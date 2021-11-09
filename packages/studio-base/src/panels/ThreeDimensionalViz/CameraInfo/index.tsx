@@ -20,10 +20,10 @@ import { CameraState, cameraStateSelectors, Vec3 } from "@foxglove/regl-worldvie
 import Button from "@foxglove/studio-base/components/Button";
 import ExpandingToolbar, { ToolGroup } from "@foxglove/studio-base/components/ExpandingToolbar";
 import Flex from "@foxglove/studio-base/components/Flex";
+import JsonInput from "@foxglove/studio-base/components/JsonInput";
 import { LegacyInput } from "@foxglove/studio-base/components/LegacyStyledComponents";
 import { usePanelContext } from "@foxglove/studio-base/components/PanelContext";
 import Tooltip from "@foxglove/studio-base/components/Tooltip";
-import { JsonInput } from "@foxglove/studio-base/components/ValidatedInput";
 import {
   SValue,
   SLabel,

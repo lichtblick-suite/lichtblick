@@ -115,7 +115,7 @@ function ObjectDetailsInner({ interactionData, objectToDisplay }: Props) {
   const getItemString = useGetItemStringWithTimezone();
 
   if (topic.length === 0) {
-    // show the original object directly if there is no interaction data. e.g. DrawPolygons
+    // show the original object directly if there is no interaction data
     return (
       <SObjectDetails>
         <Tree

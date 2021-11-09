@@ -11,12 +11,7 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import {
-  isEmail,
-  cameraStateValidator,
-  polygonPointsValidator,
-  point2DValidator,
-} from "./validators";
+import { isEmail, cameraStateValidator, point2DValidator } from "./validators";
 
 describe("isEmail", () => {
   it("validates email", () => {
@@ -104,48 +99,6 @@ describe("cameraStateValidator", () => {
       distance: "must be a number",
       targetOffset: 'must contain only numbers in the array. "121" is not a number.',
     });
-  });
-});
-
-describe("polygonPointsValidator", () => {
-  it("returns undefined for valid input", () => {
-    expect(polygonPointsValidator([[{ x: 1, y: 2 }]])).toEqual(undefined);
-  });
-  it("returns undefined for null or empty input", () => {
-    expect(polygonPointsValidator([])).toEqual(undefined);
-    expect(polygonPointsValidator()).toEqual(undefined);
-    expect(polygonPointsValidator("")).toEqual(undefined);
-    expect(polygonPointsValidator({})).toEqual(undefined);
-  });
-  it("returns error for non-array input", () => {
-    expect(polygonPointsValidator(123)).toEqual("must be an array of nested x and y points");
-    expect(polygonPointsValidator([{}])).toEqual("must be an array of x and y points");
-  });
-  it("returns error for non-number input", () => {
-    expect(
-      polygonPointsValidator([
-        [
-          { x: "1", y: 1 },
-          { x: 2, y: 2 },
-          { x: 3, y: 3 },
-        ],
-      ]),
-    ).toEqual("x and y points must be numbers");
-  });
-  it("returns error when missing input for x/y point", () => {
-    expect(polygonPointsValidator([[{ y: 1 }, { x: 2, y: 2 }, { x: 3, y: 3 }]])).toEqual(
-      "must contain x and y points",
-    );
-  });
-  it("does not return error when the input points have 0 as coordinates", () => {
-    expect(
-      polygonPointsValidator([
-        [
-          { x: 0.000001, y: 0.0 },
-          { x: 0, y: 0.0 },
-        ],
-      ]),
-    ).toEqual(undefined);
   });
 });
 

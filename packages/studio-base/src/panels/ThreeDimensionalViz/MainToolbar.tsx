@@ -7,7 +7,7 @@ import { IconButton, IButtonStyles, Stack, useTheme } from "@fluentui/react";
 import { useTooltip } from "@foxglove/studio-base/components/Tooltip";
 import MeasuringTool, {
   MeasureInfo,
-} from "@foxglove/studio-base/panels/ThreeDimensionalViz/DrawingTools/MeasuringTool";
+} from "@foxglove/studio-base/panels/ThreeDimensionalViz/MeasuringTool";
 import { colors } from "@foxglove/studio-base/util/sharedStyleConstants";
 
 type Props = {
@@ -37,11 +37,11 @@ function MainToolbar({
     contents: perspective
       ? "Switch to 2D camera to measure distance"
       : measureActive
-      ? "Cancel Measuring"
-      : "Measure Distance",
+      ? "Cancel measuring"
+      : "Measure distance",
   });
   const debugButton = useTooltip({
-    contents: debug ? "Disable Debug" : "Enable Debug",
+    contents: debug ? "Disable debug" : "Enable debug",
   });
 
   const iconButtonStyles: Partial<IButtonStyles> = {

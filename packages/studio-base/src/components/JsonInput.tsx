@@ -14,7 +14,6 @@
 import { isEqual } from "lodash";
 import styled from "styled-components";
 
-import Flex from "@foxglove/studio-base/components/Flex";
 import { LegacyTextarea } from "@foxglove/studio-base/components/LegacyStyledComponents";
 import { validationErrorToString, ValidationResult } from "@foxglove/studio-base/util/validators";
 
@@ -50,15 +49,11 @@ export type BaseProps = {
   onError?: (err: string) => void;
   value: Value;
 };
-type Props = BaseProps & {
-  children?: React.ReactNode;
-};
 
 /**
- * The base component for ValidatedInput which handles the value change, data validation
- * and data stringifying/parsing. Any external value change will cause the input string to change
- * and trigger new validations. Only valid internal value change will call onChange. Any data processing
- * and validation error will trigger onError.
+ * Handles value change, data validation, and data stringifying/parsing.
+ * Any external value change will cause the input string to change and trigger new validations.
+ * Only valid internal value change will call onChange. Any data processing and validation error will trigger onError.
  */
 export function ValidatedInputBase({
   dataValidator = () => undefined,
@@ -177,7 +172,7 @@ export function ValidatedInputBase({
   );
 }
 
-export function JsonInput(props: BaseProps): JSX.Element {
+export default function JsonInput(props: BaseProps): JSX.Element {
   function stringify(val: unknown) {
     return JSON.stringify(val, undefined, 2);
   }
@@ -185,20 +180,5 @@ export function JsonInput(props: BaseProps): JSX.Element {
     <SEditBox>
       <ValidatedInputBase parse={JSON.parse} stringify={stringify} {...props} />
     </SEditBox>
-  );
-}
-
-// An enhanced input component that allows editing values in json format with custom validations
-export default function ValidatedInput({ children, ...rest }: Props): JSX.Element {
-  const InputComponent = JsonInput;
-  return (
-    <Flex col>
-      <Flex row reverse>
-        {children}
-      </Flex>
-      <SEditBox>
-        <InputComponent {...rest} />
-      </SEditBox>
-    </Flex>
   );
 }

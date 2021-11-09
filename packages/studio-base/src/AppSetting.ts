@@ -13,7 +13,6 @@ export enum AppSetting {
   SHOW_DEBUG_PANELS = "showDebugPanels",
   HIDE_SIGN_IN_PROMPT = "hideSignInPrompt",
   ENABLE_LAYOUT_DEBUGGING = "enableLayoutDebugging",
-  ENABLE_DRAWING_POLYGONS = "enableDrawingPolygons",
   ENABLE_LEGACY_PLOT_PANEL = "enableLegacyPlotPanel",
   COLOR_SCHEME = "colorScheme",
 }

@@ -10,7 +10,6 @@
 //   This source code is licensed under the Apache License, Version 2.0,
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
-import { isEqual } from "lodash";
 
 type Rule = (value: unknown) => string | undefined;
 type Rules = {
@@ -118,47 +117,6 @@ export const cameraStateValidator = (jsonData: unknown): ValidationResult | unde
   const result = validator(data);
 
   return Object.keys(result).length === 0 ? undefined : result;
-};
-
-const isXYPointArray = (value: unknown): string | undefined => {
-  if (Array.isArray(value)) {
-    for (const item of value) {
-      if (item == undefined || item.x == undefined || item.y == undefined) {
-        return `must contain x and y points`;
-      }
-      if (typeof item.x !== "number" || typeof item.y !== "number") {
-        return `x and y points must be numbers`;
-      }
-    }
-    return undefined;
-  } else {
-    return "must be an array of x and y points";
-  }
-};
-
-const isPolygons = (value: unknown): string | undefined => {
-  if (Array.isArray(value)) {
-    for (const item of value) {
-      const error = isXYPointArray(item);
-      if (error != undefined) {
-        return error;
-      }
-    }
-    return undefined;
-  } else {
-    return "must be an array of nested x and y points";
-  }
-};
-
-// validate the polygons must be a nested array of xy points
-export const polygonPointsValidator = (jsonData?: unknown): ValidationResult | undefined => {
-  if (jsonData == undefined || jsonData === "" || isEqual(jsonData, []) || isEqual(jsonData, {})) {
-    return undefined;
-  }
-  const rules = { polygons: [isPolygons] };
-  const validator = createValidator(rules);
-  const result = validator({ polygons: jsonData });
-  return Object.keys(result).length === 0 ? undefined : result.polygons;
 };
 
 export const point2DValidator = (jsonData?: unknown): ValidationResult | undefined => {

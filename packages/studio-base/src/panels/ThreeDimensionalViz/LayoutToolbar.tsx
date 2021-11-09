@@ -13,20 +13,17 @@
 
 import { Stack, Text, useTheme } from "@fluentui/react";
 
-import { PolygonBuilder, MouseEventObject, Polygon } from "@foxglove/regl-worldview";
+import { MouseEventObject } from "@foxglove/regl-worldview";
 import CameraInfo from "@foxglove/studio-base/panels/ThreeDimensionalViz/CameraInfo";
 import Crosshair from "@foxglove/studio-base/panels/ThreeDimensionalViz/Crosshair";
-import DrawingTools, {
-  DrawingTabType,
-} from "@foxglove/studio-base/panels/ThreeDimensionalViz/DrawingTools";
-import MeasuringTool, {
-  MeasureInfo,
-} from "@foxglove/studio-base/panels/ThreeDimensionalViz/DrawingTools/MeasuringTool";
 import FollowTFControl from "@foxglove/studio-base/panels/ThreeDimensionalViz/FollowTFControl";
 import Interactions from "@foxglove/studio-base/panels/ThreeDimensionalViz/Interactions";
 import { TabType } from "@foxglove/studio-base/panels/ThreeDimensionalViz/Interactions/Interactions";
 import MainToolbar from "@foxglove/studio-base/panels/ThreeDimensionalViz/MainToolbar";
 import MeasureMarker from "@foxglove/studio-base/panels/ThreeDimensionalViz/MeasureMarker";
+import MeasuringTool, {
+  MeasureInfo,
+} from "@foxglove/studio-base/panels/ThreeDimensionalViz/MeasuringTool";
 import SearchText, {
   SearchTextProps,
 } from "@foxglove/studio-base/panels/ThreeDimensionalViz/SearchText";
@@ -40,11 +37,8 @@ type Props = LayoutToolbarSharedProps &
     interactionsTabType?: TabType;
     measureInfo: MeasureInfo;
     measuringElRef: { current: MeasuringTool | ReactNull };
-    onSetDrawingTabType: (arg0?: DrawingTabType) => void;
-    onSetPolygons: (polygons: Polygon[]) => void;
     onToggleCameraMode: () => void;
     onToggleDebug: () => void;
-    polygonBuilder: PolygonBuilder;
     rootTf?: string;
     selectedObject?: MouseEventObject;
     setInteractionsTabType: (arg0?: TabType) => void;
@@ -65,11 +59,8 @@ function LayoutToolbar({
   onAlignXYAxis,
   onCameraStateChange,
   onFollowChange,
-  onSetDrawingTabType,
-  onSetPolygons,
   onToggleCameraMode,
   onToggleDebug,
-  polygonBuilder,
   rootTf,
   searchInputRef,
   searchText,
@@ -157,11 +148,6 @@ function LayoutToolbar({
           selectedObject={selectedObject}
           interactionsTabType={interactionsTabType}
           setInteractionsTabType={setInteractionsTabType}
-        />
-        <DrawingTools
-          onSetPolygons={onSetPolygons}
-          polygonBuilder={polygonBuilder}
-          onSetDrawingTabType={onSetDrawingTabType}
         />
         <CameraInfo
           cameraState={cameraState}

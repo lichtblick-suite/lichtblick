@@ -19,15 +19,7 @@ import { useDebouncedCallback } from "use-debounce";
 
 import { filterMap } from "@foxglove/den/collection";
 import { useShallowMemo } from "@foxglove/hooks";
-import {
-  Worldview,
-  PolygonBuilder,
-  DrawPolygons,
-  CameraState,
-  ReglClickInfo,
-  MouseEventObject,
-  Polygon,
-} from "@foxglove/regl-worldview";
+import { Worldview, CameraState, ReglClickInfo, MouseEventObject } from "@foxglove/regl-worldview";
 import { Time } from "@foxglove/rostime";
 import { useDataSourceInfo } from "@foxglove/studio-base/PanelAPI";
 import KeyListener from "@foxglove/studio-base/components/KeyListener";
@@ -35,13 +27,6 @@ import PanelToolbar from "@foxglove/studio-base/components/PanelToolbar";
 import useGlobalVariables from "@foxglove/studio-base/hooks/useGlobalVariables";
 import { Save3DConfig } from "@foxglove/studio-base/panels/ThreeDimensionalViz";
 import DebugStats from "@foxglove/studio-base/panels/ThreeDimensionalViz/DebugStats";
-import {
-  POLYGON_TAB_TYPE,
-  DrawingTabType,
-} from "@foxglove/studio-base/panels/ThreeDimensionalViz/DrawingTools";
-import MeasuringTool, {
-  MeasureInfo,
-} from "@foxglove/studio-base/panels/ThreeDimensionalViz/DrawingTools/MeasuringTool";
 import GridBuilder from "@foxglove/studio-base/panels/ThreeDimensionalViz/GridBuilder";
 import {
   InteractionContextMenu,
@@ -50,6 +35,9 @@ import {
 } from "@foxglove/studio-base/panels/ThreeDimensionalViz/Interactions";
 import useLinkedGlobalVariables from "@foxglove/studio-base/panels/ThreeDimensionalViz/Interactions/useLinkedGlobalVariables";
 import LayoutToolbar from "@foxglove/studio-base/panels/ThreeDimensionalViz/LayoutToolbar";
+import MeasuringTool, {
+  MeasureInfo,
+} from "@foxglove/studio-base/panels/ThreeDimensionalViz/MeasuringTool";
 import SceneBuilder from "@foxglove/studio-base/panels/ThreeDimensionalViz/SceneBuilder";
 import sceneBuilderHooks from "@foxglove/studio-base/panels/ThreeDimensionalViz/SceneBuilder/defaultHooks";
 import { useSearchText } from "@foxglove/studio-base/panels/ThreeDimensionalViz/SearchText";
@@ -233,7 +221,6 @@ export default function Layout({
   const { globalVariables, setGlobalVariables } = useGlobalVariables();
   const [debug, setDebug] = useState(false);
   const [showTopicTree, setShowTopicTree] = useState<boolean>(false);
-  const [polygonBuilder, setPolygonBuilder] = useState(() => new PolygonBuilder());
   const [measureInfo, setMeasureInfo] = useState<MeasureInfo>({
     measureState: "idle",
     measurePoints: { start: undefined, end: undefined },
@@ -251,7 +238,6 @@ export default function Layout({
   // used for updating DrawPolygon during mouse move and scenebuilder namespace change.
   const [_, forceUpdate] = useReducer((x: number) => x + 1, 0);
   const measuringElRef = useRef<MeasuringTool>(ReactNull);
-  const [drawingTabType, setDrawingTabType] = useState<DrawingTabType | undefined>(undefined);
   const [interactionsTabType, setInteractionsTabType] = useState<TabType | undefined>(undefined);
 
   const [selectionState, setSelectionState] = useState<UserSelectionState>({
@@ -266,10 +252,7 @@ export default function Layout({
   const [hoveredMarkerMatchers, setHoveredMarkerMatchers] = useState<MarkerMatcher[]>([]);
   const setHoveredMarkerMatchersDebounced = useDebouncedCallback(setHoveredMarkerMatchers, 100);
 
-  const isDrawing = useMemo(
-    () => measureInfo.measureState !== "idle" || drawingTabType === POLYGON_TAB_TYPE,
-    [drawingTabType, measureInfo.measureState],
-  );
+  const isDrawing = useMemo(() => measureInfo.measureState !== "idle", [measureInfo.measureState]);
 
   // initialize the GridBuilder, SceneBuilder, and TransformsBuilder
   const { gridBuilder, sceneBuilder, transformsBuilder } = useMemo(
@@ -522,20 +505,10 @@ export default function Layout({
     transformsBuilder,
   ]);
 
-  const handleDrawPolygons = useCallback(
-    (eventName: EventName, ev: React.MouseEvent, args: ReglClickInfo) => {
-      polygonBuilder[eventName](ev, args);
-      forceUpdate();
-    },
-    [polygonBuilder],
-  );
-
   // use callbackInputsRef to prevent unnecessary callback changes
   const callbackInputsRef = useRef({
     cameraState,
     debug,
-    drawingTabType,
-    handleDrawPolygons,
     showTopicTree,
     saveConfig,
     selectionState,
@@ -546,8 +519,6 @@ export default function Layout({
   callbackInputsRef.current = {
     cameraState,
     debug,
-    drawingTabType,
-    handleDrawPolygons,
     showTopicTree,
     saveConfig,
     selectionState,
@@ -567,17 +538,11 @@ export default function Layout({
       if (!args) {
         return;
       }
-      const {
-        drawingTabType: currentDrawingTabType,
-        handleDrawPolygons: currentHandleDrawPolygons,
-      } = callbackInputsRef.current;
       const measuringHandler =
         eventName === "onDoubleClick" ? undefined : measuringElRef.current?.[eventName];
       const measureActive = measuringElRef.current?.measureActive ?? false;
       if (measuringHandler && measureActive) {
         return measuringHandler(ev.nativeEvent, args);
-      } else if (currentDrawingTabType === POLYGON_TAB_TYPE) {
-        currentHandleDrawPolygons(eventName, ev, args);
       }
     },
     [],
@@ -630,7 +595,6 @@ export default function Layout({
     onMouseDown,
     onMouseMove,
     onMouseUp,
-    onSetPolygons,
     toggleCameraMode,
     toggleDebug,
   } = useMemo(() => {
@@ -675,7 +639,6 @@ export default function Layout({
       onMouseMove: (ev: React.MouseEvent, args?: ReglClickInfo) =>
         handleEvent("onMouseMove", ev, args),
       onMouseUp: (ev: React.MouseEvent, args?: ReglClickInfo) => handleEvent("onMouseUp", ev, args),
-      onSetPolygons: (polygons: Polygon[]) => setPolygonBuilder(new PolygonBuilder(polygons)),
       toggleDebug: () => setDebug(!callbackInputsRef.current.debug),
       toggleCameraMode: () => {
         const { cameraState: currentCameraState, saveConfig: currentSaveConfig } =
@@ -708,7 +671,6 @@ export default function Layout({
       Escape: (e) => {
         e.preventDefault();
         setShowTopicTree(false);
-        setDrawingTabType(undefined);
         searchTextProps.toggleSearchTextOpen(false);
         if (document.activeElement && document.activeElement === containerRef.current) {
           (document.activeElement as HTMLElement).blur();
@@ -855,7 +817,6 @@ export default function Layout({
               selectedMatchIndex={selectedMatchIndex}
             >
               {children}
-              <DrawPolygons>{polygonBuilder.polygons}</DrawPolygons>
               <div>
                 <LayoutToolbar
                   cameraState={cameraState}
@@ -871,11 +832,8 @@ export default function Layout({
                   onCameraStateChange={onCameraStateChange}
                   autoSyncCameraState={!!autoSyncCameraState}
                   onFollowChange={onFollowChange}
-                  onSetDrawingTabType={setDrawingTabType}
-                  onSetPolygons={onSetPolygons}
                   onToggleCameraMode={toggleCameraMode}
                   onToggleDebug={toggleDebug}
-                  polygonBuilder={polygonBuilder}
                   saveConfig={saveConfig}
                   selectedObject={selectedObject}
                   setMeasureInfo={setMeasureInfo}
