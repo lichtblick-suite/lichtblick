@@ -32,16 +32,19 @@ const fixtureMessages: MessageEvent<unknown>[] = [
     topic: "/topic",
     receiveTime: { sec: 0, nsec: 0 },
     message: { value: 0 },
+    sizeInBytes: 0,
   },
   {
     topic: "/topic",
     receiveTime: { sec: 1, nsec: 0 },
     message: { value: 1 },
+    sizeInBytes: 0,
   },
   {
     topic: "/topic",
     receiveTime: { sec: 2, nsec: 0 },
     message: { value: 2 },
+    sizeInBytes: 0,
   },
 ];
 

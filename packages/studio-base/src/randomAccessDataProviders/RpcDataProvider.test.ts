@@ -20,12 +20,13 @@ import Rpc, { createLinkedChannels } from "@foxglove/studio-base/util/Rpc";
 import RpcDataProvider from "./RpcDataProvider";
 import RpcDataProviderRemote from "./RpcDataProviderRemote";
 
+const message = new ArrayBuffer(0);
 const data = {
   messages: {
     rosBinaryMessages: [
-      { topic: "/some_topic", receiveTime: { sec: 100, nsec: 0 }, message: new ArrayBuffer(0) },
-      { topic: "/some_topic", receiveTime: { sec: 101, nsec: 0 }, message: new ArrayBuffer(0) },
-      { topic: "/some_topic", receiveTime: { sec: 102, nsec: 0 }, message: new ArrayBuffer(0) },
+      { topic: "/some_topic", receiveTime: { sec: 100, nsec: 0 }, message, sizeInBytes: 0 },
+      { topic: "/some_topic", receiveTime: { sec: 101, nsec: 0 }, message, sizeInBytes: 0 },
+      { topic: "/some_topic", receiveTime: { sec: 102, nsec: 0 }, message, sizeInBytes: 0 },
     ],
     parsedMessages: undefined,
   },

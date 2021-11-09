@@ -367,8 +367,8 @@ export default class Ros1Player implements Player {
         const newDatatypes = this._getRosDatatypes(datatype, msgdef);
         this._providerDatatypes = new Map([...this._providerDatatypes, ...newDatatypes]);
       });
-      subscription.on("message", (message, _data, _pub) =>
-        this._handleMessage(topicName, message, true),
+      subscription.on("message", (message, data, _pub) =>
+        this._handleMessage(topicName, message, data.byteLength, true),
       );
       subscription.on("error", (error) => {
         this._addProblem(`subscribe:${topicName}`, {
@@ -393,6 +393,7 @@ export default class Ros1Player implements Player {
   private _handleMessage = (
     topic: string,
     message: unknown,
+    sizeInBytes: number,
     // This is a hot path so we avoid extra object allocation from a parameters struct
     // eslint-disable-next-line @foxglove/no-boolean-parameters
     external: boolean,
@@ -408,7 +409,7 @@ export default class Ros1Player implements Player {
       this._metricsCollector.recordTimeToFirstMsgs();
     }
 
-    const msg: MessageEvent<unknown> = { topic, receiveTime, message };
+    const msg: MessageEvent<unknown> = { topic, receiveTime, message, sizeInBytes };
     this._parsedMessages.push(msg);
     this._handleInternalMessage(msg);
 

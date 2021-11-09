@@ -15,6 +15,7 @@ export const CoreDataProviders = {
   BagDataProvider: "BagDataProvider",
   MemoryCacheDataProvider: "MemoryCacheDataProvider",
   ParseMessagesDataProvider: "ParseMessagesDataProvider",
+  Ros1MemoryCacheDataProvider: "Ros1MemoryCacheDataProvider",
   Rosbag2DataProvider: "Rosbag2DataProvider",
   RpcDataProvider: "RpcDataProvider",
   UlogDataProvider: "UlogDataProvider",

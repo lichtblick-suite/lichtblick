@@ -39,6 +39,7 @@ function makeMessage(
       },
     },
     receiveTime: fromSec(receiveTime),
+    sizeInBytes: 0,
   };
 }
 

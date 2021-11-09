@@ -295,6 +295,7 @@ describe("RandomAccessPlayer", () => {
               topic: "/foo/bar",
               receiveTime: { sec: 10, nsec: 2 },
               message: { payload: "foo bar" },
+              sizeInBytes: 0,
             },
           ];
           return { ...getMessagesResult, parsedMessages };
@@ -338,6 +339,7 @@ describe("RandomAccessPlayer", () => {
             topic: "/foo/bar",
             receiveTime: { sec: 10, nsec: 2 },
             message: { payload: "foo bar" },
+            sizeInBytes: 0,
           },
         ],
       },
@@ -462,6 +464,7 @@ describe("RandomAccessPlayer", () => {
               topic: "/foo/bar",
               receiveTime: { sec: 10, nsec: 0 },
               message: { payload: "foo bar" },
+              sizeInBytes: 0,
             },
           ];
           return { ...getMessagesResult, parsedMessages };
@@ -506,6 +509,7 @@ describe("RandomAccessPlayer", () => {
             topic: "/foo/bar",
             receiveTime: { sec: 10, nsec: 0 },
             message: { payload: "foo bar" },
+            sizeInBytes: 0,
           },
         ],
       }, // this is the 'pause' messages payload - should be empty:
@@ -543,6 +547,7 @@ describe("RandomAccessPlayer", () => {
               topic: "/foo/bar",
               receiveTime: { sec: 10, nsec: 0 },
               message: { payload: "foo bar" },
+              sizeInBytes: 0,
             },
           ];
           await delay(10);
@@ -628,6 +633,7 @@ describe("RandomAccessPlayer", () => {
               topic: "/foo/bar",
               receiveTime: { sec: 10, nsec: 5 },
               message: { payload: "foo bar" },
+              sizeInBytes: 0,
             },
           ];
           return { ...getMessagesResult, parsedMessages };
@@ -662,6 +668,7 @@ describe("RandomAccessPlayer", () => {
             topic: "/foo/bar",
             receiveTime: { sec: 10, nsec: 5 },
             message: { payload: "foo bar" },
+            sizeInBytes: 0,
           },
         ],
       },
@@ -694,6 +701,7 @@ describe("RandomAccessPlayer", () => {
               topic: "/foo/bar",
               receiveTime: { sec: 10, nsec: 5 },
               message: { payload: "foo bar" },
+              sizeInBytes: 0,
             },
           ];
           return { ...getMessagesResult, parsedMessages };
@@ -737,6 +745,7 @@ describe("RandomAccessPlayer", () => {
             topic: "/foo/bar",
             receiveTime: { sec: 10, nsec: 5 },
             message: { payload: "foo bar" },
+            sizeInBytes: 0,
           },
         ],
         isPlaying: true,
@@ -772,6 +781,7 @@ describe("RandomAccessPlayer", () => {
               topic: "/foo/bar",
               receiveTime: { sec: 10, nsec: 5 },
               message: { payload: "foo bar" },
+              sizeInBytes: 0,
             },
           ];
           return { ...getMessagesResult, parsedMessages };
@@ -786,6 +796,7 @@ describe("RandomAccessPlayer", () => {
                 topic: "/foo/bar",
                 receiveTime: { sec: 10, nsec: 101 },
                 message: { payload: "baz" },
+                sizeInBytes: 0,
               },
             ],
           };
@@ -819,6 +830,7 @@ describe("RandomAccessPlayer", () => {
           topic: "/foo/bar",
           receiveTime: { sec: 10, nsec: 5 },
           message: { payload: "foo bar" },
+          sizeInBytes: 0,
         },
       ],
     ]);
@@ -841,6 +853,7 @@ describe("RandomAccessPlayer", () => {
           topic: "/foo/bar",
           receiveTime: { sec: 10, nsec: 101 },
           message: { payload: "baz" },
+          sizeInBytes: 0,
         },
       ],
       [],
@@ -882,6 +895,7 @@ describe("RandomAccessPlayer", () => {
                 topic: "/foo/bar",
                 receiveTime: { sec: 20, nsec: 50 },
                 message: { payload: "baz" },
+                sizeInBytes: 0,
               },
             ],
           };
@@ -929,6 +943,7 @@ describe("RandomAccessPlayer", () => {
           topic: "/foo/bar",
           receiveTime: { sec: 20, nsec: 50 },
           message: { payload: "baz" },
+          sizeInBytes: 0,
         },
       ],
       [], // pausePlayback
@@ -939,6 +954,7 @@ describe("RandomAccessPlayer", () => {
       topic: "/foo/bar",
       receiveTime: { sec: 10, nsec: 5 },
       message: { payload: "foo bar" },
+      sizeInBytes: 0,
     };
     backfillPromiseCallback({ ...getMessagesResult, parsedMessages: [result] });
     await delay(10);
@@ -1085,21 +1101,25 @@ describe("RandomAccessPlayer", () => {
         topic: "/foo/bar",
         receiveTime: { sec: 10, nsec: 0 },
         message: { payload: "foo bar 1" },
+        sizeInBytes: 0,
       },
       {
         topic: "/baz",
         receiveTime: { sec: 10, nsec: 500 },
         message: { payload: "baz 1" },
+        sizeInBytes: 0,
       },
       {
         topic: "/baz",
         receiveTime: { sec: 10, nsec: 5000 },
         message: { payload: "baz 2" },
+        sizeInBytes: 0,
       },
       {
         topic: "/foo/bar",
         receiveTime: { sec: 10, nsec: 9000000 },
         message: { payload: "foo bar 2" },
+        sizeInBytes: 0,
       },
     ];
     let resolve: any;
@@ -1142,21 +1162,25 @@ describe("RandomAccessPlayer", () => {
         topic: "/foo/bar",
         receiveTime: { sec: 10, nsec: 0 },
         message: { payload: "foo bar 1" },
+        sizeInBytes: 0,
       },
       {
         topic: "/baz",
         receiveTime: { sec: 10, nsec: 500 },
         message: { payload: "baz 1" },
+        sizeInBytes: 0,
       },
       {
         topic: "/baz",
         receiveTime: { sec: 10, nsec: 5000 },
         message: { payload: "baz 2" },
+        sizeInBytes: 0,
       },
       {
         topic: "/foo/bar",
         receiveTime: { sec: 10, nsec: 9000000 },
         message: { payload: "foo bar 2" },
+        sizeInBytes: 0,
       },
     ]);
 

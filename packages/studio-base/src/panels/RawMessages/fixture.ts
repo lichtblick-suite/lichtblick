@@ -49,6 +49,7 @@ export const fixture = {
           some_long_data: new Uint8ClampedArray(2000),
           some_float_data: new Float64Array(10),
         },
+        sizeInBytes: 0,
       },
     ],
     "/foo": [
@@ -60,6 +61,7 @@ export const fixture = {
           some_deleted_key: "GONE",
           some_id_example_2: { some_id: 0 },
         },
+        sizeInBytes: 0,
       },
       {
         topic: "/foo",
@@ -68,6 +70,7 @@ export const fixture = {
           some_array: ["a", "b", "c", "d", "e", "f"],
           some_id_example_2: { some_id: 123 },
         },
+        sizeInBytes: 0,
       },
     ],
     "/baz/num": [
@@ -75,6 +78,7 @@ export const fixture = {
         topic: "/baz/num",
         receiveTime: { sec: 123, nsec: 456789012 },
         message: { value: 3425363211 },
+        sizeInBytes: 0,
       },
     ],
     "/baz/bigint": [
@@ -82,11 +86,13 @@ export const fixture = {
         topic: "/baz/bigint",
         receiveTime: { sec: 123, nsec: 456789012 },
         message: { value: 18446744073709551615n },
+        sizeInBytes: 0,
       },
       {
         topic: "/baz/bigint",
         receiveTime: { sec: 123, nsec: 456789013 },
         message: { value: 18446744073709551616n },
+        sizeInBytes: 0,
       },
     ],
     "/baz/text": [
@@ -101,6 +107,7 @@ export const fixture = {
             .map((_, i) => `this is line ${i} of the text`)
             .join("\n"),
         },
+        sizeInBytes: 0,
       },
     ],
     "/baz/array": [
@@ -108,6 +115,7 @@ export const fixture = {
         topic: "/baz/array",
         receiveTime: { sec: 123, nsec: 456789012 },
         message: { value: [false] },
+        sizeInBytes: 0,
       },
     ],
     "/baz/array/obj": [
@@ -115,6 +123,7 @@ export const fixture = {
         topic: "/baz/array/obj",
         receiveTime: { sec: 123, nsec: 456789012 },
         message: { value: [{ a: "b", c: "d", e: "f" }] },
+        sizeInBytes: 0,
       },
     ],
     "/geometry/types": [
@@ -132,6 +141,7 @@ export const fixture = {
             z: 3.0,
           },
         },
+        sizeInBytes: 0,
       },
     ],
   },
@@ -235,6 +245,7 @@ export const enumFixture = {
         message: {
           value: 2,
         },
+        sizeInBytes: 0,
       },
     ],
   },
@@ -285,6 +296,7 @@ export const enumAdvancedFixture = {
         topic: "/baz/enum_advanced",
         receiveTime: { sec: 123, nsec: 456789012 },
         message: exampleMessage,
+        sizeInBytes: 0,
       },
     ],
   },
@@ -308,6 +320,7 @@ export const withMissingData = {
         message: {
           value: undefined,
         },
+        sizeInBytes: 0,
       },
     ],
   },
@@ -330,6 +343,7 @@ export const topicsToDiffFixture: Fixture = {
           toBeDeletedVal: "Bye!",
           toBeDeletedObj: { a: 1, b: 2, c: 3 },
         },
+        sizeInBytes: 0,
       },
     ],
     "/another/baz/enum_advanced": [
@@ -371,6 +385,7 @@ export const topicsWithIdsToDiffFixture = {
             { ...exampleMessage, id: 2 },
           ],
         },
+        sizeInBytes: 0,
       },
     ],
     "/another/baz/enum_advanced_array": [
@@ -383,6 +398,7 @@ export const topicsWithIdsToDiffFixture = {
             { ...exampleMessage, state: 2, color: 3, newField: "hello", id: 1 },
           ],
         },
+        sizeInBytes: 0,
       },
     ],
   },
@@ -404,16 +420,19 @@ export const multipleNumberMessagesFixture = {
         topic: "/multiple_number_messages",
         receiveTime: { sec: 123, nsec: 1 },
         message: { value: 1 },
+        sizeInBytes: 0,
       },
       {
         topic: "/multiple_number_messages",
         receiveTime: { sec: 123, nsec: 2 },
         message: { value: 2 },
+        sizeInBytes: 0,
       },
       {
         topic: "/multiple_number_messages",
         receiveTime: { sec: 123, nsec: 3 },
         message: { value: 3 },
+        sizeInBytes: 0,
       },
     ],
   },

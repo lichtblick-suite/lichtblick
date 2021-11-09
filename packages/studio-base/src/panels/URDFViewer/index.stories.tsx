@@ -67,6 +67,7 @@ export function JointPositionFromTopic(): JSX.Element {
       velocity: [0],
       effort: [0],
     },
+    sizeInBytes: 0,
   };
   return (
     <ExampleAssetsProvider>

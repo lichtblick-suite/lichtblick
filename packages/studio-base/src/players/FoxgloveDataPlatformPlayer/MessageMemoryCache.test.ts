@@ -101,16 +101,16 @@ describe("MessageMemoryCache", () => {
     const cache = new MessageMemoryCache({ start: fromSec(0), end: fromSec(5) });
 
     cache.insert({ start: fromSec(1), end: fromSec(2) }, [
-      { topic: "", receiveTime: fromSec(1), message: "a" },
+      { topic: "", receiveTime: fromSec(1), message: "a", sizeInBytes: 0 },
     ]);
     cache.insert({ start: fromSec(2), end: fromSec(3) }, [
-      { topic: "", receiveTime: fromSec(2), message: "b" },
+      { topic: "", receiveTime: fromSec(2), message: "b", sizeInBytes: 0 },
     ]);
 
     expect(cache.fullyLoadedRanges()).toEqual([{ start: fromSec(1), end: fromSec(3) }]);
     expect(cache.getMessages({ start: fromSec(1), end: fromSec(3) })).toEqual([
-      { topic: "", receiveTime: fromSec(1), message: "a" },
-      { topic: "", receiveTime: fromSec(2), message: "b" },
+      { topic: "", receiveTime: fromSec(1), message: "a", sizeInBytes: 0 },
+      { topic: "", receiveTime: fromSec(2), message: "b", sizeInBytes: 0 },
     ]);
   });
 
@@ -118,16 +118,16 @@ describe("MessageMemoryCache", () => {
     const cache = new MessageMemoryCache({ start: fromSec(0), end: fromSec(5) });
 
     cache.insert({ start: fromSec(2), end: fromSec(3) }, [
-      { topic: "", receiveTime: fromSec(2), message: "b" },
+      { topic: "", receiveTime: fromSec(2), message: "b", sizeInBytes: 0 },
     ]);
     cache.insert({ start: fromSec(1), end: fromSec(2) }, [
-      { topic: "", receiveTime: fromSec(1), message: "a" },
+      { topic: "", receiveTime: fromSec(1), message: "a", sizeInBytes: 0 },
     ]);
 
     expect(cache.fullyLoadedRanges()).toEqual([{ start: fromSec(1), end: fromSec(3) }]);
     expect(cache.getMessages({ start: fromSec(1), end: fromSec(3) })).toEqual([
-      { topic: "", receiveTime: fromSec(1), message: "a" },
-      { topic: "", receiveTime: fromSec(2), message: "b" },
+      { topic: "", receiveTime: fromSec(1), message: "a", sizeInBytes: 0 },
+      { topic: "", receiveTime: fromSec(2), message: "b", sizeInBytes: 0 },
     ]);
   });
 
@@ -135,20 +135,20 @@ describe("MessageMemoryCache", () => {
     const cache = new MessageMemoryCache({ start: fromSec(0), end: fromSec(5) });
 
     cache.insert({ start: fromSec(2), end: fromSec(3) }, [
-      { topic: "", receiveTime: fromSec(2), message: "c" },
+      { topic: "", receiveTime: fromSec(2), message: "c", sizeInBytes: 0 },
     ]);
     cache.insert({ start: fromSec(0), end: fromSec(1) }, [
-      { topic: "", receiveTime: fromSec(0), message: "a" },
+      { topic: "", receiveTime: fromSec(0), message: "a", sizeInBytes: 0 },
     ]);
     cache.insert({ start: fromSec(1), end: fromSec(2) }, [
-      { topic: "", receiveTime: fromSec(1), message: "b" },
+      { topic: "", receiveTime: fromSec(1), message: "b", sizeInBytes: 0 },
     ]);
 
     expect(cache.fullyLoadedRanges()).toEqual([{ start: fromSec(0), end: fromSec(3) }]);
     expect(cache.getMessages({ start: fromSec(0), end: fromSec(3) })).toEqual([
-      { topic: "", receiveTime: fromSec(0), message: "a" },
-      { topic: "", receiveTime: fromSec(1), message: "b" },
-      { topic: "", receiveTime: fromSec(2), message: "c" },
+      { topic: "", receiveTime: fromSec(0), message: "a", sizeInBytes: 0 },
+      { topic: "", receiveTime: fromSec(1), message: "b", sizeInBytes: 0 },
+      { topic: "", receiveTime: fromSec(2), message: "c", sizeInBytes: 0 },
     ]);
   });
 
@@ -165,7 +165,7 @@ describe("MessageMemoryCache", () => {
       const cache = new MessageMemoryCache({ start: fromSec(0), end: fromSec(11) });
       for (const [start, end] of permutation) {
         cache.insert({ start: fromSec(start), end: fromSec(end) }, [
-          { topic: "", receiveTime: fromSec(start), message: { start, end } },
+          { topic: "", receiveTime: fromSec(start), message: { start, end }, sizeInBytes: 0 },
         ]);
       }
       expect(cache.fullyLoadedRanges()).toEqual(
@@ -187,17 +187,17 @@ describe("MessageMemoryCache", () => {
       const cache = new MessageMemoryCache({ start: fromSec(0), end: fromSec(6) });
       for (const [start, end] of permutation) {
         cache.insert({ start: fromSec(start), end: fromSec(end) }, [
-          { topic: "", receiveTime: fromSec(start), message: { start, end } },
+          { topic: "", receiveTime: fromSec(start), message: { start, end }, sizeInBytes: 0 },
         ]);
       }
       expect(cache.fullyLoadedRanges()).toEqual([{ start: fromSec(0), end: fromSec(6) }]);
       expect(cache.getMessages({ start: fromSec(0), end: fromSec(6) })).toEqual([
-        { topic: "", receiveTime: fromSec(0), message: { start: 0, end: 1 } },
-        { topic: "", receiveTime: fromSec(1), message: { start: 1, end: 2 } },
-        { topic: "", receiveTime: fromSec(2), message: { start: 2, end: 3 } },
-        { topic: "", receiveTime: fromSec(3), message: { start: 3, end: 4 } },
-        { topic: "", receiveTime: fromSec(4), message: { start: 4, end: 5 } },
-        { topic: "", receiveTime: fromSec(5), message: { start: 5, end: 6 } },
+        { topic: "", receiveTime: fromSec(0), message: { start: 0, end: 1 }, sizeInBytes: 0 },
+        { topic: "", receiveTime: fromSec(1), message: { start: 1, end: 2 }, sizeInBytes: 0 },
+        { topic: "", receiveTime: fromSec(2), message: { start: 2, end: 3 }, sizeInBytes: 0 },
+        { topic: "", receiveTime: fromSec(3), message: { start: 3, end: 4 }, sizeInBytes: 0 },
+        { topic: "", receiveTime: fromSec(4), message: { start: 4, end: 5 }, sizeInBytes: 0 },
+        { topic: "", receiveTime: fromSec(5), message: { start: 5, end: 6 }, sizeInBytes: 0 },
       ]);
     }
   });
@@ -209,42 +209,52 @@ describe("MessageMemoryCache", () => {
     (leading, trailing) => {
       const cache = new MessageMemoryCache({ start: fromSec(0), end: fromSec(2) });
       const messages = [
-        { topic: "", receiveTime: { sec: 1, nsec: 0 }, message: "0" },
-        { topic: "", receiveTime: { sec: 1, nsec: 1 }, message: "1" },
-        { topic: "", receiveTime: { sec: 1, nsec: 2 }, message: "2" },
-        { topic: "", receiveTime: { sec: 1, nsec: 3 }, message: "3" },
-        { topic: "", receiveTime: { sec: 1, nsec: 4 }, message: "4" },
-        { topic: "", receiveTime: { sec: 1, nsec: 5 }, message: "5" },
+        { topic: "", receiveTime: { sec: 1, nsec: 0 }, message: "0", sizeInBytes: 0 },
+        { topic: "", receiveTime: { sec: 1, nsec: 1 }, message: "1", sizeInBytes: 0 },
+        { topic: "", receiveTime: { sec: 1, nsec: 2 }, message: "2", sizeInBytes: 0 },
+        { topic: "", receiveTime: { sec: 1, nsec: 3 }, message: "3", sizeInBytes: 0 },
+        { topic: "", receiveTime: { sec: 1, nsec: 4 }, message: "4", sizeInBytes: 0 },
+        { topic: "", receiveTime: { sec: 1, nsec: 5 }, message: "5", sizeInBytes: 0 },
       ];
 
       for (let i = 0; i < leading; i++) {
-        messages.unshift({ topic: "", receiveTime: { sec: 0, nsec: i }, message: `leading-${i}` });
+        messages.unshift({
+          topic: "",
+          receiveTime: { sec: 0, nsec: i },
+          message: `leading-${i}`,
+          sizeInBytes: 0,
+        });
       }
       for (let i = 0; i < trailing; i++) {
-        messages.push({ topic: "", receiveTime: { sec: 2, nsec: i }, message: `trailing-${i}` });
+        messages.push({
+          topic: "",
+          receiveTime: { sec: 2, nsec: i },
+          message: `trailing-${i}`,
+          sizeInBytes: 0,
+        });
       }
 
       cache.insert({ start: fromSec(0), end: fromSec(2) }, messages);
       expect(cache.getMessages({ start: { sec: 1, nsec: 1 }, end: { sec: 1, nsec: 5 } })).toEqual([
-        { topic: "", receiveTime: { sec: 1, nsec: 1 }, message: "1" },
-        { topic: "", receiveTime: { sec: 1, nsec: 2 }, message: "2" },
-        { topic: "", receiveTime: { sec: 1, nsec: 3 }, message: "3" },
-        { topic: "", receiveTime: { sec: 1, nsec: 4 }, message: "4" },
+        { topic: "", receiveTime: { sec: 1, nsec: 1 }, message: "1", sizeInBytes: 0 },
+        { topic: "", receiveTime: { sec: 1, nsec: 2 }, message: "2", sizeInBytes: 0 },
+        { topic: "", receiveTime: { sec: 1, nsec: 3 }, message: "3", sizeInBytes: 0 },
+        { topic: "", receiveTime: { sec: 1, nsec: 4 }, message: "4", sizeInBytes: 0 },
       ]);
       expect(cache.getMessages({ start: { sec: 1, nsec: 0 }, end: { sec: 1, nsec: 5 } })).toEqual([
-        { topic: "", receiveTime: { sec: 1, nsec: 0 }, message: "0" },
-        { topic: "", receiveTime: { sec: 1, nsec: 1 }, message: "1" },
-        { topic: "", receiveTime: { sec: 1, nsec: 2 }, message: "2" },
-        { topic: "", receiveTime: { sec: 1, nsec: 3 }, message: "3" },
-        { topic: "", receiveTime: { sec: 1, nsec: 4 }, message: "4" },
+        { topic: "", receiveTime: { sec: 1, nsec: 0 }, message: "0", sizeInBytes: 0 },
+        { topic: "", receiveTime: { sec: 1, nsec: 1 }, message: "1", sizeInBytes: 0 },
+        { topic: "", receiveTime: { sec: 1, nsec: 2 }, message: "2", sizeInBytes: 0 },
+        { topic: "", receiveTime: { sec: 1, nsec: 3 }, message: "3", sizeInBytes: 0 },
+        { topic: "", receiveTime: { sec: 1, nsec: 4 }, message: "4", sizeInBytes: 0 },
       ]);
       expect(cache.getMessages({ start: { sec: 1, nsec: 0 }, end: { sec: 1, nsec: 6 } })).toEqual([
-        { topic: "", receiveTime: { sec: 1, nsec: 0 }, message: "0" },
-        { topic: "", receiveTime: { sec: 1, nsec: 1 }, message: "1" },
-        { topic: "", receiveTime: { sec: 1, nsec: 2 }, message: "2" },
-        { topic: "", receiveTime: { sec: 1, nsec: 3 }, message: "3" },
-        { topic: "", receiveTime: { sec: 1, nsec: 4 }, message: "4" },
-        { topic: "", receiveTime: { sec: 1, nsec: 5 }, message: "5" },
+        { topic: "", receiveTime: { sec: 1, nsec: 0 }, message: "0", sizeInBytes: 0 },
+        { topic: "", receiveTime: { sec: 1, nsec: 1 }, message: "1", sizeInBytes: 0 },
+        { topic: "", receiveTime: { sec: 1, nsec: 2 }, message: "2", sizeInBytes: 0 },
+        { topic: "", receiveTime: { sec: 1, nsec: 3 }, message: "3", sizeInBytes: 0 },
+        { topic: "", receiveTime: { sec: 1, nsec: 4 }, message: "4", sizeInBytes: 0 },
+        { topic: "", receiveTime: { sec: 1, nsec: 5 }, message: "5", sizeInBytes: 0 },
       ]);
     },
   );

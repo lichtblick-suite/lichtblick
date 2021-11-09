@@ -32,6 +32,7 @@ const fixture = {
           msg: "Couldn't find int 83757.",
           name: "/some_topic",
         },
+        sizeInBytes: 0,
       },
       {
         topic: "/rosout",
@@ -45,6 +46,7 @@ const fixture = {
           msg: "Couldn't find int 2121.",
           name: "/other_node",
         },
+        sizeInBytes: 0,
       },
       {
         topic: "/rosout",
@@ -58,6 +60,7 @@ const fixture = {
           msg: "Lorem ipsum blah blah. This message should\nshow up as multiple lines",
           name: "/other_node",
         },
+        sizeInBytes: 0,
       },
       {
         topic: "/rosout",
@@ -72,6 +75,7 @@ const fixture = {
           line: 491,
           topics: [],
         },
+        sizeInBytes: 0,
       },
       {
         topic: "/rosout",
@@ -86,6 +90,7 @@ const fixture = {
           line: 491,
           topics: [],
         },
+        sizeInBytes: 0,
       },
     ],
   },

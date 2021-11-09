@@ -169,6 +169,7 @@ export default class UlogDataProvider implements RandomAccessDataProvider {
             topic,
             receiveTime,
             message: msg.value,
+            sizeInBytes: msg.data.byteLength,
           });
         }
       } else if (msg.type === MessageType.Log || msg.type === MessageType.LogTagged) {
@@ -186,6 +187,7 @@ export default class UlogDataProvider implements RandomAccessDataProvider {
               msg: msg.message,
               name: "",
             },
+            sizeInBytes: msg.size,
           });
         }
       }

@@ -190,6 +190,7 @@ describe("ImageView", () => {
       topic: "foo",
       receiveTime: { sec: 0, nsec: 0 },
       message: {},
+      sizeInBytes: 0,
     };
 
     it("returns nothing if markers are empty", () => {

@@ -51,12 +51,14 @@ describe("useMessagesByTopic", () => {
       topic: "/foo",
       receiveTime: { sec: 0, nsec: 0 },
       message: { value: 1 },
+      sizeInBytes: 0,
     };
 
     const message2 = {
       topic: "/foo",
       receiveTime: { sec: 0, nsec: 0 },
       message: { value: 2 },
+      sizeInBytes: 0,
     };
 
     const root = mount(
@@ -84,12 +86,14 @@ describe("useMessagesByTopic", () => {
       topic: "/foo",
       receiveTime: { sec: 0, nsec: 0 },
       message: { value: 1 },
+      sizeInBytes: 0,
     };
 
     const message2 = {
       topic: "/foo",
       receiveTime: { sec: 0, nsec: 0 },
       message: { value: 2 },
+      sizeInBytes: 0,
     };
 
     const root = mount(

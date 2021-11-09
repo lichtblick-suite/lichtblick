@@ -134,11 +134,13 @@ describe("BagDataProvider", () => {
         topic: "/tf",
         receiveTime: { sec: 1396293888, nsec: 56251251 },
         message: expect.any(ArrayBuffer),
+        sizeInBytes: 92,
       },
       {
         topic: "/tf",
         receiveTime: { nsec: 56262848, sec: 1396293888 },
         message: expect.any(ArrayBuffer),
+        sizeInBytes: 92,
       },
     ]);
   });

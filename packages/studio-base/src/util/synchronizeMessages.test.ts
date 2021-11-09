@@ -20,6 +20,7 @@ function message(topic: string, stamp?: Time) {
     topic,
     receiveTime: { sec: 0, nsec: 0 },
     message: { header: { stamp } },
+    sizeInBytes: 0,
   };
 }
 

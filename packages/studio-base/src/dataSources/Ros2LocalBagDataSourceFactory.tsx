@@ -23,7 +23,7 @@ class Ros2LocalBagDataSourceFactory implements IDataSourceFactory {
       return;
     }
 
-    return buildNonRos1PlayerFromDescriptor(getLocalRosbag2Descriptor(folder), {
+    return buildNonRos1PlayerFromDescriptor(folder.name, getLocalRosbag2Descriptor(folder), {
       metricsCollector: args.metricsCollector,
       unlimitedMemoryCache: args.unlimitedMemoryCache,
     });

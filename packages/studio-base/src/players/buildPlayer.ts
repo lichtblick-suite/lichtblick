@@ -29,7 +29,7 @@ export function buildPlayerFromDescriptor(
     args: {},
     children: [
       {
-        name: CoreDataProviders.MemoryCacheDataProvider,
+        name: CoreDataProviders.Ros1MemoryCacheDataProvider,
         args: { unlimitedCache: options.unlimitedMemoryCache },
         children: [childDescriptor],
       },

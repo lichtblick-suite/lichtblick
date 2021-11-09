@@ -23,6 +23,7 @@ declare module "@foxglove/studio" {
     topic: string;
     receiveTime: Time;
     message: T;
+    sizeInBytes: number;
   }>;
 
   export interface LayoutActions {

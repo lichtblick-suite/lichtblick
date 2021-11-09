@@ -285,6 +285,7 @@ export default class BagDataProvider implements RandomAccessDataProvider {
         topic,
         receiveTime: timestamp,
         message: data.buffer.slice(data.byteOffset, data.byteOffset + data.length),
+        sizeInBytes: data.length,
       });
       totalSizeOfMessages += data.length;
       numberOfMessages += 1;

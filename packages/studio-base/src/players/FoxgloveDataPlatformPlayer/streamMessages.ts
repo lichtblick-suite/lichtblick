@@ -105,6 +105,7 @@ export default async function* streamMessages({
             topic: record.channelInfo.topic,
             receiveTime,
             message: reader.readMessage(new DataView(record.data)),
+            sizeInBytes: record.data.byteLength,
           });
         }
         return;

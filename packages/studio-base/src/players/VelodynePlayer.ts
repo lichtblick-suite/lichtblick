@@ -160,7 +160,8 @@ export default class VelodynePlayer implements Player {
         packets: this._packets.map((raw) => rawPacketToRos(raw, topOfHour)),
       };
 
-      const msg: MessageEvent<unknown> = { topic: TOPIC, receiveTime, message };
+      const sizeInBytes = this._packets.reduce((acc, packet) => acc + packet.data.byteLength, 0);
+      const msg: MessageEvent<unknown> = { topic: TOPIC, receiveTime, message, sizeInBytes };
       this._parsedMessages.push(msg);
       this._packets = [];
 

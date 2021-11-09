@@ -51,6 +51,7 @@ const fixture = {
         topic: "/my_arr",
         receiveTime: { sec: 1, nsec: 0 },
         message: { array: makeArrayData() },
+        sizeInBytes: 0,
       },
     ],
   },

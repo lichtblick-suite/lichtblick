@@ -76,6 +76,7 @@ function useImageMessage() {
       topic: "/foo",
       receiveTime: { sec: 0, nsec: 0 },
       message: { format: imageFormat, data: imageData },
+      sizeInBytes: 0,
     };
   }, [imageData]);
 }
@@ -105,6 +106,7 @@ function marker(
       ...props,
       type,
     },
+    sizeInBytes: 0,
   };
 }
 
@@ -280,6 +282,7 @@ function RGBStory({ encoding }: { encoding: string }) {
         topic: "/foo",
         receiveTime: { sec: 0, nsec: 0 },
         message: { data, width, height, encoding },
+        sizeInBytes: 0,
       }}
       rawMarkerData={noMarkersMarkerData}
       config={config}
@@ -321,6 +324,7 @@ function BayerStory({ encoding }: { encoding: string }) {
         topic: "/foo",
         receiveTime: { sec: 0, nsec: 0 },
         message: { data, width, height, encoding },
+        sizeInBytes: 0,
       }}
       rawMarkerData={noMarkersMarkerData}
       config={config}
@@ -356,6 +360,7 @@ function Mono16Story({
         topic: "/foo",
         receiveTime: { sec: 0, nsec: 0 },
         message: { data, width, height, encoding: "16UC1", is_bigendian: bigEndian ? 1 : 0 },
+        sizeInBytes: 0,
       }}
       rawMarkerData={noMarkersMarkerData}
       config={{ ...config, minValue, maxValue }}
@@ -547,6 +552,7 @@ export const ErrorState = (): JSX.Element => {
         topic: "/foo",
         receiveTime: { sec: 0, nsec: 0 },
         message: { data: new Uint8Array([]), width: 100, height: 50, encoding: "Foo" },
+        sizeInBytes: 0,
       }}
       rawMarkerData={noMarkersMarkerData}
       config={config}
@@ -589,6 +595,7 @@ export const CallsOnRenderFrameWhenRenderingFails = (): JSX.Element => {
             topic: "/foo",
             receiveTime: { sec: 0, nsec: 0 },
             message: { data: new Uint8Array([]), width: 100, height: 50, encoding: "Foo" },
+            sizeInBytes: 0,
           }}
           rawMarkerData={noMarkersMarkerData}
           config={config}

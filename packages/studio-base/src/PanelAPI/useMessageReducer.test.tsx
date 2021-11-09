@@ -101,6 +101,7 @@ describe("useMessageReducer", () => {
       topic: "/foo",
       receiveTime: { sec: 0, nsec: 0 },
       message: { value: 2 },
+      sizeInBytes: 0,
     };
 
     const root = mount(
@@ -127,6 +128,7 @@ describe("useMessageReducer", () => {
       topic: "/foo",
       receiveTime: { sec: 0, nsec: 0 },
       message: { value: 2 },
+      sizeInBytes: 0,
     };
 
     const root = mount(
@@ -153,11 +155,13 @@ describe("useMessageReducer", () => {
       topic: "/foo",
       receiveTime: { sec: 0, nsec: 0 },
       message: { value: 2 },
+      sizeInBytes: 0,
     };
     const message2 = {
       topic: "/bar",
       receiveTime: { sec: 0, nsec: 0 },
       message: { value: 3 },
+      sizeInBytes: 0,
     };
 
     const root = mount(
@@ -201,16 +205,19 @@ describe("useMessageReducer", () => {
       topic: "/foo",
       receiveTime: { sec: 0, nsec: 0 },
       message: { value: 2 },
+      sizeInBytes: 0,
     };
     const message2 = {
       topic: "/bar",
       receiveTime: { sec: 0, nsec: 0 },
       message: { value: 3 },
+      sizeInBytes: 0,
     };
     const message3 = {
       topic: "/bar",
       receiveTime: { sec: 0, nsec: 0 },
       message: { value: 4 },
+      sizeInBytes: 0,
     };
 
     const root = mount(
@@ -282,6 +289,7 @@ describe("useMessageReducer", () => {
       topic: "/foo",
       receiveTime: { sec: 0, nsec: 0 },
       message: { value: 2 },
+      sizeInBytes: 0,
     };
 
     const root = mount(
@@ -315,11 +323,13 @@ describe("useMessageReducer", () => {
       topic: "/foo",
       receiveTime: { sec: 0, nsec: 0 },
       message: { value: 2 },
+      sizeInBytes: 0,
     };
     const message2 = {
       topic: "/bar",
       receiveTime: { sec: 0, nsec: 0 },
       message: { value: 3 },
+      sizeInBytes: 0,
     };
 
     const root = mount(
@@ -351,11 +361,13 @@ describe("useMessageReducer", () => {
       topic: "/foo",
       receiveTime: { sec: 0, nsec: 0 },
       message: { value: 2 },
+      sizeInBytes: 0,
     };
     const message2 = {
       topic: "/bar",
       receiveTime: { sec: 0, nsec: 0 },
       message: { value: 3 },
+      sizeInBytes: 0,
     };
 
     const root = mount(
@@ -392,6 +404,7 @@ describe("useMessageReducer", () => {
       topic: "/foo",
       receiveTime: { sec: 0, nsec: 0 },
       message: { value: 2 },
+      sizeInBytes: 0,
     };
 
     const root = mount(
@@ -487,6 +500,7 @@ describe("useMessageReducer", () => {
       topic: "/foo",
       receiveTime: { sec: 0, nsec: 0 },
       message: { value: 2 },
+      sizeInBytes: 0,
     };
 
     const root = mount(

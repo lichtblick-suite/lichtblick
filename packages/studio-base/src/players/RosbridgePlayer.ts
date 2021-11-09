@@ -447,6 +447,7 @@ export default class RosbridgePlayer implements Player {
               topic: topicName,
               receiveTime,
               message: innerMessage,
+              sizeInBytes: bytes.byteLength,
             };
             this._parsedMessages.push(msg);
             this._handleInternalMessage(msg);

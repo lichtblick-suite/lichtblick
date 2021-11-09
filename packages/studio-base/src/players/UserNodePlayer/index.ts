@@ -276,7 +276,9 @@ export default class UserNodePlayer implements Player {
     // problems for specific userspace nodes independently of other userspace nodes.
     const problemKey = `node-id-${nodeId}`;
 
-    const processMessage = async (msgEvent: MessageEvent<unknown>) => {
+    const processMessage = async (
+      msgEvent: MessageEvent<unknown>,
+    ): Promise<MessageEvent<unknown> | undefined> => {
       // We allow _resetWorkers to "cancel" the processing by creating a new signal every time we process a message
       terminateSignal = signal<void>();
 
@@ -403,6 +405,7 @@ export default class UserNodePlayer implements Player {
         topic: outputTopic,
         receiveTime: msgEvent.receiveTime,
         message: result.message,
+        sizeInBytes: msgEvent.sizeInBytes,
       };
     };
 

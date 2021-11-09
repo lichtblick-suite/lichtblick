@@ -128,7 +128,8 @@ export default class Rosbag2DataProvider implements RandomAccessDataProvider {
       parsedMessages.push({
         topic: msg.topic.name,
         receiveTime: msg.timestamp,
-        message: msg.data,
+        message: msg.value,
+        sizeInBytes: msg.data.byteLength,
       });
     }
 

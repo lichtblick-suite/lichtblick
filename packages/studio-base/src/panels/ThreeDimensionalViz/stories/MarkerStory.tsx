@@ -40,6 +40,7 @@ const fixtureData = {
         message: {
           markers: [] as ReturnType<typeof generateMarkers>,
         },
+        sizeInBytes: 0,
       },
     ],
   },

@@ -60,6 +60,7 @@ const message = (
     header:
       headerStampSeconds == undefined ? undefined : { stamp: { sec: headerStampSeconds, nsec: 1 } },
   },
+  sizeInBytes: 0,
 });
 
 describe("MessagePipeline/warnOnOutOfSyncMessages", () => {

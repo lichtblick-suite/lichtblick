@@ -22,7 +22,7 @@ class UlogLocalDataSourceFactory implements IDataSourceFactory {
       return;
     }
 
-    return buildNonRos1PlayerFromDescriptor(getLocalUlogDescriptor(file), {
+    return buildNonRos1PlayerFromDescriptor(file.name, getLocalUlogDescriptor(file), {
       metricsCollector: args.metricsCollector,
       unlimitedMemoryCache: args.unlimitedMemoryCache,
     });

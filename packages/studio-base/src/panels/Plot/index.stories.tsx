@@ -273,6 +273,7 @@ const fixture = {
       topic: "/some_topic/location",
       receiveTime: message.header.stamp,
       message,
+      sizeInBytes: 0,
     })),
     "/some_topic/location_subset": locationMessages
       .slice(locationMessages.length / 3, (locationMessages.length * 2) / 3)
@@ -280,17 +281,20 @@ const fixture = {
         topic: "/some_topic/location_subset",
         receiveTime: message.header.stamp,
         message,
+        sizeInBytes: 0,
       })),
     "/some_topic/state": otherStateMessages.map((message) => ({
       topic: "/some_topic/state",
       receiveTime: message.header.stamp,
       message,
+      sizeInBytes: 0,
     })),
     "/boolean_topic": [
       {
         topic: "/boolean_topic",
         receiveTime: { sec: 1, nsec: 0 },
         message: { data: true },
+        sizeInBytes: 0,
       },
     ],
   },
@@ -930,11 +934,13 @@ export function SuperCloseValues(): JSX.Element {
               topic: "/some_number",
               receiveTime: { sec: 0, nsec: 0 },
               message: { data: 1.8548483304974972 },
+              sizeInBytes: 0,
             },
             {
               topic: "/some_number",
               receiveTime: { sec: 1, nsec: 0 },
               message: { data: 1.8548483304974974 },
+              sizeInBytes: 0,
             },
           ],
         },

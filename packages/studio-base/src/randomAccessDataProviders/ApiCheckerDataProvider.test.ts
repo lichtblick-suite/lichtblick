@@ -20,8 +20,18 @@ function getProvider({ isRoot = false }: { isRoot?: boolean } = {}) {
   const memoryDataProvider = new MemoryDataProvider({
     messages: {
       parsedMessages: [
-        { topic: "/some_topic", receiveTime: { sec: 100, nsec: 0 }, message: 0 as any },
-        { topic: "/some_topic", receiveTime: { sec: 105, nsec: 0 }, message: 1 as any },
+        {
+          topic: "/some_topic",
+          receiveTime: { sec: 100, nsec: 0 },
+          message: 0 as any,
+          sizeInBytes: 0,
+        },
+        {
+          topic: "/some_topic",
+          receiveTime: { sec: 105, nsec: 0 },
+          message: 1 as any,
+          sizeInBytes: 0,
+        },
       ],
       rosBinaryMessages: undefined,
     },
@@ -160,8 +170,8 @@ describe("ApiCheckerDataProvider", () => {
       );
       expect(result.rosBinaryMessages).toBe(undefined);
       expect(result.parsedMessages).toEqual([
-        { message: 0, receiveTime: { nsec: 0, sec: 100 }, topic: "/some_topic" },
-        { message: 1, receiveTime: { nsec: 0, sec: 105 }, topic: "/some_topic" },
+        { message: 0, receiveTime: { nsec: 0, sec: 100 }, topic: "/some_topic", sizeInBytes: 0 },
+        { message: 1, receiveTime: { nsec: 0, sec: 105 }, topic: "/some_topic", sizeInBytes: 0 },
       ]);
     });
 
@@ -257,7 +267,9 @@ describe("ApiCheckerDataProvider", () => {
         });
 
         // Return messages that are still within the global range, but outside of the requested range.
-        returnMessages = [{ topic: "/some_topic", receiveTime: { sec: 100, nsec: 0 }, message: 0 }];
+        returnMessages = [
+          { topic: "/some_topic", receiveTime: { sec: 100, nsec: 0 }, message: 0, sizeInBytes: 0 },
+        ];
         await expect(
           provider.getMessages(
             { sec: 102, nsec: 0 },
@@ -266,7 +278,9 @@ describe("ApiCheckerDataProvider", () => {
           ),
         ).rejects.toThrow();
 
-        returnMessages = [{ topic: "/some_topic", receiveTime: { sec: 104, nsec: 0 }, message: 0 }];
+        returnMessages = [
+          { topic: "/some_topic", receiveTime: { sec: 104, nsec: 0 }, message: 0, sizeInBytes: 0 },
+        ];
         await expect(
           provider.getMessages(
             { sec: 102, nsec: 0 },
@@ -277,8 +291,8 @@ describe("ApiCheckerDataProvider", () => {
 
         // Incorrect order.
         returnMessages = [
-          { topic: "/some_topic", receiveTime: { sec: 105, nsec: 0 }, message: 1 },
-          { topic: "/some_topic", receiveTime: { sec: 100, nsec: 0 }, message: 0 },
+          { topic: "/some_topic", receiveTime: { sec: 105, nsec: 0 }, message: 1, sizeInBytes: 0 },
+          { topic: "/some_topic", receiveTime: { sec: 100, nsec: 0 }, message: 0, sizeInBytes: 0 },
         ];
         await expect(
           provider.getMessages(
@@ -290,7 +304,12 @@ describe("ApiCheckerDataProvider", () => {
 
         // Valid topic, but not requested
         returnMessages = [
-          { topic: "/some_other_topic", receiveTime: { sec: 100, nsec: 0 }, message: 0 },
+          {
+            topic: "/some_other_topic",
+            receiveTime: { sec: 100, nsec: 0 },
+            message: 0,
+            sizeInBytes: 0,
+          },
         ];
         await expect(
           provider.getMessages(

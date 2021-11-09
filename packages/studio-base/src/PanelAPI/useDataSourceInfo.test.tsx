@@ -26,11 +26,13 @@ describe("useDataSourceInfo", () => {
       topic: "/foo",
       receiveTime: { sec: 1, nsec: 2 },
       message: {},
+      sizeInBytes: 0,
     },
     {
       topic: "/foo",
       receiveTime: { sec: 5, nsec: 6 },
       message: {},
+      sizeInBytes: 0,
     },
   ];
   const datatypes: RosDatatypes = new Map(

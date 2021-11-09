@@ -22,12 +22,12 @@ import delay from "@foxglove/studio-base/util/delay";
 import naturalSort from "@foxglove/studio-base/util/naturalSort";
 import sendNotification from "@foxglove/studio-base/util/sendNotification";
 
-import MemoryCacheDataProvider, {
+import Ros1MemoryCacheDataProvider, {
   getBlocksToKeep,
   getPrefetchStartPoint,
   MAX_BLOCK_SIZE_BYTES,
   MAX_BLOCKS,
-} from "./MemoryCacheDataProvider";
+} from "./Ros1MemoryCacheDataProvider";
 
 function sortMessages<T>(messages: MessageEvent<T>[]) {
   return messages.sort((a, b) => {
@@ -40,37 +40,40 @@ function sortMessages<T>(messages: MessageEvent<T>[]) {
 }
 
 function generateMessages(): MessageEvent<ArrayBuffer>[] {
+  // prettier-ignore
   return sortMessages([
-    { topic: "/foo", receiveTime: { sec: 100, nsec: 0 }, message: new ArrayBuffer(10) },
-    { topic: "/foo", receiveTime: { sec: 101, nsec: 0 }, message: new ArrayBuffer(10) },
-    { topic: "/foo", receiveTime: { sec: 102, nsec: 0 }, message: new ArrayBuffer(10) },
-    { topic: "/bar", receiveTime: { sec: 100, nsec: 0 }, message: new ArrayBuffer(10) },
-    { topic: "/bar", receiveTime: { sec: 101, nsec: 0 }, message: new ArrayBuffer(10) },
-    { topic: "/bar", receiveTime: { sec: 102, nsec: 0 }, message: new ArrayBuffer(10) },
+    { topic: "/foo", receiveTime: { sec: 100, nsec: 0 }, message: new ArrayBuffer(10), sizeInBytes: 0 },
+    { topic: "/foo", receiveTime: { sec: 101, nsec: 0 }, message: new ArrayBuffer(10), sizeInBytes: 0 },
+    { topic: "/foo", receiveTime: { sec: 102, nsec: 0 }, message: new ArrayBuffer(10), sizeInBytes: 0 },
+    { topic: "/bar", receiveTime: { sec: 100, nsec: 0 }, message: new ArrayBuffer(10), sizeInBytes: 0 },
+    { topic: "/bar", receiveTime: { sec: 101, nsec: 0 }, message: new ArrayBuffer(10), sizeInBytes: 0 },
+    { topic: "/bar", receiveTime: { sec: 102, nsec: 0 }, message: new ArrayBuffer(10), sizeInBytes: 0 },
   ]);
 }
 
 function generateLargeMessages(): MessageEvent<ArrayBuffer>[] {
   // The input is 201 blocks (20.1 seconds) long, with messages every two seconds.
+  // prettier-ignore
   return sortMessages([
-    { topic: "/foo", receiveTime: { sec: 0, nsec: 0 }, message: new ArrayBuffer(600) },
-    { topic: "/foo", receiveTime: { sec: 2, nsec: 0 }, message: new ArrayBuffer(600) },
-    { topic: "/foo", receiveTime: { sec: 4, nsec: 0 }, message: new ArrayBuffer(600) },
-    { topic: "/foo", receiveTime: { sec: 6, nsec: 0 }, message: new ArrayBuffer(600) },
-    { topic: "/foo", receiveTime: { sec: 8, nsec: 0 }, message: new ArrayBuffer(600) },
-    { topic: "/foo", receiveTime: { sec: 10, nsec: 0 }, message: new ArrayBuffer(600) },
-    { topic: "/foo", receiveTime: { sec: 12, nsec: 0 }, message: new ArrayBuffer(600) },
-    { topic: "/foo", receiveTime: { sec: 14, nsec: 0 }, message: new ArrayBuffer(600) },
-    { topic: "/foo", receiveTime: { sec: 16, nsec: 0 }, message: new ArrayBuffer(600) },
-    { topic: "/foo", receiveTime: { sec: 18, nsec: 0 }, message: new ArrayBuffer(600) },
-    { topic: "/foo", receiveTime: { sec: 20, nsec: 0 }, message: new ArrayBuffer(600) },
+    { topic: "/foo", receiveTime: { sec: 0, nsec: 0 }, message: new ArrayBuffer(600), sizeInBytes: 0 },
+    { topic: "/foo", receiveTime: { sec: 2, nsec: 0 }, message: new ArrayBuffer(600), sizeInBytes: 0 },
+    { topic: "/foo", receiveTime: { sec: 4, nsec: 0 }, message: new ArrayBuffer(600), sizeInBytes: 0 },
+    { topic: "/foo", receiveTime: { sec: 6, nsec: 0 }, message: new ArrayBuffer(600), sizeInBytes: 0 },
+    { topic: "/foo", receiveTime: { sec: 8, nsec: 0 }, message: new ArrayBuffer(600), sizeInBytes: 0 },
+    { topic: "/foo", receiveTime: { sec: 10, nsec: 0 }, message: new ArrayBuffer(600), sizeInBytes: 0 },
+    { topic: "/foo", receiveTime: { sec: 12, nsec: 0 }, message: new ArrayBuffer(600), sizeInBytes: 0 },
+    { topic: "/foo", receiveTime: { sec: 14, nsec: 0 }, message: new ArrayBuffer(600), sizeInBytes: 0 },
+    { topic: "/foo", receiveTime: { sec: 16, nsec: 0 }, message: new ArrayBuffer(600), sizeInBytes: 0 },
+    { topic: "/foo", receiveTime: { sec: 18, nsec: 0 }, message: new ArrayBuffer(600), sizeInBytes: 0 },
+    { topic: "/foo", receiveTime: { sec: 20, nsec: 0 }, message: new ArrayBuffer(600), sizeInBytes: 0 },
   ]);
 }
 
 function generateMessagesForLongInput(): MessageEvent<ArrayBuffer>[] {
+  // prettier-ignore
   return sortMessages([
-    { topic: "/foo", receiveTime: { sec: 0, nsec: 0 }, message: new ArrayBuffer(10) },
-    { topic: "/bar", receiveTime: { sec: 3600, nsec: 0 }, message: new ArrayBuffer(10) },
+    { topic: "/foo", receiveTime: { sec: 0, nsec: 0 }, message: new ArrayBuffer(10), sizeInBytes: 0 },
+    { topic: "/bar", receiveTime: { sec: 3600, nsec: 0 }, message: new ArrayBuffer(10), sizeInBytes: 0 },
   ]);
 }
 
@@ -87,7 +90,7 @@ function getProvider(
     },
   });
   return {
-    provider: new MemoryCacheDataProvider(
+    provider: new Ros1MemoryCacheDataProvider(
       { unlimitedCache },
       [{ name: CoreDataProviders.MemoryCacheDataProvider, args: {}, children: [] }],
       () => memoryDataProvider,
@@ -346,6 +349,7 @@ describe("MemoryCacheDataProvider", () => {
         topic: item.topic,
         receiveTime: item.receiveTime,
         message: {},
+        sizeInBytes: 0,
       })),
     );
   });
@@ -356,6 +360,7 @@ describe("MemoryCacheDataProvider", () => {
         topic: "/foo",
         receiveTime: { sec: 100, nsec: 0 },
         message: new Uint8Array(MAX_BLOCK_SIZE_BYTES + 10),
+        sizeInBytes: 0,
       },
     ]);
     await provider.initialize(mockExtensionPoint().extensionPoint);

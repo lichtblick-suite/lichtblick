@@ -16,6 +16,8 @@ import { isEqual, sum, uniq } from "lodash";
 import { v4 as uuidv4 } from "uuid";
 
 import { filterMap } from "@foxglove/den/collection";
+import { parse as parseMessageDefinition } from "@foxglove/rosmsg";
+import { LazyMessageReader } from "@foxglove/rosmsg-serialization";
 import {
   Time,
   add as addTimes,
@@ -46,7 +48,7 @@ import sendNotification from "@foxglove/studio-base/util/sendNotification";
 // for these, but it seems to work reasonably well in my tests.
 export const MIN_MEM_CACHE_BLOCK_SIZE_NS = 0.1e9; // Messages are laid out in blocks with a fixed number of milliseconds.
 
-// Preloading algorithms get too slow when there are too many blocks. For very long logs, use longer
+// Preloading algorithms get too slow when there are too many blocks. For very long bags, use longer
 // blocks. Adaptive block sizing is simpler than using a tree structure for immutable updates but
 // less flexible, so we may want to move away from a single-level block structure in the future.
 export const MAX_BLOCKS = 400;
@@ -54,7 +56,7 @@ const READ_AHEAD_NS = 3e9; // Number of nanoseconds to read ahead from the last 
 export const MAX_BLOCK_SIZE_BYTES = 50e6; // Number of bytes in a block before we show an error.
 
 // Number of bytes that we aim to keep in the cache.
-// Setting this to higher than 1.5GB caused the renderer process to crash on linux on certain logs.
+// Setting this to higher than 1.5GB caused the renderer process to crash on linux on certain bags.
 // See: https://github.com/foxglove/studio/pull/1733
 const DEFAULT_CACHE_SIZE_BYTES = 1.0e9;
 
@@ -66,12 +68,6 @@ export type MemoryCacheBlock = {
   };
   readonly sizeInBytes: number;
 };
-
-export type BlockCache = {
-  blocks: readonly (MemoryCacheBlock | undefined)[];
-  startTime: Time;
-};
-
 const EMPTY_BLOCK: MemoryCacheBlock = {
   messagesByTopic: {},
   sizeInBytes: 0,
@@ -233,18 +229,19 @@ export function getPrefetchStartPoint(uncachedRanges: Range[], cursorPosition: n
   return uncachedRanges[0]?.start ?? 0;
 }
 
-// This retains MessageEvents in memory from an underlying RandomAccessDataProvider. The messages
-// are evicted from this in-memory cache based on some constants defined at the top of this file.
-export default class MemoryCacheDataProvider implements RandomAccessDataProvider {
+// This fills up the memory with messages from an underlying RandomAccessDataProvider. The messages have to be
+// unparsed ROS messages. The messages are evicted from this in-memory cache based on some constants
+// defined at the top of this file.
+export default class Ros1MemoryCacheDataProvider implements RandomAccessDataProvider {
   private _provider: RandomAccessDataProvider;
   private _extensionPoint?: ExtensionPoint;
 
   // The actual blocks that contain the messages. Blocks have a set "width" in terms of nanoseconds
-  // since the start time of the log. If a block has some messages for a topic, then by definition
+  // since the start time of the bag. If a block has some messages for a topic, then by definition
   // it has *all* messages for that topic and timespan.
   private _blocks: (MemoryCacheBlock | undefined)[] = [];
 
-  // The start time of the log. Used for computing from and to nanoseconds since the start.
+  // The start time of the bag. Used for computing from and to nanoseconds since the start.
   private _startTime: Time = { sec: 0, nsec: 0 };
 
   // The topics that we were most recently asked to load.
@@ -290,6 +287,8 @@ export default class MemoryCacheDataProvider implements RandomAccessDataProvider
   private _readAheadBlocks: number = 0;
   private _memCacheBlockSizeNs: number = 0;
 
+  private _lazyMessageReadersByTopic = new Map<string, LazyMessageReader>();
+
   constructor(
     { unlimitedCache = false }: { unlimitedCache?: boolean },
     children: RandomAccessDataProviderDescriptor[],
@@ -326,6 +325,18 @@ export default class MemoryCacheDataProvider implements RandomAccessDataProvider
 
     const blockCount = Math.ceil(this._totalNs / this._memCacheBlockSizeNs);
     this._blocks = Array.from({ length: blockCount });
+
+    const msgDefs = result.messageDefinitions;
+    if (msgDefs.type === "parsed") {
+      for (const [topic, msgDef] of Object.entries(msgDefs.parsedMessageDefinitionsByTopic)) {
+        this._lazyMessageReadersByTopic.set(topic, new LazyMessageReader(msgDef));
+      }
+    } else if (msgDefs.type === "raw") {
+      for (const [topic, rawMsgDef] of Object.entries(msgDefs.messageDefinitionsByTopic)) {
+        const msgDef = parseMessageDefinition(rawMsgDef);
+        this._lazyMessageReadersByTopic.set(topic, new LazyMessageReader(msgDef));
+      }
+    }
 
     this._updateProgress();
 
@@ -382,7 +393,10 @@ export default class MemoryCacheDataProvider implements RandomAccessDataProvider
   private _resolveFinishedReadRequests(): void {
     this._readRequests = this._readRequests.filter(({ timeRange, blockRange, topics, resolve }) => {
       if (topics.length === 0) {
-        resolve({ parsedMessages: [] });
+        resolve({
+          parsedMessages: [],
+          rosBinaryMessages: undefined,
+        });
         return false;
       }
 
@@ -435,7 +449,10 @@ export default class MemoryCacheDataProvider implements RandomAccessDataProvider
         }
       }
 
-      resolve({ parsedMessages: messages.sort((a, b) => compare(a.receiveTime, b.receiveTime)) });
+      resolve({
+        parsedMessages: messages.sort((a, b) => compare(a.receiveTime, b.receiveTime)),
+        rosBinaryMessages: undefined,
+      });
       this._lastResolvedCallbackEnd = blockRange.end;
       return false;
     });
@@ -463,7 +480,7 @@ export default class MemoryCacheDataProvider implements RandomAccessDataProvider
       currentRemainingRange: this._currentConnection
         ? this._currentConnection.remainingBlockRange
         : undefined,
-      readRequestRange: this._readRequests[0]?.blockRange,
+      readRequestRange: this._readRequests[0] ? this._readRequests[0].blockRange : undefined,
       downloadedRanges: this._getDownloadedBlockRanges(),
       lastResolvedCallbackEnd: this._lastResolvedCallbackEnd,
       cacheSize: this._readAheadBlocks,
@@ -589,9 +606,23 @@ export default class MemoryCacheDataProvider implements RandomAccessDataProvider
       );
       const messages =
         topics.length > 0
-          ? await this._provider.getMessages(startTime, endTime, { parsedMessages: topics })
-          : { parsedMessages: [] };
-      const { parsedMessages = [] } = messages;
+          ? await this._provider.getMessages(startTime, endTime, {
+              rosBinaryMessages: topics,
+            })
+          : {
+              rosBinaryMessages: [],
+              parsedMessages: undefined,
+            };
+      const { rosBinaryMessages, parsedMessages } = messages;
+
+      if (parsedMessages != undefined) {
+        const types = (Object.keys(messages) as (keyof typeof messages)[])
+          .filter((type) => messages[type] != undefined)
+          .join("\n");
+        sendNotification("MemoryCacheDataProvider got bad message types", types, "app", "error");
+        // Do not retry.
+        return false;
+      }
 
       // If we're not current any more, discard the messages, because otherwise we might write duplicate messages.
       if (!isCurrent()) {
@@ -606,9 +637,42 @@ export default class MemoryCacheDataProvider implements RandomAccessDataProvider
         messagesByTopic[topic] = [];
       }
 
-      for (const parsedMessage of parsedMessages) {
-        sizeInBytes += parsedMessage.sizeInBytes;
-        messagesByTopic[parsedMessage.topic]?.push(parsedMessage);
+      for (const rosBinaryMessage of rosBinaryMessages ?? []) {
+        const lazyReader = this._lazyMessageReadersByTopic.get(rosBinaryMessage.topic);
+        if (!lazyReader) {
+          continue;
+        }
+
+        sizeInBytes += rosBinaryMessage.message.byteLength;
+
+        const bytes = new Uint8Array(rosBinaryMessage.message);
+
+        try {
+          const msgSize = lazyReader.size(bytes);
+          if (msgSize > bytes.byteLength) {
+            sendNotification(
+              `Message buffer not large enough on ${rosBinaryMessage.topic}`,
+              `Cannot read ${msgSize} byte message from ${bytes.byteLength} byte buffer`,
+              "user",
+              "error",
+            );
+          }
+        } catch (error) {
+          sendNotification(
+            `Message size parsing failed on ${rosBinaryMessage.topic}`,
+            error,
+            "user",
+            "error",
+          );
+        }
+
+        const lazyMsg = lazyReader.readMessage(bytes);
+        messagesByTopic[rosBinaryMessage.topic]?.push({
+          topic: rosBinaryMessage.topic,
+          receiveTime: rosBinaryMessage.receiveTime,
+          message: lazyMsg,
+          sizeInBytes: rosBinaryMessage.sizeInBytes,
+        });
       }
 
       if (sizeInBytes > MAX_BLOCK_SIZE_BYTES && !this._loggedTooLargeError) {

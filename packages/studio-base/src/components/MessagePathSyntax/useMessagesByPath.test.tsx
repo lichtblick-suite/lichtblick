@@ -337,6 +337,7 @@ describe("useMessagesByPath", () => {
           { index: 2, baz: 12 },
         ],
       },
+      sizeInBytes: 0,
     };
     it("updates queriedData when a global variable changes", () => {
       const { wrapper } = makeMessagePipelineWrapper({ foo: 0 });

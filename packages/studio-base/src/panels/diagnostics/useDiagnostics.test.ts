@@ -32,6 +32,7 @@ const messageAtLevel = (level: number): MessageEvent<DiagnosticStatusArrayMsg> =
   },
   topic: "/foo",
   receiveTime: { sec: 1547062466, nsec: 1674890 },
+  sizeInBytes: 0,
 });
 
 const diagnosticInfoAtLevel = (level: number): DiagnosticInfo => {

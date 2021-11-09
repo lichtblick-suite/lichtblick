@@ -351,8 +351,8 @@ export default class Ros2Player implements Player {
 
       const subscription = this._rosNode.subscribe({ topic: topicName, dataType, msgDefinition });
 
-      subscription.on("message", (timestamp, message, _data, _pub) =>
-        this._handleMessage(topicName, timestamp, message, true),
+      subscription.on("message", (timestamp, message, data, _pub) =>
+        this._handleMessage(topicName, timestamp, message, data.byteLength, true),
       );
     }
 
@@ -370,6 +370,7 @@ export default class Ros2Player implements Player {
     topic: string,
     timestamp: Time,
     message: unknown,
+    sizeInBytes: number,
     // This is a hot path so we avoid extra object allocation from a parameters struct
     // eslint-disable-next-line @foxglove/no-boolean-parameters
     external: boolean,
@@ -386,7 +387,7 @@ export default class Ros2Player implements Player {
       this._metricsCollector.recordTimeToFirstMsgs();
     }
 
-    const msg: MessageEvent<unknown> = { topic, receiveTime, message };
+    const msg: MessageEvent<unknown> = { topic, receiveTime, message, sizeInBytes };
     this._parsedMessages.push(msg);
     this._handleInternalMessage(msg);
 
