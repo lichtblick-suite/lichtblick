@@ -67,14 +67,14 @@ function ColorSchemeSettings(): JSX.Element {
 }
 
 function TimezoneSettings(): React.ReactElement {
-  type Option = IComboBoxOption & { data: string };
+  type Option = Omit<IComboBoxOption, "data"> & { data: string | undefined };
 
   const [timezone, setTimezone] = useAppConfigurationValue<string>(AppSetting.TIMEZONE);
   const detectItem = useMemo(
     () => ({
       key: "detect",
       text: `Detect from system: ${formatTimezone(moment.tz.guess())}`,
-      data: "",
+      data: undefined,
     }),
     [],
   );
@@ -101,16 +101,20 @@ function TimezoneSettings(): React.ReactElement {
   const itemsByData = useMemo(() => {
     const map = new Map<string, Option>();
     for (const item of fixedItems) {
-      map.set(item.data, item);
+      if (item.data != undefined) {
+        map.set(item.data, item);
+      }
     }
     for (const item of timezoneItems) {
-      map.set(item.data, item);
+      if (item.data != undefined) {
+        map.set(item.data, item);
+      }
     }
     return map;
   }, [fixedItems, timezoneItems]);
 
   const selectedItem = useMemo(
-    () => itemsByData.get(timezone ?? "") ?? detectItem,
+    () => (timezone != undefined && itemsByData.get(timezone)) || detectItem,
     [itemsByData, timezone, detectItem],
   );
 

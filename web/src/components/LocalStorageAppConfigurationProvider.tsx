@@ -21,10 +21,18 @@ export default function LocalStorageAppConfigurationProvider(
     return {
       get(key: string): AppConfigurationValue {
         const value = localStorage.getItem(KEY_PREFIX + key);
-        return value == undefined ? undefined : JSON.parse(value);
+        try {
+          return value == undefined ? undefined : JSON.parse(value);
+        } catch {
+          return undefined;
+        }
       },
       async set(key: string, value: AppConfigurationValue): Promise<void> {
-        localStorage.setItem(KEY_PREFIX + key, JSON.stringify(value));
+        if (value == undefined) {
+          localStorage.removeItem(KEY_PREFIX + key);
+        } else {
+          localStorage.setItem(KEY_PREFIX + key, JSON.stringify(value));
+        }
         const listeners = changeListeners.get(key);
         if (listeners) {
           // Copy the list of listeners to protect against mutation during iteration
