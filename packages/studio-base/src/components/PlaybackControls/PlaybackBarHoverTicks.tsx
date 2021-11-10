@@ -14,13 +14,22 @@ import { useMemo } from "react";
 import { useResizeDetector } from "react-resize-detector";
 import styled, { css } from "styled-components";
 
-import { toSec } from "@foxglove/rostime";
+import { add, fromSec, toSec } from "@foxglove/rostime";
 import { RpcScales } from "@foxglove/studio-base/components/Chart/types";
 import {
   MessagePipelineContext,
   useMessagePipeline,
 } from "@foxglove/studio-base/components/MessagePipeline";
 import HoverBar from "@foxglove/studio-base/components/TimeBasedChart/HoverBar";
+import {
+  LayoutState,
+  useCurrentLayoutSelector,
+} from "@foxglove/studio-base/context/CurrentLayoutContext";
+import { useHoverValue } from "@foxglove/studio-base/context/HoverValueContext";
+import { TimeDisplayMethod } from "@foxglove/studio-base/types/panels";
+import { formatTime } from "@foxglove/studio-base/util/formatTime";
+import { fonts } from "@foxglove/studio-base/util/sharedStyleConstants";
+import { formatTimeRaw } from "@foxglove/studio-base/util/time";
 
 const sharedTickStyles = css`
   position: absolute;
@@ -46,12 +55,29 @@ const BottomTick = styled.div`
   border-bottom: 5px solid #f7be00;
 `;
 
+const TimeLabel = styled.div`
+  position: absolute;
+  left: 0;
+  top: 0px;
+  font-family: ${fonts.MONOSPACE};
+  font-size: ${({ theme }) => theme.fonts.xSmall.fontSize};
+  color: #f7be00;
+  backgroundcolor: blue;
+  transform: translate(-50%, -50%);
+  white-space: nowrap;
+`;
+
 function getStartTime(ctx: MessagePipelineContext) {
   return ctx.playerState.activeData?.startTime;
 }
 
 function getEndTime(ctx: MessagePipelineContext) {
   return ctx.playerState.activeData?.endTime;
+}
+
+function displayMethodSelector(state: LayoutState): TimeDisplayMethod {
+  const method = state.selectedLayout?.data?.playbackConfig.timeDisplayMethod ?? "TOD";
+  return method === "TOD" ? "TOD" : "SEC";
 }
 
 type Props = {
@@ -61,6 +87,8 @@ type Props = {
 export default function PlaybackBarHoverTicks({ componentId }: Props): JSX.Element {
   const startTime = useMessagePipeline(getStartTime);
   const endTime = useMessagePipeline(getEndTime);
+  const hoverValue = useHoverValue({ componentId, isTimestampScale: true });
+  const timeDisplayMethod = useCurrentLayoutSelector(displayMethodSelector);
 
   // Use a debounce and 0 refresh rate to avoid triggering a resize observation while handling
   // and existing resize observation.
@@ -70,6 +98,14 @@ export default function PlaybackBarHoverTicks({ componentId }: Props): JSX.Eleme
     refreshMode: "debounce",
     refreshRate: 0,
   });
+
+  const hoverTimeDisplay = useMemo(() => {
+    if (!hoverValue || hoverValue.type !== "PLAYBACK_SECONDS" || !startTime) {
+      return undefined;
+    }
+    const stamp = add(startTime, fromSec(hoverValue.value));
+    return timeDisplayMethod === "TOD" ? formatTime(stamp) : formatTimeRaw(stamp);
+  }, [hoverValue, startTime, timeDisplayMethod]);
 
   const scaleBounds = useMemo<RpcScales | undefined>(() => {
     if (startTime == undefined || endTime == undefined) {
@@ -85,10 +121,12 @@ export default function PlaybackBarHoverTicks({ componentId }: Props): JSX.Eleme
       },
     };
   }, [width, startTime, endTime]);
+
   return (
     <div ref={ref} style={{ width: "100%" }}>
       {scaleBounds && (
         <HoverBar componentId={componentId} scales={scaleBounds} isTimestampScale>
+          {hoverValue != undefined && <TimeLabel>{hoverTimeDisplay}</TimeLabel>}
           <TopTick />
           <BottomTick />
         </HoverBar>

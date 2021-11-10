@@ -13,11 +13,13 @@
 
 import { action } from "@storybook/addon-actions";
 import { Story } from "@storybook/react";
+import { useLayoutEffect } from "react";
 
 import MockMessagePipelineProvider from "@foxglove/studio-base/components/MessagePipeline/MockMessagePipelineProvider";
 import AppConfigurationContext, {
   AppConfiguration,
 } from "@foxglove/studio-base/context/AppConfigurationContext";
+import { useSetHoverValue } from "@foxglove/studio-base/context/HoverValueContext";
 import {
   PlayerCapabilities,
   PlayerPresence,
@@ -129,3 +131,23 @@ export const DownloadProgressByRanges: Story = () => {
   );
 };
 DownloadProgressByRanges.parameters = { colorScheme: "both-column" };
+
+export const HoverTicks: Story = () => {
+  const player = getPlayerState();
+  const setHoverValue = useSetHoverValue();
+
+  useLayoutEffect(() => {
+    setHoverValue({
+      type: "PLAYBACK_SECONDS",
+      value: 0.5,
+      componentId: "story",
+    });
+  }, [setHoverValue]);
+
+  return (
+    <Wrapper activeData={player.activeData}>
+      <PlaybackControls />
+    </Wrapper>
+  );
+};
+HoverTicks.parameters = { colorScheme: "both-column" };

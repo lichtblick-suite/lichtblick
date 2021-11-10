@@ -23,6 +23,7 @@ import { useState, useCallback, useMemo, useRef, useEffect } from "react";
 
 import { Time, isTimeInRangeInclusive } from "@foxglove/rostime";
 import {
+  LayoutState,
   useCurrentLayoutActions,
   useCurrentLayoutSelector,
 } from "@foxglove/studio-base/context/CurrentLayoutContext";
@@ -34,6 +35,11 @@ import {
 } from "@foxglove/studio-base/util/formatTime";
 import { fonts } from "@foxglove/studio-base/util/sharedStyleConstants";
 import { formatTimeRaw } from "@foxglove/studio-base/util/time";
+
+function displayMethodSelector(state: LayoutState): TimeDisplayMethod {
+  const method = state.selectedLayout?.data?.playbackConfig.timeDisplayMethod ?? "TOD";
+  return method === "TOD" ? "TOD" : "SEC";
+}
 
 const PlaybackTimeDisplayMethod = ({
   currentTime,
@@ -53,10 +59,7 @@ const PlaybackTimeDisplayMethod = ({
   isPlaying: boolean;
 }): JSX.Element => {
   const timestampInputRef = useRef<HTMLInputElement>(ReactNull);
-  const timeDisplayMethod: TimeDisplayMethod = useCurrentLayoutSelector((state) => {
-    const method = state.selectedLayout?.data?.playbackConfig.timeDisplayMethod ?? "TOD";
-    return method === "TOD" ? "TOD" : "SEC";
-  });
+  const timeDisplayMethod = useCurrentLayoutSelector(displayMethodSelector);
   const { setPlaybackConfig } = useCurrentLayoutActions();
   const setTimeDisplayMethod = useCallback(
     (newTimeDisplayMethod: TimeDisplayMethod) =>
