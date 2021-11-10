@@ -94,6 +94,28 @@ describe("layout reducers", () => {
         tabs: [{ title: "A", layout: newAudioId }, { title: "B" }, { title: "C" }],
       });
     });
+
+    it("adds panel to uninitialized Tab layout", () => {
+      let panels: PanelsState = {
+        ...emptyLayout,
+        layout: "Tab!a",
+        configById: {
+          "Tab!a": {},
+        },
+      };
+      panels = panelsReducer(panels, {
+        type: "ADD_PANEL",
+        payload: {
+          id: "Audio!x",
+          tabId: "Tab!a",
+          config: { foo: "bar" },
+        },
+      });
+
+      const { configById } = panels;
+      const tabs = (configById["Tab!a"] as TabPanelConfig).tabs;
+      expect(tabs.length).toEqual(1);
+    });
   });
 
   describe("drops panel into a layout", () => {

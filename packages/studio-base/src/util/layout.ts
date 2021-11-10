@@ -60,6 +60,10 @@ export function isTabPanel(panelId: string): boolean {
   return getPanelTypeFromId(panelId) === TAB_PANEL_TYPE;
 }
 
+export function isTabPanelConfig(config: PanelConfig | undefined): config is TabPanelConfig {
+  return config != undefined && "tabs" in config && "activeTabIndex" in config;
+}
+
 // Traverses `tree` to find the path to the specified `node`
 export function getPathFromNode<T extends MosaicKey>(
   node: T | undefined,

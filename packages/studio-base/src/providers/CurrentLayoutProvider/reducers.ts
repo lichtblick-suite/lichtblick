@@ -67,6 +67,8 @@ import {
   getPathFromNode,
 } from "@foxglove/studio-base/util/layout";
 
+import { isTabPanelConfig } from "../../util/layout";
+
 export const defaultPlaybackConfig: PlaybackConfig = {
   speed: 1.0,
   messageOrder: "receiveTime",
@@ -339,8 +341,10 @@ const addPanel = (
   }
   let layout: MosaicNode<string> | undefined;
   if (tabId != undefined) {
-    const tabPanelConfig = panelsState.configById[tabId] as TabPanelConfig | undefined;
-    layout = tabPanelConfig?.tabs[tabPanelConfig.activeTabIdx]?.layout;
+    const tabPanelConfig = panelsState.configById[tabId];
+    if (isTabPanelConfig(tabPanelConfig)) {
+      layout = tabPanelConfig.tabs[tabPanelConfig.activeTabIdx]?.layout;
+    }
   } else {
     layout = panelsState.layout;
   }
