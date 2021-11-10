@@ -78,6 +78,7 @@ declare global {
     | "NextFilled"
     | "OpenFile"
     | "OpenFolder"
+    | "OpenInNewWindow"
     | "Pause"
     | "PauseFilled"
     | "Pencil"

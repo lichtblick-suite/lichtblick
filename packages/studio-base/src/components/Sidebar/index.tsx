@@ -40,7 +40,8 @@ export type SidebarItem = {
   iconName: IIconProps["iconName"];
   title: string;
   badge?: Badge;
-  component: React.ComponentType;
+  component?: React.ComponentType;
+  url?: string;
 };
 
 const useStyles = makeStyles({
@@ -106,8 +107,19 @@ export default function Sidebar<K extends string>({
       if (!item) {
         throw new Error(`Missing sidebar item ${key}`);
       }
-      const { title, iconName } = item;
-      return (
+      const { title, iconName, url } = item;
+      return url ? (
+        <a href={url} target="_blank" rel="noreferrer">
+          <SidebarButton
+            dataSidebarKey={key}
+            key={key}
+            selected={selectedKey === key}
+            title={title}
+            iconProps={{ iconName }}
+            badge={item.badge}
+          />
+        </a>
+      ) : (
         <SidebarButton
           dataSidebarKey={key}
           key={key}

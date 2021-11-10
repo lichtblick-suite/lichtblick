@@ -54,7 +54,7 @@ export default function ConnectionList(): JSX.Element {
     (source: IDataSourceFactory) => {
       if (source.disabledReason != undefined) {
         void confirm({
-          title: "Unsupported Connection",
+          title: "Unsupported connection",
           prompt: source.disabledReason,
           variant: "primary",
           cancel: false,

@@ -14,7 +14,7 @@ export default class Ros2UnavailableDataSourceFactory implements IDataSourceFact
   disabledReason = (
     <>
       <Text block as="p">
-        ROS 2 Native connections are only available in our desktop app.&nbsp;
+        Native ROS 2 connections are only available in our desktop app.&nbsp;
         <Link href="https://foxglove.dev/download" target="_blank" rel="noreferrer">
           Download it here.
         </Link>

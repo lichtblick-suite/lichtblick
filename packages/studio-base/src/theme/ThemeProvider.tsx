@@ -143,6 +143,7 @@ const icons: {
   NextFilled: <Next20Filled />,
   OpenFile: <Icons.OpenFileIcon />,
   OpenFolder: <Icons.OpenFolderHorizontalIcon />,
+  OpenInNewWindow: <Icons.OpenInNewWindowIcon />,
   Pause: <Pause20Regular />,
   PauseFilled: <Pause20Filled />,
   Pencil: <PencilIcon />,

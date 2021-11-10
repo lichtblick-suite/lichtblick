@@ -77,7 +77,7 @@ export function ExtensionDetails({ extension, onClose, installed }: Props): Reac
         setIsInstalled(true);
       }
     } catch (err) {
-      addToast(`Failed to download extension ${extension.id}: ${err.message}`, {
+      addToast(`Failed to download extension ${extension.id}. ${err.message}`, {
         appearance: "error",
       });
     }
