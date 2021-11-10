@@ -28,7 +28,7 @@ export type PoseSettings = {
     headWidth?: number;
     shaftWidth?: number;
   };
-  modelType?: "car-model" | "arrow";
+  modelType?: "arrow";
 };
 
 export default function PoseSettingsEditor(
@@ -38,22 +38,6 @@ export default function PoseSettingsEditor(
 
   const settingsByCarType = React.useMemo(() => {
     switch (settings.modelType) {
-      case "car-model": {
-        const alpha = settings.alpha != undefined ? settings.alpha : 1;
-        return (
-          <Flex col>
-            <SLabel>Alpha</SLabel>
-            <SInput
-              type="number"
-              value={alpha.toString()}
-              min={0}
-              max={1}
-              step={0.1}
-              onChange={(e) => onSettingsChange({ ...settings, alpha: parseFloat(e.target.value) })}
-            />
-          </Flex>
-        );
-      }
       case "arrow":
       default: {
         const currentShaftWidth = settings.size?.shaftWidth ?? 2;
@@ -110,7 +94,7 @@ export default function PoseSettingsEditor(
   }, [onFieldChange, onSettingsChange, settings]);
 
   const badModelTypeSetting = React.useMemo(
-    () => !["car-model", "arrow"].includes(settings.modelType!),
+    () => !["arrow"].includes(settings.modelType!),
     [settings],
   );
 
@@ -135,10 +119,7 @@ export default function PoseSettingsEditor(
           });
         }}
       >
-        {[
-          { value: "car-model", title: "Car Model" },
-          { value: "arrow", title: "Arrow" },
-        ].map(({ value, title }) => (
+        {[{ value: "arrow", title: "Arrow" }].map(({ value, title }) => (
           <div key={value} style={{ marginBottom: "4px", display: "flex" }}>
             <LegacyInput
               type="radio"

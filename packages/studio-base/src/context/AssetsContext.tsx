@@ -39,6 +39,9 @@ export function rewritePackageUrl(
   url: string,
   { basePath, rosPackagePath }: { basePath?: string; rosPackagePath?: string },
 ): string {
+  if (!url) {
+    return url;
+  }
   const pkgMatch = parsePackageUrl(url);
   const basePathStr = basePath ? `&basePath=${encodeURIComponent(basePath)}` : "";
   const rosPackagePathStr = rosPackagePath

@@ -12,44 +12,60 @@
 //   You may not use this file except in compliance with the License.
 import { ReactElement, useMemo } from "react";
 
+import Logger from "@foxglove/log";
 import { CommonCommandProps, GLTFScene, parseGLB } from "@foxglove/regl-worldview";
 import { AppSetting } from "@foxglove/studio-base/AppSetting";
 import { rewritePackageUrl } from "@foxglove/studio-base/context/AssetsContext";
 import { useAppConfigurationValue } from "@foxglove/studio-base/hooks/useAppConfigurationValue";
+import notFoundModelURL from "@foxglove/studio-base/panels/ThreeDimensionalViz/commands/404.glb";
 import { GlbModel } from "@foxglove/studio-base/panels/ThreeDimensionalViz/utils/GlbModel";
 import { parseDaeToGlb } from "@foxglove/studio-base/panels/ThreeDimensionalViz/utils/parseDaeToGlb";
 import { parseStlToGlb } from "@foxglove/studio-base/panels/ThreeDimensionalViz/utils/parseStlToGlb";
 import { MeshMarker } from "@foxglove/studio-base/types/Messages";
 
+const log = Logger.getLogger(__filename);
+
 type MeshMarkerProps = CommonCommandProps & {
   markers: MeshMarker[];
 };
 
+async function loadNotFoundModel(): Promise<GlbModel> {
+  const response = await fetch(notFoundModelURL);
+  if (!response.ok) {
+    throw new Error(`Unable to load 404.glb: ${response.status}`);
+  }
+  return (await parseGLB(await response.arrayBuffer())) as GlbModel;
+}
+
 async function loadModel(url: string): Promise<GlbModel | undefined> {
   const GLB_MAGIC = 0x676c5446; // "glTF"
 
-  const response = await fetch(url);
-  const buffer = await response.arrayBuffer();
-  if (buffer.byteLength < 4) {
-    return undefined;
-  }
-  const view = new DataView(buffer);
+  try {
+    const response = await fetch(url);
+    const buffer = await response.arrayBuffer();
+    if (buffer.byteLength < 4) {
+      throw new Error(`${buffer.byteLength} bytes received`);
+    }
+    const view = new DataView(buffer);
 
-  // Check if this is a glTF .glb file
-  if (GLB_MAGIC === view.getUint32(0, false)) {
-    return (await parseGLB(buffer)) as GlbModel;
+    // Check if this is a glTF .glb file
+    if (GLB_MAGIC === view.getUint32(0, false)) {
+      return (await parseGLB(buffer)) as GlbModel;
+    }
+
+    // STL binary files don't have a header, so we have to rely on the file extension
+    if (url.endsWith(".stl")) {
+      return parseStlToGlb(buffer);
+    }
+
+    if (url.endsWith(".dae")) {
+      return await parseDaeToGlb(buffer);
+    }
+  } catch (err) {
+    log.error(`Failed to load model from ${url}: ${err.message}`);
   }
 
-  // STL binary files don't have a header, so we have to rely on the file extension
-  if (url.endsWith(".stl")) {
-    return parseStlToGlb(buffer);
-  }
-
-  if (url.endsWith(".dae")) {
-    return await parseDaeToGlb(buffer);
-  }
-
-  return undefined;
+  return await loadNotFoundModel();
 }
 
 class ModelCache {
@@ -74,15 +90,16 @@ function MeshMarkers({ markers, layerIndex }: MeshMarkerProps): ReactElement {
 
   for (let i = 0; i < markers.length; i++) {
     const marker = markers[i]!;
-    const { pose, mesh_resource, scale } = marker;
-    if (mesh_resource == undefined || mesh_resource.length === 0) {
+    const { pose, mesh_resource, scale, color } = marker;
+    if (!mesh_resource) {
       continue;
     }
     const url = rewritePackageUrl(mesh_resource, { rosPackagePath });
+    const alpha = (color?.a ?? 0) > 0 ? color!.a : 1;
 
     models.push(
       <GLTFScene key={i} layerIndex={layerIndex} model={async () => await modelCache.load(url)}>
-        {{ pose, scale, interactionData: undefined }}
+        {{ pose, scale, alpha, interactionData: undefined }}
       </GLTFScene>,
     );
   }

@@ -25,8 +25,6 @@ import { InteractionData } from "@foxglove/studio-base/panels/ThreeDimensionalVi
 import { PoseSettings } from "@foxglove/studio-base/panels/ThreeDimensionalViz/TopicSettingsEditor/PoseSettingsEditor";
 import { Color, Header, Scale } from "@foxglove/studio-base/types/Messages";
 
-import CarModel from "./CarModel";
-
 type PoseMarker = {
   header: Header;
   pose: Pose;
@@ -44,18 +42,10 @@ function PoseMarkers({ markers, layerIndex }: PoseMarkerProps): ReactElement {
   const models: React.ReactNode[] = [];
   const arrowMarkers: React.ReactNode[] = [];
 
-  markers.forEach((marker, idx) => {
-    const { pose, settings, interactionData } = marker;
+  markers.forEach((marker) => {
+    const { settings } = marker;
 
     switch (settings?.modelType) {
-      case "car-model": {
-        models.push(
-          <CarModel layerIndex={layerIndex} key={idx}>
-            {{ pose, alpha: settings.alpha ?? 1, interactionData }}
-          </CarModel>,
-        );
-        break;
-      }
       case "arrow":
       default: {
         let newMarker = marker;
