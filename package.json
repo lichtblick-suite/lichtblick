@@ -39,7 +39,7 @@
     "package": "cross-env NODE_OPTIONS='-r ts-node/register' electron-builder build --publish never",
     "package:e2e": "yarn && yarn clean && yarn build:prod && yarn package",
     "release:bump-nightly-version": "node -r ts-node/register ./ci/bump-nightly-version.ts",
-    "storybook": "cross-env TS_NODE_COMPILER_OPTIONS='{\"module\":\"commonjs\"}' yarn workspace @foxglove/studio-base run start-storybook --config-dir src/.storybook",
+    "storybook": "cross-env TS_NODE_COMPILER_OPTIONS='{\"module\":\"commonjs\"}' yarn workspace @foxglove/studio-base run start-storybook --port 9009 --config-dir src/.storybook",
     "version:all": "yarn workspaces foreach version"
   },
   "workspaces": {
