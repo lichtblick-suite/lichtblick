@@ -16,7 +16,6 @@ import { isEmpty, omit } from "lodash";
 import React, { useCallback } from "react";
 
 import ErrorBoundary from "@foxglove/studio-base/components/ErrorBoundary";
-import { RenderToBodyComponent } from "@foxglove/studio-base/components/RenderToBodyComponent";
 import { topicSettingsEditorForDatatype } from "@foxglove/studio-base/panels/ThreeDimensionalViz/TopicSettingsEditor";
 import { Topic } from "@foxglove/studio-base/players/types";
 
@@ -122,37 +121,35 @@ function TopicSettingsModal({
   );
 
   return (
-    <RenderToBodyComponent>
-      <Dialog
-        isOpen
-        onDismiss={() => setCurrentEditingTopic(undefined)}
-        dialogContentProps={{
-          title: currentEditingTopic.name,
-          subText: currentEditingTopic.datatype,
-          showCloseButton: true,
-        }}
-        maxWidth={480}
-        minWidth={480}
-        modalProps={{
-          isModeless: true,
-          dragOptions: {
-            moveMenuItemText: "Move",
-            closeMenuItemText: "Close",
-            menu: ContextualMenu,
-          },
-        }}
-      >
-        <MainEditor
-          collectorMessage={sceneBuilderMessage}
-          datatype={datatype}
-          onFieldChange={onFieldChange}
-          onSettingsChange={onSettingsChange}
-          settings={settingsByKey[topicSettingsKey] ?? {}}
-          topicName={topicName}
-          setCurrentEditingTopic={setCurrentEditingTopic}
-        />
-      </Dialog>
-    </RenderToBodyComponent>
+    <Dialog
+      isOpen
+      onDismiss={() => setCurrentEditingTopic(undefined)}
+      dialogContentProps={{
+        title: currentEditingTopic.name,
+        subText: currentEditingTopic.datatype,
+        showCloseButton: true,
+      }}
+      maxWidth={480}
+      minWidth={480}
+      modalProps={{
+        isModeless: true,
+        dragOptions: {
+          moveMenuItemText: "Move",
+          closeMenuItemText: "Close",
+          menu: ContextualMenu,
+        },
+      }}
+    >
+      <MainEditor
+        collectorMessage={sceneBuilderMessage}
+        datatype={datatype}
+        onFieldChange={onFieldChange}
+        onSettingsChange={onSettingsChange}
+        settings={settingsByKey[topicSettingsKey] ?? {}}
+        topicName={topicName}
+        setCurrentEditingTopic={setCurrentEditingTopic}
+      />
+    </Dialog>
   );
 }
 
