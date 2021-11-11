@@ -74,17 +74,16 @@ const useStyles = makeStyles((theme) => ({
   tooltip: {
     fontFamily: fonts.SANS_SERIF,
     whiteSpace: "nowrap",
+  },
+  tooltipRow: {
+    paddingBottom: theme.spacing.s2,
 
-    "> div": {
-      paddingBottom: theme.spacing.s2,
-
-      "&:last-child": {
-        paddingBottom: 0,
-      },
+    "&:last-child": {
+      paddingBottom: 0,
     },
   },
   tooltipTitle: {
-    width: "70px",
+    width: "50px",
     textAlign: "right",
     marginRight: theme.spacing.s2,
     display: "inline-block",
@@ -158,7 +157,7 @@ export default function Scrubber(props: Props): JSX.Element {
       const tip = (
         <div className={classes.tooltip}>
           {tooltipItems.map((item) => (
-            <div key={item.title}>
+            <div key={item.title} className={classes.tooltipRow}>
               <span className={classes.tooltipTitle}>{item.title}:</span>
               <span className={classes.tooltipValue}>{item.value}</span>
             </div>
@@ -238,7 +237,10 @@ export default function Scrubber(props: Props): JSX.Element {
           renderSlider={renderSlider}
         />
       </div>
-      <PlaybackBarHoverTicks componentId={hoverComponentId} />
+      <PlaybackBarHoverTicks
+        componentId={hoverComponentId}
+        displayHoverTime={tooltipState == undefined}
+      />
     </>
   );
 }

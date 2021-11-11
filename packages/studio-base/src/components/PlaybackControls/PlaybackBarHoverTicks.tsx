@@ -82,9 +82,13 @@ function displayMethodSelector(state: LayoutState): TimeDisplayMethod {
 
 type Props = {
   componentId: string;
+  // When true, this will display the hover time above the hover ticks
+  displayHoverTime: boolean;
 };
 
-export default function PlaybackBarHoverTicks({ componentId }: Props): JSX.Element {
+export default function PlaybackBarHoverTicks(props: Props): JSX.Element {
+  const { componentId, displayHoverTime } = props;
+
   const startTime = useMessagePipeline(getStartTime);
   const endTime = useMessagePipeline(getEndTime);
   const hoverValue = useHoverValue({ componentId, isTimestampScale: true });
@@ -126,7 +130,7 @@ export default function PlaybackBarHoverTicks({ componentId }: Props): JSX.Eleme
     <div ref={ref} style={{ width: "100%" }}>
       {scaleBounds && (
         <HoverBar componentId={componentId} scales={scaleBounds} isTimestampScale>
-          {hoverValue != undefined && <TimeLabel>{hoverTimeDisplay}</TimeLabel>}
+          {hoverValue != undefined && displayHoverTime && <TimeLabel>{hoverTimeDisplay}</TimeLabel>}
           <TopTick />
           <BottomTick />
         </HoverBar>
