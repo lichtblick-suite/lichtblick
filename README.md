@@ -30,6 +30,8 @@ Visit [foxglove.dev/download](https://foxglove.dev/download) or [GitHub Releases
 
 Foxglove Studio is primarily written in TypeScript – contributions are welcome!
 
+> All contributors will need to agree to our [Contributor License Agreement](https://github.com/foxglove/cla)
+
 **Supported development environments:** Linux, Windows, macOS
 
 **Dependencies:**
