@@ -14,6 +14,7 @@ export type PanelInfo = {
   title: string;
   type: string;
 
+  help?: React.ReactNode;
   /**
    * The panel module is a function to load the panel.
    * This is to support our lazy built-in panels

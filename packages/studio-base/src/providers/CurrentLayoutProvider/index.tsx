@@ -91,6 +91,15 @@ export default function CurrentLayoutProvider({
     selectedPanelIdsListeners.current.delete(listener);
   }, []);
 
+  const panelDocToDisplay = useRef<string>("");
+  const panelDocToDisplayListeners = useRef(new Set<(_: string) => void>());
+  const addPanelDocToDisplayListener = useCallback((listener: (_: string) => void) => {
+    panelDocToDisplayListeners.current.add(listener);
+  }, []);
+  const removePanelDocToDisplayListener = useCallback((listener: (_: string) => void) => {
+    panelDocToDisplayListeners.current.delete(listener);
+  }, []);
+
   const getSelectedPanelIds = useCallback(() => selectedPanelIds.current, []);
   const setSelectedPanelIds = useCallback(
     (value: readonly string[] | ((prevState: readonly string[]) => readonly string[])): void => {
@@ -102,6 +111,14 @@ export default function CurrentLayoutProvider({
     },
     [],
   );
+
+  const getPanelDocToDisplay = useCallback((): string => panelDocToDisplay.current, []);
+  const setPanelDocToDisplay = useCallback((name: string): void => {
+    panelDocToDisplay.current = name;
+    for (const listener of [...panelDocToDisplayListeners.current]) {
+      listener(panelDocToDisplay.current);
+    }
+  }, []);
 
   const [, setSelectedLayoutId] = useAsyncFn(
     async (
@@ -300,6 +317,10 @@ export default function CurrentLayoutProvider({
     mosaicId,
     getSelectedPanelIds,
     setSelectedPanelIds,
+    getPanelDocToDisplay,
+    setPanelDocToDisplay,
+    addPanelDocToDisplayListener,
+    removePanelDocToDisplayListener,
     actions,
   });
 

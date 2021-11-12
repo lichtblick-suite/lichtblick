@@ -9,6 +9,9 @@ export const WorkspaceContext = createContext({
   openPanelSettings: (): void => {
     throw new Error("Must be in a WorkspaceContext.Provider to open panel settings");
   },
+  openHelp: (): void => {
+    throw new Error("Must be in a WorkspaceContext.Provider to open help");
+  },
   openAccountSettings: (): void => {
     throw new Error("Must be in a WorkspaceContext.Provider to open account settings");
   },
@@ -20,6 +23,7 @@ export const WorkspaceContext = createContext({
 export function useWorkspace(): {
   panelSettingsOpen: boolean;
   openPanelSettings: () => void;
+  openHelp: () => void;
   openAccountSettings: () => void;
   openLayoutBrowser: () => void;
 } {

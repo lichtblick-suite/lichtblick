@@ -109,9 +109,15 @@ export default function MockCurrentLayoutProvider({
     removeLayoutStateListener,
     addSelectedPanelIdsListener: useCallback(() => {}, []),
     removeSelectedPanelIdsListener: useCallback(() => {}, []),
+    addPanelDocToDisplayListener: useCallback(() => {}, []),
+    removePanelDocToDisplayListener: useCallback(() => {}, []),
     mosaicId: "mockMosaicId",
     getSelectedPanelIds: useCallback(() => [], []),
     setSelectedPanelIds: useCallback(() => {
+      throw new Error("Not implemented in MockCurrentLayoutProvider");
+    }, []),
+    getPanelDocToDisplay: useCallback(() => "", []),
+    setPanelDocToDisplay: useCallback(() => {
       throw new Error("Not implemented in MockCurrentLayoutProvider");
     }, []),
     actions,

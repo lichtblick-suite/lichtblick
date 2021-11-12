@@ -61,19 +61,18 @@ export default function SidebarButton(props: SidebarButtonProps): JSX.Element {
       {tooltip}
       <CommandBarButton
         data-sidebar-key={dataSidebarKey}
-        styles={{ root: { height: BUTTON_SIZE, margin: 0, backgroundColor: "transparent" } }}
-        iconProps={{
-          styles: {
-            root: {
-              opacity: selected ? 1 : FADED_OPACITY,
-              fontSize: ICON_SIZE,
-              height: ICON_SIZE,
-              lineHeight: ICON_SIZE,
-              "& span": { verticalAlign: "baseline" },
-            },
+        styles={{
+          root: { height: BUTTON_SIZE, margin: 0, backgroundColor: "transparent" },
+          icon: {
+            opacity: selected ? 1 : FADED_OPACITY,
+            fontSize: ICON_SIZE,
+            height: ICON_SIZE,
+            lineHeight: ICON_SIZE,
+
+            svg: { fill: "currentColor", height: "1em", width: "1em" },
           },
-          ...iconProps,
         }}
+        iconProps={iconProps}
         onClick={onClick}
         onRenderIcon={renderIcon}
         menuProps={menuProps}

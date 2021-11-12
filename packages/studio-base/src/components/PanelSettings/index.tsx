@@ -24,8 +24,8 @@ import SchemaEditor from "./SchemaEditor";
 
 export default function PanelSettings(): JSX.Element {
   const selectedLayoutId = useCurrentLayoutSelector((state) => state.selectedLayout?.id);
-  const { selectedPanelIds, setSelectedPanelIds } = useSelectedPanels();
-  const { openLayoutBrowser } = useWorkspace();
+  const { selectedPanelIds, setSelectedPanelIds, setPanelDocToDisplay } = useSelectedPanels();
+  const { openLayoutBrowser, openHelp } = useWorkspace();
   const selectedPanelId = useMemo(
     () => (selectedPanelIds.length === 1 ? selectedPanelIds[0] : undefined),
     [selectedPanelIds],
@@ -116,7 +116,7 @@ export default function PanelSettings(): JSX.Element {
     return (
       <SidebarContent title="Panel settings">
         <Text styles={{ root: { color: theme.palette.neutralTertiary } }}>
-          loading panel settings...
+          Loading panel settings...
         </Text>
       </SidebarContent>
     );
@@ -126,6 +126,22 @@ export default function PanelSettings(): JSX.Element {
     <SidebarContent title={`${panelInfo.title} panel settings`}>
       {shareModal}
       <Stack tokens={{ childrenGap: theme.spacing.m }}>
+        {panelInfo?.help ?? (
+          <Stack.Item>
+            <Text styles={{ root: { color: theme.palette.neutralTertiary } }}>
+              See docs{" "}
+              <Link
+                onClick={() => {
+                  setPanelDocToDisplay(panelInfo?.type);
+                  openHelp();
+                }}
+              >
+                here
+              </Link>
+              .
+            </Text>
+          </Stack.Item>
+        )}
         <Stack.Item>
           {schema ? (
             <StrictMode>

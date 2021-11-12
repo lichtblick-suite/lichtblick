@@ -1,5 +1,3 @@
-# Node Playground
-
 Use a code editor sandbox to write nodes that publish pseudo-ROS topics internally to Studio. Manipulate, reduce, and filter existing ROS messages and output them in a way that is useful to you.
 
 _Node Playground_ uses TypeScript to typecheck messages coming in and out of your nodes.

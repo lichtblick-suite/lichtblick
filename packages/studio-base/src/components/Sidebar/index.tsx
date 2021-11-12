@@ -107,19 +107,8 @@ export default function Sidebar<K extends string>({
       if (!item) {
         throw new Error(`Missing sidebar item ${key}`);
       }
-      const { title, iconName, url } = item;
-      return url ? (
-        <a href={url} target="_blank" rel="noreferrer">
-          <SidebarButton
-            dataSidebarKey={key}
-            key={key}
-            selected={selectedKey === key}
-            title={title}
-            iconProps={{ iconName }}
-            badge={item.badge}
-          />
-        </a>
-      ) : (
+      const { title, iconName } = item;
+      return (
         <SidebarButton
           dataSidebarKey={key}
           key={key}

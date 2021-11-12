@@ -21,7 +21,6 @@ import { useContext, useState, useCallback, useMemo, useRef } from "react";
 import { MosaicContext, MosaicNode, MosaicWindowContext } from "react-mosaic-component";
 import { useResizeDetector } from "react-resize-detector";
 
-import HelpModal from "@foxglove/studio-base/components/HelpModal";
 import Icon from "@foxglove/studio-base/components/Icon";
 import PanelContext from "@foxglove/studio-base/components/PanelContext";
 import PanelList, { PanelSelection } from "@foxglove/studio-base/components/PanelList";
@@ -363,7 +362,10 @@ export default React.memo<Props>(function PanelToolbar({
   const styles = useStyles();
   const { supportsStrictMode = true } = useContext(PanelContext) ?? {};
   const [menuOpen, setMenuOpen] = useState(false);
-  const [showHelp, setShowHelp] = useState(false);
+
+  const panelContext = useContext(PanelContext);
+  const { setPanelDocToDisplay } = useSelectedPanels();
+  const { openHelp } = useWorkspace();
 
   // Help-shown state must be hoisted outside the controls container so the modal can remain visible
   // when the panel is no longer hovered.
@@ -381,13 +383,30 @@ export default React.memo<Props>(function PanelToolbar({
           </Icon>
         )}
         {Boolean(helpContent) && (
-          <Icon tooltip="Help" fade onClick={() => setShowHelp(true)}>
+          <Icon
+            tooltip="Help"
+            fade
+            onClick={() => {
+              if (panelContext?.type != undefined) {
+                setPanelDocToDisplay(panelContext.type);
+                openHelp();
+              }
+            }}
+          >
             <HelpCircleOutlineIcon className={styles.icon} />
           </Icon>
         )}
       </>
     );
-  }, [additionalIcons, helpContent, styles.icon, supportsStrictMode]);
+  }, [
+    additionalIcons,
+    helpContent,
+    openHelp,
+    setPanelDocToDisplay,
+    panelContext?.type,
+    styles.icon,
+    supportsStrictMode,
+  ]);
 
   // Use a debounce and 0 refresh rate to avoid triggering a resize observation while handling
   // and existing resize observation.
@@ -408,7 +427,6 @@ export default React.memo<Props>(function PanelToolbar({
 
   return (
     <div ref={sizeRef}>
-      {showHelp && <HelpModal onRequestClose={() => setShowHelp(false)}>{helpContent}</HelpModal>}
       <div
         className={cx(styles.panelToolbarContainer, {
           panelToolbarHovered: floating,

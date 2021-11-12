@@ -47,6 +47,8 @@ export interface ICurrentLayout {
   removeLayoutStateListener: (listener: (_: LayoutState) => void) => void;
   addSelectedPanelIdsListener: (listener: (_: readonly string[]) => void) => void;
   removeSelectedPanelIdsListener: (listener: (_: readonly string[]) => void) => void;
+  addPanelDocToDisplayListener: (listener: (_: string) => void) => void;
+  removePanelDocToDisplayListener: (listener: (_: string) => void) => void;
 
   /**
    * We use the same mosaicId for all mosaics (at the top level and within tabs) to support
@@ -58,6 +60,8 @@ export interface ICurrentLayout {
   setSelectedPanelIds: (
     _: readonly string[] | ((prevState: readonly string[]) => readonly string[]),
   ) => void;
+  setPanelDocToDisplay: (panelType: string) => void;
+  getPanelDocToDisplay: () => string;
 
   actions: {
     /**
@@ -96,6 +100,9 @@ export type SelectedPanelActions = {
   setSelectedPanelIds: (
     _: readonly string[] | ((prevState: readonly string[]) => string[]),
   ) => void;
+  setPanelDocToDisplay: (panelType: string) => void;
+  panelDocToDisplay: string;
+  getPanelDocToDisplay: () => string;
   selectAllPanels: () => void;
   togglePanelSelected: (panelId: string, containingTabId: string | undefined) => void;
 };
@@ -156,14 +163,25 @@ export function useSelectedPanels(): SelectedPanelActions {
   const [selectedPanelIds, setSelectedPanelIdsState] = useState(() =>
     currentLayout.getSelectedPanelIds(),
   );
+  const [panelDocToDisplay, setPanelDocToDisplayState] = useState(() =>
+    currentLayout.getPanelDocToDisplay(),
+  );
   useLayoutEffect(() => {
     const listener = (newIds: readonly string[]) => setSelectedPanelIdsState(newIds);
     currentLayout.addSelectedPanelIdsListener(listener);
     return () => currentLayout.removeSelectedPanelIdsListener(listener);
   }, [currentLayout]);
 
+  useLayoutEffect(() => {
+    const listener = (panelType: string) => setPanelDocToDisplayState(panelType);
+    currentLayout.addPanelDocToDisplayListener(listener);
+    return () => currentLayout.removePanelDocToDisplayListener(listener);
+  }, [currentLayout]);
+
   const setSelectedPanelIds = useGuaranteedContext(CurrentLayoutContext).setSelectedPanelIds;
   const getSelectedPanelIds = useGuaranteedContext(CurrentLayoutContext).getSelectedPanelIds;
+  const setPanelDocToDisplay = useGuaranteedContext(CurrentLayoutContext).setPanelDocToDisplay;
+  const getPanelDocToDisplay = useGuaranteedContext(CurrentLayoutContext).getPanelDocToDisplay;
   const { getCurrentLayoutState: getCurrentLayout } = useCurrentLayoutActions();
 
   const selectAllPanels = useCallback(() => {
@@ -194,6 +212,9 @@ export function useSelectedPanels(): SelectedPanelActions {
     getSelectedPanelIds,
     selectedPanelIds,
     setSelectedPanelIds,
+    getPanelDocToDisplay,
+    setPanelDocToDisplay,
+    panelDocToDisplay,
     selectAllPanels,
     togglePanelSelected,
   });

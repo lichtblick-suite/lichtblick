@@ -11,7 +11,6 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { useTheme } from "@fluentui/react";
 import ArrowLeftBoldIcon from "@mdi/svg/svg/arrow-left-bold.svg";
 import DeleteIcon from "@mdi/svg/svg/delete.svg";
 import FileMultipleIcon from "@mdi/svg/svg/file-multiple.svg";
@@ -21,11 +20,9 @@ import styled from "styled-components";
 
 import Flex from "@foxglove/studio-base/components/Flex";
 import Icon from "@foxglove/studio-base/components/Icon";
-import TextContent from "@foxglove/studio-base/components/TextContent";
 import { Explorer } from "@foxglove/studio-base/panels/NodePlayground";
 import TemplateIcon from "@foxglove/studio-base/panels/NodePlayground/assets/file-document-edit.svg";
 import HammerWrenchIcon from "@foxglove/studio-base/panels/NodePlayground/assets/hammer-wrench.svg";
-import nodePlaygroundDocs from "@foxglove/studio-base/panels/NodePlayground/index.help.md";
 import { Script } from "@foxglove/studio-base/panels/NodePlayground/script";
 import { getNodeProjectConfig } from "@foxglove/studio-base/players/UserNodePlayer/nodeTransformerWorker/typescript/projectConfig";
 import templates from "@foxglove/studio-base/players/UserNodePlayer/nodeTransformerWorker/typescript/templates";
@@ -93,16 +90,6 @@ const TemplateItem = styled.li`
   }
 `;
 
-const SFlex = styled.div`
-  display: flex;
-  flex-direction: column;
-  padding: 10px;
-
-  pre {
-    white-space: pre-wrap;
-  }
-`;
-
 type NodesListProps = {
   nodes: UserNodes;
   selectNode: (id: string) => void;
@@ -138,7 +125,6 @@ type Props = {
   deleteNode: (nodeId: string) => void;
   userNodes: UserNodes;
   selectedNodeId?: string;
-  otherMarkdownDocsForTest?: string;
   explorer: Explorer;
   updateExplorer: (explorer: Explorer) => void;
   setScriptOverride: (script: Script, maxDepth?: number) => void;
@@ -177,7 +163,6 @@ const Sidebar = ({
   selectNode,
   deleteNode,
   selectedNodeId,
-  otherMarkdownDocsForTest,
   explorer,
   updateExplorer,
   setScriptOverride,
@@ -185,7 +170,6 @@ const Sidebar = ({
   addNewNode,
 }: Props): React.ReactElement => {
   const nodesSelected = explorer === "nodes";
-  const docsSelected = explorer === "docs";
   const utilsSelected = explorer === "utils";
   const templatesSelected = explorer === "templates";
 
@@ -209,8 +193,6 @@ const Sidebar = ({
     [setScriptOverride],
   );
 
-  const theme = useTheme();
-
   const explorers = React.useMemo(
     () => ({
       nodes: (
@@ -221,14 +203,6 @@ const Sidebar = ({
           collapse={() => updateExplorer(undefined)}
           selectedNodeId={selectedNodeId}
         />
-      ),
-      docs: (
-        <SFlex>
-          <SidebarTitle title="Docs" collapse={() => updateExplorer(undefined)} />
-          <TextContent style={{ backgroundColor: theme.palette.neutralLighterAlt }}>
-            {otherMarkdownDocsForTest ?? nodePlaygroundDocs}
-          </TextContent>
-        </SFlex>
       ),
       utils: (
         <Flex col style={{ position: "relative" }}>
@@ -248,7 +222,6 @@ const Sidebar = ({
           ))}
         </Flex>
       ),
-
       templates: (
         <Flex col>
           <SidebarTitle
@@ -269,11 +242,9 @@ const Sidebar = ({
       addNewNode,
       deleteNode,
       gotoUtils,
-      otherMarkdownDocsForTest,
       script,
       selectNode,
       selectedNodeId,
-      theme,
       updateExplorer,
       userNodes,
     ],
@@ -309,17 +280,8 @@ const Sidebar = ({
         >
           <TemplateIcon />
         </Icon>
-        <Icon
-          dataTest="docs-explorer"
-          onClick={() => updateExplorer(docsSelected ? undefined : "docs")}
-          size="large"
-          tooltip="Docs"
-          style={{ color: docsSelected ? colors.LIGHT1 : colors.DARK9 }}
-        >
-          <HelpCircleIcon />
-        </Icon>
       </MenuWrapper>
-      <ExplorerWrapper useThemeColors={docsSelected} show={explorer != undefined}>
+      <ExplorerWrapper useThemeColors={false} show={explorer != undefined}>
         {explorer != undefined && explorers[explorer]}
       </ExplorerWrapper>
     </>

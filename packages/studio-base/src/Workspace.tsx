@@ -35,6 +35,7 @@ import ExtensionsSidebar from "@foxglove/studio-base/components/ExtensionsSideba
 import GlobalVariablesTable from "@foxglove/studio-base/components/GlobalVariablesTable";
 import variablesHelpContent from "@foxglove/studio-base/components/GlobalVariablesTable/index.help.md";
 import HelpModal from "@foxglove/studio-base/components/HelpModal";
+import HelpSidebar from "@foxglove/studio-base/components/HelpSidebar";
 import LayoutBrowser from "@foxglove/studio-base/components/LayoutBrowser";
 import messagePathHelp from "@foxglove/studio-base/components/MessagePathSyntax/index.help.md";
 import {
@@ -100,7 +101,7 @@ type SidebarItemKey =
   | "account"
   | "layouts"
   | "preferences"
-  | "website";
+  | "help";
 
 function Connection() {
   return (
@@ -409,6 +410,7 @@ export default function Workspace(props: WorkspaceProps): JSX.Element {
     () => ({
       panelSettingsOpen: selectedSidebarItem === "panel-settings",
       openPanelSettings: () => setSelectedSidebarItem("panel-settings"),
+      openHelp: () => setSelectedSidebarItem("help"),
       openAccountSettings: () => supportsAccountSettings && setSelectedSidebarItem("account"),
       openLayoutBrowser: () => setSelectedSidebarItem("layouts"),
     }),
@@ -441,10 +443,7 @@ export default function Workspace(props: WorkspaceProps): JSX.Element {
       ["variables", { iconName: "Variable2", title: "Variables", component: Variables }],
       ["preferences", { iconName: "Settings", title: "Preferences", component: Preferences }],
       ["extensions", { iconName: "AddIn", title: "Extensions", component: ExtensionsSidebar }],
-      [
-        "website",
-        { iconName: "OpenInNewWindow", title: "Open website", url: "https://foxglove.dev" },
-      ],
+      ["help", { iconName: "QuestionCircle", title: "Help", component: HelpSidebar }],
     ]);
 
     return supportsAccountSettings
@@ -463,9 +462,7 @@ export default function Workspace(props: WorkspaceProps): JSX.Element {
   }, [supportsAccountSettings, playerProblems, currentUser]);
 
   const sidebarBottomItems: readonly SidebarItemKey[] = useMemo(() => {
-    return supportsAccountSettings
-      ? ["website", "account", "preferences"]
-      : ["website", "preferences"];
+    return supportsAccountSettings ? ["help", "account", "preferences"] : ["help", "preferences"];
   }, [supportsAccountSettings]);
 
   return (

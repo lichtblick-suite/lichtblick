@@ -38,13 +38,11 @@ const useStyles = makeStyles((theme) => ({
     color: theme.semanticColors.bodyText,
   },
   sectionHeader: {
-    ...theme.fonts.medium,
+    ...theme.fonts.xSmall,
     display: "block",
-    fontVariant: "small-caps",
-    textTransform: "lowercase",
+    textTransform: "uppercase",
     color: theme.palette.neutralSecondaryAlt,
-    letterSpacing: "0.5px",
-    marginTop: theme.spacing.m,
+    letterSpacing: "0.025em",
     marginBottom: theme.spacing.s1,
   },
 }));
