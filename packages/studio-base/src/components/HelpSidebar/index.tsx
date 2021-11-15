@@ -18,8 +18,11 @@ const productLinks = [
   { text: "Foxglove Data Platform", url: "https://foxglove.dev/data-platform" },
 ];
 
+const userAgent = navigator.userAgent.toLowerCase();
+const isDesktopApp = userAgent.includes(" electron/");
+
 const resourceLinks = [
-  { text: "Download app", url: "https://foxglove.dev/download" },
+  ...(isDesktopApp ? [] : [{ text: "Desktop app", url: "https://foxglove.dev/download" }]),
   { text: "Read docs", url: "https://foxglove.dev/docs" },
   { text: "Join our community", url: "https://foxglove.dev/community" },
 ];
