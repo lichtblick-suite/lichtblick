@@ -27,22 +27,10 @@ export default function BlockheadFilledIcon({ className }: { className?: string 
         aria-hidden="true"
         focusable="false"
       >
-        <rect
-          x="7.97"
-          y="4.87"
-          width="8.05"
-          height="8.05"
-          rx="2.34"
-          strokeWidth="1.3"
-          fill="currentColor"
-        />
-        <circle cx="12" cy="12" r="11.5" fill="none" stroke="currentColor" strokeWidth="1.3" />
-        <path
-          d="M4.78,21a11.5,11.5,0,0,0,14.44,0h0L17,17.44a2.31,2.31,0,0,0-1.87-1H8.87a2.31,2.31,0,0,0-1.87,1L4.78,21Z"
-          fill="currentColor"
-          stroke="currentColor"
-          strokeWidth="1.3"
-        />
+        <g fill="currentColor">
+          <rect x="8.07" y="5.38" width="7.87" height="7.87" rx="2" />
+          <path d="M12,1.53A10.5,10.5,0,1,0,22.5,12,10.51,10.51,0,0,0,12,1.53ZM18.41,19l-1.67-2.61a2.47,2.47,0,0,0-2-1H9.26a2.48,2.48,0,0,0-2,1L5.59,19a9.5,9.5,0,1,1,12.82,0Z" />
+        </g>
       </svg>
     </span>
   );
