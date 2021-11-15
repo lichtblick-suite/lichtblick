@@ -101,14 +101,9 @@ export default function messagesToDatasets(args: Args): DatasetInfo {
       const tooltip: TimeBasedChartTooltipData = {
         x,
         y,
-        item: {
-          receiveTime: itemByPath.messageEvent.receiveTime,
-          headerStamp,
-        },
         path: path.value,
         value,
         constantName,
-        startTime,
       };
       info.tooltips.unshift(tooltip);
 

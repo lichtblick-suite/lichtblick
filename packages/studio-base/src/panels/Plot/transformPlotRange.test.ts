@@ -11,168 +11,105 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { TimeBasedChartTooltipData } from "@foxglove/studio-base/components/TimeBasedChart";
-
-import {
-  derivative,
-  applyToDataOrTooltips,
-  mathFunctions,
-  MathFunction,
-} from "./transformPlotRange";
+import { derivative, applyToDatum, mathFunctions } from "./transformPlotRange";
 
 describe("transformPlotRange", () => {
   describe("derivative", () => {
     it("takes the derivative using the previous message", () => {
-      const headerStamp = undefined;
-      const receiveTime = { sec: 123, nsec: 456 };
-      const tooltips = [
+      const data = [
         {
           x: 0,
           y: 0,
-          datasetKey: "0",
           value: 0,
-          item: {
-            headerStamp,
-            receiveTime,
-            queriedData: [{ value: 0, path: "/some/topic.something", constantName: undefined }],
-          },
           path: "/some/topic.something",
           constantName: undefined,
-          startTime: { sec: 0, nsec: 0 },
         },
         {
           x: 1,
           y: -1,
-          datasetKey: "0",
           value: -1,
-          item: {
-            headerStamp,
-            receiveTime,
-            queriedData: [{ value: -1, path: "/some/topic.something", constantName: undefined }],
-          },
           path: "/some/topic.something",
           constantName: undefined,
-          startTime: { sec: 0, nsec: 0 },
         },
         {
           x: 2,
           y: -1.5,
-          datasetKey: "0",
           value: -1.5,
-          item: {
-            headerStamp,
-            receiveTime,
-            queriedData: [{ value: -1.5, path: "/some/topic.something", constantName: undefined }],
-          },
           path: "/some/topic.something",
           constantName: undefined,
-          startTime: { sec: 0, nsec: 0 },
         },
         {
           x: 3,
           y: 5,
-          datasetKey: "0",
           value: 5,
-          item: {
-            headerStamp,
-            receiveTime,
-            queriedData: [{ value: 5, path: "/some/topic.something", constantName: undefined }],
-          },
           path: "/some/topic.something",
           constantName: undefined,
-          startTime: { sec: 0, nsec: 0 },
         },
       ];
-      const data = tooltips.map(({ x, y }) => ({ x, y }));
 
-      const newPoints = [
+      const newData = [
         {
           x: 1,
           y: -1,
-        },
-        {
-          x: 2,
-          y: -0.5,
-        },
-        {
-          x: 3,
-          y: 6.5,
-        },
-      ];
-      const newTooltips = [
-        {
-          x: 1,
-          y: -1,
-          datasetKey: "0",
           value: -1,
-          item: {
-            receiveTime,
-            queriedData: [{ value: -1, path: "/some/topic.something", constantName: undefined }],
-          },
           path: "/some/topic.something.@derivative",
           constantName: undefined,
-          startTime: { sec: 0, nsec: 0 },
         },
         {
           x: 2,
           y: -0.5,
-          datasetKey: "0",
           value: -0.5,
-          item: {
-            receiveTime,
-            queriedData: [{ value: -1.5, path: "/some/topic.something", constantName: undefined }],
-          },
           path: "/some/topic.something.@derivative",
           constantName: undefined,
-          startTime: { sec: 0, nsec: 0 },
         },
         {
           x: 3,
           y: 6.5,
-          datasetKey: "0",
           value: 6.5,
-          item: {
-            receiveTime,
-            queriedData: [{ value: 5, path: "/some/topic.something", constantName: undefined }],
-          },
           path: "/some/topic.something.@derivative",
           constantName: undefined,
-          startTime: { sec: 0, nsec: 0 },
         },
       ];
-      expect(derivative(data, tooltips)).toEqual({ points: newPoints, tooltips: newTooltips });
+      expect(derivative(data)).toEqual(newData);
     });
   });
 
   // This is a good example of math functions, if this one works then the rest of them should work.
   describe("absoluteValue", () => {
     it("takes the absolute value of tooltips", () => {
-      const tooltips: TimeBasedChartTooltipData[] = [
-        { x: 0, y: NaN, datasetKey: "0" } as any,
-        { x: 1, y: -1, datasetKey: "0" },
-        { x: 2, y: 1.5, datasetKey: "0" },
-        { x: 2, y: "-1.5", datasetKey: "0" },
+      const datums = [
+        { x: 0, y: NaN, path: "foo" },
+        { x: 1, y: -1, path: "foo" },
+        { x: 2, y: 1.5, path: "foo" },
+        { x: 2, y: -1.5, path: "foo" },
       ];
-      expect(applyToDataOrTooltips(tooltips, mathFunctions.abs as MathFunction)).toEqual([
-        { x: 0, y: NaN, datasetKey: "0" },
-        { x: 1, y: 1, datasetKey: "0" },
-        { x: 2, y: 1.5, datasetKey: "0" },
-        { x: 2, y: 1.5, datasetKey: "0" },
-      ]);
+
+      const expected = [
+        { x: 0, y: NaN, value: NaN, path: "foo.@abs" },
+        { x: 1, y: 1, value: 1, path: "foo.@abs" },
+        { x: 2, y: 1.5, value: 1.5, path: "foo.@abs" },
+        { x: 2, y: 1.5, value: 1.5, path: "foo.@abs" },
+      ];
+
+      for (const [idx, datum] of datums.entries()) {
+        expect(applyToDatum(datum, mathFunctions.abs!)).toEqual(expected[idx]);
+      }
     });
   });
 
   it("rad2deg converts radians to degrees", () => {
-    const items = [{ x: 1, y: Math.PI }];
-    expect(applyToDataOrTooltips(items, mathFunctions.rad2deg as MathFunction)).toEqual([
-      { x: 1, y: 180 },
-    ]);
+    expect(applyToDatum({ y: Math.PI, path: "foo" }, mathFunctions.rad2deg!)).toEqual({
+      y: 180,
+      value: 180,
+      path: "foo.@rad2deg",
+    });
   });
 
   it("deg2rad converts degrees to radians", () => {
-    const items = [{ x: 1, y: 180 }];
-    expect(applyToDataOrTooltips(items, mathFunctions.deg2rad as MathFunction)).toEqual([
-      { x: 1, y: Math.PI },
-    ]);
+    expect(applyToDatum({ y: 180, path: "foo" }, mathFunctions.deg2rad!)).toEqual({
+      y: Math.PI,
+      value: Math.PI,
+      path: "foo.@deg2rad",
+    });
   });
 });

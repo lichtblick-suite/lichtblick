@@ -11,43 +11,23 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { TimeBasedChartTooltipData } from "@foxglove/studio-base/components/TimeBasedChart";
+export type MathFunction = (arg: number) => number;
 
-import { PlotChartPoint } from "./internalTypes";
-
-export type MathFunction = (arg0: number) => number;
-
-export function derivative(
-  data: PlotChartPoint[],
-  tooltips: TimeBasedChartTooltipData[],
-): { points: PlotChartPoint[]; tooltips: TimeBasedChartTooltipData[] } {
-  const points = [];
-  const newTooltips = [];
+export function derivative<T extends { x: number; y: number; path: string }>(data: T[]): T[] {
+  const newDatums = [];
   for (let i = 1; i < data.length; i++) {
-    const item = data[i] as PlotChartPoint;
-    const prevItem = data[i - 1] as PlotChartPoint;
+    const item = data[i]!;
+    const prevItem = data[i - 1]!;
     const secondsDifference = item.x - prevItem.x;
     const value = (item.y - prevItem.y) / secondsDifference;
-    const previousTooltip = tooltips[i];
-    const point: PlotChartPoint = { x: item.x, y: value };
-    if (!previousTooltip) {
-      continue;
-    }
-
-    const tooltip = {
-      x: point.x,
-      y: point.y,
-      item: previousTooltip.item,
-      path: `${previousTooltip.path}.@derivative`,
-      datasetKey: previousTooltip.datasetKey,
+    newDatums.push({
+      ...item,
+      y: value,
       value,
-      constantName: undefined,
-      startTime: previousTooltip.startTime,
-    };
-    newTooltips.push(tooltip);
-    points.push(point);
+      path: `${item.path}.@derivative`,
+    });
   }
-  return { points, tooltips: newTooltips };
+  return newDatums;
 }
 
 export const mathFunctions: { [fn: string]: MathFunction } = {
@@ -72,18 +52,15 @@ export const mathFunctions: { [fn: string]: MathFunction } = {
   rad2deg: (radians: number) => radians * (180 / Math.PI),
 };
 
-// Apply a function to the y-value of the data or tooltips passed in.
-export function applyToDataOrTooltips<T extends { y: number | string | bigint }>(
-  dataOrTooltips: T[],
-  func: (arg0: number) => number,
-): T[] {
-  return dataOrTooltips.map((item) => {
-    let { y } = item;
-    const numericYValue: number = Number(y);
-    // Only apply the function if the Y value is a valid number.
-    if (!isNaN(numericYValue)) {
-      y = func(numericYValue);
-    }
-    return { ...item, y };
-  });
+export function applyToDatum<T extends { y: number | string | bigint; path: string }>(
+  datum: T,
+  func: MathFunction,
+): T {
+  let { y } = datum;
+  const numericYValue: number = Number(y);
+  // Only apply the function if the Y value is a valid number.
+  if (!isNaN(numericYValue)) {
+    y = func(numericYValue);
+  }
+  return { ...datum, y, value: y, path: `${datum.path}.@${func.name}` };
 }

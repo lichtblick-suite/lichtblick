@@ -53,15 +53,15 @@ import {
   PanelConfig,
   PanelConfigSchema,
 } from "@foxglove/studio-base/types/panels";
-import { downloadFiles } from "@foxglove/studio-base/util/download";
-import { formatTimeRaw, getTimestampForMessage } from "@foxglove/studio-base/util/time";
+import { getTimestampForMessage } from "@foxglove/studio-base/util/time";
 
 import PlotChart from "./PlotChart";
 import PlotLegend from "./PlotLegend";
-import { getDatasetsAndTooltips } from "./datasets";
+import { downloadCSV } from "./csv";
+import { getDatasets } from "./datasets";
 import helpContent from "./index.help.md";
-import { DataSet, PlotDataByPath, PlotDataItem } from "./internalTypes";
-import { PlotConfig, PlotXAxisVal } from "./types";
+import { PlotDataByPath, PlotDataItem } from "./internalTypes";
+import { PlotConfig } from "./types";
 
 export { plotableRosTypes } from "./types";
 export type { PlotConfig, PlotXAxisVal } from "./types";
@@ -79,58 +79,6 @@ export function openSiblingPlotPanel(openSiblingPanel: OpenSiblingPanel, topicNa
       ),
     }),
   });
-}
-
-function getCSVRow(
-  data: { x: number; y: number },
-  label?: string,
-  tooltips?: TimeBasedChartTooltipData[],
-) {
-  const { x, y } = data ?? {};
-  const tooltip = (tooltips ?? []).find(
-    (_tooltip) => _tooltip.path === label && _tooltip.x === x && _tooltip.y === y,
-  );
-  if (!tooltip) {
-    throw new Error("Cannot find tooltip for dataset: this should never happen");
-  }
-  const { receiveTime, headerStamp } = tooltip.item;
-  const receiveTimeFloat = formatTimeRaw(receiveTime);
-  const stampTime = headerStamp ? formatTimeRaw(headerStamp) : "";
-  return [x, receiveTimeFloat, stampTime, label, y];
-}
-
-const getCVSColName = (xAxisVal: PlotXAxisVal): string =>
-  ({
-    timestamp: "elapsed time",
-    index: "index",
-    custom: "x value",
-    currentCustom: "x value",
-  }[xAxisVal]);
-
-function getCSVData(
-  datasets: DataSet[],
-  tooltips: TimeBasedChartTooltipData[],
-  xAxisVal: PlotXAxisVal,
-): string {
-  const headLine = [getCVSColName(xAxisVal), "receive time", "header.stamp", "topic", "value"];
-  const combinedLines = [];
-  combinedLines.push(headLine);
-  datasets.forEach((dataset) => {
-    dataset.data.forEach((data) => {
-      combinedLines.push(getCSVRow(data as { x: number; y: number }, dataset.label, tooltips));
-    });
-  });
-  return combinedLines.join("\n");
-}
-
-function downloadCSV(
-  datasets: DataSet[],
-  tooltips: TimeBasedChartTooltipData[],
-  xAxisVal: PlotXAxisVal,
-) {
-  const csvData = getCSVData(datasets, tooltips, xAxisVal);
-  const blob = new Blob([csvData], { type: "text/csv;charset=utf-8;" });
-  downloadFiles([{ blob, fileName: `plot_data.csv` }]);
 }
 
 type Props = {
@@ -384,9 +332,9 @@ function Plot(props: Props) {
 
   const blocks = useBlocksByTopic(subscribeTopics);
 
-  // This memoization isn't quite ideal: getDatasetsAndTooltips is a bit expensive
-  // with lots of preloaded data, and when we preload a new block we re-generate the datasets for
-  // the whole timeline. We could try to use block memoization here.
+  // This memoization isn't quite ideal: getDatasets is a bit expensive with lots of preloaded data,
+  // and when we preload a new block we re-generate the datasets for the whole timeline. We could
+  // try to use block memoization here.
   const plotDataForBlocks = useMemo(() => {
     if (showSingleCurrentMessage) {
       return {};
@@ -394,12 +342,12 @@ function Plot(props: Props) {
     return getBlockItemsByPath(decodeMessagePathsForMessagesByTopic, blocks);
   }, [blocks, decodeMessagePathsForMessagesByTopic, showSingleCurrentMessage]);
 
-  // Keep disabled paths when passing into getDatasetsAndTooltips, because we still want
+  // Keep disabled paths when passing into getDatasets, because we still want
   // easy access to the history when turning the disabled paths back on.
-  const { datasets, tooltips, pathsWithMismatchedDataLengths } = useMemo(() => {
+  const { datasets, pathsWithMismatchedDataLengths } = useMemo(() => {
     const allPlotData = { ...filteredPlotData, ...plotDataForBlocks };
 
-    return getDatasetsAndTooltips({
+    return getDatasets({
       paths: yAxisPaths,
       itemsByPath: allPlotData,
       startTime: startTime ?? ZERO_TIME,
@@ -416,6 +364,16 @@ function Plot(props: Props) {
     xAxisPath,
     theme.isInverted,
   ]);
+
+  const tooltips = useMemo(() => {
+    const allTooltips: TimeBasedChartTooltipData[] = [];
+    for (const dataset of datasets) {
+      for (const datum of dataset.data) {
+        allTooltips.push(datum);
+      }
+    }
+    return allTooltips;
+  }, [datasets]);
 
   const messagePipeline = useMessagePipelineGetter();
   const onClick = useCallback<NonNullable<ComponentProps<typeof PlotChart>["onClick"]>>(
@@ -456,7 +414,7 @@ function Plot(props: Props) {
         xAxisVal={xAxisVal}
         xAxisPath={xAxisPath}
         pathsWithMismatchedDataLengths={pathsWithMismatchedDataLengths}
-        onDownload={() => downloadCSV(datasets, tooltips, xAxisVal)}
+        onDownload={() => downloadCSV(datasets, xAxisVal)}
       />
     </Flex>
   );

@@ -11,6 +11,7 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
+import { TimeBasedChartTooltipData } from "@foxglove/studio-base/components/TimeBasedChart";
 import { useTooltip } from "@foxglove/studio-base/components/Tooltip";
 
 import TimeBasedChartTooltipContent from "./TimeBasedChartTooltipContent";
@@ -20,28 +21,44 @@ export default {
   component: TimeBasedChartTooltipContent,
 };
 
-export function Default(): React.ReactElement {
-  const data = {
+export function SingleItem(): React.ReactElement {
+  const data: TimeBasedChartTooltipData = {
     x: 0,
     y: 0,
-    datasetKey: "0",
     path: "/some/topic.path",
     value: 3,
     constantName: "ACTIVE",
-    item: {
-      receiveTime: { sec: 123, nsec: 456 },
-      headerStamp: { sec: 100, nsec: 30 },
-    },
-    startTime: { sec: 95, nsec: 0 },
   };
   const { tooltip } = useTooltip({
     shown: true,
     targetPosition: { x: 200, y: 100 },
-    contents: <TimeBasedChartTooltipContent tooltip={data} />,
+    contents: <TimeBasedChartTooltipContent content={[data]} />,
   });
   return <div style={{ width: "100%", height: "100%" }}>{tooltip}</div>;
 }
-Default.parameters = { colorScheme: "dark" };
-export const DefaultLight = Object.assign(Default.bind(undefined), {
+SingleItem.parameters = { colorScheme: "dark" };
+
+export const SingleItemLight = Object.assign(SingleItem.bind(undefined), {
+  parameters: { colorScheme: "light" },
+});
+
+export function MultipleItems(): React.ReactElement {
+  const data: TimeBasedChartTooltipData = {
+    x: 0,
+    y: 0,
+    path: "/some/topic.path",
+    value: 3,
+    constantName: "ACTIVE",
+  };
+  const { tooltip } = useTooltip({
+    shown: true,
+    targetPosition: { x: 200, y: 100 },
+    contents: <TimeBasedChartTooltipContent content={[data, data]} />,
+  });
+  return <div style={{ width: "100%", height: "100%" }}>{tooltip}</div>;
+}
+MultipleItems.parameters = { colorScheme: "dark" };
+
+export const MultipleItemsLight = Object.assign(MultipleItems.bind(undefined), {
   parameters: { colorScheme: "light" },
 });

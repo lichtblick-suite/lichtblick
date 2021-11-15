@@ -30,7 +30,6 @@ import { v4 as uuidv4 } from "uuid";
 
 import { filterMap } from "@foxglove/den/collection";
 import Logger from "@foxglove/log";
-import { Time } from "@foxglove/rostime";
 import Button from "@foxglove/studio-base/components/Button";
 import ChartComponent from "@foxglove/studio-base/components/Chart/index";
 import { RpcElement, RpcScales } from "@foxglove/studio-base/components/Chart/types";
@@ -51,20 +50,12 @@ import { downsampleTimeseries, downsampleScatter } from "./downsample";
 
 const log = Logger.getLogger(__filename);
 
-export type TooltipItem = {
-  receiveTime: Time;
-  headerStamp?: Time;
-};
-
 export type TimeBasedChartTooltipData = {
   x: number | bigint;
   y: number | bigint;
-  datasetKey?: string;
-  item: TooltipItem;
   path: string;
   value: number | bigint | boolean | string;
   constantName?: string;
-  startTime: Time;
 };
 
 const SRoot = styled.div`
@@ -282,39 +273,69 @@ export default function TimeBasedChart(props: Props): JSX.Element {
     [setHasVerticalExclusiveZoom, setHasBothAxesZoom],
   );
 
+  const mouseYRef = useRef<number | undefined>(undefined);
+
+  // Tooltip lookup via x/y string key to find tooltips on hover without iterating entire array
+  const tooltipLookup = useMemo(() => {
+    const tooltipMap = new Map<string, TimeBasedChartTooltipData>();
+    if (!tooltips) {
+      return tooltipMap;
+    }
+
+    for (const tooltip of tooltips) {
+      const key = `${tooltip.x}:${tooltip.y}`;
+      tooltipMap.set(key, tooltip);
+    }
+    return tooltipMap;
+  }, [tooltips]);
+
   // We use a custom tooltip so we can style it more nicely, and so that it can break
   // out of the bounds of the canvas, in case the panel is small.
   const [activeTooltip, setActiveTooltip] = useState<{
     x: number;
     y: number;
-    data: TimeBasedChartTooltipData;
+    data: TimeBasedChartTooltipData[];
   }>();
   const updateTooltip = useCallback(
-    (element?: RpcElement) => {
-      if (!element) {
+    (elements: RpcElement[]) => {
+      if (elements.length === 0 || mouseYRef.current == undefined) {
         return setActiveTooltip(undefined);
       }
 
-      // Locate the tooltip for our data
-      // We do a lazy linear find for now - a perf on this vs map lookups might be useful
-      // Note then you need to make keys from x/y points
-      const tooltipData = tooltips?.find(
-        (item) => Number(item.x) === element.data?.x && Number(item.y) === element.data?.y,
-      );
-      if (!tooltipData) {
+      const tooltipItems: { item: TimeBasedChartTooltipData; element: RpcElement }[] = [];
+
+      for (const element of elements) {
+        if (!element.data) {
+          continue;
+        }
+        const key = `${element.data.x}:${element.data.y}`;
+        const foundTooltip = tooltipLookup.get(key);
+        if (!foundTooltip) {
+          continue;
+        }
+
+        tooltipItems.push({
+          item: foundTooltip,
+          element,
+        });
+      }
+
+      if (tooltipItems.length === 0) {
         return setActiveTooltip(undefined);
       }
+
+      const element = tooltipItems[0]!.element;
 
       const canvasRect = canvasContainer.current?.getBoundingClientRect();
       if (canvasRect) {
         setActiveTooltip({
           x: canvasRect.left + element.view.x,
-          y: canvasRect.top + element.view.y,
-          data: tooltipData,
+          y: canvasRect.top + mouseYRef.current,
+          data: tooltipItems.map((item) => item.item),
         });
       }
     },
-    [tooltips],
+    [tooltipLookup],
   );
 
   const setHoverValue = useSetHoverValue();
@@ -341,6 +362,10 @@ export default function TimeBasedChart(props: Props): JSX.Element {
       }
 
       const canvasContainerRect = canvasContainer.current.getBoundingClientRect();
+
+      // tooltip vertical placement align with the cursor y value
+      mouseYRef.current = event.pageY - canvasContainerRect.top;
+
       const mouseX = event.pageX - canvasContainerRect.left;
       const pixels = xScale.pixelMax - xScale.pixelMin;
       const range = xScale.max - xScale.min;
@@ -679,7 +704,7 @@ export default function TimeBasedChart(props: Props): JSX.Element {
     (elements: RpcElement[]) => {
       // onHover could fire after component unmounts so we need to guard with mounted checks
       if (isMounted()) {
-        updateTooltip(elements[0]);
+        updateTooltip(elements);
       }
     },
     [isMounted, updateTooltip],
@@ -767,7 +792,7 @@ export default function TimeBasedChart(props: Props): JSX.Element {
 
   const tooltipContent = useMemo(() => {
     return activeTooltip ? (
-      <TimeBasedChartTooltipContent tooltip={activeTooltip.data} />
+      <TimeBasedChartTooltipContent content={activeTooltip.data} />
     ) : undefined;
   }, [activeTooltip]);
 
@@ -805,6 +830,7 @@ export default function TimeBasedChart(props: Props): JSX.Element {
       <Tooltip
         shown
         noPointerEvents={true}
+        placement={"right"}
         targetPosition={{ x: activeTooltip?.x ?? 0, y: activeTooltip?.y ?? 0 }}
         contents={tooltipContent}
       />

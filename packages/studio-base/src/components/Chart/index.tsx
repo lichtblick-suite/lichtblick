@@ -488,7 +488,7 @@ function Chart(props: Props): JSX.Element {
       onMouseLeave={onMouseLeave}
       onMouseEnter={onMouseEnter}
       onMouseUp={onMouseUp}
-      style={{ width, height }}
+      style={{ width, height, cursor: "crosshair" }}
     />
   );
 }

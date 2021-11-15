@@ -12,18 +12,14 @@
 //   You may not use this file except in compliance with the License.
 
 import { makeStyles } from "@fluentui/react";
-import cx from "classnames";
 import { PropsWithChildren } from "react";
 
-import { subtract as subtractTimes, toSec } from "@foxglove/rostime";
-import { formatTime } from "@foxglove/studio-base/util/formatTime";
 import { fonts } from "@foxglove/studio-base/util/sharedStyleConstants";
-import { formatTimeRaw } from "@foxglove/studio-base/util/time";
 
 import { TimeBasedChartTooltipData } from "./index";
 
 type Props = {
-  tooltip: TimeBasedChartTooltipData;
+  content: TimeBasedChartTooltipData[];
 };
 
 const useStyles = makeStyles((theme) => ({
@@ -31,35 +27,13 @@ const useStyles = makeStyles((theme) => ({
     fontFamily: fonts.MONOSPACE,
     fontSize: 11,
     lineHeight: "1.4",
-    maxWidth: 350,
     overflowWrap: "break-word",
   },
-  table: {
-    border: "none",
-    width: "100%",
+  multiValueItem: {
+    paddingBottom: theme.spacing.s2,
   },
-  tableCell: {
-    border: "none",
-    padding: "0 0.3em",
-    lineHeight: "1.3em",
-  },
-  tableCellHeader: {
-    color: theme.palette.neutralTertiary,
-    textAlign: "center",
-
-    ":first-child": {
-      textAlign: "left",
-    },
-  },
-  tableRow: {
-    ":first-child": {
-      "th, td": {
-        paddingBottom: 4,
-        paddingTop: 4,
-      },
-    },
-  },
-  title: {
+  path: {
+    whiteSpace: "nowrap",
     color: theme.palette.neutralTertiary,
   },
 }));
@@ -67,58 +41,50 @@ const useStyles = makeStyles((theme) => ({
 export default function TimeBasedChartTooltipContent(
   props: PropsWithChildren<Props>,
 ): React.ReactElement {
-  const { tooltip } = props;
+  const { content } = props;
   const classes = useStyles();
-  const value =
-    typeof tooltip.value === "string"
-      ? tooltip.value
-      : typeof tooltip.value === "bigint"
-      ? tooltip.value.toString()
-      : JSON.stringify(tooltip.value);
-  const { receiveTime, headerStamp } = tooltip.item;
+
+  // If only one value is present we don't show the series name since it is the only series present
+  if (content.length === 1) {
+    return (
+      <div className={classes.root} data-test="TimeBasedChartTooltipContent">
+        {content.map((item, idx) => {
+          const value =
+            typeof item.value === "string"
+              ? item.value
+              : typeof item.value === "bigint"
+              ? item.value.toString()
+              : JSON.stringify(item.value);
+          return (
+            <div key={idx}>
+              {value}
+              {item.constantName != undefined ? ` (${item.constantName})` : ""}
+            </div>
+          );
+        })}
+      </div>
+    );
+  }
 
   return (
     <div className={classes.root} data-test="TimeBasedChartTooltipContent">
-      <div>
-        <span className={classes.title}>Value:&nbsp;</span>
-        {tooltip.constantName != undefined ? `${tooltip.constantName} (${value})` : value}
-      </div>
-      <div>
-        <span className={classes.title}>Path:&nbsp;</span>
-        {tooltip.path}
-      </div>
-      <table className={classes.table}>
-        <tbody>
-          <tr className={classes.tableRow}>
-            <th className={cx(classes.tableCell, classes.tableCellHeader)} />
-            <th className={cx(classes.tableCell, classes.tableCellHeader)}>receive time</th>
-            {headerStamp && (
-              <th className={cx(classes.tableCell, classes.tableCellHeader)}>header.stamp</th>
-            )}
-          </tr>
-          <tr className={classes.tableRow}>
-            <th className={cx(classes.tableCell, classes.tableCellHeader)}>ROS</th>
-            <td className={classes.tableCell}>{formatTimeRaw(receiveTime)}</td>
-            {headerStamp && <td className={classes.tableCell}>{formatTimeRaw(headerStamp)}</td>}
-          </tr>
-          <tr className={classes.tableRow}>
-            <th className={cx(classes.tableCell, classes.tableCellHeader)}>Time</th>
-            {<td className={classes.tableCell}>{formatTime(receiveTime)}</td>}
-            {headerStamp && <td className={classes.tableCell}>{formatTime(headerStamp)}</td>}
-          </tr>
-          <tr className={classes.tableRow}>
-            <th className={cx(classes.tableCell, classes.tableCellHeader)}>Elapsed</th>
-            <td className={classes.tableCell}>
-              {toSec(subtractTimes(receiveTime, tooltip.startTime)).toFixed(9)} sec
-            </td>
-            {headerStamp && (
-              <td className={classes.tableCell}>
-                {toSec(subtractTimes(headerStamp, tooltip.startTime)).toFixed(9)} sec
-              </td>
-            )}
-          </tr>
-        </tbody>
-      </table>
+      {content.map((item, idx) => {
+        const value =
+          typeof item.value === "string"
+            ? item.value
+            : typeof item.value === "bigint"
+            ? item.value.toString()
+            : JSON.stringify(item.value);
+        return (
+          <div key={idx} className={classes.multiValueItem}>
+            <div className={classes.path}>{item.path}</div>
+            <div>
+              {value}
+              {item.constantName != undefined ? ` (${item.constantName})` : ""}
+            </div>
+          </div>
+        );
+      })}
     </div>
   );
 }
