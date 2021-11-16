@@ -164,7 +164,6 @@ const data: PanelsState = {
   playbackConfig: {
     speed: 1,
     messageOrder: "receiveTime",
-    timeDisplayMethod: "TOD",
   },
 };
 

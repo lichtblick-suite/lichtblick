@@ -15,17 +15,11 @@ import {
 } from "@foxglove/studio-base/components/MessagePipeline";
 import { useTooltip } from "@foxglove/studio-base/components/Tooltip";
 import {
-  LayoutState,
-  useCurrentLayoutSelector,
-} from "@foxglove/studio-base/context/CurrentLayoutContext";
-import {
   useClearHoverValue,
   useSetHoverValue,
 } from "@foxglove/studio-base/context/HoverValueContext";
-import { TimeDisplayMethod } from "@foxglove/studio-base/types/panels";
-import { formatTime } from "@foxglove/studio-base/util/formatTime";
+import { useAppTimeFormat } from "@foxglove/studio-base/hooks";
 import { fonts } from "@foxglove/studio-base/util/sharedStyleConstants";
-import { formatTimeRaw } from "@foxglove/studio-base/util/time";
 
 import PlaybackBarHoverTicks from "./PlaybackBarHoverTicks";
 import { ProgressPlot } from "./ProgressPlot";
@@ -103,18 +97,13 @@ type Props = {
   onSeek: (seekTo: Time) => void;
 };
 
-function displayMethodSelector(state: LayoutState): TimeDisplayMethod {
-  const method = state.selectedLayout?.data?.playbackConfig.timeDisplayMethod ?? "TOD";
-  return method === "TOD" ? "TOD" : "SEC";
-}
-
 export default function Scrubber(props: Props): JSX.Element {
   const { onSeek } = props;
 
   const [hoverComponentId] = useState<string>(() => uuidv4());
   const el = useRef<HTMLDivElement>(ReactNull);
 
-  const timeDisplayMethod = useCurrentLayoutSelector(displayMethodSelector);
+  const { formatTime, timeFormat } = useAppTimeFormat();
 
   const startTime = useMessagePipeline(selectStartTime);
   const currentTime = useMessagePipeline(selectCurrentTime);
@@ -143,12 +132,12 @@ export default function Scrubber(props: Props): JSX.Element {
 
       const tooltipItems = [];
 
-      switch (timeDisplayMethod) {
+      switch (timeFormat) {
         case "TOD":
           tooltipItems.push({ title: "Time", value: formatTime(stamp) });
           break;
         case "SEC":
-          tooltipItems.push({ title: "SEC", value: formatTimeRaw(stamp) });
+          tooltipItems.push({ title: "SEC", value: formatTime(stamp) });
           break;
       }
 
@@ -171,7 +160,7 @@ export default function Scrubber(props: Props): JSX.Element {
         value: toSec(timeFromStart),
       });
     },
-    [latestStartTime, classes, setHoverValue, hoverComponentId, timeDisplayMethod],
+    [latestStartTime, classes, setHoverValue, hoverComponentId, formatTime, timeFormat],
   );
 
   const clearHoverValue = useClearHoverValue();

@@ -23,7 +23,9 @@ import { AppSetting } from "@foxglove/studio-base/AppSetting";
 import OsContextSingleton from "@foxglove/studio-base/OsContextSingleton";
 import { ExperimentalFeatureSettings } from "@foxglove/studio-base/components/ExperimentalFeatureSettings";
 import { SidebarContent } from "@foxglove/studio-base/components/SidebarContent";
+import { useAppTimeFormat } from "@foxglove/studio-base/hooks";
 import { useAppConfigurationValue } from "@foxglove/studio-base/hooks/useAppConfigurationValue";
+import { TimeDisplayMethod } from "@foxglove/studio-base/types/panels";
 import fuzzyFilter from "@foxglove/studio-base/util/fuzzyFilter";
 
 const MESSAGE_RATES = [1, 3, 5, 10, 15, 20, 30, 60];
@@ -159,6 +161,33 @@ function TimezoneSettings(): React.ReactElement {
   );
 }
 
+function TimeFormat(): React.ReactElement {
+  const { timeFormat, setTimeFormat } = useAppTimeFormat();
+  const entries: Array<{ key: TimeDisplayMethod; text: string }> = [
+    { key: "SEC", text: "Seconds" },
+    { key: "TOD", text: "Local" },
+  ];
+
+  return (
+    <VirtualizedComboBox
+      label="Timestamp format:"
+      options={entries}
+      autoComplete="on"
+      openOnKeyboardFocus
+      selectedKey={timeFormat}
+      onChange={(_event, option) => {
+        if (option) {
+          void setTimeFormat(String(option.key) as TimeDisplayMethod);
+        }
+      }}
+      calloutProps={{
+        directionalHint: DirectionalHint.bottomLeftEdge,
+        directionalHintFixed: true,
+      }}
+    />
+  );
+}
+
 function MessageFramerate(): React.ReactElement {
   const [messageRate, setMessageRate] = useAppConfigurationValue<number>(AppSetting.MESSAGE_RATE);
   const entries = useMemo(
@@ -266,6 +295,9 @@ export default function Preferences(): React.ReactElement {
             </Stack.Item>
             <Stack.Item>
               <TimezoneSettings />
+            </Stack.Item>
+            <Stack.Item>
+              <TimeFormat />
             </Stack.Item>
             <Stack.Item>
               <MessageFramerate />

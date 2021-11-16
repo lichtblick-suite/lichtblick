@@ -72,7 +72,6 @@ import { isTabPanelConfig } from "../../util/layout";
 export const defaultPlaybackConfig: PlaybackConfig = {
   speed: 1.0,
   messageOrder: "receiveTime",
-  timeDisplayMethod: "TOD",
 };
 
 function changePanelLayout(

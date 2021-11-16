@@ -30,7 +30,6 @@ const TEST_LAYOUT: PanelsState = {
   playbackConfig: {
     speed: 0.2,
     messageOrder: "receiveTime",
-    timeDisplayMethod: "SEC",
   },
 };
 
@@ -106,7 +105,7 @@ describe("CurrentLayoutProvider", () => {
       globalVariables: { var: "hello" },
       linkedGlobalVariables: [{ topic: "/test", markerKeyPath: [], name: "var" }],
       userNodes: { node1: { name: "node", sourceCode: "node()" } },
-      playbackConfig: { speed: 0.1, messageOrder: "headerStamp", timeDisplayMethod: "TOD" },
+      playbackConfig: { speed: 0.1, messageOrder: "headerStamp" },
     };
     const layoutStorageGetCalled = signal();
     const mockLayoutManager = makeMockLayoutManager();
@@ -204,14 +203,14 @@ describe("CurrentLayoutProvider", () => {
     });
 
     await act(() => result.current.childMounted);
-    act(() => result.current.actions.setPlaybackConfig({ timeDisplayMethod: "TOD" }));
+    act(() => result.current.actions.setPlaybackConfig({ speed: 10 }));
     await act(() => layoutStoragePutCalled);
 
     const newState = {
       ...TEST_LAYOUT,
       playbackConfig: {
         ...TEST_LAYOUT.playbackConfig,
-        timeDisplayMethod: "TOD",
+        speed: 10,
       },
     };
 

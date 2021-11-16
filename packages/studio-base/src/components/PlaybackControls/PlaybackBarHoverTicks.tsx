@@ -21,15 +21,9 @@ import {
   useMessagePipeline,
 } from "@foxglove/studio-base/components/MessagePipeline";
 import HoverBar from "@foxglove/studio-base/components/TimeBasedChart/HoverBar";
-import {
-  LayoutState,
-  useCurrentLayoutSelector,
-} from "@foxglove/studio-base/context/CurrentLayoutContext";
 import { useHoverValue } from "@foxglove/studio-base/context/HoverValueContext";
-import { TimeDisplayMethod } from "@foxglove/studio-base/types/panels";
-import { formatTime } from "@foxglove/studio-base/util/formatTime";
+import { useAppTimeFormat } from "@foxglove/studio-base/hooks";
 import { fonts } from "@foxglove/studio-base/util/sharedStyleConstants";
-import { formatTimeRaw } from "@foxglove/studio-base/util/time";
 
 const sharedTickStyles = css`
   position: absolute;
@@ -75,11 +69,6 @@ function getEndTime(ctx: MessagePipelineContext) {
   return ctx.playerState.activeData?.endTime;
 }
 
-function displayMethodSelector(state: LayoutState): TimeDisplayMethod {
-  const method = state.selectedLayout?.data?.playbackConfig.timeDisplayMethod ?? "TOD";
-  return method === "TOD" ? "TOD" : "SEC";
-}
-
 type Props = {
   componentId: string;
   // When true, this will display the hover time above the hover ticks
@@ -92,7 +81,7 @@ export default function PlaybackBarHoverTicks(props: Props): JSX.Element {
   const startTime = useMessagePipeline(getStartTime);
   const endTime = useMessagePipeline(getEndTime);
   const hoverValue = useHoverValue({ componentId, isTimestampScale: true });
-  const timeDisplayMethod = useCurrentLayoutSelector(displayMethodSelector);
+  const { formatTime } = useAppTimeFormat();
 
   // Use a debounce and 0 refresh rate to avoid triggering a resize observation while handling
   // and existing resize observation.
@@ -108,8 +97,8 @@ export default function PlaybackBarHoverTicks(props: Props): JSX.Element {
       return undefined;
     }
     const stamp = add(startTime, fromSec(hoverValue.value));
-    return timeDisplayMethod === "TOD" ? formatTime(stamp) : formatTimeRaw(stamp);
-  }, [hoverValue, startTime, timeDisplayMethod]);
+    return formatTime(stamp);
+  }, [formatTime, hoverValue, startTime]);
 
   const scaleBounds = useMemo<RpcScales | undefined>(() => {
     if (startTime == undefined || endTime == undefined) {

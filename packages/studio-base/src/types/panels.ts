@@ -31,7 +31,6 @@ export type TimeDisplayMethod = "SEC" | "TOD";
 export type PlaybackConfig = {
   speed: number;
   messageOrder: TimestampMethod;
-  timeDisplayMethod: TimeDisplayMethod;
 };
 
 export type UserNode = { name: string; sourceCode: string };

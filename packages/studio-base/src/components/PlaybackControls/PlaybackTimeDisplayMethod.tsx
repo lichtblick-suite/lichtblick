@@ -22,12 +22,7 @@ import {
 import { useState, useCallback, useMemo, useRef, useEffect } from "react";
 
 import { Time, isTimeInRangeInclusive } from "@foxglove/rostime";
-import {
-  LayoutState,
-  useCurrentLayoutActions,
-  useCurrentLayoutSelector,
-} from "@foxglove/studio-base/context/CurrentLayoutContext";
-import { TimeDisplayMethod } from "@foxglove/studio-base/types/panels";
+import { useAppTimeFormat } from "@foxglove/studio-base/hooks";
 import {
   formatDate,
   formatTime,
@@ -35,11 +30,6 @@ import {
 } from "@foxglove/studio-base/util/formatTime";
 import { fonts } from "@foxglove/studio-base/util/sharedStyleConstants";
 import { formatTimeRaw } from "@foxglove/studio-base/util/time";
-
-function displayMethodSelector(state: LayoutState): TimeDisplayMethod {
-  const method = state.selectedLayout?.data?.playbackConfig.timeDisplayMethod ?? "TOD";
-  return method === "TOD" ? "TOD" : "SEC";
-}
 
 const PlaybackTimeDisplayMethod = ({
   currentTime,
@@ -59,13 +49,7 @@ const PlaybackTimeDisplayMethod = ({
   isPlaying: boolean;
 }): JSX.Element => {
   const timestampInputRef = useRef<HTMLInputElement>(ReactNull);
-  const timeDisplayMethod = useCurrentLayoutSelector(displayMethodSelector);
-  const { setPlaybackConfig } = useCurrentLayoutActions();
-  const setTimeDisplayMethod = useCallback(
-    (newTimeDisplayMethod: TimeDisplayMethod) =>
-      setPlaybackConfig({ timeDisplayMethod: newTimeDisplayMethod }),
-    [setPlaybackConfig],
-  );
+  const timeFormat = useAppTimeFormat();
   const timeRawString = useMemo(
     () => (currentTime ? formatTimeRaw(currentTime) : undefined),
     [currentTime],
@@ -75,8 +59,8 @@ const PlaybackTimeDisplayMethod = ({
     [currentTime, timezone],
   );
   const currentTimeString = useMemo(
-    () => (timeDisplayMethod === "SEC" ? timeRawString : timeOfDayString),
-    [timeRawString, timeOfDayString, timeDisplayMethod],
+    () => (timeFormat.timeFormat === "SEC" ? timeRawString : timeOfDayString),
+    [timeFormat.timeFormat, timeRawString, timeOfDayString],
   );
   const [isEditing, setIsEditing] = useState<boolean>(false);
   const [inputText, setInputText] = useState<string | undefined>(currentTimeString ?? undefined);
@@ -157,21 +141,12 @@ const PlaybackTimeDisplayMethod = ({
         isTimeInRangeInclusive(validTimeAndMethod.time, startTime, endTime)
       ) {
         onSeek(validTimeAndMethod.time);
-        if (validTimeAndMethod.method !== timeDisplayMethod) {
-          setTimeDisplayMethod(validTimeAndMethod.method);
+        if (validTimeAndMethod.method !== timeFormat.timeFormat) {
+          void timeFormat.setTimeFormat(validTimeAndMethod.method);
         }
       }
     },
-    [
-      currentTime,
-      endTime,
-      inputText,
-      onSeek,
-      setTimeDisplayMethod,
-      startTime,
-      timeDisplayMethod,
-      timezone,
-    ],
+    [inputText, startTime, currentTime, endTime, timezone, onSeek, timeFormat],
   );
 
   useEffect(() => {
@@ -230,15 +205,15 @@ const PlaybackTimeDisplayMethod = ({
               canCheck: true,
               key: "TOD",
               text: timeOfDayString ? timeOfDayString : "Time of Day",
-              isChecked: timeDisplayMethod === "TOD",
-              onClick: () => setTimeDisplayMethod("TOD"),
+              isChecked: timeFormat.timeFormat === "TOD",
+              onClick: () => void timeFormat.setTimeFormat("TOD"),
             },
             {
               canCheck: true,
               key: "SEC",
               text: timeRawString ? timeRawString : "Seconds",
-              isChecked: timeDisplayMethod === "SEC",
-              onClick: () => setTimeDisplayMethod("SEC"),
+              isChecked: timeFormat.timeFormat === "SEC",
+              onClick: () => void timeFormat.setTimeFormat("SEC"),
             },
           ],
         }}

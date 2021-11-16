@@ -55,6 +55,9 @@ $ yarn start        # launch electron
 # To launch the browser app:
 $ yarn web:serve
 
+# To launch the storybook:
+$ yarn storybook
+
 # Advanced usage: running webpack and electron on different computers (or VMs) on the same network
 $ yarn serve --host 192.168.xxx.yyy         # the address where electron can reach the webpack dev server
 $ yarn dlx electron@13.0.0-beta.13 .webpack # launch the version of electron for the current computer's platform
