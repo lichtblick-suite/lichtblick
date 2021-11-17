@@ -65,8 +65,9 @@ export default class Rosbag2DataProvider implements RandomAccessDataProvider {
       const parsedMsgdef = ROS2_TO_DEFINITIONS.get(topicDef.type);
       if (parsedMsgdef == undefined) {
         problems.push({
-          severity: "warning",
+          severity: "warn",
           message: `Topic "${topicDef.name}" has unrecognized datatype "${topicDef.type}"`,
+          tip: "ROS 2 bags don't contain full message definitions, so only well-known ROS types are supported in Studio. As a workaround, you can try using a Rosbridge WebSocket connection. For more information, see: https://github.com/ros2/rosbag2/issues/782",
         });
         continue;
       }

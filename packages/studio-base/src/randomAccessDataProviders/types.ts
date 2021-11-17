@@ -51,7 +51,7 @@ import { RosDatatypes } from "@foxglove/studio-base/types/RosDatatypes";
 // RandomAccessDataProviders have a strict API which is enforced automatically in ApiCheckerDataProvider.
 
 export type RandomAccessDataProviderProblem = {
-  severity: "error" | "warning";
+  severity: "error" | "warn";
   message: string;
   error?: Error;
   tip?: string;

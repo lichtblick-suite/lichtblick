@@ -224,6 +224,7 @@ export default class RandomAccessPlayer implements Player {
           parameters,
           messageDefinitions,
           providesParsedMessages,
+          problems,
         } = result;
         if (!providesParsedMessages) {
           this._setError("Incorrect message format");
@@ -251,6 +252,9 @@ export default class RandomAccessPlayer implements Player {
         this._parsedMessageDefinitionsByTopic =
           parsedMessageDefinitions.parsedMessageDefinitionsByTopic;
         this._initializing = false;
+        problems.forEach((problem, i) => {
+          this._problems.set(`initialization-${i}`, problem);
+        });
         this._reportInitialized();
 
         // Wait a bit until panels have had the chance to subscribe to topics before we start
