@@ -12,17 +12,15 @@ import { SidebarContent } from "@foxglove/studio-base/components/SidebarContent"
 import TextContent from "@foxglove/studio-base/components/TextContent";
 import { useSelectedPanels } from "@foxglove/studio-base/context/CurrentLayoutContext";
 import { PanelInfo, usePanelCatalog } from "@foxglove/studio-base/context/PanelCatalogContext";
+import isDesktopApp from "@foxglove/studio-base/util/isDesktopApp";
 
 const productLinks = [
   { text: "Foxglove Studio", url: "https://foxglove.dev/studio" },
   { text: "Foxglove Data Platform", url: "https://foxglove.dev/data-platform" },
 ];
 
-const userAgent = navigator.userAgent.toLowerCase();
-const isDesktopApp = userAgent.includes(" electron/");
-
 const resourceLinks = [
-  ...(isDesktopApp ? [] : [{ text: "Desktop app", url: "https://foxglove.dev/download" }]),
+  ...(isDesktopApp() ? [] : [{ text: "Desktop app", url: "https://foxglove.dev/download" }]),
   { text: "Read docs", url: "https://foxglove.dev/docs" },
   { text: "Join our community", url: "https://foxglove.dev/community" },
 ];
