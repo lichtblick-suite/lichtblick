@@ -13,7 +13,6 @@
 
 import { MessageBar, MessageBarType, Stack, useTheme, makeStyles } from "@fluentui/react";
 import BorderAllIcon from "@mdi/svg/svg/border-all.svg";
-import CloseIcon from "@mdi/svg/svg/close.svg";
 import ExpandAllOutlineIcon from "@mdi/svg/svg/expand-all-outline.svg";
 import FullscreenIcon from "@mdi/svg/svg/fullscreen.svg";
 import GridLargeIcon from "@mdi/svg/svg/grid-large.svg";
@@ -229,7 +228,7 @@ const useStyles = makeStyles((theme) => ({
       background: `${theme.semanticColors.primaryButtonBackgroundHovered} !important`,
     },
   },
-  exitFullScreen: {
+  exitFullscreen: {
     position: "fixed !important" as unknown as "fixed", // ensure this overrides LegacyButton styles
     top: 75,
     right: 8,
@@ -346,8 +345,8 @@ export default function Panel<
     const [quickActionsKeyPressed, setQuickActionsKeyPressed] = useState(false);
     const [shiftKeyPressed, setShiftKeyPressed] = useState(false);
     const [cmdKeyPressed, setCmdKeyPressed] = useState(false);
-    const [fullScreen, setFullScreen] = useState(false);
-    const [fullScreenLocked, setFullScreenLocked] = useState(false);
+    const [fullScreen, setFullscreen] = useState(false);
+    const [fullScreenLocked, setFullscreenLocked] = useState(false);
     const panelCatalog = usePanelCatalog();
 
     const type = PanelComponent.panelType;
@@ -454,9 +453,9 @@ export default function Panel<
     const onOverlayClick: MouseEventHandler<HTMLDivElement> = useCallback(
       (e) => {
         if (!fullScreen && quickActionsKeyPressed) {
-          setFullScreen(true);
+          setFullscreen(true);
           if (shiftKeyPressed) {
-            setFullScreenLocked(true);
+            setFullscreenLocked(true);
           }
           return;
         }
@@ -558,7 +557,7 @@ export default function Panel<
       tabId,
     ]);
 
-    const { onMouseMove, enterFullscreen, exitFullScreen } = useMemo(
+    const { onMouseMove, enterFullscreen, exitFullscreen } = useMemo(
       () => ({
         onMouseMove: ((e) => {
           if (e.metaKey !== cmdKeyPressed) {
@@ -566,12 +565,12 @@ export default function Panel<
           }
         }) as MouseEventHandler<HTMLDivElement>,
         enterFullscreen: () => {
-          setFullScreen(true);
-          setFullScreenLocked(true);
+          setFullscreen(true);
+          setFullscreenLocked(true);
         },
-        exitFullScreen: () => {
-          setFullScreen(false);
-          setFullScreenLocked(false);
+        exitFullscreen: () => {
+          setFullscreen(false);
+          setFullscreenLocked(false);
         },
       }),
       [cmdKeyPressed],
@@ -580,9 +579,9 @@ export default function Panel<
     const onReleaseQuickActionsKey = useCallback(() => {
       setQuickActionsKeyPressed(false);
       if (fullScreen && !fullScreenLocked) {
-        exitFullScreen();
+        exitFullscreen();
       }
-    }, [exitFullScreen, fullScreen, fullScreenLocked]);
+    }, [exitFullscreen, fullScreen, fullScreenLocked]);
 
     const { keyUpHandlers, keyDownHandlers } = useMemo(
       () => ({
@@ -602,24 +601,24 @@ export default function Panel<
           "`": () => setQuickActionsKeyPressed(true),
           "~": () => setQuickActionsKeyPressed(true),
           Shift: () => setShiftKeyPressed(true),
-          Escape: () => exitFullScreen(),
+          Escape: () => exitFullscreen(),
           Meta: () => setCmdKeyPressed(true),
         },
       }),
-      [selectAllPanels, cmdKeyPressed, exitFullScreen, onReleaseQuickActionsKey],
+      [selectAllPanels, cmdKeyPressed, exitFullscreen, onReleaseQuickActionsKey],
     );
 
     /* Ensure user exits full-screen mode when leaving window, even if key is still pressed down */
     useEffect(() => {
       const listener = () => {
-        exitFullScreen();
+        exitFullscreen();
         setCmdKeyPressed(false);
         setShiftKeyPressed(false);
         onReleaseQuickActionsKey();
       };
       window.addEventListener("blur", listener);
       return () => window.removeEventListener("blur", listener);
-    }, [exitFullScreen, onReleaseQuickActionsKey]);
+    }, [exitFullscreen, onReleaseQuickActionsKey]);
 
     const otherPanelProps = useShallowMemo(otherProps);
     const childProps = useMemo(
@@ -678,6 +677,8 @@ export default function Panel<
             updatePanelConfigs,
             openSiblingPanel,
             enterFullscreen,
+            exitFullscreen,
+            isFullscreen: fullScreen,
             hasSettings: PanelComponent.configSchema != undefined,
             tabId,
             supportsStrictMode: PanelComponent.supportsStrictMode ?? true,
@@ -746,15 +747,6 @@ export default function Panel<
                   </div>
                 </div>
               </div>
-            )}
-            {fullScreen && (
-              <Button
-                className={classes.exitFullScreen}
-                onClick={exitFullScreen}
-                data-panel-overlay-exit
-              >
-                <CloseIcon /> <span>Exit fullscreen</span>
-              </Button>
             )}
             <ErrorBoundary renderError={(errorProps) => <ErrorToolbar {...errorProps} />}>
               {PanelComponent.supportsStrictMode ?? true ? (

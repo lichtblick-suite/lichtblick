@@ -15,6 +15,8 @@ import { ContextualMenu, IContextualMenuItem, makeStyles } from "@fluentui/react
 import AlertIcon from "@mdi/svg/svg/alert.svg";
 import CogIcon from "@mdi/svg/svg/cog.svg";
 import DragIcon from "@mdi/svg/svg/drag.svg";
+import FullscreenExitIcon from "@mdi/svg/svg/fullscreen-exit.svg";
+import FullscreenIcon from "@mdi/svg/svg/fullscreen.svg";
 import HelpCircleOutlineIcon from "@mdi/svg/svg/help-circle-outline.svg";
 import cx from "classnames";
 import { useContext, useState, useCallback, useMemo, useRef } from "react";
@@ -360,7 +362,12 @@ export default React.memo<Props>(function PanelToolbar({
   backgroundColor,
 }: Props) {
   const styles = useStyles();
-  const { supportsStrictMode = true } = useContext(PanelContext) ?? {};
+  const {
+    supportsStrictMode = true,
+    isFullscreen,
+    enterFullscreen,
+    exitFullscreen,
+  } = useContext(PanelContext) ?? {};
   const [menuOpen, setMenuOpen] = useState(false);
 
   const panelContext = useContext(PanelContext);
@@ -396,6 +403,16 @@ export default React.memo<Props>(function PanelToolbar({
             <HelpCircleOutlineIcon className={styles.icon} />
           </Icon>
         )}
+        {isFullscreen === false && (
+          <Icon fade tooltip="Fullscreen" onClick={enterFullscreen}>
+            <FullscreenIcon />
+          </Icon>
+        )}
+        {isFullscreen === true && (
+          <Icon fade tooltip="Exit fullscreen" onClick={exitFullscreen}>
+            <FullscreenExitIcon />
+          </Icon>
+        )}
       </>
     );
   }, [
@@ -406,6 +423,9 @@ export default React.memo<Props>(function PanelToolbar({
     panelContext?.type,
     styles.icon,
     supportsStrictMode,
+    isFullscreen,
+    enterFullscreen,
+    exitFullscreen,
   ]);
 
   // Use a debounce and 0 refresh rate to avoid triggering a resize observation while handling

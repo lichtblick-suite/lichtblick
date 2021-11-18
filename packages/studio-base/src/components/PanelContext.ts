@@ -14,20 +14,20 @@
 import { SaveConfig, PanelConfig, OpenSiblingPanel } from "@foxglove/studio-base/types/panels";
 
 export type PanelContextType<T> = {
-  // TODO(PanelAPI): private API, should not be used in panels
   type: string;
   id: string;
   title: string;
   tabId?: string;
 
-  // TODO(PanelAPI): move to usePanelConfig()
   config: PanelConfig;
   saveConfig: SaveConfig<T>;
 
-  // TODO(PanelAPI): move to usePanelActions()
   updatePanelConfigs: (panelType: string, updateConfig: (config: T) => T) => void;
   openSiblingPanel: OpenSiblingPanel;
+
   enterFullscreen: () => void;
+  exitFullscreen: () => void;
+  isFullscreen: boolean;
 
   hasSettings: boolean;
   connectToolbarDragHandle: (el: Element | ReactNull) => void;
