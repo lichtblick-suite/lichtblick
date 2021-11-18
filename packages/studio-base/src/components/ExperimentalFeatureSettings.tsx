@@ -43,6 +43,11 @@ const features: Feature[] = [
     name: "Legacy Plot panel",
     description: <>Enable the Legacy Plot panel.</>,
   },
+  {
+    key: AppSetting.MCAP_DATA_SOURCE,
+    name: "Mcap Data Source",
+    description: <>Enable the Mcap data source.</>,
+  },
 ];
 if (process.env.NODE_ENV === "development") {
   features.push({

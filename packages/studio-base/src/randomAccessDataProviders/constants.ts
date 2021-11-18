@@ -19,6 +19,7 @@ export const CoreDataProviders = {
   Rosbag2DataProvider: "Rosbag2DataProvider",
   RpcDataProvider: "RpcDataProvider",
   UlogDataProvider: "UlogDataProvider",
+  McapDataProvider: "McapDataProvider",
   WorkerDataProvider: "WorkerDataProvider",
 };
 export const MESSAGE_FORMATS = ["rosBinaryMessages", "parsedMessages"] as const;

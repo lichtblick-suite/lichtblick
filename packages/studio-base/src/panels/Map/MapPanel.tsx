@@ -75,7 +75,8 @@ function MapPanel(props: MapPanelProps): JSX.Element {
       .filter(
         (topic) =>
           topic.datatype === "sensor_msgs/NavSatFix" ||
-          topic.datatype === "sensor_msgs/msg/NavSatFix",
+          topic.datatype === "sensor_msgs/msg/NavSatFix" ||
+          topic.datatype === "foxglove.LocationFix",
       )
       .map((topic) => topic.name);
   }, [topics]);
@@ -353,7 +354,7 @@ function MapPanel(props: MapPanelProps): JSX.Element {
       }
 
       const hasFix = (ev: MessageEvent<NavSatFixMsg>) =>
-        ev.message.status.status !== NavSatFixStatus.STATUS_NO_FIX;
+        ev.message.status?.status !== NavSatFixStatus.STATUS_NO_FIX;
       const noFixEvents = events.filter((ev) => !hasFix(ev));
       const fixEvents = events.filter(hasFix);
 

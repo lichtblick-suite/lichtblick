@@ -60,3 +60,4 @@ export { default as Ros2SocketDataSourceFactory } from "./dataSources/Ros2Socket
 export { default as RosbridgeDataSourceFactory } from "./dataSources/RosbridgeDataSourceFactory";
 export { default as UlogLocalDataSourceFactory } from "./dataSources/UlogLocalDataSourceFactory";
 export { default as VelodyneDataSourceFactory } from "./dataSources/VelodyneDataSourceFactory";
+export { default as McapLocalDataSourceFactory } from "./dataSources/McapLocalDataSourceFactory";
