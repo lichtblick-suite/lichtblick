@@ -4,8 +4,8 @@
 
 import { useCallback } from "react";
 
+import { ParameterValue } from "@foxglove/studio";
 import { useMessagePipeline } from "@foxglove/studio-base/components/MessagePipeline";
-import { ParameterValue } from "@foxglove/studio-base/players/types";
 
 export default function useParameter<T extends ParameterValue>(
   key: string,

@@ -16,12 +16,12 @@ import {
   subtract as subtractTimes,
   toSec,
 } from "@foxglove/rostime";
+import { ParameterValue } from "@foxglove/studio";
 import OsContextSingleton from "@foxglove/studio-base/OsContextSingleton";
 import PlayerProblemManager from "@foxglove/studio-base/players/PlayerProblemManager";
 import {
   AdvertiseOptions,
   MessageEvent,
-  ParameterValue,
   Player,
   PlayerCapabilities,
   PlayerMetricsCollectorInterface,

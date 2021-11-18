@@ -22,11 +22,11 @@ import {
   toRFC3339String,
   toSec,
 } from "@foxglove/rostime";
+import { ParameterValue } from "@foxglove/studio";
 import { GlobalVariables } from "@foxglove/studio-base/hooks/useGlobalVariables";
 import {
   AdvertiseOptions,
   MessageEvent,
-  ParameterValue,
   Player,
   PlayerMetricsCollectorInterface,
   PlayerPresence,

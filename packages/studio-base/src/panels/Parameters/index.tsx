@@ -14,6 +14,7 @@
 import { union } from "lodash";
 import { ReactElement, useEffect, useMemo, useRef, useState } from "react";
 
+import { ParameterValue } from "@foxglove/studio";
 import EmptyState from "@foxglove/studio-base/components/EmptyState";
 import { isActiveElementEditable } from "@foxglove/studio-base/components/GlobalVariablesTable";
 import { LegacyTable } from "@foxglove/studio-base/components/LegacyStyledComponents";
@@ -25,7 +26,7 @@ import Panel from "@foxglove/studio-base/components/Panel";
 import PanelToolbar from "@foxglove/studio-base/components/PanelToolbar";
 import { JSONInput } from "@foxglove/studio-base/components/input/JSONInput";
 import { usePreviousValue } from "@foxglove/studio-base/hooks/usePreviousValue";
-import { ParameterValue, PlayerCapabilities } from "@foxglove/studio-base/players/types";
+import { PlayerCapabilities } from "@foxglove/studio-base/players/types";
 
 import AnimatedRow from "./AnimatedRow";
 import ParametersPanel from "./ParametersPanel";

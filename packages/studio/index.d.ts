@@ -3,6 +3,19 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 declare module "@foxglove/studio" {
+  // Valid types for parameter data (such as rosparams)
+  export type ParameterValue =
+    | undefined
+    | boolean
+    | number
+    | string
+    | Date
+    | Uint8Array
+    | ParameterValue[]
+    | ParameterStruct;
+
+  export type ParameterStruct = Record<string, ParameterValue>;
+
   export interface Time {
     sec: number;
     nsec: number;
@@ -68,6 +81,11 @@ declare module "@foxglove/studio" {
      * All available messages. Best-effort list of all available messages.
      */
     allFrames?: readonly MessageEvent<unknown>[];
+
+    /**
+     * Map of current parameter values.
+     */
+    parameters?: Map<string, ParameterValue>;
 
     /**
      * List of available topics. This list includes subscribed and unsubscribed topics.

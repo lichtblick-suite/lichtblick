@@ -16,10 +16,10 @@ import { useCallback, useMemo, useRef, useState } from "react";
 
 import { useShallowMemo } from "@foxglove/hooks";
 import { Time, isLessThan } from "@foxglove/rostime";
+import { ParameterValue } from "@foxglove/studio";
 import {
   AdvertiseOptions,
   MessageEvent,
-  ParameterValue,
   PlayerPresence,
   PlayerState,
   PlayerStateActiveData,

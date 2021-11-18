@@ -16,6 +16,7 @@ import shallowequal from "shallowequal";
 
 import Log from "@foxglove/log";
 import { Time, compare } from "@foxglove/rostime";
+import { ParameterValue } from "@foxglove/studio";
 import { GlobalVariables } from "@foxglove/studio-base/hooks/useGlobalVariables";
 import {
   Diagnostic,
@@ -37,7 +38,6 @@ import {
   PublishPayload,
   SubscribePayload,
   Topic,
-  ParameterValue,
   MessageEvent,
   PlayerProblem,
 } from "@foxglove/studio-base/players/types";

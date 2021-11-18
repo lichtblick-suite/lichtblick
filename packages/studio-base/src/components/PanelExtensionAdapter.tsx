@@ -12,6 +12,7 @@ import {
   ExtensionPanelRegistration,
   MessageEvent,
   PanelExtensionContext,
+  ParameterValue,
   RenderState,
   Topic,
 } from "@foxglove/studio";
@@ -47,6 +48,8 @@ type PanelExtensionAdapterProps = {
   /** Help document for the panel */
   help?: string;
 };
+
+const EmptyParameters = new Map<string, ParameterValue>();
 
 const EmptyTopics: readonly Topic[] = [];
 
@@ -163,6 +166,14 @@ function PanelExtensionAdapter(props: PanelExtensionAdapterProps): JSX.Element {
       if (renderState.currentFrame?.length !== 0 || currentFrame?.length !== 0) {
         shouldRender = true;
         renderState.currentFrame = currentFrame;
+      }
+    }
+
+    if (watchedFieldsRef.current.has("parameters")) {
+      const parameters = playerState.activeData?.parameters ?? EmptyParameters;
+      if (parameters !== renderState.parameters) {
+        shouldRender = true;
+        renderState.parameters = parameters;
       }
     }
 

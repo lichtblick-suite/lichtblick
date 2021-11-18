@@ -14,6 +14,7 @@ import { partition } from "lodash";
 import memoizeWeak from "memoize-weak";
 
 import { Time, add, compare, isLessThan, clampTime, isTime } from "@foxglove/rostime";
+import { ParameterValue } from "@foxglove/studio";
 import { GlobalVariables } from "@foxglove/studio-base/hooks/useGlobalVariables";
 import UserNodePlayer from "@foxglove/studio-base/players/UserNodePlayer";
 import {
@@ -23,7 +24,6 @@ import {
   Player,
   PlayerState,
   Topic,
-  ParameterValue,
   MessageEvent,
   PlayerProblem,
 } from "@foxglove/studio-base/players/types";

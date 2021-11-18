@@ -6,10 +6,9 @@ import Logger from "@foxglove/log";
 import { RosMsgDefinition, RosMsgField } from "@foxglove/rosmsg";
 import { definitions as rosCommonDefinitions } from "@foxglove/rosmsg-msgs-common";
 import { Time, fromMicros, isTimeInRangeInclusive, toMicroSec } from "@foxglove/rostime";
-import { MessageEvent } from "@foxglove/studio";
+import { MessageEvent, ParameterValue } from "@foxglove/studio";
 import {
   MessageDefinitionsByTopic,
-  ParameterValue,
   ParsedMessageDefinitionsByTopic,
   Topic,
 } from "@foxglove/studio-base/players/types";
