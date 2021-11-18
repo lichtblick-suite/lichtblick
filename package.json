@@ -1,6 +1,6 @@
 {
   "name": "foxglove-studio",
-  "version": "0.22.0-dev",
+  "version": "0.22.1-dev",
   "description": "Integrated robotics visualization and debugging.",
   "productName": "Foxglove Studio",
   "productDescription": "Foxglove Studio is an highly customizable and extensible visualization and display tool for robotics.",
