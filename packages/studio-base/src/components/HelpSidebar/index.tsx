@@ -52,16 +52,27 @@ const useComponentStyles = (theme: ITheme) =>
     [theme],
   );
 
-export default function HelpSidebar(): JSX.Element {
+export default function HelpSidebar({
+  isHomeViewForTests,
+  panelTypeForTests = "",
+}: React.PropsWithChildren<{
+  isHomeViewForTests?: boolean;
+  panelTypeForTests?: string;
+}>): JSX.Element {
   const theme = useTheme();
   const styles = useComponentStyles(theme);
-  const [isHomeView, setIsHomeView] = useState(true);
+  const [isHomeView, setIsHomeView] = useState(
+    isHomeViewForTests == undefined ? true : isHomeViewForTests,
+  );
   const { panelDocToDisplay: panelType, setPanelDocToDisplay } = useSelectedPanels();
 
   const panelCatalog = usePanelCatalog();
   const panelInfo = useMemo(
-    () => (panelType != undefined ? panelCatalog.getPanelByType(panelType) : undefined),
-    [panelCatalog, panelType],
+    () =>
+      (panelType ? panelType : panelTypeForTests) != undefined
+        ? panelCatalog.getPanelByType(panelType ? panelType : panelTypeForTests)
+        : undefined,
+    [panelCatalog, panelType, panelTypeForTests],
   );
   const sortByTitle = (a: PanelInfo, b: PanelInfo) =>
     a.title.localeCompare(b.title, undefined, { ignorePunctuation: true, sensitivity: "base" });
