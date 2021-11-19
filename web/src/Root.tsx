@@ -26,6 +26,7 @@ import {
   Ros1RemoteBagDataSourceFactory,
   FoxgloveDataPlatformDataSourceFactory,
   UlogLocalDataSourceFactory,
+  McapLocalDataSourceFactory,
 } from "@foxglove/studio-base";
 
 import ConsoleApiCookieUserProvider from "./components/ConsoleApiCookieCurrentUserProvider";
@@ -38,17 +39,39 @@ import ExtensionLoaderProvider from "./providers/ExtensionLoaderProvider";
 
 const DEMO_BAG_URL = "https://storage.googleapis.com/foxglove-public-assets/demo.bag";
 
-const dataSources: IDataSourceFactory[] = [
-  new Ros1UnavailableDataSourceFactory(),
-  new Ros1LocalBagDataSourceFactory(),
-  new Ros1RemoteBagDataSourceFactory(),
-  new Ros2UnavailableDataSourceFactory(),
-  new Ros2LocalBagDataSourceFactory(),
-  new RosbridgeDataSourceFactory(),
-  new UlogLocalDataSourceFactory(),
-  new VelodyneUnavailableDataSourceFactory(),
-  new FoxgloveDataPlatformDataSourceFactory(),
-];
+// useAppConfiguration requires the AppConfigurationContext which is setup in Root
+// AppWrapper is used to make a functional component so we can use the context
+function AppWrapper({ loadWelcomeLayout }: { loadWelcomeLayout: boolean }) {
+  const [isMcapDataSourceEnabled] = useAppConfigurationValue(AppSetting.MCAP_DATA_SOURCE);
+
+  const dataSources: IDataSourceFactory[] = useMemo(() => {
+    const sources = [
+      new Ros1UnavailableDataSourceFactory(),
+      new Ros1LocalBagDataSourceFactory(),
+      new Ros1RemoteBagDataSourceFactory(),
+      new Ros2UnavailableDataSourceFactory(),
+      new Ros2LocalBagDataSourceFactory(),
+      new RosbridgeDataSourceFactory(),
+      new UlogLocalDataSourceFactory(),
+      new VelodyneUnavailableDataSourceFactory(),
+      new FoxgloveDataPlatformDataSourceFactory(),
+    ];
+
+    if (isMcapDataSourceEnabled === true) {
+      sources.push(new McapLocalDataSourceFactory());
+    }
+
+    return sources;
+  }, [isMcapDataSourceEnabled]);
+
+  return (
+    <App
+      loadWelcomeLayout={loadWelcomeLayout}
+      demoBagUrl={DEMO_BAG_URL}
+      availableSources={dataSources}
+    />
+  );
+}
 
 function ColorSchemeThemeProvider({ children }: React.PropsWithChildren<unknown>): JSX.Element {
   const [colorScheme = "dark"] = useAppConfigurationValue<string>(AppSetting.COLOR_SCHEME);
@@ -79,11 +102,7 @@ export function Root({ loadWelcomeLayout }: { loadWelcomeLayout: boolean }): JSX
         <CssBaseline>
           <ErrorBoundary>
             <MultiProvider providers={providers}>
-              <App
-                loadWelcomeLayout={loadWelcomeLayout}
-                demoBagUrl={DEMO_BAG_URL}
-                availableSources={dataSources}
-              />
+              <AppWrapper loadWelcomeLayout={loadWelcomeLayout} />
             </MultiProvider>
           </ErrorBoundary>
         </CssBaseline>
