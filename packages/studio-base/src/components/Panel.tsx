@@ -41,12 +41,12 @@ import {
   MosaicNode,
 } from "react-mosaic-component";
 import { useMountedState } from "react-use";
+import styled from "styled-components";
 
 import { useShallowMemo } from "@foxglove/hooks";
 import { useConfigById } from "@foxglove/studio-base/PanelAPI";
 import Button from "@foxglove/studio-base/components/Button";
 import ErrorBoundary, { ErrorRendererProps } from "@foxglove/studio-base/components/ErrorBoundary";
-import Flex from "@foxglove/studio-base/components/Flex";
 import Icon from "@foxglove/studio-base/components/Icon";
 import KeyListener from "@foxglove/studio-base/components/KeyListener";
 import PanelContext from "@foxglove/studio-base/components/PanelContext";
@@ -74,36 +74,94 @@ import {
 } from "@foxglove/studio-base/util/layout";
 import { colors, spacing } from "@foxglove/studio-base/util/sharedStyleConstants";
 
+const PanelRoot = styled.div`
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 auto;
+  overflow: hidden;
+  z-index: 1;
+  background-color: ${({ theme }) => (theme.isInverted ? colors.DARK : colors.LIGHT)};
+  position: relative;
+
+  // To use css to hide/show toolbars on hover we use a global panelToolbar class
+  // because the PanelToolbar component is currently added within each panels render
+  // function rather than handling by the panel HOC
+
+  .panelToolbarHovered {
+    display: none;
+  }
+  :hover .panelToolbarHovered {
+    display: flex;
+  }
+  :after {
+    content: "";
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    opacity: 0;
+    border: 1px solid ${colors.ACCENT};
+    position: absolute;
+    pointer-events: none;
+    transition: opacity 0.125s ease-out;
+    z-index: 100000;
+  }
+`;
+
+const ActionsOverlay = styled.div`
+  cursor: pointer;
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 100000; // highest level within panel
+  display: none;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: flex-end;
+  font-size: 14px;
+  padding-top: 24px;
+
+  ${PanelRoot}:hover > & {
+    background-color: ${({ theme }) => theme.palette.neutralLight};
+    display: flex;
+    align-items: center;
+    align-content: center;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+  // for screenshot tests
+  .hoverForScreenshot {
+    background-color: ${({ theme }) => theme.palette.neutralLight};
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+
+  div {
+    width: 100%;
+    padding: 6px 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+
+  svg {
+    margin-right: 4px;
+    width: 24px;
+    height: 24px;
+    fill: white;
+  }
+  p {
+    font-size: 12px;
+    color: ${colors.TEXT_MUTED};
+  }
+`;
+
 const useStyles = makeStyles((theme) => ({
-  root: {
-    zIndex: 1,
-    backgroundColor: theme.isInverted ? colors.DARK : colors.LIGHT,
-    position: "relative",
-
-    // // To use css to hide/show toolbars on hover we use a global panelToolbar class
-    // // because the PanelToolbar component is currently added within each panels render
-    // // function rather than handling by the panel HOC
-
-    ".panelToolbarHovered": {
-      display: "none",
-    },
-    ":hover .panelToolbarHovered": {
-      display: "flex",
-    },
-    ":after": {
-      content: '""',
-      top: 0,
-      left: 0,
-      right: 0,
-      bottom: 0,
-      opacity: 0,
-      border: `1px solid ${colors.ACCENT}`,
-      position: "absolute",
-      pointerEvents: "none",
-      transition: "opacity 0.125s ease-out",
-      zIndex: 100000,
-    },
-  },
   perfInfo: {
     position: "absolute",
     whiteSpace: "pre-line",
@@ -122,67 +180,12 @@ const useStyles = makeStyles((theme) => ({
     left: 0,
     right: 0,
     bottom: spacing.PLAYBACK_CONTROL_HEIGHT,
-
-    ":hover [data-panel-overlay-exit]": {
-      display: "block",
-    },
   },
   rootSelected: {
     ":after": {
       // https://github.com/microsoft/fluentui/issues/20452
       opacity: "1 !important",
       transition: "opacity 0.05s ease-out !important",
-    },
-  },
-  actionsOverlay: {
-    cursor: "pointer",
-    position: "absolute",
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    zIndex: 100000, // highest level within panel
-    display: "none",
-    flexDirection: "column",
-    justifyContent: "flex-start",
-    alignItems: "flex-end",
-    fontSize: "14px",
-    paddingTop: "24px",
-
-    ".mosaic-window:hover &": {
-      backgroundColor: theme.palette.neutralLight,
-      display: "flex",
-      alignItems: "center",
-      justifyContent: "center",
-      flexWrap: "wrap",
-    },
-    // for screenshot tests
-    ".hoverForScreenshot": {
-      backgroundColor: theme.palette.neutralLight,
-      display: "flex",
-      alignItems: "center",
-      justifyContent: "center",
-      flexWrap: "wrap",
-    },
-
-    div: {
-      width: "100%",
-      padding: "6px 0",
-      display: "flex",
-      alignItems: "center",
-      justifyContent: "center",
-      flexWrap: "wrap",
-    },
-
-    svg: {
-      marginRight: "4px",
-      width: "24px",
-      height: "24px",
-      fill: "white",
-    },
-    p: {
-      fontSize: "12px",
-      color: colors.TEXT_MUTED,
     },
   },
   quickActionsOverlayButton: {
@@ -208,11 +211,11 @@ const useStyles = makeStyles((theme) => ({
     },
   },
   tabActionsOverlayButton: {
-    margin: "4px",
+    margin: "4px !important",
     flex: "none",
     fontSize: "14px",
     alignItems: "center",
-    background: `${theme.semanticColors.primaryButtonBackground} !important`,
+    background: `${colors.BLUE} !important`,
     color: `${theme.semanticColors.primaryButtonText} !important`,
     width: 145,
     height: 40,
@@ -225,33 +228,7 @@ const useStyles = makeStyles((theme) => ({
       fill: theme.semanticColors.primaryButtonText,
     },
     ":not(.disabled):hover": {
-      background: `${theme.semanticColors.primaryButtonBackgroundHovered} !important`,
-    },
-  },
-  exitFullscreen: {
-    position: "fixed !important" as unknown as "fixed", // ensure this overrides LegacyButton styles
-    top: 75,
-    right: 8,
-    zIndex: 102,
-    opacity: 1,
-    backgroundColor: colors.DARK3,
-    display: "none",
-
-    ".mosaic-window:hover &": {
-      display: "block",
-    },
-    ".hoverForScreenshot &": {
-      display: "block",
-    },
-    svg: {
-      width: 16,
-      height: 16,
-      fill: "currentColor",
-      float: "left",
-    },
-    span: {
-      float: "right",
-      paddingLeft: "3",
+      background: `${colors.BLUE1} !important`,
     },
   },
 }));
@@ -348,6 +325,7 @@ export default function Panel<
     const [fullScreen, setFullscreen] = useState(false);
     const [fullScreenLocked, setFullscreenLocked] = useState(false);
     const panelCatalog = usePanelCatalog();
+    const isTopLevelPanel = mosaicWindowActions.getPath().length === 0 && tabId == undefined;
 
     const type = PanelComponent.panelType;
     const title = useMemo(
@@ -682,53 +660,52 @@ export default function Panel<
             hasSettings: PanelComponent.configSchema != undefined,
             tabId,
             supportsStrictMode: PanelComponent.supportsStrictMode ?? true,
-            connectToolbarDragHandle,
+            // disallow dragging the root panel in a layout
+            connectToolbarDragHandle: isTopLevelPanel ? undefined : connectToolbarDragHandle,
           }}
         >
           <KeyListener global keyUpHandlers={keyUpHandlers} keyDownHandlers={keyDownHandlers} />
-          <Flex
+          <PanelRoot
             onClick={onOverlayClick}
             onMouseMove={onMouseMove}
-            className={cx(classes.root, {
+            className={cx({
               [classes.rootFullScreen]: fullScreen,
               [classes.rootSelected]: isSelected,
             })}
-            col
-            dataTest={`panel-mouseenter-container ${childId ?? ""}`}
-            clip
+            data-test={`panel-mouseenter-container ${childId ?? ""}`}
             ref={(el) => {
-              connectOverlayDragPreview(el);
-              connectToolbarDragPreview(el);
+              // disallow dragging the root panel in a layout
+              if (!isTopLevelPanel) {
+                connectOverlayDragPreview(el);
+                connectToolbarDragPreview(el);
+              }
             }}
           >
             {isSelected && !fullScreen && numSelectedPanelsIfSelected > 1 && (
-              <div data-tab-options className={classes.actionsOverlay}>
-                <Button
-                  className={classes.tabActionsOverlayButton}
-                  style={{ backgroundColor: colors.BLUE }}
-                  onClick={groupPanels}
-                >
+              <ActionsOverlay>
+                <Button className={classes.tabActionsOverlayButton} onClick={groupPanels}>
                   <Icon size="small" style={{ marginBottom: 5 }}>
                     <BorderAllIcon />
                   </Icon>
                   Group in tab
                 </Button>
-                <Button style={{ backgroundColor: colors.BLUE }} onClick={createTabs}>
+                <Button className={classes.tabActionsOverlayButton} onClick={createTabs}>
                   <Icon size="small" style={{ marginBottom: 5 }}>
                     <ExpandAllOutlineIcon />
                   </Icon>
                   Create {numSelectedPanelsIfSelected} tabs
                 </Button>
-              </div>
+              </ActionsOverlay>
             )}
             {type !== TAB_PANEL_TYPE && quickActionsKeyPressed && !fullScreen && (
-              <div
-                className={classes.actionsOverlay}
+              <ActionsOverlay
                 ref={(el) => {
                   quickActionsOverlayRef.current = el;
-                  connectOverlayDragSource(el);
+                  // disallow dragging the root panel in a layout
+                  if (!isTopLevelPanel) {
+                    connectOverlayDragSource(el);
+                  }
                 }}
-                data-panel-overlay
               >
                 <div>
                   <div>
@@ -746,7 +723,7 @@ export default function Panel<
                     </Button>
                   </div>
                 </div>
-              </div>
+              </ActionsOverlay>
             )}
             <ErrorBoundary renderError={(errorProps) => <ErrorToolbar {...errorProps} />}>
               {PanelComponent.supportsStrictMode ?? true ? (
@@ -758,7 +735,7 @@ export default function Panel<
             {process.env.NODE_ENV !== "production" && (
               <div className={classes.perfInfo} ref={perfInfo} />
             )}
-          </Flex>
+          </PanelRoot>
         </PanelContext.Provider>
       </Profiler>
     );

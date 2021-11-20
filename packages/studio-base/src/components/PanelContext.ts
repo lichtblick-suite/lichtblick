@@ -30,7 +30,7 @@ export type PanelContextType<T> = {
   isFullscreen: boolean;
 
   hasSettings: boolean;
-  connectToolbarDragHandle: (el: Element | ReactNull) => void;
+  connectToolbarDragHandle?: (el: Element | ReactNull) => void;
   supportsStrictMode: boolean; // remove when all panels have strict mode enabled :)
 };
 // Context used for components to know which panel they are inside

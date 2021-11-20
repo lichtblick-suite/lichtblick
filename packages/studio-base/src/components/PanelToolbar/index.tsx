@@ -338,7 +338,7 @@ const PanelToolbarControls = React.memo(function PanelToolbarControls({
         setIsOpen={setMenuOpen}
         isUnknownPanel={isUnknownPanel}
       />
-      {!isUnknownPanel && (
+      {!isUnknownPanel && panelContext?.connectToolbarDragHandle && (
         <span ref={panelContext?.connectToolbarDragHandle} data-test="mosaic-drag-handle">
           <Icon fade tooltip="Move panel (shortcut: ` or ~)">
             <DragIcon className={cx(styles.icon, styles.dragIcon)} />

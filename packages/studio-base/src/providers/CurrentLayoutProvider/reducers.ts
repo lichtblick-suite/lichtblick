@@ -613,7 +613,12 @@ const dragToTabFromTab = (
     trimConfigById: false,
   });
   newPanelsState = savePanelConfigs(newPanelsState, {
-    configs: [...fromTabConfigs, ...toTabConfigs, ...sourceTabChildConfigs],
+    configs: [
+      ...fromTabConfigs,
+      ...toTabConfigs,
+      // if the target tab is inside the source tab, make sure not to overwrite it with its old config
+      ...sourceTabChildConfigs.filter(({ id }) => id !== targetTabId),
+    ],
   });
   return newPanelsState;
 };
@@ -647,7 +652,7 @@ const startDrag = (
       configs: [{ id: sourceTabId, config: updateTabPanelLayout(undefined, sourceTabConfig) }],
     });
   }
-  return panelsState;
+  throw new Error("Can't drag the top-level panel of a layout");
 };
 
 const endDrag = (panelsState: PanelsState, dragPayload: EndDragPayload): PanelsState => {
@@ -741,10 +746,6 @@ const endDrag = (panelsState: PanelsState, dragPayload: EndDragPayload): PanelsS
       sourceTabConfig,
       sourceTabChildConfigs,
     });
-  }
-
-  if (typeof originalLayout === "string") {
-    return changePanelLayout(panelsState, { layout: originalLayout, trimConfigById: false });
   }
 
   if (position != undefined && destinationPath != undefined && !isEqual(destinationPath, ownPath)) {
