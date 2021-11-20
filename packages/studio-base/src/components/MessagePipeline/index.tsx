@@ -37,8 +37,8 @@ import createSelectableContext from "@foxglove/studio-base/util/createSelectable
 import { requestThrottledAnimationFrame } from "@foxglove/studio-base/util/requestThrottledAnimationFrame";
 import signal from "@foxglove/studio-base/util/signal";
 
+import MessageOrderTracker from "./MessageOrderTracker";
 import { pauseFrameForPromises, FramePromise } from "./pauseFrameForPromise";
-import warnOnOutOfSyncMessages from "./warnOnOutOfSyncMessages";
 
 const { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } = React;
 
@@ -185,14 +185,17 @@ export function MessagePipelineProvider({
       waitingForPromises: false,
     };
 
+    const messageOrderTracker = new MessageOrderTracker();
     player.setListener(async (newPlayerState: PlayerState) => {
-      warnOnOutOfSyncMessages(newPlayerState);
       if (currentPlayer.current !== player) {
         return undefined;
       }
       if (playerTickState.current.resolveFn) {
         throw new Error("New playerState was emitted before last playerState was rendered.");
       }
+
+      // check for any out-of-order or out-of-sync messages
+      messageOrderTracker.update(newPlayerState);
 
       const promise = new Promise<void>((resolve) => {
         playerTickState.current.resolveFn = resolve;

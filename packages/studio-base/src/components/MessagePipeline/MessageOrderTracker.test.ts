@@ -14,7 +14,7 @@
 import { MessageEvent, PlayerPresence, PlayerState } from "@foxglove/studio-base/players/types";
 import sendNotification from "@foxglove/studio-base/util/sendNotification";
 
-import warnOnOutOfSyncMessages from "./warnOnOutOfSyncMessages";
+import MessageOrderTracker from "./MessageOrderTracker";
 
 let lastSeekTimeCounter = 1;
 const lastSeekTime = () => {
@@ -66,61 +66,58 @@ const message = (
 describe("MessagePipeline/warnOnOutOfSyncMessages", () => {
   describe("when expecting messages ordered by receive time", () => {
     it("calls report error when messages are out of order", () => {
-      warnOnOutOfSyncMessages(
-        playerStateWithMessages([message(7, 10), message(8, 9)], "receiveTime"),
-      );
+      const orderTracker = new MessageOrderTracker();
+      orderTracker.update(playerStateWithMessages([message(7, 10), message(8, 9)], "receiveTime"));
       sendNotification.expectCalledDuringTest();
     });
 
     it("does not report an error when messages are in order", () => {
       expect.assertions(0);
-      warnOnOutOfSyncMessages(
-        playerStateWithMessages([message(8, 9), message(7, 10)], "receiveTime"),
-      );
+      const orderTracker = new MessageOrderTracker();
+      orderTracker.update(playerStateWithMessages([message(8, 9), message(7, 10)], "receiveTime"));
     });
 
     it("reports an error when given a message with no receive time", () => {
-      warnOnOutOfSyncMessages(playerStateWithMessages([message(7, undefined)], "receiveTime"));
+      const orderTracker = new MessageOrderTracker();
+      orderTracker.update(playerStateWithMessages([message(7, undefined)], "receiveTime"));
       sendNotification.expectCalledDuringTest();
     });
 
     it("reports an error when given a message with no timestamps at all", () => {
-      warnOnOutOfSyncMessages(
-        playerStateWithMessages([message(undefined, undefined)], "receiveTime"),
-      );
+      const orderTracker = new MessageOrderTracker();
+      orderTracker.update(playerStateWithMessages([message(undefined, undefined)], "receiveTime"));
       sendNotification.expectCalledDuringTest();
     });
   });
 
   describe("when expecting messages ordered by header stamp", () => {
     it("calls report error when messages are out of order", () => {
-      warnOnOutOfSyncMessages(
-        playerStateWithMessages([message(8, 9), message(7, 10)], "headerStamp"),
-      );
+      const orderTracker = new MessageOrderTracker();
+      orderTracker.update(playerStateWithMessages([message(8, 9), message(7, 10)], "headerStamp"));
       sendNotification.expectCalledDuringTest();
     });
 
     it("does not report an error when messages are in order", () => {
       expect.assertions(0);
-      warnOnOutOfSyncMessages(
-        playerStateWithMessages([message(7, 10), message(8, 9)], "headerStamp"),
-      );
+      const orderTracker = new MessageOrderTracker();
+      orderTracker.update(playerStateWithMessages([message(7, 10), message(8, 9)], "headerStamp"));
     });
 
     it("reports an error when given a message with no header stamp", () => {
-      warnOnOutOfSyncMessages(playerStateWithMessages([message(undefined, 10)], "headerStamp"));
+      const orderTracker = new MessageOrderTracker();
+      orderTracker.update(playerStateWithMessages([message(undefined, 10)], "headerStamp"));
       sendNotification.expectCalledDuringTest();
     });
 
     it("reports an error when given a message with no timestamps at all", () => {
-      warnOnOutOfSyncMessages(
-        playerStateWithMessages([message(undefined, undefined)], "headerStamp"),
-      );
+      const orderTracker = new MessageOrderTracker();
+      orderTracker.update(playerStateWithMessages([message(undefined, undefined)], "headerStamp"));
       sendNotification.expectCalledDuringTest();
     });
 
     it("forgives a timestamp-backtracking after a missing header stamp", () => {
-      warnOnOutOfSyncMessages(
+      const orderTracker = new MessageOrderTracker();
+      orderTracker.update(
         playerStateWithMessages(
           [
             message(8, 9),
