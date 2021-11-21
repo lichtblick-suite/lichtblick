@@ -117,7 +117,7 @@ const mainConfig = (env: unknown, argv: WebpackArgv): Configuration => {
         OAUTH_CLIENT_ID: process.env.OAUTH_CLIENT_ID ?? "oSJGEAQm16LNF09FSVTMYJO5aArQzq8o",
         FOXGLOVE_API_URL: process.env.FOXGLOVE_API_URL ?? "https://api.foxglove.dev",
         FOXGLOVE_ACCOUNT_DASHBOARD_URL:
-          process.env.FOXGLOVE_ACCOUNT_DASHBOARD_URL ?? "https://console.foxglove.dev/dashboard",
+          process.env.FOXGLOVE_ACCOUNT_DASHBOARD_URL ?? "https://console.foxglove.dev/profile",
       }),
       new CopyPlugin({
         patterns: [{ from: "../public" }],
