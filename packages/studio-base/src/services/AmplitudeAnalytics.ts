@@ -25,7 +25,16 @@ export class AmplitudeAnalytics implements IAnalytics {
 
       // Capitalize platform name
       let platform = os?.platform ?? "web";
-      platform = platform.charAt(0).toUpperCase() + platform.slice(1);
+      switch (platform) {
+        case "darwin":
+          platform = "macOS";
+          break;
+        case "win32":
+          platform = "Windows";
+          break;
+        default:
+          platform = platform.charAt(0).toUpperCase() + platform.slice(1).toLowerCase();
+      }
 
       this._amp.init(options.amplitudeApiKey, undefined, {
         platform,
