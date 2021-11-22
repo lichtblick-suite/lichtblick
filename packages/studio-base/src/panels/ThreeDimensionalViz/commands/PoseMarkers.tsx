@@ -45,39 +45,32 @@ function PoseMarkers({ markers, layerIndex }: PoseMarkerProps): ReactElement {
   markers.forEach((marker) => {
     const { settings } = marker;
 
-    switch (settings?.modelType) {
-      case "arrow":
-      default: {
-        let newMarker = marker;
-        if (settings?.overrideColor != undefined) {
-          newMarker = { ...newMarker, color: settings.overrideColor };
-        }
-
-        if (settings?.size) {
-          newMarker = {
-            ...newMarker,
-            scale: {
-              x: settings.size.shaftWidth ?? marker.scale.x,
-              y: settings.size.headWidth ?? marker.scale.y,
-              z: settings.size.headLength ?? marker.scale.z,
-            },
-          };
-        }
-
-        const pos = pointToVec3(newMarker.pose.position);
-        const orientation = orientationToVec4(newMarker.pose.orientation);
-        const dir = vec3.transformQuat([0, 0, 0], [1, 0, 0], orientation);
-        // the total length of the arrow is 4.7, we move the tail backwards by 0.88 (prev implementation)
-        const tipPoint = vec3.scaleAndAdd([0, 0, 0], pos, dir, 3.82);
-        const tailPoint = vec3.scaleAndAdd([0, 0, 0], pos, dir, -0.88);
-        arrowMarkers.push({
-          ...newMarker,
-          points: [vec3ToPoint(tailPoint), vec3ToPoint(tipPoint)],
-        });
-
-        break;
-      }
+    let newMarker = marker;
+    if (settings?.overrideColor != undefined) {
+      newMarker = { ...newMarker, color: settings.overrideColor };
     }
+
+    if (settings?.size) {
+      newMarker = {
+        ...newMarker,
+        scale: {
+          x: settings.size.shaftWidth ?? marker.scale.x,
+          y: settings.size.headWidth ?? marker.scale.y,
+          z: settings.size.headLength ?? marker.scale.z,
+        },
+      };
+    }
+
+    const pos = pointToVec3(newMarker.pose.position);
+    const orientation = orientationToVec4(newMarker.pose.orientation);
+    const dir = vec3.transformQuat([0, 0, 0], [1, 0, 0], orientation);
+    // the total length of the arrow is 4.7, we move the tail backwards by 0.88 (prev implementation)
+    const tipPoint = vec3.scaleAndAdd([0, 0, 0], pos, dir, 3.82);
+    const tailPoint = vec3.scaleAndAdd([0, 0, 0], pos, dir, -0.88);
+    arrowMarkers.push({
+      ...newMarker,
+      points: [vec3ToPoint(tailPoint), vec3ToPoint(tipPoint)],
+    });
   });
 
   return (

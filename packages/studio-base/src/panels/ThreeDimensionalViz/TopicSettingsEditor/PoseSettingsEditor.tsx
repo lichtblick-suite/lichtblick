@@ -13,7 +13,6 @@
 
 import ColorPicker from "@foxglove/studio-base/components/ColorPicker";
 import Flex from "@foxglove/studio-base/components/Flex";
-import { LegacyInput } from "@foxglove/studio-base/components/LegacyStyledComponents";
 import { Color, PoseStamped } from "@foxglove/studio-base/types/Messages";
 import { colors } from "@foxglove/studio-base/util/sharedStyleConstants";
 
@@ -28,75 +27,12 @@ export type PoseSettings = {
     headWidth?: number;
     shaftWidth?: number;
   };
-  modelType?: "arrow";
 };
 
 export default function PoseSettingsEditor(
   props: TopicSettingsEditorProps<PoseStamped, PoseSettings>,
 ): JSX.Element {
   const { message, settings, onFieldChange, onSettingsChange } = props;
-
-  const settingsByCarType = React.useMemo(() => {
-    switch (settings.modelType) {
-      case "arrow":
-      default: {
-        const currentShaftWidth = settings.size?.shaftWidth ?? 2;
-        const currentHeadWidth = settings.size?.headWidth ?? 2;
-        const currentHeadLength = settings.size?.headLength ?? 0.1;
-        return (
-          <Flex col>
-            <SLabel>Color</SLabel>
-            <ColorPicker
-              color={settings.overrideColor}
-              onChange={(newColor) => onFieldChange("overrideColor", newColor)}
-              alphaType="alpha"
-            />
-            <SLabel>Shaft width</SLabel>
-            <SInput
-              type="number"
-              value={currentShaftWidth}
-              placeholder="2"
-              onChange={(e) =>
-                onSettingsChange({
-                  ...settings,
-                  size: { ...settings.size, shaftWidth: parseFloat(e.target.value) },
-                })
-              }
-            />
-            <SLabel>Head width</SLabel>
-            <SInput
-              type="number"
-              value={currentHeadWidth}
-              placeholder="2"
-              onChange={(e) =>
-                onSettingsChange({
-                  ...settings,
-                  size: { ...settings.size, headWidth: parseFloat(e.target.value) },
-                })
-              }
-            />
-            <SLabel>Head length</SLabel>
-            <SInput
-              type="number"
-              value={currentHeadLength}
-              placeholder="0.1"
-              onChange={(e) =>
-                onSettingsChange({
-                  ...settings,
-                  size: { ...settings.size, headLength: parseFloat(e.target.value) },
-                })
-              }
-            />
-          </Flex>
-        );
-      }
-    }
-  }, [onFieldChange, onSettingsChange, settings]);
-
-  const badModelTypeSetting = React.useMemo(
-    () => !["arrow"].includes(settings.modelType!),
-    [settings],
-  );
 
   if (!message) {
     return (
@@ -106,32 +42,54 @@ export default function PoseSettingsEditor(
     );
   }
 
+  const currentShaftWidth = settings.size?.shaftWidth ?? 2;
+  const currentHeadWidth = settings.size?.headWidth ?? 2;
+  const currentHeadLength = settings.size?.headLength ?? 0.1;
+
   return (
     <Flex col>
-      <SLabel>Rendered Car</SLabel>
-      <div
-        style={{ display: "flex", margin: "4px", flexDirection: "column" }}
-        onChange={(e) => {
+      <SLabel>Color</SLabel>
+      <ColorPicker
+        color={settings.overrideColor}
+        onChange={(newColor) => onFieldChange("overrideColor", newColor)}
+        alphaType="alpha"
+      />
+      <SLabel>Shaft width</SLabel>
+      <SInput
+        type="number"
+        value={currentShaftWidth}
+        placeholder="2"
+        onChange={(e) =>
           onSettingsChange({
             ...settings,
-            modelType: (e.target as HTMLFormElement).value,
-            alpha: undefined,
-          });
-        }}
-      >
-        {[{ value: "arrow", title: "Arrow" }].map(({ value, title }) => (
-          <div key={value} style={{ marginBottom: "4px", display: "flex" }}>
-            <LegacyInput
-              type="radio"
-              value={value}
-              checked={settings.modelType === value || (value === "arrow" && badModelTypeSetting)}
-            />
-            <label>{title}</label>
-          </div>
-        ))}
-      </div>
-
-      {settingsByCarType}
+            size: { ...settings.size, shaftWidth: parseFloat(e.target.value) },
+          })
+        }
+      />
+      <SLabel>Head width</SLabel>
+      <SInput
+        type="number"
+        value={currentHeadWidth}
+        placeholder="2"
+        onChange={(e) =>
+          onSettingsChange({
+            ...settings,
+            size: { ...settings.size, headWidth: parseFloat(e.target.value) },
+          })
+        }
+      />
+      <SLabel>Head length</SLabel>
+      <SInput
+        type="number"
+        value={currentHeadLength}
+        placeholder="0.1"
+        onChange={(e) =>
+          onSettingsChange({
+            ...settings,
+            size: { ...settings.size, headLength: parseFloat(e.target.value) },
+          })
+        }
+      />
     </Flex>
   );
 }
