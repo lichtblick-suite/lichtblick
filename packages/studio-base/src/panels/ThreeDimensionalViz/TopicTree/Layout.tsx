@@ -21,9 +21,12 @@ import { filterMap } from "@foxglove/den/collection";
 import { useShallowMemo } from "@foxglove/hooks";
 import { Worldview, CameraState, ReglClickInfo, MouseEventObject } from "@foxglove/regl-worldview";
 import { Time } from "@foxglove/rostime";
+import { AppSetting } from "@foxglove/studio-base/AppSetting";
+import * as PanelAPI from "@foxglove/studio-base/PanelAPI";
 import { useDataSourceInfo } from "@foxglove/studio-base/PanelAPI";
 import KeyListener from "@foxglove/studio-base/components/KeyListener";
 import PanelToolbar from "@foxglove/studio-base/components/PanelToolbar";
+import { useAppConfigurationValue } from "@foxglove/studio-base/hooks/useAppConfigurationValue";
 import useGlobalVariables from "@foxglove/studio-base/hooks/useGlobalVariables";
 import { Save3DConfig } from "@foxglove/studio-base/panels/ThreeDimensionalViz";
 import DebugStats from "@foxglove/studio-base/panels/ThreeDimensionalViz/DebugStats";
@@ -56,6 +59,7 @@ import Transforms, {
   DEFAULT_ROOT_FRAME_IDS,
 } from "@foxglove/studio-base/panels/ThreeDimensionalViz/Transforms";
 import TransformsBuilder from "@foxglove/studio-base/panels/ThreeDimensionalViz/TransformsBuilder";
+import UrdfBuilder from "@foxglove/studio-base/panels/ThreeDimensionalViz/UrdfBuilder";
 import World from "@foxglove/studio-base/panels/ThreeDimensionalViz/World";
 import {
   TF_DATATYPES,
@@ -72,7 +76,11 @@ import { ThreeDimensionalVizConfig } from "@foxglove/studio-base/panels/ThreeDim
 import { Frame, Topic } from "@foxglove/studio-base/players/types";
 import inScreenshotTests from "@foxglove/studio-base/stories/inScreenshotTests";
 import { Color, Marker } from "@foxglove/studio-base/types/Messages";
-import { FOXGLOVE_GRID_TOPIC } from "@foxglove/studio-base/util/globalConstants";
+import {
+  FOXGLOVE_GRID_TOPIC,
+  ROBOT_DESCRIPTION_PARAM,
+  URDF_TOPIC,
+} from "@foxglove/studio-base/util/globalConstants";
 import { getTopicsByTopicName } from "@foxglove/studio-base/util/selectors";
 
 type EventName = "onDoubleClick" | "onMouseMove" | "onMouseDown" | "onMouseUp";
@@ -255,11 +263,12 @@ export default function Layout({
   const isDrawing = useMemo(() => measureInfo.measureState !== "idle", [measureInfo.measureState]);
 
   // initialize the GridBuilder, SceneBuilder, and TransformsBuilder
-  const { gridBuilder, sceneBuilder, transformsBuilder } = useMemo(
+  const { gridBuilder, sceneBuilder, transformsBuilder, urdfBuilder } = useMemo(
     () => ({
       gridBuilder: new GridBuilder(),
       sceneBuilder: new SceneBuilder(sceneBuilderHooks),
       transformsBuilder: new TransformsBuilder(),
+      urdfBuilder: new UrdfBuilder(),
     }),
     [],
   );
@@ -286,6 +295,12 @@ export default function Layout({
             topicName: FOXGLOVE_GRID_TOPIC,
             children: [],
             description: "Draws a reference grid.",
+          },
+          {
+            name: "3D Model",
+            topicName: URDF_TOPIC,
+            children: [],
+            description: "Visualize a 3D model",
           },
           {
             name: "TF",
@@ -453,6 +468,10 @@ export default function Layout({
     return firstFrameId != undefined ? tfStore.get(firstFrameId)?.rootTransform().id : undefined;
   }, [transforms, followTf]);
 
+  const [rosPackagePath] = useAppConfigurationValue<string>(AppSetting.ROS_PACKAGE_PATH);
+
+  const [robotDescriptionParam] = PanelAPI.useParameter<string>(ROBOT_DESCRIPTION_PARAM);
+
   useMemo(() => {
     gridBuilder.setVisible(selectedTopicNames.includes(FOXGLOVE_GRID_TOPIC));
     gridBuilder.setSettingsByKey(settingsByKey);
@@ -463,9 +482,14 @@ export default function Layout({
 
     sceneBuilder.setPlayerId(playerId);
 
+    urdfBuilder.setTransforms(transforms, rootTf);
     if (rootTf) {
       sceneBuilder.setTransforms(transforms, rootTf);
     }
+
+    urdfBuilder.setUrdfData(robotDescriptionParam, rosPackagePath);
+    urdfBuilder.setVisible(selectedTopicNames.includes(URDF_TOPIC));
+    urdfBuilder.setSettingsByKey(settingsByKey, rosPackagePath);
 
     // Toggle scene builder topics based on visible topic nodes in the tree
     const topicsByTopicName = getTopicsByTopicName(topics);
@@ -495,7 +519,9 @@ export default function Layout({
     highlightMarkerMatchers,
     playerId,
     resetFrame,
+    robotDescriptionParam,
     rootTf,
+    rosPackagePath,
     sceneBuilder,
     selectedNamespacesByTopic,
     selectedTopicNames,
@@ -503,6 +529,7 @@ export default function Layout({
     topics,
     transforms,
     transformsBuilder,
+    urdfBuilder,
   ]);
 
   // use callbackInputsRef to prevent unnecessary callback changes
@@ -700,8 +727,8 @@ export default function Layout({
   }, [pinTopics, saveConfig, searchTextProps, toggleCameraMode]);
 
   const markerProviders = useMemo(
-    () => [gridBuilder, sceneBuilder, transformsBuilder],
-    [gridBuilder, sceneBuilder, transformsBuilder],
+    () => [gridBuilder, sceneBuilder, transformsBuilder, urdfBuilder],
+    [gridBuilder, sceneBuilder, transformsBuilder, urdfBuilder],
   );
 
   const cursorType = isDrawing ? "crosshair" : "";

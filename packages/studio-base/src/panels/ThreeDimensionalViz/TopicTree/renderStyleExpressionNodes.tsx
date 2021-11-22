@@ -170,7 +170,6 @@ function StyleExpressionNode(props: {
             onToggle={() => updateSettingsForGlobalVariable(name, { active: !active, color })}
             overrideColor={color}
             size="SMALL"
-            unavailableTooltip={""}
             visibleInScene={active}
             onMouseEnter={() =>
               setHoveredMarkerMatchers([{ topic, checks: [{ markerKeyPath, value }] }])

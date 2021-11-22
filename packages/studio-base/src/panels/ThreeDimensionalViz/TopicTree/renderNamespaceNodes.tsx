@@ -18,7 +18,6 @@ import useGuaranteedContext from "@foxglove/studio-base/hooks/useGuaranteedConte
 import { ThreeDimensionalVizContext } from "@foxglove/studio-base/panels/ThreeDimensionalViz/ThreeDimensionalVizContext";
 import { TREE_SPACING } from "@foxglove/studio-base/panels/ThreeDimensionalViz/TopicTree/constants";
 import { TopicTreeContext } from "@foxglove/studio-base/panels/ThreeDimensionalViz/TopicTree/useTopicTree";
-import { TRANSFORM_TOPIC } from "@foxglove/studio-base/panels/ThreeDimensionalViz/constants";
 
 import NamespaceMenu from "./NamespaceMenu";
 import NodeName from "./NodeName";
@@ -69,7 +68,6 @@ function NamespaceNodeRow({
   maxNodeNameLen,
   filterText,
   topicNodeAvailable,
-  unavailableTooltip,
   topicName,
   onNamespaceOverrideColorChange,
 }: {
@@ -85,7 +83,6 @@ function NamespaceNodeRow({
   maxNodeNameLen: number;
   filterText: string;
   topicNodeAvailable: boolean;
-  unavailableTooltip: string;
   topicName: string;
   onNamespaceOverrideColorChange: OnNamespaceOverrideColorChange;
 }) {
@@ -163,7 +160,6 @@ function NamespaceNodeRow({
             onToggle={() => onToggle()}
             overrideColor={overrideColor}
             size="SMALL"
-            unavailableTooltip={unavailableTooltip}
             visibleInScene={visibleInScene ?? false}
             onMouseEnter={() => updateHoveredMarkerMatchers(true)}
             onMouseLeave={onMouseLeave}
@@ -199,9 +195,6 @@ export default function renderNamespaceNodes({
   const rightActionWidth = topicNode.available ? togglesWidth + ICON_SIZE : ICON_SIZE;
   const maxNodeNameLen = rowWidth - rightActionWidth - INNER_LEFT_MARGIN * 2;
 
-  const unavailableTooltip =
-    topicNode.topicName === TRANSFORM_TOPIC ? "Unsupported" : "Unavailable";
-
   const commonRowProps = {
     rowWidth,
     isXSWidth,
@@ -209,7 +202,6 @@ export default function renderNamespaceNodes({
     filterText,
     topicNodeAvailable: topicNode.available,
     onNamespaceOverrideColorChange,
-    unavailableTooltip,
     topicName: topicNode.topicName,
   };
 

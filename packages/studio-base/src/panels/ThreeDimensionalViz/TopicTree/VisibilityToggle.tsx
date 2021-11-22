@@ -73,7 +73,6 @@ type Props = {
   onMouseLeave?: (arg0: React.MouseEvent) => void;
   overrideColor?: Color;
   size?: Size;
-  unavailableTooltip?: string;
   visibleInScene: boolean;
 };
 
@@ -125,7 +124,6 @@ export default function VisibilityToggle({
   onToggle,
   overrideColor,
   size,
-  unavailableTooltip,
   visibleInScene,
   onMouseEnter,
   onMouseLeave,
@@ -149,7 +147,7 @@ export default function VisibilityToggle({
     return (
       <Icon
         tooltipProps={{ placement: "top" }}
-        tooltip={unavailableTooltip ? unavailableTooltip : "Unavailable"}
+        tooltip={"Unavailable"}
         fade
         size="small"
         clickable={false}

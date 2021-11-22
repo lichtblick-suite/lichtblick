@@ -14,8 +14,9 @@
 import { ComponentType } from "react";
 
 import GridSettingsEditor from "@foxglove/studio-base/panels/ThreeDimensionalViz/TopicSettingsEditor/GridSettingsEditor";
+import UrdfSettingsEditor from "@foxglove/studio-base/panels/ThreeDimensionalViz/TopicSettingsEditor/UrdfSettingsEditor";
 import { TopicSettingsEditorProps } from "@foxglove/studio-base/panels/ThreeDimensionalViz/TopicSettingsEditor/types";
-import { FOXGLOVE_GRID_DATATYPE } from "@foxglove/studio-base/util/globalConstants";
+import { FOXGLOVE_GRID_DATATYPE, URDF_DATATYPE } from "@foxglove/studio-base/util/globalConstants";
 
 import LaserScanSettingsEditor from "./LaserScanSettingsEditor";
 import MarkerSettingsEditor from "./MarkerSettingsEditor";
@@ -31,6 +32,7 @@ export function topicSettingsEditorForDatatype(datatype: string):
   | undefined {
   const editors = new Map<string, unknown>([
     [FOXGLOVE_GRID_DATATYPE, GridSettingsEditor],
+    [URDF_DATATYPE, UrdfSettingsEditor],
     ["sensor_msgs/PointCloud2", PointCloudSettingsEditor],
     ["sensor_msgs/msg/PointCloud2", PointCloudSettingsEditor],
     ["velodyne_msgs/VelodyneScan", PointCloudSettingsEditor],

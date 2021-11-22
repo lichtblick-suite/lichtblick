@@ -20,6 +20,9 @@ export const DIAGNOSTIC_TOPIC = "/diagnostics";
 export const FOXGLOVE_GRID_TOPIC = "/foxglove/grid";
 export const FOXGLOVE_GRID_DATATYPE = "foxglove/Grid";
 
+export const URDF_TOPIC = "/robot_description";
+export const URDF_DATATYPE = "foxglove/RobotDescription";
+
 export const ROBOT_DESCRIPTION_PARAM = "/robot_description";
 
 export const COLORS = {

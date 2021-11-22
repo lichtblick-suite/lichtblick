@@ -286,11 +286,6 @@ export default function TreeNodeRow({
                   setHoveredMarkerMatchers([{ topic: topicName }]);
                 }
               }}
-              unavailableTooltip={
-                node.type === "group"
-                  ? "None of the topics in this group are currently available"
-                  : "Unavailable"
-              }
               visibleInScene={visible ?? false}
               onMouseEnter={() => setHoveredMarkerMatchers([{ topic: topicName }])}
               onMouseLeave={() => setHoveredMarkerMatchers([])}
