@@ -227,6 +227,7 @@ function PanelActionsDropdown({
           key: "fullscreen",
           text: "Fullscreen",
           onClick: panelContext?.enterFullscreen,
+          "data-test": "panel-settings-fullscreen",
           iconProps: {
             iconName: "FullScreenMaximize",
             styles: { root: { height: 24, marginLeft: 2, marginRight: 6 } },

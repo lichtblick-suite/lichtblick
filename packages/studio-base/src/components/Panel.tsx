@@ -17,7 +17,6 @@ import ExpandAllOutlineIcon from "@mdi/svg/svg/expand-all-outline.svg";
 import FullscreenIcon from "@mdi/svg/svg/fullscreen.svg";
 import GridLargeIcon from "@mdi/svg/svg/grid-large.svg";
 import TrashCanOutlineIcon from "@mdi/svg/svg/trash-can-outline.svg";
-import cx from "classnames";
 import { last } from "lodash";
 import React, {
   useState,
@@ -74,14 +73,19 @@ import {
 } from "@foxglove/studio-base/util/layout";
 import { colors, spacing } from "@foxglove/studio-base/util/sharedStyleConstants";
 
-const PanelRoot = styled.div`
+const PanelRoot = styled.div<{ fullscreen: boolean; selected: boolean }>`
   display: flex;
   flex-direction: column;
   flex: 1 1 auto;
   overflow: hidden;
-  z-index: 1;
+  z-index: ${({ fullscreen }) => (fullscreen ? 100 : 1)};
   background-color: ${({ theme }) => (theme.isInverted ? colors.DARK : colors.LIGHT)};
-  position: relative;
+  position: ${({ fullscreen }) => (fullscreen ? "fixed" : "relative")};
+  border: ${({ fullscreen }) => (fullscreen ? "4px solid rgba(110, 81, 238, 0.3)" : "none")};
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: ${({ fullscreen }) => (fullscreen ? spacing.PLAYBACK_CONTROL_HEIGHT : 0)};
 
   // To use css to hide/show toolbars on hover we use a global panelToolbar class
   // because the PanelToolbar component is currently added within each panels render
@@ -99,11 +103,12 @@ const PanelRoot = styled.div`
     left: 0;
     right: 0;
     bottom: 0;
-    opacity: 0;
+    opacity: ${({ selected }) => (selected ? 1 : 0)};
     border: 1px solid ${colors.ACCENT};
     position: absolute;
     pointer-events: none;
-    transition: opacity 0.125s ease-out;
+    transition: ${({ selected }) =>
+      selected ? "opacity 0.125s ease-out" : "opacity 0.05s ease-out"};
     z-index: 100000;
   }
 `;
@@ -171,22 +176,6 @@ const useStyles = makeStyles((theme) => ({
     opacity: 0.7,
     userSelect: "none",
     mixBlendMode: "difference",
-  },
-  rootFullScreen: {
-    position: "fixed",
-    zIndex: 100,
-    border: "4px solid rgba(110, 81, 238, 0.3)",
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: spacing.PLAYBACK_CONTROL_HEIGHT,
-  },
-  rootSelected: {
-    ":after": {
-      // https://github.com/microsoft/fluentui/issues/20452
-      opacity: "1 !important",
-      transition: "opacity 0.05s ease-out !important",
-    },
   },
   quickActionsOverlayButton: {
     width: 72,
@@ -668,10 +657,8 @@ export default function Panel<
           <PanelRoot
             onClick={onOverlayClick}
             onMouseMove={onMouseMove}
-            className={cx({
-              [classes.rootFullScreen]: fullScreen,
-              [classes.rootSelected]: isSelected,
-            })}
+            fullscreen={fullScreen}
+            selected={isSelected}
             data-test={`panel-mouseenter-container ${childId ?? ""}`}
             ref={(el) => {
               // disallow dragging the root panel in a layout

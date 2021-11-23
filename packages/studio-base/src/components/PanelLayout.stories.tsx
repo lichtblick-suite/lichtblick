@@ -18,6 +18,7 @@ import { createGlobalStyle } from "styled-components";
 import { HideErrorSourceLocations } from "@foxglove/studio-base/components/ErrorBoundary";
 import MockPanelContextProvider from "@foxglove/studio-base/components/MockPanelContextProvider";
 import Panel from "@foxglove/studio-base/components/Panel";
+import PanelToolbar from "@foxglove/studio-base/components/PanelToolbar";
 import { PanelCatalog, PanelInfo } from "@foxglove/studio-base/context/PanelCatalogContext";
 import PanelSetup from "@foxglove/studio-base/stories/PanelSetup";
 import { PanelConfigSchemaEntry } from "@foxglove/studio-base/types/panels";
@@ -37,6 +38,27 @@ const allPanels: readonly PanelInfo[] = [
               throw new Error("I don't work!");
             },
             { panelType: "Sample2", defaultConfig: {} },
+          ),
+        ),
+      };
+    },
+  },
+  {
+    title: "Okay Panel",
+    type: "Sample3",
+    module: async () => {
+      return {
+        default: Panel(
+          Object.assign(
+            function OkayPanel({ config: { x } }: { config: { x: number } }) {
+              return (
+                <>
+                  <PanelToolbar floating />
+                  Hi {x}
+                </>
+              );
+            },
+            { panelType: "Sample3", defaultConfig: { x: 0 } },
           ),
         ),
       };
@@ -148,3 +170,38 @@ export const PanelLoading = (): JSX.Element => {
     </DndProvider>
   );
 };
+
+export const FullScreen = (): JSX.Element => {
+  return (
+    <DndProvider backend={HTML5Backend}>
+      <PanelSetup
+        panelCatalog={new MockPanelCatalog()}
+        fixture={{
+          topics: [],
+          datatypes: new Map(),
+          frame: {},
+          layout: { first: "Sample3!a", second: "Sample3!b", direction: "row" },
+          savedProps: {
+            "Sample3!a": { x: 1 },
+            "Sample3!b": { x: 2 },
+          },
+        }}
+        omitDragAndDrop
+        onMount={() => {
+          setTimeout(() => {
+            (document.querySelectorAll("[data-test=panel-settings]")[0] as any).click();
+            (document.querySelectorAll("[data-test=panel-settings-fullscreen]")[0] as any).click();
+          }, DEFAULT_CLICK_DELAY);
+        }}
+      >
+        <MockPanelContextProvider>
+          <PanelLayout />
+        </MockPanelContextProvider>
+      </PanelSetup>
+    </DndProvider>
+  );
+};
+FullScreen.parameters = { colorScheme: "dark" };
+export const FullScreenLight = Object.assign(FullScreen.bind(undefined), {
+  parameters: { colorScheme: "light" },
+});
