@@ -98,7 +98,10 @@ export default function HelpSidebar({
                 key="back-arrow"
                 size="small"
                 style={{ marginRight: "5px" }}
-                onClick={() => setIsHomeView(true)}
+                onClick={() => {
+                  setIsHomeView(true);
+                  setPanelDocToDisplay("");
+                }}
               >
                 <ChevronLeftIcon />
               </Icon>,
@@ -107,16 +110,7 @@ export default function HelpSidebar({
       title={isHomeView ? "Help" : panelInfo?.title ? panelInfo.title : ""}
     >
       <Stack>
-        {!isHomeView && (
-          <Stack tokens={{ childrenGap: theme.spacing.s2 }}>
-            {panelInfo?.help != undefined ? (
-              <TextContent allowMarkdownHtml={true}>{panelInfo?.help}</TextContent>
-            ) : (
-              "Panel does not have any documentation details."
-            )}
-          </Stack>
-        )}
-        {isHomeView && (
+        {isHomeView ? (
           <Stack tokens={{ childrenGap: theme.spacing.m }}>
             <Stack.Item>
               <Text styles={styles.subheader}>Panels</Text>
@@ -181,6 +175,14 @@ export default function HelpSidebar({
                 ))}
               </Stack>
             </Stack.Item>
+          </Stack>
+        ) : (
+          <Stack tokens={{ childrenGap: theme.spacing.s2 }}>
+            {panelInfo?.help != undefined ? (
+              <TextContent allowMarkdownHtml={true}>{panelInfo?.help}</TextContent>
+            ) : (
+              "Panel does not have any documentation details."
+            )}
           </Stack>
         )}
       </Stack>
