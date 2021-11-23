@@ -18,7 +18,7 @@ class RosbridgeDataSourceFactory implements IDataSourceFactory {
 
   promptOptions(previousValue?: string): PromptOptions {
     return {
-      title: "WebSocket connection",
+      title: "Rosbridge connection",
       placeholder: "ws://localhost:9090",
       initialValue: previousValue ?? "ws://localhost:9090",
       transformer: (str) => {
