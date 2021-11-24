@@ -13,6 +13,7 @@
 import { isEqual, groupBy, partition } from "lodash";
 import memoizeWeak from "memoize-weak";
 import shallowequal from "shallowequal";
+import { v4 as uuidv4 } from "uuid";
 
 import Log from "@foxglove/log";
 import { Time, compare } from "@foxglove/rostime";
@@ -118,7 +119,12 @@ export default class UserNodePlayer implements Player {
 
   // exposed as a static to allow testing to mock/replace
   static CreateNodeRuntimeWorker = (): SharedWorker => {
-    return new SharedWorker(new URL("./nodeRuntimeWorker/index", import.meta.url));
+    return new SharedWorker(new URL("./nodeRuntimeWorker/index", import.meta.url), {
+      // Although we are using SharedWorkers, each nodeRuntimeWorker uses a single global variable
+      // for the compiled `nodeCallback` function, so we need a separate worker per user node. We
+      // achieve this by passing in a unique name.
+      name: uuidv4(),
+    });
   };
 
   constructor(player: Player, userNodeActions: UserNodeActions) {
