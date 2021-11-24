@@ -25,6 +25,7 @@ import {
   RosbridgeDataSourceFactory,
   Ros1RemoteBagDataSourceFactory,
   FoxgloveDataPlatformDataSourceFactory,
+  FoxgloveWebSocketDataSourceFactory,
   UlogLocalDataSourceFactory,
   McapLocalDataSourceFactory,
 } from "@foxglove/studio-base";
@@ -42,7 +43,12 @@ const DEMO_BAG_URL = "https://storage.googleapis.com/foxglove-public-assets/demo
 // useAppConfiguration requires the AppConfigurationContext which is setup in Root
 // AppWrapper is used to make a functional component so we can use the context
 function AppWrapper({ loadWelcomeLayout }: { loadWelcomeLayout: boolean }) {
-  const [isMcapDataSourceEnabled] = useAppConfigurationValue(AppSetting.MCAP_DATA_SOURCE);
+  const [enableMcapDataSource = false] = useAppConfigurationValue<boolean>(
+    AppSetting.ENABLE_MCAP_DATA_SOURCE,
+  );
+  const [enableWebSocketDataSource = false] = useAppConfigurationValue<boolean>(
+    AppSetting.ENABLE_WEBSOCKET_DATA_SOURCE,
+  );
 
   const dataSources: IDataSourceFactory[] = useMemo(() => {
     const sources = [
@@ -57,12 +63,15 @@ function AppWrapper({ loadWelcomeLayout }: { loadWelcomeLayout: boolean }) {
       new FoxgloveDataPlatformDataSourceFactory(),
     ];
 
-    if (isMcapDataSourceEnabled === true) {
+    if (enableWebSocketDataSource) {
+      sources.unshift(new FoxgloveWebSocketDataSourceFactory());
+    }
+    if (enableMcapDataSource) {
       sources.push(new McapLocalDataSourceFactory());
     }
 
     return sources;
-  }, [isMcapDataSourceEnabled]);
+  }, [enableMcapDataSource, enableWebSocketDataSource]);
 
   return (
     <App

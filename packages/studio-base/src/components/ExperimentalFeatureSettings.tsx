@@ -44,9 +44,14 @@ const features: Feature[] = [
     description: <>Enable the Legacy Plot panel.</>,
   },
   {
-    key: AppSetting.MCAP_DATA_SOURCE,
+    key: AppSetting.ENABLE_MCAP_DATA_SOURCE,
     name: "Mcap Data Source",
     description: <>Enable the Mcap data source.</>,
+  },
+  {
+    key: AppSetting.ENABLE_WEBSOCKET_DATA_SOURCE,
+    name: "Foxglove WebSocket Data Source",
+    description: <>Enable the Foxglove WebSocket data source.</>,
   },
 ];
 if (process.env.NODE_ENV === "development") {

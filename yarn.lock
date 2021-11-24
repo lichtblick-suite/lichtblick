@@ -2339,6 +2339,7 @@ __metadata:
     "@foxglove/studio": "workspace:*"
     "@foxglove/ulog": 2.1.1
     "@foxglove/velodyne-cloud": 1.0.0
+    "@foxglove/ws-protocol": 0.0.1
     "@mdi/svg": 6.3.95
     "@sentry/core": 6.13.3
     "@sentry/types": 6.13.3
@@ -2367,6 +2368,7 @@ __metadata:
     "@types/offscreencanvas": 2019.6.4
     "@types/prettier": 2.4.1
     "@types/promise-queue": 2.2.0
+    "@types/protobufjs": "workspace:*"
     "@types/react": 17.0.31
     "@types/react-autocomplete": 1.8.6
     "@types/react-dom": 17.0.10
@@ -2516,6 +2518,16 @@ __metadata:
   version: 0.0.4
   resolution: "@foxglove/wasm-bz2@npm:0.0.4"
   checksum: 48492b02fbea537bf5483c320effe5ebfebb4c79ab95ac3ff95c2ff52668b5e57c74d598038edce5ea0b0a35d8b917b73e9fa5a3c9a95750663db4beca9241e0
+  languageName: node
+  linkType: hard
+
+"@foxglove/ws-protocol@npm:0.0.1":
+  version: 0.0.1
+  resolution: "@foxglove/ws-protocol@npm:0.0.1"
+  dependencies:
+    eventemitter3: ^4.0.7
+    tslib: ^2
+  checksum: 68d60334802b6559aeb30007511da72f06936cc9c918b6f98f973318b2e83c9d4d0e040a936a19001b2e2d51716f3a0553f1f71f362e5c92aec21c90aea10424
   languageName: node
   linkType: hard
 
@@ -5422,6 +5434,12 @@ __metadata:
   checksum: ef6e1899e59b876c273811b1bd845022fc66d5a3d11cb38a25b6c566b30514ae38fe20a40f67622f362a4f4f7f9224e22d8da101cff3d6e97e11d7b4c307cfc1
   languageName: node
   linkType: hard
+
+"@types/protobufjs@workspace:*, @types/protobufjs@workspace:packages/@types/protobufjs":
+  version: 0.0.0-use.local
+  resolution: "@types/protobufjs@workspace:packages/@types/protobufjs"
+  languageName: unknown
+  linkType: soft
 
 "@types/q@npm:^1.5.1":
   version: 1.5.5

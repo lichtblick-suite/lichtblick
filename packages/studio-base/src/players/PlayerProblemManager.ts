@@ -48,4 +48,9 @@ export default class PlayerProblemManager {
     }
     return changed;
   }
+
+  clear(): void {
+    this._problemsById.clear();
+    this._problems = undefined;
+  }
 }

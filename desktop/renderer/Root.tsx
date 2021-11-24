@@ -26,6 +26,7 @@ import {
   Ros1SocketDataSourceFactory,
   Ros2SocketDataSourceFactory,
   FoxgloveDataPlatformDataSourceFactory,
+  FoxgloveWebSocketDataSourceFactory,
   UlogLocalDataSourceFactory,
   McapLocalDataSourceFactory,
   useAppConfigurationValue,
@@ -48,8 +49,12 @@ const desktopBridge = (global as unknown as { desktopBridge: Desktop }).desktopB
 // useAppConfiguration requires the AppConfigurationContext which is setup in Root
 // AppWrapper is used to make a functional component so we can use the context
 function AppWrapper() {
-  const [isMcapDataSourceEnabled] = useAppConfigurationValue(AppSetting.MCAP_DATA_SOURCE);
-
+  const [enableMcapDataSource = false] = useAppConfigurationValue<boolean>(
+    AppSetting.ENABLE_MCAP_DATA_SOURCE,
+  );
+  const [enableWebSocketDataSource = false] = useAppConfigurationValue<boolean>(
+    AppSetting.ENABLE_WEBSOCKET_DATA_SOURCE,
+  );
   const deepLinks = useMemo(() => desktopBridge.getDeepLinks(), []);
 
   const dataSources: IDataSourceFactory[] = useMemo(() => {
@@ -66,12 +71,15 @@ function AppWrapper() {
       new FoxgloveDataPlatformDataSourceFactory(),
     ];
 
-    if (isMcapDataSourceEnabled === true) {
+    if (enableWebSocketDataSource) {
+      sources.unshift(new FoxgloveWebSocketDataSourceFactory());
+    }
+    if (enableMcapDataSource) {
       sources.push(new McapLocalDataSourceFactory());
     }
 
     return sources;
-  }, [isMcapDataSourceEnabled]);
+  }, [enableMcapDataSource, enableWebSocketDataSource]);
 
   return <App demoBagUrl={DEMO_BAG_URL} deepLinks={deepLinks} availableSources={dataSources} />;
 }
