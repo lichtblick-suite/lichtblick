@@ -53,6 +53,16 @@ export default class Rosbag2DataProvider implements RandomAccessDataProvider {
     const [start, end] = await this.bag_.timeRange();
     const topicDefs = await this.bag_.readTopics();
     const messageCounts = await this.bag_.messageCounts();
+    let hasAnyMessages = false;
+    for (const count of messageCounts.values()) {
+      if (count > 0) {
+        hasAnyMessages = true;
+        break;
+      }
+    }
+    if (!hasAnyMessages) {
+      throw new Error("Bag contains no messages");
+    }
 
     const problems: RandomAccessDataProviderProblem[] = [];
     const topics: Topic[] = [];

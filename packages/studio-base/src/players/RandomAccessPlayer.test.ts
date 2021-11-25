@@ -1229,7 +1229,7 @@ describe("RandomAccessPlayer", () => {
         problems: [
           {
             error: new Error("fake initialization failure"),
-            message: "Error initializing player",
+            message: "Error initializing player: fake initialization failure",
             severity: "error",
           },
         ],

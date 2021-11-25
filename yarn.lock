@@ -2214,13 +2214,13 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@foxglove/rosbag2-web@npm:3.0.0":
-  version: 3.0.0
-  resolution: "@foxglove/rosbag2-web@npm:3.0.0"
+"@foxglove/rosbag2-web@npm:3.0.2":
+  version: 3.0.2
+  resolution: "@foxglove/rosbag2-web@npm:3.0.2"
   dependencies:
     "@foxglove/rosbag2": ^3.0.0
     sql.js: ^1.6.2
-  checksum: 4deab0dd3b1d526afe063740c1abb42d17cfcae5192f14491271d8a161969f2e045c6a6ab76f8907e5883700b8075ae4a8c9a64cf7287531ded1f30861899885
+  checksum: b7c2829f2cbc6ee9a476afdd7fba5cfcb74c981dd1eab5dc40ec949731f595fb4a0664a5b05eb6b94277701a627cf8e9d63756c5ee8b4070742c173d557a9762
   languageName: node
   linkType: hard
 
@@ -2329,7 +2329,7 @@ __metadata:
     "@foxglove/ros1": 1.3.4
     "@foxglove/ros2": 1.0.5
     "@foxglove/rosbag": 0.1.2
-    "@foxglove/rosbag2-web": 3.0.0
+    "@foxglove/rosbag2-web": 3.0.2
     "@foxglove/rosmsg": 3.0.0
     "@foxglove/rosmsg-msgs-common": 1.0.4
     "@foxglove/rosmsg-msgs-foxglove": 2.0.3

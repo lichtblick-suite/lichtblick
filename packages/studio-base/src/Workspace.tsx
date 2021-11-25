@@ -200,7 +200,7 @@ export default function Workspace(props: WorkspaceProps): JSX.Element {
       return;
     }
 
-    if (selectedSidebarItem === "connection" && playerPresence !== PlayerPresence.NOT_PRESENT) {
+    if (selectedSidebarItem === "connection" && playerPresence === PlayerPresence.PRESENT) {
       setSelectedSidebarItem(undefined);
     }
   }, [selectedSidebarItem, playerPresence]);
