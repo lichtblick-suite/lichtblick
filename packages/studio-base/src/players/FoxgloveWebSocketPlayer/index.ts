@@ -42,18 +42,14 @@ type ParsedChannel = {
 };
 
 function parseChannel(channel: Channel): ParsedChannel {
-  let root: protobufjs.Root;
-  if (channel.encoding === "protobuf.binary") {
-    const decodedSchema = new Uint8Array(base64.length(channel.schema));
-    if (base64.decode(channel.schema, decodedSchema, 0) !== decodedSchema.byteLength) {
-      throw new Error(`Failed to decode base64 schema on ${channel.topic}`);
-    }
-    root = protobufjs.Root.fromDescriptor(FileDescriptorSet.decode(decodedSchema));
-  } else if (channel.encoding === "protobuf") {
-    root = protobufjs.parse(channel.schema).root;
-  } else {
+  if (channel.encoding !== "protobuf") {
     throw new Error(`Unsupported encoding ${channel.encoding}`);
   }
+  const decodedSchema = new Uint8Array(base64.length(channel.schema));
+  if (base64.decode(channel.schema, decodedSchema, 0) !== decodedSchema.byteLength) {
+    throw new Error(`Failed to decode base64 schema on ${channel.topic}`);
+  }
+  const root = protobufjs.Root.fromDescriptor(FileDescriptorSet.decode(decodedSchema));
   root.resolveAll();
   const type = root.lookupType(channel.schemaName);
 
