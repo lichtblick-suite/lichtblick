@@ -41,6 +41,8 @@ export type DecodedMarker = PointCloudMarker & {
   };
 };
 
+const DEFAULT_COLOR_FIELDS = ["intensity", "i"];
+
 // Decode a marker and generate position and color buffers for rendering
 // The resulting marker should be memoized for better performance
 export function decodeMarker(marker: PointCloudMarker): DecodedMarker {
@@ -54,17 +56,22 @@ export function decodeMarker(marker: PointCloudMarker): DecodedMarker {
     data,
   } = marker;
   const offsetsAndReaders = getFieldOffsetsAndReaders(data, fields);
-  const rgbOffset = offsetsAndReaders.rgb?.offset;
+  const hasRGB = offsetsAndReaders.rgb?.offset != undefined;
 
   // Calculate the number of points in the cloud.
   // Do not use data.length, since it doesn't work with sparse point clouds.
   const pointCount = width * height;
 
-  const colorMode: ColorMode = settings.colorMode
-    ? settings.colorMode
-    : rgbOffset != undefined
-    ? { mode: "rgb" }
-    : { mode: "flat", flatColor: DEFAULT_FLAT_COLOR };
+  const defaultColorField =
+    fields.find(({ name }) => DEFAULT_COLOR_FIELDS.includes(name))?.name ??
+    fields.find(({ name }) => name !== "rgb")?.name;
+  const colorMode: ColorMode =
+    settings.colorMode ??
+    (hasRGB
+      ? { mode: "rgb" }
+      : defaultColorField
+      ? { mode: "turbo", colorField: defaultColorField }
+      : { mode: "flat", flatColor: DEFAULT_FLAT_COLOR });
 
   const isHitmap = !!hitmapColors;
 
