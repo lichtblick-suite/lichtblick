@@ -19,6 +19,7 @@ import ChildToggle from "@foxglove/studio-base/components/ChildToggle";
 import Icon from "@foxglove/studio-base/components/Icon";
 import MockPanelContextProvider from "@foxglove/studio-base/components/MockPanelContextProvider";
 import MockCurrentLayoutProvider from "@foxglove/studio-base/providers/CurrentLayoutProvider/MockCurrentLayoutProvider";
+import HelpInfoProvider from "@foxglove/studio-base/providers/HelpInfoProvider";
 
 import PanelToolbar from "./index";
 
@@ -39,9 +40,11 @@ class MosaicWrapper extends React.Component<{
             toolbarControls={<div />}
             renderPreview={() => undefined as any}
           >
-            <div style={{ width, height: 300, padding: 30, position: "relative" }}>
-              {id === "Sibling" ? "Sibling Panel" : this.props.children}
-            </div>
+            <HelpInfoProvider>
+              <div style={{ width, height: 300, padding: 30, position: "relative" }}>
+                {id === "Sibling" ? "Sibling Panel" : this.props.children}
+              </div>
+            </HelpInfoProvider>
           </MosaicWindow>
         )}
         value={this.props.layout ?? "dummy"}

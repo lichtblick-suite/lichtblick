@@ -26,10 +26,10 @@ import Panel from "@foxglove/studio-base/components/Panel";
 import PanelToolbar from "@foxglove/studio-base/components/PanelToolbar";
 import TextContent from "@foxglove/studio-base/components/TextContent";
 import {
-  useSelectedPanels,
   useCurrentLayoutActions,
   useCurrentLayoutSelector,
 } from "@foxglove/studio-base/context/CurrentLayoutContext";
+import { useHelpInfo } from "@foxglove/studio-base/context/HelpInfoContext";
 import { useUserNodeState } from "@foxglove/studio-base/context/UserNodeStateContext";
 import { useWorkspace } from "@foxglove/studio-base/context/WorkspaceContext";
 import BottomBar from "@foxglove/studio-base/panels/NodePlayground/BottomBar";
@@ -95,7 +95,7 @@ const SWelcomeScreen = styled.div`
 export type Explorer = undefined | "nodes" | "utils" | "templates";
 
 const WelcomeScreen = ({ addNewNode }: { addNewNode: (code?: string) => void }) => {
-  const { setPanelDocToDisplay } = useSelectedPanels();
+  const { setHelpInfo } = useHelpInfo();
   const { openHelp } = useWorkspace();
   return (
     <SWelcomeScreen>
@@ -106,7 +106,7 @@ const WelcomeScreen = ({ addNewNode }: { addNewNode: (code?: string) => void }) 
           href=""
           onClick={(e) => {
             e.preventDefault();
-            setPanelDocToDisplay("NodePlayground");
+            setHelpInfo({ title: "NodePlayground", content: helpContent });
             openHelp();
           }}
         >

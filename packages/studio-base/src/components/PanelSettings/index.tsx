@@ -14,6 +14,7 @@ import {
   useCurrentLayoutSelector,
   useSelectedPanels,
 } from "@foxglove/studio-base/context/CurrentLayoutContext";
+import { useHelpInfo } from "@foxglove/studio-base/context/HelpInfoContext";
 import { usePanelCatalog } from "@foxglove/studio-base/context/PanelCatalogContext";
 import { useWorkspace } from "@foxglove/studio-base/context/WorkspaceContext";
 import { PanelConfig } from "@foxglove/studio-base/types/panels";
@@ -28,11 +29,7 @@ export default function PanelSettings({
   selectedPanelIdsForTests?: readonly string[];
 }>): JSX.Element {
   const selectedLayoutId = useCurrentLayoutSelector((state) => state.selectedLayout?.id);
-  const {
-    selectedPanelIds: originalSelectedPanelIds,
-    setSelectedPanelIds,
-    setPanelDocToDisplay,
-  } = useSelectedPanels();
+  const { selectedPanelIds: originalSelectedPanelIds, setSelectedPanelIds } = useSelectedPanels();
   const selectedPanelIds = selectedPanelIdsForTests ?? originalSelectedPanelIds;
   const { openLayoutBrowser, openHelp } = useWorkspace();
   const selectedPanelId = useMemo(
@@ -57,6 +54,7 @@ export default function PanelSettings({
     () => (panelType != undefined ? panelCatalog.getPanelByType(panelType) : undefined),
     [panelCatalog, panelType],
   );
+  const { setHelpInfo } = useHelpInfo();
 
   const [showShareModal, setShowShareModal] = useState(false);
   const shareModal = useMemo(() => {
@@ -141,7 +139,7 @@ export default function PanelSettings({
               See docs{" "}
               <Link
                 onClick={() => {
-                  setPanelDocToDisplay(panelInfo?.type);
+                  setHelpInfo({ title: panelInfo?.type, content: panelInfo?.help });
                   openHelp();
                 }}
               >

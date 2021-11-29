@@ -250,26 +250,12 @@ function buildMenu(browserWindow: BrowserWindow): Menu {
         click: () => browserWindow.webContents.send("open-welcome-layout"),
       },
       {
-        label: "Message path syntax",
-        click: () => browserWindow.webContents.send("open-message-path-syntax-help"),
-      },
-      {
-        label: "Keyboard shortcuts",
-        accelerator: "CommandOrControl+/",
-        click: () => browserWindow.webContents.send("open-keyboard-shortcuts"),
-      },
-      {
         label: "Learn more",
+        click: () => browserWindow.webContents.send("open-help"),
+      },
+      {
+        label: "Visit website",
         click: async () => await shell.openExternal("https://foxglove.dev"),
-      },
-      { type: "separator" } as const,
-      {
-        label: "License",
-        click: async () => await shell.openExternal("https://foxglove.dev/legal/studio-license"),
-      },
-      {
-        label: "Privacy",
-        click: async () => await shell.openExternal("https://foxglove.dev/legal/privacy"),
       },
       ...(isMac
         ? []

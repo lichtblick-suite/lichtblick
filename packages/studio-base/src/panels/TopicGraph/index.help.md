@@ -6,4 +6,4 @@ To use this panel, you must be connected to a live ROS system via a native or Ro
 
 <kbd>Scroll</kbd> – Zoom
 
-[Learn more](https://foxglove.dev/docs/panels/topic-graph).
+[View docs](https://foxglove.dev/docs/panels/topic-graph).

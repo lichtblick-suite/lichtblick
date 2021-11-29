@@ -3,11 +3,7 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 // Events that are forwarded from the main process
-export type ForwardedMenuEvent =
-  | "open-preferences"
-  | "open-keyboard-shortcuts"
-  | "open-message-path-syntax-help"
-  | "open-welcome-layout";
+export type ForwardedMenuEvent = "open-preferences" | "open-help" | "open-welcome-layout";
 
 interface NativeMenuBridge {
   // Events from the native window are available in the main process but not the renderer, so we forward them through the bridge.

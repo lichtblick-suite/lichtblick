@@ -10,7 +10,6 @@
 //   This source code is licensed under the Apache License, Version 2.0,
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
-
 import { ContextualMenu, IContextualMenuItem, makeStyles } from "@fluentui/react";
 import AlertIcon from "@mdi/svg/svg/alert.svg";
 import CogIcon from "@mdi/svg/svg/cog.svg";
@@ -31,6 +30,7 @@ import {
   useCurrentLayoutActions,
   useSelectedPanels,
 } from "@foxglove/studio-base/context/CurrentLayoutContext";
+import { useHelpInfo } from "@foxglove/studio-base/context/HelpInfoContext";
 import { useWorkspace } from "@foxglove/studio-base/context/WorkspaceContext";
 import { colors } from "@foxglove/studio-base/util/sharedStyleConstants";
 
@@ -372,8 +372,9 @@ export default React.memo<Props>(function PanelToolbar({
   const [menuOpen, setMenuOpen] = useState(false);
 
   const panelContext = useContext(PanelContext);
-  const { setPanelDocToDisplay } = useSelectedPanels();
   const { openHelp } = useWorkspace();
+
+  const { setHelpInfo } = useHelpInfo();
 
   // Help-shown state must be hoisted outside the controls container so the modal can remain visible
   // when the panel is no longer hovered.
@@ -395,8 +396,8 @@ export default React.memo<Props>(function PanelToolbar({
             tooltip="Help"
             fade
             onClick={() => {
-              if (panelContext?.type != undefined) {
-                setPanelDocToDisplay(panelContext.type);
+              if (panelContext?.title != undefined) {
+                setHelpInfo({ title: panelContext.title, content: helpContent });
                 openHelp();
               }
             }}
@@ -418,10 +419,10 @@ export default React.memo<Props>(function PanelToolbar({
     );
   }, [
     additionalIcons,
-    helpContent,
     openHelp,
-    setPanelDocToDisplay,
-    panelContext?.type,
+    setHelpInfo,
+    panelContext?.title,
+    helpContent,
     styles.icon,
     supportsStrictMode,
     isFullscreen,

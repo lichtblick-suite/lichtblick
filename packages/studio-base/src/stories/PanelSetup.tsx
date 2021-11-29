@@ -47,6 +47,7 @@ import {
   AdvertiseOptions,
 } from "@foxglove/studio-base/players/types";
 import MockCurrentLayoutProvider from "@foxglove/studio-base/providers/CurrentLayoutProvider/MockCurrentLayoutProvider";
+import HelpInfoProvider from "@foxglove/studio-base/providers/HelpInfoProvider";
 import { RosDatatypes } from "@foxglove/studio-base/types/RosDatatypes";
 import { PanelConfigSchemaEntry, SavedProps, UserNodes } from "@foxglove/studio-base/types/panels";
 
@@ -287,7 +288,9 @@ export default function PanelSetup(props: Props): JSX.Element {
     <UserNodeStateProvider>
       <HoverValueProvider>
         <MockCurrentLayoutProvider>
-          <UnconnectedPanelSetup {...props} />
+          <HelpInfoProvider>
+            <UnconnectedPanelSetup {...props} />
+          </HelpInfoProvider>
         </MockCurrentLayoutProvider>
       </HoverValueProvider>
     </UserNodeStateProvider>

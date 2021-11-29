@@ -4,31 +4,21 @@ Display visualization markers with any of the following datatypes in a 2D or 3D 
 
 #### To move the camera:
 
-<kbd>w</kbd> – Forward
-
-<kbd>a</kbd> – Left
-
-<kbd>s</kbd> – Backward
-
-<kbd>d</kbd> – Right
-
-<kbd>z</kbd> or <kbd>Scroll up</kbd> – Zoom in
-
-<kbd>x</kbd> or <kbd>Scroll down</kbd> – Zoom out
-
-<kbd>Drag</kbd> – Parallel to the ground. Will disengage “follow” mode, if enabled.
-
-<kbd>Right-click</kbd> + <kbd>drag</kbd> – Pan and rotate. Dragging horizontally rotates around the world's z-axis; dragging vertically pans around the x and y axes
-
-<kbd>Shift</kbd> + <kbd>other action</kbd> – Adjusts all values to be 1/10 of baseline values; allows for more precise movements and adjustments
+- `w` – Forward
+- `a` – Left
+- `s` – Backward
+- `d` – Right
+- `z` or `Scroll up` – Zoom in
+- `x` or `Scroll down` – Zoom out
+- `Drag` – Parallel to the ground. Will disengage “follow” mode, if enabled.
+- `Right-click` + `drag` – Pan and rotate. Dragging horizontally rotates around the world's z-axis; dragging vertically pans around the x and y axes
+- `Shift` + `other action` – Adjusts all values to be 1/10 of baseline values; allows for more precise movements and adjustments
 
 #### Other:
 
-<kbd>t</kbd> – Open topic picker
-
-<kbd>Esc</kbd> – Close topic picker
-
-<kbd>Cmd</kbd> + <kbd>f</kbd> – Search for marker text
+- `t` – Open topic picker
+- `Esc` – Close topic picker
+- `Cmd` + `f` – Search for marker text
 
 ## Supported datatypes
 
@@ -88,4 +78,4 @@ Display visualization markers with any of the following datatypes in a 2D or 3D 
 - [`std_msgs/msg/ColorRGBA`](https://github.com/ros2/common_interfaces/blob/master/std_msgs/msg/ColorRGBA.msg)
 - or any datatype suffixed with `/Color` or `/ColorRGBA` and containing `r`, `g`, `b` fields
 
-[Learn more](https://foxglove.dev/docs/panels/3d).
+[View docs](https://foxglove.dev/docs/panels/3d).

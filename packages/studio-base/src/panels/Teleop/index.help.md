@@ -2,4 +2,4 @@ Teleoperate your robot by publishing `geometry_msgs/Twist` messages on a given t
 
 To use this panel, you must be connected to your robot via a native or Rosbridge connection. Configure your control pad to specify the topic, publish rate, and message values.
 
-[Learn more](https://foxglove.dev/docs/panels/teleop).
+[View docs](https://foxglove.dev/docs/panels/teleop).

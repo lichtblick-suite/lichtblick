@@ -21,6 +21,7 @@ import { UserNodeStateProvider } from "@foxglove/studio-base/context/UserNodeSta
 import CurrentLayoutProvider from "@foxglove/studio-base/providers/CurrentLayoutProvider";
 import ExtensionMarketplaceProvider from "@foxglove/studio-base/providers/ExtensionMarketplaceProvider";
 import ExtensionRegistryProvider from "@foxglove/studio-base/providers/ExtensionRegistryProvider";
+import HelpInfoProvider from "@foxglove/studio-base/providers/HelpInfoProvider";
 import LayoutManagerProvider from "@foxglove/studio-base/providers/LayoutManagerProvider";
 import PanelCatalogProvider from "@foxglove/studio-base/providers/PanelCatalogProvider";
 import URDFAssetLoader from "@foxglove/studio-base/services/URDFAssetLoader";
@@ -45,6 +46,7 @@ export default function App(props: AppProps): JSX.Element {
     <LayoutManagerProvider />,
     <ModalHost />, // render modal elements inside the ThemeProvider
     <AssetsProvider loaders={assetLoaders} />,
+    <HelpInfoProvider />,
     <HoverValueProvider />,
     <UserNodeStateProvider />,
     <CurrentLayoutProvider />,

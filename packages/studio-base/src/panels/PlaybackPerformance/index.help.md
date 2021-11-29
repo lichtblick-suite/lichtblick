@@ -2,4 +2,4 @@ Display playback and data-streaming performance statistics. Displayed only when 
 
 "Instantaneous" statistics are reported based on the most recent frame, and also are averaged over the last 5 seconds.
 
-[Learn more](https://foxglove.dev/docs/panels/studio-playback-performance).
+[View docs](https://foxglove.dev/docs/panels/studio-playback-performance).

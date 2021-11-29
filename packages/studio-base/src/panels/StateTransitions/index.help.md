@@ -6,4 +6,4 @@ Track when the discrete values of topic paths, specified using [message path syn
 
 <kbd>Double-click</kbd> – Reset view
 
-[Learn more](https://foxglove.dev/docs/panels/state-transitions).
+[View docs](https://foxglove.dev/docs/panels/state-transitions).

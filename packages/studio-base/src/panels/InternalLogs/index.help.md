@@ -2,4 +2,4 @@ Specify the channels for which to display internal logs. Displayed only when the
 
 Internal logs can be viewed in the app's Developer Tools console.
 
-[Learn more](https://foxglove.dev/docs/panels/studio-logs).
+[View docs](https://foxglove.dev/docs/panels/studio-logs).
