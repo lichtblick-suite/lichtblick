@@ -295,9 +295,7 @@ function PanelExtensionAdapter(props: PanelExtensionAdapterProps): JSX.Element {
 
       layout,
 
-      seekPlayback: capabilities.includes(PlayerCapabilities.playbackControl)
-        ? (stamp: number) => seekPlayback(fromSec(stamp))
-        : undefined,
+      seekPlayback: seekPlayback ? (stamp: number) => seekPlayback(fromSec(stamp)) : undefined,
 
       setPreviewTime: (stamp: number | undefined) => {
         if (stamp == undefined) {

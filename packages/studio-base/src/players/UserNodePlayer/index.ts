@@ -242,7 +242,7 @@ export default class UserNodePlayer implements Player {
       this.setSubscriptions(this._subscriptions);
       const { currentTime, isPlaying = false } = this._lastPlayerStateActiveData ?? {};
       if (currentTime && !isPlaying) {
-        this._player.seekPlayback(currentTime);
+        this._player.seekPlayback?.(currentTime);
       }
     });
   }
@@ -732,10 +732,10 @@ export default class UserNodePlayer implements Player {
   setParameter = (key: string, value: ParameterValue): void =>
     this._player.setParameter(key, value);
   publish = (request: PublishPayload): void => this._player.publish(request);
-  startPlayback = (): void => this._player.startPlayback();
-  pausePlayback = (): void => this._player.pausePlayback();
-  setPlaybackSpeed = (speed: number): void => this._player.setPlaybackSpeed(speed);
+  startPlayback = (): void => this._player.startPlayback?.();
+  pausePlayback = (): void => this._player.pausePlayback?.();
+  setPlaybackSpeed = (speed: number): void => this._player.setPlaybackSpeed?.(speed);
   seekPlayback = (time: Time, backfillDuration?: Time): void =>
-    this._player.seekPlayback(time, backfillDuration);
+    this._player.seekPlayback?.(time, backfillDuration);
   requestBackfill = (): void => this._player.requestBackfill();
 }

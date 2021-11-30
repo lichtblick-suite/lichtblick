@@ -395,16 +395,6 @@ export default class FoxgloveWebSocketPlayer implements Player {
     throw new Error("Publishing is not supported by the Foxglove WebSocket connection");
   }
 
-  startPlayback(): void {
-    throw new Error("Playback control is not supported by the Foxglove WebSocket connection");
-  }
-  pausePlayback(): void {
-    throw new Error("Playback control is not supported by the Foxglove WebSocket connection");
-  }
-  seekPlayback(): void {
-    throw new Error("Playback control is not supported by the Foxglove WebSocket connection");
-  }
-  setPlaybackSpeed(_speedFraction: number): void {}
   requestBackfill(): void {}
   setGlobalVariables(): void {}
 }

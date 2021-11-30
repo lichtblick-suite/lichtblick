@@ -21,7 +21,12 @@ import { act } from "react-dom/test-utils";
 
 import AppConfigurationContext from "@foxglove/studio-base/context/AppConfigurationContext";
 import { GlobalVariables } from "@foxglove/studio-base/hooks/useGlobalVariables";
-import { Player, PlayerPresence, PlayerStateActiveData } from "@foxglove/studio-base/players/types";
+import {
+  Player,
+  PlayerCapabilities,
+  PlayerPresence,
+  PlayerStateActiveData,
+} from "@foxglove/studio-base/players/types";
 import delay from "@foxglove/studio-base/util/delay";
 import { makeConfiguration } from "@foxglove/studio-base/util/makeConfiguration";
 import tick from "@foxglove/studio-base/util/tick";
@@ -72,10 +77,10 @@ describe("MessagePipelineProvider/useMessagePipeline", () => {
         setSubscriptions: expect.any(Function),
         setPublishers: expect.any(Function),
         publish: expect.any(Function),
-        startPlayback: expect.any(Function),
-        pausePlayback: expect.any(Function),
-        setPlaybackSpeed: expect.any(Function),
-        seekPlayback: expect.any(Function),
+        startPlayback: undefined,
+        pausePlayback: undefined,
+        setPlaybackSpeed: undefined,
+        seekPlayback: undefined,
         setParameter: expect.any(Function),
         pauseFrame: expect.any(Function),
         requestBackfill: expect.any(Function),
@@ -234,7 +239,7 @@ describe("MessagePipelineProvider/useMessagePipeline", () => {
     expect(result.all.length).toBe(3);
   });
 
-  it("proxies player methods to player", () => {
+  it("proxies player methods to player, accounting for capabilities", async () => {
     const player = new FakePlayer();
     jest.spyOn(player, "startPlayback");
     jest.spyOn(player, "pausePlayback");
@@ -245,18 +250,36 @@ describe("MessagePipelineProvider/useMessagePipeline", () => {
       initialProps: { player },
     });
 
+    expect(result.current.startPlayback).toBeUndefined();
+    expect(result.current.pausePlayback).toBeUndefined();
+    expect(result.current.setPlaybackSpeed).toBeUndefined();
+    expect(result.current.seekPlayback).toBeUndefined();
+
+    player.setCapabilities([PlayerCapabilities.playbackControl]);
+
+    await act(async () => await player.emit());
+
+    expect(result.current.startPlayback).not.toBeUndefined();
+    expect(result.current.pausePlayback).not.toBeUndefined();
+    expect(result.current.setPlaybackSpeed).toBeUndefined();
+    expect(result.current.seekPlayback).not.toBeUndefined();
+
     expect(player.startPlayback).toHaveBeenCalledTimes(0);
     expect(player.pausePlayback).toHaveBeenCalledTimes(0);
-    expect(player.setPlaybackSpeed).toHaveBeenCalledTimes(0);
     expect(player.seekPlayback).toHaveBeenCalledTimes(0);
-    result.current.startPlayback();
-    result.current.pausePlayback();
-    result.current.setPlaybackSpeed(0.5);
-    result.current.seekPlayback({ sec: 1, nsec: 0 });
+    result.current.startPlayback!();
+    result.current.pausePlayback!();
+    result.current.seekPlayback!({ sec: 1, nsec: 0 });
     expect(player.startPlayback).toHaveBeenCalledTimes(1);
     expect(player.pausePlayback).toHaveBeenCalledTimes(1);
-    expect(player.setPlaybackSpeed).toHaveBeenCalledWith(0.5);
     expect(player.seekPlayback).toHaveBeenCalledWith({ sec: 1, nsec: 0 });
+
+    player.setCapabilities([PlayerCapabilities.playbackControl, PlayerCapabilities.setSpeed]);
+
+    await act(async () => await player.emit());
+    expect(player.setPlaybackSpeed).toHaveBeenCalledTimes(0);
+    result.current.setPlaybackSpeed!(0.5);
+    expect(player.setPlaybackSpeed).toHaveBeenCalledWith(0.5);
   });
 
   it("closes player on unmount", () => {
@@ -329,10 +352,10 @@ describe("MessagePipelineProvider/useMessagePipeline", () => {
   it("does not throw when interacting w/ context and player is missing", () => {
     expect(() => {
       const { result } = renderHook(Hook, { wrapper: Wrapper });
-      result.current.startPlayback();
-      result.current.pausePlayback();
-      result.current.setPlaybackSpeed(1);
-      result.current.seekPlayback({ sec: 1, nsec: 0 });
+      expect(result.current.startPlayback).toBeUndefined();
+      expect(result.current.pausePlayback).toBeUndefined();
+      expect(result.current.setPlaybackSpeed).toBeUndefined();
+      expect(result.current.seekPlayback).toBeUndefined();
       result.current.publish({ topic: "/foo", msg: {} });
     }).not.toThrow();
   });

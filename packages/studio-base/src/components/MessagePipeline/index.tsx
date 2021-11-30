@@ -25,6 +25,7 @@ import {
   AdvertiseOptions,
   Frame,
   Player,
+  PlayerCapabilities,
   PlayerPresence,
   PlayerState,
   PlayerStateActiveData,
@@ -54,10 +55,10 @@ export type MessagePipelineContext = {
   setPublishers: (id: string, publishersForId: AdvertiseOptions[]) => void;
   setParameter: (key: string, value: ParameterValue) => void;
   publish: (request: PublishPayload) => void;
-  startPlayback: () => void;
-  pausePlayback: () => void;
-  setPlaybackSpeed: (speed: number) => void;
-  seekPlayback: (time: Time) => void;
+  startPlayback?: () => void;
+  pausePlayback?: () => void;
+  setPlaybackSpeed?: (speed: number) => void;
+  seekPlayback?: (time: Time) => void;
   // Don't render the next frame until the returned function has been called.
   pauseFrame: (name: string) => ResumeFrame;
   requestBackfill: () => void;
@@ -239,6 +240,7 @@ export function MessagePipelineProvider({
     () => rawPlayerState.activeData?.datatypes ?? new Map(),
     [rawPlayerState.activeData?.datatypes],
   );
+  const capabilities = useShallowMemo(rawPlayerState.capabilities);
   const setSubscriptions = useCallback(
     (id: string, subscriptionsForId: SubscribePayload[]) => {
       setAllSubscriptions((previousSubscriptions) => {
@@ -261,15 +263,33 @@ export function MessagePipelineProvider({
     (request: PublishPayload) => (player ? player.publish(request) : undefined),
     [player],
   );
-  const startPlayback = useCallback(() => (player ? player.startPlayback() : undefined), [player]);
-  const pausePlayback = useCallback(() => (player ? player.pausePlayback() : undefined), [player]);
-  const setPlaybackSpeed = useCallback(
-    (speed: number) => (player ? player.setPlaybackSpeed(speed) : undefined),
-    [player],
+  const startPlayback = useMemo(
+    () =>
+      capabilities.includes(PlayerCapabilities.playbackControl)
+        ? player?.startPlayback?.bind(player)
+        : undefined,
+    [player, capabilities],
   );
-  const seekPlayback = useCallback(
-    (time: Time) => (player ? player.seekPlayback(time) : undefined),
-    [player],
+  const pausePlayback = useMemo(
+    () =>
+      capabilities.includes(PlayerCapabilities.playbackControl)
+        ? player?.pausePlayback?.bind(player)
+        : undefined,
+    [player, capabilities],
+  );
+  const seekPlayback = useMemo(
+    () =>
+      capabilities.includes(PlayerCapabilities.playbackControl)
+        ? player?.seekPlayback?.bind(player)
+        : undefined,
+    [player, capabilities],
+  );
+  const setPlaybackSpeed = useMemo(
+    () =>
+      capabilities.includes(PlayerCapabilities.setSpeed)
+        ? player?.setPlaybackSpeed?.bind(player)
+        : undefined,
+    [player, capabilities],
   );
   const pauseFrame = useCallback((name: string) => {
     const promise = signal();

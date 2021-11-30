@@ -58,14 +58,14 @@ export interface Player {
   // If the Player supports publishing (i.e. PlayerState#capabilities contains
   // PlayerCapabilities.advertise), publish a message.
   publish(request: PublishPayload): void;
-  // Basic playback controls.
-  startPlayback(): void;
-  pausePlayback(): void;
-  seekPlayback(time: Time, backfillDuration?: Time): void;
+  // Basic playback controls. Available if `capabilities` contains PlayerCapabilities.playbackControl.
+  startPlayback?(): void;
+  pausePlayback?(): void;
+  seekPlayback?(time: Time, backfillDuration?: Time): void;
   // Seek to a particular time. Might trigger backfilling.
   // If the Player supports non-real-time speeds (i.e. PlayerState#capabilities contains
   // PlayerCapabilities.setSpeed), set that speed. E.g. 1.0 is real time, 0.2 is 20% of real time.
-  setPlaybackSpeed(speedFraction: number): void;
+  setPlaybackSpeed?(speedFraction: number): void;
   // Request a backfill for Players that support it. Allowed to be a no-op if the player does not
   // support backfilling, or if it's already playing (in which case we'd get new messages soon anyway).
   // This is currently called after subscriptions changed. We do our best in the MessagePipeline to

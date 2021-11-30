@@ -485,18 +485,6 @@ export default class Ros2Player implements Player {
   }
 
   // Bunch of unsupported stuff. Just don't do anything for these.
-  startPlayback(): void {
-    // no-op
-  }
-  pausePlayback(): void {
-    // no-op
-  }
-  seekPlayback(_time: Time): void {
-    // no-op
-  }
-  setPlaybackSpeed(_speedFraction: number): void {
-    // no-op
-  }
   requestBackfill(): void {
     // no-op
   }

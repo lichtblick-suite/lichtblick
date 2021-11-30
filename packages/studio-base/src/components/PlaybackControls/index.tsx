@@ -15,15 +15,10 @@ import { Stack, IButtonStyles, useTheme, StackItem, makeStyles } from "@fluentui
 import { merge } from "lodash";
 import { useCallback, useMemo, useState } from "react";
 
-import { compare } from "@foxglove/rostime";
+import { compare, Time } from "@foxglove/rostime";
 import HoverableIconButton from "@foxglove/studio-base/components/HoverableIconButton";
 import KeyListener from "@foxglove/studio-base/components/KeyListener";
 import MessageOrderControls from "@foxglove/studio-base/components/MessageOrderControls";
-import {
-  MessagePipelineContext,
-  useMessagePipeline,
-  useMessagePipelineGetter,
-} from "@foxglove/studio-base/components/MessagePipeline";
 import {
   jumpSeek,
   DIRECTION,
@@ -35,14 +30,6 @@ import PlaybackTimeDisplay from "./PlaybackTimeDisplay";
 import RepeatAdapter from "./RepeatAdapter";
 import Scrubber from "./Scrubber";
 
-const selectPause = (ctx: MessagePipelineContext) => ctx.pausePlayback;
-const selectPlay = (ctx: MessagePipelineContext) => ctx.startPlayback;
-const selectSeek = (ctx: MessagePipelineContext) => ctx.seekPlayback;
-
-const selectIsPlaying = (ctx: MessagePipelineContext) =>
-  ctx.playerState.activeData?.isPlaying === true;
-const selectIsActive = (ctx: MessagePipelineContext) => !!ctx.playerState.activeData;
-
 const useStyles = makeStyles((theme) => ({
   root: {
     backgroundColor: theme.palette.neutralLighterAlt,
@@ -50,31 +37,31 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-export default function PlaybackControls(): JSX.Element {
+export default function PlaybackControls({
+  play,
+  pause,
+  seek,
+  isPlaying,
+  getTimeInfo,
+}: {
+  play: () => void;
+  pause: () => void;
+  seek: (time: Time) => void;
+  isPlaying: boolean;
+  getTimeInfo: () => { startTime?: Time; endTime?: Time; currentTime?: Time };
+}): JSX.Element {
   const theme = useTheme();
   const styles = useStyles();
   const [repeat, setRepeat] = useState(false);
 
-  const pause = useMessagePipeline(selectPause);
-  const play = useMessagePipeline(selectPlay);
-  const seek = useMessagePipeline(selectSeek);
-
-  const msgPipeline = useMessagePipelineGetter();
-  const isActive = useMessagePipeline(selectIsActive);
-  const isPlaying = useMessagePipeline(selectIsPlaying);
-
   const resumePlay = useCallback(() => {
-    const {
-      startTime: start,
-      endTime: end,
-      currentTime: current,
-    } = msgPipeline().playerState.activeData ?? {};
+    const { startTime: start, endTime: end, currentTime: current } = getTimeInfo();
     // if we are at the end, we need to go back to start
     if (current && end && start && compare(current, end) >= 0) {
       seek(start);
     }
     play();
-  }, [msgPipeline, play, seek]);
+  }, [getTimeInfo, play, seek]);
 
   const toggleRepeat = useCallback(() => {
     setRepeat((old) => !old);
@@ -92,21 +79,21 @@ export default function PlaybackControls(): JSX.Element {
     () => ({
       " ": togglePlayPause,
       ArrowLeft: (ev: KeyboardEvent) => {
-        const currentTime = msgPipeline().playerState.activeData?.currentTime;
+        const { currentTime } = getTimeInfo();
         if (!currentTime) {
           return;
         }
         seek(jumpSeek(DIRECTION.BACKWARD, currentTime, ev));
       },
       ArrowRight: (ev: KeyboardEvent) => {
-        const currentTime = msgPipeline().playerState.activeData?.currentTime;
+        const { currentTime } = getTimeInfo();
         if (!currentTime) {
           return;
         }
         seek(jumpSeek(DIRECTION.FORWARD, currentTime, ev));
       },
     }),
-    [msgPipeline, seek, togglePlayPause],
+    [getTimeInfo, seek, togglePlayPause],
   );
 
   const iconButtonStyles: IButtonStyles = {
@@ -184,7 +171,6 @@ export default function PlaybackControls(): JSX.Element {
               <Tooltip contents="Loop playback">
                 <HoverableIconButton
                   checked={repeat}
-                  disabled={!isActive}
                   onClick={toggleRepeat}
                   iconProps={{
                     iconName: repeat ? "LoopFilled" : "Loop",
@@ -198,7 +184,6 @@ export default function PlaybackControls(): JSX.Element {
             </StackItem>
             <StackItem>
               <HoverableIconButton
-                disabled={!isActive}
                 onClick={isPlaying ? pause : resumePlay}
                 iconProps={{
                   iconName: isPlaying ? "Pause" : "Play",
@@ -225,9 +210,8 @@ export default function PlaybackControls(): JSX.Element {
             <Tooltip contents="Seek backward">
               <HoverableIconButton
                 iconProps={{ iconName: "Previous", iconNameActive: "PreviousFilled" }}
-                disabled={!isActive}
                 onClick={() => {
-                  const currentTime = msgPipeline().playerState.activeData?.currentTime;
+                  const { currentTime } = getTimeInfo();
                   if (!currentTime) {
                     return;
                   }
@@ -241,9 +225,8 @@ export default function PlaybackControls(): JSX.Element {
             <Tooltip contents="Seek forward">
               <HoverableIconButton
                 iconProps={{ iconName: "Next", iconNameActive: "NextFilled" }}
-                disabled={!isActive}
                 onClick={() => {
-                  const currentTime = msgPipeline().playerState.activeData?.currentTime;
+                  const { currentTime } = getTimeInfo();
                   if (!currentTime) {
                     return;
                   }

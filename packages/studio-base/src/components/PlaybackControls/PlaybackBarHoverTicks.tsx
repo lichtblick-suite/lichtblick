@@ -55,8 +55,7 @@ const TimeLabel = styled.div`
   top: 0px;
   font-family: ${fonts.MONOSPACE};
   font-size: ${({ theme }) => theme.fonts.xSmall.fontSize};
-  color: #f7be00;
-  backgroundcolor: blue;
+  color: ${({ theme }) => theme.palette.yellowDark};
   transform: translate(-50%, -50%);
   white-space: nowrap;
 `;

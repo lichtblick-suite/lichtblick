@@ -377,11 +377,12 @@ function Plot(props: Props) {
 
   const messagePipeline = useMessagePipelineGetter();
   const onClick = useCallback<NonNullable<ComponentProps<typeof PlotChart>["onClick"]>>(
-    (params: OnChartClickArgs) => {
-      const seekSeconds = params.x;
-      const { startTime: start } = messagePipeline().playerState.activeData ?? {};
-      const { seekPlayback } = messagePipeline();
-      if (!start || seekSeconds == undefined || xAxisVal !== "timestamp") {
+    ({ x: seekSeconds }: OnChartClickArgs) => {
+      const {
+        seekPlayback,
+        playerState: { activeData: { startTime: start } = {} },
+      } = messagePipeline();
+      if (!seekPlayback || !start || seekSeconds == undefined || xAxisVal !== "timestamp") {
         return;
       }
       // The player validates and clamps the time.

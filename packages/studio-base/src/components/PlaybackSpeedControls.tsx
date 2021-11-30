@@ -11,13 +11,11 @@ import {
 } from "@fluentui/react";
 import { useCallback, useEffect } from "react";
 
-import { useDataSourceInfo } from "@foxglove/studio-base/PanelAPI";
 import { useMessagePipeline } from "@foxglove/studio-base/components/MessagePipeline";
 import {
   useCurrentLayoutActions,
   useCurrentLayoutSelector,
 } from "@foxglove/studio-base/context/CurrentLayoutContext";
-import { PlayerCapabilities } from "@foxglove/studio-base/players/types";
 
 const SPEED_OPTIONS = [0.01, 0.02, 0.05, 0.1, 0.2, 0.5, 0.8, 1, 2, 3, 5];
 
@@ -33,26 +31,20 @@ export default function PlaybackSpeedControls(): JSX.Element {
   const speed = useMessagePipeline(
     useCallback(({ playerState }) => playerState.activeData?.speed, []),
   );
-  const { capabilities } = useDataSourceInfo();
-  const canSetSpeed = capabilities.includes(PlayerCapabilities.setSpeed);
-  const setPlaybackSpeed = useMessagePipeline(
-    useCallback(({ setPlaybackSpeed: pipelineSetPlaybackSpeed }) => pipelineSetPlaybackSpeed, []),
-  );
+  const setPlaybackSpeed = useMessagePipeline(useCallback((state) => state.setPlaybackSpeed, []));
   const { setPlaybackConfig } = useCurrentLayoutActions();
   const setSpeed = useCallback(
     (newSpeed: number) => {
       setPlaybackConfig({ speed: newSpeed });
-      if (canSetSpeed) {
-        setPlaybackSpeed(newSpeed);
-      }
+      setPlaybackSpeed?.(newSpeed);
     },
-    [canSetSpeed, setPlaybackConfig, setPlaybackSpeed],
+    [setPlaybackConfig, setPlaybackSpeed],
   );
 
   // Set the speed to the speed that we got from the config whenever we get a new Player.
   useEffect(() => {
     if (configSpeed != undefined) {
-      setPlaybackSpeed(configSpeed);
+      setPlaybackSpeed?.(configSpeed);
     }
   }, [configSpeed, setPlaybackSpeed]);
 

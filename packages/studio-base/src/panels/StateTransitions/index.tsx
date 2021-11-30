@@ -352,9 +352,11 @@ const StateTransitions = React.memo(function StateTransitions(props: Props) {
   const messagePipeline = useMessagePipelineGetter();
   const onClick = useCallback(
     ({ x: seekSeconds }: OnChartClickArgs) => {
-      const { startTime: start } = messagePipeline().playerState.activeData ?? {};
-      const { seekPlayback } = messagePipeline();
-      if (seekSeconds == undefined || start == undefined) {
+      const {
+        seekPlayback,
+        playerState: { activeData: { startTime: start } = {} },
+      } = messagePipeline();
+      if (!seekPlayback || seekSeconds == undefined || start == undefined) {
         return;
       }
       const seekTime = addTimes(start, fromSec(seekSeconds));

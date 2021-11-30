@@ -41,6 +41,7 @@ import LayoutBrowser from "@foxglove/studio-base/components/LayoutBrowser";
 import {
   MessagePipelineContext,
   useMessagePipeline,
+  useMessagePipelineGetter,
 } from "@foxglove/studio-base/components/MessagePipeline";
 import MultiProvider from "@foxglove/studio-base/components/MultiProvider";
 import PanelLayout from "@foxglove/studio-base/components/PanelLayout";
@@ -149,17 +150,19 @@ type WorkspaceProps = {
 };
 
 const selectPlayerPresence = ({ playerState }: MessagePipelineContext) => playerState.presence;
-const selectPlayerCapabilities = ({ playerState }: MessagePipelineContext) =>
-  playerState.capabilities;
 const selectRequestBackfill = ({ requestBackfill }: MessagePipelineContext) => requestBackfill;
 const selectPlayerProblems = ({ playerState }: MessagePipelineContext) => playerState.problems;
+const selectIsPlaying = (ctx: MessagePipelineContext) =>
+  ctx.playerState.activeData?.isPlaying === true;
+const selectPause = (ctx: MessagePipelineContext) => ctx.pausePlayback;
+const selectPlay = (ctx: MessagePipelineContext) => ctx.startPlayback;
+const selectSeek = (ctx: MessagePipelineContext) => ctx.seekPlayback;
 
 export default function Workspace(props: WorkspaceProps): JSX.Element {
   const classes = useStyles();
   const containerRef = useRef<HTMLDivElement>(ReactNull);
   const { availableSources, selectSource } = usePlayerSelection();
   const playerPresence = useMessagePipeline(selectPlayerPresence);
-  const playerCapabilities = useMessagePipeline(selectPlayerCapabilities);
   const playerProblems = useMessagePipeline(selectPlayerProblems);
 
   // file types we support for drag/drop
@@ -403,9 +406,6 @@ export default function Workspace(props: WorkspaceProps): JSX.Element {
     [openFiles],
   );
 
-  const showPlaybackControls =
-    playerPresence === PlayerPresence.NOT_PRESENT || playerCapabilities.includes("playbackControl");
-
   const workspaceActions = useMemo(
     () => ({
       panelSettingsOpen: selectedSidebarItem === "panel-settings",
@@ -465,6 +465,16 @@ export default function Workspace(props: WorkspaceProps): JSX.Element {
     return supportsAccountSettings ? ["help", "account", "preferences"] : ["help", "preferences"];
   }, [supportsAccountSettings]);
 
+  const play = useMessagePipeline(selectPlay);
+  const pause = useMessagePipeline(selectPause);
+  const seek = useMessagePipeline(selectSeek);
+  const isPlaying = useMessagePipeline(selectIsPlaying);
+  const getMessagePipeline = useMessagePipelineGetter();
+  const getTimeInfo = useCallback(
+    () => getMessagePipeline().playerState.activeData ?? {},
+    [getMessagePipeline],
+  );
+
   return (
     <MultiProvider
       providers={[
@@ -490,9 +500,15 @@ export default function Workspace(props: WorkspaceProps): JSX.Element {
           <RemountOnValueChange value={requestBackfill}>
             <Stack>
               <PanelLayout />
-              {showPlaybackControls && (
+              {play && pause && seek && (
                 <Stack.Item disableShrink>
-                  <PlaybackControls />
+                  <PlaybackControls
+                    play={play}
+                    pause={pause}
+                    seek={seek}
+                    isPlaying={isPlaying}
+                    getTimeInfo={getTimeInfo}
+                  />
                 </Stack.Item>
               )}
             </Stack>
