@@ -392,18 +392,21 @@ export default function Panel<
 
         // Otherwise, open new panel
         const newPanelPath = ownPath.concat("second");
-        void mosaicWindowActions.split({ type: panelType }).then(() => {
-          const newPanelId = getNodeAtPath(mosaicActions.getRoot(), newPanelPath) as string;
-          savePanelConfigs({
-            configs: [
-              {
-                id: newPanelId,
-                config: siblingConfigCreator(siblingDefaultConfig),
-                defaultConfig: siblingDefaultConfig,
-              },
-            ],
+        const newPanelConfig = siblingConfigCreator(siblingDefaultConfig);
+        void mosaicWindowActions
+          .split({ type: panelType, panelConfig: newPanelConfig })
+          .then(() => {
+            const newPanelId = getNodeAtPath(mosaicActions.getRoot(), newPanelPath) as string;
+            savePanelConfigs({
+              configs: [
+                {
+                  id: newPanelId,
+                  config: newPanelConfig,
+                  defaultConfig: siblingDefaultConfig,
+                },
+              ],
+            });
           });
-        });
       },
       [
         getCurrentLayoutState,
