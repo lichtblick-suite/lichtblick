@@ -28,8 +28,52 @@ const isProduction = process.env.NODE_ENV === "production";
 const rendererPath = MAIN_WINDOW_WEBPACK_ENTRY;
 
 const closeMenuItem: MenuItemConstructorOptions = isMac ? { role: "close" } : { role: "quit" };
-
 const log = Logger.getLogger(__filename);
+
+type SectionKey = "app" | "panels" | "resources" | "products" | "legal";
+type HelpInfo = {
+  title: string;
+  content?: React.ReactNode;
+  url?: string;
+};
+const helpMenuItems: Map<SectionKey, { subheader: string; links: HelpInfo[] }> = new Map([
+  [
+    "resources",
+    {
+      subheader: "External resources",
+      links: [
+        { title: "Read docs", url: "https://foxglove.dev/docs" },
+        { title: "Join our community", url: "https://foxglove.dev/community" },
+      ],
+    },
+  ],
+  [
+    "products",
+    {
+      subheader: "Products",
+      links: [
+        { title: "Foxglove Studio", url: "https://foxglove.dev/studio" },
+        { title: "Foxglove Data Platform", url: "https://foxglove.dev/data-platform" },
+      ],
+    },
+  ],
+  [
+    "legal",
+    {
+      subheader: "Legal",
+      links: [
+        { title: "License terms", url: "https://foxglove.dev/legal/studio-license" },
+        { title: "Privacy policy", url: "https://foxglove.dev/legal/privacy" },
+      ],
+    },
+  ],
+]);
+
+const getTitleCase = (baseString: string): string =>
+  baseString
+    .split(" ")
+    .map((word) => `${word[0]?.toUpperCase()}${word.substring(1)}`)
+    .join(" ");
 
 type ClearableMenu = Menu & { clear: () => void };
 
@@ -242,6 +286,16 @@ function buildMenu(browserWindow: BrowserWindow): Menu {
     });
   };
 
+  const helpSidebarItems = Array.from(helpMenuItems.values(), ({ subheader, links }) => ({
+    label: getTitleCase(subheader),
+    submenu: links.map(({ title, url }) => ({
+      label: getTitleCase(title),
+      click: url
+        ? async () => await shell.openExternal(url)
+        : () => browserWindow.webContents.send("open-help"),
+    })),
+  }));
+
   menuTemplate.push({
     role: "help",
     submenu: [
@@ -249,12 +303,9 @@ function buildMenu(browserWindow: BrowserWindow): Menu {
         label: "Welcome",
         click: () => browserWindow.webContents.send("open-welcome-layout"),
       },
+      ...helpSidebarItems,
       {
-        label: "Learn more",
-        click: () => browserWindow.webContents.send("open-help"),
-      },
-      {
-        label: "Visit website",
+        label: "Learn More",
         click: async () => await shell.openExternal("https://foxglove.dev"),
       },
       ...(isMac

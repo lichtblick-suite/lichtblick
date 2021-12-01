@@ -21,26 +21,41 @@ export const MESSAGE_PATH_SYNTAX_HELP_INFO = {
   title: "Message path syntax",
   content: MesssagePathSyntaxHelp,
 };
-const appLinks: HelpInfo[] = [
-  MESSAGE_PATH_SYNTAX_HELP_INFO,
-  { title: "Keyboard shortcuts", content: KeyboardShortcutHelp },
-];
 
-const resourceLinks = [
-  ...(isDesktopApp() ? [] : [{ title: "Desktop app", url: "https://foxglove.dev/download" }]),
-  { title: "Read docs", url: "https://foxglove.dev/docs" },
-  { title: "Join our community", url: "https://foxglove.dev/community" },
-];
-
-const productLinks = [
-  { title: "Foxglove Studio", url: "https://foxglove.dev/studio" },
-  { title: "Foxglove Data Platform", url: "https://foxglove.dev/data-platform" },
-];
-
-const legalLinks = [
-  { title: "License", url: "https://foxglove.dev/legal/studio-license" },
-  { title: "Privacy", url: "https://foxglove.dev/legal/privacy" },
-];
+type SectionKey = "app" | "panels" | "resources" | "products" | "legal";
+const helpMenuItems: Map<SectionKey, { subheader: string; links: HelpInfo[] }> = new Map([
+  [
+    "resources",
+    {
+      subheader: "External resources",
+      links: [
+        ...(isDesktopApp() ? [] : [{ title: "Desktop app", url: "https://foxglove.dev/download" }]),
+        { title: "Read docs", url: "https://foxglove.dev/docs" },
+        { title: "Join our community", url: "https://foxglove.dev/community" },
+      ],
+    },
+  ],
+  [
+    "products",
+    {
+      subheader: "Products",
+      links: [
+        { title: "Foxglove Studio", url: "https://foxglove.dev/studio" },
+        { title: "Foxglove Data Platform", url: "https://foxglove.dev/data-platform" },
+      ],
+    },
+  ],
+  [
+    "legal",
+    {
+      subheader: "Legal",
+      links: [
+        { title: "License terms", url: "https://foxglove.dev/legal/studio-license" },
+        { title: "Privacy policy", url: "https://foxglove.dev/legal/privacy" },
+      ],
+    },
+  ],
+]);
 
 const useComponentStyles = (theme: ITheme) =>
   useMemo(
@@ -78,7 +93,31 @@ export default function HelpSidebar({
   const sortByTitle = (a: PanelInfo, b: PanelInfo) =>
     a.title.localeCompare(b.title, undefined, { ignorePunctuation: true, sensitivity: "base" });
   const panels = panelCatalog.getPanels();
-  const sortedPanels = [...panels].sort(sortByTitle);
+  const sortedPanelLinks = [...panels]
+    .sort(sortByTitle)
+    .map(({ title, help }) => ({ title, content: help }));
+
+  const sections: Map<SectionKey, { subheader: string; links: HelpInfo[] } | undefined> = useMemo(
+    () =>
+      new Map([
+        [
+          "app",
+          {
+            subheader: "App",
+            links: [
+              MESSAGE_PATH_SYNTAX_HELP_INFO,
+              { title: "Keyboard shortcuts", content: KeyboardShortcutHelp },
+            ],
+          },
+        ],
+        ["panels", { subheader: "Panels", links: sortedPanelLinks }],
+        ["resources", helpMenuItems.get("resources")],
+        ["products", helpMenuItems.get("products")],
+        ["legal", helpMenuItems.get("legal")],
+      ]),
+    [sortedPanelLinks],
+  );
+  const sectionKeys = Array.from(sections.keys());
 
   const isHomeView = useMemo(
     () => (isHomeViewForTests != undefined ? isHomeViewForTests : helpInfo.content == undefined),
@@ -113,85 +152,30 @@ export default function HelpSidebar({
       <Stack>
         {isHomeView ? (
           <Stack tokens={{ childrenGap: theme.spacing.m }}>
-            <Stack.Item>
-              <Text styles={styles.subheader}>App</Text>
-              <Stack tokens={{ padding: `${theme.spacing.m} 0`, childrenGap: theme.spacing.s1 }}>
-                {appLinks.map(({ title, content }) => (
-                  <Link
-                    key={title}
-                    style={{ color: theme.semanticColors.bodyText }}
-                    onClick={() => setHelpInfo({ title, content })}
-                    styles={styles.link}
+            {sectionKeys.map((key: SectionKey) => {
+              const { subheader, links = [] } = sections.get(key) ?? {};
+              return (
+                <Stack.Item key={subheader}>
+                  <Text styles={styles.subheader}>{subheader}</Text>
+                  <Stack
+                    tokens={{ padding: `${theme.spacing.m} 0`, childrenGap: theme.spacing.s1 }}
                   >
-                    {title}
-                  </Link>
-                ))}
-              </Stack>
-            </Stack.Item>
-            <Stack.Item>
-              <Text styles={styles.subheader}>Panels</Text>
-              <Stack tokens={{ padding: `${theme.spacing.m} 0`, childrenGap: theme.spacing.s1 }}>
-                {sortedPanels.map(({ title, type, help }) => (
-                  <Link
-                    key={title}
-                    data-test={type}
-                    style={{ color: theme.semanticColors.bodyText }}
-                    onClick={() => setHelpInfo({ title, content: help })}
-                    styles={styles.link}
-                  >
-                    {title}
-                  </Link>
-                ))}
-              </Stack>
-            </Stack.Item>
-
-            <Stack.Item>
-              <Text styles={styles.subheader}>External Resources</Text>
-              <Stack tokens={{ padding: `${theme.spacing.m} 0`, childrenGap: theme.spacing.s1 }}>
-                {resourceLinks.map(({ title, url }) => (
-                  <Link
-                    key={title}
-                    style={{ color: theme.semanticColors.bodyText }}
-                    href={url}
-                    styles={styles.link}
-                  >
-                    {title}
-                  </Link>
-                ))}
-              </Stack>
-            </Stack.Item>
-
-            <Stack.Item>
-              <Text styles={styles.subheader}>Products</Text>
-              <Stack tokens={{ padding: `${theme.spacing.m} 0`, childrenGap: theme.spacing.s1 }}>
-                {productLinks.map(({ title, url }) => (
-                  <Link
-                    key={title}
-                    style={{ color: theme.semanticColors.bodyText }}
-                    href={url}
-                    styles={styles.link}
-                  >
-                    {title}
-                  </Link>
-                ))}
-              </Stack>
-            </Stack.Item>
-
-            <Stack.Item>
-              <Text styles={styles.subheader}>Legal</Text>
-              <Stack tokens={{ padding: `${theme.spacing.m} 0`, childrenGap: theme.spacing.s1 }}>
-                {legalLinks.map(({ title, url }) => (
-                  <Link
-                    key={title}
-                    style={{ color: theme.semanticColors.bodyText }}
-                    href={url}
-                    styles={styles.link}
-                  >
-                    {title}
-                  </Link>
-                ))}
-              </Stack>
-            </Stack.Item>
+                    {links.map(({ title, url, content }: HelpInfo) => (
+                      <Link
+                        key={title}
+                        data-test={title}
+                        style={{ color: theme.semanticColors.bodyText }}
+                        href={url ?? ""}
+                        onClick={() => (url ? undefined : setHelpInfo({ title, content }))}
+                        styles={styles.link}
+                      >
+                        {title}
+                      </Link>
+                    ))}
+                  </Stack>
+                </Stack.Item>
+              );
+            })}
           </Stack>
         ) : (
           <Stack tokens={{ childrenGap: theme.spacing.s2 }}>
