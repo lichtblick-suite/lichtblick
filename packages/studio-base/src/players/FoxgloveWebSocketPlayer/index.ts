@@ -231,9 +231,23 @@ export default class FoxgloveWebSocketPlayer implements Player {
       }
 
       try {
+        const receiveTime = fromNanoSec(timestamp);
+        // If time goes backwards, increment lastSeekTime and discard unemitted messages from before
+        // the discontinuity. This prevents us from queueing an unbounded number of messages when
+        // servers loop over the same recorded data multiple times. However, for now the queue can
+        // still grow unboundedly in a live system if the listener is not processing messages (such
+        // as when the app is hidden/backgrounded).
+        if (this._currentTime && isLessThan(receiveTime, this._currentTime)) {
+          ++this._lastSeekTime;
+          this._parsedMessages = [];
+        }
+        this._currentTime = receiveTime;
+        if (!this._start) {
+          this._start = receiveTime;
+        }
         this._parsedMessages.push({
           topic: chanInfo.channel.topic,
-          receiveTime: fromNanoSec(timestamp),
+          receiveTime,
           message: chanInfo.deserializer(data),
           sizeInBytes: data.byteLength,
         });
@@ -284,18 +298,6 @@ export default class FoxgloveWebSocketPlayer implements Player {
       });
     }
 
-    const currentTime =
-      this._parsedMessages.length > 0
-        ? this._parsedMessages[this._parsedMessages.length - 1]!.receiveTime
-        : this._currentTime;
-    if (!this._start) {
-      this._start = currentTime;
-    }
-    if (currentTime && this._currentTime && isLessThan(currentTime, this._currentTime)) {
-      ++this._lastSeekTime;
-    }
-    this._currentTime = currentTime;
-
     const messages = this._parsedMessages;
     this._parsedMessages = [];
     return this._listener({
@@ -311,8 +313,8 @@ export default class FoxgloveWebSocketPlayer implements Player {
         totalBytesReceived: this._receivedBytes,
         messageOrder: this._messageOrder,
         startTime: this._start ?? ZERO_TIME,
-        endTime: currentTime ?? ZERO_TIME,
-        currentTime: currentTime ?? ZERO_TIME,
+        endTime: this._currentTime ?? ZERO_TIME,
+        currentTime: this._currentTime ?? ZERO_TIME,
         isPlaying: true,
         speed: 1,
         lastSeekTime: this._lastSeekTime,
