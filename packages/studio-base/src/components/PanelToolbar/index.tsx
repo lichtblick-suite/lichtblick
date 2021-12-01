@@ -212,6 +212,14 @@ function PanelActionsDropdown({
         },
         subMenuProps: {
           items: [{ key: "dummy" }],
+          calloutProps: {
+            styles: {
+              // Work around Callout not repositioning when PanelList height changes:
+              // https://github.com/foxglove/studio/issues/2205
+              // https://github.com/microsoft/fluentui/issues/18839
+              calloutMain: { height: "100%" },
+            },
+          },
           onRenderMenuList: () => (
             <PanelList
               selectedPanelTitle={panelContext?.title}
