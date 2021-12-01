@@ -434,7 +434,7 @@ export default class SceneBuilder implements MarkerProvider {
   private _transformMarkerPose = (topic: string, marker: BaseMarker): MutablePose | undefined => {
     const frame_id = marker.header.frame_id;
 
-    if (frame_id.length === 0) {
+    if (!frame_id) {
       const error = this._addError(this.errors.topicsMissingFrameIds, topic);
       error.namespaces.add(marker.ns);
       return undefined;
@@ -453,12 +453,7 @@ export default class SceneBuilder implements MarkerProvider {
     badFrameError.namespaces.add(namespace);
     badFrameError.frameIds.add(frame_id);
 
-    const pose = (this.transforms as Transforms).apply(
-      emptyPose(),
-      marker.pose,
-      frame_id,
-      this.rootTransformID as string,
-    );
+    const pose = this.transforms?.apply(emptyPose(), marker.pose, frame_id, this.rootTransformID!);
     if (!pose) {
       const topicMissingError = this._addError(this.errors.topicsMissingTransforms, topic);
       topicMissingError.namespaces.add(namespace);
