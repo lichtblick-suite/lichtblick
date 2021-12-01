@@ -458,17 +458,18 @@ class StudioWindow {
       }),
     );
 
-    for (const sourceName of this._inputSources) {
-      fileMenu.submenu?.append(
-        new MenuItem({
-          label: `Open ${sourceName}`,
+    fileMenu.submenu?.append(
+      new MenuItem({
+        label: "Open Connection",
+        submenu: Array.from(this._inputSources).map((sourceName) => ({
+          label: sourceName,
           click: async () => {
             await simulateUserClick(browserWindow);
             browserWindow.webContents.send("menu.click-input-source", sourceName);
           },
-        }),
-      );
-    }
+        })),
+      }),
+    );
 
     if (!isMac) {
       fileMenu.submenu?.append(
