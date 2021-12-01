@@ -409,7 +409,7 @@ export default class RandomAccessPlayer implements Player {
       return;
     }
 
-    // our read finished and we didn't seed during the read, prepare for the next tick
+    // our read finished and we didn't seek during the read, prepare for the next tick
     // we need to do this after checking for seek changes since seek time may have changed
     this._nextReadStartTime = add(end, { sec: 0, nsec: 1 });
 
@@ -559,11 +559,20 @@ export default class RandomAccessPlayer implements Player {
   }
 
   private _seekPlaybackInternal = debouncePromise(async (backfillDuration?: Time) => {
+    // track seek time so _tick can know if a seek happened while reading messages in a tick
     const seekTime = Date.now();
     this._lastSeekStartTime = seekTime;
+
     this._cancelSeekBackfill = false;
     // cancel any queued _emitState that might later emit messages from before we seeked
     this._messages = [];
+
+    // If a backfill duration is provided, we always perform the backfill even if playing
+    // If a backfill duration is not provided, we only perform the backfill when paused
+    if (this._isPlaying && !backfillDuration) {
+      this._lastSeekEmitTime = seekTime;
+      return;
+    }
 
     // backfill includes the current time we've seek'd to
     // playback after backfill will load messages after the seek time
@@ -583,25 +592,26 @@ export default class RandomAccessPlayer implements Player {
       this._end,
     );
 
-    // Only getMessages if we have some messages to get.
-    if (backfillDuration || !this._isPlaying) {
-      const { parsedMessages: messages } = await this._getMessages(backfillStart, backfillEnd);
-      // Only emit the messages if we haven't seeked again / emitted messages since we
-      // started loading them. Note that for the latter part just checking for `isPlaying`
-      // is not enough because the user might have started playback and then paused again!
-      // Therefore we really need something like `this._cancelSeekBackfill`.
-      if (this._lastSeekStartTime === seekTime && !this._cancelSeekBackfill) {
-        // similar to _tick(), we set the next start time past where we have read
-        // this happens after reading and confirming that playback or other seeking hasn't happened
-        this._nextReadStartTime = add(backfillEnd, { sec: 0, nsec: 1 });
+    const prevNextReadStartTime = this._nextReadStartTime;
+    const { parsedMessages: messages } = await this._getMessages(backfillStart, backfillEnd);
 
-        this._messages = messages;
-        this._lastSeekEmitTime = seekTime;
-        this._emitState();
-      }
-    } else {
-      // If we are playing, make sure we set this emit time so that consumers will know that we seeked.
+    // If the read time was altered (another seek request), then ignore messages from this seek
+    if (prevNextReadStartTime !== this._nextReadStartTime) {
+      return;
+    }
+
+    // Only emit the messages if we haven't seeked again / emitted messages since we
+    // started loading them. Note that for the latter part just checking for `isPlaying`
+    // is not enough because the user might have started playback and then paused again!
+    // Therefore we really need something like `this._cancelSeekBackfill`.
+    if (!this._cancelSeekBackfill) {
+      // similar to _tick(), we set the next start time past where we have read
+      // this happens after reading and confirming that playback or other seeking hasn't happened
+      this._nextReadStartTime = add(backfillEnd, { sec: 0, nsec: 1 });
+
+      this._messages = messages;
       this._lastSeekEmitTime = seekTime;
+      this._emitState();
     }
   });
 
@@ -610,6 +620,7 @@ export default class RandomAccessPlayer implements Player {
     if (!this._initialized) {
       return;
     }
+
     this._metricsCollector.seek(time);
     this._setNextReadStartTime(time);
     this._seekPlaybackInternal(backfillDuration);

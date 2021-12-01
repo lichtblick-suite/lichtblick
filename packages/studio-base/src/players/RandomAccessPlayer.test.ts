@@ -163,6 +163,46 @@ describe("RandomAccessPlayer", () => {
     source.close();
   });
 
+  // Seeking while loading messages for a previous seek cancels the previous seek
+  it("a new seek during existing seek cancels existing seek", async () => {
+    const provider = new TestProvider();
+    const source = new RandomAccessPlayer(
+      { name: "TestProvider", args: { provider }, children: [] },
+      { ...playerOptions, seekToTime: getSeekToTime() },
+    );
+    const store = new MessageStore(2);
+    source.setListener(store.add);
+
+    await store.done;
+
+    const emptyMessages = async (): Promise<GetMessagesResult> => {
+      return {};
+    };
+
+    provider.getMessages = emptyMessages;
+
+    store.reset(1);
+    source.setSubscriptions([{ topic: "/foo/bar" }]);
+    source.requestBackfill();
+
+    await store.done;
+
+    // This replicates behavior of seeking during a processing sync
+    provider.getMessages = async (): Promise<GetMessagesResult> => {
+      provider.getMessages = emptyMessages;
+      source.seekPlayback({ sec: 11, nsec: 0 });
+      return {};
+    };
+
+    store.reset(1);
+    source.seekPlayback({ sec: 11, nsec: 0 });
+
+    const messages: any = await store.done;
+    expect(messages[0]!.activeData.currentTime).toEqual({ sec: 11, nsec: 0 });
+
+    source.close();
+  });
+
   it("calls listener with player state changes on play/pause", async () => {
     const provider = new TestProvider();
     const source = new RandomAccessPlayer(
@@ -540,6 +580,7 @@ describe("RandomAccessPlayer", () => {
           expect(end).toEqual({ sec: 10, nsec: 0 });
           return getMessagesResult;
         case 2: {
+          // from starting playback (tick)
           expect(start).toEqual({ sec: 10, nsec: 0 });
           expect(end).toEqual({ sec: 10, nsec: 4000000 });
           const parsedMessages: MessageEvent<unknown>[] = [
@@ -1008,7 +1049,7 @@ describe("RandomAccessPlayer", () => {
     lastGetMessagesCall.resolve(getMessagesResult);
     expect(lastGetMessagesCall).toEqual({
       start: { sec: 10, nsec: 0 }, // Clamped to start
-      end: { sec: 10, nsec: 1 }, // Clamped to start
+      end: { sec: 10, nsec: 0 }, // Clamped to start
       topics: { parsedMessages: ["/foo/bar"] },
       resolve: expect.any(Function),
     });

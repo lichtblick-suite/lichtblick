@@ -15,7 +15,6 @@ import {
   PropsWithChildren,
   useCallback,
   useContext,
-  useEffect,
   useLayoutEffect,
   useMemo,
   useRef,
@@ -119,10 +118,10 @@ export default function PlayerManager(props: PropsWithChildren<PlayerManagerProp
     return headerStampPlayer;
   }, [basePlayer, initialMessageOrder, userNodeActions]);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     player?.setMessageOrder(messageOrder ?? DEFAULT_MESSAGE_ORDER);
   }, [player, messageOrder]);
-  useEffect(() => {
+  useLayoutEffect(() => {
     player?.setUserNodes(userNodes ?? EMPTY_USER_NODES);
   }, [player, userNodes]);
 
