@@ -252,16 +252,51 @@ export default function Workspace(props: WorkspaceProps): JSX.Element {
   useCalloutDismissalBlocker();
 
   useNativeAppMenuEvent(
-    "open-preferences",
+    "open-layouts",
     useCallback(() => {
-      setSelectedSidebarItem("preferences");
+      setSelectedSidebarItem("layouts");
     }, []),
   );
 
   useNativeAppMenuEvent(
-    "open-help",
+    "open-add-panel",
     useCallback(() => {
-      setSelectedSidebarItem("help");
+      setSelectedSidebarItem("add-panel");
+    }, []),
+  );
+
+  useNativeAppMenuEvent(
+    "open-panel-settings",
+    useCallback(() => {
+      setSelectedSidebarItem("panel-settings");
+    }, []),
+  );
+
+  useNativeAppMenuEvent(
+    "open-variables",
+    useCallback(() => {
+      setSelectedSidebarItem("variables");
+    }, []),
+  );
+
+  useNativeAppMenuEvent(
+    "open-extensions",
+    useCallback(() => {
+      setSelectedSidebarItem("extensions");
+    }, []),
+  );
+
+  useNativeAppMenuEvent(
+    "open-account",
+    useCallback(() => {
+      setSelectedSidebarItem("account");
+    }, []),
+  );
+
+  useNativeAppMenuEvent(
+    "open-preferences",
+    useCallback(() => {
+      setSelectedSidebarItem("preferences");
     }, []),
   );
 

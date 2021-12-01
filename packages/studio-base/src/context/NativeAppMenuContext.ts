@@ -4,7 +4,16 @@
 
 import { createContext, useContext } from "react";
 
-export type NativeAppMenuEvent = "open-preferences" | "open-help" | "open-welcome-layout";
+export type NativeAppMenuEvent =
+  | "open-layouts"
+  | "open-add-panel"
+  | "open-panel-settings"
+  | "open-variables"
+  | "open-extensions"
+  | "open-help"
+  | "open-account"
+  | "open-preferences"
+  | "open-welcome-layout";
 
 type Handler = () => void;
 
