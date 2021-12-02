@@ -70,12 +70,10 @@ function getEndTime(ctx: MessagePipelineContext) {
 
 type Props = {
   componentId: string;
-  // When true, this will display the hover time above the hover ticks
-  displayHoverTime: boolean;
 };
 
 export default function PlaybackBarHoverTicks(props: Props): JSX.Element {
-  const { componentId, displayHoverTime } = props;
+  const { componentId } = props;
 
   const startTime = useMessagePipeline(getStartTime);
   const endTime = useMessagePipeline(getEndTime);
@@ -114,11 +112,14 @@ export default function PlaybackBarHoverTicks(props: Props): JSX.Element {
     };
   }, [width, startTime, endTime]);
 
+  // Hover time is only displayed when the hover value originates from other components
+  const displayHoverTime = hoverValue != undefined && hoverValue.componentId !== componentId;
+
   return (
     <div ref={ref} style={{ width: "100%" }}>
       {scaleBounds && (
         <HoverBar componentId={componentId} scales={scaleBounds} isTimestampScale>
-          {hoverValue != undefined && displayHoverTime && <TimeLabel>{hoverTimeDisplay}</TimeLabel>}
+          {displayHoverTime && <TimeLabel>{hoverTimeDisplay}</TimeLabel>}
           <TopTick />
           <BottomTick />
         </HoverBar>

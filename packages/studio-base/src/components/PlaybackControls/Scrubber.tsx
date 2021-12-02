@@ -226,10 +226,7 @@ export default function Scrubber(props: Props): JSX.Element {
           renderSlider={renderSlider}
         />
       </div>
-      <PlaybackBarHoverTicks
-        componentId={hoverComponentId}
-        displayHoverTime={tooltipState == undefined}
-      />
+      <PlaybackBarHoverTicks componentId={hoverComponentId} />
     </>
   );
 }
