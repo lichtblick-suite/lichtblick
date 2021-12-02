@@ -76,6 +76,7 @@ function MapPanel(props: MapPanelProps): JSX.Element {
         (topic) =>
           topic.datatype === "sensor_msgs/NavSatFix" ||
           topic.datatype === "sensor_msgs/msg/NavSatFix" ||
+          topic.datatype === "ros.sensor_msgs.NavSatFix" ||
           topic.datatype === "foxglove.LocationFix",
       )
       .map((topic) => topic.name);

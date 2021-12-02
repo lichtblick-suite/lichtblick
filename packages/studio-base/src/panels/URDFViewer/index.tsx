@@ -170,7 +170,9 @@ function URDFViewer({ config, saveConfig }: Props) {
   const { topics } = PanelAPI.useDataSourceInfo();
   const topicOptions = useMemo(() => {
     const options = filterMap(topics, ({ name, datatype }) =>
-      datatype === "sensor_msgs/JointState" || datatype === "sensor_msgs/msg/JointState"
+      datatype === "sensor_msgs/JointState" ||
+      datatype === "sensor_msgs/msg/JointState" ||
+      datatype === "ros.sensor_msgs.JointState"
         ? { key: name, text: name }
         : undefined,
     );

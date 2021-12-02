@@ -46,7 +46,9 @@ const getTopicsWithHeader = memoizeWeak((topics: Topic[], datatypes: RosDatatype
       fields?.find(
         (field) =>
           field.name === "header" &&
-          (field.type === "std_msgs/Header" || field.type === "std_msgs/msg/Header"),
+          (field.type === "std_msgs/Header" ||
+            field.type === "std_msgs/msg/Header" ||
+            field.type === "ros.std_msgs.Header"),
       )
     );
   });

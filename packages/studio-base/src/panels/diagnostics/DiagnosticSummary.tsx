@@ -257,7 +257,11 @@ function DiagnosticSummary(props: Props): JSX.Element {
       topicToRender={topicToRender}
       onChange={(newTopicToRender) => saveConfig({ topicToRender: newTopicToRender })}
       topics={topics}
-      allowedDatatypes={["diagnostic_msgs/DiagnosticArray", "diagnostic_msgs/msg/DiagnosticArray"]}
+      allowedDatatypes={[
+        "diagnostic_msgs/DiagnosticArray",
+        "diagnostic_msgs/msg/DiagnosticArray",
+        "ros.diagnostic_msgs.DiagnosticArray",
+      ]}
       defaultTopicToRender={DIAGNOSTIC_TOPIC}
     />
   );

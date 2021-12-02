@@ -39,8 +39,12 @@ type Props = {
   saveConfig: (arg0: Config) => void;
 };
 
-const ROS1_LOG = "rosgraph_msgs/Log";
-const ROS2_LOG = "rcl_interfaces/msg/Log";
+const SUPPORTED_DATATYPES = [
+  "rosgraph_msgs/Log",
+  "rcl_interfaces/msg/Log",
+  "ros.rosgraph_msgs.Log",
+  "ros.rcl_interfaces.Log",
+];
 
 const LogPanel = React.memo(({ config, saveConfig }: Props) => {
   const { topics } = PanelAPI.useDataSourceInfo();
@@ -55,9 +59,7 @@ const LogPanel = React.memo(({ config, saveConfig }: Props) => {
   );
 
   const defaultTopicToRender = useMemo(
-    () =>
-      topics.find((topic) => topic.datatype === ROS1_LOG || topic.datatype === ROS2_LOG)?.name ??
-      "/rosout",
+    () => topics.find((topic) => SUPPORTED_DATATYPES.includes(topic.datatype))?.name ?? "/rosout",
     [topics],
   );
 
@@ -85,7 +87,7 @@ const LogPanel = React.memo(({ config, saveConfig }: Props) => {
       topicToRender={topicToRender}
       onChange={(newTopicToRender) => saveConfig({ ...config, topicToRender: newTopicToRender })}
       topics={topics}
-      allowedDatatypes={[ROS1_LOG, ROS2_LOG]}
+      allowedDatatypes={SUPPORTED_DATATYPES}
       defaultTopicToRender={defaultTopicToRender}
     />
   );

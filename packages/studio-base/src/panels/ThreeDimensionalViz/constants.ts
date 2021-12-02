@@ -24,6 +24,13 @@ export const LAYER_INDEX_HIGHLIGHT_BASE = 1000;
 export const TRANSFORM_TOPIC = "/tf";
 export const TRANSFORM_STAMPED_DATATYPES = [
   "geometry_msgs/TransformStamped",
+  "ros.geometry_msgs.TransformStamped",
   "geometry_msgs/msg/TransformStamped",
 ];
-export const TF_DATATYPES = ["tf/tfMessage", "tf2_msgs/TFMessage", "tf2_msgs/msg/TFMessage"];
+export const TF_DATATYPES = [
+  "tf/tfMessage",
+  "ros.tf.tfMessage",
+  "tf2_msgs/TFMessage",
+  "tf2_msgs/msg/TFMessage",
+  "ros.tf2_msgs.TFMessage",
+];

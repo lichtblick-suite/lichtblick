@@ -143,7 +143,13 @@ export function filterOutSupersededMessages<T extends Pick<MessageEvent<unknown>
   // Later messages take precedence over earlier messages, so iterate from latest to earliest to
   // find the last one that matters.
   const reversedMessages = messages.slice().reverse();
-  if (["visualization_msgs/MarkerArray", "visualization_msgs/msg/MarkerArray"].includes(datatype)) {
+  if (
+    [
+      "visualization_msgs/MarkerArray",
+      "visualization_msgs/msg/MarkerArray",
+      "ros.visualization_msgs.MarkerArray",
+    ].includes(datatype)
+  ) {
     // Many marker arrays begin with a command to "delete all markers on this topic". If we see
     // this, we can ignore any earlier messages on the topic.
     const earliestMessageToKeepIndex = reversedMessages.findIndex(({ message }) => {
@@ -800,16 +806,19 @@ export default class SceneBuilder implements MarkerProvider {
     switch (datatype) {
       case "visualization_msgs/Marker":
       case "visualization_msgs/msg/Marker":
+      case "ros.visualization_msgs.Marker":
         this._consumeMarker(topic, message as BaseMarker);
 
         break;
       case "visualization_msgs/MarkerArray":
       case "visualization_msgs/msg/MarkerArray":
+      case "ros.visualization_msgs.MarkerArray":
         this._consumeMarkerArray(topic, message as { markers: BaseMarker[] });
 
         break;
       case "geometry_msgs/PoseStamped":
-      case "geometry_msgs/msg/PoseStamped": {
+      case "geometry_msgs/msg/PoseStamped":
+      case "ros.geometry_msgs.PoseStamped": {
         // make synthetic arrow marker from the stamped pose
         const pose = (msg.message as PoseStamped).pose;
         this.collectors[topic]!.addNonMarker(
@@ -824,12 +833,14 @@ export default class SceneBuilder implements MarkerProvider {
       }
       case "nav_msgs/OccupancyGrid":
       case "nav_msgs/msg/OccupancyGrid":
+      case "ros.nav_msgs.OccupancyGrid":
         // flatten btn: set empty z values to be at the same level as the flattenedZHeightPose
         this._consumeOccupancyGrid(topic, message as NavMsgs$OccupancyGrid);
 
         break;
       case "nav_msgs/Path":
-      case "nav_msgs/msg/Path": {
+      case "nav_msgs/msg/Path":
+      case "ros.nav_msgs.Path": {
         const topicSettings = this._settingsByKey[`t:${topic}`];
 
         const pathStamped = message as NavMsgs$Path;
@@ -849,10 +860,12 @@ export default class SceneBuilder implements MarkerProvider {
       }
       case "sensor_msgs/PointCloud2":
       case "sensor_msgs/msg/PointCloud2":
+      case "ros.sensor_msgs.PointCloud2":
         this._consumeNonMarkerMessage(topic, message as StampedMessage, 102);
         break;
       case "velodyne_msgs/VelodyneScan":
-      case "velodyne_msgs/msg/VelodyneScan": {
+      case "velodyne_msgs/msg/VelodyneScan":
+      case "ros.velodyne_msgs.VelodyneScan": {
         const converted = this._velodyneCloudConverter.decode(message as VelodyneScan);
         if (converted) {
           this._consumeNonMarkerMessage(topic, converted, 102);
@@ -861,14 +874,17 @@ export default class SceneBuilder implements MarkerProvider {
       }
       case "sensor_msgs/LaserScan":
       case "sensor_msgs/msg/LaserScan":
+      case "ros.sensor_msgs.LaserScan":
         this._consumeNonMarkerMessage(topic, message as StampedMessage, 104);
         break;
       case "std_msgs/ColorRGBA":
       case "std_msgs/msg/ColorRGBA":
+      case "ros.std_msgs.ColorRGBA":
         this._consumeColor(msg as MessageEvent<Color>);
         break;
       case "geometry_msgs/PolygonStamped":
-      case "geometry_msgs/msg/PolygonStamped": {
+      case "geometry_msgs/msg/PolygonStamped":
+      case "ros.geometry_msgs.PolygonStamped": {
         // convert Polygon to a line strip
         const polygonStamped = message as GeometryMsgs$PolygonStamped;
         const polygon = polygonStamped.polygon;

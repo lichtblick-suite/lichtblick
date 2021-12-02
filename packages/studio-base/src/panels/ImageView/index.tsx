@@ -362,6 +362,7 @@ function ImageView(props: Props) {
       // Single marker
       "visualization_msgs/ImageMarker",
       "visualization_msgs/msg/ImageMarker",
+      "ros.visualization_msgs.ImageMarker",
       // Marker arrays
       "foxglove_msgs/ImageMarkerArray",
       "foxglove_msgs/msg/ImageMarkerArray",
@@ -369,6 +370,7 @@ function ImageView(props: Props) {
       "studio_msgs/msg/ImageMarkerArray",
       "visualization_msgs/ImageMarkerArray",
       "visualization_msgs/msg/ImageMarkerArray",
+      "ros.visualization_msgs.ImageMarkerArray",
       // backwards compat with webviz
       "webviz_msgs/ImageMarkerArray",
     ],

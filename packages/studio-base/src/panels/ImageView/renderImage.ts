@@ -37,12 +37,18 @@ import {
 } from "./decodings";
 import { buildMarkerData, Dimensions, RawMarkerData, MarkerData, RenderOptions } from "./util";
 
-const UNCOMPRESSED_IMAGE_DATATYPES = ["sensor_msgs/Image", "sensor_msgs/msg/Image"];
+const UNCOMPRESSED_IMAGE_DATATYPES = [
+  "sensor_msgs/Image",
+  "sensor_msgs/msg/Image",
+  "ros.sensor_msgs.Image",
+];
 export const IMAGE_DATATYPES = [
   "sensor_msgs/Image",
   "sensor_msgs/msg/Image",
+  "ros.sensor_msgs.Image",
   "sensor_msgs/CompressedImage",
   "sensor_msgs/msg/CompressedImage",
+  "ros.sensor_msgs.CompressedImage",
 ];
 
 // Just globally keep track of if we've shown an error in rendering, since typically when you get
