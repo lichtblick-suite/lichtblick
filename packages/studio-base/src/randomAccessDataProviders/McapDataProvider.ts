@@ -74,10 +74,10 @@ export default class McapDataProvider implements RandomAccessDataProvider {
             break;
           }
           let messageDeserializer;
-          if (record.schema === "ros1") {
+          if (record.encoding === "ros1") {
             const parsedDefinitions = parseMessageDefinition(record.schema);
             messageDeserializer = new LazyMessageReader(parsedDefinitions);
-          } else if (record.schema === "ros2") {
+          } else if (record.encoding === "ros2") {
             const parsedDefinitions = parseMessageDefinition(record.schema, {
               ros2: true,
             });
