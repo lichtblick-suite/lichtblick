@@ -315,7 +315,6 @@ export type PointCloud2 = Readonly<
     is_bigendian: boolean;
     point_step: number; // Length of point in bytes
     row_step: number; // Length of row in bytes
-    // TODO(steel): Figure out how to make data read-only in flow.
     data: Uint8Array;
     is_dense: number;
     // this is appended by scene builder
