@@ -64,6 +64,25 @@ export function messagePathStructures(
 
   lastDatatypes = undefined;
   const structureFor = memoize((datatype: string): MessagePathStructureItemMessage => {
+    if (datatype === "time" || datatype === "duration") {
+      return {
+        structureType: "message",
+        nextByName: {
+          sec: {
+            structureType: "primitive",
+            primitiveType: "uint32",
+            datatype: "",
+          },
+          nsec: {
+            structureType: "primitive",
+            primitiveType: "uint32",
+            datatype: "",
+          },
+        },
+        datatype,
+      };
+    }
+
     const nextByName: Record<string, MessagePathStructureItem> = {};
     const rosDatatype = datatypes.get(datatype);
     if (!rosDatatype) {
@@ -107,6 +126,7 @@ export function validTerminatingStructureItem(
     !!structureItem &&
     (!validTypes ||
       validTypes.includes(structureItem.structureType) ||
+      validTypes.includes(structureItem.datatype) ||
       (structureItem.structureType === "primitive" &&
         validTypes.includes(structureItem.primitiveType)))
   );

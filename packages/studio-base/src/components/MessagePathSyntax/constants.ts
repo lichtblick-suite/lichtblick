@@ -24,8 +24,6 @@ const RosPrimitives = {
   float32: undefined,
   float64: undefined,
   string: undefined,
-  time: undefined,
-  duration: undefined,
   json: undefined,
 };
 

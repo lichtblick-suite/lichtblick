@@ -182,11 +182,6 @@ export function fillInGlobalVariablesInPath(
   };
 }
 
-const TIME_NEXT_BY_NAME: Record<string, MessagePathStructureItem> = Object.freeze({
-  sec: { structureType: "primitive", primitiveType: "int32", datatype: "time" },
-  nsec: { structureType: "primitive", primitiveType: "int32", datatype: "time" },
-});
-
 // Get a new item that has `queriedData` set to the values and paths as queried by `rosPath`.
 // Exported just for tests.
 export function getMessagePathDataItems(
@@ -252,17 +247,6 @@ export function getMessagePathDataItems(
           ? next
           : { structureType: "primitive", primitiveType: "json", datatype: "" };
       traverse(value[pathItem.name], pathIndex + 1, `${path}.${pathItem.name}`, actualNext);
-    } else if (
-      pathItem.type === "name" &&
-      structureItem.structureType === "primitive" &&
-      (structureItem.primitiveType === "time" || structureItem.primitiveType === "duration")
-    ) {
-      traverse(
-        value[pathItem.name],
-        pathIndex + 1,
-        `${path}.${pathItem.name}`,
-        TIME_NEXT_BY_NAME[pathItem.name],
-      );
     } else if (
       pathItem.type === "slice" &&
       (structureItem.structureType === "array" || structureIsJson)

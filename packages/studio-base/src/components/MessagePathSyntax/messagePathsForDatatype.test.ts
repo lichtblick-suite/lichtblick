@@ -81,9 +81,12 @@ describe("messagePathStructures", () => {
                 datatype: "std_msgs/Header",
               },
               stamp: {
-                primitiveType: "time",
-                structureType: "primitive",
-                datatype: "std_msgs/Header",
+                structureType: "message",
+                nextByName: {
+                  sec: { primitiveType: "uint32", structureType: "primitive", datatype: "" },
+                  nsec: { primitiveType: "uint32", structureType: "primitive", datatype: "" },
+                },
+                datatype: "time",
               },
             },
             structureType: "message",
@@ -113,9 +116,12 @@ describe("messagePathStructures", () => {
                 datatype: "std_msgs/Header",
               },
               stamp: {
-                primitiveType: "time",
-                structureType: "primitive",
-                datatype: "std_msgs/Header",
+                structureType: "message",
+                nextByName: {
+                  sec: { primitiveType: "uint32", structureType: "primitive", datatype: "" },
+                  nsec: { primitiveType: "uint32", structureType: "primitive", datatype: "" },
+                },
+                datatype: "time",
               },
             },
             structureType: "message",
@@ -145,9 +151,12 @@ describe("messagePathStructures", () => {
                     datatype: "std_msgs/Header",
                   },
                   stamp: {
-                    primitiveType: "time",
-                    structureType: "primitive",
-                    datatype: "std_msgs/Header",
+                    structureType: "message",
+                    nextByName: {
+                      sec: { primitiveType: "uint32", structureType: "primitive", datatype: "" },
+                      nsec: { primitiveType: "uint32", structureType: "primitive", datatype: "" },
+                    },
+                    datatype: "time",
                   },
                 },
                 structureType: "message",
@@ -174,7 +183,14 @@ describe("messagePathStructures", () => {
             datatype: "std_msgs/Header",
           },
           seq: { primitiveType: "uint32", structureType: "primitive", datatype: "std_msgs/Header" },
-          stamp: { primitiveType: "time", structureType: "primitive", datatype: "std_msgs/Header" },
+          stamp: {
+            structureType: "message",
+            nextByName: {
+              sec: { primitiveType: "uint32", structureType: "primitive", datatype: "" },
+              nsec: { primitiveType: "uint32", structureType: "primitive", datatype: "" },
+            },
+            datatype: "time",
+          },
         },
         structureType: "message",
         datatype: "std_msgs/Header",
@@ -204,6 +220,8 @@ describe("messagePathsForDatatype", () => {
       ".header.frame_id",
       ".header.seq",
       ".header.stamp",
+      ".header.stamp.nsec",
+      ".header.stamp.sec",
       ".some_pose",
       ".some_pose.dummy_array",
       ".some_pose.dummy_array[:]",
@@ -211,6 +229,8 @@ describe("messagePathsForDatatype", () => {
       ".some_pose.header.frame_id",
       ".some_pose.header.seq",
       ".some_pose.header.stamp",
+      ".some_pose.header.stamp.nsec",
+      ".some_pose.header.stamp.sec",
       ".some_pose.x",
     ]);
     expect(messagePathsForDatatype("msgs/Log", datatypes)).toEqual(["", ".id", ".myJson"]);
@@ -253,19 +273,31 @@ describe("validTerminatingStructureItem", () => {
     ).toEqual(false);
   });
 
-  it("works for primitiveType", () => {
+  // time and duration are special sturctures. Even tho they are technically a _message_ structure type
+  // we support using them as a terminating sturcture item since they can also be represented as a single value
+  it("works for time and duration", () => {
     expect(
       validTerminatingStructureItem(
-        { structureType: "primitive", primitiveType: "time", datatype: "" },
+        { structureType: "message", nextByName: {}, datatype: "time" },
         ["time"],
       ),
     ).toEqual(true);
+
     expect(
       validTerminatingStructureItem(
-        { structureType: "primitive", primitiveType: "time", datatype: "" },
+        { structureType: "message", nextByName: {}, datatype: "duration" },
+        ["duration"],
+      ),
+    ).toEqual(true);
+  });
+
+  it("works for primitiveType", () => {
+    expect(
+      validTerminatingStructureItem(
+        { structureType: "primitive", primitiveType: "uint32", datatype: "" },
         ["uint32"],
       ),
-    ).toEqual(false);
+    ).toEqual(true);
   });
 });
 
@@ -360,6 +392,22 @@ describe("traverseStructure", () => {
       msgPathPart: undefined,
       structureItem: { datatype: "msgs/Log", structureType: "primitive", primitiveType: "json" },
       valid: true,
+    });
+
+    expect(
+      traverseStructure(structure, [
+        { type: "name", name: "header" },
+        { type: "name", name: "stamp" },
+        { type: "name", name: "sec" },
+      ]),
+    ).toEqual({
+      valid: true,
+      msgPathPart: undefined,
+      structureItem: {
+        datatype: "",
+        primitiveType: "uint32",
+        structureType: "primitive",
+      },
     });
 
     // Invalid:

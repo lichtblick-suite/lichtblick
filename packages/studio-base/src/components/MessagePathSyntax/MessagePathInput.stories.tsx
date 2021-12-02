@@ -159,6 +159,9 @@ function MessagePathPerformanceStory(props: { path: string; prioritizedDatatype?
 
 storiesOf("components/MessagePathInput", module)
   .addParameters({ colorScheme: "dark" })
+  .add("path with header fields", () => {
+    return <MessagePathInputStory path="/some_topic/state.header.stamp.sec" />;
+  })
   .add("autocomplete topics", () => {
     return <MessagePathInputStory path="/" />;
   })
