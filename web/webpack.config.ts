@@ -29,23 +29,16 @@ const devServerConfig: WebpackConfiguration = {
   },
 
   devServer: {
-    contentBase: path.resolve(__dirname, ".webpack"),
+    static: {
+      directory: path.resolve(__dirname, ".webpack"),
+    },
     hot: true,
     // The problem and solution are described at <https://github.com/webpack/webpack-dev-server/issues/1604>.
     // When running in dev mode two errors are logged to the dev console:
     //  "Invalid Host/Origin header"
     //  "[WDS] Disconnected!"
     // Since we are only connecting to localhost, DNS rebinding attacks are not a concern during dev
-    disableHostCheck: true,
-
-    // (For now) extensions also do not work with hot reloading because we need load the extension as a module
-    // and injecting hot reloading breaks the "library" export we've setup in extensions.config.ts
-    injectClient: (compilerConfig) => {
-      return compilerConfig.name === "main";
-    },
-    injectHot: (compilerConfig) => {
-      return compilerConfig.name === "main";
-    },
+    allowedHosts: "all",
   },
 
   plugins: [new CleanWebpackPlugin()],

@@ -180,6 +180,11 @@ export function makeConfig(
                 replace:
                   "throw new Error('[Foxglove] This module is not supported in the browser.');",
               },
+              {
+                search: `getModuleResolver=function(e){let t;try{t=require(e)}`,
+                replace:
+                  "getModuleResolver=function(e){let t;try{throw new Error('[Foxglove] This module is not supported in the browser.')}",
+              },
             ],
           },
         },

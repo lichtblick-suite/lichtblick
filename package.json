@@ -75,7 +75,7 @@
     "@types/pngjs": "^6.0.1",
     "@types/semver": "^7.3.9",
     "@types/utif": "^3.0.1",
-    "@types/webpack-dev-server": "3.11.6",
+    "@types/webpack-dev-server": "4.5.0",
     "@typescript-eslint/eslint-plugin": "4.31.1",
     "@typescript-eslint/parser": "4.31.1",
     "@xmldom/xmldom": "0.7.5",
@@ -120,7 +120,7 @@
     "utif": "3.1.0",
     "webpack": "5.64.4",
     "webpack-cli": "4.9.1",
-    "webpack-dev-server": "3.11.3",
+    "webpack-dev-server": "4.6.0",
     "webpack-hot-middleware": "2.25.1"
   },
   "packageManager": "yarn@3.1.0"

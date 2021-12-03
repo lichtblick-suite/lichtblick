@@ -35,12 +35,18 @@ const devServerConfig: WebpackConfiguration = {
   },
 
   devServer: {
-    contentBase: path.resolve(__dirname, ".webpack"),
-    writeToDisk: (filePath) => {
-      // Electron needs to open the main thread source and preload source from disk
-      // avoid writing the hot-update js and json files
-      // allow writing package.json at root -> needed for electron to find entrypoint
-      return /\.webpack[\\/]((main|extensions)[\\/](?!.*hot-update)|package\.json)/.test(filePath);
+    static: {
+      directory: path.resolve(__dirname, ".webpack"),
+    },
+    devMiddleware: {
+      writeToDisk: (filePath) => {
+        // Electron needs to open the main thread source and preload source from disk
+        // avoid writing the hot-update js and json files
+        // allow writing package.json at root -> needed for electron to find entrypoint
+        return /\.webpack[\\/]((main|extensions)[\\/](?!.*hot-update)|package\.json)/.test(
+          filePath,
+        );
+      },
     },
     hot: true,
     // The problem and solution are described at <https://github.com/webpack/webpack-dev-server/issues/1604>.
@@ -48,7 +54,7 @@ const devServerConfig: WebpackConfiguration = {
     //  "Invalid Host/Origin header"
     //  "[WDS] Disconnected!"
     // Since we are only connecting to localhost, DNS rebinding attacks are not a concern during dev
-    disableHostCheck: true,
+    allowedHosts: "all",
   },
   plugins: [
     new CleanWebpackPlugin(),
