@@ -26,7 +26,7 @@ import debouncePromise from "@foxglove/studio-base/util/debouncePromise";
 import { TimestampMethod } from "@foxglove/studio-base/util/time";
 import { Channel, ChannelId, FoxgloveClient, SubscriptionId } from "@foxglove/ws-protocol";
 
-import protobufDefinitionsToDatatypes from "./protobufDefinitionsToDatatypes";
+import protobufDefinitionsToDatatypes, { stripLeadingDot } from "./protobufDefinitionsToDatatypes";
 
 const log = Log.getLogger(__dirname);
 
@@ -63,7 +63,7 @@ function parseChannel(channel: Channel): ParsedChannel {
   return {
     channel,
     // fullName is a fully qualified name but includes a leading dot. Remove the leading dot.
-    fullSchemaName: type.fullName.replace(/^\./, ""),
+    fullSchemaName: stripLeadingDot(type.fullName),
     deserializer,
     datatypes,
   };

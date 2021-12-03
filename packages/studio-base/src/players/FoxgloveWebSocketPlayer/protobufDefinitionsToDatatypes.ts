@@ -34,6 +34,10 @@ function protobufScalarToRosPrimitive(type: string): string {
   throw new Error(`Expected protobuf scalar type, got ${type}`);
 }
 
+export function stripLeadingDot(typeName: string): string {
+  return typeName.replace(/^\./, "");
+}
+
 export default function protobufDefinitionsToDatatypes(
   datatypes: RosDatatypes,
   type: protobufjs.Type,
@@ -49,7 +53,7 @@ export default function protobufDefinitionsToDatatypes(
       }
     } else if (field.resolvedType) {
       definitions.push({
-        type: field.resolvedType.fullName,
+        type: stripLeadingDot(field.resolvedType.fullName),
         name: field.name,
         isComplex: true,
         isArray: field.repeated,
@@ -68,5 +72,5 @@ export default function protobufDefinitionsToDatatypes(
       });
     }
   }
-  datatypes.set(type.fullName, { definitions });
+  datatypes.set(stripLeadingDot(type.fullName), { definitions });
 }
