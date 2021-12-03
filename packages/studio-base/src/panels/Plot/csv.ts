@@ -9,10 +9,10 @@ import { DataSet, Datum } from "./internalTypes";
 import { PlotXAxisVal } from "./types";
 
 function getCSVRow(label: string | undefined, data: Datum) {
-  const { x, y, receiveTime, headerStamp } = data;
+  const { x, value, receiveTime, headerStamp } = data;
   const receiveTimeFloat = formatTimeRaw(receiveTime);
   const stampTime = headerStamp ? formatTimeRaw(headerStamp) : "";
-  return [x, receiveTimeFloat, stampTime, label, y];
+  return [x, receiveTimeFloat, stampTime, label, value];
 }
 
 const getCVSColName = (xAxisVal: PlotXAxisVal): string => {
@@ -24,7 +24,7 @@ const getCVSColName = (xAxisVal: PlotXAxisVal): string => {
   }[xAxisVal];
 };
 
-function getCSVData(datasets: DataSet[], xAxisVal: PlotXAxisVal): string {
+function generateCSV(datasets: DataSet[], xAxisVal: PlotXAxisVal): string {
   const headLine = [getCVSColName(xAxisVal), "receive time", "header.stamp", "topic", "value"];
   const combinedLines = [];
   combinedLines.push(headLine);
@@ -37,9 +37,9 @@ function getCSVData(datasets: DataSet[], xAxisVal: PlotXAxisVal): string {
 }
 
 function downloadCSV(datasets: DataSet[], xAxisVal: PlotXAxisVal): void {
-  const csvData = getCSVData(datasets, xAxisVal);
+  const csvData = generateCSV(datasets, xAxisVal);
   const blob = new Blob([csvData], { type: "text/csv;charset=utf-8;" });
   downloadFiles([{ blob, fileName: `plot_data.csv` }]);
 }
 
-export { downloadCSV };
+export { downloadCSV, generateCSV };
