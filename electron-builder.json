@@ -48,7 +48,12 @@
     ]
   },
   "win": {
-    "target": ["nsis"],
+    "target": [
+      {
+        "target": "nsis",
+        "arch": ["x64", "arm64"]
+      }
+    ],
     "icon": "resources/icon/icon.png",
     "fileAssociations": [
       {
