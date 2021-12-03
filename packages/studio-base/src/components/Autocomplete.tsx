@@ -240,11 +240,12 @@ export default React.forwardRef(function Autocomplete<T = unknown>(
   const autocompleteItems: FzfResultItem<T>[] = useMemo(
     () =>
       filterText
-        ? new Fzf(items, {
+        ? // @ts-expect-error Fzf selector TS type seems to be wrong?
+          new Fzf(items, {
             fuzzy: filterText.length > 2 ? "v2" : false,
             sort: sortWhenFiltering,
             limit: MAX_ITEMS,
-            selector: getItemText as (_: unknown) => string, // Fzf selector TS type seems to be wrong?
+            selector: getItemText,
           }).find(filterText)
         : items.map((item) => itemToFzfResult(item)),
     [filterText, getItemText, items, sortWhenFiltering],

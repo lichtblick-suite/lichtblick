@@ -468,7 +468,8 @@ function RawMessages(props: Props) {
               theme={{
                 ...jsonTreeTheme,
                 tree: { margin: 0 },
-                nestedNode: ({ style }, keyPath) => {
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                nestedNode: ({ style }, keyPath: any) => {
                   const baseStyle = {
                     ...style,
                     padding: "2px 0 2px 0",
@@ -514,7 +515,8 @@ function RawMessages(props: Props) {
                 nestedNodeChildren: ({ style }) => ({
                   style: { ...style, textDecoration: "inherit" },
                 }),
-                value: ({ style }, _nodeType, keyPath) => {
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                value: ({ style }, _nodeType, keyPath: any) => {
                   const baseStyle = { ...style, textDecoration: "inherit" };
                   if (!diffEnabled) {
                     return { style: baseStyle };

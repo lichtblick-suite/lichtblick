@@ -1,29 +1,32 @@
 diff --git a/dist/esm/client/preview/render.js b/dist/esm/client/preview/render.js
-index 5883ed6c7e9db640cd8f209a3b840efb1d54c6a7..03c377000bdc7eb620c2f9107a2635e820d69247 100644
+index 4a388101c8db468e1a4c9805c5b5a6a364655487..43a5fda1a29a58df0ee07c4c999d02d282589665 100644
 --- a/dist/esm/client/preview/render.js
 +++ b/dist/esm/client/preview/render.js
-@@ -44,9 +44,13 @@ var document = global.document,
-     FRAMEWORK_OPTIONS = global.FRAMEWORK_OPTIONS;
- var rootEl = document ? document.getElementById('root') : null;
-
--var render = function render(node, el) {
-+var render = function render(node, el, storyContext) {
-   return new Promise(function (resolve) {
--    ReactDOM.render(node, el, resolve);
-+    ReactDOM.render(node, el, () => {
-+      // access the parameters in the render callback to allow decorators to set storyReady
-+      var maybeSignal = storyContext.parameters?.storyReady;
-+      maybeSignal ? maybeSignal.then(resolve) : resolve();
-+    });
-   });
+@@ -53,14 +53,16 @@ export var render = function render(args, context) {
  };
 
-@@ -137,7 +139,7 @@ function _renderMain() {
+ var renderElement = /*#__PURE__*/function () {
+-  var _ref = _asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee(node, el) {
++  var _ref = _asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee(node, el, storyContext) {
+     return regeneratorRuntime.wrap(function _callee$(_context) {
+       while (1) {
+         switch (_context.prev = _context.next) {
+           case 0:
+             return _context.abrupt("return", new Promise(function (resolve) {
+               ReactDOM.render(node, el, function () {
+-                return resolve(null);
++                // access the parameters in the render callback to allow decorators to set storyReady
++                var maybeSignal = storyContext.parameters?.storyReady;
++                maybeSignal ? maybeSignal.then(() => resolve(null)) : resolve(null);
+               });
+             }));
+
+@@ -164,7 +166,7 @@ function _renderToDOM() {
              }
 
-             _context.next = 7;
--            return render(element, rootEl);
-+            return render(element, rootEl, storyContext);
+             _context2.next = 7;
+-            return renderElement(element, domElement);
++            return renderElement(element, domElement, storyContext);
 
            case 7:
            case "end":
