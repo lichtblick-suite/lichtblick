@@ -442,12 +442,6 @@ export default function TimeBasedChart(props: Props): JSX.Element {
       return { min: undefined, max: undefined };
     }
 
-    // if the aren't syncing bounds or if the bounds are from our own component, then we
-    // unset the min/max and allow the chart to control the bounds
-    if (globalBounds?.sourceId === componentId) {
-      return { min: undefined, max: undefined };
-    }
-
     let min: number | undefined;
     let max: number | undefined;
 
@@ -490,7 +484,6 @@ export default function TimeBasedChart(props: Props): JSX.Element {
     datasetBounds.x.min,
     defaultView,
     globalBounds,
-    componentId,
     hasUserPannedOrZoomed,
   ]);
 

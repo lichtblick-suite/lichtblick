@@ -16,7 +16,6 @@ import type { Context as DatalabelContext } from "chartjs-plugin-datalabels";
 import DatalabelPlugin from "chartjs-plugin-datalabels";
 import { Zoom as ZoomPlugin } from "chartjs-plugin-zoom";
 import EventEmitter from "eventemitter3";
-import merge from "lodash/merge";
 
 import Logger from "@foxglove/log";
 import { RpcElement, RpcScales } from "@foxglove/studio-base/components/Chart/types";
@@ -26,7 +25,7 @@ const log = Logger.getLogger(__filename);
 
 export type InitOpts = {
   id: string;
-  node: OffscreenCanvas;
+  node: { canvas: HTMLCanvasElement };
   type: ChartType;
   data: ChartData;
   options: ChartOptions;
@@ -69,6 +68,7 @@ export default class ChartJSManager {
   private _fakeNodeEvents = new EventEmitter();
   private _fakeDocumentEvents = new EventEmitter();
   private _lastDatalabelClickContext?: DatalabelContext;
+  private _hasZoomed = false;
 
   constructor(initOpts: InitOpts) {
     log.info(`new ChartJSManager(id=${initOpts.id})`);
@@ -197,8 +197,20 @@ export default class ChartJSManager {
     if (options != undefined) {
       instance.options.plugins = this.addFunctionsToConfig(options).plugins;
 
-      // scales are special because we can mutate them interally via the zoom plugin
-      instance.options.scales = merge(instance.options.scales, options.scales);
+      // If the options specify specific values for min/max then we go back into a state where scales are updated
+      // We need scales to update with undefined values if we haven't zoomed so new data is shown on the chart.
+      // If we do not update the scales to undefined, the initial zoom range stays and new data is not visible.
+      if (options.scales?.x?.min != undefined && options.scales.x.max != undefined) {
+        this._hasZoomed = false;
+      }
+      if (options.scales?.y?.min != undefined && options.scales.y.max != undefined) {
+        this._hasZoomed = false;
+      }
+
+      // If the user manually zoomed this chart we avoid updating the scales since they have updated
+      if (!this._hasZoomed) {
+        instance.options.scales = options.scales;
+      }
     }
 
     if (width != undefined || height != undefined) {
@@ -355,6 +367,12 @@ export default class ChartJSManager {
         // eslint-disable-next-line no-restricted-syntax
         return value?.label ?? null;
       };
+
+      if (config.plugins.zoom?.zoom) {
+        config.plugins.zoom.zoom.onZoom = () => {
+          this._hasZoomed = true;
+        };
+      }
 
       // Override color so that it can be set per-dataset.
       const staticColor = config.plugins.datalabels.color ?? "white";

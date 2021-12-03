@@ -2397,8 +2397,8 @@ __metadata:
     argparse: 2.0.1
     async-mutex: 0.3.2
     browserify-zlib: 0.2.0
-    chart.js: 3.5.1
-    chartjs-plugin-annotation: 1.0.2
+    chart.js: 3.6.1
+    chartjs-plugin-annotation: 1.1.0
     chartjs-plugin-datalabels: 2.0.0
     chartjs-plugin-zoom: "github:foxglove/chartjs-plugin-zoom#656541279943f00dce600288435f83c436293146"
     chromatic: 6.0.4
@@ -8326,19 +8326,19 @@ __metadata:
   languageName: node
   linkType: hard
 
-"chart.js@npm:3.5.1":
-  version: 3.5.1
-  resolution: "chart.js@npm:3.5.1"
-  checksum: aab597abd025354608336111da4e9f7a912a65d4c29f3c7fb41df5cc54bb29d235c41a2cf08d82a79a9a8be928812445f930cbee16aeb8075ebeeb963bfc0da2
+"chart.js@npm:3.6.1":
+  version: 3.6.1
+  resolution: "chart.js@npm:3.6.1"
+  checksum: 195dcd6c4f23d9375a516b7737318abed686d9b993f0678a4c47666d7e6a75b3b855874976e881a9973e0b93327e75f262b0dbe89b378d8bba8078ddb6aac3c6
   languageName: node
   linkType: hard
 
-"chartjs-plugin-annotation@npm:1.0.2":
-  version: 1.0.2
-  resolution: "chartjs-plugin-annotation@npm:1.0.2"
+"chartjs-plugin-annotation@npm:1.1.0":
+  version: 1.1.0
+  resolution: "chartjs-plugin-annotation@npm:1.1.0"
   peerDependencies:
-    chart.js: ^3.0.1
-  checksum: e5ffb5fddb0b6e60fafa19287f1e56c209d3a6fee3199a4bc518f55af6062558fafe8ddec0341beb3cc17df0eb121cc6d6538f9dac0e934a23811c39e9a6e5d6
+    chart.js: ^3.1.0
+  checksum: 9e47f1f91aa436af4daf945ce8d1e48c0e6a66d47d47359010ce0297de88083627abcaf49d80bef1b867793213fdbb61a36015d4d04400a1bfce40be8e8baf3f
   languageName: node
   linkType: hard
 
