@@ -1428,7 +1428,7 @@ describe("RandomAccessPlayer", () => {
       playerConstructed(): void {
         // no-op
       }
-      initialized(): void {
+      initialized(_args?: { isDemoBag: boolean }): void {
         this._initialized++;
       }
       play(_speed: number): void {

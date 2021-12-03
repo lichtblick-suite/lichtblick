@@ -29,6 +29,7 @@ import {
   UlogLocalDataSourceFactory,
   McapLocalDataSourceFactory,
 } from "@foxglove/studio-base";
+import { DEMO_BAG_URL } from "@foxglove/studio-base/util/isDemoBagUrl";
 
 import ConsoleApiCookieUserProvider from "./components/ConsoleApiCookieCurrentUserProvider";
 import LocalStorageAppConfigurationProvider from "./components/LocalStorageAppConfigurationProvider";
@@ -37,8 +38,6 @@ import Ros1UnavailableDataSourceFactory from "./dataSources/Ros1UnavailableDataS
 import Ros2UnavailableDataSourceFactory from "./dataSources/Ros2UnavailableDataSourceFactory";
 import VelodyneUnavailableDataSourceFactory from "./dataSources/VelodyneUnavailableDataSourceFactory";
 import ExtensionLoaderProvider from "./providers/ExtensionLoaderProvider";
-
-const DEMO_BAG_URL = "https://storage.googleapis.com/foxglove-public-assets/demo.bag";
 
 // useAppConfiguration requires the AppConfigurationContext which is setup in Root
 // AppWrapper is used to make a functional component so we can use the context

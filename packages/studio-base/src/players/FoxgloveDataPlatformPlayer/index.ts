@@ -224,6 +224,7 @@ export default class FoxgloveDataPlatformPlayer implements Player {
     this._initialized = {
       preloadedMessages: new MessageMemoryCache({ start: this._start, end: this._end }),
     };
+    this._metricsCollector.initialized();
     this._emitState();
     this._startPreloadTaskIfNeeded();
   };

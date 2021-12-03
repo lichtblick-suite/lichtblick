@@ -50,6 +50,7 @@ import {
 import { RosDatatypes } from "@foxglove/studio-base/types/RosDatatypes";
 import debouncePromise from "@foxglove/studio-base/util/debouncePromise";
 import delay from "@foxglove/studio-base/util/delay";
+import isDemoBagUrl from "@foxglove/studio-base/util/isDemoBagUrl";
 import { isRangeCoveredByRanges } from "@foxglove/studio-base/util/ranges";
 import { getSanitizedTopics } from "@foxglove/studio-base/util/selectors";
 import {
@@ -547,7 +548,7 @@ export default class RandomAccessPlayer implements Player {
     if (this._initializing || this._initialized) {
       return;
     }
-    this._metricsCollector.initialized();
+    this._metricsCollector.initialized({ isDemoBag: isDemoBagUrl(this._label ?? "") });
     this._initialized = true;
   }
 

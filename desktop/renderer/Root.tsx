@@ -32,6 +32,7 @@ import {
   useAppConfigurationValue,
   AppSetting,
 } from "@foxglove/studio-base";
+import { DEMO_BAG_URL } from "@foxglove/studio-base/util/isDemoBagUrl";
 
 import { Desktop } from "../common/types";
 import ConsoleApiCurrentUserProvider from "./components/ConsoleApiCurrentUserProvider";
@@ -41,8 +42,6 @@ import NativeStorageAppConfigurationProvider from "./components/NativeStorageApp
 import NativeStorageLayoutStorageProvider from "./components/NativeStorageLayoutStorageProvider";
 import NativeWindowProvider from "./components/NativeWindowProvider";
 import ExtensionLoaderProvider from "./providers/ExtensionLoaderProvider";
-
-const DEMO_BAG_URL = "https://storage.googleapis.com/foxglove-public-assets/demo.bag";
 
 const desktopBridge = (global as unknown as { desktopBridge: Desktop }).desktopBridge;
 

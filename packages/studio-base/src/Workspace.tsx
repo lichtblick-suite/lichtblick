@@ -222,9 +222,7 @@ export default function Workspace(props: WorkspaceProps): JSX.Element {
     if (isMounted()) {
       setSelectedLayoutId(newLayout.id);
       if (props.demoBagUrl) {
-        selectSource("ros1-remote-bagfile", {
-          url: props.demoBagUrl,
-        });
+        selectSource("ros1-remote-bagfile", { url: props.demoBagUrl });
       }
     }
   }, [layoutStorage, isMounted, setSelectedLayoutId, props.demoBagUrl, selectSource]);
@@ -362,9 +360,7 @@ export default function Workspace(props: WorkspaceProps): JSX.Element {
 
           // select the first source that has files that match the supported extensions
           if (filteredFiles.length > 0) {
-            selectSource(source.id, {
-              files: otherFiles,
-            });
+            selectSource(source.id, { files: otherFiles });
             break;
           }
         }
@@ -403,11 +399,7 @@ export default function Workspace(props: WorkspaceProps): JSX.Element {
           log.warn(`Missing rosbag url param in ${url}`);
           return;
         }
-        selectSource(
-          "ros1-remote-bagfile",
-
-          { url: bagUrl },
-        );
+        selectSource("ros1-remote-bagfile", { url: bagUrl });
       } else if (type === "foxglove-data-platform") {
         const start = url.searchParams.get("start") ?? "";
         const end = url.searchParams.get("end") ?? "";

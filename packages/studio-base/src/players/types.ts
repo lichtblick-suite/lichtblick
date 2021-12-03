@@ -289,7 +289,7 @@ export const PlayerCapabilities = {
 export interface PlayerMetricsCollectorInterface {
   setProperty(key: string, value: string | number | boolean): void;
   playerConstructed(): void;
-  initialized(): void;
+  initialized(args?: { isDemoBag: boolean }): void;
   play(speed: number): void;
   seek(time: Time): void;
   setSpeed(speed: number): void;
