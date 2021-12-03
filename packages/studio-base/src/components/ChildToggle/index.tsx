@@ -157,8 +157,14 @@ export default function ChildToggle(props: Props): ReactElement {
       const node = event.target as HTMLElement;
       // if there was a click outside this container and outside children[0]
       // fire the toggle callback to close expanded section
+
+      const thisLayer = el.current?.closest(".ms-Layer");
+      const nodeLayer = node.closest(".ms-Layer");
+
       if (floatingEl.current.contains(node) || (el.current?.contains(node) ?? false)) {
         // the click was inside our bounds and shouldn't auto-close the menu
+      } else if (thisLayer !== nodeLayer) {
+        // If the clicked node is in a different fluentui Layer from this node, ignore the click.
       } else {
         // allow any nested child toggle click events to reach their dom node before removing
         // the expanded toggle portion from the dom
