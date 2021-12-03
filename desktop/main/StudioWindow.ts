@@ -391,14 +391,26 @@ class StudioWindow {
   }
 
   addInputSource(name: string): void {
-    this._inputSources.add(name);
+    // A "Foxglove Data Platform" connection is triggered by opening a URL from console
+    // Not currently a connection that can be started from inside Foxglove Studio
+    const unsupportedInputSourceNames = ["Foxglove Data Platform"];
+    if (unsupportedInputSourceNames.includes(name)) {
+      return;
+    }
+
+    // Electron menus require a preceding & to escape the & char
+    const formattedName = name
+      .split("")
+      .map((char) => (char === "&" ? "&&" : char))
+      .join("");
+    this._inputSources.add(formattedName);
 
     const fileMenu = this._menu.getMenuItemById("fileMenu");
     if (!fileMenu) {
       return;
     }
 
-    const existingItem = fileMenu.submenu?.getMenuItemById(name);
+    const existingItem = fileMenu.submenu?.getMenuItemById(formattedName);
     // If the item already exists, we can silently return
     // The existing click handler will support the new item since they have the same name
     if (existingItem) {

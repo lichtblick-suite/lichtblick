@@ -153,6 +153,7 @@ export default function PlayerManager(props: PropsWithChildren<PlayerManagerProp
         return;
       }
 
+      metricsCollector.setProperty("player", sourceId);
       setSelectedSource(() => foundSource);
 
       if (foundSource.promptOptions) {
@@ -282,6 +283,7 @@ export default function PlayerManager(props: PropsWithChildren<PlayerManagerProp
       if (!foundSource) {
         return;
       }
+      metricsCollector.setProperty("player", savedSource.id);
 
       const initializedBasePlayer = foundSource.initialize({
         ...savedSource.args,
