@@ -242,7 +242,7 @@ const Editor = ({
     editor.addAction({
       id: "ctrl-s",
       label: "Save current node",
-      keybindings: [monacoApi.KeyMod.CtrlCmd | monacoApi.KeyCode.KEY_S],
+      keybindings: [monacoApi.KeyMod.CtrlCmd | monacoApi.KeyCode.KeyS],
 
       // Because this didMount function only runs once, we need to store the saveCode function in a
       // ref so the command can always access the latest version.

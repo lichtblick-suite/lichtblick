@@ -2438,8 +2438,8 @@ __metadata:
     moment: 2.29.1
     moment-duration-format: 2.3.2
     moment-timezone: 0.5.34
-    monaco-editor: 0.27.0
-    monaco-editor-webpack-plugin: 4.2.0
+    monaco-editor: 0.30.1
+    monaco-editor-webpack-plugin: 6.0.0
     natsort: 2.0.3
     nearley: 2.20.1
     nearley-loader: 2.0.0
@@ -2458,7 +2458,7 @@ __metadata:
     react-is: 17.0.2
     react-json-tree: 0.15.1
     react-markdown: 6.0.3
-    react-monaco-editor: 0.45.0
+    react-monaco-editor: 0.46.0
     react-mosaic-component: 5.0.0
     react-resize-detector: 6.7.6
     react-svg-loader: 3.0.3
@@ -7109,6 +7109,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"array-union@npm:^3.0.1":
+  version: 3.0.1
+  resolution: "array-union@npm:3.0.1"
+  checksum: 47b29f88258e8f37ffb93ddaa327d4308edd950b52943c172b73558afdd3fa74cfd68816ba5aa4b894242cf281fa3c6d0362ae057e4a18bddbaedbe46ebe7112
+  languageName: node
+  linkType: hard
+
 "array-uniq@npm:^1.0.1":
   version: 1.0.3
   resolution: "array-uniq@npm:1.0.3"
@@ -9187,19 +9194,19 @@ __metadata:
   languageName: node
   linkType: hard
 
-"copy-webpack-plugin@npm:9.1.0":
-  version: 9.1.0
-  resolution: "copy-webpack-plugin@npm:9.1.0"
+"copy-webpack-plugin@npm:10.0.0":
+  version: 10.0.0
+  resolution: "copy-webpack-plugin@npm:10.0.0"
   dependencies:
     fast-glob: ^3.2.7
     glob-parent: ^6.0.1
-    globby: ^11.0.3
+    globby: ^12.0.2
     normalize-path: ^3.0.0
-    schema-utils: ^3.1.1
+    schema-utils: ^4.0.0
     serialize-javascript: ^6.0.0
   peerDependencies:
     webpack: ^5.1.0
-  checksum: 06cb4fb6fc99a95ccfd3169115ee57f64953e5b4075900fc8faab98b7e7d3fcd6915b125fdb98c919cfd55e581a8444f5c6b9dbb342cbd60b154d8fb3f79f2b9
+  checksum: 70652af613b6bee93039c95daa72a68b0cdc4f66d3d861d9237b4b338968fb5c4fb1860c8424348c73d480975844887c9a0d9a2a57257c226a896b2348d2edcd
   languageName: node
   linkType: hard
 
@@ -12778,6 +12785,20 @@ __metadata:
   languageName: node
   linkType: hard
 
+"globby@npm:^12.0.2":
+  version: 12.0.2
+  resolution: "globby@npm:12.0.2"
+  dependencies:
+    array-union: ^3.0.1
+    dir-glob: ^3.0.1
+    fast-glob: ^3.2.7
+    ignore: ^5.1.8
+    merge2: ^1.4.1
+    slash: ^4.0.0
+  checksum: f474ced866755f48ce7e8a7e11b0a1d90fa1f1c25cf86c245fbf05a862accfba695102a843b6386dbe41fa73c2f9a7e625bf566fa7648d2e1304f58748975e3f
+  languageName: node
+  linkType: hard
+
 "globby@npm:^6.1.0":
   version: 6.1.0
   resolution: "globby@npm:6.1.0"
@@ -13563,7 +13584,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"ignore@npm:^5.1.4":
+"ignore@npm:^5.1.4, ignore@npm:^5.1.8":
   version: 5.1.9
   resolution: "ignore@npm:5.1.9"
   checksum: 6f6b2235f4e63648116c5814f76b2d3d63fae9c21b8a466862e865732f59e787c9938a9042f9457091db6f0d811508ea3c8c6a60f35bafc4ceea08bbe8f96fd5
@@ -16314,7 +16335,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"merge2@npm:^1.2.3, merge2@npm:^1.3.0":
+"merge2@npm:^1.2.3, merge2@npm:^1.3.0, merge2@npm:^1.4.1":
   version: 1.4.1
   resolution: "merge2@npm:1.4.1"
   checksum: 7268db63ed5169466540b6fb947aec313200bcf6d40c5ab722c22e242f651994619bcd85601602972d3c85bd2cc45a358a4c61937e9f11a061919a1da569b0c2
@@ -16637,22 +16658,22 @@ __metadata:
   languageName: node
   linkType: hard
 
-"monaco-editor-webpack-plugin@npm:4.2.0":
-  version: 4.2.0
-  resolution: "monaco-editor-webpack-plugin@npm:4.2.0"
+"monaco-editor-webpack-plugin@npm:6.0.0":
+  version: 6.0.0
+  resolution: "monaco-editor-webpack-plugin@npm:6.0.0"
   dependencies:
     loader-utils: ^2.0.0
   peerDependencies:
-    monaco-editor: 0.25.x || 0.26.x || 0.27.x || 0.28.x
+    monaco-editor: 0.30.x
     webpack: ^4.5.0 || 5.x
-  checksum: 165da4085635e19f8dc7f9a30c6c473422ea54115d8051c99fb4c90eb94e6403ab9ddb99f5506016feb8065ec50a27d2c340f10cc90c2e500dc7258da659846e
+  checksum: 8f3ac71fe5461af10cd76f45dafb3a70672756b260b1421478cb0e690d719c6394748dabec11ea4e8f0b7db944f00a7f007d55da8e0fd470d19e9a466e789fa4
   languageName: node
   linkType: hard
 
-"monaco-editor@npm:0.27.0, monaco-editor@npm:^0.27.0":
-  version: 0.27.0
-  resolution: "monaco-editor@npm:0.27.0"
-  checksum: 766ce20ea6f5b5861ce3a05fa437d0755622520ce3e7d6af84a103ea5daa52fe7053cfa4ab470fa84eb42a27810c336b39764c984b9cd30bc32fd69b2eba233b
+"monaco-editor@npm:0.30.1":
+  version: 0.30.1
+  resolution: "monaco-editor@npm:0.30.1"
+  checksum: 474b8b2f252eaa9d0c02a9b3b9ff587abfbe7e39bb825441e9277d983a80807eca049a26900706113139e0f8c1d664ad346aa25f3c3a30aab0ac3518943e1bed
   languageName: node
   linkType: hard
 
@@ -19314,16 +19335,16 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-monaco-editor@npm:0.45.0":
-  version: 0.45.0
-  resolution: "react-monaco-editor@npm:0.45.0"
+"react-monaco-editor@npm:0.46.0":
+  version: 0.46.0
+  resolution: "react-monaco-editor@npm:0.46.0"
   dependencies:
-    monaco-editor: ^0.27.0
     prop-types: ^15.7.2
   peerDependencies:
     "@types/react": ^17.x
+    monaco-editor: ^0.28.1
     react: ^17.x
-  checksum: ac260730208fc2b852bdd8c2a7bf3e8c60d4d9b701bde87d4791f4a6469361c2475c5b3eb9c40dcb9ec547984bf0e8e8461cbf277827dcdc45afba379622f382
+  checksum: 53e38657c4a996809dd5922000c36325f154f327521bf575d9b3cb0189439df6e5b120fbe88ab13bf1ca6dbdca8f8a7da907b09196a4eec65e1e59a8adc4af94
   languageName: node
   linkType: hard
 
@@ -20897,6 +20918,13 @@ __metadata:
   version: 3.0.0
   resolution: "slash@npm:3.0.0"
   checksum: 94a93fff615f25a999ad4b83c9d5e257a7280c90a32a7cb8b4a87996e4babf322e469c42b7f649fd5796edd8687652f3fb452a86dc97a816f01113183393f11c
+  languageName: node
+  linkType: hard
+
+"slash@npm:^4.0.0":
+  version: 4.0.0
+  resolution: "slash@npm:4.0.0"
+  checksum: da8e4af73712253acd21b7853b7e0dbba776b786e82b010a5bfc8b5051a1db38ed8aba8e1e8f400dd2c9f373be91eb1c42b66e91abb407ff42b10feece5e1d2d
   languageName: node
   linkType: hard
 
@@ -23421,7 +23449,7 @@ __metadata:
   dependencies:
     "@foxglove/studio-base": "workspace:*"
     "@types/copy-webpack-plugin": 8.0.1
-    copy-webpack-plugin: 9.1.0
+    copy-webpack-plugin: 10.0.0
     webpack: 5.64.4
   languageName: unknown
   linkType: soft
