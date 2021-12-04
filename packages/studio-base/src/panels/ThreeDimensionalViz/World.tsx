@@ -20,6 +20,7 @@ import {
   MouseHandler,
   DEFAULT_CAMERA_STATE,
 } from "@foxglove/regl-worldview";
+import { Time } from "@foxglove/rostime";
 import { Interactive } from "@foxglove/studio-base/panels/ThreeDimensionalViz/Interactions/types";
 import {
   WorldSearchTextProps,
@@ -54,6 +55,7 @@ type Props = WorldSearchTextProps & {
   cameraState: CameraState;
   children?: React.ReactNode;
   isPlaying: boolean;
+  currentTime: Time;
   markerProviders: MarkerProvider[];
   onCameraStateChange: (arg0: CameraState) => void;
   onClick: MouseHandler;
@@ -63,7 +65,7 @@ type Props = WorldSearchTextProps & {
   onMouseUp?: MouseHandler;
 };
 
-function getMarkers(markerProviders: MarkerProvider[]): InteractiveMarkersByType {
+function getMarkers(markerProviders: MarkerProvider[], time: Time): InteractiveMarkersByType {
   const markers: InteractiveMarkersByType = {
     arrow: [],
     color: [],
@@ -115,7 +117,7 @@ function getMarkers(markerProviders: MarkerProvider[]): InteractiveMarkersByType
   };
 
   for (const provider of markerProviders) {
-    provider.renderMarkers(collector);
+    provider.renderMarkers(collector, time);
   }
 
   return markers;
@@ -133,6 +135,7 @@ function World(
     onCameraStateChange,
     cameraState,
     isPlaying,
+    currentTime,
     markerProviders,
     onDoubleClick,
     onMouseDown,
@@ -146,7 +149,7 @@ function World(
   }: Props,
   ref: typeof Worldview,
 ) {
-  const markersByType = getMarkers(markerProviders);
+  const markersByType = getMarkers(markerProviders, currentTime);
   const { text = [] } = markersByType;
   const processedMarkersByType = {
     ...markersByType,

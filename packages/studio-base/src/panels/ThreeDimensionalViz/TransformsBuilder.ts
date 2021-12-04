@@ -11,15 +11,23 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { mat4, quat, vec3 } from "gl-matrix";
+import { quat, vec3 } from "gl-matrix";
 
-import Transforms, { Transform } from "@foxglove/studio-base/panels/ThreeDimensionalViz/Transforms";
-import { Marker, ArrowMarker, Color, MutablePose } from "@foxglove/studio-base/types/Messages";
+import { Time } from "@foxglove/rostime";
+import {
+  CoordinateFrame,
+  TransformTree,
+} from "@foxglove/studio-base/panels/ThreeDimensionalViz/transforms";
+import {
+  Marker,
+  ArrowMarker,
+  Color,
+  MutablePose,
+  Point,
+} from "@foxglove/studio-base/types/Messages";
 import { MarkerProvider, MarkerCollector } from "@foxglove/studio-base/types/Scene";
+import { emptyPose } from "@foxglove/studio-base/util/Pose";
 import { MARKER_MSG_TYPES } from "@foxglove/studio-base/util/globalConstants";
-
-const originPosition = { x: 0, y: 0, z: 0 };
-const originOrientation = { x: 0, y: 0, z: 0, w: 1 };
 
 const defaultArrowMarker = {
   id: "",
@@ -37,13 +45,8 @@ const defaultArrowMarker = {
 };
 
 const defaultArrowScale = { x: 0.2, y: 0.02, z: 0.02 };
-
-const getOriginPose = (): MutablePose => ({
-  position: { ...originPosition },
-  orientation: { ...originOrientation },
-});
-
-const unitXVector = vec3.fromValues(1, 0, 0);
+const unitXVector = [1, 0, 0];
+const unusedPose = emptyPose();
 
 type Axis = ArrowMarker & {
   id: string;
@@ -55,35 +58,26 @@ const originAxes: Axis[] = [
   {
     ...defaultArrowMarker,
     scale: { ...defaultArrowScale },
-    pose: {
-      position: { ...originPosition },
-      orientation: { ...originOrientation },
-    },
+    pose: emptyPose(),
     id: "X",
     color: { r: 1, g: 0, b: 0, a: 1 },
-    unitVector: vec3.fromValues(1, 0, 0),
+    unitVector: [1, 0, 0],
   } as Axis,
   {
     ...defaultArrowMarker,
     scale: { ...defaultArrowScale },
-    pose: {
-      position: { ...originPosition },
-      orientation: { ...originOrientation },
-    },
+    pose: emptyPose(),
     id: "Y",
     color: { r: 0, g: 1, b: 0, a: 1 },
-    unitVector: vec3.fromValues(0, 1, 0),
+    unitVector: [0, 1, 0],
   } as Axis,
   {
     ...defaultArrowMarker,
     scale: { ...defaultArrowScale },
-    pose: {
-      position: { ...originPosition },
-      orientation: { ...originOrientation },
-    },
+    pose: emptyPose(),
     id: "Z",
     color: { r: 0, g: 0, b: 1, a: 1 },
-    unitVector: vec3.fromValues(0, 0, 1),
+    unitVector: [0, 0, 1],
   } as Axis,
 ];
 
@@ -91,14 +85,15 @@ const tempOrientation = [0, 0, 0, 0] as [number, number, number, number];
 
 const getTransformedAxisArrowMarker = (
   id: string,
-  transform: Transform,
+  frame: CoordinateFrame,
   axis: Axis,
-  rootTransformID: string,
+  rootFrame: CoordinateFrame,
+  time: Time,
 ) => {
   const { unitVector, id: axisId } = axis;
   quat.rotationTo(tempOrientation, unitXVector, unitVector);
   const pose = {
-    position: { ...originPosition },
+    position: { x: 0, y: 0, z: 0 },
     orientation: {
       x: tempOrientation[0],
       y: tempOrientation[1],
@@ -107,7 +102,7 @@ const getTransformedAxisArrowMarker = (
     },
   };
 
-  transform.apply(pose, pose, rootTransformID);
+  rootFrame.apply(pose, pose, frame, time);
 
   return {
     ...axis,
@@ -119,17 +114,21 @@ const getTransformedAxisArrowMarker = (
 
 const getAxesArrowMarkers = (
   id: string,
-  transform: Transform,
-  rootTransformID: string,
+  frame: CoordinateFrame,
+  rootFrame: CoordinateFrame,
+  time: Time,
 ): ArrowMarker[] => {
-  return originAxes.map((axis) =>
-    getTransformedAxisArrowMarker(id, transform, axis, rootTransformID),
-  );
+  return originAxes.map((axis) => getTransformedAxisArrowMarker(id, frame, axis, rootFrame, time));
 };
 
-const getAxisTextMarker = (id: string, transform: Transform, rootTransformID: string): Marker => {
-  const textPose = getOriginPose();
-  transform.apply(textPose, textPose, rootTransformID);
+const getAxisTextMarker = (
+  id: string,
+  frame: CoordinateFrame,
+  rootFrame: CoordinateFrame,
+  time: Time,
+): Marker => {
+  const textPose = emptyPose();
+  rootFrame.apply(textPose, textPose, frame, time);
   // Lower it a little in world coordinates so it appears slightly below the axis origin (like in rviz).
   textPose.position.z = textPose.position.z - 0.02;
   return {
@@ -154,69 +153,64 @@ const getAxisTextMarker = (id: string, transform: Transform, rootTransformID: st
   };
 };
 
-const tempTranslation: vec3 = [0, 0, 0];
 // So we don't create a lot of effectively unused vectors / quats.
-const throwawayQuat = { ...originOrientation };
+const UNUSED_QUAT = { x: 0, y: 0, z: 0, w: 1 };
 
 // Exported for tests
-export const getArrowToParentMarkers = (
+export const getArrowToParentMarker = (
   id: string,
-  transform: Transform,
-  rootTransformID: string,
-): ArrowMarker[] => {
-  const { parent } = transform;
+  frame: CoordinateFrame,
+  rootFrame: CoordinateFrame,
+  time: Time,
+): ArrowMarker | undefined => {
+  const parent = frame.parent();
   if (!parent) {
-    return [];
+    return undefined;
+  }
+
+  const childPose: MutablePose = {
+    position: { x: 0, y: 0, z: 0 },
+    orientation: UNUSED_QUAT,
+  };
+  const parentPose: MutablePose = {
+    position: { x: 0, y: 0, z: 0 },
+    orientation: UNUSED_QUAT,
+  };
+
+  if (
+    !rootFrame.apply(childPose, childPose, frame, time) ||
+    !rootFrame.apply(parentPose, parentPose, parent, time)
+  ) {
+    return undefined;
   }
 
   // If the distance between the parent and child is 0, skip drawing an arrow between them.
-  mat4.getTranslation(tempTranslation, transform.matrix);
-  if (vec3.length(tempTranslation) <= 0) {
-    return [];
+  if (pointsEqual(childPose.position, parentPose.position)) {
+    return undefined;
   }
 
-  let childPose: MutablePose | undefined = {
-    position: { ...originPosition },
-    orientation: throwawayQuat,
-  };
-  childPose = transform.apply(childPose, childPose, rootTransformID);
-
-  let parentPose: MutablePose | undefined = {
-    position: { ...originPosition },
-    orientation: throwawayQuat,
-  };
-  parentPose = parent?.apply(parentPose, parentPose, rootTransformID);
-
-  if (!childPose || !parentPose) {
-    return [];
-  }
-
-  return [
-    {
-      ...defaultArrowMarker,
-      pose: {
-        position: { ...originPosition },
-        orientation: { ...originOrientation },
-      },
-      id: `${id}-childToParentArrow`,
-      color: { r: 1, g: 1, b: 0, a: 1 },
-      points: [childPose.position, parentPose.position],
-      scale: {
-        // Intentionally different scale from the other arrows, to make the arrow head reasonable.
-        x: 0.02,
-        y: 0.01,
-        z: 0.05,
-      },
-    } as ArrowMarker,
-  ];
+  return {
+    ...defaultArrowMarker,
+    pose: emptyPose(),
+    id: `${id}-childToParentArrow`,
+    color: { r: 1, g: 1, b: 0, a: 1 },
+    points: [childPose.position, parentPose.position],
+    scale: {
+      // Intentionally different scale from the other arrows, to make the arrow head reasonable.
+      x: 0.02,
+      y: 0.01,
+      z: 0.05,
+    },
+    frame_locked: true,
+  } as ArrowMarker;
 };
 
 export default class TransformsBuilder implements MarkerProvider {
-  transforms?: Transforms;
+  transforms?: TransformTree;
   rootTransformID?: string;
   selections: string[] = [];
 
-  setTransforms = (transforms: Transforms, rootTransformID: string): void => {
+  setTransforms = (transforms: TransformTree, rootTransformID: string | undefined): void => {
     this.transforms = transforms;
     this.rootTransformID = rootTransformID;
   };
@@ -224,17 +218,22 @@ export default class TransformsBuilder implements MarkerProvider {
   addMarkersForTransform(
     add: MarkerCollector,
     id: string,
-    transform: Transform,
-    rootTransformID: string,
+    frame: CoordinateFrame,
+    rootFrame: CoordinateFrame,
+    time: Time,
   ): void {
-    if (!transform.isChildOfTransform(rootTransformID)) {
+    // If rootFrame_T_frame is invalid at the given time, don't draw anything
+    if (!rootFrame.apply(unusedPose, unusedPose, frame, time)) {
       return;
     }
-    const markersForTransform: Marker[] = [
-      ...getAxesArrowMarkers(id, transform, rootTransformID),
-      ...getArrowToParentMarkers(id, transform, rootTransformID),
-      getAxisTextMarker(id, transform, rootTransformID),
-    ];
+
+    const markersForTransform: Marker[] = getAxesArrowMarkers(id, frame, rootFrame, time);
+    const arrowMarker = getArrowToParentMarker(id, frame, rootFrame, time);
+    if (arrowMarker) {
+      markersForTransform.push(arrowMarker);
+    }
+    markersForTransform.push(getAxisTextMarker(id, frame, rootFrame, time));
+
     for (const marker of markersForTransform) {
       switch (marker.type) {
         case 0:
@@ -253,18 +252,26 @@ export default class TransformsBuilder implements MarkerProvider {
     this.selections = selections;
   }
 
-  renderMarkers = (add: MarkerCollector): void => {
+  renderMarkers = (add: MarkerCollector, time: Time): void => {
     const { selections, transforms } = this;
     if (transforms == undefined || this.rootTransformID == undefined) {
       return;
     }
     for (const key of selections) {
-      const transform = transforms.getMaybe(key);
-      // If a marker doesn't exist yet, skip rendering for now, we might get the
-      // transform in a later message, so we still want to keep it in selections.
-      if (transform?.isValid(this.rootTransformID) === true) {
-        this.addMarkersForTransform(add, key, transform, this.rootTransformID);
+      const frame = transforms.frame(key);
+      const rootFrame = transforms.frame(this.rootTransformID);
+      if (frame && rootFrame) {
+        this.addMarkersForTransform(add, key, frame, rootFrame, time);
       }
     }
   };
+}
+
+function pointsEqual(a: Point, b: Point): boolean {
+  const EPSILON = 0.000001; // From gl-matrix
+  return (
+    Math.abs(a.x - b.x) <= EPSILON * Math.max(1.0, Math.abs(a.x), Math.abs(b.x)) &&
+    Math.abs(a.y - b.y) <= EPSILON * Math.max(1.0, Math.abs(a.y), Math.abs(b.y)) &&
+    Math.abs(a.z - b.z) <= EPSILON * Math.max(1.0, Math.abs(a.z), Math.abs(b.z))
+  );
 }

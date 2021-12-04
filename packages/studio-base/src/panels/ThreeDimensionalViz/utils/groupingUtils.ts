@@ -165,7 +165,7 @@ export function groupLinesIntoInstancedLineLists(
     }
 
     // Extract common properties from base marker
-    const { header, action, ns, scale, blend, depth } = baseMessage;
+    const { header, action, ns, scale, blend, depth, frame_locked } = baseMessage;
     resultMarkers.push({
       header,
       action,
@@ -175,6 +175,7 @@ export function groupLinesIntoInstancedLineLists(
       colors: allColors,
       points: allPoints,
       poses,
+      frame_locked,
       blend,
       depth,
       metadataByIndex,

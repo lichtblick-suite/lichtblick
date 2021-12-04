@@ -20,10 +20,10 @@ import Autocomplete, { IAutocomplete } from "@foxglove/studio-base/components/Au
 import { useTooltip } from "@foxglove/studio-base/components/Tooltip";
 import { colors } from "@foxglove/studio-base/util/sharedStyleConstants";
 
-import Transforms, { Transform } from "./Transforms";
+import { TransformTree, CoordinateFrame } from "./transforms";
 
 type TfTreeNode = {
-  tf: Transform;
+  tf: CoordinateFrame;
   children: TfTreeNode[];
   depth: number;
 };
@@ -37,7 +37,7 @@ type TfTree = {
 
 const treeNodeToTfId = (node: TfTreeNode) => node.tf.id;
 
-const buildTfTree = (transforms: Transform[]): TfTree => {
+const buildTfTree = (transforms: CoordinateFrame[]): TfTree => {
   const tree: TfTree = {
     roots: [],
     nodes: {},
@@ -57,8 +57,9 @@ const buildTfTree = (transforms: Transform[]): TfTree => {
   // Now add children to their parents treenode.
   for (const tf of transforms) {
     const node = tree.nodes[tf.id] as TfTreeNode;
-    if (tf.parent) {
-      tree.nodes[tf.parent.id]?.children.push(node);
+    const parentId = tf.parent()?.id;
+    if (parentId) {
+      tree.nodes[parentId]?.children.push(node);
     } else {
       tree.roots.push(node);
     }
@@ -81,7 +82,7 @@ const buildTfTree = (transforms: Transform[]): TfTree => {
 };
 
 type Props = {
-  transforms: Transforms;
+  transforms: TransformTree;
   tfToFollow?: string;
   followOrientation: boolean;
   // eslint-disable-next-line @foxglove/no-boolean-parameters
@@ -101,7 +102,7 @@ function getItemText(node: TfTreeNode | { tf: { id: string }; depth: number }) {
 
 const arePropsEqual = (prevProps: Props, nextProps: Props) => {
   if (!nextProps.tfToFollow) {
-    const tfTree = buildTfTree(nextProps.transforms.values());
+    const tfTree = buildTfTree(Array.from(nextProps.transforms.frames().values()));
     const allNodes = Array.from(getDescendants(tfTree.roots));
     // As a result of various refactors this code does not make sense anymore and is in need of
     // cleanup. An original version can be found at
@@ -143,7 +144,7 @@ const FollowTFControl = memo<Props>((props: Props) => {
     [theme],
   );
 
-  const tfTree = buildTfTree(transforms.values());
+  const tfTree = buildTfTree(Array.from(transforms.frames().values()));
   const allNodes = Array.from(getDescendants(tfTree.roots));
   // As a result of various refactors this code does not make sense anymore and is in need of
   // cleanup. An original version can be found at
@@ -225,8 +226,9 @@ const FollowTFControl = memo<Props>((props: Props) => {
   const showFrameList =
     lastSelectedFrame != undefined || forceShowFrameList || followingCustomFrame;
   const selectedFrameId = tfToFollow ?? lastSelectedFrame;
-  const selectedItem: TfTreeNode | undefined = selectedFrameId
-    ? { tf: new Transform(selectedFrameId), children: [], depth: 0 }
+  const selectedFrame = selectedFrameId ? transforms.frame(selectedFrameId) : undefined;
+  const selectedItem: TfTreeNode | undefined = selectedFrame
+    ? { tf: selectedFrame, children: [], depth: 0 }
     : undefined;
 
   const followButton = useTooltip({ contents: getFollowButtonTooltip() });

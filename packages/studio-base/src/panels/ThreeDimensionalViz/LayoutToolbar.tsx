@@ -14,6 +14,7 @@
 import { Stack, Text, useTheme } from "@fluentui/react";
 
 import { MouseEventObject } from "@foxglove/regl-worldview";
+import { Time } from "@foxglove/rostime";
 import CameraInfo from "@foxglove/studio-base/panels/ThreeDimensionalViz/CameraInfo";
 import Crosshair from "@foxglove/studio-base/panels/ThreeDimensionalViz/Crosshair";
 import FollowTFControl from "@foxglove/studio-base/panels/ThreeDimensionalViz/FollowTFControl";
@@ -40,6 +41,7 @@ type Props = LayoutToolbarSharedProps &
     onToggleCameraMode: () => void;
     onToggleDebug: () => void;
     rootTf?: string;
+    currentTime: Time;
     selectedObject?: MouseEventObject;
     setInteractionsTabType: (arg0?: TabType) => void;
     setMeasureInfo: (arg0: MeasureInfo) => void;
@@ -77,6 +79,7 @@ function LayoutToolbar({
   targetPose,
   toggleSearchTextOpen,
   transforms,
+  currentTime,
 }: Props) {
   const theme = useTheme();
   return (
@@ -117,6 +120,7 @@ function LayoutToolbar({
           cameraState={cameraState}
           transforms={transforms}
           rootTf={rootTf}
+          currentTime={currentTime}
         />
         <FollowTFControl
           transforms={transforms}

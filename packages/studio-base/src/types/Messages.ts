@@ -114,7 +114,7 @@ export type BaseMarker = Readonly<
     color?: Color;
     colors?: Colors;
     lifetime?: Time;
-    frame_locked?: boolean; // TODO: required
+    frame_locked: boolean;
     text?: string;
     mesh_resource?: string; // TODO: required
     mesh_use_embedded_materials?: boolean;

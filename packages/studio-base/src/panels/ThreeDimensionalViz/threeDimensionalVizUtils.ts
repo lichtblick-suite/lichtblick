@@ -24,10 +24,11 @@ import {
   cameraStateSelectors,
   DEFAULT_CAMERA_STATE,
 } from "@foxglove/regl-worldview";
+import { Time } from "@foxglove/rostime";
 import { GlobalVariables } from "@foxglove/studio-base/hooks/useGlobalVariables";
 import { InteractionData } from "@foxglove/studio-base/panels/ThreeDimensionalViz/Interactions/types";
 import { LinkedGlobalVariables } from "@foxglove/studio-base/panels/ThreeDimensionalViz/Interactions/useLinkedGlobalVariables";
-import Transforms from "@foxglove/studio-base/panels/ThreeDimensionalViz/Transforms";
+import { TransformTree } from "@foxglove/studio-base/panels/ThreeDimensionalViz/transforms";
 import { InstancedLineListMarker, MutablePose } from "@foxglove/studio-base/types/Messages";
 import { emptyPose } from "@foxglove/studio-base/util/Pose";
 
@@ -46,18 +47,18 @@ function getZoomDistanceFromURLParam(): number | undefined {
 // Get the camera target position and orientation
 export function getTargetPose(
   followTf: string | false | undefined,
-  transforms: Transforms,
+  transforms: TransformTree,
+  time: Time,
 ): TargetPose | undefined {
-  if (typeof followTf === "string" && followTf.length > 0 && transforms.has(followTf)) {
-    let pose: MutablePose | undefined = emptyPose();
-    pose = transforms.apply(pose, pose, followTf, transforms.rootOfTransform(followTf).id);
-    if (pose) {
-      const { x: px, y: py, z: pz } = pose.position;
-      const { x: ox, y: oy, z: oz, w: ow } = pose.orientation;
-      return {
-        target: [px, py, pz],
-        targetOrientation: [ox, oy, oz, ow],
-      };
+  if (typeof followTf === "string" && followTf.length > 0) {
+    const frame = transforms.frame(followTf);
+    if (frame) {
+      const pose: MutablePose | undefined = emptyPose();
+      if (frame.root().apply(pose, pose, frame, time)) {
+        const p = pose.position;
+        const o = pose.orientation;
+        return { target: [p.x, p.y, p.z], targetOrientation: [o.x, o.y, o.z, o.w] };
+      }
     }
   }
   return undefined;
@@ -68,14 +69,16 @@ export function useTransformedCameraState({
   followTf,
   followOrientation,
   transforms,
+  time,
 }: {
   configCameraState: Partial<CameraState>;
   followTf?: string | false;
   followOrientation: boolean;
-  transforms: Transforms;
+  transforms: TransformTree;
+  time: Time;
 }): { transformedCameraState: CameraState; targetPose?: TargetPose } {
   const transformedCameraState = { ...configCameraState };
-  const targetPose = getTargetPose(followTf, transforms);
+  const targetPose = getTargetPose(followTf, transforms, time);
   // Store last seen target pose because the target may become available/unavailable over time as
   // the player changes, and we want to avoid moving the camera when it disappears.
   const lastTargetPoseRef = useRef<TargetPose | undefined>();

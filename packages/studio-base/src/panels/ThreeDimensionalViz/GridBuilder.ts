@@ -13,6 +13,7 @@
 
 import { isEqual } from "lodash";
 
+import { Time } from "@foxglove/rostime";
 import { TopicSettingsCollection } from "@foxglove/studio-base/panels/ThreeDimensionalViz/SceneBuilder";
 import {
   DEFAULT_GRID_COLOR,
@@ -31,7 +32,7 @@ export default class GridBuilder implements MarkerProvider {
     this.grid = GridBuilder.BuildGrid(this._settings);
   }
 
-  renderMarkers = (add: MarkerCollector): void => {
+  renderMarkers = (add: MarkerCollector, _time: Time): void => {
     if (this._visible) {
       add.instancedLineList(this.grid);
     }

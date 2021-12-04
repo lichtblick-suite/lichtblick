@@ -55,9 +55,6 @@ import useSceneBuilderAndTransformsData from "@foxglove/studio-base/panels/Three
 import useTopicTree, {
   TopicTreeContext,
 } from "@foxglove/studio-base/panels/ThreeDimensionalViz/TopicTree/useTopicTree";
-import Transforms, {
-  DEFAULT_ROOT_FRAME_IDS,
-} from "@foxglove/studio-base/panels/ThreeDimensionalViz/Transforms";
 import TransformsBuilder from "@foxglove/studio-base/panels/ThreeDimensionalViz/TransformsBuilder";
 import UrdfBuilder from "@foxglove/studio-base/panels/ThreeDimensionalViz/UrdfBuilder";
 import World from "@foxglove/studio-base/panels/ThreeDimensionalViz/World";
@@ -72,6 +69,10 @@ import {
   getObject,
   getUpdatedGlobalVariablesBySelectedObject,
 } from "@foxglove/studio-base/panels/ThreeDimensionalViz/threeDimensionalVizUtils";
+import {
+  DEFAULT_ROOT_FRAME_IDS,
+  TransformTree,
+} from "@foxglove/studio-base/panels/ThreeDimensionalViz/transforms";
 import { ThreeDimensionalVizConfig } from "@foxglove/studio-base/panels/ThreeDimensionalViz/types";
 import { Frame, Topic } from "@foxglove/studio-base/players/types";
 import inScreenshotTests from "@foxglove/studio-base/stories/inScreenshotTests";
@@ -96,12 +97,12 @@ export type LayoutToolbarSharedProps = {
   onFollowChange: (followTf?: string | false, followOrientation?: boolean) => void;
   saveConfig: Save3DConfig;
   targetPose?: TargetPose;
-  transforms: Transforms;
+  transforms: TransformTree;
   isPlaying?: boolean;
 };
 
 export type LayoutTopicSettingsSharedProps = {
-  transforms: Transforms;
+  transforms: TransformTree;
   topics: readonly Topic[];
   saveConfig: Save3DConfig;
 };
@@ -118,7 +119,7 @@ type Props = LayoutToolbarSharedProps &
     saveConfig: Save3DConfig;
     setSubscriptions: (subscriptions: string[]) => void;
     topics: readonly Topic[];
-    transforms: Transforms;
+    transforms: TransformTree;
   };
 
 export type UserSelectionState = {
@@ -457,25 +458,23 @@ export default function Layout({
   const rootTf = useMemo(() => {
     // If the user specified a followTf we will only return the root frame from their followTf
     if (typeof followTf === "string" && followTf.length > 0) {
-      if (transforms.has(followTf)) {
-        return transforms.rootOfTransform(followTf).id;
+      const followFrame = transforms.frame(followTf);
+      if (followFrame) {
+        return followFrame.root().id;
       }
       return undefined;
     }
 
-    const tfStore = transforms.storage.entries();
-
     // Try the conventional list of root frame transform ids
     for (const frameId of DEFAULT_ROOT_FRAME_IDS) {
-      const tf = tfStore.get(frameId);
-      if (tf != undefined) {
-        return tf.id;
+      if (transforms.hasFrame(frameId)) {
+        return frameId;
       }
     }
 
     // Fall back to the root of the first transform (lexicographically), if any
-    const firstFrameId = Array.from(tfStore.keys()).sort()[0];
-    return firstFrameId != undefined ? tfStore.get(firstFrameId)?.rootTransform().id : undefined;
+    const firstFrameId = Array.from(transforms.frames().keys()).sort()[0];
+    return firstFrameId != undefined ? transforms.frame(firstFrameId)?.root().id : undefined;
   }, [transforms, followTf]);
 
   const [rosPackagePath] = useAppConfigurationValue<string>(AppSetting.ROS_PACKAGE_PATH);
@@ -490,13 +489,7 @@ export default function Layout({
       sceneBuilder.clear();
     }
 
-    sceneBuilder.setPlayerId(playerId);
-
     urdfBuilder.setTransforms(transforms, rootTf);
-    if (rootTf) {
-      sceneBuilder.setTransforms(transforms, rootTf);
-    }
-
     urdfBuilder.setUrdfData(robotDescriptionParam, rosPackagePath);
     urdfBuilder.setVisible(selectedTopicNames.includes(URDF_TOPIC));
     urdfBuilder.setSettingsByKey(settingsByKey, rosPackagePath);
@@ -505,6 +498,8 @@ export default function Layout({
     const topicsByTopicName = getTopicsByTopicName(topics);
     const selectedTopics = filterMap(selectedTopicNames, (name) => topicsByTopicName[name]);
 
+    sceneBuilder.setPlayerId(playerId);
+    sceneBuilder.setTransforms(transforms, rootTf);
     sceneBuilder.setFlattenMarkers(flattenMarkers);
     sceneBuilder.setSelectedNamespacesByTopic(selectedNamespacesByTopic);
     sceneBuilder.setSettingsByKey(settingsByKey);
@@ -516,9 +511,7 @@ export default function Layout({
     sceneBuilder.render();
 
     // update the transforms and set the selected ones to render
-    if (rootTf) {
-      transformsBuilder.setTransforms(transforms, rootTf);
-    }
+    transformsBuilder.setTransforms(transforms, rootTf);
     transformsBuilder.setSelectedTransforms(selectedNamespacesByTopic[TRANSFORM_TOPIC] ?? []);
   }, [
     colorOverrideMarkerMatchers,
@@ -840,6 +833,7 @@ export default function Layout({
               autoTextBackgroundColor={autoTextBackgroundColor}
               cameraState={cameraState}
               isPlaying={isPlaying}
+              currentTime={currentTime}
               markerProviders={markerProviders}
               onCameraStateChange={onCameraStateChange}
               onClick={onClick}
@@ -878,6 +872,7 @@ export default function Layout({
                   targetPose={targetPose}
                   transforms={transforms}
                   rootTf={rootTf}
+                  currentTime={currentTime}
                   {...searchTextProps}
                 />
               </div>

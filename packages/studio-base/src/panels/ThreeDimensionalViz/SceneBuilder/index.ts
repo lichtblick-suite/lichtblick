@@ -21,8 +21,8 @@ import {
 } from "@foxglove/studio-base/panels/ThreeDimensionalViz/Interactions/types";
 import MessageCollector from "@foxglove/studio-base/panels/ThreeDimensionalViz/SceneBuilder/MessageCollector";
 import { MarkerMatcher } from "@foxglove/studio-base/panels/ThreeDimensionalViz/ThreeDimensionalVizContext";
-import Transforms from "@foxglove/studio-base/panels/ThreeDimensionalViz/Transforms";
 import VelodyneCloudConverter from "@foxglove/studio-base/panels/ThreeDimensionalViz/VelodyneCloudConverter";
+import { TransformTree } from "@foxglove/studio-base/panels/ThreeDimensionalViz/transforms";
 import { Topic, Frame, MessageEvent, RosObject } from "@foxglove/studio-base/players/types";
 import {
   Color,
@@ -46,8 +46,7 @@ import {
   OccupancyGridMessage,
   PointCloud2,
 } from "@foxglove/studio-base/types/Messages";
-import { MarkerProvider, MarkerCollector, Scene } from "@foxglove/studio-base/types/Scene";
-import Bounds from "@foxglove/studio-base/util/Bounds";
+import { MarkerProvider, MarkerCollector } from "@foxglove/studio-base/types/Scene";
 import { emptyPose } from "@foxglove/studio-base/util/Pose";
 import naturalSort from "@foxglove/studio-base/util/naturalSort";
 
@@ -97,7 +96,7 @@ type MarkerMatchersByTopic = {
 const missingTransformMessage = (
   rootTransformId: string,
   error: ErrorDetails,
-  transforms: Transforms,
+  transforms: TransformTree,
 ): string => {
   const frameIds = [...error.frameIds].sort().join(",");
   const s = error.frameIds.size === 1 ? "" : "s"; // for plural
@@ -105,7 +104,7 @@ const missingTransformMessage = (
     frameIds.length > 0
       ? `missing transforms from frame${s} <${frameIds}> to root frame <${rootTransformId}>`
       : `missing transform <${rootTransformId}>`;
-  if (transforms.empty) {
+  if (transforms.frames().size === 0) {
     return msg + ". No transforms found";
   }
   return msg;
@@ -113,7 +112,7 @@ const missingTransformMessage = (
 
 export function getSceneErrorsByTopic(
   sceneErrors: SceneErrors,
-  transforms: Transforms,
+  transforms: TransformTree,
 ): {
   [topicName: string]: string[];
 } {
@@ -177,12 +176,27 @@ export function filterOutSupersededMessages<T extends Pick<MessageEvent<unknown>
   return filteredMessages;
 }
 
+function computeMarkerPose(
+  marker: Marker,
+  transforms: TransformTree,
+  rootFrameId: string,
+  currentTime: Time,
+): MutablePose | undefined {
+  const frame = transforms.frame(marker.header.frame_id);
+  const rootFrame = transforms.frame(rootFrameId);
+  if (!frame || !rootFrame) {
+    return undefined;
+  }
+  const time = marker.frame_locked ? currentTime : marker.header.stamp;
+  return rootFrame.apply(emptyPose(), marker.pose, frame, time);
+}
+
 export default class SceneBuilder implements MarkerProvider {
   topicsByName: {
     [topicName: string]: Topic;
   } = {};
   markers: Marker[] = [];
-  transforms?: Transforms;
+  transforms?: TransformTree;
   rootTransformID?: string;
   frame?: Frame;
   // TODO(JP): Get rid of these two different variables `errors` and `errorsByTopic` which we
@@ -226,7 +240,6 @@ export default class SceneBuilder implements MarkerProvider {
   enabledNamespaces: Namespace[] = [];
   selectedNamespacesByTopic?: { [topicName: string]: Set<string> };
   flatten: boolean = false;
-  bounds: Bounds = new Bounds();
 
   // list of topics that need to be rerendered because the frame has new values
   // or because a prop affecting its rendering was changed
@@ -242,10 +255,12 @@ export default class SceneBuilder implements MarkerProvider {
     this._hooks = hooks;
   }
 
-  setTransforms = (transforms: Transforms, rootTransformID: string): void => {
+  setTransforms = (transforms: TransformTree, rootTransformID: string | undefined): void => {
     this.transforms = transforms;
     this.rootTransformID = rootTransformID;
-    this.errors.rootTransformID = rootTransformID;
+    if (rootTransformID != undefined) {
+      this.errors.rootTransformID = rootTransformID;
+    }
   };
 
   clear(): void {
@@ -437,37 +452,6 @@ export default class SceneBuilder implements MarkerProvider {
     return some(this.enabledNamespaces, (ns) => ns.topic === topic && ns.name === name);
   }
 
-  private _transformMarkerPose = (topic: string, marker: BaseMarker): MutablePose | undefined => {
-    const frame_id = marker.header.frame_id;
-
-    if (!frame_id) {
-      const error = this._addError(this.errors.topicsMissingFrameIds, topic);
-      error.namespaces.add(marker.ns);
-      return undefined;
-    }
-
-    if (frame_id === this.rootTransformID) {
-      // Transforming is a bit expensive, and this (no transformation necessary) is the common-case
-      // TODO: Need to deep-clone, callers mutate the result; fix this downstream.
-      return marker.pose;
-    }
-
-    // frame_id !== this.rootTransformID.
-    // We continue to render these, though they may be inaccurate
-    const badFrameError = this._addError(this.errors.topicsWithBadFrameIds, topic);
-    const namespace = marker.ns;
-    badFrameError.namespaces.add(namespace);
-    badFrameError.frameIds.add(frame_id);
-
-    const pose = this.transforms?.apply(emptyPose(), marker.pose, frame_id, this.rootTransformID!);
-    if (!pose) {
-      const topicMissingError = this._addError(this.errors.topicsMissingTransforms, topic);
-      topicMissingError.namespaces.add(namespace);
-      topicMissingError.frameIds.add(frame_id);
-    }
-    return pose;
-  };
-
   private _consumeMarkerArray = (
     topic: string,
     message: { markers: readonly BaseMarker[] },
@@ -516,40 +500,8 @@ export default class SceneBuilder implements MarkerProvider {
         return;
     }
 
-    const pose = this._transformMarkerPose(topic, message);
-    if (!pose) {
-      return;
-    }
-
     const points = (message as unknown as { points: MutablePoint[] }).points;
-    const { position } = pose;
-
-    let minZ = Number.MAX_SAFE_INTEGER;
-
-    const parsedPoints = [];
-    // if the marker has points, adjust bounds by the points. (Constructed markers sometimes don't
-    // have points.)
-    if (points.length > 0) {
-      for (const point of points) {
-        const x = point.x;
-        const y = point.y;
-        const z = point.z;
-        minZ = Math.min(minZ, point.z);
-        const transformedPoint = { x: x + position.x, y: y + position.y, z: z + position.z };
-        this.bounds.update(transformedPoint);
-        parsedPoints.push({ x, y, z });
-      }
-    } else {
-      // otherwise just adjust by the pose
-      minZ = Math.min(minZ, position.z);
-      this.bounds.update(position);
-    }
-
-    // if the minimum z value of any point (or the pose) is exactly 0
-    // then assume this marker can be flattened
-    if (minZ === 0 && this.flatten && this.flattenedZHeightPose) {
-      position.z = this.flattenedZHeightPose.position.z;
-    }
+    const parsedPoints = points.map((p) => ({ x: p.x, y: p.y, z: p.z }));
 
     // HACK(jacob): rather than hard-coding this, we should
     //  (a) produce this visualization dynamically from a non-marker topic
@@ -601,6 +553,7 @@ export default class SceneBuilder implements MarkerProvider {
       ns: string;
       header: Header;
       action: 0 | 1 | 2 | 3;
+      frame_locked: boolean;
       text?: string;
       poses?: readonly Pose[];
       closed?: boolean;
@@ -611,7 +564,7 @@ export default class SceneBuilder implements MarkerProvider {
       type: (message as unknown as { type: number }).type,
       scale: message.scale,
       lifetime,
-      pose,
+      pose: message.pose,
       interactionData,
       color: overrideColor ?? color,
       colors: overrideColor ? [] : message.colors,
@@ -620,6 +573,7 @@ export default class SceneBuilder implements MarkerProvider {
       ns: message.ns,
       header: message.header,
       action: message.action,
+      frame_locked: message.frame_locked,
       mesh_resource: message.mesh_resource,
       mesh_use_embedded_materials: message.mesh_use_embedded_materials,
     };
@@ -651,10 +605,11 @@ export default class SceneBuilder implements MarkerProvider {
 
     let pose: MutablePose | undefined = emptyPose();
     if (this.transforms) {
-      if (this.rootTransformID == undefined) {
+      const rootFrameId = this.rootTransformID;
+      if (rootFrameId == undefined) {
         throw new Error("missing rootTransformId");
       }
-      pose = this.transforms.apply(pose, pose, frame_id, this.rootTransformID);
+      pose = this.transforms.apply(pose, pose, rootFrameId, frame_id, message.header.stamp);
     }
     if (!pose) {
       const error = this._addError(this.errors.topicsMissingTransforms, topic);
@@ -729,20 +684,20 @@ export default class SceneBuilder implements MarkerProvider {
       throw new Error("missing rootTransformId");
     }
     const sourcePose = emptyPose();
-    let pose = this.transforms?.apply(
+    const frameId = drawData.header.frame_id;
+    const pose = this.transforms?.apply(
       sourcePose,
       sourcePose,
-      drawData.header.frame_id,
       this.rootTransformID,
+      frameId,
+      drawData.header.stamp,
     );
     if (!pose) {
-      // Don't error on frame_id="", interpret it as an identity transform
-      if (drawData.header.frame_id.length > 0) {
+      if (!(this.transforms?.hasFrame(frameId) ?? false)) {
         const error = this._addError(this.errors.topicsMissingTransforms, topic);
         error.frameIds.add(drawData.header.frame_id);
-        return;
       }
-      pose = sourcePose;
+      return;
     }
 
     // some callers of _consumeNonMarkerMessage provide LazyMessages and others provide regular objects
@@ -771,8 +726,6 @@ export default class SceneBuilder implements MarkerProvider {
   };
 
   setCurrentTime = (currentTime: { sec: number; nsec: number }): void => {
-    this.bounds.reset();
-
     this._clock = currentTime;
     // set the new clock value in all existing collectors
     // including those for topics not included in this frame,
@@ -784,12 +737,6 @@ export default class SceneBuilder implements MarkerProvider {
 
   // extracts renderable markers from the ros frame
   render(): void {
-    this.flattenedZHeightPose =
-      this._hooks.getFlattenedPose(this.frame!) ?? this.flattenedZHeightPose;
-
-    if (this.flattenedZHeightPose?.position) {
-      this.bounds.update(this.flattenedZHeightPose.position);
-    }
     for (const topic of this.topicsToRender) {
       try {
         this._consumeTopic(topic);
@@ -949,14 +896,11 @@ export default class SceneBuilder implements MarkerProvider {
     }
   };
 
-  getScene(): Scene {
-    return {
-      bounds: this.bounds,
-      flattenedZHeightPose: this.flattenedZHeightPose,
-    };
-  }
+  renderMarkers(add: MarkerCollector, time: Time): void {
+    if (!this.transforms || !this.rootTransformID) {
+      return;
+    }
 
-  renderMarkers(add: MarkerCollector): void {
     for (const topic of Object.values(this.topicsByName)) {
       const collector = this.collectors[topic.name];
       if (!collector) {
@@ -969,6 +913,11 @@ export default class SceneBuilder implements MarkerProvider {
           if (!this.namespaceIsEnabled(topic.name, marker.ns)) {
             continue;
           }
+        }
+
+        const pose = computeMarkerPose(marker, this.transforms, this.rootTransformID, time);
+        if (!pose) {
+          continue;
         }
 
         // Highlight if marker matches any of this topic's highlightMarkerMatchers; dim other markers
@@ -989,12 +938,18 @@ export default class SceneBuilder implements MarkerProvider {
         if (settings) {
           (marker as { settings?: unknown }).settings = settings;
         }
-        this._addMarkerToCollector(add, topic, marker);
+
+        this._addMarkerToCollector(add, topic, marker, pose);
       }
     }
   }
 
-  private _addMarkerToCollector(add: MarkerCollector, topic: Topic, originalMarker: Marker) {
+  private _addMarkerToCollector(
+    add: MarkerCollector,
+    topic: Topic,
+    originalMarker: Marker,
+    pose: MutablePose,
+  ) {
     let marker = originalMarker as
       | Marker
       | OccupancyGridMessage
@@ -1002,17 +957,32 @@ export default class SceneBuilder implements MarkerProvider {
       | (PoseStamped & { type: 103 })
       | (LaserScan & { type: 104 });
     switch (marker.type) {
-      case 1:
-      case 2:
-      case 3:
-        marker = { ...marker, points: undefined } as unknown as typeof marker;
+      case 1: // CubeMarker
+      case 2: // SphereMarker
+      case 3: // CylinderMarker
+        marker = { ...marker, pose, points: undefined } as unknown as typeof marker;
         break;
-      case 4:
-        marker = { ...marker, primitive: "line strip" };
+      case 4: // LineStripMarker
+        marker = { ...marker, pose, primitive: "line strip" };
         break;
-      case 6:
-        marker = { ...marker, primitive: "lines" };
+      case 5: // LineListMarker
+        marker = { ...marker, pose, primitive: "lines" };
         break;
+      case 0: // ArrowMarker
+      case 6: // CubeListMarker
+      case 7: // SphereListMarker
+      case 8: // PointsMarker
+      case 9: // TextMarker
+      case 10: // MeshMarker
+      case 11: // TriangleListMarker
+      case 102: // PointCloud2
+      case 103: // (unknown!)
+      case 108: // InstanceLineListMarker
+      case 110: // ColorMarker
+        marker = { ...marker, pose };
+        break;
+      case 101: // OccupancyGridMessage - needs special handling
+      case 104: // LaserScan - needs special handling
       default:
         break;
     }

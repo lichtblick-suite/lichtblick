@@ -15,7 +15,6 @@ import { ThreeDimensionalVizHooks } from "./types";
 
 const defaultHooks: ThreeDimensionalVizHooks = {
   getSyntheticArrowMarkerColor: () => ({ r: 0, g: 0, b: 1, a: 0.5 }),
-  getFlattenedPose: () => undefined,
   getOccupancyGridValues: (_topic) => [0.5, "map"],
   getMarkerColor: (_topic, markerColor) => markerColor,
 };

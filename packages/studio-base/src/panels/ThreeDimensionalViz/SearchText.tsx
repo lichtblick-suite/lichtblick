@@ -17,10 +17,11 @@ import { range, throttle } from "lodash";
 import { useState, useRef, useEffect, useCallback, KeyboardEvent } from "react";
 
 import { CameraState, cameraStateSelectors } from "@foxglove/regl-worldview";
+import { Time } from "@foxglove/rostime";
 import { useTooltip } from "@foxglove/studio-base/components/Tooltip";
 import useDeepChangeDetector from "@foxglove/studio-base/hooks/useDeepChangeDetector";
 import { Interactive } from "@foxglove/studio-base/panels/ThreeDimensionalViz/Interactions/types";
-import Transforms from "@foxglove/studio-base/panels/ThreeDimensionalViz/Transforms";
+import { TransformTree } from "@foxglove/studio-base/panels/ThreeDimensionalViz/transforms";
 import { TextMarker, Color } from "@foxglove/studio-base/types/Messages";
 
 export const YELLOW = { r: 1, b: 0, g: 1, a: 1 };
@@ -148,7 +149,8 @@ type SearchTextComponentProps = SearchTextProps & {
   onCameraStateChange: (arg0: CameraState) => void;
   cameraState: CameraState;
   rootTf?: string;
-  transforms: Transforms;
+  currentTime: Time;
+  transforms: TransformTree;
 };
 
 // Exported for tests.
@@ -157,6 +159,7 @@ export const useSearchMatches = ({
   currentMatch,
   onCameraStateChange,
   rootTf,
+  currentTime,
   searchTextOpen,
   transforms,
 }: {
@@ -164,8 +167,9 @@ export const useSearchMatches = ({
   currentMatch?: GLTextMarker;
   onCameraStateChange: (arg0: CameraState) => void;
   rootTf?: string;
+  currentTime: Time;
   searchTextOpen: boolean;
-  transforms: Transforms;
+  transforms: TransformTree;
 }): void => {
   const hasCurrentMatchChanged = useDeepChangeDetector([currentMatch], { initiallyTrue: true });
 
@@ -179,8 +183,9 @@ export const useSearchMatches = ({
     const output = transforms.apply(
       { position: { x: 0, y: 0, z: 0 }, orientation: { x: 0, y: 0, z: 0, w: 0 } },
       pose,
-      header.frame_id,
       rootTf,
+      header.frame_id,
+      currentTime,
     );
     if (!output) {
       return;
@@ -201,6 +206,7 @@ export const useSearchMatches = ({
   }, [
     cameraState,
     currentMatch,
+    currentTime,
     hasCurrentMatchChanged,
     onCameraStateChange,
     rootTf,
@@ -230,6 +236,7 @@ const SearchText = React.memo<SearchTextComponentProps>(function SearchText({
   cameraState,
   transforms,
   rootTf,
+  currentTime,
 }: SearchTextComponentProps) {
   const theme = useTheme();
   const currentMatch = searchTextMatches[selectedMatchIndex];
@@ -258,6 +265,7 @@ const SearchText = React.memo<SearchTextComponentProps>(function SearchText({
     currentMatch,
     onCameraStateChange,
     rootTf,
+    currentTime,
     searchTextOpen,
     transforms,
   });

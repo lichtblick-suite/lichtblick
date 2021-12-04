@@ -34,10 +34,7 @@ export default function useSceneBuilderAndTransformsData({
   const { playerId } = useDataSourceInfo();
   const hasChangedPlayerId = useChangeDetector([playerId], { initiallyTrue: false });
 
-  const newAvailableTfs = transforms
-    .values()
-    .map(({ id }) => id)
-    .filter(Boolean);
+  const newAvailableTfs = Array.from(transforms.frames().keys());
   const availableTfsRef = useRef<string[]>(newAvailableTfs);
   if (hasChangedPlayerId) {
     // If we have changed the playerId - meaning that we've added or removed a source - recalculate the available TFs

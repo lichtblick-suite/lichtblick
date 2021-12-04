@@ -17,6 +17,7 @@ import { omit } from "lodash";
 
 import MockMessagePipelineProvider from "@foxglove/studio-base/components/MessagePipeline/MockMessagePipelineProvider";
 import { TRANSFORM_TOPIC } from "@foxglove/studio-base/panels/ThreeDimensionalViz/constants";
+import { CoordinateFrame } from "@foxglove/studio-base/panels/ThreeDimensionalViz/transforms";
 import { Namespace } from "@foxglove/studio-base/types/Messages";
 
 import { UseSceneBuilderAndTransformsDataInput } from "./types";
@@ -26,12 +27,16 @@ type ErrorsByTopic = {
   [topicName: string]: string[];
 };
 class MockTransform {
-  private _values: { id: string }[];
+  private _frames = new Map<string, CoordinateFrame>();
   constructor({ tfs }: { tfs: { id: string }[] }) {
-    this._values = tfs;
+    for (const tf of tfs) {
+      if (tf.id) {
+        this._frames.set(tf.id, new CoordinateFrame(tf.id, undefined));
+      }
+    }
   }
-  values() {
-    return this._values;
+  frames() {
+    return this._frames;
   }
 }
 

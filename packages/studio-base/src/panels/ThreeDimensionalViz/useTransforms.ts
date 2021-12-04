@@ -13,28 +13,28 @@
 
 import { useMemo, useRef } from "react";
 
-import Transforms from "@foxglove/studio-base/panels/ThreeDimensionalViz/Transforms";
 import {
   TF_DATATYPES,
   TRANSFORM_STAMPED_DATATYPES,
 } from "@foxglove/studio-base/panels/ThreeDimensionalViz/constants";
+import { TransformTree } from "@foxglove/studio-base/panels/ThreeDimensionalViz/transforms";
 import { Frame, MessageEvent, Topic } from "@foxglove/studio-base/players/types";
 import { MarkerArray, StampedMessage, TF } from "@foxglove/studio-base/types/Messages";
 
 type TfMessage = { transforms: TF[] };
 
-function consumeTfs(tfs: MessageEvent<TfMessage>[], transforms: Transforms): void {
+function consumeTfs(tfs: MessageEvent<TfMessage>[], transforms: TransformTree): void {
   for (const { message } of tfs) {
     const parsedMessage = message;
     for (const tf of parsedMessage.transforms) {
-      transforms.consume(tf);
+      transforms.addTransformMessage(tf);
     }
   }
 }
 
-function consumeSingleTfs(tfs: MessageEvent<TF>[], transforms: Transforms): void {
+function consumeSingleTfs(tfs: MessageEvent<TF>[], transforms: TransformTree): void {
   for (const { message } of tfs) {
-    transforms.consume(message);
+    transforms.addTransformMessage(message);
   }
 }
 
@@ -47,16 +47,16 @@ function consumeSingleTfs(tfs: MessageEvent<TF>[], transforms: Transforms): void
  * If the frame is undefined, transform accumulation is reset and all existing transforms are discarded.
  */
 // eslint-disable-next-line @foxglove/no-boolean-parameters
-function useTransforms(topics: readonly Topic[], frame: Frame, reset: boolean): Transforms {
+function useTransforms(topics: readonly Topic[], frame: Frame, reset: boolean): TransformTree {
   const topicsToDatatypes = useMemo(() => {
     return new Map<string, string>(topics.map((topic) => [topic.name, topic.datatype]));
   }, [topics]);
 
-  const transformsRef = useRef(new Transforms());
+  const transformsRef = useRef(new TransformTree());
 
-  return useMemo<Transforms>(() => {
+  return useMemo<TransformTree>(() => {
     if (reset) {
-      transformsRef.current = new Transforms();
+      transformsRef.current = new TransformTree();
     }
 
     const transforms = transformsRef.current;
@@ -76,7 +76,7 @@ function useTransforms(topics: readonly Topic[], frame: Frame, reset: boolean): 
         if ("header" in (msg.message as Partial<StampedMessage>)) {
           const frameId = (msg.message as StampedMessage).header.frame_id;
           if (frameId != undefined) {
-            transforms.register(frameId);
+            transforms.getOrCreateFrame(frameId);
             updated = true;
             continue;
           }
@@ -87,7 +87,7 @@ function useTransforms(topics: readonly Topic[], frame: Frame, reset: boolean): 
           for (const marker of markers) {
             const frameId = marker.header.frame_id;
             if (frameId != undefined) {
-              transforms.register(frameId);
+              transforms.getOrCreateFrame(frameId);
               updated = true;
             }
           }
@@ -109,10 +109,7 @@ function useTransforms(topics: readonly Topic[], frame: Frame, reset: boolean): 
 
     // clone the transforms object if there were updates
     // This creates a new reference identity for the returned transforms so memoization can update
-    const newTransforms = new Transforms();
-    newTransforms.storage = transforms.storage;
-    newTransforms.empty = transforms.empty;
-
+    const newTransforms = TransformTree.Clone(transforms);
     return (transformsRef.current = newTransforms);
   }, [reset, frame, topicsToDatatypes]);
 }

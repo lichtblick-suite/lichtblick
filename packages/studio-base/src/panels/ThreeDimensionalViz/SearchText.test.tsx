@@ -23,8 +23,8 @@ import {
   getHighlightedIndices,
   useSearchMatches,
 } from "@foxglove/studio-base/panels/ThreeDimensionalViz/SearchText";
-import Transforms from "@foxglove/studio-base/panels/ThreeDimensionalViz/Transforms";
-import { TextMarker } from "@foxglove/studio-base/types/Messages";
+import { TransformTree } from "@foxglove/studio-base/panels/ThreeDimensionalViz/transforms";
+import { TextMarker, TF } from "@foxglove/studio-base/types/Messages";
 import { MARKER_MSG_TYPES } from "@foxglove/studio-base/util/globalConstants";
 
 const ROOT_FRAME_ID = "root_frame";
@@ -33,6 +33,7 @@ const CHILD_FRAME_ID = "child_frame";
 const header = {
   frame_id: ROOT_FRAME_ID,
   stamp: { sec: 0, nsec: 0 },
+  seq: 0,
 };
 
 function makeInteractive<T>(message: T): Interactive<T> {
@@ -186,19 +187,18 @@ describe("<SearchText />", () => {
   describe("useCurrentMatchPosition", () => {
     const p = (x: number = 0, y = x, z = x) => ({ x, y, z });
     const q = (x = 0, y = 0, z = 0, w = 0) => ({ x, y, z, w });
-    const getTf = () => {
-      const tf = new Transforms();
-      const message = {
+    const getTf = (): TransformTree => {
+      const tree = new TransformTree();
+      const tf: TF = {
         header,
-        pose: {
-          position: p(30, 60, 90),
-          orientation: q(0, 0, 0, 1),
+        child_frame_id: CHILD_FRAME_ID,
+        transform: {
+          translation: p(30, 60, 90),
+          rotation: q(0, 0, 0, 1),
         },
       };
-      const rootTf = tf.storage.get(CHILD_FRAME_ID);
-      rootTf.set(message.pose.position, message.pose.orientation);
-      rootTf.parent = tf.storage.get(ROOT_FRAME_ID);
-      return tf;
+      tree.addTransformMessage(tf);
+      return tree;
     };
 
     const baseCameraState: CameraState = {
@@ -225,6 +225,7 @@ describe("<SearchText />", () => {
         rootTf: ROOT_FRAME_ID,
         searchTextOpen: true,
         transforms,
+        currentTime: { sec: 0, nsec: 0 },
       });
       return { cameraState, updateCurrentMatch, onCameraStateChange };
     };

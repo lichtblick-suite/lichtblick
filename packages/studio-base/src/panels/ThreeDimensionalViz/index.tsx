@@ -44,9 +44,10 @@ export type Props = {
   saveConfig: Save3DConfig;
 };
 
-const TimeZero = { sec: 0, nsec: 0 };
+const TIME_ZERO = { sec: 0, nsec: 0 };
+
 function selectCurrentTime(ctx: MessagePipelineContext) {
-  return ctx.playerState.activeData?.currentTime ?? TimeZero;
+  return ctx.playerState.activeData?.currentTime ?? TIME_ZERO;
 }
 
 function selectIsPlaying(ctx: MessagePipelineContext) {
@@ -113,6 +114,7 @@ function BaseRenderer(props: Props): JSX.Element {
     followTf,
     followOrientation,
     transforms,
+    time: currentTime,
   });
 
   const onSetSubscriptions = useCallback(

@@ -11,33 +11,28 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { mat4 } from "gl-matrix";
+import { getArrowToParentMarker } from "@foxglove/studio-base/panels/ThreeDimensionalViz/TransformsBuilder";
+import {
+  CoordinateFrame,
+  Transform,
+} from "@foxglove/studio-base/panels/ThreeDimensionalViz/transforms";
 
-import { Transform } from "@foxglove/studio-base/panels/ThreeDimensionalViz/Transforms";
-import { getArrowToParentMarkers } from "@foxglove/studio-base/panels/ThreeDimensionalViz/TransformsBuilder";
+const ZERO_TIME = { sec: 0, nsec: 0 };
 
 describe("TransformBuilder", () => {
   describe("getArrowToParentMarkers", () => {
-    const invalidParent = new Transform("parent");
-    const matrix = mat4.fromValues(1, 0, 0, 2, 1, 0, 0, 1, 0, 0, 1, 0, 2, 0, 1, 2);
+    const parent = new CoordinateFrame("parent", undefined);
 
-    it("does NOT return arrows to invalid parent if is the NOT root", () => {
-      const validChild = Object.assign(new Transform("child"), { matrix, parent: invalidParent });
-      validChild.set({ x: 1, y: 1, z: 1 }, { x: 1, y: 1, z: 1, w: 1 });
-      expect(getArrowToParentMarkers("child", validChild, "some_other_root")).toEqual([]);
+    it("returns an arrow", () => {
+      const child = new CoordinateFrame("child", parent);
+      child.addTransform(ZERO_TIME, new Transform([1, 1, 1], [0, 0, 0, 1]));
+      expect(getArrowToParentMarker("child", child, parent, ZERO_TIME)).toBeDefined();
     });
 
-    it("returns arrows to invalid parent if is the root", () => {
-      const validChild = Object.assign(new Transform("child"), { matrix, parent: invalidParent });
-      validChild.set({ x: 1, y: 1, z: 1 }, { x: 1, y: 1, z: 1, w: 1 });
-      expect(getArrowToParentMarkers("child", validChild, "parent")).not.toEqual([]);
-    });
-
-    it("does NOT return arrows if the distance between the parent and child is 0", () => {
-      const parent = new Transform("parent");
-      const child = Object.assign(new Transform("child"), { parent });
-      child.set({ x: 0, y: 0, z: 0 }, { x: 1, y: 1, z: 1, w: 1 });
-      expect(getArrowToParentMarkers("child", child, "some_other_root")).toEqual([]);
+    it("does NOT return an arrow if the distance between the parent and child is 0", () => {
+      const child = new CoordinateFrame("child", parent);
+      child.addTransform(ZERO_TIME, new Transform([0, 0, 0], [0, 0, 0, 1]));
+      expect(getArrowToParentMarker("child", child, parent, ZERO_TIME)).toBeUndefined();
     });
   });
 });

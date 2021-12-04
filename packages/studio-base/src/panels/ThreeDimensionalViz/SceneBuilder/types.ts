@@ -11,12 +11,10 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { Frame } from "@foxglove/studio-base/players/types";
-import { Color, Pose } from "@foxglove/studio-base/types/Messages";
+import { Color } from "@foxglove/studio-base/types/Messages";
 
 export type ThreeDimensionalVizHooks = Readonly<{
   getMarkerColor: (arg0: string, arg1: Color) => Color;
   getOccupancyGridValues: (arg0: string) => [number, string]; // arg is topic, return value is [alpha, map].
-  getFlattenedPose: (arg0: Frame) => Pose | undefined;
   getSyntheticArrowMarkerColor: (arg0: string) => Color; // arg is topic
 }>;

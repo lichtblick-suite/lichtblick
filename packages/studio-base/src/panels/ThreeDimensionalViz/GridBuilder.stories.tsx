@@ -83,7 +83,7 @@ storiesOf("panels/ThreeDimensionalViz/GridBuilder", module)
   .add("renders the default grid", () => {
     const collector = new MockMarkerCollector();
     const gridBuilder = new GridBuilder();
-    gridBuilder.renderMarkers(collector);
+    gridBuilder.renderMarkers(collector, { sec: 0, nsec: 0 });
 
     return (
       <div style={{ width: 640, height: 480 }}>
@@ -115,7 +115,7 @@ storiesOf("panels/ThreeDimensionalViz/GridBuilder", module)
     const topicSettings: TopicSettingsCollection = {};
     topicSettings[`t:${FOXGLOVE_GRID_TOPIC}`] = settings;
     gridBuilder.setSettingsByKey(topicSettings);
-    gridBuilder.renderMarkers(collector);
+    gridBuilder.renderMarkers(collector, { sec: 0, nsec: 0 });
 
     return (
       <div style={{ width: 640, height: 480 }}>

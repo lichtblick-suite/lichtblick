@@ -11,6 +11,7 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
+import { quat, vec3 } from "gl-matrix";
 import { isEqual } from "lodash";
 
 import {
@@ -23,18 +24,22 @@ import {
   parseRobot,
 } from "@foxglove/den/urdf";
 import Logger from "@foxglove/log";
+import { Time } from "@foxglove/rostime";
 import { rewritePackageUrl } from "@foxglove/studio-base/context/AssetsContext";
 import { TopicSettingsCollection } from "@foxglove/studio-base/panels/ThreeDimensionalViz/SceneBuilder";
 import { UrdfSettings } from "@foxglove/studio-base/panels/ThreeDimensionalViz/TopicSettingsEditor/UrdfSettingsEditor";
-import Transforms from "@foxglove/studio-base/panels/ThreeDimensionalViz/Transforms";
+import {
+  Transform,
+  TransformTree,
+} from "@foxglove/studio-base/panels/ThreeDimensionalViz/transforms";
 import {
   Color,
   CubeMarker,
   CylinderMarker,
+  Marker,
   MeshMarker,
   MutablePose,
   SphereMarker,
-  TF,
 } from "@foxglove/studio-base/types/Messages";
 import { MarkerProvider, MarkerCollector } from "@foxglove/studio-base/types/Scene";
 import { emptyPose } from "@foxglove/studio-base/util/Pose";
@@ -58,23 +63,27 @@ export default class UrdfBuilder implements MarkerProvider {
   private _visible = true;
   private _settings: UrdfSettings = {};
   private _urdfData?: string;
-  private _transforms?: Transforms;
+  private _transforms?: TransformTree;
   private _rootTransformID?: string;
 
   constructor() {}
 
-  renderMarkers = (add: MarkerCollector): void => {
-    if (this._visible) {
+  renderMarkers = (add: MarkerCollector, time: Time): void => {
+    if (this._visible && this._transforms && this._rootTransformID) {
       for (const box of this._boxes) {
+        updatePose(box, this._transforms, this._rootTransformID, time);
         add.cube(box);
       }
       for (const sphere of this._spheres) {
+        updatePose(sphere, this._transforms, this._rootTransformID, time);
         add.sphere(sphere);
       }
       for (const cylinder of this._cylinders) {
+        updatePose(cylinder, this._transforms, this._rootTransformID, time);
         add.cylinder(cylinder);
       }
       for (const mesh of this._meshes) {
+        updatePose(mesh, this._transforms, this._rootTransformID, time);
         add.mesh(mesh);
       }
     }
@@ -85,7 +94,7 @@ export default class UrdfBuilder implements MarkerProvider {
     this._visible = isVisible;
   }
 
-  setTransforms = (transforms: Transforms, rootTransformID: string | undefined): void => {
+  setTransforms = (transforms: TransformTree, rootTransformID: string | undefined): void => {
     if (transforms === this._transforms && rootTransformID === this._rootTransformID) {
       return;
     }
@@ -161,21 +170,12 @@ export default class UrdfBuilder implements MarkerProvider {
     }
 
     for (const joint of this._urdf.joints.values()) {
-      if (!this._transforms.has(joint.child)) {
-        const tf: TF = {
-          header: {
-            frame_id: joint.parent,
-            stamp: { sec: 0, nsec: 0 },
-            seq: 0,
-          },
-          child_frame_id: joint.child,
-          transform: {
-            translation: joint.origin.xyz,
-            rotation: eulerToQuaternion(joint.origin.rpy),
-          },
-        };
-        this._transforms.consume(tf);
-      }
+      const t = joint.origin.xyz;
+      const q = eulerToQuaternion(joint.origin.rpy);
+      const translation: vec3 = [t.x, t.y, t.z];
+      const rotation: quat = [q.x, q.y, q.z, q.w];
+      const tf = new Transform(translation, rotation);
+      this._transforms.addTransform(joint.child, joint.parent, TIME_ZERO, tf);
     }
 
     this.createMarkers(this._urdf);
@@ -220,7 +220,7 @@ export default class UrdfBuilder implements MarkerProvider {
     ns: string,
     id: string,
     frame_id: string,
-    tfs: Transforms,
+    tfs: TransformTree,
     rootTf: string,
     visual: UrdfVisual,
     robot: UrdfRobot,
@@ -229,7 +229,7 @@ export default class UrdfBuilder implements MarkerProvider {
       position: visual.origin.xyz,
       orientation: eulerToQuaternion(visual.origin.rpy),
     };
-    const pose = tfs.apply(emptyPose(), localPose, frame_id, rootTf);
+    const pose = tfs.apply(emptyPose(), localPose, rootTf, frame_id, TIME_ZERO);
     if (!pose) {
       return;
     }
@@ -403,4 +403,18 @@ function getColor(visual: UrdfVisual, robot: UrdfRobot): Color {
     return robot.materials.get(visual.material.name)?.color ?? DEFAULT_COLOR;
   }
   return DEFAULT_COLOR;
+}
+
+function updatePose(
+  marker: Marker,
+  transforms: TransformTree,
+  rootFrameId: string,
+  currentTime: Time,
+): boolean {
+  const frame = transforms.frame(marker.header.frame_id);
+  const rootFrame = transforms.frame(rootFrameId);
+  if (!frame || !rootFrame) {
+    return false;
+  }
+  return rootFrame.apply(marker.pose, marker.pose, frame, currentTime) != undefined;
 }
