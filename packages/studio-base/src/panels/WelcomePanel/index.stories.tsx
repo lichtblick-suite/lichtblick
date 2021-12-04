@@ -7,6 +7,7 @@ import ReactTestUtils from "react-dom/test-utils";
 
 import AppConfigurationContext from "@foxglove/studio-base/context/AppConfigurationContext";
 import PanelSetup from "@foxglove/studio-base/stories/PanelSetup";
+import delay from "@foxglove/studio-base/util/delay";
 import { makeConfiguration } from "@foxglove/studio-base/util/makeConfiguration";
 import signal from "@foxglove/studio-base/util/signal";
 
@@ -57,18 +58,22 @@ function Example({
     return configuration;
   });
   const wrapper = useRef<HTMLDivElement>(ReactNull);
-  const onMount = useCallback(() => {
-    const input = wrapper.current?.querySelector("input");
-    const button = wrapper.current?.querySelector("[data-test='welcome-content'] button");
-    if (!input || !button) {
-      throw new Error("missing required elements");
-    }
+  const onMount = useCallback(async () => {
+    for (let tries = 0; tries < 5; tries++) {
+      const input = wrapper.current?.querySelector("input");
+      const button = wrapper.current?.querySelector("[data-test='welcome-content'] button");
+      if (!input || !button) {
+        await delay(100);
+        continue;
+      }
 
-    input.value = "test@example.com";
-    ReactTestUtils.Simulate.change(input);
-    setTimeout(() => {
+      input.value = "test@example.com";
+      ReactTestUtils.Simulate.change(input);
+      await delay(0);
       ReactTestUtils.Simulate.click(button);
-    });
+      return;
+    }
+    throw new Error("missing required elements");
   }, []);
   return (
     <div style={{ flex: "1 1 auto" }} ref={wrapper}>

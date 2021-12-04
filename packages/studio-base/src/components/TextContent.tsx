@@ -12,13 +12,15 @@
 //   You may not use this file except in compliance with the License.
 
 import { Link, makeStyles } from "@fluentui/react";
-import { PropsWithChildren, useCallback, useContext } from "react";
-import Markdown from "react-markdown";
-import rehypeRaw from "rehype-raw";
+import { PropsWithChildren, useCallback, useContext, Suspense } from "react";
+import { useAsync } from "react-use";
 import { CSSProperties } from "styled-components";
 
 import LinkHandlerContext from "@foxglove/studio-base/context/LinkHandlerContext";
 import { fonts } from "@foxglove/studio-base/util/sharedStyleConstants";
+
+// workaround for ESM in jest: https://github.com/foxglove/studio/issues/1854
+const Markdown = React.lazy(async () => await import("react-markdown"));
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -146,7 +148,9 @@ type Props = {
   allowMarkdownHtml?: boolean;
 };
 
-export default function TextContent(props: PropsWithChildren<Props>): React.ReactElement {
+export default function TextContent(
+  props: PropsWithChildren<Props>,
+): React.ReactElement | ReactNull {
   const { children, style, allowMarkdownHtml } = props;
   const classes = useStyles();
   const handleLink = useContext(LinkHandlerContext);
@@ -167,15 +171,23 @@ export default function TextContent(props: PropsWithChildren<Props>): React.Reac
     [handleLink],
   );
 
+  // workaround for ESM in jest: https://github.com/foxglove/studio/issues/1854
+  const { value: rehypeRaw } = useAsync(async () => await import("rehype-raw"));
+  if (!rehypeRaw) {
+    return ReactNull;
+  }
+
   return (
     <div className={classes.root} style={style}>
       {typeof children === "string" ? (
-        <Markdown
-          rehypePlugins={allowMarkdownHtml === true ? [rehypeRaw] : []}
-          components={{ a: linkRenderer }}
-        >
-          {children}
-        </Markdown>
+        <Suspense fallback={ReactNull}>
+          <Markdown
+            rehypePlugins={allowMarkdownHtml === true ? [rehypeRaw.default] : []}
+            components={{ a: linkRenderer }}
+          >
+            {children}
+          </Markdown>
+        </Suspense>
       ) : (
         children
       )}
