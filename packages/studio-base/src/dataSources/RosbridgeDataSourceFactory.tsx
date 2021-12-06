@@ -12,7 +12,7 @@ import { Player } from "@foxglove/studio-base/players/types";
 import { parseInputUrl } from "@foxglove/studio-base/util/url";
 
 class RosbridgeDataSourceFactory implements IDataSourceFactory {
-  id = "rosbridge-websockete";
+  id = "rosbridge-websocket";
   displayName = "Rosbridge (ROS 1 & 2)";
   iconName: IDataSourceFactory["iconName"] = "Flow";
 
