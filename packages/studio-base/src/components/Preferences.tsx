@@ -27,6 +27,7 @@ import { useAppTimeFormat } from "@foxglove/studio-base/hooks";
 import { useAppConfigurationValue } from "@foxglove/studio-base/hooks/useAppConfigurationValue";
 import { TimeDisplayMethod } from "@foxglove/studio-base/types/panels";
 import fuzzyFilter from "@foxglove/studio-base/util/fuzzyFilter";
+import isDesktopApp from "@foxglove/studio-base/util/isDesktopApp";
 
 const MESSAGE_RATES = [1, 3, 5, 10, 15, 20, 30, 60];
 
@@ -188,6 +189,37 @@ function TimeFormat(): React.ReactElement {
   );
 }
 
+function LaunchDefault(): React.ReactElement {
+  const [preference = "unknown", setPreference] = useAppConfigurationValue<string | undefined>(
+    AppSetting.LAUNCH_PREFERENCE,
+  );
+
+  const entries: Array<{ key: string; text: string }> = [
+    { key: "unknown", text: "Ask each time" },
+    { key: "web", text: "Web app" },
+    { key: "desktop", text: "Desktop app" },
+  ];
+
+  return (
+    <VirtualizedComboBox
+      label="Open links in:"
+      options={entries}
+      autoComplete="on"
+      openOnKeyboardFocus
+      selectedKey={preference}
+      onChange={(_event, option) => {
+        if (option) {
+          void setPreference(String(option.key));
+        }
+      }}
+      calloutProps={{
+        directionalHint: DirectionalHint.bottomLeftEdge,
+        directionalHintFixed: true,
+      }}
+    />
+  );
+}
+
 function MessageFramerate(): React.ReactElement {
   const [messageRate, setMessageRate] = useAppConfigurationValue<number>(AppSetting.MESSAGE_RATE);
   const entries = useMemo(
@@ -302,6 +334,11 @@ export default function Preferences(): React.ReactElement {
             <Stack.Item>
               <MessageFramerate />
             </Stack.Item>
+            {!isDesktopApp() && (
+              <Stack.Item>
+                <LaunchDefault />
+              </Stack.Item>
+            )}
           </Stack>
         </Stack.Item>
         <Stack.Item>

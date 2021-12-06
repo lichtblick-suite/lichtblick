@@ -24,8 +24,6 @@ import {
 import { useToasts } from "react-toast-notifications";
 import { useMount, useMountedState } from "react-use";
 
-import Log from "@foxglove/log";
-import { fromRFC3339String } from "@foxglove/rostime";
 import AccountSettings from "@foxglove/studio-base/components/AccountSettingsSidebar/AccountSettings";
 import ConnectionList from "@foxglove/studio-base/components/ConnectionList";
 import connectionHelpContent from "@foxglove/studio-base/components/ConnectionList/index.help.md";
@@ -53,6 +51,7 @@ import Preferences from "@foxglove/studio-base/components/Preferences";
 import RemountOnValueChange from "@foxglove/studio-base/components/RemountOnValueChange";
 import Sidebar, { SidebarItem } from "@foxglove/studio-base/components/Sidebar";
 import { SidebarContent } from "@foxglove/studio-base/components/SidebarContent";
+import { URLStateSyncAdapter } from "@foxglove/studio-base/components/URLStateSyncAdapter";
 import { useAppConfiguration } from "@foxglove/studio-base/context/AppConfigurationContext";
 import { useAssets } from "@foxglove/studio-base/context/AssetsContext";
 import ConsoleApiContext from "@foxglove/studio-base/context/ConsoleApiContext";
@@ -73,8 +72,6 @@ import useElectronFilesToOpen from "@foxglove/studio-base/hooks/useElectronFiles
 import useNativeAppMenuEvent from "@foxglove/studio-base/hooks/useNativeAppMenuEvent";
 import welcomeLayout from "@foxglove/studio-base/layouts/welcomeLayout";
 import { PlayerPresence } from "@foxglove/studio-base/players/types";
-
-const log = Log.getLogger(__filename);
 
 const useStyles = makeStyles({
   container: {
@@ -377,55 +374,6 @@ export default function Workspace(props: WorkspaceProps): JSX.Element {
     }
   }, [filesToOpen, openFiles]);
 
-  useEffect(() => {
-    const firstLink = props.deepLinks?.[0];
-    if (firstLink == undefined) {
-      return;
-    }
-
-    try {
-      const url = new URL(firstLink);
-      // only support the open command
-
-      // Test if the pathname matches //open or //open/
-      if (!/\/\/open\/?/.test(url.pathname)) {
-        return;
-      }
-
-      const type = url.searchParams.get("type");
-      if (type === "rosbag") {
-        const bagUrl = url.searchParams.get("url");
-        if (!bagUrl) {
-          log.warn(`Missing rosbag url param in ${url}`);
-          return;
-        }
-        selectSource("ros1-remote-bagfile", { url: bagUrl });
-      } else if (type === "foxglove-data-platform") {
-        const start = url.searchParams.get("start") ?? "";
-        const end = url.searchParams.get("end") ?? "";
-        const seekTo = url.searchParams.get("seekTo") ?? undefined;
-        const deviceId = url.searchParams.get("deviceId");
-        if (!deviceId) {
-          log.warn(`Missing deviceId param in ${url}`);
-          return;
-        }
-        if (
-          !fromRFC3339String(start) ||
-          !fromRFC3339String(end) ||
-          (seekTo && !fromRFC3339String(seekTo))
-        ) {
-          log.warn(`Missing or invalid timestamp(s) in ${url}`);
-          return;
-        }
-        selectSource("foxglove-data-platform", { start, end, seekTo, deviceId });
-      } else {
-        log.warn(`Unknown deep link type ${url}`);
-      }
-    } catch (err) {
-      log.error(err);
-    }
-  }, [props.deepLinks, selectSource]);
-
   const dropHandler = useCallback(
     ({ files }: { files: FileList }) => {
       void openFiles(files);
@@ -516,6 +464,7 @@ export default function Workspace(props: WorkspaceProps): JSX.Element {
           <div className={classes.dropzone}>Drop a file here</div>
         </DropOverlay>
       </DocumentDropListener>
+      <URLStateSyncAdapter deepLinks={props.deepLinks ?? []} />
       <div className={classes.container} ref={containerRef} tabIndex={0}>
         <Sidebar
           items={sidebarItems}

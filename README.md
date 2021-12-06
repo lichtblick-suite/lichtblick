@@ -55,6 +55,12 @@ $ yarn start        # launch electron
 # To launch the browser app:
 $ yarn web:serve
 
+# To launch the browser app using the dev backend server:
+$ yarn web:serve:dev
+
+# To launch the browser app using a local instance of the backend server:
+$ yarn web:serve:local
+
 # To launch the storybook:
 $ yarn storybook
 

@@ -6,6 +6,7 @@ import { Suspense, useState } from "react";
 import { DndProvider } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
 
+import { AppSetting } from "@foxglove/studio-base/AppSetting";
 import Workspace from "@foxglove/studio-base/Workspace";
 import DocumentTitleAdapter from "@foxglove/studio-base/components/DocumentTitleAdapter";
 import MultiProvider from "@foxglove/studio-base/components/MultiProvider";
@@ -18,13 +19,18 @@ import { HoverValueProvider } from "@foxglove/studio-base/context/HoverValueCont
 import ModalHost from "@foxglove/studio-base/context/ModalHost";
 import { IDataSourceFactory } from "@foxglove/studio-base/context/PlayerSelectionContext";
 import { UserNodeStateProvider } from "@foxglove/studio-base/context/UserNodeStateContext";
+import { useAppConfigurationValue } from "@foxglove/studio-base/hooks";
+import { useSessionStorageValue } from "@foxglove/studio-base/hooks/useSessionStorageValue";
 import CurrentLayoutProvider from "@foxglove/studio-base/providers/CurrentLayoutProvider";
 import ExtensionMarketplaceProvider from "@foxglove/studio-base/providers/ExtensionMarketplaceProvider";
 import ExtensionRegistryProvider from "@foxglove/studio-base/providers/ExtensionRegistryProvider";
 import HelpInfoProvider from "@foxglove/studio-base/providers/HelpInfoProvider";
 import LayoutManagerProvider from "@foxglove/studio-base/providers/LayoutManagerProvider";
 import PanelCatalogProvider from "@foxglove/studio-base/providers/PanelCatalogProvider";
+import { LaunchPreferenceScreen } from "@foxglove/studio-base/screens/LaunchPreferenceScreen";
+import { LaunchingInDesktopScreen } from "@foxglove/studio-base/screens/LaunchingInDesktopScreen";
 import URDFAssetLoader from "@foxglove/studio-base/services/URDFAssetLoader";
+import isDesktopApp from "@foxglove/studio-base/util/isDesktopApp";
 
 type AppProps = {
   /**
@@ -37,7 +43,7 @@ type AppProps = {
   deepLinks?: string[];
 };
 
-export default function App(props: AppProps): JSX.Element {
+function AppContent(props: AppProps): JSX.Element {
   const [assetLoaders] = useState(() => [new URDFAssetLoader()]);
 
   const providers = [
@@ -74,4 +80,28 @@ export default function App(props: AppProps): JSX.Element {
       </DndProvider>
     </MultiProvider>
   );
+}
+
+export default function App(props: AppProps): JSX.Element {
+  const isDesktop = isDesktopApp();
+  const [globalLaunchPreference] = useAppConfigurationValue<string>(AppSetting.LAUNCH_PREFERENCE);
+  const [sessionLaunchPreference] = useSessionStorageValue(AppSetting.LAUNCH_PREFERENCE);
+
+  // Session preferences take priority over global preferences.
+  const activePreference = sessionLaunchPreference ?? globalLaunchPreference;
+
+  if (isDesktop) {
+    return <AppContent {...props} />;
+  } else {
+    const url = new URL(window.location.href);
+    const hasParams = Array.from(url.searchParams.entries()).length > 0;
+    // Ask the user in which environment they want to open this session.
+    if (activePreference == undefined && hasParams) {
+      return <LaunchPreferenceScreen />;
+    } else if (activePreference === "desktop" && hasParams) {
+      return <LaunchingInDesktopScreen />;
+    } else {
+      return <AppContent {...props} />;
+    }
+  }
 }

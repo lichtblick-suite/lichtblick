@@ -94,6 +94,8 @@ export type PlayerProblem = {
   tip?: string;
 };
 
+export type PlayerURLState = Record<string, string>;
+
 export type PlayerState = {
   // Information about the player's presence or connection status, for the UI to show a loading indicator.
   presence: PlayerPresence;
@@ -124,6 +126,9 @@ export type PlayerState = {
   // The actual data to render panels with. Can be empty during initialization, until all this data
   // is known. See `type PlayerStateActiveData` for more details.
   activeData?: PlayerStateActiveData;
+
+  /** State to serialize into the active URL. */
+  urlState?: PlayerURLState;
 };
 
 export type PlayerStateActiveData = {

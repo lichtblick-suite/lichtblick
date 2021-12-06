@@ -260,6 +260,11 @@ export default class FoxgloveDataPlatformPlayer implements Player {
       capabilities: CAPABILITIES,
       playerId: this._id,
       problems: this._problems,
+      urlState: {
+        start: toRFC3339String(this._start ?? ZERO_TIME),
+        end: toRFC3339String(this._end ?? ZERO_TIME),
+        deviceId: this._deviceId,
+      },
 
       activeData: {
         messages,

@@ -4,7 +4,12 @@
 
 type WebpackArgv = {
   mode?: string;
-  env?: { WEBPACK_SERVE?: boolean; WEBPACK_BUNDLE?: boolean; WEBPACK_BUILD?: boolean };
+  env?: {
+    FOXGLOVE_BACKEND?: string;
+    WEBPACK_SERVE?: boolean;
+    WEBPACK_BUNDLE?: boolean;
+    WEBPACK_BUILD?: boolean;
+  };
   host?: string;
 };
 

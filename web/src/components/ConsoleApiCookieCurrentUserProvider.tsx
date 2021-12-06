@@ -46,7 +46,7 @@ export default function ConsoleApiCookieCurrentUserProvider(
   // cookies and return the user back to studio
   const signIn = useCallback(() => {
     const currentLocation = encodeURIComponent(window.location.href);
-    window.location.href = `https://console.foxglove.dev/signin?returnTo=${currentLocation}`;
+    window.location.href = `${process.env.FOXGLOVE_CONSOLE_URL}/signin?returnTo=${currentLocation}`;
   }, []);
 
   const value = useShallowMemo({ currentUser, signIn, signOut });
