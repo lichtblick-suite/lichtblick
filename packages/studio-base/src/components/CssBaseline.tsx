@@ -82,9 +82,29 @@ const useStyles = makeStyles((theme) => ({
         },
       },
       ".mosaic-tile": {
+        margin: 0,
+      },
+      ".mosaic-tile:first-child": {
         // make room for splitters - unfortunately this means the background color will show
         // through even if the tile has its own background color set
+        marginRight: 1,
+        marginBottom: 1,
+      },
+      // The last tile does not need a bottom margin
+      ".mosaic-tile:last-child": {
+        marginBottom: 0,
+      },
+      // If there is only one tile in the container there are no splitters and no margin is needed
+      ".mosaic-tile:only-child": {
         margin: 0,
+      },
+      // tile immediately after a row splitter needs 1px margin so the splitter doesn't overlap the tile content
+      ".-row + .mosaic-tile": {
+        marginLeft: 1,
+      },
+      // tile immediately after a column splitter needs 1px margin so the splitter doesn't overlap the tile content
+      ".-column + .mosaic-tile": {
+        marginTop: 1,
       },
       ".mosaic-window": {
         boxShadow: "none",
