@@ -416,5 +416,10 @@ function updatePose(
   if (!frame || !rootFrame) {
     return false;
   }
-  return rootFrame.apply(marker.pose, marker.pose, frame, currentTime) != undefined;
+
+  // Store the original pose on the marker
+  const markerWithOrigPose = marker as Marker & { origPose?: MutablePose };
+  markerWithOrigPose.origPose ??= marker.pose;
+
+  return rootFrame.apply(marker.pose, markerWithOrigPose.origPose, frame, currentTime) != undefined;
 }

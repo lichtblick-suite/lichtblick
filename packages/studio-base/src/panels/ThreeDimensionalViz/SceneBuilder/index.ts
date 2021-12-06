@@ -72,13 +72,10 @@ const buildSyntheticArrowMarker = (
   interactionData: { topic, originalMessage: message },
 });
 
-// TODO(JP): looks like we might not actually use these fields in the new topic picker?
-export type ErrorDetails = { frameIds: Set<string>; namespaces: Set<string> };
+export type ErrorDetails = { frameIds: Set<string> };
 
 export type SceneErrors = {
-  topicsMissingFrameIds: Map<string, ErrorDetails>;
   topicsMissingTransforms: Map<string, ErrorDetails>;
-  topicsWithBadFrameIds: Map<string, ErrorDetails>;
   topicsWithError: Map<string, string>;
   rootTransformID: string;
 };
@@ -98,12 +95,12 @@ const missingTransformMessage = (
   error: ErrorDetails,
   transforms: TransformTree,
 ): string => {
-  const frameIds = [...error.frameIds].sort().join(",");
-  const s = error.frameIds.size === 1 ? "" : "s"; // for plural
-  const msg =
-    frameIds.length > 0
-      ? `missing transforms from frame${s} <${frameIds}> to root frame <${rootTransformId}>`
-      : `missing transform <${rootTransformId}>`;
+  if (error.frameIds.size === 0) {
+    throw new Error(`Missing transform error has no frameIds`);
+  }
+  const frameIds = [...error.frameIds].sort().join(`>, <`);
+  const s = error.frameIds.size > 1 ? "s" : ""; // for plural
+  const msg = `missing transform${s} from frame${s} <${frameIds}> to frame <${rootTransformId}>`;
   if (transforms.frames().size === 0) {
     return msg + ". No transforms found";
   }
@@ -124,13 +121,10 @@ export function getSceneErrorsByTopic(
   for (const [topic, message] of sceneErrors.topicsWithError) {
     addError(topic, message);
   }
-  // errors related to missing frame ids and transform ids
-  sceneErrors.topicsMissingTransforms.forEach((err, topic) => {
-    addError(topic, missingTransformMessage(sceneErrors.rootTransformID, err, transforms));
-  });
-  sceneErrors.topicsMissingFrameIds.forEach((_err, topic) => {
-    addError(topic, "missing frame id");
-  });
+  // errors related to missing transforms
+  for (const [topic, error] of sceneErrors.topicsMissingTransforms) {
+    addError(topic, missingTransformMessage(sceneErrors.rootTransformID, error, transforms));
+  }
   return res;
 }
 
@@ -203,9 +197,7 @@ export default class SceneBuilder implements MarkerProvider {
   // have to keep in sync.
   errors: SceneErrors = {
     rootTransformID: "",
-    topicsMissingFrameIds: new Map(),
     topicsMissingTransforms: new Map(),
-    topicsWithBadFrameIds: new Map(),
     topicsWithError: new Map(),
   };
   errorsByTopic: {
@@ -276,9 +268,7 @@ export default class SceneBuilder implements MarkerProvider {
     if (this._playerId !== playerId) {
       this.errors = {
         rootTransformID: "",
-        topicsMissingFrameIds: new Map(),
         topicsMissingTransforms: new Map(),
-        topicsWithBadFrameIds: new Map(),
         topicsWithError: new Map(),
       };
       this._updateErrorsByTopic();
@@ -384,18 +374,7 @@ export default class SceneBuilder implements MarkerProvider {
   }
 
   hasErrors(): boolean {
-    const {
-      topicsMissingFrameIds,
-      topicsMissingTransforms,
-      topicsWithBadFrameIds,
-      topicsWithError,
-    } = this.errors;
-    return (
-      topicsMissingFrameIds.size !== 0 ||
-      topicsMissingTransforms.size !== 0 ||
-      topicsWithBadFrameIds.size !== 0 ||
-      topicsWithError.size !== 0
-    );
+    return this.errors.topicsMissingTransforms.size !== 0 || this.errors.topicsWithError.size !== 0;
   }
 
   setOnForceUpdate(callback: () => void): void {
@@ -405,10 +384,9 @@ export default class SceneBuilder implements MarkerProvider {
   private _addError(map: Map<string, ErrorDetails>, topic: string): ErrorDetails {
     let values = map.get(topic);
     if (!values) {
-      values = { namespaces: new Set(), frameIds: new Set() };
+      values = { frameIds: new Set() };
       map.set(topic, values);
     }
-    this._updateErrorsByTopic();
     return values;
   }
 
@@ -591,32 +569,6 @@ export default class SceneBuilder implements MarkerProvider {
   }
 
   private _consumeOccupancyGrid = (topic: string, message: NavMsgs$OccupancyGrid): void => {
-    const { frame_id } = message.header;
-
-    if (frame_id.length === 0) {
-      this._addError(this.errors.topicsMissingFrameIds, topic);
-      return;
-    }
-
-    if (frame_id !== this.rootTransformID) {
-      const error = this._addError(this.errors.topicsWithBadFrameIds, topic);
-      error.frameIds.add(frame_id);
-    }
-
-    let pose: MutablePose | undefined = emptyPose();
-    if (this.transforms) {
-      const rootFrameId = this.rootTransformID;
-      if (rootFrameId == undefined) {
-        throw new Error("missing rootTransformId");
-      }
-      pose = this.transforms.apply(pose, pose, rootFrameId, frame_id, message.header.stamp);
-    }
-    if (!pose) {
-      const error = this._addError(this.errors.topicsMissingTransforms, topic);
-      error.frameIds.add(frame_id);
-      return;
-    }
-
     const type = 101;
     const name = `${topic}/${type}`;
 
@@ -643,7 +595,7 @@ export default class SceneBuilder implements MarkerProvider {
       map,
       type,
       name,
-      pose,
+      pose: emptyPose(),
       interactionData: { topic, originalMessage: message },
     };
 
@@ -683,22 +635,6 @@ export default class SceneBuilder implements MarkerProvider {
     if (this.rootTransformID == undefined) {
       throw new Error("missing rootTransformId");
     }
-    const sourcePose = emptyPose();
-    const frameId = drawData.header.frame_id;
-    const pose = this.transforms?.apply(
-      sourcePose,
-      sourcePose,
-      this.rootTransformID,
-      frameId,
-      drawData.header.stamp,
-    );
-    if (!pose) {
-      if (!(this.transforms?.hasFrame(frameId) ?? false)) {
-        const error = this._addError(this.errors.topicsMissingTransforms, topic);
-        error.frameIds.add(drawData.header.frame_id);
-      }
-      return;
-    }
 
     // some callers of _consumeNonMarkerMessage provide LazyMessages and others provide regular objects
     const obj =
@@ -708,7 +644,7 @@ export default class SceneBuilder implements MarkerProvider {
     const mappedMessage = {
       ...obj,
       type,
-      pose,
+      pose: emptyPose(),
       interactionData: { topic, originalMessage: originalMessage ?? drawData },
     };
 
@@ -872,9 +808,7 @@ export default class SceneBuilder implements MarkerProvider {
       return;
     }
 
-    this.errors.topicsMissingFrameIds.delete(topic);
     this.errors.topicsMissingTransforms.delete(topic);
-    this.errors.topicsWithBadFrameIds.delete(topic);
     this.errors.topicsWithError.delete(topic);
     this.collectors[topic] ??= new MessageCollector();
     this.collectors[topic]?.setClock(this._clock ?? { sec: 0, nsec: 0 });
@@ -901,11 +835,17 @@ export default class SceneBuilder implements MarkerProvider {
       return;
     }
 
+    this.errors.topicsMissingTransforms.clear();
+    const missingTfFrameIds = new Set<string>();
+
     for (const topic of Object.values(this.topicsByName)) {
       const collector = this.collectors[topic.name];
       if (!collector) {
         continue;
       }
+
+      missingTfFrameIds.clear();
+
       const topicMarkers = collector.getMessages();
       for (const message of topicMarkers) {
         const marker = message as unknown as Interactive<BaseMarker & Marker>;
@@ -917,6 +857,7 @@ export default class SceneBuilder implements MarkerProvider {
 
         const pose = computeMarkerPose(marker, this.transforms, this.rootTransformID, time);
         if (!pose) {
+          missingTfFrameIds.add(marker.header.frame_id);
           continue;
         }
 
@@ -941,6 +882,18 @@ export default class SceneBuilder implements MarkerProvider {
 
         this._addMarkerToCollector(add, topic, marker, pose);
       }
+
+      if (missingTfFrameIds.size > 0) {
+        const error = this._addError(this.errors.topicsMissingTransforms, topic.name);
+        for (const frameId of missingTfFrameIds) {
+          error.frameIds.add(frameId);
+        }
+      }
+    }
+
+    const errorsByTopic = getSceneErrorsByTopic(this.errors, this.transforms);
+    if (!isEqual(this.errorsByTopic, errorsByTopic)) {
+      this.errorsByTopic = errorsByTopic;
     }
   }
 

@@ -26,7 +26,7 @@ import {
   Point,
 } from "@foxglove/studio-base/types/Messages";
 import { MarkerProvider, MarkerCollector } from "@foxglove/studio-base/types/Scene";
-import { emptyPose } from "@foxglove/studio-base/util/Pose";
+import { clonePose, emptyPose, setIdentityPose } from "@foxglove/studio-base/util/Pose";
 import { MARKER_MSG_TYPES } from "@foxglove/studio-base/util/globalConstants";
 
 const defaultArrowMarker = {
@@ -46,7 +46,8 @@ const defaultArrowMarker = {
 
 const defaultArrowScale = { x: 0.2, y: 0.02, z: 0.02 };
 const unitXVector = [1, 0, 0];
-const unusedPose = emptyPose();
+const tempPose = emptyPose();
+const tempOrientation = [0, 0, 0, 0] as [number, number, number, number];
 
 type Axis = ArrowMarker & {
   id: string;
@@ -80,8 +81,6 @@ const originAxes: Axis[] = [
     unitVector: [0, 0, 1],
   } as Axis,
 ];
-
-const tempOrientation = [0, 0, 0, 0] as [number, number, number, number];
 
 const getTransformedAxisArrowMarker = (
   id: string,
@@ -121,14 +120,8 @@ const getAxesArrowMarkers = (
   return originAxes.map((axis) => getTransformedAxisArrowMarker(id, frame, axis, rootFrame, time));
 };
 
-const getAxisTextMarker = (
-  id: string,
-  frame: CoordinateFrame,
-  rootFrame: CoordinateFrame,
-  time: Time,
-): Marker => {
-  const textPose = emptyPose();
-  rootFrame.apply(textPose, textPose, frame, time);
+const getAxisTextMarker = (id: string, pose: MutablePose): Marker => {
+  const textPose = clonePose(pose);
   // Lower it a little in world coordinates so it appears slightly below the axis origin (like in rviz).
   textPose.position.z = textPose.position.z - 0.02;
   return {
@@ -222,8 +215,10 @@ export default class TransformsBuilder implements MarkerProvider {
     rootFrame: CoordinateFrame,
     time: Time,
   ): void {
+    setIdentityPose(tempPose);
+
     // If rootFrame_T_frame is invalid at the given time, don't draw anything
-    if (!rootFrame.apply(unusedPose, unusedPose, frame, time)) {
+    if (!rootFrame.apply(tempPose, tempPose, frame, time)) {
       return;
     }
 
@@ -232,7 +227,7 @@ export default class TransformsBuilder implements MarkerProvider {
     if (arrowMarker) {
       markersForTransform.push(arrowMarker);
     }
-    markersForTransform.push(getAxisTextMarker(id, frame, rootFrame, time));
+    markersForTransform.push(getAxisTextMarker(id, tempPose));
 
     for (const marker of markersForTransform) {
       switch (marker.type) {
