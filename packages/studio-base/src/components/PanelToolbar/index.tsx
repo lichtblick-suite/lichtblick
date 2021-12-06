@@ -234,7 +234,9 @@ function PanelActionsDropdown({
         {
           key: "fullscreen",
           text: "Fullscreen",
-          onClick: panelContext?.enterFullscreen,
+          onClick: () => {
+            panelContext?.enterFullscreen();
+          },
           "data-test": "panel-settings-fullscreen",
           iconProps: {
             iconName: "FullScreenMaximize",
@@ -269,17 +271,7 @@ function PanelActionsDropdown({
       "data-test": "panel-settings-remove",
     });
     return items;
-  }, [
-    close,
-    isUnknownPanel,
-    openSettings,
-    panelContext?.enterFullscreen,
-    panelContext?.hasSettings,
-    panelContext?.id,
-    panelContext?.title,
-    split,
-    swap,
-  ]);
+  }, [close, isUnknownPanel, openSettings, panelContext, split, swap]);
 
   const buttonRef = useRef<HTMLDivElement>(ReactNull);
 

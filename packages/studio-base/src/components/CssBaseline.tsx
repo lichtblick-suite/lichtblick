@@ -84,7 +84,7 @@ const useStyles = makeStyles((theme) => ({
       ".mosaic-tile": {
         // make room for splitters - unfortunately this means the background color will show
         // through even if the tile has its own background color set
-        margin: 1,
+        margin: 0,
       },
       ".mosaic-window": {
         boxShadow: "none",

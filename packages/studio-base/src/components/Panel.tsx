@@ -14,7 +14,6 @@
 import { MessageBar, MessageBarType, Stack, useTheme, makeStyles } from "@fluentui/react";
 import BorderAllIcon from "@mdi/svg/svg/border-all.svg";
 import ExpandAllOutlineIcon from "@mdi/svg/svg/expand-all-outline.svg";
-import FullscreenIcon from "@mdi/svg/svg/fullscreen.svg";
 import GridLargeIcon from "@mdi/svg/svg/grid-large.svg";
 import TrashCanOutlineIcon from "@mdi/svg/svg/trash-can-outline.svg";
 import { last } from "lodash";
@@ -78,7 +77,7 @@ const PanelRoot = styled.div<{ fullscreen: boolean; selected: boolean }>`
   flex-direction: column;
   flex: 1 1 auto;
   overflow: hidden;
-  z-index: ${({ fullscreen }) => (fullscreen ? 100 : 1)};
+  z-index: ${({ fullscreen }) => (fullscreen ? 10000 : 1)};
   background-color: ${({ theme }) => (theme.isInverted ? colors.DARK : colors.LIGHT)};
   position: ${({ fullscreen }) => (fullscreen ? "fixed" : "relative")};
   border: ${({ fullscreen }) => (fullscreen ? "4px solid rgba(110, 81, 238, 0.3)" : "none")};
@@ -276,7 +275,6 @@ export default function Panel<
     const { childId, overrideConfig, tabId, ...otherProps } = props;
 
     const classes = useStyles();
-    const theme = useTheme();
     const isMounted = useMountedState();
 
     const { mosaicActions } = useContext(MosaicContext);
@@ -312,9 +310,11 @@ export default function Panel<
     const [shiftKeyPressed, setShiftKeyPressed] = useState(false);
     const [cmdKeyPressed, setCmdKeyPressed] = useState(false);
     const [fullScreen, setFullscreen] = useState(false);
-    const [fullScreenLocked, setFullscreenLocked] = useState(false);
     const panelCatalog = usePanelCatalog();
     const isTopLevelPanel = mosaicWindowActions.getPath().length === 0 && tabId == undefined;
+
+    // There may be a parent panel (when a panel is in a tab).
+    const parentPanelContext = useContext(PanelContext);
 
     const type = PanelComponent.panelType;
     const title = useMemo(
@@ -420,16 +420,8 @@ export default function Panel<
 
     const { panelSettingsOpen } = useWorkspace();
 
-    const onOverlayClick: MouseEventHandler<HTMLDivElement> = useCallback(
+    const onPanelRootClick: MouseEventHandler<HTMLDivElement> = useCallback(
       (e) => {
-        if (!fullScreen && quickActionsKeyPressed) {
-          setFullscreen(true);
-          if (shiftKeyPressed) {
-            setFullscreenLocked(true);
-          }
-          return;
-        }
-
         if (childId == undefined) {
           return;
         }
@@ -445,8 +437,6 @@ export default function Panel<
       [
         childId,
         tabId,
-        fullScreen,
-        quickActionsKeyPressed,
         togglePanelSelected,
         shiftKeyPressed,
         isSelected,
@@ -536,28 +526,24 @@ export default function Panel<
         }) as MouseEventHandler<HTMLDivElement>,
         enterFullscreen: () => {
           setFullscreen(true);
-          setFullscreenLocked(true);
+
+          // When entering fullscreen for a panel within a tab we need to put the tab into fullscreen mode
+          // to have our panel properly overlay other panels outside the tab.
+          parentPanelContext?.enterFullscreen();
         },
         exitFullscreen: () => {
           setFullscreen(false);
-          setFullscreenLocked(false);
+          parentPanelContext?.exitFullscreen();
         },
       }),
-      [cmdKeyPressed],
+      [cmdKeyPressed, parentPanelContext],
     );
-
-    const onReleaseQuickActionsKey = useCallback(() => {
-      setQuickActionsKeyPressed(false);
-      if (fullScreen && !fullScreenLocked) {
-        exitFullscreen();
-      }
-    }, [exitFullscreen, fullScreen, fullScreenLocked]);
 
     const { keyUpHandlers, keyDownHandlers } = useMemo(
       () => ({
         keyUpHandlers: {
-          "`": () => onReleaseQuickActionsKey(),
-          "~": () => onReleaseQuickActionsKey(),
+          "`": () => setQuickActionsKeyPressed(false),
+          "~": () => setQuickActionsKeyPressed(false),
           Shift: () => setShiftKeyPressed(false),
           Meta: () => setCmdKeyPressed(false),
         },
@@ -575,7 +561,7 @@ export default function Panel<
           Meta: () => setCmdKeyPressed(true),
         },
       }),
-      [selectAllPanels, cmdKeyPressed, exitFullscreen, onReleaseQuickActionsKey],
+      [selectAllPanels, cmdKeyPressed, exitFullscreen],
     );
 
     /* Ensure user exits full-screen mode when leaving window, even if key is still pressed down */
@@ -584,11 +570,11 @@ export default function Panel<
         exitFullscreen();
         setCmdKeyPressed(false);
         setShiftKeyPressed(false);
-        onReleaseQuickActionsKey();
+        setQuickActionsKeyPressed(false);
       };
       window.addEventListener("blur", listener);
       return () => window.removeEventListener("blur", listener);
-    }, [exitFullscreen, onReleaseQuickActionsKey]);
+    }, [exitFullscreen]);
 
     const otherPanelProps = useShallowMemo(otherProps);
     const childProps = useMemo(
@@ -658,7 +644,7 @@ export default function Panel<
         >
           <KeyListener global keyUpHandlers={keyUpHandlers} keyDownHandlers={keyDownHandlers} />
           <PanelRoot
-            onClick={onOverlayClick}
+            onClick={onPanelRootClick}
             onMouseMove={onMouseMove}
             fullscreen={fullScreen}
             selected={isSelected}
@@ -698,20 +684,14 @@ export default function Panel<
                 }}
               >
                 <div>
-                  <div>
-                    <FullscreenIcon style={{ fill: theme.semanticColors.bodyText }} />
-                    {shiftKeyPressed ? "Lock fullscreen" : "Fullscreen (Shift+click to lock)"}
-                  </div>
-                  <div>
-                    <Button className={classes.quickActionsOverlayButton} onClick={removePanel}>
-                      <TrashCanOutlineIcon />
-                      Remove
-                    </Button>
-                    <Button className={classes.quickActionsOverlayButton} onClick={splitPanel}>
-                      <GridLargeIcon />
-                      Split
-                    </Button>
-                  </div>
+                  <Button className={classes.quickActionsOverlayButton} onClick={removePanel}>
+                    <TrashCanOutlineIcon />
+                    Remove
+                  </Button>
+                  <Button className={classes.quickActionsOverlayButton} onClick={splitPanel}>
+                    <GridLargeIcon />
+                    Split
+                  </Button>
                 </div>
               </ActionsOverlay>
             )}
