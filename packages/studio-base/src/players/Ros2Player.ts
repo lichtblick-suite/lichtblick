@@ -91,8 +91,10 @@ export default class Ros2Player implements Player {
     }
     for (const dataType in foxgloveDefs) {
       const msgDef = (foxgloveDefs as Record<string, RosMsgDefinition>)[dataType]!;
-      this._providerDatatypes.set(dataType, msgDef);
-      this._providerDatatypes.set(ros1ToRos2Type(dataType), msgDef);
+      if (!this._providerDatatypes.has(dataType)) {
+        this._providerDatatypes.set(dataType, msgDef);
+        this._providerDatatypes.set(ros1ToRos2Type(dataType), msgDef);
+      }
     }
 
     void this._open();
