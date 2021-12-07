@@ -2,7 +2,6 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import * as base64 from "@protobufjs/base64";
 import protobufjs from "protobufjs";
 import { FileDescriptorSet } from "protobufjs/ext/descriptor";
 import { v4 as uuidv4 } from "uuid";
@@ -26,6 +25,7 @@ import debouncePromise from "@foxglove/studio-base/util/debouncePromise";
 import { TimestampMethod } from "@foxglove/studio-base/util/time";
 import { Channel, ChannelId, FoxgloveClient, SubscriptionId } from "@foxglove/ws-protocol";
 
+import parseJsonSchema from "./parseJsonSchema";
 import protobufDefinitionsToDatatypes, { stripLeadingDot } from "./protobufDefinitionsToDatatypes";
 
 const log = Log.getLogger(__dirname);
@@ -45,31 +45,54 @@ type ParsedChannel = {
 };
 
 function parseChannel(channel: Channel): ParsedChannel {
-  if (channel.encoding !== "protobuf") {
-    throw new Error(`Unsupported encoding ${channel.encoding}`);
+  if (channel.encoding === "json") {
+    const schema = channel.schema.length > 0 ? JSON.parse(channel.schema) : undefined;
+    const textDecoder = new TextDecoder();
+    let datatypes: RosDatatypes = new Map();
+    let deserializer = (data: ArrayBufferView) => JSON.parse(textDecoder.decode(data));
+    if (schema != undefined) {
+      if (typeof schema !== "object") {
+        throw new Error(`Invalid schema for channel ${channel.id}, expected JSON object`);
+      }
+      const { datatypes: parsedDatatypes, postprocessValue } = parseJsonSchema(
+        schema as Record<string, unknown>,
+        channel.schemaName,
+      );
+      datatypes = parsedDatatypes;
+      deserializer = (data) =>
+        postprocessValue(JSON.parse(textDecoder.decode(data)) as Record<string, unknown>);
+    }
+    return { channel, fullSchemaName: channel.schemaName, deserializer, datatypes };
   }
-  const decodedSchema = new Uint8Array(base64.length(channel.schema));
-  if (base64.decode(channel.schema, decodedSchema, 0) !== decodedSchema.byteLength) {
-    throw new Error(`Failed to decode base64 schema on ${channel.topic}`);
+
+  if (channel.encoding === "protobuf") {
+    const decodedSchema = new Uint8Array(protobufjs.util.base64.length(channel.schema));
+    if (
+      protobufjs.util.base64.decode(channel.schema, decodedSchema, 0) !== decodedSchema.byteLength
+    ) {
+      throw new Error(`Failed to decode base64 schema on ${channel.topic}`);
+    }
+    const root = protobufjs.Root.fromDescriptor(FileDescriptorSet.decode(decodedSchema));
+    root.resolveAll();
+    const type = root.lookupType(channel.schemaName);
+
+    const deserializer = (data: ArrayBufferView) => {
+      return type.decode(new Uint8Array(data.buffer, data.byteOffset, data.byteLength));
+    };
+
+    const datatypes: RosDatatypes = new Map();
+    protobufDefinitionsToDatatypes(datatypes, type);
+
+    return {
+      channel,
+      // fullName is a fully qualified name but includes a leading dot. Remove the leading dot.
+      fullSchemaName: stripLeadingDot(type.fullName),
+      deserializer,
+      datatypes,
+    };
   }
-  const root = protobufjs.Root.fromDescriptor(FileDescriptorSet.decode(decodedSchema));
-  root.resolveAll();
-  const type = root.lookupType(channel.schemaName);
 
-  const deserializer = (data: ArrayBufferView) => {
-    return type.decode(new Uint8Array(data.buffer, data.byteOffset, data.byteLength));
-  };
-
-  const datatypes: RosDatatypes = new Map();
-  protobufDefinitionsToDatatypes(datatypes, type);
-
-  return {
-    channel,
-    // fullName is a fully qualified name but includes a leading dot. Remove the leading dot.
-    fullSchemaName: stripLeadingDot(type.fullName),
-    deserializer,
-    datatypes,
-  };
+  throw new Error(`Unsupported encoding ${channel.encoding}`);
 }
 
 export default class FoxgloveWebSocketPlayer implements Player {
