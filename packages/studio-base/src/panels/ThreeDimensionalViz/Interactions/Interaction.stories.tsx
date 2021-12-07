@@ -270,10 +270,10 @@ storiesOf("panels/ThreeDimensionalViz/Interactions/Interaction", module)
     );
   })
   .add("PointCloud", () => {
-    const cloud1 = { ...selectedObject.object, ...decodeMarker(POINT_CLOUD_MESSAGE as any) };
+    const cloud1 = { ...selectedObject.object, ...decodeMarker(POINT_CLOUD_MESSAGE) };
     const cloud2 = {
       ...selectedObject.object,
-      ...decodeMarker(POINT_CLOUD_WITH_ADDITIONAL_FIELDS as any),
+      ...decodeMarker(POINT_CLOUD_WITH_ADDITIONAL_FIELDS),
     };
 
     return (

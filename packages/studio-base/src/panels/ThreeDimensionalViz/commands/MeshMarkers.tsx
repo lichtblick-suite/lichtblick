@@ -75,7 +75,7 @@ class ModelCache {
       return await promise;
     }
     promise = loadModel(url).catch(async (err) => {
-      reportError(err);
+      reportError(err as Error);
       return await loadNotFoundModel();
     });
     this.models.set(url, promise);

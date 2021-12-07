@@ -248,7 +248,7 @@ export default function CurrentLayoutProvider({
       createTabPanel: (payload: CreateTabPanelPayload) => {
         performAction({ type: "CREATE_TAB_PANEL", payload });
         setSelectedPanelIds([]);
-        analytics?.logEvent(AppEvent.PANEL_ADD, { type: "Tab" });
+        void analytics?.logEvent(AppEvent.PANEL_ADD, { type: "Tab" });
       },
       changePanelLayout: (payload: ChangePanelLayoutPayload) =>
         performAction({ type: "CHANGE_PANEL_LAYOUT", payload }),
@@ -269,7 +269,7 @@ export default function CurrentLayoutProvider({
         // Deselect the removed panel
         setSelectedPanelIds((ids) => ids.filter((id) => id !== closedId));
 
-        analytics?.logEvent(
+        void analytics?.logEvent(
           AppEvent.PANEL_DELETE,
           typeof closedId === "string" ? { type: getPanelTypeFromId(closedId) } : undefined,
         );
@@ -277,8 +277,8 @@ export default function CurrentLayoutProvider({
       splitPanel: (payload: SplitPanelPayload) => performAction({ type: "SPLIT_PANEL", payload }),
       swapPanel: (payload: SwapPanelPayload) => {
         performAction({ type: "SWAP_PANEL", payload });
-        analytics?.logEvent(AppEvent.PANEL_ADD, { type: payload.type, action: "swap" });
-        analytics?.logEvent(AppEvent.PANEL_DELETE, {
+        void analytics?.logEvent(AppEvent.PANEL_ADD, { type: payload.type, action: "swap" });
+        void analytics?.logEvent(AppEvent.PANEL_DELETE, {
           type: getPanelTypeFromId(payload.originalId),
           action: "swap",
         });
@@ -286,11 +286,14 @@ export default function CurrentLayoutProvider({
       moveTab: (payload: MoveTabPayload) => performAction({ type: "MOVE_TAB", payload }),
       addPanel: (payload: AddPanelPayload) => {
         performAction({ type: "ADD_PANEL", payload });
-        analytics?.logEvent(AppEvent.PANEL_ADD, { type: getPanelTypeFromId(payload.id) });
+        void analytics?.logEvent(AppEvent.PANEL_ADD, { type: getPanelTypeFromId(payload.id) });
       },
       dropPanel: (payload: DropPanelPayload) => {
         performAction({ type: "DROP_PANEL", payload });
-        analytics?.logEvent(AppEvent.PANEL_ADD, { type: payload.newPanelType, action: "drop" });
+        void analytics?.logEvent(AppEvent.PANEL_ADD, {
+          type: payload.newPanelType,
+          action: "drop",
+        });
       },
       startDrag: (payload: StartDragPayload) => performAction({ type: "START_DRAG", payload }),
       endDrag: (payload: EndDragPayload) => performAction({ type: "END_DRAG", payload }),

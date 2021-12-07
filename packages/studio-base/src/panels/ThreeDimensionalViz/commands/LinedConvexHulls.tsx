@@ -30,6 +30,9 @@ import {
   AssignNextColorsFn,
   MouseEventObject,
   Color,
+  Point,
+  Vec3,
+  Vec4,
 } from "@foxglove/regl-worldview";
 
 type Props = CommonCommandProps & {
@@ -45,7 +48,9 @@ function getTriangleChildrenForHitmap(
   const triangles = filterMap(props, (line) => {
     // Make sure all points are in vec3 format and unique.
     const points = uniqBy(
-      line.points.map((point) => (shouldConvert(point) ? pointToVec3(point) : point)),
+      line.points.map((point) =>
+        shouldConvert(point) ? pointToVec3(point as Point) : (point as Vec3),
+      ),
       ([x, y, z]) => `${x}:${y}:${z}`,
     );
     // We need a minimum of 4 points to do the convex hull algorithm.
@@ -66,7 +71,9 @@ function getTriangleChildrenForHitmap(
       return [points[index1], points[index2], points[index3]];
     });
     const convertedColor =
-      typeof (line.color! as Color).r === "number" ? line.color : vec4ToRGBA(line.color);
+      typeof (line.color! as Color).r === "number"
+        ? (line.color as Color)
+        : vec4ToRGBA(line.color as Vec4);
     return {
       pose: line.pose,
       scale: line.scale,

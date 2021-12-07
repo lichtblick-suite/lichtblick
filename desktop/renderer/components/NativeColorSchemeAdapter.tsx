@@ -15,7 +15,7 @@ export default function NativeColorSchemeAdapter(): ReactNull {
   const [colorScheme] = useAppConfigurationValue<string>(AppSetting.COLOR_SCHEME);
   useLayoutEffect(() => {
     void colorScheme;
-    desktopBridge?.updateNativeColorScheme();
+    void desktopBridge?.updateNativeColorScheme();
   }, [colorScheme]);
   return ReactNull;
 }

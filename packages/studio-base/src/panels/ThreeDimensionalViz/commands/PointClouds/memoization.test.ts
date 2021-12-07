@@ -13,13 +13,13 @@
 
 import { POINT_CLOUD_MESSAGE } from "./fixture/pointCloudData";
 import { memoizedMarker, updateMarkerCache } from "./memoization";
-import { MemoizedMarker } from "./types";
+import { MemoizedMarker, PointCloudMarker } from "./types";
 
 describe("<PointClouds />", () => {
   describe("marker memoization", () => {
     it("returns memoized object", () => {
       let cache = new Map<Uint8Array, MemoizedMarker>();
-      const marker: any = { ...POINT_CLOUD_MESSAGE };
+      const marker: PointCloudMarker = { ...POINT_CLOUD_MESSAGE };
       cache = updateMarkerCache(cache, [marker]);
       const memoized1 = memoizedMarker(cache, marker);
       cache = updateMarkerCache(cache, [marker]);
@@ -29,10 +29,10 @@ describe("<PointClouds />", () => {
 
     it("returns memoized object after adding new markers", () => {
       let cache = new Map<Uint8Array, MemoizedMarker>();
-      const marker1: any = { ...POINT_CLOUD_MESSAGE };
+      const marker1: PointCloudMarker = { ...POINT_CLOUD_MESSAGE };
       cache = updateMarkerCache(cache, [marker1]);
       const memoized1 = memoizedMarker(cache, marker1);
-      const marker2: any = { ...POINT_CLOUD_MESSAGE };
+      const marker2: PointCloudMarker = { ...POINT_CLOUD_MESSAGE };
       cache = updateMarkerCache(cache, [marker1, marker2]);
       const memoized2 = memoizedMarker(cache, marker1);
       expect(memoized1).toBe(memoized2);
@@ -40,7 +40,7 @@ describe("<PointClouds />", () => {
 
     it("returns undefined when marker has been removed from cache", () => {
       let cache = new Map<Uint8Array, MemoizedMarker>();
-      const marker: any = { ...POINT_CLOUD_MESSAGE };
+      const marker: PointCloudMarker = { ...POINT_CLOUD_MESSAGE };
       cache = updateMarkerCache(cache, [marker]);
       let memoized = memoizedMarker(cache, marker);
       expect(memoized).not.toBeUndefined();
@@ -51,18 +51,18 @@ describe("<PointClouds />", () => {
 
     it("returns memoized object when settings are the same", () => {
       let cache = new Map<Uint8Array, MemoizedMarker>();
-      const marker: any = { ...POINT_CLOUD_MESSAGE };
+      const marker: PointCloudMarker = { ...POINT_CLOUD_MESSAGE };
       cache = updateMarkerCache(cache, [
         {
           ...marker,
-          settings: { colorMode: { mode: "flat", flatColor: "#ffffff" } },
+          settings: { colorMode: { mode: "flat", flatColor: { r: 0xff, g: 0xff, b: 0xff, a: 1 } } },
         },
       ]);
       const memoized1 = memoizedMarker(cache, marker);
       cache = updateMarkerCache(cache, [
         {
           ...marker,
-          settings: { colorMode: { mode: "flat", flatColor: "#ffffff" } },
+          settings: { colorMode: { mode: "flat", flatColor: { r: 0xff, g: 0xff, b: 0xff, a: 1 } } },
         },
       ]);
       const memoized2 = memoizedMarker(cache, marker);
@@ -71,18 +71,18 @@ describe("<PointClouds />", () => {
 
     it("returns different objects for different settings", () => {
       let cache = new Map<Uint8Array, MemoizedMarker>();
-      const marker: any = { ...POINT_CLOUD_MESSAGE };
+      const marker: PointCloudMarker = { ...POINT_CLOUD_MESSAGE };
       cache = updateMarkerCache(cache, [
         {
           ...marker,
-          settings: { colorMode: { mode: "flat", flatColor: "#ffffff" } },
+          settings: { colorMode: { mode: "flat", flatColor: { r: 0xff, g: 0xff, b: 0xff, a: 1 } } },
         },
       ]);
       const memoized1 = memoizedMarker(cache, marker);
       cache = updateMarkerCache(cache, [
         {
           ...marker,
-          settings: { colorMode: { mode: "flat", flatColor: "#ff0000" } },
+          settings: { colorMode: { mode: "flat", flatColor: { r: 0xff, g: 0x00, b: 0x00, a: 1 } } },
         },
       ]);
       const memoized2 = memoizedMarker(cache, marker);
@@ -91,18 +91,18 @@ describe("<PointClouds />", () => {
 
     it("returns different objects when hitmap colors are defined", () => {
       let cache = new Map<Uint8Array, MemoizedMarker>();
-      const marker: any = { ...POINT_CLOUD_MESSAGE };
+      const marker: PointCloudMarker = { ...POINT_CLOUD_MESSAGE };
       cache = updateMarkerCache(cache, [
         {
           ...marker,
-          settings: { colorMode: { mode: "flat", flatColor: "#ffffff" } },
+          settings: { colorMode: { mode: "flat", flatColor: { r: 0xff, g: 0xff, b: 0xff, a: 1 } } },
         },
       ]);
       const memoized1 = memoizedMarker(cache, marker);
       cache = updateMarkerCache(cache, [
         {
           ...marker,
-          settings: { colorMode: { mode: "flat", flatColor: "#ffffff" } },
+          settings: { colorMode: { mode: "flat", flatColor: { r: 0xff, g: 0xff, b: 0xff, a: 1 } } },
           hitmapColors: [1, 2, 3, 4, 5, 6],
         },
       ]);
@@ -111,9 +111,9 @@ describe("<PointClouds />", () => {
     });
     it("returns memoized object when same hitmap colors are defined", () => {
       let cache = new Map<Uint8Array, MemoizedMarker>();
-      const marker: any = {
+      const marker: PointCloudMarker = {
         ...POINT_CLOUD_MESSAGE,
-        settings: { colorMode: { mode: "flat", flatColor: "#ffffff" } },
+        settings: { colorMode: { mode: "flat", flatColor: { r: 0xff, g: 0xff, b: 0xff, a: 1 } } },
         hitmapColors: [1, 2, 3, 4, 5, 6],
       };
       cache = updateMarkerCache(cache, [marker]);

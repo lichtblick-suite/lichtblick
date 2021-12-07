@@ -20,6 +20,7 @@ import {
   orientationToVec4,
   CommonCommandProps,
   Pose,
+  Vec3,
 } from "@foxglove/regl-worldview";
 import { InteractionData } from "@foxglove/studio-base/panels/ThreeDimensionalViz/Interactions/types";
 import { PoseSettings } from "@foxglove/studio-base/panels/ThreeDimensionalViz/TopicSettingsEditor/PoseSettingsEditor";
@@ -65,8 +66,8 @@ function PoseMarkers({ markers, layerIndex }: PoseMarkerProps): ReactElement {
     const orientation = orientationToVec4(newMarker.pose.orientation);
     const dir = vec3.transformQuat([0, 0, 0], [1, 0, 0], orientation);
     // the total length of the arrow is 4.7, we move the tail backwards by 0.88 (prev implementation)
-    const tipPoint = vec3.scaleAndAdd([0, 0, 0], pos, dir, 3.82);
-    const tailPoint = vec3.scaleAndAdd([0, 0, 0], pos, dir, -0.88);
+    const tipPoint = vec3.scaleAndAdd([0, 0, 0], pos, dir, 3.82) as Vec3;
+    const tailPoint = vec3.scaleAndAdd([0, 0, 0], pos, dir, -0.88) as Vec3;
     arrowMarkers.push({
       ...newMarker,
       points: [vec3ToPoint(tailPoint), vec3ToPoint(tipPoint)],

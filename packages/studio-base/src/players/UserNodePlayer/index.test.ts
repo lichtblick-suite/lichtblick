@@ -21,8 +21,9 @@ import {
   DiagnosticSeverity,
   ErrorCodes,
 } from "@foxglove/studio-base/players/UserNodePlayer/types";
-import { PlayerStateActiveData } from "@foxglove/studio-base/players/types";
+import { MessageEvent, PlayerStateActiveData, Topic } from "@foxglove/studio-base/players/types";
 import { RosDatatypes } from "@foxglove/studio-base/types/RosDatatypes";
+import { UserNode } from "@foxglove/studio-base/types/panels";
 import { basicDatatypes } from "@foxglove/studio-base/util/datatypes";
 import { DEFAULT_STUDIO_NODE_PREFIX } from "@foxglove/studio-base/util/globalConstants";
 import signal from "@foxglove/studio-base/util/signal";
@@ -112,7 +113,14 @@ const upstreamSecond = {
 };
 
 const setListenerHelper = (player: UserNodePlayer, numPromises: number = 1) => {
-  const signals = [...new Array(numPromises)].map(() => signal());
+  const signals = [...new Array(numPromises)].map(() =>
+    signal<{
+      topicNames: string[];
+      messages: readonly MessageEvent<unknown>[];
+      topics: Topic[] | undefined;
+      datatypes: RosDatatypes | undefined;
+    }>(),
+  );
   let numEmits = 0;
   player.setListener(async (playerState) => {
     const topicNames = [];
@@ -125,7 +133,7 @@ const setListenerHelper = (player: UserNodePlayer, numPromises: number = 1) => {
       messages,
       topics: playerState.activeData?.topics,
       datatypes: playerState.activeData?.datatypes,
-    } as any);
+    });
     numEmits += 1;
   });
 
@@ -365,7 +373,7 @@ describe("UserNodePlayer", () => {
       const fakePlayer = new FakePlayer();
       const userNodePlayer = new UserNodePlayer(fakePlayer, defaultUserNodeActions);
 
-      const [done] = setListenerHelper(userNodePlayer);
+      const done = setListenerHelper(userNodePlayer)[0]!;
 
       void fakePlayer.emit({
         activeData: {
@@ -378,11 +386,11 @@ describe("UserNodePlayer", () => {
         },
       });
 
-      const { topicNames }: any = await done;
+      const { topicNames } = await done;
       void userNodePlayer.setUserNodes({
         nodeId: { name: "someNodeName", sourceCode: nodeUserCode },
       });
-      userNodePlayer.setSubscriptions(topicNames.map((topic: any) => ({ topic })));
+      userNodePlayer.setSubscriptions(topicNames.map((topic) => ({ topic })));
       expect(fakePlayer.subscriptions).toEqual([{ topic: "/np_input" }]);
     });
 
@@ -1278,8 +1286,8 @@ describe("UserNodePlayer", () => {
   });
 
   describe("node registration caching", () => {
-    let fakePlayer: any;
-    let userNodePlayer: any;
+    let fakePlayer: FakePlayer;
+    let userNodePlayer: UserNodePlayer;
     let emit: any;
     let expectFromSource: any;
     let callCount: any;
@@ -1293,8 +1301,8 @@ describe("UserNodePlayer", () => {
       fakePlayer = new FakePlayer();
       userNodePlayer = new UserNodePlayer(fakePlayer, defaultUserNodeActions);
 
-      emit = () => {
-        fakePlayer.emit({
+      emit = async () => {
+        await fakePlayer.emit({
           activeData: {
             ...basicPlayerState,
             messages: [upstreamFirst],
@@ -1333,7 +1341,7 @@ describe("UserNodePlayer", () => {
           };
         `,
       };
-    });
+    }) as [UserNode, UserNode, UserNode];
 
     it("creates node registrations when userNodes change", async () => {
       const donePromises = setListenerHelper(userNodePlayer, 5);

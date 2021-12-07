@@ -128,7 +128,7 @@ export async function getMcapInfo(file: File): Promise<FileInfo> {
     }
   }
 
-  const streamReader = file.stream().getReader();
+  const streamReader = file.stream().getReader() as ReadableStreamDefaultReader<Uint8Array>;
   for (let result; (result = await streamReader.read()), !result.done; ) {
     reader.append(result.value);
     for (let record; (record = reader.nextRecord()); ) {

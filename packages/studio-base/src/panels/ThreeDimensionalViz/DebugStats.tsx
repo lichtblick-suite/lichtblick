@@ -75,6 +75,7 @@ function validate(stats: Stats) {
 // TODO(bmc): move to regl-worldview at some point
 export default function DebugStats(): JSX.Element | ReactNull {
   const classes = useStyles();
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
   const context = useContext<WorldviewContextType>(WorldviewReactContext);
   const renderCount = useRef(0);
   renderCount.current = renderCount.current + 1;

@@ -442,7 +442,7 @@ export default class RandomAccessPlayer implements Player {
         }
       }
     } catch (err) {
-      this._setError(err.message, err);
+      this._setError((err as Error).message, err);
     }
   });
 

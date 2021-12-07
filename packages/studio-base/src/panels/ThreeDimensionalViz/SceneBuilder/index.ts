@@ -678,7 +678,7 @@ export default class SceneBuilder implements MarkerProvider {
         this._consumeTopic(topic);
       } catch (error) {
         log.error(error);
-        this._setTopicError(topic, error.toString());
+        this._setTopicError(topic, (error as Error).toString());
       }
     }
     this.topicsToRender.clear();

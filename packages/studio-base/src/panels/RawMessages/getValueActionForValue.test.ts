@@ -11,25 +11,22 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
+import { MessagePathStructureItem } from "@foxglove/studio-base/components/MessagePathSyntax/constants";
+
 import { getValueActionForValue, getStructureItemForPath } from "./getValueActionForValue";
 
 describe("getValueActionForValue", () => {
-  const getAction = (data: any, structureItem: any, keyPath: any) => {
-    const value = data;
-    return getValueActionForValue(value, structureItem, keyPath);
-  };
-
   it("returns undefined if it is not a primitive", () => {
-    const structureItem = {
+    const structureItem: MessagePathStructureItem = {
       structureType: "message",
       nextByName: {},
       datatype: "",
     };
-    expect(getAction({}, structureItem, [])).toEqual(undefined);
+    expect(getValueActionForValue({}, structureItem, [])).toEqual(undefined);
   });
 
   it("returns paths for an id inside an array", () => {
-    const structureItem = {
+    const structureItem: MessagePathStructureItem = {
       structureType: "array",
       next: {
         structureType: "message",
@@ -44,7 +41,7 @@ describe("getValueActionForValue", () => {
       },
       datatype: "",
     };
-    expect(getAction([{ some_id: 123 }], structureItem, [0, "some_id"])).toEqual({
+    expect(getValueActionForValue([{ some_id: 123 }], structureItem, [0, "some_id"])).toEqual({
       filterPath: "[:]{some_id==123}",
       multiSlicePath: "[:].some_id",
       primitiveType: "uint32",
@@ -53,7 +50,7 @@ describe("getValueActionForValue", () => {
   });
 
   it("returns paths with bigints", () => {
-    const structureItem = {
+    const structureItem: MessagePathStructureItem = {
       structureType: "array",
       next: {
         structureType: "message",
@@ -68,7 +65,9 @@ describe("getValueActionForValue", () => {
       },
       datatype: "",
     };
-    expect(getAction([{ some_id: 18446744073709552000n }], structureItem, [0, "some_id"])).toEqual({
+    expect(
+      getValueActionForValue([{ some_id: 18446744073709552000n }], structureItem, [0, "some_id"]),
+    ).toEqual({
       filterPath: "[:]{some_id==18446744073709552000}",
       multiSlicePath: "[:].some_id",
       primitiveType: "uint64",
@@ -77,7 +76,7 @@ describe("getValueActionForValue", () => {
   });
 
   it("returns slice paths when pointing at a number (even when it looks like an id)", () => {
-    const structureItem = {
+    const structureItem: MessagePathStructureItem = {
       structureType: "message",
       nextByName: {
         some_id: {
@@ -88,7 +87,7 @@ describe("getValueActionForValue", () => {
       },
       datatype: "",
     };
-    expect(getAction({ some_id: 123 }, structureItem, ["some_id"])).toEqual({
+    expect(getValueActionForValue({ some_id: 123 }, structureItem, ["some_id"])).toEqual({
       filterPath: "",
       singleSlicePath: ".some_id",
       multiSlicePath: ".some_id",
@@ -97,7 +96,7 @@ describe("getValueActionForValue", () => {
   });
 
   it("returns different single/multi slice paths when pointing at a value inside an array (not an id)", () => {
-    const structureItem = {
+    const structureItem: MessagePathStructureItem = {
       structureType: "array",
       next: {
         structureType: "message",
@@ -112,16 +111,18 @@ describe("getValueActionForValue", () => {
       },
       datatype: "",
     };
-    expect(getAction([{ some_value: 456 }], structureItem, [0, "some_value"])).toEqual({
-      filterPath: "[:]{some_value==456}",
-      singleSlicePath: "[0].some_value",
-      multiSlicePath: "[:].some_value",
-      primitiveType: "uint32",
-    });
+    expect(getValueActionForValue([{ some_value: 456 }], structureItem, [0, "some_value"])).toEqual(
+      {
+        filterPath: "[:]{some_value==456}",
+        singleSlicePath: "[0].some_value",
+        multiSlicePath: "[:].some_value",
+        primitiveType: "uint32",
+      },
+    );
   });
 
   it("uses an id for the `singleSlicePath` if one is available next to the value", () => {
-    const structureItem = {
+    const structureItem: MessagePathStructureItem = {
       structureType: "array",
       next: {
         structureType: "message",
@@ -142,7 +143,7 @@ describe("getValueActionForValue", () => {
       datatype: "",
     };
     expect(
-      getAction([{ some_id: 123, some_value: 456 }], structureItem, [0, "some_value"]),
+      getValueActionForValue([{ some_id: 123, some_value: 456 }], structureItem, [0, "some_value"]),
     ).toEqual({
       filterPath: "[:]{some_value==456}",
       singleSlicePath: "[:]{some_id==123}.some_value",
@@ -152,8 +153,12 @@ describe("getValueActionForValue", () => {
   });
 
   it("returns value when looking inside a 'json' primitive", () => {
-    const structureItem = { structureType: "primitive", primitiveType: "json", datatype: "" };
-    expect(getAction({ abc: 0, def: 0 }, structureItem, ["abc"])).toEqual({
+    const structureItem: MessagePathStructureItem = {
+      structureType: "primitive",
+      primitiveType: "json",
+      datatype: "",
+    };
+    expect(getValueActionForValue({ abc: 0, def: 0 }, structureItem, ["abc"])).toEqual({
       filterPath: "",
       multiSlicePath: ".abc",
       primitiveType: "json",
@@ -162,7 +167,7 @@ describe("getValueActionForValue", () => {
   });
 
   it("returns single/multi slice paths when pointing at a value inside an array, nested inside a JSON field", () => {
-    const structureItem = {
+    const structureItem: MessagePathStructureItem = {
       structureType: "array",
       next: {
         structureType: "message",
@@ -174,7 +179,7 @@ describe("getValueActionForValue", () => {
       datatype: "",
     };
     expect(
-      getAction([{ outer_key: { nested_key: 456 } }], structureItem, [
+      getValueActionForValue([{ outer_key: { nested_key: 456 } }], structureItem, [
         0,
         "outer_key",
         "nested_key",
@@ -187,17 +192,8 @@ describe("getValueActionForValue", () => {
     });
   });
 
-  it("returns undefined when trying to look inside a 'time'", () => {
-    const structureItem = {
-      structureType: "primitive",
-      primitiveType: "time",
-      datatype: "",
-    };
-    expect(getAction({ sec: 0, nsec: 0 }, structureItem, ["sec"])).toEqual(undefined);
-  });
-
   it("returns slice paths for json", () => {
-    const structureItem = {
+    const structureItem: MessagePathStructureItem = {
       structureType: "message",
       nextByName: {
         some_id: {
@@ -208,7 +204,7 @@ describe("getValueActionForValue", () => {
       },
       datatype: "",
     };
-    expect(getAction({ some_id: 123 }, structureItem, ["some_id"])).toEqual({
+    expect(getValueActionForValue({ some_id: 123 }, structureItem, ["some_id"])).toEqual({
       filterPath: "",
       singleSlicePath: ".some_id",
       multiSlicePath: ".some_id",
@@ -225,7 +221,7 @@ describe("getValueActionForValue", () => {
         },
       ],
     };
-    const rootStructureItem = {
+    const rootStructureItem: MessagePathStructureItem = {
       structureType: "message",
       nextByName: {
         status: {
@@ -251,7 +247,7 @@ describe("getValueActionForValue", () => {
       },
       datatype: "msgs/nodeArray",
     };
-    expect(getAction(rootValue, rootStructureItem, ["status", 0, "level"])).toEqual({
+    expect(getValueActionForValue(rootValue, rootStructureItem, ["status", 0, "level"])).toEqual({
       filterPath: ".status[:]{level==0}",
       singleSlicePath: '.status[:]{node_id=="/my_node"}.level',
       multiSlicePath: ".status[:].level",
@@ -262,15 +258,16 @@ describe("getValueActionForValue", () => {
 
 describe("getStructureItemForPath", () => {
   it("returns a structureItem for an array element", () => {
-    const structureItem = {
+    const structureItem: MessagePathStructureItem = {
       structureType: "array",
       next: {
         structureType: "primitive",
         primitiveType: "uint32",
         datatype: "",
       },
+      datatype: "",
     };
-    expect(getStructureItemForPath(structureItem as any, "0")).toEqual({
+    expect(getStructureItemForPath(structureItem, "0")).toEqual({
       structureType: "primitive",
       primitiveType: "uint32",
       datatype: "",
@@ -278,7 +275,7 @@ describe("getStructureItemForPath", () => {
   });
 
   it("returns a structureItem for a map element", () => {
-    const structureItem = {
+    const structureItem: MessagePathStructureItem = {
       structureType: "message",
       nextByName: {
         some_id: {
@@ -289,7 +286,7 @@ describe("getStructureItemForPath", () => {
       },
       datatype: "",
     };
-    expect(getStructureItemForPath(structureItem as any, "some_id")).toEqual({
+    expect(getStructureItemForPath(structureItem, "some_id")).toEqual({
       structureType: "primitive",
       primitiveType: "uint32",
       datatype: "",
@@ -297,7 +294,7 @@ describe("getStructureItemForPath", () => {
   });
 
   it("returns a structureItem multi elements path", () => {
-    const structureItem = {
+    const structureItem: MessagePathStructureItem = {
       structureType: "array",
       next: {
         structureType: "message",
@@ -312,7 +309,7 @@ describe("getStructureItemForPath", () => {
       },
       datatype: "",
     };
-    expect(getStructureItemForPath(structureItem as any, "0,some_id")).toEqual({
+    expect(getStructureItemForPath(structureItem, "0,some_id")).toEqual({
       structureType: "primitive",
       primitiveType: "uint32",
       datatype: "",

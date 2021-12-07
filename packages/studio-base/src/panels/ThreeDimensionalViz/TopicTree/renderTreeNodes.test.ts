@@ -66,9 +66,8 @@ const getIsTreeNodeVisibleInSceneMock = (topicName: string) => {
 const sharedProps = {
   availableNamespacesByTopic: {},
   canEditNamespaceOverrideColor: false,
-  checkedKeysSet: new Set(),
+  checkedKeysSet: new Set<string>(),
   derivedCustomSettingsByKey: {},
-  hasFeatureColumn: false,
   showVisible: false,
 };
 describe("getNamespaceNodes", () => {
@@ -88,7 +87,7 @@ describe("getNamespaceNodes", () => {
           providerAvailable: false,
           available: true,
         },
-      } as any),
+      }),
     ).toEqual([
       {
         available: true,
@@ -306,7 +305,6 @@ describe("getNamespaceNodes", () => {
       },
       getIsNamespaceCheckedByDefault: getIsNamespaceCheckedByDefaultMock(topicName),
       getIsTreeNodeVisibleInScene: getIsTreeNodeVisibleInSceneMock(topicName),
-      hasFeatureColumn: true,
       node: {
         type: "topic",
         topicName,
@@ -315,7 +313,7 @@ describe("getNamespaceNodes", () => {
         available: true,
       },
       showVisible: true,
-    } as any);
+    });
     expect(nsNodes.map(({ namespace, overrideColor }) => ({ namespace, overrideColor }))).toEqual([
       {
         namespace: "ns1",

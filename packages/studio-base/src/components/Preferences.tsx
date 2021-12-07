@@ -150,7 +150,7 @@ function TimezoneSettings(): React.ReactElement {
       selectedKey={selectedItem.key}
       onChange={(_event, option) => {
         if (option) {
-          void setTimezone(option.data);
+          void setTimezone(option.data as string);
         }
       }}
       onPendingValueChanged={onPendingValueChanged}
@@ -236,7 +236,7 @@ function MessageFramerate(): React.ReactElement {
       selectedKey={messageRate ?? 60}
       onChange={(_event, option) => {
         if (option) {
-          void setMessageRate(option.data);
+          void setMessageRate(option.data as number);
         }
       }}
       calloutProps={{

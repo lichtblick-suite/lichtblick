@@ -194,7 +194,7 @@ export const useSearchMatches = ({
       position: { x, y, z },
     } = output;
 
-    const targetHeading = cameraStateSelectors.targetHeading(cameraState);
+    const targetHeading: number = cameraStateSelectors.targetHeading(cameraState);
     const targetOffset: vec3 = [0, 0, 0];
     vec3.rotateZ(
       targetOffset,

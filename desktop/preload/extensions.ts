@@ -13,7 +13,7 @@ import { DesktopExtension } from "../common/types";
 
 const log = Logger.getLogger(__filename);
 
-type ExtensionPackageJson = { name: string; version: string; publisher?: string };
+type ExtensionPackageJson = { name: string; version: string; main: string; publisher?: string };
 
 /**
  * Returns a unique identifier for an extension based on the publisher and package name. The
@@ -94,7 +94,7 @@ export async function getExtensions(rootFolder: string): Promise<DesktopExtensio
       const extensionRootPath = pathJoin(rootFolder, entry.name);
       const packagePath = pathJoin(extensionRootPath, "package.json");
       const packageData = await readFile(packagePath, { encoding: "utf8" });
-      const packageJson = JSON.parse(packageData);
+      const packageJson = JSON.parse(packageData) as ExtensionPackageJson;
 
       const id = getPackageId(packageJson);
 
@@ -120,7 +120,7 @@ export async function loadExtension(id: string, rootFolder: string): Promise<str
 
   const packagePath = pathJoin(extension.directory, "package.json");
   const packageData = await readFile(packagePath, { encoding: "utf8" });
-  const packageJson = JSON.parse(packageData);
+  const packageJson = JSON.parse(packageData) as ExtensionPackageJson;
   const sourcePath = pathJoin(extension.directory, packageJson.main);
   return await readFile(sourcePath, { encoding: "utf-8" });
 }

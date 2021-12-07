@@ -95,11 +95,13 @@ export default class Rpc {
     }
     // invoke the receive handler in a promise so if it throws synchronously we can reject
     new Promise<Record<string, Transferable[] | undefined> | undefined>((resolve) => {
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
       const handler = this._receivers.get(topic);
       if (!handler) {
         throw new Error(`no receiver registered for ${topic}`);
       }
       // This works both when `handler` returns a value or a Promise.
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
       resolve(handler(data));
     })
       .then((result) => {
@@ -143,11 +145,13 @@ export default class Rpc {
     const result = new Promise<TResult>((resolve, reject) => {
       this._pendingCallbacks[id] = (info) => {
         if (info.data?.[ERROR] != undefined) {
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
           const error = new Error(info.data.message);
           error.name = info.data.name;
           error.stack = info.data.stack;
           reject(error);
         } else {
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
           resolve(info.data);
         }
       };

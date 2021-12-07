@@ -16,10 +16,10 @@ export default function NativeAppMenuProvider(props: PropsWithChildren<unknown>)
   const value = useMemo<NativeAppMenu>(() => {
     return {
       addFileEntry: (name: string, handler: Handler) => {
-        menuBridge?.menuAddInputSource(name, handler);
+        void menuBridge?.menuAddInputSource(name, handler);
       },
       removeFileEntry: (name: string) => {
-        menuBridge?.menuRemoveInputSource(name);
+        void menuBridge?.menuRemoveInputSource(name);
       },
       on: (name: NativeAppMenuEvent, listener: Handler) => {
         menuBridge?.addIpcEventListener(name, listener);

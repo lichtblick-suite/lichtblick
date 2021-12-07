@@ -49,11 +49,12 @@ afterEach(() => {
   if (calls.length > 0) {
     // show the user the error messages so they can track them down
     for (const call of calls) {
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
       origError(...call);
     }
     throw new Error(
       `console.error was called in the test.\n\n
-If this is expected, check the call values via console.error.mock.calls and 
+If this is expected, check the call values via console.error.mock.calls and
 clear with console.error.mockClear()`,
     );
   }
@@ -65,11 +66,12 @@ afterEach(() => {
   if (calls.length > 0) {
     // show the user the warnings so they can track them down
     for (const call of calls) {
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
       origWarn(...call);
     }
     throw new Error(
       `console.warn was called in the test.\n\n
-If this is expected, check the call values via console.warn.mock.calls and 
+If this is expected, check the call values via console.warn.mock.calls and
 clear with console.warn.mockClear()`,
     );
   }

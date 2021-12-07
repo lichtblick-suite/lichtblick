@@ -14,7 +14,7 @@ import type { Storage, StorageContent } from "../common/types";
 const log = Logger.getLogger(__filename);
 
 export default class LocalFileStorage implements Storage {
-  private _userDataPath = ipcRenderer.invoke("getUserDataPath");
+  private _userDataPath = ipcRenderer.invoke("getUserDataPath") as Promise<string>;
 
   async list(datastore: string): Promise<string[]> {
     const datastoreDir = await this.ensureDatastorePath(datastore);

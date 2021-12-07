@@ -19,7 +19,7 @@ import { enforceFetchIsBlocked, inSharedWorker } from "@foxglove/studio-base/uti
 
 let unsentErrors: string[] = [];
 (global as unknown as SharedWorkerGlobalScope).onerror = (event: ErrorEvent) => {
-  unsentErrors.push(event.error.toString());
+  unsentErrors.push((event.error as Error).toString());
 };
 (global as unknown as SharedWorkerGlobalScope).onunhandledrejection = (
   event: PromiseRejectionEvent,
@@ -38,7 +38,7 @@ if (!inSharedWorker()) {
 }
 
 (global as unknown as SharedWorkerGlobalScope).onconnect = (e) => {
-  const port = e.ports[0]!;
+  const port = e.ports[0]! as MessagePort;
   const rpc = new Rpc(port);
 
   // If any errors occurred while nobody was connected, send them now

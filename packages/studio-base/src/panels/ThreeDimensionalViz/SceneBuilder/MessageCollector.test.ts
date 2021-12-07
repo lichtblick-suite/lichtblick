@@ -38,7 +38,7 @@ const makeMarker = (namespace: string, id: string): Interactive<BaseMarker> => {
 };
 
 const getName = (marker: BaseMarker): string => `${marker.ns}/${marker.id}`;
-const interactive = (message: any) => ({
+const interactive = (message: any): Interactive<unknown> => ({
   ...message,
   interactionData: { topic: "/topic", originalMessage: message },
 });

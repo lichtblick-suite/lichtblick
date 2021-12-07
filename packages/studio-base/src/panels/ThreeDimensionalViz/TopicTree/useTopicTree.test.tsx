@@ -834,7 +834,7 @@ describe("useTopicTree", () => {
     };
 
     function expectVisibilityByNodeKey(
-      visibiltyByNodeKey: any,
+      visibiltyByNodeKey: Record<string, boolean>,
       _rootTreeNode: unknown,
       getIsTreeNodeVisibleInTree: any,
     ) {

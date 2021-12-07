@@ -19,9 +19,9 @@ import TextContent from "@foxglove/studio-base/components/TextContent";
 const stories = storiesOf("Help pages", module).addParameters({ colorScheme: "dark" });
 
 export function makeHelpPageStories(req: ReturnType<typeof require.context>): void {
-  const helpData = req.keys().map((name: any) => ({ name, data: req(name) }));
+  const helpData = req.keys().map((name) => ({ name, data: req(name) }));
 
-  helpData.forEach(({ name, data }: any) => {
+  helpData.forEach(({ name, data }) => {
     stories.add(name, () => (
       <SidebarContent title={name}>
         <TextContent allowMarkdownHtml={true}>

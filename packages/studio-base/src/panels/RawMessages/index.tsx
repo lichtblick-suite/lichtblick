@@ -416,7 +416,7 @@ function RawMessages(props: Props) {
               hideRoot
               invertTheme={false}
               getItemString={getItemString}
-              valueRenderer={(valueAsString, value, ...keyPath) => {
+              valueRenderer={(valueAsString: string, value, ...keyPath) => {
                 if (diffEnabled) {
                   return renderDiffLabel(valueAsString, value);
                 }
@@ -491,6 +491,7 @@ function RawMessages(props: Props) {
                       keyPath[0] === diffLabels.DELETED.labelText ? "line-through" : "none";
                   }
                   const nestedObj = get(diff, keyPath.slice().reverse(), {});
+                  // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
                   const nestedObjKey = Object.keys(nestedObj)[0];
                   if (nestedObjKey != undefined && diffLabelsByLabelText[nestedObjKey]) {
                     backgroundColor = theme.isInverted
@@ -524,6 +525,7 @@ function RawMessages(props: Props) {
                   let backgroundColor;
                   let textDecoration;
                   const nestedObj = get(diff, keyPath.slice().reverse(), {});
+                  // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
                   const nestedObjKey = Object.keys(nestedObj)[0];
                   if (nestedObjKey != undefined && diffLabelsByLabelText[nestedObjKey]) {
                     backgroundColor = theme.isInverted

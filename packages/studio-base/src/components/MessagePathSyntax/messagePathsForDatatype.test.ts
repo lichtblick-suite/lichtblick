@@ -331,10 +331,10 @@ describe("traverseStructure", () => {
     expect(
       traverseStructure(structure, [
         { type: "name", name: "some_pose" },
-        { type: "filter", path: ["x"], value: 10, nameLoc: 123 },
+        { type: "filter", path: ["x"], value: 10, nameLoc: 123, valueLoc: 0, repr: "" },
         { type: "name", name: "dummy_array" },
         { type: "slice", start: 50, end: 100 },
-      ] as any),
+      ]),
     ).toEqual({
       valid: true,
       msgPathPart: undefined,
@@ -343,8 +343,8 @@ describe("traverseStructure", () => {
     expect(
       traverseStructure(structure, [
         { type: "name", name: "some_pose" },
-        { type: "filter", path: ["header", "seq"], value: 10, nameLoc: 123 },
-      ] as any),
+        { type: "filter", path: ["header", "seq"], value: 10, nameLoc: 123, valueLoc: 0, repr: "" },
+      ]),
     ).toEqual({
       valid: true,
       msgPathPart: undefined,
@@ -375,8 +375,8 @@ describe("traverseStructure", () => {
     expect(
       traverseStructure(structureJson, [
         { type: "name", name: "myJson" },
-        { type: "filter", path: ["y"], value: 10, nameLoc: 123 },
-      ] as any),
+        { type: "filter", path: ["y"], value: 10, nameLoc: 123, valueLoc: 0, repr: "" },
+      ]),
     ).toEqual({
       msgPathPart: undefined,
       structureItem: { datatype: "msgs/Log", structureType: "primitive", primitiveType: "json" },
@@ -414,21 +414,28 @@ describe("traverseStructure", () => {
     expect(
       traverseStructure(structure, [
         { type: "name", name: "some_pose" },
-        { type: "filter", path: ["y"], value: 10, nameLoc: 123 },
-      ] as any),
+        { type: "filter", path: ["y"], value: 10, nameLoc: 123, valueLoc: 0, repr: "" },
+      ]),
     ).toEqual({
       valid: false,
-      msgPathPart: { type: "filter", path: ["y"], value: 10, nameLoc: 123 },
+      msgPathPart: { type: "filter", path: ["y"], value: 10, nameLoc: 123, valueLoc: 0, repr: "" },
       structureItem: messagePathStructures(datatypes)["pose_msgs/SomePose"],
     });
     expect(
       traverseStructure(structure, [
         { type: "name", name: "some_pose" },
-        { type: "filter", path: ["header", "y"], value: 10, nameLoc: 123 },
-      ] as any),
+        { type: "filter", path: ["header", "y"], value: 10, nameLoc: 123, valueLoc: 0, repr: "" },
+      ]),
     ).toEqual({
       valid: false,
-      msgPathPart: { type: "filter", path: ["header", "y"], value: 10, nameLoc: 123 },
+      msgPathPart: {
+        type: "filter",
+        path: ["header", "y"],
+        value: 10,
+        nameLoc: 123,
+        valueLoc: 0,
+        repr: "",
+      },
       structureItem: messagePathStructures(datatypes)["pose_msgs/SomePose"],
     });
   });

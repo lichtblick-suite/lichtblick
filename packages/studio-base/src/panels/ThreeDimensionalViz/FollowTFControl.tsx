@@ -115,7 +115,7 @@ const arePropsEqual = (prevProps: Props, nextProps: Props) => {
   return shallowequal(prevProps, nextProps);
 };
 
-const FollowTFControl = memo<Props>((props: Props) => {
+const FollowTFControl = memo<Props>(function FollowTFControl(props: Props) {
   const { transforms, tfToFollow, followOrientation, onFollowChange } = props;
   const [forceShowFrameList, setForceShowFrameList] = useState(false);
   const [hovering, setHovering] = useState(false);

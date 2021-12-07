@@ -34,7 +34,8 @@ export default {
   decorators: [
     (SingleStory: Story, ctx: StoryContext): JSX.Element => {
       const fakeConsoleApi =
-        ctx.parameters.consoleApi ?? new FakeConsoleApi(ctx.parameters.deviceCode);
+        ctx.parameters.consoleApi ??
+        new FakeConsoleApi(ctx.parameters.deviceCode as DeviceCodeResponse);
 
       return (
         <ModalHost>

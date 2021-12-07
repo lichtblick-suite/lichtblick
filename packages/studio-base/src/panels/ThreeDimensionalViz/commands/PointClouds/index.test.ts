@@ -21,7 +21,7 @@ describe("<PointClouds />", () => {
         ...POINT_CLOUD_MESSAGE,
         // Three colors per point
         hitmapColors: [255, 255, 255, 255, 255, 255, 255, 255, 255],
-      } as any);
+      });
       const { colorBuffer } = result;
       expect(colorBuffer).toBeNullOrUndefined();
     });

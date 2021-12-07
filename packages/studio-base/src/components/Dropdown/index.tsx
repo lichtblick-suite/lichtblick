@@ -97,8 +97,10 @@ export default class Dropdown<T> extends React.Component<Props<T>, State> {
   renderItem(child: ReactElement): JSX.Element {
     const { value } = this.props;
     const checked = Array.isArray(value)
-      ? value.includes(child.props.value)
+      ? // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
+        value.includes(child.props.value)
       : child.props.value === value;
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
     const onClick = () => this.onClick(child.props.value);
     if ((child.type as { isMenuItem?: boolean }).isMenuItem === true) {
       return React.cloneElement(child, { checked, onClick });

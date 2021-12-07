@@ -143,6 +143,7 @@ export default function Table({
     const maybeMessage = Array.isArray(value) ? value[0] ?? {} : value;
 
     // Strong assumption about structure of data.
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
     return getColumnsFromObject(maybeMessage, accessorPath);
   }, [accessorPath, value]);
 

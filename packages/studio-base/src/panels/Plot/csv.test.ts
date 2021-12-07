@@ -31,6 +31,7 @@ describe("csv", () => {
                 receiveTime: { sec: 0, nsec: 0 },
                 path: "path",
                 x: 0,
+                // eslint-disable-next-line @typescript-eslint/no-loss-of-precision
                 y: Number(9999999999999001),
                 value: 9999999999999001n,
               },

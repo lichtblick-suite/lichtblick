@@ -123,7 +123,7 @@ jest.mock("roslib", () => {
     __esModule: true,
     default: {
       Ros: jest.fn(() => new MockRosClient()),
-      Topic: jest.fn((arg) => new MockRosTopic(arg)),
+      Topic: jest.fn((arg: { name: string }) => new MockRosTopic(arg)),
     },
   };
 });

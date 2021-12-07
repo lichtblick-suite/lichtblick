@@ -312,7 +312,7 @@ describe("OrderedStampPlayer", () => {
     const fakePlayer = new ModifiedFakePlayer();
     fakePlayer.setCapabilities([PlayerCapabilities.setSpeed, PlayerCapabilities.playbackControl]);
     const player = new OrderedStampPlayer(
-      new UserNodePlayer(fakePlayer as any, {
+      new UserNodePlayer(fakePlayer, {
         setUserNodeDiagnostics: jest.fn(),
         addUserNodeLogs: jest.fn(),
         setUserNodeRosLib: jest.fn(),

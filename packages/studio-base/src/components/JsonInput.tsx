@@ -74,7 +74,7 @@ export function ValidatedInputBase({
   const memorizedInputValidation = useCallback(
     (newInputVal: string, onChangeFcn?: OnChange) => {
       let newVal;
-      let newError;
+      let newError: string | undefined;
       // parse the empty string directly as empty array or object for validation and onChange callback
       if (newInputVal.trim() === "") {
         newVal = Array.isArray(value) ? [] : {};

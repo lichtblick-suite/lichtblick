@@ -231,6 +231,7 @@ function main() {
       log.info("Automatic updates disabled (development version)");
     } else {
       autoUpdater.checkForUpdatesAndNotify().catch((err) => {
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
         if (isNetworkError(err)) {
           log.warn(`Network error checking for updates: ${err}`);
         } else {

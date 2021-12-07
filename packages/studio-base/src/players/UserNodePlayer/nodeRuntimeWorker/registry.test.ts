@@ -71,7 +71,7 @@ describe("stringifyFuncsInObject", () => {
 
 describe("requireImplementation", () => {
   it("correctly matches modules", () => {
-    const map = new Map();
+    const map = new Map<string, string>();
     map.set(
       "main.js",
       `
@@ -87,7 +87,7 @@ describe("requireImplementation", () => {
     expect(requireImplementation("main", map)).toEqual({});
   });
   it("correctly matches nested modules", () => {
-    const map = new Map();
+    const map = new Map<string, string>();
     map.set(
       "main.js",
       `

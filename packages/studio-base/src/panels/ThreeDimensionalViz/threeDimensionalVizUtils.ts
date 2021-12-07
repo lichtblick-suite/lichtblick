@@ -199,7 +199,7 @@ export function getNewCameraStateOnFollowChange({
   if (typeof newFollowTf === "string" && newFollowTf.length > 0) {
     // When switching to follow orientation, adjust thetaOffset to preserve camera rotation.
     if (newFollowOrientation && !prevFollowOrientation && prevTargetPose) {
-      const heading = cameraStateSelectors.targetHeading({
+      const heading: number = cameraStateSelectors.targetHeading({
         targetOrientation: prevTargetPose.targetOrientation,
       });
       newCameraState.targetOffset = vec3.rotateZ(

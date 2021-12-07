@@ -734,6 +734,7 @@ describe("RandomAccessPlayer", () => {
         case 1: {
           // This is the getMessages call from the playback tick
           // Simulate a progress callback while we are playing
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
           provider.extensionPoint?.progressCallback(progressDuringPlayback);
           await delay(1);
           // The actual message is irrelevant
@@ -750,6 +751,7 @@ describe("RandomAccessPlayer", () => {
         case 2: {
           source.pausePlayback();
           await delay(1);
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
           provider.extensionPoint?.progressCallback(progressAfterPause);
           return getMessagesResult;
         }

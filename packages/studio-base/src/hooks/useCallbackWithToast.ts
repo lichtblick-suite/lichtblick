@@ -23,7 +23,7 @@ export default function useCallbackWithToast<Args extends unknown[]>(
         return await callback(...args);
       } catch (error) {
         log.error(error);
-        addToast(error.toString(), { appearance: "error" });
+        addToast((error as Error).toString(), { appearance: "error" });
       }
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps

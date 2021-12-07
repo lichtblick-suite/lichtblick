@@ -62,7 +62,7 @@ storiesOf("components/ShareJsonModal", module)
     () => {
       useEffect(() => {
         setTimeout(() => {
-          const textarea: any = document.querySelector("textarea");
+          const textarea = document.querySelector("textarea")!;
           textarea.value = "{";
           TestUtils.Simulate.change(textarea);
         }, 10);

@@ -32,7 +32,7 @@ export default function DocumentTitleAdapter(): JSX.Element {
   }, [playerName]);
 
   useEffect(() => {
-    nativeWindow?.setRepresentedFilename(filePath);
+    void nativeWindow?.setRepresentedFilename(filePath);
   }, [filePath, nativeWindow]);
 
   return <></>;

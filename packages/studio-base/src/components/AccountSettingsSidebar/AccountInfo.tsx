@@ -33,7 +33,7 @@ export default function AccountInfo(props: { currentUser?: User }): JSX.Element 
       await signOut();
     } catch (error) {
       log.error(error);
-      addToast(error.toString(), { appearance: "error" });
+      addToast((error as Error).toString(), { appearance: "error" });
     }
   }, [addToast, signOut]);
 

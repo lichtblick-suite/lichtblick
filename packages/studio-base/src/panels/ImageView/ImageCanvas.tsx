@@ -294,7 +294,7 @@ export default function ImageCanvas(props: Props): JSX.Element {
           setDoRenderImage(() => workerRender);
         })
         .catch((err) => {
-          setError(err);
+          setError(err as Error);
         });
     }
 

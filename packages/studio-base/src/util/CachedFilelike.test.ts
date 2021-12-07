@@ -93,6 +93,7 @@ describe("CachedFilelike", () => {
             }
           },
           destroy() {
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
             clearInterval(interval);
             destroyed = true;
           },

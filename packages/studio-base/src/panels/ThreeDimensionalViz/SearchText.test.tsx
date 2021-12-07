@@ -61,7 +61,7 @@ const runUseGLTextTest = (
   text: Interactive<TextMarker>[],
   searchText: string,
   searchTextMatches: Interactive<GLTextMarker>[],
-  setSearchTextMatches: (marker: Interactive<GLTextMarker>[]) => void = jest.fn(),
+  setSearchTextMatches: (marker: GLTextMarker[]) => void = jest.fn(),
   selectedMatchIndex: number = 0,
 ) => {
   const originalMarkers: Interactive<TextMarker>[] = text;
@@ -74,7 +74,7 @@ const runUseGLTextTest = (
       selectedMatchIndex,
       setSearchTextMatches,
       searchTextMatches,
-    } as any);
+    });
     return ReactNull;
   };
   const root = mount(<Wrapper />);
@@ -117,12 +117,7 @@ describe("<SearchText />", () => {
     it("updates matches to empty", async () => {
       const setSearchTextMatches = jest.fn();
       const marker = createMarker("hello");
-      const glTextMarkers = runUseGLTextTest(
-        [marker],
-        "bye",
-        [marker as any],
-        setSearchTextMatches,
-      );
+      const glTextMarkers = runUseGLTextTest([marker], "bye", [marker], setSearchTextMatches);
       expect(glTextMarkers.length).toEqual(1);
       expect(glTextMarkers[0].highlightedIndices).toEqual(undefined);
       expect(setSearchTextMatches).toHaveBeenCalledWith([]);

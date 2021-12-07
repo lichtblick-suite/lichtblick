@@ -74,7 +74,7 @@ function rpcMouseEvent(event: React.MouseEvent<HTMLCanvasElement>) {
   };
 }
 
-type RpcSend = <T extends unknown>(
+type RpcSend = <T>(
   topic: string,
   payload?: Record<string, unknown>,
   transferables?: (Transferable | OffscreenCanvas)[],
@@ -113,7 +113,7 @@ function Chart(props: Props): JSX.Element {
     const rpc = webWorkerManager.registerWorkerListener(id);
 
     // helper function to send rpc to our worker - all invocations need an _id_ so we inject it here
-    const sendWrapper = async <T extends unknown>(
+    const sendWrapper = async <T,>(
       topic: string,
       payload?: Record<string, unknown>,
       transferables?: (Transferable | OffscreenCanvas)[],

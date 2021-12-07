@@ -101,7 +101,7 @@ const libDts = new Map(
 );
 
 function resolveReferences(originalSrc: string): string {
-  return originalSrc.replace(/\/\/\/ <reference lib="(.+)" \/>/g, (_, name) => {
+  return originalSrc.replace(/\/\/\/ <reference lib="(.+)" \/>/g, (_, name: string) => {
     const src = libDts.get(name);
     // remove entry so we don't try to load it again if it appears in another referenced file
     libDts.delete(name);

@@ -27,6 +27,7 @@ export default function filterMap<T, U>(
   let index = 0;
   for (const item of values) {
     const mappedItem = mapFn(item, index++);
+    // eslint-disable-next-line @typescript-eslint/strict-boolean-expressions
     if (mappedItem) {
       results.push(mappedItem);
     }

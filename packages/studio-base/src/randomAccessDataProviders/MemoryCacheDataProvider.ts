@@ -523,7 +523,7 @@ export default class MemoryCacheDataProvider implements RandomAccessDataProvider
           `MemoryCacheDataProvider connection ${
             this._currentConnection ? this._currentConnection.id : ""
           }`,
-          err?.message ?? "<unknown error>",
+          (err?.message as string | undefined) ?? "<unknown error>",
           "app",
           "error",
         );

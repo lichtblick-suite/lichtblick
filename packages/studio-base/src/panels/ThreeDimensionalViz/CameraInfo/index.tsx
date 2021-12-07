@@ -250,7 +250,7 @@ export default function CameraInfo({
                               [0, 0, 0],
                               vec3.sub(TEMP_VEC3, newPos, cameraState.target),
                               ZERO_VEC3,
-                              cameraStateSelectors.targetHeading(cameraState),
+                              cameraStateSelectors.targetHeading(cameraState) as number,
                             ) as Vec3;
                             if (!isEqual(cameraState.targetOffset, newTargetOffset)) {
                               onCameraStateChange({

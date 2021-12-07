@@ -61,7 +61,7 @@ function useImageMessage() {
     ctx.strokeStyle = "red";
     ctx.strokeRect(0, 0, 400, 300);
     canvas.toBlob((blob) => {
-      blob?.arrayBuffer().then((arrayBuffer) => {
+      void blob?.arrayBuffer().then((arrayBuffer) => {
         setImageData(new Uint8Array(arrayBuffer));
       });
     }, imageFormat);

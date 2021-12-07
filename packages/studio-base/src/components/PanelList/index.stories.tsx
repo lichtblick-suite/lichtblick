@@ -82,7 +82,7 @@ const PanelListWithInteractions = ({
   events = [],
 }: {
   inputValue?: string;
-  events?: any[];
+  events?: TestUtils.SyntheticEventData[];
 }) => (
   <div
     style={{ margin: 50, height: 480 }}

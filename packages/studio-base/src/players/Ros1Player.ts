@@ -485,7 +485,9 @@ export default class Ros1Player implements Player {
 
   setParameter(key: string, value: ParameterValue): void {
     log.debug(`Ros1Player.setParameter(key=${key}, value=${value})`);
-    this._rosNode?.setParameter(key, value);
+    // seems to be a TypeScript issue - the ParameterValue type is treated as `any`
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
+    void this._rosNode?.setParameter(key, value);
   }
 
   publish({ topic, msg }: PublishPayload): void {

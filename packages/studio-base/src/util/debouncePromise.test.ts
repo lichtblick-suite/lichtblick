@@ -42,7 +42,7 @@ describe("debouncePromise", () => {
         const finishedSignal = callsFinished[prevExpectedCallsStarted];
         debouncedFn.currentPromise?.then(
           () => finishedSignal?.resolve(),
-          (err) => finishedSignal?.reject(err),
+          (err: Error) => finishedSignal?.reject(err),
         );
       }
       prevExpectedCallsStarted = expectedNum;

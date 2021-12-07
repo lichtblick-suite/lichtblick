@@ -18,7 +18,7 @@ import { enforceFetchIsBlocked, inSharedWorker } from "@foxglove/studio-base/uti
 
 let unsentErrors: string[] = [];
 (global as unknown as SharedWorkerGlobalScope).onerror = (event: ErrorEvent) => {
-  unsentErrors.push(event.error.toString());
+  unsentErrors.push((event.error as Error).toString());
 };
 (global as unknown as SharedWorkerGlobalScope).onunhandledrejection = (
   event: PromiseRejectionEvent,

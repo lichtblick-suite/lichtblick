@@ -99,6 +99,7 @@ const Editor = ({
   codeEditorService.doOpenEditor = React.useCallback(
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (editor: monacoApi.editor.ICodeEditor, input: any) => {
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
       const requestedModel = monacoApi.editor.getModel(input.resource);
       if (!requestedModel) {
         return editor;
@@ -107,6 +108,7 @@ const Editor = ({
       // If we are jumping to a definition within the user node, don't push
       // to script override.
       if (requestedModel.uri.path === script?.filePath) {
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
         gotoSelection(editor, input.options.selection);
         return;
       }

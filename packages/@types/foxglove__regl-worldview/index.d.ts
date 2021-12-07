@@ -84,15 +84,16 @@ declare module "@foxglove/regl-worldview" {
     interactionData: any;
   }
 
-  function pointToVec3(arg: any): any;
-  function orientationToVec4(arg: any): any;
-  function vec3ToPoint(arg: any): any;
+  function pointToVec3({ x, y, z }: Point): [number, number, number];
+  function orientationToVec4({ x, y, z, w }: Orientation): [number, number, number, number];
+  function vec3ToPoint([x, y, z]: Vec3): Point;
+  function vec4ToOrientation([x, y, z, w]: Vec4): Orientation;
   function withPose<Uniforms, Attributes, Props, OwnContext, ParentContext>(
     arg: REGL.DrawConfig<Uniforms, Attributes, Props, OwnContext, ParentContext>,
   ): REGL.DrawConfig<Uniforms, Attributes, Props, OwnContext, ParentContext>;
   function parseGLB(arg: any): any;
-  function vec4ToRGBA(arg: any): any;
-  function toRGBA(arg: any): any;
+  function vec4ToRGBA(color: Vec4): Color;
+  function toRGBA(val: Color): [number, number, number, number];
   function nonInstancedGetChildrenForHitmap<T>(
     props: T,
     assignNextColors: AssignNextColorsFn,

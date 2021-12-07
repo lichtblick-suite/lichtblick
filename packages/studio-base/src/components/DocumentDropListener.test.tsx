@@ -54,11 +54,11 @@ describe("<DocumentDropListener>", () => {
 
   it("prevents the event from bubbling if the dataTransfer contains Files", async () => {
     // DragEvent is not defined in jsdom at the moment, so simulate one using a MouseEvent
-    const event: any = new MouseEvent("dragover", {
+    const event = new MouseEvent("dragover", {
       bubbles: true,
       cancelable: true,
     });
-    event.dataTransfer = {
+    (event as any).dataTransfer = {
       types: ["Files"],
     };
     act(() => {
