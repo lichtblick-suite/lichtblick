@@ -11,10 +11,6 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import {
-  DEPRECATED__ros_lib_dts,
-  DEPRECATED__ros_lib_filename,
-} from "@foxglove/studio-base/players/UserNodePlayer/nodeTransformerWorker/typescript/DEPRECATED_ros";
 import rawUserUtils from "@foxglove/studio-base/players/UserNodePlayer/nodeTransformerWorker/typescript/rawUserUtils";
 import {
   ros_lib_filename,
@@ -43,17 +39,11 @@ const utilityFiles: NodeProjectFile[] = rawUserUtils.map((utility) => ({
 }));
 
 export function getNodeProjectConfig(): NodeProjectConfig {
-  // TODO load these from .ts files rather than string consts
   const declarations = [];
   declarations.push({
     fileName: lib_filename,
     filePath: lib_filename,
     sourceCode: lib_dts,
-  });
-  declarations.push({
-    fileName: DEPRECATED__ros_lib_filename,
-    filePath: `/node_modules/${DEPRECATED__ros_lib_filename}`,
-    sourceCode: DEPRECATED__ros_lib_dts,
   });
 
   return {

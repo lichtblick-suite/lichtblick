@@ -11,7 +11,6 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { without } from "lodash";
 import ts from "typescript/lib/typescript";
 
 import { RosMsgField } from "@foxglove/rosmsg";
@@ -361,27 +360,6 @@ export const constructDatatypes = (
   if (isNodeFromRosModule(node) && messageDef != undefined) {
     return {
       outputDatatype: messageDef,
-      datatypes: baseDatatypes,
-    };
-  }
-
-  // TODO: Remove when we remove DEPRECATED__ros. Hardcoded 'visualization_msgs/MarkerArray' flow.
-  const memberKeys = node.members.map(({ name }) => name?.getText());
-  if (memberKeys.includes("markers")) {
-    if (memberKeys.length > 1) {
-      throw new DatatypeExtractionError({
-        severity: DiagnosticSeverity.Error,
-        message: `For marker return types, they must have only one property 'markers'. Please remove '${without(
-          memberKeys,
-          "markers",
-        ).join(", ")}', or rename 'markers'.`,
-        source: Sources.DatatypeExtraction,
-        code: ErrorCodes.DatatypeExtraction.STRICT_MARKERS_RETURN_TYPE,
-      });
-    }
-
-    return {
-      outputDatatype: "visualization_msgs/MarkerArray",
       datatypes: baseDatatypes,
     };
   }

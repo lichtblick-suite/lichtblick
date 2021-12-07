@@ -1070,36 +1070,6 @@ describe("pipeline", () => {
         datatypes: posDatatypes,
       },
       {
-        description: "DEPRECATED__ros",
-        sourceCode: `
-          import { Point } from "DEPRECATED__ros";
-
-          type Output = Point;
-          export const inputs = [];
-          export const output = "${DEFAULT_STUDIO_NODE_PREFIX}";
-          const publisher = (message: any): Output => {
-              return { x: 1, y: 1, z: 1 }
-          };
-          export default publisher;`,
-        datatypes: pointDataType,
-      }, // HARDCODED DATATYPES
-      {
-        description: "Should return marker array if the top level message returns 'markers'",
-        sourceCode: `
-          import { LineStripMarker } from "DEPRECATED__ros";
-
-          export const inputs = [];
-          export const output = "${DEFAULT_STUDIO_NODE_PREFIX}";
-
-          const publisher = (message: any): { markers: LineStripMarker[] } => {
-            return { markers: [] };
-          };
-
-          export default publisher;`,
-        datatypes: baseDatatypes,
-        outputDatatype: "visualization_msgs/MarkerArray",
-      },
-      {
         description: "Should return any arbritrary datatype as the return type",
         sourceCode: `
           import { Messages } from "ros";
