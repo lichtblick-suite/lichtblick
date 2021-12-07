@@ -61,10 +61,11 @@ export type TopicSettingsCollection = {
 // builds a syntehtic arrow marker from a geometry_msgs/PoseStamped
 // these pose sizes were manually configured in rviz; for now we hard-code them here
 const buildSyntheticArrowMarker = (
-  { topic, message }: MessageEvent<unknown>,
+  { topic, message }: MessageEvent<PoseStamped>,
   pose: Pose,
   getSyntheticArrowMarkerColor: (arg0: string) => Color,
 ) => ({
+  header: message.header,
   type: 103,
   pose,
   scale: { x: 2, y: 2, z: 0.1 },
@@ -702,12 +703,13 @@ export default class SceneBuilder implements MarkerProvider {
       case "geometry_msgs/PoseStamped":
       case "geometry_msgs/msg/PoseStamped":
       case "ros.geometry_msgs.PoseStamped": {
+        const poseMsg = msg as MessageEvent<PoseStamped>;
         // make synthetic arrow marker from the stamped pose
-        const pose = (msg.message as PoseStamped).pose;
+        const pose = poseMsg.message.pose;
         this.collectors[topic]!.addNonMarker(
           topic,
           buildSyntheticArrowMarker(
-            msg,
+            poseMsg,
             pose,
             this._hooks.getSyntheticArrowMarkerColor,
           ) as Interactive<unknown>,
