@@ -326,12 +326,15 @@ export default function Panel<
     const [savedConfig, saveConfig] = useConfigById<Config>(childId);
 
     // PanelSettings needs useConfigById to return a config
-    // If there is no saved config, we save the default config provided by the panel.
-    // This typically happens when a new panel is added and the layout does not yet have a config.
-    // Even if this effect gets run more than once, we only need to save the default config once.
+    // If there is no saved config (or it is an empty object), we save the default config provided
+    // by the panel. This typically happens when a new panel is added and the layout does not yet
+    // have a config. Even if this effect gets run more than once, we only need to save the default
+    // config once.
+    //
+    // An empty object can occur when swapping a panel
     const savedDefaultConfig = useRef(false);
     useLayoutEffect(() => {
-      if (!savedConfig && !savedDefaultConfig.current) {
+      if ((!savedConfig || Object.keys(savedConfig).length === 0) && !savedDefaultConfig.current) {
         savedDefaultConfig.current = true;
         saveConfig(defaultConfig);
       }
