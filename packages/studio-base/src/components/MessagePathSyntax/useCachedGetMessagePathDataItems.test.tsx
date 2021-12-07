@@ -12,7 +12,6 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 import { act, renderHook } from "@testing-library/react-hooks";
-import { cloneDeep } from "lodash";
 
 import parseRosPath from "@foxglove/studio-base/components/MessagePathSyntax/parseRosPath";
 import MockMessagePipelineProvider from "@foxglove/studio-base/components/MessagePipeline/MockMessagePipelineProvider";
@@ -132,19 +131,53 @@ describe("useCachedGetMessagePathDataItems", () => {
     expect(result.current.getItems("/topic.an_array[1]", message)).not.toBe(data1);
     expect(result.current.getItems("/topic.an_array[0]", message)).toBe(data0); // Another sanity check.
 
-    // Invalidate cache with topics.
+    // Changing unrelated topics and datatypes does not clear the cache.
     const data0BeforeProviderTopicsChange = result.current.getItems("/topic.an_array[0]", message);
-    rerender({ ...initialProps, topics: cloneDeep(initialTopics) });
+    rerender({
+      ...initialProps,
+      topics: [
+        { name: "/topic", datatype: "datatype" },
+        { name: "/topic2", datatype: "datatype2" },
+      ],
+      datatypes: new Map([
+        [
+          "datatype",
+          { definitions: [{ name: "an_array", type: "uint32", isArray: true, isComplex: false }] },
+        ],
+        [
+          "datatype2",
+          { definitions: [{ name: "an_array2", type: "uint32", isArray: true, isComplex: false }] },
+        ],
+      ]),
+    });
+    expect(result.current.getItems("/topic.an_array[0]", message)).toBe(
+      data0BeforeProviderTopicsChange,
+    );
+
+    // Invalidate cache with topics.
+    rerender({ ...initialProps, topics: [{ name: "/topic", datatype: "datatype2" }] });
     expect(result.current.getItems("/topic.an_array[0]", message)).not.toBe(
       data0BeforeProviderTopicsChange,
     );
 
     // Invalidate cache with datatypes.
+    rerender({ ...initialProps });
     const data0BeforeDatatypesChange = result.current.getItems("/topic.an_array[0]", message);
-    rerender({ ...initialProps, datatypes: cloneDeep(initialDatatypes) });
+    rerender({
+      ...initialProps,
+      datatypes: new Map([
+        [
+          "datatype",
+          { definitions: [{ name: "an_array", type: "uint64", isArray: true, isComplex: false }] },
+        ],
+      ]),
+    });
     expect(result.current.getItems("/topic.an_array[0]", message)).not.toBe(
       data0BeforeDatatypesChange,
     );
+    expect(result.current.getItems("/topic.an_array[0]", message)).toEqual([
+      { path: "/topic.an_array[0]", value: 5 },
+    ]);
   });
 
   it("clears the cache only when relevant global variables change", async () => {

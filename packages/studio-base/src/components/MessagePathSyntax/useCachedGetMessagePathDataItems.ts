@@ -27,6 +27,7 @@ import { MessageEvent, Topic } from "@foxglove/studio-base/players/types";
 import { RosDatatypes } from "@foxglove/studio-base/types/RosDatatypes";
 import {
   enumValuesByDatatypeAndField,
+  extractTypeFromStudioEnumAnnotation,
   getTopicsByTopicName,
 } from "@foxglove/studio-base/util/selectors";
 
@@ -71,6 +72,54 @@ export function useCachedGetMessagePathDataItems(
     [key: string]: RosPath;
   }>(unmemoizedFilledInPaths);
 
+  // Filter down topics and datatypes to only the ones we need to process the requested paths, so
+  // our result can be dependent on the relevant topics only. Without this, adding topics/datatypes
+  // dynamically would result in panels clearing out when their message reducers change as a result
+  // of the change in topics/datatypes identity from the player.
+  const unmemoizedRelevantTopics = useMemo(() => {
+    const topicsByName = getTopicsByTopicName(providerTopics);
+    const seenNames = new Set<string>();
+    const result: Topic[] = [];
+    for (const path of memoizedPaths) {
+      const rosPath = parseRosPath(path);
+      if (rosPath) {
+        if (seenNames.has(rosPath.topicName)) {
+          continue;
+        }
+        seenNames.add(rosPath.topicName);
+        const topic = topicsByName[rosPath.topicName];
+        if (topic) {
+          result.push(topic);
+        }
+      }
+    }
+    return result;
+  }, [providerTopics, memoizedPaths]);
+  const relevantTopics = useDeepMemo(unmemoizedRelevantTopics);
+
+  const unmemoizedRelevantDatatypes = useMemo(() => {
+    const relevantDatatypes: RosDatatypes = new Map();
+    function addRelevantDatatype(datatypeName: string) {
+      const type = datatypes.get(datatypeName);
+      if (type) {
+        relevantDatatypes.set(datatypeName, type);
+        for (const field of type.definitions) {
+          if (
+            field.isComplex === true ||
+            extractTypeFromStudioEnumAnnotation(field.name) != undefined
+          ) {
+            addRelevantDatatype(field.type);
+          }
+        }
+      }
+    }
+    for (const { datatype } of relevantTopics.values()) {
+      addRelevantDatatype(datatype);
+    }
+    return relevantDatatypes;
+  }, [datatypes, relevantTopics]);
+  const relevantDatatypes = useDeepMemo(unmemoizedRelevantDatatypes);
+
   // Cache MessagePathDataItem arrays by Message. We need to clear out this cache whenever
   // the topics or datatypes change, since that's what getMessagePathDataItems
   // depends on, outside of the message+path.
@@ -80,7 +129,7 @@ export function useCachedGetMessagePathDataItems(
       weakMap: WeakMap<MessageEvent<unknown>, MessagePathDataItem[] | undefined>;
     };
   }>({});
-  if (useChangeDetector([providerTopics, datatypes], { initiallyTrue: true })) {
+  if (useChangeDetector([relevantTopics, relevantDatatypes], { initiallyTrue: true })) {
     cachesByPath.current = {};
   }
   // When the filled in paths changed, then that means that either the path string changed, or a
@@ -113,8 +162,8 @@ export function useCachedGetMessagePathDataItems(
         const messagePathDataItems = getMessagePathDataItems(
           message,
           filledInPath,
-          providerTopics,
-          datatypes,
+          relevantTopics,
+          relevantDatatypes,
         );
         weakMap.set(message, messagePathDataItems);
         return messagePathDataItems;
@@ -122,7 +171,7 @@ export function useCachedGetMessagePathDataItems(
       const messagePathDataItems = weakMap.get(message);
       return messagePathDataItems;
     },
-    [datatypes, memoizedFilledInPaths, memoizedPaths, providerTopics],
+    [relevantDatatypes, memoizedFilledInPaths, memoizedPaths, relevantTopics],
   );
 }
 

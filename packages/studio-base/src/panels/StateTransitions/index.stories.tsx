@@ -51,7 +51,7 @@ const fixture = {
     Object.entries({
       "msgs/SystemState": {
         definitions: [
-          { type: "std_msgs/Header", name: "header", isArray: false },
+          { type: "std_msgs/Header", name: "header", isArray: false, isComplex: true },
           { type: "int8", name: "UNKNOWN", isConstant: true, value: -1 },
           { type: "int8", name: "OFF", isConstant: true, value: 1 },
           { type: "int8", name: "BOOTING", isConstant: true, value: 2 },
