@@ -30,6 +30,9 @@ import protobufDefinitionsToDatatypes, { stripLeadingDot } from "./protobufDefin
 
 const log = Log.getLogger(__dirname);
 
+/** Suppress warnings about messages on unknown subscriptions if the susbscription was recently canceled. */
+const SUBSCRIPTION_WARNING_SUPPRESSION_MS = 2000;
+
 const CAPABILITIES = [PlayerCapabilities.advertise];
 
 const ZERO_TIME = Object.freeze({ sec: 0, nsec: 0 });
@@ -94,6 +97,8 @@ export default class FoxgloveWebSocketPlayer implements Player {
   private _resolvedSubscriptionsById = new Map<SubscriptionId, ParsedChannel>();
   private _channelsByTopic = new Map<string, ParsedChannel>();
   private _channelsById = new Map<ChannelId, ParsedChannel>();
+  private _unsupportedChannelIds = new Set<ChannelId>();
+  private _recentlyCanceledSubscriptions = new Set<SubscriptionId>();
 
   constructor({
     url,
@@ -176,6 +181,7 @@ export default class FoxgloveWebSocketPlayer implements Player {
         try {
           parsedChannel = parseChannel(channel);
         } catch (error) {
+          this._unsupportedChannelIds.add(channel.id);
           this._problems.addProblem(`schema:${channel.topic}`, {
             severity: "error",
             message: `Failed to parse channel schema on ${channel.topic}`,
@@ -205,11 +211,13 @@ export default class FoxgloveWebSocketPlayer implements Player {
       for (const id of removedChannels) {
         const chanInfo = this._channelsById.get(id);
         if (!chanInfo) {
-          this._problems.addProblem(`unadvertise:${id}`, {
-            severity: "error",
-            message: `Server unadvertised channel ${id} that was not advertised`,
-          });
-          this._emitState();
+          if (!this._unsupportedChannelIds.delete(id)) {
+            this._problems.addProblem(`unadvertise:${id}`, {
+              severity: "error",
+              message: `Server unadvertised channel ${id} that was not advertised`,
+            });
+            this._emitState();
+          }
           continue;
         }
         for (const [subId, { channel }] of this._resolvedSubscriptionsById) {
@@ -234,7 +242,15 @@ export default class FoxgloveWebSocketPlayer implements Player {
       }
       const chanInfo = this._resolvedSubscriptionsById.get(subscriptionId);
       if (!chanInfo) {
-        throw new Error(`Received message on unknown subscription ${subscriptionId}`);
+        const wasRecentlyCanceled = this._recentlyCanceledSubscriptions.has(subscriptionId);
+        if (!wasRecentlyCanceled) {
+          this._problems.addProblem(`message-missing-subscription:${subscriptionId}`, {
+            severity: "warn",
+            message: `Received message on unknown subscription id: ${subscriptionId}. This might be a WebSocket server bug.`,
+          });
+          this._emitState();
+        }
+        return;
       }
 
       try {
@@ -363,6 +379,11 @@ export default class FoxgloveWebSocketPlayer implements Player {
         this._client.unsubscribe(subId); // TODO: batch?
         this._resolvedSubscriptionsByTopic.delete(topic);
         this._resolvedSubscriptionsById.delete(subId);
+        this._recentlyCanceledSubscriptions.add(subId);
+        setTimeout(
+          () => this._recentlyCanceledSubscriptions.delete(subId),
+          SUBSCRIPTION_WARNING_SUPPRESSION_MS,
+        );
       }
     }
     for (const topic of this._unresolvedSubscriptions) {
