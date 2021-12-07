@@ -213,11 +213,14 @@ function PanelActionsDropdown({
         subMenuProps: {
           items: [{ key: "dummy" }],
           calloutProps: {
+            // https://github.com/foxglove/studio/issues/2205
+            // https://github.com/microsoft/fluentui/issues/18839
+            // Lie to the callout and tell it the height of the content so that it keeps the top
+            // edge anchored as the user searches panels and the PanelList changes height.
+            calloutMaxHeight: 310,
+            finalHeight: 310,
             styles: {
-              // Work around Callout not repositioning when PanelList height changes:
-              // https://github.com/foxglove/studio/issues/2205
-              // https://github.com/microsoft/fluentui/issues/18839
-              calloutMain: { height: "100%" },
+              calloutMain: { overflowY: "auto !important" },
             },
           },
           onRenderMenuList: () => (
