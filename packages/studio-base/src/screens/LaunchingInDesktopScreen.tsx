@@ -22,9 +22,32 @@ export function LaunchingInDesktopScreen(): ReactElement {
 
   useEffect(() => {
     const desktopURL = new URL("foxglove://open");
-    cleanWebURL.searchParams.forEach((k, v) => {
+    cleanWebURL.searchParams.forEach((v, k) => {
       if (k && v) {
         desktopURL.searchParams.set(k, v);
+
+        // Temporarily send both sets of params until desktop app is updated to
+        // use new ds.* parameters.
+        switch (k) {
+          case "ds":
+            desktopURL.searchParams.set("type", v);
+            break;
+          case "ds.deviceId":
+            desktopURL.searchParams.set("deviceId", v);
+            break;
+          case "ds.end":
+            desktopURL.searchParams.set("end", v);
+            break;
+          case "ds.start":
+            desktopURL.searchParams.set("start", v);
+            break;
+          case "ds.url":
+            desktopURL.searchParams.set("url", v);
+            break;
+          case "time":
+            desktopURL.searchParams.set("seekTo", v);
+            break;
+        }
       }
     });
 

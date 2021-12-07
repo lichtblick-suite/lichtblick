@@ -84,7 +84,9 @@ function AppContent(props: AppProps): JSX.Element {
 
 export default function App(props: AppProps): JSX.Element {
   const isDesktop = isDesktopApp();
-  const [globalLaunchPreference] = useAppConfigurationValue<string>(AppSetting.LAUNCH_PREFERENCE);
+  const [globalLaunchPreference = "unknown"] = useAppConfigurationValue<string>(
+    AppSetting.LAUNCH_PREFERENCE,
+  );
   const [sessionLaunchPreference] = useSessionStorageValue(AppSetting.LAUNCH_PREFERENCE);
 
   // Session preferences take priority over global preferences.
@@ -96,7 +98,7 @@ export default function App(props: AppProps): JSX.Element {
     const url = new URL(window.location.href);
     const hasParams = Array.from(url.searchParams.entries()).length > 0;
     // Ask the user in which environment they want to open this session.
-    if (activePreference == undefined && hasParams) {
+    if (activePreference === "unknown" && hasParams) {
       return <LaunchPreferenceScreen />;
     } else if (activePreference === "desktop" && hasParams) {
       return <LaunchingInDesktopScreen />;
