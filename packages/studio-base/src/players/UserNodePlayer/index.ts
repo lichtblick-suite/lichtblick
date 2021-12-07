@@ -583,7 +583,9 @@ export default class UserNodePlayer implements Player {
     const transformWorker = this._getTransformWorker();
     const rosLib: string = await transformWorker.send("generateRosLib", {
       topics,
-      datatypes,
+      // Include basic datatypes along with any custom datatypes.
+      // Custom datatypes appear as the second array items to override any basicDatatype items
+      datatypes: new Map([...basicDatatypes, ...datatypes]),
     });
     this._setRosLib(rosLib, datatypes);
 
