@@ -19,13 +19,10 @@ export class TransformTree {
   addTransform(frameId: string, parentFrameId: string, time: Time, transform: Transform): void {
     const frame = this.getOrCreateFrame(frameId);
     const curParentFrame = frame.parent();
-    if (curParentFrame == undefined) {
-      // This frame was previously unparented but now we know its parent. Update it
+    if (curParentFrame == undefined || curParentFrame.id !== parentFrameId) {
+      // This frame was previously unparented but now we know its parent, or we
+      // are reparenting this frame
       frame.setParent(this.getOrCreateFrame(parentFrameId));
-    } else if (curParentFrame.id !== parentFrameId) {
-      throw new Error(
-        `Received "${frameId}"->"${parentFrameId}" transform but parent "${curParentFrame.id}" already exists`,
-      );
     }
 
     frame.addTransform(time, transform);

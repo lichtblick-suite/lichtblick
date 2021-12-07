@@ -84,9 +84,6 @@ describe("TransformTree", () => {
     expect(output.position).toEqual(EMPTY_POSE.position);
     expect(output.orientation).toEqual(EMPTY_POSE.orientation);
 
-    // Can't reparent base_link -> map after base_link -> odom already exists
-    expect(() => tree.addTransform("base_link", "map", TIME_ZERO, odom_T_baseLink)).toThrow();
-
     // This demonstrates that transforms are stored by reference, not by value.
     // Although this works, it's better practice to call addTransform() again
     // with the same timestamp and a new transform
@@ -114,6 +111,35 @@ describe("TransformTree", () => {
     expect(tree.apply(output, a, "base_link", "map", TIME_ZERO)).toBeDefined();
     expect(output.position).toEqual({ x: -109, y: -218, z: 267 });
     expect(output.orientation).toEqual({ x: 0, y: 1, z: 0, w: 0 });
+  });
+
+  it("reparents", () => {
+    const T2 = { sec: 2, nsec: 0 };
+
+    const tree = new TransformTree();
+    const map_T_odom = new Transform([1, 2, 3], [0, 0, 0, 1]);
+    const odom_T_baseLink = new Transform([4, 5, 6], [0, 0, 0, 1]);
+    const world_T_baseLink = new Transform([7, 8, 9], [0, 0, 0, 1]);
+
+    const output = emptyPose();
+
+    tree.addTransform("base_link", "odom", TIME_ZERO, odom_T_baseLink);
+    tree.addTransform("odom", "map", TIME_ZERO, map_T_odom);
+
+    expect(tree.apply(output, emptyPose(), "odom", "base_link", TIME_ZERO)).toBeDefined();
+
+    // Reparent
+    tree.addTransform("base_link", "world", T2, world_T_baseLink);
+
+    // This will now fail
+    expect(tree.apply(output, emptyPose(), "odom", "base_link", TIME_ZERO)).toBeUndefined();
+    expect(tree.apply(output, emptyPose(), "map", "base_link", TIME_ZERO)).toBeUndefined();
+
+    // Too far in the past
+    expect(tree.apply(output, emptyPose(), "world", "base_link", TIME_ZERO)).toBeUndefined();
+
+    // This works
+    expect(tree.apply(output, emptyPose(), "world", "base_link", T2)).toBeDefined();
   });
 
   it("Clone", () => {

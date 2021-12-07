@@ -74,13 +74,11 @@ export class CoordinateFrame {
 
   /**
    * Set the parent frame for this frame. If the parent frame is already set to
-   * a different frame, an error is thrown.
+   * a different frame, the transform history is cleared.
    */
   setParent(parent: CoordinateFrame): void {
     if (this._parent && this._parent !== parent) {
-      throw new Error(
-        `Cannot reparent frame "${this.id}" from "${this._parent.id}" to "${parent.id}"`,
-      );
+      this._transforms.clear();
     }
     this._parent = parent;
   }
@@ -236,28 +234,28 @@ export class CoordinateFrame {
       out.orientation = input.orientation;
       return out;
     } else if (srcFrame.findAncestor(this.id)) {
-      // This frame is a parent of the source frame
+      // This frame is an ancestor of the source frame
       return CoordinateFrame.Apply(out, input, this, srcFrame, false, time, maxDelta)
         ? out
         : undefined;
     } else if (this.findAncestor(srcFrame.id)) {
-      // This frame is a child of the source frame
+      // This frame is a descendant of the source frame
       return CoordinateFrame.Apply(out, input, srcFrame, this, true, time, maxDelta)
         ? out
         : undefined;
     }
 
-    // Check if the two frames share a common parent
+    // Check if the two frames share a common ancestor
     let curSrcFrame: CoordinateFrame | undefined = srcFrame;
     while (curSrcFrame) {
-      const commonParent = this.findAncestor(curSrcFrame.id);
-      if (commonParent) {
-        // Common parent found. Apply transforms from the source frame to the common parent,
-        // then apply transforms from the common parent to this frame
-        if (!CoordinateFrame.Apply(out, input, commonParent, srcFrame, false, time, maxDelta)) {
+      const commonAncestor = this.findAncestor(curSrcFrame.id);
+      if (commonAncestor) {
+        // Common ancestor found. Apply transforms from the source frame to the common ancestor,
+        // then apply transforms from the common ancestor to this frame
+        if (!CoordinateFrame.Apply(out, input, commonAncestor, srcFrame, false, time, maxDelta)) {
           return undefined;
         }
-        return CoordinateFrame.Apply(out, out, commonParent, this, true, time, maxDelta)
+        return CoordinateFrame.Apply(out, out, commonAncestor, this, true, time, maxDelta)
           ? out
           : undefined;
       }
