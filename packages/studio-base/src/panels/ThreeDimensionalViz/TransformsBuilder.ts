@@ -84,9 +84,9 @@ const originAxes: Axis[] = [
 
 const getTransformedAxisArrowMarker = (
   id: string,
-  frame: CoordinateFrame,
+  srcFrame: CoordinateFrame,
   axis: Axis,
-  rootFrame: CoordinateFrame,
+  renderFrame: CoordinateFrame,
   time: Time,
 ) => {
   const { unitVector, id: axisId } = axis;
@@ -101,7 +101,7 @@ const getTransformedAxisArrowMarker = (
     },
   };
 
-  rootFrame.apply(pose, pose, frame, time);
+  renderFrame.apply(pose, pose, srcFrame, time);
 
   return {
     ...axis,
@@ -113,11 +113,13 @@ const getTransformedAxisArrowMarker = (
 
 const getAxesArrowMarkers = (
   id: string,
-  frame: CoordinateFrame,
-  rootFrame: CoordinateFrame,
+  srcFrame: CoordinateFrame,
+  renderFrame: CoordinateFrame,
   time: Time,
 ): ArrowMarker[] => {
-  return originAxes.map((axis) => getTransformedAxisArrowMarker(id, frame, axis, rootFrame, time));
+  return originAxes.map((axis) =>
+    getTransformedAxisArrowMarker(id, srcFrame, axis, renderFrame, time),
+  );
 };
 
 const getAxisTextMarker = (id: string, pose: MutablePose): Marker => {
@@ -152,11 +154,11 @@ const UNUSED_QUAT = { x: 0, y: 0, z: 0, w: 1 };
 // Exported for tests
 export const getArrowToParentMarker = (
   id: string,
-  frame: CoordinateFrame,
-  rootFrame: CoordinateFrame,
+  srcFrame: CoordinateFrame,
+  renderFrame: CoordinateFrame,
   time: Time,
 ): ArrowMarker | undefined => {
-  const parent = frame.parent();
+  const parent = srcFrame.parent();
   if (!parent) {
     return undefined;
   }
@@ -171,8 +173,8 @@ export const getArrowToParentMarker = (
   };
 
   if (
-    !rootFrame.apply(childPose, childPose, frame, time) ||
-    !rootFrame.apply(parentPose, parentPose, parent, time)
+    !renderFrame.apply(childPose, childPose, srcFrame, time) ||
+    !renderFrame.apply(parentPose, parentPose, parent, time)
   ) {
     return undefined;
   }
@@ -200,30 +202,30 @@ export const getArrowToParentMarker = (
 
 export default class TransformsBuilder implements MarkerProvider {
   transforms?: TransformTree;
-  rootTransformID?: string;
+  renderFrameId?: string;
   selections: string[] = [];
 
-  setTransforms = (transforms: TransformTree, rootTransformID: string | undefined): void => {
+  setTransforms = (transforms: TransformTree, renderFrameId: string | undefined): void => {
     this.transforms = transforms;
-    this.rootTransformID = rootTransformID;
+    this.renderFrameId = renderFrameId;
   };
 
   addMarkersForTransform(
     add: MarkerCollector,
     id: string,
-    frame: CoordinateFrame,
-    rootFrame: CoordinateFrame,
+    srcFrame: CoordinateFrame,
+    renderFrame: CoordinateFrame,
     time: Time,
   ): void {
     setIdentityPose(tempPose);
 
-    // If rootFrame_T_frame is invalid at the given time, don't draw anything
-    if (!rootFrame.apply(tempPose, tempPose, frame, time)) {
+    // If renderFrame_T_srcFrame is invalid at the given time, don't draw anything
+    if (!renderFrame.apply(tempPose, tempPose, srcFrame, time)) {
       return;
     }
 
-    const markersForTransform: Marker[] = getAxesArrowMarkers(id, frame, rootFrame, time);
-    const arrowMarker = getArrowToParentMarker(id, frame, rootFrame, time);
+    const markersForTransform: Marker[] = getAxesArrowMarkers(id, srcFrame, renderFrame, time);
+    const arrowMarker = getArrowToParentMarker(id, srcFrame, renderFrame, time);
     if (arrowMarker) {
       markersForTransform.push(arrowMarker);
     }
@@ -249,14 +251,14 @@ export default class TransformsBuilder implements MarkerProvider {
 
   renderMarkers = (add: MarkerCollector, time: Time): void => {
     const { selections, transforms } = this;
-    if (transforms == undefined || this.rootTransformID == undefined) {
+    if (transforms == undefined || this.renderFrameId == undefined) {
       return;
     }
     for (const key of selections) {
-      const frame = transforms.frame(key);
-      const rootFrame = transforms.frame(this.rootTransformID);
-      if (frame && rootFrame) {
-        this.addMarkersForTransform(add, key, frame, rootFrame, time);
+      const srcFrame = transforms.frame(key);
+      const renderFrame = transforms.frame(this.renderFrameId);
+      if (srcFrame && renderFrame) {
+        this.addMarkersForTransform(add, key, srcFrame, renderFrame, time);
       }
     }
   };

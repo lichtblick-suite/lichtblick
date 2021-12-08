@@ -64,26 +64,26 @@ export default class UrdfBuilder implements MarkerProvider {
   private _settings: UrdfSettings = {};
   private _urdfData?: string;
   private _transforms?: TransformTree;
-  private _rootTransformID?: string;
+  private _renderFrameId?: string;
 
   constructor() {}
 
   renderMarkers = (add: MarkerCollector, time: Time): void => {
-    if (this._visible && this._transforms && this._rootTransformID) {
+    if (this._visible && this._transforms && this._renderFrameId) {
       for (const box of this._boxes) {
-        updatePose(box, this._transforms, this._rootTransformID, time);
+        updatePose(box, this._transforms, this._renderFrameId, time);
         add.cube(box);
       }
       for (const sphere of this._spheres) {
-        updatePose(sphere, this._transforms, this._rootTransformID, time);
+        updatePose(sphere, this._transforms, this._renderFrameId, time);
         add.sphere(sphere);
       }
       for (const cylinder of this._cylinders) {
-        updatePose(cylinder, this._transforms, this._rootTransformID, time);
+        updatePose(cylinder, this._transforms, this._renderFrameId, time);
         add.cylinder(cylinder);
       }
       for (const mesh of this._meshes) {
-        updatePose(mesh, this._transforms, this._rootTransformID, time);
+        updatePose(mesh, this._transforms, this._renderFrameId, time);
         add.mesh(mesh);
       }
     }
@@ -94,12 +94,12 @@ export default class UrdfBuilder implements MarkerProvider {
     this._visible = isVisible;
   }
 
-  setTransforms = (transforms: TransformTree, rootTransformID: string | undefined): void => {
-    if (transforms === this._transforms && rootTransformID === this._rootTransformID) {
+  setTransforms = (transforms: TransformTree, renderFrameId: string | undefined): void => {
+    if (transforms === this._transforms && renderFrameId === this._renderFrameId) {
       return;
     }
     this._transforms = transforms;
-    this._rootTransformID = rootTransformID;
+    this._renderFrameId = renderFrameId;
     this.update();
   };
 
@@ -189,12 +189,12 @@ export default class UrdfBuilder implements MarkerProvider {
   }
 
   private createMarkers(urdf: UrdfRobot): void {
-    if (!this._transforms || !this._rootTransformID) {
+    if (!this._transforms || !this._renderFrameId) {
       return;
     }
 
     const tfs = this._transforms;
-    const rootTf = this._rootTransformID;
+    const renderFrameId = this._renderFrameId;
     const ns = `urdf-${urdf.name}`;
 
     for (const link of urdf.links.values()) {
@@ -203,14 +203,14 @@ export default class UrdfBuilder implements MarkerProvider {
       let i = 0;
       for (const visual of link.visuals) {
         const id = `${link.name}-visual${i++}-${visual.geometry.geometryType}`;
-        this.addMarker(ns, id, frame_id, tfs, rootTf, visual, urdf);
+        this.addMarker(ns, id, frame_id, tfs, renderFrameId, visual, urdf);
       }
 
       if (link.visuals.length === 0 && link.colliders.length > 0) {
         // If there are no visuals, but there are colliders, render those instead
         for (const collider of link.colliders) {
           const id = `${link.name}-collider${i++}-${collider.geometry.geometryType}`;
-          this.addMarker(ns, id, frame_id, tfs, rootTf, collider, urdf);
+          this.addMarker(ns, id, frame_id, tfs, renderFrameId, collider, urdf);
         }
       }
     }
@@ -221,7 +221,7 @@ export default class UrdfBuilder implements MarkerProvider {
     id: string,
     frame_id: string,
     tfs: TransformTree,
-    rootTf: string,
+    renderFrameId: string,
     visual: UrdfVisual,
     robot: UrdfRobot,
   ): void {
@@ -229,7 +229,7 @@ export default class UrdfBuilder implements MarkerProvider {
       position: visual.origin.xyz,
       orientation: eulerToQuaternion(visual.origin.rpy),
     };
-    const pose = tfs.apply(emptyPose(), localPose, rootTf, frame_id, TIME_ZERO);
+    const pose = tfs.apply(emptyPose(), localPose, renderFrameId, frame_id, TIME_ZERO);
     if (!pose) {
       return;
     }
@@ -408,12 +408,12 @@ function getColor(visual: UrdfVisual, robot: UrdfRobot): Color {
 function updatePose(
   marker: Marker,
   transforms: TransformTree,
-  rootFrameId: string,
+  frameId: string,
   currentTime: Time,
 ): boolean {
-  const frame = transforms.frame(marker.header.frame_id);
-  const rootFrame = transforms.frame(rootFrameId);
-  if (!frame || !rootFrame) {
+  const srcFrame = transforms.frame(marker.header.frame_id);
+  const frame = transforms.frame(frameId);
+  if (!srcFrame || !frame) {
     return false;
   }
 
@@ -421,5 +421,5 @@ function updatePose(
   const markerWithOrigPose = marker as Marker & { origPose?: MutablePose };
   markerWithOrigPose.origPose ??= marker.pose;
 
-  return rootFrame.apply(marker.pose, markerWithOrigPose.origPose, frame, currentTime) != undefined;
+  return frame.apply(marker.pose, markerWithOrigPose.origPose, srcFrame, currentTime) != undefined;
 }

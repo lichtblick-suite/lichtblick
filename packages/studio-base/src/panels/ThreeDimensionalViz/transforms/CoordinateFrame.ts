@@ -370,27 +370,11 @@ export class CoordinateFrame {
       return false;
     }
     if (invert) {
-      // Remove the translation component, leaving only a rotation matrix
-      const x = tempMatrix[12];
-      const y = tempMatrix[13];
-      const z = tempMatrix[14];
-      tempMatrix[12] = 0;
-      tempMatrix[13] = 0;
-      tempMatrix[14] = 0;
-
-      // The transpose of a rotation matrix is its inverse
-      mat4.transpose(tempMatrix, tempMatrix);
-
-      // The negatation of the translation is its inverse
-      tempMatrix[12] = -x;
-      tempMatrix[13] = -y;
-      tempMatrix[14] = -z;
+      mat4.invert(tempMatrix, tempMatrix);
     }
 
-    tempTransform.setPose(input);
-    mat4.multiply(tempMatrix, tempMatrix, tempTransform.matrix());
-    tempTransform.setMatrix(tempMatrix);
-    tempTransform.toPose(out);
+    mat4.multiply(tempMatrix, tempMatrix, tempTransform.setPose(input).matrix());
+    tempTransform.setMatrix(tempMatrix).toPose(out);
     return true;
   }
 }

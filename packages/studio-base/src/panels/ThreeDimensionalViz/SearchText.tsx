@@ -148,7 +148,7 @@ export const useSearchText = (): SearchTextProps => {
 type SearchTextComponentProps = SearchTextProps & {
   onCameraStateChange: (arg0: CameraState) => void;
   cameraState: CameraState;
-  rootTf?: string;
+  renderFrameId?: string;
   currentTime: Time;
   transforms: TransformTree;
 };
@@ -158,7 +158,7 @@ export const useSearchMatches = ({
   cameraState,
   currentMatch,
   onCameraStateChange,
-  rootTf,
+  renderFrameId,
   currentTime,
   searchTextOpen,
   transforms,
@@ -166,7 +166,7 @@ export const useSearchMatches = ({
   cameraState: CameraState;
   currentMatch?: GLTextMarker;
   onCameraStateChange: (arg0: CameraState) => void;
-  rootTf?: string;
+  renderFrameId?: string;
   currentTime: Time;
   searchTextOpen: boolean;
   transforms: TransformTree;
@@ -174,17 +174,15 @@ export const useSearchMatches = ({
   const hasCurrentMatchChanged = useDeepChangeDetector([currentMatch], { initiallyTrue: true });
 
   useEffect(() => {
-    if (!currentMatch || !searchTextOpen || !rootTf || !hasCurrentMatchChanged) {
+    if (!currentMatch || !searchTextOpen || !renderFrameId || !hasCurrentMatchChanged) {
       return;
     }
 
-    const { header, pose } = currentMatch;
-
     const output = transforms.apply(
       { position: { x: 0, y: 0, z: 0 }, orientation: { x: 0, y: 0, z: 0, w: 0 } },
-      pose,
-      rootTf,
-      header.frame_id,
+      currentMatch.pose,
+      renderFrameId,
+      currentMatch.header.frame_id,
       currentTime,
     );
     if (!output) {
@@ -209,7 +207,7 @@ export const useSearchMatches = ({
     currentTime,
     hasCurrentMatchChanged,
     onCameraStateChange,
-    rootTf,
+    renderFrameId,
     searchTextOpen,
     transforms,
   ]);
@@ -235,7 +233,7 @@ const SearchText = React.memo<SearchTextComponentProps>(function SearchText({
   onCameraStateChange,
   cameraState,
   transforms,
-  rootTf,
+  renderFrameId,
   currentTime,
 }: SearchTextComponentProps) {
   const theme = useTheme();
@@ -264,7 +262,7 @@ const SearchText = React.memo<SearchTextComponentProps>(function SearchText({
     cameraState,
     currentMatch,
     onCameraStateChange,
-    rootTf,
+    renderFrameId,
     currentTime,
     searchTextOpen,
     transforms,

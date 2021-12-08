@@ -114,7 +114,6 @@ function BaseRenderer(props: Props): JSX.Element {
     followTf,
     followOrientation,
     transforms,
-    time: currentTime,
   });
 
   const onSetSubscriptions = useCallback(

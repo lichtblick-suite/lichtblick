@@ -40,7 +40,7 @@ type Props = LayoutToolbarSharedProps &
     measuringElRef: { current: MeasuringTool | ReactNull };
     onToggleCameraMode: () => void;
     onToggleDebug: () => void;
-    rootTf?: string;
+    renderFrameId?: string;
     currentTime: Time;
     selectedObject?: MouseEventObject;
     setInteractionsTabType: (arg0?: TabType) => void;
@@ -63,7 +63,7 @@ function LayoutToolbar({
   onFollowChange,
   onToggleCameraMode,
   onToggleDebug,
-  rootTf,
+  renderFrameId,
   searchInputRef,
   searchText,
   searchTextMatches,
@@ -119,7 +119,7 @@ function LayoutToolbar({
           onCameraStateChange={onCameraStateChange}
           cameraState={cameraState}
           transforms={transforms}
-          rootTf={rootTf}
+          renderFrameId={renderFrameId}
           currentTime={currentTime}
         />
         <FollowTFControl

@@ -24,13 +24,11 @@ import {
   cameraStateSelectors,
   DEFAULT_CAMERA_STATE,
 } from "@foxglove/regl-worldview";
-import { Time } from "@foxglove/rostime";
 import { GlobalVariables } from "@foxglove/studio-base/hooks/useGlobalVariables";
 import { InteractionData } from "@foxglove/studio-base/panels/ThreeDimensionalViz/Interactions/types";
 import { LinkedGlobalVariables } from "@foxglove/studio-base/panels/ThreeDimensionalViz/Interactions/useLinkedGlobalVariables";
 import { TransformTree } from "@foxglove/studio-base/panels/ThreeDimensionalViz/transforms";
-import { InstancedLineListMarker, MutablePose } from "@foxglove/studio-base/types/Messages";
-import { emptyPose } from "@foxglove/studio-base/util/Pose";
+import { InstancedLineListMarker } from "@foxglove/studio-base/types/Messages";
 
 export type TargetPose = { target: Vec3; targetOrientation: Vec4 };
 
@@ -45,21 +43,12 @@ function getZoomDistanceFromURLParam(): number | undefined {
 }
 
 // Get the camera target position and orientation
-export function getTargetPose(
+function getTargetPose(
   followTf: string | false | undefined,
   transforms: TransformTree,
-  time: Time,
 ): TargetPose | undefined {
-  if (typeof followTf === "string" && followTf.length > 0) {
-    const frame = transforms.frame(followTf);
-    if (frame) {
-      const pose: MutablePose | undefined = emptyPose();
-      if (frame.root().apply(pose, pose, frame, time)) {
-        const p = pose.position;
-        const o = pose.orientation;
-        return { target: [p.x, p.y, p.z], targetOrientation: [o.x, o.y, o.z, o.w] };
-      }
-    }
+  if (typeof followTf === "string" && transforms.hasFrame(followTf)) {
+    return { target: [0, 0, 0], targetOrientation: [0, 0, 0, 1] };
   }
   return undefined;
 }
@@ -69,16 +58,14 @@ export function useTransformedCameraState({
   followTf,
   followOrientation,
   transforms,
-  time,
 }: {
   configCameraState: Partial<CameraState>;
   followTf?: string | false;
   followOrientation: boolean;
   transforms: TransformTree;
-  time: Time;
 }): { transformedCameraState: CameraState; targetPose?: TargetPose } {
   const transformedCameraState = { ...configCameraState };
-  const targetPose = getTargetPose(followTf, transforms, time);
+  const targetPose = getTargetPose(followTf, transforms);
   // Store last seen target pose because the target may become available/unavailable over time as
   // the player changes, and we want to avoid moving the camera when it disappears.
   const lastTargetPoseRef = useRef<TargetPose | undefined>();
@@ -90,7 +77,7 @@ export function useTransformedCameraState({
     if (followOrientation) {
       transformedCameraState.targetOrientation = targetPose.targetOrientation;
     }
-  } else if (typeof followTf === "string" && followTf.length > 0 && lastTargetPose) {
+  } else if (typeof followTf === "string" && lastTargetPose) {
     // If follow is enabled but no target is available (such as when seeking), keep the camera
     // position the same as it would have been by reusing the last seen target pose.
     transformedCameraState.target = lastTargetPose.target;

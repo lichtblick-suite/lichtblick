@@ -78,7 +78,7 @@ export type ErrorDetails = { frameIds: Set<string> };
 export type SceneErrors = {
   topicsMissingTransforms: Map<string, ErrorDetails>;
   topicsWithError: Map<string, string>;
-  rootTransformID: string;
+  renderFrameId: string;
 };
 
 type SelectedNamespacesByTopic = {
@@ -92,7 +92,7 @@ type MarkerMatchersByTopic = {
 };
 
 const missingTransformMessage = (
-  rootTransformId: string,
+  renderFrameId: string,
   error: ErrorDetails,
   transforms: TransformTree,
 ): string => {
@@ -101,7 +101,7 @@ const missingTransformMessage = (
   }
   const frameIds = [...error.frameIds].sort().join(`>, <`);
   const s = error.frameIds.size > 1 ? "s" : ""; // for plural
-  const msg = `missing transform${s} from frame${s} <${frameIds}> to frame <${rootTransformId}>`;
+  const msg = `missing transform${s} from frame${s} <${frameIds}> to frame <${renderFrameId}>`;
   if (transforms.frames().size === 0) {
     return msg + ". No transforms found";
   }
@@ -124,7 +124,7 @@ export function getSceneErrorsByTopic(
   }
   // errors related to missing transforms
   for (const [topic, error] of sceneErrors.topicsMissingTransforms) {
-    addError(topic, missingTransformMessage(sceneErrors.rootTransformID, error, transforms));
+    addError(topic, missingTransformMessage(sceneErrors.renderFrameId, error, transforms));
   }
   return res;
 }
@@ -174,16 +174,16 @@ export function filterOutSupersededMessages<T extends Pick<MessageEvent<unknown>
 function computeMarkerPose(
   marker: Marker,
   transforms: TransformTree,
-  rootFrameId: string,
+  renderFrameId: string,
   currentTime: Time,
 ): MutablePose | undefined {
-  const frame = transforms.frame(marker.header.frame_id);
-  const rootFrame = transforms.frame(rootFrameId);
-  if (!frame || !rootFrame) {
+  const srcFrame = transforms.frame(marker.header.frame_id);
+  const frame = transforms.frame(renderFrameId);
+  if (!srcFrame || !frame) {
     return undefined;
   }
   const time = marker.frame_locked ? currentTime : marker.header.stamp;
-  return rootFrame.apply(emptyPose(), marker.pose, frame, time);
+  return frame.apply(emptyPose(), marker.pose, srcFrame, time);
 }
 
 export default class SceneBuilder implements MarkerProvider {
@@ -192,12 +192,12 @@ export default class SceneBuilder implements MarkerProvider {
   } = {};
   markers: Marker[] = [];
   transforms?: TransformTree;
-  rootTransformID?: string;
+  renderFrameId?: string;
   frame?: Frame;
   // TODO(JP): Get rid of these two different variables `errors` and `errorsByTopic` which we
   // have to keep in sync.
   errors: SceneErrors = {
-    rootTransformID: "",
+    renderFrameId: "",
     topicsMissingTransforms: new Map(),
     topicsWithError: new Map(),
   };
@@ -248,11 +248,11 @@ export default class SceneBuilder implements MarkerProvider {
     this._hooks = hooks;
   }
 
-  setTransforms = (transforms: TransformTree, rootTransformID: string | undefined): void => {
+  setTransforms = (transforms: TransformTree, renderFrameId: string | undefined): void => {
     this.transforms = transforms;
-    this.rootTransformID = rootTransformID;
-    if (rootTransformID != undefined) {
-      this.errors.rootTransformID = rootTransformID;
+    this.renderFrameId = renderFrameId;
+    if (renderFrameId != undefined) {
+      this.errors.renderFrameId = renderFrameId;
     }
   };
 
@@ -268,7 +268,7 @@ export default class SceneBuilder implements MarkerProvider {
   setPlayerId(playerId: string): void {
     if (this._playerId !== playerId) {
       this.errors = {
-        rootTransformID: "",
+        renderFrameId: "",
         topicsMissingTransforms: new Map(),
         topicsWithError: new Map(),
       };
@@ -633,8 +633,8 @@ export default class SceneBuilder implements MarkerProvider {
     type: number,
     originalMessage?: unknown,
   ): void => {
-    if (this.rootTransformID == undefined) {
-      throw new Error("missing rootTransformId");
+    if (this.renderFrameId == undefined) {
+      throw new Error("No camera frame selected");
     }
 
     // some callers of _consumeNonMarkerMessage provide LazyMessages and others provide regular objects
@@ -833,7 +833,7 @@ export default class SceneBuilder implements MarkerProvider {
   };
 
   renderMarkers(add: MarkerCollector, time: Time): void {
-    if (!this.transforms || !this.rootTransformID) {
+    if (!this.transforms || !this.renderFrameId) {
       return;
     }
 
@@ -857,7 +857,7 @@ export default class SceneBuilder implements MarkerProvider {
           }
         }
 
-        const pose = computeMarkerPose(marker, this.transforms, this.rootTransformID, time);
+        const pose = computeMarkerPose(marker, this.transforms, this.renderFrameId, time);
         if (!pose) {
           missingTfFrameIds.add(marker.header.frame_id);
           continue;

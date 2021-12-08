@@ -84,8 +84,8 @@ type Props = {
 
 // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
 export function generateMarkers(props: Props, idx: number, markerName: string) {
-  const rootTfID = "map";
-  const header = { seq: 257399, stamp: { sec: 1534827954, nsec: 262587964 }, frame_id: rootTfID };
+  const frame_id = "map";
+  const header = { seq: 257399, stamp: { sec: 1534827954, nsec: 262587964 }, frame_id };
   const pose = {
     position: { x: idx * GAP - (TOTAL * GAP) / 2 - 20, y: 0, z: 0 },
     orientation: { x: 0, y: 0, z: 0, w: 1 },

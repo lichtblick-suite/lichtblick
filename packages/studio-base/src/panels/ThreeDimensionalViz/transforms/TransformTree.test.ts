@@ -98,7 +98,7 @@ describe("TransformTree", () => {
 
     // map -> odom -> base_link
     expect(tree.apply(output, emptyPose(), "base_link", "map", TIME_ZERO)).toBeDefined();
-    expect(output.position).toEqual({ x: -9, y: -18, z: -33 });
+    expect(output.position).toEqual({ x: 9, y: 18, z: -33 });
     expect(output.orientation).toEqual({ x: 0, y: 0, z: 1, w: 0 });
 
     // base_link -> odom -> map
@@ -109,7 +109,7 @@ describe("TransformTree", () => {
 
     // map -> odom -> base_link
     expect(tree.apply(output, a, "base_link", "map", TIME_ZERO)).toBeDefined();
-    expect(output.position).toEqual({ x: -109, y: -218, z: 267 });
+    expect(output.position).toEqual({ x: -91, y: -182, z: 267 });
     expect(output.orientation).toEqual({ x: 0, y: 1, z: 0, w: 0 });
   });
 

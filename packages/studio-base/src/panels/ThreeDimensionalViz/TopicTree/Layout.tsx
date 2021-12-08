@@ -70,7 +70,7 @@ import {
   getUpdatedGlobalVariablesBySelectedObject,
 } from "@foxglove/studio-base/panels/ThreeDimensionalViz/threeDimensionalVizUtils";
 import {
-  DEFAULT_ROOT_FRAME_IDS,
+  DEFAULT_FRAME_IDS,
   TransformTree,
 } from "@foxglove/studio-base/panels/ThreeDimensionalViz/transforms";
 import { ThreeDimensionalVizConfig } from "@foxglove/studio-base/panels/ThreeDimensionalViz/types";
@@ -455,18 +455,14 @@ export default function Layout({
     }, [] as MarkerMatcher[]);
   }, [colorOverrideByVariable, globalVariables, linkedGlobalVariables]);
 
-  const rootTf = useMemo(() => {
-    // If the user specified a followTf we will only return the root frame from their followTf
-    if (typeof followTf === "string" && followTf.length > 0) {
-      const followFrame = transforms.frame(followTf);
-      if (followFrame) {
-        return followFrame.root().id;
-      }
-      return undefined;
+  const renderFrameId = useMemo(() => {
+    // If the user specified a followTf, do not fall back to any other frame
+    if (typeof followTf === "string") {
+      return transforms.hasFrame(followTf) ? followTf : undefined;
     }
 
-    // Try the conventional list of root frame transform ids
-    for (const frameId of DEFAULT_ROOT_FRAME_IDS) {
+    // Try the conventional list of transform ids
+    for (const frameId of DEFAULT_FRAME_IDS) {
       if (transforms.hasFrame(frameId)) {
         return frameId;
       }
@@ -489,7 +485,7 @@ export default function Layout({
       sceneBuilder.clear();
     }
 
-    urdfBuilder.setTransforms(transforms, rootTf);
+    urdfBuilder.setTransforms(transforms, renderFrameId);
     urdfBuilder.setUrdfData(robotDescriptionParam, rosPackagePath);
     urdfBuilder.setVisible(selectedTopicNames.includes(URDF_TOPIC));
     urdfBuilder.setSettingsByKey(settingsByKey, rosPackagePath);
@@ -499,7 +495,7 @@ export default function Layout({
     const selectedTopics = filterMap(selectedTopicNames, (name) => topicsByTopicName[name]);
 
     sceneBuilder.setPlayerId(playerId);
-    sceneBuilder.setTransforms(transforms, rootTf);
+    sceneBuilder.setTransforms(transforms, renderFrameId);
     sceneBuilder.setFlattenMarkers(flattenMarkers);
     sceneBuilder.setSelectedNamespacesByTopic(selectedNamespacesByTopic);
     sceneBuilder.setSettingsByKey(settingsByKey);
@@ -511,7 +507,7 @@ export default function Layout({
     sceneBuilder.render();
 
     // update the transforms and set the selected ones to render
-    transformsBuilder.setTransforms(transforms, rootTf);
+    transformsBuilder.setTransforms(transforms, renderFrameId);
     transformsBuilder.setSelectedTransforms(selectedNamespacesByTopic[TRANSFORM_TOPIC] ?? []);
   }, [
     colorOverrideMarkerMatchers,
@@ -523,7 +519,7 @@ export default function Layout({
     playerId,
     resetFrame,
     robotDescriptionParam,
-    rootTf,
+    renderFrameId,
     rosPackagePath,
     sceneBuilder,
     selectedNamespacesByTopic,
@@ -871,7 +867,7 @@ export default function Layout({
                   showCrosshair={showCrosshair}
                   targetPose={targetPose}
                   transforms={transforms}
-                  rootTf={rootTf}
+                  renderFrameId={renderFrameId}
                   currentTime={currentTime}
                   {...searchTextProps}
                 />
