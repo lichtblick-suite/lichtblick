@@ -7,12 +7,13 @@ enum AppEventCategory {
   PLAYERS = "PLAYERS",
   LAYOUTS = "LAYOUTS",
   PANELS = "PANELS",
+  EXTENSIONS = "EXTENSIONS",
 }
 
 enum AppEvent {
   APP_INIT = "APP_INIT",
 
-  // PlayerMetricsCollectorInterface events
+  // Player events
   PLAYER_CONSTRUCTED = "PLAYER_CONSTRUCTED",
   PLAYER_INITIALIZED = "PLAYER_INITIALIZED",
   PLAYER_PLAY = "PLAYER_PLAY",
@@ -37,6 +38,10 @@ enum AppEvent {
   // Panel events
   PANEL_ADD = "PANEL_ADD",
   PANEL_DELETE = "PANEL_DELETE",
+
+  // Extension events
+  EXTENSION_INSTALL = "EXTENSION_INSTALL",
+  EXTENSION_UNINSTALL = "EXTENSION_UNINSTALL",
 }
 
 /** https://develop.sentry.dev/sdk/event-payloads/breadcrumbs/#breadcrumb-types */
@@ -83,6 +88,10 @@ export function getEventCategory(event: AppEvent): AppEventCategory {
     case AppEvent.PANEL_ADD:
     case AppEvent.PANEL_DELETE:
       return AppEventCategory.PANELS;
+
+    case AppEvent.EXTENSION_INSTALL:
+    case AppEvent.EXTENSION_UNINSTALL:
+      return AppEventCategory.EXTENSIONS;
   }
 }
 
@@ -117,6 +126,10 @@ export function getEventBreadcrumbType(event: AppEvent): SentryBreadcrumbType {
     case AppEvent.LAYOUT_MAKE_PERSONAL_COPY:
     case AppEvent.PANEL_ADD:
     case AppEvent.PANEL_DELETE:
+      return SentryBreadcrumbType.USER;
+
+    case AppEvent.EXTENSION_INSTALL:
+    case AppEvent.EXTENSION_UNINSTALL:
       return SentryBreadcrumbType.USER;
   }
 }

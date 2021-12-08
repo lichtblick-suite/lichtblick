@@ -11,11 +11,13 @@ import styled from "styled-components";
 import Button from "@foxglove/studio-base/components/Button";
 import { SidebarContent } from "@foxglove/studio-base/components/SidebarContent";
 import TextContent from "@foxglove/studio-base/components/TextContent";
+import { useAnalytics } from "@foxglove/studio-base/context/AnalyticsContext";
 import { useExtensionLoader } from "@foxglove/studio-base/context/ExtensionLoaderContext";
 import {
   ExtensionMarketplaceDetail,
   useExtensionMarketplace,
 } from "@foxglove/studio-base/context/ExtensionMarketplaceContext";
+import { AppEvent } from "@foxglove/studio-base/services/IAnalytics";
 
 type Props = {
   installed: boolean;
@@ -65,6 +67,8 @@ export function ExtensionDetails({ extension, onClose, installed }: Props): Reac
     [marketplace, changelogUrl],
   );
 
+  const analytics = useAnalytics();
+
   const install = useCallback(async () => {
     const url = extension.foxe;
     try {
@@ -75,20 +79,22 @@ export function ExtensionDetails({ extension, onClose, installed }: Props): Reac
       await extensionLoader.installExtension(data);
       if (isMounted()) {
         setIsInstalled(true);
+        void analytics.logEvent(AppEvent.EXTENSION_INSTALL, { type: extension.id });
       }
     } catch (err) {
       addToast(`Failed to download extension ${extension.id}. ${err.message}`, {
         appearance: "error",
       });
     }
-  }, [extension.id, extension.foxe, extensionLoader, isMounted, addToast]);
+  }, [analytics, extension.id, extension.foxe, extensionLoader, isMounted, addToast]);
 
   const uninstall = useCallback(async () => {
     await extensionLoader.uninstallExtension(extension.id);
     if (isMounted()) {
       setIsInstalled(false);
+      void analytics.logEvent(AppEvent.EXTENSION_UNINSTALL, { type: extension.id });
     }
-  }, [extension.id, extensionLoader, isMounted]);
+  }, [analytics, extension.id, extensionLoader, isMounted]);
 
   return (
     <SidebarContent
