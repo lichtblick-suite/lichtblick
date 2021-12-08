@@ -101,7 +101,7 @@ class MessageOrderTracker {
           isLessThan(messageTime, this.lastMessageTime)
         ) {
           sendNotification(
-            "Bag went back in time",
+            "Data went back in time",
             `Processed a message on ${message.topic} at ${formatFrame(
               messageTime,
             )} which is earlier than ` +

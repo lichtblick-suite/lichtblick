@@ -9,13 +9,7 @@ import { Sockets } from "@foxglove/electron-socket/renderer";
 import Logger from "@foxglove/log";
 import { RosNode, TcpSocket } from "@foxglove/ros1";
 import { RosMsgDefinition } from "@foxglove/rosmsg";
-import {
-  Time,
-  add as addTimes,
-  fromMillis,
-  subtract as subtractTimes,
-  toSec,
-} from "@foxglove/rostime";
+import { Time, fromMillis, toSec } from "@foxglove/rostime";
 import { ParameterValue } from "@foxglove/studio";
 import OsContextSingleton from "@foxglove/studio-base/OsContextSingleton";
 import PlayerProblemManager from "@foxglove/studio-base/players/PlayerProblemManager";
@@ -62,8 +56,7 @@ type Ros1PlayerOpts = {
   metricsCollector: PlayerMetricsCollectorInterface;
 };
 
-// Connects to `rosmaster` instance using `@foxglove/ros1`. Currently doesn't support seeking or
-// showing simulated time, so current time from Date.now() is always used instead.
+// Connects to `rosmaster` instance using `@foxglove/ros1`
 export default class Ros1Player implements Player {
   private _url: string; // rosmaster URL.
   private _hostname?: string; // ROS_HOSTNAME
@@ -79,7 +72,6 @@ export default class Ros1Player implements Player {
   private _parameters = new Map<string, ParameterValue>(); // rosparams
   private _start?: Time; // The time at which we started playing.
   private _clockTime?: Time; // The most recent published `/clock` time, if available
-  private _clockReceived: Time = { sec: 0, nsec: 0 }; // The local time when `_clockTime` was last received
   private _requestedSubscriptions: SubscribePayload[] = []; // Requested subscriptions by setSubscriptions()
   private _parsedMessages: MessageEvent<unknown>[] = []; // Queue of messages that we'll send in next _emitState() call.
   private _messageOrder: TimestampMethod = "receiveTime";
@@ -402,7 +394,7 @@ export default class Ros1Player implements Player {
       return;
     }
 
-    const receiveTime = fromMillis(Date.now());
+    const receiveTime = this._getCurrentTime();
 
     if (external && !this._hasReceivedMessage) {
       this._hasReceivedMessage = true;
@@ -563,7 +555,7 @@ export default class Ros1Player implements Player {
       }
 
       this._clockTime = time;
-      this._clockReceived = msg.receiveTime;
+      (msg as { receiveTime: Time }).receiveTime = this._getCurrentTime();
     }
   }
 
@@ -599,12 +591,6 @@ stale graph may result in missing topics you expect. Ensure that roscore is reac
   }
 
   private _getCurrentTime(): Time {
-    const now = fromMillis(Date.now());
-    if (this._clockTime == undefined) {
-      return now;
-    }
-
-    const delta = subtractTimes(now, this._clockReceived);
-    return addTimes(this._clockTime, delta);
+    return this._clockTime ?? fromMillis(Date.now());
   }
 }
