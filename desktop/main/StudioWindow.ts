@@ -162,18 +162,20 @@ function buildMenu(browserWindow: BrowserWindow): Menu {
       submenu: [
         { role: "about" },
         { type: "separator" },
+
         {
           label: "Preferences…",
           accelerator: "CommandOrControl+,",
           click: () => browserWindow.webContents.send("open-preferences"),
         },
-        { type: "separator" },
         { role: "services" },
         { type: "separator" },
+
+        { type: "separator" },
+
         { role: "hide" },
         { role: "hideOthers" },
         { role: "unhide" },
-        { type: "separator" },
         { role: "quit" },
       ],
     });
@@ -209,9 +211,20 @@ function buildMenu(browserWindow: BrowserWindow): Menu {
     role: "editMenu",
     label: "Edit",
     submenu: [
+      {
+        label: "Add Panel to Layout",
+        click: () => browserWindow.webContents.send("open-add-panel"),
+      },
+      {
+        label: "Edit Panel Settings",
+        click: () => browserWindow.webContents.send("open-panel-settings"),
+      },
+      { type: "separator" },
+
       { role: "undo" },
       { role: "redo" },
       { type: "separator" },
+
       { role: "cut" },
       { role: "copy" },
       { role: "paste" },
@@ -254,6 +267,12 @@ function buildMenu(browserWindow: BrowserWindow): Menu {
     role: "viewMenu",
     label: "View",
     submenu: [
+      { label: "Layouts", click: () => browserWindow.webContents.send("open-layouts") },
+      { label: "Variables", click: () => browserWindow.webContents.send("open-variables") },
+      { label: "Extensions", click: () => browserWindow.webContents.send("open-extensions") },
+      { label: "Account", click: () => browserWindow.webContents.send("open-account") },
+      { type: "separator" },
+
       { role: "resetZoom" },
       { role: "zoomIn" },
       { role: "zoomOut" },
@@ -481,24 +500,6 @@ class StudioWindow {
           },
         })),
       }),
-    );
-
-    const fileMenuItems = [
-      { label: "View Layouts", event: "open-layouts" },
-      { label: "Add Panel", event: "open-add-panel" },
-      { label: "Edit Panel Settings", event: "open-panel-settings" },
-      { label: "Set Variables", event: "open-variables" },
-      { label: "Install Extensions", event: "open-extensions" },
-      { label: "Log In", event: "open-account" },
-    ];
-
-    fileMenuItems.forEach(({ label, event }) =>
-      fileMenu.submenu?.append(
-        new MenuItem({
-          label,
-          click: () => browserWindow.webContents.send(event),
-        }),
-      ),
     );
 
     if (!isMac) {
