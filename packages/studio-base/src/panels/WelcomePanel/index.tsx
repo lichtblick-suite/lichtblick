@@ -115,10 +115,7 @@ function WelcomePanel() {
             },
           }}
         >
-          <b>
-            To get in touch with us and learn more tips &amp; tricks, join our Slack community and
-            subscribe to our mailing list:
-          </b>
+          <b>To learn more, join our Slack community and subscribe to our newsletter:</b>
         </Text>
 
         <Stack tokens={{ childrenGap: theme.spacing.m }}>
