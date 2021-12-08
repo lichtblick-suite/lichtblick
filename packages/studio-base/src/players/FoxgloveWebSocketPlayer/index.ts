@@ -180,7 +180,7 @@ export default class FoxgloveWebSocketPlayer implements Player {
       this._problems.addProblem("ws:connection-failed", {
         severity: "error",
         message: "Connection failed",
-        tip: `Check that the WebSocket server at ${this._url} is reachable.`,
+        tip: `Check that the WebSocket server at ${this._url} is reachable and supports protocol version ${FoxgloveClient.SUPPORTED_SUBPROTOCOL}.`,
       });
 
       this._emitState();
@@ -303,8 +303,6 @@ export default class FoxgloveWebSocketPlayer implements Player {
           message: `Failed to parse message on ${chanInfo.channel.topic}`,
           error,
         });
-        this._emitState();
-        throw error;
       }
       this._emitState();
     });
