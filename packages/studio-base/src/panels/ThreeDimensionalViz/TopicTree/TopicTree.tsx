@@ -183,7 +183,6 @@ const useComponentStyles = (theme: ITheme) =>
           padding: `0 ${theme.spacing.l2}`,
 
           "::placeholder": {
-            opacity: 0.6,
             fontSize: theme.fonts.small.fontSize,
             lineHeight: 30,
           },

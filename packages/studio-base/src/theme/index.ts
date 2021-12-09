@@ -13,6 +13,7 @@ import {
   IOverlayStyles,
   IPalette,
   ISpinnerStyles,
+  ITextFieldStyles,
   IToggleStyles,
   ITooltipStyleProps,
   ITooltipStyles,
@@ -95,6 +96,18 @@ function getPartialTheme({ inverted }: { inverted: boolean }): PartialTheme {
             },
           },
         } as Partial<IComboBoxStyles>,
+      },
+      TextField: {
+        styles: {
+          field: {
+            "::placeholder": {
+              opacity: 0.6,
+            },
+            ":focus::placeholder": {
+              opacity: 0,
+            },
+          },
+        } as Partial<ITextFieldStyles>,
       },
       Tooltip: {
         styles: ({ theme }: ITooltipStyleProps): Partial<ITooltipStyles> => ({
