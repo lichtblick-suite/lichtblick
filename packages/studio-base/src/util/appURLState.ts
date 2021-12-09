@@ -61,10 +61,6 @@ export function parseAppURLState(url: URL): AppURLState | undefined {
     throw Error("Unknown protocol.");
   }
 
-  if (!isDesktopApp() && url.pathname !== "/") {
-    throw Error("Unknown path.");
-  }
-
   const layoutId = url.searchParams.get("layoutId");
   const timeString = url.searchParams.get("time");
   const time = timeString == undefined ? undefined : fromRFC3339String(timeString);
