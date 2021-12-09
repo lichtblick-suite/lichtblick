@@ -13,20 +13,26 @@ import { getLocalRosbag2Descriptor } from "@foxglove/studio-base/randomAccessDat
 class Ros2LocalBagDataSourceFactory implements IDataSourceFactory {
   id = "ros2-local-bagfile";
   displayName = "ROS 2 Bag (local)";
-  iconName: IDataSourceFactory["iconName"] = "OpenFolder";
-
-  supportsOpenDirectory = true;
+  iconName: IDataSourceFactory["iconName"] = "OpenFile";
+  supportedFileTypes = [".db3"];
+  supportsMultiFile = true;
 
   initialize(args: DataSourceFactoryInitializeArgs): Player | undefined {
-    const folder = args.folder;
-    if (!folder) {
-      return;
+    if ((args.files?.length ?? 0) > 0) {
+      const files = args.files as File[];
+      return buildNonRos1PlayerFromDescriptor(files[0]!.name, getLocalRosbag2Descriptor(files), {
+        metricsCollector: args.metricsCollector,
+        unlimitedMemoryCache: args.unlimitedMemoryCache,
+      });
+    } else if (args.file) {
+      const file = args.file;
+      return buildNonRos1PlayerFromDescriptor(file.name, getLocalRosbag2Descriptor(file), {
+        metricsCollector: args.metricsCollector,
+        unlimitedMemoryCache: args.unlimitedMemoryCache,
+      });
     }
 
-    return buildNonRos1PlayerFromDescriptor(folder.name, getLocalRosbag2Descriptor(folder), {
-      metricsCollector: args.metricsCollector,
-      unlimitedMemoryCache: args.unlimitedMemoryCache,
-    });
+    return undefined;
   }
 }
 

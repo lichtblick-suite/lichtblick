@@ -4,7 +4,15 @@
 
 import { Md5 } from "md5-typescript";
 
-import { ROS2_TO_DEFINITIONS, Rosbag2, openFileSystemDirectoryHandle } from "@foxglove/rosbag2-web";
+import {
+  BlobReader,
+  ROS2_TO_DEFINITIONS,
+  Rosbag2,
+  openFileSystemDirectoryHandle,
+  openFileSystemFile,
+  FileEntry,
+  SqliteSqljs,
+} from "@foxglove/rosbag2-web";
 import { stringify } from "@foxglove/rosmsg";
 import { Time } from "@foxglove/rostime";
 import { MessageEvent } from "@foxglove/studio";
@@ -25,10 +33,11 @@ import {
 } from "@foxglove/studio-base/randomAccessDataProviders/types";
 import { RosDatatypes } from "@foxglove/studio-base/types/RosDatatypes";
 
-type BagFolderPath = { type: "folder"; folder: FileSystemDirectoryHandle | string };
+type BagPath = { type: "file"; file: Blob };
+type BagMultiPath = { type: "files"; files: File[] };
+type BagFolderPath = { type: "folder"; folder: FileSystemDirectoryHandle };
 
-type Options = { bagFolderPath: BagFolderPath };
-
+type Options = { bagPath: BagPath | BagMultiPath | BagFolderPath };
 export default class Rosbag2DataProvider implements RandomAccessDataProvider {
   private options_: Options;
   private bag_?: Rosbag2;
@@ -41,13 +50,24 @@ export default class Rosbag2DataProvider implements RandomAccessDataProvider {
   }
 
   async initialize(_extensionPoint: ExtensionPoint): Promise<InitializationResult> {
-    const folder = this.options_.bagFolderPath.folder;
-    if (folder instanceof FileSystemDirectoryHandle) {
-      const res = await fetch(new URL("sql.js/dist/sql-wasm.wasm", import.meta.url).toString());
-      const sqlWasm = await (await res.blob()).arrayBuffer();
-      this.bag_ = await openFileSystemDirectoryHandle(folder, sqlWasm);
+    const res = await fetch(new URL("sql.js/dist/sql-wasm.wasm", import.meta.url).toString());
+    const sqlWasm = await (await res.blob()).arrayBuffer();
+
+    if (this.options_.bagPath.type === "files") {
+      const files = this.options_.bagPath.files;
+      const entries: FileEntry[] = files.map((f) => ({
+        relativePath: (f as unknown as { path: string }).path,
+        file: new BlobReader(f),
+      }));
+      const bag = new Rosbag2(entries, (fileEntry) => new SqliteSqljs(fileEntry.file, sqlWasm));
+      await bag.open();
+      this.bag_ = bag;
+    } else if (this.options_.bagPath.type === "file") {
+      const file = this.options_.bagPath.file;
+      this.bag_ = await openFileSystemFile(file, sqlWasm);
     } else {
-      throw new Error("Opening ROS2 bags via the native interface is not implemented yet");
+      const folder = this.options_.bagPath.folder;
+      this.bag_ = await openFileSystemDirectoryHandle(folder, sqlWasm);
     }
 
     const [start, end] = await this.bag_.timeRange();

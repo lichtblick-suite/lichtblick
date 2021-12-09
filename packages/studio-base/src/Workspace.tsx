@@ -316,7 +316,7 @@ export default function Workspace(props: WorkspaceProps): JSX.Element {
   const extensionLoader = useExtensionLoader();
 
   const openFiles = useCallback(
-    async (files: FileList) => {
+    async (files: File[]) => {
       const otherFiles: File[] = [];
       for (const file of files) {
         // electron extends File with a `path` field which is not available in browsers
@@ -370,12 +370,12 @@ export default function Workspace(props: WorkspaceProps): JSX.Element {
   const filesToOpen = useElectronFilesToOpen();
   useEffect(() => {
     if (filesToOpen) {
-      void openFiles(filesToOpen);
+      void openFiles(Array.from(filesToOpen));
     }
   }, [filesToOpen, openFiles]);
 
   const dropHandler = useCallback(
-    ({ files }: { files: FileList }) => {
+    ({ files }: { files: File[] }) => {
       void openFiles(files);
     },
     [openFiles],

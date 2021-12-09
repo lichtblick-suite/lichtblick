@@ -20,7 +20,7 @@ import { LegacyInput } from "@foxglove/studio-base/components/LegacyStyledCompon
 type Props = {
   children: React.ReactNode; // Shown when dragging in a file.
   allowedExtensions?: string[];
-  filesSelected?: (arg: { files: FileList; shiftPressed: boolean }) => void;
+  filesSelected?: (arg: { files: File[]; shiftPressed: boolean }) => void;
 };
 
 export default function DocumentDropListener(props: Props): JSX.Element {
@@ -31,28 +31,79 @@ export default function DocumentDropListener(props: Props): JSX.Element {
   const { addToast } = useToasts();
 
   const onDrop = useCallback(
-    (ev: DragEvent) => {
+    async (ev: DragEvent) => {
       setHovering(false);
 
       if (!ev.dataTransfer) {
         return;
       }
-      const { files } = ev.dataTransfer;
-      // allow event to bubble for non-file based drag and drop
-      if (files.length === 0 || !allowedExtensions) {
+
+      const allFiles: File[] = [];
+      const directories: FileSystemDirectoryEntry[] = [];
+      for (const item of ev.dataTransfer.items) {
+        const entry = item.webkitGetAsEntry();
+        if (entry) {
+          if (entry.isFile) {
+            const file = item.getAsFile();
+            if (file) {
+              allFiles.push(file);
+            }
+          } else if (entry.isDirectory) {
+            directories.push(entry as FileSystemDirectoryEntry);
+          }
+        }
+      }
+
+      // Allow event to bubble for non-file based drag and drop
+      if ((allFiles.length === 0 && directories.length === 0) || !allowedExtensions) {
         return;
       }
 
-      const containsUnsupportedFiles = Array.from(files).some((file) => {
+      for (const directory of directories) {
+        // Read the list of files and folders in this directory (non-recursively)
+        const entries = await new Promise<FileSystemEntry[]>((resolve, reject) => {
+          directory.createReader().readEntries(resolve, reject);
+        });
+
+        // Add all files in this directory to our list of files
+        for (const entry of entries) {
+          if (entry.isFile) {
+            const file = await new Promise<File>((resolve, reject) => {
+              (entry as FileSystemFileEntry).file(resolve, reject);
+            });
+            allFiles.push(file);
+          }
+        }
+      }
+
+      // Organize files by (supported) extension
+      const filesByType = new Map<string, File[]>();
+      for (const file of allFiles) {
         const fileExtension = extname(file.name);
-        return !allowedExtensions.includes(fileExtension);
-      });
-      if (containsUnsupportedFiles) {
+        if (allowedExtensions.includes(fileExtension)) {
+          const filesOfType = filesByType.get(fileExtension) ?? [];
+          filesOfType.push(file);
+          filesByType.set(fileExtension, filesOfType);
+        }
+      }
+
+      // Check for no supported files
+      if (filesByType.size === 0) {
         addToast("The file format is unsupported.", {
           appearance: "error",
         });
         return;
       }
+
+      // Check for more than one supported file type
+      if (filesByType.size > 1) {
+        addToast("Cannot open different file types at once.", {
+          appearance: "error",
+        });
+        return;
+      }
+
+      const files: File[] = filesByType.values().next().value;
 
       ev.preventDefault();
       ev.stopPropagation();
@@ -100,7 +151,7 @@ export default function DocumentDropListener(props: Props): JSX.Element {
         style={{ display: "none" }}
         onChange={(event) => {
           if (event.target.files) {
-            props.filesSelected?.({ files: event.target.files, shiftPressed: false });
+            props.filesSelected?.({ files: Array.from(event.target.files), shiftPressed: false });
           }
         }}
         data-puppeteer-file-upload

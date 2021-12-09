@@ -52,14 +52,24 @@ export function getRemoteBagDescriptor(
 }
 
 export function getLocalRosbag2Descriptor(
-  folder: FileSystemDirectoryHandle,
+  files: File | File[],
 ): RandomAccessDataProviderDescriptor {
-  return {
-    label: folder.name,
-    name: CoreDataProviders.Rosbag2DataProvider,
-    args: { bagFolderPath: { type: "folder", folder } },
-    children: [],
-  };
+  if (Array.isArray(files)) {
+    return {
+      label: files[0]!.name,
+      name: CoreDataProviders.Rosbag2DataProvider,
+      args: { bagPath: { type: "files", files } },
+      children: [],
+    };
+  } else {
+    const file = files;
+    return {
+      label: file.name,
+      name: CoreDataProviders.Rosbag2DataProvider,
+      args: { bagPath: { type: "file", file } },
+      children: [],
+    };
+  }
 }
 
 export function getLocalUlogDescriptor(file: File): RandomAccessDataProviderDescriptor {

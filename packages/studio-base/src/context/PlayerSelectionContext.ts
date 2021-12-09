@@ -14,6 +14,7 @@ export type DataSourceFactoryInitializeArgs = {
   rosHostname?: string;
   folder?: FileSystemDirectoryHandle;
   file?: File;
+  files?: File[];
   url?: string;
   consoleApi?: ConsoleApi;
 } & Record<string, unknown>;
@@ -30,7 +31,7 @@ export interface IDataSourceFactory {
   // file types
   supportedFileTypes?: string[];
 
-  supportsOpenDirectory?: boolean;
+  supportsMultiFile?: boolean;
 
   promptOptions?: (previousValue?: string) => PromptOptions;
 
