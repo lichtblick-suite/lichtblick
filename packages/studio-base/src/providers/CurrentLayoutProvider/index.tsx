@@ -38,7 +38,7 @@ import { LayoutID } from "@foxglove/studio-base/services/ConsoleApi";
 import { AppEvent } from "@foxglove/studio-base/services/IAnalytics";
 import { LayoutManagerEventTypes } from "@foxglove/studio-base/services/ILayoutManager";
 import { PanelConfig, UserNodes, PlaybackConfig } from "@foxglove/studio-base/types/panels";
-import { windowHasValidURLState } from "@foxglove/studio-base/util/appURLState";
+import { windowAppURLState } from "@foxglove/studio-base/util/appURLState";
 import { getPanelTypeFromId } from "@foxglove/studio-base/util/layout";
 
 const log = Logger.getLogger(__filename);
@@ -228,7 +228,7 @@ export default function CurrentLayoutProvider({
   // Load initial state by re-selecting the last selected layout from the UserProfile.
   // Don't restore the layout if there's one specified in the app state url.
   useAsync(async () => {
-    if (windowHasValidURLState()) {
+    if (windowAppURLState()?.layoutId) {
       return;
     }
 
