@@ -297,6 +297,11 @@ function PanelExtensionAdapter(props: PanelExtensionAdapterProps): JSX.Element {
 
       seekPlayback: seekPlayback ? (stamp: number) => seekPlayback(fromSec(stamp)) : undefined,
 
+      setParameter: (name: string, value: ParameterValue) => {
+        const ctx = latestPipelineContextRef.current;
+        ctx?.setParameter(name, value);
+      },
+
       setPreviewTime: (stamp: number | undefined) => {
         if (stamp == undefined) {
           clearHoverValue("PanelExtensionAdatper");

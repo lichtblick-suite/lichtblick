@@ -135,6 +135,14 @@ declare module "@foxglove/studio" {
     saveState: (state: Partial<unknown>) => void;
 
     /**
+     * Set the value of parameter name to value.
+     *
+     * @param name The name of the parameter to set.
+     * @param value The new value of the parameter.
+     */
+    setParameter: (name: string, value: ParameterValue) => void;
+
+    /**
      * Set the active preview time. Setting the preview time to undefined clears the preview time.
      */
     setPreviewTime: (time: number | undefined) => void;
