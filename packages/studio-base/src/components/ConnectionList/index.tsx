@@ -17,7 +17,6 @@ import {
 } from "@foxglove/studio-base/context/PlayerSelectionContext";
 import { useConfirm } from "@foxglove/studio-base/hooks/useConfirm";
 import { PlayerPresence, PlayerProblem } from "@foxglove/studio-base/players/types";
-import { colors } from "@foxglove/studio-base/util/sharedStyleConstants";
 
 const selectPlayerPresence = ({ playerState }: MessagePipelineContext) => playerState.presence;
 const selectPlayerProblems = (ctx: MessagePipelineContext) => ctx.playerState.problems;
@@ -36,13 +35,19 @@ const useStyles = makeStyles((theme) => ({
     marginLeft: "10px",
     borderRadius: 100,
   },
+  divider: {
+    width: "100%",
+    height: 1,
+    border: 0,
+    backgroundColor: theme.semanticColors.bodyDivider,
+  },
 }));
 
 export default function ConnectionList(): JSX.Element {
   const { selectSource, availableSources } = usePlayerSelection();
   const confirm = useConfirm();
   const modalHost = useContext(ModalContext);
-  const styles = useStyles();
+  const classes = useStyles();
 
   const playerProblems = useMessagePipeline(selectPlayerProblems) ?? emptyArray;
   const playerPresence = useMessagePipeline(selectPlayerPresence);
@@ -121,15 +126,13 @@ export default function ConnectionList(): JSX.Element {
               onClick={() => onSourceClick(source)}
             >
               {source.displayName}
-              {source.badgeText && <span className={styles.badge}>{source.badgeText}</span>}
+              {source.badgeText && <span className={classes.badge}>{source.badgeText}</span>}
             </ActionButton>
           </div>
         );
       })}
 
-      {playerProblems.length > 0 && (
-        <hr style={{ width: "100%", height: "1px", border: 0, backgroundColor: colors.DIVIDER }} />
-      )}
+      {playerProblems.length > 0 && <hr className={classes.divider} />}
       {playerProblems.map((problem, idx) => {
         const iconName = problem.severity === "error" ? "Error" : "Warning";
         const color =

@@ -21,7 +21,7 @@ import {
   useState,
 } from "react";
 import { useToasts } from "react-toast-notifications";
-import { useLocalStorage } from "react-use";
+import { useAsync, useLocalStorage } from "react-use";
 
 import { useShallowMemo } from "@foxglove/hooks";
 import Logger from "@foxglove/log";
@@ -44,6 +44,10 @@ import OrderedStampPlayer from "@foxglove/studio-base/players/OrderedStampPlayer
 import UserNodePlayer from "@foxglove/studio-base/players/UserNodePlayer";
 import { Player } from "@foxglove/studio-base/players/types";
 import { UserNodes } from "@foxglove/studio-base/types/panels";
+import {
+  IndexedDbRecentsStore,
+  RecentRecord,
+} from "@foxglove/studio-base/util/IndexedDbRecentsStore";
 import Storage from "@foxglove/studio-base/util/Storage";
 import { windowHasValidURLState } from "@foxglove/studio-base/util/appURLState";
 
@@ -61,6 +65,8 @@ export default function PlayerManager(props: PropsWithChildren<PlayerManagerProp
   const { children, playerSources } = props;
 
   useWarnImmediateReRender();
+
+  const recentsStore = useMemo(() => new IndexedDbRecentsStore(), []);
 
   const { setUserNodeDiagnostics, addUserNodeLogs, setUserNodeRosLib } = useUserNodeState();
   const userNodeActions = useShallowMemo({
@@ -134,10 +140,110 @@ export default function PlayerManager(props: PropsWithChildren<PlayerManagerProp
 
   const [selectedSource, setSelectedSource] = useState<IDataSourceFactory | undefined>();
 
+  const { value: initialRecents } = useAsync(async () => await recentsStore.get(), [recentsStore]);
+  const [recents, setRecents] = useState<RecentRecord[]>([]);
+
+  // Set the first load records from the store to the state
+  useLayoutEffect(() => {
+    if (!initialRecents) {
+      return;
+    }
+    setRecents(initialRecents);
+  }, [initialRecents]);
+
+  const saveRecents = useCallback(
+    (recentRecords: RecentRecord[]) => {
+      recentsStore.set(recentRecords).catch((err) => {
+        log.error(err);
+      });
+    },
+    [recentsStore],
+  );
+
+  // Add a new recent entry
+  const addRecent = useCallback(
+    (record: Omit<RecentRecord, "id">) => {
+      const newRecord: RecentRecord = {
+        id: IndexedDbRecentsStore.GenerateRecordId(),
+        ...record,
+      };
+
+      setRecents((prevRecents) => {
+        // To keep only the latest 5 recent items, we remove any items index 4+
+        prevRecents.splice(4, 100);
+        prevRecents.unshift(newRecord);
+
+        saveRecents(prevRecents);
+        return [...prevRecents];
+      });
+    },
+    [saveRecents],
+  );
+
+  // Select a recent entry by id
+  const selectRecent = useCallback(
+    (recentId: string) => {
+      // find the recent from the list and initialize
+      const foundRecent = recents.find((value) => value.id === recentId);
+      if (!foundRecent) {
+        addToast(`Failed to restore recent: ${recentId}`, {
+          appearance: "error",
+        });
+        return;
+      }
+
+      const sourceId = foundRecent.sourceId;
+      const foundSource = playerSources.find((source) => source.id === sourceId);
+      if (!foundSource) {
+        addToast(`Unknown data source: ${sourceId}`, {
+          appearance: "error",
+        });
+        return;
+      }
+
+      metricsCollector.setProperty("player", sourceId);
+      setSelectedSource(() => foundSource);
+
+      try {
+        const initArgs = {
+          metricsCollector,
+          unlimitedMemoryCache,
+          ...foundRecent.extra,
+        };
+
+        const newPlayer = foundSource.initialize(initArgs);
+        setBasePlayer(newPlayer);
+
+        setRecents((prevRecents) => {
+          const recentIdx = recents.findIndex((value) => value.id === recentId);
+          if (recentIdx < 0) {
+            return prevRecents;
+          }
+          prevRecents.splice(recentIdx, 1);
+          prevRecents.unshift(foundRecent);
+
+          saveRecents(prevRecents);
+          return [...prevRecents];
+        });
+      } catch (err) {
+        addToast((err as Error).message, { appearance: "error" });
+      }
+    },
+    [recents, playerSources, metricsCollector, addToast, unlimitedMemoryCache, saveRecents],
+  );
+
+  // Make a RecentSources array for the PlayerSelectionContext
+  const recentSources = useMemo(() => {
+    return recents.map((item) => {
+      return { id: item.id, title: item.title, label: item.label };
+    });
+  }, [recents]);
+
   const selectSource = useCallback(
     async (sourceId: string, args?: Record<string, unknown>) => {
       log.debug(`Select Source: ${sourceId}`);
 
+      // empty string sourceId
       if (!sourceId) {
         removeSavedSource();
         setSelectedSource(undefined);
@@ -177,20 +283,28 @@ export default function PlayerManager(props: PropsWithChildren<PlayerManagerProp
 
           new Storage().setItem(previousPromptCacheKey, url);
 
+          const allArgs = {
+            ...args,
+            rosHostname,
+            url,
+          };
+
           // only url based sources are saved as the selected source
           setSavedSource({
             id: sourceId,
-            args: {
-              ...args,
-              url,
-              rosHostname,
-              metricsCollector,
-              unlimitedMemoryCache,
-            },
+            args: allArgs,
           });
 
+          new Storage().setItem(previousPromptCacheKey, url);
           const newPlayer = foundSource.initialize({ url, metricsCollector, unlimitedMemoryCache });
           setBasePlayer(newPlayer);
+
+          addRecent({
+            sourceId,
+            title: url,
+            label: foundSource.displayName,
+            extra: allArgs,
+          });
         } catch (error) {
           addToast((error as Error).message, { appearance: "error" });
         }
@@ -221,6 +335,11 @@ export default function PlayerManager(props: PropsWithChildren<PlayerManagerProp
             }
           }
 
+          const allArgs = {
+            ...args,
+            file,
+            fileList,
+          };
           const multiFile = foundSource.supportsMultiFile === true && fileList.length > 1;
 
           const newPlayer = foundSource.initialize({
@@ -229,7 +348,19 @@ export default function PlayerManager(props: PropsWithChildren<PlayerManagerProp
             metricsCollector,
             unlimitedMemoryCache,
           });
+
           setBasePlayer(newPlayer);
+
+          // When we come up with a reasonable display name for multifile recents we can add support
+          if (multiFile || !file) {
+            return;
+          }
+
+          addRecent({
+            sourceId,
+            title: file.name,
+            extra: allArgs,
+          });
         } catch (error) {
           if (error.name === "AbortError") {
             return;
@@ -255,6 +386,7 @@ export default function PlayerManager(props: PropsWithChildren<PlayerManagerProp
       return;
     },
     [
+      addRecent,
       addToast,
       consoleApi,
       metricsCollector,
@@ -295,8 +427,10 @@ export default function PlayerManager(props: PropsWithChildren<PlayerManagerProp
 
   const value: PlayerSelection = {
     selectSource,
+    selectRecent,
     selectedSource,
     availableSources: playerSources,
+    recentSources,
   };
 
   return (
