@@ -12,6 +12,7 @@ import createStyledComponentsTransformer from "typescript-plugin-styled-componen
 import webpack, { Configuration, WebpackPluginInstance } from "webpack";
 
 import { WebpackArgv } from "./WebpackArgv";
+import packageJson from "./package.json";
 
 const styledComponentsTransformer = createStyledComponentsTransformer({
   getDisplayName: (filename, bindingName) => {
@@ -224,6 +225,7 @@ export function makeConfig(
       new webpack.DefinePlugin({
         // Should match webpack-defines.d.ts
         ReactNull: null, // eslint-disable-line no-restricted-syntax
+        FOXGLOVE_STUDIO_VERSION: JSON.stringify(packageJson.version),
       }),
       // https://webpack.js.org/plugins/ignore-plugin/#example-of-ignoring-moment-locales
       new webpack.IgnorePlugin({

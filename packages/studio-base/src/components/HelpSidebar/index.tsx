@@ -75,6 +75,12 @@ const useComponentStyles = (theme: ITheme) =>
           fontSize: 13,
         } as Partial<ILinkStyles>,
       },
+      footer: {
+        root: {
+          ...theme.fonts.xSmall,
+          color: theme.palette.neutralSecondaryAlt,
+        } as Partial<ITextStyles>,
+      },
     }),
     [theme],
   );
@@ -176,6 +182,7 @@ export default function HelpSidebar({
                 </Stack.Item>
               );
             })}
+            <Text styles={styles.footer}>Foxglove Studio version {FOXGLOVE_STUDIO_VERSION}</Text>
           </Stack>
         ) : (
           <Stack tokens={{ childrenGap: theme.spacing.s2 }}>
