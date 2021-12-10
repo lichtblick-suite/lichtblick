@@ -45,9 +45,6 @@ function AppWrapper({ loadWelcomeLayout }: { loadWelcomeLayout: boolean }) {
   const [enableMcapDataSource = false] = useAppConfigurationValue<boolean>(
     AppSetting.ENABLE_MCAP_DATA_SOURCE,
   );
-  const [enableWebSocketDataSource = false] = useAppConfigurationValue<boolean>(
-    AppSetting.ENABLE_WEBSOCKET_DATA_SOURCE,
-  );
 
   const dataSources: IDataSourceFactory[] = useMemo(() => {
     const sources = [
@@ -57,20 +54,18 @@ function AppWrapper({ loadWelcomeLayout }: { loadWelcomeLayout: boolean }) {
       new Ros2UnavailableDataSourceFactory(),
       new Ros2LocalBagDataSourceFactory(),
       new RosbridgeDataSourceFactory(),
+      new FoxgloveWebSocketDataSourceFactory(),
       new UlogLocalDataSourceFactory(),
       new VelodyneUnavailableDataSourceFactory(),
       new FoxgloveDataPlatformDataSourceFactory(),
     ];
 
-    if (enableWebSocketDataSource) {
-      sources.unshift(new FoxgloveWebSocketDataSourceFactory());
-    }
     if (enableMcapDataSource) {
       sources.push(new McapLocalDataSourceFactory());
     }
 
     return sources;
-  }, [enableMcapDataSource, enableWebSocketDataSource]);
+  }, [enableMcapDataSource]);
 
   return (
     <App

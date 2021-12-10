@@ -51,9 +51,6 @@ function AppWrapper() {
   const [enableMcapDataSource = false] = useAppConfigurationValue<boolean>(
     AppSetting.ENABLE_MCAP_DATA_SOURCE,
   );
-  const [enableWebSocketDataSource = false] = useAppConfigurationValue<boolean>(
-    AppSetting.ENABLE_WEBSOCKET_DATA_SOURCE,
-  );
   const deepLinks = useMemo(() => desktopBridge.getDeepLinks(), []);
 
   const dataSources: IDataSourceFactory[] = useMemo(() => {
@@ -64,21 +61,18 @@ function AppWrapper() {
       new Ros2SocketDataSourceFactory(),
       new Ros2LocalBagDataSourceFactory(),
       new RosbridgeDataSourceFactory(),
+      new FoxgloveWebSocketDataSourceFactory(),
       new UlogLocalDataSourceFactory(),
       new VelodyneDataSourceFactory(),
-
       new FoxgloveDataPlatformDataSourceFactory(),
     ];
 
-    if (enableWebSocketDataSource) {
-      sources.unshift(new FoxgloveWebSocketDataSourceFactory());
-    }
     if (enableMcapDataSource) {
       sources.push(new McapLocalDataSourceFactory());
     }
 
     return sources;
-  }, [enableMcapDataSource, enableWebSocketDataSource]);
+  }, [enableMcapDataSource]);
 
   return <App demoBagUrl={DEMO_BAG_URL} deepLinks={deepLinks} availableSources={dataSources} />;
 }
