@@ -6,9 +6,15 @@ import styled from "styled-components";
 
 const ErrorInfo = styled.div`
   padding: 12px;
+  border-radius: 4px;
+
   background: #ffeaea;
   border: 1px dashed #cc5f5f;
-  border-radius: 4px;
+
+  @media (prefers-color-scheme: dark) {
+    background: #673636;
+    border: 1px dashed #bb5959;
+  }
 `;
 
 export default ErrorInfo;

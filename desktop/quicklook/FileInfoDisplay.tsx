@@ -63,12 +63,16 @@ const TopicRowWrapper = styled.tr`
   display: table-row;
   word-break: break-word;
   &:nth-child(2n) {
+    --zebra-color: rgba(0, 0, 0, 5%);
+    @media (prefers-color-scheme: dark) {
+      --zebra-color: rgba(255, 255, 255, 5%);
+    }
     > :first-child {
-      background: rgba(0, 0, 0, 5%);
+      background: var(--zebra-color);
       border-radius: 4px 0 0 4px;
     }
     > :last-child {
-      background: rgba(0, 0, 0, 5%);
+      background: var(--zebra-color);
       border-radius: 0 4px 4px 0;
     }
   }

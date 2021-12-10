@@ -34,12 +34,21 @@ const GlobalStyle = createGlobalStyle`
     height: 100%;
     padding: 0;
     margin: 0;
+
+    @media (prefers-color-scheme: dark) {
+      background: #333;
+    }
   }
   body {
     padding: 10px;
     font-family: ui-sans-serif, -apple-system;
+    @media (prefers-color-scheme: dark) {
+      color: #fff;
+    }
   }
-  pre, code, tt {
+  pre,
+  code,
+  tt {
     font-family: ui-monospace, monospace;
   }
 `;
