@@ -127,13 +127,13 @@ const markers = [
     position: { x: 40, y: 20, z: 0 },
     scale: 5,
     thickness: 2,
-    outline_color: { r: 255, g: 127, b: 0, a: 255 },
+    outline_color: { r: 1, g: 0.5, b: 0, a: 1 },
   }),
   marker(0, {
     position: { x: 55, y: 20, z: 0 },
     scale: 5,
     thickness: -1,
-    outline_color: { r: 255, g: 0, b: 255, a: 255 },
+    outline_color: { r: 1, g: 0, b: 1, a: 1 },
   }),
   marker(1, {
     thickness: 1,
@@ -142,27 +142,27 @@ const markers = [
       { x: 40, y: 30, z: 0 },
       { x: 30, y: 30, z: 0 },
     ],
-    outline_color: { r: 0, g: 0, b: 255, a: 255 },
+    outline_color: { r: 0, g: 0, b: 1, a: 1 },
   }), // line strip
   marker(1, {
     thickness: 2,
     points: makeLines(0),
-    outline_color: { r: 255, g: 255, b: 255, a: 255 },
+    outline_color: { r: 1, g: 1, b: 1, a: 1 },
   }), // line list
   marker(2, {
     thickness: 2,
     points: makeLines(50),
-    outline_color: { r: 127, g: 127, b: 255, a: 255 },
+    outline_color: { r: 0.5, g: 0.5, b: 1, a: 1 },
   }), // polygon
   marker(3, {
     thickness: 2,
     points: makeLines(100),
-    outline_color: { r: 127, g: 127, b: 255, a: 255 },
+    outline_color: { r: 0.5, g: 0.5, b: 1, a: 1 },
   }),
   marker(3, {
     thickness: -10,
     points: makeLines(150),
-    outline_color: { r: 127, g: 255, b: 127, a: 255 },
+    outline_color: { r: 0.5, g: 1, b: 0.5, a: 1 },
   }),
   marker(3, {
     thickness: -10,
@@ -172,7 +172,7 @@ const markers = [
       { x: 120, y: 30, z: 0 },
       { x: 100, y: 30, z: 0 },
     ],
-    outline_color: { r: 127, g: 255, b: 127, a: 255 },
+    outline_color: { r: 0.5, g: 1, b: 0.5, a: 1 },
   }),
   marker(3, {
     thickness: 1,
@@ -182,7 +182,7 @@ const markers = [
       { x: 120, y: 30, z: 0 },
       { x: 100, y: 30, z: 0 },
     ],
-    outline_color: { r: 0, g: 0, b: 0, a: 255 },
+    outline_color: { r: 0, g: 0, b: 0, a: 1 },
   }),
   marker(3, {
     thickness: -10,
@@ -192,58 +192,58 @@ const markers = [
       { x: 170, y: 30, z: 0 },
       { x: 150, y: 30, z: 0 },
     ],
-    outline_color: { r: 127, g: 255, b: 127, a: 255 },
+    outline_color: { r: 0.5, g: 1, b: 0.5, a: 1 },
   }), // points
   marker(4, {
     points: range(50).map((i) => ({ x: 20 + 5 * i, y: 130 + 10 * Math.sin(i / 2), z: 0 })),
-    fill_color: { r: 255, g: 0, b: 0, a: 255 },
+    fill_color: { r: 1, g: 0, b: 0, a: 1 },
   }),
   marker(4, {
     scale: 1,
     points: range(50).map((i) => ({ x: 20 + 5 * i, y: 150 + 10 * Math.sin(i / 2), z: 0 })),
-    fill_color: { r: 127, g: 255, b: 0, a: 255 },
+    fill_color: { r: 0.5, g: 1, b: 0, a: 1 },
   }),
   marker(4, {
     scale: 2,
     points: range(50).map((i) => ({ x: 20 + 5 * i, y: 170 + 10 * Math.sin(i / 2), z: 0 })),
-    fill_color: { r: 0, g: 0, b: 255, a: 255 },
+    fill_color: { r: 0, g: 0, b: 1, a: 1 },
   }),
   marker(4, {
     scale: 2,
     points: range(50).map((i) => ({ x: 20 + 5 * i, y: 190 + 10 * Math.sin(i / 2), z: 0 })),
     outline_colors: range(50).map((i) => ({
-      r: Math.round(255 * Math.min(1, (2 * i) / 50)),
-      g: Math.round(255 * Math.min(1, (2 * (i - 15)) / 50)),
-      b: Math.round(255 * Math.min(1, (2 * (i - 30)) / 50)),
-      a: 255,
+      r: Math.min(1, (2 * i) / 50),
+      g: Math.min(1, (2 * (i - 15)) / 50),
+      b: Math.min(1, (2 * (i - 30)) / 50),
+      a: 1,
     })),
-    fill_color: { r: 0, g: 0, b: 255, a: 255 },
+    fill_color: { r: 0, g: 0, b: 1, a: 1 },
   }), // text
   marker(5, {
     text: { data: "Hello!" },
     position: { x: 30, y: 100, z: 0 },
     scale: 1,
-    outline_color: { r: 255, g: 127, b: 127, a: 255 },
+    outline_color: { r: 1, g: 0.5, b: 0.5, a: 1 },
   }),
   marker(5, {
     text: { data: "Hello!" },
     position: { x: 130, y: 100, z: 0 },
     scale: 1,
-    outline_color: { r: 255, g: 127, b: 127, a: 255 },
+    outline_color: { r: 1, g: 0.5, b: 0.5, a: 1 },
     filled: true,
-    fill_color: { r: 50, g: 50, b: 50, a: 255 },
+    fill_color: { r: 50 / 255, g: 50 / 255, b: 50 / 255, a: 1 },
   }),
   marker(0, {
     position: { x: 30, y: 100, z: 0 },
     scale: 2,
     thickness: -1,
-    outline_color: { r: 255, g: 255, b: 0, a: 255 },
+    outline_color: { r: 1, g: 1, b: 0, a: 1 },
   }),
   marker(0, {
     position: { x: 130, y: 100, z: 0 },
     scale: 2,
     thickness: -1,
-    outline_color: { r: 255, g: 255, b: 0, a: 255 },
+    outline_color: { r: 1, g: 1, b: 0, a: 1 },
   }),
 ];
 

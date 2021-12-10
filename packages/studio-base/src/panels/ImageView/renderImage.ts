@@ -109,8 +109,7 @@ export async function renderImage({
 }
 
 function toRGBA(color: Color) {
-  const { r, g, b, a } = color;
-  return `rgba(${r}, ${g}, ${b}, ${a !== 0 ? a : 1})`;
+  return `rgba(${color.r * 255}, ${color.g * 255}, ${color.b * 255}, ${color.a})`;
 }
 
 // Note: Return type is inexact -- may contain z.
