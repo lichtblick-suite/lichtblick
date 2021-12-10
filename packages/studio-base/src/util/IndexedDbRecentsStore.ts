@@ -40,8 +40,11 @@ export class IndexedDbRecentsStore {
   }
 
   /** Save the recents into the store */
-  async set(recents: RecentRecord[]): Promise<void> {
-    await idbSet(this.key, recents, this.store);
+  async set(_recents: RecentRecord[]): Promise<void> {
+    // Avoid storing recents until we identify issues with file handles the current code tries to
+    // store File instances which incorrectly stores the entire file in indexeddb. This clears out
+    // those entries.
+    await idbSet(this.key, [], this.store);
   }
 
   static GenerateRecordId(): string {
