@@ -44,7 +44,7 @@ jobs:
           base: main
           head: ${{ github.event.release.target_commitish || github.event.inputs.target_commitish }}
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.FOXGLOVEBOT_GITHUB_TOKEN }}
 
   npm:
     name: NPM publish
