@@ -14,7 +14,6 @@ import { parseInputUrl } from "@foxglove/studio-base/util/url";
 export default class FoxgloveWebSocketDataSourceFactory implements IDataSourceFactory {
   id = "foxglove-websocket";
   displayName = "Foxglove WebSocket";
-  badgeText = "beta";
   iconName: IDataSourceFactory["iconName"] = "Flow";
 
   promptOptions(previousValue?: string): PromptOptions {
