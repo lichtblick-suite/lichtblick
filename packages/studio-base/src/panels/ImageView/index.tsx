@@ -19,6 +19,7 @@ import MenuDownIcon from "@mdi/svg/svg/menu-down.svg";
 import WavesIcon from "@mdi/svg/svg/waves.svg";
 import cx from "classnames";
 import { last, uniq } from "lodash";
+import { useEffect } from "react";
 
 import { filterMap } from "@foxglove/den/collection";
 import { useShallowMemo } from "@foxglove/hooks";
@@ -124,7 +125,7 @@ const useStyles = makeStyles((theme) => ({
     overflow: "hidden",
     whiteSpace: "nowrap",
     textOverflow: "ellipsis",
-    flexDhrink: 1,
+    flexShrink: 1,
     display: "flex",
     alignItems: "center",
   },
@@ -348,14 +349,24 @@ function ImageView(props: Props) {
   );
 
   // Namespaces represent marker topics based on the camera topic prefix (e.g. "/camera_front_medium")
-  const { allCameraNamespaces, imageTopicsByNamespace } = useMemo(() => {
+  const { allCameraNamespaces, imageTopicsByNamespace, allImageTopics } = useMemo(() => {
     const imageTopics = (topics ?? []).filter(({ datatype }) => IMAGE_DATATYPES.includes(datatype));
     const topicsByNamespace = groupTopics(imageTopics);
     return {
+      allImageTopics: imageTopics,
       imageTopicsByNamespace: topicsByNamespace,
       allCameraNamespaces: [...topicsByNamespace.keys()],
     };
   }, [topics]);
+
+  // If no cameraTopic is selected, automatically select the first available image topic
+  useEffect(() => {
+    if (cameraTopic == undefined || cameraTopic === "") {
+      if (allImageTopics[0] && allImageTopics[0].name !== "") {
+        saveConfig({ cameraTopic: allImageTopics[0].name });
+      }
+    }
+  }, [allImageTopics, cameraTopic, saveConfig]);
 
   const imageMarkerDatatypes = useMemo(
     () => [

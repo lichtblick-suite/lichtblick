@@ -57,7 +57,7 @@ const classes = mergeStyleSets({
     overflow: "hidden",
     whiteSpace: "nowrap",
     textOverflow: "ellipsis",
-    flexDhrink: 1,
+    flexShrink: 1,
     display: "flex",
     alignItems: "center",
   },
