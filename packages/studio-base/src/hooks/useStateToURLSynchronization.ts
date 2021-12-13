@@ -12,9 +12,12 @@ import {
 import { useCurrentLayoutSelector } from "@foxglove/studio-base/context/CurrentLayoutContext";
 import { usePlayerSelection } from "@foxglove/studio-base/context/PlayerSelectionContext";
 import useDeepMemo from "@foxglove/studio-base/hooks/useDeepMemo";
+import { PlayerCapabilities } from "@foxglove/studio-base/players/types";
 import { encodeAppURLState } from "@foxglove/studio-base/util/appURLState";
 import isDesktopApp from "@foxglove/studio-base/util/isDesktopApp";
 
+const selectCanSeek = (ctx: MessagePipelineContext) =>
+  ctx.playerState.capabilities.includes(PlayerCapabilities.playbackControl);
 const selectCurrentTime = (ctx: MessagePipelineContext) => ctx.playerState.activeData?.currentTime;
 const selectUrlState = (ctx: MessagePipelineContext) => ctx.playerState.urlState;
 
@@ -28,6 +31,7 @@ const debouncedURLUpdate = debounce(
  * Syncs our current player, layout and other state with the URL in the address bar.
  */
 export function useStateToURLSynchronization(): void {
+  const canSeek = useMessagePipeline(selectCanSeek);
   const currentTime = useMessagePipeline(selectCurrentTime);
   const urlState = useMessagePipeline(selectUrlState);
   const layoutId = useCurrentLayoutSelector((layout) => layout.selectedLayout?.id);
@@ -49,11 +53,11 @@ export function useStateToURLSynchronization(): void {
     const url = encodeAppURLState(new URL(window.location.href), {
       ds: selectedSource.id,
       layoutId,
-      time: currentTime,
+      time: canSeek ? currentTime : undefined,
       dsParams: stableUrlState,
     });
 
     // Debounce updates to avoid spamming changes to the address bar.
     debouncedURLUpdate(url);
-  }, [currentTime, layoutId, selectedSource, stableUrlState]);
+  }, [canSeek, currentTime, layoutId, selectedSource, stableUrlState]);
 }
