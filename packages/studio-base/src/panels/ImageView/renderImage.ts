@@ -16,9 +16,10 @@ import {
   Image,
   ImageMarker,
   Color,
-  Point,
   CompressedImage,
   ImageMarkerArray,
+  ImageMarkerType,
+  Point2D,
 } from "@foxglove/studio-base/types/Messages";
 import sendNotification from "@foxglove/studio-base/util/sendNotification";
 
@@ -112,15 +113,8 @@ function toRGBA(color: Color) {
   return `rgba(${color.r * 255}, ${color.g * 255}, ${color.b * 255}, ${color.a})`;
 }
 
-// Note: Return type is inexact -- may contain z.
-function maybeUnrectifyPoint(
-  cameraModel: PinholeCameraModel | undefined,
-  point: Point,
-): Readonly<{ x: number; y: number }> {
-  if (cameraModel) {
-    return cameraModel.unrectifyPoint(point);
-  }
-  return point;
+function maybeUnrectifyPoint(cameraModel: PinholeCameraModel | undefined, point: Point2D): Point2D {
+  return cameraModel?.unrectifyPoint(point) ?? point;
 }
 
 // Potentially performance-sensitive; await can be expensive
@@ -312,117 +306,194 @@ function paintMarker(
   cameraModel: PinholeCameraModel | undefined,
 ) {
   switch (marker.type) {
-    case 0: {
-      // CIRCLE
-      ctx.beginPath();
-      const { x, y } = maybeUnrectifyPoint(cameraModel, marker.position);
-      ctx.arc(x, y, marker.scale, 0, 2 * Math.PI);
-      if (marker.thickness <= 0) {
-        ctx.fillStyle = toRGBA(marker.outline_color);
-        ctx.fill();
-      } else {
-        ctx.lineWidth = marker.thickness;
-        ctx.strokeStyle = toRGBA(marker.outline_color);
-        ctx.stroke();
-      }
+    case ImageMarkerType.CIRCLE: {
+      paintCircle(
+        ctx,
+        marker.position,
+        marker.scale,
+        1.0,
+        marker.outline_color,
+        marker.filled ? marker.fill_color : undefined,
+        cameraModel,
+      );
       break;
     }
 
-    // LINE_LIST
-    case 2:
+    case ImageMarkerType.LINE_LIST: {
       if (marker.points.length % 2 !== 0) {
+        sendNotification(
+          `ImageMarker LINE_LIST has an odd number of points`,
+          `LINE_LIST marker "${marker.ns}$${marker.ns ? ":" : ""}${marker.id}" has ${
+            marker.points.length
+          } point${marker.points.length !== 1 ? "s" : ""}, expected an even number`,
+          "user",
+          "error",
+        );
         break;
       }
 
-      ctx.strokeStyle = toRGBA(marker.outline_color);
-      ctx.lineWidth = marker.thickness;
+      const hasExactColors = marker.outline_colors.length === marker.points.length / 2;
 
       for (let i = 0; i < marker.points.length; i += 2) {
-        const { x: x1, y: y1 } = maybeUnrectifyPoint(cameraModel, marker.points[i] as Point);
-        const { x: x2, y: y2 } = maybeUnrectifyPoint(cameraModel, marker.points[i + 1] as Point);
-        ctx.beginPath();
-        ctx.moveTo(x1, y1);
-        ctx.lineTo(x2, y2);
-        ctx.stroke();
+        // Support the case where outline_colors is half the length of points,
+        // one color per line, and where outline_colors matches the length of
+        // points (although we only use the first color in this case). Fall back
+        // to marker.outline_color as needed
+        const outlineColor = hasExactColors
+          ? marker.outline_colors[i / 2]!
+          : marker.outline_colors.length > i
+          ? marker.outline_colors[i]!
+          : marker.outline_color;
+        paintLine(
+          ctx,
+          marker.points[i]!,
+          marker.points[i + 1]!,
+          marker.scale,
+          outlineColor,
+          cameraModel,
+        );
       }
 
       break;
+    }
 
-    // LINE_STRIP, POLYGON
-    case 1:
-    case 3: {
+    case ImageMarkerType.LINE_STRIP:
+    case ImageMarkerType.POLYGON: {
       if (marker.points.length === 0) {
         break;
       }
       ctx.beginPath();
-      const { x, y } = maybeUnrectifyPoint(cameraModel, marker.points[0] as Point);
+      const { x, y } = maybeUnrectifyPoint(cameraModel, marker.points[0]!);
       ctx.moveTo(x, y);
       for (let i = 1; i < marker.points.length; i++) {
-        const maybeUnrectifiedPoint = maybeUnrectifyPoint(cameraModel, marker.points[i] as Point);
+        const maybeUnrectifiedPoint = maybeUnrectifyPoint(cameraModel, marker.points[i]!);
         ctx.lineTo(maybeUnrectifiedPoint.x, maybeUnrectifiedPoint.y);
       }
-      if (marker.type === 3) {
+      if (marker.type === ImageMarkerType.POLYGON) {
         ctx.closePath();
+        if (marker.filled && marker.fill_color.a > 0) {
+          ctx.fillStyle = toRGBA(marker.fill_color);
+          ctx.fill();
+        }
       }
-      if (marker.thickness <= 0) {
-        ctx.fillStyle = toRGBA(marker.outline_color);
-        ctx.fill();
-      } else {
+      if (marker.outline_color.a > 0 && marker.scale > 0) {
         ctx.strokeStyle = toRGBA(marker.outline_color);
-        ctx.lineWidth = marker.thickness;
+        ctx.lineWidth = marker.scale;
         ctx.stroke();
       }
       break;
     }
 
-    case 4: {
-      // POINTS
-      if (marker.points.length === 0) {
-        break;
-      }
-
-      const size = marker.scale !== 0 ? marker.scale : 4;
-      if (marker.outline_colors.length === marker.points.length) {
-        for (let i = 0; i < marker.points.length; i++) {
-          const { x, y } = maybeUnrectifyPoint(cameraModel, marker.points[i] as Point);
-          ctx.fillStyle = toRGBA(marker.outline_colors[i] as Color);
-          ctx.beginPath();
-          ctx.arc(x, y, size, 0, 2 * Math.PI);
-          ctx.fill();
-        }
-      } else {
-        ctx.beginPath();
-        for (let i = 0; i < marker.points.length; i++) {
-          const { x, y } = maybeUnrectifyPoint(cameraModel, marker.points[i] as Point);
-          ctx.arc(x, y, size, 0, 2 * Math.PI);
-          ctx.closePath();
-        }
-        ctx.fillStyle = toRGBA(marker.fill_color);
-        ctx.fill();
+    case ImageMarkerType.POINTS: {
+      for (let i = 0; i < marker.points.length; i++) {
+        const point = marker.points[i]!;
+        // This is not a typo. ImageMarker has an array for outline_colors but
+        // not fill_colors, even though points are filled and not outlined. We
+        // only fall back to fill_color if both outline_colors[i] and
+        // outline_color are fully transparent
+        const fillColor =
+          marker.outline_colors.length > i
+            ? marker.outline_colors[i]!
+            : marker.outline_color.a > 0
+            ? marker.outline_color
+            : marker.fill_color;
+        paintCircle(ctx, point, marker.scale, marker.scale, undefined, fillColor, cameraModel);
       }
       break;
     }
 
-    case 5: {
+    case ImageMarkerType.TEXT: {
       // TEXT (our own extension on visualization_msgs/Marker)
       const { x, y } = maybeUnrectifyPoint(cameraModel, marker.position);
+      const text = marker.text?.data ?? "";
+      if (!text) {
+        break;
+      }
 
       const fontSize = marker.scale * 12;
       const padding = 4 * marker.scale;
       ctx.font = `${fontSize}px sans-serif`;
       ctx.textBaseline = "bottom";
       if (marker.filled) {
-        const metrics = ctx.measureText(marker.text.data);
-        const height = fontSize * 1.2; // Chrome doesn't yet support height in TextMetrics
+        const metrics = ctx.measureText(text);
+        const height =
+          "fontBoundingBoxAscent" in metrics
+            ? metrics.fontBoundingBoxAscent + metrics.fontBoundingBoxDescent
+            : fontSize * 1.2;
         ctx.fillStyle = toRGBA(marker.fill_color);
         ctx.fillRect(x, y - height, Math.ceil(metrics.width + 2 * padding), Math.ceil(height));
       }
       ctx.fillStyle = toRGBA(marker.outline_color);
-      ctx.fillText(marker.text.data, x + padding, y);
+      ctx.fillText(text, x + padding, y);
       break;
     }
 
-    default:
-      console.warn("unrecognized image marker type", marker);
+    default: {
+      sendNotification(
+        `Unrecognized ImageMarker type ${marker.type}`,
+        `Marker "${marker.ns}$${marker.ns ? ":" : ""}${marker.id}" has an unrecognized type ${
+          marker.type
+        }`,
+        "user",
+        "error",
+      );
+    }
+  }
+}
+
+function paintLine(
+  ctx: CanvasRenderingContext2D | OffscreenCanvasRenderingContext2D,
+  pointA: Point2D,
+  pointB: Point2D,
+  thickness: number,
+  outlineColor: Color,
+  cameraModel: PinholeCameraModel | undefined,
+) {
+  if (thickness <= 0 || outlineColor.a <= 0) {
+    return;
+  }
+
+  const { x: x1, y: y1 } = maybeUnrectifyPoint(cameraModel, pointA);
+  const { x: x2, y: y2 } = maybeUnrectifyPoint(cameraModel, pointB);
+
+  ctx.beginPath();
+  ctx.moveTo(x1, y1);
+  ctx.lineTo(x2, y2);
+
+  ctx.lineWidth = thickness;
+  ctx.strokeStyle = toRGBA(outlineColor);
+  ctx.stroke();
+}
+
+function paintCircle(
+  ctx: CanvasRenderingContext2D | OffscreenCanvasRenderingContext2D,
+  point: Point2D,
+  radius: number,
+  thickness: number,
+  outlineColor: Color | undefined,
+  fillColor: Color | undefined,
+  cameraModel: PinholeCameraModel | undefined,
+) {
+  // perf-sensitive: function params instead of options object to avoid allocations
+  const hasFill = fillColor != undefined && fillColor.a > 0;
+  const hasStroke = outlineColor != undefined && outlineColor.a > 0 && thickness > 0;
+
+  if (radius <= 0 || (!hasFill && !hasStroke)) {
+    return;
+  }
+
+  const { x, y } = maybeUnrectifyPoint(cameraModel, point);
+  ctx.beginPath();
+  ctx.arc(x, y, radius, 0, 2 * Math.PI);
+
+  if (hasFill) {
+    ctx.fillStyle = toRGBA(fillColor);
+    ctx.fill();
+  }
+
+  if (hasStroke) {
+    ctx.lineWidth = thickness;
+    ctx.strokeStyle = toRGBA(outlineColor);
+    ctx.stroke();
   }
 }

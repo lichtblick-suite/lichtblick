@@ -52,7 +52,7 @@ export function getMarkerOptions(
   for (const { name, datatype } of topics) {
     if (
       cameraNamespace &&
-      (name.startsWith(cameraNamespace) || name.startsWith(`/old${cameraNamespace}`)) &&
+      name.startsWith(cameraNamespace + "/") &&
       imageMarkerDatatypes.includes(datatype)
     ) {
       results.push(name);

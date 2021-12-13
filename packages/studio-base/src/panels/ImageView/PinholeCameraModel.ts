@@ -11,7 +11,7 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { Point, CameraInfo } from "@foxglove/studio-base/types/Messages";
+import { CameraInfo, Point2D } from "@foxglove/studio-base/types/Messages";
 
 const DISTORTION_STATE = {
   NONE: "NONE",
@@ -80,9 +80,9 @@ export default class PinholeCameraModel {
     this.K = K;
   }
 
-  unrectifyPoint({ x: rectX, y: rectY }: Point): { x: number; y: number } {
+  unrectifyPoint(point: Point2D): Point2D {
     if (this._distortionState === DISTORTION_STATE.NONE) {
-      return { x: rectX, y: rectY };
+      return point;
     }
 
     const { P, R, D, K } = this;
@@ -99,8 +99,8 @@ export default class PinholeCameraModel {
     // x <- (u - c'x) / f'x
     // y <- (v - c'y) / f'y
     // c'x, f'x, etc. (primed) come from "new camera matrix" P[0:3, 0:3].
-    const x1 = (rectX - cx - tx) / fx;
-    const y1 = (rectY - cy - ty) / fy;
+    const x1 = (point.x - cx - tx) / fx;
+    const y1 = (point.y - cy - ty) / fy;
     // [X Y W]^T <- R^-1 * [x y 1]^T
     const X = R[0]! * x1 + R[1]! * y1 + R[2]!;
     const Y = R[3]! * x1 + R[4]! * y1 + R[5]!;

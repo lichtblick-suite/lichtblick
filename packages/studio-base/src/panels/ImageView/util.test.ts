@@ -59,11 +59,7 @@ describe("ImageView", () => {
           allCameraNamespaces,
           ["visualization_msgs/ImageMarker", "vision_msgs/ImageMarker"],
         ),
-      ).toEqual([
-        "/old/some_camera_topic/marker3",
-        "/some_camera_topic/marker1",
-        "/some_camera_topic/marker2",
-      ]);
+      ).toEqual(["/some_camera_topic/marker1", "/some_camera_topic/marker2"]);
     });
   });
 

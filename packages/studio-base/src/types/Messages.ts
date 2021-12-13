@@ -29,6 +29,12 @@ export type MutablePoint = {
 export type Point = Readonly<MutablePoint>;
 type Points = readonly Point[];
 
+export type MutablePoint2D = {
+  x: number;
+  y: number;
+};
+export type Point2D = Readonly<MutablePoint2D>;
+
 export type Header = Readonly<{
   frame_id: string;
   stamp: Time;
@@ -373,12 +379,28 @@ export type TF = Readonly<
   }
 >;
 
+export enum ImageMarkerType {
+  CIRCLE = 0,
+  LINE_STRIP = 1,
+  LINE_LIST = 2,
+  POLYGON = 3,
+  POINTS = 4,
+  // TEXT is not part of visualization_msgs/ImageMarker, but we include it to
+  // support existing frameworks that have extended this message definition
+  TEXT = 5,
+}
+
+export enum ImageMarkerAction {
+  ADD = 0,
+  REMOVE = 1,
+}
+
 export type ImageMarker = Readonly<{
   header: Header;
   ns: string;
   id: number;
-  type: 0 | 1 | 2 | 3 | 4 | 5;
-  action: 0 | 1;
+  type: ImageMarkerType;
+  action: ImageMarkerAction;
   position: Point;
   scale: number;
   outline_color: Color;
@@ -387,8 +409,9 @@ export type ImageMarker = Readonly<{
   lifetime: Duration;
   points: Points;
   outline_colors: Colors;
-  text: { data: string };
-  thickness: number;
+  // `text` is not part of visualization_msgs/ImageMarker, but we include it to
+  // support existing frameworks that have extended this message definition
+  text?: { data: string };
 }>;
 
 export type ImageMarkerArray = Readonly<{
