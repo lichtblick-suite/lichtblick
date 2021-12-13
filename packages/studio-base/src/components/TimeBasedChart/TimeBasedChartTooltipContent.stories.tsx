@@ -21,7 +21,7 @@ export default {
   component: TimeBasedChartTooltipContent,
 };
 
-export function SingleItem(): React.ReactElement {
+export function SingleItemSingleDataset(): React.ReactElement {
   const data: TimeBasedChartTooltipData = {
     x: 0,
     y: 0,
@@ -32,17 +32,17 @@ export function SingleItem(): React.ReactElement {
   const { tooltip } = useTooltip({
     shown: true,
     targetPosition: { x: 200, y: 100 },
-    contents: <TimeBasedChartTooltipContent content={[data]} />,
+    contents: <TimeBasedChartTooltipContent multiDataset={false} content={[data]} />,
   });
   return <div style={{ width: "100%", height: "100%" }}>{tooltip}</div>;
 }
-SingleItem.parameters = { colorScheme: "dark" };
+SingleItemSingleDataset.parameters = { colorScheme: "dark" };
 
-export const SingleItemLight = Object.assign(SingleItem.bind(undefined), {
+export const SingleItemSingleDatasetLight = Object.assign(SingleItemSingleDataset.bind(undefined), {
   parameters: { colorScheme: "light" },
 });
 
-export function MultipleItems(): React.ReactElement {
+export function SingleItemMultiDataset(): React.ReactElement {
   const data: TimeBasedChartTooltipData = {
     x: 0,
     y: 0,
@@ -53,12 +53,60 @@ export function MultipleItems(): React.ReactElement {
   const { tooltip } = useTooltip({
     shown: true,
     targetPosition: { x: 200, y: 100 },
-    contents: <TimeBasedChartTooltipContent content={[data, data]} />,
+    contents: <TimeBasedChartTooltipContent multiDataset={true} content={[data]} />,
   });
   return <div style={{ width: "100%", height: "100%" }}>{tooltip}</div>;
 }
-MultipleItems.parameters = { colorScheme: "dark" };
+SingleItemMultiDataset.parameters = { colorScheme: "dark" };
 
-export const MultipleItemsLight = Object.assign(MultipleItems.bind(undefined), {
+export const SingleItemMultiDatasetLight = Object.assign(SingleItemMultiDataset.bind(undefined), {
   parameters: { colorScheme: "light" },
 });
+
+export function MultipleItemsSingleDataset(): React.ReactElement {
+  const data: TimeBasedChartTooltipData = {
+    x: 0,
+    y: 0,
+    path: "/some/topic.path",
+    value: 3,
+    constantName: "ACTIVE",
+  };
+  const { tooltip } = useTooltip({
+    shown: true,
+    targetPosition: { x: 200, y: 100 },
+    contents: <TimeBasedChartTooltipContent multiDataset={false} content={[data, data]} />,
+  });
+  return <div style={{ width: "100%", height: "100%" }}>{tooltip}</div>;
+}
+MultipleItemsSingleDataset.parameters = { colorScheme: "dark" };
+
+export const MultipleItemsSingleDatasetLight = Object.assign(
+  MultipleItemsSingleDataset.bind(undefined),
+  {
+    parameters: { colorScheme: "light" },
+  },
+);
+
+export function MultipleItemsMultieDataset(): React.ReactElement {
+  const data: TimeBasedChartTooltipData = {
+    x: 0,
+    y: 0,
+    path: "/some/topic.path",
+    value: 3,
+    constantName: "ACTIVE",
+  };
+  const { tooltip } = useTooltip({
+    shown: true,
+    targetPosition: { x: 200, y: 100 },
+    contents: <TimeBasedChartTooltipContent multiDataset={true} content={[data, data]} />,
+  });
+  return <div style={{ width: "100%", height: "100%" }}>{tooltip}</div>;
+}
+MultipleItemsMultieDataset.parameters = { colorScheme: "dark" };
+
+export const MultipleItemsMultiDatasetLight = Object.assign(
+  MultipleItemsMultieDataset.bind(undefined),
+  {
+    parameters: { colorScheme: "light" },
+  },
+);

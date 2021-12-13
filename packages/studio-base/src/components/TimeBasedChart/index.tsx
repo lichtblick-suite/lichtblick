@@ -783,11 +783,15 @@ export default function TimeBasedChart(props: Props): JSX.Element {
 
   useEffect(() => log.debug(`<TimeBasedChart> (datasetId=${datasetId})`), [datasetId]);
 
+  const datasetsLength = datasets.length;
   const tooltipContent = useMemo(() => {
     return activeTooltip ? (
-      <TimeBasedChartTooltipContent content={activeTooltip.data} />
+      <TimeBasedChartTooltipContent
+        multiDataset={datasetsLength > 1}
+        content={activeTooltip.data}
+      />
     ) : undefined;
-  }, [activeTooltip]);
+  }, [activeTooltip, datasetsLength]);
 
   // reset is shown if we have sync lock and there has been user interaction, or if we don't
   // have sync lock and the user has manually interacted with the plot
