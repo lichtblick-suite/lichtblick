@@ -14,8 +14,13 @@ import { Player } from "@foxglove/studio-base/players/types";
 
 class VelodyneDataSourceFactory implements IDataSourceFactory {
   id = "velodyne-device";
+  type: IDataSourceFactory["type"] = "connection";
   displayName = "Velodyne LIDAR";
   iconName: IDataSourceFactory["iconName"] = "GenericScan";
+
+  formConfig = {
+    fields: [{ id: "url", label: "UDP Port", defaultValue: "2369" }],
+  };
 
   promptOptions(previousValue?: string): PromptOptions {
     return {

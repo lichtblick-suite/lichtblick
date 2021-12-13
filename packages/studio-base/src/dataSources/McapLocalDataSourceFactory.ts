@@ -13,6 +13,7 @@ import { RandomAccessDataProviderDescriptor } from "@foxglove/studio-base/random
 
 class McapLocalDataSourceFactory implements IDataSourceFactory {
   id = "mcap-local-file";
+  type: IDataSourceFactory["type"] = "file";
   displayName = "MCAP (local)";
   iconName: IDataSourceFactory["iconName"] = "OpenFile";
   supportedFileTypes = [".mcap"];

@@ -13,8 +13,10 @@ import { parseInputUrl } from "@foxglove/studio-base/util/url";
 
 class Ros1RemoteBagDataSourceFactory implements IDataSourceFactory {
   id = "ros1-remote-bagfile";
+  type: IDataSourceFactory["type"] = "remote-file";
   displayName = "ROS 1 Bag (remote)";
   iconName: IDataSourceFactory["iconName"] = "FileASPX";
+  supportedFileTypes = [".bag"];
 
   promptOptions(previousValue?: string): PromptOptions {
     return {

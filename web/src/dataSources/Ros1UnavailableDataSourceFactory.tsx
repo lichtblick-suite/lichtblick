@@ -9,6 +9,7 @@ import { IDataSourceFactory } from "@foxglove/studio-base";
 export default class Ros1UnavailableDataSourceFactory implements IDataSourceFactory {
   displayName = "ROS 1";
   id = "ros1-socket";
+  type: IDataSourceFactory["type"] = "connection";
   iconName: IDataSourceFactory["iconName"] = "studio.ROS";
 
   disabledReason = (

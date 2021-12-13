@@ -13,8 +13,13 @@ import { parseInputUrl } from "@foxglove/studio-base/util/url";
 
 class RosbridgeDataSourceFactory implements IDataSourceFactory {
   id = "rosbridge-websocket";
+  type: IDataSourceFactory["type"] = "connection";
   displayName = "Rosbridge (ROS 1 & 2)";
   iconName: IDataSourceFactory["iconName"] = "Flow";
+
+  formConfig = {
+    fields: [{ id: "url", label: "Websocket URL", defaultValue: "ws://localhost:9090" }],
+  };
 
   promptOptions(previousValue?: string): PromptOptions {
     return {

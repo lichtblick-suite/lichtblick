@@ -68,7 +68,7 @@ export function useInitialDeepLinkState(deepLinks: string[]): void {
     }
 
     try {
-      selectSource(appUrlState.ds, appUrlState.dsParams);
+      selectSource(appUrlState.ds, { type: "connection", params: appUrlState.dsParams });
     } catch (err) {
       log.error(err);
     }

@@ -12,6 +12,7 @@ import { getLocalUlogDescriptor } from "@foxglove/studio-base/randomAccessDataPr
 
 class UlogLocalDataSourceFactory implements IDataSourceFactory {
   id = "ulog-local-file";
+  type: IDataSourceFactory["type"] = "file";
   displayName = "PX4 ULog (local)";
   iconName: IDataSourceFactory["iconName"] = "OpenFile";
   supportedFileTypes = [".ulg", ".ulog"];

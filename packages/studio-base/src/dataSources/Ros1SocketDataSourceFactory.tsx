@@ -2,6 +2,7 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
+import { RosNode } from "@foxglove/ros1";
 import OsContextSingleton from "@foxglove/studio-base/OsContextSingleton";
 import {
   IDataSourceFactory,
@@ -12,14 +13,32 @@ import Ros1Player from "@foxglove/studio-base/players/Ros1Player";
 import { Player } from "@foxglove/studio-base/players/types";
 import { parseInputUrl } from "@foxglove/studio-base/util/url";
 
+const os = OsContextSingleton; // workaround for https://github.com/webpack/webpack/issues/12960
+
 class Ros1SocketDataSourceFactory implements IDataSourceFactory {
   id = "ros1-socket";
+  type: IDataSourceFactory["type"] = "connection";
   displayName = "ROS 1";
   iconName: IDataSourceFactory["iconName"] = "studio.ROS";
 
-  promptOptions(previousValue?: string): PromptOptions {
-    const os = OsContextSingleton; // workaround for https://github.com/webpack/webpack/issues/12960
+  formConfig = {
+    fields: [
+      {
+        id: "url",
+        label: "ROS_MASTER_URI",
+        defaultValue: os?.getEnvVar("ROS_MASTER_URI") ?? "http://localhost:11311",
+      },
+      {
+        id: "hostname",
+        label: "ROS_HOSTNAME",
+        defaultValue: os
+          ? RosNode.GetRosHostname(os.getEnvVar, os.getHostname, os.getNetworkInterfaces)
+          : "localhost",
+      },
+    ],
+  };
 
+  promptOptions(previousValue?: string): PromptOptions {
     return {
       title: "ROS 1 TCP connection",
       placeholder: "localhost:11311",

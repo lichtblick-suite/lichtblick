@@ -19,13 +19,21 @@ export type DataSourceFactoryInitializeArgs = {
   consoleApi?: ConsoleApi;
 } & Record<string, unknown>;
 
+export type DataSourceFactoryType = "file" | "remote-file" | "connection";
+
 export interface IDataSourceFactory {
   id: string;
+  type: DataSourceFactoryType;
   displayName: string;
   iconName?: RegisteredIconNames;
   disabledReason?: string | JSX.Element;
   badgeText?: string;
   hidden?: boolean;
+
+  formConfig?: {
+    // Initialization args are populated with keys of the _id_ field
+    fields: { id: string; label: string; defaultValue?: string; placeholder?: string }[];
+  };
 
   // If data source initialization supports "Open File" workflow, this property lists the supported
   // file types
@@ -50,11 +58,28 @@ export type RecentSource = {
   label?: string;
 };
 
+type DataSourceArgsCommon = {
+  skipRecents?: boolean;
+};
+
+// File data sources accept either file instances or handles
+type FileDataSourceArgs = DataSourceArgsCommon & {
+  type: "file";
+  files?: File[];
+};
+
+type ConnectionDataSourceArgs = DataSourceArgsCommon & {
+  type: "connection";
+  params?: Record<string, string | undefined>;
+};
+
+export type DataSourceArgs = FileDataSourceArgs | ConnectionDataSourceArgs;
+
 /**
  * PlayerSelectionContext exposes the available data sources and a function to set the current data source
  */
 export interface PlayerSelection {
-  selectSource: (sourceId: string, args?: Record<string, unknown>) => void;
+  selectSource: (sourceId: string, args?: DataSourceArgs) => void;
   selectRecent: (recentId: string) => void;
 
   /** Currently selected data source */

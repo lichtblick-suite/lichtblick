@@ -13,8 +13,13 @@ import { parseInputUrl } from "@foxglove/studio-base/util/url";
 
 export default class FoxgloveWebSocketDataSourceFactory implements IDataSourceFactory {
   id = "foxglove-websocket";
+  type: IDataSourceFactory["type"] = "connection";
   displayName = "Foxglove WebSocket";
   iconName: IDataSourceFactory["iconName"] = "Flow";
+
+  formConfig = {
+    fields: [{ id: "url", label: "Websocket URL", defaultValue: "ws://localhost:9090" }],
+  };
 
   promptOptions(previousValue?: string): PromptOptions {
     return {

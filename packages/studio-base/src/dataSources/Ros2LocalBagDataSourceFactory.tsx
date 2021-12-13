@@ -12,6 +12,7 @@ import { getLocalRosbag2Descriptor } from "@foxglove/studio-base/randomAccessDat
 
 class Ros2LocalBagDataSourceFactory implements IDataSourceFactory {
   id = "ros2-local-bagfile";
+  type: IDataSourceFactory["type"] = "file";
   displayName = "ROS 2 Bag (local)";
   iconName: IDataSourceFactory["iconName"] = "OpenFile";
   supportedFileTypes = [".db3"];

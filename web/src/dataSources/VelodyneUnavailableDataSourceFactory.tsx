@@ -9,6 +9,7 @@ import { IDataSourceFactory } from "@foxglove/studio-base";
 export default class VelodyneUnavailableDataSourceFactory implements IDataSourceFactory {
   id = "velodyne-device";
   displayName = "Velodyne LIDAR";
+  type: IDataSourceFactory["type"] = "connection";
   iconName: IDataSourceFactory["iconName"] = "GenericScan";
 
   disabledReason = (

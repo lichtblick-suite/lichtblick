@@ -31,6 +31,7 @@ import { useAnalytics } from "@foxglove/studio-base/context/AnalyticsContext";
 import ConsoleApiContext from "@foxglove/studio-base/context/ConsoleApiContext";
 import { useCurrentLayoutSelector } from "@foxglove/studio-base/context/CurrentLayoutContext";
 import PlayerSelectionContext, {
+  DataSourceArgs,
   IDataSourceFactory,
   PlayerSelection,
 } from "@foxglove/studio-base/context/PlayerSelectionContext";
@@ -81,6 +82,8 @@ export default function PlayerManager(props: PropsWithChildren<PlayerManagerProp
   // connector. As a workaround, we read this from our app settings and provide this to
   // initialization args for all connectors.
   const [rosHostname] = useAppConfigurationValue<string>(AppSetting.ROS1_ROS_HOSTNAME);
+
+  const [enableOpenDialog] = useAppConfigurationValue(AppSetting.OPEN_DIALOG);
 
   const analytics = useAnalytics();
   const metricsCollector = useMemo(() => new AnalyticsMetricsCollector(analytics), [analytics]);
@@ -162,74 +165,17 @@ export default function PlayerManager(props: PropsWithChildren<PlayerManagerProp
 
   // Add a new recent entry
   const addRecent = useCallback(
-    (record: Omit<RecentRecord, "id">) => {
-      const newRecord: RecentRecord = {
-        id: IndexedDbRecentsStore.GenerateRecordId(),
-        ...record,
-      };
-
+    (record: RecentRecord) => {
       setRecents((prevRecents) => {
         // To keep only the latest 5 recent items, we remove any items index 4+
         prevRecents.splice(4, 100);
-        prevRecents.unshift(newRecord);
+        prevRecents.unshift(record);
 
         saveRecents(prevRecents);
         return [...prevRecents];
       });
     },
     [saveRecents],
-  );
-
-  // Select a recent entry by id
-  const selectRecent = useCallback(
-    (recentId: string) => {
-      // find the recent from the list and initialize
-      const foundRecent = recents.find((value) => value.id === recentId);
-      if (!foundRecent) {
-        addToast(`Failed to restore recent: ${recentId}`, {
-          appearance: "error",
-        });
-        return;
-      }
-
-      const sourceId = foundRecent.sourceId;
-      const foundSource = playerSources.find((source) => source.id === sourceId);
-      if (!foundSource) {
-        addToast(`Unknown data source: ${sourceId}`, {
-          appearance: "error",
-        });
-        return;
-      }
-
-      metricsCollector.setProperty("player", sourceId);
-      setSelectedSource(() => foundSource);
-
-      try {
-        const initArgs = {
-          metricsCollector,
-          unlimitedMemoryCache,
-          ...foundRecent.extra,
-        };
-
-        const newPlayer = foundSource.initialize(initArgs);
-        setBasePlayer(newPlayer);
-
-        setRecents((prevRecents) => {
-          const recentIdx = recents.findIndex((value) => value.id === recentId);
-          if (recentIdx < 0) {
-            return prevRecents;
-          }
-          prevRecents.splice(recentIdx, 1);
-          prevRecents.unshift(foundRecent);
-
-          saveRecents(prevRecents);
-          return [...prevRecents];
-        });
-      } catch (err) {
-        addToast((err as Error).message, { appearance: "error" });
-      }
-    },
-    [recents, playerSources, metricsCollector, addToast, unlimitedMemoryCache, saveRecents],
   );
 
   // Make a RecentSources array for the PlayerSelectionContext
@@ -240,7 +186,7 @@ export default function PlayerManager(props: PropsWithChildren<PlayerManagerProp
   }, [recents]);
 
   const selectSource = useCallback(
-    async (sourceId: string, args?: Record<string, unknown>) => {
+    async (sourceId: string, args?: DataSourceArgs) => {
       log.debug(`Select Source: ${sourceId}`);
 
       // empty string sourceId
@@ -263,11 +209,71 @@ export default function PlayerManager(props: PropsWithChildren<PlayerManagerProp
       metricsCollector.setProperty("player", sourceId);
       setSelectedSource(() => foundSource);
 
+      // If args is provided we try to initialize with no prompts
+      if (args) {
+        try {
+          switch (args.type) {
+            case "connection": {
+              const newPlayer = foundSource.initialize({
+                ...args.params,
+                consoleApi,
+                metricsCollector,
+                unlimitedMemoryCache,
+              });
+              setBasePlayer(newPlayer);
+
+              if (args.params?.url && args.skipRecents !== true) {
+                addRecent({
+                  id: IndexedDbRecentsStore.GenerateRecordId(),
+                  type: "connection",
+                  sourceId: foundSource.id,
+                  title: args.params?.url,
+                  label: foundSource.displayName,
+                  extra: args.params,
+                });
+              }
+
+              break;
+            }
+            case "file": {
+              const files = args.files;
+
+              // files we can try loading immediately
+              // We do not add these to recents entries because putting File in indexedb reuslts in
+              // the entire file being stored in the database.
+              if (files) {
+                let file = files[0];
+                const fileList: File[] = [];
+
+                for (const curFile of files) {
+                  file ??= curFile;
+                  fileList.push(curFile);
+                }
+                const multiFile = foundSource.supportsMultiFile === true && fileList.length > 1;
+
+                const newPlayer = foundSource.initialize({
+                  file: multiFile ? undefined : file,
+                  files: multiFile ? fileList : undefined,
+                  metricsCollector,
+                  unlimitedMemoryCache,
+                });
+
+                setBasePlayer(newPlayer);
+                return;
+              }
+
+              break;
+            }
+          }
+        } catch (error) {
+          addToast((error as Error).message, { appearance: "error" });
+        }
+
+        return;
+      }
+
       if (foundSource.promptOptions) {
         let argUrl: string | undefined;
-        if (typeof args?.url === "string") {
-          argUrl = args?.url;
-        }
 
         // Load the previous prompt value
         const previousPromptCacheKey = `${foundSource.id}.previousPromptValue`;
@@ -284,7 +290,6 @@ export default function PlayerManager(props: PropsWithChildren<PlayerManagerProp
           new Storage().setItem(previousPromptCacheKey, url);
 
           const allArgs = {
-            ...args,
             rosHostname,
             url,
           };
@@ -300,6 +305,8 @@ export default function PlayerManager(props: PropsWithChildren<PlayerManagerProp
           setBasePlayer(newPlayer);
 
           addRecent({
+            id: IndexedDbRecentsStore.GenerateRecordId(),
+            type: "connection",
             sourceId,
             title: url,
             label: foundSource.displayName,
@@ -315,11 +322,12 @@ export default function PlayerManager(props: PropsWithChildren<PlayerManagerProp
       const supportedFileTypes = foundSource.supportedFileTypes;
       if (supportedFileTypes != undefined) {
         try {
-          const fileList = (args?.files as File[] | undefined) ?? [];
-          let file = fileList[0];
+          const fileList: File[] = [];
+          let file: File | undefined;
+          let handles: FileSystemFileHandle[] | undefined;
 
           if (!file) {
-            const res = await showOpenFilePicker({
+            handles = await showOpenFilePicker({
               multiple: foundSource.supportsMultiFile,
               types: [
                 {
@@ -328,18 +336,13 @@ export default function PlayerManager(props: PropsWithChildren<PlayerManagerProp
                 },
               ],
             });
-            for (const fileHandle of res) {
+            for (const fileHandle of handles) {
               const curFile = await fileHandle.getFile();
               file ??= curFile;
               fileList.push(curFile);
             }
           }
 
-          const allArgs = {
-            ...args,
-            file,
-            fileList,
-          };
           const multiFile = foundSource.supportsMultiFile === true && fileList.length > 1;
 
           const newPlayer = foundSource.initialize({
@@ -350,17 +353,6 @@ export default function PlayerManager(props: PropsWithChildren<PlayerManagerProp
           });
 
           setBasePlayer(newPlayer);
-
-          // When we come up with a reasonable display name for multifile recents we can add support
-          if (multiFile || !file) {
-            return;
-          }
-
-          addRecent({
-            sourceId,
-            title: file.name,
-            extra: allArgs,
-          });
         } catch (error) {
           if (error.name === "AbortError") {
             return;
@@ -371,19 +363,7 @@ export default function PlayerManager(props: PropsWithChildren<PlayerManagerProp
         return;
       }
 
-      try {
-        const newPlayer = foundSource.initialize({
-          ...args,
-          consoleApi,
-          metricsCollector,
-          unlimitedMemoryCache,
-        });
-        setBasePlayer(newPlayer);
-      } catch (error) {
-        addToast((error as Error).message, { appearance: "error" });
-      }
-
-      return;
+      addToast("Unable to initialize player", { appearance: "error" });
     },
     [
       addRecent,
@@ -399,8 +379,39 @@ export default function PlayerManager(props: PropsWithChildren<PlayerManagerProp
     ],
   );
 
+  // Select a recent entry by id
+  const selectRecent = useCallback(
+    (recentId: string) => {
+      // find the recent from the list and initialize
+      const foundRecent = recents.find((value) => value.id === recentId);
+      if (!foundRecent) {
+        addToast(`Failed to restore recent: ${recentId}`, {
+          appearance: "error",
+        });
+        return;
+      }
+
+      switch (foundRecent.type) {
+        case "connection": {
+          void selectSource(foundRecent.sourceId, {
+            skipRecents: true,
+            type: "connection",
+            params: foundRecent.extra,
+          });
+          break;
+        }
+      }
+    },
+    [recents, addToast, selectSource],
+  );
+
   // Restore the saved source on first mount unless our url specifies a source.
   useLayoutEffect(() => {
+    // with open dialog enabled we don't restore any data source
+    if (enableOpenDialog === true) {
+      return;
+    }
+
     // The URL encodes a valid session state. Defer to the URL state.
     if (windowHasValidURLState()) {
       return;

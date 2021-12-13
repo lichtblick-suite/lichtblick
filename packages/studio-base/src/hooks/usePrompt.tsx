@@ -2,23 +2,8 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import {
-  DefaultButton,
-  Dialog,
-  DialogFooter,
-  ITextField,
-  PrimaryButton,
-  TextField,
-} from "@fluentui/react";
-import {
-  useCallback,
-  useContext,
-  useEffect,
-  useLayoutEffect,
-  useMemo,
-  useRef,
-  useState,
-} from "react";
+import { DefaultButton, Dialog, DialogFooter, PrimaryButton, TextField } from "@fluentui/react";
+import { useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
 
 import ModalContext from "@foxglove/studio-base/context/ModalContext";
 
@@ -78,12 +63,6 @@ function ModalPrompt({
     return () => onComplete(undefined);
   }, [onComplete]);
 
-  // Select the text field on mount
-  const [textField, setTextField] = useState<ITextField | ReactNull>(ReactNull);
-  useLayoutEffect(() => {
-    textField?.select();
-  }, [textField]);
-
   return (
     <Dialog
       hidden={false}
@@ -102,7 +81,7 @@ function ModalPrompt({
       >
         <TextField
           label={label}
-          componentRef={setTextField}
+          autoFocus
           placeholder={placeholder}
           value={value}
           errorMessage={errorMessage}

@@ -24,6 +24,7 @@ import {
 import { useToasts } from "react-toast-notifications";
 import { useMount, useMountedState } from "react-use";
 
+import { AppSetting } from "@foxglove/studio-base/AppSetting";
 import AccountSettings from "@foxglove/studio-base/components/AccountSettingsSidebar/AccountSettings";
 import ConnectionList from "@foxglove/studio-base/components/ConnectionList";
 import connectionHelpContent from "@foxglove/studio-base/components/ConnectionList/index.help.md";
@@ -42,6 +43,7 @@ import {
   useMessagePipelineGetter,
 } from "@foxglove/studio-base/components/MessagePipeline";
 import MultiProvider from "@foxglove/studio-base/components/MultiProvider";
+import { OpenDialog } from "@foxglove/studio-base/components/OpenDialog";
 import PanelLayout from "@foxglove/studio-base/components/PanelLayout";
 import PanelList from "@foxglove/studio-base/components/PanelList";
 import panelsHelpContent from "@foxglove/studio-base/components/PanelList/index.help.md";
@@ -66,6 +68,7 @@ import { useLayoutManager } from "@foxglove/studio-base/context/LayoutManagerCon
 import LinkHandlerContext from "@foxglove/studio-base/context/LinkHandlerContext";
 import { usePlayerSelection } from "@foxglove/studio-base/context/PlayerSelectionContext";
 import { useWorkspace, WorkspaceContext } from "@foxglove/studio-base/context/WorkspaceContext";
+import { useAppConfigurationValue } from "@foxglove/studio-base/hooks";
 import useAddPanel from "@foxglove/studio-base/hooks/useAddPanel";
 import { useCalloutDismissalBlocker } from "@foxglove/studio-base/hooks/useCalloutDismissalBlocker";
 import useElectronFilesToOpen from "@foxglove/studio-base/hooks/useElectronFilesToOpen";
@@ -100,14 +103,6 @@ type SidebarItemKey =
   | "layouts"
   | "preferences"
   | "help";
-
-function Connection() {
-  return (
-    <SidebarContent title="Connection" helpContent={connectionHelpContent}>
-      <ConnectionList />
-    </SidebarContent>
-  );
-}
 
 function AddPanel() {
   const addPanel = useAddPanel();
@@ -179,10 +174,19 @@ export default function Workspace(props: WorkspaceProps): JSX.Element {
   // see comment below above the RemountOnValueChange component
   const requestBackfill = useMessagePipeline(selectRequestBackfill);
 
-  const [selectedSidebarItem, setSelectedSidebarItem] = useState<SidebarItemKey | undefined>(
+  const isPlayerPresent = playerPresence !== PlayerPresence.NOT_PRESENT;
+
+  const [showOpenDialog, setShowOpenDialog] = useState(!isPlayerPresent);
+  const [enableOpenDialog] = useAppConfigurationValue(AppSetting.OPEN_DIALOG);
+
+  const [selectedSidebarItem, setSelectedSidebarItem] = useState<SidebarItemKey | undefined>(() => {
+    // when using the open dialog ui - we display the dialog rather than a connection sidebar
+    if (enableOpenDialog === true) {
+      return undefined;
+    }
     // Start with the sidebar open if no connection has been made
-    playerPresence === PlayerPresence.NOT_PRESENT ? "connection" : undefined,
-  );
+    return isPlayerPresent ? undefined : "connection";
+  });
 
   // When a player is present we hide the connection sidebar. To prevent hiding the connection sidebar
   // when the user wants to select a new connection we track whether the sidebar item opened
@@ -195,6 +199,11 @@ export default function Workspace(props: WorkspaceProps): JSX.Element {
 
   // Automatically close the connection sidebar when a connection is chosen
   useLayoutEffect(() => {
+    // When using the open dialog feature we don't automatically do anything with the connection sidebar
+    if (enableOpenDialog === true) {
+      return;
+    }
+
     if (userSelectSidebarItem.current) {
       userSelectSidebarItem.current = false;
       return;
@@ -203,7 +212,11 @@ export default function Workspace(props: WorkspaceProps): JSX.Element {
     if (selectedSidebarItem === "connection" && playerPresence === PlayerPresence.PRESENT) {
       setSelectedSidebarItem(undefined);
     }
-  }, [selectedSidebarItem, playerPresence]);
+  }, [selectedSidebarItem, playerPresence, enableOpenDialog]);
+
+  useLayoutEffect(() => {
+    setShowOpenDialog(!isPlayerPresent);
+  }, [isPlayerPresent]);
 
   const isMounted = useMountedState();
 
@@ -219,7 +232,10 @@ export default function Workspace(props: WorkspaceProps): JSX.Element {
     if (isMounted()) {
       setSelectedLayoutId(newLayout.id);
       if (props.demoBagUrl) {
-        selectSource("ros1-remote-bagfile", { url: props.demoBagUrl });
+        selectSource("ros1-remote-bagfile", {
+          type: "connection",
+          params: { url: props.demoBagUrl },
+        });
       }
     }
   }, [layoutStorage, isMounted, setSelectedLayoutId, props.demoBagUrl, selectSource]);
@@ -357,7 +373,7 @@ export default function Workspace(props: WorkspaceProps): JSX.Element {
 
           // select the first source that has files that match the supported extensions
           if (filteredFiles.length > 0) {
-            selectSource(source.id, { files: otherFiles });
+            selectSource(source.id, { type: "file", files: otherFiles });
             break;
           }
         }
@@ -395,6 +411,18 @@ export default function Workspace(props: WorkspaceProps): JSX.Element {
   const { currentUser } = useCurrentUser();
 
   const sidebarItems = useMemo<Map<SidebarItemKey, SidebarItem>>(() => {
+    function Connection() {
+      return (
+        <SidebarContent title="Data Sources" helpContent={connectionHelpContent}>
+          <ConnectionList
+            onOpen={() => {
+              setShowOpenDialog(true);
+            }}
+          />
+        </SidebarContent>
+      );
+    }
+
     const connectionItem: SidebarItem = {
       iconName: "DataManagementSettings",
       title: "Connection",
@@ -491,6 +519,9 @@ export default function Workspace(props: WorkspaceProps): JSX.Element {
           </RemountOnValueChange>
         </Sidebar>
       </div>
+      {enableOpenDialog === true && showOpenDialog && (
+        <OpenDialog onDismiss={() => setShowOpenDialog(false)} />
+      )}
     </MultiProvider>
   );
 }

@@ -40,10 +40,10 @@ import { defaultPlaybackConfig } from "@foxglove/studio-base/providers/CurrentLa
 import { AppEvent } from "@foxglove/studio-base/services/IAnalytics";
 import { Layout, layoutIsShared } from "@foxglove/studio-base/services/ILayoutStorage";
 import { downloadTextFile } from "@foxglove/studio-base/util/download";
+import showOpenFilePicker from "@foxglove/studio-base/util/showOpenFilePicker";
 
 import LayoutSection from "./LayoutSection";
 import helpContent from "./index.help.md";
-import showOpenFilePicker from "./showOpenFilePicker";
 import { debugBorder } from "./styles";
 
 export default function LayoutBrowser({

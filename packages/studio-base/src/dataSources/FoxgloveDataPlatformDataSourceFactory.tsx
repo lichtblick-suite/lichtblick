@@ -18,6 +18,7 @@ type FoxgloveDataPlatformOptions = {
 
 class FoxgloveDataPlatformDataSourceFactory implements IDataSourceFactory {
   id = "foxglove-data-platform";
+  type: IDataSourceFactory["type"] = "connection";
   displayName = "Foxglove Data Platform";
   iconName: IDataSourceFactory["iconName"] = "FileASPX";
   hidden = true;

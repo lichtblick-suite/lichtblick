@@ -12,8 +12,13 @@ import { Player } from "@foxglove/studio-base/players/types";
 
 class Ros2SocketDataSourceFactory implements IDataSourceFactory {
   id = "ros2-socket";
+  type: IDataSourceFactory["type"] = "connection";
   displayName = "ROS 2";
   iconName: IDataSourceFactory["iconName"] = "studio.ROS";
+
+  formConfig = {
+    fields: [{ id: "url", label: "ROS_DOMAIN_ID", defaultValue: "0" }],
+  };
 
   promptOptions(previousValue?: string): PromptOptions {
     return {

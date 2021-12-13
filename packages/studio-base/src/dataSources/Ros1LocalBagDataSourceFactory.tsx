@@ -11,6 +11,7 @@ import { Player } from "@foxglove/studio-base/players/types";
 
 class Ros1LocalBagDataSourceFactory implements IDataSourceFactory {
   id = "ros1-local-bagfile";
+  type: IDataSourceFactory["type"] = "file";
   displayName = "ROS 1 Bag (local)";
   iconName: IDataSourceFactory["iconName"] = "OpenFile";
   supportedFileTypes = [".bag"];

@@ -7,7 +7,7 @@
  * the user cancels the file picker.
  */
 export default async function showOpenFilePicker(
-  options: OpenFilePickerOptions,
+  options?: OpenFilePickerOptions,
 ): Promise<FileSystemFileHandle[]> {
   try {
     return await window.showOpenFilePicker(options);
