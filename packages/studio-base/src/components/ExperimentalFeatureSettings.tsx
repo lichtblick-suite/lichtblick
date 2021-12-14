@@ -45,12 +45,12 @@ const features: Feature[] = [
   },
   {
     key: AppSetting.ENABLE_MCAP_DATA_SOURCE,
-    name: "Mcap Data Source",
-    description: <>Enable the Mcap data source.</>,
+    name: "MCAP data source",
+    description: <>Enable the MCAP data source.</>,
   },
   {
     key: AppSetting.OPEN_DIALOG,
-    name: "Open Dialog",
+    name: "Open dialog",
     description: <>Use the new open dialog for selecting data sources.</>,
   },
 ];
