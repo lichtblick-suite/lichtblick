@@ -75,6 +75,7 @@ import useElectronFilesToOpen from "@foxglove/studio-base/hooks/useElectronFiles
 import useNativeAppMenuEvent from "@foxglove/studio-base/hooks/useNativeAppMenuEvent";
 import welcomeLayout from "@foxglove/studio-base/layouts/welcomeLayout";
 import { PlayerPresence } from "@foxglove/studio-base/players/types";
+import { windowHasValidURLState } from "@foxglove/studio-base/util/appURLState";
 
 const useStyles = makeStyles({
   container: {
@@ -322,7 +323,7 @@ export default function Workspace(props: WorkspaceProps): JSX.Element {
   const appConfiguration = useAppConfiguration();
   const { addToast } = useToasts();
 
-  // Show welcome layout on first run
+  // Show welcome layout on first run unless we have a valid URL state.
   useMount(() => {
     // When using the open dialog, the welcome layout is triggered by vieweing demo data
     if (enableOpenDialog === true) {
@@ -330,6 +331,10 @@ export default function Workspace(props: WorkspaceProps): JSX.Element {
     }
 
     void (async () => {
+      if (windowHasValidURLState()) {
+        return;
+      }
+
       const welcomeLayoutShown = appConfiguration.get("onboarding.welcome-layout.shown");
       if (welcomeLayoutShown !== true || props.loadWelcomeLayout === true) {
         await appConfiguration.set("onboarding.welcome-layout.shown", true);
