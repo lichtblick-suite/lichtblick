@@ -180,9 +180,10 @@ export default function Workspace(props: WorkspaceProps): JSX.Element {
   const [enableOpenDialog] = useAppConfigurationValue(AppSetting.OPEN_DIALOG);
 
   const [selectedSidebarItem, setSelectedSidebarItem] = useState<SidebarItemKey | undefined>(() => {
-    // when using the open dialog ui - we display the dialog rather than a connection sidebar
+    // When using the open dialog ui - we always start with the connection sidebar open.
+    // This is to help the user find where to select a connection should they dismiss the open dialog
     if (enableOpenDialog === true) {
-      return undefined;
+      return "connection";
     }
     // Start with the sidebar open if no connection has been made
     return isPlayerPresent ? undefined : "connection";
@@ -214,9 +215,14 @@ export default function Workspace(props: WorkspaceProps): JSX.Element {
     }
   }, [selectedSidebarItem, playerPresence, enableOpenDialog]);
 
+  // When activating the connection sidebar and no player is present we automatically trigger
+  // the open dialog.
   useLayoutEffect(() => {
-    setShowOpenDialog(!isPlayerPresent);
-  }, [isPlayerPresent]);
+    if (selectedSidebarItem === "connection" && !isPlayerPresent) {
+      setShowOpenDialog(true);
+      return;
+    }
+  }, [isPlayerPresent, selectedSidebarItem]);
 
   const isMounted = useMountedState();
 
@@ -318,6 +324,11 @@ export default function Workspace(props: WorkspaceProps): JSX.Element {
 
   // Show welcome layout on first run
   useMount(() => {
+    // When using the open dialog, the welcome layout is triggered by vieweing demo data
+    if (enableOpenDialog === true) {
+      return;
+    }
+
     void (async () => {
       const welcomeLayoutShown = appConfiguration.get("onboarding.welcome-layout.shown");
       if (welcomeLayoutShown !== true || props.loadWelcomeLayout === true) {
