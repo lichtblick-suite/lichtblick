@@ -26,6 +26,7 @@ import {
   WeatherSunny20Regular,
   WeatherMoon20Filled,
   CircleHalfFill20Regular,
+  BookStar24Regular,
 } from "@fluentui/react-icons";
 import * as Icons from "@fluentui/react-icons-mdl2";
 import { registerIcons, unregisterIcons } from "@fluentui/style-utilities";
@@ -88,6 +89,7 @@ const icons: {
   ArrowUpDown: <ArrowUpDownIcon />,
   Blockhead: <BlockheadIcon />,
   BlockheadFilled: <BlockheadFilledIcon />,
+  BookStar: <BookStar24Regular />,
   Braces: <Braces20Regular />,
   BracesFilled: <Braces20Filled />,
   Bug: <BugIcon />,

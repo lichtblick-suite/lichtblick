@@ -21,7 +21,7 @@ import {
   useState,
 } from "react";
 import { useToasts } from "react-toast-notifications";
-import { useAsync, useLocalStorage } from "react-use";
+import { useAsync, useLocalStorage, useMountedState } from "react-use";
 
 import { useShallowMemo } from "@foxglove/hooks";
 import Logger from "@foxglove/log";
@@ -29,7 +29,11 @@ import { AppSetting } from "@foxglove/studio-base/AppSetting";
 import { MessagePipelineProvider } from "@foxglove/studio-base/components/MessagePipeline";
 import { useAnalytics } from "@foxglove/studio-base/context/AnalyticsContext";
 import ConsoleApiContext from "@foxglove/studio-base/context/ConsoleApiContext";
-import { useCurrentLayoutSelector } from "@foxglove/studio-base/context/CurrentLayoutContext";
+import {
+  useCurrentLayoutActions,
+  useCurrentLayoutSelector,
+} from "@foxglove/studio-base/context/CurrentLayoutContext";
+import { useLayoutManager } from "@foxglove/studio-base/context/LayoutManagerContext";
 import PlayerSelectionContext, {
   DataSourceArgs,
   IDataSourceFactory,
@@ -78,6 +82,8 @@ export default function PlayerManager(props: PropsWithChildren<PlayerManagerProp
 
   const prompt = usePrompt();
 
+  const isMounted = useMountedState();
+
   // When we implement per-data-connector UI settings we will move this into the ROS 1 Socket data
   // connector. As a workaround, we read this from our app settings and provide this to
   // initialization args for all connectors.
@@ -97,6 +103,9 @@ export default function PlayerManager(props: PropsWithChildren<PlayerManagerProp
 
   // When we implement per-data-connector UI settings we will move this into the foxglove data platform source.
   const consoleApi = useContext(ConsoleApiContext);
+
+  const layoutStorage = useLayoutManager();
+  const { setSelectedLayoutId } = useCurrentLayoutActions();
 
   const messageOrder = useCurrentLayoutSelector(
     (state) => state.selectedLayout?.data?.playbackConfig.messageOrder,
@@ -208,6 +217,37 @@ export default function PlayerManager(props: PropsWithChildren<PlayerManagerProp
 
       metricsCollector.setProperty("player", sourceId);
       setSelectedSource(() => foundSource);
+
+      // Sample sources don't need args or prompts to initialize
+      if (foundSource.type === "sample") {
+        const newPlayer = foundSource.initialize({
+          consoleApi,
+          metricsCollector,
+          unlimitedMemoryCache,
+        });
+
+        setBasePlayer(newPlayer);
+
+        if (foundSource.sampleLayout) {
+          layoutStorage
+            .saveNewLayout({
+              name: foundSource.displayName,
+              data: foundSource.sampleLayout,
+              permission: "CREATOR_WRITE",
+            })
+            .then((newLayout) => {
+              if (!isMounted()) {
+                return;
+              }
+              setSelectedLayoutId(newLayout.id);
+            })
+            .catch((err) => {
+              addToast((err as Error).message, { appearance: "error" });
+            });
+        }
+
+        return;
+      }
 
       // If args is provided we try to initialize with no prompts
       if (args) {
@@ -369,12 +409,15 @@ export default function PlayerManager(props: PropsWithChildren<PlayerManagerProp
       addRecent,
       addToast,
       consoleApi,
+      isMounted,
+      layoutStorage,
       metricsCollector,
       playerSources,
       prompt,
       removeSavedSource,
       rosHostname,
       setSavedSource,
+      setSelectedLayoutId,
       unlimitedMemoryCache,
     ],
   );

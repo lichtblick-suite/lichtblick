@@ -199,6 +199,11 @@ export default function Workspace(props: WorkspaceProps): JSX.Element {
     setSelectedSidebarItem(item);
   }, []);
 
+  // When a player is activated, hide the open dialog. When a player is gone, show the open dialog.
+  useLayoutEffect(() => {
+    setShowOpenDialog(!isPlayerPresent);
+  }, [isPlayerPresent]);
+
   // Automatically close the connection sidebar when a connection is chosen
   useLayoutEffect(() => {
     // When using the open dialog feature we don't automatically do anything with the connection sidebar
@@ -215,15 +220,6 @@ export default function Workspace(props: WorkspaceProps): JSX.Element {
       setSelectedSidebarItem(undefined);
     }
   }, [selectedSidebarItem, playerPresence, enableOpenDialog]);
-
-  // When activating the connection sidebar and no player is present we automatically trigger
-  // the open dialog.
-  useLayoutEffect(() => {
-    if (selectedSidebarItem === "connection" && !isPlayerPresent) {
-      setShowOpenDialog(true);
-      return;
-    }
-  }, [isPlayerPresent, selectedSidebarItem]);
 
   const isMounted = useMountedState();
 

@@ -4,6 +4,7 @@
 
 import { createContext, useContext } from "react";
 
+import { PanelsState } from "@foxglove/studio-base/context/CurrentLayoutContext/actions";
 import { PromptOptions } from "@foxglove/studio-base/hooks/usePrompt";
 import { Player, PlayerMetricsCollectorInterface } from "@foxglove/studio-base/players/types";
 import ConsoleApi from "@foxglove/studio-base/services/ConsoleApi";
@@ -19,7 +20,7 @@ export type DataSourceFactoryInitializeArgs = {
   consoleApi?: ConsoleApi;
 } & Record<string, unknown>;
 
-export type DataSourceFactoryType = "file" | "remote-file" | "connection";
+export type DataSourceFactoryType = "file" | "remote-file" | "connection" | "sample";
 
 export interface IDataSourceFactory {
   id: string;
@@ -29,6 +30,8 @@ export interface IDataSourceFactory {
   disabledReason?: string | JSX.Element;
   badgeText?: string;
   hidden?: boolean;
+
+  sampleLayout?: PanelsState;
 
   formConfig?: {
     // Initialization args are populated with keys of the _id_ field

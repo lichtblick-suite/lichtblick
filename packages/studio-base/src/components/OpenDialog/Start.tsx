@@ -64,15 +64,13 @@ export default function Start(props: IStartProps): JSX.Element {
         iconProps: { iconName: "Flow" },
         onClick: () => onSelectView("connection"),
       },
-      /*
-    {
-      id: "demo-data",
-      children: "Explore sample data",
-      secondaryText: "New to Studio? Have a play with demo data",
-      iconProps: { iconName: "BookStar" },
-      onClick: () => onSelectView("demo"),
-    },
-    */
+      {
+        id: "sample-data",
+        children: "Explore sample data",
+        secondaryText: "New to Studio? View some sample data",
+        iconProps: { iconName: "BookStar" },
+        onClick: () => onSelectView("demo"),
+      },
     ],
     [onSelectView, supportedFileExtensions],
   );

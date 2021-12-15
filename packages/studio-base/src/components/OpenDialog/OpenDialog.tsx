@@ -13,16 +13,23 @@ import Start from "./Start";
 import { OpenDialogViews } from "./types";
 import { useOpenFile } from "./useOpenFile";
 
-type OpenDialogProps = { activeView?: OpenDialogViews; onDismiss?: () => void };
+type OpenDialogProps = {
+  activeView?: OpenDialogViews;
+  onDismiss?: () => void;
+};
 
 export default function OpenDialog(props: OpenDialogProps): JSX.Element {
   const { activeView: defaultActiveView, onDismiss } = props;
-  const { availableSources } = usePlayerSelection();
+  const { availableSources, selectSource } = usePlayerSelection();
 
   const [activeView, setActiveView] = useState<OpenDialogViews>(defaultActiveView ?? "start");
   const theme = useTheme();
 
   const openFile = useOpenFile(availableSources);
+
+  const firstSampleSource = useMemo(() => {
+    return availableSources.find((source) => source.type === "sample");
+  }, [availableSources]);
 
   const onSelectView = useCallback(
     (view: OpenDialogViews) => {
@@ -33,9 +40,13 @@ export default function OpenDialog(props: OpenDialogProps): JSX.Element {
         return;
       }
 
+      if (view === "demo" && firstSampleSource) {
+        selectSource(firstSampleSource.id);
+      }
+
       setActiveView(view);
     },
-    [openFile],
+    [firstSampleSource, openFile, selectSource],
   );
 
   const allExtensions = useMemo(() => {
@@ -61,11 +72,12 @@ export default function OpenDialog(props: OpenDialogProps): JSX.Element {
 
   const view = useMemo(() => {
     switch (activeView) {
-      case "demo":
+      case "demo": {
         return {
-          title: "Demo",
-          component: <>Demo data coming soon</>,
+          title: "",
+          component: <></>,
         };
+      }
       case "connection":
         return {
           title: "Open new connection",
@@ -88,7 +100,6 @@ export default function OpenDialog(props: OpenDialogProps): JSX.Element {
             />
           ),
         };
-
       default:
         return {
           title: "Open new data source",

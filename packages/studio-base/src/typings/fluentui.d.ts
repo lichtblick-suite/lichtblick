@@ -22,6 +22,7 @@ declare global {
     | "ArrowUpDown"
     | "Blockhead"
     | "BlockheadFilled"
+    | "BookStar"
     | "Braces"
     | "BracesFilled"
     | "Bug"
