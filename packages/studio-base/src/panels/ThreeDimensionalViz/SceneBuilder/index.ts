@@ -47,7 +47,7 @@ import {
   PointCloud2,
 } from "@foxglove/studio-base/types/Messages";
 import { MarkerProvider, MarkerCollector } from "@foxglove/studio-base/types/Scene";
-import { emptyPose } from "@foxglove/studio-base/util/Pose";
+import { clonePose, emptyPose } from "@foxglove/studio-base/util/Pose";
 import naturalSort from "@foxglove/studio-base/util/naturalSort";
 
 import { ThreeDimensionalVizHooks } from "./types";
@@ -68,6 +68,7 @@ const buildSyntheticArrowMarker = (
   header: message.header,
   type: 103,
   pose,
+  frame_locked: true,
   scale: { x: 2, y: 2, z: 0.1 },
   color: getSyntheticArrowMarkerColor(topic),
   interactionData: { topic, originalMessage: message },
@@ -176,7 +177,7 @@ function computeMarkerPose(
   transforms: TransformTree,
   renderFrameId: string,
   currentTime: Time,
-): MutablePose | undefined {
+): Pose | undefined {
   const srcFrame = transforms.frame(marker.header.frame_id);
   const frame = transforms.frame(renderFrameId);
   if (!srcFrame || !frame) {
@@ -573,10 +574,6 @@ export default class SceneBuilder implements MarkerProvider {
     const type = 101;
     const name = `${topic}/${type}`;
 
-    // set ogrid texture & alpha based on current rviz settings
-    // in the future these will be customizable via the UI
-    const [alpha, map] = this._hooks.getOccupancyGridValues(topic);
-
     const { header, info, data } = message;
     const mappedMessage = {
       header: {
@@ -592,25 +589,16 @@ export default class SceneBuilder implements MarkerProvider {
         origin: info.origin,
       },
       data,
-      alpha,
-      map,
       type,
       name,
-      pose: emptyPose(),
+      pose: clonePose(info.origin),
+      frame_locked: false,
       interactionData: { topic, originalMessage: message },
     };
 
     // if we neeed to flatten the ogrid clone the position and change the z to match the flattenedZHeightPose
-    if (mappedMessage.info.origin.position.z === 0 && this.flattenedZHeightPose && this.flatten) {
-      const originalInfo = mappedMessage.info;
-      const originalPosition = originalInfo.origin.position;
-      mappedMessage.info = {
-        ...originalInfo,
-        origin: {
-          ...originalInfo.origin,
-          position: { ...originalPosition, z: this.flattenedZHeightPose.position.z },
-        },
-      };
+    if (mappedMessage.pose.position.z === 0 && this.flattenedZHeightPose && this.flatten) {
+      mappedMessage.pose.position.z = this.flattenedZHeightPose.position.z;
     }
     this.collectors[topic]!.addNonMarker(topic, mappedMessage as unknown as Interactive<unknown>);
   };
@@ -733,9 +721,7 @@ export default class SceneBuilder implements MarkerProvider {
       case "nav_msgs/OccupancyGrid":
       case "nav_msgs/msg/OccupancyGrid":
       case "ros.nav_msgs.OccupancyGrid":
-        // flatten btn: set empty z values to be at the same level as the flattenedZHeightPose
         this._consumeOccupancyGrid(topic, message as NavMsgs$OccupancyGrid);
-
         break;
       case "nav_msgs/Path":
       case "nav_msgs/msg/Path":
@@ -945,12 +931,14 @@ export default class SceneBuilder implements MarkerProvider {
       case 10: // MeshMarker
       case 11: // TriangleListMarker
       case 102: // PointCloud2
-      case 103: // (unknown!)
+      case 103: // PoseStamped
       case 108: // InstanceLineListMarker
       case 110: // ColorMarker
         marker = { ...marker, pose };
         break;
-      case 101: // OccupancyGridMessage - needs special handling
+      case 101: // OccupancyGridMessage
+        marker = { ...marker, pose };
+        break;
       case 104: // LaserScan - needs special handling
       default:
         break;

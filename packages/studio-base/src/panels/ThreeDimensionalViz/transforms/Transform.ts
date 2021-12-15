@@ -51,6 +51,11 @@ export class Transform {
     return this;
   }
 
+  /**
+   * Update position and rotation simultaneously. This is more efficient than
+   * calling setPosition and setRotation separately, since we only need to
+   * update the matrix once
+   */
   setPositionRotation(position: ReadonlyVec3, rotation: ReadonlyQuat): this {
     vec3.copy(this._position, position);
     quat.copy(this._rotation, rotation);
@@ -58,6 +63,9 @@ export class Transform {
     return this;
   }
 
+  /**
+   * Update position and rotation from a Pose object
+   */
   setPose(pose: Pose): this {
     vec3.set(this._position, pose.position.x, pose.position.y, pose.position.z);
     quat.set(
@@ -71,6 +79,9 @@ export class Transform {
     return this;
   }
 
+  /**
+   * Update position and rotation from a matrix
+   */
   setMatrix(matrix: ReadonlyMat4): this {
     mat4.copy(this._matrix, matrix);
     mat4.getTranslation(this._position, matrix);
@@ -91,6 +102,9 @@ export class Transform {
     return this;
   }
 
+  /**
+   * Copy the values in another transform into this one
+   */
   copy(other: Transform): this {
     // eslint-disable-next-line no-underscore-dangle
     vec3.copy(this._position, other._position);

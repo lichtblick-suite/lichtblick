@@ -230,8 +230,7 @@ export class CoordinateFrame {
     // perf-sensitive: function params instead of options object to avoid allocations
     if (srcFrame === this) {
       // Identity transform
-      out.position = input.position;
-      out.orientation = input.orientation;
+      copyPose(out, input);
       return out;
     } else if (srcFrame.findAncestor(this.id)) {
       // This frame is an ancestor of the source frame
@@ -388,4 +387,14 @@ function isDiffWithinDelta(timeA: Time, timeB: Time, delta: Duration): boolean {
   const diff = subtract(timeA, timeB);
   diff.sec = Math.abs(diff.sec);
   return compare(diff, delta) <= 0;
+}
+
+function copyPose(out: MutablePose, pose: Pose): void {
+  out.position.x = pose.position.x;
+  out.position.y = pose.position.y;
+  out.position.z = pose.position.z;
+  out.orientation.x = pose.orientation.x;
+  out.orientation.y = pose.orientation.y;
+  out.orientation.z = pose.orientation.z;
+  out.orientation.w = pose.orientation.w;
 }

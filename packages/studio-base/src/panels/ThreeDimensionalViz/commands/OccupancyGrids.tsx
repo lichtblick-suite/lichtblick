@@ -13,13 +13,7 @@
 
 import type REGL from "regl";
 
-import {
-  Command,
-  withPose,
-  pointToVec3,
-  defaultBlend,
-  CommonCommandProps,
-} from "@foxglove/regl-worldview";
+import { Command, withPose, defaultBlend, CommonCommandProps } from "@foxglove/regl-worldview";
 import {
   defaultMapPalette,
   TextureCache,
@@ -27,8 +21,6 @@ import {
 import { OccupancyGridMessage } from "@foxglove/studio-base/types/Messages";
 
 type Uniforms = {
-  offset: number[];
-  orientation: number[];
   width: number;
   height: number;
   resolution: number;
@@ -56,8 +48,6 @@ const occupancyGrids = (regl: REGL.Regl) => {
     precision lowp float;
 
     uniform mat4 projection, view;
-    uniform vec3 offset;
-    uniform vec4 orientation;
     uniform float width, height, resolution, alpha;
 
     attribute vec3 point;
@@ -75,11 +65,7 @@ const occupancyGrids = (regl: REGL.Regl) => {
       float planeWidth = width * resolution;
       float planeHeight = height * resolution;
 
-      // rotate the point by the ogrid orientation & scale the point by the plane vertex dimensions
-      vec3 position = rotate(point * vec3(planeWidth, planeHeight, 1.), orientation);
-
-      // move the vertex by the marker offset
-      vec3 loc = applyPose(position + offset);
+      vec3 loc = applyPose(point * vec3(planeWidth, planeHeight, 1.));
       vAlpha = alpha;
       gl_Position = projection * view * vec4(loc, 1);
     }
@@ -120,13 +106,6 @@ const occupancyGrids = (regl: REGL.Regl) => {
       // make alpha a uniform so in the future it can be controlled by topic settings
       alpha: (_context, props) => {
         return props.alpha ?? 0.5;
-      },
-      offset: (_context, props) => {
-        return pointToVec3(props.info.origin.position);
-      },
-      orientation: (_context, props) => {
-        const { x, y, z, w } = props.info.origin.orientation;
-        return [x, y, z, w];
       },
       palette: (_context: unknown, _props: OccupancyGridMessage) => {
         const palette = defaultMapPalette;

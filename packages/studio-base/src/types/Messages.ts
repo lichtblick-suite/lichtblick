@@ -231,7 +231,7 @@ type NavMsgs$MapMetaData = Readonly<{
 export type NavMsgs$OccupancyGrid = Readonly<{
   header: Header;
   info: NavMsgs$MapMetaData;
-  data: readonly number[];
+  data: number[] | Int8Array;
 }>;
 
 export type NavMsgs$Path = Readonly<{
@@ -243,9 +243,9 @@ export type OccupancyGridMessage = Readonly<{
   header: Header;
   name: string;
   type: 101;
-  map: "map" | "costmap";
-  alpha: number;
+  alpha?: number;
   info: NavMsgs$MapMetaData;
+  pose: MutablePose;
   data: readonly number[];
 }>;
 
