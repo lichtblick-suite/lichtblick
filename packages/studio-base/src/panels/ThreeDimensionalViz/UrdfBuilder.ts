@@ -44,6 +44,7 @@ import {
 import { MarkerProvider, MarkerCollector } from "@foxglove/studio-base/types/Scene";
 import { emptyPose } from "@foxglove/studio-base/util/Pose";
 import { URDF_TOPIC } from "@foxglove/studio-base/util/globalConstants";
+import sendNotification from "@foxglove/studio-base/util/sendNotification";
 
 export const DEFAULT_COLOR: Color = { r: 36 / 255, g: 142 / 255, b: 255 / 255, a: 1 };
 
@@ -112,7 +113,9 @@ export default class UrdfBuilder implements MarkerProvider {
         this.clearMarkers();
 
         if (urdfData) {
-          void this.parseUrdf(urdfData, rosPackagePath);
+          void this.parseUrdf(urdfData, rosPackagePath).catch((err) => {
+            sendNotification(`Error parsing URDF`, (err as Error).message, "user", "error");
+          });
         }
       }
     }
@@ -125,7 +128,9 @@ export default class UrdfBuilder implements MarkerProvider {
       this.clearMarkers();
 
       if (this._settings.urdfUrl && isUrdfUrlValid(this._settings.urdfUrl)) {
-        void this.fetchUrdf(this._settings.urdfUrl, rosPackagePath);
+        void this.fetchUrdf(this._settings.urdfUrl, rosPackagePath).catch((err) => {
+          sendNotification(`Error loading URDF`, (err as Error).message, "user", "error");
+        });
       } else {
         this._urdf = undefined;
       }
@@ -140,7 +145,9 @@ export default class UrdfBuilder implements MarkerProvider {
       const res = await fetch(fetchUrl);
       text = await res.text();
     } catch (err) {
-      throw new Error(`Failed to fetch URDF from "${url}": ${err}`);
+      const errMessage = (err as Error).message;
+      const hasError = !errMessage.startsWith("Failed to fetch");
+      throw new Error(`Failed to load URDF from "${url}"${hasError ? `: ${errMessage}` : ""}`);
     }
 
     if (!text) {
