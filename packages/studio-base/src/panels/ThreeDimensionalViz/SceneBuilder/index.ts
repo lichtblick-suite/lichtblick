@@ -649,6 +649,20 @@ export default class SceneBuilder implements MarkerProvider {
       interactionData: { topic, originalMessage: originalMessage ?? drawData },
     };
 
+    if (type === 102) {
+      // We don't support big-endian point clouds yet. Register an error and omit this marker.
+      if (obj.is_bigendian === true) {
+        this._setTopicError(topic, "Unsupported big endian point cloud.");
+        return;
+      }
+
+      // Register a per-topic error for empty point cloud data and omit this marker.
+      if (obj.data instanceof Uint8Array && obj.data.length === 0) {
+        this._setTopicError(topic, "Point cloud data is empty.");
+        return;
+      }
+    }
+
     // If a decay time is available, we assign a lifetime to this message
     // Do not automatically assign a 0 (zero) decay time since that translates
     // to an infinite lifetime. But do allow for 0 values based on user preferences.
