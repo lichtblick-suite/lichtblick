@@ -65,10 +65,7 @@ export function SidebarContent({
         horizontal
         horizontalAlign="space-between"
         verticalAlign="center"
-        style={{
-          paddingBottom: theme.spacing.m,
-          padding: theme.spacing.m,
-        }}
+        style={{ padding: theme.spacing.m }}
       >
         {leadingItems && (
           <Stack horizontal verticalAlign="center">
@@ -95,7 +92,12 @@ export function SidebarContent({
           <TextContent allowMarkdownHtml={true}>{helpContent}</TextContent>
         </Stack>
       ) : undefined}
-      <Stack.Item style={{ padding: noPadding ? undefined : `0px ${theme.spacing.m}` }} grow>
+      <Stack.Item
+        style={{
+          padding: noPadding ? undefined : `0px ${theme.spacing.m} ${theme.spacing.m}`,
+        }}
+        grow
+      >
         {children}
       </Stack.Item>
     </Stack>
