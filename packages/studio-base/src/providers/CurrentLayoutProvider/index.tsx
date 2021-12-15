@@ -225,6 +225,22 @@ export default function CurrentLayoutProvider({
     return () => layoutManager.off("change", listener);
   }, [layoutManager, setLayoutState]);
 
+  // Make sure our layout still exists after changes. If not deselect it.
+  useEffect(() => {
+    async function listener() {
+      if (layoutStateRef.current?.selectedLayout?.id) {
+        const layout = await layoutManager.getLayout(layoutStateRef.current?.selectedLayout?.id);
+        if (!layout) {
+          await setSelectedLayoutId(undefined);
+          addToast("Your active layout was deleted.", { appearance: "warning" });
+        }
+      }
+    }
+
+    layoutManager.on("change", listener);
+    return () => layoutManager.off("change", listener);
+  }, [addToast, layoutManager, setSelectedLayoutId]);
+
   // Load initial state by re-selecting the last selected layout from the UserProfile.
   // Don't restore the layout if there's one specified in the app state url.
   useAsync(async () => {
