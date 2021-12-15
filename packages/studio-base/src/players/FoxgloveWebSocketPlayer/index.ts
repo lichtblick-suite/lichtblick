@@ -352,6 +352,9 @@ export default class FoxgloveWebSocketPlayer implements Player {
       capabilities: CAPABILITIES,
       playerId: this._id,
       problems: this._problems.problems(),
+      urlState: {
+        url: this._url,
+      },
 
       activeData: {
         messages,
