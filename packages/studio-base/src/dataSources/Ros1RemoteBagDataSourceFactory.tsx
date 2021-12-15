@@ -7,8 +7,11 @@ import {
   DataSourceFactoryInitializeArgs,
 } from "@foxglove/studio-base/context/PlayerSelectionContext";
 import { PromptOptions } from "@foxglove/studio-base/hooks/usePrompt";
-import { buildPlayerFromBagURLs } from "@foxglove/studio-base/players/buildPlayer";
+import RandomAccessPlayer from "@foxglove/studio-base/players/RandomAccessPlayer";
 import { Player } from "@foxglove/studio-base/players/types";
+import Ros1MemoryCacheDataProvider from "@foxglove/studio-base/randomAccessDataProviders/Ros1MemoryCacheDataProvider";
+import WorkerBagDataProvider from "@foxglove/studio-base/randomAccessDataProviders/WorkerBagDataProvider";
+import { getSeekToTime } from "@foxglove/studio-base/util/time";
 import { parseInputUrl } from "@foxglove/studio-base/util/url";
 
 class Ros1RemoteBagDataSourceFactory implements IDataSourceFactory {
@@ -45,9 +48,14 @@ class Ros1RemoteBagDataSourceFactory implements IDataSourceFactory {
       return;
     }
 
-    return buildPlayerFromBagURLs([url], {
-      unlimitedMemoryCache: args.unlimitedMemoryCache,
+    const bagWorkerDataProvider = new WorkerBagDataProvider({ type: "remote", url });
+    const messageCacheProvider = new Ros1MemoryCacheDataProvider(bagWorkerDataProvider, {
+      unlimitedCache: args.unlimitedMemoryCache,
+    });
+
+    return new RandomAccessPlayer(messageCacheProvider, {
       metricsCollector: args.metricsCollector,
+      seekToTime: getSeekToTime(),
     });
   }
 }

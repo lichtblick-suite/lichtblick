@@ -6,10 +6,11 @@ import {
   IDataSourceFactory,
   DataSourceFactoryInitializeArgs,
 } from "@foxglove/studio-base/context/PlayerSelectionContext";
-import { buildNonRos1PlayerFromDescriptor } from "@foxglove/studio-base/players/buildNonRos1Player";
+import RandomAccessPlayer from "@foxglove/studio-base/players/RandomAccessPlayer";
 import { Player } from "@foxglove/studio-base/players/types";
-import { CoreDataProviders } from "@foxglove/studio-base/randomAccessDataProviders/constants";
-import { RandomAccessDataProviderDescriptor } from "@foxglove/studio-base/randomAccessDataProviders/types";
+import McapDataProvider from "@foxglove/studio-base/randomAccessDataProviders/McapDataProvider";
+import MemoryCacheDataProvider from "@foxglove/studio-base/randomAccessDataProviders/MemoryCacheDataProvider";
+import { getSeekToTime } from "@foxglove/studio-base/util/time";
 
 class McapLocalDataSourceFactory implements IDataSourceFactory {
   id = "mcap-local-file";
@@ -24,17 +25,14 @@ class McapLocalDataSourceFactory implements IDataSourceFactory {
       return;
     }
 
-    const descriptor: RandomAccessDataProviderDescriptor = {
-      label: file.name,
-      name: CoreDataProviders.McapDataProvider,
-      filePath: (file as { path?: string }).path, // File.path is added by Electron
-      args: { file },
-      children: [],
-    };
+    const mcapProvider = new McapDataProvider({ file });
+    const messageCacheProvider = new MemoryCacheDataProvider(mcapProvider, {
+      unlimitedCache: args.unlimitedMemoryCache,
+    });
 
-    return buildNonRos1PlayerFromDescriptor(file.name, descriptor, {
+    return new RandomAccessPlayer(messageCacheProvider, {
       metricsCollector: args.metricsCollector,
-      unlimitedMemoryCache: args.unlimitedMemoryCache,
+      seekToTime: getSeekToTime(),
     });
   }
 }

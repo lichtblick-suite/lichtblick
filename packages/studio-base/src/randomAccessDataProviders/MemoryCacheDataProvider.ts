@@ -27,9 +27,7 @@ import {
 import { MessageEvent } from "@foxglove/studio-base/players/types";
 import {
   RandomAccessDataProvider,
-  RandomAccessDataProviderDescriptor,
   ExtensionPoint,
-  GetDataProvider,
   GetMessagesResult,
   GetMessagesTopics,
   InitializationResult,
@@ -290,20 +288,10 @@ export default class MemoryCacheDataProvider implements RandomAccessDataProvider
   private _readAheadBlocks: number = 0;
   private _memCacheBlockSizeNs: number = 0;
 
-  constructor(
-    { unlimitedCache = false }: { unlimitedCache?: boolean },
-    children: RandomAccessDataProviderDescriptor[],
-    getDataProvider: GetDataProvider,
-  ) {
+  constructor(provider: RandomAccessDataProvider, options: { unlimitedCache?: boolean }) {
+    const { unlimitedCache = false } = options;
     this._cacheSizeBytes = unlimitedCache ? Infinity : DEFAULT_CACHE_SIZE_BYTES;
-    const child = children[0];
-    if (children.length !== 1 || !child) {
-      throw new Error(
-        `Incorrect number of children to MemoryCacheDataProvider: ${children.length}`,
-      );
-    }
-
-    this._provider = getDataProvider(child);
+    this._provider = provider;
   }
 
   async initialize(extensionPoint: ExtensionPoint): Promise<InitializationResult> {

@@ -8,7 +8,6 @@ import {
   BlobReader,
   ROS2_TO_DEFINITIONS,
   Rosbag2,
-  openFileSystemDirectoryHandle,
   openFileSystemFile,
   FileEntry,
   SqliteSqljs,
@@ -24,7 +23,6 @@ import {
 import {
   Connection,
   RandomAccessDataProvider,
-  RandomAccessDataProviderDescriptor,
   RandomAccessDataProviderProblem,
   ExtensionPoint,
   GetMessagesResult,
@@ -35,17 +33,14 @@ import { RosDatatypes } from "@foxglove/studio-base/types/RosDatatypes";
 
 type BagPath = { type: "file"; file: Blob };
 type BagMultiPath = { type: "files"; files: File[] };
-type BagFolderPath = { type: "folder"; folder: FileSystemDirectoryHandle };
 
-type Options = { bagPath: BagPath | BagMultiPath | BagFolderPath };
+type Options = { bagPath: BagPath | BagMultiPath };
+
 export default class Rosbag2DataProvider implements RandomAccessDataProvider {
   private options_: Options;
   private bag_?: Rosbag2;
 
-  constructor(options: Options, children: RandomAccessDataProviderDescriptor[]) {
-    if (children.length > 0) {
-      throw new Error("Rosbag2DataProvider cannot have children");
-    }
+  constructor(options: Options) {
     this.options_ = options;
   }
 
@@ -66,8 +61,7 @@ export default class Rosbag2DataProvider implements RandomAccessDataProvider {
       const file = this.options_.bagPath.file;
       this.bag_ = await openFileSystemFile(file, sqlWasm);
     } else {
-      const folder = this.options_.bagPath.folder;
-      this.bag_ = await openFileSystemDirectoryHandle(folder, sqlWasm);
+      throw new Error("Unsupported Rosbag2DataProvider arguments");
     }
 
     const [start, end] = await this.bag_.timeRange();

@@ -27,11 +27,10 @@ import {
   toNanoSec,
 } from "@foxglove/rostime";
 import { MessageEvent } from "@foxglove/studio-base/players/types";
+import rawMessageDefinitionsToParsed from "@foxglove/studio-base/randomAccessDataProviders/rawMessageDefinitionsToParsed";
 import {
   RandomAccessDataProvider,
-  RandomAccessDataProviderDescriptor,
   ExtensionPoint,
-  GetDataProvider,
   GetMessagesResult,
   GetMessagesTopics,
   InitializationResult,
@@ -290,19 +289,11 @@ export default class Ros1MemoryCacheDataProvider implements RandomAccessDataProv
   private _lazyMessageReadersByTopic = new Map<string, LazyMessageReader>();
 
   constructor(
+    provider: RandomAccessDataProvider,
     { unlimitedCache = false }: { unlimitedCache?: boolean },
-    children: RandomAccessDataProviderDescriptor[],
-    getDataProvider: GetDataProvider,
   ) {
     this._cacheSizeBytes = unlimitedCache ? Infinity : DEFAULT_CACHE_SIZE_BYTES;
-    const child = children[0];
-    if (children.length !== 1 || !child) {
-      throw new Error(
-        `Incorrect number of children to MemoryCacheDataProvider: ${children.length}`,
-      );
-    }
-
-    this._provider = getDataProvider(child);
+    this._provider = provider;
   }
 
   async initialize(extensionPoint: ExtensionPoint): Promise<InitializationResult> {
@@ -338,9 +329,14 @@ export default class Ros1MemoryCacheDataProvider implements RandomAccessDataProv
       }
     }
 
-    this._updateProgress();
+    const { topics } = result;
+    const messageDefinitions =
+      result.messageDefinitions.type === "parsed"
+        ? result.messageDefinitions
+        : rawMessageDefinitionsToParsed(result.messageDefinitions, topics);
 
-    return result;
+    this._updateProgress();
+    return { ...result, providesParsedMessages: true, messageDefinitions };
   }
 
   // Potentially performance-sensitive; await can be expensive

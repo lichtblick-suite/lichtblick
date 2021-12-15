@@ -15,7 +15,6 @@ import {
 import {
   Connection,
   RandomAccessDataProvider,
-  RandomAccessDataProviderDescriptor,
   RandomAccessDataProviderProblem,
   ExtensionPoint,
   GetMessagesResult,
@@ -36,23 +35,19 @@ const LOG_TOPIC = "Log";
 
 const log = Logger.getLogger(__filename);
 
-type UlogPath = { type: "file"; file: Blob };
-type Options = { filePath: UlogPath };
+type Options = { file: Blob };
 
 export default class UlogDataProvider implements RandomAccessDataProvider {
   private _options: Options;
   private _ulog?: ULog;
 
-  constructor(options: Options, children: RandomAccessDataProviderDescriptor[]) {
-    if (children.length > 0) {
-      throw new Error("UlogDataProvider cannot have children");
-    }
+  constructor(options: Options) {
     this._options = options;
   }
 
   async initialize(_extensionPoint: ExtensionPoint): Promise<InitializationResult> {
-    const file = this._options.filePath.file;
-    const bytes = this._options.filePath.file.size;
+    const file = this._options.file;
+    const bytes = this._options.file.size;
     log.debug(`initialize(${bytes} bytes)`);
 
     const startTime = performance.now();

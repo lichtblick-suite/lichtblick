@@ -19,10 +19,8 @@ import { Bag } from "@foxglove/rosbag";
 import { BlobReader } from "@foxglove/rosbag/web";
 import { Time, add, compare, fromMillis, subtract as subtractTimes } from "@foxglove/rostime";
 import { MessageEvent } from "@foxglove/studio-base/players/types";
-import BrowserHttpReader from "@foxglove/studio-base/randomAccessDataProviders/BrowserHttpReader";
 import {
   RandomAccessDataProvider,
-  RandomAccessDataProviderDescriptor,
   Connection,
   ExtensionPoint,
   GetMessagesResult,
@@ -31,6 +29,7 @@ import {
   AverageThroughput,
 } from "@foxglove/studio-base/randomAccessDataProviders/types";
 import { getReportMetadataForChunk } from "@foxglove/studio-base/randomAccessDataProviders/util";
+import BrowserHttpReader from "@foxglove/studio-base/util/BrowserHttpReader";
 import CachedFilelike, { FileReader } from "@foxglove/studio-base/util/CachedFilelike";
 import { bagConnectionsToTopics } from "@foxglove/studio-base/util/bagConnectionsHelper";
 import { getBagChunksOverlapCount } from "@foxglove/studio-base/util/bags";
@@ -38,7 +37,7 @@ import { UserError } from "@foxglove/studio-base/util/errors";
 import sendNotification from "@foxglove/studio-base/util/sendNotification";
 import Bzip2 from "@foxglove/wasm-bz2";
 
-type BagPath = { type: "file"; file: Blob } | { type: "remoteBagUrl"; url: string };
+type BagPath = { type: "file"; file: Blob } | { type: "remote"; url: string };
 
 type Options = { bagPath: BagPath; cacheSizeInBytes?: number };
 
@@ -103,7 +102,7 @@ class LogMetricsReader {
 
 // Read from a ROS Bag. `bagPath` can either represent a local file, or a remote bag. See
 // `BrowserHttpReader` for how to set up a remote server to be able to directly stream from it.
-// Returns raw messages that still need to be parsed by `ParseMessagesDataProvider`.
+// Returns raw messages that still need to be parsed downstream.
 export default class BagDataProvider implements RandomAccessDataProvider {
   private _options: Options;
   private _bag?: Bag;
@@ -111,10 +110,7 @@ export default class BagDataProvider implements RandomAccessDataProvider {
   private _extensionPoint?: ExtensionPoint;
   private bzip2?: Bzip2;
 
-  constructor(options: Options, children: RandomAccessDataProviderDescriptor[]) {
-    if (children.length > 0) {
-      throw new Error("BagDataProvider cannot have children");
-    }
+  constructor(options: Options) {
     this._options = options;
   }
 
@@ -125,7 +121,7 @@ export default class BagDataProvider implements RandomAccessDataProvider {
     this.bzip2 = await Bzip2.init();
 
     try {
-      if (bagPath.type === "remoteBagUrl") {
+      if (bagPath.type === "remote") {
         const fileReader = new LogMetricsReader(new BrowserHttpReader(bagPath.url), extensionPoint);
         const remoteReader = new CachedFilelike({
           fileReader,

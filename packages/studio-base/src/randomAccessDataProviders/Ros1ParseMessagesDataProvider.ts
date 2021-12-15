@@ -12,42 +12,27 @@
 //   You may not use this file except in compliance with the License.
 
 import { Time } from "@foxglove/rostime";
+import BagDataProvider from "@foxglove/studio-base/randomAccessDataProviders/BagDataProvider";
 
 import rawMessageDefinitionsToParsed from "./rawMessageDefinitionsToParsed";
 import {
   RandomAccessDataProvider,
   InitializationResult,
   ExtensionPoint,
-  RandomAccessDataProviderDescriptor,
-  GetDataProvider,
   GetMessagesResult,
   GetMessagesTopics,
 } from "./types";
 
-// Parses raw messages as returned by `BagDataProvider`. To make it fast to seek back and forth, we keep
-// a small cache here, which maps messages from the underlying RandomAccessDataProvider to parsed messages. This assumes
-// that usually the underlying RandomAccessDataProvider will give us the same message references, and fast, which should
-// be the case when using the MemoryCacheDataProvider.
-export default class ParseMessagesDataProvider implements RandomAccessDataProvider {
-  // Underlying RandomAccessDataProvider.
-  private _provider: RandomAccessDataProvider;
+// Parses raw messages as returned by `BagDataProvider`.
+export default class Ros1ParseMessagesDataProvider implements RandomAccessDataProvider {
+  private _provider: BagDataProvider;
 
   private _datatypeNamesByTopic: {
     [topic: string]: string;
   } = {};
 
-  constructor(
-    _args: unknown,
-    children: RandomAccessDataProviderDescriptor[],
-    getDataProvider: GetDataProvider,
-  ) {
-    const child = children[0];
-    if (children.length !== 1 || !child) {
-      throw new Error(
-        `Incorrect number of children to ParseMessagesDataProvider: ${children.length}`,
-      );
-    }
-    this._provider = getDataProvider(child);
+  constructor(provider: BagDataProvider) {
+    this._provider = provider;
   }
 
   async initialize(extensionPoint: ExtensionPoint): Promise<InitializationResult> {

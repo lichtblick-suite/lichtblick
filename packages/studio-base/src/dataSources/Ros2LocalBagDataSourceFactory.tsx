@@ -6,9 +6,11 @@ import {
   IDataSourceFactory,
   DataSourceFactoryInitializeArgs,
 } from "@foxglove/studio-base/context/PlayerSelectionContext";
-import { buildNonRos1PlayerFromDescriptor } from "@foxglove/studio-base/players/buildNonRos1Player";
+import RandomAccessPlayer from "@foxglove/studio-base/players/RandomAccessPlayer";
 import { Player } from "@foxglove/studio-base/players/types";
-import { getLocalRosbag2Descriptor } from "@foxglove/studio-base/randomAccessDataProviders/standardDataProviderDescriptors";
+import MemoryCacheDataProvider from "@foxglove/studio-base/randomAccessDataProviders/MemoryCacheDataProvider";
+import Rosbag2DataProvider from "@foxglove/studio-base/randomAccessDataProviders/Rosbag2DataProvider";
+import { getSeekToTime } from "@foxglove/studio-base/util/time";
 
 class Ros2LocalBagDataSourceFactory implements IDataSourceFactory {
   id = "ros2-local-bagfile";
@@ -20,16 +22,36 @@ class Ros2LocalBagDataSourceFactory implements IDataSourceFactory {
 
   initialize(args: DataSourceFactoryInitializeArgs): Player | undefined {
     if ((args.files?.length ?? 0) > 0) {
-      const files = args.files as File[];
-      return buildNonRos1PlayerFromDescriptor(files[0]!.name, getLocalRosbag2Descriptor(files), {
+      const rosbag2Provider = new Rosbag2DataProvider({
+        bagPath: {
+          type: "files",
+          files: args.files ?? [],
+        },
+      });
+
+      const messageCacheProvider = new MemoryCacheDataProvider(rosbag2Provider, {
+        unlimitedCache: args.unlimitedMemoryCache,
+      });
+
+      return new RandomAccessPlayer(messageCacheProvider, {
         metricsCollector: args.metricsCollector,
-        unlimitedMemoryCache: args.unlimitedMemoryCache,
+        seekToTime: getSeekToTime(),
       });
     } else if (args.file) {
-      const file = args.file;
-      return buildNonRos1PlayerFromDescriptor(file.name, getLocalRosbag2Descriptor(file), {
+      const rosbag2Provider = new Rosbag2DataProvider({
+        bagPath: {
+          type: "file",
+          file: args.file,
+        },
+      });
+
+      const messageCacheProvider = new MemoryCacheDataProvider(rosbag2Provider, {
+        unlimitedCache: args.unlimitedMemoryCache,
+      });
+
+      return new RandomAccessPlayer(messageCacheProvider, {
         metricsCollector: args.metricsCollector,
-        unlimitedMemoryCache: args.unlimitedMemoryCache,
+        seekToTime: getSeekToTime(),
       });
     }
 

@@ -6,9 +6,11 @@ import {
   IDataSourceFactory,
   DataSourceFactoryInitializeArgs,
 } from "@foxglove/studio-base/context/PlayerSelectionContext";
-import { buildNonRos1PlayerFromDescriptor } from "@foxglove/studio-base/players/buildNonRos1Player";
+import RandomAccessPlayer from "@foxglove/studio-base/players/RandomAccessPlayer";
 import { Player } from "@foxglove/studio-base/players/types";
-import { getLocalUlogDescriptor } from "@foxglove/studio-base/randomAccessDataProviders/standardDataProviderDescriptors";
+import MemoryCacheDataProvider from "@foxglove/studio-base/randomAccessDataProviders/MemoryCacheDataProvider";
+import UlogDataProvider from "@foxglove/studio-base/randomAccessDataProviders/UlogDataProvider";
+import { getSeekToTime } from "@foxglove/studio-base/util/time";
 
 class UlogLocalDataSourceFactory implements IDataSourceFactory {
   id = "ulog-local-file";
@@ -23,9 +25,14 @@ class UlogLocalDataSourceFactory implements IDataSourceFactory {
       return;
     }
 
-    return buildNonRos1PlayerFromDescriptor(file.name, getLocalUlogDescriptor(file), {
+    const ulogDataProvider = new UlogDataProvider({ file });
+    const messageCacheProvider = new MemoryCacheDataProvider(ulogDataProvider, {
+      unlimitedCache: args.unlimitedMemoryCache,
+    });
+
+    return new RandomAccessPlayer(messageCacheProvider, {
       metricsCollector: args.metricsCollector,
-      unlimitedMemoryCache: args.unlimitedMemoryCache,
+      seekToTime: getSeekToTime(),
     });
   }
 }

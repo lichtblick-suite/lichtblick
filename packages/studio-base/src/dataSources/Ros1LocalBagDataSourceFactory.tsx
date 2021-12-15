@@ -6,8 +6,11 @@ import {
   IDataSourceFactory,
   DataSourceFactoryInitializeArgs,
 } from "@foxglove/studio-base/context/PlayerSelectionContext";
-import { buildPlayerFromFiles } from "@foxglove/studio-base/players/buildPlayer";
+import RandomAccessPlayer from "@foxglove/studio-base/players/RandomAccessPlayer";
 import { Player } from "@foxglove/studio-base/players/types";
+import Ros1MemoryCacheDataProvider from "@foxglove/studio-base/randomAccessDataProviders/Ros1MemoryCacheDataProvider";
+import WorkerBagDataProvider from "@foxglove/studio-base/randomAccessDataProviders/WorkerBagDataProvider";
+import { getSeekToTime } from "@foxglove/studio-base/util/time";
 
 class Ros1LocalBagDataSourceFactory implements IDataSourceFactory {
   id = "ros1-local-bagfile";
@@ -22,9 +25,14 @@ class Ros1LocalBagDataSourceFactory implements IDataSourceFactory {
       return;
     }
 
-    return buildPlayerFromFiles([file], {
-      unlimitedMemoryCache: args.unlimitedMemoryCache,
+    const bagWorkerDataProvider = new WorkerBagDataProvider({ type: "file", file });
+    const messageCacheProvider = new Ros1MemoryCacheDataProvider(bagWorkerDataProvider, {
+      unlimitedCache: args.unlimitedMemoryCache,
+    });
+
+    return new RandomAccessPlayer(messageCacheProvider, {
       metricsCollector: args.metricsCollector,
+      seekToTime: getSeekToTime(),
     });
   }
 }

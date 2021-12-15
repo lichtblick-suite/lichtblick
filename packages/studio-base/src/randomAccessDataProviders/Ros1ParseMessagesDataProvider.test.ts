@@ -12,24 +12,18 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
+import fs from "fs";
+
 import BagDataProvider from "@foxglove/studio-base/randomAccessDataProviders/BagDataProvider";
-import ParseMessagesDataProvider from "@foxglove/studio-base/randomAccessDataProviders/ParseMessagesDataProvider";
-import { CoreDataProviders } from "@foxglove/studio-base/randomAccessDataProviders/constants";
-import createGetDataProvider from "@foxglove/studio-base/randomAccessDataProviders/createGetDataProvider";
+import Ros1ParseMessagesDataProvider from "@foxglove/studio-base/randomAccessDataProviders/Ros1ParseMessagesDataProvider";
+
+const bagFileContent = fs.readFileSync(`${__dirname}/../test/fixtures/example.bag`);
 
 function getProvider() {
-  return new ParseMessagesDataProvider(
-    {},
-    [
-      {
-        name: CoreDataProviders.BagDataProvider,
-        args: {
-          bagPath: { type: "file", file: `${__dirname}/../test/fixtures/example.bag` },
-        },
-        children: [],
-      },
-    ],
-    createGetDataProvider({ BagDataProvider }),
+  return new Ros1ParseMessagesDataProvider(
+    new BagDataProvider({
+      bagPath: { type: "file", file: new Blob([bagFileContent]) },
+    }),
   );
 }
 

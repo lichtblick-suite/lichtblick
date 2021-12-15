@@ -40,11 +40,9 @@ import {
   PlayerPresence,
   PlayerProblem,
 } from "@foxglove/studio-base/players/types";
-import { rootGetDataProvider } from "@foxglove/studio-base/randomAccessDataProviders/rootGetDataProvider";
 import {
   Connection,
   RandomAccessDataProvider,
-  RandomAccessDataProviderDescriptor,
   RandomAccessDataProviderMetadata,
 } from "@foxglove/studio-base/randomAccessDataProviders/types";
 import { RosDatatypes } from "@foxglove/studio-base/types/RosDatatypes";
@@ -145,16 +143,10 @@ export default class RandomAccessPlayer implements Player {
   private _problems = new Map<string, PlayerProblem>();
 
   constructor(
-    providerDescriptor: RandomAccessDataProviderDescriptor,
+    provider: RandomAccessDataProvider,
     { metricsCollector, seekToTime }: RandomAccessPlayerOptions,
   ) {
-    this._label = providerDescriptor.label;
-    this._filePath = providerDescriptor.filePath;
-    if (process.env.NODE_ENV === "test" && providerDescriptor.name === "TestProvider") {
-      this._provider = providerDescriptor.args.provider;
-    } else {
-      this._provider = rootGetDataProvider(providerDescriptor);
-    }
+    this._provider = provider;
     this._metricsCollector = metricsCollector ?? new NoopMetricsCollector();
     this._seekToTime = seekToTime;
     this._metricsCollector.playerConstructed();

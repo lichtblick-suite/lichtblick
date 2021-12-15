@@ -33,15 +33,12 @@ const dummyExtensionPoint = {
 
 describe("BagDataProvider", () => {
   it("initializes", async () => {
-    const provider = new BagDataProvider(
-      {
-        bagPath: {
-          type: "file",
-          file: new Blob([fs.readFileSync(`${__dirname}/../test/fixtures/example.bag`)]),
-        },
+    const provider = new BagDataProvider({
+      bagPath: {
+        type: "file",
+        file: new Blob([fs.readFileSync(`${__dirname}/../test/fixtures/example.bag`)]),
       },
-      [],
-    );
+    });
     const result = await provider.initialize(dummyExtensionPoint);
     expect(result.start).toEqual({ sec: 1396293887, nsec: 844783943 });
     expect(result.end).toEqual({ sec: 1396293909, nsec: 544870199 });
@@ -74,15 +71,12 @@ describe("BagDataProvider", () => {
   });
 
   it("initializes with bz2 bag", async () => {
-    const provider = new BagDataProvider(
-      {
-        bagPath: {
-          type: "file",
-          file: new Blob([fs.readFileSync(`${__dirname}/../test/fixtures/example-bz2.bag`)]),
-        },
+    const provider = new BagDataProvider({
+      bagPath: {
+        type: "file",
+        file: new Blob([fs.readFileSync(`${__dirname}/../test/fixtures/example-bz2.bag`)]),
       },
-      [],
-    );
+    });
     const result = await provider.initialize(dummyExtensionPoint);
     expect(result.start).toEqual({ sec: 1396293887, nsec: 844783943 });
     expect(result.end).toEqual({ sec: 1396293909, nsec: 544870199 });
@@ -115,15 +109,12 @@ describe("BagDataProvider", () => {
   });
 
   it("gets messages", async () => {
-    const provider = new BagDataProvider(
-      {
-        bagPath: {
-          type: "file",
-          file: new Blob([fs.readFileSync(`${__dirname}/../test/fixtures/example.bag`)]),
-        },
+    const provider = new BagDataProvider({
+      bagPath: {
+        type: "file",
+        file: new Blob([fs.readFileSync(`${__dirname}/../test/fixtures/example.bag`)]),
       },
-      [],
-    );
+    });
     await provider.initialize(dummyExtensionPoint);
     const start = { sec: 1396293887, nsec: 844783943 };
     const end = { sec: 1396293888, nsec: 60000000 };
@@ -146,15 +137,12 @@ describe("BagDataProvider", () => {
   });
 
   it("sorts shuffled messages (and reports an error)", async () => {
-    const provider = new BagDataProvider(
-      {
-        bagPath: {
-          type: "file",
-          file: new Blob([fs.readFileSync(`${__dirname}/../test/fixtures/demo-shuffled.bag`)]),
-        },
+    const provider = new BagDataProvider({
+      bagPath: {
+        type: "file",
+        file: new Blob([fs.readFileSync(`${__dirname}/../test/fixtures/demo-shuffled.bag`)]),
       },
-      [],
-    );
+    });
     await provider.initialize(dummyExtensionPoint);
     const start = { sec: 1490148912, nsec: 0 };
     const end = { sec: 1490148913, nsec: 0 };

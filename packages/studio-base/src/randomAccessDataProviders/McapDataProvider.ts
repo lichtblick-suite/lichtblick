@@ -21,7 +21,6 @@ import {
 import { MessageEvent, Topic } from "@foxglove/studio-base/players/types";
 import {
   RandomAccessDataProvider,
-  RandomAccessDataProviderDescriptor,
   ExtensionPoint,
   GetMessagesResult,
   GetMessagesTopics,
@@ -36,10 +35,7 @@ export default class McapDataProvider implements RandomAccessDataProvider {
   private options: Options;
   private messagesByChannel?: Map<number, MessageEvent<unknown>[]>;
 
-  constructor(options: Options, children: RandomAccessDataProviderDescriptor[]) {
-    if (children.length > 0) {
-      throw new Error("McapBlobDataProvider cannot have children");
-    }
+  constructor(options: Options) {
     this.options = options;
   }
 

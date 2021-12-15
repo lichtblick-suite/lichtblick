@@ -6,8 +6,11 @@ import {
   IDataSourceFactory,
   DataSourceFactoryInitializeArgs,
 } from "@foxglove/studio-base/context/PlayerSelectionContext";
-import { buildPlayerFromBagURLs } from "@foxglove/studio-base/players/buildPlayer";
+import RandomAccessPlayer from "@foxglove/studio-base/players/RandomAccessPlayer";
+import Ros1MemoryCacheDataProvider from "@foxglove/studio-base/randomAccessDataProviders/Ros1MemoryCacheDataProvider";
+import WorkerBagDataProvider from "@foxglove/studio-base/randomAccessDataProviders/WorkerBagDataProvider";
 import { DEMO_BAG_URL } from "@foxglove/studio-base/util/isDemoBagUrl";
+import { getSeekToTime } from "@foxglove/studio-base/util/time";
 
 class SampleUdacityDataSourceFactory implements IDataSourceFactory {
   id = "sample-udacity";
@@ -180,9 +183,14 @@ class SampleUdacityDataSourceFactory implements IDataSourceFactory {
   };
 
   initialize(args: DataSourceFactoryInitializeArgs): ReturnType<IDataSourceFactory["initialize"]> {
-    return buildPlayerFromBagURLs([DEMO_BAG_URL], {
-      unlimitedMemoryCache: args.unlimitedMemoryCache,
+    const bagWorkerDataProvider = new WorkerBagDataProvider({ type: "remote", url: DEMO_BAG_URL });
+    const messageCacheProvider = new Ros1MemoryCacheDataProvider(bagWorkerDataProvider, {
+      unlimitedCache: args.unlimitedMemoryCache,
+    });
+
+    return new RandomAccessPlayer(messageCacheProvider, {
       metricsCollector: args.metricsCollector,
+      seekToTime: getSeekToTime(),
     });
   }
 }

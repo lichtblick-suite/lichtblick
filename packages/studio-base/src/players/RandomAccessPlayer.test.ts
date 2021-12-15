@@ -100,10 +100,7 @@ describe("RandomAccessPlayer", () => {
 
   it("calls listener with player initial player state and data types", async () => {
     const provider = new TestProvider();
-    const source = new RandomAccessPlayer(
-      { name: "TestProvider", args: { provider }, children: [] },
-      playerOptions,
-    );
+    const source = new RandomAccessPlayer(provider, playerOptions);
     const store = new MessageStore(2);
     source.setListener(store.add);
     const messages = await store.done;
@@ -149,10 +146,10 @@ describe("RandomAccessPlayer", () => {
 
   it("with the default seekToTime it seeks into the bag by a bit, so that there's something useful on the screen", async () => {
     const provider = new TestProvider();
-    const source = new RandomAccessPlayer(
-      { name: "TestProvider", args: { provider }, children: [] },
-      { ...playerOptions, seekToTime: getSeekToTime() },
-    );
+    const source = new RandomAccessPlayer(provider, {
+      ...playerOptions,
+      seekToTime: getSeekToTime(),
+    });
     const store = new MessageStore(2);
     source.setListener(store.add);
     const messages: any = await store.done;
@@ -166,10 +163,10 @@ describe("RandomAccessPlayer", () => {
   // Seeking while loading messages for a previous seek cancels the previous seek
   it("a new seek during existing seek cancels existing seek", async () => {
     const provider = new TestProvider();
-    const source = new RandomAccessPlayer(
-      { name: "TestProvider", args: { provider }, children: [] },
-      { ...playerOptions, seekToTime: getSeekToTime() },
-    );
+    const source = new RandomAccessPlayer(provider, {
+      ...playerOptions,
+      seekToTime: getSeekToTime(),
+    });
     const store = new MessageStore(2);
     source.setListener(store.add);
 
@@ -205,10 +202,7 @@ describe("RandomAccessPlayer", () => {
 
   it("calls listener with player state changes on play/pause", async () => {
     const provider = new TestProvider();
-    const source = new RandomAccessPlayer(
-      { name: "TestProvider", args: { provider }, children: [] },
-      playerOptions,
-    );
+    const source = new RandomAccessPlayer(provider, playerOptions);
     const store = new MessageStore(2);
     source.setListener(store.add);
     // make getMessages do nothing since we're going to start reading
@@ -260,10 +254,7 @@ describe("RandomAccessPlayer", () => {
 
   it("calls listener with speed changes", async () => {
     const provider = new TestProvider();
-    const source = new RandomAccessPlayer(
-      { name: "TestProvider", args: { provider }, children: [] },
-      playerOptions,
-    );
+    const source = new RandomAccessPlayer(provider, playerOptions);
     const store = new MessageStore(2);
     source.setListener(store.add);
     // allow initialization messages to come in
@@ -351,10 +342,7 @@ describe("RandomAccessPlayer", () => {
       }
     };
 
-    const source = new RandomAccessPlayer(
-      { name: "TestProvider", args: { provider }, children: [] },
-      playerOptions,
-    );
+    const source = new RandomAccessPlayer(provider, playerOptions);
     const store = new MessageStore(5);
     source.setListener(store.add);
     await Promise.resolve();
@@ -393,10 +381,7 @@ describe("RandomAccessPlayer", () => {
       throw new Error("getMessages should not be called");
     };
 
-    const source = new RandomAccessPlayer(
-      { name: "TestProvider", args: { provider }, children: [] },
-      playerOptions,
-    );
+    const source = new RandomAccessPlayer(provider, playerOptions);
     const store = new MessageStore(5);
     source.setListener(store.add);
 
@@ -421,10 +406,7 @@ describe("RandomAccessPlayer", () => {
 
   it("still moves forward time if there are no messages", async () => {
     const provider = new TestProvider();
-    const source = new RandomAccessPlayer(
-      { name: "TestProvider", args: { provider }, children: [] },
-      playerOptions,
-    );
+    const source = new RandomAccessPlayer(provider, playerOptions);
 
     let callCount = 0;
     provider.getMessages = async (
@@ -475,10 +457,7 @@ describe("RandomAccessPlayer", () => {
 
   it("pauses and does not emit messages after pause", async () => {
     const provider = new TestProvider();
-    const source = new RandomAccessPlayer(
-      { name: "TestProvider", args: { provider }, children: [] },
-      playerOptions,
-    );
+    const source = new RandomAccessPlayer(provider, playerOptions);
 
     let callCount = 0;
     provider.getMessages = async (
@@ -561,10 +540,7 @@ describe("RandomAccessPlayer", () => {
 
   it("seek during reading discards messages before seek", async () => {
     const provider = new TestProvider();
-    const source = new RandomAccessPlayer(
-      { name: "TestProvider", args: { provider }, children: [] },
-      playerOptions,
-    );
+    const source = new RandomAccessPlayer(provider, playerOptions);
     let callCount = 0;
     provider.getMessages = async (
       start: Time,
@@ -654,10 +630,7 @@ describe("RandomAccessPlayer", () => {
 
   it("only emits a new lastSeekTime when seeking is actually done", async () => {
     const provider = new TestProvider();
-    const source = new RandomAccessPlayer(
-      { name: "TestProvider", args: { provider }, children: [] },
-      playerOptions,
-    );
+    const source = new RandomAccessPlayer(provider, playerOptions);
     let callCount = 0;
     provider.getMessages = async (): Promise<GetMessagesResult> => {
       callCount++;
@@ -721,10 +694,7 @@ describe("RandomAccessPlayer", () => {
 
   it("does not emit when getting a progressCallback when playing", async () => {
     const provider = new TestProvider();
-    const source = new RandomAccessPlayer(
-      { name: "TestProvider", args: { provider }, children: [] },
-      playerOptions,
-    );
+    const source = new RandomAccessPlayer(provider, playerOptions);
     let callCount = 0;
     const progressDuringPlayback: any = { duringPlayback: true };
     const progressAfterPause: any = { afterPause: true };
@@ -803,10 +773,7 @@ describe("RandomAccessPlayer", () => {
 
   it("backfills previous messages on seek", async () => {
     const provider = new TestProvider();
-    const source = new RandomAccessPlayer(
-      { name: "TestProvider", args: { provider }, children: [] },
-      playerOptions,
-    );
+    const source = new RandomAccessPlayer(provider, playerOptions);
     let callCount = 0;
     provider.getMessages = async (
       start: Time,
@@ -907,10 +874,7 @@ describe("RandomAccessPlayer", () => {
 
   it("discards backfilled messages if we started playing after the seek", async () => {
     const provider = new TestProvider();
-    const source = new RandomAccessPlayer(
-      { name: "TestProvider", args: { provider }, children: [] },
-      playerOptions,
-    );
+    const source = new RandomAccessPlayer(provider, playerOptions);
     let callCount = 0;
     let backfillPromiseCallback: ((_: GetMessagesResult) => void) | undefined;
     provider.getMessages = async (
@@ -1007,10 +971,7 @@ describe("RandomAccessPlayer", () => {
 
   it("clamps times passed to the RandomAccessDataProvider", async () => {
     const provider = new TestProvider();
-    const source = new RandomAccessPlayer(
-      { name: "TestProvider", args: { provider }, children: [] },
-      playerOptions,
-    );
+    const source = new RandomAccessPlayer(provider, playerOptions);
     source.setSubscriptions([{ topic: "/foo/bar" }]);
     source.requestBackfill(); // We always get a `requestBackfill` after each `setSubscriptions`.
 
@@ -1074,10 +1035,7 @@ describe("RandomAccessPlayer", () => {
   it("gets messages when requestBackfill is called", async () => {
     expect.assertions(5);
     const provider = new TestProvider();
-    const source = new RandomAccessPlayer(
-      { name: "TestProvider", args: { provider }, children: [] },
-      playerOptions,
-    );
+    const source = new RandomAccessPlayer(provider, playerOptions);
 
     let callCount = 0;
     provider.getMessages = async (
@@ -1181,10 +1139,7 @@ describe("RandomAccessPlayer", () => {
       return { ...getMessagesResult, parsedMessages: [next] };
     };
 
-    const source = new RandomAccessPlayer(
-      { name: "TestProvider", args: { provider }, children: [] },
-      playerOptions,
-    );
+    const source = new RandomAccessPlayer(provider, playerOptions);
     const messagesReceived: MessageEvent<unknown>[] = [];
     source.setListener(async (playerState) => {
       messagesReceived.push(
@@ -1232,10 +1187,7 @@ describe("RandomAccessPlayer", () => {
 
   it("closes provider when closed", async () => {
     const provider = new TestProvider();
-    const source = new RandomAccessPlayer(
-      { name: "TestProvider", args: { provider }, children: [] },
-      playerOptions,
-    );
+    const source = new RandomAccessPlayer(provider, playerOptions);
     source.setListener(async () => {});
     await Promise.resolve();
     source.close();
@@ -1249,10 +1201,7 @@ describe("RandomAccessPlayer", () => {
       }
     }
     const provider = new FailTestProvider();
-    const source = new RandomAccessPlayer(
-      { name: "TestProvider", args: { provider }, children: [] },
-      playerOptions,
-    );
+    const source = new RandomAccessPlayer(provider, playerOptions);
 
     const store = new MessageStore(2);
     source.setListener(store.add);
@@ -1283,10 +1232,7 @@ describe("RandomAccessPlayer", () => {
   it("reports when a provider is reconnecting", (done) => {
     expect.assertions(0);
     const provider = new TestProvider();
-    const source = new RandomAccessPlayer(
-      { name: "TestProvider", args: { provider }, children: [] },
-      playerOptions,
-    );
+    const source = new RandomAccessPlayer(provider, playerOptions);
     source.setListener(async (state) => {
       if (state.presence === PlayerPresence.PRESENT) {
         setImmediate(() =>
@@ -1317,10 +1263,7 @@ describe("RandomAccessPlayer", () => {
       message: { payload: "foo bar 2" },
     };
 
-    const player = new RandomAccessPlayer(
-      { name: "TestProvider", args: { provider }, children: [] },
-      playerOptions,
-    );
+    const player = new RandomAccessPlayer(provider, playerOptions);
     player.setSubscriptions([{ topic: "/foo/bar" }]);
     player.requestBackfill(); // We always get a `requestBackfill` after each `setSubscriptions`.
 
@@ -1488,10 +1431,7 @@ describe("RandomAccessPlayer", () => {
       provider.getMessages = async () => getMessagesResult;
 
       const metricsCollector = new TestMetricsCollector();
-      const source = new RandomAccessPlayer(
-        { name: "TestProvider", args: { provider }, children: [] },
-        { ...playerOptions, metricsCollector },
-      );
+      const source = new RandomAccessPlayer(provider, { ...playerOptions, metricsCollector });
       expect(metricsCollector.stats()).toEqual({
         initialized: 0,
         played: 0,
@@ -1571,10 +1511,7 @@ describe("RandomAccessPlayer", () => {
   it("seeks the player after starting", async () => {
     const provider = new TestProvider();
     provider.getMessages = jest.fn().mockImplementation(async () => getMessagesResult);
-    const player = new RandomAccessPlayer(
-      { name: "TestProvider", args: { provider }, children: [] },
-      playerOptions,
-    );
+    const player = new RandomAccessPlayer(provider, playerOptions);
     const store = new MessageStore(2);
     player.setSubscriptions([{ topic: "/foo/bar" }]);
     player.requestBackfill(); // We always get a `requestBackfill` after each `setSubscriptions`.
@@ -1594,10 +1531,7 @@ describe("RandomAccessPlayer", () => {
   it("does not seek until setListener is called to initialize the start and end time", async () => {
     const provider = new TestProvider();
     provider.getMessages = jest.fn().mockImplementation(async () => getMessagesResult);
-    const player = new RandomAccessPlayer(
-      { name: "TestProvider", args: { provider }, children: [] },
-      playerOptions,
-    );
+    const player = new RandomAccessPlayer(provider, playerOptions);
     const store = new MessageStore(2);
     player.setSubscriptions([{ topic: "/foo/bar" }]);
     player.requestBackfill(); // We always get a `requestBackfill` after each `setSubscriptions`.
@@ -1616,10 +1550,7 @@ describe("RandomAccessPlayer", () => {
   it("keeps currentTime reference equality if current time does not change", async () => {
     const provider = new TestProvider();
     provider.getMessages = jest.fn().mockImplementation(async () => getMessagesResult);
-    const player = new RandomAccessPlayer(
-      { name: "TestProvider", args: { provider }, children: [] },
-      playerOptions,
-    );
+    const player = new RandomAccessPlayer(provider, playerOptions);
     const store = new MessageStore(3);
     player.setListener(store.add);
     await Promise.resolve();
@@ -1642,10 +1573,7 @@ describe("RandomAccessPlayer", () => {
         { name: "/only_binary_topic", datatype: "dummy" },
       ],
     });
-    const source = new RandomAccessPlayer(
-      { name: "TestProvider", args: { provider }, children: [] },
-      playerOptions,
-    );
+    const source = new RandomAccessPlayer(provider, playerOptions);
 
     provider.getMessages = async (
       _start: Time,
@@ -1673,10 +1601,7 @@ describe("RandomAccessPlayer", () => {
       const provider = new TestProvider({
         topics: [{ name: "/fallback_parsed", datatype: "dummy" }],
       });
-      const player = new RandomAccessPlayer(
-        { name: "TestProvider", args: { provider }, children: [] },
-        playerOptions,
-      );
+      const player = new RandomAccessPlayer(provider, playerOptions);
       player.setListener(async () => {
         // no-op
       });
@@ -1689,10 +1614,7 @@ describe("RandomAccessPlayer", () => {
       const provider = new TestProvider({
         topics: [{ name: "/fallback_parsed", datatype: "dummy" }],
       });
-      const player = new RandomAccessPlayer(
-        { name: "TestProvider", args: { provider }, children: [] },
-        playerOptions,
-      );
+      const player = new RandomAccessPlayer(provider, playerOptions);
       player.setListener(async () => {});
       await Promise.resolve();
 

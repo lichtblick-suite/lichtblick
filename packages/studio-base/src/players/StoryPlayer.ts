@@ -18,11 +18,9 @@ import {
   PlayerPresence,
 } from "@foxglove/studio-base/players/types";
 import BagDataProvider from "@foxglove/studio-base/randomAccessDataProviders/BagDataProvider";
-import ParseMessagesDataProvider from "@foxglove/studio-base/randomAccessDataProviders/ParseMessagesDataProvider";
+import Ros1ParseMessagesDataProvider from "@foxglove/studio-base/randomAccessDataProviders/Ros1ParseMessagesDataProvider";
 
 const noop = (): void => {};
-
-const NOOP_PROVIDER = [{ name: "noop", args: {}, children: [] }];
 
 export default class StoryPlayer implements Player {
   private _parsedSubscribedTopics: string[] = [];
@@ -34,15 +32,12 @@ export default class StoryPlayer implements Player {
     void (async () => {
       const response = await fetch(this._bag);
       const blobs = await response.blob();
-      const provider = new ParseMessagesDataProvider({}, NOOP_PROVIDER, () => {
-        return new BagDataProvider(
-          {
-            bagPath: { type: "file", file: new File([blobs], "test.bag") },
-            cacheSizeInBytes: Infinity,
-          },
-          [],
-        );
-      });
+      const provider = new Ros1ParseMessagesDataProvider(
+        new BagDataProvider({
+          bagPath: { type: "file", file: new File([blobs], "test.bag") },
+          cacheSizeInBytes: Infinity,
+        }),
+      );
       void provider
         .initialize({
           progressCallback: () => {

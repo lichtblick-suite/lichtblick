@@ -16,7 +16,6 @@ import { first, flatten, last } from "lodash";
 import { compare } from "@foxglove/rostime";
 import { MessageEvent } from "@foxglove/studio-base/players/types";
 import MemoryDataProvider from "@foxglove/studio-base/randomAccessDataProviders/MemoryDataProvider";
-import { CoreDataProviders } from "@foxglove/studio-base/randomAccessDataProviders/constants";
 import { mockExtensionPoint } from "@foxglove/studio-base/randomAccessDataProviders/mockExtensionPoint";
 import delay from "@foxglove/studio-base/util/delay";
 import naturalSort from "@foxglove/studio-base/util/naturalSort";
@@ -90,23 +89,19 @@ function getProvider(
     },
   });
   return {
-    provider: new Ros1MemoryCacheDataProvider(
-      { unlimitedCache },
-      [{ name: CoreDataProviders.MemoryCacheDataProvider, args: {}, children: [] }],
-      () => memoryDataProvider,
-    ),
+    provider: new Ros1MemoryCacheDataProvider(memoryDataProvider, { unlimitedCache }),
     memoryDataProvider,
   };
 }
 
 describe("MemoryCacheDataProvider", () => {
-  it("initialize passes through underlying provider result", async () => {
+  it("initialize passes through underlying provider result and parsed messages", async () => {
     const { provider, memoryDataProvider } = getProvider(generateMessages());
     const initializeSpy = jest.spyOn(memoryDataProvider, "initialize");
 
     const result = await provider.initialize(mockExtensionPoint().extensionPoint);
     const expected = await initializeSpy.mock.results[0]?.value;
-    expect(result).toEqual(expected);
+    expect(result).toEqual({ ...expected, providesParsedMessages: true });
   });
 
   it("suppresses the underlying progress updates, and only publishes its own", async () => {
