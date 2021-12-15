@@ -33,7 +33,7 @@ const log = Log.getLogger(__dirname);
 /** Suppress warnings about messages on unknown subscriptions if the susbscription was recently canceled. */
 const SUBSCRIPTION_WARNING_SUPPRESSION_MS = 2000;
 
-const CAPABILITIES = [PlayerCapabilities.advertise];
+const CAPABILITIES: typeof PlayerCapabilities[keyof typeof PlayerCapabilities][] = [];
 
 const ZERO_TIME = Object.freeze({ sec: 0, nsec: 0 });
 
