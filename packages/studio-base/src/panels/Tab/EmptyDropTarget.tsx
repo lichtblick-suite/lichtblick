@@ -11,55 +11,43 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
+import { Link, Stack, Text, makeStyles, useTheme } from "@fluentui/react";
+import cx from "classnames";
 import { useCallback } from "react";
 import { useDrop } from "react-dnd";
 import { MosaicDragType } from "react-mosaic-component";
-import styled from "styled-components";
 
-import EmptyBoxSvg from "@foxglove/studio-base/assets/emptyBox.svg";
 import ChildToggle from "@foxglove/studio-base/components/ChildToggle";
+import EmptyBoxIcon from "@foxglove/studio-base/components/EmptyBoxIcon";
 import Menu from "@foxglove/studio-base/components/Menu";
 import PanelList, { PanelSelection } from "@foxglove/studio-base/components/PanelList";
 import { useCurrentLayoutActions } from "@foxglove/studio-base/context/CurrentLayoutContext";
 import { MosaicDropResult } from "@foxglove/studio-base/types/panels";
 import { getPanelIdForType } from "@foxglove/studio-base/util/layout";
-import { colors } from "@foxglove/studio-base/util/sharedStyleConstants";
 
-const SDropTarget = styled.div<{ isOver: boolean }>`
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  flex-direction: column;
-  width: 100%;
-  height: 100%;
-  background-color: ${({ isOver, theme }) =>
-    isOver ? theme.palette.neutralLighterAlt : "transparent"};
-  border: ${({ isOver, theme }) => (isOver ? `1px solid ${theme.palette.neutralLight}` : "none")};
-`;
-
-const SEmptyStateText = styled.div`
-  font-size: 16px;
-  margin: 16px 72px;
-  text-align: center;
-  line-height: 1.5;
-  color: ${({ theme }) => theme.semanticColors.disabledText};
-`;
-
-const SPickAPanelText = styled.div`
-  cursor: pointer;
-  text-decoration: underline;
-  transition: color 0.1s;
-
-  &:hover {
-    color: ${colors.TEXTL1};
-  }
-`;
+const useStyles = makeStyles((theme) => ({
+  dropzone: {
+    display: "flex",
+    justifyContent: "center",
+    alignItems: "center",
+    flexDirection: "column",
+    width: "100%",
+    height: "100%",
+    border: "1px solid transparent",
+  },
+  dropzoneOver: {
+    backgroundColor: theme.palette.neutralLighterAlt,
+    borderColor: theme.palette.neutralLight,
+  },
+}));
 
 type Props = {
   tabId?: string;
 };
 
 export const EmptyDropTarget = ({ tabId }: Props): JSX.Element => {
+  const theme = useTheme();
+  const classes = useStyles();
   const { addPanel } = useCurrentLayoutActions();
 
   const [{ isOver }, drop] = useDrop<unknown, MosaicDropResult, { isOver: boolean }>({
@@ -81,19 +69,44 @@ export const EmptyDropTarget = ({ tabId }: Props): JSX.Element => {
   );
 
   return (
-    <SDropTarget ref={drop} isOver={isOver} data-test="empty-drop-target">
-      <EmptyBoxSvg />
-      <SEmptyStateText>
-        Nothing here yet.
-        <br />
-        <ChildToggle position="below" style={{ display: "inline-flex" }}>
-          <SPickAPanelText data-test="pick-a-panel">Pick a panel</SPickAPanelText>
-          <Menu>
-            <PanelList onPanelSelect={onPanelSelect} />
-          </Menu>
-        </ChildToggle>{" "}
-        or drag one in to get started.
-      </SEmptyStateText>
-    </SDropTarget>
+    <div
+      ref={drop}
+      data-test="empty-drop-target"
+      className={cx(classes.dropzone, {
+        [classes.dropzoneOver]: isOver,
+      })}
+    >
+      <Stack
+        horizontalAlign="center"
+        verticalFill
+        verticalAlign="center"
+        tokens={{ childrenGap: theme.spacing.m, padding: theme.spacing.m }}
+      >
+        <EmptyBoxIcon />
+
+        <Text
+          variant="mediumPlus"
+          styles={{
+            root: {
+              color: theme.semanticColors.disabledText,
+              textAlign: "center",
+              lineHeight: "1.5",
+            },
+          }}
+        >
+          Nothing here yet.
+          <br />
+          <ChildToggle position="below" style={{ display: "inline-flex" }}>
+            <Link underline data-test="pick-a-panel">
+              Pick a panel
+            </Link>
+            <Menu>
+              <PanelList onPanelSelect={onPanelSelect} />
+            </Menu>
+          </ChildToggle>{" "}
+          or drag one in to get started.
+        </Text>
+      </Stack>
+    </div>
   );
 };
