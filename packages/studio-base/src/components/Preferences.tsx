@@ -5,6 +5,7 @@ import {
   Checkbox,
   ChoiceGroup,
   DirectionalHint,
+  Dropdown,
   IChoiceGroupOption,
   IComboBoxOption,
   SelectableOptionMenuItemType,
@@ -170,10 +171,9 @@ function TimeFormat(): React.ReactElement {
   ];
 
   return (
-    <VirtualizedComboBox
+    <Dropdown
       label="Timestamp format:"
       options={entries}
-      autoComplete="on"
       openOnKeyboardFocus
       selectedKey={timeFormat}
       onChange={(_event, option) => {
@@ -201,10 +201,9 @@ function LaunchDefault(): React.ReactElement {
   ];
 
   return (
-    <VirtualizedComboBox
+    <Dropdown
       label="Open links in:"
       options={entries}
-      autoComplete="on"
       openOnKeyboardFocus
       selectedKey={preference}
       onChange={(_event, option) => {
