@@ -48,6 +48,7 @@ import DatabaseIcon from "@mdi/svg/svg/database.svg";
 import DragIcon from "@mdi/svg/svg/drag.svg";
 import FitToPageIcon from "@mdi/svg/svg/fit-to-page-outline.svg";
 import HelpCircleIcon from "@mdi/svg/svg/help-circle-outline.svg";
+import HelpCircleFilledIcon from "@mdi/svg/svg/help-circle.svg";
 import LayersIcon from "@mdi/svg/svg/layers.svg";
 import SearchIcon from "@mdi/svg/svg/magnify.svg";
 import MenuDownIcon from "@mdi/svg/svg/menu-down.svg";
@@ -135,6 +136,7 @@ const icons: {
   FullScreenMaximize: <FullScreenMaximize20Regular />,
   GenericScan: <Icons.GenericScanIcon />,
   HelpCircle: <HelpCircleIcon />,
+  HelpCircleFilled: <HelpCircleFilledIcon />,
   Info: <Icons.InfoIcon />,
   Layers: <LayersIcon />,
   LocationDot: <Icons.LocationDotIcon />,

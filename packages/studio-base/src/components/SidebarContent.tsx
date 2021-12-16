@@ -2,17 +2,11 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { Stack, Text, useTheme, mergeStyleSets } from "@fluentui/react";
-import HelpCircleOutlineIcon from "@mdi/svg/svg/help-circle-outline.svg";
-import HelpCircleIcon from "@mdi/svg/svg/help-circle.svg";
+import { IconButton, Stack, Text, useTheme } from "@fluentui/react";
 import { useState, useMemo } from "react";
 
-import Icon from "@foxglove/studio-base/components/Icon";
 import TextContent from "@foxglove/studio-base/components/TextContent";
-
-const styles = mergeStyleSets({
-  icon: { fontSize: 14, margin: "0 0.2em" },
-});
+import { useTooltip } from "@foxglove/studio-base/components/Tooltip";
 
 export function SidebarContent({
   noPadding = false,
@@ -33,20 +27,35 @@ export function SidebarContent({
 }>): JSX.Element {
   const theme = useTheme();
   const [showHelp, setShowHelp] = useState<boolean>(false);
+  const button = useTooltip({ contents: showHelp ? "Hide help" : "Show help" });
 
   const trailingItemsWithHelp = useMemo(() => {
     if (helpContent != undefined) {
-      const IconComponent = showHelp ? HelpCircleIcon : HelpCircleOutlineIcon;
-      const tooltipText = showHelp ? "Hide help" : "Show help";
       return [
         ...(trailingItems ?? []),
-        <Icon key="icon" tooltip={tooltipText} fade onClick={() => setShowHelp(!showHelp)}>
-          <IconComponent className={styles.icon} style={{ width: "18px", height: "18px" }} />
-        </Icon>,
+        <IconButton
+          elementRef={button.ref}
+          key="help-icon"
+          iconProps={{ iconName: showHelp ? "HelpCircleFilled" : "HelpCircle" }}
+          onClick={() => setShowHelp(!showHelp)}
+          styles={{
+            icon: {
+              color: theme.semanticColors.bodySubtext,
+
+              svg: {
+                fill: "currentColor",
+                height: "1em",
+                width: "1em",
+              },
+            },
+          }}
+        >
+          {button.tooltip}
+        </IconButton>,
       ];
     }
     return trailingItems ?? [];
-  }, [showHelp, helpContent, trailingItems]);
+  }, [helpContent, trailingItems, button, showHelp, theme]);
 
   return (
     <Stack
@@ -65,7 +74,8 @@ export function SidebarContent({
         horizontal
         horizontalAlign="space-between"
         verticalAlign="center"
-        style={{ padding: theme.spacing.m }}
+        tokens={{ padding: theme.spacing.m }}
+        styles={{ root: { minHeight: 56 } }}
       >
         {leadingItems && (
           <Stack horizontal verticalAlign="center">
@@ -88,14 +98,16 @@ export function SidebarContent({
         ) : undefined}
       </Stack>
       {showHelp ? (
-        <Stack style={{ margin: "0px", padding: theme.spacing.m, paddingTop: "0px" }}>
+        <Stack
+          tokens={{
+            padding: `0 ${theme.spacing.m} ${theme.spacing.m} ${theme.spacing.m}`,
+          }}
+        >
           <TextContent allowMarkdownHtml={true}>{helpContent}</TextContent>
         </Stack>
       ) : undefined}
       <Stack.Item
-        style={{
-          padding: noPadding ? undefined : `0px ${theme.spacing.m} ${theme.spacing.m}`,
-        }}
+        tokens={{ padding: noPadding ? undefined : `0px ${theme.spacing.m} ${theme.spacing.m}` }}
         grow
       >
         {children}

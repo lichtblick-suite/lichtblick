@@ -54,8 +54,10 @@ function DataSourceInfo(): JSX.Element {
     >
       <Stack horizontal verticalAlign="center">
         <Stack grow tokens={{ childrenGap: theme.spacing.s2 }}>
-          <Text styles={subheaderStyles}>Current Connection</Text>
-          <Text styles={{ root: { color: theme.palette.neutralSecondary } }}>{playerName}</Text>
+          <Text styles={subheaderStyles}>Current data source</Text>
+          <Text styles={{ root: { color: theme.palette.neutralSecondary } }}>
+            {playerName ?? "Select a data source"}
+          </Text>
         </Stack>
       </Stack>
 
@@ -64,13 +66,21 @@ function DataSourceInfo(): JSX.Element {
         {startTime ? (
           <Timestamp time={startTime} />
         ) : (
-          <Text variant="small">Waiting for data…</Text>
+          <Text variant="small" styles={{ root: { color: theme.palette.neutralSecondary } }}>
+            00:00:00
+          </Text>
         )}
       </Stack>
 
       <Stack tokens={{ childrenGap: theme.spacing.s2 }}>
         <Text styles={subheaderStyles}>End time</Text>
-        {endTime ? <Timestamp time={endTime} /> : <Text variant="small">Waiting for data…</Text>}
+        {endTime ? (
+          <Timestamp time={endTime} />
+        ) : (
+          <Text variant="small" styles={{ root: { color: theme.palette.neutralSecondary } }}>
+            00:00:00
+          </Text>
+        )}
       </Stack>
 
       <Stack tokens={{ childrenGap: theme.spacing.s2 }}>
@@ -79,14 +89,12 @@ function DataSourceInfo(): JSX.Element {
           variant="small"
           styles={{
             root: {
-              fontFamily: fonts.MONOSPACE,
+              fontFamily: startTime && endTime ? fonts.MONOSPACE : undefined,
               color: theme.palette.neutralSecondary,
             },
           }}
         >
-          {startTime && endTime
-            ? formatDuration(subtractTimes(endTime, startTime))
-            : "Waiting for data…"}
+          {startTime && endTime ? formatDuration(subtractTimes(endTime, startTime)) : "00:00:00"}
         </Text>
       </Stack>
     </Stack>

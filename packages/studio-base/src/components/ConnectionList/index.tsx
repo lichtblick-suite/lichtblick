@@ -2,15 +2,7 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import {
-  ActionButton,
-  DefaultButton,
-  Icon,
-  makeStyles,
-  Stack,
-  Text,
-  useTheme,
-} from "@fluentui/react";
+import { ActionButton, Icon, makeStyles, Text, useTheme } from "@fluentui/react";
 import { useCallback, useContext, useMemo } from "react";
 
 import { AppSetting } from "@foxglove/studio-base/AppSetting";
@@ -55,12 +47,7 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-type Props = {
-  onOpen?: () => void;
-};
-
-export default function ConnectionList(props: Props): JSX.Element {
-  const { onOpen } = props;
+export default function ConnectionList(): JSX.Element {
   const [enableOpenDialog] = useAppConfigurationValue(AppSetting.OPEN_DIALOG);
   const { selectSource, availableSources } = usePlayerSelection();
   const confirm = useConfirm();
@@ -173,12 +160,7 @@ export default function ConnectionList(props: Props): JSX.Element {
   return (
     <>
       {sourcesListElements}
-      {enableOpenDialog === true && (
-        <Stack tokens={{ childrenGap: theme.spacing.m }}>
-          <DefaultButton onClick={onOpen}>Open new data source</DefaultButton>
-          <DataSourceInfo />
-        </Stack>
-      )}
+      {enableOpenDialog === true && <DataSourceInfo />}
       {playerProblems.length > 0 && <hr className={classes.divider} />}
       {playerProblems.map((problem, idx) => {
         const iconName = problem.severity === "error" ? "Error" : "Warning";

@@ -67,6 +67,7 @@ declare global {
     | "FullScreenMaximize"
     | "GenericScan"
     | "HelpCircle"
+    | "HelpCircleFilled"
     | "Info"
     | "Layers"
     | "LocationDot"

@@ -1,15 +1,7 @@
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
-import {
-  DefaultButton,
-  IconBase,
-  IconButton,
-  Spinner,
-  Stack,
-  Toggle,
-  useTheme,
-} from "@fluentui/react";
+import { DefaultButton, IconButton, Spinner, Stack, Toggle, useTheme } from "@fluentui/react";
 import { partition } from "lodash";
 import moment from "moment";
 import path from "path";
@@ -361,6 +353,7 @@ export default function LayoutBrowser({
 
   const createLayoutTooltip = useTooltip({ contents: "Create new layout" });
   const importLayoutTooltip = useTooltip({ contents: "Import layout" });
+  const offlineTooltip = useTooltip({ contents: "Offline" });
 
   const layoutDebug = useContext(LayoutStorageDebuggingContext);
   const supportsSignIn = useContext(ConsoleApiContext) != undefined;
@@ -379,10 +372,22 @@ export default function LayoutBrowser({
       trailingItems={[
         (layouts.loading || isBusy) && <Spinner key="spinner" />,
         !isOnline && (
-          <IconBase
-            iconName="CloudOffFilled"
-            styles={{ root: { color: theme.palette.themeLighterAlt } }}
-          />
+          <IconButton
+            key="offline"
+            checked
+            elementRef={offlineTooltip.ref}
+            iconProps={{ iconName: "CloudOffFilled" }}
+            styles={{
+              rootChecked: { backgroundColor: "transparent" },
+              rootCheckedHovered: { backgroundColor: "transparent" },
+              icon: {
+                color: theme.semanticColors.disabledBodyText,
+                svg: { fill: "currentColor", height: "1em", width: "1em" },
+              },
+            }}
+          >
+            {offlineTooltip.tooltip}
+          </IconButton>
         ),
         <IconButton
           key="add-layout"
@@ -392,8 +397,10 @@ export default function LayoutBrowser({
           ariaLabel="Create new layout"
           data-test="add-layout"
           styles={{
-            icon: { height: 20 },
-            root: { margin: `0 ${theme.spacing.s2}` },
+            icon: {
+              svg: { height: "1em", width: "1em" },
+              "> span": { display: "flex" },
+            },
           }}
         >
           {createLayoutTooltip.tooltip}
@@ -405,13 +412,15 @@ export default function LayoutBrowser({
           onClick={importLayout}
           ariaLabel="Import layout"
           styles={{
-            icon: { height: 20 },
-            root: { marginRight: theme.spacing.s1 },
+            icon: {
+              svg: { height: "1em", width: "1em" },
+              "> span": { display: "flex" },
+            },
           }}
         >
           {importLayoutTooltip.tooltip}
         </IconButton>,
-      ]}
+      ].filter(Boolean)}
     >
       {unsavedChangesPrompt}
       <Stack verticalFill>
