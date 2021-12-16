@@ -106,6 +106,12 @@ function LayoutToolbar({
         }}
         tokens={{ childrenGap: theme.spacing.s1 }}
       >
+        <FollowTFControl
+          transforms={transforms}
+          tfToFollow={typeof followTf === "string" && followTf.length > 0 ? followTf : undefined}
+          followOrientation={followOrientation}
+          onFollowChange={onFollowChange}
+        />
         <SearchText
           searchTextOpen={searchTextOpen}
           toggleSearchTextOpen={toggleSearchTextOpen}
@@ -121,12 +127,6 @@ function LayoutToolbar({
           transforms={transforms}
           renderFrameId={renderFrameId}
           currentTime={currentTime}
-        />
-        <FollowTFControl
-          transforms={transforms}
-          tfToFollow={typeof followTf === "string" && followTf.length > 0 ? followTf : undefined}
-          followOrientation={followOrientation}
-          onFollowChange={onFollowChange}
         />
         <Stack
           horizontal

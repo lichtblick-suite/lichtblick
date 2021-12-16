@@ -22,12 +22,7 @@ import {
   POINT_CLOUD_MESSAGE,
   POINT_CLOUD_WITH_ADDITIONAL_FIELDS,
 } from "@foxglove/studio-base/panels/ThreeDimensionalViz/commands/PointClouds/fixture/pointCloudData";
-import { MarkerStory } from "@foxglove/studio-base/panels/ThreeDimensionalViz/stories/MarkerStory";
 import PanelSetup, { triggerInputChange } from "@foxglove/studio-base/stories/PanelSetup";
-import { ScreenshotSizedContainer } from "@foxglove/studio-base/stories/storyHelpers";
-import { simulateDragClick } from "@foxglove/studio-base/test/mouseEventsHelper";
-import delay from "@foxglove/studio-base/util/delay";
-import tick from "@foxglove/studio-base/util/tick";
 
 import Interactions, { OBJECT_TAB_TYPE, LINKED_VARIABLES_TAB_TYPE } from "./Interactions";
 import useLinkedGlobalVariables from "./useLinkedGlobalVariables";
@@ -428,73 +423,5 @@ storiesOf("panels/ThreeDimensionalViz/Interactions/Interaction", module)
           <Interactions {...(sharedProps as any)} />
         </PanelSetupWithData>
       </SWrapper>
-    );
-  });
-
-const selectObject = async () => await simulateDragClick([468, 340]);
-const deselectObject = async () => await simulateDragClick([515, 630]);
-
-storiesOf("panels/ThreeDimensionalViz/interactions/open-close behavior", module)
-  .addParameters({ chromatic: { delay: 2500 } })
-  .add("auto opens the object details after selectedObject is set", () => {
-    return (
-      <ScreenshotSizedContainer>
-        <MarkerStory
-          onMount={(_) =>
-            setImmediate(async () => {
-              await delay(250);
-              await selectObject();
-            })
-          }
-        />
-      </ScreenshotSizedContainer>
-    );
-  })
-  .add("does not auto open the object details during drawing when it's closed", () => {
-    return (
-      <ScreenshotSizedContainer>
-        <MarkerStory
-          onMount={(_) =>
-            setImmediate(async () => {
-              await delay(100);
-              (
-                document.querySelectorAll('[data-test="ExpandingToolbar-Drawing tools"]')[0] as any
-              ).click(); // Start drawing
-              await delay(250);
-              await selectObject();
-            })
-          }
-        />
-      </ScreenshotSizedContainer>
-    );
-  })
-  .add("auto closes the object details when selectedObject becomes undefined", () => {
-    return (
-      <ScreenshotSizedContainer>
-        <MarkerStory
-          onMount={(_) =>
-            setImmediate(async () => {
-              await delay(250);
-              await selectObject();
-              await tick();
-              await deselectObject();
-            })
-          }
-        />
-      </ScreenshotSizedContainer>
-    );
-  })
-  .add("does not open after selectedObject is set if disableAutoOpenClickedObject enabled", () => {
-    return (
-      <ScreenshotSizedContainer>
-        <MarkerStory
-          initialConfigOverride={{ disableAutoOpenClickedObject: true }}
-          onMount={(_) =>
-            setImmediate(async () => {
-              await selectObject();
-            })
-          }
-        />
-      </ScreenshotSizedContainer>
     );
   });
