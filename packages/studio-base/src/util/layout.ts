@@ -193,8 +193,8 @@ export const getParentTabPanelByPanelId = (
 } =>
   Object.entries(savedProps).reduce((memo: Record<string, string>, [savedPanelId, savedConfig]) => {
     if (isTabPanel(savedPanelId) && savedConfig != undefined) {
-      const tabPanelConfig = savedConfig as TabPanelConfig;
-      tabPanelConfig.tabs.forEach((tab) => {
+      const tabPanelConfig = savedConfig as Partial<TabPanelConfig>;
+      tabPanelConfig.tabs?.forEach((tab) => {
         const panelIdsInTab = getLeaves(tab.layout ?? ReactNull);
         panelIdsInTab.forEach((id) => (memo[id] = savedPanelId));
       });
@@ -202,9 +202,8 @@ export const getParentTabPanelByPanelId = (
     return memo;
   }, {});
 
-const replaceMaybeTabLayoutWithNewPanelIds =
-  (panelIdMap: PanelIdMap) =>
-  ({ id, config }: { id: string; config: Partial<TabPanelConfig> }) => {
+const replaceMaybeTabLayoutWithNewPanelIds = (panelIdMap: PanelIdMap) => {
+  return ({ id, config }: { id: string; config: Partial<TabPanelConfig> }) => {
     return config.tabs
       ? {
           id,
@@ -218,6 +217,7 @@ const replaceMaybeTabLayoutWithNewPanelIds =
         }
       : { id, config };
   };
+};
 
 export const getSaveConfigsPayloadForAddedPanel = ({
   id,

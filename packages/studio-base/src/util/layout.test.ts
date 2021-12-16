@@ -28,6 +28,7 @@ import {
   moveTabBetweenTabPanels,
   reorderTabWithinTabPanel,
   getPathFromNode,
+  getParentTabPanelByPanelId,
 } from "./layout";
 
 const tabConfig = {
@@ -618,26 +619,36 @@ describe("layout", () => {
       expect(validateTabPanelConfig(undefined)).toEqual(false);
     });
   });
-});
 
-describe("getPathFromNode", () => {
-  it("should get a node based on id", () => {
-    const tree: MosaicNode<number> = {
-      direction: "row",
-      first: 1,
-      second: {
-        direction: "column",
-        first: {
+  describe("getPathFromNode", () => {
+    it("should get a node based on id", () => {
+      const tree: MosaicNode<number> = {
+        direction: "row",
+        first: 1,
+        second: {
           direction: "column",
-          first: 2,
-          second: 3,
+          first: {
+            direction: "column",
+            first: 2,
+            second: 3,
+          },
+          second: 4,
         },
-        second: 4,
-      },
-    };
-    expect(getNodeAtPath(tree, getPathFromNode(1, tree))).toEqual(1);
-    expect(getNodeAtPath(tree, getPathFromNode(2, tree))).toEqual(2);
-    expect(getNodeAtPath(tree, getPathFromNode(3, tree))).toEqual(3);
-    expect(getNodeAtPath(tree, getPathFromNode(4, tree))).toEqual(4);
+      };
+      expect(getNodeAtPath(tree, getPathFromNode(1, tree))).toEqual(1);
+      expect(getNodeAtPath(tree, getPathFromNode(2, tree))).toEqual(2);
+      expect(getNodeAtPath(tree, getPathFromNode(3, tree))).toEqual(3);
+      expect(getNodeAtPath(tree, getPathFromNode(4, tree))).toEqual(4);
+    });
+  });
+
+  describe("getParentTabPanelByPanelId", () => {
+    it("should return parent tabs by id when there is no tab config", () => {
+      const configById = {
+        "Tab!abc": {},
+      };
+      const parentTabsByPanelId = getParentTabPanelByPanelId(configById);
+      expect(parentTabsByPanelId).toEqual({});
+    });
   });
 });
