@@ -7,10 +7,10 @@ import { LayoutID } from "@foxglove/studio-base/index";
 import isDesktopApp from "@foxglove/studio-base/util/isDesktopApp";
 
 export type AppURLState = {
-  ds: string;
-  dsParams: Record<string, string>;
-  layoutId: LayoutID | undefined;
-  time: Time | undefined;
+  ds?: string;
+  dsParams?: Record<string, string>;
+  layoutId?: LayoutID;
+  time?: Time;
 };
 
 /**
@@ -34,10 +34,12 @@ export function encodeAppURLState(url: URL, urlState: AppURLState): URL {
     newURL.searchParams.set("time", toRFC3339String(urlState.time));
   }
 
-  newURL.searchParams.set("ds", urlState.ds);
-  Object.entries(urlState.dsParams).forEach(([k, v]) => {
-    newURL.searchParams.set("ds." + k, v);
-  });
+  if (urlState.ds && urlState.dsParams) {
+    newURL.searchParams.set("ds", urlState.ds);
+    Object.entries(urlState.dsParams).forEach(([k, v]) => {
+      newURL.searchParams.set("ds." + k, v);
+    });
+  }
 
   newURL.searchParams.sort();
 

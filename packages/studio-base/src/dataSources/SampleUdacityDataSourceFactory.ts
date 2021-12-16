@@ -191,6 +191,10 @@ class SampleUdacityDataSourceFactory implements IDataSourceFactory {
     return new RandomAccessPlayer(messageCacheProvider, {
       metricsCollector: args.metricsCollector,
       seekToTime: getSeekToTime(),
+      name: "Sample: Udacity",
+      urlParams: {
+        url: DEMO_BAG_URL,
+      },
     });
   }
 }

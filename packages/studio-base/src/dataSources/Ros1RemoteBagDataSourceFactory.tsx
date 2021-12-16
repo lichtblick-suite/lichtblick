@@ -56,6 +56,10 @@ class Ros1RemoteBagDataSourceFactory implements IDataSourceFactory {
     return new RandomAccessPlayer(messageCacheProvider, {
       metricsCollector: args.metricsCollector,
       seekToTime: getSeekToTime(),
+      name: url,
+      urlParams: {
+        url,
+      },
     });
   }
 }

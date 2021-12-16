@@ -307,6 +307,9 @@ export default class RosbridgePlayer implements Player {
         playerId: this._id,
         activeData: undefined,
         problems: this._problems.problems(),
+        urlState: {
+          url: this._url,
+        },
       });
     }
 

@@ -46,12 +46,8 @@ export function useStateToURLSynchronization(): void {
       return;
     }
 
-    if (!stableUrlState || !selectedSource) {
-      return;
-    }
-
     const url = encodeAppURLState(new URL(window.location.href), {
-      ds: selectedSource.id,
+      ds: selectedSource?.id,
       layoutId,
       time: canSeek ? currentTime : undefined,
       dsParams: stableUrlState,

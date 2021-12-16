@@ -52,6 +52,7 @@ class Ros2LocalBagDataSourceFactory implements IDataSourceFactory {
       return new RandomAccessPlayer(messageCacheProvider, {
         metricsCollector: args.metricsCollector,
         seekToTime: getSeekToTime(),
+        name: args.file.name,
       });
     }
 

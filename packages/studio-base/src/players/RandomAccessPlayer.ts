@@ -87,11 +87,18 @@ export const SEEK_START_DELAY_MS = 100;
 export type RandomAccessPlayerOptions = {
   metricsCollector?: PlayerMetricsCollectorInterface;
   seekToTime: SeekToTimeSpec;
+
+  // Optional player name
+  name?: string;
+
+  // Optional set of key/values to store with url handling
+  urlParams?: Record<string, string>;
 };
 
 // A `Player` that wraps around a tree of `RandomAccessDataProviders`.
 export default class RandomAccessPlayer implements Player {
-  private _label?: string;
+  private _urlParams?: Record<string, string>;
+  private _name?: string;
   private _filePath?: string;
   private _provider: RandomAccessDataProvider;
   private _isPlaying: boolean = false;
@@ -142,10 +149,10 @@ export default class RandomAccessPlayer implements Player {
   // These are set/cleared in the store to track the current set of problems
   private _problems = new Map<string, PlayerProblem>();
 
-  constructor(
-    provider: RandomAccessDataProvider,
-    { metricsCollector, seekToTime }: RandomAccessPlayerOptions,
-  ) {
+  constructor(provider: RandomAccessDataProvider, options: RandomAccessPlayerOptions) {
+    const { metricsCollector, seekToTime, urlParams, name } = options;
+    this._name = name;
+    this._urlParams = urlParams;
     this._provider = provider;
     this._metricsCollector = metricsCollector ?? new NoopMetricsCollector();
     this._seekToTime = seekToTime;
@@ -276,7 +283,7 @@ export default class RandomAccessPlayer implements Player {
 
     if (this._hasError) {
       return this._listener({
-        name: this._label,
+        name: this._name,
         filePath: this._filePath,
         presence: PlayerPresence.ERROR,
         progress: {},
@@ -323,7 +330,7 @@ export default class RandomAccessPlayer implements Player {
     }
 
     const data: PlayerState = {
-      name: this._label,
+      name: this._name,
       filePath: this._filePath,
       presence: this._reconnecting
         ? PlayerPresence.RECONNECTING
@@ -352,11 +359,7 @@ export default class RandomAccessPlayer implements Player {
             publishedTopics,
             parsedMessageDefinitionsByTopic: this._parsedMessageDefinitionsByTopic,
           },
-      urlState: this._label
-        ? {
-            url: this._label,
-          }
-        : undefined,
+      urlState: this._urlParams,
     };
 
     return this._listener(data);
@@ -545,7 +548,7 @@ export default class RandomAccessPlayer implements Player {
     if (this._initializing || this._initialized) {
       return;
     }
-    this._metricsCollector.initialized({ isDemoBag: isDemoBagUrl(this._label ?? "") });
+    this._metricsCollector.initialized({ isDemoBag: isDemoBagUrl(this._name ?? "") });
     this._initialized = true;
   }
 
