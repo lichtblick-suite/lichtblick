@@ -276,10 +276,11 @@ export default function PlayerManager(props: PropsWithChildren<PlayerManagerProp
               break;
             }
             case "file": {
+              const handle = args.handle;
               const files = args.files;
 
               // files we can try loading immediately
-              // We do not add these to recents entries because putting File in indexedb reuslts in
+              // We do not add these to recents entries because putting File in indexedb results in
               // the entire file being stored in the database.
               if (files) {
                 let file = files[0];
@@ -300,9 +301,44 @@ export default function PlayerManager(props: PropsWithChildren<PlayerManagerProp
 
                 setBasePlayer(newPlayer);
                 return;
-              }
+              } else if (handle) {
+                const permission = await handle.queryPermission({ mode: "read" });
+                if (!isMounted()) {
+                  return;
+                }
 
-              break;
+                if (permission !== "granted") {
+                  const newPerm = await handle.requestPermission({ mode: "read" });
+                  if (newPerm !== "granted") {
+                    throw new Error(`Permission denied: ${handle.name}`);
+                  }
+                }
+
+                const file = await handle.getFile();
+                if (!isMounted()) {
+                  return;
+                }
+
+                const newPlayer = foundSource.initialize({
+                  file,
+                  metricsCollector,
+                  unlimitedMemoryCache,
+                });
+
+                setBasePlayer(newPlayer);
+
+                if (args.skipRecents !== true) {
+                  addRecent({
+                    id: IndexedDbRecentsStore.GenerateRecordId(),
+                    type: "file",
+                    title: handle.name,
+                    sourceId: foundSource.id,
+                    handle,
+                  });
+                }
+
+                break;
+              }
             }
           }
         } catch (error) {
@@ -442,6 +478,13 @@ export default function PlayerManager(props: PropsWithChildren<PlayerManagerProp
             params: foundRecent.extra,
           });
           break;
+        }
+        case "file": {
+          void selectSource(foundRecent.sourceId, {
+            type: "file",
+            handle: foundRecent.handle,
+            skipRecents: true,
+          });
         }
       }
     },

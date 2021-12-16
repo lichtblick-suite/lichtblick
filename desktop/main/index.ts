@@ -28,6 +28,9 @@ import { getTelemetrySettings } from "./telemetry";
 
 const log = Logger.getLogger(__filename);
 
+// https://github.com/electron/electron/issues/28422#issuecomment-987504138
+app.commandLine.appendSwitch("enable-experimental-web-platform-features");
+
 /**
  * Determine whether an item in argv is a file that we should try opening as a data source.
  *

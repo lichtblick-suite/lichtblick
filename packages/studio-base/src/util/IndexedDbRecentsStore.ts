@@ -25,7 +25,12 @@ type RecentConnectionRecord = RecentRecordCommon & {
   extra?: Record<string, string | undefined>;
 };
 
-export type RecentRecord = RecentConnectionRecord;
+type RecentFileRecord = RecentRecordCommon & {
+  type: "file";
+  handle: FileSystemFileHandle;
+};
+
+export type RecentRecord = RecentConnectionRecord | RecentFileRecord;
 
 /**
  * IndexedDbRecentStore provides load/save operations for retrieving recent records from indexeddb
@@ -45,11 +50,8 @@ export class IndexedDbRecentsStore {
   }
 
   /** Save the recents into the store */
-  async set(_recents: RecentRecord[]): Promise<void> {
-    // Avoid storing recents until we identify issues with file handles the current code tries to
-    // store File instances which incorrectly stores the entire file in indexeddb. This clears out
-    // those entries.
-    await idbSet(this.key, [], this.store);
+  async set(recents: RecentRecord[]): Promise<void> {
+    await idbSet(this.key, recents, this.store);
   }
 
   static GenerateRecordId(): string {
