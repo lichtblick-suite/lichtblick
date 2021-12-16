@@ -8,6 +8,8 @@ import {
   IComboBoxStyles,
   IContextualMenuItemStyles,
   IContextualMenuStyles,
+  IDetailsRowProps,
+  IDetailsRowStyles,
   ILayerStyles,
   IModalStyles,
   IOverlayStyles,
@@ -67,6 +69,13 @@ function getPartialTheme({ inverted }: { inverted: boolean }): PartialTheme {
             } as Partial<IContextualMenuItemStyles>,
           },
         } as IContextualMenuStyles,
+      },
+      DetailsRow: {
+        styles: ({ theme }: IDetailsRowProps): Partial<IDetailsRowStyles> => ({
+          root: {
+            borderBottom: `1px solid ${theme?.semanticColors.bodyDivider} !important`,
+          },
+        }),
       },
       Overlay: {
         styles: {

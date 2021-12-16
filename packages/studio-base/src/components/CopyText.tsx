@@ -1,53 +1,91 @@
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
-//
-// This file incorporates work covered by the following copyright and
-// permission notice:
-//
-//   Copyright 2019-2021 Cruise LLC
-//
-//   This source code is licensed under the Apache License, Version 2.0,
-//   found at http://www.apache.org/licenses/LICENSE-2.0
-//   You may not use this file except in compliance with the License.
-import ClipboardOutlineIcon from "@mdi/svg/svg/clipboard-outline.svg";
-import styled from "styled-components";
 
-import Icon from "@foxglove/studio-base/components/Icon";
+import { IconButton, Text, ITextProps, Stack, makeStyles, useTheme } from "@fluentui/react";
+
+import { useTooltip } from "@foxglove/studio-base/components/Tooltip";
 import clipboard from "@foxglove/studio-base/util/clipboard";
 
-const SCopyTextWrapper = styled.div`
-  display: flex;
-  align-items: center;
-  cursor: pointer;
-  .icon {
-    visibility: hidden;
-  }
-  :hover {
-    .icon {
-      visibility: visible;
-    }
-  }
-`;
+const useStyles = makeStyles({
+  root: {
+    "& > :last-child": {
+      visibility: "hidden",
+    },
+    ":hover > :last-child": {
+      visibility: "visible",
+    },
+  },
+});
 
 type Props = {
   copyText: string;
+  textProps?: ITextProps;
   tooltip: string;
   children: React.ReactNode;
 };
 
-function CopyText({ copyText, tooltip, children }: Props): JSX.Element | ReactNull {
+export default function CopyText({
+  copyText,
+  textProps,
+  tooltip,
+  children,
+}: Props): JSX.Element | ReactNull {
+  const classes = useStyles();
+  const theme = useTheme();
+  const button = useTooltip({ contents: tooltip });
+
   if (copyText.length === 0 || children == undefined) {
     return ReactNull;
   }
+
   return (
-    <SCopyTextWrapper onClick={() => void clipboard.copy(copyText)}>
-      {children != undefined ? children : copyText}
-      <Icon fade style={{ margin: "0 8px", verticalAlign: "middle" }} tooltip={tooltip}>
-        <ClipboardOutlineIcon />
-      </Icon>
-    </SCopyTextWrapper>
+    <Stack
+      className={classes.root}
+      horizontal
+      verticalAlign="center"
+      onClick={() => void clipboard.copy(copyText)}
+      styles={{
+        root: {
+          userSelect: "none",
+          cursor: "pointer",
+
+          ":active": {
+            color: theme.semanticColors.buttonTextPressed,
+          },
+        },
+      }}
+    >
+      <Stack.Item
+        grow
+        styles={{
+          root: {
+            textOverflow: "ellipsis",
+            whiteSpace: "nowrap",
+            overflow: "hidden",
+          },
+        }}
+      >
+        <Text {...textProps}>{children != undefined ? children : copyText}</Text>
+      </Stack.Item>
+      {button.tooltip}
+      <IconButton
+        elementRef={button.ref}
+        iconProps={{ iconName: "Clipboard" }}
+        onClick={() => {}}
+        styles={{
+          root: { backgroundColor: "transparent", width: 18, height: 18 },
+          rootHovered: { backgroundColor: "transparent" },
+          rootPressed: { backgroundColor: "transparent" },
+
+          icon: {
+            fontSize: 12,
+            height: 12,
+            width: 12,
+            svg: { fill: "currentColor", height: "1em", width: "1em" },
+          },
+        }}
+      />
+    </Stack>
   );
 }
-
-export default CopyText;

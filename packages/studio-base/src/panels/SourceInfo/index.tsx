@@ -1,72 +1,37 @@
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
-//
-// This file incorporates work covered by the following copyright and
-// permission notice:
-//
-//   Copyright 2019-2021 Cruise LLC
-//
-//   This source code is licensed under the Apache License, Version 2.0,
-//   found at http://www.apache.org/licenses/LICENSE-2.0
-//   You may not use this file except in compliance with the License.
 
-import { useCallback } from "react";
-import styled from "styled-components";
+import {
+  ITextStyles,
+  DetailsList,
+  makeStyles,
+  Stack,
+  Text,
+  useTheme,
+  CheckboxVisibility,
+} from "@fluentui/react";
+import { useCallback, useMemo } from "react";
 
 import { subtract as subtractTimes, toSec } from "@foxglove/rostime";
+import { Topic } from "@foxglove/studio";
+import CopyText from "@foxglove/studio-base/components/CopyText";
 import EmptyState from "@foxglove/studio-base/components/EmptyState";
 import { useMessagePipeline } from "@foxglove/studio-base/components/MessagePipeline";
 import Panel from "@foxglove/studio-base/components/Panel";
 import PanelToolbar from "@foxglove/studio-base/components/PanelToolbar";
-import clipboard from "@foxglove/studio-base/util/clipboard";
 import { formatDuration } from "@foxglove/studio-base/util/formatTime";
+import { fonts } from "@foxglove/studio-base/util/sharedStyleConstants";
 
 import Timestamp from "./Timestamp";
 import helpContent from "./index.help.md";
 
-const STableContainer = styled.div`
-  overflow-y: auto;
-  overflow-x: hidden;
-`;
-
-const STable = styled.div`
-  max-width: 100%;
-  min-width: 400px;
-  overflow: auto;
-`;
-
-const SRow = styled.div`
-  &:nth-child(even) {
-    background: ${({ theme }) => theme.palette.neutralLighterAlt};
-  }
-`;
-
-const SCell = styled.div`
-  border: 0;
-  text-overflow: ellipsis;
-  overflow: hidden;
-  font-size: 14px;
-  line-height: 1.6;
-  width: 33%;
-  display: inline-block;
-  padding: 2px 8px;
-  white-space: nowrap;
-`;
-
-const SHeader = styled.div`
-  font-size: 14px;
-  border-bottom: ${({ theme }) => theme.semanticColors.bodyDivider} solid 2px;
-`;
-
-const STitle = styled.div`
-  padding: 2px 8px;
-`;
-
-const SHeaderItem = styled.div`
-  overflow: hidden;
-  white-space: nowrap;
-`;
+const useStyles = makeStyles(() => ({
+  container: {
+    overflowX: "hidden",
+    overflowY: "auto",
+  },
+}));
 
 function SourceInfo() {
   const topics = useMessagePipeline(useCallback((ctx) => ctx.playerState.activeData?.topics, []));
@@ -74,6 +39,20 @@ function SourceInfo() {
     useCallback((ctx) => ctx.playerState.activeData?.startTime, []),
   );
   const endTime = useMessagePipeline(useCallback((ctx) => ctx.playerState.activeData?.endTime, []));
+  const classes = useStyles();
+  const theme = useTheme();
+  const subheaderStyles = useMemo(
+    () =>
+      ({
+        root: {
+          fontVariant: "small-caps",
+          textTransform: "lowercase",
+          color: theme.palette.neutralSecondaryAlt,
+          letterSpacing: "0.5px",
+        },
+      } as ITextStyles),
+    [theme],
+  );
 
   if (!startTime || !endTime) {
     return (
@@ -88,50 +67,108 @@ function SourceInfo() {
   return (
     <>
       <PanelToolbar helpContent={helpContent} floating />
-      <STableContainer>
-        <SHeader>
-          <SHeaderItem>
-            <STitle>Start time:</STitle>
+      <div className={classes.container}>
+        <Stack
+          styles={{
+            root: {
+              borderBottom: `2px solid ${theme.semanticColors.bodyDivider}`,
+              backgroundColor: theme.semanticColors.bodyBackground,
+            },
+          }}
+          tokens={{ padding: 12, childrenGap: theme.spacing.s1 }}
+        >
+          <Stack tokens={{ childrenGap: theme.spacing.s2 }}>
+            <Text styles={subheaderStyles}>Start time</Text>
             <Timestamp time={startTime} />
-          </SHeaderItem>
-          <SHeaderItem>
-            <STitle>End Time:</STitle>
+          </Stack>
+          <Stack tokens={{ childrenGap: theme.spacing.s2 }}>
+            <Text styles={subheaderStyles}>End Time</Text>
             <Timestamp time={endTime} />
-          </SHeaderItem>
-          <SHeaderItem>
-            <STitle>Duration: {formatDuration(duration)}</STitle>
-          </SHeaderItem>
-        </SHeader>
-        <STable>
-          {topics?.map((topic) => (
-            <SRow key={topic.name}>
-              <SCell
-                title={`Click to copy topic name ${topic.name} to clipboard.`}
-                onClick={() => {
-                  void clipboard.copy(topic.name);
-                }}
-              >
-                {topic.name}
-              </SCell>
-              <SCell
-                title={`Click to copy topic type ${topic.datatype} to clipboard.`}
-                onClick={() => {
-                  void clipboard.copy(topic.datatype);
-                }}
-              >
-                {topic.datatype}
-              </SCell>
-              {topic.numMessages != undefined ? (
-                <SCell>
-                  {topic.numMessages} msgs ({(topic.numMessages / toSec(duration)).toFixed(2)} Hz)
-                </SCell>
-              ) : (
-                <SCell />
-              )}
-            </SRow>
-          ))}
-        </STable>
-      </STableContainer>
+          </Stack>
+          <Stack tokens={{ childrenGap: theme.spacing.s2 }}>
+            <Text styles={subheaderStyles}>Duration</Text>
+            <Text
+              variant="small"
+              styles={{
+                root: {
+                  fontFamily: fonts.MONOSPACE,
+                  color: theme.palette.neutralSecondary,
+                },
+              }}
+            >
+              {formatDuration(duration)}
+            </Text>
+          </Stack>
+        </Stack>
+        <DetailsList
+          compact
+          checkboxVisibility={CheckboxVisibility.hidden}
+          disableSelectionZone
+          enableUpdateAnimations={false}
+          isHeaderVisible={false}
+          items={
+            topics?.map((topic) => ({
+              key: topic.name,
+              ...topic,
+            })) as Topic[]
+          }
+          columns={[
+            {
+              key: "name",
+              name: "topic name",
+              fieldName: "name",
+              minWidth: 100,
+              maxWidth: 500,
+              data: "string",
+              isPadded: true,
+              onRender: (topic) => (
+                <CopyText
+                  copyText={topic.name}
+                  textProps={{ variant: "small" }}
+                  tooltip={`Click to copy topic name ${topic.name} to clipboard.`}
+                >
+                  {topic.name}
+                </CopyText>
+              ),
+            },
+            {
+              key: "datatype",
+              name: "datatype",
+              fieldName: "datatype",
+              minWidth: 100,
+              maxWidth: 500,
+              data: "string",
+              isPadded: true,
+              onRender: (topic) => (
+                <CopyText
+                  copyText={topic.datatype}
+                  textProps={{ variant: "small" }}
+                  tooltip={`Click to copy topic name ${topic.datatype} to clipboard.`}
+                >
+                  {topic.name}
+                </CopyText>
+              ),
+            },
+            {
+              key: "numMessages",
+              name: "message count",
+              fieldName: "numMessages",
+              minWidth: 0,
+              data: "number",
+              isPadded: true,
+            },
+            {
+              key: "frequency",
+              name: "frequency",
+              minWidth: 0,
+              onRender: (topic) =>
+                topic.numMessages != undefined
+                  ? `${(topic.numMessages / toSec(duration)).toFixed(2)} Hz`
+                  : "",
+            },
+          ]}
+        />
+      </div>
     </>
   );
 }
