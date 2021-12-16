@@ -17,6 +17,7 @@ import {
   interpolate,
   percentOf,
   isLessThan,
+  add,
 } from "@foxglove/rostime";
 import { MutablePose, Pose } from "@foxglove/studio-base/types/Messages";
 
@@ -25,6 +26,7 @@ import { mat4Identity } from "./geometry";
 
 type TimeAndTransform = [time: Time, transform: Transform];
 
+const INFINITE_DURATION: Duration = { sec: 4_294_967_295, nsec: 0 };
 const DEFAULT_MAX_STORAGE_TIME: Duration = { sec: 10, nsec: 0 };
 
 const tempLower: TimeAndTransform = [{ sec: 0, nsec: 0 }, Transform.Identity()];
@@ -143,25 +145,19 @@ export class CoordinateFrame {
       return false;
     }
 
-    // If only a single transform exists, check if it's within the maxDelta
-    if (this._transforms.size === 1) {
-      const [latestTime, latestTf] = this._transforms.maxEntry()!;
-      if (isDiffWithinDelta(time, latestTime, maxDelta)) {
-        outLower[0] = outUpper[0] = latestTime;
-        outLower[1] = outUpper[1] = latestTf;
-        return true;
-      }
+    // If there is no transform at or before `time`, early exit
+    const lte = this._transforms.findLessThanOrEqual(time);
+    if (!lte) {
       return false;
     }
 
-    const lte = this._transforms.findLessThanOrEqual(time);
-
-    // If the time is before the first transform, check if the first transform is within maxDelta
-    if (!lte) {
-      const [firstTime, firstTf] = this._transforms.minEntry()!;
-      if (isDiffWithinDelta(time, firstTime, maxDelta)) {
-        outLower[0] = outUpper[0] = firstTime;
-        outLower[1] = outUpper[1] = firstTf;
+    // If only a single transform exists, check if `time` is before or equal to
+    // `latestTime + maxDelta`
+    if (this._transforms.size === 1) {
+      const [latestTime, latestTf] = lte;
+      if (compare(time, add(latestTime, maxDelta)) <= 0) {
+        outLower[0] = outUpper[0] = latestTime;
+        outLower[1] = outUpper[1] = latestTf;
         return true;
       }
       return false;
@@ -178,12 +174,13 @@ export class CoordinateFrame {
 
     const gt = this._transforms.findGreaterThan(time);
 
-    // If the time is after the last transform, check if the last transform is within maxDelta
+    // If the time is after the last transform, check if `time` is before or
+    // equal to `latestTime + maxDelta`
     if (!gt) {
-      const [lastTime, lastTf] = this._transforms.maxEntry()!;
-      if (isDiffWithinDelta(time, lastTime, maxDelta)) {
-        outLower[0] = outUpper[0] = lastTime;
-        outLower[1] = outUpper[1] = lastTf;
+      const [latestTime, latestTf] = this._transforms.maxEntry()!;
+      if (compare(time, add(latestTime, maxDelta)) <= 0) {
+        outLower[0] = outUpper[0] = latestTime;
+        outLower[1] = outUpper[1] = latestTf;
         return true;
       }
       return false;
@@ -225,7 +222,7 @@ export class CoordinateFrame {
     input: Pose,
     srcFrame: CoordinateFrame,
     time: Time,
-    maxDelta: Duration = { sec: 1, nsec: 0 },
+    maxDelta: Duration = INFINITE_DURATION,
   ): MutablePose | undefined {
     // perf-sensitive: function params instead of options object to avoid allocations
     if (srcFrame === this) {
@@ -381,12 +378,6 @@ export class CoordinateFrame {
 function copyTime(out: Time, time: Time): void {
   out.sec = time.sec;
   out.nsec = time.nsec;
-}
-
-function isDiffWithinDelta(timeA: Time, timeB: Time, delta: Duration): boolean {
-  const diff = subtract(timeA, timeB);
-  diff.sec = Math.abs(diff.sec);
-  return compare(diff, delta) <= 0;
 }
 
 function copyPose(out: MutablePose, pose: Pose): void {
