@@ -16,7 +16,7 @@ import { mount } from "enzyme";
 
 import ThemeProvider from "@foxglove/studio-base/theme/ThemeProvider";
 
-import Button from "./ButtonBase";
+import Button from "./Button";
 
 describe("<Button />", () => {
   it("fires click callback", (done) => {
