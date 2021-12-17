@@ -38,6 +38,34 @@ describe("NativeStorageAppConfiguration", () => {
     expect(ctx.get).toHaveBeenCalledTimes(1);
   });
 
+  it("preserves stored value when default is provided", async () => {
+    const ctx = makeMockContext();
+    ctx.get.mockImplementationOnce(async () => {
+      return JSON.stringify({ abc: 123 });
+    });
+
+    const config = await NativeStorageAppConfiguration.Initialize(ctx, {
+      defaults: {
+        abc: "foo",
+      },
+    });
+    expect(config.get("abc")).toEqual(123);
+  });
+
+  it("uses default value when no value is set", async () => {
+    const ctx = makeMockContext();
+    ctx.get.mockImplementationOnce(async () => {
+      return JSON.stringify({ abc: 123 });
+    });
+
+    const config = await NativeStorageAppConfiguration.Initialize(ctx, {
+      defaults: {
+        foo: "bar",
+      },
+    });
+    expect(config.get("foo")).toEqual("bar");
+  });
+
   it("serializes reads and writes", async () => {
     const ctx = makeMockContext();
 

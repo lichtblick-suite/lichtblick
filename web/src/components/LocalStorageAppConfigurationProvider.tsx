@@ -13,16 +13,25 @@ import {
 
 const KEY_PREFIX = "studio.app-configuration.";
 
+type LocalStorageAppConfigurationProviderProps = {
+  // Default values for app configuration items which have never been set by a user
+  defaults?: {
+    [key: string]: AppConfigurationValue;
+  };
+};
+
 export default function LocalStorageAppConfigurationProvider(
-  props: PropsWithChildren<unknown>,
+  props: PropsWithChildren<LocalStorageAppConfigurationProviderProps>,
 ): JSX.Element {
+  const { defaults } = props;
+
   const [ctx] = useState<AppConfiguration>(() => {
     const changeListeners = new Map<string, Set<ChangeHandler>>();
     return {
       get(key: string): AppConfigurationValue {
         const value = localStorage.getItem(KEY_PREFIX + key);
         try {
-          return value == undefined ? undefined : JSON.parse(value);
+          return value == undefined ? defaults?.[key] : JSON.parse(value);
         } catch {
           return undefined;
         }

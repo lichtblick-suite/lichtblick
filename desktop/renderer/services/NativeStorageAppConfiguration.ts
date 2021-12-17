@@ -26,14 +26,18 @@ export default class NativeStorageAppConfiguration implements AppConfiguration {
   }
 
   // create a new OsContextAppConfiguration
-  static async Initialize(ctx: Storage): Promise<NativeStorageAppConfiguration> {
+  static async Initialize(
+    ctx: Storage,
+    options: { defaults?: { [key: string]: AppConfigurationValue } } = {},
+  ): Promise<NativeStorageAppConfiguration> {
+    const { defaults } = options;
     const value = await ctx.get(
       NativeStorageAppConfiguration.STORE_NAME,
       NativeStorageAppConfiguration.STORE_KEY,
       { encoding: "utf8" },
     );
     const currentValue = JSON.parse(value ?? "{}");
-    const config = new NativeStorageAppConfiguration(ctx, currentValue);
+    const config = new NativeStorageAppConfiguration(ctx, { ...defaults, ...currentValue });
 
     return config;
   }

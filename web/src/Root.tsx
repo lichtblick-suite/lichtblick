@@ -102,7 +102,7 @@ export function Root({ loadWelcomeLayout }: { loadWelcomeLayout: boolean }): JSX
   ];
 
   return (
-    <LocalStorageAppConfigurationProvider>
+    <LocalStorageAppConfigurationProvider defaults={{ [AppSetting.OPEN_DIALOG]: true }}>
       <ColorSchemeThemeProvider>
         <GlobalCss />
         <CssBaseline>
