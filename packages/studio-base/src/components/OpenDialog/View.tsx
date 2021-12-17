@@ -8,7 +8,7 @@ import { PropsWithChildren } from "react";
 type ViewProps = {
   onBack?: () => void;
   onCancel?: () => void;
-  onOpen: () => void;
+  onOpen?: () => void;
 };
 
 export default function View(props: PropsWithChildren<ViewProps>): JSX.Element {
@@ -36,7 +36,9 @@ export default function View(props: PropsWithChildren<ViewProps>): JSX.Element {
         </ActionButton>
         <Stack horizontal tokens={{ childrenGap: theme.spacing.m }}>
           <DefaultButton onClick={onCancel}>Cancel</DefaultButton>
-          <PrimaryButton onClick={onOpen}>Open</PrimaryButton>
+          <PrimaryButton onClick={onOpen} disabled={onOpen == undefined}>
+            Open
+          </PrimaryButton>
         </Stack>
       </Stack>
     </Stack>

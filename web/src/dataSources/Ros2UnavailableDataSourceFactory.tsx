@@ -4,33 +4,22 @@
 
 import { Link, Text } from "@fluentui/react";
 
-import { IDataSourceFactory } from "@foxglove/studio-base";
+import { IDataSourceFactory, Ros2SocketDataSourceFactory } from "@foxglove/studio-base";
 
-export default class Ros2UnavailableDataSourceFactory implements IDataSourceFactory {
-  displayName = "ROS 2";
-  id = "ros2-socket";
-  type: IDataSourceFactory["type"] = "connection";
-  iconName: IDataSourceFactory["iconName"] = "studio.ROS";
-
+export default class Ros2UnavailableDataSourceFactory extends Ros2SocketDataSourceFactory {
   disabledReason = (
     <>
       <Text block as="p">
-        Native ROS 2 connections are only available in our desktop app.&nbsp;
+        ROS 2 connections require UDP sockets, which are not available in a web browser.{" "}
         <Link href="https://foxglove.dev/download" target="_blank" rel="noreferrer">
-          Download it here.
-        </Link>
-      </Text>
-      <Text
-        block
-        as="p"
-        styles={(_props, theme) => ({ root: { color: theme.semanticColors.disabledText } })}
-      >
-        Native TCP and UDP sockets are not available in a standard browser environment.
+          Download our desktop app
+        </Link>{" "}
+        to connect to a ROS 2 system.
       </Text>
     </>
   );
 
-  initialize(): ReturnType<IDataSourceFactory["initialize"]> {
+  override initialize(): ReturnType<IDataSourceFactory["initialize"]> {
     return;
   }
 }

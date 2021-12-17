@@ -58,7 +58,11 @@ export default function Connection(props: ConnectionProps): JSX.Element {
   }, [selectedSource, fieldValues, selectSource]);
 
   return (
-    <View onBack={onBack} onCancel={onCancel} onOpen={onOpen}>
+    <View
+      onBack={onBack}
+      onCancel={onCancel}
+      onOpen={selectedSource?.disabledReason == undefined ? onOpen : undefined}
+    >
       <Stack grow verticalFill horizontal tokens={{ childrenGap: theme.spacing.l2 }}>
         <Stack
           verticalFill
@@ -86,13 +90,12 @@ export default function Connection(props: ConnectionProps): JSX.Element {
           })}
         </Stack>
         <Stack grow verticalFill key={selectedSource?.id} tokens={{ childrenGap: theme.spacing.m }}>
-          {selectedSource?.disabledReason}
           {selectedSource?.formConfig != undefined && (
             <Stack grow verticalAlign="space-between">
               <Stack tokens={{ childrenGap: theme.spacing.m }}>
-                {selectedSource?.disabledReason}
                 {selectedSource?.formConfig.fields.map((field) => (
                   <TextField
+                    disabled={selectedSource?.disabledReason != undefined}
                     key={field.label}
                     label={field.label}
                     placeholder={field.placeholder}
@@ -110,6 +113,7 @@ export default function Connection(props: ConnectionProps): JSX.Element {
               </Stack>
             </Stack>
           )}
+          {selectedSource?.disabledReason}
         </Stack>
       </Stack>
     </View>

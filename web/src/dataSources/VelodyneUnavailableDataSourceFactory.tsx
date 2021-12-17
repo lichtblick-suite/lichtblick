@@ -4,33 +4,22 @@
 
 import { Link, Text } from "@fluentui/react";
 
-import { IDataSourceFactory } from "@foxglove/studio-base";
+import { IDataSourceFactory, VelodyneDataSourceFactory } from "@foxglove/studio-base";
 
-export default class VelodyneUnavailableDataSourceFactory implements IDataSourceFactory {
-  id = "velodyne-device";
-  displayName = "Velodyne LIDAR";
-  type: IDataSourceFactory["type"] = "connection";
-  iconName: IDataSourceFactory["iconName"] = "GenericScan";
-
+export default class VelodyneUnavailableDataSourceFactory extends VelodyneDataSourceFactory {
   disabledReason = (
     <>
       <Text block as="p">
-        Velodyne connections are only available in our desktop app.&nbsp;
+        Velodyne connections require UDP sockets, which are not available in a web browser.{" "}
         <Link href="https://foxglove.dev/download" target="_blank" rel="noreferrer">
-          Download it here.
-        </Link>
-      </Text>
-      <Text
-        block
-        as="p"
-        styles={(_props, theme) => ({ root: { color: theme.semanticColors.disabledText } })}
-      >
-        Native TCP and UDP sockets are not available in a standard browser environment.
+          Download our desktop app
+        </Link>{" "}
+        to connect to a Velodyne sensor.
       </Text>
     </>
   );
 
-  initialize(): ReturnType<IDataSourceFactory["initialize"]> {
+  override initialize(): ReturnType<IDataSourceFactory["initialize"]> {
     return;
   }
 }
