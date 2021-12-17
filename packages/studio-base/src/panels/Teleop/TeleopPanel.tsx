@@ -8,8 +8,8 @@ import { useCallback, useLayoutEffect, useMemo, useState } from "react";
 import { definitions as commonDefs } from "@foxglove/rosmsg-msgs-common";
 import { PanelExtensionContext, Topic } from "@foxglove/studio";
 import HoverableIconButton from "@foxglove/studio-base/components/HoverableIconButton";
-import { darkTheme, lightTheme } from "@foxglove/studio-base/theme";
 import ThemeProvider from "@foxglove/studio-base/theme/ThemeProvider";
+import { darkFluentTheme, lightFluentTheme } from "@foxglove/studio-base/theme/createFluentTheme";
 
 import DirectionalPad, { DirectionalPadAction } from "./DirectionalPad";
 import Settings from "./Settings";
@@ -180,7 +180,7 @@ function TeleopPanel(props: TeleopPanelProps): JSX.Element {
   }, [renderDone]);
 
   const enabled = Boolean(context.publish && config.publishRate > 0 && currentTopic);
-  const theme = colorScheme === "dark" ? darkTheme : lightTheme;
+  const theme = colorScheme === "dark" ? darkFluentTheme : lightFluentTheme;
 
   return (
     <ThemeProvider isDark={colorScheme === "dark"}>

@@ -26,6 +26,8 @@
     "build:webpack": "cross-env TS_NODE_PROJECT=\"tsconfig.cli.json\" webpack --mode production --progress"
   },
   "devDependencies": {
+    "@emotion/react": "11.6.0",
+    "@emotion/styled": "11.6.0",
     "@fluentui/react": "8.46.1",
     "@fluentui/react-icons": "1.1.145",
     "@fluentui/react-icons-mdl2": "1.2.9",
@@ -50,6 +52,8 @@
     "@foxglove/velodyne-cloud": "1.0.0",
     "@foxglove/ws-protocol": "0.0.2",
     "@mdi/svg": "6.5.95",
+    "@mui/material": "5.1.1",
+    "@mui/styles": "5.1.1",
     "@sentry/core": "6.15.0",
     "@sentry/types": "6.15.0",
     "@storybook/addon-actions": "6.4.8",
