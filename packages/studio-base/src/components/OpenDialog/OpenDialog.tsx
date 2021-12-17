@@ -114,6 +114,9 @@ export default function OpenDialog(props: OpenDialogProps): JSX.Element {
       maxWidth={800}
       minWidth={800}
       modalProps={{
+        layerProps: {
+          eventBubblingEnabled: true,
+        },
         styles: {
           main: {
             minHeight: 520,

@@ -11,11 +11,10 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
+import { Layer } from "@fluentui/react";
 import { extname } from "path";
 import { useCallback, useLayoutEffect, useState } from "react";
 import { useToasts } from "react-toast-notifications";
-
-import { LegacyInput } from "@foxglove/studio-base/components/LegacyStyledComponents";
 
 type Props = {
   children: React.ReactNode; // Shown when dragging in a file.
@@ -146,7 +145,7 @@ export default function DocumentDropListener(props: Props): JSX.Element {
 
   return (
     <>
-      <LegacyInput // Expose a hidden input for Puppeteer to use to drop a file in.
+      <input // Expose a hidden input for Puppeteer to use to drop a file in.
         type="file"
         style={{ display: "none" }}
         onChange={(event) => {
@@ -157,7 +156,7 @@ export default function DocumentDropListener(props: Props): JSX.Element {
         data-puppeteer-file-upload
         multiple
       />
-      {hovering && props.children}
+      {hovering && <Layer>{props.children}</Layer>}
     </>
   );
 }

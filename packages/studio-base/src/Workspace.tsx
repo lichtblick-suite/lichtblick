@@ -514,6 +514,9 @@ export default function Workspace(props: WorkspaceProps): JSX.Element {
         /* eslint-enable react/jsx-key */
       ]}
     >
+      {enableOpenDialog === true && showOpenDialog && (
+        <OpenDialog onDismiss={() => setShowOpenDialog(false)} />
+      )}
       <DocumentDropListener filesSelected={dropHandler} allowedExtensions={allowedDropExtensions}>
         <DropOverlay>
           <div className={classes.dropzone}>Drop a file here</div>
@@ -546,9 +549,6 @@ export default function Workspace(props: WorkspaceProps): JSX.Element {
           </RemountOnValueChange>
         </Sidebar>
       </div>
-      {enableOpenDialog === true && showOpenDialog && (
-        <OpenDialog onDismiss={() => setShowOpenDialog(false)} />
-      )}
     </MultiProvider>
   );
 }
