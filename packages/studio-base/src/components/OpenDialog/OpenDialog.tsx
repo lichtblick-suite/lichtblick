@@ -115,6 +115,8 @@ export default function OpenDialog(props: OpenDialogProps): JSX.Element {
       minWidth={800}
       modalProps={{
         layerProps: {
+          // We enable event bubbling so a user can drag&drop files or folders onto the app even when
+          // the dialog is shown.
           eventBubblingEnabled: true,
         },
         styles: {
