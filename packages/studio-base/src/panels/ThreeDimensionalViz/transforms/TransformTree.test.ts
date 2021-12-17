@@ -53,10 +53,10 @@ describe("TransformTree", () => {
     expect(output.position).toEqual({ x: 1, y: 2, z: 3 });
     // Exact equality is tested to ensure we are using 64-bit math
     expect(output.orientation).toEqual({
-      x: 0.24234604615919636,
-      y: 0.2784524934265757,
-      z: 0.6759817665372134,
-      w: 0.4836539488240748,
+      x: 0.1825741858350553,
+      y: 0.3651483716701106,
+      z: 0.5477225575051661,
+      w: 0.7302967433402215,
     });
   });
 

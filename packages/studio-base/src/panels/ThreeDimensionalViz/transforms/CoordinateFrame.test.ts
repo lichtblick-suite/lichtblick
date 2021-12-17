@@ -61,7 +61,7 @@ describe("CoordinateFrame", () => {
     CoordinateFrame.Interpolate(outTime, outTf, lower, upper, fromSec(0.5));
     expect(outTime).toEqual({ sec: 0, nsec: 5e8 });
     expect(outTf.position()).toEqual([0.5, 0.5, 0.5]);
-    expect(outTf.rotation()).toEqual([0, 0, 0.7071067811865475, 0.7071067811865475]); // 90 degrees around z
+    expect(outTf.rotation()).toEqual([0, 0, 0.7071067811865476, 0.7071067811865476]); // 90 degrees around z
   });
 
   it("GetTransformMatrix", () => {
@@ -92,9 +92,9 @@ describe("CoordinateFrame", () => {
     );
     // prettier-ignore
     expect(out).toEqual([
-      2.220446049250313e-16, 0.9999999999999998,    0,                   0,
-      0.9999999999999998,    2.220446049250313e-16, 0,                   0,
-      0,                     0,                     -0.9999999999999996, 0,
+     -2.220446049250313e-16, 1.0000000000000002,    0,                   0,
+      1.0000000000000002,   -2.220446049250313e-16, 0,                   0,
+      0,                     0,                     -1.0000000000000004, 0,
       55,                    110,                   165,                 1,
     ]);
 

@@ -33,7 +33,6 @@ import {
   MutablePose,
   Pose,
   StampedMessage,
-  MutablePoint,
   BaseMarker,
   PoseStamped,
   VelodyneScan,
@@ -102,7 +101,7 @@ const missingTransformMessage = (
   }
   const frameIds = [...error.frameIds].sort().join(`>, <`);
   const s = error.frameIds.size > 1 ? "s" : ""; // for plural
-  const msg = `missing transform${s} from frame${s} <${frameIds}> to frame <${renderFrameId}>`;
+  const msg = `Missing transform${s} from frame${s} <${frameIds}> to frame <${renderFrameId}>`;
   if (transforms.frames().size === 0) {
     return msg + ". No transforms found";
   }
@@ -239,7 +238,7 @@ export default class SceneBuilder implements MarkerProvider {
   // or because a prop affecting its rendering was changed
   topicsToRender: Set<string> = new Set();
 
-  // stored message arrays allowing used to re-render topics even when the latest
+  // stored message arrays allowing us to re-render topics even when the latest
   // frame does not not contain that topic
   lastSeenMessages: {
     [key: string]: MessageEvent<unknown>[];
@@ -480,13 +479,7 @@ export default class SceneBuilder implements MarkerProvider {
         return;
     }
 
-    const points = (message as unknown as { points: MutablePoint[] }).points;
-    const parsedPoints = points.map((p) => ({ x: p.x, y: p.y, z: p.z }));
-
-    // HACK(jacob): rather than hard-coding this, we should
-    //  (a) produce this visualization dynamically from a non-marker topic
-    //  (b) fix translucency so it looks correct (harder)
-    const color = this._hooks.getMarkerColor(topic, message.color!);
+    const color = message.color ?? { r: 0, g: 0, b: 0, a: 0 };
 
     // Allow topic settings to override marker color (see MarkerSettingsEditor.js)
     let { overrideColor } = (this._settingsByKey[`ns:${topic}:${namespace}`] ??
@@ -515,7 +508,7 @@ export default class SceneBuilder implements MarkerProvider {
     const interactionData: InteractionData = {
       topic,
       highlighted,
-      originalMessage: message as unknown as RosObject,
+      originalMessage: message as RosObject,
     };
     const lifetime = message.lifetime;
 
@@ -548,7 +541,7 @@ export default class SceneBuilder implements MarkerProvider {
       interactionData,
       color: overrideColor ?? color,
       colors: overrideColor ? [] : message.colors,
-      points: parsedPoints,
+      points: message.points,
       id: message.id,
       ns: message.ns,
       header: message.header,

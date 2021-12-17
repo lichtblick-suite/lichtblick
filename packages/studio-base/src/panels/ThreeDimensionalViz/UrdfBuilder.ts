@@ -276,6 +276,7 @@ export default class UrdfBuilder implements MarkerProvider {
       scale: box.size,
       color: getColor(visual, robot),
       frame_locked: true,
+      points: [],
     };
     return marker;
   }
@@ -299,6 +300,7 @@ export default class UrdfBuilder implements MarkerProvider {
       scale: { x: sphere.radius * 2, y: sphere.radius * 2, z: sphere.radius * 2 },
       color: getColor(visual, robot),
       frame_locked: true,
+      points: [],
     };
     return marker;
   }
@@ -322,6 +324,7 @@ export default class UrdfBuilder implements MarkerProvider {
       scale: { x: cylinder.radius * 2, y: cylinder.radius * 2, z: cylinder.length },
       color: getColor(visual, robot),
       frame_locked: true,
+      points: [],
     };
     return marker;
   }
@@ -345,6 +348,7 @@ export default class UrdfBuilder implements MarkerProvider {
       scale: mesh.scale ?? { x: 1, y: 1, z: 1 },
       color: getColor(visual, robot),
       frame_locked: true,
+      points: [],
       mesh_resource: mesh.filename,
       mesh_use_embedded_materials: true,
     };

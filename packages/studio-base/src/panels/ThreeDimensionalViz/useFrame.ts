@@ -41,21 +41,32 @@ const useFrame = (topics: string[]): FrameState => {
       returnedLastValueRef.current = false;
       return { reset: true, frame: {} };
     }, []),
-    addMessages: useCallback((prev: FrameState, messages: readonly MessageEvent<unknown>[]) => {
-      if (returnedLastValueRef.current) {
-        // after we've returned the value we can remove the reset flag and clear the frame
-        prev.reset = false;
-        prev.frame = {};
-        returnedLastValueRef.current = false;
-      }
+    addMessages: useCallback(
+      (prev: FrameState, messageEvents: readonly MessageEvent<unknown>[]) => {
+        if (returnedLastValueRef.current) {
+          // after we've returned the value we can remove the reset flag and clear the frame
+          prev.reset = false;
+          prev.frame = {};
+          returnedLastValueRef.current = false;
+        }
 
-      for (const message of messages) {
-        (prev.frame[message.topic] ??= []).push(message);
-      }
+        for (const messageEvent of messageEvents) {
+          // ThreeDimensionalViz panel fully parses all of the messages it
+          // consumes, and sometimes repeatedly so via lastSeenMessages. All
+          // incoming lazy messages are converted into fully parsed messages here
+          const maybeLazy = messageEvent as { message: { toJSON?: () => unknown } };
+          if ("toJSON" in maybeLazy.message) {
+            (maybeLazy.message as unknown) = maybeLazy.message.toJSON!();
+          }
 
-      // every call to addMessages returns a new reference to trigger a state update
-      return { reset: prev.reset, frame: { ...prev.frame } };
-    }, []),
+          (prev.frame[messageEvent.topic] ??= []).push(messageEvent);
+        }
+
+        // every call to addMessages returns a new reference to trigger a state update
+        return { reset: prev.reset, frame: { ...prev.frame } };
+      },
+      [],
+    ),
   });
 
   // indicate we've returned the previous state and can start building a new frame

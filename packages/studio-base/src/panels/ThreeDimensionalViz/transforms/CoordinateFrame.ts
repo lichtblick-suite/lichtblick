@@ -381,11 +381,13 @@ function copyTime(out: Time, time: Time): void {
 }
 
 function copyPose(out: MutablePose, pose: Pose): void {
-  out.position.x = pose.position.x;
-  out.position.y = pose.position.y;
-  out.position.z = pose.position.z;
-  out.orientation.x = pose.orientation.x;
-  out.orientation.y = pose.orientation.y;
-  out.orientation.z = pose.orientation.z;
-  out.orientation.w = pose.orientation.w;
+  const p = pose.position;
+  const o = pose.orientation;
+  out.position.x = p.x;
+  out.position.y = p.y;
+  out.position.z = p.z;
+  out.orientation.x = o.x;
+  out.orientation.y = o.y;
+  out.orientation.z = o.z;
+  out.orientation.w = o.w;
 }

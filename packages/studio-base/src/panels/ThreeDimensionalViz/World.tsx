@@ -12,7 +12,7 @@
 //   You may not use this file except in compliance with the License.
 
 import { getColorFromString } from "@fluentui/react";
-import { forwardRef, useMemo } from "react";
+import { forwardRef, useMemo, useRef } from "react";
 
 import {
   Worldview,
@@ -65,30 +65,11 @@ type Props = WorldSearchTextProps & {
   onMouseUp?: MouseHandler;
 };
 
-function getMarkers(markerProviders: MarkerProvider[], time: Time): InteractiveMarkersByType {
-  const markers: InteractiveMarkersByType = {
-    arrow: [],
-    color: [],
-    cube: [],
-    cubeList: [],
-    cylinder: [],
-    glText: [],
-    grid: [],
-    instancedLineList: [],
-    laserScan: [],
-    linedConvexHull: [],
-    lineList: [],
-    lineStrip: [],
-    mesh: [],
-    pointcloud: [],
-    points: [],
-    poseMarker: [],
-    sphere: [],
-    sphereList: [],
-    text: [],
-    triangleList: [],
-  };
-
+function getMarkers(
+  markers: InteractiveMarkersByType,
+  markerProviders: MarkerProvider[],
+  time: Time,
+): void {
   // These casts seem wrong - some type definitions around MarkerProvider or MarkerCollector are not
   // compatible with interactive markers. Ideally interactive markers would not require mutating
   // marker objects which would help avoid unsafe casting.
@@ -119,8 +100,6 @@ function getMarkers(markerProviders: MarkerProvider[], time: Time): InteractiveM
   for (const provider of markerProviders) {
     provider.renderMarkers(collector, time);
   }
-
-  return markers;
 }
 
 // Wrap the WorldMarkers in HoC(s)
@@ -149,7 +128,37 @@ function World(
   }: Props,
   ref: typeof Worldview,
 ) {
-  const markersByType = getMarkers(markerProviders, currentTime);
+  // Building these arrays every frame is expensive, so we instantiate once and
+  // clear them each time to reduce allocations
+  const markersRef = useRef<InteractiveMarkersByType | undefined>(undefined);
+  markersRef.current ??= {
+    arrow: [],
+    color: [],
+    cube: [],
+    cubeList: [],
+    cylinder: [],
+    glText: [],
+    grid: [],
+    instancedLineList: [],
+    laserScan: [],
+    linedConvexHull: [],
+    lineList: [],
+    lineStrip: [],
+    mesh: [],
+    pointcloud: [],
+    points: [],
+    poseMarker: [],
+    sphere: [],
+    sphereList: [],
+    text: [],
+    triangleList: [],
+  };
+  for (const key in markersRef.current) {
+    (markersRef.current as Record<string, unknown[]>)[key]!.length = 0;
+  }
+
+  getMarkers(markersRef.current, markerProviders, currentTime);
+  const markersByType = markersRef.current;
   const { text = [] } = markersByType;
   const processedMarkersByType = {
     ...markersByType,

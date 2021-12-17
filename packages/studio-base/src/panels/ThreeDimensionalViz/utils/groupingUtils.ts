@@ -19,6 +19,8 @@ import {
   LineStripMarker,
   InstancedLineListMarker,
   Pose,
+  Point,
+  Color,
 } from "@foxglove/studio-base/types/Messages";
 import { emptyPose } from "@foxglove/studio-base/util/Pose";
 import { COLORS, MARKER_MSG_TYPES } from "@foxglove/studio-base/util/globalConstants";
@@ -53,10 +55,10 @@ export function groupLinesIntoInstancedLineLists(
         depth?: REGL.DepthTestOptions;
       };
     const isLineStrip = baseMessage.type === MARKER_MSG_TYPES.LINE_STRIP;
-    const allColors = []; // accumulated colors
-    const allPoints = []; // accumulated positions
-    const metadataByIndex = [];
-    const poses = [];
+    const allColors: Color[] = []; // accumulated colors
+    const allPoints: Point[] = []; // accumulated positions
+    const metadataByIndex: Record<string, unknown>[] = [];
+    const poses: Pose[] = [];
 
     for (let messageIdx = 0; messageIdx < messageList.length; messageIdx++) {
       const message: (LineListMarker | LineStripMarker) & {
@@ -69,6 +71,7 @@ export function groupLinesIntoInstancedLineLists(
         // Ignore markers with no points
         continue;
       }
+      const firstPoint = points[0]!;
 
       if (isLineStrip) {
         // We want to keep corners joined between lines in the same strip. The <Lines>
@@ -85,7 +88,7 @@ export function groupLinesIntoInstancedLineLists(
           // If this is not the first strip, we need to add a line from infinity to the
           // first point that we want to render. By repeating the first point in the strip,
           // we also make sure gradients look correctly in the final rendered image.
-          allPoints.push(points[0]);
+          allPoints.push(firstPoint);
           allColors.push(INFINITE_COLOR);
           poses.push(INFINITE_POSE);
           metadataByIndex.push(INFINITE_METADATA);
@@ -100,22 +103,23 @@ export function groupLinesIntoInstancedLineLists(
         fillExtend(allColors, message.color ?? COLORS.WHITE, points.length - colors.length);
 
         // Accumulate poses for each points, if they're provided in the marker
-        if (message.poses && message.poses.length > 0) {
-          extend(poses, message.poses);
+        const messagePosesLength = message.poses?.length ?? 0;
+        if (messagePosesLength > 0) {
+          extend(poses, message.poses!);
         }
 
         // Accumulate metadata and poses
         fillExtend(metadataByIndex, message, points.length);
-        fillExtend(poses, message.pose, points.length - (message.poses ? message.poses.length : 0));
+        fillExtend(poses, message.pose, points.length - messagePosesLength);
 
         if (message.closed ?? false) {
           // If this is a closed marker, we need to add an extra point to generate a new line
           // from the last element to the first one. We also need to add the metadata and a pose
           // that correspond to that point.
-          allPoints.push(points[0]);
-          allColors.push(colors.length > 0 ? colors[0] : message.color ?? COLORS.WHITE);
+          allPoints.push(firstPoint);
+          allColors.push(colors[0] ?? message.color ?? COLORS.WHITE);
           metadataByIndex.push(message);
-          poses.push(message.poses ? message.poses[0] : message.pose);
+          poses.push(message.poses?.[0] ?? message.pose);
         }
 
         if (messageIdx < messageList.length - 1) {
@@ -123,10 +127,10 @@ export function groupLinesIntoInstancedLineLists(
           // The next strip will deal with connecting it with its first point (see above).
           // By repeating the last point in the strip we ensure gradients look
           // correctly in the final rendered image.
-          allPoints.push(...[allPoints[allPoints.length - 1], INFINITE_POSITION]);
-          allColors.push(...[INFINITE_COLOR, INFINITE_COLOR]);
-          poses.push(...[INFINITE_POSE, INFINITE_POSE]);
-          metadataByIndex.push(...[INFINITE_METADATA, INFINITE_METADATA]);
+          allPoints.push(allPoints[allPoints.length - 1]!, INFINITE_POSITION);
+          allColors.push(INFINITE_COLOR, INFINITE_COLOR);
+          poses.push(INFINITE_POSE, INFINITE_POSE);
+          metadataByIndex.push(INFINITE_METADATA, INFINITE_METADATA);
         }
       } else {
         // If the marker is already a line list, just add the points to the list, validating that points
@@ -189,13 +193,14 @@ export function groupLinesIntoInstancedLineLists(
 }
 
 function extend<T>(arr1: T[], arr2: readonly T[]) {
-  arr2.forEach((v) => arr1.push(v));
+  // perf-sensitive: faster than alternatives that use filling or spreading
+  for (let i = 0; i < arr2.length; i++) {
+    arr1.push(arr2[i]!);
+  }
 }
 
-// fillExtend and extend are a bit faster than alternatives that use filling or spreading to
-// achieve the same purpose, and groupPredictionMarkersIntoInstancedMarkers is a fairly heavy
-// function.
 function fillExtend<T>(arr: T[], value: T, n: number): void {
+  // perf-sensitive: faster than alternatives that use filling or spreading
   for (let i = 0; i < n; ++i) {
     arr.push(value);
   }

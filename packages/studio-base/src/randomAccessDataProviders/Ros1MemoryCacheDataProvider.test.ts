@@ -343,7 +343,7 @@ describe("MemoryCacheDataProvider", () => {
       inputMessages.map((item) => ({
         topic: item.topic,
         receiveTime: item.receiveTime,
-        message: {},
+        message: { _offset: 0, _view: new DataView(new ArrayBuffer(0)) },
         sizeInBytes: 0,
       })),
     );

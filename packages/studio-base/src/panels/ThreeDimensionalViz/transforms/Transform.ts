@@ -6,9 +6,14 @@ import { mat4, vec3, quat, ReadonlyMat4, ReadonlyVec3, ReadonlyQuat } from "gl-m
 
 import { MutablePose, Pose } from "@foxglove/studio-base/types/Messages";
 
-import { mat4Identity, quatIdentity, vec3Identity } from "./geometry";
+import {
+  approxEq,
+  getRotationNoScaling,
+  mat4Identity,
+  quatIdentity,
+  vec3Identity,
+} from "./geometry";
 
-const tempMat = mat4Identity();
 const tempScale = vec3Identity();
 
 /**
@@ -24,6 +29,7 @@ export class Transform {
   constructor(position: vec3, rotation: quat) {
     this._position = position;
     this._rotation = rotation;
+    quat.normalize(this._rotation, this._rotation);
     this._matrix = mat4.fromRotationTranslation(mat4Identity(), this._rotation, this._position);
   }
 
@@ -46,7 +52,7 @@ export class Transform {
   }
 
   setRotation(rotation: ReadonlyQuat): this {
-    quat.copy(this._rotation, rotation);
+    quat.normalize(this._rotation, rotation);
     mat4.fromRotationTranslation(this._matrix, this._rotation, this._position);
     return this;
   }
@@ -58,7 +64,7 @@ export class Transform {
    */
   setPositionRotation(position: ReadonlyVec3, rotation: ReadonlyQuat): this {
     vec3.copy(this._position, position);
-    quat.copy(this._rotation, rotation);
+    quat.normalize(this._rotation, rotation);
     mat4.fromRotationTranslation(this._matrix, this._rotation, this._position);
     return this;
   }
@@ -75,6 +81,7 @@ export class Transform {
       pose.orientation.z,
       pose.orientation.w,
     );
+    quat.normalize(this._rotation, this._rotation);
     mat4.fromRotationTranslation(this._matrix, this._rotation, this._position);
     return this;
   }
@@ -83,22 +90,19 @@ export class Transform {
    * Update position and rotation from a matrix
    */
   setMatrix(matrix: ReadonlyMat4): this {
+    // Ensure the matrix has no scaling
+    mat4.getScaling(tempScale, matrix);
+    if (!approxEq(tempScale[0], 1) || !approxEq(tempScale[1], 1) || !approxEq(tempScale[2], 1)) {
+      throw new Error(
+        `setMatrix given a matrix with non-unit scale [${tempScale[0]}, ${tempScale[1]}, ${
+          tempScale[2]
+        }]: ${mat4.str(matrix)}`,
+      );
+    }
+
     mat4.copy(this._matrix, matrix);
     mat4.getTranslation(this._position, matrix);
-
-    // Normalize the values in the matrix by the scale. This ensures that we get the correct rotation
-    // out even if the scale isn't 1 in each axis. The logic from this comes from the threejs
-    // implementation and an SO answer:
-    // - https://github.com/mrdoob/three.js/blob/master/src/math/Matrix4.js#L790-L815
-    // - https://math.stackexchange.com/a/1463487
-    mat4.getScaling(tempScale, matrix);
-    if (mat4.determinant(matrix) < 0) {
-      tempScale[0] *= -1;
-    }
-    vec3.inverse(tempScale, tempScale);
-    mat4.scale(tempMat, matrix, tempScale);
-
-    mat4.getRotation(this._rotation, tempMat);
+    getRotationNoScaling(this._rotation, matrix); // A faster mat4.getRotation when there is no scaling
     return this;
   }
 

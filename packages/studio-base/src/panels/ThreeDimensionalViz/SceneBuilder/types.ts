@@ -14,7 +14,6 @@
 import { Color } from "@foxglove/studio-base/types/Messages";
 
 export type ThreeDimensionalVizHooks = Readonly<{
-  getMarkerColor: (arg0: string, arg1: Color) => Color;
   getOccupancyGridValues: (arg0: string) => [number, string]; // arg is topic, return value is [alpha, map].
   getSyntheticArrowMarkerColor: (arg0: string) => Color; // arg is topic
 }>;
