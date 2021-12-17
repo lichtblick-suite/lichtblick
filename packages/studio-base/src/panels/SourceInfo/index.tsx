@@ -20,10 +20,10 @@ import EmptyState from "@foxglove/studio-base/components/EmptyState";
 import { useMessagePipeline } from "@foxglove/studio-base/components/MessagePipeline";
 import Panel from "@foxglove/studio-base/components/Panel";
 import PanelToolbar from "@foxglove/studio-base/components/PanelToolbar";
+import Timestamp from "@foxglove/studio-base/components/Timestamp";
 import { formatDuration } from "@foxglove/studio-base/util/formatTime";
 import { fonts } from "@foxglove/studio-base/util/sharedStyleConstants";
 
-import Timestamp from "./Timestamp";
 import helpContent from "./index.help.md";
 
 const useStyles = makeStyles(() => ({
@@ -79,11 +79,11 @@ function SourceInfo() {
         >
           <Stack tokens={{ childrenGap: theme.spacing.s2 }}>
             <Text styles={subheaderStyles}>Start time</Text>
-            <Timestamp time={startTime} />
+            <Timestamp horizontal time={startTime} />
           </Stack>
           <Stack tokens={{ childrenGap: theme.spacing.s2 }}>
             <Text styles={subheaderStyles}>End Time</Text>
-            <Timestamp time={endTime} />
+            <Timestamp horizontal time={endTime} />
           </Stack>
           <Stack tokens={{ childrenGap: theme.spacing.s2 }}>
             <Text styles={subheaderStyles}>Duration</Text>

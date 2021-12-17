@@ -65,7 +65,7 @@ function DataSourceInfo(): JSX.Element {
       <Stack tokens={{ childrenGap: theme.spacing.s2 }}>
         <Text styles={subheaderStyles}>Start time</Text>
         {startTime ? (
-          <Timestamp time={startTime} />
+          <Timestamp horizontal time={startTime} />
         ) : (
           <Text variant="small" styles={{ root: { color: theme.palette.neutralSecondary } }}>
             00:00:00
@@ -76,7 +76,7 @@ function DataSourceInfo(): JSX.Element {
       <Stack tokens={{ childrenGap: theme.spacing.s2 }}>
         <Text styles={subheaderStyles}>End time</Text>
         {endTime ? (
-          <Timestamp time={endTime} />
+          <Timestamp horizontal time={endTime} />
         ) : (
           <Text variant="small" styles={{ root: { color: theme.palette.neutralSecondary } }}>
             00:00:00
