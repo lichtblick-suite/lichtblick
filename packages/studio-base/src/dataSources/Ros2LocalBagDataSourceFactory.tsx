@@ -9,7 +9,7 @@ import {
 import RandomAccessPlayer from "@foxglove/studio-base/players/RandomAccessPlayer";
 import { Player } from "@foxglove/studio-base/players/types";
 import MemoryCacheDataProvider from "@foxglove/studio-base/randomAccessDataProviders/MemoryCacheDataProvider";
-import Rosbag2DataProvider from "@foxglove/studio-base/randomAccessDataProviders/Rosbag2DataProvider";
+import WorkerRosbag2DataProvider from "@foxglove/studio-base/randomAccessDataProviders/WorkerRosbag2DataProvider";
 import { getSeekToTime } from "@foxglove/studio-base/util/time";
 
 class Ros2LocalBagDataSourceFactory implements IDataSourceFactory {
@@ -22,14 +22,12 @@ class Ros2LocalBagDataSourceFactory implements IDataSourceFactory {
 
   initialize(args: DataSourceFactoryInitializeArgs): Player | undefined {
     if ((args.files?.length ?? 0) > 0) {
-      const rosbag2Provider = new Rosbag2DataProvider({
-        bagPath: {
-          type: "files",
-          files: args.files ?? [],
-        },
+      const bagWorkerDataProvider = new WorkerRosbag2DataProvider({
+        type: "files",
+        files: args.files ?? [],
       });
 
-      const messageCacheProvider = new MemoryCacheDataProvider(rosbag2Provider, {
+      const messageCacheProvider = new MemoryCacheDataProvider(bagWorkerDataProvider, {
         unlimitedCache: args.unlimitedMemoryCache,
       });
 
@@ -38,14 +36,12 @@ class Ros2LocalBagDataSourceFactory implements IDataSourceFactory {
         seekToTime: getSeekToTime(),
       });
     } else if (args.file) {
-      const rosbag2Provider = new Rosbag2DataProvider({
-        bagPath: {
-          type: "file",
-          file: args.file,
-        },
+      const bagWorkerDataProvider = new WorkerRosbag2DataProvider({
+        type: "file",
+        file: args.file,
       });
 
-      const messageCacheProvider = new MemoryCacheDataProvider(rosbag2Provider, {
+      const messageCacheProvider = new MemoryCacheDataProvider(bagWorkerDataProvider, {
         unlimitedCache: args.unlimitedMemoryCache,
       });
 

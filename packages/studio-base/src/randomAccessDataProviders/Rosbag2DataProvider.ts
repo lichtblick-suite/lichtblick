@@ -4,14 +4,7 @@
 
 import { Md5 } from "md5-typescript";
 
-import {
-  BlobReader,
-  ROS2_TO_DEFINITIONS,
-  Rosbag2,
-  openFileSystemFile,
-  FileEntry,
-  SqliteSqljs,
-} from "@foxglove/rosbag2-web";
+import { ROS2_TO_DEFINITIONS, Rosbag2, SqliteSqljs } from "@foxglove/rosbag2-web";
 import { stringify } from "@foxglove/rosmsg";
 import { Time } from "@foxglove/rostime";
 import { MessageEvent } from "@foxglove/studio";
@@ -31,10 +24,10 @@ import {
 } from "@foxglove/studio-base/randomAccessDataProviders/types";
 import { RosDatatypes } from "@foxglove/studio-base/types/RosDatatypes";
 
-type BagPath = { type: "file"; file: Blob };
+type BagPath = { type: "file"; file: File };
 type BagMultiPath = { type: "files"; files: File[] };
 
-type Options = { bagPath: BagPath | BagMultiPath };
+export type Options = BagPath | BagMultiPath;
 
 export default class Rosbag2DataProvider implements RandomAccessDataProvider {
   private options_: Options;
@@ -45,24 +38,18 @@ export default class Rosbag2DataProvider implements RandomAccessDataProvider {
   }
 
   async initialize(_extensionPoint: ExtensionPoint): Promise<InitializationResult> {
-    const res = await fetch(new URL("sql.js/dist/sql-wasm.wasm", import.meta.url).toString());
+    const res = await fetch(
+      new URL("@foxglove/sql.js/dist/sql-wasm.wasm", import.meta.url).toString(),
+    );
     const sqlWasm = await (await res.blob()).arrayBuffer();
+    await SqliteSqljs.Initialize({ wasmBinary: sqlWasm });
 
-    if (this.options_.bagPath.type === "files") {
-      const files = this.options_.bagPath.files;
-      const entries: FileEntry[] = files.map((f) => ({
-        relativePath: (f as unknown as { path: string }).path,
-        file: new BlobReader(f),
-      }));
-      const bag = new Rosbag2(entries, (fileEntry) => new SqliteSqljs(fileEntry.file, sqlWasm));
-      await bag.open();
-      this.bag_ = bag;
-    } else if (this.options_.bagPath.type === "file") {
-      const file = this.options_.bagPath.file;
-      this.bag_ = await openFileSystemFile(file, sqlWasm);
-    } else {
-      throw new Error("Unsupported Rosbag2DataProvider arguments");
-    }
+    const files = this.options_.type === "files" ? this.options_.files : [this.options_.file];
+
+    const dbs = files.map((file) => new SqliteSqljs(file));
+    const bag = new Rosbag2(dbs);
+    await bag.open();
+    this.bag_ = bag;
 
     const [start, end] = await this.bag_.timeRange();
     const topicDefs = await this.bag_.readTopics();
