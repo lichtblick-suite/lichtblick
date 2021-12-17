@@ -10,6 +10,7 @@ import {
   useMessagePipeline,
 } from "@foxglove/studio-base/components/MessagePipeline";
 import Timestamp from "@foxglove/studio-base/components/Timestamp";
+import TextMiddleTruncate from "@foxglove/studio-base/panels/ThreeDimensionalViz/TopicTree/TextMiddleTruncate";
 import { subtractTimes } from "@foxglove/studio-base/players/UserNodePlayer/nodeTransformerWorker/typescript/userUtils/time";
 import { formatDuration } from "@foxglove/studio-base/util/formatTime";
 import { fonts } from "@foxglove/studio-base/util/sharedStyleConstants";
@@ -53,10 +54,10 @@ function DataSourceInfo(): JSX.Element {
       }}
     >
       <Stack horizontal verticalAlign="center">
-        <Stack grow tokens={{ childrenGap: theme.spacing.s2 }}>
+        <Stack grow tokens={{ childrenGap: theme.spacing.s2 }} styles={{ root: { minWidth: 0 } }}>
           <Text styles={subheaderStyles}>Current data source</Text>
           <Text styles={{ root: { color: theme.palette.neutralSecondary } }}>
-            {playerName ?? "Select a data source"}
+            {playerName ? <TextMiddleTruncate text={playerName} /> : <>&mdash;</>}
           </Text>
         </Stack>
       </Stack>

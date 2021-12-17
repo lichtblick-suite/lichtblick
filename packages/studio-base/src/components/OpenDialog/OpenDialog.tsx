@@ -102,7 +102,7 @@ export default function OpenDialog(props: OpenDialogProps): JSX.Element {
         };
       default:
         return {
-          title: "Open new data source",
+          title: "Get started",
           component: <Start onSelectView={onSelectView} supportedFileExtensions={allExtensions} />,
         };
     }
@@ -119,7 +119,6 @@ export default function OpenDialog(props: OpenDialogProps): JSX.Element {
         },
         styles: {
           main: {
-            minHeight: 520,
             display: "flex",
             flexDirection: "column",
           },
@@ -135,21 +134,28 @@ export default function OpenDialog(props: OpenDialogProps): JSX.Element {
         title: view.title,
         styles: {
           content: {
-            height: "100%",
+            overflow: "hidden",
+            height: 480,
             display: "flex",
             flexDirection: "column",
             padding: theme.spacing.l1,
+
+            "@media (max-height: 512px)": { overflowY: "auto" },
           },
           inner: {
             flex: 1,
             display: "flex",
             flexDirection: "column",
+
+            "@media (min-height: 512px)": { overflow: "hidden" },
           },
           innerContent: {
             height: "100%",
             display: "flex",
             flexDirection: "column",
             flex: 1,
+
+            "@media (min-height: 512px)": { overflow: "hidden" },
           },
         },
       }}

@@ -6,6 +6,7 @@ import { CompoundButton, Stack, Text, IButtonProps, useTheme } from "@fluentui/r
 import { useMemo } from "react";
 
 import { usePlayerSelection } from "@foxglove/studio-base/context/PlayerSelectionContext";
+import TextMiddleTruncate from "@foxglove/studio-base/panels/ThreeDimensionalViz/TopicTree/TextMiddleTruncate";
 
 import ActionList from "./ActionList";
 import { OpenDialogViews } from "./types";
@@ -13,13 +14,13 @@ import { OpenDialogViews } from "./types";
 const HELP_ITEMS: IButtonProps[] = [
   {
     id: "slack",
-    href: "https://join.slack.com/t/foxglove/shared_invite/zt-n60289dv-jb2WxEesFUT1k56AHGNaug",
+    href: "https://foxglove.dev/slack&utm_source=studio&utm_medium=open-dialog",
     target: "_blank",
     children: "Join our Slack community",
   },
   {
     id: "docs",
-    href: "https://foxglove.dev/docs",
+    href: "https://foxglove.dev/docs&utm_source=studio&utm_medium=open-dialog",
     target: "_blank",
     children: "Browse the documentation",
   },
@@ -40,6 +41,31 @@ export default function Start(props: IStartProps): JSX.Element {
   const { supportedFileExtensions = [], onSelectView } = props;
   const theme = useTheme();
   const { recentSources, selectRecent } = usePlayerSelection();
+
+  const buttonStyles = useMemo(
+    () => ({
+      root: {
+        width: 340,
+        maxWidth: "none",
+      },
+      rootHovered: { backgroundColor: theme.palette.neutralLighterAlt },
+      rootPressed: { backgroundColor: theme.palette.neutralLighter },
+      flexContainer: { alignItems: "center" },
+      descriptionHovered: { color: theme.semanticColors.bodySubtext },
+      icon: {
+        marginRight: theme.spacing.m,
+        marginLeft: theme.spacing.s1,
+        color: theme.palette.themePrimary,
+
+        "> span": { display: "flex" },
+        svg: { height: "1em", width: "1em" },
+      },
+      labelHovered: {
+        color: theme.palette.themePrimary,
+      },
+    }),
+    [theme],
+  );
 
   const startItems: IButtonProps[] = useMemo(
     () => [
@@ -77,14 +103,48 @@ export default function Start(props: IStartProps): JSX.Element {
 
   const recentItems: IButtonProps[] = useMemo(() => {
     return recentSources.map((recent) => {
-      const fullTitle = recent.label ? `${recent.title} · ${recent.label}` : recent.title;
       return {
         id: recent.id,
-        children: fullTitle,
+        children: (
+          <Stack
+            horizontal
+            styles={{
+              root: {
+                overflow: "hidden",
+
+                ":hover": { color: theme.palette.themeDark },
+              },
+            }}
+          >
+            <Text
+              variant="small"
+              styles={{
+                root: {
+                  whiteSpace: "nowrap",
+                  overflow: "hidden",
+                  color: "inherit",
+                  paddingRight: theme.spacing.s1,
+                },
+              }}
+            >
+              <TextMiddleTruncate text={recent.title} />
+            </Text>
+            {recent.label && (
+              <Text
+                variant="small"
+                styles={{
+                  root: { whiteSpace: "nowrap", color: theme.palette.neutralSecondaryAlt },
+                }}
+              >
+                {recent.label}
+              </Text>
+            )}
+          </Stack>
+        ),
         onClick: () => selectRecent(recent.id),
       };
     });
-  }, [recentSources, selectRecent]);
+  }, [recentSources, selectRecent, theme]);
 
   return (
     <>
@@ -92,41 +152,18 @@ export default function Start(props: IStartProps): JSX.Element {
         {/* Left column */}
         <Stack grow tokens={{ childrenGap: theme.spacing.m }}>
           <Text variant="large" styles={{ root: { color: theme.semanticColors.bodySubtext } }}>
-            Start
+            Open data source
           </Text>
           <Stack tokens={{ childrenGap: theme.spacing.s1 }}>
             {startItems.map(({ id, ...item }) => (
-              <CompoundButton
-                {...item}
-                key={id}
-                id={id}
-                styles={{
-                  root: {
-                    width: 340,
-                    maxWidth: "none",
-                  },
-                  flexContainer: {
-                    alignItems: "center",
-                  },
-                  icon: {
-                    marginRight: theme.spacing.m,
-                    marginLeft: theme.spacing.s1,
-                    color: theme.palette.themePrimary,
-
-                    svg: { height: "1em", width: "1em" },
-                  },
-                  labelHovered: {
-                    color: theme.palette.themePrimary,
-                  },
-                }}
-              />
+              <CompoundButton {...item} key={id} id={id} styles={buttonStyles} />
             ))}
           </Stack>
         </Stack>
 
         {/* Right column */}
         <Stack grow tokens={{ childrenGap: theme.spacing.l1 }} styles={{ root: { minWidth: 0 } }}>
-          <ActionList title="Recent" items={recentItems} />
+          {recentItems.length > 0 && <ActionList title="Recent" items={recentItems} />}
           <ActionList title="Help" items={HELP_ITEMS} />
         </Stack>
       </Stack>

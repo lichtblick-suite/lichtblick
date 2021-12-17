@@ -64,12 +64,7 @@ export default function Connection(props: ConnectionProps): JSX.Element {
       onOpen={selectedSource?.disabledReason == undefined ? onOpen : undefined}
     >
       <Stack grow verticalFill horizontal tokens={{ childrenGap: theme.spacing.l2 }}>
-        <Stack
-          verticalFill
-          styles={{
-            root: { marginLeft: `-${theme.spacing.s1}` },
-          }}
-        >
+        <Stack verticalFill>
           {enabledSourcesFirst.map((source, idx) => {
             const { id, iconName, displayName } = source;
             return (
@@ -81,6 +76,7 @@ export default function Connection(props: ConnectionProps): JSX.Element {
                 styles={{
                   root: { minWidth: 240 },
                   rootChecked: { backgroundColor: theme.semanticColors.bodyBackgroundHovered },
+                  icon: { "> span": { display: "flex" } },
                   iconChecked: { color: theme.palette.themePrimary },
                 }}
               >
@@ -89,7 +85,14 @@ export default function Connection(props: ConnectionProps): JSX.Element {
             );
           })}
         </Stack>
-        <Stack grow verticalFill key={selectedSource?.id} tokens={{ childrenGap: theme.spacing.m }}>
+        <Stack
+          grow
+          verticalFill
+          key={selectedSource?.id}
+          tokens={{ childrenGap: theme.spacing.m }}
+          styles={{ root: { overflowY: "auto" } }}
+        >
+          {selectedSource?.disabledReason}
           {selectedSource?.formConfig != undefined && (
             <Stack grow verticalAlign="space-between">
               <Stack tokens={{ childrenGap: theme.spacing.m }}>

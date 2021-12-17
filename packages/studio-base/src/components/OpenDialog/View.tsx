@@ -16,20 +16,25 @@ export default function View(props: PropsWithChildren<ViewProps>): JSX.Element {
   const theme = useTheme();
 
   return (
-    <Stack
-      grow
-      verticalFill
-      verticalAlign="space-between"
-      tokens={{ childrenGap: theme.spacing.m }}
-    >
-      {props.children}
+    <>
+      <Stack
+        grow
+        verticalFill
+        verticalAlign="space-between"
+        tokens={{ childrenGap: theme.spacing.m }}
+        styles={{
+          root: { "@media (min-height: 512px)": { overflow: "hidden" } },
+        }}
+      >
+        {props.children}
+      </Stack>
       <Stack horizontal horizontalAlign="space-between" verticalAlign="center">
         <ActionButton
           iconProps={{ iconName: "ChevronLeft" }}
           onClick={onBack}
           styles={{
             root: { color: theme.palette.themePrimary, padding: 0 },
-            icon: { svg: { height: "1em", width: "1em" } },
+            icon: { svg: { height: "1em", width: "1em" }, "> span": { display: "flex" } },
           }}
         >
           Back
@@ -41,7 +46,7 @@ export default function View(props: PropsWithChildren<ViewProps>): JSX.Element {
           </PrimaryButton>
         </Stack>
       </Stack>
-    </Stack>
+    </>
   );
 
   return <>{props.children}</>;
