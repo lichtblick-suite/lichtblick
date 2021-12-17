@@ -521,7 +521,7 @@ export default class SceneBuilder implements MarkerProvider {
       interactionData: InteractionData;
       color?: Color;
       colors?: readonly Color[];
-      points: Point[];
+      points?: Point[];
       id: string | number;
       ns: string;
       header: Header;

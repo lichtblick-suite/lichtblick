@@ -98,12 +98,15 @@ function MeshMarkers({ markers, layerIndex }: MeshMarkerProps): ReactElement {
 
   for (let i = 0; i < markers.length; i++) {
     const marker = markers[i]!;
-    const { pose, mesh_resource, scale, color } = marker;
+    const { mesh_resource, color } = marker;
     if (!mesh_resource) {
       continue;
     }
     const url = rewritePackageUrl(mesh_resource, { rosPackagePath });
     const alpha = (color?.a ?? 0) > 0 ? color!.a : 1;
+
+    const newMarker = { ...marker, alpha };
+    delete newMarker.color;
 
     models.push(
       <GLTFScene
@@ -111,7 +114,7 @@ function MeshMarkers({ markers, layerIndex }: MeshMarkerProps): ReactElement {
         layerIndex={layerIndex}
         model={async () => await modelCache.load(url, reportError)}
       >
-        {{ pose, scale, alpha, interactionData: undefined }}
+        {newMarker}
       </GLTFScene>,
     );
   }

@@ -2622,7 +2622,7 @@ __metadata:
     uuid: 8.3.2
     wasm-lz4: 2.0.0
     webpack: 5.65.0
-    xacro-parser: 0.3.3
+    xacro-parser: 0.3.4
   languageName: unknown
   linkType: soft
 
@@ -24929,12 +24929,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"xacro-parser@npm:0.3.3":
-  version: 0.3.3
-  resolution: "xacro-parser@npm:0.3.3"
+"xacro-parser@npm:0.3.4":
+  version: 0.3.4
+  resolution: "xacro-parser@npm:0.3.4"
   dependencies:
     expr-eval: ^2.0.2
-  checksum: 555b19d371f219d7bec3931caa8f84c3b26ff34e27cd04cc9ad74bdd8c47072ffde9657f6c7a62e2a68ae06f119b896563347ef42a9aab04eac5c00c0ae35d32
+  checksum: 62c3e3cd64a5589d19b27013386c0b01344c86e4f1b6b9609c2abd3d75375c5ccf5f7f233902ef7bf4cf10739aca302d1d433a174c761f3b3a50b05c0754e1b1
   languageName: node
   linkType: hard
 
