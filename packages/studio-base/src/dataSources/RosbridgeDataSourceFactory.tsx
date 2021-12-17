@@ -18,7 +18,7 @@ class RosbridgeDataSourceFactory implements IDataSourceFactory {
   iconName: IDataSourceFactory["iconName"] = "Flow";
 
   formConfig = {
-    fields: [{ id: "url", label: "Websocket URL", defaultValue: "ws://localhost:9090" }],
+    fields: [{ id: "url", label: "WebSocket URL", defaultValue: "ws://localhost:9090" }],
   };
 
   promptOptions(previousValue?: string): PromptOptions {
