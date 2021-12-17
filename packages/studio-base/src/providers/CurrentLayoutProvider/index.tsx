@@ -227,15 +227,16 @@ export default function CurrentLayoutProvider({
 
   // Make sure our layout still exists after changes. If not deselect it.
   useEffect(() => {
-    async function listener() {
-      if (layoutStateRef.current?.selectedLayout?.id) {
-        const layout = await layoutManager.getLayout(layoutStateRef.current?.selectedLayout?.id);
-        if (!layout) {
-          await setSelectedLayoutId(undefined);
-          addToast("Your active layout was deleted.", { appearance: "warning" });
-        }
+    const listener: LayoutManagerEventTypes["change"] = async (event) => {
+      if (event.type !== "delete" || !layoutStateRef.current?.selectedLayout?.id) {
+        return;
       }
-    }
+
+      if (event.layoutId === layoutStateRef.current.selectedLayout.id) {
+        await setSelectedLayoutId(undefined);
+        addToast("Your active layout was deleted.", { appearance: "warning" });
+      }
+    };
 
     layoutManager.on("change", listener);
     return () => layoutManager.off("change", listener);

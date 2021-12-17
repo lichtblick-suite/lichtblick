@@ -7,12 +7,16 @@ import { EventNames, EventListener } from "eventemitter3";
 import { PanelsState } from "@foxglove/studio-base/context/CurrentLayoutContext/actions";
 import { Layout, LayoutID, LayoutPermission } from "@foxglove/studio-base/services/ILayoutStorage";
 
+export type LayoutManagerChangeEvent =
+  | { type: "delete"; updatedLayout?: undefined; layoutId: LayoutID }
+  | { type: "change"; updatedLayout: Layout | undefined };
+
 export type LayoutManagerEventTypes = {
   /**
    * Called when a change has occurred to the layouts and the user interface should be updated.
    * If a particular layout was updated, its data will be passed in the event.
    */
-  change: (event: { updatedLayout: Layout | undefined }) => void;
+  change: (event: LayoutManagerChangeEvent) => void;
 
   /** Called when the layout manager starts or stops asynchronous activity.  */
   busychange: () => void;
