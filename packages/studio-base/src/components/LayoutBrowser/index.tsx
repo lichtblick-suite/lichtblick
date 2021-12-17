@@ -185,19 +185,19 @@ export default function LayoutBrowser({
 
   const onDeleteLayout = useCallbackWithToast(
     async (item: Layout) => {
-      await layoutManager.deleteLayout({ id: item.id });
       void analytics.logEvent(AppEvent.LAYOUT_DELETE, { permission: item.permission });
 
-      if (currentLayoutId !== item.id) {
-        return;
+      // If the layout was selected, select a different available layout.
+      //
+      // When a users current layout is deleted, we display a notice. By selecting a new layout
+      // before deleting their current layout we avoid the weirdness of displaying a notice that the
+      // user just deleted their current layout which is somewhat obvious to the user.
+      if (currentLayoutId === item.id) {
+        const storedLayouts = await layoutManager.getLayouts();
+        const targetLayout = storedLayouts.find((layout) => layout.id !== currentLayoutId);
+        setSelectedLayoutId(targetLayout?.id);
       }
-      // If the layout was selected, select a different available layout
-      for (const layout of await layoutManager.getLayouts()) {
-        setSelectedLayoutId(layout.id);
-        return;
-      }
-      // If no other layouts exist, just deselect the layout
-      setSelectedLayoutId(undefined);
+      await layoutManager.deleteLayout({ id: item.id });
     },
     [analytics, currentLayoutId, layoutManager, setSelectedLayoutId],
   );
