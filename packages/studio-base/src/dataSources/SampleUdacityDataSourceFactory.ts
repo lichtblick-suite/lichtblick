@@ -192,9 +192,8 @@ class SampleUdacityDataSourceFactory implements IDataSourceFactory {
       metricsCollector: args.metricsCollector,
       seekToTime: getSeekToTime(),
       name: "Sample: Udacity",
-      urlParams: {
-        url: DEMO_BAG_URL,
-      },
+      // Use blank url params so the udacity data source is set in the url
+      urlParams: {},
     });
   }
 }
