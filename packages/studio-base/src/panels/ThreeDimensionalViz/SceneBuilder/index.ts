@@ -49,8 +49,6 @@ import { MarkerProvider, MarkerCollector } from "@foxglove/studio-base/types/Sce
 import { clonePose, emptyPose } from "@foxglove/studio-base/util/Pose";
 import naturalSort from "@foxglove/studio-base/util/naturalSort";
 
-import { ThreeDimensionalVizHooks } from "./types";
-
 const log = Log.getLogger(__filename);
 
 export type TopicSettingsCollection = {
@@ -59,17 +57,13 @@ export type TopicSettingsCollection = {
 
 // builds a syntehtic arrow marker from a geometry_msgs/PoseStamped
 // these pose sizes were manually configured in rviz; for now we hard-code them here
-const buildSyntheticArrowMarker = (
-  { topic, message }: MessageEvent<PoseStamped>,
-  pose: Pose,
-  getSyntheticArrowMarkerColor: (arg0: string) => Color,
-) => ({
+const buildSyntheticArrowMarker = ({ topic, message }: MessageEvent<PoseStamped>, pose: Pose) => ({
   header: message.header,
   type: 103,
   pose,
   frame_locked: true,
   scale: { x: 2, y: 2, z: 0.1 },
-  color: getSyntheticArrowMarkerColor(topic),
+  color: { r: 0, g: 0, b: 1, a: 0.5 },
   interactionData: { topic, originalMessage: message },
 });
 
@@ -221,8 +215,6 @@ export default class SceneBuilder implements MarkerProvider {
   // When not-empty, override the color of matching markers
   private _colorOverrideMarkerMatchersByTopic: MarkerMatchersByTopic = {};
 
-  private _hooks: ThreeDimensionalVizHooks;
-
   // Decodes `velodyne_msgs/VelodyneScan` ROS messages into
   // `VelodyneScanDecoded` objects that mimic `PointCloud2` and can be rendered
   // as point clouds
@@ -244,9 +236,7 @@ export default class SceneBuilder implements MarkerProvider {
     [key: string]: MessageEvent<unknown>[];
   } = {};
 
-  constructor(hooks: ThreeDimensionalVizHooks) {
-    this._hooks = hooks;
-  }
+  constructor() {}
 
   setTransforms = (transforms: TransformTree, renderFrameId: string | undefined): void => {
     this.transforms = transforms;
@@ -703,11 +693,7 @@ export default class SceneBuilder implements MarkerProvider {
         const pose = poseMsg.message.pose;
         this.collectors[topic]!.addNonMarker(
           topic,
-          buildSyntheticArrowMarker(
-            poseMsg,
-            pose,
-            this._hooks.getSyntheticArrowMarkerColor,
-          ) as Interactive<unknown>,
+          buildSyntheticArrowMarker(poseMsg, pose) as Interactive<unknown>,
         );
         break;
       }

@@ -13,11 +13,10 @@
 import SceneBuilder, {
   filterOutSupersededMessages,
 } from "@foxglove/studio-base/panels/ThreeDimensionalViz/SceneBuilder";
-import sceneBuilderHooks from "@foxglove/studio-base/panels/ThreeDimensionalViz/SceneBuilder/defaultHooks";
 
 describe("SceneBuilder", () => {
   it("on setFrame, modified topics rendered", () => {
-    const builder = new SceneBuilder(sceneBuilderHooks);
+    const builder = new SceneBuilder();
     builder.setTopics([{ name: "a", datatype: "A" }]);
 
     builder.setFrame({ a: [] });
@@ -26,7 +25,7 @@ describe("SceneBuilder", () => {
   });
 
   it("on setFrame, only specified topics rendered", () => {
-    const builder = new SceneBuilder(sceneBuilderHooks);
+    const builder = new SceneBuilder();
     builder.setTopics([{ name: "a", datatype: "A" }]);
 
     builder.setFrame({ b: [] });
@@ -35,7 +34,7 @@ describe("SceneBuilder", () => {
   });
 
   it("on setFrame, same instance, nothing rendered", () => {
-    const builder = new SceneBuilder(sceneBuilderHooks);
+    const builder = new SceneBuilder();
     builder.setTopics([{ name: "a", datatype: "A" }]);
     const frame = { a: [] };
     builder.setFrame(frame);
@@ -49,7 +48,7 @@ describe("SceneBuilder", () => {
   });
 
   it("on setFrame, same value different instance, topics rendered", () => {
-    const builder = new SceneBuilder(sceneBuilderHooks);
+    const builder = new SceneBuilder();
     builder.setTopics([{ name: "a", datatype: "A" }]);
     const frame1 = { a: [] };
     const frame2 = { a: [] };
@@ -62,7 +61,7 @@ describe("SceneBuilder", () => {
   });
 
   it("on setFrame, latest value saved", () => {
-    const builder = new SceneBuilder(sceneBuilderHooks);
+    const builder = new SceneBuilder();
     builder.setTopics([{ name: "a", datatype: "A" }]);
     const messages1: any = [];
     const messages2: any = [];
@@ -74,7 +73,7 @@ describe("SceneBuilder", () => {
   });
 
   it("on setFrame, messages are saved", () => {
-    const builder = new SceneBuilder(sceneBuilderHooks);
+    const builder = new SceneBuilder();
     const messagesValue: any = [];
     builder.setTopics([{ name: "a", datatype: "A" }]);
 
@@ -84,7 +83,7 @@ describe("SceneBuilder", () => {
   });
 
   it("on setFrame, old messages not clobbered", () => {
-    const builder = new SceneBuilder(sceneBuilderHooks);
+    const builder = new SceneBuilder();
     const messagesValue: any = [];
     builder.setTopics([
       { name: "a", datatype: "A" },
@@ -99,7 +98,7 @@ describe("SceneBuilder", () => {
   });
 
   it("on setFrame, unrendered messages saved", () => {
-    const builder = new SceneBuilder(sceneBuilderHooks);
+    const builder = new SceneBuilder();
     const messagesValue: any = [];
     builder.setTopics([{ name: "a", datatype: "A" }]);
 
@@ -109,7 +108,7 @@ describe("SceneBuilder", () => {
   });
 
   it("on render, topics to render cleared", () => {
-    const builder = new SceneBuilder(sceneBuilderHooks);
+    const builder = new SceneBuilder();
     builder.setTopics([{ name: "a", datatype: "A" }]);
     builder.setFrame({ a: [] });
     // to make sure we're set up right, check that one topic should be rendered

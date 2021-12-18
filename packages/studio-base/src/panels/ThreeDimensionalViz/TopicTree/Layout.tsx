@@ -42,7 +42,6 @@ import MeasuringTool, {
   MeasureInfo,
 } from "@foxglove/studio-base/panels/ThreeDimensionalViz/MeasuringTool";
 import SceneBuilder from "@foxglove/studio-base/panels/ThreeDimensionalViz/SceneBuilder";
-import sceneBuilderHooks from "@foxglove/studio-base/panels/ThreeDimensionalViz/SceneBuilder/defaultHooks";
 import { useSearchText } from "@foxglove/studio-base/panels/ThreeDimensionalViz/SearchText";
 import {
   MarkerMatcher,
@@ -277,7 +276,7 @@ export default function Layout({
   const { gridBuilder, sceneBuilder, transformsBuilder, urdfBuilder } = useMemo(
     () => ({
       gridBuilder: new GridBuilder(),
-      sceneBuilder: new SceneBuilder(sceneBuilderHooks),
+      sceneBuilder: new SceneBuilder(),
       transformsBuilder: new TransformsBuilder(),
       urdfBuilder: new UrdfBuilder(),
     }),
