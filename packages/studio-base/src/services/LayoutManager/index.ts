@@ -307,6 +307,11 @@ export default class LayoutManager implements ILayoutManager {
       this.notifyChangeListeners({ type: "change", updatedLayout: result });
       return result;
     } else {
+      const isRename =
+        this.remote != undefined &&
+        name != undefined &&
+        localLayout.syncInfo != undefined &&
+        localLayout.syncInfo?.status !== "new";
       const result = await this.local.runExclusive(
         async (local) =>
           await local.put({
@@ -314,14 +319,11 @@ export default class LayoutManager implements ILayoutManager {
             name: name ?? localLayout.name,
             working: data != undefined ? { data, savedAt: now } : localLayout.working,
 
-            // If the name is being changed, we will need to upload to the server
-            syncInfo:
-              this.remote &&
-              name != undefined &&
-              localLayout.syncInfo &&
-              localLayout.syncInfo?.status !== "new"
-                ? { status: "updated", lastRemoteSavedAt: localLayout.syncInfo?.lastRemoteSavedAt }
-                : localLayout.syncInfo,
+            // If the name is being changed, we will need to upload to the server with a new savedAt
+            baseline: isRename ? { ...localLayout.baseline, savedAt: now } : localLayout.baseline,
+            syncInfo: isRename
+              ? { status: "updated", lastRemoteSavedAt: localLayout.syncInfo?.lastRemoteSavedAt }
+              : localLayout.syncInfo,
           }),
       );
       this.notifyChangeListeners({ type: "change", updatedLayout: result });
