@@ -12,7 +12,9 @@
 //   You may not use this file except in compliance with the License.
 
 type KeyHandlers = {
-  [key: string]: (event: KeyboardEvent) => void;
+  // Invoke handler for matcking key.
+  // By default, preventDefault() is invoked on the event. Return false to allow the default
+  [key: string]: (event: KeyboardEvent) => void | boolean | undefined;
 };
 
 type Props = {
@@ -54,8 +56,14 @@ export default class KeyListener extends React.Component<Props> {
       return;
     }
     if (typeof handlers[event.key] === "function") {
-      event.preventDefault();
-      handlers[event.key]?.(event);
+      let preventDefault = true;
+      try {
+        preventDefault = handlers[event.key]?.(event) ?? true;
+      } finally {
+        if (preventDefault) {
+          event.preventDefault();
+        }
+      }
     }
   }
 
