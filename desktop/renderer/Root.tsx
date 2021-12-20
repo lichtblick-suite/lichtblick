@@ -33,7 +33,6 @@ import {
   AppSetting,
   SampleUdacityDataSourceFactory,
 } from "@foxglove/studio-base";
-import { DEMO_BAG_URL } from "@foxglove/studio-base/util/isDemoBagUrl";
 
 import { Desktop } from "../common/types";
 import ConsoleApiCurrentUserProvider from "./components/ConsoleApiCurrentUserProvider";
@@ -76,7 +75,7 @@ function AppWrapper() {
     return sources;
   }, [enableMcapDataSource]);
 
-  return <App demoBagUrl={DEMO_BAG_URL} deepLinks={deepLinks} availableSources={dataSources} />;
+  return <App deepLinks={deepLinks} availableSources={dataSources} />;
 }
 
 export default function Root(): ReactElement {

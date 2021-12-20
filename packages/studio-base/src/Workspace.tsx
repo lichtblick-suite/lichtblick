@@ -22,7 +22,6 @@ import {
   useContext,
 } from "react";
 import { useToasts } from "react-toast-notifications";
-import { useMount, useMountedState } from "react-use";
 
 import { AppSetting } from "@foxglove/studio-base/AppSetting";
 import AccountSettings from "@foxglove/studio-base/components/AccountSettingsSidebar/AccountSettings";
@@ -54,17 +53,12 @@ import RemountOnValueChange from "@foxglove/studio-base/components/RemountOnValu
 import Sidebar, { SidebarItem } from "@foxglove/studio-base/components/Sidebar";
 import { SidebarContent } from "@foxglove/studio-base/components/SidebarContent";
 import { URLStateSyncAdapter } from "@foxglove/studio-base/components/URLStateSyncAdapter";
-import { useAppConfiguration } from "@foxglove/studio-base/context/AppConfigurationContext";
 import { useAssets } from "@foxglove/studio-base/context/AssetsContext";
 import ConsoleApiContext from "@foxglove/studio-base/context/ConsoleApiContext";
-import {
-  useCurrentLayoutActions,
-  useCurrentLayoutSelector,
-} from "@foxglove/studio-base/context/CurrentLayoutContext";
+import { useCurrentLayoutSelector } from "@foxglove/studio-base/context/CurrentLayoutContext";
 import { useCurrentUser } from "@foxglove/studio-base/context/CurrentUserContext";
 import { useExtensionLoader } from "@foxglove/studio-base/context/ExtensionLoaderContext";
 import { useHelpInfo } from "@foxglove/studio-base/context/HelpInfoContext";
-import { useLayoutManager } from "@foxglove/studio-base/context/LayoutManagerContext";
 import LinkHandlerContext from "@foxglove/studio-base/context/LinkHandlerContext";
 import { usePlayerSelection } from "@foxglove/studio-base/context/PlayerSelectionContext";
 import { useWorkspace, WorkspaceContext } from "@foxglove/studio-base/context/WorkspaceContext";
@@ -73,9 +67,7 @@ import useAddPanel from "@foxglove/studio-base/hooks/useAddPanel";
 import { useCalloutDismissalBlocker } from "@foxglove/studio-base/hooks/useCalloutDismissalBlocker";
 import useElectronFilesToOpen from "@foxglove/studio-base/hooks/useElectronFilesToOpen";
 import useNativeAppMenuEvent from "@foxglove/studio-base/hooks/useNativeAppMenuEvent";
-import welcomeLayout from "@foxglove/studio-base/layouts/welcomeLayout";
 import { PlayerPresence } from "@foxglove/studio-base/players/types";
-import { windowHasValidURLState } from "@foxglove/studio-base/util/appURLState";
 
 const useStyles = makeStyles({
   container: {
@@ -137,8 +129,6 @@ function Variables() {
 }
 
 type WorkspaceProps = {
-  loadWelcomeLayout?: boolean;
-  demoBagUrl?: string;
   deepLinks?: string[];
 };
 
@@ -221,28 +211,6 @@ export default function Workspace(props: WorkspaceProps): JSX.Element {
     }
   }, [selectedSidebarItem, playerPresence, enableOpenDialog]);
 
-  const isMounted = useMountedState();
-
-  const layoutStorage = useLayoutManager();
-  const { setSelectedLayoutId } = useCurrentLayoutActions();
-
-  const openWelcomeLayout = useCallback(async () => {
-    const newLayout = await layoutStorage.saveNewLayout({
-      name: welcomeLayout.name,
-      data: welcomeLayout.data,
-      permission: "CREATOR_WRITE",
-    });
-    if (isMounted()) {
-      setSelectedLayoutId(newLayout.id);
-      if (props.demoBagUrl) {
-        selectSource("ros1-remote-bagfile", {
-          type: "connection",
-          params: { url: props.demoBagUrl },
-        });
-      }
-    }
-  }, [layoutStorage, isMounted, setSelectedLayoutId, props.demoBagUrl, selectSource]);
-
   const { setHelpInfo } = useHelpInfo();
 
   const handleInternalLink = useCallback(
@@ -314,30 +282,7 @@ export default function Workspace(props: WorkspaceProps): JSX.Element {
     }, []),
   );
 
-  useNativeAppMenuEvent("open-welcome-layout", openWelcomeLayout);
-
-  const appConfiguration = useAppConfiguration();
   const { addToast } = useToasts();
-
-  // Show welcome layout on first run unless we have a valid URL state.
-  useMount(() => {
-    // When using the open dialog, the welcome layout is triggered by vieweing demo data
-    if (enableOpenDialog === true) {
-      return;
-    }
-
-    void (async () => {
-      if (windowHasValidURLState()) {
-        return;
-      }
-
-      const welcomeLayoutShown = appConfiguration.get("onboarding.welcome-layout.shown");
-      if (welcomeLayoutShown !== true || props.loadWelcomeLayout === true) {
-        await appConfiguration.set("onboarding.welcome-layout.shown", true);
-        await openWelcomeLayout();
-      }
-    })();
-  });
 
   const { loadFromFile } = useAssets();
 

@@ -12,8 +12,7 @@ export type NativeAppMenuEvent =
   | "open-extensions"
   | "open-help"
   | "open-account"
-  | "open-preferences"
-  | "open-welcome-layout";
+  | "open-preferences";
 
 type Handler = () => void;
 

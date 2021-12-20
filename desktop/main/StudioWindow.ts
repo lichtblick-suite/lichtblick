@@ -318,10 +318,6 @@ function buildMenu(browserWindow: BrowserWindow): Menu {
   menuTemplate.push({
     role: "help",
     submenu: [
-      {
-        label: "Welcome",
-        click: () => browserWindow.webContents.send("open-welcome-layout"),
-      },
       ...helpSidebarItems,
       {
         label: "Learn More",

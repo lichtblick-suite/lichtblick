@@ -11,8 +11,7 @@ export type ForwardedMenuEvent =
   | "open-variables"
   | "open-extensions"
   | "open-help"
-  | "open-account"
-  | "open-welcome-layout";
+  | "open-account";
 
 interface NativeMenuBridge {
   // Events from the native window are available in the main process but not the renderer, so we forward them through the bridge.

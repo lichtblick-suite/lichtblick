@@ -30,7 +30,6 @@ import {
   McapLocalDataSourceFactory,
   SampleUdacityDataSourceFactory,
 } from "@foxglove/studio-base";
-import { DEMO_BAG_URL } from "@foxglove/studio-base/util/isDemoBagUrl";
 
 import ConsoleApiCookieUserProvider from "./components/ConsoleApiCookieCurrentUserProvider";
 import LocalStorageAppConfigurationProvider from "./components/LocalStorageAppConfigurationProvider";
@@ -42,7 +41,7 @@ import ExtensionLoaderProvider from "./providers/ExtensionLoaderProvider";
 
 // useAppConfiguration requires the AppConfigurationContext which is setup in Root
 // AppWrapper is used to make a functional component so we can use the context
-function AppWrapper({ loadWelcomeLayout }: { loadWelcomeLayout: boolean }) {
+function AppWrapper() {
   const [enableMcapDataSource = false] = useAppConfigurationValue<boolean>(
     AppSetting.ENABLE_MCAP_DATA_SOURCE,
   );
@@ -69,14 +68,7 @@ function AppWrapper({ loadWelcomeLayout }: { loadWelcomeLayout: boolean }) {
     return sources;
   }, [enableMcapDataSource]);
 
-  return (
-    <App
-      loadWelcomeLayout={loadWelcomeLayout}
-      demoBagUrl={DEMO_BAG_URL}
-      availableSources={dataSources}
-      deepLinks={[window.location.href]}
-    />
-  );
+  return <App availableSources={dataSources} deepLinks={[window.location.href]} />;
 }
 
 function ColorSchemeThemeProvider({ children }: React.PropsWithChildren<unknown>): JSX.Element {
@@ -86,7 +78,7 @@ function ColorSchemeThemeProvider({ children }: React.PropsWithChildren<unknown>
   return <ThemeProvider isDark={isDark}>{children}</ThemeProvider>;
 }
 
-export function Root({ loadWelcomeLayout }: { loadWelcomeLayout: boolean }): JSX.Element {
+export function Root(): JSX.Element {
   const api = useMemo(() => new ConsoleApi(process.env.FOXGLOVE_API_URL!), []);
 
   const providers = [
@@ -108,7 +100,7 @@ export function Root({ loadWelcomeLayout }: { loadWelcomeLayout: boolean }): JSX
         <CssBaseline>
           <ErrorBoundary>
             <MultiProvider providers={providers}>
-              <AppWrapper loadWelcomeLayout={loadWelcomeLayout} />
+              <AppWrapper />
             </MultiProvider>
           </ErrorBoundary>
         </CssBaseline>

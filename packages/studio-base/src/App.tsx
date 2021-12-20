@@ -37,9 +37,7 @@ type AppProps = {
    * Set to true to force loading the welcome layout for demo mode. Normally the demo is only shown
    * on first launch and not subsequent launches.
    */
-  loadWelcomeLayout?: boolean;
   availableSources: IDataSourceFactory[];
-  demoBagUrl?: string;
   deepLinks?: string[];
 };
 
@@ -70,11 +68,7 @@ function AppContent(props: AppProps): JSX.Element {
       <DndProvider backend={HTML5Backend}>
         <Suspense fallback={<></>}>
           <PanelCatalogProvider>
-            <Workspace
-              loadWelcomeLayout={props.loadWelcomeLayout}
-              demoBagUrl={props.demoBagUrl}
-              deepLinks={props.deepLinks}
-            />
+            <Workspace deepLinks={props.deepLinks} />
           </PanelCatalogProvider>
         </Suspense>
       </DndProvider>
