@@ -75,7 +75,7 @@ const PlaybackTimeDisplayMethod = ({
         },
         field: {
           margin: 0,
-          padding: 0,
+          padding: "0px 8px",
           whiteSpace: "nowrap",
           fontFeatureSettings: `${fonts.SANS_SERIF_FEATURE_SETTINGS}, 'zero'`,
           backgroundColor: "transparent",
