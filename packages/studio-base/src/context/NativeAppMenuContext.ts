@@ -5,6 +5,9 @@
 import { createContext, useContext } from "react";
 
 export type NativeAppMenuEvent =
+  | "open-file"
+  | "open-remote-file"
+  | "open-sample-data"
   | "open-layouts"
   | "open-add-panel"
   | "open-panel-settings"

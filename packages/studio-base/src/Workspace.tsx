@@ -42,7 +42,7 @@ import {
   useMessagePipelineGetter,
 } from "@foxglove/studio-base/components/MessagePipeline";
 import MultiProvider from "@foxglove/studio-base/components/MultiProvider";
-import { OpenDialog } from "@foxglove/studio-base/components/OpenDialog";
+import { OpenDialog, OpenDialogViews } from "@foxglove/studio-base/components/OpenDialog";
 import PanelLayout from "@foxglove/studio-base/components/PanelLayout";
 import PanelList from "@foxglove/studio-base/components/PanelList";
 import panelsHelpContent from "@foxglove/studio-base/components/PanelList/index.help.md";
@@ -60,7 +60,11 @@ import { useCurrentUser } from "@foxglove/studio-base/context/CurrentUserContext
 import { useExtensionLoader } from "@foxglove/studio-base/context/ExtensionLoaderContext";
 import { useHelpInfo } from "@foxglove/studio-base/context/HelpInfoContext";
 import LinkHandlerContext from "@foxglove/studio-base/context/LinkHandlerContext";
-import { usePlayerSelection } from "@foxglove/studio-base/context/PlayerSelectionContext";
+import { useNativeAppMenu } from "@foxglove/studio-base/context/NativeAppMenuContext";
+import {
+  IDataSourceFactory,
+  usePlayerSelection,
+} from "@foxglove/studio-base/context/PlayerSelectionContext";
 import { useWorkspace, WorkspaceContext } from "@foxglove/studio-base/context/WorkspaceContext";
 import { useAppConfigurationValue } from "@foxglove/studio-base/hooks";
 import useAddPanel from "@foxglove/studio-base/hooks/useAddPanel";
@@ -167,7 +171,9 @@ export default function Workspace(props: WorkspaceProps): JSX.Element {
 
   const isPlayerPresent = playerPresence !== PlayerPresence.NOT_PRESENT;
 
-  const [showOpenDialog, setShowOpenDialog] = useState(!isPlayerPresent);
+  const [showOpenDialog, setShowOpenDialog] = useState<
+    { view: OpenDialogViews; activeDataSource?: IDataSourceFactory } | undefined
+  >(isPlayerPresent ? undefined : { view: "start" });
   const [enableOpenDialog] = useAppConfigurationValue(AppSetting.OPEN_DIALOG);
 
   const [selectedSidebarItem, setSelectedSidebarItem] = useState<SidebarItemKey | undefined>(() => {
@@ -191,7 +197,7 @@ export default function Workspace(props: WorkspaceProps): JSX.Element {
 
   // When a player is activated, hide the open dialog. When a player is gone, show the open dialog.
   useLayoutEffect(() => {
-    setShowOpenDialog(!isPlayerPresent);
+    setShowOpenDialog(isPlayerPresent ? undefined : { view: "start" });
   }, [isPlayerPresent]);
 
   // Automatically close the connection sidebar when a connection is chosen
@@ -281,6 +287,51 @@ export default function Workspace(props: WorkspaceProps): JSX.Element {
       setSelectedSidebarItem("preferences");
     }, []),
   );
+
+  useNativeAppMenuEvent(
+    "open-file",
+    useCallback(() => {
+      setShowOpenDialog({ view: "file" });
+    }, []),
+  );
+
+  useNativeAppMenuEvent(
+    "open-remote-file",
+    useCallback(() => {
+      setShowOpenDialog({ view: "remote" });
+    }, []),
+  );
+
+  useNativeAppMenuEvent(
+    "open-sample-data",
+    useCallback(() => {
+      setShowOpenDialog({ view: "demo" });
+    }, []),
+  );
+
+  const nativeAppMenu = useNativeAppMenu();
+
+  const connectionSources = useMemo(() => {
+    return availableSources.filter((source) => source.type === "connection");
+  }, [availableSources]);
+
+  useEffect(() => {
+    if (!nativeAppMenu) {
+      return;
+    }
+
+    for (const item of connectionSources) {
+      nativeAppMenu.addFileEntry(item.displayName, () => {
+        setShowOpenDialog({ view: "connection", activeDataSource: item });
+      });
+    }
+
+    return () => {
+      for (const item of connectionSources) {
+        nativeAppMenu.removeFileEntry(item.displayName);
+      }
+    };
+  }, [connectionSources, nativeAppMenu, selectSource]);
 
   const { addToast } = useToasts();
 
@@ -385,7 +436,7 @@ export default function Workspace(props: WorkspaceProps): JSX.Element {
                   },
                 }}
                 onClick={() => {
-                  setShowOpenDialog(true);
+                  setShowOpenDialog({ view: "start" });
                 }}
               />
             ),
@@ -459,8 +510,12 @@ export default function Workspace(props: WorkspaceProps): JSX.Element {
         /* eslint-enable react/jsx-key */
       ]}
     >
-      {enableOpenDialog === true && showOpenDialog && (
-        <OpenDialog onDismiss={() => setShowOpenDialog(false)} />
+      {enableOpenDialog === true && showOpenDialog != undefined && (
+        <OpenDialog
+          activeView={showOpenDialog?.view}
+          activeDataSource={showOpenDialog?.activeDataSource}
+          onDismiss={() => setShowOpenDialog(undefined)}
+        />
       )}
       <DocumentDropListener filesSelected={dropHandler} allowedExtensions={allowedDropExtensions}>
         <DropOverlay>

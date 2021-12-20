@@ -5,3 +5,5 @@
 import OpenDialog from "./OpenDialog";
 
 export { OpenDialog };
+
+export * from "./types";

@@ -10,7 +10,6 @@ import { AppSetting } from "@foxglove/studio-base/AppSetting";
 import Workspace from "@foxglove/studio-base/Workspace";
 import DocumentTitleAdapter from "@foxglove/studio-base/components/DocumentTitleAdapter";
 import MultiProvider from "@foxglove/studio-base/components/MultiProvider";
-import { NativeFileMenuPlayerSelection } from "@foxglove/studio-base/components/NativeFileMenuPlayerSelection";
 import PlayerManager from "@foxglove/studio-base/components/PlayerManager";
 import SendNotificationToastAdapter from "@foxglove/studio-base/components/SendNotificationToastAdapter";
 import AnalyticsProvider from "@foxglove/studio-base/context/AnalyticsProvider";
@@ -64,7 +63,6 @@ function AppContent(props: AppProps): JSX.Element {
     <MultiProvider providers={providers}>
       <DocumentTitleAdapter />
       <SendNotificationToastAdapter />
-      <NativeFileMenuPlayerSelection />
       <DndProvider backend={HTML5Backend}>
         <Suspense fallback={<></>}>
           <PanelCatalogProvider>

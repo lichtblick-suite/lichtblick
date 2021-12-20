@@ -318,6 +318,11 @@ function buildMenu(browserWindow: BrowserWindow): Menu {
   menuTemplate.push({
     role: "help",
     submenu: [
+      {
+        label: "Explore sample data",
+        click: () => browserWindow.webContents.send("open-sample-data"),
+      },
+      { type: "separator" },
       ...helpSidebarItems,
       {
         label: "Learn More",
@@ -482,6 +487,26 @@ class StudioWindow {
     fileMenu.submenu?.append(
       new MenuItem({
         type: "separator",
+      }),
+    );
+
+    fileMenu.submenu?.append(
+      new MenuItem({
+        label: "Open File…",
+        click: async () => {
+          await simulateUserClick(browserWindow);
+          browserWindow.webContents.send("open-file");
+        },
+      }),
+    );
+
+    fileMenu.submenu?.append(
+      new MenuItem({
+        label: "Open Remote File…",
+        click: async () => {
+          await simulateUserClick(browserWindow);
+          browserWindow.webContents.send("open-remote-file");
+        },
       }),
     );
 

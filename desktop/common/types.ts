@@ -4,6 +4,9 @@
 
 // Events that are forwarded from the main process
 export type ForwardedMenuEvent =
+  | "open-file"
+  | "open-remote-file"
+  | "open-sample-data"
   | "open-preferences"
   | "open-layouts"
   | "open-add-panel"

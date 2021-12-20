@@ -16,14 +16,18 @@ type ConnectionProps = {
   onBack?: () => void;
   onCancel?: () => void;
   availableSources: IDataSourceFactory[];
+  activeSource?: IDataSourceFactory;
 };
 
 export default function Connection(props: ConnectionProps): JSX.Element {
-  const { availableSources, onCancel, onBack } = props;
+  const { availableSources, activeSource, onCancel, onBack } = props;
 
   const { selectSource } = usePlayerSelection();
   const theme = useTheme();
-  const [selectedConnectionIdx, setSelectedConnectionIdx] = useState<number>(0);
+  const [selectedConnectionIdx, setSelectedConnectionIdx] = useState<number>(() => {
+    const foundIdx = availableSources.findIndex((source) => source === activeSource);
+    return foundIdx < 0 ? 0 : foundIdx;
+  });
 
   // List enabled sources before disabled sources so the default selected item is an available source
   const enabledSourcesFirst = useMemo(() => {
@@ -38,6 +42,13 @@ export default function Connection(props: ConnectionProps): JSX.Element {
   );
 
   const [fieldValues, setFieldValues] = useState<Record<string, string | undefined>>({});
+
+  useLayoutEffect(() => {
+    const connectionIdx = availableSources.findIndex((source) => source === activeSource);
+    if (connectionIdx >= 0) {
+      setSelectedConnectionIdx(connectionIdx);
+    }
+  }, [activeSource, availableSources]);
 
   // clear field values when the user changes the source tab
   useLayoutEffect(() => {

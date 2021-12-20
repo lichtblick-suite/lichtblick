@@ -3,9 +3,12 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 import { Dialog, Stack, useTheme } from "@fluentui/react";
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useLayoutEffect, useMemo, useState } from "react";
 
-import { usePlayerSelection } from "@foxglove/studio-base/context/PlayerSelectionContext";
+import {
+  IDataSourceFactory,
+  usePlayerSelection,
+} from "@foxglove/studio-base/context/PlayerSelectionContext";
 
 import Connection from "./Connection";
 import Remote from "./Remote";
@@ -15,11 +18,12 @@ import { useOpenFile } from "./useOpenFile";
 
 type OpenDialogProps = {
   activeView?: OpenDialogViews;
+  activeDataSource?: IDataSourceFactory;
   onDismiss?: () => void;
 };
 
 export default function OpenDialog(props: OpenDialogProps): JSX.Element {
-  const { activeView: defaultActiveView, onDismiss } = props;
+  const { activeView: defaultActiveView, onDismiss, activeDataSource } = props;
   const { availableSources, selectSource } = usePlayerSelection();
 
   const [activeView, setActiveView] = useState<OpenDialogViews>(defaultActiveView ?? "start");
@@ -31,23 +35,23 @@ export default function OpenDialog(props: OpenDialogProps): JSX.Element {
     return availableSources.find((source) => source.type === "sample");
   }, [availableSources]);
 
-  const onSelectView = useCallback(
-    (view: OpenDialogViews) => {
-      if (view === "file") {
-        openFile().catch((err) => {
-          console.error(err);
-        });
-        return;
-      }
+  useLayoutEffect(() => {
+    setActiveView(defaultActiveView ?? "start");
+  }, [defaultActiveView]);
 
-      if (view === "demo" && firstSampleSource) {
-        selectSource(firstSampleSource.id);
-      }
+  const onSelectView = useCallback((view: OpenDialogViews) => {
+    setActiveView(view);
+  }, []);
 
-      setActiveView(view);
-    },
-    [firstSampleSource, openFile, selectSource],
-  );
+  useLayoutEffect(() => {
+    if (activeView === "file") {
+      openFile().catch((err) => {
+        console.error(err);
+      });
+    } else if (activeView === "demo" && firstSampleSource) {
+      selectSource(firstSampleSource.id);
+    }
+  }, [activeView, firstSampleSource, openFile, selectSource]);
 
   const allExtensions = useMemo(() => {
     return availableSources.reduce((all, source) => {
@@ -86,6 +90,7 @@ export default function OpenDialog(props: OpenDialogProps): JSX.Element {
               onBack={() => onSelectView("start")}
               onCancel={onDismiss}
               availableSources={connectionSources}
+              activeSource={activeDataSource}
             />
           ),
         };
@@ -106,7 +111,15 @@ export default function OpenDialog(props: OpenDialogProps): JSX.Element {
           component: <Start onSelectView={onSelectView} supportedFileExtensions={allExtensions} />,
         };
     }
-  }, [activeView, allExtensions, connectionSources, onDismiss, onSelectView, remoteFileSources]);
+  }, [
+    activeDataSource,
+    activeView,
+    allExtensions,
+    connectionSources,
+    onDismiss,
+    onSelectView,
+    remoteFileSources,
+  ]);
 
   return (
     <Dialog
