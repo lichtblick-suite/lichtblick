@@ -17,11 +17,10 @@ import {
   useContext,
   useLayoutEffect,
   useMemo,
-  useRef,
   useState,
 } from "react";
 import { useToasts } from "react-toast-notifications";
-import { useAsync, useLocalStorage, useMountedState } from "react-use";
+import { useAsync, useLatest, useLocalStorage, useMountedState } from "react-use";
 
 import { useShallowMemo } from "@foxglove/hooks";
 import Logger from "@foxglove/log";
@@ -107,21 +106,28 @@ export default function PlayerManager(props: PropsWithChildren<PlayerManagerProp
   const layoutStorage = useLayoutManager();
   const { setSelectedLayoutId } = useCurrentLayoutActions();
 
-  const messageOrder = useCurrentLayoutSelector(
-    (state) => state.selectedLayout?.data?.playbackConfig.messageOrder,
+  const userNodes = useCurrentLayoutSelector(
+    (state) => state.selectedLayout?.data?.userNodes ?? EMPTY_USER_NODES,
   );
-  const userNodes = useCurrentLayoutSelector((state) => state.selectedLayout?.data?.userNodes);
+
+  const [basePlayer, setBasePlayer] = useState<Player | undefined>();
+
   const globalVariables = useCurrentLayoutSelector(
     (state) => state.selectedLayout?.data?.globalVariables ?? EMPTY_GLOBAL_VARIABLES,
   );
 
-  const globalVariablesRef = useRef<GlobalVariables>(globalVariables);
-  const [basePlayer, setBasePlayer] = useState<Player | undefined>();
+  const messageOrder = useCurrentLayoutSelector(
+    (state) => state.selectedLayout?.data?.playbackConfig.messageOrder ?? DEFAULT_MESSAGE_ORDER,
+  );
 
-  // We don't want to recreate the player when the message order changes, but we do want to
+  // We don't want to recreate the player when the these variables change, but we do want to
   // initialize it with the right order, so make a variable for its initial value we can use in the
-  // dependency array below to defeat the linter.
-  const [initialMessageOrder] = useState(messageOrder);
+  // dependency array to the player useMemo.
+  //
+  // Updating the player with new values in handled by effects below the player useMemo or within
+  // the message pipeline
+  const globalVariablesRef = useLatest(globalVariables);
+  const messageOrderRef = useLatest(messageOrder);
 
   const player = useMemo<OrderedStampPlayer | undefined>(() => {
     if (!basePlayer) {
@@ -129,20 +135,15 @@ export default function PlayerManager(props: PropsWithChildren<PlayerManagerProp
     }
 
     const userNodePlayer = new UserNodePlayer(basePlayer, userNodeActions);
-    const headerStampPlayer = new OrderedStampPlayer(
-      userNodePlayer,
-      initialMessageOrder ?? DEFAULT_MESSAGE_ORDER,
-    );
+    const headerStampPlayer = new OrderedStampPlayer(userNodePlayer, messageOrderRef.current);
     headerStampPlayer.setGlobalVariables(globalVariablesRef.current);
     return headerStampPlayer;
-  }, [basePlayer, initialMessageOrder, userNodeActions]);
+  }, [basePlayer, globalVariablesRef, messageOrderRef, userNodeActions]);
 
-  useLayoutEffect(() => {
-    player?.setMessageOrder(messageOrder ?? DEFAULT_MESSAGE_ORDER);
-  }, [player, messageOrder]);
-  useLayoutEffect(() => {
-    void player?.setUserNodes(userNodes ?? EMPTY_USER_NODES);
-  }, [player, userNodes]);
+  // Update player with new message order
+  useLayoutEffect(() => player?.setMessageOrder(messageOrder), [player, messageOrder]);
+
+  useLayoutEffect(() => void player?.setUserNodes(userNodes), [player, userNodes]);
 
   const { addToast } = useToasts();
   const [savedSource, setSavedSource, removeSavedSource] = useLocalStorage<{
@@ -533,7 +534,7 @@ export default function PlayerManager(props: PropsWithChildren<PlayerManagerProp
   return (
     <>
       <PlayerSelectionContext.Provider value={value}>
-        <MessagePipelineProvider player={player} globalVariables={globalVariables}>
+        <MessagePipelineProvider player={player} globalVariables={globalVariablesRef.current}>
           {children}
         </MessagePipelineProvider>
       </PlayerSelectionContext.Provider>
