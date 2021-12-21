@@ -103,7 +103,6 @@ export default function Connection(props: ConnectionProps): JSX.Element {
           tokens={{ childrenGap: theme.spacing.m }}
           styles={{ root: { overflowY: "auto" } }}
         >
-          {selectedSource?.disabledReason}
           {selectedSource?.formConfig != undefined && (
             <Stack grow verticalAlign="space-between">
               <Stack tokens={{ childrenGap: theme.spacing.m }}>
