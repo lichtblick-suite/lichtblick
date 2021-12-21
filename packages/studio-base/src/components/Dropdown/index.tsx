@@ -14,7 +14,7 @@
 import { mergeStyleSets } from "@fluentui/react";
 import ChevronDownIcon from "@mdi/svg/svg/chevron-down.svg";
 import cx from "classnames";
-import { ReactNode, CSSProperties, ReactElement } from "react";
+import { ReactNode, CSSProperties, ReactElement, useState } from "react";
 
 import { LegacyButton } from "@foxglove/studio-base/components/LegacyStyledComponents";
 import Tooltip from "@foxglove/studio-base/components/Tooltip";
@@ -25,25 +25,21 @@ import Icon from "../Icon";
 import Menu, { Item } from "../Menu";
 
 type Props<T> = {
-  children?: ReactNode;
-  value?: T | T[];
-  text?: ReactNode;
-  position: "above" | "below" | "left" | "right";
-  disabled: boolean;
-  closeOnChange: boolean;
-  onChange?: (value: T) => void;
-  toggleComponent?: ReactNode;
-  flatEdges: boolean;
-  tooltip?: string;
-  dataTest?: string;
-  noPortal?: boolean;
-  btnStyle?: CSSProperties;
   btnClassname?: string;
+  btnStyle?: CSSProperties;
+  children?: ReactNode;
+  closeOnChange?: boolean;
+  dataTest?: string;
+  disabled?: boolean;
+  flatEdges?: boolean;
   menuStyle?: CSSProperties;
-};
-
-type State = {
-  isOpen: boolean;
+  noPortal?: boolean;
+  onChange?: (value: T) => void;
+  position?: "above" | "below" | "left" | "right";
+  text?: ReactNode;
+  toggleComponent?: ReactNode;
+  tooltip?: string;
+  value?: T | T[];
 };
 
 const classes = mergeStyleSets({
@@ -69,39 +65,47 @@ const classes = mergeStyleSets({
   },
 });
 
-export default class Dropdown<T> extends React.Component<Props<T>, State> {
-  override state = { isOpen: false };
-  toggle = (): void => {
-    if (!this.props.disabled) {
-      this.setState({ isOpen: !this.state.isOpen });
+export default function Dropdown<T>({
+  btnClassname,
+  btnStyle,
+  children,
+  closeOnChange = true,
+  dataTest,
+  disabled = false,
+  flatEdges = true,
+  onChange,
+  menuStyle,
+  noPortal,
+  position = "below",
+  text,
+  toggleComponent,
+  tooltip,
+  value,
+}: Props<T>): ReactElement {
+  const [isOpen, setIsOpen] = useState(false);
+
+  function toggle() {
+    if (!disabled) {
+      setIsOpen(!isOpen);
     }
-  };
+  }
 
-  static defaultProps = {
-    disabled: false,
-    flatEdges: true,
-    closeOnChange: true,
-    position: "below",
-  };
-
-  onClick = (value: T): void => {
-    const { onChange, closeOnChange } = this.props;
+  function handleOnClick(clickedValue: T) {
     if (onChange) {
       if (closeOnChange) {
-        this.setState({ isOpen: false });
+        setIsOpen(false);
       }
-      onChange(value);
+      onChange(clickedValue);
     }
-  };
+  }
 
-  renderItem(child: ReactElement): JSX.Element {
-    const { value } = this.props;
+  function renderItem(child: ReactElement) {
     const checked = Array.isArray(value)
       ? // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
         value.includes(child.props.value)
       : child.props.value === value;
     // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
-    const onClick = () => this.onClick(child.props.value);
+    const onClick = () => handleOnClick(child.props.value);
     if ((child.type as { isMenuItem?: boolean }).isMenuItem === true) {
       return React.cloneElement(child, { checked, onClick });
     }
@@ -112,29 +116,26 @@ export default class Dropdown<T> extends React.Component<Props<T>, State> {
     );
   }
 
-  renderChildren(): ReactNode {
-    const { children } = this.props;
+  function renderChildren(): ReactNode {
     return React.Children.map(children, (child, i) => {
       if (child == undefined) {
         return ReactNull;
       }
       const childEl = child as ReactElement;
-      const inner = childEl.props.value != undefined ? this.renderItem(childEl) : child;
+      const inner = childEl.props.value != undefined ? renderItem(childEl) : child;
       return <span key={i}>{inner}</span>;
     });
   }
 
-  renderButton(): ReactNode {
-    if (this.props.toggleComponent != undefined) {
-      return this.props.toggleComponent;
+  function renderButton() {
+    if (toggleComponent != undefined) {
+      return toggleComponent;
     }
-    const { btnClassname, text, value, disabled, tooltip } = this.props;
-    const { isOpen } = this.state;
     const button = (
       <LegacyButton
         className={cx(classes.button, btnClassname, { disabled })}
-        style={{ opacity: isOpen ? 1 : undefined, ...this.props.btnStyle }}
-        data-test={this.props.dataTest}
+        style={{ opacity: isOpen ? 1 : undefined, ...btnStyle }}
+        data-test={dataTest}
       >
         <span className={classes.title}>{text ?? value}</span>
         <Icon style={{ marginLeft: 4 }}>
@@ -149,29 +150,26 @@ export default class Dropdown<T> extends React.Component<Props<T>, State> {
     return button;
   }
 
-  override render(): JSX.Element {
-    const { isOpen } = this.state;
-    const { position, flatEdges, menuStyle } = this.props;
-    const style = {
-      borderTopLeftRadius: flatEdges && position !== "above" ? "0" : undefined,
-      borderTopRightRadius: flatEdges && position !== "above" ? "0" : undefined,
-      borderBottomLeftRadius: flatEdges && position === "above" ? "0" : undefined,
-      borderBottomRightRadius: flatEdges && position === "above" ? "0" : undefined,
-      ...(position === "above" ? { marginBottom: 4, borderRadius: 4 } : {}),
-      ...menuStyle,
-    };
-    return (
-      <ChildToggle
-        style={{ maxWidth: "100%", zIndex: 0 }}
-        position={position}
-        isOpen={isOpen}
-        onToggle={this.toggle}
-        dataTest={this.props.dataTest}
-        noPortal={this.props.noPortal}
-      >
-        {this.renderButton()}
-        <Menu style={style}>{this.renderChildren()}</Menu>
-      </ChildToggle>
-    );
-  }
+  const style = {
+    borderTopLeftRadius: flatEdges && position !== "above" ? "0" : undefined,
+    borderTopRightRadius: flatEdges && position !== "above" ? "0" : undefined,
+    borderBottomLeftRadius: flatEdges && position === "above" ? "0" : undefined,
+    borderBottomRightRadius: flatEdges && position === "above" ? "0" : undefined,
+    ...(position === "above" ? { marginBottom: 4, borderRadius: 4 } : {}),
+    ...menuStyle,
+  };
+
+  return (
+    <ChildToggle
+      style={{ maxWidth: "100%", zIndex: 0 }}
+      position={position}
+      isOpen={isOpen}
+      onToggle={toggle}
+      dataTest={dataTest}
+      noPortal={noPortal}
+    >
+      {renderButton()}
+      <Menu style={style}>{renderChildren()}</Menu>
+    </ChildToggle>
+  );
 }
