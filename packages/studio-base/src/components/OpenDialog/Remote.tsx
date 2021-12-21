@@ -61,7 +61,7 @@ export default function Remote(props: RemoteProps): JSX.Element {
         <TextField
           label="Remote file URL"
           errorMessage={errorMessage}
-          placeholder="https://storage.googleapis.com/foxglove-public-assets/demo.bag"
+          placeholder="https://example.com/file.bag"
           onChange={(_, newValue) => {
             setCurrentUrl(newValue);
           }}
