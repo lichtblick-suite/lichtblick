@@ -23,7 +23,7 @@ describe("threeDimensionalVizUtils", () => {
   describe("getNewCameraStateOnFollowChange", () => {
     it("converts the camera state to use targetOffset instead of target when no longer following", () => {
       const prevFollowTf = "root";
-      const prevFollowOrientation = undefined;
+      const prevFollowMode = "follow";
       const prevTargetPose: TargetPose = {
         target: [1322.127197265625, -1484.3931884765625, -20.19326400756836],
         targetOrientation: [
@@ -47,9 +47,9 @@ describe("threeDimensionalVizUtils", () => {
         prevCameraState,
         prevTargetPose,
         prevFollowTf,
-        prevFollowOrientation,
-        newFollowTf: false,
-        newFollowOrientation: undefined,
+        prevFollowMode,
+        newFollowTf: prevFollowTf,
+        newFollowMode: "no-follow",
       });
       expect(newCameraState).toEqual({
         ...prevCameraState,

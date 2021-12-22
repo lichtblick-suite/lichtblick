@@ -59,12 +59,9 @@ function selectIsPlaying(ctx: MessagePipelineContext) {
 }
 
 function BaseRenderer(props: Props): JSX.Element {
-  const {
-    config: savedConfig,
-    saveConfig,
-    config: { autoSyncCameraState = false, followOrientation = false, followTf },
-  } = props;
+  const { config: savedConfig, saveConfig } = props;
 
+  // Migration and defaults for config
   const config = useMemo<ThreeDimensionalVizConfig>(() => {
     // Migrate old colorOverrideBySourceIdxByVariable field to new colorOverrideByVariable The new
     // field drops the "BySourceIdx" which powered the base/feature branch feature that no longer
@@ -87,11 +84,22 @@ function BaseRenderer(props: Props): JSX.Element {
       }
     }
 
+    // Previous 3d panel configurations had followTf as `string | boolean`
+    // We now require followTf to be a string. Clear any non-string value by unsetting followTf
+    const oldFollowTf = savedConfig.followTf;
+    if (oldFollowTf != undefined && typeof oldFollowTf !== "string") {
+      savedConfig.followTf = undefined;
+    }
+
+    savedConfig.followMode ??= "follow";
+
     return {
       colorOverrideByVariable,
       ...savedConfig,
     };
   }, [savedConfig]);
+
+  const { autoSyncCameraState = false, followMode = "follow", followTf } = config;
 
   const { updatePanelConfigs } = React.useContext(PanelContext) ?? {};
 
@@ -141,7 +149,7 @@ function BaseRenderer(props: Props): JSX.Element {
   const { transformedCameraState, targetPose } = useTransformedCameraState({
     configCameraState,
     followTf,
-    followOrientation,
+    followMode,
     transforms,
   });
 
@@ -150,22 +158,21 @@ function BaseRenderer(props: Props): JSX.Element {
     transformedCameraState,
     configCameraState,
     targetPose,
-    configFollowOrientation: config.followOrientation,
+    configFollowMode: config.followMode,
     configFollowTf: config.followTf,
   });
   callbackInputsRef.current = {
     transformedCameraState,
     configCameraState,
     targetPose,
-    configFollowOrientation: config.followOrientation,
+    configFollowMode: config.followMode,
     configFollowTf: config.followTf,
   };
   const onFollowChange = useCallback(
-    // eslint-disable-next-line @foxglove/no-boolean-parameters
-    (newFollowTf?: string | false, newFollowOrientation?: boolean) => {
+    (newFollowTf?: string, newFollowMode?: "follow" | "no-follow" | "follow-orientation") => {
       const {
         configCameraState: prevCameraState,
-        configFollowOrientation: prevFollowOrientation,
+        configFollowMode: prevFollowMode,
         configFollowTf: prevFollowTf,
         targetPose: prevTargetPose,
       } = callbackInputsRef.current;
@@ -173,13 +180,14 @@ function BaseRenderer(props: Props): JSX.Element {
         prevCameraState,
         prevTargetPose,
         prevFollowTf,
-        prevFollowOrientation,
+        prevFollowMode,
         newFollowTf,
-        newFollowOrientation,
+        newFollowMode,
       });
+
       saveConfig({
         followTf: newFollowTf,
-        followOrientation: newFollowOrientation,
+        followMode: newFollowMode,
         cameraState: newCameraState,
       });
     },
@@ -189,7 +197,7 @@ function BaseRenderer(props: Props): JSX.Element {
   const onAlignXYAxis = useCallback(
     () =>
       saveConfig({
-        followOrientation: false,
+        followMode: "follow",
         cameraState: {
           ...omit(callbackInputsRef.current.transformedCameraState, [
             "target",
@@ -233,7 +241,7 @@ function BaseRenderer(props: Props): JSX.Element {
       cameraState={transformedCameraState}
       config={config}
       currentTime={currentTime}
-      followOrientation={followOrientation}
+      followMode={followMode}
       followTf={followTf}
       renderFrame={renderFrame}
       fixedFrame={fixedFrame}
@@ -278,7 +286,7 @@ BaseRenderer.defaultConfig = {
   checkedKeys: ["name:Topics"],
   expandedKeys: ["name:Topics"],
   followTf: undefined,
-  followOrientation: false,
+  followMode: "follow",
   cameraState: {},
   modifiedNamespaceTopics: [],
   pinTopics: false,

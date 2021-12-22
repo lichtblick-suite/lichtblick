@@ -53,7 +53,7 @@ function LayoutToolbar({
   autoSyncCameraState,
   cameraState,
   debug,
-  followOrientation,
+  followMode,
   followTf,
   interactionsTabType,
   isPlaying,
@@ -110,8 +110,8 @@ function LayoutToolbar({
       >
         <FollowTFControl
           transforms={transforms}
-          tfToFollow={typeof followTf === "string" && followTf.length > 0 ? followTf : undefined}
-          followOrientation={followOrientation}
+          followTf={followTf}
+          followMode={followMode}
           onFollowChange={onFollowChange}
         />
         <SearchText
@@ -159,7 +159,7 @@ function LayoutToolbar({
         <CameraInfo
           cameraState={cameraState}
           targetPose={targetPose}
-          followOrientation={followOrientation}
+          followMode={followMode}
           followTf={followTf}
           isPlaying={isPlaying}
           onAlignXYAxis={onAlignXYAxis}
