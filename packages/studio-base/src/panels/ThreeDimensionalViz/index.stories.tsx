@@ -3,15 +3,184 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 import { RosMsgDefinition } from "@foxglove/rosmsg";
+import { fromSec, Time } from "@foxglove/rostime";
 import { MessageEvent, Topic } from "@foxglove/studio";
 import useDelayedFixture from "@foxglove/studio-base/panels/ThreeDimensionalViz/stories/useDelayedFixture";
 import PanelSetup from "@foxglove/studio-base/stories/PanelSetup";
-import { CubeMarker, TF } from "@foxglove/studio-base/types/Messages";
+import { CubeMarker, Point, Pose, TF } from "@foxglove/studio-base/types/Messages";
+import { hexToColorObj } from "@foxglove/studio-base/util/colorUtils";
 
 import ThreeDimensionalViz from "./index";
 
 const VEC3_ZERO = { x: 0, y: 0, z: 0 };
+const VEC3_HALF = { x: 0.5, y: 0.5, z: 0.5 };
+const VEC3_3_4 = { x: 0.75, y: 0.75, z: 0.75 };
 const QUAT_IDENTITY = { x: 0, y: 0, z: 0, w: 1 };
+
+const testColors = {
+  MARKER_GREEN1: "#296019",
+  MARKER_GREEN2: "#65C83B",
+  MARKER_GREEN3: "#B8F9AE",
+
+  MARKER_RED1: "#910000",
+  MARKER_RED2: "#D32431",
+  MARKER_RED3: "#FF6B6B",
+};
+
+function makeColor(hex: string, alpha?: number) {
+  const color = hexToColorObj(hex, alpha);
+  if (alpha != undefined) {
+    // Mutate the otherwise readonly Color object
+    (color as { a: number }).a = alpha;
+  }
+  return color;
+}
+
+type PassFailMarker = CubeMarker;
+
+type MarkerArgs = {
+  id: number;
+  stamp: Time;
+  frame_id: string;
+  colorHex: string;
+  description?: string;
+  ns?: string;
+  frame_locked?: boolean;
+  pose?: Pose;
+  scale?: Point;
+  receiveTime?: Time;
+  lifetime?: Time;
+};
+
+function makePass({
+  id,
+  stamp,
+  frame_id,
+  colorHex,
+  description,
+  ns = "",
+  frame_locked = false,
+  pose = { position: VEC3_ZERO, orientation: QUAT_IDENTITY },
+  scale = VEC3_HALF,
+  receiveTime = { sec: 10, nsec: 0 },
+  lifetime = { sec: 0, nsec: 0 },
+}: MarkerArgs): MessageEvent<PassFailMarker> {
+  return {
+    topic: "/markers",
+    receiveTime,
+    message: {
+      header: { seq: 0, stamp, frame_id },
+      id: `pass${id}${description ? `: ${description}` : ""}`,
+      ns,
+      type: 1,
+      action: 0,
+      frame_locked,
+      pose,
+      scale,
+      color: makeColor(colorHex, 0.25),
+      lifetime,
+    },
+    sizeInBytes: 0,
+  };
+}
+
+function makeFail({
+  id,
+  stamp,
+  frame_id,
+  colorHex,
+  description,
+  ns = "",
+  frame_locked = false,
+  pose = { position: VEC3_ZERO, orientation: QUAT_IDENTITY },
+  scale = VEC3_3_4,
+  receiveTime = { sec: 10, nsec: 0 },
+  lifetime = { sec: 0, nsec: 0 },
+}: MarkerArgs): MessageEvent<PassFailMarker> {
+  return {
+    topic: "/markers",
+    receiveTime,
+    message: {
+      header: { seq: 0, stamp, frame_id },
+      id: `fail${id}${description ? `: ${description}` : ""}`,
+      ns,
+      type: 1,
+      action: 0,
+      frame_locked,
+      pose,
+      scale,
+      color: makeColor(colorHex, 0.75),
+      lifetime,
+    },
+    sizeInBytes: 0,
+  };
+}
+
+const datatypes = new Map<string, RosMsgDefinition>(
+  Object.entries({
+    "geometry_msgs/TransformStamped": {
+      definitions: [
+        { name: "header", type: "std_msgs/Header", isComplex: true },
+        { name: "transform", type: "geometry_msgs/Transform", isComplex: true },
+      ],
+    },
+    "visualization_msgs/Marker": {
+      definitions: [
+        { name: "header", type: "std_msgs/Header", isComplex: true },
+        { name: "ns", type: "string" },
+        { name: "id", type: "int32" },
+        { name: "type", type: "int32" },
+        { name: "action", type: "int32" },
+        { name: "pose", type: "geometry_msgs/Pose", isComplex: true },
+        { name: "scale", type: "geometry_msgs/Vector3", isComplex: true },
+        { name: "color", type: "std_msgs/ColorRGBA", isComplex: true },
+        { name: "lifetime", type: "duration" },
+        { name: "frame_locked", type: "bool" },
+        { name: "points", type: "geometry_msgs/Point", isArray: true, isComplex: true },
+        { name: "colors", type: "std_msgs/ColorRGBA", isArray: true, isComplex: true },
+        { name: "text", type: "string" },
+        { name: "mesh_resource", type: "string" },
+        { name: "mesh_use_embedded_materials", type: "bool" },
+      ],
+    },
+    "std_msgs/Header": {
+      definitions: [
+        { name: "seq", type: "uint32" },
+        { name: "stamp", type: "time" },
+        { name: "frame_id", type: "string" },
+      ],
+    },
+    "geometry_msgs/Transform": {
+      definitions: [
+        { name: "translation", type: "geometry_msgs/Vector3", isComplex: true },
+        { name: "rotation", type: "geometry_msgs/Quaternion", isComplex: true },
+      ],
+    },
+    "geometry_msgs/Vector3": {
+      definitions: [
+        { name: "x", type: "float64" },
+        { name: "y", type: "float64" },
+        { name: "z", type: "float64" },
+      ],
+    },
+    "geometry_msgs/Quaternion": {
+      definitions: [
+        { name: "x", type: "float64" },
+        { name: "y", type: "float64" },
+        { name: "z", type: "float64" },
+        { name: "w", type: "float64" },
+      ],
+    },
+    "std_msgs/ColorRGBA": {
+      definitions: [
+        { name: "r", type: "float32" },
+        { name: "g", type: "float32" },
+        { name: "b", type: "float32" },
+        { name: "a", type: "float32" },
+      ],
+    },
+  }),
+);
 
 export default {
   title: "panels/ThreeDimensionalViz",
@@ -46,71 +215,6 @@ export function CustomBackgroundColor(): JSX.Element {
 }
 
 export function TransformInterpolation(): JSX.Element {
-  const datatypes = new Map<string, RosMsgDefinition>(
-    Object.entries({
-      "geometry_msgs/TransformStamped": {
-        definitions: [
-          { name: "header", type: "std_msgs/Header", isComplex: true },
-          { name: "transform", type: "geometry_msgs/Transform", isComplex: true },
-        ],
-      },
-      "visualization_msgs/Marker": {
-        definitions: [
-          { name: "header", type: "std_msgs/Header", isComplex: true },
-          { name: "ns", type: "string" },
-          { name: "id", type: "int32" },
-          { name: "type", type: "int32" },
-          { name: "action", type: "int32" },
-          { name: "pose", type: "geometry_msgs/Pose", isComplex: true },
-          { name: "scale", type: "geometry_msgs/Vector3", isComplex: true },
-          { name: "color", type: "std_msgs/ColorRGBA", isComplex: true },
-          { name: "lifetime", type: "duration" },
-          { name: "frame_locked", type: "bool" },
-          { name: "points", type: "geometry_msgs/Point", isArray: true, isComplex: true },
-          { name: "colors", type: "std_msgs/ColorRGBA", isArray: true, isComplex: true },
-          { name: "text", type: "string" },
-          { name: "mesh_resource", type: "string" },
-          { name: "mesh_use_embedded_materials", type: "bool" },
-        ],
-      },
-      "std_msgs/Header": {
-        definitions: [
-          { name: "seq", type: "uint32" },
-          { name: "stamp", type: "time" },
-          { name: "frame_id", type: "string" },
-        ],
-      },
-      "geometry_msgs/Transform": {
-        definitions: [
-          { name: "translation", type: "geometry_msgs/Vector3", isComplex: true },
-          { name: "rotation", type: "geometry_msgs/Quaternion", isComplex: true },
-        ],
-      },
-      "geometry_msgs/Vector3": {
-        definitions: [
-          { name: "x", type: "float64" },
-          { name: "y", type: "float64" },
-          { name: "z", type: "float64" },
-        ],
-      },
-      "geometry_msgs/Quaternion": {
-        definitions: [
-          { name: "x", type: "float64" },
-          { name: "y", type: "float64" },
-          { name: "z", type: "float64" },
-          { name: "w", type: "float64" },
-        ],
-      },
-      "std_msgs/ColorRGBA": {
-        definitions: [
-          { name: "r", type: "float32" },
-          { name: "g", type: "float32" },
-          { name: "b", type: "float32" },
-          { name: "a", type: "float32" },
-        ],
-      },
-    }),
-  );
   const topics: Topic[] = [
     { name: "/markers", datatype: "visualization_msgs/Marker" },
     { name: "/tf", datatype: "geometry_msgs/TransformStamped" },
@@ -141,63 +245,32 @@ export function TransformInterpolation(): JSX.Element {
     },
     sizeInBytes: 0,
   };
-  const cube1: MessageEvent<CubeMarker> = {
-    topic: "/markers",
-    receiveTime: { sec: 10, nsec: 0 },
-    message: {
-      header: { seq: 0, stamp: { sec: 1, nsec: 0 }, frame_id: "base_link" },
-      id: 1,
-      ns: "",
-      type: 1,
-      action: 0,
-      frame_locked: false,
-      pose: { position: VEC3_ZERO, orientation: QUAT_IDENTITY },
-      scale: { x: 0.5, y: 0.5, z: 0.5 },
-      color: { r: 1, g: 0, b: 0, a: 0.25 },
-      lifetime: { sec: 0, nsec: 0 },
-    },
-    sizeInBytes: 0,
-  };
-  const cube2: MessageEvent<CubeMarker> = {
-    topic: "/markers",
-    receiveTime: { sec: 10, nsec: 0 },
-    message: {
-      header: { seq: 0, stamp: { sec: 1, nsec: 0 }, frame_id: "base_link" },
-      id: 2,
-      ns: "",
-      type: 1,
-      action: 0,
-      frame_locked: true,
-      pose: { position: VEC3_ZERO, orientation: QUAT_IDENTITY },
-      scale: { x: 0.5, y: 0.5, z: 0.5 },
-      color: { r: 0, g: 1, b: 0, a: 0.25 },
-      lifetime: { sec: 0, nsec: 0 },
-    },
-    sizeInBytes: 0,
-  };
-  const cube3: MessageEvent<CubeMarker> = {
-    topic: "/markers",
-    receiveTime: { sec: 10, nsec: 0 },
-    message: {
-      header: { seq: 0, stamp: { sec: 2, nsec: 0 }, frame_id: "base_link" },
-      id: 3,
-      ns: "",
-      type: 1,
-      action: 0,
-      frame_locked: false,
-      pose: { position: { x: 1, y: 0, z: 0 }, orientation: QUAT_IDENTITY },
-      scale: { x: 0.5, y: 0.5, z: 0.5 },
-      color: { r: 0, g: 0, b: 1, a: 0.25 },
-      lifetime: { sec: 0, nsec: 0 },
-    },
-    sizeInBytes: 0,
-  };
+  const pass1 = makePass({
+    id: 1,
+    frame_id: "base_link",
+    stamp: fromSec(1),
+    colorHex: testColors.MARKER_GREEN1,
+  });
+  const pass2 = makePass({
+    id: 2,
+    frame_id: "base_link",
+    stamp: fromSec(1),
+    colorHex: testColors.MARKER_GREEN2,
+    frame_locked: true,
+  });
+  const pass3 = makePass({
+    id: 3,
+    frame_id: "base_link",
+    stamp: fromSec(2),
+    colorHex: testColors.MARKER_GREEN3,
+    pose: { position: { x: 1, y: 0, z: 0 }, orientation: QUAT_IDENTITY },
+  });
 
   const fixture = useDelayedFixture({
     datatypes,
     topics,
     frame: {
-      "/markers": [cube1, cube2, cube3],
+      "/markers": [pass1, pass2, pass3],
       "/tf": [tf_t1, tf_t3],
     },
     capabilities: [],
@@ -233,4 +306,229 @@ export function TransformInterpolation(): JSX.Element {
   );
 }
 
+export function MarkerLifetimes(): JSX.Element {
+  const topics: Topic[] = [
+    { name: "/markers", datatype: "visualization_msgs/Marker" },
+    { name: "/tf", datatype: "geometry_msgs/TransformStamped" },
+  ];
+  const tf1: MessageEvent<TF> = {
+    topic: "/tf",
+    receiveTime: { sec: 10, nsec: 0 },
+    message: {
+      header: { seq: 0, stamp: { sec: 1, nsec: 0 }, frame_id: "map" },
+      child_frame_id: "base_link",
+      transform: {
+        translation: VEC3_ZERO,
+        rotation: QUAT_IDENTITY,
+      },
+    },
+    sizeInBytes: 0,
+  };
+  const tf2: MessageEvent<TF> = {
+    topic: "/tf",
+    receiveTime: { sec: 10, nsec: 0 },
+    message: {
+      header: { seq: 0, stamp: { sec: 0, nsec: 0 }, frame_id: "base_link" },
+      child_frame_id: "sensor",
+      transform: {
+        translation: { x: -1, y: 0, z: 0 },
+        rotation: QUAT_IDENTITY,
+      },
+    },
+    sizeInBytes: 0,
+  };
+  const pass1 = makePass({
+    id: 1,
+    frame_id: "base_link",
+    stamp: fromSec(1),
+    colorHex: testColors.MARKER_GREEN1,
+    pose: { position: { x: -1, y: 0, z: 0 }, orientation: QUAT_IDENTITY },
+  });
+  const pass2 = makePass({
+    id: 2,
+    frame_id: "sensor",
+    stamp: fromSec(2),
+    colorHex: testColors.MARKER_GREEN2,
+    pose: { position: { x: 1, y: 0, z: 0 }, orientation: QUAT_IDENTITY },
+  });
+  const pass3 = makePass({
+    id: 3,
+    frame_id: "sensor",
+    stamp: fromSec(1),
+    colorHex: testColors.MARKER_GREEN3,
+    lifetime: { sec: 1, nsec: 0 },
+    pose: { position: { x: 2, y: 0, z: 0 }, orientation: QUAT_IDENTITY },
+  });
+
+  const fail1 = makeFail({
+    id: 1,
+    frame_id: "base_link",
+    stamp: fromSec(0),
+    colorHex: testColors.MARKER_RED1,
+    description: "No transform from base_link to map at t0",
+  });
+  const fail2 = makeFail({
+    id: 2,
+    frame_id: "base_link",
+    stamp: fromSec(3),
+    colorHex: testColors.MARKER_RED2,
+    pose: { position: { x: 1, y: 0, z: 0 }, orientation: QUAT_IDENTITY },
+    description: "t3 is ahead of currentTime (t2)",
+  });
+  const fail3 = makeFail({
+    id: 3,
+    frame_id: "missing",
+    stamp: fromSec(1),
+    colorHex: testColors.MARKER_RED3,
+    description: `No transform(s) for coordinate frame "missing"`,
+  });
+  const fail4 = makeFail({
+    id: 4,
+    frame_id: "sensor",
+    stamp: fromSec(1),
+    colorHex: testColors.MARKER_RED1,
+    lifetime: { sec: 0, nsec: 1 },
+    pose: { position: { x: 0, y: 1, z: 0 }, orientation: QUAT_IDENTITY },
+    description: `Expired at t1:1, currentTime is t2`,
+  });
+
+  const fixture = useDelayedFixture({
+    datatypes,
+    topics,
+    frame: {
+      "/markers": [pass1, pass2, pass3, fail1, fail2, fail3, fail4],
+      "/tf": [tf1, tf2],
+    },
+    capabilities: [],
+    activeData: {
+      currentTime: { sec: 2, nsec: 0 },
+    },
+  });
+
+  const KEYS = ["name:Topics", "t:/tf", "t:/markers", "ns:/tf:base_link", "ns:/tf:map", "ns:/tf:sensor"]; // prettier-ignore
+
+  return (
+    <PanelSetup fixture={fixture}>
+      <ThreeDimensionalViz
+        overrideConfig={{
+          ...ThreeDimensionalViz.defaultConfig,
+          checkedKeys: KEYS,
+          expandedKeys: KEYS,
+          followTf: "base_link",
+          modifiedNamespaceTopics: ["/tf"],
+          cameraState: {
+            distance: 3,
+            perspective: true,
+            phi: 1,
+            targetOffset: [0, 0, 0],
+            thetaOffset: 0,
+            fovy: 0.75,
+            near: 0.01,
+            far: 5000,
+            target: [0, 0, 0],
+            targetOrientation: [0, 0, 0, 1],
+          },
+        }}
+      />
+    </PanelSetup>
+  );
+}
+
+export function LargeTransform(): JSX.Element {
+  const topics: Topic[] = [
+    { name: "/markers", datatype: "visualization_msgs/Marker" },
+    { name: "/tf", datatype: "geometry_msgs/TransformStamped" },
+  ];
+  const tf1: MessageEvent<TF> = {
+    topic: "/tf",
+    receiveTime: { sec: 10, nsec: 0 },
+    message: {
+      header: { seq: 0, stamp: { sec: 0, nsec: 0 }, frame_id: "map" },
+      child_frame_id: "odom",
+      transform: {
+        translation: { x: 1e7, y: 0, z: 0 },
+        rotation: QUAT_IDENTITY,
+      },
+    },
+    sizeInBytes: 0,
+  };
+  const tf2: MessageEvent<TF> = {
+    topic: "/tf",
+    receiveTime: { sec: 10, nsec: 0 },
+    message: {
+      header: { seq: 0, stamp: { sec: 0, nsec: 0 }, frame_id: "odom" },
+      child_frame_id: "base_link",
+      transform: {
+        translation: { x: 1, y: 0, z: 0 },
+        rotation: QUAT_IDENTITY,
+      },
+    },
+    sizeInBytes: 0,
+  };
+
+  const pass1 = makePass({
+    id: 1,
+    frame_id: "map",
+    stamp: fromSec(0),
+    colorHex: testColors.MARKER_GREEN1,
+    pose: { position: { x: 1e7, y: 0, z: 0 }, orientation: QUAT_IDENTITY },
+  });
+  const pass2 = makePass({
+    id: 2,
+    frame_id: "base_link",
+    stamp: fromSec(0),
+    colorHex: testColors.MARKER_GREEN2,
+  });
+  const pass3 = makePass({
+    id: 3,
+    frame_id: "odom",
+    stamp: fromSec(0),
+    colorHex: testColors.MARKER_GREEN3,
+    pose: { position: { x: 2, y: 0, z: 0 }, orientation: QUAT_IDENTITY },
+  });
+
+  const fixture = useDelayedFixture({
+    datatypes,
+    topics,
+    frame: {
+      "/markers": [pass1, pass2, pass3],
+      "/tf": [tf1, tf2],
+    },
+    capabilities: [],
+    activeData: {
+      currentTime: { sec: 0, nsec: 0 },
+    },
+  });
+
+  const KEYS = ["name:Topics", "t:/tf", "t:/markers", "ns:/tf:base_link", "ns:/tf:map", "ns:/tf:odom"]; // prettier-ignore
+
+  return (
+    <PanelSetup fixture={fixture}>
+      <ThreeDimensionalViz
+        overrideConfig={{
+          ...ThreeDimensionalViz.defaultConfig,
+          checkedKeys: KEYS,
+          expandedKeys: KEYS,
+          followTf: "base_link",
+          modifiedNamespaceTopics: ["/tf"],
+          cameraState: {
+            distance: 3,
+            perspective: true,
+            phi: 1,
+            targetOffset: [0, 0, 0],
+            thetaOffset: 0,
+            fovy: 0.75,
+            near: 0.01,
+            far: 5000,
+            target: [0, 0, 0],
+            targetOrientation: [0, 0, 0, 1],
+          },
+        }}
+      />
+    </PanelSetup>
+  );
+}
+
 TransformInterpolation.parameters = { colorScheme: "dark" };
+MarkerLifetimes.parameters = { colorScheme: "dark" };
+LargeTransform.parameters = { colorScheme: "dark" };
