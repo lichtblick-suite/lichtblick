@@ -49,14 +49,12 @@ const allPanels: PanelInfo[] = [
     type: "Sample1",
     module: async () => ({ default: MockPanel1 }),
     config: { text: "def" },
-    preconfigured: true,
   },
   {
     title: "Preconfigured Panel BBB",
     type: "Sample2",
     module: async () => ({ default: MockPanel1 }),
     config: { num: 456 },
-    preconfigured: true,
   },
 ];
 
@@ -73,7 +71,7 @@ class MockPanelCatalog implements PanelCatalog {
     return allPanels;
   }
   getPanelByType(type: string): PanelInfo | undefined {
-    return allPanels.find((panel) => panel.preconfigured !== true && panel.type === type);
+    return allPanels.find((panel) => !panel.config && panel.type === type);
   }
 }
 

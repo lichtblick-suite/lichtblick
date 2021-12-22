@@ -43,7 +43,7 @@ class MockPanelCatalog implements PanelCatalog {
     return panels;
   }
   getPanelByType(type: string): PanelInfo | undefined {
-    return panels.find((panel) => panel.preconfigured !== true && panel.type === type);
+    return panels.find((panel) => !panel.config && panel.type === type);
   }
 }
 
