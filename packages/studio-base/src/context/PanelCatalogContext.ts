@@ -13,6 +13,7 @@ export type PanelComponent = ComponentType<{ childId?: string; tabId?: string }>
 export type PanelInfo = {
   title: string;
   type: string;
+  description?: string;
 
   help?: React.ReactNode;
   /**

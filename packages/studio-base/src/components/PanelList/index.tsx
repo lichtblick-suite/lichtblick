@@ -23,6 +23,7 @@ import Icon from "@foxglove/studio-base/components/Icon";
 import { LegacyInput } from "@foxglove/studio-base/components/LegacyStyledComponents";
 import { Item } from "@foxglove/studio-base/components/Menu";
 import TextHighlight from "@foxglove/studio-base/components/TextHighlight";
+import { useTooltip } from "@foxglove/studio-base/components/Tooltip";
 import {
   useCurrentLayoutActions,
   usePanelMosaicId,
@@ -92,6 +93,7 @@ type PanelItemProps = {
   panel: {
     type: string;
     title: string;
+    description?: string;
     config?: PanelConfig;
     relatedConfigs?: SavedProps;
   };
@@ -154,18 +156,30 @@ function DraggablePanelItem({
     }
   }, [highlighted]);
 
+  const { ref: tooltipRef, tooltip } = useTooltip({
+    contents: (
+      <div style={{ padding: "0px 5px", width: "200px" }}>
+        <p style={{ fontWeight: "bold" }}>{panel.title}</p>
+        <p>{panel.description}</p>
+      </div>
+    ),
+    placement: "right",
+  });
   return (
     <div ref={drag}>
-      <div ref={scrollRef}>
-        <Item
-          onClick={onClick}
-          checked={checked}
-          highlighted={highlighted}
-          className={classes.item}
-          dataTest={`panel-menu-item ${panel.title}`}
-        >
-          <TextHighlight targetStr={panel.title} searchText={searchQuery} />
-        </Item>
+      <div ref={tooltipRef}>
+        <div ref={scrollRef}>
+          {tooltip}
+          <Item
+            onClick={onClick}
+            checked={checked}
+            highlighted={highlighted}
+            className={classes.item}
+            dataTest={`panel-menu-item ${panel.title}`}
+          >
+            <TextHighlight targetStr={panel.title} searchText={searchQuery} />
+          </Item>
+        </div>
       </div>
     </div>
   );
@@ -304,18 +318,20 @@ function PanelList(props: Props): JSX.Element {
   );
 
   const displayPanelListItem = React.useCallback(
-    ({ title, type, config, relatedConfigs }: PanelInfo) => {
+    ({ title, type, description, config, relatedConfigs }: PanelInfo) => {
       return (
-        <DraggablePanelItem
-          key={`${type}-${title}`}
-          mosaicId={mosaicId}
-          panel={{ type, title, config, relatedConfigs }}
-          onDrop={onPanelMenuItemDrop}
-          onClick={() => onPanelSelect({ type, config, relatedConfigs })}
-          checked={title === selectedPanelTitle}
-          highlighted={highlightedPanel?.title === title}
-          searchQuery={searchQuery}
-        />
+        <>
+          <DraggablePanelItem
+            key={`${type}-${title}`}
+            mosaicId={mosaicId}
+            panel={{ type, title, description, config, relatedConfigs }}
+            onDrop={onPanelMenuItemDrop}
+            onClick={() => onPanelSelect({ type, config, relatedConfigs })}
+            checked={title === selectedPanelTitle}
+            highlighted={highlightedPanel?.title === title}
+            searchQuery={searchQuery}
+          />
+        </>
       );
     },
     [
