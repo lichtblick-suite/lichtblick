@@ -42,10 +42,11 @@ import {
   MutablePose,
   SphereMarker,
 } from "@foxglove/studio-base/types/Messages";
-import { MarkerProvider, RenderMarkerArgs } from "@foxglove/studio-base/types/Scene";
 import { clonePose } from "@foxglove/studio-base/util/Pose";
 import { URDF_TOPIC } from "@foxglove/studio-base/util/globalConstants";
 import sendNotification from "@foxglove/studio-base/util/sendNotification";
+
+import { MarkerProvider, RenderMarkerArgs } from "./types";
 
 export const DEFAULT_COLOR: Color = { r: 36 / 255, g: 142 / 255, b: 255 / 255, a: 1 };
 

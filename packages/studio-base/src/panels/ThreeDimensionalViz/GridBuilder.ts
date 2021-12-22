@@ -19,8 +19,9 @@ import {
   GridSettings,
 } from "@foxglove/studio-base/panels/ThreeDimensionalViz/TopicSettingsEditor/GridSettingsEditor";
 import { Point, InstancedLineListMarker } from "@foxglove/studio-base/types/Messages";
-import { MarkerProvider, RenderMarkerArgs } from "@foxglove/studio-base/types/Scene";
 import { FOXGLOVE_GRID_TOPIC } from "@foxglove/studio-base/util/globalConstants";
+
+import { MarkerProvider, RenderMarkerArgs } from "./types";
 
 export default class GridBuilder implements MarkerProvider {
   grid: InstancedLineListMarker;

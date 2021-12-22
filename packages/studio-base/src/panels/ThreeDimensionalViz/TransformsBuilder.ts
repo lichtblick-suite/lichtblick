@@ -22,13 +22,10 @@ import {
   MutablePose,
   Point,
 } from "@foxglove/studio-base/types/Messages";
-import {
-  MarkerProvider,
-  MarkerCollector,
-  RenderMarkerArgs,
-} from "@foxglove/studio-base/types/Scene";
 import { clonePose, emptyPose, setIdentityPose } from "@foxglove/studio-base/util/Pose";
 import { MARKER_MSG_TYPES } from "@foxglove/studio-base/util/globalConstants";
+
+import { MarkerProvider, MarkerCollector, RenderMarkerArgs } from "./types";
 
 const defaultArrowMarker = {
   id: "",

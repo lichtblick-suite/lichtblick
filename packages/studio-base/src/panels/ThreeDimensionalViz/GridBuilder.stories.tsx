@@ -39,10 +39,10 @@ import {
   TextMarker,
   TriangleListMarker,
 } from "@foxglove/studio-base/types/Messages";
-import { MarkerCollector } from "@foxglove/studio-base/types/Scene";
 import { FOXGLOVE_GRID_TOPIC } from "@foxglove/studio-base/util/globalConstants";
 
 import GridBuilder from "./GridBuilder";
+import { MarkerCollector } from "./types";
 
 const SExpectedResult = styled.div`
   position: fixed;

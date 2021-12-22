@@ -51,7 +51,8 @@ import {
   SphereMarker,
   TextMarker,
 } from "@foxglove/studio-base/types/Messages";
-import { MarkerCollector, MarkerProvider } from "@foxglove/studio-base/types/Scene";
+
+import { MarkerCollector, MarkerProvider } from "./types";
 
 type Props = WorldSearchTextProps & {
   autoTextBackgroundColor: boolean;

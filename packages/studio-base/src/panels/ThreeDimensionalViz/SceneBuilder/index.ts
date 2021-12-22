@@ -26,6 +26,11 @@ import {
   CoordinateFrame,
   TransformTree,
 } from "@foxglove/studio-base/panels/ThreeDimensionalViz/transforms";
+import {
+  MarkerProvider,
+  MarkerCollector,
+  RenderMarkerArgs,
+} from "@foxglove/studio-base/panels/ThreeDimensionalViz/types";
 import { Topic, Frame, MessageEvent, RosObject } from "@foxglove/studio-base/players/types";
 import {
   Color,
@@ -48,11 +53,6 @@ import {
   OccupancyGridMessage,
   PointCloud2,
 } from "@foxglove/studio-base/types/Messages";
-import {
-  MarkerProvider,
-  MarkerCollector,
-  RenderMarkerArgs,
-} from "@foxglove/studio-base/types/Scene";
 import { clonePose, emptyPose } from "@foxglove/studio-base/util/Pose";
 import naturalSort from "@foxglove/studio-base/util/naturalSort";
 

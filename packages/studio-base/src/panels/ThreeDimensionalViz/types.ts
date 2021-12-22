@@ -12,12 +12,32 @@
 //   You may not use this file except in compliance with the License.
 
 import { CameraState } from "@foxglove/regl-worldview";
-import { TopicSettingsCollection } from "@foxglove/studio-base/panels/ThreeDimensionalViz/SceneBuilder";
+import { Time } from "@foxglove/rostime";
 import {
-  ColorOverrideByVariable,
-  ColorOverride,
-} from "@foxglove/studio-base/panels/ThreeDimensionalViz/TopicTree/Layout";
-import { TopicDisplayMode } from "@foxglove/studio-base/panels/ThreeDimensionalViz/TopicTree/types";
+  ArrowMarker,
+  CubeMarker,
+  SphereMarker,
+  CylinderMarker,
+  LineStripMarker,
+  LineListMarker,
+  CubeListMarker,
+  SphereListMarker,
+  PointsMarker,
+  TextMarker,
+  TriangleListMarker,
+  OccupancyGridMessage,
+  PointCloud,
+  LaserScan,
+  InstancedLineListMarker,
+  ColorMarker,
+  PoseStamped,
+  MeshMarker,
+} from "@foxglove/studio-base/types/Messages";
+
+import { TopicSettingsCollection } from "./SceneBuilder";
+import { ColorOverrideByVariable, ColorOverride } from "./TopicTree/Layout";
+import { TopicDisplayMode } from "./TopicTree/types";
+import { CoordinateFrame, TransformTree } from "./transforms";
 
 /** @deprecated */
 type ColorOverrideBySourceIdxByVariable = Record<string, ColorOverride[]>;
@@ -28,6 +48,40 @@ type ColorOverrideBySourceIdxByVariable = Record<string, ColorOverride[]>;
 type PreviousThreeDimensionalVizConfig = {
   colorOverrideBySourceIdxByVariable?: ColorOverrideBySourceIdxByVariable;
 };
+
+export interface MarkerCollector {
+  arrow(arg0: ArrowMarker): void;
+  color(arg0: ColorMarker): void;
+  cube(arg0: CubeMarker): void;
+  cubeList(arg0: CubeListMarker): void;
+  sphere(arg0: SphereMarker): void;
+  sphereList(arg0: SphereListMarker): void;
+  cylinder(arg0: CylinderMarker): void;
+  poseMarker(arg0: PoseStamped): void;
+  lineStrip(arg0: LineStripMarker): void;
+  lineList(arg0: LineListMarker): void;
+  points(arg0: PointsMarker): void;
+  text(arg0: TextMarker): void;
+  mesh(arg0: MeshMarker): void;
+  triangleList(arg0: TriangleListMarker): void;
+  grid(arg0: OccupancyGridMessage): void;
+  pointcloud(arg0: PointCloud): void;
+  laserScan(arg0: LaserScan): void;
+  linedConvexHull(arg0: LineListMarker | LineStripMarker): void;
+  instancedLineList(arg0: InstancedLineListMarker): void;
+}
+
+export type RenderMarkerArgs = {
+  add: MarkerCollector;
+  renderFrame: CoordinateFrame;
+  fixedFrame: CoordinateFrame;
+  transforms: TransformTree;
+  time: Time;
+};
+
+export interface MarkerProvider {
+  renderMarkers(args: RenderMarkerArgs): void;
+}
 
 export type ThreeDimensionalVizConfig = {
   useThemeBackgroundColor: boolean;
