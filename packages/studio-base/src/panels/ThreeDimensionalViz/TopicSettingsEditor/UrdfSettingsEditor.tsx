@@ -23,7 +23,7 @@ export type UrdfSettings = {
 };
 
 // One day we can think about using feature detection. Until that day comes we acknowledge the
-// realities of only having two playforms: web and desktop.
+// realities of only having two platforms: web and desktop.
 const supportsPackageUrl = isDesktopApp();
 
 export default function UrdfSettingsEditor(
