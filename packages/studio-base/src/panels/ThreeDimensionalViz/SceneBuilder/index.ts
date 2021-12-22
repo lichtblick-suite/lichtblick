@@ -22,7 +22,10 @@ import {
 import MessageCollector from "@foxglove/studio-base/panels/ThreeDimensionalViz/SceneBuilder/MessageCollector";
 import { MarkerMatcher } from "@foxglove/studio-base/panels/ThreeDimensionalViz/ThreeDimensionalVizContext";
 import VelodyneCloudConverter from "@foxglove/studio-base/panels/ThreeDimensionalViz/VelodyneCloudConverter";
-import { TransformTree } from "@foxglove/studio-base/panels/ThreeDimensionalViz/transforms";
+import {
+  CoordinateFrame,
+  TransformTree,
+} from "@foxglove/studio-base/panels/ThreeDimensionalViz/transforms";
 import { Topic, Frame, MessageEvent, RosObject } from "@foxglove/studio-base/players/types";
 import {
   Color,
@@ -45,7 +48,11 @@ import {
   OccupancyGridMessage,
   PointCloud2,
 } from "@foxglove/studio-base/types/Messages";
-import { MarkerProvider, MarkerCollector } from "@foxglove/studio-base/types/Scene";
+import {
+  MarkerProvider,
+  MarkerCollector,
+  RenderMarkerArgs,
+} from "@foxglove/studio-base/types/Scene";
 import { clonePose, emptyPose } from "@foxglove/studio-base/util/Pose";
 import naturalSort from "@foxglove/studio-base/util/naturalSort";
 
@@ -168,16 +175,24 @@ export function filterOutSupersededMessages<T extends Pick<MessageEvent<unknown>
 function computeMarkerPose(
   marker: Marker,
   transforms: TransformTree,
-  renderFrameId: string,
+  renderFrame: CoordinateFrame,
+  fixedFrame: CoordinateFrame,
   currentTime: Time,
 ): Pose | undefined {
   const srcFrame = transforms.frame(marker.header.frame_id);
-  const frame = transforms.frame(renderFrameId);
-  if (!srcFrame || !frame) {
+  if (!srcFrame) {
     return undefined;
   }
-  const time = marker.frame_locked ? currentTime : marker.header.stamp;
-  return frame.apply(emptyPose(), marker.pose, srcFrame, time);
+  let srcTime: Time;
+  let dstTime: Time;
+  if (marker.frame_locked) {
+    srcTime = currentTime;
+    dstTime = currentTime;
+  } else {
+    srcTime = marker.header.stamp;
+    dstTime = currentTime;
+  }
+  return renderFrame.apply(emptyPose(), marker.pose, fixedFrame, srcFrame, dstTime, srcTime);
 }
 
 export default class SceneBuilder implements MarkerProvider {
@@ -185,8 +200,9 @@ export default class SceneBuilder implements MarkerProvider {
     [topicName: string]: Topic;
   } = {};
   markers: Marker[] = [];
-  transforms?: TransformTree;
-  renderFrameId?: string;
+  // A batch of messages organized by topic. This is the source material for
+  // rendering. Not to be confused with the graphics rendering frame, or a
+  // CoordinateFrame
   frame?: Frame;
   // TODO(JP): Get rid of these two different variables `errors` and `errorsByTopic` which we
   // have to keep in sync.
@@ -204,6 +220,8 @@ export default class SceneBuilder implements MarkerProvider {
   collectors: {
     [key: string]: MessageCollector;
   } = {};
+  private _transforms?: TransformTree;
+  private _missingTfFrameIds = new Set<string>();
   private _clock?: Time;
   private _playerId?: string;
   private _settingsByKey: TopicSettingsCollection = {};
@@ -237,14 +255,6 @@ export default class SceneBuilder implements MarkerProvider {
   } = {};
 
   constructor() {}
-
-  setTransforms = (transforms: TransformTree, renderFrameId: string | undefined): void => {
-    this.transforms = transforms;
-    this.renderFrameId = renderFrameId;
-    if (renderFrameId != undefined) {
-      this.errors.renderFrameId = renderFrameId;
-    }
-  };
 
   clear(): void {
     for (const topicName of Object.keys(this.topicsByName)) {
@@ -382,37 +392,35 @@ export default class SceneBuilder implements MarkerProvider {
   }
 
   private _setTopicError = (topic: string, message: string): void => {
+    log.warn(`[TOPIC ERROR][${topic}] ${message}`);
     this.errors.topicsWithError.set(topic, message);
     this._updateErrorsByTopic();
   };
 
-  // Update the field anytime the errors change in order to generate a new object to trigger TopicTree to rerender.
+  // Update the field anytime the errors change in order to generate a new
+  // object to trigger TopicTree to rerender
   private _updateErrorsByTopic(): void {
-    if (!this.transforms) {
+    if (!this._transforms) {
       return;
     }
 
-    const errorsByTopic = getSceneErrorsByTopic(this.errors, this.transforms);
+    const errorsByTopic = getSceneErrorsByTopic(this.errors, this._transforms);
     if (!isEqual(this.errorsByTopic, errorsByTopic)) {
       this.errorsByTopic = errorsByTopic;
-      if (this._onForceUpdate) {
-        this._onForceUpdate();
-      }
+      this._onForceUpdate?.();
     }
   }
 
-  // keep a unique set of all seen namespaces
+  // Keep a unique set of all seen namespaces
   private _consumeNamespace(topic: string, name: string): void {
     if (some(this.allNamespaces, (ns) => ns.topic === topic && ns.name === name)) {
       return;
     }
     this.allNamespaces = this.allNamespaces.concat([{ topic, name }]);
-    if (this._onForceUpdate) {
-      this._onForceUpdate();
-    }
+    this._onForceUpdate?.();
   }
 
-  // Only public for tests.
+  // Only public for tests
   namespaceIsEnabled(topic: string, name: string): boolean {
     if (this.selectedNamespacesByTopic) {
       // enable all namespaces under a topic if it's not already set
@@ -604,10 +612,6 @@ export default class SceneBuilder implements MarkerProvider {
     type: number,
     originalMessage?: unknown,
   ): void => {
-    if (this.renderFrameId == undefined) {
-      throw new Error("No camera frame selected");
-    }
-
     // some callers of _consumeNonMarkerMessage provide LazyMessages and others provide regular objects
     const obj =
       "toJSON" in drawData
@@ -617,6 +621,7 @@ export default class SceneBuilder implements MarkerProvider {
       ...obj,
       type,
       pose: emptyPose(),
+      frame_locked: false,
       interactionData: { topic, originalMessage: originalMessage ?? drawData },
     };
 
@@ -811,13 +816,11 @@ export default class SceneBuilder implements MarkerProvider {
     }
   };
 
-  renderMarkers(add: MarkerCollector, time: Time): void {
-    if (!this.transforms || !this.renderFrameId) {
-      return;
-    }
+  renderMarkers({ add, transforms, renderFrame, fixedFrame, time }: RenderMarkerArgs): void {
+    this._transforms = transforms;
 
+    this.errors.renderFrameId = renderFrame.id;
     this.errors.topicsMissingTransforms.clear();
-    const missingTfFrameIds = new Set<string>();
 
     for (const topic of Object.values(this.topicsByName)) {
       const collector = this.collectors[topic.name];
@@ -825,7 +828,7 @@ export default class SceneBuilder implements MarkerProvider {
         continue;
       }
 
-      missingTfFrameIds.clear();
+      this._missingTfFrameIds.clear();
 
       const topicMarkers = collector.getMessages();
       for (const message of topicMarkers) {
@@ -836,9 +839,9 @@ export default class SceneBuilder implements MarkerProvider {
           }
         }
 
-        const pose = computeMarkerPose(marker, this.transforms, this.renderFrameId, time);
+        const pose = computeMarkerPose(marker, transforms, renderFrame, fixedFrame, time);
         if (!pose) {
-          missingTfFrameIds.add(marker.header.frame_id);
+          this._missingTfFrameIds.add(marker.header.frame_id);
           continue;
         }
 
@@ -864,15 +867,15 @@ export default class SceneBuilder implements MarkerProvider {
         this._addMarkerToCollector(add, topic, marker, pose);
       }
 
-      if (missingTfFrameIds.size > 0) {
+      if (this._missingTfFrameIds.size > 0) {
         const error = this._addError(this.errors.topicsMissingTransforms, topic.name);
-        for (const frameId of missingTfFrameIds) {
+        for (const frameId of this._missingTfFrameIds) {
           error.frameIds.add(frameId);
         }
       }
     }
 
-    const errorsByTopic = getSceneErrorsByTopic(this.errors, this.transforms);
+    const errorsByTopic = getSceneErrorsByTopic(this.errors, transforms);
     if (!isEqual(this.errorsByTopic, errorsByTopic)) {
       this.errorsByTopic = errorsByTopic;
     }

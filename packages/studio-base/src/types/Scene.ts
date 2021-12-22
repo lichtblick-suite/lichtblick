@@ -12,6 +12,10 @@
 //   You may not use this file except in compliance with the License.
 import { Time } from "@foxglove/rostime";
 import {
+  CoordinateFrame,
+  TransformTree,
+} from "@foxglove/studio-base/panels/ThreeDimensionalViz/transforms";
+import {
   ArrowMarker,
   CubeMarker,
   SphereMarker,
@@ -54,6 +58,14 @@ export interface MarkerCollector {
   instancedLineList(arg0: InstancedLineListMarker): void;
 }
 
+export type RenderMarkerArgs = {
+  add: MarkerCollector;
+  renderFrame: CoordinateFrame;
+  fixedFrame: CoordinateFrame;
+  transforms: TransformTree;
+  time: Time;
+};
+
 export interface MarkerProvider {
-  renderMarkers(add: MarkerCollector, time: Time): void;
+  renderMarkers(args: RenderMarkerArgs): void;
 }

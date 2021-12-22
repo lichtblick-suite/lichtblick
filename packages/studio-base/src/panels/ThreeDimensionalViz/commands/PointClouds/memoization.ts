@@ -40,6 +40,11 @@ export function updateMarkerCache(
         hitmapColors: marker.hitmapColors,
       };
     }
+
+    // Update the marker pose unconditionally since it can change per-frame even
+    // when we don't need to do a full point cloud decode
+    decoded.marker.pose = marker.pose;
+
     markerCache.set(marker.data, decoded);
   });
   return markerCache;

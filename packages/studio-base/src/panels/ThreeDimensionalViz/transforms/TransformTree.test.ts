@@ -49,7 +49,9 @@ describe("TransformTree", () => {
     expect(tree.hasFrame("")).toBe(false);
 
     const output = emptyPose();
-    expect(tree.apply(output, output, "odom", "base_link", TIME_ZERO)).toBeDefined();
+    expect(
+      tree.apply(output, output, "odom", "odom", "base_link", TIME_ZERO, TIME_ZERO),
+    ).toBeDefined();
     expect(output.position).toEqual({ x: 1, y: 2, z: 3 });
     // Exact equality is tested to ensure we are using 64-bit math
     expect(output.orientation).toEqual({
@@ -75,12 +77,16 @@ describe("TransformTree", () => {
     // const baseLink = tree.frame("base_link")!;
     // const map = tree.frame("map")!;
     const output = emptyPose();
-    expect(tree.apply(output, emptyPose(), "map", "base_link", TIME_ZERO)).toBeDefined();
+    expect(
+      tree.apply(output, emptyPose(), "map", "map", "base_link", TIME_ZERO, TIME_ZERO),
+    ).toBeDefined();
     expect(output.position).toEqual(EMPTY_POSE.position);
     expect(output.orientation).toEqual(EMPTY_POSE.orientation);
 
     // Identity transforms from map -> odom -> base_link
-    expect(tree.apply(output, emptyPose(), "base_link", "map", TIME_ZERO)).toBeDefined();
+    expect(
+      tree.apply(output, emptyPose(), "base_link", "map", "map", TIME_ZERO, TIME_ZERO),
+    ).toBeDefined();
     expect(output.position).toEqual(EMPTY_POSE.position);
     expect(output.orientation).toEqual(EMPTY_POSE.orientation);
 
@@ -92,25 +98,50 @@ describe("TransformTree", () => {
     map_T_odom.setRotation([0, 0, 1, 0]); // Rotate 180 degrees around z axis
 
     // base_link -> odom -> map
-    expect(tree.apply(output, emptyPose(), "map", "base_link", TIME_ZERO)).toBeDefined();
+    expect(
+      tree.apply(output, emptyPose(), "map", "map", "base_link", TIME_ZERO, TIME_ZERO),
+    ).toBeDefined();
     expect(output.position).toEqual({ x: 9, y: 18, z: 33 });
     expect(output.orientation).toEqual({ x: 0, y: 0, z: 1, w: 0 });
 
     // map -> odom -> base_link
-    expect(tree.apply(output, emptyPose(), "base_link", "map", TIME_ZERO)).toBeDefined();
+    expect(
+      tree.apply(output, emptyPose(), "base_link", "map", "map", TIME_ZERO, TIME_ZERO),
+    ).toBeDefined();
     expect(output.position).toEqual({ x: 9, y: 18, z: -33 });
     expect(output.orientation).toEqual({ x: 0, y: 0, z: 1, w: 0 });
 
     // base_link -> odom -> map
     const a = { position: { x: 100, y: 200, z: 300 }, orientation: { x: 1, y: 0, z: 0, w: 0 } };
-    expect(tree.apply(output, a, "map", "base_link", TIME_ZERO)).toBeDefined();
+    expect(tree.apply(output, a, "map", "map", "base_link", TIME_ZERO, TIME_ZERO)).toBeDefined();
     expect(output.position).toEqual({ x: -91, y: -182, z: 333 });
     expect(output.orientation).toEqual({ x: 0, y: 1, z: 0, w: 0 });
 
     // map -> odom -> base_link
-    expect(tree.apply(output, a, "base_link", "map", TIME_ZERO)).toBeDefined();
+    expect(tree.apply(output, a, "base_link", "map", "map", TIME_ZERO, TIME_ZERO)).toBeDefined();
     expect(output.position).toEqual({ x: -91, y: -182, z: 267 });
     expect(output.orientation).toEqual({ x: 0, y: 1, z: 0, w: 0 });
+  });
+
+  it("across-time transformation", () => {
+    const T1 = { sec: 1, nsec: 0 };
+
+    const tree = new TransformTree();
+    const map_T_odom = new Transform([1, 2, 3], [0, 0, 0, 1]);
+    const map_T_odom_t1 = new Transform([4, 5, 6], [0, 0, 0, 1]);
+    const odom_T_baseLink = new Transform([10, 20, 30], [0, 0, 0, 1]);
+    tree.addTransform("base_link", "odom", TIME_ZERO, odom_T_baseLink);
+    tree.addTransform("odom", "map", TIME_ZERO, map_T_odom);
+    tree.addTransform("odom", "map", T1, map_T_odom_t1);
+
+    const input = { position: { x: 100, y: 200, z: 300 }, orientation: { x: 0, y: 0, z: 0, w: 1 } };
+    const output = emptyPose();
+    expect(tree.apply(output, input, "odom", "map", "base_link", T1, TIME_ZERO)).toBeDefined();
+
+    expect(output).toEqual({
+      position: { x: 107, y: 217, z: 327 },
+      orientation: { x: 0, y: 0, z: 0, w: 1 },
+    });
   });
 
   it("reparents", () => {
@@ -126,20 +157,28 @@ describe("TransformTree", () => {
     tree.addTransform("base_link", "odom", TIME_ZERO, odom_T_baseLink);
     tree.addTransform("odom", "map", TIME_ZERO, map_T_odom);
 
-    expect(tree.apply(output, emptyPose(), "odom", "base_link", TIME_ZERO)).toBeDefined();
+    expect(
+      tree.apply(output, emptyPose(), "odom", "world", "base_link", TIME_ZERO, TIME_ZERO),
+    ).toBeDefined();
 
     // Reparent
     tree.addTransform("base_link", "world", T2, world_T_baseLink);
 
     // This will now fail
-    expect(tree.apply(output, emptyPose(), "odom", "base_link", TIME_ZERO)).toBeUndefined();
-    expect(tree.apply(output, emptyPose(), "map", "base_link", TIME_ZERO)).toBeUndefined();
+    expect(
+      tree.apply(output, emptyPose(), "odom", "world", "base_link", TIME_ZERO, TIME_ZERO),
+    ).toBeUndefined();
+    expect(
+      tree.apply(output, emptyPose(), "map", "world", "base_link", TIME_ZERO, TIME_ZERO),
+    ).toBeUndefined();
 
     // Too far in the past
-    expect(tree.apply(output, emptyPose(), "world", "base_link", TIME_ZERO)).toBeUndefined();
+    expect(
+      tree.apply(output, emptyPose(), "world", "world", "base_link", TIME_ZERO, TIME_ZERO),
+    ).toBeUndefined();
 
     // This works
-    expect(tree.apply(output, emptyPose(), "world", "base_link", T2)).toBeDefined();
+    expect(tree.apply(output, emptyPose(), "world", "world", "base_link", T2, T2)).toBeDefined();
   });
 
   it("Clone", () => {

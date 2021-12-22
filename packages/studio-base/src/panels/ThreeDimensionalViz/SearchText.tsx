@@ -23,6 +23,7 @@ import useDeepChangeDetector from "@foxglove/studio-base/hooks/useDeepChangeDete
 import { Interactive } from "@foxglove/studio-base/panels/ThreeDimensionalViz/Interactions/types";
 import { TransformTree } from "@foxglove/studio-base/panels/ThreeDimensionalViz/transforms";
 import { TextMarker, Color } from "@foxglove/studio-base/types/Messages";
+import { emptyPose } from "@foxglove/studio-base/util/Pose";
 
 export const YELLOW = { r: 1, b: 0, g: 1, a: 1 };
 export const ORANGE = { r: 0.97, g: 0.58, b: 0.02, a: 1 };
@@ -149,6 +150,7 @@ type SearchTextComponentProps = SearchTextProps & {
   onCameraStateChange: (arg0: CameraState) => void;
   cameraState: CameraState;
   renderFrameId?: string;
+  fixedFrameId?: string;
   currentTime: Time;
   transforms: TransformTree;
 };
@@ -159,6 +161,7 @@ export const useSearchMatches = ({
   currentMatch,
   onCameraStateChange,
   renderFrameId,
+  fixedFrameId,
   currentTime,
   searchTextOpen,
   transforms,
@@ -167,6 +170,7 @@ export const useSearchMatches = ({
   currentMatch?: GLTextMarker;
   onCameraStateChange: (arg0: CameraState) => void;
   renderFrameId?: string;
+  fixedFrameId?: string;
   currentTime: Time;
   searchTextOpen: boolean;
   transforms: TransformTree;
@@ -174,18 +178,23 @@ export const useSearchMatches = ({
   const hasCurrentMatchChanged = useDeepChangeDetector([currentMatch], { initiallyTrue: true });
 
   useEffect(() => {
-    if (!currentMatch || !searchTextOpen || !renderFrameId || !hasCurrentMatchChanged) {
+    if (!currentMatch || !searchTextOpen || renderFrameId == undefined || !hasCurrentMatchChanged) {
       return;
+    }
+    if (fixedFrameId == undefined) {
+      throw new Error(`renderFrameId="${renderFrameId}" but fixedFrame is undefined`);
     }
 
     const output = transforms.apply(
-      { position: { x: 0, y: 0, z: 0 }, orientation: { x: 0, y: 0, z: 0, w: 0 } },
+      emptyPose(),
       currentMatch.pose,
       renderFrameId,
+      fixedFrameId,
       currentMatch.header.frame_id,
       currentTime,
+      currentTime,
     );
-    if (!output) {
+    if (output == undefined) {
       return;
     }
     const {
@@ -205,6 +214,7 @@ export const useSearchMatches = ({
     cameraState,
     currentMatch,
     currentTime,
+    fixedFrameId,
     hasCurrentMatchChanged,
     onCameraStateChange,
     renderFrameId,
@@ -234,6 +244,7 @@ const SearchText = React.memo<SearchTextComponentProps>(function SearchText({
   cameraState,
   transforms,
   renderFrameId,
+  fixedFrameId,
   currentTime,
 }: SearchTextComponentProps) {
   const theme = useTheme();
@@ -263,6 +274,7 @@ const SearchText = React.memo<SearchTextComponentProps>(function SearchText({
     currentMatch,
     onCameraStateChange,
     renderFrameId,
+    fixedFrameId,
     currentTime,
     searchTextOpen,
     transforms,

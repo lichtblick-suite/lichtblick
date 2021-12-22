@@ -41,6 +41,7 @@ type Props = LayoutToolbarSharedProps &
     onToggleCameraMode: () => void;
     onToggleDebug: () => void;
     renderFrameId?: string;
+    fixedFrameId?: string;
     currentTime: Time;
     selectedObject?: MouseEventObject;
     setInteractionsTabType: (arg0?: TabType) => void;
@@ -64,6 +65,7 @@ function LayoutToolbar({
   onToggleCameraMode,
   onToggleDebug,
   renderFrameId,
+  fixedFrameId,
   searchInputRef,
   searchText,
   searchTextMatches,
@@ -126,6 +128,7 @@ function LayoutToolbar({
           cameraState={cameraState}
           transforms={transforms}
           renderFrameId={renderFrameId}
+          fixedFrameId={fixedFrameId}
           currentTime={currentTime}
         />
         <Stack

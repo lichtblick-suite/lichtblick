@@ -45,7 +45,7 @@ export class CoordinateFrame {
   maxStorageTime: Duration;
 
   private _parent?: CoordinateFrame;
-  private _transforms: AVLTree<Time, Transform> = new AVLTree<Time, Transform>(compare);
+  private _transforms: AVLTree<Time, Transform>;
 
   constructor(
     id: string,
@@ -53,8 +53,9 @@ export class CoordinateFrame {
     maxStorageTime: Duration = DEFAULT_MAX_STORAGE_TIME,
   ) {
     this.id = id;
-    this._parent = parent;
     this.maxStorageTime = maxStorageTime;
+    this._parent = parent;
+    this._transforms = new AVLTree<Time, Transform>(compare);
   }
 
   parent(): CoordinateFrame | undefined {
@@ -196,11 +197,9 @@ export class CoordinateFrame {
   }
 
   /**
-   * Compute the transform from `srcFrame` to this frame at the given time,
-   * represented as a pose object. If srcFrame has a transform translation at
-   * the given time of <1, 0, 0>, then <1, 0, 0> will be returned. That
-   * translation can be applied to a point in `srcFrame` to move it into this
-   * frame.
+   * Transform a pose from the coordinate frame `srcFrame` to this coordinate
+   * frame at the given time. The transform will be done using the shortest path
+   * from `srcFrame` to this frame
    *
    * Transforms can go up through multiple parents, down through one or more
    * children, or both as long as the transforms share a common ancestor.
@@ -217,7 +216,7 @@ export class CoordinateFrame {
    *   transform
    * @returns A reference to `out` on success, otherwise undefined
    */
-  apply(
+  applyLocal(
     out: MutablePose,
     input: Pose,
     srcFrame: CoordinateFrame,
@@ -259,6 +258,44 @@ export class CoordinateFrame {
     }
 
     return undefined;
+  }
+
+  /**
+   * Transform a pose from the coordinate frame `srcFrame` to rootFrame at
+   * `srcTime`, then from `rootFrame` to this coordinate frame at `dstTime`. The
+   * transform will be done using the shortest path from `srcFrame` to the root
+   * frame, then from the root frame to this frame.
+   *
+   * Transforms can go up through multiple parents, down through one or more
+   * children, or both as long as the transforms share a common ancestor.
+   * @param out Output pose, this will be modified with the result on success
+   * @param input Input pose that exists in `srcFrame`
+   * @param rootFrame Reference coordinate frame to transform from srcFrame into as srcTime
+   * @param srcFrame Coordinate frame we are transforming from
+   * @param dstTime Time to transform from rootFrome into this frame
+   * @param srcTime Time to transform from srcFrame into rootFrame
+   * @param maxDelta The time parameter can exceed the bounds of the transform
+   *   history by up to this amount and still clamp to the oldest or newest
+   *   transform
+   * @returns A reference to `out` on success, otherwise undefined
+   */
+  apply(
+    out: MutablePose,
+    input: Pose,
+    rootFrame: CoordinateFrame,
+    srcFrame: CoordinateFrame,
+    dstTime: Time,
+    srcTime: Time,
+    maxDelta: Duration = INFINITE_DURATION,
+  ): MutablePose | undefined {
+    // perf-sensitive: function params instead of options object to avoid allocations
+
+    // Transform from the source frame to the root frame
+    if (rootFrame.applyLocal(out, input, srcFrame, srcTime, maxDelta) == undefined) {
+      return undefined;
+    }
+    // Transform from the root frame to this frame
+    return this.applyLocal(out, out, rootFrame, dstTime, maxDelta);
   }
 
   /**

@@ -26,13 +26,13 @@ describe("TransformBuilder", () => {
     it("returns an arrow", () => {
       const child = new CoordinateFrame("child", parent);
       child.addTransform(ZERO_TIME, new Transform([1, 1, 1], [0, 0, 0, 1]));
-      expect(getArrowToParentMarker("child", child, parent, ZERO_TIME)).toBeDefined();
+      expect(getArrowToParentMarker("child", parent, parent, child, ZERO_TIME)).toBeDefined();
     });
 
     it("does NOT return an arrow if the distance between the parent and child is 0", () => {
       const child = new CoordinateFrame("child", parent);
       child.addTransform(ZERO_TIME, new Transform([0, 0, 0], [0, 0, 0, 1]));
-      expect(getArrowToParentMarker("child", child, parent, ZERO_TIME)).toBeUndefined();
+      expect(getArrowToParentMarker("child", parent, parent, child, ZERO_TIME)).toBeUndefined();
     });
   });
 });

@@ -69,7 +69,7 @@ import {
   getUpdatedGlobalVariablesBySelectedObject,
 } from "@foxglove/studio-base/panels/ThreeDimensionalViz/threeDimensionalVizUtils";
 import {
-  DEFAULT_FRAME_IDS,
+  CoordinateFrame,
   TransformTree,
 } from "@foxglove/studio-base/panels/ThreeDimensionalViz/transforms";
 import { ThreeDimensionalVizConfig } from "@foxglove/studio-base/panels/ThreeDimensionalViz/types";
@@ -109,6 +109,8 @@ export type LayoutTopicSettingsSharedProps = {
 type Props = LayoutToolbarSharedProps &
   LayoutTopicSettingsSharedProps & {
     children?: React.ReactNode;
+    renderFrame: CoordinateFrame;
+    fixedFrame: CoordinateFrame;
     currentTime: Time;
     resetFrame: boolean;
     frame: Frame;
@@ -118,7 +120,6 @@ type Props = LayoutToolbarSharedProps &
     saveConfig: Save3DConfig;
     setSubscriptions: (subscriptions: string[]) => void;
     topics: readonly Topic[];
-    transforms: TransformTree;
   };
 
 export type UserSelectionState = {
@@ -201,6 +202,8 @@ function isTopicRenderable(topic: Topic): boolean {
 export default function Layout({
   cameraState,
   children,
+  renderFrame,
+  fixedFrame,
   currentTime,
   followOrientation,
   followTf,
@@ -454,26 +457,7 @@ export default function Layout({
     }, [] as MarkerMatcher[]);
   }, [colorOverrideByVariable, globalVariables, linkedGlobalVariables]);
 
-  const renderFrameId = useMemo(() => {
-    // If the user specified a followTf, do not fall back to any other frame
-    if (typeof followTf === "string") {
-      return transforms.hasFrame(followTf) ? followTf : undefined;
-    }
-
-    // Try the conventional list of transform ids
-    for (const frameId of DEFAULT_FRAME_IDS) {
-      if (transforms.hasFrame(frameId)) {
-        return frameId;
-      }
-    }
-
-    // Fall back to the root of the first transform (lexicographically), if any
-    const firstFrameId = Array.from(transforms.frames().keys()).sort()[0];
-    return firstFrameId != undefined ? transforms.frame(firstFrameId)?.root().id : undefined;
-  }, [transforms, followTf]);
-
   const [rosPackagePath] = useAppConfigurationValue<string>(AppSetting.ROS_PACKAGE_PATH);
-
   const [robotDescriptionParam] = PanelAPI.useParameter<string>(ROBOT_DESCRIPTION_PARAM);
 
   useMemo(() => {
@@ -484,7 +468,6 @@ export default function Layout({
       sceneBuilder.clear();
     }
 
-    urdfBuilder.setTransforms(transforms, renderFrameId);
     urdfBuilder.setUrdfData(robotDescriptionParam, rosPackagePath);
     urdfBuilder.setVisible(selectedTopicNames.includes(URDF_TOPIC));
     urdfBuilder.setSettingsByKey(settingsByKey, rosPackagePath);
@@ -494,7 +477,6 @@ export default function Layout({
     const selectedTopics = filterMap(selectedTopicNames, (name) => topicsByTopicName[name]);
 
     sceneBuilder.setPlayerId(playerId);
-    sceneBuilder.setTransforms(transforms, renderFrameId);
     sceneBuilder.setFlattenMarkers(flattenMarkers);
     sceneBuilder.setSelectedNamespacesByTopic(selectedNamespacesByTopic);
     sceneBuilder.setSettingsByKey(settingsByKey);
@@ -506,7 +488,6 @@ export default function Layout({
     sceneBuilder.render();
 
     // update the transforms and set the selected ones to render
-    transformsBuilder.setTransforms(transforms, renderFrameId);
     transformsBuilder.setSelectedTransforms(selectedNamespacesByTopic[TRANSFORM_TOPIC] ?? []);
   }, [
     colorOverrideMarkerMatchers,
@@ -518,14 +499,12 @@ export default function Layout({
     playerId,
     resetFrame,
     robotDescriptionParam,
-    renderFrameId,
     rosPackagePath,
     sceneBuilder,
     selectedNamespacesByTopic,
     selectedTopicNames,
     settingsByKey,
     topics,
-    transforms,
     transformsBuilder,
     urdfBuilder,
   ]);
@@ -832,6 +811,9 @@ export default function Layout({
               autoTextBackgroundColor={autoTextBackgroundColor}
               cameraState={cameraState}
               isPlaying={isPlaying}
+              transforms={transforms}
+              renderFrame={renderFrame}
+              fixedFrame={fixedFrame}
               currentTime={currentTime}
               markerProviders={markerProviders}
               onCameraStateChange={onCameraStateChange}
@@ -870,7 +852,8 @@ export default function Layout({
                   showCrosshair={showCrosshair}
                   targetPose={targetPose}
                   transforms={transforms}
-                  renderFrameId={renderFrameId}
+                  renderFrameId={renderFrame.id}
+                  fixedFrameId={fixedFrame.id}
                   currentTime={currentTime}
                   {...searchTextProps}
                 />

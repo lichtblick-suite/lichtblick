@@ -11,6 +11,14 @@ import { mat4Identity } from "./geometry";
 
 type TimeAndTransform = [time: Time, transform: Transform];
 
+const T0 = { sec: 0, nsec: 0 };
+const T1 = { sec: 0, nsec: 10 };
+const T2 = { sec: 0, nsec: 20 };
+
+function createTime(): Time {
+  return { sec: 0, nsec: 0 };
+}
+
 describe("CoordinateFrame", () => {
   it("construction and traversal", () => {
     const odom = new CoordinateFrame("odom", undefined, undefined);
@@ -43,13 +51,13 @@ describe("CoordinateFrame", () => {
   });
 
   it("Interpolate", () => {
-    const lower: TimeAndTransform = [{ sec: 0, nsec: 0 }, new Transform([0, 0, 0], [0, 0, 0, 1])];
+    const lower: TimeAndTransform = [T0, new Transform([0, 0, 0], [0, 0, 0, 1])];
     const upper: TimeAndTransform = [{ sec: 1, nsec: 0 }, new Transform([1, 1, 1], [0, 0, 1, 0])];
 
-    const outTime = { sec: 0, nsec: 0 };
+    const outTime = createTime();
     const outTf = Transform.Identity();
-    CoordinateFrame.Interpolate(outTime, outTf, lower, upper, { sec: 0, nsec: 0 });
-    expect(outTime).toEqual({ sec: 0, nsec: 0 });
+    CoordinateFrame.Interpolate(outTime, outTf, lower, upper, T0);
+    expect(outTime).toEqual(T0);
     expect(outTf.position()).toEqual([0, 0, 0]);
     expect(outTf.rotation()).toEqual([0, 0, 0, 1]);
 
@@ -65,10 +73,6 @@ describe("CoordinateFrame", () => {
   });
 
   it("GetTransformMatrix", () => {
-    const T0 = { sec: 0, nsec: 0 };
-    const T1 = { sec: 0, nsec: 10 };
-    const T2 = { sec: 0, nsec: 20 };
-
     const parent = new CoordinateFrame("parent", undefined);
     const child = new CoordinateFrame("child", parent);
 
@@ -130,59 +134,47 @@ describe("CoordinateFrame", () => {
 
     const frame = new CoordinateFrame("frame", undefined);
 
-    const lower: TimeAndTransform = [{ sec: 0, nsec: 0 }, Transform.Identity()];
-    const upper: TimeAndTransform = [{ sec: 0, nsec: 0 }, Transform.Identity()];
-    expect(
-      frame.findClosestTransforms(lower, upper, { sec: 0, nsec: 0 }, { sec: 0, nsec: 0 }),
-    ).toBe(false);
+    const lower: TimeAndTransform = [T0, Transform.Identity()];
+    const upper: TimeAndTransform = [T0, Transform.Identity()];
+    expect(frame.findClosestTransforms(lower, upper, T0, T0)).toBe(false);
 
-    frame.addTransform({ sec: 0, nsec: 0 }, TF1);
-    expect(
-      frame.findClosestTransforms(lower, upper, { sec: 0, nsec: 0 }, { sec: 0, nsec: 0 }),
-    ).toBe(true);
-    expect(lower).toEqual([{ sec: 0, nsec: 0 }, TF1]);
-    expect(upper).toEqual([{ sec: 0, nsec: 0 }, TF1]);
+    frame.addTransform(T0, TF1);
+    expect(frame.findClosestTransforms(lower, upper, T0, T0)).toBe(true);
+    expect(lower).toEqual([T0, TF1]);
+    expect(upper).toEqual([T0, TF1]);
 
-    expect(
-      frame.findClosestTransforms(lower, upper, { sec: 0, nsec: 1 }, { sec: 0, nsec: 0 }),
-    ).toBe(false);
+    expect(frame.findClosestTransforms(lower, upper, { sec: 0, nsec: 1 }, T0)).toBe(false);
     expect(
       frame.findClosestTransforms(lower, upper, { sec: 0, nsec: 1 }, { sec: 0, nsec: 1 }),
     ).toBe(true);
-    expect(lower).toEqual([{ sec: 0, nsec: 0 }, TF1]);
-    expect(upper).toEqual([{ sec: 0, nsec: 0 }, TF1]);
+    expect(lower).toEqual([T0, TF1]);
+    expect(upper).toEqual([T0, TF1]);
 
     frame.addTransform({ sec: 0, nsec: 9 }, TF2);
     frame.addTransform({ sec: 0, nsec: 10 }, TF3);
     frame.addTransform({ sec: 0, nsec: 12 }, TF4);
 
-    expect(
-      frame.findClosestTransforms(lower, upper, { sec: 0, nsec: 1 }, { sec: 0, nsec: 0 }),
-    ).toBe(true);
-    expect(lower).toEqual([{ sec: 0, nsec: 0 }, TF1]);
+    expect(frame.findClosestTransforms(lower, upper, { sec: 0, nsec: 1 }, T0)).toBe(true);
+    expect(lower).toEqual([T0, TF1]);
     expect(upper).toEqual([{ sec: 0, nsec: 9 }, TF2]);
 
-    expect(
-      frame.findClosestTransforms(lower, upper, { sec: 0, nsec: 9 }, { sec: 0, nsec: 0 }),
-    ).toBe(true);
+    expect(frame.findClosestTransforms(lower, upper, { sec: 0, nsec: 9 }, T0)).toBe(true);
     expect(lower).toEqual([{ sec: 0, nsec: 9 }, TF2]);
     expect(upper).toEqual([{ sec: 0, nsec: 9 }, TF2]);
 
-    expect(
-      frame.findClosestTransforms(lower, upper, { sec: 0, nsec: 11 }, { sec: 0, nsec: 0 }),
-    ).toBe(true);
+    expect(frame.findClosestTransforms(lower, upper, { sec: 0, nsec: 11 }, T0)).toBe(true);
     expect(lower).toEqual([{ sec: 0, nsec: 10 }, TF3]);
     expect(upper).toEqual([{ sec: 0, nsec: 12 }, TF4]);
   });
 
   it("apply", () => {
     const parent = new CoordinateFrame("parent", undefined);
-    parent.addTransform({ sec: 0, nsec: 0 }, new Transform([0, 1, 0], [0, 0, 0, 1]));
+    parent.addTransform(T0, new Transform([0, 1, 0], [0, 0, 0, 1]));
     const child = new CoordinateFrame("child", parent);
-    child.addTransform({ sec: 0, nsec: 0 }, new Transform([1, 0, 0], [0, 0, 0, 1]));
+    child.addTransform(T0, new Transform([1, 0, 0], [0, 0, 0, 1]));
 
     const out = emptyPose();
-    expect(parent.apply(out, emptyPose(), child, { sec: 0, nsec: 0 })).toBeDefined();
+    expect(parent.apply(out, emptyPose(), parent, child, T0, T0)).toBeDefined();
     expect(out.position).toEqual({ x: 1, y: 0, z: 0 });
     expect(out.orientation).toEqual({ x: 0, y: 0, z: 0, w: 1 });
   });

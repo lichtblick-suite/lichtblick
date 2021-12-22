@@ -61,15 +61,22 @@ export class TransformTree {
 
   apply(
     output: MutablePose,
-    original: Pose,
+    input: Pose,
     frameId: string,
+    rootFrameId: string | undefined,
     srcFrameId: string,
-    time: Time,
+    dstTime: Time,
+    srcTime: Time,
     maxDelta?: Duration,
   ): MutablePose | undefined {
     const frame = this.frame(frameId);
     const srcFrame = this.frame(srcFrameId);
-    return frame && srcFrame ? frame.apply(output, original, srcFrame, time, maxDelta) : undefined;
+    if (!frame || !srcFrame) {
+      return undefined;
+    }
+    const rootFrame =
+      (rootFrameId != undefined ? this.frame(rootFrameId) : frame.root()) ?? frame.root();
+    return frame.apply(output, input, rootFrame, srcFrame, dstTime, srcTime, maxDelta);
   }
 
   static Clone(tree: TransformTree): TransformTree {

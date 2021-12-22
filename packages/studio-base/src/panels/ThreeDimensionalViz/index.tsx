@@ -28,6 +28,10 @@ import {
   useTransformedCameraState,
   getNewCameraStateOnFollowChange,
 } from "@foxglove/studio-base/panels/ThreeDimensionalViz/threeDimensionalVizUtils";
+import {
+  CoordinateFrame,
+  DEFAULT_FRAME_IDS,
+} from "@foxglove/studio-base/panels/ThreeDimensionalViz/transforms";
 import { ThreeDimensionalVizConfig } from "@foxglove/studio-base/panels/ThreeDimensionalViz/types";
 import { PanelConfigSchema, SaveConfig } from "@foxglove/studio-base/types/panels";
 
@@ -102,6 +106,31 @@ function BaseRenderer(props: Props): JSX.Element {
   const transforms = useTransforms(topics, frame, resetFrame);
   const currentTime = useMessagePipeline(selectCurrentTime);
   const isPlaying = useMessagePipeline(selectIsPlaying);
+
+  const orphanedFrame = useMemo(() => new CoordinateFrame("(empty)", undefined), []);
+
+  const renderFrame = useMemo<CoordinateFrame>(() => {
+    // If the user specified a followTf, do not fall back to any other (valid) frame
+    if (typeof followTf === "string") {
+      return transforms.frame(followTf) ?? orphanedFrame;
+    }
+
+    // Try the conventional list of transform ids
+    for (const frameId of DEFAULT_FRAME_IDS) {
+      const curFrame = transforms.frame(frameId);
+      if (curFrame) {
+        return curFrame;
+      }
+    }
+
+    // Fall back to the root of the first transform (lexicographically), if any
+    const firstFrameId = Array.from(transforms.frames().keys()).sort()[0];
+    return firstFrameId != undefined
+      ? transforms.frame(firstFrameId)?.root() ?? orphanedFrame
+      : orphanedFrame;
+  }, [followTf, transforms, orphanedFrame]);
+
+  const fixedFrame = useMemo(() => renderFrame?.root(), [renderFrame]);
 
   // We use useState to store the cameraState instead of using config directly in order to
   // speed up the pan/rotate performance of the 3D panel. This allows us to update the cameraState
@@ -206,6 +235,8 @@ function BaseRenderer(props: Props): JSX.Element {
       currentTime={currentTime}
       followOrientation={followOrientation}
       followTf={followTf}
+      renderFrame={renderFrame}
+      fixedFrame={fixedFrame}
       resetFrame={resetFrame}
       frame={frame}
       helpContent={helpContent}

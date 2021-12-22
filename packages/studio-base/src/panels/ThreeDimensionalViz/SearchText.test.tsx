@@ -218,6 +218,7 @@ describe("<SearchText />", () => {
         onCameraStateChange,
         currentMatch,
         renderFrameId: ROOT_FRAME_ID,
+        fixedFrameId: ROOT_FRAME_ID,
         searchTextOpen: true,
         transforms,
         currentTime: { sec: 0, nsec: 0 },

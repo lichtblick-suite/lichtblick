@@ -17,7 +17,7 @@
       "name": "vscode-jest-tests",
       "request": "launch",
       "program": "${workspaceFolder}/node_modules/.bin/jest",
-      "args": ["--runInBand"],
+      "args": ["--runInBand", "${relativeFileDirname}"],
       "cwd": "${workspaceFolder}",
       "env": {
         "NODE_OPTIONS": "--require ts-node/register"

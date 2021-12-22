@@ -14,10 +14,7 @@
 import { quat, vec3 } from "gl-matrix";
 
 import { Time } from "@foxglove/rostime";
-import {
-  CoordinateFrame,
-  TransformTree,
-} from "@foxglove/studio-base/panels/ThreeDimensionalViz/transforms";
+import { CoordinateFrame } from "@foxglove/studio-base/panels/ThreeDimensionalViz/transforms";
 import {
   Marker,
   ArrowMarker,
@@ -25,7 +22,11 @@ import {
   MutablePose,
   Point,
 } from "@foxglove/studio-base/types/Messages";
-import { MarkerProvider, MarkerCollector } from "@foxglove/studio-base/types/Scene";
+import {
+  MarkerProvider,
+  MarkerCollector,
+  RenderMarkerArgs,
+} from "@foxglove/studio-base/types/Scene";
 import { clonePose, emptyPose, setIdentityPose } from "@foxglove/studio-base/util/Pose";
 import { MARKER_MSG_TYPES } from "@foxglove/studio-base/util/globalConstants";
 
@@ -84,9 +85,10 @@ const originAxes: Axis[] = [
 
 const getTransformedAxisArrowMarker = (
   id: string,
-  srcFrame: CoordinateFrame,
   axis: Axis,
   renderFrame: CoordinateFrame,
+  fixedFrame: CoordinateFrame,
+  srcFrame: CoordinateFrame,
   time: Time,
 ) => {
   const { unitVector, id: axisId } = axis;
@@ -101,7 +103,7 @@ const getTransformedAxisArrowMarker = (
     },
   };
 
-  renderFrame.apply(pose, pose, srcFrame, time);
+  renderFrame.apply(pose, pose, fixedFrame, srcFrame, time, time);
 
   return {
     ...axis,
@@ -113,12 +115,13 @@ const getTransformedAxisArrowMarker = (
 
 const getAxesArrowMarkers = (
   id: string,
-  srcFrame: CoordinateFrame,
   renderFrame: CoordinateFrame,
+  fixedFrame: CoordinateFrame,
+  srcFrame: CoordinateFrame,
   time: Time,
 ): ArrowMarker[] => {
   return originAxes.map((axis) =>
-    getTransformedAxisArrowMarker(id, srcFrame, axis, renderFrame, time),
+    getTransformedAxisArrowMarker(id, axis, renderFrame, fixedFrame, srcFrame, time),
   );
 };
 
@@ -154,8 +157,9 @@ const UNUSED_QUAT = { x: 0, y: 0, z: 0, w: 1 };
 // Exported for tests
 export const getArrowToParentMarker = (
   id: string,
-  srcFrame: CoordinateFrame,
   renderFrame: CoordinateFrame,
+  fixedFrame: CoordinateFrame,
+  srcFrame: CoordinateFrame,
   time: Time,
 ): ArrowMarker | undefined => {
   const parent = srcFrame.parent();
@@ -173,8 +177,8 @@ export const getArrowToParentMarker = (
   };
 
   if (
-    !renderFrame.apply(childPose, childPose, srcFrame, time) ||
-    !renderFrame.apply(parentPose, parentPose, parent, time)
+    !renderFrame.apply(childPose, childPose, fixedFrame, srcFrame, time, time) ||
+    !renderFrame.apply(parentPose, parentPose, fixedFrame, parent, time, time)
   ) {
     return undefined;
   }
@@ -201,34 +205,42 @@ export const getArrowToParentMarker = (
 };
 
 export default class TransformsBuilder implements MarkerProvider {
-  transforms?: TransformTree;
-  renderFrameId?: string;
   selections: string[] = [];
-
-  setTransforms = (transforms: TransformTree, renderFrameId: string | undefined): void => {
-    this.transforms = transforms;
-    this.renderFrameId = renderFrameId;
-  };
 
   addMarkersForTransform(
     add: MarkerCollector,
     id: string,
-    srcFrame: CoordinateFrame,
     renderFrame: CoordinateFrame,
+    fixedFrame: CoordinateFrame,
+    srcFrame: CoordinateFrame,
     time: Time,
   ): void {
     setIdentityPose(tempPose);
 
     // If renderFrame_T_srcFrame is invalid at the given time, don't draw anything
-    if (!renderFrame.apply(tempPose, tempPose, srcFrame, time)) {
+    if (!renderFrame.apply(tempPose, tempPose, fixedFrame, srcFrame, time, time)) {
       return;
     }
 
-    const markersForTransform: Marker[] = getAxesArrowMarkers(id, srcFrame, renderFrame, time);
-    const arrowMarker = getArrowToParentMarker(id, srcFrame, renderFrame, time);
-    if (arrowMarker) {
-      markersForTransform.push(arrowMarker);
+    // Three RGB axis arrows
+    const markersForTransform: Marker[] = getAxesArrowMarkers(
+      id,
+      renderFrame,
+      fixedFrame,
+      srcFrame,
+      time,
+    );
+
+    // A yellow arrow connecting this axis to its parent
+    const parent = srcFrame.parent();
+    if (parent && this.selections.includes(parent.id)) {
+      const arrowMarker = getArrowToParentMarker(id, renderFrame, fixedFrame, srcFrame, time);
+      if (arrowMarker) {
+        markersForTransform.push(arrowMarker);
+      }
     }
+
+    // Text label
     markersForTransform.push(getAxisTextMarker(id, tempPose));
 
     for (const marker of markersForTransform) {
@@ -249,16 +261,13 @@ export default class TransformsBuilder implements MarkerProvider {
     this.selections = selections;
   }
 
-  renderMarkers = (add: MarkerCollector, time: Time): void => {
-    const { selections, transforms } = this;
-    if (transforms == undefined || this.renderFrameId == undefined) {
-      return;
-    }
-    for (const key of selections) {
+  renderMarkers = (args: RenderMarkerArgs): void => {
+    const { add, renderFrame, fixedFrame, transforms, time } = args;
+
+    for (const key of this.selections) {
       const srcFrame = transforms.frame(key);
-      const renderFrame = transforms.frame(this.renderFrameId);
-      if (srcFrame && renderFrame) {
-        this.addMarkersForTransform(add, key, srcFrame, renderFrame, time);
+      if (srcFrame) {
+        this.addMarkersForTransform(add, key, renderFrame, fixedFrame, srcFrame, time);
       }
     }
   };

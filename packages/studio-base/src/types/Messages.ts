@@ -115,7 +115,7 @@ export type BaseMarker = Readonly<
     ns: string;
     id: string | number; // TODO: Actually just a number
     action: 0 | 1 | 2 | 3;
-    pose: Pose;
+    pose: MutablePose;
     scale: Scale;
     color?: Color;
     colors?: Colors;
@@ -314,22 +314,20 @@ export type PointField = Readonly<{
   count: number;
 }>;
 
-export type PointCloud2 = Readonly<
-  StampedMessage & {
-    fields: readonly PointField[];
-    height: number;
-    width: number;
-    is_bigendian: boolean;
-    point_step: number; // Length of point in bytes
-    row_step: number; // Length of row in bytes
-    data: Uint8Array;
-    is_dense: number;
-    // this is appended by scene builder
-    type: 102;
-    // this is appended by scene builder
-    pose?: Pose;
-  }
->;
+export type PointCloud2 = StampedMessage & {
+  fields: readonly PointField[];
+  height: number;
+  width: number;
+  is_bigendian: boolean;
+  point_step: number; // Length of point in bytes
+  row_step: number; // Length of row in bytes
+  data: Uint8Array;
+  is_dense: number;
+  // this is appended by scene builder
+  type: 102;
+  // this is appended by scene builder
+  pose?: MutablePose;
+};
 
 export type Image = Readonly<
   StampedMessage & {

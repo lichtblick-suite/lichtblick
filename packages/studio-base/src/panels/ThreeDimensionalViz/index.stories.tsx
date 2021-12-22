@@ -122,7 +122,7 @@ export function TransformInterpolation(): JSX.Element {
       header: { seq: 0, stamp: { sec: 1, nsec: 0 }, frame_id: "map" },
       child_frame_id: "base_link",
       transform: {
-        translation: { x: 1, y: 0, z: 0 },
+        translation: VEC3_ZERO,
         rotation: QUAT_IDENTITY,
       },
     },
@@ -146,7 +146,7 @@ export function TransformInterpolation(): JSX.Element {
     receiveTime: { sec: 10, nsec: 0 },
     message: {
       header: { seq: 0, stamp: { sec: 1, nsec: 0 }, frame_id: "base_link" },
-      id: 0,
+      id: 1,
       ns: "",
       type: 1,
       action: 0,
@@ -154,6 +154,7 @@ export function TransformInterpolation(): JSX.Element {
       pose: { position: VEC3_ZERO, orientation: QUAT_IDENTITY },
       scale: { x: 0.5, y: 0.5, z: 0.5 },
       color: { r: 1, g: 0, b: 0, a: 0.25 },
+      lifetime: { sec: 0, nsec: 0 },
     },
     sizeInBytes: 0,
   };
@@ -161,8 +162,8 @@ export function TransformInterpolation(): JSX.Element {
     topic: "/markers",
     receiveTime: { sec: 10, nsec: 0 },
     message: {
-      header: { seq: 0, stamp: { sec: 2, nsec: 0 }, frame_id: "base_link" },
-      id: 0,
+      header: { seq: 0, stamp: { sec: 1, nsec: 0 }, frame_id: "base_link" },
+      id: 2,
       ns: "",
       type: 1,
       action: 0,
@@ -170,6 +171,24 @@ export function TransformInterpolation(): JSX.Element {
       pose: { position: VEC3_ZERO, orientation: QUAT_IDENTITY },
       scale: { x: 0.5, y: 0.5, z: 0.5 },
       color: { r: 0, g: 1, b: 0, a: 0.25 },
+      lifetime: { sec: 0, nsec: 0 },
+    },
+    sizeInBytes: 0,
+  };
+  const cube3: MessageEvent<CubeMarker> = {
+    topic: "/markers",
+    receiveTime: { sec: 10, nsec: 0 },
+    message: {
+      header: { seq: 0, stamp: { sec: 2, nsec: 0 }, frame_id: "base_link" },
+      id: 3,
+      ns: "",
+      type: 1,
+      action: 0,
+      frame_locked: false,
+      pose: { position: { x: 1, y: 0, z: 0 }, orientation: QUAT_IDENTITY },
+      scale: { x: 0.5, y: 0.5, z: 0.5 },
+      color: { r: 0, g: 0, b: 1, a: 0.25 },
+      lifetime: { sec: 0, nsec: 0 },
     },
     sizeInBytes: 0,
   };
@@ -178,7 +197,7 @@ export function TransformInterpolation(): JSX.Element {
     datatypes,
     topics,
     frame: {
-      "/markers": [cube1, cube2],
+      "/markers": [cube1, cube2, cube3],
       "/tf": [tf_t1, tf_t3],
     },
     capabilities: [],

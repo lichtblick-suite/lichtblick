@@ -31,6 +31,10 @@ import WorldMarkers, {
   MarkerWithInteractionData,
 } from "@foxglove/studio-base/panels/ThreeDimensionalViz/WorldMarkers";
 import { LAYER_INDEX_DEFAULT_BASE } from "@foxglove/studio-base/panels/ThreeDimensionalViz/constants";
+import {
+  CoordinateFrame,
+  TransformTree,
+} from "@foxglove/studio-base/panels/ThreeDimensionalViz/transforms";
 import withHighlights from "@foxglove/studio-base/panels/ThreeDimensionalViz/withHighlights";
 import inScreenshotTests from "@foxglove/studio-base/stories/inScreenshotTests";
 import {
@@ -55,6 +59,9 @@ type Props = WorldSearchTextProps & {
   cameraState: CameraState;
   children?: React.ReactNode;
   isPlaying: boolean;
+  transforms: TransformTree;
+  renderFrame: CoordinateFrame;
+  fixedFrame: CoordinateFrame;
   currentTime: Time;
   markerProviders: MarkerProvider[];
   onCameraStateChange: (arg0: CameraState) => void;
@@ -65,11 +72,21 @@ type Props = WorldSearchTextProps & {
   onMouseUp?: MouseHandler;
 };
 
-function getMarkers(
-  markers: InteractiveMarkersByType,
-  markerProviders: MarkerProvider[],
-  time: Time,
-): void {
+function getMarkers({
+  markers,
+  markerProviders,
+  transforms,
+  renderFrame,
+  fixedFrame,
+  time,
+}: {
+  markers: InteractiveMarkersByType;
+  markerProviders: MarkerProvider[];
+  transforms: TransformTree;
+  renderFrame: CoordinateFrame;
+  fixedFrame: CoordinateFrame;
+  time: Time;
+}): void {
   // These casts seem wrong - some type definitions around MarkerProvider or MarkerCollector are not
   // compatible with interactive markers. Ideally interactive markers would not require mutating
   // marker objects which would help avoid unsafe casting.
@@ -97,8 +114,9 @@ function getMarkers(
     triangleList: (o) => markers.triangleList.push(o as unknown as MarkerWithInteractionData),
   };
 
+  const args = { add: collector, transforms, renderFrame, fixedFrame, time };
   for (const provider of markerProviders) {
-    provider.renderMarkers(collector, time);
+    provider.renderMarkers(args);
   }
 }
 
@@ -114,6 +132,9 @@ function World(
     onCameraStateChange,
     cameraState,
     isPlaying,
+    transforms,
+    renderFrame,
+    fixedFrame,
     currentTime,
     markerProviders,
     onDoubleClick,
@@ -157,7 +178,14 @@ function World(
     (markersRef.current as Record<string, unknown[]>)[key]!.length = 0;
   }
 
-  getMarkers(markersRef.current, markerProviders, currentTime);
+  getMarkers({
+    markers: markersRef.current,
+    markerProviders,
+    transforms,
+    renderFrame,
+    fixedFrame,
+    time: currentTime,
+  });
   const markersByType = markersRef.current;
   const { text = [] } = markersByType;
   const processedMarkersByType = {
