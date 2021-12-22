@@ -38,7 +38,6 @@ const NO_DATATYPES = new Map();
 
 function noop() {}
 
-// TODO(Audrey): put messages under activeData, add ability to mock seeking
 export default function MockMessagePipelineProvider(props: {
   children: React.ReactNode;
   presence?: PlayerPresence;

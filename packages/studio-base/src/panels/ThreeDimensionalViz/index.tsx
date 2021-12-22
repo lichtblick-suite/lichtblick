@@ -116,11 +116,6 @@ function BaseRenderer(props: Props): JSX.Element {
     transforms,
   });
 
-  const onSetSubscriptions = useCallback(
-    (subscriptions: string[]) => setSubscriptions(subscriptions),
-    [setSubscriptions],
-  );
-
   // use callbackInputsRef to make sure the input changes don't trigger `onFollowChange` or `onAlignXYAxis` to change
   const callbackInputsRef = useRef({
     transformedCameraState,
@@ -222,7 +217,7 @@ function BaseRenderer(props: Props): JSX.Element {
       topics={topics}
       targetPose={targetPose}
       transforms={transforms}
-      setSubscriptions={onSetSubscriptions}
+      setSubscriptions={setSubscriptions}
     />
   );
 }
