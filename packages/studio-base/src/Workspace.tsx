@@ -10,7 +10,7 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { Link, IconButton, makeStyles, Stack, Text, useTheme } from "@fluentui/react";
+import { Link, makeStyles, Stack, Text, useTheme } from "@fluentui/react";
 import { extname } from "path";
 import {
   useState,
@@ -25,8 +25,7 @@ import { useToasts } from "react-toast-notifications";
 
 import { AppSetting } from "@foxglove/studio-base/AppSetting";
 import AccountSettings from "@foxglove/studio-base/components/AccountSettingsSidebar/AccountSettings";
-import ConnectionList from "@foxglove/studio-base/components/ConnectionList";
-import connectionHelpContent from "@foxglove/studio-base/components/ConnectionList/index.help.md";
+import { DataSourceSidebar } from "@foxglove/studio-base/components/DataSourceSidebar";
 import DocumentDropListener from "@foxglove/studio-base/components/DocumentDropListener";
 import DropOverlay from "@foxglove/studio-base/components/DropOverlay";
 import ExtensionsSidebar from "@foxglove/studio-base/components/ExtensionsSidebar";
@@ -418,42 +417,25 @@ export default function Workspace(props: WorkspaceProps): JSX.Element {
 
   const { currentUser } = useCurrentUser();
 
-  const sidebarItems = useMemo<Map<SidebarItemKey, SidebarItem>>(() => {
-    function Connection() {
+  // Since the _component_ field of a sidebar item entry is a component and accepts no additional
+  // props we need to wrap our DataSourceSidebar component to connect the open data source action to
+  // open the data source dialog.
+  const DataSourceSidebarItem = useMemo(() => {
+    return function DataSourceSidebarItemImpl() {
       return (
-        <SidebarContent
-          title="Data sources"
-          helpContent={connectionHelpContent}
-          trailingItems={[
-            enableOpenDialog === true && (
-              <IconButton
-                key="add-connection"
-                iconProps={{ iconName: "Add" }}
-                styles={{
-                  icon: {
-                    svg: { height: "1em", width: "1em" },
-                    "> span": { display: "flex" },
-                  },
-                }}
-                onClick={() => {
-                  setShowOpenDialog({ view: "start" });
-                }}
-              />
-            ),
-          ].filter(Boolean)}
-        >
-          <ConnectionList />
-        </SidebarContent>
+        <DataSourceSidebar onSelectDataSourceAction={() => setShowOpenDialog({ view: "start" })} />
       );
-    }
+    };
+  }, []);
 
+  const sidebarItems = useMemo<Map<SidebarItemKey, SidebarItem>>(() => {
     const SIDEBAR_ITEMS = new Map<SidebarItemKey, SidebarItem>([
       [
         "connection",
         {
           iconName: "DataManagementSettings",
           title: "Data sources",
-          component: Connection,
+          component: DataSourceSidebarItem,
           badge:
             playerProblems && playerProblems.length > 0
               ? { count: playerProblems.length }
@@ -485,7 +467,7 @@ export default function Workspace(props: WorkspaceProps): JSX.Element {
           ],
         ])
       : SIDEBAR_ITEMS;
-  }, [playerProblems, supportsAccountSettings, currentUser, enableOpenDialog]);
+  }, [DataSourceSidebarItem, playerProblems, supportsAccountSettings, currentUser]);
 
   const sidebarBottomItems: readonly SidebarItemKey[] = useMemo(() => {
     return supportsAccountSettings ? ["help", "account", "preferences"] : ["help", "preferences"];
