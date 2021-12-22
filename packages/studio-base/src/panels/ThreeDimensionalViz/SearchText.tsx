@@ -75,36 +75,31 @@ export const useGLText = ({
 }: WorldSearchTextProps & {
   text: Interactive<TextMarker>[];
 }): Interactive<GLTextMarker>[] => {
-  const glText: Interactive<GLTextMarker>[] = React.useMemo(() => {
-    let numMatches = 0;
-    return text.map((marker) => {
-      const scale = {
-        // RViz ignores scale.x/y for text and only uses z
-        x: marker.scale.z,
-        y: marker.scale.z,
-        z: marker.scale.z,
-      };
+  let numMatches = 0;
+  const glText: Interactive<GLTextMarker>[] = text.map((marker) => {
+    // RViz ignores scale.x/y for text and only uses z
+    const z = marker.scale.z;
+    const scale = { x: z, y: z, z };
 
-      if (searchText.length === 0 || !searchTextOpen) {
-        return { ...marker, scale };
-      }
-
-      const highlightedIndices = getHighlightedIndices(marker.text, searchText);
-
-      if (highlightedIndices.length > 0) {
-        numMatches += 1;
-        const highlightedMarker = {
-          ...marker,
-          scale,
-          highlightColor: selectedMatchIndex + 1 === numMatches ? ORANGE : YELLOW,
-          highlightedIndices,
-        };
-        return highlightedMarker;
-      }
-
+    if (searchText.length === 0 || !searchTextOpen) {
       return { ...marker, scale };
-    });
-  }, [searchText, searchTextOpen, selectedMatchIndex, text]);
+    }
+
+    const highlightedIndices = getHighlightedIndices(marker.text, searchText);
+
+    if (highlightedIndices.length > 0) {
+      numMatches += 1;
+      const highlightedMarker = {
+        ...marker,
+        scale,
+        highlightColor: selectedMatchIndex + 1 === numMatches ? ORANGE : YELLOW,
+        highlightedIndices,
+      };
+      return highlightedMarker;
+    }
+
+    return { ...marker, scale };
+  });
 
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const throttledSetSearchTextMatches = useCallback(

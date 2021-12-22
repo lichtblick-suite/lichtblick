@@ -15,26 +15,23 @@ import { quat, vec3 } from "gl-matrix";
 
 import { Time } from "@foxglove/rostime";
 import { CoordinateFrame } from "@foxglove/studio-base/panels/ThreeDimensionalViz/transforms";
-import {
-  Marker,
-  ArrowMarker,
-  Color,
-  MutablePose,
-  Point,
-} from "@foxglove/studio-base/types/Messages";
+import { ArrowMarker, MutablePose, Point, TextMarker } from "@foxglove/studio-base/types/Messages";
 import { clonePose, emptyPose, setIdentityPose } from "@foxglove/studio-base/util/Pose";
 import { MARKER_MSG_TYPES } from "@foxglove/studio-base/util/globalConstants";
 
 import { MarkerProvider, MarkerCollector, RenderMarkerArgs } from "./types";
 
+// So we don't create a lot of effectively unused vectors / quats.
+const UNUSED_QUAT = { x: 0, y: 0, z: 0, w: 1 };
+
+// Don't draw lines longer than this, to avoid precision issues
+const MAX_DISTANCE = 5000;
+
 const defaultArrowMarker = {
   id: "",
   header: {
     frame_id: "",
-    stamp: {
-      sec: 0,
-      nsec: 0,
-    },
+    stamp: { sec: 0, nsec: 0 },
     seq: 0,
   },
   ns: "tf-axes",
@@ -49,7 +46,6 @@ const tempOrientation = [0, 0, 0, 0] as [number, number, number, number];
 
 type Axis = ArrowMarker & {
   id: string;
-  color: Color;
   unitVector: vec3;
 };
 
@@ -87,7 +83,7 @@ const getTransformedAxisArrowMarker = (
   fixedFrame: CoordinateFrame,
   srcFrame: CoordinateFrame,
   time: Time,
-) => {
+): ArrowMarker => {
   const { unitVector, id: axisId } = axis;
   quat.rotationTo(tempOrientation, unitXVector, unitVector);
   const pose = {
@@ -102,12 +98,7 @@ const getTransformedAxisArrowMarker = (
 
   renderFrame.apply(pose, pose, fixedFrame, srcFrame, time, time);
 
-  return {
-    ...axis,
-    id: `${id}-${axisId}axis`,
-    name: `${id}-${axisId}axis`,
-    pose,
-  };
+  return { ...axis, id: `${id}-${axisId}axis`, pose };
 };
 
 const getAxesArrowMarkers = (
@@ -122,17 +113,14 @@ const getAxesArrowMarkers = (
   );
 };
 
-const getAxisTextMarker = (id: string, pose: MutablePose): Marker => {
+const getAxisTextMarker = (id: string, pose: MutablePose): TextMarker => {
   const textPose = clonePose(pose);
   // Lower it a little in world coordinates so it appears slightly below the axis origin (like in rviz).
-  textPose.position.z = textPose.position.z - 0.02;
+  textPose.position.z -= 0.02;
   return {
     header: {
       frame_id: "",
-      stamp: {
-        sec: 0,
-        nsec: 0,
-      },
+      stamp: { sec: 0, nsec: 0 },
       seq: 0,
     },
     ns: "tf-axes",
@@ -140,16 +128,42 @@ const getAxisTextMarker = (id: string, pose: MutablePose): Marker => {
     scale: { x: 1, y: 1, z: 1 },
     color: { r: 1, g: 1, b: 1, a: 1 },
     id: `${id}-name`,
-    // @ts-expect-error should name exist on marker?
-    name: `${id}-name`,
     pose: textPose,
     type: MARKER_MSG_TYPES.TEXT_VIEW_FACING,
     text: id,
+    frame_locked: true,
   };
 };
 
-// So we don't create a lot of effectively unused vectors / quats.
-const UNUSED_QUAT = { x: 0, y: 0, z: 0, w: 1 };
+function pointsEqual(a: Point, b: Point): boolean {
+  const EPSILON = 0.000001; // From gl-matrix
+  return (
+    Math.abs(a.x - b.x) <= EPSILON * Math.max(1.0, Math.abs(a.x), Math.abs(b.x)) &&
+    Math.abs(a.y - b.y) <= EPSILON * Math.max(1.0, Math.abs(a.y), Math.abs(b.y)) &&
+    Math.abs(a.z - b.z) <= EPSILON * Math.max(1.0, Math.abs(a.z), Math.abs(b.z))
+  );
+}
+
+function distanceSquared(a: Point, b: Point): number {
+  const dx = a.x - b.x;
+  const dy = a.y - b.y;
+  const dz = a.z - b.z;
+  return dx * dx + dy * dy + dz * dz;
+}
+
+function reproject(a: Point, b: Point, distance: number): Point {
+  // Subtract a from b, then normalize the result
+  const diff = { x: b.x - a.x, y: b.y - a.y, z: b.z - a.z };
+  const length = Math.sqrt(diff.x * diff.x + diff.y * diff.y + diff.z * diff.z);
+  if (length > 0) {
+    diff.x /= length;
+    diff.y /= length;
+    diff.z /= length;
+  }
+
+  // Scale the result by the distance
+  return { x: a.x + diff.x * distance, y: a.y + diff.y * distance, z: a.z + diff.z * distance };
+}
 
 // Exported for tests
 export const getArrowToParentMarker = (
@@ -183,6 +197,11 @@ export const getArrowToParentMarker = (
   // If the distance between the parent and child is 0, skip drawing an arrow between them.
   if (pointsEqual(childPose.position, parentPose.position)) {
     return undefined;
+  }
+
+  // If the
+  if (distanceSquared(childPose.position, parentPose.position) > MAX_DISTANCE * MAX_DISTANCE) {
+    parentPose.position = reproject(childPose.position, parentPose.position, MAX_DISTANCE);
   }
 
   return {
@@ -220,38 +239,21 @@ export default class TransformsBuilder implements MarkerProvider {
     }
 
     // Three RGB axis arrows
-    const markersForTransform: Marker[] = getAxesArrowMarkers(
-      id,
-      renderFrame,
-      fixedFrame,
-      srcFrame,
-      time,
-    );
+    for (const marker of getAxesArrowMarkers(id, renderFrame, fixedFrame, srcFrame, time)) {
+      add.arrow(marker);
+    }
 
     // A yellow arrow connecting this axis to its parent
     const parent = srcFrame.parent();
     if (parent && this.selections.includes(parent.id)) {
       const arrowMarker = getArrowToParentMarker(id, renderFrame, fixedFrame, srcFrame, time);
       if (arrowMarker) {
-        markersForTransform.push(arrowMarker);
+        add.arrow(arrowMarker);
       }
     }
 
     // Text label
-    markersForTransform.push(getAxisTextMarker(id, tempPose));
-
-    for (const marker of markersForTransform) {
-      switch (marker.type) {
-        case 0:
-          add.arrow(marker);
-          break;
-        case 9:
-          add.text(marker);
-          break;
-        default:
-          console.warn("Marker for transform not supported", marker);
-      }
-    }
+    add.text(getAxisTextMarker(id, tempPose));
   }
 
   setSelectedTransforms(selections: string[]): void {
@@ -268,13 +270,4 @@ export default class TransformsBuilder implements MarkerProvider {
       }
     }
   };
-}
-
-function pointsEqual(a: Point, b: Point): boolean {
-  const EPSILON = 0.000001; // From gl-matrix
-  return (
-    Math.abs(a.x - b.x) <= EPSILON * Math.max(1.0, Math.abs(a.x), Math.abs(b.x)) &&
-    Math.abs(a.y - b.y) <= EPSILON * Math.max(1.0, Math.abs(a.y), Math.abs(b.y)) &&
-    Math.abs(a.z - b.z) <= EPSILON * Math.max(1.0, Math.abs(a.z), Math.abs(b.z))
-  );
 }
