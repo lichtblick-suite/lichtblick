@@ -58,6 +58,8 @@ import naturalSort from "@foxglove/studio-base/util/naturalSort";
 
 const log = Log.getLogger(__filename);
 
+const POSE_MARKER_COLOR = { r: 124 / 255, g: 107 / 255, b: 255 / 255, a: 0.5 };
+
 export type TopicSettingsCollection = {
   [topicOrNamespaceKey: string]: Record<string, unknown>;
 };
@@ -70,7 +72,7 @@ const buildSyntheticArrowMarker = ({ topic, message }: MessageEvent<PoseStamped>
   pose,
   frame_locked: true,
   scale: { x: 2, y: 2, z: 0.1 },
-  color: { r: 0, g: 0, b: 1, a: 0.5 },
+  color: POSE_MARKER_COLOR,
   interactionData: { topic, originalMessage: message },
 });
 
