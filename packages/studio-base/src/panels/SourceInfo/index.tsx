@@ -54,6 +54,15 @@ function SourceInfo() {
     [theme],
   );
 
+  const detailListItems = useMemo<(Topic & { key: string })[]>(() => {
+    return (
+      topics?.map((topic) => ({
+        key: topic.name,
+        ...topic,
+      })) ?? []
+    );
+  }, [topics]);
+
   if (!startTime || !endTime) {
     return (
       <>
@@ -106,12 +115,7 @@ function SourceInfo() {
           disableSelectionZone
           enableUpdateAnimations={false}
           isHeaderVisible={false}
-          items={
-            topics?.map((topic) => ({
-              key: topic.name,
-              ...topic,
-            })) as Topic[]
-          }
+          items={detailListItems}
           columns={[
             {
               key: "name",
@@ -145,7 +149,7 @@ function SourceInfo() {
                   textProps={{ variant: "small" }}
                   tooltip={`Click to copy topic name ${topic.datatype} to clipboard.`}
                 >
-                  {topic.name}
+                  {topic.datatype}
                 </CopyText>
               ),
             },
