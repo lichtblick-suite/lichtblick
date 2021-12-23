@@ -148,11 +148,11 @@ const FollowTFControl = memo<Props>(function FollowTFControl(props: Props) {
   const followButtonTooltipContent = useMemo(() => {
     switch (followMode) {
       case "follow":
-        return "Follow orientation";
+        return "Following position - click to follow orientation";
       case "follow-orientation":
-        return "Unfollow";
+        return "Following orientation - click to stop following";
       case "no-follow":
-        return "Follow";
+        return "Not following - click to follow position";
     }
   }, [followMode]);
 
@@ -237,7 +237,7 @@ const FollowTFControl = memo<Props>(function FollowTFControl(props: Props) {
       />
       {followButton.tooltip}
       <IconButton
-        checked={followTf != undefined}
+        checked={followMode !== "no-follow"}
         elementRef={followButton.ref}
         onClick={toggleFollowMode}
         iconProps={{
