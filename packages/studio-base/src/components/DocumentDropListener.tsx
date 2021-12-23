@@ -118,7 +118,7 @@ export default function DocumentDropListener(props: Props): JSX.Element {
       }
 
       const { dataTransfer } = ev;
-      if (dataTransfer?.types[0] === "Files") {
+      if (dataTransfer?.types.includes("Files") === true) {
         ev.stopPropagation();
         ev.preventDefault();
         dataTransfer.dropEffect = "copy";
