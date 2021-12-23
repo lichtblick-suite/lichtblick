@@ -182,13 +182,18 @@ const FollowTFControl = memo<Props>(function FollowTFControl(props: Props) {
     autocomplete.current?.focus();
   }, [autocomplete]);
 
-  const selectedFrame = followTf ? transforms.frame(followTf) : undefined;
-  const selectedItem: TfTreeNode | undefined = selectedFrame
-    ? { tf: selectedFrame, children: [], depth: 0 }
-    : undefined;
+  const selectedItem = {
+    tf: new CoordinateFrame(followTf ?? "(empty)", undefined),
+    children: [],
+    depth: 0,
+  };
 
   const followButton = useTooltip({ contents: followButtonTooltipContent });
   const frameListButton = useTooltip({ contents: "Select a frame to follow…" });
+
+  // The control is active only if there are transform frames.
+  // With no transform frames we show a disabled state.
+  const active = useMemo(() => transforms.frames().size > 0, [transforms]);
 
   return (
     <Stack
@@ -206,37 +211,42 @@ const FollowTFControl = memo<Props>(function FollowTFControl(props: Props) {
         },
       }}
     >
-      <Autocomplete
-        ref={autocomplete}
-        items={allNodes}
-        getItemValue={treeNodeToTfId}
-        getItemText={getItemText}
-        selectedItem={selectedItem}
-        placeholder={selectedItem ? getItemText(selectedItem) : "choose a target frame"}
-        onSelect={onSelectFrame}
-        sortWhenFiltering={false}
-        minWidth={0}
-        clearOnFocus
-        autoSize
-        menuStyle={{
-          // bump the menu down to reduce likelihood of it appearing while the mouse is
-          // already over it, which causes onMouseEnter not to be delivered correctly and
-          // breaks selection
-          marginTop: 4,
-        }}
-      />
+      {active && (
+        <Autocomplete
+          ref={autocomplete}
+          items={allNodes}
+          getItemValue={treeNodeToTfId}
+          getItemText={getItemText}
+          selectedItem={selectedItem}
+          placeholder={followTf ?? "(empty)"}
+          onSelect={onSelectFrame}
+          sortWhenFiltering={false}
+          minWidth={0}
+          clearOnFocus
+          autoSize
+          menuStyle={{
+            // bump the menu down to reduce likelihood of it appearing while the mouse is
+            // already over it, which causes onMouseEnter not to be delivered correctly and
+            // breaks selection
+            marginTop: 4,
+          }}
+        />
+      )}
       {frameListButton.tooltip}
-      <IconButton
-        elementRef={frameListButton.ref}
-        onClick={openFrameList}
-        iconProps={{ iconName: "MenuDown" }}
-        styles={{
-          ...iconButtonStyles,
-          root: { width: 16 },
-        }}
-      />
+      {active && (
+        <IconButton
+          elementRef={frameListButton.ref}
+          onClick={openFrameList}
+          iconProps={{ iconName: "MenuDown" }}
+          styles={{
+            ...iconButtonStyles,
+            root: { width: 16 },
+          }}
+        />
+      )}
       {followButton.tooltip}
       <IconButton
+        disabled={!active}
         checked={followMode !== "no-follow"}
         elementRef={followButton.ref}
         onClick={toggleFollowMode}

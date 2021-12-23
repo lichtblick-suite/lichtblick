@@ -119,8 +119,8 @@ function BaseRenderer(props: Props): JSX.Element {
 
   const renderFrame = useMemo<CoordinateFrame>(() => {
     // If the user specified a followTf, do not fall back to any other (valid) frame
-    if (typeof followTf === "string") {
-      return transforms.frame(followTf) ?? orphanedFrame;
+    if (followTf) {
+      return transforms.frame(followTf) ?? new CoordinateFrame(followTf, undefined);
     }
 
     // Try the conventional list of transform ids
@@ -242,7 +242,7 @@ function BaseRenderer(props: Props): JSX.Element {
       config={config}
       currentTime={currentTime}
       followMode={followMode}
-      followTf={followTf}
+      followTf={renderFrame.id}
       renderFrame={renderFrame}
       fixedFrame={fixedFrame}
       resetFrame={resetFrame}
