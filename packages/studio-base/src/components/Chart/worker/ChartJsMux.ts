@@ -53,7 +53,11 @@ type RpcUpdateEvent = {
 // >100%. For more info on this crash, see util/waitForFonts.ts.
 async function loadDefaultFont(): Promise<FontFace> {
   const fontFace = new FontFace("IBM Plex Mono", `url(${PlexMono}) format('woff2')`);
-  (self as unknown as WorkerGlobalScope).fonts.add(fontFace);
+  if (typeof WorkerGlobalScope !== "undefined" && self instanceof WorkerGlobalScope) {
+    (self as unknown as WorkerGlobalScope).fonts.add(fontFace);
+  } else {
+    document.fonts.add(fontFace);
+  }
   return await fontFace.load();
 }
 
@@ -88,7 +92,7 @@ export default class ChartJsMux {
   constructor(rpc: Rpc) {
     this._rpc = rpc;
 
-    if (this._rpc instanceof Rpc) {
+    if (typeof WorkerGlobalScope !== "undefined" && self instanceof WorkerGlobalScope) {
       setupWorker(this._rpc);
     }
 

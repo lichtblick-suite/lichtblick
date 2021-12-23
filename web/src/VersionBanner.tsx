@@ -34,6 +34,7 @@ const StyledIconWrapper = styled.div`
   position: absolute;
   top: 10px;
   right: 10px;
+  cursor: pointer;
 `;
 
 const VersionBanner = function ({
@@ -52,8 +53,8 @@ const VersionBanner = function ({
   }
 
   const prompt = isChrome
-    ? "You're using an outdated version of Chrome."
-    : "You're using an unsupported browser.";
+    ? "You’re using an outdated version of Chrome."
+    : "You’re using an unsupported browser.";
   const fixText = isChrome ? "Update Chrome" : "Download Chrome";
 
   return (
@@ -75,7 +76,18 @@ const VersionBanner = function ({
         {isChrome ? undefined : (
           <Text styles={{ root: { color: "white", fontSize: "1.1em" } }}>
             Check out our cross-browser support progress in GitHub issue{" "}
-            <Link href="https://github.com/foxglove/studio/issues/1511">#1511</Link>.
+            <Link
+              styles={{
+                root: {
+                  color: "rgba(229, 218, 255, 0.9)",
+                  ":hover": { color: "rgba(247, 244, 255, 0.9)" },
+                },
+              }}
+              href="https://github.com/foxglove/studio/issues/1511"
+            >
+              #1511
+            </Link>
+            .
           </Text>
         )}
 
@@ -85,15 +97,15 @@ const VersionBanner = function ({
           rel="noreferrer"
           styles={{
             root: {
-              color: "rgba(255,255, 255, 0.7)",
+              color: "white",
               backgroundColor: "rgba(255,255, 255, 0.1)",
               borderRadius: "4px",
-              border: "none",
+              border: "1px solid rgba(255,255,255,0.3)",
               fontSize: "1em",
             },
             rootHovered: {
               color: "white",
-              backgroundColor: "rgba(255,255, 255, 0.4)",
+              backgroundColor: "rgba(255,255, 255, 0.3)",
             },
           }}
         >

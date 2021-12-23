@@ -10,12 +10,15 @@
 
 import { ChartOptions, ChartData as ChartJsChartData, ScatterDataPoint } from "chart.js";
 import Hammer from "hammerjs";
-import { useCallback, useLayoutEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
+import { useToasts } from "react-toast-notifications";
 import { useAsync, useMountedState } from "react-use";
 import { v4 as uuidv4 } from "uuid";
 
 import Logger from "@foxglove/log";
 import { RpcElement, RpcScales } from "@foxglove/studio-base/components/Chart/types";
+import ChartJsMux from "@foxglove/studio-base/components/Chart/worker/ChartJsMux";
+import Rpc, { createLinkedChannels } from "@foxglove/studio-base/util/Rpc";
 import WebWorkerManager from "@foxglove/studio-base/util/WebWorkerManager";
 
 const log = Logger.getLogger(__filename);
@@ -81,8 +84,21 @@ type RpcSend = <T>(
 ) => Promise<T>;
 
 // Chart component renders data using workers with chartjs offscreen canvas
+
+const supportsOffscreenCanvas =
+  typeof HTMLCanvasElement.prototype.transferControlToOffscreen === "function";
+
 function Chart(props: Props): JSX.Element {
   const [id] = useState(() => uuidv4());
+  const { addToast } = useToasts();
+  useEffect(() => {
+    if (!supportsOffscreenCanvas) {
+      addToast(
+        `Your browser does not support rendering charts in a background thread. Performance may be degraded.`,
+        { appearance: "warning", autoDismiss: true },
+      );
+    }
+  }, [addToast]);
 
   const initialized = useRef(false);
   const canvasRef = useRef<HTMLCanvasElement>(ReactNull);
@@ -110,7 +126,14 @@ function Chart(props: Props): JSX.Element {
     }
 
     log.info(`Register Chart ${id}`);
-    const rpc = webWorkerManager.registerWorkerListener(id);
+    let rpc: Rpc;
+    if (supportsOffscreenCanvas) {
+      rpc = webWorkerManager.registerWorkerListener(id);
+    } else {
+      const { local, remote } = createLinkedChannels();
+      new ChartJsMux(new Rpc(remote));
+      rpc = new Rpc(local);
+    }
 
     // helper function to send rpc to our worker - all invocations need an _id_ so we inject it here
     const sendWrapper = async <T,>(
@@ -128,7 +151,9 @@ function Chart(props: Props): JSX.Element {
       log.info(`Unregister chart ${id}`);
       rpcSendRef.current = undefined;
       void sendWrapper("destroy");
-      webWorkerManager.unregisterWorkerListener(id);
+      if (supportsOffscreenCanvas) {
+        webWorkerManager.unregisterWorkerListener(id);
+      }
     };
   }, [id]);
 
@@ -210,10 +235,6 @@ function Chart(props: Props): JSX.Element {
         return;
       }
 
-      if (!("transferControlToOffscreen" in canvas)) {
-        throw new Error("Chart requires browsers with offscreen canvas support");
-      }
-
       const newUpdateMessage = getNewUpdateMessage();
       if (!newUpdateMessage) {
         return;
@@ -221,7 +242,8 @@ function Chart(props: Props): JSX.Element {
 
       initialized.current = true;
 
-      const offscreenCanvas = canvas.transferControlToOffscreen();
+      const offscreenCanvas =
+        "transferControlToOffscreen" in canvas ? canvas.transferControlToOffscreen() : canvas;
       const scales = await sendWrapperRef.current<RpcScales>(
         "initialize",
         {
