@@ -32,16 +32,6 @@ import { InstancedLineListMarker } from "@foxglove/studio-base/types/Messages";
 
 export type TargetPose = { target: Vec3; targetOrientation: Vec4 };
 
-const ZOOM_LEVEL_URL_PARAM = "zoom";
-
-function getZoomDistanceFromURLParam(): number | undefined {
-  const params = new URLSearchParams(location?.search);
-  if (params.has(ZOOM_LEVEL_URL_PARAM)) {
-    return parseFloat(params.get(ZOOM_LEVEL_URL_PARAM) as string);
-  }
-  return undefined;
-}
-
 // Get the camera target position and orientation
 function getTargetPose(
   followTf: string | false | undefined,
@@ -84,10 +74,6 @@ export function useTransformedCameraState({
     if (followMode === "follow-orientation") {
       transformedCameraState.targetOrientation = lastTargetPose.targetOrientation;
     }
-  }
-  // Read the distance from URL when World is first loaded with empty cameraState distance in savedProps
-  if (configCameraState.distance == undefined) {
-    transformedCameraState.distance = getZoomDistanceFromURLParam();
   }
 
   const mergedCameraState = mergeWith(
