@@ -75,7 +75,7 @@ export default class WorkerRosbag2DataProvider implements RandomAccessDataProvid
       throw new Error("WorkerRosbag2DataProvider not initialized");
     }
 
-    if (topics.rosBinaryMessages) {
+    if (topics.encodedMessages) {
       throw new Error("WorkerRosbag2DataProvider only supports parsed messages");
     }
 
@@ -88,7 +88,7 @@ export default class WorkerRosbag2DataProvider implements RandomAccessDataProvid
       },
     );
     return {
-      rosBinaryMessages: undefined,
+      encodedMessages: undefined,
       parsedMessages: rpcRes.messages,
     };
   }

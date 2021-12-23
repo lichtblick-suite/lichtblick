@@ -51,11 +51,11 @@ if (inWebWorker()) {
     }: {
       start: Time;
       end: Time;
-      topics: GetMessagesTopics["rosBinaryMessages"];
+      topics: GetMessagesTopics["encodedMessages"];
     }) => {
-      const messages = await provider.getMessages(start, end, { rosBinaryMessages: topics });
-      const { parsedMessages, rosBinaryMessages } = messages;
-      const messagesToSend = rosBinaryMessages ?? [];
+      const messages = await provider.getMessages(start, end, { encodedMessages: topics });
+      const { parsedMessages, encodedMessages } = messages;
+      const messagesToSend = encodedMessages ?? [];
       if (parsedMessages != undefined) {
         throw new Error("Worker only accepts raw messages");
       }

@@ -118,9 +118,9 @@ describe("BagDataProvider", () => {
     await provider.initialize(dummyExtensionPoint);
     const start = { sec: 1396293887, nsec: 844783943 };
     const end = { sec: 1396293888, nsec: 60000000 };
-    const messages = await provider.getMessages(start, end, { rosBinaryMessages: ["/tf"] });
+    const messages = await provider.getMessages(start, end, { encodedMessages: ["/tf"] });
     expect(messages.parsedMessages).toBe(undefined);
-    expect(messages.rosBinaryMessages).toEqual([
+    expect(messages.encodedMessages).toEqual([
       {
         topic: "/tf",
         receiveTime: { sec: 1396293888, nsec: 56251251 },
@@ -146,13 +146,13 @@ describe("BagDataProvider", () => {
     await provider.initialize(dummyExtensionPoint);
     const start = { sec: 1490148912, nsec: 0 };
     const end = { sec: 1490148913, nsec: 0 };
-    const { parsedMessages, rosBinaryMessages } = await provider.getMessages(start, end, {
-      rosBinaryMessages: ["/tf"],
+    const { parsedMessages, encodedMessages } = await provider.getMessages(start, end, {
+      encodedMessages: ["/tf"],
     });
     expect(parsedMessages).toBe(undefined);
-    expect(rosBinaryMessages).toBeTruthy();
-    assert(rosBinaryMessages);
-    const timestamps = rosBinaryMessages.map(({ receiveTime }) => receiveTime);
+    expect(encodedMessages).toBeTruthy();
+    assert(encodedMessages);
+    const timestamps = encodedMessages.map(({ receiveTime }) => receiveTime);
     const sortedTimestamps = [...timestamps];
     sortedTimestamps.sort(compare);
     expect(timestamps).toEqual(sortedTimestamps);

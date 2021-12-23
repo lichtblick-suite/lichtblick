@@ -104,9 +104,9 @@ export default class MemoryDataProvider implements RandomAccessDataProvider {
         fullyLoadedFractionRanges: [{ start: 0, end: 0 }],
       });
     }
-    const { parsedMessages, rosBinaryMessages } = this.messages;
-    const sortedMessages = [...(parsedMessages ?? []), ...(rosBinaryMessages ?? [])].sort(
-      (m1, m2) => compare(m1.receiveTime, m2.receiveTime),
+    const { parsedMessages, encodedMessages } = this.messages;
+    const sortedMessages = [...(parsedMessages ?? []), ...(encodedMessages ?? [])].sort((m1, m2) =>
+      compare(m1.receiveTime, m2.receiveTime),
     );
 
     let messageDefinitions: MessageDefinitions;
@@ -153,11 +153,11 @@ export default class MemoryDataProvider implements RandomAccessDataProvider {
         topics.parsedMessages ?? [],
         this.messages.parsedMessages,
       ),
-      rosBinaryMessages: filterMessages(
+      encodedMessages: filterMessages(
         start,
         end,
-        topics.rosBinaryMessages ?? [],
-        this.messages.rosBinaryMessages,
+        topics.encodedMessages ?? [],
+        this.messages.encodedMessages,
       ),
     };
   }

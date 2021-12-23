@@ -81,7 +81,7 @@ function getProvider(
   { unlimitedCache = false }: { unlimitedCache?: boolean } = {},
 ) {
   const memoryDataProvider = new MemoryDataProvider({
-    messages: { parsedMessages: undefined, rosBinaryMessages: messages },
+    messages: { parsedMessages: undefined, encodedMessages: messages },
     providesParsedMessages: false,
     parsedMessageDefinitionsByTopic: {
       "/foo": [{ definitions: [] }],
@@ -152,7 +152,7 @@ describe("MemoryCacheDataProvider", () => {
       // The last block will typically be exactly one timestamp since BLOCK_SIZE_NS divides seconds.
       { sec: 102, nsec: 0 },
       { sec: 102, nsec: 0 },
-      { rosBinaryMessages: ["/foo"] },
+      { encodedMessages: ["/foo"] },
     ]);
   });
 
@@ -205,13 +205,13 @@ describe("MemoryCacheDataProvider", () => {
     expect(first(getMessagesSpy.mock.calls)).toEqual([
       { sec: 101, nsec: 0 },
       { sec: 101, nsec: 0.1e9 - 1 },
-      { rosBinaryMessages: ["/foo"] },
+      { encodedMessages: ["/foo"] },
     ]);
     // The last request is up to the requested range from below.
     expect(last(getMessagesSpy.mock.calls)).toEqual([
       { sec: 100, nsec: 0.9e9 },
       { sec: 100, nsec: 1e9 - 1 },
-      { rosBinaryMessages: ["/foo"] },
+      { encodedMessages: ["/foo"] },
     ]);
   });
 

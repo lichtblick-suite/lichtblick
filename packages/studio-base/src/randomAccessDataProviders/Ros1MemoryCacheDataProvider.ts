@@ -391,7 +391,7 @@ export default class Ros1MemoryCacheDataProvider implements RandomAccessDataProv
       if (topics.length === 0) {
         resolve({
           parsedMessages: [],
-          rosBinaryMessages: undefined,
+          encodedMessages: undefined,
         });
         return false;
       }
@@ -447,7 +447,7 @@ export default class Ros1MemoryCacheDataProvider implements RandomAccessDataProv
 
       resolve({
         parsedMessages: messages.sort((a, b) => compare(a.receiveTime, b.receiveTime)),
-        rosBinaryMessages: undefined,
+        encodedMessages: undefined,
       });
       this._lastResolvedCallbackEnd = blockRange.end;
       return false;
@@ -603,13 +603,13 @@ export default class Ros1MemoryCacheDataProvider implements RandomAccessDataProv
       const messages =
         topics.length > 0
           ? await this._provider.getMessages(startTime, endTime, {
-              rosBinaryMessages: topics,
+              encodedMessages: topics,
             })
           : {
-              rosBinaryMessages: [],
+              encodedMessages: [],
               parsedMessages: undefined,
             };
-      const { rosBinaryMessages, parsedMessages } = messages;
+      const { encodedMessages, parsedMessages } = messages;
 
       if (parsedMessages != undefined) {
         const types = (Object.keys(messages) as (keyof typeof messages)[])
@@ -633,7 +633,7 @@ export default class Ros1MemoryCacheDataProvider implements RandomAccessDataProv
         messagesByTopic[topic] = [];
       }
 
-      for (const rosBinaryMessage of rosBinaryMessages ?? []) {
+      for (const rosBinaryMessage of encodedMessages ?? []) {
         const lazyReader = this._lazyMessageReadersByTopic.get(rosBinaryMessage.topic);
         if (!lazyReader) {
           continue;

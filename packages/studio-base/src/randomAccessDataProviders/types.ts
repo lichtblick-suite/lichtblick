@@ -48,12 +48,12 @@ export type RandomAccessDataProviderProblem = {
 
 export type GetMessagesTopics = Readonly<{
   parsedMessages?: readonly string[];
-  rosBinaryMessages?: readonly string[];
+  encodedMessages?: readonly string[];
 }>;
 
 export type GetMessagesResult = Readonly<{
   parsedMessages?: readonly MessageEvent<unknown>[];
-  rosBinaryMessages?: readonly MessageEvent<ArrayBuffer>[];
+  encodedMessages?: readonly MessageEvent<ArrayBuffer>[];
 }>;
 
 export type ParsedMessageDefinitions = Readonly<{
@@ -103,8 +103,6 @@ export type InitializationResult = {
 
   // Signals whether the messages returned from calls to getMessages are parsed into Javascript
   // objects or are returned in ROS binary format.
-  // TODO(steel/hernan): Replace topics and providesParsedMessages with a GetMessagesResult, and
-  // update the ApiCheckerDataProvider to enforce it.
   providesParsedMessages: boolean;
   messageDefinitions: MessageDefinitions;
 
@@ -156,8 +154,9 @@ export type RandomAccessDataProviderStall = Readonly<{
   bytesReceivedBeforeStall: number;
 }>;
 
-export type RandomAccessDataProviderMetadata = // Report whether or not the RandomAccessDataProvider is reconnecting to some external server. Used to show a
-  // loading indicator in the UI.
+// Report whether or not the RandomAccessDataProvider is reconnecting to some external server. Used
+// to show a loading indicator in the UI.
+export type RandomAccessDataProviderMetadata =
   | Readonly<{ type: "updateReconnecting"; reconnecting: boolean }>
   | AverageThroughput
   | InitializationPerformanceMetadata

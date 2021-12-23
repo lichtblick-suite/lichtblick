@@ -84,7 +84,7 @@ class MessageStore {
   };
 }
 
-const getMessagesResult = { parsedMessages: [], rosBinaryMessages: undefined };
+const getMessagesResult = { parsedMessages: [], encodedMessages: undefined };
 
 describe("RandomAccessPlayer", () => {
   let mockDateNow: jest.SpyInstance<number, []>;

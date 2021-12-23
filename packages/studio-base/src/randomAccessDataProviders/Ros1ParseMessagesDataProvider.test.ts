@@ -37,7 +37,7 @@ const dummyExtensionPoint = {
 };
 
 // prior to updating MemoryCacheDataProvider to lazy messages, ParseMessageDataProvider expended to query its child
-// with rosBinaryMessages topics and do the parsing itself. Since MemoryCacheDataProvider uses lazy messages
+// with encodedMessages topics and do the parsing itself. Since MemoryCacheDataProvider uses lazy messages
 // this is no longer necessary behavior and ParseMessageDataProvider is a passthrough.
 // eslint-disable-next-line jest/no-disabled-tests
 describe.skip("ParseMessagesDataProvider", () => {
@@ -84,7 +84,7 @@ describe.skip("ParseMessagesDataProvider", () => {
     const messages = await provider.getMessages(start, end, {
       parsedMessages: ["/tf"],
     });
-    expect(messages.rosBinaryMessages).toBe(undefined);
+    expect(messages.encodedMessages).toBe(undefined);
     expect(messages.parsedMessages).toHaveLength(2);
     expect(
       messages.parsedMessages?.map((event) => {
@@ -139,10 +139,10 @@ describe.skip("ParseMessagesDataProvider", () => {
     const start = { sec: 1396293887, nsec: 844783943 };
     const end = { sec: 1396293888, nsec: 60000000 };
     const messages = await provider.getMessages(start, end, {
-      rosBinaryMessages: ["/tf"],
+      encodedMessages: ["/tf"],
       parsedMessages: [],
     });
-    expect(messages.rosBinaryMessages).toBe(undefined);
+    expect(messages.encodedMessages).toBe(undefined);
     expect(messages.parsedMessages).toEqual([]);
   });
 });

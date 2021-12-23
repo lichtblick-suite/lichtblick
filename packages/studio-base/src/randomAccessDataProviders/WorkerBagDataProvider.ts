@@ -77,18 +77,18 @@ export default class WorkerBagDataProvider implements RandomAccessDataProvider {
     }
 
     if (topics.parsedMessages) {
-      throw new Error("WorkerDataProvider only supports rosBinaryMessages");
+      throw new Error("WorkerDataProvider only supports encodedMessages");
     }
-    const rpcRes = await this.rpc.send<{ messages: GetMessagesResult["rosBinaryMessages"] }>(
+    const rpcRes = await this.rpc.send<{ messages: GetMessagesResult["encodedMessages"] }>(
       "getMessages",
       {
         start,
         end,
-        topics: topics.rosBinaryMessages,
+        topics: topics.encodedMessages,
       },
     );
     return {
-      rosBinaryMessages: rpcRes.messages,
+      encodedMessages: rpcRes.messages,
       parsedMessages: undefined,
     };
   }

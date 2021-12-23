@@ -270,7 +270,7 @@ export default class BagDataProvider implements RandomAccessDataProvider {
     end: Time,
     subscriptions: GetMessagesTopics,
   ): Promise<GetMessagesResult> {
-    const topics = subscriptions.rosBinaryMessages ?? [];
+    const topics = subscriptions.encodedMessages ?? [];
     const connectionStart = fromMillis(new Date().getTime());
     let totalSizeOfMessages = 0;
     let numberOfMessages = 0;
@@ -336,7 +336,7 @@ export default class BagDataProvider implements RandomAccessDataProvider {
         totalTransferTime: subtractTimes(fromMillis(new Date().getTime()), connectionStart),
       },
     });
-    return { rosBinaryMessages: messages, parsedMessages: undefined };
+    return { encodedMessages: messages, parsedMessages: undefined };
   }
 
   async close(): Promise<void> {
