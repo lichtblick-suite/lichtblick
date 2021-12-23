@@ -43,6 +43,7 @@ const useStyles = makeStyles((theme) => ({
   },
   container: {
     padding: 16,
+    backgroundImage: `linear-gradient(to top, transparent, ${theme.palette.neutralLighterAlt} ${theme.spacing.s1})`,
   },
   item: {
     cursor: "grab",
@@ -72,7 +73,6 @@ const useStyles = makeStyles((theme) => ({
   },
   scrollContainer: {
     overflowY: "auto",
-    height: "100%",
   },
   noResults: {
     padding: "8px 16px",

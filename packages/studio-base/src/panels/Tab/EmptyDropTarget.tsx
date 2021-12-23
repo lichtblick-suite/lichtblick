@@ -100,7 +100,7 @@ export const EmptyDropTarget = ({ tabId }: Props): JSX.Element => {
             <Link underline data-test="pick-a-panel">
               Pick a panel
             </Link>
-            <Menu>
+            <Menu style={{ backgroundColor: theme.palette.neutralLighterAlt }}>
               <PanelList onPanelSelect={onPanelSelect} />
             </Menu>
           </ChildToggle>{" "}
