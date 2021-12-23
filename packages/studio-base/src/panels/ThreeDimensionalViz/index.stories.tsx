@@ -12,6 +12,7 @@ import {
   CubeListMarker,
   CubeMarker,
   CylinderMarker,
+  LaserScan,
   LineListMarker,
   LineStripMarker,
   MeshMarker,
@@ -138,6 +139,20 @@ const datatypes = new Map<string, RosMsgDefinition>(
       definitions: [
         { name: "header", type: "std_msgs/Header", isComplex: true },
         { name: "transform", type: "geometry_msgs/Transform", isComplex: true },
+      ],
+    },
+    "sensor_msgs/LaserScan": {
+      definitions: [
+        { name: "header", type: "std_msgs/Header", isComplex: true },
+        { name: "angle_min", type: "float32" },
+        { name: "angle_max", type: "float32" },
+        { name: "angle_increment", type: "float32" },
+        { name: "time_increment", type: "float32" },
+        { name: "scan_time", type: "float32" },
+        { name: "range_min", type: "float32" },
+        { name: "range_max", type: "float32" },
+        { name: "ranges", type: "float32", isArray: true },
+        { name: "intensities", type: "float32", isArray: true },
       ],
     },
     "visualization_msgs/Marker": {
@@ -784,6 +799,95 @@ export function MarkerLifetimes(): JSX.Element {
   );
 }
 
+export function SensorMsgs_LaserScan(): JSX.Element {
+  const topics: Topic[] = [
+    { name: "/laserscan", datatype: "sensor_msgs/LaserScan" },
+    { name: "/tf", datatype: "geometry_msgs/TransformStamped" },
+  ];
+  const tf1: MessageEvent<TF> = {
+    topic: "/tf",
+    receiveTime: { sec: 10, nsec: 0 },
+    message: {
+      header: { seq: 0, stamp: { sec: 0, nsec: 0 }, frame_id: "map" },
+      child_frame_id: "base_link",
+      transform: {
+        translation: { x: 1e7, y: 0, z: 0 },
+        rotation: QUAT_IDENTITY,
+      },
+    },
+    sizeInBytes: 0,
+  };
+  const tf2: MessageEvent<TF> = {
+    topic: "/tf",
+    receiveTime: { sec: 10, nsec: 0 },
+    message: {
+      header: { seq: 0, stamp: { sec: 0, nsec: 0 }, frame_id: "base_link" },
+      child_frame_id: "sensor",
+      transform: {
+        translation: { x: 0, y: 0, z: 1 },
+        rotation: QUAT_IDENTITY,
+      },
+    },
+    sizeInBytes: 0,
+  };
+
+  const laserScan: MessageEvent<LaserScan> = {
+    topic: "/laserscan",
+    receiveTime: { sec: 10, nsec: 0 },
+    message: {
+      header: { seq: 0, stamp: { sec: 0, nsec: 0 }, frame_id: "sensor" },
+      angle_min: 0,
+      angle_max: 2 * Math.PI,
+      angle_increment: (1 / 360) * 2 * Math.PI,
+      time_increment: 1 / 360,
+      scan_time: 1,
+      range_min: 0.001,
+      range_max: 10,
+      ranges: [...Array(360)].map((_, i) => 4 + (1 + Math.sin(i / 2)) / 2),
+      intensities: [...Array(360)].map((_, i) => (1 + Math.sin(i / 2)) / 2),
+    },
+    sizeInBytes: 0,
+  };
+
+  const fixture = useDelayedFixture({
+    datatypes,
+    topics,
+    frame: {
+      "/laserscan": [laserScan],
+      "/tf": [tf1, tf2],
+    },
+    capabilities: [],
+    activeData: {
+      currentTime: { sec: 0, nsec: 0 },
+    },
+  });
+
+  return (
+    <PanelSetup fixture={fixture}>
+      <ThreeDimensionalViz
+        overrideConfig={{
+          ...ThreeDimensionalViz.defaultConfig,
+          checkedKeys: ["name:Topics", "t:/tf", "t:/laserscan", `t:${FOXGLOVE_GRID_TOPIC}`],
+          expandedKeys: ["name:Topics", "t:/tf", "t:/laserscan", `t:${FOXGLOVE_GRID_TOPIC}`],
+          followTf: "base_link",
+          cameraState: {
+            distance: 13.5,
+            perspective: true,
+            phi: 1.22,
+            targetOffset: [0.25, -0.5, 0],
+            thetaOffset: -0.33,
+            fovy: 0.75,
+            near: 0.01,
+            far: 5000,
+            target: [0, 0, 0],
+            targetOrientation: [0, 0, 0, 1],
+          },
+        }}
+      />
+    </PanelSetup>
+  );
+}
+
 export function LargeTransform(): JSX.Element {
   const topics: Topic[] = [
     { name: "/markers", datatype: "visualization_msgs/Marker" },
@@ -882,4 +986,5 @@ export function LargeTransform(): JSX.Element {
 LargeTransform.parameters = { colorScheme: "dark" };
 MarkerLifetimes.parameters = { colorScheme: "dark" };
 Markers.parameters = { colorScheme: "dark" };
+SensorMsgs_LaserScan.parameters = { colorScheme: "dark" };
 TransformInterpolation.parameters = { colorScheme: "dark" };

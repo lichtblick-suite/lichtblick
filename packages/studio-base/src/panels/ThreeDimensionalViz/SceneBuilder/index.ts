@@ -894,7 +894,7 @@ export default class SceneBuilder implements MarkerProvider {
       | OccupancyGridMessage
       | PointCloud2
       | (PoseStamped & { type: 103 })
-      | (LaserScan & { type: 104 });
+      | (LaserScan & { type: 104; pose: MutablePose });
     switch (marker.type) {
       case 1: // CubeMarker
       case 2: // SphereMarker
@@ -918,12 +918,10 @@ export default class SceneBuilder implements MarkerProvider {
       case 103: // PoseStamped
       case 108: // InstanceLineListMarker
       case 110: // ColorMarker
-        marker = { ...marker, pose };
-        break;
       case 101: // OccupancyGridMessage
+      case 104: // LaserScan
         marker = { ...marker, pose };
         break;
-      case 104: // LaserScan - needs special handling
       default:
         break;
     }

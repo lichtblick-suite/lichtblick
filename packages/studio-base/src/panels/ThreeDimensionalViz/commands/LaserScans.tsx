@@ -48,6 +48,7 @@ const LaserScanVert = `
   attribute vec4 hitmapColor;
 
   varying vec4 vColor;
+  varying float vIntensity;
 
   void main () {
     float angle = angle_min + index * angle_increment;
@@ -60,6 +61,7 @@ const LaserScanVert = `
       gl_PointSize = 0.;
     }
     vColor = isHitmap ? hitmapColor : color;
+    vIntensity = intensity;
   }
 `;
 
@@ -91,14 +93,18 @@ const laserScan = (regl: REGL.Regl) =>
     vert: LaserScanVert,
     frag: `
   precision mediump float;
-  varying vec4 vColor;
+
   uniform bool isCircle;
+
+  varying vec4 vColor;
+  varying float vIntensity;
+
   void main () {
     if (isCircle && length(gl_PointCoord * 2.0 - 1.0) > 1.0) {
       discard;
     }
 
-    gl_FragColor = vColor;
+    gl_FragColor = vColor * vIntensity;
   }
   `,
 
