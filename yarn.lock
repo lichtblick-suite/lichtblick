@@ -2594,7 +2594,6 @@ __metadata:
     prettier: 2.5.1
     promise-queue: 2.2.5
     protobufjs: 6.11.2
-    quickhull3d: 2.0.5
     rc-tree: 5.3.5
     react: 17.0.2
     react-autocomplete: "janpaul123/react-autocomplete#bc8737070b5744069719c8fcd4e0a197192b0d48"
@@ -5856,12 +5855,6 @@ __metadata:
   checksum: 7fd6f9c25053e9b5bb6bc9f9f76c1d89e6c04f7707a7ba0e44cc01f17ef5284adb82f230f542c2d5557d69407c9a40f0f3515e8319afd14e1e16b5543ac6cdba
   languageName: node
   linkType: hard
-
-"@types/quickhull3d@workspace:packages/@types/quickhull3d":
-  version: 0.0.0-use.local
-  resolution: "@types/quickhull3d@workspace:packages/@types/quickhull3d"
-  languageName: unknown
-  linkType: soft
 
 "@types/range-parser@npm:*":
   version: 1.2.4
@@ -13042,15 +13035,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"get-plane-normal@npm:^1.0.0":
-  version: 1.0.0
-  resolution: "get-plane-normal@npm:1.0.0"
-  dependencies:
-    gl-vec3: ^1.0.3
-  checksum: 2c4f02c10b58c2ead73baf6d95b2e6eca3858bb93000d69542ae9ac0c7d162b9ce3981c4aa3f491ad268dc3f4df13c3d255946d3666f0b37ff97fe71de1c6791
-  languageName: node
-  linkType: hard
-
 "get-stream@npm:^4.0.0, get-stream@npm:^4.1.0":
   version: 4.1.0
   resolution: "get-stream@npm:4.1.0"
@@ -13111,13 +13095,6 @@ __metadata:
   version: 2.8.1
   resolution: "gl-matrix@npm:2.8.1"
   checksum: 20d13fd428ea3021d625781e025132ff8ec264f4c05310bda9ad859535ab32fb505323486d2d5c51b5f715c2a9d059da588b66e8e2afdafdf1acc4f45629b7ff
-  languageName: node
-  linkType: hard
-
-"gl-vec3@npm:^1.0.3":
-  version: 1.1.3
-  resolution: "gl-vec3@npm:1.1.3"
-  checksum: 987ef77eec955a2a5d4304aad7833bc2e49830e3e415e4422eb4ac3a45975a2a6a29a241d9e6e8de5682659cfffdb0b97ef7a3ef80c8b69ea11954166347734c
   languageName: node
   linkType: hard
 
@@ -19067,15 +19044,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"point-line-distance@npm:^1.0.0":
-  version: 1.0.0
-  resolution: "point-line-distance@npm:1.0.0"
-  dependencies:
-    gl-vec3: ^1.0.3
-  checksum: c6e5a043e611713b5b25360ab30cf5e1c4f4036c90b46ce65979e9ec51aca06076c274b593ba9202f487387476c288e70239b55aec0ee06d8fff8960efedecf6
-  languageName: node
-  linkType: hard
-
 "polished@npm:^4.0.5":
   version: 4.1.3
   resolution: "polished@npm:4.1.3"
@@ -19747,18 +19715,6 @@ __metadata:
   version: 1.2.3
   resolution: "queue-microtask@npm:1.2.3"
   checksum: b676f8c040cdc5b12723ad2f91414d267605b26419d5c821ff03befa817ddd10e238d22b25d604920340fd73efd8ba795465a0377c4adf45a4a41e4234e42dc4
-  languageName: node
-  linkType: hard
-
-"quickhull3d@npm:2.0.5":
-  version: 2.0.5
-  resolution: "quickhull3d@npm:2.0.5"
-  dependencies:
-    debug: ^3.1.0
-    get-plane-normal: ^1.0.0
-    gl-vec3: ^1.0.3
-    point-line-distance: ^1.0.0
-  checksum: 7bdd44ef76292b46dda351d9f8be0f53bed1e5e755ddd1007b19a6e49d775c05de9d4fc8207ae11ba504af9e4e225d03e7395ab2113dd7fa0d001f6fc4ef8e28
   languageName: node
   linkType: hard
 

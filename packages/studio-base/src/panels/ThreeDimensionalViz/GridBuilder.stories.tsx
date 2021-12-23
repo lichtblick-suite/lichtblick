@@ -75,7 +75,6 @@ class MockMarkerCollector implements MarkerCollector {
   grid(_arg0: OccupancyGridMessage): void {}
   pointcloud(_arg0: PointCloud): void {}
   laserScan(_arg0: LaserScan): void {}
-  linedConvexHull(_arg0: LineListMarker | LineStripMarker): void {}
   instancedLineList(arg0: InstancedLineListMarker): void {
     this.data.instancedLineList.push(arg0);
   }

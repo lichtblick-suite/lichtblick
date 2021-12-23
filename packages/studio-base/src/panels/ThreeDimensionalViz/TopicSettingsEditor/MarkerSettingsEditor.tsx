@@ -12,7 +12,6 @@
 //   You may not use this file except in compliance with the License.
 
 import { Color } from "@foxglove/regl-worldview";
-import Checkbox from "@foxglove/studio-base/components/Checkbox";
 import ColorPicker from "@foxglove/studio-base/components/ColorPicker";
 import Flex from "@foxglove/studio-base/components/Flex";
 import { Marker, MarkerArray } from "@foxglove/studio-base/types/Messages";
@@ -22,7 +21,6 @@ import { SLabel, SDescription } from "./common";
 
 type MarkerSettings = {
   overrideColor?: Color;
-  overrideCommand?: string;
 };
 
 export default function MarkerSettingsEditor(
@@ -38,24 +36,6 @@ export default function MarkerSettingsEditor(
       <ColorPicker
         color={settings.overrideColor}
         onChange={(newColor) => onFieldChange("overrideColor", newColor)}
-      />
-      <SLabel>Line marker click events override</SLabel>
-      <SDescription>
-        {`
-        Optionally allow treating line markers as polygons, so that clicking inside the lines in the line marker selects
-        the marker. The default behavior for line markers requires the user to click exactly on the line to select the
-        line marker. This option can reduce performance and will not work on instanced line markers (those with "type":
-        108).
-        `}
-      </SDescription>
-      <Checkbox
-        checked={settings.overrideCommand === "LinedConvexHull"}
-        label="Allow clicking inside line markers that form polygons"
-        onChange={(checked) =>
-          onFieldChange("overrideCommand", checked ? "LinedConvexHull" : undefined)
-        }
-        style={{ marginBottom: 12 }}
-        labelStyle={{ lineHeight: 1.2 }}
       />
     </Flex>
   );

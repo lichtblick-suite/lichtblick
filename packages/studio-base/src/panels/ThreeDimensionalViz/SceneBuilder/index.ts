@@ -926,9 +926,6 @@ export default class SceneBuilder implements MarkerProvider {
         break;
     }
 
-    // allow topic settings to override renderable marker command (see MarkerSettingsEditor.js)
-    const { overrideCommand } = this._settingsByKey[`t:${topic.name}`] ?? {};
-
     switch (marker.type) {
       case 0:
         return add.arrow(marker);
@@ -939,16 +936,8 @@ export default class SceneBuilder implements MarkerProvider {
       case 3:
         return add.cylinder(marker);
       case 4:
-        if (overrideCommand === "LinedConvexHull") {
-          return add.linedConvexHull(marker);
-        }
-
         return add.lineStrip(marker);
       case 5:
-        if (overrideCommand === "LinedConvexHull") {
-          return add.linedConvexHull(marker);
-        }
-
         return add.lineList(marker);
       case 6:
         return add.cubeList(marker);
