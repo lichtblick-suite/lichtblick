@@ -16,6 +16,7 @@ import MagnifyIcon from "@mdi/svg/svg/magnify.svg";
 import cx from "classnames";
 import { useCallback, useLayoutEffect, useRef, MouseEvent, useState, useMemo } from "react";
 import { useResizeDetector } from "react-resize-detector";
+import { useToasts } from "react-toast-notifications";
 import { useAsync } from "react-use";
 import usePanZoom from "use-pan-and-zoom";
 import { v4 as uuidv4 } from "uuid";
@@ -154,18 +155,24 @@ type RenderImage = (args: {
   options?: RenderOptions;
 }) => Promise<Dimensions | undefined>;
 
+const supportsOffscreenCanvas =
+  typeof HTMLCanvasElement.prototype.transferControlToOffscreen === "function";
+
 export default function ImageCanvas(props: Props): JSX.Element {
-  const {
-    rawMarkerData,
-    topic,
-    image,
-    config,
-    saveConfig,
-    renderInMainThread,
-    onStartRenderImage,
-  } = props;
+  const { addToast } = useToasts();
+  const { rawMarkerData, topic, image, config, saveConfig, onStartRenderImage } = props;
   const { mode } = config;
   const classes = useStyles();
+
+  const renderInMainThread = (props.renderInMainThread ?? false) || !supportsOffscreenCanvas;
+  useLayoutEffect(() => {
+    if (props.renderInMainThread !== true && !supportsOffscreenCanvas) {
+      addToast(
+        "Your browser does not support rendering images in a background thread. Performance may be degraded.",
+        { appearance: "warning", autoDismiss: true },
+      );
+    }
+  }, [addToast, props.renderInMainThread]);
 
   // generic errors within the panel
   const [error, setError] = useState<Error | undefined>();
@@ -201,7 +208,7 @@ export default function ImageCanvas(props: Props): JSX.Element {
 
     const id = uuidv4();
 
-    if (renderInMainThread === true) {
+    if (renderInMainThread) {
       // Potentially performance-sensitive; await can be expensive
       // eslint-disable-next-line @typescript-eslint/promise-function-async
       const renderInMain = (args: {
@@ -299,7 +306,7 @@ export default function ImageCanvas(props: Props): JSX.Element {
     }
 
     return () => {
-      if (renderInMainThread === true) {
+      if (renderInMainThread) {
         return;
       }
 
