@@ -115,6 +115,7 @@ function DraggablePanelItem({
   mosaicId,
 }: PanelItemProps) {
   const classes = useStyles();
+  const theme = useTheme();
   const scrollRef = React.useRef<HTMLDivElement>(ReactNull);
   const [, drag] = useDrag<unknown, MosaicDropResult, never>({
     type: MosaicDragType.WINDOW,
@@ -158,12 +159,13 @@ function DraggablePanelItem({
 
   const { ref: tooltipRef, tooltip } = useTooltip({
     contents: (
-      <div style={{ padding: "0px 5px", width: "200px" }}>
-        <p style={{ fontWeight: "bold" }}>{panel.title}</p>
-        <p>{panel.description}</p>
+      <div style={{ padding: `0 ${theme.spacing.s1}`, width: "200px" }}>
+        <p style={{ fontWeight: "bold", marginTop: theme.spacing.s1 }}>{panel.title}</p>
+        <p style={{ marginBottom: theme.spacing.s1 }}>{panel.description}</p>
       </div>
     ),
     placement: "right",
+    delay: 0,
   });
   return (
     <div ref={drag}>
