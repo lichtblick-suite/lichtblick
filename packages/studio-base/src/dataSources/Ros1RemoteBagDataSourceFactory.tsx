@@ -56,6 +56,9 @@ class Ros1RemoteBagDataSourceFactory implements IDataSourceFactory {
     return new RandomAccessPlayer(messageCacheProvider, {
       metricsCollector: args.metricsCollector,
       seekToTime: getSeekToTime(),
+      // Overridden to 500ms to limit the number of blocks that need to be
+      // fetched per seek from the potentially slow remote data source
+      seekBackNs: BigInt(0.5e9),
       name: url,
       urlParams: {
         url,

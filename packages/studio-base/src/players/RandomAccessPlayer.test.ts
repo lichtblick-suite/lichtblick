@@ -35,7 +35,6 @@ import { getSeekToTime, SEEK_ON_START_NS } from "@foxglove/studio-base/util/time
 
 import RandomAccessPlayer, {
   RandomAccessPlayerOptions,
-  SEEK_BACK_NANOSECONDS,
   SEEK_START_DELAY_MS,
 } from "./RandomAccessPlayer";
 import TestProvider from "./TestProvider";
@@ -783,7 +782,7 @@ describe("RandomAccessPlayer", () => {
       callCount++;
       switch (callCount) {
         case 1: {
-          expect(start).toEqual({ sec: 19, nsec: 1e9 + 50 - SEEK_BACK_NANOSECONDS });
+          expect(start).toEqual({ sec: 17, nsec: 0.5e9 + 50 });
           expect(end).toEqual({ sec: 20, nsec: 50 });
           expect(topics).toEqual({ parsedMessages: ["/foo/bar"] });
           const parsedMessages: MessageEvent<unknown>[] = [
@@ -885,7 +884,7 @@ describe("RandomAccessPlayer", () => {
       callCount++;
       switch (callCount) {
         case 1: {
-          expect(start).toEqual({ sec: 19, nsec: 1e9 + 50 - SEEK_BACK_NANOSECONDS });
+          expect(start).toEqual({ sec: 17, nsec: 0.5e9 + 50 });
           expect(end).toEqual({ sec: 20, nsec: 50 });
           expect(topics).toEqual({ parsedMessages: ["/foo/bar"] });
           return await new Promise((resolve) => {

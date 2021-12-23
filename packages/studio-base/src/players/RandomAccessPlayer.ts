@@ -22,6 +22,7 @@ import {
   fromMillis,
   percentOf,
   subtract as subtractTimes,
+  fromNanoSec,
 } from "@foxglove/rostime";
 import { ParameterValue } from "@foxglove/studio";
 import NoopMetricsCollector from "@foxglove/studio-base/players/NoopMetricsCollector";
@@ -58,35 +59,23 @@ import {
   TimestampMethod,
 } from "@foxglove/studio-base/util/time";
 
-// The number of nanoseconds to seek backwards to build context during a seek
-// operation larger values mean more opportunity to capture context before the
-// seek event, but are slower operations. We shouldn't make this number too big,
-// otherwise we pull in too many unnecessary messages, making seeking slow. But
-// we also don't want it to be too low, otherwise you don't see enough data when
-// seeking.
-// Unfortunately right now we need a pretty high number here, especially when
-// using "synchronized topics" (e.g. in the Image panel) when one of the topics
-// is publishing at a fairly low rate.
-// TODO(JP): Add support for subscribers to express that we're only interested
-// in the last message on a topic, and then support that in `getMessages` as
-// well, so we can fetch pretty old messages without incurring the cost of
-// fetching too many.
-export const SEEK_BACK_NANOSECONDS =
-  299 *
-  /* ms */
-  1e6;
+export const DEFAULT_SEEK_BACK_NANOSECONDS = BigInt(2.5e9);
 
-if (SEEK_ON_START_NS >= SEEK_BACK_NANOSECONDS) {
-  throw new Error(
-    "SEEK_ON_START_NS should be less than SEEK_BACK_NANOSECONDS (otherwise we skip over messages at the start)",
-  );
-}
-
+// Amount to wait until panels have had the chance to subscribe to topics before
+// we start playback
 export const SEEK_START_DELAY_MS = 100;
 
 export type RandomAccessPlayerOptions = {
   metricsCollector?: PlayerMetricsCollectorInterface;
   seekToTime: SeekToTimeSpec;
+
+  // The number of nanoseconds to seek backwards to build context during a seek
+  // operation larger values mean more opportunity to capture context before the
+  // seek event, but are slower operations. We shouldn't make this number too big,
+  // otherwise we pull in too many unnecessary messages, making seeking slow. But
+  // we also don't want it to be too low, otherwise you don't see enough data when
+  // seeking.
+  seekBackNs?: bigint;
 
   // Optional player name
   name?: string;
@@ -101,6 +90,7 @@ export default class RandomAccessPlayer implements Player {
   private _name?: string;
   private _filePath?: string;
   private _provider: RandomAccessDataProvider;
+  private _seekBackNs: bigint;
   private _isPlaying: boolean = false;
   private _listener?: (arg0: PlayerState) => Promise<void>;
   private _speed: number = 0.2;
@@ -151,11 +141,18 @@ export default class RandomAccessPlayer implements Player {
 
   constructor(provider: RandomAccessDataProvider, options: RandomAccessPlayerOptions) {
     const { metricsCollector, seekToTime, urlParams, name } = options;
+    const seekBackNs = options.seekBackNs ?? DEFAULT_SEEK_BACK_NANOSECONDS;
+
+    if (SEEK_ON_START_NS >= seekBackNs) {
+      throw new Error(`SEEK_ON_START_NS must be less than seekBackNs (${seekBackNs})`);
+    }
+
     this._name = name;
     this._urlParams = urlParams;
     this._provider = provider;
     this._metricsCollector = metricsCollector ?? new NoopMetricsCollector();
     this._seekToTime = seekToTime;
+    this._seekBackNs = seekBackNs;
     this._metricsCollector.playerConstructed();
   }
 
@@ -581,7 +578,7 @@ export default class RandomAccessPlayer implements Player {
 
     // Backfill a few hundred milliseconds of data if we're paused so panels have something to show.
     // If we're playing, we'll give the panels some data soon anyway.
-    const internalBackfillDuration = { sec: 0, nsec: this._isPlaying ? 0 : SEEK_BACK_NANOSECONDS };
+    const internalBackfillDuration = fromNanoSec(this._isPlaying ? 0n : this._seekBackNs);
     // Add on any extra time needed by the OrderedStampPlayer.
     const totalBackfillDuration = add(
       internalBackfillDuration,
