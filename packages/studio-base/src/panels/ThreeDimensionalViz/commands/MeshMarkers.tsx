@@ -39,13 +39,13 @@ async function loadModel(url: string): Promise<GlbModel | undefined> {
   const GLB_MAGIC = 0x676c5446; // "glTF"
 
   const response = await fetch(url);
-  if (response.status !== 200) {
-    throw new Error(`Error ${response.status} loading model from ${url}`);
+  if (!response.ok) {
+    throw new Error(`Error ${response.status} (${response.statusText}) loading model from ${url}`);
   }
 
   const buffer = await response.arrayBuffer();
   if (buffer.byteLength < 4) {
-    throw new Error(`${buffer.byteLength} bytes received`);
+    throw new Error(`${buffer.byteLength} bytes received loading model from ${url}`);
   }
   const view = new DataView(buffer);
 

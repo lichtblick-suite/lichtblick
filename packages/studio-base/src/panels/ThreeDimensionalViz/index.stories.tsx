@@ -7,8 +7,24 @@ import { fromSec, Time } from "@foxglove/rostime";
 import { MessageEvent, Topic } from "@foxglove/studio";
 import useDelayedFixture from "@foxglove/studio-base/panels/ThreeDimensionalViz/stories/useDelayedFixture";
 import PanelSetup from "@foxglove/studio-base/stories/PanelSetup";
-import { CubeMarker, Point, Pose, TF } from "@foxglove/studio-base/types/Messages";
+import {
+  ArrowMarker,
+  CubeListMarker,
+  CubeMarker,
+  CylinderMarker,
+  LineListMarker,
+  LineStripMarker,
+  MeshMarker,
+  Point,
+  PointsMarker,
+  Pose,
+  SphereListMarker,
+  SphereMarker,
+  TextMarker,
+  TF,
+} from "@foxglove/studio-base/types/Messages";
 import { hexToColorObj } from "@foxglove/studio-base/util/colorUtils";
+import { FOXGLOVE_GRID_TOPIC } from "@foxglove/studio-base/util/globalConstants";
 
 import ThreeDimensionalViz from "./index";
 
@@ -208,6 +224,340 @@ export function CustomBackgroundColor(): JSX.Element {
           ...ThreeDimensionalViz.defaultConfig,
           useThemeBackgroundColor: false,
           customBackgroundColor: "#2d7566",
+        }}
+      />
+    </PanelSetup>
+  );
+}
+
+export function Markers(): JSX.Element {
+  const topics: Topic[] = [{ name: "/markers", datatype: "visualization_msgs/Marker" }];
+
+  const arrow: MessageEvent<ArrowMarker> = {
+    topic: "/markers",
+    receiveTime: { sec: 10, nsec: 0 },
+    message: {
+      header: { seq: 0, stamp: { sec: 0, nsec: 0 }, frame_id: "" },
+      id: `arrow`,
+      ns: "",
+      type: 0,
+      action: 0,
+      frame_locked: false,
+      pose: {
+        position: { x: -2, y: 1, z: 0 },
+        orientation: { x: 0, y: 0, z: 0, w: 1 },
+      },
+      scale: { x: 0.5, y: 0.1, z: 0.1 },
+      color: makeColor("#f44336", 0.5),
+      lifetime: { sec: 0, nsec: 0 },
+    },
+    sizeInBytes: 0,
+  };
+
+  const cube: MessageEvent<CubeMarker> = {
+    topic: "/markers",
+    receiveTime: { sec: 10, nsec: 0 },
+    message: {
+      header: { seq: 0, stamp: { sec: 0, nsec: 0 }, frame_id: "" },
+      id: `cube`,
+      ns: "",
+      type: 1,
+      action: 0,
+      frame_locked: false,
+      pose: {
+        position: { x: -1, y: 1, z: 0 },
+        orientation: { x: 0, y: 0, z: 0, w: 1 },
+      },
+      scale: { x: 0.5, y: 0.5, z: 0.5 },
+      color: makeColor("#e81e63", 0.5),
+      lifetime: { sec: 0, nsec: 0 },
+    },
+    sizeInBytes: 0,
+  };
+
+  const sphere: MessageEvent<SphereMarker> = {
+    topic: "/markers",
+    receiveTime: { sec: 10, nsec: 0 },
+    message: {
+      header: { seq: 0, stamp: { sec: 0, nsec: 0 }, frame_id: "" },
+      id: `sphere`,
+      ns: "",
+      type: 2,
+      action: 0,
+      frame_locked: false,
+      pose: {
+        position: { x: 0, y: 1, z: 0 },
+        orientation: { x: 0, y: 0, z: 0, w: 1 },
+      },
+      scale: { x: 0.5, y: 0.5, z: 0.5 },
+      color: makeColor("#9c27b0", 0.5),
+      lifetime: { sec: 0, nsec: 0 },
+    },
+    sizeInBytes: 0,
+  };
+
+  const cylinder: MessageEvent<CylinderMarker> = {
+    topic: "/markers",
+    receiveTime: { sec: 10, nsec: 0 },
+    message: {
+      header: { seq: 0, stamp: { sec: 0, nsec: 0 }, frame_id: "" },
+      id: `cylinder`,
+      ns: "",
+      type: 3,
+      action: 0,
+      frame_locked: false,
+      pose: {
+        position: { x: 1, y: 1, z: 0 },
+        orientation: { x: 0, y: 0, z: 0, w: 1 },
+      },
+      scale: { x: 0.5, y: 0.5, z: 0.5 },
+      color: makeColor("#673ab7", 0.5),
+      lifetime: { sec: 0, nsec: 0 },
+    },
+    sizeInBytes: 0,
+  };
+
+  const lineStrip: MessageEvent<LineStripMarker> = {
+    topic: "/markers",
+    receiveTime: { sec: 10, nsec: 0 },
+    message: {
+      header: { seq: 0, stamp: { sec: 0, nsec: 0 }, frame_id: "" },
+      id: `lineStrip`,
+      ns: "",
+      type: 4,
+      action: 0,
+      frame_locked: false,
+      pose: {
+        position: { x: -2, y: 0, z: 0 },
+        orientation: { x: 0, y: 0, z: 0, w: 1 },
+      },
+      scale: { x: 0.1, y: 0.1, z: 0.1 },
+      color: makeColor("#3f51b5", 0.5),
+      points: [
+        { x: 0, y: 0.25, z: 0 },
+        { x: 0.25, y: -0.25, z: 0 },
+        { x: -0.25, y: -0.25, z: 0 },
+        { x: 0, y: 0.25, z: 0 },
+      ],
+      colors: [
+        makeColor("#f44336", 0.5),
+        makeColor("#4caf50", 1),
+        makeColor("#2196f3", 1),
+        makeColor("#ffeb3b", 0.5),
+      ],
+      lifetime: { sec: 0, nsec: 0 },
+    },
+    sizeInBytes: 0,
+  };
+
+  const lineList: MessageEvent<LineListMarker> = {
+    topic: "/markers",
+    receiveTime: { sec: 10, nsec: 0 },
+    message: {
+      header: { seq: 0, stamp: { sec: 0, nsec: 0 }, frame_id: "" },
+      id: `lineList`,
+      ns: "",
+      type: 5,
+      action: 0,
+      frame_locked: false,
+      pose: {
+        position: { x: -1, y: 0, z: 0 },
+        orientation: { x: 0, y: 0, z: 0, w: 1 },
+      },
+      scale: { x: 0.1, y: 0.1, z: 0.1 },
+      color: makeColor("#4caf50", 1),
+      points: [
+        { x: 0, y: 0.25, z: 0 },
+        { x: 0.25, y: -0.25, z: 0 },
+        { x: 0.25, y: -0.25, z: 0 },
+        { x: -0.25, y: -0.25, z: 0 },
+        { x: -0.25, y: -0.25, z: 0 },
+        { x: 0, y: 0.25, z: 0 },
+      ],
+      colors: [
+        makeColor("#f44336", 0.5),
+        makeColor("#4caf50", 0.5),
+        makeColor("#2196f3", 1),
+        makeColor("#ffeb3b", 1),
+        makeColor("#e81e63", 0.5),
+        makeColor("#3f51b5", 0.5),
+      ],
+      lifetime: { sec: 0, nsec: 0 },
+    },
+    sizeInBytes: 0,
+  };
+
+  const cubeList: MessageEvent<CubeListMarker> = {
+    topic: "/markers",
+    receiveTime: { sec: 10, nsec: 0 },
+    message: {
+      header: { seq: 0, stamp: { sec: 0, nsec: 0 }, frame_id: "" },
+      id: `cubeList`,
+      ns: "",
+      type: 6,
+      action: 0,
+      frame_locked: false,
+      pose: {
+        position: { x: 0, y: 0, z: 0 },
+        orientation: { x: 0, y: 0, z: 0, w: 1 },
+      },
+      scale: { x: 0.25, y: 0.25, z: 0.25 },
+      color: makeColor("#ffc107", 0.25),
+      points: [
+        { x: 0, y: 0.25, z: 0 },
+        { x: 0.25, y: -0.25, z: 0 },
+        { x: -0.25, y: -0.25, z: 0 },
+      ],
+      colors: [makeColor("#f44336", 0.5), makeColor("#4caf50", 0.5), makeColor("#2196f3", 0.5)],
+      lifetime: { sec: 0, nsec: 0 },
+    },
+    sizeInBytes: 0,
+  };
+
+  const sphereList: MessageEvent<SphereListMarker> = {
+    topic: "/markers",
+    receiveTime: { sec: 10, nsec: 0 },
+    message: {
+      header: { seq: 0, stamp: { sec: 0, nsec: 0 }, frame_id: "" },
+      id: `sphereList`,
+      ns: "",
+      type: 7,
+      action: 0,
+      frame_locked: false,
+      pose: {
+        position: { x: 1, y: 0, z: 0 },
+        orientation: { x: 0, y: 0, z: 0, w: 1 },
+      },
+      scale: { x: 0.25, y: 0.25, z: 0.25 },
+      color: makeColor("#f44336", 0.25),
+      points: [
+        { x: 0, y: 0.25, z: 0 },
+        { x: 0.25, y: -0.25, z: 0 },
+        { x: -0.25, y: -0.25, z: 0 },
+      ],
+      colors: [makeColor("#f44336", 0.5), makeColor("#4caf50", 0.5), makeColor("#2196f3", 0.5)],
+      lifetime: { sec: 0, nsec: 0 },
+    },
+    sizeInBytes: 0,
+  };
+
+  const points: MessageEvent<PointsMarker> = {
+    topic: "/markers",
+    receiveTime: { sec: 10, nsec: 0 },
+    message: {
+      header: { seq: 0, stamp: { sec: 0, nsec: 0 }, frame_id: "" },
+      id: `points`,
+      ns: "",
+      type: 8,
+      action: 0,
+      frame_locked: false,
+      pose: {
+        position: { x: -2, y: -1, z: 0 },
+        orientation: { x: 0, y: 0, z: 0, w: 1 },
+      },
+      scale: { x: 0.25, y: 0.25, z: 0.25 },
+      color: makeColor("#3f51b5", 0.25),
+
+      points: [
+        { x: 0, y: 0.25, z: 0 },
+        { x: 0.25, y: -0.25, z: 0 },
+        { x: -0.25, y: -0.25, z: 0 },
+      ],
+      colors: [makeColor("#f44336", 0.5), makeColor("#4caf50", 0.5), makeColor("#2196f3", 0.5)],
+      lifetime: { sec: 0, nsec: 0 },
+    },
+    sizeInBytes: 0,
+  };
+
+  const text: MessageEvent<TextMarker> = {
+    topic: "/markers",
+    receiveTime: { sec: 10, nsec: 0 },
+    message: {
+      header: { seq: 0, stamp: { sec: 0, nsec: 0 }, frame_id: "" },
+      id: `text`,
+      ns: "",
+      type: 9,
+      action: 0,
+      frame_locked: false,
+      pose: {
+        position: { x: -1, y: -1, z: 0 },
+        orientation: { x: 0, y: 0, z: 0, w: 1 },
+      },
+      scale: { x: 1, y: 1, z: 1 },
+      color: makeColor("#4caf50", 0.5),
+      text: "Lorem Ipsum\nDolor Sit Amet",
+      lifetime: { sec: 0, nsec: 0 },
+    },
+    sizeInBytes: 0,
+  };
+
+  const mesh: MessageEvent<MeshMarker> = {
+    topic: "/markers",
+    receiveTime: { sec: 10, nsec: 0 },
+    message: {
+      header: { seq: 0, stamp: { sec: 0, nsec: 0 }, frame_id: "" },
+      id: `mesh`,
+      ns: "",
+      type: 10,
+      action: 0,
+      frame_locked: false,
+      pose: {
+        position: { x: 0, y: -1, z: 0 },
+        orientation: { x: 0, y: 0, z: 0, w: 1 },
+      },
+      scale: { x: 0.5, y: 0.5, z: 0.5 },
+      color: makeColor("#8bc34a", 0.5),
+      mesh_resource: "missing",
+      mesh_use_embedded_materials: true,
+      lifetime: { sec: 0, nsec: 0 },
+    },
+    sizeInBytes: 0,
+  };
+
+  const fixture = useDelayedFixture({
+    datatypes,
+    topics,
+    frame: {
+      "/markers": [
+        arrow,
+        cube,
+        sphere,
+        cylinder,
+        lineStrip,
+        lineList,
+        cubeList,
+        sphereList,
+        points,
+        text,
+        mesh,
+      ],
+    },
+    capabilities: [],
+    activeData: {
+      currentTime: { sec: 0, nsec: 0 },
+    },
+  });
+
+  return (
+    <PanelSetup fixture={fixture}>
+      <ThreeDimensionalViz
+        overrideConfig={{
+          ...ThreeDimensionalViz.defaultConfig,
+          checkedKeys: ["name:Topics", "t:/markers", `t:${FOXGLOVE_GRID_TOPIC}`],
+          expandedKeys: ["name:Topics", "t:/markers", `t:${FOXGLOVE_GRID_TOPIC}`],
+          followTf: "",
+          cameraState: {
+            distance: 5.5,
+            perspective: true,
+            phi: 0.5,
+            targetOffset: [0, 0, 0],
+            thetaOffset: -0.25,
+            fovy: 0.75,
+            near: 0.01,
+            far: 5000,
+            target: [0, 0, 0],
+            targetOrientation: [0, 0, 0, 1],
+          },
         }}
       />
     </PanelSetup>
@@ -529,6 +879,7 @@ export function LargeTransform(): JSX.Element {
   );
 }
 
-TransformInterpolation.parameters = { colorScheme: "dark" };
-MarkerLifetimes.parameters = { colorScheme: "dark" };
 LargeTransform.parameters = { colorScheme: "dark" };
+MarkerLifetimes.parameters = { colorScheme: "dark" };
+Markers.parameters = { colorScheme: "dark" };
+TransformInterpolation.parameters = { colorScheme: "dark" };
