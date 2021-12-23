@@ -64,7 +64,7 @@
     "@babel/preset-typescript": "7.16.5",
     "@foxglove/eslint-plugin": "0.18.0",
     "@foxglove/tsconfig": "1.1.0",
-    "@foxglove/wasm-bz2": "0.0.4",
+    "@foxglove/wasm-bz2": "0.1.0",
     "@pmmmwh/react-refresh-webpack-plugin": "0.5.4",
     "@sentry/electron": "2.5.4",
     "@sentry/webpack-plugin": "1.18.3",
