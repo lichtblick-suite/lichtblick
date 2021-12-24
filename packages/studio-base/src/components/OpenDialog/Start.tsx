@@ -79,7 +79,7 @@ export default function Start(props: IStartProps): JSX.Element {
       {
         id: "open-url",
         children: "Open file from URL",
-        secondaryText: "Load a file via HTTP/HTTPS",
+        secondaryText: "Load a file via HTTP(S)",
         iconProps: { iconName: "FileASPX" },
         onClick: () => onSelectView("remote"),
       },
@@ -93,7 +93,7 @@ export default function Start(props: IStartProps): JSX.Element {
       {
         id: "sample-data",
         children: "Explore sample data",
-        secondaryText: "New to Studio? View some sample data",
+        secondaryText: "New to Foxglove Studio? Start here!",
         iconProps: { iconName: "BookStar" },
         onClick: () => onSelectView("demo"),
       },

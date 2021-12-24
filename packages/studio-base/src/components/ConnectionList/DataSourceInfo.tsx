@@ -55,7 +55,7 @@ function DataSourceInfo(): JSX.Element {
     >
       <Stack horizontal verticalAlign="center">
         <Stack grow tokens={{ childrenGap: theme.spacing.s2 }} styles={{ root: { minWidth: 0 } }}>
-          <Text styles={subheaderStyles}>Current data source</Text>
+          <Text styles={subheaderStyles}>Current source</Text>
           <Text styles={{ root: { color: theme.palette.neutralSecondary } }}>
             {playerName ? <TextMiddleTruncate text={playerName} /> : <>&mdash;</>}
           </Text>

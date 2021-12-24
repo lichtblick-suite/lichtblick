@@ -434,7 +434,7 @@ export default function Workspace(props: WorkspaceProps): JSX.Element {
         "connection",
         {
           iconName: "DataManagementSettings",
-          title: "Data sources",
+          title: "Data source",
           component: DataSourceSidebarItem,
           badge:
             playerProblems && playerProblems.length > 0

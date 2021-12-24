@@ -20,7 +20,7 @@ export default function DataSourceSidebar(props: Props): JSX.Element {
 
   return (
     <SidebarContent
-      title="Data sources"
+      title="Data source"
       helpContent={connectionHelpContent}
       trailingItems={[
         enableOpenDialog === true && (
