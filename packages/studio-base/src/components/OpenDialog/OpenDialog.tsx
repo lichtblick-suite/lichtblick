@@ -4,6 +4,7 @@
 
 import { Dialog, Overlay, Stack, useTheme } from "@fluentui/react";
 import { useCallback, useLayoutEffect, useMemo, useState } from "react";
+import { useMountedState } from "react-use";
 
 import Snow from "@foxglove/studio-base/Snow";
 import {
@@ -27,6 +28,7 @@ export default function OpenDialog(props: OpenDialogProps): JSX.Element {
   const { activeView: defaultActiveView, onDismiss, activeDataSource } = props;
   const { availableSources, selectSource } = usePlayerSelection();
 
+  const isMounted = useMountedState();
   const [activeView, setActiveView] = useState<OpenDialogViews>(defaultActiveView ?? "start");
   const theme = useTheme();
 
@@ -46,13 +48,20 @@ export default function OpenDialog(props: OpenDialogProps): JSX.Element {
 
   useLayoutEffect(() => {
     if (activeView === "file") {
-      openFile().catch((err) => {
-        console.error(err);
-      });
+      openFile()
+        .catch((err) => {
+          console.error(err);
+        })
+        .finally(() => {
+          // set the view back to start so the user can click to open file again
+          if (isMounted()) {
+            setActiveView("start");
+          }
+        });
     } else if (activeView === "demo" && firstSampleSource) {
       selectSource(firstSampleSource.id);
     }
-  }, [activeView, firstSampleSource, openFile, selectSource]);
+  }, [activeView, firstSampleSource, isMounted, openFile, selectSource]);
 
   const allExtensions = useMemo(() => {
     return availableSources.reduce((all, source) => {
