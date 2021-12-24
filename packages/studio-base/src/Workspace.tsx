@@ -199,23 +199,6 @@ export default function Workspace(props: WorkspaceProps): JSX.Element {
     setShowOpenDialog(isPlayerPresent ? undefined : { view: "start" });
   }, [isPlayerPresent]);
 
-  // Automatically close the connection sidebar when a connection is chosen
-  useLayoutEffect(() => {
-    // When using the open dialog feature we don't automatically do anything with the connection sidebar
-    if (enableOpenDialog === true) {
-      return;
-    }
-
-    if (userSelectSidebarItem.current) {
-      userSelectSidebarItem.current = false;
-      return;
-    }
-
-    if (selectedSidebarItem === "connection" && playerPresence === PlayerPresence.PRESENT) {
-      setSelectedSidebarItem(undefined);
-    }
-  }, [selectedSidebarItem, playerPresence, enableOpenDialog]);
-
   const { setHelpInfo } = useHelpInfo();
 
   const handleInternalLink = useCallback(
