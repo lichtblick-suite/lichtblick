@@ -7,6 +7,7 @@ import { DndProvider } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
 
 import { AppSetting } from "@foxglove/studio-base/AppSetting";
+import Snow from "@foxglove/studio-base/Snow";
 import Workspace from "@foxglove/studio-base/Workspace";
 import DocumentTitleAdapter from "@foxglove/studio-base/components/DocumentTitleAdapter";
 import MultiProvider from "@foxglove/studio-base/components/MultiProvider";
@@ -59,6 +60,14 @@ function AppContent(props: AppProps): JSX.Element {
     /* eslint-enable react/jsx-key */
   ];
 
+  let snowType: "snow" | "confetti" | undefined;
+  const now = new Date();
+  if (now.getMonth() === 0 && now.getDate() === 1) {
+    snowType = "confetti";
+  } else if (now > new Date(2021, 11, 25)) {
+    snowType = "snow";
+  }
+
   return (
     <MultiProvider providers={providers}>
       <DocumentTitleAdapter />
@@ -67,6 +76,7 @@ function AppContent(props: AppProps): JSX.Element {
         <Suspense fallback={<></>}>
           <PanelCatalogProvider>
             <Workspace deepLinks={props.deepLinks} />
+            {snowType && <Snow type={snowType} />}
           </PanelCatalogProvider>
         </Suspense>
       </DndProvider>
