@@ -2,6 +2,8 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
+import { vec3 } from "gl-matrix";
+
 import { RosMsgDefinition } from "@foxglove/rosmsg";
 import { fromSec, Time } from "@foxglove/rostime";
 import { MessageEvent, Topic } from "@foxglove/studio";
@@ -995,7 +997,7 @@ export function SensorMsgs_PointCloud2_RGBA(): JSX.Element {
       point_step: 16,
       row_step: 128 * 128 * 16,
       data,
-      is_dense: 0,
+      is_dense: 1,
     },
     sizeInBytes: 0,
   };
@@ -1026,6 +1028,177 @@ export function SensorMsgs_PointCloud2_RGBA(): JSX.Element {
             perspective: true,
             phi: 1.22,
             targetOffset: [0.25, -0.5, 0],
+            thetaOffset: -0.33,
+            fovy: 0.75,
+            near: 0.01,
+            far: 5000,
+            target: [0, 0, 0],
+            targetOrientation: [0, 0, 0, 1],
+          },
+        }}
+      />
+    </PanelSetup>
+  );
+}
+
+export function SensorMsgs_PointCloud2_Intensity(): JSX.Element {
+  const topics: Topic[] = [
+    { name: "/pointcloud", datatype: "sensor_msgs/PointCloud2" },
+    { name: "/tf", datatype: "geometry_msgs/TransformStamped" },
+  ];
+  const tf1: MessageEvent<TF> = {
+    topic: "/tf",
+    receiveTime: { sec: 10, nsec: 0 },
+    message: {
+      header: { seq: 0, stamp: { sec: 0, nsec: 0 }, frame_id: "map" },
+      child_frame_id: "base_link",
+      transform: {
+        translation: { x: 1e7, y: 0, z: 0 },
+        rotation: QUAT_IDENTITY,
+      },
+    },
+    sizeInBytes: 0,
+  };
+  const tf2: MessageEvent<TF> = {
+    topic: "/tf",
+    receiveTime: { sec: 10, nsec: 0 },
+    message: {
+      header: { seq: 0, stamp: { sec: 0, nsec: 0 }, frame_id: "base_link" },
+      child_frame_id: "sensor",
+      transform: {
+        translation: { x: 0, y: 0, z: 1 },
+        rotation: QUAT_IDENTITY,
+      },
+    },
+    sizeInBytes: 0,
+  };
+
+  const WIDTH = 128;
+  const HW = 5;
+  const SCALE = 10 / WIDTH;
+  const SCALE_2 = 0.5 * SCALE;
+  const STEP = 13;
+  const METABALLS: [number, number, number, number][] = [
+    [0, 0, 2, 1.5],
+    [2.2, 2, 3, 0.75],
+    [2.1, -0.1, 4, 0.5],
+    [-1.2, -1, 1, 0.5],
+  ];
+
+  const tempVec: vec3 = [0, 0, 0];
+  function inside(p: vec3): number {
+    let sum = 0;
+    for (const metaball of METABALLS) {
+      tempVec[0] = metaball[0];
+      tempVec[1] = metaball[1];
+      tempVec[2] = metaball[2];
+      const r = metaball[3];
+      const d2 = Math.max(Number.EPSILON, vec3.squaredDistance(p, tempVec) - r * r);
+      sum += Math.pow(1 / d2, 2);
+    }
+    return sum >= 1 ? 1 : 0;
+  }
+
+  function countInside(xi: number, yi: number, zi: number): number {
+    const p0: vec3 = [xi * SCALE - HW - SCALE_2, yi * SCALE - HW - SCALE_2, zi * SCALE - SCALE_2];
+    const p1: vec3 = [xi * SCALE - HW + SCALE_2, yi * SCALE - HW - SCALE_2, zi * SCALE - SCALE_2];
+    const p2: vec3 = [xi * SCALE - HW - SCALE_2, yi * SCALE - HW + SCALE_2, zi * SCALE - SCALE_2];
+    const p3: vec3 = [xi * SCALE - HW + SCALE_2, yi * SCALE - HW + SCALE_2, zi * SCALE - SCALE_2];
+    const p4: vec3 = [xi * SCALE - HW - SCALE_2, yi * SCALE - HW - SCALE_2, zi * SCALE + SCALE_2];
+    const p5: vec3 = [xi * SCALE - HW + SCALE_2, yi * SCALE - HW - SCALE_2, zi * SCALE + SCALE_2];
+    const p6: vec3 = [xi * SCALE - HW - SCALE_2, yi * SCALE - HW + SCALE_2, zi * SCALE + SCALE_2];
+    const p7: vec3 = [xi * SCALE - HW + SCALE_2, yi * SCALE - HW + SCALE_2, zi * SCALE + SCALE_2];
+
+    return (
+      inside(p0) +
+      inside(p1) +
+      inside(p2) +
+      inside(p3) +
+      inside(p4) +
+      inside(p5) +
+      inside(p6) +
+      inside(p7)
+    );
+  }
+
+  const data = new Uint8Array(WIDTH * WIDTH * WIDTH * STEP);
+  const view = new DataView(data.buffer, data.byteOffset, data.byteLength);
+  for (let zi = 0; zi < WIDTH; zi++) {
+    for (let yi = 0; yi < WIDTH; yi++) {
+      for (let xi = 0; xi < WIDTH; xi++) {
+        const i = (zi * WIDTH + yi) * WIDTH * STEP + xi * STEP;
+        const count = countInside(xi, yi, zi);
+        if (count !== 0 && count !== 8) {
+          view.setFloat32(i + 0, xi * SCALE - HW, true);
+          view.setFloat32(i + 4, yi * SCALE - HW, true);
+          view.setFloat32(i + 8, zi * SCALE, true);
+          const position = xi * 0.5 + yi * 0.5 + zi * 0.5;
+          const surface = ((count / 7) * 255) / 2 + (xi / 2 + yi / 2 + zi / 2);
+          view.setUint8(i + 12, Math.trunc(position * 0.8 + surface * 0.2));
+        } else {
+          view.setFloat32(i + 0, Number.NaN, true);
+          view.setFloat32(i + 4, Number.NaN, true);
+          view.setFloat32(i + 8, Number.NaN, true);
+          view.setUint8(i + 12, 255);
+        }
+      }
+    }
+  }
+
+  const pointCloud: MessageEvent<PointCloud2> = {
+    topic: "/pointcloud",
+    receiveTime: { sec: 10, nsec: 0 },
+    message: {
+      type: 102,
+      header: { seq: 0, stamp: { sec: 0, nsec: 0 }, frame_id: "sensor" },
+      height: 1,
+      width: WIDTH * WIDTH * WIDTH,
+      fields: [
+        { name: "x", offset: 0, datatype: 7, count: 1 },
+        { name: "y", offset: 4, datatype: 7, count: 1 },
+        { name: "z", offset: 8, datatype: 7, count: 1 },
+        { name: "intensity", offset: 12, datatype: 2, count: 1 },
+      ],
+      is_bigendian: false,
+      point_step: 13,
+      row_step: WIDTH * WIDTH * WIDTH * STEP,
+      data,
+      is_dense: 0,
+    },
+    sizeInBytes: 0,
+  };
+
+  const fixture = useDelayedFixture({
+    datatypes,
+    topics,
+    frame: {
+      "/pointcloud": [pointCloud],
+      "/tf": [tf1, tf2],
+    },
+    capabilities: [],
+    activeData: {
+      currentTime: { sec: 0, nsec: 0 },
+    },
+  });
+
+  return (
+    <PanelSetup fixture={fixture}>
+      <ThreeDimensionalViz
+        overrideConfig={{
+          ...ThreeDimensionalViz.defaultConfig,
+          checkedKeys: ["name:Topics", "t:/tf", "t:/pointcloud", `t:${FOXGLOVE_GRID_TOPIC}`],
+          expandedKeys: ["name:Topics", "t:/tf", "t:/pointcloud", `t:${FOXGLOVE_GRID_TOPIC}`],
+          followTf: "base_link",
+          settingsByKey: {
+            "t:/pointcloud": {
+              pointSize: 5,
+            },
+          },
+          cameraState: {
+            distance: 13.5,
+            perspective: true,
+            phi: 1.22,
+            targetOffset: [0.25, -0.5, 3],
             thetaOffset: -0.33,
             fovy: 0.75,
             near: 0.01,
@@ -1138,5 +1311,6 @@ LargeTransform.parameters = { colorScheme: "dark" };
 MarkerLifetimes.parameters = { colorScheme: "dark" };
 Markers.parameters = { colorScheme: "dark" };
 SensorMsgs_LaserScan.parameters = { colorScheme: "dark" };
+SensorMsgs_PointCloud2_Intensity.parameters = { colorScheme: "dark" };
 SensorMsgs_PointCloud2_RGBA.parameters = { colorScheme: "dark" };
 TransformInterpolation.parameters = { colorScheme: "dark" };
