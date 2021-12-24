@@ -62,7 +62,9 @@ function AppContent(props: AppProps): JSX.Element {
 
   let snowType: "snow" | "confetti" | undefined;
   const now = new Date();
-  if (now.getMonth() === 0 && now.getDate() === 1) {
+  if (now >= new Date(2022, 0, 2)) {
+    snowType = undefined;
+  } else if (now >= new Date(2022, 0, 1)) {
     snowType = "confetti";
   } else if (now > new Date(2021, 11, 25)) {
     snowType = "snow";
