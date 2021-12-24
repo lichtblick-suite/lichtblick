@@ -189,9 +189,9 @@ export function createColorBuffer({
   }
 
   if (colorMode.mode === "rgb") {
-    const rgbField = fields.rgb;
+    const rgbField = fields.rgb ?? fields.rgba;
     if (!rgbField) {
-      throw new Error("Cannot create color buffer in rgb mode without an rgb field");
+      throw new Error("Cannot create color buffer in rgb mode without an rgb(a) field");
     }
     const rgbOffset = rgbField.offset ?? 0;
     if (hasValidStride(FLOAT_SIZE * stride)) {
@@ -222,9 +222,10 @@ export function createColorBuffer({
     });
   }
 
-  const colorField = fields[colorMode.colorField ?? "rgb"];
+  const colorFieldName = colorMode.colorField ?? (fields.rgba ? "rgba" : "rgb");
+  const colorField = fields[colorFieldName];
   if (!colorField) {
-    throw new Error(`Cannot create color buffer without ${colorMode.colorField ?? "rgb"} field`);
+    throw new Error(`Cannot create color buffer without ${colorFieldName} field`);
   }
 
   // If the color is computed from any of the other float fields (i.e. x positions)

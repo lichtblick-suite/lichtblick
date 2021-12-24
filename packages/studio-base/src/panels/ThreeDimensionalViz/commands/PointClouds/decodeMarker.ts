@@ -56,7 +56,8 @@ export function decodeMarker(marker: PointCloudMarker): DecodedMarker {
     data,
   } = marker;
   const offsetsAndReaders = getFieldOffsetsAndReaders(data, fields);
-  const hasRGB = offsetsAndReaders.rgb?.offset != undefined;
+  const hasRGB =
+    offsetsAndReaders.rgb?.offset != undefined || offsetsAndReaders.rgba?.offset != undefined;
 
   // Calculate the number of points in the cloud.
   // Do not use data.length, since it doesn't work with sparse point clouds.
@@ -64,7 +65,7 @@ export function decodeMarker(marker: PointCloudMarker): DecodedMarker {
 
   const defaultColorField =
     fields.find(({ name }) => DEFAULT_COLOR_FIELDS.includes(name))?.name ??
-    fields.find(({ name }) => name !== "rgb")?.name;
+    fields.find(({ name }) => name !== "rgb" && name !== "rgba")?.name;
   const colorMode: ColorMode =
     settings.colorMode ??
     (hasRGB
