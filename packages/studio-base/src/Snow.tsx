@@ -2,16 +2,11 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { useTheme, getColorFromString } from "@fluentui/react";
-import { useLayoutEffect, useMemo, useRef, useState } from "react";
-import { Transition, TransitionStatus } from "react-transition-group";
+import { useLayoutEffect, useRef } from "react";
 import createREGL from "regl";
 import styled from "styled-components";
 
-const SNOW_DURATION = 5000;
-const FADE_OUT_DURATION = 1000;
-
-const Container = styled.div<{ state: TransitionStatus }>`
+const Container = styled.div`
   z-index: 10000;
   pointer-events: none;
   position: absolute;
@@ -19,43 +14,20 @@ const Container = styled.div<{ state: TransitionStatus }>`
   left: 0;
   width: 100%;
   height: 100%;
-  transition: opacity ${FADE_OUT_DURATION}ms linear;
-  opacity: ${({ state }) => (state === "exiting" ? 0 : 1)};
 `;
 
 export default function Snow({ type }: { type: "snow" | "confetti" }): JSX.Element {
   const containerRef = useRef<HTMLDivElement>(ReactNull);
-  const [showSnow, setShowSnow] = useState(true);
-  const [exited, setExited] = useState(false);
-
-  const theme = useTheme();
-  const themeColor = useMemo(() => {
-    if (theme.isInverted) {
-      return [1, 1, 1, 1];
-    }
-    const rgba = getColorFromString(theme.palette.themeTertiary);
-    if (!rgba) {
-      return [191 / 255, 164 / 255, 240 / 255, 1];
-    }
-    return [rgba.r / 255, rgba.g / 255, rgba.b / 255, (rgba.a ?? 100) / 100];
-  }, [theme]);
-
-  const themeColorRef = useRef(themeColor);
-  themeColorRef.current = themeColor;
 
   const typeRef = useRef(type);
   typeRef.current = type;
 
   useLayoutEffect(() => {
-    if (exited) {
-      return;
-    }
     const container = containerRef.current;
     if (!container) {
       return;
     }
     const regl = createREGL(container);
-    const startExitTimeout = setTimeout(() => setShowSnow(false), SNOW_DURATION);
 
     const COUNT = 100;
     const xOffset = new Array(COUNT).fill(0).map(() => Math.random());
@@ -66,7 +38,6 @@ export default function Snow({ type }: { type: "snow" | "confetti" }): JSX.Eleme
     const drawSnow = regl({
       primitive: "points",
       uniforms: {
-        themeColor: regl.prop("themeColor"),
         time: regl.context("time"),
         isConfetti: regl.prop("isConfetti"),
       },
@@ -98,7 +69,6 @@ export default function Snow({ type }: { type: "snow" | "confetti" }): JSX.Eleme
       `,
       frag: `
       uniform bool isConfetti;
-      uniform lowp vec4 themeColor;
       varying lowp float vPhase;
       void main() {
         if (length(gl_PointCoord * 2.0 - 1.0) > 1.0) {
@@ -112,30 +82,20 @@ export default function Snow({ type }: { type: "snow" | "confetti" }): JSX.Eleme
           else if (vPhase < 5.0/6.0) gl_FragColor = vec4(1.0, 0.0, 1.0, 1.0);
           else                       gl_FragColor = vec4(1.0, 1.0, 0.0, 1.0);
         } else {
-          gl_FragColor = themeColor;
+          gl_FragColor = vec4(1.0, 1.0, 1.0, 1.0);
         }
       }
       `,
     });
     const frame = regl.frame(() => {
       regl.clear({ color: [0, 0, 0, 0] });
-      drawSnow({ themeColor: themeColorRef.current, isConfetti: typeRef.current === "confetti" });
+      drawSnow({ isConfetti: typeRef.current === "confetti" });
     });
     return () => {
-      clearTimeout(startExitTimeout);
       frame.cancel();
       regl.destroy();
     };
-  }, [exited]);
+  }, []);
 
-  return (
-    <Transition
-      in={showSnow}
-      timeout={{ exit: FADE_OUT_DURATION }}
-      unmountOnExit
-      onExited={() => setExited(true)}
-    >
-      {(state) => <Container state={state} ref={containerRef} />}
-    </Transition>
-  );
+  return <Container ref={containerRef} />;
 }

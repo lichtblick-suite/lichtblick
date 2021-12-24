@@ -2,9 +2,10 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { Dialog, Stack, useTheme } from "@fluentui/react";
+import { Dialog, Overlay, Stack, useTheme } from "@fluentui/react";
 import { useCallback, useLayoutEffect, useMemo, useState } from "react";
 
+import Snow from "@foxglove/studio-base/Snow";
 import {
   IDataSourceFactory,
   usePlayerSelection,
@@ -121,68 +122,89 @@ export default function OpenDialog(props: OpenDialogProps): JSX.Element {
     remoteFileSources,
   ]);
 
+  let snowType: "snow" | "confetti" | undefined;
+  const now = new Date();
+  if (now >= new Date(2022, 0, 2)) {
+    snowType = undefined;
+  } else if (now >= new Date(2022, 0, 1)) {
+    snowType = "confetti";
+  } else if (now > new Date(2021, 11, 25)) {
+    snowType = "snow";
+  }
+
   return (
-    <Dialog
-      hidden={false}
-      maxWidth={800}
-      minWidth={800}
-      modalProps={{
-        layerProps: {
-          // We enable event bubbling so a user can drag&drop files or folders onto the app even when
-          // the dialog is shown.
-          eventBubblingEnabled: true,
-        },
-        styles: {
-          main: {
-            display: "flex",
-            flexDirection: "column",
+    <>
+      {snowType && (
+        <Overlay isDarkThemed onClick={onDismiss} style={{ zIndex: 100000 }}>
+          <Snow type={snowType} />
+        </Overlay>
+      )}
+      <Dialog
+        hidden={false}
+        maxWidth={800}
+        minWidth={800}
+        modalProps={{
+          isModeless: snowType != undefined,
+          layerProps: {
+            // We enable event bubbling so a user can drag&drop files or folders onto the app even when
+            // the dialog is shown.
+            eventBubblingEnabled: true,
           },
-          scrollableContent: {
-            display: "flex",
-            flexDirection: "column",
+          overlay: {
+            styles: snowType ? { root: { display: "none" } } : undefined,
           },
-        },
-      }}
-      onDismiss={onDismiss}
-      dialogContentProps={{
-        showCloseButton: true,
-        title: view.title,
-        styles: {
-          content: {
-            overflow: "hidden",
-            height: 480,
-            display: "flex",
-            flexDirection: "column",
-            padding: theme.spacing.l1,
+          styles: {
+            main: {
+              display: "flex",
+              flexDirection: "column",
+            },
+            scrollableContent: {
+              display: "flex",
+              flexDirection: "column",
+            },
+          },
+        }}
+        onDismiss={onDismiss}
+        dialogContentProps={{
+          showCloseButton: true,
+          title: view.title,
+          styles: {
+            content: {
+              overflow: "hidden",
+              height: 480,
+              display: "flex",
+              flexDirection: "column",
+              padding: theme.spacing.l1,
 
-            "@media (max-height: 512px)": { overflowY: "auto" },
-          },
-          inner: {
-            flex: 1,
-            display: "flex",
-            flexDirection: "column",
+              "@media (max-height: 512px)": { overflowY: "auto" },
+            },
+            inner: {
+              flex: 1,
+              display: "flex",
+              flexDirection: "column",
 
-            "@media (min-height: 512px)": { overflow: "hidden" },
-          },
-          innerContent: {
-            height: "100%",
-            display: "flex",
-            flexDirection: "column",
-            flex: 1,
+              "@media (min-height: 512px)": { overflow: "hidden" },
+            },
+            innerContent: {
+              height: "100%",
+              display: "flex",
+              flexDirection: "column",
+              flex: 1,
 
-            "@media (min-height: 512px)": { overflow: "hidden" },
+              "@media (min-height: 512px)": { overflow: "hidden" },
+            },
           },
-        },
-      }}
-    >
-      <Stack
-        grow
-        verticalFill
-        verticalAlign="space-between"
-        tokens={{ childrenGap: theme.spacing.m }}
+        }}
       >
-        {view.component}
-      </Stack>
-    </Dialog>
+        <Stack
+          grow
+          verticalFill
+          verticalAlign="space-between"
+          tokens={{ childrenGap: theme.spacing.m }}
+        >
+          {view.component}
+        </Stack>
+      </Dialog>
+    </>
   );
 }
