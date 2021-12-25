@@ -48,11 +48,6 @@ const features: Feature[] = [
     name: "MCAP data source",
     description: <>Enable the MCAP data source.</>,
   },
-  {
-    key: AppSetting.OPEN_DIALOG,
-    name: "Open dialog",
-    description: <>Use the new open dialog for selecting data sources.</>,
-  },
 ];
 if (process.env.NODE_ENV === "development") {
   features.push({
