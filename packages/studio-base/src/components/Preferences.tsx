@@ -19,7 +19,6 @@ import moment from "moment-timezone";
 import { useCallback, useMemo, useState } from "react";
 
 import { filterMap } from "@foxglove/den/collection";
-import { RosNode } from "@foxglove/ros1";
 import { AppSetting } from "@foxglove/studio-base/AppSetting";
 import OsContextSingleton from "@foxglove/studio-base/OsContextSingleton";
 import { ExperimentalFeatureSettings } from "@foxglove/studio-base/components/ExperimentalFeatureSettings";
@@ -246,30 +245,6 @@ function MessageFramerate(): React.ReactElement {
   );
 }
 
-function RosHostname(): React.ReactElement {
-  const [rosHostname, setRosHostname] = useAppConfigurationValue<string>(
-    AppSetting.ROS1_ROS_HOSTNAME,
-  );
-
-  const os = OsContextSingleton;
-  const rosHostnamePlaceholder = useMemo(
-    () =>
-      os != undefined
-        ? RosNode.GetRosHostname(os.getEnvVar, os.getHostname, os.getNetworkInterfaces)
-        : "localhost",
-    [os],
-  );
-
-  return (
-    <TextField
-      label="ROS_HOSTNAME"
-      placeholder={rosHostnamePlaceholder}
-      value={rosHostname ?? ""}
-      onChange={(_event, newValue) => void setRosHostname(newValue ? newValue : undefined)}
-    />
-  );
-}
-
 function RosPackagePath(): React.ReactElement {
   const [rosPackagePath, setRosPackagePath] = useAppConfigurationValue<string>(
     AppSetting.ROS_PACKAGE_PATH,
@@ -343,9 +318,6 @@ export default function Preferences(): React.ReactElement {
         <Stack.Item>
           <SectionHeader>ROS</SectionHeader>
           <Stack tokens={{ childrenGap: theme.spacing.s1 }}>
-            <Stack.Item>
-              <RosHostname />
-            </Stack.Item>
             <Stack.Item>
               <RosPackagePath />
             </Stack.Item>
