@@ -8,10 +8,8 @@ import {
   IDataSourceFactory,
   DataSourceFactoryInitializeArgs,
 } from "@foxglove/studio-base/context/PlayerSelectionContext";
-import { PromptOptions } from "@foxglove/studio-base/hooks/usePrompt";
 import Ros1Player from "@foxglove/studio-base/players/Ros1Player";
 import { Player } from "@foxglove/studio-base/players/types";
-import { parseInputUrl } from "@foxglove/studio-base/util/url";
 
 const os = OsContextSingleton; // workaround for https://github.com/webpack/webpack/issues/12960
 
@@ -37,27 +35,6 @@ class Ros1SocketDataSourceFactory implements IDataSourceFactory {
       },
     ],
   };
-
-  promptOptions(previousValue?: string): PromptOptions {
-    return {
-      title: "ROS 1 TCP connection",
-      placeholder: "localhost:11311",
-      initialValue: previousValue ?? os?.getEnvVar("ROS_MASTER_URI") ?? "localhost:11311",
-      transformer: (str) => {
-        const result = parseInputUrl(str, "ros:", {
-          "http:": { port: 80 },
-          "https:": { port: 443 },
-          "ros:": { protocol: "http:", port: 11311 },
-        });
-        if (result == undefined) {
-          throw new Error(
-            "Invalid ROS URL. See the ROS_MASTER_URI at http://wiki.ros.org/ROS/EnvironmentVariables for more info.",
-          );
-        }
-        return result;
-      },
-    };
-  }
 
   initialize(args: DataSourceFactoryInitializeArgs): Player | undefined {
     const url = args.url;

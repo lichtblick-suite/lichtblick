@@ -5,7 +5,6 @@
 import { createContext, useContext } from "react";
 
 import { PanelsState } from "@foxglove/studio-base/context/CurrentLayoutContext/actions";
-import { PromptOptions } from "@foxglove/studio-base/hooks/usePrompt";
 import { Player, PlayerMetricsCollectorInterface } from "@foxglove/studio-base/players/types";
 import ConsoleApi from "@foxglove/studio-base/services/ConsoleApi";
 
@@ -43,8 +42,6 @@ export interface IDataSourceFactory {
   supportedFileTypes?: string[];
 
   supportsMultiFile?: boolean;
-
-  promptOptions?: (previousValue?: string) => PromptOptions;
 
   // Initialize a player.
   initialize: (args: DataSourceFactoryInitializeArgs) => Player | undefined;

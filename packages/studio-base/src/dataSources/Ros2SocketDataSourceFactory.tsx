@@ -6,7 +6,6 @@ import {
   IDataSourceFactory,
   DataSourceFactoryInitializeArgs,
 } from "@foxglove/studio-base/context/PlayerSelectionContext";
-import { PromptOptions } from "@foxglove/studio-base/hooks/usePrompt";
 import Ros2Player from "@foxglove/studio-base/players/Ros2Player";
 import { Player } from "@foxglove/studio-base/players/types";
 
@@ -19,21 +18,6 @@ class Ros2SocketDataSourceFactory implements IDataSourceFactory {
   formConfig = {
     fields: [{ id: "url", label: "ROS_DOMAIN_ID", defaultValue: "0" }],
   };
-
-  promptOptions(previousValue?: string): PromptOptions {
-    return {
-      title: "ROS_DOMAIN_ID",
-      placeholder: "0",
-      initialValue: previousValue ?? "0",
-      transformer: (str) => {
-        const result = parseInt(str);
-        if (isNaN(result) || result < 0) {
-          throw new Error("Invalid ROS 2 DomainId. Please use a non-negative integer");
-        }
-        return String(result);
-      },
-    };
-  }
 
   initialize(args: DataSourceFactoryInitializeArgs): Player | undefined {
     const url = args.url;

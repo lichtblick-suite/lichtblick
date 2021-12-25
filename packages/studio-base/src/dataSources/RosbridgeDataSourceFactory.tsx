@@ -6,10 +6,8 @@ import {
   IDataSourceFactory,
   DataSourceFactoryInitializeArgs,
 } from "@foxglove/studio-base/context/PlayerSelectionContext";
-import { PromptOptions } from "@foxglove/studio-base/hooks/usePrompt";
 import RosbridgePlayer from "@foxglove/studio-base/players/RosbridgePlayer";
 import { Player } from "@foxglove/studio-base/players/types";
-import { parseInputUrl } from "@foxglove/studio-base/util/url";
 
 class RosbridgeDataSourceFactory implements IDataSourceFactory {
   id = "rosbridge-websocket";
@@ -20,27 +18,6 @@ class RosbridgeDataSourceFactory implements IDataSourceFactory {
   formConfig = {
     fields: [{ id: "url", label: "WebSocket URL", defaultValue: "ws://localhost:9090" }],
   };
-
-  promptOptions(previousValue?: string): PromptOptions {
-    return {
-      title: "Rosbridge connection",
-      placeholder: "ws://localhost:9090",
-      initialValue: previousValue ?? "ws://localhost:9090",
-      transformer: (str) => {
-        const result = parseInputUrl(str, "http:", {
-          "http:": { protocol: "ws:", port: 9090 },
-          "https:": { protocol: "wss:", port: 9090 },
-          "ws:": { port: 9090 },
-          "wss:": { port: 9090 },
-          "ros:": { protocol: "ws:", port: 9090 },
-        });
-        if (result == undefined) {
-          throw new Error("Invalid rosbridge WebSocket URL. Use the ws:// or wss:// protocol.");
-        }
-        return result;
-      },
-    };
-  }
 
   initialize(args: DataSourceFactoryInitializeArgs): Player | undefined {
     const url = args.url;

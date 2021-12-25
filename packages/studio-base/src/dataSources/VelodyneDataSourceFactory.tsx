@@ -6,10 +6,7 @@ import {
   IDataSourceFactory,
   DataSourceFactoryInitializeArgs,
 } from "@foxglove/studio-base/context/PlayerSelectionContext";
-import { PromptOptions } from "@foxglove/studio-base/hooks/usePrompt";
-import VelodynePlayer, {
-  DEFAULT_VELODYNE_PORT,
-} from "@foxglove/studio-base/players/VelodynePlayer";
+import VelodynePlayer from "@foxglove/studio-base/players/VelodynePlayer";
 import { Player } from "@foxglove/studio-base/players/types";
 
 class VelodyneDataSourceFactory implements IDataSourceFactory {
@@ -21,23 +18,6 @@ class VelodyneDataSourceFactory implements IDataSourceFactory {
   formConfig = {
     fields: [{ id: "url", label: "UDP Port", defaultValue: "2369" }],
   };
-
-  promptOptions(previousValue?: string): PromptOptions {
-    return {
-      title: "Velodyne LIDAR UDP port",
-      placeholder: `${DEFAULT_VELODYNE_PORT}`,
-      initialValue: previousValue ?? `${DEFAULT_VELODYNE_PORT}`,
-      transformer: (str) => {
-        const parsed = parseInt(str);
-        if (isNaN(parsed) || parsed <= 0 || parsed > 65535) {
-          throw new Error(
-            "Invalid port number. Please enter a valid UDP port number to listen for Velodyne packets",
-          );
-        }
-        return parsed.toString();
-      },
-    };
-  }
 
   initialize(args: DataSourceFactoryInitializeArgs): Player | undefined {
     // velodyne uses the url arg as the port

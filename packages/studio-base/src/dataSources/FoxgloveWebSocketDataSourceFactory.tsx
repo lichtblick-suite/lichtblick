@@ -6,10 +6,8 @@ import {
   IDataSourceFactory,
   DataSourceFactoryInitializeArgs,
 } from "@foxglove/studio-base/context/PlayerSelectionContext";
-import { PromptOptions } from "@foxglove/studio-base/hooks/usePrompt";
 import FoxgloveWebSocketPlayer from "@foxglove/studio-base/players/FoxgloveWebSocketPlayer";
 import { Player } from "@foxglove/studio-base/players/types";
-import { parseInputUrl } from "@foxglove/studio-base/util/url";
 
 export default class FoxgloveWebSocketDataSourceFactory implements IDataSourceFactory {
   id = "foxglove-websocket";
@@ -20,26 +18,6 @@ export default class FoxgloveWebSocketDataSourceFactory implements IDataSourceFa
   formConfig = {
     fields: [{ id: "url", label: "WebSocket URL", defaultValue: "ws://localhost:8765" }],
   };
-
-  promptOptions(previousValue?: string): PromptOptions {
-    return {
-      title: "WebSocket connection",
-      placeholder: "ws://localhost:8765",
-      initialValue: previousValue ?? "ws://localhost:8765",
-      transformer: (str) => {
-        const result = parseInputUrl(str, "ws:", {
-          "http:": { protocol: "ws:", port: 8765 },
-          "https:": { protocol: "wss:", port: 8765 },
-          "ws:": { port: 8765 },
-          "wss:": { port: 8765 },
-        });
-        if (result == undefined) {
-          throw new Error("Invalid WebSocket URL. Use the ws:// or wss:// protocol.");
-        }
-        return result;
-      },
-    };
-  }
 
   initialize(args: DataSourceFactoryInitializeArgs): Player | undefined {
     const url = args.url;

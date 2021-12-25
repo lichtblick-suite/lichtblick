@@ -96,13 +96,3 @@ export function windowAppURLState(): AppURLState | undefined {
     return undefined;
   }
 }
-
-/**
- * Checks to see if we have a valid state encoded in the url.
- *
- * @returns True if the window has a valid encoded url state.
- */
-export function windowHasValidURLState(): boolean {
-  const urlState = windowAppURLState();
-  return urlState != undefined;
-}
