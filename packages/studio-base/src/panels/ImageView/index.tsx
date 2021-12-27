@@ -27,7 +27,6 @@ import * as PanelAPI from "@foxglove/studio-base/PanelAPI";
 import Autocomplete from "@foxglove/studio-base/components/Autocomplete";
 import Dropdown from "@foxglove/studio-base/components/Dropdown";
 import DropdownItem from "@foxglove/studio-base/components/Dropdown/DropdownItem";
-import EmptyState from "@foxglove/studio-base/components/EmptyState";
 import Flex from "@foxglove/studio-base/components/Flex";
 import Icon from "@foxglove/studio-base/components/Icon";
 import { LegacyButton } from "@foxglove/studio-base/components/LegacyStyledComponents";
@@ -48,6 +47,7 @@ import { formatTimeRaw, getTimestampForMessage } from "@foxglove/studio-base/uti
 import toggle from "@foxglove/studio-base/util/toggle";
 
 import ImageCanvas from "./ImageCanvas";
+import ImageEmptyState from "./ImageEmptyState";
 import helpContent from "./index.help.md";
 import {
   getCameraInfoTopic,
@@ -85,7 +85,7 @@ type Props = {
   saveConfig: SaveImagePanelConfig;
 };
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles(() => ({
   controls: {
     display: "flex",
     flexWrap: "wrap",
@@ -132,14 +132,6 @@ const useStyles = makeStyles((theme) => ({
   dropdownItem: {
     position: "relative",
   },
-  emptyStateWrapper: {
-    width: "100%",
-    height: "100%",
-    background: theme.palette.neutralLighterAlt,
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-  },
   toggleButton: {
     display: "flex",
     alignItems: "center",
@@ -148,6 +140,11 @@ const useStyles = makeStyles((theme) => ({
     padding: "0px 15px 0px 0px",
     fontSize: 10,
     fontStyle: "italic",
+  },
+  emptyStateContainer: {
+    width: "100%",
+    height: "100%",
+    position: "absolute",
   },
 }));
 
@@ -208,75 +205,6 @@ const ToggleComponent = ({
 };
 
 const canTransformMarkersByTopic = (topic: string) => !topic.includes("rect");
-
-// Group image topics by the first component of their name
-
-function ImageEmptyState({
-  cameraTopic,
-  markerTopics,
-  shouldSynchronize,
-  messagesByTopic,
-}: {
-  cameraTopic: string;
-  markerTopics: string[];
-  shouldSynchronize: boolean;
-  messagesByTopic: {
-    [topic: string]: readonly MessageEvent<unknown>[];
-  };
-}) {
-  const classes = useStyles();
-  if (cameraTopic === "") {
-    return (
-      <div className={classes.emptyStateWrapper}>
-        <EmptyState>Select a topic to view images</EmptyState>
-      </div>
-    );
-  }
-  return (
-    <div className={classes.emptyStateWrapper}>
-      <EmptyState>
-        Waiting for images {markerTopics.length > 0 && "and markers"} on:
-        <div>
-          <div>
-            <code>{cameraTopic}</code>
-          </div>
-          {markerTopics.sort().map((m) => (
-            <div key={m}>
-              <code>{m}</code>
-            </div>
-          ))}
-        </div>
-        {shouldSynchronize && (
-          <>
-            <p>
-              Synchronization is enabled, so all messages with <code>header.stamp</code>s must match
-              exactly.
-            </p>
-            <ul>
-              {Object.entries(messagesByTopic).map(([topic, topicMessages]) => (
-                <li key={topic}>
-                  <code>{topic}</code>:{" "}
-                  {topicMessages.length > 0
-                    ? topicMessages
-                        .map(
-                          (
-                            { message }, // In some cases, a user may have subscribed to a topic that does not include a header stamp.
-                          ) => {
-                            const stamp = getTimestampForMessage(message);
-                            return stamp != undefined ? formatTimeRaw(stamp) : "[ unknown ]";
-                          },
-                        )
-                        .join(", ")
-                    : "no messages"}
-                </li>
-              ))}
-            </ul>
-          </>
-        )}
-      </EmptyState>
-    </div>
-  );
-}
 
 function useOptionallySynchronizedMessages(
   // eslint-disable-next-line @foxglove/no-boolean-parameters
@@ -706,27 +634,31 @@ function ImageView(props: Props) {
   return (
     <Flex col clip>
       {toolbar}
-      {/* If rendered, EmptyState will hide the always-present ImageCanvas */}
-      {showEmptyState && (
-        <ImageEmptyState
-          cameraTopic={cameraTopic}
-          markerTopics={enabledMarkerTopics}
-          shouldSynchronize={shouldSynchronize}
-          messagesByTopic={messagesByTopic}
-        />
-      )}
-      {/* Always render the ImageCanvas because it's expensive to unmount and start up. */}
-      {imageMessageToRender && (
-        <ImageCanvas
-          topic={cameraTopicFullObject}
-          image={imageMessageToRender}
-          rawMarkerData={rawMarkerData}
-          config={config}
-          saveConfig={saveConfig}
-          onStartRenderImage={onStartRenderImage}
-        />
-      )}
-      {!showEmptyState && renderBottomBar()}
+      <div style={{ display: "flex", flexDirection: "column", width: "100%", height: "100%" }}>
+        {/* Always render the ImageCanvas because it's expensive to unmount and start up. */}
+        {imageMessageToRender && (
+          <ImageCanvas
+            topic={cameraTopicFullObject}
+            image={imageMessageToRender}
+            rawMarkerData={rawMarkerData}
+            config={config}
+            saveConfig={saveConfig}
+            onStartRenderImage={onStartRenderImage}
+          />
+        )}
+        {/* If rendered, EmptyState will hide the always-present ImageCanvas */}
+        {showEmptyState && (
+          <div className={classes.emptyStateContainer}>
+            <ImageEmptyState
+              cameraTopic={cameraTopic}
+              markerTopics={enabledMarkerTopics}
+              shouldSynchronize={shouldSynchronize}
+              messagesByTopic={messagesByTopic}
+            />
+          </div>
+        )}
+        {!showEmptyState && renderBottomBar()}
+      </div>
     </Flex>
   );
 }
