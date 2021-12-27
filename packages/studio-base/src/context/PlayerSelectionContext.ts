@@ -58,18 +58,14 @@ export type RecentSource = {
   label?: string;
 };
 
-type DataSourceArgsCommon = {
-  skipRecents?: boolean;
-};
-
 // File data sources accept either file instances or handles
-type FileDataSourceArgs = DataSourceArgsCommon & {
+type FileDataSourceArgs = {
   type: "file";
   files?: File[];
   handle?: FileSystemFileHandle;
 };
 
-type ConnectionDataSourceArgs = DataSourceArgsCommon & {
+type ConnectionDataSourceArgs = {
   type: "connection";
   params?: Record<string, string | undefined>;
 };

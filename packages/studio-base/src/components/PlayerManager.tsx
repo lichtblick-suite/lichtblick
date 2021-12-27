@@ -20,7 +20,7 @@ import {
   useState,
 } from "react";
 import { useToasts } from "react-toast-notifications";
-import { useAsync, useLatest, useMountedState } from "react-use";
+import { useLatest, useMountedState } from "react-use";
 
 import { useShallowMemo } from "@foxglove/hooks";
 import Logger from "@foxglove/log";
@@ -41,16 +41,13 @@ import PlayerSelectionContext, {
 import { useUserNodeState } from "@foxglove/studio-base/context/UserNodeStateContext";
 import { useAppConfigurationValue } from "@foxglove/studio-base/hooks/useAppConfigurationValue";
 import { GlobalVariables } from "@foxglove/studio-base/hooks/useGlobalVariables";
+import useIndexedDbRecents from "@foxglove/studio-base/hooks/useIndexedDbRecents";
 import useWarnImmediateReRender from "@foxglove/studio-base/hooks/useWarnImmediateReRender";
 import AnalyticsMetricsCollector from "@foxglove/studio-base/players/AnalyticsMetricsCollector";
 import OrderedStampPlayer from "@foxglove/studio-base/players/OrderedStampPlayer";
 import UserNodePlayer from "@foxglove/studio-base/players/UserNodePlayer";
 import { Player } from "@foxglove/studio-base/players/types";
 import { UserNodes } from "@foxglove/studio-base/types/panels";
-import {
-  IndexedDbRecentsStore,
-  RecentRecord,
-} from "@foxglove/studio-base/util/IndexedDbRecentsStore";
 
 const log = Logger.getLogger(__filename);
 
@@ -61,13 +58,10 @@ const EMPTY_GLOBAL_VARIABLES: GlobalVariables = Object.freeze({});
 type PlayerManagerProps = {
   playerSources: IDataSourceFactory[];
 };
-
 export default function PlayerManager(props: PropsWithChildren<PlayerManagerProps>): JSX.Element {
   const { children, playerSources } = props;
 
   useWarnImmediateReRender();
-
-  const recentsStore = useMemo(() => new IndexedDbRecentsStore(), []);
 
   const { setUserNodeDiagnostics, addUserNodeLogs, setUserNodeRosLib } = useUserNodeState();
   const userNodeActions = useShallowMemo({
@@ -108,6 +102,8 @@ export default function PlayerManager(props: PropsWithChildren<PlayerManagerProp
     (state) => state.selectedLayout?.data?.playbackConfig.messageOrder ?? DEFAULT_MESSAGE_ORDER,
   );
 
+  const { recents, addRecent } = useIndexedDbRecents();
+
   // We don't want to recreate the player when the these variables change, but we do want to
   // initialize it with the right order, so make a variable for its initial value we can use in the
   // dependency array to the player useMemo.
@@ -136,48 +132,6 @@ export default function PlayerManager(props: PropsWithChildren<PlayerManagerProp
   const { addToast } = useToasts();
 
   const [selectedSource, setSelectedSource] = useState<IDataSourceFactory | undefined>();
-
-  const { value: initialRecents } = useAsync(async () => await recentsStore.get(), [recentsStore]);
-  const [recents, setRecents] = useState<RecentRecord[]>([]);
-
-  // Set the first load records from the store to the state
-  useLayoutEffect(() => {
-    if (!initialRecents) {
-      return;
-    }
-    setRecents(initialRecents);
-  }, [initialRecents]);
-
-  const saveRecents = useCallback(
-    (recentRecords: RecentRecord[]) => {
-      recentsStore.set(recentRecords).catch((err) => {
-        log.error(err);
-      });
-    },
-    [recentsStore],
-  );
-
-  // Add a new recent entry
-  const addRecent = useCallback(
-    (record: RecentRecord) => {
-      setRecents((prevRecents) => {
-        // To keep only the latest 5 recent items, we remove any items index 4+
-        prevRecents.splice(4, 100);
-        prevRecents.unshift(record);
-
-        saveRecents(prevRecents);
-        return [...prevRecents];
-      });
-    },
-    [saveRecents],
-  );
-
-  // Make a RecentSources array for the PlayerSelectionContext
-  const recentSources = useMemo(() => {
-    return recents.map((item) => {
-      return { id: item.id, title: item.title, label: item.label };
-    });
-  }, [recents]);
 
   const selectSource = useCallback(
     async (sourceId: string, args?: DataSourceArgs) => {
@@ -247,9 +201,8 @@ export default function PlayerManager(props: PropsWithChildren<PlayerManagerProp
             });
             setBasePlayer(newPlayer);
 
-            if (args.params?.url && args.skipRecents !== true) {
+            if (args.params?.url) {
               addRecent({
-                id: IndexedDbRecentsStore.GenerateRecordId(),
                 type: "connection",
                 sourceId: foundSource.id,
                 title: args.params?.url,
@@ -311,16 +264,12 @@ export default function PlayerManager(props: PropsWithChildren<PlayerManagerProp
               });
 
               setBasePlayer(newPlayer);
-
-              if (args.skipRecents !== true) {
-                addRecent({
-                  id: IndexedDbRecentsStore.GenerateRecordId(),
-                  type: "file",
-                  title: handle.name,
-                  sourceId: foundSource.id,
-                  handle,
-                });
-              }
+              addRecent({
+                type: "file",
+                title: handle.name,
+                sourceId: foundSource.id,
+                handle,
+              });
 
               return;
             }
@@ -360,7 +309,6 @@ export default function PlayerManager(props: PropsWithChildren<PlayerManagerProp
       switch (foundRecent.type) {
         case "connection": {
           void selectSource(foundRecent.sourceId, {
-            skipRecents: true,
             type: "connection",
             params: foundRecent.extra,
           });
@@ -370,13 +318,19 @@ export default function PlayerManager(props: PropsWithChildren<PlayerManagerProp
           void selectSource(foundRecent.sourceId, {
             type: "file",
             handle: foundRecent.handle,
-            skipRecents: true,
           });
         }
       }
     },
     [recents, addToast, selectSource],
   );
+
+  // Make a RecentSources array for the PlayerSelectionContext
+  const recentSources = useMemo(() => {
+    return recents.map((item) => {
+      return { id: item.id, title: item.title, label: item.label };
+    });
+  }, [recents]);
 
   const value: PlayerSelection = {
     selectSource,
