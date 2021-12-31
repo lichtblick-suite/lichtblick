@@ -12,7 +12,8 @@
 //   You may not use this file except in compliance with the License.
 
 import { uniq, omit, debounce } from "lodash";
-import React, { useCallback, useMemo, useState, useRef, useEffect } from "react";
+import React, { useCallback, useMemo, useState, useRef, useEffect, useLayoutEffect } from "react";
+import { useLatest } from "react-use";
 
 import { CameraState } from "@foxglove/regl-worldview";
 import { useDataSourceInfo } from "@foxglove/studio-base/PanelAPI";
@@ -22,6 +23,7 @@ import {
 } from "@foxglove/studio-base/components/MessagePipeline";
 import Panel from "@foxglove/studio-base/components/Panel";
 import PanelContext from "@foxglove/studio-base/components/PanelContext";
+import useCallbackWithToast from "@foxglove/studio-base/hooks/useCallbackWithToast";
 import Layout from "@foxglove/studio-base/panels/ThreeDimensionalViz/TopicTree/Layout";
 import helpContent from "@foxglove/studio-base/panels/ThreeDimensionalViz/index.help.md";
 import {
@@ -32,8 +34,13 @@ import {
   CoordinateFrame,
   DEFAULT_FRAME_IDS,
 } from "@foxglove/studio-base/panels/ThreeDimensionalViz/transforms";
-import { ThreeDimensionalVizConfig } from "@foxglove/studio-base/panels/ThreeDimensionalViz/types";
+import {
+  FollowMode,
+  ThreeDimensionalVizConfig,
+} from "@foxglove/studio-base/panels/ThreeDimensionalViz/types";
+import { MutablePose } from "@foxglove/studio-base/types/Messages";
 import { PanelConfigSchema, SaveConfig } from "@foxglove/studio-base/types/panels";
+import { emptyPose } from "@foxglove/studio-base/util/Pose";
 
 import useFrame from "./useFrame";
 import useTransforms from "./useTransforms";
@@ -146,44 +153,138 @@ function BaseRenderer(props: Props): JSX.Element {
   const [configCameraState, setConfigCameraState] = useState(config.cameraState);
   useEffect(() => setConfigCameraState(config.cameraState), [config]);
 
-  const { transformedCameraState, targetPose } = useTransformedCameraState({
+  // unfollowPoseSnapshot has the pose of the follow frame in the fixed frame when following was
+  // turned off.
+  const unfollowPoseSnapshot = useRef<MutablePose | undefined>();
+
+  // We always orient the camera to the render frame. The render frame continues to move relative to
+  // the fixed frame, but we want to keep the camera stationary. We calculate the location of the
+  // snapshot pose in render frame coordinates.
+  //
+  // This new pose tells us where to place the camera within the render frame to create the
+  // appearance that the camera is stationary.
+  const poseInRenderRef = useRef<MutablePose | undefined>();
+  poseInRenderRef.current = unfollowPoseSnapshot.current
+    ? renderFrame.applyLocal(emptyPose(), unfollowPoseSnapshot.current, fixedFrame, currentTime)
+    : undefined;
+
+  const transformedCameraState = useTransformedCameraState({
     configCameraState,
     followTf,
     followMode,
     transforms,
+    poseInRenderFrame: poseInRenderRef.current,
   });
+
+  const renderFrameLatest = useLatest(renderFrame);
+  const currentTimeLatest = useLatest(currentTime);
+  const transformsLatest = useLatest(transforms);
+
+  // When the fixed frame changes, we clear any unfollow pose. The next effect will attempt to set
+  // a new unfollowPoseSnapshot if we are able to detect one for the new fixed frame.
+  useLayoutEffect(() => {
+    unfollowPoseSnapshot.current = undefined;
+  }, [fixedFrame]);
+
+  // When starting up in no-follow or partial follow, we try to initialize the unfollowPoseSnapshot
+  // to the location of the follow frame within its root frame.
+  //
+  // This effect depends on fixedFrame, transforms, followTf so it runs repeatedly during
+  // initialization until a stable unfollowPoseSnapshot is obtained.
+  useLayoutEffect(() => {
+    // Bail if
+    if (followMode === "follow-orientation") {
+      return;
+    }
+
+    // Bail if we already have an unfollow pose or don't have a follow frame to looku[]
+    if (unfollowPoseSnapshot.current || followTf == undefined) {
+      return;
+    }
+
+    // get the current root frame for the render frame we are _currently_ following but want to stop following
+    const followFrame = transforms.frame(followTf);
+    if (!followFrame) {
+      return;
+    }
+
+    // Bail if the fixed frame is the follow frame. There is no need to set the unfollow pose snapshot
+    // in this case.
+    if (fixedFrame.id === followFrame.id) {
+      unfollowPoseSnapshot.current = undefined;
+      return;
+    }
+
+    // calculate the pose of our follow frame in our root frame
+    let rootFramePose: MutablePose | undefined = emptyPose();
+    rootFramePose = fixedFrame.applyLocal(
+      rootFramePose,
+      rootFramePose,
+      followFrame,
+      currentTimeLatest.current,
+    );
+    if (!rootFramePose) {
+      return;
+    }
+    unfollowPoseSnapshot.current = rootFramePose;
+  }, [followTf, followMode, transforms, fixedFrame, currentTimeLatest]);
 
   // use callbackInputsRef to make sure the input changes don't trigger `onFollowChange` or `onAlignXYAxis` to change
   const callbackInputsRef = useRef({
     transformedCameraState,
     configCameraState,
-    targetPose,
     configFollowMode: config.followMode,
     configFollowTf: config.followTf,
   });
   callbackInputsRef.current = {
     transformedCameraState,
     configCameraState,
-    targetPose,
     configFollowMode: config.followMode,
     configFollowTf: config.followTf,
   };
-  const onFollowChange = useCallback(
-    (newFollowTf?: string, newFollowMode?: "follow" | "no-follow" | "follow-orientation") => {
-      const {
-        configCameraState: prevCameraState,
-        configFollowMode: prevFollowMode,
-        configFollowTf: prevFollowTf,
-        targetPose: prevTargetPose,
-      } = callbackInputsRef.current;
+  const onFollowChange = useCallbackWithToast(
+    (newFollowTf?: string, newFollowMode?: FollowMode) => {
+      const { configFollowMode: prevFollowMode, configFollowTf: prevFollowTf } =
+        callbackInputsRef.current;
       const newCameraState = getNewCameraStateOnFollowChange({
-        prevCameraState,
-        prevTargetPose,
+        prevCameraState: callbackInputsRef.current.configCameraState,
         prevFollowTf,
         prevFollowMode,
         newFollowTf,
         newFollowMode,
       });
+
+      // When entering follow-orientation mode, we no longer transform the camera state
+      if (prevFollowMode !== "follow-orientation" && newFollowMode === "follow-orientation") {
+        unfollowPoseSnapshot.current = undefined;
+      }
+
+      // When activating follow (follow position) or no-follow we record a snapshot of the render frame
+      // in the root frame.
+      if (prevFollowMode === "follow-orientation" && newFollowMode !== "follow-orientation") {
+        const renderId = renderFrameLatest.current.id;
+
+        // get the current root frame for the render frame we are _currently_ following but want to stop following
+        const rootFrameForFollow = transformsLatest.current.frame(renderId)?.root();
+        if (!rootFrameForFollow) {
+          throw new Error(`Could not find frame [${renderId}]`);
+        }
+
+        // calculate the pose of our current render frame in our root frame
+        let rootFramePose: MutablePose | undefined = emptyPose();
+        rootFramePose = rootFrameForFollow.applyLocal(
+          rootFramePose,
+          rootFramePose,
+          renderFrameLatest.current,
+          currentTimeLatest.current,
+        );
+        if (!rootFramePose) {
+          throw new Error(
+            `Could not transform [${renderId}] to the root frame [${rootFrameForFollow.id}]`,
+          );
+        }
+        unfollowPoseSnapshot.current = rootFramePose;
+      }
 
       saveConfig({
         followTf: newFollowTf,
@@ -191,7 +292,7 @@ function BaseRenderer(props: Props): JSX.Element {
         cameraState: newCameraState,
       });
     },
-    [saveConfig],
+    [currentTimeLatest, renderFrameLatest, saveConfig, transformsLatest],
   );
 
   const onAlignXYAxis = useCallback(
@@ -254,7 +355,6 @@ function BaseRenderer(props: Props): JSX.Element {
       onFollowChange={onFollowChange}
       saveConfig={saveConfig}
       topics={topics}
-      targetPose={targetPose}
       transforms={transforms}
       setSubscriptions={setSubscriptions}
     />

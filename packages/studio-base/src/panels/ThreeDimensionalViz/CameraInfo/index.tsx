@@ -29,10 +29,7 @@ import {
   SLabel,
 } from "@foxglove/studio-base/panels/ThreeDimensionalViz/Interactions/styling";
 import styles from "@foxglove/studio-base/panels/ThreeDimensionalViz/sharedStyles";
-import {
-  getNewCameraStateOnFollowChange,
-  TargetPose,
-} from "@foxglove/studio-base/panels/ThreeDimensionalViz/threeDimensionalVizUtils";
+import { getNewCameraStateOnFollowChange } from "@foxglove/studio-base/panels/ThreeDimensionalViz/threeDimensionalVizUtils";
 import {
   FollowMode,
   ThreeDimensionalVizConfig,
@@ -70,7 +67,6 @@ export type CameraInfoPropsWithoutCameraState = {
 
 export type CameraInfoProps = {
   cameraState: CameraState;
-  targetPose?: TargetPose;
 } & CameraInfoPropsWithoutCameraState;
 
 function CameraStateInfo({ cameraState, onAlignXYAxis }: CameraStateInfoProps) {
@@ -109,7 +105,6 @@ function CameraStateInfo({ cameraState, onAlignXYAxis }: CameraStateInfoProps) {
 
 export default function CameraInfo({
   cameraState,
-  targetPose,
   followMode,
   followTf,
   isPlaying = false,
@@ -139,7 +134,6 @@ export default function CameraInfo({
       // Transform the camera state by whichever TF or orientation the other panels are following.
       const newCameraState = getNewCameraStateOnFollowChange({
         prevCameraState: cameraState,
-        prevTargetPose: targetPose,
         prevFollowTf: followTf,
         prevFollowMode: followMode,
         newFollowTf: (config as ThreeDimensionalVizConfig).followTf,

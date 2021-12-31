@@ -63,7 +63,6 @@ import {
   TRANSFORM_TOPIC,
 } from "@foxglove/studio-base/panels/ThreeDimensionalViz/constants";
 import {
-  TargetPose,
   getInteractionData,
   getObject,
   getUpdatedGlobalVariablesBySelectedObject,
@@ -97,7 +96,6 @@ export type LayoutToolbarSharedProps = {
   onCameraStateChange: (arg0: CameraState) => void;
   onFollowChange: (followTf?: string, followMode?: FollowMode) => void;
   saveConfig: Save3DConfig;
-  targetPose?: TargetPose;
   transforms: TransformTree;
   isPlaying?: boolean;
 };
@@ -218,7 +216,6 @@ export default function Layout({
   onFollowChange,
   saveConfig,
   topics,
-  targetPose,
   transforms,
   setSubscriptions,
   config: {
@@ -852,7 +849,6 @@ export default function Layout({
                   selectedObject={selectedObject}
                   setMeasureInfo={setMeasureInfo}
                   showCrosshair={showCrosshair}
-                  targetPose={targetPose}
                   transforms={transforms}
                   renderFrameId={renderFrame.id}
                   fixedFrameId={fixedFrame.id}

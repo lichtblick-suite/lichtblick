@@ -78,7 +78,6 @@ function LayoutToolbar({
   setSearchTextMatches,
   setSelectedMatchIndex,
   showCrosshair = false,
-  targetPose,
   toggleSearchTextOpen,
   transforms,
   currentTime,
@@ -158,7 +157,6 @@ function LayoutToolbar({
         />
         <CameraInfo
           cameraState={cameraState}
-          targetPose={targetPose}
           followMode={followMode}
           followTf={followTf}
           isPlaying={isPlaying}

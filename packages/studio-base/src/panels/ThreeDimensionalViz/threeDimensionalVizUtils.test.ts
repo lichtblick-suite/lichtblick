@@ -16,26 +16,19 @@ import { CameraState, MouseEventObject } from "@foxglove/regl-worldview";
 import {
   getNewCameraStateOnFollowChange,
   getUpdatedGlobalVariablesBySelectedObject,
-  TargetPose,
 } from "./threeDimensionalVizUtils";
 
 describe("threeDimensionalVizUtils", () => {
   describe("getNewCameraStateOnFollowChange", () => {
-    it("converts the camera state to use targetOffset instead of target when no longer following", () => {
+    it("changing the follow tf resets the targetOffset", () => {
       const prevFollowTf = "root";
       const prevFollowMode = "follow";
-      const prevTargetPose: TargetPose = {
-        target: [1322.127197265625, -1484.3931884765625, -20.19326400756836],
-        targetOrientation: [
-          -0.004656290448945672, 0.00933881579479869, 0.04371859882195202, 0.9989893841257927,
-        ],
-      };
       const prevCameraState: CameraState = {
         perspective: false,
         target: [1322.127197265625, -1484.3931884765625, -20.19326400756836],
         distance: 75,
         phi: 0.7853981633974483,
-        targetOffset: [0, 0, 0],
+        targetOffset: [1, 1, 1],
         targetOrientation: [0, 0, 0, 1],
         thetaOffset: 0,
         fovy: 1,
@@ -45,17 +38,70 @@ describe("threeDimensionalVizUtils", () => {
 
       const newCameraState = getNewCameraStateOnFollowChange({
         prevCameraState,
-        prevTargetPose,
+        prevFollowTf,
+        prevFollowMode,
+        newFollowTf: "another-tf",
+        newFollowMode: prevFollowMode,
+      });
+      expect(newCameraState).toEqual({
+        ...prevCameraState,
+        targetOffset: [0, 0, 0],
+      });
+    });
+
+    it("leaving no-follow resets the target offset", () => {
+      const prevFollowTf = "root";
+      const prevFollowMode = "no-follow";
+      const prevCameraState: CameraState = {
+        perspective: false,
+        target: [1322.127197265625, -1484.3931884765625, -20.19326400756836],
+        distance: 75,
+        phi: 0.7853981633974483,
+        targetOffset: [1, 1, 1],
+        targetOrientation: [0, 0, 0, 1],
+        thetaOffset: 0,
+        fovy: 1,
+        near: 0,
+        far: 1,
+      };
+
+      const newCameraState = getNewCameraStateOnFollowChange({
+        prevCameraState,
+        prevFollowTf,
+        prevFollowMode,
+        newFollowTf: prevFollowTf,
+        newFollowMode: "follow",
+      });
+      expect(newCameraState).toEqual({
+        ...prevCameraState,
+        targetOffset: [0, 0, 0],
+      });
+    });
+
+    it("entering no-follow leaves the target offset unchanged", () => {
+      const prevFollowTf = "root";
+      const prevFollowMode = "follow";
+      const prevCameraState: CameraState = {
+        perspective: false,
+        target: [1322.127197265625, -1484.3931884765625, -20.19326400756836],
+        distance: 75,
+        phi: 0.7853981633974483,
+        targetOffset: [1, 1, 1],
+        targetOrientation: [0, 0, 0, 1],
+        thetaOffset: 0,
+        fovy: 1,
+        near: 0,
+        far: 1,
+      };
+
+      const newCameraState = getNewCameraStateOnFollowChange({
+        prevCameraState,
         prevFollowTf,
         prevFollowMode,
         newFollowTf: prevFollowTf,
         newFollowMode: "no-follow",
       });
-      expect(newCameraState).toEqual({
-        ...prevCameraState,
-        target: [0, 0, 0],
-        targetOffset: prevCameraState.target,
-      });
+      expect(newCameraState).toEqual(prevCameraState);
     });
   });
 

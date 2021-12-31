@@ -33,7 +33,6 @@ const containerStyle: CSSProperties = {
 
 const DEFAULT_PROPS: CameraInfoProps = {
   cameraState: DEFAULT_CAMERA_STATE,
-  targetPose: undefined,
   followMode: "follow",
   followTf: "some_frame",
   onAlignXYAxis: () => {
