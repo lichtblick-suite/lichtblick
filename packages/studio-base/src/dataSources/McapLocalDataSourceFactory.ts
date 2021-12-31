@@ -15,7 +15,7 @@ import { getSeekToTime } from "@foxglove/studio-base/util/time";
 class McapLocalDataSourceFactory implements IDataSourceFactory {
   id = "mcap-local-file";
   type: IDataSourceFactory["type"] = "file";
-  displayName = "MCAP (local)";
+  displayName = "MCAP";
   iconName: IDataSourceFactory["iconName"] = "OpenFile";
   supportedFileTypes = [".mcap"];
 

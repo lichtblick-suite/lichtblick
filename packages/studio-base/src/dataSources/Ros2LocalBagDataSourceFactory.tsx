@@ -15,7 +15,7 @@ import { getSeekToTime } from "@foxglove/studio-base/util/time";
 class Ros2LocalBagDataSourceFactory implements IDataSourceFactory {
   id = "ros2-local-bagfile";
   type: IDataSourceFactory["type"] = "file";
-  displayName = "ROS 2 Bag (local)";
+  displayName = "ROS 2 Bag";
   iconName: IDataSourceFactory["iconName"] = "OpenFile";
   supportedFileTypes = [".db3"];
   supportsMultiFile = true;

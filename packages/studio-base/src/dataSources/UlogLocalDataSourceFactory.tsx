@@ -15,7 +15,7 @@ import { getSeekToTime } from "@foxglove/studio-base/util/time";
 class UlogLocalDataSourceFactory implements IDataSourceFactory {
   id = "ulog-local-file";
   type: IDataSourceFactory["type"] = "file";
-  displayName = "PX4 ULog (local)";
+  displayName = "PX4 ULog";
   iconName: IDataSourceFactory["iconName"] = "OpenFile";
   supportedFileTypes = [".ulg", ".ulog"];
 

@@ -15,7 +15,7 @@ import { getSeekToTime } from "@foxglove/studio-base/util/time";
 class Ros1RemoteBagDataSourceFactory implements IDataSourceFactory {
   id = "ros1-remote-bagfile";
   type: IDataSourceFactory["type"] = "remote-file";
-  displayName = "ROS 1 Bag (remote)";
+  displayName = "ROS 1 Bag";
   iconName: IDataSourceFactory["iconName"] = "FileASPX";
   supportedFileTypes = [".bag"];
 
