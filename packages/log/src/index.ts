@@ -48,7 +48,7 @@ class Logger {
 
   // create a new logger under this logger's namespace
   getLogger(name: string): Logger {
-    const shortName = name.replace(/^.+\.(asar|webpack)[\\/\\]/, "");
+    const shortName = name.replace(/^.+\.(asar|webpack)[\\/\\]/, "").replace(/^(\.\.\/)+/, "");
     const channelName = this._name.length > 0 ? `${this._name}.${shortName}` : shortName;
     const existing = channels.get(channelName);
     if (existing) {

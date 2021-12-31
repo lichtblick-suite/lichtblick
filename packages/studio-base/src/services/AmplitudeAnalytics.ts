@@ -6,6 +6,7 @@ import { setUser as setSentryUser, addBreadcrumb as addSentryBreadcrumb } from "
 import { Severity } from "@sentry/types";
 import amplitude, { AmplitudeClient } from "amplitude-js";
 
+import Logger from "@foxglove/log";
 import OsContextSingleton from "@foxglove/studio-base/OsContextSingleton";
 import { User } from "@foxglove/studio-base/context/CurrentUserContext";
 import IAnalytics, {
@@ -14,27 +15,29 @@ import IAnalytics, {
   getEventCategory,
 } from "@foxglove/studio-base/services/IAnalytics";
 
+const log = Logger.getLogger("Analytics");
+
 const os = OsContextSingleton; // workaround for https://github.com/webpack/webpack/issues/12960
 
 export class AmplitudeAnalytics implements IAnalytics {
   private _amp?: AmplitudeClient;
 
   constructor(options: { enableTelemetry: boolean; amplitudeApiKey?: string }) {
+    const platform = getPlatformName();
+    const appVersion = os?.getAppVersion();
+    const { glVendor, glRenderer } = getWebGLInfo() ?? {
+      glVendor: "(unknown)",
+      glRenderer: "(unknown)",
+    };
+
+    log.info(
+      `[APP_INIT] ${platform}${
+        appVersion ? ` v${appVersion}` : ""
+      }, GL Vendor: ${glVendor}, GL Renderer: ${glRenderer}`,
+    );
+
     if (options.amplitudeApiKey) {
       this._amp = amplitude.getInstance();
-
-      // Capitalize platform name
-      let platform = os?.platform ?? "web";
-      switch (platform) {
-        case "darwin":
-          platform = "macOS";
-          break;
-        case "win32":
-          platform = "Windows";
-          break;
-        default:
-          platform = platform.charAt(0).toUpperCase() + platform.slice(1).toLowerCase();
-      }
 
       this._amp.init(options.amplitudeApiKey, undefined, {
         platform,
@@ -42,11 +45,11 @@ export class AmplitudeAnalytics implements IAnalytics {
 
       this._amp.setOptOut(!options.enableTelemetry);
 
-      if (os) {
-        this._amp.setVersionName(os.getAppVersion());
+      if (appVersion) {
+        this._amp.setVersionName(appVersion);
       }
 
-      void this.logEvent(AppEvent.APP_INIT);
+      void this.logEvent(AppEvent.APP_INIT, { glVendor, glRenderer });
     }
   }
 
@@ -80,4 +83,38 @@ export class AmplitudeAnalytics implements IAnalytics {
       }
     });
   }
+}
+
+function getPlatformName(): string {
+  const platform = os?.platform ?? "web";
+  switch (platform) {
+    case "darwin":
+      return "macOS";
+      break;
+    case "win32":
+      return "Windows";
+      break;
+    default:
+      return platform.charAt(0).toUpperCase() + platform.slice(1).toLowerCase();
+  }
+}
+
+function getWebGLInfo(): { glVendor: string; glRenderer: string } | undefined {
+  const canvas = document.createElement("canvas");
+  const gl = canvas.getContext("webgl");
+  if (!gl) {
+    canvas.remove();
+    return undefined;
+  }
+
+  const debugInfo = gl.getExtension("WEBGL_debug_renderer_info");
+  const res = debugInfo
+    ? {
+        glVendor: gl.getParameter(debugInfo.UNMASKED_VENDOR_WEBGL),
+        glRenderer: gl.getParameter(debugInfo.UNMASKED_RENDERER_WEBGL),
+      }
+    : undefined;
+
+  canvas.remove();
+  return res;
 }
