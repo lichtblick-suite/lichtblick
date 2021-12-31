@@ -180,7 +180,6 @@ export default function OpenDialog(props: OpenDialogProps): JSX.Element {
           styles: {
             content: {
               overflow: "hidden",
-              height: 480,
               display: "flex",
               flexDirection: "column",
               padding: theme.spacing.l1,

@@ -170,10 +170,15 @@ export default function Workspace(props: WorkspaceProps): JSX.Element {
 
   const isPlayerPresent = playerPresence !== PlayerPresence.NOT_PRESENT;
 
+  const [enableOpenDialog] = useAppConfigurationValue(AppSetting.OPEN_DIALOG);
+
+  const [showOpenDialogOnStartup = true] = useAppConfigurationValue<boolean>(
+    AppSetting.SHOW_OPEN_DIALOG_ON_STARTUP,
+  );
+
   const [showOpenDialog, setShowOpenDialog] = useState<
     { view: OpenDialogViews; activeDataSource?: IDataSourceFactory } | undefined
-  >(isPlayerPresent ? undefined : { view: "start" });
-  const [enableOpenDialog] = useAppConfigurationValue(AppSetting.OPEN_DIALOG);
+  >(isPlayerPresent || !showOpenDialogOnStartup ? undefined : { view: "start" });
 
   const [selectedSidebarItem, setSelectedSidebarItem] = useState<SidebarItemKey | undefined>(() => {
     // When using the open dialog ui - we always start with the connection sidebar open.
@@ -194,9 +199,11 @@ export default function Workspace(props: WorkspaceProps): JSX.Element {
     setSelectedSidebarItem(item);
   }, []);
 
-  // When a player is activated, hide the open dialog. When a player is gone, show the open dialog.
+  // When a player is activated, hide the open dialog.
   useLayoutEffect(() => {
-    setShowOpenDialog(isPlayerPresent ? undefined : { view: "start" });
+    if (isPlayerPresent) {
+      setShowOpenDialog(undefined);
+    }
   }, [isPlayerPresent]);
 
   const { setHelpInfo } = useHelpInfo();

@@ -2,10 +2,12 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { CompoundButton, Stack, Text, IButtonProps, useTheme } from "@fluentui/react";
+import { CompoundButton, Stack, Text, IButtonProps, useTheme, Checkbox } from "@fluentui/react";
 import { useMemo } from "react";
 
+import { AppSetting } from "@foxglove/studio-base/AppSetting";
 import { usePlayerSelection } from "@foxglove/studio-base/context/PlayerSelectionContext";
+import { useAppConfigurationValue } from "@foxglove/studio-base/hooks";
 import TextMiddleTruncate from "@foxglove/studio-base/panels/ThreeDimensionalViz/TopicTree/TextMiddleTruncate";
 
 import ActionList from "./ActionList";
@@ -41,6 +43,10 @@ export default function Start(props: IStartProps): JSX.Element {
   const { supportedFileExtensions = [], onSelectView } = props;
   const theme = useTheme();
   const { recentSources, selectRecent } = usePlayerSelection();
+
+  const [showOnStartup = true, setShowOnStartup] = useAppConfigurationValue<boolean>(
+    AppSetting.SHOW_OPEN_DIALOG_ON_STARTUP,
+  );
 
   const buttonStyles = useMemo(
     () => ({
@@ -147,7 +153,7 @@ export default function Start(props: IStartProps): JSX.Element {
   }, [recentSources, selectRecent, theme]);
 
   return (
-    <>
+    <Stack tokens={{ childrenGap: theme.spacing.l1 }}>
       <Stack horizontal tokens={{ childrenGap: theme.spacing.l2 }}>
         {/* Left column */}
         <Stack grow tokens={{ childrenGap: theme.spacing.m }}>
@@ -167,6 +173,13 @@ export default function Start(props: IStartProps): JSX.Element {
           <ActionList title="Help" items={HELP_ITEMS} />
         </Stack>
       </Stack>
-    </>
+      <Checkbox
+        label="Show on startup"
+        checked={showOnStartup}
+        onChange={async (_, checked) => {
+          await setShowOnStartup(checked);
+        }}
+      />
+    </Stack>
   );
 }

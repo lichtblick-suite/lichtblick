@@ -18,4 +18,5 @@ export enum AppSetting {
   COLOR_SCHEME = "colorScheme",
   ENABLE_MCAP_DATA_SOURCE = "sources.mcap",
   OPEN_DIALOG = "ui.open-dialog",
+  SHOW_OPEN_DIALOG_ON_STARTUP = "ui.open-dialog-startup",
 }
