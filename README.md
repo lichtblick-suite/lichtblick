@@ -26,11 +26,25 @@ You can also join us on the following platforms to ask questions, share feedback
 
 Visit [foxglove.dev/download](https://foxglove.dev/download) or [GitHub Releases](https://github.com/foxglove/studio/releases) to download the latest version.
 
+## Self-hosting
+
+Foxglove Studio can be run as a standalone [desktop application](https://foxglove.dev/download), accessed in your browser at [studio.foxglove.dev](https://studio.foxglove.dev/), or self-hosted on your own domain.
+
+A Docker image is provided to make self-hosting easy. You can run it like so:
+
+```sh
+docker run --rm -p "8080:8080" ghcr.io/foxglove/studio:latest
+```
+
+Foxglove Studio will then be accessible in your browser at [localhost:8080](http://localhost:8080/).
+
+For all list of available image versions, see the [package details](https://github.com/foxglove/studio/pkgs/container/studio).
+
 ## Contributing
 
 Foxglove Studio is primarily written in TypeScript – contributions are welcome!
 
-> All contributors will need to agree to our [Contributor License Agreement](https://github.com/foxglove/cla)
+Note: All contributors must agree to our [Contributor License Agreement](https://github.com/foxglove/cla).
 
 **Supported development environments:** Linux, Windows, macOS
 
