@@ -8751,7 +8751,7 @@ __metadata:
     hammerjs: ^2.0.8
   peerDependencies:
     chart.js: ^3.0.0-beta.13
-  checksum: e181e38296e677ecee33e41a500ec9ae63bea660f158765d83985389abfbad97cadb8f6d1e7dc65b13ad3ac22dd80100f2f5918e721afd9f1e47c8aa0d2512fa
+  checksum: 45023bef95376b092429b51f5f82bc7714cd8e253e2550bb102ba8146987dbc19b43ab971b8bfa30f2d2b7fba3a7a189b43ea80db09cc429149f11693e2d9770
   languageName: node
   linkType: hard
 
