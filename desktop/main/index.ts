@@ -158,7 +158,10 @@ function main() {
     if (preloaderFileInputIsReady) {
       const focusedWindow = BrowserWindow.getFocusedWindow();
       if (focusedWindow) {
-        await injectFilesToOpen(focusedWindow, filesToOpen);
+        await injectFilesToOpen(focusedWindow.webContents.debugger, filesToOpen);
+      } else {
+        // On MacOS the user may have closed all the windows so we need to open a new window
+        new StudioWindow().load();
       }
     }
   });
@@ -167,10 +170,9 @@ function main() {
   // It is important this handler is registered before any windows open because preload will call
   // this handler to get the files we were told to open on startup
   ipcMain.handle("load-pending-files", async (ev) => {
-    const browserWindow = BrowserWindow.fromId(ev.sender.id);
-    if (browserWindow) {
-      await injectFilesToOpen(browserWindow, filesToOpen);
-    }
+    log.debug("load-pending-files");
+    const debug = ev.sender.debugger;
+    await injectFilesToOpen(debug, filesToOpen);
     preloaderFileInputIsReady = true;
   });
 

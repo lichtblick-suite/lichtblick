@@ -1,7 +1,11 @@
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
-import { BrowserWindow } from "electron";
+import { Debugger, dialog } from "electron";
+
+import Logger from "@foxglove/log";
+
+const log = Logger.getLogger(__filename);
 
 /*
  * Our app has support for working with File instances in the renderer. This avoids extra copies
@@ -14,17 +18,21 @@ import { BrowserWindow } from "electron";
  */
 const inputElementId = "electron-open-file-input";
 export default async function injectFilesToOpen(
-  browserWindow: BrowserWindow,
+  debug: Debugger,
   filesToOpen: string[],
 ): Promise<void> {
-  const debug = browserWindow.webContents.debugger;
-  try {
-    debug.attach("1.1");
-  } catch (err) {
-    // debugger may already be attached
+  if (filesToOpen.length === 0) {
+    log.debug("injectFilesToOpen: no files - skipping");
+    return;
   }
 
+  log.debug(`injectFilesToOpen: ${filesToOpen.join(",")}`);
+
   try {
+    if (!debug.isAttached()) {
+      debug.attach("1.1");
+    }
+
     const documentRes = await debug.sendCommand("DOM.getDocument");
     const queryRes = await debug.sendCommand("DOM.querySelector", {
       nodeId: documentRes.root.nodeId,
@@ -35,8 +43,16 @@ export default async function injectFilesToOpen(
       files: filesToOpen,
     });
 
+    log.debug(`Set input files #${inputElementId}: ${filesToOpen.join(",")}`);
+
     // clear the files once we've opened them
     filesToOpen.splice(0, filesToOpen.length);
+  } catch (err) {
+    log.error(err);
+    dialog.showErrorBox(
+      "Internal error",
+      `The app encountered an internal error trying to open: ${filesToOpen.join(",")}`,
+    );
   } finally {
     debug.detach();
   }
