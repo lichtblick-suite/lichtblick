@@ -322,18 +322,16 @@ function PanelList(props: Props): JSX.Element {
   const displayPanelListItem = React.useCallback(
     ({ title, type, description, config, relatedConfigs }: PanelInfo) => {
       return (
-        <>
-          <DraggablePanelItem
-            key={`${type}-${title}`}
-            mosaicId={mosaicId}
-            panel={{ type, title, description, config, relatedConfigs }}
-            onDrop={onPanelMenuItemDrop}
-            onClick={() => onPanelSelect({ type, config, relatedConfigs })}
-            checked={title === selectedPanelTitle}
-            highlighted={highlightedPanel?.title === title}
-            searchQuery={searchQuery}
-          />
-        </>
+        <DraggablePanelItem
+          key={`${type}-${title}`}
+          mosaicId={mosaicId}
+          panel={{ type, title, description, config, relatedConfigs }}
+          onDrop={onPanelMenuItemDrop}
+          onClick={() => onPanelSelect({ type, config, relatedConfigs })}
+          checked={title === selectedPanelTitle}
+          highlighted={highlightedPanel?.title === title}
+          searchQuery={searchQuery}
+        />
       );
     },
     [
