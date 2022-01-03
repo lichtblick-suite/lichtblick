@@ -35,9 +35,9 @@ export default class AnalyticsMetricsCollector implements PlayerMetricsCollector
     this.logEvent(AppEvent.PLAYER_CONSTRUCTED);
   }
 
-  initialized(args?: { isDemoBag: boolean }): void {
+  initialized(args?: { isSampleDataSource: boolean }): void {
     this.logEvent(AppEvent.PLAYER_INITIALIZED, {
-      isDemoBag: args?.isDemoBag == undefined ? false : args.isDemoBag,
+      isSampleDataSource: args?.isSampleDataSource === true,
     });
   }
 

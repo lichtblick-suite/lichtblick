@@ -23,7 +23,7 @@ export default class NoopMetricsCollector implements PlayerMetricsCollectorInter
   playerConstructed(): void {
     // no-op
   }
-  initialized(_args?: { isDemoBag: boolean }): void {
+  initialized(_args?: { isSampleDataSource: boolean }): void {
     // no-op
   }
   play(_speed: number): void {

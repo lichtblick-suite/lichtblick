@@ -49,7 +49,6 @@ import {
 import { RosDatatypes } from "@foxglove/studio-base/types/RosDatatypes";
 import debouncePromise from "@foxglove/studio-base/util/debouncePromise";
 import delay from "@foxglove/studio-base/util/delay";
-import isDemoBagUrl from "@foxglove/studio-base/util/isDemoBagUrl";
 import { isRangeCoveredByRanges } from "@foxglove/studio-base/util/ranges";
 import { getSanitizedTopics } from "@foxglove/studio-base/util/selectors";
 import {
@@ -82,6 +81,8 @@ export type RandomAccessPlayerOptions = {
 
   // Optional set of key/values to store with url handling
   urlParams?: Record<string, string>;
+
+  isSampleDataSource?: boolean;
 };
 
 // A `Player` that wraps around a tree of `RandomAccessDataProviders`.
@@ -129,6 +130,7 @@ export default class RandomAccessPlayer implements Player {
   private _seekToTime: SeekToTimeSpec;
   private _lastRangeMillis?: number;
   private _parsedMessageDefinitionsByTopic: ParsedMessageDefinitionsByTopic = {};
+  private _isSampleDataSource: boolean;
 
   // To keep reference equality for downstream user memoization cache the currentTime provided in the last activeData update
   // See additional comments below where _currentTime is set
@@ -154,6 +156,7 @@ export default class RandomAccessPlayer implements Player {
     this._seekToTime = seekToTime;
     this._seekBackNs = seekBackNs;
     this._metricsCollector.playerConstructed();
+    this._isSampleDataSource = options.isSampleDataSource ?? false;
   }
 
   private _setError(message: string, error?: Error): void {
@@ -545,7 +548,7 @@ export default class RandomAccessPlayer implements Player {
     if (this._initializing || this._initialized) {
       return;
     }
-    this._metricsCollector.initialized({ isDemoBag: isDemoBagUrl(this._name ?? "") });
+    this._metricsCollector.initialized({ isSampleDataSource: this._isSampleDataSource });
     this._initialized = true;
   }
 
