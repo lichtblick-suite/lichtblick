@@ -19,13 +19,13 @@ import { useToasts } from "react-toast-notifications";
 type Props = {
   children: React.ReactNode; // Shown when dragging in a file.
   allowedExtensions?: string[];
-  filesSelected?: (arg: { files: File[]; shiftPressed: boolean }) => void;
+  onDrop?: (event: { files?: File[]; handles?: FileSystemFileHandle[] }) => void;
 };
 
 export default function DocumentDropListener(props: Props): JSX.Element {
   const [hovering, setHovering] = useState(false);
 
-  const { filesSelected, allowedExtensions } = props;
+  const { onDrop: onDropProp, allowedExtensions } = props;
 
   const { addToast } = useToasts();
 
@@ -33,28 +33,50 @@ export default function DocumentDropListener(props: Props): JSX.Element {
     async (ev: DragEvent) => {
       setHovering(false);
 
-      if (!ev.dataTransfer) {
+      if (!ev.dataTransfer || !allowedExtensions) {
         return;
       }
 
+      let handles: FileSystemFileHandle[] | undefined = [];
+      const handlePromises: Promise<FileSystemHandle | ReactNull>[] = [];
       const allFiles: File[] = [];
       const directories: FileSystemDirectoryEntry[] = [];
-      for (const item of ev.dataTransfer.items) {
+      const dataItems = ev.dataTransfer.items;
+      for (const item of Array.from(dataItems)) {
         const entry = item.webkitGetAsEntry();
-        if (entry) {
-          if (entry.isFile) {
-            const file = item.getAsFile();
-            if (file) {
-              allFiles.push(file);
-            }
-          } else if (entry.isDirectory) {
-            directories.push(entry as FileSystemDirectoryEntry);
+
+        // Attempt to grab the filesystem handle if the feature is available.
+        // A file system handle is more versatile than File instances.
+        // Note: awaiting on the fileSystemHandle function triggered a (bug?) where all other
+        // dataTransfer items were ignored
+        if ("getAsFileSystemHandle" in item) {
+          handlePromises.push(item.getAsFileSystemHandle());
+        }
+
+        // Keep track of all File and Directory instaces
+        if (entry?.isFile === true) {
+          const file = item.getAsFile();
+          if (file) {
+            allFiles.push(file);
+          }
+        } else if (entry?.isDirectory === true) {
+          directories.push(entry as FileSystemDirectoryEntry);
+        }
+      }
+
+      // If we had any directories, then we will not use handles and instead use File instances.
+      // A future enhancement could be to load handles from directories.
+      if (directories.length === 0) {
+        for (const promise of handlePromises) {
+          const fileSystemHandle = await promise;
+          if (fileSystemHandle?.kind === "file") {
+            handles.push(fileSystemHandle);
           }
         }
       }
 
       // Allow event to bubble for non-file based drag and drop
-      if ((allFiles.length === 0 && directories.length === 0) || !allowedExtensions) {
+      if (allFiles.length === 0 && directories.length === 0 && handles.length === 0) {
         return;
       }
 
@@ -75,40 +97,33 @@ export default function DocumentDropListener(props: Props): JSX.Element {
         }
       }
 
-      // Organize files by (supported) extension
-      const filesByType = new Map<string, File[]>();
-      for (const file of allFiles) {
-        const fileExtension = extname(file.name);
-        if (allowedExtensions.includes(fileExtension)) {
-          const filesOfType = filesByType.get(fileExtension) ?? [];
-          filesOfType.push(file);
-          filesByType.set(fileExtension, filesOfType);
-        }
+      // If we had any directories, then we will not use handles and instead use File instances.
+      // A future enhancement could be to load handles from directories.
+      if (directories.length > 0 || handles.length === 0) {
+        handles = undefined;
       }
 
+      const filteredFiles = allFiles.filter((file) =>
+        allowedExtensions.includes(extname(file.name)),
+      );
+      const filteredHandles = handles?.filter((handle) =>
+        allowedExtensions.includes(extname(handle.name)),
+      );
+
       // Check for no supported files
-      if (filesByType.size === 0) {
+      if (filteredFiles.length === 0 && filteredHandles?.length === 0) {
         addToast("The file format is unsupported.", {
           appearance: "error",
         });
         return;
       }
 
-      // Check for more than one supported file type
-      if (filesByType.size > 1) {
-        addToast("Cannot open different file types at once.", {
-          appearance: "error",
-        });
-        return;
-      }
-
-      const files: File[] = filesByType.values().next().value;
-
       ev.preventDefault();
       ev.stopPropagation();
-      filesSelected?.({ files, shiftPressed: ev.shiftKey });
+
+      onDropProp?.({ files: filteredFiles, handles: filteredHandles });
     },
-    [addToast, filesSelected, allowedExtensions],
+    [addToast, onDropProp, allowedExtensions],
   );
 
   const onDragOver = useCallback(
@@ -150,7 +165,7 @@ export default function DocumentDropListener(props: Props): JSX.Element {
         style={{ display: "none" }}
         onChange={(event) => {
           if (event.target.files) {
-            props.filesSelected?.({ files: Array.from(event.target.files), shiftPressed: false });
+            props.onDrop?.({ files: Array.from(event.target.files) });
           }
         }}
         data-puppeteer-file-upload
