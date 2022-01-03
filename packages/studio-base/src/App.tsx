@@ -2,7 +2,7 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { Suspense, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import { DndProvider } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
 
@@ -42,6 +42,16 @@ type AppProps = {
 
 function AppContent(props: AppProps): JSX.Element {
   const [assetLoaders] = useState(() => [new URDFAssetLoader()]);
+  const [_, setSessionLaunchPreference] = useSessionStorageValue(AppSetting.LAUNCH_PREFERENCE);
+
+  // Once we've rendered the app content set a temporary, session storage preference
+  // for web so that we don't inadvertently bounce the user to the web/desktop
+  // session preference screen again.
+  useEffect(() => {
+    if (!isDesktopApp()) {
+      setSessionLaunchPreference("web");
+    }
+  }, [setSessionLaunchPreference]);
 
   const providers = [
     /* eslint-disable react/jsx-key */
