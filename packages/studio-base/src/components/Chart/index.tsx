@@ -10,8 +10,7 @@
 
 import { ChartOptions, ChartData as ChartJsChartData, ScatterDataPoint } from "chart.js";
 import Hammer from "hammerjs";
-import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
-import { useToasts } from "react-toast-notifications";
+import { useCallback, useLayoutEffect, useRef, useState } from "react";
 import { useAsync, useMountedState } from "react-use";
 import { v4 as uuidv4 } from "uuid";
 
@@ -90,15 +89,6 @@ const supportsOffscreenCanvas =
 
 function Chart(props: Props): JSX.Element {
   const [id] = useState(() => uuidv4());
-  const { addToast } = useToasts();
-  useEffect(() => {
-    if (!supportsOffscreenCanvas) {
-      addToast(
-        `Your browser does not support rendering charts in a background thread. Performance may be degraded.`,
-        { appearance: "warning", autoDismiss: true },
-      );
-    }
-  }, [addToast]);
 
   const initialized = useRef(false);
   const canvasRef = useRef<HTMLCanvasElement>(ReactNull);
