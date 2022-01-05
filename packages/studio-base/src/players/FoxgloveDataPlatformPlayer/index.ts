@@ -29,6 +29,7 @@ import {
   AdvertiseOptions,
   MessageEvent,
   Player,
+  PlayerCapabilities,
   PlayerMetricsCollectorInterface,
   PlayerPresence,
   PlayerProblem,
@@ -50,7 +51,7 @@ import streamMessages from "./streamMessages";
 
 const log = Logger.getLogger(__filename);
 
-const CAPABILITIES: string[] = ["playbackControl"];
+const CAPABILITIES = [PlayerCapabilities.playbackControl, PlayerCapabilities.setSpeed];
 
 type FoxgloveDataPlatformPlayerOpts = {
   consoleApi: ConsoleApi;
