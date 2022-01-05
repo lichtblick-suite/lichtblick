@@ -110,7 +110,7 @@ export default class Ros1Player implements Player {
       return await net.createSocket(options.host, options.port);
     };
     const tcpServer = await net.createServer();
-    void tcpServer.listen(undefined, hostname, 10);
+    await tcpServer.listen(undefined, hostname, 10);
 
     if (this._rosNode == undefined) {
       const rosNode = new RosNode({
@@ -140,10 +140,13 @@ export default class Ros1Player implements Player {
     }
 
     await this._rosNode.start();
-    await this._requestTopics();
 
     // Process any advertise requests made before our node was ready.
     this.setPublishers(this._requestedPublishers);
+
+    // Request topics *after* setting publishers in case we want to subscribe
+    // to topics we are publishing.
+    await this._requestTopics();
 
     this._presence = PlayerPresence.PRESENT;
   };
