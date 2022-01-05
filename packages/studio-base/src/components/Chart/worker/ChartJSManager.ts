@@ -14,9 +14,9 @@
 import { Chart, ChartData, ChartOptions, ChartType } from "chart.js";
 import type { Context as DatalabelContext } from "chartjs-plugin-datalabels";
 import DatalabelPlugin from "chartjs-plugin-datalabels";
-import { Zoom as ZoomPlugin } from "chartjs-plugin-zoom";
 import EventEmitter from "eventemitter3";
 
+import { Zoom as ZoomPlugin } from "@foxglove/chartjs-plugin-zoom";
 import Logger from "@foxglove/log";
 import { RpcElement, RpcScales } from "@foxglove/studio-base/components/Chart/types";
 import { fonts } from "@foxglove/studio-base/util/sharedStyleConstants";

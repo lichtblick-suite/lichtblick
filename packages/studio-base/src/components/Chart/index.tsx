@@ -6,7 +6,7 @@
 // Since we don't use the modules directly in this file, we need to load the types as references
 // so typescript will have the merged declarations.
 /// <reference types="chartjs-plugin-datalabels" />
-/// <reference types="chartjs-plugin-zoom" />
+/// <reference types="@foxglove/chartjs-plugin-zoom" />
 
 import { ChartOptions, ChartData as ChartJsChartData, ScatterDataPoint } from "chart.js";
 import Hammer from "hammerjs";

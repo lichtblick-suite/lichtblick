@@ -13,12 +13,12 @@
 
 import { useTheme } from "@fluentui/react";
 import { ChartOptions, ScaleOptions } from "chart.js";
-import { ZoomOptions } from "chartjs-plugin-zoom/types/options";
 import { flatten, pick, uniq } from "lodash";
 import { ComponentProps, useCallback, useMemo, useState } from "react";
 import { useResizeDetector } from "react-resize-detector";
 import styled from "styled-components";
 
+import type { ZoomOptions } from "@foxglove/chartjs-plugin-zoom/types/options";
 import { filterMap } from "@foxglove/den/collection";
 import Button from "@foxglove/studio-base/components/Button";
 import ChartComponent from "@foxglove/studio-base/components/Chart";

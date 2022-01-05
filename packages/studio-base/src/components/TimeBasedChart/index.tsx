@@ -13,7 +13,6 @@
 import { useTheme } from "@fluentui/react";
 import { ChartOptions, ScaleOptions } from "chart.js";
 import { AnnotationOptions } from "chartjs-plugin-annotation";
-import { ZoomOptions } from "chartjs-plugin-zoom/types/options";
 import React, {
   useEffect,
   useCallback,
@@ -28,6 +27,7 @@ import styled from "styled-components";
 import { useDebouncedCallback } from "use-debounce";
 import { v4 as uuidv4 } from "uuid";
 
+import type { ZoomOptions } from "@foxglove/chartjs-plugin-zoom/types/options";
 import { filterMap } from "@foxglove/den/collection";
 import Logger from "@foxglove/log";
 import Button from "@foxglove/studio-base/components/Button";
