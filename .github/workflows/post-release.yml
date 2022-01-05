@@ -16,6 +16,9 @@ jobs:
     name: Merge release branch
     runs-on: ubuntu-20.04
 
+    permissions:
+      contents: write
+
     steps:
       - name: Checkout ${{ github.event.release.target_commitish || github.event.inputs.target_commitish }}
         uses: actions/checkout@v2
