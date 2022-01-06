@@ -219,7 +219,7 @@ export function makeConfig(
         React: "react",
         // the buffer module exposes the Buffer class as a property
         Buffer: ["buffer", "Buffer"],
-        process: "process/browser.js",
+        process: ["@foxglove/studio-base/util/process", "default"],
         setImmediate: ["@foxglove/studio-base/util/setImmediate", "default"],
       }),
       new webpack.DefinePlugin({

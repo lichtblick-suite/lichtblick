@@ -6,6 +6,12 @@ import { info } from "@actions/core";
 
 import { execOutput } from "./exec";
 
+// Identify unused exports
+//
+// An export is considered unused if it is never imported in any source file.
+//
+// Note: use the "// ts-prune-ignore-next" comment above an export if you would like to mark it
+// as used even though it appears unused. This might happen for exports which are injected via webpack.
 async function main(): Promise<void> {
   const { stdout, status } = await execOutput(
     "ts-prune",
