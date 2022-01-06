@@ -13,6 +13,7 @@
 
 import { Time } from "@foxglove/rostime";
 import Rpc from "@foxglove/studio-base/util/Rpc";
+import { setupReceiveReportErrorHandler } from "@foxglove/studio-base/util/RpcMainThreadUtils";
 
 import {
   RandomAccessDataProvider,
@@ -39,8 +40,12 @@ export default class WorkerBagDataProvider implements RandomAccessDataProvider {
   }
 
   async initialize(extensionPoint: ExtensionPoint): Promise<InitializationResult> {
+    // close any previous initialized workers
+    await this.close();
+
     this.worker = WorkerDataProviderWorker();
     this.rpc = new Rpc(this.worker);
+    setupReceiveReportErrorHandler(this.rpc);
 
     const { progressCallback, reportMetadataCallback } = extensionPoint;
 
