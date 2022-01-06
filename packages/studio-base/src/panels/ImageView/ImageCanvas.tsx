@@ -345,12 +345,12 @@ export default function ImageCanvas(props: Props): JSX.Element {
 
     // can't set width/height of canvas after transferring control to offscreen
     // so we need to send the width/height to rpc
-    const targetWidth = width * devicePixelRatio;
-    const targetHeight = height * devicePixelRatio;
+    const targetWidth = Math.floor(width * devicePixelRatio);
+    const targetHeight = Math.floor(height * devicePixelRatio);
 
     const computedViewbox = {
-      x: panX * devicePixelRatio,
-      y: panY * devicePixelRatio,
+      x: Math.floor(panX * devicePixelRatio),
+      y: Math.floor(panY * devicePixelRatio),
       scale: scaleValue,
     };
 
