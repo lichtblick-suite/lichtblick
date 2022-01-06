@@ -4,6 +4,7 @@
 
 import { quat, vec3 } from "gl-matrix";
 
+import { DEFAULT_CAMERA_STATE } from "@foxglove/regl-worldview";
 import { RosMsgDefinition } from "@foxglove/rosmsg";
 import { fromSec, Time } from "@foxglove/rostime";
 import { MessageEvent, Topic } from "@foxglove/studio";
@@ -289,6 +290,7 @@ export function CustomBackgroundColor(): JSX.Element {
   );
 }
 
+Markers.parameters = { colorScheme: "dark" };
 export function Markers(): JSX.Element {
   const topics: Topic[] = [{ name: "/markers", datatype: "visualization_msgs/Marker" }];
 
@@ -623,6 +625,7 @@ export function Markers(): JSX.Element {
   );
 }
 
+TransformInterpolation.parameters = { colorScheme: "dark" };
 export function TransformInterpolation(): JSX.Element {
   const topics: Topic[] = [
     { name: "/markers", datatype: "visualization_msgs/Marker" },
@@ -715,6 +718,7 @@ export function TransformInterpolation(): JSX.Element {
   );
 }
 
+MarkerLifetimes.parameters = { colorScheme: "dark" };
 export function MarkerLifetimes(): JSX.Element {
   const topics: Topic[] = [
     { name: "/markers", datatype: "visualization_msgs/Marker" },
@@ -843,6 +847,7 @@ export function MarkerLifetimes(): JSX.Element {
   );
 }
 
+GeometryMsgs_Polygon.parameters = { colorScheme: "dark" };
 export function GeometryMsgs_Polygon(): JSX.Element {
   const topics: Topic[] = [
     { name: "/polygon", datatype: "geometry_msgs/PolygonStamped" },
@@ -930,6 +935,7 @@ export function GeometryMsgs_Polygon(): JSX.Element {
   );
 }
 
+NavMsgs_Path.parameters = { colorScheme: "dark" };
 export function NavMsgs_Path(): JSX.Element {
   const topics: Topic[] = [
     { name: "/baselink_path", datatype: "nav_msgs/Path" },
@@ -1065,6 +1071,7 @@ export function NavMsgs_Path(): JSX.Element {
   );
 }
 
+SensorMsgs_LaserScan.parameters = { colorScheme: "dark" };
 export function SensorMsgs_LaserScan(): JSX.Element {
   const topics: Topic[] = [
     { name: "/laserscan", datatype: "sensor_msgs/LaserScan" },
@@ -1154,6 +1161,7 @@ export function SensorMsgs_LaserScan(): JSX.Element {
   );
 }
 
+SensorMsgs_PointCloud2_RGBA.parameters = { colorScheme: "dark" };
 export function SensorMsgs_PointCloud2_RGBA(): JSX.Element {
   const topics: Topic[] = [
     { name: "/pointcloud", datatype: "sensor_msgs/PointCloud2" },
@@ -1283,6 +1291,7 @@ export function SensorMsgs_PointCloud2_RGBA(): JSX.Element {
   );
 }
 
+SensorMsgs_PointCloud2_Intensity.parameters = { colorScheme: "dark" };
 export function SensorMsgs_PointCloud2_Intensity(): JSX.Element {
   const topics: Topic[] = [
     { name: "/pointcloud", datatype: "sensor_msgs/PointCloud2" },
@@ -1454,6 +1463,7 @@ export function SensorMsgs_PointCloud2_Intensity(): JSX.Element {
   );
 }
 
+LargeTransform.parameters = { colorScheme: "dark" };
 export function LargeTransform(): JSX.Element {
   const topics: Topic[] = [
     { name: "/markers", datatype: "visualization_msgs/Marker" },
@@ -1549,12 +1559,63 @@ export function LargeTransform(): JSX.Element {
   );
 }
 
-GeometryMsgs_Polygon.parameters = { colorScheme: "dark" };
-LargeTransform.parameters = { colorScheme: "dark" };
-MarkerLifetimes.parameters = { colorScheme: "dark" };
-Markers.parameters = { colorScheme: "dark" };
-NavMsgs_Path.parameters = { colorScheme: "dark" };
-SensorMsgs_LaserScan.parameters = { colorScheme: "dark" };
-SensorMsgs_PointCloud2_Intensity.parameters = { colorScheme: "dark" };
-SensorMsgs_PointCloud2_RGBA.parameters = { colorScheme: "dark" };
-TransformInterpolation.parameters = { colorScheme: "dark" };
+STLMeshMarkers.parameters = { colorScheme: "dark" };
+export function STLMeshMarkers(): JSX.Element {
+  const topics: Topic[] = [{ name: "/markers", datatype: "visualization_msgs/Marker" }];
+
+  const mesh: MessageEvent<MeshMarker> = {
+    topic: "/markers",
+    receiveTime: { sec: 10, nsec: 0 },
+    message: {
+      header: { seq: 0, stamp: { sec: 0, nsec: 0 }, frame_id: "" },
+      id: `mesh`,
+      ns: "",
+      type: 10,
+      action: 0,
+      frame_locked: false,
+      pose: {
+        position: { x: 0, y: -1, z: 0 },
+        orientation: { x: 0, y: 0, z: 0, w: 1 },
+      },
+      scale: { x: 0.5, y: 0.5, z: 0.5 },
+      color: makeColor("#8bc34a", 0.5),
+      mesh_resource: encodeURI(`data:model/stl;utf8,solid AssimpScene
+  facet normal 0 0 -1 outer loop vertex -0.5 -0.5 -0.5 vertex -0.5 0.5 -0.5 vertex 0.5 0.5 -0.5 endloop endfacet
+  facet normal 0 0 -1 outer loop vertex 0.5 0.5 -0.5 vertex 0.5 -0.5 -0.5 vertex -0.5 -0.5 -0.5 endloop endfacet
+  facet normal 0 0 1 outer loop vertex 0.5 -0.5 0.5 vertex 0.5 0.5 0.5 vertex -0.5 0.5 0.5 endloop endfacet
+  facet normal 0 0 1 outer loop vertex -0.5 0.5 0.5 vertex -0.5 -0.5 0.5 vertex 0.5 -0.5 0.5 endloop endfacet
+  facet normal 0 1 0 outer loop vertex -0.5 0.5 0.5 vertex 0.5 0.5 0.5 vertex 0.5 0.5 -0.5 endloop endfacet
+  facet normal 0 1 0 outer loop vertex 0.5 0.5 -0.5 vertex -0.5 0.5 -0.5 vertex -0.5 0.5 0.5 endloop endfacet
+  facet normal 1 0 0 outer loop vertex 0.5 0.5 0.5 vertex 0.5 -0.5 0.5 vertex 0.5 -0.5 -0.5 endloop endfacet
+  facet normal 1 0 0 outer loop vertex 0.5 -0.5 -0.5 vertex 0.5 0.5 -0.5 vertex 0.5 0.5 0.5 endloop endfacet
+  facet normal 0 -1 0 outer loop vertex 0.5 -0.5 0.5 vertex -0.5 -0.5 0.5 vertex -0.5 -0.5 -0.5 endloop endfacet
+  facet normal 0 -1 0 outer loop vertex -0.5 -0.5 -0.5 vertex 0.5 -0.5 -0.5 vertex 0.5 -0.5 0.5 endloop endfacet
+  facet normal -1 0 0 outer loop vertex -0.5 -0.5 0.5 vertex -0.5 0.5 0.5 vertex -0.5 0.5 -0.5 endloop endfacet
+  facet normal -1 0 0 outer loop vertex -0.5 0.5 -0.5 vertex -0.5 -0.5 -0.5 vertex -0.5 -0.5 0.5 endloop endfacet
+endsolid AssimpScene`),
+      mesh_use_embedded_materials: true,
+      lifetime: { sec: 0, nsec: 0 },
+    },
+    sizeInBytes: 0,
+  };
+
+  const fixture = useDelayedFixture({
+    datatypes,
+    topics,
+    frame: { "/markers": [mesh] },
+    capabilities: [],
+    activeData: { currentTime: { sec: 0, nsec: 0 } },
+  });
+
+  return (
+    <PanelSetup fixture={fixture}>
+      <ThreeDimensionalViz
+        overrideConfig={{
+          ...ThreeDimensionalViz.defaultConfig,
+          checkedKeys: ["name:Topics", "t:/markers", `t:${FOXGLOVE_GRID_TOPIC}`],
+          cameraState: { ...DEFAULT_CAMERA_STATE, distance: 5, thetaOffset: 1 },
+        }}
+      />
+    </PanelSetup>
+  );
+}

@@ -245,7 +245,7 @@ function parseAscii(data: string): StlData | undefined {
 
       vertices.push(vertexX, vertexY, vertexZ);
       normals.push(normal.x, normal.y, normal.z);
-      indices.push(i++, i++, i++);
+      indices.push(i++);
     }
   }
 

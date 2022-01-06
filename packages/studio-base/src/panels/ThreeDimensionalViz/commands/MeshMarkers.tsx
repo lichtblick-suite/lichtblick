@@ -35,6 +35,9 @@ async function loadNotFoundModel(): Promise<GlbModel> {
   return (await parseGLB(await response.arrayBuffer())) as GlbModel;
 }
 
+// https://github.com/Ultimaker/Cura/issues/4141
+const STL_MIME_TYPES = ["model/stl", "model/x.stl-ascii", "model/x.stl-binary", "application/sla"];
+
 async function loadModel(url: string): Promise<GlbModel | undefined> {
   const GLB_MAGIC = 0x676c5446; // "glTF"
 
@@ -54,8 +57,9 @@ async function loadModel(url: string): Promise<GlbModel | undefined> {
     return (await parseGLB(buffer)) as GlbModel;
   }
 
-  // STL binary files don't have a header, so we have to rely on the file extension
-  if (/\.stl$/i.test(url)) {
+  // STL binary files don't have a header, so we have to rely on the MIME type or file extension
+  const contentType = response.headers.get("content-type");
+  if ((contentType != undefined && STL_MIME_TYPES.includes(contentType)) || /\.stl$/i.test(url)) {
     return parseStlToGlb(buffer);
   }
 
