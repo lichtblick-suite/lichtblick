@@ -87,26 +87,25 @@ describe("<PointClouds />", () => {
   });
 
   describe("rgb colors", () => {
-    it("builds color buffer by expanding RGB data from PointCloud2", () => {
+    it("builds color buffer by extracting RGB data from PointCloud2", () => {
       const result = decodeMarker({
         ...POINT_CLOUD_MESSAGE,
         settings: { colorMode: { mode: "rgb" } },
       });
       const { colorBuffer, data } = result;
       expect(colorBuffer).not.toBeNullOrUndefined();
+      expect(data.length).toBe(96);
       const { buffer, offset, stride } = colorBuffer ?? {};
       if (!buffer) {
         throw new Error("Buffer is undefined");
       }
-      expect(buffer.length).toBe(data.length);
-      expect(offset).toBe(16);
-      expect(stride).toBe(32);
-      expect(Math.floor(buffer[16]!)).toBe(255);
-      expect(Math.floor(buffer[17]!)).toBe(225);
-      expect(Math.floor(buffer[18]!)).toBe(127);
+      expect(buffer.length).toBe(6);
+      expect(offset).toBe(0);
+      expect(stride).toBe(3);
+      expect(Array.from(buffer)).toEqual([127, 225, 255, 127, 255, 255]);
     });
 
-    it("builds color buffer by expanding RGB, ignoring endianness since that'll be handled by shaders", () => {
+    it("builds color buffer by extracting RGB data from big-endian PointCloud2", () => {
       const result = decodeMarker({
         ...POINT_CLOUD_MESSAGE,
         settings: { colorMode: { mode: "rgb" } },
@@ -114,16 +113,15 @@ describe("<PointClouds />", () => {
       });
       const { colorBuffer, data } = result;
       expect(colorBuffer).not.toBeNullOrUndefined();
+      expect(data.length).toBe(96);
       const { buffer, offset, stride } = colorBuffer ?? {};
       if (!buffer) {
         throw new Error("Buffer is undefined");
       }
-      expect(buffer.length).toBe(data.length);
-      expect(offset).toBe(16);
-      expect(stride).toBe(32);
-      expect(Math.floor(buffer[16]!)).toBe(255);
-      expect(Math.floor(buffer[17]!)).toBe(225);
-      expect(Math.floor(buffer[18]!)).toBe(127);
+      expect(buffer.length).toBe(6);
+      expect(offset).toBe(0);
+      expect(stride).toBe(3);
+      expect(Array.from(buffer)).toEqual([0, 255, 225, 0, 255, 255]);
     });
   });
 

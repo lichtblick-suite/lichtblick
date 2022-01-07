@@ -64,7 +64,7 @@ export function getClickedInfo(
   maybeFullyDecodedMarker: Omit<DecodedMarker, "data">,
   instanceIndex: number | undefined,
 ): ClickedInfo | undefined {
-  const { positionBuffer, colorBuffer, fields, settings, is_bigendian } = maybeFullyDecodedMarker;
+  const { positionBuffer, colorBuffer, fields, settings } = maybeFullyDecodedMarker;
   if (
     isEmpty(positionBuffer) ||
     isNil(instanceIndex) ||
@@ -89,13 +89,6 @@ export function getClickedInfo(
         // of 1 as well.
         1.0,
       ];
-      if (!is_bigendian) {
-        // When data uses little endianess, colors are in BGR format
-        // and we must swap R and B channels to display them correclty.
-        const temp = clickedPointColor[2] as number;
-        clickedPointColor[2] = clickedPointColor[0] as number;
-        clickedPointColor[0] = temp;
-      }
     } else if (colorMode.mode === "gradient" && colorBuffer) {
       const { minColorValue, maxColorValue } = maybeFullyDecodedMarker as MinMaxColors;
       const colorFieldValue = getVertexValue(colorBuffer, pointIndex);

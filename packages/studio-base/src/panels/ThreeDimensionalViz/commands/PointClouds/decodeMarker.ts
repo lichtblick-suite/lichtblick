@@ -55,6 +55,7 @@ export function decodeMarker(marker: PointCloudMarker): DecodedMarker {
     hitmapColors,
     data,
   } = marker;
+  const isBigEndian = marker.is_bigendian;
   const offsetsAndReaders = getFieldOffsetsAndReaders(data, fields);
   const hasRGB =
     offsetsAndReaders.rgb?.offset != undefined || offsetsAndReaders.rgba?.offset != undefined;
@@ -94,6 +95,7 @@ export function decodeMarker(marker: PointCloudMarker): DecodedMarker {
         colorMode,
         pointCount,
         stride,
+        isBigEndian,
       });
 
   let minColorValue: number = Number.POSITIVE_INFINITY;

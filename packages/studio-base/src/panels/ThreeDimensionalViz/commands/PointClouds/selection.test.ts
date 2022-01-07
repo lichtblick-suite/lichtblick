@@ -70,7 +70,7 @@ describe("<PointClouds />", () => {
         -2239, -706, -3,
       ]);
       expect((clickInfo?.clickedPointColor ?? []).map((v) => Math.floor(v))).toStrictEqual([
-        255, 255, 127, 1,
+        0, 255, 255, 1,
       ]);
       expect(clickInfo?.additionalFieldValues).toBeUndefined();
     });
