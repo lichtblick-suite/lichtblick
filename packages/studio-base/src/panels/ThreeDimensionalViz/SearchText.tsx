@@ -21,7 +21,7 @@ import { Time } from "@foxglove/rostime";
 import { useTooltip } from "@foxglove/studio-base/components/Tooltip";
 import useDeepChangeDetector from "@foxglove/studio-base/hooks/useDeepChangeDetector";
 import { Interactive } from "@foxglove/studio-base/panels/ThreeDimensionalViz/Interactions/types";
-import { TransformTree } from "@foxglove/studio-base/panels/ThreeDimensionalViz/transforms";
+import { IImmutableTransformTree } from "@foxglove/studio-base/panels/ThreeDimensionalViz/transforms";
 import { TextMarker, Color } from "@foxglove/studio-base/types/Messages";
 import { emptyPose } from "@foxglove/studio-base/util/Pose";
 
@@ -147,7 +147,7 @@ type SearchTextComponentProps = SearchTextProps & {
   renderFrameId?: string;
   fixedFrameId?: string;
   currentTime: Time;
-  transforms: TransformTree;
+  transforms: IImmutableTransformTree;
 };
 
 // Exported for tests.
@@ -168,7 +168,7 @@ export const useSearchMatches = ({
   fixedFrameId?: string;
   currentTime: Time;
   searchTextOpen: boolean;
-  transforms: TransformTree;
+  transforms: IImmutableTransformTree;
 }): void => {
   const hasCurrentMatchChanged = useDeepChangeDetector([currentMatch], { initiallyTrue: true });
 

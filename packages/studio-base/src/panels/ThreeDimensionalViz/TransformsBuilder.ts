@@ -14,7 +14,7 @@
 import { quat, vec3 } from "gl-matrix";
 
 import { Time } from "@foxglove/rostime";
-import { CoordinateFrame } from "@foxglove/studio-base/panels/ThreeDimensionalViz/transforms";
+import { IImmutableCoordinateFrame } from "@foxglove/studio-base/panels/ThreeDimensionalViz/transforms";
 import { ArrowMarker, MutablePose, Point, TextMarker } from "@foxglove/studio-base/types/Messages";
 import { clonePose, emptyPose, setIdentityPose } from "@foxglove/studio-base/util/Pose";
 import { MARKER_MSG_TYPES } from "@foxglove/studio-base/util/globalConstants";
@@ -79,9 +79,9 @@ const originAxes: Axis[] = [
 const getTransformedAxisArrowMarker = (
   id: string,
   axis: Axis,
-  renderFrame: CoordinateFrame,
-  fixedFrame: CoordinateFrame,
-  srcFrame: CoordinateFrame,
+  renderFrame: IImmutableCoordinateFrame,
+  fixedFrame: IImmutableCoordinateFrame,
+  srcFrame: IImmutableCoordinateFrame,
   time: Time,
 ): ArrowMarker => {
   const { unitVector, id: axisId } = axis;
@@ -103,9 +103,9 @@ const getTransformedAxisArrowMarker = (
 
 const getAxesArrowMarkers = (
   id: string,
-  renderFrame: CoordinateFrame,
-  fixedFrame: CoordinateFrame,
-  srcFrame: CoordinateFrame,
+  renderFrame: IImmutableCoordinateFrame,
+  fixedFrame: IImmutableCoordinateFrame,
+  srcFrame: IImmutableCoordinateFrame,
   time: Time,
 ): ArrowMarker[] => {
   return originAxes.map((axis) =>
@@ -168,9 +168,9 @@ function reproject(a: Point, b: Point, distance: number): Point {
 // Exported for tests
 export const getArrowToParentMarker = (
   id: string,
-  renderFrame: CoordinateFrame,
-  fixedFrame: CoordinateFrame,
-  srcFrame: CoordinateFrame,
+  renderFrame: IImmutableCoordinateFrame,
+  fixedFrame: IImmutableCoordinateFrame,
+  srcFrame: IImmutableCoordinateFrame,
   time: Time,
 ): ArrowMarker | undefined => {
   const parent = srcFrame.parent();
@@ -226,9 +226,9 @@ export default class TransformsBuilder implements MarkerProvider {
   addMarkersForTransform(
     add: MarkerCollector,
     id: string,
-    renderFrame: CoordinateFrame,
-    fixedFrame: CoordinateFrame,
-    srcFrame: CoordinateFrame,
+    renderFrame: IImmutableCoordinateFrame,
+    fixedFrame: IImmutableCoordinateFrame,
+    srcFrame: IImmutableCoordinateFrame,
     time: Time,
   ): void {
     setIdentityPose(tempPose);

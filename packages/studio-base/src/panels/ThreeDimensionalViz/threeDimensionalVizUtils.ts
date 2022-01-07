@@ -25,7 +25,7 @@ import {
 import { GlobalVariables } from "@foxglove/studio-base/hooks/useGlobalVariables";
 import { InteractionData } from "@foxglove/studio-base/panels/ThreeDimensionalViz/Interactions/types";
 import { LinkedGlobalVariables } from "@foxglove/studio-base/panels/ThreeDimensionalViz/Interactions/useLinkedGlobalVariables";
-import { TransformTree } from "@foxglove/studio-base/panels/ThreeDimensionalViz/transforms";
+import { IImmutableTransformTree } from "@foxglove/studio-base/panels/ThreeDimensionalViz/transforms";
 import { FollowMode } from "@foxglove/studio-base/panels/ThreeDimensionalViz/types";
 import { InstancedLineListMarker, MutablePose } from "@foxglove/studio-base/types/Messages";
 
@@ -36,7 +36,7 @@ type MutableVec4 = [number, number, number, number];
 // Get the camera target position and orientation
 function getTargetPose(
   followTf: string | undefined,
-  transforms: TransformTree,
+  transforms: IImmutableTransformTree,
 ): TargetPose | undefined {
   if (followTf != undefined && transforms.hasFrame(followTf)) {
     return { target: [0, 0, 0], targetOrientation: [0, 0, 0, 1] };
@@ -61,7 +61,7 @@ export function useTransformedCameraState({
   configCameraState: Partial<CameraState>;
   followTf?: string;
   followMode: FollowMode;
-  transforms: TransformTree;
+  transforms: IImmutableTransformTree;
   poseInRenderFrame?: MutablePose;
 }): CameraState {
   const transformedCameraState = { ...configCameraState };

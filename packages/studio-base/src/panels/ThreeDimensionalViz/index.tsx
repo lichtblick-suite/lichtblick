@@ -25,6 +25,7 @@ import Panel from "@foxglove/studio-base/components/Panel";
 import PanelContext from "@foxglove/studio-base/components/PanelContext";
 import useCallbackWithToast from "@foxglove/studio-base/hooks/useCallbackWithToast";
 import Layout from "@foxglove/studio-base/panels/ThreeDimensionalViz/TopicTree/Layout";
+import UrdfBuilder from "@foxglove/studio-base/panels/ThreeDimensionalViz/UrdfBuilder";
 import helpContent from "@foxglove/studio-base/panels/ThreeDimensionalViz/index.help.md";
 import {
   useTransformedCameraState,
@@ -32,11 +33,12 @@ import {
 } from "@foxglove/studio-base/panels/ThreeDimensionalViz/threeDimensionalVizUtils";
 import {
   CoordinateFrame,
-  DEFAULT_FRAME_IDS,
+  IImmutableCoordinateFrame,
 } from "@foxglove/studio-base/panels/ThreeDimensionalViz/transforms";
 import {
   FollowMode,
   ThreeDimensionalVizConfig,
+  TransformLink,
 } from "@foxglove/studio-base/panels/ThreeDimensionalViz/types";
 import { MutablePose } from "@foxglove/studio-base/types/Messages";
 import { PanelConfigSchema, SaveConfig } from "@foxglove/studio-base/types/panels";
@@ -54,6 +56,8 @@ export type Props = {
   config: ThreeDimensionalVizConfig;
   saveConfig: Save3DConfig;
 };
+
+const DEFAULT_FRAME_IDS = ["base_link", "odom", "map", "earth"];
 
 const TIME_ZERO = { sec: 0, nsec: 0 };
 
@@ -117,14 +121,21 @@ function BaseRenderer(props: Props): JSX.Element {
     setSubscribedTopics(uniq(newTopics));
   }, []);
 
+  const [urdfTransforms, setUrdfTransforms] = useState<TransformLink[]>([]);
+
   const { reset: resetFrame, frame } = useFrame(subscribedTopics);
-  const transforms = useTransforms(topics, frame, resetFrame);
+  const transforms = useTransforms({
+    topics,
+    frame,
+    reset: resetFrame,
+    urdfTransforms,
+  });
   const currentTime = useMessagePipeline(selectCurrentTime);
   const isPlaying = useMessagePipeline(selectIsPlaying);
 
   const orphanedFrame = useMemo(() => new CoordinateFrame("(empty)", undefined), []);
 
-  const renderFrame = useMemo<CoordinateFrame>(() => {
+  const renderFrame = useMemo<IImmutableCoordinateFrame>(() => {
     // If the user specified a followTf, do not fall back to any other (valid) frame
     if (followTf) {
       return transforms.frame(followTf) ?? new CoordinateFrame(followTf, undefined);
@@ -337,6 +348,18 @@ function BaseRenderer(props: Props): JSX.Element {
     [autoSyncCameraState, saveCameraStateDebounced, updatePanelConfigs],
   );
 
+  const urdfBuilder = useMemo(() => new UrdfBuilder(), []);
+  useLayoutEffect(() => {
+    const handle = (newTransforms: TransformLink[]) => {
+      setUrdfTransforms((existing) => existing.concat(newTransforms));
+    };
+
+    urdfBuilder.on("transforms", handle);
+    return () => {
+      urdfBuilder.off("transforms", handle);
+    };
+  }, [urdfBuilder]);
+
   return (
     <Layout
       cameraState={transformedCameraState}
@@ -350,12 +373,13 @@ function BaseRenderer(props: Props): JSX.Element {
       frame={frame}
       helpContent={helpContent}
       isPlaying={isPlaying}
+      topics={topics}
+      transforms={transforms}
+      urdfBuilder={urdfBuilder}
       onAlignXYAxis={onAlignXYAxis}
       onCameraStateChange={onCameraStateChange}
       onFollowChange={onFollowChange}
       saveConfig={saveConfig}
-      topics={topics}
-      transforms={transforms}
       setSubscriptions={setSubscriptions}
     />
   );

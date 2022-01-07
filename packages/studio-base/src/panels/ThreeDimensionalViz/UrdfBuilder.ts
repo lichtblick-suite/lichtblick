@@ -11,6 +11,7 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
+import { EventEmitter } from "eventemitter3";
 import { quat, vec3 } from "gl-matrix";
 import { isEqual } from "lodash";
 
@@ -29,9 +30,9 @@ import { rewritePackageUrl } from "@foxglove/studio-base/context/AssetsContext";
 import { TopicSettingsCollection } from "@foxglove/studio-base/panels/ThreeDimensionalViz/SceneBuilder";
 import { UrdfSettings } from "@foxglove/studio-base/panels/ThreeDimensionalViz/TopicSettingsEditor/UrdfSettingsEditor";
 import {
-  CoordinateFrame,
+  IImmutableCoordinateFrame,
+  IImmutableTransformTree,
   Transform,
-  TransformTree,
 } from "@foxglove/studio-base/panels/ThreeDimensionalViz/transforms";
 import {
   Color,
@@ -46,7 +47,7 @@ import { clonePose } from "@foxglove/studio-base/util/Pose";
 import { URDF_TOPIC } from "@foxglove/studio-base/util/globalConstants";
 import sendNotification from "@foxglove/studio-base/util/sendNotification";
 
-import { MarkerProvider, RenderMarkerArgs } from "./types";
+import { MarkerProvider, RenderMarkerArgs, TransformLink } from "./types";
 
 export const DEFAULT_COLOR: Color = { r: 36 / 255, g: 142 / 255, b: 255 / 255, a: 1 };
 
@@ -57,23 +58,21 @@ type Quaternion = { x: number; y: number; z: number; w: number };
 
 const log = Logger.getLogger(__filename);
 
-export default class UrdfBuilder implements MarkerProvider {
+type EventTypes = {
+  transforms: (transforms: TransformLink[]) => void;
+};
+
+export default class UrdfBuilder extends EventEmitter<EventTypes> implements MarkerProvider {
   private _urdf?: UrdfRobot;
   private _boxes: CubeMarker[] = [];
   private _spheres: SphereMarker[] = [];
   private _cylinders: CylinderMarker[] = [];
   private _meshes: MeshMarker[] = [];
   private _visible = true;
-  private _needsUpdate = false;
   private _settings: UrdfSettings = {};
   private _urdfData?: string;
 
   renderMarkers = ({ add, transforms, renderFrame, fixedFrame, time }: RenderMarkerArgs): void => {
-    if (this._needsUpdate) {
-      this._needsUpdate = false;
-      this.update(transforms);
-    }
-
     if (!this._visible) {
       return;
     }
@@ -164,27 +163,29 @@ export default class UrdfBuilder implements MarkerProvider {
     try {
       log.debug(`Parsing ${text.length} byte URDF`);
       this._urdf = await parseRobot(text, fileFetcher);
-      this._needsUpdate = true;
+
+      const transforms = Array.from(this._urdf.joints.values(), (joint) => {
+        const t = joint.origin.xyz;
+        const q = eulerToQuaternion(joint.origin.rpy);
+        const translation: vec3 = [t.x, t.y, t.z];
+        const rotation: quat = [q.x, q.y, q.z, q.w];
+        const transform = new Transform(translation, rotation);
+        const transformLink: TransformLink = {
+          parent: joint.parent,
+          child: joint.child,
+          transform,
+        };
+        return transformLink;
+      });
+
+      // createMarkers before emit so if the emit triggers a repaint the markers are ready
+      this.createMarkers();
+
+      log.debug("Transforms from urdf: ", transforms);
+      this.emit("transforms", transforms);
     } catch (err) {
       throw new Error(`Failed to parse ${text.length} byte URDF: ${err}`);
     }
-  }
-
-  private update(transforms: TransformTree): void {
-    if (!this._urdf) {
-      return;
-    }
-
-    for (const joint of this._urdf.joints.values()) {
-      const t = joint.origin.xyz;
-      const q = eulerToQuaternion(joint.origin.rpy);
-      const translation: vec3 = [t.x, t.y, t.z];
-      const rotation: quat = [q.x, q.y, q.z, q.w];
-      const tf = new Transform(translation, rotation);
-      transforms.addTransform(joint.child, joint.parent, TIME_ZERO, tf);
-    }
-
-    this.createMarkers();
   }
 
   createMarkers(): void {
@@ -410,9 +411,9 @@ function getColor(visual: UrdfVisual, robot: UrdfRobot): Color {
 
 function updatePose(
   marker: Marker,
-  transforms: TransformTree,
-  renderFrame: CoordinateFrame,
-  fixedFrame: CoordinateFrame,
+  transforms: IImmutableTransformTree,
+  renderFrame: IImmutableCoordinateFrame,
+  fixedFrame: IImmutableCoordinateFrame,
   time: Time,
 ): boolean {
   const srcFrame = transforms.frame(marker.header.frame_id);

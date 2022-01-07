@@ -4,8 +4,9 @@
 
 // REP 105 specifies a set of conventional frame ids
 // https://www.ros.org/reps/rep-0105.html
-export const DEFAULT_FRAME_IDS = ["base_link", "odom", "map", "earth"];
 
 export * from "./CoordinateFrame";
 export * from "./Transform";
 export * from "./TransformTree";
+export * from "./IImmutableTransformTree";
+export * from "./IImmutableCoordinateFrame";

@@ -85,7 +85,12 @@ const fixedFrame = renderFrame;
 
 storiesOf("panels/ThreeDimensionalViz/GridBuilder", module)
   .add("renders the default grid", () => {
-    const transforms = useTransforms([], {}, false);
+    const transforms = useTransforms({
+      topics: [],
+      frame: {},
+      reset: false,
+      urdfTransforms: [],
+    });
     const collector = new MockMarkerCollector();
     const gridBuilder = new GridBuilder();
     gridBuilder.renderMarkers({
@@ -114,7 +119,7 @@ storiesOf("panels/ThreeDimensionalViz/GridBuilder", module)
     );
   })
   .add("renders a customized grid", () => {
-    const transforms = useTransforms([], {}, false);
+    const transforms = useTransforms({ topics: [], frame: {}, reset: false, urdfTransforms: [] });
     const collector = new MockMarkerCollector();
     const gridBuilder = new GridBuilder();
     const settings: GridSettings = {

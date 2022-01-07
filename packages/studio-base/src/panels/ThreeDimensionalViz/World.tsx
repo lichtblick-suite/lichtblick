@@ -32,8 +32,8 @@ import WorldMarkers, {
 } from "@foxglove/studio-base/panels/ThreeDimensionalViz/WorldMarkers";
 import { LAYER_INDEX_DEFAULT_BASE } from "@foxglove/studio-base/panels/ThreeDimensionalViz/constants";
 import {
-  CoordinateFrame,
-  TransformTree,
+  IImmutableCoordinateFrame,
+  IImmutableTransformTree,
 } from "@foxglove/studio-base/panels/ThreeDimensionalViz/transforms";
 import withHighlights from "@foxglove/studio-base/panels/ThreeDimensionalViz/withHighlights";
 import inScreenshotTests from "@foxglove/studio-base/stories/inScreenshotTests";
@@ -60,9 +60,9 @@ type Props = WorldSearchTextProps & {
   cameraState: CameraState;
   children?: React.ReactNode;
   isPlaying: boolean;
-  transforms: TransformTree;
-  renderFrame: CoordinateFrame;
-  fixedFrame: CoordinateFrame;
+  transforms: IImmutableTransformTree;
+  renderFrame: IImmutableCoordinateFrame;
+  fixedFrame: IImmutableCoordinateFrame;
   currentTime: Time;
   markerProviders: MarkerProvider[];
   onCameraStateChange: (arg0: CameraState) => void;
@@ -83,9 +83,9 @@ function getMarkers({
 }: {
   markers: InteractiveMarkersByType;
   markerProviders: MarkerProvider[];
-  transforms: TransformTree;
-  renderFrame: CoordinateFrame;
-  fixedFrame: CoordinateFrame;
+  transforms: IImmutableTransformTree;
+  renderFrame: IImmutableCoordinateFrame;
+  fixedFrame: IImmutableCoordinateFrame;
   time: Time;
 }): void {
   // These casts seem wrong - some type definitions around MarkerProvider or MarkerCollector are not

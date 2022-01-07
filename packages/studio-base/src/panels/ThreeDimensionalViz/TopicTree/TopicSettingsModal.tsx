@@ -122,7 +122,7 @@ function TopicSettingsModal({
 
   return (
     <Dialog
-      isOpen
+      hidden={false}
       onDismiss={() => setCurrentEditingTopic(undefined)}
       dialogContentProps={{
         title: currentEditingTopic.name,

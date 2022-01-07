@@ -37,7 +37,7 @@ import {
 import { TopicSettingsCollection } from "./SceneBuilder";
 import { ColorOverrideByVariable, ColorOverride } from "./TopicTree/Layout";
 import { TopicDisplayMode } from "./TopicTree/types";
-import { CoordinateFrame, TransformTree } from "./transforms";
+import { IImmutableCoordinateFrame, IImmutableTransformTree, Transform } from "./transforms";
 
 /** @deprecated */
 type ColorOverrideBySourceIdxByVariable = Record<string, ColorOverride[]>;
@@ -72,9 +72,9 @@ export interface MarkerCollector {
 
 export type RenderMarkerArgs = {
   add: MarkerCollector;
-  renderFrame: CoordinateFrame;
-  fixedFrame: CoordinateFrame;
-  transforms: TransformTree;
+  renderFrame: IImmutableCoordinateFrame;
+  fixedFrame: IImmutableCoordinateFrame;
+  transforms: IImmutableTransformTree;
   time: Time;
 };
 
@@ -103,5 +103,14 @@ export type ThreeDimensionalVizConfig = {
   colorOverrideByVariable?: ColorOverrideByVariable;
   disableAutoOpenClickedObject?: boolean;
 } & PreviousThreeDimensionalVizConfig;
+
+/**
+ * TransformLink describes the transform between two coordinate frames.
+ */
+export type TransformLink = {
+  parent: string;
+  child: string;
+  transform: Transform;
+};
 
 export type FollowMode = "follow" | "follow-orientation" | "no-follow";
