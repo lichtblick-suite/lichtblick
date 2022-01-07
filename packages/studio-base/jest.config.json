@@ -12,7 +12,8 @@
   "setupFiles": [
     "<rootDir>/src/test/setup.ts",
     "<rootDir>/src/test/setupEnzyme.ts",
-    "jest-canvas-mock"
+    "jest-canvas-mock",
+    "fake-indexeddb/auto"
   ],
   "setupFilesAfterEnv": ["<rootDir>/src/test/setupTestFramework.ts"],
   "restoreMocks": true,

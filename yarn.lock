@@ -2581,6 +2581,7 @@ __metadata:
     cytoscape-dagre: 2.3.2
     enzyme: 3.11.0
     esbuild-loader: 2.18.0
+    fake-indexeddb: 3.1.7
     fetch-mock: 9.11.0
     fork-ts-checker-webpack-plugin: 6.5.0
     fuzzysort: 1.1.4
@@ -7972,6 +7973,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"base64-arraybuffer-es6@npm:^0.7.0":
+  version: 0.7.0
+  resolution: "base64-arraybuffer-es6@npm:0.7.0"
+  checksum: 6d2fd114df49201b476cea5d470504e5d4e8c4cd42544152b312c9bdcb824313086fe83f1ffc34262e9e276b82d46aefc6e63bb85553f016932061137b355cdf
+  languageName: node
+  linkType: hard
+
 "base64-arraybuffer@npm:~1.0.1":
   version: 1.0.1
   resolution: "base64-arraybuffer@npm:1.0.1"
@@ -9545,6 +9553,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"core-js@npm:^2.5.3":
+  version: 2.6.12
+  resolution: "core-js@npm:2.6.12"
+  checksum: 44fa9934a85f8c78d61e0c8b7b22436330471ffe59ec5076fe7f324d6e8cf7f824b14b1c81ca73608b13bdb0fef035bd820989bf059767ad6fa13123bb8bd016
+  languageName: node
+  linkType: hard
+
 "core-js@npm:^3.0.0, core-js@npm:^3.0.4, core-js@npm:^3.2.1, core-js@npm:^3.6.5, core-js@npm:^3.8.2":
   version: 3.19.2
   resolution: "core-js@npm:3.19.2"
@@ -10686,6 +10701,15 @@ __metadata:
   version: 2.2.0
   resolution: "domelementtype@npm:2.2.0"
   checksum: 24cb386198640cd58aa36f8c987f2ea61859929106d06ffcc8f547e70cb2ed82a6dc56dcb8252b21fba1f1ea07df6e4356d60bfe57f77114ca1aed6828362629
+  languageName: node
+  linkType: hard
+
+"domexception@npm:^1.0.1":
+  version: 1.0.1
+  resolution: "domexception@npm:1.0.1"
+  dependencies:
+    webidl-conversions: ^4.0.2
+  checksum: f564a9c0915dcb83ceefea49df14aaed106b1468fbe505119e8bcb0b77e242534f3aba861978537c0fc9dc6f35b176d0ffc77b3e342820fb27a8f215e7ae4d52
   languageName: node
   linkType: hard
 
@@ -12199,6 +12223,15 @@ __metadata:
   version: 1.4.1
   resolution: "extsprintf@npm:1.4.1"
   checksum: a2f29b241914a8d2bad64363de684821b6b1609d06ae68d5b539e4de6b28659715b5bea94a7265201603713b7027d35399d10b0548f09071c5513e65e8323d33
+  languageName: node
+  linkType: hard
+
+"fake-indexeddb@npm:3.1.7":
+  version: 3.1.7
+  resolution: "fake-indexeddb@npm:3.1.7"
+  dependencies:
+    realistic-structured-clone: ^2.0.1
+  checksum: bd1663c9e27858de3ce6217721eeb0e802a3910bf521a509caaff509ca8c490efda6842d19de86488c43cf5cf5f55a7fdadcefc5e7d591a0976e606ead5000fd
   languageName: node
   linkType: hard
 
@@ -20732,6 +20765,18 @@ __metadata:
   languageName: node
   linkType: hard
 
+"realistic-structured-clone@npm:^2.0.1":
+  version: 2.0.3
+  resolution: "realistic-structured-clone@npm:2.0.3"
+  dependencies:
+    core-js: ^2.5.3
+    domexception: ^1.0.1
+    typeson: ^6.1.0
+    typeson-registry: ^1.0.0-alpha.20
+  checksum: aca8c7c2712519a8c05278456972dd4dd93f73da57be000f4693669d02479eebe995bc277019dc64adf508696b5dca3cbd425a06c0372557a0d3178da0adab06
+  languageName: node
+  linkType: hard
+
 "rechoir@npm:^0.7.0":
   version: 0.7.1
   resolution: "rechoir@npm:0.7.1"
@@ -23651,6 +23696,24 @@ __metadata:
   languageName: node
   linkType: hard
 
+"typeson-registry@npm:^1.0.0-alpha.20":
+  version: 1.0.0-alpha.39
+  resolution: "typeson-registry@npm:1.0.0-alpha.39"
+  dependencies:
+    base64-arraybuffer-es6: ^0.7.0
+    typeson: ^6.0.0
+    whatwg-url: ^8.4.0
+  checksum: c6b629697acf4652aecfff7be760356d764600afc9beca253278bbfc44fae0fe635b7619201b83e497cdc30645cbce7614d12a04b5726d9b8b505f73e6a3fc2a
+  languageName: node
+  linkType: hard
+
+"typeson@npm:^6.0.0, typeson@npm:^6.1.0":
+  version: 6.1.0
+  resolution: "typeson@npm:6.1.0"
+  checksum: 00a77b03ac8f704acb103307bad9295fe47d6b304c386297f078ec3be63875c0b81e022a4815edb9dc2c7da0a72a431345411d35c755a8510af4a420e9e46cdc
+  languageName: node
+  linkType: hard
+
 "uglify-js@npm:^3.1.4":
   version: 3.14.4
   resolution: "uglify-js@npm:3.14.4"
@@ -24911,7 +24974,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"whatwg-url@npm:^8.0.0, whatwg-url@npm:^8.5.0":
+"whatwg-url@npm:^8.0.0, whatwg-url@npm:^8.4.0, whatwg-url@npm:^8.5.0":
   version: 8.7.0
   resolution: "whatwg-url@npm:8.7.0"
   dependencies:

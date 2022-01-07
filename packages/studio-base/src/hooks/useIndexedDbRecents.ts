@@ -56,8 +56,8 @@ interface IRecentsStore {
 }
 
 function useIndexedDbRecents(): IRecentsStore {
-  const { value: initialRecents } = useAsync(
-    async () => await idbGet<RecentRecord[]>(IDB_KEY, IDB_STORE),
+  const { value: initialRecents, loading } = useAsync(
+    async () => await idbGet<RecentRecord[] | undefined>(IDB_KEY, IDB_STORE),
     [],
   );
 
@@ -68,7 +68,7 @@ function useIndexedDbRecents(): IRecentsStore {
 
   const save = useCallback(async () => {
     // We don't save until we've loaded our existing recents. This ensures we include stored recents when we save
-    if (!initialRecents) {
+    if (loading) {
       return;
     }
 
@@ -115,28 +115,28 @@ function useIndexedDbRecents(): IRecentsStore {
     idbSet(IDB_KEY, recentsToSave, IDB_STORE).catch((err) => {
       log.error(err);
     });
-  }, [initialRecents]);
+  }, [loading]);
 
   // Set the first load records from the store to the state
   useLayoutEffect(() => {
-    if (!initialRecents) {
+    if (loading) {
       return;
     }
 
-    // No new recents by the time we loaded our initial recents so we don't need to save
-    if (newRecentsRef.current.length === 0) {
-      newRecentsRef.current.push(...initialRecents);
+    const haveUnsavedRecents = newRecentsRef.current.length > 0;
 
+    if (initialRecents) {
+      newRecentsRef.current.push(...initialRecents);
+    }
+
+    if (haveUnsavedRecents) {
+      void save();
+    } else {
+      // No new recents by the time we loaded our initial recents so we don't need to save
       // Normally a save invokes set - but since we don't need to save we set here
       setRecents(newRecentsRef.current);
-      return;
     }
-
-    // There were new recents by the time we loaded our stored recents.
-    // We add the stored recents to the ref and invoke save to persist the merged list
-    newRecentsRef.current.push(...initialRecents);
-    void save();
-  }, [initialRecents, save]);
+  }, [loading, initialRecents, save]);
 
   const addRecent = useCallback(
     (record: UnsavedRecentRecord) => {

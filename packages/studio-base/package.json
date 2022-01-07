@@ -124,6 +124,7 @@
     "cytoscape-dagre": "2.3.2",
     "enzyme": "3.11.0",
     "esbuild-loader": "2.18.0",
+    "fake-indexeddb": "3.1.7",
     "fetch-mock": "9.11.0",
     "fork-ts-checker-webpack-plugin": "6.5.0",
     "fuzzysort": "1.1.4",
