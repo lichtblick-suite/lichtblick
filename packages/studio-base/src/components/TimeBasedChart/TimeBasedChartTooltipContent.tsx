@@ -12,6 +12,7 @@
 //   You may not use this file except in compliance with the License.
 
 import { makeStyles } from "@fluentui/react";
+import { take } from "lodash";
 import { PropsWithChildren, useMemo } from "react";
 
 import { fonts } from "@foxglove/studio-base/util/sharedStyleConstants";
@@ -34,11 +35,25 @@ const useStyles = makeStyles((theme) => ({
   multiValueItem: {
     paddingBottom: theme.spacing.s2,
   },
+  overflow: {
+    color: theme.palette.neutralTertiaryAlt,
+    fontStyle: "italic",
+  },
   path: {
     whiteSpace: "nowrap",
     color: theme.palette.neutralTertiary,
   },
 }));
+
+function OverflowMessage() {
+  const classes = useStyles();
+
+  return (
+    <div className={classes.overflow}>
+      &lt;Multiple values under cursor. Zoom in to see more.&gt;
+    </div>
+  );
+}
 
 export default function TimeBasedChartTooltipContent(
   props: PropsWithChildren<Props>,
@@ -48,18 +63,23 @@ export default function TimeBasedChartTooltipContent(
 
   const itemsByPath = useMemo(() => {
     const out = new Map<string, TimeBasedChartTooltipData[]>();
+    const overflow = new Set<string>();
     // for single dataset plots we don't care about grouping by path - there is only one path
     if (!multiDataset) {
-      return out;
+      return { out, overflow };
     }
     // group items by path
     for (const item of content) {
       const existing = out.get(item.path) ?? [];
       existing.push(item);
       out.set(item.path, existing);
+
+      if (existing.length > 1) {
+        overflow.add(item.path);
+      }
     }
 
-    return out;
+    return { out, overflow };
   }, [content, multiDataset]);
 
   // If the chart contains only one dataset, we don't need to render the dataset label - saving space
@@ -68,7 +88,7 @@ export default function TimeBasedChartTooltipContent(
   if (!multiDataset) {
     return (
       <div className={classes.root} data-test="TimeBasedChartTooltipContent">
-        {content.map((item, idx) => {
+        {take(content, 1).map((item, idx) => {
           const value =
             typeof item.value === "string"
               ? item.value
@@ -82,17 +102,18 @@ export default function TimeBasedChartTooltipContent(
             </div>
           );
         })}
+        {content.length > 1 && <OverflowMessage />}
       </div>
     );
   }
 
   return (
     <div className={classes.root} data-test="TimeBasedChartTooltipContent">
-      {Array.from(itemsByPath.entries(), ([path, items], idx) => {
+      {Array.from(itemsByPath.out.entries(), ([path, items], idx) => {
         return (
           <div key={idx} className={classes.multiValueItem}>
             <div className={classes.path}>{path}</div>
-            {items.map((item, itemIdx) => {
+            {take(items, 1).map((item, itemIdx) => {
               const value =
                 typeof item.value === "string"
                   ? item.value
@@ -106,6 +127,7 @@ export default function TimeBasedChartTooltipContent(
                 </div>
               );
             })}
+            {itemsByPath.overflow.has(path) && <OverflowMessage />}
           </div>
         );
       })}
