@@ -172,6 +172,12 @@ function PanelActionsDropdown({
   const swap = useCallback(
     (id?: string) =>
       ({ type, config, relatedConfigs }: PanelSelection) => {
+        // Reselecting current panel type is a no-op.
+        if (type === panelContext?.type) {
+          setIsOpen(false);
+          return;
+        }
+
         swapPanel({
           tabId,
           originalId: id ?? "",
@@ -182,7 +188,7 @@ function PanelActionsDropdown({
           relatedConfigs,
         });
       },
-    [mosaicActions, mosaicWindowActions, swapPanel, tabId],
+    [mosaicActions, mosaicWindowActions, panelContext?.type, setIsOpen, swapPanel, tabId],
   );
 
   const { openPanelSettings } = useWorkspace();
