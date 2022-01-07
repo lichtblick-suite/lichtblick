@@ -314,6 +314,7 @@ export default function ImageCanvas(props: Props): JSX.Element {
     setContainer,
     panZoomHandlers,
   } = usePanZoom({
+    minZoom: 0.5,
     initialPan: config.pan,
     initialZoom: config.zoom,
   });
