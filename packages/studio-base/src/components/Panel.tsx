@@ -431,7 +431,7 @@ export default function Panel<
         if (panelSettingsOpen) {
           // Allow clicking with no modifiers to select a panel (and deselect others) when panel settings are open
           e.stopPropagation(); // select the deepest clicked panel, not parent tab panels
-          setSelectedPanelIds(isSelected ? [] : [childId]);
+          setSelectedPanelIds([childId]);
         } else if (e.metaKey || shiftKeyPressed || isSelected) {
           e.stopPropagation(); // select the deepest clicked panel, not parent tab panels
           togglePanelSelected(childId, tabId);
