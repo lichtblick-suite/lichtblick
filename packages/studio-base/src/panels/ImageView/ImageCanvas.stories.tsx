@@ -209,13 +209,18 @@ const markers = [
     fill_color: { r: 0.5, g: 1, b: 0, a: 1 },
   }),
   marker(4, {
-    scale: 2,
+    scale: 4,
     points: range(50).map((i) => ({ x: 20 + 5 * i, y: 170 + 10 * Math.sin(i / 2), z: 0 })),
     fill_color: { r: 0, g: 0, b: 1, a: 1 },
   }),
   marker(4, {
     scale: 2,
     points: range(50).map((i) => ({ x: 20 + 5 * i, y: 190 + 10 * Math.sin(i / 2), z: 0 })),
+    fill_color: { r: 0, g: 0, b: 1, a: 1 },
+  }),
+  marker(4, {
+    scale: 2,
+    points: range(50).map((i) => ({ x: 20 + 5 * i, y: 210 + 10 * Math.sin(i / 2), z: 0 })),
     outline_colors: range(50).map((i) => ({
       r: Math.min(1, (2 * i) / 50),
       g: Math.min(1, (2 * (i - 15)) / 50),
