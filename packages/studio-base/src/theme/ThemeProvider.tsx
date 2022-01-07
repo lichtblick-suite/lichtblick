@@ -4,7 +4,7 @@
 import { ThemeProvider as FluentThemeProvider } from "@fluentui/react";
 import { registerIcons, unregisterIcons } from "@fluentui/style-utilities";
 import { ThemeProvider as MuiThemeProvider } from "@mui/material";
-import { useLayoutEffect, useState } from "react";
+import { useLayoutEffect, useMemo, useState } from "react";
 import { ThemeProvider as StyledThemeProvider } from "styled-components";
 
 import { createMuiTheme, createFluentTheme } from "@foxglove/studio-base/theme";
@@ -32,12 +32,12 @@ export default function ThemeProvider({
     return undefined;
   }, [iconsRegistered]);
 
+  const muiTheme = useMemo(() => createMuiTheme(isDark ? "dark" : "light"), [isDark]);
+  const fluentTheme = useMemo(() => createFluentTheme({ isInverted: isDark }), [isDark]);
+
   if (!iconsRegistered) {
     return ReactNull;
   }
-
-  const muiTheme = createMuiTheme(isDark ? "dark" : "light");
-  const fluentTheme = createFluentTheme({ isInverted: isDark });
 
   return (
     <MuiThemeProvider theme={muiTheme}>
