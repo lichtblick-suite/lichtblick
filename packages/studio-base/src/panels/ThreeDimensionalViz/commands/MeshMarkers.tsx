@@ -43,12 +43,15 @@ async function loadModel(url: string): Promise<GlbModel | undefined> {
 
   const response = await fetch(url);
   if (!response.ok) {
-    throw new Error(`Error ${response.status} (${response.statusText}) loading model from ${url}`);
+    const errMsg = response.statusText;
+    throw new Error(
+      `Error ${response.status}${errMsg ? ` (${errMsg})` : ``} loading model from <${url}>`,
+    );
   }
 
   const buffer = await response.arrayBuffer();
   if (buffer.byteLength < 4) {
-    throw new Error(`${buffer.byteLength} bytes received loading model from ${url}`);
+    throw new Error(`${buffer.byteLength} bytes received loading model from <${url}>`);
   }
   const view = new DataView(buffer);
 

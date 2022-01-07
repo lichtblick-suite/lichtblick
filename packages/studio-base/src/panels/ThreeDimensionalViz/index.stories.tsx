@@ -294,7 +294,7 @@ export function CustomBackgroundColor(): JSX.Element {
   );
 }
 
-Markers.parameters = { colorScheme: "dark" };
+Markers.parameters = { colorScheme: "dark", chromatic: { delay: 100 } };
 export function Markers(): JSX.Element {
   const topics: Topic[] = [
     { name: "/tf", datatype: "geometry_msgs/TransformStamped" },
