@@ -31,7 +31,7 @@ import {
   McapLocalDataSourceFactory,
   useAppConfigurationValue,
   AppSetting,
-  SampleUdacityDataSourceFactory,
+  SampleNuscenesDataSourceFactory,
 } from "@foxglove/studio-base";
 
 import { Desktop } from "../common/types";
@@ -65,7 +65,7 @@ function AppWrapper() {
       new UlogLocalDataSourceFactory(),
       new VelodyneDataSourceFactory(),
       new FoxgloveDataPlatformDataSourceFactory(),
-      new SampleUdacityDataSourceFactory(),
+      new SampleNuscenesDataSourceFactory(),
     ];
 
     if (enableMcapDataSource) {

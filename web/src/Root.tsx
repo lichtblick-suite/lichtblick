@@ -28,7 +28,7 @@ import {
   FoxgloveWebSocketDataSourceFactory,
   UlogLocalDataSourceFactory,
   McapLocalDataSourceFactory,
-  SampleUdacityDataSourceFactory,
+  SampleNuscenesDataSourceFactory,
 } from "@foxglove/studio-base";
 
 import ConsoleApiCookieUserProvider from "./components/ConsoleApiCookieCurrentUserProvider";
@@ -58,7 +58,7 @@ function AppWrapper() {
       new UlogLocalDataSourceFactory(),
       new VelodyneUnavailableDataSourceFactory(),
       new FoxgloveDataPlatformDataSourceFactory(),
-      new SampleUdacityDataSourceFactory(),
+      new SampleNuscenesDataSourceFactory(),
     ];
 
     if (enableMcapDataSource) {

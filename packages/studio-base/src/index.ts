@@ -62,4 +62,4 @@ export { default as RosbridgeDataSourceFactory } from "./dataSources/RosbridgeDa
 export { default as UlogLocalDataSourceFactory } from "./dataSources/UlogLocalDataSourceFactory";
 export { default as VelodyneDataSourceFactory } from "./dataSources/VelodyneDataSourceFactory";
 export { default as McapLocalDataSourceFactory } from "./dataSources/McapLocalDataSourceFactory";
-export { default as SampleUdacityDataSourceFactory } from "./dataSources/SampleUdacityDataSourceFactory";
+export { default as SampleNuscenesDataSourceFactory } from "./dataSources/SampleNuscenesDataSourceFactory";
