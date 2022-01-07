@@ -34,8 +34,8 @@ import {
   MeshMarker,
 } from "@foxglove/studio-base/types/Messages";
 
+import { ColorOverrideByVariable, ColorOverride } from "./Layout";
 import { TopicSettingsCollection } from "./SceneBuilder";
-import { ColorOverrideByVariable, ColorOverride } from "./TopicTree/Layout";
 import { TopicDisplayMode } from "./TopicTree/types";
 import { IImmutableCoordinateFrame, IImmutableTransformTree, Transform } from "./transforms";
 

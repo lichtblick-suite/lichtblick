@@ -13,7 +13,7 @@
 
 import { noop } from "lodash";
 
-import { ColorOverrideByVariable } from "@foxglove/studio-base/panels/ThreeDimensionalViz/TopicTree/Layout";
+import { ColorOverrideByVariable } from "@foxglove/studio-base/panels/ThreeDimensionalViz/Layout";
 import { Color } from "@foxglove/studio-base/types/Messages";
 
 // Used to check if a Marker's path matches a value

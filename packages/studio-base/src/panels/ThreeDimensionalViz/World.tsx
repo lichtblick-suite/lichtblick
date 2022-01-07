@@ -35,7 +35,6 @@ import {
   IImmutableCoordinateFrame,
   IImmutableTransformTree,
 } from "@foxglove/studio-base/panels/ThreeDimensionalViz/transforms";
-import withHighlights from "@foxglove/studio-base/panels/ThreeDimensionalViz/withHighlights";
 import inScreenshotTests from "@foxglove/studio-base/stories/inScreenshotTests";
 import {
   BaseMarker,
@@ -53,6 +52,7 @@ import {
 } from "@foxglove/studio-base/types/Messages";
 
 import { MarkerCollector, MarkerProvider } from "./types";
+import withHighlights from "./withHighlights";
 
 type Props = WorldSearchTextProps & {
   autoTextBackgroundColor: boolean;
@@ -210,7 +210,8 @@ function World(
       cameraState={cameraState}
       enableStackedObjectEvents={!isPlaying}
       hideDebug={inScreenshotTests()}
-      onCameraStateChange={onCameraStateChange} // Rendering the hitmap is an expensive operation and we want to avoid
+      onCameraStateChange={onCameraStateChange}
+      // Rendering the hitmap is an expensive operation and we want to avoid
       // doing it when the user is dragging the view with the mouse. By ignoring
       // these events, the only way to select an object is when receiving an "onClick" event.
       disableHitmapForEvents={["onMouseDown", "onMouseMove", "onMouseUp"]}

@@ -24,7 +24,7 @@ import {
 import Panel from "@foxglove/studio-base/components/Panel";
 import PanelContext from "@foxglove/studio-base/components/PanelContext";
 import useCallbackWithToast from "@foxglove/studio-base/hooks/useCallbackWithToast";
-import Layout from "@foxglove/studio-base/panels/ThreeDimensionalViz/TopicTree/Layout";
+import Layout from "@foxglove/studio-base/panels/ThreeDimensionalViz/Layout";
 import UrdfBuilder from "@foxglove/studio-base/panels/ThreeDimensionalViz/UrdfBuilder";
 import helpContent from "@foxglove/studio-base/panels/ThreeDimensionalViz/index.help.md";
 import {

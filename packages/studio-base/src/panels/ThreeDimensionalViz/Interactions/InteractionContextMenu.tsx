@@ -19,8 +19,8 @@ import {
   Interactive,
   SelectedObject,
 } from "@foxglove/studio-base/panels/ThreeDimensionalViz/Interactions/types";
+import { ClickedPosition } from "@foxglove/studio-base/panels/ThreeDimensionalViz/Layout";
 import { ThreeDimensionalVizContext } from "@foxglove/studio-base/panels/ThreeDimensionalViz/ThreeDimensionalVizContext";
-import { ClickedPosition } from "@foxglove/studio-base/panels/ThreeDimensionalViz/TopicTree/Layout";
 import {
   getInteractionData,
   getObject,
