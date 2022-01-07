@@ -48,11 +48,7 @@ const useStyles = makeStyles((theme) => ({
 function OverflowMessage() {
   const classes = useStyles();
 
-  return (
-    <div className={classes.overflow}>
-      &lt;Multiple values under cursor. Zoom in to see more.&gt;
-    </div>
-  );
+  return <div className={classes.overflow}>&lt;multiple values under cursor&gt;</div>;
 }
 
 export default function TimeBasedChartTooltipContent(
