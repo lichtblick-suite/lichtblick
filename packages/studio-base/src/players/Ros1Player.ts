@@ -114,7 +114,7 @@ export default class Ros1Player implements Player {
 
     if (this._rosNode == undefined) {
       const rosNode = new RosNode({
-        name: "/foxglovestudio",
+        name: `/foxglovestudio_${os.pid}`,
         hostname,
         pid: os.pid,
         rosMasterUri: this._url,

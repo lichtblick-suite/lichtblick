@@ -113,7 +113,7 @@ export default class Ros2Player implements Player {
 
     if (this._rosNode == undefined) {
       const rosNode = new RosNode({
-        name: "/foxglovestudio",
+        name: `/foxglovestudio_${os.pid}`,
         domainId: this._domainId,
         udpSocketCreate,
         getNetworkInterfaces: os.getNetworkInterfaces,
