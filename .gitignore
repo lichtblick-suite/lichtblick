@@ -2,6 +2,7 @@
 *.tsbuildinfo
 .DS_Store
 .webpack/
+ci/apt/packages
 dist/
 node_modules/
 storybook-screenshots/
