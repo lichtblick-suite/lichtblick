@@ -103,7 +103,6 @@ export default Panel(
       sliderProps: { min: 0, max: 10, step: 1 },
       globalVariableName: "globalVariable",
     },
-    supportsStrictMode: false,
     configSchema,
   }),
 );

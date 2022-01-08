@@ -51,7 +51,6 @@ export default function PanelCatalogProvider(
       };
       PanelWrapper.panelType = panelType;
       PanelWrapper.defaultConfig = {};
-      PanelWrapper.supportsStrictMode = true;
       return {
         category: "misc",
         title: panel.registration.name,

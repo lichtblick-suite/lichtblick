@@ -34,6 +34,5 @@ function TeleopPanelAdapter(props: Props) {
 
 TeleopPanelAdapter.panelType = "Teleop";
 TeleopPanelAdapter.defaultConfig = {};
-TeleopPanelAdapter.supportsStrictMode = true;
 
 export default Panel(TeleopPanelAdapter);
