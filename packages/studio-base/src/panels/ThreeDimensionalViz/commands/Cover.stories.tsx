@@ -34,7 +34,7 @@ storiesOf("panels/ThreeDimensionalViz/Commands/Cover", module)
     const transparentRed = [1, 0, 0, 0.5];
     const transparentBlue = [0, 0, 1, 0.5];
     return (
-      <div style={{ width: 1001, height: 745 }}>
+      <div style={{ width: 1001, height: 745, overflow: "hidden" }}>
         <Worldview
           onClick={noop}
           onCameraStateChange={noop}
