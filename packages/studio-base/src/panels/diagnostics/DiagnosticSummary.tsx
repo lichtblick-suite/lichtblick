@@ -377,7 +377,6 @@ export default Panel(
   Object.assign(DiagnosticSummary, {
     panelType: "DiagnosticSummary",
     defaultConfig,
-    supportsStrictMode: false,
     configSchema,
   }),
 );

@@ -14,7 +14,6 @@
 import { debounce, isEqual } from "lodash";
 import decompressLZ4 from "wasm-lz4";
 
-import Logger from "@foxglove/log";
 import { Bag } from "@foxglove/rosbag";
 import { BlobReader } from "@foxglove/rosbag/web";
 import { Time, add, compare, fromMillis, subtract as subtractTimes } from "@foxglove/rostime";
@@ -40,8 +39,6 @@ import Bzip2 from "@foxglove/wasm-bz2";
 type BagPath = { type: "file"; file: Blob } | { type: "remote"; url: string };
 
 type Options = { bagPath: BagPath; cacheSizeInBytes?: number };
-
-const log = Logger.getLogger(__filename);
 
 type ReadResult = Parameters<Parameters<Bag["readMessages"]>[1]>[0];
 
@@ -126,9 +123,6 @@ export default class BagDataProvider implements RandomAccessDataProvider {
         const remoteReader = new CachedFilelike({
           fileReader,
           cacheSizeInBytes: cacheSizeInBytes ?? 1024 * 1024 * 200, // 200MiB
-          logFn: (message) => {
-            log.info(`CachedFilelike: ${message}`);
-          },
           // eslint-disable-next-line @foxglove/no-boolean-parameters
           keepReconnectingCallback: (reconnecting: boolean) => {
             extensionPoint.reportMetadataCallback({

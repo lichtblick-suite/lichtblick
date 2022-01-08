@@ -161,6 +161,5 @@ export default Panel(
   Object.assign(DiagnosticStatusPanel, {
     panelType: "DiagnosticStatusPanel",
     defaultConfig,
-    supportsStrictMode: false,
   }),
 );

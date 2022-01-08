@@ -42,28 +42,25 @@ class InMemoryFileReader implements FileReader {
   }
 }
 
+const log = {
+  debug: (..._args: unknown[]) => {},
+  info: (..._args: unknown[]) => {},
+  warn: (..._args: unknown[]) => {},
+  error: (..._args: unknown[]) => {},
+};
+
 describe("CachedFilelike", () => {
   describe("#size", () => {
     it("returns the size from the underlying FileReader", async () => {
       const fileReader = new InMemoryFileReader(buffer.Buffer.from([0, 1, 2, 3]));
-      const cachedFileReader = new CachedFilelike({
-        fileReader,
-        logFn: () => {
-          // no-op
-        },
-      });
+      const cachedFileReader = new CachedFilelike({ fileReader, log });
       await cachedFileReader.open();
       expect(cachedFileReader.size()).toEqual(4);
     });
 
     it("does not throw when the size is 0", async () => {
       const fileReader = new InMemoryFileReader(buffer.Buffer.from([]));
-      const cachedFileReader = new CachedFilelike({
-        fileReader,
-        logFn: () => {
-          // no-op
-        },
-      });
+      const cachedFileReader = new CachedFilelike({ fileReader, log });
       await cachedFileReader.open();
       expect(cachedFileReader.size()).toEqual(0);
     });
@@ -72,12 +69,7 @@ describe("CachedFilelike", () => {
   describe("#read", () => {
     it("returns data from the underlying FileReader", async () => {
       const fileReader = new InMemoryFileReader(buffer.Buffer.from([0, 1, 2, 3]));
-      const cachedFileReader = new CachedFilelike({
-        fileReader,
-        logFn: () => {
-          // no-op
-        },
-      });
+      const cachedFileReader = new CachedFilelike({ fileReader, log });
       await expect(cachedFileReader.read(1, 2)).resolves.toEqual(buffer.Buffer.from([1, 2]));
     });
 
@@ -99,12 +91,7 @@ describe("CachedFilelike", () => {
           },
         };
       });
-      const cachedFileReader = new CachedFilelike({
-        fileReader,
-        logFn: () => {
-          // no-op
-        },
-      });
+      const cachedFileReader = new CachedFilelike({ fileReader, log });
       await expect(cachedFileReader.read(1, 2)).rejects.toThrow("Dummy error");
       expect(destroyed).toEqual(true);
     });
@@ -131,13 +118,7 @@ describe("CachedFilelike", () => {
       });
 
       const keepReconnectingCallback = jest.fn();
-      const cachedFileReader = new CachedFilelike({
-        fileReader,
-        logFn: () => {
-          // no-op
-        },
-        keepReconnectingCallback,
-      });
+      const cachedFileReader = new CachedFilelike({ fileReader, log, keepReconnectingCallback });
 
       const readerPromise = cachedFileReader.read(1, 2);
 
@@ -159,12 +140,7 @@ describe("CachedFilelike", () => {
 
     it("returns an empty buffer when requesting size 0 (does not throw an error)", async () => {
       const fileReader = new InMemoryFileReader(buffer.Buffer.from([0, 1, 2, 3]));
-      const cachedFileReader = new CachedFilelike({
-        fileReader,
-        logFn: () => {
-          // no-op
-        },
-      });
+      const cachedFileReader = new CachedFilelike({ fileReader, log });
       await expect(cachedFileReader.read(1, 0)).resolves.toEqual(new Uint8Array([]));
     });
   });
