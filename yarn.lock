@@ -2372,25 +2372,26 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@foxglove/rosbag2-web@npm:4.0.2":
-  version: 4.0.2
-  resolution: "@foxglove/rosbag2-web@npm:4.0.2"
+"@foxglove/rosbag2-web@npm:4.0.3":
+  version: 4.0.3
+  resolution: "@foxglove/rosbag2-web@npm:4.0.3"
   dependencies:
-    "@foxglove/rosbag2": ^4.0.0
+    "@foxglove/rosbag2": ^4.1.0
     "@foxglove/sql.js": ^0.0.4
-  checksum: 0f2bd9ee385fb420689b5e4f748bb0a8d21b10e8f52a7d79bff35fd8e2121e4361f29eab675773c1383a370574f2e900c6a0dfc3494618050321dff150d1e0d8
+  checksum: 998e923b1a4365ba40c933f2f6b1b9c8533742ef5d9f30b4bce664850d10d3c87f6885469ecf56ccfc67d072bc077de7e84c63bf5672657bed8e4e3b84ec5fbd
   languageName: node
   linkType: hard
 
-"@foxglove/rosbag2@npm:^4.0.0":
-  version: 4.0.0
-  resolution: "@foxglove/rosbag2@npm:4.0.0"
+"@foxglove/rosbag2@npm:^4.1.0":
+  version: 4.1.0
+  resolution: "@foxglove/rosbag2@npm:4.1.0"
   dependencies:
     "@foxglove/rosmsg-msgs-common": ^1.0.4
+    "@foxglove/rosmsg-msgs-foxglove": ^2.0.3
     "@foxglove/rosmsg2-serialization": ^1.0.5
     "@foxglove/rostime": ^1.1.1
     js-yaml: ^4.1.0
-  checksum: 805e49a01e0b5d1ab3fde662c16bcffb4067e7085f17d590d55cd9ee7bb36677aefaa9f62a01e80dbe968f6289437535826875b9e566b820d828bbad321fc20a
+  checksum: 9f80aeb4f0784d50963a76dc2de1861cc7a9ce711551056159750ec18cd37f8313f11d00b2a06122ad3b114849f733eeb40a3e920f5ed6f0da2cb1586e03f0f4
   languageName: node
   linkType: hard
 
@@ -2415,7 +2416,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@foxglove/rosmsg-msgs-foxglove@npm:2.0.3":
+"@foxglove/rosmsg-msgs-foxglove@npm:2.0.3, @foxglove/rosmsg-msgs-foxglove@npm:^2.0.3":
   version: 2.0.3
   resolution: "@foxglove/rosmsg-msgs-foxglove@npm:2.0.3"
   dependencies:
@@ -2498,7 +2499,7 @@ __metadata:
     "@foxglove/ros1": 1.4.0
     "@foxglove/ros2": 1.0.8
     "@foxglove/rosbag": 0.1.2
-    "@foxglove/rosbag2-web": 4.0.2
+    "@foxglove/rosbag2-web": 4.0.3
     "@foxglove/rosmsg": 3.0.0
     "@foxglove/rosmsg-msgs-common": 1.0.4
     "@foxglove/rosmsg-msgs-foxglove": 2.0.3
