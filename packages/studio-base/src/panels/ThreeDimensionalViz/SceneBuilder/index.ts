@@ -14,7 +14,7 @@ import _, { flatten, groupBy, isEqual, keyBy, mapValues, some, xor } from "lodas
 import shallowequal from "shallowequal";
 
 import Log from "@foxglove/log";
-import { Time, fromSec } from "@foxglove/rostime";
+import { Time, add as addTime, fromSec, isGreaterThan, isLessThan, toSec } from "@foxglove/rostime";
 import {
   InteractionData,
   Interactive,
@@ -846,6 +846,19 @@ export default class SceneBuilder implements MarkerProvider {
           if (!this.namespaceIsEnabled(topic.name, marker.ns)) {
             continue;
           }
+        }
+
+        // If this marker's header.stamp is in the future, don't render it
+        if (isGreaterThan(marker.header.stamp, time)) {
+          continue;
+        }
+        // If this marker has an expired lifetime, don't render it
+        if (
+          marker.lifetime &&
+          toSec(marker.lifetime) > 0 &&
+          isLessThan(addTime(marker.header.stamp, marker.lifetime), time)
+        ) {
+          continue;
         }
 
         const pose = computeMarkerPose(marker, transforms, renderFrame, fixedFrame, time);
