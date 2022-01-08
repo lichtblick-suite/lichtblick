@@ -11,7 +11,6 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import buffer from "buffer";
 import { simplify, substract, unify } from "intervals-fn";
 
 import { isRangeCoveredByRanges, Range } from "./ranges";
@@ -42,12 +41,14 @@ import { isRangeCoveredByRanges, Range } from "./ranges";
 // (in bytes) and `numberOfBlocks`. The least recently used block will get evicted when writing to
 // an unallocated block using `VirtualLRUBuffer.copyFrom`.
 
+const kMaxLength = Math.pow(2, 32);
+
 export default class VirtualLRUBuffer {
   byteLength: number; // How many bytes does this buffer represent.
-  private _blocks: Buffer[] = []; // Actual `Buffer` for each block.
+  private _blocks: Uint8Array[] = []; // Actual `Buffer` for each block.
   // How many bytes is each block. This used to work up to 2GiB minus a byte, and now seems to crash
   // past 2GiB minus 4KiB. Default to 1GiB so we don't get caught out next time the limit drops.
-  private _blockSize: number = Math.trunc(buffer.kMaxLength / 2);
+  private _blockSize: number = Math.trunc(kMaxLength / 2);
   private _numberOfBlocks: number = Infinity; // How many blocks are we allowed to have at any time.
   private _lastAccessedBlockIndices: number[] = []; // Indexes of blocks, from least to most recently accessed.
   private _rangesWithData: Range[] = []; // Ranges for which we have data copied in (and have not been evicted).
@@ -71,7 +72,7 @@ export default class VirtualLRUBuffer {
   }
 
   // Copy data from the `source` buffer to the byte at `targetStart` in the VirtualLRUBuffer.
-  copyFrom(source: Buffer, targetStart: number): void {
+  copyFrom(source: Uint8Array, targetStart: number): void {
     if (targetStart < 0 || targetStart >= this.byteLength) {
       throw new Error("VirtualLRUBuffer#copyFrom invalid input");
     }
@@ -85,7 +86,7 @@ export default class VirtualLRUBuffer {
     while (position < range.end) {
       const { blockIndex, positionInBlock, remainingBytesInBlock } =
         this._calculatePosition(position);
-      source.copy(this._getBlock(blockIndex), positionInBlock, position - targetStart);
+      copy(source, this._getBlock(blockIndex), positionInBlock, position - targetStart);
       position += remainingBytesInBlock;
     }
 
@@ -93,11 +94,11 @@ export default class VirtualLRUBuffer {
   }
 
   // Get a slice of data. Throws if `VirtualLRUBuffer#hasData(start, end)` is false, so be sure to check
-  // that first. Will use an efficient `Buffer#slice` instead of a copy if all the data happens to
+  // that first. Will use an efficient `slice` instead of a copy if all the data happens to
   // be contained in one block.
-  slice(start: number, end: number): Buffer {
+  slice(start: number, end: number): Uint8Array {
     const size = end - start;
-    if (start < 0 || end > this.byteLength || size <= 0 || size > buffer.kMaxLength) {
+    if (start < 0 || end > this.byteLength || size <= 0 || size > kMaxLength) {
       throw new Error("VirtualLRUBuffer#slice invalid input");
     }
     if (!this.hasData(start, end)) {
@@ -112,21 +113,21 @@ export default class VirtualLRUBuffer {
       return this._getBlock(blockIndex).slice(positionInBlock, positionInBlock + size);
     }
 
-    const result = buffer.Buffer.allocUnsafe(size);
+    const result = new Uint8Array(size);
     let position = start;
     while (position < end) {
       const { blockIndex, positionInBlock, remainingBytesInBlock } =
         this._calculatePosition(position);
       // Note that these calls to `_getBlock` will never cause any eviction, since we verified using
       // the `VirtualLRUBuffer#hasData` precondition that all these buffers exist already.
-      this._getBlock(blockIndex).copy(result, position - start, positionInBlock);
+      copy(this._getBlock(blockIndex), result, position - start, positionInBlock);
       position += remainingBytesInBlock;
     }
     return result;
   }
 
   // Get a reference to a block, and mark it as most recently used. Might evict older blocks.
-  private _getBlock(index: number): Buffer {
+  private _getBlock(index: number): Uint8Array {
     if (!this._blocks[index]) {
       // If a block is not allocated yet, do so.
       let size = this._blockSize;
@@ -135,7 +136,7 @@ export default class VirtualLRUBuffer {
       }
       // It's okay to use `allocUnsafe` because we don't allow reading data from ranges that have
       // not explicitly be filled using `VirtualLRUBuffer#copyFrom`.
-      this._blocks[index] = buffer.Buffer.allocUnsafe(size);
+      this._blocks[index] = new Uint8Array(size);
     }
     // Put the current index to the end of the list, while avoiding duplicates.
     this._lastAccessedBlockIndices = [
@@ -178,5 +179,26 @@ export default class VirtualLRUBuffer {
     const positionInBlock = position - blockIndex * this._blockSize;
     const remainingBytesInBlock = this._getBlock(blockIndex).byteLength - positionInBlock;
     return { blockIndex, positionInBlock, remainingBytesInBlock };
+  }
+}
+
+/**
+ * Copy part of a Uint8Array into another Uint8Array
+ * @param source Source to copy from
+ * @param target Destination to copy to
+ * @param targetStart Index to start copying bytes to in `target`
+ * @param sourceStart Index to start copying bytes from in `source`
+ * @param sourceEnd Index to stop copying bytes from in `source`
+ */
+function copy(
+  source: Uint8Array,
+  target: Uint8Array,
+  targetStart: number,
+  sourceStart: number,
+  sourceEnd?: number,
+): void {
+  const count = (sourceEnd ?? source.byteLength) - sourceStart;
+  for (let i = 0; i < count; i++) {
+    target[targetStart + i] = source[sourceStart + i]!;
   }
 }

@@ -23,12 +23,12 @@ const STALL_THRESHOLD_MS = 2000;
 const getMaybeLogStall = (
   extensionPoint: ExtensionPoint,
   stallThresholdMs: number,
-): ((arg0: Buffer) => void) => {
+): ((buffer: Uint8Array) => void) => {
   let firstDataReceivedTime: number;
   let lastDataReceivedTime: number;
   let bytesReceived = 0;
   const startOfRequest = Date.now();
-  return (buffer: Buffer) => {
+  return (buffer: Uint8Array) => {
     const now = Date.now();
     if (firstDataReceivedTime == undefined) {
       firstDataReceivedTime = now;
@@ -48,7 +48,7 @@ const getMaybeLogStall = (
       });
     }
     lastDataReceivedTime = now;
-    bytesReceived += buffer.length;
+    bytesReceived += buffer.byteLength;
   };
 };
 
@@ -82,7 +82,7 @@ export const debounceReduce = <A, T>({
   };
 };
 
-const getLogThroughput = (extensionPoint: ExtensionPoint): ((arg0: Buffer) => void) => {
+const getLogThroughput = (extensionPoint: ExtensionPoint): ((buffer: Uint8Array) => void) => {
   return debounceReduce({
     action: (bytes) => extensionPoint.reportMetadataCallback({ type: "received_bytes", bytes }),
     wait: 10,
@@ -94,10 +94,10 @@ const getLogThroughput = (extensionPoint: ExtensionPoint): ((arg0: Buffer) => vo
 export const getReportMetadataForChunk = (
   extensionPoint: ExtensionPoint,
   stallThresholdMs: number = STALL_THRESHOLD_MS,
-): ((arg0: Buffer) => void) => {
+): ((buffer: Uint8Array) => void) => {
   const maybeLogStall = getMaybeLogStall(extensionPoint, stallThresholdMs);
   const logThroughput = getLogThroughput(extensionPoint);
-  return (buffer: Buffer) => {
+  return (buffer: Uint8Array) => {
     maybeLogStall(buffer);
     logThroughput(buffer);
   };

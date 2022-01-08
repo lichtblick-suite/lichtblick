@@ -11,16 +11,14 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import buffer from "buffer";
-
 import delay from "@foxglove/studio-base/util/delay";
 
 import CachedFilelike, { FileReader, FileStream } from "./CachedFilelike";
 
 class InMemoryFileReader implements FileReader {
-  private _buffer: Buffer;
+  private _buffer: Uint8Array;
 
-  constructor(bufferObj: Buffer) {
+  constructor(bufferObj: Uint8Array) {
     this._buffer = bufferObj;
   }
 
@@ -30,7 +28,7 @@ class InMemoryFileReader implements FileReader {
 
   fetch(offset: number, length: number): FileStream {
     return {
-      on: (type: "data" | "error", callback: ((_: Buffer) => void) & ((_: Error) => void)) => {
+      on: (type: "data" | "error", callback: ((_: Uint8Array) => void) & ((_: Error) => void)) => {
         if (type === "data") {
           setTimeout(() => callback(this._buffer.slice(offset, offset + length)));
         }
@@ -52,14 +50,14 @@ const log = {
 describe("CachedFilelike", () => {
   describe("#size", () => {
     it("returns the size from the underlying FileReader", async () => {
-      const fileReader = new InMemoryFileReader(buffer.Buffer.from([0, 1, 2, 3]));
+      const fileReader = new InMemoryFileReader(new Uint8Array([0, 1, 2, 3]));
       const cachedFileReader = new CachedFilelike({ fileReader, log });
       await cachedFileReader.open();
       expect(cachedFileReader.size()).toEqual(4);
     });
 
     it("does not throw when the size is 0", async () => {
-      const fileReader = new InMemoryFileReader(buffer.Buffer.from([]));
+      const fileReader = new InMemoryFileReader(new Uint8Array([]));
       const cachedFileReader = new CachedFilelike({ fileReader, log });
       await cachedFileReader.open();
       expect(cachedFileReader.size()).toEqual(0);
@@ -68,18 +66,21 @@ describe("CachedFilelike", () => {
 
   describe("#read", () => {
     it("returns data from the underlying FileReader", async () => {
-      const fileReader = new InMemoryFileReader(buffer.Buffer.from([0, 1, 2, 3]));
+      const fileReader = new InMemoryFileReader(new Uint8Array([0, 1, 2, 3]));
       const cachedFileReader = new CachedFilelike({ fileReader, log });
-      await expect(cachedFileReader.read(1, 2)).resolves.toEqual(buffer.Buffer.from([1, 2]));
+      await expect(cachedFileReader.read(1, 2)).resolves.toEqual(new Uint8Array([1, 2]));
     });
 
     it("returns an error in the callback if the FileReader keeps returning errors", async () => {
-      const fileReader = new InMemoryFileReader(buffer.Buffer.from([0, 1, 2, 3]));
+      const fileReader = new InMemoryFileReader(new Uint8Array([0, 1, 2, 3]));
       let interval: any;
       let destroyed: any;
       jest.spyOn(fileReader, "fetch").mockImplementation(() => {
         return {
-          on: (type: "data" | "error", callback: ((_: Buffer) => void) & ((_: Error) => void)) => {
+          on: (
+            type: "data" | "error",
+            callback: ((_: Uint8Array) => void) & ((_: Error) => void),
+          ) => {
             if (type === "error") {
               interval = setInterval(() => callback(new Error("Dummy error")), 20);
             }
@@ -97,15 +98,18 @@ describe("CachedFilelike", () => {
     });
 
     it("keeps reconnecting when keepReconnectingCallback is set", async () => {
-      const fileReader = new InMemoryFileReader(buffer.Buffer.from([0, 1, 2, 3]));
-      let dataCallback: ((_: Buffer) => void) | undefined;
+      const fileReader = new InMemoryFileReader(new Uint8Array([0, 1, 2, 3]));
+      let dataCallback: ((_: Uint8Array) => void) | undefined;
       let errorCallback: ((_: Error) => void) | undefined;
       let destroyed: any;
       const mockFetch = jest.spyOn(fileReader, "fetch").mockImplementation(() => {
         return {
-          on: (type: "data" | "error", callback: ((_: Buffer) => void) & ((_: Error) => void)) => {
+          on: (
+            type: "data" | "error",
+            callback: ((_: Uint8Array) => void) & ((_: Error) => void),
+          ) => {
             if (type === "data") {
-              dataCallback = callback as (_: Buffer) => void;
+              dataCallback = callback as (_: Uint8Array) => void;
             }
             if (type === "error") {
               errorCallback = callback as (_: Error) => void;
@@ -131,7 +135,7 @@ describe("CachedFilelike", () => {
       await delay(10);
       expect(keepReconnectingCallback.mock.calls).toEqual([[true]]);
 
-      dataCallback(buffer.Buffer.from([1, 2]));
+      dataCallback(new Uint8Array([1, 2]));
       const data = await readerPromise;
       expect(keepReconnectingCallback.mock.calls).toEqual([[true], [false]]);
       expect([...data]).toEqual([1, 2]);
@@ -139,7 +143,7 @@ describe("CachedFilelike", () => {
     });
 
     it("returns an empty buffer when requesting size 0 (does not throw an error)", async () => {
-      const fileReader = new InMemoryFileReader(buffer.Buffer.from([0, 1, 2, 3]));
+      const fileReader = new InMemoryFileReader(new Uint8Array([0, 1, 2, 3]));
       const cachedFileReader = new CachedFilelike({ fileReader, log });
       await expect(cachedFileReader.read(1, 0)).resolves.toEqual(new Uint8Array([]));
     });

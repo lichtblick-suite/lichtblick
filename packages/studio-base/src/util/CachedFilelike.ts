@@ -57,7 +57,7 @@ export interface FileReader {
   fetch(offset: number, length: number): FileStream;
 }
 
-const LOGGING_INTERVAL_IN_BYTES = 1024 * 1024 * 500; // Log every 500MiB to avoid cluttering the logs too much.
+const LOGGING_INTERVAL_IN_BYTES = 1024 * 1024 * 100; // Log every 100MiB to avoid cluttering the logs too much.
 const CACHE_BLOCK_SIZE = 1024 * 1024 * 10; // 10MiB blocks.
 // Don't start a new connection if we're 5MiB away from downloading the requested byte.
 // TODO(JP): It would be better (but a bit more involved) to express this in seconds, and take into
@@ -291,7 +291,7 @@ export default class CachedFilelike implements Filelike {
     const startTime = Date.now();
     let bytesRead = 0;
     let lastReportedBytesRead = 0;
-    stream.on("data", (chunk: Buffer) => {
+    stream.on("data", (chunk: Uint8Array) => {
       const currentConnection = this._currentConnection;
       if (!currentConnection || stream !== currentConnection.stream) {
         return; // Ignore data from old streams.

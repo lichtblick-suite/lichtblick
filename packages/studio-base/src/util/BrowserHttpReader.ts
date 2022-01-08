@@ -23,7 +23,7 @@ export default class BrowserHttpReader implements FileReader {
   }
 
   async open(): Promise<{ size: number; identifier?: string }> {
-    let response;
+    let response: Response;
     try {
       // Make a GET request and then immediately cancel it. This is more robust than a HEAD request,
       // since the server might not accept HEAD requests (e.g. when using S3 presigned URLs that
@@ -58,6 +58,8 @@ export default class BrowserHttpReader implements FileReader {
 
   fetch(offset: number, length: number): FileStream {
     const headers = new Headers({ range: `bytes=${offset}-${offset + (length - 1)}` });
-    return new FetchReader(this._url, { headers }) as FileStream;
+    const reader = new FetchReader(this._url, { headers });
+    reader.read();
+    return reader;
   }
 }
