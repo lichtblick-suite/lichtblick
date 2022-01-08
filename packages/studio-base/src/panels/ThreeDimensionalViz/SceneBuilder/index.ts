@@ -568,6 +568,13 @@ export default class SceneBuilder implements MarkerProvider {
     const name = `${topic}/${type}`;
 
     const { header, info, data } = message;
+    if (info.width * info.height !== data.length) {
+      this._setTopicError(
+        topic,
+        `OccupancyGrid data length (${data.length}) does not match width*height (${info.width}x${info.height}).`,
+      );
+      return;
+    }
     const mappedMessage = {
       header: {
         frame_id: header.frame_id,
