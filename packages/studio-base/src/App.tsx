@@ -32,10 +32,6 @@ import URDFAssetLoader from "@foxglove/studio-base/services/URDFAssetLoader";
 import isDesktopApp from "@foxglove/studio-base/util/isDesktopApp";
 
 type AppProps = {
-  /**
-   * Set to true to force loading the welcome layout for demo mode. Normally the demo is only shown
-   * on first launch and not subsequent launches.
-   */
   availableSources: IDataSourceFactory[];
   deepLinks?: string[];
 };

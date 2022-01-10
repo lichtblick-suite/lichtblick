@@ -2,7 +2,7 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { useEffect, useMemo } from "react";
+import { useEffect, useRef } from "react";
 
 import Log from "@foxglove/log";
 import { AppSetting } from "@foxglove/studio-base/AppSetting";
@@ -14,7 +14,7 @@ import { useCurrentLayoutActions } from "@foxglove/studio-base/context/CurrentLa
 import { usePlayerSelection } from "@foxglove/studio-base/context/PlayerSelectionContext";
 import useDeepMemo from "@foxglove/studio-base/hooks/useDeepMemo";
 import { useSessionStorageValue } from "@foxglove/studio-base/hooks/useSessionStorageValue";
-import { parseAppURLState } from "@foxglove/studio-base/util/appURLState";
+import { AppURLState, parseAppURLState } from "@foxglove/studio-base/util/appURLState";
 import isDesktopApp from "@foxglove/studio-base/util/isDesktopApp";
 
 const selectSeek = (ctx: MessagePipelineContext) => ctx.seekPlayback;
@@ -26,27 +26,27 @@ const log = Log.getLogger(__filename);
  * Restores our session state from any deep link we were passed on startup.
  */
 export function useInitialDeepLinkState(deepLinks: string[]): void {
-  const urlState = useMessagePipeline(selectUrlState);
-  const stableUrlState = useDeepMemo(urlState);
+  const stableUrlState = useDeepMemo(useMessagePipeline(selectUrlState));
   const { selectSource } = usePlayerSelection();
   const { setSelectedLayoutId } = useCurrentLayoutActions();
   const [launchPreference, setLaunchPreference] = useSessionStorageValue(
     AppSetting.LAUNCH_PREFERENCE,
   );
   const seekPlayback = useMessagePipeline(selectSeek);
-  const appUrlState = useMemo(() => {
+
+  const appUrlRef = useRef<AppURLState | undefined>();
+  if (!appUrlRef.current) {
     const firstLink = deepLinks[0];
     if (firstLink) {
       try {
-        return parseAppURLState(new URL(firstLink));
+        appUrlRef.current = parseAppURLState(new URL(firstLink));
       } catch (error) {
         log.error(error);
-        return undefined;
       }
-    } else {
-      return undefined;
     }
-  }, [deepLinks]);
+  }
+
+  const shouldSeekTimeRef = useRef(false);
 
   // Set a sessionStorage preference for web if we have a stable URL state.
   // This allows us to avoid asking for the preference immediately on
@@ -61,35 +61,45 @@ export function useInitialDeepLinkState(deepLinks: string[]): void {
     }
   }, [launchPreference, setLaunchPreference, stableUrlState]);
 
-  // Load app state from deeplink url if present.
   useEffect(() => {
-    if (appUrlState == undefined) {
+    const urlState = appUrlRef.current;
+    if (!urlState) {
       return;
     }
 
-    if (appUrlState.ds && appUrlState.dsParams) {
-      selectSource(appUrlState.ds, { type: "connection", params: appUrlState.dsParams });
+    // Apply any available datasource args
+    if (urlState.ds && urlState.dsParams) {
+      log.debug("Initialising source from url", urlState);
+      selectSource(urlState.ds, { type: "connection", params: urlState.dsParams });
+      urlState.ds = undefined;
+      urlState.dsParams = undefined;
+      shouldSeekTimeRef.current = true;
     }
-  }, [appUrlState, selectSource]);
 
-  // Select layout from deeplink URL if present.
+    // Apply any available layout id
+    if (urlState.layoutId != undefined) {
+      log.debug(`Initializing layout from url: ${urlState.layoutId}`);
+      setSelectedLayoutId(urlState.layoutId);
+      urlState.layoutId = undefined;
+    }
+  }, [selectSource, setSelectedLayoutId]);
+
   useEffect(() => {
-    if (appUrlState == undefined) {
+    const urlState = appUrlRef.current;
+    if (urlState?.time == undefined || !seekPlayback) {
       return;
     }
 
-    if (appUrlState.layoutId != undefined) {
-      setSelectedLayoutId(appUrlState.layoutId);
-    }
-  }, [appUrlState, setSelectedLayoutId]);
-
-  // Sync to url time once our source has loaded and playback control is available.
-  // seekPlayback will be undefined until the new source has loaded.
-  useEffect(() => {
-    if (appUrlState?.time == undefined || !seekPlayback) {
+    if (!shouldSeekTimeRef.current) {
+      log.debug("Clearing urlState time");
+      urlState.time = undefined;
       return;
     }
 
-    seekPlayback(appUrlState.time);
-  }, [appUrlState, seekPlayback]);
+    shouldSeekTimeRef.current = false;
+
+    log.debug(`Seeking to url time:`, urlState.time);
+    seekPlayback(urlState.time);
+    urlState.time = undefined;
+  }, [seekPlayback]);
 }
