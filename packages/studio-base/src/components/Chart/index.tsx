@@ -50,8 +50,11 @@ type Props = {
   // called when the chart scales have updated (happens for zoom/pan/reset)
   onScalesUpdate?: (scales: RpcScales, opt: { userInteraction: boolean }) => void;
 
+  // called when the chart is about to start rendering new data
+  onStartRender?: () => void;
+
   // called when the chart has finished updating with new data
-  onChartUpdate?: () => void;
+  onFinishRender?: () => void;
 
   // called when a user hovers over an element
   // uses the chart.options.hover configuration
@@ -101,7 +104,7 @@ function Chart(props: Props): JSX.Element {
   const zoomEnabled = props.options.plugins?.zoom?.zoom?.enabled ?? false;
   const panEnabled = props.options.plugins?.zoom?.pan?.enabled ?? false;
 
-  const { type, data, options, width, height, onChartUpdate } = props;
+  const { type, data, options, width, height, onStartRender, onFinishRender } = props;
 
   const sendWrapperRef = useRef<RpcSend | undefined>();
   const rpcSendRef = useRef<RpcSend | undefined>();
@@ -232,6 +235,7 @@ function Chart(props: Props): JSX.Element {
 
       initialized.current = true;
 
+      onStartRender?.();
       const offscreenCanvas =
         "transferControlToOffscreen" in canvas ? canvas.transferControlToOffscreen() : canvas;
       const scales = await sendWrapperRef.current<RpcScales>(
@@ -248,15 +252,11 @@ function Chart(props: Props): JSX.Element {
         [offscreenCanvas],
       );
 
-      if (!isMounted()) {
-        return;
-      }
-
       // once we are initialized, we can allow other handlers to send to the rpc endpoint
       rpcSendRef.current = sendWrapperRef.current;
 
       maybeUpdateScales(scales);
-      onChartUpdate?.();
+      onFinishRender?.();
       return;
     }
 
@@ -269,14 +269,11 @@ function Chart(props: Props): JSX.Element {
       return;
     }
 
+    onStartRender?.();
     const scales = await rpcSendRef.current<RpcScales>("update", newUpdateMessage);
-    if (!isMounted()) {
-      return;
-    }
-
     maybeUpdateScales(scales);
-    onChartUpdate?.();
-  }, [getNewUpdateMessage, isMounted, maybeUpdateScales, onChartUpdate, type]);
+    onFinishRender?.();
+  }, [getNewUpdateMessage, maybeUpdateScales, onFinishRender, onStartRender, type]);
 
   useLayoutEffect(() => {
     const canvas = canvasRef.current;

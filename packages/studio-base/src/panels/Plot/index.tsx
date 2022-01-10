@@ -454,7 +454,6 @@ export default Panel(
   Object.assign(Plot, {
     panelType: "Plot",
     defaultConfig,
-    supportsStrictMode: false,
     configSchema,
   }),
 );

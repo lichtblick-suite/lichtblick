@@ -87,7 +87,7 @@ type Config = {
 type Props = {
   config: Config;
   saveConfig: (arg0: Partial<Config>) => void;
-  onChartUpdate?: () => void;
+  onFinishRender?: () => void;
 };
 export type Line = {
   order?: number;
@@ -129,7 +129,7 @@ export type PlotMessage = {
 
 function TwoDimensionalPlot(props: Props) {
   const theme = useTheme();
-  const { config, saveConfig, onChartUpdate } = props;
+  const { config, saveConfig, onFinishRender } = props;
   const { path, minXVal, maxXVal, minYVal, maxYVal, pointRadiusOverride } = config;
   const [hasUserPannedOrZoomed, setHasUserPannedOrZoomed] = React.useState<boolean>(false);
   const [hasVerticalExclusiveZoom, setHasVerticalExclusiveZoom] = React.useState<boolean>(false);
@@ -449,7 +449,7 @@ function TwoDimensionalPlot(props: Props) {
               onScalesUpdate={onScaleBoundsUpdate}
               onHover={onHover}
               data={data}
-              onChartUpdate={onChartUpdate}
+              onFinishRender={onFinishRender}
             />
             {hasUserPannedOrZoomed && (
               <SResetZoom>

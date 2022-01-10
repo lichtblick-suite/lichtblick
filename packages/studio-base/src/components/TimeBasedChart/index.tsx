@@ -167,13 +167,25 @@ export default function TimeBasedChart(props: Props): JSX.Element {
     useCallback((messagePipeline) => messagePipeline.pauseFrame, []),
   );
 
-  // when data changes, we pause and wait for onChartUpdate to resume
   const resumeFrame = useRef<() => void | undefined>();
+
+  // when data changes, we pause and wait for onFinishRender to resume
+  const onStartRender = useCallback(() => {
+    if (resumeFrame.current) {
+      if (process.env.NODE_ENV === "development") {
+        log.warn("force resumed paused frame");
+      }
+      resumeFrame.current();
+    }
+    // during streaming the message pipeline should not give us any more data until we finish
+    // rendering this update
+    resumeFrame.current = pauseFrame("TimeBasedChart");
+  }, [pauseFrame]);
 
   // resumes any paused frames
   // since we render in a web-worker we need to pause/resume the message pipeline to keep
   // our plot rendeirng in-sync with data rendered elsewhere in the app
-  const onChartUpdate = useCallback(() => {
+  const onFinishRender = useCallback(() => {
     const current = resumeFrame.current;
     resumeFrame.current = undefined;
 
@@ -183,18 +195,18 @@ export default function TimeBasedChart(props: Props): JSX.Element {
     }
   }, []);
 
+  useEffect(() => {
+    // cleanup paused frames on unmount or dataset changes
+    return () => {
+      onFinishRender();
+    };
+  }, [pauseFrame, onFinishRender]);
+
   const hoverBar = useRef<HTMLDivElement>(ReactNull);
 
   const [globalBounds, setGlobalBounds] = useGlobalXBounds({ enabled: isSynced });
 
   const linesToHide = useMemo(() => props.linesToHide ?? {}, [props.linesToHide]);
-
-  useEffect(() => {
-    // cleanup paused frames on unmount or dataset changes
-    return () => {
-      onChartUpdate();
-    };
-  }, [pauseFrame, onChartUpdate]);
 
   // some callbacks don't need to re-create when the current scales change, so we keep a ref
   const currentScalesRef = useRef<RpcScales | undefined>(undefined);
@@ -659,21 +671,11 @@ export default function TimeBasedChart(props: Props): JSX.Element {
   }, [invalidateDownsample, throttledDownsample, visibleDatasets]);
 
   const downsampledData = useMemo(() => {
-    if (resumeFrame.current) {
-      if (process.env.NODE_ENV === "development") {
-        log.warn("force resumed paused frame");
-      }
-      resumeFrame.current();
-    }
-    // during streaming the message pipeline should not give us any more data until we finish
-    // rendering this update
-    resumeFrame.current = pauseFrame("TimeBasedChart");
-
     return {
       labels,
       datasets: downsampledDatasets,
     };
-  }, [pauseFrame, labels, downsampledDatasets]);
+  }, [labels, downsampledDatasets]);
 
   const options = useMemo<ChartOptions>(() => {
     return {
@@ -812,12 +814,13 @@ export default function TimeBasedChart(props: Props): JSX.Element {
     data: downsampledData,
     onClick: props.onClick,
     onScalesUpdate,
-    onChartUpdate,
+    onStartRender,
+    onFinishRender,
     onHover,
   };
 
   // avoid rendering if width/height are 0 - usually on initial mount
-  // so we don't trigger onChartUpdate if we know we will immediately resize
+  // so we don't trigger onFinishRender if we know we will immediately resize
   if (width === 0 || height === 0) {
     return <></>;
   }

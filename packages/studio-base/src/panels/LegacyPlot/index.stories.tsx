@@ -138,7 +138,7 @@ export function Basic(): JSX.Element {
     <PanelSetup fixture={fixture}>
       <TwoDimensionalPlot
         overrideConfig={{ path: { value: "/plot_a.versions[0]" } }}
-        onChartUpdate={readySignal}
+        onFinishRender={readySignal}
       />
     </PanelSetup>
   );
@@ -157,7 +157,7 @@ export function CustomMinMaxWindow(): JSX.Element {
           minYVal: "0.5",
           maxYVal: "4.5",
         }}
-        onChartUpdate={readySignal}
+        onFinishRender={readySignal}
       />
     </PanelSetup>
   );
@@ -170,7 +170,7 @@ export function CustomMinMaxVal(): JSX.Element {
     <PanelSetup fixture={fixture}>
       <TwoDimensionalPlot
         overrideConfig={{ path: { value: "/plot_a.versions[0]" }, maxYVal: "10" }}
-        onChartUpdate={readySignal}
+        onFinishRender={readySignal}
       />
     </PanelSetup>
   );
@@ -209,7 +209,7 @@ export function WithTooltip(): JSX.Element {
       <PanelSetup fixture={fixture}>
         <TwoDimensionalPlot
           overrideConfig={{ path: { value: "/plot_a.versions[0]" } }}
-          onChartUpdate={readySignal}
+          onFinishRender={readySignal}
         />
       </PanelSetup>
     </div>
@@ -238,7 +238,7 @@ export function ShowResetAfterHorizontalZoom(): JSX.Element {
     <PanelSetup fixture={fixture}>
       <TwoDimensionalPlot
         overrideConfig={{ path: { value: "/plot_a.versions[0]" } }}
-        onChartUpdate={step}
+        onFinishRender={step}
       />
     </PanelSetup>
   );
@@ -258,7 +258,7 @@ export function ShowResetAfterVerticalZoom(): JSX.Element {
     <PanelSetup fixture={fixture}>
       <TwoDimensionalPlot
         overrideConfig={{ path: { value: "/plot_a.versions[0]" } }}
-        onChartUpdate={step}
+        onFinishRender={step}
       />
     </PanelSetup>
   );
@@ -278,7 +278,7 @@ export function ShowResetZoom(): JSX.Element {
     <PanelSetup fixture={fixture}>
       <TwoDimensionalPlot
         overrideConfig={{ path: { value: "/plot_a.versions[0]" } }}
-        onChartUpdate={step}
+        onFinishRender={step}
       />
     </PanelSetup>
   );
@@ -307,7 +307,7 @@ export function ResetZoom(): JSX.Element {
     >
       <TwoDimensionalPlot
         overrideConfig={{ path: { value: "/plot_a.versions[0]" } }}
-        onChartUpdate={step}
+        onFinishRender={step}
       />
     </PanelSetup>
   );

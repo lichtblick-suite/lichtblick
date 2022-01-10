@@ -127,7 +127,7 @@ export const Basic: Story = (_args) => {
 
   return (
     <div style={divStyle}>
-      <ChartComponent {...props} onChartUpdate={readySignal} />
+      <ChartComponent {...props} onFinishRender={readySignal} />
     </div>
   );
 };
@@ -140,7 +140,7 @@ export const WithDatalabels: Story = (_args) => {
 
   return (
     <div style={divStyle}>
-      <ChartComponent {...propsWithDatalabels} onChartUpdate={readySignal} />
+      <ChartComponent {...propsWithDatalabels} onFinishRender={readySignal} />
     </div>
   );
 };
@@ -179,7 +179,7 @@ export const AllowsClickingOnDatalabels: Story = (_args) => {
             )}`
           : "Have not clicked datalabel"}
       </div>
-      <ChartComponent {...propsWithDatalabels} onChartUpdate={doClick} onClick={onClick} />
+      <ChartComponent {...propsWithDatalabels} onFinishRender={doClick} onClick={onClick} />
     </div>
   );
 };

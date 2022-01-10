@@ -437,6 +437,5 @@ export default Panel(
   Object.assign(StateTransitions, {
     panelType: "StateTransitions",
     defaultConfig,
-    supportsStrictMode: false,
   }),
 );
