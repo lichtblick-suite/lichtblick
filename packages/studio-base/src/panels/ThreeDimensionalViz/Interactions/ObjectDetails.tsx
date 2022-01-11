@@ -12,16 +12,11 @@
 //   You may not use this file except in compliance with the License.
 
 import { first, omit, sortBy } from "lodash";
-import { useCallback } from "react";
 import Tree from "react-json-tree";
 import styled from "styled-components";
 
-import { MouseEventObject } from "@foxglove/regl-worldview";
-import Dropdown from "@foxglove/studio-base/components/Dropdown";
-import DropdownItem from "@foxglove/studio-base/components/Dropdown/DropdownItem";
 import useGetItemStringWithTimezone from "@foxglove/studio-base/components/JsonTree/useGetItemStringWithTimezone";
-import styles from "@foxglove/studio-base/panels/ThreeDimensionalViz/sharedStyles";
-import { getInstanceObj } from "@foxglove/studio-base/panels/ThreeDimensionalViz/threeDimensionalVizUtils";
+import { RosValue } from "@foxglove/studio-base/players/types";
 import { useJsonTreeTheme } from "@foxglove/studio-base/util/globalConstants";
 
 import GlobalVariableLink from "./GlobalVariableLink/index";
@@ -41,57 +36,14 @@ const PREFERRED_OBJECT_KEY_ORDER = [
   "points",
 ].reverse();
 
-const SObjectDetails = styled.div`
+const TreeContainer = styled.div`
   padding: 12px 0 16px 0;
 `;
 
-type CommonProps = { readonly interactionData?: InteractionData };
-
-type WrapperProps = CommonProps & { readonly selectedObject: MouseEventObject };
-
-type Props = CommonProps & { readonly objectToDisplay: unknown };
-
-// Used for switching between views of individual and combined objects.
-// TODO(steel): Only show the combined object when the individual objects are semantically related.
-export default function ObjectDetails({
-  interactionData,
-  selectedObject: { object, instanceIndex },
-}: WrapperProps): JSX.Element {
-  const [showInstance, setShowInstance] = React.useState(true);
-  const instanceObject = getInstanceObj(object, instanceIndex as number);
-  const dropdownText = {
-    instance: "Show instance object",
-    full: "Show full object",
-  };
-
-  // eslint-disable-next-line @foxglove/no-boolean-parameters
-  const updateShowInstance = useCallback((shouldShowInstance: boolean) => {
-    setShowInstance(shouldShowInstance);
-  }, []);
-
-  const objectToDisplay = instanceObject != undefined && showInstance ? instanceObject : object;
-  return (
-    <div>
-      {instanceObject != undefined && (
-        <Dropdown
-          btnClassname={styles.button}
-          position="below"
-          value={showInstance}
-          text={showInstance ? dropdownText.instance : dropdownText.full}
-          onChange={updateShowInstance}
-        >
-          <DropdownItem value={true}>
-            <span>{dropdownText.instance}</span>
-          </DropdownItem>
-          <DropdownItem value={false}>
-            <span>{dropdownText.full}</span>
-          </DropdownItem>
-        </Dropdown>
-      )}
-      <ObjectDetailsInner interactionData={interactionData} objectToDisplay={objectToDisplay} />
-    </div>
-  );
-}
+type Props = {
+  readonly interactionData?: InteractionData;
+  readonly selectedObject?: RosValue;
+};
 
 function maybePlainObject(rawVal: unknown) {
   if (typeof rawVal === "object" && rawVal && "toJSON" in rawVal) {
@@ -100,16 +52,13 @@ function maybePlainObject(rawVal: unknown) {
   return rawVal;
 }
 
-function ObjectDetailsInner({ interactionData, objectToDisplay }: Props) {
+function ObjectDetails({ interactionData, selectedObject }: Props): JSX.Element {
   const jsonTreeTheme = useJsonTreeTheme();
   const topic = interactionData?.topic ?? "";
 
   // object to display may not be a plain-ole-data
   // We need a plain object to sort the keys and omit interaction data
-  const plainObject =
-    "toJSON" in (objectToDisplay as { toJSON?: () => unknown })
-      ? (objectToDisplay as { toJSON: () => unknown }).toJSON()
-      : objectToDisplay;
+  const plainObject = maybePlainObject(selectedObject);
   const originalObject = omit(plainObject as Record<string, unknown>, "interactionData");
 
   const getItemString = useGetItemStringWithTimezone();
@@ -117,16 +66,16 @@ function ObjectDetailsInner({ interactionData, objectToDisplay }: Props) {
   if (topic.length === 0) {
     // show the original object directly if there is no interaction data
     return (
-      <SObjectDetails>
+      <TreeContainer>
         <Tree
-          data={objectToDisplay}
+          data={selectedObject}
           shouldExpandNode={(_markerKeyPath, _data, level) => level < 2}
           invertTheme={false}
           postprocessValue={maybePlainObject}
           theme={{ ...jsonTreeTheme, tree: { margin: 0 } }}
           hideRoot
         />
-      </SObjectDetails>
+      </TreeContainer>
     );
   }
 
@@ -137,7 +86,7 @@ function ObjectDetailsInner({ interactionData, objectToDisplay }: Props) {
   );
 
   return (
-    <SObjectDetails>
+    <TreeContainer>
       <Tree
         data={sortedDataObject}
         shouldExpandNode={() => false}
@@ -190,6 +139,8 @@ function ObjectDetailsInner({ interactionData, objectToDisplay }: Props) {
           );
         }}
       />
-    </SObjectDetails>
+    </TreeContainer>
   );
 }
+
+export default ObjectDetails;

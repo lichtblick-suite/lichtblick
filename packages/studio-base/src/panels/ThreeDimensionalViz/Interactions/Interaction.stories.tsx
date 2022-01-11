@@ -281,7 +281,7 @@ storiesOf("panels/ThreeDimensionalViz/Interactions/Interaction", module)
               object: {
                 ...cloud1,
                 type: 102,
-                interactionData: { topic: "/foo/bar", originalMessage: selectedObject.object },
+                interactionData: { topic: "/foo/bar", originalMessage: POINT_CLOUD_MESSAGE },
               },
             }}
           />
@@ -294,7 +294,10 @@ storiesOf("panels/ThreeDimensionalViz/Interactions/Interaction", module)
               object: {
                 ...cloud2,
                 type: 102,
-                interactionData: { topic: "/foo/bar", originalMessage: selectedObject.object },
+                interactionData: {
+                  topic: "/foo/bar",
+                  originalMessage: POINT_CLOUD_WITH_ADDITIONAL_FIELDS,
+                },
               },
             }}
           />

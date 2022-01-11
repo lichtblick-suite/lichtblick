@@ -602,22 +602,15 @@ export default function Layout({
     toggleDebug,
   } = useMemo(() => {
     return {
-      onClick: (ev: React.MouseEvent, args?: ReglClickInfo) => {
+      onClick: (_ev: React.MouseEvent, args?: ReglClickInfo) => {
         // Don't set any clicked objects when measuring distance or drawing polygons.
         if (callbackInputsRef.current.isDrawing) {
           return;
         }
         const newClickedObjects =
           (args?.objects as MouseEventObject[] | undefined) ?? ([] as MouseEventObject[]);
-        const newClickedPosition = { clientX: ev.clientX, clientY: ev.clientY };
         const newSelectedObject = newClickedObjects.length === 1 ? newClickedObjects[0] : undefined;
 
-        // Select the object directly if there is only one or open up context menu if there are many.
-        setSelectionState({
-          ...callbackInputsRef.current.selectionState,
-          clickedObjects: newClickedObjects,
-          clickedPosition: newClickedPosition,
-        });
         selectObject(newSelectedObject);
       },
       onControlsOverlayClick: (ev: React.MouseEvent<HTMLDivElement>) => {

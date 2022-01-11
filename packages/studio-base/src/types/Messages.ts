@@ -141,7 +141,6 @@ type ArrowSize = Readonly<{
   headWidth: number;
 }>;
 
-// TODO: Is this correct?
 export type ArrowMarker = Readonly<
   BaseMarker & {
     type: 0;

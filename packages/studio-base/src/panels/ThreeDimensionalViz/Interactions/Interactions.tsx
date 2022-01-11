@@ -55,17 +55,20 @@ const InteractionsBaseComponent = React.memo<PropsWithConfig>(function Interacti
   saveConfig,
 }: PropsWithConfig) {
   const { object } = selectedObject ?? {};
-  const isPointCloud = object ? (object as unknown as { type: number }).type === 102 : false;
+  const selectedInteractionData = getInteractionData(selectedObject);
+
+  const { originalMessage } = selectedInteractionData ?? {};
+
+  const isPointCloud = (object as { type?: number })?.type === 102;
   const maybeFullyDecodedObject = React.useMemo(
     () =>
       isPointCloud
-        ? { ...selectedObject, object: decodeAdditionalFields(object as unknown as PointCloud2) }
-        : selectedObject,
-    [isPointCloud, object, selectedObject],
+        ? decodeAdditionalFields(originalMessage as unknown as PointCloud2)
+        : originalMessage,
+    [isPointCloud, originalMessage],
   );
 
   const { linkedGlobalVariables } = useLinkedGlobalVariables();
-  const selectedInteractionData = selectedObject && getInteractionData(selectedObject);
 
   return (
     <ExpandingToolbar
@@ -86,10 +89,10 @@ const InteractionsBaseComponent = React.memo<PropsWithConfig>(function Interacti
                 </SRow>
               )}
               {isPointCloud && (
-                <PointCloudDetails selectedObject={maybeFullyDecodedObject as SelectedObject} />
+                <PointCloudDetails selectedObject={selectedObject as SelectedObject} />
               )}
               <ObjectDetails
-                selectedObject={maybeFullyDecodedObject as SelectedObject}
+                selectedObject={maybeFullyDecodedObject}
                 interactionData={selectedInteractionData}
               />
             </>

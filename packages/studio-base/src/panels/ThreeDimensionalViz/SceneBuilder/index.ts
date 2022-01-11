@@ -654,11 +654,8 @@ export default class SceneBuilder implements MarkerProvider {
     const decayTimeInSec = this._settingsByKey[`t:${topic}`]?.decayTime as number | undefined;
     const lifetime =
       decayTimeInSec != undefined && decayTimeInSec !== 0 ? fromSec(decayTimeInSec) : undefined;
-    (this.collectors[topic] as MessageCollector).addNonMarker(
-      topic,
-      mappedMessage as Interactive<unknown>,
-      lifetime,
-    );
+
+    this.collectors[topic]?.addNonMarker(topic, mappedMessage as Interactive<unknown>, lifetime);
   };
 
   setCurrentTime = (currentTime: { sec: number; nsec: number }): void => {
@@ -671,7 +668,7 @@ export default class SceneBuilder implements MarkerProvider {
     }
   };
 
-  // extracts renderable markers from the ros frame
+  // extracts renderable markers from the frame
   render(): void {
     for (const topic of this.topicsToRender) {
       try {
@@ -879,13 +876,10 @@ export default class SceneBuilder implements MarkerProvider {
         );
         marker.interactionData.highlighted = markerMatches;
 
-        // TODO(bmc): once we support more topic settings
-        // flesh this out to be more marker type agnostic
         const settings = this._settingsByKey[`t:${topic.name}`];
         if (settings) {
           (marker as { settings?: unknown }).settings = settings;
         }
-
         this._addMarkerToCollector(add, topic, marker, pose);
       }
 

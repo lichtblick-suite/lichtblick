@@ -11,7 +11,7 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { omit, difference, isEmpty, isNil } from "lodash";
+import { difference, isEmpty, isNil } from "lodash";
 
 import { toRGBA, Color } from "@foxglove/regl-worldview";
 import {
@@ -20,6 +20,7 @@ import {
   DEFAULT_MAX_COLOR,
 } from "@foxglove/studio-base/panels/ThreeDimensionalViz/TopicSettingsEditor/PointCloudSettingsEditor";
 import { DecodedMarker } from "@foxglove/studio-base/panels/ThreeDimensionalViz/commands/PointClouds/decodeMarker";
+import { RosObject } from "@foxglove/studio-base/players/types";
 import { PointCloud2, PointField } from "@foxglove/studio-base/types/Messages";
 
 import {
@@ -154,8 +155,10 @@ export function getAdditionalFieldNames(fields: readonly PointField[]): string[]
 
 export function decodeAdditionalFields<T extends PointCloud2>(
   marker: T,
-): Omit<T, "data"> & Record<string, unknown> {
-  const { fields, data, width, row_step, height, point_step } = marker;
+): Omit<T, "data"> & RosObject {
+  const { data, ...markerRest } = marker;
+  const { fields, width, row_step, height, point_step } = markerRest;
+
   const offsets = getFieldOffsetsAndReaders(data, fields);
 
   let pointCount = 0;
@@ -181,7 +184,7 @@ export function decodeAdditionalFields<T extends PointCloud2>(
   }
 
   return {
-    ...omit(marker, "data"), // no need to include data since all fields have been decoded
+    ...markerRest, // no need to include data since all fields have been decoded
     ...otherFieldsValues,
   };
 }
