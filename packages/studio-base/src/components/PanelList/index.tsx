@@ -12,6 +12,7 @@
 //   You may not use this file except in compliance with the License.
 import { makeStyles, useTheme } from "@fluentui/react";
 import MagnifyIcon from "@mdi/svg/svg/magnify.svg";
+import { Stack, Typography } from "@mui/material";
 import fuzzySort from "fuzzysort";
 import { isEmpty } from "lodash";
 import { useEffect, useMemo } from "react";
@@ -96,6 +97,7 @@ type PanelItemProps = {
     description?: string;
     config?: PanelConfig;
     relatedConfigs?: SavedProps;
+    thumbnail?: string;
   };
   searchQuery: string;
   checked?: boolean;
@@ -115,7 +117,6 @@ function DraggablePanelItem({
   mosaicId,
 }: PanelItemProps) {
   const classes = useStyles();
-  const theme = useTheme();
   const scrollRef = React.useRef<HTMLDivElement>(ReactNull);
   const [, drag] = useDrag<unknown, MosaicDropResult, never>({
     type: MosaicDragType.WINDOW,
@@ -159,13 +160,20 @@ function DraggablePanelItem({
 
   const { ref: tooltipRef, tooltip } = useTooltip({
     contents: (
-      <div style={{ padding: `0 ${theme.spacing.s1}`, width: "200px" }}>
-        <p style={{ fontWeight: "bold", marginTop: theme.spacing.s1 }}>{panel.title}</p>
-        <p style={{ marginBottom: theme.spacing.s1 }}>{panel.description}</p>
-      </div>
+      <Stack width={200}>
+        {panel.thumbnail != undefined && <img src={panel.thumbnail} alt={panel.title} />}
+        <Stack padding={1} spacing={0.5}>
+          <Typography variant="body2" style={{ fontWeight: "bold" }}>
+            {panel.title}
+          </Typography>
+          <Typography variant="body2" color="text.secondary">
+            {panel.description}
+          </Typography>
+        </Stack>
+      </Stack>
     ),
     placement: "right",
-    delay: 0,
+    delay: 200,
   });
   return (
     <div ref={drag}>
@@ -320,12 +328,12 @@ function PanelList(props: Props): JSX.Element {
   );
 
   const displayPanelListItem = React.useCallback(
-    ({ title, type, description, config, relatedConfigs }: PanelInfo) => {
+    ({ title, type, description, config, relatedConfigs, thumbnail }: PanelInfo) => {
       return (
         <DraggablePanelItem
           key={`${type}-${title}`}
           mosaicId={mosaicId}
-          panel={{ type, title, description, config, relatedConfigs }}
+          panel={{ type, title, description, config, relatedConfigs, thumbnail }}
           onDrop={onPanelMenuItemDrop}
           onClick={() => onPanelSelect({ type, config, relatedConfigs })}
           checked={title === selectedPanelTitle}
