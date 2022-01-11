@@ -73,12 +73,17 @@ export default function Start(props: IStartProps): JSX.Element {
     [theme],
   );
 
+  const supportedLocalFiles = useMemo(
+    () => Array.from(new Set(supportedFileExtensions)).join(", "),
+    [supportedFileExtensions],
+  );
+
   const startItems: IButtonProps[] = useMemo(
     () => [
       {
         id: "open-local-file",
         children: "Open local file",
-        secondaryText: `Supports ${supportedFileExtensions.join(", ")} files`,
+        secondaryText: `Supports ${supportedLocalFiles} files`,
         iconProps: { iconName: "OpenFile" },
         onClick: () => onSelectView("file"),
       },
@@ -104,7 +109,7 @@ export default function Start(props: IStartProps): JSX.Element {
         onClick: () => onSelectView("demo"),
       },
     ],
-    [onSelectView, supportedFileExtensions],
+    [onSelectView, supportedLocalFiles],
   );
 
   const recentItems: IButtonProps[] = useMemo(() => {
