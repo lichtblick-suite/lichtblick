@@ -181,6 +181,12 @@ function computeMarkerPose(
   fixedFrame: IImmutableCoordinateFrame,
   currentTime: Time,
 ): Pose | undefined {
+  // Default markers with no frame_id to the empty frame
+  // (empty) frame id is our internal identifier for empty string frame_ids or undefined frame_ids
+  if (renderFrame.id === "(empty)" && !marker.header.frame_id) {
+    return marker.pose;
+  }
+
   const srcFrame = transforms.frame(marker.header.frame_id);
   if (!srcFrame) {
     return undefined;

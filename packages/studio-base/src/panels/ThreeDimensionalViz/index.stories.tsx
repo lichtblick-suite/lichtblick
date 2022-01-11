@@ -16,6 +16,7 @@ import {
   CubeMarker,
   CylinderMarker,
   GeometryMsgs$PolygonStamped,
+  Header,
   LaserScan,
   LineListMarker,
   LineStripMarker,
@@ -642,6 +643,71 @@ export function Markers(): JSX.Element {
           checkedKeys: ["name:Topics", "t:/markers", "t:/tf", `t:${FOXGLOVE_GRID_TOPIC}`],
           expandedKeys: ["name:Topics", "t:/markers", "t:/tf", `t:${FOXGLOVE_GRID_TOPIC}`],
           followTf: "base_link",
+          cameraState: {
+            distance: 5.5,
+            perspective: true,
+            phi: 0.5,
+            targetOffset: [-0.5, 0.75, 0],
+            thetaOffset: -0.25,
+            fovy: 0.75,
+            near: 0.01,
+            far: 5000,
+            target: [0, 0, 0],
+            targetOrientation: [0, 0, 0, 1],
+          },
+        }}
+      />
+    </PanelSetup>
+  );
+}
+
+FramelessMarkers.parameters = { colorScheme: "dark", chromatic: { delay: 100 } };
+export function FramelessMarkers(): JSX.Element {
+  const topics: Topic[] = [{ name: "/markers", datatype: "visualization_msgs/Marker" }];
+
+  type FramelessHeader = Omit<Header, "frame_id">;
+  type FramelessCubeMaker = Omit<CubeMarker, "header"> & { header: FramelessHeader };
+
+  const cube: MessageEvent<FramelessCubeMaker> = {
+    topic: "/markers",
+    receiveTime: { sec: 10, nsec: 0 },
+    message: {
+      header: { seq: 0, stamp: { sec: 0, nsec: 0 } },
+      id: `cube`,
+      ns: "",
+      type: 1,
+      action: 0,
+      frame_locked: false,
+      pose: {
+        position: { x: -1, y: 1, z: 0 },
+        orientation: { x: 0, y: 0, z: 0, w: 1 },
+      },
+      scale: { x: 0.5, y: 0.5, z: 0.5 },
+      color: makeColor("#e81e63", 0.5),
+      lifetime: { sec: 0, nsec: 0 },
+    },
+    sizeInBytes: 0,
+  };
+
+  const fixture = useDelayedFixture({
+    datatypes,
+    topics,
+    frame: {
+      "/markers": [cube],
+    },
+    capabilities: [],
+    activeData: {
+      currentTime: { sec: 0, nsec: 0 },
+    },
+  });
+
+  return (
+    <PanelSetup fixture={fixture}>
+      <ThreeDimensionalViz
+        overrideConfig={{
+          ...ThreeDimensionalViz.defaultConfig,
+          checkedKeys: ["name:Topics", "t:/markers", "t:/tf", `t:${FOXGLOVE_GRID_TOPIC}`],
+          expandedKeys: ["name:Topics", "t:/markers", "t:/tf", `t:${FOXGLOVE_GRID_TOPIC}`],
           cameraState: {
             distance: 5.5,
             perspective: true,
