@@ -257,7 +257,6 @@ export default Panel(
       advancedView: true,
       value: "",
     },
-    supportsStrictMode: false,
     configSchema,
   }),
 );

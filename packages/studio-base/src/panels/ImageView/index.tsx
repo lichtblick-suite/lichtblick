@@ -702,6 +702,5 @@ export default Panel(
     panelType: "ImageViewPanel",
     defaultConfig,
     configSchema,
-    supportsStrictMode: true,
   }),
 );

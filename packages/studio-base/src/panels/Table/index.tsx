@@ -87,6 +87,5 @@ TablePanel.panelType = "Table";
 TablePanel.defaultConfig = {
   topicPath: "",
 };
-TablePanel.supportsStrictMode = false;
 
 export default Panel(TablePanel);

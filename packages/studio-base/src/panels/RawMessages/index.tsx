@@ -644,6 +644,5 @@ export default Panel(
   Object.assign(RawMessages, {
     panelType: "RawMessages",
     defaultConfig,
-    supportsStrictMode: false,
   }),
 );

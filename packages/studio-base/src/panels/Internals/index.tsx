@@ -12,7 +12,7 @@
 //   You may not use this file except in compliance with the License.
 
 import { groupBy, sortBy } from "lodash";
-import { Fragment } from "react";
+import { Fragment, useCallback } from "react";
 import styled from "styled-components";
 
 import { filterMap } from "@foxglove/den/collection";
@@ -36,8 +36,6 @@ import { downloadTextFile } from "@foxglove/studio-base/util/download";
 import { getTopicsByTopicName } from "@foxglove/studio-base/util/selectors";
 
 import helpContent from "./index.help.md";
-
-const { useCallback } = React;
 
 const RECORD_ALL = "RECORD_ALL";
 
@@ -243,6 +241,5 @@ function Internals() {
 }
 Internals.panelType = "Internals";
 Internals.defaultConfig = {};
-Internals.supportsStrictMode = false;
 
 export default Panel(Internals);
