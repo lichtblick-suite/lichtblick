@@ -5,14 +5,13 @@
 import { ITextStyles, Stack, Text, useTheme } from "@fluentui/react";
 import { useMemo } from "react";
 
+import Duration from "@foxglove/studio-base/components/Duration";
 import {
   MessagePipelineContext,
   useMessagePipeline,
 } from "@foxglove/studio-base/components/MessagePipeline";
 import Timestamp from "@foxglove/studio-base/components/Timestamp";
 import { subtractTimes } from "@foxglove/studio-base/players/UserNodePlayer/nodeTransformerWorker/typescript/userUtils/time";
-import { formatDuration } from "@foxglove/studio-base/util/formatTime";
-import { fonts } from "@foxglove/studio-base/util/sharedStyleConstants";
 
 import { MultilineMiddleTruncate } from "./MultilineMiddleTruncate";
 
@@ -26,6 +25,8 @@ function DataSourceInfo(): JSX.Element {
   const startTime = useMessagePipeline(selectStartTime);
   const endTime = useMessagePipeline(selectEndTime);
   const playerName = useMessagePipeline(selectPlayerName);
+
+  const duration = startTime && endTime ? subtractTimes(endTime, startTime) : undefined;
 
   const subheaderStyles = useMemo(
     () =>
@@ -69,7 +70,7 @@ function DataSourceInfo(): JSX.Element {
           <Timestamp horizontal time={startTime} />
         ) : (
           <Text variant="small" styles={{ root: { color: theme.palette.neutralSecondary } }}>
-            00:00:00
+            &mdash;
           </Text>
         )}
       </Stack>
@@ -80,24 +81,20 @@ function DataSourceInfo(): JSX.Element {
           <Timestamp horizontal time={endTime} />
         ) : (
           <Text variant="small" styles={{ root: { color: theme.palette.neutralSecondary } }}>
-            00:00:00
+            &mdash;
           </Text>
         )}
       </Stack>
 
       <Stack tokens={{ childrenGap: theme.spacing.s2 }}>
         <Text styles={subheaderStyles}>Duration</Text>
-        <Text
-          variant="small"
-          styles={{
-            root: {
-              fontFamily: startTime && endTime ? fonts.MONOSPACE : undefined,
-              color: theme.palette.neutralSecondary,
-            },
-          }}
-        >
-          {startTime && endTime ? formatDuration(subtractTimes(endTime, startTime)) : "00:00:00"}
-        </Text>
+        {duration ? (
+          <Duration duration={duration} />
+        ) : (
+          <Text variant="small" styles={{ root: { color: theme.palette.neutralSecondary } }}>
+            &mdash;
+          </Text>
+        )}
       </Stack>
     </Stack>
   );

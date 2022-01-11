@@ -16,13 +16,12 @@ import { useCallback, useMemo } from "react";
 import { subtract as subtractTimes, toSec } from "@foxglove/rostime";
 import { Topic } from "@foxglove/studio";
 import CopyText from "@foxglove/studio-base/components/CopyText";
+import Duration from "@foxglove/studio-base/components/Duration";
 import EmptyState from "@foxglove/studio-base/components/EmptyState";
 import { useMessagePipeline } from "@foxglove/studio-base/components/MessagePipeline";
 import Panel from "@foxglove/studio-base/components/Panel";
 import PanelToolbar from "@foxglove/studio-base/components/PanelToolbar";
 import Timestamp from "@foxglove/studio-base/components/Timestamp";
-import { formatDuration } from "@foxglove/studio-base/util/formatTime";
-import { fonts } from "@foxglove/studio-base/util/sharedStyleConstants";
 
 import helpContent from "./index.help.md";
 
@@ -96,17 +95,7 @@ function SourceInfo() {
           </Stack>
           <Stack tokens={{ childrenGap: theme.spacing.s2 }}>
             <Text styles={subheaderStyles}>Duration</Text>
-            <Text
-              variant="small"
-              styles={{
-                root: {
-                  fontFamily: fonts.MONOSPACE,
-                  color: theme.palette.neutralSecondary,
-                },
-              }}
-            >
-              {formatDuration(duration)}
-            </Text>
+            <Duration duration={duration} />
           </Stack>
         </Stack>
         <DetailsList

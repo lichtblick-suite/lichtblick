@@ -2,6 +2,7 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
+import moment from "moment-timezone";
 import { useCallback, useMemo } from "react";
 
 import { Time } from "@foxglove/studio";
@@ -12,12 +13,15 @@ import { formatTimeRaw } from "@foxglove/studio-base/util/time";
 
 import { useAppConfigurationValue } from "./useAppConfigurationValue";
 
-export function useAppTimeFormat(): {
+export interface IAppTimeFormat {
   formatTime: (stamp: Time) => string;
+  formatDuration: (duration: Time) => string;
   timeFormat: TimeDisplayMethod;
   setTimeFormat: (format: TimeDisplayMethod) => Promise<void>;
   timeZone: string | undefined;
-} {
+}
+
+export function useAppTimeFormat(): IAppTimeFormat {
   const [timeFormat, setTimeFormat] = useAppConfigurationValue<string>(AppSetting.TIME_FORMAT);
   const [timeZone] = useAppConfigurationValue<string>(AppSetting.TIMEZONE);
 
@@ -37,8 +41,23 @@ export function useAppTimeFormat(): {
     [effectiveFormat, timeZone],
   );
 
+  const formatDurationCallback = useCallback(
+    (duration: Time) => {
+      if (effectiveFormat === "TOD") {
+        return (
+          moment.duration(duration.sec * 1e3).format("h:mm:ss", { trim: false }) +
+          `.${duration.nsec}`
+        );
+      } else {
+        return formatTimeRaw(duration);
+      }
+    },
+    [effectiveFormat],
+  );
+
   return {
     formatTime: formatTimeCallback,
+    formatDuration: formatDurationCallback,
     setTimeFormat,
     timeFormat: effectiveFormat,
     timeZone,
