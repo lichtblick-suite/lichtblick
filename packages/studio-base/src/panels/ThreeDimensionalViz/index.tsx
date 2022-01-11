@@ -421,7 +421,6 @@ BaseRenderer.defaultConfig = {
   useThemeBackgroundColor: true,
   customBackgroundColor: "#000000",
 } as ThreeDimensionalVizConfig;
-BaseRenderer.supportsStrictMode = false;
 BaseRenderer.configSchema = configSchema;
 
 export default Panel(BaseRenderer);
