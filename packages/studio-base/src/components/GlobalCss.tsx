@@ -27,6 +27,11 @@ body {
   font-feature-settings: ${({ theme }) => theme.fonts.small.fontFeatureSettings};
   font-size: ${({ theme }) => theme.fonts.small.fontSize};
   font-weight: ${({ theme }) => theme.fonts.small.fontWeight};
+
+  // Prevent scroll "bouncing" since the app workspace is not scrollable. Allows individual
+  // scrollable elements to be scrolled without the whole page moving (even if they don't
+  // preventDefault on scroll events).
+  overscroll-behavior: none;
 }
 #root {
   height: 100%;
