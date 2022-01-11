@@ -2,6 +2,7 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
+import { StrictMode } from "react";
 import ReactDOM from "react-dom";
 
 import { PanelExtensionContext } from "@foxglove/studio";
@@ -17,9 +18,11 @@ import "leaflet/dist/leaflet.css";
 
 function initPanel(context: PanelExtensionContext) {
   ReactDOM.render(
-    <ThemeProvider isDark>
-      <MapPanel context={context} />
-    </ThemeProvider>,
+    <StrictMode>
+      <ThemeProvider isDark>
+        <MapPanel context={context} />
+      </ThemeProvider>
+    </StrictMode>,
     context.panelElement,
   );
 }
@@ -42,6 +45,5 @@ function MapPanelAdapter(props: Props) {
 
 MapPanelAdapter.panelType = "map";
 MapPanelAdapter.defaultConfig = {};
-MapPanelAdapter.supportsStrictMode = false;
 
 export default Panel(MapPanelAdapter);

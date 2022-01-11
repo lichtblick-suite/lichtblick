@@ -375,7 +375,6 @@ export default Panel(
   Object.assign(NodePlayground, {
     panelType: "NodePlayground",
     defaultConfig,
-    supportsStrictMode: false,
     configSchema,
   }),
 );

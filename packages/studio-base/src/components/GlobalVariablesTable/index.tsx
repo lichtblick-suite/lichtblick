@@ -26,7 +26,6 @@ import { ValidatedResizingInput } from "@foxglove/studio-base/components/input/V
 import useGlobalVariables, {
   GlobalVariables,
 } from "@foxglove/studio-base/hooks/useGlobalVariables";
-import { usePreviousValue } from "@foxglove/studio-base/hooks/usePreviousValue";
 import useLinkedGlobalVariables from "@foxglove/studio-base/panels/ThreeDimensionalViz/Interactions/useLinkedGlobalVariables";
 import { colors as sharedColors, fonts } from "@foxglove/studio-base/util/sharedStyleConstants";
 
@@ -271,13 +270,12 @@ function GlobalVariablesTable(): ReactElement {
     return () => clearTimeout(timeoutId);
   }, []);
 
-  const previousGlobalVariables = usePreviousValue(globalVariables);
-  const previousGlobalVariablesRef = useRef<GlobalVariables | undefined>(previousGlobalVariables);
-  previousGlobalVariablesRef.current = previousGlobalVariables;
+  const previousGlobalVariablesRef = useRef<GlobalVariables | undefined>(globalVariables);
 
   const [changedVariables, setChangedVariables] = useState<string[]>([]);
   useEffect(() => {
     if (skipAnimation.current || isActiveElementEditable()) {
+      previousGlobalVariablesRef.current = globalVariables;
       return;
     }
     const newChangedVariables = union(
@@ -289,6 +287,7 @@ function GlobalVariablesTable(): ReactElement {
     });
 
     setChangedVariables(newChangedVariables);
+    previousGlobalVariablesRef.current = globalVariables;
     const timerId = setTimeout(() => setChangedVariables([]), ANIMATION_RESET_DELAY_MS);
     return () => clearTimeout(timerId);
   }, [globalVariables, skipAnimation]);

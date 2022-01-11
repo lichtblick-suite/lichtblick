@@ -25,7 +25,6 @@ import {
 import Panel from "@foxglove/studio-base/components/Panel";
 import PanelToolbar from "@foxglove/studio-base/components/PanelToolbar";
 import { JSONInput } from "@foxglove/studio-base/components/input/JSONInput";
-import { usePreviousValue } from "@foxglove/studio-base/hooks/usePreviousValue";
 import { PlayerCapabilities } from "@foxglove/studio-base/players/types";
 
 import AnimatedRow from "./AnimatedRow";
@@ -67,13 +66,12 @@ function Parameters(): ReactElement {
     return () => clearTimeout(timeoutId);
   }, []);
 
-  const previousParameters = usePreviousValue(parameters);
-  const previousParametersRef = useRef<Map<string, unknown> | undefined>(previousParameters);
-  previousParametersRef.current = previousParameters;
+  const previousParametersRef = useRef<Map<string, unknown> | undefined>(parameters);
 
   const [changedParameters, setChangedParameters] = useState<string[]>([]);
   useEffect(() => {
     if (skipAnimation.current || isActiveElementEditable()) {
+      previousParametersRef.current = parameters;
       return;
     }
     const newChangedParameters = union(
@@ -85,6 +83,7 @@ function Parameters(): ReactElement {
     });
 
     setChangedParameters(newChangedParameters);
+    previousParametersRef.current = parameters;
     const timerId = setTimeout(() => setChangedParameters([]), ANIMATION_RESET_DELAY_MS);
     return () => clearTimeout(timerId);
   }, [parameters, skipAnimation]);
