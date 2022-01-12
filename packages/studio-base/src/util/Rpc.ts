@@ -135,9 +135,9 @@ export default class Rpc {
   // send a message across the rpc boundary to a receiver on the other side
   // this returns a promise for the receiver's response.  If there is no registered
   // receiver for the given topic, this method throws
-  async send<TResult>(
+  async send<TResult, TData = unknown>(
     topic: string,
-    data?: unknown,
+    data?: TData,
     transfer?: (Transferable | OffscreenCanvas)[],
   ): Promise<TResult> {
     const id = this._messageId++;

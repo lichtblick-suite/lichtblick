@@ -12,26 +12,12 @@
 //   You may not use this file except in compliance with the License.
 
 import { MessageEvent } from "@foxglove/studio-base/players/types";
-import {
-  Image,
-  CompressedImage,
-  ImageMarker,
-  ImageMarkerArray,
-} from "@foxglove/studio-base/types/Messages";
+import { ImageMarker, ImageMarkerArray } from "@foxglove/studio-base/types/Messages";
 import Rpc, { Channel } from "@foxglove/studio-base/util/Rpc";
 import { setupWorker } from "@foxglove/studio-base/util/RpcWorkerUtils";
 
 import { renderImage } from "./renderImage";
-import {
-  Dimensions,
-  idColorToIndex,
-  flattenImageMarkers,
-  RawMarkerData,
-  RenderDimensions,
-  RenderOptions,
-  PanZoom,
-  ZoomMode,
-} from "./util";
+import { flattenImageMarkers, idColorToIndex, RenderArgs, RenderDimensions } from "./util";
 
 type RenderState = {
   canvas: OffscreenCanvas;
@@ -82,40 +68,22 @@ class ImageCanvasWorker {
       "renderImage",
       // Potentially performance-sensitive; await can be expensive
       // eslint-disable-next-line @typescript-eslint/promise-function-async
-      (args: {
-        id: string;
-        zoomMode: ZoomMode;
-        panZoom: PanZoom;
-        viewport: Dimensions;
-        imageMessage?: Image | CompressedImage;
-        imageMessageDatatype?: string;
-        rawMarkerData: RawMarkerData;
-        options: RenderOptions;
-      }): Promise<RenderDimensions | undefined> => {
-        const {
-          id,
-          zoomMode,
-          panZoom,
-          viewport,
-          imageMessage,
-          imageMessageDatatype,
-          rawMarkerData,
-          options,
-        } = args;
+      (args: RenderArgs & { id: string }): Promise<RenderDimensions | undefined> => {
+        const { id, geometry, imageMessage, imageMessageDatatype, rawMarkerData, options } = args;
 
         const render = this._renderStates[id];
         if (!render) {
           return Promise.resolve(undefined);
         }
 
-        if (render.canvas.width !== viewport.width) {
-          render.canvas.width = viewport.width;
-          render.hitmap.width = viewport.width;
+        if (render.canvas.width !== geometry.viewport.width) {
+          render.canvas.width = geometry.viewport.width;
+          render.hitmap.width = geometry.viewport.width;
         }
 
-        if (render.canvas.height !== viewport.height) {
-          render.canvas.height = viewport.height;
-          render.hitmap.height = viewport.height;
+        if (render.canvas.height !== geometry.viewport.height) {
+          render.canvas.height = geometry.viewport.height;
+          render.hitmap.height = geometry.viewport.height;
         }
 
         // Flatten markers because we need to be able to index into them for hitmapping.
@@ -125,13 +93,12 @@ class ImageCanvasWorker {
 
         return renderImage({
           canvas: render.canvas,
+          geometry,
           hitmapCanvas: render.hitmap,
-          zoomMode,
-          panZoom,
           imageMessage,
           imageMessageDatatype,
-          rawMarkerData,
           options,
+          rawMarkerData,
         }).then((dimensions) => (render.dimensions = dimensions));
       },
     );

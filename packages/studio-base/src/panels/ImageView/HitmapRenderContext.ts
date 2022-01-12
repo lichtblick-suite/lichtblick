@@ -163,6 +163,12 @@ export class HitmapRenderContext {
     this._hctx?.restore();
   }
 
+  rotate(angle: number): void {
+    const rads = (angle * Math.PI) / 180;
+    this._ctx.rotate(rads);
+    this._hctx?.rotate(rads);
+  }
+
   save(): void {
     this._ctx.save();
     this._hctx?.save();

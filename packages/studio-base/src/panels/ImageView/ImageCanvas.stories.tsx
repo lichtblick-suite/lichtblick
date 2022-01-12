@@ -473,8 +473,14 @@ export const MarkersWithHitmap: Story = (_args) => {
     void renderImage({
       canvas: canvasRef.current,
       hitmapCanvas: hitmapRef.current,
-      zoomMode: "fill",
-      panZoom: { x: 0, y: 0, scale: 1 },
+      geometry: {
+        flipHorizontal: false,
+        flipVertical: false,
+        panZoom: { x: 0, y: 0, scale: 1 },
+        rotation: 0,
+        viewport: { width, height },
+        zoomMode: "fill",
+      },
       imageMessage: imageMessage?.message as any,
       imageMessageDatatype: "sensor_msgs/Image",
       rawMarkerData: {
@@ -489,6 +495,68 @@ export const MarkersWithHitmap: Story = (_args) => {
     <div style={{ backgroundColor: "white", padding: "1rem" }}>
       <canvas ref={canvasRef} style={{ width, height }} />
       <canvas ref={hitmapRef} style={{ width, height }} />
+    </div>
+  );
+};
+
+export const MarkersWithRotations: Story = (_args) => {
+  const width = 300;
+  const height = 200;
+  const imageMessage = useImageMessage();
+  const canvasRefs = useRef<Array<HTMLCanvasElement | ReactNull>>([]);
+  const geometries = useMemo(
+    () => [
+      { rotation: 0 },
+      { rotation: 90 },
+      { rotation: 180 },
+      { rotation: 270 },
+      { flipHorizontal: true },
+      { flipVertical: true },
+    ],
+    [],
+  );
+
+  useEffect(() => {
+    canvasRefs.current.forEach((canvas, i) => {
+      if (!canvas) {
+        return;
+      }
+
+      canvas.width = 2 * width;
+      canvas.height = 2 * height;
+
+      void renderImage({
+        canvas,
+        hitmapCanvas: undefined,
+        geometry: {
+          flipHorizontal: false,
+          flipVertical: false,
+          panZoom: { x: 0, y: 0, scale: 1 },
+          rotation: 0,
+          viewport: { width, height },
+          zoomMode: "fill",
+          ...geometries[i],
+        },
+        imageMessage: imageMessage?.message as any,
+        imageMessageDatatype: "sensor_msgs/Image",
+        rawMarkerData: {
+          markers,
+          cameraInfo,
+          transformMarkers: true,
+        },
+      });
+    });
+  }, [geometries, imageMessage]);
+
+  return (
+    <div>
+      {geometries.map((r, i) => (
+        <canvas
+          key={JSON.stringify(r)}
+          ref={(ref) => (canvasRefs.current[i] = ref)}
+          style={{ width, height }}
+        />
+      ))}
     </div>
   );
 };

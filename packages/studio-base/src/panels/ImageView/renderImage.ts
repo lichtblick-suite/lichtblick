@@ -40,12 +40,13 @@ import {
 import {
   buildMarkerData,
   calculateZoomScale,
-  RawMarkerData,
   MarkerData,
-  RenderDimensions,
-  RenderOptions,
   PanZoom,
-  ZoomMode,
+  RenderableCanvas,
+  RenderArgs,
+  RenderDimensions,
+  RenderGeometry,
+  RenderOptions,
 } from "./util";
 
 const UNCOMPRESSED_IMAGE_DATATYPES = [
@@ -69,28 +70,19 @@ let hasLoggedCameraModelError: boolean = false;
 // Size threshold below which we do fast point rendering as rects.
 // Empirically 3 seems like a good threshold here.
 const FAST_POINT_SIZE_THRESHOlD = 3;
-type RenderableCanvas = HTMLCanvasElement | OffscreenCanvas;
 
 // Given a canvas, an image message, and marker info, render the image to the canvas.
 export async function renderImage({
   canvas,
   hitmapCanvas,
-  zoomMode,
-  panZoom,
+  geometry,
   imageMessage,
   imageMessageDatatype,
   rawMarkerData,
   options,
-}: {
-  canvas: RenderableCanvas;
-  hitmapCanvas: RenderableCanvas | undefined;
-  zoomMode: ZoomMode;
-  panZoom: PanZoom;
-  imageMessage?: Image | CompressedImage;
-  imageMessageDatatype?: string;
-  rawMarkerData: RawMarkerData;
-  options?: RenderOptions;
-}): Promise<RenderDimensions | undefined> {
+}: RenderArgs & { canvas: RenderableCanvas; hitmapCanvas: RenderableCanvas | undefined }): Promise<
+  RenderDimensions | undefined
+> {
   if (!imageMessage || imageMessageDatatype == undefined) {
     clearCanvas(canvas);
     return undefined;
@@ -118,9 +110,8 @@ export async function renderImage({
 
     const dimensions = render({
       canvas,
+      geometry,
       hitmapCanvas,
-      zoomMode,
-      panZoom,
       bitmap,
       imageSmoothing,
       markerData,
@@ -217,30 +208,32 @@ function decodeMessageToBitmap(
   return self.createImageBitmap(image);
 }
 
-function clearCanvas(canvas?: HTMLCanvasElement | OffscreenCanvas) {
+function clearCanvas(canvas?: RenderableCanvas) {
   if (canvas) {
     canvas.getContext("2d")?.clearRect(0, 0, canvas.width, canvas.height);
   }
 }
 
 function render({
-  canvas,
-  hitmapCanvas,
-  zoomMode,
-  panZoom,
   bitmap,
+  canvas,
+  geometry,
+  hitmapCanvas,
   imageSmoothing,
   markerData,
 }: {
-  canvas: RenderableCanvas;
-  hitmapCanvas: RenderableCanvas | undefined;
-  zoomMode: ZoomMode;
-  panZoom: PanZoom;
   bitmap: ImageBitmap;
+  canvas: RenderableCanvas;
+  geometry: RenderGeometry;
+  hitmapCanvas: RenderableCanvas | undefined;
   imageSmoothing: boolean;
   markerData: MarkerData | undefined;
 }): RenderDimensions | undefined {
-  const bitmapDimensions = { width: bitmap.width, height: bitmap.height };
+  const bitmapDimensions =
+    geometry.rotation % 180 === 0
+      ? { width: bitmap.width, height: bitmap.height }
+      : { width: bitmap.height, height: bitmap.width };
+
   const canvasCtx = canvas.getContext("2d");
   if (!canvasCtx) {
     return;
@@ -253,7 +246,7 @@ function render({
   const viewportW = canvas.width;
   const viewportH = canvas.height;
 
-  const imageViewportScale = calculateZoomScale(bitmap, canvas, zoomMode);
+  const imageViewportScale = calculateZoomScale(bitmapDimensions, canvas, geometry.zoomMode);
 
   const ctx = new HitmapRenderContext(canvasCtx, hitmapCanvas);
   ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -262,10 +255,22 @@ function render({
 
   // translate x/y from the center of the canvas
   ctx.translate(viewportW / 2, viewportH / 2);
-  ctx.translate(panZoom.x, panZoom.y);
+  ctx.translate(geometry.panZoom.x, geometry.panZoom.y);
 
-  ctx.scale(panZoom.scale, panZoom.scale);
+  ctx.scale(geometry.panZoom.scale, geometry.panZoom.scale);
   ctx.scale(imageViewportScale, imageViewportScale);
+
+  if (geometry.flipHorizontal) {
+    ctx.scale(-1, 1);
+  }
+
+  if (geometry.flipVertical) {
+    ctx.scale(1, -1);
+  }
+
+  if (geometry.rotation != undefined) {
+    ctx.rotate(geometry.rotation);
+  }
 
   // center the image in the viewport
   // also sets 0,0 as the upper left corner of the image since markers are drawn from 0,0 on the image
@@ -286,7 +291,7 @@ function render({
       ctx,
       markers as MessageEvent<ImageMarker | ImageMarkerArray>[],
       cameraModel,
-      panZoom,
+      geometry.panZoom,
     );
   } catch (err) {
     console.warn("error painting markers:", err);

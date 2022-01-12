@@ -12,7 +12,13 @@
 //   You may not use this file except in compliance with the License.
 
 import { Topic, MessageEvent } from "@foxglove/studio-base/players/types";
-import { CameraInfo, ImageMarker, ImageMarkerArray } from "@foxglove/studio-base/types/Messages";
+import {
+  CameraInfo,
+  CompressedImage,
+  Image,
+  ImageMarker,
+  ImageMarkerArray,
+} from "@foxglove/studio-base/types/Messages";
 
 import PinholeCameraModel from "./PinholeCameraModel";
 
@@ -30,6 +36,23 @@ export type RenderOptions = {
   resizeCanvas?: boolean;
 };
 
+export type RenderGeometry = {
+  flipVertical: boolean;
+  flipHorizontal: boolean;
+  panZoom: PanZoom;
+  rotation: number;
+  viewport: Dimensions;
+  zoomMode: ZoomMode;
+};
+
+export type RenderArgs = {
+  imageMessage?: Image | CompressedImage;
+  imageMessageDatatype?: string;
+  geometry: RenderGeometry;
+  options?: RenderOptions;
+  rawMarkerData: RawMarkerData;
+};
+
 export type Dimensions = { width: number; height: number };
 
 export type PixelData = {
@@ -38,6 +61,8 @@ export type PixelData = {
   markerIndex?: number;
   marker?: ImageMarker;
 };
+
+export type RenderableCanvas = HTMLCanvasElement | OffscreenCanvas;
 
 export type RawMarkerData = {
   markers: MessageEvent<unknown>[];
