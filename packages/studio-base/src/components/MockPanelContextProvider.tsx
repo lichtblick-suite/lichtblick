@@ -38,7 +38,6 @@ const DEFAULT_MOCK_PANEL_CONTEXT: PanelContextType<PanelConfig> = {
   },
   isFullscreen: false,
   hasSettings: false,
-  supportsStrictMode: true,
   connectToolbarDragHandle: () => {},
 };
 function MockPanelContextProvider({

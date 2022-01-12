@@ -230,7 +230,6 @@ type Props<Config> = {
 export interface PanelStatics<Config> {
   panelType: string;
   defaultConfig: Config;
-  supportsStrictMode?: boolean;
   configSchema?: PanelConfigSchema<Config>;
 }
 
@@ -640,7 +639,6 @@ export default function Panel<
             isFullscreen: fullScreen,
             hasSettings: PanelComponent.configSchema != undefined,
             tabId,
-            supportsStrictMode: PanelComponent.supportsStrictMode ?? true,
             // disallow dragging the root panel in a layout
             connectToolbarDragHandle: isTopLevelPanel ? undefined : connectToolbarDragHandle,
           }}
@@ -699,11 +697,7 @@ export default function Panel<
               </ActionsOverlay>
             )}
             <ErrorBoundary renderError={(errorProps) => <ErrorToolbar {...errorProps} />}>
-              {PanelComponent.supportsStrictMode ?? true ? (
-                <React.StrictMode>{child}</React.StrictMode>
-              ) : (
-                child
-              )}
+              <React.StrictMode>{child}</React.StrictMode>
             </ErrorBoundary>
             {process.env.NODE_ENV !== "production" && (
               <div className={classes.perfInfo} ref={perfInfo} />

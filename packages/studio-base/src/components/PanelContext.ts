@@ -31,7 +31,6 @@ export type PanelContextType<T> = {
 
   hasSettings: boolean;
   connectToolbarDragHandle?: (el: Element | ReactNull) => void;
-  supportsStrictMode: boolean; // remove when all panels have strict mode enabled :)
 };
 // Context used for components to know which panel they are inside
 const PanelContext = React.createContext<PanelContextType<PanelConfig> | undefined>(undefined);
