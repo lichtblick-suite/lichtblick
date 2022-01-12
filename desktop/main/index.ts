@@ -2,18 +2,16 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-// Allow console logs in this file
-
 import "colors";
-import { captureException, init as initSentry } from "@sentry/electron";
+import { init as initSentry } from "@sentry/electron";
 import { app, BrowserWindow, ipcMain, Menu, session, nativeTheme } from "electron";
-import { autoUpdater } from "electron-updater";
 import fs from "fs";
 
 import Logger from "@foxglove/log";
 import { AppSetting } from "@foxglove/studio-base/src/AppSetting";
 
 import pkgInfo from "../../package.json";
+import StudioAppUpdater from "./StudioAppUpdater";
 import StudioWindow from "./StudioWindow";
 import getDevModeIcon from "./getDevModeIcon";
 import injectFilesToOpen from "./injectFilesToOpen";
@@ -44,17 +42,6 @@ function isFileToOpen(arg: string) {
     // ignore
   }
   return false;
-}
-
-function isNetworkError(err: Error) {
-  return (
-    err.message === "net::ERR_INTERNET_DISCONNECTED" ||
-    err.message === "net::ERR_PROXY_CONNECTION_FAILED" ||
-    err.message === "net::ERR_CONNECTION_RESET" ||
-    err.message === "net::ERR_CONNECTION_CLOSE" ||
-    err.message === "net::ERR_NAME_NOT_RESOLVED" ||
-    err.message === "net::ERR_CONNECTION_TIMED_OUT"
-  );
 }
 
 function updateNativeColorScheme() {
@@ -229,21 +216,14 @@ function main() {
 
     registerRosPackageProtocolHandlers();
 
-    // Only stable builds check for automatic updates
+    // Only production builds check for automatic updates
     if (process.env.NODE_ENV !== "production") {
       log.info("Automatic updates disabled (development environment)");
     } else if (/-(dev|nightly)/.test(pkgInfo.version)) {
       log.info("Automatic updates disabled (development version)");
-    } else {
-      autoUpdater.checkForUpdatesAndNotify().catch((err) => {
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
-        if (isNetworkError(err)) {
-          log.warn(`Network error checking for updates: ${err}`);
-        } else {
-          captureException(err);
-        }
-      });
     }
+
+    StudioAppUpdater.Instance().start();
 
     app.setAboutPanelOptions({
       applicationName: pkgInfo.productName,
