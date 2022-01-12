@@ -70,7 +70,7 @@ export function Toolbar({ pixelData }: { pixelData: PixelData | undefined }): JS
   }, [pixelData]);
 
   return (
-    <Stack sx={{ position: "absolute", top: 0, right: 0, mr: 2, mt: 6, zIndex: "drawer" }}>
+    <Stack sx={{ position: "absolute", top: 0, right: 0, mr: 2, mt: 8, zIndex: "drawer" }}>
       <ExpandingToolbar
         tooltip="Inspect objects"
         iconName="CursorDefault"
