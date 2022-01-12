@@ -25,15 +25,17 @@ import { LegacyButton } from "@foxglove/studio-base/components/LegacyStyledCompo
 import { Item } from "@foxglove/studio-base/components/Menu";
 import { MessageEvent, Topic } from "@foxglove/studio-base/players/types";
 import { CompressedImage, Image } from "@foxglove/studio-base/types/Messages";
+import Rpc from "@foxglove/studio-base/util/Rpc";
 import WebWorkerManager from "@foxglove/studio-base/util/WebWorkerManager";
 import { downloadFiles } from "@foxglove/studio-base/util/download";
 import { getTimestampForMessage } from "@foxglove/studio-base/util/time";
 
 import { Config, SaveImagePanelConfig } from "./index";
 import { renderImage } from "./renderImage";
-import { Dimensions, RawMarkerData, RenderOptions } from "./util";
+import { Dimensions, PixelData, RawMarkerData, RenderOptions, PanZoom, ZoomMode } from "./util";
 
 type OnFinishRenderImage = () => void;
+
 type Props = {
   topic?: Topic;
   image?: MessageEvent<unknown>;
@@ -42,6 +44,7 @@ type Props = {
   saveConfig: SaveImagePanelConfig;
   onStartRenderImage: () => OnFinishRenderImage;
   renderInMainThread?: boolean;
+  setActivePixelData: (data: PixelData | undefined) => void;
 };
 
 const useStyles = makeStyles((theme) => ({
@@ -145,9 +148,9 @@ const webWorkerManager = new WebWorkerManager(() => {
 
 type RenderImage = (args: {
   canvas: HTMLCanvasElement | OffscreenCanvas;
-  zoomMode: "fit" | "fill" | "other";
-  panZoom: { x: number; y: number; scale: number };
-  viewport: { width: number; height: number };
+  zoomMode: ZoomMode;
+  panZoom: PanZoom;
+  viewport: Dimensions;
   imageMessage?: Image | CompressedImage;
   imageMessageDatatype?: string;
   rawMarkerData: RawMarkerData;
@@ -189,6 +192,10 @@ export default function ImageCanvas(props: Props): JSX.Element {
   // the canvas can only be transferred once, so we keep the transfer around
   const transfferedCanvasRef = useRef<OffscreenCanvas | undefined>(undefined);
 
+  const workerRef = useRef<Rpc | undefined>();
+
+  const [workerId] = useState(uuidv4());
+
   // setup the render function to render in the main thread or in the worker
   useLayoutEffect(() => {
     const canvas = canvasRef.current;
@@ -196,21 +203,12 @@ export default function ImageCanvas(props: Props): JSX.Element {
       return;
     }
 
-    const id = uuidv4();
+    const id = workerId;
 
     if (renderInMainThread) {
       // Potentially performance-sensitive; await can be expensive
       // eslint-disable-next-line @typescript-eslint/promise-function-async
-      const renderInMain = (args: {
-        canvas: HTMLCanvasElement | OffscreenCanvas;
-        zoomMode: "fit" | "fill" | "other";
-        panZoom: { x: number; y: number; scale: number };
-        viewport: { width: number; height: number };
-        imageMessage?: Image | CompressedImage;
-        imageMessageDatatype?: string;
-        rawMarkerData: RawMarkerData;
-        options?: RenderOptions;
-      }) => {
+      const renderInMain: RenderImage = (args) => {
         const targetWidth = args.viewport.width;
         const targetHeight = args.viewport.height;
 
@@ -220,25 +218,17 @@ export default function ImageCanvas(props: Props): JSX.Element {
         if (targetHeight !== canvas.height) {
           canvas.height = targetHeight;
         }
-        return renderImage(args);
+        return renderImage({ ...args, hitmapCanvas: undefined });
       };
 
       setDoRenderImage(() => renderInMain);
     } else {
       const worker = webWorkerManager.registerWorkerListener(id);
+      workerRef.current = worker;
 
       // Potentially performance-sensitive; await can be expensive
       // eslint-disable-next-line @typescript-eslint/promise-function-async
-      const workerRender = (args: {
-        canvas: HTMLCanvasElement | OffscreenCanvas;
-        zoomMode: "fit" | "fill" | "other";
-        panZoom: { x: number; y: number; scale: number };
-        viewport: { width: number; height: number };
-        imageMessage?: Image | CompressedImage;
-        imageMessageDatatype?: string;
-        rawMarkerData: RawMarkerData;
-        options?: RenderOptions;
-      }) => {
+      const workerRender: RenderImage = (args) => {
         const {
           zoomMode: zoom,
           panZoom,
@@ -302,7 +292,7 @@ export default function ImageCanvas(props: Props): JSX.Element {
 
       webWorkerManager.unregisterWorkerListener(id);
     };
-  }, [renderInMainThread]);
+  }, [renderInMainThread, workerId]);
 
   const {
     setPan,
@@ -495,6 +485,7 @@ export default function ImageCanvas(props: Props): JSX.Element {
     const tempCanvas = document.createElement("canvas");
     void renderImage({
       canvas: tempCanvas,
+      hitmapCanvas: undefined,
       zoomMode: "other",
       panZoom: { x: 0, y: 0, scale: 1 },
       imageMessage,
@@ -526,6 +517,19 @@ export default function ImageCanvas(props: Props): JSX.Element {
     });
   }, [image, topic, renderOptions]);
 
+  function onCanvasClick(event: MouseEvent<HTMLCanvasElement>) {
+    const boundingRect = event.currentTarget.getBoundingClientRect();
+    const x = event.clientX - boundingRect.x;
+    const y = event.clientY - boundingRect.y;
+    void workerRef.current
+      ?.send<PixelData | undefined>("mouseMove", {
+        id: workerId,
+        x: x * devicePixelRatio,
+        y: y * devicePixelRatio,
+      })
+      .then((r) => props.setActivePixelData(r));
+  }
+
   const keyDownHandlers = useMemo(() => {
     return {
       "=": zoomIn,
@@ -545,6 +549,7 @@ export default function ImageCanvas(props: Props): JSX.Element {
         className={cx(classes.canvas, {
           [classes.canvasImageRenderingSmooth]: config.smooth === true,
         })}
+        onClick={onCanvasClick}
         ref={canvasRef}
       />
       {contextMenuEvent && (

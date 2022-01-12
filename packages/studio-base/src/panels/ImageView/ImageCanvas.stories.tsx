@@ -13,10 +13,11 @@
 
 import { Story } from "@storybook/react";
 import { range, noop } from "lodash";
-import { useMemo } from "react";
+import { useEffect, useMemo, useRef } from "react";
 
 import ImageView, { Config } from "@foxglove/studio-base/panels/ImageView";
 import ImageCanvas from "@foxglove/studio-base/panels/ImageView/ImageCanvas";
+import { renderImage } from "@foxglove/studio-base/panels/ImageView/renderImage";
 import { MessageEvent } from "@foxglove/studio-base/players/types";
 import { useReadySignal } from "@foxglove/studio-base/stories/ReadySignalContext";
 import { CameraInfo, ImageMarker, ImageMarkerType } from "@foxglove/studio-base/types/Messages";
@@ -295,6 +296,7 @@ function RGBStory({ encoding }: { encoding: string }) {
       rawMarkerData={noMarkersMarkerData}
       config={config}
       saveConfig={noop}
+      setActivePixelData={noop}
       onStartRenderImage={() => () => undefined}
     />
   );
@@ -337,6 +339,7 @@ function BayerStory({ encoding }: { encoding: string }) {
       rawMarkerData={noMarkersMarkerData}
       config={config}
       saveConfig={noop}
+      setActivePixelData={noop}
       onStartRenderImage={() => () => undefined}
     />
   );
@@ -373,6 +376,7 @@ function Mono16Story({
       rawMarkerData={noMarkersMarkerData}
       config={{ ...config, minValue, maxValue }}
       saveConfig={noop}
+      setActivePixelData={noop}
       onStartRenderImage={() => () => undefined}
     />
   );
@@ -437,6 +441,7 @@ export const MarkersOriginal: Story = (_args) => {
         }}
         config={config}
         saveConfig={noop}
+        setActivePixelData={noop}
         onStartRenderImage={() => readySignal}
       />
     </div>
@@ -445,6 +450,47 @@ export const MarkersOriginal: Story = (_args) => {
 
 MarkersOriginal.parameters = {
   useReadySignal: true,
+};
+
+export const MarkersWithHitmap: Story = (_args) => {
+  const imageMessage = useImageMessage();
+  const canvasRef = useRef<HTMLCanvasElement>(ReactNull);
+  const hitmapRef = useRef<HTMLCanvasElement>(ReactNull);
+
+  const width = 400;
+  const height = 300;
+
+  useEffect(() => {
+    if (!canvasRef.current || !hitmapRef.current) {
+      return;
+    }
+
+    canvasRef.current.width = 2 * width;
+    canvasRef.current.height = 2 * height;
+    hitmapRef.current.width = 2 * width;
+    hitmapRef.current.height = 2 * height;
+
+    void renderImage({
+      canvas: canvasRef.current,
+      hitmapCanvas: hitmapRef.current,
+      zoomMode: "fill",
+      panZoom: { x: 0, y: 0, scale: 1 },
+      imageMessage: imageMessage?.message as any,
+      imageMessageDatatype: "sensor_msgs/Image",
+      rawMarkerData: {
+        markers,
+        cameraInfo,
+        transformMarkers: true,
+      },
+    });
+  }, [imageMessage]);
+
+  return (
+    <div style={{ backgroundColor: "white", padding: "1rem" }}>
+      <canvas ref={canvasRef} style={{ width, height }} />
+      <canvas ref={hitmapRef} style={{ width, height }} />
+    </div>
+  );
 };
 
 export const MarkersTransformed: Story = (_args) => {
@@ -463,6 +509,7 @@ export const MarkersTransformed: Story = (_args) => {
         }}
         config={config}
         saveConfig={noop}
+        setActivePixelData={noop}
         onStartRenderImage={() => readySignal}
       />
     </div>
@@ -490,6 +537,7 @@ export const MarkersImageSize: Story = (_args) => {
         }}
         config={config}
         saveConfig={noop}
+        setActivePixelData={noop}
         onStartRenderImage={() => readySignal}
       />
     </div>
@@ -516,6 +564,7 @@ export const MarkersWithFallbackRenderingUsingMainThread = (): JSX.Element => {
         }}
         config={config}
         saveConfig={noop}
+        setActivePixelData={noop}
         renderInMainThread
         onStartRenderImage={() => () => undefined}
       />
@@ -531,6 +580,7 @@ export const MarkersWithFallbackRenderingUsingMainThread = (): JSX.Element => {
         }}
         config={config}
         saveConfig={noop}
+        setActivePixelData={noop}
         renderInMainThread
         onStartRenderImage={() => () => undefined}
       />
@@ -545,6 +595,7 @@ export const MarkersWithFallbackRenderingUsingMainThread = (): JSX.Element => {
         }}
         config={config}
         saveConfig={noop}
+        setActivePixelData={noop}
         renderInMainThread
         onStartRenderImage={() => () => undefined}
       />
@@ -565,6 +616,7 @@ export const ErrorState = (): JSX.Element => {
       rawMarkerData={noMarkersMarkerData}
       config={config}
       saveConfig={noop}
+      setActivePixelData={noop}
       onStartRenderImage={() => () => undefined}
     />
   );
@@ -586,6 +638,7 @@ export const CallsOnRenderFrameWhenRenderingSucceeds = (): JSX.Element => {
           }}
           config={config}
           saveConfig={noop}
+          setActivePixelData={noop}
           onStartRenderImage={onStartRenderImage}
         />
       )}
@@ -608,6 +661,7 @@ export const CallsOnRenderFrameWhenRenderingFails = (): JSX.Element => {
           rawMarkerData={noMarkersMarkerData}
           config={config}
           saveConfig={noop}
+          setActivePixelData={noop}
           onStartRenderImage={onStartRenderImage}
         />
       )}

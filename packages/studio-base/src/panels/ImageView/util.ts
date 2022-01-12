@@ -12,9 +12,13 @@
 //   You may not use this file except in compliance with the License.
 
 import { Topic, MessageEvent } from "@foxglove/studio-base/players/types";
-import { CameraInfo } from "@foxglove/studio-base/types/Messages";
+import { CameraInfo, ImageMarker, ImageMarkerArray } from "@foxglove/studio-base/types/Messages";
 
 import PinholeCameraModel from "./PinholeCameraModel";
+
+export type PanZoom = { x: number; y: number; scale: number };
+
+export type ZoomMode = "fit" | "fill" | "other";
 
 export type RenderOptions = {
   imageSmoothing?: boolean;
@@ -28,11 +32,20 @@ export type RenderOptions = {
 
 export type Dimensions = { width: number; height: number };
 
+export type PixelData = {
+  color: { r: number; g: number; b: number; a: number };
+  position: { x: number; y: number };
+  markerIndex?: number;
+  marker?: ImageMarker;
+};
+
 export type RawMarkerData = {
   markers: MessageEvent<unknown>[];
   transformMarkers: boolean;
   cameraInfo?: CameraInfo;
 };
+
+export type RenderDimensions = Dimensions & { transform: DOMMatrix };
 
 export type MarkerData = {
   markers: MessageEvent<unknown>[];
@@ -40,6 +53,57 @@ export type MarkerData = {
   originalHeight?: number; // undefined means no scaling is needed (use the image's size)
   cameraModel?: PinholeCameraModel; // undefined means no transformation is needed
 };
+
+export function calculateZoomScale(
+  bitmap: Dimensions,
+  viewport: Dimensions,
+  zoomMode: ZoomMode,
+): number {
+  let imageViewportScale = viewport.width / bitmap.width;
+
+  const calculatedHeight = bitmap.height * imageViewportScale;
+
+  // if we are trying to fit and the height exeeds viewport, we need to scale on height
+  if (zoomMode === "fit" && calculatedHeight > viewport.height) {
+    imageViewportScale = viewport.height / bitmap.height;
+  }
+
+  // if we are trying to fill and the height doesn't fill viewport, we need to scale on height
+  if (zoomMode === "fill" && calculatedHeight < viewport.height) {
+    imageViewportScale = viewport.height / bitmap.height;
+  }
+
+  if (zoomMode === "other") {
+    imageViewportScale = 1;
+  }
+
+  return imageViewportScale;
+}
+
+function toPaddedHexString(n: number, length: number) {
+  const str = n.toString(16);
+  return "0".repeat(length - str.length) + str;
+}
+
+/**
+ * Converts an integer index into a hex color value. Used for encoding
+ * hitmaps.
+ */
+export function indexToIDColor(index: number): string {
+  return toPaddedHexString(index, 6);
+}
+
+/**
+ * Converts an encoded color back to an index value. Used for decoding hitmaps.
+ */
+export function idColorToIndex(id: Uint8ClampedArray): number | undefined {
+  // Treat pixels without max alpha as empty to avoid blended regions.
+  if (id.length < 4 || id[3] !== 255) {
+    return undefined;
+  }
+
+  return (id[0]! << 16) + (id[1]! << 8) + id[2]!;
+}
 
 export function getMarkerOptions(
   imageTopic: string,
@@ -107,6 +171,20 @@ export function groupTopics(topics: Topic[]): Map<string, Topic[]> {
     }
   }
   return imageTopicsByNamespace;
+}
+
+export function flattenImageMarkers(
+  messages: MessageEvent<ImageMarker | ImageMarkerArray>[],
+): ImageMarker[] {
+  const markers: ImageMarker[] = [];
+  for (const m of messages) {
+    if ("markers" in m.message && Array.isArray(m.message.markers)) {
+      markers.push(...m.message.markers);
+    } else {
+      markers.push(m.message as ImageMarker);
+    }
+  }
+  return markers;
 }
 
 export function buildMarkerData(rawMarkerData: RawMarkerData): MarkerData | undefined {

@@ -19,7 +19,7 @@ import MenuDownIcon from "@mdi/svg/svg/menu-down.svg";
 import WavesIcon from "@mdi/svg/svg/waves.svg";
 import cx from "classnames";
 import { last, uniq } from "lodash";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 
 import { filterMap } from "@foxglove/den/collection";
 import { useShallowMemo } from "@foxglove/hooks";
@@ -35,6 +35,7 @@ import { useMessagePipeline } from "@foxglove/studio-base/components/MessagePipe
 import Panel from "@foxglove/studio-base/components/Panel";
 import PanelToolbar from "@foxglove/studio-base/components/PanelToolbar";
 import useDeepMemo from "@foxglove/studio-base/hooks/useDeepMemo";
+import { Toolbar } from "@foxglove/studio-base/panels/ImageView/Toolbar";
 import { IMAGE_DATATYPES } from "@foxglove/studio-base/panels/ImageView/renderImage";
 import { MessageEvent } from "@foxglove/studio-base/players/types";
 import inScreenshotTests from "@foxglove/studio-base/stories/inScreenshotTests";
@@ -55,6 +56,8 @@ import {
   getRelatedMarkerTopics,
   getMarkerOptions,
   groupTopics,
+  PixelData,
+  ZoomMode,
 } from "./util";
 
 const { useMemo, useCallback } = React;
@@ -68,7 +71,7 @@ type DefaultConfig = {
 
 export type Config = DefaultConfig & {
   transformMarkers: boolean;
-  mode?: "fit" | "fill" | "other";
+  mode?: ZoomMode;
   smooth?: boolean;
   zoom?: number;
   pan?: { x: number; y: number };
@@ -275,6 +278,7 @@ function ImageView(props: Props) {
     () => getTopicsByTopicName(topics)[cameraTopic],
     [cameraTopic, topics],
   );
+  const [activePixelData, setActivePixelData] = useState<PixelData | undefined>();
 
   // Namespaces represent marker topics based on the camera topic prefix (e.g. "/camera_front_medium")
   const { allCameraNamespaces, imageTopicsByNamespace, allImageTopics } = useMemo(() => {
@@ -632,7 +636,7 @@ function ImageView(props: Props) {
   const showEmptyState = !imageMessage || (shouldSynchronize && !synchronizedMessages);
 
   return (
-    <Flex col clip>
+    <Flex col clip style={{ position: "relative" }}>
       {toolbar}
       <div style={{ display: "flex", flexDirection: "column", width: "100%", height: "100%" }}>
         {/* Always render the ImageCanvas because it's expensive to unmount and start up. */}
@@ -644,6 +648,7 @@ function ImageView(props: Props) {
             config={config}
             saveConfig={saveConfig}
             onStartRenderImage={onStartRenderImage}
+            setActivePixelData={setActivePixelData}
           />
         )}
         {/* If rendered, EmptyState will hide the always-present ImageCanvas */}
@@ -659,6 +664,7 @@ function ImageView(props: Props) {
         )}
         {!showEmptyState && renderBottomBar()}
       </div>
+      <Toolbar pixelData={activePixelData} />
     </Flex>
   );
 }

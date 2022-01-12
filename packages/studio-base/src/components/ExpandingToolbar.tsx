@@ -11,7 +11,7 @@ import {
   useTheme,
   IButtonStyles,
 } from "@fluentui/react";
-import { ReactElement, useMemo } from "react";
+import { ReactElement, ReactNode, useMemo } from "react";
 
 import { useTooltip } from "@foxglove/studio-base/components/Tooltip";
 import { colors } from "@foxglove/studio-base/util/sharedStyleConstants";
@@ -31,11 +31,7 @@ export function ToolGroup<T>({ children }: { name: T; children: React.ReactEleme
   return children;
 }
 
-export function ToolGroupFixedSizePane({
-  children,
-}: {
-  children: React.ReactElement | React.ReactElement[];
-}): JSX.Element {
+export function ToolGroupFixedSizePane({ children }: { children: ReactNode }): JSX.Element {
   const classes = useStyles();
   return <div className={classes.toolGroupFixedSizePanel}>{children}</div>;
 }
