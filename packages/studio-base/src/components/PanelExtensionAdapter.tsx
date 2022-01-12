@@ -131,7 +131,11 @@ function PanelExtensionAdapter(props: PanelExtensionAdapterProps): JSX.Element {
 
   const colorScheme = useTheme().isInverted ? "dark" : "light";
 
-  const renderPanel = useCallback(() => {
+  // renderPanelImpl invokes the panel extension context's render function with updated
+  // render state fields.
+  //
+  // NOTE: Do not call renderPanelImpl directly, always call queueRender()
+  const renderPanelImpl = useCallback(() => {
     if (!renderFn) {
       return;
     }
@@ -256,17 +260,29 @@ function PanelExtensionAdapter(props: PanelExtensionAdapterProps): JSX.Element {
     }
   }, [colorScheme, renderFn]);
 
+  const queueRender = useCallback(() => {
+    if (!renderFn || rafRequestedRef.current != undefined) {
+      return;
+    }
+    rafRequestedRef.current = requestAnimationFrame(renderPanelImpl);
+  }, [renderFn, renderPanelImpl]);
+
+  // Queue render when message pipeline has new data
   const messagePipelineSelector = useCallback(
     (ctx: MessagePipelineContext) => {
       latestPipelineContextRef.current = ctx;
-
-      if (!renderFn || rafRequestedRef.current != undefined) {
-        return;
-      }
-      rafRequestedRef.current = requestAnimationFrame(renderPanel);
+      queueRender();
     },
-    [renderFn, renderPanel],
+    [queueRender],
   );
+
+  // Queue render on hover value changes which occur outside the message pipeline
+  useLayoutEffect(() => {
+    // No need to queue render if not interested in preview time
+    if (watchedFieldsRef.current.has("previewTime")) {
+      queueRender();
+    }
+  }, [hoverValue, queueRender]);
 
   useMessagePipeline(messagePipelineSelector);
 
