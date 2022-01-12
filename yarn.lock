@@ -2611,7 +2611,7 @@ __metadata:
     rc-tree: 5.3.7
     react: 17.0.2
     react-autocomplete: "janpaul123/react-autocomplete#bc8737070b5744069719c8fcd4e0a197192b0d48"
-    react-dom: 17.0.2
+    react-dom: "patch:react-dom@npm:17.0.2#../../patches/react-dom.patch"
     react-highlight-words: 0.17.0
     react-hover-observer: 2.1.1
     react-input-autosize: 3.0.0
@@ -20270,6 +20270,19 @@ __metadata:
   peerDependencies:
     react: 17.0.2
   checksum: 1c1eaa3bca7c7228d24b70932e3d7c99e70d1d04e13bb0843bbf321582bc25d7961d6b8a6978a58a598af2af496d1cedcfb1bf65f6b0960a0a8161cb8dab743c
+  languageName: node
+  linkType: hard
+
+"react-dom@patch:react-dom@npm:17.0.2#../../patches/react-dom.patch::locator=%40foxglove%2Fstudio-base%40workspace%3Apackages%2Fstudio-base":
+  version: 17.0.2
+  resolution: "react-dom@patch:react-dom@npm%3A17.0.2#../../patches/react-dom.patch::version=17.0.2&hash=e5f27c&locator=%40foxglove%2Fstudio-base%40workspace%3Apackages%2Fstudio-base"
+  dependencies:
+    loose-envify: ^1.1.0
+    object-assign: ^4.1.1
+    scheduler: ^0.20.2
+  peerDependencies:
+    react: 17.0.2
+  checksum: 6e1db6fd74ea7ed5583ea103472190d096c5976e61c847c20fa0680bcc95c3b863135680e93aa2f7ed6164f57de415b908709febe0e88f79c329f430504f9600
   languageName: node
   linkType: hard
 

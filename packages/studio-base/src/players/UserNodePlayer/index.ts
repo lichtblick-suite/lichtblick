@@ -129,7 +129,6 @@ export default class UserNodePlayer implements Player {
 
   constructor(player: Player, userNodeActions: UserNodeActions) {
     this._player = player;
-    this._player.setListener(async (state) => await this._onPlayerState(state));
     const { setUserNodeDiagnostics, addUserNodeLogs, setUserNodeRosLib } = userNodeActions;
 
     // TODO(troy): can we make the below action flow better? Might be better to
@@ -679,6 +678,11 @@ export default class UserNodePlayer implements Player {
 
   setListener(listener: NonNullable<UserNodePlayer["_listener"]>): void {
     this._listener = listener;
+
+    // Delay _player.setListener until our setListener is called because setListener in some cases
+    // triggers initialization logic and remote requests. This is an unfortunate API behavior and
+    // naming choice, but it's better for us not to do trigger this logic in the constructor.
+    this._player.setListener(async (state) => await this._onPlayerState(state));
   }
 
   setSubscriptions(subscriptions: SubscribePayload[]): void {

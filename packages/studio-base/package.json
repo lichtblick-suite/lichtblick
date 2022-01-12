@@ -153,7 +153,7 @@
     "rc-tree": "5.3.7",
     "react": "17.0.2",
     "react-autocomplete": "janpaul123/react-autocomplete#bc8737070b5744069719c8fcd4e0a197192b0d48",
-    "react-dom": "17.0.2",
+    "react-dom": "patch:react-dom@npm:17.0.2#../../patches/react-dom.patch",
     "react-highlight-words": "0.17.0",
     "react-hover-observer": "2.1.1",
     "react-input-autosize": "3.0.0",

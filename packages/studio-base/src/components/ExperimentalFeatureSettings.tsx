@@ -11,7 +11,7 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { Stack, Text, useTheme, Checkbox } from "@fluentui/react";
+import { Stack, Text, useTheme, Checkbox, Link } from "@fluentui/react";
 
 import { AppSetting } from "@foxglove/studio-base/AppSetting";
 import { useAppConfigurationValue } from "@foxglove/studio-base/hooks/useAppConfigurationValue";
@@ -54,6 +54,19 @@ if (process.env.NODE_ENV === "development") {
     key: AppSetting.ENABLE_LAYOUT_DEBUGGING,
     name: "Layout debugging",
     description: <>Show extra controls for developing and debugging layout storage.</>,
+  });
+  features.push({
+    key: AppSetting.ENABLE_REACT_STRICT_MODE,
+    name: "React Strict Mode",
+    description: (
+      <>
+        Enable React{" "}
+        <Link href="https://reactjs.org/docs/strict-mode.html" target="_blank" rel="noreferrer">
+          Strict Mode
+        </Link>
+        . Changing this setting requires a restart.
+      </>
+    ),
   });
 }
 

@@ -6,14 +6,22 @@
 /// <reference types="electron" />
 
 import { init as initSentry } from "@sentry/electron";
+import { StrictMode } from "react";
 import ReactDOM from "react-dom";
 
 import { Sockets } from "@foxglove/electron-socket/renderer";
 import Logger from "@foxglove/log";
-import { installDevtoolsFormatters, overwriteFetch, waitForFonts } from "@foxglove/studio-base";
+import {
+  AppSetting,
+  installDevtoolsFormatters,
+  overwriteFetch,
+  waitForFonts,
+} from "@foxglove/studio-base";
 
 import pkgInfo from "../../package.json";
+import { Storage } from "../common/types";
 import Root from "./Root";
+import NativeStorageAppConfiguration from "./services/NativeStorageAppConfiguration";
 
 const log = Logger.getLogger(__filename);
 
@@ -57,7 +65,14 @@ async function main() {
   // consider moving waitForFonts into App to display an app loading screen
   await waitForFonts();
 
-  ReactDOM.render(<Root />, rootEl, () => {
+  const appConfiguration = await NativeStorageAppConfiguration.Initialize(
+    (global as { storageBridge?: Storage }).storageBridge!,
+    { defaults: { [AppSetting.OPEN_DIALOG]: true, [AppSetting.ENABLE_REACT_STRICT_MODE]: true } },
+  );
+
+  const enableStrictMode = appConfiguration.get(AppSetting.ENABLE_REACT_STRICT_MODE) as boolean;
+  const root = <Root appConfiguration={appConfiguration} />;
+  ReactDOM.render(enableStrictMode ? <StrictMode>{root}</StrictMode> : root, rootEl, () => {
     // Integration tests look for this console log to indicate the app has rendered once
     log.debug("App rendered");
   });

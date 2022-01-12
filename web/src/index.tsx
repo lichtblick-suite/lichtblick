@@ -3,11 +3,14 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 import { init as initSentry } from "@sentry/browser";
+import { StrictMode } from "react";
 import ReactDOM from "react-dom";
 
 import Logger from "@foxglove/log";
+import { AppSetting } from "@foxglove/studio-base";
 
 import VersionBanner from "./VersionBanner";
+import LocalStorageAppConfiguration from "./services/LocalStorageAppConfiguration";
 
 const log = Logger.getLogger(__filename);
 log.debug("initializing");
@@ -56,7 +59,7 @@ async function main() {
   };
 
   if (!canRenderApp) {
-    ReactDOM.render(banner, rootEl, renderCallback);
+    ReactDOM.render(<StrictMode>{banner}</StrictMode>, rootEl, renderCallback);
     return;
   }
 
@@ -69,11 +72,20 @@ async function main() {
   await waitForFonts();
 
   const { Root } = await import("./Root");
-  ReactDOM.render(
+
+  const appConfiguration = new LocalStorageAppConfiguration({
+    defaults: { [AppSetting.OPEN_DIALOG]: true, [AppSetting.ENABLE_REACT_STRICT_MODE]: true },
+  });
+  const enableStrictMode = appConfiguration.get(AppSetting.ENABLE_REACT_STRICT_MODE) as boolean;
+
+  const root = (
     <>
       {banner}
-      <Root />
-    </>,
+      <Root appConfiguration={appConfiguration} />
+    </>
+  );
+  ReactDOM.render(
+    enableStrictMode ? <StrictMode>{root}</StrictMode> : root,
     rootEl,
     renderCallback,
   );

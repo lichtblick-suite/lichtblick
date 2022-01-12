@@ -32,13 +32,14 @@ import {
   useAppConfigurationValue,
   AppSetting,
   SampleNuscenesDataSourceFactory,
+  AppConfiguration,
+  AppConfigurationContext,
 } from "@foxglove/studio-base";
 
 import { Desktop } from "../common/types";
 import ConsoleApiCurrentUserProvider from "./components/ConsoleApiCurrentUserProvider";
 import NativeAppMenuProvider from "./components/NativeAppMenuProvider";
 import NativeColorSchemeAdapter from "./components/NativeColorSchemeAdapter";
-import NativeStorageAppConfigurationProvider from "./components/NativeStorageAppConfigurationProvider";
 import NativeStorageLayoutStorageProvider from "./components/NativeStorageLayoutStorageProvider";
 import NativeWindowProvider from "./components/NativeWindowProvider";
 import ExtensionLoaderProvider from "./providers/ExtensionLoaderProvider";
@@ -78,12 +79,16 @@ function AppWrapper() {
   return <App deepLinks={deepLinks} availableSources={dataSources} />;
 }
 
-export default function Root(): ReactElement {
+export default function Root({
+  appConfiguration,
+}: {
+  appConfiguration: AppConfiguration;
+}): ReactElement {
   const api = useMemo(() => new ConsoleApi(process.env.FOXGLOVE_API_URL!), []);
 
   const providers = [
     /* eslint-disable react/jsx-key */
-    <NativeStorageAppConfigurationProvider defaults={{ [AppSetting.OPEN_DIALOG]: true }} />,
+    <AppConfigurationContext.Provider value={appConfiguration} />,
     <ConsoleApiContext.Provider value={api} />,
     <ConsoleApiCurrentUserProvider />,
     <ConsoleApiRemoteLayoutStorageProvider />,

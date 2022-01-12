@@ -1,0 +1,100 @@
+diff --git a/cjs/react-dom-server.browser.development.js b/cjs/react-dom-server.browser.development.js
+index 37fe89d0aaba328fe4edfc13a2ec74875dbb1182..f611427793f1c96920354cba9e8e128e30b2cb50 100644
+--- a/cjs/react-dom-server.browser.development.js
++++ b/cjs/react-dom-server.browser.development.js
+@@ -239,6 +239,7 @@ function disabledLog() {}
+ 
+ disabledLog.__reactDisabledLog = true;
+ function disableLogs() {
++  return;
+   {
+     if (disabledDepth === 0) {
+       /* eslint-disable react-internal/no-production-logging */
+@@ -273,6 +274,7 @@ function disableLogs() {
+   }
+ }
+ function reenableLogs() {
++  return;
+   {
+     disabledDepth--;
+ 
+diff --git a/cjs/react-dom-server.node.development.js b/cjs/react-dom-server.node.development.js
+index 405bd3aa4aa448c4198bfe0345c6f73fa62411f2..6f16ed5d5a3d380a0f63c0fcad8e2da90b9e0a96 100644
+--- a/cjs/react-dom-server.node.development.js
++++ b/cjs/react-dom-server.node.development.js
+@@ -240,6 +240,7 @@ function disabledLog() {}
+ 
+ disabledLog.__reactDisabledLog = true;
+ function disableLogs() {
++  return;
+   {
+     if (disabledDepth === 0) {
+       /* eslint-disable react-internal/no-production-logging */
+@@ -274,6 +275,7 @@ function disableLogs() {
+   }
+ }
+ function reenableLogs() {
++  return;
+   {
+     disabledDepth--;
+ 
+diff --git a/cjs/react-dom.development.js b/cjs/react-dom.development.js
+index f0b9ee7705587aebc4c740afb7439f31cc6dfcf8..a6981823e9da31274a1ba9776300b167c1ba211d 100644
+--- a/cjs/react-dom.development.js
++++ b/cjs/react-dom.development.js
+@@ -768,6 +768,7 @@ function disabledLog() {}
+ 
+ disabledLog.__reactDisabledLog = true;
+ function disableLogs() {
++  return;
+   {
+     if (disabledDepth === 0) {
+       /* eslint-disable react-internal/no-production-logging */
+@@ -802,6 +803,7 @@ function disableLogs() {
+   }
+ }
+ function reenableLogs() {
++  return;
+   {
+     disabledDepth--;
+ 
+diff --git a/umd/react-dom-server.browser.development.js b/umd/react-dom-server.browser.development.js
+index 4dd5d34c1a4d727b253d232423d7307e4b33c411..d5c1d3abaacb90be330c24fc06a7696ec90fefbc 100644
+--- a/umd/react-dom-server.browser.development.js
++++ b/umd/react-dom-server.browser.development.js
+@@ -238,6 +238,7 @@
+ 
+   disabledLog.__reactDisabledLog = true;
+   function disableLogs() {
++    return;
+     {
+       if (disabledDepth === 0) {
+         /* eslint-disable react-internal/no-production-logging */
+@@ -272,6 +273,7 @@
+     }
+   }
+   function reenableLogs() {
++    return;
+     {
+       disabledDepth--;
+ 
+diff --git a/umd/react-dom.development.js b/umd/react-dom.development.js
+index 45db5aa39463f60fab611418c3e8660c29d81eec..3b593caa39d9a860d9b17762949c2366e280ae45 100644
+--- a/umd/react-dom.development.js
++++ b/umd/react-dom.development.js
+@@ -765,6 +765,7 @@
+ 
+   disabledLog.__reactDisabledLog = true;
+   function disableLogs() {
++    return;
+     {
+       if (disabledDepth === 0) {
+         /* eslint-disable react-internal/no-production-logging */
+@@ -799,6 +800,7 @@
+     }
+   }
+   function reenableLogs() {
++    return;
+     {
+       disabledDepth--;
+ 

@@ -1,7 +1,7 @@
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
-import { useRef } from "react";
+import { useLayoutEffect, useRef } from "react";
 
 import Log from "@foxglove/log";
 
@@ -18,14 +18,15 @@ const useWarnImmediateReRender =
     ? () => {}
     : () => {
         const renderedRef = useRef(false);
-
-        if (renderedRef.current) {
-          log.warn("Component re-rendered immediately");
-        }
-
-        renderedRef.current = true;
-        requestAnimationFrame(() => {
-          renderedRef.current = false;
+        useLayoutEffect(() => {
+          if (renderedRef.current) {
+            log.warn("Component re-rendered immediately");
+          }
+          renderedRef.current = true;
+          const raf = requestAnimationFrame(() => {
+            renderedRef.current = false;
+          });
+          return () => cancelAnimationFrame(raf);
         });
       };
 
