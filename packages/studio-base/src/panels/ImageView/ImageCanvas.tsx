@@ -531,7 +531,11 @@ export default function ImageCanvas(props: Props): JSX.Element {
         x: x * devicePixelRatio,
         y: y * devicePixelRatio,
       })
-      .then((r) => props.setActivePixelData(r));
+      .then((r) => {
+        if (r?.marker) {
+          props.setActivePixelData(r);
+        }
+      });
   }
 
   const keyDownHandlers = useMemo(() => {

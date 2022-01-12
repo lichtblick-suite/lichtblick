@@ -92,6 +92,15 @@ type Props = {
 };
 
 const useStyles = makeStyles(() => ({
+  root: {
+    position: "relative",
+    "[data-pixel-inspector]": {
+      visibility: "hidden",
+    },
+    "&:hover > [data-pixel-inspector]": {
+      visibility: "visible",
+    },
+  },
   controls: {
     display: "flex",
     flexWrap: "wrap",
@@ -639,7 +648,7 @@ function ImageView(props: Props) {
   const showEmptyState = !imageMessage || (shouldSynchronize && !synchronizedMessages);
 
   return (
-    <Flex col clip style={{ position: "relative" }}>
+    <Flex col clip className={classes.root}>
       {toolbar}
       <div style={{ display: "flex", flexDirection: "column", width: "100%", height: "100%" }}>
         {/* Always render the ImageCanvas because it's expensive to unmount and start up. */}
