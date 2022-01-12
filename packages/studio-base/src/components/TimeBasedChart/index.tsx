@@ -533,22 +533,15 @@ export default function TimeBasedChart(props: Props): JSX.Element {
       padding: 0,
     };
 
-    let minY;
-    let maxY;
+    let { min: minY, max: maxY } = yAxes;
 
-    if (!hasUserPannedOrZoomed) {
-      // we prefer user specified bounds over dataset bounds
-      minY = yAxes.min;
-      maxY = yAxes.max;
-
-      // chartjs doesn't like it when only one of min/max are specified for scales
-      // so if either is specified then we specify both
-      if (maxY == undefined && minY != undefined) {
-        maxY = datasetBounds.y.max;
-      }
-      if (minY == undefined && maxY != undefined) {
-        minY = datasetBounds.y.min;
-      }
+    // chartjs doesn't like it when only one of min/max are specified for scales
+    // so if either is specified then we specify both
+    if (maxY == undefined && minY != undefined) {
+      maxY = datasetBounds.y.max;
+    }
+    if (minY == undefined && maxY != undefined) {
+      minY = datasetBounds.y.min;
     }
 
     return {
@@ -561,7 +554,7 @@ export default function TimeBasedChart(props: Props): JSX.Element {
         ...yAxes.ticks,
       },
     } as ScaleOptions;
-  }, [datasetBounds.y, yAxes, hasUserPannedOrZoomed, theme.palette.neutralSecondary]);
+  }, [datasetBounds.y, yAxes, theme.palette.neutralSecondary]);
 
   const datasetBoundsRef = useRef(datasetBounds);
   datasetBoundsRef.current = datasetBounds;
