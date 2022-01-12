@@ -100,3 +100,20 @@ export const ErrorWithJsxElementDetails = (): JSX.Element => {
 ErrorWithJsxElementDetails.parameters = { colorScheme: "light" };
 export const ErrorWithJsxElementDetailsDark = ErrorWithJsxElementDetails.bind(undefined);
 ErrorWithJsxElementDetailsDark.parameters = { colorScheme: "dark" };
+
+export const ErrorWithNewlineDetails = (): JSX.Element => {
+  return (
+    <NotificationModal
+      onRequestClose={() => {}}
+      notification={{
+        id: "1",
+        message: "Error 1",
+        details: "Some details.\n\nWith a newline.",
+        read: false,
+        created: new Date(),
+        severity: "error",
+      }}
+    />
+  );
+};
+ErrorWithNewlineDetails.parameters = { colorScheme: "dark" };

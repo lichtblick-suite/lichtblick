@@ -58,7 +58,9 @@ export default function NotificationModal({
           underlined={false}
         />
       ) : details != undefined && details !== "" ? (
-        <Text>{details}</Text>
+        <Text style={{ whiteSpace: "pre-line" /* allow newlines in the details message */ }}>
+          {details}
+        </Text>
       ) : (
         "No details provided"
       )}
