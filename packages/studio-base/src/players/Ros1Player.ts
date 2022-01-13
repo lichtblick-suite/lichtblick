@@ -84,7 +84,7 @@ export default class Ros1Player implements Player {
   private _emitTimer?: ReturnType<typeof setTimeout>;
 
   constructor({ url, hostname, metricsCollector }: Ros1PlayerOpts) {
-    log.info(`initializing Ros1Player (url=${url})`);
+    log.info(`initializing Ros1Player (url=${url}, hostname=${hostname})`);
     this._metricsCollector = metricsCollector;
     this._url = url;
     this._hostname = hostname;

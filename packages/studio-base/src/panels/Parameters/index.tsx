@@ -12,7 +12,8 @@
 //   You may not use this file except in compliance with the License.
 
 import { union } from "lodash";
-import { ReactElement, useEffect, useMemo, useRef, useState } from "react";
+import { ReactElement, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useDebouncedCallback } from "use-debounce";
 
 import { ParameterValue } from "@foxglove/studio";
 import EmptyState from "@foxglove/studio-base/components/EmptyState";
@@ -51,8 +52,18 @@ function selectParameters(ctx: MessagePipelineContext) {
 
 function Parameters(): ReactElement {
   const capabilities = useMessagePipeline(selectCapabilities);
-  const setParameter = useMessagePipeline(selectSetParameter);
+  const setParameterUnbounced = useMessagePipeline(selectSetParameter);
   const parameters = useMessagePipeline(selectParameters);
+
+  const setParameter = useDebouncedCallback(
+    useCallback(
+      (name: string, value: ParameterValue) => {
+        setParameterUnbounced(name, value);
+      },
+      [setParameterUnbounced],
+    ),
+    200,
+  );
 
   const canGetParams = capabilities.includes(PlayerCapabilities.getParameters);
   const canSetParams = capabilities.includes(PlayerCapabilities.setParameters);
@@ -124,7 +135,9 @@ function Parameters(): ReactElement {
                         <JSONInput
                           dataTest={`parameter-value-input-${value}`}
                           value={value}
-                          onChange={(newVal) => setParameter(name, newVal as ParameterValue)}
+                          onChange={(newVal) => {
+                            setParameter(name, newVal as ParameterValue);
+                          }}
                         />
                       ) : (
                         value
