@@ -107,7 +107,7 @@ storiesOf("components/PanelToolbar", module)
   .add("non-floating (narrow)", () => {
     return (
       <MosaicWrapper>
-        <PanelToolbar helpContent={<div />}>
+        <PanelToolbar alwaysVisible helpContent={<div />}>
           <div style={{ width: "100%", lineHeight: "22px", paddingLeft: 5 }}>
             Some controls here
           </div>
@@ -119,7 +119,7 @@ storiesOf("components/PanelToolbar", module)
   .add("non-floating (wide with panel name)", () => {
     return (
       <MosaicWrapper width={500}>
-        <PanelToolbar helpContent={<div />}>
+        <PanelToolbar alwaysVisible helpContent={<div />}>
           <div style={{ width: "100%", lineHeight: "22px", paddingLeft: 5 }}>
             Some controls here
           </div>
@@ -136,7 +136,7 @@ storiesOf("components/PanelToolbar", module)
     );
     return (
       <MosaicWrapper width={500}>
-        <PanelToolbar helpContent={<div />} additionalIcons={additionalIcons}>
+        <PanelToolbar helpContent={<div />} additionalIcons={additionalIcons} alwaysVisible>
           <div style={{ width: "100%", lineHeight: "22px", paddingLeft: 5 }}>
             Some controls here
           </div>

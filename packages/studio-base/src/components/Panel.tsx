@@ -48,6 +48,7 @@ import Icon from "@foxglove/studio-base/components/Icon";
 import KeyListener from "@foxglove/studio-base/components/KeyListener";
 import PanelContext from "@foxglove/studio-base/components/PanelContext";
 import PanelErrorBoundary from "@foxglove/studio-base/components/PanelErrorBoundary";
+import { PanelRoot } from "@foxglove/studio-base/components/PanelRoot";
 import {
   useCurrentLayoutActions,
   useSelectedPanels,
@@ -69,47 +70,7 @@ import {
   getPathFromNode,
   updateTabPanelLayout,
 } from "@foxglove/studio-base/util/layout";
-import { colors, spacing } from "@foxglove/studio-base/util/sharedStyleConstants";
-
-const PanelRoot = styled.div<{ fullscreen: boolean; selected: boolean }>`
-  display: flex;
-  flex-direction: column;
-  flex: 1 1 auto;
-  overflow: hidden;
-  z-index: ${({ fullscreen }) => (fullscreen ? 10000 : 1)};
-  background-color: ${({ theme }) => (theme.isInverted ? colors.DARK : colors.LIGHT)};
-  position: ${({ fullscreen }) => (fullscreen ? "fixed" : "relative")};
-  border: ${({ fullscreen }) => (fullscreen ? "4px solid rgba(110, 81, 238, 0.3)" : "none")};
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: ${({ fullscreen }) => (fullscreen ? spacing.PLAYBACK_CONTROL_HEIGHT : 0)};
-
-  // To use css to hide/show toolbars on hover we use a global panelToolbar class
-  // because the PanelToolbar component is currently added within each panels render
-  // function rather than handling by the panel HOC
-
-  .panelToolbarHovered {
-    display: none;
-  }
-  :hover .panelToolbarHovered {
-    display: flex;
-  }
-  :after {
-    content: "";
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    opacity: ${({ selected }) => (selected ? 1 : 0)};
-    border: 1px solid ${colors.ACCENT};
-    position: absolute;
-    pointer-events: none;
-    transition: ${({ selected }) =>
-      selected ? "opacity 0.125s ease-out" : "opacity 0.05s ease-out"};
-    z-index: 100000;
-  }
-`;
+import { colors } from "@foxglove/studio-base/util/sharedStyleConstants";
 
 const ActionsOverlay = styled.div`
   cursor: pointer;

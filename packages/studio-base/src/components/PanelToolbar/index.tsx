@@ -15,24 +15,26 @@ import FullscreenExitIcon from "@mdi/svg/svg/fullscreen-exit.svg";
 import FullscreenIcon from "@mdi/svg/svg/fullscreen.svg";
 import HelpCircleOutlineIcon from "@mdi/svg/svg/help-circle-outline.svg";
 import cx from "classnames";
-import { useContext, useState, useMemo } from "react";
+import { useContext, useState, useMemo, useRef } from "react";
 import { useResizeDetector } from "react-resize-detector";
 
 import Icon from "@foxglove/studio-base/components/Icon";
 import PanelContext from "@foxglove/studio-base/components/PanelContext";
 import { useHelpInfo } from "@foxglove/studio-base/context/HelpInfoContext";
 import { useWorkspace } from "@foxglove/studio-base/context/WorkspaceContext";
+import { usePanelMousePresence } from "@foxglove/studio-base/hooks/usePanelMousePresence";
 
 import { PanelToolbarControls } from "./PanelToolbarControls";
 
 type Props = {
+  additionalIcons?: React.ReactNode;
+  alwaysVisible?: boolean;
+  backgroundColor?: string;
   children?: React.ReactNode;
   floating?: boolean;
   helpContent?: React.ReactNode;
-  additionalIcons?: React.ReactNode;
   hideToolbars?: boolean;
   isUnknownPanel?: boolean;
-  backgroundColor?: string;
 };
 
 const PANEL_TOOLBAR_HEIGHT = 26;
@@ -87,12 +89,13 @@ const useStyles = makeStyles((theme) => ({
 // and has a place to add custom controls via it's children property
 export default React.memo<Props>(function PanelToolbar({
   additionalIcons,
+  alwaysVisible = false,
+  backgroundColor,
   children,
   floating = false,
   helpContent,
   hideToolbars = false,
   isUnknownPanel = false,
-  backgroundColor,
 }: Props) {
   const styles = useStyles();
   const { isFullscreen, enterFullscreen, exitFullscreen } = useContext(PanelContext) ?? {};
@@ -161,27 +164,33 @@ export default React.memo<Props>(function PanelToolbar({
     refreshMode: "debounce",
   });
 
-  if (hideToolbars) {
-    return ReactNull;
-  }
-
   // floating toolbars only show when hovered - but hovering over a context menu would hide the toolbar
   // showToolbar is used to force-show elements even if not hovered
   const showToolbar = menuOpen || !!isUnknownPanel;
 
+  const containerRef = useRef<HTMLDivElement>(ReactNull);
+
+  const mousePresent = usePanelMousePresence(containerRef);
+  const shouldShow = alwaysVisible || (floating ? showToolbar || mousePresent : true);
+
+  if (hideToolbars) {
+    return ReactNull;
+  }
+
   return (
     <div ref={sizeRef}>
       <div
+        ref={containerRef}
         className={cx(styles.panelToolbarContainer, {
-          panelToolbarHovered: floating,
           floating,
           hasChildren: Boolean(children),
         })}
-        style={showToolbar ? { display: "flex", backgroundColor } : { backgroundColor }}
+        style={{ backgroundColor, display: shouldShow ? "flex" : "none" }}
       >
         {children}
         <PanelToolbarControls
-          showControls={showToolbar}
+          showControls={showToolbar || alwaysVisible}
+          mousePresent={mousePresent}
           floating={floating}
           showPanelName={(width ?? 0) > 360}
           additionalIcons={additionalIconsWithHelp}

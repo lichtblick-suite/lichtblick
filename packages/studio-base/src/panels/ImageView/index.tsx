@@ -94,12 +94,6 @@ type Props = {
 const useStyles = makeStyles(() => ({
   root: {
     position: "relative",
-    "[data-pixel-inspector]": {
-      visibility: "hidden",
-    },
-    "&:hover > [data-pixel-inspector]": {
-      visibility: "visible",
-    },
   },
   controls: {
     display: "flex",

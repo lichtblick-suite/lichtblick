@@ -3,13 +3,14 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 import { Box, Stack, Typography } from "@mui/material";
-import { ReactElement, useEffect, useState } from "react";
+import { ReactElement, useEffect, useRef, useState } from "react";
 import Tree from "react-json-tree";
 
 import ExpandingToolbar, {
   ToolGroup,
   ToolGroupFixedSizePane,
 } from "@foxglove/studio-base/components/ExpandingToolbar";
+import { usePanelMousePresence } from "@foxglove/studio-base/hooks/usePanelMousePresence";
 import { PixelData } from "@foxglove/studio-base/panels/ImageView/util";
 import { useJsonTreeTheme } from "@foxglove/studio-base/util/globalConstants";
 import { colors } from "@foxglove/studio-base/util/sharedStyleConstants";
@@ -61,6 +62,7 @@ export function ObjectPane({ pixelData }: { pixelData: PixelData | undefined }):
 }
 
 export function Toolbar({ pixelData }: { pixelData: PixelData | undefined }): JSX.Element {
+  const ref = useRef<HTMLDivElement>(ReactNull);
   const [selectedTab, setSelectedTab] = useState<TabName | undefined>();
 
   useEffect(() => {
@@ -69,15 +71,18 @@ export function Toolbar({ pixelData }: { pixelData: PixelData | undefined }): JS
     }
   }, [pixelData]);
 
+  const mousePresent = usePanelMousePresence(ref);
+
   return (
     <Stack
-      data-pixel-inspector
+      ref={ref}
       sx={{
         position: "absolute",
         top: 0,
         right: 0,
         mr: 2,
         mt: 8,
+        visibility: mousePresent ? "visible" : "hidden",
         zIndex: "drawer",
       }}
     >

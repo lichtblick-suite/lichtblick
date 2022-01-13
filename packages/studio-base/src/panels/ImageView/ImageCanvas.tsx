@@ -23,6 +23,7 @@ import { v4 as uuidv4 } from "uuid";
 import KeyListener from "@foxglove/studio-base/components/KeyListener";
 import { LegacyButton } from "@foxglove/studio-base/components/LegacyStyledComponents";
 import { Item } from "@foxglove/studio-base/components/Menu";
+import { usePanelMousePresence } from "@foxglove/studio-base/hooks/usePanelMousePresence";
 import { MessageEvent, Topic } from "@foxglove/studio-base/players/types";
 import { CompressedImage, Image } from "@foxglove/studio-base/types/Messages";
 import Rpc from "@foxglove/studio-base/util/Rpc";
@@ -53,13 +54,6 @@ const useStyles = makeStyles((theme) => ({
     width: "100%",
     height: "100%",
     position: "relative",
-
-    "&:hover > [data-zoom-menu]": {
-      display: "block",
-    },
-    "&:hover > [data-magnify-icon]": {
-      display: "block",
-    },
   },
   magnify: {
     position: "absolute !important" as unknown as "absolute",
@@ -68,7 +62,6 @@ const useStyles = makeStyles((theme) => ({
     zIndex: 102,
     opacity: 1,
     backgroundColor: `${theme.palette.neutralLight} !important`,
-    display: "none",
 
     ".hoverScreenshot &": {
       display: "block",
@@ -94,7 +87,6 @@ const useStyles = makeStyles((theme) => ({
     backgroundColor: theme.semanticColors.menuBackground,
     width: 145,
     borderRadius: "4%",
-    display: "none",
     boxShadow: theme.effects.elevation64,
 
     ".hoverScreenshot &": {
@@ -421,7 +413,7 @@ export default function ImageCanvas(props: Props): JSX.Element {
 
   const zoomContextMenu = useMemo(() => {
     return (
-      <div className={classes.zoomContextMenu} data-zoom-menu>
+      <div className={classes.zoomContextMenu}>
         <div className={cx(classes.menuItem, classes.notInteractive)}>
           Scroll or use the buttons below to zoom
         </div>
@@ -538,6 +530,10 @@ export default function ImageCanvas(props: Props): JSX.Element {
       });
   }
 
+  const zoomRef = useRef<HTMLDivElement>(ReactNull);
+
+  const mousePresent = usePanelMousePresence(zoomRef);
+
   const keyDownHandlers = useMemo(() => {
     return {
       "=": zoomIn,
@@ -567,14 +563,12 @@ export default function ImageCanvas(props: Props): JSX.Element {
           items={[{ key: "download", text: "Download Image", onClick: onDownloadImage }]}
         />
       )}
-      {openZoomContext && zoomContextMenu}
-      <LegacyButton
-        className={classes.magnify}
-        onClick={() => setOpenZoomContext((old) => !old)}
-        data-magnify-icon
-      >
-        <MagnifyIcon />
-      </LegacyButton>
+      <div ref={zoomRef} style={{ visibility: mousePresent ? "visible" : "hidden" }}>
+        {openZoomContext && zoomContextMenu}
+        <LegacyButton className={classes.magnify} onClick={() => setOpenZoomContext((old) => !old)}>
+          <MagnifyIcon />
+        </LegacyButton>
+      </div>
     </div>
   );
 }

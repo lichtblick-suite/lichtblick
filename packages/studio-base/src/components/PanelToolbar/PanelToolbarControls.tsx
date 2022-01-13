@@ -25,14 +25,15 @@ const PANEL_TOOLBAR_HEIGHT = 26;
 const PANEL_TOOLBAR_SPACING = 4;
 
 type PanelToolbarControlsProps = {
-  floating?: boolean;
   additionalIcons?: React.ReactNode;
+  floating?: boolean;
+  isUnknownPanel: boolean;
   menuOpen: boolean;
+  mousePresent?: boolean;
   // eslint-disable-next-line @foxglove/no-boolean-parameters
   setMenuOpen: (_: boolean) => void;
   showControls?: boolean;
   showPanelName?: boolean;
-  isUnknownPanel: boolean;
 };
 
 const useStyles = makeStyles({
@@ -67,24 +68,22 @@ const useStyles = makeStyles({
 // Keep controls, which don't change often, in a pure component in order to avoid re-rendering the
 // whole PanelToolbar when only children change.
 export const PanelToolbarControls = React.memo(function PanelToolbarControls({
-  menuOpen,
-  setMenuOpen,
   additionalIcons,
-  showControls = false,
   floating = false,
   isUnknownPanel,
+  menuOpen,
+  mousePresent = false,
+  setMenuOpen,
+  showControls = false,
   showPanelName = false,
 }: PanelToolbarControlsProps) {
   const panelContext = useContext(PanelContext);
   const styles = useStyles();
 
+  const shouldShow = showControls ? true : floating ? true : mousePresent;
+
   return (
-    <div
-      style={showControls ? { display: "flex" } : {}}
-      className={cx(styles.iconContainer, {
-        panelToolbarHovered: !floating,
-      })}
-    >
+    <div style={{ display: shouldShow ? "flex" : "none" }} className={cx(styles.iconContainer)}>
       {showPanelName && panelContext && (
         <div className={styles.panelName}>{panelContext.title}</div>
       )}
