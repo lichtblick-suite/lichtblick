@@ -7,6 +7,7 @@ import { createContext, useContext } from "react";
 import { IRemoteLayoutStorage } from "@foxglove/studio-base/services/IRemoteLayoutStorage";
 
 const RemoteLayoutStorageContext = createContext<IRemoteLayoutStorage | undefined>(undefined);
+RemoteLayoutStorageContext.displayName = "RemoteLayoutStorageContext";
 
 export function useRemoteLayoutStorage(): IRemoteLayoutStorage | undefined {
   return useContext(RemoteLayoutStorageContext);

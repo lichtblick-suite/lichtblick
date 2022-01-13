@@ -22,6 +22,7 @@ export interface AppConfiguration {
 }
 
 const AppConfigurationContext = createContext<AppConfiguration | undefined>(undefined);
+AppConfigurationContext.displayName = "AppConfigurationContext";
 
 export function useAppConfiguration(): AppConfiguration {
   const storage = useContext(AppConfigurationContext);

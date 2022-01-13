@@ -26,6 +26,7 @@ type HoverValueContext = Readonly<{
 }>;
 
 const Context = createSelectableContext<HoverValueContext>();
+Context.displayName = "HoverValueContext";
 
 export function useClearHoverValue(): HoverValueContext["clearHoverValue"] {
   return useContextSelector(

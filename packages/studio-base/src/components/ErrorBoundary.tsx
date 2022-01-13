@@ -137,6 +137,7 @@ function defaultRenderErrorDetails(props: ErrorRendererProps): JSX.Element {
 }
 
 export const HideErrorSourceLocations = createContext(false);
+HideErrorSourceLocations.displayName = "HideErrorSourceLocationsContext";
 
 export default class ErrorBoundary extends Component<PropsWithChildren<Props>, State> {
   override state: State = {

@@ -31,3 +31,4 @@ export type TabActions = {
 export const TabDndContext = createContext<{
   preventTabDrop: boolean;
 }>({ preventTabDrop: false });
+TabDndContext.displayName = "TabDndContext";

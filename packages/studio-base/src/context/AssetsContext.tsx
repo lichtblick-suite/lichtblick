@@ -23,6 +23,7 @@ const AssetsContext = createContext<Assets>({
   },
   assets: [],
 });
+AssetsContext.displayName = "AssetsContext";
 
 export interface AssetLoader {
   /**

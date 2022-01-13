@@ -7,6 +7,7 @@ import { createContext, useCallback, useContext, useRef } from "react";
 type ReadySignal = () => void;
 
 const ReadySignalContext = createContext<ReadySignal | undefined>(undefined);
+ReadySignalContext.displayName = "ReadySignalContext";
 
 /**
  * useReadySignal returns a function that can be called to indicate a story is ready to be captured

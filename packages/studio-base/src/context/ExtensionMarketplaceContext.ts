@@ -26,6 +26,7 @@ export interface ExtensionMarketplace {
 }
 
 const ExtensionMarketplaceContext = createContext<ExtensionMarketplace | undefined>(undefined);
+ExtensionMarketplaceContext.displayName = "ExtensionMarketplaceContext";
 
 export function useExtensionMarketplace(): ExtensionMarketplace {
   const extensionMarketplace = useContext(ExtensionMarketplaceContext);

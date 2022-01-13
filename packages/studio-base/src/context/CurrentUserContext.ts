@@ -24,6 +24,7 @@ const CurrentUserContext = createContext<CurrentUser>({
   signIn: () => {},
   signOut: async () => {},
 });
+CurrentUserContext.displayName = "CurrentUserContext";
 
 export function useCurrentUser(): CurrentUser {
   return useContext(CurrentUserContext);

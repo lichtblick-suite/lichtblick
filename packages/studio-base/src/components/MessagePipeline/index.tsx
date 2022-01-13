@@ -66,6 +66,7 @@ export type MessagePipelineContext = {
 
 // exported only for MockMessagePipelineProvider
 export const ContextInternal = createSelectableContext<MessagePipelineContext>();
+ContextInternal.displayName = "MessagePipelineContext";
 
 /**
  * useMessagePipelineGetter returns a function to access the current message pipeline context.

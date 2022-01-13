@@ -7,6 +7,7 @@ import { createContext, useContext } from "react";
 import { ILayoutManager } from "@foxglove/studio-base/services/ILayoutManager";
 
 const LayoutManagerContext = createContext<ILayoutManager | undefined>(undefined);
+LayoutManagerContext.displayName = "LayoutManagerContext";
 
 export function useLayoutManager(): ILayoutManager {
   const ctx = useContext(LayoutManagerContext);

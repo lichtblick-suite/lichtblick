@@ -101,6 +101,7 @@ export type SelectedPanelActions = {
 };
 
 const CurrentLayoutContext = createContext<ICurrentLayout | undefined>(undefined);
+CurrentLayoutContext.displayName = "CurrentLayoutContext";
 
 export function usePanelMosaicId(): string {
   return useGuaranteedContext(CurrentLayoutContext).mosaicId;

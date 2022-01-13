@@ -17,6 +17,7 @@ export type UserProfileStorage = {
 };
 
 export const UserProfileStorageContext = createContext<UserProfileStorage | undefined>(undefined);
+UserProfileStorageContext.displayName = "UserProfileStorageContext";
 
 export function useUserProfileStorage(): UserProfileStorage {
   const storage = useContext(UserProfileStorageContext);

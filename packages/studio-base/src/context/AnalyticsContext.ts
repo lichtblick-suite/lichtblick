@@ -8,6 +8,7 @@ import IAnalytics from "@foxglove/studio-base/services/IAnalytics";
 import NullAnalytics from "@foxglove/studio-base/services/NullAnalytics";
 
 const AnalyticsContext = createContext<IAnalytics>(new NullAnalytics());
+AnalyticsContext.displayName = "AnalyticsContext";
 
 export function useAnalytics(): IAnalytics {
   return useContext(AnalyticsContext);

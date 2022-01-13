@@ -6,10 +6,13 @@ import { createContext } from "react";
 
 // The ModalContext provides a hook to render elements inside a modal host -- this is usually a
 // provider of a theme that modal elements also need to access.
-export default createContext<{
+const ModalContext = createContext<{
   // Add an element to the modal host.
   // Returns a function to remove the added element.
   addModalElement: (_: React.ReactNode) => () => void;
 }>({
   addModalElement: () => () => {},
 });
+ModalContext.displayName = "ModalContext";
+
+export default ModalContext;

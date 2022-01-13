@@ -44,3 +44,4 @@ export const ThreeDimensionalVizContext = React.createContext<{
   colorOverrideByVariable: {},
   setColorOverrideByVariable: noop,
 });
+ThreeDimensionalVizContext.displayName = "ThreeDimensionalVizContext";

@@ -26,6 +26,7 @@ export type HelpInfoActions = {
 };
 
 const HelpInfoContext = createContext<IHelpInfo | undefined>(undefined);
+HelpInfoContext.displayName = "HelpInfoContext";
 
 export function useHelpInfo(): HelpInfoActions {
   const ctx = useGuaranteedContext(HelpInfoContext);

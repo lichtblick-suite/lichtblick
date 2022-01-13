@@ -36,6 +36,7 @@ export interface ExtensionLoader {
 }
 
 const ExtensionLoaderContext = createContext<ExtensionLoader | undefined>(undefined);
+ExtensionLoaderContext.displayName = "ExtensionLoaderContext";
 
 export function useExtensionLoader(): ExtensionLoader {
   const extensionLoader = useContext(ExtensionLoaderContext);

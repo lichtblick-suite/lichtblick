@@ -9,6 +9,7 @@ import { Storage } from "../../common/types";
 const NativeStorageContext = createContext<Storage | undefined>(
   (global as { storageBridge?: Storage }).storageBridge,
 );
+NativeStorageContext.displayName = "NativeStorageContext";
 
 export function useNativeStorage(): Storage {
   const nativeStorage = useContext(NativeStorageContext);

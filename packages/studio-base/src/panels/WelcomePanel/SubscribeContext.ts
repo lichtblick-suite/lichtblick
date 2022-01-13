@@ -9,6 +9,7 @@ import subscribeToNewsletter from "./subscribeToNewsletter";
 type SubscribeNewsletterFn = (email: string) => Promise<void> | void;
 
 const SubscribeContext = createContext<SubscribeNewsletterFn>(subscribeToNewsletter);
+SubscribeContext.displayName = "SubscribeContext";
 
 function useSubscribeContext(): SubscribeNewsletterFn {
   return useContext(SubscribeContext);

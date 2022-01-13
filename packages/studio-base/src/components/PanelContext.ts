@@ -34,6 +34,7 @@ export type PanelContextType<T> = {
 };
 // Context used for components to know which panel they are inside
 const PanelContext = React.createContext<PanelContextType<PanelConfig> | undefined>(undefined);
+PanelContext.displayName = "PanelContext";
 
 export function usePanelContext(): PanelContextType<PanelConfig> {
   const context = React.useContext(PanelContext);

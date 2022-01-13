@@ -7,6 +7,7 @@ import { createContext, useContext } from "react";
 import { ILayoutStorage } from "@foxglove/studio-base/services/ILayoutStorage";
 
 const LayoutStorageContext = createContext<ILayoutStorage | undefined>(undefined);
+LayoutStorageContext.displayName = "LayoutStorageContext";
 
 export function useLayoutStorage(): ILayoutStorage {
   const ctx = useContext(LayoutStorageContext);

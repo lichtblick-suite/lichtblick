@@ -44,6 +44,7 @@ export interface PanelCatalog {
 }
 
 const PanelCatalogContext = createContext<PanelCatalog | undefined>(undefined);
+PanelCatalogContext.displayName = "PanelCatalogContext";
 
 export function usePanelCatalog(): PanelCatalog {
   const panelCatalog = useContext(PanelCatalogContext);

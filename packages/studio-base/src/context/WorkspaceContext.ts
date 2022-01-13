@@ -19,6 +19,7 @@ export const WorkspaceContext = createContext({
     throw new Error("Must be in a WorkspaceContext.Provider to open layout browser");
   },
 });
+WorkspaceContext.displayName = "WorkspaceContext";
 
 export function useWorkspace(): {
   panelSettingsOpen: boolean;

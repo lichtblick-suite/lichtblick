@@ -28,6 +28,7 @@ export interface NativeAppMenu {
 }
 
 const NativeAppMenuContext = createContext<NativeAppMenu | undefined>(undefined);
+NativeAppMenuContext.displayName = "NativeAppMenuContext";
 
 export function useNativeAppMenu(): NativeAppMenu | undefined {
   return useContext(NativeAppMenuContext);

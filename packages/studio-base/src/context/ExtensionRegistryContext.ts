@@ -20,6 +20,7 @@ export interface ExtensionRegistry {
 }
 
 const ExtensionRegistryContext = createContext<ExtensionRegistry | undefined>(undefined);
+ExtensionRegistryContext.displayName = "ExtensionRegistryContext";
 
 export function useExtensionRegistry(): ExtensionRegistry {
   const extensionRegistry = useContext(ExtensionRegistryContext);

@@ -729,3 +729,4 @@ export default function useTopicTree({
 }
 
 export const TopicTreeContext = createContext<UseTreeOutput | undefined>(undefined);
+TopicTreeContext.displayName = "TopicTreeContext";

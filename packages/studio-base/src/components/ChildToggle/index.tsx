@@ -42,6 +42,7 @@ type ContainsOpenProps = {
 
 // eslint-disable-next-line @foxglove/no-boolean-parameters
 const Context = React.createContext((_opening: boolean) => {});
+Context.displayName = "ChildToggleContainsOpenContext";
 
 // Component for detecting if any child component is opened or not. Handy for
 // not hiding things when there is a dropdown open or so.

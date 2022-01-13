@@ -7,6 +7,7 @@ import { createContext, useContext } from "react";
 import ConsoleApi from "@foxglove/studio-base/services/ConsoleApi";
 
 const ConsoleApiContext = createContext<ConsoleApi | undefined>(undefined);
+ConsoleApiContext.displayName = "ConsoleApiContext";
 
 function useConsoleApi(): ConsoleApi {
   const api = useContext(ConsoleApiContext);

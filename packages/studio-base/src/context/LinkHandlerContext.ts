@@ -5,4 +5,7 @@ import { createContext } from "react";
 
 // This context provides a function that handles link clicks, for example to handle app-internal
 // links by showing a modal dialog rather than actualy navigating.
-export default createContext<(event: React.MouseEvent, href: string) => void>(() => {});
+const LinkHandlerContext = createContext<(event: React.MouseEvent, href: string) => void>(() => {});
+LinkHandlerContext.displayName = "LinkHandlerContext";
+
+export default LinkHandlerContext;

@@ -15,4 +15,7 @@ type ILayoutStorageDebugging = {
   injectDelete: (id: LayoutID) => Promise<void>;
 };
 
-export default createContext<ILayoutStorageDebugging | undefined>(undefined);
+const LayoutStorageDebuggingContext = createContext<ILayoutStorageDebugging | undefined>(undefined);
+LayoutStorageDebuggingContext.displayName = "LayoutStorageDebuggingContext";
+
+export default LayoutStorageDebuggingContext;

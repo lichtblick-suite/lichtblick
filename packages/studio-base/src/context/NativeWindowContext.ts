@@ -10,6 +10,7 @@ export interface NativeWindow {
 }
 
 const NativeWindowContext = createContext<NativeWindow | undefined>(undefined);
+NativeWindowContext.displayName = "NativeWindowContext";
 
 export function useNativeWindow(): NativeWindow | undefined {
   return useContext(NativeWindowContext);
