@@ -2,7 +2,7 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { Link, Stack, Button, Box } from "@mui/material";
+import { Box, Button, Link, Stack } from "@mui/material";
 import { captureException } from "@sentry/core";
 import { Component, ErrorInfo, PropsWithChildren, ReactNode } from "react";
 
@@ -11,14 +11,15 @@ import { AppError } from "@foxglove/studio-base/util/errors";
 import ErrorDisplay from "./ErrorDisplay";
 
 type Props = {
-  actions?: JSX.Element;
+  onResetPanel: () => void;
+  onRemovePanel: () => void;
 };
 
 type State = {
   currentError: { error: Error; errorInfo: ErrorInfo } | undefined;
 };
 
-export default class ErrorBoundary extends Component<PropsWithChildren<Props>, State> {
+export default class PanelErrorBoundary extends Component<PropsWithChildren<Props>, State> {
   override state: State = {
     currentError: undefined,
   };
@@ -30,27 +31,14 @@ export default class ErrorBoundary extends Component<PropsWithChildren<Props>, S
 
   override render(): ReactNode {
     if (this.state.currentError) {
-      const actions = this.props.actions ?? (
-        <>
-          <Stack direction="row" spacing={1}>
-            <Box sx={{ flexGrow: 1 }} />
-            <Button
-              variant="outlined"
-              color="secondary"
-              onClick={() => this.setState({ currentError: undefined })}
-            >
-              Dismiss
-            </Button>
-          </Stack>
-        </>
-      );
       return (
         <ErrorDisplay
+          title="The panel encountered an unexpected error"
           error={this.state.currentError?.error}
           errorInfo={this.state.currentError?.errorInfo}
           content={
             <p>
-              Something went wrong in the app.{" "}
+              Something went wrong in the panel.{" "}
               <Link
                 sx={{ cursor: "pointer" }}
                 color="inherit"
@@ -58,10 +46,39 @@ export default class ErrorBoundary extends Component<PropsWithChildren<Props>, S
               >
                 Dismiss this error
               </Link>{" "}
-              to continue using the app. If the issue persists try restarting the app.
+              to continue using the panel. If the issue persists try resetting the panel.
             </p>
           }
-          actions={actions}
+          actions={
+            <>
+              <Stack direction="row" spacing={1}>
+                <Box sx={{ flexGrow: 1 }} />
+                <Button
+                  variant="text"
+                  title="remove the panel"
+                  color="error"
+                  onClick={this.props.onRemovePanel}
+                >
+                  Remove Panel
+                </Button>
+                <Button
+                  variant="outlined"
+                  title="reset panel settings to default values"
+                  color="error"
+                  onClick={this.props.onResetPanel}
+                >
+                  Reset Panel
+                </Button>
+                <Button
+                  variant="outlined"
+                  color="secondary"
+                  onClick={() => this.setState({ currentError: undefined })}
+                >
+                  Dismiss
+                </Button>
+              </Stack>
+            </>
+          }
         />
       );
     }

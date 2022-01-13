@@ -15,7 +15,6 @@ import { DndProvider } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
 import { createGlobalStyle } from "styled-components";
 
-import { HideErrorSourceLocations } from "@foxglove/studio-base/components/ErrorBoundary";
 import MockPanelContextProvider from "@foxglove/studio-base/components/MockPanelContextProvider";
 import Panel from "@foxglove/studio-base/components/Panel";
 import PanelToolbar from "@foxglove/studio-base/components/PanelToolbar";
@@ -120,16 +119,14 @@ const PanelToolbarShown = createGlobalStyle`
 export const PanelWithError = (): JSX.Element => {
   return (
     <DndProvider backend={HTML5Backend}>
-      <HideErrorSourceLocations.Provider value={true}>
-        <PanelToolbarShown />
-        <PanelSetup
-          panelCatalog={new MockPanelCatalog()}
-          fixture={{ topics: [], datatypes: new Map(), frame: {}, layout: "Sample2!4co6n9d" }}
-          omitDragAndDrop
-        >
-          <PanelLayout />
-        </PanelSetup>
-      </HideErrorSourceLocations.Provider>
+      <PanelToolbarShown />
+      <PanelSetup
+        panelCatalog={new MockPanelCatalog()}
+        fixture={{ topics: [], datatypes: new Map(), frame: {}, layout: "Sample2!4co6n9d" }}
+        omitDragAndDrop
+      >
+        <PanelLayout />
+      </PanelSetup>
     </DndProvider>
   );
 };

@@ -11,7 +11,7 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { MessageBar, MessageBarType, Stack, useTheme, makeStyles } from "@fluentui/react";
+import { makeStyles } from "@fluentui/react";
 import BorderAllIcon from "@mdi/svg/svg/border-all.svg";
 import ExpandAllOutlineIcon from "@mdi/svg/svg/expand-all-outline.svg";
 import GridLargeIcon from "@mdi/svg/svg/grid-large.svg";
@@ -44,11 +44,10 @@ import styled from "styled-components";
 import { useShallowMemo } from "@foxglove/hooks";
 import { useConfigById } from "@foxglove/studio-base/PanelAPI";
 import Button from "@foxglove/studio-base/components/Button";
-import ErrorBoundary, { ErrorRendererProps } from "@foxglove/studio-base/components/ErrorBoundary";
 import Icon from "@foxglove/studio-base/components/Icon";
 import KeyListener from "@foxglove/studio-base/components/KeyListener";
 import PanelContext from "@foxglove/studio-base/components/PanelContext";
-import PanelToolbar from "@foxglove/studio-base/components/PanelToolbar";
+import PanelErrorBoundary from "@foxglove/studio-base/components/PanelErrorBoundary";
 import {
   useCurrentLayoutActions,
   useSelectedPanels,
@@ -239,25 +238,6 @@ type ComponentConstructorType<P> = { displayName?: string } & (
   | { (props: P): React.ReactElement<unknown> | ReactNull }
 );
 
-function ErrorToolbar(errorProps: ErrorRendererProps): JSX.Element {
-  const theme = useTheme();
-  return (
-    <Stack style={{ overflow: "hidden" }}>
-      <PanelToolbar backgroundColor={theme.semanticColors.errorBackground}>
-        <MessageBar
-          messageBarType={MessageBarType.error}
-          dismissIconProps={{ iconName: "Refresh" }}
-          dismissButtonAriaLabel="Reset"
-          onDismiss={errorProps.onDismiss}
-        >
-          {errorProps.error.toString()}
-        </MessageBar>
-      </PanelToolbar>
-      {errorProps.defaultRenderErrorDetails(errorProps)}
-    </Stack>
-  );
-}
-
 // HOC that wraps panel in an error boundary and flex box.
 // Gives panel a `config` and `saveConfig`.
 //   export default Panel(MyPanelComponent)
@@ -323,6 +303,10 @@ export default function Panel<
 
     const defaultConfig = PanelComponent.defaultConfig;
     const [savedConfig, saveConfig] = useConfigById<Config>(childId);
+
+    const resetPanel = useCallback(() => {
+      saveConfig(defaultConfig);
+    }, [defaultConfig, saveConfig]);
 
     // PanelSettings needs useConfigById to return a config
     // If there is no saved config (or it is an empty object), we save the default config provided
@@ -696,9 +680,9 @@ export default function Panel<
                 </div>
               </ActionsOverlay>
             )}
-            <ErrorBoundary renderError={(errorProps) => <ErrorToolbar {...errorProps} />}>
+            <PanelErrorBoundary onRemovePanel={removePanel} onResetPanel={resetPanel}>
               <React.StrictMode>{child}</React.StrictMode>
-            </ErrorBoundary>
+            </PanelErrorBoundary>
             {process.env.NODE_ENV !== "production" && (
               <div className={classes.perfInfo} ref={perfInfo} />
             )}
