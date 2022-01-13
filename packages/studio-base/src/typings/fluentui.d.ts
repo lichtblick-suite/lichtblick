@@ -54,6 +54,7 @@ declare global {
     | "DataManagementSettings"
     | "Delete"
     | "DependencyAdd"
+    | "DoubleChevronDown"
     | "Download"
     | "DownloadDocument"
     | "Drag"

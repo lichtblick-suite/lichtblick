@@ -50,10 +50,14 @@ function Stamp(props: {
 
 const classes = mergeStyleSets({
   root: {
+    // Subsequent lines are indented bu using left padding, so we undo the padding for the first line
+    // with textIndent
     textIndent: "-20px",
     paddingLeft: "20px",
     whiteSpace: "pre-wrap",
-    lineHeight: "1.2",
+    paddingTop: "1px",
+    paddingBottom: "1px",
+    lineHeight: "1",
     fontFamily: fonts.MONOSPACE,
   },
 });

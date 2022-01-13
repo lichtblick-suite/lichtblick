@@ -11,8 +11,8 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { Stack } from "@fluentui/react";
-import { useCallback, useMemo, useRef } from "react";
+import { IconButton, IList, List, Stack } from "@fluentui/react";
+import { useCallback, useLayoutEffect, useMemo, useRef, useState } from "react";
 
 import * as PanelAPI from "@foxglove/studio-base/PanelAPI";
 import Panel from "@foxglove/studio-base/components/Panel";
@@ -22,11 +22,12 @@ import { useAppTimeFormat } from "@foxglove/studio-base/hooks";
 import { MessageEvent } from "@foxglove/studio-base/players/types";
 
 import FilterBar, { FilterBarProps } from "./FilterBar";
-import LogList from "./LogList";
 import LogMessage from "./LogMessage";
 import filterMessages from "./filterMessages";
 import helpContent from "./index.help.md";
 import { RosgraphMsgs$Log } from "./types";
+
+type ArrayElementType<T extends readonly unknown[]> = T extends readonly (infer E)[] ? E : never;
 
 type Config = {
   searchTerms: string[];
@@ -72,8 +73,15 @@ const LogPanel = React.memo(({ config, saveConfig }: Props) => {
 
   // avoid making new sets for node names
   // the filter bar uess the node names during on-demand filtering
-  const seenNodeNames = useRef(new Set<string>());
-  messages.forEach((msg) => seenNodeNames.current.add(msg.message.name));
+  const seenNodeNamesCache = useRef(new Set<string>());
+
+  const seenNodeNames = useMemo(() => {
+    for (const msg of messages) {
+      seenNodeNamesCache.current.add(msg.message.name);
+    }
+
+    return seenNodeNamesCache.current;
+  }, [messages]);
 
   const searchTermsSet = useMemo(() => new Set(searchTerms), [searchTerms]);
 
@@ -81,6 +89,8 @@ const LogPanel = React.memo(({ config, saveConfig }: Props) => {
     () => filterMessages(messages, { minLogLevel, searchTerms }),
     [messages, minLogLevel, searchTerms],
   );
+
+  const listRef = useRef<IList>(ReactNull);
 
   const topicToRenderMenu = (
     <TopicToRenderMenu
@@ -92,27 +102,90 @@ const LogPanel = React.memo(({ config, saveConfig }: Props) => {
     />
   );
 
+  const [hasUserScrolled, setHasUserScrolled] = useState(false);
+  const scrollByUpdate = useRef<boolean>(false);
+
+  const divRef = useRef<HTMLDivElement>(ReactNull);
+
+  function scrollToBottom() {
+    const div = divRef.current;
+    if (!div) {
+      return;
+    }
+
+    div.scrollTop = div.scrollHeight;
+  }
+
+  function scrollToBottomAction() {
+    setHasUserScrolled(false);
+    scrollByUpdate.current = true;
+    scrollToBottom();
+  }
+
+  useLayoutEffect(() => {
+    const div = divRef.current;
+    if (!div) {
+      return;
+    }
+
+    const listener = () => {
+      if (!scrollByUpdate.current) {
+        setHasUserScrolled(true);
+      }
+      scrollByUpdate.current = false;
+    };
+
+    div.addEventListener("scroll", listener);
+    return () => {
+      div.removeEventListener("scroll", listener);
+    };
+  }, []);
+
   return (
     <Stack verticalFill>
       <PanelToolbar helpContent={helpContent} additionalIcons={topicToRenderMenu}>
         <FilterBar
           searchTerms={searchTermsSet}
           minLogLevel={minLogLevel}
-          nodeNames={seenNodeNames.current}
+          nodeNames={seenNodeNames}
           messages={filteredMessages}
           onFilterChange={onFilterChange}
         />
       </PanelToolbar>
-      <Stack grow>
-        <LogList
-          items={filteredMessages}
-          renderRow={({ item, style, key, ref }) => (
-            <div ref={ref} key={key} style={style}>
-              <LogMessage msg={item.message} timestampFormat={timeFormat} timeZone={timeZone} />
-            </div>
-          )}
-        />
+      <Stack grow style={{ overflow: "hidden" }}>
+        <div ref={divRef} style={{ height: "100%", overflow: "auto" }}>
+          {/* items property wants a mutable array but filteredMessages is readonly */}
+          <List
+            componentRef={listRef}
+            items={filteredMessages as ArrayElementType<typeof filteredMessages>[]}
+            onPagesUpdated={() => {
+              // If the user has scrolled manually then we avoid automatic scrolling
+              if (!hasUserScrolled) {
+                scrollByUpdate.current = true;
+                scrollToBottom();
+              }
+            }}
+            onRenderCell={(item) => {
+              if (!item) {
+                return;
+              }
+
+              return (
+                <LogMessage msg={item.message} timestampFormat={timeFormat} timeZone={timeZone} />
+              );
+            }}
+          />
+        </div>
       </Stack>
+      {hasUserScrolled && (
+        <div style={{ position: "absolute", bottom: 10, right: 10 }}>
+          <IconButton
+            iconProps={{ iconName: "DoubleChevronDown" }}
+            title="Scroll to bottom"
+            onClick={scrollToBottomAction}
+          />
+        </div>
+      )}
     </Stack>
   );
 });

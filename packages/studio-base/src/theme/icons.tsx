@@ -119,6 +119,7 @@ const icons: {
   DataManagementSettings: <Icons.DataManagementSettingsIcon />,
   Delete: <Icons.DeleteIcon />,
   DependencyAdd: <Icons.DependencyAddIcon />,
+  DoubleChevronDown: <Icons.DoubleChevronDownIcon />,
   Download: <Icons.DownloadIcon />,
   DownloadDocument: <Icons.DownloadDocumentIcon />,
   Drag: <DragIcon />,

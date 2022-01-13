@@ -26,6 +26,8 @@ export default function filterMessages(
     return messages;
   }
 
+  const searchTermsInLowerCase = searchTerms.map((term) => term.toLowerCase());
+
   return messages.filter((message) => {
     const logMessage = message.message;
     if (logMessage.level < minLogLevel) {
@@ -36,7 +38,6 @@ export default function filterMessages(
       return true;
     }
 
-    const searchTermsInLowerCase = searchTerms.map((term) => term.toLowerCase());
     const { name, msg } = logMessage;
     const lowerCaseName = name.toLowerCase();
     const lowerCaseMsg = msg.toLowerCase();
