@@ -159,18 +159,6 @@ export function PanelActionsDropdown({ isOpen, setIsOpen, isUnknownPanel }: Prop
     if (!isUnknownPanel) {
       items.push(
         {
-          key: "fullscreen",
-          text: "Fullscreen",
-          onClick: () => {
-            panelContext?.enterFullscreen();
-          },
-          "data-test": "panel-menu-fullscreen",
-          iconProps: {
-            iconName: "FullScreenMaximize",
-            styles: { root: { height: 24, marginLeft: 2, marginRight: 6 } },
-          },
-        },
-        {
           key: "hsplit",
           text: "Split horizontal",
           onClick: () => split(panelContext?.id, "column"),

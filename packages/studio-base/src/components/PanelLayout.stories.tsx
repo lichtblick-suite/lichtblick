@@ -186,8 +186,7 @@ export const FullScreen = (): JSX.Element => {
         omitDragAndDrop
         onMount={() => {
           setTimeout(() => {
-            (document.querySelectorAll("[data-test=panel-menu]")[0] as any).click();
-            (document.querySelectorAll("[data-test=panel-menu-fullscreen]")[0] as any).click();
+            (document.querySelectorAll("[data-test=panel-toolbar-fullscreen]")[0] as any).click();
           }, DEFAULT_CLICK_DELAY);
         }}
       >

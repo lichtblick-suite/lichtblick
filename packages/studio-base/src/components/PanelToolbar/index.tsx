@@ -124,7 +124,12 @@ export default React.memo<Props>(function PanelToolbar({
           </Icon>
         )}
         {isFullscreen === false && (
-          <Icon fade tooltip="Fullscreen" onClick={enterFullscreen}>
+          <Icon
+            fade
+            tooltip="Fullscreen"
+            dataTest="panel-toolbar-fullscreen"
+            onClick={enterFullscreen}
+          >
             <FullscreenIcon />
           </Icon>
         )}
