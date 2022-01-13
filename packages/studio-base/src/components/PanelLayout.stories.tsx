@@ -95,7 +95,7 @@ export const PanelNotFound = (): JSX.Element => {
       <PanelSetup
         onMount={() => {
           setTimeout(() => {
-            (document.querySelectorAll("[data-test=panel-settings]")[0] as any).click();
+            (document.querySelectorAll("[data-test=panel-menu]")[0] as any).click();
           }, DEFAULT_CLICK_DELAY);
         }}
         fixture={{ topics: [], datatypes: new Map(), frame: {}, layout: "UnknownPanel!4co6n9d" }}
@@ -140,8 +140,8 @@ export const RemoveUnknownPanel = (): JSX.Element => {
       <PanelSetup
         onMount={() => {
           setTimeout(() => {
-            (document.querySelectorAll("[data-test=panel-settings]")[0] as any).click();
-            (document.querySelectorAll("[data-test=panel-settings-remove]")[0] as any).click();
+            (document.querySelectorAll("[data-test=panel-menu]")[0] as any).click();
+            (document.querySelectorAll("[data-test=panel-menu-remove]")[0] as any).click();
           }, DEFAULT_CLICK_DELAY);
         }}
         fixture={{ topics: [], datatypes: new Map(), frame: {}, layout: "UnknownPanel!4co6n9d" }}
@@ -189,8 +189,8 @@ export const FullScreen = (): JSX.Element => {
         omitDragAndDrop
         onMount={() => {
           setTimeout(() => {
-            (document.querySelectorAll("[data-test=panel-settings]")[0] as any).click();
-            (document.querySelectorAll("[data-test=panel-settings-fullscreen]")[0] as any).click();
+            (document.querySelectorAll("[data-test=panel-menu]")[0] as any).click();
+            (document.querySelectorAll("[data-test=panel-menu-fullscreen]")[0] as any).click();
           }, DEFAULT_CLICK_DELAY);
         }}
       >
