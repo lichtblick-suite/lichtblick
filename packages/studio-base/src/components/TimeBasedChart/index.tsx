@@ -454,6 +454,12 @@ export default function TimeBasedChart(props: Props): JSX.Element {
       return { min: undefined, max: undefined };
     }
 
+    // If we're the source of global bounds then use our current values
+    // to avoid scale feedback jitter.
+    if (globalBounds?.sourceId === componentId && globalBounds.userInteraction) {
+      return { min: undefined, max: undefined };
+    }
+
     let min: number | undefined;
     let max: number | undefined;
 
@@ -491,6 +497,7 @@ export default function TimeBasedChart(props: Props): JSX.Element {
 
     return { min, max };
   }, [
+    componentId,
     currentTime,
     datasetBounds.x.max,
     datasetBounds.x.min,
