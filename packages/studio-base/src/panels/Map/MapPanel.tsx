@@ -13,6 +13,7 @@ import {
   LayerGroup,
 } from "leaflet";
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
+import { useResizeDetector } from "react-resize-detector";
 import { useLatest } from "react-use";
 import { useDebouncedCallback } from "use-debounce";
 
@@ -65,6 +66,19 @@ function MapPanel(props: MapPanelProps): JSX.Element {
   const [previewTime, setPreviewTime] = useState<number | undefined>();
 
   const [currentMap, setCurrentMap] = useState<LeafMap | undefined>(undefined);
+
+  const onResize = useCallback(() => {
+    currentMap?.invalidateSize();
+  }, [currentMap]);
+
+  // Use a debounce and 0 refresh rate to avoid triggering a resize observation while handling
+  // an existing resize observation.
+  // https://github.com/maslianok/react-resize-detector/issues/45
+  const { ref: sizeRef } = useResizeDetector({
+    refreshRate: 0,
+    refreshMode: "debounce",
+    onResize,
+  });
 
   // panel extensions must notify when they've completed rendering
   // onRender will setRenderDone to a done callback which we can invoke after we've rendered
@@ -484,7 +498,7 @@ function MapPanel(props: MapPanelProps): JSX.Element {
   }, [renderDone]);
 
   return (
-    <div style={{ width: "100%", height: "100%" }}>
+    <div ref={sizeRef} style={{ width: "100%", height: "100%" }}>
       {!center && <EmptyState>Waiting for first GPS point...</EmptyState>}
       <div
         ref={mapContainerRef}
