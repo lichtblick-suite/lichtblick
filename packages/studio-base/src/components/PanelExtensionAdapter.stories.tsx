@@ -51,7 +51,7 @@ export const CatchRenderError = (): JSX.Element => {
 };
 
 function SimplePanel({ context }: { context: PanelExtensionContext }) {
-  const [parameters, setParameters] = useState<Map<string, ParameterValue>>(new Map());
+  const [parameters, setParameters] = useState<ReadonlyMap<string, ParameterValue>>(new Map());
 
   useLayoutEffect(() => {
     context.watch("parameters");

@@ -3,12 +3,21 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 import { useTheme } from "@fluentui/react";
-import { CSSProperties, useCallback, useLayoutEffect, useMemo, useRef, useState } from "react";
+import {
+  CSSProperties,
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { v4 as uuid } from "uuid";
 
 import Logger from "@foxglove/log";
 import { fromSec, toSec } from "@foxglove/rostime";
 import {
+  AppSettingValue,
   ExtensionPanelRegistration,
   MessageEvent,
   PanelExtensionContext,
@@ -22,6 +31,7 @@ import {
 } from "@foxglove/studio-base/components/MessagePipeline";
 import { usePanelContext } from "@foxglove/studio-base/components/PanelContext";
 import PanelToolbar from "@foxglove/studio-base/components/PanelToolbar";
+import { useAppConfiguration } from "@foxglove/studio-base/context/AppConfigurationContext";
 import {
   useClearHoverValue,
   useHoverValue,
@@ -92,6 +102,8 @@ function PanelExtensionAdapter(props: PanelExtensionAdapterProps): JSX.Element {
   const [error, setError] = useState<Error | undefined>();
   const watchedFieldsRef = useRef(new Set<keyof RenderState>());
   const subscribedTopicsRef = useRef(new Set<string>());
+  const currentAppSettingsRef = useRef(new Map<string, AppSettingValue>());
+  const [subscribedAppSettings, setSubscribedAppSettings] = useState<string[]>([]);
   const previousPlayerStateRef = useRef<PlayerState | undefined>(undefined);
 
   // To avoid updating extended message stores once message pipeline blocks are no longer updating
@@ -130,6 +142,8 @@ function PanelExtensionAdapter(props: PanelExtensionAdapterProps): JSX.Element {
   hoverValueRef.current = hoverValue;
 
   const colorScheme = useTheme().isInverted ? "dark" : "light";
+
+  const appConfiguration = useAppConfiguration();
 
   // renderPanelImpl invokes the panel extension context's render function with updated
   // render state fields.
@@ -238,6 +252,13 @@ function PanelExtensionAdapter(props: PanelExtensionAdapterProps): JSX.Element {
       }
     }
 
+    if (watchedFieldsRef.current.has("appSettings")) {
+      if (renderState.appSettings !== currentAppSettingsRef.current) {
+        shouldRender = true;
+        renderState.appSettings = currentAppSettingsRef.current;
+      }
+    }
+
     if (!shouldRender) {
       return;
     }
@@ -275,6 +296,30 @@ function PanelExtensionAdapter(props: PanelExtensionAdapterProps): JSX.Element {
     },
     [queueRender],
   );
+
+  useEffect(() => {
+    const handlers = new Map<string, (newValue: AppSettingValue) => void>();
+    for (const key of subscribedAppSettings) {
+      currentAppSettingsRef.current.set(key, appConfiguration.get(key));
+
+      const handler = (newValue: AppSettingValue) => {
+        currentAppSettingsRef.current = new Map(currentAppSettingsRef.current);
+        currentAppSettingsRef.current.set(key, newValue);
+        queueRender();
+      };
+      handlers.set(key, handler);
+      appConfiguration.addChangeListener(key, handler);
+    }
+
+    currentAppSettingsRef.current = new Map(currentAppSettingsRef.current);
+    queueRender();
+
+    return () => {
+      for (const [key, handler] of handlers.entries()) {
+        appConfiguration.removeChangeListener(key, handler);
+      }
+    };
+  }, [appConfiguration, queueRender, subscribedAppSettings]);
 
   // Queue render on hover value changes which occur outside the message pipeline
   useLayoutEffect(() => {
@@ -406,6 +451,10 @@ function PanelExtensionAdapter(props: PanelExtensionAdapterProps): JSX.Element {
       unsubscribeAll: () => {
         subscribedTopicsRef.current.clear();
         setSubscriptions(panelId, []);
+      },
+
+      subscribeAppSettings: (settings: string[]) => {
+        setSubscribedAppSettings(settings);
       },
     };
   }, [

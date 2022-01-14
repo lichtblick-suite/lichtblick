@@ -16,6 +16,9 @@ declare module "@foxglove/studio" {
 
   export type ParameterStruct = Record<string, ParameterValue>;
 
+  // Valid types for application settings
+  export type AppSettingValue = string | number | boolean | undefined;
+
   export interface Time {
     sec: number;
     nsec: number;
@@ -85,7 +88,7 @@ declare module "@foxglove/studio" {
     /**
      * Map of current parameter values.
      */
-    parameters?: Map<string, ParameterValue>;
+    parameters?: ReadonlyMap<string, ParameterValue>;
 
     /**
      * List of available topics. This list includes subscribed and unsubscribed topics.
@@ -104,6 +107,9 @@ declare module "@foxglove/studio" {
 
     /** The color scheme currently in use throughout the app. */
     colorScheme?: "dark" | "light";
+
+    /** Application settings. This will only contain subscribed application setting key/values */
+    appSettings?: ReadonlyMap<string, AppSettingValue>;
   }
 
   export type PanelExtensionContext = {
@@ -161,6 +167,11 @@ declare module "@foxglove/studio" {
      * Unsubscribe from all topics.
      */
     unsubscribeAll(): void;
+
+    /**
+     * Subscribe to any changes in application settings for an array of setting names.
+     */
+    subscribeAppSettings(settings: string[]): void;
 
     /**
      * Indicate intent to advertise on a specific topic and datatype.
