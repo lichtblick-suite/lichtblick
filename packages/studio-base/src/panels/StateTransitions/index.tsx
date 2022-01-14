@@ -13,7 +13,7 @@
 
 import { ChartOptions, ScaleOptions } from "chart.js";
 import { uniq } from "lodash";
-import { useCallback, useMemo } from "react";
+import { useCallback, useMemo, useRef } from "react";
 import { useResizeDetector } from "react-resize-detector";
 import styled, { css } from "styled-components";
 import tinycolor from "tinycolor2";
@@ -37,6 +37,7 @@ import PanelToolbar from "@foxglove/studio-base/components/PanelToolbar";
 import TimeBasedChart, {
   TimeBasedChartTooltipData,
 } from "@foxglove/studio-base/components/TimeBasedChart";
+import { usePanelMousePresence } from "@foxglove/studio-base/hooks/usePanelMousePresence";
 import {
   ChartData,
   OnClickArg as OnChartClickArgs,
@@ -74,12 +75,10 @@ const SRoot = styled.div`
   overflow: hidden;
 `;
 
-const SAddButton = styled.div<{ show: boolean }>`
+const SAddButton = styled.div`
   position: absolute;
   top: 30px;
   right: 5px;
-  opacity: ${(props) => (props.show ? 1 : 0)};
-  transition: opacity 0.1s ease-in-out;
   z-index: 1;
 `;
 
@@ -366,11 +365,13 @@ const StateTransitions = React.memo(function StateTransitions(props: Props) {
   );
 
   const data: ChartData = useShallowMemo({ datasets });
+  const rootRef = useRef<HTMLDivElement>(ReactNull);
+  const mousePresent = usePanelMousePresence(rootRef);
 
   return (
-    <SRoot>
+    <SRoot ref={rootRef}>
       <PanelToolbar floating helpContent={helpContent} />
-      <SAddButton show={true}>
+      <SAddButton style={{ visibility: mousePresent ? "visible" : "hidden" }}>
         <Button
           onClick={() =>
             saveConfig({
