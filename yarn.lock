@@ -2360,15 +2360,15 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@foxglove/ros2@npm:1.0.8":
-  version: 1.0.8
-  resolution: "@foxglove/ros2@npm:1.0.8"
+"@foxglove/ros2@npm:3.0.1":
+  version: 3.0.1
+  resolution: "@foxglove/ros2@npm:3.0.1"
   dependencies:
     "@foxglove/rosmsg": ^2.0.0 || ^3.0.0
     "@foxglove/rosmsg2-serialization": ^1.0.5
-    "@foxglove/rtps": ^1.2.5
+    "@foxglove/rtps": ^1.4.0
     eventemitter3: ^4.0.7
-  checksum: 846763e1e6608d1e7f4ee6752d26adafe463abdd43cbc457de8dc7587ea499b9007f57d4517399b0db0027661d590a33ed221198dc03de38026dc1ecb12615f5
+  checksum: 88a4062a6c7e275069fb81b3b6d4ff0a011e70dbdd1b17292be1116eca8b35b8701d5477ed08bfbf958234d11e2ee07d7ca364e81e7cda37fc9df97cd91109fe
   languageName: node
   linkType: hard
 
@@ -2461,15 +2461,15 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@foxglove/rtps@npm:^1.2.5":
-  version: 1.2.5
-  resolution: "@foxglove/rtps@npm:1.2.5"
+"@foxglove/rtps@npm:^1.4.0":
+  version: 1.4.0
+  resolution: "@foxglove/rtps@npm:1.4.0"
   dependencies:
     "@foxglove/cdr": ^2.0.0
-    "@foxglove/rostime": ^1.1.0
-    avl: ^1.5.2
+    "@foxglove/rostime": ^1.1.1
+    avl: ^1.5.3
     eventemitter3: ^4.0.7
-  checksum: 3d10b2aafe17bfa20f3421119b068e11ce72cb2b4fbb4eda07c367b7fffa9ceeff21e870a4c83e8fa28f5dccac4e45f9941571c09461a970b99b33f667f3f3b5
+  checksum: 420ab1d4c4e3ab04881a4ee5e7e7198f4e531f24bddc79fa8c585251167321dba966c8d348b79b94497286d705102f0fa371f7c74ca9f3e6939cd60c8a09a15e
   languageName: node
   linkType: hard
 
@@ -2497,7 +2497,7 @@ __metadata:
     "@foxglove/mcap": "github:foxglove/mcap#workspace=@foxglove/mcap&commit=3ab57caf1139c9ad4bcd756988d874caabd12f1f"
     "@foxglove/regl-worldview": 2.0.1
     "@foxglove/ros1": 1.4.0
-    "@foxglove/ros2": 1.0.8
+    "@foxglove/ros2": 3.0.1
     "@foxglove/rosbag": 0.1.2
     "@foxglove/rosbag2-web": 4.0.3
     "@foxglove/rosmsg": 3.0.0
@@ -7782,7 +7782,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"avl@npm:^1.5.2":
+"avl@npm:^1.5.3":
   version: 1.5.3
   resolution: "avl@npm:1.5.3"
   checksum: 19ab9bff1eec3de86188313342fc8843e695db174aa355217ca2c0e2ec925a415f2c65d83c6772238c8d646cf6310cae5d92cc0ef5d76fc0348eef9c1eac06aa
