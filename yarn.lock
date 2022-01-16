@@ -2360,15 +2360,15 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@foxglove/ros2@npm:3.0.1":
-  version: 3.0.1
-  resolution: "@foxglove/ros2@npm:3.0.1"
+"@foxglove/ros2@npm:3.1.0":
+  version: 3.1.0
+  resolution: "@foxglove/ros2@npm:3.1.0"
   dependencies:
     "@foxglove/rosmsg": ^2.0.0 || ^3.0.0
     "@foxglove/rosmsg2-serialization": ^1.0.5
     "@foxglove/rtps": ^1.4.0
     eventemitter3: ^4.0.7
-  checksum: 88a4062a6c7e275069fb81b3b6d4ff0a011e70dbdd1b17292be1116eca8b35b8701d5477ed08bfbf958234d11e2ee07d7ca364e81e7cda37fc9df97cd91109fe
+  checksum: 5e122c5109af168ed3ceeaa829e1bd2e646fcb5b24b3081ce0eb72c9e4cc9074c0ed81d012410b19cc22d77870d7ef18d8d4d49849f514720fddfdc1a40cedc7
   languageName: node
   linkType: hard
 
@@ -2497,7 +2497,7 @@ __metadata:
     "@foxglove/mcap": "github:foxglove/mcap#workspace=@foxglove/mcap&commit=3ab57caf1139c9ad4bcd756988d874caabd12f1f"
     "@foxglove/regl-worldview": 2.0.1
     "@foxglove/ros1": 1.4.0
-    "@foxglove/ros2": 3.0.1
+    "@foxglove/ros2": 3.1.0
     "@foxglove/rosbag": 0.1.2
     "@foxglove/rosbag2-web": 4.0.3
     "@foxglove/rosmsg": 3.0.0

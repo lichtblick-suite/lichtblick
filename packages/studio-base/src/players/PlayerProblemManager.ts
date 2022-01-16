@@ -26,6 +26,10 @@ export default class PlayerProblemManager {
     this._problems = undefined;
   }
 
+  hasProblem(id: string): boolean {
+    return this._problemsById.has(id);
+  }
+
   removeProblem(id: string): boolean {
     const changed = this._problemsById.delete(id);
     if (changed) {

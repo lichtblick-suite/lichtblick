@@ -85,6 +85,12 @@ export default class Ros2Player implements Player {
 
     // The ros1ToRos2Type() hack can be removed when @foxglove/rosmsg-msgs-* packages are updated to
     // natively support ROS 2
+    this._fixRos2MsgDefs();
+
+    void this._open();
+  }
+
+  private _fixRos2MsgDefs(): void {
     for (const dataType in commonDefs) {
       const msgDef = (commonDefs as Record<string, RosMsgDefinition>)[dataType]!;
       this._providerDatatypes.set(dataType, msgDef);
@@ -98,7 +104,17 @@ export default class Ros2Player implements Player {
       }
     }
 
-    void this._open();
+    // Fix std_msgs/Header, which changed in ROS 2
+    const definitions = [
+      // "seq" was removed
+      { name: "stamp", type: "time" },
+      { name: "frame_id", type: "string" },
+    ];
+    this._providerDatatypes.set("std_msgs/Header", { name: "std_msgs/Header", definitions });
+    this._providerDatatypes.set("std_msgs/msg/Header", {
+      name: "std_msgs/msg/Header",
+      definitions,
+    });
   }
 
   private _open = async (): Promise<void> => {
@@ -173,16 +189,14 @@ export default class Ros2Player implements Player {
           dataTypes.add(endpoint.rosDataType);
         }
         const dataType = dataTypes.values().next().value as string;
-        if (dataTypes.size > 1) {
-          this._problems.addProblem(`subscription:${topic}`, {
+        const problemId = `subscription:${topic}`;
+        if (dataTypes.size > 1 && !this._problems.hasProblem(problemId)) {
+          const message = `Multiple data types for "${topic}": ${Array.from(dataTypes).join(", ")}`;
+          this._problems.addProblem(problemId, {
             severity: "warn",
-            message: `Multiple data types for topic "${topic}": ${Array.from(dataTypes).join(
-              ", ",
-            )}`,
+            message,
             tip: `Only data type "${dataType}" will be used`,
           });
-        } else {
-          this._problems.removeProblem(`subscription:${topic}`);
         }
 
         topics.push({ name: topic, datatype: dataType });
@@ -389,6 +403,15 @@ export default class Ros2Player implements Player {
       subscription.on("message", (timestamp, message, data, _pub) =>
         this._handleMessage(topicName, timestamp, message, data.byteLength, true),
       );
+      subscription.on("error", (err) => {
+        log.error(`Subscription error for ${topicName}: ${err}`);
+        this._problems.addProblem(`subscription:${topicName}`, {
+          severity: "error",
+          message: `Error receiving messages on "${topicName}"`,
+          tip: `Report this error if you continue experiencing issues`,
+          error: err,
+        });
+      });
     }
 
     // Unsubscribe from topics that we are subscribed to but shouldn't be.
