@@ -103,15 +103,21 @@ function SourceInfo() {
           checkboxVisibility={CheckboxVisibility.hidden}
           disableSelectionZone
           enableUpdateAnimations={false}
-          isHeaderVisible={false}
           items={detailListItems}
+          styles={{
+            root: {
+              ".ms-DetailsHeader": { paddingTop: 0, height: 32, lineHeight: 32 },
+              ".ms-DetailsHeader-cell": { height: 32 },
+              ".ms-DetailsHeader-cellName": { ...theme.fonts.smallPlus, fontWeight: "bold" },
+            },
+          }}
           columns={[
             {
               key: "name",
               name: "topic name",
               fieldName: "name",
-              minWidth: 100,
-              maxWidth: 500,
+              minWidth: 200,
+              isResizable: true,
               data: "string",
               isPadded: true,
               onRender: (topic) => (
@@ -128,8 +134,8 @@ function SourceInfo() {
               key: "datatype",
               name: "datatype",
               fieldName: "datatype",
-              minWidth: 100,
-              maxWidth: 500,
+              minWidth: 200,
+              isResizable: true,
               data: "string",
               isPadded: true,
               onRender: (topic) => (
