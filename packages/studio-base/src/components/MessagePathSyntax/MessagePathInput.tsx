@@ -22,6 +22,7 @@ import {
 import { flatten, flatMap, partition } from "lodash";
 import { CSSProperties, useCallback, useMemo } from "react";
 
+import { RosMsgField } from "@foxglove/rosmsg";
 import * as PanelAPI from "@foxglove/studio-base/PanelAPI";
 import Autocomplete, { IAutocomplete } from "@foxglove/studio-base/components/Autocomplete";
 import { useTooltip } from "@foxglove/studio-base/components/Tooltip";
@@ -97,8 +98,11 @@ function topicHasNoHeaderStamp(topic: Topic, datatypes: RosDatatypes): boolean {
 }
 
 // Get a list of Message Path strings for all of the fields (recursively) in a list of topics
-function getFieldPaths(topics: readonly Topic[], datatypes: RosDatatypes): string[] {
-  const output: string[] = [];
+function getFieldPaths(
+  topics: readonly Topic[],
+  datatypes: RosDatatypes,
+): Map<string, RosMsgField> {
+  const output = new Map<string, RosMsgField>();
   for (const topic of topics) {
     addFieldPathsForType(topic.name, topic.datatype, datatypes, output);
   }
@@ -109,13 +113,13 @@ function addFieldPathsForType(
   curPath: string,
   typeName: string,
   datatypes: RosDatatypes,
-  output: string[],
+  output: Map<string, RosMsgField>,
 ): void {
   const msgdef = datatypes.get(typeName);
   if (msgdef) {
     for (const field of msgdef.definitions) {
       if (field.isConstant !== true) {
-        output.push(`${curPath}.${field.name}`);
+        output.set(`${curPath}.${field.name}`, field);
         if (field.isComplex === true) {
           addFieldPathsForType(`${curPath}.${field.name}`, field.type, datatypes, output);
         }
@@ -296,6 +300,8 @@ export default React.memo<MessagePathInputBaseProps>(function MessagePathInput(
     disableAutocomplete = false,
   } = props;
 
+  const topicFields = useMemo(() => getFieldPaths(topics, datatypes), [datatypes, topics]);
+
   const onChangeProp = props.onChange;
   const onChange = useCallback(
     (event: React.SyntheticEvent<HTMLInputElement>, rawValue: string) => {
@@ -321,20 +327,23 @@ export default React.memo<MessagePathInputBaseProps>(function MessagePathInput(
       autocompleteType: ("topicName" | "messagePath" | "globalVariables") | undefined,
       autocompleteRange: { start: number; end: number },
     ) => {
-      let value = rawValue;
+      const completeStart = path.slice(0, autocompleteRange.start);
+      const completeEnd = path.slice(autocompleteRange.end);
+
+      // Check if accepting this completion would result in a path to a non-complex field.
+      const completedPath = completeStart + rawValue + completeEnd;
+      const completedField = topicFields.get(completedPath);
+      const isSimpleField = completedField?.isComplex === false;
+
       // If we're dealing with a topic name, and we cannot validly end in a message type,
       // add a "." so the user can keep typing to autocomplete the message path.
+      const messageIsValidType = validTypes?.includes("message") === true;
       const keepGoingAfterTopicName =
-        autocompleteType === "topicName" &&
-        validTypes != undefined &&
-        !validTypes.includes("message");
-      if (keepGoingAfterTopicName) {
-        value += ".";
-      }
-      onChangeProp(
-        path.substr(0, autocompleteRange.start) + value + path.substr(autocompleteRange.end),
-        props.index,
-      );
+        autocompleteType === "topicName" && !messageIsValidType && !isSimpleField;
+      const value = keepGoingAfterTopicName ? rawValue + "." : rawValue;
+
+      onChangeProp(completeStart + value + completeEnd, props.index);
+
       // We want to continue typing if we're dealing with a topic name,
       // or if we just autocompleted something with a filter (because we might want to
       // edit that filter), or if the autocomplete already has a filter (because we might
@@ -346,7 +355,7 @@ export default React.memo<MessagePathInputBaseProps>(function MessagePathInput(
         autocomplete.blur();
       }
     },
-    [onChangeProp, path, props.index, validTypes],
+    [onChangeProp, path, props.index, topicFields, validTypes],
   );
 
   const onTimestampMethodChangeProp = props.onTimestampMethodChange;
@@ -387,8 +396,8 @@ export default React.memo<MessagePathInputBaseProps>(function MessagePathInput(
   const topicNamesAutocompleteItems = useMemo(() => getTopicNames(topics), [topics]);
 
   const topicNamesAndFieldsAutocompleteItems = useMemo(
-    () => topicNamesAutocompleteItems.concat(getFieldPaths(topics, datatypes)),
-    [topicNamesAutocompleteItems, topics, datatypes],
+    () => topicNamesAutocompleteItems.concat(Array.from(topicFields.keys())),
+    [topicFields, topicNamesAutocompleteItems],
   );
 
   const autocompleteType = useMemo(() => {
