@@ -486,6 +486,8 @@ export default function Panel<
       [cmdKeyPressed, parentPanelContext],
     );
 
+    // We use two separate sets of key handlers because the panel context and exitFullScreen
+    // change often and invalidate our key handlers during user interactions.
     const { keyUpHandlers, keyDownHandlers } = useMemo(
       () => ({
         keyUpHandlers: {
@@ -504,11 +506,17 @@ export default function Panel<
           "`": () => setQuickActionsKeyPressed(true),
           "~": () => setQuickActionsKeyPressed(true),
           Shift: () => setShiftKeyPressed(true),
-          Escape: () => exitFullscreen(),
           Meta: () => setCmdKeyPressed(true),
         },
       }),
-      [selectAllPanels, cmdKeyPressed, exitFullscreen],
+      [selectAllPanels, cmdKeyPressed],
+    );
+
+    const fullScreenKeyHandlers = useMemo(
+      () => ({
+        Escape: () => exitFullscreen(),
+      }),
+      [exitFullscreen],
     );
 
     /* Ensure user exits full-screen mode when leaving window, even if key is still pressed down */
@@ -589,6 +597,7 @@ export default function Panel<
           }}
         >
           <KeyListener global keyUpHandlers={keyUpHandlers} keyDownHandlers={keyDownHandlers} />
+          <KeyListener global keyDownHandlers={fullScreenKeyHandlers} />
           <PanelRoot
             onClick={onPanelRootClick}
             onMouseMove={onMouseMove}
