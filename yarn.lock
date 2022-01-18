@@ -2507,7 +2507,7 @@ __metadata:
     "@foxglove/rosmsg2-serialization": 1.0.5
     "@foxglove/rostime": 1.1.1
     "@foxglove/studio": "workspace:*"
-    "@foxglove/ulog": 2.1.1
+    "@foxglove/ulog": 2.1.2
     "@foxglove/velodyne-cloud": 1.0.0
     "@foxglove/ws-protocol": 0.0.8
     "@mdi/svg": 6.5.95
@@ -2672,10 +2672,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@foxglove/ulog@npm:2.1.1":
-  version: 2.1.1
-  resolution: "@foxglove/ulog@npm:2.1.1"
-  checksum: 6bd6b28dbc0acffe11958916d859391a2406ab1e38c9d0b1bdc61f47aed6bcc41f3a1b68b8a85da098a4094bb98d835a23921ff21cfeebf2124e2b2d8dfafb30
+"@foxglove/ulog@npm:2.1.2":
+  version: 2.1.2
+  resolution: "@foxglove/ulog@npm:2.1.2"
+  checksum: 5014a871a13e3acaeba7fc8d7db16937f1936e6bef827f10800b254a9bedd56faa939347479ee88412967789d8680e74f375cc82acb21aae39bbbfa3f21a2444
   languageName: node
   linkType: hard
 
