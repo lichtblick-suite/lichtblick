@@ -82,10 +82,13 @@ const Editor = ({
   autoFormatOnSaveRef.current = autoFormatOnSave;
 
   React.useEffect(() => {
-    monacoApi.languages.typescript.typescriptDefaults.addExtraLib(
+    const disposable = monacoApi.languages.typescript.typescriptDefaults.addExtraLib(
       rosLib,
       `file:///node_modules/@types/${projectConfig.rosLib.fileName}`,
     );
+    return () => {
+      disposable.dispose();
+    };
   }, [rosLib]);
 
   /*

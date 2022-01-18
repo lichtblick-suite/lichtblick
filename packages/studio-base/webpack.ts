@@ -6,6 +6,7 @@ import CircularDependencyPlugin from "circular-dependency-plugin";
 import { ESBuildMinifyPlugin } from "esbuild-loader";
 import ForkTsCheckerWebpackPlugin from "fork-ts-checker-webpack-plugin";
 import MonacoWebpackPlugin from "monaco-editor-webpack-plugin";
+import monacoPkg from "monaco-editor/package.json";
 import path from "path";
 import ReactRefreshTypescript from "react-refresh-typescript";
 import createStyledComponentsTransformer from "typescript-plugin-styled-components";
@@ -13,6 +14,21 @@ import webpack, { Configuration, WebpackPluginInstance } from "webpack";
 
 import { WebpackArgv } from "./WebpackArgv";
 import packageJson from "./package.json";
+
+if (monacoPkg.version !== "0.30.1") {
+  throw new Error(`
+    It looks like you are trying to change the version of Monaco.
+
+    Please make a node playground node and confirm that loading a data source properly updates
+    the "ros" library and that Input and Message interfaces are usable:
+      - Messages. should autocomplete
+      - Input<""> should autocomplete
+
+    See:
+    - https://github.com/foxglove/studio/issues/2646
+    - https://github.com/microsoft/monaco-editor/issues/2866
+  `);
+}
 
 const styledComponentsTransformer = createStyledComponentsTransformer({
   getDisplayName: (filename, bindingName) => {
