@@ -16,13 +16,13 @@ import { OpenDialogViews } from "./types";
 const HELP_ITEMS: IButtonProps[] = [
   {
     id: "slack",
-    href: "https://foxglove.dev/slack&utm_source=studio&utm_medium=open-dialog",
+    href: "https://foxglove.dev/slack?utm_source=studio&utm_medium=open-dialog",
     target: "_blank",
     children: "Join our Slack community",
   },
   {
     id: "docs",
-    href: "https://foxglove.dev/docs&utm_source=studio&utm_medium=open-dialog",
+    href: "https://foxglove.dev/docs?utm_source=studio&utm_medium=open-dialog",
     target: "_blank",
     children: "Browse the documentation",
   },
@@ -144,7 +144,10 @@ export default function Start(props: IStartProps): JSX.Element {
               <Text
                 variant="small"
                 styles={{
-                  root: { whiteSpace: "nowrap", color: theme.palette.neutralSecondaryAlt },
+                  root: {
+                    whiteSpace: "nowrap",
+                    color: theme.palette.neutralSecondaryAlt,
+                  },
                 }}
               >
                 {recent.label}
