@@ -55,8 +55,9 @@ export default function Timestamp(props: Props): JSX.Element {
     <Stack tokens={{ childrenGap: theme.spacing.s2 }}>
       <Stack
         horizontal={horizontal}
-        verticalAlign="center"
         tokens={{ childrenGap: theme.spacing.s2 }}
+        verticalAlign="center"
+        wrap
       >
         {!disableDate && (
           <>
