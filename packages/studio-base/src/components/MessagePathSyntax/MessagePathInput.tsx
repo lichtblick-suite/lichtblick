@@ -337,7 +337,7 @@ export default React.memo<MessagePathInputBaseProps>(function MessagePathInput(
 
       // If we're dealing with a topic name, and we cannot validly end in a message type,
       // add a "." so the user can keep typing to autocomplete the message path.
-      const messageIsValidType = validTypes?.includes("message") === true;
+      const messageIsValidType = validTypes == undefined || validTypes.includes("message");
       const keepGoingAfterTopicName =
         autocompleteType === "topicName" && !messageIsValidType && !isSimpleField;
       const value = keepGoingAfterTopicName ? rawValue + "." : rawValue;
