@@ -114,9 +114,9 @@ function SourceInfo() {
           columns={[
             {
               key: "name",
-              name: "topic name",
+              name: "Topic name",
               fieldName: "name",
-              minWidth: 200,
+              minWidth: 0,
               isResizable: true,
               data: "string",
               isPadded: true,
@@ -132,9 +132,9 @@ function SourceInfo() {
             },
             {
               key: "datatype",
-              name: "datatype",
+              name: "Datatype",
               fieldName: "datatype",
-              minWidth: 200,
+              minWidth: 0,
               isResizable: true,
               data: "string",
               isPadded: true,
@@ -150,7 +150,7 @@ function SourceInfo() {
             },
             {
               key: "numMessages",
-              name: "message count",
+              name: "Message count",
               fieldName: "numMessages",
               minWidth: 0,
               data: "number",
@@ -158,7 +158,7 @@ function SourceInfo() {
             },
             {
               key: "frequency",
-              name: "frequency",
+              name: "Frequency",
               minWidth: 0,
               onRender: (topic) =>
                 topic.numMessages != undefined
