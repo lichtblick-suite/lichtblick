@@ -160,6 +160,9 @@ declare module "@foxglove/studio" {
 
     /**
      * Subscribe to an array of topic names.
+     *
+     * Subscribe will update the current subscriptions to the list of topic names. Passing an empty
+     * array will unsubscribe from all topics.
      */
     subscribe(topics: string[]): void;
 

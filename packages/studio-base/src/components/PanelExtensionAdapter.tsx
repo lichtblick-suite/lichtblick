@@ -386,9 +386,7 @@ function PanelExtensionAdapter(props: PanelExtensionAdapterProps): JSX.Element {
       },
 
       subscribe: (topics: string[]) => {
-        if (topics.length === 0) {
-          return;
-        }
+        subscribedTopicsRef.current.clear();
 
         // If the player has loaded all the blocks, the blocks reference won't change so our message
         // pipeline handler for allFrames won't create a new set of all frames for the newly
@@ -402,7 +400,9 @@ function PanelExtensionAdapter(props: PanelExtensionAdapterProps): JSX.Element {
           subscribedTopicsRef.current.add(topic);
         }
 
-        requestBackfill();
+        if (topics.length > 0) {
+          requestBackfill();
+        }
       },
 
       advertise: capabilities.includes(PlayerCapabilities.advertise)

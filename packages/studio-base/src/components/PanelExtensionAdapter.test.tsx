@@ -379,4 +379,32 @@ describe("PanelExtensionAdapter", () => {
     // force a re-render to make sure we call init panel once
     handle.setProps({});
   });
+
+  it("should unsubscribe from all topics when subscribing to empty topics array", (done) => {
+    const initPanel = (context: PanelExtensionContext) => {
+      context.subscribe([]);
+    };
+
+    mount(
+      <ThemeProvider isDark>
+        <MockPanelContextProvider>
+          <PanelSetup
+            fixture={{
+              capabilities: [PlayerCapabilities.advertise],
+              topics: [],
+              datatypes: new Map(),
+              frame: {},
+              layout: "UnknownPanel!4co6n9d",
+              setSubscriptions: (_, payload) => {
+                expect(payload).toEqual([]);
+                done();
+              },
+            }}
+          >
+            <PanelExtensionAdapter config={{}} saveConfig={() => {}} initPanel={initPanel} />
+          </PanelSetup>
+        </MockPanelContextProvider>
+      </ThemeProvider>,
+    );
+  });
 });

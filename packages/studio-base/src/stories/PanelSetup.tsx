@@ -69,6 +69,7 @@ export type Fixture = {
   savedProps?: SavedProps;
   publish?: (request: PublishPayload) => void;
   setPublishers?: (publisherId: string, advertisements: AdvertiseOptions[]) => void;
+  setSubscriptions?: ComponentProps<typeof MockMessagePipelineProvider>["setSubscriptions"];
 };
 
 type Props = {
@@ -230,6 +231,7 @@ function UnconnectedPanelSetup(props: Props): JSX.Element | ReactNull {
     progress,
     publish,
     setPublishers,
+    setSubscriptions,
   } = props.fixture ?? {};
   let dTypes = datatypes;
   if (!dTypes) {
@@ -264,6 +266,7 @@ function UnconnectedPanelSetup(props: Props): JSX.Element | ReactNull {
         progress={progress}
         publish={publish}
         setPublishers={setPublishers}
+        setSubscriptions={setSubscriptions}
       >
         <PanelCatalogContext.Provider value={mockPanelCatalog}>
           <AppConfigurationContext.Provider value={mockAppConfiguration}>
