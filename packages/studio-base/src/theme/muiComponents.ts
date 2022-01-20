@@ -109,7 +109,7 @@ export default function muiComponents(theme: Theme): ThemeOptions["components"] 
     },
     MuiPaper: {
       defaultProps: {
-        elevation: 0,
+        elevation: 2,
         square: true,
       },
     },

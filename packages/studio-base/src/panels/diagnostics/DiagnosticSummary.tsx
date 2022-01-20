@@ -247,7 +247,7 @@ function DiagnosticSummary(props: Props): JSX.Element {
         fontSize: "12px",
       }}
       value={hardwareIdFilter}
-      placeholder="Filter hardware id"
+      placeholder="Filter"
       onChange={(e) => saveConfig({ hardwareIdFilter: e.target.value })}
     />
   );
@@ -268,7 +268,7 @@ function DiagnosticSummary(props: Props): JSX.Element {
 
   const diagnostics = useDiagnostics(topicToRender);
   const summary = useMemo(() => {
-    if (diagnostics.diagnosticsByNameByTrimmedHardwareId.size === 0) {
+    if (diagnostics.size === 0) {
       return (
         <EmptyState>
           Waiting for <code>{topicToRender}</code> messages
@@ -280,8 +280,7 @@ function DiagnosticSummary(props: Props): JSX.Element {
       if (name == undefined || trimmedHardwareId == undefined) {
         return;
       }
-      const diagnosticsByName =
-        diagnostics.diagnosticsByNameByTrimmedHardwareId.get(trimmedHardwareId);
+      const diagnosticsByName = diagnostics.get(trimmedHardwareId);
       return diagnosticsByName?.get(name);
     });
 

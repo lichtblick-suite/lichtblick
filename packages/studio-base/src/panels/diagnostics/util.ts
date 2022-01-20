@@ -17,8 +17,6 @@ import { Time } from "@foxglove/rostime";
 import { Header } from "@foxglove/studio-base/types/Messages";
 import fuzzyFilter from "@foxglove/studio-base/util/fuzzyFilter";
 
-import { DiagnosticsBuffer } from "./useDiagnostics";
-
 // Trim the message if it's too long. We sometimes get crazy massive messages here that can
 // otherwise crash our entire UI. I looked at a bunch of messages manually and they are typically
 // way smaller than 5KB, so this is a very generous maximum. But feel free to increase it more if
@@ -84,10 +82,13 @@ export function getDiagnosticId(hardwareId: string, name?: string): DiagnosticId
 }
 
 export function getDisplayName(hardwareId: string, name: string): string {
-  if (name.indexOf(hardwareId) === 0) {
-    return name;
-  }
-  return name.length > 0 ? `${hardwareId}: ${name}` : hardwareId;
+  return name.length > 0
+    ? hardwareId.length > 0
+      ? `${hardwareId}: ${name}`
+      : `${name}`
+    : hardwareId.length > 0
+    ? `${hardwareId}`
+    : `(empty)`;
 }
 
 // ensures the diagnostic status message's name consists of both the hardware id and the name
@@ -115,9 +116,11 @@ export function computeDiagnosticInfo(
   };
 }
 
-export function getDiagnosticsByLevel(buffer: DiagnosticsBuffer): Map<number, DiagnosticInfo[]> {
+export function getDiagnosticsByLevel(
+  diagnosticsByHardwareId: Map<string, DiagnosticsById>,
+): Map<number, DiagnosticInfo[]> {
   const ret = new Map<number, DiagnosticInfo[]>();
-  for (const diagnosticsByName of buffer.diagnosticsByNameByTrimmedHardwareId.values()) {
+  for (const diagnosticsByName of diagnosticsByHardwareId.values()) {
     for (const diagnostic of diagnosticsByName.values()) {
       const statuses = ret.get(diagnostic.status.level);
       if (statuses) {

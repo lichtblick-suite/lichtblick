@@ -14,10 +14,10 @@
 
 import { MessageEvent } from "@foxglove/studio-base/players/types";
 
-import { addMessages, defaultDiagnosticsBuffer } from "./useDiagnostics";
+import { addMessages } from "./useDiagnostics";
 import { computeDiagnosticInfo, DiagnosticInfo, DiagnosticStatusArrayMsg, LEVELS } from "./util";
 
-const messageAtLevel = (level: number): MessageEvent<DiagnosticStatusArrayMsg> => ({
+const buildMessageAtLevel = (level: number): MessageEvent<DiagnosticStatusArrayMsg> => ({
   message: {
     status: [
       {
@@ -36,63 +36,25 @@ const messageAtLevel = (level: number): MessageEvent<DiagnosticStatusArrayMsg> =
 });
 
 const diagnosticInfoAtLevel = (level: number): DiagnosticInfo => {
-  const { message } = messageAtLevel(level);
+  const { message } = buildMessageAtLevel(level);
   return computeDiagnosticInfo(message.status[0]!, message.header.stamp);
 };
 
 describe("addMessages", () => {
   it("adds a message at the right warning level", () => {
-    const message = messageAtLevel(LEVELS.OK);
+    const message = buildMessageAtLevel(LEVELS.OK);
     const info = diagnosticInfoAtLevel(LEVELS.OK);
-    const hardwareId = `|${info.status.hardware_id}|`;
-    expect(addMessages(defaultDiagnosticsBuffer(), [message])).toEqual({
-      diagnosticsByNameByTrimmedHardwareId: new Map([
-        [info.status.hardware_id, new Map([[info.status.name, info]])],
-      ]),
-      sortedAutocompleteEntries: [
-        {
-          displayName: info.status.hardware_id,
-          hardware_id: info.status.hardware_id,
-          id: hardwareId,
-          name: undefined,
-          sortKey: info.status.hardware_id.toLowerCase(),
-        },
-        {
-          displayName: info.displayName,
-          hardware_id: info.status.hardware_id,
-          id: info.id,
-          name: info.status.name,
-          sortKey: info.displayName.toLowerCase(),
-        },
-      ],
-    });
+    expect(addMessages(new Map(), [message])).toEqual(
+      new Map([[info.status.hardware_id, new Map([[info.status.name, info]])]]),
+    );
   });
 
   it("can move a message from one level to another", () => {
-    const message1 = messageAtLevel(LEVELS.OK);
-    const message2 = messageAtLevel(LEVELS.ERROR);
+    const message1 = buildMessageAtLevel(LEVELS.OK);
+    const message2 = buildMessageAtLevel(LEVELS.ERROR);
     const info = diagnosticInfoAtLevel(LEVELS.ERROR);
-    const hardwareId = `|${info.status.hardware_id}|`;
-    expect(addMessages(defaultDiagnosticsBuffer(), [message1, message2])).toEqual({
-      diagnosticsByNameByTrimmedHardwareId: new Map([
-        [info.status.hardware_id, new Map([[info.status.name, info]])],
-      ]),
-      sortedAutocompleteEntries: [
-        {
-          displayName: info.status.hardware_id,
-          hardware_id: info.status.hardware_id,
-          id: hardwareId,
-          name: undefined,
-          sortKey: info.status.hardware_id.toLowerCase(),
-        },
-        {
-          displayName: info.displayName,
-          hardware_id: info.status.hardware_id,
-          id: info.id,
-          name: info.status.name,
-          sortKey: info.displayName.toLowerCase(),
-        },
-      ],
-    });
+    expect(addMessages(new Map(), [message1, message2])).toEqual(
+      new Map([[info.status.hardware_id, new Map([[info.status.name, info]])]]),
+    );
   });
 });

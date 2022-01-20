@@ -19,9 +19,11 @@ import {
   computeDiagnosticInfo,
   LEVELS,
   MAX_STRING_LENGTH,
+  DiagnosticsById,
+  DiagnosticInfo,
 } from "./util";
 
-const watchdogStatus = {
+const watchdogStatus: DiagnosticInfo = {
   status: {
     level: 0,
     name: "status",
@@ -29,11 +31,11 @@ const watchdogStatus = {
     hardware_id: "watchdog",
     values: [],
   },
+  id: "watchdog",
   stamp: { sec: 1547062465, nsec: 999879954 },
-  id: "|watchdog|status|",
   displayName: "watchdog: status",
 };
-const mctmLogger = {
+const mctmLogger: DiagnosticInfo = {
   status: {
     level: 0,
     name: "MCTM Logger",
@@ -41,16 +43,16 @@ const mctmLogger = {
     hardware_id: "mctm_logger",
     values: [],
   },
+  id: "mctm_logger",
   stamp: { sec: 1547062466, nsec: 1674890 },
-  id: "|mctm_logger|MCTM Logger|",
   displayName: "mctm_logger: MCTM Logger",
 };
-const okMap = new Map([
+const okMap: Map<string, DiagnosticsById> = new Map([
   ["watchdog", new Map([["status", watchdogStatus]])],
   ["mctm_logger", new Map([["MCTM Logger", mctmLogger]])],
 ]);
 
-const cameraStatus = {
+const cameraStatus: DiagnosticInfo = {
   status: {
     level: 1,
     name: "status",
@@ -59,15 +61,15 @@ const cameraStatus = {
     hardware_id: "camera_front_left_40/camera_ground_rendering",
     values: [],
   },
+  id: "status",
   stamp: { sec: 1547062466, nsec: 37309350 },
-  id: "|camera_front_left_40/camera_ground_rendering|status|",
   displayName: "camera_front_left_40/camera_ground_rendering: status",
 };
 const warnMap = new Map([
   ["camera_front_left_40/camera_ground_rendering", new Map([["status", cameraStatus]])],
 ]);
 
-const usrrStatus = {
+const usrrStatus: DiagnosticInfo = {
   status: {
     level: 2,
     name: "status",
@@ -76,18 +78,19 @@ const usrrStatus = {
     hardware_id: "usrr_rear_left_center/usrr_segmentation_node",
     values: [],
   },
+  id: "status",
   stamp: { sec: 1547062466, nsec: 98998486 },
-  id: "|usrr_rear_left_center/usrr_segmentation_node|status|",
   displayName: "usrr_rear_left_center/usrr_segmentation_node: status",
 };
-const errorMap = new Map([
+const errorMap: Map<string, DiagnosticsById> = new Map([
   ["usrr_rear_left_center/usrr_segmentation_node", new Map([["status", usrrStatus]])],
 ]);
 
-const buffer = {
-  diagnosticsByNameByTrimmedHardwareId: new Map([...okMap, ...warnMap, ...errorMap]),
-  sortedAutocompleteEntries: [],
-};
+const diagnosticsByHardwareId = new Map<string, DiagnosticsById>([
+  ...okMap,
+  ...warnMap,
+  ...errorMap,
+]);
 
 describe("diagnostics", () => {
   describe("getDiagnosticId", () => {
@@ -106,18 +109,26 @@ describe("diagnostics", () => {
   });
 
   describe("getDisplayName", () => {
-    it("leaves old formatted diagnostic messages alone", () => {
-      expect(getDisplayName("my_hardware_id", "my_hardware_id: foo")).toBe("my_hardware_id: foo");
+    it("handles hardware_id and name", () => {
+      expect(getDisplayName("my_hardware_id", "my_name")).toBe("my_hardware_id: my_name");
     });
 
-    it("appends hardware id to diagnostic message for new formatted messages", () => {
-      expect(getDisplayName("my_hardware_id", "foo")).toBe("my_hardware_id: foo");
+    it("handles blank name with hardware_id", () => {
+      expect(getDisplayName("my_hardware_id", "")).toBe("my_hardware_id");
+    });
+
+    it("handles blank hardware_id with name", () => {
+      expect(getDisplayName("", "my_name")).toBe("my_name");
+    });
+
+    it("handles blank hardware_id and blank name", () => {
+      expect(getDisplayName("", "")).toBe("(empty)");
     });
   });
 
   describe("getDiagnosticsByLevel", () => {
-    it("removes leading slash from hardware_id if present", () => {
-      expect(getDiagnosticsByLevel(buffer)).toStrictEqual(
+    it("groups diagnostics by level", () => {
+      expect(getDiagnosticsByLevel(diagnosticsByHardwareId)).toStrictEqual(
         new Map([
           [LEVELS.ERROR, [usrrStatus]],
           [LEVELS.OK, [watchdogStatus, mctmLogger]],
@@ -129,7 +140,7 @@ describe("diagnostics", () => {
 
   describe("filterAndSortDiagnostics", () => {
     it("sorts nodes that match hardware ID, if present", () => {
-      const nodes = getDiagnosticsByLevel(buffer).get(LEVELS.OK);
+      const nodes = getDiagnosticsByLevel(diagnosticsByHardwareId).get(LEVELS.OK);
       if (!nodes) {
         throw new Error("Missing level OK");
       }
