@@ -33,7 +33,6 @@ type PanelToolbarControlsProps = {
   // eslint-disable-next-line @foxglove/no-boolean-parameters
   setMenuOpen: (_: boolean) => void;
   showControls?: boolean;
-  showPanelName?: boolean;
 };
 
 const useStyles = makeStyles({
@@ -50,11 +49,6 @@ const useStyles = makeStyles({
     svg: {
       fontSize: 14,
     },
-  },
-  panelName: {
-    fontSize: 10,
-    opacity: 0.5,
-    marginRight: 4,
   },
   icon: {
     fontSize: 14,
@@ -75,7 +69,6 @@ export const PanelToolbarControls = React.memo(function PanelToolbarControls({
   mousePresent = false,
   setMenuOpen,
   showControls = false,
-  showPanelName = false,
 }: PanelToolbarControlsProps) {
   const panelContext = useContext(PanelContext);
   const styles = useStyles();
@@ -84,9 +77,6 @@ export const PanelToolbarControls = React.memo(function PanelToolbarControls({
 
   return (
     <div style={{ display: shouldShow ? "flex" : "none" }} className={cx(styles.iconContainer)}>
-      {showPanelName && panelContext && (
-        <div className={styles.panelName}>{panelContext.title}</div>
-      )}
       {additionalIcons}
       <PanelActionsDropdown
         isOpen={menuOpen}

@@ -16,7 +16,6 @@ import FullscreenIcon from "@mdi/svg/svg/fullscreen.svg";
 import HelpCircleOutlineIcon from "@mdi/svg/svg/help-circle-outline.svg";
 import cx from "classnames";
 import { useContext, useState, useMemo, useRef } from "react";
-import { useResizeDetector } from "react-resize-detector";
 
 import Icon from "@foxglove/studio-base/components/Icon";
 import PanelContext from "@foxglove/studio-base/components/PanelContext";
@@ -155,15 +154,6 @@ export default React.memo<Props>(function PanelToolbar({
     exitFullscreen,
   ]);
 
-  // Use a debounce and 0 refresh rate to avoid triggering a resize observation while handling
-  // and existing resize observation.
-  // https://github.com/maslianok/react-resize-detector/issues/45
-  const { width, ref: sizeRef } = useResizeDetector({
-    handleHeight: false,
-    refreshRate: 0,
-    refreshMode: "debounce",
-  });
-
   // floating toolbars only show when hovered - but hovering over a context menu would hide the toolbar
   // showToolbar is used to force-show elements even if not hovered
   const showToolbar = menuOpen || !!isUnknownPanel;
@@ -178,27 +168,24 @@ export default React.memo<Props>(function PanelToolbar({
   }
 
   return (
-    <div ref={sizeRef}>
-      <div
-        ref={containerRef}
-        className={cx(styles.panelToolbarContainer, {
-          floating,
-          hasChildren: Boolean(children),
-        })}
-        style={{ backgroundColor, display: shouldShow ? "flex" : "none" }}
-      >
-        {children}
-        <PanelToolbarControls
-          showControls={showToolbar || alwaysVisible}
-          mousePresent={mousePresent}
-          floating={floating}
-          showPanelName={(width ?? 0) > 360}
-          additionalIcons={additionalIconsWithHelp}
-          isUnknownPanel={!!isUnknownPanel}
-          menuOpen={menuOpen}
-          setMenuOpen={setMenuOpen}
-        />
-      </div>
+    <div
+      ref={containerRef}
+      className={cx(styles.panelToolbarContainer, {
+        floating,
+        hasChildren: Boolean(children),
+      })}
+      style={{ backgroundColor, display: shouldShow ? "flex" : "none" }}
+    >
+      {children}
+      <PanelToolbarControls
+        showControls={showToolbar || alwaysVisible}
+        mousePresent={mousePresent}
+        floating={floating}
+        additionalIcons={additionalIconsWithHelp}
+        isUnknownPanel={!!isUnknownPanel}
+        menuOpen={menuOpen}
+        setMenuOpen={setMenuOpen}
+      />
     </div>
   );
 });
