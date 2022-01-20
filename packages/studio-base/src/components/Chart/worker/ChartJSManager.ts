@@ -69,6 +69,7 @@ export default class ChartJSManager {
   private _fakeDocumentEvents = new EventEmitter();
   private _lastDatalabelClickContext?: DatalabelContext;
   private _hasZoomed = false;
+  private _hasPanned = false;
 
   constructor(initOpts: InitOpts) {
     log.info(`new ChartJSManager(id=${initOpts.id})`);
@@ -201,14 +202,16 @@ export default class ChartJSManager {
       // We need scales to update with undefined values if we haven't zoomed so new data is shown on the chart.
       // If we do not update the scales to undefined, the initial zoom range stays and new data is not visible.
       if (options.scales?.x?.min != undefined && options.scales.x.max != undefined) {
+        this._hasPanned = false;
         this._hasZoomed = false;
       }
       if (options.scales?.y?.min != undefined && options.scales.y.max != undefined) {
+        this._hasPanned = false;
         this._hasZoomed = false;
       }
 
-      // If the user manually zoomed this chart we avoid updating the scales since they have updated
-      if (!this._hasZoomed) {
+      // If the user manually zoomed or panned this chart we avoid updating the scales since they have updated.
+      if (!this._hasZoomed && !this._hasPanned) {
         instance.options.scales = options.scales;
       }
     }
@@ -371,6 +374,12 @@ export default class ChartJSManager {
       if (config.plugins.zoom?.zoom) {
         config.plugins.zoom.zoom.onZoom = () => {
           this._hasZoomed = true;
+        };
+      }
+
+      if (config.plugins.zoom?.pan) {
+        config.plugins.zoom.pan.onPan = () => {
+          this._hasPanned = true;
         };
       }
 
