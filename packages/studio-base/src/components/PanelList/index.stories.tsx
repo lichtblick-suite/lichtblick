@@ -77,9 +77,11 @@ class MockPanelCatalog implements PanelCatalog {
 }
 
 const PanelListWithInteractions = ({
+  mode,
   inputValue,
   events = [],
 }: {
+  mode?: "grid" | "list";
   inputValue?: string;
   events?: TestUtils.SyntheticEventData[];
 }) => {
@@ -106,6 +108,7 @@ const PanelListWithInteractions = ({
       }}
     >
       <PanelList
+        mode={mode}
         onPanelSelect={() => {
           // no-op
         }}
@@ -142,7 +145,16 @@ storiesOf("components/PanelList", module)
       </div>
     );
   })
+  .add("panel grid", () => {
+    const theme = useTheme();
+    return (
+      <div style={{ margin: 50, height: 480, backgroundColor: theme.palette.neutralLighterAlt }}>
+        <PanelList mode="grid" onPanelSelect={() => {}} />
+      </div>
+    );
+  })
   .add("filtered panel list", () => <PanelListWithInteractions inputValue="AAA" />)
+  .add("filtered panel grid", () => <PanelListWithInteractions mode="grid" inputValue="AAA" />)
   .add("filtered panel list light", () => <PanelListWithInteractions inputValue="AAA" />, {
     colorScheme: "light",
   })
@@ -160,6 +172,9 @@ storiesOf("components/PanelList", module)
   ))
   .add("filtered panel list without results in any category", () => (
     <PanelListWithInteractions inputValue="WWW" />
+  ))
+  .add("filtered panel grid without results in any category", () => (
+    <PanelListWithInteractions mode="grid" inputValue="WWW" />
   ))
   .add("case-insensitive filtering and highlight submenu", () => (
     <PanelListWithInteractions inputValue="pA" />

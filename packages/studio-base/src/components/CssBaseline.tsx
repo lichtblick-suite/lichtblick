@@ -32,7 +32,7 @@ const useStyles = makeStyles((theme) => ({
         borderRadius: "2px",
       },
     },
-    p: {
+    "p:not(.MuiTypography-root)": {
       margin: "1em 0",
 
       ":last-child": {

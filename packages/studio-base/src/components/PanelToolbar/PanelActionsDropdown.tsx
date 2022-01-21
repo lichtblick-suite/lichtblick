@@ -11,7 +11,7 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { ContextualMenu, IContextualMenuItem, makeStyles } from "@fluentui/react";
+import { ContextualMenu, IContextualMenuItem, makeStyles, useTheme } from "@fluentui/react";
 import CogIcon from "@mdi/svg/svg/cog.svg";
 import { useCallback, useContext, useMemo, useRef } from "react";
 import { MosaicContext, MosaicNode, MosaicWindowContext } from "react-mosaic-component";
@@ -117,6 +117,8 @@ export function PanelActionsDropdown({ isOpen, setIsOpen, isUnknownPanel }: Prop
     }
   }, [setSelectedPanelIds, openPanelSettings, panelContext?.id]);
 
+  const theme = useTheme();
+
   const menuItems: IContextualMenuItem[] = useMemo(() => {
     const items: IContextualMenuItem[] = [
       {
@@ -151,6 +153,7 @@ export function PanelActionsDropdown({ isOpen, setIsOpen, isUnknownPanel }: Prop
             <PanelList
               selectedPanelTitle={panelContext?.title}
               onPanelSelect={swap(panelContext?.id)}
+              backgroundColor={theme.semanticColors.menuBackground}
             />
           ),
         },
@@ -186,7 +189,7 @@ export function PanelActionsDropdown({ isOpen, setIsOpen, isUnknownPanel }: Prop
       "data-test": "panel-menu-remove",
     });
     return items;
-  }, [close, isUnknownPanel, openSettings, panelContext, split, swap]);
+  }, [close, isUnknownPanel, openSettings, panelContext, split, swap, theme]);
 
   const buttonRef = useRef<HTMLDivElement>(ReactNull);
 

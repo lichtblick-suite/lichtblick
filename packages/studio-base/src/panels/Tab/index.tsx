@@ -14,11 +14,11 @@ import { useCallback, useMemo, useState } from "react";
 import { MosaicNode } from "react-mosaic-component";
 import styled from "styled-components";
 
+import { EmptyPanelLayout } from "@foxglove/studio-base/components/EmptyPanelLayout";
 import Flex from "@foxglove/studio-base/components/Flex";
 import Panel from "@foxglove/studio-base/components/Panel";
 import { usePanelContext } from "@foxglove/studio-base/components/PanelContext";
 import { UnconnectedPanelLayout } from "@foxglove/studio-base/components/PanelLayout";
-import { EmptyDropTarget } from "@foxglove/studio-base/panels/Tab/EmptyDropTarget";
 import {
   DraggingTabPanelState,
   TabDndContext,
@@ -105,7 +105,7 @@ function Tab({ config, saveConfig }: Props) {
     !draggingTabState.isOver;
 
   return (
-    <Flex col>
+    <Flex col clip>
       <TabbedToolbar
         panelId={panelId}
         tabs={tabs}
@@ -113,11 +113,7 @@ function Tab({ config, saveConfig }: Props) {
         activeTabIdx={activeTabIdx}
         setDraggingTabState={setDraggingTabState}
       />
-      <Flex
-        style={{
-          position: "relative",
-        }}
-      >
+      <Flex style={{ position: "relative" }} clip>
         {activeLayout != undefined ? (
           <TabDndContext.Provider value={{ preventTabDrop }}>
             <UnconnectedPanelLayout
@@ -127,7 +123,7 @@ function Tab({ config, saveConfig }: Props) {
             />
           </TabDndContext.Provider>
         ) : (
-          <EmptyDropTarget tabId={panelId} />
+          <EmptyPanelLayout tabId={panelId} />
         )}
         {preventTabDrop && <SPanelCover />}
       </Flex>

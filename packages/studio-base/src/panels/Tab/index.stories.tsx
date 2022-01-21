@@ -89,32 +89,14 @@ storiesOf("panels/Tab", module)
     { colorScheme: "both-row" },
   )
   .add("showing panel list", () => (
-    <PanelSetup
-      fixture={fixture}
-      panelCatalog={new MockPanelCatalog()}
-      onMount={() => {
-        setTimeout(async () => {
-          await tick();
-          (document.querySelectorAll('[data-test="pick-a-panel"]')[0] as any).click();
-        }, DEFAULT_TIMEOUT);
-      }}
-    >
+    <PanelSetup fixture={fixture} panelCatalog={new MockPanelCatalog()}>
       <Tab />
     </PanelSetup>
   ))
   .add(
     "showing panel list light",
     () => (
-      <PanelSetup
-        fixture={fixture}
-        panelCatalog={new MockPanelCatalog()}
-        onMount={() => {
-          setTimeout(async () => {
-            await tick();
-            (document.querySelectorAll('[data-test="pick-a-panel"]')[0] as any).click();
-          }, DEFAULT_TIMEOUT);
-        }}
-      >
+      <PanelSetup fixture={fixture} panelCatalog={new MockPanelCatalog()}>
         <Tab />
       </PanelSetup>
     ),
@@ -135,8 +117,6 @@ storiesOf("panels/Tab", module)
         }}
         onMount={() => {
           setTimeout(async () => {
-            await tick();
-            (document.querySelectorAll('[data-test="pick-a-panel"]')[0] as any).click();
             await tick();
             (
               document.querySelectorAll('[data-test="panel-menu-item Some Panel"]')[0] as any
@@ -164,8 +144,6 @@ storiesOf("panels/Tab", module)
         onMount={() => {
           setTimeout(async () => {
             await tick();
-            (document.querySelectorAll('[data-test="pick-a-panel"]')[0] as any).click();
-            await tick();
             (
               document.querySelectorAll('[data-test="panel-menu-item Some Panel"]')[0] as any
             ).click();
@@ -191,8 +169,6 @@ storiesOf("panels/Tab", module)
         }}
         onMount={() => {
           setTimeout(async () => {
-            await tick();
-            (document.querySelectorAll('[data-test="pick-a-panel"]')[0] as any).click();
             await tick();
 
             const imageItem = document.querySelectorAll(
@@ -222,8 +198,6 @@ storiesOf("panels/Tab", module)
         }}
         onMount={() => {
           setTimeout(async () => {
-            await tick();
-            (document.querySelectorAll('[data-test="pick-a-panel"]')[0] as any).click();
             await tick();
 
             const imageItem = document.querySelectorAll(
