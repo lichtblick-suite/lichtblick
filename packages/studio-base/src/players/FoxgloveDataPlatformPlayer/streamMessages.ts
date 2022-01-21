@@ -5,7 +5,7 @@
 import decompressLZ4 from "wasm-lz4";
 
 import Logger from "@foxglove/log";
-import { McapReader, McapRecord } from "@foxglove/mcap";
+import { McapPre0Reader, McapPre0Types } from "@foxglove/mcap";
 import { fromNanoSec, isTimeInRangeInclusive, Time, toRFC3339String } from "@foxglove/rostime";
 import { MessageEvent } from "@foxglove/studio-base/players/types";
 import ConsoleApi from "@foxglove/studio-base/services/ConsoleApi";
@@ -69,7 +69,7 @@ export default async function* streamMessages({
   let totalMessages = 0;
   let messages: MessageEvent<unknown>[] = [];
 
-  function processRecord(record: McapRecord) {
+  function processRecord(record: McapPre0Types.McapRecord) {
     switch (record.type) {
       default:
         return;
@@ -113,7 +113,7 @@ export default async function* streamMessages({
     }
   }
 
-  const reader = new McapReader({
+  const reader = new McapPre0Reader({
     decompressHandlers: {
       lz4: (buffer, decompressedSize) => decompressLZ4(buffer, Number(decompressedSize)),
     },

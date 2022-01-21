@@ -4,15 +4,15 @@
 
 /// <reference types="quicklookjs" />
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import ReactDOM from "react-dom";
 import { useAsync } from "react-use";
 import { createGlobalStyle } from "styled-components";
 
 import Logger from "@foxglove/log";
 
-import ErrorInfo from "./ErrorInfo";
 import FileInfoDisplay from "./FileInfoDisplay";
+import Flash from "./Flash";
 import { getBagInfo, getMcapInfo } from "./getInfo";
 
 const log = Logger.getLogger(__filename);
@@ -41,7 +41,7 @@ const GlobalStyle = createGlobalStyle`
   }
   body {
     padding: 10px;
-    font-family: ui-sans-serif, -apple-system;
+    font-family: ui-sans-serif, -apple-system, BlinkMacSystemFont;
     @media (prefers-color-scheme: dark) {
       color: #fff;
     }
@@ -49,7 +49,13 @@ const GlobalStyle = createGlobalStyle`
   pre,
   code,
   tt {
-    font-family: ui-monospace, monospace;
+    font-family: ui-monospace, Menlo, Monaco, monospace;
+  }
+  a {
+    color:  #476ebd;
+    @media (prefers-color-scheme: dark) {
+      color: #99b5ed;
+    }
   }
 `;
 
@@ -64,6 +70,7 @@ function Root(): JSX.Element {
         e.dataTransfer.dropEffect = "copy";
       }
       if (e.type === "drop" && e.dataTransfer?.files[0]) {
+        setShouldLoadMoreInfo(false);
         setPreviewedFile(e.dataTransfer.files[0]);
       }
     };
@@ -98,11 +105,49 @@ function Root(): JSX.Element {
   }, [previewedFile]);
   useEffect(() => state.error && console.error(state.error), [state.error]);
 
+  // eslint-disable-next-line no-restricted-syntax
+  const progressRef = useRef<HTMLProgressElement>(null);
+
+  const loadMoreInfo = state.value?.fileInfo?.loadMoreInfo;
+  const [shouldLoadMoreInfo, setShouldLoadMoreInfo] = useState(false);
+  const moreInfo = useAsync(async () => {
+    if (!shouldLoadMoreInfo) {
+      return undefined;
+    }
+    return await loadMoreInfo?.((progress) => {
+      if (progressRef.current) {
+        progressRef.current.value = progress;
+      }
+    });
+  }, [shouldLoadMoreInfo, loadMoreInfo]);
+
+  const fileStats = state.value?.fileStats;
+  const fileInfo = moreInfo?.value ?? state.value?.fileInfo;
+  const fileError = moreInfo?.error ?? state.value?.error;
+
   return (
     <div>
       {state.loading && "Loading…"}
-      {state.error && <ErrorInfo>{state.error.toString()}</ErrorInfo>}
-      {state.value && <FileInfoDisplay {...state.value} />}
+      {state.error && <Flash type="error">{state.error.toString()}</Flash>}
+      {fileStats && <FileInfoDisplay fileStats={fileStats} fileInfo={fileInfo} error={fileError} />}
+      {loadMoreInfo && (!shouldLoadMoreInfo || moreInfo.loading) && (
+        <Flash type="info">
+          This file cannot be summarized without a full scan.{" "}
+          {moreInfo.loading ? (
+            <progress ref={progressRef} style={{ margin: 0 }} />
+          ) : (
+            <a
+              href="#"
+              onClick={(event) => {
+                event.preventDefault();
+                setShouldLoadMoreInfo(true);
+              }}
+            >
+              Scan now
+            </a>
+          )}
+        </Flash>
+      )}
     </div>
   );
 }

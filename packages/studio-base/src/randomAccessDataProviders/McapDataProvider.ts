@@ -7,7 +7,7 @@ import protobufjs from "protobufjs";
 import descriptor from "protobufjs/ext/descriptor";
 import decompressLZ4 from "wasm-lz4";
 
-import { ChannelInfo, McapReader, McapRecord } from "@foxglove/mcap";
+import { McapPre0Reader as McapReader, McapPre0Types } from "@foxglove/mcap";
 import { parse as parseMessageDefinition } from "@foxglove/rosmsg";
 import { LazyMessageReader } from "@foxglove/rosmsg-serialization";
 import { MessageReader as ROS2MessageReader } from "@foxglove/rosmsg2-serialization";
@@ -49,14 +49,14 @@ export default class McapDataProvider implements RandomAccessDataProvider {
     const channelInfoById = new Map<
       number,
       {
-        info: ChannelInfo;
+        info: McapPre0Types.ChannelInfo;
         messageDeserializer: ROS2MessageReader | LazyMessageReader | protobufjs.Type;
       }
     >();
 
     let startTime: Time | undefined;
     let endTime: Time | undefined;
-    function processRecord(record: McapRecord) {
+    function processRecord(record: McapPre0Types.McapRecord) {
       switch (record.type) {
         default:
           break;
