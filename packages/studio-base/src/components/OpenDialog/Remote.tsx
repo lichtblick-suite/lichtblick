@@ -20,6 +20,14 @@ type RemoteProps = {
   availableSources: IDataSourceFactory[];
 };
 
+function maybeParseURL(urlString: string): undefined | URL {
+  try {
+    return new URL(urlString);
+  } catch {
+    return undefined;
+  }
+}
+
 export default function Remote(props: RemoteProps): JSX.Element {
   const { onCancel, onBack, availableSources } = props;
 
@@ -32,8 +40,14 @@ export default function Remote(props: RemoteProps): JSX.Element {
       return;
     }
 
-    const extension = path.extname(currentUrl);
-    if (extension.length === 0) {
+    const parsedUrl = maybeParseURL(currentUrl);
+    if (!parsedUrl) {
+      setErrorMessage(`${currentUrl} is not a valid URL`);
+      return;
+    }
+
+    const extension = path.extname(parsedUrl.pathname);
+    if (extension == undefined || extension.length === 0) {
       setErrorMessage("URL must end with a filename and extension");
       return;
     }
