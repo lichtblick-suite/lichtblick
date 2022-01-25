@@ -2,8 +2,9 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { Stack, useTheme, Text, Link, ITheme, ITextStyles, ILinkStyles } from "@fluentui/react";
+import { useTheme, Text, Link, ITheme, ITextStyles, ILinkStyles } from "@fluentui/react";
 import ChevronLeftIcon from "@mdi/svg/svg/chevron-left.svg";
+import { Stack } from "@mui/material";
 import { useMemo } from "react";
 import { useUnmount } from "react-use";
 
@@ -157,15 +158,13 @@ export default function HelpSidebar({
     >
       <Stack>
         {isHomeView ? (
-          <Stack tokens={{ childrenGap: theme.spacing.m }}>
+          <Stack spacing={2}>
             {sectionKeys.map((key: SectionKey) => {
               const { subheader, links = [] } = sections.get(key) ?? {};
               return (
-                <Stack.Item key={subheader}>
+                <div key={subheader}>
                   <Text styles={styles.subheader}>{subheader}</Text>
-                  <Stack
-                    tokens={{ padding: `${theme.spacing.m} 0`, childrenGap: theme.spacing.s1 }}
-                  >
+                  <Stack paddingY={2} spacing={1}>
                     {links.map(({ title, url, content }: HelpInfo) => (
                       <Link
                         key={title}
@@ -179,13 +178,13 @@ export default function HelpSidebar({
                       </Link>
                     ))}
                   </Stack>
-                </Stack.Item>
+                </div>
               );
             })}
             <Text styles={styles.footer}>Foxglove Studio version {FOXGLOVE_STUDIO_VERSION}</Text>
           </Stack>
         ) : (
-          <Stack tokens={{ childrenGap: theme.spacing.s2 }}>
+          <Stack spacing={0.5}>
             {helpInfo.content != undefined ? (
               <TextContent allowMarkdownHtml={true}>{helpInfo.content}</TextContent>
             ) : (

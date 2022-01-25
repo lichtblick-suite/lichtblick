@@ -2,7 +2,8 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { IconBase, Link, makeStyles, Stack, Text, useTheme } from "@fluentui/react";
+import { IconBase, Link, makeStyles, Text, useTheme } from "@fluentui/react";
+import { Stack } from "@mui/material";
 
 import { useWorkspace } from "@foxglove/studio-base/context/WorkspaceContext";
 
@@ -11,14 +12,6 @@ type SignInPromptProps = {
 };
 
 const useStyles = makeStyles((theme) => ({
-  root: {
-    backgroundColor: theme.palette.themeLighterAlt,
-    position: "sticky",
-    bottom: 0,
-  },
-  text: {
-    lineHeight: "1.4",
-  },
   link: {
     color: "inherit",
     textDecoration: "underline",
@@ -38,15 +31,17 @@ export default function SignInPrompt(props: SignInPromptProps): JSX.Element {
 
   return (
     <Stack
-      className={classes.root}
-      horizontal
-      verticalAlign="center"
-      tokens={{
-        padding: theme.spacing.m,
-        childrenGap: theme.spacing.m,
+      direction="row"
+      alignItems="center"
+      padding={2}
+      spacing={2}
+      sx={{
+        bgcolor: theme.palette.themeLighterAlt,
+        position: "sticky",
+        bottom: 0,
       }}
     >
-      <Text className={classes.text} variant="smallPlus">
+      <Text variant="smallPlus" styles={{ root: { lineHeight: "1.4" } }}>
         <Link onClick={openAccountSettings} className={classes.link}>
           Sign in
         </Link>{" "}

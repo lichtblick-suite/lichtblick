@@ -1,7 +1,9 @@
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
-import { Slider, Stack, useTheme } from "@fluentui/react";
+
+import { Slider } from "@fluentui/react";
+import { Stack } from "@mui/material";
 import { pick } from "lodash";
 import { useCallback, useMemo } from "react";
 import { URDFRobot } from "urdf-loader";
@@ -27,9 +29,9 @@ export function JointValueSliders({
     },
     [onChange, customJointValues, model.joints],
   );
-  const theme = useTheme();
+
   return (
-    <Stack style={{ overflowY: "auto", width: "40%", maxWidth: 300, padding: theme.spacing.s1 }}>
+    <Stack padding={1} sx={{ overflowY: "auto", width: "40%", maxWidth: 300 }}>
       {joints.map(([name, joint]) => {
         const min = joint.jointType === "continuous" ? -Math.PI : +joint.limit.lower;
         const max = joint.jointType === "continuous" ? Math.PI : +joint.limit.upper;

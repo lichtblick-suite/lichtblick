@@ -2,7 +2,8 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { ActionButton, Stack, TextField, useTheme } from "@fluentui/react";
+import { ActionButton, TextField, useTheme } from "@fluentui/react";
+import { Stack } from "@mui/material";
 import { useState, useMemo, useCallback, useLayoutEffect } from "react";
 
 import {
@@ -74,8 +75,8 @@ export default function Connection(props: ConnectionProps): JSX.Element {
       onCancel={onCancel}
       onOpen={selectedSource?.disabledReason == undefined ? onOpen : undefined}
     >
-      <Stack grow verticalFill horizontal tokens={{ childrenGap: theme.spacing.l2 }}>
-        <Stack verticalFill>
+      <Stack direction="row" flexGrow={1} height="100%" spacing={4}>
+        <Stack height="100%">
           {enabledSourcesFirst.map((source, idx) => {
             const { id, iconName, displayName } = source;
             return (
@@ -97,15 +98,15 @@ export default function Connection(props: ConnectionProps): JSX.Element {
           })}
         </Stack>
         <Stack
-          grow
-          verticalFill
           key={selectedSource?.id}
-          tokens={{ childrenGap: theme.spacing.m }}
-          styles={{ root: { overflowY: "auto" } }}
+          flexGrow={1}
+          height="100%"
+          spacing={2}
+          sx={{ overflowX: "auto" }}
         >
           {selectedSource?.formConfig != undefined && (
-            <Stack grow verticalAlign="space-between">
-              <Stack tokens={{ childrenGap: theme.spacing.m }}>
+            <Stack flexGrow={1} justifyContent="space-between">
+              <Stack spacing={2}>
                 {selectedSource?.formConfig.fields.map((field) => (
                   <TextField
                     disabled={selectedSource?.disabledReason != undefined}

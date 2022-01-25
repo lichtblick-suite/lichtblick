@@ -15,17 +15,16 @@ import {
   DefaultButton,
   IconButton,
   IContextualMenuItemStyles,
-  Stack,
   Text,
   TextField,
   ITheme,
-  IStackStyles,
   ITextFieldStyles,
   IButtonStyles,
   makeStyles,
   mergeStyleSets,
   useTheme,
 } from "@fluentui/react";
+import { Stack } from "@mui/material";
 import { clamp, groupBy } from "lodash";
 import Tree from "rc-tree";
 import React, { useCallback, useMemo, useRef } from "react";
@@ -149,17 +148,6 @@ const useStyles = makeStyles((theme) => ({
 const useComponentStyles = (theme: ITheme) =>
   useMemo(
     () => ({
-      header: {
-        root: {
-          position: "sticky",
-          top: 0,
-          zIndex: 1,
-          backgroundColor: theme.semanticColors.buttonBackgroundHovered,
-          borderTopLeftRadius: theme.effects.roundedCorner4,
-          borderTopRightRadius: theme.effects.roundedCorner4,
-        },
-      } as Partial<IStackStyles>,
-
       input: {
         root: {
           width: "100%",
@@ -473,17 +461,22 @@ function TopicTree({
   );
 
   return (
-    <Stack className={classes.inner} styles={{ root: { width: treeWidth } }}>
+    <Stack className={classes.inner} width={treeWidth}>
       <Stack
-        horizontal
-        verticalAlign="center"
-        styles={styles.header}
-        tokens={{
-          childrenGap: theme.spacing.s2,
-          padding: theme.spacing.s2,
+        direction="row"
+        alignItems="center"
+        spacing={0.5}
+        padding={0.5}
+        sx={{
+          position: "sticky",
+          top: 0,
+          zIndex: 1,
+          backgroundColor: theme.semanticColors.buttonBackgroundHovered,
+          borderTopLeftRadius: theme.effects.roundedCorner4,
+          borderTopRightRadius: theme.effects.roundedCorner4,
         }}
       >
-        <Stack horizontal grow styles={{ root: { position: "relative" } }}>
+        <Stack direction="row" flexGrow={1} position="relative">
           <TextField
             iconProps={{ iconName: "Search" }}
             data-test="topic-tree-filter-input"
@@ -533,12 +526,11 @@ function TopicTree({
       <div ref={scrollContainerRef} style={{ overflow: "auto", width: treeWidth }}>
         {showNoMatchesState ? (
           <Stack
-            verticalAlign="center"
-            horizontalAlign="center"
-            tokens={{
-              padding: `${theme.spacing.l2} 0 ${theme.spacing.l1}`,
-              childrenGap: theme.spacing.m,
-            }}
+            alignItems="center"
+            justifyContent="center"
+            paddingTop={4}
+            paddingBottom={2.5}
+            spacing={2}
           >
             <NoMatchesSvg />
             <Text variant="smallPlus" styles={{ root: { textAlign: "center", lineHeight: "1.3" } }}>

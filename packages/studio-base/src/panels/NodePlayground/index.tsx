@@ -11,9 +11,10 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { Link, Spinner, SpinnerSize, Stack } from "@fluentui/react";
+import { Link, Spinner, SpinnerSize } from "@fluentui/react";
 import ArrowLeftIcon from "@mdi/svg/svg/arrow-left.svg";
 import PlusIcon from "@mdi/svg/svg/plus.svg";
+import { Box, Stack } from "@mui/material";
 import { Suspense } from "react";
 import styled from "styled-components";
 import { v4 as uuidv4 } from "uuid";
@@ -234,9 +235,9 @@ function NodePlayground(props: Props) {
   );
 
   return (
-    <Stack verticalFill>
+    <Stack height="100%">
       <PanelToolbar floating helpContent={helpContent} />
-      <Stack horizontal verticalFill>
+      <Stack direction="row" height="100%">
         <Sidebar
           explorer={explorer}
           updateExplorer={updateExplorer}
@@ -264,7 +265,7 @@ function NodePlayground(props: Props) {
           setScriptOverride={setScriptOverride}
           addNewNode={addNewNode}
         />
-        <Stack grow verticalFill style={{ overflow: "hidden" }}>
+        <Stack flexGrow={1} height="100%" overflow="hidden">
           <Flex
             start
             style={{
@@ -315,9 +316,9 @@ function NodePlayground(props: Props) {
             </Icon>
           </Flex>
 
-          <Stack grow style={{ overflow: "hidden " }}>
+          <Stack flexGrow={1} overflow="hidden ">
             {selectedNodeId == undefined && <WelcomeScreen addNewNode={addNewNode} />}
-            <div
+            <Box
               style={{
                 flexGrow: 1,
                 width: "100%",
@@ -344,7 +345,7 @@ function NodePlayground(props: Props) {
                   />
                 )}
               </Suspense>
-            </div>
+            </Box>
             <Stack>
               <BottomBar
                 nodeId={selectedNodeId}

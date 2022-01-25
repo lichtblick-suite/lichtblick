@@ -350,6 +350,7 @@ export default function PlotLegend(props: PlotLegendProps): JSX.Element {
                   index={index}
                   autoSize
                   disableAutocomplete={isReferenceLinePlotPath}
+                  inputStyle={{ height: 20 }}
                   {...(xAxisVal === "timestamp" ? { timestampMethod } : undefined)}
                 />
                 {hasMismatchedDataLength && (

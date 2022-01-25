@@ -10,12 +10,11 @@ import {
   OverflowSet,
   ResizeGroup,
   ResizeGroupDirection,
-  Stack,
   useTheme,
 } from "@fluentui/react";
+import { Box, Stack } from "@mui/material";
 import { useCallback, useLayoutEffect, useRef, useState } from "react";
 import { MosaicNode, MosaicWithoutDragDropContext } from "react-mosaic-component";
-import styled from "styled-components";
 
 import { filterMap } from "@foxglove/den/collection";
 import ErrorBoundary from "@foxglove/studio-base/components/ErrorBoundary";
@@ -26,15 +25,6 @@ import { Badge } from "./types";
 function Noop(): ReactNull {
   return ReactNull;
 }
-
-// Root drop targets in this top level sidebar mosaic interfere with drag/mouse events from the
-// PanelList. We don't allow users to edit the mosaic since it's just used for the sidebar, so we
-// can hide the drop targets.
-const HideRootDropTargets = styled.div`
-  & > .mosaic > .drop-target-container {
-    display: none !important;
-  }
-`;
 
 export type SidebarItem = {
   iconName: IIconProps["iconName"];
@@ -190,17 +180,15 @@ export default function Sidebar<K extends string>({
   );
 
   return (
-    <Stack horizontal verticalFill style={{ overflow: "hidden" }}>
+    <Stack direction="row" height="100%" overflow="hidden">
       <Stack
-        verticalAlign="space-between"
-        styles={{
-          root: {
-            width: BUTTON_SIZE,
-            flexShrink: 0,
-            boxSizing: "content-box",
-            borderRight: `1px solid ${theme.semanticColors.bodyDivider}`,
-            backgroundColor: theme.palette.neutralLighterAlt,
-          },
+        justifyContent="space-between"
+        sx={{
+          width: BUTTON_SIZE,
+          flexShrink: 0,
+          boxSizing: "content-box",
+          borderRight: `1px solid ${theme.semanticColors.bodyDivider}`,
+          backgroundColor: theme.palette.neutralLighterAlt,
         }}
       >
         <ResizeGroup
@@ -217,7 +205,18 @@ export default function Sidebar<K extends string>({
         // By always rendering the mosaic, even if we are only showing children, we can prevent the
         // children from having to re-mount each time the sidebar is opened/closed.
       }
-      <HideRootDropTargets style={{ flex: "1 1 100%" }}>
+      <Box
+        sx={{
+          flex: "1 1 100%",
+
+          // Root drop targets in this top level sidebar mosaic interfere with drag/mouse events from the
+          // PanelList. We don't allow users to edit the mosaic since it's just used for the sidebar, so we
+          // can hide the drop targets.
+          "& > .mosaic > .drop-target-container": {
+            display: "none !important",
+          },
+        }}
+      >
         <MosaicWithoutDragDropContext<"sidebar" | "children">
           className=""
           value={mosaicValue}
@@ -239,7 +238,7 @@ export default function Sidebar<K extends string>({
           )}
           resize={{ minimumPaneSizePercentage: 10 }}
         />
-      </HideRootDropTargets>
+      </Box>
     </Stack>
   );
 }

@@ -8,13 +8,13 @@ import {
   TextField,
   ITextField,
   makeStyles,
-  Stack,
   useTheme,
   IContextualMenuItem,
   ContextualMenu,
 } from "@fluentui/react";
+import { Box, Stack } from "@mui/material";
 import cx from "classnames";
-import { useCallback, useContext, useLayoutEffect, useState } from "react";
+import { SetStateAction, useCallback, useContext, useLayoutEffect, useState } from "react";
 import { useMountedState } from "react-use";
 
 import { useLayoutManager } from "@foxglove/studio-base/context/LayoutManagerContext";
@@ -381,9 +381,9 @@ export default function LayoutRow({
 
   return (
     <Stack
-      as="form"
-      horizontal
-      verticalAlign="center"
+      component="form"
+      direction="row"
+      alignItems="center"
       className={cx(styles.layoutRow, {
         [styles.layoutRowSelected]: selected,
         [styles.layoutRowWithOpenMenu]: contextMenuEvent != undefined || menuOpen,
@@ -392,7 +392,10 @@ export default function LayoutRow({
       })}
       onClick={editingName ? undefined : onClick}
       onSubmit={onSubmit}
-      onContextMenu={(event) => {
+      onContextMenu={(event: {
+        preventDefault: () => void;
+        nativeEvent: SetStateAction<MouseEvent | undefined>;
+      }) => {
         event.preventDefault();
         setContextMenuEvent(event.nativeEvent);
       }}
@@ -421,13 +424,13 @@ export default function LayoutRow({
           }}
         />
       ) : (
-        <Stack.Item
-          grow
+        <Box
+          flexGrow={1}
           title={layout.name}
           className={cx(styles.layoutName, { [styles.layoutNameSelected]: selected })}
         >
           {layout.name}
-        </Stack.Item>
+        </Box>
       )}
 
       {!editingName && (

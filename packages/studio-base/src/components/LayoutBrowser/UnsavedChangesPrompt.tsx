@@ -7,13 +7,13 @@ import {
   IChoiceGroupOption,
   Dialog,
   DialogFooter,
-  Stack,
   Text,
   TextField,
   useTheme,
   DefaultButton,
   PrimaryButton,
 } from "@fluentui/react";
+import { Stack } from "@mui/material";
 import { useCallback, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { useLatest, useUnmount } from "react-use";
 
@@ -113,7 +113,7 @@ export function UnsavedChangesPrompt({
       maxWidth={320}
     >
       <form onSubmit={handleSubmit}>
-        <Stack tokens={{ childrenGap: theme.spacing.m }} styles={{ root: { minHeight: 180 } }}>
+        <Stack spacing={2} sx={{ minHeight: 180 }}>
           <ChoiceGroup
             selectedKey={selectedKey}
             options={options}

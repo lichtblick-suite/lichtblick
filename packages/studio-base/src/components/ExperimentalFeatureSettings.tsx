@@ -11,7 +11,8 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { Stack, Text, useTheme, Checkbox, Link } from "@fluentui/react";
+import { Text, useTheme, Checkbox, Link } from "@fluentui/react";
+import { Stack } from "@mui/material";
 
 import { AppSetting } from "@foxglove/studio-base/AppSetting";
 import { useAppConfigurationValue } from "@foxglove/studio-base/hooks/useAppConfigurationValue";
@@ -76,24 +77,17 @@ function ExperimentalFeatureItem(props: { feature: Feature }) {
 
   const [enabled, setEnabled] = useAppConfigurationValue<boolean>(feature.key);
   return (
-    <Stack grow tokens={{ childrenGap: theme.spacing.s2 }}>
+    <Stack flexGrow={1} spacing={0.5}>
       <Checkbox
         onRenderLabel={() => {
           return (
-            <Stack
-              tokens={{ childrenGap: theme.spacing.s2 }}
-              styles={{ root: { paddingLeft: theme.spacing.s2 } }}
-            >
+            <Stack spacing={0.5} sx={{ paddingLeft: 0.5 }}>
               <Text variant="medium" styles={{ root: { fontWeight: 600 } }}>
                 {feature.name}
               </Text>
               <Text
                 variant="smallPlus"
-                styles={{
-                  root: {
-                    color: theme.semanticColors.bodySubtext,
-                  },
-                }}
+                styles={{ root: { color: theme.semanticColors.bodySubtext } }}
               >
                 {feature.description}
               </Text>
@@ -114,9 +108,8 @@ function ExperimentalFeatureItem(props: { feature: Feature }) {
 }
 
 export function ExperimentalFeatureSettings(): React.ReactElement {
-  const theme = useTheme();
   return (
-    <Stack tokens={{ childrenGap: theme.spacing.m }}>
+    <Stack spacing={2}>
       {features.length === 0 && (
         <p>
           <em>Currently there are no experimental features.</em>

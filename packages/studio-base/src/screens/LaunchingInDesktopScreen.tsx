@@ -2,14 +2,14 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { Link, Stack, Text, useTheme } from "@fluentui/react";
+import { Link, Text } from "@fluentui/react";
+import { Stack } from "@mui/material";
 import { ReactElement, useEffect } from "react";
 
 import { AppSetting } from "@foxglove/studio-base/AppSetting";
 import { useSessionStorageValue } from "@foxglove/studio-base/hooks/useSessionStorageValue";
 
 export function LaunchingInDesktopScreen(): ReactElement {
-  const theme = useTheme();
   const [, setLaunchPreference] = useSessionStorageValue(AppSetting.LAUNCH_PREFERENCE);
 
   const cleanWebURL = new URL(window.location.href);
@@ -55,17 +55,17 @@ export function LaunchingInDesktopScreen(): ReactElement {
   });
 
   return (
-    <Stack horizontalAlign="center" verticalAlign="center" verticalFill>
+    <Stack alignItems="center" justifyContent="center" height="100%">
       <Stack
-        horizontalAlign="center"
-        verticalAlign="center"
-        verticalFill
-        tokens={{ childrenGap: theme.spacing.l1, maxWidth: 480 }}
-        styles={{ root: { textAlign: "center" } }}
+        alignItems="center"
+        justifyContent="center"
+        height="100%"
+        spacing={2.5}
+        sx={{ textAlign: "center", maxWidth: 480 }}
       >
         <Text variant="xxLarge">Launching Foxglove Studio…</Text>
         <Text>We’ve directed you to the desktop app.</Text>
-        <Stack tokens={{ childrenGap: theme.spacing.s2 }}>
+        <Stack spacing={0.5}>
           <Text>
             You can also <Link onClick={openWeb}>open this link in your browser</Link>.
           </Text>

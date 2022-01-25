@@ -1,6 +1,7 @@
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
+
 import {
   Checkbox,
   ChoiceGroup,
@@ -10,12 +11,12 @@ import {
   IComboBoxOption,
   Label,
   SelectableOptionMenuItemType,
-  Stack,
   Text,
   TextField,
   useTheme,
   VirtualizedComboBox,
 } from "@fluentui/react";
+import { Stack } from "@mui/material";
 import moment from "moment-timezone";
 import { useCallback, useMemo, useState } from "react";
 
@@ -320,45 +321,45 @@ export default function Preferences(): React.ReactElement {
 
   return (
     <SidebarContent title="Preferences">
-      <Stack tokens={{ childrenGap: 30 }}>
-        <Stack.Item>
+      <Stack spacing={3.75}>
+        <div>
           <SectionHeader>General</SectionHeader>
-          <Stack tokens={{ childrenGap: theme.spacing.s1 }}>
-            <Stack.Item>
+          <Stack spacing={1}>
+            <div>
               <ColorSchemeSettings />
-            </Stack.Item>
-            <Stack.Item>
+            </div>
+            <div>
               <TimezoneSettings />
-            </Stack.Item>
-            <Stack.Item>
+            </div>
+            <div>
               <TimeFormat />
-            </Stack.Item>
-            <Stack.Item>
+            </div>
+            <div>
               <MessageFramerate />
-            </Stack.Item>
+            </div>
             {supportsAppUpdates && (
-              <Stack.Item>
+              <div>
                 <AutoUpdate />
-              </Stack.Item>
+              </div>
             )}
             {!isDesktopApp() && (
-              <Stack.Item>
+              <div>
                 <LaunchDefault />
-              </Stack.Item>
+              </div>
             )}
           </Stack>
-        </Stack.Item>
-        <Stack.Item>
+        </div>
+        <div>
           <SectionHeader>ROS</SectionHeader>
-          <Stack tokens={{ childrenGap: theme.spacing.s1 }}>
-            <Stack.Item>
+          <Stack spacing={1}>
+            <div>
               <RosPackagePath />
-            </Stack.Item>
+            </div>
           </Stack>
-        </Stack.Item>
-        <Stack.Item>
+        </div>
+        <div>
           <SectionHeader>Privacy</SectionHeader>
-          <Stack tokens={{ childrenGap: theme.spacing.s1 }}>
+          <Stack spacing={1}>
             <Text style={{ color: theme.palette.neutralSecondary }}>
               Changes will take effect the next time Foxglove Studio is launched.
             </Text>
@@ -373,16 +374,16 @@ export default function Preferences(): React.ReactElement {
               label="Send anonymized crash reports"
             />
           </Stack>
-        </Stack.Item>
-        <Stack.Item>
+        </div>
+        <div>
           <SectionHeader>Experimental features</SectionHeader>
-          <Stack tokens={{ childrenGap: theme.spacing.s1 }}>
+          <Stack spacing={1}>
             <Text style={{ color: theme.palette.neutralSecondary }}>
               These features are unstable and not recommended for daily use.
             </Text>
             <ExperimentalFeatureSettings />
           </Stack>
-        </Stack.Item>
+        </div>
       </Stack>
     </SidebarContent>
   );

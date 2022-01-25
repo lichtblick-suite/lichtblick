@@ -2,7 +2,8 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { CompoundButton, Stack, Text, IButtonProps, useTheme, Checkbox } from "@fluentui/react";
+import { CompoundButton, Text, IButtonProps, useTheme, Checkbox } from "@fluentui/react";
+import { Stack } from "@mui/material";
 import { useMemo } from "react";
 
 import { AppSetting } from "@foxglove/studio-base/AppSetting";
@@ -118,14 +119,8 @@ export default function Start(props: IStartProps): JSX.Element {
         id: recent.id,
         children: (
           <Stack
-            horizontal
-            styles={{
-              root: {
-                overflow: "hidden",
-
-                ":hover": { color: theme.palette.themeDark },
-              },
-            }}
+            direction="row"
+            sx={{ overflow: "hidden", "&:hover": { color: theme.palette.themeDark } }}
           >
             <Text
               variant="small"
@@ -161,14 +156,14 @@ export default function Start(props: IStartProps): JSX.Element {
   }, [recentSources, selectRecent, theme]);
 
   return (
-    <Stack tokens={{ childrenGap: theme.spacing.l1 }}>
-      <Stack horizontal tokens={{ childrenGap: theme.spacing.l2 }}>
+    <Stack spacing={2.5}>
+      <Stack direction="row" spacing={4}>
         {/* Left column */}
-        <Stack grow tokens={{ childrenGap: theme.spacing.m }}>
+        <Stack flexGrow={1} spacing={2}>
           <Text variant="large" styles={{ root: { color: theme.semanticColors.bodySubtext } }}>
             Open data source
           </Text>
-          <Stack tokens={{ childrenGap: theme.spacing.s1 }}>
+          <Stack spacing={1}>
             {startItems.map(({ id, ...item }) => (
               <CompoundButton {...item} key={id} id={id} styles={buttonStyles} />
             ))}
@@ -176,7 +171,7 @@ export default function Start(props: IStartProps): JSX.Element {
         </Stack>
 
         {/* Right column */}
-        <Stack grow tokens={{ childrenGap: theme.spacing.l1 }} styles={{ root: { minWidth: 0 } }}>
+        <Stack flexGrow={1} minWidth={0} spacing={2.5}>
           {recentItems.length > 0 && <ActionList title="Recent" items={recentItems} />}
           <ActionList title="Help" items={HELP_ITEMS} />
         </Stack>

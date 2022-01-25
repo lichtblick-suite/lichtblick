@@ -11,14 +11,8 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import {
-  DefaultButton,
-  IButtonStyles,
-  IconButton,
-  Stack,
-  makeStyles,
-  useTheme,
-} from "@fluentui/react";
+import { DefaultButton, IButtonStyles, IconButton, makeStyles, useTheme } from "@fluentui/react";
+import { Stack } from "@mui/material";
 import { flatten, flatMap, partition } from "lodash";
 import { CSSProperties, useCallback, useMemo } from "react";
 
@@ -577,15 +571,15 @@ export default React.memo<MessagePathInputBaseProps>(function MessagePathInput(
 
   return (
     <Stack
-      horizontal
-      horizontalAlign="space-between"
-      verticalAlign="center"
-      grow
-      disableShrink
-      styles={{ root: { minWidth: 0, ".ms-layer:empty": { margin: 0 } } }}
-      tokens={{ childrenGap: 2 }}
+      direction="row"
+      justifyContent="space-between"
+      alignItems="center"
+      flexGrow={1}
+      flexShrink={0}
+      minWidth={0}
+      spacing={0.5}
     >
-      <Stack.Item grow>
+      <Stack direction="row" alignItems="center" flexGrow={1}>
         <Autocomplete
           items={orderedAutocompleteItems}
           filterText={autocompleteFilterText}
@@ -606,10 +600,10 @@ export default React.memo<MessagePathInputBaseProps>(function MessagePathInput(
           // to have the entire input selected whenever you want to make a change to a part it.
           disableAutoSelect
         />
-      </Stack.Item>
+      </Stack>
       {timestampMethod != undefined && (
         <>
-          <Stack.Item>
+          <div>
             {timestampButton.tooltip}
             <DefaultButton
               elementRef={timestampButton.ref}
@@ -641,15 +635,15 @@ export default React.memo<MessagePathInputBaseProps>(function MessagePathInput(
               }}
               styles={dropdownStyles}
             />
-          </Stack.Item>
-          <Stack.Item>
+          </div>
+          <div>
             {helpButton.tooltip}
             <IconButton
               elementRef={helpButton.ref}
               iconProps={{ iconName: "HelpCircle" }}
               styles={iconButtonStyles}
             />
-          </Stack.Item>
+          </div>
         </>
       )}
     </Stack>

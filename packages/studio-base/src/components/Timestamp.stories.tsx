@@ -2,7 +2,7 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { Stack } from "@fluentui/react";
+import { Stack } from "@mui/material";
 import { PropsWithChildren, useState } from "react";
 
 import { Time } from "@foxglove/rostime";
@@ -30,7 +30,7 @@ function TimestampStory(props: PropsWithChildren<Props>): JSX.Element {
 
   return (
     <AppConfigurationContext.Provider value={value}>
-      <Stack tokens={{ padding: 16, childrenGap: 16 }}>
+      <Stack padding={2} spacing={2}>
         <Timestamp horizontal time={time} />
         <Timestamp time={time} />
         <Timestamp disableDate time={time} />

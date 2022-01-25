@@ -11,6 +11,7 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
+import { Box, Stack, Typography } from "@mui/material";
 import { useCallback, useEffect, useMemo, useRef } from "react";
 import styled from "styled-components";
 
@@ -18,11 +19,9 @@ import { useRethrow } from "@foxglove/hooks";
 import { useDataSourceInfo } from "@foxglove/studio-base/PanelAPI";
 import Autocomplete, { IAutocomplete } from "@foxglove/studio-base/components/Autocomplete";
 import Button from "@foxglove/studio-base/components/Button";
-import Flex from "@foxglove/studio-base/components/Flex";
 import { LegacyTextarea } from "@foxglove/studio-base/components/LegacyStyledComponents";
 import Panel from "@foxglove/studio-base/components/Panel";
 import PanelToolbar from "@foxglove/studio-base/components/PanelToolbar";
-import PanelToolbarLabel from "@foxglove/studio-base/components/PanelToolbarLabel";
 import usePublisher from "@foxglove/studio-base/hooks/usePublisher";
 import { PlayerCapabilities, Topic } from "@foxglove/studio-base/players/types";
 import { PanelConfigSchema } from "@foxglove/studio-base/types/panels";
@@ -51,26 +50,12 @@ const STextArea = styled(LegacyTextarea)`
   resize: none;
 `;
 
-const STextAreaContainer = styled.div`
-  flex-grow: 1;
-  padding: 12px 0;
-`;
-
 const SErrorText = styled.div`
   flex: 1 1 auto;
   display: flex;
   align-items: center;
   padding: 4px;
   color: ${({ theme }) => theme.semanticColors.errorBackground};
-`;
-
-const SSpan = styled.span`
-  opacity: 0.8;
-`;
-const SRow = styled.div`
-  display: flex;
-  line-height: 24px;
-  flex-shrink: 0;
 `;
 
 function getTopicName(topic: Topic): string {
@@ -180,18 +165,15 @@ function Publish(props: Props) {
 
   const canPublish = capabilities.includes(PlayerCapabilities.advertise);
 
-  const showAdvancedView = advancedView;
-  const buttonRowStyle = showAdvancedView
-    ? { flex: "0 0 auto" }
-    : { flex: "0 0 auto", justifyContent: "center" };
-
   return (
-    <Flex col style={{ height: "100%", padding: "12px" }}>
+    <Stack height="100%" padding={1.5}>
       <PanelToolbar helpContent={helpContent} floating />
-      {showAdvancedView && (
+      {advancedView && (
         <>
-          <SRow>
-            <SSpan>Topic:</SSpan>
+          <Stack alignItems="baseline" spacing={1} padding={0.5} direction="row" flexShrink={0}>
+            <Typography color="text.secondary" variant="body2" component="label">
+              Topic:
+            </Typography>
             <Autocomplete
               placeholder="Choose a topic"
               items={[...topics]}
@@ -202,9 +184,11 @@ function Publish(props: Props) {
               getItemText={getTopicName}
               getItemValue={getTopicName}
             />
-          </SRow>
-          <SRow>
-            <PanelToolbarLabel>Datatype:</PanelToolbarLabel>
+          </Stack>
+          <Stack alignItems="baseline" spacing={1} padding={0.5} direction="row" flexShrink={0}>
+            <Typography color="text.secondary" variant="body2" component="label">
+              Datatype:
+            </Typography>
             <Autocomplete
               clearOnFocus
               placeholder="Choose a datatype"
@@ -212,17 +196,22 @@ function Publish(props: Props) {
               onSelect={onSelectDatatype}
               selectedItem={datatype}
             />
-          </SRow>
-          <STextAreaContainer>
+          </Stack>
+          <Box flexGrow={1} paddingY={1.5}>
             <STextArea
               placeholder="Enter message content as JSON"
               value={value}
               onChange={onChange}
             />
-          </STextAreaContainer>
+          </Box>
         </>
       )}
-      <Flex row style={buttonRowStyle}>
+      <Stack
+        direction="row"
+        flex="0 0 auto"
+        alignItems="flex-start"
+        justifyContent={advancedView ? "flex-end" : "center"}
+      >
         {error && <SErrorText>{error}</SErrorText>}
         <Button
           style={{ backgroundColor: buttonColor }}
@@ -233,8 +222,8 @@ function Publish(props: Props) {
         >
           {buttonText}
         </Button>
-      </Flex>
-    </Flex>
+      </Stack>
+    </Stack>
   );
 }
 

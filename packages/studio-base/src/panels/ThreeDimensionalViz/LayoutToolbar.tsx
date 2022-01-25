@@ -11,7 +11,8 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { Stack, Text, useTheme } from "@fluentui/react";
+import { Text, useTheme } from "@fluentui/react";
+import { Stack } from "@mui/material";
 
 import { MouseEventObject } from "@foxglove/regl-worldview";
 import { Time } from "@foxglove/rostime";
@@ -92,20 +93,18 @@ function LayoutToolbar({
         onMeasureInfoChange={setMeasureInfo}
       />
       <Stack
-        styles={{
-          root: {
-            position: "absolute",
-            top: `calc(${theme.spacing.l2} + ${theme.spacing.s1})`,
-            right: theme.spacing.m,
-            zIndex: 101,
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "flex-end",
-            // allow mouse events to pass through the empty space in this container element
-            pointerEvents: "none",
-          },
+        spacing={1}
+        sx={{
+          position: "absolute",
+          top: `calc(${theme.spacing.l2} + ${theme.spacing.s1})`,
+          right: theme.spacing.m,
+          zIndex: 101,
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "flex-end",
+          // allow mouse events to pass through the empty space in this container element
+          pointerEvents: "none",
         }}
-        tokens={{ childrenGap: theme.spacing.s1 }}
       >
         <FollowTFControl
           transforms={transforms}
@@ -130,12 +129,7 @@ function LayoutToolbar({
           fixedFrameId={fixedFrameId}
           currentTime={currentTime}
         />
-        <Stack
-          horizontal
-          verticalAlign="center"
-          styles={{ root: { position: "relative" } }}
-          tokens={{ childrenGap: theme.spacing.s1 }}
-        >
+        <Stack direction="row" alignItems="center" position="relative" spacing={1}>
           {measuringElRef.current && (
             <Text variant="small" styles={{ root: { fontFamily: fonts.MONOSPACE } }}>
               {measuringElRef.current?.measureDistance}

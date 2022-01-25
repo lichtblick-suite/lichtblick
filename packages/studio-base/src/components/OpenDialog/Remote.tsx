@@ -2,7 +2,8 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { Stack, TextField, useTheme } from "@fluentui/react";
+import { TextField } from "@fluentui/react";
+import { Stack } from "@mui/material";
 import path from "path";
 import { useCallback, useState } from "react";
 
@@ -23,7 +24,6 @@ export default function Remote(props: RemoteProps): JSX.Element {
   const { onCancel, onBack, availableSources } = props;
 
   const { selectSource } = usePlayerSelection();
-  const theme = useTheme();
   const [currentUrl, setCurrentUrl] = useState<string | undefined>();
   const [errorMessage, setErrorMessage] = useState<string | undefined>();
 
@@ -57,7 +57,7 @@ export default function Remote(props: RemoteProps): JSX.Element {
 
   return (
     <View onBack={onBack} onCancel={onCancel} onOpen={onOpen}>
-      <Stack tokens={{ childrenGap: theme.spacing.m }}>
+      <Stack spacing={2}>
         <TextField
           label="Remote file URL"
           errorMessage={errorMessage}

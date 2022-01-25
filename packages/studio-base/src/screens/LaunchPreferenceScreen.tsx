@@ -5,12 +5,12 @@
 import {
   CompoundButton,
   Checkbox,
-  Stack,
   Text,
   useTheme,
   makeStyles,
   IButtonStyles,
 } from "@fluentui/react";
+import { Stack } from "@mui/material";
 import { ReactElement, useState } from "react";
 
 import { AppSetting } from "@foxglove/studio-base/AppSetting";
@@ -18,11 +18,7 @@ import { useAppConfigurationValue } from "@foxglove/studio-base/hooks";
 import { useSessionStorageValue } from "@foxglove/studio-base/hooks/useSessionStorageValue";
 
 const useStyles = makeStyles((theme) => ({
-  container: {
-    border: `1px solid ${theme.semanticColors.bodyDivider}`,
-    borderRadius: theme.effects.roundedCorner4,
-    marginBottom: theme.spacing.l2,
-  },
+  container: {},
   title: {
     textAlign: "center",
     marginBottom: theme.spacing.m,
@@ -72,19 +68,21 @@ export function LaunchPreferenceScreen(): ReactElement {
   }
 
   return (
-    <Stack horizontalAlign="center" verticalAlign="center" verticalFill>
+    <Stack alignItems="center" justifyContent="center" height="100%">
       <Stack
-        className={classes.container}
-        tokens={{
-          childrenGap: theme.spacing.l1,
-          padding: theme.spacing.l1,
+        spacing={2.5}
+        padding={2.5}
+        sx={{
+          border: `1px solid ${theme.semanticColors.bodyDivider}`,
+          borderRadius: theme.effects.roundedCorner4,
+          marginBottom: theme.spacing.l2,
           maxWidth: 480,
         }}
       >
         <Text className={classes.title} variant="xxLarge">
           Launch Foxglove Studio
         </Text>
-        <Stack horizontal tokens={{ childrenGap: theme.spacing.m }}>
+        <Stack direction="row" spacing={2}>
           <CompoundButton
             styles={buttonStyles}
             onClick={() => void launchInWeb()}

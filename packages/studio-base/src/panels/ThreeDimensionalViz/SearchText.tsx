@@ -11,7 +11,8 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { IButtonStyles, IconButton, Stack, TextField, useTheme } from "@fluentui/react";
+import { IButtonStyles, IconButton, TextField, useTheme } from "@fluentui/react";
+import { Stack } from "@mui/material";
 import { vec3 } from "gl-matrix";
 import { range, throttle } from "lodash";
 import { useState, useRef, useEffect, useCallback, KeyboardEvent } from "react";
@@ -315,15 +316,13 @@ const SearchText = React.memo<SearchTextComponentProps>(function SearchText({
 
   return (
     <Stack
-      horizontal
-      verticalAlign="center"
-      styles={{
-        root: {
-          pointerEvents: "auto",
-          backgroundColor: theme.semanticColors.buttonBackgroundHovered,
-          borderRadius: theme.effects.roundedCorner2,
-          position: "relative",
-        },
+      direction="row"
+      alignItems="center"
+      sx={{
+        pointerEvents: "auto",
+        backgroundColor: theme.semanticColors.buttonBackgroundHovered,
+        borderRadius: theme.effects.roundedCorner2,
+        position: "relative",
       }}
     >
       <TextField
@@ -368,14 +367,7 @@ const SearchText = React.memo<SearchTextComponentProps>(function SearchText({
           iterateCurrentIndex(1);
         }}
       />
-      <Stack
-        horizontal
-        verticalAlign="center"
-        tokens={{
-          childrenGap: theme.spacing.s2,
-          padding: `0 0 0 ${theme.spacing.s2}`,
-        }}
-      >
+      <Stack direction="row" alignItems="center" paddingLeft={0.5} spacing={0.5}>
         <IconButton
           iconProps={{ iconName: "ChevronUpSmall" }}
           onClick={() => iterateCurrentIndex(-1)}

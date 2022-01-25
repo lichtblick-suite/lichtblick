@@ -2,7 +2,8 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { MessageBar, MessageBarType, Stack, useTheme, makeStyles } from "@fluentui/react";
+import { MessageBar, MessageBarType, makeStyles, useTheme } from "@fluentui/react";
+import { Stack } from "@mui/material";
 import { useMemo, useState } from "react";
 import { useAsync } from "react-use";
 
@@ -48,7 +49,6 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 export default function ExtensionsSidebar(): React.ReactElement {
-  const theme = useTheme();
   const classes = useStyles();
   const [shouldFetch, setShouldFetch] = useState<boolean>(true);
   const [marketplaceEntries, setMarketplaceEntries] = useState<ExtensionMarketplaceDetail[]>([]);
@@ -132,10 +132,10 @@ export default function ExtensionsSidebar(): React.ReactElement {
 
   return (
     <SidebarContent title="Extensions" helpContent={helpContent}>
-      <Stack tokens={{ childrenGap: 30 }}>
-        <Stack.Item>
+      <Stack spacing={3.75}>
+        <div>
           <h2 className={classes.sectionHeader}>Installed</h2>
-          <Stack tokens={{ childrenGap: theme.spacing.s1 }}>
+          <Stack spacing={1}>
             {installedEntries.length > 0
               ? installedEntries.map((entry) => (
                   <ExtensionListEntry
@@ -151,10 +151,10 @@ export default function ExtensionsSidebar(): React.ReactElement {
                 ))
               : "No installed extensions"}
           </Stack>
-        </Stack.Item>
-        <Stack.Item>
+        </div>
+        <div>
           <h2 className={classes.sectionHeader}>Available</h2>
-          <Stack tokens={{ childrenGap: theme.spacing.s1 }}>
+          <Stack spacing={1}>
             {filteredMarketplaceEntries.map((entry) => (
               <ExtensionListEntry
                 key={entry.id}
@@ -168,7 +168,7 @@ export default function ExtensionsSidebar(): React.ReactElement {
               />
             ))}
           </Stack>
-        </Stack.Item>
+        </div>
       </Stack>
     </SidebarContent>
   );
@@ -185,34 +185,31 @@ function ExtensionListEntry(props: {
     <Stack
       key={entry.id}
       onClick={props.onClick}
-      styles={{
-        root: {
-          margin: `0 -${theme.spacing.m}`,
-          borderBottom: `1px solid ${theme.semanticColors.bodyBackground}`,
-          borderTop: `1px solid ${theme.semanticColors.bodyBackground}`,
+      sx={{
+        margin: `0 -${theme.spacing.m}`,
+        borderBottom: `1px solid ${theme.semanticColors.bodyBackground}`,
+        borderTop: `1px solid ${theme.semanticColors.bodyBackground}`,
 
-          ":hover": {
-            backgroundColor: theme.semanticColors.menuItemBackgroundHovered,
-            color: theme.semanticColors.accentButtonBackground,
-            cursor: "pointer",
-          },
+        "&:hover": {
+          backgroundColor: theme.semanticColors.menuItemBackgroundHovered,
+          color: theme.semanticColors.accentButtonBackground,
+          cursor: "pointer",
         },
       }}
-      tokens={{
-        childrenGap: 6,
-        padding: `${theme.spacing.s1} ${theme.spacing.m}`,
-      }}
+      spacing={0.75}
+      paddingX={2}
+      paddingY={1}
     >
-      <Stack.Item>
+      <div>
         <span className={classes.name}>{entry.name}</span>
         <span className={classes.version}>{entry.version}</span>
-      </Stack.Item>
-      <Stack.Item>
+      </div>
+      <div>
         <span className={classes.description}>{entry.description}</span>
-      </Stack.Item>
-      <Stack.Item>
+      </div>
+      <div>
         <span className={classes.publisher}>{entry.publisher}</span>
-      </Stack.Item>
+      </div>
     </Stack>
   );
 }

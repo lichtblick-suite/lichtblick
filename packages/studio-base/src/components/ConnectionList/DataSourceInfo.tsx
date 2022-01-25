@@ -2,7 +2,8 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { ITextStyles, Stack, Text, useTheme } from "@fluentui/react";
+import { ITextStyles, Text, useTheme } from "@fluentui/react";
+import { Stack } from "@mui/material";
 import { useMemo } from "react";
 
 import Duration from "@foxglove/studio-base/components/Duration";
@@ -44,19 +45,9 @@ function DataSourceInfo(): JSX.Element {
   );
 
   return (
-    <Stack
-      tokens={{
-        childrenGap: theme.spacing.m,
-      }}
-      styles={{
-        root: {
-          whiteSpace: "nowrap",
-          overflow: "hidden",
-        },
-      }}
-    >
-      <Stack horizontal verticalAlign="center">
-        <Stack grow tokens={{ childrenGap: theme.spacing.s2 }} styles={{ root: { minWidth: 0 } }}>
+    <Stack spacing={2} sx={{ whiteSpace: "nowrap", overflow: "hidden" }}>
+      <Stack direction="row" alignItems="center">
+        <Stack flexGrow={1} spacing={0.5} minWidth={0}>
           <Text styles={subheaderStyles}>Current source</Text>
           <Text styles={{ root: { color: theme.palette.neutralSecondary } }}>
             {playerName ? <MultilineMiddleTruncate text={playerName} /> : <>&mdash;</>}
@@ -64,7 +55,7 @@ function DataSourceInfo(): JSX.Element {
         </Stack>
       </Stack>
 
-      <Stack tokens={{ childrenGap: theme.spacing.s2 }}>
+      <Stack spacing={0.5}>
         <Text styles={subheaderStyles}>Start time</Text>
         {startTime ? (
           <Timestamp horizontal time={startTime} />
@@ -75,7 +66,7 @@ function DataSourceInfo(): JSX.Element {
         )}
       </Stack>
 
-      <Stack tokens={{ childrenGap: theme.spacing.s2 }}>
+      <Stack spacing={0.5}>
         <Text styles={subheaderStyles}>End time</Text>
         {endTime ? (
           <Timestamp horizontal time={endTime} />
@@ -86,7 +77,7 @@ function DataSourceInfo(): JSX.Element {
         )}
       </Stack>
 
-      <Stack tokens={{ childrenGap: theme.spacing.s2 }}>
+      <Stack spacing={0.5}>
         <Text styles={subheaderStyles}>Duration</Text>
         {duration ? (
           <Duration duration={duration} />

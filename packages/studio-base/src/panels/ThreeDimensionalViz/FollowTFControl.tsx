@@ -11,7 +11,8 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { IButtonStyles, IconButton, Stack, useTheme } from "@fluentui/react";
+import { IButtonStyles, IconButton, useTheme } from "@fluentui/react";
+import { Stack } from "@mui/material";
 import { sortBy } from "lodash";
 import { memo, useCallback, useMemo, useRef } from "react";
 import shallowequal from "shallowequal";
@@ -197,18 +198,16 @@ const FollowTFControl = memo<Props>(function FollowTFControl(props: Props) {
 
   return (
     <Stack
-      horizontal
-      grow={1}
-      verticalAlign="center"
-      styles={{
-        root: {
-          // see also ExpandingToolbar styles
-          backgroundColor: theme.semanticColors.buttonBackgroundHovered,
-          borderRadius: theme.effects.roundedCorner2,
-          pointerEvents: "auto",
-          color: followTf ? undefined : theme.semanticColors.disabledText,
-          position: "relative",
-        },
+      direction="row"
+      flexGrow={1}
+      alignItems="center"
+      sx={{
+        // see also ExpandingToolbar styles
+        backgroundColor: theme.semanticColors.buttonBackgroundHovered,
+        borderRadius: theme.effects.roundedCorner2,
+        pointerEvents: "auto",
+        color: followTf ? undefined : theme.semanticColors.disabledText,
+        position: "relative",
       }}
     >
       {active && (

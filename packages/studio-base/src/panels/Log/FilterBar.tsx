@@ -11,15 +11,9 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import {
-  Dropdown,
-  IDropdownOption,
-  TagPicker,
-  Stack,
-  ISelectableOption,
-  useTheme,
-} from "@fluentui/react";
+import { Dropdown, IDropdownOption, TagPicker, ISelectableOption, useTheme } from "@fluentui/react";
 import ClipboardOutlineIcon from "@mdi/svg/svg/clipboard-outline.svg";
+import { Stack } from "@mui/material";
 import cx from "classnames";
 
 import Icon from "@foxglove/studio-base/components/Icon";
@@ -97,7 +91,7 @@ export default function FilterBar(props: FilterBarProps): JSX.Element {
   const theme = useTheme();
   const logStyles = useLogStyles();
   return (
-    <Stack grow horizontal tokens={{ childrenGap: theme.spacing.s1 }}>
+    <Stack flexGrow={1} direction="row" spacing={1}>
       <Dropdown
         styles={{ title: { background: "transparent" } }}
         onRenderOption={(option) => renderOption(option, logStyles)}
@@ -114,7 +108,7 @@ export default function FilterBar(props: FilterBarProps): JSX.Element {
         selectedKey={props.minLogLevel}
       />
 
-      <Stack grow>
+      <Stack flexGrow={1}>
         <TagPicker
           inputProps={{
             placeholder: "Search filter",
@@ -143,7 +137,7 @@ export default function FilterBar(props: FilterBarProps): JSX.Element {
           }}
         />
       </Stack>
-      <Stack verticalAlign="center">
+      <Stack justifyContent="center">
         <div
           style={{
             whiteSpace: "nowrap",

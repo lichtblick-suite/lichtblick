@@ -2,15 +2,8 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import {
-  Dropdown,
-  IDropdownOption,
-  Label,
-  Stack,
-  Text,
-  TextField,
-  useTheme,
-} from "@fluentui/react";
+import { Dropdown, IDropdownOption, Label, Text, TextField, useTheme } from "@fluentui/react";
+import { Box, Stack } from "@mui/material";
 import { useCallback, useMemo } from "react";
 
 import Autocomplete from "@foxglove/studio-base/components/Autocomplete";
@@ -67,14 +60,10 @@ export default function Settings(props: SettingsProps): JSX.Element {
   }, []);
 
   return (
-    <Stack verticalFill tokens={{ childrenGap: theme.spacing.m }}>
-      <Stack.Item>
+    <Stack height="100%" spacing={2}>
+      <div>
         <Text>Publish topic</Text>
-        <Stack
-          tokens={{
-            padding: `${theme.spacing.s1} 0`,
-          }}
-        >
+        <Stack paddingY={1}>
           <Autocomplete
             placeholder="Enter a topic"
             items={topics}
@@ -92,8 +81,8 @@ export default function Settings(props: SettingsProps): JSX.Element {
             }}
           />
         </Stack>
-      </Stack.Item>
-      <Stack.Item>
+      </div>
+      <div>
         <TextField
           type="number"
           label="Publish rate (Hz)"
@@ -119,12 +108,12 @@ export default function Settings(props: SettingsProps): JSX.Element {
             });
           }}
         />
-      </Stack.Item>
-      <Stack.Item grow>
-        <Stack horizontal verticalAlign="end" tokens={{ childrenGap: theme.spacing.m }}>
-          <Stack.Item grow>
+      </div>
+      <Box flexGrow={1}>
+        <Stack direction="row" alignItems="flex-end" spacing={2}>
+          <Box flexGrow={1}>
             <Label>Up button:</Label>
-          </Stack.Item>
+          </Box>
           <Dropdown
             label="Field"
             selectedKey={config.upButton.field}
@@ -156,12 +145,12 @@ export default function Settings(props: SettingsProps): JSX.Element {
             }}
           />
         </Stack>
-      </Stack.Item>
-      <Stack.Item>
-        <Stack horizontal verticalAlign="center" tokens={{ childrenGap: theme.spacing.m }}>
-          <Stack.Item grow>
+      </Box>
+      <div>
+        <Stack direction="row" alignItems="center" spacing={2}>
+          <Box flexGrow={1}>
             <Label>Down button:</Label>
-          </Stack.Item>
+          </Box>
           <Dropdown
             selectedKey={config.downButton.field}
             options={dropDownOptions}
@@ -191,12 +180,12 @@ export default function Settings(props: SettingsProps): JSX.Element {
             }}
           />
         </Stack>
-      </Stack.Item>
-      <Stack.Item>
-        <Stack horizontal verticalAlign="center" tokens={{ childrenGap: theme.spacing.m }}>
-          <Stack.Item grow>
+      </div>
+      <div>
+        <Stack direction="row" alignItems="center" spacing={2}>
+          <Box flexGrow={1}>
             <Label>Left button:</Label>
-          </Stack.Item>
+          </Box>
           <Dropdown
             selectedKey={config.leftButton.field}
             options={dropDownOptions}
@@ -226,12 +215,12 @@ export default function Settings(props: SettingsProps): JSX.Element {
             }}
           />
         </Stack>
-      </Stack.Item>
-      <Stack.Item>
-        <Stack horizontal verticalAlign="center" tokens={{ childrenGap: theme.spacing.m }}>
-          <Stack.Item grow>
+      </div>
+      <div>
+        <Stack direction="row" alignItems="center" spacing={2}>
+          <Box flexGrow={1}>
             <Label>Right button:</Label>
-          </Stack.Item>
+          </Box>
           <Dropdown
             selectedKey={config.rightButton.field}
             options={dropDownOptions}
@@ -261,7 +250,7 @@ export default function Settings(props: SettingsProps): JSX.Element {
             }}
           />
         </Stack>
-      </Stack.Item>
+      </div>
     </Stack>
   );
 }

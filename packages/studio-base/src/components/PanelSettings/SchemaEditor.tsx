@@ -2,7 +2,7 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { Stack, useTheme } from "@fluentui/react";
+import { Stack } from "@mui/material";
 
 import { PanelConfigSchema, SaveConfig } from "@foxglove/studio-base/types/panels";
 
@@ -17,9 +17,8 @@ export default function SchemaEditor({
   config: Record<string, unknown>;
   saveConfig: SaveConfig<Record<string, unknown>>;
 }): JSX.Element {
-  const theme = useTheme();
   return (
-    <Stack tokens={{ childrenGap: theme.spacing.m }}>
+    <Stack spacing={2}>
       {configSchema.map((entry) => (
         <SchemaEntryEditor config={config} saveConfig={saveConfig} key={entry.key} entry={entry} />
       ))}

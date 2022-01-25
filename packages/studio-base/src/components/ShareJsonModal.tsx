@@ -7,10 +7,10 @@ import {
   Dialog,
   DialogFooter,
   IconButton,
-  Stack,
   TextField,
   useTheme,
 } from "@fluentui/react";
+import { Stack } from "@mui/material";
 import { useCallback, useMemo, useState } from "react";
 
 import clipboard from "@foxglove/studio-base/util/clipboard";
@@ -99,7 +99,7 @@ export default function ShareJsonModal({
           },
         }}
       >
-        <Stack tokens={{ childrenGap: theme.spacing.s1 }} horizontal>
+        <Stack direction="row" spacing={1}>
           <IconButton
             onClick={handleDownload}
             iconProps={{ iconName: "Download" }}

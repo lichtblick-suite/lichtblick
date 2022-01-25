@@ -11,7 +11,8 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { Stack, IconButton, IButtonStyles, useTheme } from "@fluentui/react";
+import { IconButton, IButtonStyles, useTheme } from "@fluentui/react";
+import { Stack } from "@mui/material";
 import Cytoscape from "cytoscape";
 import { useCallback, useMemo, useRef, useState } from "react";
 import textMetrics from "text-metrics";
@@ -366,31 +367,26 @@ function TopicGraph() {
       {servicesButton.tooltip}
       <PanelToolbar floating helpContent={helpContent} />
       <Stack
-        styles={{
-          root: {
-            position: "absolute",
-            top: theme.spacing.l2,
-            right: theme.spacing.s1,
-            zIndex: 101,
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "flex-end",
-
-            // allow mouse events to pass through the empty space in this container element
-            pointerEvents: "none",
-          },
+        spacing={1}
+        sx={{
+          position: "absolute",
+          top: theme.spacing.l2,
+          right: theme.spacing.s1,
+          zIndex: 101,
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "flex-end",
+          // allow mouse events to pass through the empty space in this container element
+          pointerEvents: "none",
         }}
-        tokens={{ childrenGap: theme.spacing.s1 }}
       >
         <Stack
-          grow={0}
-          styles={{
-            root: {
-              backgroundColor: theme.semanticColors.buttonBackgroundHovered,
-              borderRadius: theme.effects.roundedCorner2,
-              flexShrink: 0,
-              pointerEvents: "auto",
-            },
+          flexGrow={0}
+          flexShrink={0}
+          sx={{
+            backgroundColor: theme.semanticColors.buttonBackgroundHovered,
+            borderRadius: theme.effects.roundedCorner2,
+            pointerEvents: "auto",
           }}
         >
           <IconButton

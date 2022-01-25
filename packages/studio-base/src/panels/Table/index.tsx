@@ -66,7 +66,7 @@ function TablePanel({ config, saveConfig }: Props) {
             index={0}
             path={topicPath}
             onChange={onTopicPathChange}
-            inputStyle={{ height: "100%" }}
+            inputStyle={{ height: 20 }}
           />
         </div>
       </PanelToolbar>

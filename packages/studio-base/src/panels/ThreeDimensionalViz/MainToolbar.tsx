@@ -2,7 +2,8 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { IconButton, IButtonStyles, Stack, useTheme } from "@fluentui/react";
+import { IconButton, IButtonStyles, useTheme } from "@fluentui/react";
+import { Stack } from "@mui/material";
 
 import { useTooltip } from "@foxglove/studio-base/components/Tooltip";
 import MeasuringTool, {
@@ -67,14 +68,12 @@ function MainToolbar({
 
   return (
     <Stack
-      grow={0}
-      styles={{
-        root: {
-          backgroundColor: theme.semanticColors.buttonBackgroundHovered,
-          borderRadius: theme.effects.roundedCorner2,
-          flexShrink: 0,
-          pointerEvents: "auto",
-        },
+      flexShrink={0}
+      flexGrow={0}
+      sx={{
+        backgroundColor: theme.semanticColors.buttonBackgroundHovered,
+        borderRadius: theme.effects.roundedCorner2,
+        pointerEvents: "auto",
       }}
     >
       {toggleCameraButton.tooltip}

@@ -2,15 +2,8 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import {
-  Pivot,
-  PivotItem,
-  Stack,
-  IconButton,
-  makeStyles,
-  useTheme,
-  IButtonStyles,
-} from "@fluentui/react";
+import { Pivot, PivotItem, IconButton, makeStyles, useTheme, IButtonStyles } from "@fluentui/react";
+import { Stack } from "@mui/material";
 import { ReactElement, ReactNode, useMemo } from "react";
 
 import { useTooltip } from "@foxglove/studio-base/components/Tooltip";
@@ -124,14 +117,12 @@ export default function ExpandingToolbar<T extends string>({
   return (
     <Stack
       data-test={dataTest}
-      styles={{
-        root: {
-          position: "relative",
-          pointerEvents: "auto",
-          backgroundColor: theme.semanticColors.buttonBackgroundHovered,
-          borderRadius: theme.effects.roundedCorner4,
-          width: 280,
-        },
+      sx={{
+        position: "relative",
+        pointerEvents: "auto",
+        backgroundColor: theme.semanticColors.buttonBackgroundHovered,
+        borderRadius: theme.effects.roundedCorner4,
+        width: 280,
       }}
     >
       <Pivot

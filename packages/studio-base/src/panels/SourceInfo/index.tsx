@@ -2,15 +2,8 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import {
-  ITextStyles,
-  DetailsList,
-  makeStyles,
-  Stack,
-  Text,
-  useTheme,
-  CheckboxVisibility,
-} from "@fluentui/react";
+import { ITextStyles, DetailsList, Text, useTheme, CheckboxVisibility } from "@fluentui/react";
+import { Box, Stack } from "@mui/material";
 import { useCallback, useMemo } from "react";
 
 import { subtract as subtractTimes, toSec } from "@foxglove/rostime";
@@ -25,20 +18,12 @@ import Timestamp from "@foxglove/studio-base/components/Timestamp";
 
 import helpContent from "./index.help.md";
 
-const useStyles = makeStyles(() => ({
-  container: {
-    overflowX: "hidden",
-    overflowY: "auto",
-  },
-}));
-
 function SourceInfo() {
   const topics = useMessagePipeline(useCallback((ctx) => ctx.playerState.activeData?.topics, []));
   const startTime = useMessagePipeline(
     useCallback((ctx) => ctx.playerState.activeData?.startTime, []),
   );
   const endTime = useMessagePipeline(useCallback((ctx) => ctx.playerState.activeData?.endTime, []));
-  const classes = useStyles();
   const theme = useTheme();
   const subheaderStyles = useMemo(
     () =>
@@ -75,25 +60,24 @@ function SourceInfo() {
   return (
     <>
       <PanelToolbar helpContent={helpContent} floating />
-      <div className={classes.container}>
+      <Box overflow="hidden auto">
         <Stack
-          styles={{
-            root: {
-              borderBottom: `2px solid ${theme.semanticColors.bodyDivider}`,
-              backgroundColor: theme.semanticColors.bodyBackground,
-            },
+          sx={{
+            borderBottom: `2px solid ${theme.semanticColors.bodyDivider}`,
+            backgroundColor: theme.semanticColors.bodyBackground,
           }}
-          tokens={{ padding: 12, childrenGap: theme.spacing.s1 }}
+          padding={1.5}
+          spacing={1}
         >
-          <Stack tokens={{ childrenGap: theme.spacing.s2 }}>
+          <Stack spacing={0.5}>
             <Text styles={subheaderStyles}>Start time</Text>
             <Timestamp horizontal time={startTime} />
           </Stack>
-          <Stack tokens={{ childrenGap: theme.spacing.s2 }}>
+          <Stack spacing={0.5}>
             <Text styles={subheaderStyles}>End Time</Text>
             <Timestamp horizontal time={endTime} />
           </Stack>
-          <Stack tokens={{ childrenGap: theme.spacing.s2 }}>
+          <Stack spacing={0.5}>
             <Text styles={subheaderStyles}>Duration</Text>
             <Duration duration={duration} />
           </Stack>
@@ -167,7 +151,7 @@ function SourceInfo() {
             },
           ]}
         />
-      </div>
+      </Box>
     </>
   );
 }

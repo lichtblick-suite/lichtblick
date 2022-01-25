@@ -1,7 +1,9 @@
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
-import { ComboBox, IDropdownOption, Stack, Toggle } from "@fluentui/react";
+
+import { ComboBox, IDropdownOption, Toggle } from "@fluentui/react";
+import { Stack } from "@mui/material";
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { useResizeDetector } from "react-resize-detector";
 
@@ -202,7 +204,7 @@ function URDFViewer({ config, saveConfig }: Props) {
   return (
     <Flex col clip>
       <PanelToolbar helpContent={helpContent}>
-        <Stack grow horizontal verticalAlign="baseline">
+        <Stack direction="row" flexGrow={1} alignItems="baseline">
           <Toggle
             inlineLabel
             offText="Manual joint control"
@@ -230,7 +232,7 @@ function URDFViewer({ config, saveConfig }: Props) {
           )}
         </Stack>
       </PanelToolbar>
-      <Stack verticalFill>
+      <Stack height="100%">
         {messageBar}
         {model == undefined ? (
           <EmptyState>Drag and drop a URDF file to visualize it.</EmptyState>

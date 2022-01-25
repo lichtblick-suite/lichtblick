@@ -3,7 +3,6 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 import {
-  Stack,
   Text,
   Dialog,
   DialogFooter,
@@ -14,6 +13,7 @@ import {
   Spinner,
   SpinnerSize,
 } from "@fluentui/react";
+import { Stack } from "@mui/material";
 import { useEffect, useMemo } from "react";
 import { useAsync, useMountedState } from "react-use";
 
@@ -107,8 +107,8 @@ export default function DeviceCodeDialog(props: DeviceCodePanelProps): JSX.Eleme
     }
     const { userCode, verificationUri } = deviceCode;
     return (
-      <Stack tokens={{ childrenGap: theme.spacing.l1 }}>
-        <Stack tokens={{ childrenGap: theme.spacing.s1 }} styles={{ root: { lineHeight: "1.3" } }}>
+      <Stack spacing={2.5}>
+        <Stack spacing={1} sx={{ lineHeight: "1.3" }}>
           <Text variant="medium" block>
             To complete sign in, follow the instructions in your browser with the code below.
           </Text>
@@ -151,7 +151,7 @@ export default function DeviceCodeDialog(props: DeviceCodePanelProps): JSX.Eleme
     <Dialog hidden={false} minWidth={440} title="Sign in">
       {dialogContent}
       <DialogFooter styles={{ action: { display: "block" } }}>
-        <Stack horizontal grow horizontalAlign="space-between">
+        <Stack direction="row" flexGrow={1} justifyContent="space-between">
           <Spinner
             size={SpinnerSize.small}
             label={deviceCode ? "Awaiting authentication…" : "Connecting…"}

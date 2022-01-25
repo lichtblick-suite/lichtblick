@@ -593,7 +593,7 @@ function RawMessages(props: Props) {
             index={0}
             path={topicPath}
             onChange={onTopicPathChange}
-            inputStyle={{ height: "100%" }}
+            inputStyle={{ height: 20 }}
           />
           {diffEnabled && (
             <Flex>

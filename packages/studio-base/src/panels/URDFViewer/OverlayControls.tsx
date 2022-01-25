@@ -3,15 +3,14 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 import {
-  useTheme,
   DefaultButton,
   Dropdown,
-  Stack,
   Slider,
   IDropdownOption,
   IDropdownProps,
   ISliderProps,
 } from "@fluentui/react";
+import { Box, Stack } from "@mui/material";
 
 type Props = {
   assetOptions: IDropdownOption[];
@@ -32,30 +31,22 @@ export default function OverlayControls({
   cameraCentered,
   onCenterCamera,
 }: Props): JSX.Element {
-  const theme = useTheme();
   return (
     <>
-      <div
-        style={{
-          position: "absolute",
-          top: theme.spacing.s1,
-          left: theme.spacing.s1,
-        }}
-      >
+      <Box position="absolute" top={0} left={0} margin={1}>
         <Dropdown options={assetOptions} selectedKey={selectedAssetId} onChange={onSelectAsset} />
-      </div>
+      </Box>
       <Stack
-        horizontal
-        horizontalAlign="space-between"
-        wrap
-        style={{
-          position: "absolute",
-          bottom: theme.spacing.s1,
-          left: theme.spacing.s1,
-          right: theme.spacing.s1,
-        }}
+        direction="row"
+        justifyContent="space-between"
+        flexWrap="wrap"
+        margin={1}
+        position="absolute"
+        bottom={0}
+        left={0}
+        right={0}
       >
-        <Stack.Item grow style={{ minWidth: 120, maxWidth: 300 }}>
+        <Box flexGrow={1} minWidth={120} maxWidth={300}>
           <Slider
             ariaLabel="Opacity"
             min={0}
@@ -65,7 +56,7 @@ export default function OverlayControls({
             valueFormat={(value) => `${(value * 100).toFixed(0)}%`}
             onChange={onChangeOpacity}
           />
-        </Stack.Item>
+        </Box>
         {!cameraCentered && <DefaultButton text="Re-center" onClick={onCenterCamera} />}
       </Stack>
     </>

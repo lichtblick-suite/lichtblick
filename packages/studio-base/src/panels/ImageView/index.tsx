@@ -17,6 +17,7 @@ import CheckboxMarkedIcon from "@mdi/svg/svg/checkbox-marked.svg";
 import CloseIcon from "@mdi/svg/svg/close.svg";
 import MenuDownIcon from "@mdi/svg/svg/menu-down.svg";
 import WavesIcon from "@mdi/svg/svg/waves.svg";
+import { Stack } from "@mui/material";
 import cx from "classnames";
 import { last, uniq } from "lodash";
 import { useEffect, useState } from "react";
@@ -644,7 +645,7 @@ function ImageView(props: Props) {
   return (
     <Flex col clip className={classes.root}>
       {toolbar}
-      <div style={{ display: "flex", flexDirection: "column", width: "100%", height: "100%" }}>
+      <Stack sx={{ width: "100%", height: "100%" }}>
         {/* Always render the ImageCanvas because it's expensive to unmount and start up. */}
         {imageMessageToRender && (
           <ImageCanvas
@@ -669,7 +670,7 @@ function ImageView(props: Props) {
           </div>
         )}
         {!showEmptyState && renderBottomBar()}
-      </div>
+      </Stack>
       <Toolbar pixelData={activePixelData} />
     </Flex>
   );

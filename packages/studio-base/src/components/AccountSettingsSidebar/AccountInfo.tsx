@@ -8,10 +8,10 @@ import {
   PrimaryButton,
   Spinner,
   SpinnerSize,
-  Stack,
   Text,
   useTheme,
 } from "@fluentui/react";
+import { Stack } from "@mui/material";
 import { useCallback } from "react";
 import { useToasts } from "react-toast-notifications";
 import { useAsyncFn } from "react-use";
@@ -53,9 +53,9 @@ export default function AccountInfo(props: { currentUser?: User }): JSX.Element 
   }
 
   return (
-    <Stack verticalFill verticalAlign="space-between">
-      <Stack tokens={{ childrenGap: theme.spacing.m }}>
-        <Stack horizontal verticalAlign="center" tokens={{ childrenGap: theme.spacing.s1 }}>
+    <Stack height="100%" justifyContent="space-between">
+      <Stack spacing={2}>
+        <Stack direction="row" alignItems="center" spacing={1}>
           <Icon
             iconName="BlockheadFilled"
             styles={{
@@ -66,7 +66,7 @@ export default function AccountInfo(props: { currentUser?: User }): JSX.Element 
               },
             }}
           />
-          <Stack verticalAlign="center" tokens={{ childrenGap: theme.spacing.s2 }}>
+          <Stack justifyContent="center" spacing={0.5}>
             <Text variant="medium">{props.currentUser.email ?? "(no email address)"}</Text>
             <Text
               variant="smallPlus"
@@ -80,7 +80,7 @@ export default function AccountInfo(props: { currentUser?: User }): JSX.Element 
           Account settings
         </PrimaryButton>
       </Stack>
-      <Stack tokens={{ childrenGap: theme.spacing.s1 }}>
+      <Stack spacing={1}>
         <DefaultButton onClick={onSignoutClick}>
           Sign out&nbsp;{loading && <Spinner size={SpinnerSize.small} />}
         </DefaultButton>

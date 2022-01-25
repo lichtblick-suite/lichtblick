@@ -11,7 +11,8 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { IconButton, IList, List, Stack } from "@fluentui/react";
+import { IconButton, IList, List } from "@fluentui/react";
+import { Box, Stack } from "@mui/material";
 import { useCallback, useLayoutEffect, useMemo, useRef, useState } from "react";
 
 import * as PanelAPI from "@foxglove/studio-base/PanelAPI";
@@ -142,7 +143,7 @@ const LogPanel = React.memo(({ config, saveConfig }: Props) => {
   }, []);
 
   return (
-    <Stack verticalFill>
+    <Stack height="100%">
       <PanelToolbar helpContent={helpContent} additionalIcons={topicToRenderMenu}>
         <FilterBar
           searchTerms={searchTermsSet}
@@ -152,8 +153,8 @@ const LogPanel = React.memo(({ config, saveConfig }: Props) => {
           onFilterChange={onFilterChange}
         />
       </PanelToolbar>
-      <Stack grow style={{ overflow: "hidden" }}>
-        <div ref={divRef} style={{ height: "100%", overflow: "auto" }}>
+      <Stack flexGrow={1} overflow="hidden">
+        <Box ref={divRef} height="100%" overflow="auto">
           {/* items property wants a mutable array but filteredMessages is readonly */}
           <List
             componentRef={listRef}
@@ -175,16 +176,16 @@ const LogPanel = React.memo(({ config, saveConfig }: Props) => {
               );
             }}
           />
-        </div>
+        </Box>
       </Stack>
       {hasUserScrolled && (
-        <div style={{ position: "absolute", bottom: 10, right: 10 }}>
+        <Box position="absolute" bottom={10} right={10}>
           <IconButton
             iconProps={{ iconName: "DoubleChevronDown" }}
             title="Scroll to bottom"
             onClick={scrollToBottomAction}
           />
-        </div>
+        </Box>
       )}
     </Stack>
   );

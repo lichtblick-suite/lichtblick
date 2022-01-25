@@ -2,7 +2,8 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { ActionButton, Stack, Text, IButtonStyles, IButtonProps, useTheme } from "@fluentui/react";
+import { ActionButton, Text, IButtonStyles, IButtonProps, useTheme } from "@fluentui/react";
+import { Stack } from "@mui/material";
 import { ReactNode, useMemo } from "react";
 
 type IActionListProps = {
@@ -44,7 +45,7 @@ export default function ActionList(props: IActionListProps): JSX.Element {
   );
 
   return (
-    <Stack tokens={{ childrenGap: theme.spacing.s1 }}>
+    <Stack spacing={1}>
       {title != undefined && (
         <Text variant="large" styles={{ root: { color: theme.semanticColors.bodySubtext } }}>
           {title}

@@ -2,7 +2,8 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { Stack, Icon, Text, useTheme } from "@fluentui/react";
+import { Icon, Text, useTheme } from "@fluentui/react";
+import { Stack } from "@mui/material";
 import { useMemo } from "react";
 
 import { Time } from "@foxglove/rostime";
@@ -35,7 +36,7 @@ export default function Timestamp(props: Props): JSX.Element {
 
   if (!isAbsoluteTime(time)) {
     return (
-      <Stack horizontal verticalAlign="center" grow={0}>
+      <Stack direction="row" alignItems="center" flexGrow={0}>
         <Text
           variant="small"
           styles={{
@@ -52,12 +53,13 @@ export default function Timestamp(props: Props): JSX.Element {
   }
 
   return (
-    <Stack tokens={{ childrenGap: theme.spacing.s2 }}>
+    <Stack spacing={0.5}>
       <Stack
-        horizontal={horizontal}
-        tokens={{ childrenGap: theme.spacing.s2 }}
-        verticalAlign="center"
-        wrap
+        alignItems={horizontal ? "center" : "flex-start"}
+        direction={horizontal ? "row" : "column"}
+        flexWrap="wrap"
+        justifyContent={horizontal ? "flex-start" : "center"}
+        sx={{ gap: 0.5 }}
       >
         {!disableDate && (
           <>
@@ -89,12 +91,7 @@ export default function Timestamp(props: Props): JSX.Element {
           </>
         )}
 
-        <Stack
-          horizontal
-          disableShrink
-          verticalAlign="center"
-          tokens={{ childrenGap: theme.spacing.s2 }}
-        >
+        <Stack direction="row" alignItems="center" flexShrink={0} spacing={0.5}>
           <Text
             variant="small"
             styles={{

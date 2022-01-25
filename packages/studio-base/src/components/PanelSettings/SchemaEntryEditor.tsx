@@ -2,7 +2,8 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { Dropdown, Label, SpinButton, Stack, TextField, Toggle } from "@fluentui/react";
+import { Dropdown, Label, SpinButton, TextField, Toggle } from "@fluentui/react";
+import { Box, Stack } from "@mui/material";
 // We need lodash.get for dynamic key path support
 // eslint-disable-next-line no-restricted-imports
 import { get, set, cloneDeep } from "lodash";
@@ -43,12 +44,14 @@ export default function SchemaEntryEditor({
         log.warn(`Unexpected type for ${key}:`, currentValue);
       }
       return (
-        <TextField
-          label={title}
-          placeholder={entry.placeholder}
-          value={value}
-          onChange={(_event, newValue) => setValue(newValue)}
-        />
+        <div>
+          <TextField
+            label={title}
+            placeholder={entry.placeholder}
+            value={value}
+            onChange={(_event, newValue) => setValue(newValue)}
+          />
+        </div>
       );
     }
     case "number": {
@@ -65,11 +68,11 @@ export default function SchemaEntryEditor({
         log.warn(`Unexpected type for ${key}:`, currentValue);
       }
       return (
-        <Stack horizontal wrap tokens={(_props, theme) => ({ childrenGap: theme.spacing.s1 })}>
-          <Stack.Item align="center">
+        <Stack direction="row" flexWrap="wrap" alignItems="center" spacing={1}>
+          <Box textAlign="center">
             <Label>{title}</Label>
-          </Stack.Item>
-          <Stack.Item grow style={{ flexBasis: 0, minWidth: 86 }}>
+          </Box>
+          <Box flexGrow={1} flexBasis={0} minWidth={86}>
             <SpinButton
               inputProps={{ placeholder }}
               value={value}
@@ -94,7 +97,7 @@ export default function SchemaEntryEditor({
                 }
               }}
             />
-          </Stack.Item>
+          </Box>
         </Stack>
       );
     }
@@ -104,11 +107,13 @@ export default function SchemaEntryEditor({
         log.warn(`Unexpected type for ${key}:`, currentValue);
       }
       return (
-        <Toggle
-          label={title}
-          checked={Boolean(currentValue)}
-          onChange={(_event, checked) => setValue(checked)}
-        />
+        <div>
+          <Toggle
+            label={title}
+            checked={Boolean(currentValue)}
+            onChange={(_event, checked) => setValue(checked)}
+          />
+        </div>
       );
     }
 
@@ -121,16 +126,18 @@ export default function SchemaEntryEditor({
         selectedKey = undefined;
       }
       return (
-        <Dropdown
-          label={title}
-          selectedKey={selectedKey}
-          onChange={(_event, _value, index) => {
-            if (index != undefined) {
-              setValue(entry.options[index]?.value);
-            }
-          }}
-          options={entry.options.map(({ value, text }) => ({ key: value, text }))}
-        />
+        <div>
+          <Dropdown
+            label={title}
+            selectedKey={selectedKey}
+            onChange={(_event, _value, index) => {
+              if (index != undefined) {
+                setValue(entry.options[index]?.value);
+              }
+            }}
+            options={entry.options.map(({ value, text }) => ({ key: value, text }))}
+          />
+        </div>
       );
     }
 
@@ -143,13 +150,13 @@ export default function SchemaEntryEditor({
         value = "";
       }
       return (
-        <Stack.Item>
+        <div>
           <Label>{title}</Label>
           <ColorPicker
             color={hexToColorObj(value)}
             onChange={(newColor) => setValue(`#${colorObjToIColor(newColor).hex}`)}
           />
-        </Stack.Item>
+        </div>
       );
     }
   }

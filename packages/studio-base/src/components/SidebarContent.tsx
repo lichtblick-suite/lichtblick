@@ -2,7 +2,8 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { IconButton, Stack, Text, useTheme } from "@fluentui/react";
+import { IconButton, Text, useTheme } from "@fluentui/react";
+import { Box, Stack } from "@mui/material";
 import { useState, useMemo } from "react";
 
 import TextContent from "@foxglove/studio-base/components/TextContent";
@@ -59,59 +60,48 @@ export function SidebarContent({
 
   return (
     <Stack
-      verticalFill
-      styles={{
-        root: {
-          maxHeight: "100%",
-          overflow: "auto",
-        },
-      }}
-      tokens={{
-        childrenGap: theme.spacing.s1,
+      flex={1}
+      spacing={1}
+      sx={{
+        maxHeight: "100%",
+        overflow: "auto",
       }}
     >
       <Stack
-        horizontal
-        horizontalAlign="space-between"
-        verticalAlign="center"
-        tokens={{ padding: theme.spacing.m }}
-        styles={{ root: { minHeight: 56 } }}
+        direction="row"
+        justifyContent="space-between"
+        alignItems="center"
+        padding={2}
+        sx={{ minHeight: 56 }}
       >
         {leadingItems && (
-          <Stack horizontal verticalAlign="center">
+          <Stack direction="row" alignItems="center">
             {leadingItems.map((item, i) => (
-              <Stack.Item key={i}>{item}</Stack.Item>
+              <div key={i}>{item}</div>
             ))}
           </Stack>
         )}
-        <Stack.Item grow>
+        <Box flexGrow={1}>
           <Text as="h2" variant="xLarge">
             {title}
           </Text>
-        </Stack.Item>
+        </Box>
         {trailingItemsWithHelp.length > 0 ? (
-          <Stack horizontal verticalAlign="center">
+          <Stack direction="row" alignItems="center">
             {trailingItemsWithHelp.map((item, i) => (
-              <Stack.Item key={i}>{item}</Stack.Item>
+              <div key={i}>{item}</div>
             ))}
           </Stack>
         ) : undefined}
       </Stack>
       {showHelp ? (
-        <Stack
-          tokens={{
-            padding: `0 ${theme.spacing.m} ${theme.spacing.m} ${theme.spacing.m}`,
-          }}
-        >
+        <Stack padding={2} paddingTop={0}>
           <TextContent allowMarkdownHtml={true}>{helpContent}</TextContent>
         </Stack>
       ) : undefined}
-      <Stack.Item
-        tokens={{ padding: noPadding ? undefined : `0px ${theme.spacing.m} ${theme.spacing.m}` }}
-        grow
-      >
+      <Box flexGrow={1} padding={noPadding ? undefined : 2} paddingTop={0}>
         {children}
-      </Stack.Item>
+      </Box>
     </Stack>
   );
 }

@@ -442,6 +442,7 @@ export default React.forwardRef(function Autocomplete<T = unknown>(
           ...inputStyle,
           fontFamily,
           fontSize,
+          paddingLeft: 4,
           width: autoSize
             ? Math.max(
                 measureText(value != undefined && value.length > 0 ? value : placeholder ?? ""),
@@ -508,7 +509,13 @@ export default React.forwardRef(function Autocomplete<T = unknown>(
       // @ts-expect-error renderMenuWrapper added in the fork but we don't have typings for it
       renderMenuWrapper={(menu: React.ReactNode) => <Layer>{menu}</Layer>}
       ref={autocomplete}
-      wrapperStyle={{ flex: "1 1 auto", overflow: "hidden", marginLeft: 6 }}
+      wrapperStyle={{
+        display: "flex",
+        flex: "1 1 auto",
+        alignItems: "center",
+        overflow: "hidden",
+        height: "100%",
+      }}
     />
   );
 }) as <T>(props: AutocompleteProps<T> & React.RefAttributes<IAutocomplete>) => JSX.Element; // https://stackoverflow.com/a/58473012/23649

@@ -15,10 +15,10 @@ import {
   DefaultButton,
   DirectionalHint,
   ITextFieldStyles,
-  Stack,
   TextField,
   useTheme,
 } from "@fluentui/react";
+import { Stack } from "@mui/material";
 import { useState, useCallback, useMemo, useRef, useEffect } from "react";
 
 import { Time, isTimeInRangeInclusive } from "@foxglove/rostime";
@@ -158,14 +158,7 @@ const PlaybackTimeDisplayMethod = ({
   }, [hasError, inputText, isPlaying]);
 
   return (
-    <Stack
-      horizontal
-      verticalAlign="center"
-      grow={0}
-      tokens={{
-        childrenGap: theme.spacing.s2,
-      }}
-    >
+    <Stack direction="row" alignItems="center" flexGrow={0} spacing={0.5}>
       {currentTime ? (
         <form onSubmit={onSubmit} style={{ width: "100%" }}>
           <TextField

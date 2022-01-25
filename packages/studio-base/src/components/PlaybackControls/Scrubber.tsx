@@ -2,7 +2,8 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { Stack, makeStyles } from "@fluentui/react";
+import { makeStyles } from "@fluentui/react";
+import { Stack } from "@mui/material";
 import cx from "classnames";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useLatest } from "react-use";
@@ -53,6 +54,8 @@ const useStyles = makeStyles((theme) => ({
     height: "100%",
   },
   stateBar: {
+    display: "flex",
+    flexDirection: "column",
     position: "absolute",
     zIndex: 1,
     flex: 1,
@@ -202,16 +205,17 @@ export default function Scrubber(props: Props): JSX.Element {
   const step = ((max ?? 100) - (min ?? 0)) / 500;
 
   return (
-    <>
+    <Stack
+      direction="row"
+      flexGrow={1}
+      alignItems="center"
+      sx={{ height: 28, position: "relative" }}
+    >
       {tooltip}
-      <div
-        className={cx(classes.fullWidthBar, {
-          [classes.fullWidthBarActive]: startTime,
-        })}
-      />
-      <Stack className={classes.stateBar}>
+      <div className={cx(classes.fullWidthBar, { [classes.fullWidthBarActive]: startTime })} />
+      <div className={classes.stateBar}>
         <ProgressPlot progress={progress} />
-      </Stack>
+      </div>
       <div ref={el} className={classes.sliderContainer}>
         <Slider
           min={min ?? 0}
@@ -227,6 +231,6 @@ export default function Scrubber(props: Props): JSX.Element {
         />
       </div>
       <PlaybackBarHoverTicks componentId={hoverComponentId} />
-    </>
+    </Stack>
   );
 }

@@ -2,7 +2,7 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { Stack } from "@fluentui/react";
+import { Stack } from "@mui/material";
 import { ComponentProps, useState } from "react";
 
 import { AppSetting } from "@foxglove/studio-base/AppSetting";
@@ -33,7 +33,7 @@ function DurationStory(props: Props): JSX.Element {
   );
 
   return (
-    <Stack tokens={{ padding: 16, childrenGap: 16 }}>
+    <Stack padding={2} spacing={2}>
       <AppConfigurationContext.Provider value={secAppConfig}>
         <Duration {...props} />
       </AppConfigurationContext.Provider>

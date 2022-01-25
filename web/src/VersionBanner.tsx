@@ -1,41 +1,12 @@
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
-import { DefaultButton, Stack, Text, Link } from "@fluentui/react";
+import { DefaultButton, Text, Link } from "@fluentui/react";
 import CloseIcon from "@mdi/svg/svg/close.svg";
+import { Box, Stack } from "@mui/material";
 import { useState, ReactElement } from "react";
-import styled from "styled-components";
 
 const MINIMUM_CHROME_VERSION = 76;
-
-const StyledBanner = styled.div<{
-  isDismissable: boolean;
-}>`
-  height: ${(props) => (props.isDismissable ? "auto" : "100vh")};
-  ${(props) =>
-    !props.isDismissable &&
-    `position: fixed;
-  top: 0;
-  left:0;
-  right:0;
-  bottom:0;`};
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  text-align: center;
-  width: 100vw;
-  color: white;
-  background-color: rgba(99, 102, 241, 0.9);
-  z-index: 100;
-`;
-const StyledIconWrapper = styled.div`
-  fill: white;
-  position: absolute;
-  top: 10px;
-  right: 10px;
-  cursor: pointer;
-`;
 
 const VersionBanner = function ({
   isChrome,
@@ -58,12 +29,40 @@ const VersionBanner = function ({
   const fixText = isChrome ? "Update Chrome" : "Download Chrome";
 
   return (
-    <StyledBanner isDismissable={isDismissable}>
-      <Stack style={{ padding: "10px" }} tokens={{ childrenGap: 8 }} horizontalAlign="center">
+    <Stack
+      alignItems="center"
+      justifyContent="center"
+      sx={{
+        textAlign: "center",
+        width: "100vw",
+        color: "white",
+        backgroundColor: "rgba(99, 102, 241, 0.9)",
+        zIndex: 100,
+        height: isDismissable ? "auto" : "100vh",
+
+        ...(!isDismissable && {
+          position: "fixed",
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+        }),
+      }}
+    >
+      <Stack padding={1.5} spacing={1} alignItems="center">
         {isDismissable ? (
-          <StyledIconWrapper onClick={() => setShowBanner(false)}>
+          <Box
+            onClick={() => setShowBanner(false)}
+            sx={{
+              fill: "white",
+              position: "absolute",
+              top: "10px",
+              right: "10px",
+              cursor: "pointer",
+            }}
+          >
             <CloseIcon />
-          </StyledIconWrapper>
+          </Box>
         ) : (
           ReactNull
         )}
@@ -112,7 +111,7 @@ const VersionBanner = function ({
           {fixText}
         </DefaultButton>
       </Stack>
-    </StyledBanner>
+    </Stack>
   );
 };
 

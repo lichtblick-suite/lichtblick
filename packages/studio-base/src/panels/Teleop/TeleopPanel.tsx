@@ -2,7 +2,8 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { Dialog, DialogFooter, PrimaryButton, Stack } from "@fluentui/react";
+import { Dialog, DialogFooter, PrimaryButton } from "@fluentui/react";
+import { Stack } from "@mui/material";
 import { useCallback, useLayoutEffect, useMemo, useState } from "react";
 
 import { definitions as commonDefs } from "@foxglove/rosmsg-msgs-common";
@@ -185,14 +186,14 @@ function TeleopPanel(props: TeleopPanelProps): JSX.Element {
   return (
     <ThemeProvider isDark={colorScheme === "dark"}>
       <Stack
-        verticalFill
-        verticalAlign="center"
-        horizontalAlign="center"
-        tokens={{ padding: `min(5%, ${theme.spacing.s1})` }}
+        height="100%"
+        justifyContent="100"
+        alignItems="center"
+        sx={{ padding: `min(5%, ${theme.spacing.s1})` }}
       >
         <DirectionalPad onAction={setCurrentAction} disabled={!enabled} />
       </Stack>
-      <Stack styles={{ root: { position: "absolute", top: 0, left: 0, margin: theme.spacing.s1 } }}>
+      <Stack sx={{ position: "absolute", top: 0, left: 0, margin: 1 }}>
         <HoverableIconButton
           onClick={() => setShowSettings(true)}
           iconProps={{

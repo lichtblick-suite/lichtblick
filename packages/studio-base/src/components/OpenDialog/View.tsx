@@ -2,7 +2,8 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { ActionButton, DefaultButton, PrimaryButton, Stack, useTheme } from "@fluentui/react";
+import { ActionButton, DefaultButton, PrimaryButton, useTheme } from "@fluentui/react";
+import { Stack } from "@mui/material";
 import { PropsWithChildren } from "react";
 
 type ViewProps = {
@@ -18,17 +19,17 @@ export default function View(props: PropsWithChildren<ViewProps>): JSX.Element {
   return (
     <>
       <Stack
-        grow
-        verticalFill
-        verticalAlign="space-between"
-        tokens={{ childrenGap: theme.spacing.m }}
-        styles={{
-          root: { "@media (min-height: 512px)": { overflow: "hidden" } },
+        flexGrow={1}
+        height="100%"
+        justifyContent="space-between"
+        spacing={2}
+        sx={{
+          "@media (min-height: 512px)": { overflow: "hidden" },
         }}
       >
         {props.children}
       </Stack>
-      <Stack horizontal horizontalAlign="space-between" verticalAlign="center">
+      <Stack direction="row" justifyContent="space-between" alignItems="center">
         <ActionButton
           iconProps={{ iconName: "ChevronLeft" }}
           onClick={onBack}
@@ -39,7 +40,7 @@ export default function View(props: PropsWithChildren<ViewProps>): JSX.Element {
         >
           Back
         </ActionButton>
-        <Stack horizontal tokens={{ childrenGap: theme.spacing.m }}>
+        <Stack direction="row" spacing={2}>
           <DefaultButton onClick={onCancel}>Cancel</DefaultButton>
           <PrimaryButton onClick={onOpen} disabled={onOpen == undefined}>
             Open

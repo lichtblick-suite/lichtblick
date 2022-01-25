@@ -1,16 +1,17 @@
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
+
 import {
   Checkbox,
   DefaultButton,
   Icon,
   IIconStyles,
-  Stack,
   Text,
   TextField,
   useTheme,
 } from "@fluentui/react";
+import { Stack } from "@mui/material";
 import { useMemo, useState } from "react";
 import { useAsyncFn } from "react-use";
 
@@ -70,11 +71,7 @@ function WelcomePanel() {
     !loading;
 
   return (
-    <Stack
-      data-test="welcome-content"
-      styles={{ root: { overflowY: "auto" } }}
-      tokens={{ padding: theme.spacing.l1 }}
-    >
+    <Stack data-test="welcome-content" padding={2.5} sx={{ overflowY: "auto" }}>
       <PanelToolbar floating />
       <TextContent>
         <h1>Welcome</h1>
@@ -118,7 +115,7 @@ function WelcomePanel() {
           <b>To learn more, join our Slack community and subscribe to our newsletter:</b>
         </Text>
 
-        <Stack tokens={{ childrenGap: theme.spacing.m }}>
+        <Stack spacing={2}>
           <TextField
             placeholder="me@example.com"
             value={emailValue}
@@ -137,7 +134,7 @@ function WelcomePanel() {
               newValue != undefined && setSlackInviteChecked(newValue)
             }
           />
-          <Stack horizontalAlign="start">
+          <Stack alignItems="flex-start">
             <DefaultButton primary={!subscribed} disabled={!submitEnabled} onClick={submit}>
               {loading ? "Signing Up..." : "Sign Up"}
             </DefaultButton>

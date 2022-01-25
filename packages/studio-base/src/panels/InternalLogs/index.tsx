@@ -2,11 +2,11 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { Checkbox, Stack, useTheme } from "@fluentui/react";
+import { Checkbox } from "@fluentui/react";
+import { Stack } from "@mui/material";
 import { useMemo } from "react";
 
 import log from "@foxglove/log";
-import Flex from "@foxglove/studio-base/components/Flex";
 import Panel from "@foxglove/studio-base/components/Panel";
 import PanelToolbar from "@foxglove/studio-base/components/PanelToolbar";
 
@@ -42,12 +42,10 @@ function InternalLogs(props: Props) {
     return allChannels;
   }, [disabledChannels]);
 
-  const theme = useTheme();
-
   return (
-    <Flex col scroll style={{ maxWidth: "100%" }}>
+    <Stack maxWidth="100%" sx={{ overflowY: "auto" }}>
       <PanelToolbar floating helpContent={helpContent} />
-      <Stack tokens={{ padding: theme.spacing.s1, childrenGap: theme.spacing.s1 }}>
+      <Stack padding={1} spacing={1}>
         {channels.map((logger) => {
           const label = logger.name().length === 0 ? "default" : logger.name();
           return (
@@ -73,7 +71,7 @@ function InternalLogs(props: Props) {
           );
         })}
       </Stack>
-    </Flex>
+    </Stack>
   );
 }
 
