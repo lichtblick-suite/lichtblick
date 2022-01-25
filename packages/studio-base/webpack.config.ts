@@ -39,7 +39,7 @@ const mainConfig = (env: unknown, argv: WebpackArgv): Configuration => {
     },
 
     output: {
-      publicPath: "",
+      publicPath: "auto",
       filename: "index.js", // Referred to by package.json "browser" field
 
       // Output filenames should include content hashes in order to avoid caching issues with
