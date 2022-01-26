@@ -39,6 +39,7 @@ import BugIcon from "@mdi/svg/svg/bug.svg";
 import CameraControlIcon from "@mdi/svg/svg/camera-control.svg";
 import ArrowDownIcon from "@mdi/svg/svg/chevron-down.svg";
 import ArrowUpIcon from "@mdi/svg/svg/chevron-up.svg";
+import ClockOutlineIcon from "@mdi/svg/svg/clock-outline.svg";
 import CloseIcon from "@mdi/svg/svg/close.svg";
 import CogIcon from "@mdi/svg/svg/cog.svg";
 import CrosshairsGpsIcon from "@mdi/svg/svg/crosshairs-gps.svg";
@@ -106,6 +107,7 @@ const icons: {
   ClearSelection: <Icons.ClearSelectionIcon />,
   Clipboard: <Clipboard16Regular />,
   ClipboardList: <Icons.ClipboardListIcon />,
+  ClockOutline: <ClockOutlineIcon />,
   Close: <CloseIcon />,
   CloudOffFilled: <CloudOff24Filled />,
   CodeEdit: <Icons.CodeEditIcon />,

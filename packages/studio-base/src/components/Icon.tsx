@@ -109,6 +109,7 @@ const Icon = (props: Props): JSX.Element => {
     tooltip,
     tooltipProps,
     dataTest,
+    ...rest
   } = props;
   const classNames = cx("icon", classes.icon, className, {
     active,
@@ -145,6 +146,7 @@ const Icon = (props: Props): JSX.Element => {
       onClick={clickHandler}
       style={style}
       data-test={dataTest}
+      {...rest}
     >
       {children}
       {tooltipNode}

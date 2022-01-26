@@ -36,6 +36,7 @@ const commonProps: Props = {
   zoom: true,
   width: 800,
   height: 600,
+  showXAxisLabels: true,
   data: {
     datasets: [
       {

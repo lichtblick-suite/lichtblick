@@ -1,5 +1,10 @@
 Plot arbitrary values from topic paths, specified using [message path syntax](#help:message-path-syntax).
 
+Order incoming topic messages using either of the following options:
+
+- `receive time` - ROS-time at which the message was received and recorded
+- `header.stamp` - Value of the message's `header.stamp` field (can mean different things for different topics)
+
 ## Shortcuts
 
 <kbd>Scroll</kbd> – Zoom horizontally

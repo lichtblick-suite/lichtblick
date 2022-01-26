@@ -41,6 +41,7 @@ declare global {
     | "ClearSelection"
     | "Clipboard"
     | "ClipboardList"
+    | "ClockOutline"
     | "Close"
     | "CloudOffFilled"
     | "CodeEdit"

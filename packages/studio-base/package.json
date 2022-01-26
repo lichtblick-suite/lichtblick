@@ -53,6 +53,7 @@
     "@foxglove/velodyne-cloud": "1.0.0",
     "@foxglove/ws-protocol": "0.0.8",
     "@mdi/svg": "6.5.95",
+    "@mui/icons-material": "5.2.5",
     "@mui/material": "5.2.7",
     "@mui/styles": "5.2.3",
     "@sentry/core": "6.16.1",

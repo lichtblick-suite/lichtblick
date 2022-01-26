@@ -37,6 +37,7 @@ import PanelToolbar from "@foxglove/studio-base/components/PanelToolbar";
 import TimeBasedChart, {
   TimeBasedChartTooltipData,
 } from "@foxglove/studio-base/components/TimeBasedChart";
+import TimestampMethodDropdown from "@foxglove/studio-base/components/TimestampMethodDropdown";
 import { usePanelMousePresence } from "@foxglove/studio-base/hooks/usePanelMousePresence";
 import {
   ChartData,
@@ -387,6 +388,7 @@ const StateTransitions = React.memo(function StateTransitions(props: Props) {
           <TimeBasedChart
             zoom
             isSynced
+            showXAxisLabels
             width={width ?? 0}
             height={height}
             data={data}
@@ -422,6 +424,11 @@ const StateTransitions = React.memo(function StateTransitions(props: Props) {
                 autoSize
                 validTypes={transitionableRosTypes}
                 noMultiSlices
+              />
+              <TimestampMethodDropdown
+                path={path}
+                index={index}
+                disabled={!path}
                 timestampMethod={timestampMethod}
                 onTimestampMethodChange={onInputTimestampMethodChange}
               />

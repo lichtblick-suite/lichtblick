@@ -60,6 +60,8 @@ type PlotChartProps = {
   paths: PlotPath[];
   minYValue: number;
   maxYValue: number;
+  showXAxisLabels: boolean;
+  showYAxisLabels: boolean;
   datasets: ComponentProps<typeof TimeBasedChart>["data"]["datasets"];
   tooltips: TimeBasedChartTooltipData[];
   xAxisVal: PlotXAxisVal;
@@ -73,6 +75,8 @@ export default function PlotChart(props: PlotChartProps): JSX.Element {
     paths,
     currentTime,
     defaultView,
+    showXAxisLabels,
+    showYAxisLabels,
     minYValue,
     maxYValue,
     datasets,
@@ -91,13 +95,14 @@ export default function PlotChart(props: PlotChartProps): JSX.Element {
       min,
       max,
       ticks: {
+        display: showYAxisLabels,
         precision: 3,
       },
       grid: {
         color: theme.palette.neutralLighter,
       },
     };
-  }, [maxYValue, minYValue, theme.palette.neutralLighter]);
+  }, [maxYValue, minYValue, showYAxisLabels, theme.palette.neutralLighter]);
 
   // Use a debounce and 0 refresh rate to avoid triggering a resize observation while handling
   // and existing resize observation.
@@ -129,6 +134,7 @@ export default function PlotChart(props: PlotChartProps): JSX.Element {
         type="scatter"
         yAxes={yAxes}
         xAxisIsPlaybackTime={xAxisVal === "timestamp"}
+        showXAxisLabels={showXAxisLabels}
         currentTime={currentTime}
         defaultView={defaultView}
         onClick={onClick}

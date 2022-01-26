@@ -126,6 +126,7 @@ export type Props = {
   // If the x axis represents playback time ("timestamp"), the hover cursor will be synced.
   // Note, this setting should not be used for other time values.
   xAxisIsPlaybackTime: boolean;
+  showXAxisLabels: boolean;
   plugins?: ChartOptions["plugins"];
   currentTime?: number;
   defaultView?: ChartDefaultView;
@@ -152,6 +153,7 @@ export default function TimeBasedChart(props: Props): JSX.Element {
     defaultView,
     currentTime,
     xAxisIsPlaybackTime,
+    showXAxisLabels,
   } = props;
 
   const { labels, datasets } = data;
@@ -522,13 +524,21 @@ export default function TimeBasedChart(props: Props): JSX.Element {
       min: minX,
       max: maxX,
       ticks: {
+        display: showXAxisLabels,
         ...defaultXTicksSettings,
         ...xAxes?.ticks,
       },
     };
 
     return scale;
-  }, [theme.palette.neutralSecondary, theme.palette.neutralLighter, xAxes, minX, maxX]);
+  }, [
+    theme.palette.neutralSecondary,
+    showXAxisLabels,
+    theme.palette.neutralLighter,
+    xAxes,
+    minX,
+    maxX,
+  ]);
 
   const yScale = useMemo<ScaleOptions>(() => {
     const defaultYTicksSettings: ScaleOptions["ticks"] = {

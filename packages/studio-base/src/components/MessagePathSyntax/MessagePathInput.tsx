@@ -11,7 +11,6 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { DefaultButton, IButtonStyles, IconButton, makeStyles, useTheme } from "@fluentui/react";
 import { Stack } from "@mui/material";
 import { flatten, flatMap, partition } from "lodash";
 import { CSSProperties, useCallback, useMemo } from "react";
@@ -19,14 +18,12 @@ import { CSSProperties, useCallback, useMemo } from "react";
 import { RosMsgField } from "@foxglove/rosmsg";
 import * as PanelAPI from "@foxglove/studio-base/PanelAPI";
 import Autocomplete, { IAutocomplete } from "@foxglove/studio-base/components/Autocomplete";
-import { useTooltip } from "@foxglove/studio-base/components/Tooltip";
 import useGlobalVariables, {
   GlobalVariables,
 } from "@foxglove/studio-base/hooks/useGlobalVariables";
 import { Topic } from "@foxglove/studio-base/players/types";
 import { RosDatatypes } from "@foxglove/studio-base/types/RosDatatypes";
 import { getTopicNames, getTopicsByTopicName } from "@foxglove/studio-base/util/selectors";
-import { TimestampMethod } from "@foxglove/studio-base/util/time";
 
 import { RosPath, RosPrimitive } from "./constants";
 import {
@@ -36,25 +33,6 @@ import {
   validTerminatingStructureItem,
 } from "./messagePathsForDatatype";
 import parseRosPath from "./parseRosPath";
-
-const useStyles = makeStyles({
-  helpTooltip: {
-    margin: 0,
-    lineHeight: "1.3",
-
-    dd: {
-      margin: "2px 0",
-    },
-    dt: {
-      fontWeight: 700,
-      marginTop: 6,
-
-      ":first-of-type": {
-        marginTop: 0,
-      },
-    },
-  },
-});
 
 // To show an input field with an autocomplete so the user can enter message paths, use:
 //
@@ -75,21 +53,6 @@ const useStyles = makeStyles({
 // which gets passed down to `<MessagePathInput onChange>` as the second parameter, so you can
 // avoid creating anonymous functions on every render (which will prevent the component from
 // rendering unnecessarily).
-
-function topicHasNoHeaderStamp(topic: Topic, datatypes: RosDatatypes): boolean {
-  const structureTraversalResult = traverseStructure(
-    messagePathStructures(datatypes)[topic.datatype],
-    [
-      { type: "name", name: "header" },
-      { type: "name", name: "stamp" },
-    ],
-  );
-
-  return (
-    !structureTraversalResult.valid ||
-    !validTerminatingStructureItem(structureTraversalResult.structureItem, ["time"])
-  );
-}
 
 // Get a list of Message Path strings for all of the fields (recursively) in a list of topics
 function getFieldPaths(
@@ -203,83 +166,13 @@ type MessagePathInputBaseProps = {
   inputStyle?: CSSProperties;
   disableAutocomplete?: boolean; // Treat this as a normal input, with no autocomplete.
   prioritizedDatatype?: string;
-  timestampMethod?: TimestampMethod;
-  onTimestampMethodChange?: (arg0: TimestampMethod, index?: number) => void;
 };
 
 export default React.memo<MessagePathInputBaseProps>(function MessagePathInput(
   props: MessagePathInputBaseProps,
 ) {
-  const classes = useStyles();
   const { globalVariables, setGlobalVariables } = useGlobalVariables();
   const { datatypes, topics } = PanelAPI.useDataSourceInfo();
-  const theme = useTheme();
-
-  const dropdownStyles: Partial<IButtonStyles> = useMemo(
-    () => ({
-      root: {
-        backgroundColor: "transparent",
-        color: theme.semanticColors.disabledText,
-        borderColor: "transparent",
-        fontSize: 12,
-        height: 24,
-        padding: "0 2px 0 4px",
-        cursor: "pointer",
-        minWidth: 120,
-      },
-      rootHovered: {
-        color: theme.semanticColors.buttonText,
-        padding: "0 2px 0 4px",
-        backgroundColor: theme.semanticColors.buttonBackgroundHovered,
-      },
-      rootPressed: { backgroundColor: theme.semanticColors.buttonBackgroundPressed },
-      label: { fontWeight: 400 },
-      menuIcon: {
-        fontSize: "1em",
-        height: "1em",
-        color: "inherit",
-        marginLeft: 0,
-
-        svg: {
-          fill: "currentColor",
-          height: "1em",
-          width: "1em",
-          display: "block",
-        },
-      },
-    }),
-    [theme],
-  );
-
-  const iconButtonStyles: Partial<IButtonStyles> = useMemo(
-    () => ({
-      root: {
-        backgroundColor: "transparent",
-        fontSize: 20,
-        height: 24,
-        width: 24,
-        cursor: "pointer",
-        color: theme.semanticColors.disabledText,
-      },
-      rootHovered: {
-        backgroundColor: theme.semanticColors.buttonBackgroundHovered,
-        color: theme.semanticColors.buttonTextHovered,
-      },
-      rootPressed: { backgroundColor: theme.semanticColors.buttonBackgroundPressed },
-      iconHovered: { color: "inherit" },
-      icon: {
-        color: "inherit",
-
-        svg: {
-          height: "1em",
-          width: "1em",
-          display: "block",
-          fill: "currentColor",
-        },
-      },
-    }),
-    [theme],
-  );
 
   const {
     supportsMathModifiers,
@@ -289,7 +182,6 @@ export default React.memo<MessagePathInputBaseProps>(function MessagePathInput(
     autoSize,
     placeholder,
     noMultiSlices,
-    timestampMethod,
     inputStyle,
     disableAutocomplete = false,
   } = props;
@@ -350,15 +242,6 @@ export default React.memo<MessagePathInputBaseProps>(function MessagePathInput(
       }
     },
     [onChangeProp, path, props.index, topicFields, validTypes],
-  );
-
-  const onTimestampMethodChangeProp = props.onTimestampMethodChange;
-
-  const onTimestampMethodChange = useCallback(
-    (value: TimestampMethod) => {
-      onTimestampMethodChangeProp?.(value, props.index);
-    },
-    [onTimestampMethodChangeProp, props.index],
   );
 
   const rosPath = useMemo(() => parseRosPath(path), [path]);
@@ -522,10 +405,6 @@ export default React.memo<MessagePathInputBaseProps>(function MessagePathInput(
     globalVariables,
   ]);
 
-  const noHeaderStamp = useMemo(() => {
-    return topic ? topicHasNoHeaderStamp(topic, datatypes) : false;
-  }, [datatypes, topic]);
-
   const orderedAutocompleteItems = useMemo(() => {
     if (prioritizedDatatype == undefined) {
       return autocompleteItems;
@@ -546,29 +425,6 @@ export default React.memo<MessagePathInputBaseProps>(function MessagePathInput(
     usesUnsupportedMathModifier ||
     (autocompleteType != undefined && !disableAutocomplete && path.length > 0);
 
-  const timestampButton = useTooltip({
-    contents: noHeaderStamp
-      ? "header.stamp is not present in this topic"
-      : "Timestamp used for x-axis",
-    placement: "top",
-  });
-
-  const helpButton = useTooltip({
-    contents: (
-      <dl className={classes.helpTooltip}>
-        <dt>receive time</dt>
-        <dd>ROS-time at which the message was received and recorded.</dd>
-
-        <dt>header.stamp</dt>
-        <dd>
-          Value of the header.stamp field. Can mean different things for different topics. Be sure
-          you know what this value means before using it.
-        </dd>
-      </dl>
-    ),
-    placement: "top",
-  });
-
   return (
     <Stack
       direction="row"
@@ -576,76 +432,26 @@ export default React.memo<MessagePathInputBaseProps>(function MessagePathInput(
       alignItems="center"
       flexGrow={1}
       flexShrink={0}
-      minWidth={0}
-      spacing={0.5}
+      spacing={0.25}
     >
-      <Stack direction="row" alignItems="center" flexGrow={1}>
-        <Autocomplete
-          items={orderedAutocompleteItems}
-          filterText={autocompleteFilterText}
-          value={path}
-          onChange={onChange}
-          onSelect={(value, _item, autocomplete) =>
-            onSelect(value, autocomplete, autocompleteType, autocompleteRange)
-          }
-          hasError={hasError}
-          autocompleteKey={autocompleteType}
-          placeholder={
-            placeholder != undefined && placeholder !== ""
-              ? placeholder
-              : "/some/topic.msgs[0].field"
-          }
-          autoSize={autoSize}
-          inputStyle={inputStyle} // Disable autoselect since people often construct complex queries, and it's very annoying
-          // to have the entire input selected whenever you want to make a change to a part it.
-          disableAutoSelect
-        />
-      </Stack>
-      {timestampMethod != undefined && (
-        <>
-          <div>
-            {timestampButton.tooltip}
-            <DefaultButton
-              elementRef={timestampButton.ref}
-              checked={timestampMethod === "headerStamp" && noHeaderStamp}
-              text={timestampMethod === "receiveTime" ? "(receive time)" : "(header.stamp)"}
-              menuIconProps={{ iconName: "MenuDown" }}
-              menuProps={{
-                styles: {
-                  subComponentStyles: {
-                    menuItem: {
-                      root: { height: 24 },
-                      label: { fontSize: theme.fonts.small.fontSize },
-                      secondaryText: { fontSize: theme.fonts.small.fontSize },
-                    },
-                  },
-                },
-                items: [
-                  {
-                    key: "receiveTime",
-                    text: "receive time",
-                    onClick: () => onTimestampMethodChange("receiveTime"),
-                  },
-                  {
-                    key: "headerStamp",
-                    text: "header.stamp",
-                    onClick: () => onTimestampMethodChange("headerStamp"),
-                  },
-                ],
-              }}
-              styles={dropdownStyles}
-            />
-          </div>
-          <div>
-            {helpButton.tooltip}
-            <IconButton
-              elementRef={helpButton.ref}
-              iconProps={{ iconName: "HelpCircle" }}
-              styles={iconButtonStyles}
-            />
-          </div>
-        </>
-      )}
+      <Autocomplete
+        items={orderedAutocompleteItems}
+        filterText={autocompleteFilterText}
+        value={path}
+        onChange={onChange}
+        onSelect={(value, _item, autocomplete) =>
+          onSelect(value, autocomplete, autocompleteType, autocompleteRange)
+        }
+        hasError={hasError}
+        autocompleteKey={autocompleteType}
+        placeholder={
+          placeholder != undefined && placeholder !== "" ? placeholder : "/some/topic.msgs[0].field"
+        }
+        autoSize={autoSize}
+        inputStyle={inputStyle} // Disable autoselect since people often construct complex queries, and it's very annoying
+        // to have the entire input selected whenever you want to make a change to a part it.
+        disableAutoSelect
+      />
     </Stack>
   );
 });

@@ -11,157 +11,42 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { IconButton, ITheme, makeStyles } from "@fluentui/react";
-import AlertCircleIcon from "@mdi/svg/svg/alert-circle.svg";
-import MenuIcon from "@mdi/svg/svg/menu.svg";
+import {
+  Add as AddIcon,
+  Menu as MenuIcon,
+  KeyboardArrowLeft as KeyboardArrowLeftIcon,
+  KeyboardArrowRight as KeyboardArrowRightIcon,
+} from "@mui/icons-material";
+import { Box, Button, IconButton, Stack, Theme, alpha } from "@mui/material";
+import { createStyles, makeStyles } from "@mui/styles";
 import cx from "classnames";
 import { last } from "lodash";
-import { Fragment, useCallback, useMemo } from "react";
-import tinycolor from "tinycolor2";
+import { ComponentProps, useCallback, useMemo, useRef } from "react";
 
 import Dropdown from "@foxglove/studio-base/components/Dropdown";
 import DropdownItem from "@foxglove/studio-base/components/Dropdown/DropdownItem";
-import Icon from "@foxglove/studio-base/components/Icon";
 import MessagePathInput from "@foxglove/studio-base/components/MessagePathSyntax/MessagePathInput";
-import { useTooltip } from "@foxglove/studio-base/components/Tooltip";
-import { lineColors } from "@foxglove/studio-base/util/plotColors";
-import { colors } from "@foxglove/studio-base/util/sharedStyleConstants";
-import { TimestampMethod } from "@foxglove/studio-base/util/time";
+import TimeBasedChart from "@foxglove/studio-base/components/TimeBasedChart";
+import PlotLegendRow from "@foxglove/studio-base/panels/Plot/PlotLegendRow";
 
 import { PlotPath, BasePlotPath, isReferenceLinePlotPathType } from "./internalTypes";
 import { plotableRosTypes, PlotConfig, PlotXAxisVal } from "./types";
 
-const stylesForButtonsDisplayedOnHover = (theme: ITheme) =>
-  ({
-    visibility: "hidden",
-    padding: 6,
-    cursor: "pointer",
-    position: "absolute",
-    top: 0,
-    height: 25,
-    width: 25,
-    borderRadius: theme.effects.roundedCorner2,
-    userSelect: "none",
-    background: tinycolor(theme.palette.neutralLight).setAlpha(0.75).toRgbString(),
-
-    ":hover": {
-      background: tinycolor(theme.palette.neutralLight).setAlpha(0.75).toRgbString(),
-    },
-    ".mosaic-window:hover &": {
-      visibility: "initial",
-    },
-  } as const);
-
-const useStyles = makeStyles((theme) => ({
-  root: {
-    position: "absolute",
-    left: 65,
-    top: 6,
-    background: tinycolor(theme.palette.neutralLight).setAlpha(0.25).toRgbString(),
-    color: theme.semanticColors.bodySubtext,
-    maxWidth: "calc(100% - 65px - 25px)",
-
-    ":hover": {
-      background: tinycolor(theme.palette.neutralLight).setAlpha(0.5).toRgbString(),
-    },
-  },
-  dropdown: {
-    backgroundColor: "transparent !important",
-    padding: "3px !important",
-  },
-  addLine: {
-    display: "none",
-    content: "+ add line",
-    position: "absolute",
-    background: tinycolor(theme.palette.neutralLight).setAlpha(0.5).toRgbString(),
-    left: 0,
-    right: 0,
-    bottom: 0,
-    transform: "translateY(100%)",
-    padding: 6,
-    cursor: "pointer",
-    textAlign: "center",
-
-    ":hover": {
-      background: tinycolor(theme.palette.neutralLight).setAlpha(0.75).toRgbString(),
-    },
-    ".mosaic-window:hover &": {
-      display: "block",
-    },
-  },
-  item: {
-    display: "flex",
-    padding: "0 5px",
-    height: 20,
-    lineHeight: 20,
-    position: "relative",
-
-    ":hover": {
-      background: tinycolor(theme.palette.neutralLight).setAlpha(0.75).toRgbString(),
-
-      "[data-item-remove]": {
-        visibility: "initial",
-      },
-    },
-  },
-  itemIconContainer: {
-    display: "inline-block",
-    width: 22,
-    height: 20,
-    lineHeight: 0,
-    cursor: "pointer",
-    flexShrink: 0,
-
-    ":hover": {
-      background: theme.palette.neutralLight,
-    },
-  },
-  itemIcon: {
-    display: "inline-block",
-    width: 15,
-    borderBottom: "2px solid currentColor",
-    height: 0,
-    verticalAlign: "middle",
-    position: "relative",
-    top: "calc(50% - 1px)",
-  },
-  download: { ...stylesForButtonsDisplayedOnHover(theme), left: -60 },
-  legendToggle: { ...stylesForButtonsDisplayedOnHover(theme), left: -30 },
-  itemRemove: {
-    visibility: "hidden",
-    padding: "0 6px",
-    cursor: "pointer",
-    position: "absolute",
-    right: -21,
-    background: "transparent",
-    height: 20,
-    lineHeight: 20,
-    userSelect: "none",
-
-    ":hover": {
-      background: tinycolor(theme.palette.neutralLight).setAlpha(0.75).toRgbString(),
-    },
-  },
-  itemInput: {
-    overflow: "hidden",
-    width: "100%",
-    display: "flex",
-  },
-  itemInputDisabled: {
-    input: {
-      textDecoration: "line-through",
-    },
-  },
-}));
+const minLegendWidth = 25;
+const maxLegendWidth = 800;
 
 type PlotLegendProps = {
   paths: PlotPath[];
+  datasets: ComponentProps<typeof TimeBasedChart>["data"]["datasets"];
+  currentTime?: number;
   saveConfig: (arg0: Partial<PlotConfig>) => void;
   showLegend: boolean;
   xAxisVal: PlotXAxisVal;
   xAxisPath?: BasePlotPath;
   pathsWithMismatchedDataLengths: string[];
-  onDownload: () => void;
+  sidebarWidth: number;
+  showSidebar: boolean;
+  showPlotValuesInLegend: boolean;
 };
 
 const shortXAxisLabel = (path: PlotXAxisVal): string => {
@@ -178,226 +63,326 @@ const shortXAxisLabel = (path: PlotXAxisVal): string => {
   throw new Error(`unknown path: ${path}`);
 };
 
-export default function PlotLegend(props: PlotLegendProps): JSX.Element {
+const useStyles = makeStyles((theme: Theme) =>
+  createStyles({
+    dropdown: {
+      backgroundColor: "transparent !important",
+      padding: "4px !important",
+    },
+    root: {
+      position: "relative",
+      color: theme.palette.text.secondary,
+      backgroundColor: theme.palette.background.paper,
+      borderTop: `${theme.palette.background.default} solid 1px`,
+    },
+    floatingRoot: {
+      cursor: "pointer",
+      position: "absolute",
+      left: theme.spacing(4),
+      top: theme.spacing(1),
+      bottom: theme.spacing(3),
+      maxWidth: `calc(100% - ${theme.spacing(8)})`,
+      backgroundColor: "transparent",
+      borderTop: "none",
+      pointerEvents: "none",
+      zIndex: theme.zIndex.mobileStepper,
+    },
+    legendToggle: {
+      cursor: "pointer",
+      userSelect: "none",
+      height: "100%",
+      backgroundColor: theme.palette.background.paper,
+    },
+    floatingLegendToggle: {
+      marginRight: theme.spacing(0.25),
+      visibility: "hidden",
+      borderRadius: theme.shape.borderRadius,
+      backgroundColor: theme.palette.action.focus,
+      height: "inherit",
+
+      "&:hover": {
+        backgroundColor: theme.palette.background.paper,
+      },
+      ".mosaic-window:hover &": { visibility: "initial" },
+    },
+  }),
+);
+
+function SidebarWrapper(props: {
+  sidebarWidth: number;
+  saveConfig: (arg0: Partial<PlotConfig>) => void;
+  children: JSX.Element | undefined;
+}): JSX.Element | ReactNull {
+  const { sidebarWidth, saveConfig } = props;
+  const originalWrapper = useRef<DOMRect | undefined>(undefined);
+  const handleMouseMove = useCallback(
+    (e: MouseEvent) => {
+      const offsetLeft = originalWrapper.current?.left ?? 0;
+      const newWidth = e.clientX - offsetLeft;
+      if (newWidth > minLegendWidth && newWidth < maxLegendWidth) {
+        saveConfig({ sidebarWidth: newWidth });
+      }
+    },
+    [originalWrapper, saveConfig],
+  );
+
+  const handleMouseDown = (e: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
+    originalWrapper.current = (e.target as Node).parentElement?.getBoundingClientRect() as DOMRect;
+    document.addEventListener("mouseup", handleMouseUp, true);
+    document.addEventListener("mousemove", handleMouseMove, true);
+  };
+
+  const handleMouseUp = () => {
+    originalWrapper.current = undefined;
+    document.removeEventListener("mouseup", handleMouseUp, true);
+    document.removeEventListener("mousemove", handleMouseMove, true);
+  };
+
+  return (
+    <Stack direction="row" height="100%">
+      <Stack flexGrow={1} spacing={0.5} sx={{ width: sidebarWidth, overflow: "auto" }}>
+        {props.children}
+      </Stack>
+      <Box
+        onMouseDown={handleMouseDown}
+        sx={(theme) => ({
+          cursor: "ew-resize",
+          userSelect: "none",
+          width: theme.spacing(0.5),
+          height: "100%",
+          borderRight: `2px solid ${theme.palette.action.hover}`,
+
+          "&:hover": {
+            borderRightColor: theme.palette.action.selected,
+          },
+        })}
+      />
+    </Stack>
+  );
+}
+
+export default function PlotLegend(props: PlotLegendProps): JSX.Element | ReactNull {
   const {
     paths,
+    datasets,
+    currentTime,
     saveConfig,
     showLegend,
     xAxisVal,
     xAxisPath,
     pathsWithMismatchedDataLengths,
-    onDownload,
+    sidebarWidth,
+    showSidebar,
+    showPlotValuesInLegend,
   } = props;
+
   const lastPath = last(paths);
   const classes = useStyles();
 
-  const onInputChange = useCallback(
-    (value: string, index?: number) => {
-      if (index == undefined) {
-        throw new Error("index not set");
-      }
-      const newPaths = paths.slice();
-      const newPath = newPaths[index];
-      if (newPath) {
-        newPaths[index] = { ...newPath, value: value.trim() };
-      }
-      saveConfig({ paths: newPaths });
-    },
-    [paths, saveConfig],
+  const toggleLegend = useCallback(
+    () => saveConfig({ showLegend: !showLegend }),
+    [showLegend, saveConfig],
   );
 
-  const onInputTimestampMethodChange = useCallback(
-    (value: TimestampMethod, index?: number) => {
-      if (index == undefined) {
-        throw new Error("index not set");
-      }
-      const newPaths = paths.slice();
-      const newPath = newPaths[index];
-      if (newPath) {
-        newPaths[index] = { ...newPath, timestampMethod: value };
-      }
-      saveConfig({ paths: newPaths });
-    },
-    [paths, saveConfig],
+  const legendIcon = useMemo(
+    () =>
+      showSidebar ? (
+        showLegend ? (
+          <KeyboardArrowLeftIcon fontSize="inherit" />
+        ) : (
+          <KeyboardArrowRightIcon fontSize="inherit" />
+        )
+      ) : (
+        <MenuIcon fontSize="inherit" />
+      ),
+    [showLegend, showSidebar],
   );
 
-  const { toggleToHideLegend, toggleToShowLegend } = useMemo(
-    () => ({
-      toggleToHideLegend: () => saveConfig({ showLegend: false }),
-      toggleToShowLegend: () => saveConfig({ showLegend: true }),
-    }),
-    [saveConfig],
-  );
-
-  const downloadCSVTooltip = useTooltip({ contents: "Download plot data as CSV" });
-
-  if (!showLegend) {
-    return (
-      <div className={classes.root}>
-        <Icon className={classes.legendToggle} onClick={toggleToShowLegend}>
-          <MenuIcon />
-        </Icon>
-      </div>
-    );
-  }
-
-  return (
-    <div className={classes.root}>
-      <IconButton
-        className={classes.download}
-        elementRef={downloadCSVTooltip.ref}
-        iconProps={{ iconName: "Download" }}
-        onClick={onDownload}
-        ariaLabel="Download plot data as CSV"
-        styles={{ icon: { height: 20 } }}
-      >
-        {downloadCSVTooltip.tooltip}
-      </IconButton>
-      <Icon className={classes.legendToggle} onClick={toggleToHideLegend}>
-        <MenuIcon />
-      </Icon>
-      <div className={classes.item}>
-        x:
-        <div
-          className={classes.itemIconContainer}
-          style={{ width: "auto", lineHeight: "normal", zIndex: 2 }}
-        >
-          <Dropdown
-            value={xAxisVal}
-            text={shortXAxisLabel(xAxisVal)}
-            btnClassname={classes.dropdown}
-            onChange={(newXAxisVal) => saveConfig({ xAxisVal: newXAxisVal })}
-            noPortal
-          >
-            <DropdownItem value="timestamp">
-              <span>timestamp</span>
-            </DropdownItem>
-            <DropdownItem value="index">
-              <span>index</span>
-            </DropdownItem>
-            <DropdownItem value="currentCustom">
-              <span>msg path (current)</span>
-            </DropdownItem>
-            <DropdownItem value="custom">
-              <span>msg path (accumulated)</span>
-            </DropdownItem>
-          </Dropdown>
-        </div>
-        <div
-          className={cx(classes.itemInput, {
-            [classes.itemInputDisabled]: xAxisPath?.enabled !== true,
+  const legendContent = useMemo(
+    () =>
+      showLegend ? (
+        <Stack
+          sx={(theme) => ({
+            bgcolor: alpha(theme.palette.background.paper, 0.8),
+            overflow: "auto",
+            pointerEvents: "auto",
+            [showSidebar ? "height" : "maxHeight"]: "100%",
+            position: "relative",
           })}
         >
-          {(xAxisVal === "custom" || xAxisVal === "currentCustom") && (
-            <MessagePathInput
-              path={xAxisPath?.value ? xAxisPath.value : "/"}
-              onChange={(newXAxisPath) =>
-                saveConfig({
-                  xAxisPath: { value: newXAxisPath, enabled: xAxisPath ? xAxisPath.enabled : true },
-                })
-              }
-              validTypes={plotableRosTypes}
-              placeholder="Enter a topic name or a number"
-              disableAutocomplete={xAxisPath && isReferenceLinePlotPathType(xAxisPath)}
-              autoSize
-            />
-          )}
-        </div>
-      </div>
-      {paths.map((path: PlotPath, index: number) => {
-        const isReferenceLinePlotPath = isReferenceLinePlotPathType(path);
-        let timestampMethod;
-        // Only allow chosing the timestamp method if it is applicable (not a reference line) and there is at least
-        // one character typed.
-        if (!isReferenceLinePlotPath && path.value.length > 0) {
-          timestampMethod = path.timestampMethod;
-        }
-        const hasMismatchedDataLength = pathsWithMismatchedDataLengths.includes(path.value);
+          <Stack
+            direction="row"
+            alignItems="center"
+            padding={0.25}
+            sx={(theme) => ({
+              height: 26,
+              position: "sticky",
+              top: 0,
+              left: 0,
+              right: 0,
+              bgcolor: "background.paper",
+              zIndex: theme.zIndex.mobileStepper + 1,
+            })}
+          >
+            <Box
+              sx={{
+                zIndex: 4,
+                height: 20,
 
-        return (
-          <Fragment key={index}>
-            <div className={classes.item}>
-              y:
-              <div
-                className={classes.itemIconContainer}
-                style={{ zIndex: 1 }}
-                onClick={() => {
-                  const newPaths = paths.slice();
-                  const newPath = newPaths[index];
-                  if (newPath) {
-                    newPaths[index] = { ...newPath, enabled: !newPath.enabled };
-                  }
-                  saveConfig({ paths: newPaths });
-                }}
+                "&:hover": { bgcolor: "action.hover" },
+              }}
+            >
+              <Dropdown
+                value={xAxisVal}
+                text={`x: ${shortXAxisLabel(xAxisVal)}`}
+                btnClassname={classes.dropdown}
+                onChange={(newXAxisVal) => saveConfig({ xAxisVal: newXAxisVal })}
+                noPortal
               >
-                <div
-                  className={classes.itemIcon}
-                  style={{ color: path.enabled ? lineColors[index % lineColors.length] : "#777" }}
-                />
-              </div>
-              <div
-                className={cx(classes.itemInput, {
-                  [classes.itemInputDisabled]: !path.enabled,
-                })}
-              >
+                <DropdownItem value="timestamp">timestamp</DropdownItem>
+                <DropdownItem value="index">index</DropdownItem>
+                <DropdownItem value="currentCustom">msg path (current)</DropdownItem>
+                <DropdownItem value="custom">msg path (accumulated)</DropdownItem>
+              </Dropdown>
+            </Box>
+            <Stack direction="row" overflow="hidden">
+              {(xAxisVal === "custom" || xAxisVal === "currentCustom") && (
                 <MessagePathInput
-                  supportsMathModifiers
-                  path={path.value}
-                  onChange={onInputChange}
-                  onTimestampMethodChange={onInputTimestampMethodChange}
+                  path={xAxisPath?.value ? xAxisPath.value : "/"}
+                  onChange={(newXAxisPath) =>
+                    saveConfig({
+                      xAxisPath: {
+                        value: newXAxisPath,
+                        enabled: xAxisPath ? xAxisPath.enabled : true,
+                      },
+                    })
+                  }
                   validTypes={plotableRosTypes}
                   placeholder="Enter a topic name or a number"
-                  index={index}
+                  disableAutocomplete={xAxisPath && isReferenceLinePlotPathType(xAxisPath)}
                   autoSize
-                  disableAutocomplete={isReferenceLinePlotPath}
-                  inputStyle={{ height: 20 }}
-                  {...(xAxisVal === "timestamp" ? { timestampMethod } : undefined)}
                 />
-                {hasMismatchedDataLength && (
-                  <Icon
-                    style={{ color: colors.RED }}
-                    clickable={false}
-                    size="small"
-                    tooltipProps={{ placement: "top" }}
-                    tooltip="Mismatch in the number of elements in x-axis and y-axis messages"
-                  >
-                    <AlertCircleIcon />
-                  </Icon>
-                )}
-              </div>
-              <div
-                data-item-remove
-                className={classes.itemRemove}
-                onClick={() => {
-                  const newPaths = paths.slice();
-                  newPaths.splice(index, 1);
-                  saveConfig({ paths: newPaths });
-                }}
-              >
-                ✕
-              </div>
-            </div>
-          </Fragment>
-        );
-      })}
-      <div
-        className={classes.addLine}
-        onClick={() =>
-          saveConfig({
-            paths: [
-              ...paths,
-              {
-                value: "",
-                enabled: true,
-                // For convenience, default to the `timestampMethod` of the last path.
-                timestampMethod: lastPath ? lastPath.timestampMethod : "receiveTime",
-              },
-            ],
-          })
-        }
+              )}
+            </Stack>
+          </Stack>
+          <Box
+            sx={{
+              position: "relative",
+              display: "grid",
+              gridTemplateColumns: [
+                "auto",
+                "minmax(max-content, 1fr)",
+                showPlotValuesInLegend && "minmax(max-content, 1fr)",
+                "auto",
+              ]
+                .filter(Boolean)
+                .join(" "),
+              alignItems: "stretch",
+            }}
+          >
+            {paths.map((path: PlotPath, index: number) => {
+              const hasMismatchedDataLength = pathsWithMismatchedDataLengths.includes(path.value);
+              return (
+                <PlotLegendRow
+                  key={index}
+                  index={index}
+                  xAxisVal={xAxisVal}
+                  path={path}
+                  paths={paths}
+                  hasMismatchedDataLength={hasMismatchedDataLength}
+                  datasets={datasets}
+                  currentTime={currentTime}
+                  saveConfig={saveConfig}
+                  showPlotValuesInLegend={showPlotValuesInLegend}
+                />
+              );
+            })}
+          </Box>
+          <Box
+            padding={0.5}
+            gridColumn="span 4"
+            sx={{
+              ...(showSidebar && {
+                position: "sticky",
+                right: 0,
+                left: 0,
+              }),
+            }}
+          >
+            <Button
+              size="small"
+              fullWidth
+              startIcon={<AddIcon />}
+              onClick={() =>
+                saveConfig({
+                  paths: [
+                    ...paths,
+                    {
+                      value: "",
+                      enabled: true,
+                      // For convenience, default to the `timestampMethod` of the last path.
+                      timestampMethod: lastPath ? lastPath.timestampMethod : "receiveTime",
+                    },
+                  ],
+                })
+              }
+              sx={{ minWidth: 100, bgcolor: "action.hover" }}
+            >
+              Add line
+            </Button>
+          </Box>
+        </Stack>
+      ) : undefined,
+    [
+      classes.dropdown,
+      currentTime,
+      datasets,
+      lastPath,
+      paths,
+      pathsWithMismatchedDataLengths,
+      saveConfig,
+      showLegend,
+      showSidebar,
+      showPlotValuesInLegend,
+      xAxisPath,
+      xAxisVal,
+    ],
+  );
+
+  return (
+    <Stack
+      direction="row"
+      alignItems="flex-start"
+      className={cx(classes.root, { [classes.floatingRoot]: !showSidebar })}
+    >
+      <IconButton
+        disableRipple={showSidebar}
+        size="small"
+        onClick={toggleLegend}
+        className={cx(classes.legendToggle, { [classes.floatingLegendToggle]: !showSidebar })}
+        sx={{
+          bgcolor: "action.hover",
+          padding: showSidebar ? "0" : undefined,
+          pointerEvents: "auto",
+
+          "&:hover": {
+            bgcolor: "action.focus",
+          },
+        }}
       >
-        + add line
-      </div>
-    </div>
+        {legendIcon}
+      </IconButton>
+      {showLegend ? (
+        showSidebar ? (
+          <SidebarWrapper sidebarWidth={sidebarWidth} saveConfig={saveConfig}>
+            {legendContent}
+          </SidebarWrapper>
+        ) : (
+          <Stack overflow="hidden" height="100%">
+            {legendContent}
+          </Stack>
+        )
+      ) : undefined}
+    </Stack>
   );
 }

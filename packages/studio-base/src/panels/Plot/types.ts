@@ -17,10 +17,15 @@ export type PlotConfig = {
   minYValue?: string | number;
   maxYValue?: string | number;
   showLegend: boolean;
+  showSidebar: boolean;
+  showPlotValuesInLegend: boolean;
+  showXAxisLabels: boolean;
+  showYAxisLabels: boolean;
   isSynced: boolean;
   xAxisVal: PlotXAxisVal;
   xAxisPath?: BasePlotPath;
   followingViewWidth?: number;
+  sidebarWidth: number;
 };
 
 export const plotableRosTypes = [

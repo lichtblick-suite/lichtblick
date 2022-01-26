@@ -12,6 +12,7 @@
 //   You may not use this file except in compliance with the License.
 
 import { useTheme } from "@fluentui/react";
+import DownloadOutlineIcon from "@mdi/svg/svg/download-outline.svg";
 import { compact, uniq } from "lodash";
 import memoizeWeak from "memoize-weak";
 import { useEffect, useCallback, useMemo, ComponentProps } from "react";
@@ -28,6 +29,7 @@ import { MessageEvent } from "@foxglove/studio";
 import { useBlocksByTopic, useMessageReducer } from "@foxglove/studio-base/PanelAPI";
 import { MessageBlock } from "@foxglove/studio-base/PanelAPI/useBlocksByTopic";
 import Flex from "@foxglove/studio-base/components/Flex";
+import Icon from "@foxglove/studio-base/components/Icon";
 import parseRosPath, {
   getTopicsFromPaths,
 } from "@foxglove/studio-base/components/MessagePathSyntax/parseRosPath";
@@ -65,6 +67,8 @@ import { PlotConfig } from "./types";
 
 export { plotableRosTypes } from "./types";
 export type { PlotConfig, PlotXAxisVal } from "./types";
+
+const defaultSidebarWidth = 240;
 
 export function openSiblingPlotPanel(openSiblingPanel: OpenSiblingPanel, topicName: string): void {
   openSiblingPanel({
@@ -173,10 +177,15 @@ function Plot(props: Props) {
     paths: yAxisPaths,
     minYValue,
     maxYValue,
+    showXAxisLabels,
+    showYAxisLabels,
     showLegend,
+    showSidebar,
+    showPlotValuesInLegend,
     isSynced,
     xAxisVal,
     xAxisPath,
+    sidebarWidth,
   } = config;
   const theme = useTheme();
 
@@ -366,6 +375,9 @@ function Plot(props: Props) {
   ]);
 
   const tooltips = useMemo(() => {
+    if (showLegend && showPlotValuesInLegend) {
+      return [];
+    }
     const allTooltips: TimeBasedChartTooltipData[] = [];
     for (const dataset of datasets) {
       for (const datum of dataset.data) {
@@ -373,7 +385,7 @@ function Plot(props: Props) {
       }
     }
     return allTooltips;
-  }, [datasets]);
+  }, [datasets, showLegend, showPlotValuesInLegend]);
 
   const messagePipeline = useMessagePipelineGetter();
   const onClick = useCallback<NonNullable<ComponentProps<typeof PlotChart>["onClick"]>>(
@@ -393,30 +405,52 @@ function Plot(props: Props) {
   );
 
   return (
-    <Flex col clip center style={{ position: "relative" }}>
-      <PanelToolbar helpContent={helpContent} floating />
-      {title && <div>{title}</div>}
-      <PlotChart
-        isSynced={xAxisVal === "timestamp" && isSynced}
-        paths={yAxisPaths}
-        minYValue={parseFloat((minYValue ?? "")?.toString())}
-        maxYValue={parseFloat((maxYValue ?? "")?.toString())}
-        datasets={datasets}
-        tooltips={tooltips}
-        xAxisVal={xAxisVal}
-        currentTime={currentTimeSinceStart}
-        onClick={onClick}
-        defaultView={defaultView}
+    <Flex col clip center style={{ width: "100%", height: "100%", position: "relative" }}>
+      <PanelToolbar
+        helpContent={helpContent}
+        additionalIcons={
+          <Icon
+            fade
+            onClick={() => downloadCSV(datasets, xAxisVal)}
+            tooltip="Download plot data as CSV"
+          >
+            <DownloadOutlineIcon />
+          </Icon>
+        }
+        floating
       />
-      <PlotLegend
-        paths={yAxisPaths}
-        saveConfig={saveConfig}
-        showLegend={showLegend}
-        xAxisVal={xAxisVal}
-        xAxisPath={xAxisPath}
-        pathsWithMismatchedDataLengths={pathsWithMismatchedDataLengths}
-        onDownload={() => downloadCSV(datasets, xAxisVal)}
-      />
+      <Flex style={{ width: "100%", height: "100%" }}>
+        <PlotLegend
+          paths={yAxisPaths}
+          datasets={datasets}
+          currentTime={currentTimeSinceStart}
+          saveConfig={saveConfig}
+          showLegend={showLegend}
+          xAxisVal={xAxisVal}
+          xAxisPath={xAxisPath}
+          pathsWithMismatchedDataLengths={pathsWithMismatchedDataLengths}
+          showSidebar={showSidebar}
+          showPlotValuesInLegend={showPlotValuesInLegend}
+          sidebarWidth={sidebarWidth}
+        />
+        <Flex col center style={{ overflow: "hidden" }}>
+          {title && <div>{title}</div>}
+          <PlotChart
+            isSynced={xAxisVal === "timestamp" && isSynced}
+            paths={yAxisPaths}
+            minYValue={parseFloat((minYValue ?? "")?.toString())}
+            maxYValue={parseFloat((maxYValue ?? "")?.toString())}
+            showXAxisLabels={showXAxisLabels}
+            showYAxisLabels={showYAxisLabels}
+            datasets={datasets}
+            tooltips={tooltips}
+            xAxisVal={xAxisVal}
+            currentTime={currentTimeSinceStart}
+            onClick={onClick}
+            defaultView={defaultView}
+          />
+        </Flex>
+      </Flex>
     </Flex>
   );
 }
@@ -427,6 +461,26 @@ const configSchema: PanelConfigSchema<PlotConfig> = [
     key: "isSynced",
     type: "toggle",
     title: "Sync with other timestamp-based plots",
+  },
+  {
+    key: "showSidebar",
+    type: "toggle",
+    title: "Display legend in collapsible sidebar",
+  },
+  {
+    key: "showPlotValuesInLegend",
+    type: "toggle",
+    title: "Show plot values in legend",
+  },
+  {
+    key: "showXAxisLabels",
+    type: "toggle",
+    title: "Show x-axis labels",
+  },
+  {
+    key: "showYAxisLabels",
+    type: "toggle",
+    title: "Show y-axis labels",
   },
   { key: "maxYValue", type: "number", title: "Y max", placeholder: "auto", allowEmpty: true },
   { key: "minYValue", type: "number", title: "Y min", placeholder: "auto", allowEmpty: true },
@@ -445,9 +499,14 @@ const defaultConfig: PlotConfig = {
   paths: [{ value: "", enabled: true, timestampMethod: "receiveTime" }],
   minYValue: "",
   maxYValue: "",
+  showXAxisLabels: true,
+  showYAxisLabels: true,
   showLegend: true,
+  showSidebar: false,
+  showPlotValuesInLegend: false,
   isSynced: true,
   xAxisVal: "timestamp",
+  sidebarWidth: defaultSidebarWidth,
 };
 
 export default Panel(
