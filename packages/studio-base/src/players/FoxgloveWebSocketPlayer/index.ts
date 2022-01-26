@@ -77,7 +77,10 @@ function parseChannel(channel: Channel): ParsedChannel {
     const type = root.lookupType(channel.schemaName);
 
     const deserializer = (data: ArrayBufferView) => {
-      return type.decode(new Uint8Array(data.buffer, data.byteOffset, data.byteLength));
+      return type.toObject(
+        type.decode(new Uint8Array(data.buffer, data.byteOffset, data.byteLength)),
+        { defaults: true },
+      );
     };
 
     const datatypes: RosDatatypes = new Map();

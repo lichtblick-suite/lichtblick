@@ -118,7 +118,7 @@ export default class McapDataProvider implements RandomAccessDataProvider {
             messages.push({
               topic: channelInfo.info.topic,
               receiveTime,
-              message: channelInfo.messageDeserializer.toObject(protoMsg),
+              message: channelInfo.messageDeserializer.toObject(protoMsg, { defaults: true }),
               sizeInBytes: record.data.byteLength,
             });
           } else {
