@@ -122,7 +122,7 @@ function Parameters(): ReactElement {
             </thead>
             <tbody>
               {parameterNames.map((name) => {
-                const value = JSON.stringify(parameters.get(name) ?? "");
+                const value = JSON.stringify(parameters.get(name)) ?? "";
                 return (
                   <AnimatedRow
                     key={`parameter-${name}`}

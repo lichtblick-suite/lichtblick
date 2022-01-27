@@ -24,7 +24,7 @@ export default function UserProfileLocalStorageProvider({
     return item != undefined ? (JSON.parse(item) as UserProfile) : DEFAULT_PROFILE;
   }, []);
   const setUserProfile = useCallback(async (profile: UserProfile) => {
-    localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(profile));
+    localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(profile) ?? "");
   }, []);
   const storage = useShallowMemo({
     getUserProfile,

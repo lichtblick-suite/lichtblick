@@ -47,7 +47,10 @@ export default function LocalStorageLayoutStorageProvider(
       },
 
       async put(namespace: string, layout: Layout): Promise<Layout> {
-        localStorage.setItem(`${KEY_PREFIX}.${namespace}.${layout.id}`, JSON.stringify(layout));
+        localStorage.setItem(
+          `${KEY_PREFIX}.${namespace}.${layout.id}`,
+          JSON.stringify(layout) ?? "",
+        );
         return layout;
       },
 
@@ -97,7 +100,7 @@ export default function LocalStorageLayoutStorageProvider(
               const layout = migrateLayout(JSON.parse(item));
               localStorage.setItem(
                 `${KEY_PREFIX}.${namespace}.${layout.id}`,
-                JSON.stringify(layout),
+                JSON.stringify(layout) ?? "",
               );
               localStorage.removeItem(key);
             } catch (err) {

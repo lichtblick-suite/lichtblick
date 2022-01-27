@@ -27,8 +27,8 @@ export default function HighlightedValue({ itemLabel }: Props): JSX.Element {
   const itemLabelContainsChange = splitItemLabel.length === 2;
   if (itemLabelContainsChange) {
     const [before, after] = splitItemLabel;
-    const beforeText = JSON.parse(JSON.stringify(before));
-    const afterText = JSON.parse(JSON.stringify(after));
+    const beforeText = JSON.parse(JSON.stringify(before) ?? "");
+    const afterText = JSON.parse(JSON.stringify(after) ?? "");
     return (
       <DiffSpan style={{ color: diffLabels.CHANGED.color }}>
         <MaybeCollapsedValue itemLabel={beforeText} />

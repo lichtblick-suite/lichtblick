@@ -149,7 +149,7 @@ export default function FilterBar(props: FilterBarProps): JSX.Element {
           <Icon
             style={{ padding: "1px 0px 0px 6px" }}
             onClick={() => {
-              void clipboard.copy(JSON.stringify(props.messages, undefined, 2));
+              void clipboard.copy(JSON.stringify(props.messages, undefined, 2) ?? "");
             }}
             tooltip="Copy log to clipboard"
           >

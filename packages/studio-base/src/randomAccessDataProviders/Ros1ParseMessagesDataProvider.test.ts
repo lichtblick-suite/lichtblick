@@ -91,7 +91,7 @@ describe.skip("ParseMessagesDataProvider", () => {
         return {
           topic: event.topic,
           receiveTime: event.receiveTime,
-          message: JSON.parse(JSON.stringify(event.message)),
+          message: JSON.parse(JSON.stringify(event.message) ?? ""),
         };
       }),
     ).toEqual([

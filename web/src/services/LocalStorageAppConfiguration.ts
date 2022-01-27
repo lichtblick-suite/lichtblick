@@ -28,7 +28,10 @@ export default class LocalStorageAppConfiguration implements AppConfiguration {
     if (value == undefined) {
       localStorage.removeItem(LocalStorageAppConfiguration.KEY_PREFIX + key);
     } else {
-      localStorage.setItem(LocalStorageAppConfiguration.KEY_PREFIX + key, JSON.stringify(value));
+      localStorage.setItem(
+        LocalStorageAppConfiguration.KEY_PREFIX + key,
+        JSON.stringify(value) ?? "",
+      );
     }
     const listeners = this.changeListeners.get(key);
     if (listeners) {

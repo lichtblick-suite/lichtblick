@@ -197,7 +197,7 @@ function LinkedGlobalVariableRow({ name }: { name: string }): ReactElement {
       <td>${name}</td>
       <td width="100%">
         <JSONInput
-          value={JSON.stringify(globalVariables[name] ?? "")}
+          value={JSON.stringify(globalVariables[name]) ?? ""}
           onChange={(newVal) => setGlobalVariables({ [name]: newVal })}
         />
       </td>
@@ -339,7 +339,7 @@ function GlobalVariablesTable(): ReactElement {
                   dataTest={`global-variable-value-input-${JSON.stringify(
                     globalVariables[name] ?? "",
                   )}`}
-                  value={JSON.stringify(globalVariables[name] ?? "")}
+                  value={JSON.stringify(globalVariables[name]) ?? ""}
                   onChange={(newVal) => setGlobalVariables({ [name]: newVal })}
                 />
               </td>

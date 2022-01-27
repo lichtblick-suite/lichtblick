@@ -59,7 +59,7 @@ export default class NativeStorageAppConfiguration implements AppConfiguration {
       await this._ctx.put(
         NativeStorageAppConfiguration.STORE_NAME,
         NativeStorageAppConfiguration.STORE_KEY,
-        JSON.stringify(newConfig),
+        JSON.stringify(newConfig) ?? "",
       );
       this._currentValue = newConfig;
     });

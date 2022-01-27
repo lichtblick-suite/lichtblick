@@ -251,7 +251,7 @@ export default function ImageCanvas(props: Props): JSX.Element {
           imageMessage: msg,
           imageMessageDatatype,
           options,
-          rawMarkerData: JSON.parse(JSON.stringify(rawMarkers)),
+          rawMarkerData: JSON.parse(JSON.stringify(rawMarkers) ?? ""),
         });
       };
 

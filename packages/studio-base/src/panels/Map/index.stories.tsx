@@ -22,7 +22,7 @@ const EMPTY_MESSAGE: NavSatFixMsg = {
   position_covariance: [1, 0, 0, 0, 1, 0, 0, 0, 1],
   position_covariance_type: NavSatFixPositionCovarianceType.COVARIANCE_TYPE_UNKNOWN,
 };
-const OFFSET_MESSAGE = JSON.parse(JSON.stringify(EMPTY_MESSAGE)) as NavSatFixMsg;
+const OFFSET_MESSAGE = JSON.parse(JSON.stringify(EMPTY_MESSAGE) ?? "") as NavSatFixMsg;
 OFFSET_MESSAGE.latitude += 0.1;
 OFFSET_MESSAGE.longitude += 0.1;
 

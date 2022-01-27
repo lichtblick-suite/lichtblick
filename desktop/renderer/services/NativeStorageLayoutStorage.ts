@@ -54,7 +54,7 @@ export default class NativeStorageLayoutStorage implements ILayoutStorage {
   }
 
   async put(namespace: string, layout: Layout): Promise<Layout> {
-    const content = JSON.stringify(layout);
+    const content = JSON.stringify(layout) ?? "";
     await this._ctx.put(NativeStorageLayoutStorage.STORE_PREFIX + namespace, layout.id, content);
     return layout;
   }
@@ -104,7 +104,7 @@ export default class NativeStorageLayoutStorage implements ILayoutStorage {
         await this._ctx.put(
           NativeStorageLayoutStorage.STORE_PREFIX + namespace,
           layout.id,
-          JSON.stringify(layout),
+          JSON.stringify(layout) ?? "",
         );
         await this._ctx.delete(NativeStorageLayoutStorage.LEGACY_STORE_NAME, layout.id);
       } catch (err) {

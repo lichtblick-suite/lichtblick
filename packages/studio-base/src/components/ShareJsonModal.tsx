@@ -33,7 +33,7 @@ export default function ShareJsonModal({
   title,
 }: Props): React.ReactElement {
   const theme = useTheme();
-  const [value, setValue] = useState(JSON.stringify(initialValue, undefined, 2));
+  const [value, setValue] = useState(JSON.stringify(initialValue, undefined, 2) ?? "");
   const [copied, setCopied] = useState(false);
 
   const { decodedValue, error } = useMemo(() => {

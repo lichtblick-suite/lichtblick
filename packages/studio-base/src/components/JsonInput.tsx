@@ -174,8 +174,9 @@ export function ValidatedInputBase({
 
 export default function JsonInput(props: BaseProps): JSX.Element {
   function stringify(val: unknown) {
-    return JSON.stringify(val, undefined, 2);
+    return JSON.stringify(val, undefined, 2) ?? "";
   }
+
   return (
     <SEditBox>
       <ValidatedInputBase parse={JSON.parse} stringify={stringify} {...props} />

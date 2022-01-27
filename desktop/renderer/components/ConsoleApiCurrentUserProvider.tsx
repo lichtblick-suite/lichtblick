@@ -40,7 +40,7 @@ export default function ConsoleApiCurrentUserProvider(
     undefined,
     {
       raw: false,
-      serializer: (value: User) => JSON.stringify(value),
+      serializer: (value: User) => JSON.stringify(value) ?? "",
       deserializer: (value: string) => JSON.parse(value) as User,
     },
   );

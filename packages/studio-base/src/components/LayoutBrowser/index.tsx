@@ -230,7 +230,7 @@ export default function LayoutBrowser({
 
   const onExportLayout = useCallbackWithToast(
     async (item: Layout) => {
-      const content = JSON.stringify(item.working?.data ?? item.baseline.data, undefined, 2);
+      const content = JSON.stringify(item.working?.data ?? item.baseline.data, undefined, 2) ?? "";
       downloadTextFile(content, `${item.name}.json`);
       void analytics.logEvent(AppEvent.LAYOUT_EXPORT, { permission: item.permission });
     },
