@@ -11,11 +11,10 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import styled from "styled-components";
+import { Box, Stack } from "@mui/material";
 
 import { useMessagesByTopic } from "@foxglove/studio-base/PanelAPI";
 import EmptyState from "@foxglove/studio-base/components/EmptyState";
-import Flex from "@foxglove/studio-base/components/Flex";
 import MessagePathInput from "@foxglove/studio-base/components/MessagePathSyntax/MessagePathInput";
 import { RosPath } from "@foxglove/studio-base/components/MessagePathSyntax/constants";
 import parseRosPath from "@foxglove/studio-base/components/MessagePathSyntax/parseRosPath";
@@ -27,13 +26,6 @@ import { fonts } from "@foxglove/studio-base/util/sharedStyleConstants";
 
 import Table from "./Table";
 import helpContent from "./index.help.md";
-
-const TableContainer = styled.div`
-  overflow: auto;
-  display: flex;
-  flex-direction: column;
-  font-family: ${fonts.MONOSPACE};
-`;
 
 type Config = { topicPath: string };
 type Props = { config: Config; saveConfig: SaveConfig<Config> };
@@ -59,27 +51,27 @@ function TablePanel({ config, saveConfig }: Props) {
   const firstCachedMessage = cachedMessages[0];
 
   return (
-    <Flex col clip style={{ position: "relative" }}>
+    <Stack flex="auto" overflow="hidden" position="relative">
       <PanelToolbar helpContent={helpContent}>
-        <div style={{ width: "100%", lineHeight: "20px" }}>
+        <Box width="100%" lineHeight="20px">
           <MessagePathInput
             index={0}
             path={topicPath}
             onChange={onTopicPathChange}
             inputStyle={{ height: 20 }}
           />
-        </div>
+        </Box>
       </PanelToolbar>
       {topicPath.length === 0 && <EmptyState>No topic selected</EmptyState>}
       {topicPath.length !== 0 && cachedMessages.length === 0 && (
         <EmptyState>Waiting for next message</EmptyState>
       )}
       {topicPath.length !== 0 && firstCachedMessage && (
-        <TableContainer>
+        <Stack overflow="auto" fontFamily={fonts.MONOSPACE}>
           <Table value={firstCachedMessage.value} accessorPath={""} />
-        </TableContainer>
+        </Stack>
       )}
-    </Flex>
+    </Stack>
   );
 }
 

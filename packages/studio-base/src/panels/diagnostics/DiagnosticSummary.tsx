@@ -20,6 +20,7 @@ import {
   useTheme,
 } from "@fluentui/react";
 import PinIcon from "@mdi/svg/svg/pin.svg";
+import { Stack } from "@mui/material";
 import cx from "classnames";
 import { compact } from "lodash";
 import { useCallback, useMemo } from "react";
@@ -28,7 +29,6 @@ import { List, AutoSizer, ListRowProps } from "react-virtualized";
 import { filterMap } from "@foxglove/den/collection";
 import { useDataSourceInfo } from "@foxglove/studio-base/PanelAPI";
 import EmptyState from "@foxglove/studio-base/components/EmptyState";
-import Flex from "@foxglove/studio-base/components/Flex";
 import Icon from "@foxglove/studio-base/components/Icon";
 import { LegacyInput } from "@foxglove/studio-base/components/LegacyStyledComponents";
 import Panel from "@foxglove/studio-base/components/Panel";
@@ -338,7 +338,7 @@ function DiagnosticSummary(props: Props): JSX.Element {
     );
 
   return (
-    <Flex col>
+    <Stack flex="auto">
       <PanelToolbar helpContent={helpContent} additionalIcons={topicToRenderMenu}>
         <Dropdown
           styles={dropdownStyles}
@@ -356,8 +356,8 @@ function DiagnosticSummary(props: Props): JSX.Element {
         />
         {hardwareFilter}
       </PanelToolbar>
-      <Flex col>{summary}</Flex>
-    </Flex>
+      <Stack flex="auto">{summary}</Stack>
+    </Stack>
   );
 }
 

@@ -11,8 +11,9 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
+import { Box, Stack } from "@mui/material";
+
 import ColorPicker from "@foxglove/studio-base/components/ColorPicker";
-import Flex from "@foxglove/studio-base/components/Flex";
 import { Color, PoseStamped } from "@foxglove/studio-base/types/Messages";
 import { colors } from "@foxglove/studio-base/util/sharedStyleConstants";
 
@@ -36,9 +37,9 @@ export default function PoseSettingsEditor(
 
   if (!message) {
     return (
-      <div style={{ color: colors.TEXT_MUTED }}>
+      <Box color={colors.TEXT_MUTED}>
         <small>Waiting for messages...</small>
-      </div>
+      </Box>
     );
   }
 
@@ -47,7 +48,7 @@ export default function PoseSettingsEditor(
   const currentHeadLength = settings.size?.headLength ?? 0.1;
 
   return (
-    <Flex col>
+    <Stack flex="auto">
       <SLabel>Color</SLabel>
       <ColorPicker
         color={settings.overrideColor}
@@ -90,7 +91,7 @@ export default function PoseSettingsEditor(
           })
         }
       />
-    </Flex>
+    </Stack>
   );
 }
 

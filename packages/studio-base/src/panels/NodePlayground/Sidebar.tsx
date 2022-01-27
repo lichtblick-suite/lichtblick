@@ -15,10 +15,10 @@ import ArrowLeftBoldIcon from "@mdi/svg/svg/arrow-left-bold.svg";
 import DeleteIcon from "@mdi/svg/svg/delete.svg";
 import FileMultipleIcon from "@mdi/svg/svg/file-multiple.svg";
 import HelpCircleIcon from "@mdi/svg/svg/help-circle.svg";
+import { Stack } from "@mui/material";
 import * as monacoApi from "monaco-editor/esm/vs/editor/editor.api";
 import styled from "styled-components";
 
-import Flex from "@foxglove/studio-base/components/Flex";
 import Icon from "@foxglove/studio-base/components/Icon";
 import { Explorer } from "@foxglove/studio-base/panels/NodePlayground";
 import TemplateIcon from "@foxglove/studio-base/panels/NodePlayground/assets/file-document-edit.svg";
@@ -100,7 +100,7 @@ type NodesListProps = {
 
 const NodesList = ({ nodes, selectNode, deleteNode, collapse, selectedNodeId }: NodesListProps) => {
   return (
-    <Flex col>
+    <Stack flex="auto">
       <SidebarTitle title="Nodes" collapse={collapse} />
       {Object.keys(nodes).map((nodeId) => {
         return (
@@ -116,7 +116,7 @@ const NodesList = ({ nodes, selectNode, deleteNode, collapse, selectedNodeId }: 
           </ListItem>
         );
       })}
-    </Flex>
+    </Stack>
   );
 };
 
@@ -143,19 +143,19 @@ const SidebarTitle = ({
   tooltip?: string;
   collapse: () => void;
 }) => (
-  <Flex row style={{ alignItems: "center", color: colors.DARK9, padding: "5px" }}>
+  <Stack direction="row" alignItems="center" color={colors.DARK9} padding={0.625}>
     <h3>{title}</h3>
     {tooltip && (
       <Icon style={{ cursor: "unset", marginLeft: "5px" }} size="xsmall" tooltip={tooltip}>
         <HelpCircleIcon />
       </Icon>
     )}
-    <div style={{ display: "flex", justifyContent: "flex-end", flexGrow: 1 }}>
+    <Stack direction="row" justifyContent="flex-end" flex="auto">
       <Icon onClick={collapse} size="medium" tooltip={"collapse"}>
         <ArrowLeftBoldIcon />
       </Icon>
-    </div>
-  </Flex>
+    </Stack>
+  </Stack>
 );
 
 const Sidebar = ({
@@ -205,7 +205,7 @@ const Sidebar = ({
         />
       ),
       utils: (
-        <Flex col style={{ position: "relative" }}>
+        <Stack flex="auto" position="relative">
           <SidebarTitle
             collapse={() => updateExplorer(undefined)}
             title="Utilities"
@@ -220,10 +220,10 @@ const Sidebar = ({
               {fileName}
             </ListItem>
           ))}
-        </Flex>
+        </Stack>
       ),
       templates: (
-        <Flex col>
+        <Stack flex="auto">
           <SidebarTitle
             title="Templates"
             tooltip={"Create nodes from these templates"}
@@ -235,7 +235,7 @@ const Sidebar = ({
               <span>{description}</span>
             </TemplateItem>
           ))}
-        </Flex>
+        </Stack>
       ),
     }),
     [

@@ -11,9 +11,9 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
+import { Stack } from "@mui/material";
 import { storiesOf } from "@storybook/react";
 
-import Flex from "@foxglove/studio-base/components/Flex";
 import MockPanelContextProvider from "@foxglove/studio-base/components/MockPanelContextProvider";
 import { Topic } from "@foxglove/studio-base/players/types";
 import PanelSetup, { Fixture } from "@foxglove/studio-base/stories/PanelSetup";
@@ -118,14 +118,14 @@ function MessagePathInputStory(props: { path: string; prioritizedDatatype?: stri
   return (
     <MockPanelContextProvider>
       <PanelSetup fixture={fixture} onMount={clickInput}>
-        <Flex style={{ margin: "10px" }}>
+        <Stack direction="row" flex="auto" margin={1.25}>
           <MessagePathInput
             autoSize={false}
             path={path}
             prioritizedDatatype={props.prioritizedDatatype}
             onChange={(newPath) => setPath(newPath)}
           />
-        </Flex>
+        </Stack>
       </PanelSetup>
     </MockPanelContextProvider>
   );
@@ -137,14 +137,14 @@ function MessagePathPerformanceStory(props: { path: string; prioritizedDatatype?
   return (
     <MockPanelContextProvider>
       <PanelSetup fixture={heavyFixture} onMount={clickInput}>
-        <Flex style={{ margin: "10px" }}>
+        <Stack direction="row" flex="auto" margin={1.25}>
           <MessagePathInput
             autoSize={false}
             path={path}
             prioritizedDatatype={props.prioritizedDatatype}
             onChange={(newPath) => setPath(newPath)}
           />
-        </Flex>
+        </Stack>
       </PanelSetup>
     </MockPanelContextProvider>
   );

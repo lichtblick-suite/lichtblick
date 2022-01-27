@@ -12,11 +12,11 @@
 //   You may not use this file except in compliance with the License.
 import { Callout, DefaultButton, IconButton } from "@fluentui/react";
 import CloseIcon from "@mdi/svg/svg/close.svg";
+import { Stack } from "@mui/material";
 import { partition, pick, union, without } from "lodash";
 import { useEffect, useMemo, useCallback, useRef, useState, ReactElement } from "react";
 import styled, { css, FlattenSimpleInterpolation, keyframes } from "styled-components";
 
-import Flex from "@foxglove/studio-base/components/Flex";
 import Icon from "@foxglove/studio-base/components/Icon";
 import { LegacyTable } from "@foxglove/studio-base/components/LegacyStyledComponents";
 import Menu, { Item } from "@foxglove/studio-base/components/Menu";
@@ -202,8 +202,8 @@ function LinkedGlobalVariableRow({ name }: { name: string }): ReactElement {
         />
       </td>
       <td>
-        <Flex center style={{ justifyContent: "space-between" }}>
-          <Flex style={{ marginRight: 16 }}>
+        <Stack direction="row" flex="auto" alignItems="center" justifyContent="space-between">
+          <Stack direction="row" flex="auto" marginRight={2}>
             {linkedTopicPaths.length > 1 && <span>({linkedTopicPaths.length})</span>}
 
             <Tooltip
@@ -226,7 +226,7 @@ function LinkedGlobalVariableRow({ name }: { name: string }): ReactElement {
                 {linkedTopicPaths.length > 0 ? <bdi>{linkedTopicPaths.join(", ")}</bdi> : "--"}
               </SLinkedTopicsSpan>
             </Tooltip>
-          </Flex>
+          </Stack>
           <IconButton
             elementRef={moreButton}
             iconProps={{ iconName: "MoreVertical" }}
@@ -248,7 +248,7 @@ function LinkedGlobalVariableRow({ name }: { name: string }): ReactElement {
               </Callout>
             )}
           </IconButton>
-        </Flex>
+        </Stack>
       </td>
     </>
   );
@@ -344,26 +344,31 @@ function GlobalVariablesTable(): ReactElement {
                 />
               </td>
               <td width="100%">
-                <Flex center style={{ justifyContent: "space-between" }}>
+                <Stack
+                  direction="row"
+                  flex="auto"
+                  alignItems="center"
+                  justifyContent="space-between"
+                >
                   --
                   <SIconWrapper onClick={() => setGlobalVariables({ [name]: undefined })}>
                     <Icon size="small">
                       <CloseIcon />
                     </Icon>
                   </SIconWrapper>
-                </Flex>
+                </Stack>
               </td>
             </SAnimatedRow>
           ))}
         </tbody>
       </LegacyTable>
-      <Flex style={{ marginTop: 20 }}>
+      <Stack direction="row" flex="auto" marginTop={2.5}>
         <DefaultButton
           text="Add variable"
           disabled={globalVariables[""] != undefined}
           onClick={() => setGlobalVariables({ "": "" })}
         />
-      </Flex>
+      </Stack>
     </SGlobalVariablesTable>
   );
 }

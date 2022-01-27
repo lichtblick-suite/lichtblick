@@ -12,6 +12,7 @@
 //   You may not use this file except in compliance with the License.
 
 import { Link, Spinner, SpinnerSize } from "@fluentui/react";
+import { Stack } from "@mui/material";
 import React, {
   useCallback,
   useMemo,
@@ -33,7 +34,6 @@ import styled from "styled-components";
 
 import { EmptyPanelLayout } from "@foxglove/studio-base/components/EmptyPanelLayout";
 import EmptyState from "@foxglove/studio-base/components/EmptyState";
-import Flex from "@foxglove/studio-base/components/Flex";
 import PanelToolbar from "@foxglove/studio-base/components/PanelToolbar";
 import {
   useCurrentLayoutActions,
@@ -128,10 +128,10 @@ export function UnconnectedPanelLayout(props: Props): React.ReactElement {
         Panel = panelInfo
           ? React.lazy(panelInfo.module)
           : () => (
-              <Flex col center dataTest={id}>
+              <Stack flex="auto" alignItems="center" justifyContent="center" data-test={id}>
                 <PanelToolbar floating isUnknownPanel />
                 Unknown panel type: {type}.
-              </Flex>
+              </Stack>
             );
         panelCompoentCache.current.set(type, Panel);
       }

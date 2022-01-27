@@ -11,7 +11,8 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { Layer, mergeStyleSets } from "@fluentui/react";
+import { Layer } from "@fluentui/react";
+import { Box, Stack } from "@mui/material";
 import cx from "classnames";
 import {
   ReactElement,
@@ -24,15 +25,7 @@ import {
   useState,
 } from "react";
 
-import Flex from "@foxglove/studio-base/components/Flex";
 import KeyListener from "@foxglove/studio-base/components/KeyListener";
-
-const classes = mergeStyleSets({
-  childContainer: {
-    position: "fixed",
-    pointerEvents: "none",
-  },
-});
 
 type ContainsOpenProps = {
   // eslint-disable-next-line @foxglove/no-boolean-parameters
@@ -224,18 +217,17 @@ export default function ChildToggle(props: Props): ReactElement {
 
     const tree = (
       <div ref={floatingEl}>
-        <Flex
-          row
-          reverse={position === "left" || position === "bottom-left"}
-          start={position !== "above"}
-          end={position === "above"}
-          className={classes.childContainer}
-          style={styleObj}
+        <Stack
+          flex="auto"
+          direction={position === "left" || position === "bottom-left" ? "row-reverse" : "row"}
+          alignItems={position === "above" ? "flex-end" : "flex-start"}
+          position="fixed"
+          sx={{ pointerEvents: "none", ...styleObj }}
         >
           {/* shrinkable spacer allows child to have a default position but slide over when it would go offscreen */}
-          <span style={{ flexBasis: spacerSize, flexShrink: 1 }} />
+          <Box flexBasis={spacerSize} flexShrink={1} />
           {children[1]}
-        </Flex>
+        </Stack>
       </div>
     );
 

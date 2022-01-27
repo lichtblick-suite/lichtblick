@@ -13,6 +13,7 @@
 
 import { useTheme } from "@fluentui/react";
 import DownloadOutlineIcon from "@mdi/svg/svg/download-outline.svg";
+import { Stack } from "@mui/material";
 import { compact, uniq } from "lodash";
 import memoizeWeak from "memoize-weak";
 import { useEffect, useCallback, useMemo, ComponentProps } from "react";
@@ -28,7 +29,6 @@ import {
 import { MessageEvent } from "@foxglove/studio";
 import { useBlocksByTopic, useMessageReducer } from "@foxglove/studio-base/PanelAPI";
 import { MessageBlock } from "@foxglove/studio-base/PanelAPI/useBlocksByTopic";
-import Flex from "@foxglove/studio-base/components/Flex";
 import Icon from "@foxglove/studio-base/components/Icon";
 import parseRosPath, {
   getTopicsFromPaths,
@@ -405,7 +405,13 @@ function Plot(props: Props) {
   );
 
   return (
-    <Flex col clip center style={{ width: "100%", height: "100%", position: "relative" }}>
+    <Stack
+      flex="auto"
+      alignItems="center"
+      justifyContent="center"
+      overflow="hidden"
+      position="relative"
+    >
       <PanelToolbar
         helpContent={helpContent}
         additionalIcons={
@@ -419,7 +425,7 @@ function Plot(props: Props) {
         }
         floating
       />
-      <Flex style={{ width: "100%", height: "100%" }}>
+      <Stack direction="row" flex="auto" width="100%" height="100%">
         <PlotLegend
           paths={yAxisPaths}
           datasets={datasets}
@@ -433,7 +439,7 @@ function Plot(props: Props) {
           showPlotValuesInLegend={showPlotValuesInLegend}
           sidebarWidth={sidebarWidth}
         />
-        <Flex col center style={{ overflow: "hidden" }}>
+        <Stack flex="auto" alignItems="center" justifyContent="center" overflow="hidden">
           {title && <div>{title}</div>}
           <PlotChart
             isSynced={xAxisVal === "timestamp" && isSynced}
@@ -449,9 +455,9 @@ function Plot(props: Props) {
             onClick={onClick}
             defaultView={defaultView}
           />
-        </Flex>
-      </Flex>
-    </Flex>
+        </Stack>
+      </Stack>
+    </Stack>
   );
 }
 

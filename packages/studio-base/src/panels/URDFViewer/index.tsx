@@ -3,7 +3,7 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 import { ComboBox, IDropdownOption, Toggle } from "@fluentui/react";
-import { Stack } from "@mui/material";
+import { Box, Stack } from "@mui/material";
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { useResizeDetector } from "react-resize-detector";
 
@@ -16,7 +16,6 @@ import {
 } from "@foxglove/regl-worldview";
 import * as PanelAPI from "@foxglove/studio-base/PanelAPI";
 import EmptyState from "@foxglove/studio-base/components/EmptyState";
-import Flex from "@foxglove/studio-base/components/Flex";
 import Panel from "@foxglove/studio-base/components/Panel";
 import PanelToolbar from "@foxglove/studio-base/components/PanelToolbar";
 import { useAssets } from "@foxglove/studio-base/context/AssetsContext";
@@ -202,7 +201,7 @@ function URDFViewer({ config, saveConfig }: Props) {
   }, [assets, robotDescriptionAsset]);
 
   return (
-    <Flex col clip>
+    <Stack flex="auto" overflow="hidden">
       <PanelToolbar helpContent={helpContent}>
         <Stack direction="row" flexGrow={1} alignItems="baseline">
           <Toggle
@@ -237,13 +236,13 @@ function URDFViewer({ config, saveConfig }: Props) {
         {model == undefined ? (
           <EmptyState>Drag and drop a URDF file to visualize it.</EmptyState>
         ) : (
-          <Flex row clip>
-            <div ref={resizeRef} style={{ flex: "1 1 auto", position: "relative" }}>
-              <div style={{ position: "absolute", inset: 0 }}>
+          <Box display="flex" flex="auto" overflow="hidden">
+            <Box ref={resizeRef} flex="auto" position="relative">
+              <Box position="absolute" sx={{ inset: 0 }}>
                 <CameraListener cameraStore={cameraStore} shiftKeys={true}>
                   <canvas ref={(el) => setCanvas(el)} width={width} height={height} />
                 </CameraListener>
-              </div>
+              </Box>
               <OverlayControls
                 assetOptions={assetOptions}
                 selectedAssetId={selectedAssetId}
@@ -263,7 +262,7 @@ function URDFViewer({ config, saveConfig }: Props) {
                   setCameraState(newState);
                 }}
               />
-            </div>
+            </Box>
             {useCustomJointValues && model && (
               <JointValueSliders
                 model={model}
@@ -271,10 +270,10 @@ function URDFViewer({ config, saveConfig }: Props) {
                 onChange={setCustomJointValues}
               />
             )}
-          </Flex>
+          </Box>
         )}
       </Stack>
-    </Flex>
+    </Stack>
   );
 }
 

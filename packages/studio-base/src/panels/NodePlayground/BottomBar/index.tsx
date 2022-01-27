@@ -10,12 +10,13 @@
 //   This source code is licensed under the Apache License, Version 2.0,
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
+
 import { useTheme } from "@fluentui/react";
+import { Box, Stack } from "@mui/material";
 import { useState, useRef, useEffect, ReactElement } from "react";
 import styled from "styled-components";
 
 import Button from "@foxglove/studio-base/components/Button";
-import Flex from "@foxglove/studio-base/components/Flex";
 import { useUserNodeState } from "@foxglove/studio-base/context/UserNodeStateContext";
 import DiagnosticsSection from "@foxglove/studio-base/panels/NodePlayground/BottomBar/DiagnosticsSection";
 import LogsSection from "@foxglove/studio-base/panels/NodePlayground/BottomBar/LogsSection";
@@ -73,19 +74,14 @@ const BottomBar = ({ nodeId, isSaved, save, diagnostics, logs }: Props): ReactEl
   }, [autoScroll, logs]);
 
   return (
-    <Flex col style={{ backgroundColor: colors.DARK1, position: "relative" }}>
-      <Flex
-        row
-        start
-        style={{
-          padding: 5,
-          bottom: 0,
-        }}
-      >
-        <Flex
-          center
-          style={{ flexGrow: 0, color: colors.DARK9 }}
-          dataTest="np-errors"
+    <Stack flex="auto" bgcolor={colors.DARK1} position="relative">
+      <Stack direction="row" flex="auto" alignItems="flex-start" padding={0.625} bottom={0}>
+        <Stack
+          direction="row"
+          alignItems="center"
+          justifyContent="center"
+          color={colors.DARK9}
+          data-test="np-errors"
           onClick={() => {
             if (bottomBarDisplay !== "diagnostics") {
               setBottomBarDisplay("diagnostics");
@@ -99,11 +95,13 @@ const BottomBar = ({ nodeId, isSaved, save, diagnostics, logs }: Props): ReactEl
             numItems={diagnostics.length}
             isOpen={bottomBarDisplay === "diagnostics"}
           />
-        </Flex>
-        <Flex
-          center
-          style={{ flexGrow: 0, color: colors.DARK9 }}
-          dataTest="np-logs"
+        </Stack>
+        <Stack
+          direction="row"
+          alignItems="center"
+          justifyContent="center"
+          color={colors.DARK9}
+          data-test="np-logs"
           onClick={() => {
             if (bottomBarDisplay !== "logs") {
               setBottomBarDisplay("logs");
@@ -113,7 +111,7 @@ const BottomBar = ({ nodeId, isSaved, save, diagnostics, logs }: Props): ReactEl
           }}
         >
           <HeaderItem text="Logs" numItems={logs.length} isOpen={bottomBarDisplay === "logs"} />
-        </Flex>
+        </Stack>
         <Button
           style={{ padding: "2px 4px" }}
           primary={!isSaved}
@@ -128,8 +126,8 @@ const BottomBar = ({ nodeId, isSaved, save, diagnostics, logs }: Props): ReactEl
         >
           {isSaved ? "saved" : "save"}
         </Button>
-      </Flex>
-      <div
+      </Stack>
+      <Box
         ref={scrollContainer}
         onScroll={({ currentTarget }) => {
           const scrolledUp =
@@ -140,7 +138,7 @@ const BottomBar = ({ nodeId, isSaved, save, diagnostics, logs }: Props): ReactEl
             setAutoScroll(true);
           }
         }}
-        style={{
+        sx={{
           overflowY: bottomBarDisplay !== "closed" ? "scroll" : "auto",
           height: bottomBarDisplay !== "closed" ? 150 : 0,
           color: colors.DARK9,
@@ -150,8 +148,8 @@ const BottomBar = ({ nodeId, isSaved, save, diagnostics, logs }: Props): ReactEl
         {bottomBarDisplay === "logs" && (
           <LogsSection nodeId={nodeId} logs={logs} clearLogs={clearUserNodeLogs} />
         )}
-      </div>
-    </Flex>
+      </Box>
+    </Stack>
   );
 };
 

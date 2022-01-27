@@ -11,7 +11,7 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import Flex from "@foxglove/studio-base/components/Flex";
+import { Stack } from "@mui/material";
 
 import { SLabel, SDescription, SInput } from "./common";
 
@@ -26,7 +26,7 @@ export default function CommonDecaySettings({
   const decayTimeValue = decayTime == undefined ? "" : decayTime;
 
   return (
-    <Flex col>
+    <Stack flex="auto">
       <SLabel>Decay time (seconds)</SLabel>
       <SDescription>When set to 0, only the latest received data will be displayed.</SDescription>
       <SInput
@@ -40,6 +40,6 @@ export default function CommonDecaySettings({
           onFieldChange("decayTime", isInputValid ? parseFloat(e.target.value) : undefined);
         }}
       />
-    </Flex>
+    </Stack>
   );
 }

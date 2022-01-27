@@ -11,11 +11,11 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
+import { Stack } from "@mui/material";
 import { last, sumBy } from "lodash";
 import { ReactElement } from "react";
 
 import { subtract as subtractTimes, toSec } from "@foxglove/rostime";
-import Flex from "@foxglove/studio-base/components/Flex";
 import { useMessagePipeline } from "@foxglove/studio-base/components/MessagePipeline";
 import Panel from "@foxglove/studio-base/components/Panel";
 import PanelToolbar from "@foxglove/studio-base/components/PanelToolbar";
@@ -117,9 +117,16 @@ export function UnconnectedPlaybackPerformance({
   }
 
   return (
-    <Flex col>
+    <Stack flex="auto">
       <PanelToolbar floating helpContent={helpContent} />
-      <Flex col wrap center start style={{ lineHeight: 1, whiteSpace: "nowrap" }}>
+      <Stack
+        flex="auto"
+        flexWrap="wrap"
+        alignItems="flex-start"
+        justifyContent="center"
+        lineHeight={1}
+        whiteSpace="nowrap"
+      >
         <PlaybackPerformanceItem points={perfPoints.current.speed} maximum={1.6} decimalPlaces={2}>
           &times; realtime
         </PlaybackPerformanceItem>
@@ -144,8 +151,8 @@ export function UnconnectedPlaybackPerformance({
         >
           Mbps
         </PlaybackPerformanceItem>
-      </Flex>
-    </Flex>
+      </Stack>
+    </Stack>
   );
 }
 

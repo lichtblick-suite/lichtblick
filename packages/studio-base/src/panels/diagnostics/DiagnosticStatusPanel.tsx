@@ -11,13 +11,12 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { Autocomplete, TextField } from "@mui/material";
+import { Autocomplete, TextField, Stack } from "@mui/material";
 import { sortBy } from "lodash";
 import { useMemo } from "react";
 
 import { useDataSourceInfo } from "@foxglove/studio-base/PanelAPI";
 import EmptyState from "@foxglove/studio-base/components/EmptyState";
-import Flex from "@foxglove/studio-base/components/Flex";
 import Panel from "@foxglove/studio-base/components/Panel";
 import { usePanelContext } from "@foxglove/studio-base/components/PanelContext";
 import PanelToolbar from "@foxglove/studio-base/components/PanelToolbar";
@@ -128,7 +127,7 @@ function DiagnosticStatusPanel(props: Props) {
     autocompleteOptions.length > 0 ? "No matches" : "Waiting for diagnostics...";
 
   return (
-    <Flex scroll scrollX col>
+    <Stack flex="auto" overflow="scroll">
       <PanelToolbar floating helpContent={helpContent} additionalIcons={topicToRenderMenu}>
         <Autocomplete
           disablePortal
@@ -164,7 +163,7 @@ function DiagnosticStatusPanel(props: Props) {
         />
       </PanelToolbar>
       {filteredDiagnostics != undefined && filteredDiagnostics.length > 0 ? (
-        <Flex col scroll>
+        <Stack flex="auto" sx={{ overflowY: "auto" }}>
           {sortBy(filteredDiagnostics, ({ status }) => status.name.toLowerCase()).map((item) => (
             <DiagnosticStatus
               key={item.id}
@@ -179,7 +178,7 @@ function DiagnosticStatusPanel(props: Props) {
               collapsedSections={collapsedSections}
             />
           ))}
-        </Flex>
+        </Stack>
       ) : selectedDisplayName ? (
         <EmptyState>
           Waiting for diagnostics from <code>{selectedDisplayName}</code>
@@ -187,7 +186,7 @@ function DiagnosticStatusPanel(props: Props) {
       ) : (
         <EmptyState>No diagnostic node selected</EmptyState>
       )}
-    </Flex>
+    </Stack>
   );
 }
 

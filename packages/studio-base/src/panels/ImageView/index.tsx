@@ -28,7 +28,6 @@ import * as PanelAPI from "@foxglove/studio-base/PanelAPI";
 import Autocomplete from "@foxglove/studio-base/components/Autocomplete";
 import Dropdown from "@foxglove/studio-base/components/Dropdown";
 import DropdownItem from "@foxglove/studio-base/components/Dropdown/DropdownItem";
-import Flex from "@foxglove/studio-base/components/Flex";
 import Icon from "@foxglove/studio-base/components/Icon";
 import { LegacyButton } from "@foxglove/studio-base/components/LegacyStyledComponents";
 import { Item, SubMenu } from "@foxglove/studio-base/components/Menu";
@@ -93,9 +92,6 @@ type Props = {
 };
 
 const useStyles = makeStyles(() => ({
-  root: {
-    position: "relative",
-  },
   controls: {
     display: "flex",
     flexWrap: "wrap",
@@ -643,9 +639,9 @@ function ImageView(props: Props) {
   const showEmptyState = !imageMessage || (shouldSynchronize && !synchronizedMessages);
 
   return (
-    <Flex col clip className={classes.root}>
+    <Stack flex="auto" overflow="hidden" position="relative">
       {toolbar}
-      <Stack sx={{ width: "100%", height: "100%" }}>
+      <Stack width="100%" height="100%">
         {/* Always render the ImageCanvas because it's expensive to unmount and start up. */}
         {imageMessageToRender && (
           <ImageCanvas
@@ -672,7 +668,7 @@ function ImageView(props: Props) {
         {!showEmptyState && renderBottomBar()}
       </Stack>
       <Toolbar pixelData={activePixelData} />
-    </Flex>
+    </Stack>
   );
 }
 

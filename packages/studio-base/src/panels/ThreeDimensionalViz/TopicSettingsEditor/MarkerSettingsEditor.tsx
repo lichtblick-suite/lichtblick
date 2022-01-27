@@ -11,9 +11,10 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
+import { Stack } from "@mui/material";
+
 import { Color } from "@foxglove/regl-worldview";
 import ColorPicker from "@foxglove/studio-base/components/ColorPicker";
-import Flex from "@foxglove/studio-base/components/Flex";
 import { Marker, MarkerArray } from "@foxglove/studio-base/types/Messages";
 
 import { TopicSettingsEditorProps } from ".";
@@ -28,7 +29,7 @@ export default function MarkerSettingsEditor(
 ): JSX.Element {
   const { settings = {}, onFieldChange } = props;
   return (
-    <Flex col>
+    <Stack flex="auto">
       <SLabel>Color</SLabel>
       <SDescription>
         Overrides <code>color</code>/<code>colors</code> for all markers on this topic.
@@ -37,7 +38,7 @@ export default function MarkerSettingsEditor(
         color={settings.overrideColor}
         onChange={(newColor) => onFieldChange("overrideColor", newColor)}
       />
-    </Flex>
+    </Stack>
   );
 }
 

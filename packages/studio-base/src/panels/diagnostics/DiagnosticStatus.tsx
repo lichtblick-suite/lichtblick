@@ -16,13 +16,13 @@ import ChartLineVariantIcon from "@mdi/svg/svg/chart-line-variant.svg";
 import DotsHorizontalIcon from "@mdi/svg/svg/dots-horizontal.svg";
 import ChevronDownIcon from "@mdi/svg/svg/unfold-less-horizontal.svg";
 import ChevronUpIcon from "@mdi/svg/svg/unfold-more-horizontal.svg";
+import { Stack } from "@mui/material";
 import cx from "classnames";
 import { clamp } from "lodash";
 import { ReactElement, useCallback, useEffect, useRef, useState } from "react";
 import { createSelector } from "reselect";
 import sanitizeHtml from "sanitize-html";
 
-import Flex from "@foxglove/studio-base/components/Flex";
 import Icon from "@foxglove/studio-base/components/Icon";
 import Tooltip from "@foxglove/studio-base/components/Tooltip";
 import { openSiblingPlotPanel } from "@foxglove/studio-base/panels/Plot";
@@ -434,7 +434,7 @@ export default function DiagnosticStatus(props: Props): JSX.Element {
           </tr>
           <tr className={cx(classes.interactiveRow, statusClass)}>
             <td colSpan={2}>
-              <Flex style={{ justifyContent: "space-between" }}>
+              <Stack direction="row" flex="auto" justifyContent="space-between">
                 <div>
                   {info.status.message}{" "}
                   <Icon
@@ -474,7 +474,7 @@ export default function DiagnosticStatus(props: Props): JSX.Element {
                     </Icon>
                   </div>
                 )}
-              </Flex>
+              </Stack>
             </td>
           </tr>
           {renderKeyValueSections()}

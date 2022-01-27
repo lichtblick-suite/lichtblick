@@ -11,9 +11,10 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
+import { Stack } from "@mui/material";
+
 import { Color } from "@foxglove/regl-worldview";
 import ColorPicker from "@foxglove/studio-base/components/ColorPicker";
-import Flex from "@foxglove/studio-base/components/Flex";
 import { LaserScan } from "@foxglove/studio-base/types/Messages";
 
 import CommonDecaySettings from "./CommonDecaySettings";
@@ -34,7 +35,7 @@ export default function LaserScanSettingsEditor(
   const { settings, onFieldChange } = props;
 
   return (
-    <Flex col>
+    <Stack flex="auto">
       <CommonPointSettings
         settings={settings}
         defaultPointSize={4}
@@ -48,6 +49,6 @@ export default function LaserScanSettingsEditor(
         color={settings.overrideColor}
         onChange={(newColor) => onFieldChange("overrideColor", newColor)}
       />
-    </Flex>
+    </Stack>
   );
 }

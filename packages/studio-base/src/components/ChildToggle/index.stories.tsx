@@ -13,17 +13,20 @@
 
 import MinusCircleIcon from "@mdi/svg/svg/minus-circle.svg";
 import PlusCircleIcon from "@mdi/svg/svg/plus-circle.svg";
+import { Box, Stack } from "@mui/material";
 import { storiesOf } from "@storybook/react";
 import { ReactNode, useEffect, useState } from "react";
 
 import ChildToggle, { ChildToggleContainsOpen } from "@foxglove/studio-base/components/ChildToggle";
-import Flex from "@foxglove/studio-base/components/Flex";
 import Icon from "@foxglove/studio-base/components/Icon";
 
+const MARGIN = 6.25;
+
 const Block = (props: { children: ReactNode }) => (
-  <div style={{ width: 50, backgroundColor: "red" }}>{props.children}</div>
+  <Box width={50} bgcolor="red">
+    {props.children}
+  </Box>
 );
-const MARGIN = 50;
 
 function ChildToggleStory() {
   const [isOpen, setIsOpen] = useState(true);
@@ -31,45 +34,38 @@ function ChildToggleStory() {
   const [containsOpen1, setContainsOpen1] = useState(false);
   const [containsOpen2, setContainsOpen2] = useState(false);
   return (
-    <Flex
-      col
-      center
-      style={{
-        position: "relative",
-        /* shouldn't affect popup position */
-      }}
-    >
-      <div style={{ margin: MARGIN, border: "1px solid gray" }}>
+    <Stack flex="auto" alignItems="center" justifyContent="center" position="relative">
+      <Box margin={MARGIN} border="1px solid gray">
         <ChildToggle position="right" onToggle={setIsOpen} isOpen={isOpen}>
           <Icon>{icon}</Icon>
           <Block>this opens right-aligned of the icon</Block>
         </ChildToggle>
-      </div>
-      <div style={{ marginTop: 60, marginBottom: 10, border: "1px solid gray" }}>
+      </Box>
+      <Box marginTop={7.5} marginBottom={1.25} border="1px solid gray">
         <ChildToggle position="above" onToggle={setIsOpen} isOpen={isOpen}>
           <Icon>{icon}</Icon>
           <Block>this opens above the icon</Block>
         </ChildToggle>
-      </div>
-      <div style={{ margin: MARGIN, border: "1px solid gray" }}>
+      </Box>
+      <Box margin={MARGIN} border="1px solid gray">
         <ChildToggle position="below" onToggle={setIsOpen} isOpen={isOpen}>
           <Icon>{icon}</Icon>
           <Block>this opens below the icon</Block>
         </ChildToggle>
-      </div>
-      <div style={{ margin: MARGIN, border: "1px solid gray" }}>
+      </Box>
+      <Box margin={MARGIN} border="1px solid gray">
         <ChildToggle position="bottom-left" onToggle={setIsOpen} isOpen={isOpen}>
           <Icon>{icon}</Icon>
           <Block>this opens below and to the left of the icon</Block>
         </ChildToggle>
-      </div>
-      <div style={{ margin: MARGIN, border: "1px solid gray" }}>
+      </Box>
+      <Box margin={MARGIN} border="1px solid gray">
         <ChildToggle position="left" onToggle={setIsOpen} isOpen={isOpen}>
           <Icon>{icon}</Icon>
           <Block>this opens left-aligned of the icon</Block>
         </ChildToggle>
-      </div>
-      <div style={{ margin: MARGIN, border: "1px solid gray" }}>
+      </Box>
+      <Box margin={MARGIN} border="1px solid gray">
         <ChildToggleContainsOpen onChange={setContainsOpen1}>
           <div>
             Contains an open child toggle: {JSON.stringify(containsOpen1)}
@@ -79,8 +75,8 @@ function ChildToggleStory() {
             </ChildToggle>
           </div>
         </ChildToggleContainsOpen>
-      </div>
-      <div style={{ margin: MARGIN, border: "1px solid gray" }}>
+      </Box>
+      <Box margin={MARGIN} border="1px solid gray">
         <ChildToggleContainsOpen onChange={setContainsOpen2}>
           <div>
             Contains an open child toggle: {JSON.stringify(containsOpen2)}
@@ -90,8 +86,8 @@ function ChildToggleStory() {
             </ChildToggle>
           </div>
         </ChildToggleContainsOpen>
-      </div>
-    </Flex>
+      </Box>
+    </Stack>
   );
 }
 
@@ -99,12 +95,12 @@ function UncontrolledChildToggleStory({ defaultIsOpen }: { defaultIsOpen?: boole
   const [isOpen, setIsOpen] = useState(defaultIsOpen ?? false);
   const icon = isOpen ? <MinusCircleIcon /> : <PlusCircleIcon />;
   return (
-    <div style={{ margin: MARGIN, border: "1px solid gray" }}>
+    <Box margin={MARGIN} border="1px solid gray">
       <ChildToggle position="right" onToggle={setIsOpen} defaultIsOpen={defaultIsOpen}>
         <Icon>{icon}</Icon>
         <Block>this opens right-aligned of the icon</Block>
       </ChildToggle>
-    </div>
+    </Box>
   );
 }
 storiesOf("components/ChildToggle", module)

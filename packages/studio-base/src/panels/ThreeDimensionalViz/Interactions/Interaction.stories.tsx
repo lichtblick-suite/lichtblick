@@ -11,10 +11,10 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
+import { Stack } from "@mui/material";
 import { storiesOf } from "@storybook/react";
 import styled from "styled-components";
 
-import Flex from "@foxglove/studio-base/components/Flex";
 import MockPanelContextProvider from "@foxglove/studio-base/components/MockPanelContextProvider";
 import useGlobalVariables from "@foxglove/studio-base/hooks/useGlobalVariables";
 import { decodeMarker } from "@foxglove/studio-base/panels/ThreeDimensionalViz/commands/PointClouds/decodeMarker";
@@ -33,6 +33,7 @@ const SWrapper = styled.div`
   flex-wrap: wrap;
   height: 100%;
 `;
+
 const SP = styled.p`
   color: ${({ theme }) => theme.semanticColors.disabledText};
 `;
@@ -175,13 +176,13 @@ function PanelSetupWithData({
           }}
         >
           <p>{title}</p>
-          <Flex>
-            <Flex col style={{ flex: 1 }}>
+          <Stack direction="row" flex="auto">
+            <Stack flex={1}>
               {showGlobalVariables && <GlobalVariablesDisplay />}
               {showLinkedGlobalVariables && <LinkedGlobalVariablesDisplay />}
-            </Flex>
+            </Stack>
             {children}
-          </Flex>
+          </Stack>
         </div>
       </MockPanelContextProvider>
     </PanelSetup>

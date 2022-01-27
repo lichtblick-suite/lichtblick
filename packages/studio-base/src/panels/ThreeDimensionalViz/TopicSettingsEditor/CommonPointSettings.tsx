@@ -11,11 +11,11 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
+import { Stack } from "@mui/material";
 import { upperFirst } from "lodash";
 
 import DropdownItem from "@foxglove/studio-base/components/Dropdown/DropdownItem";
 import Dropdown from "@foxglove/studio-base/components/Dropdown/index";
-import Flex from "@foxglove/studio-base/components/Flex";
 
 import { SLabel, SInput } from "./common";
 
@@ -44,7 +44,7 @@ export default function CommonPointSettings({
   ));
 
   return (
-    <Flex col>
+    <Stack flex="auto">
       <SLabel>Point size</SLabel>
       <SInput
         data-test="point-size-input"
@@ -73,6 +73,6 @@ export default function CommonPointSettings({
       >
         {pointShapeOpts}
       </Dropdown>
-    </Flex>
+    </Stack>
   );
 }

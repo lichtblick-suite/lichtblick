@@ -11,9 +11,10 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
+import { Stack } from "@mui/material";
+
 import { Color } from "@foxglove/regl-worldview";
 import ColorPicker from "@foxglove/studio-base/components/ColorPicker";
-import Flex from "@foxglove/studio-base/components/Flex";
 
 import { TopicSettingsEditorProps } from ".";
 import { SLabel, SDescription, SInput } from "./common";
@@ -34,7 +35,7 @@ export default function GridSettingsEditor(
   const { settings = {}, onFieldChange } = props;
 
   return (
-    <Flex col>
+    <Stack flex="auto">
       <SLabel>Color</SLabel>
       <SDescription>Set the grid color.</SDescription>
       <ColorPicker
@@ -101,6 +102,6 @@ export default function GridSettingsEditor(
           onFieldChange("heightOffset", isInputValid ? parseFloat(e.target.value) : undefined);
         }}
       />
-    </Flex>
+    </Stack>
   );
 }

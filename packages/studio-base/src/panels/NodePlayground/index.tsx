@@ -20,7 +20,6 @@ import styled from "styled-components";
 import { v4 as uuidv4 } from "uuid";
 
 import Button from "@foxglove/studio-base/components/Button";
-import Flex from "@foxglove/studio-base/components/Flex";
 import Icon from "@foxglove/studio-base/components/Icon";
 import { LegacyInput } from "@foxglove/studio-base/components/LegacyStyledComponents";
 import Panel from "@foxglove/studio-base/components/Panel";
@@ -266,14 +265,7 @@ function NodePlayground(props: Props) {
           addNewNode={addNewNode}
         />
         <Stack flexGrow={1} height="100%" overflow="hidden">
-          <Flex
-            start
-            style={{
-              flexGrow: 0,
-              backgroundColor: colors.DARK1,
-              alignItems: "center",
-            }}
-          >
+          <Stack direction="row" alignItems="center" bgcolor={colors.DARK1}>
             {scriptBackStack.length > 1 && (
               <Icon
                 size="large"
@@ -314,7 +306,7 @@ function NodePlayground(props: Props) {
             >
               <PlusIcon />
             </Icon>
-          </Flex>
+          </Stack>
 
           <Stack flexGrow={1} overflow="hidden ">
             {selectedNodeId == undefined && <WelcomeScreen addNewNode={addNewNode} />}
@@ -329,9 +321,16 @@ function NodePlayground(props: Props) {
             >
               <Suspense
                 fallback={
-                  <Flex center style={{ width: "100%", height: "100%" }}>
+                  <Stack
+                    direction="row"
+                    flex="auto"
+                    alignItems="center"
+                    justifyContent="center"
+                    width="100%"
+                    height="100%"
+                  >
                     <Spinner size={SpinnerSize.large} />
-                  </Flex>
+                  </Stack>
                 }
               >
                 {editorForStorybook ?? (

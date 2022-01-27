@@ -12,8 +12,8 @@
 //   You may not use this file except in compliance with the License.
 
 import { Link, Text, TextField } from "@fluentui/react";
+import { Stack } from "@mui/material";
 
-import Flex from "@foxglove/studio-base/components/Flex";
 import isDesktopApp from "@foxglove/studio-base/util/isDesktopApp";
 
 import { TopicSettingsEditorProps } from ".";
@@ -36,7 +36,7 @@ export default function UrdfSettingsEditor(
     : "http(s) URL pointing to a Unified Robot Description Format (URDF) XML file";
 
   return (
-    <Flex col>
+    <Stack flex="auto">
       <TextField
         label={descriptionString}
         value={settings.urdfUrl ?? ""}
@@ -53,6 +53,6 @@ export default function UrdfSettingsEditor(
           .
         </Text>
       )}
-    </Flex>
+    </Stack>
   );
 }
