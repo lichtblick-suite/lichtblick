@@ -75,11 +75,14 @@ export async function parseDaeToGlb(buffer: ArrayBuffer): Promise<GlbModel> {
 function patchGlb(glb: GlbModel): void {
   // Change all the materials to a consistent shade of blue
   for (const material of glb.json.materials ?? []) {
-    material.pbrMetallicRoughness = {
+    material.pbrMetallicRoughness ??= {
       baseColorFactor: DEFAULT_COLOR,
       metallicFactor: 0,
       roughnessFactor: 1,
     };
+    if (material.pbrMetallicRoughness.baseColorFactor?.[3] === 0) {
+      material.pbrMetallicRoughness.baseColorFactor[3] = 1;
+    }
   }
 
   for (const mesh of glb.json.meshes ?? []) {

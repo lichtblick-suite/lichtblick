@@ -12,7 +12,7 @@ type Vector3 = [number, number, number];
 type StlData = {
   position: Float32Array;
   normal: Float32Array;
-  indices: Uint16Array;
+  indices: Uint32Array;
   minPosition: Vector3;
   maxPosition: Vector3;
   minNormal: Vector3;
@@ -50,7 +50,7 @@ export function parseStlToGlb(buffer: ArrayBuffer): GlbModel | undefined {
       },
       {
         bufferView: 2,
-        componentType: WebGLRenderingContext.UNSIGNED_SHORT,
+        componentType: WebGLRenderingContext.UNSIGNED_INT,
         count: stlData.indices.length,
         type: "SCALAR",
         min: [0],
@@ -132,19 +132,18 @@ function parseBinary(data: ArrayBuffer): StlData | undefined {
   const header = textDecoder.decode(data.slice(0, 80));
   const scale = getScale(header);
 
-  const reader = new DataView(data);
-  const maxFaces = reader.getUint32(80, true);
-  const faceCount = Math.min(Math.floor((data.byteLength - 84) / 50), maxFaces);
-  const vertexCount = faceCount * 3;
-  const floatCount = vertexCount * 3;
-
   const dataOffset = 84;
   const faceLength = 12 * 4 + 2;
+  const reader = new DataView(data);
+  const maxFaces = reader.getUint32(80, true);
+  const faceCount = Math.min(Math.floor((data.byteLength - dataOffset) / faceLength), maxFaces);
+  const vertexCount = faceCount * 3;
+  const floatCount = vertexCount * 3;
 
   const stlData: StlData = {
     position: new Float32Array(floatCount),
     normal: new Float32Array(floatCount),
-    indices: new Uint16Array(vertexCount),
+    indices: new Uint32Array(vertexCount),
     minPosition: [Infinity, Infinity, Infinity],
     maxPosition: [-Infinity, -Infinity, -Infinity],
     minNormal: [Infinity, Infinity, Infinity],
@@ -252,7 +251,7 @@ function parseAscii(data: string): StlData | undefined {
   return {
     position: new Float32Array(vertices),
     normal: new Float32Array(normals),
-    indices: new Uint16Array(indices),
+    indices: new Uint32Array(indices),
     minPosition,
     maxPosition,
     minNormal,
