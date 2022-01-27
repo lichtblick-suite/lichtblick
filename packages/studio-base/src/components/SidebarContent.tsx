@@ -60,10 +60,10 @@ export function SidebarContent({
 
   return (
     <Stack
-      flex={1}
+      flex="auto"
       spacing={1}
       sx={{
-        maxHeight: "100%",
+        height: "100%",
         overflow: "auto",
       }}
     >
