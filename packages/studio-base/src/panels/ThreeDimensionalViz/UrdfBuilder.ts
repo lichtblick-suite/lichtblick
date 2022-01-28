@@ -343,7 +343,10 @@ export default class UrdfBuilder extends EventEmitter<EventTypes> implements Mar
       color: getColor(visual, robot),
       frame_locked: true,
       mesh_resource: mesh.filename,
-      mesh_use_embedded_materials: true,
+      mesh_use_embedded_materials:
+        visual.material == undefined ||
+        // RViz ignores the URDF-specified material when the Collada mesh has an embedded material
+        (visual.geometry.geometryType === "mesh" && visual.geometry.filename.endsWith(".dae")),
     };
     return marker;
   }

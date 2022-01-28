@@ -2108,10 +2108,20 @@ endsolid AssimpScene`),
     sizeInBytes: 0,
   };
 
+  const coloredMesh = {
+    ...mesh,
+    message: {
+      ...mesh.message,
+      id: "coloredMesh",
+      mesh_use_embedded_materials: false,
+      pose: { ...mesh.message.pose, position: { x: -1, y: 0, z: 0 } },
+    },
+  };
+
   const fixture = useDelayedFixture({
     datatypes,
     topics,
-    frame: { "/markers": [mesh] },
+    frame: { "/markers": [mesh, coloredMesh] },
     capabilities: [],
     activeData: { currentTime: { sec: 0, nsec: 0 } },
   });

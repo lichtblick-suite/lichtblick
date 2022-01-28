@@ -112,15 +112,19 @@ function MeshMarkers({ markers, loadModelOptions, layerIndex }: MeshMarkerProps)
 
   for (let i = 0; i < markers.length; i++) {
     const marker = markers[i]!;
-    const { mesh_resource, color } = marker;
+    const { mesh_resource, mesh_use_embedded_materials, color } = marker;
     if (!mesh_resource) {
       continue;
     }
     const url = rewritePackageUrl(mesh_resource, { rosPackagePath });
     const alpha = (color?.a ?? 0) > 0 ? color!.a : 1;
 
-    const newMarker = { ...marker, alpha };
-    delete newMarker.color;
+    const newMarker = {
+      ...marker,
+      alpha,
+      overrideColor: mesh_use_embedded_materials ? undefined : color,
+    };
+    delete newMarker.color; // color field is used for hitmap
 
     models.push(
       <GLTFScene
