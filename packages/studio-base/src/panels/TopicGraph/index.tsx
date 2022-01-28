@@ -12,7 +12,7 @@
 //   You may not use this file except in compliance with the License.
 
 import { IconButton, IButtonStyles, useTheme } from "@fluentui/react";
-import { Stack } from "@mui/material";
+import { Paper, Stack } from "@mui/material";
 import Cytoscape from "cytoscape";
 import { useCallback, useMemo, useRef, useState } from "react";
 import textMetrics from "text-metrics";
@@ -373,42 +373,34 @@ function TopicGraph() {
           top: theme.spacing.l2,
           right: theme.spacing.s1,
           zIndex: 101,
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "flex-end",
           // allow mouse events to pass through the empty space in this container element
           pointerEvents: "none",
         }}
       >
-        <Stack
-          flexGrow={0}
-          flexShrink={0}
-          sx={{
-            backgroundColor: theme.semanticColors.buttonBackgroundHovered,
-            borderRadius: theme.effects.roundedCorner2,
-            pointerEvents: "auto",
-          }}
-        >
-          <IconButton
-            elementRef={fitToPageButton.ref}
-            onClick={onZoomFit}
-            iconProps={{ iconName: "FitToPage" }}
-            styles={iconButtonStyles}
-          />
-          <IconButton
-            elementRef={orientationButton.ref}
-            onClick={toggleOrientation}
-            iconProps={{ iconName: lrOrientation ? "ArrowLeftRight" : "ArrowUpDown" }}
-            styles={iconButtonStyles}
-          />
-          <IconButton
-            checked={showServices}
-            elementRef={servicesButton.ref}
-            iconProps={{ iconName: "Service" }}
-            onClick={toggleShowServices}
-            styles={iconButtonStyles}
-          />
-        </Stack>
+        <Paper square={false} elevation={4} sx={{ pointerEvents: "auto" }}>
+          <Stack flex="0 0" sx={{ pointerEvents: "auto" }}>
+            <IconButton
+              elementRef={fitToPageButton.ref}
+              onClick={onZoomFit}
+              iconProps={{ iconName: "FitToPage" }}
+              styles={iconButtonStyles}
+            />
+            <IconButton
+              elementRef={orientationButton.ref}
+              onClick={toggleOrientation}
+              iconProps={{ iconName: lrOrientation ? "ArrowLeftRight" : "ArrowUpDown" }}
+              styles={iconButtonStyles}
+            />
+            <IconButton
+              checked={showServices}
+              elementRef={servicesButton.ref}
+              iconProps={{ iconName: "Service" }}
+              onClick={toggleShowServices}
+              styles={iconButtonStyles}
+            />
+          </Stack>
+        </Paper>
+
         <ExpandingToolbar
           checked={topicVisibility !== "none"}
           dataTest="set-topic-visibility"

@@ -1563,7 +1563,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@babel/runtime@npm:^7.0.0, @babel/runtime@npm:^7.1.2, @babel/runtime@npm:^7.10.1, @babel/runtime@npm:^7.10.2, @babel/runtime@npm:^7.11.1, @babel/runtime@npm:^7.12.5, @babel/runtime@npm:^7.13.10, @babel/runtime@npm:^7.14.0, @babel/runtime@npm:^7.14.8, @babel/runtime@npm:^7.16.3, @babel/runtime@npm:^7.16.5, @babel/runtime@npm:^7.3.1, @babel/runtime@npm:^7.3.4, @babel/runtime@npm:^7.5.0, @babel/runtime@npm:^7.5.5, @babel/runtime@npm:^7.7.2, @babel/runtime@npm:^7.7.6, @babel/runtime@npm:^7.8.3, @babel/runtime@npm:^7.8.4, @babel/runtime@npm:^7.8.7, @babel/runtime@npm:^7.9.2":
+"@babel/runtime@npm:^7.0.0, @babel/runtime@npm:^7.1.2, @babel/runtime@npm:^7.10.1, @babel/runtime@npm:^7.10.2, @babel/runtime@npm:^7.11.1, @babel/runtime@npm:^7.12.5, @babel/runtime@npm:^7.13.10, @babel/runtime@npm:^7.14.0, @babel/runtime@npm:^7.14.8, @babel/runtime@npm:^7.16.3, @babel/runtime@npm:^7.16.5, @babel/runtime@npm:^7.16.7, @babel/runtime@npm:^7.3.1, @babel/runtime@npm:^7.3.4, @babel/runtime@npm:^7.5.0, @babel/runtime@npm:^7.5.5, @babel/runtime@npm:^7.7.2, @babel/runtime@npm:^7.7.6, @babel/runtime@npm:^7.8.3, @babel/runtime@npm:^7.8.4, @babel/runtime@npm:^7.8.7, @babel/runtime@npm:^7.9.2":
   version: 7.16.7
   resolution: "@babel/runtime@npm:7.16.7"
   dependencies:
@@ -2512,7 +2512,7 @@ __metadata:
     "@foxglove/velodyne-cloud": 1.0.0
     "@foxglove/ws-protocol": 0.0.8
     "@mdi/svg": 6.5.95
-    "@mui/icons-material": 5.2.5
+    "@mui/icons-material": 5.3.1
     "@mui/material": 5.2.7
     "@mui/styles": 5.2.3
     "@sentry/core": 6.16.1
@@ -2593,6 +2593,7 @@ __metadata:
     hammerjs: 2.0.8
     history: 5.2.0
     idb-keyval: 6.0.3
+    immer: 9.0.12
     intervals-fn: 3.0.3
     leaflet: 1.7.1
     lodash: 4.17.21
@@ -2654,6 +2655,7 @@ __metadata:
     urdf-loader: 0.10.2
     url-search-params: 1.1.0
     use-debounce: 7.0.1
+    use-immer: 0.6.0
     use-pan-and-zoom: 0.6.2
     uuid: 8.3.2
     wasm-lz4: 2.0.0
@@ -3152,19 +3154,19 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@mui/icons-material@npm:5.2.5":
-  version: 5.2.5
-  resolution: "@mui/icons-material@npm:5.2.5"
+"@mui/icons-material@npm:5.3.1":
+  version: 5.3.1
+  resolution: "@mui/icons-material@npm:5.3.1"
   dependencies:
-    "@babel/runtime": ^7.16.3
+    "@babel/runtime": ^7.16.7
   peerDependencies:
     "@mui/material": ^5.0.0
     "@types/react": ^16.8.6 || ^17.0.0
-    react: ^17.0.2
+    react: ^17.0.0
   peerDependenciesMeta:
     "@types/react":
       optional: true
-  checksum: 34fc7d9795f19456e0df47712951651969fe44603884da9b08a5bd8dc2bbaba329a34aa80b0cdbb86bbb0e10907f269b91a197d8ed11481eac4907482205dbcd
+  checksum: b9073a0432734466fa61c0493505e36e8eb663cd58f006590bc8be932c218ff58d666cef20b50d9265afa8ab3579bd35c6a5ca1a158d07d55dc9680d544159cb
   languageName: node
   linkType: hard
 
@@ -14425,6 +14427,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"immer@npm:9.0.12":
+  version: 9.0.12
+  resolution: "immer@npm:9.0.12"
+  checksum: bcbec6d76dac65e49068eb67ece4d407116e62b8cde3126aa89c801e408f5047763ba0aeb62f1938c1aa704bb6612f1d8302bb2a86fa1fc60fcc12d8b25dc895
+  languageName: node
+  linkType: hard
+
 "immutability-helper@npm:^3.1.1":
   version: 3.1.1
   resolution: "immutability-helper@npm:3.1.1"
@@ -24383,6 +24392,16 @@ __metadata:
   peerDependencies:
     react: ">=16.8.0"
   checksum: c5c1c34ccef6c11fe25fecef983a07f5a7260fce77b58f0f648f6ae08693a22a9077b5362b96154896e9ea756e6aaea303eb44550a293456cecb6f15cf87d73b
+  languageName: node
+  linkType: hard
+
+"use-immer@npm:0.6.0":
+  version: 0.6.0
+  resolution: "use-immer@npm:0.6.0"
+  peerDependencies:
+    immer: ">=2.0.0"
+    react: ^16.8.0 || ^17.0.1
+  checksum: 5cb3e2f411cfaf0eeab8cce8919a83fdf82e10b3acfd2d4550d9c6a0afb105aace8c0406131126557a2eab6c4ef8aef87c24a82830b75140ec6b2cdffe818d76
   languageName: node
   linkType: hard
 

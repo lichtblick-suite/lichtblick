@@ -12,7 +12,7 @@
 //   You may not use this file except in compliance with the License.
 
 import { IButtonStyles, IconButton, useTheme } from "@fluentui/react";
-import { Stack } from "@mui/material";
+import { Paper, Stack } from "@mui/material";
 import { sortBy } from "lodash";
 import { memo, useCallback, useMemo, useRef } from "react";
 import shallowequal from "shallowequal";
@@ -197,64 +197,63 @@ const FollowTFControl = memo<Props>(function FollowTFControl(props: Props) {
   const active = useMemo(() => transforms.frames().size > 0, [transforms]);
 
   return (
-    <Stack
-      direction="row"
-      flexGrow={1}
-      alignItems="center"
-      sx={{
-        // see also ExpandingToolbar styles
-        backgroundColor: theme.semanticColors.buttonBackgroundHovered,
-        borderRadius: theme.effects.roundedCorner2,
-        pointerEvents: "auto",
-        color: followTf ? undefined : theme.semanticColors.disabledText,
-        position: "relative",
-      }}
-    >
-      {active && (
-        <Autocomplete
-          ref={autocomplete}
-          items={allNodes}
-          getItemValue={treeNodeToTfId}
-          getItemText={getItemText}
-          selectedItem={selectedItem}
-          placeholder={followTf ?? "(empty)"}
-          onSelect={onSelectFrame}
-          sortWhenFiltering={false}
-          minWidth={0}
-          clearOnFocus
-          autoSize
-          menuStyle={{
-            // bump the menu down to reduce likelihood of it appearing while the mouse is
-            // already over it, which causes onMouseEnter not to be delivered correctly and
-            // breaks selection
-            marginTop: 4,
-          }}
-        />
-      )}
-      {frameListButton.tooltip}
-      {active && (
-        <IconButton
-          elementRef={frameListButton.ref}
-          onClick={openFrameList}
-          iconProps={{ iconName: "MenuDown" }}
-          styles={{
-            ...iconButtonStyles,
-            root: { width: 16 },
-          }}
-        />
-      )}
-      {followButton.tooltip}
-      <IconButton
-        disabled={!active}
-        checked={followMode !== "no-follow"}
-        elementRef={followButton.ref}
-        onClick={toggleFollowMode}
-        iconProps={{
-          iconName: followMode === "follow-orientation" ? "CompassOutline" : "CrosshairsGps",
+    <Paper square={false} elevation={4} sx={{ pointerEvents: "auto" }}>
+      <Stack
+        direction="row"
+        flexGrow={1}
+        alignItems="center"
+        sx={{
+          // see also ExpandingToolbar styles
+          color: followTf ? undefined : theme.semanticColors.disabledText,
+          position: "relative",
         }}
-        styles={iconButtonStyles}
-      />
-    </Stack>
+      >
+        {active && (
+          <Autocomplete
+            ref={autocomplete}
+            items={allNodes}
+            getItemValue={treeNodeToTfId}
+            getItemText={getItemText}
+            selectedItem={selectedItem}
+            placeholder={followTf ?? "(empty)"}
+            onSelect={onSelectFrame}
+            sortWhenFiltering={false}
+            minWidth={0}
+            clearOnFocus
+            autoSize
+            menuStyle={{
+              // bump the menu down to reduce likelihood of it appearing while the mouse is
+              // already over it, which causes onMouseEnter not to be delivered correctly and
+              // breaks selection
+              marginTop: 4,
+            }}
+          />
+        )}
+        {frameListButton.tooltip}
+        {active && (
+          <IconButton
+            elementRef={frameListButton.ref}
+            onClick={openFrameList}
+            iconProps={{ iconName: "MenuDown" }}
+            styles={{
+              ...iconButtonStyles,
+              root: { width: 16 },
+            }}
+          />
+        )}
+        {followButton.tooltip}
+        <IconButton
+          disabled={!active}
+          checked={followMode !== "no-follow"}
+          elementRef={followButton.ref}
+          onClick={toggleFollowMode}
+          iconProps={{
+            iconName: followMode === "follow-orientation" ? "CompassOutline" : "CrosshairsGps",
+          }}
+          styles={iconButtonStyles}
+        />
+      </Stack>
+    </Paper>
   );
 }, arePropsEqual);
 

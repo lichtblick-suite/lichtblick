@@ -44,6 +44,7 @@ import {
   SphereMarker,
 } from "@foxglove/studio-base/types/Messages";
 import { clonePose } from "@foxglove/studio-base/util/Pose";
+import { eulerToQuaternion } from "@foxglove/studio-base/util/geometry";
 import { URDF_TOPIC } from "@foxglove/studio-base/util/globalConstants";
 import sendNotification from "@foxglove/studio-base/util/sendNotification";
 
@@ -52,9 +53,6 @@ import { MarkerProvider, RenderMarkerArgs, TransformLink } from "./types";
 export const DEFAULT_COLOR: Color = { r: 36 / 255, g: 142 / 255, b: 255 / 255, a: 1 };
 
 const TIME_ZERO = { sec: 0, nsec: 0 };
-
-type Vector3 = { x: number; y: number; z: number };
-type Quaternion = { x: number; y: number; z: number; w: number };
 
 const log = Logger.getLogger(__filename);
 
@@ -377,26 +375,6 @@ function getFileFetch(rosPackagePath: string | undefined): (url: string) => Prom
       throw new Error(`Failed to fetch "${url}": ${err}`);
     }
   };
-}
-
-function eulerToQuaternion(rpy: Vector3): Quaternion {
-  const roll = rpy.x;
-  const pitch = rpy.y;
-  const yaw = rpy.z;
-
-  const cy = Math.cos(yaw * 0.5);
-  const sy = Math.sin(yaw * 0.5);
-  const cr = Math.cos(roll * 0.5);
-  const sr = Math.sin(roll * 0.5);
-  const cp = Math.cos(pitch * 0.5);
-  const sp = Math.sin(pitch * 0.5);
-
-  const w = cy * cr * cp + sy * sr * sp;
-  const x = cy * sr * cp - sy * cr * sp;
-  const y = cy * cr * sp + sy * sr * cp;
-  const z = sy * cr * cp - cy * sr * sp;
-
-  return { x, y, z, w };
 }
 
 function getColor(visual: UrdfVisual, robot: UrdfRobot): Color {

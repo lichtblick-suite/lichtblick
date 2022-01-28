@@ -11,52 +11,50 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { Lines, Spheres, Point } from "@foxglove/regl-worldview";
+import { ReactElement } from "react";
 
-type Props = {
-  measurePoints: { start?: Point; end?: Point };
-};
+import { Lines, Spheres } from "@foxglove/regl-worldview";
+import { MeasuringState } from "@foxglove/studio-base/panels/ThreeDimensionalViz/MeasuringTool";
 
-const sphereSize: number = 0.3;
-const lineSize: number = 0.1;
+const SphereSize: number = 0.3;
+const LineSize: number = 0.1;
 
-const defaultSphere = Object.freeze({
-  type: 2,
+const DefaultSphere = {
   action: 0,
-  scale: { x: sphereSize, y: sphereSize, z: 0.1 },
   color: { r: 1, g: 0.2, b: 0, a: 1 },
-});
-const defaultPose = Object.freeze({ orientation: { x: 0, y: 0, z: 0, w: 1 } });
+  scale: { x: SphereSize, y: SphereSize, z: 0.1 },
+  type: 2,
+} as const;
 
-export default function MeasureMarker({ measurePoints: { start, end } }: Props): JSX.Element {
+const DefaultPose = { orientation: { x: 0, y: 0, z: 0, w: 1 } } as const;
+
+export default function MeasureMarker({ measure }: { measure: MeasuringState }): ReactElement {
   const spheres = [];
   const lines = [];
-  if (start) {
-    const startPoint = { ...start };
 
+  if (measure.start) {
     spheres.push({
-      ...defaultSphere,
+      ...DefaultSphere,
       id: "_measure_start",
-      pose: { position: startPoint, ...defaultPose },
+      pose: { position: measure.start, ...DefaultPose },
+    });
+  }
+
+  if (measure.state === "finish") {
+    lines.push({
+      ...DefaultSphere,
+      id: "_measure_line",
+      points: [measure.start, measure.end],
+      pose: { ...DefaultPose, position: { x: 0, y: 0, z: 0 } },
+      scale: { x: LineSize, y: 1, z: 1 },
+      type: 4,
     });
 
-    if (end) {
-      const endPoint = { ...end };
-      lines.push({
-        ...defaultSphere,
-        id: "_measure_line",
-        points: [start, end],
-        pose: { ...defaultPose, position: { x: 0, y: 0, z: 0 } },
-        scale: { x: lineSize, y: 1, z: 1 },
-        type: 4,
-      });
-
-      spheres.push({
-        ...defaultSphere,
-        id: "_measure_end",
-        pose: { position: endPoint, ...defaultPose },
-      });
-    }
+    spheres.push({
+      ...DefaultSphere,
+      id: "_measure_end",
+      pose: { position: measure.end, ...DefaultPose },
+    });
   }
 
   return (

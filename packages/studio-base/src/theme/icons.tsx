@@ -30,7 +30,9 @@ import {
   WeatherSunny20Regular,
 } from "@fluentui/react-icons";
 import * as Icons from "@fluentui/react-icons-mdl2";
+import ArrowCollapseUpIcon from "@mdi/svg/svg/arrow-collapse-up.svg";
 import ArrowCollapseIcon from "@mdi/svg/svg/arrow-collapse.svg";
+import ArrowExpandUpIcon from "@mdi/svg/svg/arrow-expand-up.svg";
 import ArrowLeftRightIcon from "@mdi/svg/svg/arrow-left-right.svg";
 import ArrowLeftIcon from "@mdi/svg/svg/arrow-left.svg";
 import ArrowRightIcon from "@mdi/svg/svg/arrow-right.svg";
@@ -51,6 +53,7 @@ import HelpCircleIcon from "@mdi/svg/svg/help-circle-outline.svg";
 import HelpCircleFilledIcon from "@mdi/svg/svg/help-circle.svg";
 import LayersIcon from "@mdi/svg/svg/layers.svg";
 import SearchIcon from "@mdi/svg/svg/magnify.svg";
+import MapMarkerIcon from "@mdi/svg/svg/map-marker.svg";
 import MenuDownIcon from "@mdi/svg/svg/menu-down.svg";
 import MenuLeftIcon from "@mdi/svg/svg/menu-left.svg";
 import CompassOutlineIcon from "@mdi/svg/svg/navigation.svg";
@@ -78,7 +81,9 @@ const icons: {
   Add: <Icons.AddIcon />,
   AddIn: <Icons.AddInIcon />,
   ArrowCollapse: <ArrowCollapseIcon />,
+  ArrowCollapseUp: <ArrowCollapseUpIcon />,
   ArrowDown: <ArrowDownIcon />,
+  ArrowExpandUp: <ArrowExpandUpIcon />,
   ArrowLeft: <ArrowLeftIcon />,
   ArrowLeftRight: <ArrowLeftRightIcon />,
   ArrowRight: <ArrowRightIcon />,
@@ -141,6 +146,7 @@ const icons: {
   LocationDot: <Icons.LocationDotIcon />,
   Loop: <LoopIcon strokeWidth={1.375} />,
   LoopFilled: <LoopIcon strokeWidth={1.875} />,
+  MapMarker: <MapMarkerIcon />,
   MenuDown: <MenuDownIcon />,
   MenuLeft: <MenuLeftIcon />,
   More: <Icons.MoreIcon />,

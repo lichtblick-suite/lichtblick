@@ -464,10 +464,11 @@ export default class Ros1Player implements Player {
         }
         msgdef = rosDatatypesToMessageDefinition(datatypes, dataType);
       } catch (error) {
+        log.debug(error);
         this._addProblem(msgdefProblemId, {
           severity: "warn",
           message: `Unknown message definition for "${topic}"`,
-          tip: `Try subscribing to the topic "${topic} before publishing to it`,
+          tip: `Try subscribing to the topic "${topic}" before publishing to it`,
         });
         continue;
       }

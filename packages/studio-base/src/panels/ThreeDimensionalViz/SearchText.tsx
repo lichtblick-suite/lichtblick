@@ -12,7 +12,7 @@
 //   You may not use this file except in compliance with the License.
 
 import { IButtonStyles, IconButton, TextField, useTheme } from "@fluentui/react";
-import { Stack } from "@mui/material";
+import { Paper, Stack } from "@mui/material";
 import { vec3 } from "gl-matrix";
 import { range, throttle } from "lodash";
 import { useState, useRef, useEffect, useCallback, KeyboardEvent } from "react";
@@ -292,7 +292,7 @@ const SearchText = React.memo<SearchTextComponentProps>(function SearchText({
 
   if (!searchTextOpen) {
     return (
-      <div>
+      <Paper square={false} elevation={4}>
         {searchButton.tooltip}
         <IconButton
           elementRef={searchButton.ref}
@@ -301,97 +301,96 @@ const SearchText = React.memo<SearchTextComponentProps>(function SearchText({
           styles={{
             // see also ExpandingToolbar styles
             root: {
-              backgroundColor: theme.semanticColors.buttonBackgroundHovered,
+              backgroundColor: "transparent",
               pointerEvents: "auto",
             },
-            rootHovered: { backgroundColor: theme.semanticColors.buttonBackgroundHovered },
-            rootPressed: { backgroundColor: theme.semanticColors.buttonBackgroundHovered },
-            rootDisabled: { backgroundColor: theme.semanticColors.buttonBackgroundHovered },
+            rootHovered: { backgroundColor: "transparent" },
+            rootPressed: { backgroundColor: "transparent" },
+            rootDisabled: { backgroundColor: "transparent" },
             ...iconStyle,
           }}
         />
-      </div>
+      </Paper>
     );
   }
 
   return (
-    <Stack
-      direction="row"
-      alignItems="center"
-      sx={{
-        pointerEvents: "auto",
-        backgroundColor: theme.semanticColors.buttonBackgroundHovered,
-        borderRadius: theme.effects.roundedCorner2,
-        position: "relative",
-      }}
-    >
-      <TextField
-        autoFocus
-        iconProps={{ iconName: "Search" }}
-        elementRef={searchInputRef}
-        type="text"
-        placeholder="Find in scene"
-        spellCheck={false}
-        suffix={`${hasMatches ? selectedMatchIndex + 1 : "0"} of ${searchTextMatches.length}`}
-        value={searchText}
-        styles={{
-          icon: {
-            color: theme.semanticColors.inputText,
-            lineHeight: 0,
-            left: theme.spacing.s1,
-            right: "auto",
-            fontSize: 18,
+    <Paper square={false} elevation={4} sx={{ pointerEvents: "auto" }}>
+      <Stack
+        direction="row"
+        alignItems="center"
+        sx={{
+          position: "relative",
+        }}
+      >
+        <TextField
+          autoFocus
+          iconProps={{ iconName: "Search" }}
+          elementRef={searchInputRef}
+          type="text"
+          placeholder="Find in scene"
+          spellCheck={false}
+          suffix={`${hasMatches ? selectedMatchIndex + 1 : "0"} of ${searchTextMatches.length}`}
+          value={searchText}
+          styles={{
+            icon: {
+              color: theme.semanticColors.inputText,
+              lineHeight: 0,
+              left: theme.spacing.s1,
+              right: "auto",
+              fontSize: 18,
 
-            svg: {
-              fill: "currentColor",
-              height: "1em",
-              width: "1em",
+              svg: {
+                fill: "currentColor",
+                height: "1em",
+                width: "1em",
+              },
             },
-          },
-          field: {
-            padding: `0 ${theme.spacing.s1} 0 ${theme.spacing.l2}`,
+            field: {
+              padding: `0 ${theme.spacing.s1} 0 ${theme.spacing.l2}`,
 
-            "::placeholder": { opacity: 0.6 },
-          },
-          suffix: { backgroundColor: "transparent" },
-        }}
-        onChange={(_, newValue) => setSearchText(newValue ?? "")}
-        onKeyDown={(e: KeyboardEvent<HTMLInputElement>) => {
-          if (e.key !== "Enter") {
-            return;
-          }
-          if (e.shiftKey) {
-            iterateCurrentIndex(-1);
-            return;
-          }
-          iterateCurrentIndex(1);
-        }}
-      />
-      <Stack direction="row" alignItems="center" paddingLeft={0.5} spacing={0.5}>
-        <IconButton
-          iconProps={{ iconName: "ChevronUpSmall" }}
-          onClick={() => iterateCurrentIndex(-1)}
-          disabled={!hasMatches || searchTextMatches.length === selectedMatchIndex + 1}
-          styles={arrowButtonStyles}
+              "::placeholder": { opacity: 0.6 },
+            },
+            suffix: { backgroundColor: "transparent" },
+          }}
+          onChange={(_, newValue) => setSearchText(newValue ?? "")}
+          onKeyDown={(e: KeyboardEvent<HTMLInputElement>) => {
+            if (e.key !== "Enter") {
+              return;
+            }
+            if (e.shiftKey) {
+              iterateCurrentIndex(-1);
+              return;
+            }
+            iterateCurrentIndex(1);
+          }}
         />
+        <Stack direction="row" alignItems="center" paddingLeft={0.5} spacing={0.5}>
+          <IconButton
+            iconProps={{ iconName: "ChevronUpSmall" }}
+            onClick={() => iterateCurrentIndex(-1)}
+            disabled={!hasMatches || searchTextMatches.length === selectedMatchIndex + 1}
+            styles={arrowButtonStyles}
+          />
+          <IconButton
+            iconProps={{ iconName: "ChevronDownSmall" }}
+            onClick={() => iterateCurrentIndex(1)}
+            disabled={!hasMatches || selectedMatchIndex === 0}
+            styles={arrowButtonStyles}
+          />
+        </Stack>
         <IconButton
-          iconProps={{ iconName: "ChevronDownSmall" }}
-          onClick={() => iterateCurrentIndex(1)}
-          disabled={!hasMatches || selectedMatchIndex === 0}
-          styles={arrowButtonStyles}
+          onClick={() => toggleSearchTextOpen(false)}
+          iconProps={{ iconName: "Close" }}
+          styles={{
+            rootHovered: { backgroundColor: "transparent" },
+            rootPressed: { backgroundColor: "transparent" },
+            rootDisabled: { backgroundColor: "transparent" },
+            ...iconStyle,
+          }}
         />
       </Stack>
-      <IconButton
-        onClick={() => toggleSearchTextOpen(false)}
-        iconProps={{ iconName: "Close" }}
-        styles={{
-          rootHovered: { backgroundColor: "transparent" },
-          rootPressed: { backgroundColor: "transparent" },
-          rootDisabled: { backgroundColor: "transparent" },
-          ...iconStyle,
-        }}
-      />
-    </Stack>
+    </Paper>
   );
 });
 
