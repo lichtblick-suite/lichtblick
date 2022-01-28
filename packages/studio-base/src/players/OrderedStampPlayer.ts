@@ -54,6 +54,24 @@ const getTopicsWithHeader = memoizeWeak((topics: Topic[], datatypes: RosDatatype
   });
 });
 
+function compareMessageEventsByTime(
+  a: MessageEvent<StampedMessage>,
+  b: MessageEvent<StampedMessage>,
+): number {
+  const timeA = getTimestampForMessage(a.message);
+  const timeB = getTimestampForMessage(b.message);
+  if (timeA == undefined || timeB == undefined) {
+    if (timeA == undefined && timeB == undefined) {
+      return 0;
+    } else if (timeA == undefined) {
+      return -1;
+    } else {
+      return 1;
+    }
+  }
+  return compare(timeA, timeB);
+}
+
 export default class OrderedStampPlayer implements Player {
   private _player: UserNodePlayer;
   private _messageOrder: TimestampMethod;
@@ -108,13 +126,14 @@ export default class OrderedStampPlayer implements Player {
         sec: activeData.currentTime.sec - BUFFER_DURATION_SECS,
         nsec: activeData.currentTime.nsec,
       };
-      const [messages, newMessageBuffer] = partition(extendedMessageBuffer, (message) =>
-        isLessThan(message.message.header.stamp, thresholdTime),
-      );
+      const [messages, newMessageBuffer] = partition(extendedMessageBuffer, (message) => {
+        const time = getTimestampForMessage(message.message);
+        return time && isLessThan(time, thresholdTime);
+      });
 
       this._messageBuffer = newMessageBuffer;
 
-      messages.sort((a, b) => compare(a.message.header.stamp, b.message.header.stamp));
+      messages.sort(compareMessageEventsByTime);
 
       const currentTime = clampTime(thresholdTime, activeData.startTime, activeData.endTime);
       this._currentTime = currentTime;
