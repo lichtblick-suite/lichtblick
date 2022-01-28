@@ -335,6 +335,7 @@ function PanelExtensionAdapter(props: PanelExtensionAdapterProps): JSX.Element {
   const partialExtensionContext = useMemo<PartialPanelExtensionContext>(() => {
     const layout: PanelExtensionContext["layout"] = {
       addPanel({ position, type, updateIfExists, getState }) {
+        // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
         if (position === "sibling") {
           openSiblingPanel({
             panelType: type,

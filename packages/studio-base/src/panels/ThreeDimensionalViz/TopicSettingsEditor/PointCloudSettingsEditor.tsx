@@ -25,6 +25,7 @@ import SegmentedControl from "@foxglove/studio-base/components/SegmentedControl"
 import CommonPointSettings from "@foxglove/studio-base/panels/ThreeDimensionalViz/TopicSettingsEditor/CommonPointSettings";
 import { TopicSettingsEditorProps } from "@foxglove/studio-base/panels/ThreeDimensionalViz/TopicSettingsEditor/types";
 import { PointCloud2 } from "@foxglove/studio-base/types/Messages";
+import { mightActuallyBePartial } from "@foxglove/studio-base/util/mightActuallyBePartial";
 
 import CommonDecaySettings from "./CommonDecaySettings";
 import { SLabel, SInput } from "./common";
@@ -134,10 +135,10 @@ export default function PointCloudSettingsEditor(
 ): React.ReactElement {
   const { message, settings = {}, onFieldChange, onSettingsChange } = props;
 
-  const hasRGB = message?.fields?.some(({ name }) => name === "rgb") ?? false;
+  const hasRGB = message?.fields.some(({ name }) => name === "rgb") ?? false;
   const defaultColorField =
-    message?.fields?.find(({ name }) => DEFAULT_COLOR_FIELDS.includes(name))?.name ??
-    message?.fields?.find(({ name }) => name !== "rgb")?.name;
+    message?.fields.find(({ name }) => DEFAULT_COLOR_FIELDS.includes(name))?.name ??
+    message?.fields.find(({ name }) => name !== "rgb")?.name;
   const colorMode: ColorMode =
     settings.colorMode ??
     (hasRGB
@@ -290,8 +291,8 @@ export default function PointCloudSettingsEditor(
       {colorMode.mode === "gradient" && (
         <Box margin={1}>
           <GradientPicker
-            minColor={colorMode.minColor ?? DEFAULT_MIN_COLOR}
-            maxColor={colorMode.maxColor ?? DEFAULT_MAX_COLOR}
+            minColor={mightActuallyBePartial(colorMode).minColor ?? DEFAULT_MIN_COLOR}
+            maxColor={mightActuallyBePartial(colorMode).maxColor ?? DEFAULT_MAX_COLOR}
             onChange={({ minColor, maxColor }) =>
               onColorModeChange((prevColorMode) =>
                 prevColorMode.mode === "gradient"

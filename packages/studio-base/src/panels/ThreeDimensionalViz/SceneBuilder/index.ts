@@ -54,6 +54,7 @@ import {
   PointCloud2,
 } from "@foxglove/studio-base/types/Messages";
 import { clonePose, emptyPose } from "@foxglove/studio-base/util/Pose";
+import { mightActuallyBePartial } from "@foxglove/studio-base/util/mightActuallyBePartial";
 import naturalSort from "@foxglove/studio-base/util/naturalSort";
 
 const log = Log.getLogger(__filename);
@@ -610,7 +611,7 @@ export default class SceneBuilder implements MarkerProvider {
   };
 
   private _consumeColor = (msg: MessageEvent<Color>): void => {
-    const color = msg.message;
+    const color = mightActuallyBePartial(msg.message);
     if (color.r == undefined || color.g == undefined || color.b == undefined) {
       return;
     }
@@ -845,7 +846,7 @@ export default class SceneBuilder implements MarkerProvider {
       const topicMarkers = collector.getMessages();
       for (const message of topicMarkers) {
         const marker = message as unknown as Interactive<BaseMarker & Marker>;
-        if (marker.ns != undefined && marker.ns !== "") {
+        if (marker.ns !== "") {
           if (!this.namespaceIsEnabled(topic.name, marker.ns)) {
             continue;
           }

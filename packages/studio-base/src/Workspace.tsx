@@ -541,8 +541,8 @@ export default function Workspace(props: WorkspaceProps): JSX.Element {
     >
       {enableOpenDialog === true && showOpenDialog != undefined && (
         <OpenDialog
-          activeView={showOpenDialog?.view}
-          activeDataSource={showOpenDialog?.activeDataSource}
+          activeView={showOpenDialog.view}
+          activeDataSource={showOpenDialog.activeDataSource}
           onDismiss={() => setShowOpenDialog(undefined)}
         />
       )}

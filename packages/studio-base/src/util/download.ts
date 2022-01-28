@@ -17,10 +17,7 @@ export function downloadTextFile(text: string, fileName: string): void {
 }
 
 export function downloadFiles(files: { blob: Blob; fileName: string }[]): void {
-  const { body } = document;
-  if (body == undefined) {
-    return;
-  }
+  const body = document.body;
 
   const link = document.createElement("a");
   link.style.display = "none";

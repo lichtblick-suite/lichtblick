@@ -261,10 +261,10 @@ describe("layout reducers", () => {
       const childTabId = parentTabConfig.tabs[0]!.layout as string;
       expect(getPanelTypeFromId(childTabId)).toEqual("Tab");
       const childTabProps = configById[childTabId] as TabPanelConfig;
-      expect(childTabProps?.activeTabIdx).toEqual(0);
-      expect(childTabProps?.tabs.length).toEqual(1);
-      expect(childTabProps?.tabs[0]!.title).toEqual("B");
-      expect(getPanelTypeFromId(childTabProps?.tabs[0]!.layout as string)).toEqual("Plot");
+      expect(childTabProps.activeTabIdx).toEqual(0);
+      expect(childTabProps.tabs.length).toEqual(1);
+      expect(childTabProps.tabs[0]!.title).toEqual("B");
+      expect(getPanelTypeFromId(childTabProps.tabs[0]!.layout as string)).toEqual("Plot");
     });
   });
 
@@ -586,7 +586,7 @@ describe("layout reducers", () => {
       expect(configById["Tab!a"]).toEqual(tabConfig);
       expect(
         getPanelTypeFromId(
-          (configById[layout.second as string] as TabPanelConfig)?.tabs[0]!.layout as string,
+          (configById[layout.second as string] as TabPanelConfig).tabs[0]!.layout as string,
         ),
       ).toEqual("Audio");
       expect(configById["Audio!a"]).toEqual(audioConfig);

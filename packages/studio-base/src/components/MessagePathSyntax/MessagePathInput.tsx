@@ -119,11 +119,7 @@ export function getFirstInvalidVariableFromRosPath(
         const [variableName, loc] = [path.start.variableName, path.start.startLoc];
         messagePathParts.push({ variableName, loc });
       }
-      if (
-        path.end != undefined &&
-        typeof path.end === "object" &&
-        !globalVars.includes(path.end.variableName)
-      ) {
+      if (typeof path.end === "object" && !globalVars.includes(path.end.variableName)) {
         const [variableName, loc] = [path.end.variableName, path.end.startLoc];
         messagePathParts.push({ variableName, loc });
       }

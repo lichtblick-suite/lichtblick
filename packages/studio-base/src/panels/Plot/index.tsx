@@ -444,8 +444,8 @@ function Plot(props: Props) {
           <PlotChart
             isSynced={xAxisVal === "timestamp" && isSynced}
             paths={yAxisPaths}
-            minYValue={parseFloat((minYValue ?? "")?.toString())}
-            maxYValue={parseFloat((maxYValue ?? "")?.toString())}
+            minYValue={parseFloat((minYValue ?? "").toString())}
+            maxYValue={parseFloat((maxYValue ?? "").toString())}
             showXAxisLabels={showXAxisLabels}
             showYAxisLabels={showYAxisLabels}
             datasets={datasets}

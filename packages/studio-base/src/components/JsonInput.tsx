@@ -129,7 +129,7 @@ export function ValidatedInputBase({
 
   const handleChange = useCallback(
     (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-      const val = e.currentTarget?.value;
+      const val = e.currentTarget.value;
       if (!isEditing) {
         setIsEditing(true);
       }

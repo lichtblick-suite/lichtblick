@@ -64,8 +64,6 @@ type FoxgloveDataPlatformPlayerOpts = {
   metricsCollector: PlayerMetricsCollectorInterface;
 };
 
-const ZERO_TIME = Object.freeze({ sec: 0, nsec: 0 });
-
 export default class FoxgloveDataPlatformPlayer implements Player {
   private readonly _preloadThresholdSecs = 5;
   private readonly _preloadDurationSecs = 15;
@@ -263,8 +261,8 @@ export default class FoxgloveDataPlatformPlayer implements Player {
       playerId: this._id,
       problems: this._problems,
       urlState: {
-        start: toRFC3339String(this._start ?? ZERO_TIME),
-        end: toRFC3339String(this._end ?? ZERO_TIME),
+        start: toRFC3339String(this._start),
+        end: toRFC3339String(this._end),
         deviceId: this._deviceId,
       },
 
@@ -272,8 +270,8 @@ export default class FoxgloveDataPlatformPlayer implements Player {
         messages,
         totalBytesReceived: this._totalBytesReceived,
         messageOrder: "receiveTime",
-        startTime: this._start ?? ZERO_TIME,
-        endTime: this._end ?? ZERO_TIME,
+        startTime: this._start,
+        endTime: this._end,
         currentTime: this._currentTime,
         isPlaying: this._isPlaying,
         speed: this._speed,

@@ -107,9 +107,9 @@ export default function Connection(props: ConnectionProps): JSX.Element {
           {selectedSource?.formConfig != undefined && (
             <Stack flexGrow={1} justifyContent="space-between">
               <Stack spacing={2}>
-                {selectedSource?.formConfig.fields.map((field) => (
+                {selectedSource.formConfig.fields.map((field) => (
                   <TextField
-                    disabled={selectedSource?.disabledReason != undefined}
+                    disabled={selectedSource.disabledReason != undefined}
                     key={field.label}
                     label={field.label}
                     placeholder={field.placeholder}

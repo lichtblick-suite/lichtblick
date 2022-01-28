@@ -114,7 +114,7 @@ function InteractionContextMenuItem({
   selectObject: (arg0?: SelectedObject) => void;
   interactiveObject?: MouseEventObject;
 }) {
-  const object = getObject(interactiveObject) as Interactive<BaseMarker>;
+  const object = getObject(interactiveObject) as Partial<Interactive<BaseMarker>>;
   const topic = getInteractionData(interactiveObject)?.topic;
   const menuText = (
     <>

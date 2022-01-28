@@ -156,7 +156,7 @@ function BaseRenderer(props: Props): JSX.Element {
       : orphanedFrame;
   }, [followTf, transforms, orphanedFrame]);
 
-  const fixedFrame = useMemo(() => renderFrame?.root(), [renderFrame]);
+  const fixedFrame = useMemo(() => renderFrame.root(), [renderFrame]);
 
   // We use useState to store the cameraState instead of using config directly in order to
   // speed up the pan/rotate performance of the 3D panel. This allows us to update the cameraState

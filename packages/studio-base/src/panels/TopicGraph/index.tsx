@@ -337,7 +337,7 @@ function TopicGraph() {
   }, [lrOrientation]);
 
   const topicVisibilityTooltip: string = useMemo(() => {
-    return `Showing ${(topicVisibilityToLabelMap[topicVisibility] ?? "").toLowerCase()}`;
+    return `Showing ${topicVisibilityToLabelMap[topicVisibility].toLowerCase()}`;
   }, [topicVisibility]);
 
   const toggleShowServices = useCallback(() => {
@@ -426,9 +426,9 @@ function TopicGraph() {
                 graph.current?.resetUserPanZoom();
                 setTopicVisibility(id as TopicVisibility);
               }}
-              options={Object.keys(topicVisibilityToLabelMap).map((id) => ({
+              options={Object.entries(topicVisibilityToLabelMap).map(([id, label]) => ({
                 id,
-                label: topicVisibilityToLabelMap[id as TopicVisibility] ?? "",
+                label,
               }))}
             />
           </ToolGroup>

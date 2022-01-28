@@ -108,7 +108,7 @@ const arePropsEqual = (prevProps: Props, nextProps: Props) => {
     // As a result of various refactors this code does not make sense anymore and is in need of
     // cleanup. An original version can be found at
     // https://github.com/cruise-automation/webviz/blob/7407ef1687e19615a43194c003aec6608c4f7c51/packages/webviz-core/src/panels/ThreeDimensionalViz/FollowTFControl.js#L113
-    const nodesWithoutDefaultFollowTfFrame = allNodes?.length;
+    const nodesWithoutDefaultFollowTfFrame = allNodes.length;
     if (nodesWithoutDefaultFollowTfFrame !== 0) {
       return false;
     }

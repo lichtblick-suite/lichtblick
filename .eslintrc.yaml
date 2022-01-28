@@ -109,7 +109,7 @@ overrides:
       "@typescript-eslint/restrict-template-expressions": off
 
       "@typescript-eslint/prefer-regexp-exec": off
-      "@typescript-eslint/no-unnecessary-condition": off # similar to strict-boolean-expressions, but catches more (noisy) cases?
+      "@typescript-eslint/no-unnecessary-condition": error
       "@typescript-eslint/unbound-method": [error, { ignoreStatic: true }]
 
   - rules:

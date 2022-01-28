@@ -70,7 +70,7 @@ class MockPanelCatalog implements PanelCatalog {
     if (!info) {
       return undefined;
     }
-    const module = await info?.module();
+    const module = await info.module();
     return module.default.configSchema;
   }
   getPanels(): readonly PanelInfo[] {

@@ -91,7 +91,7 @@ export default function GlobalVariableLink({
             )}
           </UnlinkWrapper>
         )}
-        {renderAddLink && addToLinkedGlobalVariable && (
+        {renderAddLink && (
           <LinkToGlobalVariable
             highlight={highlight}
             addToLinkedGlobalVariable={addToLinkedGlobalVariable}

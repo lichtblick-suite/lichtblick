@@ -179,7 +179,10 @@ export default function TreeNodeRow({
   );
 
   const showVisibleTopicsCount =
-    providerAvailable && node.type === "group" && node.children && visibleTopicsCount > 0;
+    providerAvailable &&
+    node.type === "group" &&
+    node.children.length > 0 &&
+    visibleTopicsCount > 0;
 
   maxNodeNameWidth -= showVisibleTopicsCount ? VISIBLE_COUNT_WIDTH + VISIBLE_COUNT_MARGIN * 2 : 0;
 
@@ -232,7 +235,7 @@ export default function TreeNodeRow({
             <LeadPencilIcon />
           </Icon>
         )}
-        {showGroupError && errorTooltip && sceneErrors && (
+        {showGroupError && errorTooltip && sceneErrors.length > 0 && (
           <Tooltip contents={errorTooltip} placement="top">
             <SErrorCount>{`${sceneErrors.length} ${
               sceneErrors.length === 1 ? "error" : "errors"
@@ -286,7 +289,7 @@ export default function TreeNodeRow({
                   setHoveredMarkerMatchers([{ topic: topicName }]);
                 }
               }}
-              visibleInScene={visible ?? false}
+              visibleInScene={visible}
               onMouseEnter={() => setHoveredMarkerMatchers([{ topic: topicName }])}
               onMouseLeave={() => setHoveredMarkerMatchers([])}
             />

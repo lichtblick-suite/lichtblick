@@ -30,6 +30,7 @@ import {
   DEFAULT_MAX_COLOR,
 } from "@foxglove/studio-base/panels/ThreeDimensionalViz/TopicSettingsEditor/PointCloudSettingsEditor";
 import { toRgba } from "@foxglove/studio-base/panels/ThreeDimensionalViz/commands/PointClouds/selection";
+import { mightActuallyBePartial } from "@foxglove/studio-base/util/mightActuallyBePartial";
 import sendNotification from "@foxglove/studio-base/util/sendNotification";
 
 import VertexBufferCache from "./VertexBufferCache";
@@ -298,7 +299,7 @@ const makePointCloudCommand = () => {
         },
         color: (_context, props) => {
           const { hitmapColors, settings, blend } = props;
-          const { colorMode } = settings;
+          const { colorMode } = mightActuallyBePartial(settings);
           if (hitmapColors) {
             // If colors are provided, we use those instead what is indicated by colorMode
             // This is a common scenario when rendering to the hitmap, for example.
@@ -328,11 +329,11 @@ const makePointCloudCommand = () => {
 
       uniforms: {
         pointSize: (_context, props) => {
-          return props.settings?.pointSize ?? 2;
+          return props.settings.pointSize ?? 2;
         },
         isCircle: (_context, props) => {
-          return props.settings?.pointShape != undefined
-            ? props.settings?.pointShape === "circle"
+          return props.settings.pointShape != undefined
+            ? props.settings.pointShape === "circle"
             : true;
         },
         colorMode: (_context, props) => getEffectiveColorMode(props),

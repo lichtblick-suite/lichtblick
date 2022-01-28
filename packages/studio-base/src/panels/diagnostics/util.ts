@@ -98,10 +98,10 @@ export function computeDiagnosticInfo(
 ): DiagnosticInfo {
   const displayName = getDisplayName(status.hardware_id, status.name);
   let validatedStatus = status;
-  if (status.values?.some(({ value }) => value.length > MAX_STRING_LENGTH)) {
+  if (status.values.some(({ value }) => value.length > MAX_STRING_LENGTH)) {
     validatedStatus = {
       ...status,
-      values: status.values?.map((kv) =>
+      values: status.values.map((kv) =>
         kv.value.length > MAX_STRING_LENGTH
           ? { key: kv.key, value: truncate(kv.value, { length: MAX_STRING_LENGTH }) }
           : kv,

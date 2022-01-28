@@ -75,6 +75,6 @@ export default class VertexBufferCache {
   private _deleteBuffer = (cached: MemoizedVertexBuffer): void => {
     const { buffer } = cached;
     // Destroy GPU buffer
-    buffer?.destroy();
+    buffer.destroy();
   };
 }

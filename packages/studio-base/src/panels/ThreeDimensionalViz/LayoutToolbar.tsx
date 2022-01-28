@@ -132,7 +132,7 @@ function LayoutToolbar({
         <Stack direction="row" alignItems="center" position="relative" spacing={1}>
           {measuringElRef.current && (
             <Text variant="small" styles={{ root: { fontFamily: fonts.MONOSPACE } }}>
-              {measuringElRef.current?.measureDistance}
+              {measuringElRef.current.measureDistance}
             </Text>
           )}
           <MainToolbar

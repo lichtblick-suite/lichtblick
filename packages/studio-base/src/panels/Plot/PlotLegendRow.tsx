@@ -42,8 +42,8 @@ export default function PlotLegendRow({
   showPlotValuesInLegend,
 }: PlotLegendRowProps): JSX.Element {
   const correspondingData = useMemo(
-    () => datasets.find((set) => set.label === path?.value)?.data ?? [],
-    [datasets, path?.value],
+    () => datasets.find((set) => set.label === path.value)?.data ?? [],
+    [datasets, path.value],
   );
 
   const [hoverComponentId] = useState<string>(() => uuidv4());
@@ -94,9 +94,6 @@ export default function PlotLegendRow({
 
   const onInputTimestampMethodChange = useCallback(
     (value: TimestampMethod) => {
-      if (index == undefined) {
-        throw new Error("index not set");
-      }
       const newPaths = paths.slice();
       const newPath = newPaths[index];
       if (newPath) {

@@ -47,6 +47,7 @@ import {
   SavedProps,
   MosaicDropResult,
 } from "@foxglove/studio-base/types/panels";
+import { mightActuallyBePartial } from "@foxglove/studio-base/util/mightActuallyBePartial";
 
 const useStyles = makeStyles((theme) => ({
   searchInput: {
@@ -134,7 +135,7 @@ function DraggablePanelItem({
           highlightedItem.top + 50 <= window.innerHeight;
 
         if (!isInView) {
-          scrollRef.current?.scrollIntoView();
+          scrollRef.current.scrollIntoView();
         }
       }
     }
@@ -243,12 +244,12 @@ type Props = {
 function verifyPanels(panels: readonly PanelInfo[]) {
   const panelTypes: Map<string, PanelInfo> = new Map();
   for (const panel of panels) {
-    const { title, type, config } = panel;
+    const { title, type, config } = mightActuallyBePartial(panel);
     const dispName = title ?? type ?? "<unnamed>";
-    if (type.length === 0) {
+    if (type == undefined || type.length === 0) {
       throw new Error(`Panel component ${title} must declare a unique \`static panelType\``);
     }
-    const existingPanel = panelTypes.get(type);
+    const existingPanel = mightActuallyBePartial(panelTypes.get(type));
     if (existingPanel) {
       const bothHaveEmptyConfigs = isEmpty(existingPanel.config) && isEmpty(config);
       if (bothHaveEmptyConfigs) {

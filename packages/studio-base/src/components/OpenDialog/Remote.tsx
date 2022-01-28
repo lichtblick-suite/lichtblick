@@ -47,7 +47,7 @@ export default function Remote(props: RemoteProps): JSX.Element {
     }
 
     const extension = path.extname(parsedUrl.pathname);
-    if (extension == undefined || extension.length === 0) {
+    if (extension.length === 0) {
       setErrorMessage("URL must end with a filename and extension");
       return;
     }

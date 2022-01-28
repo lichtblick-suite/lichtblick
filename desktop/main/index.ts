@@ -56,7 +56,7 @@ function main() {
 
   const isProduction = process.env.NODE_ENV === "production";
 
-  if (!isProduction && app.dock != undefined) {
+  if (!isProduction && (app as Partial<typeof app>).dock != undefined) {
     const devIcon = getDevModeIcon();
     if (devIcon) {
       app.dock.setIcon(devIcon);

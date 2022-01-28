@@ -86,8 +86,6 @@ function NamespaceNodeRow({
   topicName: string;
   onNamespaceOverrideColorChange: OnNamespaceOverrideColorChange;
 }) {
-  const nodeVisibleInScene = visibleInScene ?? false;
-
   const { setHoveredMarkerMatchers } = useContext(ThreeDimensionalVizContext);
   const { toggleCheckAllAncestors, toggleNamespaceChecked } = useGuaranteedContext(
     TopicTreeContext,
@@ -110,16 +108,16 @@ function NamespaceNodeRow({
 
   const onToggle = useCallback(() => {
     toggleNamespaceChecked({ topicName, namespace });
-    updateHoveredMarkerMatchers(!(visibleInScene ?? false));
+    updateHoveredMarkerMatchers(!visibleInScene);
   }, [toggleNamespaceChecked, topicName, namespace, updateHoveredMarkerMatchers, visibleInScene]);
   const onAltToggle = useCallback(() => {
     toggleCheckAllAncestors(nodeKey, topicName);
-    updateHoveredMarkerMatchers(!(visibleInScene ?? false));
+    updateHoveredMarkerMatchers(!visibleInScene);
   }, [toggleCheckAllAncestors, nodeKey, topicName, updateHoveredMarkerMatchers, visibleInScene]);
 
   return (
     <STreeNodeRow
-      visibleInScene={nodeVisibleInScene}
+      visibleInScene={visibleInScene}
       style={{
         width: rowWidth,
         marginLeft: `-${OUTER_LEFT_MARGIN}px`,
@@ -154,19 +152,19 @@ function NamespaceNodeRow({
             // Some namespaces are statically available. But we want to make sure the parent topic is also available
             // before showing it as available.
             available={topicNodeAvailable && available}
-            checked={checked ?? false}
+            checked={checked}
             dataTest={`visibility-toggle~${nodeKey}`}
             onAltToggle={() => onAltToggle()}
             onToggle={() => onToggle()}
             overrideColor={overrideColor}
             size="SMALL"
-            visibleInScene={visibleInScene ?? false}
+            visibleInScene={visibleInScene}
             onMouseEnter={() => updateHoveredMarkerMatchers(true)}
             onMouseLeave={onMouseLeave}
           />
         </SToggles>
         <NamespaceMenu
-          disableBaseColumn={!(available ?? false)}
+          disableBaseColumn={!available}
           hasNamespaceOverrideColorChanged={hasNamespaceOverrideColorChanged}
           namespace={namespace}
           nodeKey={nodeKey}

@@ -158,7 +158,7 @@ async function getIndexedMcapInfo(file: File, decompressHandlers: Mcap0Types.Dec
     } else {
       topicInfosByTopic.set(channel.topicName, {
         topic: channel.topicName,
-        datatype: channel.schemaName ?? "(unknown)",
+        datatype: (channel as Partial<typeof channel>).schemaName ?? "(unknown)",
         numMessages: reader.statistics?.channelMessageCounts.get(channel.channelId) ?? 0n,
         numConnections: 1,
       });

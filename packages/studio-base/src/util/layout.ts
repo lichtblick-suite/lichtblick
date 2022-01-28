@@ -100,7 +100,7 @@ function mapTemplateIdsToNewIds(templateIds: string[]): PanelIdMap {
 type IndexableMosaic = MosaicNode<string> & Record<string, unknown>;
 
 function getLayoutWithNewPanelIds(
-  layout: IndexableMosaic,
+  layout: undefined | IndexableMosaic,
   panelIdMap: PanelIdMap,
 ): MosaicNode<string> | undefined {
   if (typeof layout === "string") {
@@ -191,16 +191,22 @@ export const getParentTabPanelByPanelId = (
 ): {
   [key: string]: string;
 } =>
-  Object.entries(savedProps).reduce((memo: Record<string, string>, [savedPanelId, savedConfig]) => {
-    if (isTabPanel(savedPanelId) && savedConfig != undefined) {
-      const tabPanelConfig = savedConfig as Partial<TabPanelConfig>;
-      tabPanelConfig.tabs?.forEach((tab) => {
-        const panelIdsInTab = getLeaves(tab.layout ?? ReactNull);
-        panelIdsInTab.forEach((id) => (memo[id] = savedPanelId));
-      });
-    }
-    return memo;
-  }, {});
+  Object.entries(savedProps).reduce(
+    (
+      memo: Record<string, string>,
+      [savedPanelId, savedConfig]: [string, undefined | PanelConfig],
+    ) => {
+      if (isTabPanel(savedPanelId) && savedConfig != undefined) {
+        const tabPanelConfig = savedConfig as Partial<TabPanelConfig>;
+        tabPanelConfig.tabs?.forEach((tab) => {
+          const panelIdsInTab = getLeaves(tab.layout ?? ReactNull);
+          panelIdsInTab.forEach((id) => (memo[id] = savedPanelId));
+        });
+      }
+      return memo;
+    },
+    {},
+  );
 
 const replaceMaybeTabLayoutWithNewPanelIds = (panelIdMap: PanelIdMap) => {
   return ({ id, config }: { id: string; config: Partial<TabPanelConfig> }) => {
@@ -245,9 +251,9 @@ export const getSaveConfigsPayloadForAddedPanel = ({
       config: relatedConfig,
     };
   });
-  const allConfigs = [...newConfigs, { id, config }]
-    .filter((configObj) => configObj.config)
-    .map(replaceMaybeTabLayoutWithNewPanelIds(panelIdMap));
+  const allConfigs = [...newConfigs, { id, config }].map(
+    replaceMaybeTabLayoutWithNewPanelIds(panelIdMap),
+  );
   return { configs: allConfigs };
 };
 

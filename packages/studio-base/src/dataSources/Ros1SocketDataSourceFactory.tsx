@@ -42,7 +42,7 @@ class Ros1SocketDataSourceFactory implements IDataSourceFactory {
       return;
     }
 
-    const hostname = args?.hostname ?? "localhost";
+    const hostname = args.hostname ?? "localhost";
     if (typeof hostname !== "string") {
       throw new Error(`Unable to initialize Ros1. Invalid hostname ${hostname}`);
     }

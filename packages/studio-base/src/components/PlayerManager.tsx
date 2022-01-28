@@ -205,7 +205,7 @@ export default function PlayerManager(props: PropsWithChildren<PlayerManagerProp
               addRecent({
                 type: "connection",
                 sourceId: foundSource.id,
-                title: args.params?.url,
+                title: args.params.url,
                 label: foundSource.displayName,
                 extra: args.params,
               });

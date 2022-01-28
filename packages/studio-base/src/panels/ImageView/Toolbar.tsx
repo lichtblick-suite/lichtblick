@@ -50,7 +50,7 @@ export function ObjectPane({ pixelData }: { pixelData: PixelData | undefined }):
         <Box>
           <Typography variant="caption">Marker:</Typography>
           <Tree
-            data={pixelData?.marker}
+            data={pixelData.marker}
             hideRoot
             invertTheme={false}
             theme={{ ...jsonTreeTheme, tree: { margin: 0 } }}

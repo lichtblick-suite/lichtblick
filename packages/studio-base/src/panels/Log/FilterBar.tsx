@@ -124,8 +124,8 @@ export default function FilterBar(props: FilterBarProps): JSX.Element {
           onResolveSuggestions={(filter: string) => {
             return [
               { name: filter, key: filter },
-              ...nodeNameOptions.filter(
-                ({ key }) => selectedItems?.every((item) => item.key !== key) ?? true,
+              ...nodeNameOptions.filter(({ key }) =>
+                selectedItems.every((item) => item.key !== key),
               ),
             ];
           }}

@@ -296,7 +296,7 @@ export default function useTopicTree({
       }
       const baseKey = node.key;
       if (namespace && node.type === "topic") {
-        const prefixedTopicName = node.type === "topic" ? node.topicName : undefined;
+        const prefixedTopicName = node.topicName;
         if (!prefixedTopicName) {
           return false;
         }
@@ -306,7 +306,7 @@ export default function useTopicTree({
         // A namespace node is visible if the parent topic node is visible.
         return getIsTreeNodeVisibleInScene(node);
       }
-      return (node.available ?? false) && isSelected(baseKey);
+      return node.available && isSelected(baseKey);
     }
     return {
       selectedTopicNames,
@@ -627,7 +627,7 @@ export default function useTopicTree({
         return false;
       } else if (node.type === "group") {
         // Group node
-        return node.name?.toLowerCase().includes(searchText);
+        return node.name.toLowerCase().includes(searchText);
       }
       // Topic node, without namespace
       return (
@@ -642,7 +642,7 @@ export default function useTopicTree({
       // When the user is viewing available/visible nodes, we can skip setting the visibility for the children of
       // unavailable/invisible nodes since they are not going to be rendered.
       if (providerAvailable && node.name !== "root") {
-        const unavailable = !(node.available ?? false);
+        const unavailable = !node.available;
         const invisibleInScene = !getIsTreeNodeVisibleInScene(node);
 
         if ((showAvailable && unavailable) || (showVisible && invisibleInScene)) {

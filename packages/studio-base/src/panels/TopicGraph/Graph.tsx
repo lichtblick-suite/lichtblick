@@ -82,7 +82,7 @@ export default function Graph(props: Props): JSX.Element {
     });
 
     if (!userPanZoom.current) {
-      cy.current?.fit();
+      cy.current.fit();
     }
   }, [elements, rankDir]);
 

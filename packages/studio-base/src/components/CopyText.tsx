@@ -49,7 +49,7 @@ export default function CopyText({
       }}
     >
       <Box flexGrow={1} textOverflow="ellipsis" whiteSpace="nowrap" overflow="hidden">
-        <Text {...textProps}>{children != undefined ? children : copyText}</Text>
+        <Text {...textProps}>{children}</Text>
       </Box>
       {button.tooltip}
       <IconButton

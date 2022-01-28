@@ -15,7 +15,7 @@ const useStyles = makeStyles((theme) => ({
     width: radius * 2,
     height: radius * 2,
     borderRadius: radius,
-    backgroundColor: theme.semanticColors.errorBackground ?? "red",
+    backgroundColor: theme.semanticColors.errorBackground,
     color: "rgba(255, 255, 255, 0.8)",
     fontSize: 8,
     fontWeight: 700,

@@ -19,6 +19,7 @@ import EventEmitter from "eventemitter3";
 import { Zoom as ZoomPlugin } from "@foxglove/chartjs-plugin-zoom";
 import Logger from "@foxglove/log";
 import { RpcElement, RpcScales } from "@foxglove/studio-base/components/Chart/types";
+import { maybeCast } from "@foxglove/studio-base/util/maybeCast";
 import { fonts } from "@foxglove/studio-base/util/sharedStyleConstants";
 
 const log = Logger.getLogger(__filename);
@@ -161,21 +162,21 @@ export default class ChartJSManager {
   panstart(event: HammerInput): RpcScales {
     const target = event.target as HTMLElement & { boundingClientRect: DOMRect };
     target.getBoundingClientRect = () => target.boundingClientRect;
-    (this._chartInstance as ZoomableChart)?.$zoom.panStartHandler(event);
+    maybeCast<ZoomableChart>(this._chartInstance)?.$zoom.panStartHandler(event);
     return this.getScales();
   }
 
   panmove(event: HammerInput): RpcScales {
     const target = event.target as HTMLElement & { boundingClientRect: DOMRect };
     target.getBoundingClientRect = () => target.boundingClientRect;
-    (this._chartInstance as ZoomableChart)?.$zoom.panHandler(event);
+    maybeCast<ZoomableChart>(this._chartInstance)?.$zoom.panHandler(event);
     return this.getScales();
   }
 
   panend(event: HammerInput): RpcScales {
     const target = event.target as HTMLElement & { boundingClientRect: DOMRect };
     target.getBoundingClientRect = () => target.boundingClientRect;
-    (this._chartInstance as ZoomableChart)?.$zoom.panEndHandler(event);
+    maybeCast<ZoomableChart>(this._chartInstance)?.$zoom.panEndHandler(event);
     return this.getScales();
   }
 
@@ -201,11 +202,12 @@ export default class ChartJSManager {
       // If the options specify specific values for min/max then we go back into a state where scales are updated
       // We need scales to update with undefined values if we haven't zoomed so new data is shown on the chart.
       // If we do not update the scales to undefined, the initial zoom range stays and new data is not visible.
-      if (options.scales?.x?.min != undefined && options.scales.x.max != undefined) {
+      const scales = options.scales ?? {};
+      if (scales.x?.min != undefined && scales.x.max != undefined) {
         this._hasPanned = false;
         this._hasZoomed = false;
       }
-      if (options.scales?.y?.min != undefined && options.scales.y.max != undefined) {
+      if (scales.y?.min != undefined && scales.y.max != undefined) {
         this._hasPanned = false;
         this._hasZoomed = false;
       }
@@ -368,7 +370,7 @@ export default class ChartJSManager {
         // Return "null" if we don't want this label to be displayed.
         // Returning "undefined" falls back to the default formatting and will display
         // eslint-disable-next-line no-restricted-syntax
-        return value?.label ?? null;
+        return value.label ?? null;
       };
 
       if (config.plugins.zoom?.zoom) {

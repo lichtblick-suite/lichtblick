@@ -2,6 +2,8 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
+import { MarkOptional } from "ts-essentials";
+
 import { PanelsState } from "@foxglove/studio-base/context/CurrentLayoutContext/actions";
 
 // We use "brand" tags to prevent confusion between string types with distinct meanings
@@ -120,7 +122,7 @@ export function migrateLayout(value: unknown): Layout {
     }
   }
 
-  function migrateData(data: PanelsState): PanelsState {
+  function migrateData(data: MarkOptional<PanelsState, "configById">): PanelsState {
     const result = { ...data, configById: data.configById ?? data.savedProps ?? {} };
     delete result.savedProps;
     return result;

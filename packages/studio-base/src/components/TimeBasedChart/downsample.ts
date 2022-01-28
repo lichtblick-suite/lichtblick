@@ -94,17 +94,17 @@ export function downsampleTimeseries(dataset: DataSet, bounds: DownsampleBounds)
     // interval has ended, we determine whether to write additional points for min/max/last
     if (intFirst?.xPixel !== x) {
       // add the min value from previous interval if it doesn't match the first or last of that interval
-      if (intMin && intMin?.yPixel !== intFirst?.yPixel && intMin?.yPixel !== intLast?.yPixel) {
-        downsampled.push(intMin?.datum);
+      if (intMin && intMin.yPixel !== intFirst?.yPixel && intMin.yPixel !== intLast?.yPixel) {
+        downsampled.push(intMin.datum);
       }
 
       // add the max value from previous interval if it doesn't match the first or last of that interval
-      if (intMax && intMax?.yPixel !== intFirst?.yPixel && intMax?.yPixel !== intLast?.yPixel) {
-        downsampled.push(intMax?.datum);
+      if (intMax && intMax.yPixel !== intFirst?.yPixel && intMax.yPixel !== intLast?.yPixel) {
+        downsampled.push(intMax.datum);
       }
 
       // add the last value if it doesn't match the first
-      if (intLast && intFirst?.yPixel !== intLast?.yPixel) {
+      if (intLast && intFirst?.yPixel !== intLast.yPixel) {
         downsampled.push(intLast.datum);
       }
 
@@ -131,17 +131,17 @@ export function downsampleTimeseries(dataset: DataSet, bounds: DownsampleBounds)
   }
 
   // add the min value from previous interval if it doesn't match the first or last of that interval
-  if (intMin && intMin?.yPixel !== intFirst?.yPixel && intMin?.yPixel !== intLast?.yPixel) {
-    downsampled.push(intMin?.datum);
+  if (intMin && intMin.yPixel !== intFirst?.yPixel && intMin.yPixel !== intLast?.yPixel) {
+    downsampled.push(intMin.datum);
   }
 
   // add the max value from previous interval if it doesn't match the first or last of that interval
-  if (intMax && intMax?.yPixel !== intFirst?.yPixel && intMax?.yPixel !== intLast?.yPixel) {
-    downsampled.push(intMax?.datum);
+  if (intMax && intMax.yPixel !== intFirst?.yPixel && intMax.yPixel !== intLast?.yPixel) {
+    downsampled.push(intMax.datum);
   }
 
   // add the last value if it doesn't match the first
-  if (intLast && intFirst?.yPixel !== intLast?.yPixel) {
+  if (intLast && intFirst?.yPixel !== intLast.yPixel) {
     downsampled.push(intLast.datum);
   }
 

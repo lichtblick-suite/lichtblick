@@ -117,7 +117,7 @@ export function getNamespaceNodes({
       visibleInScene: getIsTreeNodeVisibleInScene(node, namespace),
     };
 
-    const visible = namespaceNode.visibleInScene ?? false;
+    const visible = namespaceNode.visibleInScene;
     // Don't render namespaces that are not visible when the user selected to view Visible only.
     if (node.providerAvailable && showVisible && !visible) {
       return undefined;
@@ -153,10 +153,10 @@ export default function renderTreeNodes({
     if (!getIsTreeNodeVisibleInTree(key)) {
       return undefined;
     }
-    const visible = getIsTreeNodeVisibleInScene(item) ?? false;
+    const visible = getIsTreeNodeVisibleInScene(item);
 
     const nodeVisibleInScene = visible;
-    const nodeAvailable = item.available ?? false;
+    const nodeAvailable = item.available;
 
     const showVisible = topicDisplayMode === TOPIC_DISPLAY_MODES.SHOW_SELECTED.value;
     const showAvailable = topicDisplayMode === TOPIC_DISPLAY_MODES.SHOW_AVAILABLE.value;

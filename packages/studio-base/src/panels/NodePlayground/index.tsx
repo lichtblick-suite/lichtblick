@@ -152,7 +152,7 @@ function NodePlayground(props: Props) {
   const isCurrentScriptSelectedNode =
     !!selectedNode && !!currentScript && currentScript.filePath === selectedNode.name;
   const isNodeSaved =
-    !isCurrentScriptSelectedNode || currentScript?.code === selectedNode?.sourceCode;
+    !isCurrentScriptSelectedNode || currentScript.code === selectedNode.sourceCode;
   const selectedNodeLogs =
     (selectedNodeId != undefined ? userNodeDiagnostics[selectedNodeId]?.logs : undefined) ?? [];
 
@@ -224,8 +224,8 @@ function NodePlayground(props: Props) {
       // update code at top of backstack
       const backStack = [...scriptBackStack];
       if (backStack.length > 0) {
-        const script = backStack.pop()!;
-        if (!(script?.readOnly ?? false)) {
+        const script = backStack.pop();
+        if (script && !script.readOnly) {
           setScriptBackStack([...backStack, { ...script, code }]);
         }
       }

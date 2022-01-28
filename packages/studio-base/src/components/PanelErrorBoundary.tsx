@@ -34,8 +34,8 @@ export default class PanelErrorBoundary extends Component<PropsWithChildren<Prop
       return (
         <ErrorDisplay
           title="The panel encountered an unexpected error"
-          error={this.state.currentError?.error}
-          errorInfo={this.state.currentError?.errorInfo}
+          error={this.state.currentError.error}
+          errorInfo={this.state.currentError.errorInfo}
           content={
             <p>
               Something went wrong in the panel.{" "}

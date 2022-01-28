@@ -337,7 +337,7 @@ export default function ImageCanvas(props: Props): JSX.Element {
     const finishRender = onStartRenderImage();
     try {
       return await doRenderImage({
-        canvas: canvasRef.current ?? undefined,
+        canvas: canvasRef.current,
         geometry: {
           flipHorizontal: config.flipHorizontal ?? false,
           flipVertical: config.flipVertical ?? false,

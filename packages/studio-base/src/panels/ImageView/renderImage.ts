@@ -268,9 +268,7 @@ function render({
     ctx.scale(1, -1);
   }
 
-  if (geometry.rotation != undefined) {
-    ctx.rotate(geometry.rotation);
-  }
+  ctx.rotate(geometry.rotation);
 
   // center the image in the viewport
   // also sets 0,0 as the upper left corner of the image since markers are drawn from 0,0 on the image

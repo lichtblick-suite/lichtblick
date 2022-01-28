@@ -372,7 +372,7 @@ class StudioWindow {
         const existingMenu = Menu.getApplicationMenu();
         const fileMenu = existingMenu?.getMenuItemById("fileMenu");
         // https://github.com/electron/electron/issues/8598
-        (fileMenu?.submenu as ClearableMenu)?.clear();
+        (fileMenu?.submenu as undefined | ClearableMenu)?.clear();
         fileMenu?.submenu?.append(
           new MenuItem({
             label: "New Window",
@@ -447,7 +447,7 @@ class StudioWindow {
   removeInputSource(name: string): void {
     this._inputSources.delete(name);
 
-    const fileMenu = this._menu?.getMenuItemById("fileMenu");
+    const fileMenu = this._menu.getMenuItemById("fileMenu");
     if (!fileMenu) {
       return;
     }

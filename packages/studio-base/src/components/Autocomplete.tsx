@@ -35,7 +35,7 @@ Object.assign(ReactAutocomplete.prototype, { maybeScrollItemIntoView: () => {} }
 
 const fontFamily = fonts.SANS_SERIF;
 const fontSize = "12px";
-let textMeasure: textMetrics.TextMeasure;
+let textMeasure: undefined | textMetrics.TextMeasure;
 function measureText(text: string): number {
   if (textMeasure == undefined) {
     textMeasure = textMetrics.init({ fontFamily, fontSize });

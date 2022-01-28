@@ -4,6 +4,7 @@
 
 import { useMessageReducer } from "@foxglove/studio-base/PanelAPI";
 import { MessageEvent } from "@foxglove/studio-base/players/types";
+import { mightActuallyBePartial } from "@foxglove/studio-base/util/mightActuallyBePartial";
 
 import { DiagnosticStatusArrayMsg } from "./util";
 
@@ -26,7 +27,7 @@ export function addMessages(
     }
 
     for (const status of statusArray) {
-      const hardwareId = status.hardware_id ?? "";
+      const hardwareId = mightActuallyBePartial(status).hardware_id ?? "";
       const name = status.name;
 
       const nameSet = previousAvailableDiagnostics.get(hardwareId);

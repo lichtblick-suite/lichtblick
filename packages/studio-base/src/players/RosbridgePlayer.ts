@@ -562,7 +562,7 @@ export default class RosbridgePlayer implements Player {
   private _handleInternalMessage(msg: MessageEvent<unknown>): void {
     const maybeClockMsg = msg.message as { clock?: Time };
 
-    if (msg.topic === "/clock" && maybeClockMsg.clock && !isNaN(maybeClockMsg.clock?.sec)) {
+    if (msg.topic === "/clock" && maybeClockMsg.clock && !isNaN(maybeClockMsg.clock.sec)) {
       const time = maybeClockMsg.clock;
       const seconds = toSec(maybeClockMsg.clock);
       if (isNaN(seconds)) {

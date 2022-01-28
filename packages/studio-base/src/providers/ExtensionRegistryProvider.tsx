@@ -21,7 +21,7 @@ export default function ExtensionRegistryProvider(props: PropsWithChildren<unkno
 
   const { value: registry, error } = useAsync(async () => {
     const extensionList = await extensionLoader.getExtensions();
-    log.debug(`Found ${extensionList?.length ?? 0} extension(s)`);
+    log.debug(`Found ${extensionList.length} extension(s)`);
 
     // registered panels stored by their fully qualified id
     // the fully qualified id is the extension name + panel name

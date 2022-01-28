@@ -162,7 +162,7 @@ export function MessagePipelineProvider({
 
           currentPlayerTickState.waitingForPromises = false;
           // https://github.com/microsoft/TypeScript/issues/43781
-          // eslint-disable-next-line @typescript-eslint/strict-boolean-expressions
+          // eslint-disable-next-line @typescript-eslint/strict-boolean-expressions, @typescript-eslint/no-unnecessary-condition
           if (currentPlayerTickState.resolveFn) {
             currentPlayerTickState.resolveFn();
             currentPlayerTickState.resolveFn = undefined;
@@ -308,10 +308,12 @@ export function MessagePipelineProvider({
     let skipUpdate = false;
     void (async () => {
       // Wait for the current frame to finish rendering if needed
+      // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
       await pauseFrameForPromises(playerTickState.current.promisesToWaitFor ?? []);
 
       // If the globalVariables have already changed again while
       // we waited for the frame to render, skip the update.
+      // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
       if (!skipUpdate && currentPlayer.current) {
         currentPlayer.current.setGlobalVariables(globalVariables);
       }

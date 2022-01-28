@@ -22,6 +22,7 @@ import {
 import { DecodedMarker } from "@foxglove/studio-base/panels/ThreeDimensionalViz/commands/PointClouds/decodeMarker";
 import { RosObject } from "@foxglove/studio-base/players/types";
 import { PointCloud2, PointField } from "@foxglove/studio-base/types/Messages";
+import { mightActuallyBePartial } from "@foxglove/studio-base/util/mightActuallyBePartial";
 
 import {
   getVertexValues,
@@ -74,13 +75,13 @@ export function getClickedInfo(
     return undefined;
   }
 
-  const pointIndex = instanceIndex ?? 0;
+  const pointIndex = instanceIndex;
 
   // Extract [x, y, z] from position buffer;
   const clickedPoint = getVertexValues(positionBuffer, pointIndex, 3);
 
   let clickedPointColor: number[] = [];
-  const colorMode = settings?.colorMode;
+  const colorMode = mightActuallyBePartial(settings).colorMode;
   if (colorMode != undefined) {
     if (colorMode.mode === "rgb" && colorBuffer) {
       // Extract [r, g, b, a] from colors buffer
@@ -95,7 +96,7 @@ export function getClickedInfo(
       const colorFieldValue = getVertexValue(colorBuffer, pointIndex);
       const colorFieldRange = getRange(minColorValue, maxColorValue);
       const pct = Math.max(0, Math.min((colorFieldValue - minColorValue) / colorFieldRange, 1));
-      const { minColor, maxColor } = colorMode;
+      const { minColor, maxColor } = mightActuallyBePartial(colorMode);
       const parsedMinColor = toRgba(minColor ?? DEFAULT_MIN_COLOR);
       const parsedMaxColor = toRgba(maxColor ?? DEFAULT_MAX_COLOR);
       clickedPointColor = [
@@ -112,7 +113,7 @@ export function getClickedInfo(
       clickedPointColor = [0, 0, 0, 1];
       setRainbowColor(clickedPointColor, 0, pct);
     } else if (colorMode.mode === "flat") {
-      clickedPointColor = toRgba(colorMode.flatColor ?? DEFAULT_FLAT_COLOR);
+      clickedPointColor = toRgba(mightActuallyBePartial(colorMode).flatColor ?? DEFAULT_FLAT_COLOR);
     }
   }
 

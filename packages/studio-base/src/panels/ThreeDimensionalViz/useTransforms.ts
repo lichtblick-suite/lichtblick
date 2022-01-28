@@ -23,6 +23,7 @@ import {
 } from "@foxglove/studio-base/panels/ThreeDimensionalViz/transforms";
 import { Frame, MessageEvent, Topic } from "@foxglove/studio-base/players/types";
 import { MarkerArray, StampedMessage, TF } from "@foxglove/studio-base/types/Messages";
+import { mightActuallyBePartial } from "@foxglove/studio-base/util/mightActuallyBePartial";
 
 import { TransformLink } from "./types";
 
@@ -92,7 +93,7 @@ function useTransforms(args: Args): IImmutableTransformTree {
 
       for (const msg of msgs) {
         if ("header" in (msg.message as Partial<StampedMessage>)) {
-          const frameId = (msg.message as StampedMessage).header.frame_id;
+          const frameId = (msg.message as Partial<StampedMessage>).header?.frame_id;
           if (frameId != undefined) {
             transforms.getOrCreateFrame(frameId);
             updated = true;
@@ -103,7 +104,7 @@ function useTransforms(args: Args): IImmutableTransformTree {
         if ("markers" in (msg.message as Partial<MarkerArray>)) {
           const markers = (msg.message as MarkerArray).markers;
           for (const marker of markers) {
-            const frameId = marker.header.frame_id;
+            const frameId = mightActuallyBePartial(marker).header?.frame_id;
             if (frameId != undefined) {
               transforms.getOrCreateFrame(frameId);
               updated = true;

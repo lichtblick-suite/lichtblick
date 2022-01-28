@@ -84,7 +84,7 @@ export const getInputTopics = (nodeData: NodeData): NodeData => {
     };
   }
 
-  const decl = inputsExport?.declarations?.[0];
+  const decl = inputsExport.declarations?.[0];
   if (!decl || !ts.isVariableDeclaration(decl)) {
     const error: Diagnostic = {
       severity: DiagnosticSeverity.Error,
@@ -111,7 +111,7 @@ export const getInputTopics = (nodeData: NodeData): NodeData => {
     };
   }
 
-  const inputTopicElements = decl.initializer?.elements;
+  const inputTopicElements = decl.initializer.elements;
   if (inputTopicElements.some(({ kind }) => kind !== ts.SyntaxKind.StringLiteral)) {
     const error: Diagnostic = {
       severity: DiagnosticSeverity.Error,
@@ -328,6 +328,7 @@ export const compile = (nodeData: NodeData): NodeData => {
     host,
   );
   program.emit();
+  // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
   if (!codeEmitted) {
     // TODO: Remove after this has been running in prod for a while, and we haven't seen anything in Sentry.
     throw new Error(

@@ -24,6 +24,7 @@ import {
 } from "@foxglove/studio-base/types/Messages";
 import { emptyPose } from "@foxglove/studio-base/util/Pose";
 import { COLORS, MARKER_MSG_TYPES } from "@foxglove/studio-base/util/globalConstants";
+import { mightActuallyBePartial } from "@foxglove/studio-base/util/mightActuallyBePartial";
 
 // Group multiple line strip and line list markers into as few as possible.
 // This reduces the amount of draw calls required to render line them and increases performance.
@@ -65,7 +66,7 @@ export function groupLinesIntoInstancedLineLists(
         poses?: readonly Pose[];
         closed?: boolean;
       } = messageList[messageIdx]!;
-      const points = message.points ?? [];
+      const points = mightActuallyBePartial(message).points ?? [];
       const colors = message.colors ?? [];
       if (points.length === 0) {
         // Ignore markers with no points

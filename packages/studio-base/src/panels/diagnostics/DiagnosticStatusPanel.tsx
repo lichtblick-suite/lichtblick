@@ -146,7 +146,7 @@ function DiagnosticStatusPanel(props: Props) {
             }
 
             saveConfig({
-              selectedHardwareId: value?.hardwareId,
+              selectedHardwareId: value.hardwareId,
               selectedName: value.name,
             });
           }}
@@ -162,7 +162,7 @@ function DiagnosticStatusPanel(props: Props) {
           )}
         />
       </PanelToolbar>
-      {filteredDiagnostics != undefined && filteredDiagnostics.length > 0 ? (
+      {filteredDiagnostics.length > 0 ? (
         <Stack flex="auto" sx={{ overflowY: "auto" }}>
           {sortBy(filteredDiagnostics, ({ status }) => status.name.toLowerCase()).map((item) => (
             <DiagnosticStatus

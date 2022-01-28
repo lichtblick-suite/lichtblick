@@ -28,6 +28,7 @@ import {
 } from "@foxglove/studio-base/panels/ThreeDimensionalViz/commands/PointClouds/selection";
 import clipboard from "@foxglove/studio-base/util/clipboard";
 import { downloadFiles } from "@foxglove/studio-base/util/download";
+import { maybeCast } from "@foxglove/studio-base/util/maybeCast";
 
 import { SValue, SLabel } from "./styling";
 
@@ -55,7 +56,7 @@ export default function PointCloudDetails({
   }, [instanceIndex, object]);
 
   const additionalFieldNames = useMemo(
-    () => (additionalFieldValues && Object.keys(additionalFieldValues)) || [],
+    () => (additionalFieldValues ? Object.keys(additionalFieldValues) : []),
     [additionalFieldValues],
   );
 
@@ -71,7 +72,7 @@ export default function PointCloudDetails({
       const rowData = [allPoints[i * 3], allPoints[i * 3 + 1], allPoints[i * 3 + 2]];
       rowData.push(
         ...additionalFieldNames.map(
-          (fieldName) => (object as unknown as Record<string, number[]>)?.[fieldName]?.[i],
+          (fieldName) => maybeCast<Record<string, number[]>>(object)?.[fieldName]?.[i],
         ),
       );
       dataRows.push(rowData.join(","));

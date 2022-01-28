@@ -586,7 +586,7 @@ export default function TimeBasedChart(props: Props): JSX.Element {
             y: { min: number; max: number };
           }
         | undefined = undefined;
-      if (currentScales?.x && currentScales?.y) {
+      if (currentScales?.x && currentScales.y) {
         bounds = {
           width,
           height,
@@ -730,13 +730,13 @@ export default function TimeBasedChart(props: Props): JSX.Element {
       queueDownsampleInvalidate();
 
       // chart indicated we got a scales update, we may need to update global bounds
-      if (!isSynced || !scales?.x) {
+      if (!isSynced || !scales.x) {
         return;
       }
 
       // the change is a result of user interaction on our chart
       // we set the sync scale value so other synced charts follow our zoom/pan behavior
-      if (userInteraction && isSynced) {
+      if (userInteraction) {
         setGlobalBounds({
           min: scales.x.min,
           max: scales.x.max,
@@ -750,7 +750,7 @@ export default function TimeBasedChart(props: Props): JSX.Element {
       // the sync value is conditionally set depending on the state of the existing sync value
       setGlobalBounds((old) => {
         // no scale from our plot, always use old value
-        const scalesX = scales?.x;
+        const scalesX = scales.x;
         if (!scalesX) {
           return old;
         }

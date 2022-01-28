@@ -331,7 +331,7 @@ function DiagnosticSummary(props: Props): JSX.Element {
           [classes.stale]: option.text === "stale",
         })}
       >
-        &gt;= {option?.text.toUpperCase() ?? ""}
+        &gt;= {option.text.toUpperCase()}
       </div>
     ) : (
       ReactNull

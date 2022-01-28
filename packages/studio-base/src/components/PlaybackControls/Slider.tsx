@@ -74,7 +74,7 @@ export default function Slider(props: Props): JSX.Element {
       const { clientX } = ev;
       const t = (clientX - left) / width;
       let interpolated = min + t * (max - min);
-      if (step != undefined && step !== 0) {
+      if (step !== 0) {
         interpolated = Math.round(interpolated / step) * step;
       }
       return clamp(interpolated, min, max);

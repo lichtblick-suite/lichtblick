@@ -19,6 +19,7 @@ import { RpcElement, RpcScales } from "@foxglove/studio-base/components/Chart/ty
 import ChartJsMux from "@foxglove/studio-base/components/Chart/worker/ChartJsMux";
 import Rpc, { createLinkedChannels } from "@foxglove/studio-base/util/Rpc";
 import WebWorkerManager from "@foxglove/studio-base/util/WebWorkerManager";
+import { mightActuallyBePartial } from "@foxglove/studio-base/util/mightActuallyBePartial";
 
 const log = Logger.getLogger(__filename);
 
@@ -61,7 +62,7 @@ type Props = {
   onHover?: (elements: RpcElement[]) => void;
 };
 
-const devicePixelRatio = window.devicePixelRatio ?? 1;
+const devicePixelRatio = mightActuallyBePartial(window).devicePixelRatio ?? 1;
 
 const webWorkerManager = new WebWorkerManager(makeChartJSWorker, 4);
 
@@ -243,11 +244,11 @@ function Chart(props: Props): JSX.Element {
         {
           node: offscreenCanvas,
           type,
-          data: newUpdateMessage?.data,
-          options: newUpdateMessage?.options,
+          data: newUpdateMessage.data,
+          options: newUpdateMessage.options,
           devicePixelRatio,
-          width: newUpdateMessage?.width,
-          height: newUpdateMessage?.height,
+          width: newUpdateMessage.width,
+          height: newUpdateMessage.height,
         },
         [offscreenCanvas],
       );
@@ -416,7 +417,7 @@ function Chart(props: Props): JSX.Element {
           event: rpcMouseEvent(event),
         });
 
-        if (!isMounted() || !mousePresentRef.current) {
+        if (!isMounted()) {
           return;
         }
 
@@ -472,7 +473,7 @@ function Chart(props: Props): JSX.Element {
         yVal = (range / pixels) * (mouseY - yScale.pixelMin) + yScale.min;
       }
 
-      props.onClick?.({
+      props.onClick({
         datalabel,
         x: xVal,
         y: yVal,

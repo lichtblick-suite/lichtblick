@@ -10,7 +10,6 @@ import {
   useCurrentLayoutActions,
   useCurrentLayoutSelector,
 } from "@foxglove/studio-base/context/CurrentLayoutContext";
-import { defaultPlaybackConfig } from "@foxglove/studio-base/providers/CurrentLayoutProvider/reducers";
 import { TimestampMethod } from "@foxglove/studio-base/util/time";
 
 const messageOrderLabel = {
@@ -32,7 +31,7 @@ export default function MessageOrderControls(): JSX.Element {
     [setPlaybackConfig],
   );
 
-  const orderText = messageOrderLabel[messageOrder] ?? defaultPlaybackConfig.messageOrder;
+  const orderText = messageOrderLabel[messageOrder];
   const messageOrderTooltip = useTooltip({
     contents: `Order messages by ${orderText.toLowerCase()}`,
   });

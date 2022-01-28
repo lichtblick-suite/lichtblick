@@ -16,7 +16,7 @@ export default function ExtensionLoaderProvider(props: PropsWithChildren<unknown
   const extensionLoader: ExtensionLoader = {
     async getExtensions(): Promise<ExtensionInfo[]> {
       const extensionList = (await desktopBridge?.getExtensions()) ?? [];
-      log.debug(`Loaded ${extensionList?.length ?? 0} extension(s)`);
+      log.debug(`Loaded ${extensionList.length} extension(s)`);
 
       const extensions = extensionList.map<ExtensionInfo>((item) => {
         const pkgInfo = item.packageJson as ExtensionInfo;

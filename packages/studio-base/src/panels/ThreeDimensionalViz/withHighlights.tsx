@@ -23,6 +23,7 @@ import {
   LAYER_INDEX_HIGHLIGHT_OVERLAY,
   LAYER_INDEX_HIGHLIGHT_BASE,
 } from "@foxglove/studio-base/panels/ThreeDimensionalViz/constants";
+import { mightActuallyBePartial } from "@foxglove/studio-base/util/mightActuallyBePartial";
 
 const withHighlights = (
   BaseWorldMarkers: ComponentType<WorldMarkerProps>,
@@ -36,10 +37,10 @@ const withHighlights = (
     const nonHighlightedMarkersByType: Partial<InteractiveMarkersByType> = {};
 
     // Partition the markersByType into two sets: highlighted and non-highlighted
-    (Object.keys(markersByType) as (keyof InteractiveMarkersByType)[]).forEach((type) => {
+    Object.entries(markersByType).forEach(([type, markers]) => {
       const [highlightedMarkers, nonHighlightedMarkers] = partition(
-        markersByType[type],
-        ({ interactionData }) => interactionData?.highlighted,
+        markers,
+        (marker) => mightActuallyBePartial(marker).interactionData?.highlighted,
       );
 
       (highlightedMarkersByType as Record<string, unknown>)[type] = highlightedMarkers;
@@ -58,6 +59,7 @@ const withHighlights = (
           }}
         />
         <Cover
+          // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
           color={[0, 0, 0, hasHighlightedMarkers ? 0.6 : 0]}
           layerIndex={LAYER_INDEX_HIGHLIGHT_OVERLAY}
           overwriteDepthBuffer

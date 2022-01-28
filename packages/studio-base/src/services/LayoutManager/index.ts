@@ -311,7 +311,7 @@ export default class LayoutManager implements ILayoutManager {
         this.remote != undefined &&
         name != undefined &&
         localLayout.syncInfo != undefined &&
-        localLayout.syncInfo?.status !== "new";
+        localLayout.syncInfo.status !== "new";
       const result = await this.local.runExclusive(
         async (local) =>
           await local.put({

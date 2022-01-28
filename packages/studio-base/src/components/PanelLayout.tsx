@@ -164,7 +164,7 @@ export function UnconnectedPanelLayout(props: Props): React.ReactElement {
   );
   const bodyToRender = useMemo(
     () =>
-      layout != undefined || layout === "" ? (
+      layout != undefined ? (
         <MosaicWithoutDragDropContext
           renderTile={renderTile}
           className="mosaic-foxglove-theme" // prevent the default mosaic theme from being applied

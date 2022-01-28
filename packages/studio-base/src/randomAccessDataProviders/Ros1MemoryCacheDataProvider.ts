@@ -322,6 +322,7 @@ export default class Ros1MemoryCacheDataProvider implements RandomAccessDataProv
       for (const [topic, msgDef] of Object.entries(msgDefs.parsedMessageDefinitionsByTopic)) {
         this._lazyMessageReadersByTopic.set(topic, new LazyMessageReader(msgDef));
       }
+      // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
     } else if (msgDefs.type === "raw") {
       for (const [topic, rawMsgDef] of Object.entries(msgDefs.messageDefinitionsByTopic)) {
         const msgDef = parseMessageDefinition(rawMsgDef);

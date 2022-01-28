@@ -13,6 +13,7 @@
 
 import { ColorMode } from "@foxglove/studio-base/panels/ThreeDimensionalViz/TopicSettingsEditor/PointCloudSettingsEditor";
 import { PointField } from "@foxglove/studio-base/types/Messages";
+import { mightActuallyBePartial } from "@foxglove/studio-base/util/mightActuallyBePartial";
 
 import { FieldReader, Uint8Reader, getReader } from "./readers";
 import { DATATYPE, VertexBuffer } from "./types";
@@ -181,7 +182,7 @@ export function createColorBuffer({
   }
 
   if (colorMode.mode === "rgb") {
-    const rgbField = fields.rgb ?? fields.rgba;
+    const rgbField = mightActuallyBePartial(fields.rgb ?? fields.rgba);
     if (!rgbField) {
       throw new Error("Cannot create color buffer in rgb mode without an rgb(a) field");
     }
@@ -203,7 +204,8 @@ export function createColorBuffer({
     return extractValues({ data, readers, stride, pointCount });
   }
 
-  const colorFieldName = colorMode.colorField ?? (fields.rgba ? "rgba" : "rgb");
+  const colorFieldName =
+    mightActuallyBePartial(colorMode).colorField ?? (fields.rgba ? "rgba" : "rgb");
   const colorField = fields[colorFieldName];
   if (!colorField) {
     throw new Error(`Cannot create color buffer without ${colorFieldName} field`);

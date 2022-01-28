@@ -67,7 +67,7 @@ export default function AccountInfo(props: { currentUser?: User }): JSX.Element 
             }}
           />
           <Stack justifyContent="center" spacing={0.5}>
-            <Text variant="medium">{props.currentUser.email ?? "(no email address)"}</Text>
+            <Text variant="medium">{props.currentUser.email}</Text>
             <Text
               variant="smallPlus"
               styles={{ root: { color: theme.semanticColors.bodySubtext } }}

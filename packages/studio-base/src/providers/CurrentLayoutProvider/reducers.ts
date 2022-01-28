@@ -22,6 +22,7 @@ import {
   getLeaves,
   MosaicNode,
 } from "react-mosaic-component";
+import { MarkOptional } from "ts-essentials";
 
 import { filterMap } from "@foxglove/den/collection";
 import {
@@ -221,7 +222,15 @@ const splitPanel = (
 
 const swapPanel = (
   panelsState: PanelsState,
-  { tabId, originalId, type, config, relatedConfigs, root, path }: SwapPanelPayload,
+  {
+    tabId,
+    originalId,
+    type,
+    config,
+    relatedConfigs,
+    root,
+    path,
+  }: MarkOptional<SwapPanelPayload, "originalId">,
 ): PanelsState => {
   const newId = getPanelIdForType(type);
   let newPanelsState = { ...panelsState };
@@ -676,21 +685,14 @@ const endDrag = (panelsState: PanelsState, dragPayload: EndDragPayload): PanelsS
   const targetTabConfig =
     targetTabId != undefined ? (originalSavedProps[targetTabId] as TabPanelConfig) : undefined;
   const panelIdsInsideTabPanels =
-    (sourceTabId != undefined && getPanelIdsInsideTabPanels([sourceTabId], originalSavedProps)) ||
-    [];
+    sourceTabId != undefined ? getPanelIdsInsideTabPanels([sourceTabId], originalSavedProps) : [];
 
   const sourceTabChildConfigs = filterMap(panelIdsInsideTabPanels, (id) => {
     const config = originalSavedProps[id];
     return config ? { id, config } : undefined;
   });
 
-  if (
-    withinSameTab &&
-    sourceTabConfig &&
-    sourceTabId != undefined &&
-    position != undefined &&
-    destinationPath != undefined
-  ) {
+  if (withinSameTab && sourceTabConfig && position != undefined && destinationPath != undefined) {
     return dragWithinSameTab(panelsState, {
       originalLayout,
       sourceTabId,
@@ -702,13 +704,7 @@ const endDrag = (panelsState: PanelsState, dragPayload: EndDragPayload): PanelsS
     });
   }
 
-  if (
-    toMainFromTab &&
-    sourceTabConfig &&
-    sourceTabId != undefined &&
-    position != undefined &&
-    destinationPath != undefined
-  ) {
+  if (toMainFromTab && sourceTabConfig && position != undefined && destinationPath != undefined) {
     return dragToMainFromTab(panelsState, {
       originalLayout,
       sourceTabId,
@@ -720,7 +716,7 @@ const endDrag = (panelsState: PanelsState, dragPayload: EndDragPayload): PanelsS
     });
   }
 
-  if (toTabfromMain && targetTabId != undefined) {
+  if (toTabfromMain) {
     return dragToTabFromMain(panelsState, {
       originalLayout,
       panelId,
@@ -733,7 +729,7 @@ const endDrag = (panelsState: PanelsState, dragPayload: EndDragPayload): PanelsS
     });
   }
 
-  if (toTabfromTab && sourceTabConfig && sourceTabId != undefined && targetTabId != undefined) {
+  if (toTabfromTab && sourceTabConfig) {
     return dragToTabFromTab(panelsState, {
       originalLayout,
       panelId,

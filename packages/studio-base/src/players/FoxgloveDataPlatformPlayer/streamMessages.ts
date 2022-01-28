@@ -62,7 +62,7 @@ export default async function* streamMessages({
   if (!response.body) {
     throw new Error("Unable to stream response body");
   }
-  const streamReader = response.body?.getReader();
+  const streamReader = response.body.getReader();
 
   const messageReadersByChannelId = new Map<number, MessageReader>();
 

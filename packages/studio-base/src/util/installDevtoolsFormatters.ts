@@ -17,6 +17,7 @@
 import seedrandom from "seedrandom";
 
 import { isTime } from "@foxglove/rostime";
+import { mightActuallyBePartial } from "@foxglove/studio-base/util/mightActuallyBePartial";
 
 type HtmlTemplate = unknown;
 type DevtoolFormatterConfig = {
@@ -93,6 +94,6 @@ const timeFormatter: DevtoolFormatter = (() => {
 })();
 
 export default function installDevtoolsFormatters(): void {
-  window.devtoolsFormatters = window.devtoolsFormatters ?? [];
+  window.devtoolsFormatters = mightActuallyBePartial(window).devtoolsFormatters ?? [];
   window.devtoolsFormatters.push(timeFormatter);
 }

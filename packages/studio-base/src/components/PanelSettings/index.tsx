@@ -134,13 +134,13 @@ export default function PanelSettings({
     <SidebarContent title={`${panelInfo.title} panel settings`}>
       {shareModal}
       <Stack spacing={2} alignItems="flex-start">
-        {panelInfo?.help != undefined && (
+        {panelInfo.help != undefined && (
           <div>
             <Text styles={{ root: { color: theme.palette.neutralTertiary } }}>
               See docs{" "}
               <Link
                 onClick={() => {
-                  setHelpInfo({ title: panelInfo?.type, content: panelInfo?.help });
+                  setHelpInfo({ title: panelInfo.type, content: panelInfo.help });
                   openHelp();
                 }}
               >

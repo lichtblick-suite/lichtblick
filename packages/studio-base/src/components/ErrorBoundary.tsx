@@ -46,8 +46,8 @@ export default class ErrorBoundary extends Component<PropsWithChildren<Props>, S
       );
       return (
         <ErrorDisplay
-          error={this.state.currentError?.error}
-          errorInfo={this.state.currentError?.errorInfo}
+          error={this.state.currentError.error}
+          errorInfo={this.state.currentError.errorInfo}
           content={
             <p>
               Something went wrong in the app.{" "}

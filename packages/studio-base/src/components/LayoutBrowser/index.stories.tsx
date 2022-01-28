@@ -50,7 +50,7 @@ function WithSetup(Child: Story, ctx: StoryContext): JSX.Element {
     () =>
       new MockLayoutStorage(
         LayoutManager.LOCAL_STORAGE_NAMESPACE,
-        (ctx.parameters?.mockLayouts as Layout[] | undefined) ?? [
+        (ctx.parameters.mockLayouts as Layout[] | undefined) ?? [
           {
             id: "not-current" as LayoutID,
             name: "Another Layout",
@@ -76,7 +76,7 @@ function WithSetup(Child: Story, ctx: StoryContext): JSX.Element {
           },
         ],
       ),
-    [ctx.parameters?.mockLayouts],
+    [ctx.parameters.mockLayouts],
   );
   const userProfile = useMemo(
     () => ({

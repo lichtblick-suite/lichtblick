@@ -57,7 +57,7 @@ function SimplePanel({ context }: { context: PanelExtensionContext }) {
     context.watch("parameters");
     context.onRender = (renderState: RenderState, done) => {
       if (renderState.parameters != undefined) {
-        setParameters(renderState.parameters ?? new Map());
+        setParameters(renderState.parameters);
       }
       done();
     };

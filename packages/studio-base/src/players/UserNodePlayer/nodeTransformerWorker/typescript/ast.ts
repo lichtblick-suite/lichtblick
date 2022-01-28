@@ -99,6 +99,7 @@ const findImportedTypeDeclaration = (
   }
 
   const declaredType = checker.getDeclaredTypeOfSymbol(symbol);
+  // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
   return findDeclaration(declaredType.symbol ?? declaredType.aliasSymbol, kind);
 };
 
@@ -404,10 +405,6 @@ export const constructDatatypes = (
           isNodeFromRosModule(typeLiteral) && messageDefinition != undefined
             ? messageDefinition
             : `${currentDatatype}/${name}`;
-
-        if (nestedType == undefined) {
-          throw new Error("could not find nested type");
-        }
 
         const typeParamMap = ts.isInterfaceDeclaration(tsNode)
           ? buildTypeMapFromParams(tsNode.typeParameters, typeMap)

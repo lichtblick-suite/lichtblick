@@ -28,7 +28,7 @@ describe("<DocumentDropListener>", () => {
     window.addEventListener("dragover", windowDragoverHandler);
 
     wrapper = document.createElement("div");
-    document.body?.appendChild(wrapper);
+    document.body.appendChild(wrapper);
 
     ReactDOM.render(
       <div>
@@ -68,7 +68,7 @@ describe("<DocumentDropListener>", () => {
   });
 
   afterEach(() => {
-    document.body?.removeChild(wrapper);
+    document.body.removeChild(wrapper);
     window.removeEventListener("dragover", windowDragoverHandler);
   });
 });

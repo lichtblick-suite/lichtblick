@@ -61,7 +61,7 @@ export function parseTimeStr(str: string, timezone?: string): Time | undefined {
       ? moment.tz(str, "YYYY-MM-DD h:mm:ss.SSS A z", timezone)
       : moment(str, "YYYY-MM-DD h:mm:ss.SSS A z");
   const date = newMomentTimeObj.toDate();
-  const result = (newMomentTimeObj.isValid() && fromDate(date)) || undefined;
+  const result = newMomentTimeObj.isValid() ? fromDate(date) : undefined;
 
   if (!result || result.sec <= 0 || result.nsec < 0) {
     return undefined;

@@ -23,6 +23,7 @@ import { Script } from "@foxglove/studio-base/panels/NodePlayground/script";
 import vsStudioTheme from "@foxglove/studio-base/panels/NodePlayground/theme/vs-studio.json";
 import { getNodeProjectConfig } from "@foxglove/studio-base/players/UserNodePlayer/nodeTransformerWorker/typescript/projectConfig";
 import inScreenshotTests from "@foxglove/studio-base/stories/inScreenshotTests";
+import { mightActuallyBePartial } from "@foxglove/studio-base/util/mightActuallyBePartial";
 
 const VS_STUDIO_THEME = "vs-studio";
 
@@ -44,7 +45,8 @@ type Props = {
 // https://github.com/microsoft/vscode/blob/master/src/vs/editor/standalone/browser/standaloneCodeServiceImpl.ts
 const gotoSelection = (editor: monacoApi.editor.IEditor, selection?: monacoApi.IRange) => {
   if (selection) {
-    if (selection.endLineNumber != undefined && selection.endColumn != undefined) {
+    const maybeSelection = mightActuallyBePartial(selection);
+    if (maybeSelection.endLineNumber != undefined && maybeSelection.endColumn != undefined) {
       // These fields indicate a range was selected, set the range and reveal it.
       editor.setSelection(selection);
       editor.revealRangeInCenter(

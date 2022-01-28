@@ -83,7 +83,7 @@ const useStyles = makeStyles((theme) => ({
 
 const fontFamily = fonts.SANS_SERIF;
 const fontSize = "12px";
-let textMeasure: textMetrics.TextMeasure;
+let textMeasure: undefined | textMetrics.TextMeasure;
 function measureText(text: string): number {
   if (textMeasure == undefined) {
     textMeasure = textMetrics.init({ fontFamily, fontSize });
@@ -100,7 +100,7 @@ type Props = {
   actions: TabActions;
   tabCount: number;
   tabIndex: number;
-  tabTitle: string;
+  tabTitle?: string;
 };
 
 export function ToolbarTab(props: Props): JSX.Element {
@@ -108,7 +108,7 @@ export function ToolbarTab(props: Props): JSX.Element {
     tabIndex,
     isActive,
     tabCount,
-    tabTitle,
+    tabTitle = "",
     isDragging,
     actions,
     innerRef,
@@ -118,7 +118,7 @@ export function ToolbarTab(props: Props): JSX.Element {
   const styles = useStyles();
 
   const inputRef = useRef<HTMLInputElement>(ReactNull);
-  const [title, setTitle] = useState<string>(tabTitle ?? "");
+  const [title, setTitle] = useState<string>(tabTitle);
   const [editingTitle, setEditingTitle] = useState<boolean>(false);
   const onChangeTitleInput = useCallback(
     (ev: React.ChangeEvent<HTMLInputElement>) => setTitle(ev.target.value),

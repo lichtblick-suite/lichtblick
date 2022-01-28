@@ -67,6 +67,7 @@ export default class PinholeCameraModel {
     }
 
     // Figure out how to handle the distortion
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
     if (distortion_model === "plumb_bob" || distortion_model === "rational_polynomial") {
       this._distortionState = D[0] === 0.0 ? DISTORTION_STATE.NONE : DISTORTION_STATE.CALIBRATED;
     } else {

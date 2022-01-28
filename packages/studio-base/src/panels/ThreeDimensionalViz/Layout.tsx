@@ -435,7 +435,7 @@ export default function Layout({
 
     const variables = Object.entries(colorOverrideByVariable ?? {});
     return variables.reduce((activeColorOverrideMatchers, [variable, override]) => {
-      return override?.active ?? false
+      return override.active ?? false
         ? [
             ...activeColorOverrideMatchers,
             ...(linkedGlobalVariablesByName[variable] ?? []).map(({ topic, markerKeyPath }) => {

@@ -208,8 +208,8 @@ export default function Table({
                 {headerGroup.headers.map((column) => {
                   return (
                     <STableHeader
-                      isSortedAsc={(column.isSorted ?? false) && !(column.isSortedDesc ?? false)}
-                      isSortedDesc={(column.isSorted ?? false) && (column.isSortedDesc ?? false)}
+                      isSortedAsc={column.isSorted && !(column.isSortedDesc ?? false)}
+                      isSortedDesc={column.isSorted && (column.isSortedDesc ?? false)}
                       id={column.id}
                       {...column.getHeaderProps(column.getSortByToggleProps())}
                       key={column.id}

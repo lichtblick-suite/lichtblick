@@ -2644,6 +2644,7 @@ __metadata:
     text-metrics: 2.0.9
     three: 0.136.0
     tinycolor2: 1.4.2
+    ts-essentials: 9.1.2
     ts-loader: 9.2.6
     tsconfig-paths: 3.12.0
     ttypescript: 1.5.13
@@ -23562,6 +23563,15 @@ __metadata:
   version: 0.2.0
   resolution: "ts-easing@npm:0.2.0"
   checksum: e67ee862acca3b2e2718e736f31999adcef862d0df76d76a0e138588728d8a87dfec9978556044640bd0e90203590ad88ac2fe8746d0e9959b8d399132315150
+  languageName: node
+  linkType: hard
+
+"ts-essentials@npm:9.1.2":
+  version: 9.1.2
+  resolution: "ts-essentials@npm:9.1.2"
+  peerDependencies:
+    typescript: ">=4.1.0"
+  checksum: 3b14d8511557bd1bdec068505074ee41d3b1cdb052d3c66a5046f00b483bd4722d529b32a99cca424a9d7db9caff7ba108acbf344a5477a741e0616af5649b47
   languageName: node
   linkType: hard
 

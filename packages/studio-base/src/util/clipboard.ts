@@ -11,11 +11,10 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
+import { mightActuallyBePartial } from "@foxglove/studio-base/util/mightActuallyBePartial";
+
 function fallbackCopy(text: string) {
-  const { body } = document;
-  if (body == undefined) {
-    throw new Error("Could not find body, failed to copy.");
-  }
+  const body = document.body;
   const el = document.createElement("textarea");
   body.appendChild(el);
   el.value = text;
@@ -29,7 +28,7 @@ export default {
   async copy(text: string): Promise<void> {
     // attempt to use the new async clipboard methods. If those are not available or fail, fallback to the old
     // `execCommand` method.
-    if (navigator?.clipboard?.writeText != undefined) {
+    if (mightActuallyBePartial(navigator.clipboard).writeText != undefined) {
       try {
         return await navigator.clipboard.writeText(text);
       } catch (error) {

@@ -151,7 +151,7 @@ function TwoDimensionalPlot(props: Props) {
       return [];
     }
 
-    const { lines = [], points = [], polygons = [] } = message ?? {};
+    const { lines = [], points = [], polygons = [] } = message;
 
     const linesDatasets = filterMap(lines, (line) => {
       const { data, ...picked } = pick(line, keysToPick);

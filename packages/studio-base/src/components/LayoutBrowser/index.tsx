@@ -483,7 +483,7 @@ export default function LayoutBrowser({
                   <DefaultButton
                     text="Sync"
                     onClick={async () => {
-                      await layoutDebug.syncNow?.();
+                      await layoutDebug.syncNow();
                       await reloadLayouts();
                     }}
                     styles={{

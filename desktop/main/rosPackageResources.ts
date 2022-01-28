@@ -17,9 +17,9 @@ const log = Logger.getLogger(__filename);
 /** Extract a package name from a ROS package.xml file. */
 function rosPackageName(packageXmlContents: string) {
   const doc = new DOMParser().parseFromString(packageXmlContents, "text/xml");
-  const packageName = Array.from(doc.documentElement?.childNodes ?? []).find(
-    (n) => n.nodeName.toLowerCase() === "name",
-  )?.textContent;
+  const packageName = Array.from(
+    (doc as Partial<typeof doc>).documentElement?.childNodes ?? [],
+  ).find((n) => n.nodeName.toLowerCase() === "name")?.textContent;
   return packageName ?? undefined;
 }
 
@@ -104,7 +104,7 @@ export async function findRosPackageRoot(
 
   // Search options.rosPackagePath
   if (options?.rosPackagePath) {
-    const rosPackagePaths = options?.rosPackagePath.split(path.delimiter);
+    const rosPackagePaths = options.rosPackagePath.split(path.delimiter);
     for (const rosPackagePath of rosPackagePaths) {
       triedPaths.push(rosPackagePath);
       const packages = await listRosPackages(rosPackagePath);

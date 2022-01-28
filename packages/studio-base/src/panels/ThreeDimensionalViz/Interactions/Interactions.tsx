@@ -26,6 +26,7 @@ import { getInteractionData } from "@foxglove/studio-base/panels/ThreeDimensiona
 import { ThreeDimensionalVizConfig } from "@foxglove/studio-base/panels/ThreeDimensionalViz/types";
 import { PointCloud2 } from "@foxglove/studio-base/types/Messages";
 import { SaveConfig, PanelConfig } from "@foxglove/studio-base/types/panels";
+import { maybeCast } from "@foxglove/studio-base/util/maybeCast";
 
 import LinkedGlobalVariableList from "./LinkedGlobalVariableList";
 import PointCloudDetails from "./PointCloudDetails";
@@ -59,7 +60,7 @@ const InteractionsBaseComponent = React.memo<PropsWithConfig>(function Interacti
 
   const { originalMessage } = selectedInteractionData ?? {};
 
-  const isPointCloud = (object as { type?: number })?.type === 102;
+  const isPointCloud = maybeCast<{ type?: number }>(object)?.type === 102;
   const maybeFullyDecodedObject = React.useMemo(
     () =>
       isPointCloud

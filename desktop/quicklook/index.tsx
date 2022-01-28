@@ -122,8 +122,8 @@ function Root(): JSX.Element {
   }, [shouldLoadMoreInfo, loadMoreInfo]);
 
   const fileStats = state.value?.fileStats;
-  const fileInfo = moreInfo?.value ?? state.value?.fileInfo;
-  const fileError = moreInfo?.error ?? state.value?.error;
+  const fileInfo = moreInfo.value ?? state.value?.fileInfo;
+  const fileError = moreInfo.error ?? state.value?.error;
 
   return (
     <div>

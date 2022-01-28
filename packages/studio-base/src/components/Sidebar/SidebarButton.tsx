@@ -46,10 +46,10 @@ export default function SidebarButton(props: SidebarButtonProps): JSX.Element {
       }
 
       if (!badge) {
-        return defaultRender?.(buttonProps);
+        return defaultRender(buttonProps);
       }
 
-      return <StatusBadge count={badge?.count}>{defaultRender?.(buttonProps)}</StatusBadge>;
+      return <StatusBadge count={badge.count}>{defaultRender(buttonProps)}</StatusBadge>;
     },
     [badge],
   );

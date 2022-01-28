@@ -51,7 +51,7 @@ function useCombinedReadySignal(
 }
 
 function WithContextProviders(Child: Story, ctx: StoryContext): JSX.Element {
-  if (ctx.parameters?.useReadySignal === true) {
+  if (ctx.parameters.useReadySignal === true) {
     const sig = signal();
     ctx.parameters.storyReady = sig;
     ctx.parameters.readySignal = () => {

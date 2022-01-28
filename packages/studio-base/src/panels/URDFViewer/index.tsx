@@ -70,6 +70,7 @@ function URDFViewer({ config, saveConfig }: Props) {
   const [selectedAssetId, setSelectedAssetId] = useState<string | undefined>();
 
   const model = useMemo(() => {
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
     const asset = assets.find(({ type, uuid }) => uuid === selectedAssetId && type === "urdf");
     return asset?.model;
   }, [assets, selectedAssetId]);
@@ -80,6 +81,7 @@ function URDFViewer({ config, saveConfig }: Props) {
     const prevAssetIds = new Set(prevAssets.current?.map(({ uuid }) => uuid));
     prevAssets.current = assets;
     for (const asset of assets) {
+      // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
       if (!prevAssetIds.has(asset.uuid) && asset.type === "urdf") {
         setSelectedAssetId(asset.uuid);
         return;
@@ -192,6 +194,7 @@ function URDFViewer({ config, saveConfig }: Props) {
 
   const assetOptions: IDropdownOption[] = useMemo(() => {
     const options = filterMap(assets, (asset) =>
+      // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
       asset.type === "urdf" ? { key: asset.uuid, text: asset.name } : undefined,
     );
     if (robotDescriptionAsset != undefined) {
@@ -263,7 +266,7 @@ function URDFViewer({ config, saveConfig }: Props) {
                 }}
               />
             </Box>
-            {useCustomJointValues && model && (
+            {useCustomJointValues && (
               <JointValueSliders
                 model={model}
                 customJointValues={customJointValues}

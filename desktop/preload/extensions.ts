@@ -24,7 +24,7 @@ type ExtensionPackageJson = { name: string; version: string; main: string; publi
  * @param pkgJson Parsed package.json file
  * @returns An identifier string such as "foxglove.studio-extension-turtlesim"
  */
-function getPackageId(pkgJson: ExtensionPackageJson): string {
+function getPackageId(pkgJson: undefined | ExtensionPackageJson): string {
   if (pkgJson == undefined) {
     throw new Error(`Missing package.json`);
   }

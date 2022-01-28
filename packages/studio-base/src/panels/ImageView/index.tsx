@@ -41,6 +41,7 @@ import { MessageEvent } from "@foxglove/studio-base/players/types";
 import inScreenshotTests from "@foxglove/studio-base/stories/inScreenshotTests";
 import { CameraInfo, StampedMessage } from "@foxglove/studio-base/types/Messages";
 import { PanelConfigSchema, SaveConfig } from "@foxglove/studio-base/types/panels";
+import { mightActuallyBePartial } from "@foxglove/studio-base/util/mightActuallyBePartial";
 import naturalSort from "@foxglove/studio-base/util/naturalSort";
 import { getTopicsByTopicName } from "@foxglove/studio-base/util/selectors";
 import { getSynchronizingReducers } from "@foxglove/studio-base/util/synchronizeMessages";
@@ -285,7 +286,7 @@ function ImageView(props: Props) {
 
   // Namespaces represent marker topics based on the camera topic prefix (e.g. "/camera_front_medium")
   const { allCameraNamespaces, imageTopicsByNamespace, allImageTopics } = useMemo(() => {
-    const imageTopics = (topics ?? []).filter(({ datatype }) => IMAGE_DATATYPES.includes(datatype));
+    const imageTopics = topics.filter(({ datatype }) => IMAGE_DATATYPES.includes(datatype));
     const topicsByNamespace = groupTopics(imageTopics);
     return {
       allImageTopics: imageTopics,
@@ -296,12 +297,13 @@ function ImageView(props: Props) {
 
   // If no cameraTopic is selected, automatically select the first available image topic
   useEffect(() => {
-    if (cameraTopic == undefined || cameraTopic === "") {
+    const maybeCameraTopic = mightActuallyBePartial(config).cameraTopic;
+    if (maybeCameraTopic == undefined || maybeCameraTopic === "") {
       if (allImageTopics[0] && allImageTopics[0].name !== "") {
         saveConfig({ cameraTopic: allImageTopics[0].name });
       }
     }
-  }, [allImageTopics, cameraTopic, saveConfig]);
+  }, [allImageTopics, config, saveConfig]);
 
   const imageMarkerDatatypes = useMemo(
     () => [

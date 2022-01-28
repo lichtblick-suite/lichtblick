@@ -416,6 +416,7 @@ export default class RandomAccessPlayer implements Player {
 
     // if we paused while reading then do not emit messages
     // and exit the read loop
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
     if (!this._isPlaying) {
       return;
     }
@@ -605,6 +606,7 @@ export default class RandomAccessPlayer implements Player {
     // started loading them. Note that for the latter part just checking for `isPlaying`
     // is not enough because the user might have started playback and then paused again!
     // Therefore we really need something like `this._cancelSeekBackfill`.
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
     if (!this._cancelSeekBackfill) {
       // similar to _tick(), we set the next start time past where we have read
       // this happens after reading and confirming that playback or other seeking hasn't happened

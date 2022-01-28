@@ -12,7 +12,7 @@ import plist, { PlistObject } from "plist";
 
 async function getKeychainFile(context: AfterPackContext): Promise<string | undefined> {
   const macPackager = context.packager as MacPackager;
-  if (macPackager.codeSigningInfo == undefined) {
+  if ((macPackager as Partial<typeof macPackager>).codeSigningInfo == undefined) {
     log.error("No code signing info available.");
     return;
   }

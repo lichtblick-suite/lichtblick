@@ -24,8 +24,8 @@ const getMaybeLogStall = (
   extensionPoint: ExtensionPoint,
   stallThresholdMs: number,
 ): ((buffer: Uint8Array) => void) => {
-  let firstDataReceivedTime: number;
-  let lastDataReceivedTime: number;
+  let firstDataReceivedTime: undefined | number;
+  let lastDataReceivedTime: undefined | number;
   let bytesReceived = 0;
   const startOfRequest = Date.now();
   return (buffer: Uint8Array) => {
