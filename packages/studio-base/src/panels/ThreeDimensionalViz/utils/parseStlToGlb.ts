@@ -5,6 +5,8 @@
 // The STL parsing logic is adapted from the MIT licensed ts-three-stl-loader at
 // <https://github.com/GarrettCannon/ts-three-stl-loader/blob/8db9d94fb609aa010555b70f99c37083c2ca0814/src/index.ts>
 
+import { quat } from "gl-matrix";
+
 import { GlbModel } from "@foxglove/studio-base/panels/ThreeDimensionalViz/utils/GlbModel";
 import type { GlTf } from "@foxglove/studio-base/panels/ThreeDimensionalViz/utils/gltf";
 
@@ -78,7 +80,17 @@ export function parseStlToGlb(buffer: ArrayBuffer): GlbModel | undefined {
       },
     ],
     meshes: [{ primitives: [{ attributes: { POSITION: 0, NORMAL: 1 }, indices: 2, material: 0 }] }],
-    nodes: [{ mesh: 0, rotation: [-Math.SQRT1_2, 0, 0, Math.SQRT1_2] }], // Z-up to Y-up
+    nodes: [
+      {
+        mesh: 0,
+        // Z-up to Y-up
+        rotation: quat.rotateZ(
+          [0, 0, 0, 0],
+          quat.rotateX([0, 0, 0, 0], [0, 0, 0, 1], -Math.PI / 2),
+          -Math.PI / 2,
+        ) as [number, number, number, number],
+      },
+    ],
     scene: 0,
     scenes: [{ nodes: [0] }],
   };

@@ -402,6 +402,11 @@ const configSchema: PanelConfigSchema<ThreeDimensionalVizConfig> = [
     title: "Automatically determine background color based on the color scheme",
   },
   { key: "customBackgroundColor", type: "color", title: "Background color" },
+  {
+    key: "ignoreColladaUpAxis",
+    type: "toggle",
+    title: "Ignore <up_axis> in Collada meshes",
+  },
 ];
 
 BaseRenderer.displayName = "ThreeDimensionalViz";

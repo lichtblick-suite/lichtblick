@@ -235,6 +235,7 @@ export default function Layout({
     disableAutoOpenClickedObject = false,
     useThemeBackgroundColor,
     customBackgroundColor,
+    ignoreColladaUpAxis = false,
   },
 }: Props): React.ReactElement {
   const [filterText, setFilterText] = useState(""); // Topic tree text for filtering to see certain topics.
@@ -735,6 +736,8 @@ export default function Layout({
       : "#303030"
     : customBackgroundColor;
 
+  const loadModelOptions = useMemo(() => ({ ignoreColladaUpAxis }), [ignoreColladaUpAxis]);
+
   return (
     <ThreeDimensionalVizContext.Provider value={threeDimensionalVizContextValue}>
       <TopicTreeContext.Provider value={topicTreeData}>
@@ -819,6 +822,7 @@ export default function Layout({
               setSearchTextMatches={setSearchTextMatches}
               searchTextMatches={searchTextMatches}
               selectedMatchIndex={selectedMatchIndex}
+              loadModelOptions={loadModelOptions}
             >
               {children}
               <div>

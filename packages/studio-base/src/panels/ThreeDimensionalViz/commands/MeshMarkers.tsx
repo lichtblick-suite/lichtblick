@@ -15,6 +15,7 @@ import { useToasts } from "react-toast-notifications";
 
 import { CommonCommandProps, GLTFScene, parseGLB } from "@foxglove/regl-worldview";
 import { AppSetting } from "@foxglove/studio-base/AppSetting";
+import RemountOnValueChange from "@foxglove/studio-base/components/RemountOnValueChange";
 import { rewritePackageUrl } from "@foxglove/studio-base/context/AssetsContext";
 import { useAppConfigurationValue } from "@foxglove/studio-base/hooks/useAppConfigurationValue";
 import notFoundModelURL from "@foxglove/studio-base/panels/ThreeDimensionalViz/commands/404.glb";
@@ -25,6 +26,7 @@ import { MeshMarker } from "@foxglove/studio-base/types/Messages";
 
 type MeshMarkerProps = CommonCommandProps & {
   markers: MeshMarker[];
+  loadModelOptions: LoadModelOptions;
 };
 
 async function loadNotFoundModel(): Promise<GlbModel> {
@@ -38,7 +40,10 @@ async function loadNotFoundModel(): Promise<GlbModel> {
 // https://github.com/Ultimaker/Cura/issues/4141
 const STL_MIME_TYPES = ["model/stl", "model/x.stl-ascii", "model/x.stl-binary", "application/sla"];
 
-async function loadModel(url: string): Promise<GlbModel | undefined> {
+export type LoadModelOptions = {
+  ignoreColladaUpAxis?: boolean;
+};
+async function loadModel(url: string, options: LoadModelOptions): Promise<GlbModel | undefined> {
   const GLB_MAGIC = 0x676c5446; // "glTF"
 
   const response = await fetch(url);
@@ -67,7 +72,7 @@ async function loadModel(url: string): Promise<GlbModel | undefined> {
   }
 
   if (/\.dae$/i.test(url)) {
-    return await parseDaeToGlb(buffer);
+    return await parseDaeToGlb(buffer, options);
   }
 
   throw new Error(`Unknown mesh resource type at ${url}`);
@@ -76,12 +81,14 @@ async function loadModel(url: string): Promise<GlbModel | undefined> {
 class ModelCache {
   private models = new Map<string, Promise<GlbModel | undefined>>();
 
+  constructor(private loadModelOptions: LoadModelOptions) {}
+
   async load(url: string, reportError: (_: Error) => void): Promise<GlbModel | undefined> {
     let promise = this.models.get(url);
     if (promise) {
       return await promise;
     }
-    promise = loadModel(url).catch(async (err) => {
+    promise = loadModel(url, this.loadModelOptions).catch(async (err) => {
       reportError(err as Error);
       return await loadNotFoundModel();
     });
@@ -90,10 +97,10 @@ class ModelCache {
   }
 }
 
-function MeshMarkers({ markers, layerIndex }: MeshMarkerProps): ReactElement {
+function MeshMarkers({ markers, loadModelOptions, layerIndex }: MeshMarkerProps): ReactElement {
   const models: React.ReactNode[] = [];
 
-  const modelCache = useMemo(() => new ModelCache(), []);
+  const modelCache = useMemo(() => new ModelCache(loadModelOptions), [loadModelOptions]);
   const [rosPackagePath] = useAppConfigurationValue<string>(AppSetting.ROS_PACKAGE_PATH);
   const { addToast } = useToasts();
   const reportError = useCallback(
@@ -126,7 +133,7 @@ function MeshMarkers({ markers, layerIndex }: MeshMarkerProps): ReactElement {
     );
   }
 
-  return <>{...models}</>;
+  return <RemountOnValueChange value={modelCache}>{...models}</RemountOnValueChange>;
 }
 
 export default MeshMarkers;

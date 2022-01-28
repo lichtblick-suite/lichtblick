@@ -102,6 +102,7 @@ export type ThreeDimensionalVizConfig = {
   autoSyncCameraState?: boolean;
   colorOverrideByVariable?: ColorOverrideByVariable;
   disableAutoOpenClickedObject?: boolean;
+  ignoreColladaUpAxis?: boolean;
 } & PreviousThreeDimensionalVizConfig;
 
 /**

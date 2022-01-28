@@ -33,7 +33,9 @@ import {
   PointClouds,
   PoseMarkers,
 } from "@foxglove/studio-base/panels/ThreeDimensionalViz/commands";
-import MeshMarkers from "@foxglove/studio-base/panels/ThreeDimensionalViz/commands/MeshMarkers";
+import MeshMarkers, {
+  LoadModelOptions,
+} from "@foxglove/studio-base/panels/ThreeDimensionalViz/commands/MeshMarkers";
 import {
   LAYER_INDEX_TEXT,
   LAYER_INDEX_OCCUPANCY_GRIDS,
@@ -103,6 +105,7 @@ export type WorldMarkerProps = {
   markersByType: InteractiveMarkersByType;
   clearCachedMarkers: boolean;
   cameraDistance: number;
+  loadModelOptions: LoadModelOptions;
 };
 
 // Average a list of color markers into a single output color value. The returned value is the
@@ -137,6 +140,7 @@ export default function WorldMarkers({
   layerIndex,
   markersByType,
   clearCachedMarkers,
+  loadModelOptions,
 }: WorldMarkerProps): JSX.Element {
   const getChildrenForHitmap = useMemo(() => createInstancedGetChildrenForHitmap(1), []);
   const {
@@ -217,7 +221,11 @@ export default function WorldMarkers({
       <Lines getChildrenForHitmap={getChildrenForHitmap} layerIndex={layerIndex}>
         {[...instancedLineList, ...groupedLines]}
       </Lines>
-      <MeshMarkers layerIndex={layerIndex} markers={mesh}></MeshMarkers>
+      <MeshMarkers
+        layerIndex={layerIndex}
+        markers={mesh}
+        loadModelOptions={loadModelOptions}
+      ></MeshMarkers>
     </>
   );
 }
