@@ -25,6 +25,7 @@ import {
 import { InteractionData } from "@foxglove/studio-base/panels/ThreeDimensionalViz/Interactions/types";
 import { PoseSettings } from "@foxglove/studio-base/panels/ThreeDimensionalViz/TopicSettingsEditor/PoseSettingsEditor";
 import { Color, Header, Scale } from "@foxglove/studio-base/types/Messages";
+import { emptyPose } from "@foxglove/studio-base/util/Pose";
 
 type PoseMarker = {
   header: Header;
@@ -70,6 +71,8 @@ function PoseMarkers({ markers, layerIndex }: PoseMarkerProps): ReactElement {
     const tailPoint = vec3.scaleAndAdd([0, 0, 0], pos, dir, -0.88) as Vec3;
     arrowMarkers.push({
       ...newMarker,
+      // Reset the pose since this information is incorporated into the arrow tip and tail
+      pose: emptyPose(),
       points: [vec3ToPoint(tailPoint), vec3ToPoint(tipPoint)],
     });
   });
