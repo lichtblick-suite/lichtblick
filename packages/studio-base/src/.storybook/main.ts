@@ -27,6 +27,10 @@ module.exports = {
 
     return {
       ...config,
+      optimization: {
+        ...config.optimization,
+        minimize: false, // disabling minification improves build performance
+      },
       resolve: {
         ...studioWebpackConfig.resolve,
         alias: {
