@@ -347,6 +347,7 @@ export default function Workspace(props: WorkspaceProps): JSX.Element {
           const extension = await extensionLoader.installExtension(data);
           addToast(`Installed extension ${extension.id}`, { appearance: "success" });
         } catch (err) {
+          log.error(err);
           addToast(`Failed to install extension ${file.name}: ${err.message}`, {
             appearance: "error",
           });
@@ -357,7 +358,8 @@ export default function Workspace(props: WorkspaceProps): JSX.Element {
             return;
           }
         } catch (err) {
-          addToast(`Failed to load ${file.name}`, {
+          log.error(err);
+          addToast(`Failed to load ${file.name}: ${err.message}`, {
             appearance: "error",
           });
         }
@@ -392,6 +394,7 @@ export default function Workspace(props: WorkspaceProps): JSX.Element {
             const extension = await extensionLoader.installExtension(data);
             addToast(`Installed extension ${extension.id}`, { appearance: "success" });
           } catch (err) {
+            log.error(err);
             addToast(`Failed to install extension ${file.name}: ${err.message}`, {
               appearance: "error",
             });
@@ -402,7 +405,8 @@ export default function Workspace(props: WorkspaceProps): JSX.Element {
               otherFiles.push(file);
             }
           } catch (err) {
-            addToast(`Failed to load ${file.name}`, {
+            log.error(err);
+            addToast(`Failed to load ${file.name}: ${err.message}`, {
               appearance: "error",
             });
           }
