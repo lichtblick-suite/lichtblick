@@ -181,12 +181,27 @@ export default class RosbridgePlayer implements Player {
       return;
     }
 
+    // getTopicsAndRawTypes might silently hang. When this happens, there is no indication to the user
+    // that the connection is doing anything and studio shows no errors and no data.
+    // This logic adds a warning after 5 seconds (picked arbitrarily) to display a notice to the user.
+    const topicsStallWarningTimeout = setTimeout(() => {
+      this._problems.addProblem("topicsAndRawTypesTimeout", {
+        severity: "warn",
+        message: "Taking too long to get topics and raw types.",
+      });
+
+      this._emitState();
+    }, 5000);
+
     try {
       const result = await new Promise<{
         topics: string[];
         types: string[];
         typedefs_full_text: string[];
       }>((resolve, reject) => rosClient.getTopicsAndRawTypes(resolve, reject));
+
+      clearTimeout(topicsStallWarningTimeout);
+      this._problems.removeProblem("topicsAndRawTypesTimeout");
 
       const topicsMissingDatatypes: string[] = [];
       const topics = [];
@@ -277,6 +292,9 @@ export default class RosbridgePlayer implements Player {
         this._services = new Map();
       }
     } catch (error) {
+      clearTimeout(topicsStallWarningTimeout);
+      this._problems.removeProblem("topicsAndRawTypesTimeout");
+
       this._problems.addProblem("requestTopics:error", {
         severity: "error",
         message: "Failed to fetch topics from rosbridge",

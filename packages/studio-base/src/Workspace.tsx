@@ -205,7 +205,10 @@ export default function Workspace(props: WorkspaceProps): JSX.Element {
 
   // When a player is activated, hide the open dialog.
   useLayoutEffect(() => {
-    if (playerPresence === PlayerPresence.PRESENT) {
+    if (
+      playerPresence === PlayerPresence.PRESENT ||
+      playerPresence === PlayerPresence.INITIALIZING
+    ) {
       setShowOpenDialog(undefined);
     }
   }, [playerPresence]);
