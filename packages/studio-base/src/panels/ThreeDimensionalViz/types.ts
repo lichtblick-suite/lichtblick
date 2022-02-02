@@ -32,6 +32,7 @@ import {
   ColorMarker,
   PoseStamped,
   MeshMarker,
+  GlLineListMarker,
 } from "@foxglove/studio-base/types/Messages";
 
 import { ColorOverrideByVariable, ColorOverride } from "./Layout";
@@ -68,6 +69,7 @@ export interface MarkerCollector {
   pointcloud(arg0: PointCloud): void;
   laserScan(arg0: LaserScan): void;
   instancedLineList(arg0: InstancedLineListMarker): void;
+  glLineList(arg0: GlLineListMarker): void;
 }
 
 export type MouseEventName = "onDoubleClick" | "onMouseMove" | "onMouseDown" | "onMouseUp";

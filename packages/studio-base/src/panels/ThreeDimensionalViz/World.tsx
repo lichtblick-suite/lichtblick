@@ -43,6 +43,7 @@ import {
   CubeListMarker,
   CubeMarker,
   CylinderMarker,
+  GlLineListMarker,
   LineListMarker,
   LineStripMarker,
   MeshMarker,
@@ -114,6 +115,7 @@ function getMarkers({
     sphereList: (o) => markers.sphereList.push(o as Interactive<SphereListMarker>),
     text: (o) => markers.text.push(o as Interactive<TextMarker>),
     triangleList: (o) => markers.triangleList.push(o as unknown as MarkerWithInteractionData),
+    glLineList: (o) => markers.glLineList.push(o as Interactive<GlLineListMarker>),
   };
 
   const args = { add: collector, transforms, renderFrame, fixedFrame, time };
@@ -175,6 +177,7 @@ function World(
     sphereList: [],
     text: [],
     triangleList: [],
+    glLineList: [],
   };
   for (const key in markersRef.current) {
     (markersRef.current as Record<string, unknown[]>)[key]!.length = 0;

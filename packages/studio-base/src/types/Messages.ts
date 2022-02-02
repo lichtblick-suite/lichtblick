@@ -212,6 +212,11 @@ export type TextMarker = Readonly<
   }
 >;
 
+export type GlLineListMarker = Readonly<{
+  color: Float32Array;
+  points: Float32Array;
+}>;
+
 export type MeshMarker = Readonly<
   BaseMarker & {
     type: 10;

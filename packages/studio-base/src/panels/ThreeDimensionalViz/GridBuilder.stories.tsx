@@ -15,9 +15,10 @@ import { storiesOf } from "@storybook/react";
 import { noop } from "lodash";
 import styled from "styled-components";
 
-import { DEFAULT_CAMERA_STATE, Lines, Worldview } from "@foxglove/regl-worldview";
+import { DEFAULT_CAMERA_STATE, Worldview } from "@foxglove/regl-worldview";
 import { TopicSettingsCollection } from "@foxglove/studio-base/panels/ThreeDimensionalViz/SceneBuilder";
 import { GridSettings } from "@foxglove/studio-base/panels/ThreeDimensionalViz/TopicSettingsEditor/GridSettingsEditor";
+import GlLineLists from "@foxglove/studio-base/panels/ThreeDimensionalViz/commands/GlLineLists";
 import { CoordinateFrame } from "@foxglove/studio-base/panels/ThreeDimensionalViz/transforms";
 import useTransforms from "@foxglove/studio-base/panels/ThreeDimensionalViz/useTransforms";
 import {
@@ -26,6 +27,7 @@ import {
   CubeListMarker,
   CubeMarker,
   CylinderMarker,
+  GlLineListMarker,
   InstancedLineListMarker,
   LaserScan,
   LineListMarker,
@@ -55,7 +57,7 @@ const SExpectedResult = styled.div`
 
 class MockMarkerCollector implements MarkerCollector {
   data = {
-    instancedLineList: [] as InstancedLineListMarker[],
+    glLineList: [] as GlLineListMarker[],
   };
 
   arrow(_arg0: ArrowMarker): void {}
@@ -75,8 +77,9 @@ class MockMarkerCollector implements MarkerCollector {
   grid(_arg0: OccupancyGridMessage): void {}
   pointcloud(_arg0: PointCloud): void {}
   laserScan(_arg0: LaserScan): void {}
-  instancedLineList(arg0: InstancedLineListMarker): void {
-    this.data.instancedLineList.push(arg0);
+  instancedLineList(_arg0: InstancedLineListMarker): void {}
+  glLineList(arg0: Readonly<{ color: Float32Array; points: Float32Array }>): void {
+    this.data.glLineList.push(arg0);
   }
 }
 
@@ -112,7 +115,7 @@ storiesOf("panels/ThreeDimensionalViz/GridBuilder", module)
           onMouseMove={noop}
           onMouseUp={noop}
         >
-          <Lines>{collector.data.instancedLineList}</Lines>
+          <GlLineLists glLineLists={collector.data.glLineList} />
         </Worldview>
         <SExpectedResult>A 10x10 grid should be rendered</SExpectedResult>
       </div>
@@ -124,7 +127,6 @@ storiesOf("panels/ThreeDimensionalViz/GridBuilder", module)
     const gridBuilder = new GridBuilder();
     const settings: GridSettings = {
       heightOffset: -3,
-      lineWidth: 3,
       overrideColor: { r: 1, g: 0, b: 1, a: 1 },
       subdivisions: 0,
       width: 5,
@@ -151,11 +153,9 @@ storiesOf("panels/ThreeDimensionalViz/GridBuilder", module)
           onMouseMove={noop}
           onMouseUp={noop}
         >
-          <Lines>{collector.data.instancedLineList}</Lines>
+          <GlLineLists glLineLists={collector.data.glLineList} />
         </Worldview>
-        <SExpectedResult>
-          A magenta rectangle with thick lines should be rendered, offset down
-        </SExpectedResult>
+        <SExpectedResult>A magenta rectangle should be rendered, offset down</SExpectedResult>
       </div>
     );
   });

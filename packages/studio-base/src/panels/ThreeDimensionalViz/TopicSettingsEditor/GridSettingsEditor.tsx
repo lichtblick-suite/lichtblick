@@ -21,7 +21,6 @@ import { SLabel, SDescription, SInput } from "./common";
 
 export type GridSettings = {
   overrideColor?: Color;
-  lineWidth?: number;
   width?: number;
   subdivisions?: number;
   heightOffset?: number;
@@ -41,21 +40,6 @@ export default function GridSettingsEditor(
       <ColorPicker
         color={settings.overrideColor ?? DEFAULT_GRID_COLOR}
         onChange={(newColor) => onFieldChange("overrideColor", newColor)}
-      />
-
-      <SLabel>Line width</SLabel>
-      <SInput
-        data-test="line-width-input"
-        type="number"
-        placeholder={"1"}
-        value={settings.lineWidth ?? ""}
-        min={0.1}
-        max={2}
-        step={0.1}
-        onChange={(e) => {
-          const isInputValid = !isNaN(parseFloat(e.target.value));
-          onFieldChange("lineWidth", isInputValid ? parseFloat(e.target.value) : undefined);
-        }}
       />
 
       <SLabel>Width</SLabel>

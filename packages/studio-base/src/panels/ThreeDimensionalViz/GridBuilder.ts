@@ -13,18 +13,19 @@
 
 import { isEqual } from "lodash";
 
+import { toRGBA } from "@foxglove/regl-worldview";
 import { TopicSettingsCollection } from "@foxglove/studio-base/panels/ThreeDimensionalViz/SceneBuilder";
 import {
   DEFAULT_GRID_COLOR,
   GridSettings,
 } from "@foxglove/studio-base/panels/ThreeDimensionalViz/TopicSettingsEditor/GridSettingsEditor";
-import { Point, InstancedLineListMarker } from "@foxglove/studio-base/types/Messages";
+import { GlLineListMarker } from "@foxglove/studio-base/types/Messages";
 import { FOXGLOVE_GRID_TOPIC } from "@foxglove/studio-base/util/globalConstants";
 
 import { MarkerProvider, RenderMarkerArgs } from "./types";
 
 export default class GridBuilder implements MarkerProvider {
-  grid: InstancedLineListMarker;
+  grid: GlLineListMarker;
   private _visible = true;
   private _settings: GridSettings = {};
 
@@ -34,7 +35,7 @@ export default class GridBuilder implements MarkerProvider {
 
   renderMarkers = (args: RenderMarkerArgs): void => {
     if (this._visible) {
-      args.add.instancedLineList(this.grid);
+      args.add.glLineList(this.grid);
     }
   };
 
@@ -51,36 +52,32 @@ export default class GridBuilder implements MarkerProvider {
     }
   }
 
-  static BuildGrid(settings: GridSettings): InstancedLineListMarker {
+  static BuildGrid(settings: GridSettings): GlLineListMarker {
     const width = settings.width ?? 10;
     const halfWidth = width / 2;
     const subdivisions = settings.subdivisions ?? 9;
     const step = width / (subdivisions + 1);
 
-    const gridPoints: Point[] = [];
+    const z = settings.heightOffset ?? 0;
+    const points = new Float32Array(4 * 3 * (subdivisions + 1 + 1));
     for (let i = 0; i <= subdivisions + 1; i++) {
-      gridPoints.push({ x: i * step - halfWidth, y: halfWidth, z: 0 });
-      gridPoints.push({ x: i * step - halfWidth, y: -halfWidth, z: 0 });
+      points[(i * 4 + 0) * 3 + 0] = i * step - halfWidth;
+      points[(i * 4 + 0) * 3 + 1] = halfWidth;
+      points[(i * 4 + 0) * 3 + 2] = z;
+      points[(i * 4 + 1) * 3 + 0] = i * step - halfWidth;
+      points[(i * 4 + 1) * 3 + 1] = -halfWidth;
+      points[(i * 4 + 1) * 3 + 2] = z;
 
-      gridPoints.push({ x: halfWidth, y: i * step - halfWidth, z: 0 });
-      gridPoints.push({ x: -halfWidth, y: i * step - halfWidth, z: 0 });
+      points[(i * 4 + 2) * 3 + 0] = halfWidth;
+      points[(i * 4 + 2) * 3 + 1] = i * step - halfWidth;
+      points[(i * 4 + 2) * 3 + 2] = z;
+      points[(i * 4 + 3) * 3 + 0] = -halfWidth;
+      points[(i * 4 + 3) * 3 + 1] = i * step - halfWidth;
+      points[(i * 4 + 3) * 3 + 2] = z;
     }
-    const grid: InstancedLineListMarker = {
-      type: 108,
-      header: { frame_id: "", stamp: { sec: 0, nsec: 0 }, seq: 0 },
-      ns: "foxglove",
-      id: "grid",
-      action: 0,
-      pose: {
-        position: { x: 0, y: 0, z: settings.heightOffset ?? 0 },
-        orientation: { x: 0, y: 0, z: 0, w: 1 },
-      },
-      scale: { x: settings.lineWidth ?? 1, y: 1, z: 1 },
-      color: settings.overrideColor ?? DEFAULT_GRID_COLOR,
-      frame_locked: false,
-      points: gridPoints,
-      scaleInvariant: true,
+    return {
+      color: Float32Array.from(toRGBA(settings.overrideColor ?? DEFAULT_GRID_COLOR)),
+      points,
     };
-    return grid;
   }
 }

@@ -14,6 +14,7 @@
 import { partition } from "lodash";
 import { ComponentType } from "react";
 
+import { Interactive } from "@foxglove/studio-base/panels/ThreeDimensionalViz/Interactions/types";
 import {
   InteractiveMarkersByType,
   WorldMarkerProps,
@@ -37,8 +38,8 @@ const withHighlights = (
     const nonHighlightedMarkersByType: Partial<InteractiveMarkersByType> = {};
 
     // Partition the markersByType into two sets: highlighted and non-highlighted
-    Object.entries(markersByType).forEach(([type, markers]) => {
-      const [highlightedMarkers, nonHighlightedMarkers] = partition(
+    for (const [type, markers] of Object.entries(markersByType)) {
+      const [highlightedMarkers, nonHighlightedMarkers] = partition<Interactive<unknown>>(
         markers,
         (marker) => mightActuallyBePartial(marker).interactionData?.highlighted,
       );
@@ -46,7 +47,7 @@ const withHighlights = (
       (highlightedMarkersByType as Record<string, unknown>)[type] = highlightedMarkers;
       (nonHighlightedMarkersByType as Record<string, unknown>)[type] = nonHighlightedMarkers;
       hasHighlightedMarkers = hasHighlightedMarkers || highlightedMarkers.length > 0;
-    });
+    }
 
     return (
       <>
@@ -59,7 +60,6 @@ const withHighlights = (
           }}
         />
         <Cover
-          // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
           color={[0, 0, 0, hasHighlightedMarkers ? 0.6 : 0]}
           layerIndex={LAYER_INDEX_HIGHLIGHT_OVERLAY}
           overwriteDepthBuffer

@@ -4,9 +4,10 @@
 
 import { quat, vec3 } from "gl-matrix";
 
-import { Worldview, Lines, DEFAULT_CAMERA_STATE } from "@foxglove/regl-worldview";
+import { Worldview, DEFAULT_CAMERA_STATE } from "@foxglove/regl-worldview";
 import GridBuilder from "@foxglove/studio-base/panels/ThreeDimensionalViz/GridBuilder";
 
+import GlLineLists from "./GlLineLists";
 import OccupancyGrids from "./OccupancyGrids";
 
 export default {
@@ -62,7 +63,7 @@ export function Rotations(): JSX.Element {
       cameraMode="perspective"
       hideDebug
     >
-      <Lines>{[GridBuilder.BuildGrid({ width: 20, subdivisions: 19 })]}</Lines>
+      <GlLineLists glLineLists={[GridBuilder.BuildGrid({ width: 20, subdivisions: 19 })]} />
       <OccupancyGrids>
         {[
           makeGrid([-5, 5, 0], quat.rotateX(quat.create(), identity, 0)),
