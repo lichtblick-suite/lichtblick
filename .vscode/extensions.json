@@ -8,7 +8,7 @@
     "dbaeumer.vscode-eslint",
     "esbenp.prettier-vscode",
     "orta.vscode-jest",
-    "jpoissonnier.vscode-styled-components"
+    "styled-components.vscode-styled-components"
   ],
   // List of extensions recommended by VS Code that should not be recommended for users of this workspace.
   "unwantedRecommendations": []
