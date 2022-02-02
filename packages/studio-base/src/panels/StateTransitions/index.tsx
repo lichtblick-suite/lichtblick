@@ -428,7 +428,7 @@ const StateTransitions = React.memo(function StateTransitions(props: Props) {
               <TimestampMethodDropdown
                 path={path}
                 index={index}
-                disabled={!path}
+                iconButtonProps={{ disabled: !path }}
                 timestampMethod={timestampMethod}
                 onTimestampMethodChange={onInputTimestampMethodChange}
               />
