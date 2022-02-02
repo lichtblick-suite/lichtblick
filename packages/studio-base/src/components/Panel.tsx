@@ -199,6 +199,25 @@ type ComponentConstructorType<P> = { displayName?: string } & (
   | { (props: P): React.ReactElement<unknown> | ReactNull }
 );
 
+const areConfigKeysEqual = (
+  firstConfig: Record<string, unknown>,
+  secondConfig: Record<string, unknown>,
+): boolean => {
+  const firstConfigKeys = Object.keys(firstConfig).sort();
+  const secondConfigKeys = Object.keys(secondConfig).sort();
+
+  if (firstConfigKeys.length !== secondConfigKeys.length) {
+    return false;
+  }
+
+  for (let i = 0; i < firstConfigKeys.length; i++) {
+    if (firstConfigKeys[i] !== secondConfigKeys[i]) {
+      return false;
+    }
+  }
+  return true;
+};
+
 // HOC that wraps panel in an error boundary and flex box.
 // Gives panel a `config` and `saveConfig`.
 //   export default Panel(MyPanelComponent)
@@ -281,6 +300,8 @@ export default function Panel<
       if ((!savedConfig || Object.keys(savedConfig).length === 0) && !savedDefaultConfig.current) {
         savedDefaultConfig.current = true;
         saveConfig(defaultConfig);
+      } else if (savedConfig && !areConfigKeysEqual(savedConfig, defaultConfig)) {
+        saveConfig({ ...defaultConfig, ...savedConfig });
       }
     }, [defaultConfig, saveConfig, savedConfig]);
 
