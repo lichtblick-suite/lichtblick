@@ -5,7 +5,7 @@
 import { createContext, useCallback, useLayoutEffect, useReducer, useRef, useState } from "react";
 import { getLeaves } from "react-mosaic-component";
 
-import { useShallowMemo } from "@foxglove/hooks";
+import { useMustNotChange, useShallowMemo } from "@foxglove/hooks";
 import { selectWithUnstableIdentityWarning } from "@foxglove/studio-base/hooks/selectWithUnstableIdentityWarning";
 import useGuaranteedContext from "@foxglove/studio-base/hooks/useGuaranteedContext";
 import { LinkedGlobalVariables } from "@foxglove/studio-base/panels/ThreeDimensionalViz/Interactions/useLinkedGlobalVariables";
@@ -112,6 +112,9 @@ export function useCurrentLayoutActions(): CurrentLayoutActions {
 export function useCurrentLayoutSelector<T>(selector: (layoutState: LayoutState) => T): T {
   const currentLayout = useGuaranteedContext(CurrentLayoutContext);
   const [_, forceUpdate] = useReducer((x: number) => x + 1, 0);
+
+  // Catch locations using unstable function selectors
+  useMustNotChange(selector);
 
   const state = useRef<{ value: T; selector: typeof selector } | undefined>(undefined);
   if (!state.current || selector !== state.current.selector) {

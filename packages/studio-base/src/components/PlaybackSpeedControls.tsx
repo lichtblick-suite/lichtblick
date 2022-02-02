@@ -13,6 +13,7 @@ import { useCallback, useEffect } from "react";
 
 import { useMessagePipeline } from "@foxglove/studio-base/components/MessagePipeline";
 import {
+  LayoutState,
   useCurrentLayoutActions,
   useCurrentLayoutSelector,
 } from "@foxglove/studio-base/context/CurrentLayoutContext";
@@ -23,11 +24,13 @@ function formatSpeed(val: number) {
   return `${val < 0.1 ? val.toFixed(2) : val}×`;
 }
 
+const selectedLayoutSelector = (state: LayoutState) => state.selectedLayout;
+
 export default function PlaybackSpeedControls(): JSX.Element {
   const theme = useTheme();
-  const configSpeed = useCurrentLayoutSelector(
-    (state) => state.selectedLayout?.data?.playbackConfig.speed,
-  );
+
+  const selectedLayout = useCurrentLayoutSelector(selectedLayoutSelector);
+  const configSpeed = selectedLayout?.data?.playbackConfig.speed;
   const speed = useMessagePipeline(
     useCallback(({ playerState }) => playerState.activeData?.speed, []),
   );

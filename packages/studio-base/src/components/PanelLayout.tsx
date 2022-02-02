@@ -36,6 +36,7 @@ import { EmptyPanelLayout } from "@foxglove/studio-base/components/EmptyPanelLay
 import EmptyState from "@foxglove/studio-base/components/EmptyState";
 import PanelToolbar from "@foxglove/studio-base/components/PanelToolbar";
 import {
+  LayoutState,
   useCurrentLayoutActions,
   useCurrentLayoutSelector,
   usePanelMosaicId,
@@ -182,11 +183,14 @@ export function UnconnectedPanelLayout(props: Props): React.ReactElement {
   return <ErrorBoundary>{bodyToRender}</ErrorBoundary>;
 }
 
+const selectedLayoutSelector = (state: LayoutState) => state.selectedLayout;
+
 export default function PanelLayout(): JSX.Element {
   const { changePanelLayout } = useCurrentLayoutActions();
   const { openLayoutBrowser } = useWorkspace();
-  const layoutLoading = useCurrentLayoutSelector((state) => state.selectedLayout?.loading);
-  const selectedLayout = useCurrentLayoutSelector((state) => state.selectedLayout);
+  const selectedLayout = useCurrentLayoutSelector(selectedLayoutSelector);
+
+  const layoutLoading = selectedLayout?.loading;
   const onChange = useCallback(
     (newLayout: MosaicNode<string> | undefined) => {
       if (newLayout != undefined) {

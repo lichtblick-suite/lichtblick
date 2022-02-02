@@ -56,7 +56,10 @@ import { SidebarContent } from "@foxglove/studio-base/components/SidebarContent"
 import { URLStateSyncAdapter } from "@foxglove/studio-base/components/URLStateSyncAdapter";
 import { useAssets } from "@foxglove/studio-base/context/AssetsContext";
 import ConsoleApiContext from "@foxglove/studio-base/context/ConsoleApiContext";
-import { useCurrentLayoutSelector } from "@foxglove/studio-base/context/CurrentLayoutContext";
+import {
+  LayoutState,
+  useCurrentLayoutSelector,
+} from "@foxglove/studio-base/context/CurrentLayoutContext";
 import { useCurrentUser } from "@foxglove/studio-base/context/CurrentUserContext";
 import { useExtensionLoader } from "@foxglove/studio-base/context/ExtensionLoaderContext";
 import { useHelpInfo } from "@foxglove/studio-base/context/HelpInfoContext";
@@ -104,11 +107,13 @@ type SidebarItemKey =
   | "preferences"
   | "help";
 
+const selectedLayoutIdSelector = (state: LayoutState) => state.selectedLayout?.id;
+
 function AddPanel() {
   const addPanel = useAddPanel();
   const { openLayoutBrowser } = useWorkspace();
   const theme = useTheme();
-  const selectedLayoutId = useCurrentLayoutSelector((state) => state.selectedLayout?.id);
+  const selectedLayoutId = useCurrentLayoutSelector(selectedLayoutIdSelector);
 
   return (
     <SidebarContent

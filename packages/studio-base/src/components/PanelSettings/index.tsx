@@ -11,6 +11,7 @@ import { useConfigById } from "@foxglove/studio-base/PanelAPI";
 import ShareJsonModal from "@foxglove/studio-base/components/ShareJsonModal";
 import { SidebarContent } from "@foxglove/studio-base/components/SidebarContent";
 import {
+  LayoutState,
   useCurrentLayoutActions,
   useCurrentLayoutSelector,
   useSelectedPanels,
@@ -24,12 +25,14 @@ import { getPanelTypeFromId } from "@foxglove/studio-base/util/layout";
 
 import SchemaEditor from "./SchemaEditor";
 
+const selectedLayoutIdSelector = (state: LayoutState) => state.selectedLayout?.id;
+
 export default function PanelSettings({
   selectedPanelIdsForTests,
 }: React.PropsWithChildren<{
   selectedPanelIdsForTests?: readonly string[];
 }>): JSX.Element {
-  const selectedLayoutId = useCurrentLayoutSelector((state) => state.selectedLayout?.id);
+  const selectedLayoutId = useCurrentLayoutSelector(selectedLayoutIdSelector);
   const { selectedPanelIds: originalSelectedPanelIds, setSelectedPanelIds } = useSelectedPanels();
   const selectedPanelIds = selectedPanelIdsForTests ?? originalSelectedPanelIds;
   const { openLayoutBrowser, openHelp } = useWorkspace();

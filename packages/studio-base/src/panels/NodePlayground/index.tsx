@@ -26,6 +26,7 @@ import Panel from "@foxglove/studio-base/components/Panel";
 import PanelToolbar from "@foxglove/studio-base/components/PanelToolbar";
 import TextContent from "@foxglove/studio-base/components/TextContent";
 import {
+  LayoutState,
   useCurrentLayoutActions,
   useCurrentLayoutSelector,
 } from "@foxglove/studio-base/context/CurrentLayoutContext";
@@ -126,15 +127,16 @@ const WelcomeScreen = ({ addNewNode }: { addNewNode: (code?: string) => void }) 
 
 const EMPTY_USER_NODES: UserNodes = Object.freeze({});
 
+const userNodeSelector = (state: LayoutState) =>
+  state.selectedLayout?.data?.userNodes ?? EMPTY_USER_NODES;
+
 function NodePlayground(props: Props) {
   const { config, saveConfig } = props;
   const { autoFormatOnSave = false, selectedNodeId, editorForStorybook } = config;
 
   const [explorer, updateExplorer] = React.useState<Explorer>(undefined);
 
-  const userNodes = useCurrentLayoutSelector(
-    (state) => state.selectedLayout?.data?.userNodes ?? EMPTY_USER_NODES,
-  );
+  const userNodes = useCurrentLayoutSelector(userNodeSelector);
   const {
     state: { nodeStates: userNodeDiagnostics, rosLib },
   } = useUserNodeState();

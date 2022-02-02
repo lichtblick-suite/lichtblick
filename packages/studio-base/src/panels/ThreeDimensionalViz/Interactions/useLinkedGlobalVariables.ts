@@ -14,6 +14,7 @@
 import { useMemo } from "react";
 
 import {
+  LayoutState,
   useCurrentLayoutActions,
   useCurrentLayoutSelector,
 } from "@foxglove/studio-base/context/CurrentLayoutContext";
@@ -28,15 +29,16 @@ export type LinkedGlobalVariables = readonly LinkedGlobalVariable[];
 
 const EMPTY_VARIABLES = Object.freeze([]);
 
+const linkedGlobalVariablesSelector = (state: LayoutState) =>
+  state.selectedLayout?.data?.linkedGlobalVariables ?? EMPTY_VARIABLES;
+
 export default function useLinkedGlobalVariables(): {
   linkedGlobalVariables: LinkedGlobalVariables;
   setLinkedGlobalVariables: (arg0: LinkedGlobalVariables) => void;
   linkedGlobalVariablesByName: { [name: string]: LinkedGlobalVariable[] };
 } {
   const { setLinkedGlobalVariables } = useCurrentLayoutActions();
-  const linkedGlobalVariables = useCurrentLayoutSelector(
-    (state) => state.selectedLayout?.data?.linkedGlobalVariables ?? EMPTY_VARIABLES,
-  );
+  const linkedGlobalVariables = useCurrentLayoutSelector(linkedGlobalVariablesSelector);
   const linkedGlobalVariablesByName = useMemo(() => {
     const linksByName: { [name: string]: LinkedGlobalVariable[] } = {};
     for (const link of linkedGlobalVariables) {

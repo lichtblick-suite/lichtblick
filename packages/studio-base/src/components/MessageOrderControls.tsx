@@ -7,6 +7,7 @@ import { useCallback } from "react";
 
 import { useTooltip } from "@foxglove/studio-base/components/Tooltip";
 import {
+  LayoutState,
   useCurrentLayoutActions,
   useCurrentLayoutSelector,
 } from "@foxglove/studio-base/context/CurrentLayoutContext";
@@ -17,11 +18,12 @@ const messageOrderLabel = {
   headerStamp: "Header stamp",
 };
 
+const messageOrderSelector = (state: LayoutState) =>
+  state.selectedLayout?.data?.playbackConfig.messageOrder ?? "receiveTime";
+
 export default function MessageOrderControls(): JSX.Element {
   const theme = useTheme();
-  const messageOrder = useCurrentLayoutSelector(
-    (state) => state.selectedLayout?.data?.playbackConfig.messageOrder ?? "receiveTime",
-  );
+  const messageOrder = useCurrentLayoutSelector(messageOrderSelector);
   const { setPlaybackConfig } = useCurrentLayoutActions();
 
   const setMessageOrder = useCallback(
