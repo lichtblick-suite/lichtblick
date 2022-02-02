@@ -974,8 +974,34 @@ export default class SceneBuilder implements MarkerProvider {
         return add.triangleList(marker);
       case 101:
         return add.grid(marker);
-      case 102:
+      case 102: {
+        // PointCloud decoding requires x, y, and z fields and will fail if all are not present.
+        // We check for the fields here so we can present the user with a topic error prior to decoding.
+        const fieldNames: { [key: string]: boolean } = {};
+        for (const field of marker.fields) {
+          fieldNames[field.name] = true;
+        }
+
+        let missingFields = "";
+        if (fieldNames.x == undefined) {
+          missingFields += "x";
+        }
+        if (fieldNames.y == undefined) {
+          missingFields += " y";
+        }
+        if (fieldNames.z == undefined) {
+          missingFields += " z";
+        }
+        if (missingFields.length > 0) {
+          this._setTopicError(
+            topic.name,
+            `Point cloud is missing required fields: ${missingFields}`,
+          );
+          return;
+        }
+
         return add.pointcloud(marker);
+      }
       case 103:
         return add.poseMarker(marker);
       case 104:

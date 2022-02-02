@@ -1972,6 +1972,89 @@ export function SensorMsgs_PointCloud2_Intensity(): JSX.Element {
   );
 }
 
+// Should display a topic error to the user when the PointCloud message is missing the necessary
+// field descriptions.
+SensorMsgs_PointCloud2_InsufficientFields.parameters = { colorScheme: "dark" };
+export function SensorMsgs_PointCloud2_InsufficientFields(): JSX.Element {
+  const topics: Topic[] = [{ name: "/pointcloud", datatype: "sensor_msgs/PointCloud2" }];
+
+  const SCALE = 10 / 128;
+
+  function f(x: number, y: number) {
+    return (x / 128 - 0.5) ** 2 + (y / 128 - 0.5) ** 2;
+  }
+
+  const data = new Uint8Array(128 * 128 * 12);
+  const view = new DataView(data.buffer, data.byteOffset, data.byteLength);
+  for (let y = 0; y < 128; y++) {
+    for (let x = 0; x < 128; x++) {
+      const i = (y * 128 + x) * 12;
+      view.setFloat32(i + 0, x * SCALE - 5, true);
+      view.setFloat32(i + 4, y * SCALE - 5, true);
+      view.setFloat32(i + 8, f(x, y) * 5, true);
+    }
+  }
+
+  const pointCloud: MessageEvent<PointCloud2> = {
+    topic: "/pointcloud",
+    receiveTime: { sec: 10, nsec: 0 },
+    message: {
+      type: 102,
+      header: { seq: 0, stamp: { sec: 0, nsec: 0 }, frame_id: "sensor" },
+      height: 1,
+      width: 128 * 128,
+      fields: [
+        { name: "x", offset: 0, datatype: 7, count: 1 },
+        { name: "y", offset: 4, datatype: 7, count: 1 },
+      ],
+      is_bigendian: false,
+      point_step: 12,
+      row_step: 128 * 128 * 12,
+      data,
+      is_dense: 1,
+    },
+    sizeInBytes: 0,
+  };
+
+  const fixture = useDelayedFixture({
+    datatypes,
+    topics,
+    frame: {
+      "/pointcloud": [pointCloud],
+    },
+    capabilities: [],
+    activeData: {
+      currentTime: { sec: 0, nsec: 0 },
+    },
+  });
+
+  return (
+    <PanelSetup fixture={fixture}>
+      <ThreeDimensionalViz
+        overrideConfig={{
+          ...ThreeDimensionalViz.defaultConfig,
+          checkedKeys: ["name:Topics", "t:/pointcloud", `t:${FOXGLOVE_GRID_TOPIC}`],
+          expandedKeys: ["name:Topics", "t:/pointcloud", `t:${FOXGLOVE_GRID_TOPIC}`],
+          pinTopics: true,
+          followTf: "sensor",
+          cameraState: {
+            distance: 13.5,
+            perspective: true,
+            phi: 1.22,
+            targetOffset: [0.25, -0.5, 0],
+            thetaOffset: -0.33,
+            fovy: 0.75,
+            near: 0.01,
+            far: 5000,
+            target: [0, 0, 0],
+            targetOrientation: [0, 0, 0, 1],
+          },
+        }}
+      />
+    </PanelSetup>
+  );
+}
+
 LargeTransform.parameters = { colorScheme: "dark" };
 export function LargeTransform(): JSX.Element {
   const topics: Topic[] = [

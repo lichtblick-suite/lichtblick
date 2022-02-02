@@ -48,7 +48,7 @@ const defaultNotificationHandler: NotificationHandler = (
   type: NotificationType,
   severity: NotificationSeverity,
 ): void => {
-  if (!inWebWorker()) {
+  if (inWebWorker()) {
     const webWorkerError =
       "Web Worker has uninitialized sendNotification function; this means this error message cannot show up in the UI (so we show it here in the console instead).";
     if (process.env.NODE_ENV === "test") {
