@@ -290,8 +290,12 @@ function PanelList(props: Props): JSX.Element {
   );
 
   const handleSearchChange = React.useCallback((e: React.SyntheticEvent<HTMLInputElement>) => {
-    setSearchQuery(e.currentTarget.value);
-    setHighlightedPanelIdx(0);
+    const query = e.currentTarget.value;
+    setSearchQuery(query);
+
+    // When there is a search query, automatically highlight the first (0th) item.
+    // When the user erases the query, remove the highlight.
+    setHighlightedPanelIdx(query ? 0 : undefined);
   }, []);
 
   const panelCatalog = usePanelCatalog();
@@ -347,11 +351,25 @@ function PanelList(props: Props): JSX.Element {
       if (mode === "grid") {
         return;
       }
-      if (e.key === "ArrowDown" && highlightedPanelIdx != undefined) {
-        setHighlightedPanelIdx((highlightedPanelIdx + 1) % allFilteredPanels.length);
-      } else if (e.key === "ArrowUp" && highlightedPanelIdx != undefined) {
-        const newIdx = (highlightedPanelIdx - 1) % (allFilteredPanels.length - 1);
-        setHighlightedPanelIdx(newIdx >= 0 ? newIdx : allFilteredPanels.length + newIdx);
+      if (e.key === "ArrowDown") {
+        setHighlightedPanelIdx((existing) => {
+          if (existing == undefined) {
+            return 0;
+          }
+          return (existing + 1) % allFilteredPanels.length;
+        });
+      } else if (e.key === "ArrowUp") {
+        setHighlightedPanelIdx((existing) => {
+          // nothing to highlight if there are no entries
+          if (allFilteredPanels.length <= 0) {
+            return undefined;
+          }
+
+          if (existing == undefined) {
+            return allFilteredPanels.length - 1;
+          }
+          return (existing - 1 + allFilteredPanels.length) % allFilteredPanels.length;
+        });
       } else if (e.key === "Enter" && highlightedPanel) {
         onPanelSelect({
           type: highlightedPanel.type,
@@ -360,7 +378,7 @@ function PanelList(props: Props): JSX.Element {
         });
       }
     },
-    [allFilteredPanels.length, highlightedPanel, highlightedPanelIdx, mode, onPanelSelect],
+    [allFilteredPanels.length, highlightedPanel, mode, onPanelSelect],
   );
 
   const displayPanelListItem = React.useCallback(
@@ -426,7 +444,6 @@ function PanelList(props: Props): JSX.Element {
             onChange={handleSearchChange}
             onKeyDown={onKeyDown}
             onBlur={() => setHighlightedPanelIdx(undefined)}
-            onFocus={() => setHighlightedPanelIdx(0)}
             autoFocus
           />
         </Stack>
