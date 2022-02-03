@@ -160,7 +160,7 @@
     "react-hover-observer": "2.1.1",
     "react-input-autosize": "3.0.0",
     "react-is": "17.0.2",
-    "react-json-tree": "0.15.1",
+    "react-json-tree": "patch:react-json-tree@npm:0.15.1#../../patches/react-json-tree.patch",
     "react-markdown": "7.1.2",
     "react-monaco-editor": "0.46.0",
     "react-mosaic-component": "5.0.0",

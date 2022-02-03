@@ -1,0 +1,35 @@
+diff --git a/lib/JSONNestedNode.js b/lib/JSONNestedNode.js
+index 544cd314c7217bbd14e5fc1326ab097005f9fe7e..410e4f1d052b969214ee875c5b4b5acfcb3539ca 100644
+--- a/lib/JSONNestedNode.js
++++ b/lib/JSONNestedNode.js
+@@ -123,6 +123,17 @@ var JSONNestedNode = /*#__PURE__*/function (_React$Component) {
+
+     _defineProperty(_assertThisInitialized(_this), "handleClick", function () {
+       if (_this.props.expandable) {
++        const {
++          data,
++          level,
++          keyPath
++        } = _this.props;
++        if (_this.props.onExpand && !_this.state.expanded) {
++          _this.props.onExpand(data, level, keyPath);
++        }
++        if (_this.props.onCollapse && _this.state.expanded) {
++          _this.props.onCollapse(data, level, keyPath);
++        }
+         _this.setState({
+           expanded: !_this.state.expanded
+         });
+diff --git a/lib/types.d.ts b/lib/types.d.ts
+index a60c350ca0932a94b3c73d163bceb0a276724508..c803f507b3f8187ab6708b52ce30ca1c1191fd08 100644
+--- a/lib/types.d.ts
++++ b/lib/types.d.ts
+@@ -13,6 +13,8 @@ interface JSONValueNodeCircularPropsPassedThroughJSONTree {
+ export declare type JSONValueNodeCircularPropsProvidedByJSONNode = SharedCircularPropsProvidedByJSONTree & JSONValueNodeCircularPropsPassedThroughJSONTree;
+ interface JSONNestedNodeCircularPropsPassedThroughJSONTree {
+     shouldExpandNode: (keyPath: (string | number)[], data: any, level: number) => boolean;
++    onExpand?: (data: unknown, level: number, keyPath: (string | number)[]) => void;
++    onCollapse?: (data: unknown, level: number, keyPath: (string | number)[]) => void;
+     hideRoot: boolean;
+     getItemString: (nodeType: string, data: any, itemType: React.ReactNode, itemString: string, keyPath: (string | number)[]) => React.ReactNode;
+     postprocessValue: (value: any) => any;

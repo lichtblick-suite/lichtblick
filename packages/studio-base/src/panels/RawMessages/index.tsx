@@ -327,14 +327,13 @@ function RawMessages(props: Props) {
   );
 
   const renderSingleTopicOrDiffOutput = useCallback(() => {
-    let shouldExpandNode;
-    if (expandAll != undefined) {
-      shouldExpandNode = () => expandAll;
-    } else {
-      shouldExpandNode = (keypath: (string | number)[]) => {
-        return expandedFields.has(keypath.join("~"));
-      };
-    }
+    const shouldExpandNode = (keypath: (string | number)[]) => {
+      if (expandAll != undefined) {
+        return expandAll;
+      }
+
+      return expandedFields.has(keypath.join("~"));
+    };
 
     if (topicPath.length === 0) {
       return <EmptyState>No topic selected</EmptyState>;
@@ -344,6 +343,7 @@ function RawMessages(props: Props) {
         <EmptyState>{`Waiting to diff next messages from "${topicPath}" and "${diffTopicPath}"`}</EmptyState>
       );
     }
+
     if (!baseItem) {
       return <EmptyState>Waiting for next message</EmptyState>;
     }
@@ -412,10 +412,14 @@ function RawMessages(props: Props) {
               </div>
             )}
             <Tree
-              labelRenderer={(raw) => (
-                <DiffSpan onClick={() => onLabelClick(raw)}>{first(raw)}</DiffSpan>
-              )}
+              labelRenderer={(raw) => <DiffSpan>{first(raw)}</DiffSpan>}
               shouldExpandNode={shouldExpandNode}
+              onExpand={(_data, _level, keyPath) => {
+                onLabelClick(keyPath);
+              }}
+              onCollapse={(_data, _level, keyPath) => {
+                onLabelClick(keyPath);
+              }}
               hideRoot
               invertTheme={false}
               getItemString={getItemString}
