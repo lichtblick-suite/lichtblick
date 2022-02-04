@@ -86,7 +86,6 @@ const useStyles = makeStyles((theme) => ({
     maxWidth: "100%",
     overflow: "auto",
     pointerEvents: "auto",
-    transition: "opacity 0.15s linear, transform 0.15s linear",
   },
   inner: {
     "rc-tree li ul": {
@@ -348,14 +347,21 @@ const transitionClasses = mergeStyleSets({
     transform: "translateX(-20px)",
     pointerEvents: "none",
   },
+  enterActive: {
+    opacity: 1,
+    transform: "none",
+    transition: "opacity 0.15s linear, transform 0.15s linear",
+  },
+  exit: {
+    opacity: 1,
+    transform: "none",
+    pointerEvents: "none",
+  },
   exitActive: {
     opacity: 0,
     transform: "translateX(-20px)",
     pointerEvents: "none",
-  },
-  enterActive: {
-    opacity: 1,
-    transform: "none",
+    transition: "opacity 0.15s linear, transform 0.15s linear",
   },
 });
 
@@ -614,6 +620,8 @@ function TopicTreeWrapper({
     refreshMode: "debounce",
   });
 
+  const treeRef = useRef<HTMLDivElement>(ReactNull);
+
   return (
     <div className={classes.wrapper} style={{ height: containerHeight - CONTAINER_SPACING * 3 }}>
       <div
@@ -640,8 +648,9 @@ function TopicTreeWrapper({
           classNames={transitionClasses}
           mountOnEnter
           unmountOnExit
+          nodeRef={treeRef}
         >
-          <div className={classes.tree} onClick={(e) => e.stopPropagation()}>
+          <div ref={treeRef} className={classes.tree} onClick={(e) => e.stopPropagation()}>
             <TopicTree
               {...rest}
               sceneErrorsByKey={sceneErrorsByKey}
