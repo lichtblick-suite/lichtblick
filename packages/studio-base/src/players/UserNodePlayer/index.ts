@@ -114,15 +114,18 @@ export default class UserNodePlayer implements Player {
 
   // exposed as a static to allow testing to mock/replace
   static CreateNodeTransformWorker = (): SharedWorker => {
-    return new SharedWorker(new URL("./nodeTransformerWorker/index", import.meta.url));
+    return new SharedWorker(new URL("./nodeTransformerWorker/index", import.meta.url), {
+      // Although we are using SharedWorkers, we do not actually want to share worker instances
+      // between tabs. We achieve this by passing in a unique name.
+      name: uuidv4(),
+    });
   };
 
   // exposed as a static to allow testing to mock/replace
   static CreateNodeRuntimeWorker = (): SharedWorker => {
     return new SharedWorker(new URL("./nodeRuntimeWorker/index", import.meta.url), {
-      // Although we are using SharedWorkers, each nodeRuntimeWorker uses a single global variable
-      // for the compiled `nodeCallback` function, so we need a separate worker per user node. We
-      // achieve this by passing in a unique name.
+      // Although we are using SharedWorkers, we do not actually want to share worker instances
+      // between tabs. We achieve this by passing in a unique name.
       name: uuidv4(),
     });
   };
