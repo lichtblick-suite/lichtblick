@@ -14,8 +14,6 @@
 import { useCallback, useMemo } from "react";
 
 import * as PanelAPI from "@foxglove/studio-base/PanelAPI";
-import { useMessagePipeline } from "@foxglove/studio-base/components/MessagePipeline";
-import useChangeDetector from "@foxglove/studio-base/hooks/useChangeDetector";
 import { MessageEvent } from "@foxglove/studio-base/players/types";
 
 import parseRosPath from "./parseRosPath";
@@ -24,25 +22,25 @@ import {
   MessageAndData,
 } from "./useCachedGetMessagePathDataItems";
 
-// Get the last message for a path, but *after* applying filters. In other words, we'll keep the
-// last message that matched.
+// Return MessageAndData with the latest matching message for @param path.
+// Return undefined if no message matches the path
 export function useLatestMessageDataItem(path: string): MessageAndData | undefined {
   const rosPath = useMemo(() => parseRosPath(path), [path]);
   const topics = useMemo(() => (rosPath ? [rosPath.topicName] : []), [rosPath]);
+
   const cachedGetMessagePathDataItems = useCachedGetMessagePathDataItems([path]);
 
   const addMessages = useCallback(
     (
       prevMessageAndData: MessageAndData | undefined,
       messages: Readonly<MessageEvent<unknown>[]>,
-    ) => {
+    ): MessageAndData | undefined => {
       // Iterate in reverse so we can early-return and not process all messages.
       for (let i = messages.length - 1; i >= 0; --i) {
-        const message = messages[i] as MessageEvent<unknown>;
+        const message = messages[i]!;
         const queriedData = cachedGetMessagePathDataItems(path, message);
         if (queriedData == undefined) {
-          // Invalid path.
-          return;
+          return { messageEvent: message, queriedData: [] };
         }
         if (queriedData.length > 0) {
           return { messageEvent: message, queriedData };
@@ -66,19 +64,18 @@ export function useLatestMessageDataItem(path: string): MessageAndData | undefin
     [cachedGetMessagePathDataItems, path],
   );
 
-  // A backfill is not automatically requested when the above callbacks' identities change, so we
-  // need to do that manually.
-  const requestBackfill = useMessagePipeline(
-    useCallback(({ requestBackfill: pipelineRequestBackfill }) => pipelineRequestBackfill, []),
-  );
-  if (useChangeDetector([cachedGetMessagePathDataItems, path], { initiallyTrue: false })) {
-    requestBackfill();
-  }
-
   const messageAndData = PanelAPI.useMessageReducer<MessageAndData | undefined>({
     topics,
     addMessages,
     restore,
   });
-  return rosPath ? messageAndData : undefined;
+
+  return useMemo(() => {
+    // If there's no query data it means we didn't have a match and should return undefined
+    if (!rosPath || (messageAndData?.queriedData.length ?? 0) === 0) {
+      return undefined;
+    }
+
+    return messageAndData;
+  }, [messageAndData, rosPath]);
 }

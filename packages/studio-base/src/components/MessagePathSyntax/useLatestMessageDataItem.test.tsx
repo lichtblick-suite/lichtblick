@@ -13,7 +13,7 @@
 import { renderHook } from "@testing-library/react-hooks";
 
 import MockMessagePipelineProvider from "@foxglove/studio-base/components/MessagePipeline/MockMessagePipelineProvider";
-import { MessageEvent } from "@foxglove/studio-base/players/types";
+import { MessageEvent, Topic } from "@foxglove/studio-base/players/types";
 import MockCurrentLayoutProvider from "@foxglove/studio-base/providers/CurrentLayoutProvider/MockCurrentLayoutProvider";
 import { RosDatatypes } from "@foxglove/studio-base/types/RosDatatypes";
 
@@ -141,6 +141,39 @@ describe("useLatestMessageDataItem", () => {
       {
         messageEvent: fixtureMessages[1],
         queriedData: [{ path: "/topic{value==1}", value: fixtureMessages[1]?.message }],
+      },
+    ]);
+  });
+
+  it("restores previously received message when topics and datatypes becomes available", async () => {
+    const { result, rerender } = renderHook(({ path }) => useLatestMessageDataItem(path), {
+      initialProps: {
+        path: "/topic{value==2}.value",
+        datatypes: new Map(),
+        topics: [] as Topic[],
+      },
+      wrapper({ children, datatypes: rosDatatypes, topics: rosTopics }) {
+        return (
+          <MockCurrentLayoutProvider>
+            <MockMessagePipelineProvider
+              messages={fixtureMessages}
+              topics={rosTopics}
+              datatypes={rosDatatypes}
+            >
+              {children}
+            </MockMessagePipelineProvider>
+          </MockCurrentLayoutProvider>
+        );
+      },
+    });
+
+    expect(result.all).toEqual([undefined]);
+    rerender({ path: "/topic{value==2}.value", datatypes, topics });
+    expect(result.all).toEqual([
+      undefined,
+      {
+        messageEvent: fixtureMessages[2],
+        queriedData: [{ path: "/topic{value==2}.value", value: 2 }],
       },
     ]);
   });
