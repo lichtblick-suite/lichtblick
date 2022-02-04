@@ -33,6 +33,7 @@ import {
 import { useLayoutManager } from "@foxglove/studio-base/context/LayoutManagerContext";
 import { useUserProfileStorage } from "@foxglove/studio-base/context/UserProfileStorageContext";
 import { LinkedGlobalVariables } from "@foxglove/studio-base/panels/ThreeDimensionalViz/Interactions/useLinkedGlobalVariables";
+import { defaultLayout } from "@foxglove/studio-base/providers/CurrentLayoutProvider/defaultLayout";
 import panelsReducer from "@foxglove/studio-base/providers/CurrentLayoutProvider/reducers";
 import { LayoutID } from "@foxglove/studio-base/services/ConsoleApi";
 import { AppEvent } from "@foxglove/studio-base/services/IAnalytics";
@@ -243,15 +244,25 @@ export default function CurrentLayoutProvider({
   }, [addToast, layoutManager, setSelectedLayoutId]);
 
   // Load initial state by re-selecting the last selected layout from the UserProfile.
-  // Don't restore the layout if there's one specified in the app state url.
   useAsync(async () => {
+    // Don't restore the layout if there's one specified in the app state url.
     if (windowAppURLState()?.layoutId) {
       return;
     }
 
     const { currentLayoutId } = await getUserProfile();
     await setSelectedLayoutId(currentLayoutId, { saveToProfile: false });
-  }, [getUserProfile, setSelectedLayoutId]);
+
+    // If there's no layout selected then save and select a default layout.
+    if (currentLayoutId == undefined && layoutStateRef.current.selectedLayout == undefined) {
+      const newLayout = await layoutManager.saveNewLayout({
+        name: "Default",
+        data: defaultLayout,
+        permission: "CREATOR_WRITE",
+      });
+      await setSelectedLayoutId(newLayout.id);
+    }
+  }, [getUserProfile, layoutManager, setSelectedLayoutId]);
 
   const actions: ICurrentLayout["actions"] = useMemo(
     () => ({
