@@ -216,17 +216,13 @@ const canTransformMarkersByTopic = (topic: string) => !topic.includes("rect");
 function useOptionallySynchronizedMessages(
   // eslint-disable-next-line @foxglove/no-boolean-parameters
   shouldSynchronize: boolean,
-  topics: readonly PanelAPI.RequestedTopic[],
+  topics: readonly string[],
 ) {
   const memoizedTopics = useDeepMemo(topics);
   const reducers = useMemo(
     () =>
       shouldSynchronize
-        ? getSynchronizingReducers(
-            memoizedTopics.map((request) =>
-              typeof request === "string" ? request : request.topic,
-            ),
-          )
+        ? getSynchronizingReducers(memoizedTopics)
         : {
             restore: (previousValue) => ({
               messagesByTopic: previousValue ? previousValue.messagesByTopic : {},
@@ -449,7 +445,7 @@ function ImageView(props: Props) {
   });
 
   const shouldSynchronize = config.synchronize && enabledMarkerTopics.length > 0;
-  const imageAndMarkerTopics = useShallowMemo([{ topic: cameraTopic }, ...enabledMarkerTopics]);
+  const imageAndMarkerTopics = useShallowMemo([cameraTopic, ...enabledMarkerTopics]);
   const { messagesByTopic, synchronizedMessages } = useOptionallySynchronizedMessages(
     shouldSynchronize,
     imageAndMarkerTopics,
