@@ -20,13 +20,7 @@ import type { RosGraph } from "@foxglove/ros1";
 import { parse as parseMessageDefinition } from "@foxglove/rosmsg";
 import { LazyMessageReader } from "@foxglove/rosmsg-serialization";
 import { MessageReader as ROS2MessageReader } from "@foxglove/rosmsg2-serialization";
-import {
-  Time,
-  add as addTimes,
-  fromMillis,
-  subtract as subtractTimes,
-  toSec,
-} from "@foxglove/rostime";
+import { Time, fromMillis, toSec } from "@foxglove/rostime";
 import { ParameterValue } from "@foxglove/studio";
 import PlayerProblemManager from "@foxglove/studio-base/players/PlayerProblemManager";
 import {
@@ -52,6 +46,11 @@ const log = Log.getLogger(__dirname);
 
 const CAPABILITIES = [PlayerCapabilities.advertise];
 
+function isClockMessage(topic: string, msg: unknown): msg is { clock: Time } {
+  const maybeClockMsg = msg as { clock?: Time };
+  return topic === "/clock" && maybeClockMsg.clock != undefined && !isNaN(maybeClockMsg.clock.sec);
+}
+
 // Connects to `rosbridge_server` instance using `roslibjs`. Currently doesn't support seeking or
 // showing simulated time, so current time from Date.now() is always used instead. Also doesn't yet
 // support raw ROS messages; instead we use the CBOR compression provided by roslibjs, which
@@ -72,7 +71,6 @@ export default class RosbridgePlayer implements Player {
   } = {};
   private _start?: Time; // The time at which we started playing.
   private _clockTime?: Time; // The most recent published `/clock` time, if available
-  private _clockReceived: Time = { sec: 0, nsec: 0 }; // The local time when `_clockTime` was last received
   // active subscriptions
   private _topicSubscriptions = new Map<string, roslib.Topic>();
   private _requestedSubscriptions: SubscribePayload[] = []; // Requested subscriptions by setSubscriptions()
@@ -439,7 +437,6 @@ export default class RosbridgePlayer implements Player {
           return;
         }
         try {
-          const receiveTime = fromMillis(Date.now());
           const buffer = (message as { bytes: ArrayBuffer }).bytes;
           const bytes = new Uint8Array(buffer);
 
@@ -461,6 +458,20 @@ export default class RosbridgePlayer implements Player {
 
           const innerMessage = messageReader.readMessage(bytes);
 
+          // handle clock messages before choosing receiveTime so the clock can set its own receive time
+          if (isClockMessage(topicName, innerMessage)) {
+            const time = innerMessage.clock;
+            const seconds = toSec(innerMessage.clock);
+            if (!isNaN(seconds)) {
+              if (this._clockTime == undefined) {
+                this._start = time;
+              }
+
+              this._clockTime = time;
+            }
+          }
+          const receiveTime = this._getCurrentTime();
+
           if (!this._hasReceivedMessage) {
             this._hasReceivedMessage = true;
             this._metricsCollector.recordTimeToFirstMsgs();
@@ -474,7 +485,6 @@ export default class RosbridgePlayer implements Player {
               sizeInBytes: bytes.byteLength,
             };
             this._parsedMessages.push(msg);
-            this._handleInternalMessage(msg);
           }
           this._problems.removeProblem(problemId);
         } catch (error) {
@@ -577,33 +587,8 @@ export default class RosbridgePlayer implements Player {
     }
   }
 
-  private _handleInternalMessage(msg: MessageEvent<unknown>): void {
-    const maybeClockMsg = msg.message as { clock?: Time };
-
-    if (msg.topic === "/clock" && maybeClockMsg.clock && !isNaN(maybeClockMsg.clock.sec)) {
-      const time = maybeClockMsg.clock;
-      const seconds = toSec(maybeClockMsg.clock);
-      if (isNaN(seconds)) {
-        return;
-      }
-
-      if (this._clockTime == undefined) {
-        this._start = time;
-      }
-
-      this._clockTime = time;
-      this._clockReceived = msg.receiveTime;
-    }
-  }
-
   private _getCurrentTime(): Time {
-    const now = fromMillis(Date.now());
-    if (this._clockTime == undefined) {
-      return now;
-    }
-
-    const delta = subtractTimes(now, this._clockReceived);
-    return addTimes(this._clockTime, delta);
+    return this._clockTime ?? fromMillis(Date.now());
   }
 
   private async _getSystemState(): Promise<RosGraph> {
