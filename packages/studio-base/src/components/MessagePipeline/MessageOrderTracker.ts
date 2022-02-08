@@ -35,6 +35,14 @@ class MessageOrderTracker {
   private lastMessageTopic?: string;
   private lastLastSeekTime?: number;
   private warningTimeout?: ReturnType<typeof setTimeout>;
+
+  /**
+   * Set this to `true` to debug out-of-order messages. It is disabled by default in production
+   * because logging messages to the console prevents them from getting garbage-collected as long as
+   * the console is not cleared.
+   */
+  private trackIncorrectMessages = false;
+
   private incorrectMessages: MessageEvent<unknown>[] = [];
 
   update(playerState: PlayerState): void {
@@ -73,23 +81,29 @@ class MessageOrderTracker {
         const currentTimeDrift = Math.abs(toSec(subtractTimes(messageTime, currentTime)));
 
         if (currentTimeDrift > DRIFT_THRESHOLD_SEC) {
-          this.incorrectMessages.push(message);
+          if (this.trackIncorrectMessages) {
+            this.incorrectMessages.push(message);
+          }
           if (!this.warningTimeout) {
             this.warningTimeout = setTimeout(() => {
               // timeout has fired, we need to clear so a new timeout registers if there are more messages
               this.warningTimeout = undefined;
-              // reset incorrect message queue before posting warning so we never keep incorrectMessages around
-              const tempMessages = this.incorrectMessages;
+              // reset incorrect message queue before posting warning so we never keep
+              // incorrectMessages around. The browser console will keep messages in memory when
+              // logged, so disable logging of messages unless explicitly enabled.
+              const info = {
+                currentTime,
+                lastSeekTime,
+                messageOrder,
+                messageTime,
+                incorrectMessages: this.trackIncorrectMessages
+                  ? this.incorrectMessages
+                  : "not being tracked",
+              };
               this.incorrectMessages = [];
               log.warn(
                 `${messageOrder} very different from player.currentTime; without updating lastSeekTime`,
-                {
-                  currentTime,
-                  lastSeekTime,
-                  messageOrder,
-                  messageTime,
-                  tempMessages,
-                },
+                info,
               );
             }, WAIT_FOR_SEEK_SEC * 1000);
           }
