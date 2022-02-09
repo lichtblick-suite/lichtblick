@@ -481,12 +481,12 @@ const configSchema: PanelConfigSchema<PlotConfig> = [
   {
     key: "showXAxisLabels",
     type: "toggle",
-    title: "Show x-axis labels",
+    title: "Show x-axis label",
   },
   {
     key: "showYAxisLabels",
     type: "toggle",
-    title: "Show y-axis labels",
+    title: "Show y-axis label",
   },
   { key: "maxYValue", type: "number", title: "Y max", placeholder: "auto", allowEmpty: true },
   { key: "minYValue", type: "number", title: "Y min", placeholder: "auto", allowEmpty: true },

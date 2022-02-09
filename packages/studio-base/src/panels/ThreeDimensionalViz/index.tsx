@@ -405,7 +405,7 @@ const configSchema: PanelConfigSchema<ThreeDimensionalVizConfig> = [
   {
     key: "ignoreColladaUpAxis",
     type: "toggle",
-    title: "Ignore <up_axis> in Collada meshes",
+    title: "Ignore <up_axis> in COLLADA meshes",
   },
   { key: "clickToPublishPoseEstimateTopic", type: "text", title: "Pose estimate topic" },
   { key: "clickToPublishPoseTopic", type: "text", title: "Pose topic" },
