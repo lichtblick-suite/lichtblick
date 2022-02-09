@@ -174,9 +174,8 @@ function PanelExtensionAdapter(props: PanelExtensionAdapterProps): JSX.Element {
     const renderState: RenderState = prevRenderState.current;
 
     if (watchedFieldsRef.current.has("currentFrame")) {
-      const currentFrame = playerState?.activeData?.messages.filter((messageEvent) => {
-        return subscribedTopicsRef.current.has(messageEvent.topic);
-      });
+      const currentFrame = ctx?.messageEventsBySubscriberId.get(panelId);
+
       // If there are new frames we render
       // If there are old frames we render (new frames either replace old or no new frames)
       // Note: renderState.currentFrame.length !== currentFrame.length is wrong because it
@@ -279,7 +278,7 @@ function PanelExtensionAdapter(props: PanelExtensionAdapterProps): JSX.Element {
     } catch (err) {
       setError(err);
     }
-  }, [colorScheme, renderFn]);
+  }, [colorScheme, panelId, renderFn]);
 
   const queueRender = useCallback(() => {
     if (!renderFn || rafRequestedRef.current != undefined) {

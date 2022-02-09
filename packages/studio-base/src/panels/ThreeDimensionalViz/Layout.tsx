@@ -79,7 +79,8 @@ import {
   MouseEventName,
   ThreeDimensionalVizConfig,
 } from "@foxglove/studio-base/panels/ThreeDimensionalViz/types";
-import { Frame, Topic } from "@foxglove/studio-base/players/types";
+import { Frame } from "@foxglove/studio-base/panels/ThreeDimensionalViz/useFrame";
+import { Topic } from "@foxglove/studio-base/players/types";
 import inScreenshotTests from "@foxglove/studio-base/stories/inScreenshotTests";
 import { Color, Marker } from "@foxglove/studio-base/types/Messages";
 import {

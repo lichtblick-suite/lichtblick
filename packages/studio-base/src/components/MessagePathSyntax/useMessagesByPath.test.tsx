@@ -164,7 +164,7 @@ describe("useMessagesByPath", () => {
       wrapper,
       initialProps,
     });
-    expect(result.all.length).toEqual(1);
+    expect(result.all.length).toEqual(2);
 
     // Then let's send in the last message too, and it should discard the older message
     // (since bufferSize=2).
@@ -173,6 +173,7 @@ describe("useMessagesByPath", () => {
     expect(
       result.all.map((item) => (item instanceof Error ? undefined : item.messagesByPath)),
     ).toEqual([
+      { "/some/topic": [] },
       { "/some/topic": [queriedMessage(0), queriedMessage(1)] },
       { "/some/topic": [queriedMessage(1), queriedMessage(2)] },
     ]);
@@ -190,14 +191,18 @@ describe("useMessagesByPath", () => {
       wrapper,
       initialProps,
     });
-    expect(result.all.length).toEqual(1);
+    expect(result.all.length).toEqual(2);
 
     // Do the seek, and make sure we clear things out.
     rerender({ ...initialProps, messages: [], activeData: { lastSeekTime: 1 } });
 
     expect(
       result.all.map((item) => (item instanceof Error ? undefined : item.messagesByPath)),
-    ).toEqual([{ "/some/topic": [queriedMessage(0)] }, { "/some/topic": [] }]);
+    ).toEqual([
+      { "/some/topic": [] },
+      { "/some/topic": [queriedMessage(0)] },
+      { "/some/topic": [] },
+    ]);
   });
 
   it("returns the same when passing in a topic twice", () => {
@@ -236,6 +241,7 @@ describe("useMessagesByPath", () => {
     expect(
       result.all.map((item) => (item instanceof Error ? undefined : item.messagesByPath)),
     ).toEqual([
+      { "/some/topic.index": [] },
       {
         "/some/topic.index": [
           {
@@ -273,6 +279,7 @@ describe("useMessagesByPath", () => {
     expect(
       result.all.map((item) => (item instanceof Error ? undefined : item.messagesByPath)),
     ).toEqual([
+      { "/some/topic": [] },
       { "/some/topic": [queriedMessage(0)] },
       { "/some/topic": [queriedMessage(0)], "/some/other/topic": [] },
     ]);
@@ -300,6 +307,7 @@ describe("useMessagesByPath", () => {
     expect(
       result.all.map((item) => (item instanceof Error ? undefined : item.messagesByPath)),
     ).toEqual([
+      { "/some/topic": [] },
       { "/some/topic": [queriedMessage(0)] },
       {
         "/some/topic.index": [
@@ -360,6 +368,7 @@ describe("useMessagesByPath", () => {
       expect(
         result.all.map((item) => (item instanceof Error ? undefined : item.messagesByPath)),
       ).toEqual([
+        { "/some/topic.bars[:]{index==$foo}.baz": [] },
         {
           "/some/topic.bars[:]{index==$foo}.baz": [
             {
@@ -398,29 +407,11 @@ describe("useMessagesByPath", () => {
 
     expect(
       result.all.map((item) => (item instanceof Error ? undefined : item.messagesByPath)),
-    ).toEqual([{ "/some/topic": [queriedMessage(0)] }, { "/some/topic.index": [] }]);
-  });
-
-  it("ignores messages from non-subscribed topics", () => {
-    const { wrapper } = makeMessagePipelineWrapper();
-    const initialProps = {
-      paths: ["/some/other/topic"],
-      topics: [
-        { name: "/some/topic", datatype: "dummy" },
-        { name: "/some/other/topic", datatype: "dummy" },
-      ],
-      datatypes: fixture.datatypes,
-      messages: [fixture.messages[0]],
-    };
-    const { result, rerender } = renderHook(Hooks, {
-      wrapper,
-      initialProps,
-    });
-    rerender({ ...initialProps, messages: [fixture.messages[1], fixture.messages[2]] });
-
-    expect(
-      result.all.map((item) => (item instanceof Error ? undefined : item.messagesByPath)),
-    ).toEqual([{ "/some/other/topic": [] }, { "/some/other/topic": [] }]);
+    ).toEqual([
+      { "/some/topic": [] },
+      { "/some/topic": [queriedMessage(0)] },
+      { "/some/topic.index": [] },
+    ]);
   });
 
   it("return the same itemsByPath (identity) if the MessageHistory props did not change but children changed", () => {
@@ -437,9 +428,13 @@ describe("useMessagesByPath", () => {
     rerender();
     expect(
       result.all.map((item) => (item instanceof Error ? undefined : item.messagesByPath)),
-    ).toEqual([{ "/some/topic": [queriedMessage(0)] }, { "/some/topic": [queriedMessage(0)] }]);
-    expect((result.all[0] as { messagesByPath: MessageDataItemsByPath }).messagesByPath).toBe(
-      (result.all[1] as { messagesByPath: MessageDataItemsByPath }).messagesByPath,
+    ).toEqual([
+      { "/some/topic": [] },
+      { "/some/topic": [queriedMessage(0)] },
+      { "/some/topic": [queriedMessage(0)] },
+    ]);
+    expect((result.all[1] as { messagesByPath: MessageDataItemsByPath }).messagesByPath).toBe(
+      (result.all[2] as { messagesByPath: MessageDataItemsByPath }).messagesByPath,
     );
   });
 });

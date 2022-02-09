@@ -21,11 +21,12 @@ import {
   IImmutableTransformTree,
   TransformTree,
 } from "@foxglove/studio-base/panels/ThreeDimensionalViz/transforms";
-import { Frame, MessageEvent, Topic } from "@foxglove/studio-base/players/types";
+import { MessageEvent, Topic } from "@foxglove/studio-base/players/types";
 import { MarkerArray, StampedMessage, TF } from "@foxglove/studio-base/types/Messages";
 import { mightActuallyBePartial } from "@foxglove/studio-base/util/mightActuallyBePartial";
 
 import { TransformLink } from "./types";
+import { Frame } from "./useFrame";
 
 type TfMessage = { transforms: TF[] };
 

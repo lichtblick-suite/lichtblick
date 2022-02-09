@@ -241,10 +241,6 @@ export type Progress = Readonly<{
   readonly messageCache?: BlockCache;
 }>;
 
-export type Frame = {
-  [topic: string]: MessageEvent<unknown>[];
-};
-
 // Represents a subscription to a single topic, for use in `setSubscriptions`.
 // TODO(JP): Pull this into two types, one for the Player (which does not care about the
 // `requester`) and one for the Internals panel (which does).

@@ -108,8 +108,8 @@ export type NodeRegistration = {
   inputs: readonly string[];
   output: Topic;
   processMessage: (
-    arg0: MessageEvent<unknown>,
-    arg1: GlobalVariables,
+    messageEvent: MessageEvent<unknown>,
+    globalVariables: GlobalVariables,
   ) => Promise<MessageEvent<unknown> | undefined>;
   terminate: () => void;
 };

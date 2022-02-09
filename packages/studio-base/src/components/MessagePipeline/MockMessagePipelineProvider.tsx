@@ -11,8 +11,9 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { flatten, groupBy } from "lodash";
+import { flatten } from "lodash";
 import { useCallback, useMemo, useRef, useState } from "react";
+import { useLatest } from "react-use";
 
 import { useShallowMemo } from "@foxglove/hooks";
 import { Time, isLessThan } from "@foxglove/rostime";
@@ -77,6 +78,9 @@ export default function MockMessagePipelineProvider(props: {
     }
   }
 
+  // See comment for messageEventsBySubscriberId below on the purpose of this ref
+  const firstChangeRef = useRef<boolean>(false);
+
   const [allSubscriptions, setAllSubscriptions] = useState<{
     [key: string]: SubscribePayload[];
   }>({});
@@ -85,8 +89,15 @@ export default function MockMessagePipelineProvider(props: {
     [allSubscriptions],
   );
   const setSubscriptions = useCallback(
-    (id: string, subs: SubscribePayload[]) => setAllSubscriptions((s) => ({ ...s, [id]: subs })),
-    [setAllSubscriptions],
+    (id: string, subs: SubscribePayload[]) => {
+      setAllSubscriptions((sub) => ({ ...sub, [id]: subs }));
+      const setSubs = props.setSubscriptions;
+      setSubs?.(id, subs);
+      if (subs.length > 0) {
+        firstChangeRef.current = true;
+      }
+    },
+    [setAllSubscriptions, props.setSubscriptions],
   );
 
   const requestBackfill = useMemo(
@@ -140,16 +151,35 @@ export default function MockMessagePipelineProvider(props: {
     ],
   );
 
+  // In the real pipeline, the messageEventsBySubscriberId only change
+  // on player listener callback - not on subscriber changes
+  //
+  // In tests, the first setSubscriptions call happens after we've already set props.messages
+  // So we have some special logic to detect the _first_ change of subscriptions
+  // and update messageEventsBySubscriberId.
+  const latestAllSubs = useLatest(allSubscriptions);
+  const firstChange = firstChangeRef.current;
+  const messageEventsBySubscriberId = useMemo(() => {
+    void firstChange;
+    return new Map(
+      Object.entries(latestAllSubs.current).map(([id, payloads]) => [
+        id,
+        props.messages?.filter((msg) => payloads.find((payload) => payload.topic === msg.topic)) ??
+          [],
+      ]),
+    );
+  }, [firstChange, props.messages, latestAllSubs]);
+
   return (
     <ContextInternal.Provider
       value={{
         playerState,
-        frame: groupBy(props.messages ?? [], "topic"),
         sortedTopics: (props.topics ?? []).sort(naturalSort("name")),
         datatypes: props.datatypes ?? NO_DATATYPES,
         subscriptions: flattenedSubscriptions,
         publishers: [],
-        setSubscriptions: props.setSubscriptions ?? setSubscriptions,
+        messageEventsBySubscriberId,
+        setSubscriptions,
         setPublishers: props.setPublishers ?? noop,
         setParameter: props.setParameter ?? noop,
         publish: props.publish ?? noop,

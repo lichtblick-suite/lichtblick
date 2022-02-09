@@ -75,27 +75,56 @@ describe("useFrame", () => {
       },
     );
 
-    expect(result.current.reset).toEqual(true);
-    expect(result.current.frame["/some/topic"]).toEqual([
+    expect(result.all).toEqual([
+      { reset: true, frame: {} },
       {
-        topic: "/some/topic",
-        receiveTime: { sec: 100, nsec: 0 },
-        message: { index: 0 },
-        sizeInBytes: 0,
+        reset: false,
+        frame: {
+          "/some/topic": [
+            {
+              topic: "/some/topic",
+              receiveTime: { sec: 100, nsec: 0 },
+              message: { index: 0 },
+              sizeInBytes: 0,
+            },
+          ],
+        },
       },
     ]);
-
     // re-render keeps reset value since no new messages have been fed in
     rerender();
-    expect(result.current.reset).toEqual(true);
-    expect(result.current.frame["/some/topic"]).toEqual([
+    expect(result.all).toEqual([
+      { reset: true, frame: {} },
       {
-        topic: "/some/topic",
-        receiveTime: { sec: 100, nsec: 0 },
-        message: { index: 0 },
-        sizeInBytes: 0,
+        reset: false,
+        frame: {
+          "/some/topic": [
+            {
+              topic: "/some/topic",
+              receiveTime: { sec: 100, nsec: 0 },
+              message: { index: 0 },
+              sizeInBytes: 0,
+            },
+          ],
+        },
+      },
+      {
+        reset: false,
+        frame: {
+          "/some/topic": [
+            {
+              topic: "/some/topic",
+              receiveTime: { sec: 100, nsec: 0 },
+              message: { index: 0 },
+              sizeInBytes: 0,
+            },
+          ],
+        },
       },
     ]);
+    expect((result.all[1]! as Record<string, unknown>).frame).toBe(
+      (result.all[2]! as Record<string, unknown>).frame,
+    );
   });
 
   it("should pass in another frame of messages", () => {
@@ -121,27 +150,53 @@ describe("useFrame", () => {
         },
       },
     );
-
-    expect(result.current.reset).toEqual(true);
-    expect(result.current.frame["/some/topic"]).toEqual([
+    expect(result.all).toEqual([
+      { reset: true, frame: {} },
       {
-        topic: "/some/topic",
-        receiveTime: { sec: 100, nsec: 0 },
-        message: { index: 0 },
-        sizeInBytes: 0,
+        reset: false,
+        frame: {
+          "/some/topic": [
+            {
+              topic: "/some/topic",
+              receiveTime: { sec: 100, nsec: 0 },
+              message: { index: 0 },
+              sizeInBytes: 0,
+            },
+          ],
+        },
       },
     ]);
 
     rerender({ messages: [messageEventFixtures[1]] });
 
-    // next render indicates reset is false since the stream remains the same
-    expect(result.current.reset).toEqual(false);
-    expect(result.current.frame["/some/topic"]).toEqual([
+    expect(result.all).toEqual([
+      { reset: true, frame: {} },
       {
-        topic: "/some/topic",
-        receiveTime: { sec: 101, nsec: 0 },
-        message: { index: 1 },
-        sizeInBytes: 0,
+        reset: false,
+        frame: {
+          "/some/topic": [
+            {
+              topic: "/some/topic",
+              receiveTime: { sec: 100, nsec: 0 },
+              message: { index: 0 },
+              sizeInBytes: 0,
+            },
+          ],
+        },
+      },
+      {
+        // next render indicates reset is false since the stream remains the same
+        reset: false,
+        frame: {
+          "/some/topic": [
+            {
+              topic: "/some/topic",
+              receiveTime: { sec: 101, nsec: 0 },
+              message: { index: 1 },
+              sizeInBytes: 0,
+            },
+          ],
+        },
       },
     ]);
   });

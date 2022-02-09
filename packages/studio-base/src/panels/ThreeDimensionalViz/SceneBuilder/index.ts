@@ -31,7 +31,8 @@ import {
   MarkerCollector,
   RenderMarkerArgs,
 } from "@foxglove/studio-base/panels/ThreeDimensionalViz/types";
-import { Topic, Frame, MessageEvent, RosObject } from "@foxglove/studio-base/players/types";
+import { Frame } from "@foxglove/studio-base/panels/ThreeDimensionalViz/useFrame";
+import { Topic, MessageEvent, RosObject } from "@foxglove/studio-base/players/types";
 import {
   Color,
   Marker,

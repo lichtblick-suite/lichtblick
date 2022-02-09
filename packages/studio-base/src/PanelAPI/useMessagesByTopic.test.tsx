@@ -69,12 +69,13 @@ describe("useMessagesByTopic", () => {
     root.setProps({ messages: [message2] });
 
     expect(Test.result.mock.calls).toEqual([
+      [{ "/foo": [] }],
       [{ "/foo": [message1] }],
       [{ "/foo": [message1, message2] }],
     ]);
 
     // Make sure that the identities are also the same, not just deep-equal.
-    expect(Test.result.mock.calls[0][0]["/foo"][0]).toBe(message1);
+    expect(Test.result.mock.calls[1][0]["/foo"][0]).toBe(message1);
 
     root.unmount();
   });
@@ -102,17 +103,18 @@ describe("useMessagesByTopic", () => {
       </MockMessagePipelineProvider>,
     );
 
-    expect(Test.result.mock.calls).toEqual([[{ "/foo": [message1, message2] }]]);
+    expect(Test.result.mock.calls).toEqual([[{ "/foo": [] }], [{ "/foo": [message1, message2] }]]);
 
     root.setProps({ messages: [], children: <Test topics={["/foo", "/bar"]} historySize={1} /> });
 
     expect(Test.result.mock.calls).toEqual([
+      [{ "/foo": [] }],
       [{ "/foo": [message1, message2] }],
       [{ "/foo": [message2], "/bar": [] }],
     ]);
 
     // Make sure that the identities are also the same, not just deep-equal.
-    expect(Test.result.mock.calls[1][0]["/foo"][0]).toBe(message2);
+    expect(Test.result.mock.calls[2][0]["/foo"][0]).toBe(message2);
 
     root.unmount();
   });

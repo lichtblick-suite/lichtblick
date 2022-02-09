@@ -284,8 +284,9 @@ export default class UserNodePlayer implements Player {
     // problems for specific userspace nodes independently of other userspace nodes.
     const problemKey = `node-id-${nodeId}`;
 
-    const processMessage = async (
-      msgEvent: MessageEvent<unknown>,
+    const processMessage: NodeRegistration["processMessage"] = async (
+      msgEvent,
+      globalVariables,
     ): Promise<MessageEvent<unknown> | undefined> => {
       // We allow _resetWorkers to "cancel" the processing by creating a new signal every time we process a message
       terminateSignal = signal<void>();
@@ -368,7 +369,7 @@ export default class UserNodePlayer implements Player {
             receiveTime: msgEvent.receiveTime,
             message: maybePlainObject(msgEvent.message),
           },
-          globalVariables: this._globalVariables,
+          globalVariables,
         }),
         terminateSignal,
       ]);
@@ -597,6 +598,7 @@ export default class UserNodePlayer implements Player {
   // invoked when our child player state changes
   private async _onPlayerState(playerState: PlayerState) {
     try {
+      const globalVariables = this._globalVariables;
       const { activeData } = playerState;
       if (!activeData) {
         this._playerState = playerState;
@@ -625,7 +627,7 @@ export default class UserNodePlayer implements Player {
 
       const { parsedMessages } = await this._getMessages(
         messages,
-        this._globalVariables,
+        globalVariables,
         this._nodeRegistrations,
       );
 

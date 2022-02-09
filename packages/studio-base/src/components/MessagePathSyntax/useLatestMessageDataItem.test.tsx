@@ -79,11 +79,13 @@ describe("useLatestMessageDataItem", () => {
       },
     });
     expect(result.all).toEqual([
+      undefined,
       { messageEvent: fixtureMessages[0], queriedData: [{ path: "/topic.value", value: 0 }] },
     ]);
 
     rerender({ path: "/topic.value", messages: [fixtureMessages[1]!, fixtureMessages[2]!] });
     expect(result.all).toEqual([
+      undefined,
       { messageEvent: fixtureMessages[0], queriedData: [{ path: "/topic.value", value: 0 }] },
       { messageEvent: fixtureMessages[2], queriedData: [{ path: "/topic.value", value: 2 }] },
     ]);
@@ -107,6 +109,7 @@ describe("useLatestMessageDataItem", () => {
       },
     });
     expect(result.all).toEqual([
+      undefined,
       {
         messageEvent: fixtureMessages[1],
         queriedData: [{ path: "/topic{value==1}.value", value: 1 }],
@@ -134,6 +137,7 @@ describe("useLatestMessageDataItem", () => {
 
     rerender({ path: "/topic{value==1}" });
     expect(result.all).toEqual([
+      undefined,
       {
         messageEvent: fixtureMessages[1],
         queriedData: [{ path: "/topic{value==1}.value", value: 1 }],
@@ -167,9 +171,10 @@ describe("useLatestMessageDataItem", () => {
       },
     });
 
-    expect(result.all).toEqual([undefined]);
+    expect(result.all).toEqual([undefined, undefined]);
     rerender({ path: "/topic{value==2}.value", datatypes, topics });
     expect(result.all).toEqual([
+      undefined,
       undefined,
       {
         messageEvent: fixtureMessages[2],
