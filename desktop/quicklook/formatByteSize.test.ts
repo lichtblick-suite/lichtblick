@@ -6,8 +6,8 @@ import formatByteSize from "./formatByteSize";
 
 describe("formatByteSize", () => {
   it.each([
-    [0, "0 B"],
-    [1023, "1023 B"],
+    [0, "0 Bytes"],
+    [1023, "1023 Bytes"],
     [1024, "1.0 KiB"],
     [1023.9 * Math.pow(1024, 1), "1023.9 KiB"],
     [1023.9 * Math.pow(1024, 1) + 1, "1.0 MiB"],

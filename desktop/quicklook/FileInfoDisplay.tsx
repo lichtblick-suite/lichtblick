@@ -12,7 +12,7 @@ import bagIcon from "../../resources/icon/BagIcon.png";
 import mcapIcon from "../../resources/icon/McapIcon.png";
 import Flash from "./Flash";
 import formatByteSize from "./formatByteSize";
-import { FileInfo, TopicInfo } from "./getInfo";
+import { FileInfo, TopicInfo } from "./types";
 
 const log = Logger.getLogger(__filename);
 
@@ -123,7 +123,7 @@ const Datatype = styled.div`
 function TopicRow({ info: { topic, datatype, numMessages, numConnections } }: { info: TopicInfo }) {
   return (
     <TopicRowWrapper>
-      <MessageCount>{numMessages.toLocaleString()}</MessageCount>
+      <MessageCount>{numMessages?.toLocaleString()}</MessageCount>
       <TopicNameAndDatatype>
         <TopicName>{topic}</TopicName>
         <Datatype>
@@ -136,7 +136,7 @@ function TopicRow({ info: { topic, datatype, numMessages, numConnections } }: { 
 }
 
 function formatCount(count: number | bigint | undefined, noun: string): string | undefined {
-  if (count == undefined) {
+  if (count == undefined || count === 0 || count === 0n) {
     return undefined;
   }
   return `${count.toLocaleString()} ${noun}${count === 1 || count === 1n ? "" : "s"}`;
@@ -184,9 +184,12 @@ export default function FileInfoDisplay({
           {fileInfo?.compressionTypes && (
             <SummaryRow>
               Compression:{" "}
-              {fileInfo.compressionTypes.length === 0
+              {fileInfo.compressionTypes.size === 0
                 ? "none"
-                : fileInfo.compressionTypes.filter(Boolean).join(", ")}
+                : Array.from(fileInfo.compressionTypes)
+                    .filter(Boolean)
+                    .sort((a, b) => a.localeCompare(b))
+                    .join(", ")}
             </SummaryRow>
           )}
           {fileInfo?.startTime && (

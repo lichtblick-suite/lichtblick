@@ -3,7 +3,7 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 export default function formatByteSize(size: number): string {
-  const suffixes = ["B", "KiB", "MiB", "GiB", "TiB", "PiB"];
+  const suffixes = ["Bytes", "KiB", "MiB", "GiB", "TiB", "PiB"];
   let value = size;
   let suffix = 0;
   while (value > 1023.9 && suffix + 1 < suffixes.length) {
