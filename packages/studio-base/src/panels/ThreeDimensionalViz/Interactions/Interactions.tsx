@@ -11,8 +11,9 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
+import { Checkbox } from "@fluentui/react";
+
 import { MouseEventObject } from "@foxglove/regl-worldview";
-import Checkbox from "@foxglove/studio-base/components/Checkbox";
 import ExpandingToolbar, {
   ToolGroup,
   ToolGroupFixedSizePane,
@@ -106,6 +107,11 @@ const InteractionsBaseComponent = React.memo<PropsWithConfig>(function Interacti
             onChange={() =>
               saveConfig({ disableAutoOpenClickedObject: !disableAutoOpenClickedObject })
             }
+            styles={{
+              checkmark: { fontSize: 9, lineHeight: 14, ".is-checked &": { color: "#fff" } },
+              checkbox: { height: 14, width: 14, marginTop: 2 },
+              text: { fontSize: 12 },
+            }}
           />
         </ToolGroupFixedSizePane>
       </ToolGroup>
