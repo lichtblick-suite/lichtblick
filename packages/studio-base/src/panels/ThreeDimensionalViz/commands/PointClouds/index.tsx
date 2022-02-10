@@ -23,13 +23,14 @@ import {
   MouseEventObject,
   vec4ToRGBA,
   BaseShape,
+  defaultBlend,
 } from "@foxglove/regl-worldview";
+import { toRgba } from "@foxglove/studio-base/panels/ThreeDimensionalViz/commands/PointClouds/selection";
 import {
   DEFAULT_FLAT_COLOR,
-  DEFAULT_MIN_COLOR,
   DEFAULT_MAX_COLOR,
-} from "@foxglove/studio-base/panels/ThreeDimensionalViz/TopicSettingsEditor/PointCloudSettingsEditor";
-import { toRgba } from "@foxglove/studio-base/panels/ThreeDimensionalViz/commands/PointClouds/selection";
+  DEFAULT_MIN_COLOR,
+} from "@foxglove/studio-base/panels/ThreeDimensionalViz/utils/pointCloudColors";
 import { mightActuallyBePartial } from "@foxglove/studio-base/util/mightActuallyBePartial";
 
 import VertexBufferCache from "./VertexBufferCache";
@@ -38,16 +39,19 @@ import { DecodedMarker, decodeMarker } from "./decodeMarker";
 import { updateMarkerCache } from "./memoization";
 import { MemoizedMarker, MemoizedVertexBuffer, PointCloudMarker, VertexBuffer } from "./types";
 
-const COLOR_MODE_FLAT = 0;
-const COLOR_MODE_RGB = 1;
-const COLOR_MODE_GRADIENT = 2;
-const COLOR_MODE_RAINBOW = 3;
-const COLOR_MODE_TURBO = 4;
+enum ShaderColorMode {
+  FLAT,
+  RGB,
+  RGBA,
+  GRADIENT,
+  RAINBOW,
+  TURBO,
+}
 
 type Uniforms = {
   pointSize: number;
   isCircle: boolean;
-  colorMode: 2 | 3 | 4 | 1 | -1 | 0;
+  colorMode: ShaderColorMode;
   flatColor: [number, number, number, number];
   minGradientColor: [number, number, number, number];
   maxGradientColor: [number, number, number, number];
@@ -71,14 +75,14 @@ attribute vec3 position;
 attribute float color; // color values in range [0-255]
 
 uniform float pointSize;
-uniform int colorMode;
+uniform lowp int colorMode;
 uniform vec4 flatColor;
 uniform vec4 minGradientColor;
 uniform vec4 maxGradientColor;
 uniform float minColorFieldValue;
 uniform float maxColorFieldValue;
 
-varying vec3 fragColor;
+varying vec4 fragColor;
 
 float getFieldValue() {
   return color;
@@ -150,19 +154,19 @@ void main () {
   vec3 p = applyPose(position);
   gl_Position = projection * view * vec4(p, 1);
 
-  if (colorMode == ${COLOR_MODE_GRADIENT}) {
-    fragColor = gradientColor();
-  } else if (colorMode == ${COLOR_MODE_RAINBOW}) {
-    fragColor = rainbowColor();
-  } else if (colorMode == ${COLOR_MODE_TURBO}) {
-    fragColor = turboColor();
+  if (colorMode == ${ShaderColorMode.GRADIENT}) {
+    fragColor = vec4(gradientColor(), 1.0);
+  } else if (colorMode == ${ShaderColorMode.RAINBOW}) {
+    fragColor = vec4(rainbowColor(), 1.0);
+  } else if (colorMode == ${ShaderColorMode.TURBO}) {
+    fragColor = vec4(turboColor(), 1.0);
   } else {
-    fragColor = flatColor.rgb;
+    fragColor = vec4(flatColor.rgb, 1.0);
   }
 }
 `;
 
-const vertexShaderForRgbColor = `
+const vertexShaderForRgbaColor = `
 precision mediump float;
 
 // this comes from the camera
@@ -171,28 +175,27 @@ uniform mat4 projection, view;
 #WITH_POSE
 
 attribute vec3 position;
-attribute vec3 color; // color values in range [0-255]
+attribute vec4 color; // color values in range [0-255]
 
 uniform float pointSize;
-uniform int colorMode;
+uniform lowp int colorMode;
 
-varying vec3 fragColor;
+varying vec4 fragColor;
 
 void main () {
   gl_PointSize = pointSize;
   vec3 p = applyPose(position);
   gl_Position = projection * view * vec4(p, 1);
 
-  if (colorMode == ${COLOR_MODE_RGB}) {
-    fragColor = color;
-  }
+  fragColor = color;
 }
 `;
 
 const fragmentShader = `
 precision mediump float;
-varying vec3 fragColor;
+varying vec4 fragColor;
 uniform bool isCircle;
+uniform lowp int colorMode;
 void main () {
   if (isCircle) {
     // gl_PointCoord give us the coordinate of this pixel relative to the current point's position
@@ -205,33 +208,41 @@ void main () {
       discard;
     }
   }
-  gl_FragColor = vec4(fragColor / 255.0, 1.0);
+  if (colorMode == ${ShaderColorMode.RGBA}) {
+    gl_FragColor = vec4(fragColor / 255.0);
+  } else {
+    gl_FragColor = vec4(fragColor.rgb / 255.0, 1.0);
+  }
 }
 `;
 
-function getEffectiveColorMode(props: DecodedMarker) {
+function getEffectiveColorMode(props: DecodedMarker): ShaderColorMode {
   const { settings, hitmapColors, blend } = props;
   if (hitmapColors) {
     // We're providing a colors array in RGB format
-    return COLOR_MODE_RGB;
+    return ShaderColorMode.RGB;
   }
 
   if (blend?.color) {
     // Force to `flat` mode if constant color is required for blending.
-    return COLOR_MODE_FLAT;
+    return ShaderColorMode.FLAT;
   }
 
   const { colorMode } = settings;
-  if (colorMode.mode === "flat") {
-    return COLOR_MODE_FLAT;
-  } else if (colorMode.mode === "gradient") {
-    return COLOR_MODE_GRADIENT;
-  } else if (colorMode.mode === "rainbow") {
-    return COLOR_MODE_RAINBOW;
-  } else if (colorMode.mode === "turbo") {
-    return COLOR_MODE_TURBO;
+  switch (colorMode.mode) {
+    case "flat":
+      return ShaderColorMode.FLAT;
+    case "gradient":
+      return ShaderColorMode.GRADIENT;
+    case "rainbow":
+      return ShaderColorMode.RAINBOW;
+    case "turbo":
+      return ShaderColorMode.TURBO;
+    case "rgb":
+      return ShaderColorMode.RGB;
+    case "rgba":
+      return ShaderColorMode.RGBA;
   }
-  return COLOR_MODE_RGB;
 }
 
 // Implements a custom caching mechanism for vertex buffers.
@@ -286,10 +297,23 @@ const makePointCloudCommand = () => {
       Record<string, never>,
       REGL.DefaultContext
     >({
+      blend: defaultBlend,
       primitive: "points",
       vert: (_context, props) => {
+        // We use different shaders for different color modes because the size of the color
+        // attribute is different and we need to avoid out of bounds reads:
+        // https://github.com/foxglove/studio/pull/1559
         const mode = getEffectiveColorMode(props);
-        return mode === COLOR_MODE_RGB ? vertexShaderForRgbColor : vertexShaderForSingleColor;
+        switch (mode) {
+          case ShaderColorMode.RGB:
+          case ShaderColorMode.RGBA:
+            return vertexShaderForRgbaColor;
+          case ShaderColorMode.FLAT:
+          case ShaderColorMode.GRADIENT:
+          case ShaderColorMode.RAINBOW:
+          case ShaderColorMode.TURBO:
+            return vertexShaderForSingleColor;
+        }
       },
       frag: fragmentShader,
       attributes: {
@@ -421,11 +445,12 @@ function instancedGetChildrenForHitmap<
       return undefined;
     }
     const idColors = assignNextColors(prop, instanceCount);
-    const allColors: number[] = [];
-    idColors.forEach((color) => {
-      allColors.push(color[0] * 255);
-      allColors.push(color[1] * 255);
-      allColors.push(color[2] * 255);
+    const allColors = new Uint8Array(idColors.length * 4);
+    idColors.forEach((color, idx) => {
+      allColors[idx * 4 + 0] = color[0] * 255;
+      allColors[idx * 4 + 1] = color[1] * 255;
+      allColors[idx * 4 + 2] = color[2] * 255;
+      allColors[idx * 4 + 3] = 255;
     });
     hitmapProp.hitmapColors = allColors;
     // expand the interaction area

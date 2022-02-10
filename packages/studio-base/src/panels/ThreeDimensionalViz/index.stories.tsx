@@ -1344,6 +1344,7 @@ export function Marker_PointCloud2_Alignment(): JSX.Element {
           settingsByKey: {
             "t:/pointcloud": {
               pointSize: 30,
+              colorMode: { mode: "rgba", rgbByteOrder: "abgr" },
             },
           },
           followTf: "base_link",
@@ -1679,8 +1680,17 @@ export function SensorMsgs_LaserScan(): JSX.Element {
   );
 }
 
+export const SensorMsgs_PointCloud2_RGBA = (): JSX.Element => (
+  <SensorMsgs_PointCloud2 rgbaFieldName="rgba" />
+);
 SensorMsgs_PointCloud2_RGBA.parameters = { colorScheme: "dark" };
-export function SensorMsgs_PointCloud2_RGBA(): JSX.Element {
+
+export const SensorMsgs_PointCloud2_RGB = (): JSX.Element => (
+  <SensorMsgs_PointCloud2 rgbaFieldName="rgb" />
+);
+SensorMsgs_PointCloud2_RGB.parameters = { colorScheme: "dark" };
+
+function SensorMsgs_PointCloud2({ rgbaFieldName }: { rgbaFieldName: string }): JSX.Element {
   const topics: Topic[] = [
     { name: "/pointcloud", datatype: "sensor_msgs/PointCloud2" },
     { name: "/tf", datatype: "geometry_msgs/TransformStamped" },
@@ -1718,23 +1728,23 @@ export function SensorMsgs_PointCloud2_RGBA(): JSX.Element {
     return (x / 128 - 0.5) ** 2 + (y / 128 - 0.5) ** 2;
   }
 
-  function jet(x: number): number {
+  function jet(x: number, a: number): number {
     const i = Math.trunc(x * 255);
     const r = Math.max(0, Math.min(255, 4 * (i - 96), 255 - 4 * (i - 224)));
     const g = Math.max(0, Math.min(255, 4 * (i - 32), 255 - 4 * (i - 160)));
     const b = Math.max(0, Math.min(255, 4 * i + 127, 255 - 4 * (i - 96)));
-    return rgba(r / 255, g / 255, b / 255, 0.5 + x / 2);
+    return rgba(r / 255, g / 255, b / 255, a);
   }
 
   const data = new Uint8Array(128 * 128 * 16);
   const view = new DataView(data.buffer, data.byteOffset, data.byteLength);
-  for (let y = 0; y < 128; y++) {
-    for (let x = 0; x < 128; x++) {
+  for (let y = 0; y < 128; y += 3) {
+    for (let x = 0; x < 128; x += 3) {
       const i = (y * 128 + x) * 16;
       view.setFloat32(i + 0, x * SCALE - 5, true);
       view.setFloat32(i + 4, y * SCALE - 5, true);
       view.setFloat32(i + 8, f(x, y) * 5, true);
-      view.setUint32(i + 12, jet(f(x, y) * 2), true);
+      view.setUint32(i + 12, jet(f(x, y) * 2, x / 128), true);
     }
   }
 
@@ -1750,7 +1760,7 @@ export function SensorMsgs_PointCloud2_RGBA(): JSX.Element {
         { name: "x", offset: 0, datatype: 7, count: 1 },
         { name: "y", offset: 4, datatype: 7, count: 1 },
         { name: "z", offset: 8, datatype: 7, count: 1 },
-        { name: "rgba", offset: 12, datatype: 6, count: 1 },
+        { name: rgbaFieldName, offset: 12, datatype: 6, count: 1 },
       ],
       is_bigendian: false,
       point_step: 16,
@@ -1782,6 +1792,12 @@ export function SensorMsgs_PointCloud2_RGBA(): JSX.Element {
           checkedKeys: ["name:Topics", "t:/tf", "t:/pointcloud", `t:${FOXGLOVE_GRID_TOPIC}`],
           expandedKeys: ["name:Topics", "t:/tf", "t:/pointcloud", `t:${FOXGLOVE_GRID_TOPIC}`],
           followTf: "base_link",
+          settingsByKey: {
+            "t:/pointcloud": {
+              pointSize: 10,
+              colorMode: { mode: rgbaFieldName, rgbByteOrder: "abgr" },
+            },
+          },
           cameraState: {
             distance: 13.5,
             perspective: true,

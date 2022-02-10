@@ -16,7 +16,7 @@ const RGBA_WHITE = { r: 0, g: 0, b: 0, a: 1 };
 const RGBA_BLACK = { r: 1, g: 1, b: 1, a: 1 };
 const POSITION = { x: 1, y: 1, z: 1 };
 
-const DefaultElem = ({ settings }: { settings: PointCloudSettings }) => {
+const PointCloudSettingsStory = ({ settings }: { settings: PointCloudSettings }) => {
   return (
     <div style={{ padding: "10px", width: "400px" }}>
       <PointCloudSettingsEditor
@@ -46,20 +46,26 @@ const DefaultElem = ({ settings }: { settings: PointCloudSettings }) => {
 };
 
 export const Default = (): JSX.Element => {
-  return <DefaultElem settings={{}} />;
+  return <PointCloudSettingsStory settings={{}} />;
 };
 
 export const ColorModeRgb = (): JSX.Element => {
-  return <DefaultElem settings={{ colorMode: { mode: "rgb" } }} />;
+  return <PointCloudSettingsStory settings={{ colorMode: { mode: "rgb" } }} />;
+};
+
+export const ColorModeRgba = (): JSX.Element => {
+  return <PointCloudSettingsStory settings={{ colorMode: { mode: "rgba" } }} />;
 };
 
 export const ColorModeFlat = (): JSX.Element => {
-  return <DefaultElem settings={{ colorMode: { mode: "flat", flatColor: RGBA_WHITE } }} />;
+  return (
+    <PointCloudSettingsStory settings={{ colorMode: { mode: "flat", flatColor: RGBA_WHITE } }} />
+  );
 };
 
 export const ColorModeGradient = (): JSX.Element => {
   return (
-    <DefaultElem
+    <PointCloudSettingsStory
       settings={{
         colorMode: {
           mode: "gradient",
@@ -73,5 +79,5 @@ export const ColorModeGradient = (): JSX.Element => {
 };
 
 export const ColorModeRainbow = (): JSX.Element => {
-  return <DefaultElem settings={{ colorMode: { mode: "rainbow", colorField: "b" } }} />;
+  return <PointCloudSettingsStory settings={{ colorMode: { mode: "rainbow", colorField: "b" } }} />;
 };

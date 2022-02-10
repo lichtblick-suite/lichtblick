@@ -14,12 +14,12 @@
 import { difference, isEmpty, isNil } from "lodash";
 
 import { toRGBA, Color } from "@foxglove/regl-worldview";
+import { DecodedMarker } from "@foxglove/studio-base/panels/ThreeDimensionalViz/commands/PointClouds/decodeMarker";
 import {
   DEFAULT_FLAT_COLOR,
-  DEFAULT_MIN_COLOR,
   DEFAULT_MAX_COLOR,
-} from "@foxglove/studio-base/panels/ThreeDimensionalViz/TopicSettingsEditor/PointCloudSettingsEditor";
-import { DecodedMarker } from "@foxglove/studio-base/panels/ThreeDimensionalViz/commands/PointClouds/decodeMarker";
+  DEFAULT_MIN_COLOR,
+} from "@foxglove/studio-base/panels/ThreeDimensionalViz/utils/pointCloudColors";
 import { RosObject } from "@foxglove/studio-base/players/types";
 import { PointCloud2, PointField } from "@foxglove/studio-base/types/Messages";
 import { mightActuallyBePartial } from "@foxglove/studio-base/util/mightActuallyBePartial";
@@ -83,14 +83,9 @@ export function getClickedInfo(
   let clickedPointColor: number[] = [];
   const colorMode = mightActuallyBePartial(settings).colorMode;
   if (colorMode != undefined) {
-    if (colorMode.mode === "rgb" && colorBuffer) {
+    if ((colorMode.mode === "rgb" || colorMode.mode === "rgba") && colorBuffer) {
       // Extract [r, g, b, a] from colors buffer
-      clickedPointColor = [
-        ...getVertexValues(colorBuffer, pointIndex, 3), // alpha value is set to 1 since 'colorBuffer' only stores
-        // [r, g, b] components. Shaders always use an alpha value
-        // of 1 as well.
-        1.0,
-      ];
+      clickedPointColor = getVertexValues(colorBuffer, pointIndex, 4);
     } else if (colorMode.mode === "gradient" && colorBuffer) {
       const { minColorValue, maxColorValue } = maybeFullyDecodedMarker as MinMaxColors;
       const colorFieldValue = getVertexValue(colorBuffer, pointIndex);

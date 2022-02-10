@@ -13,11 +13,11 @@
 
 import REGL from "regl";
 
+import { PointCloudSettings } from "@foxglove/studio-base/panels/ThreeDimensionalViz/TopicSettingsEditor/PointCloudSettingsEditor";
 import {
-  DEFAULT_FLAT_COLOR,
   ColorMode,
-  PointCloudSettings,
-} from "@foxglove/studio-base/panels/ThreeDimensionalViz/TopicSettingsEditor/PointCloudSettingsEditor";
+  getDefaultColorMode,
+} from "@foxglove/studio-base/panels/ThreeDimensionalViz/utils/pointCloudColors";
 
 import {
   getFieldOffsetsAndReaders,
@@ -41,8 +41,6 @@ export type DecodedMarker = PointCloudMarker & {
   };
 };
 
-const DEFAULT_COLOR_FIELDS = ["intensity", "i"];
-
 // Decode a marker and generate position and color buffers for rendering
 // The resulting marker should be memoized for better performance
 export function decodeMarker(marker: PointCloudMarker): DecodedMarker {
@@ -57,23 +55,11 @@ export function decodeMarker(marker: PointCloudMarker): DecodedMarker {
   } = marker;
   const isBigEndian = marker.is_bigendian;
   const offsetsAndReaders = getFieldOffsetsAndReaders(data, fields);
-  const hasRGB =
-    offsetsAndReaders.rgb?.offset != undefined || offsetsAndReaders.rgba?.offset != undefined;
 
   // Calculate the number of points in the cloud.
   // Do not use data.length, since it doesn't work with sparse point clouds.
   const pointCount = width * height;
-
-  const defaultColorField =
-    fields.find(({ name }) => DEFAULT_COLOR_FIELDS.includes(name))?.name ??
-    fields.find(({ name }) => name !== "rgb" && name !== "rgba")?.name;
-  const colorMode: ColorMode =
-    settings.colorMode ??
-    (hasRGB
-      ? { mode: "rgb" }
-      : defaultColorField
-      ? { mode: "turbo", colorField: defaultColorField }
-      : { mode: "flat", flatColor: DEFAULT_FLAT_COLOR });
+  const colorMode: ColorMode = settings.colorMode ?? getDefaultColorMode(marker);
 
   const isHitmap = !!hitmapColors;
 

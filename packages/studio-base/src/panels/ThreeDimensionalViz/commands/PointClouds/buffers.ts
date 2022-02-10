@@ -11,7 +11,10 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { ColorMode } from "@foxglove/studio-base/panels/ThreeDimensionalViz/TopicSettingsEditor/PointCloudSettingsEditor";
+import {
+  ColorMode,
+  DEFAULT_RGB_BYTE_ORDER,
+} from "@foxglove/studio-base/panels/ThreeDimensionalViz/utils/pointCloudColors";
 import { PointField } from "@foxglove/studio-base/types/Messages";
 import { mightActuallyBePartial } from "@foxglove/studio-base/util/mightActuallyBePartial";
 
@@ -103,18 +106,17 @@ function extractValues({
   pointCount: number;
   stride: number;
 }): VertexBuffer {
-  const COMPONENT_COUNT = 3;
-  const buffer = new Float32Array(COMPONENT_COUNT * pointCount);
+  const buffer = new Float32Array(readers.length * pointCount);
   for (let i = 0; i < pointCount; i++) {
     const pointStart = i * stride;
     for (let j = 0; j < readers.length; j++) {
-      buffer[i * COMPONENT_COUNT + j] = readers[j]?.read(pointStart) ?? Number.NaN;
+      buffer[i * readers.length + j] = readers[j]?.read(pointStart) ?? Number.NaN;
     }
   }
   return {
     buffer,
     offset: 0,
-    stride: COMPONENT_COUNT,
+    stride: readers.length,
   };
 }
 
@@ -166,7 +168,6 @@ export function createColorBuffer({
   colorMode,
   pointCount,
   stride,
-  isBigEndian,
 }: {
   data: Uint8Array;
   fields: FieldOffsetsAndReaders;
@@ -181,26 +182,43 @@ export function createColorBuffer({
     return undefined;
   }
 
-  if (colorMode.mode === "rgb") {
-    const rgbField = mightActuallyBePartial(fields.rgb ?? fields.rgba);
+  if (colorMode.mode === "rgb" || colorMode.mode === "rgba") {
+    const rgbField = mightActuallyBePartial(fields[colorMode.mode] ?? fields.rgb ?? fields.rgba);
     if (!rgbField) {
       throw new Error("Cannot create color buffer in rgb mode without an rgb(a) field");
     }
     const rgbOffset = rgbField.offset ?? 0;
     // Extract colors from data
-    const readers = isBigEndian
-      ? [
-          // big-endian, read RGB from RGBA
-          new Uint8Reader(data, rgbOffset + 0),
-          new Uint8Reader(data, rgbOffset + 1),
-          new Uint8Reader(data, rgbOffset + 2),
-        ]
-      : [
-          // little-endian, read RGB from ABGR
-          new Uint8Reader(data, rgbOffset + 3),
-          new Uint8Reader(data, rgbOffset + 2),
-          new Uint8Reader(data, rgbOffset + 1),
-        ];
+    let aOffset = 0;
+    let rOffset = 0;
+    let gOffset = 0;
+    let bOffset = 0;
+    switch (colorMode.rgbByteOrder ?? DEFAULT_RGB_BYTE_ORDER) {
+      case "rgba":
+        rOffset = 0;
+        gOffset = 1;
+        bOffset = 2;
+        aOffset = 3;
+        break;
+      case "bgra":
+        bOffset = 0;
+        gOffset = 1;
+        rOffset = 2;
+        aOffset = 3;
+        break;
+      case "abgr":
+        aOffset = 0;
+        bOffset = 1;
+        gOffset = 2;
+        rOffset = 3;
+        break;
+    }
+    const readers = [
+      new Uint8Reader(data, rgbOffset + rOffset),
+      new Uint8Reader(data, rgbOffset + gOffset),
+      new Uint8Reader(data, rgbOffset + bOffset),
+      colorMode.mode === "rgba" ? new Uint8Reader(data, rgbOffset + aOffset) : { read: () => 255 },
+    ];
     return extractValues({ data, readers, stride, pointCount });
   }
 

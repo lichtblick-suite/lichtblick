@@ -102,7 +102,7 @@ const SVisibleCount = styled.span`
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  color: rgba(255, 255, 255, 0.5);
+  color: ${({ theme }) => theme.palette.neutralTertiary};
   font-size: 10px;
   margin: 0 ${VISIBLE_COUNT_MARGIN}px;
 `;

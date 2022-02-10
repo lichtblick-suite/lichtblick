@@ -20,15 +20,15 @@ import { colors } from "@foxglove/studio-base/util/sharedStyleConstants";
 import Icon from "./Icon";
 import { colorToAlpha } from "./SegmentedControl";
 
-export type RadioOption = {
-  id: string;
+export type RadioOption<Key extends string> = {
+  id: Key;
   label: React.ReactNode;
 };
 
-export type RadioProps = {
-  options: RadioOption[];
-  selectedId?: string;
-  onChange: (selectedId: string) => void;
+export type RadioProps<Key extends string> = {
+  options: RadioOption<Key>[];
+  selectedId?: Key;
+  onChange: (selectedId: Key) => void;
 };
 
 const SOption = styled.div`
@@ -62,11 +62,11 @@ const SLabel = styled.div`
   overflow: hidden;
 `;
 
-export default function Radio(props: RadioProps): ReactElement {
+export default function Radio<Key extends string>(props: RadioProps<Key>): ReactElement {
   const { options, selectedId, onChange, ...restProps } = props;
   return (
     <>
-      {options.map(({ id, label }: RadioOption) => (
+      {options.map(({ id, label }: RadioOption<Key>) => (
         <SOption tabIndex={0} key={id} data-test={id} onClick={() => onChange(id)} {...restProps}>
           <Icon size="small">
             {id === selectedId ? <RadioButtonCheckedIcon /> : <RadioButtonUncheckedIcon />}

@@ -71,7 +71,7 @@ export const POINT_CLOUD_MESSAGE: PointCloud2 = {
     // ?
     0, 0, 128, 63,
     // rgb (abgr ordering)
-    0, 255, 225, 127,
+    10, 255, 230, 127,
     // ?
     254, 127, 0, 0, 16, 142, 140, 0, 161, 254, 127, 0,
     // point 2
@@ -84,7 +84,7 @@ export const POINT_CLOUD_MESSAGE: PointCloud2 = {
     // ?
     0, 0, 128, 63,
     // rgb (abgr ordering)
-    0, 255, 255, 127,
+    10, 255, 255, 127,
     // ?
     254, 127, 0, 0, 16, 142, 140, 0, 161, 254, 127, 0,
     // point 3
@@ -97,7 +97,7 @@ export const POINT_CLOUD_MESSAGE: PointCloud2 = {
     // ?
     0, 0, 128, 63,
     // rgb (abgr ordering)
-    0, 127, 255, 127,
+    10, 127, 255, 127,
     // ?
     254, 127, 0, 0, 16, 142, 140, 0, 161, 254, 127, 8,
   ]),

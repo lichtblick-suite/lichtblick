@@ -53,7 +53,7 @@ function Box({
   );
 }
 
-const optionArr: RadioOption[] = Object.values(OPTIONS);
+const optionArr: RadioOption<string>[] = Object.values(OPTIONS);
 
 function ControlledExample() {
   const [selectedId, setSelectedId] = React.useState(OPTIONS.first.id);
