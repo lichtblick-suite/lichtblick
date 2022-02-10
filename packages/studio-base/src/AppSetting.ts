@@ -3,22 +3,33 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 export enum AppSetting {
-  CRASH_REPORTING_ENABLED = "telemetry.crashReportingEnabled",
-  MESSAGE_RATE = "messageRate",
-  LAUNCH_PREFERENCE = "launchPreference",
-  ROS_PACKAGE_PATH = "ros.ros_package_path",
-  TELEMETRY_ENABLED = "telemetry.telemetryEnabled",
-  TIME_FORMAT = "time.format",
+  // General
+  COLOR_SCHEME = "colorScheme",
   TIMEZONE = "timezone",
+  TIME_FORMAT = "time.format",
+  MESSAGE_RATE = "messageRate",
+  UPDATES_ENABLED = "updates.enabled",
+
+  // ROS
+  ROS_PACKAGE_PATH = "ros.ros_package_path",
+
+  // Privacy
+  TELEMETRY_ENABLED = "telemetry.telemetryEnabled",
+  CRASH_REPORTING_ENABLED = "telemetry.crashReportingEnabled",
+
+  // Experimental features
   UNLIMITED_MEMORY_CACHE = "experimental.unlimited-memory-cache",
   SHOW_DEBUG_PANELS = "showDebugPanels",
-  HIDE_SIGN_IN_PROMPT = "hideSignInPrompt",
-  ENABLE_LAYOUT_DEBUGGING = "enableLayoutDebugging",
   ENABLE_LEGACY_PLOT_PANEL = "enableLegacyPlotPanel",
-  COLOR_SCHEME = "colorScheme",
   ENABLE_MCAP_DATA_SOURCE = "sources.mcap",
+
+  // Miscellaneous
+  HIDE_SIGN_IN_PROMPT = "hideSignInPrompt",
+  LAUNCH_PREFERENCE = "launchPreference",
   OPEN_DIALOG = "ui.open-dialog",
-  UPDATES_ENABLED = "updates.enabled",
   SHOW_OPEN_DIALOG_ON_STARTUP = "ui.open-dialog-startup",
+
+  // Dev only
+  ENABLE_LAYOUT_DEBUGGING = "enableLayoutDebugging",
   ENABLE_REACT_STRICT_MODE = "enableReactStrictMode",
 }
