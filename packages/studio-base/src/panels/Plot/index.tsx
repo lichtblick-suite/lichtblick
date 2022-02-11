@@ -263,9 +263,26 @@ function Plot(props: Props) {
     return out;
   }, [allPaths]);
 
-  const restore = useCallback((): PlotDataByPath => {
-    return {};
-  }, []);
+  // When restoring, keep only the paths that are present in allPaths.
+  // Without this, the reducer value will grow unbounded with new paths as users add/remove series.
+  const restore = useCallback(
+    (previous?: PlotDataByPath): PlotDataByPath => {
+      if (!previous) {
+        return {};
+      }
+
+      const updated: PlotDataByPath = {};
+      for (const path of allPaths) {
+        const plotData = previous[path];
+        if (plotData) {
+          updated[path] = plotData;
+        }
+      }
+
+      return updated;
+    },
+    [allPaths],
+  );
 
   const addMessages = useCallback(
     (accumulated: PlotDataByPath, msgEvents: readonly MessageEvent<unknown>[]) => {
