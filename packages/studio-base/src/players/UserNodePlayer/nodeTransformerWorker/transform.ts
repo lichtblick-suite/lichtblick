@@ -17,9 +17,9 @@ import { filterMap } from "@foxglove/den/collection";
 import { formatInterfaceName } from "@foxglove/studio-base/players/UserNodePlayer/nodeTransformerWorker/generateRosLib";
 import {
   constructDatatypes,
-  findReturnType,
   findDefaultExportFunction,
   DatatypeExtractionError,
+  findReturnType,
 } from "@foxglove/studio-base/players/UserNodePlayer/nodeTransformerWorker/typescript/ast";
 import { getNodeProjectConfig } from "@foxglove/studio-base/players/UserNodePlayer/nodeTransformerWorker/typescript/projectConfig";
 import {
@@ -421,7 +421,7 @@ export const extractDatatypes = (nodeData: NodeData): NodeData => {
       throw new Error("Your node must default export a function");
     }
 
-    const typeNode = findReturnType(typeChecker, 0, exportNode);
+    const typeNode = findReturnType(typeChecker, exportNode);
 
     const { outputDatatype, datatypes } = constructDatatypes(
       typeChecker,

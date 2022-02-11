@@ -114,9 +114,3 @@ export const noMappedTypes = {
   source: Sources.DatatypeExtraction,
   code: ErrorCodes.DatatypeExtraction.NO_MAPPED_TYPES,
 };
-
-export const invalidIndexedAccessError = {
-  severity: DiagnosticSeverity.Error,
-  source: Sources.DatatypeExtraction,
-  code: ErrorCodes.DatatypeExtraction.INVALID_INDEXED_ACCESS,
-};
