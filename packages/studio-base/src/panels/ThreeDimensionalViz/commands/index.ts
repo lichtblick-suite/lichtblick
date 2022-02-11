@@ -15,3 +15,4 @@ export { default as PoseMarkers } from "./PoseMarkers";
 export { default as LaserScans } from "./LaserScans";
 export { default as OccupancyGrids } from "./OccupancyGrids";
 export { default as PointClouds } from "./PointClouds";
+export { default as LinedConvexHulls } from "./LinedConvexHulls";

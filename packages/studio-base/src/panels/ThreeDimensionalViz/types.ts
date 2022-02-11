@@ -68,6 +68,7 @@ export interface MarkerCollector {
   grid(arg0: OccupancyGridMessage): void;
   pointcloud(arg0: PointCloud): void;
   laserScan(arg0: LaserScan): void;
+  linedConvexHull(arg0: LineListMarker | LineStripMarker): void;
   instancedLineList(arg0: InstancedLineListMarker): void;
   glLineList(arg0: GlLineListMarker): void;
 }

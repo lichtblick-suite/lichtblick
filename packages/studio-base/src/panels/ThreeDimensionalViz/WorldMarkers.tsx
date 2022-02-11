@@ -32,6 +32,7 @@ import {
   LaserScans,
   PointClouds,
   PoseMarkers,
+  LinedConvexHulls,
 } from "@foxglove/studio-base/panels/ThreeDimensionalViz/commands";
 import GlLineLists from "@foxglove/studio-base/panels/ThreeDimensionalViz/commands/GlLineLists";
 import MeshMarkers, {
@@ -73,6 +74,7 @@ export type InteractiveMarkersByType = {
   grid: Interactive<BaseMarker>[];
   instancedLineList: Interactive<BaseMarker>[];
   laserScan: Interactive<BaseMarker>[];
+  linedConvexHull: Interactive<LineListMarker | LineStripMarker>[];
   lineList: Interactive<LineListMarker>[];
   lineStrip: Interactive<LineStripMarker>[];
   mesh: Interactive<MeshMarker>[];
@@ -156,6 +158,7 @@ export default function WorldMarkers({
     grid,
     instancedLineList,
     laserScan,
+    linedConvexHull,
     lineList,
     lineStrip,
     mesh,
@@ -227,6 +230,7 @@ export default function WorldMarkers({
       </Lines>
       <MeshMarkers layerIndex={layerIndex} markers={mesh} loadModelOptions={loadModelOptions} />
       <GlLineLists glLineLists={glLineList} />
+      <LinedConvexHulls layerIndex={layerIndex}>{linedConvexHull}</LinedConvexHulls>
     </>
   );
 }
