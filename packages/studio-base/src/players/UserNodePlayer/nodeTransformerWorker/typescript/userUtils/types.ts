@@ -1,3 +1,30 @@
+import { MessageTypeByTopic, MessageTypeBySchemaName } from "./generatedTypes";
+
+/**
+ * Message is a generic type for getting the type of a message for a schema name.
+ *
+ * ```
+ * type GeometryPose = Message<"geometry_msgs/Pose">;
+ * type PkgGeometryPose = Message<"pkg.geometry.Pose">;
+ * ```
+ */
+export type Message<T extends keyof MessageTypeBySchemaName> = MessageTypeBySchemaName[T];
+
+/**
+ * Input type is a generic type for getting the event type on a topic.
+ *
+ * Most commonly used to type the input argument to your process function.
+ *
+ * ```
+ * function process(msgEvent: Input<"/points">) { ... }
+ * ```
+ */
+export type Input<T extends keyof MessageTypeByTopic> = {
+  topic: T;
+  receiveTime: Time;
+  message: MessageTypeByTopic[T];
+};
+
 export type RGBA = {
   // all values are scaled between 0-1 instead of 0-255
   r: number;

@@ -35,8 +35,10 @@ import {
   NodeDataTransformer,
 } from "@foxglove/studio-base/players/UserNodePlayer/types";
 import { Topic } from "@foxglove/studio-base/players/types";
-import { RosDatatypes } from "@foxglove/studio-base/types/RosDatatypes";
 import { DEFAULT_STUDIO_NODE_PREFIX } from "@foxglove/studio-base/util/globalConstants";
+
+import { TransformArgs } from "./types";
+import generatedTypesLibSrc from "./typescript/userUtils/generatedTypes.ts?raw";
 
 export const hasTransformerErrors = (nodeData: NodeData): boolean =>
   nodeData.diagnostics.some(({ severity }) => severity === DiagnosticSeverity.Error);
@@ -244,7 +246,7 @@ export const validateOutputTopic = (nodeData: NodeData): NodeData => {
 // - Generate the AST
 // - Handle external libraries
 export const compile = (nodeData: NodeData): NodeData => {
-  const { sourceCode, rosLib } = nodeData;
+  const { sourceCode, rosLib, typesLib } = nodeData;
 
   // If a node name does not start with a forward slash, the compiler host will
   // not be able to match the correct filename.
@@ -269,6 +271,8 @@ export const compile = (nodeData: NodeData): NodeData => {
   const sourceCodeMap = new Map<string, string>();
   sourceCodeMap.set(nodeFileName, sourceCode);
   sourceCodeMap.set(projectConfig.rosLib.filePath, rosLib);
+  sourceCodeMap.set("/studio_node/generatedTypes.ts", typesLib ? typesLib : generatedTypesLibSrc);
+
   projectConfig.utilityFiles.forEach((file) => sourceCodeMap.set(file.filePath, file.sourceCode));
   projectConfig.declarations.forEach((lib) => sourceCodeMap.set(lib.filePath, lib.sourceCode));
 
@@ -322,11 +326,7 @@ export const compile = (nodeData: NodeData): NodeData => {
     },
   };
 
-  const program = ts.createProgram(
-    [...projectConfig.utilityFiles.map((file) => file.filePath), nodeFileName],
-    options,
-    host,
-  );
+  const program = ts.createProgram([nodeFileName], options, host);
   program.emit();
   // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
   if (!codeEmitted) {
@@ -446,7 +446,6 @@ TODO:
 export const compose = (...transformers: NodeDataTransformer[]): NodeDataTransformer => {
   return (nodeData: NodeData, topics: Topic[]) => {
     let newNodeData = nodeData;
-    // TODO: try/catch here?
     for (const transformer of transformers) {
       newNodeData = transformer(newNodeData, topics);
     }
@@ -466,19 +465,9 @@ export const compose = (...transformers: NodeDataTransformer[]): NodeDataTransfo
   when errors are not fatal.
 
 */
-const transform = ({
-  name,
-  sourceCode,
-  topics,
-  rosLib,
-  datatypes,
-}: {
-  name: string;
-  sourceCode: string;
-  topics: Topic[];
-  rosLib: string;
-  datatypes: RosDatatypes;
-}): NodeData => {
+const transform = (args: TransformArgs): NodeData => {
+  const { name, sourceCode, topics, rosLib, typesLib, datatypes } = args;
+
   const transformer = compose(
     getOutputTopic,
     validateOutputTopic,
@@ -494,6 +483,7 @@ const transform = ({
       name,
       sourceCode,
       rosLib,
+      typesLib,
       transpiledCode: "",
       projectCode: undefined,
       inputTopics: [],

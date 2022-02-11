@@ -220,6 +220,12 @@ const Sidebar = ({
               {fileName}
             </ListItem>
           ))}
+          <ListItem
+            onClick={gotoUtils.bind(undefined, "/studio_node/generatedTypes.ts")}
+            selected={script ? script.filePath === "/studio_node/generatedTypes.ts" : false}
+          >
+            generatedTypes.ts
+          </ListItem>
         </Stack>
       ),
       templates: (

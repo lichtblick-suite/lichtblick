@@ -98,6 +98,7 @@ export type NodeData = {
   sourceFile?: SourceFile;
   typeChecker?: TypeChecker;
   rosLib: string;
+  typesLib: string;
   // An array of globalVariable names
   globalVariables: readonly string[];
 };

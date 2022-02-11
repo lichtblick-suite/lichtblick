@@ -15,6 +15,7 @@
 
 import exampleDatatypes from "@foxglove/studio-base/players/UserNodePlayer/nodeTransformerWorker/fixtures/example-datatypes";
 import generateRosLib from "@foxglove/studio-base/players/UserNodePlayer/nodeTransformerWorker/generateRosLib";
+import { generateEmptyTypesLib } from "@foxglove/studio-base/players/UserNodePlayer/nodeTransformerWorker/generateTypesLib";
 import {
   getOutputTopic,
   validateOutputTopic,
@@ -26,7 +27,6 @@ import {
   getInputTopics,
 } from "@foxglove/studio-base/players/UserNodePlayer/nodeTransformerWorker/transform";
 import baseDatatypes from "@foxglove/studio-base/players/UserNodePlayer/nodeTransformerWorker/typescript/baseDatatypes";
-import rawUserUtils from "@foxglove/studio-base/players/UserNodePlayer/nodeTransformerWorker/typescript/rawUserUtils";
 import {
   DiagnosticSeverity,
   ErrorCodes,
@@ -54,6 +54,7 @@ const baseNodeData: NodeData = {
     topics: [{ name: "/some_topic", datatype: "std_msgs/ColorRGBA" }],
     datatypes: exampleDatatypes,
   }),
+  typesLib: generateEmptyTypesLib(),
 };
 
 describe("pipeline", () => {
@@ -347,10 +348,9 @@ describe("pipeline", () => {
       const x = norm({x:1, y:2, z:3});
       `,
     ])("produces projectCode", (sourceCode) => {
-      const { projectCode, diagnostics, transpiledCode } = compile({ ...baseNodeData, sourceCode });
-      expect(projectCode?.size).toEqual(rawUserUtils.length);
-      expect(typeof transpiledCode).toEqual("string");
+      const { diagnostics, transpiledCode } = compile({ ...baseNodeData, sourceCode });
       expect(diagnostics).toEqual([]);
+      expect(typeof transpiledCode).toEqual("string");
     });
   });
 

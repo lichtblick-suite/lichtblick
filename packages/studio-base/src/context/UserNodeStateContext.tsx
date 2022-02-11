@@ -6,11 +6,13 @@ import { createContext, useCallback, useState } from "react";
 
 import { useShallowMemo } from "@foxglove/hooks";
 import useGuaranteedContext from "@foxglove/studio-base/hooks/useGuaranteedContext";
+import { generateEmptyTypesLib } from "@foxglove/studio-base/players/UserNodePlayer/nodeTransformerWorker/generateTypesLib";
 import { ros_lib_dts } from "@foxglove/studio-base/players/UserNodePlayer/nodeTransformerWorker/typescript/ros";
 import { Diagnostic, UserNodeLog } from "@foxglove/studio-base/players/UserNodePlayer/types";
 
 type UserNodeState = {
   rosLib: string;
+  typesLib: string;
   nodeStates: {
     [nodeId: string]: {
       diagnostics: readonly Diagnostic[];
@@ -26,13 +28,18 @@ export const UserNodeStateContext = createContext<
       addUserNodeLogs: (nodeId: string, logs: readonly UserNodeLog[]) => void;
       clearUserNodeLogs: (nodeId: string) => void;
       setUserNodeRosLib: (rosLib: string) => void;
+      setUserNodeTypesLib: (lib: string) => void;
     }
   | undefined
 >(undefined);
 UserNodeStateContext.displayName = "UserNodeStateContext";
 
 export function UserNodeStateProvider({ children }: React.PropsWithChildren<unknown>): JSX.Element {
-  const [state, setState] = useState<UserNodeState>({ rosLib: ros_lib_dts, nodeStates: {} });
+  const [state, setState] = useState<UserNodeState>({
+    rosLib: ros_lib_dts,
+    typesLib: generateEmptyTypesLib(),
+    nodeStates: {},
+  });
 
   const setUserNodeDiagnostics = useCallback(
     (nodeId: string, diagnostics: readonly Diagnostic[]) => {
@@ -83,12 +90,17 @@ export function UserNodeStateProvider({ children }: React.PropsWithChildren<unkn
     setState((prevState) => ({ ...prevState, rosLib }));
   }, []);
 
+  const setUserNodeTypesLib = useCallback((typesLib: string) => {
+    setState((prevState) => ({ ...prevState, typesLib }));
+  }, []);
+
   const value = useShallowMemo({
     state,
     setUserNodeDiagnostics,
     addUserNodeLogs,
     clearUserNodeLogs,
     setUserNodeRosLib,
+    setUserNodeTypesLib,
   });
 
   return <UserNodeStateContext.Provider value={value}>{children}</UserNodeStateContext.Provider>;
