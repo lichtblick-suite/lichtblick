@@ -15,7 +15,10 @@
 
 import exampleDatatypes from "@foxglove/studio-base/players/UserNodePlayer/nodeTransformerWorker/fixtures/example-datatypes";
 import generateRosLib from "@foxglove/studio-base/players/UserNodePlayer/nodeTransformerWorker/generateRosLib";
-import { generateEmptyTypesLib } from "@foxglove/studio-base/players/UserNodePlayer/nodeTransformerWorker/generateTypesLib";
+import {
+  generateEmptyTypesLib,
+  generateTypesLib,
+} from "@foxglove/studio-base/players/UserNodePlayer/nodeTransformerWorker/generateTypesLib";
 import {
   getOutputTopic,
   validateOutputTopic,
@@ -1230,6 +1233,22 @@ describe("pipeline", () => {
         ),
         outputDatatype: "/studio_node/main",
       },
+      {
+        description: "Should detect output datatype from input datatypes",
+        sourceCode: `
+          import { Message } from "./types";
+
+          export const inputs = [];
+          export const output = "${DEFAULT_STUDIO_NODE_PREFIX}";
+
+          const publisher = (message: any): Message<"std_msgs/ColorRGBA"> => {
+            return { r: 1, g: 1, b: 1, a: 1 };
+          };
+
+          export default publisher;`,
+        datatypes: baseDatatypes,
+        outputDatatype: "std_msgs/ColorRGBA",
+      },
       /*
       ERRORS
     */
@@ -1582,10 +1601,12 @@ describe("pipeline", () => {
       filteredTestCases.forEach(
         ({ description, sourceCode, datatypes = new Map(), error, outputDatatype, rosLib }) => {
           it(`${error != undefined ? "Expected Error: " : ""}${description}`, () => {
-            const inputNodeData = {
+            const typesLib = generateTypesLib({ topics: [], datatypes });
+            const inputNodeData: NodeData = {
               ...baseNodeData,
               datatypes,
               sourceCode,
+              typesLib,
               ...(rosLib != undefined ? { rosLib } : {}),
             };
             const nodeData = extract(inputNodeData, []);
