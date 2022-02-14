@@ -325,11 +325,11 @@ const exampleConfig: PlotConfig = {
   xAxisVal: "timestamp",
   showLegend: true,
   isSynced: true,
-  showSidebar: false,
+  legendDisplay: "floating",
   showXAxisLabels: true,
   showYAxisLabels: true,
   showPlotValuesInLegend: false,
-  sidebarWidth: 0,
+  sidebarDimension: 0,
 };
 
 function PlotWrapper(props: {

@@ -11,13 +11,17 @@ export type PlotXAxisVal =
   | "custom" // Message path data. Preloaded.
   | "currentCustom"; // Message path data. One "current" message at playback time.
 
-export type PlotConfig = {
+type DeprecatedPlotConfig = {
+  showSidebar?: boolean;
+  sidebarWidth?: number;
+};
+export type PlotConfig = DeprecatedPlotConfig & {
   title?: string;
   paths: PlotPath[];
   minYValue?: string | number;
   maxYValue?: string | number;
   showLegend: boolean;
-  showSidebar: boolean;
+  legendDisplay: "floating" | "top" | "left";
   showPlotValuesInLegend: boolean;
   showXAxisLabels: boolean;
   showYAxisLabels: boolean;
@@ -25,7 +29,7 @@ export type PlotConfig = {
   xAxisVal: PlotXAxisVal;
   xAxisPath?: BasePlotPath;
   followingViewWidth?: number;
-  sidebarWidth: number;
+  sidebarDimension: number;
 };
 
 export const plotableRosTypes = [

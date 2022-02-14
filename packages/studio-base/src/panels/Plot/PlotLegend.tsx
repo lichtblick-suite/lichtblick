@@ -16,6 +16,8 @@ import {
   Menu as MenuIcon,
   KeyboardArrowLeft as KeyboardArrowLeftIcon,
   KeyboardArrowRight as KeyboardArrowRightIcon,
+  KeyboardArrowUp as KeyboardArrowUpIcon,
+  KeyboardArrowDown as KeyboardArrowDownIcon,
 } from "@mui/icons-material";
 import { Box, Button, IconButton, Stack, Theme, alpha } from "@mui/material";
 import { createStyles, makeStyles } from "@mui/styles";
@@ -44,8 +46,8 @@ type PlotLegendProps = {
   xAxisVal: PlotXAxisVal;
   xAxisPath?: BasePlotPath;
   pathsWithMismatchedDataLengths: string[];
-  sidebarWidth: number;
-  showSidebar: boolean;
+  sidebarDimension: number;
+  legendDisplay: "floating" | "top" | "left";
   showPlotValuesInLegend: boolean;
 };
 
@@ -90,7 +92,6 @@ const useStyles = makeStyles((theme: Theme) =>
     legendToggle: {
       cursor: "pointer",
       userSelect: "none",
-      height: "100%",
       backgroundColor: theme.palette.background.paper,
     },
     floatingLegendToggle: {
@@ -109,21 +110,22 @@ const useStyles = makeStyles((theme: Theme) =>
 );
 
 function SidebarWrapper(props: {
-  sidebarWidth: number;
+  position: "floating" | "top" | "left";
+  sidebarDimension: number;
   saveConfig: (arg0: Partial<PlotConfig>) => void;
   children: JSX.Element | undefined;
 }): JSX.Element | ReactNull {
-  const { sidebarWidth, saveConfig } = props;
+  const { position, sidebarDimension, saveConfig } = props;
   const originalWrapper = useRef<DOMRect | undefined>(undefined);
   const handleMouseMove = useCallback(
     (e: MouseEvent) => {
-      const offsetLeft = originalWrapper.current?.left ?? 0;
-      const newWidth = e.clientX - offsetLeft;
-      if (newWidth > minLegendWidth && newWidth < maxLegendWidth) {
-        saveConfig({ sidebarWidth: newWidth });
+      const offset = originalWrapper.current?.[position as "top" | "left"] ?? 0;
+      const newDimension = e[position === "left" ? "clientX" : "clientY"] - offset;
+      if (newDimension > minLegendWidth && newDimension < maxLegendWidth) {
+        saveConfig({ sidebarDimension: newDimension });
       }
     },
-    [originalWrapper, saveConfig],
+    [originalWrapper, position, saveConfig],
   );
 
   const handleMouseDown = (e: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
@@ -138,9 +140,28 @@ function SidebarWrapper(props: {
     document.removeEventListener("mousemove", handleMouseMove, true);
   };
 
+  const {
+    width,
+    height,
+    stackDirection = "row",
+    dimension,
+    oppositeDimension,
+    borderPosition,
+  } = useMemo(
+    () => ({
+      width: { top: "100%", left: undefined }[position as "top" | "left"],
+      height: { top: undefined, left: "100%" }[position as "top" | "left"],
+      stackDirection: position === "left" ? "row" : "column",
+      dimension: position === "left" ? "width" : "height",
+      oppositeDimension: position === "left" ? "height" : "width",
+      borderPosition: position === "left" ? "borderRight" : "borderBottom",
+    }),
+    [position],
+  );
+
   return (
-    <Stack direction="row" height="100%">
-      <Stack flexGrow={1} spacing={0.5} sx={{ width: sidebarWidth, overflow: "auto" }}>
+    <Stack direction={stackDirection} width={width} height={height}>
+      <Stack flexGrow={1} spacing={0.5} sx={{ [dimension]: sidebarDimension, overflow: "auto" }}>
         {props.children}
       </Stack>
       <Box
@@ -148,13 +169,11 @@ function SidebarWrapper(props: {
         sx={(theme) => ({
           cursor: "ew-resize",
           userSelect: "none",
-          width: theme.spacing(0.5),
-          height: "100%",
-          borderRight: `2px solid ${theme.palette.action.hover}`,
+          [dimension]: theme.spacing(0.5),
+          [oppositeDimension]: "100%",
+          [borderPosition]: `2px solid ${theme.palette.action.hover}`,
 
-          "&:hover": {
-            borderRightColor: theme.palette.action.selected,
-          },
+          "&:hover": { [`${borderPosition}Color`]: theme.palette.action.selected },
         })}
       />
     </Stack>
@@ -171,10 +190,11 @@ export default function PlotLegend(props: PlotLegendProps): JSX.Element | ReactN
     xAxisVal,
     xAxisPath,
     pathsWithMismatchedDataLengths,
-    sidebarWidth,
-    showSidebar,
+    sidebarDimension,
+    legendDisplay,
     showPlotValuesInLegend,
   } = props;
+  const isSidebar = useMemo(() => legendDisplay !== "floating", [legendDisplay]);
 
   const lastPath = last(paths);
   const classes = useStyles();
@@ -184,19 +204,16 @@ export default function PlotLegend(props: PlotLegendProps): JSX.Element | ReactN
     [showLegend, saveConfig],
   );
 
-  const legendIcon = useMemo(
-    () =>
-      showSidebar ? (
-        showLegend ? (
-          <KeyboardArrowLeftIcon fontSize="inherit" />
-        ) : (
-          <KeyboardArrowRightIcon fontSize="inherit" />
-        )
-      ) : (
-        <MenuIcon fontSize="inherit" />
-      ),
-    [showLegend, showSidebar],
-  );
+  const legendIcon = useMemo(() => {
+    if (isSidebar) {
+      const iconMap = showLegend
+        ? { left: KeyboardArrowLeftIcon, top: KeyboardArrowUpIcon }
+        : { left: KeyboardArrowRightIcon, top: KeyboardArrowDownIcon };
+      const ArrowIcon = iconMap[legendDisplay as "top" | "left"];
+      return <ArrowIcon fontSize="inherit" />;
+    }
+    return <MenuIcon fontSize="inherit" />;
+  }, [showLegend, isSidebar, legendDisplay]);
 
   const legendContent = useMemo(
     () =>
@@ -206,7 +223,7 @@ export default function PlotLegend(props: PlotLegendProps): JSX.Element | ReactN
             bgcolor: alpha(theme.palette.background.paper, 0.8),
             overflow: "auto",
             pointerEvents: "auto",
-            [showSidebar ? "height" : "maxHeight"]: "100%",
+            [isSidebar ? "height" : "maxHeight"]: "100%",
             position: "relative",
           })}
         >
@@ -302,7 +319,7 @@ export default function PlotLegend(props: PlotLegendProps): JSX.Element | ReactN
             padding={0.5}
             gridColumn="span 4"
             sx={{
-              ...(showSidebar && {
+              ...(isSidebar && {
                 position: "sticky",
                 right: 0,
                 left: 0,
@@ -334,47 +351,61 @@ export default function PlotLegend(props: PlotLegendProps): JSX.Element | ReactN
         </Stack>
       ) : undefined,
     [
-      classes.dropdown,
-      currentTime,
-      datasets,
-      lastPath,
-      paths,
-      pathsWithMismatchedDataLengths,
-      saveConfig,
+      isSidebar,
       showLegend,
-      showSidebar,
-      showPlotValuesInLegend,
-      xAxisPath,
       xAxisVal,
+      classes.dropdown,
+      xAxisPath,
+      showPlotValuesInLegend,
+      paths,
+      saveConfig,
+      pathsWithMismatchedDataLengths,
+      datasets,
+      currentTime,
+      lastPath,
     ],
+  );
+
+  const { stackDirection, height, width, padding } = useMemo(
+    () => ({
+      stackDirection: !isSidebar || legendDisplay === "left" ? "row" : "column",
+      height: legendDisplay === "left" ? "100%" : "auto",
+      width: legendDisplay === "top" ? "100%" : "auto",
+      padding: isSidebar ? "0" : undefined,
+    }),
+    [isSidebar, legendDisplay],
   );
 
   return (
     <Stack
-      direction="row"
+      direction={stackDirection as "row" | "column"}
       alignItems="flex-start"
-      className={cx(classes.root, { [classes.floatingRoot]: !showSidebar })}
+      className={cx(classes.root, { [classes.floatingRoot]: !isSidebar })}
     >
       <IconButton
-        disableRipple={showSidebar}
+        disableRipple={isSidebar}
         size="small"
         onClick={toggleLegend}
-        className={cx(classes.legendToggle, { [classes.floatingLegendToggle]: !showSidebar })}
+        className={cx(classes.legendToggle, { [classes.floatingLegendToggle]: !isSidebar })}
         sx={{
           bgcolor: "action.hover",
-          padding: showSidebar ? "0" : undefined,
+          padding,
           pointerEvents: "auto",
+          height,
+          width,
 
-          "&:hover": {
-            bgcolor: "action.focus",
-          },
+          "&:hover": { bgcolor: "action.focus" },
         }}
       >
         {legendIcon}
       </IconButton>
       {showLegend ? (
-        showSidebar ? (
-          <SidebarWrapper sidebarWidth={sidebarWidth} saveConfig={saveConfig}>
+        isSidebar ? (
+          <SidebarWrapper
+            position={legendDisplay}
+            sidebarDimension={sidebarDimension}
+            saveConfig={saveConfig}
+          >
             {legendContent}
           </SidebarWrapper>
         ) : (
