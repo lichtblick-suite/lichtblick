@@ -18,17 +18,34 @@ import cx from "classnames";
 
 import Icon from "@foxglove/studio-base/components/Icon";
 import useLogStyles from "@foxglove/studio-base/panels/Log/useLogStyles";
-import { MessageEvent } from "@foxglove/studio-base/players/types";
 import clipboard from "@foxglove/studio-base/util/clipboard";
 
-import LevelToString, { KNOWN_LOG_LEVELS } from "./LevelToString";
-import { RosgraphMsgs$Log } from "./types";
+import LevelToString from "./LevelToString";
+import { LogMessageEvent, LogLevel } from "./types";
 
 // Create the log level options nodes once since they don't change per render.
-const LOG_LEVEL_OPTIONS = KNOWN_LOG_LEVELS.map<IDropdownOption>((level) => ({
-  text: `>= ${LevelToString(level)}`,
-  key: level,
-}));
+const LOG_LEVEL_OPTIONS: IDropdownOption[] = [
+  {
+    text: ">= DEBUG",
+    key: LogLevel.DEBUG,
+  },
+  {
+    text: ">= INFO",
+    key: LogLevel.INFO,
+  },
+  {
+    text: ">= WARN",
+    key: LogLevel.WARN,
+  },
+  {
+    text: ">= ERROR",
+    key: LogLevel.ERROR,
+  },
+  {
+    text: ">= FATAL",
+    key: LogLevel.FATAL,
+  },
+];
 
 type Filter = {
   minLogLevel: number;
@@ -39,7 +56,7 @@ export type FilterBarProps = {
   searchTerms: Set<string>;
   nodeNames: Set<string>;
   minLogLevel: number;
-  messages: readonly MessageEvent<RosgraphMsgs$Log>[];
+  messages: readonly LogMessageEvent[];
 
   onFilterChange: (filter: Filter) => void;
 };

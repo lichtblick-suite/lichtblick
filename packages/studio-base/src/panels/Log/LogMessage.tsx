@@ -15,38 +15,13 @@ import { mergeStyleSets } from "@fluentui/react";
 import cx from "classnames";
 import { padStart } from "lodash";
 
-import { Time } from "@foxglove/rostime";
 import useLogStyles from "@foxglove/studio-base/panels/Log/useLogStyles";
 import { TimeDisplayMethod } from "@foxglove/studio-base/types/panels";
-import { formatTime } from "@foxglove/studio-base/util/formatTime";
 import { fonts } from "@foxglove/studio-base/util/sharedStyleConstants";
 
 import LevelToString from "./LevelToString";
-import { RosgraphMsgs$Log } from "./types";
-
-// pad the start of `val` with 0's to make the total string length `count` size
-function PadStart(val: unknown, count: number) {
-  return padStart(`${val}`, count, "0");
-}
-
-function Stamp(props: {
-  stamp: Time;
-  timestampFormat: TimeDisplayMethod;
-  timeZone: string | undefined;
-}) {
-  const stamp = props.stamp;
-
-  if (props.timestampFormat === "TOD") {
-    const formattedTime = formatTime(props.stamp, props.timeZone);
-    return <span>{formattedTime}</span>;
-  } else {
-    return (
-      <span>
-        {PadStart(stamp.sec, 10)}.{PadStart(stamp.nsec, 9)}
-      </span>
-    );
-  }
-}
+import Stamp from "./Stamp";
+import { NormalizedLogMessage } from "./types";
 
 const classes = mergeStyleSets({
   root: {
@@ -62,22 +37,20 @@ const classes = mergeStyleSets({
   },
 });
 
-export default React.memo(function LogMessage({
-  msg,
-  timestampFormat,
-  timeZone,
-}: {
-  msg: RosgraphMsgs$Log;
+export default React.memo(function LogMessage(props: {
+  value: NormalizedLogMessage;
   timestampFormat: TimeDisplayMethod;
   timeZone: string | undefined;
 }) {
+  const { value: msg, timestampFormat, timeZone } = props;
+
   const altStr = `${msg.file}:${msg.line}`;
   const strLevel = LevelToString(msg.level);
-  const stamp = msg.header?.stamp ?? msg.stamp ?? { sec: 0, nsec: 0 };
+  const stamp = msg.stamp;
 
   // the first message line is rendered with the info/stamp/name
   // following newlines are rendered on their own line
-  const lines = msg.msg.split("\n");
+  const lines = msg.message.split("\n");
   const logStyles = useLogStyles();
 
   return (
@@ -96,10 +69,7 @@ export default React.memo(function LogMessage({
         <span>
           [<Stamp stamp={stamp} timestampFormat={timestampFormat} timeZone={timeZone} />]
         </span>
-        <span>
-          [{msg.name}
-          ]:
-        </span>
+        {msg.name != undefined && <span>[{msg.name}]:</span>}
         <span>&nbsp;</span>
         <span>{lines[0]}</span>
       </div>

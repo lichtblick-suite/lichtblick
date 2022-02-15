@@ -11,25 +11,24 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { MessageEvent } from "@foxglove/studio-base/players/types";
-
-import { RosgraphMsgs$Log } from "./types";
+import { getNormalizedMessage } from "./conversion";
+import { LogMessageEvent } from "./types";
 
 export default function filterMessages(
-  messages: readonly MessageEvent<RosgraphMsgs$Log>[],
+  events: readonly LogMessageEvent[],
   filter: { minLogLevel: number; searchTerms: string[] },
-): readonly MessageEvent<RosgraphMsgs$Log>[] {
+): readonly LogMessageEvent[] {
   const { minLogLevel, searchTerms } = filter;
   const hasActiveFilters = minLogLevel > 1 || searchTerms.length > 0;
   // return all messages if we wouldn't filter anything
   if (!hasActiveFilters) {
-    return messages;
+    return events;
   }
 
   const searchTermsInLowerCase = searchTerms.map((term) => term.toLowerCase());
 
-  return messages.filter((message) => {
-    const logMessage = message.message;
+  return events.filter((event) => {
+    const logMessage = event.message;
     if (logMessage.level < minLogLevel) {
       return false;
     }
@@ -38,9 +37,8 @@ export default function filterMessages(
       return true;
     }
 
-    const { name, msg } = logMessage;
-    const lowerCaseName = name.toLowerCase();
-    const lowerCaseMsg = msg.toLowerCase();
+    const lowerCaseName = logMessage.name?.toLowerCase() ?? "";
+    const lowerCaseMsg = getNormalizedMessage(logMessage).toLowerCase();
     return searchTermsInLowerCase.some(
       (term) => lowerCaseName.includes(term) || lowerCaseMsg.includes(term),
     );

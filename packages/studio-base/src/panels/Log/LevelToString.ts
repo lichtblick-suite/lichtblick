@@ -11,25 +11,20 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-export const KNOWN_LOG_LEVELS: Array<number> = [1, 2, 4, 8, 16];
+import { LogLevel } from "./types";
 
 // map a numeric level to a string
-export default function LevelToString(level: number): string {
+export default function LevelToString(level: LogLevel): string {
   switch (level) {
-    case 1:
-    case 10:
+    case LogLevel.DEBUG:
       return "DEBUG";
-    case 2:
-    case 20:
+    case LogLevel.INFO:
       return "INFO";
-    case 4:
-    case 30:
+    case LogLevel.WARN:
       return "WARN";
-    case 8:
-    case 40:
+    case LogLevel.ERROR:
       return "ERROR";
-    case 16:
-    case 50:
+    case LogLevel.FATAL:
       return "FATAL";
     default:
       return "?????";

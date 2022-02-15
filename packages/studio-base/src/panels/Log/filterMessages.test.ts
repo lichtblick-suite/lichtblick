@@ -14,7 +14,7 @@
 import { MessageEvent } from "@foxglove/studio-base/players/types";
 
 import filterMessages from "./filterMessages";
-import { RosgraphMsgs$Log } from "./types";
+import { Ros1RosgraphMsgs$Log } from "./types";
 
 describe("filter", () => {
   const msgs = [
@@ -27,7 +27,7 @@ describe("filter", () => {
         name: "/some_topic",
       },
     },
-  ] as MessageEvent<RosgraphMsgs$Log>[];
+  ] as MessageEvent<Ros1RosgraphMsgs$Log>[];
 
   it("should remove when minLogLevel is higher than msg level", () => {
     expect(filterMessages(msgs, { minLogLevel: 3, searchTerms: [] })).toEqual([]);

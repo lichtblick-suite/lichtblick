@@ -15,18 +15,18 @@ import { IconButton, IList, List } from "@fluentui/react";
 import { Box, Stack } from "@mui/material";
 import { useCallback, useLayoutEffect, useMemo, useRef, useState } from "react";
 
-import * as PanelAPI from "@foxglove/studio-base/PanelAPI";
+import { useDataSourceInfo, useMessagesByTopic } from "@foxglove/studio-base/PanelAPI";
 import Panel from "@foxglove/studio-base/components/Panel";
 import PanelToolbar from "@foxglove/studio-base/components/PanelToolbar";
 import TopicToRenderMenu from "@foxglove/studio-base/components/TopicToRenderMenu";
 import { useAppTimeFormat } from "@foxglove/studio-base/hooks";
-import { MessageEvent } from "@foxglove/studio-base/players/types";
 
 import FilterBar, { FilterBarProps } from "./FilterBar";
 import LogMessage from "./LogMessage";
+import { normalizedLogMessage } from "./conversion";
 import filterMessages from "./filterMessages";
 import helpContent from "./index.help.md";
-import { RosgraphMsgs$Log } from "./types";
+import { LogMessageEvent } from "./types";
 
 type ArrayElementType<T extends readonly unknown[]> = T extends readonly (infer E)[] ? E : never;
 
@@ -46,10 +46,11 @@ const SUPPORTED_DATATYPES = [
   "rcl_interfaces/msg/Log",
   "ros.rosgraph_msgs.Log",
   "ros.rcl_interfaces.Log",
+  "foxglove.Log",
 ];
 
 const LogPanel = React.memo(({ config, saveConfig }: Props) => {
-  const { topics } = PanelAPI.useDataSourceInfo();
+  const { topics } = useDataSourceInfo();
   const { minLogLevel, searchTerms } = config;
   const { timeFormat, timeZone } = useAppTimeFormat();
 
@@ -60,35 +61,53 @@ const LogPanel = React.memo(({ config, saveConfig }: Props) => {
     [config, saveConfig],
   );
 
-  const defaultTopicToRender = useMemo(
-    () => topics.find((topic) => SUPPORTED_DATATYPES.includes(topic.datatype))?.name ?? "/rosout",
+  const datatypeByTopic = useMemo(() => {
+    const out = new Map<string, string>();
+
+    for (const topic of topics) {
+      out.set(topic.name, topic.datatype);
+    }
+    return out;
+  }, [topics]);
+
+  // Get the topics that have our supported datatypes
+  // Users can select any of these topics for display in the panel
+  const availableTopics = useMemo(
+    () => topics.filter((topic) => SUPPORTED_DATATYPES.includes(topic.datatype)),
     [topics],
   );
 
-  const topicToRender = config.topicToRender ?? defaultTopicToRender;
+  // Pick the first available topic, if there are not available topics, then we inform the user
+  // nothing is publishing log messages
+  const defaultTopicToRender = useMemo(() => availableTopics[0]?.name, [availableTopics]);
 
-  const { [topicToRender]: messages = [] } = PanelAPI.useMessagesByTopic({
+  const topicToRender = config.topicToRender ?? defaultTopicToRender ?? "/rosout";
+
+  const { [topicToRender]: msgEvents = [] } = useMessagesByTopic({
     topics: [topicToRender],
     historySize: 100000,
-  }) as { [key: string]: MessageEvent<RosgraphMsgs$Log>[] };
+  }) as { [key: string]: LogMessageEvent[] };
 
   // avoid making new sets for node names
-  // the filter bar uess the node names during on-demand filtering
+  // the filter bar uses the node names during on-demand filtering
   const seenNodeNamesCache = useRef(new Set<string>());
 
   const seenNodeNames = useMemo(() => {
-    for (const msg of messages) {
-      seenNodeNamesCache.current.add(msg.message.name);
+    for (const msgEvent of msgEvents) {
+      const name = msgEvent.message.name;
+      if (name != undefined) {
+        seenNodeNamesCache.current.add(name);
+      }
     }
 
     return seenNodeNamesCache.current;
-  }, [messages]);
+  }, [msgEvents]);
 
   const searchTermsSet = useMemo(() => new Set(searchTerms), [searchTerms]);
 
   const filteredMessages = useMemo(
-    () => filterMessages(messages, { minLogLevel, searchTerms }),
-    [messages, minLogLevel, searchTerms],
+    () => filterMessages(msgEvents, { minLogLevel, searchTerms }),
+    [msgEvents, minLogLevel, searchTerms],
   );
 
   const listRef = useRef<IList>(ReactNull);
@@ -97,9 +116,9 @@ const LogPanel = React.memo(({ config, saveConfig }: Props) => {
     <TopicToRenderMenu
       topicToRender={topicToRender}
       onChange={(newTopicToRender) => saveConfig({ ...config, topicToRender: newTopicToRender })}
-      topics={topics}
       allowedDatatypes={SUPPORTED_DATATYPES}
-      defaultTopicToRender={defaultTopicToRender}
+      topics={topics}
+      defaultTopicToRender={topicToRender}
     />
   );
 
@@ -171,8 +190,18 @@ const LogPanel = React.memo(({ config, saveConfig }: Props) => {
                 return;
               }
 
+              const datatype = datatypeByTopic.get(item.topic);
+              if (!datatype) {
+                return;
+              }
+
+              const normalizedLog = normalizedLogMessage(datatype, item["message"]);
               return (
-                <LogMessage msg={item.message} timestampFormat={timeFormat} timeZone={timeZone} />
+                <LogMessage
+                  value={normalizedLog}
+                  timestampFormat={timeFormat}
+                  timeZone={timeZone}
+                />
               );
             }}
           />
