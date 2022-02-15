@@ -4,7 +4,8 @@
 
 import { useTheme as useFluentUITheme } from "@fluentui/react";
 import { Close as CloseIcon, Error as ErrorIcon, Remove as RemoveIcon } from "@mui/icons-material";
-import { Box, IconButton, Stack, Tooltip, Typography } from "@mui/material";
+import { IconButton, Theme, Tooltip, Typography } from "@mui/material";
+import { createStyles, makeStyles } from "@mui/styles";
 import { ComponentProps, useCallback, useMemo, useState } from "react";
 import { v4 as uuidv4 } from "uuid";
 
@@ -29,6 +30,75 @@ type PlotLegendRowProps = {
   saveConfig: (arg0: Partial<PlotConfig>) => void;
   showPlotValuesInLegend: boolean;
 };
+
+type StyleProps = {
+  index: number;
+  color: string;
+  enabled: boolean;
+};
+
+const useStyles = makeStyles((theme: Theme) =>
+  createStyles({
+    root: {
+      display: "contents",
+
+      "&:hover, &:focus-within": {
+        "& .MuiIconButton-root": {
+          backgroundColor: theme.palette.action.hover,
+        },
+        "& > *:last-child": {
+          opacity: 1,
+        },
+        "& > *": {
+          backgroundColor: theme.palette.action.hover,
+        },
+      },
+    },
+    listIcon: {
+      padding: theme.spacing(0.25),
+      position: "sticky",
+      left: 0,
+      // creates an opaque background for the sticky element
+      backgroundImage: `linear-gradient(${theme.palette.background.paper}, ${theme.palette.background.paper})`,
+      backgroundBlendMode: "overlay",
+    },
+    legendIconButton: {
+      padding: theme.spacing(0.125),
+      marginLeft: theme.spacing(0.25),
+    },
+    legendIcon: ({ enabled, index }: StyleProps) => ({
+      color: enabled ? lineColors[index % lineColors.length] : theme.palette.text.secondary,
+    }),
+    inputWrapper: {
+      display: "flex",
+      alignItems: "center",
+      padding: theme.spacing(0.25),
+    },
+    plotValue: ({ color }: StyleProps) => ({
+      color,
+      display: "flex",
+      alignItems: "center",
+      padding: theme.spacing(0.25),
+    }),
+    actions: {
+      display: "flex",
+      flexDirection: "row",
+      alignItems: "center",
+      padding: theme.spacing(0.25),
+      gap: theme.spacing(0.25),
+      position: "sticky",
+      right: 0,
+      opacity: 0,
+      // creates an opaque background for the sticky element
+      backgroundImage: `linear-gradient(${theme.palette.background.paper}, ${theme.palette.background.paper})`,
+      backgroundBlendMode: "overlay",
+
+      "&:hover": {
+        opacity: 1,
+      },
+    },
+  }),
+);
 
 export default function PlotLegendRow({
   index,
@@ -68,6 +138,7 @@ export default function PlotLegendRow({
       color: hoverValue?.value != undefined ? fluentUITheme.palette.yellowDark : "inherit",
     };
   }, [hoverValue, correspondingData, currentTime, fluentUITheme]);
+  const classes = useStyles({ color: currentDisplay.color, enabled: path.enabled, index });
 
   const isReferenceLinePlotPath = isReferenceLinePlotPathType(path);
   let timestampMethod;
@@ -105,39 +176,12 @@ export default function PlotLegendRow({
   );
 
   return (
-    <Box
-      display="contents"
-      sx={{
-        "&:hover, &:focus-within": {
-          "& .MuiIconButton-root": {
-            bgcolor: "action.hover",
-          },
-          "& > *:last-child": {
-            opacity: 1,
-          },
-          "& > *": {
-            bgcolor: "action.hover",
-          },
-        },
-      }}
-    >
-      <Box
-        sx={({ palette }) => ({
-          padding: 0.25,
-          position: "sticky",
-          left: 0,
-          // creates an opaque background for the sticky element
-          backgroundImage: `linear-gradient(${palette.background.paper}, ${palette.background.paper})`,
-          backgroundBlendMode: "overlay",
-        })}
-      >
+    <div className={classes.root}>
+      <div className={classes.listIcon}>
         <IconButton
+          className={classes.legendIconButton}
           centerRipple={false}
           size="small"
-          sx={{
-            padding: 0.125,
-            marginLeft: 0.25,
-          }}
           title="Toggle visibility"
           onClick={() => {
             const newPaths = paths.slice();
@@ -148,21 +192,10 @@ export default function PlotLegendRow({
             saveConfig({ paths: newPaths });
           }}
         >
-          <RemoveIcon
-            sx={{ color: path.enabled ? lineColors[index % lineColors.length] : "#777" }}
-          />
+          <RemoveIcon className={classes.legendIcon} color="inherit" />
         </IconButton>
-      </Box>
-      <Box
-        display="flex"
-        alignItems="center"
-        padding={0.25}
-        sx={{
-          input: {
-            textDecoration: !path.enabled ? "line-through" : "none",
-          },
-        }}
-      >
+      </div>
+      <div className={classes.inputWrapper}>
         <MessagePathInput
           supportsMathModifiers
           path={path.value}
@@ -172,6 +205,7 @@ export default function PlotLegendRow({
           index={index}
           autoSize
           disableAutocomplete={isReferenceLinePlotPath}
+          inputStyle={{ textDecoration: !path.enabled ? "line-through" : undefined }}
           {...(xAxisVal === "timestamp" ? { timestampMethod } : undefined)}
         />
         {hasMismatchedDataLength && (
@@ -182,38 +216,15 @@ export default function PlotLegendRow({
             <ErrorIcon fontSize="small" sx={{ color: "error.main" }} />
           </Tooltip>
         )}
-      </Box>
-      {currentDisplay.value != undefined && showPlotValuesInLegend && (
-        <Box display="flex" alignItems="center" padding={0.25}>
-          <Typography
-            component="div"
-            variant="body2"
-            align="right"
-            sx={{ color: currentDisplay.color, width: 150 }}
-          >
-            {currentDisplay.value}
+      </div>
+      {showPlotValuesInLegend && (
+        <div className={classes.plotValue}>
+          <Typography component="div" variant="body2" align="right" color="inherit">
+            {currentDisplay.value ?? ""}
           </Typography>
-        </Box>
+        </div>
       )}
-
-      <Stack
-        direction="row"
-        alignItems="center"
-        padding={0.25}
-        spacing={0.25}
-        position="sticky"
-        right={0}
-        sx={({ palette }) => ({
-          opacity: 0,
-          // creates an opaque background for the sticky element
-          backgroundImage: `linear-gradient(${palette.background.paper}, ${palette.background.paper})`,
-          backgroundBlendMode: "overlay",
-
-          "&:hover": {
-            opacity: 1,
-          },
-        })}
-      >
+      <div className={classes.actions}>
         <TimestampMethodDropdown
           path={path.value}
           onTimestampMethodChange={onInputTimestampMethodChange}
@@ -233,7 +244,7 @@ export default function PlotLegendRow({
         >
           <CloseIcon fontSize="small" />
         </IconButton>
-      </Stack>
-    </Box>
+      </div>
+    </div>
   );
 }
