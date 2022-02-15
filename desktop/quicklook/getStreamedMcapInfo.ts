@@ -87,7 +87,7 @@ export function processMcap0Record(info: McapInfo, record: Mcap0Types.TypedMcapR
       info.schemaNamesById.set(record.id, record.name);
       break;
 
-    case "ChannelInfo": {
+    case "Channel": {
       info.topicNamesByChannelId.set(record.id, record.topic);
       const chanInfo = info.topicInfosByTopic.get(record.topic);
       const schemaName = info.schemaNamesById.get(record.schemaId);

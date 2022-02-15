@@ -2,11 +2,11 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import protobufjs from "protobufjs";
-import { FileDescriptorSet } from "protobufjs/ext/descriptor";
+import * as base64 from "@protobufjs/base64";
 import { v4 as uuidv4 } from "uuid";
 
 import Log from "@foxglove/log";
+import { parseChannel, ParsedChannel } from "@foxglove/mcap-support";
 import { Time, fromNanoSec, isLessThan } from "@foxglove/rostime";
 import PlayerProblemManager from "@foxglove/studio-base/players/PlayerProblemManager";
 import {
@@ -25,9 +25,6 @@ import debouncePromise from "@foxglove/studio-base/util/debouncePromise";
 import { TimestampMethod } from "@foxglove/studio-base/util/time";
 import { Channel, ChannelId, FoxgloveClient, SubscriptionId } from "@foxglove/ws-protocol";
 
-import parseJsonSchema from "./parseJsonSchema";
-import protobufDefinitionsToDatatypes, { stripLeadingDot } from "./protobufDefinitionsToDatatypes";
-
 const log = Log.getLogger(__dirname);
 
 /** Suppress warnings about messages on unknown subscriptions if the susbscription was recently canceled. */
@@ -37,66 +34,7 @@ const CAPABILITIES: typeof PlayerCapabilities[keyof typeof PlayerCapabilities][]
 
 const ZERO_TIME = Object.freeze({ sec: 0, nsec: 0 });
 
-type ParsedChannel = {
-  channel: Channel;
-  fullSchemaName: string;
-  deserializer: (data: ArrayBufferView) => unknown;
-  datatypes: RosDatatypes;
-};
-
-function parseChannel(channel: Channel): ParsedChannel {
-  if (channel.encoding === "json") {
-    const schema = channel.schema.length > 0 ? JSON.parse(channel.schema) : undefined;
-    const textDecoder = new TextDecoder();
-    let datatypes: RosDatatypes = new Map();
-    let deserializer = (data: ArrayBufferView) => JSON.parse(textDecoder.decode(data));
-    if (schema != undefined) {
-      if (typeof schema !== "object") {
-        throw new Error(`Invalid schema for channel ${channel.id}, expected JSON object`);
-      }
-      const { datatypes: parsedDatatypes, postprocessValue } = parseJsonSchema(
-        schema as Record<string, unknown>,
-        channel.schemaName,
-      );
-      datatypes = parsedDatatypes;
-      deserializer = (data) =>
-        postprocessValue(JSON.parse(textDecoder.decode(data)) as Record<string, unknown>);
-    }
-    return { channel, fullSchemaName: channel.schemaName, deserializer, datatypes };
-  }
-
-  if (channel.encoding === "protobuf") {
-    const decodedSchema = new Uint8Array(protobufjs.util.base64.length(channel.schema));
-    if (
-      protobufjs.util.base64.decode(channel.schema, decodedSchema, 0) !== decodedSchema.byteLength
-    ) {
-      throw new Error(`Failed to decode base64 schema on ${channel.topic}`);
-    }
-    const root = protobufjs.Root.fromDescriptor(FileDescriptorSet.decode(decodedSchema));
-    root.resolveAll();
-    const type = root.lookupType(channel.schemaName);
-
-    const deserializer = (data: ArrayBufferView) => {
-      return type.toObject(
-        type.decode(new Uint8Array(data.buffer, data.byteOffset, data.byteLength)),
-        { defaults: true },
-      );
-    };
-
-    const datatypes: RosDatatypes = new Map();
-    protobufDefinitionsToDatatypes(datatypes, type);
-
-    return {
-      channel,
-      // fullName is a fully qualified name but includes a leading dot. Remove the leading dot.
-      fullSchemaName: stripLeadingDot(type.fullName),
-      deserializer,
-      datatypes,
-    };
-  }
-
-  throw new Error(`Unsupported encoding ${channel.encoding}`);
-}
+type ResolvedChannel = { channel: Channel; parsedChannel: ParsedChannel };
 
 export default class FoxgloveWebSocketPlayer implements Player {
   private _url: string; // WebSocket URL.
@@ -120,9 +58,9 @@ export default class FoxgloveWebSocketPlayer implements Player {
 
   private _unresolvedSubscriptions = new Set<string>();
   private _resolvedSubscriptionsByTopic = new Map<string, SubscriptionId>();
-  private _resolvedSubscriptionsById = new Map<SubscriptionId, ParsedChannel>();
-  private _channelsByTopic = new Map<string, ParsedChannel>();
-  private _channelsById = new Map<ChannelId, ParsedChannel>();
+  private _resolvedSubscriptionsById = new Map<SubscriptionId, ResolvedChannel>();
+  private _channelsByTopic = new Map<string, ResolvedChannel>();
+  private _channelsById = new Map<ChannelId, ResolvedChannel>();
   private _unsupportedChannelIds = new Set<ChannelId>();
   private _recentlyCanceledSubscriptions = new Set<SubscriptionId>();
 
@@ -205,7 +143,24 @@ export default class FoxgloveWebSocketPlayer implements Player {
       for (const channel of newChannels) {
         let parsedChannel;
         try {
-          parsedChannel = parseChannel(channel);
+          let schemaEncoding;
+          let schemaData;
+          if (channel.encoding === "json") {
+            schemaEncoding = "jsonschema";
+            schemaData = new TextEncoder().encode(channel.schema);
+          } else if (channel.encoding === "protobuf") {
+            schemaEncoding = "proto";
+            schemaData = new Uint8Array(base64.length(channel.schema));
+            if (base64.decode(channel.schema, schemaData, 0) !== schemaData.byteLength) {
+              throw new Error(`Failed to decode base64 schema on channel ${channel.id}`);
+            }
+          } else {
+            throw new Error(`Unsupported encoding ${channel.encoding}`);
+          }
+          parsedChannel = parseChannel({
+            messageEncoding: channel.encoding,
+            schema: { name: channel.schemaName, encoding: schemaEncoding, data: schemaData },
+          });
         } catch (error) {
           this._unsupportedChannelIds.add(channel.id);
           this._problems.addProblem(`schema:${channel.topic}`, {
@@ -225,8 +180,9 @@ export default class FoxgloveWebSocketPlayer implements Player {
           this._emitState();
           continue;
         }
-        this._channelsById.set(channel.id, parsedChannel);
-        this._channelsByTopic.set(channel.topic, parsedChannel);
+        const resolvedChannel = { channel, parsedChannel };
+        this._channelsById.set(channel.id, resolvedChannel);
+        this._channelsByTopic.set(channel.topic, resolvedChannel);
       }
       this._updateTopicsAndDatatypes();
       this._emitState();
@@ -298,7 +254,7 @@ export default class FoxgloveWebSocketPlayer implements Player {
         this._parsedMessages.push({
           topic: chanInfo.channel.topic,
           receiveTime,
-          message: chanInfo.deserializer(data),
+          message: chanInfo.parsedChannel.deserializer(data),
           sizeInBytes: data.byteLength,
         });
       } catch (error) {
@@ -315,11 +271,11 @@ export default class FoxgloveWebSocketPlayer implements Player {
   private _updateTopicsAndDatatypes() {
     this._topics = Array.from(this._channelsById.values(), (chanInfo) => ({
       name: chanInfo.channel.topic,
-      datatype: chanInfo.fullSchemaName,
+      datatype: chanInfo.parsedChannel.fullSchemaName,
     }));
     this._datatypes = new Map();
-    for (const { datatypes } of this._channelsById.values()) {
-      for (const [name, types] of datatypes) {
+    for (const { parsedChannel } of this._channelsById.values()) {
+      for (const [name, types] of parsedChannel.datatypes) {
         this._datatypes.set(name, types);
       }
     }

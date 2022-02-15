@@ -533,6 +533,7 @@ export default class Ros1MemoryCacheDataProvider implements RandomAccessDataProv
       }
 
       const connectionSuccess = await this._setConnection(newConnection).catch((err) => {
+        console.error(err);
         sendNotification(
           `MemoryCacheDataProvider connection ${
             this._currentConnection ? this._currentConnection.id : ""

@@ -99,6 +99,8 @@ export default (_env: unknown, argv: WebpackArgv): Configuration => {
       extensions: [".js", ".ts", ".tsx", ".json"],
       fallback: {
         path: require.resolve("path-browserify"),
+        stream: false,
+        crypto: false,
         fs: false,
       },
     },

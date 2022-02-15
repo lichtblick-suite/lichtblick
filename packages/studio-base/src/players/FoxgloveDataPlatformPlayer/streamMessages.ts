@@ -2,10 +2,9 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import decompressLZ4 from "wasm-lz4";
-
 import Logger from "@foxglove/log";
 import { McapPre0Reader, McapPre0Types } from "@foxglove/mcap";
+import { loadDecompressHandlers } from "@foxglove/mcap-support";
 import { fromNanoSec, isTimeInRangeInclusive, Time, toRFC3339String } from "@foxglove/rostime";
 import { MessageEvent } from "@foxglove/studio-base/players/types";
 import ConsoleApi from "@foxglove/studio-base/services/ConsoleApi";
@@ -39,7 +38,7 @@ export default async function* streamMessages({
    */
   messageReadersByTopic: Map<string, { encoding: string; schema: string; reader: MessageReader }[]>;
 }): AsyncIterable<MessageEvent<unknown>[]> {
-  await decompressLZ4.isLoaded;
+  const decompressHandlers = await loadDecompressHandlers();
 
   log.debug("streamMessages", params);
   const startTimer = performance.now();
@@ -113,11 +112,7 @@ export default async function* streamMessages({
     }
   }
 
-  const reader = new McapPre0Reader({
-    decompressHandlers: {
-      lz4: (buffer, decompressedSize) => decompressLZ4(buffer, Number(decompressedSize)),
-    },
-  });
+  const reader = new McapPre0Reader({ decompressHandlers });
   for (let result; (result = await streamReader.read()), !result.done; ) {
     reader.append(result.value);
     for (let record; (record = reader.nextRecord()); ) {

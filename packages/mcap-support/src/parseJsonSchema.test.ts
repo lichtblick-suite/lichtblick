@@ -4,7 +4,7 @@
 
 import * as protobufjs from "protobufjs";
 
-import parseJsonSchema from "./parseJsonSchema";
+import { parseJsonSchema } from "./parseJsonSchema";
 
 describe("parseJsonSchema", () => {
   it("rejects invalid schema", () => {

@@ -2304,14 +2304,26 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@foxglove/mcap@github:foxglove/mcap#workspace=@foxglove/mcap&commit=09b43c06f609325ddbf37d1009a11edcffdc892a":
+"@foxglove/mcap-support@workspace:*, @foxglove/mcap-support@workspace:packages/mcap-support":
+  version: 0.0.0-use.local
+  resolution: "@foxglove/mcap-support@workspace:packages/mcap-support"
+  dependencies:
+    "@foxglove/wasm-bz2": 0.1.0
+    "@protobufjs/base64": 1.1.2
+    typescript: 4.5.5
+    wasm-lz4: 2.0.0
+    zstd-codec: 0.1.4
+  languageName: unknown
+  linkType: soft
+
+"@foxglove/mcap@github:foxglove/mcap#workspace=@foxglove/mcap&commit=8a731dcb1a7a6375374f5c1197e74d03d414078d":
   version: 0.1.0
-  resolution: "@foxglove/mcap@https://github.com/foxglove/mcap.git#workspace=%40foxglove%2Fmcap&commit=09b43c06f609325ddbf37d1009a11edcffdc892a"
+  resolution: "@foxglove/mcap@https://github.com/foxglove/mcap.git#workspace=%40foxglove%2Fmcap&commit=8a731dcb1a7a6375374f5c1197e74d03d414078d"
   dependencies:
     "@foxglove/crc": ^0.0.3
     heap-js: ^2.1.6
     tslib: ^2
-  checksum: 4dfea0d708fd9fabf700e98e20a2adf8f40c47e1bcbb3c82cc4049c12639dc0463348cce1d28cf450dac7e623f7ec04e689ee6cecd3a7db832a2878959e98821
+  checksum: 54733836e2d507ea1230f81a71d3e89ee2f65edf864dd7c6fcf250c7d174d51d2b431595dc1e1df75fe19e2eb294d70ad2e0da8438b66388d5289aa1a1cbb8ab
   languageName: node
   linkType: hard
 
@@ -2495,7 +2507,8 @@ __metadata:
     "@foxglove/den": "workspace:*"
     "@foxglove/electron-socket": 1.3.1
     "@foxglove/hooks": "workspace:*"
-    "@foxglove/mcap": "github:foxglove/mcap#workspace=@foxglove/mcap&commit=09b43c06f609325ddbf37d1009a11edcffdc892a"
+    "@foxglove/mcap": "github:foxglove/mcap#workspace=@foxglove/mcap&commit=8a731dcb1a7a6375374f5c1197e74d03d414078d"
+    "@foxglove/mcap-support": "workspace:*"
     "@foxglove/regl-worldview": 2.4.0
     "@foxglove/ros1": 1.4.0
     "@foxglove/ros2": 3.1.0
@@ -2510,6 +2523,7 @@ __metadata:
     "@foxglove/studio": "workspace:*"
     "@foxglove/ulog": 2.1.2
     "@foxglove/velodyne-cloud": 1.0.0
+    "@foxglove/wasm-bz2": 0.1.0
     "@foxglove/ws-protocol": 0.0.8
     "@mdi/svg": 6.5.95
     "@mui/icons-material": 5.4.1
@@ -2566,6 +2580,7 @@ __metadata:
     "@types/uuid": 8.3.4
     "@types/wicg-file-system-access": 2020.9.4
     "@types/ws": 8.2.2
+    "@types/zstd-codec": "workspace:*"
     "@wojtekmaj/enzyme-adapter-react-17": 0.6.6
     amplitude-js: 8.16.1
     argparse: 2.0.1
@@ -2662,6 +2677,7 @@ __metadata:
     wasm-lz4: 2.0.0
     webpack: 5.68.0
     xacro-parser: 0.3.8
+    zstd-codec: 0.1.4
   languageName: unknown
   linkType: soft
 
@@ -3626,7 +3642,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@protobufjs/base64@npm:^1.1.2":
+"@protobufjs/base64@npm:1.1.2, @protobufjs/base64@npm:^1.1.2":
   version: 1.1.2
   resolution: "@protobufjs/base64@npm:1.1.2"
   checksum: 67173ac34de1e242c55da52c2f5bdc65505d82453893f9b51dc74af9fe4c065cf4a657a4538e91b0d4a1a1e0a0642215e31894c31650ff6e3831471061e1ee9e
@@ -6491,6 +6507,12 @@ __metadata:
   checksum: dfb49abe82605615712fc694eaa4f7068fe30aa03f38c085e2c2e74408beaad30471d36da9654a811482ece2ea4405575fd99b19c0aa327ed2a9736b554bbf43
   languageName: node
   linkType: hard
+
+"@types/zstd-codec@workspace:*, @types/zstd-codec@workspace:packages/@types/zstd-codec":
+  version: 0.0.0-use.local
+  resolution: "@types/zstd-codec@workspace:packages/@types/zstd-codec"
+  languageName: unknown
+  linkType: soft
 
 "@typescript-eslint/eslint-plugin@npm:5.11.0":
   version: 5.11.0
@@ -12860,7 +12882,6 @@ __metadata:
     "@babel/preset-typescript": 7.16.7
     "@foxglove/eslint-plugin": 0.19.0
     "@foxglove/tsconfig": 1.1.0
-    "@foxglove/wasm-bz2": 0.1.0
     "@octokit/rest": 18.12.0
     "@pmmmwh/react-refresh-webpack-plugin": 0.5.4
     "@sentry/electron": 2.5.4
@@ -25441,6 +25462,13 @@ __metadata:
   version: 0.1.0
   resolution: "yocto-queue@npm:0.1.0"
   checksum: f77b3d8d00310def622123df93d4ee654fc6a0096182af8bd60679ddcdfb3474c56c6c7190817c84a2785648cdee9d721c0154eb45698c62176c322fb46fc700
+  languageName: node
+  linkType: hard
+
+"zstd-codec@npm:0.1.4":
+  version: 0.1.4
+  resolution: "zstd-codec@npm:0.1.4"
+  checksum: 8689bc0defc4f387d1be990b8b8ca8ca56690d17dfc8dd4703db798465b92a21e64e54e886acfaa376147d9d07d879a68627b09fddc34a0c93f0dc5c610a790c
   languageName: node
   linkType: hard
 

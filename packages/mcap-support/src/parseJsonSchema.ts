@@ -2,12 +2,13 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import * as protobufjs from "protobufjs";
+import * as base64 from "@protobufjs/base64";
 
 import { RosMsgField } from "@foxglove/rosmsg";
-import { RosDatatypes } from "@foxglove/studio-base/types/RosDatatypes";
 
-export default function parseJsonSchema(
+import { RosDatatypes } from "./types";
+
+export function parseJsonSchema(
   rootJsonSchema: Record<string, unknown>,
   rootTypeName: string,
 ): {
@@ -51,8 +52,8 @@ export default function parseJsonSchema(
               postprocessObject = (value) => {
                 const str = value[fieldName];
                 if (typeof str === "string") {
-                  const decoded = new Uint8Array(protobufjs.util.base64.length(str));
-                  if (protobufjs.util.base64.decode(str, decoded, 0) !== decoded.byteLength) {
+                  const decoded = new Uint8Array(base64.length(str));
+                  if (base64.decode(str, decoded, 0) !== decoded.byteLength) {
                     throw new Error(
                       `Failed to decode base64 data for ${keyPath.join(".")}.${fieldName}`,
                     );

@@ -1,0 +1,32 @@
+{
+  "name": "@foxglove/mcap-support",
+  "description": "Common schema and message parsing logic for use with MCAP and related protocols",
+  "license": "MPL-2.0",
+  "private": true,
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/foxglove/studio.git"
+  },
+  "author": {
+    "name": "Foxglove Technologies",
+    "email": "support@foxglove.dev"
+  },
+  "homepage": "https://foxglove.dev/",
+  "main": "./src/index.ts",
+  "files": [
+    "dist",
+    "src"
+  ],
+  "scripts": {
+    "prepack": "tsc -b"
+  },
+  "devDependencies": {
+    "typescript": "4.5.5"
+  },
+  "dependencies": {
+    "@foxglove/wasm-bz2": "0.1.0",
+    "@protobufjs/base64": "1.1.2",
+    "wasm-lz4": "2.0.0",
+    "zstd-codec": "0.1.4"
+  }
+}

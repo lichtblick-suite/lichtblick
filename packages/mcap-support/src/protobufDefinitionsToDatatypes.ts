@@ -4,7 +4,8 @@
 import protobufjs from "protobufjs";
 
 import { RosMsgField } from "@foxglove/rosmsg";
-import { RosDatatypes } from "@foxglove/studio-base/types/RosDatatypes";
+
+import { RosDatatypes } from "./types";
 
 function protobufScalarToRosPrimitive(type: string): string {
   switch (type) {
@@ -38,7 +39,7 @@ export function stripLeadingDot(typeName: string): string {
   return typeName.replace(/^\./, "");
 }
 
-export default function protobufDefinitionsToDatatypes(
+export function protobufDefinitionsToDatatypes(
   datatypes: RosDatatypes,
   type: protobufjs.Type,
 ): void {

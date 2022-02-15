@@ -2,16 +2,14 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import decompressLZ4 from "wasm-lz4";
-
 import Logger from "@foxglove/log";
 import {
   Mcap0StreamReader,
   McapPre0Reader,
-  Mcap0Types,
   detectVersion,
   DETECT_VERSION_BYTES_REQUIRED,
 } from "@foxglove/mcap";
+import { loadDecompressHandlers } from "@foxglove/mcap-support";
 import { Bag } from "@foxglove/rosbag";
 import { BlobReader } from "@foxglove/rosbag/web";
 
@@ -73,9 +71,7 @@ export async function getMcapInfo(file: File): Promise<FileInfo> {
     new DataView(await file.slice(0, DETECT_VERSION_BYTES_REQUIRED).arrayBuffer()),
   );
 
-  const decompressHandlers: Mcap0Types.DecompressHandlers = {
-    lz4: (buffer, decompressedSize) => decompressLZ4(buffer, Number(decompressedSize)),
-  };
+  const decompressHandlers = await loadDecompressHandlers();
   switch (mcapVersion) {
     case undefined:
       throw new Error("Not a valid MCAP file");
