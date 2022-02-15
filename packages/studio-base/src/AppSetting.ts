@@ -21,7 +21,6 @@ export enum AppSetting {
   UNLIMITED_MEMORY_CACHE = "experimental.unlimited-memory-cache",
   SHOW_DEBUG_PANELS = "showDebugPanels",
   ENABLE_LEGACY_PLOT_PANEL = "enableLegacyPlotPanel",
-  ENABLE_MCAP_DATA_SOURCE = "sources.mcap",
 
   // Miscellaneous
   HIDE_SIGN_IN_PROMPT = "hideSignInPrompt",

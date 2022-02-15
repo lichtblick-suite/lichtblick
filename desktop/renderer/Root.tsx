@@ -29,8 +29,6 @@ import {
   FoxgloveWebSocketDataSourceFactory,
   UlogLocalDataSourceFactory,
   McapLocalDataSourceFactory,
-  useAppConfigurationValue,
-  AppSetting,
   SampleNuscenesDataSourceFactory,
   AppConfiguration,
   AppConfigurationContext,
@@ -49,9 +47,6 @@ const desktopBridge = (global as unknown as { desktopBridge: Desktop }).desktopB
 // useAppConfiguration requires the AppConfigurationContext which is setup in Root
 // AppWrapper is used to make a functional component so we can use the context
 function AppWrapper() {
-  const [enableMcapDataSource = false] = useAppConfigurationValue<boolean>(
-    AppSetting.ENABLE_MCAP_DATA_SOURCE,
-  );
   const deepLinks = useMemo(() => desktopBridge.getDeepLinks(), []);
 
   const dataSources: IDataSourceFactory[] = useMemo(() => {
@@ -67,14 +62,11 @@ function AppWrapper() {
       new VelodyneDataSourceFactory(),
       new FoxgloveDataPlatformDataSourceFactory(),
       new SampleNuscenesDataSourceFactory(),
+      new McapLocalDataSourceFactory(),
     ];
 
-    if (enableMcapDataSource) {
-      sources.push(new McapLocalDataSourceFactory());
-    }
-
     return sources;
-  }, [enableMcapDataSource]);
+  }, []);
 
   return <App deepLinks={deepLinks} availableSources={dataSources} />;
 }

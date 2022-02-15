@@ -43,10 +43,6 @@ import ExtensionLoaderProvider from "./providers/ExtensionLoaderProvider";
 // useAppConfiguration requires the AppConfigurationContext which is setup in Root
 // AppWrapper is used to make a functional component so we can use the context
 function AppWrapper() {
-  const [enableMcapDataSource = false] = useAppConfigurationValue<boolean>(
-    AppSetting.ENABLE_MCAP_DATA_SOURCE,
-  );
-
   const dataSources: IDataSourceFactory[] = useMemo(() => {
     const sources = [
       new Ros1UnavailableDataSourceFactory(),
@@ -60,14 +56,11 @@ function AppWrapper() {
       new VelodyneUnavailableDataSourceFactory(),
       new FoxgloveDataPlatformDataSourceFactory(),
       new SampleNuscenesDataSourceFactory(),
+      new McapLocalDataSourceFactory(),
     ];
 
-    if (enableMcapDataSource) {
-      sources.push(new McapLocalDataSourceFactory());
-    }
-
     return sources;
-  }, [enableMcapDataSource]);
+  }, []);
 
   return <App availableSources={dataSources} deepLinks={[window.location.href]} />;
 }
