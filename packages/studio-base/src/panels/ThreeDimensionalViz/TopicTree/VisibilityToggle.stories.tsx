@@ -16,13 +16,12 @@ import { useState, useCallback, useRef } from "react";
 
 import { Color } from "@foxglove/regl-worldview";
 
-import VisibilityToggle, { Size, TOGGLE_SIZE_CONFIG } from "./VisibilityToggle";
+import VisibilityToggle from "./VisibilityToggle";
 
 function Example({
   available,
   checked: defaultChecked = false,
   overrideColor,
-  size,
   title,
   visibleInScene = false,
   showFocused = false,
@@ -31,7 +30,6 @@ function Example({
   available: boolean;
   checked?: boolean;
   overrideColor?: Color;
-  size?: Size;
   title: string;
   visibleInScene?: boolean;
   showFocused?: boolean;
@@ -44,7 +42,7 @@ function Example({
   const renderedRef = useRef(false);
   return (
     <div
-      style={{ marginBottom: 16 }}
+      style={{ display: "flex", marginBottom: 8, gap: 8, alignItems: "center" }}
       ref={(el) => {
         if (!el || renderedRef.current) {
           return;
@@ -60,16 +58,15 @@ function Example({
         renderedRef.current = true;
       }}
     >
-      <p>{title}</p>
       <VisibilityToggle
         available={available}
         checked={checked}
         onToggle={onToggle}
         visibleInScene={visibleInScene}
-        size={size}
         overrideColor={overrideColor}
         dataTest="myToggle"
       />
+      {title}
     </div>
   );
 }
@@ -77,7 +74,7 @@ function Example({
 storiesOf("panels/ThreeDimensionalViz/TopicTree/VisibilityToggle", module)
   .add("default", () => {
     return (
-      <div>
+      <div style={{ padding: 8 }}>
         <Example available={false} title="available: false" />
         <Example available checked visibleInScene title="checked: true, visibleInScene: true" />
         <Example available visibleInScene title="visibleInScene: true" />
@@ -92,13 +89,6 @@ storiesOf("panels/ThreeDimensionalViz/TopicTree/VisibilityToggle", module)
           visibleInScene={false}
           checked
           title="visibleInScene: false, checked: true"
-        />
-        <Example
-          available
-          checked
-          visibleInScene
-          size={TOGGLE_SIZE_CONFIG.SMALL.name as any}
-          title="checked: true, visibleInScene: true, size: SMALL "
         />
         <Example
           available

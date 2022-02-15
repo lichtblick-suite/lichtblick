@@ -31,7 +31,7 @@ import { colors } from "@foxglove/studio-base/util/sharedStyleConstants";
 
 import NodeName from "./NodeName";
 import TreeNodeMenu, { DOT_MENU_WIDTH } from "./TreeNodeMenu";
-import VisibilityToggle, { TOGGLE_WRAPPER_SIZE, TOPIC_ROW_PADDING } from "./VisibilityToggle";
+import VisibilityToggle from "./VisibilityToggle";
 import { DerivedCustomSettings, SetCurrentEditingTopic, TreeNode } from "./types";
 
 export const ICON_SIZE = 22;
@@ -39,6 +39,8 @@ export const ICON_SIZE = 22;
 const MAX_GROUP_ERROR_WIDTH = 64;
 const VISIBLE_COUNT_WIDTH = 18;
 const VISIBLE_COUNT_MARGIN = 4;
+
+const TOGGLE_WRAPPER_SIZE = 24;
 
 export const STreeNodeRow = styled.div<{ visibleInScene: boolean }>`
   color: ${({ theme, visibleInScene }) =>
@@ -53,7 +55,7 @@ export const SLeft = styled.div`
   align-items: center;
   flex: 1 1 auto;
   min-height: ${TOGGLE_WRAPPER_SIZE}px;
-  padding: ${TOPIC_ROW_PADDING}px 0px;
+  padding: 3px 0px;
 `;
 
 const SErrorCount = styled.small`
@@ -155,8 +157,10 @@ export default function TreeNodeRow({
 
   const rowWidth = width - (isXSWidth ? 0 : TREE_SPACING * 2);
 
-  const togglesWidth = TOGGLE_WRAPPER_SIZE;
-  const rightActionWidth = providerAvailable ? togglesWidth + DOT_MENU_WIDTH : DOT_MENU_WIDTH;
+  const rightActionWidth = providerAvailable
+    ? TOGGLE_WRAPPER_SIZE + DOT_MENU_WIDTH
+    : DOT_MENU_WIDTH;
+
   // -8px to add some spacing between the name and right action area.
   let maxNodeNameWidth = rowWidth - rightActionWidth - 8;
 
@@ -268,7 +272,6 @@ export default function TreeNodeRow({
             <VisibilityToggle
               available={available}
               dataTest={`visibility-toggle~${key}`}
-              size={node.type === "topic" ? "SMALL" : "NORMAL"}
               overrideColor={derivedCustomSettings?.overrideColor}
               checked={checked}
               onToggle={() => {

@@ -24,7 +24,7 @@ import NodeName from "./NodeName";
 import TooltipRow from "./TooltipRow";
 import TooltipTable from "./TooltipTable";
 import { SToggles, STreeNodeRow, SLeft, SRightActions, ICON_SIZE } from "./TreeNodeRow";
-import VisibilityToggle, { TOGGLE_WRAPPER_SIZE } from "./VisibilityToggle";
+import VisibilityToggle from "./VisibilityToggle";
 import {
   GetIsTreeNodeVisibleInTree,
   OnNamespaceOverrideColorChange,
@@ -32,6 +32,7 @@ import {
   TreeUINode,
 } from "./types";
 
+const TOGGLE_WRAPPER_SIZE = 24;
 const OUTER_LEFT_MARGIN = 12;
 const INNER_LEFT_MARGIN = 8;
 
@@ -157,7 +158,6 @@ function NamespaceNodeRow({
             onAltToggle={() => onAltToggle()}
             onToggle={() => onToggle()}
             overrideColor={overrideColor}
-            size="SMALL"
             visibleInScene={visibleInScene}
             onMouseEnter={() => updateHoveredMarkerMatchers(true)}
             onMouseLeave={onMouseLeave}
