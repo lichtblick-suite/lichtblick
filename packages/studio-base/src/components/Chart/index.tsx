@@ -175,6 +175,7 @@ function Chart(props: Props): JSX.Element {
     [isMounted],
   );
 
+  const hasPannedSinceMouseDown = useRef(false);
   const previousUpdateMessage = useRef<Record<string, unknown>>({});
 
   // getNewUpdateMessage returns an update message for the changed fields from the last
@@ -287,6 +288,8 @@ function Chart(props: Props): JSX.Element {
     hammerManager.add(new Hammer.Pan({ threshold }));
 
     hammerManager.on("panstart", async (event) => {
+      hasPannedSinceMouseDown.current = true;
+
       if (!rpcSendRef.current) {
         return;
       }
@@ -377,6 +380,8 @@ function Chart(props: Props): JSX.Element {
 
   const onMouseDown = useCallback(
     async (event: React.MouseEvent<HTMLCanvasElement>) => {
+      hasPannedSinceMouseDown.current = false;
+
       if (!rpcSendRef.current) {
         return;
       }
@@ -439,7 +444,12 @@ function Chart(props: Props): JSX.Element {
 
   const onClick = useCallback(
     async (event: React.MouseEvent<HTMLCanvasElement>): Promise<void> => {
-      if (!props.onClick || !rpcSendRef.current) {
+      if (
+        !props.onClick ||
+        !rpcSendRef.current ||
+        !isMounted() ||
+        hasPannedSinceMouseDown.current // Don't send click event if it was part of a pan gesture.
+      ) {
         return;
       }
 
@@ -452,10 +462,6 @@ function Chart(props: Props): JSX.Element {
       const datalabel = await rpcSendRef.current("getDatalabelAtEvent", {
         event: { x: mouseX, y: mouseY, type: "click" },
       });
-
-      if (!isMounted()) {
-        return;
-      }
 
       let xVal: number | undefined;
       let yVal: number | undefined;
