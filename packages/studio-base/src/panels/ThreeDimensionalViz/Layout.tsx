@@ -601,6 +601,8 @@ export default function Layout({
     (newSelectedObject?: MouseEventObject) => {
       setSelectionState({
         ...callbackInputsRef.current.selectionState,
+        clickedObjects: [],
+        clickedPosition: { clientX: 0, clientY: 0 },
         selectedObject: newSelectedObject,
       });
       updateInteractionsTabVisibility(newSelectedObject);
