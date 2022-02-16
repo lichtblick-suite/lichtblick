@@ -106,7 +106,7 @@ function getSynchronizedMessages(
   return synchronizedMessages;
 }
 
-type ReducedValue = {
+export type ReducedValue = {
   messagesByTopic: MessagesByTopic;
   synchronizedMessages?: MessageByTopic;
 };

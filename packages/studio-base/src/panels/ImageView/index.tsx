@@ -20,11 +20,11 @@ import WavesIcon from "@mdi/svg/svg/waves.svg";
 import { Stack } from "@mui/material";
 import cx from "classnames";
 import { last, uniq } from "lodash";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo, useCallback } from "react";
 
 import { filterMap } from "@foxglove/den/collection";
 import { useShallowMemo } from "@foxglove/hooks";
-import * as PanelAPI from "@foxglove/studio-base/PanelAPI";
+import { useDataSourceInfo } from "@foxglove/studio-base/PanelAPI";
 import Autocomplete from "@foxglove/studio-base/components/Autocomplete";
 import Dropdown from "@foxglove/studio-base/components/Dropdown";
 import DropdownItem from "@foxglove/studio-base/components/Dropdown/DropdownItem";
@@ -34,34 +34,25 @@ import { Item, SubMenu } from "@foxglove/studio-base/components/Menu";
 import { useMessagePipeline } from "@foxglove/studio-base/components/MessagePipeline";
 import Panel from "@foxglove/studio-base/components/Panel";
 import PanelToolbar from "@foxglove/studio-base/components/PanelToolbar";
-import useDeepMemo from "@foxglove/studio-base/hooks/useDeepMemo";
-import { Toolbar } from "@foxglove/studio-base/panels/ImageView/Toolbar";
-import { IMAGE_DATATYPES } from "@foxglove/studio-base/panels/ImageView/renderImage";
 import { MessageEvent } from "@foxglove/studio-base/players/types";
 import inScreenshotTests from "@foxglove/studio-base/stories/inScreenshotTests";
-import { CameraInfo, StampedMessage } from "@foxglove/studio-base/types/Messages";
+import { StampedMessage } from "@foxglove/studio-base/types/Messages";
 import { PanelConfigSchema, SaveConfig } from "@foxglove/studio-base/types/panels";
 import { mightActuallyBePartial } from "@foxglove/studio-base/util/mightActuallyBePartial";
 import naturalSort from "@foxglove/studio-base/util/naturalSort";
 import { getTopicsByTopicName } from "@foxglove/studio-base/util/selectors";
-import { getSynchronizingReducers } from "@foxglove/studio-base/util/synchronizeMessages";
 import { formatTimeRaw, getTimestampForMessage } from "@foxglove/studio-base/util/time";
 import toggle from "@foxglove/studio-base/util/toggle";
 
 import ImageCanvas from "./ImageCanvas";
 import ImageEmptyState from "./ImageEmptyState";
+import { Toolbar } from "./Toolbar";
 import helpContent from "./index.help.md";
-import {
-  getCameraInfoTopic,
-  getCameraNamespace,
-  getRelatedMarkerTopics,
-  getMarkerOptions,
-  groupTopics,
-  PixelData,
-  ZoomMode,
-} from "./util";
-
-const { useMemo, useCallback } = React;
+import { NORMALIZABLE_IMAGE_DATATYPES } from "./normalizeMessage";
+import type { PixelData, ZoomMode } from "./types";
+import { useCameraInfo } from "./useCameraInfo";
+import { useOptionallySynchronizedMessages } from "./useOptionallySynchronizedMessages";
+import { getCameraNamespace, getRelatedMarkerTopics, getMarkerOptions, groupTopics } from "./util";
 
 type DefaultConfig = {
   cameraTopic: string;
@@ -213,34 +204,6 @@ const ToggleComponent = ({
 
 const canTransformMarkersByTopic = (topic: string) => !topic.includes("rect");
 
-function useOptionallySynchronizedMessages(
-  // eslint-disable-next-line @foxglove/no-boolean-parameters
-  shouldSynchronize: boolean,
-  topics: readonly string[],
-) {
-  const memoizedTopics = useDeepMemo(topics);
-  const reducers = useMemo(
-    () =>
-      shouldSynchronize
-        ? getSynchronizingReducers(memoizedTopics)
-        : {
-            restore: (previousValue) => ({
-              messagesByTopic: previousValue ? previousValue.messagesByTopic : {},
-              synchronizedMessages: undefined,
-            }),
-            addMessage: ({ messagesByTopic }, newMessage) => ({
-              messagesByTopic: { ...messagesByTopic, [newMessage.topic]: [newMessage] },
-              synchronizedMessages: undefined,
-            }),
-          },
-    [shouldSynchronize, memoizedTopics],
-  );
-  return PanelAPI.useMessageReducer({
-    topics,
-    ...reducers,
-  });
-}
-
 const AddTopic = ({
   onSelectTopic,
   topics,
@@ -273,7 +236,7 @@ function ImageView(props: Props) {
     customMarkerTopicOptions = NO_CUSTOM_OPTIONS,
   } = config;
   const theme = useTheme();
-  const { topics } = PanelAPI.useDataSourceInfo();
+  const { topics } = useDataSourceInfo();
   const cameraTopicFullObject = useMemo(
     () => getTopicsByTopicName(topics)[cameraTopic],
     [cameraTopic, topics],
@@ -282,7 +245,9 @@ function ImageView(props: Props) {
 
   // Namespaces represent marker topics based on the camera topic prefix (e.g. "/camera_front_medium")
   const { allCameraNamespaces, imageTopicsByNamespace, allImageTopics } = useMemo(() => {
-    const imageTopics = topics.filter(({ datatype }) => IMAGE_DATATYPES.includes(datatype));
+    const imageTopics = topics.filter(({ datatype }) =>
+      NORMALIZABLE_IMAGE_DATATYPES.includes(datatype),
+    );
     const topicsByNamespace = groupTopics(imageTopics);
     return {
       allImageTopics: imageTopics,
@@ -434,15 +399,7 @@ function ImageView(props: Props) {
     );
   }, [cameraTopic, classes.dropdown, imageTopicsByNamespace, onChangeCameraTopic]);
 
-  const cameraInfoTopic = getCameraInfoTopic(cameraTopic);
-  const cameraInfo = PanelAPI.useMessageReducer<CameraInfo | undefined>({
-    topics: cameraInfoTopic != undefined ? [cameraInfoTopic] : [],
-    restore: useCallback((value) => value, []),
-    addMessage: useCallback(
-      (_value: CameraInfo | undefined, { message }: MessageEvent<unknown>) => message as CameraInfo,
-      [],
-    ),
-  });
+  const cameraInfo = useCameraInfo(cameraTopic);
 
   const shouldSynchronize = config.synchronize && enabledMarkerTopics.length > 0;
   const imageAndMarkerTopics = useShallowMemo([cameraTopic, ...enabledMarkerTopics]);

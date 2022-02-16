@@ -17,7 +17,8 @@ import Rpc, { Channel } from "@foxglove/studio-base/util/Rpc";
 import { setupWorker } from "@foxglove/studio-base/util/RpcWorkerUtils";
 
 import { renderImage } from "./renderImage";
-import { flattenImageMarkers, idColorToIndex, RenderArgs, RenderDimensions } from "./util";
+import type { RenderArgs, RenderDimensions } from "./types";
+import { flattenImageMarkers, idColorToIndex } from "./util";
 
 type RenderState = {
   canvas: OffscreenCanvas;
@@ -69,7 +70,7 @@ class ImageCanvasWorker {
       // Potentially performance-sensitive; await can be expensive
       // eslint-disable-next-line @typescript-eslint/promise-function-async
       (args: RenderArgs & { id: string }): Promise<RenderDimensions | undefined> => {
-        const { id, geometry, imageMessage, imageMessageDatatype, rawMarkerData, options } = args;
+        const { id, geometry, imageMessage, rawMarkerData, options } = args;
 
         const render = this._renderStates[id];
         if (!render) {
@@ -96,7 +97,6 @@ class ImageCanvasWorker {
           geometry,
           hitmapCanvas: render.hitmap,
           imageMessage,
-          imageMessageDatatype,
           options,
           rawMarkerData,
         }).then((dimensions) => (render.dimensions = dimensions));

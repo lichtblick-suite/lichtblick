@@ -15,12 +15,14 @@ import { Story } from "@storybook/react";
 import { range, noop } from "lodash";
 import { useEffect, useMemo, useRef } from "react";
 
-import ImageView, { Config } from "@foxglove/studio-base/panels/ImageView";
-import ImageCanvas from "@foxglove/studio-base/panels/ImageView/ImageCanvas";
-import { renderImage } from "@foxglove/studio-base/panels/ImageView/renderImage";
+import { NormalizedImageMessage } from "@foxglove/studio-base/panels/ImageView/normalizeMessage";
 import { MessageEvent } from "@foxglove/studio-base/players/types";
 import { useReadySignal } from "@foxglove/studio-base/stories/ReadySignalContext";
 import { CameraInfo, ImageMarker, ImageMarkerType } from "@foxglove/studio-base/types/Messages";
+
+import ImageCanvas from "./ImageCanvas";
+import ImageView, { Config } from "./index";
+import { renderImage } from "./renderImage";
 
 const cameraInfo: CameraInfo = {
   width: 400,
@@ -41,9 +43,9 @@ const cameraInfo: CameraInfo = {
   },
 };
 
-const imageFormat = "image/png";
-
 function useImageMessage() {
+  const imageFormat = "image/png";
+
   const [imageData, setImageData] = React.useState<Uint8Array | undefined>();
   React.useEffect(() => {
     const canvas = document.createElement("canvas");
@@ -76,10 +78,24 @@ function useImageMessage() {
     return {
       topic: "/foo",
       receiveTime: { sec: 0, nsec: 0 },
-      message: { format: imageFormat, data: imageData },
+      message: { header: { stamp: { sec: 0, nsec: 0 } }, format: imageFormat, data: imageData },
       sizeInBytes: 0,
     };
   }, [imageData]);
+}
+
+function useNormalizedImageMessage(): NormalizedImageMessage | undefined {
+  const imageMessage = useImageMessage();
+  if (!imageMessage) {
+    return undefined;
+  }
+
+  return {
+    type: "compressed",
+    stamp: imageMessage.message.header.stamp,
+    format: imageMessage.message.format,
+    data: imageMessage.message.data,
+  };
 }
 
 function marker(
@@ -290,7 +306,7 @@ function RGBStory({ encoding }: { encoding: string }) {
       image={{
         topic: "/foo",
         receiveTime: { sec: 0, nsec: 0 },
-        message: { data, width, height, encoding },
+        message: { header: { stamp: { sec: 0, nsec: 0 } }, data, width, height, encoding },
         sizeInBytes: 0,
       }}
       rawMarkerData={noMarkersMarkerData}
@@ -333,7 +349,7 @@ function BayerStory({ encoding }: { encoding: string }) {
       image={{
         topic: "/foo",
         receiveTime: { sec: 0, nsec: 0 },
-        message: { data, width, height, encoding },
+        message: { header: { stamp: { sec: 0, nsec: 0 } }, data, width, height, encoding },
         sizeInBytes: 0,
       }}
       rawMarkerData={noMarkersMarkerData}
@@ -370,7 +386,14 @@ function Mono16Story({
       image={{
         topic: "/foo",
         receiveTime: { sec: 0, nsec: 0 },
-        message: { data, width, height, encoding: "16UC1", is_bigendian: bigEndian ? 1 : 0 },
+        message: {
+          header: { stamp: { sec: 0, nsec: 0 } },
+          data,
+          width,
+          height,
+          encoding: "16UC1",
+          is_bigendian: bigEndian ? 1 : 0,
+        },
         sizeInBytes: 0,
       }}
       rawMarkerData={noMarkersMarkerData}
@@ -453,7 +476,7 @@ MarkersOriginal.parameters = {
 };
 
 export const MarkersWithHitmap: Story = (_args) => {
-  const imageMessage = useImageMessage();
+  const imageMessage = useNormalizedImageMessage();
   const canvasRef = useRef<HTMLCanvasElement>(ReactNull);
   const hitmapRef = useRef<HTMLCanvasElement>(ReactNull);
 
@@ -481,8 +504,7 @@ export const MarkersWithHitmap: Story = (_args) => {
         viewport: { width, height },
         zoomMode: "fill",
       },
-      imageMessage: imageMessage?.message as any,
-      imageMessageDatatype: "sensor_msgs/Image",
+      imageMessage,
       rawMarkerData: {
         markers,
         cameraInfo,
@@ -502,7 +524,7 @@ export const MarkersWithHitmap: Story = (_args) => {
 export const MarkersWithRotations: Story = (_args) => {
   const width = 300;
   const height = 200;
-  const imageMessage = useImageMessage();
+  const imageMessage = useNormalizedImageMessage();
   const canvasRefs = useRef<Array<HTMLCanvasElement | ReactNull>>([]);
   const geometries = useMemo(
     () => [
@@ -537,8 +559,7 @@ export const MarkersWithRotations: Story = (_args) => {
           zoomMode: "fill",
           ...geometries[i],
         },
-        imageMessage: imageMessage?.message as any,
-        imageMessageDatatype: "sensor_msgs/Image",
+        imageMessage,
         rawMarkerData: {
           markers,
           cameraInfo,
@@ -678,7 +699,13 @@ export const ErrorState = (): JSX.Element => {
       image={{
         topic: "/foo",
         receiveTime: { sec: 0, nsec: 0 },
-        message: { data: new Uint8Array([]), width: 100, height: 50, encoding: "Foo" },
+        message: {
+          header: { stamp: { sec: 0, nsec: 0 } },
+          data: new Uint8Array([]),
+          width: 100,
+          height: 50,
+          encoding: "Foo",
+        },
         sizeInBytes: 0,
       }}
       rawMarkerData={noMarkersMarkerData}
@@ -723,7 +750,13 @@ export const CallsOnRenderFrameWhenRenderingFails = (): JSX.Element => {
           image={{
             topic: "/foo",
             receiveTime: { sec: 0, nsec: 0 },
-            message: { data: new Uint8Array([]), width: 100, height: 50, encoding: "Foo" },
+            message: {
+              header: { stamp: { sec: 0, nsec: 0 } },
+              data: new Uint8Array([]),
+              width: 100,
+              height: 50,
+              encoding: "Foo",
+            },
             sizeInBytes: 0,
           }}
           rawMarkerData={noMarkersMarkerData}

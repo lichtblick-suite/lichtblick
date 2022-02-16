@@ -11,19 +11,17 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { HitmapRenderContext } from "@foxglove/studio-base/panels/ImageView/HitmapRenderContext";
 import { MessageEvent } from "@foxglove/studio-base/players/types";
 import {
-  Image,
   ImageMarker,
   Color,
-  CompressedImage,
   ImageMarkerArray,
   ImageMarkerType,
   Point2D,
 } from "@foxglove/studio-base/types/Messages";
 import sendNotification from "@foxglove/studio-base/util/sendNotification";
 
+import { HitmapRenderContext } from "./HitmapRenderContext";
 import PinholeCameraModel from "./PinholeCameraModel";
 import {
   decodeYUV,
@@ -37,9 +35,8 @@ import {
   decodeMono8,
   decodeMono16,
 } from "./decodings";
-import {
-  buildMarkerData,
-  calculateZoomScale,
+import { NormalizedImageMessage } from "./normalizeMessage";
+import type {
   MarkerData,
   PanZoom,
   RenderableCanvas,
@@ -47,21 +44,8 @@ import {
   RenderDimensions,
   RenderGeometry,
   RenderOptions,
-} from "./util";
-
-const UNCOMPRESSED_IMAGE_DATATYPES = [
-  "sensor_msgs/Image",
-  "sensor_msgs/msg/Image",
-  "ros.sensor_msgs.Image",
-];
-export const IMAGE_DATATYPES = [
-  "sensor_msgs/Image",
-  "sensor_msgs/msg/Image",
-  "ros.sensor_msgs.Image",
-  "sensor_msgs/CompressedImage",
-  "sensor_msgs/msg/CompressedImage",
-  "ros.sensor_msgs.CompressedImage",
-];
+} from "./types";
+import { buildMarkerData, calculateZoomScale } from "./util";
 
 // Just globally keep track of if we've shown an error in rendering, since typically when you get
 // one error, you'd then get a whole bunch more, which is spammy.
@@ -77,13 +61,12 @@ export async function renderImage({
   hitmapCanvas,
   geometry,
   imageMessage,
-  imageMessageDatatype,
   rawMarkerData,
   options,
 }: RenderArgs & { canvas: RenderableCanvas; hitmapCanvas: RenderableCanvas | undefined }): Promise<
   RenderDimensions | undefined
 > {
-  if (!imageMessage || imageMessageDatatype == undefined) {
+  if (!imageMessage) {
     clearCanvas(canvas);
     return undefined;
   }
@@ -101,7 +84,7 @@ export async function renderImage({
   }
 
   try {
-    const bitmap = await decodeMessageToBitmap(imageMessage, imageMessageDatatype, options);
+    const bitmap = await decodeMessageToBitmap(imageMessage, options);
 
     if (options?.resizeCanvas === true) {
       canvas.width = bitmap.width;
@@ -136,76 +119,62 @@ function maybeUnrectifyPoint(cameraModel: PinholeCameraModel | undefined, point:
 // Potentially performance-sensitive; await can be expensive
 // eslint-disable-next-line @typescript-eslint/promise-function-async
 function decodeMessageToBitmap(
-  imageMessage: Partial<Image> | Partial<CompressedImage>,
-  datatype: string,
+  imageMessage: NormalizedImageMessage,
   options: RenderOptions = {},
 ): Promise<ImageBitmap> {
-  let image: ImageData | HTMLImageElement | Blob;
   const { data: rawData } = imageMessage;
   if (!(rawData instanceof Uint8Array)) {
     throw new Error("Message must have data of type Uint8Array");
   }
 
-  // In a Websocket context, we don't know whether the message is compressed or
-  // raw. Our subscription interface for the WebsocketPlayer can request
-  // compressed verisons of topics, in which case the message datatype can
-  // differ from the one recorded during initialization. So here we just check
-  // for properties consistent with either datatype, and render accordingly.
-  if (
-    UNCOMPRESSED_IMAGE_DATATYPES.includes(datatype) &&
-    "encoding" in imageMessage &&
-    imageMessage.encoding
-  ) {
-    const { is_bigendian, width, height, encoding } = imageMessage as Image;
-    image = new ImageData(width, height);
-    switch (encoding) {
-      case "yuv422":
-        decodeYUV(rawData as unknown as Int8Array, width, height, image.data);
-        break;
-      case "rgb8":
-        decodeRGB8(rawData, width, height, image.data);
-        break;
-      case "bgr8":
-      case "8UC3":
-        decodeBGR8(rawData, width, height, image.data);
-        break;
-      case "32FC1":
-        decodeFloat1c(rawData, width, height, is_bigendian, image.data);
-        break;
-      case "bayer_rggb8":
-        decodeBayerRGGB8(rawData, width, height, image.data);
-        break;
-      case "bayer_bggr8":
-        decodeBayerBGGR8(rawData, width, height, image.data);
-        break;
-      case "bayer_gbrg8":
-        decodeBayerGBRG8(rawData, width, height, image.data);
-        break;
-      case "bayer_grbg8":
-        decodeBayerGRBG8(rawData, width, height, image.data);
-        break;
-      case "mono8":
-      case "8UC1":
-        decodeMono8(rawData, width, height, image.data);
-        break;
-      case "mono16":
-      case "16UC1":
-        decodeMono16(rawData, width, height, is_bigendian, image.data, options);
-        break;
-      default:
-        throw new Error(`Unsupported encoding ${encoding}`);
+  switch (imageMessage.type) {
+    case "compressed": {
+      const image = new Blob([rawData], { type: `image/${imageMessage.format}` });
+      return self.createImageBitmap(image);
     }
-  } else if (
-    IMAGE_DATATYPES.includes(datatype) ||
-    ("format" in imageMessage && imageMessage.format)
-  ) {
-    const { format } = imageMessage as CompressedImage;
-    image = new Blob([rawData], { type: `image/${format}` });
-  } else {
-    throw new Error(`Message type is not usable for rendering images.`);
+    case "raw": {
+      const { is_bigendian, width, height, encoding } = imageMessage;
+      const image = new ImageData(width, height);
+      switch (encoding) {
+        case "yuv422":
+          decodeYUV(rawData as unknown as Int8Array, width, height, image.data);
+          break;
+        case "rgb8":
+          decodeRGB8(rawData, width, height, image.data);
+          break;
+        case "bgr8":
+        case "8UC3":
+          decodeBGR8(rawData, width, height, image.data);
+          break;
+        case "32FC1":
+          decodeFloat1c(rawData, width, height, is_bigendian, image.data);
+          break;
+        case "bayer_rggb8":
+          decodeBayerRGGB8(rawData, width, height, image.data);
+          break;
+        case "bayer_bggr8":
+          decodeBayerBGGR8(rawData, width, height, image.data);
+          break;
+        case "bayer_gbrg8":
+          decodeBayerGBRG8(rawData, width, height, image.data);
+          break;
+        case "bayer_grbg8":
+          decodeBayerGRBG8(rawData, width, height, image.data);
+          break;
+        case "mono8":
+        case "8UC1":
+          decodeMono8(rawData, width, height, image.data);
+          break;
+        case "mono16":
+        case "16UC1":
+          decodeMono16(rawData, width, height, is_bigendian, image.data, options);
+          break;
+        default:
+          throw new Error(`Unsupported encoding ${encoding}`);
+      }
+      return self.createImageBitmap(image);
+    }
   }
-
-  return self.createImageBitmap(image);
 }
 
 function clearCanvas(canvas?: RenderableCanvas) {

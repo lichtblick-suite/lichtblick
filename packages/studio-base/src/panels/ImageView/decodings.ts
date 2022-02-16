@@ -11,7 +11,7 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { RenderOptions } from "@foxglove/studio-base/panels/ImageView/util";
+import { RenderOptions } from "./types";
 
 export function decodeYUV(
   yuv: Int8Array,

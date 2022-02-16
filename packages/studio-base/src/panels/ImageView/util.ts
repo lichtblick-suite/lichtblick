@@ -12,72 +12,10 @@
 //   You may not use this file except in compliance with the License.
 
 import { Topic, MessageEvent } from "@foxglove/studio-base/players/types";
-import {
-  CameraInfo,
-  CompressedImage,
-  Image,
-  ImageMarker,
-  ImageMarkerArray,
-} from "@foxglove/studio-base/types/Messages";
+import { ImageMarker, ImageMarkerArray } from "@foxglove/studio-base/types/Messages";
 
 import PinholeCameraModel from "./PinholeCameraModel";
-
-export type PanZoom = { x: number; y: number; scale: number };
-
-export type ZoomMode = "fit" | "fill" | "other";
-
-export type RenderOptions = {
-  imageSmoothing?: boolean;
-  minValue?: number;
-  maxValue?: number;
-
-  // resize the canvas element to fit the bitmap
-  // default is false
-  resizeCanvas?: boolean;
-};
-
-export type RenderGeometry = {
-  flipVertical: boolean;
-  flipHorizontal: boolean;
-  panZoom: PanZoom;
-  rotation: number;
-  viewport: Dimensions;
-  zoomMode: ZoomMode;
-};
-
-export type RenderArgs = {
-  imageMessage?: Image | CompressedImage;
-  imageMessageDatatype?: string;
-  geometry: RenderGeometry;
-  options?: RenderOptions;
-  rawMarkerData: RawMarkerData;
-};
-
-export type Dimensions = { width: number; height: number };
-
-export type PixelData = {
-  color: { r: number; g: number; b: number; a: number };
-  position: { x: number; y: number };
-  markerIndex?: number;
-  marker?: ImageMarker;
-};
-
-export type RenderableCanvas = HTMLCanvasElement | OffscreenCanvas;
-
-export type RawMarkerData = {
-  markers: MessageEvent<unknown>[];
-  transformMarkers: boolean;
-  cameraInfo?: CameraInfo;
-};
-
-export type RenderDimensions = Dimensions & { transform: DOMMatrix };
-
-export type MarkerData = {
-  markers: MessageEvent<unknown>[];
-  originalWidth?: number; // undefined means no scaling is needed (use the image's size)
-  originalHeight?: number; // undefined means no scaling is needed (use the image's size)
-  cameraModel?: PinholeCameraModel; // undefined means no transformation is needed
-};
+import { Dimensions, MarkerData, RawMarkerData, ZoomMode } from "./types";
 
 export function calculateZoomScale(
   bitmap: Dimensions,

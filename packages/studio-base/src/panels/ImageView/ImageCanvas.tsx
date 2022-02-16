@@ -25,15 +25,14 @@ import { LegacyButton } from "@foxglove/studio-base/components/LegacyStyledCompo
 import { Item } from "@foxglove/studio-base/components/Menu";
 import { usePanelMousePresence } from "@foxglove/studio-base/hooks/usePanelMousePresence";
 import { MessageEvent, Topic } from "@foxglove/studio-base/players/types";
-import { CompressedImage, Image } from "@foxglove/studio-base/types/Messages";
 import Rpc from "@foxglove/studio-base/util/Rpc";
 import WebWorkerManager from "@foxglove/studio-base/util/WebWorkerManager";
 import { downloadFiles } from "@foxglove/studio-base/util/download";
-import { getTimestampForMessage } from "@foxglove/studio-base/util/time";
 
 import { Config, SaveImagePanelConfig } from "./index";
+import { normalizeImageMessage } from "./normalizeMessage";
 import { renderImage } from "./renderImage";
-import { Dimensions, PixelData, RawMarkerData, RenderableCanvas, RenderArgs } from "./util";
+import { Dimensions, PixelData, RawMarkerData, RenderableCanvas, RenderArgs } from "./types";
 
 type OnFinishRenderImage = () => void;
 
@@ -214,42 +213,12 @@ export default function ImageCanvas(props: Props): JSX.Element {
       // Potentially performance-sensitive; await can be expensive
       // eslint-disable-next-line @typescript-eslint/promise-function-async
       const workerRender: RenderImage = (args) => {
-        const {
-          geometry,
-          imageMessage,
-          imageMessageDatatype,
-          options,
-          rawMarkerData: rawMarkers,
-        } = args;
-
-        if (!imageMessage) {
-          return Promise.resolve(undefined);
-        }
-
-        // Create a payload based on whether the image is a compressed image (format field present)
-        // or a regular uncompressed image
-        const msg =
-          "format" in imageMessage
-            ? {
-                data: imageMessage.data,
-                format: imageMessage.format,
-                header: imageMessage.header,
-              }
-            : {
-                data: imageMessage.data,
-                encoding: imageMessage.encoding,
-                header: imageMessage.header,
-                height: imageMessage.height,
-                is_bigendian: imageMessage.is_bigendian,
-                step: imageMessage.step,
-                width: imageMessage.width,
-              };
+        const { geometry, imageMessage, options, rawMarkerData: rawMarkers } = args;
 
         return worker.send<Dimensions | undefined, RenderArgs & { id: string }>("renderImage", {
           geometry,
           id,
-          imageMessage: msg,
-          imageMessageDatatype,
+          imageMessage,
           options,
           rawMarkerData: JSON.parse(JSON.stringify(rawMarkers) ?? ""),
         });
@@ -299,6 +268,17 @@ export default function ImageCanvas(props: Props): JSX.Element {
     }
   }, [setContainer]);
 
+  const normalizedImageMessage = useMemo(() => {
+    // An image datatype is required to understand the fields in the message
+    const imageMessage = image?.message;
+    const imageDatatype = topic?.datatype;
+    if (imageMessage == undefined || !imageDatatype) {
+      return undefined;
+    }
+
+    return normalizeImageMessage(imageMessage, imageDatatype);
+  }, [image?.message, topic?.datatype]);
+
   const renderOptions = useMemo(() => {
     return {
       imageSmoothing: config.smooth,
@@ -329,11 +309,6 @@ export default function ImageCanvas(props: Props): JSX.Element {
       scale: scaleValue,
     };
 
-    const imageMessage = image?.message as Image | CompressedImage | undefined;
-    if (!imageMessage) {
-      return;
-    }
-
     const finishRender = onStartRenderImage();
     try {
       return await doRenderImage({
@@ -346,8 +321,7 @@ export default function ImageCanvas(props: Props): JSX.Element {
           viewport: { width: targetWidth, height: targetHeight },
           zoomMode: zoomMode ?? "fit",
         },
-        imageMessage,
-        imageMessageDatatype: topic?.datatype,
+        imageMessage: normalizedImageMessage,
         rawMarkerData,
         options: renderOptions,
       });
@@ -359,14 +333,13 @@ export default function ImageCanvas(props: Props): JSX.Element {
     devicePixelRatio,
     doRenderImage,
     height,
-    image?.message,
+    normalizedImageMessage,
     onStartRenderImage,
     panX,
     panY,
     rawMarkerData,
     renderOptions,
     scaleValue,
-    topic?.datatype,
     width,
     zoomMode,
   ]);
@@ -462,12 +435,7 @@ export default function ImageCanvas(props: Props): JSX.Element {
   const onDownloadImage = useCallback(() => {
     const canvas = canvasRef.current;
 
-    if (!canvas || !image || !topic || width == undefined || height == undefined) {
-      return;
-    }
-
-    const imageMessage = image.message as Image | CompressedImage | undefined;
-    if (!imageMessage) {
+    if (!canvas || !normalizedImageMessage || !topic || width == undefined || height == undefined) {
       return;
     }
 
@@ -484,8 +452,7 @@ export default function ImageCanvas(props: Props): JSX.Element {
         viewport: { width, height },
         zoomMode: "other",
       },
-      imageMessage,
-      imageMessageDatatype: topic.datatype,
+      imageMessage: normalizedImageMessage,
       rawMarkerData: { markers: [], transformMarkers: false },
       options: { ...renderOptions, resizeCanvas: true },
     }).then((dimensions) => {
@@ -504,14 +471,14 @@ export default function ImageCanvas(props: Props): JSX.Element {
         }
         // name the image the same name as the topic
         // note: the / characters in the file name will be replaced with _ by the browser
-        // remove the leading / so the image name doesn't start with _
-        const topicName = topic.name.slice(1);
-        const stamp = getTimestampForMessage(image.message) ?? { sec: 0, nsec: 0 };
+        // remove any leading / so the image name doesn't start with _
+        const topicName = topic.name.replace(/^\/+/, "");
+        const stamp = normalizedImageMessage.stamp;
         const fileName = `${topicName}-${stamp.sec}-${stamp.nsec}`;
         downloadFiles([{ blob, fileName }]);
       }, "image/png");
     });
-  }, [image, topic, width, height, config, renderOptions]);
+  }, [normalizedImageMessage, topic, width, height, config, renderOptions]);
 
   function onCanvasClick(event: MouseEvent<HTMLCanvasElement>) {
     const boundingRect = event.currentTarget.getBoundingClientRect();

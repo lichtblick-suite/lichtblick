@@ -11,9 +11,10 @@ import ExpandingToolbar, {
   ToolGroupFixedSizePane,
 } from "@foxglove/studio-base/components/ExpandingToolbar";
 import { usePanelMousePresence } from "@foxglove/studio-base/hooks/usePanelMousePresence";
-import { PixelData } from "@foxglove/studio-base/panels/ImageView/util";
 import { useJsonTreeTheme } from "@foxglove/studio-base/util/globalConstants";
 import { colors } from "@foxglove/studio-base/util/sharedStyleConstants";
+
+import { PixelData } from "./types";
 
 const style = {
   values: {
