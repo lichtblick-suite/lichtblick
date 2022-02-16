@@ -77,10 +77,6 @@ function maybePlainObject(rawVal: unknown) {
   return rawVal;
 }
 
-// TODO: FUTURE - Performance tests
-// TODO: FUTURE - Consider how to incorporate with existing hardcoded nodes (esp re: stories/testing)
-// 1 - Do we convert them all over to the new node format / Typescript? What about imported libraries?
-// 2 - Do we keep them in the old format for a while and support both formats?
 export default class UserNodePlayer implements Player {
   private _player: Player;
 

@@ -11,6 +11,7 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
+import { useTheme } from "@fluentui/react";
 import * as monacoApi from "monaco-editor/esm/vs/editor/editor.api";
 // @ts-expect-error StaticServices does not have type information in the monaco-editor package
 import { StaticServices } from "monaco-editor/esm/vs/editor/standalone/browser/standaloneServices";
@@ -20,12 +21,11 @@ import { useResizeDetector } from "react-resize-detector";
 
 import getPrettifiedCode from "@foxglove/studio-base/panels/NodePlayground/getPrettifiedCode";
 import { Script } from "@foxglove/studio-base/panels/NodePlayground/script";
-import vsStudioTheme from "@foxglove/studio-base/panels/NodePlayground/theme/vs-studio.json";
 import { getNodeProjectConfig } from "@foxglove/studio-base/players/UserNodePlayer/nodeTransformerWorker/typescript/projectConfig";
 import inScreenshotTests from "@foxglove/studio-base/stories/inScreenshotTests";
 import { mightActuallyBePartial } from "@foxglove/studio-base/util/mightActuallyBePartial";
 
-const VS_STUDIO_THEME = "vs-studio";
+import { themes } from "./theme";
 
 const codeEditorService = StaticServices.codeEditorService.get();
 
@@ -84,6 +84,8 @@ const Editor = ({
   const editorRef = React.useRef<CodeEditor>(ReactNull);
   const autoFormatOnSaveRef = React.useRef(autoFormatOnSave);
   autoFormatOnSaveRef.current = autoFormatOnSave;
+
+  const editorTheme = useTheme().isInverted ? "vs-studio-dark" : "vs-studio-light";
 
   React.useEffect(() => {
     const disposable = monacoApi.languages.typescript.typescriptDefaults.addExtraLib(
@@ -176,10 +178,10 @@ const Editor = ({
       if (!script) {
         return;
       }
-      monaco.editor.defineTheme(
-        VS_STUDIO_THEME,
-        vsStudioTheme as monacoApi.editor.IStandaloneThemeData,
-      );
+
+      for (const theme of themes) {
+        monaco.editor.defineTheme(theme.name, theme.theme);
+      }
 
       // Set eager model sync to enable intellisense between the user code and utility files
       monaco.languages.typescript.typescriptDefaults.setEagerModelSync(true);
@@ -298,7 +300,7 @@ const Editor = ({
     <div ref={sizeRef} style={{ width: "100%", height: "100%" }}>
       <MonacoEditor
         language="typescript"
-        theme={VS_STUDIO_THEME}
+        theme={editorTheme}
         editorWillMount={willMount}
         editorDidMount={didMount}
         options={options}

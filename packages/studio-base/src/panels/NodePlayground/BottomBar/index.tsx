@@ -61,6 +61,7 @@ function HeaderItem({ isOpen, numItems, text }: HeaderItemProps) {
 const BottomBar = ({ nodeId, isSaved, save, diagnostics, logs }: Props): ReactElement => {
   const [bottomBarDisplay, setBottomBarDisplay] = useState("closed");
   const [autoScroll, setAutoScroll] = useState(true);
+  const theme = useTheme();
 
   const { clearUserNodeLogs } = useUserNodeState();
   const scrollContainer = useRef<HTMLDivElement>(ReactNull);
@@ -74,7 +75,7 @@ const BottomBar = ({ nodeId, isSaved, save, diagnostics, logs }: Props): ReactEl
   }, [autoScroll, logs]);
 
   return (
-    <Stack flex="auto" bgcolor={colors.DARK1} position="relative">
+    <Stack flex="auto" bgcolor={theme.palette.neutralLighterAlt} position="relative">
       <Stack direction="row" flex="auto" alignItems="flex-start" padding={0.625} bottom={0}>
         <Stack
           direction="row"

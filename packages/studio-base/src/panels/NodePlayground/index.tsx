@@ -11,7 +11,7 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { Link, Spinner, SpinnerSize } from "@fluentui/react";
+import { useTheme, Link, Spinner, SpinnerSize } from "@fluentui/react";
 import ArrowLeftIcon from "@mdi/svg/svg/arrow-left.svg";
 import PlusIcon from "@mdi/svg/svg/plus.svg";
 import { Box, Stack } from "@mui/material";
@@ -48,20 +48,38 @@ const Editor = React.lazy(
   async () => await import("@foxglove/studio-base/panels/NodePlayground/Editor"),
 );
 
-const skeletonBody = `import { Input, Messages } from "ros";
+const skeletonBody = `\
+// The ./types module provides helper types for your Input events and messages.
+import { Input, Message } from "./types";
 
-type Output = {};
-type GlobalVariables = { id: number };
-
-export const inputs = [];
-export const output = "${DEFAULT_STUDIO_NODE_PREFIX}";
-
-// Populate 'Input' with a parameter to properly type your inputs, e.g. 'Input<"/your_input_topic">'
-const publisher = (message: Input<>, globalVars: GlobalVariables): Output => {
-  return {};
+// Your node can output well-known message types, any of your custom message types, or
+// complete custom message types.
+//
+// Use \`Message\` to access your data source types or well-known types:
+// type Twist = Message<"geometry_msgs/Twist">;
+//
+// Conventionally, it's common to make a _type alias_ for your node's output type
+// and use that type name as the return type for your node function.
+// Here we've called the type \`Output\` but you can pick any type name.
+type Output = {
+  hello: string;
 };
 
-export default publisher;`;
+// These are the topics your node "subscribes" to. Studio will invoke your node function
+// when any message is received on one of these topics.
+export const inputs = ["/input/topic"];
+
+// Any output your node produces is "published" to this topic. Published messages are only visible within Studio, not to your original data source.
+export const output = "/studio_node/output_topic";
+
+// This function is called with messages from your input topics.
+// The first argument is an event with the topic, receive time, and message.
+// Use the \`Input<...>\` helper to get the correct event type for your input topic messages.
+export default function node(event: Input<"/input/topic">): Output {
+  return {
+    hello: "world!",
+  };
+};`;
 
 type Props = {
   config: Config;
@@ -134,6 +152,7 @@ function NodePlayground(props: Props) {
   const { config, saveConfig } = props;
   const { autoFormatOnSave = false, selectedNodeId, editorForStorybook } = config;
 
+  const theme = useTheme();
   const [explorer, updateExplorer] = React.useState<Explorer>(undefined);
 
   const userNodes = useCurrentLayoutSelector(userNodeSelector);
@@ -161,11 +180,11 @@ function NodePlayground(props: Props) {
   const inputTitle = currentScript
     ? currentScript.filePath + (currentScript.readOnly ? " (READONLY)" : "")
     : "node name";
+
   const inputStyle = {
     borderRadius: 0,
     margin: 0,
-    backgroundColor: colors.DARK2,
-    color: colors.LIGHT2,
+    backgroundColor: theme.semanticColors.bodyBackground,
     padding: "4px 20px",
     width: `${inputTitle.length + 4}ch`, // Width based on character count of title + padding
   };
@@ -266,7 +285,7 @@ function NodePlayground(props: Props) {
           addNewNode={addNewNode}
         />
         <Stack flexGrow={1} height="100%" overflow="hidden">
-          <Stack direction="row" alignItems="center" bgcolor={colors.DARK1}>
+          <Stack direction="row" alignItems="center" bgcolor={theme.palette.neutralLighterAlt}>
             {scriptBackStack.length > 1 && (
               <Icon
                 size="large"
