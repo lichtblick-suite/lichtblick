@@ -149,7 +149,7 @@ export default class FoxgloveWebSocketPlayer implements Player {
             schemaEncoding = "jsonschema";
             schemaData = new TextEncoder().encode(channel.schema);
           } else if (channel.encoding === "protobuf") {
-            schemaEncoding = "proto";
+            schemaEncoding = "protobuf";
             schemaData = new Uint8Array(base64.length(channel.schema));
             if (base64.decode(channel.schema, schemaData, 0) !== schemaData.byteLength) {
               throw new Error(`Failed to decode base64 schema on channel ${channel.id}`);

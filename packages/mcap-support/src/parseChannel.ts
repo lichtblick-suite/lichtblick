@@ -42,16 +42,20 @@ function parsedDefinitionsToDatatypes(
 /**
  * Process a channel/schema and extract information that can be used to deserialize messages on the
  * channel, and schemas in the format expected by Studio's RosDatatypes.
+ *
+ * See:
+ * - https://github.com/foxglove/mcap/blob/main/docs/specification/well-known-message-encodings.md
+ * - https://github.com/foxglove/mcap/blob/main/docs/specification/well-known-schema-encodings.md
  */
 export function parseChannel(channel: Channel): ParsedChannel {
   if (channel.messageEncoding === "json") {
-    if (channel.schema?.encoding !== "protobuf") {
+    if (channel.schema?.encoding !== "jsonschema") {
       throw new Error(
         `Message encoding ${channel.messageEncoding} with ${
           channel.schema == undefined
             ? "no encoding"
             : `schema encoding '${channel.schema.encoding}'`
-        } is not supported (expected protobuf)`,
+        } is not supported (expected jsonschema)`,
       );
     }
     const textDecoder = new TextDecoder();
@@ -77,13 +81,13 @@ export function parseChannel(channel: Channel): ParsedChannel {
   }
 
   if (channel.messageEncoding === "protobuf") {
-    if (channel.schema?.encoding !== "proto") {
+    if (channel.schema?.encoding !== "protobuf") {
       throw new Error(
         `Message encoding ${channel.messageEncoding} with ${
           channel.schema == undefined
             ? "no encoding"
             : `schema encoding '${channel.schema.encoding}'`
-        } is not supported (expected proto)`,
+        } is not supported (expected protobuf)`,
       );
     }
     const root = protobufjs.Root.fromDescriptor(FileDescriptorSet.decode(channel.schema.data));
