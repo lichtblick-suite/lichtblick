@@ -17,7 +17,7 @@ import { MessageEvent, Topic } from "@foxglove/studio-base/players/types";
 import MockCurrentLayoutProvider from "@foxglove/studio-base/providers/CurrentLayoutProvider/MockCurrentLayoutProvider";
 import { RosDatatypes } from "@foxglove/studio-base/types/RosDatatypes";
 
-import { useLatestMessageDataItem } from "./useLatestMessageDataItem";
+import { useMessageDataItem } from "./useMessageDataItem";
 
 const topics = [{ name: "/topic", datatype: "datatype" }];
 const datatypes: RosDatatypes = new Map(
@@ -48,9 +48,9 @@ const fixtureMessages: MessageEvent<unknown>[] = [
   },
 ];
 
-describe("useLatestMessageDataItem", () => {
-  it("returns undefined by default", async () => {
-    const { result } = renderHook(({ path }) => useLatestMessageDataItem(path), {
+describe("useMessageDataItem", () => {
+  it("returns empty array by default", async () => {
+    const { result } = renderHook(({ path }) => useMessageDataItem(path), {
       initialProps: { path: "/topic.value" },
       wrapper({ children }) {
         return (
@@ -62,11 +62,11 @@ describe("useLatestMessageDataItem", () => {
         );
       },
     });
-    expect(result.all).toEqual([undefined]);
+    expect(result.all).toEqual([[]]);
   });
 
   it("uses the latest message", async () => {
-    const { result, rerender } = renderHook(({ path }) => useLatestMessageDataItem(path), {
+    const { result, rerender } = renderHook(({ path }) => useMessageDataItem(path), {
       initialProps: { path: "/topic.value", messages: [fixtureMessages[0]!] },
       wrapper({ children, messages }) {
         return (
@@ -79,20 +79,20 @@ describe("useLatestMessageDataItem", () => {
       },
     });
     expect(result.all).toEqual([
-      undefined,
-      { messageEvent: fixtureMessages[0], queriedData: [{ path: "/topic.value", value: 0 }] },
+      [],
+      [{ messageEvent: fixtureMessages[0], queriedData: [{ path: "/topic.value", value: 0 }] }],
     ]);
 
     rerender({ path: "/topic.value", messages: [fixtureMessages[1]!, fixtureMessages[2]!] });
     expect(result.all).toEqual([
-      undefined,
-      { messageEvent: fixtureMessages[0], queriedData: [{ path: "/topic.value", value: 0 }] },
-      { messageEvent: fixtureMessages[2], queriedData: [{ path: "/topic.value", value: 2 }] },
+      [],
+      [{ messageEvent: fixtureMessages[0], queriedData: [{ path: "/topic.value", value: 0 }] }],
+      [{ messageEvent: fixtureMessages[2], queriedData: [{ path: "/topic.value", value: 2 }] }],
     ]);
   });
 
   it("only keeps messages that match the path", async () => {
-    const { result } = renderHook(({ path }) => useLatestMessageDataItem(path), {
+    const { result } = renderHook(({ path }) => useMessageDataItem(path), {
       initialProps: { path: "/topic{value==1}.value" },
       wrapper({ children }) {
         return (
@@ -109,16 +109,18 @@ describe("useLatestMessageDataItem", () => {
       },
     });
     expect(result.all).toEqual([
-      undefined,
-      {
-        messageEvent: fixtureMessages[1],
-        queriedData: [{ path: "/topic{value==1}.value", value: 1 }],
-      },
+      [],
+      [
+        {
+          messageEvent: fixtureMessages[1],
+          queriedData: [{ path: "/topic{value==1}.value", value: 1 }],
+        },
+      ],
     ]);
   });
 
   it("changing the path gives the new queriedData from the message", async () => {
-    const { result, rerender } = renderHook(({ path }) => useLatestMessageDataItem(path), {
+    const { result, rerender } = renderHook(({ path }) => useMessageDataItem(path), {
       initialProps: { path: "/topic{value==1}.value" },
       wrapper({ children }) {
         return (
@@ -137,20 +139,24 @@ describe("useLatestMessageDataItem", () => {
 
     rerender({ path: "/topic{value==1}" });
     expect(result.all).toEqual([
-      undefined,
-      {
-        messageEvent: fixtureMessages[1],
-        queriedData: [{ path: "/topic{value==1}.value", value: 1 }],
-      },
-      {
-        messageEvent: fixtureMessages[1],
-        queriedData: [{ path: "/topic{value==1}", value: fixtureMessages[1]?.message }],
-      },
+      [],
+      [
+        {
+          messageEvent: fixtureMessages[1],
+          queriedData: [{ path: "/topic{value==1}.value", value: 1 }],
+        },
+      ],
+      [
+        {
+          messageEvent: fixtureMessages[1],
+          queriedData: [{ path: "/topic{value==1}", value: fixtureMessages[1]?.message }],
+        },
+      ],
     ]);
   });
 
   it("restores previously received message when topics and datatypes becomes available", async () => {
-    const { result, rerender } = renderHook(({ path }) => useLatestMessageDataItem(path), {
+    const { result, rerender } = renderHook(({ path }) => useMessageDataItem(path), {
       initialProps: {
         path: "/topic{value==2}.value",
         datatypes: new Map(),
@@ -171,15 +177,49 @@ describe("useLatestMessageDataItem", () => {
       },
     });
 
-    expect(result.all).toEqual([undefined, undefined]);
+    expect(result.all).toEqual([[], []]);
     rerender({ path: "/topic{value==2}.value", datatypes, topics });
     expect(result.all).toEqual([
-      undefined,
-      undefined,
-      {
-        messageEvent: fixtureMessages[2],
-        queriedData: [{ path: "/topic{value==2}.value", value: 2 }],
+      [],
+      [],
+      [
+        {
+          messageEvent: fixtureMessages[2],
+          queriedData: [{ path: "/topic{value==2}.value", value: 2 }],
+        },
+      ],
+    ]);
+  });
+
+  it("keeps a history", async () => {
+    const { result } = renderHook(({ path }) => useMessageDataItem(path, { historySize: 2 }), {
+      initialProps: { path: "/topic.value" },
+      wrapper({ children }) {
+        return (
+          <MockCurrentLayoutProvider>
+            <MockMessagePipelineProvider
+              messages={fixtureMessages}
+              topics={topics}
+              datatypes={datatypes}
+            >
+              {children}
+            </MockMessagePipelineProvider>
+          </MockCurrentLayoutProvider>
+        );
       },
+    });
+    expect(result.all).toEqual([
+      [],
+      [
+        {
+          messageEvent: fixtureMessages[1],
+          queriedData: [{ path: "/topic.value", value: 1 }],
+        },
+        {
+          messageEvent: fixtureMessages[2],
+          queriedData: [{ path: "/topic.value", value: 2 }],
+        },
+      ],
     ]);
   });
 });

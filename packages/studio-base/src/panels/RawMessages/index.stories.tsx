@@ -24,6 +24,7 @@ import {
   topicsToDiffFixture,
   topicsWithIdsToDiffFixture,
   multipleNumberMessagesFixture,
+  multipleMessagesFilter,
 } from "./fixture";
 
 const noDiffConfig = {
@@ -225,6 +226,22 @@ storiesOf("panels/RawMessages", module)
         <RawMessages
           overrideConfig={{
             topicPath: "/foo",
+            diffMethod: PREV_MSG_METHOD,
+            diffTopicPath: "",
+            diffEnabled: true,
+            showFullMessageForDiff: true,
+          }}
+          defaultExpandAll
+        />
+      </PanelSetup>
+    );
+  })
+  .add("diff consecutive messages with filter", () => {
+    return (
+      <PanelSetup fixture={multipleMessagesFilter} style={{ width: 380 }}>
+        <RawMessages
+          overrideConfig={{
+            topicPath: "/foo{type==2}",
             diffMethod: PREV_MSG_METHOD,
             diffTopicPath: "",
             diffEnabled: true,
