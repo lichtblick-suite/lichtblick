@@ -11,8 +11,9 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { ContextualMenu, IContextualMenuItem, makeStyles, useTheme } from "@fluentui/react";
+import { ContextualMenu, IContextualMenuItem, useTheme } from "@fluentui/react";
 import CogIcon from "@mdi/svg/svg/cog.svg";
+import { makeStyles } from "@mui/styles";
 import { useCallback, useContext, useMemo, useRef } from "react";
 import { MosaicContext, MosaicNode, MosaicWindowContext } from "react-mosaic-component";
 

@@ -10,8 +10,9 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { Link, makeStyles, Text, useTheme } from "@fluentui/react";
+import { Link, Text, useTheme } from "@fluentui/react";
 import { Box, Stack } from "@mui/material";
+import { makeStyles } from "@mui/styles";
 import { extname } from "path";
 import {
   useState,

@@ -11,13 +11,14 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { mergeStyleSets, useTheme } from "@fluentui/react";
+import { useTheme } from "@fluentui/react";
 import CheckboxBlankOutlineIcon from "@mdi/svg/svg/checkbox-blank-outline.svg";
 import CheckboxMarkedIcon from "@mdi/svg/svg/checkbox-marked.svg";
 import PlusMinusIcon from "@mdi/svg/svg/plus-minus.svg";
 import LessIcon from "@mdi/svg/svg/unfold-less-horizontal.svg";
 import MoreIcon from "@mdi/svg/svg/unfold-more-horizontal.svg";
 import { Stack } from "@mui/material";
+import { makeStyles } from "@mui/styles";
 // eslint-disable-next-line no-restricted-imports
 import { first, isEqual, get, last } from "lodash";
 import { useState, useCallback, useMemo } from "react";
@@ -106,7 +107,7 @@ function maybeDeepParse(val: unknown) {
   return val;
 }
 
-const classes = mergeStyleSets({
+const useStyles = makeStyles({
   iconWrapper: {
     display: "inline",
     paddingRight: 40, // To make it so the icons appear when you move the mouse somewhat close.
@@ -125,6 +126,7 @@ const classes = mergeStyleSets({
 
 function RawMessages(props: Props) {
   const theme = useTheme();
+  const classes = useStyles();
   const jsonTreeTheme = useJsonTreeTheme();
   const { config, saveConfig } = props;
   const { openSiblingPanel } = usePanelContext();
@@ -322,7 +324,7 @@ function RawMessages(props: Props) {
         }}
       </ReactHoverObserver>
     ),
-    [datatypes, getValueLabels, onTopicPathChange, openSiblingPanel],
+    [classes, datatypes, getValueLabels, onTopicPathChange, openSiblingPanel],
   );
 
   const renderSingleTopicOrDiffOutput = useCallback(() => {
@@ -559,7 +561,6 @@ function RawMessages(props: Props) {
       </Stack>
     );
   }, [
-    expandAll,
     topicPath,
     diffEnabled,
     diffMethod,
@@ -567,8 +568,10 @@ function RawMessages(props: Props) {
     diffItem,
     showFullMessageForDiff,
     topic,
+    classes,
     getItemString,
     jsonTreeTheme,
+    expandAll,
     expandedFields,
     diffTopicPath,
     saveConfig,
@@ -576,7 +579,7 @@ function RawMessages(props: Props) {
     valueRenderer,
     rootStructureItem,
     renderDiffLabel,
-    theme.isInverted,
+    theme,
   ]);
 
   return (

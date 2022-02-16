@@ -11,7 +11,8 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { makeStyles } from "@fluentui/react";
+import { Theme } from "@mui/material";
+import { makeStyles } from "@mui/styles";
 import { useContext, useRef } from "react";
 
 import { WorldviewReactContext, WorldviewContextType } from "@foxglove/regl-worldview";
@@ -27,25 +28,25 @@ type Stats = {
   getTotalBufferSize(): number;
 };
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles((theme: Theme) => ({
   root: {
     position: "absolute",
-    bottom: theme.spacing.m,
-    right: theme.spacing.m,
-    backgroundColor: theme.palette.neutralLight,
-    borderRadius: theme.effects.roundedCorner2,
+    bottom: theme.spacing(2),
+    right: theme.spacing(2),
+    backgroundColor: theme.palette.background.paper,
+    borderRadius: theme.shape.borderRadius,
     fontFamily: fonts.MONOSPACE,
-    fontSize: theme.fonts.tiny.fontSize,
-    padding: theme.spacing.s2,
+    fontSize: theme.typography.caption.fontSize,
+    padding: theme.spacing(0.5),
     pointerEvents: "none",
 
     td: {
-      padding: 2,
+      padding: theme.spacing(0.25),
       textAlign: "right",
     },
     th: {
-      padding: "2px 6px",
-      color: theme.semanticColors.menuHeader,
+      padding: theme.spacing(0.25, 0.75),
+      color: theme.palette.text.secondary,
       textTransform: "uppercase",
     },
   },

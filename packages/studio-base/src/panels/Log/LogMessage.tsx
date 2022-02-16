@@ -11,7 +11,7 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { mergeStyleSets } from "@fluentui/react";
+import { makeStyles } from "@mui/styles";
 import cx from "classnames";
 import { padStart } from "lodash";
 
@@ -23,7 +23,7 @@ import LevelToString from "./LevelToString";
 import Stamp from "./Stamp";
 import { NormalizedLogMessage } from "./types";
 
-const classes = mergeStyleSets({
+const useStyles = makeStyles({
   root: {
     // Subsequent lines are indented bu using left padding, so we undo the padding for the first line
     // with textIndent
@@ -44,6 +44,7 @@ export default React.memo(function LogMessage(props: {
 }) {
   const { value: msg, timestampFormat, timeZone } = props;
 
+  const classes = useStyles();
   const altStr = `${msg.file}:${msg.line}`;
   const strLevel = LevelToString(msg.level);
   const stamp = msg.stamp;

@@ -11,16 +11,16 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { mergeStyleSets } from "@fluentui/react";
 import ChevronDownIcon from "@mdi/svg/svg/chevron-down.svg";
 import ChevronUpIcon from "@mdi/svg/svg/chevron-up.svg";
+import { makeStyles } from "@mui/styles";
 import { ReactNode } from "react";
 
 import Icon from "@foxglove/studio-base/components/Icon";
 
 import Item from "./Item";
 
-const classes = mergeStyleSets({
+const useStyles = makeStyles({
   title: {
     lineHeight: "15px",
     flex: "1 1 auto",
@@ -47,6 +47,7 @@ export default function ExpandableMenu({
   disableOpenClose = false,
   dataTest,
 }: Props): JSX.Element {
+  const classes = useStyles();
   const rootItem = (
     <Item
       icon={icon}

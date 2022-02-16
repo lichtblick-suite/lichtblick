@@ -13,6 +13,10 @@ export const dark: PaletteOptions & CustomPaletteOptions = {
   mode: "dark",
   primary: { main: "#9480ed" },
   secondary: { main: "#b1b1b1" },
+  error: { main: "#f54966" },
+  warning: { main: "#eba800" },
+  success: { main: "#92c353" },
+  info: { main: "#29bee7" },
   text: {
     primary: "#e1e1e4",
     secondary: "#bbbac0",
@@ -44,6 +48,10 @@ export const light: PaletteOptions & CustomPaletteOptions = {
   mode: "light",
   primary: { main: "#6f3be8" },
   secondary: { main: "#808080" },
+  error: { main: "#db3553" },
+  warning: { main: "#eba800" },
+  success: { main: "#107c10" },
+  info: { main: "#1EA7FD" },
   background: {
     default: "#ffffff",
     paper: "#f4f4f5",

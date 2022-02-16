@@ -2,26 +2,19 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import {
-  CompoundButton,
-  Checkbox,
-  Text,
-  useTheme,
-  makeStyles,
-  IButtonStyles,
-} from "@fluentui/react";
-import { Stack } from "@mui/material";
+import { CompoundButton, Checkbox, Text, useTheme, IButtonStyles } from "@fluentui/react";
+import { Stack, Theme } from "@mui/material";
+import { makeStyles } from "@mui/styles";
 import { ReactElement, useState } from "react";
 
 import { AppSetting } from "@foxglove/studio-base/AppSetting";
 import { useAppConfigurationValue } from "@foxglove/studio-base/hooks";
 import { useSessionStorageValue } from "@foxglove/studio-base/hooks/useSessionStorageValue";
 
-const useStyles = makeStyles((theme) => ({
-  container: {},
+const useStyles = makeStyles((theme: Theme) => ({
   title: {
     textAlign: "center",
-    marginBottom: theme.spacing.m,
+    marginBottom: theme.spacing(2),
   },
 }));
 

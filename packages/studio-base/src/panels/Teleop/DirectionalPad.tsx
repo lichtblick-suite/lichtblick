@@ -2,7 +2,8 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { makeStyles } from "@fluentui/react";
+import { makeStyles as fluentMakeStyles } from "@fluentui/react";
+import { makeStyles } from "@mui/styles";
 import cx from "classnames";
 import { useCallback, useState } from "react";
 
@@ -22,17 +23,17 @@ const useStyles = makeStyles({
   },
 });
 
-const useButtonStyles = makeStyles(({ semanticColors }) => ({
+const useButtonStyles = fluentMakeStyles(({ semanticColors }) => ({
   background: {
     cursor: "pointer",
     fill: semanticColors.bodyBackgroundHovered,
     stroke: semanticColors.buttonBorder,
     strokeWidth: 0.5,
 
-    ":hover": {
+    "&:hover": {
       fill: semanticColors.bodyBackgroundChecked,
 
-      "+ path": {
+      "& + path": {
         fill: semanticColors.buttonTextHovered,
       },
     },
@@ -42,10 +43,10 @@ const useButtonStyles = makeStyles(({ semanticColors }) => ({
     strokeWidth: 0,
 
     fill: semanticColors.buttonBackgroundDisabled,
-    ":hover": {
+    "&:hover": {
       fill: semanticColors.buttonBackgroundDisabled,
 
-      "+ path": {
+      "& + path": {
         fill: semanticColors.bodyBackground,
       },
     },
@@ -54,8 +55,8 @@ const useButtonStyles = makeStyles(({ semanticColors }) => ({
     fill: `${semanticColors.primaryButtonBackground} !important`,
     stroke: `${semanticColors.primaryButtonBackgroundPressed} !important`,
 
-    ":hover": {
-      "+ path": {
+    "&:hover": {
+      "& + path": {
         fill: semanticColors.buttonTextHovered,
       },
     },
@@ -69,17 +70,17 @@ const useButtonStyles = makeStyles(({ semanticColors }) => ({
   },
 }));
 
-const useStopButtonStyles = makeStyles(({ fonts, semanticColors }) => ({
+const useStopButtonStyles = fluentMakeStyles(({ fonts, semanticColors }) => ({
   background: {
     cursor: "pointer",
     fill: semanticColors.errorBackground,
     stroke: semanticColors.errorText,
     strokeWidth: 0.5,
 
-    ":hover": {
+    "&:hover": {
       stroke: semanticColors.buttonText,
 
-      "+ text": {
+      "& + text": {
         fill: semanticColors.buttonText,
       },
     },
@@ -89,7 +90,7 @@ const useStopButtonStyles = makeStyles(({ fonts, semanticColors }) => ({
     opacity: 0.4,
     stroke: semanticColors.errorBackground,
 
-    ":hover": {
+    "&:hover": {
       stroke: `${semanticColors.errorBackground} !important`,
     },
   },

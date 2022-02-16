@@ -10,11 +10,12 @@
 //   This source code is licensed under the Apache License, Version 2.0,
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
-import { mergeStyles } from "@fluentui/react";
+
 import ChartBubbleIcon from "@mdi/svg/svg/chart-bubble.svg";
 import ChartLineVariantIcon from "@mdi/svg/svg/chart-line-variant.svg";
 import DotsHorizontalIcon from "@mdi/svg/svg/dots-horizontal.svg";
 import FilterIcon from "@mdi/svg/svg/filter.svg";
+import { makeStyles } from "@mui/styles";
 import { ReactElement, useCallback } from "react";
 
 import Icon from "@foxglove/studio-base/components/Icon";
@@ -34,9 +35,11 @@ type Props = {
   openSiblingPanel: OpenSiblingPanel;
 };
 
-const iconClassName = mergeStyles({
-  "> svg": {
-    verticalAlign: "top !important",
+const useStyles = makeStyles({
+  icon: {
+    "& > svg": {
+      verticalAlign: "top !important",
+    },
   },
 });
 
@@ -46,6 +49,7 @@ export default function RawMessagesIcons({
   onTopicPathChange,
   openSiblingPanel,
 }: Props): ReactElement {
+  const classes = useStyles();
   const { singleSlicePath, multiSlicePath, primitiveType, filterPath } = valueAction;
 
   const openPlotPanel = useCallback(
@@ -70,7 +74,7 @@ export default function RawMessagesIcons({
       {filterPath.length > 0 && (
         <Icon
           fade
-          className={iconClassName}
+          className={classes.icon}
           onClick={onFilter}
           tooltip="filter on this value"
           key="filter"
@@ -81,7 +85,7 @@ export default function RawMessagesIcons({
       {plotableRosTypes.includes(primitiveType) && (
         <Icon
           fade
-          className={iconClassName}
+          className={classes.icon}
           onClick={openPlotPanel(singleSlicePath)}
           tooltip="Line chart"
         >
@@ -91,7 +95,7 @@ export default function RawMessagesIcons({
       {plotableRosTypes.includes(primitiveType) && multiSlicePath !== singleSlicePath && (
         <Icon
           fade
-          className={iconClassName}
+          className={classes.icon}
           onClick={openPlotPanel(multiSlicePath)}
           tooltip="Scatter plot"
         >
@@ -101,7 +105,7 @@ export default function RawMessagesIcons({
       {transitionableRosTypes.includes(primitiveType) && multiSlicePath === singleSlicePath && (
         <Icon
           fade
-          className={iconClassName}
+          className={classes.icon}
           onClick={openStateTransitionsPanel(singleSlicePath)}
           tooltip="State Transitions"
         >

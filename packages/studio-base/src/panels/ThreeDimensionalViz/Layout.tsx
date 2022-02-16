@@ -11,7 +11,8 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { mergeStyleSets, useTheme } from "@fluentui/react";
+import { useTheme } from "@mui/material";
+import { makeStyles } from "@mui/styles";
 import { groupBy } from "lodash";
 import React, { useCallback, useEffect, useMemo, useReducer, useRef, useState } from "react";
 import { useResizeDetector } from "react-resize-detector";
@@ -143,7 +144,7 @@ export type ColorOverride = {
 };
 export type ColorOverrideByVariable = Record<GlobalVariableName, ColorOverride>;
 
-const styles = mergeStyleSets({
+const useStyles = makeStyles({
   container: {
     display: "flex",
     flex: "1 1 auto",
@@ -243,6 +244,7 @@ export default function Layout({
     ignoreColladaUpAxis = false,
   },
 }: Props): React.ReactElement {
+  const classes = useStyles();
   const [filterText, setFilterText] = useState(""); // Topic tree text for filtering to see certain topics.
   const containerRef = useRef<HTMLDivElement>(ReactNull);
   const { linkedGlobalVariables } = useLinkedGlobalVariables();
@@ -766,7 +768,7 @@ export default function Layout({
 
   const theme = useTheme();
   const canvasBackgroundColor = useThemeBackgroundColor
-    ? theme.isInverted
+    ? theme.palette.mode === "dark"
       ? "#000000"
       : "#303030"
     : customBackgroundColor;
@@ -780,7 +782,7 @@ export default function Layout({
           ref={containerRef}
           onClick={onControlsOverlayClick}
           tabIndex={-1}
-          className={styles.container}
+          className={classes.container}
           style={{ cursor: cursorType }}
           data-test="3dviz-layout"
         >
@@ -834,7 +836,7 @@ export default function Layout({
               )}
             </div>
           </div>
-          <div className={styles.world}>
+          <div className={classes.world}>
             <World
               key={`${callbackInputsRef.current.autoSyncCameraState ? "synced" : "not-synced"}`}
               canvasBackgroundColor={canvasBackgroundColor}

@@ -20,7 +20,7 @@ import {
   KeyboardArrowDown as KeyboardArrowDownIcon,
 } from "@mui/icons-material";
 import { Box, Button, IconButton, Stack, Theme, alpha } from "@mui/material";
-import { createStyles, makeStyles } from "@mui/styles";
+import { makeStyles } from "@mui/styles";
 import cx from "classnames";
 import { last } from "lodash";
 import { ComponentProps, useCallback, useMemo, useRef } from "react";
@@ -65,49 +65,47 @@ const shortXAxisLabel = (path: PlotXAxisVal): string => {
   throw new Error(`unknown path: ${path}`);
 };
 
-const useStyles = makeStyles((theme: Theme) =>
-  createStyles({
-    dropdown: {
-      backgroundColor: "transparent !important",
-      padding: "4px !important",
-    },
-    root: {
-      position: "relative",
-      color: theme.palette.text.secondary,
-      backgroundColor: theme.palette.background.paper,
-      borderTop: `${theme.palette.background.default} solid 1px`,
-    },
-    floatingRoot: {
-      cursor: "pointer",
-      position: "absolute",
-      left: theme.spacing(4),
-      top: theme.spacing(1),
-      bottom: theme.spacing(3),
-      maxWidth: `calc(100% - ${theme.spacing(8)})`,
-      backgroundColor: "transparent",
-      borderTop: "none",
-      pointerEvents: "none",
-      zIndex: theme.zIndex.mobileStepper,
-    },
-    legendToggle: {
-      cursor: "pointer",
-      userSelect: "none",
-      backgroundColor: theme.palette.background.paper,
-    },
-    floatingLegendToggle: {
-      marginRight: theme.spacing(0.25),
-      visibility: "hidden",
-      borderRadius: theme.shape.borderRadius,
-      backgroundColor: theme.palette.action.focus,
-      height: "inherit",
+const useStyles = makeStyles((theme: Theme) => ({
+  dropdown: {
+    backgroundColor: "transparent !important",
+    padding: "4px !important",
+  },
+  root: {
+    position: "relative",
+    color: theme.palette.text.secondary,
+    backgroundColor: theme.palette.background.paper,
+    borderTop: `${theme.palette.background.default} solid 1px`,
+  },
+  floatingRoot: {
+    cursor: "pointer",
+    position: "absolute",
+    left: theme.spacing(4),
+    top: theme.spacing(1),
+    bottom: theme.spacing(3),
+    maxWidth: `calc(100% - ${theme.spacing(8)})`,
+    backgroundColor: "transparent",
+    borderTop: "none",
+    pointerEvents: "none",
+    zIndex: theme.zIndex.mobileStepper,
+  },
+  legendToggle: {
+    cursor: "pointer",
+    userSelect: "none",
+    backgroundColor: theme.palette.background.paper,
+  },
+  floatingLegendToggle: {
+    marginRight: theme.spacing(0.25),
+    visibility: "hidden",
+    borderRadius: theme.shape.borderRadius,
+    backgroundColor: theme.palette.action.focus,
+    height: "inherit",
 
-      "&:hover": {
-        backgroundColor: theme.palette.background.paper,
-      },
-      ".mosaic-window:hover &": { visibility: "initial" },
+    "&:hover": {
+      backgroundColor: theme.palette.background.paper,
     },
-  }),
-);
+    ".mosaic-window:hover &": { visibility: "initial" },
+  },
+}));
 
 function SidebarWrapper(props: {
   position: "floating" | "top" | "left";

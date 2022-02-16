@@ -47,7 +47,6 @@ const useStyles = makeStyles((theme) => ({
       borderSpacing: 0,
     },
     "th, td": {
-      textAlign: "left",
       verticalAlign: "top",
     },
 

@@ -11,7 +11,7 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { mergeStyleSets } from "@fluentui/react";
+import { makeStyles } from "@mui/styles";
 import cx from "classnames";
 import { ComponentProps, CSSProperties, ReactNode, MouseEvent } from "react";
 
@@ -36,9 +36,9 @@ function makeIconStyle(size: number) {
   };
 }
 
-const classes = mergeStyleSets({
+const useStyles = makeStyles({
   icon: {
-    "> svg": {
+    "& > svg": {
       fill: "currentColor",
       width: "1em",
       height: "1em",
@@ -97,6 +97,7 @@ type Props = {
 };
 
 const Icon = (props: Props): JSX.Element => {
+  const classes = useStyles();
   const {
     children,
     size,
@@ -157,6 +158,7 @@ const Icon = (props: Props): JSX.Element => {
 Icon.displayName = "Icon";
 
 export const WrappedIcon = (props: Props): JSX.Element => {
+  const classes = useStyles();
   return (
     <Icon
       {...props}

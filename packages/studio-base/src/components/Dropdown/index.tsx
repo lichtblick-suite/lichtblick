@@ -11,8 +11,8 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { mergeStyleSets } from "@fluentui/react";
 import ChevronDownIcon from "@mdi/svg/svg/chevron-down.svg";
+import { makeStyles } from "@mui/styles";
 import cx from "classnames";
 import { ReactNode, CSSProperties, ReactElement, useState } from "react";
 
@@ -42,7 +42,7 @@ type Props<T> = {
   value?: T | T[];
 };
 
-const classes = mergeStyleSets({
+const useStyles = makeStyles({
   button: {
     display: "flex",
     maxWidth: "100%",
@@ -82,6 +82,7 @@ export default function Dropdown<T>({
   tooltip,
   value,
 }: Props<T>): ReactElement {
+  const classes = useStyles();
   const [isOpen, setIsOpen] = useState(false);
 
   function toggle() {

@@ -2,8 +2,8 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { mergeStyleSets } from "@fluentui/react";
 import ClipboardOutlineIcon from "@mdi/svg/svg/clipboard-outline.svg";
+import { makeStyles } from "@mui/styles";
 
 import Icon from "@foxglove/studio-base/components/Icon";
 import { OpenSiblingPanel } from "@foxglove/studio-base/types/panels";
@@ -14,7 +14,7 @@ import RawMessagesIcons from "./RawMessagesIcons";
 import { copyMessageReplacer } from "./copyMessageReplacer";
 import { ValueAction } from "./getValueActionForValue";
 
-const classes = mergeStyleSets({
+const useStyles = makeStyles({
   icon: {
     "> svg": {
       verticalAlign: "top !important",
@@ -47,6 +47,7 @@ export default function Value({
   onTopicPathChange: (arg0: string) => void;
   openSiblingPanel: OpenSiblingPanel;
 }): JSX.Element {
+  const classes = useStyles();
   return (
     <span>
       <HighlightedValue itemLabel={itemLabel} />

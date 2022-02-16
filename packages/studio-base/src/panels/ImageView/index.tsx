@@ -11,13 +11,14 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { makeStyles, useTheme } from "@fluentui/react";
+import { useTheme } from "@fluentui/react";
 import CheckboxBlankOutlineIcon from "@mdi/svg/svg/checkbox-blank-outline.svg";
 import CheckboxMarkedIcon from "@mdi/svg/svg/checkbox-marked.svg";
 import CloseIcon from "@mdi/svg/svg/close.svg";
 import MenuDownIcon from "@mdi/svg/svg/menu-down.svg";
 import WavesIcon from "@mdi/svg/svg/waves.svg";
-import { Stack } from "@mui/material";
+import { Stack, Theme } from "@mui/material";
+import { makeStyles } from "@mui/styles";
 import cx from "classnames";
 import { last, uniq } from "lodash";
 import { useEffect, useState, useMemo, useCallback } from "react";
@@ -83,7 +84,7 @@ type Props = {
   saveConfig: SaveImagePanelConfig;
 };
 
-const useStyles = makeStyles(() => ({
+const useStyles = makeStyles((theme: Theme) => ({
   controls: {
     display: "flex",
     flexWrap: "wrap",
@@ -92,7 +93,7 @@ const useStyles = makeStyles(() => ({
     overflow: "hidden",
 
     button: {
-      margin: "1px 4px 1px 0",
+      margin: theme.spacing(0.125, 0.5, 0.125, 0),
     },
   },
   bottomBar: {

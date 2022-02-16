@@ -28,7 +28,7 @@ import {
   SValue,
   SLabel,
 } from "@foxglove/studio-base/panels/ThreeDimensionalViz/Interactions/styling";
-import styles from "@foxglove/studio-base/panels/ThreeDimensionalViz/sharedStyles";
+import useSharedStyles from "@foxglove/studio-base/panels/ThreeDimensionalViz/sharedStyles";
 import { getNewCameraStateOnFollowChange } from "@foxglove/studio-base/panels/ThreeDimensionalViz/threeDimensionalVizUtils";
 import {
   FollowMode,
@@ -70,6 +70,7 @@ export type CameraInfoProps = {
 } & CameraInfoPropsWithoutCameraState;
 
 function CameraStateInfo({ cameraState, onAlignXYAxis }: CameraStateInfoProps) {
+  const classes = useSharedStyles();
   return (
     <>
       {(Object.keys(cameraState) as (keyof CameraState)[])
@@ -90,7 +91,7 @@ function CameraStateInfo({ cameraState, onAlignXYAxis }: CameraStateInfoProps) {
             <SLabel width={LABEL_WIDTH}>{key}:</SLabel> <SValue>{val}</SValue>
             {key === "thetaOffset" && (
               <Button
-                className={styles.button}
+                className={classes.button}
                 onClick={onAlignXYAxis}
                 tooltip="Align XY axis by reseting thetaOffset to 0. Will no longer follow orientation."
               >
@@ -115,6 +116,7 @@ export default function CameraInfo({
   defaultSelectedTab,
 }: CameraInfoProps): JSX.Element {
   const theme = useTheme();
+  const classes = useSharedStyles();
   const [selectedTab, setSelectedTab] = React.useState(defaultSelectedTab);
   const { updatePanelConfigs, saveConfig } = usePanelContext();
   const [edit, setEdit] = React.useState<boolean>(false);
@@ -155,7 +157,7 @@ export default function CameraInfo({
         <>
           <Stack direction="row-reverse" paddingTop={0.5} paddingRight={0.5}>
             <Button
-              className={styles.button}
+              className={classes.button}
               tooltip="Copy cameraState"
               small
               onClick={() => {
@@ -165,7 +167,7 @@ export default function CameraInfo({
               Copy
             </Button>
             <Button
-              className={styles.button}
+              className={classes.button}
               disabled={isPlaying}
               tooltip={
                 isPlaying
@@ -177,7 +179,7 @@ export default function CameraInfo({
               {edit ? "Done" : "Edit"}
             </Button>
             <Button
-              className={styles.button}
+              className={classes.button}
               tooltip="Sync camera state across all 3D panels"
               onClick={syncCameraState}
             >

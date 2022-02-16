@@ -16,11 +16,11 @@ import {
   IDropdownOption,
   IDropdownStyles,
   ISelectableOption,
-  makeStyles,
   useTheme,
 } from "@fluentui/react";
 import PinIcon from "@mdi/svg/svg/pin.svg";
-import { Stack } from "@mui/material";
+import { Stack, Theme } from "@mui/material";
+import { makeStyles } from "@mui/styles";
 import cx from "classnames";
 import { compact } from "lodash";
 import { useCallback, useMemo } from "react";
@@ -58,18 +58,18 @@ type NodeRowProps = {
   onClickPin: (info: DiagnosticInfo) => void;
 };
 
-const useStyles = makeStyles((theme) => ({
-  ok: { color: theme.semanticColors.successIcon },
-  warn: { color: theme.semanticColors.warningBackground },
-  error: { color: theme.semanticColors.errorBackground },
-  stale: { color: theme.semanticColors.infoIcon },
+const useStyles = makeStyles((theme: Theme) => ({
+  ok: { color: theme.palette.success.main },
+  warn: { color: theme.palette.warning.main },
+  error: { color: theme.palette.error.main },
+  stale: { color: theme.palette.text.secondary },
   pinIcon: {
     marginRight: 4,
     marginLeft: 4,
     verticalAlign: "middle",
     visibility: "hidden",
 
-    svg: {
+    "& svg": {
       fontSize: 16,
       position: "relative",
       top: -1,
@@ -91,11 +91,10 @@ const useStyles = makeStyles((theme) => ({
     textOverflow: "ellipsis",
 
     "&:hover": {
-      backgroundColor: theme.semanticColors.listItemBackgroundHovered,
-
-      "> .icon": {
-        visibility: "visible",
-      },
+      backgroundColor: theme.palette.action.hover,
+    },
+    "&:hover .icon": {
+      visibility: "visible",
     },
   },
 }));
@@ -165,8 +164,8 @@ function DiagnosticSummary(props: Props): JSX.Element {
         },
         caretDownWrapper: {
           top: 0,
-          lineHeight: 24,
-          height: 24,
+          lineHeight: 18,
+          height: 18,
         },
         title: {
           backgroundColor: "transparent",
