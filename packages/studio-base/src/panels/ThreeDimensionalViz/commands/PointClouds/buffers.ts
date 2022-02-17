@@ -132,13 +132,35 @@ export function createPositionBuffer({
   stride: number;
 }): VertexBuffer {
   const { x: xField, y: yField, z: zField } = fields;
-  if (!xField || !yField || !zField) {
-    throw new Error("Cannot create a position buffer without x, y, and z fields");
+  if (!xField?.reader) {
+    throw new Error(
+      `${
+        xField ? `Unsupported datatype ${xField.datatype} for` : "Missing"
+      } x field in point cloud. Point clouds cannot be displayed without readable x, y, and z fields.`,
+    );
+  }
+  if (!yField?.reader) {
+    throw new Error(
+      `${
+        yField ? `Unsupported datatype ${yField.datatype} for` : "Missing"
+      } y field in point cloud. Point clouds cannot be displayed without readable x, y, and z fields.`,
+    );
+  }
+  if (!zField?.reader) {
+    throw new Error(
+      `${
+        zField ? `Unsupported datatype ${zField.datatype} for` : "Missing"
+      } z field in point cloud. Point clouds cannot be displayed without readable x, y, and z fields.`,
+    );
   }
 
   // Check if all position components are stored next to each other
   const positionIsValid =
-    yField.offset - xField.offset === FLOAT_SIZE && zField.offset - yField.offset === FLOAT_SIZE;
+    xField.datatype === DATATYPE.FLOAT32 &&
+    yField.datatype === DATATYPE.FLOAT32 &&
+    zField.datatype === DATATYPE.FLOAT32 &&
+    yField.offset - xField.offset === FLOAT_SIZE &&
+    zField.offset - yField.offset === FLOAT_SIZE;
   if (positionIsValid && hasValidStride(stride)) {
     // Create a VBO for positions by recasting the data array into a float array
     // This will give us the correct values for (x,y,z) tuples.
