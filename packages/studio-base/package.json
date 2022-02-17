@@ -48,7 +48,7 @@
     "@foxglove/rosmsg-msgs-foxglove": "2.0.3",
     "@foxglove/rosmsg-serialization": "1.3.0",
     "@foxglove/rosmsg2-serialization": "1.0.5",
-    "@foxglove/rostime": "1.1.1",
+    "@foxglove/rostime": "1.1.2",
     "@foxglove/studio": "workspace:*",
     "@foxglove/ulog": "2.1.2",
     "@foxglove/velodyne-cloud": "1.0.0",
