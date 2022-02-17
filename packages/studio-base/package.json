@@ -40,7 +40,7 @@
     "@foxglove/mcap-support": "workspace:*",
     "@foxglove/regl-worldview": "2.4.0",
     "@foxglove/ros1": "1.4.0",
-    "@foxglove/ros2": "3.1.0",
+    "@foxglove/ros2": "3.1.1",
     "@foxglove/rosbag": "0.1.2",
     "@foxglove/rosbag2-web": "4.0.3",
     "@foxglove/rosmsg": "3.0.0",
