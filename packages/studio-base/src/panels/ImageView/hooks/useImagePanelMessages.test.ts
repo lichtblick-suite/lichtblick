@@ -5,7 +5,7 @@
 import { AVLTree } from "@foxglove/avl";
 import { Time, compare as compareTime, toNanoSec } from "@foxglove/rostime";
 
-import { FoxgloveCompressedImageMessage, FoxgloveImageAnnotationsMessage } from "./types";
+import { FoxgloveCompressedImageMessage, FoxgloveImageAnnotationsMessage } from "../types";
 import { synchronizedAddMessage, SynchronizationItem } from "./useImagePanelMessages";
 
 function EmptyState() {

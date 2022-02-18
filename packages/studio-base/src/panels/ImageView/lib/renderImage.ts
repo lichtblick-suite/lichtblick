@@ -14,6 +14,20 @@
 import { Color, Point2D } from "@foxglove/studio-base/types/Messages";
 import sendNotification from "@foxglove/studio-base/util/sendNotification";
 
+import type {
+  MarkerData,
+  PanZoom,
+  RenderableCanvas,
+  RenderArgs,
+  RenderDimensions,
+  RenderGeometry,
+  RenderOptions,
+  Annotation,
+  CircleAnnotation,
+  PointsAnnotation,
+  TextAnnotation,
+  NormalizedImageMessage,
+} from "../types";
 import { HitmapRenderContext } from "./HitmapRenderContext";
 import PinholeCameraModel from "./PinholeCameraModel";
 import {
@@ -28,20 +42,6 @@ import {
   decodeMono8,
   decodeMono16,
 } from "./decodings";
-import type {
-  MarkerData,
-  PanZoom,
-  RenderableCanvas,
-  RenderArgs,
-  RenderDimensions,
-  RenderGeometry,
-  RenderOptions,
-  Annotation,
-  CircleAnnotation,
-  PointsAnnotation,
-  TextAnnotation,
-  NormalizedImageMessage,
-} from "./types";
 import { buildMarkerData, calculateZoomScale } from "./util";
 
 // Just globally keep track of if we've shown an error in rendering, since typically when you get

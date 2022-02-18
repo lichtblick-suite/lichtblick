@@ -10,7 +10,7 @@ import {
   ImageMarkerType,
 } from "@foxglove/studio-base/types/Messages";
 
-import type { FoxgloveImageAnnotationsMessage, Annotation, PointsAnnotation } from "./types";
+import type { FoxgloveImageAnnotationsMessage, Annotation, PointsAnnotation } from "../types";
 
 function foxglovePointTypeToStyle(type: number): PointsAnnotation["style"] | undefined {
   switch (type) {

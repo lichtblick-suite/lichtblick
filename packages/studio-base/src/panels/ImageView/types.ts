@@ -4,8 +4,33 @@
 
 import { Time } from "@foxglove/studio";
 import type { CameraInfo, Color, ImageMarker, Point2D } from "@foxglove/studio-base/types/Messages";
+import type { SaveConfig } from "@foxglove/studio-base/types/panels";
 
-import type PinholeCameraModel from "./PinholeCameraModel";
+import type PinholeCameraModel from "./lib/PinholeCameraModel";
+
+export type DefaultConfig = {
+  cameraTopic: string;
+  enabledMarkerTopics: string[];
+  customMarkerTopicOptions?: string[];
+  synchronize: boolean;
+};
+
+export type Config = DefaultConfig & {
+  flipHorizontal?: boolean;
+  flipVertical?: boolean;
+  maxValue?: number;
+  minValue?: number;
+  mode?: ZoomMode;
+  pan?: { x: number; y: number };
+  rotation?: number;
+  saveStoryConfig?: () => void;
+  smooth?: boolean;
+  transformMarkers: boolean;
+  zoom?: number;
+  zoomPercentage?: number;
+};
+
+export type SaveImagePanelConfig = SaveConfig<Config>;
 
 export type PanZoom = { x: number; y: number; scale: number };
 

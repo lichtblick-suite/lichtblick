@@ -32,7 +32,7 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-export default function ImageEmptyState(props: Props): JSX.Element {
+export function ImageEmptyState(props: Props): JSX.Element {
   const { cameraTopic, markerTopics, shouldSynchronize } = props;
 
   const classes = useStyles();

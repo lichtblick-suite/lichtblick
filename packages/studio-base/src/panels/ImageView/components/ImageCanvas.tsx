@@ -29,8 +29,8 @@ import Rpc from "@foxglove/studio-base/util/Rpc";
 import WebWorkerManager from "@foxglove/studio-base/util/WebWorkerManager";
 import { downloadFiles } from "@foxglove/studio-base/util/download";
 
-import { Config, SaveImagePanelConfig } from "./index";
-import { renderImage } from "./renderImage";
+import { renderImage } from "../lib/renderImage";
+import { Config, SaveImagePanelConfig } from "../types";
 import type {
   Dimensions,
   PixelData,
@@ -38,7 +38,7 @@ import type {
   RenderableCanvas,
   RenderArgs,
   NormalizedImageMessage,
-} from "./types";
+} from "../types";
 
 type OnFinishRenderImage = () => void;
 
@@ -150,7 +150,7 @@ type RenderImage = (
 const supportsOffscreenCanvas =
   typeof HTMLCanvasElement.prototype.transferControlToOffscreen === "function";
 
-export default function ImageCanvas(props: Props): JSX.Element {
+export function ImageCanvas(props: Props): JSX.Element {
   const {
     rawMarkerData,
     topic,

@@ -13,8 +13,8 @@
 
 import { Topic } from "@foxglove/studio-base/players/types";
 
+import { Dimensions, MarkerData, RawMarkerData, ZoomMode } from "../types";
 import PinholeCameraModel from "./PinholeCameraModel";
-import { Dimensions, MarkerData, RawMarkerData, ZoomMode } from "./types";
 
 export function calculateZoomScale(
   bitmap: Dimensions,

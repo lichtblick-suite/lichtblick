@@ -8,7 +8,7 @@ import { MessageEvent } from "@foxglove/studio";
 import { useMessageReducer } from "@foxglove/studio-base/PanelAPI";
 import { CameraInfo } from "@foxglove/studio-base/types/Messages";
 
-import { getCameraInfoTopic } from "./util";
+import { getCameraInfoTopic } from "../lib/util";
 
 export function useCameraInfo(cameraTopic: string): CameraInfo | undefined {
   const cameraInfoTopic = getCameraInfoTopic(cameraTopic);

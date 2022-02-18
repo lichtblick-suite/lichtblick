@@ -17,9 +17,10 @@ import { noop } from "lodash";
 import { useReadySignal } from "@foxglove/studio-base/stories/ReadySignalContext";
 import { CameraInfo } from "@foxglove/studio-base/types/Messages";
 
-import ImageCanvas from "./ImageCanvas";
-import ImageView, { Config } from "./index";
-import { useCompressedImage, annotations } from "./storySupport";
+import ImageView from "../index";
+import { useCompressedImage, annotations } from "../storySupport";
+import { Config } from "../types";
+import { ImageCanvas } from "./ImageCanvas";
 
 const cameraInfo: CameraInfo = {
   width: 400,

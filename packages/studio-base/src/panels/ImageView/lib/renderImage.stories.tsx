@@ -5,8 +5,8 @@
 import { Story } from "@storybook/react";
 import { useEffect, useMemo, useRef } from "react";
 
+import { useCompressedImage, cameraInfo, annotations } from "../storySupport";
 import { renderImage } from "./renderImage";
-import { useCompressedImage, cameraInfo, annotations } from "./storySupport";
 
 export default {
   title: "panels/ImageView/renderImage",

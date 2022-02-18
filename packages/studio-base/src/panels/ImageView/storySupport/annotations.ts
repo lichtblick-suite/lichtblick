@@ -4,7 +4,7 @@
 
 import { range } from "lodash";
 
-import { normalizeAnnotations } from "@foxglove/studio-base/panels/ImageView/normalizeAnnotations";
+import { normalizeAnnotations } from "@foxglove/studio-base/panels/ImageView/lib/normalizeAnnotations";
 import { ImageMarker, ImageMarkerType } from "@foxglove/studio-base/types/Messages";
 
 function marker(type: ImageMarkerType, props: Partial<ImageMarker> = {}): ImageMarker {

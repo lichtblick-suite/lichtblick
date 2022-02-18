@@ -35,47 +35,24 @@ import { useMessagePipeline } from "@foxglove/studio-base/components/MessagePipe
 import Panel from "@foxglove/studio-base/components/Panel";
 import PanelToolbar from "@foxglove/studio-base/components/PanelToolbar";
 import inScreenshotTests from "@foxglove/studio-base/stories/inScreenshotTests";
-import { PanelConfigSchema, SaveConfig } from "@foxglove/studio-base/types/panels";
+import { PanelConfigSchema } from "@foxglove/studio-base/types/panels";
 import { mightActuallyBePartial } from "@foxglove/studio-base/util/mightActuallyBePartial";
 import naturalSort from "@foxglove/studio-base/util/naturalSort";
 import { getTopicsByTopicName } from "@foxglove/studio-base/util/selectors";
 import { formatTimeRaw } from "@foxglove/studio-base/util/time";
 import toggle from "@foxglove/studio-base/util/toggle";
 
-import ImageCanvas from "./ImageCanvas";
-import ImageEmptyState from "./ImageEmptyState";
-import { Toolbar } from "./Toolbar";
-import { TopicTimestamp } from "./TopicTimestamp";
+import { ImageCanvas, ImageEmptyState, Toolbar, TopicTimestamp } from "./components";
+import { useCameraInfo, ANNOTATION_DATATYPES, useImagePanelMessages } from "./hooks";
 import helpContent from "./index.help.md";
-import { NORMALIZABLE_IMAGE_DATATYPES } from "./normalizeMessage";
-import type { PixelData, ZoomMode } from "./types";
-import { useCameraInfo } from "./useCameraInfo";
-import { ANNOTATION_DATATYPES, useImagePanelMessages } from "./useImagePanelMessages";
-import { getCameraNamespace, getRelatedMarkerTopics, getMarkerOptions, groupTopics } from "./util";
-
-type DefaultConfig = {
-  cameraTopic: string;
-  enabledMarkerTopics: string[];
-  customMarkerTopicOptions?: string[];
-  synchronize: boolean;
-};
-
-export type Config = DefaultConfig & {
-  flipHorizontal?: boolean;
-  flipVertical?: boolean;
-  maxValue?: number;
-  minValue?: number;
-  mode?: ZoomMode;
-  pan?: { x: number; y: number };
-  rotation?: number;
-  saveStoryConfig?: () => void;
-  smooth?: boolean;
-  transformMarkers: boolean;
-  zoom?: number;
-  zoomPercentage?: number;
-};
-
-export type SaveImagePanelConfig = SaveConfig<Config>;
+import { NORMALIZABLE_IMAGE_DATATYPES } from "./lib/normalizeMessage";
+import {
+  getCameraNamespace,
+  getRelatedMarkerTopics,
+  getMarkerOptions,
+  groupTopics,
+} from "./lib/util";
+import type { Config, SaveImagePanelConfig, PixelData } from "./types";
 
 type Props = {
   config: Config;

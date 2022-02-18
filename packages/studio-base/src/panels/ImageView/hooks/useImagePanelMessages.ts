@@ -17,9 +17,9 @@ import {
 import { MessageEvent } from "@foxglove/studio";
 import { useMessageReducer } from "@foxglove/studio-base/PanelAPI";
 
-import { normalizeAnnotations } from "./normalizeAnnotations";
-import { normalizeImageMessage } from "./normalizeMessage";
-import { Annotation, NormalizedImageMessage } from "./types";
+import { normalizeAnnotations } from "../lib/normalizeAnnotations";
+import { normalizeImageMessage } from "../lib/normalizeMessage";
+import { Annotation, NormalizedImageMessage } from "../types";
 import { useDatatypesByTopic } from "./useDatatypesByTopic";
 
 export type ImagePanelMessages = {

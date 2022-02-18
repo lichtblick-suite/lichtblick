@@ -9,7 +9,7 @@ import {
   NormalizedImageMessage,
   FoxgloveRawImageMessage,
   FoxgloveCompressedImageMessage,
-} from "./types";
+} from "../types";
 
 // Supported datatypes for normalization
 export const NORMALIZABLE_IMAGE_DATATYPES = [
