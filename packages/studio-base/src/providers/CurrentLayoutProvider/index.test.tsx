@@ -124,7 +124,7 @@ describe("CurrentLayoutProvider", () => {
     const result = renderTest({ mockLayoutManager, mockUserProfile });
     await act(() => layoutStorageGetCalled);
 
-    expect(mockLayoutManager.getLayout.mock.calls).toEqual([["example"]]);
+    expect(mockLayoutManager.getLayout.mock.calls).toEqual([["example"], ["example"]]);
     expect(
       result.all.map((item) => (item instanceof Error ? undefined : item.layoutState)),
     ).toEqual([

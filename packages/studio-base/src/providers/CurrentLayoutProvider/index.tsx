@@ -250,11 +250,13 @@ export default function CurrentLayoutProvider({
       return;
     }
 
+    // Retreive the selected layout id from the user's profile. If there's no layout specified
+    // or we can't load it then save and select a default layout.
     const { currentLayoutId } = await getUserProfile();
-    await setSelectedLayoutId(currentLayoutId, { saveToProfile: false });
-
-    // If there's no layout selected then save and select a default layout.
-    if (currentLayoutId == undefined && layoutStateRef.current.selectedLayout == undefined) {
+    const layout = currentLayoutId ? await layoutManager.getLayout(currentLayoutId) : undefined;
+    if (layout) {
+      await setSelectedLayoutId(currentLayoutId, { saveToProfile: false });
+    } else {
       const newLayout = await layoutManager.saveNewLayout({
         name: "Default",
         data: defaultLayout,
