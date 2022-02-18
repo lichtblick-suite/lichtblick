@@ -11,20 +11,18 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { MessageEvent } from "@foxglove/studio-base/players/types";
-import { ImageMarker, ImageMarkerArray } from "@foxglove/studio-base/types/Messages";
 import Rpc, { Channel } from "@foxglove/studio-base/util/Rpc";
 import { setupWorker } from "@foxglove/studio-base/util/RpcWorkerUtils";
 
 import { renderImage } from "./renderImage";
-import type { RenderArgs, RenderDimensions } from "./types";
-import { flattenImageMarkers, idColorToIndex } from "./util";
+import type { RenderArgs, RenderDimensions, Annotation } from "./types";
+import { idColorToIndex } from "./util";
 
 type RenderState = {
   canvas: OffscreenCanvas;
   dimensions?: RenderDimensions;
   hitmap: OffscreenCanvas;
-  markers: ImageMarker[];
+  markers: Annotation[];
 };
 
 class ImageCanvasWorker {
@@ -87,10 +85,7 @@ class ImageCanvasWorker {
           render.hitmap.height = geometry.viewport.height;
         }
 
-        // Flatten markers because we need to be able to index into them for hitmapping.
-        render.markers = flattenImageMarkers(
-          rawMarkerData.markers as MessageEvent<ImageMarker | ImageMarkerArray>[],
-        );
+        render.markers = rawMarkerData.markers;
 
         return renderImage({
           canvas: render.canvas,

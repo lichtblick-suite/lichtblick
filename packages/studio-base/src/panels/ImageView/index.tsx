@@ -20,10 +20,9 @@ import WavesIcon from "@mdi/svg/svg/waves.svg";
 import { Stack, Theme } from "@mui/material";
 import { makeStyles } from "@mui/styles";
 import cx from "classnames";
-import { last, uniq } from "lodash";
-import { useEffect, useState, useMemo, useCallback } from "react";
+import { uniq } from "lodash";
+import { useEffect, useState, useMemo, useCallback, useRef } from "react";
 
-import { filterMap } from "@foxglove/den/collection";
 import { useShallowMemo } from "@foxglove/hooks";
 import { useDataSourceInfo } from "@foxglove/studio-base/PanelAPI";
 import Autocomplete from "@foxglove/studio-base/components/Autocomplete";
@@ -35,24 +34,23 @@ import { Item, SubMenu } from "@foxglove/studio-base/components/Menu";
 import { useMessagePipeline } from "@foxglove/studio-base/components/MessagePipeline";
 import Panel from "@foxglove/studio-base/components/Panel";
 import PanelToolbar from "@foxglove/studio-base/components/PanelToolbar";
-import { MessageEvent } from "@foxglove/studio-base/players/types";
 import inScreenshotTests from "@foxglove/studio-base/stories/inScreenshotTests";
-import { StampedMessage } from "@foxglove/studio-base/types/Messages";
 import { PanelConfigSchema, SaveConfig } from "@foxglove/studio-base/types/panels";
 import { mightActuallyBePartial } from "@foxglove/studio-base/util/mightActuallyBePartial";
 import naturalSort from "@foxglove/studio-base/util/naturalSort";
 import { getTopicsByTopicName } from "@foxglove/studio-base/util/selectors";
-import { formatTimeRaw, getTimestampForMessage } from "@foxglove/studio-base/util/time";
+import { formatTimeRaw } from "@foxglove/studio-base/util/time";
 import toggle from "@foxglove/studio-base/util/toggle";
 
 import ImageCanvas from "./ImageCanvas";
 import ImageEmptyState from "./ImageEmptyState";
 import { Toolbar } from "./Toolbar";
+import { TopicTimestamp } from "./TopicTimestamp";
 import helpContent from "./index.help.md";
 import { NORMALIZABLE_IMAGE_DATATYPES } from "./normalizeMessage";
 import type { PixelData, ZoomMode } from "./types";
 import { useCameraInfo } from "./useCameraInfo";
-import { useOptionallySynchronizedMessages } from "./useOptionallySynchronizedMessages";
+import { ANNOTATION_DATATYPES, useImagePanelMessages } from "./useImagePanelMessages";
 import { getCameraNamespace, getRelatedMarkerTopics, getMarkerOptions, groupTopics } from "./util";
 
 type DefaultConfig = {
@@ -135,36 +133,12 @@ const useStyles = makeStyles((theme: Theme) => ({
     display: "flex",
     alignItems: "center",
   },
-  topicTimestamp: {
-    padding: "0px 15px 0px 0px",
-    fontSize: 10,
-    fontStyle: "italic",
-  },
   emptyStateContainer: {
     width: "100%",
     height: "100%",
     position: "absolute",
   },
 }));
-
-const TopicTimestamp = ({
-  text,
-  style: styleObj,
-}: {
-  text: string;
-  style?: {
-    [key: string]: string;
-  };
-}) => {
-  const classes = useStyles();
-  return text === "" ? (
-    ReactNull
-  ) : (
-    <span className={classes.topicTimestamp} style={styleObj}>
-      {text}
-    </span>
-  );
-};
 
 const BottomBar = ({ children }: { children?: React.ReactNode }) => {
   const classes = useStyles();
@@ -267,29 +241,11 @@ function ImageView(props: Props) {
     }
   }, [allImageTopics, config, saveConfig]);
 
-  const imageMarkerDatatypes = useMemo(
-    () => [
-      // Single marker
-      "visualization_msgs/ImageMarker",
-      "visualization_msgs/msg/ImageMarker",
-      "ros.visualization_msgs.ImageMarker",
-      // Marker arrays
-      "foxglove_msgs/ImageMarkerArray",
-      "foxglove_msgs/msg/ImageMarkerArray",
-      "studio_msgs/ImageMarkerArray",
-      "studio_msgs/msg/ImageMarkerArray",
-      "visualization_msgs/ImageMarkerArray",
-      "visualization_msgs/msg/ImageMarkerArray",
-      "ros.visualization_msgs.ImageMarkerArray",
-      // backwards compat with webviz
-      "webviz_msgs/ImageMarkerArray",
-    ],
-    [],
-  );
   const defaultAvailableMarkerTopics = useMemo(
-    () => getMarkerOptions(cameraTopic, topics, allCameraNamespaces, imageMarkerDatatypes),
-    [cameraTopic, topics, allCameraNamespaces, imageMarkerDatatypes],
+    () => getMarkerOptions(cameraTopic, topics, allCameraNamespaces, ANNOTATION_DATATYPES),
+    [cameraTopic, topics, allCameraNamespaces],
   );
+
   const availableAndEnabledMarkerTopics = useShallowMemo(
     uniq([
       ...defaultAvailableMarkerTopics,
@@ -297,6 +253,7 @@ function ImageView(props: Props) {
       ...enabledMarkerTopics,
     ]).sort(),
   );
+
   const onToggleMarkerName = useCallback(
     (markerTopic: string) => {
       saveConfig({ enabledMarkerTopics: toggle(enabledMarkerTopics, markerTopic) });
@@ -310,7 +267,7 @@ function ImageView(props: Props) {
         newCameraTopic,
         topics,
         allCameraNamespaces,
-        imageMarkerDatatypes,
+        ANNOTATION_DATATYPES,
       );
 
       const newEnabledMarkerTopics = getRelatedMarkerTopics(
@@ -324,7 +281,7 @@ function ImageView(props: Props) {
         enabledMarkerTopics: newEnabledMarkerTopics,
       });
     },
-    [topics, allCameraNamespaces, imageMarkerDatatypes, enabledMarkerTopics, saveConfig],
+    [topics, allCameraNamespaces, enabledMarkerTopics, saveConfig],
   );
   const imageTopicDropdown = useMemo(() => {
     const cameraNamespace = getCameraNamespace(cameraTopic);
@@ -403,32 +360,12 @@ function ImageView(props: Props) {
   const cameraInfo = useCameraInfo(cameraTopic);
 
   const shouldSynchronize = config.synchronize && enabledMarkerTopics.length > 0;
-  const imageAndMarkerTopics = useShallowMemo([cameraTopic, ...enabledMarkerTopics]);
-  const { messagesByTopic, synchronizedMessages } = useOptionallySynchronizedMessages(
-    shouldSynchronize,
-    imageAndMarkerTopics,
-  );
 
-  const markersToRender: MessageEvent<unknown>[] = useMemo(
-    () =>
-      shouldSynchronize
-        ? synchronizedMessages
-          ? filterMap(enabledMarkerTopics, (topic) => synchronizedMessages[topic])
-          : []
-        : filterMap(enabledMarkerTopics, (topic) => last(messagesByTopic[topic])),
-    [enabledMarkerTopics, messagesByTopic, shouldSynchronize, synchronizedMessages],
-  );
-
-  // Timestamps are displayed for informational purposes in the markers menu
-  const renderedMarkerTimestamps = useMemo(() => {
-    const stamps: Record<string, string> = {};
-    for (const { topic, message } of markersToRender) {
-      // In some cases, a user may have subscribed to a topic that does not include a header stamp.
-      const stamp = getTimestampForMessage(message);
-      stamps[topic] = stamp != undefined ? formatTimeRaw(stamp) : "[ not available ]";
-    }
-    return stamps;
-  }, [markersToRender]);
+  const { image, annotations } = useImagePanelMessages({
+    imageTopic: cameraTopic,
+    annotationTopics: enabledMarkerTopics,
+    synchronize: shouldSynchronize,
+  });
 
   const addTopicsMenu = useMemo(
     () => (
@@ -477,7 +414,6 @@ function ImageView(props: Props) {
             className={classes.dropdownItem}
           >
             <span style={{ display: "inline-block", marginRight: "15px" }}>{topic}</span>
-            <TopicTimestamp text={renderedMarkerTimestamps[topic] ?? ""} />
             {customMarkerTopicOptions.includes(topic) && (
               <Icon
                 style={{ position: "absolute", right: "10px" }}
@@ -508,18 +444,17 @@ function ImageView(props: Props) {
     customMarkerTopicOptions,
     enabledMarkerTopics,
     onToggleMarkerName,
-    renderedMarkerTimestamps,
     saveConfig,
   ]);
 
-  const imageMessage = messagesByTopic[cameraTopic]?.[0];
-  const lastImageMessageRef = React.useRef(imageMessage);
-  if (imageMessage) {
-    lastImageMessageRef.current = imageMessage;
+  //const imageMessage = messagesByTopic[cameraTopic]?.[0];
+  const lastImageMessageRef = useRef(image);
+  if (image) {
+    lastImageMessageRef.current = image;
   }
   // Keep the last image message, if it exists, to render on the ImageCanvas.
   // Improve perf by hiding the ImageCanvas while seeking, instead of unmounting and remounting it.
-  const imageMessageToRender = imageMessage ?? lastImageMessageRef.current;
+  const imageMessageToRender = image ?? lastImageMessageRef.current;
 
   const pauseFrame = useMessagePipeline(
     useCallback((messagePipeline) => messagePipeline.pauseFrame, []),
@@ -534,11 +469,11 @@ function ImageView(props: Props) {
 
   const rawMarkerData = useMemo(() => {
     return {
-      markers: markersToRender,
+      markers: annotations ?? [],
       transformMarkers,
-      cameraInfo: markersToRender.length > 0 ? cameraInfo : undefined,
+      cameraInfo,
     };
-  }, [cameraInfo, markersToRender, transformMarkers]);
+  }, [annotations, cameraInfo, transformMarkers]);
 
   const toolbar = useMemo(() => {
     return (
@@ -557,9 +492,7 @@ function ImageView(props: Props) {
     const topicTimestamp = (
       <TopicTimestamp
         style={{ padding: "8px 8px 0px 0px" }}
-        text={
-          imageMessage ? formatTimeRaw((imageMessage.message as StampedMessage).header.stamp) : ""
-        }
+        text={image ? formatTimeRaw(image.stamp) : ""}
       />
     );
 
@@ -592,7 +525,7 @@ function ImageView(props: Props) {
     );
   };
 
-  const showEmptyState = !imageMessage || (shouldSynchronize && !synchronizedMessages);
+  const showEmptyState = !image;
 
   return (
     <Stack flex="auto" overflow="hidden" position="relative">
@@ -617,7 +550,6 @@ function ImageView(props: Props) {
               cameraTopic={cameraTopic}
               markerTopics={enabledMarkerTopics}
               shouldSynchronize={shouldSynchronize}
-              messagesByTopic={messagesByTopic}
             />
           </div>
         )}

@@ -11,8 +11,7 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { Topic, MessageEvent } from "@foxglove/studio-base/players/types";
-import { ImageMarker, ImageMarkerArray } from "@foxglove/studio-base/types/Messages";
+import { Topic } from "@foxglove/studio-base/players/types";
 
 import PinholeCameraModel from "./PinholeCameraModel";
 import { Dimensions, MarkerData, RawMarkerData, ZoomMode } from "./types";
@@ -72,7 +71,7 @@ export function getMarkerOptions(
   imageTopic: string,
   topics: readonly Topic[],
   _allCameraNamespaces: string[],
-  imageMarkerDatatypes: string[],
+  imageMarkerDatatypes: readonly string[],
 ): string[] {
   const results = [];
   const cameraNamespace = getCameraNamespace(imageTopic);
@@ -134,20 +133,6 @@ export function groupTopics(topics: Topic[]): Map<string, Topic[]> {
     }
   }
   return imageTopicsByNamespace;
-}
-
-export function flattenImageMarkers(
-  messages: MessageEvent<ImageMarker | ImageMarkerArray>[],
-): ImageMarker[] {
-  const markers: ImageMarker[] = [];
-  for (const m of messages) {
-    if ("markers" in m.message && Array.isArray(m.message.markers)) {
-      markers.push(...m.message.markers);
-    } else {
-      markers.push(m.message as ImageMarker);
-    }
-  }
-  return markers;
 }
 
 export function buildMarkerData(rawMarkerData: RawMarkerData): MarkerData | undefined {

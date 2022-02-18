@@ -11,14 +11,7 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { MessageEvent } from "@foxglove/studio-base/players/types";
-import {
-  ImageMarker,
-  Color,
-  ImageMarkerArray,
-  ImageMarkerType,
-  Point2D,
-} from "@foxglove/studio-base/types/Messages";
+import { Color, Point2D } from "@foxglove/studio-base/types/Messages";
 import sendNotification from "@foxglove/studio-base/util/sendNotification";
 
 import { HitmapRenderContext } from "./HitmapRenderContext";
@@ -35,7 +28,6 @@ import {
   decodeMono8,
   decodeMono16,
 } from "./decodings";
-import { NormalizedImageMessage } from "./normalizeMessage";
 import type {
   MarkerData,
   PanZoom,
@@ -44,6 +36,11 @@ import type {
   RenderDimensions,
   RenderGeometry,
   RenderOptions,
+  Annotation,
+  CircleAnnotation,
+  PointsAnnotation,
+  TextAnnotation,
+  NormalizedImageMessage,
 } from "./types";
 import { buildMarkerData, calculateZoomScale } from "./util";
 
@@ -254,12 +251,7 @@ function render({
   const transform = ctx.getTransform();
 
   try {
-    paintMarkers(
-      ctx,
-      markers as MessageEvent<ImageMarker | ImageMarkerArray>[],
-      cameraModel,
-      geometry.panZoom,
-    );
+    paintMarkers(ctx, markers, cameraModel, geometry.panZoom);
   } catch (err) {
     console.warn("error painting markers:", err);
   } finally {
@@ -271,176 +263,30 @@ function render({
 
 function paintMarkers(
   ctx: HitmapRenderContext,
-  messages: MessageEvent<ImageMarker | ImageMarkerArray>[],
+  annotations: Annotation[],
   cameraModel: PinholeCameraModel | undefined,
   panZoom: PanZoom,
 ) {
-  for (const { message } of messages) {
+  for (const annotation of annotations) {
     ctx.save();
     try {
-      if ("markers" in message && Array.isArray(message.markers)) {
-        for (const marker of message.markers) {
-          paintMarker(ctx, marker, cameraModel, panZoom);
-        }
-      } else {
-        paintMarker(ctx, message as ImageMarker, cameraModel, panZoom);
+      ctx.startMarker();
+
+      switch (annotation.type) {
+        case "circle":
+          paintCircleAnnotation(ctx, annotation, cameraModel);
+          break;
+        case "points":
+          paintPointsAnnotation(ctx, annotation, cameraModel, panZoom);
+          break;
+        case "text":
+          paintTextAnnotation(ctx, annotation, cameraModel);
+          break;
       }
-    } catch (e) {
-      console.error("Unable to paint marker to ImageView", e, message);
+    } catch (err) {
+      console.error("Unable to paint annotation to ImageView", err, annotation);
     } finally {
       ctx.restore();
-    }
-  }
-}
-
-function paintMarker(
-  ctx: HitmapRenderContext,
-  marker: ImageMarker,
-  cameraModel: PinholeCameraModel | undefined,
-  panZoom: PanZoom,
-) {
-  ctx.startMarker();
-
-  switch (marker.type) {
-    case ImageMarkerType.CIRCLE: {
-      paintCircle(
-        ctx,
-        marker.position,
-        marker.scale,
-        1.0,
-        marker.outline_color,
-        marker.filled ? marker.fill_color : undefined,
-        cameraModel,
-      );
-      break;
-    }
-
-    case ImageMarkerType.LINE_LIST: {
-      if (marker.points.length % 2 !== 0) {
-        sendNotification(
-          `ImageMarker LINE_LIST has an odd number of points`,
-          `LINE_LIST marker "${marker.ns}$${marker.ns ? ":" : ""}${marker.id}" has ${
-            marker.points.length
-          } point${marker.points.length !== 1 ? "s" : ""}, expected an even number`,
-          "user",
-          "error",
-        );
-        break;
-      }
-
-      const hasExactColors = marker.outline_colors.length === marker.points.length / 2;
-
-      for (let i = 0; i < marker.points.length; i += 2) {
-        // Support the case where outline_colors is half the length of points,
-        // one color per line, and where outline_colors matches the length of
-        // points (although we only use the first color in this case). Fall back
-        // to marker.outline_color as needed
-        const outlineColor = hasExactColors
-          ? marker.outline_colors[i / 2]!
-          : marker.outline_colors.length > i
-          ? marker.outline_colors[i]!
-          : marker.outline_color;
-        paintLine(
-          ctx,
-          marker.points[i]!,
-          marker.points[i + 1]!,
-          marker.scale,
-          outlineColor,
-          cameraModel,
-        );
-      }
-
-      break;
-    }
-
-    case ImageMarkerType.LINE_STRIP:
-    case ImageMarkerType.POLYGON: {
-      if (marker.points.length === 0) {
-        break;
-      }
-      ctx.beginPath();
-      const { x, y } = maybeUnrectifyPoint(cameraModel, marker.points[0]!);
-      ctx.moveTo(x, y);
-      for (let i = 1; i < marker.points.length; i++) {
-        const maybeUnrectifiedPoint = maybeUnrectifyPoint(cameraModel, marker.points[i]!);
-        ctx.lineTo(maybeUnrectifiedPoint.x, maybeUnrectifiedPoint.y);
-      }
-      if (marker.type === ImageMarkerType.POLYGON) {
-        ctx.closePath();
-        if (marker.filled && marker.fill_color.a > 0) {
-          ctx.fillStyle = toRGBA(marker.fill_color);
-          ctx.fill();
-        }
-      }
-      if (marker.outline_color.a > 0 && marker.scale > 0) {
-        ctx.strokeStyle = toRGBA(marker.outline_color);
-        ctx.lineWidth = marker.scale;
-        ctx.stroke();
-      }
-      break;
-    }
-
-    case ImageMarkerType.POINTS: {
-      for (let i = 0; i < marker.points.length; i++) {
-        const point = marker.points[i]!;
-        // This is not a typo. ImageMarker has an array for outline_colors but
-        // not fill_colors, even though points are filled and not outlined. We
-        // only fall back to fill_color if both outline_colors[i] and
-        // outline_color are fully transparent
-        const fillColor =
-          marker.outline_colors.length > i
-            ? marker.outline_colors[i]!
-            : marker.outline_color.a > 0
-            ? marker.outline_color
-            : marker.fill_color;
-
-        // For points small enough to be visually indistinct at our current zoom level
-        // we do a fast render.
-        const size = marker.scale * panZoom.scale;
-        if (size <= FAST_POINT_SIZE_THRESHOlD) {
-          paintFastPoint(ctx, point, marker.scale, marker.scale, undefined, fillColor, cameraModel);
-        } else {
-          paintCircle(ctx, point, marker.scale, marker.scale, undefined, fillColor, cameraModel);
-        }
-      }
-      break;
-    }
-
-    case ImageMarkerType.TEXT: {
-      // TEXT (our own extension on visualization_msgs/Marker)
-      const { x, y } = maybeUnrectifyPoint(cameraModel, marker.position);
-      const text = marker.text?.data ?? "";
-      if (!text) {
-        break;
-      }
-
-      const fontSize = marker.scale * 12;
-      const padding = 4 * marker.scale;
-      ctx.font = `${fontSize}px sans-serif`;
-      ctx.textBaseline = "bottom";
-      if (marker.filled) {
-        const metrics = ctx.measureText(text);
-        const height =
-          "fontBoundingBoxAscent" in metrics
-            ? metrics.fontBoundingBoxAscent + metrics.fontBoundingBoxDescent
-            : fontSize * 1.2;
-        ctx.fillStyle = toRGBA(marker.fill_color);
-        ctx.fillRect(x, y - height, Math.ceil(metrics.width + 2 * padding), Math.ceil(height));
-      }
-      ctx.fillStyle = toRGBA(marker.outline_color);
-      ctx.fillText(text, x + padding, y);
-      break;
-    }
-
-    default: {
-      sendNotification(
-        `Unrecognized ImageMarker type ${marker.type}`,
-        `Marker "${marker.ns}$${marker.ns ? ":" : ""}${marker.id}" has an unrecognized type ${
-          marker.type
-        }`,
-        "user",
-        "error",
-      );
     }
   }
 }
@@ -467,6 +313,162 @@ function paintLine(
   ctx.lineWidth = thickness;
   ctx.strokeStyle = toRGBA(outlineColor);
   ctx.stroke();
+}
+
+function paintTextAnnotation(
+  ctx: HitmapRenderContext,
+  annotation: TextAnnotation,
+  cameraModel: PinholeCameraModel | undefined,
+) {
+  const { x, y } = maybeUnrectifyPoint(cameraModel, annotation.position);
+  const text = annotation.text;
+  if (!text) {
+    return;
+  }
+
+  const fontSize = annotation.fontSize;
+  const padding = annotation.padding;
+  ctx.font = `${fontSize}px sans-serif`;
+  ctx.textBaseline = "bottom";
+  if (annotation.backgroundColor) {
+    const metrics = ctx.measureText(text);
+    const height =
+      "fontBoundingBoxAscent" in metrics
+        ? metrics.fontBoundingBoxAscent + metrics.fontBoundingBoxDescent
+        : fontSize * 1.2;
+    ctx.fillStyle = toRGBA(annotation.backgroundColor);
+    ctx.fillRect(x, y - height, Math.ceil(metrics.width + 2 * padding), Math.ceil(height));
+  }
+  ctx.fillStyle = toRGBA(annotation.textColor);
+  ctx.fillText(text, x + padding, y);
+}
+
+function paintCircleAnnotation(
+  ctx: HitmapRenderContext,
+  annotation: CircleAnnotation,
+  cameraModel: PinholeCameraModel | undefined,
+) {
+  const { fillColor, outlineColor, radius, thickness, position } = annotation;
+
+  // perf-sensitive: function params instead of options object to avoid allocations
+  const hasFill = fillColor != undefined && fillColor.a > 0;
+  const hasStroke = outlineColor != undefined && outlineColor.a > 0 && thickness > 0;
+
+  if (radius <= 0 || (!hasFill && !hasStroke)) {
+    return;
+  }
+
+  const { x, y } = maybeUnrectifyPoint(cameraModel, position);
+  ctx.beginPath();
+  ctx.arc(x, y, radius, 0, 2 * Math.PI);
+
+  if (hasFill) {
+    ctx.fillStyle = toRGBA(fillColor);
+    ctx.fill();
+  }
+
+  if (hasStroke) {
+    ctx.lineWidth = thickness;
+    ctx.strokeStyle = toRGBA(outlineColor);
+    ctx.stroke();
+  }
+}
+
+function paintPointsAnnotation(
+  ctx: HitmapRenderContext,
+  annotation: PointsAnnotation,
+  cameraModel: PinholeCameraModel | undefined,
+  panZoom: PanZoom,
+) {
+  const thickness = annotation.thickness ?? 1;
+
+  switch (annotation.style) {
+    case "points": {
+      for (let i = 0; i < annotation.points.length; i++) {
+        const point = annotation.points[i]!;
+        // This is not a typo. ImageMarker has an array for outline_colors but
+        // not fill_colors, even though points are filled and not outlined. We
+        // only fall back to fill_color if both outline_colors[i] and
+        // outline_color are fully transparent
+        const pointOutlineColor = annotation.outlineColors[i];
+        const fillColor = pointOutlineColor
+          ? pointOutlineColor
+          : annotation.outlineColor && annotation.outlineColor.a > 0
+          ? annotation.outlineColor
+          : annotation.fillColor;
+
+        // For points small enough to be visually indistinct at our current zoom level
+        // we do a fast render.
+        const size = thickness * panZoom.scale;
+        if (size <= FAST_POINT_SIZE_THRESHOlD) {
+          paintFastPoint(ctx, point, thickness, thickness, undefined, fillColor, cameraModel);
+        } else {
+          paintCircle(ctx, point, thickness, thickness, undefined, fillColor, cameraModel);
+        }
+      }
+      break;
+    }
+    case "polygon":
+    case "line_strip": {
+      if (annotation.points.length === 0) {
+        break;
+      }
+      ctx.beginPath();
+      const { x, y } = maybeUnrectifyPoint(cameraModel, annotation.points[0]!);
+      ctx.moveTo(x, y);
+      for (let i = 1; i < annotation.points.length; i++) {
+        const maybeUnrectifiedPoint = maybeUnrectifyPoint(cameraModel, annotation.points[i]!);
+        ctx.lineTo(maybeUnrectifiedPoint.x, maybeUnrectifiedPoint.y);
+      }
+      if (annotation.style === "polygon") {
+        ctx.closePath();
+        if (annotation.fillColor && annotation.fillColor.a > 0) {
+          ctx.fillStyle = toRGBA(annotation.fillColor);
+          ctx.fill();
+        }
+      }
+      if (
+        annotation.outlineColor &&
+        annotation.outlineColor.a > 0 &&
+        annotation.thickness != undefined &&
+        annotation.thickness > 0
+      ) {
+        ctx.strokeStyle = toRGBA(annotation.outlineColor);
+        ctx.lineWidth = annotation.thickness;
+        ctx.stroke();
+      }
+      break;
+    }
+    case "line_list": {
+      if (annotation.points.length % 2 !== 0) {
+        break;
+      }
+
+      const hasExactColors = annotation.outlineColors.length === annotation.points.length / 2;
+
+      for (let i = 0; i < annotation.points.length; i += 2) {
+        // Support the case where outline_colors is half the length of points,
+        // one color per line, and where outline_colors matches the length of
+        // points (although we only use the first color in this case). Fall back
+        // to marker.outline_color as needed
+        const outlineColor = hasExactColors
+          ? annotation.outlineColors[i / 2]!
+          : annotation.outlineColors.length > i
+          ? annotation.outlineColors[i]!
+          : annotation.outlineColor;
+        paintLine(
+          ctx,
+          annotation.points[i]!,
+          annotation.points[i + 1]!,
+          thickness,
+          outlineColor ?? { r: 0, g: 0, b: 0, a: 1 },
+          cameraModel,
+        );
+      }
+
+      break;
+    }
+  }
 }
 
 function paintCircle(

@@ -24,21 +24,27 @@ import KeyListener from "@foxglove/studio-base/components/KeyListener";
 import { LegacyButton } from "@foxglove/studio-base/components/LegacyStyledComponents";
 import { Item } from "@foxglove/studio-base/components/Menu";
 import { usePanelMousePresence } from "@foxglove/studio-base/hooks/usePanelMousePresence";
-import { MessageEvent, Topic } from "@foxglove/studio-base/players/types";
+import { Topic } from "@foxglove/studio-base/players/types";
 import Rpc from "@foxglove/studio-base/util/Rpc";
 import WebWorkerManager from "@foxglove/studio-base/util/WebWorkerManager";
 import { downloadFiles } from "@foxglove/studio-base/util/download";
 
 import { Config, SaveImagePanelConfig } from "./index";
-import { normalizeImageMessage } from "./normalizeMessage";
 import { renderImage } from "./renderImage";
-import { Dimensions, PixelData, RawMarkerData, RenderableCanvas, RenderArgs } from "./types";
+import type {
+  Dimensions,
+  PixelData,
+  RawMarkerData,
+  RenderableCanvas,
+  RenderArgs,
+  NormalizedImageMessage,
+} from "./types";
 
 type OnFinishRenderImage = () => void;
 
 type Props = {
   topic?: Topic;
-  image?: MessageEvent<unknown>;
+  image?: NormalizedImageMessage;
   rawMarkerData: RawMarkerData;
   config: Config;
   saveConfig: SaveImagePanelConfig;
@@ -145,7 +151,14 @@ const supportsOffscreenCanvas =
   typeof HTMLCanvasElement.prototype.transferControlToOffscreen === "function";
 
 export default function ImageCanvas(props: Props): JSX.Element {
-  const { rawMarkerData, topic, image, config, saveConfig, onStartRenderImage } = props;
+  const {
+    rawMarkerData,
+    topic,
+    image: normalizedImageMessage,
+    config,
+    saveConfig,
+    onStartRenderImage,
+  } = props;
   const { mode } = config;
   const classes = useStyles();
 
@@ -220,7 +233,7 @@ export default function ImageCanvas(props: Props): JSX.Element {
           id,
           imageMessage,
           options,
-          rawMarkerData: JSON.parse(JSON.stringify(rawMarkers) ?? ""),
+          rawMarkerData: rawMarkers,
         });
       };
 
@@ -267,17 +280,6 @@ export default function ImageCanvas(props: Props): JSX.Element {
       setContainer(canvasRef.current);
     }
   }, [setContainer]);
-
-  const normalizedImageMessage = useMemo(() => {
-    // An image datatype is required to understand the fields in the message
-    const imageMessage = image?.message;
-    const imageDatatype = topic?.datatype;
-    if (imageMessage == undefined || !imageDatatype) {
-      return undefined;
-    }
-
-    return normalizeImageMessage(imageMessage, imageDatatype);
-  }, [image?.message, topic?.datatype]);
 
   const renderOptions = useMemo(() => {
     return {

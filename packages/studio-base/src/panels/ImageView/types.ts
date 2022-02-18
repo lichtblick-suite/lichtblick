@@ -2,11 +2,10 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import type { MessageEvent } from "@foxglove/studio";
-import type { CameraInfo, ImageMarker } from "@foxglove/studio-base/types/Messages";
+import { Time } from "@foxglove/studio";
+import type { CameraInfo, Color, ImageMarker, Point2D } from "@foxglove/studio-base/types/Messages";
 
 import type PinholeCameraModel from "./PinholeCameraModel";
-import type { NormalizedImageMessage } from "./normalizeMessage";
 
 export type PanZoom = { x: number; y: number; scale: number };
 
@@ -15,7 +14,7 @@ export type ZoomMode = "fit" | "fill" | "other";
 export type Dimensions = { width: number; height: number };
 
 export type RawMarkerData = {
-  markers: MessageEvent<unknown>[];
+  markers: Annotation[];
   transformMarkers: boolean;
   cameraInfo?: CameraInfo;
 };
@@ -59,8 +58,102 @@ export type RenderableCanvas = HTMLCanvasElement | OffscreenCanvas;
 export type RenderDimensions = Dimensions & { transform: DOMMatrix };
 
 export type MarkerData = {
-  markers: MessageEvent<unknown>[];
+  markers: Annotation[];
   originalWidth?: number; // undefined means no scaling is needed (use the image's size)
   originalHeight?: number; // undefined means no scaling is needed (use the image's size)
   cameraModel?: PinholeCameraModel; // undefined means no transformation is needed
 };
+
+type FoxgloveImageAnnotationCircleAnnotation = {
+  timestamp: bigint;
+  position: Point2D;
+  diameter: number;
+  thickness: number;
+  fill_color?: Color;
+  outline_color: Color;
+};
+
+type FoxgloveImageAnnotationPointsAnnotation = {
+  timestamp: bigint;
+  type: number;
+  points: Point2D[];
+  outline_colors: Color[];
+  outline_color?: Color;
+  fill_color?: Color;
+  thickness: number;
+};
+
+export type FoxgloveImageAnnotationsMessage = {
+  circles?: FoxgloveImageAnnotationCircleAnnotation[];
+  points?: FoxgloveImageAnnotationPointsAnnotation[];
+};
+
+export type CircleAnnotation = {
+  type: "circle";
+  stamp: Time;
+  fillColor?: Color;
+  outlineColor?: Color;
+  radius: number;
+  thickness: number;
+  position: Point2D;
+};
+
+export type PointsAnnotation = {
+  type: "points";
+  stamp: Time;
+  style: "points" | "polygon" | "line_strip" | "line_list";
+  points: readonly Point2D[];
+  outlineColors: readonly Color[];
+  outlineColor?: Color;
+  thickness?: number;
+  fillColor?: Color;
+};
+
+export type TextAnnotation = {
+  type: "text";
+  stamp: Time;
+  position: Point2D;
+  text: string;
+  textColor: Color;
+  backgroundColor?: Color;
+  fontSize: number;
+  padding: number;
+};
+
+export type Annotation = CircleAnnotation | PointsAnnotation | TextAnnotation;
+
+export type RawImageMessage = {
+  type: "raw";
+  stamp: { sec: number; nsec: number };
+  width: number;
+  height: number;
+  is_bigendian: boolean;
+  encoding: string;
+  step: number;
+  data: Uint8Array;
+};
+
+export type CompressedImageMessage = {
+  type: "compressed";
+  stamp: { sec: number; nsec: number };
+  format: string;
+  data: Uint8Array;
+};
+
+export type FoxgloveRawImageMessage = {
+  timestamp: bigint;
+  width: number;
+  height: number;
+  encoding: string;
+  step: number;
+  data: Uint8Array;
+};
+
+export type FoxgloveCompressedImageMessage = {
+  type: "compressed";
+  timestamp: bigint;
+  format: string;
+  data: Uint8Array;
+};
+
+export type NormalizedImageMessage = RawImageMessage | CompressedImageMessage;
