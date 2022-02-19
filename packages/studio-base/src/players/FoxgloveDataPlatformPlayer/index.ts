@@ -489,7 +489,7 @@ export default class FoxgloveDataPlatformPlayer implements Player {
 
   seekPlayback(time: Time, _backfillDuration?: Time): void {
     log.debug("Seek", time);
-    this._currentTime = time;
+    this._currentTime = clampTime(time, this._start, this._end);
     this._lastSeekTime = Date.now();
     this._nextFrame = [];
     this._currentPreloadTask?.abort();
