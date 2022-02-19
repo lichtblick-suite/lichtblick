@@ -49,7 +49,7 @@ import {
 import { RosDatatypes } from "@foxglove/studio-base/types/RosDatatypes";
 import { UserNode, UserNodes } from "@foxglove/studio-base/types/panels";
 import Rpc from "@foxglove/studio-base/util/Rpc";
-import { basicDatatypes } from "@foxglove/studio-base/util/datatypes";
+import { basicDatatypes, foxgloveDatatypes } from "@foxglove/studio-base/util/datatypes";
 import { DEFAULT_STUDIO_NODE_PREFIX } from "@foxglove/studio-base/util/globalConstants";
 import signal from "@foxglove/studio-base/util/signal";
 
@@ -147,7 +147,7 @@ export default class UserNodePlayer implements Player {
     this._typesLibGenerator = new MemoizedLibGenerator(async (args) => {
       const lib = generateTypesLib({
         topics: args.topics,
-        datatypes: new Map(args.datatypes),
+        datatypes: new Map([...basicDatatypes, ...foxgloveDatatypes, ...args.datatypes]),
       });
 
       return await getPrettifiedCode(lib);

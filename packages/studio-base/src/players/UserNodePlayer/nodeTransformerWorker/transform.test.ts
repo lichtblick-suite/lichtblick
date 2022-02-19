@@ -29,7 +29,6 @@ import {
   compose,
   getInputTopics,
 } from "@foxglove/studio-base/players/UserNodePlayer/nodeTransformerWorker/transform";
-import baseDatatypes from "@foxglove/studio-base/players/UserNodePlayer/nodeTransformerWorker/typescript/baseDatatypes";
 import {
   DiagnosticSeverity,
   ErrorCodes,
@@ -37,6 +36,7 @@ import {
   NodeData,
 } from "@foxglove/studio-base/players/UserNodePlayer/types";
 import { RosDatatypes } from "@foxglove/studio-base/types/RosDatatypes";
+import { basicDatatypes } from "@foxglove/studio-base/util/datatypes";
 import { DEFAULT_STUDIO_NODE_PREFIX } from "@foxglove/studio-base/util/globalConstants";
 
 // Exported for use in other tests.
@@ -584,7 +584,7 @@ describe("pipeline", () => {
     );
 
     const baseDatatypesWithNestedColor: RosDatatypes = new Map([
-      ...baseDatatypes,
+      ...basicDatatypes,
       [
         baseNodeData.name,
         {
@@ -1085,7 +1085,7 @@ describe("pipeline", () => {
           };
 
           export default publisher;`,
-        datatypes: baseDatatypes,
+        datatypes: basicDatatypes,
         outputDatatype: "std_msgs/ColorRGBA",
       },
       {
@@ -1121,7 +1121,7 @@ describe("pipeline", () => {
           };
 
           export default publisher;`,
-        datatypes: baseDatatypes,
+        datatypes: basicDatatypes,
         outputDatatype: "std_msgs/ColorRGBA",
       },
       {
@@ -1137,7 +1137,7 @@ describe("pipeline", () => {
           };
 
           export default publisher;`,
-        datatypes: baseDatatypes,
+        datatypes: basicDatatypes,
         outputDatatype: "std_msgs/ColorRGBA",
       },
       {
@@ -1155,7 +1155,7 @@ describe("pipeline", () => {
           };
 
           export default publisher;`,
-        datatypes: baseDatatypes,
+        datatypes: basicDatatypes,
         outputDatatype: "std_msgs/ColorRGBA",
       },
       {
@@ -1246,12 +1246,12 @@ describe("pipeline", () => {
           };
 
           export default publisher;`,
-        datatypes: baseDatatypes,
+        datatypes: basicDatatypes,
         outputDatatype: "std_msgs/ColorRGBA",
       },
       /*
       ERRORS
-    */
+      */
       {
         description: "No default export",
         sourceCode: `

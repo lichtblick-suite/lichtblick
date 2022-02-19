@@ -1,0 +1,24 @@
+// This example shows how to publish a foxglove.LocationFix message
+//
+// https://foxglove.dev/docs/studio/messages/location-fix
+//
+// You can visualize this message with the Map panel
+// https://foxglove.dev/docs/studio/panels/map
+
+import { Input, Message } from "./types";
+
+export const inputs = ["/input/topic"];
+export const output = "/studio_node/my_gps";
+
+// Our node will output a LocationFix message
+type LocationFix = Message<"foxglove.LocationFix">;
+
+export default function node(event: Input<"/input/topic">): LocationFix {
+  return {
+    latitude: 51.477928,
+    longitude: -0.001545,
+    altitude: 0,
+    position_covariance_type: 0,
+    position_covariance: new Float64Array(),
+  };
+};

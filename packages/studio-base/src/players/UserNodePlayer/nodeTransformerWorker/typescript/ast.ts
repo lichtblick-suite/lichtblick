@@ -14,7 +14,6 @@
 import ts from "typescript/lib/typescript";
 
 import { RosMsgField } from "@foxglove/rosmsg";
-import baseDatatypes from "@foxglove/studio-base/players/UserNodePlayer/nodeTransformerWorker/typescript/baseDatatypes";
 import {
   noFuncError,
   nonFuncError,
@@ -38,6 +37,7 @@ import {
   Diagnostic,
 } from "@foxglove/studio-base/players/UserNodePlayer/types";
 import type { RosDatatypes } from "@foxglove/studio-base/types/RosDatatypes";
+import { basicDatatypes } from "@foxglove/studio-base/util/datatypes";
 
 type TypeParam = {
   parent?: TypeParam;
@@ -272,7 +272,7 @@ export const constructDatatypes = (
   if (isNodeFromRosModule(node) && messageDef != undefined) {
     return {
       outputDatatype: messageDef,
-      datatypes: baseDatatypes,
+      datatypes: basicDatatypes,
     };
   }
 
@@ -284,7 +284,7 @@ export const constructDatatypes = (
       const datatype = node.parent.name.text;
       return {
         outputDatatype: datatype,
-        datatypes: baseDatatypes,
+        datatypes: basicDatatypes,
       };
     }
   }
