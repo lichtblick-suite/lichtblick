@@ -36,9 +36,6 @@ export default class PinholeCameraModel {
   constructor(info: CameraInfo) {
     const { binning_x, binning_y, roi, distortion_model, D, K, P, R } = info;
 
-    // @ts-expect-error distortion_model is a union type not a string
-    //                  typescript compiler thinks this condition is never false since it knows the value
-    //                  of distortion_model is one of the union values
     if (distortion_model === "") {
       // Allow CameraInfo with no model to indicate no distortion
       this._distortionState = DISTORTION_STATE.NONE;

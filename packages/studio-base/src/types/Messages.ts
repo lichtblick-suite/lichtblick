@@ -429,7 +429,8 @@ type Roi = Readonly<{
   do_rectify: false;
 }>;
 
-type DistortionModel = "plumb_bob" | "rational_polynomial";
+// Empty string indicates no distortion model
+export type DistortionModel = "plumb_bob" | "rational_polynomial" | "";
 
 export type CameraInfo = Readonly<{
   width: number;
