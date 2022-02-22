@@ -65,7 +65,10 @@ export default class PanelErrorBoundary extends Component<PropsWithChildren<Prop
                   variant="outlined"
                   title="reset panel settings to default values"
                   color="error"
-                  onClick={this.props.onResetPanel}
+                  onClick={() => {
+                    this.setState({ currentError: undefined });
+                    this.props.onResetPanel();
+                  }}
                 >
                   Reset Panel
                 </Button>
