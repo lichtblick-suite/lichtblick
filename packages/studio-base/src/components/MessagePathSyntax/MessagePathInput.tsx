@@ -23,7 +23,7 @@ import useGlobalVariables, {
 } from "@foxglove/studio-base/hooks/useGlobalVariables";
 import { Topic } from "@foxglove/studio-base/players/types";
 import { RosDatatypes } from "@foxglove/studio-base/types/RosDatatypes";
-import { getTopicNames, getTopicsByTopicName } from "@foxglove/studio-base/util/selectors";
+import { getTopicsByTopicName } from "@foxglove/studio-base/util/selectors";
 
 import { RosPath, RosPrimitive } from "./constants";
 import {
@@ -32,7 +32,7 @@ import {
   messagePathsForDatatype,
   validTerminatingStructureItem,
 } from "./messagePathsForDatatype";
-import parseRosPath from "./parseRosPath";
+import parseRosPath, { quoteFieldNameIfNeeded, quoteTopicNameIfNeeded } from "./parseRosPath";
 
 // To show an input field with an autocomplete so the user can enter message paths, use:
 //
@@ -61,7 +61,7 @@ function getFieldPaths(
 ): Map<string, RosMsgField> {
   const output = new Map<string, RosMsgField>();
   for (const topic of topics) {
-    addFieldPathsForType(topic.name, topic.datatype, datatypes, output);
+    addFieldPathsForType(quoteTopicNameIfNeeded(topic.name), topic.datatype, datatypes, output);
   }
   return output;
 }
@@ -76,9 +76,10 @@ function addFieldPathsForType(
   if (msgdef) {
     for (const field of msgdef.definitions) {
       if (field.isConstant !== true) {
-        output.set(`${curPath}.${field.name}`, field);
+        const fieldPath = `${curPath}.${quoteFieldNameIfNeeded(field.name)}`;
+        output.set(fieldPath, field);
         if (field.isComplex === true) {
-          addFieldPathsForType(`${curPath}.${field.name}`, field.type, datatypes, output);
+          addFieldPathsForType(fieldPath, field.type, datatypes, output);
         }
       }
     }
@@ -266,7 +267,10 @@ export default React.memo<MessagePathInputBaseProps>(function MessagePathInput(
     return getFirstInvalidVariableFromRosPath(rosPath, globalVariables, setGlobalVariables);
   }, [globalVariables, rosPath, setGlobalVariables]);
 
-  const topicNamesAutocompleteItems = useMemo(() => getTopicNames(topics), [topics]);
+  const topicNamesAutocompleteItems = useMemo(
+    () => topics.map(({ name }) => quoteTopicNameIfNeeded(name)),
+    [topics],
+  );
 
   const topicNamesAndFieldsAutocompleteItems = useMemo(
     () => topicNamesAutocompleteItems.concat(Array.from(topicFields.keys())),
@@ -357,13 +361,18 @@ export default React.memo<MessagePathInputBaseProps>(function MessagePathInput(
             (msgPath) => msgPath !== "" && !msgPath.endsWith(".header.seq"),
           ),
 
-          autocompleteRange: { start: topic.name.length + initialFilterLength, end: Infinity },
+          autocompleteRange: {
+            start: rosPath.topicNameRepr.length + initialFilterLength,
+            end: Infinity,
+          },
           // Filter out filters (hah!) in a pretty crude way, so autocomplete still works
           // when already having specified a filter and you want to see what other object
           // names you can complete it with. Kind of an edge case, and this doesn't work
           // ideally (because it will remove your existing filter if you actually select
           // the autocomplete item), but it's easy to do for now, and nice to have.
-          autocompleteFilterText: path.substr(topic.name.length).replace(/\{[^}]*\}/g, ""),
+          autocompleteFilterText: path
+            .substring(rosPath.topicNameRepr.length)
+            .replace(/\{[^}]*\}/g, ""),
         };
       }
     } else if (invalidGlobalVariablesVariable) {

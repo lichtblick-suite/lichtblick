@@ -309,8 +309,8 @@ describe("traverseStructure", () => {
     // Valid:
     expect(
       traverseStructure(structure, [
-        { type: "name", name: "some_pose" },
-        { type: "name", name: "x" },
+        { type: "name", name: "some_pose", repr: "some_pose" },
+        { type: "name", name: "x", repr: "x" },
       ]),
     ).toEqual({
       valid: true,
@@ -319,8 +319,8 @@ describe("traverseStructure", () => {
     });
     expect(
       traverseStructure(structure, [
-        { type: "name", name: "some_pose" },
-        { type: "name", name: "dummy_array" },
+        { type: "name", name: "some_pose", repr: "some_pose" },
+        { type: "name", name: "dummy_array", repr: "dummy_array" },
         { type: "slice", start: 50, end: 100 },
       ]),
     ).toEqual({
@@ -330,9 +330,9 @@ describe("traverseStructure", () => {
     });
     expect(
       traverseStructure(structure, [
-        { type: "name", name: "some_pose" },
+        { type: "name", name: "some_pose", repr: "some_pose" },
         { type: "filter", path: ["x"], value: 10, nameLoc: 123, valueLoc: 0, repr: "" },
-        { type: "name", name: "dummy_array" },
+        { type: "name", name: "dummy_array", repr: "dummy_array" },
         { type: "slice", start: 50, end: 100 },
       ]),
     ).toEqual({
@@ -342,7 +342,7 @@ describe("traverseStructure", () => {
     });
     expect(
       traverseStructure(structure, [
-        { type: "name", name: "some_pose" },
+        { type: "name", name: "some_pose", repr: "some_pose" },
         { type: "filter", path: ["header", "seq"], value: 10, nameLoc: 123, valueLoc: 0, repr: "" },
       ]),
     ).toEqual({
@@ -350,12 +350,16 @@ describe("traverseStructure", () => {
       msgPathPart: undefined,
       structureItem: structure?.nextByName.some_pose,
     });
-    expect(traverseStructure(structure, [{ type: "name", name: "some_pose" }])).toEqual({
+    expect(
+      traverseStructure(structure, [{ type: "name", name: "some_pose", repr: "some_pose" }]),
+    ).toEqual({
       valid: true,
       msgPathPart: undefined,
       structureItem: structure?.nextByName.some_pose,
     });
-    expect(traverseStructure(structureJson, [{ type: "name", name: "myJson" }])).toEqual({
+    expect(
+      traverseStructure(structureJson, [{ type: "name", name: "myJson", repr: "myJson" }]),
+    ).toEqual({
       msgPathPart: undefined,
       structureItem: { structureType: "primitive", primitiveType: "json", datatype: "msgs/Log" },
       valid: true,
@@ -363,8 +367,8 @@ describe("traverseStructure", () => {
 
     expect(
       traverseStructure(structureJson, [
-        { type: "name", name: "myJson" },
-        { type: "name", name: "fieldInsideMyJson" },
+        { type: "name", name: "myJson", repr: "myJson" },
+        { type: "name", name: "fieldInsideMyJson", repr: "fieldInsideMyJson" },
       ]),
     ).toEqual({
       msgPathPart: undefined,
@@ -374,7 +378,7 @@ describe("traverseStructure", () => {
 
     expect(
       traverseStructure(structureJson, [
-        { type: "name", name: "myJson" },
+        { type: "name", name: "myJson", repr: "myJson" },
         { type: "filter", path: ["y"], value: 10, nameLoc: 123, valueLoc: 0, repr: "" },
       ]),
     ).toEqual({
@@ -385,7 +389,7 @@ describe("traverseStructure", () => {
 
     expect(
       traverseStructure(structureJson, [
-        { type: "name", name: "myJson" },
+        { type: "name", name: "myJson", repr: "myJson" },
         { type: "slice", start: 50, end: 100 },
       ]),
     ).toEqual({
@@ -396,9 +400,9 @@ describe("traverseStructure", () => {
 
     expect(
       traverseStructure(structure, [
-        { type: "name", name: "header" },
-        { type: "name", name: "stamp" },
-        { type: "name", name: "sec" },
+        { type: "name", name: "header", repr: "header" },
+        { type: "name", name: "stamp", repr: "stamp" },
+        { type: "name", name: "sec", repr: "sec" },
       ]),
     ).toEqual({
       valid: true,
@@ -413,7 +417,7 @@ describe("traverseStructure", () => {
     // Invalid:
     expect(
       traverseStructure(structure, [
-        { type: "name", name: "some_pose" },
+        { type: "name", name: "some_pose", repr: "some_pose" },
         { type: "filter", path: ["y"], value: 10, nameLoc: 123, valueLoc: 0, repr: "" },
       ]),
     ).toEqual({
@@ -423,7 +427,7 @@ describe("traverseStructure", () => {
     });
     expect(
       traverseStructure(structure, [
-        { type: "name", name: "some_pose" },
+        { type: "name", name: "some_pose", repr: "some_pose" },
         { type: "filter", path: ["header", "y"], value: 10, nameLoc: 123, valueLoc: 0, repr: "" },
       ]),
     ).toEqual({

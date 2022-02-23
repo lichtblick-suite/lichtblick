@@ -21,8 +21,8 @@ function topicHasNoHeaderStamp(topic: Topic, datatypes: RosDatatypes): boolean {
   const structureTraversalResult = traverseStructure(
     messagePathStructures(datatypes)[topic.datatype],
     [
-      { type: "name", name: "header" },
-      { type: "name", name: "stamp" },
+      { type: "name", name: "header", repr: "header" },
+      { type: "name", name: "stamp", repr: "stamp" },
     ],
   );
 

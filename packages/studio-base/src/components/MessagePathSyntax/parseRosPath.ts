@@ -21,6 +21,24 @@ import grammar from "./grammar.ne";
 
 const grammarObj = Grammar.fromCompiled(grammar);
 
+/** Wrap topic name in double quotes if it contains special characters */
+export function quoteTopicNameIfNeeded(name: string): string {
+  // Pattern should match `slashID` in grammar.ne
+  if (name.match(/^[a-zA-Z0-9_/-]+$/)) {
+    return name;
+  }
+  return `"${name.replace(/[\\"]/g, (char) => `\\${char}`)}"`;
+}
+
+/** Wrap field name in double quotes if it contains special characters */
+export function quoteFieldNameIfNeeded(name: string): string {
+  // Pattern should match `id` in grammar.ne
+  if (name.match(/^[a-zA-Z0-9_-]+$/)) {
+    return name;
+  }
+  return `"${name.replace(/[\\"]/g, (char) => `\\${char}`)}"`;
+}
+
 const parseRosPath = memoize((path: string): RosPath | undefined => {
   // Need to create a new Parser object for every new string to parse (should be cheap).
   const parser = new Parser(grammarObj);

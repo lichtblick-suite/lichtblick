@@ -28,8 +28,9 @@ describe("getFirstInvalidVariableFromRosPath", () => {
     const setGlobalVars = jest.fn();
     const rosPath: RosPath = {
       topicName: "/some_topic",
+      topicNameRepr: "/some_topic",
       messagePath: [
-        { type: "name", name: "fieldName" },
+        { type: "name", name: "fieldName", repr: "fieldName" },
         { type: "slice", start: 0, end: Infinity },
         {
           type: "filter",

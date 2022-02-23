@@ -41,7 +41,16 @@ export type MessagePathFilter = {
 
 // A parsed version of paths.
 export type MessagePathPart =
-  | { type: "name"; name: string }
+  | {
+      type: "name";
+      /** Referenced field name */
+      name: string;
+      /**
+       * Original spelling of the field name in the input message path (for accurate reproduction in
+       * autocomplete and string length)
+       */
+      repr: string;
+    }
   | {
       type: "slice";
       start: number | { variableName: string; startLoc: number };
@@ -50,7 +59,13 @@ export type MessagePathPart =
   | MessagePathFilter;
 
 export type RosPath = {
+  /** Referenced topic name */
   topicName: string;
+  /**
+   * Original spelling of the topic name in the input message path (for accurate reproduction in
+   * autocomplete and string length)
+   */
+  topicNameRepr: string;
   messagePath: MessagePathPart[];
   modifier?: string;
 };

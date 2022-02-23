@@ -21,150 +21,251 @@ describe("parseRosPath", () => {
   it("parses valid strings", () => {
     expect(parseRosPath("/some0/nice_topic.with[99].stuff[0]")).toEqual({
       topicName: "/some0/nice_topic",
+      topicNameRepr: "/some0/nice_topic",
       messagePath: [
-        { type: "name", name: "with" },
+        { type: "name", name: "with", repr: "with" },
         { type: "slice", start: 99, end: 99 },
-        { type: "name", name: "stuff" },
+        { type: "name", name: "stuff", repr: "stuff" },
         { type: "slice", start: 0, end: 0 },
       ],
       modifier: MISSING,
     });
     expect(parseRosPath("/some0/nice_topic.with[99].stuff[0].@derivative")).toEqual({
       topicName: "/some0/nice_topic",
+      topicNameRepr: "/some0/nice_topic",
       messagePath: [
-        { type: "name", name: "with" },
+        { type: "name", name: "with", repr: "with" },
         { type: "slice", start: 99, end: 99 },
-        { type: "name", name: "stuff" },
+        { type: "name", name: "stuff", repr: "stuff" },
         { type: "slice", start: 0, end: 0 },
       ],
       modifier: "derivative",
     });
     expect(parseRosPath("some0/nice_topic.with[99].stuff[0]")).toEqual({
       topicName: "some0/nice_topic",
+      topicNameRepr: "some0/nice_topic",
       messagePath: [
-        { type: "name", name: "with" },
+        { type: "name", name: "with", repr: "with" },
         { type: "slice", start: 99, end: 99 },
-        { type: "name", name: "stuff" },
+        { type: "name", name: "stuff", repr: "stuff" },
         { type: "slice", start: 0, end: 0 },
       ],
       modifier: MISSING,
     });
     expect(parseRosPath("some_nice_topic")).toEqual({
       topicName: "some_nice_topic",
+      topicNameRepr: "some_nice_topic",
       messagePath: [],
       modifier: MISSING,
     });
   });
 
+  it("parses quoted topic and field names with escapes", () => {
+    expect(parseRosPath(String.raw`"/foo/bar".baz`)).toEqual({
+      topicName: "/foo/bar",
+      topicNameRepr: String.raw`"/foo/bar"`,
+      messagePath: [{ type: "name", name: "baz", repr: "baz" }],
+      modifier: MISSING,
+    });
+    expect(parseRosPath(String.raw`"\"/foo/bar\"".baz`)).toEqual({
+      topicName: `"/foo/bar"`,
+      topicNameRepr: String.raw`"\"/foo/bar\""`,
+      messagePath: [{ type: "name", name: "baz", repr: "baz" }],
+      modifier: MISSING,
+    });
+    expect(parseRosPath(String.raw`"\"".baz`)).toEqual({
+      topicName: `"`,
+      topicNameRepr: String.raw`"\""`,
+      messagePath: [{ type: "name", name: "baz", repr: "baz" }],
+      modifier: MISSING,
+    });
+    expect(parseRosPath(String.raw`"\\".baz`)).toEqual({
+      topicName: "\\",
+      topicNameRepr: String.raw`"\\"`,
+      messagePath: [{ type: "name", name: "baz", repr: "baz" }],
+      modifier: MISSING,
+    });
+    expect(parseRosPath(String.raw`"\\a".baz`)).toEqual({
+      topicName: "\\a",
+      topicNameRepr: String.raw`"\\a"`,
+      messagePath: [{ type: "name", name: "baz", repr: "baz" }],
+      modifier: MISSING,
+    });
+    expect(parseRosPath(String.raw`/foo."/foo/bar".baz`)).toEqual({
+      topicName: "/foo",
+      topicNameRepr: "/foo",
+      messagePath: [
+        { type: "name", name: "/foo/bar", repr: String.raw`"/foo/bar"` },
+        { type: "name", name: "baz", repr: "baz" },
+      ],
+      modifier: MISSING,
+    });
+    expect(parseRosPath(String.raw`/foo."\"/foo/bar\"".baz`)).toEqual({
+      topicName: "/foo",
+      topicNameRepr: "/foo",
+      messagePath: [
+        { type: "name", name: `"/foo/bar"`, repr: String.raw`"\"/foo/bar\""` },
+        { type: "name", name: "baz", repr: "baz" },
+      ],
+      modifier: MISSING,
+    });
+    expect(parseRosPath(String.raw`/foo."\"".baz`)).toEqual({
+      topicName: "/foo",
+      topicNameRepr: "/foo",
+      messagePath: [
+        { type: "name", name: `"`, repr: String.raw`"\""` },
+        { type: "name", name: "baz", repr: "baz" },
+      ],
+      modifier: MISSING,
+    });
+    expect(parseRosPath(String.raw`/foo."\\".baz`)).toEqual({
+      topicName: "/foo",
+      topicNameRepr: "/foo",
+      messagePath: [
+        { type: "name", name: "\\", repr: String.raw`"\\"` },
+        { type: "name", name: "baz", repr: "baz" },
+      ],
+      modifier: MISSING,
+    });
+    expect(parseRosPath(String.raw`/foo."\\a".baz`)).toEqual({
+      topicName: "/foo",
+      topicNameRepr: "/foo",
+      messagePath: [
+        { type: "name", name: "\\a", repr: String.raw`"\\a"` },
+        { type: "name", name: "baz", repr: "baz" },
+      ],
+      modifier: MISSING,
+    });
+    expect(parseRosPath(String.raw`""".baz`)).toBeUndefined();
+    expect(parseRosPath(String.raw`"\a".baz`)).toBeUndefined();
+    expect(parseRosPath(String.raw`"\".baz`)).toBeUndefined();
+    expect(parseRosPath(String.raw`"x.baz`)).toBeUndefined();
+    expect(parseRosPath(String.raw`/foo.""".baz`)).toBeUndefined();
+    expect(parseRosPath(String.raw`/foo."\a".baz`)).toBeUndefined();
+    expect(parseRosPath(String.raw`/foo."\".baz`)).toBeUndefined();
+    expect(parseRosPath(String.raw`/foo."x.baz`)).toBeUndefined();
+  });
+
   it("parses slices", () => {
     expect(parseRosPath("/topic.foo[0].bar")).toEqual({
       topicName: "/topic",
+      topicNameRepr: "/topic",
       messagePath: [
-        { type: "name", name: "foo" },
+        { type: "name", name: "foo", repr: "foo" },
         { type: "slice", start: 0, end: 0 },
-        { type: "name", name: "bar" },
+        { type: "name", name: "bar", repr: "bar" },
       ],
       modifier: MISSING,
     });
     expect(parseRosPath("/topic.foo[1:3].bar")).toEqual({
       topicName: "/topic",
+      topicNameRepr: "/topic",
       messagePath: [
-        { type: "name", name: "foo" },
+        { type: "name", name: "foo", repr: "foo" },
         { type: "slice", start: 1, end: 3 },
-        { type: "name", name: "bar" },
+        { type: "name", name: "bar", repr: "bar" },
       ],
       modifier: MISSING,
     });
     expect(parseRosPath("/topic.foo[1:].bar")).toEqual({
       topicName: "/topic",
+      topicNameRepr: "/topic",
       messagePath: [
-        { type: "name", name: "foo" },
+        { type: "name", name: "foo", repr: "foo" },
         { type: "slice", start: 1, end: Infinity },
-        { type: "name", name: "bar" },
+        { type: "name", name: "bar", repr: "bar" },
       ],
       modifier: MISSING,
     });
     expect(parseRosPath("/topic.foo[:10].bar")).toEqual({
       topicName: "/topic",
+      topicNameRepr: "/topic",
       messagePath: [
-        { type: "name", name: "foo" },
+        { type: "name", name: "foo", repr: "foo" },
         { type: "slice", start: 0, end: 10 },
-        { type: "name", name: "bar" },
+        { type: "name", name: "bar", repr: "bar" },
       ],
       modifier: MISSING,
     });
     expect(parseRosPath("/topic.foo[:].bar")).toEqual({
       topicName: "/topic",
+      topicNameRepr: "/topic",
       messagePath: [
-        { type: "name", name: "foo" },
+        { type: "name", name: "foo", repr: "foo" },
         { type: "slice", start: 0, end: Infinity },
-        { type: "name", name: "bar" },
+        { type: "name", name: "bar", repr: "bar" },
       ],
       modifier: MISSING,
     });
     expect(parseRosPath("/topic.foo[$a].bar")).toEqual({
       topicName: "/topic",
+      topicNameRepr: "/topic",
       messagePath: [
-        { type: "name", name: "foo" },
+        { type: "name", name: "foo", repr: "foo" },
         {
           type: "slice",
           start: { variableName: "a", startLoc: "/topic.foo[".length },
           end: { variableName: "a", startLoc: "/topic.foo[".length },
         },
-        { type: "name", name: "bar" },
+        { type: "name", name: "bar", repr: "bar" },
       ],
       modifier: MISSING,
     });
     expect(parseRosPath("/topic.foo[$a:$b].bar")).toEqual({
       topicName: "/topic",
+      topicNameRepr: "/topic",
       messagePath: [
-        { type: "name", name: "foo" },
+        { type: "name", name: "foo", repr: "foo" },
         {
           type: "slice",
           start: { variableName: "a", startLoc: "/topic.foo[".length },
           end: { variableName: "b", startLoc: "/topic.foo[$a:".length },
         },
-        { type: "name", name: "bar" },
+        { type: "name", name: "bar", repr: "bar" },
       ],
       modifier: MISSING,
     });
     expect(parseRosPath("/topic.foo[$a:].bar")).toEqual({
       topicName: "/topic",
+      topicNameRepr: "/topic",
       messagePath: [
-        { type: "name", name: "foo" },
+        { type: "name", name: "foo", repr: "foo" },
         {
           type: "slice",
           start: { variableName: "a", startLoc: "/topic.foo[".length },
           end: Infinity,
         },
-        { type: "name", name: "bar" },
+        { type: "name", name: "bar", repr: "bar" },
       ],
       modifier: MISSING,
     });
     expect(parseRosPath("/topic.foo[$a:5].bar")).toEqual({
       topicName: "/topic",
+      topicNameRepr: "/topic",
       messagePath: [
-        { type: "name", name: "foo" },
+        { type: "name", name: "foo", repr: "foo" },
         { type: "slice", start: { variableName: "a", startLoc: "/topic.foo[".length }, end: 5 },
-        { type: "name", name: "bar" },
+        { type: "name", name: "bar", repr: "bar" },
       ],
       modifier: MISSING,
     });
     expect(parseRosPath("/topic.foo[:$b].bar")).toEqual({
       topicName: "/topic",
+      topicNameRepr: "/topic",
       messagePath: [
-        { type: "name", name: "foo" },
+        { type: "name", name: "foo", repr: "foo" },
         { type: "slice", start: 0, end: { variableName: "b", startLoc: "/topic.foo[:".length } },
-        { type: "name", name: "bar" },
+        { type: "name", name: "bar", repr: "bar" },
       ],
       modifier: MISSING,
     });
     expect(parseRosPath("/topic.foo[2:$b].bar")).toEqual({
       topicName: "/topic",
+      topicNameRepr: "/topic",
       messagePath: [
-        { type: "name", name: "foo" },
+        { type: "name", name: "foo", repr: "foo" },
         { type: "slice", start: 2, end: { variableName: "b", startLoc: "/topic.foo[2:".length } },
-        { type: "name", name: "bar" },
+        { type: "name", name: "bar", repr: "bar" },
       ],
       modifier: MISSING,
     });
@@ -177,8 +278,9 @@ describe("parseRosPath", () => {
       ),
     ).toEqual({
       topicName: "/topic",
+      topicNameRepr: "/topic",
       messagePath: [
-        { type: "name", name: "foo" },
+        { type: "name", name: "foo", repr: "foo" },
         {
           type: "filter",
           path: ["bar"],
@@ -187,7 +289,7 @@ describe("parseRosPath", () => {
           valueLoc: "/topic.foo{bar==".length,
           repr: "bar=='baz'",
         },
-        { type: "name", name: "a" },
+        { type: "name", name: "a", repr: "a" },
         {
           type: "filter",
           path: ["bar"],
@@ -196,7 +298,7 @@ describe("parseRosPath", () => {
           valueLoc: "/topic.foo{bar=='baz'}.a{bar==".length,
           repr: 'bar=="baz"',
         },
-        { type: "name", name: "b" },
+        { type: "name", name: "b", repr: "b" },
         {
           type: "filter",
           path: ["bar"],
@@ -205,7 +307,7 @@ describe("parseRosPath", () => {
           valueLoc: "/topic.foo{bar=='baz'}.a{bar==\"baz\"}.b{bar==".length,
           repr: "bar==3",
         },
-        { type: "name", name: "c" },
+        { type: "name", name: "c", repr: "c" },
         {
           type: "filter",
           path: ["bar"],
@@ -214,7 +316,7 @@ describe("parseRosPath", () => {
           valueLoc: "/topic.foo{bar=='baz'}.a{bar==\"baz\"}.b{bar==3}.c{bar==".length,
           repr: "bar==-1",
         },
-        { type: "name", name: "d" },
+        { type: "name", name: "d", repr: "d" },
         {
           type: "filter",
           path: ["bar"],
@@ -223,7 +325,7 @@ describe("parseRosPath", () => {
           valueLoc: "/topic.foo{bar=='baz'}.a{bar==\"baz\"}.b{bar==3}.c{bar==-1}.d{bar==".length,
           repr: "bar==false",
         },
-        { type: "name", name: "e" },
+        { type: "name", name: "e", repr: "e" },
         { type: "slice", start: 0, end: Infinity },
         {
           type: "filter",
@@ -244,6 +346,7 @@ describe("parseRosPath", () => {
   it("parses filters on top level topic", () => {
     expect(parseRosPath("/topic{foo=='bar'}{baz==2}.a[3].b{x=='y'}")).toEqual({
       topicName: "/topic",
+      topicNameRepr: "/topic",
       messagePath: [
         {
           type: "filter",
@@ -261,9 +364,9 @@ describe("parseRosPath", () => {
           valueLoc: "/topic{foo=='bar'}{baz==".length,
           repr: "baz==2",
         },
-        { type: "name", name: "a" },
+        { type: "name", name: "a", repr: "a" },
         { type: "slice", start: 3, end: 3 },
-        { type: "name", name: "b" },
+        { type: "name", name: "b", repr: "b" },
         {
           type: "filter",
           path: ["x"],
@@ -280,8 +383,9 @@ describe("parseRosPath", () => {
   it("parses filters with global variables", () => {
     expect(parseRosPath("/topic.foo{bar==$}.a{bar==$my_var_1}")).toEqual({
       topicName: "/topic",
+      topicNameRepr: "/topic",
       messagePath: [
-        { type: "name", name: "foo" },
+        { type: "name", name: "foo", repr: "foo" },
         {
           type: "filter",
           path: ["bar"],
@@ -290,7 +394,7 @@ describe("parseRosPath", () => {
           valueLoc: "/topic.foo{bar==".length,
           repr: "bar==$",
         },
-        { type: "name", name: "a" },
+        { type: "name", name: "a", repr: "a" },
         {
           type: "filter",
           path: ["bar"],
@@ -305,29 +409,38 @@ describe("parseRosPath", () => {
   });
 
   it("parses unfinished strings", () => {
-    expect(parseRosPath("/")).toEqual({ topicName: "/", messagePath: [], modifier: MISSING });
+    expect(parseRosPath("/")).toEqual({
+      topicName: "/",
+      topicNameRepr: "/",
+      messagePath: [],
+      modifier: MISSING,
+    });
     expect(parseRosPath("/topic.")).toEqual({
       topicName: "/topic",
-      messagePath: [{ type: "name", name: "" }],
+      topicNameRepr: "/topic",
+      messagePath: [{ type: "name", name: "", repr: "" }],
       modifier: MISSING,
     });
     expect(parseRosPath("/topic.hi.")).toEqual({
       topicName: "/topic",
+      topicNameRepr: "/topic",
       messagePath: [
-        { type: "name", name: "hi" },
-        { type: "name", name: "" },
+        { type: "name", name: "hi", repr: "hi" },
+        { type: "name", name: "", repr: "" },
       ],
       modifier: MISSING,
     });
     expect(parseRosPath("/topic.hi.@")).toEqual({
       topicName: "/topic",
-      messagePath: [{ type: "name", name: "hi" }],
+      topicNameRepr: "/topic",
+      messagePath: [{ type: "name", name: "hi", repr: "hi" }],
       modifier: "",
     });
     expect(parseRosPath("/topic.foo{}")).toEqual({
       topicName: "/topic",
+      topicNameRepr: "/topic",
       messagePath: [
-        { type: "name", name: "foo" },
+        { type: "name", name: "foo", repr: "foo" },
         {
           type: "filter",
           path: [],
@@ -341,8 +454,9 @@ describe("parseRosPath", () => {
     });
     expect(parseRosPath("/topic.foo{bar}")).toEqual({
       topicName: "/topic",
+      topicNameRepr: "/topic",
       messagePath: [
-        { type: "name", name: "foo" },
+        { type: "name", name: "foo", repr: "foo" },
         {
           type: "filter",
           path: ["bar"],
@@ -356,8 +470,9 @@ describe("parseRosPath", () => {
     });
     expect(parseRosPath("/topic.foo{==1}")).toEqual({
       topicName: "/topic",
+      topicNameRepr: "/topic",
       messagePath: [
-        { type: "name", name: "foo" },
+        { type: "name", name: "foo", repr: "foo" },
         {
           type: "filter",
           path: [],
@@ -371,8 +486,9 @@ describe("parseRosPath", () => {
     });
     expect(parseRosPath("/topic.foo{==-3}")).toEqual({
       topicName: "/topic",
+      topicNameRepr: "/topic",
       messagePath: [
-        { type: "name", name: "foo" },
+        { type: "name", name: "foo", repr: "foo" },
         {
           type: "filter",
           path: [],
@@ -393,7 +509,6 @@ describe("parseRosPath", () => {
   });
 
   it("returns undefined for invalid strings", () => {
-    expect(parseRosPath("-100")).toBeUndefined();
     expect(parseRosPath("[100]")).toBeUndefined();
     expect(parseRosPath("[-100]")).toBeUndefined();
     expect(parseRosPath("/topic.no.2d.arrays[0][1]")).toBeUndefined();

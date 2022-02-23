@@ -16,8 +16,6 @@ import { useCallback, useMemo, useRef } from "react";
 
 import { useShallowMemo } from "@foxglove/hooks";
 import * as PanelAPI from "@foxglove/studio-base/PanelAPI";
-import { TypicalFilterNames } from "@foxglove/studio-base/components/MessagePathSyntax/isTypicalFilterName";
-import parseRosPath from "@foxglove/studio-base/components/MessagePathSyntax/parseRosPath";
 import useChangeDetector from "@foxglove/studio-base/hooks/useChangeDetector";
 import useDeepMemo from "@foxglove/studio-base/hooks/useDeepMemo";
 import useGlobalVariables, {
@@ -32,7 +30,9 @@ import {
 } from "@foxglove/studio-base/util/selectors";
 
 import { MessagePathFilter, MessagePathStructureItem, RosPath } from "./constants";
+import { TypicalFilterNames } from "./isTypicalFilterName";
 import { messagePathStructures } from "./messagePathsForDatatype";
+import parseRosPath, { quoteTopicNameIfNeeded } from "./parseRosPath";
 
 export type MessagePathDataItem = {
   value: unknown; // The actual value.
@@ -295,7 +295,7 @@ export function getMessagePathDataItems(
         !nextStructIsJson && next
           ? next
           : { structureType: "primitive", primitiveType: "json", datatype: "" };
-      traverse(value[pathItem.name], pathIndex + 1, `${path}.${pathItem.name}`, actualNext);
+      traverse(value[pathItem.name], pathIndex + 1, `${path}.${pathItem.repr}`, actualNext);
     } else if (
       pathItem.type === "slice" &&
       (structureItem.structureType === "array" || structureIsJson)
@@ -361,7 +361,7 @@ export function getMessagePathDataItems(
       }
     } else if (structureIsJson && pathItem.type === "name") {
       // Use getField just in case.
-      traverse(value[pathItem.name], pathIndex + 1, `${path}.${pathItem.name}`, {
+      traverse(value[pathItem.name], pathIndex + 1, `${path}.${pathItem.repr}`, {
         structureType: "primitive",
         primitiveType: "json",
         datatype: "",
@@ -374,7 +374,7 @@ export function getMessagePathDataItems(
   }
   const structure = structures[topic.datatype];
   if (structure) {
-    traverse(message.message, 0, filledInPath.topicName, structure);
+    traverse(message.message, 0, quoteTopicNameIfNeeded(filledInPath.topicName), structure);
   }
   return queriedData;
 }

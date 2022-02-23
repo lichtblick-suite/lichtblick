@@ -14,12 +14,12 @@
 #
 # For more examples, please see parseRosPath.test.js
 main -> topicName messagePath:? modifier:?
-  {% (d) => ({ topicName: d[0], messagePath: d[1] || [], modifier: d[2] }) %}
+  {% (d) => ({ topicName: d[0].value, topicNameRepr: d[0].repr, messagePath: d[1] || [], modifier: d[2] }) %}
 
 ## Primitives
 
 # A typical id like `some_thing_123`.
-id -> [a-zA-Z0-9_]:+
+id -> [a-zA-Z0-9_-]:+
   {% (d) => d[0].join("") %}
 
 # Integer.
@@ -41,10 +41,26 @@ value -> integer  {% (d) => d[0] %}
 	   | variable {% (d) => d[0] %}
 
 ## Topic part. Basically an id but with (optional) slashes.
-topicName -> slashID:+     {% (d) => d[0].join("") %}
-           | id slashID:*  {% (d) => d[0] + d[1].join("") %}
+topicName -> slashID:+     {% (d) => ({ value: d[0].join(""), repr: d[0].join("") }) %}
+           | id slashID:*  {% (d) => ({ value: d[0] + d[1].join(""), repr: d[0] + d[1].join("") }) %}
+           | quotedString  {% id %}
 slashID -> "/" id:?
   {% (d) => d.join("") %}
+
+quotedString ->
+  "\""
+  (
+    [^"\\]
+    | "\\\\" {% d => "\\" %}
+    | "\\\"" {% d => `"` %}
+  ):*
+  "\""
+  {%
+    d => ({
+      value: d[1].join(''),
+      repr: `"${d[1].join('').replace(/[\\"]/g, char => `\\${char}`)}"`
+    })
+  %}
 
 ## `messagePath` part.
 
@@ -53,7 +69,12 @@ slashID -> "/" id:?
 # and the autocomplete is actually shown.
 # Return type: `MessagePathPart[]`.
 messagePath -> messagePathElement:* ".":?
-  {% (d) => d[0].reduce((acc, arr) => acc.concat(arr), []).concat(d[1] ? [{ type: "name", name: "" }] : []) %}
+  {%
+    (d) =>
+      d[0]
+        .reduce((acc, arr) => acc.concat(arr), [])
+        .concat(d[1] ? [{ type: "name", name: "", repr: "" }] : [])
+  %}
 
 # An element of the `messagePart`, of the form `field[10:20]{some_id==10}`.
 # Multiple slices are not allowed (no 2d arrays in ROS).
@@ -63,8 +84,9 @@ messagePathElement ->
   | filter {% id %}
 
 # Name part is just an id, e.g. `field`.
-name -> id
-  {% (d) => ({ type: "name", name: d[0] }) %}
+name ->
+  id             {% (d) => ({ type: "name", name: d[0], repr: d[0] }) %}
+  | quotedString {% (d) => ({ type: "name", name: d[0].value, repr: d[0].repr }) %}
 
 # Slice part; can be a single array index `[0]` or multiple `[0:10]`, or even infinite `[:]`.
 sliceVal -> integer {% (d) => Number(d[0].value) %} | variable {% (d) => (d[0].value) %}

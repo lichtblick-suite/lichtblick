@@ -15,6 +15,7 @@ import { memoize } from "lodash";
 import memoizeWeak from "memoize-weak";
 
 import { isTypicalFilterName } from "@foxglove/studio-base/components/MessagePathSyntax/isTypicalFilterName";
+import { quoteFieldNameIfNeeded } from "@foxglove/studio-base/components/MessagePathSyntax/parseRosPath";
 import { RosDatatypes } from "@foxglove/studio-base/types/RosDatatypes";
 import { assertNever } from "@foxglove/studio-base/util/assertNever";
 import naturalSort from "@foxglove/studio-base/util/naturalSort";
@@ -155,7 +156,7 @@ export function messagePathsForDatatype(
     }
     if (structureItem.structureType === "message") {
       for (const [name, item] of Object.entries(structureItem.nextByName)) {
-        traverse(item, `${builtString}.${name}`);
+        traverse(item, `${builtString}.${quoteFieldNameIfNeeded(name)}`);
       }
     } else if (structureItem.structureType === "array") {
       if (structureItem.next.structureType === "message") {

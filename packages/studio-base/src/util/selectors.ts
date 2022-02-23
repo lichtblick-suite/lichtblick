@@ -18,11 +18,6 @@ import { createSelector } from "reselect";
 import { Topic } from "@foxglove/studio-base/players/types";
 import { RosDatatypes } from "@foxglove/studio-base/types/RosDatatypes";
 
-export const getTopicNames = createSelector(
-  (topics: readonly Topic[]) => topics,
-  (topics: readonly Topic[]): string[] => topics.map((topic) => topic.name),
-);
-
 export const getSanitizedTopics = memoizeWeak(
   (subscribedTopics: Set<string>, providerTopics: Topic[]): string[] => {
     return intersection(

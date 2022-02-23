@@ -785,8 +785,9 @@ describe("fillInGlobalVariablesInPath", () => {
       fillInGlobalVariablesInPath(
         {
           topicName: "/foo",
+          topicNameRepr: "/foo",
           messagePath: [
-            { type: "name", name: "bar" },
+            { type: "name", name: "bar", repr: "bar" },
             {
               type: "slice",
               start: { variableName: "start", startLoc: 0 },
@@ -799,8 +800,9 @@ describe("fillInGlobalVariablesInPath", () => {
       ),
     ).toEqual({
       topicName: "/foo",
+      topicNameRepr: "/foo",
       messagePath: [
-        { name: "bar", type: "name" },
+        { name: "bar", type: "name", repr: "bar" },
         { type: "slice", start: 10, end: 123 },
       ],
     });
@@ -810,8 +812,9 @@ describe("fillInGlobalVariablesInPath", () => {
       fillInGlobalVariablesInPath(
         {
           topicName: "/foo",
+          topicNameRepr: "/foo",
           messagePath: [
-            { type: "name", name: "bar" },
+            { type: "name", name: "bar", repr: "bar" },
             {
               type: "slice",
               start: { variableName: "start", startLoc: 0 },
@@ -824,8 +827,9 @@ describe("fillInGlobalVariablesInPath", () => {
       ),
     ).toEqual({
       topicName: "/foo",
+      topicNameRepr: "/foo",
       messagePath: [
-        { name: "bar", type: "name" },
+        { type: "name", name: "bar", repr: "bar" },
         { type: "slice", start: 0, end: Infinity },
       ],
     });
@@ -836,6 +840,7 @@ describe("fillInGlobalVariablesInPath", () => {
       fillInGlobalVariablesInPath(
         {
           topicName: "/foo",
+          topicNameRepr: "/foo",
           messagePath: [
             {
               type: "filter",
@@ -852,6 +857,7 @@ describe("fillInGlobalVariablesInPath", () => {
       ),
     ).toEqual({
       topicName: "/foo",
+      topicNameRepr: "/foo",
       messagePath: [
         { type: "filter", path: ["bar"], value: 123, nameLoc: 0, valueLoc: 0, repr: "" },
       ],
