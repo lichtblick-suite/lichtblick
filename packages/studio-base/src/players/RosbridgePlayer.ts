@@ -119,6 +119,7 @@ export default class RosbridgePlayer implements Player {
     const rosClient = new roslib.Ros({ url: this._url, transportLibrary: "workersocket" });
 
     rosClient.on("connection", () => {
+      log.info(`Connected to ${this._url}`);
       if (this._closed) {
         return;
       }
@@ -127,7 +128,7 @@ export default class RosbridgePlayer implements Player {
       this._rosClient = rosClient;
 
       this._setupPublishers();
-      void this._requestTopics();
+      void this._requestTopics({ forceUpdate: true });
     });
 
     rosClient.on("error", (err) => {
@@ -167,7 +168,8 @@ export default class RosbridgePlayer implements Player {
     });
   };
 
-  private _requestTopics = async (): Promise<void> => {
+  private async _requestTopics(opt?: { forceUpdate: boolean }): Promise<void> {
+    const { forceUpdate = false } = opt ?? {};
     // clear problems before each topics request so we don't have stale problems from previous failed requests
     this._problems.removeProblems((id) => id.startsWith("requestTopics:"));
 
@@ -244,9 +246,11 @@ export default class RosbridgePlayer implements Player {
         this._parsedMessageDefinitionsByTopic[topicName] = parsedDefinition;
       }
 
-      // Sort them for easy comparison. If nothing has changed here, bail out.
+      // We call requestTopics on a timeout to check for new topics. If there are no changes to topics
+      // we want to bail and avoid updating readers, subscribers, etc.
+      // However, during a re-connect, we _do_ want to refresh this list and re-subscribe
       const sortedTopics = sortBy(topics, "name");
-      if (isEqual(sortedTopics, this._providerTopics)) {
+      if (isEqual(sortedTopics, this._providerTopics) && !forceUpdate) {
         return;
       }
 
@@ -290,6 +294,7 @@ export default class RosbridgePlayer implements Player {
         this._services = new Map();
       }
     } catch (error) {
+      log.error(error);
       clearTimeout(topicsStallWarningTimeout);
       this._problems.removeProblem("topicsAndRawTypesTimeout");
 
@@ -302,9 +307,9 @@ export default class RosbridgePlayer implements Player {
       this._emitState();
 
       // Regardless of what happens, request topics again in a little bit.
-      this._requestTopicsTimeout = setTimeout(this._requestTopics, 3000);
+      this._requestTopicsTimeout = setTimeout(() => void this._requestTopics(), 3000);
     }
-  };
+  }
 
   // Potentially performance-sensitive; await can be expensive
   // eslint-disable-next-line @typescript-eslint/promise-function-async
