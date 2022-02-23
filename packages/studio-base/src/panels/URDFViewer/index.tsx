@@ -3,7 +3,7 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 import { ComboBox, IDropdownOption, Toggle } from "@fluentui/react";
-import { Box, Stack } from "@mui/material";
+import { makeStyles } from "@mui/styles";
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { useResizeDetector } from "react-resize-detector";
 
@@ -51,7 +51,40 @@ const defaultConfig: Config = {
   opacity: 0.75,
 };
 
+const useStyles = makeStyles({
+  root: {
+    display: "flex",
+    flexDirection: "column",
+    flex: "auto",
+    overflow: "hidden",
+  },
+  toolbar: {
+    display: "flex",
+    flexGrow: 1,
+    alignItems: "baseline",
+  },
+  content: {
+    display: "flex",
+    flexDirection: "column",
+    height: "100%",
+  },
+  viewer: {
+    display: "flex",
+    flex: "auto",
+    overflow: "hidden",
+  },
+  inner: {
+    flex: "auto",
+    position: "relative",
+  },
+  canvasWrapper: {
+    position: "absolute",
+    inset: 0,
+  },
+});
+
 function URDFViewer({ config, saveConfig }: Props) {
+  const classes = useStyles();
   const { customJointValues, jointStatesTopic, opacity } = config;
   const [canvas, setCanvas] = useState<HTMLCanvasElement | ReactNull>(ReactNull);
 
@@ -204,9 +237,9 @@ function URDFViewer({ config, saveConfig }: Props) {
   }, [assets, robotDescriptionAsset]);
 
   return (
-    <Stack flex="auto" overflow="hidden">
+    <div className={classes.root}>
       <PanelToolbar helpContent={helpContent}>
-        <Stack direction="row" flexGrow={1} alignItems="baseline">
+        <div className={classes.toolbar}>
           <Toggle
             inlineLabel
             offText="Manual joint control"
@@ -232,20 +265,20 @@ function URDFViewer({ config, saveConfig }: Props) {
               }}
             />
           )}
-        </Stack>
+        </div>
       </PanelToolbar>
-      <Stack height="100%">
+      <div className={classes.content}>
         {messageBar}
         {model == undefined ? (
           <EmptyState>Drag and drop a URDF file to visualize it.</EmptyState>
         ) : (
-          <Box display="flex" flex="auto" overflow="hidden">
-            <Box ref={resizeRef} flex="auto" position="relative">
-              <Box position="absolute" sx={{ inset: 0 }}>
+          <div className={classes.viewer}>
+            <div className={classes.inner} ref={resizeRef}>
+              <div className={classes.canvasWrapper}>
                 <CameraListener cameraStore={cameraStore} shiftKeys={true}>
                   <canvas ref={(el) => setCanvas(el)} width={width} height={height} />
                 </CameraListener>
-              </Box>
+              </div>
               <OverlayControls
                 assetOptions={assetOptions}
                 selectedAssetId={selectedAssetId}
@@ -265,7 +298,7 @@ function URDFViewer({ config, saveConfig }: Props) {
                   setCameraState(newState);
                 }}
               />
-            </Box>
+            </div>
             {useCustomJointValues && (
               <JointValueSliders
                 model={model}
@@ -273,10 +306,10 @@ function URDFViewer({ config, saveConfig }: Props) {
                 onChange={setCustomJointValues}
               />
             )}
-          </Box>
+          </div>
         )}
-      </Stack>
-    </Stack>
+      </div>
+    </div>
   );
 }
 

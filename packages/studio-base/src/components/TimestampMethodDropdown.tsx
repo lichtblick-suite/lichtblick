@@ -3,7 +3,8 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 import { AccessTime as AccessTimeIcon, Check as CheckIcon } from "@mui/icons-material";
-import { IconButton, IconButtonProps, Menu, MenuItem } from "@mui/material";
+import { IconButton, IconButtonProps, Menu, MenuItem, Theme } from "@mui/material";
+import { makeStyles } from "@mui/styles";
 import { useCallback, useMemo } from "react";
 
 import * as PanelAPI from "@foxglove/studio-base/PanelAPI";
@@ -40,7 +41,22 @@ type Props = {
   onTimestampMethodChange?: (arg0: TimestampMethod, index?: number) => void;
 };
 
+const useStyles = makeStyles((theme: Theme) => ({
+  iconButton: {
+    "&.MuiIconButton-root": {
+      color: theme.palette.text.secondary,
+      padding: theme.spacing(0.375),
+
+      "&:hover": {
+        color: theme.palette.text.primary,
+      },
+    },
+  },
+  checkIcon: { marginLeft: theme.spacing(2) },
+}));
+
 export default function TimestampMethodDropdown(props: Props): JSX.Element {
+  const classes = useStyles();
   const [anchorEl, setAnchorEl] = React.useState<undefined | HTMLElement>(undefined);
   const open = Boolean(anchorEl);
 
@@ -85,11 +101,11 @@ export default function TimestampMethodDropdown(props: Props): JSX.Element {
       <IconButton
         size="small"
         id="timestamp-method-button"
-        aria-controls={open ? "basic-menu" : undefined}
-        aria-haspopup="true"
+        className={classes.iconButton}
+        aria-controls={open ? "timestamp-method-menu" : undefined}
         aria-expanded={open ? "true" : undefined}
+        aria-haspopup="true"
         onClick={handleClick}
-        sx={{ padding: 0.375, color: "text.secondary", "&:hover": { color: "text.primary" } }}
         {...iconButtonProps}
       >
         <AccessTimeIcon fontSize="inherit" />
@@ -117,7 +133,7 @@ export default function TimestampMethodDropdown(props: Props): JSX.Element {
           >
             {method.label}
             {timestampMethod === method.value && (
-              <CheckIcon fontSize="small" sx={{ marginLeft: 2 }} />
+              <CheckIcon className={classes.checkIcon} fontSize="small" />
             )}
           </MenuItem>
         ))}

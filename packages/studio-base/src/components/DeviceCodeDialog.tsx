@@ -13,7 +13,8 @@ import {
   Spinner,
   SpinnerSize,
 } from "@fluentui/react";
-import { Stack } from "@mui/material";
+import { Theme } from "@mui/material";
+import { makeStyles } from "@mui/styles";
 import { useEffect, useMemo } from "react";
 import { useAsync, useMountedState } from "react-use";
 
@@ -28,8 +29,28 @@ type DeviceCodePanelProps = {
   onClose?: (session?: Session) => void;
 };
 
+const useStyles = makeStyles((theme: Theme) => ({
+  content: {
+    display: "flex",
+    flexDirection: "column",
+    gap: theme.spacing(2.5),
+  },
+  contentStack: {
+    display: "flex",
+    flexDirection: "column",
+    gap: theme.spacing(1),
+    lineHeight: "1.3",
+  },
+  spinnerWrapper: {
+    display: "flex",
+    flexGrow: 1,
+    justifyContent: "space-between",
+  },
+}));
+
 // Show instructions on opening the browser and entering the device code
 export default function DeviceCodeDialog(props: DeviceCodePanelProps): JSX.Element {
+  const classes = useStyles();
   const theme = useTheme();
   const isMounted = useMountedState();
   const api = useConsoleApi();
@@ -107,8 +128,8 @@ export default function DeviceCodeDialog(props: DeviceCodePanelProps): JSX.Eleme
     }
     const { userCode, verificationUri } = deviceCode;
     return (
-      <Stack spacing={2.5}>
-        <Stack spacing={1} sx={{ lineHeight: "1.3" }}>
+      <div className={classes.content}>
+        <div className={classes.contentStack}>
           <Text variant="medium" block>
             To complete sign in, follow the instructions in your browser with the code below.
           </Text>
@@ -127,10 +148,10 @@ export default function DeviceCodeDialog(props: DeviceCodePanelProps): JSX.Eleme
             If your browser didn’t open automatically, please{" "}
             <Link href={`${verificationUri}?user_code=${userCode}`}>click here</Link> to continue.
           </Text>
-        </Stack>
-      </Stack>
+        </div>
+      </div>
     );
-  }, [deviceCode, theme]);
+  }, [classes, deviceCode, theme.fonts.superLarge.fontSize, theme.semanticColors.disabledBodyText]);
 
   if (
     deviceCodeError != undefined ||
@@ -151,7 +172,7 @@ export default function DeviceCodeDialog(props: DeviceCodePanelProps): JSX.Eleme
     <Dialog hidden={false} minWidth={440} title="Sign in">
       {dialogContent}
       <DialogFooter styles={{ action: { display: "block" } }}>
-        <Stack direction="row" flexGrow={1} justifyContent="space-between">
+        <div className={classes.spinnerWrapper}>
           <Spinner
             size={SpinnerSize.small}
             label={deviceCode ? "Awaiting authentication…" : "Connecting…"}
@@ -164,7 +185,7 @@ export default function DeviceCodeDialog(props: DeviceCodePanelProps): JSX.Eleme
             }}
           />
           <DefaultButton text="Cancel" onClick={() => onClose?.()} />
-        </Stack>
+        </div>
       </DialogFooter>
     </Dialog>
   );

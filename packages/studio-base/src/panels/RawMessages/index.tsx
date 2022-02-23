@@ -17,7 +17,7 @@ import CheckboxMarkedIcon from "@mdi/svg/svg/checkbox-marked.svg";
 import PlusMinusIcon from "@mdi/svg/svg/plus-minus.svg";
 import LessIcon from "@mdi/svg/svg/unfold-less-horizontal.svg";
 import MoreIcon from "@mdi/svg/svg/unfold-more-horizontal.svg";
-import { Stack } from "@mui/material";
+import { Theme } from "@mui/material";
 import { makeStyles } from "@mui/styles";
 // eslint-disable-next-line no-restricted-imports
 import { first, isEqual, get, last } from "lodash";
@@ -104,7 +104,27 @@ function maybeDeepParse(val: unknown) {
   return val;
 }
 
-const useStyles = makeStyles({
+const useStyles = makeStyles((theme: Theme) => ({
+  root: {
+    display: "flex",
+    flexDirection: "column",
+    flex: "auto",
+    overflow: "hidden",
+    position: "relative",
+  },
+  topic: {
+    display: "flex",
+    flexDirection: "column",
+    flex: "auto",
+    overflow: "hidden auto",
+    paddingLeft: theme.spacing(0.75),
+    fontFamily: fonts.SANS_SERIF,
+    fontFeatureSettings: `${fonts.SANS_SERIF_FEATURE_SETTINGS}, "zero"`,
+  },
+  diff: {
+    display: "flex",
+    flex: "auto",
+  },
   iconWrapper: {
     display: "inline",
     paddingRight: 40, // To make it so the icons appear when you move the mouse somewhat close.
@@ -119,7 +139,7 @@ const useStyles = makeStyles({
     width: "100%",
     lineHeight: "20px",
   },
-});
+}));
 
 function RawMessages(props: Props) {
   const theme = useTheme();
@@ -365,15 +385,7 @@ function RawMessages(props: Props) {
       : CheckboxBlankOutlineIcon;
 
     return (
-      <Stack
-        flex="auto"
-        overflow="hidden auto"
-        paddingLeft={0.75}
-        sx={{
-          fontFamily: fonts.SANS_SERIF,
-          fontFeatureSettings: `${fonts.SANS_SERIF_FEATURE_SETTINGS}, "zero"`,
-        }}
-      >
+      <div className={classes.topic}>
         <Metadata
           data={data}
           diffData={diffData}
@@ -547,7 +559,7 @@ function RawMessages(props: Props) {
             />
           </>
         )}
-      </Stack>
+      </div>
     );
   }, [
     topicPath,
@@ -572,7 +584,7 @@ function RawMessages(props: Props) {
   ]);
 
   return (
-    <Stack flex="auto" overflow="hidden" position="relative">
+    <div className={classes.root}>
       <PanelToolbar helpContent={helpContent}>
         <Icon tooltip="Toggle diff" size="medium" fade onClick={onToggleDiff} active={diffEnabled}>
           <PlusMinusIcon />
@@ -595,23 +607,21 @@ function RawMessages(props: Props) {
             inputStyle={{ height: 20 }}
           />
           {diffEnabled && (
-            <Stack direction="row" flex="auto">
+            <div className={classes.diff}>
               <Tooltip contents="Diff method" placement="top">
-                <>
-                  <Dropdown
-                    value={diffMethod}
-                    onChange={(newDiffMethod) => saveConfig({ diffMethod: newDiffMethod })}
-                    noPortal
-                    btnStyle={{ padding: "4px 10px" }}
-                  >
-                    <DropdownItem value={PREV_MSG_METHOD}>
-                      <span>{PREV_MSG_METHOD}</span>
-                    </DropdownItem>
-                    <DropdownItem value={CUSTOM_METHOD}>
-                      <span>custom</span>
-                    </DropdownItem>
-                  </Dropdown>
-                </>
+                <Dropdown
+                  value={diffMethod}
+                  onChange={(newDiffMethod) => saveConfig({ diffMethod: newDiffMethod })}
+                  noPortal
+                  btnStyle={{ padding: "4px 10px" }}
+                >
+                  <DropdownItem value={PREV_MSG_METHOD}>
+                    <span>{PREV_MSG_METHOD}</span>
+                  </DropdownItem>
+                  <DropdownItem value={CUSTOM_METHOD}>
+                    <span>custom</span>
+                  </DropdownItem>
+                </Dropdown>
               </Tooltip>
               {diffMethod === CUSTOM_METHOD ? (
                 <MessagePathInput
@@ -622,12 +632,12 @@ function RawMessages(props: Props) {
                   {...(topic ? { prioritizedDatatype: topic.datatype } : {})}
                 />
               ) : undefined}
-            </Stack>
+            </div>
           )}
         </div>
       </PanelToolbar>
       {renderSingleTopicOrDiffOutput()}
-    </Stack>
+    </div>
   );
 }
 

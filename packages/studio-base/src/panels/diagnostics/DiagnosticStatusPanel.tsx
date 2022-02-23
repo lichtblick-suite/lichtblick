@@ -11,7 +11,8 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { Autocomplete, TextField, Stack } from "@mui/material";
+import { Autocomplete, TextField } from "@mui/material";
+import { makeStyles } from "@mui/styles";
 import { sortBy } from "lodash";
 import { useMemo } from "react";
 
@@ -41,8 +42,25 @@ type Props = {
   config: Config;
   saveConfig: (arg0: Partial<Config>) => void;
 };
+
+const useStyles = makeStyles({
+  root: {
+    display: "flex",
+    flexDirection: "column",
+    flex: "auto",
+    overflow: "scroll",
+  },
+  content: {
+    display: "flex",
+    flexDirection: "column",
+    flex: "auto",
+    overflowY: "auto",
+  },
+});
+
 // component to display a single diagnostic status from list
 function DiagnosticStatusPanel(props: Props) {
+  const classes = useStyles();
   const { saveConfig, config } = props;
   const { topics } = useDataSourceInfo();
   const { openSiblingPanel } = usePanelContext();
@@ -127,7 +145,7 @@ function DiagnosticStatusPanel(props: Props) {
     autocompleteOptions.length > 0 ? "No matches" : "Waiting for diagnostics...";
 
   return (
-    <Stack flex="auto" overflow="scroll">
+    <div className={classes.root}>
       <PanelToolbar floating helpContent={helpContent} additionalIcons={topicToRenderMenu}>
         <Autocomplete
           disablePortal
@@ -163,7 +181,7 @@ function DiagnosticStatusPanel(props: Props) {
         />
       </PanelToolbar>
       {filteredDiagnostics.length > 0 ? (
-        <Stack flex="auto" sx={{ overflowY: "auto" }}>
+        <div className={classes.content}>
           {sortBy(filteredDiagnostics, ({ status }) => status.name.toLowerCase()).map((item) => (
             <DiagnosticStatus
               key={item.id}
@@ -178,7 +196,7 @@ function DiagnosticStatusPanel(props: Props) {
               collapsedSections={collapsedSections}
             />
           ))}
-        </Stack>
+        </div>
       ) : selectedDisplayName ? (
         <EmptyState>
           Waiting for diagnostics from <code>{selectedDisplayName}</code>
@@ -186,7 +204,7 @@ function DiagnosticStatusPanel(props: Props) {
       ) : (
         <EmptyState>No diagnostic node selected</EmptyState>
       )}
-    </Stack>
+    </div>
   );
 }
 

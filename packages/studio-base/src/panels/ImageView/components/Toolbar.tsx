@@ -2,7 +2,10 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { Box, Stack, Typography } from "@mui/material";
+import CursorIcon from "@mdi/svg/svg/cursor-default.svg";
+import { Theme, Typography } from "@mui/material";
+import { makeStyles } from "@mui/styles";
+import cx from "classnames";
 import { ReactElement, useEffect, useRef, useState } from "react";
 import Tree from "react-json-tree";
 
@@ -12,43 +15,64 @@ import ExpandingToolbar, {
 } from "@foxglove/studio-base/components/ExpandingToolbar";
 import { usePanelMousePresence } from "@foxglove/studio-base/hooks/usePanelMousePresence";
 import { useJsonTreeTheme } from "@foxglove/studio-base/util/globalConstants";
-import { colors } from "@foxglove/studio-base/util/sharedStyleConstants";
 
 import { PixelData } from "../types";
 
-const style = {
-  values: {
-    color: colors.HIGHLIGHT,
+const useStyles = makeStyles((theme: Theme) => ({
+  root: {
+    displauy: "flex",
+    flexDirection: "column",
+    position: "absolute",
+    top: 0,
+    right: 0,
+    marginRight: theme.spacing(2),
+    marginTop: theme.spacing(8),
+    visibility: "hidden",
+    zIndex: "drawer",
   },
-};
+  visible: {
+    visibility: "visible",
+  },
+  objectPane: {
+    display: "flex",
+    flexDirection: "column",
+    gap: theme.spacing(1),
+  },
+  values: {
+    display: "flex",
+    color: theme.palette.info.main,
+    gap: theme.spacing(1),
+  },
+}));
 
 enum TabName {
   SELECTED_POINT = "Selected Point",
 }
 
 function ObjectPane({ pixelData }: { pixelData: PixelData | undefined }): ReactElement {
+  const classes = useStyles();
   const jsonTreeTheme = useJsonTreeTheme();
 
   return (
-    <Stack spacing={1}>
-      <Box>
+    <div className={classes.objectPane}>
+      <div>
         <Typography variant="caption">Position:</Typography>
-        <Stack direction="row" spacing={1} sx={style.values}>
-          <Box>X:{pixelData?.position.x}</Box>
-          <Box>Y:{pixelData?.position.y}</Box>
-        </Stack>
-      </Box>
-      <Box>
+        <div className={classes.values}>
+          <div>X:{pixelData?.position.x}</div>
+          <div>Y:{pixelData?.position.y}</div>
+        </div>
+      </div>
+      <div>
         <Typography variant="caption">Color:</Typography>
-        <Stack direction="row" spacing={1} sx={style.values}>
-          <Box>R:{pixelData?.color.r}</Box>
-          <Box>G:{pixelData?.color.g}</Box>
-          <Box>B:{pixelData?.color.b}</Box>
-          <Box>A:{pixelData?.color.a}</Box>
-        </Stack>
-      </Box>
+        <div className={classes.values}>
+          <div>R:{pixelData?.color.r}</div>
+          <div>G:{pixelData?.color.g}</div>
+          <div>B:{pixelData?.color.b}</div>
+          <div>A:{pixelData?.color.a}</div>
+        </div>
+      </div>
       {pixelData?.marker && (
-        <Box>
+        <div>
           <Typography variant="caption">Marker:</Typography>
           <Tree
             data={pixelData.marker}
@@ -56,13 +80,14 @@ function ObjectPane({ pixelData }: { pixelData: PixelData | undefined }): ReactE
             invertTheme={false}
             theme={{ ...jsonTreeTheme, tree: { margin: 0 } }}
           />
-        </Box>
+        </div>
       )}
-    </Stack>
+    </div>
   );
 }
 
 export function Toolbar({ pixelData }: { pixelData: PixelData | undefined }): JSX.Element {
+  const classes = useStyles();
   const ref = useRef<HTMLDivElement>(ReactNull);
   const [selectedTab, setSelectedTab] = useState<TabName | undefined>();
 
@@ -75,33 +100,28 @@ export function Toolbar({ pixelData }: { pixelData: PixelData | undefined }): JS
   const mousePresent = usePanelMousePresence(ref);
 
   return (
-    <Stack
+    <div
       ref={ref}
-      sx={{
-        position: "absolute",
-        top: 0,
-        right: 0,
-        mr: 2,
-        mt: 8,
-        visibility: mousePresent ? "visible" : "hidden",
-        zIndex: "drawer",
-      }}
+      className={cx(classes.root, {
+        [classes.visible]: mousePresent,
+      })}
     >
       <ExpandingToolbar
         tooltip="Inspect objects"
-        iconName="CursorDefault"
+        icon={<CursorIcon />}
         selectedTab={selectedTab}
         onSelectTab={setSelectedTab}
       >
         <ToolGroup name={TabName.SELECTED_POINT}>
           <ToolGroupFixedSizePane>
-            {pixelData && <ObjectPane pixelData={pixelData} />}
-            {!pixelData && (
-              <Box sx={{ color: "secondary.dark" }}>Click an object to select it.</Box>
+            {pixelData ? (
+              <ObjectPane pixelData={pixelData} />
+            ) : (
+              <Typography color="secondary.main">Click an object to select it.</Typography>
             )}
           </ToolGroupFixedSizePane>
         </ToolGroup>
       </ExpandingToolbar>
-    </Stack>
+    </div>
   );
 }

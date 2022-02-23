@@ -1,12 +1,49 @@
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
+
 import { DefaultButton, Text, Link } from "@fluentui/react";
-import CloseIcon from "@mdi/svg/svg/close.svg";
-import { Box, Stack } from "@mui/material";
+import CloseIcon from "@mui/icons-material/Close";
+import { IconButton } from "@mui/material";
+import { makeStyles } from "@mui/styles";
+import cx from "classnames";
 import { useState, ReactElement } from "react";
 
 const MINIMUM_CHROME_VERSION = 76;
+
+const useStyles = makeStyles({
+  root: {
+    display: "flex",
+    flexDirection: "column",
+    alignItems: "center",
+    justifyContent: "center",
+    textAlign: "center",
+    width: "100vw",
+    color: "white",
+    backgroundColor: "rgba(99, 102, 241, 0.9)",
+    zIndex: 100,
+  },
+  rootPersistant: {
+    position: "fixed",
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    height: "100vh",
+  },
+  inner: {
+    padding: 12,
+    gap: 8,
+    alignItems: "center",
+  },
+  closeButton: {
+    fill: "white",
+    position: "absolute",
+    margin: 8,
+    right: 0,
+    top: 0,
+  },
+});
 
 const VersionBanner = function ({
   isChrome,
@@ -17,6 +54,7 @@ const VersionBanner = function ({
   currentVersion: number;
   isDismissable: boolean;
 }): ReactElement | ReactNull {
+  const classes = useStyles();
   const [showBanner, setShowBanner] = useState(true);
 
   if (!showBanner || currentVersion >= MINIMUM_CHROME_VERSION) {
@@ -29,42 +67,12 @@ const VersionBanner = function ({
   const fixText = isChrome ? "Update Chrome" : "Download Chrome";
 
   return (
-    <Stack
-      alignItems="center"
-      justifyContent="center"
-      sx={{
-        textAlign: "center",
-        width: "100vw",
-        color: "white",
-        backgroundColor: "rgba(99, 102, 241, 0.9)",
-        zIndex: 100,
-        height: isDismissable ? "auto" : "100vh",
-
-        ...(!isDismissable && {
-          position: "fixed",
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
-        }),
-      }}
-    >
-      <Stack padding={1.5} spacing={1} alignItems="center">
-        {isDismissable ? (
-          <Box
-            onClick={() => setShowBanner(false)}
-            sx={{
-              fill: "white",
-              position: "absolute",
-              top: "10px",
-              right: "10px",
-              cursor: "pointer",
-            }}
-          >
-            <CloseIcon />
-          </Box>
-        ) : (
-          ReactNull
+    <div className={cx(classes.root, { [classes.rootPersistant]: !isDismissable })}>
+      <div className={classes.inner}>
+        {isDismissable && (
+          <IconButton className={classes.closeButton} onClick={() => setShowBanner(false)}>
+            <CloseIcon color="inherit" />
+          </IconButton>
         )}
 
         <Text styles={{ root: { color: "white", fontSize: "1.1em" } }}>
@@ -72,7 +80,7 @@ const VersionBanner = function ({
           <br /> Foxglove Studio currently requires Chrome v{MINIMUM_CHROME_VERSION}+.
         </Text>
 
-        {isChrome ? undefined : (
+        {!isChrome && (
           <Text styles={{ root: { color: "white", fontSize: "1.1em" } }}>
             Check out our cross-browser support progress in GitHub issue{" "}
             <Link
@@ -110,8 +118,8 @@ const VersionBanner = function ({
         >
           {fixText}
         </DefaultButton>
-      </Stack>
-    </Stack>
+      </div>
+    </div>
   );
 };
 

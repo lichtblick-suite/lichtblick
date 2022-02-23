@@ -3,7 +3,9 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 import { Icon, Text, useTheme } from "@fluentui/react";
-import { Stack } from "@mui/material";
+import { Theme } from "@mui/material";
+import { makeStyles } from "@mui/styles";
+import cx from "classnames";
 import { useMemo } from "react";
 
 import { Time } from "@foxglove/rostime";
@@ -21,6 +23,38 @@ type Props = {
 
 const DURATION_20_YEARS_SEC = 20 * 365 * 24 * 60 * 60;
 
+const useStyles = makeStyles((theme: Theme) => ({
+  root: {
+    display: "flex",
+    flexDirection: "column",
+    gap: theme.spacing(0.5),
+  },
+  stack: {
+    display: "flex",
+    gap: theme.spacing(0.5),
+    flexWrap: "wrap",
+    alignItems: "flex-start",
+    flexDirection: "column",
+    justifyContent: "center",
+  },
+  stackHorizontal: {
+    alignItems: "center",
+    flexDirection: "row",
+    justifyContent: "flex-start",
+  },
+  timestamp: {
+    display: "flex",
+    alignItems: "center",
+    flexShrink: 0,
+    gap: theme.spacing(0.5),
+  },
+  absoluteTimestamp: {
+    display: "flex",
+    alignItems: "center",
+    flexGrow: 0,
+  },
+}));
+
 // Values "too small" to be absolute epoch-based times are probably relative durations.
 function isAbsoluteTime(time: Time): boolean {
   return time.sec > DURATION_20_YEARS_SEC;
@@ -29,6 +63,7 @@ function isAbsoluteTime(time: Time): boolean {
 export default function Timestamp(props: Props): JSX.Element {
   const { disableDate = false, horizontal = false, time, timezone } = props;
   const theme = useTheme();
+  const classes = useStyles();
   const { formatTime } = useAppTimeFormat();
   const currentTimeStr = useMemo(() => formatTime(time), [time, formatTime]);
   const rawTimeStr = useMemo(() => formatTimeRaw(time), [time]);
@@ -36,7 +71,7 @@ export default function Timestamp(props: Props): JSX.Element {
 
   if (!isAbsoluteTime(time)) {
     return (
-      <Stack direction="row" alignItems="center" flexGrow={0}>
+      <div className={classes.absoluteTimestamp}>
         <Text
           variant="small"
           styles={{
@@ -48,18 +83,16 @@ export default function Timestamp(props: Props): JSX.Element {
         >
           {rawTimeStr}
         </Text>
-      </Stack>
+      </div>
     );
   }
 
   return (
-    <Stack spacing={0.5}>
-      <Stack
-        alignItems={horizontal ? "center" : "flex-start"}
-        direction={horizontal ? "row" : "column"}
-        flexWrap="wrap"
-        justifyContent={horizontal ? "flex-start" : "center"}
-        sx={{ gap: 0.5 }}
+    <div className={classes.root}>
+      <div
+        className={cx(classes.stack, {
+          [classes.stackHorizontal]: horizontal,
+        })}
       >
         {!disableDate && (
           <>
@@ -91,7 +124,7 @@ export default function Timestamp(props: Props): JSX.Element {
           </>
         )}
 
-        <Stack direction="row" alignItems="center" flexShrink={0} spacing={0.5}>
+        <div className={classes.timestamp}>
           <Text
             variant="small"
             styles={{
@@ -103,8 +136,8 @@ export default function Timestamp(props: Props): JSX.Element {
           >
             {currentTimeStr}
           </Text>
-        </Stack>
-      </Stack>
-    </Stack>
+        </div>
+      </div>
+    </div>
   );
 }

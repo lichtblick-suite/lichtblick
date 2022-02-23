@@ -11,8 +11,8 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { useTheme } from "@fluentui/react";
-import { Stack } from "@mui/material";
+import { Theme } from "@mui/material";
+import { makeStyles } from "@mui/styles";
 
 import { MouseEventObject } from "@foxglove/regl-worldview";
 import { Time } from "@foxglove/rostime";
@@ -58,6 +58,20 @@ type Props = LayoutToolbarSharedProps &
     showCrosshair?: boolean;
   };
 
+const useStyles = makeStyles((theme: Theme) => ({
+  controls: {
+    position: "absolute",
+    top: theme.spacing(5),
+    right: theme.spacing(2),
+    zIndex: 101,
+    display: "flex",
+    flexDirection: "column",
+    alignItems: "flex-end",
+    gap: theme.spacing(1),
+    pointerEvents: "none", // <- allow mouse events to pass through the empty space in this container element
+  },
+}));
+
 function LayoutToolbar({
   addMouseEventHandler,
   autoSyncCameraState,
@@ -93,23 +107,10 @@ function LayoutToolbar({
   toggleSearchTextOpen,
   transforms,
 }: Props) {
-  const theme = useTheme();
+  const classes = useStyles();
   return (
     <>
-      <Stack
-        spacing={1}
-        sx={{
-          position: "absolute",
-          top: `calc(${theme.spacing.l2} + ${theme.spacing.s1})`,
-          right: theme.spacing.m,
-          zIndex: 101,
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "flex-end",
-          // allow mouse events to pass through the empty space in this container element
-          pointerEvents: "none",
-        }}
-      >
+      <div className={classes.controls}>
         <FollowTFControl
           transforms={transforms}
           followTf={followTf}
@@ -156,7 +157,7 @@ function LayoutToolbar({
           showCrosshair={showCrosshair}
           autoSyncCameraState={autoSyncCameraState}
         />
-      </Stack>
+      </div>
       {!cameraState.perspective && showCrosshair && <Crosshair cameraState={cameraState} />}
       {interactionState.tool === "measure" && (
         <MeasuringTool

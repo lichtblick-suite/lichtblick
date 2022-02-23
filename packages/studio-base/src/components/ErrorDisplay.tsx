@@ -119,11 +119,7 @@ function ErrorDisplay(props: ErrorDisplayProps): JSX.Element {
             <Typography variant="subtitle2">{error?.message}</Typography>
           </div>
           <div>
-            <Link
-              color="secondary"
-              onClick={() => setShowErrorDetails(!showErrorDetails)}
-              sx={{ cursor: "pointer" }}
-            >
+            <Link color="secondary" onClick={() => setShowErrorDetails(!showErrorDetails)}>
               {showErrorDetails ? "Hide" : "Show"} details
             </Link>
           </div>

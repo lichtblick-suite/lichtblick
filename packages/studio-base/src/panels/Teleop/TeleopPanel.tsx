@@ -185,15 +185,10 @@ function TeleopPanel(props: TeleopPanelProps): JSX.Element {
 
   return (
     <ThemeProvider isDark={colorScheme === "dark"}>
-      <Stack
-        height="100%"
-        justifyContent="100"
-        alignItems="center"
-        sx={{ padding: `min(5%, ${theme.spacing.s1})` }}
-      >
+      <Stack height="100%" justifyContent="100" alignItems="center" padding="min(5%, 8px)">
         <DirectionalPad onAction={setCurrentAction} disabled={!enabled} />
       </Stack>
-      <Stack sx={{ position: "absolute", top: 0, left: 0, margin: 1 }}>
+      <Stack position="absolute" top={0} left={0} margin={1}>
         <HoverableIconButton
           onClick={() => setShowSettings(true)}
           iconProps={{

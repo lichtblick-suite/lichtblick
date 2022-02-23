@@ -12,7 +12,8 @@
 //   You may not use this file except in compliance with the License.
 
 import { Text, useTheme, Checkbox, Link } from "@fluentui/react";
-import { Stack } from "@mui/material";
+import { Theme } from "@mui/material";
+import { makeStyles } from "@mui/styles";
 
 import { AppSetting } from "@foxglove/studio-base/AppSetting";
 import { useAppConfigurationValue } from "@foxglove/studio-base/hooks/useAppConfigurationValue";
@@ -22,6 +23,26 @@ type Feature = {
   name: string;
   description: JSX.Element;
 };
+
+const useStyles = makeStyles((theme: Theme) => ({
+  root: {
+    display: "flex",
+    flexDirection: "column",
+    gap: theme.spacing(2),
+  },
+  item: {
+    display: "flex",
+    flexDirection: "column",
+    flexGrow: 1,
+    gap: theme.spacing(0.5),
+  },
+  label: {
+    display: "flex",
+    flexDirection: "column",
+    gap: theme.spacing(0.5),
+    paddingLeft: theme.spacing(0.5),
+  },
+}));
 
 const features: Feature[] = [
   {
@@ -67,16 +88,17 @@ if (process.env.NODE_ENV === "development") {
 }
 
 function ExperimentalFeatureItem(props: { feature: Feature }) {
+  const classes = useStyles();
   const theme = useTheme();
   const { feature } = props;
 
   const [enabled, setEnabled] = useAppConfigurationValue<boolean>(feature.key);
   return (
-    <Stack flexGrow={1} spacing={0.5}>
+    <div className={classes.item}>
       <Checkbox
         onRenderLabel={() => {
           return (
-            <Stack spacing={0.5} sx={{ paddingLeft: 0.5 }}>
+            <div className={classes.label}>
               <Text variant="medium" styles={{ root: { fontWeight: 600 } }}>
                 {feature.name}
               </Text>
@@ -86,7 +108,7 @@ function ExperimentalFeatureItem(props: { feature: Feature }) {
               >
                 {feature.description}
               </Text>
-            </Stack>
+            </div>
           );
         }}
         checked={enabled}
@@ -98,13 +120,15 @@ function ExperimentalFeatureItem(props: { feature: Feature }) {
           label: { alignItems: "baseline" },
         }}
       />
-    </Stack>
+    </div>
   );
 }
 
 export function ExperimentalFeatureSettings(): React.ReactElement {
+  const classes = useStyles();
+
   return (
-    <Stack spacing={2}>
+    <div className={classes.root}>
       {features.length === 0 && (
         <p>
           <em>Currently there are no experimental features.</em>
@@ -113,6 +137,6 @@ export function ExperimentalFeatureSettings(): React.ReactElement {
       {features.map((feature) => (
         <ExperimentalFeatureItem key={feature.key} feature={feature} />
       ))}
-    </Stack>
+    </div>
   );
 }

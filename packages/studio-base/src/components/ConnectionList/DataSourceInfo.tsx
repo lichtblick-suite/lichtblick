@@ -3,7 +3,9 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 import { ITextStyles, Text, useTheme } from "@fluentui/react";
-import { Stack } from "@mui/material";
+import { Theme } from "@mui/material";
+import { makeStyles } from "@mui/styles";
+import cx from "classnames";
 import { useMemo } from "react";
 
 import Duration from "@foxglove/studio-base/components/Duration";
@@ -20,7 +22,31 @@ const selectStartTime = (ctx: MessagePipelineContext) => ctx.playerState.activeD
 const selectEndTime = (ctx: MessagePipelineContext) => ctx.playerState.activeData?.endTime;
 const selectPlayerName = (ctx: MessagePipelineContext) => ctx.playerState.name;
 
+const useStyles = makeStyles((theme: Theme) => ({
+  root: {
+    display: "flex",
+    flexDirection: "column",
+    gap: theme.spacing(2),
+    whiteSpace: "nowrap",
+    overflow: "hidden",
+  },
+  header: {
+    display: "flex",
+    alignItems: "center",
+  },
+  item: {
+    display: "flex",
+    flexDirection: "column",
+    gap: theme.spacing(0.5),
+  },
+  source: {
+    flexGrow: 1,
+    minWidth: 0,
+  },
+}));
+
 function DataSourceInfo(): JSX.Element {
+  const classes = useStyles();
   const theme = useTheme();
 
   const startTime = useMessagePipeline(selectStartTime);
@@ -45,17 +71,17 @@ function DataSourceInfo(): JSX.Element {
   );
 
   return (
-    <Stack spacing={2} sx={{ whiteSpace: "nowrap", overflow: "hidden" }}>
-      <Stack direction="row" alignItems="center">
-        <Stack flexGrow={1} spacing={0.5} minWidth={0}>
+    <div className={classes.root}>
+      <header className={classes.header}>
+        <div className={cx(classes.item, classes.source)}>
           <Text styles={subheaderStyles}>Current source</Text>
           <Text styles={{ root: { color: theme.palette.neutralSecondary } }}>
             {playerName ? <MultilineMiddleTruncate text={playerName} /> : <>&mdash;</>}
           </Text>
-        </Stack>
-      </Stack>
+        </div>
+      </header>
 
-      <Stack spacing={0.5}>
+      <div className={classes.item}>
         <Text styles={subheaderStyles}>Start time</Text>
         {startTime ? (
           <Timestamp horizontal time={startTime} />
@@ -64,9 +90,9 @@ function DataSourceInfo(): JSX.Element {
             &mdash;
           </Text>
         )}
-      </Stack>
+      </div>
 
-      <Stack spacing={0.5}>
+      <div className={classes.item}>
         <Text styles={subheaderStyles}>End time</Text>
         {endTime ? (
           <Timestamp horizontal time={endTime} />
@@ -75,9 +101,9 @@ function DataSourceInfo(): JSX.Element {
             &mdash;
           </Text>
         )}
-      </Stack>
+      </div>
 
-      <Stack spacing={0.5}>
+      <div className={classes.item}>
         <Text styles={subheaderStyles}>Duration</Text>
         {duration ? (
           <Duration duration={duration} />
@@ -86,8 +112,8 @@ function DataSourceInfo(): JSX.Element {
             &mdash;
           </Text>
         )}
-      </Stack>
-    </Stack>
+      </div>
+    </div>
   );
 }
 

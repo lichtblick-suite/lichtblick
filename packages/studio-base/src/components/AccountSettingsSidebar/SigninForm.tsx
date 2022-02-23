@@ -2,37 +2,43 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { PrimaryButton, Text, useTheme } from "@fluentui/react";
-import { Stack } from "@mui/material";
+import { Button, Theme, Typography } from "@mui/material";
+import { makeStyles } from "@mui/styles";
 
 import { useCurrentUser } from "@foxglove/studio-base/context/CurrentUserContext";
 
 import AccountSyncGraphic from "./AccountSyncGraphic";
 
+const useStyles = makeStyles((theme: Theme) => ({
+  root: {
+    display: "flex",
+    flexDirection: "column",
+    gap: theme.spacing(2.5),
+  },
+  icon: {
+    display: "flex",
+    justifyContent: "center",
+    color: theme.palette.primary.main,
+  },
+}));
+
 export default function SigninForm(): JSX.Element {
-  const theme = useTheme();
+  const classes = useStyles();
   const { signIn } = useCurrentUser();
 
   return (
-    <Stack spacing={2.5} sx={{ lineHeight: "1.3" }}>
-      <Stack direction="row" justifyContent="center" sx={{ color: theme.palette.accent }}>
+    <div className={classes.root}>
+      <div className={classes.icon}>
         <AccountSyncGraphic width={192} />
-      </Stack>
-      <Text variant="medium">
+      </div>
+      <Typography variant="body1">
         Create a Foxglove account to sync your layouts across multiple devices, and share them with
         your team.
-      </Text>
+      </Typography>
 
-      <PrimaryButton
-        text="Sign in"
-        onClick={signIn}
-        styles={{
-          root: {
-            marginLeft: 0,
-            marginRight: 0,
-          },
-        }}
-      />
-    </Stack>
+      <Button variant="contained" color="primary" onClick={signIn}>
+        Sign in
+      </Button>
+    </div>
   );
 }

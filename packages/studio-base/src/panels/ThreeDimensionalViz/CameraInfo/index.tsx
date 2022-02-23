@@ -12,6 +12,7 @@
 //   You may not use this file except in compliance with the License.
 
 import { useTheme } from "@fluentui/react";
+import CameraControlIcon from "@mdi/svg/svg/camera-control.svg";
 import { Stack } from "@mui/material";
 import { vec3 } from "gl-matrix";
 import { isEqual } from "lodash";
@@ -148,7 +149,7 @@ export default function CameraInfo({
   return (
     <ExpandingToolbar
       tooltip="Camera"
-      iconName="CameraControl"
+      icon={<CameraControlIcon />}
       checked={autoSyncCameraState}
       selectedTab={selectedTab}
       onSelectTab={(newSelectedTab) => setSelectedTab(newSelectedTab)}

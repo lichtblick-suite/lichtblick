@@ -63,7 +63,7 @@ const useStyles = makeStyles((theme: Theme) =>
       backgroundBlendMode: "overlay",
     },
     legendIconButton: {
-      padding: theme.spacing(0.125),
+      padding: `${theme.spacing(0.125)} !important`,
       marginLeft: theme.spacing(0.25),
     },
     legendIcon: ({ enabled, index }: StyleProps) => ({
@@ -80,6 +80,14 @@ const useStyles = makeStyles((theme: Theme) =>
       alignItems: "center",
       padding: theme.spacing(0.25),
     }),
+    removeButton: {
+      padding: `${theme.spacing(0.25)} !important`,
+      color: theme.palette.text.secondary,
+
+      "&:hover": {
+        color: theme.palette.text.primary,
+      },
+    },
     actions: {
       display: "flex",
       flexDirection: "row",
@@ -213,7 +221,7 @@ export default function PlotLegendRow({
             placement="top"
             title="Mismatch in the number of elements in x-axis and y-axis messages"
           >
-            <ErrorIcon fontSize="small" sx={{ color: "error.main" }} />
+            <ErrorIcon fontSize="small" color="error" />
           </Tooltip>
         )}
       </div>
@@ -233,9 +241,9 @@ export default function PlotLegendRow({
           timestampMethod={xAxisVal === "timestamp" ? timestampMethod : undefined}
         />
         <IconButton
+          className={classes.removeButton}
           size="small"
           title={`Remove ${path.value}`}
-          sx={{ padding: 0.25, color: "text.secondary", "&:hover": { color: "text.primary" } }}
           onClick={() => {
             const newPaths = paths.slice();
             newPaths.splice(index, 1);

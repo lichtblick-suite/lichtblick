@@ -12,6 +12,7 @@
 //   You may not use this file except in compliance with the License.
 
 import { Checkbox } from "@fluentui/react";
+import CursorIcon from "@mdi/svg/svg/cursor-default.svg";
 
 import { MouseEventObject } from "@foxglove/regl-worldview";
 import ExpandingToolbar, {
@@ -75,7 +76,7 @@ const InteractionsBaseComponent = React.memo<PropsWithConfig>(function Interacti
   return (
     <ExpandingToolbar
       tooltip="Inspect objects"
-      iconName="CursorDefault"
+      icon={<CursorIcon />}
       selectedTab={interactionsTabType}
       onSelectTab={(newSelectedTab) => setInteractionsTabType(newSelectedTab)}
     >

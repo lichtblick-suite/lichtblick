@@ -12,7 +12,10 @@
 //   You may not use this file except in compliance with the License.
 
 import { IButtonStyles, IconButton, useTheme } from "@fluentui/react";
-import { Paper, Stack } from "@mui/material";
+import MyLocationIcon from "@mui/icons-material/MyLocation";
+import NavigationIcon from "@mui/icons-material/Navigation";
+import { Paper, IconButton as MuiIconButton, Theme } from "@mui/material";
+import { makeStyles } from "@mui/styles";
 import { sortBy } from "lodash";
 import { memo, useCallback, useMemo, useRef } from "react";
 import shallowequal from "shallowequal";
@@ -116,9 +119,31 @@ const arePropsEqual = (prevProps: Props, nextProps: Props) => {
   return shallowequal(prevProps, nextProps);
 };
 
+type StyleProps = {
+  followTf?: Props["followTf"];
+};
+
+const useStyles = makeStyles((theme: Theme) => ({
+  root: {
+    pointerEvents: "auto",
+  },
+  row: {
+    display: "flex",
+    flexGrow: 1,
+    alignItems: "center",
+    // see also ExpandingToolbar styles
+    color: ({ followTf }: StyleProps) => (followTf ? undefined : theme.palette.text.disabled),
+    position: "relative",
+  },
+  icon: {
+    fontSize: "16px !important",
+  },
+}));
+
 const FollowTFControl = memo<Props>(function FollowTFControl(props: Props) {
   const { transforms, followTf, followMode, onFollowChange } = props;
   const theme = useTheme();
+  const classes = useStyles({ followTf });
 
   const iconButtonStyles = useMemo(
     (): Partial<IButtonStyles> => ({
@@ -189,7 +214,6 @@ const FollowTFControl = memo<Props>(function FollowTFControl(props: Props) {
     depth: 0,
   };
 
-  const followButton = useTooltip({ contents: followButtonTooltipContent });
   const frameListButton = useTooltip({ contents: "Select a frame to follow…" });
 
   // The control is active only if there are transform frames.
@@ -197,17 +221,8 @@ const FollowTFControl = memo<Props>(function FollowTFControl(props: Props) {
   const active = useMemo(() => transforms.frames().size > 0, [transforms]);
 
   return (
-    <Paper square={false} elevation={4} sx={{ pointerEvents: "auto" }}>
-      <Stack
-        direction="row"
-        flexGrow={1}
-        alignItems="center"
-        sx={{
-          // see also ExpandingToolbar styles
-          color: followTf ? undefined : theme.semanticColors.disabledText,
-          position: "relative",
-        }}
-      >
+    <Paper className={classes.root} square={false} elevation={4}>
+      <div className={classes.row}>
         {active && (
           <Autocomplete
             ref={autocomplete}
@@ -241,18 +256,20 @@ const FollowTFControl = memo<Props>(function FollowTFControl(props: Props) {
             }}
           />
         )}
-        {followButton.tooltip}
-        <IconButton
+        <MuiIconButton
+          className={classes.icon}
           disabled={!active}
-          checked={followMode !== "no-follow"}
-          elementRef={followButton.ref}
+          title={followButtonTooltipContent}
+          color={followMode !== "no-follow" ? "info" : "inherit"}
           onClick={toggleFollowMode}
-          iconProps={{
-            iconName: followMode === "follow-orientation" ? "CompassOutline" : "CrosshairsGps",
-          }}
-          styles={iconButtonStyles}
-        />
-      </Stack>
+        >
+          {followMode === "follow-orientation" ? (
+            <NavigationIcon fontSize="inherit" />
+          ) : (
+            <MyLocationIcon fontSize="inherit" />
+          )}
+        </MuiIconButton>
+      </div>
     </Paper>
   );
 }, arePropsEqual);

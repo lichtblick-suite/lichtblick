@@ -33,7 +33,7 @@ export default class ErrorBoundary extends Component<PropsWithChildren<Props>, S
       const actions = this.props.actions ?? (
         <>
           <Stack direction="row" spacing={1}>
-            <Box sx={{ flexGrow: 1 }} />
+            <Box flexGrow={1} />
             <Button
               variant="outlined"
               color="secondary"
@@ -51,11 +51,7 @@ export default class ErrorBoundary extends Component<PropsWithChildren<Props>, S
           content={
             <p>
               Something went wrong in the app.{" "}
-              <Link
-                sx={{ cursor: "pointer" }}
-                color="inherit"
-                onClick={() => this.setState({ currentError: undefined })}
-              >
+              <Link color="inherit" onClick={() => this.setState({ currentError: undefined })}>
                 Dismiss this error
               </Link>{" "}
               to continue using the app. If the issue persists try restarting the app.

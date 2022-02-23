@@ -22,7 +22,7 @@ import {
   IButtonStyles,
   useTheme,
 } from "@fluentui/react";
-import { Stack, Theme } from "@mui/material";
+import { Theme } from "@mui/material";
 import { makeStyles } from "@mui/styles";
 import { clamp, groupBy } from "lodash";
 import Tree from "rc-tree";
@@ -87,6 +87,10 @@ const useStyles = makeStyles((theme: Theme) => ({
     pointerEvents: "auto",
   },
   inner: {
+    display: "flex",
+    flexDirection: "column",
+    width: ({ treeWidth }: StyleProps) => treeWidth,
+
     "& .rc-tree li ul": {
       padding: 0,
       paddingLeft: SWITCHER_WIDTH,
@@ -140,6 +144,32 @@ const useStyles = makeStyles((theme: Theme) => ({
         padding: 0,
       },
     },
+  },
+  header: {
+    display: "flex",
+    alignItems: "center",
+    gap: theme.spacing(0.5),
+    padding: theme.spacing(0.5),
+    position: "sticky",
+    top: 0,
+    zIndex: 1,
+    backgroundColor: theme.palette.action.hover,
+    borderTopLeftRadius: theme.shape.borderRadius,
+    borderTopRightRadius: theme.shape.borderRadius,
+  },
+  inputWrapper: {
+    display: "flex",
+    flexGrow: 1,
+    position: "relative",
+  },
+  noResults: {
+    display: "flex",
+    flexDirection: "column",
+    alignItems: "center",
+    justifyContent: "center",
+    paddingTop: 4,
+    paddingBottom: 2.5,
+    spacing: 2,
   },
 }));
 
@@ -400,6 +430,10 @@ type TopicTreeProps = SharedProps & {
   treeHeight: number;
 };
 
+type StyleProps = {
+  treeWidth: TopicTreeProps["treeWidth"];
+};
+
 const dropdownOptions = (Object.keys(TOPIC_DISPLAY_MODES) as TopicDisplayMode[]).map((key) => ({
   label: TOPIC_DISPLAY_MODES[key].label,
   value: TOPIC_DISPLAY_MODES[key].value,
@@ -429,7 +463,7 @@ function TopicTree({
   visibleTopicsCountByKey,
 }: TopicTreeProps) {
   const theme = useTheme();
-  const classes = useStyles();
+  const classes = useStyles({ treeWidth });
   const styles = useComponentStyles(theme);
   const scrollContainerRef = useRef<HTMLDivElement>(ReactNull);
   const checkedKeysSet = useMemo(() => new Set(checkedKeys), [checkedKeys]);
@@ -466,22 +500,9 @@ function TopicTree({
   );
 
   return (
-    <Stack className={classes.inner} width={treeWidth}>
-      <Stack
-        direction="row"
-        alignItems="center"
-        spacing={0.5}
-        padding={0.5}
-        sx={{
-          position: "sticky",
-          top: 0,
-          zIndex: 1,
-          backgroundColor: theme.semanticColors.buttonBackgroundHovered,
-          borderTopLeftRadius: theme.effects.roundedCorner4,
-          borderTopRightRadius: theme.effects.roundedCorner4,
-        }}
-      >
-        <Stack direction="row" flexGrow={1} position="relative">
+    <div className={classes.inner}>
+      <header className={classes.header}>
+        <div className={classes.inputWrapper}>
           <TextField
             iconProps={{ iconName: "Search" }}
             data-test="topic-tree-filter-input"
@@ -500,7 +521,7 @@ function TopicTree({
               styles={styles.clearIcon}
             />
           )}
-        </Stack>
+        </div>
         <DefaultButton
           disabled={!rootTreeNode.providerAvailable}
           menuIconProps={{ iconName: "CaretSolidDown" }}
@@ -527,23 +548,17 @@ function TopicTree({
           styles={styles.expandIcon}
           title={topLevelNodesCollapsed ? "Expand all" : "Collapse all"}
         />
-      </Stack>
+      </header>
       <div ref={scrollContainerRef} style={{ overflow: "auto", width: treeWidth }}>
         {showNoMatchesState ? (
-          <Stack
-            alignItems="center"
-            justifyContent="center"
-            paddingTop={4}
-            paddingBottom={2.5}
-            spacing={2}
-          >
+          <div className={classes.noResults}>
             <NoMatchesSvg />
             <Text variant="smallPlus" styles={{ root: { textAlign: "center", lineHeight: "1.3" } }}>
               No results found.
               <br />
               Try searching a different term.
             </Text>
-          </Stack>
+          </div>
         ) : (
           <Tree
             treeData={renderTreeNodes({
@@ -591,7 +606,7 @@ function TopicTree({
           />
         )}
       </div>
-    </Stack>
+    </div>
   );
 }
 
@@ -606,10 +621,10 @@ function TopicTreeWrapper({
   setShowTopicTree,
   ...rest
 }: WrapperProps) {
-  const classes = useStyles();
   const transitionClasses = useTransitionStyles();
   const defaultTreeWidth = clamp(containerWidth, DEFAULT_XS_WIDTH, DEFAULT_WIDTH);
   const renderTopicTree = pinTopics || showTopicTree;
+  const classes = useStyles({ treeWidth: defaultTreeWidth });
 
   // Use a debounce and 0 refresh rate to avoid triggering a resize observation while handling
   // and existing resize observation.

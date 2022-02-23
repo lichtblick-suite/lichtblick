@@ -3,7 +3,8 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 import { ITextStyles, DetailsList, Text, useTheme, CheckboxVisibility } from "@fluentui/react";
-import { Box, Stack } from "@mui/material";
+import { Theme } from "@mui/material";
+import { makeStyles } from "@mui/styles";
 import { useCallback, useMemo } from "react";
 
 import { subtract as subtractTimes, toSec } from "@foxglove/rostime";
@@ -18,7 +19,27 @@ import Timestamp from "@foxglove/studio-base/components/Timestamp";
 
 import helpContent from "./index.help.md";
 
+const useStyles = makeStyles((theme: Theme) => ({
+  root: {
+    overflow: "hidden auto",
+  },
+  header: {
+    display: "flex",
+    flexDirection: "column",
+    borderBottom: `2px solid ${theme.palette.divider}`,
+    backgroundColor: theme.palette.background.default,
+    padding: theme.spacing(1.5),
+    gap: theme.spacing(1),
+  },
+  row: {
+    display: "flex",
+    flexDirection: "column",
+    gap: theme.spacing(0.5),
+  },
+}));
+
 function SourceInfo() {
+  const classes = useStyles();
   const topics = useMessagePipeline(useCallback((ctx) => ctx.playerState.activeData?.topics, []));
   const startTime = useMessagePipeline(
     useCallback((ctx) => ctx.playerState.activeData?.startTime, []),
@@ -60,28 +81,22 @@ function SourceInfo() {
   return (
     <>
       <PanelToolbar helpContent={helpContent} floating />
-      <Box overflow="hidden auto">
-        <Stack
-          sx={{
-            borderBottom: `2px solid ${theme.semanticColors.bodyDivider}`,
-            backgroundColor: theme.semanticColors.bodyBackground,
-          }}
-          padding={1.5}
-          spacing={1}
-        >
-          <Stack spacing={0.5}>
+      <div className={classes.root}>
+        <header className={classes.header}>
+          <div className={classes.row}>
             <Text styles={subheaderStyles}>Start time</Text>
             <Timestamp horizontal time={startTime} />
-          </Stack>
-          <Stack spacing={0.5}>
+          </div>
+          <div className={classes.row}>
             <Text styles={subheaderStyles}>End Time</Text>
             <Timestamp horizontal time={endTime} />
-          </Stack>
-          <Stack spacing={0.5}>
+          </div>
+          <div className={classes.row}>
             <Text styles={subheaderStyles}>Duration</Text>
             <Duration duration={duration} />
-          </Stack>
-        </Stack>
+          </div>
+        </header>
+
         <DetailsList
           compact
           checkboxVisibility={CheckboxVisibility.hidden}
@@ -151,7 +166,7 @@ function SourceInfo() {
             },
           ]}
         />
-      </Box>
+      </div>
     </>
   );
 }

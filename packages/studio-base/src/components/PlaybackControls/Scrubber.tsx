@@ -3,7 +3,6 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 import { makeStyles } from "@fluentui/react";
-import { Stack } from "@mui/material";
 import cx from "classnames";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useLatest } from "react-use";
@@ -27,6 +26,13 @@ import { ProgressPlot } from "./ProgressPlot";
 import Slider from "./Slider";
 
 const useStyles = makeStyles((theme) => ({
+  root: {
+    display: "flex",
+    flexGrow: 1,
+    alignItems: "center",
+    height: 28,
+    position: "relative",
+  },
   fullWidthBar: {
     position: "absolute",
     top: "12px",
@@ -205,12 +211,7 @@ export default function Scrubber(props: Props): JSX.Element {
   const step = ((max ?? 100) - (min ?? 0)) / 500;
 
   return (
-    <Stack
-      direction="row"
-      flexGrow={1}
-      alignItems="center"
-      sx={{ height: 28, position: "relative" }}
-    >
+    <div className={classes.root}>
       {tooltip}
       <div className={cx(classes.fullWidthBar, { [classes.fullWidthBarActive]: startTime })} />
       <div className={classes.stateBar}>
@@ -231,6 +232,6 @@ export default function Scrubber(props: Props): JSX.Element {
         />
       </div>
       <PlaybackBarHoverTicks componentId={hoverComponentId} />
-    </Stack>
+    </div>
   );
 }

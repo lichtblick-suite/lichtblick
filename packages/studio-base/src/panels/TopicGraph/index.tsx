@@ -11,8 +11,14 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { IconButton, IButtonStyles, useTheme } from "@fluentui/react";
-import { Paper, Stack } from "@mui/material";
+import ArrowLeftRightIcon from "@mdi/svg/svg/arrow-left-right.svg";
+import ArrowUpDownIcon from "@mdi/svg/svg/arrow-up-down.svg";
+import FitToPageIcon from "@mdi/svg/svg/fit-to-page-outline.svg";
+import ServiceIcon from "@mdi/svg/svg/rectangle-outline.svg";
+import TopicIcon from "@mdi/svg/svg/rhombus.svg";
+import { IconButton, Paper, Theme } from "@mui/material";
+import { makeStyles } from "@mui/styles";
+import cx from "classnames";
 import Cytoscape from "cytoscape";
 import { useCallback, useMemo, useRef, useState } from "react";
 import textMetrics from "text-metrics";
@@ -23,8 +29,6 @@ import { useMessagePipeline } from "@foxglove/studio-base/components/MessagePipe
 import Panel from "@foxglove/studio-base/components/Panel";
 import PanelToolbar from "@foxglove/studio-base/components/PanelToolbar";
 import Radio from "@foxglove/studio-base/components/Radio";
-import { useTooltip } from "@foxglove/studio-base/components/Tooltip";
-import { colors } from "@foxglove/studio-base/util/sharedStyleConstants";
 
 import Graph, { GraphMutation } from "./Graph";
 import helpContent from "./index.help.md";
@@ -98,6 +102,50 @@ const STYLESHEET: Cytoscape.Stylesheet[] = [
   },
 ];
 
+const useStyles = makeStyles((theme: Theme) => ({
+  root: {
+    display: "flex",
+    flexDirection: "column",
+    alignItems: "flex-end",
+    position: "absolute",
+    top: theme.spacing(4),
+    right: theme.spacing(1),
+    zIndex: 101,
+    gap: theme.spacing(1),
+    // allow mouse events to pass through the empty space in this container element
+    pointerEvents: "none",
+  },
+  stack: {
+    display: "flex",
+    flexDirection: "column",
+    flex: "0 0",
+
+    "& > .MuiIconButton-root": {
+      "&:not(:first-child)": {
+        borderTopRightRadius: 0,
+        borderTopLeftRadius: 0,
+      },
+      "&:not(:last-child)": {
+        borderBottomRightRadius: 0,
+        borderBottomLeftRadius: 0,
+      },
+    },
+  },
+  icon: {
+    fontSize: "1rem !important",
+
+    "& svg:not(.MuiSvgIcon-root)": {
+      fontSize: "1rem !important",
+    },
+  },
+  pointerEventsAuto: {
+    pointerEvents: "auto",
+  },
+  toolbarContent: {
+    padding: theme.spacing(1),
+  },
+}));
+
 export type TopicVisibility =
   | "all"
   | "none"
@@ -126,7 +174,7 @@ function unionInto<T>(dest: Set<T>, ...iterables: Set<T>[]): void {
 }
 
 function TopicGraph() {
-  const theme = useTheme();
+  const classes = useStyles();
   const [selectedTab, setSelectedTab] = useState<"Topics" | undefined>(undefined);
 
   const publishedTopics = useMessagePipeline(
@@ -152,30 +200,6 @@ function TopicGraph() {
         fontSize: "16px",
       }),
     [],
-  );
-
-  const iconButtonStyles = useMemo<Partial<IButtonStyles>>(
-    () => ({
-      rootHovered: { backgroundColor: "transparent" },
-      rootPressed: { backgroundColor: "transparent" },
-      rootDisabled: { backgroundColor: "transparent" },
-
-      rootChecked: { backgroundColor: "transparent" },
-      rootCheckedHovered: { backgroundColor: "transparent" },
-      rootCheckedPressed: { backgroundColor: "transparent" },
-
-      iconChecked: { color: colors.ACCENT },
-      icon: {
-        color: theme.semanticColors.buttonText,
-
-        svg: {
-          fill: "currentColor",
-          height: "1em",
-          width: "1em",
-        },
-      },
-    }),
-    [theme.semanticColors.buttonText],
   );
 
   const topicPassesConditions = useCallback(
@@ -345,12 +369,6 @@ function TopicGraph() {
     setShowServices(!showServices);
   }, [showServices]);
 
-  const fitToPageButton = useTooltip({ contents: "Zoom fit" });
-  const orientationButton = useTooltip({ contents: "Orientation" });
-  const servicesButton = useTooltip({
-    contents: showServices ? "Showing services" : "Hiding services",
-  });
-
   if (publishedTopics == undefined) {
     return (
       <>
@@ -362,70 +380,54 @@ function TopicGraph() {
 
   return (
     <>
-      {fitToPageButton.tooltip}
-      {orientationButton.tooltip}
-      {servicesButton.tooltip}
       <PanelToolbar floating helpContent={helpContent} />
-      <Stack
-        spacing={1}
-        sx={{
-          position: "absolute",
-          top: theme.spacing.l2,
-          right: theme.spacing.s1,
-          zIndex: 101,
-          // allow mouse events to pass through the empty space in this container element
-          pointerEvents: "none",
-        }}
-      >
-        <Paper square={false} elevation={4} sx={{ pointerEvents: "auto" }}>
-          <Stack flex="0 0" sx={{ pointerEvents: "auto" }}>
+      <div className={classes.root}>
+        <Paper square={false} elevation={4} className={classes.pointerEventsAuto}>
+          <div className={cx(classes.stack, classes.pointerEventsAuto)}>
+            <IconButton title="Zoom fit" onClick={onZoomFit} className={classes.icon}>
+              <FitToPageIcon />
+            </IconButton>
+            <IconButton title="Orientation" onClick={toggleOrientation} className={classes.icon}>
+              {lrOrientation ? <ArrowLeftRightIcon /> : <ArrowUpDownIcon />}
+            </IconButton>
             <IconButton
-              elementRef={fitToPageButton.ref}
-              onClick={onZoomFit}
-              iconProps={{ iconName: "FitToPage" }}
-              styles={iconButtonStyles}
-            />
-            <IconButton
-              elementRef={orientationButton.ref}
-              onClick={toggleOrientation}
-              iconProps={{ iconName: lrOrientation ? "ArrowLeftRight" : "ArrowUpDown" }}
-              styles={iconButtonStyles}
-            />
-            <IconButton
-              checked={showServices}
-              elementRef={servicesButton.ref}
-              iconProps={{ iconName: "Service" }}
+              color={showServices ? "info" : "inherit"}
+              className={classes.icon}
+              title={showServices ? "Showing services" : "Hiding services"}
               onClick={toggleShowServices}
-              styles={iconButtonStyles}
-            />
-          </Stack>
+            >
+              <ServiceIcon />
+            </IconButton>
+          </div>
         </Paper>
 
         <ExpandingToolbar
           checked={topicVisibility !== "none"}
           dataTest="set-topic-visibility"
           tooltip={topicVisibilityTooltip}
-          iconName="Topic"
+          icon={<TopicIcon />}
           selectedTab={selectedTab}
           onSelectTab={(newSelectedTab) => {
             setSelectedTab(newSelectedTab);
           }}
         >
           <ToolGroup name="Topics">
-            <Radio
-              selectedId={topicVisibility}
-              onChange={(id) => {
-                graph.current?.resetUserPanZoom();
-                setTopicVisibility(id as TopicVisibility);
-              }}
-              options={Object.entries(topicVisibilityToLabelMap).map(([id, label]) => ({
-                id,
-                label,
-              }))}
-            />
+            <div className={classes.toolbarContent}>
+              <Radio
+                selectedId={topicVisibility}
+                onChange={(id) => {
+                  graph.current?.resetUserPanZoom();
+                  setTopicVisibility(id as TopicVisibility);
+                }}
+                options={Object.entries(topicVisibilityToLabelMap).map(([id, label]) => ({
+                  id,
+                  label,
+                }))}
+              />
+            </div>
           </ToolGroup>
         </ExpandingToolbar>
-      </Stack>
+      </div>
       <Graph
         style={STYLESHEET}
         elements={elements}

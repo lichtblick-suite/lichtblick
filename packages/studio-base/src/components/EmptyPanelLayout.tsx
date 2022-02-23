@@ -12,7 +12,9 @@
 //   You may not use this file except in compliance with the License.
 
 import { useTheme } from "@fluentui/react";
-import { Link, Stack, Typography } from "@mui/material";
+import { Link, Theme, Typography } from "@mui/material";
+import { makeStyles } from "@mui/styles";
+import cx from "classnames";
 import { useCallback } from "react";
 import { useDrop } from "react-dnd";
 import { MosaicDragType } from "react-mosaic-component";
@@ -26,8 +28,39 @@ type Props = {
   tabId?: string;
 };
 
+const useStyles = makeStyles((theme: Theme) => ({
+  content: {
+    display: "flex",
+    flexDirection: "column",
+    paddingBottom: theme.spacing(2),
+  },
+  root: {
+    width: "100%",
+    height: "100%",
+    overflowY: "auto",
+  },
+  dropzone: {
+    width: "100%",
+    height: "100%",
+  },
+  dropzoneOver: {
+    "&:after": {
+      content: "''",
+      borderColor: `1px solid ${theme.palette.action.selected}`,
+      backgroundColor: theme.palette.action.focus,
+      position: "absolute",
+      top: 0,
+      right: 0,
+      left: 0,
+      bottom: 0,
+      zIndex: theme.zIndex.appBar,
+    },
+  },
+}));
+
 export const EmptyPanelLayout = ({ tabId }: Props): JSX.Element => {
   const fluentUiTheme = useTheme();
+  const classes = useStyles({ fluentUiTheme });
   const { addPanel } = useCurrentLayoutActions();
 
   const [{ isOver }, drop] = useDrop<unknown, MosaicDropResult, { isOver: boolean }>({
@@ -49,19 +82,15 @@ export const EmptyPanelLayout = ({ tabId }: Props): JSX.Element => {
   );
 
   return (
-    <Stack
+    <div
       ref={drop}
       data-test="empty-drop-target"
-      sx={{
-        width: "100%",
-        height: "100%",
-        border: "1px solid",
-        borderColor: isOver ? fluentUiTheme.palette.neutralLight : "transparent",
-        backgroundColor: isOver ? fluentUiTheme.palette.neutralLighterAlt : "transparent",
-      }}
+      className={cx(classes.dropzone, {
+        [classes.dropzoneOver]: isOver,
+      })}
     >
-      <Stack width="100%" height="100%" sx={{ overflowY: "auto" }}>
-        <Stack paddingBottom={2}>
+      <div className={classes.root}>
+        <div className={classes.content}>
           <Typography variant="body2" paddingX={2} paddingTop={2}>
             Select a panel below to add it to your layout.{" "}
             <Link
@@ -73,8 +102,8 @@ export const EmptyPanelLayout = ({ tabId }: Props): JSX.Element => {
             </Link>
           </Typography>
           <PanelList mode="grid" onPanelSelect={onPanelSelect} />
-        </Stack>
-      </Stack>
-    </Stack>
+        </div>
+      </div>
+    </div>
   );
 };

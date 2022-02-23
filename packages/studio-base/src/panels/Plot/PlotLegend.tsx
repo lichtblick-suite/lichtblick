@@ -19,7 +19,7 @@ import {
   KeyboardArrowUp as KeyboardArrowUpIcon,
   KeyboardArrowDown as KeyboardArrowDownIcon,
 } from "@mui/icons-material";
-import { Box, Button, IconButton, Stack, Theme, alpha } from "@mui/material";
+import { Button, IconButton, Theme, alpha } from "@mui/material";
 import { makeStyles } from "@mui/styles";
 import cx from "classnames";
 import { last } from "lodash";
@@ -65,18 +65,139 @@ const shortXAxisLabel = (path: PlotXAxisVal): string => {
   throw new Error(`unknown path: ${path}`);
 };
 
+type StyleProps = {
+  legendDisplay: PlotLegendProps["legendDisplay"];
+  showLegend: PlotLegendProps["showLegend"];
+  showPlotValuesInLegend?: PlotLegendProps["showPlotValuesInLegend"];
+  sidebarDimension: PlotLegendProps["sidebarDimension"];
+};
+
 const useStyles = makeStyles((theme: Theme) => ({
+  addButton: {
+    minWidth: 100,
+    backgroundColor: `${theme.palette.action.hover} !important`,
+  },
+  dragHandle: ({ legendDisplay }: StyleProps) => ({
+    userSelect: "none",
+    border: `0px solid ${theme.palette.action.hover}`,
+    ...(legendDisplay === "left"
+      ? {
+          cursor: "ew-resize",
+          borderRightWidth: 2,
+          height: "100%",
+          width: theme.spacing(0.5),
+        }
+      : {
+          cursor: "ns-resize",
+          borderBottomWidth: 2,
+          height: theme.spacing(0.5),
+          width: "100%",
+        }),
+
+    "&:hover": {
+      borderColor: theme.palette.action.selected,
+    },
+  }),
+  dropdownWrapper: {
+    zIndex: 4,
+    height: 20,
+
+    "&:hover": {
+      backgroundColor: theme.palette.action.hover,
+    },
+  },
   dropdown: {
     backgroundColor: "transparent !important",
     padding: "4px !important",
   },
+  footer: ({ legendDisplay }: StyleProps) => ({
+    padding: theme.spacing(0.5),
+    gridColumn: "span 4",
+    ...(legendDisplay !== "floating" && {
+      position: "sticky",
+      right: 0,
+      left: 0,
+    }),
+  }),
+  floatingWrapper: {
+    overflow: "hidden",
+    display: "flex",
+    flexDirection: "column",
+    height: "100%",
+  },
+  grid: {
+    alignItems: "stretch",
+    position: "relative",
+    display: "grid",
+    gridTemplateColumns: ({ showPlotValuesInLegend = false }: StyleProps) =>
+      [
+        "auto",
+        "minmax(max-content, 1fr)",
+        showPlotValuesInLegend && "minmax(max-content, 1fr)",
+        "auto",
+      ]
+        .filter(Boolean)
+        .join(" "),
+  },
+  header: {
+    display: "flex",
+    alignItems: "center",
+    padding: theme.spacing(0.25),
+    height: 26,
+    position: "sticky",
+    top: 0,
+    left: 0,
+    right: 0,
+    backgroundColor: theme.palette.background.paper,
+    zIndex: theme.zIndex.mobileStepper + 1,
+  },
+  legendContent: ({ legendDisplay }: StyleProps) => ({
+    display: "flex",
+    flexDirection: "column",
+    backgroundColor: alpha(theme.palette.background.paper, 0.8),
+    overflow: "auto",
+    pointerEvents: "auto",
+    [legendDisplay !== "floating" ? "height" : "maxHeight"]: "100%",
+    position: "relative",
+  }),
+  toggleButton: ({ legendDisplay }: StyleProps) => ({
+    cursor: "pointer",
+    userSelect: "none",
+    pointerEvents: "auto",
+    ...{
+      left: { height: "100%", padding: "0px !important" },
+      top: { width: "100%", padding: "0px !important" },
+      floating: undefined,
+    }[legendDisplay],
+
+    "&:hover": {
+      backgroundColor: theme.palette.action.focus,
+    },
+  }),
+  toggleButtonFloating: {
+    marginRight: theme.spacing(0.25),
+    borderRadius: theme.shape.borderRadius,
+    backgroundColor: `${theme.palette.action.focus} !important`,
+    visibility: ({ showLegend }: StyleProps) => (showLegend ? "visible" : "hidden"),
+
+    "&:hover": {
+      backgroundColor: theme.palette.background.paper,
+    },
+    ".mosaic-window:hover &": {
+      visibility: "initial",
+    },
+  },
   root: {
+    display: "flex",
+    alignItems: "flex-start",
     position: "relative",
     color: theme.palette.text.secondary,
     backgroundColor: theme.palette.background.paper,
     borderTop: `${theme.palette.background.default} solid 1px`,
+    flexDirection: ({ legendDisplay }: StyleProps) =>
+      legendDisplay === "top" ? "column" : undefined,
   },
-  floatingRoot: {
+  rootFloating: {
     cursor: "pointer",
     position: "absolute",
     left: theme.spacing(4),
@@ -87,43 +208,72 @@ const useStyles = makeStyles((theme: Theme) => ({
     borderTop: "none",
     pointerEvents: "none",
     zIndex: theme.zIndex.mobileStepper,
+    gap: theme.spacing(0.5),
   },
-  legendToggle: {
-    cursor: "pointer",
-    userSelect: "none",
-    backgroundColor: theme.palette.background.paper,
-  },
-  floatingLegendToggle: {
-    marginRight: theme.spacing(0.25),
-    visibility: "hidden",
-    borderRadius: theme.shape.borderRadius,
-    backgroundColor: theme.palette.action.focus,
-    height: "inherit",
-
-    "&:hover": {
-      backgroundColor: theme.palette.background.paper,
-    },
-    ".mosaic-window:hover &": { visibility: "initial" },
-  },
+  wrapper: ({ legendDisplay }: StyleProps) => ({
+    display: "flex",
+    flexDirection: legendDisplay === "left" ? "row" : "column",
+    width: legendDisplay === "top" ? "100%" : undefined,
+    height: legendDisplay === "left" ? "100%" : undefined,
+  }),
+  wrapperContent: ({ legendDisplay, sidebarDimension }: StyleProps) => ({
+    display: "flex",
+    flexDirection: "column",
+    flexGrow: 1,
+    gap: theme.spacing(0.5),
+    overflow: "auto",
+    [legendDisplay === "left" ? "width" : "height"]: sidebarDimension,
+  }),
 }));
 
-function SidebarWrapper(props: {
-  position: "floating" | "top" | "left";
-  sidebarDimension: number;
-  saveConfig: (arg0: Partial<PlotConfig>) => void;
-  children: JSX.Element | undefined;
-}): JSX.Element | ReactNull {
-  const { position, sidebarDimension, saveConfig } = props;
+export default function PlotLegend(props: PlotLegendProps): JSX.Element {
+  const {
+    paths,
+    datasets,
+    currentTime,
+    saveConfig,
+    showLegend,
+    xAxisVal,
+    xAxisPath,
+    pathsWithMismatchedDataLengths,
+    sidebarDimension,
+    legendDisplay,
+    showPlotValuesInLegend,
+  } = props;
+  const lastPath = last(paths);
+  const classes = useStyles({
+    legendDisplay,
+    sidebarDimension,
+    showLegend,
+    showPlotValuesInLegend,
+  });
+
+  const toggleLegend = useCallback(
+    () => saveConfig({ showLegend: !showLegend }),
+    [showLegend, saveConfig],
+  );
+
+  const legendIcon = useMemo(() => {
+    if (legendDisplay !== "floating") {
+      const iconMap = showLegend
+        ? { left: KeyboardArrowLeftIcon, top: KeyboardArrowUpIcon }
+        : { left: KeyboardArrowRightIcon, top: KeyboardArrowDownIcon };
+      const ArrowIcon = iconMap[legendDisplay];
+      return <ArrowIcon fontSize="inherit" />;
+    }
+    return <MenuIcon fontSize="inherit" />;
+  }, [showLegend, legendDisplay]);
+
   const originalWrapper = useRef<DOMRect | undefined>(undefined);
   const handleMouseMove = useCallback(
     (e: MouseEvent) => {
-      const offset = originalWrapper.current?.[position as "top" | "left"] ?? 0;
-      const newDimension = e[position === "left" ? "clientX" : "clientY"] - offset;
+      const offset = originalWrapper.current?.[legendDisplay as "top" | "left"] ?? 0;
+      const newDimension = e[legendDisplay === "left" ? "clientX" : "clientY"] - offset;
       if (newDimension > minLegendWidth && newDimension < maxLegendWidth) {
         saveConfig({ sidebarDimension: newDimension });
       }
     },
-    [originalWrapper, position, saveConfig],
+    [originalWrapper, legendDisplay, saveConfig],
   );
 
   const handleMouseDown = (e: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
@@ -138,280 +288,123 @@ function SidebarWrapper(props: {
     document.removeEventListener("mousemove", handleMouseMove, true);
   };
 
-  const {
-    width,
-    height,
-    stackDirection = "row",
-    dimension,
-    oppositeDimension,
-    borderPosition,
-  } = useMemo(
-    () => ({
-      width: { top: "100%", left: undefined }[position as "top" | "left"],
-      height: { top: undefined, left: "100%" }[position as "top" | "left"],
-      stackDirection: position === "left" ? "row" : "column",
-      dimension: position === "left" ? "width" : "height",
-      oppositeDimension: position === "left" ? "height" : "width",
-      borderPosition: position === "left" ? "borderRight" : "borderBottom",
-    }),
-    [position],
-  );
-
-  return (
-    <Stack direction={stackDirection} width={width} height={height}>
-      <Stack flexGrow={1} spacing={0.5} sx={{ [dimension]: sidebarDimension, overflow: "auto" }}>
-        {props.children}
-      </Stack>
-      <Box
-        onMouseDown={handleMouseDown}
-        sx={(theme) => ({
-          cursor: "ew-resize",
-          userSelect: "none",
-          [dimension]: theme.spacing(0.5),
-          [oppositeDimension]: "100%",
-          [borderPosition]: `2px solid ${theme.palette.action.hover}`,
-
-          "&:hover": { [`${borderPosition}Color`]: theme.palette.action.selected },
-        })}
-      />
-    </Stack>
-  );
-}
-
-export default function PlotLegend(props: PlotLegendProps): JSX.Element | ReactNull {
-  const {
-    paths,
-    datasets,
-    currentTime,
-    saveConfig,
-    showLegend,
-    xAxisVal,
-    xAxisPath,
-    pathsWithMismatchedDataLengths,
-    sidebarDimension,
-    legendDisplay,
-    showPlotValuesInLegend,
-  } = props;
-  const isSidebar = useMemo(() => legendDisplay !== "floating", [legendDisplay]);
-
-  const lastPath = last(paths);
-  const classes = useStyles();
-
-  const toggleLegend = useCallback(
-    () => saveConfig({ showLegend: !showLegend }),
-    [showLegend, saveConfig],
-  );
-
-  const legendIcon = useMemo(() => {
-    if (isSidebar) {
-      const iconMap = showLegend
-        ? { left: KeyboardArrowLeftIcon, top: KeyboardArrowUpIcon }
-        : { left: KeyboardArrowRightIcon, top: KeyboardArrowDownIcon };
-      const ArrowIcon = iconMap[legendDisplay as "top" | "left"];
-      return <ArrowIcon fontSize="inherit" />;
-    }
-    return <MenuIcon fontSize="inherit" />;
-  }, [showLegend, isSidebar, legendDisplay]);
-
   const legendContent = useMemo(
-    () =>
-      showLegend ? (
-        <Stack
-          sx={(theme) => ({
-            bgcolor: alpha(theme.palette.background.paper, 0.8),
-            overflow: "auto",
-            pointerEvents: "auto",
-            [isSidebar ? "height" : "maxHeight"]: "100%",
-            position: "relative",
-          })}
-        >
-          <Stack
-            direction="row"
-            alignItems="center"
-            padding={0.25}
-            sx={(theme) => ({
-              height: 26,
-              position: "sticky",
-              top: 0,
-              left: 0,
-              right: 0,
-              bgcolor: "background.paper",
-              zIndex: theme.zIndex.mobileStepper + 1,
-            })}
-          >
-            <Box
-              sx={{
-                zIndex: 4,
-                height: 20,
-
-                "&:hover": { bgcolor: "action.hover" },
-              }}
+    () => (
+      <div className={classes.legendContent}>
+        <header className={classes.header}>
+          <div className={classes.dropdownWrapper}>
+            <Dropdown
+              value={xAxisVal}
+              text={`x: ${shortXAxisLabel(xAxisVal)}`}
+              btnClassname={classes.dropdown}
+              onChange={(newXAxisVal) => saveConfig({ xAxisVal: newXAxisVal })}
+              noPortal
             >
-              <Dropdown
-                value={xAxisVal}
-                text={`x: ${shortXAxisLabel(xAxisVal)}`}
-                btnClassname={classes.dropdown}
-                onChange={(newXAxisVal) => saveConfig({ xAxisVal: newXAxisVal })}
-                noPortal
-              >
-                <DropdownItem value="timestamp">timestamp</DropdownItem>
-                <DropdownItem value="index">index</DropdownItem>
-                <DropdownItem value="currentCustom">msg path (current)</DropdownItem>
-                <DropdownItem value="custom">msg path (accumulated)</DropdownItem>
-              </Dropdown>
-            </Box>
-            <Stack direction="row" overflow="hidden">
-              {(xAxisVal === "custom" || xAxisVal === "currentCustom") && (
-                <MessagePathInput
-                  path={xAxisPath?.value ? xAxisPath.value : "/"}
-                  onChange={(newXAxisPath) =>
-                    saveConfig({
-                      xAxisPath: {
-                        value: newXAxisPath,
-                        enabled: xAxisPath ? xAxisPath.enabled : true,
-                      },
-                    })
-                  }
-                  validTypes={plotableRosTypes}
-                  placeholder="Enter a topic name or a number"
-                  disableAutocomplete={xAxisPath && isReferenceLinePlotPathType(xAxisPath)}
-                  autoSize
-                />
-              )}
-            </Stack>
-          </Stack>
-          <Box
-            sx={{
-              position: "relative",
-              display: "grid",
-              gridTemplateColumns: [
-                "auto",
-                "minmax(max-content, 1fr)",
-                showPlotValuesInLegend && "minmax(max-content, 1fr)",
-                "auto",
-              ]
-                .filter(Boolean)
-                .join(" "),
-              alignItems: "stretch",
-            }}
-          >
-            {paths.map((path: PlotPath, index: number) => {
-              const hasMismatchedDataLength = pathsWithMismatchedDataLengths.includes(path.value);
-              return (
-                <PlotLegendRow
-                  key={index}
-                  index={index}
-                  xAxisVal={xAxisVal}
-                  path={path}
-                  paths={paths}
-                  hasMismatchedDataLength={hasMismatchedDataLength}
-                  datasets={datasets}
-                  currentTime={currentTime}
-                  saveConfig={saveConfig}
-                  showPlotValuesInLegend={showPlotValuesInLegend}
-                />
-              );
-            })}
-          </Box>
-          <Box
-            padding={0.5}
-            gridColumn="span 4"
-            sx={{
-              ...(isSidebar && {
-                position: "sticky",
-                right: 0,
-                left: 0,
-              }),
-            }}
-          >
-            <Button
-              size="small"
-              fullWidth
-              startIcon={<AddIcon />}
-              onClick={() =>
+              <DropdownItem value="timestamp">timestamp</DropdownItem>
+              <DropdownItem value="index">index</DropdownItem>
+              <DropdownItem value="currentCustom">msg path (current)</DropdownItem>
+              <DropdownItem value="custom">msg path (accumulated)</DropdownItem>
+            </Dropdown>
+          </div>
+          {(xAxisVal === "custom" || xAxisVal === "currentCustom") && (
+            <MessagePathInput
+              path={xAxisPath?.value ? xAxisPath.value : "/"}
+              onChange={(newXAxisPath) =>
                 saveConfig({
-                  paths: [
-                    ...paths,
-                    {
-                      value: "",
-                      enabled: true,
-                      // For convenience, default to the `timestampMethod` of the last path.
-                      timestampMethod: lastPath ? lastPath.timestampMethod : "receiveTime",
-                    },
-                  ],
+                  xAxisPath: {
+                    value: newXAxisPath,
+                    enabled: xAxisPath ? xAxisPath.enabled : true,
+                  },
                 })
               }
-              sx={{ minWidth: 100, bgcolor: "action.hover" }}
-            >
-              Add line
-            </Button>
-          </Box>
-        </Stack>
-      ) : undefined,
+              validTypes={plotableRosTypes}
+              placeholder="Enter a topic name or a number"
+              disableAutocomplete={xAxisPath && isReferenceLinePlotPathType(xAxisPath)}
+              autoSize
+            />
+          )}
+        </header>
+        <div className={classes.grid}>
+          {paths.map((path: PlotPath, index: number) => (
+            <PlotLegendRow
+              key={index}
+              index={index}
+              xAxisVal={xAxisVal}
+              path={path}
+              paths={paths}
+              hasMismatchedDataLength={pathsWithMismatchedDataLengths.includes(path.value)}
+              datasets={datasets}
+              currentTime={currentTime}
+              saveConfig={saveConfig}
+              showPlotValuesInLegend={showPlotValuesInLegend}
+            />
+          ))}
+        </div>
+        <footer className={classes.footer}>
+          <Button
+            className={classes.addButton}
+            size="small"
+            fullWidth
+            startIcon={<AddIcon />}
+            onClick={() =>
+              saveConfig({
+                paths: [
+                  ...paths,
+                  {
+                    value: "",
+                    enabled: true,
+                    // For convenience, default to the `timestampMethod` of the last path.
+                    timestampMethod: lastPath ? lastPath.timestampMethod : "receiveTime",
+                  },
+                ],
+              })
+            }
+          >
+            Add line
+          </Button>
+        </footer>
+      </div>
+    ),
     [
-      isSidebar,
-      showLegend,
-      xAxisVal,
+      classes.legendContent,
+      classes.header,
+      classes.dropdownWrapper,
       classes.dropdown,
+      classes.grid,
+      classes.footer,
+      classes.addButton,
+      xAxisVal,
       xAxisPath,
-      showPlotValuesInLegend,
       paths,
       saveConfig,
       pathsWithMismatchedDataLengths,
       datasets,
       currentTime,
+      showPlotValuesInLegend,
       lastPath,
     ],
   );
 
-  const { stackDirection, height, width, padding } = useMemo(
-    () => ({
-      stackDirection: !isSidebar || legendDisplay === "left" ? "row" : "column",
-      height: legendDisplay === "left" ? "100%" : "auto",
-      width: legendDisplay === "top" ? "100%" : "auto",
-      padding: isSidebar ? "0" : undefined,
-    }),
-    [isSidebar, legendDisplay],
-  );
-
   return (
-    <Stack
-      direction={stackDirection as "row" | "column"}
-      alignItems="flex-start"
-      className={cx(classes.root, { [classes.floatingRoot]: !isSidebar })}
-    >
+    <div className={cx(classes.root, { [classes.rootFloating]: legendDisplay === "floating" })}>
       <IconButton
-        disableRipple={isSidebar}
         size="small"
         onClick={toggleLegend}
-        className={cx(classes.legendToggle, { [classes.floatingLegendToggle]: !isSidebar })}
-        sx={{
-          bgcolor: "action.hover",
-          padding,
-          pointerEvents: "auto",
-          height,
-          width,
-
-          "&:hover": { bgcolor: "action.focus" },
-        }}
+        className={cx(classes.toggleButton, {
+          [classes.toggleButtonFloating]: legendDisplay === "floating",
+        })}
       >
         {legendIcon}
       </IconButton>
-      {showLegend ? (
-        isSidebar ? (
-          <SidebarWrapper
-            position={legendDisplay}
-            sidebarDimension={sidebarDimension}
-            saveConfig={saveConfig}
-          >
-            {legendContent}
-          </SidebarWrapper>
+      {showLegend &&
+        (legendDisplay === "floating" ? (
+          <div className={classes.floatingWrapper}>{legendContent}</div>
         ) : (
-          <Stack overflow="hidden" height="100%">
-            {legendContent}
-          </Stack>
-        )
-      ) : undefined}
-    </Stack>
+          <div className={classes.wrapper}>
+            <div className={classes.wrapperContent}> {legendContent}</div>
+            <div className={classes.dragHandle} onMouseDown={handleMouseDown} />
+          </div>
+        ))}
+    </div>
   );
 }

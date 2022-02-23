@@ -2,8 +2,9 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { IconButton, Text, ITextProps, useTheme } from "@fluentui/react";
-import { Box, Stack } from "@mui/material";
+import { IconButton, Text, ITextProps } from "@fluentui/react";
+import { Theme } from "@mui/material";
+import { makeStyles } from "@mui/styles";
 
 import { useTooltip } from "@foxglove/studio-base/components/Tooltip";
 import clipboard from "@foxglove/studio-base/util/clipboard";
@@ -15,13 +16,39 @@ type Props = {
   children: React.ReactNode;
 };
 
+const useStyles = makeStyles((theme: Theme) => ({
+  root: {
+    display: "flex",
+    flexDirection: "row",
+    alignItems: "center",
+    userSelect: "none",
+    cursor: "pointer",
+
+    "& > :last-child": {
+      visibility: "hidden",
+    },
+    "&:hover > :last-child": {
+      visibility: "visible",
+    },
+    "&:active": {
+      color: theme.palette.text.primary,
+    },
+  },
+  truncate: {
+    flexGrow: 1,
+    textOverflow: "ellipsis",
+    whiteSpace: "nowrap",
+    overflow: "hidden",
+  },
+}));
+
 export default function CopyText({
   copyText,
   textProps,
   tooltip,
   children,
 }: Props): JSX.Element | ReactNull {
-  const theme = useTheme();
+  const classes = useStyles();
   const button = useTooltip({ contents: tooltip });
 
   if (copyText.length === 0 || children == undefined) {
@@ -29,28 +56,10 @@ export default function CopyText({
   }
 
   return (
-    <Stack
-      direction="row"
-      alignItems="center"
-      onClick={() => void clipboard.copy(copyText)}
-      sx={{
-        userSelect: "none",
-        cursor: "pointer",
-
-        "& > :last-child": {
-          visibility: "hidden",
-        },
-        "&:hover > :last-child": {
-          visibility: "visible",
-        },
-        "&:active": {
-          color: theme.semanticColors.buttonTextPressed,
-        },
-      }}
-    >
-      <Box flexGrow={1} textOverflow="ellipsis" whiteSpace="nowrap" overflow="hidden">
+    <div className={classes.root} onClick={() => void clipboard.copy(copyText)}>
+      <div className={classes.truncate}>
         <Text {...textProps}>{children}</Text>
-      </Box>
+      </div>
       {button.tooltip}
       <IconButton
         elementRef={button.ref}
@@ -69,6 +78,6 @@ export default function CopyText({
           },
         }}
       />
-    </Stack>
+    </div>
   );
 }
