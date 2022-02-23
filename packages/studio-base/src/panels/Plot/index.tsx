@@ -286,6 +286,9 @@ function Plot(props: Props) {
 
   const addMessages = useCallback(
     (accumulated: PlotDataByPath, msgEvents: readonly MessageEvent<unknown>[]) => {
+      const lastEventTime = msgEvents[msgEvents.length - 1]?.receiveTime;
+      const isFollowing = followingView?.type === "following";
+
       for (const msgEvent of msgEvents) {
         const paths = topicToPaths.get(msgEvent.topic);
         if (!paths) {
@@ -312,14 +315,26 @@ function Plot(props: Props) {
             // PlotDataPaths have 2d arrays of items to accomodate blocks which may have gaps so
             // each continuous set of blocks forms one continuous line. For streaming messages we
             // treat this as one continuous set of items and always add to the first "range"
-            plotDataPath[0]!.push(plotDataItem);
+            const plotDataItems = plotDataPath[0]!;
+            plotDataItems.push(plotDataItem);
+
+            // If we are using the _following_ view mode, truncate away any items older than the view window.
+            if (lastEventTime && isFollowing) {
+              const minStamp = toSec(lastEventTime) - followingView.width;
+              plotDataPath[0] = filterMap(plotDataItems, (item) => {
+                if (toSec(item.receiveTime) < minStamp) {
+                  return undefined;
+                }
+                return item;
+              });
+            }
           }
         }
       }
 
       return { ...accumulated };
     },
-    [cachedGetMessagePathDataItems, showSingleCurrentMessage, topicToPaths],
+    [cachedGetMessagePathDataItems, followingView, showSingleCurrentMessage, topicToPaths],
   );
 
   const plotDataByPath = useMessageReducer<PlotDataByPath>({
@@ -327,34 +342,6 @@ function Plot(props: Props) {
     restore,
     addMessages,
   });
-
-  // filter down the message history to the follow window
-  const filteredPlotData = useMemo(() => {
-    if (followingView?.type !== "following" || currentTime == undefined) {
-      return plotDataByPath;
-    }
-
-    const filteredByPath: typeof plotDataByPath = {};
-
-    const minStamp = toSec(currentTime) - followingView.width;
-    for (const [path, plotDataItems] of Object.entries(plotDataByPath)) {
-      const newArr = [];
-      for (const tooltipArr of plotDataItems) {
-        const filtered = filterMap(tooltipArr, (tooltip) => {
-          if (toSec(tooltip.receiveTime) < minStamp) {
-            return undefined;
-          }
-          return tooltip;
-        });
-        if (filtered.length > 0) {
-          newArr.push(filtered);
-        }
-      }
-
-      filteredByPath[path] = newArr;
-    }
-    return filteredByPath;
-  }, [currentTime, followingView, plotDataByPath]);
 
   const blocks = useBlocksByTopic(subscribeTopics);
 
@@ -371,7 +358,7 @@ function Plot(props: Props) {
   // Keep disabled paths when passing into getDatasets, because we still want
   // easy access to the history when turning the disabled paths back on.
   const { datasets, pathsWithMismatchedDataLengths } = useMemo(() => {
-    const allPlotData = { ...filteredPlotData, ...plotDataForBlocks };
+    const allPlotData = { ...plotDataByPath, ...plotDataForBlocks };
 
     return getDatasets({
       paths: yAxisPaths,
@@ -382,7 +369,7 @@ function Plot(props: Props) {
       invertedTheme: theme.isInverted,
     });
   }, [
-    filteredPlotData,
+    plotDataByPath,
     plotDataForBlocks,
     yAxisPaths,
     startTime,
