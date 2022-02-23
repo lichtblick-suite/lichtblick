@@ -83,7 +83,10 @@ export function parseJsonSchema(
           );
           const prevPostprocess = postprocessObject;
           postprocessObject = (value) => {
-            value[fieldName] = postprocessNestedObject(value[fieldName] as Record<string, unknown>);
+            const fieldValue = value[fieldName];
+            if (fieldValue != undefined && typeof fieldValue === "object") {
+              value[fieldName] = postprocessNestedObject(fieldValue as Record<string, unknown>);
+            }
             return prevPostprocess(value);
           };
           fields.push({ name: fieldName, type: nestedTypeName, isComplex: true });

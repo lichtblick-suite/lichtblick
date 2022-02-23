@@ -199,4 +199,45 @@ describe("parseJsonSchema", () => {
       expect(postprocessValue(value)).toEqual(expectedValue);
     },
   );
+
+  it("allows missing sub-properties", () => {
+    const { postprocessValue } = parseJsonSchema(
+      {
+        type: "object",
+        properties: {
+          foo: { type: "number" },
+          bar: {
+            type: "object",
+            properties: { baz: { type: "object", properties: { quux: { type: "number" } } } },
+          },
+        },
+      },
+      "Root",
+    );
+    expect(postprocessValue({ foo: 3 })).toEqual({ foo: 3 });
+  });
+  it("allows missing sub-properties in arrays", () => {
+    const { postprocessValue } = parseJsonSchema(
+      {
+        type: "object",
+        properties: {
+          arr: {
+            type: "array",
+            items: {
+              type: "object",
+              properties: {
+                foo: { type: "number" },
+                bar: {
+                  type: "object",
+                  properties: { baz: { type: "object", properties: { quux: { type: "number" } } } },
+                },
+              },
+            },
+          },
+        },
+      },
+      "Root",
+    );
+    expect(postprocessValue({ arr: [{ foo: 3 }] })).toEqual({ arr: [{ foo: 3 }] });
+  });
 });
