@@ -3,8 +3,8 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 import { Dialog, DialogFooter, PrimaryButton } from "@fluentui/react";
-import { Stack } from "@mui/material";
-import { useCallback, useLayoutEffect, useMemo, useState } from "react";
+import { Stack, Typography } from "@mui/material";
+import { ReactNode, useCallback, useLayoutEffect, useMemo, useState } from "react";
 
 import { definitions as commonDefs } from "@foxglove/rosmsg-msgs-common";
 import { PanelExtensionContext, Topic } from "@foxglove/studio";
@@ -19,6 +19,26 @@ import { Config, DeepPartial } from "./types";
 type TeleopPanelProps = {
   context: PanelExtensionContext;
 };
+
+function ErrorMessage({
+  children,
+  message,
+}: {
+  children?: ReactNode;
+  message: string;
+}): JSX.Element {
+  return (
+    <Stack
+      alignItems="center"
+      direction="column"
+      spacing={3}
+      style={{ maxWidth: "60ch", textAlign: "center" }}
+    >
+      <Typography variant="h4">{message}</Typography>
+      {children}
+    </Stack>
+  );
+}
 
 function TeleopPanel(props: TeleopPanelProps): JSX.Element {
   const { context } = props;
@@ -180,13 +200,23 @@ function TeleopPanel(props: TeleopPanelProps): JSX.Element {
     renderDone();
   }, [renderDone]);
 
-  const enabled = Boolean(context.publish && config.publishRate > 0 && currentTopic);
+  const canPublish = context.publish != undefined && config.publishRate > 0;
+  const hasTopic = Boolean(currentTopic);
+  const enabled = canPublish && hasTopic;
   const theme = colorScheme === "dark" ? darkFluentTheme : lightFluentTheme;
 
   return (
     <ThemeProvider isDark={colorScheme === "dark"}>
-      <Stack height="100%" justifyContent="100" alignItems="center" padding="min(5%, 8px)">
-        <DirectionalPad onAction={setCurrentAction} disabled={!enabled} />
+      <Stack height="100%" justifyContent="center" alignItems="center" padding="min(5%, 8px)">
+        {!canPublish && (
+          <ErrorMessage message="Please connect to a datasource that supports publishing in order to use this panel." />
+        )}
+        {canPublish && !hasTopic && (
+          <ErrorMessage message="Please select a topic in the panel settings in order to use this panel.">
+            <PrimaryButton onClick={() => setShowSettings(true)}>Open Panel Settings</PrimaryButton>
+          </ErrorMessage>
+        )}
+        {enabled && <DirectionalPad onAction={setCurrentAction} disabled={!enabled} />}
       </Stack>
       <Stack position="absolute" top={0} left={0} margin={1}>
         <HoverableIconButton
