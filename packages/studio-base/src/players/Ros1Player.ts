@@ -233,6 +233,7 @@ export default class Ros1Player implements Player {
       // Fetch the full graph topology
       await this._updateConnectionGraph(rosNode);
 
+      this._clearProblem(Problem.Connection, { skipEmit: true });
       this._presence = PlayerPresence.PRESENT;
       this._emitState();
     } catch (error) {
