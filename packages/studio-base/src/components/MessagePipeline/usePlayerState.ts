@@ -30,7 +30,7 @@ type UpdatePlayerStateAction = {
   renderDone?: () => void;
 };
 
-type Action = UpdateSubscriberAction | UpdatePlayerStateAction;
+export type MessagePipelineStateAction = UpdateSubscriberAction | UpdatePlayerStateAction;
 
 // Update state with a subscriber. Any new topics for the subscriber are tracked in newTopicsBySubscriberId
 // to receive the last message on their newly subscribed topics.
@@ -159,7 +159,10 @@ function updatePlayerStateAction(
   };
 }
 
-function reduce(prevSubscriberState: InternalState, action: Action): InternalState {
+function reduce(
+  prevSubscriberState: InternalState,
+  action: MessagePipelineStateAction,
+): InternalState {
   switch (action.type) {
     case "update-player-state":
       return updatePlayerStateAction(prevSubscriberState, action);

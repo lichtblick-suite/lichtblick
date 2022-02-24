@@ -37,7 +37,7 @@ import signal from "@foxglove/studio-base/util/signal";
 
 import MessageOrderTracker from "./MessageOrderTracker";
 import { pauseFrameForPromises, FramePromise } from "./pauseFrameForPromise";
-import { usePlayerState } from "./usePlayerState";
+import { MessagePipelineStateAction, usePlayerState } from "./usePlayerState";
 
 const { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } = React;
 
@@ -142,77 +142,14 @@ export function MessagePipelineProvider({
       return;
     }
 
-    let closed = false;
-    let resolveFn: undefined | (() => void);
-
-    const messageOrderTracker = new MessageOrderTracker();
-    player.setListener(async (newPlayerState: PlayerState) => {
-      if (closed) {
-        return;
-      }
-
-      if (resolveFn) {
-        throw new Error("New playerState was emitted before last playerState was rendered.");
-      }
-
-      // check for any out-of-order or out-of-sync messages
-      messageOrderTracker.update(newPlayerState);
-
-      const promise = new Promise<void>((resolve) => {
-        resolveFn = () => {
-          resolveFn = undefined;
-          resolve();
-        };
-      });
-
-      // Track when we start the state update. This will pair when layout effect calls renderDone.
-      const start = Date.now();
-
-      // Render done is invoked by a layout effect once the component has rendered.
-      // After the component renders, we kick off an animation frame to give panels one
-      // animation frame to invoke pause.
-      let called = false;
-      function renderDone() {
-        if (called) {
-          return;
-        }
-        called = true;
-
-        // Compute how much time remains before this frame is done
-        const delta = Date.now() - start;
-        const frameTime = Math.max(0, msPerFrameRef.current - delta);
-
-        // Panels have the remaining frame time to invoke pause
-        setTimeout(async () => {
-          if (closed) {
-            return;
-          }
-
-          const promisesToWaitFor = promisesToWaitForRef.current;
-          if (promisesToWaitFor.length > 0) {
-            promisesToWaitForRef.current = [];
-            await pauseFrameForPromises(promisesToWaitFor);
-          }
-
-          if (!resolveFn) {
-            return;
-          }
-          resolveFn();
-        }, frameTime);
-      }
-
-      updateState({
-        type: "update-player-state",
-        playerState: newPlayerState,
-        renderDone,
-      });
-
-      return await promise;
+    const { listener, cleanupListener } = createPlayerListener({
+      msPerFrameRef,
+      promisesToWaitForRef,
+      updateState,
     });
+    player.setListener(listener);
     return () => {
-      closed = true;
-      resolveFn = undefined;
-
+      cleanupListener();
       player.close();
       updateState({
         type: "update-player-state",
@@ -318,4 +255,111 @@ export function MessagePipelineProvider({
       {children}
     </ContextInternal.Provider>
   );
+}
+
+/**
+ * The creation of the player listener is extracted as a separate function to prevent memory leaks.
+ * When multiple closures are created inside of an outer function, V8 allocates one "context" object
+ * to be shared by all the inner closures, holding the shared variables they access. As long as any
+ * of the inner closures are still alive, the context and **all** the shared variables stay alive.
+ *
+ * In the case of MessagePipelineProvider, when the `listener` closure was created directly inside
+ * the useEffect above, it would end up retaining a shared context that also retained the player
+ * `state` variable returned by `usePlayerState()`, even though the listener closure didn't actually
+ * use it. In particular, each time a new player was created in the useEffect, this caused it to
+ * retain the old player's state (via the listener closure), creating a "linked list" effect that
+ * caused the last state produced by each player (and therefore also its preloaded message blocks)
+ * to be retained indefinitely as new data sources were swapped in.
+ *
+ * To avoid this problem, we extract the closure creation into a module-level function where it
+ * won't see variables from outer scopes that are potentially retained in the shared context due to
+ * their use in other closures.
+ *
+ * This type of leak is discussed at:
+ * - https://bugs.chromium.org/p/chromium/issues/detail?id=315190
+ * - http://point.davidglasser.net/2013/06/27/surprising-javascript-memory-leak.html
+ * - https://stackoverflow.com/questions/53985411/understanding-javascript-closure-variable-capture-in-v8
+ */
+function createPlayerListener(args: {
+  msPerFrameRef: React.MutableRefObject<number>;
+  promisesToWaitForRef: React.MutableRefObject<FramePromise[]>;
+  updateState: (action: MessagePipelineStateAction) => void;
+}): {
+  listener: (state: PlayerState) => Promise<void>;
+  cleanupListener: () => void;
+} {
+  const { msPerFrameRef, promisesToWaitForRef, updateState } = args;
+  const messageOrderTracker = new MessageOrderTracker();
+  let closed = false;
+  let resolveFn: undefined | (() => void);
+  const listener = async (newPlayerState: PlayerState) => {
+    if (closed) {
+      return;
+    }
+
+    if (resolveFn) {
+      throw new Error("New playerState was emitted before last playerState was rendered.");
+    }
+
+    // check for any out-of-order or out-of-sync messages
+    messageOrderTracker.update(newPlayerState);
+
+    const promise = new Promise<void>((resolve) => {
+      resolveFn = () => {
+        resolveFn = undefined;
+        resolve();
+      };
+    });
+
+    // Track when we start the state update. This will pair when layout effect calls renderDone.
+    const start = Date.now();
+
+    // Render done is invoked by a layout effect once the component has rendered.
+    // After the component renders, we kick off an animation frame to give panels one
+    // animation frame to invoke pause.
+    let called = false;
+    function renderDone() {
+      if (called) {
+        return;
+      }
+      called = true;
+
+      // Compute how much time remains before this frame is done
+      const delta = Date.now() - start;
+      const frameTime = Math.max(0, msPerFrameRef.current - delta);
+
+      // Panels have the remaining frame time to invoke pause
+      setTimeout(async () => {
+        if (closed) {
+          return;
+        }
+
+        const promisesToWaitFor = promisesToWaitForRef.current;
+        if (promisesToWaitFor.length > 0) {
+          promisesToWaitForRef.current = [];
+          await pauseFrameForPromises(promisesToWaitFor);
+        }
+
+        if (!resolveFn) {
+          return;
+        }
+        resolveFn();
+      }, frameTime);
+    }
+
+    updateState({
+      type: "update-player-state",
+      playerState: newPlayerState,
+      renderDone,
+    });
+
+    return await promise;
+  };
+  return {
+    listener,
+    cleanupListener() {
+      closed = true;
+      resolveFn = undefined;
+    },
+  };
 }
