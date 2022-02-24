@@ -32,8 +32,14 @@ export default function SigninForm(): JSX.Element {
         <AccountSyncGraphic width={192} />
       </div>
       <Typography variant="body1">
-        Create a Foxglove account to sync your layouts across multiple devices, and share them with
-        your team.
+        <>
+          Create a Foxglove account to:
+          <ul>
+            <li>Sync your layouts across multiple devices</li>
+            <li>Share your layouts with others</li>
+            <li>Manage and store your robotics data</li>
+          </ul>
+        </>
       </Typography>
 
       <Button variant="contained" color="primary" onClick={signIn}>
