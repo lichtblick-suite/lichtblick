@@ -4,7 +4,7 @@
 
 import { useTheme as useFluentUITheme } from "@fluentui/react";
 import { Close as CloseIcon, Error as ErrorIcon, Remove as RemoveIcon } from "@mui/icons-material";
-import { IconButton, Theme, Tooltip, Typography } from "@mui/material";
+import { IconButton, Theme, Tooltip, Typography, useTheme } from "@mui/material";
 import { createStyles, makeStyles } from "@mui/styles";
 import { ComponentProps, useCallback, useMemo, useState } from "react";
 import { v4 as uuidv4 } from "uuid";
@@ -29,12 +29,6 @@ type PlotLegendRowProps = {
   currentTime?: number;
   saveConfig: (arg0: Partial<PlotConfig>) => void;
   showPlotValuesInLegend: boolean;
-};
-
-type StyleProps = {
-  index: number;
-  color: string;
-  enabled: boolean;
 };
 
 const useStyles = makeStyles((theme: Theme) =>
@@ -66,20 +60,16 @@ const useStyles = makeStyles((theme: Theme) =>
       padding: `${theme.spacing(0.125)} !important`,
       marginLeft: theme.spacing(0.25),
     },
-    legendIcon: ({ enabled, index }: StyleProps) => ({
-      color: enabled ? lineColors[index % lineColors.length] : theme.palette.text.secondary,
-    }),
     inputWrapper: {
       display: "flex",
       alignItems: "center",
       padding: theme.spacing(0.25),
     },
-    plotValue: ({ color }: StyleProps) => ({
-      color,
+    plotValue: {
       display: "flex",
       alignItems: "center",
       padding: theme.spacing(0.25),
-    }),
+    },
     removeButton: {
       padding: `${theme.spacing(0.25)} !important`,
       color: theme.palette.text.secondary,
@@ -119,10 +109,12 @@ export default function PlotLegendRow({
   saveConfig,
   showPlotValuesInLegend,
 }: PlotLegendRowProps): JSX.Element {
-  const correspondingData = useMemo(
-    () => datasets.find((set) => set.label === path.value)?.data ?? [],
-    [datasets, path.value],
-  );
+  const correspondingData = useMemo(() => {
+    if (!showPlotValuesInLegend) {
+      return [];
+    }
+    return datasets.find((set) => set.label === path.value)?.data ?? [];
+  }, [datasets, path.value, showPlotValuesInLegend]);
 
   const [hoverComponentId] = useState<string>(() => uuidv4());
   const hoverValue = useHoverValue({
@@ -131,7 +123,15 @@ export default function PlotLegendRow({
   });
 
   const fluentUITheme = useFluentUITheme();
+  const theme = useTheme();
+
   const currentDisplay = useMemo(() => {
+    if (!showPlotValuesInLegend) {
+      return {
+        value: undefined,
+        color: "inherit",
+      };
+    }
     const timeToCompare = hoverValue?.value ?? currentTime;
 
     let value;
@@ -145,8 +145,19 @@ export default function PlotLegendRow({
       value,
       color: hoverValue?.value != undefined ? fluentUITheme.palette.yellowDark : "inherit",
     };
-  }, [hoverValue, correspondingData, currentTime, fluentUITheme]);
-  const classes = useStyles({ color: currentDisplay.color, enabled: path.enabled, index });
+  }, [
+    showPlotValuesInLegend,
+    hoverValue?.value,
+    currentTime,
+    fluentUITheme.palette.yellowDark,
+    correspondingData,
+  ]);
+
+  const legendIconColor = path.enabled
+    ? lineColors[index % lineColors.length]
+    : theme.palette.text.secondary;
+
+  const classes = useStyles();
 
   const isReferenceLinePlotPath = isReferenceLinePlotPathType(path);
   let timestampMethod;
@@ -200,7 +211,7 @@ export default function PlotLegendRow({
             saveConfig({ paths: newPaths });
           }}
         >
-          <RemoveIcon className={classes.legendIcon} color="inherit" />
+          <RemoveIcon style={{ color: legendIconColor }} color="inherit" />
         </IconButton>
       </div>
       <div className={classes.inputWrapper}>
@@ -226,7 +237,7 @@ export default function PlotLegendRow({
         )}
       </div>
       {showPlotValuesInLegend && (
-        <div className={classes.plotValue}>
+        <div className={classes.plotValue} style={{ color: currentDisplay.color }}>
           <Typography component="div" variant="body2" align="right" color="inherit">
             {currentDisplay.value ?? ""}
           </Typography>
