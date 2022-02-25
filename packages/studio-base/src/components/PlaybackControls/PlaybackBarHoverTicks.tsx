@@ -34,7 +34,7 @@ const sharedTickStyles = css`
   border-left: 5px solid transparent;
   border-right: 5px solid transparent;
 
-  margin-left: -6px; /* -6px seems to line up better than -5px */
+  margin-left: -5px;
 `;
 
 const TopTick = styled.div`

@@ -127,12 +127,11 @@ export default function Scrubber(props: Props): JSX.Element {
 
   const latestStartTime = useLatest(startTime);
   const onHoverOver = useCallback(
-    (ev: React.MouseEvent<HTMLDivElement>, value: number) => {
+    (x: number, value: number) => {
       if (!latestStartTime.current || el.current == undefined) {
         return;
       }
       const currentEl = el.current;
-      const x = ev.clientX;
       // fix the y position of the tooltip to float on top of the playback bar
       const y = currentEl.getBoundingClientRect().top;
 
@@ -224,7 +223,6 @@ export default function Scrubber(props: Props): JSX.Element {
           disabled={min == undefined || max == undefined}
           step={step}
           value={value}
-          draggable
           onHoverOver={onHoverOver}
           onHoverOut={onHoverOut}
           onChange={onChange}

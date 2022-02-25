@@ -3,7 +3,15 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 import { clamp } from "lodash";
-import { useCallback, useEffect, useRef, MouseEvent, ReactNode, useMemo } from "react";
+import {
+  useCallback,
+  useEffect,
+  useRef,
+  ReactNode,
+  useMemo,
+  useState,
+  useLayoutEffect,
+} from "react";
 import styled from "styled-components";
 
 import Logger from "@foxglove/log";
@@ -16,9 +24,8 @@ type Props = {
   max: number;
   disabled?: boolean;
   step?: number;
-  draggable?: boolean;
   onChange: (value: number) => void;
-  onHoverOver?: (ev: MouseEvent<HTMLDivElement>, value: number) => void;
+  onHoverOver?: (clientX: number, value: number) => void;
   onHoverOut?: () => void;
   renderSlider?: (value?: number) => ReactNode;
 };
@@ -53,7 +60,6 @@ export default function Slider(props: Props): JSX.Element {
     step = 0,
     max = 0,
     min = 0,
-    draggable = false,
     disabled = false,
     renderSlider = defaultRenderSlider,
     onHoverOver,
@@ -63,10 +69,8 @@ export default function Slider(props: Props): JSX.Element {
 
   const elRef = useRef<HTMLDivElement | ReactNull>(ReactNull);
 
-  const mouseDownRef = useRef(false);
-
   const getValueAtMouse = useCallback(
-    (ev: MouseEvent<HTMLDivElement>): number => {
+    (ev: React.MouseEvent | MouseEvent): number => {
       if (!elRef.current) {
         return 0;
       }
@@ -82,39 +86,58 @@ export default function Slider(props: Props): JSX.Element {
     [max, min, step],
   );
 
-  const onClick = useCallback(
-    (ev: MouseEvent<HTMLDivElement>): void => {
-      if (disabled || draggable) {
-        return;
-      }
-      onChange(getValueAtMouse(ev));
-    },
-    [disabled, draggable, getValueAtMouse, onChange],
-  );
+  const [mouseDown, setMouseDown] = useState(false);
+  const mouseDownRef = useRef(mouseDown);
+  useLayoutEffect(() => {
+    mouseDownRef.current = mouseDown;
+  }, [mouseDown]);
 
-  const onMouseUp = useCallback((): void => {
-    mouseDownRef.current = false;
+  const [mouseInside, setMouseInside] = useState(false);
+  const mouseInsideRef = useRef(mouseInside);
+  useLayoutEffect(() => {
+    mouseInsideRef.current = mouseInside;
+  }, [mouseInside]);
+
+  const onMouseEnter = useCallback(() => {
+    setMouseInside(true);
   }, []);
 
+  const onMouseLeave = useCallback(() => {
+    setMouseInside(false);
+    if (!mouseDownRef.current) {
+      onHoverOut?.();
+    }
+  }, [onHoverOut]);
+
+  const onMouseUp = useCallback((): void => {
+    setMouseDown(false);
+    if (!mouseInsideRef.current) {
+      onHoverOut?.();
+    }
+  }, [onHoverOut]);
+
   const onMouseMove = useCallback(
-    (ev: MouseEvent<HTMLDivElement>): void => {
+    (ev: React.MouseEvent | MouseEvent): void => {
       const val = getValueAtMouse(ev);
       if (disabled) {
         return;
       }
 
-      onHoverOver?.(ev, val);
-      if (!draggable || !mouseDownRef.current) {
+      if (elRef.current) {
+        const { left, right } = elRef.current.getBoundingClientRect();
+        onHoverOver?.(clamp(ev.clientX, left, right), val);
+      }
+      if (!mouseDownRef.current) {
         return;
       }
       onChange(val);
     },
-    [disabled, draggable, getValueAtMouse, onChange, onHoverOver],
+    [disabled, getValueAtMouse, onChange, onHoverOver],
   );
 
   const onMouseDown = useCallback(
-    (ev: MouseEvent<HTMLDivElement>): void => {
-      if (disabled || !draggable) {
+    (ev: React.MouseEvent<HTMLDivElement>): void => {
+      if (disabled) {
         return;
       }
       if (document.activeElement instanceof HTMLElement) {
@@ -122,9 +145,9 @@ export default function Slider(props: Props): JSX.Element {
       }
       ev.preventDefault();
       onChange(getValueAtMouse(ev));
-      mouseDownRef.current = true;
+      setMouseDown(true);
     },
-    [disabled, draggable, getValueAtMouse, onChange],
+    [disabled, getValueAtMouse, onChange],
   );
 
   useEffect(() => {
@@ -138,15 +161,26 @@ export default function Slider(props: Props): JSX.Element {
     return value != undefined && max > min ? (value - min) / (max - min) : undefined;
   }, [max, min, value]);
 
+  useEffect(() => {
+    if (mouseDown) {
+      window.addEventListener("mouseup", onMouseUp);
+      window.addEventListener("mousemove", onMouseMove);
+      return () => {
+        window.removeEventListener("mouseup", onMouseUp);
+        window.removeEventListener("mousemove", onMouseMove);
+      };
+    }
+    return undefined;
+  }, [mouseDown, onMouseMove, onMouseUp]);
+
   return (
     <StyledSlider
       disabled={disabled}
       ref={elRef}
-      onClick={onClick}
-      onMouseUp={onMouseUp}
       onMouseDown={onMouseDown}
       onMouseMove={onMouseMove}
-      onMouseOut={onHoverOut}
+      onMouseEnter={onMouseEnter}
+      onMouseLeave={onMouseLeave}
     >
       {renderSlider(sliderValue)}
     </StyledSlider>

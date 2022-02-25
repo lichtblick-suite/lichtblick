@@ -67,13 +67,7 @@ export const Examples: Story = () => {
       </div>
       <p>draggable</p>
       <div style={{ backgroundColor: "cornflowerblue", height: 20, width: 500 }}>
-        <Slider
-          draggable
-          min={10}
-          max={200}
-          onChange={(v) => setDraggableValue(v)}
-          value={draggableValue}
-        />
+        <Slider min={10} max={200} onChange={(v) => setDraggableValue(v)} value={draggableValue} />
       </div>
     </div>
   );
@@ -87,7 +81,6 @@ export const CustomRenderer: Story = () => {
       <p>Customize slider UI using renderSlider</p>
       <div style={{ backgroundColor: "cornflowerblue", height: 20, width: 500 }}>
         <Slider
-          draggable
           min={10}
           max={200}
           onChange={(v) => setDraggableValue(v)}
