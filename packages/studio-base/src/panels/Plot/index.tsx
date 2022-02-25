@@ -263,6 +263,18 @@ function Plot(props: Props) {
     return out;
   }, [allPaths]);
 
+  const blocks = useBlocksByTopic(subscribeTopics);
+
+  // This memoization isn't quite ideal: getDatasets is a bit expensive with lots of preloaded data,
+  // and when we preload a new block we re-generate the datasets for the whole timeline. We could
+  // try to use block memoization here.
+  const plotDataForBlocks = useMemo(() => {
+    if (showSingleCurrentMessage) {
+      return {};
+    }
+    return getBlockItemsByPath(decodeMessagePathsForMessagesByTopic, blocks);
+  }, [blocks, decodeMessagePathsForMessagesByTopic, showSingleCurrentMessage]);
+
   // When restoring, keep only the paths that are present in allPaths.
   // Without this, the reducer value will grow unbounded with new paths as users add/remove series.
   const restore = useCallback(
@@ -289,6 +301,10 @@ function Plot(props: Props) {
       const lastEventTime = msgEvents[msgEvents.length - 1]?.receiveTime;
       const isFollowing = followingView?.type === "following";
 
+      // If we don't change any accumulated data, avoid returning a new "accumulated" object so
+      // react hooks remain stable.
+      let changed = false;
+
       for (const msgEvent of msgEvents) {
         const paths = topicToPaths.get(msgEvent.topic);
         if (!paths) {
@@ -296,6 +312,12 @@ function Plot(props: Props) {
         }
 
         for (const path of paths) {
+          // Skip any paths we already service in plotDataForBlocks.
+          // We don't need to accumulate these because the block data takes precedence.
+          if (path in plotDataForBlocks) {
+            continue;
+          }
+
           const dataItem = cachedGetMessagePathDataItems(path, msgEvent);
           if (!dataItem) {
             continue;
@@ -307,6 +329,8 @@ function Plot(props: Props) {
             receiveTime: msgEvent.receiveTime,
             headerStamp,
           };
+
+          changed = true;
 
           if (showSingleCurrentMessage) {
             accumulated[path] = [[plotDataItem]];
@@ -332,9 +356,19 @@ function Plot(props: Props) {
         }
       }
 
+      if (!changed) {
+        return accumulated;
+      }
+
       return { ...accumulated };
     },
-    [cachedGetMessagePathDataItems, followingView, showSingleCurrentMessage, topicToPaths],
+    [
+      plotDataForBlocks,
+      cachedGetMessagePathDataItems,
+      followingView,
+      showSingleCurrentMessage,
+      topicToPaths,
+    ],
   );
 
   const plotDataByPath = useMessageReducer<PlotDataByPath>({
@@ -342,18 +376,6 @@ function Plot(props: Props) {
     restore,
     addMessages,
   });
-
-  const blocks = useBlocksByTopic(subscribeTopics);
-
-  // This memoization isn't quite ideal: getDatasets is a bit expensive with lots of preloaded data,
-  // and when we preload a new block we re-generate the datasets for the whole timeline. We could
-  // try to use block memoization here.
-  const plotDataForBlocks = useMemo(() => {
-    if (showSingleCurrentMessage) {
-      return {};
-    }
-    return getBlockItemsByPath(decodeMessagePathsForMessagesByTopic, blocks);
-  }, [blocks, decodeMessagePathsForMessagesByTopic, showSingleCurrentMessage]);
 
   // Keep disabled paths when passing into getDatasets, because we still want
   // easy access to the history when turning the disabled paths back on.

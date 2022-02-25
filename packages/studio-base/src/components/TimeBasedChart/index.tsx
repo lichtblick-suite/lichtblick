@@ -670,7 +670,7 @@ export default function TimeBasedChart(props: Props): JSX.Element {
   }, [datasets, linesToHide]);
 
   // throttle the downsampleDatasets callback since this is an input to the downsampledData memo
-  // avoids down a downsample if the callback changes rapidly
+  // avoids doing a downsample if the callback changes rapidly
   const throttledDownsample = useThrottle(() => downsampleDatasets, 100);
 
   // downsample datasets with the latest downsample function
