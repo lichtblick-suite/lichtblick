@@ -109,7 +109,6 @@
     "@types/uuid": "8.3.4",
     "@types/wicg-file-system-access": "2020.9.4",
     "@types/ws": "8.2.2",
-    "@types/zstd-codec": "workspace:*",
     "@wojtekmaj/enzyme-adapter-react-17": "0.6.6",
     "amplitude-js": "8.16.1",
     "argparse": "2.0.1",
@@ -205,7 +204,6 @@
     "uuid": "8.3.2",
     "wasm-lz4": "2.0.0",
     "webpack": "5.68.0",
-    "xacro-parser": "0.3.8",
-    "zstd-codec": "0.1.4"
+    "xacro-parser": "0.3.8"
   }
 }

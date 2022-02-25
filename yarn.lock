@@ -2310,9 +2310,10 @@ __metadata:
   dependencies:
     "@foxglove/wasm-bz2": 0.1.0
     "@protobufjs/base64": 1.1.2
+    "@types/zstd-codec": "workspace:*"
     typescript: 4.5.5
     wasm-lz4: 2.0.0
-    zstd-codec: 0.1.4
+    zstd-codec: "patch:zstd-codec@0.1.4#../../patches/zstd-codec.patch"
   languageName: unknown
   linkType: soft
 
@@ -2580,7 +2581,6 @@ __metadata:
     "@types/uuid": 8.3.4
     "@types/wicg-file-system-access": 2020.9.4
     "@types/ws": 8.2.2
-    "@types/zstd-codec": "workspace:*"
     "@wojtekmaj/enzyme-adapter-react-17": 0.6.6
     amplitude-js: 8.16.1
     argparse: 2.0.1
@@ -2677,7 +2677,6 @@ __metadata:
     wasm-lz4: 2.0.0
     webpack: 5.68.0
     xacro-parser: 0.3.8
-    zstd-codec: 0.1.4
   languageName: unknown
   linkType: soft
 
@@ -25469,6 +25468,13 @@ __metadata:
   version: 0.1.4
   resolution: "zstd-codec@npm:0.1.4"
   checksum: 8689bc0defc4f387d1be990b8b8ca8ca56690d17dfc8dd4703db798465b92a21e64e54e886acfaa376147d9d07d879a68627b09fddc34a0c93f0dc5c610a790c
+  languageName: node
+  linkType: hard
+
+"zstd-codec@patch:zstd-codec@0.1.4#../../patches/zstd-codec.patch::locator=%40foxglove%2Fmcap-support%40workspace%3Apackages%2Fmcap-support":
+  version: 0.1.4
+  resolution: "zstd-codec@patch:zstd-codec@npm%3A0.1.4#../../patches/zstd-codec.patch::version=0.1.4&hash=a862de&locator=%40foxglove%2Fmcap-support%40workspace%3Apackages%2Fmcap-support"
+  checksum: 08a5e329950cb926581ea3a0a46131676e05fcbcdc59faebe2d7c66036562694c9a266140183848facb08fa06e5f6db7e55e23dac27f219e7dbb69f124b62554
   languageName: node
   linkType: hard
 

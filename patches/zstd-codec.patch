@@ -1,0 +1,13 @@
+diff --git a/lib/helpers.js b/lib/helpers.js
+index ce3fee061613361e41f3b84ac2447e152196ee6d..ceea656401f1257c6ded5863e8e779b25c4103ef 100644
+--- a/lib/helpers.js
++++ b/lib/helpers.js
+@@ -1,7 +1,7 @@
+ class ArrayBufferHelper {
+     static transfer(old_buffer, new_capacity) {
+         const bytes = new Uint8Array(new ArrayBuffer(new_capacity));
+-        bytes.set(new Uint8Array(old_buffer.slice(0, new_capacity)));
++        bytes.set(new Uint8Array(old_buffer, 0, Math.min(new_capacity, old_buffer.byteLength)));
+         return bytes.buffer;
+     }
+ }
