@@ -2,8 +2,14 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
+import { groupBy, sumBy } from "lodash";
+
 import { areEqual, isGreaterThan, isLessThan, Time, toString } from "@foxglove/rostime";
 import { MessageEvent } from "@foxglove/studio-base/players/types";
+import {
+  BlockCache,
+  MemoryCacheBlock,
+} from "@foxglove/studio-base/randomAccessDataProviders/MemoryCacheDataProvider";
 import { Range } from "@foxglove/studio-base/util/ranges";
 
 /** Represents a half-open time interval: [start, end) */
@@ -58,9 +64,13 @@ function getMessagesFromLoadedRange(messages: MessageEvent<unknown>[], requestRa
  * An in-memory cache of preloaded messages over a time range.
  */
 export default class MessageMemoryCache {
+  private _blockCache: { blocks: MemoryCacheBlock[]; startTime: Time } = {
+    blocks: [],
+    startTime: { sec: 0, nsec: 0 },
+  };
   private minTime: Time;
   private maxTime: Time;
-  private loadedRanges: { range: TimeRange; messages: MessageEvent<unknown>[] }[] = [];
+  private loadedRanges: Array<{ range: TimeRange; messages: MessageEvent<unknown>[] }> = [];
 
   constructor(totalRange: TimeRange) {
     this.minTime = totalRange.start;
@@ -211,15 +221,24 @@ export default class MessageMemoryCache {
       insertEnd = coveredRange.end;
       insertMessages = messages;
     }
+
     this.loadedRanges.splice(spliceIdx, deleteCount, {
       range: { start: insertStart, end: insertEnd },
       messages: insertMessages,
     });
+
+    // Build & insert new cache block for this range.
+    this._blockCache.blocks.splice(spliceIdx, deleteCount, {
+      messagesByTopic: groupBy(insertMessages, (m) => m.topic),
+      sizeInBytes: sumBy(insertMessages, (m) => m.sizeInBytes),
+    });
+    this._blockCache.startTime = this.loadedRanges[0]?.range.start ?? { sec: 0, nsec: 0 };
   }
 
   /** Remove all messages and preloaded ranges. */
   clear(): void {
     this.loadedRanges = [];
+    this._blockCache = { blocks: [], startTime: { sec: 0, nsec: 0 } };
   }
 
   /**
@@ -248,5 +267,12 @@ export default class MessageMemoryCache {
       }
     }
     return undefined;
+  }
+
+  /**
+   * Returns loaded messages in the format other panels expect for preloading.
+   */
+  getBlockCache(): BlockCache {
+    return this._blockCache;
   }
 }

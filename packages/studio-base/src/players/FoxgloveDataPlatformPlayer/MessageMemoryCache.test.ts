@@ -131,6 +131,30 @@ describe("MessageMemoryCache", () => {
     ]);
   });
 
+  it("generates a block cache from loaded ranges", () => {
+    const cache = new MessageMemoryCache({ start: fromSec(0), end: fromSec(5) });
+
+    cache.insert({ start: fromSec(2), end: fromSec(3) }, [
+      { topic: "ta", receiveTime: fromSec(2), message: "ta", sizeInBytes: 0 },
+    ]);
+    cache.insert({ start: fromSec(1), end: fromSec(2) }, [
+      { topic: "tb", receiveTime: fromSec(1), message: "tb", sizeInBytes: 0 },
+    ]);
+
+    expect(cache.getBlockCache()).toEqual({
+      blocks: [
+        {
+          messagesByTopic: {
+            ta: [{ message: "ta", receiveTime: { nsec: 0, sec: 2 }, sizeInBytes: 0, topic: "ta" }],
+            tb: [{ message: "tb", receiveTime: { nsec: 0, sec: 1 }, sizeInBytes: 0, topic: "tb" }],
+          },
+          sizeInBytes: 0,
+        },
+      ],
+      startTime: { nsec: 0, sec: 1 },
+    });
+  });
+
   it("merges inserted range with previous and next ranges", () => {
     const cache = new MessageMemoryCache({ start: fromSec(0), end: fromSec(5) });
 
