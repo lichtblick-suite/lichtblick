@@ -2530,6 +2530,7 @@ __metadata:
     "@mui/icons-material": 5.4.1
     "@mui/material": 5.4.1
     "@mui/styles": 5.4.1
+    "@protobufjs/base64": 1.1.2
     "@sentry/core": 6.17.6
     "@sentry/types": 6.17.6
     "@storybook/addon-actions": 6.4.18

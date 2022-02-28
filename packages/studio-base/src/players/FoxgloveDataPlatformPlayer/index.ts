@@ -3,12 +3,11 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 import { captureException } from "@sentry/core";
+import { isEqual } from "lodash";
 import { v4 as uuidv4 } from "uuid";
 
 import Logger from "@foxglove/log";
-import { parse as parseMessageDefinition } from "@foxglove/rosmsg";
-import { LazyMessageReader } from "@foxglove/rosmsg-serialization";
-import { MessageReader as ROS2MessageReader } from "@foxglove/rosmsg2-serialization";
+import { parseChannel } from "@foxglove/mcap-support";
 import {
   add,
   areEqual,
@@ -47,7 +46,7 @@ import { formatTimeRaw } from "@foxglove/studio-base/util/time";
 
 import MessageMemoryCache from "./MessageMemoryCache";
 import collateMessageStream from "./collateMessageStream";
-import streamMessages from "./streamMessages";
+import streamMessages, { ParsedChannelAndEncodings } from "./streamMessages";
 
 const log = Logger.getLogger(__filename);
 
@@ -97,10 +96,7 @@ export default class FoxgloveDataPlatformPlayer implements Player {
    * Although each topic is usually homogeneous, technically it is possible to have different
    * encoding or schema for each topic, so we store all the ones we've seen.
    */
-  private _messageReadersByTopic = new Map<
-    string,
-    { encoding: string; schema: string; reader: ROS2MessageReader | LazyMessageReader }[]
-  >();
+  private _parsedChannelsByTopic = new Map<string, ParsedChannelAndEncodings[]>();
 
   // track issues within the player
   private _problems: PlayerProblem[] = [];
@@ -181,44 +177,38 @@ export default class FoxgloveDataPlatformPlayer implements Player {
 
     const topics: Topic[] = [];
     const datatypes: RosDatatypes = new Map();
-    for (const { topic, encoding, schema, schemaName } of rawTopics) {
+    rawTopics: for (const rawTopic of rawTopics) {
+      const { topic, encoding: messageEncoding, schemaEncoding, schema, schemaName } = rawTopic;
       if (schema == undefined) {
         throw new Error(`missing requested schema for ${topic}`);
       }
-      if (encoding !== "ros1" && encoding !== "ros2") {
-        throw new Error(`Unsupported encoding for ${topic}: ${encoding}`);
+
+      let parsedChannels = this._parsedChannelsByTopic.get(topic);
+      if (!parsedChannels) {
+        parsedChannels = [];
+        this._parsedChannelsByTopic.set(topic, parsedChannels);
+      }
+      for (const info of parsedChannels) {
+        if (
+          info.messageEncoding === messageEncoding &&
+          info.schemaEncoding === schemaEncoding &&
+          isEqual(info.schema, schema)
+        ) {
+          continue rawTopics;
+        }
       }
 
-      topics.push({ name: topic, datatype: schemaName });
-
-      const parsedDefinitions = parseMessageDefinition(schema, { ros2: encoding === "ros2" });
-      parsedDefinitions.forEach(({ name, definitions }, index) => {
-        // The first definition usually doesn't have an explicit name,
-        // so we get the name from the datatype.
-        if (index === 0) {
-          datatypes.set(schemaName, { name: schemaName, definitions });
-        } else if (name != undefined) {
-          datatypes.set(name, { name, definitions });
-        }
+      const parsedChannel = parseChannel({
+        messageEncoding,
+        schema: { name: schemaName, data: schema, encoding: schemaEncoding },
       });
 
-      let readers = this._messageReadersByTopic.get(topic);
-      if (!readers) {
-        readers = [];
-        this._messageReadersByTopic.set(topic, readers);
-      }
-      for (const reader of readers) {
-        if (reader.encoding === encoding && reader.schema === schema) {
-          continue;
-        }
-      }
-      switch (encoding) {
-        case "ros1":
-          readers.push({ encoding, schema, reader: new LazyMessageReader(parsedDefinitions) });
-          break;
-        case "ros2":
-          readers.push({ encoding, schema, reader: new ROS2MessageReader(parsedDefinitions) });
-          break;
+      topics.push({ name: topic, datatype: parsedChannel.fullSchemaName });
+      parsedChannels.push({ messageEncoding, schemaEncoding, schema, parsedChannel });
+
+      // Final datatypes is an unholy union of schemas across all channels
+      for (const [name, datatype] of parsedChannel.datatypes) {
+        datatypes.set(name, datatype);
       }
     }
     this._topics = topics;
@@ -412,7 +402,7 @@ export default class FoxgloveDataPlatformPlayer implements Player {
       const stream = streamMessages({
         api: this._consoleApi,
         signal: thisTask.signal,
-        messageReadersByTopic: this._messageReadersByTopic,
+        parsedChannelsByTopic: this._parsedChannelsByTopic,
         params: {
           deviceId: this._deviceId,
           start: startTime,

@@ -2,23 +2,32 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
+import { isEqual } from "lodash";
+
 import Logger from "@foxglove/log";
-import { McapPre0Reader, McapPre0Types } from "@foxglove/mcap";
-import { loadDecompressHandlers } from "@foxglove/mcap-support";
+import { Mcap0StreamReader, Mcap0Types } from "@foxglove/mcap";
+import { loadDecompressHandlers, ParsedChannel } from "@foxglove/mcap-support";
 import { fromNanoSec, isTimeInRangeInclusive, Time, toRFC3339String } from "@foxglove/rostime";
 import { MessageEvent } from "@foxglove/studio-base/players/types";
 import ConsoleApi from "@foxglove/studio-base/services/ConsoleApi";
 
 const log = Logger.getLogger(__filename);
 
-interface MessageReader {
-  readMessage(data: ArrayBufferView): MessageEvent<unknown>;
-}
+/**
+ * Information necessary to match a Channel & Schema record in the MCAP data to one that we received
+ * from the /topics endpoint.
+ */
+export type ParsedChannelAndEncodings = {
+  messageEncoding: string;
+  schemaEncoding: string;
+  schema: Uint8Array;
+  parsedChannel: ParsedChannel;
+};
 
 export default async function* streamMessages({
   api,
   signal,
-  messageReadersByTopic,
+  parsedChannelsByTopic,
   params,
 }: {
   api: ConsoleApi;
@@ -36,7 +45,7 @@ export default async function* streamMessages({
   /**
    * Message readers are initialized out of band so we can parse message definitions only once.
    */
-  messageReadersByTopic: Map<string, { encoding: string; schema: string; reader: MessageReader }[]>;
+  parsedChannelsByTopic: Map<string, ParsedChannelAndEncodings[]>;
 }): AsyncIterable<MessageEvent<unknown>[]> {
   const decompressHandlers = await loadDecompressHandlers();
 
@@ -47,6 +56,7 @@ export default async function* streamMessages({
     start: toRFC3339String(params.start),
     end: toRFC3339String(params.end),
     topics: params.topics,
+    outputFormat: "mcap0",
   });
   if (signal.aborted) {
     return;
@@ -63,47 +73,75 @@ export default async function* streamMessages({
   }
   const streamReader = response.body.getReader();
 
-  const messageReadersByChannelId = new Map<number, MessageReader>();
+  const schemasById = new Map<number, Mcap0Types.TypedMcapRecords["Schema"]>();
+  const channelInfoById = new Map<
+    number,
+    { channel: Mcap0Types.TypedMcapRecords["Channel"]; parsedChannel: ParsedChannel }
+  >();
 
   let totalMessages = 0;
   let messages: MessageEvent<unknown>[] = [];
 
-  function processRecord(record: McapPre0Types.McapRecord) {
+  function processRecord(record: Mcap0Types.TypedMcapRecord) {
     switch (record.type) {
       default:
         return;
 
-      case "ChannelInfo": {
-        if (messageReadersByChannelId.has(record.id)) {
+      case "Schema":
+        schemasById.set(record.id, record);
+        return;
+
+      case "Channel": {
+        if (channelInfoById.has(record.id)) {
           return;
         }
-        const readers = messageReadersByTopic.get(record.topic) ?? [];
-        for (const reader of readers) {
-          if (reader.encoding === record.encoding && reader.schema === record.schema) {
-            messageReadersByChannelId.set(record.id, reader.reader);
+        if (record.schemaId === 0) {
+          throw new Error(
+            `Channel ${record.id} (topic ${record.topic}) has no schema; channels without schemas are not supported`,
+          );
+        }
+        const schema = schemasById.get(record.schemaId);
+        if (!schema) {
+          throw new Error(
+            `Missing schema info for schema id ${record.schemaId} (channel ${record.id}, topic ${record.topic})`,
+          );
+        }
+        const parsedChannels = parsedChannelsByTopic.get(record.topic) ?? [];
+        for (const info of parsedChannels) {
+          if (
+            info.messageEncoding === record.messageEncoding &&
+            info.schemaEncoding === schema.encoding &&
+            isEqual(info.schema, schema.data)
+          ) {
+            channelInfoById.set(record.id, { channel: record, parsedChannel: info.parsedChannel });
             return;
           }
         }
-        log.error("No pre-initialized reader for", record, "available readers are:", readers);
+        // Throw an error for now, although we could fall back to just-in-time parsing:
+        // https://github.com/foxglove/studio/issues/2303
+        log.error(
+          "No pre-initialized reader for",
+          record,
+          "available readers are:",
+          parsedChannels,
+        );
         throw new Error(
-          `No pre-initialized reader for ${record.topic} (${record.encoding}, ${record.schemaName})`,
+          `No pre-initialized reader for ${record.topic} (message encoding ${record.messageEncoding}, schema encoding ${schema.encoding}, schema name ${schema.name})`,
         );
       }
 
       case "Message": {
-        const reader = messageReadersByChannelId.get(record.channelInfo.id);
-        if (!reader) {
-          throw new Error(
-            `message for channel ${record.channelInfo.id} with no prior channel info`,
-          );
+        const info = channelInfoById.get(record.channelId);
+        if (!info) {
+          throw new Error(`message for channel ${record.channelId} with no prior channel/schema`);
         }
-        const receiveTime = fromNanoSec(record.timestamp);
+        const receiveTime = fromNanoSec(record.logTime);
         if (isTimeInRangeInclusive(receiveTime, params.start, params.end)) {
           totalMessages++;
           messages.push({
-            topic: record.channelInfo.topic,
+            topic: info.channel.topic,
             receiveTime,
-            message: reader.readMessage(new DataView(record.data)),
+            message: info.parsedChannel.deserializer(record.data),
             sizeInBytes: record.data.byteLength,
           });
         }
@@ -112,7 +150,7 @@ export default async function* streamMessages({
     }
   }
 
-  const reader = new McapPre0Reader({ decompressHandlers });
+  const reader = new Mcap0StreamReader({ decompressHandlers });
   for (let result; (result = await streamReader.read()), !result.done; ) {
     reader.append(result.value);
     for (let record; (record = reader.nextRecord()); ) {
