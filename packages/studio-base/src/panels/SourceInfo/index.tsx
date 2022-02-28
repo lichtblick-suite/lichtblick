@@ -152,8 +152,7 @@ function SourceInfo() {
               name: "Message count",
               fieldName: "numMessages",
               minWidth: 0,
-              data: "number",
-              isPadded: true,
+              onRender: (topic) => topic.numMessages?.toLocaleString() ?? "–",
             },
             {
               key: "frequency",
@@ -162,7 +161,7 @@ function SourceInfo() {
               onRender: (topic) =>
                 topic.numMessages != undefined
                   ? `${(topic.numMessages / toSec(duration)).toFixed(2)} Hz`
-                  : "",
+                  : "–",
             },
           ]}
         />
