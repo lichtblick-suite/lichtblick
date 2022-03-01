@@ -423,9 +423,10 @@ function Plot(props: Props) {
       if (!seekPlayback || !start || seekSeconds == undefined || xAxisVal !== "timestamp") {
         return;
       }
-      // The player validates and clamps the time.
-      const seekTime = addTimes(start, fromSec(seekSeconds));
-      seekPlayback(seekTime);
+      // Avoid normalizing a negative time if the clicked point had x < 0.
+      if (seekSeconds >= 0) {
+        seekPlayback(addTimes(start, fromSec(seekSeconds)));
+      }
     },
     [messagePipeline, xAxisVal],
   );
