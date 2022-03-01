@@ -13,6 +13,7 @@
 import { v4 as uuidv4 } from "uuid";
 
 import { filterMap } from "@foxglove/den/collection";
+import Logger from "@foxglove/log";
 import {
   Time,
   add,
@@ -57,6 +58,8 @@ import {
   SeekToTimeSpec,
   TimestampMethod,
 } from "@foxglove/studio-base/util/time";
+
+const log = Logger.getLogger(__filename);
 
 export const DEFAULT_SEEK_BACK_NANOSECONDS = BigInt(2.5e9);
 
@@ -270,6 +273,7 @@ export default class RandomAccessPlayer implements Player {
         }, SEEK_START_DELAY_MS);
       })
       .catch((error: Error) => {
+        log.error(error);
         this._setError(`Error initializing player: ${error.message}`, error);
       });
   }

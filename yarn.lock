@@ -2549,6 +2549,7 @@ __metadata:
     "@types/cytoscape": ^3.19.4
     "@types/enzyme": ^3.10.11
     "@types/enzyme-adapter-react-16": 1.0.6
+    "@types/escape-html": ^1
     "@types/gl-matrix": 3.2.0
     "@types/hammerjs": 2.0.41
     "@types/leaflet": 1.7.9
@@ -2600,6 +2601,7 @@ __metadata:
     cytoscape-dagre: 2.4.0
     enzyme: 3.11.0
     esbuild-loader: 2.18.0
+    escape-html: 1.0.3
     fake-indexeddb: 3.1.7
     fetch-mock: 9.11.0
     fork-ts-checker-webpack-plugin: 7.2.0
@@ -5608,6 +5610,13 @@ __metadata:
     "@types/cheerio": "*"
     "@types/react": "*"
   checksum: 4085899b16e691e715f374345fae2963dc89a002c55a249381e37f94d93c8d016ad7208a8d11cc0f2d8c7cdfa6fa9f5590f0bfae984e51571f5d1e9c2d6ee782
+  languageName: node
+  linkType: hard
+
+"@types/escape-html@npm:^1":
+  version: 1.0.1
+  resolution: "@types/escape-html@npm:1.0.1"
+  checksum: 141d6e44dd514b0bf8a1c5e7730d6b9fa291bb11a52bcc3434d269252b10622f52bd7458553efc2c95ca8341bafab836fe696f8fe72f82c5809204239b8ba791
   languageName: node
   linkType: hard
 
@@ -11717,7 +11726,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"escape-html@npm:~1.0.3":
+"escape-html@npm:1.0.3, escape-html@npm:~1.0.3":
   version: 1.0.3
   resolution: "escape-html@npm:1.0.3"
   checksum: 6213ca9ae00d0ab8bccb6d8d4e0a98e76237b2410302cf7df70aaa6591d509a2a37ce8998008cbecae8fc8ffaadf3fb0229535e6a145f3ce0b211d060decbb24

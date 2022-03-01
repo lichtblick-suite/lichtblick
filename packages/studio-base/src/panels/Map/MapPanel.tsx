@@ -2,6 +2,7 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
+import escapeHTML from "escape-html";
 import {
   Map as LeafMap,
   TileLayer,
@@ -24,12 +25,9 @@ import FilteredPointLayer, {
   POINT_MARKER_RADIUS,
 } from "@foxglove/studio-base/panels/Map/FilteredPointLayer";
 import { Topic } from "@foxglove/studio-base/players/types";
+import { darkColor, lightColor, lineColors } from "@foxglove/studio-base/util/plotColors";
 
 import { NavSatFixMsg, NavSatFixStatus, Point } from "./types";
-
-const COLOR_HISTORY = "#6771ef";
-const COLOR_ACTIVE_FIX = "#ec1515";
-const COLOR_ACTIVE_NO_FIX = "#5f0909";
 
 // Persisted panel state
 type Config = {
@@ -106,6 +104,7 @@ function MapPanel(props: MapPanelProps): JSX.Element {
   }, [context, disabledTopics, eligibleTopics]);
 
   type TopicGroups = {
+    baseColor: string;
     topicGroup: LayerGroup;
     currentFrame: FeatureGroup;
     allFrames: FeatureGroup;
@@ -115,6 +114,7 @@ function MapPanel(props: MapPanelProps): JSX.Element {
   // A feature group for all messages markers, and a feature group for current frame markers
   const topicLayers = useMemo(() => {
     const topicLayerMap = new Map<string, TopicGroups>();
+    let i = 0;
     for (const topic of eligibleTopics) {
       const allFrames = new FeatureGroup();
       const currentFrame = new FeatureGroup();
@@ -123,7 +123,9 @@ function MapPanel(props: MapPanelProps): JSX.Element {
         topicGroup,
         allFrames,
         currentFrame,
+        baseColor: lineColors[i]!,
       });
+      i = (i + 1) % lineColors.length;
     }
     return topicLayerMap;
   }, [eligibleTopics]);
@@ -140,10 +142,11 @@ function MapPanel(props: MapPanelProps): JSX.Element {
     }
 
     const topicLayerEntries = [...topicLayers.entries()];
-    for (const entry of topicLayerEntries) {
-      const topic = entry[0];
-      const featureGroups = entry[1];
-      layerControl.addOverlay(featureGroups.topicGroup, topic);
+    for (const [topic, featureGroups] of topicLayerEntries) {
+      layerControl.addOverlay(
+        featureGroups.topicGroup,
+        `<span style="color: ${featureGroups.baseColor}">${escapeHTML(topic)}</span>`,
+      );
 
       // if the topic does not appear in the disabled topics list, add to map so it displays
       if (!disabledTopicsLatest.current.has(topic)) {
@@ -316,14 +319,14 @@ function MapPanel(props: MapPanelProps): JSX.Element {
     }
 
     // Group messages by topic to render into layers by topic
-    const byTopic = new Map<string, MessageEvent<NavSatFixMsg>[]>();
+    const messageEventsByTopic = new Map<string, MessageEvent<NavSatFixMsg>[]>();
     for (const msgEvent of allNavMessages) {
-      const msgEvents = byTopic.get(msgEvent.topic) ?? [];
+      const msgEvents = messageEventsByTopic.get(msgEvent.topic) ?? [];
       msgEvents.push(msgEvent);
-      byTopic.set(msgEvent.topic, msgEvents);
+      messageEventsByTopic.set(msgEvent.topic, msgEvents);
     }
 
-    for (const [topic, events] of byTopic) {
+    for (const [topic, events] of messageEventsByTopic) {
       const topicLayer = topicLayers.get(topic);
       if (!topicLayer) {
         // If we get a message for a topic we did not subscribe to - something bad has happened.
@@ -335,7 +338,8 @@ function MapPanel(props: MapPanelProps): JSX.Element {
         map: currentMap,
         navSatMessageEvents: events,
         bounds: filterBounds ?? currentMap.getBounds(),
-        color: COLOR_HISTORY,
+        color: lightColor(topicLayer.baseColor),
+        hoverColor: darkColor(topicLayer.baseColor),
         onHover,
         onClick,
       });
@@ -377,14 +381,16 @@ function MapPanel(props: MapPanelProps): JSX.Element {
         map: currentMap,
         navSatMessageEvents: noFixEvents,
         bounds: filterBounds ?? currentMap.getBounds(),
-        color: COLOR_ACTIVE_NO_FIX,
+        color: darkColor(topicLayer.baseColor),
+        hoverColor: darkColor(topicLayer.baseColor),
         showAccuracy: true,
       });
       const pointLayerFix = FilteredPointLayer({
         map: currentMap,
         navSatMessageEvents: fixEvents,
         bounds: filterBounds ?? currentMap.getBounds(),
-        color: COLOR_ACTIVE_FIX,
+        color: topicLayer.baseColor,
+        hoverColor: darkColor(topicLayer.baseColor),
         showAccuracy: true,
       });
 
@@ -402,26 +408,24 @@ function MapPanel(props: MapPanelProps): JSX.Element {
     }
 
     // get the point occuring most recently before preview time but not after preview time
-    let point: Point | undefined;
+    let event: MessageEvent<NavSatFixMsg> | undefined;
     let stampDelta = Number.MAX_VALUE;
     for (const msgEvent of allNavMessages) {
       const stamp = toSec(msgEvent.receiveTime);
       const delta = previewTime - stamp;
       if (delta < stampDelta && delta >= 0) {
         stampDelta = delta;
-        point = {
-          lat: msgEvent.message.latitude,
-          lon: msgEvent.message.longitude,
-        };
+        event = msgEvent;
       }
     }
-    if (!point) {
+    if (!event) {
       return;
     }
+    const topicLayer = topicLayers.get(event.topic);
 
-    const marker = new CircleMarker([point.lat, point.lon], {
+    const marker = new CircleMarker([event.message.latitude, event.message.longitude], {
       radius: POINT_MARKER_RADIUS,
-      color: "yellow",
+      color: topicLayer ? darkColor(topicLayer.baseColor) : undefined,
       stroke: false,
       fillOpacity: 1,
       interactive: false,
@@ -431,7 +435,7 @@ function MapPanel(props: MapPanelProps): JSX.Element {
     return () => {
       marker.remove();
     };
-  }, [allNavMessages, currentMap, filterBounds, previewTime]);
+  }, [allNavMessages, currentMap, filterBounds, previewTime, topicLayers]);
 
   // persist panel config on zoom changes
   useEffect(() => {

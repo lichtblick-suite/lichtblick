@@ -14,6 +14,7 @@ type Args = {
   map: Map;
   bounds: LatLngBounds;
   color: string;
+  hoverColor: string;
   showAccuracy?: boolean;
   navSatMessageEvents: readonly MessageEvent<NavSatFixMsg>[];
   onHover?: (event: MessageEvent<NavSatFixMsg> | undefined) => void;
@@ -82,7 +83,7 @@ function FilteredPointLayer(args: Args): FeatureGroup {
   if (args.onHover) {
     markersLayer.on("mouseover", (event) => {
       const marker = event.sourceTarget as PointMarker;
-      marker.setStyle({ color: "yellow" });
+      marker.setStyle({ color: args.hoverColor });
       marker.bringToFront();
       args.onHover?.(marker.messageEvent);
     });
