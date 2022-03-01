@@ -62,19 +62,22 @@ async function configureQuickLookExtension(context: AfterPackContext) {
         QLSupportsSearchableItems: false,
       },
     },
+    QLJS: {
+      ...(originalInfo.QLJS as PlistObject),
+      pagePath: "index.html",
+    },
   };
   await fs.writeFile(appexInfoPlist, plist.build(newInfo));
   log.info("Updated appex Info.plist for Quick Look");
 
-  await fs.copyFile(
-    path.join("desktop", ".webpack", "quicklook", "index.html"),
-    path.join(appexResources, "preview.html"),
-  );
-  await fs.copyFile(
-    path.join("desktop", ".webpack", "quicklook", "main.js"),
-    path.join(appexResources, "main.js"),
-  );
-  log.info("Copied .webpack/quicklook into appex");
+  const webpackOutputDir = path.join("desktop", ".webpack", "quicklook");
+  for (const file of await fs.readdir(webpackOutputDir, { withFileTypes: true })) {
+    if (!file.isFile()) {
+      throw new Error(`Expected only files in Quick Look webpack output, found: ${file.name}`);
+    }
+    await fs.copyFile(path.join(webpackOutputDir, file.name), path.join(appexResources, file.name));
+  }
+  log.info("Copied .webpack/quicklook into appex resources");
 
   // When building a universal app, electron-builder uses lipo to merge binaries at the same path.
   // Since quicklookjs already provides a universal binary, we need to strip out other architectures
