@@ -2,7 +2,7 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { PropsWithChildren, useCallback, useMemo, useState } from "react";
+import { PropsWithChildren, useCallback, useEffect, useMemo, useState } from "react";
 import { useAsync, useLocalStorage } from "react-use";
 
 import { useShallowMemo } from "@foxglove/hooks";
@@ -94,6 +94,21 @@ export default function ConsoleApiCurrentUserProvider(
   const signIn = useCallback(() => {
     setModalOpen(true);
   }, []);
+
+  const responseObserverCallback = useCallback(
+    (response: Response) => {
+      if (response.status === 401) {
+        log.error("Response received authentication error. Signing out the current user.");
+        signOut().catch((e) => log.error(e));
+      }
+    },
+    [signOut],
+  );
+
+  useEffect(() => {
+    api.setResponseObserver(responseObserverCallback);
+    return () => api.setResponseObserver(undefined);
+  }, [api, responseObserverCallback]);
 
   const value = useShallowMemo({ currentUser: cachedCurrentUser, signIn, signOut });
 

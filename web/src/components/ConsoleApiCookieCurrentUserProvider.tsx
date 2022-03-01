@@ -6,7 +6,10 @@ import { PropsWithChildren, useCallback, useEffect, useState } from "react";
 import { useAsync } from "react-use";
 
 import { useShallowMemo } from "@foxglove/hooks";
+import Logger from "@foxglove/log";
 import { useConsoleApi, CurrentUserContext, User } from "@foxglove/studio-base";
+
+const log = Logger.getLogger(__filename);
 
 /**
  * ConsoleApiCookieUserProvider provides a CurrentUserContext
@@ -41,6 +44,21 @@ export default function ConsoleApiCookieCurrentUserProvider(
       setCurrentUser(undefined);
     }
   }, [api]);
+
+  const responseObserverCallback = useCallback(
+    (response: Response) => {
+      if (response.status === 401) {
+        log.error("Response received authentication error. Signing out the current user.");
+        signOut().catch((e) => log.error(e));
+      }
+    },
+    [signOut],
+  );
+
+  useEffect(() => {
+    api.setResponseObserver(responseObserverCallback);
+    return () => api.setResponseObserver(undefined);
+  }, [api, responseObserverCallback]);
 
   // On signIn, direct the user to console to perform the account signin flow. This will set the correct
   // cookies and return the user back to studio

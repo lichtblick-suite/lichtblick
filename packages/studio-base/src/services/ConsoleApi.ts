@@ -83,6 +83,7 @@ type ApiResponse<T> = { status: number; json: T };
 class ConsoleApi {
   private _baseUrl: string;
   private _authHeader?: string;
+  private _responseObserver: undefined | ((response: Response) => void);
 
   constructor(baseUrl: string) {
     this._baseUrl = baseUrl;
@@ -90,6 +91,10 @@ class ConsoleApi {
 
   setAuthHeader(header: string): void {
     this._authHeader = header;
+  }
+
+  setResponseObserver(observer: undefined | ((response: Response) => void)): void {
+    this._responseObserver = observer;
   }
 
   async orgs(): Promise<Org[]> {
@@ -186,6 +191,7 @@ class ConsoleApi {
     };
 
     const res = await fetch(fullUrl, fullConfig);
+    this._responseObserver?.(res);
     if (res.status !== 200 && !allowedStatuses.includes(res.status)) {
       const json = (await res.json().catch((err) => {
         throw new Error(`Status ${res.status}: ${err.message}`);
