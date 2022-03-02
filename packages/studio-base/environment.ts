@@ -10,7 +10,7 @@ function serverURLsForBackend(backend: string): { api: string; console: string }
     };
   }
 
-  if (backend === "dev") {
+  if (backend === "development") {
     return {
       api: "https://api-dev.foxglove.dev",
       console: "https://console-dev.foxglove.dev",

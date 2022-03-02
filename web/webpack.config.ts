@@ -102,7 +102,7 @@ const mainConfig = (env: unknown, argv: WebpackArgv): Configuration => {
     plugins: [
       ...plugins,
       ...(appWebpackConfig.plugins ?? []),
-      new EnvironmentPlugin(buildEnvironmentDefaults(argv.env?.FOXGLOVE_BACKEND)),
+      new EnvironmentPlugin(buildEnvironmentDefaults(argv.env?.FOXGLOVE_BACKEND ?? argv.mode)),
       new CopyPlugin({
         patterns: [{ from: "../public" }],
       }),
