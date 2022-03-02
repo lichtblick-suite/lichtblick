@@ -13,7 +13,9 @@ import Logger from "@foxglove/log";
 
 import FileInfoDisplay from "./FileInfoDisplay";
 import Flash from "./Flash";
-import { getBagInfo, getMcapInfo } from "./getInfo";
+import { getBagInfo } from "./getBagInfo";
+import { getMcapInfo } from "./getMcapInfo";
+import * as styleConstants from "./styleConstants";
 
 const log = Logger.getLogger(__filename);
 
@@ -40,7 +42,8 @@ const GlobalStyle = createGlobalStyle`
     }
   }
   body {
-    padding: 10px;
+    padding: ${styleConstants.bodyPadding};
+    min-width: 150px;
     font-family: ui-sans-serif, -apple-system, BlinkMacSystemFont;
     @media (prefers-color-scheme: dark) {
       color: #fff;

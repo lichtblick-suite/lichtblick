@@ -6,7 +6,7 @@ import { CleanWebpackPlugin } from "clean-webpack-plugin";
 import HtmlWebpackPlugin from "html-webpack-plugin";
 import path from "path";
 import type { Configuration } from "webpack";
-import type { Configuration as WebpackDevServerConfiguration } from "webpack-dev-server";
+import "webpack-dev-server";
 
 import packageJson from "../package.json";
 import main from "./webpack.main.config";
@@ -14,17 +14,13 @@ import preload from "./webpack.preload.config";
 import quicklook from "./webpack.quicklook.config";
 import renderer from "./webpack.renderer.config";
 
-interface WebpackConfiguration extends Configuration {
-  devServer?: WebpackDevServerConfiguration;
-}
-
 const isRelease = process.env.RELEASE != undefined;
 
 // The appdata directory is derived from the product name. To have a separate directory
 // for our production and development builds we change the product name when using dev or serve.
 const productName = isRelease ? packageJson.productName : `${packageJson.productName} Dev`;
 
-const devServerConfig: WebpackConfiguration = {
+const devServerConfig: Configuration = {
   // Use empty entry to avoid webpack default fallback to /src
   entry: {},
 

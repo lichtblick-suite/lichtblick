@@ -2,7 +2,7 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { useEffect } from "react";
+import { useEffect, useMemo } from "react";
 import styled from "styled-components";
 
 import Logger from "@foxglove/log";
@@ -12,6 +12,7 @@ import bagIcon from "../../resources/icon/BagIcon.png";
 import mcapIcon from "../../resources/icon/McapIcon.png";
 import Flash from "./Flash";
 import formatByteSize from "./formatByteSize";
+import * as styleConstants from "./styleConstants";
 import { FileInfo, TopicInfo } from "./types";
 
 const log = Logger.getLogger(__filename);
@@ -50,6 +51,10 @@ const IconContainer = styled.div`
   display: flex;
   flex-direction: column;
   align-items: center;
+
+  @media (max-width: ${styleConstants.breakpoints.narrowMaxWidth}) {
+    display: none;
+  }
 `;
 
 const FileType = styled.span`
@@ -63,10 +68,13 @@ const TimeLabel = styled.span`
 `;
 
 const TopicList = styled.table`
-  width: 100%;
-  max-width: 100%;
   word-break: break-word;
   border-spacing: 0 4px;
+
+  @media (max-width: ${styleConstants.breakpoints.narrowMaxWidth}) {
+    margin-left: -${styleConstants.bodyPadding};
+    margin-right: -${styleConstants.bodyPadding};
+  }
 `;
 
 const TopicRowWrapper = styled.tr`
@@ -80,11 +88,15 @@ const TopicRowWrapper = styled.tr`
     }
     > :first-child {
       background: var(--zebra-color);
-      border-radius: 4px 0 0 4px;
+      @media (min-width: ${styleConstants.breakpoints.narrowMinWidth}) {
+        border-radius: 4px 0 0 4px;
+      }
     }
     > :last-child {
       background: var(--zebra-color);
-      border-radius: 0 4px 4px 0;
+      @media (min-width: ${styleConstants.breakpoints.narrowMinWidth}) {
+        border-radius: 0 4px 4px 0;
+      }
     }
   }
   border-collapse: separate;
@@ -120,6 +132,17 @@ const Datatype = styled.div`
   opacity: 0.5;
 `;
 
+const HideNarrow = styled.div`
+  @media (max-width: ${styleConstants.breakpoints.narrowMaxWidth}) {
+    display: none;
+  }
+`;
+const ShowNarrow = styled.div`
+  @media (min-width: ${styleConstants.breakpoints.narrowMinWidth}) {
+    display: none;
+  }
+`;
+
 function TopicRow({ info: { topic, datatype, numMessages, numConnections } }: { info: TopicInfo }) {
   return (
     <TopicRowWrapper>
@@ -139,7 +162,7 @@ function formatCount(count: number | bigint | undefined, noun: string): string |
   if (count == undefined || count === 0 || count === 0n) {
     return undefined;
   }
-  return `${count.toLocaleString()} ${noun}${count === 1 || count === 1n ? "" : "s"}`;
+  return `${count.toLocaleString()}\xa0${noun}${count === 1 || count === 1n ? "" : "s"}`;
 }
 
 export default function FileInfoDisplay({
@@ -151,13 +174,20 @@ export default function FileInfoDisplay({
   fileInfo?: FileInfo;
   error?: Error;
 }): JSX.Element {
+  const compressionTypes = useMemo(
+    () =>
+      fileInfo?.compressionTypes &&
+      Array.from(fileInfo.compressionTypes)
+        .filter(Boolean)
+        .sort((a, b) => a.localeCompare(b)),
+    [fileInfo?.compressionTypes],
+  );
   useEffect(() => error && console.error(error), [error]);
   return (
-    <div style={{ width: "100%" }}>
+    <div style={{ width: "100%", display: "flex", flexDirection: "column" }}>
       <div
         style={{
           display: "flex",
-          flexFlow: "row wrap",
           alignItems: "center",
           justifyContent: "center",
           marginBottom: 16,
@@ -165,10 +195,21 @@ export default function FileInfoDisplay({
       >
         <IconContainer>
           <img src={fileStats.name.endsWith(".mcap") ? mcapIcon : bagIcon} style={{ width: 128 }} />
-          {fileInfo?.fileType && <FileType>{fileInfo.fileType}</FileType>}
+          {fileInfo?.fileType && (
+            <HideNarrow>
+              <FileType>{fileInfo.fileType}</FileType>
+            </HideNarrow>
+          )}
         </IconContainer>
-        <div style={{ display: "flex", flexDirection: "column", minWidth: 300, flex: "1 1 0" }}>
-          <FileName>{fileStats.name}</FileName>
+        <div style={{ display: "flex", flexDirection: "column", flex: "1 1 0" }}>
+          <HideNarrow>
+            <FileName>{fileStats.name}</FileName>
+          </HideNarrow>
+          {fileInfo?.fileType && (
+            <ShowNarrow>
+              <FileType>{fileInfo.fileType}</FileType>
+            </ShowNarrow>
+          )}
           <SummaryRow>
             {fileInfo &&
               [
@@ -176,20 +217,14 @@ export default function FileInfoDisplay({
                 formatCount(fileInfo.numChunks, "chunk"),
                 formatCount(fileInfo.totalMessages, "message"),
                 formatCount(fileInfo.numAttachments, "attachment"),
-                formatByteSize(fileStats.size),
+                formatByteSize(fileStats.size).replace(/ /g, "\xa0"),
               ]
                 .filter(Boolean)
                 .join(", ")}
           </SummaryRow>
-          {fileInfo?.compressionTypes && (
+          {compressionTypes && (
             <SummaryRow>
-              Compression:{" "}
-              {fileInfo.compressionTypes.size === 0
-                ? "none"
-                : Array.from(fileInfo.compressionTypes)
-                    .filter(Boolean)
-                    .sort((a, b) => a.localeCompare(b))
-                    .join(", ")}
+              Compression: {compressionTypes.length === 0 ? "none" : compressionTypes.join(", ")}
             </SummaryRow>
           )}
           {fileInfo?.startTime && (

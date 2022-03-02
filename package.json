@@ -22,6 +22,7 @@
     "build:dev": "webpack --mode development --progress --config desktop/webpack.config.ts",
     "build:prod": "webpack --mode production --progress --config desktop/webpack.config.ts",
     "serve": "webpack serve --mode development --progress --config desktop/webpack.config.ts",
+    "serve:quicklook": "webpack serve --mode development --progress --config desktop/webpack.quicklook.config.ts",
     "web:build:dev": "webpack --mode development --progress --config web/webpack.config.ts",
     "web:build:prod": "webpack --mode production --progress --config web/webpack.config.ts",
     "web:serve": "webpack serve --mode development --progress --config web/webpack.config.ts",
