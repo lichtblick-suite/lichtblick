@@ -12,12 +12,12 @@ const useStyles = makeStyles((theme: Theme) => ({
     flexDirection: "column",
     height: "100%",
     padding: theme.spacing(2),
+    overflow: "auto",
   },
   alertContainer: {
     display: "flex",
     flexDirection: "column",
     flexGrow: 1,
-    overflow: "hidden",
   },
   errorDetailHeader: {
     fontWeight: "bold",
@@ -28,8 +28,9 @@ const useStyles = makeStyles((theme: Theme) => ({
     paddingLeft: theme.spacing(2),
   },
   errorDetailContainer: {
-    flexGrow: 2,
     overflowY: "auto",
+    background: theme.palette.background.paper,
+    padding: theme.spacing(1),
   },
   actions: {
     paddingTop: theme.spacing(2),
@@ -69,13 +70,14 @@ type ErrorDisplayProps = {
   errorInfo?: ErrorInfo;
   content?: JSX.Element;
   actions?: JSX.Element;
+  showErrorDetails?: boolean;
 };
 
 function ErrorDisplay(props: ErrorDisplayProps): JSX.Element {
   const styles = useStyles();
   const { error, errorInfo } = props;
 
-  const [showErrorDetails, setShowErrorDetails] = useState(false);
+  const [showErrorDetails, setShowErrorDetails] = useState(props.showErrorDetails ?? false);
 
   const errorDetails = useMemo(() => {
     if (!showErrorDetails) {
@@ -109,22 +111,18 @@ function ErrorDisplay(props: ErrorDisplayProps): JSX.Element {
           {props.title ?? "The app encountered an unexpected error"}
         </Typography>
         <Stack spacing={2}>
-          <div>
-            <Typography variant="body1" component="div">
-              {props.content}
-            </Typography>
-          </div>
+          <Typography variant="body1" component="div">
+            {props.content}
+          </Typography>
           <Divider />
-          <div>
-            <Typography variant="subtitle2">{error?.message}</Typography>
-          </div>
-          <div>
-            <Link color="secondary" onClick={() => setShowErrorDetails(!showErrorDetails)}>
-              {showErrorDetails ? "Hide" : "Show"} details
-            </Link>
-          </div>
+          <Typography variant="subtitle2" component="code" fontWeight="bold">
+            {error?.message}
+          </Typography>
+          <Link color="secondary" onClick={() => setShowErrorDetails(!showErrorDetails)}>
+            {showErrorDetails ? "Hide" : "Show"} details
+          </Link>
+          {errorDetails && <div className={styles.errorDetailContainer}>{errorDetails}</div>}
         </Stack>
-        <div className={styles.errorDetailContainer}>{errorDetails}</div>
       </div>
       <div className={styles.actions}>{props.actions}</div>
     </div>

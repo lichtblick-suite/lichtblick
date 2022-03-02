@@ -33,16 +33,16 @@ export default class PanelErrorBoundary extends Component<PropsWithChildren<Prop
     if (this.state.currentError) {
       return (
         <ErrorDisplay
-          title="The panel encountered an unexpected error"
+          title="This panel encountered an unexpected error"
           error={this.state.currentError.error}
           errorInfo={this.state.currentError.errorInfo}
           content={
             <p>
-              Something went wrong in the panel.{" "}
+              Something went wrong in this panel.{" "}
               <Link color="inherit" onClick={() => this.setState({ currentError: undefined })}>
                 Dismiss this error
               </Link>{" "}
-              to continue using the panel. If the issue persists try resetting the panel.
+              to continue using this panel. If the issue persists, try resetting the panel.
             </p>
           }
           actions={
@@ -51,7 +51,7 @@ export default class PanelErrorBoundary extends Component<PropsWithChildren<Prop
                 <Box flexGrow={1} />
                 <Button
                   variant="text"
-                  title="remove the panel"
+                  title="Remove this panel from the layout"
                   color="error"
                   onClick={this.props.onRemovePanel}
                 >
@@ -59,7 +59,7 @@ export default class PanelErrorBoundary extends Component<PropsWithChildren<Prop
                 </Button>
                 <Button
                   variant="outlined"
-                  title="reset panel settings to default values"
+                  title="Reset panel settings to default values"
                   color="error"
                   onClick={() => {
                     this.setState({ currentError: undefined });

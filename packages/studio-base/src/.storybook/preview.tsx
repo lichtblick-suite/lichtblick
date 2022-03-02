@@ -98,8 +98,15 @@ function WithContextProviders(Child: Story, ctx: StoryContext): JSX.Element {
       }
 
       {(colorScheme === "light" || colorScheme.startsWith("both")) && (
-        // Set a transform to make this the root for position:fixed elements
-        <div style={{ position: "relative", transform: "scale(1)", flexGrow: 1 }}>
+        <div
+          style={{
+            position: "relative",
+            transform: "scale(1)", // Set a transform to make this the root for position:fixed elements
+            flexGrow: 1,
+            flexBasis: "50%",
+            overflow: "hidden",
+          }}
+        >
           <ReadySignalContext.Provider
             value={needsCombinedReadySignal ? readySignal1 : readySignal}
           >
@@ -114,8 +121,15 @@ function WithContextProviders(Child: Story, ctx: StoryContext): JSX.Element {
         </div>
       )}
       {(colorScheme === "dark" || colorScheme.startsWith("both")) && (
-        // Set a transform to make this the root for position:fixed elements
-        <div style={{ position: "relative", transform: "scale(1)", flexGrow: 1 }}>
+        <div
+          style={{
+            position: "relative",
+            transform: "scale(1)", // Set a transform to make this the root for position:fixed elements
+            flexGrow: 1,
+            flexBasis: "50%",
+            overflow: "hidden",
+          }}
+        >
           <ReadySignalContext.Provider
             value={needsCombinedReadySignal ? readySignal2 : readySignal}
           >

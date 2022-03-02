@@ -140,7 +140,7 @@ export default function muiComponents(theme: Theme): ThemeOptions["components"] 
       },
       styleOverrides: {
         root: {
-          cursor: "ppointer",
+          cursor: "pointer",
         },
       },
     },
