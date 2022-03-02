@@ -139,6 +139,10 @@ const useStyles = makeStyles((theme: Theme) => ({
     width: "100%",
     lineHeight: "20px",
   },
+  invisibleSpace: {
+    // https://stackoverflow.com/questions/62319014/make-text-selection-treat-adjacent-elements-as-separate-words
+    fontSize: 0,
+  },
 }));
 
 function RawMessages(props: Props) {
@@ -414,7 +418,12 @@ function RawMessages(props: Props) {
               </div>
             )}
             <Tree
-              labelRenderer={(raw) => <DiffSpan>{first(raw)}</DiffSpan>}
+              labelRenderer={(raw) => (
+                <>
+                  <DiffSpan>{first(raw)}</DiffSpan>
+                  <span className={classes.invisibleSpace}>&nbsp;</span>
+                </>
+              )}
               shouldExpandNode={shouldExpandNode}
               onExpand={(_data, _level, keyPath) => {
                 onLabelClick(keyPath);
