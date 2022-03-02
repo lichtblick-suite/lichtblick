@@ -38,7 +38,7 @@ export type NavSatFixMsg = {
   latitude: number;
   longitude: number;
   altitude?: number;
-  status: { status: NavSatFixStatus; service: NavSatFixService };
-  position_covariance: Matrix3x3;
-  position_covariance_type: NavSatFixPositionCovarianceType;
+  status?: { status: NavSatFixStatus; service: NavSatFixService };
+  position_covariance?: Matrix3x3;
+  position_covariance_type?: NavSatFixPositionCovarianceType;
 };

@@ -27,7 +27,8 @@ import FilteredPointLayer, {
 import { Topic } from "@foxglove/studio-base/players/types";
 import { darkColor, lightColor, lineColors } from "@foxglove/studio-base/util/plotColors";
 
-import { NavSatFixMsg, NavSatFixStatus, Point } from "./types";
+import { hasFix } from "./support";
+import { NavSatFixMsg, Point } from "./types";
 
 // Persisted panel state
 type Config = {
@@ -372,8 +373,6 @@ function MapPanel(props: MapPanelProps): JSX.Element {
         continue;
       }
 
-      const hasFix = (ev: MessageEvent<NavSatFixMsg>) =>
-        ev.message.status.status !== NavSatFixStatus.STATUS_NO_FIX;
       const noFixEvents = events.filter((ev) => !hasFix(ev));
       const fixEvents = events.filter(hasFix);
 
