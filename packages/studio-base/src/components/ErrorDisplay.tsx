@@ -38,9 +38,23 @@ const useStyles = makeStyles((theme: Theme) => ({
   },
 }));
 
-function ErrorStacktrace({ stack }: { stack: string }) {
+/**
+ * Remove source locations (which often include file hashes) so storybook screenshots can be
+ * deterministic.
+ */
+function sanitizeStack(stack: string) {
+  return stack.replace(/\s+\(.+\)$/gm, "").replace(/\s+https?:\/\/.+$/gm, "");
+}
+
+function ErrorStacktrace({
+  stack,
+  hideSourceLocations,
+}: {
+  stack: string;
+  hideSourceLocations: boolean;
+}) {
   const styles = useStyles();
-  const lines = stack
+  const lines = (hideSourceLocations ? sanitizeStack(stack) : stack)
     .trim()
     .replace(/^\s*at /gm, "")
     .split("\n")
@@ -71,11 +85,12 @@ type ErrorDisplayProps = {
   content?: JSX.Element;
   actions?: JSX.Element;
   showErrorDetails?: boolean;
+  hideErrorSourceLocations?: boolean;
 };
 
 function ErrorDisplay(props: ErrorDisplayProps): JSX.Element {
   const styles = useStyles();
-  const { error, errorInfo } = props;
+  const { error, errorInfo, hideErrorSourceLocations = false } = props;
 
   const [showErrorDetails, setShowErrorDetails] = useState(props.showErrorDetails ?? false);
 
@@ -93,16 +108,22 @@ function ErrorDisplay(props: ErrorDisplayProps): JSX.Element {
     return (
       <div>
         <Typography className={styles.errorDetailHeader}>Error stack:</Typography>
-        <ErrorStacktrace stack={stackWithoutMessage} />
+        <ErrorStacktrace
+          stack={stackWithoutMessage}
+          hideSourceLocations={hideErrorSourceLocations}
+        />
         {errorInfo && (
           <>
             <Typography className={styles.errorDetailHeader}>Component stack:</Typography>
-            <ErrorStacktrace stack={errorInfo.componentStack} />
+            <ErrorStacktrace
+              stack={errorInfo.componentStack}
+              hideSourceLocations={hideErrorSourceLocations}
+            />
           </>
         )}
       </div>
     );
-  }, [error, errorInfo, showErrorDetails, styles]);
+  }, [error, errorInfo, hideErrorSourceLocations, showErrorDetails, styles.errorDetailHeader]);
 
   return (
     <div className={styles.root}>

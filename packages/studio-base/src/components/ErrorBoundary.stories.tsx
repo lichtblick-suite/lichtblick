@@ -47,7 +47,7 @@ export const Default: Story = () => {
 export const ShowingDetails: Story = () => {
   return (
     <DndProvider backend={HTML5Backend}>
-      <ErrorBoundary showErrorDetails>
+      <ErrorBoundary showErrorDetails hideErrorSourceLocations>
         <Broken />
       </ErrorBoundary>
     </DndProvider>

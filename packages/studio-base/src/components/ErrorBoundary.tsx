@@ -13,6 +13,7 @@ import ErrorDisplay from "./ErrorDisplay";
 type Props = {
   actions?: JSX.Element;
   showErrorDetails?: boolean;
+  hideErrorSourceLocations?: boolean;
 };
 
 type State = {
@@ -46,6 +47,7 @@ export default class ErrorBoundary extends Component<PropsWithChildren<Props>, S
       return (
         <ErrorDisplay
           showErrorDetails={this.props.showErrorDetails}
+          hideErrorSourceLocations={this.props.hideErrorSourceLocations}
           error={this.state.currentError.error}
           errorInfo={this.state.currentError.errorInfo}
           content={
