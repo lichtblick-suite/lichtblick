@@ -184,6 +184,7 @@ export default function CurrentLayoutProvider({
 
         debouncedSaveTimeout.current = undefined;
         for (const params of layoutsToSave) {
+          void analytics.logEvent(AppEvent.LAYOUT_UPDATE);
           layoutManager.updateLayout(params).catch((error) => {
             log.error(error);
             if (isMounted()) {
@@ -201,7 +202,7 @@ export default function CurrentLayoutProvider({
       // debounced params are set in the proper order, we invoke setLayoutState at the end.
       setLayoutState({ selectedLayout: { ...newLayout, loading: false } });
     },
-    [addToast, isMounted, layoutManager, setLayoutState],
+    [addToast, analytics, isMounted, layoutManager, setLayoutState],
   );
 
   // Changes to the layout storage from external user actions (such as resetting a layout to a
