@@ -340,14 +340,17 @@ describe("UserNodePlayer", () => {
 
       const [done, nextDone] = setListenerHelper(userNodePlayer, 2);
 
+      const topics = [{ name: "/np_input", datatype: `${DEFAULT_STUDIO_NODE_PREFIX}1` }];
+      const datatypes = new Map(Object.entries({ foo: { definitions: [] } }));
+
       void fakePlayer.emit({
         activeData: {
           ...basicPlayerState,
           messages: messagesArray,
           messageOrder: "receiveTime",
           currentTime: { sec: 0, nsec: 0 },
-          topics: [{ name: "/np_input", datatype: `${DEFAULT_STUDIO_NODE_PREFIX}1` }],
-          datatypes: new Map(Object.entries({ foo: { definitions: [] } })),
+          topics,
+          datatypes,
         },
       });
 
@@ -359,8 +362,8 @@ describe("UserNodePlayer", () => {
           messages: messagesArray,
           messageOrder: "receiveTime",
           currentTime: { sec: 0, nsec: 0 },
-          topics: [{ name: "/np_input", datatype: `${DEFAULT_STUDIO_NODE_PREFIX}1` }],
-          datatypes: new Map(Object.entries({ foo: { definitions: [] } })),
+          topics,
+          datatypes,
         },
       });
 
@@ -499,6 +502,7 @@ describe("UserNodePlayer", () => {
       const datatypes: RosDatatypes = new Map(
         Object.entries({ foo: { definitions: [{ name: "payload", type: "string" }] } }),
       );
+      const topics = [{ name: "/np_input", datatype: "std_msgs/Header" }];
 
       const [done1, done2] = setListenerHelper(userNodePlayer, 2);
       userNodePlayer.setSubscriptions([{ topic: `${DEFAULT_STUDIO_NODE_PREFIX}1` }]);
@@ -515,7 +519,7 @@ describe("UserNodePlayer", () => {
           messages: [upstreamFirst],
           messageOrder: "receiveTime",
           currentTime: upstreamFirst.receiveTime,
-          topics: [{ name: "/np_input", datatype: "std_msgs/Header" }],
+          topics,
           datatypes,
         },
       });
@@ -527,7 +531,7 @@ describe("UserNodePlayer", () => {
           messages: [upstreamSecond],
           messageOrder: "receiveTime",
           currentTime: upstreamSecond.receiveTime,
-          topics: [{ name: "/np_input", datatype: "std_msgs/Header" }],
+          topics,
           datatypes,
         },
       });
@@ -1307,6 +1311,9 @@ describe("UserNodePlayer", () => {
       fakePlayer = new FakePlayer();
       userNodePlayer = new UserNodePlayer(fakePlayer, defaultUserNodeActions);
 
+      const topics = [{ name: "/np_input", datatype: "std_msgs/Header" }];
+      const datatypes = new Map(Object.entries({ foo: { definitions: [] } }));
+
       emit = async () => {
         await fakePlayer.emit({
           activeData: {
@@ -1314,8 +1321,8 @@ describe("UserNodePlayer", () => {
             messages: [upstreamFirst],
             messageOrder: "receiveTime",
             currentTime: upstreamFirst.receiveTime,
-            topics: [{ name: "/np_input", datatype: "std_msgs/Header" }],
-            datatypes: new Map(Object.entries({ foo: { definitions: [] } })),
+            topics,
+            datatypes,
           },
         });
       };
@@ -1391,6 +1398,36 @@ describe("UserNodePlayer", () => {
       // We'll still call registerNode and processMessage for every emit()
       expect(callCount("registerNode")).toBe(5);
       expect(callCount("processMessage")).toBe(5);
+    });
+
+    it("re-transforms the code when topics change", async () => {
+      const donePromises = setListenerHelper(userNodePlayer, 5);
+      userNodePlayer.setSubscriptions([{ topic: `${DEFAULT_STUDIO_NODE_PREFIX}0` }]);
+
+      // New node 0, needs registration
+      await userNodePlayer.setUserNodes({ nodeId0: userNode0 });
+      emit();
+      const { messages: messages0 }: any = await donePromises[0];
+      expectFromSource(messages0, 0);
+      expect(callCount("transform")).toBe(1);
+      expect(callCount("processMessage")).toBe(1);
+
+      // No change to topics, no new transform
+      emit();
+      expect(callCount("transform")).toBe(1);
+
+      // Emit with new topics
+      await fakePlayer.emit({
+        activeData: {
+          ...basicPlayerState,
+          messages: [upstreamFirst],
+          messageOrder: "receiveTime",
+          currentTime: upstreamFirst.receiveTime,
+          topics: [{ name: "/np_input", datatype: "std_msgs/Header" }],
+          datatypes: new Map(Object.entries({ foo: { definitions: [] } })),
+        },
+      });
+      expect(callCount("transform")).toBe(2);
     });
   });
 });

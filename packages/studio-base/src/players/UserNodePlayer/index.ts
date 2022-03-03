@@ -112,6 +112,12 @@ export default class UserNodePlayer implements Player {
   // a node may set its own problem or clear its problem
   private _problemStore = new Map<string, PlayerProblem>();
 
+  private _nodeRegistrationCache: {
+    nodeId: string;
+    userNode: UserNode;
+    result: NodeRegistration;
+  }[] = [];
+
   // exposed as a static to allow testing to mock/replace
   static CreateNodeTransformWorker = (): SharedWorker => {
     return new SharedWorker(new URL("./nodeTransformerWorker/index", import.meta.url), {
@@ -259,11 +265,6 @@ export default class UserNodePlayer implements Player {
     });
   }
 
-  private _nodeRegistrationCache: {
-    nodeId: string;
-    userNode: UserNode;
-    result: NodeRegistration;
-  }[] = [];
   // Defines the inputs/outputs and worker interface of a user node.
   private _createNodeRegistration = async (
     nodeId: string,
@@ -631,11 +632,6 @@ export default class UserNodePlayer implements Player {
 
       const { messages, topics, datatypes } = activeData;
 
-      // Reset node state after seeking
-      if (activeData.lastSeekTime !== this._lastPlayerStateActiveData?.lastSeekTime) {
-        await this._resetWorkers();
-      }
-
       // If we do not have active player data from a previous call, then our
       // player just spun up, meaning we should re-run our user nodes in case
       // they have inputs that now exist in the current player context.
@@ -644,6 +640,23 @@ export default class UserNodePlayer implements Player {
         await this._resetWorkers();
         this.setSubscriptions(this._subscriptions);
         this.requestBackfill();
+      } else {
+        // Reset node state after seeking
+        let shouldReset = activeData.lastSeekTime !== this._lastPlayerStateActiveData.lastSeekTime;
+
+        // When topics or datatypes change we also need to re-build the nodes so we clear the cache
+        if (
+          activeData.topics !== this._lastPlayerStateActiveData.topics ||
+          activeData.datatypes !== this._lastPlayerStateActiveData.datatypes
+        ) {
+          shouldReset ||= true;
+          this._nodeRegistrationCache = [];
+        }
+
+        this._lastPlayerStateActiveData = activeData;
+        if (shouldReset) {
+          await this._resetWorkers();
+        }
       }
 
       const allDatatypes = this._getDatatypes(datatypes, this._memoizedNodeDatatypes);
@@ -665,7 +678,6 @@ export default class UserNodePlayer implements Player {
       };
 
       this._playerState = newPlayerState;
-      this._lastPlayerStateActiveData = playerState.activeData;
 
       // clear any previous problem we had from making a new player state
       this._problemStore.delete("player-state-update");
