@@ -11,6 +11,7 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
+import { signal } from "@foxglove/den/async";
 import { add, fromSec } from "@foxglove/rostime";
 import FakePlayer from "@foxglove/studio-base/components/MessagePipeline/FakePlayer";
 import UserNodePlayer from "@foxglove/studio-base/players/UserNodePlayer";
@@ -21,7 +22,6 @@ import {
 } from "@foxglove/studio-base/players/types";
 import { RosDatatypes } from "@foxglove/studio-base/types/RosDatatypes";
 import { basicDatatypes } from "@foxglove/studio-base/util/datatypes";
-import signal from "@foxglove/studio-base/util/signal";
 import { TimestampMethod } from "@foxglove/studio-base/util/time";
 
 import OrderedStampPlayer, { BUFFER_DURATION_SECS } from "./OrderedStampPlayer";

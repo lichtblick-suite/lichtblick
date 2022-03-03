@@ -16,7 +16,7 @@
   },
   "homepage": "https://foxglove.dev/",
   "scripts": {
-    "clean": "tsc --build --clean packages/*/tsconfig.json && rimraf .webpack dist packages/studio-base/storybook-screenshots packages/studio-base/storybook-static",
+    "clean": "tsc --build --clean packages/*/tsconfig.json && rimraf .webpack dist storybook-screenshots storybook-static",
     "start": "electron desktop/.webpack",
     "build:packages": "tsc --build --verbose packages/**/tsconfig.json",
     "build:dev": "webpack --mode development --progress --config desktop/webpack.config.ts",
@@ -41,7 +41,8 @@
     "package": "cross-env NODE_OPTIONS='-r ts-node/register' electron-builder build --publish never",
     "package:e2e": "yarn && yarn clean && yarn build:prod && yarn package",
     "release:bump-nightly-version": "node -r ts-node/register ./ci/bump-nightly-version.ts",
-    "storybook": "cross-env TS_NODE_COMPILER_OPTIONS='{\"module\":\"commonjs\"}' yarn workspace @foxglove/studio-base run start-storybook --port 9009 --config-dir src/.storybook",
+    "storybook": "yarn run start-storybook --port 9009 --config-dir .storybook",
+    "storybook:build": "build-storybook --config-dir .storybook",
     "version:all": "yarn workspaces foreach version"
   },
   "workspaces": {
@@ -68,6 +69,11 @@
     "@pmmmwh/react-refresh-webpack-plugin": "0.5.4",
     "@sentry/electron": "2.5.4",
     "@sentry/webpack-plugin": "1.18.5",
+    "@storybook/addon-actions": "6.4.18",
+    "@storybook/addon-essentials": "6.4.18",
+    "@storybook/builder-webpack5": "6.4.18",
+    "@storybook/manager-webpack5": "6.4.18",
+    "@storybook/react": "patch:@storybook/react@6.4.18#./patches/storybook-react.patch",
     "@types/babel__core": "^7.1.18",
     "@types/babel__preset-env": "^7.9.2",
     "@types/case-sensitive-paths-webpack-plugin": "2.1.6",

@@ -16,10 +16,10 @@ import { useState } from "react";
 
 import Preferences from "@foxglove/studio-base/components/Preferences";
 import AppConfigurationContext from "@foxglove/studio-base/context/AppConfigurationContext";
-import { makeConfiguration } from "@foxglove/studio-base/util/makeConfiguration";
+import { makeMockAppConfiguration } from "@foxglove/studio-base/util/makeMockAppConfiguration";
 
 export function Default(): React.ReactElement {
-  const [config] = useState(() => makeConfiguration());
+  const [config] = useState(() => makeMockAppConfiguration());
   return (
     <AppConfigurationContext.Provider value={config}>
       <Preferences />

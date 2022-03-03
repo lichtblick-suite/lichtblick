@@ -211,16 +211,15 @@ export default function FileInfoDisplay({
             </ShowNarrow>
           )}
           <SummaryRow>
-            {fileInfo &&
-              [
-                formatCount(fileInfo.topics?.length, "topic"),
-                formatCount(fileInfo.numChunks, "chunk"),
-                formatCount(fileInfo.totalMessages, "message"),
-                formatCount(fileInfo.numAttachments, "attachment"),
-                formatByteSize(fileStats.size).replace(/ /g, "\xa0"),
-              ]
-                .filter(Boolean)
-                .join(", ")}
+            {[
+              formatCount(fileInfo?.topics?.length, "topic"),
+              formatCount(fileInfo?.numChunks, "chunk"),
+              formatCount(fileInfo?.totalMessages, "message"),
+              formatCount(fileInfo?.numAttachments, "attachment"),
+              formatByteSize(fileStats.size).replace(/ /g, "\xa0"),
+            ]
+              .filter(Boolean)
+              .join(", ")}
           </SummaryRow>
           {compressionTypes && (
             <SummaryRow>

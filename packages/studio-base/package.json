@@ -21,7 +21,6 @@
   ],
   "scripts": {
     "prepack": "yarn build:webpack && yarn build:tsc",
-    "storybook:build": "cross-env TS_NODE_COMPILER_OPTIONS='{\"module\":\"commonjs\"}' build-storybook --config-dir src/.storybook",
     "build:tsc": "ttsc --module es2020 --project tsconfig.json",
     "build:webpack": "cross-env TS_NODE_PROJECT=\"tsconfig.cli.json\" webpack --mode production --progress"
   },
@@ -61,11 +60,6 @@
     "@protobufjs/base64": "1.1.2",
     "@sentry/core": "6.17.6",
     "@sentry/types": "6.17.6",
-    "@storybook/addon-actions": "6.4.18",
-    "@storybook/addon-essentials": "6.4.18",
-    "@storybook/builder-webpack5": "6.4.18",
-    "@storybook/manager-webpack5": "6.4.18",
-    "@storybook/react": "patch:@storybook/react@6.4.18#../../patches/storybook-react.patch",
     "@testing-library/dom": "8.11.3",
     "@testing-library/react": "12.1.2",
     "@testing-library/react-hooks": "7.0.2",

@@ -6,6 +6,7 @@ import { act, renderHook } from "@testing-library/react-hooks";
 import { useEffect } from "react";
 import { ToastProvider } from "react-toast-notifications";
 
+import { signal } from "@foxglove/den/async";
 import {
   useCurrentLayoutActions,
   useCurrentLayoutSelector,
@@ -19,7 +20,6 @@ import {
 import CurrentLayoutProvider from "@foxglove/studio-base/providers/CurrentLayoutProvider";
 import { ILayoutManager } from "@foxglove/studio-base/services/ILayoutManager";
 import { LayoutID } from "@foxglove/studio-base/services/ILayoutStorage";
-import signal from "@foxglove/studio-base/util/signal";
 
 const TEST_LAYOUT: PanelsState = {
   layout: "ExamplePanel!1",

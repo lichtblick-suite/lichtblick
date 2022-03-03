@@ -18,7 +18,7 @@ const useStyles = makeStyles({
     alignItems: "center",
     justifyContent: "center",
     textAlign: "center",
-    width: "100vw",
+    width: "100%",
     color: "white",
     backgroundColor: "rgba(99, 102, 241, 0.9)",
     zIndex: 100,

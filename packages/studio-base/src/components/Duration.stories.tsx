@@ -7,7 +7,7 @@ import { ComponentProps, useState } from "react";
 
 import { AppSetting } from "@foxglove/studio-base/AppSetting";
 import AppConfigurationContext from "@foxglove/studio-base/context/AppConfigurationContext";
-import { makeConfiguration } from "@foxglove/studio-base/util/makeConfiguration";
+import { makeMockAppConfiguration } from "@foxglove/studio-base/util/makeMockAppConfiguration";
 
 import Duration from "./Duration";
 
@@ -20,13 +20,13 @@ type Props = ComponentProps<typeof Duration>;
 
 function DurationStory(props: Props): JSX.Element {
   const [secAppConfig] = useState(() =>
-    makeConfiguration([
+    makeMockAppConfiguration([
       [AppSetting.TIME_FORMAT, "SEC"],
       [AppSetting.TIMEZONE, "UTC"],
     ]),
   );
   const [todAppConfig] = useState(() =>
-    makeConfiguration([
+    makeMockAppConfiguration([
       [AppSetting.TIME_FORMAT, "TOD"],
       [AppSetting.TIMEZONE, "UTC"],
     ]),

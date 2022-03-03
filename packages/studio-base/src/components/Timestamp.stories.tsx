@@ -9,7 +9,7 @@ import { Time } from "@foxglove/rostime";
 import { AppSetting } from "@foxglove/studio-base/AppSetting";
 import Timestamp from "@foxglove/studio-base/components/Timestamp";
 import AppConfigurationContext from "@foxglove/studio-base/context/AppConfigurationContext";
-import { makeConfiguration } from "@foxglove/studio-base/util/makeConfiguration";
+import { makeMockAppConfiguration } from "@foxglove/studio-base/util/makeMockAppConfiguration";
 
 const ABSOLUTE_TIME = { sec: 1643800942, nsec: 222222222 };
 const RELATIVE_TIME = { sec: 630720000, nsec: 597648236 };
@@ -26,7 +26,7 @@ type Props = {
 
 function TimestampStory(props: PropsWithChildren<Props>): JSX.Element {
   const { config, time } = props;
-  const [value] = useState(() => makeConfiguration(config));
+  const [value] = useState(() => makeMockAppConfiguration(config));
 
   return (
     <AppConfigurationContext.Provider value={value}>

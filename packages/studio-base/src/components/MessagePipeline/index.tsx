@@ -13,6 +13,7 @@
 
 import { debounce, flatten } from "lodash";
 
+import { signal } from "@foxglove/den/async";
 import { useShallowMemo } from "@foxglove/hooks";
 import { Time } from "@foxglove/rostime";
 import { MessageEvent, ParameterValue } from "@foxglove/studio";
@@ -33,7 +34,6 @@ import {
 } from "@foxglove/studio-base/players/types";
 import { RosDatatypes } from "@foxglove/studio-base/types/RosDatatypes";
 import createSelectableContext from "@foxglove/studio-base/util/createSelectableContext";
-import signal from "@foxglove/studio-base/util/signal";
 
 import MessageOrderTracker from "./MessageOrderTracker";
 import { pauseFrameForPromises, FramePromise } from "./pauseFrameForPromise";

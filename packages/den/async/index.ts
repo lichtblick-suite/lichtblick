@@ -4,3 +4,4 @@
 
 export { default as LazilyInitialized } from "./LazilyInitialized";
 export { default as MutexLocked } from "./MutexLocked";
+export { default as signal, type Signal } from "./signal";

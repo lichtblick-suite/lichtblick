@@ -7,7 +7,9 @@ import {
   AppConfigurationValue,
 } from "@foxglove/studio-base/context/AppConfigurationContext";
 
-export function makeConfiguration(entries?: [string, AppConfigurationValue][]): AppConfiguration {
+export function makeMockAppConfiguration(
+  entries?: [string, AppConfigurationValue][],
+): AppConfiguration {
   const map = new Map<string, AppConfigurationValue>(entries);
   const listeners = new Set<(newValue: AppConfigurationValue) => void>();
   return {

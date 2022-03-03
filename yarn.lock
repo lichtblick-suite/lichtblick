@@ -2533,11 +2533,6 @@ __metadata:
     "@protobufjs/base64": 1.1.2
     "@sentry/core": 6.17.6
     "@sentry/types": 6.17.6
-    "@storybook/addon-actions": 6.4.18
-    "@storybook/addon-essentials": 6.4.18
-    "@storybook/builder-webpack5": 6.4.18
-    "@storybook/manager-webpack5": 6.4.18
-    "@storybook/react": "patch:@storybook/react@6.4.18#../../patches/storybook-react.patch"
     "@testing-library/dom": 8.11.3
     "@testing-library/react": 12.1.2
     "@testing-library/react-hooks": 7.0.2
@@ -5050,9 +5045,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@storybook/react@patch:@storybook/react@6.4.18#../../patches/storybook-react.patch::locator=%40foxglove%2Fstudio-base%40workspace%3Apackages%2Fstudio-base":
+"@storybook/react@patch:@storybook/react@6.4.18#./patches/storybook-react.patch::locator=foxglove-studio%40workspace%3A.":
   version: 6.4.18
-  resolution: "@storybook/react@patch:@storybook/react@npm%3A6.4.18#../../patches/storybook-react.patch::version=6.4.18&hash=456cc0&locator=%40foxglove%2Fstudio-base%40workspace%3Apackages%2Fstudio-base"
+  resolution: "@storybook/react@patch:@storybook/react@npm%3A6.4.18#./patches/storybook-react.patch::version=6.4.18&hash=456cc0&locator=foxglove-studio%40workspace%3A."
   dependencies:
     "@babel/preset-flow": ^7.12.1
     "@babel/preset-react": ^7.12.10
@@ -12895,6 +12890,11 @@ __metadata:
     "@pmmmwh/react-refresh-webpack-plugin": 0.5.4
     "@sentry/electron": 2.5.4
     "@sentry/webpack-plugin": 1.18.5
+    "@storybook/addon-actions": 6.4.18
+    "@storybook/addon-essentials": 6.4.18
+    "@storybook/builder-webpack5": 6.4.18
+    "@storybook/manager-webpack5": 6.4.18
+    "@storybook/react": "patch:@storybook/react@6.4.18#./patches/storybook-react.patch"
     "@types/babel__core": ^7.1.18
     "@types/babel__preset-env": ^7.9.2
     "@types/case-sensitive-paths-webpack-plugin": 2.1.6

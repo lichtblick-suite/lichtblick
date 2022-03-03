@@ -7,15 +7,14 @@
 import { useState, useEffect, useRef } from "react";
 import ReactDOM from "react-dom";
 import { useAsync } from "react-use";
-import { createGlobalStyle } from "styled-components";
 
 import Logger from "@foxglove/log";
 
 import FileInfoDisplay from "./FileInfoDisplay";
 import Flash from "./Flash";
+import { GlobalStyle } from "./GlobalStyle";
 import { getBagInfo } from "./getBagInfo";
 import { getMcapInfo } from "./getMcapInfo";
-import * as styleConstants from "./styleConstants";
 
 const log = Logger.getLogger(__filename);
 
@@ -25,42 +24,6 @@ const rootEl = document.getElementById("root");
 if (!rootEl) {
   throw new Error("missing #root element");
 }
-
-const GlobalStyle = createGlobalStyle`
-  * {
-    box-sizing: border-box;
-  }
-  body,
-  html {
-    width: 100%;
-    height: 100%;
-    padding: 0;
-    margin: 0;
-
-    @media (prefers-color-scheme: dark) {
-      background: #333;
-    }
-  }
-  body {
-    padding: ${styleConstants.bodyPadding};
-    min-width: 150px;
-    font-family: ui-sans-serif, -apple-system, BlinkMacSystemFont;
-    @media (prefers-color-scheme: dark) {
-      color: #fff;
-    }
-  }
-  pre,
-  code,
-  tt {
-    font-family: ui-monospace, Menlo, Monaco, monospace;
-  }
-  a {
-    color:  #476ebd;
-    @media (prefers-color-scheme: dark) {
-      color: #99b5ed;
-    }
-  }
-`;
 
 function Root(): JSX.Element {
   const [previewedFile, setPreviewedFile] = useState<File | undefined>();

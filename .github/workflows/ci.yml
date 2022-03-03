@@ -98,7 +98,7 @@ jobs:
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           projectToken: f50040a29fb8
-          storybookBuildDir: packages/studio-base/storybook-static
+          storybookBuildDir: storybook-static
           autoAcceptChanges: main
           exitOnceUploaded: true
 

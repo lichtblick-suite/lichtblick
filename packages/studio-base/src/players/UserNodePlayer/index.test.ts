@@ -12,6 +12,7 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
+import { signal } from "@foxglove/den/async";
 import FakePlayer from "@foxglove/studio-base/components/MessagePipeline/FakePlayer";
 import UserNodePlayer from "@foxglove/studio-base/players/UserNodePlayer";
 import MockUserNodePlayerWorker from "@foxglove/studio-base/players/UserNodePlayer/MockUserNodePlayerWorker";
@@ -26,7 +27,6 @@ import { RosDatatypes } from "@foxglove/studio-base/types/RosDatatypes";
 import { UserNode } from "@foxglove/studio-base/types/panels";
 import { basicDatatypes } from "@foxglove/studio-base/util/datatypes";
 import { DEFAULT_STUDIO_NODE_PREFIX } from "@foxglove/studio-base/util/globalConstants";
-import signal from "@foxglove/studio-base/util/signal";
 
 const nodeId = "nodeId";
 

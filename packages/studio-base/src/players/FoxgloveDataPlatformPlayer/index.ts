@@ -6,6 +6,7 @@ import { captureException } from "@sentry/core";
 import { isEqual } from "lodash";
 import { v4 as uuidv4 } from "uuid";
 
+import { signal, Signal } from "@foxglove/den/async";
 import Logger from "@foxglove/log";
 import { parseChannel } from "@foxglove/mcap-support";
 import {
@@ -41,7 +42,6 @@ import {
 import ConsoleApi from "@foxglove/studio-base/services/ConsoleApi";
 import { RosDatatypes } from "@foxglove/studio-base/types/RosDatatypes";
 import debouncePromise from "@foxglove/studio-base/util/debouncePromise";
-import signal, { Signal } from "@foxglove/studio-base/util/signal";
 import { formatTimeRaw } from "@foxglove/studio-base/util/time";
 
 import MessageMemoryCache from "./MessageMemoryCache";

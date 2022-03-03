@@ -22,7 +22,7 @@ import FakePlayer from "@foxglove/studio-base/components/MessagePipeline/FakePla
 import MockMessagePipelineProvider from "@foxglove/studio-base/components/MessagePipeline/MockMessagePipelineProvider";
 import AppConfigurationContext from "@foxglove/studio-base/context/AppConfigurationContext";
 import { MessageEvent, Player } from "@foxglove/studio-base/players/types";
-import { makeConfiguration } from "@foxglove/studio-base/util/makeConfiguration";
+import { makeMockAppConfiguration } from "@foxglove/studio-base/util/makeMockAppConfiguration";
 
 import * as PanelAPI from ".";
 
@@ -325,7 +325,7 @@ describe("useMessageReducer", () => {
   };
 
   function Wrapper({ children, player }: PropsWithChildren<WrapperProps>) {
-    const [config] = useState(() => makeConfiguration());
+    const [config] = useState(() => makeMockAppConfiguration());
     return (
       <AppConfigurationContext.Provider value={config}>
         <MessagePipelineProvider player={player} globalVariables={{}}>

@@ -22,7 +22,7 @@ import ExtensionLoaderContext, {
 import ExtensionMarketplaceContext, {
   ExtensionMarketplace,
 } from "@foxglove/studio-base/context/ExtensionMarketplaceContext";
-import { makeConfiguration } from "@foxglove/studio-base/util/makeConfiguration";
+import { makeMockAppConfiguration } from "@foxglove/studio-base/util/makeMockAppConfiguration";
 
 export default {
   title: "components/ExtensionsSidebar",
@@ -74,7 +74,7 @@ Mock markdown rendering for URL [${url}](${url}).`,
 };
 
 export function Sidebar(): JSX.Element {
-  const [config] = useState(() => makeConfiguration());
+  const [config] = useState(() => makeMockAppConfiguration());
 
   return (
     <AppConfigurationContext.Provider value={config}>

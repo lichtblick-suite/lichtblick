@@ -5,11 +5,11 @@ import { action } from "@storybook/addon-actions";
 import { useCallback, useRef, useState } from "react";
 import ReactTestUtils from "react-dom/test-utils";
 
+import { signal } from "@foxglove/den/async";
 import AppConfigurationContext from "@foxglove/studio-base/context/AppConfigurationContext";
 import PanelSetup from "@foxglove/studio-base/stories/PanelSetup";
 import delay from "@foxglove/studio-base/util/delay";
-import { makeConfiguration } from "@foxglove/studio-base/util/makeConfiguration";
-import signal from "@foxglove/studio-base/util/signal";
+import { makeMockAppConfiguration } from "@foxglove/studio-base/util/makeMockAppConfiguration";
 
 import SubscribeContext, { SubscribeNewsletterFn } from "./SubscribeContext";
 import WelcomePanel from "./index";
@@ -20,7 +20,7 @@ export default {
 };
 
 export function Default(): React.ReactElement {
-  const [config] = useState(() => makeConfiguration());
+  const [config] = useState(() => makeMockAppConfiguration());
   return (
     <PanelSetup>
       <AppConfigurationContext.Provider value={config}>
@@ -31,7 +31,7 @@ export function Default(): React.ReactElement {
 }
 
 export function AlreadySignedUp(): React.ReactElement {
-  const [config] = useState(() => makeConfiguration([["onboarding.subscribed", true]]));
+  const [config] = useState(() => makeMockAppConfiguration([["onboarding.subscribed", true]]));
   return (
     <PanelSetup>
       <AppConfigurationContext.Provider value={config}>
@@ -51,7 +51,7 @@ function Example({
   mockSubscribe = async () => undefined,
 }: ExampleProps): React.ReactElement {
   const [config] = useState(() => {
-    const configuration = makeConfiguration();
+    const configuration = makeMockAppConfiguration();
     if (mockSetConfig) {
       configuration.set = mockSetConfig;
     }

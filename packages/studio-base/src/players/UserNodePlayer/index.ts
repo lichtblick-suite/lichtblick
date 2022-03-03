@@ -15,6 +15,7 @@ import memoizeWeak from "memoize-weak";
 import shallowequal from "shallowequal";
 import { v4 as uuidv4 } from "uuid";
 
+import { signal } from "@foxglove/den/async";
 import Log from "@foxglove/log";
 import { Time, compare } from "@foxglove/rostime";
 import { ParameterValue } from "@foxglove/studio";
@@ -51,7 +52,6 @@ import { UserNode, UserNodes } from "@foxglove/studio-base/types/panels";
 import Rpc from "@foxglove/studio-base/util/Rpc";
 import { basicDatatypes, foxgloveDatatypes } from "@foxglove/studio-base/util/datatypes";
 import { DEFAULT_STUDIO_NODE_PREFIX } from "@foxglove/studio-base/util/globalConstants";
-import signal from "@foxglove/studio-base/util/signal";
 
 const log = Log.getLogger(__filename);
 

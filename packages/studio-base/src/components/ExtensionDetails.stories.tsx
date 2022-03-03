@@ -22,7 +22,7 @@ import ExtensionMarketplaceContext, {
   ExtensionMarketplace,
   ExtensionMarketplaceDetail,
 } from "@foxglove/studio-base/context/ExtensionMarketplaceContext";
-import { makeConfiguration } from "@foxglove/studio-base/util/makeConfiguration";
+import { makeMockAppConfiguration } from "@foxglove/studio-base/util/makeMockAppConfiguration";
 
 export default {
   title: "components/ExtensionDetails",
@@ -67,7 +67,7 @@ const extension: ExtensionMarketplaceDetail = {
 };
 
 export function Details(): JSX.Element {
-  const [config] = useState(() => makeConfiguration());
+  const [config] = useState(() => makeMockAppConfiguration());
 
   return (
     <AppConfigurationContext.Provider value={config}>

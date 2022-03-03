@@ -22,7 +22,7 @@ import AppConfigurationContext from "@foxglove/studio-base/context/AppConfigurat
 import { GlobalVariables } from "@foxglove/studio-base/hooks/useGlobalVariables";
 import { Player, PlayerCapabilities, PlayerPresence } from "@foxglove/studio-base/players/types";
 import delay from "@foxglove/studio-base/util/delay";
-import { makeConfiguration } from "@foxglove/studio-base/util/makeConfiguration";
+import { makeMockAppConfiguration } from "@foxglove/studio-base/util/makeMockAppConfiguration";
 
 import { MessagePipelineProvider, useMessagePipeline, MessagePipelineContext } from ".";
 import FakePlayer from "./FakePlayer";
@@ -40,7 +40,7 @@ function Hook(_props: WrapperProps) {
 }
 
 function Wrapper({ children, player, globalVariables = {} }: PropsWithChildren<WrapperProps>) {
-  const [config] = useState(() => makeConfiguration());
+  const [config] = useState(() => makeMockAppConfiguration());
   return (
     <AppConfigurationContext.Provider value={config}>
       <MessagePipelineProvider player={player} globalVariables={globalVariables}>
