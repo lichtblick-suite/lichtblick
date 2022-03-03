@@ -4,15 +4,24 @@
 
 import { renderHook } from "@testing-library/react-hooks";
 
+import Logger from "@foxglove/log";
+
 import { useMustNotChangeImpl } from "./useMustNotChange";
 
 describe("useMustNotChange", () => {
-  it("should throw when value changes", () => {
-    const { result, rerender } = renderHook((val) => useMustNotChangeImpl(val), {
+  it("should log an error when value changes", () => {
+    const errorMock = jest.fn();
+    Logger.channels().forEach((channel) => {
+      if (channel.name().endsWith("useMustNotChange.ts")) {
+        channel.error = errorMock;
+      }
+    });
+
+    const { rerender } = renderHook((val) => useMustNotChangeImpl(val), {
       initialProps: 1,
     });
     rerender(2);
 
-    expect(result.error?.message).toEqual("Value must not change");
+    expect(errorMock).toHaveBeenCalled();
   });
 });
