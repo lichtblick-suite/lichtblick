@@ -15,6 +15,10 @@ export {
   useConsoleApi,
 } from "@foxglove/studio-base/context/ConsoleApiContext";
 export { default as ConsoleApiRemoteLayoutStorageProvider } from "@foxglove/studio-base/providers/ConsoleApiRemoteLayoutStorageProvider";
+export {
+  default as DialogHostIdContext,
+  useDialogHostId,
+} from "@foxglove/studio-base/context/DialogHostIdContext";
 export { default as App } from "./App";
 export type { NetworkInterface, OsContext } from "./OsContext";
 export { default as ErrorBoundary } from "./components/ErrorBoundary";

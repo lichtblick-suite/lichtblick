@@ -14,6 +14,7 @@
 import { DefaultButton, Dialog, DialogFooter } from "@fluentui/react";
 import { useCallback, useEffect, useContext, useRef } from "react";
 
+import { useDialogHostId } from "@foxglove/studio-base/context/DialogHostIdContext";
 import ModalContext from "@foxglove/studio-base/context/ModalContext";
 
 type ConfirmVariant = "danger" | "primary";
@@ -56,6 +57,8 @@ function ConfirmModal(props: ConfirmModalProps) {
   useEffect(() => {
     return () => onComplete("cancel");
   }, [onComplete]);
+
+  const hostId = useDialogHostId();
 
   const confirmStyle = props.variant ?? "primary";
 
@@ -100,6 +103,7 @@ function ConfirmModal(props: ConfirmModalProps) {
       hidden={false}
       onDismiss={() => onComplete("cancel")}
       dialogContentProps={{ title: props.title }}
+      modalProps={{ layerProps: { hostId } }}
       minWidth={320}
       maxWidth={480}
     >

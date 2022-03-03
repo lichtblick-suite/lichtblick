@@ -16,6 +16,7 @@ import { isEmpty, omit } from "lodash";
 import React, { useCallback } from "react";
 
 import ErrorBoundary from "@foxglove/studio-base/components/ErrorBoundary";
+import { useDialogHostId } from "@foxglove/studio-base/context/DialogHostIdContext";
 import { topicSettingsEditorForDatatype } from "@foxglove/studio-base/panels/ThreeDimensionalViz/TopicSettingsEditor";
 import { Topic } from "@foxglove/studio-base/players/types";
 
@@ -85,6 +86,7 @@ function TopicSettingsModal({
   setCurrentEditingTopic,
   settingsByKey,
 }: Props) {
+  const hostId = useDialogHostId();
   const topicSettingsKey = `t:${topicName}`;
   const onSettingsChange = useCallback(
     (
@@ -129,6 +131,7 @@ function TopicSettingsModal({
         subText: currentEditingTopic.datatype,
         showCloseButton: true,
       }}
+      modalProps={{ layerProps: { hostId } }}
       maxWidth={480}
       minWidth={480}
     >

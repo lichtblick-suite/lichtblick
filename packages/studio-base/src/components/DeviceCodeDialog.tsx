@@ -20,6 +20,7 @@ import { useAsync, useMountedState } from "react-use";
 
 import Logger from "@foxglove/log";
 import { useConsoleApi } from "@foxglove/studio-base/context/ConsoleApiContext";
+import { useDialogHostId } from "@foxglove/studio-base/context/DialogHostIdContext";
 import { Session } from "@foxglove/studio-base/services/ConsoleApi";
 import { fonts } from "@foxglove/studio-base/util/sharedStyleConstants";
 
@@ -54,6 +55,7 @@ export default function DeviceCodeDialog(props: DeviceCodePanelProps): JSX.Eleme
   const theme = useTheme();
   const isMounted = useMountedState();
   const api = useConsoleApi();
+  const hostId = useDialogHostId();
   const { onClose } = props;
 
   const { value: deviceCode, error: deviceCodeError } = useAsync(async () => {
@@ -159,7 +161,7 @@ export default function DeviceCodeDialog(props: DeviceCodePanelProps): JSX.Eleme
     signinError != undefined
   ) {
     return (
-      <Dialog hidden={false} title="Error">
+      <Dialog hidden={false} title="Error" modalProps={{ layerProps: { hostId } }}>
         {deviceCodeError?.message ?? deviceResponseError?.message ?? signinError?.message}
         <DialogFooter>
           <PrimaryButton text="Done" onClick={() => onClose?.()} />
@@ -169,7 +171,7 @@ export default function DeviceCodeDialog(props: DeviceCodePanelProps): JSX.Eleme
   }
 
   return (
-    <Dialog hidden={false} minWidth={440} title="Sign in">
+    <Dialog hidden={false} minWidth={440} title="Sign in" modalProps={{ layerProps: { hostId } }}>
       {dialogContent}
       <DialogFooter styles={{ action: { display: "block" } }}>
         <div className={classes.spinnerWrapper}>

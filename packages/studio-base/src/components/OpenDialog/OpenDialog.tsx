@@ -7,6 +7,7 @@ import { Stack } from "@mui/material";
 import { useCallback, useLayoutEffect, useMemo, useState } from "react";
 import { useMountedState } from "react-use";
 
+import { useDialogHostId } from "@foxglove/studio-base/context/DialogHostIdContext";
 import {
   IDataSourceFactory,
   usePlayerSelection,
@@ -33,6 +34,7 @@ export default function OpenDialog(props: OpenDialogProps): JSX.Element {
   const theme = useTheme();
 
   const openFile = useOpenFile(availableSources);
+  const hostId = useDialogHostId();
 
   const firstSampleSource = useMemo(() => {
     return availableSources.find((source) => source.type === "sample");
@@ -141,6 +143,7 @@ export default function OpenDialog(props: OpenDialogProps): JSX.Element {
           // We enable event bubbling so a user can drag&drop files or folders onto the app even when
           // the dialog is shown.
           eventBubblingEnabled: true,
+          hostId,
         },
         styles: {
           main: {

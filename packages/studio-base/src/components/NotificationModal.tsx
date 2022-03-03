@@ -4,6 +4,7 @@
 
 import { Dialog, Text, TextField, useTheme, IModalProps } from "@fluentui/react";
 
+import { useDialogHostId } from "@foxglove/studio-base/context/DialogHostIdContext";
 import { NotificationMessage } from "@foxglove/studio-base/util/sendNotification";
 import { fonts } from "@foxglove/studio-base/util/sharedStyleConstants";
 
@@ -15,6 +16,7 @@ export default function NotificationModal({
   onRequestClose: IModalProps["onDismiss"];
 }): React.ReactElement {
   const theme = useTheme();
+  const hostId = useDialogHostId();
 
   const displayPropsBySeverity = {
     error: theme.semanticColors.errorBackground,
@@ -36,6 +38,7 @@ export default function NotificationModal({
         subText,
         showCloseButton: true,
       }}
+      modalProps={{ layerProps: { hostId } }}
       minWidth={700}
     >
       {details instanceof Error ? (

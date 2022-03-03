@@ -5,6 +5,7 @@
 import { DefaultButton, Dialog, DialogFooter, PrimaryButton, TextField } from "@fluentui/react";
 import { useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
 
+import { useDialogHostId } from "@foxglove/studio-base/context/DialogHostIdContext";
 import ModalContext from "@foxglove/studio-base/context/ModalContext";
 
 type PromptOptions = {
@@ -63,11 +64,14 @@ function ModalPrompt({
     return () => onComplete(undefined);
   }, [onComplete]);
 
+  const hostId = useDialogHostId();
+
   return (
     <Dialog
       hidden={false}
       onDismiss={() => onComplete(undefined)}
       dialogContentProps={{ title, subText }}
+      modalProps={{ layerProps: { hostId } }}
     >
       <form
         onSubmit={(event) => {

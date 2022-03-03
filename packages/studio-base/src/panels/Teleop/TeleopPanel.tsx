@@ -9,6 +9,7 @@ import { ReactNode, useCallback, useLayoutEffect, useMemo, useState } from "reac
 import { definitions as commonDefs } from "@foxglove/rosmsg-msgs-common";
 import { PanelExtensionContext, Topic } from "@foxglove/studio";
 import HoverableIconButton from "@foxglove/studio-base/components/HoverableIconButton";
+import { useDialogHostId } from "@foxglove/studio-base/context/DialogHostIdContext";
 import ThemeProvider from "@foxglove/studio-base/theme/ThemeProvider";
 import { darkFluentTheme, lightFluentTheme } from "@foxglove/studio-base/theme/createFluentTheme";
 
@@ -71,6 +72,7 @@ function TeleopPanel(props: TeleopPanelProps): JSX.Element {
 
   const [topics, setTopics] = useState<readonly Topic[] | undefined>();
   const [showSettings, setShowSettings] = useState<boolean>(false);
+  const hostId = useDialogHostId();
 
   const onChangeConfig = useCallback(
     (newConfig: Config) => {
@@ -238,6 +240,7 @@ function TeleopPanel(props: TeleopPanelProps): JSX.Element {
       </Stack>
       <Dialog
         dialogContentProps={{ title: "Teleop panel settings", showCloseButton: true }}
+        modalProps={{ layerProps: { hostId } }}
         hidden={!showSettings}
         onDismiss={() => setShowSettings(false)}
         maxWidth={480}
