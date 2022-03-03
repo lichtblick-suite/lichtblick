@@ -194,8 +194,7 @@ const useStyles = makeStyles((theme: Theme) => ({
     color: theme.palette.text.secondary,
     backgroundColor: theme.palette.background.paper,
     borderTop: `${theme.palette.background.default} solid 1px`,
-    flexDirection: ({ legendDisplay }: StyleProps) =>
-      legendDisplay === "top" ? "column" : undefined,
+    flexDirection: ({ legendDisplay }: StyleProps) => (legendDisplay === "top" ? "column" : "row"),
   },
   rootFloating: {
     cursor: "pointer",
