@@ -64,13 +64,17 @@ function getMessagesFromLoadedRange(messages: MessageEvent<unknown>[], requestRa
  * An in-memory cache of preloaded messages over a time range.
  */
 export default class MessageMemoryCache {
-  private _blockCache: { blocks: MemoryCacheBlock[]; startTime: Time } = {
+  private _blockCache: { blocks: (undefined | MemoryCacheBlock)[]; startTime: Time } = {
     blocks: [],
     startTime: { sec: 0, nsec: 0 },
   };
   private minTime: Time;
   private maxTime: Time;
-  private loadedRanges: Array<{ range: TimeRange; messages: MessageEvent<unknown>[] }> = [];
+  private loadedRanges: Array<{
+    block: MemoryCacheBlock;
+    range: TimeRange;
+    messages: MessageEvent<unknown>[];
+  }> = [];
 
   constructor(totalRange: TimeRange) {
     this.minTime = totalRange.start;
@@ -225,17 +229,13 @@ export default class MessageMemoryCache {
     this.loadedRanges.splice(spliceIdx, deleteCount, {
       range: { start: insertStart, end: insertEnd },
       messages: insertMessages,
+      block: {
+        messagesByTopic: groupBy(insertMessages, (m) => m.topic),
+        sizeInBytes: sumBy(insertMessages, (m) => m.sizeInBytes),
+      },
     });
 
-    // Create new array to clear later memoizations.
-    this._blockCache.blocks = [...this._blockCache.blocks];
-
-    // Build & insert new cache block for this range.
-    this._blockCache.blocks.splice(spliceIdx, deleteCount, {
-      messagesByTopic: groupBy(insertMessages, (m) => m.topic),
-      sizeInBytes: sumBy(insertMessages, (m) => m.sizeInBytes),
-    });
-    this._blockCache.startTime = this.loadedRanges[0]?.range.start ?? { sec: 0, nsec: 0 };
+    this._rebuildBlockCache();
   }
 
   /** Remove all messages and preloaded ranges. */
@@ -277,5 +277,22 @@ export default class MessageMemoryCache {
    */
   getBlockCache(): BlockCache {
     return this._blockCache;
+  }
+
+  // Rebuilds block cache, interspersing empty blocks where there are time gaps
+  // in our loaded ranges.
+  private _rebuildBlockCache() {
+    const newBlocks: (undefined | MemoryCacheBlock)[] = [];
+    for (let i = 0; i < this.loadedRanges.length; i++) {
+      if (
+        i > 0 &&
+        isLessThan(this.loadedRanges[i - 1]!.range.end, this.loadedRanges[i]!.range.start)
+      ) {
+        newBlocks.push(undefined);
+      }
+      newBlocks.push(this.loadedRanges[i]!.block);
+    }
+    this._blockCache.blocks = newBlocks;
+    this._blockCache.startTime = this.loadedRanges[0]?.range.start ?? { sec: 0, nsec: 0 };
   }
 }
