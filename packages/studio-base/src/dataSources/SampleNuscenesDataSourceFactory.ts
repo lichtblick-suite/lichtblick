@@ -30,6 +30,7 @@ class SampleNuscenesDataSourceFactory implements IDataSourceFactory {
     });
 
     return new RandomAccessPlayer(messageCacheProvider, {
+      isSampleDataSource: true,
       metricsCollector: args.metricsCollector,
       seekToTime: getSeekToTime(),
       name: "Adapted from nuScenes dataset.\nCopyright © 2020 nuScenes.\nhttps://www.nuscenes.org/terms-of-use",
