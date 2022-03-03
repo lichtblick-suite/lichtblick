@@ -8,7 +8,7 @@
       "headers": [
         { "key": "X-Frame-Options", "value": "DENY" },
         { "key": "Referrer-Policy", "value": "origin" },
-        { "key": "Content-Security-Policy", "value": "base-uri 'self'; upgrade-insecure-requests;" }
+        { "key": "Content-Security-Policy", "value": "base-uri 'self';" }
       ]
     },
     {
