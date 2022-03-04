@@ -11,8 +11,9 @@ import type PinholeCameraModel from "./lib/PinholeCameraModel";
 export type DefaultConfig = {
   cameraTopic: string;
   enabledMarkerTopics: string[];
-  customMarkerTopicOptions?: string[];
   synchronize: boolean;
+  /** @deprecated */
+  customMarkerTopicOptions?: string[];
 };
 
 export type Config = DefaultConfig & {

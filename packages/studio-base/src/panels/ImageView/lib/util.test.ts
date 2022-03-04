@@ -18,7 +18,6 @@ import {
   getCameraInfoTopic,
   getMarkerOptions,
   getRelatedMarkerTopics,
-  groupTopics,
   buildMarkerData,
   getCameraNamespace,
 } from "./util";
@@ -51,15 +50,12 @@ describe("ImageView", () => {
       { name: "/camera_rear_medium/marker4", datatype: "vision_msgs/ImageMarker" }, // not included because it's for a different camera
       { name: "/unknown_camera/marker5", datatype: "vision_msgs/ImageMarker" },
     ];
-    const allCameraNamespaces = ["/some_camera_topic", "/camera_rear_medium"];
     it("filters and sorts topics relevant to this camera", () => {
       expect(
-        getMarkerOptions(
-          "/some_camera_topic/image_rect_color",
-          allMarkerTopics,
-          allCameraNamespaces,
-          ["visualization_msgs/ImageMarker", "vision_msgs/ImageMarker"],
-        ),
+        getMarkerOptions("/some_camera_topic/image_rect_color", allMarkerTopics, [
+          "visualization_msgs/ImageMarker",
+          "vision_msgs/ImageMarker",
+        ]),
       ).toEqual(["/some_camera_topic/marker1", "/some_camera_topic/marker2"]);
     });
   });
@@ -102,64 +98,6 @@ describe("ImageView", () => {
     });
     it("Returns undefined when encountering a single level topic", () => {
       expect(getCameraNamespace("/camera_back_left")).toEqual(undefined);
-    });
-  });
-
-  describe("groupTopics", () => {
-    const topic = (name: string) => ({ name, datatype: "dummy" });
-
-    it("groups by camera name", () => {
-      expect(
-        groupTopics([
-          topic("/camera_1/foo"),
-          topic("/camera_2/foo"),
-          topic("/camera_1/bar"),
-          topic("/weird_topic"),
-        ]),
-      ).toEqual(
-        new Map([
-          ["/camera_1", [topic("/camera_1/foo"), topic("/camera_1/bar")]],
-          ["/camera_2", [topic("/camera_2/foo")]],
-          ["/weird_topic", [topic("/weird_topic")]],
-        ]),
-      );
-    });
-
-    it("puts /old topics under the correct camera", () => {
-      expect(
-        groupTopics([
-          topic("/camera_1/foo"),
-          topic("/old/camera_2/foo"),
-          topic("/old/camera_1/bar"),
-          topic("/camera_2/old/foo"),
-        ]),
-      ).toEqual(
-        new Map([
-          ["/camera_1", [topic("/camera_1/foo"), topic("/old/camera_1/bar")]],
-          ["/camera_2", [topic("/old/camera_2/foo"), topic("/camera_2/old/foo")]],
-        ]),
-      );
-    });
-
-    it("Separates /studio_source_2 topics", () => {
-      expect(
-        groupTopics([
-          topic("/camera_1/foo"),
-          topic("/camera_1/bar"),
-          topic("/studio_source_2/camera_1/foo"),
-          topic("/studio_source_2/camera_1/bar"),
-          topic("/studio_source_2/camera_2/foo"),
-        ]),
-      ).toEqual(
-        new Map([
-          ["/camera_1", [topic("/camera_1/foo"), topic("/camera_1/bar")]],
-          [
-            "/studio_source_2/camera_1",
-            [topic("/studio_source_2/camera_1/foo"), topic("/studio_source_2/camera_1/bar")],
-          ],
-          ["/studio_source_2/camera_2", [topic("/studio_source_2/camera_2/foo")]],
-        ]),
-      );
     });
   });
 

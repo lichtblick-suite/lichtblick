@@ -58,11 +58,7 @@ const useStyles = makeStyles((theme) => ({
       width: "100%",
       zIndex: 5000,
       backgroundColor: "transparent",
-      pointerEvents: "none",
 
-      "*": {
-        pointerEvents: "auto",
-      },
       "&.hasChildren": {
         left: 0,
         backgroundColor: theme.palette.neutralLighterAlt,

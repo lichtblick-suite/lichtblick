@@ -70,7 +70,6 @@ export function idColorToIndex(id: Uint8ClampedArray): number | undefined {
 export function getMarkerOptions(
   imageTopic: string,
   topics: readonly Topic[],
-  _allCameraNamespaces: string[],
   imageMarkerDatatypes: readonly string[],
 ): string[] {
   const results = [];
@@ -118,21 +117,6 @@ export function getCameraNamespace(topicName: string): string | undefined {
   // Since there is a leading slash in the topicName, splitTopic will always have at least one empty string to start.
   // If we can't find the namespace, return undefined.
   return splitTopic.length > 1 ? splitTopic.join("/") : undefined;
-}
-
-// group topics by the first component of their name
-export function groupTopics(topics: Topic[]): Map<string, Topic[]> {
-  const imageTopicsByNamespace: Map<string, Topic[]> = new Map();
-  for (const topic of topics) {
-    const key = getCameraNamespace(topic.name) ?? topic.name;
-    const vals = imageTopicsByNamespace.get(key);
-    if (vals) {
-      vals.push(topic);
-    } else {
-      imageTopicsByNamespace.set(key, [topic]);
-    }
-  }
-  return imageTopicsByNamespace;
 }
 
 export function buildMarkerData(rawMarkerData: RawMarkerData): MarkerData | undefined {
