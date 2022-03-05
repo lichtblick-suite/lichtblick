@@ -196,16 +196,7 @@ export default class CachedFilelike implements Filelike {
       this._lastResolvedCallbackEnd = range.end;
       const buffer = this._virtualBuffer.slice(range.start, range.end);
 
-      // You can set READ_DELAY=<number> on the command line when testing locally to simulate a slow connection.
-      let delay = 0;
-      if (process.env.READ_DELAY != undefined && process.env.NODE_ENV !== "production") {
-        delay = parseInt(process.env.READ_DELAY);
-        if (isNaN(delay)) {
-          delay = 1000;
-        }
-      }
-      setTimeout(() => resolve(buffer), delay);
-
+      resolve(buffer);
       return false;
     });
 
