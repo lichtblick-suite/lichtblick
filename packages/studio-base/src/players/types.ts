@@ -15,7 +15,6 @@ import { RosMsgDefinition } from "@foxglove/rosmsg";
 import { Time } from "@foxglove/rostime";
 import type { MessageEvent, ParameterValue } from "@foxglove/studio";
 import { GlobalVariables } from "@foxglove/studio-base/hooks/useGlobalVariables";
-import { BlockCache } from "@foxglove/studio-base/randomAccessDataProviders/MemoryCacheDataProvider";
 import {
   AverageThroughput,
   RandomAccessDataProviderStall,
@@ -230,6 +229,20 @@ export type RosValue =
 export type RosObject = Readonly<{
   [property: string]: RosValue;
 }>;
+
+// For each memory block we store the actual messages (grouped by topic), and a total byte size of
+// the underlying ArrayBuffers.
+export type MessageBlock = {
+  readonly messagesByTopic: {
+    readonly [topic: string]: MessageEvent<unknown>[];
+  };
+  readonly sizeInBytes: number;
+};
+
+export type BlockCache = {
+  blocks: readonly (MessageBlock | undefined)[];
+  startTime: Time;
+};
 
 // Contains different kinds of progress indications
 export type Progress = Readonly<{

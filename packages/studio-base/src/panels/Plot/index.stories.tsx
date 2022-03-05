@@ -17,7 +17,7 @@ import { parse as parseMessageDefinition } from "@foxglove/rosmsg";
 import { fromSec } from "@foxglove/rostime";
 import SchemaEditor from "@foxglove/studio-base/components/PanelSettings/SchemaEditor";
 import Plot, { PlotConfig } from "@foxglove/studio-base/panels/Plot";
-import { BlockCache } from "@foxglove/studio-base/randomAccessDataProviders/MemoryCacheDataProvider";
+import { BlockCache } from "@foxglove/studio-base/players/types";
 import PanelSetup, { Fixture, triggerWheel } from "@foxglove/studio-base/stories/PanelSetup";
 import { useReadySignal } from "@foxglove/studio-base/stories/ReadySignalContext";
 import { RosDatatypes } from "@foxglove/studio-base/types/RosDatatypes";

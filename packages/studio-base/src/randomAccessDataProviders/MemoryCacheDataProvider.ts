@@ -24,7 +24,7 @@ import {
   subtract as subtractTimes,
   toNanoSec,
 } from "@foxglove/rostime";
-import { MessageEvent } from "@foxglove/studio-base/players/types";
+import { MessageBlock } from "@foxglove/studio-base/players/types";
 import {
   RandomAccessDataProvider,
   ExtensionPoint,
@@ -56,21 +56,7 @@ export const MAX_BLOCK_SIZE_BYTES = 50e6; // Number of bytes in a block before w
 // See: https://github.com/foxglove/studio/pull/1733
 const DEFAULT_CACHE_SIZE_BYTES = 1.0e9;
 
-// For each memory block we store the actual messages (grouped by topic), and a total byte size of
-// the underlying ArrayBuffers.
-export type MemoryCacheBlock = {
-  readonly messagesByTopic: {
-    readonly [topic: string]: MessageEvent<unknown>[];
-  };
-  readonly sizeInBytes: number;
-};
-
-export type BlockCache = {
-  blocks: readonly (MemoryCacheBlock | undefined)[];
-  startTime: Time;
-};
-
-const EMPTY_BLOCK: MemoryCacheBlock = {
+const EMPTY_BLOCK: MessageBlock = {
   messagesByTopic: {},
   sizeInBytes: 0,
 };
@@ -240,7 +226,7 @@ export default class MemoryCacheDataProvider implements RandomAccessDataProvider
   // The actual blocks that contain the messages. Blocks have a set "width" in terms of nanoseconds
   // since the start time of the log. If a block has some messages for a topic, then by definition
   // it has *all* messages for that topic and timespan.
-  private _blocks: (MemoryCacheBlock | undefined)[] = [];
+  private _blocks: (MessageBlock | undefined)[] = [];
 
   // The start time of the log. Used for computing from and to nanoseconds since the start.
   private _startTime: Time = { sec: 0, nsec: 0 };
@@ -708,7 +694,7 @@ export default class MemoryCacheDataProvider implements RandomAccessDataProvider
 
     // Update our state.
     this._recentBlockRanges = newRecentRanges;
-    const newBlocks: (MemoryCacheBlock | undefined)[] = Array.from({ length: this._blocks.length });
+    const newBlocks: (MessageBlock | undefined)[] = Array.from({ length: this._blocks.length });
 
     for (let blockIndex = 0; blockIndex < this._blocks.length; blockIndex++) {
       if (this._blocks[blockIndex] && blockIndexesToKeep.has(blockIndex)) {

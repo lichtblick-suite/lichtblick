@@ -14,7 +14,7 @@
 import { useCallback } from "react";
 import TestUtils from "react-dom/test-utils";
 
-import { BlockCache } from "@foxglove/studio-base/randomAccessDataProviders/MemoryCacheDataProvider";
+import { BlockCache } from "@foxglove/studio-base/players/types";
 import PanelSetup from "@foxglove/studio-base/stories/PanelSetup";
 import { useReadySignal } from "@foxglove/studio-base/stories/ReadySignalContext";
 

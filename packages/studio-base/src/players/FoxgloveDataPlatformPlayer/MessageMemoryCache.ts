@@ -5,11 +5,7 @@
 import { groupBy, sumBy } from "lodash";
 
 import { areEqual, isGreaterThan, isLessThan, Time, toString } from "@foxglove/rostime";
-import { MessageEvent } from "@foxglove/studio-base/players/types";
-import {
-  BlockCache,
-  MemoryCacheBlock,
-} from "@foxglove/studio-base/randomAccessDataProviders/MemoryCacheDataProvider";
+import { MessageEvent, BlockCache, MessageBlock } from "@foxglove/studio-base/players/types";
 import { Range } from "@foxglove/studio-base/util/ranges";
 
 /** Represents a half-open time interval: [start, end) */
@@ -64,14 +60,14 @@ function getMessagesFromLoadedRange(messages: MessageEvent<unknown>[], requestRa
  * An in-memory cache of preloaded messages over a time range.
  */
 export default class MessageMemoryCache {
-  private _blockCache: { blocks: (undefined | MemoryCacheBlock)[]; startTime: Time } = {
+  private _blockCache: { blocks: (undefined | MessageBlock)[]; startTime: Time } = {
     blocks: [],
     startTime: { sec: 0, nsec: 0 },
   };
   private minTime: Time;
   private maxTime: Time;
   private loadedRanges: Array<{
-    block: MemoryCacheBlock;
+    block: MessageBlock;
     range: TimeRange;
     messages: MessageEvent<unknown>[];
   }> = [];
@@ -282,7 +278,7 @@ export default class MessageMemoryCache {
   // Rebuilds block cache, interspersing empty blocks where there are time gaps
   // in our loaded ranges.
   private _rebuildBlockCache() {
-    const newBlocks: (undefined | MemoryCacheBlock)[] = [];
+    const newBlocks: (undefined | MessageBlock)[] = [];
     for (let i = 0; i < this.loadedRanges.length; i++) {
       if (
         i > 0 &&
