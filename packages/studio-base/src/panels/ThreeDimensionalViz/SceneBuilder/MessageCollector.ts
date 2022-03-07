@@ -44,26 +44,6 @@ class MessageWithLifetime {
     this.receiveTime = receiveTime;
     this.lifetime = lifetime;
   }
-
-  isExpired(currentTime: Time) {
-    if (this.lifetime == undefined) {
-      // Do not expire markers if we can't tell what their lifetime is.
-      // They'll be flushed later if needed (see flush below)
-      return false;
-    }
-    const lifetime: Time = this.lifetime;
-
-    if (areEqual(lifetime, ZERO_TIME)) {
-      // Do not expire markers with infinite lifetime (lifetime == 0)
-      return false;
-    }
-
-    // we use the receive time (clock) instead of the header stamp
-    // to match the behavior of rviz
-    const expiresAt = add(this.receiveTime, lifetime);
-
-    return isGreaterThan(currentTime, expiresAt);
-  }
 }
 
 // used to collect marker and non-marker visualization messages
@@ -151,12 +131,25 @@ export default class MessageCollector {
     const result: ObjectWithInteractionData[] = [];
     this.markers.forEach((marker, key) => {
       // Check if the marker has a lifetime and should be deleted
-      if (marker.isExpired(this.clock)) {
+      const messageStamp =
+        (marker.message as { header?: { stamp?: Time } }).header?.stamp ?? marker.receiveTime;
+      if (MessageCollector.markerIsExpired(marker.lifetime, messageStamp, this.clock)) {
         this.markers.delete(key);
       } else {
         result.push(marker.message);
       }
     });
     return result;
+  }
+
+  static markerIsExpired(
+    lifetime: Time | undefined,
+    messageStamp: Time,
+    currentTime: Time,
+  ): boolean {
+    if (lifetime == undefined || areEqual(lifetime, ZERO_TIME)) {
+      return false;
+    }
+    return isGreaterThan(currentTime, add(messageStamp, lifetime));
   }
 }

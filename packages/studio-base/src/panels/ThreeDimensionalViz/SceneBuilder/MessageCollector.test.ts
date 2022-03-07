@@ -106,10 +106,10 @@ describe("MessageCollector", () => {
     collector.addMarker(marker, getName(marker));
     expect(collector.getMessages()).toHaveLength(1);
 
-    collector.setClock({ sec: 100, nsec: 100 + lifetimeNanos });
+    collector.setClock({ sec: 100, nsec: 90 + lifetimeNanos });
     expect(collector.getMessages()).toHaveLength(1);
 
-    collector.setClock({ sec: 100, nsec: 100 + lifetimeNanos + 1 });
+    collector.setClock({ sec: 100, nsec: 90 + lifetimeNanos + 1 });
     expect(collector.getMessages()).toHaveLength(0);
 
     collector.addMarker(marker, getName(marker));

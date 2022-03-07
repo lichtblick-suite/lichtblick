@@ -14,7 +14,7 @@ import _, { flatten, groupBy, isEqual, keyBy, mapValues, some, xor } from "lodas
 import shallowequal from "shallowequal";
 
 import Log from "@foxglove/log";
-import { Time, add as addTime, fromSec, isGreaterThan, isLessThan, toSec } from "@foxglove/rostime";
+import { Time, fromSec, isGreaterThan } from "@foxglove/rostime";
 import {
   InteractionData,
   Interactive,
@@ -487,6 +487,16 @@ export default class SceneBuilder implements MarkerProvider {
         return;
     }
 
+    // Check if this marker has a non-zero lifetime and is already expired
+    const currentTime = this._clock;
+    if (currentTime) {
+      if (MessageCollector.markerIsExpired(message.lifetime, message.header.stamp, currentTime)) {
+        const markerId = `${message.ns ? message.ns + ":" : ""}${message.id}`;
+        this._setTopicError(topic, `Received expired marker ${markerId}`);
+        return;
+      }
+    }
+
     const color = message.color ?? { r: 0, g: 0, b: 0, a: 0 };
 
     // Allow topic settings to override marker color (see MarkerSettingsEditor.js)
@@ -858,11 +868,7 @@ export default class SceneBuilder implements MarkerProvider {
           continue;
         }
         // If this marker has an expired lifetime, don't render it
-        if (
-          marker.lifetime &&
-          toSec(marker.lifetime) > 0 &&
-          isLessThan(addTime(marker.header.stamp, marker.lifetime), time)
-        ) {
+        if (MessageCollector.markerIsExpired(marker.lifetime, marker.header.stamp, time)) {
           continue;
         }
 
