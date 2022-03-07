@@ -27,6 +27,7 @@ import {
   MessageEvent,
   PlayerStateActiveData,
   SubscribePayload,
+  SubscriptionPreloadType,
 } from "@foxglove/studio-base/players/types";
 
 const log = Log.getLogger(__filename);
@@ -36,6 +37,7 @@ type MessagesReducer<T> = (arg0: T, messages: readonly MessageEvent<unknown>[]) 
 
 type Params<T> = {
   topics: readonly string[];
+  preloadType?: SubscriptionPreloadType;
 
   // Functions called when the reducers change and for each newly received message.
   // The object is assumed to be immutable, so in order to trigger a re-render, the reducers must
@@ -56,6 +58,7 @@ function selectSetSubscriptions(ctx: MessagePipelineContext) {
 export function useMessageReducer<T>(props: Params<T>): T {
   const [id] = useState(() => uuidv4());
   const { type: panelType = undefined } = useContext(PanelContext) ?? {};
+  const { restore, addMessage, addMessages, preloadType = "partial" } = props;
 
   // only one of the add message callbacks should be provided
   if ([props.addMessage, props.addMessages].filter(Boolean).length !== 1) {
@@ -92,8 +95,8 @@ export function useMessageReducer<T>(props: Params<T>): T {
     const requester: SubscribePayload["requester"] =
       panelType != undefined ? { type: "panel", name: panelType } : undefined;
 
-    return requestedTopics.map((topic) => ({ requester, topic }));
-  }, [panelType, requestedTopics]);
+    return requestedTopics.map((topic) => ({ requester, topic, preloadType }));
+  }, [panelType, preloadType, requestedTopics]);
 
   const setSubscriptions = useMessagePipeline(selectSetSubscriptions);
   useEffect(() => setSubscriptions(id, subscriptions), [id, setSubscriptions, subscriptions]);
@@ -103,8 +106,6 @@ export function useMessageReducer<T>(props: Params<T>): T {
 
   // Whenever `subscriptions` change, request a backfill, since we'd like to show fresh data.
   useEffect(() => requestBackfill(), [requestBackfill, subscriptions]);
-
-  const { restore, addMessage, addMessages } = props;
 
   const state = useRef<
     | Readonly<{

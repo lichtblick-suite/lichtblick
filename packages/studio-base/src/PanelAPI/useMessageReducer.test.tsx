@@ -279,8 +279,14 @@ describe("useMessageReducer", () => {
       root.unmount();
     });
     expect(setSubscriptions.mock.calls).toEqual([
-      [expect.any(String), [{ topic: "/foo" }]],
-      [expect.any(String), [{ topic: "/foo" }, { topic: "/bar" }]],
+      [expect.any(String), [{ topic: "/foo", preloadType: "partial", requestor: undefined }]],
+      [
+        expect.any(String),
+        [
+          { topic: "/foo", preloadType: "partial", requestor: undefined },
+          { topic: "/bar", preloadType: "partial", requestor: undefined },
+        ],
+      ],
       [expect.any(String), []],
     ]);
   });
