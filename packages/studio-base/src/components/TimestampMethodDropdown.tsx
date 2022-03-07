@@ -92,7 +92,7 @@ export default function TimestampMethodDropdown(props: Props): JSX.Element {
   );
 
   const timestampMethods = [
-    { label: "Receive time", value: "recieveTime" },
+    { label: "Receive time", value: "receiveTime" },
     { label: "header.stamp", value: "headerStamp" },
   ] as { label: string; value: TimestampMethod }[];
 

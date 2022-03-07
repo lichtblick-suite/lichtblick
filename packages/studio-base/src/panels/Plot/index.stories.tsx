@@ -11,6 +11,7 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
+import { shuffle } from "lodash";
 import { useCallback, useRef } from "react";
 
 import { parse as parseMessageDefinition } from "@foxglove/rosmsg";
@@ -254,6 +255,7 @@ const fixture = {
   topics: [
     { name: "/some_topic/location", datatype: "msgs/PoseDebug" },
     { name: "/some_topic/location_subset", datatype: "msgs/PoseDebug" },
+    { name: "/some_topic/location_shuffled", datatype: "msgs/PoseDebug" },
     { name: "/some_topic/state", datatype: "msgs/State" },
     { name: "/boolean_topic", datatype: "std_msgs/Bool" },
     { name: "/preloaded_topic", datatype: "nonstd_msgs/Float64Stamped" },
@@ -297,6 +299,17 @@ const fixture = {
         sizeInBytes: 0,
       },
     ],
+    // Shuffle the location messages so that they are out of stamp order
+    // This is used in the headerStamp series test to check that the dataset is sorted
+    // prior to rendering. If the dataset is not sorted properly, the plot is jumbled.
+    "/some_topic/location_shuffled": shuffle(
+      locationMessages.map((message) => ({
+        topic: "/some_topic/location_shuffled",
+        receiveTime: message.header.stamp,
+        message,
+        sizeInBytes: 0,
+      })),
+    ),
   },
   progress: { messageCache },
 };
@@ -461,6 +474,7 @@ TimestampMethodHeaderStamp.storyName = "timestampMethod: headerStamp";
 export function TimestampMethodHeaderStamp(): JSX.Element {
   const readySignal = useReadySignal({ count: 3 });
   const pauseFrame = useCallback(() => readySignal, [readySignal]);
+
   return (
     <PlotWrapper
       pauseFrame={pauseFrame}
@@ -468,7 +482,7 @@ export function TimestampMethodHeaderStamp(): JSX.Element {
         ...exampleConfig,
         paths: [
           {
-            value: "/some_topic/location.pose.velocity",
+            value: "/some_topic/location_shuffled.pose.velocity",
             enabled: true,
             timestampMethod: "headerStamp",
           },
