@@ -948,6 +948,22 @@ export default class SceneBuilder implements MarkerProvider {
         break;
     }
 
+    // If this marker has fewer colors specified than the number of points,
+    // use Marker.color for the remaining points
+    const markerWithPoints = marker as { points?: Point[]; colors?: Color[]; color?: Color };
+    if (
+      markerWithPoints.points &&
+      markerWithPoints.points.length > 0 &&
+      markerWithPoints.colors &&
+      markerWithPoints.colors.length > 0 &&
+      markerWithPoints.colors.length < markerWithPoints.points.length
+    ) {
+      const color = markerWithPoints.color ?? { r: 0, g: 0, b: 0, a: 1 };
+      while (markerWithPoints.colors.length < markerWithPoints.points.length) {
+        markerWithPoints.colors.push(color);
+      }
+    }
+
     // allow topic settings to override renderable marker command (see MarkerSettingsEditor.js)
     const { overrideCommand } = this._settingsByKey[`t:${topic.name}`] ?? {};
 

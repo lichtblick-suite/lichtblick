@@ -30,6 +30,7 @@ import {
   SphereMarker,
   TextMarker,
   TF,
+  TriangleListMarker,
 } from "@foxglove/studio-base/types/Messages";
 import { hexToColorObj } from "@foxglove/studio-base/util/colorUtils";
 import { FOXGLOVE_GRID_TOPIC } from "@foxglove/studio-base/util/globalConstants";
@@ -610,6 +611,37 @@ export function Markers(): JSX.Element {
     sizeInBytes: 0,
   };
 
+  const triangleList: MessageEvent<TriangleListMarker> = {
+    topic: "/markers",
+    receiveTime: { sec: 10, nsec: 0 },
+    message: {
+      header: { seq: 0, stamp: { sec: 0, nsec: 0 }, frame_id: "sensor" },
+      id: `triangleList`,
+      ns: "",
+      type: 11,
+      action: 0,
+      frame_locked: false,
+      pose: {
+        position: { x: 1, y: -1, z: 0 },
+        orientation: { x: 0, y: 0, z: 0, w: 1 },
+      },
+      scale: { x: 0.5, y: 0.5, z: 0.5 },
+      color: makeColor("#3f51b5", 0.5),
+      points: [
+        { x: 0, y: 0.25, z: 0 },
+        { x: 0.25, y: -0.25, z: 0 },
+        { x: -0.25, y: -0.25, z: 0 },
+
+        { x: 0.25, y: -0.25, z: 0 },
+        { x: -0.25, y: -0.25, z: 0 },
+        { x: 0, y: -0.5, z: 0 },
+      ],
+      colors: [makeColor("#f44336", 0.5), makeColor("#4caf50", 0.5), makeColor("#2196f3", 0.5)],
+      lifetime: { sec: 0, nsec: 0 },
+    },
+    sizeInBytes: 0,
+  };
+
   const fixture = useDelayedFixture({
     datatypes,
     topics,
@@ -627,6 +659,7 @@ export function Markers(): JSX.Element {
         points,
         text,
         mesh,
+        triangleList,
       ],
     },
     capabilities: [],
