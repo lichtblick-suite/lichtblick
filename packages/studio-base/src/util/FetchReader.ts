@@ -92,10 +92,7 @@ export default class FetchReader extends EventEmitter<EventTypes> {
               this.emit("end");
               return;
             }
-            // TypeScript doesn't know that value is only undefined when value done is true
-            if (value != undefined) {
-              this.emit("data", value);
-            }
+            this.emit("data", value);
             this.read();
           })
           .catch((unk) => {

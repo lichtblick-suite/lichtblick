@@ -22,7 +22,7 @@
   },
   "devDependencies": {
     "@types/zstd-codec": "workspace:*",
-    "typescript": "4.5.5"
+    "typescript": "4.6.2"
   },
   "dependencies": {
     "@foxglove/wasm-bz2": "0.1.0",

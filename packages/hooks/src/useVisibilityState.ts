@@ -4,7 +4,7 @@
 import { useState, useEffect } from "react";
 
 /** Returns the value of `document.visibilityState` and tracks changes. */
-export default function useVisibilityState(): VisibilityState {
+export default function useVisibilityState(): DocumentVisibilityState {
   const [visibility, setVisibility] = useState(document.visibilityState);
   useEffect(() => {
     // Update if state changed between the initial call and this effect

@@ -69,7 +69,7 @@ export default function DocumentDropListener(props: Props): JSX.Element {
       if (directories.length === 0) {
         for (const promise of handlePromises) {
           const fileSystemHandle = await promise;
-          if (fileSystemHandle?.kind === "file") {
+          if (fileSystemHandle instanceof FileSystemFileHandle) {
             handles.push(fileSystemHandle);
           }
         }
