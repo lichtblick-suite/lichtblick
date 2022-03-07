@@ -29,7 +29,6 @@ import {
   CylinderMarker,
   GlLineListMarker,
   InstancedLineListMarker,
-  LaserScan,
   LineListMarker,
   LineStripMarker,
   MeshMarker,
@@ -76,7 +75,6 @@ class MockMarkerCollector implements MarkerCollector {
   triangleList(_arg0: TriangleListMarker): void {}
   grid(_arg0: OccupancyGridMessage): void {}
   pointcloud(_arg0: PointCloud): void {}
-  laserScan(_arg0: LaserScan): void {}
   linedConvexHull(_arg0: LineListMarker | LineStripMarker): void {}
   instancedLineList(_arg0: InstancedLineListMarker): void {}
   glLineList(arg0: Readonly<{ color: Float32Array; points: Float32Array }>): void {

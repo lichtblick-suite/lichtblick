@@ -104,7 +104,6 @@ function getMarkers({
     grid: (o) => markers.grid.push(o as unknown as Interactive<BaseMarker>),
     instancedLineList: (o) =>
       markers.instancedLineList.push(o as unknown as Interactive<BaseMarker>),
-    laserScan: (o) => markers.laserScan.push(o as unknown as Interactive<BaseMarker>),
     linedConvexHull: (o) =>
       markers.linedConvexHull.push(o as unknown as Interactive<LineListMarker | LineStripMarker>),
     lineList: (o) => markers.lineList.push(o as Interactive<LineListMarker>),
@@ -168,7 +167,6 @@ function World(
     glText: [],
     grid: [],
     instancedLineList: [],
-    laserScan: [],
     linedConvexHull: [],
     lineList: [],
     lineStrip: [],
@@ -194,6 +192,7 @@ function World(
     fixedFrame,
     time: currentTime,
   });
+
   const markersByType = markersRef.current;
   const { text = [] } = markersByType;
   const processedMarkersByType = {

@@ -27,7 +27,6 @@ import {
   TriangleListMarker,
   OccupancyGridMessage,
   PointCloud,
-  LaserScan,
   InstancedLineListMarker,
   ColorMarker,
   PoseStamped,
@@ -67,7 +66,6 @@ export interface MarkerCollector {
   triangleList(arg0: TriangleListMarker): void;
   grid(arg0: OccupancyGridMessage): void;
   pointcloud(arg0: PointCloud): void;
-  laserScan(arg0: LaserScan): void;
   linedConvexHull(arg0: LineListMarker | LineStripMarker): void;
   instancedLineList(arg0: InstancedLineListMarker): void;
   glLineList(arg0: GlLineListMarker): void;

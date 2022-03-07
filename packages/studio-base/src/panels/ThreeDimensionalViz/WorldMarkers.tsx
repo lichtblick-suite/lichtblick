@@ -29,7 +29,6 @@ import { GLTextMarker } from "@foxglove/studio-base/panels/ThreeDimensionalViz/S
 import {
   Cover,
   OccupancyGrids,
-  LaserScans,
   PointClouds,
   PoseMarkers,
   LinedConvexHulls,
@@ -73,7 +72,6 @@ export type InteractiveMarkersByType = {
   glText: Interactive<GLTextMarker>[];
   grid: Interactive<BaseMarker>[];
   instancedLineList: Interactive<BaseMarker>[];
-  laserScan: Interactive<BaseMarker>[];
   linedConvexHull: Interactive<LineListMarker | LineStripMarker>[];
   lineList: Interactive<LineListMarker>[];
   lineStrip: Interactive<LineStripMarker>[];
@@ -157,7 +155,6 @@ export default function WorldMarkers({
     glText,
     grid,
     instancedLineList,
-    laserScan,
     linedConvexHull,
     lineList,
     lineStrip,
@@ -213,7 +210,6 @@ export default function WorldMarkers({
       <Cylinders layerIndex={layerIndex}>{cylinder}</Cylinders>
       <Cubes layerIndex={layerIndex}>{[...cube, ...cubeList]}</Cubes>
       <PoseMarkers layerIndex={layerIndex} markers={poseMarker} />
-      <LaserScans layerIndex={layerIndex}>{laserScan}</LaserScans>
       {glTextAtlasInfo.status === "LOADED" && (
         <GLText
           layerIndex={(layerIndex as number) + LAYER_INDEX_TEXT}

@@ -18,7 +18,6 @@ import UrdfSettingsEditor from "@foxglove/studio-base/panels/ThreeDimensionalViz
 import { TopicSettingsEditorProps } from "@foxglove/studio-base/panels/ThreeDimensionalViz/TopicSettingsEditor/types";
 import { FOXGLOVE_GRID_DATATYPE, URDF_DATATYPE } from "@foxglove/studio-base/util/globalConstants";
 
-import LaserScanSettingsEditor from "./LaserScanSettingsEditor";
 import MarkerSettingsEditor from "./MarkerSettingsEditor";
 import PointCloudSettingsEditor from "./PointCloudSettingsEditor";
 import PoseSettingsEditor from "./PoseSettingsEditor";
@@ -42,9 +41,9 @@ export function topicSettingsEditorForDatatype(datatype: string):
     ["geometry_msgs/PoseStamped", PoseSettingsEditor],
     ["geometry_msgs/msg/PoseStamped", PoseSettingsEditor],
     ["ros.geometry_msgs.PoseStamped", PoseSettingsEditor],
-    ["sensor_msgs/LaserScan", LaserScanSettingsEditor],
-    ["sensor_msgs/msg/LaserScan", LaserScanSettingsEditor],
-    ["ros.sensor_msgs.LaserScan", LaserScanSettingsEditor],
+    ["sensor_msgs/LaserScan", PointCloudSettingsEditor],
+    ["sensor_msgs/msg/LaserScan", PointCloudSettingsEditor],
+    ["ros.sensor_msgs.LaserScan", PointCloudSettingsEditor],
     ["visualization_msgs/Marker", MarkerSettingsEditor],
     ["visualization_msgs/msg/Marker", MarkerSettingsEditor],
     ["ros.visualization_msgs.Marker", MarkerSettingsEditor],
