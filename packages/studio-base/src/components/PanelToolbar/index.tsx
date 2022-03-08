@@ -55,11 +55,14 @@ const useStyles = makeStyles((theme) => ({
       // leave some room for possible scrollbar
       paddingRight: 8,
       top: 0,
-      width: "100%",
       zIndex: 5000,
       backgroundColor: "transparent",
 
       "&.hasChildren": {
+        // If the toolbar has children, set the width to 100% to take up the entire panel width.
+        // If the toolbar does not have children, then the width should be only the controls
+        // so the div does not interfere with other panel elements.
+        width: "100%",
         left: 0,
         backgroundColor: theme.palette.neutralLighterAlt,
       },
