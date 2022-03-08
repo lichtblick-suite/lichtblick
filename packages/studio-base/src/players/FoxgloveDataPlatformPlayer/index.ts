@@ -344,7 +344,6 @@ export default class FoxgloveDataPlatformPlayer implements Player {
       const startTime = this._currentTime;
       const endTime = clampTime(add(startTime, fromMillis(readMs)), this._start, this._end);
       if (this._subscriptions.partial.length > 0) {
-        this._startPreloadTaskIfNeeded("partial");
         let messages;
         while (
           !(messages = this._caches.partial.getMessages({
@@ -352,6 +351,7 @@ export default class FoxgloveDataPlatformPlayer implements Player {
             end: endTime,
           }))
         ) {
+          this._startPreloadTaskIfNeeded("partial");
           log.debug("Waiting for more messages");
           // Wait for new messages to be loaded
           await (this._loadedMoreMessages = signal());
@@ -469,9 +469,17 @@ export default class FoxgloveDataPlatformPlayer implements Player {
         this._addProblem("stream-error", { message: error.message, error, severity: "error" });
       })
       .finally(() => {
+        log.debug("Ending preload task", startTime, endTime);
         if (this._currentPreloadTasks[preloadType] === thisTask) {
           this._currentPreloadTasks[preloadType] = undefined;
         }
+        // Wake up any waiters that may have been waiting for more messages. While there may be no
+        // more messages available (since we would've already woken them up to consume messages
+        // inside the `for await` loop above), it's important that we wake them up *after*
+        // `this._currentPreloadTasks[preloadType] = undefined`, so they can call
+        // `_startPreloadTaskIfNeeded` again and have it actually start a new task.
+        this._loadedMoreMessages?.resolve();
+        this._loadedMoreMessages = undefined;
       });
 
     this._emitState();
