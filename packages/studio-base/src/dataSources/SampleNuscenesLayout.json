@@ -9,12 +9,7 @@
       "customMarkerTopicOptions": [],
       "transformMarkers": false,
       "synchronize": false,
-      "mode": "fit",
-      "zoom": 1.467091317737759,
-      "pan": {
-        "x": -18.766339672385854,
-        "y": 3.9962119425323834
-      }
+      "mode": "fit"
     },
     "ImageViewPanel!15kmj7r": {
       "cameraTopic": "/CAM_FRONT/image_rect_compressed",
@@ -25,12 +20,7 @@
       "customMarkerTopicOptions": [],
       "transformMarkers": false,
       "synchronize": false,
-      "mode": "fit",
-      "zoom": 1.1281780995019715,
-      "pan": {
-        "x": 9.510604159161662,
-        "y": -4.4608086865532295
-      }
+      "mode": "fit"
     },
     "ImageViewPanel!1jn49st": {
       "cameraTopic": "/CAM_FRONT_RIGHT/image_rect_compressed",
@@ -41,86 +31,43 @@
       "customMarkerTopicOptions": [],
       "transformMarkers": false,
       "synchronize": false,
-      "mode": "fit",
-      "zoom": 1.397125784786731,
-      "pan": {
-        "x": 33.01238310720072,
-        "y": -0.04121223476559699
-      }
-    },
-    "ImageViewPanel!1aws3fn": {
-      "cameraTopic": "/CAM_BACK_RIGHT/image_rect_compressed",
-      "enabledMarkerTopics": [
-        "/CAM_BACK_RIGHT/image_markers_annotations",
-        "/CAM_BACK_RIGHT/image_markers_lidar"
-      ],
-      "customMarkerTopicOptions": [],
-      "transformMarkers": false,
-      "synchronize": false,
-      "mode": "fit",
-      "zoom": 1.5682162885365147,
-      "pan": {
-        "x": -66.28845425754514,
-        "y": -3.3957787232336063
-      }
-    },
-    "ImageViewPanel!41uf7ue": {
-      "cameraTopic": "/CAM_BACK/image_rect_compressed",
-      "enabledMarkerTopics": [
-        "/CAM_BACK/image_markers_annotations",
-        "/CAM_BACK/image_markers_lidar"
-      ],
-      "customMarkerTopicOptions": [],
-      "transformMarkers": false,
-      "synchronize": false,
-      "mode": "fit",
-      "zoom": 1.105727355321881,
-      "pan": {
-        "x": -0.3391766147215005,
-        "y": 2.5374565277251424
-      }
-    },
-    "ImageViewPanel!12q54st": {
-      "cameraTopic": "/CAM_BACK_LEFT/image_rect_compressed",
-      "enabledMarkerTopics": [
-        "/CAM_BACK_LEFT/image_markers_annotations",
-        "/CAM_BACK_LEFT/image_markers_lidar"
-      ],
-      "customMarkerTopicOptions": [],
-      "transformMarkers": false,
-      "synchronize": false,
-      "mode": "fit",
-      "zoom": 1.4090960094122935,
-      "pan": {
-        "x": 62.15906795764468,
-        "y": 5.818192018824586
-      }
+      "mode": "fit"
     },
     "3D Panel!3bempa7": {
       "checkedKeys": [
         "name:Topics",
-        "t:/tf",
-        "ns:/tf:CAM_FRONT",
+        "ns:/tf:base_link",
         "ns:/tf:CAM_BACK",
-        "t:/map",
+        "ns:/tf:CAM_FRONT",
         "t:/LIDAR_TOP",
-        "t:/markers/annotations"
+        "t:/map",
+        "t:/markers/annotations",
+        "t:/pose",
+        "t:/tf"
       ],
-      "expandedKeys": ["name:Topics", "t:/tf"],
+      "expandedKeys": ["name:Topics"],
       "followMode": "follow",
       "cameraState": {
-        "distance": 6.607395635353808,
+        "distance": 30,
         "perspective": true,
-        "phi": 1.3081824565300704,
-        "targetOffset": [7.754356358745841, -0.14215463076571247, 0],
-        "thetaOffset": 1.5943902835924675,
+        "phi": 1.0099838922608053,
+        "targetOffset": [3.552551884097018, 0.17283719439514628, 0],
+        "thetaOffset": 0.8495002225312027,
         "fovy": 0.7853981633974483,
         "near": 0.01,
         "far": 5000
       },
       "modifiedNamespaceTopics": ["/tf"],
       "pinTopics": false,
-      "settingsByKey": {},
+      "settingsByKey": {
+        "t:/pose": {
+          "size": {
+            "headLength": 0.5,
+            "headWidth": 2,
+            "shaftWidth": 2
+          }
+        }
+      },
       "autoSyncCameraState": false,
       "autoTextBackgroundColor": true,
       "diffModeEnabled": true,
@@ -255,33 +202,19 @@
           "title": "Perception",
           "layout": {
             "first": {
-              "first": {
-                "first": "ImageViewPanel!1r5tdvh",
-                "second": {
-                  "first": "ImageViewPanel!15kmj7r",
-                  "second": "ImageViewPanel!1jn49st",
-                  "direction": "row",
-                  "splitPercentage": 58.02861685214624
-                },
-                "direction": "row",
-                "splitPercentage": 28.95164136957289
-              },
+              "first": "ImageViewPanel!1r5tdvh",
               "second": {
-                "first": "ImageViewPanel!1aws3fn",
-                "second": {
-                  "first": "ImageViewPanel!41uf7ue",
-                  "second": "ImageViewPanel!12q54st",
-                  "direction": "row",
-                  "splitPercentage": 58.02861685214624
-                },
+                "first": "ImageViewPanel!15kmj7r",
+                "second": "ImageViewPanel!1jn49st",
                 "direction": "row",
-                "splitPercentage": 28.95164136957289
+                "splitPercentage": 50
               },
-              "direction": "column"
+              "direction": "row",
+              "splitPercentage": 33.333
             },
             "second": "3D Panel!3bempa7",
             "direction": "column",
-            "splitPercentage": 69.84126984126983
+            "splitPercentage": 30
           }
         },
         {
@@ -290,7 +223,7 @@
             "first": "map!2vkib4e",
             "second": "3D Panel!4ey2b8s",
             "direction": "row",
-            "splitPercentage": 30.4403832219628
+            "splitPercentage": 30
           }
         },
         {
@@ -299,7 +232,7 @@
             "first": "Plot!2pb7zl7",
             "second": "Plot!4792hqu",
             "direction": "column",
-            "splitPercentage": 50.3257328990228
+            "splitPercentage": 50
           }
         },
         {
@@ -310,20 +243,20 @@
                 "first": "StateTransitions!3i4dk1l",
                 "second": "DiagnosticSummary!3equ26v",
                 "direction": "column",
-                "splitPercentage": 44.927536231884055
+                "splitPercentage": 45
               },
               "second": "DiagnosticStatusPanel!4bdyip2",
               "direction": "column",
-              "splitPercentage": 40.828402366863905
+              "splitPercentage": 40
             },
             "second": {
               "first": "SourceInfo!7dc2bd",
               "second": "RawMessages!21ab95j",
               "direction": "column",
-              "splitPercentage": 59.81479888764657
+              "splitPercentage": 60
             },
             "direction": "row",
-            "splitPercentage": 48.80750465900287
+            "splitPercentage": 50
           }
         }
       ]
