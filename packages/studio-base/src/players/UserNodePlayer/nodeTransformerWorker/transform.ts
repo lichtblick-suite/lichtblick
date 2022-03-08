@@ -185,23 +185,6 @@ export const getOutputTopic = (nodeData: NodeData): NodeData => {
 };
 
 export const validateInputTopics = (nodeData: NodeData, topics: Topic[]): NodeData => {
-  const badInputTopic = nodeData.inputTopics.find((topic) =>
-    topic.startsWith(DEFAULT_STUDIO_NODE_PREFIX),
-  );
-  if (badInputTopic != undefined) {
-    const error = {
-      severity: DiagnosticSeverity.Error,
-      message: `Input "${badInputTopic}" cannot equal another node's output.`,
-      source: "InputTopicsChecker",
-      code: ErrorCodes.InputTopicsChecker.CIRCULAR_IMPORT,
-    };
-
-    return {
-      ...nodeData,
-      diagnostics: [...nodeData.diagnostics, error],
-    };
-  }
-
   const { inputTopics } = nodeData;
   const activeTopics = topics.map(({ name }) => name);
   const diagnostics = [];
@@ -222,25 +205,6 @@ export const validateInputTopics = (nodeData: NodeData, topics: Topic[]): NodeDa
   };
 };
 
-export const validateOutputTopic = (nodeData: NodeData): NodeData => {
-  const { outputTopic } = nodeData;
-  if (!outputTopic.startsWith(DEFAULT_STUDIO_NODE_PREFIX)) {
-    return {
-      ...nodeData,
-      diagnostics: [
-        ...nodeData.diagnostics,
-        {
-          severity: DiagnosticSeverity.Error,
-          message: `Output "${outputTopic}" must start with "${DEFAULT_STUDIO_NODE_PREFIX}"`,
-          source: Sources.OutputTopicChecker,
-          code: ErrorCodes.OutputTopicChecker.BAD_PREFIX,
-        },
-      ],
-    };
-  }
-  return nodeData;
-};
-
 // The compile step is currently used for generating syntactic/semantic errors. In the future, it
 // will be leveraged to:
 // - Generate the AST
@@ -248,23 +212,8 @@ export const validateOutputTopic = (nodeData: NodeData): NodeData => {
 export const compile = (nodeData: NodeData): NodeData => {
   const { sourceCode, rosLib, typesLib } = nodeData;
 
-  // If a node name does not start with a forward slash, the compiler host will
-  // not be able to match the correct filename.
-  if (!nodeData.name.startsWith(DEFAULT_STUDIO_NODE_PREFIX)) {
-    const error: Diagnostic = {
-      severity: DiagnosticSeverity.Error,
-      message: `The filename of your node "${nodeData.name}" must start with "/studio_node/."`,
-      source: Sources.Other,
-      code: ErrorCodes.Other.FILENAME,
-    };
-    return {
-      ...nodeData,
-      diagnostics: [...nodeData.diagnostics, error],
-    };
-  }
-
   const options: ts.CompilerOptions = baseCompilerOptions;
-  const nodeFileName = `${nodeData.name}.ts`;
+  const nodeFileName = "/studio_node/index.ts";
   const projectConfig = getNodeProjectConfig();
   const projectCode = new Map<string, string>();
 
@@ -306,7 +255,7 @@ export const compile = (nodeData: NodeData): NodeData => {
     },
     writeFile: (name: string, data: string) => {
       codeEmitted = true;
-      if (name === `${nodeData.name}.js`) {
+      if (name === "/studio_node/index.js") {
         transpiledCode = data;
       } else {
         // It's one of our utility files
@@ -470,7 +419,6 @@ const transform = (args: TransformArgs): NodeData => {
 
   const transformer = compose(
     getOutputTopic,
-    validateOutputTopic,
     compile,
     getInputTopics,
     validateInputTopics,

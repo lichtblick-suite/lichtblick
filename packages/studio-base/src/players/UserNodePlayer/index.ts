@@ -10,7 +10,7 @@
 //   This source code is licensed under the Apache License, Version 2.0,
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
-import { isEqual, groupBy, partition } from "lodash";
+import { isEqual } from "lodash";
 import memoizeWeak from "memoize-weak";
 import shallowequal from "shallowequal";
 import { v4 as uuidv4 } from "uuid";
@@ -51,7 +51,6 @@ import { RosDatatypes } from "@foxglove/studio-base/types/RosDatatypes";
 import { UserNode, UserNodes } from "@foxglove/studio-base/types/panels";
 import Rpc from "@foxglove/studio-base/util/Rpc";
 import { basicDatatypes, foxgloveDatatypes } from "@foxglove/studio-base/util/datatypes";
-import { DEFAULT_STUDIO_NODE_PREFIX } from "@foxglove/studio-base/util/globalConstants";
 
 const log = Log.getLogger(__filename);
 
@@ -86,7 +85,7 @@ export default class UserNodePlayer implements Player {
   private _memoizedNodeTopics: readonly Topic[] = [];
 
   private _subscriptions: SubscribePayload[] = [];
-  private _validTopics = new Set<string>();
+  private _nodeSubscriptions = new Set<string>();
   private _userNodes: UserNodes = {};
 
   // listener for state updates
@@ -216,7 +215,7 @@ export default class UserNodePlayer implements Player {
       const messagePromises = [];
       for (const nodeRegistration of nodeRegistrations) {
         if (
-          this._validTopics.has(nodeRegistration.output.name) &&
+          this._nodeSubscriptions.has(nodeRegistration.output.name) &&
           nodeRegistration.inputs.includes(message.topic)
         ) {
           const messagePromise = nodeRegistration.processMessage(message, globalVariables);
@@ -511,9 +510,6 @@ export default class UserNodePlayer implements Player {
   // - When a user node is updated, added or deleted
   // - When we seek (in order to reset state)
   // - When a new child player is added
-  //
-  // For the time being, resetWorkers is a catchall for these circumstances. As
-  // performance bottlenecks are identified, it will be subject to change.
   private async _resetWorkers(): Promise<void> {
     if (!this._lastPlayerStateActiveData) {
       return;
@@ -546,34 +542,62 @@ export default class UserNodePlayer implements Player {
       ),
     );
 
-    // Filter out nodes with compilation errors
-    const nodeRegistrations: Array<NodeRegistration> = allNodeRegistrations.filter(
-      ({ nodeData, nodeId }) => {
-        const hasError = hasTransformerErrors(nodeData);
-        if (hasError) {
-          this._setUserNodeDiagnostics(nodeId, nodeData.diagnostics);
-        }
-        return !hasError;
-      },
+    const validNodeRegistrations: NodeRegistration[] = [];
+    const playerTopics = new Set(this._lastPlayerStateActiveData.topics.map((topic) => topic.name));
+    const allNodeOutputs = new Set(
+      allNodeRegistrations.map(({ nodeData }) => nodeData.outputTopic),
     );
+    const seenNodeOutputs = new Set<string>();
 
-    // Create diagnostic errors if more than one node outputs to the same topic
-    const nodesByOutputTopic = groupBy(nodeRegistrations, ({ output }) => output.name);
-    const [validNodeRegistrations, duplicateNodeRegistrations] = partition(
-      nodeRegistrations,
-      (nodeReg) => nodeReg === nodesByOutputTopic[nodeReg.output.name]?.[0],
-    );
-    duplicateNodeRegistrations.forEach(({ nodeId, nodeData }) => {
-      this._setUserNodeDiagnostics(nodeId, [
-        ...nodeData.diagnostics,
-        {
-          severity: DiagnosticSeverity.Error,
-          message: `Output "${nodeData.outputTopic}" must be unique`,
-          source: Sources.OutputTopicChecker,
-          code: ErrorCodes.OutputTopicChecker.NOT_UNIQUE,
-        },
-      ]);
-    });
+    for (const nodeRegistration of allNodeRegistrations) {
+      const { nodeData, nodeId } = nodeRegistration;
+
+      // Filter out nodes with compilation errors
+      if (hasTransformerErrors(nodeData)) {
+        this._setUserNodeDiagnostics(nodeId, nodeData.diagnostics);
+        continue;
+      }
+
+      // Create diagnostic errors if more than one node outputs to the same topic
+      if (seenNodeOutputs.has(nodeData.outputTopic)) {
+        this._setUserNodeDiagnostics(nodeId, [
+          ...nodeData.diagnostics,
+          {
+            severity: DiagnosticSeverity.Error,
+            message: `Output "${nodeData.outputTopic}" must be unique`,
+            source: Sources.OutputTopicChecker,
+            code: ErrorCodes.OutputTopicChecker.NOT_UNIQUE,
+          },
+        ]);
+        continue;
+      }
+      seenNodeOutputs.add(nodeData.outputTopic);
+
+      // Create diagnostic errors if node outputs overlap with real topics
+      if (playerTopics.has(nodeData.outputTopic)) {
+        this._setUserNodeDiagnostics(nodeId, [
+          ...nodeData.diagnostics,
+          {
+            severity: DiagnosticSeverity.Error,
+            message: `Output topic "${nodeData.outputTopic}" is already present in the data source`,
+            source: Sources.OutputTopicChecker,
+            code: ErrorCodes.OutputTopicChecker.EXISTING_TOPIC,
+          },
+        ]);
+        continue;
+      }
+
+      // Throw if nodes use other nodes' outputs as inputs. We should never get here because we
+      // already prevent outputs from being the same as real topics in the data source, and we
+      // already filter out input topics that aren't present in the data source.
+      for (const input of nodeData.inputTopics) {
+        if (allNodeOutputs.has(input)) {
+          throw new Error(`Input "${input}" cannot equal another node's output`);
+        }
+      }
+
+      validNodeRegistrations.push(nodeRegistration);
+    }
 
     this._nodeRegistrations = validNodeRegistrations;
     const nodeTopics = this._nodeRegistrations.map(({ output }) => output);
@@ -728,39 +752,32 @@ export default class UserNodePlayer implements Player {
   setSubscriptions(subscriptions: SubscribePayload[]): void {
     this._subscriptions = subscriptions;
 
-    const mappedTopics: string[] = [];
+    const nodeSubscriptions = new Set<string>();
     const realTopicSubscriptions: SubscribePayload[] = [];
-    const nodeSubscriptions: SubscribePayload[] = [];
     for (const subscription of subscriptions) {
-      // For performance, only check topics that start with DEFAULT_STUDIO_NODE_PREFIX.
-      if (!subscription.topic.startsWith(DEFAULT_STUDIO_NODE_PREFIX)) {
-        realTopicSubscriptions.push(subscription);
-        continue;
-      }
-
-      nodeSubscriptions.push(subscription);
-
       // When subscribing to the same node multiple times, only subscribe to the underlying
       // topics once. This is not strictly necessary, but it makes debugging a bit easier.
-      if (mappedTopics.includes(subscription.topic)) {
+      if (nodeSubscriptions.has(subscription.topic)) {
         continue;
       }
-      mappedTopics.push(subscription.topic);
 
       const nodeRegistration = this._nodeRegistrations.find(
         (info) => info.output.name === subscription.topic,
       );
-      if (nodeRegistration) {
-        for (const inputTopic of nodeRegistration.inputs) {
-          realTopicSubscriptions.push({
-            topic: inputTopic,
-            requester: { type: "node", name: nodeRegistration.output.name },
-          });
-        }
+      if (!nodeRegistration) {
+        realTopicSubscriptions.push(subscription);
+        continue;
+      }
+      nodeSubscriptions.add(subscription.topic);
+      for (const inputTopic of nodeRegistration.inputs) {
+        realTopicSubscriptions.push({
+          topic: inputTopic,
+          requester: { type: "node", name: nodeRegistration.output.name },
+        });
       }
     }
 
-    this._validTopics = new Set(nodeSubscriptions.map((sub) => sub.topic));
+    this._nodeSubscriptions = nodeSubscriptions;
     this._player.setSubscriptions(realTopicSubscriptions);
   }
 

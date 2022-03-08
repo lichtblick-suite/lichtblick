@@ -31,7 +31,6 @@ export const Sources = {
   InputTopicsChecker: "InputTopicsChecker",
   OutputTopicChecker: "OutputTopicChecker",
   Runtime: "Runtime",
-  Other: "Other",
 };
 
 export const ErrorCodes = {
@@ -59,18 +58,14 @@ export const ErrorCodes = {
   },
   InputTopicsChecker: {
     NO_TOPIC_AVAIL: 1,
-    CIRCULAR_IMPORT: 2,
-    NO_INPUTS_EXPORT: 3,
-    EMPTY_INPUTS_EXPORT: 4,
-    BAD_INPUTS_TYPE: 5,
+    NO_INPUTS_EXPORT: 2,
+    EMPTY_INPUTS_EXPORT: 3,
+    BAD_INPUTS_TYPE: 4,
   },
   OutputTopicChecker: {
     NO_OUTPUTS: 1,
-    BAD_PREFIX: 2,
-    NOT_UNIQUE: 3,
-  },
-  Other: {
-    FILENAME: 1,
+    NOT_UNIQUE: 2,
+    EXISTING_TOPIC: 3,
   },
 };
 

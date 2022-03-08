@@ -42,7 +42,7 @@ const DiagnosticsSection = ({ diagnostics }: Props): ReactElement => {
   };
 
   return diagnostics.length > 0 ? (
-    <ul>
+    <ul style={{ listStyle: "none", padding: 0 }}>
       {diagnostics.map(({ severity, message, source, startColumn, startLineNumber }, i) => {
         const severityLabel =
           (invert(DiagnosticSeverity) as Record<string, keyof typeof DiagnosticSeverity>)[

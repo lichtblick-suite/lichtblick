@@ -21,7 +21,6 @@ import {
 } from "@foxglove/studio-base/players/UserNodePlayer/nodeTransformerWorker/generateTypesLib";
 import {
   getOutputTopic,
-  validateOutputTopic,
   validateInputTopics,
   compile,
   extractDatatypes,
@@ -162,14 +161,6 @@ describe("pipeline", () => {
       expect(diagnostics[0]?.code).toEqual(ErrorCodes.OutputTopicChecker.NO_OUTPUTS);
     });
   });
-  describe("validateOutputTopic", () => {
-    it.each(["/bad_prefix"])("errs on bad topic prefixes", (outputTopic) => {
-      const { diagnostics } = validateOutputTopic({ ...baseNodeData, outputTopic });
-      expect(diagnostics.length).toEqual(1);
-      expect(diagnostics[0]?.severity).toEqual(DiagnosticSeverity.Error);
-      expect(diagnostics[0]?.code).toEqual(ErrorCodes.OutputTopicChecker.BAD_PREFIX);
-    });
-  });
   describe("validateInputTopics", () => {
     it.each([
       [["/foo"], ["/bar"]],
@@ -183,25 +174,9 @@ describe("pipeline", () => {
       expect(diagnostics[0]?.severity).toEqual(DiagnosticSeverity.Error);
       expect(diagnostics[0]?.code).toEqual(ErrorCodes.InputTopicsChecker.NO_TOPIC_AVAIL);
     });
-    it("errs when a node tries to input another user node", () => {
-      const { diagnostics } = validateInputTopics(
-        { ...baseNodeData, inputTopics: [`${DEFAULT_STUDIO_NODE_PREFIX}my_topic`] },
-        [],
-      );
-      expect(diagnostics.length).toEqual(1);
-      expect(diagnostics[0]?.severity).toEqual(DiagnosticSeverity.Error);
-      expect(diagnostics[0]?.code).toEqual(ErrorCodes.InputTopicsChecker.CIRCULAR_IMPORT);
-    });
   });
 
   describe("compile", () => {
-    it("should return an error if a node does not start with the default prefix", () => {
-      const { diagnostics } = compose(compile, getInputTopics)(
-        { ...baseNodeData, name: "/bad_name" },
-        [],
-      );
-      expect(diagnostics[0]?.code).toEqual(ErrorCodes.Other.FILENAME);
-    });
     it.each(["const x: string = 'hello foxglove'", "const num: number = 1222"])(
       "can compile",
       (sourceCode) => {
