@@ -504,11 +504,11 @@ const configSchema: PanelConfigSchema<PlotConfig> = [
   {
     key: "legendDisplay",
     type: "dropdown",
-    title: "Legend display",
+    title: "Legend position",
     options: [
-      { value: "floating", text: "floating" },
-      { value: "left", text: "left" },
-      { value: "top", text: "top" },
+      { value: "floating", text: "Floating" },
+      { value: "left", text: "Left" },
+      { value: "top", text: "Top" },
     ],
   },
   {

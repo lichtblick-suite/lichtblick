@@ -23,14 +23,14 @@ import TimeBasedChart, {
   ChartDefaultView,
   TimeBasedChartTooltipData,
 } from "@foxglove/studio-base/components/TimeBasedChart";
-import { lineColors } from "@foxglove/studio-base/util/plotColors";
+import { getLineColor } from "@foxglove/studio-base/util/plotColors";
 
 import { PlotXAxisVal } from "./index";
 import { PlotPath, isReferenceLinePlotPathType } from "./internalTypes";
 
 // A "reference line" plot path is a numeric value. It creates a horizontal line on the plot at the specified value.
 function getAnnotationFromReferenceLine(path: PlotPath, index: number): AnnotationOptions {
-  const borderColor = lineColors[index % lineColors.length] ?? "#DDDDDD";
+  const borderColor = getLineColor(path.color, index);
   return {
     type: "line",
     display: true,

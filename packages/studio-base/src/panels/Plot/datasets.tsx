@@ -7,7 +7,7 @@ import { v4 as uuidv4 } from "uuid";
 import { filterMap } from "@foxglove/den/collection";
 import { isTime, Time, toSec, subtract } from "@foxglove/rostime";
 import { format } from "@foxglove/studio-base/util/formatTime";
-import { darkColor, lightColor, lineColors } from "@foxglove/studio-base/util/plotColors";
+import { darkColor, getLineColor, lightColor } from "@foxglove/studio-base/util/plotColors";
 import { formatTimeRaw, TimestampMethod } from "@foxglove/studio-base/util/time";
 
 import { PlotXAxisVal } from "./index";
@@ -215,7 +215,7 @@ function getDatasetsFromMessagePlotPath({
     }
   }
 
-  const borderColor = lineColors[index % lineColors.length] ?? "#DDDDDD";
+  const borderColor = getLineColor(path.color, index);
   const dataset: DataSet = {
     borderColor,
     label: path.value ? path.value : uuidv4(),

@@ -24,6 +24,7 @@ export type BasePlotPath = {
 
 export type PlotPath = BasePlotPath & {
   timestampMethod: TimestampMethod;
+  color?: string;
 };
 
 export type Datum = {

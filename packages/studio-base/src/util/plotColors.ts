@@ -36,3 +36,7 @@ export const lightColor: (_: string) => string = memoize((color: string): string
 export const darkColor: (_: string) => string = memoize((color: string): string =>
   tinycolor(color).darken(30).toString(),
 );
+
+export function getLineColor(color: string | undefined, index: number): string {
+  return color ?? lineColors[index % lineColors.length]!;
+}
