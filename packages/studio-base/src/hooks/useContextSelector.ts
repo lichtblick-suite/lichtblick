@@ -11,7 +11,7 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { useRef, useLayoutEffect, useContext, useReducer } from "react";
+import { useLayoutEffect, useContext, useReducer, useRef } from "react";
 
 import { SelectableContext } from "@foxglove/studio-base/util/createSelectableContext";
 
@@ -36,17 +36,28 @@ export default function useContextSelector<T, U>(
     Readonly<{ contextValue: T; selectedValue: U; selector: (value: T) => U }> | undefined
   >();
   const contextValue = handle.currentValue();
-  if (
+
+  const shouldUpdate =
     state.current == undefined ||
     contextValue !== state.current.contextValue ||
-    selector !== state.current.selector
-  ) {
-    state.current = {
-      contextValue,
-      selectedValue: selectWithUnstableIdentityWarning(contextValue, selector),
-      selector,
-    };
-  }
+    selector !== state.current.selector;
+
+  const selectedValue =
+    shouldUpdate || !state.current
+      ? selectWithUnstableIdentityWarning(contextValue, selector)
+      : state.current.selectedValue;
+
+  // Update the state ref in a layout effect to be concurrent mode safe.
+  // It would be "unsafe" to update the ref in the render since the render might not "commit"
+  useLayoutEffect(() => {
+    if (shouldUpdate) {
+      state.current = {
+        contextValue,
+        selectedValue,
+        selector,
+      };
+    }
+  });
 
   // Subscribe to context updates, and trigger a re-render when the selected value changes.
   useLayoutEffect(() => {
@@ -67,5 +78,5 @@ export default function useContextSelector<T, U>(
     };
   }, [handle, selector]);
 
-  return state.current.selectedValue;
+  return selectedValue;
 }
