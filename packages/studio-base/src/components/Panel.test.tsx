@@ -18,6 +18,7 @@ import { useEffect } from "react";
 
 import Panel from "@foxglove/studio-base/components/Panel";
 import { useCurrentLayoutActions } from "@foxglove/studio-base/context/CurrentLayoutContext";
+import { PanelsActions } from "@foxglove/studio-base/context/CurrentLayoutContext/actions";
 import PanelSetup from "@foxglove/studio-base/stories/PanelSetup";
 
 type DummyConfig = { someString: string };
@@ -36,21 +37,28 @@ function getDummyPanel(renderFn: jest.Mock) {
 }
 
 describe("Panel", () => {
-  it("renders properly with defaultConfig", () => {
+  it("saves defaultConfig when there is no saved config", async () => {
     const renderFn = jest.fn();
     const DummyPanel = getDummyPanel(renderFn);
+    const childId = "Dummy!1my2ydk";
 
+    const actions: PanelsActions[] = [];
     mount(
-      <PanelSetup>
-        <DummyPanel />
+      <PanelSetup onLayoutAction={(action) => actions.push(action)}>
+        <DummyPanel childId={childId} />
       </PanelSetup>,
     );
 
-    expect(renderFn.mock.calls.length).toEqual(1);
-    expect(renderFn.mock.calls[0]).toEqual([
+    expect(renderFn.mock.calls).toEqual([
+      [{ config: { someString: "hello world" }, saveConfig: expect.any(Function) }],
+      [{ config: { someString: "hello world" }, saveConfig: expect.any(Function) }],
+    ]);
+
+    expect(actions).toEqual([
+      // first one is from PanelSetup
       {
-        config: { someString: "hello world" },
-        saveConfig: expect.any(Function),
+        type: "SAVE_PANEL_CONFIGS",
+        payload: { configs: [{ id: childId, config: { someString: "hello world" } }] },
       },
     ]);
   });
@@ -62,39 +70,112 @@ describe("Panel", () => {
     const childId = "Dummy!1my2ydk";
     const someString = "someNewString";
 
+    const actions: PanelsActions[] = [];
     mount(
-      <PanelSetup fixture={{ savedProps: { [childId]: { someString } } }}>
+      <PanelSetup
+        fixture={{ savedProps: { [childId]: { someString } } }}
+        onLayoutAction={(action) => actions.push(action)}
+      >
         <DummyPanel childId={childId} />
       </PanelSetup>,
     );
 
     expect(renderFn.mock.calls).toEqual([
-      [
-        {
-          config: { someString },
-          saveConfig: expect.any(Function),
+      [{ config: { someString }, saveConfig: expect.any(Function) }],
+    ]);
+
+    expect(actions).toEqual([
+      {
+        // initial save action is from PanelSetup
+        type: "SAVE_PANEL_CONFIGS",
+        payload: { configs: [{ id: childId, config: { someString } }] },
+      },
+    ]);
+  });
+
+  it("merges saved config with defaultConfig when defaultConfig has new keys", async () => {
+    const renderFn = jest.fn();
+    const DummyPanel = getDummyPanel(renderFn);
+    const childId = "Dummy!1my2ydk";
+
+    const actions: PanelsActions[] = [];
+    mount(
+      <PanelSetup
+        fixture={{ savedProps: { [childId]: { someNumber: 42 } } }}
+        onLayoutAction={(action) => actions.push(action)}
+      >
+        <DummyPanel childId={childId} />
+      </PanelSetup>,
+    );
+
+    expect(renderFn.mock.calls).toEqual([
+      [{ config: { someNumber: 42, someString: "hello world" }, saveConfig: expect.any(Function) }],
+      [{ config: { someNumber: 42, someString: "hello world" }, saveConfig: expect.any(Function) }],
+    ]);
+
+    expect(actions).toEqual([
+      {
+        // initial save action is from PanelSetup
+        type: "SAVE_PANEL_CONFIGS",
+        payload: { configs: [{ id: childId, config: { someNumber: 42 } }] },
+      },
+      {
+        type: "SAVE_PANEL_CONFIGS",
+        payload: {
+          configs: [{ id: childId, config: { someNumber: 42, someString: "hello world" } }],
         },
-      ],
+      },
+    ]);
+  });
+
+  it("does not re-save configs when defaultConfig has fewer keys than saved config", async () => {
+    const renderFn = jest.fn();
+    const DummyPanel = getDummyPanel(renderFn);
+    const childId = "Dummy!1my2ydk";
+    const someString = "someNewString";
+
+    const actions: PanelsActions[] = [];
+    mount(
+      <PanelSetup
+        fixture={{ savedProps: { [childId]: { someNumber: 42, someString } } }}
+        onLayoutAction={(action) => actions.push(action)}
+      >
+        <DummyPanel childId={childId} />
+      </PanelSetup>,
+    );
+
+    expect(renderFn.mock.calls).toEqual([
+      [{ config: { someNumber: 42, someString }, saveConfig: expect.any(Function) }],
+    ]);
+
+    expect(actions).toEqual([
+      {
+        // initial save action is from PanelSetup
+        type: "SAVE_PANEL_CONFIGS",
+        payload: { configs: [{ id: childId, config: { someNumber: 42, someString } }] },
+      },
+      // we do not expect a second save action
     ]);
   });
 
   it("does not rerender when another panel changes", () => {
     const renderFn = jest.fn();
     const DummyPanel = getDummyPanel(renderFn);
+    const childId = "Dummy!1my2ydk";
 
     const { result: actions } = renderHook(() => useCurrentLayoutActions(), {
       wrapper({ children }) {
         return (
           <PanelSetup>
             {children}
-            <DummyPanel />
+            <DummyPanel childId={childId} />
           </PanelSetup>
         );
       },
     });
 
-    expect(renderFn.mock.calls.length).toEqual(1);
+    expect(renderFn.mock.calls.length).toEqual(2);
     act(() => actions.current.savePanelConfigs({ configs: [{ id: "someOtherId", config: {} }] }));
-    expect(renderFn.mock.calls.length).toEqual(1);
+    expect(renderFn.mock.calls.length).toEqual(2);
   });
 });

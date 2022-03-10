@@ -199,25 +199,6 @@ type ComponentConstructorType<P> = { displayName?: string } & (
   | { (props: P): React.ReactElement<unknown> | ReactNull }
 );
 
-const areConfigKeysEqual = (
-  firstConfig: Record<string, unknown>,
-  secondConfig: Record<string, unknown>,
-): boolean => {
-  const firstConfigKeys = Object.keys(firstConfig).sort();
-  const secondConfigKeys = Object.keys(secondConfig).sort();
-
-  if (firstConfigKeys.length !== secondConfigKeys.length) {
-    return false;
-  }
-
-  for (let i = 0; i < firstConfigKeys.length; i++) {
-    if (firstConfigKeys[i] !== secondConfigKeys[i]) {
-      return false;
-    }
-  }
-  return true;
-};
-
 // HOC that wraps panel in an error boundary and flex box.
 // Gives panel a `config` and `saveConfig`.
 //   export default Panel(MyPanelComponent)
@@ -288,19 +269,28 @@ export default function Panel<
       saveConfig(defaultConfig);
     }, [defaultConfig, saveConfig]);
 
-    // PanelSettings needs useConfigById to return a config
-    // If there is no saved config (or it is an empty object), we save the default config provided
-    // by the panel. This typically happens when a new panel is added and the layout does not yet
-    // have a config. Even if this effect gets run more than once, we only need to save the default
-    // config once.
+    // PanelSettings needs useConfigById to return a complete config. If there is no saved config
+    // (or it is an empty object), or if keys have been added to the default config since it was
+    // previously saved, we save the default config provided by the panel. This typically happens
+    // when a new panel is added and the layout does not yet have a config. Even if this effect gets
+    // run more than once, we only need to save the default config once.
     //
     // An empty object can occur when swapping a panel
     const savedDefaultConfig = useRef(false);
     useLayoutEffect(() => {
-      if ((!savedConfig || Object.keys(savedConfig).length === 0) && !savedDefaultConfig.current) {
+      if (savedDefaultConfig.current) {
+        return;
+      }
+
+      if (!savedConfig || Object.keys(savedConfig).length === 0) {
         savedDefaultConfig.current = true;
         saveConfig(defaultConfig);
-      } else if (savedConfig && !areConfigKeysEqual(savedConfig, defaultConfig)) {
+      } else if (
+        Object.entries(defaultConfig).some(
+          ([key, value]) => value != undefined && !(key in savedConfig),
+        )
+      ) {
+        savedDefaultConfig.current = true;
         saveConfig({ ...defaultConfig, ...savedConfig });
       }
     }, [defaultConfig, saveConfig, savedConfig]);

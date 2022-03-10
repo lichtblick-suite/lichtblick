@@ -26,7 +26,11 @@ import panelsReducer from "./reducers";
 export default function MockCurrentLayoutProvider({
   children,
   initialState,
-}: React.PropsWithChildren<{ initialState?: Partial<PanelsState> }>): JSX.Element {
+  onAction,
+}: React.PropsWithChildren<{
+  initialState?: Partial<PanelsState>;
+  onAction?: (action: PanelsActions) => void;
+}>): JSX.Element {
   const layoutStateListeners = useRef(new Set<(_: LayoutState) => void>());
   const addLayoutStateListener = useCallback((listener: (_: LayoutState) => void) => {
     layoutStateListeners.current.add(listener);
@@ -62,6 +66,7 @@ export default function MockCurrentLayoutProvider({
 
   const performAction = useCallback(
     (action: PanelsActions) => {
+      onAction?.(action);
       setLayoutState({
         ...layoutStateRef.current,
         selectedLayout: {
@@ -70,7 +75,7 @@ export default function MockCurrentLayoutProvider({
         },
       });
     },
-    [setLayoutState],
+    [onAction, setLayoutState],
   );
 
   const actions: ICurrentLayout["actions"] = useMemo(

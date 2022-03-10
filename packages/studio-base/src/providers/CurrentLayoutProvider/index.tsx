@@ -167,6 +167,7 @@ export default function CurrentLayoutProvider({
 
       // the panel state did not change, so no need to perform layout state updates or layout manager updates
       if (isEqual(oldData, newData)) {
+        log.warn("Panel action resulted in identical config:", action);
         return;
       }
 
