@@ -5,6 +5,7 @@
 import { setUser as setSentryUser, addBreadcrumb as addSentryBreadcrumb } from "@sentry/core";
 import { Severity } from "@sentry/types";
 import amplitude, { AmplitudeClient } from "amplitude-js";
+import moment from "moment";
 
 import Logger from "@foxglove/log";
 import OsContextSingleton from "@foxglove/studio-base/OsContextSingleton";
@@ -48,6 +49,13 @@ export class AmplitudeAnalytics implements IAnalytics {
       if (appVersion) {
         this._amp.setVersionName(appVersion);
       }
+
+      // use setOnce() to set first seen cohort for new users
+      const identify = new amplitude.Identify();
+      identify.setOnce("first_seen_date", moment.utc().format("YYYY-MM-DD"));
+      identify.setOnce("first_seen_month", moment.utc().format("YYYY-MM"));
+      identify.setOnce("first_seen_year", moment.utc().format("YYYY"));
+      this._amp.identify(identify);
 
       void this.logEvent(AppEvent.APP_INIT, { glVendor, glRenderer });
     }
