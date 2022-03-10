@@ -3,7 +3,7 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 import EventEmitter, { EventNames, EventListener } from "eventemitter3";
-import { partition } from "lodash";
+import { isEqual, partition } from "lodash";
 import { v4 as uuidv4 } from "uuid";
 
 import { MutexLocked } from "@foxglove/den/async";
@@ -285,6 +285,15 @@ export default class LayoutManager implements ILayoutManager {
       throw new Error(`Cannot update layout ${id} because it does not exist`);
     }
 
+    // If the modifications result in the same layout data, set the working copy to undefined so the
+    // layout appears unmodified.
+    const newWorking =
+      data == undefined
+        ? localLayout.working
+        : isEqual(localLayout.baseline.data, data)
+        ? undefined
+        : { data, savedAt: now };
+
     // Renames of shared layouts go directly to the server
     if (name != undefined && layoutIsShared(localLayout)) {
       if (!this.remote) {
@@ -300,7 +309,7 @@ export default class LayoutManager implements ILayoutManager {
             ...localLayout,
             name: updatedBaseline.name,
             baseline: { data: updatedBaseline.data, savedAt: updatedBaseline.savedAt },
-            working: data != undefined ? { data, savedAt: now } : localLayout.working,
+            working: newWorking,
             syncInfo: { status: "tracked", lastRemoteSavedAt: updatedBaseline.savedAt },
           }),
       );
@@ -317,7 +326,7 @@ export default class LayoutManager implements ILayoutManager {
           await local.put({
             ...localLayout,
             name: name ?? localLayout.name,
-            working: data != undefined ? { data, savedAt: now } : localLayout.working,
+            working: newWorking,
 
             // If the name is being changed, we will need to upload to the server with a new savedAt
             baseline: isRename ? { ...localLayout.baseline, savedAt: now } : localLayout.baseline,
