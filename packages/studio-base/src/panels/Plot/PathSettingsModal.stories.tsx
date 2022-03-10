@@ -20,6 +20,7 @@ export function DefaultIndex0(): JSX.Element {
   const index = 0;
   return (
     <PathSettingsModal
+      xAxisVal="timestamp"
       path={paths[index]!}
       paths={paths}
       index={index}
@@ -37,6 +38,7 @@ export function DefaultIndex1(): JSX.Element {
   const index = 1;
   return (
     <PathSettingsModal
+      xAxisVal="timestamp"
       path={paths[index]!}
       paths={paths}
       index={index}
@@ -54,6 +56,39 @@ export function CustomColor(): JSX.Element {
   const index = 1;
   return (
     <PathSettingsModal
+      xAxisVal="timestamp"
+      path={paths[index]!}
+      paths={paths}
+      index={index}
+      onDismiss={action("onDismiss")}
+      saveConfig={action("saveConfig")}
+    />
+  );
+}
+
+export function CustomXAxis(): JSX.Element {
+  const paths: PlotPath[] = [
+    { enabled: true, timestampMethod: "receiveTime", value: "/some.path" },
+  ];
+  const index = 0;
+  return (
+    <PathSettingsModal
+      xAxisVal="custom"
+      path={paths[index]!}
+      paths={paths}
+      index={index}
+      onDismiss={action("onDismiss")}
+      saveConfig={action("saveConfig")}
+    />
+  );
+}
+
+export function ReferenceLine(): JSX.Element {
+  const paths: PlotPath[] = [{ enabled: true, timestampMethod: "receiveTime", value: "42" }];
+  const index = 0;
+  return (
+    <PathSettingsModal
+      xAxisVal="timestamp"
       path={paths[index]!}
       paths={paths}
       index={index}

@@ -16,10 +16,8 @@ import { v4 as uuidv4 } from "uuid";
 
 import MessagePathInput from "@foxglove/studio-base/components/MessagePathSyntax/MessagePathInput";
 import TimeBasedChart from "@foxglove/studio-base/components/TimeBasedChart";
-import TimestampMethodDropdown from "@foxglove/studio-base/components/TimestampMethodDropdown";
 import { useHoverValue } from "@foxglove/studio-base/context/HoverValueContext";
 import { getLineColor } from "@foxglove/studio-base/util/plotColors";
-import { TimestampMethod } from "@foxglove/studio-base/util/time";
 
 import PathSettingsModal from "./PathSettingsModal";
 import { PlotPath, isReferenceLinePlotPathType } from "./internalTypes";
@@ -166,12 +164,6 @@ export default function PlotLegendRow({
   const classes = useStyles();
 
   const isReferenceLinePlotPath = isReferenceLinePlotPathType(path);
-  let timestampMethod;
-  // Only allow chosing the timestamp method if it is applicable (not a reference line) and there is at least
-  // one character typed.
-  if (!isReferenceLinePlotPath && path.value.length > 0) {
-    timestampMethod = path.timestampMethod;
-  }
 
   const onInputChange = useCallback(
     (value: string, idx?: number) => {
@@ -188,18 +180,6 @@ export default function PlotLegendRow({
     [paths, saveConfig],
   );
 
-  const onInputTimestampMethodChange = useCallback(
-    (value: TimestampMethod) => {
-      const newPaths = paths.slice();
-      const newPath = newPaths[index];
-      if (newPath) {
-        newPaths[index] = { ...newPath, timestampMethod: value };
-      }
-      saveConfig({ paths: newPaths });
-    },
-    [paths, index, saveConfig],
-  );
-
   const [settingsModalOpen, setSettingsModalOpen] = useState(false);
 
   return (
@@ -207,6 +187,7 @@ export default function PlotLegendRow({
       <div style={{ position: "absolute" }}>
         {settingsModalOpen && (
           <PathSettingsModal
+            xAxisVal={xAxisVal}
             path={path}
             paths={paths}
             index={index}
@@ -244,7 +225,6 @@ export default function PlotLegendRow({
           autoSize
           disableAutocomplete={isReferenceLinePlotPath}
           inputStyle={{ textDecoration: !path.enabled ? "line-through" : undefined }}
-          {...(xAxisVal === "timestamp" ? { timestampMethod } : undefined)}
         />
         {hasMismatchedDataLength && (
           <Tooltip
@@ -271,13 +251,6 @@ export default function PlotLegendRow({
         >
           <MoreVertIcon fontSize="small" />
         </IconButton>
-        <TimestampMethodDropdown
-          path={path.value}
-          onTimestampMethodChange={onInputTimestampMethodChange}
-          index={index}
-          iconButtonProps={{ disabled: !path.value }}
-          timestampMethod={xAxisVal === "timestamp" ? timestampMethod : undefined}
-        />
         <IconButton
           className={classes.actionButton}
           size="small"

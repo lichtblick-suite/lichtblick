@@ -46,9 +46,6 @@ import parseRosPath, { quoteFieldNameIfNeeded, quoteTopicNameIfNeeded } from "./
 //
 //  <MessagePathInput types={["uint16", "float64"]} />
 //
-// If you don't use timestamps, you might want to hide the warning icon that we show when selecting
-// a topic that has no header: `<MessagePathInput hideTimestampWarning>`.
-//
 // If you are rendering many input fields, you might want to use `<MessagePathInput index={5}>`,
 // which gets passed down to `<MessagePathInput onChange>` as the second parameter, so you can
 // avoid creating anonymous functions on every render (which will prevent the component from
