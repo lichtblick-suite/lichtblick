@@ -2409,15 +2409,15 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@foxglove/rosbag@npm:0.2.0":
-  version: 0.2.0
-  resolution: "@foxglove/rosbag@npm:0.2.0"
+"@foxglove/rosbag@npm:0.2.1":
+  version: 0.2.1
+  resolution: "@foxglove/rosbag@npm:0.2.1"
   dependencies:
     "@foxglove/rosmsg": ^2.0.0 || ^3.0.0
     "@foxglove/rosmsg-serialization": ^1.3.0
     "@foxglove/rostime": ^1.1.2
     heap: ^0.2.7
-  checksum: 9268d8677c35ff6a6f9311c4b2b2ce849069011a45bc49502ce2138f49ffdbfa697142a6d96a56d4ed94cc5667aa6859717df7d473beb7b35dcd4a84f86cedf8
+  checksum: 5c91f3d34e068f51cd35674b5711bd832c02ba80b8335b49ec241efffe4910b8430161aa65a69ee86d93e5b37cd7dab3d66dac55f939f6260f376469110a1cf6
   languageName: node
   linkType: hard
 
@@ -2513,7 +2513,7 @@ __metadata:
     "@foxglove/regl-worldview": 2.4.0
     "@foxglove/ros1": 1.4.0
     "@foxglove/ros2": 3.1.1
-    "@foxglove/rosbag": 0.2.0
+    "@foxglove/rosbag": 0.2.1
     "@foxglove/rosbag2-web": 4.0.3
     "@foxglove/rosmsg": 3.0.0
     "@foxglove/rosmsg-msgs-common": 1.0.4
