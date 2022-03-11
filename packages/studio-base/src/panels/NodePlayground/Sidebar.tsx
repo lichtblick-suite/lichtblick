@@ -210,15 +210,10 @@ const Sidebar = ({
             collapse={() => updateExplorer(undefined)}
             title="Utilities"
             subheader={
-              <>
-                <Typography variant="body2" color="text.secondary">
-                  You can import any of these modules into your node using the following syntax:{" "}
-                  <pre>{`import { ... } from "./pointClouds.ts".`}</pre>
-                </Typography>
-                <Typography variant="body2" color="text.secondary">
-                  Want to contribute? Scroll to the bottom of the docs for details!
-                </Typography>
-              </>
+              <Typography variant="body2" color="text.secondary">
+                You can import any of these modules into your node using the following syntax:{" "}
+                <pre>{`import { ... } from "./pointClouds.ts".`}</pre>
+              </Typography>
             }
           />
           <List dense>
