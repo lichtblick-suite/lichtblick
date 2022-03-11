@@ -11,10 +11,11 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import ArrowLeftBoldIcon from "@mdi/svg/svg/arrow-left-bold.svg";
-import DeleteIcon from "@mdi/svg/svg/delete.svg";
-import FileMultipleIcon from "@mdi/svg/svg/file-multiple.svg";
-import HelpCircleIcon from "@mdi/svg/svg/help-circle.svg";
+import CloseIcon from "@mui/icons-material/Close";
+import ConstructionOutlinedIcon from "@mui/icons-material/ConstructionOutlined";
+import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
+import TemplateIcon from "@mui/icons-material/PhotoFilter";
+import NoteIcon from "@mui/icons-material/StickyNote2Outlined";
 import {
   List,
   ListItem,
@@ -22,39 +23,42 @@ import {
   ListItemText,
   Stack,
   IconButton,
-  ListSubheader,
+  Tabs,
+  Tab,
+  styled as muiStyled,
+  Paper,
+  CardHeader,
+  Typography,
 } from "@mui/material";
 import * as monacoApi from "monaco-editor/esm/vs/editor/editor.api";
-import styled from "styled-components";
+import { ReactNode, useCallback, useMemo, useState } from "react";
 
-import Icon from "@foxglove/studio-base/components/Icon";
 import { Explorer } from "@foxglove/studio-base/panels/NodePlayground";
-import TemplateIcon from "@foxglove/studio-base/panels/NodePlayground/assets/file-document-edit.svg";
-import HammerWrenchIcon from "@foxglove/studio-base/panels/NodePlayground/assets/hammer-wrench.svg";
 import { Script } from "@foxglove/studio-base/panels/NodePlayground/script";
 import { getNodeProjectConfig } from "@foxglove/studio-base/players/UserNodePlayer/nodeTransformerWorker/typescript/projectConfig";
 import templates from "@foxglove/studio-base/players/UserNodePlayer/nodeTransformerWorker/typescript/templates";
 import { UserNodes } from "@foxglove/studio-base/types/panels";
-import { colors } from "@foxglove/studio-base/util/sharedStyleConstants";
 
-const MenuWrapper = styled.div`
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  width: 40px;
-  background-color: ${({ theme }) => theme.palette.neutralLighterAlt};
-  & > * {
-    margin: 10px;
-  }
-`;
+const STab = muiStyled(Tab)(({ theme }) => ({
+  minWidth: "auto",
+  padding: theme.spacing(1, 1.125),
 
-const ExplorerWrapper = styled.div<{ show: boolean }>`
-  display: ${({ show }: { show: boolean }) => (show ? "initial" : "none")};
-  background-color: ${({ theme }) => theme.palette.neutralLighterAlt};
-  max-width: 325px;
-  min-width: 275px;
-  overflow: auto;
-`;
+  "&.Mui-selected": {
+    backgroundColor: theme.palette.grey[100],
+  },
+}));
+
+const STabs = muiStyled(Tabs)({
+  ".MuiTabs-indicator": {
+    display: "none",
+  },
+});
+
+const ExplorerWrapper = muiStyled("div")(({ theme }) => ({
+  backgroundColor: theme.palette.grey[100],
+  width: 350,
+  overflow: "auto",
+}));
 
 type NodesListProps = {
   nodes: UserNodes;
@@ -67,8 +71,8 @@ type NodesListProps = {
 const NodesList = ({ nodes, selectNode, deleteNode, collapse, selectedNodeId }: NodesListProps) => {
   return (
     <Stack flex="auto">
-      <SidebarTitle title="Nodes" collapse={collapse} />
-      <List>
+      <SidebarHeader title="Nodes" collapse={collapse} />
+      <List dense>
         {Object.keys(nodes).map((nodeId) => {
           return (
             <ListItem
@@ -76,13 +80,23 @@ const NodesList = ({ nodes, selectNode, deleteNode, collapse, selectedNodeId }: 
               key={nodeId}
               selected={selectedNodeId === nodeId}
               secondaryAction={
-                <IconButton onClick={() => deleteNode(nodeId)} edge="end" aria-label="delete">
-                  <DeleteIcon />
+                <IconButton
+                  size="small"
+                  onClick={() => deleteNode(nodeId)}
+                  edge="end"
+                  aria-label="delete"
+                  title="Delete"
+                  color="error"
+                >
+                  <DeleteOutlineIcon fontSize="small" />
                 </IconButton>
               }
             >
               <ListItemButton onClick={() => selectNode(nodeId)}>
-                <ListItemText primary={nodes[nodeId]?.name} />
+                <ListItemText
+                  primary={nodes[nodeId]?.name}
+                  primaryTypographyProps={{ variant: "body1" }}
+                />
               </ListItemButton>
             </ListItem>
           );
@@ -106,28 +120,32 @@ type Props = {
 
 const { utilityFiles } = getNodeProjectConfig();
 
-const SidebarTitle = ({
+const SidebarHeader = ({
   title,
-  tooltip,
+  subheader,
   collapse,
 }: {
   title: string;
-  tooltip?: string;
+  subheader?: ReactNode;
   collapse: () => void;
 }) => (
-  <Stack direction="row" alignItems="center" color={colors.DARK9} padding={0.625}>
-    <h3>{title}</h3>
-    {tooltip && (
-      <Icon style={{ cursor: "unset", marginLeft: "5px" }} size="xsmall" tooltip={tooltip}>
-        <HelpCircleIcon />
-      </Icon>
-    )}
-    <Stack direction="row" justifyContent="flex-end" flex="auto">
-      <Icon onClick={collapse} size="medium" tooltip={"collapse"}>
-        <ArrowLeftBoldIcon />
-      </Icon>
-    </Stack>
-  </Stack>
+  <CardHeader
+    title={title}
+    titleTypographyProps={{
+      variant: "h5",
+      gutterBottom: true,
+    }}
+    subheader={subheader}
+    subheaderTypographyProps={{
+      variant: "body2",
+      color: "text.secondary",
+    }}
+    action={
+      <IconButton size="small" onClick={collapse} title="Collapse">
+        <CloseIcon />
+      </IconButton>
+    }
+  />
 );
 
 const Sidebar = ({
@@ -141,11 +159,12 @@ const Sidebar = ({
   script,
   addNewNode,
 }: Props): React.ReactElement => {
+  const [activeExplorerTab, setActiveExplorerTab] = useState<string | undefined>(undefined);
   const nodesSelected = explorer === "nodes";
   const utilsSelected = explorer === "utils";
   const templatesSelected = explorer === "templates";
 
-  const gotoUtils = React.useCallback(
+  const gotoUtils = useCallback(
     (filePath: string) => {
       const monacoFilePath = monacoApi.Uri.parse(`file://${filePath}`);
       const requestedModel = monacoApi.editor.getModel(monacoFilePath);
@@ -165,7 +184,16 @@ const Sidebar = ({
     [setScriptOverride],
   );
 
-  const explorers = React.useMemo(
+  const handleExplorerTabChange = useCallback(
+    (_event: React.ChangeEvent<unknown>, newValue: string) => {
+      if (newValue !== activeExplorerTab) {
+        setActiveExplorerTab(newValue);
+      }
+    },
+    [activeExplorerTab],
+  );
+
+  const explorers = useMemo(
     () => ({
       nodes: (
         <NodesList
@@ -178,12 +206,22 @@ const Sidebar = ({
       ),
       utils: (
         <Stack flex="auto" position="relative">
-          <SidebarTitle
+          <SidebarHeader
             collapse={() => updateExplorer(undefined)}
             title="Utilities"
-            tooltip={`You can import any of these modules into your node using the following syntax: 'import { .. } from "./pointClouds.ts".\n\nWant to contribute? Scroll to the bottom of the docs for details!`}
+            subheader={
+              <>
+                <Typography variant="body2" color="text.secondary">
+                  You can import any of these modules into your node using the following syntax:{" "}
+                  <pre>{`import { ... } from "./pointClouds.ts".`}</pre>
+                </Typography>
+                <Typography variant="body2" color="text.secondary">
+                  Want to contribute? Scroll to the bottom of the docs for details!
+                </Typography>
+              </>
+            }
           />
-          <List>
+          <List dense>
             {utilityFiles.map(({ fileName, filePath }) => (
               <ListItem
                 disablePadding
@@ -192,7 +230,7 @@ const Sidebar = ({
                 selected={script ? filePath === script.filePath : false}
               >
                 <ListItemButton>
-                  <ListItemText primary={fileName} />
+                  <ListItemText primary={fileName} primaryTypographyProps={{ variant: "body1" }} />
                 </ListItemButton>
               </ListItem>
             ))}
@@ -202,7 +240,10 @@ const Sidebar = ({
               selected={script ? script.filePath === "/studio_node/generatedTypes.ts" : false}
             >
               <ListItemButton>
-                <ListItemText primary="generatedTypes.ts" />
+                <ListItemText
+                  primary="generatedTypes.ts"
+                  primaryTypographyProps={{ variant: "body1" }}
+                />
               </ListItemButton>
             </ListItem>
           </List>
@@ -210,20 +251,20 @@ const Sidebar = ({
       ),
       templates: (
         <Stack flex="auto">
-          <SidebarTitle
+          <SidebarHeader
             title="Templates"
-            tooltip={"Create nodes from these templates"}
+            subheader="Create nodes from these templates, click a template to create a new node."
             collapse={() => updateExplorer(undefined)}
           />
-          <List
-            subheader={
-              <ListSubheader component="div">Click a template to create a new node.</ListSubheader>
-            }
-          >
+          <List dense>
             {templates.map(({ name, description, template }) => (
               <ListItem disablePadding key={name} onClick={() => addNewNode(template)}>
                 <ListItemButton>
-                  <ListItemText primary={name} secondary={description} />
+                  <ListItemText
+                    primary={name}
+                    primaryTypographyProps={{ variant: "body1" }}
+                    secondary={description}
+                  />
                 </ListItemButton>
               </ListItem>
             ))}
@@ -244,40 +285,37 @@ const Sidebar = ({
   );
 
   return (
-    <>
-      <MenuWrapper>
-        <Icon
-          dataTest="node-explorer"
-          onClick={() => updateExplorer(nodesSelected ? undefined : "nodes")}
-          size="large"
-          tooltip="Nodes"
-          style={{ color: nodesSelected ? colors.LIGHT1 : colors.DARK9, position: "relative" }}
-        >
-          <FileMultipleIcon />
-        </Icon>
-        <Icon
-          dataTest="utils-explorer"
-          onClick={() => updateExplorer(utilsSelected ? undefined : "utils")}
-          size="large"
-          tooltip="Utilities"
-          style={{ color: utilsSelected ? colors.LIGHT1 : colors.DARK9 }}
-        >
-          <HammerWrenchIcon />
-        </Icon>
-        <Icon
-          dataTest="templates-explorer"
-          onClick={() => updateExplorer(templatesSelected ? undefined : "templates")}
-          size="large"
-          tooltip="Templates"
-          style={{ color: templatesSelected ? colors.LIGHT1 : colors.DARK9 }}
-        >
-          <TemplateIcon />
-        </Icon>
-      </MenuWrapper>
-      <ExplorerWrapper show={explorer != undefined}>
-        {explorer != undefined && explorers[explorer]}
-      </ExplorerWrapper>
-    </>
+    <Paper>
+      <Stack direction="row" height="100%">
+        <STabs orientation="vertical" value={activeExplorerTab} onChange={handleExplorerTabChange}>
+          <STab
+            disableRipple
+            value="nodes"
+            title="Nodes"
+            icon={<NoteIcon fontSize="large" />}
+            data-test="node-explorer"
+            onClick={() => updateExplorer(nodesSelected ? undefined : "nodes")}
+          />
+          <STab
+            disableRipple
+            value="utils"
+            title="Utilities"
+            icon={<ConstructionOutlinedIcon fontSize="large" />}
+            data-test="utils-explorer"
+            onClick={() => updateExplorer(utilsSelected ? undefined : "utils")}
+          />
+          <STab
+            disableRipple
+            value="templates"
+            title="Templates"
+            icon={<TemplateIcon fontSize="large" />}
+            data-test="templates-explorer"
+            onClick={() => updateExplorer(templatesSelected ? undefined : "templates")}
+          />
+        </STabs>
+        {explorer != undefined && <ExplorerWrapper>{explorers[explorer]}</ExplorerWrapper>}
+      </Stack>
+    </Paper>
   );
 };
 
