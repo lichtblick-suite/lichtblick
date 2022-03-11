@@ -153,6 +153,7 @@ export default function Table({
     {
       columns,
       data,
+      autoResetExpanded: false,
       initialState: { pageSize: 30 },
     },
     useSortBy,
