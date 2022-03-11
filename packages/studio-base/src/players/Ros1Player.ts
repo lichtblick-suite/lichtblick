@@ -313,7 +313,6 @@ export default class Ros1Player implements Player {
         subscribedTopics: this._subscribedTopics,
         services: this._services,
         parameters: this._parameters,
-        parsedMessageDefinitionsByTopic: {},
       },
     });
   });

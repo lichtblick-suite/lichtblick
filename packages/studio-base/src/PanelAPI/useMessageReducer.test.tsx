@@ -406,7 +406,6 @@ describe("useMessageReducer", () => {
             datatypes: new Map(
               Object.entries({ foo: { definitions: [] }, bar: { definitions: [] } }),
             ),
-            parsedMessageDefinitionsByTopic: {},
             totalBytesReceived: 1234,
           },
         }),
@@ -444,7 +443,6 @@ describe("useMessageReducer", () => {
             datatypes: new Map(
               Object.entries({ foo: { definitions: [] }, bar: { definitions: [] } }),
             ),
-            parsedMessageDefinitionsByTopic: {},
             totalBytesReceived: 1234,
           },
         }),

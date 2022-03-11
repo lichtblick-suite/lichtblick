@@ -81,8 +81,6 @@ const useSubscribeToTopicsForBlocks = (topics: readonly string[]) => {
 //  - not all players provide blocks, and
 //  - topics for nodes are not available in blocks when blocks _are_ provided,
 // so all consumers need a "regular playback" pipeline fallback for now.
-// Consumers can rely on the presence of topics in messageDefinitionsByTopic to signal whether
-// a fallback is needed for a given topic, because entries will not be populated in these cases.
 //
 // Semantics of blocks:
 //   - Missing topics have not been cached.

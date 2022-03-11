@@ -181,7 +181,6 @@ describe("MessagePipelineProvider/useMessagePipeline", () => {
             lastSeekTime: 1234,
             topics: [{ name: "/input/foo", datatype: "foo" }],
             datatypes: new Map(Object.entries({ foo: { definitions: [] } })),
-            parsedMessageDefinitionsByTopic: {},
             totalBytesReceived: 1234,
           },
         }),

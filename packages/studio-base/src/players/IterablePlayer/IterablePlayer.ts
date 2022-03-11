@@ -27,7 +27,6 @@ import {
   PublishPayload,
   SubscribePayload,
   Topic,
-  ParsedMessageDefinitionsByTopic,
   PlayerPresence,
   PlayerCapabilities,
   MessageBlock,
@@ -125,7 +124,6 @@ export class IterablePlayer implements Player {
   private _messageOrder: TimestampMethod = "receiveTime";
   private _hasError = false;
   private _lastRangeMillis?: number;
-  private _parsedMessageDefinitionsByTopic: ParsedMessageDefinitionsByTopic = {};
   private _closed: boolean = false;
   private _lastMessage?: MessageEvent<unknown>;
   private _publishedTopics = new Map<string, Set<string>>();
@@ -431,7 +429,6 @@ export class IterablePlayer implements Player {
         topics: this._providerTopics,
         datatypes: this._providerDatatypes,
         publishedTopics: this._publishedTopics,
-        parsedMessageDefinitionsByTopic: this._parsedMessageDefinitionsByTopic,
       },
       urlState: this._urlParams,
     };

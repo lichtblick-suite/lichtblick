@@ -64,7 +64,6 @@ export default class StoryPlayer implements Player {
             activeData: {
               topics,
               datatypes: messageDefinitions.datatypes,
-              parsedMessageDefinitionsByTopic: {},
               currentTime: end,
               startTime: start,
               endTime: end,

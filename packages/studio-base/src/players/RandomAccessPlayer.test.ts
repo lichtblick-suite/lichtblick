@@ -131,7 +131,6 @@ describe("RandomAccessPlayer", () => {
             { datatype: "fooBar", name: "/foo/bar" },
             { datatype: "baz", name: "/baz" },
           ],
-          parsedMessageDefinitionsByTopic: {},
           publishedTopics: new Map<string, Set<string>>(),
         },
         capabilities: [PlayerCapabilities.setSpeed, PlayerCapabilities.playbackControl],

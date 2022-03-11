@@ -129,7 +129,6 @@ export default function MockMessagePipelineProvider(props: {
               lastSeekTime: 0,
               totalBytesReceived: 0,
               messageOrder: "receiveTime",
-              parsedMessageDefinitionsByTopic: {},
               ...props.activeData,
             },
     }),

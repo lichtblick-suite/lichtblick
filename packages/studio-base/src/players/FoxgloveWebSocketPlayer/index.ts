@@ -327,7 +327,6 @@ export default class FoxgloveWebSocketPlayer implements Player {
         lastSeekTime: this._lastSeekTime,
         topics: _topics,
         datatypes: _datatypes,
-        parsedMessageDefinitionsByTopic: {},
       },
     });
   });

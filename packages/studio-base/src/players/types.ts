@@ -197,10 +197,6 @@ export type PlayerStateActiveData = {
   // A map of parameter names to parameter values, used to describe remote parameters such as
   // rosparams.
   parameters?: Map<string, ParameterValue>;
-
-  // Used for late-parsing of binary messages. Required to cover any topic for which binary data is
-  // given to panels. (May be empty for players that only provide messages parsed into objects.)
-  parsedMessageDefinitionsByTopic: ParsedMessageDefinitionsByTopic;
 };
 
 // Represents a ROS topic, though the actual data does not need to come from a ROS system.

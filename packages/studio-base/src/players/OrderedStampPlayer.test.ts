@@ -70,7 +70,6 @@ function getState({ hasHeaderStamp }: { hasHeaderStamp?: boolean } = {}): Player
       ...basicDatatypes,
       ...(hasHeaderStamp === true ? dummyDatatypeWithHeader : []),
     ]),
-    parsedMessageDefinitionsByTopic: {},
     totalBytesReceived: 1234,
   };
 }

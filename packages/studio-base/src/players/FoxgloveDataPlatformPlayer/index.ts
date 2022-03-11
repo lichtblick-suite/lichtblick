@@ -286,7 +286,6 @@ export default class FoxgloveDataPlatformPlayer implements Player {
         subscribedTopics: undefined,
         services: undefined,
         parameters: undefined,
-        parsedMessageDefinitionsByTopic: {},
       },
     });
   });
