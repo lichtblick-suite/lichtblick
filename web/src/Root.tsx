@@ -43,11 +43,15 @@ import ExtensionLoaderProvider from "./providers/ExtensionLoaderProvider";
 // useAppConfiguration requires the AppConfigurationContext which is setup in Root
 // AppWrapper is used to make a functional component so we can use the context
 function AppWrapper() {
+  const [useIterablePlayer = false] = useAppConfigurationValue<boolean>(
+    AppSetting.EXPERIMENTAL_BAG_PLAYER,
+  );
+
   const dataSources: IDataSourceFactory[] = useMemo(() => {
     const sources = [
       new Ros1UnavailableDataSourceFactory(),
-      new Ros1LocalBagDataSourceFactory(),
-      new Ros1RemoteBagDataSourceFactory(),
+      new Ros1LocalBagDataSourceFactory({ useIterablePlayer }),
+      new Ros1RemoteBagDataSourceFactory({ useIterablePlayer }),
       new Ros2UnavailableDataSourceFactory(),
       new Ros2LocalBagDataSourceFactory(),
       new RosbridgeDataSourceFactory(),
@@ -55,12 +59,12 @@ function AppWrapper() {
       new UlogLocalDataSourceFactory(),
       new VelodyneUnavailableDataSourceFactory(),
       new FoxgloveDataPlatformDataSourceFactory(),
-      new SampleNuscenesDataSourceFactory(),
+      new SampleNuscenesDataSourceFactory({ useIterablePlayer }),
       new McapLocalDataSourceFactory(),
     ];
 
     return sources;
-  }, []);
+  }, [useIterablePlayer]);
 
   return <App availableSources={dataSources} deepLinks={[window.location.href]} />;
 }

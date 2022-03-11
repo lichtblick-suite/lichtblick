@@ -65,6 +65,13 @@ const features: Feature[] = [
     name: "Legacy Plot panel",
     description: <>Enable the Legacy Plot panel.</>,
   },
+  {
+    key: AppSetting.EXPERIMENTAL_BAG_PLAYER,
+    name: "Experimental bag player",
+    description: (
+      <>The experimental bag player uses a new approach to loading messages from bag files.</>
+    ),
+  },
 ];
 if (process.env.NODE_ENV === "development") {
   features.push({

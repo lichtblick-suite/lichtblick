@@ -50,6 +50,8 @@ class MessageOrderTracker {
       return;
     }
     const { messages, messageOrder, currentTime, lastSeekTime } = playerState.activeData;
+    let didSeek = false;
+
     if (this.lastLastSeekTime !== lastSeekTime) {
       this.lastLastSeekTime = lastSeekTime;
       if (this.warningTimeout) {
@@ -59,6 +61,7 @@ class MessageOrderTracker {
       }
       this.warningTimeout = this.lastMessageTime = this.lastCurrentTime = undefined;
       this.lastMessages = [];
+      didSeek = true;
     }
     if (this.lastMessages !== messages || this.lastCurrentTime !== currentTime) {
       this.lastMessages = messages;
@@ -78,34 +81,38 @@ class MessageOrderTracker {
           this.lastMessageTime = undefined;
           continue;
         }
-        const currentTimeDrift = Math.abs(toSec(subtractTimes(messageTime, currentTime)));
 
-        if (currentTimeDrift > DRIFT_THRESHOLD_SEC) {
-          if (this.trackIncorrectMessages) {
-            this.incorrectMessages.push(message);
-          }
-          if (!this.warningTimeout) {
-            this.warningTimeout = setTimeout(() => {
-              // timeout has fired, we need to clear so a new timeout registers if there are more messages
-              this.warningTimeout = undefined;
-              // reset incorrect message queue before posting warning so we never keep
-              // incorrectMessages around. The browser console will keep messages in memory when
-              // logged, so disable logging of messages unless explicitly enabled.
-              const info = {
-                currentTime,
-                lastSeekTime,
-                messageOrder,
-                messageTime,
-                incorrectMessages: this.trackIncorrectMessages
-                  ? this.incorrectMessages
-                  : "not being tracked",
-              };
-              this.incorrectMessages = [];
-              log.warn(
-                `${messageOrder} very different from player.currentTime; without updating lastSeekTime`,
-                info,
-              );
-            }, WAIT_FOR_SEEK_SEC * 1000);
+        // The first emit after a seek occurs from a backfill. This backfill might produce messages
+        // much older than the seek time.
+        if (!didSeek) {
+          const currentTimeDrift = Math.abs(toSec(subtractTimes(messageTime, currentTime)));
+          if (currentTimeDrift > DRIFT_THRESHOLD_SEC) {
+            if (this.trackIncorrectMessages) {
+              this.incorrectMessages.push(message);
+            }
+            if (!this.warningTimeout) {
+              this.warningTimeout = setTimeout(() => {
+                // timeout has fired, we need to clear so a new timeout registers if there are more messages
+                this.warningTimeout = undefined;
+                // reset incorrect message queue before posting warning so we never keep
+                // incorrectMessages around. The browser console will keep messages in memory when
+                // logged, so disable logging of messages unless explicitly enabled.
+                const info = {
+                  currentTime,
+                  lastSeekTime,
+                  messageOrder,
+                  messageTime,
+                  incorrectMessages: this.trackIncorrectMessages
+                    ? this.incorrectMessages
+                    : "not being tracked",
+                };
+                this.incorrectMessages = [];
+                log.warn(
+                  `${messageOrder} very different from player.currentTime; without updating lastSeekTime`,
+                  info,
+                );
+              }, WAIT_FOR_SEEK_SEC * 1000);
+            }
           }
         }
 

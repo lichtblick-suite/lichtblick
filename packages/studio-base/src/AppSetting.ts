@@ -21,6 +21,7 @@ export enum AppSetting {
   UNLIMITED_MEMORY_CACHE = "experimental.unlimited-memory-cache",
   SHOW_DEBUG_PANELS = "showDebugPanels",
   ENABLE_LEGACY_PLOT_PANEL = "enableLegacyPlotPanel",
+  EXPERIMENTAL_BAG_PLAYER = "experimental.bag-player",
 
   // Miscellaneous
   HIDE_SIGN_IN_PROMPT = "hideSignInPrompt",

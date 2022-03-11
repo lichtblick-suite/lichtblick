@@ -22,6 +22,35 @@ import BagDataProvider, {
 } from "@foxglove/studio-base/randomAccessDataProviders/BagDataProvider";
 import sendNotification from "@foxglove/studio-base/util/sendNotification";
 
+// eslint-disable-next-line no-restricted-syntax
+const NullFn = null;
+
+// Polyfill Blob.arrayBuffer since jsdom does not support it
+// https://github.com/jsdom/jsdom/issues/2555
+// https://developer.mozilla.org/en-US/docs/Web/API/Blob/arrayBuffer
+global.Blob.prototype.arrayBuffer = async function arrayBuffer(): Promise<ArrayBuffer> {
+  return await new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = function () {
+      reader.onload = NullFn;
+      reader.onerror = NullFn;
+
+      if (reader.result == undefined || !(reader.result instanceof ArrayBuffer)) {
+        reject("Unsupported format for BlobReader");
+        return;
+      }
+
+      resolve(new Uint8Array(reader.result));
+    };
+    reader.onerror = function () {
+      reader.onload = NullFn;
+      reader.onerror = NullFn;
+      reject(reader.error ?? new Error("Unknown FileReader error"));
+    };
+    reader.readAsArrayBuffer(this);
+  });
+};
+
 const dummyExtensionPoint = {
   progressCallback() {
     // no-op
