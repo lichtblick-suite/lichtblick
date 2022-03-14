@@ -5,11 +5,14 @@
 import { Time } from "@foxglove/rostime";
 import { Topic, MessageEvent } from "@foxglove/studio";
 import { PlayerProblem } from "@foxglove/studio-base/players/types";
+import { RosDatatypes } from "@foxglove/studio-base/types/RosDatatypes";
 
 export type Initalization = {
   start: Time;
   end: Time;
   topics: Topic[];
+  datatypes: RosDatatypes;
+
   // Publisher names by topic
   publishersByTopic: Map<string, Set<string>>;
 

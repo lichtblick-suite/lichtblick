@@ -24,6 +24,7 @@ class TestSource implements IIterableSource {
       end: { sec: 0, nsec: 0 },
       topics: [],
       problems: [],
+      datatypes: new Map(),
       publishersByTopic: new Map(),
     };
   }

@@ -176,13 +176,31 @@ export class IterablePlayer implements Player {
     await this._emitState();
 
     try {
-      const { start, end, topics, problems, publishersByTopic } =
+      const { start, end, topics, problems, publishersByTopic, datatypes } =
         await this._iterableSource.initialize();
 
       this._start = this._currentTime = start;
       this._end = end;
-      this._providerTopics = topics;
       this._publishedTopics = publishersByTopic;
+      this._providerDatatypes = datatypes;
+
+      // Studio does not like duplicate topics or topics with different datatypes
+      // Check for duplicates or for miss-matched datatypes
+      const uniqueTopics = new Map<string, Topic>();
+      for (const topic of topics) {
+        const existingTopic = uniqueTopics.get(topic.name);
+        if (existingTopic) {
+          problems.push({
+            severity: "warn",
+            message: `Duplicate topic: ${topic.name}`,
+          });
+          continue;
+        }
+
+        uniqueTopics.set(topic.name, topic);
+      }
+
+      this._providerTopics = Array.from(uniqueTopics.values());
 
       let idx = 0;
       for (const problem of problems) {

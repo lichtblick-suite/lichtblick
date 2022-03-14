@@ -10,6 +10,7 @@ import { parse as parseMessageDefinition } from "@foxglove/rosmsg";
 import { LazyMessageReader } from "@foxglove/rosmsg-serialization";
 import { Topic } from "@foxglove/studio";
 import { PlayerProblem } from "@foxglove/studio-base/players/types";
+import { RosDatatypes } from "@foxglove/studio-base/types/RosDatatypes";
 import BrowserHttpReader from "@foxglove/studio-base/util/BrowserHttpReader";
 import CachedFilelike from "@foxglove/studio-base/util/CachedFilelike";
 import { getBagChunksOverlapCount } from "@foxglove/studio-base/util/bags";
@@ -86,7 +87,8 @@ export class BagIterableSource implements IIterableSource {
       });
     }
 
-    const topics: Topic[] = [];
+    const datatypes: RosDatatypes = new Map();
+    const topics = new Map<string, Topic>();
     const publishersByTopic: Initalization["publishersByTopic"] = new Map();
     for (const [id, connection] of this._bag.connections) {
       const datatype = connection.type;
@@ -101,20 +103,40 @@ export class BagIterableSource implements IIterableSource {
       }
       publishers.add(connection.callerid ?? String(connection.conn));
 
-      topics.push({
+      const existingTopic = topics.get(connection.topic);
+      if (existingTopic && existingTopic.datatype !== datatype) {
+        problems.push({
+          severity: "warn",
+          message: `Conflicting datatypes on topic (${connection.topic}): ${datatype}, ${existingTopic.datatype}`,
+          tip: `Studio requires all connections on a topic to have the same datatype. Make sure all your nodes are publishing the same message on ${connection.topic}.`,
+        });
+      }
+
+      topics.set(connection.topic, {
         name: connection.topic,
         datatype,
       });
       const parsedDefinition = parseMessageDefinition(connection.messageDefinition);
       const reader = new LazyMessageReader(parsedDefinition);
       this._readersByConnectionId.set(id, reader);
+
+      for (const definition of parsedDefinition) {
+        // In parsed definitions, the first definition (root) does not have a name as is meant to
+        // be the datatype of the topic.
+        if (!definition.name) {
+          datatypes.set(datatype, definition);
+        } else {
+          datatypes.set(definition.name, definition);
+        }
+      }
     }
 
     return {
-      topics,
+      topics: Array.from(topics.values()),
       start: this._bag.startTime ?? { sec: 0, nsec: 0 },
       end: this._bag.endTime ?? { sec: 0, nsec: 0 },
       problems,
+      datatypes,
       publishersByTopic,
     };
   }

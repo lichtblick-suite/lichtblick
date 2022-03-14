@@ -31,7 +31,7 @@ import {
   Typography,
 } from "@mui/material";
 import * as monacoApi from "monaco-editor/esm/vs/editor/editor.api";
-import { ReactNode, useCallback, useMemo, useState } from "react";
+import { ReactNode, useCallback, useMemo } from "react";
 
 import { Explorer } from "@foxglove/studio-base/panels/NodePlayground";
 import { Script } from "@foxglove/studio-base/panels/NodePlayground/script";
@@ -159,7 +159,6 @@ const Sidebar = ({
   script,
   addNewNode,
 }: Props): React.ReactElement => {
-  const [activeExplorerTab, setActiveExplorerTab] = useState<string | undefined>(undefined);
   const nodesSelected = explorer === "nodes";
   const utilsSelected = explorer === "utils";
   const templatesSelected = explorer === "templates";
@@ -184,14 +183,19 @@ const Sidebar = ({
     [setScriptOverride],
   );
 
-  const handleExplorerTabChange = useCallback(
-    (_event: React.ChangeEvent<unknown>, newValue: string) => {
-      if (newValue !== activeExplorerTab) {
-        setActiveExplorerTab(newValue);
-      }
-    },
-    [activeExplorerTab],
-  );
+  const activeExplorerTab = useMemo(() => {
+    switch (explorer) {
+      case undefined:
+        return false;
+      case "nodes":
+        return "nodes";
+      case "templates":
+        return "templates";
+      case "utils":
+        return "utils";
+    }
+    return false;
+  }, [explorer]);
 
   const explorers = useMemo(
     () => ({
@@ -210,7 +214,7 @@ const Sidebar = ({
             collapse={() => updateExplorer(undefined)}
             title="Utilities"
             subheader={
-              <Typography variant="body2" color="text.secondary">
+              <Typography variant="body2" color="text.secondary" component="div">
                 You can import any of these modules into your node using the following syntax:{" "}
                 <pre>{`import { ... } from "./pointClouds.ts".`}</pre>
               </Typography>
@@ -282,7 +286,7 @@ const Sidebar = ({
   return (
     <Paper>
       <Stack direction="row" height="100%">
-        <STabs orientation="vertical" value={activeExplorerTab} onChange={handleExplorerTabChange}>
+        <STabs orientation="vertical" value={activeExplorerTab}>
           <STab
             disableRipple
             value="nodes"
