@@ -2317,14 +2317,14 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@foxglove/mcap@github:foxglove/mcap#workspace=@foxglove/mcap&commit=2ac4d4fc0762774ebc5c3d2a03fa12ab4063f4dd":
+"@foxglove/mcap@github:foxglove/mcap#workspace=@foxglove/mcap&commit=e79355a9e99efd5094b15f21bb361a85d9e748bc":
   version: 0.1.0
-  resolution: "@foxglove/mcap@https://github.com/foxglove/mcap.git#workspace=%40foxglove%2Fmcap&commit=2ac4d4fc0762774ebc5c3d2a03fa12ab4063f4dd"
+  resolution: "@foxglove/mcap@https://github.com/foxglove/mcap.git#workspace=%40foxglove%2Fmcap&commit=e79355a9e99efd5094b15f21bb361a85d9e748bc"
   dependencies:
     "@foxglove/crc": ^0.0.3
     heap-js: ^2.1.6
     tslib: ^2
-  checksum: 420cf34a0065910346147c72d0f04322dfc4f61fd121c890f8a4ea3cc650c4434f94c9bce0fa0005513dae545059cf30e224ea005989aeaaddc4518497d23364
+  checksum: bb66f59045cfdf1c1e5e9e01e2ed95399ead759afcb684668e37213fd739d4055694bc7b4beb4ca19cd618e730490934a357855417f644479a2cb25c56e8cb6a
   languageName: node
   linkType: hard
 
@@ -2508,7 +2508,7 @@ __metadata:
     "@foxglove/den": "workspace:*"
     "@foxglove/electron-socket": 1.4.1
     "@foxglove/hooks": "workspace:*"
-    "@foxglove/mcap": "github:foxglove/mcap#workspace=@foxglove/mcap&commit=2ac4d4fc0762774ebc5c3d2a03fa12ab4063f4dd"
+    "@foxglove/mcap": "github:foxglove/mcap#workspace=@foxglove/mcap&commit=e79355a9e99efd5094b15f21bb361a85d9e748bc"
     "@foxglove/mcap-support": "workspace:*"
     "@foxglove/regl-worldview": 2.4.0
     "@foxglove/ros1": 1.4.0
