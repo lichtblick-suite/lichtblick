@@ -109,8 +109,6 @@ const BottomBar = ({ children }: { children?: React.ReactNode }) => {
   );
 };
 
-const canTransformMarkersByTopic = (topic: string) => !topic.includes("rect");
-
 function ImageView(props: Props) {
   const classes = useStyles();
   const { config, saveConfig } = props;
@@ -163,11 +161,10 @@ function ImageView(props: Props) {
 
       saveConfig({
         cameraTopic: newCameraTopic,
-        transformMarkers: canTransformMarkersByTopic(newCameraTopic),
         enabledMarkerTopics: newEnabledMarkerTopics,
       });
     },
-    [topics, enabledMarkerTopics, saveConfig],
+    [enabledMarkerTopics, saveConfig, topics],
   );
   const imageTopicDropdown = useMemo(() => {
     const items = allImageTopics.map((topic) => {
@@ -282,18 +279,12 @@ function ImageView(props: Props) {
   }, [cameraTopic, classes.controls, imageTopicDropdown, markerDropdown]);
 
   const renderBottomBar = () => {
-    const canTransformMarkers = canTransformMarkersByTopic(cameraTopic);
-
     const topicTimestamp = (
       <TopicTimestamp
         style={{ padding: "8px 8px 0px 0px" }}
         text={image ? formatTimeRaw(image.stamp) : ""}
       />
     );
-
-    if (!canTransformMarkers) {
-      return <BottomBar>{topicTimestamp}</BottomBar>;
-    }
 
     return (
       <BottomBar>
