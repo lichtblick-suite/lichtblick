@@ -39,6 +39,8 @@ if (!rootEl) {
   throw new Error("missing #root element");
 }
 
+const isDevelopment = process.env.NODE_ENV === "development";
+
 async function main() {
   const chromeMatch = navigator.userAgent.match(/Chrome\/(\d+)\./);
   const chromeVersion = chromeMatch ? parseInt(chromeMatch[1] ?? "", 10) : 0;
@@ -73,7 +75,11 @@ async function main() {
   const { Root } = await import("./Root");
 
   const appConfiguration = new LocalStorageAppConfiguration({
-    defaults: { [AppSetting.OPEN_DIALOG]: true, [AppSetting.ENABLE_REACT_STRICT_MODE]: true },
+    defaults: {
+      [AppSetting.OPEN_DIALOG]: true,
+      [AppSetting.ENABLE_REACT_STRICT_MODE]: isDevelopment,
+      [AppSetting.EXPERIMENTAL_BAG_PLAYER]: isDevelopment,
+    },
   });
   const enableStrictMode = appConfiguration.get(AppSetting.ENABLE_REACT_STRICT_MODE) as boolean;
 

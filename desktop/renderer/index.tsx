@@ -55,6 +55,8 @@ if (!rootEl) {
   throw new Error("missing #root element");
 }
 
+const isDevelopment = process.env.NODE_ENV === "development";
+
 async function main() {
   // Initialize the RPC channel for electron-socket. This method is called first
   // since the window.onmessage handler needs to be installed before
@@ -66,7 +68,13 @@ async function main() {
 
   const appConfiguration = await NativeStorageAppConfiguration.Initialize(
     (global as { storageBridge?: Storage }).storageBridge!,
-    { defaults: { [AppSetting.OPEN_DIALOG]: true, [AppSetting.ENABLE_REACT_STRICT_MODE]: true } },
+    {
+      defaults: {
+        [AppSetting.OPEN_DIALOG]: true,
+        [AppSetting.ENABLE_REACT_STRICT_MODE]: isDevelopment,
+        [AppSetting.EXPERIMENTAL_BAG_PLAYER]: isDevelopment,
+      },
+    },
   );
 
   const enableStrictMode = appConfiguration.get(AppSetting.ENABLE_REACT_STRICT_MODE) as boolean;
