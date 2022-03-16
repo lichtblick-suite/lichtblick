@@ -38,7 +38,7 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-export default function ConnectionList(): JSX.Element {
+export default function DataSourceSidebarContent(): JSX.Element {
   const modalHost = useContext(ModalContext);
   const theme = useTheme();
   const classes = useStyles();

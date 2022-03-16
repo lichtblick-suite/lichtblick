@@ -6,18 +6,18 @@ import MockMessagePipelineProvider from "@foxglove/studio-base/components/Messag
 import ModalHost from "@foxglove/studio-base/context/ModalHost";
 import { PlayerPresence } from "@foxglove/studio-base/players/types";
 
-import ConnectionList from "./index";
+import DataSourceSidebarContent from "./DataSourceSidebarContent";
 
 export default {
-  title: "components/ConnectionList",
-  component: ConnectionList,
+  title: "components/DataSourceSidebar/DataSourceSidebarContent",
+  component: DataSourceSidebarContent,
 };
 
 export const NoDataSources = (): JSX.Element => {
   return (
     <ModalHost>
       <MockMessagePipelineProvider presence={PlayerPresence.NOT_PRESENT}>
-        <ConnectionList />
+        <DataSourceSidebarContent />
       </MockMessagePipelineProvider>
     </ModalHost>
   );
@@ -41,7 +41,7 @@ export const WithPlayerProblems = (): JSX.Element => {
           },
         ]}
       >
-        <ConnectionList />
+        <DataSourceSidebarContent />
       </MockMessagePipelineProvider>
     </ModalHost>
   );

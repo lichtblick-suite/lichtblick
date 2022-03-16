@@ -5,10 +5,11 @@
 import { IconButton } from "@fluentui/react";
 
 import { AppSetting } from "@foxglove/studio-base/AppSetting";
-import ConnectionList from "@foxglove/studio-base/components/ConnectionList";
-import connectionHelpContent from "@foxglove/studio-base/components/ConnectionList/index.help.md";
 import { SidebarContent } from "@foxglove/studio-base/components/SidebarContent";
 import { useAppConfigurationValue } from "@foxglove/studio-base/hooks/useAppConfigurationValue";
+
+import DataSourceSidebarContent from "./DataSourceSidebarContent";
+import helpContent from "./help.md";
 
 type Props = {
   onSelectDataSourceAction: () => void;
@@ -21,7 +22,7 @@ export default function DataSourceSidebar(props: Props): JSX.Element {
   return (
     <SidebarContent
       title="Data source"
-      helpContent={connectionHelpContent}
+      helpContent={helpContent}
       trailingItems={[
         enableOpenDialog === true && (
           <IconButton
@@ -38,7 +39,7 @@ export default function DataSourceSidebar(props: Props): JSX.Element {
         ),
       ].filter(Boolean)}
     >
-      <ConnectionList />
+      <DataSourceSidebarContent />
     </SidebarContent>
   );
 }
