@@ -13,8 +13,7 @@
 
 import Logger from "@foxglove/log";
 import { Time, isLessThan, subtract as subtractTimes, toSec } from "@foxglove/rostime";
-import { PlayerState, MessageEvent } from "@foxglove/studio-base/players/types";
-import sendNotification from "@foxglove/studio-base/util/sendNotification";
+import { PlayerState, MessageEvent, PlayerProblem } from "@foxglove/studio-base/players/types";
 import { formatFrame, getTimestampForMessageEvent } from "@foxglove/studio-base/util/time";
 
 const DRIFT_THRESHOLD_SEC = 1; // Maximum amount of drift allowed.
@@ -45,10 +44,13 @@ class MessageOrderTracker {
 
   private incorrectMessages: MessageEvent<unknown>[] = [];
 
-  update(playerState: PlayerState): void {
+  update(playerState: PlayerState): PlayerProblem[] {
     if (!playerState.activeData) {
-      return;
+      return [];
     }
+
+    const problems: PlayerProblem[] = [];
+
     const { messages, messageOrder, currentTime, lastSeekTime } = playerState.activeData;
     let didSeek = false;
 
@@ -69,14 +71,16 @@ class MessageOrderTracker {
       for (const message of messages) {
         const messageTime = getTimestampForMessageEvent(message, messageOrder);
         if (!messageTime) {
-          sendNotification(
-            `Message has no ${messageOrder}`,
-            `Received a message on topic ${message.topic} around ${formatFrame(
-              currentTime,
-            )} with ` + `no ${messageOrder} when sorting by that method.`,
-            "app",
-            "warn",
-          );
+          const formattedTime = formatFrame(currentTime);
+          const msg =
+            `Received a message on topic ${message.topic} around ${formattedTime} with ` +
+            `no ${messageOrder}.`;
+          problems.push({
+            severity: "warn",
+            error: new Error(msg),
+            message: "Unsortable message",
+          });
+
           this.lastMessageTopic = message.topic;
           this.lastMessageTime = undefined;
           continue;
@@ -121,23 +125,24 @@ class MessageOrderTracker {
           this.lastMessageTopic != undefined &&
           isLessThan(messageTime, this.lastMessageTime)
         ) {
-          sendNotification(
-            "Data went back in time",
-            `Processed a message on ${message.topic} at ${formatFrame(
-              messageTime,
-            )} which is earlier than ` +
-              `last processed message on ${this.lastMessageTopic} at ${formatFrame(
-                this.lastMessageTime,
-              )}. ` +
-              `Data source may be corrupted on these or other topics.`,
-            "user",
-            "warn",
-          );
+          const formattedTime = formatFrame(messageTime);
+          const lastMessageTime = formatFrame(this.lastMessageTime);
+          const errorMessage =
+            `Processed a message on ${message.topic} at ${formattedTime} which is earlier than ` +
+            `last processed message on ${this.lastMessageTopic} at ${lastMessageTime}.`;
+
+          problems.push({
+            severity: "warn",
+            message: "Data went back in time",
+            error: new Error(errorMessage),
+          });
         }
         this.lastMessageTopic = message.topic;
         this.lastMessageTime = messageTime;
       }
     }
+
+    return problems;
   }
 }
 

@@ -12,7 +12,6 @@
 //   You may not use this file except in compliance with the License.
 
 import { MessageEvent, PlayerPresence, PlayerState } from "@foxglove/studio-base/players/types";
-import sendNotification from "@foxglove/studio-base/util/sendNotification";
 
 import MessageOrderTracker from "./MessageOrderTracker";
 
@@ -62,61 +61,124 @@ const message = (
   sizeInBytes: 0,
 });
 
-describe("MessagePipeline/warnOnOutOfSyncMessages", () => {
+describe("MessagePipeline/MessageOrderTracker", () => {
   describe("when expecting messages ordered by receive time", () => {
-    it("calls report error when messages are out of order", () => {
+    it("report error when messages are out of order", () => {
       const orderTracker = new MessageOrderTracker();
-      orderTracker.update(playerStateWithMessages([message(7, 10), message(8, 9)], "receiveTime"));
-      sendNotification.expectCalledDuringTest();
+      const problems = orderTracker.update(
+        playerStateWithMessages([message(7, 10), message(8, 9)], "receiveTime"),
+      );
+
+      expect(problems).toEqual([
+        {
+          error: new Error(
+            "Processed a message on /foo at 9.000000001 which is earlier than last processed message on /foo at 10.000000001.",
+          ),
+          message: "Data went back in time",
+          severity: "warn",
+        },
+      ]);
     });
 
     it("does not report an error when messages are in order", () => {
-      expect.assertions(0);
       const orderTracker = new MessageOrderTracker();
-      orderTracker.update(playerStateWithMessages([message(8, 9), message(7, 10)], "receiveTime"));
+      const playerState = playerStateWithMessages([message(8, 9), message(7, 10)], "receiveTime");
+      const problems = orderTracker.update(playerState);
+      expect(problems).toEqual([]);
     });
 
     it("reports an error when given a message with no receive time", () => {
       const orderTracker = new MessageOrderTracker();
-      orderTracker.update(playerStateWithMessages([message(7, undefined)], "receiveTime"));
-      sendNotification.expectCalledDuringTest();
+      const problems = orderTracker.update(
+        playerStateWithMessages([message(7, undefined)], "receiveTime"),
+      );
+      expect(problems).toEqual([
+        {
+          error: new Error(
+            "Received a message on topic /foo around 1.000000011 with no receiveTime.",
+          ),
+          message: "Unsortable message",
+          severity: "warn",
+        },
+      ]);
     });
 
     it("reports an error when given a message with no timestamps at all", () => {
       const orderTracker = new MessageOrderTracker();
-      orderTracker.update(playerStateWithMessages([message(undefined, undefined)], "receiveTime"));
-      sendNotification.expectCalledDuringTest();
+      const problems = orderTracker.update(
+        playerStateWithMessages([message(undefined, undefined)], "receiveTime"),
+      );
+      expect(problems).toEqual([
+        {
+          error: new Error(
+            "Received a message on topic /foo around 1.000000011 with no receiveTime.",
+          ),
+          message: "Unsortable message",
+          severity: "warn",
+        },
+      ]);
     });
   });
 
   describe("when expecting messages ordered by header stamp", () => {
     it("calls report error when messages are out of order", () => {
       const orderTracker = new MessageOrderTracker();
-      orderTracker.update(playerStateWithMessages([message(8, 9), message(7, 10)], "headerStamp"));
-      sendNotification.expectCalledDuringTest();
+      const problems = orderTracker.update(
+        playerStateWithMessages([message(8, 9), message(7, 10)], "headerStamp"),
+      );
+      expect(problems).toEqual([
+        {
+          error: new Error(
+            "Processed a message on /foo at 7.000000001 which is earlier than last processed message on /foo at 8.000000001.",
+          ),
+          message: "Data went back in time",
+          severity: "warn",
+        },
+      ]);
     });
 
     it("does not report an error when messages are in order", () => {
-      expect.assertions(0);
       const orderTracker = new MessageOrderTracker();
-      orderTracker.update(playerStateWithMessages([message(7, 10), message(8, 9)], "headerStamp"));
+      const playerState = playerStateWithMessages([message(7, 10), message(8, 9)], "headerStamp");
+      const problems = orderTracker.update(playerState);
+      expect(problems).toEqual([]);
     });
 
     it("reports an error when given a message with no header stamp", () => {
       const orderTracker = new MessageOrderTracker();
-      orderTracker.update(playerStateWithMessages([message(undefined, 10)], "headerStamp"));
-      sendNotification.expectCalledDuringTest();
+      const problems = orderTracker.update(
+        playerStateWithMessages([message(undefined, 10)], "headerStamp"),
+      );
+      expect(problems).toEqual([
+        {
+          error: new Error(
+            "Received a message on topic /foo around 1.000000011 with no headerStamp.",
+          ),
+          message: "Unsortable message",
+          severity: "warn",
+        },
+      ]);
     });
 
     it("reports an error when given a message with no timestamps at all", () => {
       const orderTracker = new MessageOrderTracker();
-      orderTracker.update(playerStateWithMessages([message(undefined, undefined)], "headerStamp"));
-      sendNotification.expectCalledDuringTest();
+      const problems = orderTracker.update(
+        playerStateWithMessages([message(undefined, undefined)], "headerStamp"),
+      );
+      expect(problems).toEqual([
+        {
+          error: new Error(
+            "Received a message on topic /foo around 1.000000011 with no headerStamp.",
+          ),
+          message: "Unsortable message",
+          severity: "warn",
+        },
+      ]);
     });
 
     it("forgives a timestamp-backtracking after a missing header stamp", () => {
       const orderTracker = new MessageOrderTracker();
-      orderTracker.update(
+      const problems = orderTracker.update(
         playerStateWithMessages(
           [
             message(8, 9),
@@ -126,8 +188,15 @@ describe("MessagePipeline/warnOnOutOfSyncMessages", () => {
           "headerStamp",
         ),
       );
-      expect((sendNotification as any).mock.calls.length).toBe(1);
-      sendNotification.expectCalledDuringTest();
+      expect(problems).toEqual([
+        {
+          error: new Error(
+            "Received a message on topic /foo around 1.000000011 with no headerStamp.",
+          ),
+          message: "Unsortable message",
+          severity: "warn",
+        },
+      ]);
     });
   });
 });
