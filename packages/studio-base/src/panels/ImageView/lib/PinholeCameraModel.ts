@@ -11,7 +11,7 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { CameraInfo, Point2D } from "@foxglove/studio-base/types/Messages";
+import { CameraInfo, FloatArray, Point2D } from "@foxglove/studio-base/types/Messages";
 
 const DISTORTION_STATE = {
   NONE: "NONE",
@@ -26,10 +26,10 @@ type DistortionState = typeof DISTORTION_STATE[keyof typeof DISTORTION_STATE];
 // http://docs.ros.org/diamondback/api/image_geometry/html/c++/pinhole__camera__model_8cpp_source.html
 export default class PinholeCameraModel {
   private _distortionState: DistortionState = DISTORTION_STATE.NONE;
-  D: readonly number[] = [];
-  K: readonly number[] = [];
-  P: readonly number[] = [];
-  R: readonly number[] = [];
+  D: FloatArray = [];
+  K: FloatArray = [];
+  P: FloatArray = [];
+  R: FloatArray = [];
 
   // Mostly copied from `fromCameraInfo`
   // http://docs.ros.org/diamondback/api/image_geometry/html/c++/pinhole__camera__model_8cpp_source.html#l00062

@@ -625,7 +625,9 @@ export default class SceneBuilder implements MarkerProvider {
 
   private _consumeLaserScan = (topic: string, msg: MessageEvent<LaserScan>): void => {
     const scan = msg.message;
-    const hasIntensity = Array.isArray(scan.intensities) && scan.intensities.length > 0;
+    const hasIntensity =
+      (ArrayBuffer.isView(scan.intensities) || Array.isArray(scan.intensities)) &&
+      scan.intensities.length > 0;
     const pointStep = hasIntensity ? 48 : 40;
 
     const data = new Uint8Array(pointStep * scan.ranges.length);
@@ -633,7 +635,7 @@ export default class SceneBuilder implements MarkerProvider {
     for (let i = 0; i < scan.ranges.length; i++) {
       const offset = i * pointStep;
       const distance = Math.min(scan.range_max, Math.max(scan.range_min, scan.ranges[i] ?? 0));
-      const intensity = scan.intensities[i] ?? Number.NaN;
+      const intensity = (scan.intensities[i] ?? Number.NaN) as number;
       const angle = Math.min(scan.angle_max, scan.angle_min + i * scan.angle_increment);
       const x = distance * Math.cos(angle);
       const y = distance * Math.sin(angle);

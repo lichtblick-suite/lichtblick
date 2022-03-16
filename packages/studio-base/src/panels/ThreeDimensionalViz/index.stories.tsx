@@ -1627,6 +1627,7 @@ SensorMsgs_LaserScan.parameters = { colorScheme: "dark" };
 export function SensorMsgs_LaserScan(): JSX.Element {
   const topics: Topic[] = [
     { name: "/laserscan", datatype: "sensor_msgs/LaserScan" },
+    { name: "/laserscan/nointensity", datatype: "sensor_msgs/LaserScan" },
     { name: "/tf", datatype: "geometry_msgs/TransformStamped" },
   ];
   const tf1: MessageEvent<TF> = {
@@ -1674,11 +1675,30 @@ export function SensorMsgs_LaserScan(): JSX.Element {
     sizeInBytes: 0,
   };
 
+  const laserScanNoIntensity: MessageEvent<LaserScan> = {
+    topic: "/laserscan/nointensity",
+    receiveTime: { sec: 10, nsec: 0 },
+    message: {
+      header: { seq: 0, stamp: { sec: 0, nsec: 0 }, frame_id: "sensor" },
+      angle_min: 0,
+      angle_max: 2 * Math.PI,
+      angle_increment: (1 / 360) * 2 * Math.PI,
+      time_increment: 1 / 360,
+      scan_time: 1,
+      range_min: 0.001,
+      range_max: 10,
+      ranges: [...Array(360)].map((_, i) => 1 + (1 + Math.sin(i / 2)) / 2),
+      intensities: [],
+    },
+    sizeInBytes: 0,
+  };
+
   const fixture = useDelayedFixture({
     datatypes,
     topics,
     frame: {
       "/laserscan": [laserScan],
+      "/laserscan/nointensity": [laserScanNoIntensity],
       "/tf": [tf1, tf2],
     },
     capabilities: [],
@@ -1692,8 +1712,20 @@ export function SensorMsgs_LaserScan(): JSX.Element {
       <ThreeDimensionalViz
         overrideConfig={{
           ...ThreeDimensionalViz.defaultConfig,
-          checkedKeys: ["name:Topics", "t:/tf", "t:/laserscan", `t:${FOXGLOVE_GRID_TOPIC}`],
-          expandedKeys: ["name:Topics", "t:/tf", "t:/laserscan", `t:${FOXGLOVE_GRID_TOPIC}`],
+          checkedKeys: [
+            "name:Topics",
+            "t:/tf",
+            "t:/laserscan",
+            "t:/laserscan/nointensity",
+            `t:${FOXGLOVE_GRID_TOPIC}`,
+          ],
+          expandedKeys: [
+            "name:Topics",
+            "t:/tf",
+            "t:/laserscan",
+            "t:/laserscan/nointensity",
+            `t:${FOXGLOVE_GRID_TOPIC}`,
+          ],
           followTf: "base_link",
           cameraState: {
             distance: 13.5,
