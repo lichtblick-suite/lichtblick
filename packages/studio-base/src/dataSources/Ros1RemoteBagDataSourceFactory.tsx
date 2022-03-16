@@ -38,7 +38,7 @@ class Ros1RemoteBagDataSourceFactory implements IDataSourceFactory {
       return new IterablePlayer({
         source: bagSource,
         isSampleDataSource: true,
-        name: "Adapted from nuScenes dataset.\nCopyright © 2020 nuScenes.\nhttps://www.nuscenes.org/terms-of-use",
+        name: url,
         metricsCollector: args.metricsCollector,
         // Use blank url params so the data source is set in the url
         urlParams: {

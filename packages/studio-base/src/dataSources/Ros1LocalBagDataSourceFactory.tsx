@@ -38,6 +38,7 @@ class Ros1LocalBagDataSourceFactory implements IDataSourceFactory {
       return new IterablePlayer({
         metricsCollector: args.metricsCollector,
         source: bagSource,
+        name: file.name,
       });
     } else {
       const bagWorkerDataProvider = new WorkerBagDataProvider({ type: "file", file });
