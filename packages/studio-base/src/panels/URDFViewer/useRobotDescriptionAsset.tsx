@@ -24,9 +24,6 @@ export default function useRobotDescriptionAsset(): {
     }
     return await new URDFAssetLoader().load(
       new File([robotDescriptionParam], "robot_description.urdf"),
-      {
-        basePath: undefined,
-      },
     );
   }, [robotDescriptionParam]);
 

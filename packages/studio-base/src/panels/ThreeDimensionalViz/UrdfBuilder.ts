@@ -26,7 +26,6 @@ import {
 } from "@foxglove/den/urdf";
 import Logger from "@foxglove/log";
 import { Time } from "@foxglove/rostime";
-import { rewritePackageUrl } from "@foxglove/studio-base/context/AssetsContext";
 import { TopicSettingsCollection } from "@foxglove/studio-base/panels/ThreeDimensionalViz/SceneBuilder";
 import { UrdfSettings } from "@foxglove/studio-base/panels/ThreeDimensionalViz/TopicSettingsEditor/UrdfSettingsEditor";
 import {
@@ -102,7 +101,7 @@ export default class UrdfBuilder extends EventEmitter<EventTypes> implements Mar
     this._visible = isVisible;
   }
 
-  setUrdfData(urdfData: string | undefined, rosPackagePath: string | undefined): void {
+  setUrdfData(urdfData: string | undefined): void {
     if (this._urdfData !== urdfData) {
       this._urdfData = urdfData;
 
@@ -111,7 +110,7 @@ export default class UrdfBuilder extends EventEmitter<EventTypes> implements Mar
         this.clearMarkers();
 
         if (urdfData) {
-          void this.parseUrdf(urdfData, rosPackagePath).catch((err) => {
+          void this.parseUrdf(urdfData).catch((err) => {
             sendNotification(`Error parsing URDF`, (err as Error).message, "user", "error");
           });
         }
@@ -119,14 +118,14 @@ export default class UrdfBuilder extends EventEmitter<EventTypes> implements Mar
     }
   }
 
-  setSettingsByKey(settings: TopicSettingsCollection, rosPackagePath: string | undefined): void {
+  setSettingsByKey(settings: TopicSettingsCollection): void {
     const newSettings = settings[`t:${URDF_TOPIC}`] ?? {};
     if (!isEqual(newSettings, this._settings)) {
       this._settings = newSettings;
       this.clearMarkers();
 
       if (this._settings.urdfUrl && isUrdfUrlValid(this._settings.urdfUrl)) {
-        void this.fetchUrdf(this._settings.urdfUrl, rosPackagePath).catch((err) => {
+        void this.fetchUrdf(this._settings.urdfUrl).catch((err) => {
           sendNotification(`Error loading URDF`, (err as Error).message, "user", "error");
         });
       } else {
@@ -135,10 +134,10 @@ export default class UrdfBuilder extends EventEmitter<EventTypes> implements Mar
     }
   }
 
-  async fetchUrdf(url: string, rosPackagePath: string | undefined): Promise<void> {
+  async fetchUrdf(url: string): Promise<void> {
     let text: string;
     try {
-      const fetchUrl = rewritePackageUrl(url, { rosPackagePath });
+      const fetchUrl = url;
       log.debug(`Fetching URDF from ${fetchUrl}`);
       const res = await fetch(fetchUrl);
       text = await res.text();
@@ -152,11 +151,11 @@ export default class UrdfBuilder extends EventEmitter<EventTypes> implements Mar
       throw new Error(`Did not fetch any URDF data from "${url}"`);
     }
 
-    await this.parseUrdf(text, rosPackagePath);
+    await this.parseUrdf(text);
   }
 
-  async parseUrdf(text: string, rosPackagePath: string | undefined): Promise<void> {
-    const fileFetcher = getFileFetch(rosPackagePath);
+  async parseUrdf(text: string): Promise<void> {
+    const fileFetcher = getFileFetch();
 
     try {
       log.debug(`Parsing ${text.length} byte URDF`);
@@ -364,12 +363,11 @@ function isUrdfUrlValid(str: string): boolean {
   }
 }
 
-function getFileFetch(rosPackagePath: string | undefined): (url: string) => Promise<string> {
+function getFileFetch(): (url: string) => Promise<string> {
   return async (url: string) => {
     try {
       log.debug(`fetch(${url}) requested`);
-      const fetchUrl = rewritePackageUrl(url, { rosPackagePath });
-      const res = await fetch(fetchUrl);
+      const res = await fetch(url);
       return await res.text();
     } catch (err) {
       throw new Error(`Failed to fetch "${url}": ${err}`);

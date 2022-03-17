@@ -33,32 +33,6 @@ export interface AssetLoader {
 }
 
 /**
- * Rewrite ROS `package://` URLs as `x-foxglove-ros-package:` URLs. All other
- * URLs are returned unmodified.
- */
-export function rewritePackageUrl(
-  url: string,
-  { basePath, rosPackagePath }: { basePath?: string; rosPackagePath?: string },
-): string {
-  if (!url) {
-    return url;
-  }
-  const pkgMatch = parsePackageUrl(url);
-  const basePathStr = basePath ? `&basePath=${encodeURIComponent(basePath)}` : "";
-  const rosPackagePathStr = rosPackagePath
-    ? `&rosPackagePath=${encodeURIComponent(rosPackagePath)}`
-    : "";
-  const relPathStr = pkgMatch?.relPath ? encodeURIComponent(pkgMatch.relPath) : "";
-
-  const newUrl = pkgMatch
-    ? `x-foxglove-ros-package:?targetPkg=${pkgMatch.targetPkg}${basePathStr}${rosPackagePathStr}&relPath=${relPathStr}`
-    : url;
-  return /^x-foxglove-ros-package:.+\.tiff?$/i.test(newUrl)
-    ? newUrl.replace(/^x-foxglove-ros-package:/, "x-foxglove-ros-package-converted-tiff:")
-    : newUrl;
-}
-
-/**
  * Parse a ROS `package://` URL (ex: "package://camera_drivers/resource/calibration/001.yaml")
  * into targetPkg ("camera_drivers)") and relPath ("/resource/calibration/001.yaml") components.
  */

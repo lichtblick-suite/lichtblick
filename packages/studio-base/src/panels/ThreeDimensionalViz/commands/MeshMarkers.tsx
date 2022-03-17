@@ -14,10 +14,7 @@ import { ReactElement, useMemo, useCallback } from "react";
 import { useToasts } from "react-toast-notifications";
 
 import { CommonCommandProps, GLTFScene, parseGLB } from "@foxglove/regl-worldview";
-import { AppSetting } from "@foxglove/studio-base/AppSetting";
 import RemountOnValueChange from "@foxglove/studio-base/components/RemountOnValueChange";
-import { rewritePackageUrl } from "@foxglove/studio-base/context/AssetsContext";
-import { useAppConfigurationValue } from "@foxglove/studio-base/hooks/useAppConfigurationValue";
 import notFoundModelURL from "@foxglove/studio-base/panels/ThreeDimensionalViz/commands/404.glb";
 import { GlbModel } from "@foxglove/studio-base/panels/ThreeDimensionalViz/utils/GlbModel";
 import { parseDaeToGlb } from "@foxglove/studio-base/panels/ThreeDimensionalViz/utils/parseDaeToGlb";
@@ -101,7 +98,6 @@ function MeshMarkers({ markers, loadModelOptions, layerIndex }: MeshMarkerProps)
   const models: React.ReactNode[] = [];
 
   const modelCache = useMemo(() => new ModelCache(loadModelOptions), [loadModelOptions]);
-  const [rosPackagePath] = useAppConfigurationValue<string>(AppSetting.ROS_PACKAGE_PATH);
   const { addToast } = useToasts();
   const reportError = useCallback(
     (error: Error) => {
@@ -116,7 +112,7 @@ function MeshMarkers({ markers, loadModelOptions, layerIndex }: MeshMarkerProps)
     if (!mesh_resource) {
       continue;
     }
-    const url = rewritePackageUrl(mesh_resource, { rosPackagePath });
+    const url = mesh_resource;
     const alpha = (color?.a ?? 0) > 0 ? color!.a : 1;
 
     const newMarker = {
