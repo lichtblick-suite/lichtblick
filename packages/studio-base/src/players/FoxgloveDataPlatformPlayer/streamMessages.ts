@@ -2,11 +2,12 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
+import { captureException } from "@sentry/core";
 import { isEqual } from "lodash";
 
 import Logger from "@foxglove/log";
 import { Mcap0StreamReader, Mcap0Types } from "@foxglove/mcap";
-import { loadDecompressHandlers, ParsedChannel } from "@foxglove/mcap-support";
+import { loadDecompressHandlers, parseChannel, ParsedChannel } from "@foxglove/mcap-support";
 import { fromNanoSec, isTimeInRangeInclusive, Time, toRFC3339String } from "@foxglove/rostime";
 import { MessageEvent } from "@foxglove/studio-base/players/types";
 import ConsoleApi from "@foxglove/studio-base/services/ConsoleApi";
@@ -44,6 +45,9 @@ export default async function* streamMessages({
 
   /**
    * Message readers are initialized out of band so we can parse message definitions only once.
+   *
+   * NOTE: If we encounter a channel/schema pair that is not pre-initialized, we will add it to
+   * parsedChannelsByTopic (thus mutating parsedChannelsByTopic).
    */
   parsedChannelsByTopic: Map<string, ParsedChannelAndEncodings[]>;
 }): AsyncIterable<MessageEvent<unknown>[]> {
@@ -117,17 +121,30 @@ export default async function* streamMessages({
             return;
           }
         }
-        // Throw an error for now, although we could fall back to just-in-time parsing:
-        // https://github.com/foxglove/studio/issues/2303
-        log.error(
-          "No pre-initialized reader for",
-          record,
-          "available readers are:",
-          parsedChannels,
-        );
-        throw new Error(
+
+        // We've not found a previously parsed channel with matching schema
+        // Create one here just-in-time
+        const parsedChannel = parseChannel({
+          messageEncoding: record.messageEncoding,
+          schema,
+        });
+
+        parsedChannels.push({
+          messageEncoding: record.messageEncoding,
+          schemaEncoding: schema.encoding,
+          schema: schema.data,
+          parsedChannel,
+        });
+
+        parsedChannelsByTopic.set(record.topic, parsedChannels);
+
+        channelInfoById.set(record.id, { channel: record, parsedChannel });
+
+        const err = new Error(
           `No pre-initialized reader for ${record.topic} (message encoding ${record.messageEncoding}, schema encoding ${schema.encoding}, schema name ${schema.name})`,
         );
+        captureException(err);
+        return;
       }
 
       case "Message": {
