@@ -584,7 +584,7 @@ export default class SceneBuilder implements MarkerProvider {
     const type = 101;
     const name = `${topic}/${type}`;
 
-    const { frameLocked } = this._settingsByKey[`t:${topic}`] as { frameLocked?: boolean };
+    const { frameLocked } = (this._settingsByKey[`t:${topic}`] ?? {}) as { frameLocked?: boolean };
 
     const { header, info, data } = message;
     if (info.width * info.height !== data.length) {
