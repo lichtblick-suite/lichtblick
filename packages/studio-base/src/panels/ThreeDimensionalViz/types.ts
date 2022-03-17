@@ -32,6 +32,8 @@ import {
   PoseStamped,
   MeshMarker,
   GlLineListMarker,
+  GeometryMsgs$PoseArray,
+  Pose,
 } from "@foxglove/studio-base/types/Messages";
 
 import { ColorOverrideByVariable, ColorOverride } from "./Layout";
@@ -57,7 +59,7 @@ export interface MarkerCollector {
   sphere(arg0: SphereMarker): void;
   sphereList(arg0: SphereListMarker): void;
   cylinder(arg0: CylinderMarker): void;
-  poseMarker(arg0: PoseStamped): void;
+  poseMarker(arg0: PoseStamped | (GeometryMsgs$PoseArray & { pose: Pose })): void;
   lineStrip(arg0: LineStripMarker): void;
   lineList(arg0: LineListMarker): void;
   points(arg0: PointsMarker): void;

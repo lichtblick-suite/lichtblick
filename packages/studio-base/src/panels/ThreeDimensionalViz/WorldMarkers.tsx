@@ -55,6 +55,8 @@ import {
   ColorMarker,
   MeshMarker,
   GlLineListMarker,
+  GeometryMsgs$PoseArray,
+  Pose,
 } from "@foxglove/studio-base/types/Messages";
 import { ReglColor } from "@foxglove/studio-base/util/colorUtils";
 
@@ -78,7 +80,7 @@ export type InteractiveMarkersByType = {
   mesh: Interactive<MeshMarker>[];
   pointcloud: Interactive<SphereMarker>[];
   points: Interactive<PointsMarker>[];
-  poseMarker: Interactive<BaseMarker>[];
+  poseMarker: (Interactive<BaseMarker> | Interactive<GeometryMsgs$PoseArray & { pose: Pose }>)[];
   sphere: Interactive<SphereMarker>[];
   sphereList: Interactive<SphereListMarker>[];
   text: Interactive<TextMarker>[];

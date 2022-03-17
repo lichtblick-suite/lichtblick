@@ -45,6 +45,11 @@ export type StampedMessage = Readonly<{
   header: Header;
 }>;
 
+export type GeometryMsgs$PoseArray = Readonly<{
+  header: Header;
+  poses: Pose[];
+}>;
+
 export type GeometryMsgs$PolygonStamped = Readonly<{
   header: Header;
   polygon: Polygon;
@@ -138,6 +143,7 @@ type MultiPointMarker = Readonly<{
 }>;
 
 type ArrowSize = Readonly<{
+  shaftLength?: number;
   shaftWidth: number;
   headLength: number;
   headWidth: number;

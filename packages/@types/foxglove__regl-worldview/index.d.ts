@@ -205,6 +205,7 @@ declare module "@foxglove/regl-worldview" {
     pointToVec3,
     vec3ToPoint,
     orientationToVec4,
+    vec4ToOrientation,
     Worldview,
     withPose,
     parseGLB,

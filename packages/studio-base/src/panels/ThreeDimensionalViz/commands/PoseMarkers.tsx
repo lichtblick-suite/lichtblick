@@ -10,7 +10,7 @@
 //   This source code is licensed under the Apache License, Version 2.0,
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
-import { vec3 } from "gl-matrix";
+import { mat4, vec3 } from "gl-matrix";
 import { memo, ReactElement } from "react";
 
 import {
@@ -22,69 +22,81 @@ import {
   Pose,
   Vec3,
 } from "@foxglove/regl-worldview";
-import { InteractionData } from "@foxglove/studio-base/panels/ThreeDimensionalViz/Interactions/types";
 import { PoseSettings } from "@foxglove/studio-base/panels/ThreeDimensionalViz/TopicSettingsEditor/PoseSettingsEditor";
-import { Color, Header, Scale } from "@foxglove/studio-base/types/Messages";
+import { Color, GeometryMsgs$PoseArray, Header, Scale } from "@foxglove/studio-base/types/Messages";
 import { emptyPose } from "@foxglove/studio-base/util/Pose";
 
 type PoseMarker = {
   header: Header;
   pose: Pose;
-  scale: Scale;
+  scale?: Scale;
   color?: Color;
-  interactionData?: InteractionData;
   settings?: PoseSettings;
+  type?: 103;
 };
+const DEFAULT_COLOR = { r: 124 / 255, g: 107 / 255, b: 255 / 255, a: 0.5 };
+const DEFAULT_SIZE = { shaftLength: 1, shaftWidth: 0.05, headWidth: 0.2, headLength: 0.3 };
 
 type PoseMarkerProps = CommonCommandProps & {
-  markers: PoseMarker[];
+  markers: (PoseMarker | (Omit<PoseMarker, "type"> & GeometryMsgs$PoseArray & { type: 111 }))[];
 };
 
-function PoseMarkers({ markers, layerIndex }: PoseMarkerProps): ReactElement {
-  const models: React.ReactNode[] = [];
-  const arrowMarkers: React.ReactNode[] = [];
+function makeArrow(
+  marker: PoseMarkerProps["markers"][0],
+  instancePose: Pose | undefined,
+): React.ReactNode {
+  const headLength = marker.settings?.size?.headLength ?? DEFAULT_SIZE.headLength;
+  const newMarker = {
+    ...marker,
+    color: marker.settings?.overrideColor ?? DEFAULT_COLOR,
+    scale: {
+      x: marker.settings?.size?.shaftWidth ?? DEFAULT_SIZE.shaftWidth,
+      y: marker.settings?.size?.headWidth ?? DEFAULT_SIZE.headWidth,
+      z: headLength,
+    },
+  };
 
-  markers.forEach((marker) => {
-    const { settings } = marker;
-
-    let newMarker = marker;
-    if (settings?.overrideColor != undefined) {
-      newMarker = { ...newMarker, color: settings.overrideColor };
-    }
-
-    if (settings?.size) {
-      newMarker = {
-        ...newMarker,
-        scale: {
-          x: settings.size.shaftWidth ?? marker.scale.x,
-          y: settings.size.headWidth ?? marker.scale.y,
-          z: settings.size.headLength ?? marker.scale.z,
-        },
-      };
-    }
-
-    const pos = pointToVec3(newMarker.pose.position);
-    const orientation = orientationToVec4(newMarker.pose.orientation);
-    const dir = vec3.transformQuat([0, 0, 0], [1, 0, 0], orientation);
-    // the total length of the arrow is 4.7, we move the tail backwards by 0.88 (prev implementation)
-    const tipPoint = vec3.scaleAndAdd([0, 0, 0], pos, dir, 3.82) as Vec3;
-    const tailPoint = vec3.scaleAndAdd([0, 0, 0], pos, dir, -0.88) as Vec3;
-    arrowMarkers.push({
-      ...newMarker,
-      // Reset the pose since this information is incorporated into the arrow tip and tail
-      pose: emptyPose(),
-      points: [vec3ToPoint(tailPoint), vec3ToPoint(tipPoint)],
-    });
-  });
-
-  return (
-    <>
-      {...models}
-      <Arrows layerIndex={layerIndex} key="arrows">
-        {arrowMarkers}
-      </Arrows>
-    </>
+  const transform = mat4.fromRotationTranslation(
+    mat4.create(),
+    orientationToVec4(marker.pose.orientation),
+    pointToVec3(marker.pose.position),
   );
+  if (instancePose) {
+    const instanceTransform = mat4.fromRotationTranslation(
+      mat4.create(),
+      orientationToVec4(instancePose.orientation),
+      pointToVec3(instancePose.position),
+    );
+    mat4.multiply(transform, transform, instanceTransform);
+  }
+  const shaftLength = marker.settings?.size?.shaftLength ?? DEFAULT_SIZE.shaftLength;
+  const tailPoint = vec3.transformMat4([0, 0, 0], [0, 0, 0], transform) as Vec3;
+  const tipPoint = vec3.transformMat4(
+    [0, 0, 0],
+    [shaftLength + headLength, 0, 0],
+    transform,
+  ) as Vec3;
+  return {
+    ...newMarker,
+    // Reset the pose since this information is incorporated into the arrow tip and tail
+    pose: emptyPose(),
+    points: [vec3ToPoint(tailPoint), vec3ToPoint(tipPoint)],
+  };
+}
+
+function PoseMarkers({ markers, layerIndex }: PoseMarkerProps): ReactElement {
+  const arrowMarkers: React.ReactNode[] = [];
+  for (const marker of markers) {
+    if (marker.type === 111) {
+      for (const instancePose of marker.poses) {
+        arrowMarkers.push(makeArrow(marker, instancePose));
+      }
+    } else {
+      arrowMarkers.push(makeArrow(marker, undefined));
+    }
+  }
+
+  return <Arrows layerIndex={layerIndex}>{arrowMarkers}</Arrows>;
 }
 
 export default memo(PoseMarkers);

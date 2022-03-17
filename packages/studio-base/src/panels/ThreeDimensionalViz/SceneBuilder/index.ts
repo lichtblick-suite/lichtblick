@@ -53,6 +53,7 @@ import {
   InstancedLineListMarker,
   OccupancyGridMessage,
   PointCloud2,
+  GeometryMsgs$PoseArray,
   LaserScan,
   PointField,
 } from "@foxglove/studio-base/types/Messages";
@@ -62,21 +63,17 @@ import naturalSort from "@foxglove/studio-base/util/naturalSort";
 
 const log = Log.getLogger(__filename);
 
-const POSE_MARKER_COLOR = { r: 124 / 255, g: 107 / 255, b: 255 / 255, a: 0.5 };
-
 export type TopicSettingsCollection = {
   [topicOrNamespaceKey: string]: Record<string, unknown>;
 };
 
-// builds a syntehtic arrow marker from a geometry_msgs/PoseStamped
+// builds a synthetic arrow marker from a geometry_msgs/PoseStamped
 // these pose sizes were manually configured in rviz; for now we hard-code them here
 const buildSyntheticArrowMarker = ({ topic, message }: MessageEvent<PoseStamped>, pose: Pose) => ({
   header: message.header,
   type: 103,
   pose,
   frame_locked: true,
-  scale: { x: 2, y: 2, z: 0.1 },
-  color: POSE_MARKER_COLOR,
   interactionData: { topic, originalMessage: message },
 });
 
@@ -623,6 +620,23 @@ export default class SceneBuilder implements MarkerProvider {
     this.collectors[topic]!.addNonMarker(topic, mappedMessage as unknown as Interactive<unknown>);
   };
 
+  private _consumeNavMsgsPath = (topic: string, message: NavMsgs$Path): void => {
+    const topicSettings = this._settingsByKey[`t:${topic}`];
+
+    if (message.poses.length === 0) {
+      return;
+    }
+    const newMessage = {
+      header: message.header,
+      // Future: display orientation of the poses in the path
+      points: message.poses.map((pose) => pose.pose.position),
+      closed: false,
+      scale: { x: 0.2 },
+      color: topicSettings?.overrideColor ?? { r: 0.5, g: 0.5, b: 1, a: 1 },
+    };
+    this._consumeNonMarkerMessage(topic, newMessage, 4 /* line strip */, message);
+  };
+
   private _consumeLaserScan = (topic: string, msg: MessageEvent<LaserScan>): void => {
     const scan = msg.message;
     const hasIntensity =
@@ -761,13 +775,16 @@ export default class SceneBuilder implements MarkerProvider {
       case "visualization_msgs/msg/Marker":
       case "ros.visualization_msgs.Marker":
         this._consumeMarker(topic, message as BaseMarker);
-
         break;
       case "visualization_msgs/MarkerArray":
       case "visualization_msgs/msg/MarkerArray":
       case "ros.visualization_msgs.MarkerArray":
         this._consumeMarkerArray(topic, message as { markers: BaseMarker[] });
-
+        break;
+      case "geometry_msgs/PoseArray":
+      case "geometry_msgs/msg/PoseArray":
+      case "ros.geometry_msgs.PoseArray":
+        this._consumeNonMarkerMessage(topic, message as StampedMessage, 111);
         break;
       case "geometry_msgs/PoseStamped":
       case "geometry_msgs/msg/PoseStamped":
@@ -789,21 +806,7 @@ export default class SceneBuilder implements MarkerProvider {
       case "nav_msgs/Path":
       case "nav_msgs/msg/Path":
       case "ros.nav_msgs.Path": {
-        const topicSettings = this._settingsByKey[`t:${topic}`];
-
-        const pathStamped = message as NavMsgs$Path;
-        if (pathStamped.poses.length === 0) {
-          break;
-        }
-        const newMessage = {
-          header: pathStamped.header,
-          // Future: display orientation of the poses in the path
-          points: pathStamped.poses.map((pose) => pose.pose.position),
-          closed: false,
-          scale: { x: 0.2 },
-          color: topicSettings?.overrideColor ?? { r: 0.5, g: 0.5, b: 1, a: 1 },
-        };
-        this._consumeNonMarkerMessage(topic, newMessage, 4 /* line strip */, message);
+        this._consumeNavMsgsPath(topic, message as NavMsgs$Path);
         break;
       }
       case "sensor_msgs/PointCloud2":
@@ -978,7 +981,8 @@ export default class SceneBuilder implements MarkerProvider {
       | Marker
       | OccupancyGridMessage
       | PointCloud2
-      | (PoseStamped & { type: 103 });
+      | (PoseStamped & { type: 103 })
+      | (GeometryMsgs$PoseArray & { type: 111; pose: Pose });
     switch (marker.type) {
       case 1: // CubeMarker
       case 2: // SphereMarker
@@ -1002,6 +1006,7 @@ export default class SceneBuilder implements MarkerProvider {
       case 103: // PoseStamped
       case 108: // InstanceLineListMarker
       case 110: // ColorMarker
+      case 111: // PoseArray
       case 101: // OccupancyGridMessage
         marker = { ...marker, pose };
         break;
@@ -1097,6 +1102,8 @@ export default class SceneBuilder implements MarkerProvider {
         return add.instancedLineList(marker);
       case 110:
         return add.color(marker);
+      case 111:
+        return add.poseMarker(marker);
       default: {
         this._setTopicError(
           topic.name,

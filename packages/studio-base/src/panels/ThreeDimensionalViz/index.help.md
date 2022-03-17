@@ -67,6 +67,11 @@ Display visualization markers with any of the following datatypes in a 2D or 3D 
 - [`geometry_msgs/PoseStamped`](http://docs.ros.org/en/noetic/api/geometry_msgs/html/msg/PoseStamped.html)
 - [`geometry_msgs/msg/PoseStamped`](https://github.com/ros2/common_interfaces/blob/master/geometry_msgs/msg/PoseStamped.msg)
 
+#### Pose array
+
+- [`geometry_msgs/PoseArray`](http://docs.ros.org/en/noetic/api/geometry_msgs/html/msg/PoseArray.html)
+- [`geometry_msgs/msg/PoseArray`](https://github.com/ros2/common_interfaces/blob/master/geometry_msgs/msg/PoseArray.msg)
+
 #### Velodyne scan
 
 - [`velodyne_msgs/VelodyneScan`](http://docs.ros.org/en/noetic/api/velodyne_msgs/html/msg/VelodyneScan.html)
