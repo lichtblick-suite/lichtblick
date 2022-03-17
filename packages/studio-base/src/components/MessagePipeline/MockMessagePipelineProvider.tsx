@@ -29,6 +29,7 @@ import {
   PublishPayload,
   SubscribePayload,
   Topic,
+  PlayerURLState,
 } from "@foxglove/studio-base/players/types";
 import { RosDatatypes } from "@foxglove/studio-base/types/RosDatatypes";
 import naturalSort from "@foxglove/studio-base/util/naturalSort";
@@ -64,6 +65,7 @@ export default function MockMessagePipelineProvider(props: {
   playerId?: string;
   requestBackfill?: () => void;
   progress?: Progress;
+  urlState?: PlayerURLState;
 }): React.ReactElement {
   const startTime = useRef<Time | undefined>();
   let currentTime = props.currentTime;
@@ -114,6 +116,7 @@ export default function MockMessagePipelineProvider(props: {
       progress: props.progress ?? {},
       capabilities,
       problems: props.problems,
+      urlState: props.urlState,
       activeData:
         props.noActiveData === true
           ? undefined
@@ -145,6 +148,7 @@ export default function MockMessagePipelineProvider(props: {
       props.isPlaying,
       props.activeData,
       props.problems,
+      props.urlState,
       capabilities,
       currentTime,
     ],
