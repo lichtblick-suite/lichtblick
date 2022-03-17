@@ -19,6 +19,7 @@ import { TopicSettingsEditorProps } from "@foxglove/studio-base/panels/ThreeDime
 import { FOXGLOVE_GRID_DATATYPE, URDF_DATATYPE } from "@foxglove/studio-base/util/globalConstants";
 
 import MarkerSettingsEditor from "./MarkerSettingsEditor";
+import OccupancyGridSettingsEditor from "./OccupancyGridSettingsEditor";
 import PointCloudSettingsEditor from "./PointCloudSettingsEditor";
 import PoseSettingsEditor from "./PoseSettingsEditor";
 
@@ -56,6 +57,9 @@ export function topicSettingsEditorForDatatype(datatype: string):
     ["nav_msgs/Path", MarkerSettingsEditor],
     ["nav_msgs/msg/Path", MarkerSettingsEditor],
     ["ros.nav_msgs.Path", MarkerSettingsEditor],
+    ["nav_msgs/OccupancyGrid", OccupancyGridSettingsEditor],
+    ["nav_msgs/msg/OccupancyGrid", OccupancyGridSettingsEditor],
+    ["ros.nav_msgs.OccupancyGrid", OccupancyGridSettingsEditor],
   ]);
 
   return editors.get(datatype) as
