@@ -62,9 +62,10 @@
       "settingsByKey": {
         "t:/pose": {
           "size": {
-            "headLength": 0.5,
+            "headLength": 0.75,
             "headWidth": 2,
-            "shaftWidth": 2
+            "shaftLength": 1.5,
+            "shaftWidth": 1.5
           }
         }
       },
