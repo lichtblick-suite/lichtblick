@@ -12,6 +12,7 @@ export type Initalization = {
   end: Time;
   topics: Topic[];
   datatypes: RosDatatypes;
+  blockDurationNanos?: number;
 
   // Publisher names by topic
   publishersByTopic: Map<string, Set<string>>;
@@ -27,12 +28,12 @@ export type MessageIteratorArgs = {
 
 export type IteratorResult =
   | {
-      connectionId: number;
+      connectionId: number | undefined;
       msgEvent: MessageEvent<unknown>;
       problem: undefined;
     }
   | {
-      connectionId: number;
+      connectionId: number | undefined;
       msgEvent: undefined;
       problem: PlayerProblem;
     };
@@ -49,8 +50,16 @@ export interface IIterableSource {
   /**
    * Instantiate an IMessageIterator for the source.
    *
-   * The iterator produces IteratorResults from the source. The IteratorResults should be
-   * in log time order.
+   * The iterator produces IteratorResults from the source. The IteratorResults should be in log
+   * time order.
+   *
+   * Returning an AsyncIterator rather than AsyncIterable communicates that the returned iterator
+   * cannot be used directly in a `for-await-of` loop. This forces the IterablePlayer implementation
+   * to use the `.next()` API, rather than `for-await-of` which would implicitly call the iterator's
+   * `return()` method when breaking out of the loop and prevent the iterator from being used in
+   * more than one loop. This means the IIterableSource implementations can use a simple async
+   * generator function, and a `finally` block to do any necessary cleanup tasks when the request
+   * finishes or is canceled.
    */
-  messageIterator(args: MessageIteratorArgs): AsyncIterable<Readonly<IteratorResult>>;
+  messageIterator(args: MessageIteratorArgs): AsyncIterator<Readonly<IteratorResult>>;
 }

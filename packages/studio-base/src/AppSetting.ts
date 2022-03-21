@@ -22,6 +22,7 @@ export enum AppSetting {
   SHOW_DEBUG_PANELS = "showDebugPanels",
   ENABLE_LEGACY_PLOT_PANEL = "enableLegacyPlotPanel",
   EXPERIMENTAL_BAG_PLAYER = "experimental.bag-player",
+  EXPERIMENTAL_DATA_PLATFORM_PLAYER = "experimental.data-platform-player",
 
   // Miscellaneous
   HIDE_SIGN_IN_PROMPT = "hideSignInPrompt",

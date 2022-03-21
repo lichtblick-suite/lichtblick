@@ -6,7 +6,13 @@ import type { ZstdModule, ZstdStreaming } from "zstd-codec";
 
 import { Mcap0Types } from "@foxglove/mcap";
 
+let handlersPromise: Promise<Mcap0Types.DecompressHandlers> | undefined;
 export async function loadDecompressHandlers(): Promise<Mcap0Types.DecompressHandlers> {
+  return await (handlersPromise ??= _loadDecompressHandlers());
+}
+
+// eslint-disable-next-line no-underscore-dangle
+async function _loadDecompressHandlers(): Promise<Mcap0Types.DecompressHandlers> {
   const [zstd, decompressLZ4, bzip2] = await Promise.all([
     import("zstd-codec").then(async ({ ZstdCodec }) => {
       return await new Promise<ZstdModule>((resolve) => ZstdCodec.run(resolve));

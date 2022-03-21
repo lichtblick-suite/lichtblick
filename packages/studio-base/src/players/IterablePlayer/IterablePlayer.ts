@@ -2,8 +2,10 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
+import { simplify } from "intervals-fn";
 import { v4 as uuidv4 } from "uuid";
 
+import { filterMap } from "@foxglove/den/collection";
 import Log from "@foxglove/log";
 import {
   Time,
@@ -140,7 +142,7 @@ export class IterablePlayer implements Player {
   private _blockDurationNanos: number = 0;
 
   private _iterableSource: IIterableSource;
-  private _forwardIterator?: AsyncIterable<Readonly<IteratorResult>>;
+  private _forwardIterator?: AsyncIterator<Readonly<IteratorResult>>;
 
   constructor(options: IterablePlayerOptions) {
     const { metricsCollector, urlParams, source, name, enablePreload } = options;
@@ -176,7 +178,7 @@ export class IterablePlayer implements Player {
     await this._emitState();
 
     try {
-      const { start, end, topics, problems, publishersByTopic, datatypes } =
+      const { start, end, topics, problems, publishersByTopic, datatypes, blockDurationNanos } =
         await this._iterableSource.initialize();
 
       this._start = this._currentTime = start;
@@ -217,7 +219,14 @@ export class IterablePlayer implements Player {
       this._blockDurationNanos = Math.ceil(
         Math.max(MIN_MEM_CACHE_BLOCK_SIZE_NS, totalNs / MAX_BLOCKS),
       );
+
+      if (blockDurationNanos != undefined) {
+        this._blockDurationNanos = blockDurationNanos;
+      }
+
       const blockCount = Math.ceil(totalNs / this._blockDurationNanos);
+
+      log.debug(`Block count: ${blockCount}`);
 
       this._blocks = Array.from({ length: blockCount });
     } catch (error) {
@@ -258,7 +267,12 @@ export class IterablePlayer implements Player {
     this._messages = [];
 
     const messageEvents: MessageEvent<unknown>[] = [];
-    for await (const iterResult of this._forwardIterator) {
+    for (;;) {
+      const result = await this._forwardIterator.next();
+      if (result.done === true) {
+        break;
+      }
+      const iterResult = result.value;
       // Bail if a new state is requested while we are loading messages
       // This usually happens when seeking before the initial load is complete
       if (this._nextState) {
@@ -309,17 +323,24 @@ export class IterablePlayer implements Player {
         start: targetTime,
         reverse: true,
       });
-      for await (const iterResult of topicIterator) {
+      for (;;) {
+        const result = await topicIterator.next();
+        if (result.done === true) {
+          break;
+        }
         // NOTE: Even if _nextState is set, we finish the backfill
         // This is to support continuous scrubbing. As the user scrubbs, we
         // continue to backfill and emit state so they can see updates as they scrub.
 
-        if (iterResult.problem) {
-          this._problemManager.addProblem(`connid-${iterResult.connectionId}`, iterResult.problem);
+        if (result.value.problem) {
+          this._problemManager.addProblem(
+            `connid-${result.value.connectionId}`,
+            result.value.problem,
+          );
           continue;
         }
 
-        messages.push(iterResult.msgEvent);
+        messages.push(result.value.msgEvent);
         break;
       }
     }
@@ -327,6 +348,7 @@ export class IterablePlayer implements Player {
     // Our reverse iterators loaded the messages inclusive of the seek time, thus the next messages
     // we read should be _after_ the seek time.
     const forwardPosition = add(targetTime, { sec: 0, nsec: 1 });
+    await this._forwardIterator?.return?.();
     this._forwardIterator = this._iterableSource.messageIterator({
       topics: Array.from(topics),
       start: forwardPosition,
@@ -506,7 +528,12 @@ export class IterablePlayer implements Player {
       this._lastMessage = undefined;
     }
 
-    for await (const iterResult of this._forwardIterator) {
+    for (;;) {
+      const result = await this._forwardIterator.next();
+      if (result.done === true) {
+        break;
+      }
+      const iterResult = result.value;
       if (iterResult.problem) {
         this._problemManager.addProblem(`connid-${iterResult.connectionId}`, iterResult.problem);
       }
@@ -566,6 +593,7 @@ export class IterablePlayer implements Player {
           this._lastMessage = undefined;
 
           const topics = new Set(this._subscriptions.map((sub) => sub.topic));
+          await this._forwardIterator?.return?.();
           this._forwardIterator = this._iterableSource.messageIterator({
             topics: Array.from(topics),
             start: this._currentTime,
@@ -699,8 +727,12 @@ export class IterablePlayer implements Player {
       }
 
       let sizeInBytes = 0;
-      for await (const iterResult of iterator) {
-        // State change requested, bail
+      for (;;) {
+        const result = await iterator.next();
+        if (result.done === true) {
+          break;
+        }
+        const iterResult = result.value; // State change requested, bail
         if (this._nextState) {
           return;
         }
@@ -714,7 +746,17 @@ export class IterablePlayer implements Player {
           break;
         }
 
-        const events = messagesByTopic[iterResult.msgEvent.topic]!;
+        const msgTopic = iterResult.msgEvent.topic;
+        const events = messagesByTopic[msgTopic];
+        if (!events) {
+          this._problemManager.addProblem(`exexpected-topic-${msgTopic}`, {
+            severity: "error",
+            message: `Received a messaged on an unexpected topic: ${msgTopic}.`,
+          });
+          continue;
+        }
+        this._problemManager.removeProblem(`exexpected-topic-${msgTopic}`);
+
         const messageSizeInBytes = iterResult.msgEvent.sizeInBytes;
         sizeInBytes += messageSizeInBytes;
 
@@ -739,6 +781,7 @@ export class IterablePlayer implements Player {
         events.push(iterResult.msgEvent);
       }
 
+      await iterator.return?.();
       const block = {
         messagesByTopic: {
           ...existingBlock?.messagesByTopic,
@@ -748,7 +791,32 @@ export class IterablePlayer implements Player {
       };
 
       this._blocks[idx] = block;
+
+      const fullyLoadedFractionRanges = simplify(
+        filterMap(this._blocks, (thisBlock, blockIndex) => {
+          if (!thisBlock) {
+            return;
+          }
+
+          for (const topic of topics) {
+            if (!thisBlock.messagesByTopic[topic]) {
+              return;
+            }
+          }
+
+          return {
+            start: blockIndex,
+            end: blockIndex + 1,
+          };
+        }),
+      );
+
       this._progress = {
+        fullyLoadedFractionRanges: fullyLoadedFractionRanges.map((range) => ({
+          // Convert block ranges into fractions.
+          start: range.start / this._blocks.length,
+          end: range.end / this._blocks.length,
+        })),
         messageCache: {
           blocks: this._blocks.slice(),
           startTime: this._start,
@@ -853,6 +921,7 @@ export class IterablePlayer implements Player {
     this._isPlaying = false;
     this._closed = true;
     this._metricsCollector.close();
+    this._forwardIterator?.return?.().catch((err) => log.error(err));
   }
 
   setGlobalVariables(): void {

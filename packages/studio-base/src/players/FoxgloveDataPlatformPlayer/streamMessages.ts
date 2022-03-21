@@ -38,7 +38,7 @@ export default async function* streamMessages({
    * function may return successfully (possibly after yielding any remaining messages), or it may
    * raise an AbortError.
    */
-  signal: AbortSignal;
+  signal?: AbortSignal;
 
   /** Parameters indicating the time range to stream. */
   params: { deviceId: string; start: Time; end: Time; topics: readonly string[] };
@@ -50,7 +50,12 @@ export default async function* streamMessages({
    * parsedChannelsByTopic (thus mutating parsedChannelsByTopic).
    */
   parsedChannelsByTopic: Map<string, ParsedChannelAndEncodings[]>;
-}): AsyncIterable<MessageEvent<unknown>[]> {
+}): AsyncGenerator<MessageEvent<unknown>[]> {
+  const controller = new AbortController();
+  signal?.addEventListener("abort", () => {
+    log.debug("Manual abort of streamMessages", params);
+    controller.abort();
+  });
   const decompressHandlers = await loadDecompressHandlers();
 
   log.debug("streamMessages", params);
@@ -62,10 +67,10 @@ export default async function* streamMessages({
     topics: params.topics,
     outputFormat: "mcap0",
   });
-  if (signal.aborted) {
+  if (controller.signal.aborted) {
     return;
   }
-  const response = await fetch(mcapUrl, { signal });
+  const response = await fetch(mcapUrl, { signal: controller.signal });
   if (response.status === 404) {
     return;
   } else if (response.status !== 200) {
@@ -167,19 +172,25 @@ export default async function* streamMessages({
     }
   }
 
-  const reader = new Mcap0StreamReader({ decompressHandlers });
-  for (let result; (result = await streamReader.read()), !result.done; ) {
-    reader.append(result.value);
-    for (let record; (record = reader.nextRecord()); ) {
-      processRecord(record);
+  try {
+    const reader = new Mcap0StreamReader({ decompressHandlers });
+    for (let result; (result = await streamReader.read()), !result.done; ) {
+      reader.append(result.value);
+      for (let record; (record = reader.nextRecord()); ) {
+        processRecord(record);
+      }
+      if (messages.length > 0) {
+        yield messages;
+        messages = [];
+      }
     }
-    if (messages.length > 0) {
-      yield messages;
-      messages = [];
+    if (!reader.done()) {
+      throw new Error("Incomplete mcap file");
     }
-  }
-  if (!reader.done()) {
-    throw new Error("Incomplete mcap file");
+  } finally {
+    // If the caller called generator.return() in between body chunks, automatically cancel the request.
+    log.debug("Automatic abort of streamMessages", params);
+    controller.abort();
   }
 
   log.debug(

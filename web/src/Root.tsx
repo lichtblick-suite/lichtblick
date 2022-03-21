@@ -44,29 +44,34 @@ import ExtensionLoaderProvider from "./providers/ExtensionLoaderProvider";
 // useAppConfiguration requires the AppConfigurationContext which is setup in Root
 // AppWrapper is used to make a functional component so we can use the context
 function AppWrapper() {
-  const [useIterablePlayer = false] = useAppConfigurationValue<boolean>(
+  const [enableExperimentalBagPlayer = false] = useAppConfigurationValue<boolean>(
     AppSetting.EXPERIMENTAL_BAG_PLAYER,
+  );
+  const [enableExperimentalDataPlatformPlayer = false] = useAppConfigurationValue<boolean>(
+    AppSetting.EXPERIMENTAL_DATA_PLATFORM_PLAYER,
   );
 
   const dataSources: IDataSourceFactory[] = useMemo(() => {
     const sources = [
       new Ros1UnavailableDataSourceFactory(),
-      new Ros1LocalBagDataSourceFactory({ useIterablePlayer }),
-      new Ros1RemoteBagDataSourceFactory({ useIterablePlayer }),
+      new Ros1LocalBagDataSourceFactory({ useIterablePlayer: enableExperimentalBagPlayer }),
+      new Ros1RemoteBagDataSourceFactory({ useIterablePlayer: enableExperimentalBagPlayer }),
       new Ros2UnavailableDataSourceFactory(),
       new Ros2LocalBagDataSourceFactory(),
       new RosbridgeDataSourceFactory(),
       new FoxgloveWebSocketDataSourceFactory(),
       new UlogLocalDataSourceFactory(),
       new VelodyneUnavailableDataSourceFactory(),
-      new FoxgloveDataPlatformDataSourceFactory(),
-      new SampleNuscenesDataSourceFactory({ useIterablePlayer }),
+      new FoxgloveDataPlatformDataSourceFactory({
+        useIterablePlayer: enableExperimentalDataPlatformPlayer,
+      }),
+      new SampleNuscenesDataSourceFactory({ useIterablePlayer: enableExperimentalBagPlayer }),
       new McapLocalDataSourceFactory(),
       new McapRemoteDataSourceFactory(),
     ];
 
     return sources;
-  }, [useIterablePlayer]);
+  }, [enableExperimentalBagPlayer, enableExperimentalDataPlatformPlayer]);
 
   return <App availableSources={dataSources} deepLinks={[window.location.href]} />;
 }

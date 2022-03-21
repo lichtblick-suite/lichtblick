@@ -141,7 +141,7 @@ export class BagIterableSource implements IIterableSource {
     };
   }
 
-  messageIterator(opt: MessageIteratorArgs): AsyncIterable<Readonly<IteratorResult>> {
+  async *messageIterator(opt: MessageIteratorArgs): AsyncIterator<Readonly<IteratorResult>> {
     if (!this._bag) {
       throw new Error("Invariant: uninitialized");
     }
@@ -153,37 +153,33 @@ export class BagIterableSource implements IIterableSource {
     });
 
     const readersByConnectionId = this._readersByConnectionId;
-    return {
-      async *[Symbol.asyncIterator](): AsyncIterator<Readonly<IteratorResult>> {
-        for await (const bagMsgEvent of iterator) {
-          const connectionId = bagMsgEvent.connectionId;
-          const reader = readersByConnectionId.get(connectionId);
-          if (reader) {
-            const parsedMessage = reader.readMessage(bagMsgEvent.data);
+    for await (const bagMsgEvent of iterator) {
+      const connectionId = bagMsgEvent.connectionId;
+      const reader = readersByConnectionId.get(connectionId);
+      if (reader) {
+        const parsedMessage = reader.readMessage(bagMsgEvent.data);
 
-            yield {
-              connectionId,
-              problem: undefined,
-              msgEvent: {
-                topic: bagMsgEvent.topic,
-                receiveTime: bagMsgEvent.timestamp,
-                sizeInBytes: bagMsgEvent.data.byteLength,
-                message: parsedMessage,
-              },
-            };
-          } else {
-            yield {
-              connectionId,
-              msgEvent: undefined,
-              problem: {
-                severity: "error",
-                message: `Cannot deserialize message for missing connection id ${connectionId}`,
-                tip: `Check that your bag file is well-formed. It should have a connection record for every connection id referenced from a message record.`,
-              },
-            };
-          }
-        }
-      },
-    };
+        yield {
+          connectionId,
+          problem: undefined,
+          msgEvent: {
+            topic: bagMsgEvent.topic,
+            receiveTime: bagMsgEvent.timestamp,
+            sizeInBytes: bagMsgEvent.data.byteLength,
+            message: parsedMessage,
+          },
+        };
+      } else {
+        yield {
+          connectionId,
+          msgEvent: undefined,
+          problem: {
+            severity: "error",
+            message: `Cannot deserialize message for missing connection id ${connectionId}`,
+            tip: `Check that your bag file is well-formed. It should have a connection record for every connection id referenced from a message record.`,
+          },
+        };
+      }
+    }
   }
 }

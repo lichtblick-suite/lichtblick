@@ -29,11 +29,7 @@ class TestSource implements IIterableSource {
     };
   }
 
-  messageIterator(_args: MessageIteratorArgs): AsyncIterable<Readonly<IteratorResult>> {
-    return {
-      async *[Symbol.asyncIterator](): AsyncIterator<Readonly<IteratorResult>> {},
-    };
-  }
+  async *messageIterator(_args: MessageIteratorArgs): AsyncIterator<Readonly<IteratorResult>> {}
 }
 
 type PlayerStateWithoutPlayerId = Omit<PlayerState, "playerId">;
@@ -152,24 +148,20 @@ describe("IterablePlayer", () => {
     // This implementation performs a seekPlayback during backfill.
     // eslint-disable-next-line @typescript-eslint/unbound-method
     const originalMethod = source.messageIterator;
-    source.messageIterator = (args: MessageIteratorArgs) => {
+    source.messageIterator = async function* (args: MessageIteratorArgs) {
       if (args.reverse === true) {
         player.seekPlayback({ sec: 0, nsec: 0 });
         source.messageIterator = originalMethod;
       }
-      return {
-        async *[Symbol.asyncIterator](): AsyncIterator<Readonly<IteratorResult>> {
-          yield {
-            msgEvent: {
-              topic: "foo",
-              receiveTime: { sec: 0, nsec: 0 },
-              message: undefined,
-              sizeInBytes: 0,
-            },
-            problem: undefined,
-            connectionId: 0,
-          };
+      yield {
+        msgEvent: {
+          topic: "foo",
+          receiveTime: { sec: 0, nsec: 0 },
+          message: undefined,
+          sizeInBytes: 0,
         },
+        problem: undefined,
+        connectionId: 0,
       };
     };
 

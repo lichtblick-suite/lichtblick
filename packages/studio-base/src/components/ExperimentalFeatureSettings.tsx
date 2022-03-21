@@ -72,6 +72,16 @@ const features: Feature[] = [
       <>The experimental bag player uses a new approach to loading messages from bag files.</>
     ),
   },
+  {
+    key: AppSetting.EXPERIMENTAL_DATA_PLATFORM_PLAYER,
+    name: "Experimental data platform player",
+    description: (
+      <>
+        The experimental data platform player uses a new approach to loading messages from Foxglove
+        Data Platform.
+      </>
+    ),
+  },
 ];
 if (process.env.NODE_ENV === "development") {
   features.push({
