@@ -18,6 +18,9 @@ class Ros1SocketDataSourceFactory implements IDataSourceFactory {
   type: IDataSourceFactory["type"] = "connection";
   displayName = "ROS 1";
   iconName: IDataSourceFactory["iconName"] = "studio.ROS";
+  description =
+    "Connect to a running ROS 1 system via a native TCP connection that accesses your ROS master and nodes directly.";
+  docsLink = "https://foxglove.dev/docs/studio/connection/native";
 
   formConfig = {
     fields: [
@@ -25,6 +28,7 @@ class Ros1SocketDataSourceFactory implements IDataSourceFactory {
         id: "url",
         label: "ROS_MASTER_URI",
         defaultValue: os?.getEnvVar("ROS_MASTER_URI") ?? "http://localhost:11311",
+        description: "Tells ROS nodes where they can locate the master",
       },
       {
         id: "hostname",
@@ -32,6 +36,7 @@ class Ros1SocketDataSourceFactory implements IDataSourceFactory {
         defaultValue: os
           ? RosNode.GetRosHostname(os.getEnvVar, os.getHostname, os.getNetworkInterfaces)
           : "localhost",
+        description: "Acts as the declared network address of a ROS node or tool",
       },
     ],
   };

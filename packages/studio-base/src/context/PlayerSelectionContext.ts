@@ -25,6 +25,8 @@ export interface IDataSourceFactory {
   type: DataSourceFactoryType;
   displayName: string;
   iconName?: RegisteredIconNames;
+  description?: string;
+  docsLink?: string;
   disabledReason?: string | JSX.Element;
   badgeText?: string;
   hidden?: boolean;
@@ -33,7 +35,13 @@ export interface IDataSourceFactory {
 
   formConfig?: {
     // Initialization args are populated with keys of the _id_ field
-    fields: { id: string; label: string; defaultValue?: string; placeholder?: string }[];
+    fields: {
+      id: string;
+      label: string;
+      defaultValue?: string;
+      placeholder?: string;
+      description?: string;
+    }[];
   };
 
   // If data source initialization supports "Open File" workflow, this property lists the supported

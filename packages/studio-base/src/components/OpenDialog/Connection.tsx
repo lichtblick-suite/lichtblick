@@ -2,7 +2,7 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { ActionButton, TextField, useTheme } from "@fluentui/react";
+import { ActionButton, Link, TextField, useTheme, Text } from "@fluentui/react";
 import { Stack } from "@mui/material";
 import { useState, useMemo, useCallback, useLayoutEffect } from "react";
 
@@ -104,6 +104,18 @@ export default function Connection(props: ConnectionProps): JSX.Element {
           spacing={2}
           sx={{ overflowX: "auto" }}
         >
+          {selectedSource?.description && (
+            <Text styles={{ root: { color: theme.semanticColors.bodySubtext } }}>
+              {selectedSource.description}
+            </Text>
+          )}
+
+          {selectedSource?.docsLink && (
+            <Link href={`https://foxglove.dev/docs/studio/connection${selectedSource.docsLink}`}>
+              View docs.
+            </Link>
+          )}
+
           {selectedSource?.formConfig != undefined && (
             <Stack flexGrow={1} justifyContent="space-between">
               <Stack spacing={2}>
@@ -112,6 +124,7 @@ export default function Connection(props: ConnectionProps): JSX.Element {
                     disabled={selectedSource.disabledReason != undefined}
                     key={field.label}
                     label={field.label}
+                    description={field.description}
                     placeholder={field.placeholder}
                     defaultValue={field.defaultValue}
                     onChange={(_, newValue) => {

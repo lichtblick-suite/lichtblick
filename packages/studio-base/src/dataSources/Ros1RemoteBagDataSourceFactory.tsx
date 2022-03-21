@@ -20,6 +20,8 @@ class Ros1RemoteBagDataSourceFactory implements IDataSourceFactory {
   displayName = "ROS 1 Bag";
   iconName: IDataSourceFactory["iconName"] = "FileASPX";
   supportedFileTypes = [".bag"];
+  description = "Fetch and load pre-recorded ROS 1 .bag files from a remote location.";
+  docsLink = "https://foxglove.dev/docs/studio/connection/ros1-bag";
 
   private enableIterablePlayer = false;
 
