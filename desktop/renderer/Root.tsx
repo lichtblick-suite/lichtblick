@@ -32,6 +32,7 @@ import {
   SampleNuscenesDataSourceFactory,
   AppConfiguration,
   AppConfigurationContext,
+  McapRemoteDataSourceFactory,
 } from "@foxglove/studio-base";
 
 import { Desktop } from "../common/types";
@@ -63,6 +64,7 @@ function AppWrapper() {
       new FoxgloveDataPlatformDataSourceFactory(),
       new SampleNuscenesDataSourceFactory(),
       new McapLocalDataSourceFactory(),
+      new McapRemoteDataSourceFactory(),
     ];
 
     return sources;

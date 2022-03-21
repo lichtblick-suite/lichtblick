@@ -69,5 +69,6 @@ export { default as RosbridgeDataSourceFactory } from "./dataSources/RosbridgeDa
 export { default as UlogLocalDataSourceFactory } from "./dataSources/UlogLocalDataSourceFactory";
 export { default as VelodyneDataSourceFactory } from "./dataSources/VelodyneDataSourceFactory";
 export { default as McapLocalDataSourceFactory } from "./dataSources/McapLocalDataSourceFactory";
+export { default as McapRemoteDataSourceFactory } from "./dataSources/McapRemoteDataSourceFactory";
 export { default as SampleNuscenesDataSourceFactory } from "./dataSources/SampleNuscenesDataSourceFactory";
 export { default as ReadySignalContext, useReadySignal } from "./stories/ReadySignalContext";

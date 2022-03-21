@@ -25,7 +25,7 @@ import {
 } from "@foxglove/studio-base/randomAccessDataProviders/types";
 import { RosDatatypes } from "@foxglove/studio-base/types/RosDatatypes";
 
-type Options = { file: File };
+type Options = { size: number; stream: ReadableStream<Uint8Array> };
 
 export default class Mcap0StreamedDataProvider implements RandomAccessDataProvider {
   private options: Options;
@@ -36,15 +36,14 @@ export default class Mcap0StreamedDataProvider implements RandomAccessDataProvid
   }
 
   async initialize(_extensionPoint: ExtensionPoint): Promise<InitializationResult> {
-    const { file } = this.options;
-    if (file.size > 1024 * 1024 * 1024) {
+    if (this.options.size > 1024 * 1024 * 1024) {
       // This provider uses a simple approach of loading everything into memory up front, so we
       // can't handle large files
       throw new Error("Unable to stream MCAP file; too large");
     }
     const decompressHandlers = await loadDecompressHandlers();
 
-    const streamReader = (file.stream() as ReadableStream<Uint8Array>).getReader();
+    const streamReader = this.options.stream.getReader();
 
     const messagesByChannel = new Map<number, MessageEvent<unknown>[]>();
     const schemasById = new Map<number, Mcap0Types.TypedMcapRecords["Schema"]>();

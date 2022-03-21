@@ -36,12 +36,17 @@ const HELP_ITEMS: IButtonProps[] = [
 ];
 
 export type IStartProps = {
-  supportedFileExtensions?: string[];
+  supportedLocalFileExtensions?: string[];
+  supportedRemoteFileExtensions?: string[];
   onSelectView: (newValue: OpenDialogViews) => void;
 };
 
 export default function Start(props: IStartProps): JSX.Element {
-  const { supportedFileExtensions = [], onSelectView } = props;
+  const {
+    supportedLocalFileExtensions = [],
+    supportedRemoteFileExtensions = [],
+    onSelectView,
+  } = props;
   const theme = useTheme();
   const { recentSources, selectRecent } = usePlayerSelection();
 
@@ -58,6 +63,7 @@ export default function Start(props: IStartProps): JSX.Element {
       rootHovered: { backgroundColor: theme.palette.neutralLighterAlt },
       rootPressed: { backgroundColor: theme.palette.neutralLighter },
       flexContainer: { alignItems: "center" },
+      description: { whiteSpace: "pre-line" },
       descriptionHovered: { color: theme.semanticColors.bodySubtext },
       icon: {
         marginRight: theme.spacing.m,
@@ -74,31 +80,33 @@ export default function Start(props: IStartProps): JSX.Element {
     [theme],
   );
 
-  const supportedLocalFiles = useMemo(
-    () => Array.from(new Set(supportedFileExtensions)).join(", "),
-    [supportedFileExtensions],
-  );
-
-  const startItems: IButtonProps[] = useMemo(
-    () => [
+  const startItems: IButtonProps[] = useMemo(() => {
+    const formatter = new Intl.ListFormat("en-US", { style: "long" });
+    const supportedLocalFiles = formatter.format(
+      Array.from(new Set(supportedLocalFileExtensions)).sort(),
+    );
+    const supportedRemoteFiles = formatter.format(
+      Array.from(new Set(supportedRemoteFileExtensions)).sort(),
+    );
+    return [
       {
         id: "open-local-file",
         children: "Open local file",
-        secondaryText: `Supports ${supportedLocalFiles} files`,
+        secondaryText: `Supports ${supportedLocalFiles} files.`,
         iconProps: { iconName: "OpenFile" },
         onClick: () => onSelectView("file"),
       },
       {
         id: "open-url",
         children: "Open file from URL",
-        secondaryText: "Load a file via HTTP(S)",
+        secondaryText: `Load a file via HTTP(S).\nSupports ${supportedRemoteFiles} files.`,
         iconProps: { iconName: "FileASPX" },
         onClick: () => onSelectView("remote"),
       },
       {
         id: "open-connection",
         children: "Open connection",
-        secondaryText: "Connect to a live robot or server",
+        secondaryText: "Connect to a live robot or server.",
         iconProps: { iconName: "Flow" },
         onClick: () => onSelectView("connection"),
       },
@@ -109,9 +117,8 @@ export default function Start(props: IStartProps): JSX.Element {
         iconProps: { iconName: "BookStar" },
         onClick: () => onSelectView("demo"),
       },
-    ],
-    [onSelectView, supportedLocalFiles],
-  );
+    ];
+  }, [onSelectView, supportedLocalFileExtensions, supportedRemoteFileExtensions]);
 
   const recentItems: IButtonProps[] = useMemo(() => {
     return recentSources.map((recent) => {

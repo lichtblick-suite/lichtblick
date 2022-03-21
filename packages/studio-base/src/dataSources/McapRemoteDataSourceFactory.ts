@@ -12,20 +12,22 @@ import McapDataProvider from "@foxglove/studio-base/randomAccessDataProviders/Mc
 import MemoryCacheDataProvider from "@foxglove/studio-base/randomAccessDataProviders/MemoryCacheDataProvider";
 import { getSeekToTime } from "@foxglove/studio-base/util/time";
 
-class McapLocalDataSourceFactory implements IDataSourceFactory {
-  id = "mcap-local-file";
-  type: IDataSourceFactory["type"] = "file";
+export default class McapRemoteDataSourceFactory implements IDataSourceFactory {
+  id = "mcap-remote-file";
+  type: IDataSourceFactory["type"] = "remote-file";
   displayName = "MCAP";
-  iconName: IDataSourceFactory["iconName"] = "OpenFile";
+  iconName: IDataSourceFactory["iconName"] = "FileASPX";
   supportedFileTypes = [".mcap"];
+  description = "Fetch and load pre-recorded MCAP files from a remote location.";
+  docsLink = "https://foxglove.dev/docs/studio/connection/mcap";
 
   initialize(args: DataSourceFactoryInitializeArgs): Player | undefined {
-    const file = args.file;
-    if (!file) {
+    const url = args.url;
+    if (!url) {
       return;
     }
 
-    const mcapProvider = new McapDataProvider({ source: { type: "file", file } });
+    const mcapProvider = new McapDataProvider({ source: { type: "remote", url } });
     const messageCacheProvider = new MemoryCacheDataProvider(mcapProvider, {
       unlimitedCache: args.unlimitedMemoryCache,
     });
@@ -33,9 +35,7 @@ class McapLocalDataSourceFactory implements IDataSourceFactory {
     return new RandomAccessPlayer(messageCacheProvider, {
       metricsCollector: args.metricsCollector,
       seekToTime: getSeekToTime(),
-      name: file.name,
+      name: url,
     });
   }
 }
-
-export default McapLocalDataSourceFactory;

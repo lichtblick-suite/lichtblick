@@ -2,10 +2,10 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { TextField, Link, Text, useTheme } from "@fluentui/react";
+import { TextField, Text, useTheme } from "@fluentui/react";
 import { Stack } from "@mui/material";
 import path from "path";
-import { useCallback, useState } from "react";
+import { useCallback, useState, useMemo } from "react";
 
 import {
   IDataSourceFactory,
@@ -70,30 +70,19 @@ export default function Remote(props: RemoteProps): JSX.Element {
     });
   }, [availableSources, currentUrl, selectSource]);
 
+  const supportedExtensions = useMemo(
+    () =>
+      new Intl.ListFormat("en-US", { style: "long" }).format(
+        availableSources
+          .filter((source) => source.type === "remote-file")
+          .flatMap((source) => source.supportedFileTypes ?? []),
+      ),
+    [availableSources],
+  );
+
   return (
     <View onBack={onBack} onCancel={onCancel} onOpen={onOpen}>
       <Stack spacing={2}>
-        {availableSources.map(
-          ({ description }) =>
-            description && (
-              <Text
-                key={description}
-                styles={{ root: { color: theme.semanticColors.bodySubtext } }}
-              >
-                {description}
-              </Text>
-            ),
-        )}
-
-        {availableSources.map(
-          ({ displayName, docsLink }) =>
-            docsLink && (
-              <Link key={docsLink} href={docsLink}>
-                View {displayName} docs.
-              </Link>
-            ),
-        )}
-
         <TextField
           label="Remote file URL"
           errorMessage={errorMessage}
@@ -102,6 +91,9 @@ export default function Remote(props: RemoteProps): JSX.Element {
             setCurrentUrl(newValue);
           }}
         />
+        <Text styles={{ root: { color: theme.semanticColors.bodySubtext } }}>
+          {supportedExtensions} files are supported.
+        </Text>
       </Stack>
     </View>
   );
