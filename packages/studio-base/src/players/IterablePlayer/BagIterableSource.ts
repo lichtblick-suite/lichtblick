@@ -8,8 +8,9 @@ import { Bag, Filelike } from "@foxglove/rosbag";
 import { BlobReader } from "@foxglove/rosbag/web";
 import { parse as parseMessageDefinition } from "@foxglove/rosmsg";
 import { LazyMessageReader } from "@foxglove/rosmsg-serialization";
+import { compare } from "@foxglove/rostime";
 import { Topic } from "@foxglove/studio";
-import { PlayerProblem } from "@foxglove/studio-base/players/types";
+import { PlayerProblem, MessageEvent } from "@foxglove/studio-base/players/types";
 import { RosDatatypes } from "@foxglove/studio-base/types/RosDatatypes";
 import BrowserHttpReader from "@foxglove/studio-base/util/BrowserHttpReader";
 import CachedFilelike from "@foxglove/studio-base/util/CachedFilelike";
@@ -21,6 +22,7 @@ import {
   IteratorResult,
   Initalization,
   MessageIteratorArgs,
+  GetBackfillMessagesArgs,
 } from "./IIterableSource";
 
 type BagSource = { type: "file"; file: File } | { type: "remote"; url: string };
@@ -141,7 +143,13 @@ export class BagIterableSource implements IIterableSource {
     };
   }
 
-  async *messageIterator(opt: MessageIteratorArgs): AsyncIterator<Readonly<IteratorResult>> {
+  async *messageIterator(opt: MessageIteratorArgs): AsyncGenerator<Readonly<IteratorResult>> {
+    yield* this._messageIterator({ ...opt, reverse: false });
+  }
+
+  private async *_messageIterator(
+    opt: MessageIteratorArgs & { reverse: boolean },
+  ): AsyncGenerator<Readonly<IteratorResult>> {
     if (!this._bag) {
       throw new Error("Invariant: uninitialized");
     }
@@ -181,5 +189,29 @@ export class BagIterableSource implements IIterableSource {
         };
       }
     }
+  }
+
+  async getBackfillMessages({
+    topics,
+    time,
+  }: GetBackfillMessagesArgs): Promise<MessageEvent<unknown>[]> {
+    const messages: MessageEvent<unknown>[] = [];
+    for (const topic of topics) {
+      // NOTE: An iterator is made for each topic to get the latest message on that topic.
+      // An single iterator for all the topics could result in iterating through many
+      // irrelevant messages to get to an older message on a topic.
+      for await (const result of this._messageIterator({
+        topics: [topic],
+        start: time,
+        reverse: true,
+      })) {
+        if (result.msgEvent) {
+          messages.push(result.msgEvent);
+        }
+        break;
+      }
+    }
+    messages.sort((a, b) => compare(a.receiveTime, b.receiveTime));
+    return messages;
   }
 }

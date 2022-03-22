@@ -311,41 +311,13 @@ export class IterablePlayer implements Player {
     this._lastMessage = undefined;
     this._seekTarget = undefined;
 
-    const topics = new Set(this._subscriptions.map((subscription) => subscription.topic));
+    const topics = Array.from(
+      new Set(this._subscriptions.map((subscription) => subscription.topic)),
+    );
 
-    const messages: MessageEvent<unknown>[] = [];
-    for (const topic of topics) {
-      // NOTE: An iterator is made for each topic to get the latest message on that topic.
-      // An single iterator for all the topics could result in iterating through many
-      // irrelevant messages to get to an older message on a topic.
-      const topicIterator = this._iterableSource.messageIterator({
-        topics: [topic],
-        start: targetTime,
-        reverse: true,
-      });
-      for (;;) {
-        const result = await topicIterator.next();
-        if (result.done === true) {
-          break;
-        }
-        // NOTE: Even if _nextState is set, we finish the backfill
-        // This is to support continuous scrubbing. As the user scrubbs, we
-        // continue to backfill and emit state so they can see updates as they scrub.
+    const messages = await this._iterableSource.getBackfillMessages({ topics, time: targetTime });
 
-        if (result.value.problem) {
-          this._problemManager.addProblem(
-            `connid-${result.value.connectionId}`,
-            result.value.problem,
-          );
-          continue;
-        }
-
-        messages.push(result.value.msgEvent);
-        break;
-      }
-    }
-
-    // Our reverse iterators loaded the messages inclusive of the seek time, thus the next messages
+    // Our backfill loaded the messages inclusive of the seek time, thus the next messages
     // we read should be _after_ the seek time.
     const forwardPosition = add(targetTime, { sec: 0, nsec: 1 });
     await this._forwardIterator?.return?.();
@@ -353,10 +325,6 @@ export class IterablePlayer implements Player {
       topics: Array.from(topics),
       start: forwardPosition,
     });
-
-    // Our iterator reads messages in reverse, but the studio message pipeline assumes
-    // messages are delivered in increasing receiveTime order
-    messages.sort((a, b) => compare(a.receiveTime, b.receiveTime));
 
     this._messages = messages;
     this._currentTime = targetTime;

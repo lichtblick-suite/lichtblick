@@ -290,6 +290,8 @@ class ConsoleApi {
     end: string;
     topics: readonly string[];
     outputFormat?: "bag1" | "mcap0";
+    replayPolicy?: "lastPerChannel" | "";
+    replayLookbackSeconds?: number;
   }): Promise<{ link: string }> {
     return await this.post<{ link: string }>("/v1/data/stream", params);
   }

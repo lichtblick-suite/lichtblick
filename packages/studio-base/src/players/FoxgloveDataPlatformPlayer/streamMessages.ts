@@ -41,7 +41,14 @@ export default async function* streamMessages({
   signal?: AbortSignal;
 
   /** Parameters indicating the time range to stream. */
-  params: { deviceId: string; start: Time; end: Time; topics: readonly string[] };
+  params: {
+    deviceId: string;
+    start: Time;
+    end: Time;
+    topics: readonly string[];
+    replayPolicy?: "lastPerChannel" | "";
+    replayLookbackSeconds?: number;
+  };
 
   /**
    * Message readers are initialized out of band so we can parse message definitions only once.
@@ -66,6 +73,8 @@ export default async function* streamMessages({
     end: toRFC3339String(params.end),
     topics: params.topics,
     outputFormat: "mcap0",
+    replayPolicy: params.replayPolicy,
+    replayLookbackSeconds: params.replayLookbackSeconds,
   });
   if (controller.signal.aborted) {
     return;
@@ -172,11 +181,16 @@ export default async function* streamMessages({
     }
   }
 
-  try {
+  let normalReturn = false;
+  parseLoop: try {
     const reader = new Mcap0StreamReader({ decompressHandlers });
     for (let result; (result = await streamReader.read()), !result.done; ) {
       reader.append(result.value);
       for (let record; (record = reader.nextRecord()); ) {
+        if (record.type === "DataEnd") {
+          normalReturn = true;
+          break parseLoop;
+        }
         processRecord(record);
       }
       if (messages.length > 0) {
@@ -187,9 +201,12 @@ export default async function* streamMessages({
     if (!reader.done()) {
       throw new Error("Incomplete mcap file");
     }
+    normalReturn = true;
   } finally {
-    // If the caller called generator.return() in between body chunks, automatically cancel the request.
-    log.debug("Automatic abort of streamMessages", params);
+    if (!normalReturn) {
+      // If the caller called generator.return() in between body chunks, automatically cancel the request.
+      log.debug("Automatic abort of streamMessages", params);
+    }
     controller.abort();
   }
 

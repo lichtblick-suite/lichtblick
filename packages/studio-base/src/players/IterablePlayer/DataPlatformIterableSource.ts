@@ -30,6 +30,7 @@ import {
   Initalization,
   MessageIteratorArgs,
   IteratorResult,
+  GetBackfillMessagesArgs,
 } from "./IIterableSource";
 
 const log = Logger.getLogger(__filename);
@@ -154,9 +155,6 @@ export class DataPlatformIterableSource implements IIterableSource {
   }
 
   async *messageIterator(args: MessageIteratorArgs): AsyncIterator<Readonly<IteratorResult>> {
-    if (args.reverse === true) {
-      return;
-    }
     const api = this._consoleApi;
     const deviceId = this._deviceId;
     const parsedChannelsByTopic = this._parsedChannelsByTopic;
@@ -198,5 +196,27 @@ export class DataPlatformIterableSource implements IIterableSource {
         this._end,
       );
     }
+  }
+
+  async getBackfillMessages({
+    topics,
+    time,
+  }: GetBackfillMessagesArgs): Promise<MessageEvent<unknown>[]> {
+    const messages: MessageEvent<unknown>[] = [];
+    for await (const block of streamMessages({
+      api: this._consoleApi,
+      parsedChannelsByTopic: this._parsedChannelsByTopic,
+      params: {
+        deviceId: this._deviceId,
+        start: time,
+        end: time,
+        topics,
+        replayPolicy: "lastPerChannel",
+        replayLookbackSeconds: 30 * 60,
+      },
+    })) {
+      messages.push(...block);
+    }
+    return messages;
   }
 }

@@ -23,7 +23,6 @@ export type Initalization = {
 export type MessageIteratorArgs = {
   topics: string[];
   start?: Time;
-  reverse?: boolean;
 };
 
 export type IteratorResult =
@@ -37,6 +36,11 @@ export type IteratorResult =
       msgEvent: undefined;
       problem: PlayerProblem;
     };
+
+export type GetBackfillMessagesArgs = {
+  topics: string[];
+  time: Time;
+};
 
 /**
  * IIterableSource specifies an interface initializing and accessing messages.
@@ -62,4 +66,10 @@ export interface IIterableSource {
    * finishes or is canceled.
    */
   messageIterator(args: MessageIteratorArgs): AsyncIterator<Readonly<IteratorResult>>;
+
+  /**
+   * Load the most recent messages per topic that occurred before or at the target time, if
+   * available.
+   */
+  getBackfillMessages(args: GetBackfillMessagesArgs): Promise<MessageEvent<unknown>[]>;
 }
