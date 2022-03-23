@@ -226,6 +226,20 @@ function PanelExtensionAdapter(props: PanelExtensionAdapterProps): JSX.Element {
       prevBlocksRef.current = newBlocks;
     }
 
+    if (watchedFieldsRef.current.has("currentTime")) {
+      const currentTime = playerState?.activeData?.currentTime;
+
+      if (currentTime != undefined && currentTime !== renderState.currentTime) {
+        shouldRender = true;
+        renderState.currentTime = currentTime;
+      } else {
+        if (renderState.currentTime != undefined) {
+          shouldRender = true;
+        }
+        renderState.currentTime = undefined;
+      }
+    }
+
     if (watchedFieldsRef.current.has("previewTime")) {
       const startTime = playerState?.activeData?.startTime;
       const hoverVal = hoverValueRef.current?.value;

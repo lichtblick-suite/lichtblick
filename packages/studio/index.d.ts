@@ -96,6 +96,11 @@ declare module "@foxglove/studio" {
     topics?: readonly Topic[];
 
     /**
+     * A timestamp value indicating the current playback time.
+     */
+    currentTime?: Time;
+
+    /**
      * A seconds value indicating a preview time. The preview time is set when a user hovers
      * over the seek bar or when a panel sets the preview time explicitly. The preview time
      * is a seconds value within the playback range.

@@ -5,7 +5,8 @@
 import { ReactElement, useLayoutEffect, useState } from "react";
 import ReactDOM from "react-dom";
 
-import { PanelExtensionContext, ParameterValue, RenderState } from "@foxglove/studio";
+import { toSec } from "@foxglove/rostime";
+import { PanelExtensionContext, ParameterValue, RenderState, Time } from "@foxglove/studio";
 import MockPanelContextProvider from "@foxglove/studio-base/components/MockPanelContextProvider";
 import PanelExtensionAdapter from "@foxglove/studio-base/components/PanelExtensionAdapter";
 import PanelSetup from "@foxglove/studio-base/stories/PanelSetup";
@@ -51,11 +52,14 @@ export const CatchRenderError = (): JSX.Element => {
 };
 
 function SimplePanel({ context }: { context: PanelExtensionContext }) {
+  const [currentTime, setCurrentTime] = useState<Time | undefined>(undefined);
   const [parameters, setParameters] = useState<ReadonlyMap<string, ParameterValue>>(new Map());
 
   useLayoutEffect(() => {
+    context.watch("currentTime");
     context.watch("parameters");
     context.onRender = (renderState: RenderState, done) => {
+      setCurrentTime(renderState.currentTime);
       if (renderState.parameters != undefined) {
         setParameters(renderState.parameters);
       }
@@ -66,6 +70,8 @@ function SimplePanel({ context }: { context: PanelExtensionContext }) {
   return (
     <div>
       <h2>Simple Panel</h2>
+      <h3>Current Time</h3>
+      <div>{currentTime ? toSec(currentTime) : "-"}</div>
       <h3>Parameters</h3>
       <div>{JSON.stringify(Array.from(parameters))}</div>
     </div>
@@ -83,6 +89,7 @@ export const SimplePanelRender = (): ReactElement => {
         datatypes: new Map(),
         frame: {},
         activeData: {
+          currentTime: { sec: 1, nsec: 2 },
           parameters: new Map([
             ["param1", "value1"],
             ["param2", "value2"],
