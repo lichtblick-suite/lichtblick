@@ -377,6 +377,7 @@ export const extractDatatypes = (nodeData: NodeData): NodeData => {
       typeNode,
       name,
       messageDefinitionMap,
+      sourceDatatypes,
     );
     return { ...nodeData, datatypes, outputDatatype };
   } catch (error) {

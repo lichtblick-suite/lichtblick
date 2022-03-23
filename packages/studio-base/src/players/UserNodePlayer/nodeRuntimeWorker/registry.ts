@@ -107,7 +107,6 @@ export const registerNode = ({
     }
     userNodeLogs.push(...args.map((value) => ({ source: "registerNode" as const, value })));
   };
-  // TODO: Blacklist global methods.
   try {
     const nodeExports: { default?: typeof nodeCallback } = {};
 
@@ -156,9 +155,8 @@ export const processMessage = ({
   try {
     const newMessage = nodeCallback(message, globalVariables);
     return { message: newMessage, error: undefined, userNodeLogs, userNodeDiagnostics };
-  } catch (e) {
-    // TODO: Be able to map line numbers from errors.
-    const error: string = e.toString();
+  } catch (err) {
+    const error: string = err.toString();
     return {
       message: undefined,
       error: error.length > 0 ? error : "Unknown error encountered running this node.",

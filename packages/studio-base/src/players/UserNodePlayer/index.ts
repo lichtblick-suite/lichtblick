@@ -277,7 +277,11 @@ export default class UserNodePlayer implements Player {
     // Pass all the nodes a set of basic datatypes that we know how to render.
     // These could be overwritten later by bag datatypes, but these datatype definitions should be very stable.
     const { topics = [], datatypes = new Map() } = this._lastPlayerStateActiveData ?? {};
-    const nodeDatatypes: RosDatatypes = new Map([...basicDatatypes, ...datatypes]);
+    const nodeDatatypes: RosDatatypes = new Map([
+      ...basicDatatypes,
+      ...foxgloveDatatypes,
+      ...datatypes,
+    ]);
 
     const rosLib = await this._getRosLib();
     const typesLib = await this._getTypesLib();

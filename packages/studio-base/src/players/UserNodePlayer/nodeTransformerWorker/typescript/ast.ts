@@ -37,7 +37,6 @@ import {
   Diagnostic,
 } from "@foxglove/studio-base/players/UserNodePlayer/types";
 import type { RosDatatypes } from "@foxglove/studio-base/types/RosDatatypes";
-import { basicDatatypes } from "@foxglove/studio-base/util/datatypes";
 
 type TypeParam = {
   parent?: TypeParam;
@@ -256,6 +255,7 @@ export const constructDatatypes = (
   node: ts.TypeLiteralNode | ts.InterfaceDeclaration,
   currentDatatype: string,
   messageDefinitionMap: { [formattedDatatype: string]: string },
+  sourceDatatypes: RosDatatypes,
   depth: number = 1,
   currentTypeParamMap: TypeMap = {},
 ): { outputDatatype: string; datatypes: RosDatatypes } => {
@@ -272,7 +272,7 @@ export const constructDatatypes = (
   if (isNodeFromRosModule(node) && messageDef != undefined) {
     return {
       outputDatatype: messageDef,
-      datatypes: basicDatatypes,
+      datatypes: sourceDatatypes,
     };
   }
 
@@ -284,7 +284,7 @@ export const constructDatatypes = (
       const datatype = node.parent.name.text;
       return {
         outputDatatype: datatype,
-        datatypes: basicDatatypes,
+        datatypes: sourceDatatypes,
       };
     }
   }
@@ -328,6 +328,7 @@ export const constructDatatypes = (
           typeLiteral,
           nestedType,
           messageDefinitionMap,
+          sourceDatatypes,
           depth + 1,
           typeParamMap,
         );
