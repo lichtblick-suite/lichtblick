@@ -2,10 +2,11 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
+import { fromNanoSec } from "@foxglove/rostime";
 import { Time } from "@foxglove/studio";
+import { FoxgloveMessages } from "@foxglove/studio-base/types/FoxgloveMessages";
 
 import {
-  FoxgloveLog,
   Ros1RosgraphMsgs$Log,
   LogLevel,
   Ros2RosgraphMsgs$Log,
@@ -27,7 +28,7 @@ export function getNormalizedMessage(logMessage: LogMessageEvent["message"]): st
 function getNormalizedLevel(datatype: string, raw: LogMessageEvent["message"]) {
   switch (datatype) {
     case "foxglove.Log":
-      return (raw as FoxgloveLog).level;
+      return (raw as FoxgloveMessages[typeof datatype]).level;
     case "rosgraph_msgs/Log":
     case "rosgraph_msgs/msg/Log":
       return rosLevelToLogLevel((raw as Ros1RosgraphMsgs$Log).level);
@@ -39,12 +40,11 @@ function getNormalizedLevel(datatype: string, raw: LogMessageEvent["message"]) {
 function getNormalizedStamp(datatype: string, raw: LogMessageEvent["message"]): Time {
   switch (datatype) {
     case "foxglove.Log": {
-      const sec = (raw as FoxgloveLog).timestamp / 1000000000n;
-      const nsec = (raw as FoxgloveLog).timestamp - sec * 1000000000n;
-      return {
-        sec: Number(sec),
-        nsec: Number(nsec),
-      };
+      const timestamp = (raw as FoxgloveMessages[typeof datatype]).timestamp;
+      if (typeof timestamp === "bigint") {
+        return fromNanoSec(timestamp);
+      }
+      return timestamp;
     }
     case "rosgraph_msgs/Log":
       return (raw as Ros1RosgraphMsgs$Log).header.stamp;

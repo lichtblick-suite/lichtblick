@@ -4,8 +4,8 @@
 
 import { AVLTree } from "@foxglove/avl";
 import { Time, compare as compareTime, toNanoSec } from "@foxglove/rostime";
+import { FoxgloveMessages } from "@foxglove/studio-base/types/FoxgloveMessages";
 
-import { FoxgloveCompressedImageMessage, FoxgloveImageAnnotationsMessage } from "../types";
 import { synchronizedAddMessage, SynchronizationItem } from "./useImagePanelMessages";
 
 function EmptyState() {
@@ -15,16 +15,15 @@ function EmptyState() {
   };
 }
 
-function GenerateImage(stamp: Time): FoxgloveCompressedImageMessage {
+function GenerateImage(stamp: Time): FoxgloveMessages["foxglove.CompressedImage"] {
   return {
-    type: "compressed",
     timestamp: toNanoSec(stamp),
     format: "format",
     data: new Uint8Array(0),
   };
 }
 
-function GenerateAnnotations(stamp: Time): FoxgloveImageAnnotationsMessage {
+function GenerateAnnotations(stamp: Time): FoxgloveMessages["foxglove.ImageAnnotations"] {
   return {
     circles: [
       {

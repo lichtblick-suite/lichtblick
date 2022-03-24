@@ -4,13 +4,14 @@
 
 import { filterMap } from "@foxglove/den/collection";
 import { fromNanoSec } from "@foxglove/rostime";
+import { FoxgloveMessages } from "@foxglove/studio-base/types/FoxgloveMessages";
 import {
   ImageMarker,
   ImageMarkerArray,
   ImageMarkerType,
 } from "@foxglove/studio-base/types/Messages";
 
-import type { FoxgloveImageAnnotationsMessage, Annotation, PointsAnnotation } from "../types";
+import type { Annotation, PointsAnnotation } from "../types";
 
 function foxglovePointTypeToStyle(type: number): PointsAnnotation["style"] | undefined {
   switch (type) {
@@ -27,7 +28,7 @@ function foxglovePointTypeToStyle(type: number): PointsAnnotation["style"] | und
 }
 
 function normalizeFoxgloveImageAnnotations(
-  message: FoxgloveImageAnnotationsMessage,
+  message: FoxgloveMessages["foxglove.ImageAnnotations"],
 ): Annotation[] | undefined {
   if (!message.circles && !message.points) {
     return undefined;
@@ -40,7 +41,8 @@ function normalizeFoxgloveImageAnnotations(
   const annotations: Annotation[] = [];
 
   for (const circle of message.circles ?? []) {
-    const stamp = fromNanoSec(circle.timestamp);
+    const stamp =
+      typeof circle.timestamp === "bigint" ? fromNanoSec(circle.timestamp) : circle.timestamp;
     annotations.push({
       type: "circle",
       stamp,
@@ -56,7 +58,8 @@ function normalizeFoxgloveImageAnnotations(
     if (!style) {
       continue;
     }
-    const stamp = fromNanoSec(point.timestamp);
+    const stamp =
+      typeof point.timestamp === "bigint" ? fromNanoSec(point.timestamp) : point.timestamp;
     annotations.push({
       type: "points",
       stamp,
@@ -187,7 +190,7 @@ function normalizeAnnotations(
       break;
     // foxglove
     case "foxglove.ImageAnnotations": {
-      return normalizeFoxgloveImageAnnotations(message as FoxgloveImageAnnotationsMessage);
+      return normalizeFoxgloveImageAnnotations(message as FoxgloveMessages[typeof datatype]);
     }
   }
 

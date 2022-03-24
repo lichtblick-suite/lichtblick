@@ -3,6 +3,7 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 import { Time, MessageEvent } from "@foxglove/studio";
+import { FoxgloveMessages } from "@foxglove/studio-base/types/FoxgloveMessages";
 import { Header } from "@foxglove/studio-base/types/Messages";
 
 export enum LogLevel {
@@ -35,15 +36,6 @@ export type Ros2RosgraphMsgs$Log = Readonly<{
   line: number;
 }>;
 
-export type FoxgloveLog = Readonly<{
-  timestamp: bigint;
-  level: LogLevel;
-  message: string;
-  name?: string;
-  file?: string;
-  line?: number;
-}>;
-
 export type NormalizedLogMessage = {
   stamp: Time;
   level: LogLevel;
@@ -54,6 +46,6 @@ export type NormalizedLogMessage = {
 };
 
 export type LogMessageEvent =
-  | MessageEvent<FoxgloveLog>
+  | MessageEvent<FoxgloveMessages["foxglove.Log"]>
   | MessageEvent<Ros1RosgraphMsgs$Log>
   | MessageEvent<Ros2RosgraphMsgs$Log>;

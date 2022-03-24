@@ -90,41 +90,6 @@ export type MarkerData = {
   cameraModel?: PinholeCameraModel; // undefined means no transformation is needed
 };
 
-export type FoxgloveCameraCalibration = {
-  timestamp: bigint;
-  width: number;
-  height: number;
-  distortion_model?: string;
-  D?: readonly number[];
-  K?: readonly number[];
-  P?: readonly number[];
-  R?: readonly number[];
-};
-
-type FoxgloveImageAnnotationCircleAnnotation = {
-  timestamp: bigint;
-  position: Point2D;
-  diameter: number;
-  thickness: number;
-  fill_color?: Color;
-  outline_color: Color;
-};
-
-type FoxgloveImageAnnotationPointsAnnotation = {
-  timestamp: bigint;
-  type: number;
-  points: Point2D[];
-  outline_colors: Color[];
-  outline_color?: Color;
-  fill_color?: Color;
-  thickness: number;
-};
-
-export type FoxgloveImageAnnotationsMessage = {
-  circles?: FoxgloveImageAnnotationCircleAnnotation[];
-  points?: FoxgloveImageAnnotationPointsAnnotation[];
-};
-
 export type CircleAnnotation = {
   type: "circle";
   stamp: Time;
@@ -173,22 +138,6 @@ export type RawImageMessage = {
 export type CompressedImageMessage = {
   type: "compressed";
   stamp: { sec: number; nsec: number };
-  format: string;
-  data: Uint8Array;
-};
-
-export type FoxgloveRawImageMessage = {
-  timestamp: bigint;
-  width: number;
-  height: number;
-  encoding: string;
-  step: number;
-  data: Uint8Array;
-};
-
-export type FoxgloveCompressedImageMessage = {
-  type: "compressed";
-  timestamp: bigint;
   format: string;
   data: Uint8Array;
 };

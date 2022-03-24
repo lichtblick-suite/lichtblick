@@ -6,10 +6,10 @@ import { useCallback, useMemo } from "react";
 
 import { MessageEvent } from "@foxglove/studio";
 import { useMessageReducer, useDataSourceInfo } from "@foxglove/studio-base/PanelAPI";
+import { FoxgloveMessages } from "@foxglove/studio-base/types/FoxgloveMessages";
 import { CameraInfo, DistortionModel } from "@foxglove/studio-base/types/Messages";
 
 import { getCameraInfoTopic } from "../lib/util";
-import type { FoxgloveCameraCalibration } from "../types";
 
 function normalizeCameraInfo(message: unknown, datatype: string): CameraInfo | undefined {
   switch (datatype) {
@@ -17,7 +17,7 @@ function normalizeCameraInfo(message: unknown, datatype: string): CameraInfo | u
     case "sensor_msgs/msg/CameraInfo":
       return message as CameraInfo;
     case "foxglove.CameraCalibration": {
-      const typedMessage = message as FoxgloveCameraCalibration;
+      const typedMessage = message as FoxgloveMessages[typeof datatype];
       // prettier-ignore
       const mat3Identity = [
         1, 0, 0,

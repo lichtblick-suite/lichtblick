@@ -3,13 +3,10 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 import { fromNanoSec } from "@foxglove/rostime";
+import { FoxgloveMessages } from "@foxglove/studio-base/types/FoxgloveMessages";
 import { CompressedImage, Image } from "@foxglove/studio-base/types/Messages";
 
-import {
-  NormalizedImageMessage,
-  FoxgloveRawImageMessage,
-  FoxgloveCompressedImageMessage,
-} from "../types";
+import { NormalizedImageMessage } from "../types";
 
 // Supported datatypes for normalization
 export const NORMALIZABLE_IMAGE_DATATYPES = [
@@ -33,8 +30,11 @@ export function normalizeImageMessage(
 ): NormalizedImageMessage | undefined {
   switch (datatype) {
     case "foxglove.RawImage": {
-      const typedMessage = message as FoxgloveRawImageMessage;
-      const stamp = fromNanoSec(typedMessage.timestamp);
+      const typedMessage = message as FoxgloveMessages[typeof datatype];
+      const stamp =
+        typeof typedMessage.timestamp === "bigint"
+          ? fromNanoSec(typedMessage.timestamp)
+          : typedMessage.timestamp;
       return {
         type: "raw",
         stamp,
@@ -73,8 +73,11 @@ export function normalizeImageMessage(
       };
     }
     case "foxglove.CompressedImage": {
-      const typedMessage = message as FoxgloveCompressedImageMessage;
-      const stamp = fromNanoSec(typedMessage.timestamp);
+      const typedMessage = message as FoxgloveMessages[typeof datatype];
+      const stamp =
+        typeof typedMessage.timestamp === "bigint"
+          ? fromNanoSec(typedMessage.timestamp)
+          : typedMessage.timestamp;
       return {
         type: "compressed",
         stamp,
