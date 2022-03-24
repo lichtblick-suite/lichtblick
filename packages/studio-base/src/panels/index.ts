@@ -34,6 +34,7 @@ import TableHelp from "./Table/index.help.md";
 import tableThumbnail from "./Table/thumbnail.png";
 import TeleopHelp from "./Teleop/index.help.md";
 import teleopThumbnail from "./Teleop/thumbnail.png";
+import ThreeDeeRenderHelp from "./ThreeDeeRender/index.help.md";
 import ThreeDimensionalVizHelp from "./ThreeDimensionalViz/index.help.md";
 import threeDimensionalVizThumbnail from "./ThreeDimensionalViz/thumbnail.png";
 import TopicGraphHelp from "./TopicGraph/index.help.md";
@@ -239,4 +240,15 @@ const legacyPlot: PanelInfo[] = [
   },
 ];
 
-export default { builtin, debug, hidden, legacyPlot };
+const new3DPanel: PanelInfo[] = [
+  {
+    title: "3D (Experimental)",
+    type: "3D",
+    description: "Experimental 3D scene renderer.",
+    help: ThreeDeeRenderHelp,
+    thumbnail: threeDimensionalVizThumbnail,
+    module: async () => await import("./ThreeDeeRender"),
+  },
+];
+
+export default { builtin, debug, hidden, legacyPlot, new3DPanel };

@@ -1,0 +1,314 @@
+// This Source Code Form is subject to the terms of the Mozilla Public
+// License, v2.0. If a copy of the MPL was not distributed with this
+// file, You can obtain one at http://mozilla.org/MPL/2.0/
+
+import css from "@emotion/css";
+import React, { useRef, useLayoutEffect, useEffect, useState, useMemo } from "react";
+
+import Logger from "@foxglove/log";
+import { toNanoSec } from "@foxglove/rostime";
+import { PanelExtensionContext, RenderState, Topic, MessageEvent } from "@foxglove/studio";
+
+import { DebugGui } from "./DebugGui";
+import { setOverlayPosition } from "./LabelOverlay";
+import { Renderer } from "./Renderer";
+import { RendererContext, useRenderer, useRendererEvent } from "./RendererContext";
+import { Stats } from "./Stats";
+import {
+  TRANSFORM_STAMPED_DATATYPES,
+  TF_DATATYPES,
+  MARKER_DATATYPES,
+  MARKER_ARRAY_DATATYPES,
+  TF,
+  Marker,
+  PointCloud2,
+  POINTCLOUD_DATATYPES,
+} from "./ros";
+
+const SHOW_STATS = true;
+const SHOW_DEBUG = false;
+
+const SUPPORTED_DATATYPES = new Set<string>();
+mergeSetInto(SUPPORTED_DATATYPES, TRANSFORM_STAMPED_DATATYPES);
+mergeSetInto(SUPPORTED_DATATYPES, TF_DATATYPES);
+mergeSetInto(SUPPORTED_DATATYPES, MARKER_DATATYPES);
+mergeSetInto(SUPPORTED_DATATYPES, MARKER_ARRAY_DATATYPES);
+mergeSetInto(SUPPORTED_DATATYPES, POINTCLOUD_DATATYPES);
+
+const log = Logger.getLogger(__filename);
+
+const labelLight = css`
+  position: relative;
+  color: #27272b;
+  background-color: #ececec99;
+`;
+
+const labelDark = css`
+  position: relative;
+  color: #e1e1e4;
+  background-color: #181818cc;
+`;
+
+function RendererOverlay(props: { colorScheme: "dark" | "light" | undefined }): JSX.Element {
+  const colorScheme = props.colorScheme;
+  const [_selectedRenderable, setSelectedRenderable] = useState<THREE.Object3D | ReactNull>(
+    ReactNull,
+  );
+  const [labelsMap, setLabelsMap] = useState(new Map<string, Marker>());
+  const labelsRef = useRef<HTMLDivElement>(ReactNull);
+  const renderer = useRenderer();
+
+  useRendererEvent("renderableSelected", (renderable) => setSelectedRenderable(renderable));
+
+  useRendererEvent("showLabel", (labelId: string, labelMarker: Marker) => {
+    const curLabelMarker = labelsMap.get(labelId);
+    if (curLabelMarker === labelMarker) {
+      return;
+    }
+    setLabelsMap(new Map(labelsMap.set(labelId, labelMarker)));
+  });
+
+  useRendererEvent("removeLabel", (labelId: string) => {
+    if (!labelsMap.has(labelId)) {
+      return;
+    }
+    labelsMap.delete(labelId);
+    setLabelsMap(new Map(labelsMap));
+  });
+
+  useRendererEvent("endFrame", () => {
+    if (renderer && labelsRef.current) {
+      for (const labelId of labelsMap.keys()) {
+        const labelEl = document.getElementById(`label-${labelId}`);
+        if (labelEl) {
+          const worldPosition = renderer.markerWorldPosition(labelId);
+          if (worldPosition) {
+            setOverlayPosition(
+              labelEl.style,
+              worldPosition,
+              renderer.input.canvasSize,
+              renderer.camera,
+            );
+          }
+        }
+      }
+    }
+  });
+
+  // Create a div for each label
+  const labelElements = useMemo(() => {
+    const newLabelElements: JSX.Element[] = [];
+    if (!renderer) {
+      return newLabelElements;
+    }
+    const style = { left: "", top: "", transform: "" };
+    const labelCss = colorScheme === "dark" ? labelDark : labelLight;
+    for (const [labelId, labelMarker] of labelsMap) {
+      const worldPosition = renderer.markerWorldPosition(labelId);
+      if (worldPosition) {
+        setOverlayPosition(style, worldPosition, renderer.input.canvasSize, renderer.camera);
+        newLabelElements.push(
+          <div id={`label-${labelId}`} key={labelId} className={labelCss.name} style={style}>
+            {labelMarker.text}
+          </div>,
+        );
+      }
+    }
+    return newLabelElements;
+  }, [renderer, labelsMap, colorScheme]);
+
+  const labels = (
+    <div id="labels" ref={labelsRef} style={{ position: "absolute", top: 0 }}>
+      {labelElements}
+    </div>
+  );
+
+  // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+  const stats = SHOW_STATS ? (
+    <div id="stats" style={{ position: "absolute", top: 0 }}>
+      <Stats />
+    </div>
+  ) : undefined;
+
+  // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+  const debug = SHOW_DEBUG ? (
+    <div id="debug" style={{ position: "absolute", top: 60 }}>
+      <DebugGui />
+    </div>
+  ) : undefined;
+
+  return (
+    <React.Fragment>
+      {labels}
+      {stats}
+      {debug}
+    </React.Fragment>
+  );
+}
+
+export function ThreeDeeRender({ context }: { context: PanelExtensionContext }): JSX.Element {
+  const [canvas, setCanvas] = useState<HTMLCanvasElement | ReactNull>(ReactNull);
+  const [renderer, setRenderer] = useState<Renderer | ReactNull>(ReactNull);
+  useEffect(() => setRenderer(canvas ? new Renderer(canvas) : ReactNull), [canvas]);
+
+  const [colorScheme, setColorScheme] = useState<"dark" | "light" | undefined>();
+  const [topics, setTopics] = useState<ReadonlyArray<Topic> | undefined>();
+  const [messages, setMessages] = useState<ReadonlyArray<MessageEvent<unknown>> | undefined>();
+  const [currentTime, setCurrentTime] = useState<bigint | undefined>();
+
+  const [renderDone, setRenderDone] = useState<(() => void) | undefined>();
+
+  // We use a layout effect to setup render handling for our panel. We also setup some topic subscriptions.
+  useLayoutEffect(() => {
+    // The render handler is run by the broader studio system during playback when your panel
+    // needs to render because the fields it is watching have changed. How you handle rendering depends on your framework.
+    // You can only setup one render handler - usually early on in setting up your panel.
+    //
+    // Without a render handler your panel will never receive updates.
+    //
+    // The render handler could be invoked as often as 60hz during playback if fields are changing often.
+    context.onRender = (renderState: RenderState, done) => {
+      if (renderState.currentTime) {
+        setCurrentTime(toNanoSec(renderState.currentTime));
+      }
+
+      // render functions receive a _done_ callback. You MUST call this callback to indicate your panel has finished rendering.
+      // Your panel will not receive another render callback until _done_ is called from a prior render. If your panel is not done
+      // rendering before the next render call, studio shows a notification to the user that your panel is delayed.
+      //
+      // Set the done callback into a state variable to trigger a re-render
+      setRenderDone(done);
+
+      // Keep UI elements and the renderer aware of the current color scheme
+      setColorScheme(renderState.colorScheme);
+
+      // We may have new topics - since we are also watching for messages in the current frame, topics may not have changed
+      // It is up to you to determine the correct action when state has not changed
+      setTopics(renderState.topics);
+
+      // currentFrame has messages on subscribed topics since the last render call
+      setMessages(renderState.currentFrame);
+    };
+
+    context.watch("currentTime");
+    context.watch("colorScheme");
+    context.watch("topics");
+    context.watch("currentFrame");
+  }, [context]);
+
+  // Build a map from topic name to datatype
+  const topicsToDatatypes = useMemo(() => {
+    const map = new Map<string, string>();
+    if (!topics) {
+      return map;
+    }
+    for (const topic of topics) {
+      map.set(topic.name, topic.datatype);
+    }
+    return map;
+  }, [topics]);
+
+  // Build a list of topics to subscribe to
+  const topicsToSubscribe = useMemo(() => {
+    const subscriptionList: string[] = [];
+    if (!topics) {
+      return undefined;
+    }
+
+    for (const topic of topics) {
+      // Subscribe to all transform topics
+      if (TF_DATATYPES.has(topic.datatype) || TRANSFORM_STAMPED_DATATYPES.has(topic.datatype)) {
+        subscriptionList.push(topic.name);
+      }
+
+      // TODO: Allow disabling of subscriptions to non-TF topics
+      if (SUPPORTED_DATATYPES.has(topic.datatype)) {
+        subscriptionList.push(topic.name);
+      }
+    }
+
+    return subscriptionList;
+  }, [topics]);
+
+  // Notify the extension context when our subscription list changes
+  useEffect(() => {
+    if (!topicsToSubscribe) {
+      return;
+    }
+    log.debug(`Subscribing to [${topicsToSubscribe.join(", ")}]`);
+    context.subscribe(topicsToSubscribe);
+  }, [context, topicsToSubscribe]);
+
+  // Keep the renderer currentTime up to date
+  useEffect(() => {
+    if (renderer && currentTime != undefined) {
+      renderer.currentTime = currentTime;
+    }
+  }, [currentTime, renderer]);
+
+  useEffect(() => {
+    if (colorScheme && renderer) {
+      renderer.setColorScheme(colorScheme);
+    }
+  }, [colorScheme, renderer]);
+
+  // Handle messages
+  useEffect(() => {
+    if (!messages || !renderer) {
+      return;
+    }
+
+    for (const message of messages) {
+      const datatype = topicsToDatatypes.get(message.topic);
+      if (!datatype) {
+        continue;
+      }
+
+      if (TF_DATATYPES.has(datatype)) {
+        // tf2_msgs/TFMessage - Ingest the list of transforms into our TF tree
+        const tfMessage = message.message as { transforms: TF[] };
+        for (const tf of tfMessage.transforms) {
+          renderer.addTransformMessage(tf);
+        }
+      } else if (TRANSFORM_STAMPED_DATATYPES.has(datatype)) {
+        // geometry_msgs/TransformStamped - Ingest this single transform into our TF tree
+        const tf = message.message as TF;
+        renderer.addTransformMessage(tf);
+      } else if (MARKER_ARRAY_DATATYPES.has(datatype)) {
+        // visualization_msgs/MarkerArray - Ingest the list of markers
+        const markerArray = message.message as { markers: Marker[] };
+        for (const marker of markerArray.markers) {
+          renderer.addMarkerMessage(message.topic, marker);
+        }
+      } else if (MARKER_DATATYPES.has(datatype)) {
+        // visualization_msgs/Marker - Ingest this single marker
+        const marker = message.message as Marker;
+        renderer.addMarkerMessage(message.topic, marker);
+      } else if (POINTCLOUD_DATATYPES.has(datatype)) {
+        // sensor_msgs/PointCloud2 - Ingest this point cloud
+        const pointCloud = message.message as PointCloud2;
+        renderer.addPointCloud2Message(message.topic, pointCloud);
+      }
+    }
+  }, [messages, renderer, topicsToDatatypes]);
+
+  // Invoke the done callback once the render is complete
+  useEffect(() => {
+    renderDone?.();
+  }, [renderDone]);
+
+  return (
+    <React.Fragment>
+      <canvas ref={setCanvas} style={{ position: "absolute", top: 0 }} />
+      <RendererContext.Provider value={renderer}>
+        <RendererOverlay colorScheme={colorScheme} />
+      </RendererContext.Provider>
+    </React.Fragment>
+  );
+}
+
+function mergeSetInto(output: Set<string>, input: ReadonlySet<string>) {
+  for (const value of input) {
+    output.add(value);
+  }
+}

@@ -2542,6 +2542,7 @@ __metadata:
     "@types/classnames": 2.3.1
     "@types/css-font-loading-module": 0.0.7
     "@types/cytoscape": ^3.19.4
+    "@types/dat.gui": ^0
     "@types/enzyme": ^3.10.11
     "@types/enzyme-adapter-react-16": 1.0.6
     "@types/escape-html": ^1.0.1
@@ -2594,6 +2595,7 @@ __metadata:
     css-loader: 6.6.0
     cytoscape: 3.21.0
     cytoscape-dagre: 2.4.0
+    dat.gui: 0.7.9
     enzyme: 3.11.0
     esbuild-loader: 2.18.0
     escape-html: 1.0.3
@@ -2660,6 +2662,7 @@ __metadata:
     three: 0.137.5
     tinycolor2: 1.4.2
     ts-essentials: 9.1.2
+    ts-key-enum: 2.0.11
     ts-loader: 9.2.7
     tsconfig-paths: 3.13.0
     ttypescript: 1.5.13
@@ -5570,6 +5573,13 @@ __metadata:
   version: 3.19.4
   resolution: "@types/cytoscape@npm:3.19.4"
   checksum: 2965b4138b333a7fbc12d1fac0453cc403d6ae08af282fa4716e0921f8cbc92dc6061a3fb32f68e05e1746ed44bdd5bd5a75b4d732d350a3ad26bf4af5bddac0
+  languageName: node
+  linkType: hard
+
+"@types/dat.gui@npm:^0":
+  version: 0.7.7
+  resolution: "@types/dat.gui@npm:0.7.7"
+  checksum: 0a20c10013c5d8595593b9d258f48c070a09601382e9cb0a4d03b98821a8373430747b31935f73434bf0c59122c43276c6763ca1e493eaeb05a9d74bf37a7b81
   languageName: node
   linkType: hard
 
@@ -10233,6 +10243,13 @@ __metadata:
     graphlib: ^2.1.8
     lodash: ^4.17.15
   checksum: b9fabd425466d7b662381c2e457b1adda996bc4169aa60121d4de50250d83a6bb4b77d559e2f887c9c564caea781c2a377fd4de2a76c15f8f04ec3d086ca95f9
+  languageName: node
+  linkType: hard
+
+"dat.gui@npm:0.7.9":
+  version: 0.7.9
+  resolution: "dat.gui@npm:0.7.9"
+  checksum: b5b70160657224eacdb8e0a8d76376e6e59adcc654db577531c7bebce854c4f774d1511df6f064e8246a88cf9a3abe489e4d647cf9e53d26a26141a1b5d31e68
   languageName: node
   linkType: hard
 
@@ -23491,6 +23508,13 @@ __metadata:
   version: 2.0.12
   resolution: "ts-essentials@npm:2.0.12"
   checksum: e46916ef44b4417f0c726faac333c8d2f363a47a5c1994eb9d42045a85d247284a3220cb7f71fb30a9bd2eef43ed7eb3bc1f76f4fedf946200a98cfde7eb3a3f
+  languageName: node
+  linkType: hard
+
+"ts-key-enum@npm:2.0.11":
+  version: 2.0.11
+  resolution: "ts-key-enum@npm:2.0.11"
+  checksum: e2c84dd3d3451b8ef1de87f594b84efc588e765554bc596ef9f220e987e350fe104d0002f87da5a4727399175fb4d41ef028cf32a7ccfa37313ac97e26561401
   languageName: node
   linkType: hard
 
