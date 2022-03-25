@@ -18,6 +18,10 @@ import { RosDatatypes } from "@foxglove/studio-base/types/RosDatatypes";
 
 // https://foxglove.dev/docs/studio/messages/introduction
 const foxgloveDatatypesObj: Record<string, RosMsgDefinition> = {
+  "foxglove.GeoJSON": {
+    name: "foxglove.GeoJSON",
+    definitions: [{ name: "geojson", type: "string" }],
+  },
   "foxglove.LocationFix": {
     name: "foxglove.LocationFix",
     definitions: [

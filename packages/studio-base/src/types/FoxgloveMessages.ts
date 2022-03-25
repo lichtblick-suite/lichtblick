@@ -44,6 +44,10 @@ export type FoxgloveMessages = {
     a: number;
   };
 
+  "foxglove.GeoJSON": {
+    geojson: string;
+  };
+
   "foxglove.ImageAnnotations.Point2D": {
     x: number;
     y: number;

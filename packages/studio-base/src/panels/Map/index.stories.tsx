@@ -26,6 +26,52 @@ const OFFSET_MESSAGE = JSON.parse(JSON.stringify(EMPTY_MESSAGE) ?? "") as NavSat
 OFFSET_MESSAGE.latitude += 0.1;
 OFFSET_MESSAGE.longitude += 0.1;
 
+const GeoJsonContent = JSON.stringify({
+  type: "FeatureCollection",
+  features: [
+    {
+      type: "Feature",
+      properties: {},
+      geometry: {
+        type: "LineString",
+        coordinates: [
+          [2.42477416992186, 1.801374964252865],
+          [2.42082595825194, 1.7846897817763],
+          [2.4422836303711, 1.78292608704408],
+        ],
+      },
+    },
+    {
+      type: "Feature",
+      properties: {},
+      geometry: {
+        type: "Polygon",
+        coordinates: [
+          [
+            [2.44314193725585, 1.77342854582093],
+            [2.43953704833984, 1.76596533600783],
+            [2.4264907836914, 1.7694934927041],
+            [2.42700576782227, 1.77817746896081],
+            [2.44314193725585, 1.77342854582093],
+          ],
+        ],
+      },
+    },
+    {
+      type: "Feature",
+      properties: {
+        "marker-color": "#7e7e7e",
+        "marker-size": "medium",
+        "marker-symbol": "1",
+      },
+      geometry: {
+        type: "Point",
+        coordinates: [2.43284225463867, 1.78943798147498],
+      },
+    },
+  ],
+});
+
 export default {
   title: "panels/Map",
   component: MapPanel,
@@ -195,6 +241,52 @@ SinglePointFullCovariance.parameters = {
               },
               position_covariance: [1, 2, 3, 2, 5000000, 6, 3, 6, 1000000000],
               position_covariance_type: NavSatFixPositionCovarianceType.COVARIANCE_TYPE_KNOWN,
+            },
+          },
+        ],
+      },
+    },
+  },
+};
+
+export const GeoJSON = (): JSX.Element => {
+  return <MapPanel />;
+};
+
+GeoJSON.parameters = {
+  chromatic: {
+    delay: 1000,
+  },
+  panelSetup: {
+    fixture: {
+      topics: [
+        { name: "/gps", datatype: "sensor_msgs/NavSatFix" },
+        { name: "/geo", datatype: "foxglove.GeoJSON" },
+      ],
+      frame: {
+        "/gps": [
+          {
+            topic: "/gps",
+            receiveTime: { sec: 123, nsec: 456 },
+            message: {
+              latitude: 1.801374964252865,
+              longitude: 2.42477416992186,
+              altitude: 0,
+              status: {
+                status: NavSatFixStatus.STATUS_GBAS_FIX,
+                service: NavSatFixService.SERVICE_GPS,
+              },
+              position_covariance: [1, 2, 3, 2, 5000000, 6, 3, 6, 1000000000],
+              position_covariance_type: NavSatFixPositionCovarianceType.COVARIANCE_TYPE_KNOWN,
+            },
+          },
+        ],
+        "/geo": [
+          {
+            topic: "/geo",
+            receiveTime: { sec: 123, nsec: 456 },
+            message: {
+              geojson: GeoJsonContent,
             },
           },
         ],
