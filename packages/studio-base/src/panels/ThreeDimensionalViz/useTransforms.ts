@@ -14,7 +14,6 @@
 import { useMemo, useRef } from "react";
 
 import {
-  FOXGLOVE_FRAME_TRANSFORM_DATATYPE,
   TF_DATATYPES,
   TRANSFORM_STAMPED_DATATYPES,
 } from "@foxglove/studio-base/panels/ThreeDimensionalViz/constants";
@@ -28,6 +27,7 @@ import {
   vec3FromValues,
 } from "@foxglove/studio-base/panels/ThreeDimensionalViz/transforms/geometry";
 import { MessageEvent, Topic } from "@foxglove/studio-base/players/types";
+import { FoxgloveMessages } from "@foxglove/studio-base/types/FoxgloveMessages";
 import { MarkerArray, StampedMessage, TF } from "@foxglove/studio-base/types/Messages";
 import { mightActuallyBePartial } from "@foxglove/studio-base/util/mightActuallyBePartial";
 
@@ -35,19 +35,6 @@ import { TransformLink } from "./types";
 import { Frame } from "./useFrame";
 
 type TfMessage = { transforms: TF[] };
-
-type FoxgloveFrameTransform = {
-  timestamp: {
-    sec: number;
-    nsec: number;
-  };
-  parent_frame_id: string;
-  child_frame_id: string;
-  transform: {
-    translation: { x: number; y: number; z: number };
-    rotation: { x: number; y: number; z: number; w: number };
-  };
-};
 
 function consumeTfs(tfs: MessageEvent<TfMessage>[], transforms: TransformTree): void {
   for (const { message } of tfs) {
@@ -65,7 +52,7 @@ function consumeSingleTfs(tfs: MessageEvent<TF>[], transforms: TransformTree): v
 }
 
 function consumeFoxgloveFrameTransform(
-  msgEvents: MessageEvent<FoxgloveFrameTransform>[],
+  msgEvents: MessageEvent<FoxgloveMessages["foxglove.FrameTransform"]>[],
   transformTree: TransformTree,
 ): void {
   for (const { message } of msgEvents) {
@@ -160,8 +147,11 @@ function useTransforms(args: Args): IImmutableTransformTree {
       } else if (TRANSFORM_STAMPED_DATATYPES.includes(datatype)) {
         consumeSingleTfs(msgs as MessageEvent<TF>[], transforms);
         updated = true;
-      } else if (datatype === FOXGLOVE_FRAME_TRANSFORM_DATATYPE) {
-        consumeFoxgloveFrameTransform(msgs as MessageEvent<FoxgloveFrameTransform>[], transforms);
+      } else if (datatype === "foxglove.FrameTransform") {
+        consumeFoxgloveFrameTransform(
+          msgs as MessageEvent<FoxgloveMessages[typeof datatype]>[],
+          transforms,
+        );
       }
     }
 

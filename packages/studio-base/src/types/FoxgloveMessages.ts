@@ -82,4 +82,17 @@ export type FoxgloveMessages = {
     file?: string;
     line?: number;
   };
+
+  "foxglove.FrameTransform": {
+    timestamp: {
+      sec: number;
+      nsec: number;
+    };
+    parent_frame_id: string;
+    child_frame_id: string;
+    transform: {
+      translation: { x: number; y: number; z: number };
+      rotation: { x: number; y: number; z: number; w: number };
+    };
+  };
 };

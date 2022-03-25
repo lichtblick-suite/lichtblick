@@ -34,4 +34,3 @@ export const TF_DATATYPES = [
   "tf2_msgs/msg/TFMessage",
   "ros.tf2_msgs.TFMessage",
 ];
-export const FOXGLOVE_FRAME_TRANSFORM_DATATYPE = "foxglove.FrameTransform";
