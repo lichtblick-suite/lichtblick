@@ -2,7 +2,7 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { fromRFC3339String } from "@foxglove/rostime";
+import { fromRFC3339String, toRFC3339String } from "@foxglove/rostime";
 import {
   IDataSourceFactory,
   DataSourceFactoryInitializeArgs,
@@ -53,6 +53,11 @@ class FoxgloveDataPlatformDataSourceFactory implements IDataSourceFactory {
       return new IterablePlayer({
         metricsCollector: args.metricsCollector,
         source,
+        urlParams: {
+          deviceId,
+          start: toRFC3339String(startTime),
+          end: toRFC3339String(endTime),
+        },
         name: `${deviceId}, ${formatTimeRaw(startTime)} to ${formatTimeRaw(endTime)}`,
       });
     }
