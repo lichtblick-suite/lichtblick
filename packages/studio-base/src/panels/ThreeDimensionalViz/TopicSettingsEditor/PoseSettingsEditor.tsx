@@ -11,11 +11,10 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { Box, Stack } from "@mui/material";
+import { Stack } from "@mui/material";
 
 import ColorPicker from "@foxglove/studio-base/components/ColorPicker";
-import { Color, PoseStamped } from "@foxglove/studio-base/types/Messages";
-import { colors } from "@foxglove/studio-base/util/sharedStyleConstants";
+import { Color } from "@foxglove/studio-base/types/Messages";
 
 import { TopicSettingsEditorProps } from ".";
 import { SLabel, SInput } from "./common";
@@ -32,17 +31,9 @@ export type PoseSettings = {
 };
 
 export default function PoseSettingsEditor(
-  props: TopicSettingsEditorProps<PoseStamped, PoseSettings>,
+  props: TopicSettingsEditorProps<unknown, PoseSettings>,
 ): JSX.Element {
-  const { message, settings, onFieldChange, onSettingsChange } = props;
-
-  if (!message) {
-    return (
-      <Box color={colors.TEXT_MUTED}>
-        <small>Waiting for messages...</small>
-      </Box>
-    );
-  }
+  const { settings, onFieldChange, onSettingsChange } = props;
 
   const currentLength = settings.size?.shaftLength ?? 1;
   const currentShaftWidth = settings.size?.shaftWidth ?? 0.05;

@@ -10,6 +10,7 @@ import { fromSec, Time } from "@foxglove/rostime";
 import { MessageEvent, Topic } from "@foxglove/studio";
 import useDelayedFixture from "@foxglove/studio-base/panels/ThreeDimensionalViz/stories/useDelayedFixture";
 import PanelSetup from "@foxglove/studio-base/stories/PanelSetup";
+import { FoxgloveMessages } from "@foxglove/studio-base/types/FoxgloveMessages";
 import {
   ArrowMarker,
   CubeListMarker,
@@ -1401,6 +1402,40 @@ export function Marker_PointCloud2_Alignment(): JSX.Element {
   );
 }
 
+Foxglove_Color.parameters = { colorScheme: "dark" };
+export function Foxglove_Color(): JSX.Element {
+  const topics: Topic[] = [{ name: "/color", datatype: "foxglove.Color" }];
+  const color: MessageEvent<FoxgloveMessages["foxglove.Color"]> = {
+    topic: "/color",
+    receiveTime: { sec: 0, nsec: 0 },
+    message: { r: 1, g: 0.5, b: 0, a: 0.5 },
+    sizeInBytes: 0,
+  };
+
+  const fixture = useDelayedFixture({
+    datatypes,
+    topics,
+    frame: {
+      "/color": [color],
+    },
+    capabilities: [],
+    activeData: {
+      currentTime: { sec: 1, nsec: 0 },
+    },
+  });
+
+  return (
+    <PanelSetup fixture={fixture}>
+      <ThreeDimensionalViz
+        overrideConfig={{
+          ...ThreeDimensionalViz.defaultConfig,
+          checkedKeys: ["name:Topics", "t:/color", `t:${FOXGLOVE_GRID_TOPIC}`],
+        }}
+      />
+    </PanelSetup>
+  );
+}
+
 GeometryMsgs_Polygon.parameters = { colorScheme: "dark" };
 export function GeometryMsgs_Polygon(): JSX.Element {
   const topics: Topic[] = [
@@ -1489,8 +1524,14 @@ export function GeometryMsgs_Polygon(): JSX.Element {
   );
 }
 
+export const GeometryMsgs_PoseArray = (): JSX.Element => <GeometryMsgs_PoseArray_Base />;
 GeometryMsgs_PoseArray.parameters = { colorScheme: "dark" };
-export function GeometryMsgs_PoseArray(): JSX.Element {
+export const GeometryMsgs_PoseArray_Line = (): JSX.Element => (
+  <GeometryMsgs_PoseArray_Base displayType="line" />
+);
+GeometryMsgs_PoseArray_Line.parameters = { colorScheme: "dark" };
+
+function GeometryMsgs_PoseArray_Base({ displayType }: { displayType?: string }): JSX.Element {
   const topics: Topic[] = [
     { name: "/baselink_path", datatype: "geometry_msgs/PoseArray" },
     { name: "/sensor_path", datatype: "geometry_msgs/PoseArray" },
@@ -1609,6 +1650,12 @@ export function GeometryMsgs_PoseArray(): JSX.Element {
             "t:/sensor_path": {
               overrideColor: { r: 1, g: 0, b: 0, a: 0.2 },
               size: { shaftWidth: 1, headWidth: 2, headLength: 0.5, length: 2 },
+              lineThickness: 0.5,
+              displayType,
+            },
+            "t:/baselink_path": {
+              lineThickness: 0.1,
+              displayType,
             },
           },
           cameraState: {

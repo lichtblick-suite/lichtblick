@@ -29,10 +29,8 @@ import {
   PointCloud,
   InstancedLineListMarker,
   ColorMarker,
-  PoseStamped,
   MeshMarker,
   GlLineListMarker,
-  GeometryMsgs$PoseArray,
   Pose,
 } from "@foxglove/studio-base/types/Messages";
 
@@ -51,6 +49,16 @@ type PreviousThreeDimensionalVizConfig = {
   colorOverrideBySourceIdxByVariable?: ColorOverrideBySourceIdxByVariable;
 };
 
+export type NormalizedPose = {
+  header: { stamp: Time; frame_id: string };
+  pose: Pose;
+};
+
+export type NormalizedPoseArray = {
+  header: { stamp: Time; frame_id: string };
+  poses: Pose[];
+};
+
 export interface MarkerCollector {
   arrow(arg0: ArrowMarker): void;
   color(arg0: ColorMarker): void;
@@ -59,7 +67,9 @@ export interface MarkerCollector {
   sphere(arg0: SphereMarker): void;
   sphereList(arg0: SphereListMarker): void;
   cylinder(arg0: CylinderMarker): void;
-  poseMarker(arg0: PoseStamped | (GeometryMsgs$PoseArray & { pose: Pose })): void;
+  poseMarker(
+    arg0: (NormalizedPose & { type: 103 }) | (NormalizedPoseArray & { type: 111; pose: Pose }),
+  ): void;
   lineStrip(arg0: LineStripMarker): void;
   lineList(arg0: LineListMarker): void;
   points(arg0: PointsMarker): void;

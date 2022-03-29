@@ -21,8 +21,13 @@ import {
 } from "@foxglove/studio-base/panels/ThreeDimensionalViz/Interactions/types";
 import MessageCollector from "@foxglove/studio-base/panels/ThreeDimensionalViz/SceneBuilder/MessageCollector";
 import { MarkerMatcher } from "@foxglove/studio-base/panels/ThreeDimensionalViz/ThreeDimensionalVizContext";
+import { PoseListSettings } from "@foxglove/studio-base/panels/ThreeDimensionalViz/TopicSettingsEditor/PoseListSettingsEditor";
 import VelodyneCloudConverter from "@foxglove/studio-base/panels/ThreeDimensionalViz/VelodyneCloudConverter";
 import { DATATYPE } from "@foxglove/studio-base/panels/ThreeDimensionalViz/commands/PointClouds/types";
+import {
+  normalizePose,
+  normalizePoseArray,
+} from "@foxglove/studio-base/panels/ThreeDimensionalViz/normalizeMessages";
 import {
   IImmutableCoordinateFrame,
   IImmutableTransformTree,
@@ -31,9 +36,12 @@ import {
   MarkerProvider,
   MarkerCollector,
   RenderMarkerArgs,
+  NormalizedPose,
+  NormalizedPoseArray,
 } from "@foxglove/studio-base/panels/ThreeDimensionalViz/types";
 import { Frame } from "@foxglove/studio-base/panels/ThreeDimensionalViz/useFrame";
 import { Topic, MessageEvent, RosObject } from "@foxglove/studio-base/players/types";
+import { FoxgloveMessages } from "@foxglove/studio-base/types/FoxgloveMessages";
 import {
   Color,
   Marker,
@@ -68,11 +76,13 @@ export type TopicSettingsCollection = {
 };
 
 // builds a synthetic arrow marker from a geometry_msgs/PoseStamped
-// these pose sizes were manually configured in rviz; for now we hard-code them here
-const buildSyntheticArrowMarker = ({ topic, message }: MessageEvent<PoseStamped>, pose: Pose) => ({
-  header: message.header,
+const buildSyntheticArrowMarker = (
+  { topic, message }: MessageEvent<unknown>,
+  poseMsg: NormalizedPose,
+) => ({
+  header: poseMsg.header,
   type: 103,
-  pose,
+  pose: poseMsg.pose,
   frame_locked: true,
   interactionData: { topic, originalMessage: message },
 });
@@ -639,6 +649,23 @@ export default class SceneBuilder implements MarkerProvider {
     this._consumeNonMarkerMessage(topic, newMessage, 4 /* line strip */, message);
   };
 
+  private _consumePoseListAsLine = (topic: string, message: NormalizedPoseArray): void => {
+    const topicSettings = this._settingsByKey[`t:${topic}`] as PoseListSettings | undefined;
+
+    if (message.poses.length === 0) {
+      return;
+    }
+    const newMessage = {
+      header: message.header,
+      // Future: display orientation of the poses in the path
+      points: message.poses.map((pose) => pose.position),
+      closed: false,
+      scale: { x: topicSettings?.lineThickness ?? 0.2 },
+      color: topicSettings?.overrideColor ?? { r: 0.5, g: 0.5, b: 1, a: 1 },
+    };
+    this._consumeNonMarkerMessage(topic, newMessage, 4 /* line strip */, message);
+  };
+
   private _consumeLaserScan = (topic: string, msg: MessageEvent<LaserScan>): void => {
     const scan = msg.message;
     const hasIntensity =
@@ -692,28 +719,37 @@ export default class SceneBuilder implements MarkerProvider {
     this._consumeNonMarkerMessage(topic, pcl, 102);
   };
 
-  private _consumeColor = (msg: MessageEvent<Color>): void => {
+  private _consumeColor = (
+    msg: MessageEvent<Color | FoxgloveMessages["foxglove.Color"]>,
+    datatype: string,
+  ): void => {
     const color = mightActuallyBePartial(msg.message);
     if (color.r == undefined || color.g == undefined || color.b == undefined) {
       return;
     }
+    let finalColor: Color;
+    if (datatype === "foxglove.Color") {
+      finalColor = msg.message as FoxgloveMessages["foxglove.Color"];
+    } else {
+      finalColor = { r: color.r / 255, g: color.g / 255, b: color.b / 255, a: color.a ?? 1 };
+    }
     const newMessage: StampedMessage & { color: Color } = {
       header: { frame_id: "", stamp: msg.receiveTime, seq: 0 },
-      color: { r: color.r / 255, g: color.g / 255, b: color.b / 255, a: color.a ?? 1 },
+      color: finalColor,
     };
     this._consumeNonMarkerMessage(msg.topic, newMessage, 110);
   };
 
   private _consumeNonMarkerMessage = (
     topic: string,
-    drawData: StampedMessage,
+    drawData: Record<string, unknown>,
     type: number,
     originalMessage?: unknown,
   ): void => {
     // some callers of _consumeNonMarkerMessage provide LazyMessages and others provide regular objects
     const obj =
       "toJSON" in drawData
-        ? (drawData as unknown as { toJSON: () => Record<string, unknown> }).toJSON()
+        ? (drawData as { toJSON: () => Record<string, unknown> }).toJSON()
         : drawData;
     const mappedMessage = {
       ...obj,
@@ -786,17 +822,30 @@ export default class SceneBuilder implements MarkerProvider {
       case "geometry_msgs/PoseArray":
       case "geometry_msgs/msg/PoseArray":
       case "ros.geometry_msgs.PoseArray":
-        this._consumeNonMarkerMessage(topic, message as StampedMessage, 111);
+      case "foxglove.PosesInFrame": {
+        const topicSettings = this._settingsByKey[`t:${topic}`] as PoseListSettings | undefined;
+        const normalized = normalizePoseArray(
+          message as GeometryMsgs$PoseArray | FoxgloveMessages["foxglove.PosesInFrame"],
+          datatype,
+        );
+        if (topicSettings?.displayType === "line") {
+          this._consumePoseListAsLine(topic, normalized);
+        } else {
+          this._consumeNonMarkerMessage(topic, normalized, 111);
+        }
         break;
+      }
       case "geometry_msgs/PoseStamped":
       case "geometry_msgs/msg/PoseStamped":
-      case "ros.geometry_msgs.PoseStamped": {
-        const poseMsg = msg as MessageEvent<PoseStamped>;
-        // make synthetic arrow marker from the stamped pose
-        const pose = poseMsg.message.pose;
+      case "ros.geometry_msgs.PoseStamped":
+      case "foxglove.PoseInFrame": {
+        const poseMsg = msg as MessageEvent<PoseStamped | FoxgloveMessages["foxglove.PoseInFrame"]>;
         this.collectors[topic]!.addNonMarker(
           topic,
-          buildSyntheticArrowMarker(poseMsg, pose) as Interactive<unknown>,
+          buildSyntheticArrowMarker(
+            poseMsg,
+            normalizePose(poseMsg.message, datatype),
+          ) as Interactive<unknown>,
         );
         break;
       }
@@ -833,7 +882,11 @@ export default class SceneBuilder implements MarkerProvider {
       case "std_msgs/ColorRGBA":
       case "std_msgs/msg/ColorRGBA":
       case "ros.std_msgs.ColorRGBA":
-        this._consumeColor(msg as MessageEvent<Color>);
+      case "foxglove.Color":
+        this._consumeColor(
+          msg as MessageEvent<Color | FoxgloveMessages["foxglove.Color"]>,
+          datatype,
+        );
         break;
       case "geometry_msgs/PolygonStamped":
       case "geometry_msgs/msg/PolygonStamped":
@@ -862,7 +915,7 @@ export default class SceneBuilder implements MarkerProvider {
       }
       default: {
         if (datatype.endsWith("/Color") || datatype.endsWith("/ColorRGBA")) {
-          this._consumeColor(msg as MessageEvent<Color>);
+          this._consumeColor(msg as MessageEvent<Color>, datatype);
           break;
         }
       }
@@ -983,8 +1036,8 @@ export default class SceneBuilder implements MarkerProvider {
       | Marker
       | OccupancyGridMessage
       | PointCloud2
-      | (PoseStamped & { type: 103 })
-      | (GeometryMsgs$PoseArray & { type: 111; pose: Pose });
+      | (NormalizedPose & { type: 103 })
+      | (NormalizedPoseArray & { type: 111; pose: Pose });
     switch (marker.type) {
       case 1: // CubeMarker
       case 2: // SphereMarker

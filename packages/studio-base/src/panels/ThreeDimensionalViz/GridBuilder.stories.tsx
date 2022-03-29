@@ -66,7 +66,7 @@ class MockMarkerCollector implements MarkerCollector {
   sphere(_arg0: SphereMarker): void {}
   sphereList(_arg0: SphereListMarker): void {}
   cylinder(_arg0: CylinderMarker): void {}
-  poseMarker(_arg0: ArrowMarker): void {}
+  poseMarker(): void {}
   lineStrip(_arg0: LineStripMarker): void {}
   lineList(_arg0: LineListMarker): void {}
   points(_arg0: PointsMarker): void {}

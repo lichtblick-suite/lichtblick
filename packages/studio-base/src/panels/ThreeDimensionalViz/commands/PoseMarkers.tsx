@@ -23,22 +23,21 @@ import {
   Vec3,
 } from "@foxglove/regl-worldview";
 import { PoseSettings } from "@foxglove/studio-base/panels/ThreeDimensionalViz/TopicSettingsEditor/PoseSettingsEditor";
-import { Color, GeometryMsgs$PoseArray, Header, Scale } from "@foxglove/studio-base/types/Messages";
+import {
+  NormalizedPose,
+  NormalizedPoseArray,
+} from "@foxglove/studio-base/panels/ThreeDimensionalViz/types";
 import { emptyPose } from "@foxglove/studio-base/util/Pose";
 
-type PoseMarker = {
-  header: Header;
-  pose: Pose;
-  scale?: Scale;
-  color?: Color;
-  settings?: PoseSettings;
-  type?: 103;
-};
 const DEFAULT_COLOR = { r: 124 / 255, g: 107 / 255, b: 255 / 255, a: 0.5 };
 const DEFAULT_SIZE = { shaftLength: 1, shaftWidth: 0.05, headWidth: 0.2, headLength: 0.3 };
 
 type PoseMarkerProps = CommonCommandProps & {
-  markers: (PoseMarker | (Omit<PoseMarker, "type"> & GeometryMsgs$PoseArray & { type: 111 }))[];
+  markers: Array<
+    ((NormalizedPose & { type: 103 }) | (NormalizedPoseArray & { pose: Pose; type: 111 })) & {
+      settings?: PoseSettings;
+    }
+  >;
 };
 
 function makeArrow(

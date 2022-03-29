@@ -21,6 +21,7 @@ import { FOXGLOVE_GRID_DATATYPE, URDF_DATATYPE } from "@foxglove/studio-base/uti
 import MarkerSettingsEditor from "./MarkerSettingsEditor";
 import OccupancyGridSettingsEditor from "./OccupancyGridSettingsEditor";
 import PointCloudSettingsEditor from "./PointCloudSettingsEditor";
+import PoseListSettingsEditor from "./PoseListSettingsEditor";
 import PoseSettingsEditor from "./PoseSettingsEditor";
 
 export type { TopicSettingsEditorProps } from "./types";
@@ -39,9 +40,10 @@ export function topicSettingsEditorForDatatype(datatype: string):
     ["velodyne_msgs/VelodyneScan", PointCloudSettingsEditor],
     ["velodyne_msgs/msg/VelodyneScan", PointCloudSettingsEditor],
     ["ros.velodyne_msgs.VelodyneScan", PointCloudSettingsEditor],
-    ["geometry_msgs/PoseArray", PoseSettingsEditor],
-    ["geometry_msgs/msg/PoseArray", PoseSettingsEditor],
-    ["ros.geometry_msgs.PoseArray", PoseSettingsEditor],
+    ["geometry_msgs/PoseArray", PoseListSettingsEditor],
+    ["geometry_msgs/msg/PoseArray", PoseListSettingsEditor],
+    ["ros.geometry_msgs.PoseArray", PoseListSettingsEditor],
+    ["foxglove.PosesInFrame", PoseListSettingsEditor],
     ["geometry_msgs/PoseStamped", PoseSettingsEditor],
     ["geometry_msgs/msg/PoseStamped", PoseSettingsEditor],
     ["ros.geometry_msgs.PoseStamped", PoseSettingsEditor],

@@ -99,4 +99,21 @@ export type FoxgloveMessages = {
       rotation: { x: number; y: number; z: number; w: number };
     };
   };
+
+  "foxglove.Pose": {
+    position: { x: number; y: number; z: number };
+    orientation: { x: number; y: number; z: number; w: number };
+  };
+
+  "foxglove.PoseInFrame": {
+    timestamp: { sec: number; nsec: number };
+    frame_id: string;
+    pose: FoxgloveMessages["foxglove.Pose"];
+  };
+
+  "foxglove.PosesInFrame": {
+    timestamp: { sec: number; nsec: number };
+    frame_id: string;
+    poses: Array<FoxgloveMessages["foxglove.Pose"]>;
+  };
 };

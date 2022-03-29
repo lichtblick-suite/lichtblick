@@ -42,6 +42,10 @@ import {
   LAYER_INDEX_OCCUPANCY_GRIDS,
 } from "@foxglove/studio-base/panels/ThreeDimensionalViz/constants";
 import {
+  NormalizedPose,
+  NormalizedPoseArray,
+} from "@foxglove/studio-base/panels/ThreeDimensionalViz/types";
+import {
   BaseMarker,
   CubeListMarker,
   CubeMarker,
@@ -55,7 +59,6 @@ import {
   ColorMarker,
   MeshMarker,
   GlLineListMarker,
-  GeometryMsgs$PoseArray,
   Pose,
 } from "@foxglove/studio-base/types/Messages";
 import { ReglColor } from "@foxglove/studio-base/util/colorUtils";
@@ -80,7 +83,10 @@ export type InteractiveMarkersByType = {
   mesh: Interactive<MeshMarker>[];
   pointcloud: Interactive<SphereMarker>[];
   points: Interactive<PointsMarker>[];
-  poseMarker: (Interactive<BaseMarker> | Interactive<GeometryMsgs$PoseArray & { pose: Pose }>)[];
+  poseMarker: (
+    | Interactive<NormalizedPose & { type: 103 }>
+    | Interactive<NormalizedPoseArray & { type: 111; pose: Pose }>
+  )[];
   sphere: Interactive<SphereMarker>[];
   sphereList: Interactive<SphereListMarker>[];
   text: Interactive<TextMarker>[];
