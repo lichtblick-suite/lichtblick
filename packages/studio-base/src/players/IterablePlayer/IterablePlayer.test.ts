@@ -137,7 +137,7 @@ describe("IterablePlayer", () => {
     player.close();
   });
 
-  it("finishes seek backfill before starting another seek backfill", async () => {
+  it("when seeking during a seek backfill, start another seek after the current one exits", async () => {
     const source = new TestSource();
     const player = new IterablePlayer({
       source,
@@ -148,23 +148,27 @@ describe("IterablePlayer", () => {
     player.setListener(async (state) => await store.add(state));
     await store.done;
 
-    store.reset(3);
+    store.reset(4);
 
     // replace the message iterator with our own implementation
     // This implementation performs a seekPlayback during backfill.
     // eslint-disable-next-line @typescript-eslint/unbound-method
     const originalMethod = source.getBackfillMessages;
-    source.getBackfillMessages = async function (_args: GetBackfillMessagesArgs) {
-      player.seekPlayback({ sec: 0, nsec: 0 });
-      source.getBackfillMessages = originalMethod;
-      return [
-        {
-          topic: "foo",
-          receiveTime: { sec: 0, nsec: 0 },
-          message: undefined,
-          sizeInBytes: 0,
-        },
-      ];
+    source.getBackfillMessages = async function () {
+      source.getBackfillMessages = async function () {
+        source.getBackfillMessages = originalMethod;
+        return [
+          {
+            topic: "foo",
+            receiveTime: { sec: 0, nsec: 1 },
+            message: undefined,
+            sizeInBytes: 0,
+          },
+        ];
+      };
+
+      player.seekPlayback({ sec: 0, nsec: 1 });
+      return [];
     };
 
     // starts a seek backfill
@@ -196,14 +200,23 @@ describe("IterablePlayer", () => {
       name: undefined,
     };
 
-    const withMessages: PlayerStateWithoutPlayerId = {
+    const newSeekBase = {
       ...baseState,
       activeData: {
         ...baseState.activeData!,
+        currentTime: { sec: 0, nsec: 1 },
+      },
+    };
+
+    const withMessages: PlayerStateWithoutPlayerId = {
+      ...newSeekBase,
+      activeData: {
+        ...newSeekBase.activeData,
+        currentTime: { sec: 0, nsec: 1 },
         messages: [
           {
             message: undefined,
-            receiveTime: { sec: 0, nsec: 0 },
+            receiveTime: { sec: 0, nsec: 1 },
             sizeInBytes: 0,
             topic: "foo",
           },
@@ -211,9 +224,13 @@ describe("IterablePlayer", () => {
       },
     };
 
-    // The first seek playback completes and includes the messages
-    // The second seek playback has no messages because we've reset back to the original messageIterator
-    expect(playerStates).toEqual([withMessages, baseState, baseState]);
+    // The first seek is interrupted by the second seek.
+    // The state order:
+    // 1. a state update with the currentTime to ack the seek
+    // 2. a state update with the _new_ seek time to ack the second seek
+    // 3. a state update with the messages from the new seek
+    // 4. a state update from idle
+    expect(playerStates).toEqual([baseState, newSeekBase, withMessages, newSeekBase]);
 
     player.close();
   });

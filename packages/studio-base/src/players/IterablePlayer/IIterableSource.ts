@@ -40,6 +40,8 @@ export type IteratorResult =
 export type GetBackfillMessagesArgs = {
   topics: string[];
   time: Time;
+
+  abortSignal?: AbortSignal;
 };
 
 /**

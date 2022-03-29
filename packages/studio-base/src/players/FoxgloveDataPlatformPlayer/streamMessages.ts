@@ -8,7 +8,7 @@ import { isEqual } from "lodash";
 import Logger from "@foxglove/log";
 import { Mcap0StreamReader, Mcap0Types } from "@foxglove/mcap";
 import { loadDecompressHandlers, parseChannel, ParsedChannel } from "@foxglove/mcap-support";
-import { fromNanoSec, isTimeInRangeInclusive, Time, toRFC3339String } from "@foxglove/rostime";
+import { fromNanoSec, Time, toRFC3339String } from "@foxglove/rostime";
 import { MessageEvent } from "@foxglove/studio-base/players/types";
 import ConsoleApi from "@foxglove/studio-base/services/ConsoleApi";
 
@@ -79,7 +79,9 @@ export default async function* streamMessages({
   if (controller.signal.aborted) {
     return;
   }
-  const response = await fetch(mcapUrl, { signal: controller.signal });
+
+  // Since every request is signed with a new token, there's no benefit to caching.
+  const response = await fetch(mcapUrl, { signal: controller.signal, cache: "no-cache" });
   if (response.status === 404) {
     return;
   } else if (response.status !== 200) {
@@ -167,15 +169,13 @@ export default async function* streamMessages({
           throw new Error(`message for channel ${record.channelId} with no prior channel/schema`);
         }
         const receiveTime = fromNanoSec(record.logTime);
-        if (isTimeInRangeInclusive(receiveTime, params.start, params.end)) {
-          totalMessages++;
-          messages.push({
-            topic: info.channel.topic,
-            receiveTime,
-            message: info.parsedChannel.deserializer(record.data),
-            sizeInBytes: record.data.byteLength,
-          });
-        }
+        totalMessages++;
+        messages.push({
+          topic: info.channel.topic,
+          receiveTime,
+          message: info.parsedChannel.deserializer(record.data),
+          sizeInBytes: record.data.byteLength,
+        });
         return;
       }
     }
@@ -189,13 +189,17 @@ export default async function* streamMessages({
       for (let record; (record = reader.nextRecord()); ) {
         if (record.type === "DataEnd") {
           normalReturn = true;
-          break parseLoop;
+          break;
         }
         processRecord(record);
       }
       if (messages.length > 0) {
         yield messages;
         messages = [];
+      }
+
+      if (normalReturn) {
+        break parseLoop;
       }
     }
     if (!reader.done()) {

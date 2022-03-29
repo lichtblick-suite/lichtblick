@@ -3,6 +3,7 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 import { simplify } from "intervals-fn";
+import { isEqual } from "lodash";
 import { v4 as uuidv4 } from "uuid";
 
 import { filterMap } from "@foxglove/den/collection";
@@ -118,6 +119,8 @@ export class IterablePlayer implements Player {
   ];
   private _metricsCollector: PlayerMetricsCollectorInterface;
   private _subscriptions: SubscribePayload[] = [];
+  private _allTopics: Set<string> = new Set();
+  private _partialTopics: Set<string> = new Set();
 
   private _progress: Progress = {};
   private _id: string = uuidv4();
@@ -130,6 +133,7 @@ export class IterablePlayer implements Player {
   private _lastMessage?: MessageEvent<unknown>;
   private _publishedTopics = new Map<string, Set<string>>();
   private _seekTarget?: Time;
+  private _abort?: AbortController;
 
   // To keep reference equality for downstream user memoization cache the currentTime provided in the last activeData update
   // See additional comments below where _currentTime is set
@@ -251,10 +255,9 @@ export class IterablePlayer implements Player {
   }
 
   private async _stateStartPlay() {
-    const topics = new Set(this._subscriptions.map((subscription) => subscription.topic));
-
+    const allTopics = this._allTopics;
     this._forwardIterator = this._iterableSource.messageIterator({
-      topics: Array.from(topics),
+      topics: Array.from(allTopics),
     });
 
     const stopTime = clampTime(
@@ -311,25 +314,58 @@ export class IterablePlayer implements Player {
     this._lastMessage = undefined;
     this._seekTarget = undefined;
 
-    const topics = Array.from(
-      new Set(this._subscriptions.map((subscription) => subscription.topic)),
-    );
+    this._messages = [];
+    this._currentTime = targetTime;
+    this._lastSeekEmitTime = Date.now();
+    await this._emitState();
+    if (this._nextState) {
+      return;
+    }
 
-    const messages = await this._iterableSource.getBackfillMessages({ topics, time: targetTime });
+    const topics = Array.from(this._allTopics);
+
+    try {
+      this._abort = new AbortController();
+      const messages = await this._iterableSource.getBackfillMessages({
+        topics,
+        time: targetTime,
+        abortSignal: this._abort.signal,
+      });
+      this._messages = messages;
+    } catch (err) {
+      // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition, @typescript-eslint/strict-boolean-expressions
+      if (this._nextState && err instanceof DOMException && err.name === "AbortError") {
+        log.debug("Aborted backfill");
+      } else {
+        throw err;
+      }
+    } finally {
+      this._abort = undefined;
+    }
+
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition, @typescript-eslint/strict-boolean-expressions
+    if (this._nextState) {
+      return;
+    }
 
     // Our backfill loaded the messages inclusive of the seek time, thus the next messages
     // we read should be _after_ the seek time.
     const forwardPosition = add(targetTime, { sec: 0, nsec: 1 });
     await this._forwardIterator?.return?.();
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition, @typescript-eslint/strict-boolean-expressions
+    if (this._nextState) {
+      return;
+    }
+
     this._forwardIterator = this._iterableSource.messageIterator({
-      topics: Array.from(topics),
+      topics,
       start: forwardPosition,
     });
 
-    this._messages = messages;
     this._currentTime = targetTime;
     this._lastSeekEmitTime = Date.now();
     await this._emitState();
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition, @typescript-eslint/strict-boolean-expressions
     if (this._nextState) {
       return;
     }
@@ -339,6 +375,11 @@ export class IterablePlayer implements Player {
   private _setState(newState: IterablePlayerState) {
     log.debug(`Set next state: ${newState}`);
     this._nextState = newState;
+    if (this._abort) {
+      this._abort.abort();
+      this._abort = undefined;
+    }
+
     void this._runState();
   }
 
@@ -372,6 +413,7 @@ export class IterablePlayer implements Player {
             await this._stateIdle();
             break;
           case "seek-backfill":
+            // We allow aborting requests when moving on to the next state
             await this._stateSeekBackfill();
             break;
           case "play": {
@@ -406,6 +448,7 @@ export class IterablePlayer implements Player {
         playerId: this._id,
         activeData: undefined,
         problems: this._problemManager.problems(),
+        urlState: this._urlParams,
       });
     }
 
@@ -547,7 +590,7 @@ export class IterablePlayer implements Player {
     if (!this._currentTime) {
       throw new Error("Invariant: currentTime not set before statePlay");
     }
-    const subscriptions = this._subscriptions;
+    let allTopics = this._allTopics;
 
     const blockLoading = this.loadBlocks(this._currentTime, { emit: false });
     try {
@@ -556,16 +599,16 @@ export class IterablePlayer implements Player {
         await this._tick();
 
         // If subscriptions changed, update to the new subscriptions
-        if (this._subscriptions !== subscriptions) {
+        if (this._allTopics !== allTopics) {
           // Discard any last message event since the new iterator will repeat it
           this._lastMessage = undefined;
 
-          const topics = new Set(this._subscriptions.map((sub) => sub.topic));
           await this._forwardIterator?.return?.();
           this._forwardIterator = this._iterableSource.messageIterator({
-            topics: Array.from(topics),
+            topics: Array.from(this._allTopics),
             start: this._currentTime,
           });
+          allTopics = this._allTopics;
         }
 
         // Eslint doesn't understand that this._nextState could change
@@ -602,10 +645,7 @@ export class IterablePlayer implements Player {
 
     log.info("Start block load", time);
 
-    const topics = this._subscriptions
-      .filter((sub) => sub.preloadType !== "partial")
-      .map((sub) => sub.topic);
-
+    const topics = this._partialTopics;
     const timeNanos = Number(toNanoSec(subtractTimes(time, this._start)));
 
     const startBlockId = Math.floor(timeNanos / this._blockDurationNanos);
@@ -859,6 +899,18 @@ export class IterablePlayer implements Player {
   setSubscriptions(newSubscriptions: SubscribePayload[]): void {
     this._subscriptions = newSubscriptions;
     this._metricsCollector.setSubscriptions(newSubscriptions);
+
+    const allTopics = new Set(this._subscriptions.map((subscription) => subscription.topic));
+    const partialTopics = new Set(
+      this._subscriptions.filter((sub) => sub.preloadType !== "partial").map((sub) => sub.topic),
+    );
+
+    if (isEqual(allTopics, this._allTopics) && isEqual(partialTopics, this._partialTopics)) {
+      return;
+    }
+
+    this._allTopics = allTopics;
+    this._partialTopics = partialTopics;
 
     // Once we are in an active state (i.e. done initializing), we use seeking to indicate
     // that subscriptions have changed so restart our loading

@@ -47,7 +47,7 @@ export class DataPlatformIterableSource implements IIterableSource {
   private _start: Time;
   private _end: Time;
   private _deviceId: string;
-  private readonly _requestDurationSecs = 1;
+  private readonly _requestDurationSecs = 5;
 
   /**
    * Cached readers for each schema so we don't have to re-parse definitions on each stream request.
@@ -159,6 +159,12 @@ export class DataPlatformIterableSource implements IIterableSource {
     const deviceId = this._deviceId;
     const parsedChannelsByTopic = this._parsedChannelsByTopic;
 
+    // Data platform treats topic array length 0 as "all topics". Until that is changed, we filter out
+    // empty topic requests
+    if (args.topics.length === 0) {
+      return;
+    }
+
     let currentStart = args.start ?? this._start;
 
     let currentEnd = clampTime(
@@ -201,11 +207,19 @@ export class DataPlatformIterableSource implements IIterableSource {
   async getBackfillMessages({
     topics,
     time,
+    abortSignal,
   }: GetBackfillMessagesArgs): Promise<MessageEvent<unknown>[]> {
+    // Data platform treats topic array length 0 as "all topics". Until that is changed, we filter out
+    // empty topic requests
+    if (topics.length === 0) {
+      return [];
+    }
+
     const messages: MessageEvent<unknown>[] = [];
     for await (const block of streamMessages({
       api: this._consoleApi,
       parsedChannelsByTopic: this._parsedChannelsByTopic,
+      signal: abortSignal,
       params: {
         deviceId: this._deviceId,
         start: time,
