@@ -53,6 +53,8 @@
     ]
   },
   "win": {
+    "sign": "desktop/sign.ts",
+    "signingHashAlgorithms": ["sha256"],
     "target": [
       {
         "target": "nsis",
