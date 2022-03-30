@@ -27,6 +27,11 @@ class InMemoryFileReader implements FileReader {
   }
 
   fetch(offset: number, length: number): FileStream {
+    if (offset + length > this._buffer.byteLength) {
+      throw new Error(
+        `Read offset=${offset} length=${length} past buffer length ${this._buffer.byteLength}`,
+      );
+    }
     return {
       on: (type: "data" | "error", callback: ((_: Uint8Array) => void) & ((_: Error) => void)) => {
         if (type === "data") {
@@ -69,6 +74,7 @@ describe("CachedFilelike", () => {
       const fileReader = new InMemoryFileReader(new Uint8Array([0, 1, 2, 3]));
       const cachedFileReader = new CachedFilelike({ fileReader, log });
       await expect(cachedFileReader.read(1, 2)).resolves.toEqual(new Uint8Array([1, 2]));
+      await expect(cachedFileReader.read(2, 2)).resolves.toEqual(new Uint8Array([2, 3]));
     });
 
     it("returns an error in the callback if the FileReader keeps returning errors", async () => {

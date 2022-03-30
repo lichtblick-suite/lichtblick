@@ -233,7 +233,7 @@ export default class CachedFilelike implements Filelike {
     }
 
     // Start the stream, and update the current connection state.
-    const stream = this._fileReader.fetch(range.start, range.end);
+    const stream = this._fileReader.fetch(range.start, range.end - range.start);
     this._currentConnection = { stream, remainingRange: range };
 
     stream.on("error", (error: Error) => {

@@ -20,8 +20,9 @@ import {
 } from "intervals-fn";
 
 export type Range = {
+  /** inclusive */
   start: number;
-  /* inclusive */
+  /** exclusive */
   end: number;
 };
 
