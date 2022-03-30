@@ -19,7 +19,7 @@ export function updatePose(
   dstTime: bigint,
   srcTime: bigint,
 ): boolean {
-  const pose = renderable.userData.pose as Pose | undefined;
+  const pose = renderable.userData.pose as Readonly<Pose> | undefined;
   if (!pose) {
     throw new Error(`Missing userData.pose for ${renderable.name}`);
   }

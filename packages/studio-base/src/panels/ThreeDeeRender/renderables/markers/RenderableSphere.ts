@@ -6,9 +6,9 @@
 
 import * as THREE from "three";
 
-import { DetailLevel } from "../../DetailLevel";
 import type { Renderer } from "../../Renderer";
 import { rgbaEqual } from "../../color";
+import { DetailLevel, sphereSubdivisions } from "../../lod";
 import { Marker } from "../../ros";
 import { RenderableMarker } from "./RenderableMarker";
 import { releaseStandardMaterial, standardMaterial } from "./materials";
@@ -24,7 +24,7 @@ export class RenderableSphere extends RenderableMarker {
 
     // Sphere mesh
     const material = standardMaterial(marker, renderer.materialCache);
-    this.mesh = new THREE.Mesh(RenderableSphere.geometry(renderer.lod), material);
+    this.mesh = new THREE.Mesh(RenderableSphere.geometry(renderer.maxLod), material);
     this.mesh.castShadow = true;
     this.mesh.receiveShadow = true;
     this.add(this.mesh);
@@ -56,16 +56,5 @@ export class RenderableSphere extends RenderableMarker {
       RenderableSphere._lod = lod;
     }
     return RenderableSphere._geometry;
-  }
-}
-
-function sphereSubdivisions(lod: DetailLevel) {
-  switch (lod) {
-    case DetailLevel.Low:
-      return 10;
-    case DetailLevel.Medium:
-      return 24;
-    case DetailLevel.High:
-      return 32;
   }
 }

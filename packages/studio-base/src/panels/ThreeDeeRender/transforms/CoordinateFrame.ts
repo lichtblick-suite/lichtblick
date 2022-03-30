@@ -16,7 +16,6 @@ import { compareTime, Duration, interpolate, percentOf, Time } from "./time";
 type TimeAndTransform = [time: Time, transform: Transform];
 
 const INFINITE_DURATION: Duration = 4_294_967_295n * BigInt(1e9);
-const DEFAULT_MAX_STORAGE_TIME: Duration = 10n * BigInt(1e9);
 
 const tempLower: TimeAndTransform = [0n, Transform.Identity()];
 const tempUpper: TimeAndTransform = [0n, Transform.Identity()];
@@ -38,11 +37,7 @@ export class CoordinateFrame {
   private _parent?: CoordinateFrame;
   private _transforms: AVLTree<Time, Transform>;
 
-  constructor(
-    id: string,
-    parent: CoordinateFrame | undefined,
-    maxStorageTime: Duration = DEFAULT_MAX_STORAGE_TIME,
-  ) {
+  constructor(id: string, parent: CoordinateFrame | undefined, maxStorageTime: Duration) {
     this.id = id;
     this.maxStorageTime = maxStorageTime;
     this._parent = parent;

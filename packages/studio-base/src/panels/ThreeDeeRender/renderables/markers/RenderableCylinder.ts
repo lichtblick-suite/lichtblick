@@ -6,9 +6,9 @@
 
 import * as THREE from "three";
 
-import { DetailLevel } from "../../DetailLevel";
 import type { Renderer } from "../../Renderer";
 import { rgbaEqual } from "../../color";
+import { cylinderSubdivisions, DetailLevel } from "../../lod";
 import { Marker } from "../../ros";
 import { RenderableMarker } from "./RenderableMarker";
 import { releaseStandardMaterial, standardMaterial } from "./materials";
@@ -26,14 +26,14 @@ export class RenderableCylinder extends RenderableMarker {
 
     // Cylinder mesh
     const material = standardMaterial(marker, renderer.materialCache);
-    this.mesh = new THREE.Mesh(RenderableCylinder.geometry(renderer.lod), material);
+    this.mesh = new THREE.Mesh(RenderableCylinder.geometry(renderer.maxLod), material);
     this.mesh.castShadow = true;
     this.mesh.receiveShadow = true;
     this.add(this.mesh);
 
     // Cylinder outline
     this.outline = new THREE.LineSegments(
-      RenderableCylinder.edgesGeometry(renderer.lod),
+      RenderableCylinder.edgesGeometry(renderer.maxLod),
       renderer.materialCache.outlineMaterial,
     );
     this.mesh.add(this.outline);
@@ -75,16 +75,5 @@ export class RenderableCylinder extends RenderableMarker {
       RenderableCylinder._edgesGeometry.computeBoundingSphere();
     }
     return RenderableCylinder._edgesGeometry;
-  }
-}
-
-function cylinderSubdivisions(lod: DetailLevel) {
-  switch (lod) {
-    case DetailLevel.Low:
-      return 12;
-    case DetailLevel.Medium:
-      return 20;
-    case DetailLevel.High:
-      return 32;
   }
 }

@@ -7,9 +7,9 @@
 import * as THREE from "three";
 import { clamp } from "three/src/math/MathUtils";
 
-import { DetailLevel } from "../../DetailLevel";
 import type { Renderer } from "../../Renderer";
 import { rgbaEqual } from "../../color";
+import { arrowHeadSubdivisions, arrowShaftSubdivisions, DetailLevel } from "../../lod";
 import { getRotationTo } from "../../math";
 import { Marker, Vector3 } from "../../ros";
 import { RenderableMarker } from "./RenderableMarker";
@@ -33,6 +33,8 @@ const tempEnd = new THREE.Vector3();
 const tempDirection = new THREE.Vector3();
 
 export class RenderableArrow extends RenderableMarker {
+  private static _shaftLod: DetailLevel | undefined;
+  private static _headLod: DetailLevel | undefined;
   private static _shaftGeometry: THREE.CylinderGeometry | undefined;
   private static _headGeometry: THREE.ConeGeometry | undefined;
   private static _shaftEdgesGeometry: THREE.EdgesGeometry | undefined;
@@ -48,27 +50,27 @@ export class RenderableArrow extends RenderableMarker {
 
     // Shaft mesh
     const material = standardMaterial(marker, renderer.materialCache);
-    this.shaftMesh = new THREE.Mesh(RenderableArrow.shaftGeometry(renderer.lod), material);
+    this.shaftMesh = new THREE.Mesh(RenderableArrow.shaftGeometry(renderer.maxLod), material);
     this.shaftMesh.castShadow = true;
     this.shaftMesh.receiveShadow = true;
     this.add(this.shaftMesh);
 
     // Head mesh
-    this.headMesh = new THREE.Mesh(RenderableArrow.headGeometry(renderer.lod), material);
+    this.headMesh = new THREE.Mesh(RenderableArrow.headGeometry(renderer.maxLod), material);
     this.headMesh.castShadow = true;
     this.headMesh.receiveShadow = true;
     this.add(this.headMesh);
 
     // Shaft outline
     this.shaftOutline = new THREE.LineSegments(
-      RenderableArrow.shaftEdgesGeometry(renderer.lod),
+      RenderableArrow.shaftEdgesGeometry(renderer.maxLod),
       renderer.materialCache.outlineMaterial,
     );
     this.shaftMesh.add(this.shaftOutline);
 
     // Head outline
     this.headOutline = new THREE.LineSegments(
-      RenderableArrow.headEdgesGeometry(renderer.lod),
+      RenderableArrow.headEdgesGeometry(renderer.maxLod),
       renderer.materialCache.outlineMaterial,
     );
     this.headMesh.add(this.headOutline);
@@ -131,21 +133,23 @@ export class RenderableArrow extends RenderableMarker {
   }
 
   static shaftGeometry(lod: DetailLevel): THREE.CylinderGeometry {
-    if (!RenderableArrow._shaftGeometry) {
-      const subdivs = shaftSubdivisions(lod);
+    if (!RenderableArrow._shaftGeometry || lod !== RenderableArrow._shaftLod) {
+      const subdivs = arrowShaftSubdivisions(lod);
       RenderableArrow._shaftGeometry = new THREE.CylinderGeometry(0.5, 0.5, 1, subdivs, 1, false);
       RenderableArrow._shaftGeometry.rotateZ(-Math.PI / 2);
       RenderableArrow._shaftGeometry.computeBoundingSphere();
+      RenderableArrow._shaftLod = lod;
     }
     return RenderableArrow._shaftGeometry;
   }
 
   static headGeometry(lod: DetailLevel): THREE.ConeGeometry {
-    if (!RenderableArrow._headGeometry) {
-      const subdivs = headSubdivisions(lod);
+    if (!RenderableArrow._headGeometry || lod !== RenderableArrow._headLod) {
+      const subdivs = arrowHeadSubdivisions(lod);
       RenderableArrow._headGeometry = new THREE.ConeGeometry(0.5, 1, subdivs, 1, false);
       RenderableArrow._headGeometry.rotateZ(-Math.PI / 2);
       RenderableArrow._headGeometry.computeBoundingSphere();
+      RenderableArrow._headLod = lod;
     }
     return RenderableArrow._headGeometry;
   }
@@ -173,26 +177,4 @@ function copyPoint(from: Vector3, to: Vector3): void {
   to.x = from.x;
   to.y = from.y;
   to.z = from.z;
-}
-
-function shaftSubdivisions(lod: DetailLevel) {
-  switch (lod) {
-    case DetailLevel.Low:
-      return 12;
-    case DetailLevel.Medium:
-      return 20;
-    case DetailLevel.High:
-      return 32;
-  }
-}
-
-function headSubdivisions(lod: DetailLevel) {
-  switch (lod) {
-    case DetailLevel.Low:
-      return 12;
-    case DetailLevel.Medium:
-      return 20;
-    case DetailLevel.High:
-      return 32;
-  }
 }

@@ -7,6 +7,10 @@ import { clamp } from "three/src/math/MathUtils";
 import { approxEquals, uint8Equals } from "./math";
 import { ColorRGBA } from "./ros";
 
+export function SRGBToLinear(c: number): number {
+  return c < 0.04045 ? c * 0.0773993808 : Math.pow(c * 0.9478672986 + 0.0521327014, 2.4);
+}
+
 export function rgbaToHexString(color: ColorRGBA): string {
   const rgba =
     (clamp(color.r * 255, 0, 255) << 24) ^

@@ -8,15 +8,16 @@ import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
 
 import Logger from "@foxglove/log";
 
-import { DetailLevel } from "./DetailLevel";
 import { Input } from "./Input";
 import { LayerErrors } from "./LayerErrors";
 import { MaterialCache } from "./MaterialCache";
 import { ModelCache } from "./ModelCache";
+import { DetailLevel } from "./lod";
 import { FrameAxes } from "./renderables/FrameAxes";
 import { Markers } from "./renderables/Markers";
+import { OccupancyGrids } from "./renderables/OccupancyGrids";
 import { PointClouds } from "./renderables/PointClouds";
-import { Marker, PointCloud2, TF } from "./ros";
+import { Marker, OccupancyGrid, PointCloud2, TF } from "./ros";
 import { TransformTree } from "./transforms/TransformTree";
 
 const log = Logger.getLogger(__filename);
@@ -24,6 +25,7 @@ const log = Logger.getLogger(__filename);
 export type RendererEvents = {
   startFrame: (currentTime: bigint, renderer: Renderer) => void;
   endFrame: (currentTime: bigint, renderer: Renderer) => void;
+  cameraMove: (renderer: Renderer) => void;
   renderableSelected: (renderable: THREE.Object3D, renderer: Renderer) => void;
   transformTreeUpdated: (renderer: Renderer) => void;
   showLabel: (labelId: string, labelMarker: Marker, renderer: Renderer) => void;
@@ -35,14 +37,20 @@ export type RendererEvents = {
 const LIGHT_BACKDROP = new THREE.Color(0xececec);
 const DARK_BACKDROP = new THREE.Color(0x121217);
 
+const LIGHT_OUTLINE = new THREE.Color(0x000000);
+const DARK_OUTLINE = new THREE.Color(0xffffff);
+
+const TRANSFORM_STORAGE_TIME_NS = 60n * BigInt(1e9);
+
 const tempVec = new THREE.Vector3();
 
 export class Renderer extends EventEmitter<RendererEvents> {
   canvas: HTMLCanvasElement;
   gl: THREE.WebGLRenderer;
-  lod = DetailLevel.High;
+  maxLod = DetailLevel.High;
   scene: THREE.Scene;
   dirLight: THREE.DirectionalLight;
+  hemiLight: THREE.HemisphereLight;
   input: Input;
   camera: THREE.PerspectiveCamera;
   controls: OrbitControls;
@@ -51,12 +59,13 @@ export class Renderer extends EventEmitter<RendererEvents> {
   colorScheme: "dark" | "light" | undefined;
   modelCache: ModelCache;
   renderables = new Map<string, THREE.Object3D>();
-  transformTree = new TransformTree();
+  transformTree = new TransformTree(TRANSFORM_STORAGE_TIME_NS);
   currentTime: bigint | undefined;
   fixedFrameId: string | undefined;
   renderFrameId: string | undefined;
 
   frameAxes = new FrameAxes(this);
+  occupancyGrids = new OccupancyGrids(this);
   pointClouds = new PointClouds(this);
   markers = new Markers(this);
 
@@ -80,7 +89,7 @@ export class Renderer extends EventEmitter<RendererEvents> {
     this.gl.toneMapping = THREE.NoToneMapping;
     this.gl.autoClear = false;
     this.gl.info.autoReset = false;
-    this.gl.shadowMap.enabled = true;
+    this.gl.shadowMap.enabled = false;
     this.gl.shadowMap.type = THREE.VSMShadowMap;
     this.gl.setPixelRatio(window.devicePixelRatio);
 
@@ -98,6 +107,7 @@ export class Renderer extends EventEmitter<RendererEvents> {
 
     this.scene = new THREE.Scene();
     this.scene.add(this.frameAxes);
+    this.scene.add(this.occupancyGrids);
     this.scene.add(this.pointClouds);
     this.scene.add(this.markers);
 
@@ -111,14 +121,16 @@ export class Renderer extends EventEmitter<RendererEvents> {
     this.dirLight.shadow.camera.far = 500;
     this.dirLight.shadow.bias = -0.00001;
 
+    this.hemiLight = new THREE.HemisphereLight(0xffffff, 0xffffff, 0.5);
+
     this.scene.add(this.dirLight);
-    this.scene.add(new THREE.HemisphereLight(0xffffff, 0xffffff, 0.5));
+    this.scene.add(this.hemiLight);
 
     this.input = new Input(canvas);
     this.input.on("resize", (size) => this.resizeHandler(size));
     this.input.on("click", (cursorCoords) => this.clickHandler(cursorCoords));
 
-    const fov = 50;
+    const fov = 79;
     const near = 0.01; // 1cm
     const far = 10_000; // 10km
     this.camera = new THREE.PerspectiveCamera(fov, width / height, near, far);
@@ -127,26 +139,34 @@ export class Renderer extends EventEmitter<RendererEvents> {
     this.camera.lookAt(new THREE.Vector3(0, 0, 0));
 
     this.controls = new OrbitControls(this.camera, this.gl.domElement);
+    this.controls.addEventListener("change", () => this.emit("cameraMove", this));
 
-    this.animationFrame(performance.now());
+    this.animationFrame();
   }
 
   dispose(): void {
     this.frameAxes.dispose();
+    this.occupancyGrids.dispose();
     this.pointClouds.dispose();
     this.markers.dispose();
     this.gl.dispose();
-    this.gl.forceContextLoss();
   }
 
   setColorScheme(colorScheme: "dark" | "light"): void {
     log.debug(`Setting color scheme to "${colorScheme}"`);
     this.colorScheme = colorScheme;
     this.gl.setClearColor(colorScheme === "dark" ? DARK_BACKDROP : LIGHT_BACKDROP, 1);
+    this.materialCache.outlineMaterial.color =
+      colorScheme === "dark" ? DARK_OUTLINE : LIGHT_OUTLINE;
+    this.materialCache.outlineMaterial.needsUpdate = true;
   }
 
   addTransformMessage(tf: TF): void {
     this.frameAxes.addTransformMessage(tf);
+  }
+
+  addOccupancyGridMessage(topic: string, occupancyGrid: OccupancyGrid): void {
+    this.occupancyGrids.addOccupancyGridMessage(topic, occupancyGrid);
   }
 
   addPointCloud2Message(topic: string, pointCloud: PointCloud2): void {
@@ -170,11 +190,10 @@ export class Renderer extends EventEmitter<RendererEvents> {
 
   // Callback handlers
 
-  animationFrame = (_wallTime: DOMHighResTimeStamp): void => {
+  animationFrame = (): void => {
     if (this.currentTime != undefined) {
       this.frameHandler(this.currentTime);
     }
-    requestAnimationFrame(this.animationFrame);
   };
 
   frameHandler = (currentTime: bigint): void => {
@@ -189,6 +208,7 @@ export class Renderer extends EventEmitter<RendererEvents> {
     this.materialCache.update(this.input.canvasSize);
 
     this.frameAxes.startFrame(currentTime);
+    this.occupancyGrids.startFrame(currentTime);
     this.pointClouds.startFrame(currentTime);
     this.markers.startFrame(currentTime);
 
@@ -202,11 +222,11 @@ export class Renderer extends EventEmitter<RendererEvents> {
 
   resizeHandler = (size: THREE.Vector2): void => {
     log.debug(`Resizing to ${size.width}x${size.height}`);
-    this.camera.aspect = size.width / size.height;
-    this.camera.updateProjectionMatrix();
-
     this.gl.setPixelRatio(window.devicePixelRatio);
     this.gl.setSize(size.width, size.height);
+    this.camera.aspect = size.width / size.height;
+    this.camera.updateProjectionMatrix();
+    this.emit("cameraMove", this);
   };
 
   clickHandler = (_cursorCoords: THREE.Vector2): void => {

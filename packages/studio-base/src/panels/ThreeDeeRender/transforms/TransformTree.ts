@@ -7,12 +7,19 @@ import { Transform } from "./Transform";
 import { Pose } from "./geometry";
 import { Duration, Time } from "./time";
 
+const DEFAULT_MAX_STORAGE_TIME: Duration = 10n * BigInt(1e9);
+
 /**
  * TransformTree is a collection of coordinate frames with convenience methods
  * for getting and creating frames and adding transforms between frames.
  */
 export class TransformTree {
   private _frames = new Map<string, CoordinateFrame>();
+  private _maxStorageTime: Duration;
+
+  constructor(maxStorageTime = DEFAULT_MAX_STORAGE_TIME) {
+    this._maxStorageTime = maxStorageTime;
+  }
 
   addTransform(frameId: string, parentFrameId: string, time: Time, transform: Transform): void {
     const frame = this.getOrCreateFrame(frameId);
@@ -37,7 +44,7 @@ export class TransformTree {
   getOrCreateFrame(id: string): CoordinateFrame {
     let frame = this._frames.get(id);
     if (!frame) {
-      frame = new CoordinateFrame(id, undefined);
+      frame = new CoordinateFrame(id, undefined, this._maxStorageTime);
       this._frames.set(id, frame);
     }
     return frame;
@@ -68,7 +75,8 @@ export class TransformTree {
   }
 
   static Clone(tree: TransformTree): TransformTree {
-    const newTree = new TransformTree();
+    // eslint-disable-next-line no-underscore-dangle
+    const newTree = new TransformTree(tree._maxStorageTime);
     // eslint-disable-next-line no-underscore-dangle
     newTree._frames = tree._frames;
     return newTree;

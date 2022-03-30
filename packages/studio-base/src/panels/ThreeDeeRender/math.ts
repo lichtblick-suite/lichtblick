@@ -60,3 +60,11 @@ export function uint8Equals(a: number, b: number): boolean {
   const bi = Math.trunc(b * 255);
   return ai === bi;
 }
+
+export function clamp(value: number, min: number, max: number): number {
+  return Math.max(min, Math.min(max, value));
+}
+
+export function lerp(a: number, b: number, t: number): number {
+  return a + (b - a) * t;
+}

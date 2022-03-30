@@ -8,6 +8,7 @@ import React, { useRef, useLayoutEffect, useEffect, useState, useMemo } from "re
 import Logger from "@foxglove/log";
 import { toNanoSec } from "@foxglove/rostime";
 import { PanelExtensionContext, RenderState, Topic, MessageEvent } from "@foxglove/studio";
+import useCleanup from "@foxglove/studio-base/hooks/useCleanup";
 
 import { DebugGui } from "./DebugGui";
 import { setOverlayPosition } from "./LabelOverlay";
@@ -23,6 +24,8 @@ import {
   Marker,
   PointCloud2,
   POINTCLOUD_DATATYPES,
+  OccupancyGrid,
+  OCCUPANCY_GRID_DATATYPES,
 } from "./ros";
 
 const SHOW_STATS = true;
@@ -33,6 +36,7 @@ mergeSetInto(SUPPORTED_DATATYPES, TRANSFORM_STAMPED_DATATYPES);
 mergeSetInto(SUPPORTED_DATATYPES, TF_DATATYPES);
 mergeSetInto(SUPPORTED_DATATYPES, MARKER_DATATYPES);
 mergeSetInto(SUPPORTED_DATATYPES, MARKER_ARRAY_DATATYPES);
+mergeSetInto(SUPPORTED_DATATYPES, OCCUPANCY_GRID_DATATYPES);
 mergeSetInto(SUPPORTED_DATATYPES, POINTCLOUD_DATATYPES);
 
 const log = Logger.getLogger(__filename);
@@ -76,18 +80,18 @@ function RendererOverlay(props: { colorScheme: "dark" | "light" | undefined }): 
     setLabelsMap(new Map(labelsMap));
   });
 
-  useRendererEvent("endFrame", () => {
-    if (renderer && labelsRef.current) {
+  useRendererEvent("endFrame", (_, curRenderer) => {
+    if (labelsRef.current) {
       for (const labelId of labelsMap.keys()) {
         const labelEl = document.getElementById(`label-${labelId}`);
         if (labelEl) {
-          const worldPosition = renderer.markerWorldPosition(labelId);
+          const worldPosition = curRenderer.markerWorldPosition(labelId);
           if (worldPosition) {
             setOverlayPosition(
               labelEl.style,
               worldPosition,
-              renderer.input.canvasSize,
-              renderer.camera,
+              curRenderer.input.canvasSize,
+              curRenderer.camera,
             );
           }
         }
@@ -155,8 +159,13 @@ export function ThreeDeeRender({ context }: { context: PanelExtensionContext }):
   const [topics, setTopics] = useState<ReadonlyArray<Topic> | undefined>();
   const [messages, setMessages] = useState<ReadonlyArray<MessageEvent<unknown>> | undefined>();
   const [currentTime, setCurrentTime] = useState<bigint | undefined>();
+  const [cameraVersion, setCameraVersion] = useState<number>(0);
 
   const [renderDone, setRenderDone] = useState<(() => void) | undefined>();
+
+  useCleanup(() => {
+    renderer?.dispose();
+  });
 
   // We use a layout effect to setup render handling for our panel. We also setup some topic subscriptions.
   useLayoutEffect(() => {
@@ -187,6 +196,15 @@ export function ThreeDeeRender({ context }: { context: PanelExtensionContext }):
       setTopics(renderState.topics);
 
       // currentFrame has messages on subscribed topics since the last render call
+      if (renderState.currentFrame) {
+        // Fully parse lazy messages
+        for (const messageEvent of renderState.currentFrame) {
+          const maybeLazy = messageEvent.message as { toJSON?: () => unknown };
+          if ("toJSON" in maybeLazy) {
+            (messageEvent as { message: unknown }).message = maybeLazy.toJSON!();
+          }
+        }
+      }
       setMessages(renderState.currentFrame);
     };
 
@@ -252,9 +270,23 @@ export function ThreeDeeRender({ context }: { context: PanelExtensionContext }):
     }
   }, [colorScheme, renderer]);
 
-  // Handle messages
+  // Handle camera movements
+  const handleCameraMove = () => setCameraVersion((prev) => prev + 1);
   useEffect(() => {
-    if (!messages || !renderer) {
+    renderer?.addListener("cameraMove", handleCameraMove);
+    return () => void renderer?.removeListener("cameraMove", handleCameraMove);
+  }, [renderer]);
+
+  // Handle messages and render a frame if the camera has moved or new messages
+  // are available
+  useEffect(() => {
+    void cameraVersion;
+    if (!renderer) {
+      return;
+    }
+
+    if (!messages) {
+      renderer.animationFrame();
       return;
     }
 
@@ -284,13 +316,19 @@ export function ThreeDeeRender({ context }: { context: PanelExtensionContext }):
         // visualization_msgs/Marker - Ingest this single marker
         const marker = message.message as Marker;
         renderer.addMarkerMessage(message.topic, marker);
+      } else if (OCCUPANCY_GRID_DATATYPES.has(datatype)) {
+        // nav_msgs/OccupancyGrid - Ingest this occupancy grid
+        const occupancyGrid = message.message as OccupancyGrid;
+        renderer.addOccupancyGridMessage(message.topic, occupancyGrid);
       } else if (POINTCLOUD_DATATYPES.has(datatype)) {
         // sensor_msgs/PointCloud2 - Ingest this point cloud
         const pointCloud = message.message as PointCloud2;
         renderer.addPointCloud2Message(message.topic, pointCloud);
       }
     }
-  }, [messages, renderer, topicsToDatatypes]);
+
+    renderer.animationFrame();
+  }, [cameraVersion, messages, renderer, topicsToDatatypes]);
 
   // Invoke the done callback once the render is complete
   useEffect(() => {

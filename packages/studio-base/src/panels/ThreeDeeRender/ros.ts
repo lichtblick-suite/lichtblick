@@ -119,6 +119,20 @@ export type PointCloud2 = {
   is_dense: boolean;
 };
 
+export type MapMetaData = {
+  map_load_time: RosTime;
+  resolution: number;
+  width: number;
+  height: number;
+  origin: Pose;
+};
+
+export type OccupancyGrid = {
+  header: Header;
+  info: MapMetaData;
+  data: Int8Array | number[];
+};
+
 export const TRANSFORM_STAMPED_DATATYPES = new Set<string>();
 addRosDataType(TRANSFORM_STAMPED_DATATYPES, "geometry_msgs/TransformStamped");
 
@@ -131,6 +145,9 @@ addRosDataType(MARKER_DATATYPES, "visualization_msgs/Marker");
 
 export const MARKER_ARRAY_DATATYPES = new Set<string>();
 addRosDataType(MARKER_ARRAY_DATATYPES, "visualization_msgs/MarkerArray");
+
+export const OCCUPANCY_GRID_DATATYPES = new Set<string>();
+addRosDataType(OCCUPANCY_GRID_DATATYPES, "nav_msgs/OccupancyGrid");
 
 export const POINTCLOUD_DATATYPES = new Set<string>();
 addRosDataType(POINTCLOUD_DATATYPES, "sensor_msgs/PointCloud2");

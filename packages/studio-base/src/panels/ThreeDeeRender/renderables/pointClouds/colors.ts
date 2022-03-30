@@ -4,6 +4,8 @@
 
 import * as THREE from "three";
 
+import { SRGBToLinear } from "../../color";
+import { clamp, lerp } from "../../math";
 import { ColorRGBA } from "../../ros";
 import { PointCloudColorMode, PointCloudSettings } from "./settings";
 
@@ -59,13 +61,9 @@ export function getColorConverter(
     case PointCloudColorMode.Turbo:
       return (output: ColorRGBA, colorValue: number) => {
         const t = (colorValue - minValue) / valueDelta;
-        turbo(output, t);
+        turboCached(output, t);
       };
   }
-}
-
-export function SRGBToLinear(c: number): number {
-  return c < 0.04045 ? c * 0.0773993808 : Math.pow(c * 0.9478672986 + 0.0521327014, 2.4);
 }
 
 // 0xrrggbb00
@@ -179,10 +177,28 @@ function turbo(output: ColorRGBA, pct: number): void {
   output.a = 1;
 }
 
-function clamp(value: number, min: number, max: number): number {
-  return Math.max(min, Math.min(max, value));
-}
+// A lookup table for the turbo() function
+let TurboLookup: Float32Array | undefined;
+const TURBO_LOOKUP_SIZE = 65535;
 
-function lerp(a: number, b: number, t: number): number {
-  return a + (b - a) * t;
+// Builds a one-time lookup table for the turbo() function then uses it to
+// convert `pct` to a color
+function turboCached(output: ColorRGBA, pct: number): void {
+  if (!TurboLookup) {
+    TurboLookup = new Float32Array(TURBO_LOOKUP_SIZE * 3);
+    const tempColor = { r: 0, g: 0, b: 0, a: 0 };
+    for (let i = 0; i < TURBO_LOOKUP_SIZE; i++) {
+      turbo(tempColor, i / (TURBO_LOOKUP_SIZE - 1));
+      const offset = i * 3;
+      TurboLookup[offset + 0] = tempColor.r;
+      TurboLookup[offset + 1] = tempColor.g;
+      TurboLookup[offset + 2] = tempColor.b;
+    }
+  }
+
+  const offset = Math.trunc(pct * (TURBO_LOOKUP_SIZE - 1)) * 3;
+  output.r = TurboLookup[offset + 0]!;
+  output.g = TurboLookup[offset + 1]!;
+  output.b = TurboLookup[offset + 2]!;
+  output.a = 1;
 }
