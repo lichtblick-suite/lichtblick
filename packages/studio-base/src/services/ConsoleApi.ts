@@ -193,12 +193,18 @@ class ConsoleApi {
     const res = await fetch(fullUrl, fullConfig);
     this._responseObserver?.(res);
     if (res.status !== 200 && !allowedStatuses.includes(res.status)) {
+      if (res.status === 401) {
+        throw new Error("Not logged in. Log in to your Foxglove account and try again.");
+      } else if (res.status === 403) {
+        throw new Error(
+          "Unauthorized. Check that you are logged in to the correct Foxglove organization.",
+        );
+      }
       const json = (await res.json().catch((err) => {
         throw new Error(`Status ${res.status}: ${err.message}`);
-      })) as { message?: string };
-      throw new Error(
-        `Status ${res.status}${json.message != undefined ? `: ${json.message}` : ""}`,
-      );
+      })) as { message?: string; error?: string };
+      const message = json.message ?? json.error;
+      throw new Error(`Status ${res.status}${message != undefined ? `: ${message}` : ""}`);
     }
 
     try {
