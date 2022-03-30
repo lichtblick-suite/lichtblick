@@ -88,7 +88,7 @@ export default class Ros1Player implements Player {
     this._metricsCollector = metricsCollector;
     this._url = url;
     this._hostname = hostname;
-    this._start = fromMillis(Date.now());
+    this._start = this._getCurrentTime();
     this._metricsCollector.playerConstructed();
     void this._open();
   }

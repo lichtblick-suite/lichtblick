@@ -114,6 +114,7 @@ export default class Mcap0StreamedDataProvider implements RandomAccessDataProvid
           messages.push({
             topic: channelInfo.channel.topic,
             receiveTime,
+            publishTime: fromNanoSec(record.publishTime),
             message: channelInfo.parsedChannel.deserializer(record.data),
             sizeInBytes: record.data.byteLength,
           });

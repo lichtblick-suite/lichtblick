@@ -125,6 +125,7 @@ export default class Mcap0IndexedDataProvider implements RandomAccessDataProvide
         parsedMessages.push({
           topic: channelInfo.channel.topic,
           receiveTime: fromNanoSec(message.logTime),
+          publishTime: fromNanoSec(message.publishTime),
           message: channelInfo.parsedChannel.deserializer(message.data),
           sizeInBytes: message.data.byteLength,
         });
