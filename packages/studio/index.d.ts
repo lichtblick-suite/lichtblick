@@ -36,9 +36,30 @@ declare module "@foxglove/studio" {
    * A message event frames message data with the topic and receive time
    */
   export type MessageEvent<T> = Readonly<{
+    /** The topic name this message was received on, i.e. "/some/topic" */
     topic: string;
+    /**
+     * The time in nanoseconds this message was received. This may be set by the
+     * local system clock or the data source, depending on the data source used
+     * and whether time is simulated via a /clock topic or similar mechanism.
+     * The timestamp is often nanoseconds since the UNIX epoch, but may be
+     * relative to another event such as system boot time or simulation start
+     * time depending on the context.
+     */
     receiveTime: Time;
+    /**
+     * The time in nanoseconds this message was originally published. This is
+     * only available for some data sources. The timestamp is often nanoseconds
+     * since the UNIX epoch, but may be relative to another event such as system
+     * boot time or simulation start time depending on the context.
+     */
+    publishTime?: Time;
+    /** The deserialized message as a JavaScript object. */
     message: T;
+    /**
+     * The approximate size of this message in its serialized form. This can be
+     * useful for statistics tracking and cache eviction.
+     */
     sizeInBytes: number;
   }>;
 
