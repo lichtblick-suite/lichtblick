@@ -36,6 +36,7 @@ async function loadNotFoundModel(): Promise<GlbModel> {
 
 // https://github.com/Ultimaker/Cura/issues/4141
 const STL_MIME_TYPES = ["model/stl", "model/x.stl-ascii", "model/x.stl-binary", "application/sla"];
+const DAE_MIME_TYPES = ["model/vnd.collada+xml"];
 
 export type LoadModelOptions = {
   ignoreColladaUpAxis?: boolean;
@@ -63,12 +64,12 @@ async function loadModel(url: string, options: LoadModelOptions): Promise<GlbMod
   }
 
   // STL binary files don't have a header, so we have to rely on the MIME type or file extension
-  const contentType = response.headers.get("content-type");
-  if ((contentType != undefined && STL_MIME_TYPES.includes(contentType)) || /\.stl$/i.test(url)) {
+  const contentType = response.headers.get("content-type") ?? "";
+  if (STL_MIME_TYPES.includes(contentType) || /\.stl$/i.test(url)) {
     return parseStlToGlb(buffer);
   }
 
-  if (/\.dae$/i.test(url)) {
+  if (DAE_MIME_TYPES.includes(contentType) || /\.dae$/i.test(url)) {
     return await parseDaeToGlb(buffer, options);
   }
 
