@@ -638,6 +638,12 @@ export default class SceneBuilder implements MarkerProvider {
     if (message.poses.length === 0) {
       return;
     }
+    for (const pose of message.poses) {
+      if (pose.header.frame_id !== message.header.frame_id) {
+        this._setTopicError(topic, "Path poses must all have the same frame_id");
+        return;
+      }
+    }
     const newMessage = {
       header: message.header,
       // Future: display orientation of the poses in the path
