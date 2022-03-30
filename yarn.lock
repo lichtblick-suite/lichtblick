@@ -2374,15 +2374,15 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@foxglove/ros2@npm:3.1.1":
-  version: 3.1.1
-  resolution: "@foxglove/ros2@npm:3.1.1"
+"@foxglove/ros2@npm:3.2.1":
+  version: 3.2.1
+  resolution: "@foxglove/ros2@npm:3.2.1"
   dependencies:
     "@foxglove/rosmsg": ^2.0.0 || ^3.0.0
     "@foxglove/rosmsg2-serialization": ^1.0.5
     "@foxglove/rtps": ^1.4.1
     eventemitter3: ^4.0.7
-  checksum: 086c4b1f2086d9caaa407c3a0429bb31fca5589fd4f2dfa743c0cf186dcddb40d5a3af6fb41fbbeebb27b8cb849398fc8e7c427255119f5cda5d6442bf973d97
+  checksum: c4ccc0864933ad601c4df42af6ec68ef753621dc93df8f84aa7d41ca5eb446a89f73d043d79f2e9b9da45881e5af6003effe4d3af41c299123843d32a45269c3
   languageName: node
   linkType: hard
 
@@ -2512,7 +2512,7 @@ __metadata:
     "@foxglove/mcap-support": "workspace:*"
     "@foxglove/regl-worldview": 2.4.0
     "@foxglove/ros1": 1.4.0
-    "@foxglove/ros2": 3.1.1
+    "@foxglove/ros2": 3.2.1
     "@foxglove/rosbag": 0.2.1
     "@foxglove/rosbag2-web": 4.0.3
     "@foxglove/rosmsg": 3.0.0
@@ -2523,7 +2523,7 @@ __metadata:
     "@foxglove/rostime": 1.1.2
     "@foxglove/studio": "workspace:*"
     "@foxglove/ulog": 2.1.2
-    "@foxglove/velodyne-cloud": 1.0.0
+    "@foxglove/velodyne-cloud": 1.0.1
     "@foxglove/wasm-bz2": 0.1.0
     "@foxglove/ws-protocol": 0.0.8
     "@mdi/svg": 6.5.95
@@ -2701,10 +2701,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@foxglove/velodyne-cloud@npm:1.0.0":
-  version: 1.0.0
-  resolution: "@foxglove/velodyne-cloud@npm:1.0.0"
-  checksum: ee2ae6b5c9a052767d71e0d3afeb5d4074902e26e382bff773ef088c3832618a0330c4e81cc5072daa22adbeef4545dbeacc8dfb133fd7580be1afbedcdf43cc
+"@foxglove/velodyne-cloud@npm:1.0.1":
+  version: 1.0.1
+  resolution: "@foxglove/velodyne-cloud@npm:1.0.1"
+  checksum: 3f461bdc2e36c4f8bcbd295f4337fe600f259465987bedcd21e8a7a03817f409fc3346d3b68ca8b52a6e8c42dfe6e148532cca06224868d50cad1f903e108d70
   languageName: node
   linkType: hard
 
