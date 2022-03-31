@@ -627,7 +627,7 @@ function TopicTreeWrapper({
   const classes = useStyles({ treeWidth: defaultTreeWidth });
 
   // Use a debounce and 0 refresh rate to avoid triggering a resize observation while handling
-  // and existing resize observation.
+  // an existing resize observation.
   // https://github.com/maslianok/react-resize-detector/issues/45
   const { width, ref: sizeRef } = useResizeDetector({
     handleHeight: false,

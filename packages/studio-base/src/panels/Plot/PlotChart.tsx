@@ -105,7 +105,7 @@ export default function PlotChart(props: PlotChartProps): JSX.Element {
   }, [maxYValue, minYValue, showYAxisLabels, theme.palette.neutralLighter]);
 
   // Use a debounce and 0 refresh rate to avoid triggering a resize observation while handling
-  // and existing resize observation.
+  // an existing resize observation.
   // https://github.com/maslianok/react-resize-detector/issues/45
   const {
     width,

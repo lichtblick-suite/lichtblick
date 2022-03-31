@@ -4,9 +4,9 @@
 
 import EventEmitter from "eventemitter3";
 import * as THREE from "three";
-import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
 
 import Logger from "@foxglove/log";
+import { CameraState } from "@foxglove/regl-worldview";
 
 import { Input } from "./Input";
 import { LayerErrors } from "./LayerErrors";
@@ -43,6 +43,8 @@ const DARK_OUTLINE = new THREE.Color(0xffffff);
 const TRANSFORM_STORAGE_TIME_NS = 60n * BigInt(1e9);
 
 const tempVec = new THREE.Vector3();
+const tempSpherical = new THREE.Spherical();
+const tempEuler = new THREE.Euler();
 
 export class Renderer extends EventEmitter<RendererEvents> {
   canvas: HTMLCanvasElement;
@@ -53,7 +55,6 @@ export class Renderer extends EventEmitter<RendererEvents> {
   hemiLight: THREE.HemisphereLight;
   input: Input;
   camera: THREE.PerspectiveCamera;
-  controls: OrbitControls;
   materialCache = new MaterialCache();
   layerErrors = new LayerErrors();
   colorScheme: "dark" | "light" | undefined;
@@ -138,9 +139,6 @@ export class Renderer extends EventEmitter<RendererEvents> {
     this.camera.position.set(1, -3, 1);
     this.camera.lookAt(new THREE.Vector3(0, 0, 0));
 
-    this.controls = new OrbitControls(this.camera, this.gl.domElement);
-    this.controls.addEventListener("change", () => this.emit("cameraMove", this));
-
     this.animationFrame();
   }
 
@@ -199,8 +197,6 @@ export class Renderer extends EventEmitter<RendererEvents> {
   frameHandler = (currentTime: bigint): void => {
     this.emit("startFrame", currentTime, this);
 
-    this.controls.update();
-
     // TODO: Remove this hack when the user can set the renderFrameId themselves
     this.fixedFrameId = "map";
     this.renderFrameId = "base_link";
@@ -220,13 +216,33 @@ export class Renderer extends EventEmitter<RendererEvents> {
     this.gl.info.reset();
   };
 
+  /** Translate a Worldview CameraState to the three.js coordinate system */
+  setCameraState(cameraState: CameraState): void {
+    this.camera.position
+      .setFromSpherical(
+        tempSpherical.set(cameraState.distance, cameraState.phi, -cameraState.thetaOffset),
+      )
+      .applyAxisAngle(tempVec.set(1, 0, 0), Math.PI / 2);
+    this.camera.position.add(
+      tempVec.set(
+        cameraState.targetOffset[0],
+        cameraState.targetOffset[1],
+        cameraState.targetOffset[2], // always 0 in Worldview CameraListener
+      ),
+    );
+    this.camera.quaternion.setFromEuler(
+      tempEuler.set(cameraState.phi, 0, -cameraState.thetaOffset, "ZYX"),
+    );
+    this.camera.updateProjectionMatrix();
+  }
+
   resizeHandler = (size: THREE.Vector2): void => {
     log.debug(`Resizing to ${size.width}x${size.height}`);
     this.gl.setPixelRatio(window.devicePixelRatio);
     this.gl.setSize(size.width, size.height);
     this.camera.aspect = size.width / size.height;
     this.camera.updateProjectionMatrix();
-    this.emit("cameraMove", this);
+    this.animationFrame();
   };
 
   clickHandler = (_cursorCoords: THREE.Vector2): void => {

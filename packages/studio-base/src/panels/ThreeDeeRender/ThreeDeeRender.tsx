@@ -4,8 +4,10 @@
 
 import css from "@emotion/css";
 import React, { useRef, useLayoutEffect, useEffect, useState, useMemo } from "react";
+import { useResizeDetector } from "react-resize-detector";
 
 import Logger from "@foxglove/log";
+import { CameraListener, CameraStore, DEFAULT_CAMERA_STATE } from "@foxglove/regl-worldview";
 import { toNanoSec } from "@foxglove/rostime";
 import { PanelExtensionContext, RenderState, Topic, MessageEvent } from "@foxglove/studio";
 import useCleanup from "@foxglove/studio-base/hooks/useCleanup";
@@ -159,7 +161,6 @@ export function ThreeDeeRender({ context }: { context: PanelExtensionContext }):
   const [topics, setTopics] = useState<ReadonlyArray<Topic> | undefined>();
   const [messages, setMessages] = useState<ReadonlyArray<MessageEvent<unknown>> | undefined>();
   const [currentTime, setCurrentTime] = useState<bigint | undefined>();
-  const [cameraVersion, setCameraVersion] = useState<number>(0);
 
   const [renderDone, setRenderDone] = useState<(() => void) | undefined>();
 
@@ -271,19 +272,16 @@ export function ThreeDeeRender({ context }: { context: PanelExtensionContext }):
   }, [colorScheme, renderer]);
 
   // Handle camera movements
-  const handleCameraMove = () => setCameraVersion((prev) => prev + 1);
-  useEffect(() => {
-    renderer?.addListener("cameraMove", handleCameraMove);
-    return () => void renderer?.removeListener("cameraMove", handleCameraMove);
-  }, [renderer]);
+  const [cameraState, setCameraState] = useState(() => DEFAULT_CAMERA_STATE);
+  const [cameraStore] = useState(() => new CameraStore(setCameraState, cameraState));
 
   // Handle messages and render a frame if the camera has moved or new messages
   // are available
   useEffect(() => {
-    void cameraVersion;
     if (!renderer) {
       return;
     }
+    renderer.setCameraState(cameraState);
 
     if (!messages) {
       renderer.animationFrame();
@@ -328,20 +326,38 @@ export function ThreeDeeRender({ context }: { context: PanelExtensionContext }):
     }
 
     renderer.animationFrame();
-  }, [cameraVersion, messages, renderer, topicsToDatatypes]);
+  }, [cameraState, messages, renderer, topicsToDatatypes]);
 
   // Invoke the done callback once the render is complete
   useEffect(() => {
     renderDone?.();
   }, [renderDone]);
 
+  // Use a debounce and 0 refresh rate to avoid triggering a resize observation while handling
+  // an existing resize observation.
+  // https://github.com/maslianok/react-resize-detector/issues/45
+  const {
+    ref: resizeRef,
+    width,
+    height,
+  } = useResizeDetector({
+    refreshRate: 0,
+    refreshMode: "debounce",
+  });
   return (
-    <React.Fragment>
-      <canvas ref={setCanvas} style={{ position: "absolute", top: 0 }} />
+    <div style={{ width: "100%", height: "100%", display: "flex" }} ref={resizeRef}>
+      <CameraListener cameraStore={cameraStore} shiftKeys={true}>
+        <div
+          // This element forces CameraListener to fill its container. We need this instead of just
+          // the canvas since three.js manages the size of the canvas element and we use position:absolute.
+          style={{ width, height }}
+        />
+        <canvas ref={setCanvas} style={{ position: "absolute", top: 0, left: 0 }} />
+      </CameraListener>
       <RendererContext.Provider value={renderer}>
         <RendererOverlay colorScheme={colorScheme} />
       </RendererContext.Provider>
-    </React.Fragment>
+    </div>
   );
 }
 

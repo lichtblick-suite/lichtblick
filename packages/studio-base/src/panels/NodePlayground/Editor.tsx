@@ -283,7 +283,7 @@ const Editor = ({
   // monaco editor builtin auto layout uses an interval to adjust size to the parent component
   // instead we use a resize observer and tell the editor to update the layout
   // Use a debounce and 0 refresh rate to avoid triggering a resize observation while handling
-  // and existing resize observation.
+  // an existing resize observation.
   // https://github.com/maslianok/react-resize-detector/issues/45
   const { ref: sizeRef } = useResizeDetector({
     refreshRate: 0,
