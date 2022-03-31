@@ -6,12 +6,12 @@ import { renderHook } from "@testing-library/react-hooks";
 import { PropsWithChildren } from "react";
 
 import AppConfigurationContext, {
-  IAppConfiguration,
+  AppConfiguration,
   AppConfigurationValue,
 } from "@foxglove/studio-base/context/AppConfigurationContext";
 import { useAppConfigurationValue } from "@foxglove/studio-base/hooks/useAppConfigurationValue";
 
-class FakeProvider implements IAppConfiguration {
+class FakeProvider implements AppConfiguration {
   get(key: string): AppConfigurationValue {
     return key;
   }

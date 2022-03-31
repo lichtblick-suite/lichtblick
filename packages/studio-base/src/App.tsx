@@ -2,90 +2,55 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { useState, Suspense, Fragment } from "react";
+import { Suspense, useEffect, useState } from "react";
 import { DndProvider } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
 
-import Workspace from "./Workspace";
-import { ColorSchemeThemeProvider } from "./components/ColorSchemeThemeProvider";
-import CssBaseline from "./components/CssBaseline";
-import DocumentTitleAdapter from "./components/DocumentTitleAdapter";
-import ErrorBoundary from "./components/ErrorBoundary";
-import GlobalCss from "./components/GlobalCss";
-import MultiProvider from "./components/MultiProvider";
-import PlayerManager from "./components/PlayerManager";
-import SendNotificationToastAdapter from "./components/SendNotificationToastAdapter";
-import StudioToastProvider from "./components/StudioToastProvider";
-import AnalyticsProvider from "./context/AnalyticsProvider";
-import AppConfigurationContext, { IAppConfiguration } from "./context/AppConfigurationContext";
-import { AssetsProvider } from "./context/AssetsContext";
-import ConsoleApiContext from "./context/ConsoleApiContext";
-import ExtensionLoaderContext, { ExtensionLoader } from "./context/ExtensionLoaderContext";
-import { HoverValueProvider } from "./context/HoverValueContext";
-import LayoutStorageContext from "./context/LayoutStorageContext";
-import ModalHost from "./context/ModalHost";
-import NativeAppMenuContext, { INativeAppMenu } from "./context/NativeAppMenuContext";
-import NativeWindowContext, { INativeWindow } from "./context/NativeWindowContext";
-import { IDataSourceFactory } from "./context/PlayerSelectionContext";
-import { UserNodeStateProvider } from "./context/UserNodeStateContext";
-import { ConsoleApiCookieCurrentUserProvider } from "./providers/ConsoleApiCookieUserProvider";
-import { ConsoleApiDialogCurrentUserProvider } from "./providers/ConsoleApiDialogCurrentUserProvider";
-import ConsoleApiRemoteLayoutStorageProvider from "./providers/ConsoleApiRemoteLayoutStorageProvider";
-import CurrentLayoutProvider from "./providers/CurrentLayoutProvider";
-import ExtensionMarketplaceProvider from "./providers/ExtensionMarketplaceProvider";
-import ExtensionRegistryProvider from "./providers/ExtensionRegistryProvider";
-import HelpInfoProvider from "./providers/HelpInfoProvider";
-import LayoutManagerProvider from "./providers/LayoutManagerProvider";
-import PanelCatalogProvider from "./providers/PanelCatalogProvider";
-import UserProfileLocalStorageProvider from "./providers/UserProfileLocalStorageProvider";
-import { LaunchPreference } from "./screens/LaunchPreference";
-import ConsoleApi from "./services/ConsoleApi";
-import { ILayoutStorage } from "./services/ILayoutStorage";
-import URDFAssetLoader from "./services/URDFAssetLoader";
+import { AppSetting } from "@foxglove/studio-base/AppSetting";
+import Workspace from "@foxglove/studio-base/Workspace";
+import DocumentTitleAdapter from "@foxglove/studio-base/components/DocumentTitleAdapter";
+import MultiProvider from "@foxglove/studio-base/components/MultiProvider";
+import PlayerManager from "@foxglove/studio-base/components/PlayerManager";
+import SendNotificationToastAdapter from "@foxglove/studio-base/components/SendNotificationToastAdapter";
+import AnalyticsProvider from "@foxglove/studio-base/context/AnalyticsProvider";
+import { AssetsProvider } from "@foxglove/studio-base/context/AssetsContext";
+import { HoverValueProvider } from "@foxglove/studio-base/context/HoverValueContext";
+import ModalHost from "@foxglove/studio-base/context/ModalHost";
+import { IDataSourceFactory } from "@foxglove/studio-base/context/PlayerSelectionContext";
+import { UserNodeStateProvider } from "@foxglove/studio-base/context/UserNodeStateContext";
+import { useAppConfigurationValue } from "@foxglove/studio-base/hooks";
+import { useSessionStorageValue } from "@foxglove/studio-base/hooks/useSessionStorageValue";
+import CurrentLayoutProvider from "@foxglove/studio-base/providers/CurrentLayoutProvider";
+import ExtensionMarketplaceProvider from "@foxglove/studio-base/providers/ExtensionMarketplaceProvider";
+import ExtensionRegistryProvider from "@foxglove/studio-base/providers/ExtensionRegistryProvider";
+import HelpInfoProvider from "@foxglove/studio-base/providers/HelpInfoProvider";
+import LayoutManagerProvider from "@foxglove/studio-base/providers/LayoutManagerProvider";
+import PanelCatalogProvider from "@foxglove/studio-base/providers/PanelCatalogProvider";
+import { LaunchPreferenceScreen } from "@foxglove/studio-base/screens/LaunchPreferenceScreen";
+import { LaunchingInDesktopScreen } from "@foxglove/studio-base/screens/LaunchingInDesktopScreen";
+import URDFAssetLoader from "@foxglove/studio-base/services/URDFAssetLoader";
+import isDesktopApp from "@foxglove/studio-base/util/isDesktopApp";
 
 type AppProps = {
-  deepLinks: string[];
-  appConfiguration: IAppConfiguration;
-  dataSources: IDataSourceFactory[];
-  consoleApi: ConsoleApi;
-  layoutStorage: ILayoutStorage;
-  extensionLoader: ExtensionLoader;
-  nativeAppMenu?: INativeAppMenu;
-  nativeWindow?: INativeWindow;
-  enableDialogAuth?: boolean;
-  enableLaunchPreferenceScreen?: boolean;
+  availableSources: IDataSourceFactory[];
+  deepLinks?: string[];
 };
 
-export function App(props: AppProps): JSX.Element {
+function AppContent(props: AppProps): JSX.Element {
   const [assetLoaders] = useState(() => [new URDFAssetLoader()]);
+  const [_, setSessionLaunchPreference] = useSessionStorageValue(AppSetting.LAUNCH_PREFERENCE);
 
-  const {
-    appConfiguration,
-    dataSources,
-    layoutStorage,
-    consoleApi,
-    extensionLoader,
-    nativeAppMenu,
-    nativeWindow,
-    enableDialogAuth,
-    deepLinks,
-    enableLaunchPreferenceScreen,
-  } = props;
-
-  const CurrentUserProviderComponent =
-    enableDialogAuth === true
-      ? ConsoleApiDialogCurrentUserProvider
-      : ConsoleApiCookieCurrentUserProvider;
+  // Once we've rendered the app content set a temporary, session storage preference
+  // for web so that we don't inadvertently bounce the user to the web/desktop
+  // session preference screen again.
+  useEffect(() => {
+    if (!isDesktopApp()) {
+      setSessionLaunchPreference("web");
+    }
+  }, [setSessionLaunchPreference]);
 
   const providers = [
     /* eslint-disable react/jsx-key */
-    <ConsoleApiContext.Provider value={consoleApi} />,
-    <ConsoleApiRemoteLayoutStorageProvider />,
-    <CurrentUserProviderComponent />,
-    <StudioToastProvider />,
-    <LayoutStorageContext.Provider value={layoutStorage} />,
-    <UserProfileLocalStorageProvider />,
-    <ExtensionLoaderContext.Provider value={extensionLoader} />,
     <AnalyticsProvider amplitudeApiKey={process.env.AMPLITUDE_API_KEY} />,
     <LayoutManagerProvider />,
     <ModalHost />, // render modal elements inside the ThemeProvider
@@ -96,42 +61,47 @@ export function App(props: AppProps): JSX.Element {
     <CurrentLayoutProvider />,
     <ExtensionMarketplaceProvider />,
     <ExtensionRegistryProvider />,
-    <PlayerManager playerSources={dataSources} />,
+    <PlayerManager playerSources={props.availableSources} />,
     /* eslint-enable react/jsx-key */
   ];
 
-  if (nativeAppMenu) {
-    providers.push(<NativeAppMenuContext.Provider value={nativeAppMenu} />);
-  }
-
-  if (nativeWindow) {
-    providers.push(<NativeWindowContext.Provider value={nativeWindow} />);
-  }
-
-  const MaybeLaunchPreference = enableLaunchPreferenceScreen === true ? LaunchPreference : Fragment;
-
   return (
-    <AppConfigurationContext.Provider value={appConfiguration}>
-      <ColorSchemeThemeProvider>
-        <GlobalCss />
-        <CssBaseline>
-          <ErrorBoundary>
-            <MaybeLaunchPreference>
-              <MultiProvider providers={providers}>
-                <DocumentTitleAdapter />
-                <SendNotificationToastAdapter />
-                <DndProvider backend={HTML5Backend}>
-                  <Suspense fallback={<></>}>
-                    <PanelCatalogProvider>
-                      <Workspace deepLinks={deepLinks} />
-                    </PanelCatalogProvider>
-                  </Suspense>
-                </DndProvider>
-              </MultiProvider>
-            </MaybeLaunchPreference>
-          </ErrorBoundary>
-        </CssBaseline>
-      </ColorSchemeThemeProvider>
-    </AppConfigurationContext.Provider>
+    <MultiProvider providers={providers}>
+      <DocumentTitleAdapter />
+      <SendNotificationToastAdapter />
+      <DndProvider backend={HTML5Backend}>
+        <Suspense fallback={<></>}>
+          <PanelCatalogProvider>
+            <Workspace deepLinks={props.deepLinks} />
+          </PanelCatalogProvider>
+        </Suspense>
+      </DndProvider>
+    </MultiProvider>
   );
+}
+
+export default function App(props: AppProps): JSX.Element {
+  const isDesktop = isDesktopApp();
+  const [globalLaunchPreference = "unknown"] = useAppConfigurationValue<string>(
+    AppSetting.LAUNCH_PREFERENCE,
+  );
+  const [sessionLaunchPreference] = useSessionStorageValue(AppSetting.LAUNCH_PREFERENCE);
+
+  // Session preferences take priority over global preferences.
+  const activePreference = sessionLaunchPreference ?? globalLaunchPreference;
+
+  if (isDesktop) {
+    return <AppContent {...props} />;
+  } else {
+    const url = new URL(window.location.href);
+    const hasParams = Array.from(url.searchParams.entries()).length > 0;
+    // Ask the user in which environment they want to open this session.
+    if (activePreference === "unknown" && hasParams) {
+      return <LaunchPreferenceScreen />;
+    } else if (activePreference === "desktop" && hasParams) {
+      return <LaunchingInDesktopScreen />;
+    } else {
+      return <AppContent {...props} />;
+    }
+  }
 }

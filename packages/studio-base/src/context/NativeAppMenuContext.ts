@@ -19,7 +19,7 @@ export type NativeAppMenuEvent =
 
 type Handler = () => void;
 
-export interface INativeAppMenu {
+export interface NativeAppMenu {
   addFileEntry(name: string, handler: Handler): void;
   removeFileEntry(name: string): void;
 
@@ -27,10 +27,10 @@ export interface INativeAppMenu {
   off(name: NativeAppMenuEvent, handler: Handler): void;
 }
 
-const NativeAppMenuContext = createContext<INativeAppMenu | undefined>(undefined);
+const NativeAppMenuContext = createContext<NativeAppMenu | undefined>(undefined);
 NativeAppMenuContext.displayName = "NativeAppMenuContext";
 
-export function useNativeAppMenu(): INativeAppMenu | undefined {
+export function useNativeAppMenu(): NativeAppMenu | undefined {
   return useContext(NativeAppMenuContext);
 }
 

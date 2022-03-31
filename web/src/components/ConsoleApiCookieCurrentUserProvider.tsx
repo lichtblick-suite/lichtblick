@@ -7,8 +7,7 @@ import { useAsync } from "react-use";
 
 import { useShallowMemo } from "@foxglove/hooks";
 import Logger from "@foxglove/log";
-import { useConsoleApi } from "@foxglove/studio-base/context/ConsoleApiContext";
-import CurrentUserContext, { User } from "@foxglove/studio-base/context/CurrentUserContext";
+import { useConsoleApi, CurrentUserContext, User } from "@foxglove/studio-base";
 
 const log = Logger.getLogger(__filename);
 
@@ -17,10 +16,11 @@ const log = Logger.getLogger(__filename);
  *
  * On mount, it loads the current user profile if there is a session.
  */
-export function ConsoleApiCookieCurrentUserProvider(
+export default function ConsoleApiCookieCurrentUserProvider(
   props: PropsWithChildren<unknown>,
 ): JSX.Element {
   const api = useConsoleApi();
+
   const [currentUser, setCurrentUser] = useState<User | undefined>();
 
   // initial load of the user profile

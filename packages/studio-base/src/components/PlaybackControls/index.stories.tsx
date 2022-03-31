@@ -17,7 +17,7 @@ import { useLayoutEffect } from "react";
 
 import MockMessagePipelineProvider from "@foxglove/studio-base/components/MessagePipeline/MockMessagePipelineProvider";
 import AppConfigurationContext, {
-  IAppConfiguration,
+  AppConfiguration,
 } from "@foxglove/studio-base/context/AppConfigurationContext";
 import { useSetHoverValue } from "@foxglove/studio-base/context/HoverValueContext";
 import {
@@ -55,7 +55,7 @@ function getPlayerState(): PlayerState {
   return player;
 }
 
-const mockAppConfiguration: IAppConfiguration = {
+const mockAppConfiguration: AppConfiguration = {
   get: () => undefined,
   set: async () => {},
   addChangeListener: () => {},
