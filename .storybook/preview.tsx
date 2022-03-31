@@ -7,18 +7,16 @@ import { useMemo, useRef } from "react";
 import { ToastProvider } from "react-toast-notifications";
 
 import { signal } from "@foxglove/den/async";
-import {
-  AppConfigurationContext,
-  CssBaseline,
-  GlobalCss,
-  MultiProvider,
-  HoverValueProvider,
-  UserNodeStateProvider,
-  ThemeProvider,
-  waitForFonts,
-  ReadySignalContext,
-  makeMockAppConfiguration,
-} from "@foxglove/studio-base";
+import CssBaseline from "@foxglove/studio-base/components/CssBaseline";
+import GlobalCss from "@foxglove/studio-base/components/GlobalCss";
+import MultiProvider from "@foxglove/studio-base/components/MultiProvider";
+import AppConfigurationContext from "@foxglove/studio-base/context/AppConfigurationContext";
+import { HoverValueProvider } from "@foxglove/studio-base/context/HoverValueContext";
+import { UserNodeStateProvider } from "@foxglove/studio-base/context/UserNodeStateContext";
+import ReadySignalContext from "@foxglove/studio-base/stories/ReadySignalContext";
+import ThemeProvider from "@foxglove/studio-base/theme/ThemeProvider";
+import { makeMockAppConfiguration } from "@foxglove/studio-base/util/makeMockAppConfiguration";
+import waitForFonts from "@foxglove/studio-base/util/waitForFonts";
 
 import "./styles.css";
 

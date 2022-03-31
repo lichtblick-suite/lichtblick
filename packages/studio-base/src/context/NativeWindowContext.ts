@@ -4,15 +4,15 @@
 
 import { createContext, useContext } from "react";
 
-export interface NativeWindow {
+export interface INativeWindow {
   /** https://www.electronjs.org/docs/tutorial/represented-file */
   setRepresentedFilename(filename: string | undefined): Promise<void>;
 }
 
-const NativeWindowContext = createContext<NativeWindow | undefined>(undefined);
+const NativeWindowContext = createContext<INativeWindow | undefined>(undefined);
 NativeWindowContext.displayName = "NativeWindowContext";
 
-export function useNativeWindow(): NativeWindow | undefined {
+export function useNativeWindow(): INativeWindow | undefined {
   return useContext(NativeWindowContext);
 }
 

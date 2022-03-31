@@ -10,7 +10,7 @@ export type AppConfigurationValue = string | number | boolean | undefined;
 export type ChangeHandler = (newValue: AppConfigurationValue) => void;
 
 // Exposes an interface for reading and writing user-configurable options and other persistent application state.
-export interface AppConfiguration {
+export interface IAppConfiguration {
   // get the current value for the key
   get(key: string): AppConfigurationValue;
   // set key to value - This returns a promise to track the progress for setting the value
@@ -21,10 +21,10 @@ export interface AppConfiguration {
   removeChangeListener(key: string, cb: ChangeHandler): void;
 }
 
-const AppConfigurationContext = createContext<AppConfiguration | undefined>(undefined);
+const AppConfigurationContext = createContext<IAppConfiguration | undefined>(undefined);
 AppConfigurationContext.displayName = "AppConfigurationContext";
 
-export function useAppConfiguration(): AppConfiguration {
+export function useAppConfiguration(): IAppConfiguration {
   const storage = useContext(AppConfigurationContext);
   if (!storage) {
     throw new Error("An AppConfigurationContext provider is required to useAppConfiguration");

@@ -3,12 +3,12 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 import { Mutex } from "async-mutex";
 
-import { AppConfiguration, AppConfigurationValue, ChangeHandler } from "@foxglove/studio-base";
+import { IAppConfiguration, AppConfigurationValue, ChangeHandler } from "@foxglove/studio-base";
 
 import { SETTINGS_DATASTORE_NAME, SETTINGS_JSON_DATASTORE_KEY } from "../../common/storage";
 import { Storage } from "../../common/types";
 
-export default class NativeStorageAppConfiguration implements AppConfiguration {
+export default class NativeStorageAppConfiguration implements IAppConfiguration {
   static STORE_NAME = SETTINGS_DATASTORE_NAME;
   static STORE_KEY = SETTINGS_JSON_DATASTORE_KEY;
 

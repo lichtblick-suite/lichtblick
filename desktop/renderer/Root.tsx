@@ -2,22 +2,10 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { ReactElement, useMemo } from "react";
-import { useMedia } from "react-use";
+import { useMemo, useEffect } from "react";
 
 import {
-  App,
-  ErrorBoundary,
-  MultiProvider,
   IDataSourceFactory,
-  ThemeProvider,
-  UserProfileLocalStorageProvider,
-  StudioToastProvider,
-  CssBaseline,
-  GlobalCss,
-  ConsoleApi,
-  ConsoleApiContext,
-  ConsoleApiRemoteLayoutStorageProvider,
   Ros1LocalBagDataSourceFactory,
   Ros2LocalBagDataSourceFactory,
   RosbridgeDataSourceFactory,
@@ -30,33 +18,33 @@ import {
   UlogLocalDataSourceFactory,
   McapLocalDataSourceFactory,
   SampleNuscenesDataSourceFactory,
-  AppConfiguration,
-  AppConfigurationContext,
-  useAppConfigurationValue,
-  AppSetting,
   McapRemoteDataSourceFactory,
+  IAppConfiguration,
+  AppSetting,
+  App,
+  ConsoleApi,
 } from "@foxglove/studio-base";
 
-import { Desktop } from "../common/types";
-import ConsoleApiCurrentUserProvider from "./components/ConsoleApiCurrentUserProvider";
-import NativeAppMenuProvider from "./components/NativeAppMenuProvider";
-import NativeColorSchemeAdapter from "./components/NativeColorSchemeAdapter";
-import NativeStorageLayoutStorageProvider from "./components/NativeStorageLayoutStorageProvider";
-import NativeWindowProvider from "./components/NativeWindowProvider";
-import ExtensionLoaderProvider from "./providers/ExtensionLoaderProvider";
+import { Desktop, NativeMenuBridge, Storage } from "../common/types";
+import { DesktopExtensionLoader } from "./services/DesktopExtensionLoader";
+import { NativeAppMenu } from "./services/NativeAppMenu";
+import NativeStorageLayoutStorage from "./services/NativeStorageLayoutStorage";
+import { NativeWindow } from "./services/NativeWindow";
 
 const desktopBridge = (global as unknown as { desktopBridge: Desktop }).desktopBridge;
+const storageBridge = (global as unknown as { storageBridge?: Storage }).storageBridge;
+const menuBridge = (global as { menuBridge?: NativeMenuBridge }).menuBridge;
 
-// useAppConfiguration requires the AppConfigurationContext which is setup in Root
-// AppWrapper is used to make a functional component so we can use the context
-function AppWrapper() {
-  const deepLinks = useMemo(() => desktopBridge.getDeepLinks(), []);
-  const [enableExperimentalBagPlayer = false] = useAppConfigurationValue<boolean>(
-    AppSetting.EXPERIMENTAL_BAG_PLAYER,
-  );
-  const [enableExperimentalDataPlatformPlayer = false] = useAppConfigurationValue<boolean>(
-    AppSetting.EXPERIMENTAL_DATA_PLATFORM_PLAYER,
-  );
+export default function Root({
+  appConfiguration,
+}: {
+  appConfiguration: IAppConfiguration;
+}): JSX.Element {
+  const enableExperimentalBagPlayer: boolean =
+    (appConfiguration.get(AppSetting.EXPERIMENTAL_BAG_PLAYER) as boolean | undefined) ?? false;
+  const enableExperimentalDataPlatformPlayer: boolean =
+    (appConfiguration.get(AppSetting.EXPERIMENTAL_DATA_PLATFORM_PLAYER) as boolean | undefined) ??
+    false;
 
   const dataSources: IDataSourceFactory[] = useMemo(() => {
     const sources = [
@@ -80,46 +68,39 @@ function AppWrapper() {
     return sources;
   }, [enableExperimentalBagPlayer, enableExperimentalDataPlatformPlayer]);
 
-  return <App deepLinks={deepLinks} availableSources={dataSources} />;
-}
+  if (!storageBridge) {
+    throw new Error("storageBridge is missing");
+  }
 
-export default function Root({
-  appConfiguration,
-}: {
-  appConfiguration: AppConfiguration;
-}): ReactElement {
-  const api = useMemo(() => new ConsoleApi(process.env.FOXGLOVE_API_URL!), []);
+  useEffect(() => {
+    const handler = () => {
+      void desktopBridge.updateNativeColorScheme();
+    };
 
-  const providers = [
-    /* eslint-disable react/jsx-key */
-    <AppConfigurationContext.Provider value={appConfiguration} />,
-    <ConsoleApiContext.Provider value={api} />,
-    <ConsoleApiCurrentUserProvider />,
-    <ConsoleApiRemoteLayoutStorageProvider />,
-    <StudioToastProvider />,
-    <NativeStorageLayoutStorageProvider />,
-    <NativeAppMenuProvider />,
-    <NativeWindowProvider />,
-    <UserProfileLocalStorageProvider />,
-    <ExtensionLoaderProvider />,
-    /* eslint-enable react/jsx-key */
-  ];
+    appConfiguration.addChangeListener(AppSetting.COLOR_SCHEME, handler);
+    return () => {
+      appConfiguration.removeChangeListener(AppSetting.COLOR_SCHEME, handler);
+    };
+  }, [appConfiguration]);
 
-  // In Electron, the app theme setting is used to set `nativeTheme.themeSource`, which Chromium
-  // uses to inform the prefers-color-scheme query, so we don't need to read the app setting here.
-  const isDark = useMedia("(prefers-color-scheme: dark)");
+  const layoutStorage = useMemo(() => new NativeStorageLayoutStorage(storageBridge), []);
+  const extensionLoader = useMemo(() => new DesktopExtensionLoader(desktopBridge), []);
+  const consoleApi = useMemo(() => new ConsoleApi(process.env.FOXGLOVE_API_URL!), []);
+  const nativeAppMenu = useMemo(() => new NativeAppMenu(menuBridge), []);
+  const nativeWindow = useMemo(() => new NativeWindow(desktopBridge), []);
+  const deepLinks = useMemo(() => desktopBridge.getDeepLinks(), []);
 
   return (
-    <ThemeProvider isDark={isDark}>
-      <GlobalCss />
-      <CssBaseline>
-        <ErrorBoundary>
-          <MultiProvider providers={providers}>
-            <NativeColorSchemeAdapter />
-            <AppWrapper />
-          </MultiProvider>
-        </ErrorBoundary>
-      </CssBaseline>
-    </ThemeProvider>
+    <App
+      enableDialogAuth
+      deepLinks={deepLinks}
+      dataSources={dataSources}
+      appConfiguration={appConfiguration}
+      consoleApi={consoleApi}
+      layoutStorage={layoutStorage}
+      extensionLoader={extensionLoader}
+      nativeAppMenu={nativeAppMenu}
+      nativeWindow={nativeWindow}
+    />
   );
 }
