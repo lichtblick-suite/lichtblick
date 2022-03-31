@@ -6,18 +6,18 @@ import {
   DirectionalHint,
   IIconProps,
   IOverflowSetItemProps,
-  makeStyles,
   OverflowSet,
   ResizeGroup,
   ResizeGroupDirection,
-  useTheme,
 } from "@fluentui/react";
-import { Box, Stack } from "@mui/material";
+import { Theme, useTheme } from "@mui/material";
+import { makeStyles } from "@mui/styles";
 import { useCallback, useLayoutEffect, useRef, useState } from "react";
 import { MosaicNode, MosaicWithoutDragDropContext } from "react-mosaic-component";
 
 import { filterMap } from "@foxglove/den/collection";
 import ErrorBoundary from "@foxglove/studio-base/components/ErrorBoundary";
+import Stack from "@foxglove/studio-base/components/Stack";
 
 import SidebarButton, { BUTTON_SIZE } from "./SidebarButton";
 import { Badge } from "./types";
@@ -34,12 +34,28 @@ export type SidebarItem = {
   url?: string;
 };
 
-const useStyles = makeStyles({
+const useStyles = makeStyles((theme: Theme) => ({
+  nav: {
+    width: BUTTON_SIZE,
+    boxSizing: "content-box",
+    borderRight: `1px solid ${theme.palette.divider}`,
+    backgroundColor: theme.palette.background.paper,
+  },
+  mosaicWrapper: {
+    flex: "1 1 100%",
+
+    // Root drop targets in this top level sidebar mosaic interfere with drag/mouse events from the
+    // PanelList. We don't allow users to edit the mosaic since it's just used for the sidebar, so we
+    // can hide the drop targets.
+    "& > .mosaic > .drop-target-container": {
+      display: "none !important",
+    },
+  },
   resizeGroup: {
     height: "100%",
     minHeight: 0,
   },
-});
+}));
 
 export default function Sidebar<K extends string>({
   children,
@@ -56,7 +72,7 @@ export default function Sidebar<K extends string>({
   const [mosaicValue, setMosaicValue] = useState<MosaicNode<"sidebar" | "children">>("children");
 
   const theme = useTheme();
-  const classNames = useStyles();
+  const classes = useStyles();
 
   const prevSelectedKey = useRef<string | undefined>(undefined);
   useLayoutEffect(() => {
@@ -180,19 +196,10 @@ export default function Sidebar<K extends string>({
   );
 
   return (
-    <Stack direction="row" height="100%" overflow="hidden">
-      <Stack
-        justifyContent="space-between"
-        sx={{
-          width: BUTTON_SIZE,
-          flexShrink: 0,
-          boxSizing: "content-box",
-          borderRight: `1px solid ${theme.semanticColors.bodyDivider}`,
-          backgroundColor: theme.palette.neutralLighterAlt,
-        }}
-      >
+    <Stack direction="row" fullHeight overflow="hidden">
+      <Stack className={classes.nav} flexShrink={0} justifyContent="space-between">
         <ResizeGroup
-          className={classNames.resizeGroup}
+          className={classes.resizeGroup}
           direction={ResizeGroupDirection.vertical}
           data={{ itemsToShow: numNonBottomItems }}
           onRenderData={onRenderData}
@@ -205,18 +212,7 @@ export default function Sidebar<K extends string>({
         // By always rendering the mosaic, even if we are only showing children, we can prevent the
         // children from having to re-mount each time the sidebar is opened/closed.
       }
-      <Box
-        sx={{
-          flex: "1 1 100%",
-
-          // Root drop targets in this top level sidebar mosaic interfere with drag/mouse events from the
-          // PanelList. We don't allow users to edit the mosaic since it's just used for the sidebar, so we
-          // can hide the drop targets.
-          "& > .mosaic > .drop-target-container": {
-            display: "none !important",
-          },
-        }}
-      >
+      <div className={classes.mosaicWrapper}>
         <MosaicWithoutDragDropContext<"sidebar" | "children">
           className=""
           value={mosaicValue}
@@ -228,7 +224,7 @@ export default function Sidebar<K extends string>({
               ) : (
                 <div
                   style={{
-                    backgroundColor: theme.palette.neutralLighterAlt,
+                    backgroundColor: theme.palette.background.paper,
                   }}
                 >
                   <SelectedComponent />
@@ -238,7 +234,7 @@ export default function Sidebar<K extends string>({
           )}
           resize={{ minimumPaneSizePercentage: 10 }}
         />
-      </Box>
+      </div>
     </Stack>
   );
 }

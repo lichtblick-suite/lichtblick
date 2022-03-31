@@ -123,6 +123,9 @@ export default function muiComponents(theme: Theme): ThemeOptions["components"] 
           "&.Mui-focused": {
             backgroundColor: theme.palette.action.focus,
           },
+          "&.Mui-disabled": {
+            opacity: 0.5,
+          },
         },
       },
     },
@@ -143,6 +146,9 @@ export default function muiComponents(theme: Theme): ThemeOptions["components"] 
           borderRadius: theme.shape.borderRadius,
           ...iconHack,
 
+          ".root-span": {
+            display: "flex",
+          },
           "&:hover": {
             backgroundColor: theme.palette.action.hover,
           },
@@ -265,6 +271,14 @@ export default function muiComponents(theme: Theme): ThemeOptions["components"] 
     MuiTab: {
       styleOverrides: {
         labelIcon: iconHack,
+        root: {
+          opacity: 0.8,
+
+          "&$selected": {
+            opacity: 1,
+          },
+        },
+        selected: {},
       },
     },
     MuiTableCell: {

@@ -2,118 +2,97 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { ITextStyles, Text, useTheme } from "@fluentui/react";
-import { Theme } from "@mui/material";
-import { makeStyles } from "@mui/styles";
-import cx from "classnames";
-import { useMemo } from "react";
+import { Skeleton, Typography } from "@mui/material";
 
 import Duration from "@foxglove/studio-base/components/Duration";
 import {
   MessagePipelineContext,
   useMessagePipeline,
 } from "@foxglove/studio-base/components/MessagePipeline";
+import Stack from "@foxglove/studio-base/components/Stack";
 import Timestamp from "@foxglove/studio-base/components/Timestamp";
 import { subtractTimes } from "@foxglove/studio-base/players/UserNodePlayer/nodeTransformerWorker/typescript/userUtils/time";
+import { PlayerPresence } from "@foxglove/studio-base/players/types";
 
-import { MultilineMiddleTruncate } from "./MultilineMiddleTruncate";
+import { MultilineMiddleTruncate } from "../MultilineMiddleTruncate";
 
 const selectStartTime = (ctx: MessagePipelineContext) => ctx.playerState.activeData?.startTime;
 const selectEndTime = (ctx: MessagePipelineContext) => ctx.playerState.activeData?.endTime;
 const selectPlayerName = (ctx: MessagePipelineContext) => ctx.playerState.name;
-
-const useStyles = makeStyles((theme: Theme) => ({
-  root: {
-    display: "flex",
-    flexDirection: "column",
-    gap: theme.spacing(2),
-    whiteSpace: "nowrap",
-    overflow: "hidden",
-  },
-  header: {
-    display: "flex",
-    alignItems: "center",
-  },
-  item: {
-    display: "flex",
-    flexDirection: "column",
-    gap: theme.spacing(0.5),
-  },
-  source: {
-    flexGrow: 1,
-    minWidth: 0,
-  },
-}));
+const selectPlayerPresence = ({ playerState }: MessagePipelineContext) => playerState.presence;
 
 function DataSourceInfo(): JSX.Element {
-  const classes = useStyles();
-  const theme = useTheme();
-
   const startTime = useMessagePipeline(selectStartTime);
   const endTime = useMessagePipeline(selectEndTime);
   const playerName = useMessagePipeline(selectPlayerName);
+  const playerPresence = useMessagePipeline(selectPlayerPresence);
 
   const duration = startTime && endTime ? subtractTimes(endTime, startTime) : undefined;
 
-  const subheaderStyles = useMemo(
-    () =>
-      ({
-        root: {
-          fontVariant: "small-caps",
-          textTransform: "lowercase",
-          color: theme.palette.neutralSecondaryAlt,
-          letterSpacing: "0.5px",
-          position: "sticky",
-          top: 0,
-        },
-      } as ITextStyles),
-    [theme],
-  );
-
   return (
-    <div className={classes.root}>
-      <header className={classes.header}>
-        <div className={cx(classes.item, classes.source)}>
-          <Text styles={subheaderStyles}>Current source</Text>
-          <Text styles={{ root: { color: theme.palette.neutralSecondary } }}>
-            {playerName ? <MultilineMiddleTruncate text={playerName} /> : <>&mdash;</>}
-          </Text>
-        </div>
-      </header>
+    <Stack gap={1.5} paddingX={2} paddingBottom={2}>
+      <Stack>
+        <Typography display="block" variant="overline" color="text.secondary">
+          Current source
+        </Typography>
+        {playerPresence === PlayerPresence.INITIALIZING ? (
+          <Typography variant="inherit">
+            <Skeleton animation="wave" width="40%" />
+          </Typography>
+        ) : playerPresence === PlayerPresence.RECONNECTING ? (
+          <Typography variant="inherit">Waiting for connection…</Typography>
+        ) : playerName ? (
+          <Typography variant="inherit">
+            <MultilineMiddleTruncate text={playerName} />
+          </Typography>
+        ) : (
+          <Typography>&mdash;</Typography>
+        )}
+      </Stack>
 
-      <div className={classes.item}>
-        <Text styles={subheaderStyles}>Start time</Text>
-        {startTime ? (
+      <Stack>
+        <Typography variant="overline" color="text.secondary">
+          Start time
+        </Typography>
+        {playerPresence === PlayerPresence.INITIALIZING ? (
+          <Skeleton animation="wave" width="50%" />
+        ) : startTime ? (
           <Timestamp horizontal time={startTime} />
         ) : (
-          <Text variant="small" styles={{ root: { color: theme.palette.neutralSecondary } }}>
-            &mdash;
-          </Text>
+          <Typography color="text.secondary">&mdash;</Typography>
         )}
-      </div>
+      </Stack>
 
-      <div className={classes.item}>
-        <Text styles={subheaderStyles}>End time</Text>
-        {endTime ? (
+      <Stack>
+        <Typography variant="overline" color="text.secondary">
+          End time
+        </Typography>
+        {playerPresence === PlayerPresence.INITIALIZING ? (
+          <Skeleton animation="wave" width="50%" />
+        ) : endTime ? (
           <Timestamp horizontal time={endTime} />
         ) : (
-          <Text variant="small" styles={{ root: { color: theme.palette.neutralSecondary } }}>
+          <Typography variant="inherit" color="text.secondary">
             &mdash;
-          </Text>
+          </Typography>
         )}
-      </div>
+      </Stack>
 
-      <div className={classes.item}>
-        <Text styles={subheaderStyles}>Duration</Text>
-        {duration ? (
+      <Stack>
+        <Typography variant="overline" color="text.secondary">
+          Duration
+        </Typography>
+        {playerPresence === PlayerPresence.INITIALIZING ? (
+          <Skeleton animation="wave" width={100} />
+        ) : duration ? (
           <Duration duration={duration} />
         ) : (
-          <Text variant="small" styles={{ root: { color: theme.palette.neutralSecondary } }}>
+          <Typography variant="inherit" color="text.secondary">
             &mdash;
-          </Text>
+          </Typography>
         )}
-      </div>
-    </div>
+      </Stack>
+    </Stack>
   );
 }
 

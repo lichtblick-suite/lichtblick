@@ -2,130 +2,106 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { IconButton, Text, useTheme } from "@fluentui/react";
-import { Theme } from "@mui/material";
-import { makeStyles } from "@mui/styles";
-import cx from "classnames";
-import { useState, useMemo } from "react";
+import HelpIcon from "@mui/icons-material/Help";
+import HelpOutlineIcon from "@mui/icons-material/HelpOutline";
+import { IconButton, styled as muiStyled, Typography } from "@mui/material";
+import { useState, useMemo, CSSProperties } from "react";
 
+import Stack from "@foxglove/studio-base/components/Stack";
 import TextContent from "@foxglove/studio-base/components/TextContent";
-import { useTooltip } from "@foxglove/studio-base/components/Tooltip";
 
-const useStyles = makeStyles((theme: Theme) => ({
-  root: {
-    display: "flex",
-    flexDirection: "column",
-    flex: "auto",
-    height: "100%",
-    overflow: "auto",
-    gap: theme.spacing(1),
-  },
-  toolbar: {
-    display: "flex",
-    justifyContent: "space-between",
-    alignItems: "center",
-    padding: theme.spacing(2),
-    minHeight: theme.spacing(7),
-  },
-  content: {
-    flexGrow: 1,
+export const TOOLBAR_HEIGHT = 56;
+
+const Toolbar = muiStyled(Stack)({
+  minHeight: TOOLBAR_HEIGHT,
+});
+
+const ContentWrapper = muiStyled("div", {
+  shouldForwardProp: (prop) => prop !== "disablePadding",
+})<{ disablePadding: boolean }>(({ theme, disablePadding }) => ({
+  flexGrow: 1,
+
+  ...(!disablePadding && {
     padding: theme.spacing(0, 2, 2),
-  },
-  noPadding: {
-    padding: 0,
-  },
-  helpContent: {
-    padding: theme.spacing(0, 2, 2),
-  },
-  items: {
-    display: "flex",
-    alignItems: "center",
-  },
+  }),
+}));
+
+const HelpContent = muiStyled("div")(({ theme }) => ({
+  padding: theme.spacing(0, 2, 2),
 }));
 
 export function SidebarContent({
-  noPadding = false,
+  disablePadding = false,
   title,
   children,
   helpContent,
   leadingItems,
+  overflow = "auto",
   trailingItems,
-}: React.PropsWithChildren<{
-  title: string;
-  helpContent?: React.ReactNode;
-  noPadding?: boolean;
-
-  /** Buttons/items to display on the leading (left) side of the header */
-  leadingItems?: React.ReactNode[];
-  /** Buttons/items to display on the trailing (right) side of the header */
-  trailingItems?: React.ReactNode[];
-}>): JSX.Element {
-  const classes = useStyles();
-  const theme = useTheme();
+}: React.PropsWithChildren<SidebarContentProps>): JSX.Element {
   const [showHelp, setShowHelp] = useState<boolean>(false);
-  const button = useTooltip({ contents: showHelp ? "Hide help" : "Show help" });
 
   const trailingItemsWithHelp = useMemo(() => {
     if (helpContent != undefined) {
       return [
         ...(trailingItems ?? []),
         <IconButton
-          elementRef={button.ref}
+          color={showHelp ? "inherit" : "primary"}
+          title={showHelp ? "Hide help" : "Show help"}
           key="help-icon"
-          iconProps={{ iconName: showHelp ? "HelpCircleFilled" : "HelpCircle" }}
           onClick={() => setShowHelp(!showHelp)}
-          styles={{
-            icon: {
-              color: theme.semanticColors.bodySubtext,
-
-              svg: {
-                fill: "currentColor",
-                height: "1em",
-                width: "1em",
-              },
-            },
-          }}
         >
-          {button.tooltip}
+          {showHelp ? <HelpIcon /> : <HelpOutlineIcon />}
         </IconButton>,
       ];
     }
     return trailingItems ?? [];
-  }, [helpContent, trailingItems, button, showHelp, theme]);
+  }, [helpContent, trailingItems, showHelp]);
 
   return (
-    <div className={classes.root}>
-      <div className={classes.toolbar}>
+    <Stack overflow={overflow} fullHeight flex="auto" gap={1}>
+      <Toolbar flexShrink={0} direction="row" alignItems="center" padding={2}>
         {leadingItems && (
-          <div className={classes.items}>
+          <Stack direction="row" alignItems="center">
             {leadingItems.map((item, i) => (
               <div key={i}>{item}</div>
             ))}
-          </div>
+          </Stack>
         )}
-        <Text as="h2" variant="xLarge" styles={{ root: { flexGrow: 1, margin: 0 } }}>
+        <Typography component="h2" variant="h4" fontWeight={800} flex="auto">
           {title}
-        </Text>
+        </Typography>
         {trailingItemsWithHelp.length > 0 && (
-          <div className={classes.items}>
+          <Stack direction="row" alignItems="center">
             {trailingItemsWithHelp.map((item, i) => (
               <div key={i}>{item}</div>
             ))}
-          </div>
+          </Stack>
         )}
-      </div>
+      </Toolbar>
       {showHelp && (
-        <div className={classes.helpContent}>
+        <HelpContent>
           <TextContent allowMarkdownHtml={true}>{helpContent}</TextContent>
-        </div>
+        </HelpContent>
       )}
-      <div
-        className={cx(classes.content, {
-          [classes.noPadding]: noPadding,
-        })}
-      >
-        {children}
-      </div>
-    </div>
+      <ContentWrapper disablePadding={disablePadding}>{children}</ContentWrapper>
+    </Stack>
   );
 }
+
+type SidebarContentProps = {
+  title: string;
+  helpContent?: React.ReactNode;
+  disablePadding?: boolean;
+
+  /** Buttons/items to display on the leading (left) side of the header */
+  leadingItems?: React.ReactNode[];
+
+  /** Overflow style of root element
+   * @default: "auto"
+   */
+  overflow?: CSSProperties["overflow"];
+
+  /** Buttons/items to display on the trailing (right) side of the header */
+  trailingItems?: React.ReactNode[];
+};

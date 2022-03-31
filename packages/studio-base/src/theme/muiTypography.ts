@@ -14,6 +14,7 @@ const muiTypography: MuiThemeOptions["typography"] = {
   },
   overline: {
     letterSpacing: "0.05em",
+    lineHeight: "1.5",
   },
   h1: { fontSize: "2rem" },
   h2: { fontSize: "1.8rem" },

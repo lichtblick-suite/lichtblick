@@ -13,13 +13,13 @@ function getStackUtilityClass(slot: string): string {
 
 const StackRoot = muiStyled("div", {
   name: "FoxgloveStack",
+  overridesResolver: (_props, styles) => [styles.root],
   slot: "Root",
-  overridesResolver: (_props, styles) => {
-    return [styles.root];
-  },
+  skipSx: true,
 })(({ theme, ownerState }: { theme: Theme; ownerState: StackProps }) => ({
   display: "flex",
   flexDirection: ownerState.direction,
+  flexShrink: ownerState.flexShrink,
   flexWrap: ownerState.wrap,
   justifyContent: ownerState.justifyContent,
   alignItems: ownerState.alignItems,
@@ -27,7 +27,11 @@ const StackRoot = muiStyled("div", {
   alignSelf: ownerState.alignSelf,
   flex: ownerState.flex,
   order: ownerState.order,
+  overflow: ownerState.overflow,
 
+  ...(ownerState.zeroMinWidth === true && {
+    minWidth: 0,
+  }),
   ...(ownerState.fullHeight === true && {
     height: "100%",
   }),
@@ -84,6 +88,7 @@ export default function Stack(props: PropsWithChildren<StackProps>): JSX.Element
     gapY,
     justifyContent,
     order,
+    overflow,
     padding,
     paddingX,
     paddingY,
@@ -93,6 +98,7 @@ export default function Stack(props: PropsWithChildren<StackProps>): JSX.Element
     paddingRight,
     wrap,
     style,
+    zeroMinWidth = false,
     ...other
   } = props;
 
@@ -111,6 +117,7 @@ export default function Stack(props: PropsWithChildren<StackProps>): JSX.Element
     gapY,
     justifyContent,
     order,
+    overflow,
     padding,
     paddingX,
     paddingY,
@@ -119,6 +126,7 @@ export default function Stack(props: PropsWithChildren<StackProps>): JSX.Element
     paddingLeft,
     paddingRight,
     wrap,
+    zeroMinWidth,
   };
 
   const classes = composeClasses({ root: ["root"] }, getStackUtilityClass, ownerState.classes);
@@ -183,6 +191,9 @@ export type StackProps = {
   /** Defines the `columnGap` style property using `theme.spacing` increments. */
   gapY?: number;
 
+  /** Defines the `overflow` style property. */
+  overflow?: CSSProperties["overflow"];
+
   /** Defines the `padding` style property using `theme.spacing` increments. */
   padding?: number;
 
@@ -218,6 +229,9 @@ export type StackProps = {
 
   /** Defines the `order` property. */
   order?: number;
+
+  /** Sets the minWidth to zero */
+  zeroMinWidth?: boolean;
 
   /** CSS styles to apply to the component. */
   style?: CSSProperties;

@@ -119,7 +119,7 @@ function AddPanel() {
 
   return (
     <SidebarContent
-      noPadding={selectedLayoutId != undefined}
+      disablePadding={selectedLayoutId != undefined}
       title="Add panel"
       helpContent={panelsHelpContent}
     >

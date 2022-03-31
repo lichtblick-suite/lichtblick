@@ -373,7 +373,7 @@ export default function LayoutBrowser({
     <SidebarContent
       title="Layouts"
       helpContent={helpContent}
-      noPadding
+      disablePadding
       trailingItems={[
         (layouts.loading || isBusy) && <Spinner key="spinner" />,
         !isOnline && (
