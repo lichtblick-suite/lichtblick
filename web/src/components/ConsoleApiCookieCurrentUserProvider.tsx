@@ -22,20 +22,21 @@ export default function ConsoleApiCookieCurrentUserProvider(
   const api = useConsoleApi();
 
   const [currentUser, setCurrentUser] = useState<User | undefined>();
+  const [completedFirstLoad, setCompletedFirstLoad] = useState(false);
 
   // initial load of the user profile
-  const { value: profile, loading: isLoading } = useAsync(async () => {
-    // Presence of the fox.signedin cookie indicates we might have a valid session
-    // we attempt to load the user's profile
-    if (document.cookie.includes("fox.signedin")) {
-      return await api.me();
+  useAsync(async () => {
+    try {
+      // Presence of the fox.signedin cookie indicates we might have a valid session
+      // we attempt to load the user's profile
+      if (document.cookie.includes("fox.signedin")) {
+        const me = await api.me();
+        setCurrentUser(me);
+      }
+    } finally {
+      setCompletedFirstLoad(true);
     }
-    return undefined;
   }, [api]);
-
-  useEffect(() => {
-    setCurrentUser(profile);
-  }, [profile]);
 
   const signOut = useCallback(async () => {
     try {
@@ -69,7 +70,10 @@ export default function ConsoleApiCookieCurrentUserProvider(
 
   const value = useShallowMemo({ currentUser, signIn, signOut });
 
-  if (isLoading) {
+  // We want to prevent any children from rendering until we've completed the first load attempt
+  // for the profile. Once we've completed that attempt, we always want to render the provider
+  // even when we unset the user on signout.
+  if (!completedFirstLoad) {
     return <></>;
   }
 
