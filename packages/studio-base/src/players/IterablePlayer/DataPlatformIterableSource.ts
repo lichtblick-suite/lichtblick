@@ -2,7 +2,7 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { isEqual } from "lodash";
+import { isEqual, maxBy, minBy } from "lodash";
 
 import Logger from "@foxglove/log";
 import { parseChannel } from "@foxglove/mcap-support";
@@ -86,22 +86,24 @@ export class DataPlatformIterableSource implements IIterableSource {
     }
 
     // Truncate start/end time to coverage range
-    const coverageStart = fromRFC3339String(coverage[0]!.start);
-    const coverageEnd = fromRFC3339String(coverage[coverage.length - 1]!.end);
-    if (!coverageStart || !coverageEnd) {
+    const coverageStart = minBy(coverage, (c) => c.start);
+    const coverageEnd = maxBy(coverage, (c) => c.end);
+    const coverageStartTime = coverageStart ? fromRFC3339String(coverageStart.start) : undefined;
+    const coverageEndTime = coverageEnd ? fromRFC3339String(coverageEnd.end) : undefined;
+    if (!coverageStartTime || !coverageEndTime) {
       throw new Error(
         `Invalid coverage response, start: ${coverage[0]!.start}, end: ${
           coverage[coverage.length - 1]!.end
         }`,
       );
     }
-    if (isLessThan(this._start, coverageStart)) {
-      log.debug("Reduced start time from", this._start, "to", coverageStart);
-      this._start = coverageStart;
+    if (isLessThan(this._start, coverageStartTime)) {
+      log.debug("Increased start time from", this._start, "to", coverageStart);
+      this._start = coverageStartTime;
     }
-    if (isGreaterThan(this._end, coverageEnd)) {
-      log.debug("Reduced end time from", this._end, "to", coverageEnd);
-      this._end = coverageEnd;
+    if (isGreaterThan(this._end, coverageEndTime)) {
+      log.debug("Reduced end time from", this._end, "to", coverageEndTime);
+      this._end = coverageEndTime;
     }
 
     const topics: Topic[] = [];

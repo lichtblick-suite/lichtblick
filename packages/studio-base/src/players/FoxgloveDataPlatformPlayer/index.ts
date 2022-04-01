@@ -3,7 +3,7 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 import { captureException } from "@sentry/core";
-import { isEqual, partition, uniq } from "lodash";
+import { isEqual, maxBy, minBy, partition, uniq } from "lodash";
 import { v4 as uuidv4 } from "uuid";
 
 import { signal, Signal } from "@foxglove/den/async";
@@ -162,22 +162,24 @@ export default class FoxgloveDataPlatformPlayer implements Player {
     }
 
     // Truncate start/end time to coverage range
-    const coverageStart = fromRFC3339String(coverage[0]!.start);
-    const coverageEnd = fromRFC3339String(coverage[coverage.length - 1]!.end);
-    if (!coverageStart || !coverageEnd) {
+    const coverageStart = minBy(coverage, (c) => c.start);
+    const coverageEnd = maxBy(coverage, (c) => c.end);
+    const coverageStartTime = coverageStart ? fromRFC3339String(coverageStart.start) : undefined;
+    const coverageEndTime = coverageEnd ? fromRFC3339String(coverageEnd.end) : undefined;
+    if (!coverageStartTime || !coverageEndTime) {
       throw new Error(
         `Invalid coverage response, start: ${coverage[0]!.start}, end: ${
           coverage[coverage.length - 1]!.end
         }`,
       );
     }
-    if (isLessThan(this._start, coverageStart)) {
-      log.debug("Reduced start time from", this._start, "to", coverageStart);
-      this._start = coverageStart;
+    if (isLessThan(this._start, coverageStartTime)) {
+      log.debug("Increased start time from", this._start, "to", coverageStartTime);
+      this._start = coverageStartTime;
     }
-    if (isGreaterThan(this._end, coverageEnd)) {
-      log.debug("Reduced end time from", this._end, "to", coverageEnd);
-      this._end = coverageEnd;
+    if (isGreaterThan(this._end, coverageEndTime)) {
+      log.debug("Reduced end time from", this._end, "to", coverageEndTime);
+      this._end = coverageEndTime;
     }
 
     // During startup, seekPlayback might get called to set the currentTime. This might change the
