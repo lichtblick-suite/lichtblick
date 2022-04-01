@@ -3,13 +3,14 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 import {
-  AppConfiguration,
+  IAppConfiguration,
   AppConfigurationValue,
 } from "@foxglove/studio-base/context/AppConfigurationContext";
 
+// ts-prune-ignore-next
 export function makeMockAppConfiguration(
   entries?: [string, AppConfigurationValue][],
-): AppConfiguration {
+): IAppConfiguration {
   const map = new Map<string, AppConfigurationValue>(entries);
   const listeners = new Set<(newValue: AppConfigurationValue) => void>();
   return {
