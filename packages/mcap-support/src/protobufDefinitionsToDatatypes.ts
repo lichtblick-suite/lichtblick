@@ -52,6 +52,7 @@ export function protobufDefinitionsToDatatypes(
         // https://github.com/foxglove/studio/issues/2214
         definitions.push({ name, type: "int32", isConstant: true, value });
       }
+      definitions.push({ type: "int32", name: field.name });
     } else if (field.resolvedType) {
       definitions.push({
         type: stripLeadingDot(field.resolvedType.fullName),
