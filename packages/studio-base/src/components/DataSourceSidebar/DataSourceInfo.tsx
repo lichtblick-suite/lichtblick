@@ -42,7 +42,7 @@ function DataSourceInfo(): JSX.Element {
         ) : playerPresence === PlayerPresence.RECONNECTING ? (
           <Typography variant="inherit">Waiting for connection…</Typography>
         ) : playerName ? (
-          <Typography variant="inherit">
+          <Typography variant="inherit" component="span">
             <MultilineMiddleTruncate text={playerName} />
           </Typography>
         ) : (
