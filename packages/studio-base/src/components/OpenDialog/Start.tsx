@@ -25,13 +25,28 @@ const HELP_ITEMS: IButtonProps[] = [
     id: "docs",
     href: "https://foxglove.dev/docs?utm_source=studio&utm_medium=open-dialog",
     target: "_blank",
-    children: "Browse the documentation",
+    children: "Browse docs",
   },
   {
     id: "github",
     href: "https://github.com/foxglove/studio/issues/",
     target: "_blank",
     children: "Report a bug or request a feature",
+  },
+];
+
+const CONTACT_ITEMS = [
+  {
+    id: "feedback",
+    href: "https://foxglove.dev/contact/",
+    target: "_blank",
+    children: "Give feedback",
+  },
+  {
+    id: "demo",
+    href: "https://foxglove.dev/demo/",
+    target: "_blank",
+    children: "Schedule a demo",
   },
 ];
 
@@ -181,6 +196,7 @@ export default function Start(props: IStartProps): JSX.Element {
         <Stack flexGrow={1} minWidth={0} spacing={2.5}>
           {recentItems.length > 0 && <ActionList title="Recent" items={recentItems} />}
           <ActionList title="Help" items={HELP_ITEMS} />
+          <ActionList title="Contact" items={CONTACT_ITEMS} />
         </Stack>
       </Stack>
       <Checkbox

@@ -23,7 +23,7 @@ export const MESSAGE_PATH_SYNTAX_HELP_INFO = {
   content: MesssagePathSyntaxHelp,
 };
 
-type SectionKey = "app" | "panels" | "resources" | "products" | "legal";
+type SectionKey = "app" | "panels" | "resources" | "products" | "contact" | "legal";
 const helpMenuItems: Map<SectionKey, { subheader: string; links: HelpInfo[] }> = new Map([
   [
     "resources",
@@ -31,7 +31,7 @@ const helpMenuItems: Map<SectionKey, { subheader: string; links: HelpInfo[] }> =
       subheader: "External resources",
       links: [
         ...(isDesktopApp() ? [] : [{ title: "Desktop app", url: "https://foxglove.dev/download" }]),
-        { title: "Read docs", url: "https://foxglove.dev/docs" },
+        { title: "Browse docs", url: "https://foxglove.dev/docs" },
         { title: "Join our community", url: "https://foxglove.dev/community" },
       ],
     },
@@ -43,6 +43,16 @@ const helpMenuItems: Map<SectionKey, { subheader: string; links: HelpInfo[] }> =
       links: [
         { title: "Foxglove Studio", url: "https://foxglove.dev/studio" },
         { title: "Foxglove Data Platform", url: "https://foxglove.dev/data-platform" },
+      ],
+    },
+  ],
+  [
+    "contact",
+    {
+      subheader: "Contact",
+      links: [
+        { title: "Give feedback", url: "https://foxglove.dev/contact" },
+        { title: "Schedule a demo", url: "https://foxglove.dev/demo" },
       ],
     },
   ],
@@ -120,6 +130,7 @@ export default function HelpSidebar({
         ["panels", { subheader: "Panels", links: sortedPanelLinks }],
         ["resources", helpMenuItems.get("resources")],
         ["products", helpMenuItems.get("products")],
+        ["contact", helpMenuItems.get("contact")],
         ["legal", helpMenuItems.get("legal")],
       ]),
     [sortedPanelLinks],

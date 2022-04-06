@@ -30,7 +30,7 @@ const rendererPath = MAIN_WINDOW_WEBPACK_ENTRY;
 const closeMenuItem: MenuItemConstructorOptions = isMac ? { role: "close" } : { role: "quit" };
 const log = Logger.getLogger(__filename);
 
-type SectionKey = "app" | "panels" | "resources" | "products" | "legal";
+type SectionKey = "app" | "panels" | "resources" | "products" | "contact" | "legal";
 type HelpInfo = {
   title: string;
   content?: React.ReactNode;
@@ -42,7 +42,7 @@ const helpMenuItems: Map<SectionKey, { subheader: string; links: HelpInfo[] }> =
     {
       subheader: "External resources",
       links: [
-        { title: "Read docs", url: "https://foxglove.dev/docs" },
+        { title: "Browse docs", url: "https://foxglove.dev/docs" },
         { title: "Join our community", url: "https://foxglove.dev/community" },
       ],
     },
@@ -54,6 +54,16 @@ const helpMenuItems: Map<SectionKey, { subheader: string; links: HelpInfo[] }> =
       links: [
         { title: "Foxglove Studio", url: "https://foxglove.dev/studio" },
         { title: "Foxglove Data Platform", url: "https://foxglove.dev/data-platform" },
+      ],
+    },
+  ],
+  [
+    "contact",
+    {
+      subheader: "Contact",
+      links: [
+        { title: "Give feedback", url: "https://foxglove.dev/contact" },
+        { title: "Schedule a demo", url: "https://foxglove.dev/demo" },
       ],
     },
   ],
@@ -319,7 +329,7 @@ function buildMenu(browserWindow: BrowserWindow): Menu {
     role: "help",
     submenu: [
       {
-        label: "Explore sample data",
+        label: "Explore Sample Data",
         click: () => browserWindow.webContents.send("open-sample-data"),
       },
       { type: "separator" },
