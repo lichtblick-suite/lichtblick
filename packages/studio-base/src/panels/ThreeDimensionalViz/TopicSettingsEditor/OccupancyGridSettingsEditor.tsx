@@ -38,7 +38,7 @@ export default function OccupancyGridSettingsEditor(
         label="Frame lock"
       />
       <SDescription>
-        When disabled, the grid will be positioned in the 3D scene by transforming it using its
+        When disabled, the grid will be positioned in the 3D scene by transforming it using its{" "}
         <code>header.stamp</code> time. When enabled, the grid will be “locked” to the current
         position of its <code>header.frame_id</code> and will move when the frame moves.
       </SDescription>

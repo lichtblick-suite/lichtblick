@@ -47,6 +47,82 @@ const foxgloveDatatypesObj: Record<string, RosMsgDefinition> = {
       { name: "line", type: "uint32" },
     ],
   },
+  "foxglove.Grid.Field": {
+    name: "foxglove.Grid.Field",
+    definitions: [
+      { name: "name", type: "string" },
+      { name: "type", type: "uint8" },
+      { name: "offset", type: "uint32" },
+    ],
+  },
+  "foxglove.Vector3": {
+    name: "foxglove.Vector3",
+    definitions: [
+      { name: "x", type: "float64" },
+      { name: "y", type: "float64" },
+      { name: "z", type: "float64" },
+    ],
+  },
+  "foxglove.Vector2": {
+    name: "foxglove.Vector2",
+    definitions: [
+      { name: "x", type: "float64" },
+      { name: "y", type: "float64" },
+    ],
+  },
+  "foxglove.Quaternion": {
+    name: "foxglove.Quaternion",
+    definitions: [
+      { name: "x", type: "float64" },
+      { name: "y", type: "float64" },
+      { name: "z", type: "float64" },
+      { name: "w", type: "float64" },
+    ],
+  },
+  "foxglove.Pose": {
+    name: "foxglove.Pose",
+    definitions: [
+      { name: "position", type: "foxglove.Vector3", isComplex: true },
+      { name: "orientation", type: "foxglove.Quaternion", isComplex: true },
+    ],
+  },
+  "foxglove.Grid": {
+    name: "foxglove.Grid",
+    definitions: [
+      { name: "timestamp", type: "time" },
+      { name: "frame_id", type: "string" },
+      { name: "pose", type: "foxglove.Pose", isComplex: true },
+      { name: "column_count", type: "uint32" },
+      { name: "cell_size", type: "foxglove.Vector2", isComplex: true },
+      { name: "row_stride", type: "uint32" },
+      { name: "cell_stride", type: "uint32" },
+      { name: "fields", type: "foxglove.Grid.Field", isArray: true },
+      { name: "data", type: "uint8", isArray: true },
+    ],
+  },
+  "foxglove.PointCloud": {
+    name: "foxglove.PointCloud",
+    definitions: [
+      { name: "timestamp", type: "time" },
+      { name: "frame_id", type: "string" },
+      { name: "pose", type: "foxglove.Pose" },
+      { name: "point_stride", type: "uint32" },
+      { name: "fields", type: "foxglove.Grid.Field", isArray: true },
+      { name: "data", type: "uint8", isArray: true },
+    ],
+  },
+  "foxglove.LaserScan": {
+    name: "foxglove.LaserScan",
+    definitions: [
+      { name: "timestamp", type: "time" },
+      { name: "frame_id", type: "string" },
+      { name: "pose", type: "foxglove.Pose", isComplex: true },
+      { name: "start_angle", type: "float64" },
+      { name: "end_angle", type: "float64" },
+      { name: "ranges", type: "float64", isArray: true },
+      { name: "intensities", type: "float64", isArray: true },
+    ],
+  },
 };
 
 /**

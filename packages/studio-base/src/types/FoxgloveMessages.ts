@@ -11,6 +11,17 @@ export enum LogLevel {
   FATAL = 5,
 }
 
+export enum NumericType {
+  UINT8 = 1,
+  INT8 = 2,
+  UINT16 = 3,
+  INT16 = 4,
+  UINT32 = 5,
+  INT32 = 6,
+  FLOAT32 = 7,
+  FLOAT64 = 8,
+}
+
 export type FoxgloveMessages = {
   "foxglove.CameraCalibration": {
     timestamp: bigint | { sec: number; nsec: number };
@@ -115,5 +126,40 @@ export type FoxgloveMessages = {
     timestamp: { sec: number; nsec: number };
     frame_id: string;
     poses: Array<FoxgloveMessages["foxglove.Pose"]>;
+  };
+
+  "foxglove.Grid": {
+    timestamp: { sec: number; nsec: number };
+    frame_id: string;
+    pose: FoxgloveMessages["foxglove.Pose"];
+
+    column_count: number;
+    cell_size: { x: number; y: number };
+
+    row_stride: number;
+    cell_stride: number;
+    fields: Array<{ name: string; offset: number; type: NumericType }>;
+    data: Uint8Array;
+  };
+
+  "foxglove.PointCloud": {
+    timestamp: { sec: number; nsec: number };
+    frame_id: string;
+    pose: FoxgloveMessages["foxglove.Pose"];
+    point_stride: number;
+    fields: Array<{ name: string; offset: number; type: NumericType }>;
+    data: Uint8Array;
+  };
+
+  "foxglove.LaserScan": {
+    timestamp: { sec: number; nsec: number };
+    frame_id: string;
+    pose: FoxgloveMessages["foxglove.Pose"];
+
+    start_angle: number;
+    end_angle: number;
+
+    ranges: number[];
+    intensities: number[];
   };
 };

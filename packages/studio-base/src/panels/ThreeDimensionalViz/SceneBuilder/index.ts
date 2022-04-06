@@ -25,6 +25,9 @@ import { PoseListSettings } from "@foxglove/studio-base/panels/ThreeDimensionalV
 import VelodyneCloudConverter from "@foxglove/studio-base/panels/ThreeDimensionalViz/VelodyneCloudConverter";
 import { DATATYPE } from "@foxglove/studio-base/panels/ThreeDimensionalViz/commands/PointClouds/types";
 import {
+  foxgloveGridToOccupancyGrid,
+  foxgloveLaserScanToLaserScan,
+  foxglovePointCloudToPointCloud2,
   normalizePose,
   normalizePoseArray,
 } from "@foxglove/studio-base/panels/ThreeDimensionalViz/normalizeMessages";
@@ -672,8 +675,7 @@ export default class SceneBuilder implements MarkerProvider {
     this._consumeNonMarkerMessage(topic, newMessage, 4 /* line strip */, message);
   };
 
-  private _consumeLaserScan = (topic: string, msg: MessageEvent<LaserScan>): void => {
-    const scan = msg.message;
+  private _consumeLaserScan = (topic: string, scan: LaserScan): void => {
     const hasIntensity =
       (ArrayBuffer.isView(scan.intensities) || Array.isArray(scan.intensities)) &&
       scan.intensities.length > 0;
@@ -860,6 +862,16 @@ export default class SceneBuilder implements MarkerProvider {
       case "ros.nav_msgs.OccupancyGrid":
         this._consumeOccupancyGrid(topic, message as NavMsgs$OccupancyGrid);
         break;
+      case "foxglove.Grid":
+        try {
+          this._consumeOccupancyGrid(
+            topic,
+            foxgloveGridToOccupancyGrid(message as FoxgloveMessages[typeof datatype]),
+          );
+        } catch (err) {
+          this._setTopicError(topic, (err as Error).message);
+        }
+        break;
       case "nav_msgs/Path":
       case "nav_msgs/msg/Path":
       case "ros.nav_msgs.Path": {
@@ -870,6 +882,18 @@ export default class SceneBuilder implements MarkerProvider {
       case "sensor_msgs/msg/PointCloud2":
       case "ros.sensor_msgs.PointCloud2":
         this._consumeNonMarkerMessage(topic, message as StampedMessage, 102);
+        break;
+      case "foxglove.PointCloud":
+        try {
+          this._consumeNonMarkerMessage(
+            topic,
+            foxglovePointCloudToPointCloud2(message as FoxgloveMessages[typeof datatype]),
+            102,
+            message,
+          );
+        } catch (err) {
+          this._setTopicError(topic, (err as Error).message);
+        }
         break;
       case "velodyne_msgs/VelodyneScan":
       case "velodyne_msgs/msg/VelodyneScan":
@@ -883,7 +907,17 @@ export default class SceneBuilder implements MarkerProvider {
       case "sensor_msgs/LaserScan":
       case "sensor_msgs/msg/LaserScan":
       case "ros.sensor_msgs.LaserScan":
-        this._consumeLaserScan(topic, msg as MessageEvent<LaserScan>);
+        this._consumeLaserScan(topic, message as LaserScan);
+        break;
+      case "foxglove.LaserScan":
+        try {
+          this._consumeLaserScan(
+            topic,
+            foxgloveLaserScanToLaserScan(message as FoxgloveMessages[typeof datatype]),
+          );
+        } catch (err) {
+          this._setTopicError(topic, (err as Error).message);
+        }
         break;
       case "std_msgs/ColorRGBA":
       case "std_msgs/msg/ColorRGBA":

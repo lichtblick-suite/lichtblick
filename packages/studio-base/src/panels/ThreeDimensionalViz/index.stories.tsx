@@ -1436,6 +1436,175 @@ export function Foxglove_Color(): JSX.Element {
   );
 }
 
+Foxglove_Grid.parameters = { colorScheme: "dark" };
+export function Foxglove_Grid(): JSX.Element {
+  const topics: Topic[] = [{ name: "/grid", datatype: "foxglove.Grid" }];
+  const width = 5;
+  const height = 3;
+  const offset = 2;
+  const row_stride = width + offset;
+  const data = new Uint8Array(row_stride * height);
+  const view = new DataView(data.buffer);
+  for (let r = 0; r < height; r++) {
+    for (let c = 0; c < width; c++) {
+      view.setInt8(r * row_stride + c + offset, (100 * (r * width + c)) / (width * height));
+    }
+  }
+  view.setInt8(offset + 0, -2);
+  view.setInt8(offset + 1, -3);
+  const grid: MessageEvent<FoxgloveMessages["foxglove.Grid"]> = {
+    topic: "/grid",
+    receiveTime: { sec: 0, nsec: 0 },
+    sizeInBytes: 0,
+    message: {
+      frame_id: "",
+      timestamp: { sec: 1, nsec: 0 },
+      pose: {
+        position: { x: 0, y: 0, z: 1 },
+        orientation: { x: 0, y: 0, z: 0, w: 1 },
+      },
+      fields: [{ name: "X", type: 2, offset }],
+      data,
+      cell_size: { x: 1, y: 1 },
+      cell_stride: 1,
+      column_count: width,
+      row_stride,
+    },
+  };
+
+  const fixture = useDelayedFixture({
+    datatypes,
+    topics,
+    frame: { "/grid": [grid] },
+    capabilities: [],
+    activeData: { currentTime: { sec: 1, nsec: 0 } },
+  });
+
+  return (
+    <PanelSetup fixture={fixture}>
+      <ThreeDimensionalViz
+        overrideConfig={{
+          ...ThreeDimensionalViz.defaultConfig,
+          checkedKeys: ["name:Topics", "t:/grid", `t:${FOXGLOVE_GRID_TOPIC}`],
+          cameraState: { ...DEFAULT_CAMERA_STATE, distance: 15 },
+        }}
+      />
+    </PanelSetup>
+  );
+}
+
+Foxglove_PointCloud.parameters = { colorScheme: "dark" };
+export function Foxglove_PointCloud(): JSX.Element {
+  const topics: Topic[] = [{ name: "/pointcloud", datatype: "foxglove.PointCloud" }];
+  const count = 5;
+  const point_stride = 8 + 8 + 8 + 4;
+  const data = new Uint8Array(point_stride * count);
+  const view = new DataView(data.buffer);
+  for (let i = 0; i < count; i++) {
+    const offset = i * point_stride;
+    view.setFloat64(offset, 0, true);
+    view.setFloat64(offset + 8, i, true);
+    view.setFloat64(offset + 16, 0, true);
+    const r = Math.round((i / count) * 0xff);
+    const g = 0xff;
+    const b = Math.round((1 - i / count) * 0xff);
+    const rgb = ((((r << 8) | g) << 8) | b) << 8;
+    view.setUint32(offset + 24, rgb);
+  }
+  const pointcloud: MessageEvent<FoxgloveMessages["foxglove.PointCloud"]> = {
+    topic: "/pointcloud",
+    receiveTime: { sec: 0, nsec: 0 },
+    sizeInBytes: 0,
+    message: {
+      frame_id: "",
+      timestamp: { sec: 1, nsec: 0 },
+      pose: {
+        position: { x: 0, y: 0, z: 0 },
+        orientation: { x: 0, y: 0, z: 0, w: 1 },
+      },
+      fields: [
+        { name: "x", type: 8, offset: 0 },
+        { name: "y", type: 8, offset: 8 },
+        { name: "z", type: 8, offset: 16 },
+        { name: "rgb", type: 6, offset: 24 },
+      ],
+      data,
+      point_stride,
+    },
+  };
+
+  const fixture = useDelayedFixture({
+    datatypes,
+    topics,
+    frame: { "/pointcloud": [pointcloud] },
+    capabilities: [],
+    activeData: { currentTime: { sec: 1, nsec: 0 } },
+  });
+
+  return (
+    <PanelSetup fixture={fixture}>
+      <ThreeDimensionalViz
+        overrideConfig={{
+          ...ThreeDimensionalViz.defaultConfig,
+          checkedKeys: ["name:Topics", "t:/pointcloud", `t:${FOXGLOVE_GRID_TOPIC}`],
+          cameraState: { ...DEFAULT_CAMERA_STATE, distance: 15 },
+          settingsByKey: {
+            "t:/pointcloud": { pointSize: 10 },
+          },
+        }}
+      />
+    </PanelSetup>
+  );
+}
+
+Foxglove_LaserScan.parameters = { colorScheme: "dark" };
+export function Foxglove_LaserScan(): JSX.Element {
+  const topics: Topic[] = [{ name: "/laserscan", datatype: "foxglove.LaserScan" }];
+  const count = 10;
+  const ranges = new Array(count).fill(3);
+  const intensities = ranges.map((_, i) => i);
+  const laserscan: MessageEvent<FoxgloveMessages["foxglove.LaserScan"]> = {
+    topic: "/laserscan",
+    receiveTime: { sec: 0, nsec: 0 },
+    sizeInBytes: 0,
+    message: {
+      frame_id: "",
+      timestamp: { sec: 1, nsec: 0 },
+      pose: {
+        position: { x: 0, y: 0, z: 0 },
+        orientation: { x: 0, y: 0, z: 0, w: 1 },
+      },
+      start_angle: 0,
+      end_angle: Math.PI / 2,
+      ranges,
+      intensities,
+    },
+  };
+
+  const fixture = useDelayedFixture({
+    datatypes,
+    topics,
+    frame: { "/laserscan": [laserscan] },
+    capabilities: [],
+    activeData: { currentTime: { sec: 1, nsec: 0 } },
+  });
+
+  return (
+    <PanelSetup fixture={fixture}>
+      <ThreeDimensionalViz
+        overrideConfig={{
+          ...ThreeDimensionalViz.defaultConfig,
+          checkedKeys: ["name:Topics", "t:/laserscan", `t:${FOXGLOVE_GRID_TOPIC}`],
+          cameraState: { ...DEFAULT_CAMERA_STATE, distance: 15 },
+          settingsByKey: {
+            "t:/laserscan": { pointSize: 10 },
+          },
+        }}
+      />
+    </PanelSetup>
+  );
+}
+
 GeometryMsgs_Polygon.parameters = { colorScheme: "dark" };
 export function GeometryMsgs_Polygon(): JSX.Element {
   const topics: Topic[] = [

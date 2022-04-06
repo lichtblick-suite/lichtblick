@@ -37,6 +37,7 @@ export function topicSettingsEditorForDatatype(datatype: string):
     ["sensor_msgs/PointCloud2", PointCloudSettingsEditor],
     ["sensor_msgs/msg/PointCloud2", PointCloudSettingsEditor],
     ["ros.sensor_msgs.PointCloud2", PointCloudSettingsEditor],
+    ["foxglove.PointCloud", PointCloudSettingsEditor],
     ["velodyne_msgs/VelodyneScan", PointCloudSettingsEditor],
     ["velodyne_msgs/msg/VelodyneScan", PointCloudSettingsEditor],
     ["ros.velodyne_msgs.VelodyneScan", PointCloudSettingsEditor],
@@ -50,6 +51,7 @@ export function topicSettingsEditorForDatatype(datatype: string):
     ["sensor_msgs/LaserScan", PointCloudSettingsEditor],
     ["sensor_msgs/msg/LaserScan", PointCloudSettingsEditor],
     ["ros.sensor_msgs.LaserScan", PointCloudSettingsEditor],
+    ["foxglove.LaserScan", PointCloudSettingsEditor],
     ["visualization_msgs/Marker", MarkerSettingsEditor],
     ["visualization_msgs/msg/Marker", MarkerSettingsEditor],
     ["ros.visualization_msgs.Marker", MarkerSettingsEditor],
@@ -62,6 +64,7 @@ export function topicSettingsEditorForDatatype(datatype: string):
     ["nav_msgs/OccupancyGrid", OccupancyGridSettingsEditor],
     ["nav_msgs/msg/OccupancyGrid", OccupancyGridSettingsEditor],
     ["ros.nav_msgs.OccupancyGrid", OccupancyGridSettingsEditor],
+    ["foxglove.Grid", OccupancyGridSettingsEditor],
   ]);
 
   return editors.get(datatype) as

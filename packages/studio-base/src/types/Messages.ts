@@ -321,7 +321,7 @@ export type PointCloud2 = StampedMessage & {
   point_step: number; // Length of point in bytes
   row_step: number; // Length of row in bytes
   data: Uint8Array;
-  is_dense: number;
+  is_dense: boolean | number;
   // this is appended by scene builder
   type: 102;
   // this is appended by scene builder
