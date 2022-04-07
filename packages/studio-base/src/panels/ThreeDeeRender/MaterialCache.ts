@@ -51,9 +51,14 @@ export class MaterialCache {
 
   update(resolution: THREE.Vector2): void {
     for (const entry of this.materials.values()) {
-      // Update the render resolution uniform on all LineMaterials
+      // Update render resolution uniforms
       if (entry.material instanceof LineMaterial) {
         entry.material.resolution = resolution;
+      } else if (
+        entry.material instanceof THREE.ShaderMaterial &&
+        entry.material.uniforms.resolution != undefined
+      ) {
+        entry.material.uniforms.resolution.value = resolution;
       }
     }
   }
@@ -122,26 +127,6 @@ export const StandardInstancedColor = {
   },
 
   dispose: disposeStandardMaterial,
-};
-
-export const LineBasicColor = {
-  id: (color: ColorRGBA): string => "LineBasicColor-" + rgbaToHexString(color),
-
-  create: (color: ColorRGBA): THREE.LineBasicMaterial => {
-    const material = new THREE.LineBasicMaterial({
-      color: new THREE.Color(color.r, color.g, color.b).convertSRGBToLinear(),
-      dithering: true,
-    });
-    material.name = LineBasicColor.id(color);
-    material.opacity = color.a;
-    material.transparent = color.a < 1;
-    material.depthWrite = !material.transparent;
-    return material;
-  },
-
-  dispose: (material: THREE.LineBasicMaterial): void => {
-    material.dispose();
-  },
 };
 
 type Scale2D = { x: number; y: number };
@@ -217,6 +202,37 @@ export const LineVertexColor = {
   },
 
   dispose: (material: LineMaterial): void => {
+    material.dispose();
+  },
+};
+
+export const LineVertexColorPicking = {
+  id: (lineWidth: number): string => `LineVertexColorPicking-${lineWidth.toFixed(4)}`,
+
+  create: (lineWidth: number): THREE.ShaderMaterial => {
+    return new THREE.ShaderMaterial({
+      vertexShader: THREE.ShaderLib["line"]!.vertexShader,
+      fragmentShader: /* glsl */ `
+        uniform vec4 objectId;
+        void main() {
+          gl_FragColor = objectId;
+        }
+      `,
+      clipping: true,
+      uniforms: {
+        objectId: { value: [NaN, NaN, NaN, NaN] },
+        worldUnits: { value: 0 },
+        linewidth: { value: lineWidth },
+        resolution: { value: new THREE.Vector2(1, 1) },
+        dashOffset: { value: 0 },
+        dashScale: { value: 1 },
+        dashSize: { value: 1 },
+        gapSize: { value: 1 },
+      },
+    });
+  },
+
+  dispose: (material: THREE.ShaderMaterial): void => {
     material.dispose();
   },
 };

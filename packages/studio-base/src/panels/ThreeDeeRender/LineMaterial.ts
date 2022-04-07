@@ -471,7 +471,7 @@ export interface LineMaterialParameters extends MaterialParameters {
   worldUnits?: boolean | undefined;
 }
 
-class LineMaterial extends ShaderMaterial {
+export class LineMaterial extends ShaderMaterial {
   readonly isLineMaterial = true;
 
   constructor(parameters: LineMaterialParameters) {
@@ -566,14 +566,6 @@ class LineMaterial extends ShaderMaterial {
     this.uniforms.gapSize!.value = value;
   }
 
-  // get opacity() {
-  //   return this.uniforms.opacity!.value;
-  // }
-
-  // set opacity(value) {
-  //   this.uniforms.opacity!.value = value;
-  // }
-
   get resolution(): THREE.Vector2 {
     return this.uniforms.resolution!.value;
   }
@@ -581,24 +573,4 @@ class LineMaterial extends ShaderMaterial {
   set resolution(value: THREE.Vector2) {
     this.uniforms.resolution!.value.copy(value);
   }
-
-  // get alphaToCoverage() {
-  //   return Boolean("USE_ALPHA_TO_COVERAGE" in this.defines);
-  // }
-
-  // set alphaToCoverage(value) {
-  //   if (Boolean(value) !== Boolean("USE_ALPHA_TO_COVERAGE" in this.defines)) {
-  //     this.needsUpdate = true;
-  //   }
-
-  //   if (value === true) {
-  //     this.defines.USE_ALPHA_TO_COVERAGE = "";
-  //     this.extensions.derivatives = true;
-  //   } else {
-  //     delete this.defines.USE_ALPHA_TO_COVERAGE;
-  //     this.extensions.derivatives = false;
-  //   }
-  // }
 }
-
-export { LineMaterial };

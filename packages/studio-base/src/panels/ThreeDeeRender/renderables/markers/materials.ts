@@ -7,6 +7,7 @@ import * as THREE from "three";
 import { LineMaterial } from "../../LineMaterial";
 import {
   LineVertexColor,
+  LineVertexColorPicking,
   LineVertexColorPrepass,
   MaterialCache,
   PointsVertexColor,
@@ -105,6 +106,21 @@ export function releaseLineMaterial(marker: Marker, materialCache: MaterialCache
   const lineWidth = marker.scale.x;
   const transparent = markerHasTransparency(marker);
   materialCache.release(LineVertexColor.id(lineWidth, transparent));
+}
+
+export function linePickingMaterial(
+  lineWidth: number,
+  materialCache: MaterialCache,
+): THREE.ShaderMaterial {
+  return materialCache.acquire(
+    LineVertexColorPicking.id(lineWidth),
+    () => LineVertexColorPicking.create(lineWidth),
+    LineVertexColorPicking.dispose,
+  );
+}
+
+export function releaseLinePickingMaterial(lineWidth: number, materialCache: MaterialCache): void {
+  materialCache.release(LineVertexColorPicking.id(lineWidth));
 }
 
 export function pointsMaterial(marker: Marker, materialCache: MaterialCache): THREE.PointsMaterial {

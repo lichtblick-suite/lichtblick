@@ -2542,7 +2542,7 @@ __metadata:
     "@types/classnames": 2.3.1
     "@types/css-font-loading-module": 0.0.7
     "@types/cytoscape": ^3.19.4
-    "@types/dat.gui": ^0
+    "@types/dat.gui": ^0.7.7
     "@types/enzyme": ^3.10.11
     "@types/enzyme-adapter-react-16": 1.0.6
     "@types/escape-html": ^1.0.1
@@ -2573,7 +2573,7 @@ __metadata:
     "@types/string-hash": 1.1.1
     "@types/styled-components": 5.1.24
     "@types/text-metrics": "workspace:*"
-    "@types/three": ^0.138.0
+    "@types/three": ^0.139.0
     "@types/tinycolor2": 1.4.3
     "@types/url-search-params": 1.1.0
     "@types/uuid": 8.3.4
@@ -2659,7 +2659,7 @@ __metadata:
     style-loader: 3.3.1
     styled-components: 5.3.3
     text-metrics: 3.0.0
-    three: 0.137.5
+    three: 0.139.2
     tinycolor2: 1.4.2
     ts-essentials: 9.1.2
     ts-key-enum: 2.0.11
@@ -5576,7 +5576,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/dat.gui@npm:^0":
+"@types/dat.gui@npm:^0.7.7":
   version: 0.7.7
   resolution: "@types/dat.gui@npm:0.7.7"
   checksum: 0a20c10013c5d8595593b9d258f48c070a09601382e9cb0a4d03b98821a8373430747b31935f73434bf0c59122c43276c6763ca1e493eaeb05a9d74bf37a7b81
@@ -6347,10 +6347,10 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@types/three@npm:^0.138.0":
-  version: 0.138.0
-  resolution: "@types/three@npm:0.138.0"
-  checksum: 49107459571a8b38e1ff4adc3cff1127286d2990d78584ceb5a161ad9d43689190011938d0c3623b28e23628cf1963e9a201596d41f2875096c5c2626db6bfd1
+"@types/three@npm:^0.139.0":
+  version: 0.139.0
+  resolution: "@types/three@npm:0.139.0"
+  checksum: 811ce2dd6cfeaa8b051699b6e57f5696b30cb4d33697675c9eee500e377cdbdc872dc6932dfc094c3ae61acfb895d089043a6e5c389d563c516d99ebfef8c130
   languageName: node
   linkType: hard
 
@@ -23212,10 +23212,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"three@npm:0.137.5":
-  version: 0.137.5
-  resolution: "three@npm:0.137.5"
-  checksum: e9fa478f54b50dae2ea745fd97fdec46cea9770292053a80c937ce9549670f4a3dfe238943bd42e535e2d57a10dacb531a51ae12aef42347303270f7f66da8c8
+"three@npm:0.139.2":
+  version: 0.139.2
+  resolution: "three@npm:0.139.2"
+  checksum: 9e016065b31a2a69bba730a32bd5b61354365bf0f5072121b8695aac38c9585e4e46361275967fbb58d21e001e5189128107c3ecbf24338ca951d11b524df992
   languageName: node
   linkType: hard
 

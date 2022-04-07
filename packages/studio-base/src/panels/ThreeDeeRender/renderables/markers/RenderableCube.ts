@@ -36,6 +36,7 @@ export class RenderableCube extends RenderableMarker {
       RenderableCube.edgesGeometry(),
       renderer.materialCache.outlineMaterial,
     );
+    this.outline.userData.picking = false;
     this.mesh.add(this.outline);
 
     this.update(marker);

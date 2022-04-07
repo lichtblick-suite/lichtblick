@@ -54,7 +54,10 @@ export class PointClouds extends THREE.Object3D {
   dispose(): void {
     for (const renderable of this.pointCloudsByTopic.values()) {
       releasePointsMaterial(renderable.userData.settings, this.renderer.materialCache);
-      renderable.userData.points.geometry.dispose();
+      const points = renderable.userData.points;
+      points.geometry.dispose();
+      const pickingMaterial = points.userData.pickingMaterial as THREE.ShaderMaterial;
+      pickingMaterial.dispose();
     }
     this.children.length = 0;
     this.pointCloudsByTopic.clear();
@@ -91,8 +94,10 @@ export class PointClouds extends THREE.Object3D {
       renderable.userData.geometry = geometry;
 
       const material = pointsMaterial(renderable.userData.settings, this.renderer.materialCache);
-      renderable.userData.points = new THREE.Points(geometry, material);
-      renderable.userData.points.name = `${topic}:PointCloud2:points`;
+      const points = new THREE.Points(geometry, material);
+      points.name = `${topic}:PointCloud2:points`;
+      points.userData.pickingMaterial = createPickingMaterial(renderable.userData.settings);
+      renderable.userData.points = points;
       renderable.add(renderable.userData.points);
 
       this.add(renderable);
@@ -286,6 +291,29 @@ function releasePointsMaterial(settings: PointCloudSettings, materialCache: Mate
   const transparent = pointCloudHasTransparency(settings);
   const scale = { x: settings.pointSize, y: settings.pointSize };
   materialCache.release(PointsVertexColor.id(scale, transparent));
+}
+
+function createPickingMaterial(settings: PointCloudSettings): THREE.ShaderMaterial {
+  const MIN_PICKING_POINT_SIZE = 8;
+
+  const pointSize = Math.max(settings.pointSize, MIN_PICKING_POINT_SIZE);
+  return new THREE.ShaderMaterial({
+    vertexShader: /* glsl */ `
+      uniform float pointSize;
+      void main() {
+        gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+        gl_PointSize = pointSize;
+      }
+    `,
+    fragmentShader: /* glsl */ `
+      uniform vec4 objectId;
+      void main() {
+        gl_FragColor = objectId;
+      }
+    `,
+    side: THREE.DoubleSide,
+    uniforms: { pointSize: { value: pointSize }, objectId: { value: [NaN, NaN, NaN, NaN] } },
+  });
 }
 
 function pointCloudHasTransparency(settings: PointCloudSettings): boolean {

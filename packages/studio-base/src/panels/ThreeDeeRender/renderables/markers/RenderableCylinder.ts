@@ -36,6 +36,7 @@ export class RenderableCylinder extends RenderableMarker {
       RenderableCylinder.edgesGeometry(renderer.maxLod),
       renderer.materialCache.outlineMaterial,
     );
+    this.outline.userData.picking = false;
     this.mesh.add(this.outline);
 
     this.update(marker);

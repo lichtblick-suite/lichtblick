@@ -8,6 +8,8 @@ import { Key } from "ts-key-enum";
 
 const MAX_DIST = 1;
 
+const tempVec2 = new THREE.Vector2();
+
 export type InputEvents = {
   resize: (windowSize: THREE.Vector2) => void;
   click: (cursorCoords: THREE.Vector2, event: MouseEvent) => void;
@@ -20,8 +22,8 @@ export class Input extends EventEmitter<InputEvents> {
   readonly canvas: HTMLCanvasElement;
   canvasSize: THREE.Vector2;
   resizeObserver: ResizeObserver;
-  startClientPos?: THREE.Vector2; // clientX / clientY
-  cursorCoords = new THREE.Vector2(); // Normalized device coordinates (-1 to +1)
+  startClientPos?: THREE.Vector2;
+  cursorCoords = new THREE.Vector2();
 
   constructor(canvas: HTMLCanvasElement) {
     super();
@@ -37,15 +39,28 @@ export class Input extends EventEmitter<InputEvents> {
     this.resizeObserver = new ResizeObserver(this.onResize);
     this.resizeObserver.observe(parentEl);
 
-    document.addEventListener("keydown", this.onKeyDown, false);
-    canvas.addEventListener("mousedown", this.onMouseDown, false);
-    canvas.addEventListener("mousemove", this.onMouseMove, false);
-    canvas.addEventListener("click", this.onClick, false);
+    canvas.addEventListener("mousedown", this.onMouseDown);
+    canvas.addEventListener("mousemove", this.onMouseMove);
+    canvas.addEventListener("click", this.onClick);
     canvas.addEventListener("touchstart", this.onTouchStart, { passive: false });
     canvas.addEventListener("touchend", this.onTouchEnd, { passive: false });
     canvas.addEventListener("touchmove", this.onTouchMove, { passive: false });
     canvas.addEventListener("touchcancel", this.onTouchCancel, { passive: false });
-    canvas.addEventListener("touchendoutside", this.onTouchEndOutside);
+  }
+
+  dispose(): void {
+    const canvas = this.canvas;
+
+    this.removeAllListeners();
+    this.resizeObserver.disconnect();
+
+    canvas.removeEventListener("mousedown", this.onMouseDown);
+    canvas.removeEventListener("mousemove", this.onMouseMove);
+    canvas.removeEventListener("click", this.onClick);
+    canvas.removeEventListener("touchstart", this.onTouchStart);
+    canvas.removeEventListener("touchend", this.onTouchEnd);
+    canvas.removeEventListener("touchmove", this.onTouchMove);
+    canvas.removeEventListener("touchcancel", this.onTouchCancel);
   }
 
   onResize = (_entries: ResizeObserverEntry[]): void => {
@@ -62,12 +77,8 @@ export class Input extends EventEmitter<InputEvents> {
     }
   };
 
-  onKeyDown = (event: KeyboardEvent): void => {
-    this.emit("keydown", event.key as Key, event);
-  };
-
   onMouseDown = (event: MouseEvent): void => {
-    this.startClientPos = new THREE.Vector2(event.clientX, event.clientY);
+    this.startClientPos = new THREE.Vector2(event.offsetX, event.offsetY);
     this.emit("mousedown", this.cursorCoords, event);
   };
 
@@ -81,8 +92,7 @@ export class Input extends EventEmitter<InputEvents> {
       return;
     }
 
-    const newPos = new THREE.Vector2(event.clientX, event.clientY);
-    const dist = this.startClientPos.distanceTo(newPos);
+    const dist = this.startClientPos.distanceTo(tempVec2.set(event.offsetX, event.offsetY));
     this.startClientPos = undefined;
 
     if (dist > MAX_DIST) {
@@ -113,15 +123,9 @@ export class Input extends EventEmitter<InputEvents> {
     event.preventDefault();
   };
 
-  onTouchEndOutside = (): void => {
-    //
-  };
-
   private updateCursorCoords(event: MouseEvent): void {
-    // Calculate mouse position in normalized device coordinates
-    // (-1 to +1) for both components
-    this.cursorCoords.x = (event.clientX / window.innerWidth) * 2 - 1;
-    this.cursorCoords.y = -(event.clientY / window.innerHeight) * 2 + 1;
+    this.cursorCoords.x = event.offsetX;
+    this.cursorCoords.y = event.offsetY;
   }
 }
 

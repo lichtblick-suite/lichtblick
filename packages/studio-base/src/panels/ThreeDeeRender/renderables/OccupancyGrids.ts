@@ -60,6 +60,9 @@ export class OccupancyGrids extends THREE.Object3D {
     for (const renderable of this.occupancyGridsByTopic.values()) {
       renderable.userData.texture.dispose();
       renderable.userData.material.dispose();
+      const pickingMaterial = renderable.userData.mesh.userData
+        .pickingMaterial as THREE.ShaderMaterial;
+      pickingMaterial.dispose();
     }
     this.children.length = 0;
     this.occupancyGridsByTopic.clear();
@@ -88,6 +91,7 @@ export class OccupancyGrids extends THREE.Object3D {
       const texture = createTexture(occupancyGrid);
       const material = createMaterial(texture, renderable);
       const mesh = new THREE.Mesh(OccupancyGrids.Geometry(), material);
+      mesh.userData.pickingMaterial = createPickingMaterial(texture);
       mesh.castShadow = true;
       mesh.receiveShadow = true;
       renderable.userData.texture = texture;
@@ -282,6 +286,32 @@ function createMaterial(
   material.transparent = transparent;
   material.depthWrite = !material.transparent;
   return material;
+}
+
+function createPickingMaterial(texture: THREE.DataTexture): THREE.ShaderMaterial {
+  return new THREE.ShaderMaterial({
+    vertexShader: /* glsl */ `
+      varying vec2 vUv;
+      void main() {
+        vUv = uv;
+        gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+      }
+    `,
+    fragmentShader: /* glsl */ `
+      uniform sampler2D map;
+      uniform vec4 objectId;
+      varying vec2 vUv;
+      void main() {
+        vec4 color = texture2D(map, vUv);
+        if (color.a == 0.0) {
+          discard;
+        }
+        gl_FragColor = objectId;
+      }
+    `,
+    side: THREE.DoubleSide,
+    uniforms: { map: { value: texture }, objectId: { value: [NaN, NaN, NaN, NaN] } },
+  });
 }
 
 function occupancyGridHasTransparency(settings: OccupancyGridSettings): boolean {

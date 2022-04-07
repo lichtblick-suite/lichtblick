@@ -57,8 +57,8 @@ const labelDark = css`
 
 function RendererOverlay(props: { colorScheme: "dark" | "light" | undefined }): JSX.Element {
   const colorScheme = props.colorScheme;
-  const [_selectedRenderable, setSelectedRenderable] = useState<THREE.Object3D | ReactNull>(
-    ReactNull,
+  const [_selectedRenderable, setSelectedRenderable] = useState<THREE.Object3D | undefined>(
+    undefined,
   );
   const [labelsMap, setLabelsMap] = useState(new Map<string, Marker>());
   const labelsRef = useRef<HTMLDivElement>(ReactNull);

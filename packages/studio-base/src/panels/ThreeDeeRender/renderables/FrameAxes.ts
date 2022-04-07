@@ -19,6 +19,7 @@ import { Pose, rosTimeToNanoSec, TF } from "../ros";
 import { Transform } from "../transforms/Transform";
 import { makePose } from "../transforms/geometry";
 import { updatePose } from "../updatePose";
+import { linePickingMaterial, releaseLinePickingMaterial } from "./markers/materials";
 import { missingTransformMessage, MISSING_TRANSFORM } from "./transforms";
 
 const log = Logger.getLogger(__filename);
@@ -34,6 +35,8 @@ const BLUE_COLOR = new THREE.Color(0x2b90fb).convertSRGBToLinear();
 const YELLOW_COLOR = new THREE.Color(0xffff00).convertSRGBToLinear();
 
 const PI_2 = Math.PI / 2;
+
+const PICKING_LINE_SIZE = 6;
 
 const tempMat4 = new THREE.Matrix4();
 const tempVec = new THREE.Vector3();
@@ -59,13 +62,16 @@ export class FrameAxes extends THREE.Object3D {
   renderer: Renderer;
   axesByFrameId = new Map<string, FrameAxisRenderable>();
   lineMaterial: LineMaterial;
+  linePickingMaterial: THREE.ShaderMaterial;
 
   constructor(renderer: Renderer) {
     super();
     this.renderer = renderer;
 
-    this.lineMaterial = new LineMaterial({ worldUnits: false, linewidth: 2 });
+    this.lineMaterial = new LineMaterial({ linewidth: 2 });
     this.lineMaterial.color = YELLOW_COLOR;
+
+    this.linePickingMaterial = linePickingMaterial(PICKING_LINE_SIZE, this.renderer.materialCache);
   }
 
   dispose(): void {
@@ -77,6 +83,7 @@ export class FrameAxes extends THREE.Object3D {
     this.children.length = 0;
     this.axesByFrameId.clear();
     this.lineMaterial.dispose();
+    releaseLinePickingMaterial(PICKING_LINE_SIZE, this.renderer.materialCache);
   }
 
   addTransformMessage(tf: TF): void {
@@ -243,6 +250,7 @@ export class FrameAxes extends THREE.Object3D {
     const line = new Line2(FrameAxes.LineGeometry(), this.lineMaterial);
     line.castShadow = true;
     line.receiveShadow = false;
+    line.userData.pickingMaterial = this.linePickingMaterial;
 
     renderable.add(line);
     renderable.userData.parentLine = line;

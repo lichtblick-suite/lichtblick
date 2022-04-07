@@ -66,6 +66,7 @@ export class RenderableArrow extends RenderableMarker {
       RenderableArrow.shaftEdgesGeometry(renderer.maxLod),
       renderer.materialCache.outlineMaterial,
     );
+    this.shaftOutline.userData.picking = false;
     this.shaftMesh.add(this.shaftOutline);
 
     // Head outline
@@ -73,6 +74,7 @@ export class RenderableArrow extends RenderableMarker {
       RenderableArrow.headEdgesGeometry(renderer.maxLod),
       renderer.materialCache.outlineMaterial,
     );
+    this.headOutline.userData.picking = false;
     this.headMesh.add(this.headOutline);
 
     this.update(marker);

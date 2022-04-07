@@ -13,10 +13,14 @@ import { RenderableMarker } from "./RenderableMarker";
 import {
   lineMaterial,
   linePrepassMaterial,
+  linePickingMaterial,
   markerHasTransparency,
   releaseLineMaterial,
   releaseLinePrepassMaterial,
+  releaseLinePickingMaterial,
 } from "./materials";
+
+const MIN_PICKING_LINE_SIZE = 6;
 
 export class RenderableLineList extends RenderableMarker {
   geometry: LineSegmentsGeometry;
@@ -32,12 +36,18 @@ export class RenderableLineList extends RenderableMarker {
     const matLinePrepass = linePrepassMaterial(marker, renderer.materialCache);
     this.linePrepass = new LineSegments2(this.geometry, matLinePrepass);
     this.linePrepass.renderOrder = 1;
+    this.linePrepass.userData.picking = false;
     this.add(this.linePrepass);
 
     // Color pass 2
     const matLine = lineMaterial(marker, renderer.materialCache);
     this.line = new LineSegments2(this.geometry, matLine);
     this.line.renderOrder = 2;
+    const pickingLineWidth = Math.max(marker.scale.x, MIN_PICKING_LINE_SIZE);
+    this.line.userData.pickingMaterial = linePickingMaterial(
+      pickingLineWidth,
+      renderer.materialCache,
+    );
     this.add(this.line);
 
     this.update(marker);
@@ -46,6 +56,10 @@ export class RenderableLineList extends RenderableMarker {
   override dispose(): void {
     releaseLinePrepassMaterial(this.userData.marker, this._renderer.materialCache);
     releaseLineMaterial(this.userData.marker, this._renderer.materialCache);
+
+    const pickingLineWidth = Math.max(this.userData.marker.scale.x, MIN_PICKING_LINE_SIZE);
+    releaseLinePickingMaterial(pickingLineWidth, this._renderer.materialCache);
+    this.line.userData.pickingMaterial = undefined;
   }
 
   override update(marker: Marker): void {
