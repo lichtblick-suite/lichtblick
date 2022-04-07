@@ -18,12 +18,13 @@ import {
   ISelectableOption,
   useTheme,
 } from "@fluentui/react";
+import DatabaseIcon from "@mdi/svg/svg/database.svg";
 import PinIcon from "@mdi/svg/svg/pin.svg";
-import { Stack, Theme } from "@mui/material";
+import { Stack, Theme, Menu, MenuItem } from "@mui/material";
 import { makeStyles } from "@mui/styles";
 import cx from "classnames";
-import { compact } from "lodash";
-import { useCallback, useMemo } from "react";
+import { compact, uniq } from "lodash";
+import { useCallback, useMemo, useRef, useState, MouseEvent } from "react";
 import { List, AutoSizer, ListRowProps } from "react-virtualized";
 
 import { filterMap } from "@foxglove/den/collection";
@@ -34,7 +35,6 @@ import { LegacyInput } from "@foxglove/studio-base/components/LegacyStyledCompon
 import Panel from "@foxglove/studio-base/components/Panel";
 import { usePanelContext } from "@foxglove/studio-base/components/PanelContext";
 import PanelToolbar from "@foxglove/studio-base/components/PanelToolbar";
-import TopicToRenderMenu from "@foxglove/studio-base/components/TopicToRenderMenu";
 import { Config as DiagnosticStatusConfig } from "@foxglove/studio-base/panels/diagnostics/DiagnosticStatusPanel";
 import helpContent from "@foxglove/studio-base/panels/diagnostics/DiagnosticSummary.help.md";
 import useDiagnostics from "@foxglove/studio-base/panels/diagnostics/useDiagnostics";
@@ -153,6 +153,12 @@ type Props = {
   saveConfig: (arg0: Partial<Config>) => void;
 };
 
+const ALLOWED_DATATYPES: string[] = [
+  "diagnostic_msgs/DiagnosticArray",
+  "diagnostic_msgs/msg/DiagnosticArray",
+  "ros.diagnostic_msgs.DiagnosticArray",
+];
+
 function DiagnosticSummary(props: Props): JSX.Element {
   const theme = useTheme();
   const classes = useStyles();
@@ -251,18 +257,44 @@ function DiagnosticSummary(props: Props): JSX.Element {
     />
   );
 
-  const topicToRenderMenu = (
-    <TopicToRenderMenu
-      topicToRender={topicToRender}
-      onChange={(newTopicToRender) => saveConfig({ topicToRender: newTopicToRender })}
-      topics={topics}
-      allowedDatatypes={[
-        "diagnostic_msgs/DiagnosticArray",
-        "diagnostic_msgs/msg/DiagnosticArray",
-        "ros.diagnostic_msgs.DiagnosticArray",
-      ]}
-      defaultTopicToRender={DIAGNOSTIC_TOPIC}
-    />
+  const menuRef = useRef<HTMLDivElement>(ReactNull);
+  const [topicMenuOpen, setTopicMenuOpen] = useState(false);
+
+  // Filter down all topics to those that conform to our supported datatypes
+  const availableTopics = useMemo(() => {
+    const filtered = topics
+      .filter((topic) => ALLOWED_DATATYPES.includes(topic.datatype))
+      .map((topic) => topic.name);
+
+    // Keeps only the first occurrence of each topic.
+    return uniq([DIAGNOSTIC_TOPIC, ...filtered, topicToRender]);
+  }, [topics, topicToRender]);
+
+  const changeTopicToRender = useCallback(
+    (newTopicToRender: string) => {
+      saveConfig({ topicToRender: newTopicToRender });
+      setTopicMenuOpen(false);
+    },
+    [saveConfig],
+  );
+
+  const toggleTopicMenuAction = useCallback((ev: MouseEvent<HTMLElement>) => {
+    // To accurately position the topic dropdown menu we set the location of our menu ref to the
+    // click location
+    menuRef.current!.style.left = `${ev.clientX}px`;
+    setTopicMenuOpen((isOpen) => !isOpen);
+  }, []);
+
+  const topicMenuIcon = (
+    <Icon
+      fade
+      tooltip={`Supported datatypes: ${ALLOWED_DATATYPES.join(", ")}`}
+      tooltipProps={{ placement: "top" }}
+      dataTest={"topic-set"}
+      onClick={toggleTopicMenuAction}
+    >
+      <DatabaseIcon />
+    </Icon>
   );
 
   const diagnostics = useDiagnostics(topicToRender);
@@ -338,7 +370,8 @@ function DiagnosticSummary(props: Props): JSX.Element {
 
   return (
     <Stack flex="auto">
-      <PanelToolbar helpContent={helpContent} additionalIcons={topicToRenderMenu}>
+      <div ref={menuRef} style={{ position: "absolute" }}></div>
+      <PanelToolbar helpContent={helpContent} additionalIcons={topicMenuIcon}>
         <Dropdown
           styles={dropdownStyles}
           onRenderOption={renderOption}
@@ -354,6 +387,21 @@ function DiagnosticSummary(props: Props): JSX.Element {
           selectedKey={minLevel}
         />
         {hardwareFilter}
+        <Menu
+          anchorEl={menuRef.current}
+          open={topicMenuOpen}
+          onClose={() => setTopicMenuOpen(false)}
+        >
+          {availableTopics.map((topic) => (
+            <MenuItem
+              key={topic}
+              onClick={() => changeTopicToRender(topic)}
+              selected={topicToRender === topic}
+            >
+              {topic}
+            </MenuItem>
+          ))}
+        </Menu>
       </PanelToolbar>
       <Stack flex="auto">{summary}</Stack>
     </Stack>

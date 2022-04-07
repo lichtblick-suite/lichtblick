@@ -11,17 +11,18 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { Autocomplete, TextField } from "@mui/material";
+import DatabaseIcon from "@mdi/svg/svg/database.svg";
+import { Autocomplete, Menu, MenuItem, TextField } from "@mui/material";
 import { makeStyles } from "@mui/styles";
-import { sortBy } from "lodash";
-import { useMemo } from "react";
+import { sortBy, uniq } from "lodash";
+import { useCallback, useMemo, useRef, useState, MouseEvent } from "react";
 
 import { useDataSourceInfo } from "@foxglove/studio-base/PanelAPI";
 import EmptyState from "@foxglove/studio-base/components/EmptyState";
+import Icon from "@foxglove/studio-base/components/Icon";
 import Panel from "@foxglove/studio-base/components/Panel";
 import { usePanelContext } from "@foxglove/studio-base/components/PanelContext";
 import PanelToolbar from "@foxglove/studio-base/components/PanelToolbar";
-import TopicToRenderMenu from "@foxglove/studio-base/components/TopicToRenderMenu";
 import { DIAGNOSTIC_TOPIC } from "@foxglove/studio-base/util/globalConstants";
 
 import DiagnosticStatus from "./DiagnosticStatus";
@@ -58,6 +59,12 @@ const useStyles = makeStyles({
   },
 });
 
+const ALLOWED_DATATYPES: string[] = [
+  "diagnostic_msgs/DiagnosticArray",
+  "diagnostic_msgs/msg/DiagnosticArray",
+  "ros.diagnostic_msgs.DiagnosticArray",
+];
+
 // component to display a single diagnostic status from list
 function DiagnosticStatusPanel(props: Props) {
   const classes = useStyles();
@@ -72,18 +79,44 @@ function DiagnosticStatusPanel(props: Props) {
     collapsedSections = [],
   } = config;
 
-  const topicToRenderMenu = (
-    <TopicToRenderMenu
-      topicToRender={topicToRender}
-      onChange={(newTopicToRender) => saveConfig({ topicToRender: newTopicToRender })}
-      topics={topics}
-      allowedDatatypes={[
-        "diagnostic_msgs/DiagnosticArray",
-        "diagnostic_msgs/msg/DiagnosticArray",
-        "ros.diagnostic_msgs.DiagnosticArray",
-      ]}
-      defaultTopicToRender={DIAGNOSTIC_TOPIC}
-    />
+  const menuRef = useRef<HTMLDivElement>(ReactNull);
+  const [topicMenuOpen, setTopicMenuOpen] = useState(false);
+
+  // Filter down all topics to those that conform to our supported datatypes
+  const availableTopics = useMemo(() => {
+    const filtered = topics
+      .filter((topic) => ALLOWED_DATATYPES.includes(topic.datatype))
+      .map((topic) => topic.name);
+
+    // Keeps only the first occurrence of each topic.
+    return uniq([DIAGNOSTIC_TOPIC, ...filtered, topicToRender]);
+  }, [topics, topicToRender]);
+
+  const changeTopicToRender = useCallback(
+    (newTopicToRender: string) => {
+      saveConfig({ topicToRender: newTopicToRender });
+      setTopicMenuOpen(false);
+    },
+    [saveConfig],
+  );
+
+  const toggleTopicMenuAction = useCallback((ev: MouseEvent<HTMLElement>) => {
+    // To accurately position the topic dropdown menu we set the location of our menu ref to the
+    // click location
+    menuRef.current!.style.left = `${ev.clientX}px`;
+    setTopicMenuOpen((isOpen) => !isOpen);
+  }, []);
+
+  const topicMenuIcon = (
+    <Icon
+      fade
+      tooltip={`Supported datatypes: ${ALLOWED_DATATYPES.join(", ")}`}
+      tooltipProps={{ placement: "top" }}
+      dataTest={"topic-set"}
+      onClick={toggleTopicMenuAction}
+    >
+      <DatabaseIcon />
+    </Icon>
   );
 
   const availableDiagnostics = useAvailableDiagnostics(topicToRender);
@@ -146,7 +179,8 @@ function DiagnosticStatusPanel(props: Props) {
 
   return (
     <div className={classes.root}>
-      <PanelToolbar floating helpContent={helpContent} additionalIcons={topicToRenderMenu}>
+      <div ref={menuRef} style={{ position: "absolute" }}></div>
+      <PanelToolbar floating helpContent={helpContent} additionalIcons={topicMenuIcon}>
         <Autocomplete
           disablePortal
           blurOnSelect={true}
@@ -179,6 +213,21 @@ function DiagnosticStatusPanel(props: Props) {
             />
           )}
         />
+        <Menu
+          anchorEl={menuRef.current}
+          open={topicMenuOpen}
+          onClose={() => setTopicMenuOpen(false)}
+        >
+          {availableTopics.map((topic) => (
+            <MenuItem
+              key={topic}
+              onClick={() => changeTopicToRender(topic)}
+              selected={topicToRender === topic}
+            >
+              {topic}
+            </MenuItem>
+          ))}
+        </Menu>
       </PanelToolbar>
       {filteredDiagnostics.length > 0 ? (
         <div className={classes.content}>
