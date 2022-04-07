@@ -17,6 +17,7 @@ import {
   fromNanoSec,
   toNanoSec,
   subtract as subtractTimes,
+  toString,
 } from "@foxglove/rostime";
 import { MessageEvent, ParameterValue } from "@foxglove/studio";
 import NoopMetricsCollector from "@foxglove/studio-base/players/NoopMetricsCollector";
@@ -134,6 +135,7 @@ export class IterablePlayer implements Player {
   private _publishedTopics = new Map<string, Set<string>>();
   private _seekTarget?: Time;
   private _abort?: AbortController;
+  private _presence = PlayerPresence.INITIALIZING;
 
   // To keep reference equality for downstream user memoization cache the currentTime provided in the last activeData update
   // See additional comments below where _currentTime is set
@@ -237,6 +239,7 @@ export class IterablePlayer implements Player {
       this._setError(`Error initializing: ${error.message}`, error);
     }
 
+    this._presence = PlayerPresence.PRESENT;
     await this._emitState();
     if (!this._hasError) {
       this._setState("start-delay");
@@ -268,6 +271,8 @@ export class IterablePlayer implements Player {
 
     this._lastMessage = undefined;
     this._messages = [];
+
+    log.debug(`Playing from ${toString(this._start)} to ${toString(stopTime)}`);
 
     const messageEvents: MessageEvent<unknown>[] = [];
     for (;;) {
@@ -456,13 +461,11 @@ export class IterablePlayer implements Player {
     this._messages = [];
 
     const currentTime = this._currentTime ?? this._start;
-    const isInitalizing =
-      this._state === "preinit" || this._state === "initialize" || this._state === "start-delay";
 
     const data: PlayerState = {
       name: this._name,
       filePath: this._filePath,
-      presence: isInitalizing ? PlayerPresence.INITIALIZING : PlayerPresence.PRESENT,
+      presence: this._presence,
       progress: this._progress,
       capabilities: this._capabilities,
       playerId: this._id,

@@ -98,7 +98,7 @@ export class DataPlatformIterableSource implements IIterableSource {
       );
     }
     if (isLessThan(this._start, coverageStartTime)) {
-      log.debug("Increased start time from", this._start, "to", coverageStart);
+      log.debug("Increased start time from", this._start, "to", coverageStartTime);
       this._start = coverageStartTime;
     }
     if (isGreaterThan(this._end, coverageEndTime)) {
