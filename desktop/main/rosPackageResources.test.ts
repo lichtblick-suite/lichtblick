@@ -4,7 +4,7 @@
 
 import path from "path";
 
-import { findRosPackageRoot, rosPackageNameAtPath } from "./rosPackageResources";
+import { findRosPackage, rosPackageNameAtPath } from "./rosPackageResources";
 
 const FIXTURES_ROOT = path.join(__dirname, "./fixtures");
 const PACKAGES_ROOT = path.join(FIXTURES_ROOT, "./packages");
@@ -17,14 +17,14 @@ describe("rosPackageResources", () => {
     });
   });
 
-  describe("findRosPackageRoot", () => {
+  describe("findRosPackage", () => {
     it("should find package within rosPackagePath", async () => {
-      const packagePath = await findRosPackageRoot("foo", { rosPackagePath: PACKAGES_ROOT });
+      const packagePath = await findRosPackage("foo", { rosPackagePath: PACKAGES_ROOT });
       expect(packagePath).toEqual(path.join(PACKAGES_ROOT, "./foo"));
     });
 
     it("should find package within multiple rosPackagePaths", async () => {
-      const packagePath = await findRosPackageRoot("foo", {
+      const packagePath = await findRosPackage("foo", {
         rosPackagePath: `${FIXTURES_ROOT}${path.delimiter}${PACKAGES_ROOT}`,
       });
       expect(packagePath).toEqual(path.join(PACKAGES_ROOT, "./foo"));
@@ -33,11 +33,18 @@ describe("rosPackageResources", () => {
     it("should find package within process.env.ROS_PACKAGE_PATH", async () => {
       process.env.ROS_PACKAGE_PATH = `${FIXTURES_ROOT}${path.delimiter}${PACKAGES_ROOT}`;
       try {
-        const packagePath = await findRosPackageRoot("foo");
+        const packagePath = await findRosPackage("foo");
         expect(packagePath).toEqual(path.join(PACKAGES_ROOT, "./foo"));
       } finally {
         process.env.ROS_PACKAGE_PATH = undefined;
       }
+    });
+
+    it("should find packages recursively within rosPackagePath", async () => {
+      const packagePath = await findRosPackage("nested-child", {
+        rosPackagePath: PACKAGES_ROOT,
+      });
+      expect(packagePath).toEqual(path.join(PACKAGES_ROOT, "nested", "child"));
     });
   });
 });
