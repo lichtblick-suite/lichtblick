@@ -119,7 +119,7 @@ const useStyles = makeStyles((theme) => ({
 // of a "false" focus event. (In our case we just don't bother with ignoring the `focus` event since
 // it doesn't cause any problems.)
 type AutocompleteProps<T = unknown> = {
-  items: T[];
+  items: readonly T[];
   getItemValue?: (arg0: T) => string;
   getItemText?: (arg0: T) => string;
   filterText?: string;

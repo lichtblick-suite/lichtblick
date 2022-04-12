@@ -67,6 +67,7 @@ import { useExtensionLoader } from "@foxglove/studio-base/context/ExtensionLoade
 import { useHelpInfo } from "@foxglove/studio-base/context/HelpInfoContext";
 import LinkHandlerContext from "@foxglove/studio-base/context/LinkHandlerContext";
 import { useNativeAppMenu } from "@foxglove/studio-base/context/NativeAppMenuContext";
+import { PanelSettingsEditorContextProvider } from "@foxglove/studio-base/context/PanelSettingsEditorContext";
 import {
   IDataSourceFactory,
   usePlayerSelection,
@@ -550,6 +551,7 @@ export default function Workspace(props: WorkspaceProps): JSX.Element {
         /* eslint-disable react/jsx-key */
         <LinkHandlerContext.Provider value={handleInternalLink} />,
         <WorkspaceContext.Provider value={workspaceActions} />,
+        <PanelSettingsEditorContextProvider />,
         /* eslint-enable react/jsx-key */
       ]}
     >

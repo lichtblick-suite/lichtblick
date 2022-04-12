@@ -62,9 +62,36 @@ export default function muiComponents(theme: Theme): ThemeOptions["components"] 
         },
       },
     },
+    MuiAutocomplete: {
+      styleOverrides: {
+        root: {
+          ".MuiInputBase-root. .MuiAutocomplete-input.MuiInputBase-input": {
+            padding: theme.spacing(1, 1.25),
+          },
+          ".MuiInputBase-root.MuiInputBase-sizeSmall": {
+            paddingBottom: 0,
+
+            ".MuiAutocomplete-input.MuiInputBase-inputSizeSmall": {
+              padding: theme.spacing(0.75, 1),
+            },
+          },
+          ".MuiInputBase-root .MuiAutocomplete-endAdornment": {
+            marginRight: theme.spacing(-0.5),
+          },
+        },
+        endAdornment: {
+          top: `calc(50% - ${theme.spacing(1.5)})`,
+        },
+      },
+    },
     MuiButton: {
       defaultProps: {
         disableElevation: true,
+      },
+      styleOverrides: {
+        colorInherit: {
+          backgroundColor: theme.palette.action.focus,
+        },
       },
     },
     MuiCard: {
@@ -115,7 +142,7 @@ export default function muiComponents(theme: Theme): ThemeOptions["components"] 
           padding: theme.spacing(1, 1.25),
         },
         inputSizeSmall: {
-          padding: theme.spacing(0.5, 1),
+          padding: theme.spacing(0.75, 1),
         },
         root: {
           borderRadius: theme.shape.borderRadius,
@@ -125,6 +152,9 @@ export default function muiComponents(theme: Theme): ThemeOptions["components"] 
           },
           "&.Mui-disabled": {
             opacity: 0.5,
+          },
+          ".MuiAutocomplete-root &": {
+            paddingTop: 0,
           },
         },
       },
@@ -161,7 +191,7 @@ export default function muiComponents(theme: Theme): ThemeOptions["components"] 
           padding: theme.spacing(1, 1.25),
         },
         inputSizeSmall: {
-          padding: theme.spacing(0.5, 1),
+          padding: theme.spacing(0.75, 1),
         },
       },
     },
@@ -221,6 +251,25 @@ export default function muiComponents(theme: Theme): ThemeOptions["components"] 
         },
       },
     },
+    MuiListItem: {
+      // variants: [
+      //   {
+      //     props: { showSecondaryActionsOnHover: true },
+      //     style: {
+      //       "@media (pointer: fine)": {
+      //         "& .MuiListItemSecondaryAction-root .MuiIconButton-root:last-child": {
+      //           visibility: "hidden",
+      //         },
+      //         "&:hover": {
+      //           "& .MuiListItemSecondaryAction-root .MuiIconButton-root:last-child": {
+      //             visibility: "visible",
+      //           },
+      //         },
+      //       },
+      //     },
+      //   },
+      // ],
+    },
     MuiListItemButton: {
       defaultProps: { disableRipple: true },
     },
@@ -253,7 +302,21 @@ export default function muiComponents(theme: Theme): ThemeOptions["components"] 
           padding: theme.spacing(1, 1.25),
         },
         inputSizeSmall: {
-          padding: theme.spacing(0.5, 1),
+          padding: theme.spacing(0.75, 1),
+        },
+      },
+    },
+    MuiSelect: {
+      styleOverrides: {
+        select: {
+          "&.MuiInputBase-input": {
+            paddingTop: theme.spacing(1),
+            paddingBottom: theme.spacing(1),
+          },
+          "&.MuiInputBase-inputSizeSmall": {
+            paddingTop: theme.spacing(0.625),
+            paddingBottom: theme.spacing(0.625),
+          },
         },
       },
     },

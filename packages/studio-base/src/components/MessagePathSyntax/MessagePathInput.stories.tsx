@@ -20,74 +20,7 @@ import PanelSetup, { Fixture } from "@foxglove/studio-base/stories/PanelSetup";
 import { basicDatatypes } from "@foxglove/studio-base/util/datatypes";
 
 import MessagePathInput from "./MessagePathInput";
-
-const fixture: Fixture = {
-  datatypes: new Map(
-    Object.entries({
-      "msgs/PoseDebug": {
-        definitions: [
-          { name: "header", type: "std_msgs/Header", isArray: false },
-          { name: "pose", type: "msgs/Pose", isArray: false },
-        ],
-      },
-      "msgs/Pose": {
-        definitions: [
-          { name: "header", type: "std_msgs/Header", isArray: false },
-          { name: "x", type: "float64", isArray: false },
-          { name: "y", type: "float64", isArray: false },
-          { name: "travel", type: "float64", isArray: false },
-          { name: "velocity", type: "float64", isArray: false },
-          { name: "acceleration", type: "float64", isArray: false },
-          { name: "heading", type: "float64", isArray: false },
-        ],
-      },
-      "msgs/State": {
-        definitions: [
-          { name: "header", type: "std_msgs/Header", isArray: false },
-          { name: "items", type: "msgs/OtherState", isArray: true },
-          { name: "foo_id", type: "uint32", isArray: false },
-        ],
-      },
-      "msgs/OtherState": {
-        definitions: [
-          { name: "id", type: "int32", isArray: false },
-          { name: "speed", type: "float32", isArray: false },
-          { name: "name", type: "string", isArray: false },
-          { name: "valid", type: "bool", isArray: false },
-        ],
-      },
-      "msgs/Log": {
-        definitions: [
-          { name: "id", type: "int32", isArray: false },
-          { name: "myJson", type: "json", isArray: false },
-          { name: "severity", type: "float32", isArray: false },
-        ],
-      },
-      "std_msgs/Header": {
-        definitions: [
-          { name: "seq", type: "uint32", isArray: false },
-          {
-            name: "stamp",
-            type: "time",
-            isArray: false,
-          },
-          { name: "frame_id", type: "string", isArray: false },
-        ],
-      },
-    }),
-  ),
-  topics: [
-    { name: "/some_topic/location", datatype: "msgs/PoseDebug" },
-    { name: "/some_topic/state", datatype: "msgs/State" },
-    {
-      name: "/very_very_very_very_very_very_very_very_very_very_very_very_very_very_very_very_very_very_very_very_very_very_very_very_very_very_very_very_very_very_very_very_very_very_very_very_very_very_very_very_very_very_very_very_very_very_very_long_topic_name/state",
-      datatype: "msgs/State",
-    },
-    { name: "/some_logs_topic", datatype: "msgs/Log" },
-  ],
-  frame: {},
-  globalVariables: { global_var_1: 42, global_var_2: 10 },
-};
+import { MessagePathInputStoryFixture } from "./fixture";
 
 let manyTopics: Topic[] = [];
 for (let i = 0; i < 10; i++) {
@@ -117,7 +50,7 @@ function MessagePathInputStory(props: { path: string; prioritizedDatatype?: stri
 
   return (
     <MockPanelContextProvider>
-      <PanelSetup fixture={fixture} onMount={clickInput}>
+      <PanelSetup fixture={MessagePathInputStoryFixture} onMount={clickInput}>
         <Stack direction="row" flex="auto" margin={1.25}>
           <MessagePathInput
             autoSize={false}

@@ -121,7 +121,7 @@ export function messagePathStructures(
 
 export function validTerminatingStructureItem(
   structureItem?: MessagePathStructureItem,
-  validTypes?: string[],
+  validTypes?: readonly string[],
 ): boolean {
   return (
     !!structureItem &&
@@ -143,7 +143,7 @@ export function messagePathsForDatatype(
     noMultiSlices,
     messagePath = [],
   }: {
-    validTypes?: string[];
+    validTypes?: readonly string[];
     noMultiSlices?: boolean;
     messagePath?: MessagePathPart[];
   } = {},
