@@ -74,22 +74,23 @@ export const generateTypesInterface = (datatypes: RosDatatypes): string => {
       const rosPrimitive = rosPrimitiveToTypescriptTypeMap.get(type);
 
       const fieldName = safeString(field.name);
+      const sigil = field.optional === true ? "?" : "";
 
       if (isConstant === true) {
         src += `\n // ${field.name} = ${field.valueText}`;
       } else if (isArray === true) {
         if (typedArray) {
-          src += `\n${fieldName}: ${typedArray},`;
+          src += `\n${fieldName}${sigil}: ${typedArray},`;
         } else if (rosPrimitive) {
-          src += `\n${fieldName}: ${rosPrimitive}[],`;
+          src += `\n${fieldName}${sigil}: ${rosPrimitive}[],`;
         } else {
-          src += `\n${fieldName}: MessageTypeBySchemaName[${safeString(type)}][],`;
+          src += `\n${fieldName}${sigil}: MessageTypeBySchemaName[${safeString(type)}][],`;
         }
       } else {
         if (rosPrimitive) {
-          src += `\n${fieldName}: ${rosPrimitive},`;
+          src += `\n${fieldName}${sigil}: ${rosPrimitive},`;
         } else {
-          src += `\n${fieldName}: MessageTypeBySchemaName[${safeString(type)}],`;
+          src += `\n${fieldName}${sigil}: MessageTypeBySchemaName[${safeString(type)}],`;
         }
       }
     }
