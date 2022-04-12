@@ -30,6 +30,12 @@ describe("app state url parser", () => {
       expect(parseAppURLState(urlBuilder())).toBeUndefined();
     });
 
+    it("parses urls with only a layoutId", () => {
+      const url = urlBuilder();
+      url.searchParams.append("layoutId", "1234");
+      expect(parseAppURLState(url)?.layoutId).toBe("1234");
+    });
+
     it("parses rosbag data state urls", () => {
       const url = urlBuilder();
       url.searchParams.append("ds", "ros1-remote-bagfile");

@@ -2,6 +2,8 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
+import { isEmpty, omitBy } from "lodash";
+
 import { fromRFC3339String, toRFC3339String, Time } from "@foxglove/rostime";
 import { LayoutID } from "@foxglove/studio-base/index";
 import isDesktopApp from "@foxglove/studio-base/util/isDesktopApp";
@@ -54,15 +56,11 @@ export function encodeAppURLState(url: URL, urlState: AppURLState): URL {
  * @throws Error if URL parsing fails.
  */
 export function parseAppURLState(url: URL): AppURLState | undefined {
-  const ds = url.searchParams.get("ds");
-  if (!ds) {
-    return undefined;
-  }
-
   if (isDesktopApp() && url.protocol !== "foxglove:") {
     throw Error("Unknown protocol.");
   }
 
+  const ds = url.searchParams.get("ds") ?? undefined;
   const layoutId = url.searchParams.get("layoutId");
   const timeString = url.searchParams.get("time");
   const time = timeString == undefined ? undefined : fromRFC3339String(timeString);
@@ -74,12 +72,17 @@ export function parseAppURLState(url: URL): AppURLState | undefined {
     }
   });
 
-  return {
-    layoutId: layoutId ? (layoutId as LayoutID) : undefined,
-    time,
-    ds,
-    dsParams,
-  };
+  const state: AppURLState = omitBy(
+    {
+      layoutId: layoutId ? (layoutId as LayoutID) : undefined,
+      time,
+      ds,
+      dsParams: isEmpty(dsParams) ? undefined : dsParams,
+    },
+    isEmpty,
+  );
+
+  return isEmpty(state) ? undefined : state;
 }
 
 /**
