@@ -608,24 +608,24 @@ export default class RosbridgePlayer implements Player {
       entries.add(value);
     };
 
-    return await new Promise((resolve, reject) => {
+    return await new Promise((outerResolve, outerReject) => {
       this._rosClient?.getNodes(async (nodes) => {
-        await Promise.all(
-          nodes.map((node) => {
+        for (const node of nodes) {
+          await new Promise((innerResolve, innerReject) => {
             this._rosClient?.getNodeDetails(
               node,
               (subscriptions, publications, services) => {
                 publications.forEach((pub) => addEntry(output.publishers, pub, node));
                 subscriptions.forEach((sub) => addEntry(output.subscribers, sub, node));
                 services.forEach((srv) => addEntry(output.services, srv, node));
+                innerResolve(undefined);
               },
-              reject,
+              innerReject,
             );
-          }),
-        );
-
-        resolve(output);
-      }, reject);
+          });
+        }
+        outerResolve(output);
+      }, outerReject);
     });
   }
 }
