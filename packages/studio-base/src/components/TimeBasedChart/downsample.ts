@@ -172,13 +172,10 @@ export function downsampleScatter(dataset: DataSet, bounds: DownsampleBounds): D
       continue;
     }
 
-    // out-of-bounds scatter points are ignored
-    if (
-      datum.x > bounds.x.max ||
-      datum.x < bounds.x.min ||
-      datum.y < bounds.y.min ||
-      datum.y > bounds.y.max
-    ) {
+    // Out-of-bounds scatter points are ignored. We don't filter on y
+    // because y values are needed to allow chart to auto scale to the correct
+    // height.
+    if (datum.x > bounds.x.max || datum.x < bounds.x.min) {
       continue;
     }
 

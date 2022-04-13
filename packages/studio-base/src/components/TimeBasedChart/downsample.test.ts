@@ -94,7 +94,10 @@ describe("downsampleScatter", () => {
       bounds,
     );
     expect(result).toEqual({
-      data: [],
+      data: [
+        { x: 0, y: -1 },
+        { x: 0, y: 200 },
+      ],
     });
   });
 
