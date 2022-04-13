@@ -148,6 +148,14 @@ type PanelItemProps = {
   onDrop: (arg0: DropDescription) => void;
 };
 
+function blurActiveElement() {
+  // Clear focus from the panel menu button so that spacebar doesn't trigger
+  // more panel additions.
+  if (document.activeElement instanceof HTMLElement) {
+    document.activeElement.blur();
+  }
+}
+
 function DraggablePanelItem({
   mode = "list",
   searchQuery,
@@ -339,6 +347,7 @@ function PanelList(props: Props): JSX.Element {
         config,
         relatedConfigs,
       });
+      blurActiveElement();
     },
     [dropPanel],
   );
@@ -445,7 +454,10 @@ function PanelList(props: Props): JSX.Element {
           mosaicId={mosaicId}
           panel={panelInfo}
           onDrop={onPanelMenuItemDrop}
-          onClick={() => onPanelSelect({ type, config, relatedConfigs })}
+          onClick={() => {
+            onPanelSelect({ type, config, relatedConfigs });
+            blurActiveElement();
+          }}
           checked={title === selectedPanelTitle}
           highlighted={highlightedPanel?.title === title}
           searchQuery={searchQuery}
