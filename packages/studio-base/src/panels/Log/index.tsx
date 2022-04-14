@@ -13,6 +13,7 @@
 
 import { IconButton, IList, List } from "@fluentui/react";
 import { Box, Stack } from "@mui/material";
+import { makeStyles } from "@mui/styles";
 import { useCallback, useLayoutEffect, useMemo, useRef, useState } from "react";
 
 import { useDataSourceInfo, useMessagesByTopic } from "@foxglove/studio-base/PanelAPI";
@@ -49,7 +50,17 @@ const SUPPORTED_DATATYPES = [
   "foxglove.Log",
 ];
 
+const useStyles = makeStyles({
+  scrollArea: {
+    height: "100%",
+    overflow: "auto",
+    display: "flex",
+    flexDirection: "column-reverse",
+  },
+});
+
 const LogPanel = React.memo(({ config, saveConfig }: Props) => {
+  const classes = useStyles();
   const { topics } = useDataSourceInfo();
   const { minLogLevel, searchTerms } = config;
   const { timeFormat, timeZone } = useAppTimeFormat();
@@ -123,24 +134,18 @@ const LogPanel = React.memo(({ config, saveConfig }: Props) => {
   );
 
   const [hasUserScrolled, setHasUserScrolled] = useState(false);
-  const scrollByUpdate = useRef<boolean>(false);
-
   const divRef = useRef<HTMLDivElement>(ReactNull);
 
-  function scrollToBottom() {
+  const scrollToBottomAction = useCallback(() => {
     const div = divRef.current;
     if (!div) {
       return;
     }
 
-    div.scrollTop = div.scrollHeight;
-  }
-
-  function scrollToBottomAction() {
     setHasUserScrolled(false);
-    scrollByUpdate.current = true;
-    scrollToBottom();
-  }
+    // With column-reverse flex direction, 0 scroll top is the bottom (latest) message
+    div.scrollTop = 0;
+  }, []);
 
   useLayoutEffect(() => {
     const div = divRef.current;
@@ -149,10 +154,7 @@ const LogPanel = React.memo(({ config, saveConfig }: Props) => {
     }
 
     const listener = () => {
-      if (!scrollByUpdate.current) {
-        setHasUserScrolled(true);
-      }
-      scrollByUpdate.current = false;
+      setHasUserScrolled(div.scrollTop !== 0);
     };
 
     div.addEventListener("scroll", listener);
@@ -173,18 +175,11 @@ const LogPanel = React.memo(({ config, saveConfig }: Props) => {
         />
       </PanelToolbar>
       <Stack flexGrow={1} overflow="hidden">
-        <Box ref={divRef} height="100%" overflow="auto">
+        <div ref={divRef} className={classes.scrollArea}>
           {/* items property wants a mutable array but filteredMessages is readonly */}
           <List
             componentRef={listRef}
             items={filteredMessages as ArrayElementType<typeof filteredMessages>[]}
-            onPagesUpdated={() => {
-              // If the user has scrolled manually then we avoid automatic scrolling
-              if (!hasUserScrolled) {
-                scrollByUpdate.current = true;
-                scrollToBottom();
-              }
-            }}
             onRenderCell={(item) => {
               if (!item) {
                 return;
@@ -205,7 +200,7 @@ const LogPanel = React.memo(({ config, saveConfig }: Props) => {
               );
             }}
           />
-        </Box>
+        </div>
       </Stack>
       {hasUserScrolled && (
         <Box position="absolute" bottom={10} right={10}>
