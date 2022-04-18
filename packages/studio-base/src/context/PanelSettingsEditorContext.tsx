@@ -7,13 +7,19 @@ import { DeepReadonly } from "ts-essentials";
 
 import { SettingsTree } from "@foxglove/studio-base/components/SettingsTreeEditor/types";
 
+export type ImmutableSettingsTree = DeepReadonly<SettingsTree>;
+
+type SettingsTreeUpdateSubscriber = (settingsTree: ImmutableSettingsTree) => void;
+
 export type PanelSettingsEditorContextType = {
-  panelSettingsTrees: DeepReadonly<Record<string, SettingsTree>>;
+  addUpdateSubscriber: (panelId: string, subscriber: SettingsTreeUpdateSubscriber) => void;
+  removeUpdateSubscriber: (panelId: string, subscriber: SettingsTreeUpdateSubscriber) => void;
   updatePanelSettingsTree: (panelId: string, settings: undefined | SettingsTree) => void;
 };
 
 export const PanelSettingsEditorContext = createContext<PanelSettingsEditorContextType>({
-  panelSettingsTrees: {},
+  addUpdateSubscriber: () => {},
+  removeUpdateSubscriber: () => {},
   updatePanelSettingsTree: () => {},
 });
 
@@ -22,29 +28,49 @@ export function PanelSettingsEditorContextProvider({
 }: {
   children?: ReactNode;
 }): JSX.Element {
-  const [panelSettingsTrees, setPanelSettingsTrees] = useState<Record<string, SettingsTree>>({});
+  const [subscribers] = useState(new Map<string, Set<SettingsTreeUpdateSubscriber>>());
+  const [panelSettingsTrees] = useState(new Map<string, ImmutableSettingsTree>());
+
+  const addUpdateSubscriber = useCallback(
+    (panelId: string, subscriber: SettingsTreeUpdateSubscriber) => {
+      subscribers.set(panelId, subscribers.get(panelId) ?? new Set());
+      subscribers.get(panelId)!.add(subscriber);
+      const tree = panelSettingsTrees.get(panelId);
+      if (tree) {
+        subscriber(tree);
+      }
+    },
+    [panelSettingsTrees, subscribers],
+  );
+
+  const removeUpdateSubscriber = useCallback(
+    (panelId: string, subscriber: SettingsTreeUpdateSubscriber) => {
+      subscribers.get(panelId)?.delete(subscriber);
+    },
+    [subscribers],
+  );
 
   const updatePanelSettingsTree = useCallback(
     (panelId: string, settings: undefined | SettingsTree) => {
       if (settings) {
-        setPanelSettingsTrees((previous) => ({ ...previous, [panelId]: settings }));
+        panelSettingsTrees.set(panelId, settings);
+        for (const subscriber of subscribers.get(panelId) ?? []) {
+          subscriber(settings);
+        }
       } else {
-        setPanelSettingsTrees((previous) => {
-          const newPanelSettingsTrees = { ...previous };
-          delete newPanelSettingsTrees[panelId];
-          return newPanelSettingsTrees;
-        });
+        panelSettingsTrees.delete(panelId);
       }
     },
-    [],
+    [panelSettingsTrees, subscribers],
   );
 
   const contextValue = useMemo(
     () => ({
-      panelSettingsTrees,
+      addUpdateSubscriber,
+      removeUpdateSubscriber,
       updatePanelSettingsTree,
     }),
-    [panelSettingsTrees, updatePanelSettingsTree],
+    [addUpdateSubscriber, removeUpdateSubscriber, updatePanelSettingsTree],
   );
 
   return (

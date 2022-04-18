@@ -3,7 +3,7 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 import { Button, Link, SvgIcon, Typography } from "@mui/material";
-import { StrictMode, useContext, useMemo, useState } from "react";
+import { StrictMode, useCallback, useContext, useEffect, useMemo, useState } from "react";
 import { useAsync, useUnmount } from "react-use";
 
 import { useConfigById } from "@foxglove/studio-base/PanelAPI";
@@ -19,7 +19,10 @@ import {
 } from "@foxglove/studio-base/context/CurrentLayoutContext";
 import { useHelpInfo } from "@foxglove/studio-base/context/HelpInfoContext";
 import { usePanelCatalog } from "@foxglove/studio-base/context/PanelCatalogContext";
-import { PanelSettingsEditorContext } from "@foxglove/studio-base/context/PanelSettingsEditorContext";
+import {
+  ImmutableSettingsTree,
+  PanelSettingsEditorContext,
+} from "@foxglove/studio-base/context/PanelSettingsEditorContext";
 import { useWorkspace } from "@foxglove/studio-base/context/WorkspaceContext";
 import { PanelConfig } from "@foxglove/studio-base/types/panels";
 import { TAB_PANEL_TYPE } from "@foxglove/studio-base/util/globalConstants";
@@ -84,12 +87,22 @@ export default function PanelSettings({
 
   const [config, saveConfig] = useConfigById<Record<string, unknown>>(selectedPanelId);
 
-  const { panelSettingsTrees } = useContext(PanelSettingsEditorContext);
+  const [settingsTree, setSettingsTree] = useState<undefined | ImmutableSettingsTree>();
 
-  const settingsTree = useMemo(
-    () => (selectedPanelId ? panelSettingsTrees[selectedPanelId] : undefined),
-    [panelSettingsTrees, selectedPanelId],
-  );
+  const updateSubscriber = useCallback((settings: ImmutableSettingsTree) => {
+    setSettingsTree(settings);
+  }, []);
+
+  const { addUpdateSubscriber, removeUpdateSubscriber } = useContext(PanelSettingsEditorContext);
+
+  useEffect(() => {
+    if (selectedPanelId) {
+      addUpdateSubscriber(selectedPanelId, updateSubscriber);
+      return () => removeUpdateSubscriber(selectedPanelId, updateSubscriber);
+    } else {
+      return () => undefined;
+    }
+  }, [addUpdateSubscriber, removeUpdateSubscriber, selectedPanelId, updateSubscriber]);
 
   const { value: schema, error } = useAsync(async () => {
     if (panelInfo?.type == undefined) {
