@@ -2,7 +2,11 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
+import { extname } from "path";
 import * as THREE from "three";
+import { ColladaLoader } from "three/examples/jsm/loaders/ColladaLoader";
+import { OBJLoader } from "three/examples/jsm/loaders/OBJLoader";
+import { STLLoader } from "three/examples/jsm/loaders/STLLoader";
 import URDFLoader from "urdf-loader";
 import { XacroParser } from "xacro-parser";
 
@@ -65,6 +69,27 @@ export default class URDFAssetLoader implements AssetLoader {
 
     const loader = new URDFLoader(manager);
 
+    const unsupportedMeshes: string[] = [];
+    loader.loadMeshCb = (path, meshManager, done) => {
+      const extension = extname(path);
+
+      if (extension === ".stl") {
+        const meshLoader = new STLLoader(meshManager);
+        meshLoader.load(path, (geom) => {
+          const mesh = new THREE.Mesh(geom, new THREE.MeshPhongMaterial());
+          done(mesh);
+        });
+      } else if (extension === ".dae") {
+        const meshLoader = new ColladaLoader(meshManager);
+        meshLoader.load(path, (dae) => done(dae.scene));
+      } else if (extension === ".obj") {
+        const meshLoader = new OBJLoader(meshManager);
+        meshLoader.load(path, (obj) => done(obj));
+      } else {
+        unsupportedMeshes.push(path);
+      }
+    };
+
     const finishedLoading = new Promise<void>((resolve, reject) => {
       manager.onLoad = () => resolve();
       manager.onError = (url) => {
@@ -108,6 +133,10 @@ export default class URDFAssetLoader implements AssetLoader {
 
     if (robot.children.length === 0) {
       throw new Error(`The URDF file ${file.name} contained no visual elements.`);
+    }
+
+    if (unsupportedMeshes.length > 0) {
+      throw new Error(`Unsupported meshes: ${unsupportedMeshes.join(", ")}`);
     }
 
     return { name: file.name, type: "urdf", model: robot };
