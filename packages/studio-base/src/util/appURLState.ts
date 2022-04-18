@@ -6,7 +6,6 @@ import { isEmpty, omitBy } from "lodash";
 
 import { fromRFC3339String, toRFC3339String, Time } from "@foxglove/rostime";
 import { LayoutID } from "@foxglove/studio-base/index";
-import isDesktopApp from "@foxglove/studio-base/util/isDesktopApp";
 
 export type AppURLState = {
   ds?: string;
@@ -56,10 +55,6 @@ export function encodeAppURLState(url: URL, urlState: AppURLState): URL {
  * @throws Error if URL parsing fails.
  */
 export function parseAppURLState(url: URL): AppURLState | undefined {
-  if (isDesktopApp() && url.protocol !== "foxglove:") {
-    throw Error("Unknown protocol.");
-  }
-
   const ds = url.searchParams.get("ds") ?? undefined;
   const layoutId = url.searchParams.get("layoutId");
   const timeString = url.searchParams.get("time");

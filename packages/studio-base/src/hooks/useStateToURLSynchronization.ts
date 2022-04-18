@@ -17,7 +17,6 @@ import { usePlayerSelection } from "@foxglove/studio-base/context/PlayerSelectio
 import useDeepMemo from "@foxglove/studio-base/hooks/useDeepMemo";
 import { PlayerCapabilities, PlayerPresence } from "@foxglove/studio-base/players/types";
 import { AppURLState, encodeAppURLState } from "@foxglove/studio-base/util/appURLState";
-import isDesktopApp from "@foxglove/studio-base/util/isDesktopApp";
 
 const selectCanSeek = (ctx: MessagePipelineContext) =>
   ctx.playerState.capabilities.includes(PlayerCapabilities.playbackControl);
@@ -68,13 +67,6 @@ export function useStateToURLSynchronization(): void {
   }, [playerPresence]);
 
   useEffect(() => {
-    // Electron has its own concept of what the app URL is. If we want to do anything
-    // here for desktop we'll need to find some other method of encoding the state
-    // like perhaps the URL hash.
-    if (isDesktopApp()) {
-      return;
-    }
-
     // Don't update url unless we have a stable player state and a selected source.
     if (!playerIsStableRef.current || !selectedSource) {
       return;

@@ -2,7 +2,7 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { useMemo, useEffect } from "react";
+import { useMemo, useEffect, useState } from "react";
 
 import {
   IDataSourceFactory,
@@ -88,7 +88,17 @@ export default function Root({
   const consoleApi = useMemo(() => new ConsoleApi(process.env.FOXGLOVE_API_URL!), []);
   const nativeAppMenu = useMemo(() => new NativeAppMenu(menuBridge), []);
   const nativeWindow = useMemo(() => new NativeWindow(desktopBridge), []);
-  const deepLinks = useMemo(() => desktopBridge.getDeepLinks(), []);
+
+  // App url state in window.location will represent the user's current session state
+  // better than the initial deep link so we prioritize the current window.location
+  // url for startup state. This persists state across user-initiated refreshes.
+  const [deepLinks] = useState(() => {
+    // We treat presence of the `ds` or `layoutId` params as indicative of active state.
+    const windowUrl = new URL(window.location.href);
+    const hasActiveURLState =
+      windowUrl.searchParams.has("ds") || windowUrl.searchParams.has("layoutId");
+    return hasActiveURLState ? [window.location.href] : desktopBridge.getDeepLinks();
+  });
 
   return (
     <App
