@@ -32,6 +32,9 @@ type ReducedValue = {
 
   // The latest set of message events recevied to addMessages
   messageEvents: readonly Readonly<MessageEvent<unknown>>[];
+
+  // The path used to match these messages.
+  path: string;
 };
 
 /**
@@ -73,6 +76,7 @@ export function useMessageDataItem(path: string, options?: Options): ReducedValu
         return {
           matches: reversed,
           messageEvents,
+          path,
         };
       }
 
@@ -80,6 +84,7 @@ export function useMessageDataItem(path: string, options?: Options): ReducedValu
       return {
         matches: prevMatches.concat(reversed).slice(-historySize),
         messageEvents,
+        path,
       };
     },
     [cachedGetMessagePathDataItems, historySize, path],
@@ -91,6 +96,7 @@ export function useMessageDataItem(path: string, options?: Options): ReducedValu
         return {
           matches: [],
           messageEvents: [],
+          path,
         };
       }
 
@@ -103,10 +109,13 @@ export function useMessageDataItem(path: string, options?: Options): ReducedValu
         }
       }
 
-      if (newMatches.length > 0) {
+      // Return a new message set if we have matching messages or this is a different path
+      // than the path used to fetch the previous set of messages.
+      if (newMatches.length > 0 || path !== prevValue.path) {
         return {
           matches: newMatches.slice(-historySize),
           messageEvents: prevValue.messageEvents,
+          path,
         };
       }
 

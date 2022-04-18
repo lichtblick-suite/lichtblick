@@ -191,6 +191,45 @@ describe("useMessageDataItem", () => {
     ]);
   });
 
+  it("clears previous messages on topic change", async () => {
+    const { result, rerender } = renderHook(
+      ({ path }) => useMessageDataItem(path, { historySize: 2 }),
+      {
+        initialProps: { path: "/topic.value" },
+        wrapper({ children }) {
+          return (
+            <MockCurrentLayoutProvider>
+              <MockMessagePipelineProvider
+                messages={fixtureMessages}
+                topics={topics}
+                datatypes={datatypes}
+              >
+                {children}
+              </MockMessagePipelineProvider>
+            </MockCurrentLayoutProvider>
+          );
+        },
+      },
+    );
+    expect(result.all).toEqual([
+      [],
+      [
+        {
+          messageEvent: fixtureMessages[1],
+          queriedData: [{ path: "/topic.value", value: 1 }],
+        },
+        {
+          messageEvent: fixtureMessages[2],
+          queriedData: [{ path: "/topic.value", value: 2 }],
+        },
+      ],
+    ]);
+
+    rerender({ path: "/other_topic" });
+
+    expect(result.current).toEqual([]);
+  });
+
   it("keeps a history", async () => {
     const { result } = renderHook(({ path }) => useMessageDataItem(path, { historySize: 2 }), {
       initialProps: { path: "/topic.value" },
