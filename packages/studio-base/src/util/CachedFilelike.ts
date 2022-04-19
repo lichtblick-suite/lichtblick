@@ -210,7 +210,7 @@ export default class CachedFilelike implements Filelike {
       readRequestRange: this._readRequests[0] ? this._readRequests[0].range : undefined,
       downloadedRanges: this._virtualBuffer.getRangesWithData(),
       lastResolvedCallbackEnd: this._lastResolvedCallbackEnd,
-      cacheSize: this._cacheSizeInBytes,
+      maxRequestSize: this._cacheSizeInBytes,
       fileSize: size,
       continueDownloadingThreshold: CLOSE_ENOUGH_BYTES_TO_NOT_START_NEW_CONNECTION,
     });
