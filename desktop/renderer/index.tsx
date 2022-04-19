@@ -5,7 +5,7 @@
 // Make Electron type definitions available globally, such as extensions to File and other built-ins
 /// <reference types="electron" />
 
-import { init as initSentry } from "@sentry/electron";
+import { init as initSentry } from "@sentry/electron/renderer";
 import { StrictMode } from "react";
 import ReactDOM from "react-dom";
 

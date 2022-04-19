@@ -3,7 +3,7 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 import "colors";
-import { init as initSentry } from "@sentry/electron";
+import { init as initSentry } from "@sentry/electron/main";
 import { app, BrowserWindow, ipcMain, Menu, session, nativeTheme } from "electron";
 import fs from "fs";
 

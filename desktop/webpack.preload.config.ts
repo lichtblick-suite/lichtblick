@@ -61,9 +61,6 @@ export default (_: unknown, argv: WebpackArgv): Configuration => {
 
     resolve: {
       extensions: [".js", ".ts", ".tsx", ".json"],
-      alias: {
-        "@sentry/electron": "@sentry/electron/esm/renderer",
-      },
     },
   };
 };
