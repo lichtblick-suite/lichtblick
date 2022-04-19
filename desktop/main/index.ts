@@ -3,7 +3,7 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 import "colors";
-import { init as initSentry } from "@sentry/electron/main";
+import * as Sentry from "@sentry/electron/main";
 import { app, BrowserWindow, ipcMain, Menu, session, nativeTheme } from "electron";
 import fs from "fs";
 
@@ -107,16 +107,14 @@ function main() {
   const { crashReportingEnabled } = getTelemetrySettings();
   if (crashReportingEnabled && typeof process.env.SENTRY_DSN === "string") {
     log.info("initializing Sentry in main");
-    initSentry({
+    Sentry.init({
       dsn: process.env.SENTRY_DSN,
       autoSessionTracking: true,
       release: `${process.env.SENTRY_PROJECT}@${pkgInfo.version}`,
       // Remove the default breadbrumbs integration - it does not accurately track breadcrumbs and
       // creates more noise than benefit.
       integrations: (integrations) => {
-        return integrations.filter((integration) => {
-          return integration.name !== "Breadcrumbs";
-        });
+        return integrations.filter((integration) => integration.name !== "Breadcrumbs");
       },
     });
   }

@@ -3859,6 +3859,19 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@sentry/tracing@npm:6.19.6":
+  version: 6.19.6
+  resolution: "@sentry/tracing@npm:6.19.6"
+  dependencies:
+    "@sentry/hub": 6.19.6
+    "@sentry/minimal": 6.19.6
+    "@sentry/types": 6.19.6
+    "@sentry/utils": 6.19.6
+    tslib: ^1.9.3
+  checksum: ba41cd4079266c7bfebb327654579ce7f52fcc0ec67581b28c330e3b26dfb79c47d2a944ff86a91c2a150ec41f378047ec188727c4fa4ab8762a44d46c47af5f
+  languageName: node
+  linkType: hard
+
 "@sentry/types@npm:6.19.2":
   version: 6.19.2
   resolution: "@sentry/types@npm:6.19.2"
@@ -12891,6 +12904,7 @@ __metadata:
     "@octokit/rest": 18.12.0
     "@pmmmwh/react-refresh-webpack-plugin": 0.5.4
     "@sentry/electron": 3.0.7
+    "@sentry/tracing": 6.19.6
     "@sentry/webpack-plugin": 1.18.8
     "@storybook/addon-actions": 6.4.18
     "@storybook/addon-essentials": 6.4.18

@@ -2,7 +2,8 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { init as initSentry } from "@sentry/browser";
+import * as Sentry from "@sentry/browser";
+import { BrowserTracing } from "@sentry/tracing";
 import { StrictMode } from "react";
 import ReactDOM from "react-dom";
 
@@ -21,16 +22,21 @@ window.onerror = (...args) => {
 
 if (typeof process.env.SENTRY_DSN === "string") {
   log.info("initializing Sentry");
-  initSentry({
+  Sentry.init({
     dsn: process.env.SENTRY_DSN,
     autoSessionTracking: true,
     // Remove the default breadbrumbs integration - it does not accurately track breadcrumbs and
     // creates more noise than benefit.
     integrations: (integrations) => {
-      return integrations.filter((integration) => {
-        return integration.name !== "Breadcrumbs";
-      });
+      return integrations
+        .filter((integration) => integration.name !== "Breadcrumbs")
+        .concat([
+          new BrowserTracing({
+            startTransactionOnLocationChange: false, // location changes as a result of non-navigation interactions such as seeking
+          }),
+        ]);
     },
+    tracesSampleRate: 0.05,
   });
 }
 
