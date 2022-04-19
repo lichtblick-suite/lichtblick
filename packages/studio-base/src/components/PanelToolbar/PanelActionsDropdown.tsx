@@ -127,7 +127,6 @@ export function PanelActionsDropdown({ isOpen, setIsOpen, isUnknownPanel }: Prop
         text: "Panel settings",
         onClick: openSettings,
         iconProps: { iconName: "SingleColumnEdit" },
-        disabled: !(panelContext?.hasSettings ?? false),
       },
       {
         key: "change-panel",

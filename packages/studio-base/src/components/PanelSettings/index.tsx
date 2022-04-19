@@ -97,6 +97,7 @@ export default function PanelSettings({
 
   useEffect(() => {
     if (selectedPanelId) {
+      setSettingsTree(undefined);
       addUpdateSubscriber(selectedPanelId, updateSubscriber);
       return () => removeUpdateSubscriber(selectedPanelId, updateSubscriber);
     } else {
