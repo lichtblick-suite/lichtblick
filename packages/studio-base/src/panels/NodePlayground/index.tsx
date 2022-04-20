@@ -36,7 +36,6 @@ import BottomBar from "@foxglove/studio-base/panels/NodePlayground/BottomBar";
 import Sidebar from "@foxglove/studio-base/panels/NodePlayground/Sidebar";
 import Playground from "@foxglove/studio-base/panels/NodePlayground/playground-icon.svg";
 import { PanelConfigSchema, UserNodes } from "@foxglove/studio-base/types/panels";
-import { DEFAULT_STUDIO_NODE_PREFIX } from "@foxglove/studio-base/util/globalConstants";
 import { colors } from "@foxglove/studio-base/util/sharedStyleConstants";
 
 import Config from "./Config";
@@ -217,7 +216,7 @@ function NodePlayground(props: Props) {
       setUserNodes({
         [newNodeId]: {
           sourceCode,
-          name: `${DEFAULT_STUDIO_NODE_PREFIX}${newNodeId.split("-")[0]}`,
+          name: `${newNodeId.split("-")[0]}`,
         },
       });
       saveConfig({ selectedNodeId: newNodeId });

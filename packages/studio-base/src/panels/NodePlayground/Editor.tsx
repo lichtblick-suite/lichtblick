@@ -15,6 +15,7 @@ import { useTheme } from "@fluentui/react";
 import * as monacoApi from "monaco-editor/esm/vs/editor/editor.api";
 // @ts-expect-error StaticServices does not have type information in the monaco-editor package
 import { StaticServices } from "monaco-editor/esm/vs/editor/standalone/browser/standaloneServices";
+import * as path from "path";
 import { ReactElement, useCallback, useRef } from "react";
 import MonacoEditor, { EditorDidMount, EditorWillMount } from "react-monaco-editor";
 import { useResizeDetector } from "react-resize-detector";
@@ -23,6 +24,7 @@ import getPrettifiedCode from "@foxglove/studio-base/panels/NodePlayground/getPr
 import { Script } from "@foxglove/studio-base/panels/NodePlayground/script";
 import { getNodeProjectConfig } from "@foxglove/studio-base/players/UserNodePlayer/nodeTransformerWorker/typescript/projectConfig";
 import inScreenshotTests from "@foxglove/studio-base/stories/inScreenshotTests";
+import { DEFAULT_STUDIO_NODE_PREFIX } from "@foxglove/studio-base/util/globalConstants";
 import { mightActuallyBePartial } from "@foxglove/studio-base/util/mightActuallyBePartial";
 
 import { themes } from "./theme";
@@ -148,7 +150,13 @@ const Editor = ({
     if (!editor || !script) {
       return;
     }
-    const filePath = monacoApi.Uri.parse(`file://${script.filePath}`);
+
+    // For nodes, the name becomes the filePath.
+    // For the editor to resolve relative imports of the utilities (i.e. ./types), we need the
+    // user's code to be in a file next to the utility files. For this we grab the basename
+    // of the user's entered node name to remove any path-like sections.
+    const basename = path.basename(script.filePath);
+    const filePath = monacoApi.Uri.parse(`file://${DEFAULT_STUDIO_NODE_PREFIX}${basename}`);
     const model =
       monacoApi.editor.getModel(filePath) ??
       monacoApi.editor.createModel(script.code, "typescript", filePath);
@@ -231,7 +239,12 @@ const Editor = ({
         model.updateOptions({ tabSize: 2 });
       });
 
-      const filePath = monacoApi.Uri.parse(`file://${script.filePath}`);
+      // For nodes, the name becomes the filePath.
+      // For the editor to resolve relative imports of the utilities (i.e. ./types), we need the
+      // user's code to be in a file next to the utility files. For this we grab the basename
+      // of the user's entered node name to remove any path-like sections.
+      const basename = path.basename(script.filePath);
+      const filePath = monacoApi.Uri.parse(`file://${DEFAULT_STUDIO_NODE_PREFIX}${basename}`);
       const model =
         monaco.editor.getModel(filePath) ??
         monaco.editor.createModel(script.code, "typescript", filePath);
