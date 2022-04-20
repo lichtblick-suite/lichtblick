@@ -70,7 +70,12 @@ export default (_env: unknown, argv: WebpackArgv): Configuration => {
 
     optimization: {
       removeAvailableModules: true,
-      minimizer: [new ESBuildMinifyPlugin({ target: "es2020" })],
+      minimizer: [
+        new ESBuildMinifyPlugin({
+          target: "es2020",
+          minifyIdentifiers: false, // readable error stack traces are helpful for debugging
+        }),
+      ],
     },
 
     plugins: [
