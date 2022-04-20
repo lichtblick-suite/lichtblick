@@ -14,9 +14,11 @@ import { useCurrentLayoutActions } from "@foxglove/studio-base/context/CurrentLa
 import { usePlayerSelection } from "@foxglove/studio-base/context/PlayerSelectionContext";
 import useDeepMemo from "@foxglove/studio-base/hooks/useDeepMemo";
 import { useSessionStorageValue } from "@foxglove/studio-base/hooks/useSessionStorageValue";
+import { PlayerPresence } from "@foxglove/studio-base/players/types";
 import { AppURLState, parseAppURLState } from "@foxglove/studio-base/util/appURLState";
 import isDesktopApp from "@foxglove/studio-base/util/isDesktopApp";
 
+const selectPlayerPresence = (ctx: MessagePipelineContext) => ctx.playerState.presence;
 const selectSeek = (ctx: MessagePipelineContext) => ctx.seekPlayback;
 const selectUrlState = (ctx: MessagePipelineContext) => ctx.playerState.urlState;
 
@@ -33,6 +35,7 @@ export function useInitialDeepLinkState(deepLinks: string[]): void {
     AppSetting.LAUNCH_PREFERENCE,
   );
   const seekPlayback = useMessagePipeline(selectSeek);
+  const playerPresence = useMessagePipeline(selectPlayerPresence);
 
   const appUrlRef = useRef<AppURLState | undefined>();
   if (!appUrlRef.current) {
@@ -85,6 +88,11 @@ export function useInitialDeepLinkState(deepLinks: string[]): void {
   }, [selectSource, setSelectedLayoutId]);
 
   useEffect(() => {
+    // Wait until player is ready before we try to seek.
+    if (playerPresence !== PlayerPresence.PRESENT) {
+      return;
+    }
+
     const urlState = appUrlRef.current;
     if (urlState?.time == undefined || !seekPlayback) {
       return;
@@ -101,5 +109,5 @@ export function useInitialDeepLinkState(deepLinks: string[]): void {
     log.debug(`Seeking to url time:`, urlState.time);
     seekPlayback(urlState.time);
     urlState.time = undefined;
-  }, [seekPlayback]);
+  }, [playerPresence, seekPlayback]);
 }

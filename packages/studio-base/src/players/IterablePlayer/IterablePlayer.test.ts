@@ -127,7 +127,7 @@ describe("IterablePlayer", () => {
       // before initialize
       baseState,
       // start delay
-      { ...baseState, presence: PlayerPresence.PRESENT },
+      baseState,
       // startPlay
       { ...baseState, presence: PlayerPresence.PRESENT },
       // idle

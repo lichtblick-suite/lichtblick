@@ -239,7 +239,6 @@ export class IterablePlayer implements Player {
       this._setError(`Error initializing: ${error.message}`, error);
     }
 
-    this._presence = PlayerPresence.PRESENT;
     await this._emitState();
     if (!this._hasError) {
       this._setState("start-delay");
@@ -303,6 +302,7 @@ export class IterablePlayer implements Player {
 
     this._currentTime = stopTime;
     this._messages = messageEvents;
+    this._presence = PlayerPresence.PRESENT;
     await this._emitState();
     if (this._nextState) {
       return;
