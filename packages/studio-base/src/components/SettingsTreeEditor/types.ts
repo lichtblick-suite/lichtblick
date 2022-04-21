@@ -51,6 +51,19 @@ export type SettingsTreeAction = {
  * a default user interface in Studio.
  */
 export type SettingsTree = {
+  /**
+   * Handler to process all actions on the settings tree initiated by the UI.
+   */
   actionHandler: (action: SettingsTreeAction) => void;
+
+  /**
+   * True if the editor should not show the filter control.
+   */
+  disableFilter?: boolean;
+
+  /**
+   * The actual settings tree. Updates to this will automatically be reflected in the
+   * editor UI.
+   */
   settings: SettingsTreeNode;
 };

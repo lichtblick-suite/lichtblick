@@ -32,28 +32,30 @@ export default function SettingsTreeEditor({
 
   return (
     <Stack fullHeight>
-      <StyledAppBar position="sticky" color="default" elevation={0}>
-        <TextField
-          onChange={(event) => setFilterText(event.target.value)}
-          value={filterText}
-          variant="filled"
-          fullWidth
-          placeholder="Filter by layer name"
-          InputProps={{
-            startAdornment: <SearchIcon fontSize="small" />,
-            endAdornment: filterText && (
-              <IconButton
-                size="small"
-                title="Clear search"
-                onClick={() => setFilterText("")}
-                edge="end"
-              >
-                <ClearIcon fontSize="small" />
-              </IconButton>
-            ),
-          }}
-        />
-      </StyledAppBar>
+      {settings.disableFilter !== true && (
+        <StyledAppBar position="sticky" color="default" elevation={0}>
+          <TextField
+            onChange={(event) => setFilterText(event.target.value)}
+            value={filterText}
+            variant="filled"
+            fullWidth
+            placeholder="Filter"
+            InputProps={{
+              startAdornment: <SearchIcon fontSize="small" />,
+              endAdornment: filterText && (
+                <IconButton
+                  size="small"
+                  title="Clear search"
+                  onClick={() => setFilterText("")}
+                  edge="end"
+                >
+                  <ClearIcon fontSize="small" />
+                </IconButton>
+              ),
+            }}
+          />
+        </StyledAppBar>
+      )}
       <List dense disablePadding>
         <NodeEditor path={ROOT_PATH} settings={settings.settings} actionHandler={actionHandler} />
       </List>

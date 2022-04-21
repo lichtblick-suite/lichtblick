@@ -2,28 +2,29 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import escapeHTML from "escape-html";
 import {
   Map as LeafMap,
   TileLayer,
-  Control,
   LatLngBounds,
   CircleMarker,
   FeatureGroup,
-  LayersControlEvent,
   LayerGroup,
   geoJSON,
   Layer,
 } from "leaflet";
-import { minBy, partition } from "lodash";
+import { difference, minBy, partition, transform, union } from "lodash";
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { useResizeDetector } from "react-resize-detector";
-import { useLatest } from "react-use";
 import { useDebouncedCallback } from "use-debounce";
 
 import { toSec } from "@foxglove/rostime";
 import { PanelExtensionContext, MessageEvent } from "@foxglove/studio";
 import EmptyState from "@foxglove/studio-base/components/EmptyState";
+import {
+  SettingsTreeAction,
+  SettingsTreeFields,
+  SettingsTreeNode,
+} from "@foxglove/studio-base/components/SettingsTreeEditor/types";
 import FilteredPointLayer, {
   POINT_MARKER_RADIUS,
 } from "@foxglove/studio-base/panels/Map/FilteredPointLayer";
@@ -36,8 +37,9 @@ import { MapPanelMessage, Point } from "./types";
 
 // Persisted panel state
 type Config = {
+  disabledTopics: string[];
+  layer: string;
   zoomLevel?: number;
-  disabledTopics?: [];
 };
 
 type MapPanelProps = {
@@ -52,6 +54,38 @@ function isGeoJSONMessage(
     message.message != undefined &&
     "geojson" in message.message
   );
+}
+
+function buildSettingsTree(config: Config, eligibleTopics: string[]): SettingsTreeNode {
+  const topics: SettingsTreeFields = transform(
+    eligibleTopics,
+    (result, topic) => {
+      result[topic] = {
+        label: topic,
+        input: "boolean",
+        value: !config.disabledTopics.includes(topic),
+      };
+    },
+    {} as SettingsTreeFields,
+  );
+
+  return {
+    label: "General",
+    fields: {
+      layer: {
+        label: "Layer",
+        input: "select",
+        value: config.layer,
+        options: ["map", "satellite"],
+      },
+    },
+    children: {
+      topics: {
+        label: "Topics",
+        fields: topics,
+      },
+    },
+  };
 }
 
 function topicMessageType(topic: Topic) {
@@ -76,7 +110,32 @@ function MapPanel(props: MapPanelProps): JSX.Element {
 
   const mapContainerRef = useRef<HTMLDivElement>(ReactNull);
 
-  const [config] = useState<Config>(props.context.initialState as Config);
+  const [config, setConfig] = useState<Config>(() => {
+    const initialConfig = props.context.initialState as Partial<Config>;
+    initialConfig.disabledTopics = initialConfig.disabledTopics ?? [];
+    initialConfig.layer = initialConfig.layer ?? "map";
+    return initialConfig as Config;
+  });
+
+  const [tileLayer] = useState(
+    new TileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+      attribution: '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors',
+      maxNativeZoom: 18,
+      maxZoom: 24,
+    }),
+  );
+
+  const [satelliteLayer] = useState(
+    new TileLayer(
+      "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
+      {
+        attribution:
+          "&copy; Esri &mdash; Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community",
+        maxNativeZoom: 18,
+        maxZoom: 24,
+      },
+    ),
+  );
 
   // Panel state management to update our set of messages
   // We use state to trigger a render on the panel
@@ -95,12 +154,6 @@ function MapPanel(props: MapPanelProps): JSX.Element {
 
   // Panel state management to track the list of available topics
   const [topics, setTopics] = useState<readonly Topic[]>([]);
-
-  // Disabled topics is the set of topics the user has unchecked in the layer control
-  // Track disabled topics rather than enabled so any new topics display by default
-  const [disabledTopics, setDisabledTopics] = useState(
-    () => new Set<string>(config.disabledTopics),
-  );
 
   // Panel state management to track the current preview time
   const [previewTime, setPreviewTime] = useState<number | undefined>();
@@ -128,14 +181,58 @@ function MapPanel(props: MapPanelProps): JSX.Element {
     return topics.filter(topicMessageType).map((topic) => topic.name);
   }, [topics]);
 
+  const settingsActionHandler = useCallback((action: SettingsTreeAction) => {
+    const { path, input, value } = action.payload;
+
+    if (path[0] === "topics" && input === "boolean") {
+      const topic = path[1];
+      if (topic) {
+        setConfig((oldConfig) => {
+          return {
+            ...oldConfig,
+            disabledTopics:
+              value === true
+                ? difference(oldConfig.disabledTopics, [topic])
+                : union(oldConfig.disabledTopics, [topic]),
+          };
+        });
+      }
+    }
+
+    if (path[0] === "layer" && input === "select") {
+      setConfig((oldConfig) => {
+        return { ...oldConfig, layer: value ?? "map" };
+      });
+    }
+  }, []);
+
+  useEffect(() => {
+    if (config.layer === "map") {
+      currentMap?.addLayer(tileLayer);
+      currentMap?.removeLayer(satelliteLayer);
+    } else {
+      currentMap?.addLayer(satelliteLayer);
+      currentMap?.removeLayer(tileLayer);
+    }
+  }, [config.layer, currentMap, satelliteLayer, tileLayer]);
+
   // Subscribe to eligible and enabled topics
   useEffect(() => {
-    const eligibleEnabled = eligibleTopics.filter((topic) => !disabledTopics.has(topic));
+    const eligibleEnabled = difference(eligibleTopics, config.disabledTopics);
     context.subscribe(eligibleEnabled);
+
+    const tree = buildSettingsTree(config, eligibleTopics);
+    // eslint-disable-next-line no-underscore-dangle, @typescript-eslint/no-explicit-any
+    (context as unknown as any).__updatePanelSettingsTree({
+      actionHandler: settingsActionHandler,
+      disableFilter: true,
+      settings: tree,
+    });
+
     return () => {
       context.unsubscribeAll();
     };
-  }, [context, disabledTopics, eligibleTopics]);
+  }, [config, context, eligibleTopics, settingsActionHandler]);
 
   type TopicGroups = {
     baseColor: string;
@@ -164,12 +261,6 @@ function MapPanel(props: MapPanelProps): JSX.Element {
     return topicLayerMap;
   }, [eligibleTopics]);
 
-  // layer controls for user selection between map, satellite and topics
-  const layerControl = useMemo(() => new Control.Layers(), []);
-
-  // toggling layers changes the disabledTopics list, but we don't want to re-run this effect
-  // because the layer controls have already updated the map with active/inactive layers
-  const disabledTopicsLatest = useLatest(disabledTopics);
   useLayoutEffect(() => {
     if (!currentMap) {
       return;
@@ -177,24 +268,18 @@ function MapPanel(props: MapPanelProps): JSX.Element {
 
     const topicLayerEntries = [...topicLayers.entries()];
     for (const [topic, featureGroups] of topicLayerEntries) {
-      layerControl.addOverlay(
-        featureGroups.topicGroup,
-        `<span style="color: ${featureGroups.baseColor}">${escapeHTML(topic)}</span>`,
-      );
-
       // if the topic does not appear in the disabled topics list, add to map so it displays
-      if (!disabledTopicsLatest.current.has(topic)) {
+      if (!config.disabledTopics.includes(topic)) {
         currentMap.addLayer(featureGroups.topicGroup);
       }
     }
 
     return () => {
       for (const [_topic, featureGroups] of topicLayerEntries) {
-        layerControl.removeLayer(featureGroups.topicGroup);
         currentMap.removeLayer(featureGroups.topicGroup);
       }
     };
-  }, [currentMap, disabledTopicsLatest, layerControl, topicLayers]);
+  }, [config.disabledTopics, currentMap, topicLayers]);
 
   // During the initial mount we setup our context render handler
   useLayoutEffect(() => {
@@ -202,35 +287,10 @@ function MapPanel(props: MapPanelProps): JSX.Element {
       return;
     }
 
-    const tileLayer = new TileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-      attribution: '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors',
-      maxNativeZoom: 18,
-      maxZoom: 24,
-    });
-
-    const satelliteLayer = new TileLayer(
-      "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
-      {
-        attribution:
-          "&copy; Esri &mdash; Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community",
-        maxNativeZoom: 18,
-        maxZoom: 24,
-      },
-    );
-
-    const map = new LeafMap(mapContainerRef.current, {
-      // sets the tile layer as the default
-      layers: [tileLayer],
-    });
+    const map = new LeafMap(mapContainerRef.current);
 
     // the map must be initialized with some view before other features work
     map.setView([0, 0], 10);
-
-    // layer controls for user selection between satellite and map
-    layerControl.addBaseLayer(tileLayer, "map");
-    layerControl.addBaseLayer(satelliteLayer, "satellite");
-    layerControl.setPosition("topleft");
-    layerControl.addTo(map);
 
     setCurrentMap(map);
 
@@ -239,30 +299,6 @@ function MapPanel(props: MapPanelProps): JSX.Element {
     context.watch("currentFrame");
     context.watch("allFrames");
     context.watch("previewTime");
-
-    // layer is added (checked) - remove from disabled list
-    map.on("overlayadd", (ev: LayersControlEvent) => {
-      const topic = ev.name;
-      setDisabledTopics((prevDisabled) => {
-        if (!prevDisabled.has(topic)) {
-          return prevDisabled;
-        }
-        prevDisabled.delete(topic);
-        return new Set(prevDisabled);
-      });
-    });
-
-    // layer is removed (unckecked) - add to disabled topics list
-    map.on("overlayremove", (ev: LayersControlEvent) => {
-      const topic = ev.name;
-      setDisabledTopics((prevDisabled) => {
-        if (prevDisabled.has(topic)) {
-          return prevDisabled;
-        }
-        prevDisabled.add(topic);
-        return new Set(prevDisabled);
-      });
-    });
 
     // The render event handler updates the state for our messages an triggers a component render
     //
@@ -290,7 +326,7 @@ function MapPanel(props: MapPanelProps): JSX.Element {
       map.remove();
       context.onRender = undefined;
     };
-  }, [context, layerControl]);
+  }, [context]);
 
   const onHover = useCallback(
     (messageEvent?: MessageEvent<unknown>) => {
@@ -490,10 +526,8 @@ function MapPanel(props: MapPanelProps): JSX.Element {
   }, [context, currentMap]);
 
   useEffect(() => {
-    context.saveState({
-      disabledTopics: Array.from(disabledTopics),
-    });
-  }, [context, disabledTopics]);
+    context.saveState(config);
+  }, [context, config]);
 
   // we don't want to invoke filtering on every user map move so we rate limit to 100ms
   const moveHandler = useDebouncedCallback(

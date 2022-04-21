@@ -19,6 +19,10 @@ export default {
 };
 
 const DefaultSettings: SettingsTreeNode = {
+  fields: {
+    firstRootField: { input: "string", label: "First Root Field" },
+    secondRootField: { input: "string", label: "Second Root Field" },
+  },
   children: {
     complex_inputs: {
       label: "Complex Inputs",
