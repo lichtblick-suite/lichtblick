@@ -143,11 +143,7 @@ export default function LayoutManagerProvider({
 
   return (
     <LayoutStorageDebuggingContext.Provider
-      value={
-        process.env.NODE_ENV !== "production" && enableLayoutDebugging && remoteLayoutStorage
-          ? debugging
-          : undefined
-      }
+      value={process.env.NODE_ENV !== "production" && enableLayoutDebugging ? debugging : undefined}
     >
       <LayoutManagerContext.Provider value={layoutManager}>
         {children}

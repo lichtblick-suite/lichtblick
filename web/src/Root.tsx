@@ -25,7 +25,7 @@ import {
 import Ros1UnavailableDataSourceFactory from "./dataSources/Ros1UnavailableDataSourceFactory";
 import Ros2UnavailableDataSourceFactory from "./dataSources/Ros2UnavailableDataSourceFactory";
 import VelodyneUnavailableDataSourceFactory from "./dataSources/VelodyneUnavailableDataSourceFactory";
-import { LocalStorageLayoutStorage } from "./services/LocalStorageLayoutStorage";
+import { IdbLayoutStorage } from "./services/IdbLayoutStorage";
 import { NoopExtensionLoader } from "./services/NoopExtensionLoader";
 
 export function Root({ appConfiguration }: { appConfiguration: IAppConfiguration }): JSX.Element {
@@ -57,7 +57,7 @@ export function Root({ appConfiguration }: { appConfiguration: IAppConfiguration
     return sources;
   }, [enableExperimentalBagPlayer, enableExperimentalDataPlatformPlayer]);
 
-  const layoutStorage = useMemo(() => new LocalStorageLayoutStorage(), []);
+  const layoutStorage = useMemo(() => new IdbLayoutStorage(), []);
   const extensionLoader = useMemo(() => new NoopExtensionLoader(), []);
   const consoleApi = useMemo(() => new ConsoleApi(process.env.FOXGLOVE_API_URL!), []);
 

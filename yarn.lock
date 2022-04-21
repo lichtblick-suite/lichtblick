@@ -2607,6 +2607,7 @@ __metadata:
     gl-matrix: 3.4.3
     hammerjs: 2.0.8
     history: 5.2.0
+    idb: 7.0.1
     idb-keyval: 6.1.0
     immer: 9.0.12
     intervals-fn: 3.0.3
@@ -14369,6 +14370,13 @@ __metadata:
   dependencies:
     safari-14-idb-fix: ^3.0.0
   checksum: 431a7467739f0279e6af5f36c408f4c83e71ad0a892296d11360e5f2eaac8948da274783946b51c46847d8286570cc9d95d2e54b3cde351749d47bba419c25fc
+  languageName: node
+  linkType: hard
+
+"idb@npm:7.0.1":
+  version: 7.0.1
+  resolution: "idb@npm:7.0.1"
+  checksum: 61526789562cc3518a1a030c7a06cc98edfcd62795700ff28c701d6f84c178aee4e98bedfc79e6c394ba26084aa4667d6594b1728e5868f305f9b34148662679
   languageName: node
   linkType: hard
 
