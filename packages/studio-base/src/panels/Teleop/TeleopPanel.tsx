@@ -22,12 +22,12 @@ type TeleopPanelProps = {
 };
 
 const geometryMsgOptions = [
-  "linear-x",
-  "linear-y",
-  "linear-z",
-  "angular-x",
-  "angular-y",
-  "angular-z",
+  { label: "linear-x", value: "linear-x" },
+  { label: "linear-y", value: "linear-y" },
+  { label: "linear-z", value: "linear-z" },
+  { label: "angular-x", value: "angular-x" },
+  { label: "angular-y", value: "angular-y" },
+  { label: "angular-z", value: "angular-z" },
 ];
 
 type Config = {

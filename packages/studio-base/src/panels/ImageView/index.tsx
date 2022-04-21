@@ -16,15 +16,22 @@ import WavesIcon from "@mdi/svg/svg/waves.svg";
 import { Stack, Theme } from "@mui/material";
 import { makeStyles } from "@mui/styles";
 import cx from "classnames";
-import { useEffect, useState, useMemo, useCallback, useRef } from "react";
+import produce from "immer";
+import { set } from "lodash";
+import { useEffect, useState, useMemo, useCallback, useRef, useContext } from "react";
 
 import { useDataSourceInfo } from "@foxglove/studio-base/PanelAPI";
 import Icon from "@foxglove/studio-base/components/Icon";
 import { useMessagePipeline } from "@foxglove/studio-base/components/MessagePipeline";
 import Panel from "@foxglove/studio-base/components/Panel";
+import { usePanelContext } from "@foxglove/studio-base/components/PanelContext";
 import PanelToolbar from "@foxglove/studio-base/components/PanelToolbar";
+import {
+  SettingsTreeAction,
+  SettingsTreeNode,
+} from "@foxglove/studio-base/components/SettingsTreeEditor/types";
+import { PanelSettingsEditorContext } from "@foxglove/studio-base/context/PanelSettingsEditorContext";
 import inScreenshotTests from "@foxglove/studio-base/stories/inScreenshotTests";
-import { PanelConfigSchema } from "@foxglove/studio-base/types/panels";
 import { mightActuallyBePartial } from "@foxglove/studio-base/util/mightActuallyBePartial";
 import { getTopicsByTopicName } from "@foxglove/studio-base/util/selectors";
 import { formatTimeRaw } from "@foxglove/studio-base/util/time";
@@ -96,6 +103,57 @@ const useStyles = makeStyles((theme: Theme) => ({
   },
 }));
 
+function buildSettingsTree(config: Config): SettingsTreeNode {
+  return {
+    label: "General",
+    fields: {
+      transformMarkers: {
+        input: "boolean",
+        label: "Synchronize Markers",
+        value: config.transformMarkers,
+      },
+      smooth: {
+        input: "boolean",
+        label: "Bilinear Smoothing",
+        value: config.smooth ?? false,
+      },
+      flipHorizontal: {
+        input: "boolean",
+        label: "Flip Horizontal",
+        value: config.flipHorizontal ?? false,
+      },
+      flipVertical: {
+        input: "boolean",
+        label: "Flip Vertical",
+        value: config.flipVertical ?? false,
+      },
+      rotation: {
+        input: "select",
+        label: "Rotation",
+        value: config.rotation ?? 0,
+        options: [
+          { label: "0°", value: 0 },
+          { label: "90°", value: 90 },
+          { label: "180°", value: 180 },
+          { label: "270°", value: 270 },
+        ],
+      },
+      minValue: {
+        input: "number",
+        label: "Minimum Value (depth images)",
+        placeholder: "0",
+        value: config.minValue,
+      },
+      maxValue: {
+        input: "number",
+        label: "Maximum Value (depth images)",
+        placeholder: "10000",
+        value: config.maxValue,
+      },
+    },
+  };
+}
+
 const BottomBar = ({ children }: { children?: React.ReactNode }) => {
   const classes = useStyles();
   return (
@@ -120,6 +178,8 @@ function ImageView(props: Props) {
     [cameraTopic, topics],
   );
   const [activePixelData, setActivePixelData] = useState<PixelData | undefined>();
+  const { updatePanelSettingsTree } = useContext(PanelSettingsEditorContext);
+  const { id: panelId } = usePanelContext();
 
   const allImageTopics = useMemo(() => {
     return topics.filter(({ datatype }) => NORMALIZABLE_IMAGE_DATATYPES.includes(datatype));
@@ -134,6 +194,25 @@ function ImageView(props: Props) {
       }
     }
   }, [allImageTopics, config, saveConfig]);
+
+  const actionHandler = useCallback(
+    (action: SettingsTreeAction) => {
+      saveConfig(
+        produce(config, (draft) => {
+          set(draft, action.payload.path, action.payload.value);
+        }),
+      );
+    },
+    [config, saveConfig],
+  );
+
+  useEffect(() => {
+    updatePanelSettingsTree(panelId, {
+      actionHandler,
+      disableFilter: true,
+      settings: buildSettingsTree(config),
+    });
+  }, [actionHandler, config, panelId, updatePanelSettingsTree]);
 
   const relatedAnnotationTopics = useMemo(
     () => getMarkerOptions(cameraTopic, topics, ANNOTATION_DATATYPES),
@@ -366,54 +445,9 @@ const defaultConfig: Config = {
   zoom: 1,
 };
 
-const configSchema: PanelConfigSchema<Config> = [
-  { key: "synchronize", type: "toggle", title: "Synchronize images and markers" },
-  {
-    key: "smooth",
-    type: "toggle",
-    title: "Bilinear smoothing",
-  },
-  {
-    key: "flipHorizontal",
-    type: "toggle",
-    title: "Flip horizontally",
-  },
-  {
-    key: "flipVertical",
-    type: "toggle",
-    title: "Flip vertically",
-  },
-  {
-    key: "rotation",
-    type: "dropdown",
-    title: "Rotation",
-    options: [
-      { value: 0, text: "0°" },
-      { value: 90, text: "90°" },
-      { value: 180, text: "180°" },
-      { value: 270, text: "270°" },
-    ],
-  },
-  {
-    key: "minValue",
-    type: "number",
-    title: "Minimum value (depth images)",
-    placeholder: "0",
-    allowEmpty: true,
-  },
-  {
-    key: "maxValue",
-    type: "number",
-    title: "Maximum value (depth images)",
-    placeholder: "10000",
-    allowEmpty: true,
-  },
-];
-
 export default Panel(
   Object.assign(ImageView, {
     panelType: "ImageViewPanel",
     defaultConfig,
-    configSchema,
   }),
 );

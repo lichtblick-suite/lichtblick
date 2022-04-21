@@ -9,23 +9,33 @@ export type SettingsTreeFieldValue =
   | { input: "gradient"; value?: string }
   | { input: "messagepath"; value?: string; validTypes?: string[] }
   | { input: "number"; value?: number; step?: number }
-  | { input: "select"; value?: string; options: string[] }
+  | {
+      input: "select";
+      value?: number | readonly number[];
+      options: Array<{ label: string; value: undefined | number }>;
+    }
+  | {
+      input: "select";
+      value?: string | readonly string[];
+      options: Array<{ label: string; value: undefined | string }>;
+    }
   | { input: "string"; value?: string }
   | { input: "toggle"; value?: string; options: string[] };
 
 export type SettingsTreeField = SettingsTreeFieldValue & {
-  label: string;
   help?: string;
+  label: string;
   placeholder?: string;
 };
 
 export type SettingsTreeFields = Record<string, SettingsTreeField>;
+
 export type SettingsTreeChildren = Record<string, SettingsTreeNode>;
 
 export type SettingsTreeNode = {
-  label?: string;
-  fields?: SettingsTreeFields;
   children?: SettingsTreeChildren;
+  fields?: SettingsTreeFields;
+  label?: string;
 };
 
 /**

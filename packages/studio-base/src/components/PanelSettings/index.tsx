@@ -17,7 +17,6 @@ import {
   useCurrentLayoutSelector,
   useSelectedPanels,
 } from "@foxglove/studio-base/context/CurrentLayoutContext";
-import { useHelpInfo } from "@foxglove/studio-base/context/HelpInfoContext";
 import { usePanelCatalog } from "@foxglove/studio-base/context/PanelCatalogContext";
 import {
   ImmutableSettingsTree,
@@ -40,7 +39,7 @@ export default function PanelSettings({
   const selectedLayoutId = useCurrentLayoutSelector(selectedLayoutIdSelector);
   const { selectedPanelIds: originalSelectedPanelIds, setSelectedPanelIds } = useSelectedPanels();
   const selectedPanelIds = selectedPanelIdsForTests ?? originalSelectedPanelIds;
-  const { openLayoutBrowser, openHelp } = useWorkspace();
+  const { openLayoutBrowser } = useWorkspace();
   const selectedPanelId = useMemo(
     () => (selectedPanelIds.length === 1 ? selectedPanelIds[0] : undefined),
     [selectedPanelIds],
@@ -62,7 +61,6 @@ export default function PanelSettings({
     () => (panelType != undefined ? panelCatalog.getPanelByType(panelType) : undefined),
     [panelCatalog, panelType],
   );
-  const { setHelpInfo } = useHelpInfo();
 
   const [showShareModal, setShowShareModal] = useState(false);
   const shareModal = useMemo(() => {
@@ -157,22 +155,6 @@ export default function PanelSettings({
     <SidebarContent disablePadding={isSettingsTree} title={`${panelInfo.title} panel settings`}>
       {shareModal}
       <Stack gap={2} justifyContent="flex-start">
-        {panelInfo.help != undefined && (
-          <Stack paddingX={isSettingsTree ? 2 : 0}>
-            <Typography color="text.secondary">
-              See docs{" "}
-              <Link
-                onClick={() => {
-                  setHelpInfo({ title: panelInfo.type, content: panelInfo.help });
-                  openHelp();
-                }}
-              >
-                here
-              </Link>
-              .
-            </Typography>
-          </Stack>
-        )}
         <div>
           {settingsTree && <SettingsEditor settings={settingsTree} />}
           {!settingsTree && schema && (

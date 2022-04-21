@@ -17,6 +17,7 @@ import {
   TextField,
   IconButton,
   ListProps,
+  useTheme,
 } from "@mui/material";
 import { DeepReadonly } from "ts-essentials";
 
@@ -261,9 +262,9 @@ function FieldInput({
           }
           MenuProps={{ MenuListProps: { dense: true } }}
         >
-          {field.options.map((opt) => (
-            <MenuItem key={opt} value={opt}>
-              {opt}
+          {field.options.map(({ label, value }) => (
+            <MenuItem key={value} value={value}>
+              {label}
             </MenuItem>
           ))}
         </Select>
@@ -284,10 +285,13 @@ function FieldEditorComponent({
   field: DeepReadonly<SettingsTreeField>;
   path: readonly string[];
 }): JSX.Element {
+  const theme = useTheme();
+  const indent = Math.min(path.length, 4);
+  const paddingLeft = theme.spacing(2 + 2 * Math.max(0, indent - 1));
+
   return (
     <>
-      <div /> {/* Spacer for left column */}
-      <Stack direction="row" alignItems="center">
+      <Stack direction="row" alignItems="center" style={{ paddingLeft }}>
         <Typography
           title={field.label}
           variant="subtitle2"
@@ -303,7 +307,7 @@ function FieldEditorComponent({
           </IconButton>
         )}
       </Stack>
-      <div>
+      <div style={{ paddingRight: theme.spacing(2) }}>
         <FieldInput actionHandler={actionHandler} field={field} path={path} />
       </div>
     </>

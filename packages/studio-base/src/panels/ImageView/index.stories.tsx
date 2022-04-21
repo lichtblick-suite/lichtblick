@@ -5,7 +5,6 @@
 import { useRef } from "react";
 import TestUtils from "react-dom/test-utils";
 
-import SchemaEditor from "@foxglove/studio-base/components/PanelSettings/SchemaEditor";
 import PanelSetup from "@foxglove/studio-base/stories/PanelSetup";
 
 import ImageView from "./index";
@@ -58,13 +57,3 @@ export const TopicButNoDataSourceHoveredLight = Object.assign(
   TopicButNoDataSourceHovered.bind(undefined),
   { parameters: { colorScheme: "light" } },
 );
-
-export function Settings(): JSX.Element {
-  return (
-    <SchemaEditor
-      configSchema={ImageView.configSchema!}
-      config={ImageView.defaultConfig}
-      saveConfig={() => {}}
-    />
-  );
-}
