@@ -91,6 +91,7 @@ const basicPlayerState: PlayerStateActiveData = {
   messageOrder: "receiveTime",
   currentTime: { sec: 0, nsec: 0 },
   topics: [],
+  topicStats: new Map(),
   datatypes: new Map(),
 };
 

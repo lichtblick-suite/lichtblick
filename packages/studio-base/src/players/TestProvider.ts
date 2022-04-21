@@ -79,6 +79,7 @@ export default class TestProvider implements RandomAccessDataProvider {
       start: this._start,
       end: this._end,
       topics: this._topics,
+      topicStats: new Map(),
       connections: [],
       providesParsedMessages: true,
       messageDefinitions: {

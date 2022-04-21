@@ -82,6 +82,7 @@ function getProvider(
 ) {
   const memoryDataProvider = new MemoryDataProvider({
     messages: { parsedMessages: undefined, encodedMessages: messages },
+    topicStats: new Map(),
     providesParsedMessages: false,
     parsedMessageDefinitionsByTopic: {
       "/foo": [{ definitions: [] }],

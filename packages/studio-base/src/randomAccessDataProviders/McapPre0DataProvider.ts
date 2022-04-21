@@ -18,7 +18,7 @@ import {
   isGreaterThan,
   isTimeInRangeInclusive,
 } from "@foxglove/rostime";
-import { MessageEvent, Topic } from "@foxglove/studio-base/players/types";
+import { MessageEvent, Topic, TopicStats } from "@foxglove/studio-base/players/types";
 import {
   RandomAccessDataProvider,
   ExtensionPoint,
@@ -162,6 +162,7 @@ export default class McapPre0DataProvider implements RandomAccessDataProvider {
       start: startTime ?? { sec: 0, nsec: 0 },
       end: endTime ?? { sec: 0, nsec: 0 },
       topics,
+      topicStats: new Map<string, TopicStats>(),
       connections,
       providesParsedMessages: true,
       messageDefinitions: {

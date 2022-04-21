@@ -20,6 +20,7 @@ import {
   ParsedMessageDefinitionsByTopic,
   MessageEvent,
   PlayerProblem,
+  TopicStats,
 } from "@foxglove/studio-base/players/types";
 import { RosDatatypes } from "@foxglove/studio-base/types/RosDatatypes";
 
@@ -100,6 +101,7 @@ export type InitializationResult = {
   start: Time; // Inclusive (time of first message).
   end: Time; // Inclusive (time of last message).
   topics: Topic[];
+  topicStats: Map<string, TopicStats>;
   connections: Connection[];
   parameters?: Map<string, ParameterValue>;
 

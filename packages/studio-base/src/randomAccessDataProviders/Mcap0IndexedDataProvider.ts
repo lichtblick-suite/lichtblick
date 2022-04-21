@@ -5,7 +5,12 @@
 import { Mcap0IndexedReader, Mcap0Types } from "@foxglove/mcap";
 import { ParsedChannel, parseChannel } from "@foxglove/mcap-support";
 import { Time, fromNanoSec, toNanoSec } from "@foxglove/rostime";
-import { Topic, MessageEvent, PlayerProblem } from "@foxglove/studio-base/players/types";
+import {
+  Topic,
+  MessageEvent,
+  PlayerProblem,
+  TopicStats,
+} from "@foxglove/studio-base/players/types";
 import {
   Connection,
   ExtensionPoint,
@@ -40,6 +45,7 @@ export default class Mcap0IndexedDataProvider implements RandomAccessDataProvide
     }
 
     const topicsByName = new Map<string, Topic>();
+    const topicStats = new Map<string, TopicStats>();
     const connections: Connection[] = [];
     const datatypes: RosDatatypes = new Map();
     const problems: RandomAccessDataProviderProblem[] = [];
@@ -68,11 +74,12 @@ export default class Mcap0IndexedDataProvider implements RandomAccessDataProvide
       if (!topic) {
         topic = { name: channel.topic, datatype: parsedChannel.fullSchemaName };
         topicsByName.set(channel.topic, topic);
+        const numMessages = this.reader.statistics?.channelMessageCounts.get(channel.id);
+        if (numMessages != undefined) {
+          topicStats.set(channel.topic, { numMessages: Number(numMessages) });
+        }
       }
-      const messageCount = this.reader.statistics?.channelMessageCounts.get(channel.id);
-      if (messageCount != undefined) {
-        topic.numMessages = (topic.numMessages ?? 0) + Number(messageCount);
-      }
+
       // Final datatypes is an unholy union of schemas across all channels
       for (const [name, datatype] of parsedChannel.datatypes) {
         datatypes.set(name, datatype);
@@ -83,6 +90,7 @@ export default class Mcap0IndexedDataProvider implements RandomAccessDataProvide
       start: fromNanoSec(startTime ?? 0n),
       end: fromNanoSec(endTime ?? startTime ?? 0n),
       topics: [...topicsByName.values()],
+      topicStats,
       connections,
       providesParsedMessages: true,
       messageDefinitions: {

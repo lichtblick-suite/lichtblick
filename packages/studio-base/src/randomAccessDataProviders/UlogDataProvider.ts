@@ -11,6 +11,7 @@ import {
   MessageDefinitionsByTopic,
   ParsedMessageDefinitionsByTopic,
   Topic,
+  TopicStats,
 } from "@foxglove/studio-base/players/types";
 import {
   Connection,
@@ -63,17 +64,15 @@ export default class UlogDataProvider implements RandomAccessDataProvider {
 
     const problems: RandomAccessDataProviderProblem[] = [];
     const topics: Topic[] = [];
+    const topicStats = new Map<string, TopicStats>();
     const connections: Connection[] = [];
     const datatypes: RosDatatypes = new Map();
     const messageDefinitionsByTopic: MessageDefinitionsByTopic = {};
     const parsedMessageDefinitionsByTopic: ParsedMessageDefinitionsByTopic = {};
     const header = this._ulog.header!;
 
-    topics.push({
-      name: LOG_TOPIC,
-      datatype: "rosgraph_msgs/Log",
-      numMessages: this._ulog.logCount() ?? 0,
-    });
+    topics.push({ name: LOG_TOPIC, datatype: "rosgraph_msgs/Log" });
+    topicStats.set(LOG_TOPIC, { numMessages: this._ulog.logCount() ?? 0 });
     datatypes.set("rosgraph_msgs/Log", rosCommonDefinitions["rosgraph_msgs/Log"]);
 
     for (const msgDef of header.definitions.values()) {
@@ -90,7 +89,8 @@ export default class UlogDataProvider implements RandomAccessDataProvider {
       const name = messageIdToTopic(msgId, this._ulog);
       if (name && !topicNames.has(name)) {
         topicNames.add(name);
-        topics.push({ name, datatype: msgDef.name, numMessages: count });
+        topics.push({ name, datatype: msgDef.name });
+        topicStats.set(name, { numMessages: count });
         messageDefinitionsByTopic[name] = msgDef.format;
         const rosMsgDef = datatypes.get(msgDef.name);
         if (rosMsgDef) {
@@ -120,6 +120,7 @@ export default class UlogDataProvider implements RandomAccessDataProvider {
       start,
       end,
       topics,
+      topicStats,
       connections,
       parameters,
       providesParsedMessages: true,

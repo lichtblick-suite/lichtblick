@@ -9,8 +9,12 @@ import { BlobReader } from "@foxglove/rosbag/web";
 import { parse as parseMessageDefinition } from "@foxglove/rosmsg";
 import { LazyMessageReader } from "@foxglove/rosmsg-serialization";
 import { compare } from "@foxglove/rostime";
-import { Topic } from "@foxglove/studio";
-import { PlayerProblem, MessageEvent } from "@foxglove/studio-base/players/types";
+import {
+  PlayerProblem,
+  MessageEvent,
+  Topic,
+  TopicStats,
+} from "@foxglove/studio-base/players/types";
 import { RosDatatypes } from "@foxglove/studio-base/types/RosDatatypes";
 import BrowserHttpReader from "@foxglove/studio-base/util/BrowserHttpReader";
 import CachedFilelike from "@foxglove/studio-base/util/CachedFilelike";
@@ -89,8 +93,16 @@ export class BagIterableSource implements IIterableSource {
       });
     }
 
+    const numMessagesByConnectionIndex: number[] = new Array(this._bag.connections.size).fill(0);
+    this._bag.chunkInfos.forEach((info) => {
+      info.connections.forEach(({ conn, count }) => {
+        numMessagesByConnectionIndex[conn] += count;
+      });
+    });
+
     const datatypes: RosDatatypes = new Map();
     const topics = new Map<string, Topic>();
+    const topicStats = new Map<string, TopicStats>();
     const publishersByTopic: Initalization["publishersByTopic"] = new Map();
     for (const [id, connection] of this._bag.connections) {
       const datatype = connection.type;
@@ -114,10 +126,16 @@ export class BagIterableSource implements IIterableSource {
         });
       }
 
-      topics.set(connection.topic, {
-        name: connection.topic,
-        datatype,
-      });
+      if (!existingTopic) {
+        topics.set(connection.topic, { name: connection.topic, datatype });
+      }
+
+      // Update the message count for this topic
+      const numMessages =
+        (topicStats.get(connection.topic)?.numMessages ?? 0) +
+        (numMessagesByConnectionIndex[connection.conn] ?? 0);
+      topicStats.set(connection.topic, { numMessages });
+
       const parsedDefinition = parseMessageDefinition(connection.messageDefinition);
       const reader = new LazyMessageReader(parsedDefinition);
       this._readersByConnectionId.set(id, reader);
@@ -135,6 +153,7 @@ export class BagIterableSource implements IIterableSource {
 
     return {
       topics: Array.from(topics.values()),
+      topicStats,
       start: this._bag.startTime ?? { sec: 0, nsec: 0 },
       end: this._bag.endTime ?? { sec: 0, nsec: 0 },
       problems,

@@ -20,7 +20,12 @@ import {
 import streamMessages, {
   ParsedChannelAndEncodings,
 } from "@foxglove/studio-base/players/FoxgloveDataPlatformPlayer/streamMessages";
-import { PlayerProblem, Topic, MessageEvent } from "@foxglove/studio-base/players/types";
+import {
+  PlayerProblem,
+  Topic,
+  MessageEvent,
+  TopicStats,
+} from "@foxglove/studio-base/players/types";
 import ConsoleApi from "@foxglove/studio-base/services/ConsoleApi";
 import { RosDatatypes } from "@foxglove/studio-base/types/RosDatatypes";
 import { formatTimeRaw } from "@foxglove/studio-base/util/time";
@@ -107,6 +112,9 @@ export class DataPlatformIterableSource implements IIterableSource {
     }
 
     const topics: Topic[] = [];
+    // TODO(jhurliman): Fill numMessages into topicStats per topic. Bonus points if we can get
+    // firstMessageTime / lastMessageTime per topic as well
+    const topicStats = new Map<string, TopicStats>();
     const datatypes: RosDatatypes = new Map();
     const problems: PlayerProblem[] = [];
     rawTopics: for (const rawTopic of rawTopics) {
@@ -147,6 +155,7 @@ export class DataPlatformIterableSource implements IIterableSource {
 
     return {
       topics,
+      topicStats,
       datatypes,
       start: this._start,
       end: this._end,

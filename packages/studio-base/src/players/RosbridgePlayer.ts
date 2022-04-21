@@ -20,7 +20,7 @@ import type { RosGraph } from "@foxglove/ros1";
 import { parse as parseMessageDefinition } from "@foxglove/rosmsg";
 import { LazyMessageReader } from "@foxglove/rosmsg-serialization";
 import { MessageReader as ROS2MessageReader } from "@foxglove/rosmsg2-serialization";
-import { Time, fromMillis, toSec } from "@foxglove/rostime";
+import { Time, fromMillis, toSec, isGreaterThan } from "@foxglove/rostime";
 import { ParameterValue } from "@foxglove/studio";
 import PlayerProblemManager from "@foxglove/studio-base/players/PlayerProblemManager";
 import {
@@ -34,6 +34,7 @@ import {
   Topic,
   PlayerPresence,
   PlayerMetricsCollectorInterface,
+  TopicStats,
 } from "@foxglove/studio-base/players/types";
 import { RosDatatypes } from "@foxglove/studio-base/types/RosDatatypes";
 import { bagConnectionsToDatatypes } from "@foxglove/studio-base/util/bagConnectionsHelper";
@@ -61,6 +62,7 @@ export default class RosbridgePlayer implements Player {
   private _listener?: (arg0: PlayerState) => Promise<void>; // Listener for _emitState().
   private _closed: boolean = false; // Whether the player has been completely closed using close().
   private _providerTopics?: Topic[]; // Topics as published by the WebSocket.
+  private _providerTopicsStats = new Map<string, TopicStats>(); // topic names to topic statistics.
   private _providerDatatypes?: RosDatatypes; // Datatypes as published by the WebSocket.
   private _publishedTopics = new Map<string, Set<string>>(); // A map of topic names to the set of publisher IDs publishing each topic.
   private _subscribedTopics = new Map<string, Set<string>>(); // A map of topic names to the set of subscriber IDs subscribed to each topic.
@@ -166,6 +168,13 @@ export default class RosbridgePlayer implements Player {
     });
   };
 
+  private _topicsChanged = (newTopics: Topic[]): boolean => {
+    if (!this._providerTopics || newTopics.length !== this._providerTopics.length) {
+      return true;
+    }
+    return !isEqual(this._providerTopics, newTopics);
+  };
+
   private async _requestTopics(opt?: { forceUpdate: boolean }): Promise<void> {
     const { forceUpdate = false } = opt ?? {};
     // clear problems before each topics request so we don't have stale problems from previous failed requests
@@ -247,7 +256,7 @@ export default class RosbridgePlayer implements Player {
       // we want to bail and avoid updating readers, subscribers, etc.
       // However, during a re-connect, we _do_ want to refresh this list and re-subscribe
       const sortedTopics = sortBy(topics, "name");
-      if (isEqual(sortedTopics, this._providerTopics) && !forceUpdate) {
+      if (!forceUpdate && !this._topicsChanged(sortedTopics)) {
         return;
       }
 
@@ -265,7 +274,16 @@ export default class RosbridgePlayer implements Player {
         this._metricsCollector.initialized();
       }
 
+      // Remove stats entries for removed topics
+      const topicsSet = new Set<string>(topics.map((topic) => topic.name));
+      for (const topic of this._providerTopicsStats.keys()) {
+        if (!topicsSet.has(topic)) {
+          this._providerTopicsStats.delete(topic);
+        }
+      }
+
       this._providerTopics = sortedTopics;
+
       this._providerDatatypes = bagConnectionsToDatatypes(datatypeDescriptions, {
         ros2: rosVersion === 2,
       });
@@ -367,6 +385,8 @@ export default class RosbridgePlayer implements Player {
         // that we don't accidentally hit falsy checks.
         lastSeekTime: 1,
         topics: _providerTopics,
+        // Always copy topic stats since message counts and timestamps are being updated
+        topicStats: new Map(this._providerTopicsStats),
         datatypes: _providerDatatypes,
         publishedTopics: this._publishedTopics,
         subscribedTopics: this._subscribedTopics,
@@ -488,6 +508,22 @@ export default class RosbridgePlayer implements Player {
             this._parsedMessages.push(msg);
           }
           this._problems.removeProblem(problemId);
+
+          // Update the message count for this topic
+          let stats = this._providerTopicsStats.get(topicName);
+          if (this._topicSubscriptions.has(topicName)) {
+            if (!stats) {
+              stats = { numMessages: 0 };
+              this._providerTopicsStats.set(topicName, stats);
+            }
+            stats.numMessages++;
+            stats.firstMessageTime ??= receiveTime;
+            if (stats.lastMessageTime == undefined) {
+              stats.lastMessageTime = receiveTime;
+            } else if (isGreaterThan(receiveTime, stats.lastMessageTime)) {
+              stats.lastMessageTime = receiveTime;
+            }
+          }
         } catch (error) {
           this._problems.addProblem(problemId, {
             severity: "error",
@@ -506,6 +542,9 @@ export default class RosbridgePlayer implements Player {
       if (!topicNames.includes(topicName)) {
         topic.unsubscribe();
         this._topicSubscriptions.delete(topicName);
+
+        // Reset the message count for this topic
+        this._providerTopicsStats.delete(topicName);
       }
     }
   }

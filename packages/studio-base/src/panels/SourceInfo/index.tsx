@@ -7,8 +7,7 @@ import { Theme } from "@mui/material";
 import { makeStyles } from "@mui/styles";
 import { useCallback, useMemo } from "react";
 
-import { subtract as subtractTimes, toSec } from "@foxglove/rostime";
-import { Topic } from "@foxglove/studio";
+import { areEqual, subtract as subtractTimes, toSec } from "@foxglove/rostime";
 import CopyText from "@foxglove/studio-base/components/CopyText";
 import Duration from "@foxglove/studio-base/components/Duration";
 import EmptyState from "@foxglove/studio-base/components/EmptyState";
@@ -16,8 +15,11 @@ import { useMessagePipeline } from "@foxglove/studio-base/components/MessagePipe
 import Panel from "@foxglove/studio-base/components/Panel";
 import PanelToolbar from "@foxglove/studio-base/components/PanelToolbar";
 import Timestamp from "@foxglove/studio-base/components/Timestamp";
+import { Topic, TopicStats } from "@foxglove/studio-base/src/players/types";
 
 import helpContent from "./index.help.md";
+
+type TopicListItem = Topic & Partial<TopicStats> & { key: string };
 
 const useStyles = makeStyles((theme: Theme) => ({
   root: {
@@ -38,9 +40,17 @@ const useStyles = makeStyles((theme: Theme) => ({
   },
 }));
 
+const EMPTY_TOPICS: Topic[] = [];
+const EMPTY_TOPIC_STATS = new Map<string, TopicStats>();
+
 function SourceInfo() {
   const classes = useStyles();
-  const topics = useMessagePipeline(useCallback((ctx) => ctx.playerState.activeData?.topics, []));
+  const topics = useMessagePipeline(
+    useCallback((ctx) => ctx.playerState.activeData?.topics ?? EMPTY_TOPICS, []),
+  );
+  const topicStats = useMessagePipeline(
+    useCallback((ctx) => ctx.playerState.activeData?.topicStats ?? EMPTY_TOPIC_STATS, []),
+  );
   const startTime = useMessagePipeline(
     useCallback((ctx) => ctx.playerState.activeData?.startTime, []),
   );
@@ -59,14 +69,16 @@ function SourceInfo() {
     [theme],
   );
 
-  const detailListItems = useMemo<(Topic & { key: string })[]>(() => {
-    return (
-      topics?.map((topic) => ({
-        key: topic.name,
+  const detailListItems = useMemo<TopicListItem[]>(() => {
+    return topics.map((topic) => {
+      const stats = topicStats.get(topic.name);
+      return {
         ...topic,
-      })) ?? []
-    );
-  }, [topics]);
+        ...stats,
+        key: topic.name,
+      };
+    });
+  }, [topicStats, topics]);
 
   if (!startTime || !endTime) {
     return (
@@ -119,13 +131,13 @@ function SourceInfo() {
               isResizable: true,
               data: "string",
               isPadded: true,
-              onRender: (topic) => (
+              onRender: (item: TopicListItem) => (
                 <CopyText
-                  copyText={topic.name}
+                  copyText={item.name}
                   textProps={{ variant: "small" }}
-                  tooltip={`Click to copy topic name ${topic.name} to clipboard.`}
+                  tooltip={`Click to copy topic name ${item.name} to clipboard.`}
                 >
-                  {topic.name}
+                  {item.name}
                 </CopyText>
               ),
             },
@@ -137,13 +149,13 @@ function SourceInfo() {
               isResizable: true,
               data: "string",
               isPadded: true,
-              onRender: (topic) => (
+              onRender: (item: TopicListItem) => (
                 <CopyText
-                  copyText={topic.datatype}
+                  copyText={item.datatype}
                   textProps={{ variant: "small" }}
-                  tooltip={`Click to copy topic name ${topic.datatype} to clipboard.`}
+                  tooltip={`Click to copy topic name ${item.datatype} to clipboard.`}
                 >
-                  {topic.datatype}
+                  {item.datatype}
                 </CopyText>
               ),
             },
@@ -152,16 +164,29 @@ function SourceInfo() {
               name: "Message count",
               fieldName: "numMessages",
               minWidth: 0,
-              onRender: (topic) => topic.numMessages?.toLocaleString() ?? "–",
+              onRender: (item: TopicListItem) => item.numMessages?.toLocaleString() ?? "–",
             },
             {
               key: "frequency",
               name: "Frequency",
               minWidth: 0,
-              onRender: (topic) =>
-                topic.numMessages != undefined
-                  ? `${(topic.numMessages / toSec(duration)).toFixed(2)} Hz`
-                  : "–",
+              onRender: (item: TopicListItem) => {
+                const { numMessages, firstMessageTime, lastMessageTime } = item;
+                if (numMessages == undefined) {
+                  // No message count, so no frequency
+                  return "–";
+                }
+                if (firstMessageTime == undefined || lastMessageTime == undefined) {
+                  // Message count but no timestamps, use the full connection duration
+                  return `${(numMessages / toSec(duration)).toFixed(2)} Hz`;
+                }
+                if (numMessages < 2 || areEqual(firstMessageTime, lastMessageTime)) {
+                  // Not enough messages or time span to calculate a frequency
+                  return "–";
+                }
+                const topicDurationSec = toSec(subtractTimes(lastMessageTime, firstMessageTime));
+                return `${((numMessages - 1) / topicDurationSec).toFixed(2)} Hz`;
+              },
             },
           ]}
         />

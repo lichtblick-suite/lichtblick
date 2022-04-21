@@ -403,6 +403,7 @@ describe("useMessageReducer", () => {
               { name: "/foo", datatype: "foo" },
               { name: "/bar", datatype: "foo" },
             ],
+            topicStats: new Map(),
             datatypes: new Map(
               Object.entries({ foo: { definitions: [] }, bar: { definitions: [] } }),
             ),
@@ -440,6 +441,7 @@ describe("useMessageReducer", () => {
               { name: "/foo", datatype: "foo" },
               { name: "/bar", datatype: "foo" },
             ],
+            topicStats: new Map(),
             datatypes: new Map(
               Object.entries({ foo: { definitions: [] }, bar: { definitions: [] } }),
             ),

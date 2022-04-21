@@ -11,7 +11,7 @@ import { RosNode } from "@foxglove/ros2";
 import { RosMsgDefinition } from "@foxglove/rosmsg";
 import { definitions as commonDefs } from "@foxglove/rosmsg-msgs-common";
 import { definitions as foxgloveDefs } from "@foxglove/rosmsg-msgs-foxglove";
-import { Time, fromMillis, toSec } from "@foxglove/rostime";
+import { Time, fromMillis, toSec, isGreaterThan } from "@foxglove/rostime";
 import { Durability, Reliability } from "@foxglove/rtps";
 import { ParameterValue } from "@foxglove/studio";
 import OsContextSingleton from "@foxglove/studio-base/OsContextSingleton";
@@ -27,6 +27,7 @@ import {
   PublishPayload,
   SubscribePayload,
   Topic,
+  TopicStats,
 } from "@foxglove/studio-base/players/types";
 import debouncePromise from "@foxglove/studio-base/util/debouncePromise";
 import rosDatatypesToMessageDefinition from "@foxglove/studio-base/util/rosDatatypesToMessageDefinition";
@@ -58,6 +59,7 @@ export default class Ros2Player implements Player {
   private _listener?: (arg0: PlayerState) => Promise<void>; // Listener for _emitState().
   private _closed = false; // Whether the player has been completely closed using close().
   private _providerTopics?: Topic[]; // Topics as advertised by peers
+  private _providerTopicsStats = new Map<string, TopicStats>(); // topic names to topic statistics.
   private _providerDatatypes = new Map<string, RosMsgDefinition>(); // All known ROS 2 message definitions.
   private _publishedTopics = new Map<string, Set<string>>(); // A map of topic names to the set of publisher IDs publishing each topic.
   private _subscribedTopics = new Map<string, Set<string>>(); // A map of topic names to the set of subscriber IDs subscribed to each topic.
@@ -170,6 +172,13 @@ export default class Ros2Player implements Player {
     }
   }
 
+  private _topicsChanged = (newTopics: Topic[]): boolean => {
+    if (!this._providerTopics || newTopics.length !== this._providerTopics.length) {
+      return true;
+    }
+    return !isEqual(this._providerTopics, newTopics);
+  };
+
   private _updateTopics = (): void => {
     if (this._updateTopicsTimeout) {
       clearTimeout(this._updateTopicsTimeout);
@@ -208,7 +217,15 @@ export default class Ros2Player implements Player {
         this._metricsCollector.initialized();
       }
 
-      if (!isEqual(sortedTopics, this._providerTopics)) {
+      if (this._topicsChanged(sortedTopics)) {
+        // Remove stats entries for removed topics
+        const topicsSet = new Set<string>(topics.map((topic) => topic.name));
+        for (const topic of this._providerTopicsStats.keys()) {
+          if (!topicsSet.has(topic)) {
+            this._providerTopicsStats.delete(topic);
+          }
+        }
+
         this._providerTopics = sortedTopics;
 
         // Try subscribing again, since we might be able to subscribe to additional topics
@@ -311,6 +328,8 @@ export default class Ros2Player implements Player {
         // that we don't accidentally hit falsy checks.
         lastSeekTime: 1,
         topics: providerTopics,
+        // Always copy topic stats since message counts and timestamps are being updated
+        topicStats: new Map(this._providerTopicsStats),
         datatypes: this._providerDatatypes,
         publishedTopics: this._publishedTopics,
         subscribedTopics: this._subscribedTopics,
@@ -434,9 +453,10 @@ export default class Ros2Player implements Player {
     // Unsubscribe from topics that we are subscribed to but shouldn't be.
     for (const topicName of this._rosNode.subscriptions.keys()) {
       if (!topicNames.includes(topicName)) {
-        {
-          this._rosNode.unsubscribe(topicName);
-        }
+        this._rosNode.unsubscribe(topicName);
+
+        // Reset the message count for this topic
+        this._providerTopicsStats.delete(topicName);
       }
     }
   }
@@ -465,6 +485,22 @@ export default class Ros2Player implements Player {
     const msg: MessageEvent<unknown> = { topic, receiveTime, publishTime, message, sizeInBytes };
     this._parsedMessages.push(msg);
     this._handleInternalMessage(msg);
+
+    // Update the message count for this topic
+    let stats = this._providerTopicsStats.get(topic);
+    if (this._rosNode?.subscriptions.has(topic) === true) {
+      if (!stats) {
+        stats = { numMessages: 0 };
+        this._providerTopicsStats.set(topic, stats);
+      }
+      stats.numMessages++;
+      stats.firstMessageTime ??= receiveTime;
+      if (stats.lastMessageTime == undefined) {
+        stats.lastMessageTime = receiveTime;
+      } else if (isGreaterThan(receiveTime, stats.lastMessageTime)) {
+        stats.lastMessageTime = receiveTime;
+      }
+    }
 
     this._emitState();
   };

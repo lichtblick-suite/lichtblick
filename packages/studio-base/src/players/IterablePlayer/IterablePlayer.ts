@@ -34,6 +34,7 @@ import {
   PlayerPresence,
   PlayerCapabilities,
   MessageBlock,
+  TopicStats,
 } from "@foxglove/studio-base/players/types";
 import { RosDatatypes } from "@foxglove/studio-base/types/RosDatatypes";
 import delay from "@foxglove/studio-base/util/delay";
@@ -112,6 +113,7 @@ export class IterablePlayer implements Player {
   private _lastSeekEmitTime: number = Date.now();
 
   private _providerTopics: Topic[] = [];
+  private _providerTopicStats = new Map<string, TopicStats>();
   private _providerDatatypes: RosDatatypes = new Map();
 
   private _capabilities: string[] = [
@@ -184,8 +186,16 @@ export class IterablePlayer implements Player {
     await this._emitState();
 
     try {
-      const { start, end, topics, problems, publishersByTopic, datatypes, blockDurationNanos } =
-        await this._iterableSource.initialize();
+      const {
+        start,
+        end,
+        topics,
+        topicStats,
+        problems,
+        publishersByTopic,
+        datatypes,
+        blockDurationNanos,
+      } = await this._iterableSource.initialize();
 
       this._start = this._currentTime = start;
       this._end = end;
@@ -193,7 +203,7 @@ export class IterablePlayer implements Player {
       this._providerDatatypes = datatypes;
 
       // Studio does not like duplicate topics or topics with different datatypes
-      // Check for duplicates or for miss-matched datatypes
+      // Check for duplicates or for mismatched datatypes
       const uniqueTopics = new Map<string, Topic>();
       for (const topic of topics) {
         const existingTopic = uniqueTopics.get(topic.name);
@@ -209,6 +219,7 @@ export class IterablePlayer implements Player {
       }
 
       this._providerTopics = Array.from(uniqueTopics.values());
+      this._providerTopicStats = topicStats;
 
       let idx = 0;
       for (const problem of problems) {
@@ -481,6 +492,7 @@ export class IterablePlayer implements Player {
         speed: this._speed,
         lastSeekTime: this._lastSeekEmitTime,
         topics: this._providerTopics,
+        topicStats: this._providerTopicStats,
         datatypes: this._providerDatatypes,
         publishedTopics: this._publishedTopics,
       },

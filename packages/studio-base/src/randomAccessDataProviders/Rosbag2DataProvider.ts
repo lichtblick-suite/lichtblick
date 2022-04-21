@@ -12,6 +12,7 @@ import {
   MessageDefinitionsByTopic,
   ParsedMessageDefinitionsByTopic,
   Topic,
+  TopicStats,
 } from "@foxglove/studio-base/players/types";
 import {
   Connection,
@@ -67,6 +68,7 @@ export default class Rosbag2DataProvider implements RandomAccessDataProvider {
 
     const problems: RandomAccessDataProviderProblem[] = [];
     const topics: Topic[] = [];
+    const topicStats = new Map<string, TopicStats>();
     const connections: Connection[] = [];
     const datatypes: RosDatatypes = new Map();
     const messageDefinitionsByTopic: MessageDefinitionsByTopic = {};
@@ -87,12 +89,12 @@ export default class Rosbag2DataProvider implements RandomAccessDataProvider {
       const fullParsedMessageDefinitions = [parsedMsgdef];
       const messageDefinition = stringify(fullParsedMessageDefinitions);
       const md5sum = Md5.init(messageDefinition);
+      const numMessages = messageCounts.get(topicDef.name);
 
-      topics.push({
-        name: topicDef.name,
-        datatype: topicDef.type,
-        numMessages: messageCounts.get(topicDef.name),
-      });
+      topics.push({ name: topicDef.name, datatype: topicDef.type });
+      if (numMessages != undefined) {
+        topicStats.set(topicDef.name, { numMessages });
+      }
       connections.push({
         messageDefinition,
         md5sum,
@@ -109,6 +111,7 @@ export default class Rosbag2DataProvider implements RandomAccessDataProvider {
       start,
       end,
       topics,
+      topicStats,
       connections,
       providesParsedMessages: true,
       messageDefinitions: {

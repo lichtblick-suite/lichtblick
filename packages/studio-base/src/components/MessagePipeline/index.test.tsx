@@ -20,7 +20,12 @@ import { act } from "react-dom/test-utils";
 
 import AppConfigurationContext from "@foxglove/studio-base/context/AppConfigurationContext";
 import { GlobalVariables } from "@foxglove/studio-base/hooks/useGlobalVariables";
-import { Player, PlayerCapabilities, PlayerPresence } from "@foxglove/studio-base/players/types";
+import {
+  Player,
+  PlayerCapabilities,
+  PlayerPresence,
+  TopicStats,
+} from "@foxglove/studio-base/players/types";
 import delay from "@foxglove/studio-base/util/delay";
 import { makeMockAppConfiguration } from "@foxglove/studio-base/util/makeMockAppConfiguration";
 
@@ -180,6 +185,7 @@ describe("MessagePipelineProvider/useMessagePipeline", () => {
             speed: 0.2,
             lastSeekTime: 1234,
             topics: [{ name: "/input/foo", datatype: "foo" }],
+            topicStats: new Map<string, TopicStats>([["/input/foo", { numMessages: 1 }]]),
             datatypes: new Map(Object.entries({ foo: { definitions: [] } })),
             totalBytesReceived: 1234,
           },

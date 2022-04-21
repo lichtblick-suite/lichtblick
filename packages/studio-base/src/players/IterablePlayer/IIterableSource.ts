@@ -4,13 +4,14 @@
 
 import { Time } from "@foxglove/rostime";
 import { Topic, MessageEvent } from "@foxglove/studio";
-import { PlayerProblem } from "@foxglove/studio-base/players/types";
+import { PlayerProblem, TopicStats } from "@foxglove/studio-base/players/types";
 import { RosDatatypes } from "@foxglove/studio-base/types/RosDatatypes";
 
 export type Initalization = {
   start: Time;
   end: Time;
   topics: Topic[];
+  topicStats: Map<string, TopicStats>;
   datatypes: RosDatatypes;
   blockDurationNanos?: number;
 

@@ -19,6 +19,7 @@ import {
   MessageDefinitionsByTopic,
   ParsedMessageDefinitionsByTopic,
   MessageEvent,
+  TopicStats,
 } from "@foxglove/studio-base/players/types";
 import {
   ExtensionPoint,
@@ -58,6 +59,7 @@ function filterMessages<T>(
 type MemoryDataProviderOptions = {
   messages: GetMessagesResult;
   topics?: Topic[];
+  topicStats: Map<string, TopicStats>;
   datatypes?: RosDatatypes;
   messageDefinitionsByTopic?: MessageDefinitionsByTopic;
   parsedMessageDefinitionsByTopic?: ParsedMessageDefinitionsByTopic;
@@ -70,6 +72,7 @@ type MemoryDataProviderOptions = {
 export default class MemoryDataProvider implements RandomAccessDataProvider {
   messages: GetMessagesResult;
   topics?: Topic[];
+  topicStats: Map<string, TopicStats>;
   datatypes?: RosDatatypes;
   messageDefinitionsByTopic: MessageDefinitionsByTopic;
   parsedMessageDefinitionsByTopic?: ParsedMessageDefinitionsByTopic;
@@ -80,6 +83,7 @@ export default class MemoryDataProvider implements RandomAccessDataProvider {
   constructor({
     messages,
     topics,
+    topicStats,
     datatypes,
     initiallyLoaded = false,
     messageDefinitionsByTopic,
@@ -88,6 +92,7 @@ export default class MemoryDataProvider implements RandomAccessDataProvider {
   }: MemoryDataProviderOptions) {
     this.messages = messages;
     this.topics = topics;
+    this.topicStats = topicStats;
     this.datatypes = datatypes;
     this.messageDefinitionsByTopic = messageDefinitionsByTopic ?? {};
     this.parsedMessageDefinitionsByTopic = parsedMessageDefinitionsByTopic;
@@ -134,6 +139,7 @@ export default class MemoryDataProvider implements RandomAccessDataProvider {
       start: firstSortedMessage.receiveTime,
       end: lastReceiveTime,
       topics: this.topics ?? [],
+      topicStats: this.topicStats,
       connections: [],
       messageDefinitions,
       providesParsedMessages: this.providesParsedMessages,

@@ -66,6 +66,7 @@ function getState({ hasHeaderStamp }: { hasHeaderStamp?: boolean } = {}): Player
     speed: 0.2,
     lastSeekTime: 0,
     topics: [],
+    topicStats: new Map(),
     datatypes: new Map([
       ...basicDatatypes,
       ...(hasHeaderStamp === true ? dummyDatatypeWithHeader : []),

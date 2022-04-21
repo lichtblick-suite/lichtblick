@@ -30,6 +30,7 @@ import {
   SubscribePayload,
   Topic,
   PlayerURLState,
+  TopicStats,
 } from "@foxglove/studio-base/players/types";
 import { RosDatatypes } from "@foxglove/studio-base/types/RosDatatypes";
 import naturalSort from "@foxglove/studio-base/util/naturalSort";
@@ -44,6 +45,7 @@ export default function MockMessagePipelineProvider(props: {
   children: React.ReactNode;
   presence?: PlayerPresence;
   topics?: Topic[];
+  topicStats?: Map<string, TopicStats>;
   datatypes?: RosDatatypes;
   messages?: MessageEvent<unknown>[];
   problems?: PlayerProblem[];
@@ -123,6 +125,7 @@ export default function MockMessagePipelineProvider(props: {
           : {
               messages: props.messages ?? [],
               topics: props.topics ?? [],
+              topicStats: props.topicStats ?? new Map(),
               datatypes: props.datatypes ?? NO_DATATYPES,
               startTime: props.startTime ?? startTime.current ?? { sec: 100, nsec: 0 },
               currentTime: currentTime ?? { sec: 100, nsec: 0 },
@@ -139,16 +142,17 @@ export default function MockMessagePipelineProvider(props: {
       props.presence,
       props.playerId,
       props.progress,
+      props.problems,
+      props.urlState,
       props.noActiveData,
       props.messages,
       props.topics,
+      props.topicStats,
       props.datatypes,
       props.startTime,
       props.endTime,
       props.isPlaying,
       props.activeData,
-      props.problems,
-      props.urlState,
       capabilities,
       currentTime,
     ],

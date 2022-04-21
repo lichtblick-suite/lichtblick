@@ -180,6 +180,11 @@ export type PlayerStateActiveData = {
   // present in the `datatypes` field (see below).
   topics: Topic[];
 
+  // A map of topic names to topic statistics, such as message count. This should be treated as a
+  // sparse list that may be missing some or all topics, depending on the active data source and its
+  // current state.
+  topicStats: Map<string, TopicStats>;
+
   // A complete list of ROS datatypes. Allowed to change. But it must always be "complete" (every
   // topic must refer to a datatype that is present in this list, every datatypes that refers to
   // another datatype must refer to a datatype that is present in this list).
@@ -207,9 +212,15 @@ export type Topic = {
   name: string;
   // Name of the datatype (see `type PlayerStateActiveData` for details).
   datatype: string;
-  // The number of messages present on the topic. Valid only for sources with a fixed number of
-  // messages, such as bags.
-  numMessages?: number;
+};
+
+export type TopicStats = {
+  // The number of messages observed on the topic.
+  numMessages: number;
+  // Timestamp of the first observed message on this topic.
+  firstMessageTime?: Time;
+  // Timestamp of the last observed message on this topic.
+  lastMessageTime?: Time;
 };
 
 type RosSingularField = number | string | boolean | RosObject; // No time -- consider it a message.

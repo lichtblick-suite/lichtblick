@@ -72,16 +72,25 @@ describe("BagDataProvider", () => {
     expect(result.start).toEqual({ sec: 1396293887, nsec: 844783943 });
     expect(result.end).toEqual({ sec: 1396293909, nsec: 544870199 });
     expect(result.topics).toContainOnly([
-      { datatype: "rosgraph_msgs/Log", name: "/rosout", numMessages: 1 },
-      { datatype: "turtlesim/Color", name: "/turtle1/color_sensor", numMessages: 1351 },
-      { datatype: "tf2_msgs/TFMessage", name: "/tf_static", numMessages: 1 },
-      { datatype: "turtlesim/Color", name: "/turtle2/color_sensor", numMessages: 1344 },
-      { datatype: "turtlesim/Pose", name: "/turtle1/pose", numMessages: 1344 },
-      { datatype: "turtlesim/Pose", name: "/turtle2/pose", numMessages: 1344 },
-      { datatype: "tf/tfMessage", name: "/tf", numMessages: 1344 },
-      { datatype: "geometry_msgs/Twist", name: "/turtle2/cmd_vel", numMessages: 208 },
-      { datatype: "geometry_msgs/Twist", name: "/turtle1/cmd_vel", numMessages: 357 },
+      { datatype: "rosgraph_msgs/Log", name: "/rosout" },
+      { datatype: "turtlesim/Color", name: "/turtle1/color_sensor" },
+      { datatype: "tf2_msgs/TFMessage", name: "/tf_static" },
+      { datatype: "turtlesim/Color", name: "/turtle2/color_sensor" },
+      { datatype: "turtlesim/Pose", name: "/turtle1/pose" },
+      { datatype: "turtlesim/Pose", name: "/turtle2/pose" },
+      { datatype: "tf/tfMessage", name: "/tf" },
+      { datatype: "geometry_msgs/Twist", name: "/turtle2/cmd_vel" },
+      { datatype: "geometry_msgs/Twist", name: "/turtle1/cmd_vel" },
     ]);
+    expect(result.topicStats.get("/rosout")).toEqual({ numMessages: 1 });
+    expect(result.topicStats.get("/turtle1/color_sensor")).toEqual({ numMessages: 1351 });
+    expect(result.topicStats.get("/tf_static")).toEqual({ numMessages: 1 });
+    expect(result.topicStats.get("/turtle2/color_sensor")).toEqual({ numMessages: 1344 });
+    expect(result.topicStats.get("/turtle1/pose")).toEqual({ numMessages: 1344 });
+    expect(result.topicStats.get("/turtle2/pose")).toEqual({ numMessages: 1344 });
+    expect(result.topicStats.get("/tf")).toEqual({ numMessages: 1344 });
+    expect(result.topicStats.get("/turtle2/cmd_vel")).toEqual({ numMessages: 208 });
+    expect(result.topicStats.get("/turtle1/cmd_vel")).toEqual({ numMessages: 357 });
     const { messageDefinitions } = result;
     if (messageDefinitions.type !== "raw") {
       throw new Error("BagDataProvider requires raw message definitions");
@@ -110,16 +119,25 @@ describe("BagDataProvider", () => {
     expect(result.start).toEqual({ sec: 1396293887, nsec: 844783943 });
     expect(result.end).toEqual({ sec: 1396293909, nsec: 544870199 });
     expect(result.topics).toContainOnly([
-      { datatype: "rosgraph_msgs/Log", name: "/rosout", numMessages: 10 },
-      { datatype: "turtlesim/Color", name: "/turtle1/color_sensor", numMessages: 1351 },
-      { datatype: "tf2_msgs/TFMessage", name: "/tf_static", numMessages: 1 },
-      { datatype: "turtlesim/Color", name: "/turtle2/color_sensor", numMessages: 1344 },
-      { datatype: "turtlesim/Pose", name: "/turtle1/pose", numMessages: 1344 },
-      { datatype: "turtlesim/Pose", name: "/turtle2/pose", numMessages: 1344 },
-      { datatype: "tf/tfMessage", name: "/tf", numMessages: 2688 },
-      { datatype: "geometry_msgs/Twist", name: "/turtle2/cmd_vel", numMessages: 208 },
-      { datatype: "geometry_msgs/Twist", name: "/turtle1/cmd_vel", numMessages: 357 },
+      { datatype: "rosgraph_msgs/Log", name: "/rosout" },
+      { datatype: "turtlesim/Color", name: "/turtle1/color_sensor" },
+      { datatype: "tf2_msgs/TFMessage", name: "/tf_static" },
+      { datatype: "turtlesim/Color", name: "/turtle2/color_sensor" },
+      { datatype: "turtlesim/Pose", name: "/turtle1/pose" },
+      { datatype: "turtlesim/Pose", name: "/turtle2/pose" },
+      { datatype: "tf/tfMessage", name: "/tf" },
+      { datatype: "geometry_msgs/Twist", name: "/turtle2/cmd_vel" },
+      { datatype: "geometry_msgs/Twist", name: "/turtle1/cmd_vel" },
     ]);
+    expect(result.topicStats.get("/rosout")).toEqual({ numMessages: 10 });
+    expect(result.topicStats.get("/turtle1/color_sensor")).toEqual({ numMessages: 1351 });
+    expect(result.topicStats.get("/tf_static")).toEqual({ numMessages: 1 });
+    expect(result.topicStats.get("/turtle2/color_sensor")).toEqual({ numMessages: 1344 });
+    expect(result.topicStats.get("/turtle1/pose")).toEqual({ numMessages: 1344 });
+    expect(result.topicStats.get("/turtle2/pose")).toEqual({ numMessages: 1344 });
+    expect(result.topicStats.get("/tf")).toEqual({ numMessages: 2688 });
+    expect(result.topicStats.get("/turtle2/cmd_vel")).toEqual({ numMessages: 208 });
+    expect(result.topicStats.get("/turtle1/cmd_vel")).toEqual({ numMessages: 357 });
     const { messageDefinitions } = result;
     if (messageDefinitions.type !== "raw") {
       throw new Error("BagDataProvider requires raw message definitions");

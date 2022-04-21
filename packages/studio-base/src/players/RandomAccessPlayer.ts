@@ -40,6 +40,7 @@ import {
   Topic,
   PlayerPresence,
   PlayerProblem,
+  TopicStats,
 } from "@foxglove/studio-base/players/types";
 import {
   Connection,
@@ -114,6 +115,7 @@ export default class RandomAccessPlayer implements Player {
   private _cancelSeekBackfill: boolean = false;
   private _parsedSubscribedTopics: Set<string> = new Set();
   private _providerTopics: Topic[] = [];
+  private _providerTopicStats = new Map<string, TopicStats>();
   private _providerConnections: Connection[] = [];
   private _providerDatatypes: RosDatatypes = new Map();
   private _providerParameters: Map<string, ParameterValue> | undefined;
@@ -221,6 +223,7 @@ export default class RandomAccessPlayer implements Player {
           start,
           end,
           topics,
+          topicStats,
           connections,
           parameters,
           messageDefinitions,
@@ -243,6 +246,7 @@ export default class RandomAccessPlayer implements Player {
         this._nextReadStartTime = initialTime;
         this._end = end;
         this._providerTopics = topics;
+        this._providerTopicStats = topicStats;
         this._providerConnections = connections;
         this._providerDatatypes = parsedMessageDefinitions.datatypes;
         this._providerParameters = parameters;
@@ -354,6 +358,7 @@ export default class RandomAccessPlayer implements Player {
             speed: this._speed,
             lastSeekTime: this._lastSeekEmitTime,
             topics: this._providerTopics,
+            topicStats: this._providerTopicStats,
             datatypes: this._providerDatatypes,
             parameters: this._providerParameters,
             publishedTopics,

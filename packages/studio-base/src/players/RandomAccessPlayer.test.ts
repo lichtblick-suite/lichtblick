@@ -115,8 +115,8 @@ describe("RandomAccessPlayer", () => {
           currentTime: { sec: 10, nsec: 0 },
           datatypes: new Map(
             Object.entries({
-              baz: { definitions: [{ name: "val", type: "number" }] },
               fooBar: { definitions: [{ name: "val", type: "number" }] },
+              baz: { definitions: [{ name: "val", type: "number" }] },
             }),
           ),
           endTime: { sec: 100, nsec: 0 },
@@ -131,6 +131,7 @@ describe("RandomAccessPlayer", () => {
             { datatype: "fooBar", name: "/foo/bar" },
             { datatype: "baz", name: "/baz" },
           ],
+          topicStats: new Map(),
           publishedTopics: new Map<string, Set<string>>(),
         },
         capabilities: [PlayerCapabilities.setSpeed, PlayerCapabilities.playbackControl],

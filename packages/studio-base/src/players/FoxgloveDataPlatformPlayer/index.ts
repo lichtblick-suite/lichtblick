@@ -39,6 +39,7 @@ import {
   SubscribePayload,
   SubscriptionPreloadType,
   Topic,
+  TopicStats,
 } from "@foxglove/studio-base/players/types";
 import ConsoleApi from "@foxglove/studio-base/services/ConsoleApi";
 import { RosDatatypes } from "@foxglove/studio-base/types/RosDatatypes";
@@ -86,6 +87,7 @@ export default class FoxgloveDataPlatformPlayer implements Player {
   private _currentTime: Time;
   private _lastSeekTime?: number;
   private _topics: Topic[] = [];
+  private _topicsStats = new Map<string, TopicStats>();
   private _subscriptions: Record<SubscriptionPreloadType, SubscribePayload[]> = {
     full: [],
     partial: [],
@@ -188,6 +190,9 @@ export default class FoxgloveDataPlatformPlayer implements Player {
     this._currentTime = clampTime(this._currentTime, this._start, this._end);
 
     const topics: Topic[] = [];
+    // TODO(jhurliman): Fill numMessages into topicStats per topic. Bonus points if we can get
+    // firstMessageTime / lastMessageTime per topic as well
+    const topicStats = new Map<string, TopicStats>();
     const datatypes: RosDatatypes = new Map();
     rawTopics: for (const rawTopic of rawTopics) {
       const { topic, encoding: messageEncoding, schemaEncoding, schema, schemaName } = rawTopic;
@@ -224,6 +229,7 @@ export default class FoxgloveDataPlatformPlayer implements Player {
       }
     }
     this._topics = topics;
+    this._topicsStats = topicStats;
     this._datatypes = datatypes;
 
     this._presence = PlayerPresence.PRESENT;
@@ -283,6 +289,7 @@ export default class FoxgloveDataPlatformPlayer implements Player {
         speed: this._speed,
         lastSeekTime: this._lastSeekTime ?? 0,
         topics: this._topics,
+        topicStats: this._topicsStats,
         datatypes: this._datatypes,
         publishedTopics: undefined,
         subscribedTopics: undefined,

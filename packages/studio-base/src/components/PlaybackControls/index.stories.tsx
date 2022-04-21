@@ -48,6 +48,7 @@ function getPlayerState(): PlayerState {
       speed: 0.2,
       lastSeekTime: 0,
       topics: [{ name: "/empty_topic", datatype: "VoidType" }],
+      topicStats: new Map(),
       datatypes: new Map(Object.entries({ VoidType: { definitions: [] } })),
       totalBytesReceived: 1234,
     },

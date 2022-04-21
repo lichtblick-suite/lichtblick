@@ -30,7 +30,10 @@ import {
 import { getReportMetadataForChunk } from "@foxglove/studio-base/randomAccessDataProviders/util";
 import BrowserHttpReader from "@foxglove/studio-base/util/BrowserHttpReader";
 import CachedFilelike, { FileReader } from "@foxglove/studio-base/util/CachedFilelike";
-import { bagConnectionsToTopics } from "@foxglove/studio-base/util/bagConnectionsHelper";
+import {
+  bagConnectionsToTopics,
+  bagConnectionsToTopicStats,
+} from "@foxglove/studio-base/util/bagConnectionsHelper";
 import { getBagChunksOverlapCount } from "@foxglove/studio-base/util/bags";
 import { UserError } from "@foxglove/studio-base/util/errors";
 import sendNotification from "@foxglove/studio-base/util/sendNotification";
@@ -219,7 +222,8 @@ export default class BagDataProvider implements RandomAccessDataProvider {
     return {
       start: startTime,
       end: endTime,
-      topics: bagConnectionsToTopics(connections, chunkInfos),
+      topics: bagConnectionsToTopics(connections),
+      topicStats: bagConnectionsToTopicStats(connections, chunkInfos),
       connections,
       messageDefinitions: {
         type: "raw",

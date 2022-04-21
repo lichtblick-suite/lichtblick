@@ -14,7 +14,7 @@ import {
   isTimeInRangeInclusive,
   fromNanoSec,
 } from "@foxglove/rostime";
-import { MessageEvent, Topic } from "@foxglove/studio-base/players/types";
+import { MessageEvent, Topic, TopicStats } from "@foxglove/studio-base/players/types";
 import {
   RandomAccessDataProvider,
   ExtensionPoint,
@@ -134,11 +134,16 @@ export default class Mcap0StreamedDataProvider implements RandomAccessDataProvid
     this.messagesByChannel = messagesByChannel;
 
     const topics: Topic[] = [];
+    const topicStats = new Map<string, TopicStats>();
     const connections: Connection[] = [];
     const datatypes: RosDatatypes = new Map();
 
     for (const { channel, parsedChannel } of channelInfoById.values()) {
       topics.push({ name: channel.topic, datatype: parsedChannel.fullSchemaName });
+      const numMessages = messagesByChannel.get(channel.id)?.length;
+      if (numMessages != undefined) {
+        topicStats.set(channel.topic, { numMessages });
+      }
       // Final datatypes is an unholy union of schemas across all channels
       for (const [name, datatype] of parsedChannel.datatypes) {
         datatypes.set(name, datatype);
@@ -149,6 +154,7 @@ export default class Mcap0StreamedDataProvider implements RandomAccessDataProvid
       start: startTime ?? { sec: 0, nsec: 0 },
       end: endTime ?? { sec: 0, nsec: 0 },
       topics,
+      topicStats,
       connections,
       providesParsedMessages: true,
       messageDefinitions: {

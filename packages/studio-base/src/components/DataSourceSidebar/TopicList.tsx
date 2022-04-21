@@ -20,23 +20,26 @@ import {
 import { Fzf, FzfResultItem } from "fzf";
 import { useMemo, useState } from "react";
 
-import { Topic } from "@foxglove/studio";
+import { areEqual, subtract as subtractTimes, Time, toSec } from "@foxglove/rostime";
 import {
   MessagePipelineContext,
   useMessagePipeline,
 } from "@foxglove/studio-base/components/MessagePipeline";
 import Stack from "@foxglove/studio-base/components/Stack";
-import { PlayerPresence } from "@foxglove/studio-base/players/types";
+import { PlayerPresence, TopicStats } from "@foxglove/studio-base/players/types";
+import { Topic } from "@foxglove/studio-base/src/players/types";
 import { fonts } from "@foxglove/studio-base/util/sharedStyleConstants";
 
-const topicToFzfResult = (item: Topic) =>
+type TopicWithStats = Topic & Partial<TopicStats>;
+
+const topicToFzfResult = (item: TopicWithStats) =>
   ({
     item,
     score: 0,
     positions: new Set<number>(),
     start: 0,
     end: 0,
-  } as FzfResultItem<Topic>);
+  } as FzfResultItem<TopicWithStats>);
 
 const HighlightChars = ({
   str,
@@ -88,43 +91,92 @@ const StyledListItem = muiStyled(ListItem, { skipSx: true })(({ theme }) => ({
   ".MuiListItemSecondaryAction-root": {
     marginRight: theme.spacing(-1),
   },
-  "@media (pointer: fine)": {
-    ".MuiListItemSecondaryAction-root": {
-      visibility: "hidden",
-    },
-    "&:not(.loading):hover": {
-      // paddingRight: theme.spacing(6),
+  // "@media (pointer: fine)": {
+  //   ".MuiListItemSecondaryAction-root": {
+  //     visibility: "hidden",
+  //   },
+  //   "&:not(.loading):hover": {
+  //     // paddingRight: theme.spacing(6),
 
-      ".MuiListItemSecondaryAction-root": {
-        visibility: "visible",
-      },
-    },
-  },
+  //     ".MuiListItemSecondaryAction-root": {
+  //       visibility: "visible",
+  //     },
+  //   },
+  // },
 }));
 
 const EMPTY_TOPICS: Topic[] = [];
+const EMPTY_TOPIC_STATS = new Map<string, TopicStats>();
 
 const selectPlayerPresence = ({ playerState }: MessagePipelineContext) => playerState.presence;
+const selectStartTime = ({ playerState }: MessagePipelineContext) =>
+  playerState.activeData?.startTime;
+const selectEndTime = ({ playerState }: MessagePipelineContext) => playerState.activeData?.endTime;
 
 const selectTopics = (ctx: MessagePipelineContext) =>
   ctx.playerState.activeData?.topics ?? EMPTY_TOPICS;
+
+const selectTopicStats = (ctx: MessagePipelineContext) =>
+  ctx.playerState.activeData?.topicStats ?? EMPTY_TOPIC_STATS;
+
+const messageFrequency = (topic: TopicWithStats, duration: Time | undefined) => {
+  const { numMessages, firstMessageTime, lastMessageTime } = topic;
+
+  if (numMessages == undefined) {
+    // No message count, so no frequency
+    return undefined;
+  }
+  if (firstMessageTime == undefined || lastMessageTime == undefined) {
+    if (duration == undefined) {
+      return undefined;
+    }
+
+    // Message count but no timestamps, use the full connection duration
+    const value = numMessages / toSec(duration);
+    const digits = value >= 1000 ? 0 : value >= 100 ? 1 : 2;
+    return `${value.toFixed(digits)} Hz`;
+  }
+  if (numMessages < 2 || areEqual(firstMessageTime, lastMessageTime)) {
+    // Not enough messages or time span to calculate a frequency
+    return undefined;
+  }
+  const topicDurationSec = toSec(subtractTimes(lastMessageTime, firstMessageTime));
+
+  const value = (numMessages - 1) / topicDurationSec;
+  const digits = value >= 1000 ? 0 : value >= 100 ? 1 : 2;
+  return `${value.toFixed(digits)} Hz`;
+};
 
 export function TopicList(): JSX.Element {
   const [filterText, setFilterText] = useState<string>("");
 
   const playerPresence = useMessagePipeline(selectPlayerPresence);
+  const startTime = useMessagePipeline(selectStartTime);
+  const endTime = useMessagePipeline(selectEndTime);
   const topics = useMessagePipeline(selectTopics);
+  const topicStats = useMessagePipeline(selectTopicStats);
+  const items: TopicWithStats[] = useMemo(
+    () =>
+      topics.map((topic) => {
+        const stats = topicStats.get(topic.name);
+        return { ...topic, ...stats };
+      }),
+    [topics, topicStats],
+  );
 
-  const filteredTopics: FzfResultItem<Topic>[] = useMemo(
+  const duration =
+    endTime != undefined && startTime != undefined ? subtractTimes(endTime, startTime) : undefined;
+
+  const filteredTopics: FzfResultItem<TopicWithStats>[] = useMemo(
     () =>
       filterText
-        ? new Fzf(topics, {
+        ? new Fzf(items, {
             fuzzy: filterText.length > 2 ? "v2" : false,
             sort: true,
-            selector: (topic) => `${topic.name}|${topic.datatype}`,
+            selector: (item) => `${item.name}|${item.datatype}`,
           }).find(filterText)
-        : topics.map((t) => topicToFzfResult(t)),
-    [filterText, topics],
+        : items.map((item) => topicToFzfResult(item)),
+    [filterText, items],
   );
 
   if (playerPresence === PlayerPresence.ERROR) {
@@ -196,35 +248,61 @@ export function TopicList(): JSX.Element {
 
       {filteredTopics.length > 0 ? (
         <List key="topics" dense disablePadding>
-          {filteredTopics.map(({ item, positions }) => (
-            <StyledListItem divider key={item.name}>
-              <ListItemText
-                primary={<HighlightChars str={item.name} indices={positions} />}
-                primaryTypographyProps={{ noWrap: true, title: item.name }}
-                secondary={
-                  <HighlightChars
-                    str={item.datatype}
-                    indices={positions}
-                    offset={item.name.length + 1}
-                  />
+          {filteredTopics.map(({ item, positions }) => {
+            const messageCount = item.numMessages;
+            const messageHz = messageFrequency(item, duration);
+
+            return (
+              <StyledListItem
+                divider
+                key={item.name}
+                secondaryAction={
+                  (messageCount != undefined || messageHz != undefined) && (
+                    <Stack style={{ textAlign: "right" }}>
+                      <Typography variant="caption" color="text.secondary">
+                        {messageCount ?? "–"}
+                      </Typography>
+                      <Typography variant="caption" color="text.secondary">
+                        {messageHz ?? "–"}
+                      </Typography>
+                    </Stack>
+                  )
                 }
-                secondaryTypographyProps={{
-                  variant: "caption",
-                  fontFamily: fonts.MONOSPACE,
-                  noWrap: true,
-                  title: item.datatype,
-                }}
-              />
-            </StyledListItem>
-          ))}
+              >
+                <ListItemText
+                  primary={<HighlightChars str={item.name} indices={positions} />}
+                  primaryTypographyProps={{ noWrap: true, title: item.name }}
+                  secondary={
+                    <HighlightChars
+                      str={item.datatype}
+                      indices={positions}
+                      offset={item.name.length + 1}
+                    />
+                  }
+                  secondaryTypographyProps={{
+                    variant: "caption",
+                    fontFamily: fonts.MONOSPACE,
+                    noWrap: true,
+                    title: item.datatype,
+                  }}
+                  style={{ marginRight: "48px" }}
+                />
+              </StyledListItem>
+            );
+          })}
         </List>
       ) : (
         <Stack flex="auto" padding={2} fullHeight alignItems="center" justifyContent="center">
-          {playerPresence === PlayerPresence.PRESENT && (
+          {playerPresence === PlayerPresence.PRESENT && filterText && (
             <Typography align="center" color="text.secondary">
               No topics or datatypes matching
               <br />
               {`“${filterText}”`}
+            </Typography>
+          )}
+          {playerPresence === PlayerPresence.PRESENT && (
+            <Typography align="center" color="text.secondary">
+              No topics available
             </Typography>
           )}
           {playerPresence === PlayerPresence.RECONNECTING && (

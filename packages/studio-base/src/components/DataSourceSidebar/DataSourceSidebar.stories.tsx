@@ -7,7 +7,7 @@ import { Box } from "@mui/material";
 import { fromDate } from "@foxglove/rostime";
 import MockMessagePipelineProvider from "@foxglove/studio-base/components/MessagePipeline/MockMessagePipelineProvider";
 import ModalHost from "@foxglove/studio-base/context/ModalHost";
-import { PlayerPresence } from "@foxglove/studio-base/players/types";
+import { PlayerPresence, Topic } from "@foxglove/studio-base/players/types";
 
 import DataSourceSidebar from "./DataSourceSidebar";
 
@@ -18,7 +18,7 @@ export default {
 
 const START_TIME = fromDate(new Date(2022, 1, 22, 1, 11, 11));
 const END_TIME = fromDate(new Date(2022, 1, 22, 22, 22, 22));
-const TOPICS = [
+const TOPICS: Topic[] = [
   { datatype: "nav_msgs/OccupancyGrid", name: "/map" },
   { datatype: "visualization_msgs/MarkerArray", name: "/semantic_map" },
   { datatype: "tf2_msgs/TFMessage", name: "/tf" },
