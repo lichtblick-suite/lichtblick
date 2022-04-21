@@ -70,7 +70,7 @@ export function Stats(): JSX.Element {
 
 // Adapted from <https://github.com/mrdoob/stats.js/>. The frame time panel is
 // modified to use a maximum value of ~33ms instead of the default 200ms and
-// appear first in the list.
+// the FPS panel is removed
 class THREEStats {
   mode = 0;
   container: HTMLDivElement;
@@ -79,7 +79,7 @@ class THREEStats {
   prevTime: number;
   frames = 0;
   msPanel: Panel;
-  fpsPanel: Panel;
+  // fpsPanel: Panel;
   memPanel: Panel;
 
   constructor() {
@@ -100,7 +100,7 @@ class THREEStats {
     this.prevTime = this.beginTime;
 
     this.msPanel = this.addPanel(new Panel("MS", "#0f0", "#020"));
-    this.fpsPanel = this.addPanel(new Panel("FPS", "#0ff", "#002"));
+    // this.fpsPanel = this.addPanel(new Panel("FPS", "#0ff", "#002"));
     this.memPanel = this.addPanel(new Panel("MB", "#f08", "#201"));
 
     this.showPanel(0);
@@ -132,7 +132,7 @@ class THREEStats {
     this.msPanel.update(time - this.beginTime, 1000 / 30);
 
     if (time >= this.prevTime + 1000) {
-      this.fpsPanel.update((this.frames * 1000) / (time - this.prevTime), 100);
+      // this.fpsPanel.update((this.frames * 1000) / (time - this.prevTime), 100);
 
       this.prevTime = time;
       this.frames = 0;

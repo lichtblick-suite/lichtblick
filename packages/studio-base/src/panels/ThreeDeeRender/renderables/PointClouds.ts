@@ -110,9 +110,11 @@ export class PointClouds extends THREE.Object3D {
   startFrame(currentTime: bigint): void {
     const renderFrameId = this.renderer.renderFrameId;
     const fixedFrameId = this.renderer.fixedFrameId;
-    if (!renderFrameId || !fixedFrameId) {
+    if (renderFrameId == undefined || fixedFrameId == undefined) {
+      this.visible = false;
       return;
     }
+    this.visible = true;
 
     for (const renderable of this.pointCloudsByTopic.values()) {
       const srcTime = renderable.userData.srcTime;

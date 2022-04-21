@@ -95,6 +95,9 @@ export class Renderer extends EventEmitter<RendererEvents> {
     // NOTE: Global side effect
     THREE.Object3D.DefaultUp = new THREE.Vector3(0, 0, 1);
 
+    // TODO: Remove this hack when the user can set the renderFrameId themselves
+    this.renderFrameId = "base_link";
+
     this.canvas = canvas;
     this.gl = new THREE.WebGLRenderer({
       canvas,
@@ -234,10 +237,7 @@ export class Renderer extends EventEmitter<RendererEvents> {
   frameHandler = (currentTime: bigint): void => {
     this.emit("startFrame", currentTime, this);
 
-    // TODO: Remove this hack when the user can set the renderFrameId themselves
-    this.fixedFrameId = "map";
-    this.renderFrameId = "base_link";
-
+    this._updateFrames();
     this.materialCache.update(this.input.canvasSize);
 
     this.frameAxes.startFrame(currentTime);
@@ -341,6 +341,26 @@ export class Renderer extends EventEmitter<RendererEvents> {
       this.animationFrame();
     }
   };
+
+  private _updateFrames(): void {
+    const frameId = this.renderFrameId;
+    if (frameId == undefined) {
+      this.fixedFrameId = undefined;
+      return;
+    }
+
+    const frame = this.transformTree.frame(frameId);
+    if (!frame) {
+      this.fixedFrameId = undefined;
+      return;
+    }
+
+    const rootFrameId = frame.root().id;
+    if (this.fixedFrameId !== rootFrameId) {
+      log.debug(`Changing fixed frame from "${this.fixedFrameId}" to "${rootFrameId}"`);
+      this.fixedFrameId = rootFrameId;
+    }
+  }
 }
 
 function selectObject(object: THREE.Object3D) {

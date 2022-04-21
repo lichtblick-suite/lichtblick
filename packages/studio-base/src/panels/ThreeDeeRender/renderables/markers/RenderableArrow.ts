@@ -26,7 +26,7 @@ const HEAD_DIAMETER = 2.0;
 
 const HEAD_LENGTH_PROPORTION = 0.23;
 
-const NEGATIVE_UNIT_Z = new THREE.Vector3(0, 0, -1);
+const UNIT_X = new THREE.Vector3(1, 0, 0);
 
 const tempStart = new THREE.Vector3();
 const tempEnd = new THREE.Vector3();
@@ -116,12 +116,15 @@ export class RenderableArrow extends RenderableMarker {
       this.shaftMesh.scale.set(shaftLength, shaftDiameter, shaftDiameter);
       this.headMesh.scale.set(headLength, headDiameter, headDiameter);
       this.scale.set(1, 1, 1);
+      this.headMesh.position.set((shaftLength + headLength) / 2, 0, 0);
       this.shaftMesh.position.set(0, 0, 0);
 
       // Override this.pose
       tempDirection.normalize();
       copyPoint(pointA, this.userData.pose.position);
-      this.userData.pose.orientation = getRotationTo(NEGATIVE_UNIT_Z, tempDirection);
+      const sign = tempDirection.x > 0 ? 1 : -1;
+      this.userData.pose.position.x += (sign * shaftLength) / 2;
+      this.userData.pose.orientation = getRotationTo(UNIT_X, tempDirection);
     } else {
       this.shaftMesh.scale.set(SHAFT_LENGTH, SHAFT_DIAMETER, SHAFT_DIAMETER);
       this.headMesh.scale.set(HEAD_LENGTH, HEAD_DIAMETER, HEAD_DIAMETER);

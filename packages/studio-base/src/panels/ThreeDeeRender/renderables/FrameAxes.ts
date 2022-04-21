@@ -120,9 +120,11 @@ export class FrameAxes extends THREE.Object3D {
 
     const renderFrameId = this.renderer.renderFrameId;
     const fixedFrameId = this.renderer.fixedFrameId;
-    if (!renderFrameId || !fixedFrameId) {
+    if (renderFrameId == undefined || fixedFrameId == undefined) {
+      this.visible = false;
       return;
     }
+    this.visible = true;
 
     // Update the arrow poses
     for (const [frameId, renderable] of this.axesByFrameId.entries()) {

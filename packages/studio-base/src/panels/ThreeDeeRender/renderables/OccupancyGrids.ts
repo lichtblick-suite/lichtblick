@@ -109,9 +109,11 @@ export class OccupancyGrids extends THREE.Object3D {
   startFrame(currentTime: bigint): void {
     const renderFrameId = this.renderer.renderFrameId;
     const fixedFrameId = this.renderer.fixedFrameId;
-    if (!renderFrameId || !fixedFrameId) {
+    if (renderFrameId == undefined || fixedFrameId == undefined) {
+      this.visible = false;
       return;
     }
+    this.visible = true;
 
     for (const renderable of this.occupancyGridsByTopic.values()) {
       const frameLocked = renderable.userData.settings.frameLocked;
