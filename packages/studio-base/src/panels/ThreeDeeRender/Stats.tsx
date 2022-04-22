@@ -34,7 +34,13 @@ export function Stats(): JSX.Element {
   const [div, setDiv] = useState<HTMLDivElement | ReactNull>(ReactNull);
   const renderer = useRenderer();
 
-  useRendererEvent("endFrame", () => renderer && update(renderer));
+  useRendererEvent("startFrame", () => stats?.begin());
+  useRendererEvent("endFrame", () => {
+    stats?.end();
+    if (renderer) {
+      update(renderer);
+    }
+  });
 
   useEffect(() => {
     if (!div) {

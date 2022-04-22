@@ -279,6 +279,9 @@ export class Renderer extends EventEmitter<RendererEvents> {
     this.camera.quaternion.setFromEuler(
       tempEuler.set(cameraState.phi, 0, -cameraState.thetaOffset, "ZYX"),
     );
+    this.camera.fov = cameraState.fovy * (180 / Math.PI);
+    this.camera.near = cameraState.near;
+    this.camera.far = cameraState.far;
     this.camera.updateProjectionMatrix();
   }
 

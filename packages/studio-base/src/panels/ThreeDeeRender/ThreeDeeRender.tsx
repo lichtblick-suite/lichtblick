@@ -8,6 +8,7 @@ import { cloneDeep, merge, set } from "lodash";
 import React, { useCallback, useRef, useLayoutEffect, useEffect, useState, useMemo } from "react";
 import { useResizeDetector } from "react-resize-detector";
 import { DeepPartial } from "ts-essentials";
+import { useDebouncedCallback } from "use-debounce";
 
 import Logger from "@foxglove/log";
 import {
@@ -18,10 +19,7 @@ import {
 } from "@foxglove/regl-worldview";
 import { toNanoSec } from "@foxglove/rostime";
 import { PanelExtensionContext, RenderState, Topic, MessageEvent } from "@foxglove/studio";
-import {
-  SettingsTreeAction,
-  SettingsTreeNode,
-} from "@foxglove/studio-base/components/SettingsTreeEditor/types";
+import { SettingsTreeAction } from "@foxglove/studio-base/components/SettingsTreeEditor/types";
 import useCleanup from "@foxglove/studio-base/hooks/useCleanup";
 import { normalizeMarker } from "@foxglove/studio-base/panels/ThreeDeeRender/normalizeMessages";
 
@@ -42,6 +40,7 @@ import {
   OccupancyGrid,
   OCCUPANCY_GRID_DATATYPES,
 } from "./ros";
+import { buildSettingsTree, ThreeDeeRenderConfig } from "./settings";
 
 const SHOW_DEBUG: true | false = false;
 
@@ -52,12 +51,6 @@ mergeSetInto(SUPPORTED_DATATYPES, MARKER_DATATYPES);
 mergeSetInto(SUPPORTED_DATATYPES, MARKER_ARRAY_DATATYPES);
 mergeSetInto(SUPPORTED_DATATYPES, OCCUPANCY_GRID_DATATYPES);
 mergeSetInto(SUPPORTED_DATATYPES, POINTCLOUD_DATATYPES);
-
-type Config = {
-  cameraState: CameraState;
-  enableStats: boolean;
-  followTf?: string;
-};
 
 const log = Logger.getLogger(__filename);
 
@@ -72,42 +65,6 @@ const labelDark = css`
   color: #e1e1e4;
   background-color: #181818cc;
 `;
-
-function buildSettingsTree(config: Config): SettingsTreeNode {
-  return {
-    fields: {
-      enableStats: { label: "Enable Stats", input: "boolean", value: config.enableStats },
-    },
-    children: {
-      cameraState: {
-        label: "Camera",
-        fields: {
-          distance: { label: "Distance", input: "number", value: config.cameraState.distance },
-          perspective: {
-            label: "Perspective",
-            input: "boolean",
-            value: config.cameraState.perspective,
-          },
-          phi: { label: "Phi", input: "number", value: config.cameraState.phi },
-          thetaOffset: {
-            label: "Theta Offset",
-            input: "number",
-            value: config.cameraState.thetaOffset,
-          },
-          fovy: { label: "Fovy", input: "number", value: config.cameraState.fovy },
-          near: { label: "Near", input: "number", value: config.cameraState.near },
-          far: { label: "Far", input: "number", value: config.cameraState.far },
-          target: { label: "Target", input: "vec3", value: config.cameraState.target },
-          targetOffset: {
-            label: "Target Offset",
-            input: "vec3",
-            value: config.cameraState.targetOffset,
-          },
-        },
-      },
-    },
-  };
-}
 
 function RendererOverlay(props: {
   colorScheme: "dark" | "light" | undefined;
@@ -211,8 +168,8 @@ export function ThreeDeeRender({ context }: { context: PanelExtensionContext }):
   const { initialState, saveState } = context;
 
   // Load and save the persisted panel configuration
-  const [config, setConfig] = useState<Config>(() => {
-    const partialConfig = initialState as DeepPartial<Config> | undefined;
+  const [config, setConfig] = useState<ThreeDeeRenderConfig>(() => {
+    const partialConfig = initialState as DeepPartial<ThreeDeeRenderConfig> | undefined;
     const cameraState: CameraState = merge(
       cloneDeep(DEFAULT_CAMERA_STATE),
       partialConfig?.cameraState,
@@ -256,9 +213,9 @@ export function ThreeDeeRender({ context }: { context: PanelExtensionContext }):
     (context as unknown as any).__updatePanelSettingsTree({
       actionHandler,
       disableFilter: true,
-      settings: buildSettingsTree(config),
+      settings: buildSettingsTree(config, topics ?? []),
     });
-  }, [actionHandler, config, context]);
+  }, [actionHandler, config, context, topics]);
 
   // Config followTf
   useEffect(() => {
@@ -268,13 +225,14 @@ export function ThreeDeeRender({ context }: { context: PanelExtensionContext }):
   }, [followTf, renderer]);
 
   // Save panel settings whenever they change
-  useEffect(() => {
-    saveState(config);
-  }, [config, saveState]);
+  const throttledSave = useDebouncedCallback(
+    (newConfig: ThreeDeeRenderConfig) => saveState(newConfig),
+    1000,
+  );
+  useEffect(() => throttledSave(config), [config, throttledSave]);
 
-  useCleanup(() => {
-    renderer?.dispose();
-  });
+  // Dispose of the renderer (and associated GPU resources) on teardown
+  useCleanup(() => renderer?.dispose());
 
   // We use a layout effect to setup render handling for our panel. We also setup some topic subscriptions.
   useLayoutEffect(() => {
