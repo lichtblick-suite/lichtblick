@@ -61,8 +61,13 @@ export function Root({ appConfiguration }: { appConfiguration: IAppConfiguration
   const extensionLoader = useMemo(() => new NoopExtensionLoader(), []);
   const consoleApi = useMemo(() => new ConsoleApi(process.env.FOXGLOVE_API_URL!), []);
 
+  // Enable dialog auth in development since using cookie auth does not work between
+  // localhost and the hosted dev deployment due to browser cookie/host security.
+  const enableDialogAuth = process.env.NODE_ENV === "development";
+
   return (
     <App
+      enableDialogAuth={enableDialogAuth}
       enableLaunchPreferenceScreen
       deepLinks={[window.location.href]}
       dataSources={dataSources}
