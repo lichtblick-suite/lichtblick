@@ -15,15 +15,31 @@ export type Initalization = {
   datatypes: RosDatatypes;
   blockDurationNanos?: number;
 
-  // Publisher names by topic
+  /** Publisher names by topic **/
   publishersByTopic: Map<string, Set<string>>;
 
   problems: PlayerProblem[];
 };
 
 export type MessageIteratorArgs = {
+  /** Which topics to return from the iterator */
   topics: string[];
+
+  /**
+   * The start time of the iterator (inclusive). If no start time is specified, the iterator will start
+   * from the beginning of the source.
+   *
+   * The first message receiveTime will be >= start.
+   * */
   start?: Time;
+
+  /**
+   * The end time of the iterator (inclusive). If no end time is specified, the iterator will stop
+   * at the end of the source.
+   *
+   * The last message receiveTime will be <= end.
+   * */
+  end?: Time;
 };
 
 export type IteratorResult =
@@ -46,7 +62,9 @@ export type GetBackfillMessagesArgs = {
 };
 
 /**
- * IIterableSource specifies an interface initializing and accessing messages.
+ * IIterableSource specifies an interface for initializing and accessing messages using iterators.
+ *
+ * IIterableSources also provide a backfill method to obtain the last message available for topics.
  */
 export interface IIterableSource {
   /**

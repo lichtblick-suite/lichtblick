@@ -173,6 +173,8 @@ export class BagIterableSource implements IIterableSource {
       throw new Error("Invariant: uninitialized");
     }
 
+    const end = opt.end;
+
     const iterator = this._bag.messageIterator({
       topics: opt.topics,
       reverse: opt.reverse,
@@ -183,6 +185,11 @@ export class BagIterableSource implements IIterableSource {
     for await (const bagMsgEvent of iterator) {
       const connectionId = bagMsgEvent.connectionId;
       const reader = readersByConnectionId.get(connectionId);
+
+      if (end && compare(bagMsgEvent.timestamp, end) > 0) {
+        return;
+      }
+
       if (reader) {
         const parsedMessage = reader.readMessage(bagMsgEvent.data);
 
