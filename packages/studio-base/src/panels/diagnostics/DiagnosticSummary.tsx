@@ -23,8 +23,9 @@ import PinIcon from "@mdi/svg/svg/pin.svg";
 import { Stack, Theme, Menu, MenuItem } from "@mui/material";
 import { makeStyles } from "@mui/styles";
 import cx from "classnames";
+import produce from "immer";
 import { compact, uniq } from "lodash";
-import { useCallback, useMemo, useRef, useState, MouseEvent } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState, MouseEvent, useContext } from "react";
 import { List, AutoSizer, ListRowProps } from "react-virtualized";
 
 import { filterMap } from "@foxglove/den/collection";
@@ -35,10 +36,14 @@ import { LegacyInput } from "@foxglove/studio-base/components/LegacyStyledCompon
 import Panel from "@foxglove/studio-base/components/Panel";
 import { usePanelContext } from "@foxglove/studio-base/components/PanelContext";
 import PanelToolbar from "@foxglove/studio-base/components/PanelToolbar";
+import {
+  SettingsTreeAction,
+  SettingsTreeNode,
+} from "@foxglove/studio-base/components/SettingsTreeEditor/types";
+import { PanelSettingsEditorContext } from "@foxglove/studio-base/context/PanelSettingsEditorContext";
 import { Config as DiagnosticStatusConfig } from "@foxglove/studio-base/panels/diagnostics/DiagnosticStatusPanel";
 import helpContent from "@foxglove/studio-base/panels/diagnostics/DiagnosticSummary.help.md";
 import useDiagnostics from "@foxglove/studio-base/panels/diagnostics/useDiagnostics";
-import { PanelConfigSchema } from "@foxglove/studio-base/types/panels";
 import { DIAGNOSTIC_TOPIC } from "@foxglove/studio-base/util/globalConstants";
 import toggle from "@foxglove/studio-base/util/toggle";
 
@@ -148,10 +153,19 @@ type Config = {
   hardwareIdFilter: string;
   sortByLevel?: boolean;
 };
+
 type Props = {
   config: Config;
   saveConfig: (arg0: Partial<Config>) => void;
 };
+
+function buildSettingsTree(config: Config): SettingsTreeNode {
+  return {
+    fields: {
+      sortByLevel: { label: "Sort By Level", input: "boolean", value: config.sortByLevel },
+    },
+  };
+}
 
 const ALLOWED_DATATYPES: string[] = [
   "diagnostic_msgs/DiagnosticArray",
@@ -198,7 +212,8 @@ function DiagnosticSummary(props: Props): JSX.Element {
   const { config, saveConfig } = props;
   const { topics } = useDataSourceInfo();
   const { minLevel, topicToRender, pinnedIds, hardwareIdFilter, sortByLevel = true } = config;
-  const { openSiblingPanel } = usePanelContext();
+  const { id: panelId, openSiblingPanel } = usePanelContext();
+  const { updatePanelSettingsTree } = useContext(PanelSettingsEditorContext);
 
   const togglePinned = useCallback(
     (info: DiagnosticInfo) => {
@@ -206,6 +221,28 @@ function DiagnosticSummary(props: Props): JSX.Element {
     },
     [pinnedIds, saveConfig],
   );
+
+  const actionHandler = useCallback(
+    (action: SettingsTreeAction) => {
+      const { input, path, value } = action.payload;
+      if (input === "boolean" && path[0] === "sortByLevel") {
+        saveConfig(
+          produce(config, (draft) => {
+            draft.sortByLevel = value;
+          }),
+        );
+      }
+    },
+    [config, saveConfig],
+  );
+
+  useEffect(() => {
+    updatePanelSettingsTree(panelId, {
+      actionHandler,
+      disableFilter: true,
+      settings: buildSettingsTree(config),
+    });
+  }, [actionHandler, config, panelId, updatePanelSettingsTree]);
 
   const showDetails = useCallback(
     (info: DiagnosticInfo) => {
@@ -408,10 +445,6 @@ function DiagnosticSummary(props: Props): JSX.Element {
   );
 }
 
-const configSchema: PanelConfigSchema<Config> = [
-  { key: "sortByLevel", type: "toggle", title: "Sort by level" },
-];
-
 const defaultConfig: Config = {
   minLevel: 0,
   pinnedIds: [],
@@ -423,6 +456,5 @@ export default Panel(
   Object.assign(DiagnosticSummary, {
     panelType: "DiagnosticSummary",
     defaultConfig,
-    configSchema,
   }),
 );
