@@ -11,12 +11,21 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { Slider } from "@fluentui/react";
+import { Slider, Typography, useTheme } from "@mui/material";
+import produce from "immer";
+import { set } from "lodash";
+import { useCallback, useContext, useEffect } from "react";
 
 import Panel from "@foxglove/studio-base/components/Panel";
+import { usePanelContext } from "@foxglove/studio-base/components/PanelContext";
 import PanelToolbar from "@foxglove/studio-base/components/PanelToolbar";
+import {
+  SettingsTreeAction,
+  SettingsTreeNode,
+} from "@foxglove/studio-base/components/SettingsTreeEditor/types";
+import Stack from "@foxglove/studio-base/components/Stack";
+import { PanelSettingsEditorContext } from "@foxglove/studio-base/context/PanelSettingsEditorContext";
 import useGlobalVariables from "@foxglove/studio-base/hooks/useGlobalVariables";
-import { PanelConfigSchema } from "@foxglove/studio-base/types/panels";
 
 import helpContent from "./index.help.md";
 
@@ -31,6 +40,21 @@ export type GlobalVariableSliderConfig = {
   globalVariableName: string;
 };
 
+function buildSettingsTree(config: GlobalVariableSliderConfig): SettingsTreeNode {
+  return {
+    fields: {
+      min: { label: "Min", input: "number", value: config.sliderProps.min },
+      max: { label: "Max", input: "number", value: config.sliderProps.max },
+      step: { label: "Step", input: "number", value: config.sliderProps.step },
+      globalVariableName: {
+        label: "Variable name",
+        input: "string",
+        value: config.globalVariableName,
+      },
+    },
+  };
+}
+
 type Props = {
   config: GlobalVariableSliderConfig;
 };
@@ -41,60 +65,69 @@ function GlobalVariableSliderPanel(props: Props): React.ReactElement {
 
   const globalVariableValue = globalVariables[globalVariableName];
 
-  const sliderOnChange = (value: number) => {
+  const { id: panelId, saveConfig } = usePanelContext();
+  const { updatePanelSettingsTree } = useContext(PanelSettingsEditorContext);
+
+  const theme = useTheme();
+
+  const actionHandler = useCallback(
+    (action: SettingsTreeAction) => {
+      saveConfig(
+        produce(props.config, (draft) => {
+          if (["min", "max"].includes(action.payload.path[0] ?? "")) {
+            set(draft, ["sliderProps", ...action.payload.path], action.payload.value);
+          } else if (
+            action.payload.path[0] === "step" &&
+            action.payload.input === "number" &&
+            action.payload.value != undefined &&
+            action.payload.value > 0
+          ) {
+            set(draft, ["sliderProps", "step"], action.payload.value);
+          } else {
+            set(draft, action.payload.path, action.payload.value);
+          }
+        }),
+      );
+    },
+    [props.config, saveConfig],
+  );
+
+  useEffect(() => {
+    updatePanelSettingsTree(panelId, {
+      actionHandler,
+      disableFilter: true,
+      settings: buildSettingsTree(props.config),
+    });
+  }, [actionHandler, panelId, props.config, updatePanelSettingsTree]);
+
+  const sliderOnChange = (_event: Event, value: number | number[]) => {
     if (value !== globalVariableValue) {
       setGlobalVariables({ [globalVariableName]: value });
     }
   };
 
+  const marks = [
+    { value: sliderProps.min, label: String(sliderProps.min) },
+    { value: sliderProps.max, label: String(sliderProps.max) },
+  ];
+
   return (
-    <div style={{ padding: "25px 4px 4px" }}>
+    <Stack direction="row" alignItems="center" fullHeight gap={2} paddingY={2} paddingX={3}>
       <PanelToolbar helpContent={helpContent} floating />
       <Slider
         min={sliderProps.min}
         max={sliderProps.max}
         step={sliderProps.step}
-        showValue
-        snapToStep
+        marks={marks}
         value={typeof globalVariableValue === "number" ? globalVariableValue : 0}
         onChange={sliderOnChange}
-        styles={{
-          // render min/max labels under the slider
-          slideBox: {
-            "::after": {
-              position: "absolute",
-              bottom: "-60%",
-              left: 0,
-              paddingLeft: "8px",
-              fontSize: "0.75em",
-              width: "100%",
-              mixBlendMode: "difference",
-              content: `'${sliderProps.min}'`,
-            },
-            "::before": {
-              position: "absolute",
-              bottom: "-60%",
-              left: 0,
-              fontSize: "0.75em",
-              paddingRight: "8px",
-              textAlign: "right",
-              width: "100%",
-              mixBlendMode: "difference",
-              content: `'${sliderProps.max}'`,
-            },
-          },
-        }}
       />
-    </div>
+      <Typography variant="h5" style={{ marginTop: theme.spacing(-2.5) }}>
+        {typeof globalVariableValue === "number" ? globalVariableValue : 0}
+      </Typography>
+    </Stack>
   );
 }
-
-const configSchema: PanelConfigSchema<GlobalVariableSliderConfig> = [
-  { key: "globalVariableName", type: "text", title: "Variable name" },
-  { key: "sliderProps.min", type: "number", title: "Min" },
-  { key: "sliderProps.max", type: "number", title: "Max" },
-  { key: "sliderProps.step", type: "number", title: "Step", validate: (x) => (x <= 0 ? 1 : x) },
-];
 
 export default Panel(
   Object.assign(GlobalVariableSliderPanel, {
@@ -103,6 +136,5 @@ export default Panel(
       sliderProps: { min: 0, max: 10, step: 1 },
       globalVariableName: "globalVariable",
     },
-    configSchema,
   }),
 );
