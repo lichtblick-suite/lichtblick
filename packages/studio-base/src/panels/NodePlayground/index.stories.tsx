@@ -13,7 +13,6 @@
 
 import { storiesOf } from "@storybook/react";
 
-import SchemaEditor from "@foxglove/studio-base/components/PanelSettings/SchemaEditor";
 import NodePlayground from "@foxglove/studio-base/panels/NodePlayground";
 import rawUserUtils from "@foxglove/studio-base/players/UserNodePlayer/nodeTransformerWorker/typescript/rawUserUtils";
 import { UserNodeLog } from "@foxglove/studio-base/players/UserNodePlayer/types";
@@ -529,13 +528,4 @@ storiesOf("panels/NodePlayground", module)
     >
       <NodePlayground overrideConfig={{ selectedNodeId: "nodeId1" }} />
     </PanelSetup>
-  ))
-  .add("Settings", () => {
-    return (
-      <SchemaEditor
-        configSchema={NodePlayground.configSchema!}
-        config={NodePlayground.defaultConfig}
-        saveConfig={() => {}}
-      />
-    );
-  });
+  ));

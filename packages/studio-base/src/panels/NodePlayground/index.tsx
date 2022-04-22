@@ -15,14 +15,19 @@ import { useTheme, Link, Spinner, SpinnerSize } from "@fluentui/react";
 import ArrowLeftIcon from "@mdi/svg/svg/arrow-left.svg";
 import PlusIcon from "@mdi/svg/svg/plus.svg";
 import { Box, Input, Stack } from "@mui/material";
-import { Suspense, useState } from "react";
+import { Suspense, useCallback, useContext, useEffect, useState } from "react";
 import styled from "styled-components";
 import { v4 as uuidv4 } from "uuid";
 
 import Button from "@foxglove/studio-base/components/Button";
 import Icon from "@foxglove/studio-base/components/Icon";
 import Panel from "@foxglove/studio-base/components/Panel";
+import { usePanelContext } from "@foxglove/studio-base/components/PanelContext";
 import PanelToolbar from "@foxglove/studio-base/components/PanelToolbar";
+import {
+  SettingsTreeAction,
+  SettingsTreeNode,
+} from "@foxglove/studio-base/components/SettingsTreeEditor/types";
 import TextContent from "@foxglove/studio-base/components/TextContent";
 import {
   LayoutState,
@@ -30,12 +35,13 @@ import {
   useCurrentLayoutSelector,
 } from "@foxglove/studio-base/context/CurrentLayoutContext";
 import { useHelpInfo } from "@foxglove/studio-base/context/HelpInfoContext";
+import { PanelSettingsEditorContext } from "@foxglove/studio-base/context/PanelSettingsEditorContext";
 import { useUserNodeState } from "@foxglove/studio-base/context/UserNodeStateContext";
 import { useWorkspace } from "@foxglove/studio-base/context/WorkspaceContext";
 import BottomBar from "@foxglove/studio-base/panels/NodePlayground/BottomBar";
 import Sidebar from "@foxglove/studio-base/panels/NodePlayground/Sidebar";
 import Playground from "@foxglove/studio-base/panels/NodePlayground/playground-icon.svg";
-import { PanelConfigSchema, UserNodes } from "@foxglove/studio-base/types/panels";
+import { UserNodes } from "@foxglove/studio-base/types/panels";
 import { colors } from "@foxglove/studio-base/util/sharedStyleConstants";
 
 import Config from "./Config";
@@ -111,6 +117,18 @@ const SWelcomeScreen = styled.div`
 
 export type Explorer = undefined | "nodes" | "utils" | "templates";
 
+function buildSettingsStree(config: Config): SettingsTreeNode {
+  return {
+    fields: {
+      autoFormatOnSave: {
+        input: "boolean",
+        label: "Auto-format on save",
+        value: config.autoFormatOnSave,
+      },
+    },
+  };
+}
+
 const WelcomeScreen = ({ addNewNode }: { addNewNode: (code?: string) => void }) => {
   const { setHelpInfo } = useHelpInfo();
   const { openHelp } = useWorkspace();
@@ -149,6 +167,8 @@ const userNodeSelector = (state: LayoutState) =>
 function NodePlayground(props: Props) {
   const { config, saveConfig } = props;
   const { autoFormatOnSave = false, selectedNodeId, editorForStorybook } = config;
+  const { id: panelId } = usePanelContext();
+  const { updatePanelSettingsTree } = useContext(PanelSettingsEditorContext);
 
   const theme = useTheme();
   const [explorer, updateExplorer] = React.useState<Explorer>(undefined);
@@ -190,6 +210,24 @@ function NodePlayground(props: Props) {
     backgroundColor: theme.semanticColors.bodyBackground,
     width: `${Math.max(inputTitle.length + 4, 10)}ch`, // Width based on character count of title + padding
   };
+
+  const actionHandler = useCallback(
+    (action: SettingsTreeAction) => {
+      const { input, value, path } = action.payload;
+      if (input === "boolean" && path[0] === "autoFormatOnSave") {
+        saveConfig({ ...config, autoFormatOnSave: value });
+      }
+    },
+    [config, saveConfig],
+  );
+
+  useEffect(() => {
+    updatePanelSettingsTree(panelId, {
+      actionHandler,
+      disableFilter: true,
+      settings: buildSettingsStree(config),
+    });
+  }, [actionHandler, config, panelId, updatePanelSettingsTree]);
 
   React.useLayoutEffect(() => {
     if (selectedNode) {
@@ -393,10 +431,6 @@ function NodePlayground(props: Props) {
   );
 }
 
-const configSchema: PanelConfigSchema<Config> = [
-  { key: "autoFormatOnSave", type: "toggle", title: "Auto-format on save" },
-];
-
 const defaultConfig: Config = {
   selectedNodeId: undefined,
   autoFormatOnSave: true,
@@ -405,6 +439,5 @@ export default Panel(
   Object.assign(NodePlayground, {
     panelType: "NodePlayground",
     defaultConfig,
-    configSchema,
   }),
 );
