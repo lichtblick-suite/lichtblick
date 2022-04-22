@@ -53,12 +53,12 @@ export default function Metadata({
           {datatype}
         </Link>
       )}
-      {diffMessage ? " base" : ""} @ {formatTimeRaw(message.receiveTime)} ROS{" "}
+      {diffMessage ? " base" : ""} @ {formatTimeRaw(message.receiveTime)} sec{" "}
       <CopyMessageButton data={data} text="Copy msg" />
       {diffMessage?.receiveTime && (
         <>
           <div>
-            {`diff @ ${formatTimeRaw(diffMessage.receiveTime)} ROS `}
+            {`diff @ ${formatTimeRaw(diffMessage.receiveTime)} sec `}
             <CopyMessageButton data={diffData} text="Copy msg" />
           </div>
           <CopyMessageButton data={diff} text="Copy diff of msgs" />
