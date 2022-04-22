@@ -400,6 +400,7 @@ export function Markers(): JSX.Element {
       <ThreeDeeRender
         overrideConfig={{
           ...ThreeDeeRender.defaultConfig,
+          enableStats: false,
           followTf: "base_link",
           cameraState: {
             distance: 5.5,
@@ -537,6 +538,7 @@ export function ArrowMarkers(): JSX.Element {
       <ThreeDeeRender
         overrideConfig={{
           ...ThreeDeeRender.defaultConfig,
+          enableStats: false,
           followTf: "base_link",
           cameraState: {
             distance: 4,

@@ -36,6 +36,12 @@ const DefaultSettings: SettingsTreeNode = {
           input: "autocomplete",
           items: ["topic1", "topic2", "topic3"],
         },
+        vec3: {
+          label: "Vec3",
+          input: "vec3",
+          labels: ["U", "V", "W"],
+          value: [1, 2, 3],
+        },
       },
     },
     background: {
