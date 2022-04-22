@@ -19,7 +19,24 @@ export default class FoxgloveWebSocketDataSourceFactory implements IDataSourceFa
   docsLink = "https://foxglove.dev/docs/studio/connection/foxglove-websocket";
 
   formConfig = {
-    fields: [{ id: "url", label: "WebSocket URL", defaultValue: "ws://localhost:8765" }],
+    fields: [
+      {
+        id: "url",
+        label: "WebSocket URL",
+        defaultValue: "ws://localhost:8765",
+        validate: (newValue: string): Error | undefined => {
+          try {
+            const url = new URL(newValue);
+            if (url.protocol !== "ws:" && url.protocol !== "wss:") {
+              return new Error(`Invalid protocol: ${url.protocol}`);
+            }
+            return undefined;
+          } catch (err) {
+            return new Error("Enter a valid url");
+          }
+        },
+      },
+    ],
   };
 
   initialize(args: DataSourceFactoryInitializeArgs): Player | undefined {

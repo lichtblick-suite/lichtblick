@@ -20,6 +20,22 @@ export type DataSourceFactoryInitializeArgs = {
 
 export type DataSourceFactoryType = "file" | "remote-file" | "connection" | "sample";
 
+export type Field = {
+  id: string;
+  label: string;
+  defaultValue?: string;
+  placeholder?: string;
+  description?: string;
+
+  /**
+   * Optional validate function
+   *
+   * The function is called with a value and can return an Error if the value should
+   * be rejected. If the function returns `undefined`, then the value is accepted.
+   */
+  validate?: (value: string) => Error | undefined;
+};
+
 export interface IDataSourceFactory {
   id: string;
   type: DataSourceFactoryType;
@@ -35,13 +51,7 @@ export interface IDataSourceFactory {
 
   formConfig?: {
     // Initialization args are populated with keys of the _id_ field
-    fields: {
-      id: string;
-      label: string;
-      defaultValue?: string;
-      placeholder?: string;
-      description?: string;
-    }[];
+    fields: Field[];
   };
 
   // If data source initialization supports "Open File" workflow, this property lists the supported

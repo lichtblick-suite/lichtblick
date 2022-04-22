@@ -2,7 +2,7 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { ActionButton, Link, TextField, useTheme, Text } from "@fluentui/react";
+import { ActionButton, Link, useTheme, Text } from "@fluentui/react";
 import { Stack } from "@mui/material";
 import { useState, useMemo, useCallback, useLayoutEffect } from "react";
 
@@ -11,6 +11,7 @@ import {
   usePlayerSelection,
 } from "@foxglove/studio-base/context/PlayerSelectionContext";
 
+import { FormField } from "./FormField";
 import View from "./View";
 
 type ConnectionProps = {
@@ -42,6 +43,7 @@ export default function Connection(props: ConnectionProps): JSX.Element {
     [enabledSourcesFirst, selectedConnectionIdx],
   );
 
+  const [fieldErrors, setFieldErrors] = useState(new Map<string, string>());
   const [fieldValues, setFieldValues] = useState<Record<string, string | undefined>>({});
 
   useLayoutEffect(() => {
@@ -69,12 +71,10 @@ export default function Connection(props: ConnectionProps): JSX.Element {
     selectSource(selectedSource.id, { type: "connection", params: fieldValues });
   }, [selectedSource, fieldValues, selectSource]);
 
+  const disableOpen = selectedSource?.disabledReason != undefined || fieldErrors.size > 0;
+
   return (
-    <View
-      onBack={onBack}
-      onCancel={onCancel}
-      onOpen={selectedSource?.disabledReason == undefined ? onOpen : undefined}
-    >
+    <View onBack={onBack} onCancel={onCancel} onOpen={disableOpen ? undefined : onOpen}>
       <Stack direction="row" flexGrow={1} height="100%" spacing={4}>
         <Stack height="100%">
           {enabledSourcesFirst.map((source, idx) => {
@@ -102,7 +102,7 @@ export default function Connection(props: ConnectionProps): JSX.Element {
           flexGrow={1}
           height="100%"
           spacing={2}
-          sx={{ overflowX: "auto" }}
+          style={{ overflowX: "auto" }}
         >
           {selectedSource?.description && (
             <Text styles={{ root: { color: theme.semanticColors.bodySubtext } }}>
@@ -120,18 +120,25 @@ export default function Connection(props: ConnectionProps): JSX.Element {
             <Stack flexGrow={1} justifyContent="space-between">
               <Stack spacing={2}>
                 {selectedSource.formConfig.fields.map((field) => (
-                  <TextField
+                  <FormField
+                    key={field.id}
+                    field={field}
                     disabled={selectedSource.disabledReason != undefined}
-                    key={field.label}
-                    label={field.label}
-                    description={field.description}
-                    placeholder={field.placeholder}
-                    defaultValue={field.defaultValue}
-                    onChange={(_, newValue) => {
+                    onError={(err) => {
+                      setFieldErrors((existing) => {
+                        existing.set(field.id, err);
+                        return new Map(existing);
+                      });
+                    }}
+                    onChange={(newValue) => {
+                      setFieldErrors((existing) => {
+                        existing.delete(field.id);
+                        return new Map(existing);
+                      });
                       setFieldValues((existing) => {
                         return {
                           ...existing,
-                          [field.id]: newValue ?? field.defaultValue,
+                          [field.id]: newValue,
                         };
                       });
                     }}

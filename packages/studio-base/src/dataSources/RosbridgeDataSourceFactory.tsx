@@ -19,7 +19,24 @@ class RosbridgeDataSourceFactory implements IDataSourceFactory {
     "Connect to a running ROS 1 or ROS 2 system over WebSockets using the rosbridge_suite package.";
 
   formConfig = {
-    fields: [{ id: "url", label: "WebSocket URL", defaultValue: "ws://localhost:9090" }],
+    fields: [
+      {
+        id: "url",
+        label: "WebSocket URL",
+        defaultValue: "ws://localhost:9090",
+        validate: (newValue: string): Error | undefined => {
+          try {
+            const url = new URL(newValue);
+            if (url.protocol !== "ws:" && url.protocol !== "wss:") {
+              return new Error(`Invalid protocol: ${url.protocol}`);
+            }
+            return undefined;
+          } catch (err) {
+            return new Error("Enter a valid url");
+          }
+        },
+      },
+    ],
   };
 
   initialize(args: DataSourceFactoryInitializeArgs): Player | undefined {
