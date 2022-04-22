@@ -12,7 +12,9 @@
 //   You may not use this file except in compliance with the License.
 
 import { Box, Stack, Typography } from "@mui/material";
-import { useCallback, useEffect, useMemo, useRef } from "react";
+import produce from "immer";
+import { set } from "lodash";
+import { useCallback, useContext, useEffect, useMemo, useRef } from "react";
 import styled from "styled-components";
 
 import { useRethrow } from "@foxglove/hooks";
@@ -21,7 +23,13 @@ import Autocomplete, { IAutocomplete } from "@foxglove/studio-base/components/Au
 import Button from "@foxglove/studio-base/components/Button";
 import { LegacyTextarea } from "@foxglove/studio-base/components/LegacyStyledComponents";
 import Panel from "@foxglove/studio-base/components/Panel";
+import { usePanelContext } from "@foxglove/studio-base/components/PanelContext";
 import PanelToolbar from "@foxglove/studio-base/components/PanelToolbar";
+import {
+  SettingsTreeAction,
+  SettingsTreeNode,
+} from "@foxglove/studio-base/components/SettingsTreeEditor/types";
+import { PanelSettingsEditorContext } from "@foxglove/studio-base/context/PanelSettingsEditorContext";
 import usePublisher from "@foxglove/studio-base/hooks/usePublisher";
 import { PlayerCapabilities, Topic } from "@foxglove/studio-base/players/types";
 import { PanelConfigSchema } from "@foxglove/studio-base/types/panels";
@@ -43,6 +51,17 @@ type Props = {
   config: Config;
   saveConfig: (config: Partial<Config>) => void;
 };
+
+function buildSettingsTree(config: Config): SettingsTreeNode {
+  return {
+    fields: {
+      advancedView: { label: "Editing Mode", input: "boolean", value: config.advancedView },
+      buttonText: { label: "Button Title", input: "string", value: config.buttonText },
+      buttonTooltip: { label: "Button Tooltip", input: "string", value: config.buttonTooltip },
+      buttonColor: { label: "Button Color", input: "color", value: config.buttonColor },
+    },
+  };
+}
 
 const STextArea = styled(LegacyTextarea)`
   width: 100%;
@@ -101,6 +120,8 @@ function Publish(props: Props) {
 
   const datatypeNames = useMemo(() => Array.from(datatypes.keys()).sort(), [datatypes]);
   const { error, parsedObject } = useMemo(() => parseInput(value), [value]);
+  const { id: panelId } = usePanelContext();
+  const { updatePanelSettingsTree } = useContext(PanelSettingsEditorContext);
 
   // when the selected datatype changes, replace the textarea contents with a sample message of the correct shape
   // Make sure not to build a sample message on first load, though -- we don't want to overwrite
@@ -121,6 +142,25 @@ function Publish(props: Props) {
     }
     prevDatatype.current = datatype;
   }, [saveConfig, datatype, datatypes]);
+
+  const actionHandler = useCallback(
+    (action: SettingsTreeAction) => {
+      saveConfig(
+        produce(props.config, (draft) => {
+          set(draft, action.payload.path, action.payload.value);
+        }),
+      );
+    },
+    [props.config, saveConfig],
+  );
+
+  useEffect(() => {
+    updatePanelSettingsTree(panelId, {
+      actionHandler,
+      disableFilter: true,
+      settings: buildSettingsTree(props.config),
+    });
+  }, [actionHandler, panelId, props.config, updatePanelSettingsTree]);
 
   const onChangeTopic = useCallback(
     (_event: unknown, name: string) => {
