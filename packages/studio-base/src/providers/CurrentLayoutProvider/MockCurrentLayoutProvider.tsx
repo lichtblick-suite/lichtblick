@@ -117,7 +117,7 @@ export default function MockCurrentLayoutProvider({
     mosaicId: "mockMosaicId",
     getSelectedPanelIds: useCallback(() => [], []),
     setSelectedPanelIds: useCallback(() => {
-      throw new Error("Not implemented in MockCurrentLayoutProvider");
+      // no-op
     }, []),
     actions,
   });

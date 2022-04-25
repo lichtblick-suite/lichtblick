@@ -31,21 +31,40 @@ import SchemaEditor from "./SchemaEditor";
 
 const selectedLayoutIdSelector = (state: LayoutState) => state.selectedLayout?.id;
 
+const singlePanelIdSelector = (state: LayoutState) =>
+  typeof state.selectedLayout?.data?.layout === "string"
+    ? state.selectedLayout.data.layout
+    : undefined;
+
 export default function PanelSettings({
   selectedPanelIdsForTests,
 }: React.PropsWithChildren<{
   selectedPanelIdsForTests?: readonly string[];
 }>): JSX.Element {
   const selectedLayoutId = useCurrentLayoutSelector(selectedLayoutIdSelector);
-  const { selectedPanelIds: originalSelectedPanelIds, setSelectedPanelIds } = useSelectedPanels();
+  const singlePanelId = useCurrentLayoutSelector(singlePanelIdSelector);
+  const {
+    selectedPanelIds: originalSelectedPanelIds,
+    setSelectedPanelIds,
+    selectAllPanels,
+  } = useSelectedPanels();
   const selectedPanelIds = selectedPanelIdsForTests ?? originalSelectedPanelIds;
+
+  // If no panel is selected and there is only one panel in the layout, select it
+  useEffect(() => {
+    if (selectedPanelIds.length === 0 && singlePanelId != undefined) {
+      selectAllPanels();
+    }
+  }, [selectAllPanels, selectedPanelIds, singlePanelId]);
+
   const { openLayoutBrowser } = useWorkspace();
   const selectedPanelId = useMemo(
     () => (selectedPanelIds.length === 1 ? selectedPanelIds[0] : undefined),
     [selectedPanelIds],
   );
+
+  // Automatically deselect the panel we were editing when the settings sidebar closes
   useUnmount(() => {
-    // Automatically deselect the panel we were editing when the settings sidebar closes
     if (selectedPanelId != undefined) {
       setSelectedPanelIds([]);
     }
