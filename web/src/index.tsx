@@ -84,7 +84,7 @@ async function main() {
     defaults: {
       [AppSetting.OPEN_DIALOG]: true,
       [AppSetting.ENABLE_REACT_STRICT_MODE]: isDevelopment,
-      [AppSetting.EXPERIMENTAL_BAG_PLAYER]: isDevelopment,
+      [AppSetting.EXPERIMENTAL_BAG_PLAYER]: true,
     },
   });
   const enableStrictMode = appConfiguration.get(AppSetting.ENABLE_REACT_STRICT_MODE) as boolean;
