@@ -367,6 +367,10 @@ export default class FoxgloveDataPlatformPlayer implements Player {
             lastTickEndTime = undefined;
             continue mainLoop;
           }
+          if (this._presence === PlayerPresence.ERROR) {
+            // Avoid persistently re-requesting data if we encountered a parsing error
+            return;
+          }
         }
         lastTickEndTime = performance.now();
         this._nextFrame = messages;
@@ -472,6 +476,7 @@ export default class FoxgloveDataPlatformPlayer implements Player {
         if (error.name === "AbortError") {
           return;
         }
+        this._presence = PlayerPresence.ERROR;
         log.error(error);
         captureException(error);
         this._addProblem("stream-error", { message: error.message, error, severity: "error" });
