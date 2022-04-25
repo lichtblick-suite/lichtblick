@@ -72,9 +72,9 @@ export type SettingsTree = {
   actionHandler: (action: SettingsTreeAction) => void;
 
   /**
-   * True if the editor should not show the filter control.
+   * True if the editor should show the filter control.
    */
-  disableFilter?: boolean;
+  enableFilter?: boolean;
 
   /**
    * The actual settings tree. Updates to this will automatically be reflected in the

@@ -287,8 +287,9 @@ export const Default = (): JSX.Element => {
 
   const settings = useMemo(
     () => ({
-      settings: settingsNode,
       actionHandler,
+      enableFilter: true,
+      settings: settingsNode,
     }),
     [settingsNode, actionHandler],
   );

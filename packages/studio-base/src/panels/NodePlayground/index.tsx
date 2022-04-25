@@ -224,7 +224,6 @@ function NodePlayground(props: Props) {
   useEffect(() => {
     updatePanelSettingsTree(panelId, {
       actionHandler,
-      disableFilter: true,
       settings: buildSettingsStree(config),
     });
   }, [actionHandler, config, panelId, updatePanelSettingsTree]);

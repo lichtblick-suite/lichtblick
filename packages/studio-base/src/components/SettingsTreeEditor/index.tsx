@@ -32,7 +32,7 @@ export default function SettingsTreeEditor({
 
   return (
     <Stack fullHeight>
-      {settings.disableFilter !== true && (
+      {settings.enableFilter === true && (
         <StyledAppBar position="sticky" color="default" elevation={0}>
           <TextField
             onChange={(event) => setFilterText(event.target.value)}

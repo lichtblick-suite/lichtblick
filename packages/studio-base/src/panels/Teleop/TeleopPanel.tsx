@@ -183,7 +183,6 @@ function TeleopPanel(props: TeleopPanelProps): JSX.Element {
     // eslint-disable-next-line no-underscore-dangle, @typescript-eslint/no-explicit-any
     (context as unknown as any).__updatePanelSettingsTree({
       actionHandler: settingsActionHandler,
-      disableFilter: true,
       settings: tree,
     });
     saveState(config);

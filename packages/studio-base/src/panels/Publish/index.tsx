@@ -157,7 +157,6 @@ function Publish(props: Props) {
   useEffect(() => {
     updatePanelSettingsTree(panelId, {
       actionHandler,
-      disableFilter: true,
       settings: buildSettingsTree(props.config),
     });
   }, [actionHandler, panelId, props.config, updatePanelSettingsTree]);

@@ -209,7 +209,6 @@ function ImageView(props: Props) {
   useEffect(() => {
     updatePanelSettingsTree(panelId, {
       actionHandler,
-      disableFilter: true,
       settings: buildSettingsTree(config),
     });
   }, [actionHandler, config, panelId, updatePanelSettingsTree]);

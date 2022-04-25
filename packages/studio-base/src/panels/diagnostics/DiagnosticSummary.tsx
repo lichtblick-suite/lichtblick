@@ -239,7 +239,6 @@ function DiagnosticSummary(props: Props): JSX.Element {
   useEffect(() => {
     updatePanelSettingsTree(panelId, {
       actionHandler,
-      disableFilter: true,
       settings: buildSettingsTree(config),
     });
   }, [actionHandler, config, panelId, updatePanelSettingsTree]);
