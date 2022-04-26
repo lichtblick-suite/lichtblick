@@ -289,6 +289,9 @@ function FieldInput({
 function FieldLabel({ field }: { field: DeepReadonly<SettingsTreeField> }): JSX.Element {
   const theme = useTheme();
 
+  const { openHelp } = useWorkspace();
+  const { setHelpInfo } = useHelpInfo();
+
   if (field.input === "vec3") {
     const labels = field.labels ?? ["X", "Y", "Z"];
     return (
@@ -341,7 +344,15 @@ function FieldLabel({ field }: { field: DeepReadonly<SettingsTreeField> }): JSX.
           {field.label}
         </Typography>
         {field.help && (
-          <IconButton size="small" color="secondary" title={field.help}>
+          <IconButton
+            size="small"
+            color="secondary"
+            title={field.help}
+            onClick={() => {
+              setHelpInfo({ title: field.label, content: field.help });
+              openHelp();
+            }}
+          >
             <HelpOutlineIcon fontSize="inherit" />
           </IconButton>
         )}

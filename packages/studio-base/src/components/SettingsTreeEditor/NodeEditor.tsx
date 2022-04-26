@@ -40,13 +40,17 @@ const LayerOptions = muiStyled("div", {
   opacity: visible ? 1 : 0.6,
 }));
 
-const NodeHeader = muiStyled("div")(({ theme }) => {
+const NodeHeader = muiStyled("div")<{
+  indent: number;
+}>(({ theme, indent }) => {
   return {
     display: "flex",
     "&:hover": {
       outline: `1px solid ${theme.palette.primary.main}`,
       outlineOffset: -1,
     },
+    paddingBottom: indent === 1 ? theme.spacing(0.5) : 0,
+    paddingTop: indent === 1 ? theme.spacing(0.5) : 0,
     paddingRight: theme.spacing(2.25),
   };
 });
@@ -90,7 +94,7 @@ function NodeEditorComponent(props: NodeEditorProps): JSX.Element {
     return (
       <NodeEditor
         actionHandler={actionHandler}
-        disableIcon={props.path.length > 0}
+        disableIcon={true}
         key={key}
         settings={child}
         path={stablePath}
@@ -103,7 +107,7 @@ function NodeEditorComponent(props: NodeEditorProps): JSX.Element {
   return (
     <>
       {indent > 0 && (
-        <NodeHeader>
+        <NodeHeader indent={indent}>
           <NodeHeaderToggle indent={indent} onClick={() => setOpen(!open)}>
             <div
               style={{
@@ -124,11 +128,23 @@ function NodeEditorComponent(props: NodeEditorProps): JSX.Element {
               {settings.label ?? "Settings"}
             </Typography>
           </NodeHeaderToggle>
-          <VisibilityToggle edge="end" size="small" checked={visible} onChange={handleChange} />
+          <VisibilityToggle
+            edge="end"
+            size="small"
+            checked={visible}
+            onChange={handleChange}
+            style={{ opacity: 0 }}
+            disabled
+          />
         </NodeHeader>
       )}
       <Collapse in={open}>
-        {fieldEditors.length > 0 && <LayerOptions visible={visible}>{fieldEditors}</LayerOptions>}
+        {fieldEditors.length > 0 && (
+          <>
+            <LayerOptions visible={visible}>{fieldEditors}</LayerOptions>
+            {indent === 0 && <Divider />}
+          </>
+        )}
         {childNodes}
       </Collapse>
       {indent === 1 && <Divider />}
