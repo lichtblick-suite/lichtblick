@@ -16,7 +16,6 @@ import { useCallback, useRef } from "react";
 
 import { parse as parseMessageDefinition } from "@foxglove/rosmsg";
 import { fromSec } from "@foxglove/rostime";
-import SchemaEditor from "@foxglove/studio-base/components/PanelSettings/SchemaEditor";
 import Plot, { PlotConfig } from "@foxglove/studio-base/panels/Plot";
 import { BlockCache } from "@foxglove/studio-base/players/types";
 import PanelSetup, { Fixture, triggerWheel } from "@foxglove/studio-base/stories/PanelSetup";
@@ -1122,13 +1121,3 @@ export function PreloadedDataAndItsAbsoluteValue(): JSX.Element {
 PreloadedDataAndItsAbsoluteValue.parameters = {
   useReadySignal: true,
 };
-
-export function Settings(): JSX.Element {
-  return (
-    <SchemaEditor
-      configSchema={Plot.configSchema!}
-      config={Plot.defaultConfig}
-      saveConfig={() => {}}
-    />
-  );
-}
