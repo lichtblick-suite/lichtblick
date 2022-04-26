@@ -388,7 +388,7 @@ export default class Ros2Player implements Player {
       if (!rosEndpoint) {
         this._problems.addProblem(`subscription:${topicName}`, {
           severity: "warn",
-          message: `No publisher for "${topicName}"`,
+          message: `No publisher for "${topicName}" ("${dataType}")`,
           tip: `Publish "${topicName}"`,
         });
         continue;
@@ -404,7 +404,7 @@ export default class Ros2Player implements Player {
       } catch (error) {
         this._problems.addProblem(`msgdef:${topicName}`, {
           severity: "warn",
-          message: `Unknown message definition for "${topicName}"`,
+          message: `Unknown message definition for "${topicName}" ("${dataType}")`,
           tip: `Only core ROS 2 data types are currently supported`,
         });
       }
