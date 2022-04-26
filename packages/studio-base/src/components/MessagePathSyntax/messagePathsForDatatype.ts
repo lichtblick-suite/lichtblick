@@ -14,6 +14,7 @@
 import { memoize } from "lodash";
 import memoizeWeak from "memoize-weak";
 
+import { MessagePathFilter } from "@foxglove/studio-base/components/MessagePathSyntax/constants";
 import { isTypicalFilterName } from "@foxglove/studio-base/components/MessagePathSyntax/isTypicalFilterName";
 import { quoteFieldNameIfNeeded } from "@foxglove/studio-base/components/MessagePathSyntax/parseRosPath";
 import { RosDatatypes } from "@foxglove/studio-base/types/RosDatatypes";
@@ -28,8 +29,23 @@ import {
   MessagePathStructureItemMessage,
 } from "./constants";
 
+const STRUCTURE_ITEM_INTEGER_TYPES = [
+  "int8",
+  "uint8",
+  "int16",
+  "uint16",
+  "int32",
+  "uint32",
+  "int64",
+  "uint64",
+];
+
 function isRosPrimitive(type: string): type is RosPrimitive {
   return rosPrimitives.includes(type as RosPrimitive);
+}
+
+function structureItemIsIntegerPrimitive(item: MessagePathStructureItem) {
+  return item.structureType === "primitive" && STRUCTURE_ITEM_INTEGER_TYPES.includes(item.datatype);
 }
 
 // Generate an easily navigable flat structure given some `datatypes`. We cache
@@ -163,33 +179,37 @@ export function messagePathsForDatatype(
         // When we have an array of messages, you probably want to filter on
         // some field, like `/topic.object{some_id=123}`. If we can't find a
         // typical filter name, fall back to `/topic.object[0]`.
-        const typicalFilterName = Object.keys(structureItem.next.nextByName).find((key) =>
-          isTypicalFilterName(key),
+        const typicalFilterItem = Object.entries(structureItem.next.nextByName).find(([name]) =>
+          isTypicalFilterName(name),
         );
-        if (typicalFilterName != undefined) {
+        if (typicalFilterItem) {
+          const [typicalFilterName, typicalFilterValue] = typicalFilterItem;
+
           // Find matching filter from clonedMessagePath
           const matchingFilterPart = clonedMessagePath.find(
-            (pathPart) => pathPart.type === "filter" && pathPart.path[0] === typicalFilterName,
-          );
-
-          // Remove the matching filter from clonedMessagePath, for future searches
-          clonedMessagePath = clonedMessagePath.filter(
-            (pathPart) => pathPart !== matchingFilterPart,
+            (pathPart): pathPart is MessagePathFilter =>
+              pathPart.type === "filter" && pathPart.path[0] === typicalFilterName,
           );
 
           // Format the displayed filter value
-          const filterVal =
-            matchingFilterPart &&
-            matchingFilterPart.type === "filter" &&
-            matchingFilterPart.value != undefined
-              ? matchingFilterPart.value
-              : 0;
-          traverse(
-            structureItem.next,
-            `${builtString}[:]{${typicalFilterName}==${
-              typeof filterVal === "object" ? `$${filterVal.variableName}` : filterVal
-            }}`,
-          );
+          if (matchingFilterPart) {
+            // Remove the matching filter from clonedMessagePath, for future searches
+            clonedMessagePath = clonedMessagePath.filter(
+              (pathPart) => pathPart !== matchingFilterPart,
+            );
+            traverse(
+              structureItem.next,
+              `${builtString}[:]{${typicalFilterName}==${
+                typeof matchingFilterPart.value === "object"
+                  ? `$${matchingFilterPart.value.variableName}`
+                  : matchingFilterPart.value
+              }}`,
+            );
+          } else if (structureItemIsIntegerPrimitive(typicalFilterValue)) {
+            traverse(structureItem.next, `${builtString}[:]{${typicalFilterName}==0}`);
+          } else {
+            traverse(structureItem.next, `${builtString}[0]`);
+          }
         } else {
           traverse(structureItem.next, `${builtString}[0]`);
         }

@@ -51,12 +51,103 @@ const datatypes: RosDatatypes = new Map(
         { name: "myJson", type: "json", isArray: false },
       ],
     },
+    "geometry_msgs/Transform": {
+      definitions: [
+        { name: "rotation", type: "float64", isArray: false },
+        { name: "translation", type: "float64", isArray: false },
+      ],
+    },
+    "geometry_msgs/TransformStamped": {
+      definitions: [
+        { name: "child_frame_id", type: "string", isArray: false },
+        { name: "header", type: "std_msgs/Header", isArray: false },
+        { name: "transform", type: "geometry_msgs/Transform", isArray: false },
+      ],
+    },
+    "tf/tfMessage": {
+      definitions: [{ name: "transforms", type: "geometry_msgs/TransformStamped", isArray: true }],
+    },
   }),
 );
 
 describe("messagePathStructures", () => {
   it("parses datatypes into a flat structure", () => {
     expect(messagePathStructures(datatypes)).toEqual({
+      "geometry_msgs/Transform": {
+        datatype: "geometry_msgs/Transform",
+        nextByName: {
+          rotation: {
+            datatype: "geometry_msgs/Transform",
+            primitiveType: "float64",
+            structureType: "primitive",
+          },
+          translation: {
+            datatype: "geometry_msgs/Transform",
+            primitiveType: "float64",
+            structureType: "primitive",
+          },
+        },
+        structureType: "message",
+      },
+      "geometry_msgs/TransformStamped": {
+        datatype: "geometry_msgs/TransformStamped",
+        nextByName: {
+          child_frame_id: {
+            datatype: "geometry_msgs/TransformStamped",
+            primitiveType: "string",
+            structureType: "primitive",
+          },
+          header: {
+            datatype: "std_msgs/Header",
+            nextByName: {
+              frame_id: {
+                datatype: "std_msgs/Header",
+                primitiveType: "string",
+                structureType: "primitive",
+              },
+              seq: {
+                datatype: "std_msgs/Header",
+                primitiveType: "uint32",
+                structureType: "primitive",
+              },
+              stamp: {
+                datatype: "time",
+                nextByName: {
+                  nsec: {
+                    datatype: "",
+                    primitiveType: "uint32",
+                    structureType: "primitive",
+                  },
+                  sec: {
+                    datatype: "",
+                    primitiveType: "uint32",
+                    structureType: "primitive",
+                  },
+                },
+                structureType: "message",
+              },
+            },
+            structureType: "message",
+          },
+          transform: {
+            datatype: "geometry_msgs/Transform",
+            nextByName: {
+              rotation: {
+                datatype: "geometry_msgs/Transform",
+                primitiveType: "float64",
+                structureType: "primitive",
+              },
+              translation: {
+                datatype: "geometry_msgs/Transform",
+                primitiveType: "float64",
+                structureType: "primitive",
+              },
+            },
+            structureType: "message",
+          },
+        },
+        structureType: "message",
+      },
       "pose_msgs/SomePose": {
         nextByName: {
           dummy_array: {
@@ -203,6 +294,75 @@ describe("messagePathStructures", () => {
         structureType: "message",
         datatype: "msgs/Log",
       },
+      "tf/tfMessage": {
+        datatype: "tf/tfMessage",
+        nextByName: {
+          transforms: {
+            datatype: "tf/tfMessage",
+            next: {
+              datatype: "geometry_msgs/TransformStamped",
+              nextByName: {
+                child_frame_id: {
+                  datatype: "geometry_msgs/TransformStamped",
+                  primitiveType: "string",
+                  structureType: "primitive",
+                },
+                header: {
+                  datatype: "std_msgs/Header",
+                  nextByName: {
+                    frame_id: {
+                      datatype: "std_msgs/Header",
+                      primitiveType: "string",
+                      structureType: "primitive",
+                    },
+                    seq: {
+                      datatype: "std_msgs/Header",
+                      primitiveType: "uint32",
+                      structureType: "primitive",
+                    },
+                    stamp: {
+                      datatype: "time",
+                      nextByName: {
+                        nsec: {
+                          datatype: "",
+                          primitiveType: "uint32",
+                          structureType: "primitive",
+                        },
+                        sec: {
+                          datatype: "",
+                          primitiveType: "uint32",
+                          structureType: "primitive",
+                        },
+                      },
+                      structureType: "message",
+                    },
+                  },
+                  structureType: "message",
+                },
+                transform: {
+                  datatype: "geometry_msgs/Transform",
+                  nextByName: {
+                    rotation: {
+                      datatype: "geometry_msgs/Transform",
+                      primitiveType: "float64",
+                      structureType: "primitive",
+                    },
+                    translation: {
+                      datatype: "geometry_msgs/Transform",
+                      primitiveType: "float64",
+                      structureType: "primitive",
+                    },
+                  },
+                  structureType: "message",
+                },
+              },
+              structureType: "message",
+            },
+            structureType: "array",
+          },
+        },
+        structureType: "message",
+      },
     });
   });
 
@@ -234,6 +394,22 @@ describe("messagePathsForDatatype", () => {
       ".some_pose.x",
     ]);
     expect(messagePathsForDatatype("msgs/Log", datatypes)).toEqual(["", ".id", ".myJson"]);
+
+    expect(messagePathsForDatatype("tf/tfMessage", datatypes)).toEqual([
+      "",
+      ".transforms",
+      ".transforms[0]",
+      ".transforms[0].child_frame_id",
+      ".transforms[0].header",
+      ".transforms[0].header.frame_id",
+      ".transforms[0].header.seq",
+      ".transforms[0].header.stamp",
+      ".transforms[0].header.stamp.nsec",
+      ".transforms[0].header.stamp.sec",
+      ".transforms[0].transform",
+      ".transforms[0].transform.rotation",
+      ".transforms[0].transform.translation",
+    ]);
   });
 
   it("returns an array of possible message paths for the given `validTypes`", () => {
