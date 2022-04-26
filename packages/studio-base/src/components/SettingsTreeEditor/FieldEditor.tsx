@@ -191,12 +191,14 @@ function FieldInput({
           value={field.value}
           exclusive
           size="small"
-          onChange={(_event, value) =>
-            actionHandler({
-              action: "update",
-              payload: { path, input: "boolean", value },
-            })
-          }
+          onChange={(_event, value) => {
+            if (value != undefined) {
+              actionHandler({
+                action: "update",
+                payload: { path, input: "boolean", value },
+              });
+            }
+          }}
         >
           <ToggleButton value={true}>On</ToggleButton>
           <ToggleButton value={false}>Off</ToggleButton>
