@@ -14,8 +14,12 @@ export type ThreeDeeRenderConfig = {
   followTf?: string;
 };
 
+export type SelectEntry = { label: string; value: string };
+
 export function buildSettingsTree(
   config: ThreeDeeRenderConfig,
+  coordinateFrames: Array<SelectEntry>,
+  followTf: string | undefined,
   _topics: ReadonlyArray<Topic>,
 ): SettingsTreeNode {
   const { cameraState } = config;
@@ -23,6 +27,7 @@ export function buildSettingsTree(
   // prettier-ignore
   return {
     fields: {
+      followTf: { label: "Coordinate Frame", input: "select", options: coordinateFrames, value: followTf },
       enableStats: { label: "Enable Stats", input: "boolean", value: config.enableStats },
     },
     children: {

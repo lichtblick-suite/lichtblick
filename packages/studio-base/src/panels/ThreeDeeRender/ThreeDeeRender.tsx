@@ -40,7 +40,7 @@ import {
   OccupancyGrid,
   OCCUPANCY_GRID_DATATYPES,
 } from "./ros";
-import { buildSettingsTree, ThreeDeeRenderConfig } from "./settings";
+import { buildSettingsTree, SelectEntry, ThreeDeeRenderConfig } from "./settings";
 
 const SHOW_DEBUG: true | false = false;
 
@@ -51,6 +51,8 @@ mergeSetInto(SUPPORTED_DATATYPES, MARKER_DATATYPES);
 mergeSetInto(SUPPORTED_DATATYPES, MARKER_ARRAY_DATATYPES);
 mergeSetInto(SUPPORTED_DATATYPES, OCCUPANCY_GRID_DATATYPES);
 mergeSetInto(SUPPORTED_DATATYPES, POINTCLOUD_DATATYPES);
+
+const DEFAULT_FRAME_IDS = ["base_link", "odom", "map", "earth"];
 
 const log = Logger.getLogger(__filename);
 
@@ -181,7 +183,7 @@ export function ThreeDeeRender({ context }: { context: PanelExtensionContext }):
       followTf: partialConfig?.followTf,
     };
   });
-  const { cameraState, followTf } = config;
+  const { cameraState, followTf: configFollowTf } = config;
 
   const [canvas, setCanvas] = useState<HTMLCanvasElement | ReactNull>(ReactNull);
   const [renderer, setRenderer] = useState<Renderer | ReactNull>(ReactNull);
@@ -208,18 +210,46 @@ export function ThreeDeeRender({ context }: { context: PanelExtensionContext }):
     );
   }, []);
 
+  // Maintain a list of coordinate frames for the settings sidebar
+  const [coordinateFrames, setCoordinateFrames] = useState<SelectEntry[]>(
+    coordinateFrameList(renderer),
+  );
+  const [defaultFrame, setDefaultFrame] = useState<string | undefined>(undefined);
+  const updateCoordinateFrames = useCallback(
+    (curRenderer: Renderer) => {
+      setCoordinateFrames(coordinateFrameList(curRenderer));
+      for (const frameId of DEFAULT_FRAME_IDS) {
+        if (curRenderer.transformTree.hasFrame(frameId)) {
+          setDefaultFrame(frameId);
+          break;
+        }
+      }
+    },
+    [setDefaultFrame],
+  );
+  useEffect(() => {
+    renderer?.addListener("transformTreeUpdated", updateCoordinateFrames);
+    return () => void renderer?.removeListener("transformTreeUpdated", updateCoordinateFrames);
+  }, [renderer, updateCoordinateFrames]);
+
+  const followTf = useMemo(
+    () => (configFollowTf ? configFollowTf : defaultFrame),
+    [configFollowTf, defaultFrame],
+  );
+
   useEffect(() => {
     // eslint-disable-next-line no-underscore-dangle, @typescript-eslint/no-explicit-any
     (context as unknown as any).__updatePanelSettingsTree({
       actionHandler,
-      settings: buildSettingsTree(config, topics ?? []),
+      settings: buildSettingsTree(config, coordinateFrames, followTf, topics ?? []),
     });
-  }, [actionHandler, config, context, topics]);
+  }, [actionHandler, config, context, coordinateFrames, followTf, topics]);
 
   // Config followTf
   useEffect(() => {
     if (renderer && followTf != undefined) {
       renderer.renderFrameId = followTf;
+      renderer.animationFrame();
     }
   }, [followTf, renderer]);
 
@@ -426,4 +456,58 @@ function mergeSetInto(output: Set<string>, input: ReadonlySet<string>) {
   for (const value of input) {
     output.add(value);
   }
+}
+
+function coordinateFrameList(renderer: Renderer | ReactNull | undefined): SelectEntry[] {
+  if (!renderer) {
+    return [];
+  }
+
+  type FrameEntry = { id: string; children: FrameEntry[] };
+
+  const frames = Array.from(renderer.transformTree.frames().values());
+  const frameMap = new Map<string, FrameEntry>(
+    frames.map((frame) => [frame.id, { id: frame.id, children: [] }]),
+  );
+
+  // Create a hierarchy of coordinate frames
+  const rootFrames: FrameEntry[] = [];
+  for (const frame of frames) {
+    const frameEntry = frameMap.get(frame.id)!;
+    const parentId = frame.parent()?.id;
+    if (parentId == undefined) {
+      rootFrames.push(frameEntry);
+    } else {
+      const parent = frameMap.get(parentId);
+      if (parent == undefined) {
+        continue;
+      }
+      parent.children.push(frameEntry);
+    }
+  }
+
+  // Convert the `rootFrames` hierarchy into a flat list of coordinate frames with depth
+  const output: SelectEntry[] = [];
+
+  function addFrame(frame: FrameEntry, depth: number) {
+    const frameName =
+      frame.id === "" || frame.id.startsWith(" ") || frame.id.endsWith(" ")
+        ? `"${frame.id}"`
+        : frame.id;
+    output.push({
+      value: frame.id,
+      label: `${"\u00A0\u00A0".repeat(depth)}${frameName}`,
+    });
+    frame.children.sort((a, b) => a.id.localeCompare(b.id));
+    for (const child of frame.children) {
+      addFrame(child, depth + 1);
+    }
+  }
+
+  rootFrames.sort((a, b) => a.id.localeCompare(b.id));
+  for (const entry of rootFrames) {
+    addFrame(entry, 0);
+  }
+
+  return output;
 }
