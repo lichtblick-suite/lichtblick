@@ -38,7 +38,7 @@
     "@foxglove/mcap": "github:foxglove/mcap#workspace=@foxglove/mcap&commit=e79355a9e99efd5094b15f21bb361a85d9e748bc",
     "@foxglove/mcap-support": "workspace:*",
     "@foxglove/regl-worldview": "2.4.0",
-    "@foxglove/ros1": "1.4.2",
+    "@foxglove/ros1": "1.4.3",
     "@foxglove/ros2": "3.2.1",
     "@foxglove/rosbag": "0.2.1",
     "@foxglove/rosbag2-web": "4.0.3",
