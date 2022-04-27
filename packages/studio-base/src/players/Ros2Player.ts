@@ -482,9 +482,11 @@ export default class Ros2Player implements Player {
       this._metricsCollector.recordTimeToFirstMsgs();
     }
 
-    const msg: MessageEvent<unknown> = { topic, receiveTime, publishTime, message, sizeInBytes };
-    this._parsedMessages.push(msg);
-    this._handleInternalMessage(msg);
+    if (message != undefined) {
+      const msg: MessageEvent<unknown> = { topic, receiveTime, publishTime, message, sizeInBytes };
+      this._parsedMessages.push(msg);
+      this._handleInternalMessage(msg);
+    }
 
     // Update the message count for this topic
     let stats = this._providerTopicsStats.get(topic);
