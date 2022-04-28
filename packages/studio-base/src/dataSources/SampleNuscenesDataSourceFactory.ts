@@ -42,6 +42,7 @@ class SampleNuscenesDataSourceFactory implements IDataSourceFactory {
         metricsCollector: args.metricsCollector,
         // Use blank url params so the data source is set in the url
         urlParams: {},
+        sourceId: this.id,
       });
     } else {
       const bagWorkerDataProvider = new WorkerBagDataProvider({ type: "remote", url: bagUrl });
@@ -56,6 +57,7 @@ class SampleNuscenesDataSourceFactory implements IDataSourceFactory {
         name: "Adapted from nuScenes dataset.\nCopyright © 2020 nuScenes.\nhttps://www.nuscenes.org/terms-of-use",
         // Use blank url params so the data source is set in the url
         urlParams: {},
+        sourceId: this.id,
       });
     }
   }

@@ -34,6 +34,7 @@ class Ros2LocalBagDataSourceFactory implements IDataSourceFactory {
       return new RandomAccessPlayer(messageCacheProvider, {
         metricsCollector: args.metricsCollector,
         seekToTime: getSeekToTime(),
+        sourceId: this.id,
       });
     } else if (args.file) {
       const bagWorkerDataProvider = new WorkerRosbag2DataProvider({
@@ -49,6 +50,7 @@ class Ros2LocalBagDataSourceFactory implements IDataSourceFactory {
         metricsCollector: args.metricsCollector,
         seekToTime: getSeekToTime(),
         name: args.file.name,
+        sourceId: this.id,
       });
     }
 

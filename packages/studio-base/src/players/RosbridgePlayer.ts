@@ -89,19 +89,23 @@ export default class RosbridgePlayer implements Player {
   private _presence: PlayerPresence = PlayerPresence.NOT_PRESENT;
   private _problems = new PlayerProblemManager();
   private _emitTimer?: ReturnType<typeof setTimeout>;
+  private readonly _sourceId: string;
 
   constructor({
     url,
     metricsCollector,
+    sourceId,
   }: {
     url: string;
     metricsCollector: PlayerMetricsCollectorInterface;
+    sourceId: string;
   }) {
     this._presence = PlayerPresence.INITIALIZING;
     this._metricsCollector = metricsCollector;
     this._url = url;
     this._start = fromMillis(Date.now());
     this._metricsCollector.playerConstructed();
+    this._sourceId = sourceId;
     this._open();
   }
 
@@ -344,7 +348,8 @@ export default class RosbridgePlayer implements Player {
         activeData: undefined,
         problems: this._problems.problems(),
         urlState: {
-          url: this._url,
+          sourceId: this._sourceId,
+          parameters: { url: this._url },
         },
       });
     }
@@ -369,7 +374,8 @@ export default class RosbridgePlayer implements Player {
       playerId: this._id,
       problems: this._problems.problems(),
       urlState: {
-        url: this._url,
+        sourceId: this._sourceId,
+        parameters: { url: this._url },
       },
 
       activeData: {

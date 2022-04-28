@@ -73,6 +73,9 @@ type IterablePlayerOptions = {
   // Optional set of key/values to store with url handling
   urlParams?: Record<string, string>;
 
+  // Source identifier used in constructing state urls.
+  sourceId: string;
+
   isSampleDataSource?: boolean;
 
   // Set to _false_ to disable preloading. (default: true)
@@ -168,8 +171,10 @@ export class IterablePlayer implements Player {
   // The iterator for processing ticks. This persists between tick calls and is cleared when changing state.
   private _tickIterator?: AsyncIterator<Readonly<IteratorResult>>;
 
+  private readonly _sourceId: string;
+
   constructor(options: IterablePlayerOptions) {
-    const { metricsCollector, urlParams, source, name, enablePreload } = options;
+    const { metricsCollector, urlParams, source, name, enablePreload, sourceId } = options;
 
     this._iterableSource = source;
     this._name = name;
@@ -177,6 +182,7 @@ export class IterablePlayer implements Player {
     this._metricsCollector = metricsCollector ?? new NoopMetricsCollector();
     this._metricsCollector.playerConstructed();
     this._enablePreload = enablePreload ?? true;
+    this._sourceId = sourceId;
   }
 
   setListener(listener: (playerState: PlayerState) => Promise<void>): void {
@@ -593,7 +599,10 @@ export class IterablePlayer implements Player {
         playerId: this._id,
         activeData: undefined,
         problems: this._problemManager.problems(),
-        urlState: this._urlParams,
+        urlState: {
+          sourceId: this._sourceId,
+          parameters: this._urlParams,
+        },
       });
     }
 
@@ -625,7 +634,10 @@ export class IterablePlayer implements Player {
         datatypes: this._providerDatatypes,
         publishedTopics: this._publishedTopics,
       },
-      urlState: this._urlParams,
+      urlState: {
+        sourceId: this._sourceId,
+        parameters: this._urlParams,
+      },
     };
 
     return await this._listener(data);

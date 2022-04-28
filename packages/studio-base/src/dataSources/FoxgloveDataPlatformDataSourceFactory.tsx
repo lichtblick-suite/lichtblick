@@ -53,6 +53,7 @@ class FoxgloveDataPlatformDataSourceFactory implements IDataSourceFactory {
       return new IterablePlayer({
         metricsCollector: args.metricsCollector,
         source,
+        sourceId: this.id,
         urlParams: {
           deviceId,
           start: toRFC3339String(startTime),
@@ -70,6 +71,7 @@ class FoxgloveDataPlatformDataSourceFactory implements IDataSourceFactory {
       },
       consoleApi: args.consoleApi,
       metricsCollector: args.metricsCollector,
+      sourceId: this.id,
     });
   }
 }

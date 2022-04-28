@@ -55,6 +55,7 @@ type Ros1PlayerOpts = {
   url: string;
   hostname?: string;
   metricsCollector: PlayerMetricsCollectorInterface;
+  sourceId: string;
 };
 
 // Connects to `rosmaster` instance using `@foxglove/ros1`
@@ -84,14 +85,16 @@ export default class Ros1Player implements Player {
   private _presence: PlayerPresence = PlayerPresence.INITIALIZING;
   private _problems = new PlayerProblemManager();
   private _emitTimer?: ReturnType<typeof setTimeout>;
+  private readonly _sourceId: string;
 
-  constructor({ url, hostname, metricsCollector }: Ros1PlayerOpts) {
+  constructor({ url, hostname, metricsCollector, sourceId }: Ros1PlayerOpts) {
     log.info(`initializing Ros1Player (url=${url}, hostname=${hostname})`);
     this._metricsCollector = metricsCollector;
     this._url = url;
     this._hostname = hostname;
     this._start = this._getCurrentTime();
     this._metricsCollector.playerConstructed();
+    this._sourceId = sourceId;
     void this._open();
   }
 
@@ -312,7 +315,8 @@ export default class Ros1Player implements Player {
       playerId: this._id,
       problems: this._problems.problems(),
       urlState: {
-        url: this._url,
+        sourceId: this._sourceId,
+        parameters: { url: this._url },
       },
 
       activeData: {

@@ -39,6 +39,7 @@ class Ros1LocalBagDataSourceFactory implements IDataSourceFactory {
         metricsCollector: args.metricsCollector,
         source: bagSource,
         name: file.name,
+        sourceId: this.id,
       });
     } else {
       const bagWorkerDataProvider = new WorkerBagDataProvider({ type: "file", file });
@@ -50,6 +51,7 @@ class Ros1LocalBagDataSourceFactory implements IDataSourceFactory {
         metricsCollector: args.metricsCollector,
         seekToTime: getSeekToTime(),
         name: file.name,
+        sourceId: this.id,
       });
     }
   }

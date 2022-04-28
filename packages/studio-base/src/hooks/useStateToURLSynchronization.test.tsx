@@ -13,85 +13,76 @@
 
 import { renderHook } from "@testing-library/react-hooks";
 
-import MockMessagePipelineProvider from "@foxglove/studio-base/components/MessagePipeline/MockMessagePipelineProvider";
-import PlayerSelectionContext, {
-  PlayerSelection,
-} from "@foxglove/studio-base/context/PlayerSelectionContext";
+import { useMessagePipeline } from "@foxglove/studio-base/components/MessagePipeline";
+import { useCurrentLayoutSelector } from "@foxglove/studio-base/context/CurrentLayoutContext";
 import { useStateToURLSynchronization } from "@foxglove/studio-base/hooks/useStateToURLSynchronization";
-import { PlayerPresence } from "@foxglove/studio-base/players/types";
-import MockCurrentLayoutProvider from "@foxglove/studio-base/providers/CurrentLayoutProvider/MockCurrentLayoutProvider";
 
-// useLayoutEffect doesn't work in headless tests.
-jest.mock("react", () => ({
-  ...jest.requireActual("react"),
-  useLayoutEffect: jest.requireActual("react").useEffect,
-}));
-
-function makePlayerSelection(options: Partial<PlayerSelection>): PlayerSelection {
-  return {
-    selectSource: () => {},
-    selectRecent: () => {},
-    availableSources: [],
-    recentSources: [],
-    selectedSource: undefined,
-    ...options,
-  };
-}
+jest.mock("@foxglove/studio-base/context/CurrentLayoutContext");
+jest.mock("@foxglove/studio-base/components/MessagePipeline");
 
 describe("useStateToURLSynchronization", () => {
   it("updates the url with a stable source & player state", () => {
-    const emptyPlayerSelection = makePlayerSelection({});
-
-    const selectedPlayerSelection = makePlayerSelection({
-      selectedSource: {
-        id: "test1",
-        type: "connection",
-        displayName: "test",
-        initialize: () => undefined,
-      },
-    });
-
     const replaceState = jest.fn();
 
     // eslint-disable-next-line id-denylist
     (global as unknown as any).window = {
       history: { replaceState },
-      location: new URL("http://localhost"),
+      location: new URL("http://example.com/"),
     };
 
-    const { rerender } = renderHook(useStateToURLSynchronization, {
-      initialProps: { presence: PlayerPresence.NOT_PRESENT, playerSelection: emptyPlayerSelection },
-      wrapper: ({ children, presence, playerSelection }) => {
-        return (
-          <MockMessagePipelineProvider
-            topics={[]}
-            presence={presence}
-            datatypes={new Map()}
-            capabilities={["hello"]}
-            messages={[]}
-            urlState={{ url: "testurl", param: "one" }}
-            startTime={{ sec: 0, nsec: 1 }}
-          >
-            <PlayerSelectionContext.Provider value={playerSelection}>
-              <MockCurrentLayoutProvider>{children}</MockCurrentLayoutProvider>
-            </PlayerSelectionContext.Provider>
-          </MockMessagePipelineProvider>
-        );
-      },
-    });
+    replaceState.mockImplementation(
+      (_data, _unused, newLocation: string) => (window.location = new URL(newLocation) as any),
+    );
 
-    expect(replaceState).not.toHaveBeenCalled();
+    (useCurrentLayoutSelector as jest.Mock).mockReturnValue(undefined);
+    (useMessagePipeline as jest.Mock).mockImplementation((selector) =>
+      selector({
+        playerState: {
+          activeData: {
+            currentTime: { sec: 1, nsec: 1 },
+          },
+          capabilities: ["playbackControl"],
+          urlState: {
+            sourceId: "test-source",
+            parameters: { a: "one", b: "two" },
+          },
+        },
+      }),
+    );
 
-    rerender({ presence: PlayerPresence.NOT_PRESENT, playerSelection: selectedPlayerSelection });
-
-    expect(replaceState).not.toHaveBeenCalled();
-
-    rerender({ presence: PlayerPresence.PRESENT, playerSelection: selectedPlayerSelection });
+    const { rerender } = renderHook(useStateToURLSynchronization);
 
     expect(replaceState).toHaveBeenCalledWith(
       undefined,
       "",
-      "http://localhost/?ds=test1&ds.param=one&ds.url=testurl&layoutId=mock-layout",
+      "http://example.com/?time=1970-01-01T00%3A00%3A01.000000001Z",
+    );
+    expect(replaceState).toHaveBeenLastCalledWith(
+      undefined,
+      "",
+      "http://example.com/?ds=test-source&ds.a=one&ds.b=two&time=1970-01-01T00%3A00%3A01.000000001Z",
+    );
+
+    (useMessagePipeline as jest.Mock).mockImplementation((selector) =>
+      selector({
+        playerState: {
+          activeData: {
+            currentTime: { sec: 10, nsec: 10 },
+          },
+          capabilities: ["playbackControl"],
+          urlState: {
+            sourceId: "test-source2",
+            parameters: { b: "two", c: "three" },
+          },
+        },
+      }),
+    );
+    (useCurrentLayoutSelector as jest.Mock).mockReturnValue("test-layout");
+    rerender();
+    expect(replaceState).toHaveBeenLastCalledWith(
+      undefined,
+      "",
+      "http://example.com/?ds=test-source2&ds.b=two&ds.c=three&layoutId=test-layout&time=1970-01-01T00%3A00%3A01.000000001Z",
     );
   });
 });

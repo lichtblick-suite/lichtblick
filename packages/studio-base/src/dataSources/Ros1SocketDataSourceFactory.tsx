@@ -56,6 +56,7 @@ class Ros1SocketDataSourceFactory implements IDataSourceFactory {
       url,
       hostname,
       metricsCollector: args.metricsCollector,
+      sourceId: this.id,
     });
   }
 }

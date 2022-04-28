@@ -36,6 +36,7 @@ export default class McapRemoteDataSourceFactory implements IDataSourceFactory {
       metricsCollector: args.metricsCollector,
       seekToTime: getSeekToTime(),
       name: url,
+      sourceId: this.id,
     });
   }
 }

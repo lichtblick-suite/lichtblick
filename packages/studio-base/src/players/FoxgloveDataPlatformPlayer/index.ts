@@ -63,6 +63,7 @@ type FoxgloveDataPlatformPlayerOpts = {
     deviceId: string;
   };
   metricsCollector: PlayerMetricsCollectorInterface;
+  sourceId: string;
 };
 
 export default class FoxgloveDataPlatformPlayer implements Player {
@@ -102,6 +103,7 @@ export default class FoxgloveDataPlatformPlayer implements Player {
   private _progress: Progress = {};
   private _loadedMoreMessages?: Signal<void>;
   private _nextFrame: MessageEvent<unknown>[] = [];
+  private readonly _sourceId: string;
 
   /**
    * Cached readers for each schema so we don't have to re-parse definitions on each stream request.
@@ -114,7 +116,7 @@ export default class FoxgloveDataPlatformPlayer implements Player {
   private _problems: PlayerProblem[] = [];
   private _problemsById = new Map<string, PlayerProblem>();
 
-  constructor({ params, metricsCollector, consoleApi }: FoxgloveDataPlatformPlayerOpts) {
+  constructor({ params, metricsCollector, consoleApi, sourceId }: FoxgloveDataPlatformPlayerOpts) {
     log.info(`initializing FoxgloveDataPlatformPlayer ${JSON.stringify(params)}`);
     this._metricsCollector = metricsCollector;
     this._metricsCollector.playerConstructed();
@@ -129,6 +131,7 @@ export default class FoxgloveDataPlatformPlayer implements Player {
     this._deviceId = params.deviceId;
     this._name = `${this._deviceId}, ${formatTimeRaw(this._start)} to ${formatTimeRaw(this._end)}`;
     this._consoleApi = consoleApi;
+    this._sourceId = sourceId;
     this._open().catch((error) => {
       this._presence = PlayerPresence.ERROR;
       this._addProblem("open-failed", { message: error.message, error, severity: "error" });
@@ -273,9 +276,12 @@ export default class FoxgloveDataPlatformPlayer implements Player {
       playerId: this._id,
       problems: this._problems,
       urlState: {
-        start: toRFC3339String(this._start),
-        end: toRFC3339String(this._end),
-        deviceId: this._deviceId,
+        sourceId: this._sourceId,
+        parameters: {
+          start: toRFC3339String(this._start),
+          end: toRFC3339String(this._end),
+          deviceId: this._deviceId,
+        },
       },
 
       activeData: {

@@ -49,6 +49,7 @@ enum Problem {
 type Ros2PlayerOpts = {
   domainId: number;
   metricsCollector: PlayerMetricsCollectorInterface;
+  sourceId: string;
 };
 
 // Connects to a ROS 2 network using RTPS over UDP, discovering peers via UDP multicast.
@@ -76,13 +77,15 @@ export default class Ros2Player implements Player {
   private _presence: PlayerPresence = PlayerPresence.INITIALIZING;
   private _problems = new PlayerProblemManager();
   private _emitTimer?: ReturnType<typeof setTimeout>;
+  private readonly _sourceId: string;
 
-  constructor({ domainId, metricsCollector }: Ros2PlayerOpts) {
+  constructor({ domainId, metricsCollector, sourceId }: Ros2PlayerOpts) {
     log.info(`initializing Ros2Player (domainId=${domainId})`);
     this._domainId = domainId;
     this._metricsCollector = metricsCollector;
     this._start = this._getCurrentTime();
     this._metricsCollector.playerConstructed();
+    this._sourceId = sourceId;
 
     // The ros1ToRos2Type() hack can be removed when @foxglove/rosmsg-msgs-* packages are updated to
     // natively support ROS 2
@@ -312,7 +315,8 @@ export default class Ros2Player implements Player {
       playerId: this._id,
       problems: this._problems.problems(),
       urlState: {
-        url: String(this._domainId),
+        sourceId: this._sourceId,
+        parameters: { url: String(this._domainId) },
       },
 
       activeData: {

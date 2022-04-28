@@ -131,17 +131,9 @@ export default function PlayerManager(props: PropsWithChildren<PlayerManagerProp
 
   const { addToast } = useToasts();
 
-  const [selectedSource, setSelectedSource] = useState<IDataSourceFactory | undefined>();
-
   const selectSource = useCallback(
     async (sourceId: string, args?: DataSourceArgs) => {
       log.debug(`Select Source: ${sourceId}`);
-
-      // empty string sourceId
-      if (!sourceId) {
-        setSelectedSource(undefined);
-        return;
-      }
 
       const foundSource = playerSources.find((source) => source.id === sourceId);
       if (!foundSource) {
@@ -152,7 +144,6 @@ export default function PlayerManager(props: PropsWithChildren<PlayerManagerProp
       }
 
       metricsCollector.setProperty("player", sourceId);
-      setSelectedSource(() => foundSource);
 
       // Sample sources don't need args or prompts to initialize
       if (foundSource.type === "sample") {
@@ -335,7 +326,6 @@ export default function PlayerManager(props: PropsWithChildren<PlayerManagerProp
   const value: PlayerSelection = {
     selectSource,
     selectRecent,
-    selectedSource,
     availableSources: playerSources,
     recentSources,
   };

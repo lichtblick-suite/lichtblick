@@ -95,6 +95,7 @@ describe("IterablePlayer", () => {
     const player = new IterablePlayer({
       source,
       enablePreload: false,
+      sourceId: "test",
     });
     const store = new PlayerStateStore(4);
     player.setListener(async (state) => await store.add(state));
@@ -121,7 +122,10 @@ describe("IterablePlayer", () => {
       presence: PlayerPresence.INITIALIZING,
       progress: {},
       filePath: undefined,
-      urlState: undefined,
+      urlState: {
+        sourceId: "test",
+        parameters: undefined,
+      },
       name: undefined,
     };
 
@@ -144,6 +148,7 @@ describe("IterablePlayer", () => {
     const player = new IterablePlayer({
       source,
       enablePreload: false,
+      sourceId: "test",
     });
     const store = new PlayerStateStore(4);
     player.setSubscriptions([{ topic: "foo" }]);
@@ -199,7 +204,10 @@ describe("IterablePlayer", () => {
       presence: PlayerPresence.PRESENT,
       progress: {},
       filePath: undefined,
-      urlState: undefined,
+      urlState: {
+        sourceId: "test",
+        parameters: undefined,
+      },
       name: undefined,
     };
 

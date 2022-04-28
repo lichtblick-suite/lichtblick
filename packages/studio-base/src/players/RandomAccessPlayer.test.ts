@@ -43,6 +43,7 @@ import TestProvider from "./TestProvider";
 const playerOptions: RandomAccessPlayerOptions = {
   metricsCollector: undefined,
   seekToTime: { type: "absolute", time: { sec: 10, nsec: 0 } },
+  sourceId: "test",
 };
 
 type PlayerStateWithoutPlayerId = Omit<PlayerState, "playerId">;
@@ -109,6 +110,7 @@ describe("RandomAccessPlayer", () => {
         capabilities: [],
         presence: PlayerPresence.INITIALIZING,
         progress: {},
+        urlState: { sourceId: "test", parameters: undefined },
       },
       {
         activeData: {
@@ -137,6 +139,7 @@ describe("RandomAccessPlayer", () => {
         capabilities: [PlayerCapabilities.setSpeed, PlayerCapabilities.playbackControl],
         presence: PlayerPresence.PRESENT,
         progress: {},
+        urlState: { sourceId: "test", parameters: undefined },
       },
     ]);
 

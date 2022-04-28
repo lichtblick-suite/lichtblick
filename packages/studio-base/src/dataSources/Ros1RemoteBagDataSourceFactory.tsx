@@ -46,6 +46,7 @@ class Ros1RemoteBagDataSourceFactory implements IDataSourceFactory {
         urlParams: {
           url,
         },
+        sourceId: this.id,
       });
     } else {
       const bagWorkerDataProvider = new WorkerBagDataProvider({ type: "remote", url });
@@ -63,6 +64,7 @@ class Ros1RemoteBagDataSourceFactory implements IDataSourceFactory {
         urlParams: {
           url,
         },
+        sourceId: this.id,
       });
     }
   }

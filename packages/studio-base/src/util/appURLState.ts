@@ -21,23 +21,41 @@ export type AppURLState = {
  * @param urlState The player state to encode.
  * @returns A url with all app state stored as query pararms.
  */
-export function encodeAppURLState(url: URL, urlState: AppURLState): URL {
+export function updateAppURLState(url: URL, urlState: AppURLState): URL {
   const newURL = new URL(url.href);
 
-  // Clear all exisiting params first.
-  [...newURL.searchParams].forEach(([k, _]) => newURL.searchParams.delete(k));
-
-  if (urlState.layoutId) {
-    newURL.searchParams.set("layoutId", urlState.layoutId);
+  if ("layoutId" in urlState) {
+    if (urlState.layoutId) {
+      newURL.searchParams.set("layoutId", urlState.layoutId);
+    } else {
+      newURL.searchParams.delete("layoutId");
+    }
   }
 
-  if (urlState.time) {
-    newURL.searchParams.set("time", toRFC3339String(urlState.time));
+  if ("time" in urlState) {
+    if (urlState.time) {
+      newURL.searchParams.set("time", toRFC3339String(urlState.time));
+    } else {
+      newURL.searchParams.delete("time");
+    }
   }
 
-  if (urlState.ds && urlState.dsParams) {
-    newURL.searchParams.set("ds", urlState.ds);
-    Object.entries(urlState.dsParams).forEach(([k, v]) => {
+  if ("ds" in urlState) {
+    if (urlState.ds) {
+      newURL.searchParams.set("ds", urlState.ds);
+    } else {
+      newURL.searchParams.delete("ds");
+    }
+  }
+
+  if ("dsParams" in urlState) {
+    [...newURL.searchParams].forEach(([k, _]) => {
+      if (k.startsWith("ds.")) {
+        newURL.searchParams.delete(k);
+      }
+    });
+
+    Object.entries(urlState.dsParams ?? "").forEach(([k, v]) => {
       newURL.searchParams.set("ds." + k, v);
     });
   }

@@ -85,6 +85,9 @@ export type RandomAccessPlayerOptions = {
   // Optional set of key/values to store with url handling
   urlParams?: Record<string, string>;
 
+  // Source identifier used to construct state urls.
+  sourceId: string;
+
   isSampleDataSource?: boolean;
 };
 
@@ -134,6 +137,7 @@ export default class RandomAccessPlayer implements Player {
   private _seekToTime: SeekToTimeSpec;
   private _lastRangeMillis?: number;
   private _isSampleDataSource: boolean;
+  private readonly _sourceId: string;
 
   // To keep reference equality for downstream user memoization cache the currentTime provided in the last activeData update
   // See additional comments below where _currentTime is set
@@ -145,7 +149,7 @@ export default class RandomAccessPlayer implements Player {
   private _problems = new Map<string, PlayerProblem>();
 
   constructor(provider: RandomAccessDataProvider, options: RandomAccessPlayerOptions) {
-    const { metricsCollector, seekToTime, urlParams, name } = options;
+    const { metricsCollector, seekToTime, urlParams, name, sourceId } = options;
     const seekBackNs = options.seekBackNs ?? DEFAULT_SEEK_BACK_NANOSECONDS;
 
     if (SEEK_ON_START_NS >= seekBackNs) {
@@ -159,6 +163,7 @@ export default class RandomAccessPlayer implements Player {
     this._seekToTime = seekToTime;
     this._seekBackNs = seekBackNs;
     this._metricsCollector.playerConstructed();
+    this._sourceId = sourceId;
     this._isSampleDataSource = options.isSampleDataSource ?? false;
   }
 
@@ -363,7 +368,10 @@ export default class RandomAccessPlayer implements Player {
             parameters: this._providerParameters,
             publishedTopics,
           },
-      urlState: this._urlParams,
+      urlState: {
+        sourceId: this._sourceId,
+        parameters: this._urlParams,
+      },
     };
 
     return this._listener(data);

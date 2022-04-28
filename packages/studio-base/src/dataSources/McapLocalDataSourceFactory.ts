@@ -39,6 +39,7 @@ class McapLocalDataSourceFactory implements IDataSourceFactory {
         metricsCollector: args.metricsCollector,
         source,
         name: file.name,
+        sourceId: this.id,
       });
     }
 
@@ -51,6 +52,7 @@ class McapLocalDataSourceFactory implements IDataSourceFactory {
       metricsCollector: args.metricsCollector,
       seekToTime: getSeekToTime(),
       name: file.name,
+      sourceId: this.id,
     });
   }
 }

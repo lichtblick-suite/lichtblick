@@ -135,6 +135,7 @@ describe("RosbridgePlayer", () => {
     player = new RosbridgePlayer({
       url: "ws://some-url",
       metricsCollector: new NoopMetricsCollector(),
+      sourceId: "rosbridge-websocket",
     });
   });
 

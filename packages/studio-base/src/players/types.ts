@@ -11,6 +11,8 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
+import { DeepReadonly } from "ts-essentials";
+
 import { RosMsgDefinition } from "@foxglove/rosmsg";
 import { Time } from "@foxglove/rostime";
 import type { MessageEvent, ParameterValue } from "@foxglove/studio";
@@ -93,7 +95,10 @@ export type PlayerProblem = {
   tip?: string;
 };
 
-export type PlayerURLState = Record<string, string>;
+export type PlayerURLState = DeepReadonly<{
+  sourceId: string;
+  parameters?: Record<string, string>;
+}>;
 
 export type PlayerState = {
   // Information about the player's presence or connection status, for the UI to show a loading indicator.

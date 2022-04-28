@@ -29,7 +29,7 @@ function Wrapper({
       datatypes={new Map()}
       capabilities={["hello"]}
       messages={[]}
-      urlState={{ url: "testurl", param: "one" }}
+      urlState={{ sourceId: "test", parameters: { url: "testurl", param: "one" } }}
       startTime={{ sec: 0, nsec: 1 }}
     >
       <PlayerSelectionContext.Provider value={playerSelection}>
