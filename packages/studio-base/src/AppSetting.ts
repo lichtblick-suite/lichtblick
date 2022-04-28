@@ -24,6 +24,7 @@ export enum AppSetting {
   ENABLE_LEGACY_PLOT_PANEL = "enableLegacyPlotPanel",
   EXPERIMENTAL_BAG_PLAYER = "experimental.bag-player",
   EXPERIMENTAL_DATA_PLATFORM_PLAYER = "experimental.data-platform-player",
+  EXPERIMENTAL_MCAP_PLAYER = "experimental.mcap-player",
 
   // Miscellaneous
   HIDE_SIGN_IN_PROMPT = "hideSignInPrompt",

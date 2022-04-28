@@ -6,6 +6,8 @@ import {
   IDataSourceFactory,
   DataSourceFactoryInitializeArgs,
 } from "@foxglove/studio-base/context/PlayerSelectionContext";
+import { IterablePlayer } from "@foxglove/studio-base/players/IterablePlayer";
+import { McapIterableSource } from "@foxglove/studio-base/players/IterablePlayer/Mcap/McapIterableSource";
 import RandomAccessPlayer from "@foxglove/studio-base/players/RandomAccessPlayer";
 import { Player } from "@foxglove/studio-base/players/types";
 import McapDataProvider from "@foxglove/studio-base/randomAccessDataProviders/McapDataProvider";
@@ -19,10 +21,25 @@ class McapLocalDataSourceFactory implements IDataSourceFactory {
   iconName: IDataSourceFactory["iconName"] = "OpenFile";
   supportedFileTypes = [".mcap"];
 
+  private enableIterablePlayer = false;
+
+  constructor(opt?: { useIterablePlayer: boolean }) {
+    this.enableIterablePlayer = opt?.useIterablePlayer ?? false;
+  }
+
   initialize(args: DataSourceFactoryInitializeArgs): Player | undefined {
     const file = args.file;
     if (!file) {
       return;
+    }
+
+    if (this.enableIterablePlayer) {
+      const source = new McapIterableSource({ type: "file", file });
+      return new IterablePlayer({
+        metricsCollector: args.metricsCollector,
+        source,
+        name: file.name,
+      });
     }
 
     const mcapProvider = new McapDataProvider({ source: { type: "file", file } });

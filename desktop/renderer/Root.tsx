@@ -45,6 +45,8 @@ export default function Root({
   const enableExperimentalDataPlatformPlayer: boolean =
     (appConfiguration.get(AppSetting.EXPERIMENTAL_DATA_PLATFORM_PLAYER) as boolean | undefined) ??
     false;
+  const enableExperimentalMcapPlayer: boolean =
+    (appConfiguration.get(AppSetting.EXPERIMENTAL_MCAP_PLAYER) as boolean | undefined) ?? false;
 
   const dataSources: IDataSourceFactory[] = useMemo(() => {
     const sources = [
@@ -61,12 +63,16 @@ export default function Root({
         useIterablePlayer: enableExperimentalDataPlatformPlayer,
       }),
       new SampleNuscenesDataSourceFactory({ useIterablePlayer: enableExperimentalBagPlayer }),
-      new McapLocalDataSourceFactory(),
+      new McapLocalDataSourceFactory({ useIterablePlayer: enableExperimentalMcapPlayer }),
       new McapRemoteDataSourceFactory(),
     ];
 
     return sources;
-  }, [enableExperimentalBagPlayer, enableExperimentalDataPlatformPlayer]);
+  }, [
+    enableExperimentalBagPlayer,
+    enableExperimentalDataPlatformPlayer,
+    enableExperimentalMcapPlayer,
+  ]);
 
   if (!storageBridge) {
     throw new Error("storageBridge is missing");

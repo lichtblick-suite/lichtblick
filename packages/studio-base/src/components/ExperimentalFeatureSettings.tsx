@@ -82,6 +82,13 @@ const features: Feature[] = [
       </>
     ),
   },
+  {
+    key: AppSetting.EXPERIMENTAL_MCAP_PLAYER,
+    name: "Experimental mcap player",
+    description: (
+      <>The experimental mcap player uses a new approach to loading messages from mcap files.</>
+    ),
+  },
 ];
 if (process.env.NODE_ENV === "development") {
   features.push({

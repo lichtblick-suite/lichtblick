@@ -34,6 +34,8 @@ export function Root({ appConfiguration }: { appConfiguration: IAppConfiguration
   const enableExperimentalDataPlatformPlayer: boolean =
     (appConfiguration.get(AppSetting.EXPERIMENTAL_DATA_PLATFORM_PLAYER) as boolean | undefined) ??
     false;
+  const enableExperimentalMcapPlayer: boolean =
+    (appConfiguration.get(AppSetting.EXPERIMENTAL_MCAP_PLAYER) as boolean | undefined) ?? false;
 
   const dataSources: IDataSourceFactory[] = useMemo(() => {
     const sources = [
@@ -50,12 +52,16 @@ export function Root({ appConfiguration }: { appConfiguration: IAppConfiguration
         useIterablePlayer: enableExperimentalDataPlatformPlayer,
       }),
       new SampleNuscenesDataSourceFactory({ useIterablePlayer: enableExperimentalBagPlayer }),
-      new McapLocalDataSourceFactory(),
+      new McapLocalDataSourceFactory({ useIterablePlayer: enableExperimentalMcapPlayer }),
       new McapRemoteDataSourceFactory(),
     ];
 
     return sources;
-  }, [enableExperimentalBagPlayer, enableExperimentalDataPlatformPlayer]);
+  }, [
+    enableExperimentalBagPlayer,
+    enableExperimentalDataPlatformPlayer,
+    enableExperimentalMcapPlayer,
+  ]);
 
   const layoutStorage = useMemo(() => new IdbLayoutStorage(), []);
   const extensionLoader = useMemo(() => new NoopExtensionLoader(), []);
