@@ -183,14 +183,18 @@ export function UnconnectedPanelLayout(props: Props): React.ReactElement {
   return <ErrorBoundary>{bodyToRender}</ErrorBoundary>;
 }
 
-const selectedLayoutSelector = (state: LayoutState) => state.selectedLayout;
+const selectedLayoutLoadingSelector = (state: LayoutState) => state.selectedLayout?.loading;
+const selectedLayoutExistsSelector = (state: LayoutState) =>
+  state.selectedLayout?.data != undefined;
+const selectedLayoutMosaicSelector = (state: LayoutState) => state.selectedLayout?.data?.layout;
 
 export default function PanelLayout(): JSX.Element {
   const { changePanelLayout } = useCurrentLayoutActions();
   const { openLayoutBrowser } = useWorkspace();
-  const selectedLayout = useCurrentLayoutSelector(selectedLayoutSelector);
+  const layoutExists = useCurrentLayoutSelector(selectedLayoutExistsSelector);
+  const layoutLoading = useCurrentLayoutSelector(selectedLayoutLoadingSelector);
+  const mosaicLayout = useCurrentLayoutSelector(selectedLayoutMosaicSelector);
 
-  const layoutLoading = selectedLayout?.loading;
   const onChange = useCallback(
     (newLayout: MosaicNode<string> | undefined) => {
       if (newLayout != undefined) {
@@ -199,8 +203,8 @@ export default function PanelLayout(): JSX.Element {
     },
     [changePanelLayout],
   );
-  if (selectedLayout?.data) {
-    return <UnconnectedPanelLayout layout={selectedLayout.data.layout} onChange={onChange} />;
+  if (layoutExists) {
+    return <UnconnectedPanelLayout layout={mosaicLayout} onChange={onChange} />;
   } else if (layoutLoading === true) {
     return (
       <EmptyState>

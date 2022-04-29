@@ -88,7 +88,7 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-export default function LayoutRow({
+export default React.memo(function LayoutRow({
   layout,
   selected,
   onSelect,
@@ -477,4 +477,4 @@ export default function LayoutRow({
       )}
     </Stack>
   );
-}
+});

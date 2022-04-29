@@ -24,13 +24,13 @@ function formatSpeed(val: number) {
   return `${val < 0.1 ? val.toFixed(2) : val}×`;
 }
 
-const selectedLayoutSelector = (state: LayoutState) => state.selectedLayout;
+const configSpeedSelector = (state: LayoutState) =>
+  state.selectedLayout?.data?.playbackConfig.speed;
 
 export default function PlaybackSpeedControls(): JSX.Element {
   const theme = useTheme();
 
-  const selectedLayout = useCurrentLayoutSelector(selectedLayoutSelector);
-  const configSpeed = selectedLayout?.data?.playbackConfig.speed;
+  const configSpeed = useCurrentLayoutSelector(configSpeedSelector);
   const speed = useMessagePipeline(
     useCallback(({ playerState }) => playerState.activeData?.speed, []),
   );
