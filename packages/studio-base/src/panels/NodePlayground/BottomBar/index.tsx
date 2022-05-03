@@ -139,7 +139,7 @@ const BottomBar = ({ nodeId, isSaved, save, diagnostics, logs }: Props): ReactEl
             setAutoScroll(true);
           }
         }}
-        sx={{
+        style={{
           overflowY: bottomBarDisplay !== "closed" ? "scroll" : "auto",
           height: bottomBarDisplay !== "closed" ? 150 : 0,
           color: colors.DARK9,

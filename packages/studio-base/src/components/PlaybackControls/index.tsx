@@ -189,7 +189,7 @@ export default function PlaybackControls({
         alignItems="center"
         spacing={1}
         padding={1}
-        sx={{
+        style={{
           backgroundColor: theme.palette.neutralLighterAlt,
           borderTop: `1px solid ${theme.palette.neutralLighter}`,
         }}

@@ -8,7 +8,7 @@ import {
   IIconProps,
   IRenderFunction,
 } from "@fluentui/react";
-import { Box, Stack } from "@mui/material";
+import { Box, Stack, useTheme } from "@mui/material";
 import { useCallback } from "react";
 
 import { useTooltip } from "@foxglove/studio-base/components/Tooltip";
@@ -32,6 +32,7 @@ type SidebarButtonProps = {
 
 export default function SidebarButton(props: SidebarButtonProps): JSX.Element {
   const { dataSidebarKey, selected, title, iconProps, onClick, menuProps, badge } = props;
+  const theme = useTheme();
 
   const { ref: tooltipRef, tooltip } = useTooltip({ contents: title, placement: "right" });
   const renderStack = useCallback(
@@ -78,13 +79,13 @@ export default function SidebarButton(props: SidebarButtonProps): JSX.Element {
       />
       {selected && (
         <Box
-          sx={{
+          style={{
             position: "absolute",
             left: 0,
             top: 0,
             bottom: 0,
             width: 3,
-            bgcolor: "primary.main",
+            backgroundColor: theme.palette.primary.main,
           }}
         />
       )}

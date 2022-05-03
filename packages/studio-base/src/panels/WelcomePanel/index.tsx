@@ -71,7 +71,7 @@ function WelcomePanel() {
     !loading;
 
   return (
-    <Stack data-test="welcome-content" padding={2.5} sx={{ overflowY: "auto" }}>
+    <Stack data-test="welcome-content" padding={2.5} style={{ overflowY: "auto" }}>
       <PanelToolbar floating />
       <TextContent>
         <h1>Welcome</h1>

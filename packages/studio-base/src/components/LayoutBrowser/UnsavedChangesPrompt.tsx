@@ -116,7 +116,7 @@ export function UnsavedChangesPrompt({
       maxWidth={320}
     >
       <form onSubmit={handleSubmit}>
-        <Stack spacing={2} sx={{ minHeight: 180 }}>
+        <Stack spacing={2} style={{ minHeight: 180 }}>
           <ChoiceGroup
             selectedKey={selectedKey}
             options={options}

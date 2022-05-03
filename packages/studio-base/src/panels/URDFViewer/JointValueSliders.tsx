@@ -31,7 +31,7 @@ export function JointValueSliders({
   );
 
   return (
-    <Stack padding={1} sx={{ overflowY: "auto", width: "40%", maxWidth: 300 }}>
+    <Stack padding={1} style={{ overflowY: "auto", width: "40%", maxWidth: 300 }}>
       {joints.map(([name, joint]) => {
         const min = joint.jointType === "continuous" ? -Math.PI : +joint.limit.lower;
         const max = joint.jointType === "continuous" ? Math.PI : +joint.limit.upper;

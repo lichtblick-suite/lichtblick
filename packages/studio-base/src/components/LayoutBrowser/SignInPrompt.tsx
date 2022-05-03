@@ -35,8 +35,8 @@ export default function SignInPrompt(props: SignInPromptProps): JSX.Element {
       alignItems="center"
       padding={2}
       spacing={2}
-      sx={{
-        bgcolor: theme.palette.themeLighterAlt,
+      style={{
+        backgroundColor: theme.palette.themeLighterAlt,
         position: "sticky",
         bottom: 0,
       }}

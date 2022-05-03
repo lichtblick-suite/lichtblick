@@ -222,7 +222,7 @@ export default function ChildToggle(props: Props): ReactElement {
           direction={position === "left" || position === "bottom-left" ? "row-reverse" : "row"}
           alignItems={position === "above" ? "flex-end" : "flex-start"}
           position="fixed"
-          sx={{ pointerEvents: "none", ...styleObj }}
+          style={{ pointerEvents: "none", ...styleObj }}
         >
           {/* shrinkable spacer allows child to have a default position but slide over when it would go offscreen */}
           <Box flexBasis={spacerSize} flexShrink={1} />

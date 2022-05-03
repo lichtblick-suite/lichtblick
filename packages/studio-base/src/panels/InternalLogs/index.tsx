@@ -43,7 +43,7 @@ function InternalLogs(props: Props) {
   }, [disabledChannels]);
 
   return (
-    <Stack maxWidth="100%" sx={{ overflowY: "auto" }}>
+    <Stack maxWidth="100%" style={{ overflowY: "auto" }}>
       <PanelToolbar floating helpContent={helpContent} />
       <Stack padding={1} spacing={1}>
         {channels.map((logger) => {

@@ -2,7 +2,7 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { MessageBar, MessageBarType, makeStyles, useTheme } from "@fluentui/react";
+import { MessageBar, MessageBarType, makeStyles } from "@fluentui/react";
 import { Stack } from "@mui/material";
 import { useMemo, useState } from "react";
 import { useAsync } from "react-use";
@@ -45,6 +45,17 @@ const useStyles = makeStyles((theme) => ({
     color: theme.palette.neutralSecondaryAlt,
     letterSpacing: "0.025em",
     marginBottom: theme.spacing.s1,
+  },
+  extensionListStack: {
+    margin: `0 -${theme.spacing.m}`,
+    borderBottom: `1px solid ${theme.semanticColors.bodyBackground}`,
+    borderTop: `1px solid ${theme.semanticColors.bodyBackground}`,
+
+    "&:hover": {
+      backgroundColor: theme.semanticColors.menuItemBackgroundHovered,
+      color: theme.semanticColors.accentButtonBackground,
+      cursor: "pointer",
+    },
   },
 }));
 
@@ -179,23 +190,12 @@ function ExtensionListEntry(props: {
   onClick: () => void;
 }): JSX.Element {
   const { entry } = props;
-  const theme = useTheme();
   const classes = useStyles();
   return (
     <Stack
       key={entry.id}
       onClick={props.onClick}
-      sx={{
-        margin: `0 -${theme.spacing.m}`,
-        borderBottom: `1px solid ${theme.semanticColors.bodyBackground}`,
-        borderTop: `1px solid ${theme.semanticColors.bodyBackground}`,
-
-        "&:hover": {
-          backgroundColor: theme.semanticColors.menuItemBackgroundHovered,
-          color: theme.semanticColors.accentButtonBackground,
-          cursor: "pointer",
-        },
-      }}
+      className={classes.extensionListStack}
       spacing={0.75}
       paddingX={2}
       paddingY={1}

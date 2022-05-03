@@ -3,7 +3,7 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 import { CompoundButton, Text, IButtonProps, useTheme, Checkbox } from "@fluentui/react";
-import { Stack } from "@mui/material";
+import { Stack, styled as muiStyled } from "@mui/material";
 import { useMemo } from "react";
 
 import { AppSetting } from "@foxglove/studio-base/AppSetting";
@@ -55,6 +55,11 @@ export type IStartProps = {
   supportedRemoteFileExtensions?: string[];
   onSelectView: (newValue: OpenDialogViews) => void;
 };
+
+const RecentStack = muiStyled(Stack)(({ theme }) => ({
+  overflow: "hidden",
+  "&:hover": { color: theme.palette.primary.dark },
+}));
 
 export default function Start(props: IStartProps): JSX.Element {
   const {
@@ -140,10 +145,7 @@ export default function Start(props: IStartProps): JSX.Element {
       return {
         id: recent.id,
         children: (
-          <Stack
-            direction="row"
-            sx={{ overflow: "hidden", "&:hover": { color: theme.palette.themeDark } }}
-          >
+          <RecentStack direction="row">
             <Text
               variant="small"
               styles={{
@@ -170,7 +172,7 @@ export default function Start(props: IStartProps): JSX.Element {
                 {recent.label}
               </Text>
             )}
-          </Stack>
+          </RecentStack>
         ),
         onClick: () => selectRecent(recent.id),
       };

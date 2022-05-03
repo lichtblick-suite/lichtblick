@@ -470,7 +470,7 @@ export default function LayoutBrowser({
         {layoutDebug?.syncNow && (
           <Stack
             spacing={0.5}
-            sx={{
+            style={{
               position: "sticky",
               bottom: 0,
               left: 0,

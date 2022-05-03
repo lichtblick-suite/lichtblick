@@ -3,7 +3,7 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 import { ActionButton, DefaultButton, PrimaryButton, useTheme } from "@fluentui/react";
-import { Stack } from "@mui/material";
+import { Stack, styled as muiStyled } from "@mui/material";
 import { PropsWithChildren } from "react";
 
 type ViewProps = {
@@ -12,23 +12,19 @@ type ViewProps = {
   onOpen?: () => void;
 };
 
+const ViewStack = muiStyled(Stack)({
+  "@media (min-height: 512px)": { overflow: "hidden" },
+});
+
 export default function View(props: PropsWithChildren<ViewProps>): JSX.Element {
   const { onCancel, onOpen, onBack } = props;
   const theme = useTheme();
 
   return (
     <>
-      <Stack
-        flexGrow={1}
-        height="100%"
-        justifyContent="space-between"
-        spacing={2}
-        sx={{
-          "@media (min-height: 512px)": { overflow: "hidden" },
-        }}
-      >
+      <ViewStack flexGrow={1} height="100%" justifyContent="space-between" spacing={2}>
         {props.children}
-      </Stack>
+      </ViewStack>
       <Stack direction="row" justifyContent="space-between" alignItems="center">
         <ActionButton
           iconProps={{ iconName: "ChevronLeft" }}

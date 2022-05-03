@@ -61,7 +61,7 @@ export function LaunchingInDesktopScreen(): ReactElement {
         justifyContent="center"
         height="100%"
         spacing={2.5}
-        sx={{ textAlign: "center", maxWidth: 480 }}
+        style={{ textAlign: "center", maxWidth: 480 }}
       >
         <Text variant="xxLarge">Launching Foxglove Studio…</Text>
         <Text>We’ve directed you to the desktop app.</Text>
