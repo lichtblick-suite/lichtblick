@@ -5,7 +5,8 @@
 import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import { IconButton, TextFieldProps, TextField, styled as muiStyled } from "@mui/material";
-import { ReactNode } from "react";
+import { clamp } from "lodash";
+import { ReactNode, useCallback } from "react";
 import { useKeyPress } from "react-use";
 
 import { fonts } from "@foxglove/studio-base/util/sharedStyleConstants";
@@ -51,6 +52,8 @@ export function NumberInput(
   props: {
     iconUp?: ReactNode;
     iconDown?: ReactNode;
+    max?: number;
+    min?: number;
     step?: number;
     value?: number;
     onChange: (value: undefined | number) => void;
@@ -62,20 +65,34 @@ export function NumberInput(
 
   const stepAmount = shiftPressed ? step * 10 : step;
 
+  const updateValue = useCallback(
+    (newValue: number) => {
+      onChange(
+        clamp(
+          newValue,
+          props.min ?? Number.NEGATIVE_INFINITY,
+          props.max ?? Number.POSITIVE_INFINITY,
+        ),
+      );
+    },
+    [onChange, props.max, props.min],
+  );
+
   return (
     <StyledTextField
       {...props}
       value={value}
       onChange={(event) =>
-        onChange(event.target.value.length > 0 ? Number(event.target.value) : undefined)
+        event.target.value.length > 0 ? updateValue(Number(event.target.value)) : undefined
       }
       type="number"
+      inputProps={{ max: props.max, min: props.min, step: stepAmount }}
       InputProps={{
         startAdornment: (
           <StyledIconButton
             size="small"
             edge="start"
-            onClick={() => value != undefined && onChange(value - stepAmount)}
+            onClick={() => updateValue((value ?? 0) - stepAmount)}
           >
             {iconDown ?? <ChevronLeftIcon fontSize="small" />}
           </StyledIconButton>
@@ -84,7 +101,7 @@ export function NumberInput(
           <StyledIconButton
             size="small"
             edge="end"
-            onClick={() => value != undefined && onChange(value + stepAmount)}
+            onClick={() => updateValue((value ?? 0) + stepAmount)}
           >
             {iconUp ?? <ChevronRightIcon fontSize="small" />}
           </StyledIconButton>

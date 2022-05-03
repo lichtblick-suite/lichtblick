@@ -143,6 +143,8 @@ function FieldInput({
           value={field.value}
           placeholder={field.placeholder}
           fullWidth
+          max={field.max}
+          min={field.min}
           step={field.step}
           onChange={(value) =>
             actionHandler({ action: "update", payload: { path, input: "number", value } })

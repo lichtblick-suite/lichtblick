@@ -22,6 +22,7 @@ const DefaultSettings: SettingsTreeNode = {
   fields: {
     firstRootField: { input: "string", label: "First Root Field" },
     secondRootField: { input: "string", label: "Second Root Field" },
+    emptyNumber: { input: "number", label: "Empty Number" },
   },
   children: {
     complex_inputs: {
@@ -123,6 +124,8 @@ For ROS users, we also support package:// URLs
           label: "Size",
           value: undefined,
           input: "number",
+          max: 10,
+          min: 1,
         },
         subdivision: {
           label: "Subdivision",
