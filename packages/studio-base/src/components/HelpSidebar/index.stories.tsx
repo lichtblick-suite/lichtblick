@@ -17,7 +17,6 @@ import { useShallowMemo } from "@foxglove/hooks";
 import { IHelpInfo, HelpInfo } from "@foxglove/studio-base/context/HelpInfoContext";
 import { PanelCatalog, PanelInfo } from "@foxglove/studio-base/context/PanelCatalogContext";
 import PanelSetup from "@foxglove/studio-base/stories/PanelSetup";
-import { PanelConfigSchemaEntry } from "@foxglove/studio-base/types/panels";
 
 import HelpSidebar from ".";
 
@@ -37,14 +36,6 @@ const allPanels: readonly PanelInfo[] = [
 ];
 
 class MockPanelCatalog implements PanelCatalog {
-  async getConfigSchema(type: string): Promise<PanelConfigSchemaEntry<string>[] | undefined> {
-    const info = this.getPanelByType(type);
-    if (!info) {
-      return undefined;
-    }
-    const module = await info.module();
-    return module.default.configSchema;
-  }
   getPanels(): readonly PanelInfo[] {
     return allPanels;
   }

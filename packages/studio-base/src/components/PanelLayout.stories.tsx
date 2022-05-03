@@ -19,7 +19,6 @@ import Panel from "@foxglove/studio-base/components/Panel";
 import PanelToolbar from "@foxglove/studio-base/components/PanelToolbar";
 import { PanelCatalog, PanelInfo } from "@foxglove/studio-base/context/PanelCatalogContext";
 import PanelSetup from "@foxglove/studio-base/stories/PanelSetup";
-import { PanelConfigSchemaEntry } from "@foxglove/studio-base/types/panels";
 
 import PanelLayout from "./PanelLayout";
 
@@ -65,14 +64,6 @@ const allPanels: readonly PanelInfo[] = [
 ];
 
 class MockPanelCatalog implements PanelCatalog {
-  async getConfigSchema(type: string): Promise<PanelConfigSchemaEntry<string>[] | undefined> {
-    const info = this.getPanelByType(type);
-    if (!info) {
-      return undefined;
-    }
-    const module = await info.module();
-    return module.default.configSchema;
-  }
   getPanels(): readonly PanelInfo[] {
     return allPanels;
   }

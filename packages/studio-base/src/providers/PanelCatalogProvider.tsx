@@ -108,15 +108,6 @@ export default function PanelCatalogProvider(
       getPanelByType(type: string) {
         return panelsByType.get(type);
       },
-      async getConfigSchema(type: string) {
-        const panelInfo = panelsByType.get(type);
-        if (!panelInfo) {
-          return undefined;
-        }
-
-        const loadedModule = await panelInfo.module();
-        return loadedModule.default.configSchema;
-      },
     };
   }, [panelsByType, visiblePanels]);
 

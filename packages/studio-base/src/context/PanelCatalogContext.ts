@@ -5,7 +5,7 @@
 import { ComponentType, createContext, useContext } from "react";
 
 import { PanelStatics } from "@foxglove/studio-base/components/Panel";
-import { PanelConfig, PanelConfigSchema } from "@foxglove/studio-base/types/panels";
+import { PanelConfig } from "@foxglove/studio-base/types/panels";
 
 export type PanelComponent = ComponentType<{ childId?: string; tabId?: string }> &
   PanelStatics<PanelConfig>;
@@ -34,13 +34,6 @@ export interface PanelCatalog {
 
   /** Get panel information for a specific panel type (i.e. 3d, map, image, etc) */
   getPanelByType(type: string): PanelInfo | undefined;
-
-  /**
-   * Get the configuration schema for a specific panel type
-   *
-   * This is async to support lazy loading our builtin panels
-   */
-  getConfigSchema(type: string): Promise<PanelConfigSchema<Record<string, unknown>> | undefined>;
 }
 
 const PanelCatalogContext = createContext<PanelCatalog | undefined>(undefined);

@@ -3,8 +3,8 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 import { Button, Link, SvgIcon, Typography } from "@mui/material";
-import { StrictMode, useCallback, useContext, useEffect, useMemo, useState } from "react";
-import { useAsync, useUnmount } from "react-use";
+import { useCallback, useContext, useEffect, useMemo, useState } from "react";
+import { useUnmount } from "react-use";
 
 import { useConfigById } from "@foxglove/studio-base/PanelAPI";
 import SettingsEditor from "@foxglove/studio-base/components/SettingsTreeEditor";
@@ -26,8 +26,6 @@ import { useWorkspace } from "@foxglove/studio-base/context/WorkspaceContext";
 import { PanelConfig } from "@foxglove/studio-base/types/panels";
 import { TAB_PANEL_TYPE } from "@foxglove/studio-base/util/globalConstants";
 import { getPanelTypeFromId } from "@foxglove/studio-base/util/layout";
-
-import SchemaEditor from "./SchemaEditor";
 
 const selectedLayoutIdSelector = (state: LayoutState) => state.selectedLayout?.id;
 
@@ -102,7 +100,7 @@ export default function PanelSettings({
     );
   }, [selectedPanelId, showShareModal, getCurrentLayout, savePanelConfigs]);
 
-  const [config, saveConfig] = useConfigById<Record<string, unknown>>(selectedPanelId);
+  const [config] = useConfigById<Record<string, unknown>>(selectedPanelId);
 
   const [settingsTree, setSettingsTree] = useState<undefined | ImmutableSettingsTree>();
 
@@ -121,22 +119,6 @@ export default function PanelSettings({
       return () => undefined;
     }
   }, [addUpdateSubscriber, removeUpdateSubscriber, selectedPanelId, updateSubscriber]);
-
-  const { value: schema, error } = useAsync(async () => {
-    if (panelInfo?.type == undefined) {
-      return undefined;
-    }
-
-    return await panelCatalog.getConfigSchema(panelInfo.type);
-  }, [panelCatalog, panelInfo?.type]);
-
-  if (error) {
-    return (
-      <SidebarContent title="Panel settings">
-        <Typography color="error.main">{error.message}</Typography>
-      </SidebarContent>
-    );
-  }
 
   if (selectedLayoutId == undefined) {
     return (
@@ -176,12 +158,7 @@ export default function PanelSettings({
       <Stack gap={2} justifyContent="flex-start">
         <div>
           {settingsTree && <SettingsEditor settings={settingsTree} />}
-          {!settingsTree && schema && (
-            <StrictMode>
-              <SchemaEditor configSchema={schema} config={config} saveConfig={saveConfig} />
-            </StrictMode>
-          )}
-          {!settingsTree && !schema && (
+          {!settingsTree && (
             <Typography color="text.secondary">No additional settings available.</Typography>
           )}
         </div>

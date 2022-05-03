@@ -17,7 +17,6 @@ import { HTML5Backend } from "react-dnd-html5-backend";
 import { PanelCatalog, PanelInfo } from "@foxglove/studio-base/context/PanelCatalogContext";
 import MockCurrentLayoutProvider from "@foxglove/studio-base/providers/CurrentLayoutProvider/MockCurrentLayoutProvider";
 import PanelSetup from "@foxglove/studio-base/stories/PanelSetup";
-import { PanelConfigSchemaEntry } from "@foxglove/studio-base/types/panels";
 
 import PanelSettings from ".";
 
@@ -31,14 +30,6 @@ const panels: readonly PanelInfo[] = [
 ];
 
 class MockPanelCatalog implements PanelCatalog {
-  async getConfigSchema(type: string): Promise<PanelConfigSchemaEntry<string>[] | undefined> {
-    const info = this.getPanelByType(type);
-    if (info == undefined) {
-      return undefined;
-    }
-    const module = await info.module();
-    return module.default.configSchema;
-  }
   getPanels(): readonly PanelInfo[] {
     return panels;
   }

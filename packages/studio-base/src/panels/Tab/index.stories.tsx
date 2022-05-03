@@ -24,7 +24,6 @@ import {
 import PanelSetup from "@foxglove/studio-base/stories/PanelSetup";
 import { SExpectedResult } from "@foxglove/studio-base/stories/storyHelpers";
 import { dragAndDrop } from "@foxglove/studio-base/test/dragAndDropHelper";
-import { PanelConfigSchemaEntry } from "@foxglove/studio-base/types/panels";
 import tick from "@foxglove/studio-base/util/tick";
 
 import Tab from "./index";
@@ -51,14 +50,6 @@ const allPanels: readonly PanelInfo[] = [
 ];
 
 class MockPanelCatalog implements PanelCatalog {
-  async getConfigSchema(type: string): Promise<PanelConfigSchemaEntry<string>[] | undefined> {
-    const info = this.getPanelByType(type);
-    if (!info) {
-      return undefined;
-    }
-    const module = await info.module();
-    return module.default.configSchema;
-  }
   getPanels(): readonly PanelInfo[] {
     return allPanels;
   }

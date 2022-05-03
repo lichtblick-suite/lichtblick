@@ -29,9 +29,9 @@ export type PanelContextType<T> = {
   exitFullscreen: () => void;
   isFullscreen: boolean;
 
-  hasSettings: boolean;
   connectToolbarDragHandle?: (el: Element | ReactNull) => void;
 };
+
 // Context used for components to know which panel they are inside
 const PanelContext = React.createContext<PanelContextType<PanelConfig> | undefined>(undefined);
 PanelContext.displayName = "PanelContext";

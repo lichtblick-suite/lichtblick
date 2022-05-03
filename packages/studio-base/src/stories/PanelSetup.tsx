@@ -50,7 +50,7 @@ import {
 import MockCurrentLayoutProvider from "@foxglove/studio-base/providers/CurrentLayoutProvider/MockCurrentLayoutProvider";
 import HelpInfoProvider from "@foxglove/studio-base/providers/HelpInfoProvider";
 import { RosDatatypes } from "@foxglove/studio-base/types/RosDatatypes";
-import { PanelConfigSchemaEntry, SavedProps, UserNodes } from "@foxglove/studio-base/types/panels";
+import { SavedProps, UserNodes } from "@foxglove/studio-base/types/panels";
 
 type Frame = {
   [topic: string]: MessageEvent<unknown>[];
@@ -146,9 +146,6 @@ export const MosaicWrapper = ({ children }: { children: React.ReactNode }): JSX.
 
 // empty catalog if one is not provided via props
 class MockPanelCatalog implements PanelCatalog {
-  async getConfigSchema(_type: string): Promise<PanelConfigSchemaEntry<string>[] | undefined> {
-    return undefined;
-  }
   getPanels(): readonly PanelInfo[] {
     return [];
   }

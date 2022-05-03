@@ -57,12 +57,7 @@ import { usePanelCatalog } from "@foxglove/studio-base/context/PanelCatalogConte
 import { useWorkspace } from "@foxglove/studio-base/context/WorkspaceContext";
 import usePanelDrag from "@foxglove/studio-base/hooks/usePanelDrag";
 import { TabPanelConfig } from "@foxglove/studio-base/types/layouts";
-import {
-  PanelConfig,
-  SaveConfig,
-  PanelConfigSchema,
-  OpenSiblingPanel,
-} from "@foxglove/studio-base/types/panels";
+import { PanelConfig, SaveConfig, OpenSiblingPanel } from "@foxglove/studio-base/types/panels";
 import { TAB_PANEL_TYPE } from "@foxglove/studio-base/util/globalConstants";
 import {
   getPanelIdForType,
@@ -190,7 +185,6 @@ type Props<Config> = {
 export interface PanelStatics<Config> {
   panelType: string;
   defaultConfig: Config;
-  configSchema?: PanelConfigSchema<Config>;
 }
 
 // Like React.ComponentType<P>, but without restrictions on the constructor return type.
@@ -601,7 +595,6 @@ export default function Panel<
             enterFullscreen,
             exitFullscreen,
             isFullscreen: fullScreen,
-            hasSettings: PanelComponent.configSchema != undefined,
             tabId,
             // disallow dragging the root panel in a layout
             connectToolbarDragHandle: isTopLevelPanel ? undefined : connectToolbarDragHandle,
@@ -677,6 +670,5 @@ export default function Panel<
     defaultConfig: PanelComponent.defaultConfig,
     panelType: PanelComponent.panelType,
     displayName: `Panel(${PanelComponent.displayName ?? PanelComponent.name})`,
-    configSchema: PanelComponent.configSchema,
   });
 }

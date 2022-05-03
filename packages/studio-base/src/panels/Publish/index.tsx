@@ -32,7 +32,6 @@ import {
 import { PanelSettingsEditorContext } from "@foxglove/studio-base/context/PanelSettingsEditorContext";
 import usePublisher from "@foxglove/studio-base/hooks/usePublisher";
 import { PlayerCapabilities, Topic } from "@foxglove/studio-base/players/types";
-import { PanelConfigSchema } from "@foxglove/studio-base/types/panels";
 
 import buildSampleMessage from "./buildSampleMessage";
 import helpContent from "./index.help.md";
@@ -266,13 +265,6 @@ function Publish(props: Props) {
   );
 }
 
-const configSchema: PanelConfigSchema<Config> = [
-  { key: "advancedView", type: "toggle", title: "Editing mode" },
-  { key: "buttonText", type: "text", title: "Button title" },
-  { key: "buttonTooltip", type: "text", title: "Button tooltip" },
-  { key: "buttonColor", type: "color", title: "Button color" },
-];
-
 export default Panel(
   Object.assign(React.memo(Publish), {
     panelType: "Publish",
@@ -285,6 +277,5 @@ export default Panel(
       advancedView: true,
       value: "",
     },
-    configSchema,
   }),
 );

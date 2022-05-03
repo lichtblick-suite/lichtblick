@@ -24,7 +24,6 @@ import PanelCatalogContext, {
   PanelInfo,
 } from "@foxglove/studio-base/context/PanelCatalogContext";
 import MockCurrentLayoutProvider from "@foxglove/studio-base/providers/CurrentLayoutProvider/MockCurrentLayoutProvider";
-import { PanelConfigSchemaEntry } from "@foxglove/studio-base/types/panels";
 
 const SamplePanel1 = function () {
   return <div></div>;
@@ -60,14 +59,6 @@ const allPanels: PanelInfo[] = [
 ];
 
 class MockPanelCatalog implements PanelCatalog {
-  async getConfigSchema(type: string): Promise<PanelConfigSchemaEntry<string>[] | undefined> {
-    const info = this.getPanelByType(type);
-    if (!info) {
-      return undefined;
-    }
-    const module = await info.module();
-    return module.default.configSchema;
-  }
   getPanels(): readonly PanelInfo[] {
     return allPanels;
   }
