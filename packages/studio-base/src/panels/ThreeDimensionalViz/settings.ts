@@ -34,7 +34,7 @@ export function buildSettingsTree(config: ThreeDimensionalVizConfig): SettingsTr
   if (!config.useThemeBackgroundColor) {
     rootFields.customBackgroundColor = {
       label: "Background color",
-      input: "color",
+      input: "rgba",
       value: config.customBackgroundColor,
     };
   }

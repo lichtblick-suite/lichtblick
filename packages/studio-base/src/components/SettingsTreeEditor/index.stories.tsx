@@ -43,12 +43,29 @@ const DefaultSettings: SettingsTreeNode = {
           labels: ["U", "V", "W"],
           value: [1, 2, 3],
         },
+        emptySelect: {
+          label: "Empty Select",
+          value: "",
+          input: "select",
+          options: [
+            { label: "Nothing", value: "" },
+            { label: "Something", value: "something" },
+          ],
+        },
+      },
+    },
+    defaultCollapsed: {
+      label: "Default Collapsed",
+      defaultExpansionState: "collapsed",
+      fields: {
+        field: { label: "Field", input: "string" },
       },
     },
     background: {
       label: "Background",
       fields: {
-        color: { label: "Color", value: "#000000", input: "color" },
+        colorRGB: { label: "Color RGB", value: "#000000", input: "rgb" },
+        colorRGBA: { label: "Color RGBA", value: "rgba(0, 128, 255, 0.75)", input: "rgba" },
       },
     },
     threeDimensionalModel: {
@@ -56,7 +73,7 @@ const DefaultSettings: SettingsTreeNode = {
       fields: {
         color: {
           label: "Color",
-          input: "color",
+          input: "rgb",
           value: "#9480ed",
         },
         url: {
@@ -107,7 +124,7 @@ For ROS users, we also support package:// URLs
         },
         marker_color: {
           label: "Marker color",
-          input: "color",
+          input: "rgb",
           value: "#ff0000",
         },
       },
@@ -118,7 +135,7 @@ For ROS users, we also support package:// URLs
         color: {
           label: "Color",
           value: "#248eff",
-          input: "color",
+          input: "rgb",
         },
         size: {
           label: "Size",
@@ -171,7 +188,7 @@ For ROS users, we also support package:// URLs
             color: {
               label: "Color",
               value: "#00ff00",
-              input: "color",
+              input: "rgb",
             },
             click_handling: {
               label: "Selection mode",
@@ -194,7 +211,7 @@ For ROS users, we also support package:// URLs
                 color: {
                   label: "Color",
                   value: "#00ff00",
-                  input: "color",
+                  input: "rgb",
                 },
               },
             },
@@ -249,7 +266,7 @@ For ROS users, we also support package:// URLs
     pose: {
       label: "Pose",
       fields: {
-        color: { label: "Color", value: "#ffffff", input: "color" },
+        color: { label: "Color", value: "#ffffff", input: "rgb" },
         shaft_length: { label: "Shaft length", value: 1.5, input: "number" },
         shaft_width: { label: "Shaft width", value: 1.5, input: "number" },
         head_length: { label: "Head length", value: 2, input: "number" },

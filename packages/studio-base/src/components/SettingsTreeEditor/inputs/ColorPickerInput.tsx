@@ -11,6 +11,7 @@ import {
   ClickAwayListener,
 } from "@mui/material";
 import { useState } from "react";
+import tinycolor from "tinycolor2";
 
 import { fonts } from "@foxglove/studio-base/util/sharedStyleConstants";
 
@@ -45,6 +46,7 @@ const PickerWrapper = muiStyled(Card)(({ theme }) => ({
 }));
 
 type ColorPickerInputProps = {
+  alphaType: "none" | "alpha";
   value: undefined | string;
   onChange: (value: undefined | string) => void;
   swatchOrientation?: "start" | "end";
@@ -54,8 +56,8 @@ export function ColorPickerInput(props: ColorPickerInputProps): JSX.Element {
   const { onChange, swatchOrientation = "start", value } = props;
   const [showPicker, setShowPicker] = useState(false);
 
-  const isValidColor = Boolean(value?.match(/^#[0-9a-fA-F]{6}$/i));
-  const swatchColor = isValidColor && value != undefined ? value : "#00000044";
+  const isValidColor = value != undefined && tinycolor(value).isValid();
+  const swatchColor = isValidColor ? value : "#00000044";
 
   const togglePicker = () => setShowPicker(!showPicker);
 
@@ -65,6 +67,7 @@ export function ColorPickerInput(props: ColorPickerInputProps): JSX.Element {
         {...props}
         value={value}
         onChange={(event) => onChange(event.target.value)}
+        placeholder={props.placeholder}
         InputProps={{
           startAdornment: swatchOrientation === "start" && (
             <ColorSwatch color={swatchColor} onClick={togglePicker} />
@@ -79,7 +82,7 @@ export function ColorPickerInput(props: ColorPickerInputProps): JSX.Element {
           <PickerWrapper variant="elevation">
             <ColorPicker
               color={swatchColor}
-              alphaType={"none"}
+              alphaType={props.alphaType}
               styles={{
                 tableHexCell: { width: "35%" },
                 input: {

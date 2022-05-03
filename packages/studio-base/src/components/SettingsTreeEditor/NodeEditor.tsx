@@ -94,6 +94,7 @@ function NodeEditorComponent(props: NodeEditorProps): JSX.Element {
     return (
       <NodeEditor
         actionHandler={actionHandler}
+        defaultOpen={child.defaultExpansionState === "collapsed" ? false : true}
         disableIcon={true}
         key={key}
         settings={child}

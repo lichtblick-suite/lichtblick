@@ -57,7 +57,7 @@ function buildSettingsTree(config: Config): SettingsTreeNode {
       advancedView: { label: "Editing Mode", input: "boolean", value: config.advancedView },
       buttonText: { label: "Button Title", input: "string", value: config.buttonText },
       buttonTooltip: { label: "Button Tooltip", input: "string", value: config.buttonTooltip },
-      buttonColor: { label: "Button Color", input: "color", value: config.buttonColor },
+      buttonColor: { label: "Button Color", input: "rgb", value: config.buttonColor },
     },
   };
 }
