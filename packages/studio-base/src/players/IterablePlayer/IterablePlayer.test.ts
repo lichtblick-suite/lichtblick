@@ -23,7 +23,7 @@ class TestSource implements IIterableSource {
   async initialize(): Promise<Initalization> {
     return {
       start: { sec: 0, nsec: 0 },
-      end: { sec: 0, nsec: 0 },
+      end: { sec: 1, nsec: 0 },
       topics: [],
       topicStats: new Map(),
       problems: [],
@@ -105,7 +105,7 @@ describe("IterablePlayer", () => {
       activeData: {
         currentTime: { sec: 0, nsec: 0 },
         startTime: { sec: 0, nsec: 0 },
-        endTime: { sec: 0, nsec: 0 },
+        endTime: { sec: 1, nsec: 0 },
         datatypes: new Map(),
         isPlaying: false,
         lastSeekTime: 0,
@@ -131,13 +131,21 @@ describe("IterablePlayer", () => {
 
     expect(playerStates).toEqual([
       // before initialize
-      baseState,
+      { ...baseState, activeData: { ...baseState.activeData, endTime: { sec: 0, nsec: 0 } } },
       // start delay
       baseState,
       // startPlay
-      { ...baseState, presence: PlayerPresence.PRESENT },
+      {
+        ...baseState,
+        presence: PlayerPresence.PRESENT,
+        activeData: { ...baseState.activeData, currentTime: { sec: 0, nsec: 99000000 } },
+      },
       // idle
-      { ...baseState, presence: PlayerPresence.PRESENT },
+      {
+        ...baseState,
+        presence: PlayerPresence.PRESENT,
+        activeData: { ...baseState.activeData, currentTime: { sec: 0, nsec: 99000000 } },
+      },
     ]);
 
     player.close();
@@ -187,7 +195,7 @@ describe("IterablePlayer", () => {
       activeData: {
         currentTime: { sec: 0, nsec: 0 },
         startTime: { sec: 0, nsec: 0 },
-        endTime: { sec: 0, nsec: 0 },
+        endTime: { sec: 1, nsec: 0 },
         datatypes: new Map(),
         isPlaying: false,
         lastSeekTime: 0,
@@ -242,6 +250,51 @@ describe("IterablePlayer", () => {
     // 3. a state update with the messages from the new seek
     // 4. a state update from idle
     expect(playerStates).toEqual([baseState, newSeekBase, withMessages, newSeekBase]);
+
+    player.close();
+  });
+
+  it("should start a new iterator mid-tick when old iterator finishes", async () => {
+    const source = new TestSource();
+    const player = new IterablePlayer({
+      source,
+      enablePreload: false,
+      sourceId: "test",
+    });
+    const store = new PlayerStateStore(4);
+    player.setListener(async (state) => await store.add(state));
+
+    await store.done;
+
+    // Replace the message iterator to produce 1 message (for the first tick), and then
+    // set back to not producing any messages. Playback should handle this properly rather
+    // than entering an infinite loop within a tick.
+    const origMsgIterator = source.messageIterator.bind(source);
+    source.messageIterator = async function* messageIterator(
+      _args: MessageIteratorArgs,
+    ): AsyncIterator<Readonly<IteratorResult>> {
+      source.messageIterator = origMsgIterator;
+
+      yield {
+        msgEvent: {
+          topic: "foo",
+          receiveTime: { sec: 0, nsec: 99000001 },
+          message: undefined,
+          sizeInBytes: 0,
+        },
+        problem: undefined,
+        connectionId: undefined,
+      };
+    };
+
+    // We only wait for 1 player state to test that tick did not enter an infinite loop
+    store.reset(1);
+    player.startPlayback();
+
+    {
+      const playerStates = await store.done;
+      expect(playerStates.length).toEqual(1);
+    }
 
     player.close();
   });
