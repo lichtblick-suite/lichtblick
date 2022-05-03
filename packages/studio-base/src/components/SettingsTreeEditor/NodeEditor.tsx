@@ -7,7 +7,7 @@ import ArrowRightIcon from "@mui/icons-material/ArrowRight";
 import LayerIcon from "@mui/icons-material/Layers";
 import SettingsIcon from "@mui/icons-material/Settings";
 import { Collapse, Divider, ListItemProps, styled as muiStyled, Typography } from "@mui/material";
-import { ChangeEvent, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { DeepReadonly } from "ts-essentials";
 
 import { FieldEditor } from "./FieldEditor";
@@ -69,10 +69,16 @@ const NodeHeaderToggle = muiStyled("div")<{ indent: number }>(({ theme, indent }
 function NodeEditorComponent(props: NodeEditorProps): JSX.Element {
   const { actionHandler, defaultOpen = true, disableIcon = false, icon, settings = {} } = props;
   const [open, setOpen] = useState(defaultOpen);
-  const [visible, setVisiblity] = useState(true);
 
-  const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
-    setVisiblity(event.target.checked);
+  const indent = props.path.length;
+  const allowVisibilityToggle = props.settings?.visible != undefined;
+  const visible = props.settings?.visible !== false;
+
+  const toggleVisibility = () => {
+    actionHandler({
+      action: "update",
+      payload: { input: "boolean", path: [...props.path, "visible"], value: !visible },
+    });
   };
 
   const { fields, children } = settings;
@@ -103,8 +109,6 @@ function NodeEditorComponent(props: NodeEditorProps): JSX.Element {
     );
   });
 
-  const indent = props.path.length;
-
   return (
     <>
       {indent > 0 && (
@@ -133,9 +137,9 @@ function NodeEditorComponent(props: NodeEditorProps): JSX.Element {
             edge="end"
             size="small"
             checked={visible}
-            onChange={handleChange}
-            style={{ opacity: 0 }}
-            disabled
+            onChange={toggleVisibility}
+            style={{ opacity: allowVisibilityToggle ? 1 : 0 }}
+            disabled={!allowVisibilityToggle}
           />
         </NodeHeader>
       )}

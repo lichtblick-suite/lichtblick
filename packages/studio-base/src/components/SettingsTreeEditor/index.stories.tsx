@@ -18,7 +18,7 @@ export default {
   component: SettingsTreeEditor,
 };
 
-const DefaultSettings: SettingsTreeNode = {
+const BasicSettings: SettingsTreeNode = {
   fields: {
     firstRootField: { input: "string", label: "First Root Field" },
     secondRootField: { input: "string", label: "Second Root Field" },
@@ -87,6 +87,11 @@ For ROS users, we also support package:// URLs
         },
       },
     },
+  },
+};
+
+const PanelExamplesSettings: SettingsTreeNode = {
+  children: {
     map: {
       label: "Map",
       fields: {
@@ -157,11 +162,27 @@ For ROS users, we also support package:// URLs
         },
       },
     },
+    pose: {
+      label: "Pose",
+      fields: {
+        color: { label: "Color", value: "#ffffff", input: "rgb" },
+        shaft_length: { label: "Shaft length", value: 1.5, input: "number" },
+        shaft_width: { label: "Shaft width", value: 1.5, input: "number" },
+        head_length: { label: "Head length", value: 2, input: "number" },
+        head_width: { label: "Head width", value: 2, input: "number" },
+      },
+    },
+  },
+};
+
+const TopicSettings: SettingsTreeNode = {
+  children: {
     topics: {
       label: "Topics",
       children: {
         drivable_area: {
           label: "/drivable_area",
+          visible: true,
           fields: {
             frame_lock: {
               label: "Frame lock",
@@ -263,16 +284,6 @@ For ROS users, we also support package:// URLs
         },
       },
     },
-    pose: {
-      label: "Pose",
-      fields: {
-        color: { label: "Color", value: "#ffffff", input: "rgb" },
-        shaft_length: { label: "Shaft length", value: 1.5, input: "number" },
-        shaft_width: { label: "Shaft width", value: 1.5, input: "number" },
-        head_length: { label: "Head length", value: 2, input: "number" },
-        head_width: { label: "Head width", value: 2, input: "number" },
-      },
-    },
   },
 };
 
@@ -288,16 +299,25 @@ function updateSettingsTreeNode(
       const key = workingPath.shift()!;
       node = node.children?.[key];
     }
+
+    if (!node) {
+      return;
+    }
+
     const key = workingPath.shift()!;
-    const field = node?.fields?.[key];
-    if (field != undefined) {
-      field.value = value as SettingsTreeFieldValue["value"];
+    if (key === "visible") {
+      node.visible = Boolean(value);
+    } else {
+      const field = node.fields?.[key];
+      if (field != undefined) {
+        field.value = value as SettingsTreeFieldValue["value"];
+      }
     }
   });
 }
 
-export const Default = (): JSX.Element => {
-  const [settingsNode, setSettingsNode] = React.useState({ ...DefaultSettings });
+function Wrapper({ settings }: { settings: SettingsTreeNode }): JSX.Element {
+  const [settingsNode, setSettingsNode] = React.useState({ ...settings });
 
   const actionHandler = useCallback((action: SettingsTreeAction) => {
     setSettingsNode((previous) =>
@@ -305,7 +325,7 @@ export const Default = (): JSX.Element => {
     );
   }, []);
 
-  const settings = useMemo(
+  const settingsTree = useMemo(
     () => ({
       actionHandler,
       enableFilter: true,
@@ -324,9 +344,21 @@ export const Default = (): JSX.Element => {
           bgcolor="background.paper"
           overflow="auto"
         >
-          <SettingsTreeEditor settings={settings} />
+          <SettingsTreeEditor settings={settingsTree} />
         </Box>
       </PanelSetup>
     </MockPanelContextProvider>
   );
-};
+}
+
+export function Basics(): JSX.Element {
+  return <Wrapper settings={BasicSettings} />;
+}
+
+export function PanelExamples(): JSX.Element {
+  return <Wrapper settings={PanelExamplesSettings} />;
+}
+
+export function Topics(): JSX.Element {
+  return <Wrapper settings={TopicSettings} />;
+}

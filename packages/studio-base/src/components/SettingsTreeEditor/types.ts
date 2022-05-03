@@ -70,6 +70,13 @@ export type SettingsTreeNode = {
    * An optional label shown at the top of this node.
    */
   label?: string;
+
+  /**
+   * An optional visibility status. If this is not undefined, the node
+   * editor will display a visiblity toggle button and send update actions
+   * to the action handler.
+   **/
+  visible?: boolean;
 };
 
 /**
