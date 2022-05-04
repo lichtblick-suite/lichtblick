@@ -538,13 +538,19 @@ export class IterablePlayer implements Player {
     this._lastMessage = undefined;
     this._seekTarget = undefined;
 
-    this._messages = [];
-    this._currentTime = targetTime;
-    this._lastSeekEmitTime = Date.now();
-    await this._emitState();
-    if (this._nextState) {
-      return;
-    }
+    // If the seekAckTimeout emits a state, _stateSeekBackfill must wait for it to complete.
+    // It would be invalid to allow the _stateSeekBackfill to finish prior to completion
+    let seekAckWait: Promise<void> | undefined;
+
+    // If the backfill does not complete within 100 milliseconds, we emit a seek event with no messages.
+    // This provides feedback to the user that we've acknowledged their seek request but haven't loaded the data.
+    const seekAckTimeout = setTimeout(() => {
+      this._messages = [];
+      this._currentTime = targetTime;
+      this._lastSeekEmitTime = Date.now();
+
+      seekAckWait = this._emitState();
+    }, 100);
 
     const topics = Array.from(this._allTopics);
 
@@ -557,7 +563,6 @@ export class IterablePlayer implements Player {
       });
       this._messages = messages;
     } catch (err) {
-      // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition, @typescript-eslint/strict-boolean-expressions
       if (this._nextState && err instanceof DOMException && err.name === "AbortError") {
         log.debug("Aborted backfill");
       } else {
@@ -567,7 +572,14 @@ export class IterablePlayer implements Player {
       this._abort = undefined;
     }
 
-    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition, @typescript-eslint/strict-boolean-expressions
+    // We've successfully loaded the messages and will emit those, no longer need the ackTimeout
+    clearTimeout(seekAckTimeout);
+
+    // timeout may have triggered, so we need to wait for any emit that happened
+    if (seekAckWait) {
+      await seekAckWait;
+    }
+
     if (this._nextState) {
       return;
     }
