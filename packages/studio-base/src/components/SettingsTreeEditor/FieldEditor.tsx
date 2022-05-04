@@ -3,8 +3,6 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 import ClearIcon from "@mui/icons-material/Clear";
-import HelpOutlineIcon from "@mui/icons-material/HelpOutline";
-import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 import {
   Autocomplete,
   ToggleButton,
@@ -15,17 +13,13 @@ import {
   MenuItem,
   Select,
   TextField,
-  IconButton,
   ListProps,
   useTheme,
 } from "@mui/material";
 import { DeepReadonly } from "ts-essentials";
 
 import MessagePathInput from "@foxglove/studio-base/components/MessagePathSyntax/MessagePathInput";
-import messagePathHelp from "@foxglove/studio-base/components/MessagePathSyntax/index.help.md";
 import Stack from "@foxglove/studio-base/components/Stack";
-import { useHelpInfo } from "@foxglove/studio-base/context/HelpInfoContext";
-import { useWorkspace } from "@foxglove/studio-base/context/WorkspaceContext";
 
 import { ColorPickerInput, ColorScalePicker, NumberInput, Vec3Input } from "./inputs";
 import { SettingsTreeAction, SettingsTreeField } from "./types";
@@ -85,15 +79,6 @@ const PsuedoInputWrapper = muiStyled(Stack)(({ theme }) => {
   };
 });
 
-const StyledIconButton = muiStyled(IconButton)(({ theme, edge }) => ({
-  marginTop: theme.spacing(-0.5),
-  marginBottom: theme.spacing(-0.5),
-
-  ...(edge === "end" && {
-    marginRight: theme.spacing(-0.75),
-  }),
-}));
-
 function FieldInput({
   actionHandler,
   field,
@@ -103,9 +88,6 @@ function FieldInput({
   field: DeepReadonly<SettingsTreeField>;
   path: readonly string[];
 }): JSX.Element {
-  const { openHelp } = useWorkspace();
-  const { setHelpInfo } = useHelpInfo();
-
   switch (field.input) {
     case "autocomplete":
       return (
@@ -256,18 +238,6 @@ function FieldInput({
             }
             validTypes={field.validTypes}
           />
-          <StyledIconButton
-            size="small"
-            color="secondary"
-            title="Message path syntax documentation"
-            onClick={() => {
-              setHelpInfo({ title: "MessagePathSyntax", content: messagePathHelp });
-              openHelp();
-            }}
-            edge="end"
-          >
-            <InfoOutlinedIcon fontSize="inherit" />
-          </StyledIconButton>
         </PsuedoInputWrapper>
       );
     }
@@ -314,9 +284,6 @@ function FieldInput({
 function FieldLabel({ field }: { field: DeepReadonly<SettingsTreeField> }): JSX.Element {
   const theme = useTheme();
 
-  const { openHelp } = useWorkspace();
-  const { setHelpInfo } = useHelpInfo();
-
   if (field.input === "vec3") {
     const labels = field.labels ?? ["X", "Y", "Z"];
     return (
@@ -360,7 +327,7 @@ function FieldLabel({ field }: { field: DeepReadonly<SettingsTreeField> }): JSX.
     return (
       <>
         <Typography
-          title={field.label}
+          title={field.help ?? field.label}
           variant="subtitle2"
           color="text.secondary"
           noWrap
@@ -368,19 +335,6 @@ function FieldLabel({ field }: { field: DeepReadonly<SettingsTreeField> }): JSX.
         >
           {field.label}
         </Typography>
-        {field.help && (
-          <IconButton
-            size="small"
-            color="secondary"
-            title={field.help}
-            onClick={() => {
-              setHelpInfo({ title: field.label, content: field.help });
-              openHelp();
-            }}
-          >
-            <HelpOutlineIcon fontSize="inherit" />
-          </IconButton>
-        )}
       </>
     );
   }
