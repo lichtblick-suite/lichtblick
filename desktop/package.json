@@ -2,7 +2,7 @@
   "name": "desktop",
   "private": true,
   "dependencies": {
-    "@foxglove/electron-socket": "1.4.1",
+    "@foxglove/electron-socket": "2.0.0",
     "@foxglove/studio-base": "workspace:*",
     "jszip": "3.7.1"
   },

@@ -2252,15 +2252,15 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@foxglove/electron-socket@npm:1.4.1":
-  version: 1.4.1
-  resolution: "@foxglove/electron-socket@npm:1.4.1"
+"@foxglove/electron-socket@npm:2.0.0":
+  version: 2.0.0
+  resolution: "@foxglove/electron-socket@npm:2.0.0"
   dependencies:
     dns-packet: ^5.2.4
     eventemitter3: ^4.0.7
   peerDependencies:
     electron: ">=12"
-  checksum: 509cd88882780086dc12a073008ccdca792bbf46fadae22a172f626e66d4b58dc28e38d02f2f353ad3f46609e2275c8cdb8f3dd61763a9969dd3832f56e36088
+  checksum: aaf47e91847830d5d75cf4e06bf5b1e208a5d122638403ee3a3ad1da3c5347775b200021b63d94f8b34d0b16fb1888422f67cd8f21a2f894699303ded3c6cc2b
   languageName: node
   linkType: hard
 
@@ -2517,7 +2517,7 @@ __metadata:
     "@foxglove/avl": 1.0.0
     "@foxglove/chartjs-plugin-zoom": 2.0.4
     "@foxglove/den": "workspace:*"
-    "@foxglove/electron-socket": 1.4.1
+    "@foxglove/electron-socket": 2.0.0
     "@foxglove/hooks": "workspace:*"
     "@foxglove/mcap": "github:foxglove/mcap#workspace=@foxglove/mcap&commit=e79355a9e99efd5094b15f21bb361a85d9e748bc"
     "@foxglove/mcap-support": "workspace:*"
@@ -10557,7 +10557,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "desktop@workspace:desktop"
   dependencies:
-    "@foxglove/electron-socket": 1.4.1
+    "@foxglove/electron-socket": 2.0.0
     "@foxglove/studio-base": "workspace:*"
     "@types/plist": ^3.0.2
     jszip: 3.7.1
