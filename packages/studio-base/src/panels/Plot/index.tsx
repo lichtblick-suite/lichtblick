@@ -20,6 +20,7 @@ import memoizeWeak from "memoize-weak";
 import { useEffect, useCallback, useMemo, ComponentProps, useContext } from "react";
 
 import { filterMap } from "@foxglove/den/collection";
+import { useShallowMemo } from "@foxglove/hooks";
 import {
   Time,
   add as addTimes,
@@ -297,6 +298,16 @@ function Plot(props: Props) {
     [allPaths],
   );
 
+  // The addMessages function below is passed to useMessageReducer to handle new messages during
+  // playback. If we have messages for a specific path in _blocks_ then we ignore the messages in
+  // the reducer.
+  //
+  // To keep the addMessages function "stable" when loading new blocks we grab only the paths from
+  // the blocks and make addMessages depend on the paths. To keep paths referentially stable when
+  // the paths values haven't changed we use a shallow memo.
+  const blockPaths = useMemo(() => Object.keys(plotDataForBlocks), [plotDataForBlocks]);
+  const blockPathsMemo = useShallowMemo(blockPaths);
+
   const addMessages = useCallback(
     (accumulated: PlotDataByPath, msgEvents: readonly MessageEvent<unknown>[]) => {
       const lastEventTime = msgEvents[msgEvents.length - 1]?.receiveTime;
@@ -315,7 +326,7 @@ function Plot(props: Props) {
         for (const path of paths) {
           // Skip any paths we already service in plotDataForBlocks.
           // We don't need to accumulate these because the block data takes precedence.
-          if (path in plotDataForBlocks) {
+          if (blockPathsMemo.includes(path)) {
             continue;
           }
 
@@ -364,7 +375,7 @@ function Plot(props: Props) {
       return { ...accumulated };
     },
     [
-      plotDataForBlocks,
+      blockPathsMemo,
       cachedGetMessagePathDataItems,
       followingView,
       showSingleCurrentMessage,
