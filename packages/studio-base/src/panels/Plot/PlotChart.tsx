@@ -88,7 +88,7 @@ export default function PlotChart(props: PlotChartProps): JSX.Element {
 
   const annotations = useMemo(() => getAnnotations(paths), [paths]);
 
-  const yAxes = useMemo((): ScaleOptions => {
+  const yAxes = useMemo((): ScaleOptions<"linear"> => {
     const min = isNaN(minYValue) ? undefined : minYValue;
     const max = isNaN(maxYValue) ? undefined : maxYValue;
     return {

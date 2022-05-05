@@ -322,7 +322,7 @@ const StateTransitions = React.memo(function StateTransitions(props: Props) {
     };
   }, [itemsByPath, decodedBlocks, paths, startTime]);
 
-  const yScale = useMemo<ScaleOptions>(() => {
+  const yScale = useMemo<ScaleOptions<"linear">>(() => {
     return {
       ticks: {
         // Hide all y-axis ticks since each bar on the y-axis is just a separate path.
@@ -334,7 +334,7 @@ const StateTransitions = React.memo(function StateTransitions(props: Props) {
     };
   }, [minY]);
 
-  const xScale = useMemo<ScaleOptions>(() => {
+  const xScale = useMemo<ScaleOptions<"linear">>(() => {
     return {
       type: "linear",
     };

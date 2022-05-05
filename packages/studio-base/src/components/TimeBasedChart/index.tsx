@@ -111,8 +111,8 @@ export type Props = {
   zoom: boolean;
   data: ChartComponentProps["data"];
   tooltips?: TimeBasedChartTooltipData[];
-  xAxes?: ScaleOptions;
-  yAxes: ScaleOptions;
+  xAxes?: ScaleOptions<"linear">;
+  yAxes: ScaleOptions<"linear">;
   annotations?: AnnotationOptions[];
   drawLegend?: boolean;
   isSynced?: boolean;
@@ -518,7 +518,7 @@ export default function TimeBasedChart(props: Props): JSX.Element {
       maxRotation: 0,
     };
 
-    const scale = {
+    const scale: ScaleOptions<"linear"> = {
       grid: { color: theme.palette.neutralLighter },
       ...xAxes,
       min: minX,
