@@ -205,9 +205,7 @@
     "uuid": "8.3.2",
     "wasm-lz4": "2.0.0",
     "webpack": "5.68.0",
-    "xacro-parser": "0.3.8"
-  },
-  "dependencies": {
+    "xacro-parser": "0.3.8",
     "zustand": "4.0.0-rc.1"
   }
 }
