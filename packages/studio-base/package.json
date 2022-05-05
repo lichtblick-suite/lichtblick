@@ -206,5 +206,8 @@
     "wasm-lz4": "2.0.0",
     "webpack": "5.68.0",
     "xacro-parser": "0.3.8"
+  },
+  "dependencies": {
+    "zustand": "4.0.0-rc.1"
   }
 }

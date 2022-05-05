@@ -14,7 +14,7 @@
 import { Slider, Typography, useTheme } from "@mui/material";
 import produce from "immer";
 import { set } from "lodash";
-import { useCallback, useContext, useEffect } from "react";
+import { useCallback, useEffect } from "react";
 
 import Panel from "@foxglove/studio-base/components/Panel";
 import { usePanelContext } from "@foxglove/studio-base/components/PanelContext";
@@ -24,8 +24,8 @@ import {
   SettingsTreeNode,
 } from "@foxglove/studio-base/components/SettingsTreeEditor/types";
 import Stack from "@foxglove/studio-base/components/Stack";
-import { PanelSettingsEditorContext } from "@foxglove/studio-base/context/PanelSettingsEditorContext";
 import useGlobalVariables from "@foxglove/studio-base/hooks/useGlobalVariables";
+import { usePanelSettingsTreeUpdate } from "@foxglove/studio-base/providers/PanelSettingsEditorContextProvider";
 
 import helpContent from "./index.help.md";
 
@@ -66,7 +66,7 @@ function GlobalVariableSliderPanel(props: Props): React.ReactElement {
   const globalVariableValue = globalVariables[globalVariableName];
 
   const { id: panelId, saveConfig } = usePanelContext();
-  const { updatePanelSettingsTree } = useContext(PanelSettingsEditorContext);
+  const updatePanelSettingsTree = usePanelSettingsTreeUpdate();
 
   const theme = useTheme();
 

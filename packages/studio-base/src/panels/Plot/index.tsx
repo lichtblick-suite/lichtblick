@@ -17,7 +17,7 @@ import { Stack } from "@mui/material";
 import produce from "immer";
 import { compact, set, uniq } from "lodash";
 import memoizeWeak from "memoize-weak";
-import { useEffect, useCallback, useMemo, ComponentProps, useContext } from "react";
+import { useEffect, useCallback, useMemo, ComponentProps } from "react";
 
 import { filterMap } from "@foxglove/den/collection";
 import { useShallowMemo } from "@foxglove/hooks";
@@ -53,7 +53,7 @@ import {
   ChartDefaultView,
   TimeBasedChartTooltipData,
 } from "@foxglove/studio-base/components/TimeBasedChart";
-import { PanelSettingsEditorContext } from "@foxglove/studio-base/context/PanelSettingsEditorContext";
+import { usePanelSettingsTreeUpdate } from "@foxglove/studio-base/providers/PanelSettingsEditorContextProvider";
 import { OnClickArg as OnChartClickArgs } from "@foxglove/studio-base/src/components/Chart";
 import { OpenSiblingPanel, PanelConfig } from "@foxglove/studio-base/types/panels";
 import { getTimestampForMessage } from "@foxglove/studio-base/util/time";
@@ -445,7 +445,7 @@ function Plot(props: Props) {
   );
 
   const { id: panelId } = usePanelContext();
-  const { updatePanelSettingsTree } = useContext(PanelSettingsEditorContext);
+  const updatePanelSettingsTree = usePanelSettingsTreeUpdate();
 
   const actionHandler = useCallback(
     (action: SettingsTreeAction) => {

@@ -15,7 +15,7 @@ import { useTheme, Link, Spinner, SpinnerSize } from "@fluentui/react";
 import ArrowLeftIcon from "@mdi/svg/svg/arrow-left.svg";
 import PlusIcon from "@mdi/svg/svg/plus.svg";
 import { Box, Input, Stack } from "@mui/material";
-import { Suspense, useCallback, useContext, useEffect, useState } from "react";
+import { Suspense, useCallback, useEffect, useState } from "react";
 import styled from "styled-components";
 import { v4 as uuidv4 } from "uuid";
 
@@ -35,12 +35,12 @@ import {
   useCurrentLayoutSelector,
 } from "@foxglove/studio-base/context/CurrentLayoutContext";
 import { useHelpInfo } from "@foxglove/studio-base/context/HelpInfoContext";
-import { PanelSettingsEditorContext } from "@foxglove/studio-base/context/PanelSettingsEditorContext";
 import { useUserNodeState } from "@foxglove/studio-base/context/UserNodeStateContext";
 import { useWorkspace } from "@foxglove/studio-base/context/WorkspaceContext";
 import BottomBar from "@foxglove/studio-base/panels/NodePlayground/BottomBar";
 import Sidebar from "@foxglove/studio-base/panels/NodePlayground/Sidebar";
 import Playground from "@foxglove/studio-base/panels/NodePlayground/playground-icon.svg";
+import { usePanelSettingsTreeUpdate } from "@foxglove/studio-base/providers/PanelSettingsEditorContextProvider";
 import { UserNodes } from "@foxglove/studio-base/types/panels";
 import { colors } from "@foxglove/studio-base/util/sharedStyleConstants";
 
@@ -168,7 +168,7 @@ function NodePlayground(props: Props) {
   const { config, saveConfig } = props;
   const { autoFormatOnSave = false, selectedNodeId, editorForStorybook } = config;
   const { id: panelId } = usePanelContext();
-  const { updatePanelSettingsTree } = useContext(PanelSettingsEditorContext);
+  const updatePanelSettingsTree = usePanelSettingsTreeUpdate();
 
   const theme = useTheme();
   const [explorer, updateExplorer] = React.useState<Explorer>(undefined);

@@ -2690,6 +2690,7 @@ __metadata:
     wasm-lz4: 2.0.0
     webpack: 5.68.0
     xacro-parser: 0.3.8
+    zustand: 4.0.0-rc.1
   languageName: unknown
   linkType: soft
 
@@ -24387,6 +24388,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"use-sync-external-store@npm:1.1.0":
+  version: 1.1.0
+  resolution: "use-sync-external-store@npm:1.1.0"
+  peerDependencies:
+    react: ^16.8.0 || ^17.0.0 || ^18.0.0
+  checksum: 8993a0b642f91d7fcdbb02b7b3ac984bd3af4769686f38291fe7fcfe73dfb73d6c64d20dfb7e5e7fbf5a6da8f5392d6f8e5b00c243a04975595946e82c02b883
+  languageName: node
+  linkType: hard
+
 "use@npm:^3.1.0":
   version: 3.1.1
   resolution: "use@npm:3.1.1"
@@ -25528,6 +25538,23 @@ __metadata:
   version: 0.1.4
   resolution: "zstd-codec@patch:zstd-codec@npm%3A0.1.4#../../patches/zstd-codec.patch::version=0.1.4&hash=a862de&locator=%40foxglove%2Fmcap-support%40workspace%3Apackages%2Fmcap-support"
   checksum: 08a5e329950cb926581ea3a0a46131676e05fcbcdc59faebe2d7c66036562694c9a266140183848facb08fa06e5f6db7e55e23dac27f219e7dbb69f124b62554
+  languageName: node
+  linkType: hard
+
+"zustand@npm:4.0.0-rc.1":
+  version: 4.0.0-rc.1
+  resolution: "zustand@npm:4.0.0-rc.1"
+  dependencies:
+    use-sync-external-store: 1.1.0
+  peerDependencies:
+    immer: ">=9.0"
+    react: ">=16.8"
+  peerDependenciesMeta:
+    immer:
+      optional: true
+    react:
+      optional: true
+  checksum: c88ae96286229b3c463cf7989c860fcde8ec9cf885eb50a0e0eaf9642388d407a854e5e07b9f80676454732bf15e1c7645201cff21fd9feacd5df8bbd62fcd46
   languageName: node
   linkType: hard
 

@@ -6,7 +6,6 @@ import { useTheme } from "@fluentui/react";
 import {
   CSSProperties,
   useCallback,
-  useContext,
   useEffect,
   useLayoutEffect,
   useMemo,
@@ -39,12 +38,12 @@ import {
   useHoverValue,
   useSetHoverValue,
 } from "@foxglove/studio-base/context/HoverValueContext";
-import { PanelSettingsEditorContext } from "@foxglove/studio-base/context/PanelSettingsEditorContext";
 import {
   AdvertiseOptions,
   PlayerCapabilities,
   PlayerState,
 } from "@foxglove/studio-base/players/types";
+import { usePanelSettingsTreeUpdate } from "@foxglove/studio-base/providers/PanelSettingsEditorContextProvider";
 import { PanelConfig, SaveConfig } from "@foxglove/studio-base/types/panels";
 import { assertNever } from "@foxglove/studio-base/util/assertNever";
 
@@ -347,7 +346,7 @@ function PanelExtensionAdapter(props: PanelExtensionAdapterProps): JSX.Element {
 
   useMessagePipeline(messagePipelineSelector);
 
-  const { updatePanelSettingsTree } = useContext(PanelSettingsEditorContext);
+  const updatePanelSettingsTree = usePanelSettingsTreeUpdate();
   const { id: panelLayoutId } = usePanelContext();
 
   const updateSettings = useCallback(

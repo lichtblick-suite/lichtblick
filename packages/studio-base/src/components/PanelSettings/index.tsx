@@ -3,7 +3,7 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 import { Button, Link, SvgIcon, Typography } from "@mui/material";
-import { useCallback, useContext, useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useUnmount } from "react-use";
 
 import { useConfigById } from "@foxglove/studio-base/PanelAPI";
@@ -18,11 +18,8 @@ import {
   useSelectedPanels,
 } from "@foxglove/studio-base/context/CurrentLayoutContext";
 import { usePanelCatalog } from "@foxglove/studio-base/context/PanelCatalogContext";
-import {
-  ImmutableSettingsTree,
-  PanelSettingsEditorContext,
-} from "@foxglove/studio-base/context/PanelSettingsEditorContext";
 import { useWorkspace } from "@foxglove/studio-base/context/WorkspaceContext";
+import { usePanelSettingsEditorStore } from "@foxglove/studio-base/providers/PanelSettingsEditorContextProvider";
 import { PanelConfig } from "@foxglove/studio-base/types/panels";
 import { TAB_PANEL_TYPE } from "@foxglove/studio-base/util/globalConstants";
 import { getPanelTypeFromId } from "@foxglove/studio-base/util/layout";
@@ -102,23 +99,9 @@ export default function PanelSettings({
 
   const [config] = useConfigById<Record<string, unknown>>(selectedPanelId);
 
-  const [settingsTree, setSettingsTree] = useState<undefined | ImmutableSettingsTree>();
-
-  const updateSubscriber = useCallback((settings: ImmutableSettingsTree) => {
-    setSettingsTree(settings);
-  }, []);
-
-  const { addUpdateSubscriber, removeUpdateSubscriber } = useContext(PanelSettingsEditorContext);
-
-  useEffect(() => {
-    if (selectedPanelId) {
-      setSettingsTree(undefined);
-      addUpdateSubscriber(selectedPanelId, updateSubscriber);
-      return () => removeUpdateSubscriber(selectedPanelId, updateSubscriber);
-    } else {
-      return () => undefined;
-    }
-  }, [addUpdateSubscriber, removeUpdateSubscriber, selectedPanelId, updateSubscriber]);
+  const settingsTree = usePanelSettingsEditorStore((state) =>
+    selectedPanelId ? state.settingsTrees[selectedPanelId] : undefined,
+  );
 
   if (selectedLayoutId == undefined) {
     return (
@@ -129,6 +112,7 @@ export default function PanelSettings({
       </SidebarContent>
     );
   }
+
   if (selectedPanelId == undefined) {
     return (
       <SidebarContent title="Panel settings">
@@ -136,6 +120,7 @@ export default function PanelSettings({
       </SidebarContent>
     );
   }
+
   if (!panelInfo) {
     throw new Error(
       `Attempt to render settings but no panel component could be found for panel id ${selectedPanelId}`,

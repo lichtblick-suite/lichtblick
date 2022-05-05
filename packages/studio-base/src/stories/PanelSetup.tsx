@@ -49,6 +49,7 @@ import {
 } from "@foxglove/studio-base/players/types";
 import MockCurrentLayoutProvider from "@foxglove/studio-base/providers/CurrentLayoutProvider/MockCurrentLayoutProvider";
 import HelpInfoProvider from "@foxglove/studio-base/providers/HelpInfoProvider";
+import { PanelSettingsEditorContextProvider } from "@foxglove/studio-base/providers/PanelSettingsEditorContextProvider";
 import { RosDatatypes } from "@foxglove/studio-base/types/RosDatatypes";
 import { SavedProps, UserNodes } from "@foxglove/studio-base/types/panels";
 
@@ -296,9 +297,11 @@ export default function PanelSetup(props: Props): JSX.Element {
     <UserNodeStateProvider>
       <HoverValueProvider>
         <MockCurrentLayoutProvider onAction={props.onLayoutAction}>
-          <HelpInfoProvider>
-            <UnconnectedPanelSetup {...props} />
-          </HelpInfoProvider>
+          <PanelSettingsEditorContextProvider>
+            <HelpInfoProvider>
+              <UnconnectedPanelSetup {...props} />
+            </HelpInfoProvider>
+          </PanelSettingsEditorContextProvider>
         </MockCurrentLayoutProvider>
       </HoverValueProvider>
     </UserNodeStateProvider>
