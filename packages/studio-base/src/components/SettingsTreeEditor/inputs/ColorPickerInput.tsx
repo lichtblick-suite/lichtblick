@@ -9,6 +9,8 @@ import tinycolor from "tinycolor2";
 
 import { fonts } from "@foxglove/studio-base/util/sharedStyleConstants";
 
+import { ColorSwatch } from "./ColorSwatch";
+
 const StyledTextField = muiStyled(TextField)({
   ".MuiInputBase-formControl.MuiInputBase-root": {
     padding: 0,
@@ -18,17 +20,6 @@ const StyledTextField = muiStyled(TextField)({
     alignItems: "center",
   },
 });
-
-const ColorSwatch = muiStyled("div", {
-  shouldForwardProp: (prop) => prop !== "color",
-})<{ color: string }>(({ theme, color }) => ({
-  backgroundColor: color,
-  height: theme.spacing(2.5),
-  width: theme.spacing(3),
-  margin: theme.spacing(0.625),
-  borderRadius: 1,
-  border: `1px solid ${theme.palette.getContrastText(color)}`,
-}));
 
 const Root = muiStyled("div")({
   position: "relative",

@@ -124,6 +124,7 @@ const ColorScale = muiStyled("div")<{ colorScale: string[] }>(({ theme, colorSca
   flex: "auto",
 }));
 
+// ts-prune-ignore-next
 export function ColorScalePicker(props: ColorScalePickerProps): JSX.Element {
   const [selectedOption, setSelectedOption] = useState<number>(0);
   const [anchorEl, setAnchorEl] = React.useState<undefined | HTMLElement>(undefined);

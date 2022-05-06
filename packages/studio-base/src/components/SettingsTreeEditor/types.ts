@@ -7,8 +7,8 @@ export type SettingsTreeFieldValue =
   | { input: "boolean"; value?: boolean }
   | { input: "rgb"; value?: string }
   | { input: "rgba"; value?: string }
-  | { input: "gradient"; value?: string }
-  | { input: "messagepath"; value?: string; validTypes?: ReadonlyArray<string> }
+  | { input: "gradient"; value?: [string, string] }
+  | { input: "messagepath"; value?: string; validTypes?: string[] }
   | { input: "number"; value?: number; step?: number; max?: number; min?: number }
   | {
       input: "select";

@@ -20,8 +20,8 @@ export default {
 
 const BasicSettings: SettingsTreeNode = {
   fields: {
-    firstRootField: { input: "string", label: "First Root Field" },
-    secondRootField: { input: "string", label: "Second Root Field" },
+    firstRootField: { input: "string", label: "Root Field" },
+    gradient: { input: "gradient", label: "Gradient" },
     emptyNumber: { input: "number", label: "Empty Number" },
   },
   children: {
