@@ -4,41 +4,58 @@
 
 import * as THREE from "three";
 
-import { SRGBToLinear } from "../../color";
+import { SRGBToLinear, stringToRgba } from "../../color";
 import { clamp, lerp } from "../../math";
 import { ColorRGBA } from "../../ros";
-import { PointCloudColorMode, PointCloudSettings } from "./settings";
+import { LayerSettingsPointCloud2 } from "../../settings";
 
 export type ColorConverter = (output: ColorRGBA, colorValue: number) => void;
 
+const tempColor1 = { r: 0, g: 0, b: 0, a: 0 };
+const tempColor2 = { r: 0, g: 0, b: 0, a: 0 };
+
 export function getColorConverter(
-  settings: PointCloudSettings,
+  settings: LayerSettingsPointCloud2,
   minValue: number,
   maxValue: number,
 ): ColorConverter {
   const valueDelta = maxValue - minValue;
   switch (settings.colorMode) {
-    case PointCloudColorMode.Flat:
+    case "flat": {
+      const flatColor = stringToRgba(tempColor1, settings.flatColor);
       return (output: ColorRGBA, _colorValue: number) => {
-        output.r = SRGBToLinear(settings.flatColor.r);
-        output.g = SRGBToLinear(settings.flatColor.g);
-        output.b = SRGBToLinear(settings.flatColor.b);
-        output.a = settings.flatColor.a;
+        output.r = SRGBToLinear(flatColor.r);
+        output.g = SRGBToLinear(flatColor.g);
+        output.b = SRGBToLinear(flatColor.b);
+        output.a = flatColor.a;
       };
-    case PointCloudColorMode.Gradient:
+    }
+    case "gradient": {
+      const minColor = stringToRgba(tempColor1, settings.gradient[0]);
+      const maxColor = stringToRgba(tempColor2, settings.gradient[1]);
       return (output: ColorRGBA, colorValue: number) => {
         const t = (colorValue - minValue) / valueDelta;
-        output.r = SRGBToLinear(lerp(settings.minColor.r, settings.maxColor.r, t));
-        output.g = SRGBToLinear(lerp(settings.minColor.g, settings.maxColor.g, t));
-        output.b = SRGBToLinear(lerp(settings.minColor.b, settings.maxColor.b, t));
-        output.a = lerp(settings.minColor.a, settings.maxColor.a, t);
+        output.r = SRGBToLinear(lerp(minColor.r, maxColor.r, t));
+        output.g = SRGBToLinear(lerp(minColor.g, maxColor.g, t));
+        output.b = SRGBToLinear(lerp(minColor.b, maxColor.b, t));
+        output.a = lerp(minColor.a, maxColor.a, t);
       };
-    case PointCloudColorMode.Rainbow:
-      return (output: ColorRGBA, colorValue: number) => {
-        const t = (colorValue - minValue) / valueDelta;
-        rainbow(output, t);
-      };
-    case PointCloudColorMode.Rgb:
+    }
+    case "colormap":
+      switch (settings.colorMap) {
+        case "turbo":
+          return (output: ColorRGBA, colorValue: number) => {
+            const t = (colorValue - minValue) / valueDelta;
+            turboCached(output, t);
+          };
+        case "rainbow":
+          return (output: ColorRGBA, colorValue: number) => {
+            const t = (colorValue - minValue) / valueDelta;
+            rainbow(output, t);
+          };
+      }
+      throw new Error(`Unrecognized color map: ${settings.colorMap}`);
+    case "rgb":
       switch (settings.rgbByteOrder) {
         default:
         case "rgba":
@@ -48,7 +65,7 @@ export function getColorConverter(
         case "abgr":
           return getColor0bgr;
       }
-    case PointCloudColorMode.Rgba:
+    case "rgba":
       switch (settings.rgbByteOrder) {
         default:
         case "rgba":
@@ -58,11 +75,6 @@ export function getColorConverter(
         case "abgr":
           return getColorAbgr;
       }
-    case PointCloudColorMode.Turbo:
-      return (output: ColorRGBA, colorValue: number) => {
-        const t = (colorValue - minValue) / valueDelta;
-        turboCached(output, t);
-      };
   }
 }
 

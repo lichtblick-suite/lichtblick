@@ -7,18 +7,19 @@ import * as THREE from "three";
 import { DynamicBufferGeometry } from "../DynamicBufferGeometry";
 import { MaterialCache, PointsVertexColor } from "../MaterialCache";
 import { Renderer } from "../Renderer";
+import { rgbaToCssString, stringToRgba } from "../color";
 import { Pose, PointCloud2, PointFieldType, rosTimeToNanoSec } from "../ros";
+import { LayerSettingsPointCloud2 } from "../settings";
 import { makePose } from "../transforms/geometry";
 import { updatePose } from "../updatePose";
 import { getColorConverter } from "./pointClouds/colors";
 import { FieldReader, getReader } from "./pointClouds/fieldReaders";
-import { PointCloudColorMode, PointCloudSettings } from "./pointClouds/settings";
 import { missingTransformMessage, MISSING_TRANSFORM } from "./transforms";
 
 type PointCloudRenderable = THREE.Object3D & {
   userData: {
     topic: string;
-    settings: PointCloudSettings;
+    settings: LayerSettingsPointCloud2;
     pointCloud: PointCloud2;
     pose: Pose;
     srcTime: bigint;
@@ -29,11 +30,26 @@ type PointCloudRenderable = THREE.Object3D & {
 
 const DEFAULT_POINT_SIZE = 1.5;
 const DEFAULT_POINT_SHAPE = "circle";
-const DEFAULT_COLOR_MODE = PointCloudColorMode.Turbo;
+const DEFAULT_COLOR_MAP = "turbo";
 const DEFAULT_FLAT_COLOR = { r: 1, g: 1, b: 1, a: 1 };
 const DEFAULT_MIN_COLOR = { r: 0, g: 0, b: 1, a: 1 };
 const DEFAULT_MAX_COLOR = { r: 1, g: 0, b: 0, a: 1 };
 const DEFAULT_RGB_BYTE_ORDER = "rgba";
+
+const DEFAULT_SETTINGS: LayerSettingsPointCloud2 = {
+  visible: true,
+  pointSize: DEFAULT_POINT_SIZE,
+  pointShape: DEFAULT_POINT_SHAPE,
+  decayTime: 0,
+  colorMode: "flat",
+  flatColor: rgbaToCssString(DEFAULT_FLAT_COLOR),
+  colorField: undefined,
+  gradient: [rgbaToCssString(DEFAULT_MIN_COLOR), rgbaToCssString(DEFAULT_MAX_COLOR)],
+  colorMap: DEFAULT_COLOR_MAP,
+  rgbByteOrder: DEFAULT_RGB_BYTE_ORDER,
+  minValue: undefined,
+  maxValue: undefined,
+};
 
 const COLOR_FIELDS = new Set<string>(["rgb", "rgba", "bgr", "bgra", "abgr", "color"]);
 const INTENSITY_FIELDS = new Set<string>(["intensity", "i"]);
@@ -70,18 +86,14 @@ export class PointClouds extends THREE.Object3D {
       renderable.name = topic;
       renderable.userData.topic = topic;
 
-      // TODO: How do we fetch the stored settings for this topic?
-      renderable.userData.settings = {
-        pointSize: DEFAULT_POINT_SIZE,
-        pointShape: DEFAULT_POINT_SHAPE,
-        decayTime: 0,
-        colorMode: PointCloudColorMode.Flat,
-        rgbByteOrder: DEFAULT_RGB_BYTE_ORDER,
-        flatColor: DEFAULT_FLAT_COLOR,
-        minColor: DEFAULT_MIN_COLOR,
-        maxColor: DEFAULT_MAX_COLOR,
-      };
-      autoSelectColorField(renderable.userData.settings, pointCloud);
+      // Set the initial settings from default values merged with any user settings
+      this.renderer.config?.topics[topic] as Partial<LayerSettingsPointCloud2> | undefined;
+      const userSettings = this.renderer.config?.topics[topic];
+      const settings = { ...DEFAULT_SETTINGS, ...userSettings };
+      if (settings.colorField == undefined) {
+        autoSelectColorField(settings, pointCloud);
+      }
+      renderable.userData.settings = settings;
 
       renderable.userData.pointCloud = pointCloud;
       renderable.userData.pose = makePose();
@@ -107,6 +119,19 @@ export class PointClouds extends THREE.Object3D {
     this._updatePointCloudRenderable(renderable, pointCloud);
   }
 
+  setTopicSettings(topic: string, settings: Partial<LayerSettingsPointCloud2>): void {
+    const renderable = this.pointCloudsByTopic.get(topic);
+    if (renderable) {
+      releasePointsMaterial(renderable.userData.settings, this.renderer.materialCache);
+      renderable.userData.settings = { ...renderable.userData.settings, ...settings };
+      renderable.userData.points.material = pointsMaterial(
+        renderable.userData.settings,
+        this.renderer.materialCache,
+      );
+      this._updatePointCloudRenderable(renderable, renderable.userData.pointCloud);
+    }
+  }
+
   startFrame(currentTime: bigint): void {
     const renderFrameId = this.renderer.renderFrameId;
     const fixedFrameId = this.renderer.fixedFrameId;
@@ -117,6 +142,11 @@ export class PointClouds extends THREE.Object3D {
     this.visible = true;
 
     for (const renderable of this.pointCloudsByTopic.values()) {
+      renderable.visible = renderable.userData.settings.visible;
+      if (!renderable.visible) {
+        this.renderer.layerErrors.clearTopic(renderable.userData.topic);
+        continue;
+      }
       const srcTime = renderable.userData.srcTime;
       const frameId = renderable.userData.pointCloud.header.frame_id;
       const updated = updatePose(
@@ -268,16 +298,11 @@ export class PointClouds extends THREE.Object3D {
 
     positionAttribute.needsUpdate = true;
     colorAttribute.needsUpdate = true;
-
-    // const material = renderable.userData.points.material;
-    // renderable.remove(renderable.userData.points);
-    // renderable.userData.points = new THREE.Points(geometry, material);
-    // renderable.add(renderable.userData.points);
   }
 }
 
 function pointsMaterial(
-  settings: PointCloudSettings,
+  settings: LayerSettingsPointCloud2,
   materialCache: MaterialCache,
 ): THREE.PointsMaterial {
   const transparent = pointCloudHasTransparency(settings);
@@ -289,13 +314,16 @@ function pointsMaterial(
   );
 }
 
-function releasePointsMaterial(settings: PointCloudSettings, materialCache: MaterialCache): void {
+function releasePointsMaterial(
+  settings: LayerSettingsPointCloud2,
+  materialCache: MaterialCache,
+): void {
   const transparent = pointCloudHasTransparency(settings);
   const scale = { x: settings.pointSize, y: settings.pointSize };
   materialCache.release(PointsVertexColor.id(scale, transparent));
 }
 
-function createPickingMaterial(settings: PointCloudSettings): THREE.ShaderMaterial {
+function createPickingMaterial(settings: LayerSettingsPointCloud2): THREE.ShaderMaterial {
   const MIN_PICKING_POINT_SIZE = 8;
 
   const pointSize = Math.max(settings.pointSize, MIN_PICKING_POINT_SIZE);
@@ -318,45 +346,48 @@ function createPickingMaterial(settings: PointCloudSettings): THREE.ShaderMateri
   });
 }
 
-function pointCloudHasTransparency(settings: PointCloudSettings): boolean {
+function pointCloudHasTransparency(settings: LayerSettingsPointCloud2): boolean {
   switch (settings.colorMode) {
-    case PointCloudColorMode.Flat:
-      return settings.flatColor.a < 1.0;
-    case PointCloudColorMode.Gradient:
-      return settings.minColor.a < 1.0 || settings.maxColor.a < 1.0;
-    case PointCloudColorMode.Rainbow:
-    case PointCloudColorMode.Turbo:
-    case PointCloudColorMode.Rgb:
+    case "flat":
+      return stringToRgba(tempColor, settings.flatColor).a < 1.0;
+    case "gradient": {
+      if (stringToRgba(tempColor, settings.gradient[0]).a < 1.0) {
+        return true;
+      }
+      return stringToRgba(tempColor, settings.gradient[1]).a < 1.0;
+    }
+    case "colormap":
+    case "rgb":
       return false;
-    case PointCloudColorMode.Rgba:
+    case "rgba":
       return true;
   }
 }
 
-function autoSelectColorField(output: PointCloudSettings, pointCloud: PointCloud2): void {
+function autoSelectColorField(output: LayerSettingsPointCloud2, pointCloud: PointCloud2): void {
   for (const field of pointCloud.fields) {
     if (COLOR_FIELDS.has(field.name)) {
       output.colorField = field.name;
       switch (field.name) {
         case "rgb":
-          output.colorMode = PointCloudColorMode.Rgb;
+          output.colorMode = "rgb";
           output.rgbByteOrder = "rgba";
           break;
         default:
         case "rgba":
-          output.colorMode = PointCloudColorMode.Rgba;
+          output.colorMode = "rgba";
           output.rgbByteOrder = "rgba";
           break;
         case "bgr":
-          output.colorMode = PointCloudColorMode.Rgb;
+          output.colorMode = "rgb";
           output.rgbByteOrder = "bgra";
           break;
         case "bgra":
-          output.colorMode = PointCloudColorMode.Rgba;
+          output.colorMode = "rgba";
           output.rgbByteOrder = "bgra";
           break;
         case "abgr":
-          output.colorMode = PointCloudColorMode.Rgba;
+          output.colorMode = "rgba";
           output.rgbByteOrder = "abgr";
           break;
       }
@@ -367,7 +398,8 @@ function autoSelectColorField(output: PointCloudSettings, pointCloud: PointCloud
   for (const field of pointCloud.fields) {
     if (INTENSITY_FIELDS.has(field.name)) {
       output.colorField = field.name;
-      output.colorMode = DEFAULT_COLOR_MODE;
+      output.colorMode = "colormap";
+      output.colorMap = "turbo";
       return;
     }
   }
@@ -375,7 +407,8 @@ function autoSelectColorField(output: PointCloudSettings, pointCloud: PointCloud
   if (pointCloud.fields.length > 0) {
     const firstField = pointCloud.fields[0]!;
     output.colorField = firstField.name;
-    output.colorMode = DEFAULT_COLOR_MODE;
+    output.colorMode = "colormap";
+    output.colorMap = "turbo";
     return;
   }
 }

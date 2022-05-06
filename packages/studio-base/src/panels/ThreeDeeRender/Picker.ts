@@ -15,6 +15,8 @@ type Camera = THREE.PerspectiveCamera | THREE.OrthographicCamera;
 // single pixel, but GL_POINTS with a >1 point size would be clipped
 const PIXEL_WIDTH = 9;
 
+const WHITE_COLOR = new THREE.Color(0xffffff);
+
 const AlwaysPickObject = (_obj: THREE.Object3D) => true;
 // This works around an incorrect method definition, where passing null is valid
 const NullScene = ReactNull as unknown as THREE.Scene;
@@ -42,7 +44,6 @@ export class Picker {
   private materialCache = new Map<number, THREE.ShaderMaterial>();
   private emptyScene: THREE.Scene;
   private pixelBuffer: Uint8Array;
-  private clearColor = new THREE.Color(0xffffff);
   private currClearColor = new THREE.Color();
   private pickingTarget: THREE.WebGLRenderTarget;
   private debug: boolean;
@@ -96,7 +97,7 @@ export class Picker {
     const currAlpha = this.gl.getClearAlpha();
     this.gl.getClearColor(this.currClearColor);
     this.gl.setRenderTarget(this.pickingTarget);
-    this.gl.setClearColor(this.clearColor);
+    this.gl.setClearColor(WHITE_COLOR);
     this.gl.setClearAlpha(1);
     this.gl.clear();
     this.gl.render(this.emptyScene, this.camera);
@@ -132,7 +133,7 @@ export class Picker {
     this.isDebugPass = true;
     const currAlpha = this.gl.getClearAlpha();
     this.gl.getClearColor(this.currClearColor);
-    this.gl.setClearColor(this.clearColor);
+    this.gl.setClearColor(WHITE_COLOR);
     this.gl.setClearAlpha(1);
     this.gl.clear();
     this.gl.render(this.emptyScene, this.camera);

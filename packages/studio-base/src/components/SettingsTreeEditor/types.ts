@@ -3,25 +3,25 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 export type SettingsTreeFieldValue =
-  | { input: "autocomplete"; value?: string; items: string[] }
+  | { input: "autocomplete"; value?: string; items: ReadonlyArray<string> }
   | { input: "boolean"; value?: boolean }
   | { input: "rgb"; value?: string }
   | { input: "rgba"; value?: string }
   | { input: "gradient"; value?: string }
-  | { input: "messagepath"; value?: string; validTypes?: string[] }
+  | { input: "messagepath"; value?: string; validTypes?: ReadonlyArray<string> }
   | { input: "number"; value?: number; step?: number; max?: number; min?: number }
   | {
       input: "select";
-      value?: number | readonly number[];
-      options: Array<{ label: string; value: undefined | number }>;
+      value?: number | ReadonlyArray<number>;
+      options: ReadonlyArray<{ label: string; value: undefined | number }>;
     }
   | {
       input: "select";
-      value?: string | readonly string[];
-      options: Array<{ label: string; value: undefined | string }>;
+      value?: string | ReadonlyArray<string>;
+      options: ReadonlyArray<{ label: string; value: undefined | string }>;
     }
   | { input: "string"; value?: string }
-  | { input: "toggle"; value?: string; options: string[] }
+  | { input: "toggle"; value?: string; options: ReadonlyArray<string> }
   | {
       input: "vec3";
       value?: readonly [undefined | number, undefined | number, undefined | number];
@@ -91,7 +91,7 @@ type DistributivePick<T, K extends keyof T> = T extends unknown ? Pick<T, K> : n
  */
 export type SettingsTreeAction = {
   action: "update";
-  payload: { path: readonly string[] } & DistributivePick<
+  payload: { path: ReadonlyArray<string> } & DistributivePick<
     SettingsTreeFieldValue,
     "input" | "value"
   >;
