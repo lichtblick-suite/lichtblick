@@ -159,7 +159,7 @@ jobs:
 
       - name: Generate Docker tags
         id: meta
-        uses: docker/metadata-action@v3
+        uses: docker/metadata-action@v4
         with:
           images: ghcr.io/${{ github.repository }}
           tags: |
