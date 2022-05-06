@@ -2,16 +2,13 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { IconButton, useTheme } from "@fluentui/react";
-import { Theme } from "@mui/material";
-import { makeStyles } from "@mui/styles";
-import cx from "classnames";
+import LayersIcon from "@mui/icons-material/Layers";
+import PushPinIcon from "@mui/icons-material/PushPin";
+import { IconButton as MuiIconButton, styled as muiStyled, Tooltip } from "@mui/material";
 import { useCallback } from "react";
 
 import KeyboardShortcut from "@foxglove/studio-base/components/KeyboardShortcut";
-import { useTooltip } from "@foxglove/studio-base/components/Tooltip";
 import { Save3DConfig } from "@foxglove/studio-base/panels/ThreeDimensionalViz";
-import { colors } from "@foxglove/studio-base/util/sharedStyleConstants";
 
 export const SWITCHER_HEIGHT = 30;
 
@@ -19,12 +16,49 @@ const BADGE_SIZE = 10;
 const BADGE_RADIUS = BADGE_SIZE / 2;
 const BADGE_OFFSET = 2;
 
-const useStyles = makeStyles((theme: Theme) => ({
-  root: {
-    position: "relative",
-    pointerEvents: "auto",
+const TopicTreeSwitcherRoot = muiStyled("div")({
+  position: "relative",
+  pointerEvents: "auto",
+});
+
+const PinIconButton = muiStyled(MuiIconButton)<{ renderTopicTree: boolean }>(
+  ({ theme, renderTopicTree }) => ({
+    color: theme.palette.common.white,
+    backgroundColor: "transparent",
+    transition: "opacity 0.25s ease-in-out, transform 0.25s ease-in-out",
+    transform: "translateY(-100%)",
+    pointerEvents: "none",
+    opacity: 0,
+
+    ...(renderTopicTree && {
+      transform: "translateY(0%)",
+      pointerEvents: "auto",
+      opacity: 1,
+    }),
+  }),
+);
+
+const LayersIconButton = muiStyled(MuiIconButton)<{
+  renderTopicTree: boolean;
+  showErrorBadge: boolean;
+}>(({ renderTopicTree, showErrorBadge, theme }) => ({
+  position: "relative",
+  transform: "translateX(-100%)",
+  backgroundColor: theme.palette.background.paper,
+  opacity: 1,
+  transition: `opacity 0.15s ease-out 0.2s`,
+  pointerEvents: "auto",
+
+  "&:hover": {
+    color: theme.palette.text.primary,
+    backgroundColor: theme.palette.background.paper,
   },
-  badge: {
+  ...(renderTopicTree && {
+    opacity: 0,
+    transition: `opacity 0.15s ease-out 0s`,
+    pointerEvents: "none",
+  }),
+  ...(showErrorBadge && {
     "&:before": {
       content: '""',
       position: "absolute",
@@ -36,7 +70,7 @@ const useStyles = makeStyles((theme: Theme) => ({
       backgroundColor: theme.palette.error.main,
       zIndex: 101,
     },
-  },
+  }),
 }));
 
 type Props = {
@@ -55,88 +89,35 @@ export default function TopicTreeSwitcher({
   setShowTopicTree,
   showErrorBadge,
 }: Props): JSX.Element {
-  const theme = useTheme();
-  const classes = useStyles();
   const onClick = useCallback(() => setShowTopicTree((shown) => !shown), [setShowTopicTree]);
 
-  const pinButton = useTooltip({ placement: "top", contents: "Pin topic picker" });
-  const topicButton = useTooltip({
-    placement: "top",
-    contents: showErrorBadge ? (
-      "Errors found in selected topics/namespaces"
-    ) : (
-      <KeyboardShortcut keys={["T"]} />
-    ),
-  });
-
   return (
-    <div className={classes.root}>
-      {renderTopicTree ? pinButton.tooltip : topicButton.tooltip}
-      <IconButton
-        elementRef={pinButton.ref}
+    <TopicTreeSwitcherRoot>
+      <PinIconButton
+        title="Pin topic picker"
         onClick={() => {
           // Keep TopicTree open after unpin.
           setShowTopicTree(true);
           saveConfig({ pinTopics: !pinTopics });
         }}
+        renderTopicTree={renderTopicTree}
         data-test="open-topic-picker"
-        iconProps={{ iconName: "Pin" }}
-        checked={pinTopics}
-        styles={{
-          root: {
-            transform: `translateY(${renderTopicTree ? 0 : -100}%)`,
-            backgroundColor: "transparent",
-            opacity: renderTopicTree ? 1 : 0,
-            transition: "opacity 0.25s ease-in-out, transform 0.25s ease-in-out",
-            pointerEvents: renderTopicTree ? "auto" : "none",
-          },
-          rootHovered: { backgroundColor: "transparent" },
-          rootPressed: { backgroundColor: "transparent" },
-          rootDisabled: { backgroundColor: "transparent" },
-          rootChecked: { backgroundColor: "transparent" },
-          rootCheckedHovered: { backgroundColor: "transparent" },
-          rootCheckedPressed: { backgroundColor: "transparent" },
-          iconChecked: { color: colors.HIGHLIGHT },
-          icon: {
-            color: colors.LIGHT1,
+      >
+        <PushPinIcon fontSize="small" color={pinTopics ? "info" : "inherit"} />
+      </PinIconButton>
 
-            svg: {
-              fill: "currentColor",
-              height: "1em",
-              width: "1em",
-            },
-          },
-        }}
-      />
-      <IconButton
-        className={cx({ [classes.badge]: showErrorBadge })}
-        elementRef={topicButton.ref}
-        onClick={onClick}
-        iconProps={{ iconName: "Layers" }}
-        styles={{
-          root: {
-            position: "relative",
-            transform: "translateX(-100%)",
-            backgroundColor: theme.semanticColors.buttonBackgroundHovered,
-            opacity: renderTopicTree ? 0 : 1,
-            transition: `opacity 0.15s ease-out ${renderTopicTree ? 0 : 0.2}s`,
-            pointerEvents: renderTopicTree ? "none" : "auto",
-          },
-          rootHovered: { backgroundColor: theme.semanticColors.buttonBackgroundHovered },
-          rootPressed: { backgroundColor: theme.semanticColors.buttonBackgroundHovered },
-          rootDisabled: { backgroundColor: theme.semanticColors.buttonBackgroundHovered },
-          iconChecked: { color: colors.ACCENT },
-          icon: {
-            color: theme.semanticColors.bodyText,
-
-            svg: {
-              fill: "currentColor",
-              height: "1em",
-              width: "1em",
-            },
-          },
-        }}
-      />
-    </div>
+      <Tooltip arrow title={<KeyboardShortcut keys={["T"]} />}>
+        <LayersIconButton
+          showErrorBadge={showErrorBadge}
+          renderTopicTree={renderTopicTree}
+          onClick={onClick}
+          title={
+            showErrorBadge ? "Errors found in selected topics/namespaces" : "Open topic switcher"
+          }
+        >
+          <LayersIcon fontSize="small" />
+        </LayersIconButton>
+      </Tooltip>
+    </TopicTreeSwitcherRoot>
   );
 }

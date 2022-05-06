@@ -34,6 +34,7 @@ const STabbedToolbar = styled.div<{ highlight: boolean }>`
   display: flex;
   position: relative;
   flex-direction: column;
+  border-bottom: 1px solid ${({ theme }) => theme.semanticColors.bodyDivider};
 
   &:after {
     border: 2px solid

@@ -11,12 +11,11 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { useTheme } from "@fluentui/react";
+import { styled as muiStyled, useTheme } from "@mui/material";
 import { ChartOptions, ScaleOptions } from "chart.js";
 import { flatten, pick, uniq } from "lodash";
 import { ComponentProps, useCallback, useMemo, useState } from "react";
 import { useResizeDetector } from "react-resize-detector";
-import styled from "styled-components";
 
 import type { ZoomOptions } from "@foxglove/chartjs-plugin-zoom/types/options";
 import { filterMap } from "@foxglove/den/collection";
@@ -30,25 +29,24 @@ import Panel from "@foxglove/studio-base/components/Panel";
 import PanelToolbar from "@foxglove/studio-base/components/PanelToolbar";
 import { useTooltip } from "@foxglove/studio-base/components/Tooltip";
 import useDeepChangeDetector from "@foxglove/studio-base/hooks/useDeepChangeDetector";
-import { colors } from "@foxglove/studio-base/util/sharedStyleConstants";
 
 import { TwoDimensionalTooltip } from "./Tooltip";
 import { safeParseFloat } from "./helpers";
 
-const SResetZoom = styled.div`
+const SResetZoom = muiStyled("div")`
   position: absolute;
   bottom: 15px;
   right: 10px;
 `;
 
-const SContainer = styled.div`
+const SContainer = muiStyled("div")`
   display: flex;
   flex: 1 1 auto;
   flex-direction: column;
   height: 100%;
 `;
 
-const SRoot = styled.div`
+const SRoot = muiStyled("div")`
   display: flex;
   flex: 1 1 auto;
   width: 100%;
@@ -138,12 +136,7 @@ function TwoDimensionalPlot(props: Props) {
   const matchedMessages = useMessageDataItem(path.value);
   const message = matchedMessages[0]?.queriedData[0]?.value as PlotMessage | undefined;
 
-  const {
-    title,
-    yAxisLabel,
-    xAxisLabel,
-    gridColor = theme.palette.neutralLighterAlt,
-  } = message ?? {};
+  const { title, yAxisLabel, xAxisLabel, gridColor = theme.palette.divider } = message ?? {};
 
   const datasets = useMemo<Data["datasets"]>(() => {
     if (!message) {
@@ -278,10 +271,14 @@ function TwoDimensionalPlot(props: Props) {
         y: yScale,
         x: xScale,
       },
-      color: colors.GRAY,
+      color: theme.palette.text.secondary,
       animation: { duration: 0 },
       plugins: {
-        title: { display: title != undefined, text: title, color: theme.palette.black },
+        title: {
+          display: title != undefined,
+          text: title,
+          color: theme.palette.text.primary,
+        },
         tooltip: {
           intersect: false,
           mode: "nearest",

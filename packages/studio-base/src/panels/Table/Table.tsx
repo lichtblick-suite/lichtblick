@@ -15,6 +15,7 @@
 
 import MinusIcon from "@mdi/svg/svg/minus-box-outline.svg";
 import PlusIcon from "@mdi/svg/svg/plus-box-outline.svg";
+import { styled as muiStyled } from "@mui/material";
 import { noop } from "lodash";
 import {
   useTable,
@@ -24,7 +25,6 @@ import {
   Column,
   ColumnWithLooseAccessor,
 } from "react-table";
-import styled from "styled-components";
 
 import EmptyState from "@foxglove/studio-base/components/EmptyState";
 import Icon from "@foxglove/studio-base/components/Icon";
@@ -33,7 +33,6 @@ import {
   LegacyTable,
   LegacySelect,
 } from "@foxglove/studio-base/components/LegacyStyledComponents";
-import { toolsColorScheme } from "@foxglove/studio-base/util/toolsColorScheme";
 
 import TableCell from "./TableCell";
 import { sanitizeAccessorPath } from "./sanitizeAccessorPath";
@@ -87,39 +86,42 @@ function getColumnsFromObject(
   return columns;
 }
 
-const STableRow = styled.tr<{ index: number }>`
-  background-color: ${({ index, theme }) =>
-    index % 2 === 0 ? "inherit" : theme.palette.neutralLighterAlt};
-  &:hover {
-    background-color: ${({ theme }) => theme.palette.neutralLighterAlt};
-  }
-`;
+const STableRow = muiStyled("tr")(({ theme }) => ({
+  "&:nth-child(even)": {
+    backgroundColor: theme.palette.action.hover,
+  },
+  "&:hover": {
+    backgroundColor: theme.palette.action.selected,
+  },
+}));
 
-type STableHeaderProps = {
-  id: string;
-  isSortedAsc: boolean;
-  isSortedDesc: boolean;
-};
+const STableHeader = muiStyled("th")<{ id: string; isSortedAsc: boolean; isSortedDesc: boolean }>(
+  ({ theme, id, isSortedAsc, isSortedDesc }) => ({
+    borderLeftColor: "transparent !important",
+    borderRightColor: "transparent !important",
+    padding: `${theme.spacing(0.5)} !important`,
+    fontWeight: "bold !important",
+    cursor: "pointer",
+    width: "auto",
+    textAlign: "left",
 
-const STableHeader = styled.th<STableHeaderProps>`
-  border-bottom: ${({ isSortedAsc }: STableHeaderProps) =>
-    isSortedAsc ? `solid 3px ${toolsColorScheme.blue.medium}` : "none"} !important;
-  border-top: ${({ isSortedDesc }: STableHeaderProps) =>
-    isSortedDesc ? `solid 3px ${toolsColorScheme.blue.medium}` : "none"} !important;
-  border-left: none !important;
-  border-right: none !important;
-  padding: 4px !important;
-  font-weight: bold !important;
-  cursor: pointer;
-  width: ${({ id }: STableHeaderProps) => (id === "expander" ? "25px" : "auto")};
-  text-align: left;
-`;
+    ...(isSortedAsc && {
+      borderBottomColor: `${theme.palette.primary.main} !important`,
+    }),
+    ...(isSortedDesc && {
+      borderTopColor: `${theme.palette.primary.main} !important`,
+    }),
+    ...(id === "expander" && {
+      width: 25,
+    }),
+  }),
+);
 
-const STableData = styled.td`
-  padding: 4px !important;
-  white-space: nowrap;
-  text-overflow: ellipsis;
-`;
+const STableData = muiStyled("td")(({ theme }) => ({
+  padding: `${theme.spacing(0.5)} !important`,
+  whiteSpace: "nowrap",
+  textOverflow: "ellipsis",
+}));
 
 export default function Table({
   value,
@@ -198,14 +200,7 @@ export default function Table({
         <thead>
           {headerGroups.map((headerGroup, i) => {
             return (
-              <STableRow
-                index={
-                  0
-                  /* For properly coloring background */
-                }
-                {...headerGroup.getHeaderGroupProps()}
-                key={i}
-              >
+              <STableRow {...headerGroup.getHeaderGroupProps()} key={i}>
                 {headerGroup.headers.map((column) => {
                   return (
                     <STableHeader
@@ -228,7 +223,7 @@ export default function Table({
           {(!isNested ? page : rows).map((row) => {
             prepareRow(row);
             return (
-              <STableRow {...row.getRowProps()} key={row.index} index={row.index}>
+              <STableRow {...row.getRowProps()} key={row.index}>
                 {row.cells.map((cell, i) => {
                   return (
                     <STableData {...cell.getCellProps()} key={i}>

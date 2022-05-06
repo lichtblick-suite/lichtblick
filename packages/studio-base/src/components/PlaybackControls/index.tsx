@@ -12,7 +12,7 @@
 //   You may not use this file except in compliance with the License.
 
 import { IButtonStyles, useTheme } from "@fluentui/react";
-import { Stack } from "@mui/material";
+import { styled as muiStyled } from "@mui/material";
 import { merge } from "lodash";
 import { useCallback, useMemo, useRef, useState } from "react";
 
@@ -26,11 +26,21 @@ import {
   DIRECTION,
 } from "@foxglove/studio-base/components/PlaybackControls/sharedHelpers";
 import PlaybackSpeedControls from "@foxglove/studio-base/components/PlaybackSpeedControls";
+import Stack from "@foxglove/studio-base/components/Stack";
 import Tooltip from "@foxglove/studio-base/components/Tooltip";
 
 import PlaybackTimeDisplay from "./PlaybackTimeDisplay";
 import RepeatAdapter from "./RepeatAdapter";
 import Scrubber from "./Scrubber";
+
+const PlaybackControlsRoot = muiStyled("div")(({ theme }) => ({
+  display: "flex",
+  alignItems: "center",
+  gap: theme.spacing(1),
+  padding: theme.spacing(1),
+  backgroundColor: theme.palette.background.paper,
+  borderTop: `1px solid ${theme.palette.divider}`,
+}));
 
 export default function PlaybackControls({
   play,
@@ -184,22 +194,13 @@ export default function PlaybackControls({
         isPlaying={isPlaying}
       />
       <KeyListener global keyDownHandlers={keyDownHandlers} />
-      <Stack
-        direction="row"
-        alignItems="center"
-        spacing={1}
-        padding={1}
-        style={{
-          backgroundColor: theme.palette.neutralLighterAlt,
-          borderTop: `1px solid ${theme.palette.neutralLighter}`,
-        }}
-      >
-        <Stack direction="row" alignItems="center" spacing={1}>
+      <PlaybackControlsRoot>
+        <Stack direction="row" alignItems="center" gap={1}>
           <MessageOrderControls />
           <PlaybackSpeedControls />
         </Stack>
-        <Stack direction="row" alignItems="center" flex={1} spacing={1} paddingX={0.5}>
-          <Stack direction="row" alignItems="center" spacing={0.5}>
+        <Stack direction="row" alignItems="center" flex={1} gap={1} paddingX={0.5}>
+          <Stack direction="row" alignItems="center" gap={0.5}>
             <div>
               <Tooltip contents="Loop playback">
                 <HoverableIconButton
@@ -231,7 +232,7 @@ export default function PlaybackControls({
           <Scrubber onSeek={seek} />
           <PlaybackTimeDisplay onSeek={seek} onPause={pause} />
         </Stack>
-        <Stack direction="row" alignItems="center" spacing={0.25}>
+        <Stack direction="row" alignItems="center" gap={0.25}>
           <div>
             <Tooltip contents="Seek backward">
               <HoverableIconButton
@@ -255,7 +256,7 @@ export default function PlaybackControls({
             </Tooltip>
           </div>
         </Stack>
-      </Stack>
+      </PlaybackControlsRoot>
     </>
   );
 }

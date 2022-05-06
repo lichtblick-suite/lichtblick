@@ -2,18 +2,12 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { generateUtilityClass, unstable_composeClasses as composeClasses } from "@mui/base";
 import { styled as muiStyled, Theme, useTheme } from "@mui/material";
 import cx from "classnames";
 import { ElementType, CSSProperties, PropsWithChildren } from "react";
 
-function getStackUtilityClass(slot: string): string {
-  return generateUtilityClass("FoxgloveStack", slot);
-}
-
 const StackRoot = muiStyled("div", {
   name: "FoxgloveStack",
-  overridesResolver: (_props, styles) => [styles.root],
   slot: "Root",
   skipSx: true,
 })(({ theme, ownerState }: { theme: Theme; ownerState: StackProps }) => ({
@@ -129,12 +123,10 @@ export default function Stack(props: PropsWithChildren<StackProps>): JSX.Element
     zeroMinWidth,
   };
 
-  const classes = composeClasses({ root: ["root"] }, getStackUtilityClass, ownerState.classes);
-
   return (
     <StackRoot
       as={component}
-      className={cx(classes.root, className)}
+      className={cx("FoxgloveStack-root", className)} // add className for ergonimic styling purposes
       ownerState={ownerState}
       theme={theme}
       style={style}

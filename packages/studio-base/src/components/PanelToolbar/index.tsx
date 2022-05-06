@@ -10,11 +10,11 @@
 //   This source code is licensed under the Apache License, Version 2.0,
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
-import { makeStyles } from "@fluentui/react";
 import FullscreenExitIcon from "@mdi/svg/svg/fullscreen-exit.svg";
 import FullscreenIcon from "@mdi/svg/svg/fullscreen.svg";
 import HelpCircleOutlineIcon from "@mdi/svg/svg/help-circle-outline.svg";
-import cx from "classnames";
+import { styled as muiStyled, Theme } from "@mui/material";
+import { makeStyles } from "@mui/styles";
 import { useContext, useState, useMemo, useRef } from "react";
 
 import Icon from "@foxglove/studio-base/components/Icon";
@@ -28,7 +28,6 @@ import { PanelToolbarControls } from "./PanelToolbarControls";
 type Props = {
   additionalIcons?: React.ReactNode;
   alwaysVisible?: boolean;
-  backgroundColor?: string;
   children?: React.ReactNode;
   floating?: boolean;
   helpContent?: React.ReactNode;
@@ -36,49 +35,52 @@ type Props = {
   isUnknownPanel?: boolean;
 };
 
-const PANEL_TOOLBAR_HEIGHT = 26;
-const PANEL_TOOLBAR_SPACING = 4;
+const PanelToolbarRoot = muiStyled("div", {
+  shouldForwardProp: (prop) =>
+    prop !== "shouldShow" && prop !== "floating" && prop !== "hasChildren",
+})<{
+  shouldShow: boolean;
+  floating: boolean;
+  hasChildren: boolean;
+}>(({ shouldShow, floating, hasChildren, theme }) => ({
+  transition: "transform 80ms ease-in-out, opacity 80ms ease-in-out",
+  flex: "0 0 auto",
+  justifyContent: "flex-end",
+  padding: theme.spacing(0.5),
+  display: !shouldShow ? "none" : "flex",
+  backgroundColor: floating ? "transparent" : theme.palette.background.paper,
 
-const useStyles = makeStyles((theme) => ({
-  panelToolbarContainer: {
-    transition: "transform 80ms ease-in-out, opacity 80ms ease-in-out",
-    display: "flex",
-    flex: "0 0 auto",
-    flexDirection: "row",
-    justifyContent: "flex-end",
-    backgroundColor: theme.palette.neutralLighterAlt,
-    padding: PANEL_TOOLBAR_SPACING,
+  ...(floating && {
+    position: "absolute",
+    right: 0,
+    paddingRight: theme.spacing(1), // leave some room for possible scrollbar
+    top: 0,
+    zIndex: theme.zIndex.appBar,
+    minHeight: 32,
 
-    "&.floating": {
-      position: "absolute",
-      right: 0,
-      // leave some room for possible scrollbar
-      paddingRight: 8,
-      top: 0,
-      zIndex: 5000,
-      backgroundColor: "transparent",
+    ...(hasChildren
+      ? {
+          // If the toolbar has children, set the width to 100% to take up the entire panel width.
+          // If the toolbar does not have children, then the width should be only the controls
+          // so the div does not interfere with other panel elements.
+          backgroundColor: theme.palette.background.paper,
+          width: "100%",
+          left: 0,
+        }
+      : {
+          "& > *": {
+            backgroundColor: theme.palette.background.paper,
+            borderRadius: theme.shape.borderRadius,
+            boxShadow: theme.shadows[4],
+          },
+        }),
+  }),
+}));
 
-      "&.hasChildren": {
-        // If the toolbar has children, set the width to 100% to take up the entire panel width.
-        // If the toolbar does not have children, then the width should be only the controls
-        // so the div does not interfere with other panel elements.
-        width: "100%",
-        left: 0,
-        backgroundColor: theme.palette.neutralLighterAlt,
-      },
-      "&:not(.hasChildren) > *": {
-        backgroundColor: theme.palette.neutralLighterAlt,
-        borderRadius: theme.effects.roundedCorner2,
-        boxShadow: theme.effects.elevation16,
-      },
-    },
-    "&:not(.floating)": {
-      minHeight: PANEL_TOOLBAR_HEIGHT + PANEL_TOOLBAR_SPACING,
-    },
-  },
+const useStyles = makeStyles((theme: Theme) => ({
   icon: {
     fontSize: 14,
-    margin: "0 0.2em",
+    margin: theme.spacing(0, 0.125),
   },
 }));
 
@@ -88,7 +90,6 @@ const useStyles = makeStyles((theme) => ({
 export default React.memo<Props>(function PanelToolbar({
   additionalIcons,
   alwaysVisible = false,
-  backgroundColor,
   children,
   floating = false,
   helpContent,
@@ -167,13 +168,11 @@ export default React.memo<Props>(function PanelToolbar({
   }
 
   return (
-    <div
+    <PanelToolbarRoot
+      shouldShow={shouldShow}
+      floating={floating}
+      hasChildren={Boolean(children)}
       ref={containerRef}
-      className={cx(styles.panelToolbarContainer, {
-        floating,
-        hasChildren: Boolean(children),
-      })}
-      style={{ backgroundColor, display: shouldShow ? "flex" : "none" }}
     >
       {children}
       <PanelToolbarControls
@@ -185,6 +184,6 @@ export default React.memo<Props>(function PanelToolbar({
         menuOpen={menuOpen}
         setMenuOpen={setMenuOpen}
       />
-    </div>
+    </PanelToolbarRoot>
   );
 });

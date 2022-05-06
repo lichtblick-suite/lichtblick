@@ -22,9 +22,6 @@ import PanelContext from "@foxglove/studio-base/components/PanelContext";
 
 import { PanelActionsDropdown } from "./PanelActionsDropdown";
 
-const PANEL_TOOLBAR_HEIGHT = 26;
-const PANEL_TOOLBAR_SPACING = 4;
-
 type PanelToolbarControlsProps = {
   additionalIcons?: React.ReactNode;
   floating?: boolean;
@@ -38,13 +35,13 @@ type PanelToolbarControlsProps = {
 
 const useStyles = makeStyles((theme: Theme) => ({
   iconContainer: ({ shouldShow }: { shouldShow: boolean }) => ({
-    paddingTop: PANEL_TOOLBAR_SPACING,
-    display: shouldShow ? "flex" : "none",
+    paddingTop: theme.spacing(0.5),
+    display: "flex",
+    visibility: shouldShow ? "visible" : "hidden",
     flex: "0 0 auto",
     alignItems: "center",
-    marginLeft: PANEL_TOOLBAR_SPACING,
+    marginLeft: theme.spacing(0.5),
     flexDirection: "row",
-    minHeight: PANEL_TOOLBAR_HEIGHT - PANEL_TOOLBAR_SPACING,
     padding: theme.spacing(0.25, 0.25, 0.25, 0.75),
 
     "& .icon": {
