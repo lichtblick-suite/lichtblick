@@ -6,6 +6,7 @@ import * as THREE from "three";
 
 import { Renderer } from "../Renderer";
 import { Marker, MarkerAction, MarkerType } from "../ros";
+import { LayerSettingsMarker } from "../settings";
 import { updatePose } from "../updatePose";
 import { RenderableArrow } from "./markers/RenderableArrow";
 import { RenderableCube } from "./markers/RenderableCube";
@@ -29,18 +30,37 @@ const INVALID_MARKER_TYPE = "INVALID_MARKER_TYPE";
 const INVALID_POINTS_LIST = "INVALID_POINTS_LIST";
 const INVALID_SPHERE_LIST = "INVALID_SPHERE_LIST";
 
+const DEFAULT_SETTINGS: LayerSettingsMarker = {
+  visible: true,
+  color: undefined,
+};
+
 export class TopicMarkers extends THREE.Object3D {
   readonly topic: string;
   readonly renderer: Renderer;
+  override userData: { settings: LayerSettingsMarker };
   namespaces = new Map<string, Map<number, RenderableMarker>>();
 
   constructor(topic: string, renderer: Renderer) {
     super();
     this.topic = topic;
     this.renderer = renderer;
+
+    // Set the initial settings from default values merged with any user settings
+    renderer.config?.topics[topic] as Partial<LayerSettingsMarker> | undefined;
+    const userSettings = renderer.config?.topics[topic];
+    this.userData = { settings: { ...DEFAULT_SETTINGS, ...userSettings } };
   }
 
-  dispose(): void {}
+  dispose(): void {
+    for (const ns of this.namespaces.values()) {
+      for (const marker of ns.values()) {
+        this.remove(marker);
+        marker.dispose();
+      }
+    }
+    this.namespaces.clear();
+  }
 
   addMarkerMessage(marker: Marker): void {
     switch (marker.action) {
@@ -83,6 +103,12 @@ export class TopicMarkers extends THREE.Object3D {
   }
 
   startFrame(currentTime: bigint, renderFrameId: string, fixedFrameId: string): void {
+    this.visible = this.userData.settings.visible;
+    if (!this.visible) {
+      this.renderer.layerErrors.clearTopic(this.topic);
+      return;
+    }
+
     for (const ns of this.namespaces.values()) {
       for (const renderable of ns.values()) {
         const marker = renderable.userData.marker;

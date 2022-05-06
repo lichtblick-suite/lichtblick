@@ -6,6 +6,7 @@ import * as THREE from "three";
 
 import { Renderer } from "../Renderer";
 import { Marker } from "../ros";
+import { LayerSettingsMarker, LayerType } from "../settings";
 import { TopicMarkers } from "./TopicMarkers";
 
 export class Markers extends THREE.Object3D {
@@ -15,6 +16,11 @@ export class Markers extends THREE.Object3D {
   constructor(renderer: Renderer) {
     super();
     this.renderer = renderer;
+
+    renderer.setSettingsFieldsProvider(LayerType.Marker, (topicConfig) => {
+      const cur = topicConfig as Partial<LayerSettingsMarker>;
+      return { color: { label: "Color", input: "rgba", value: cur.color } };
+    });
   }
 
   dispose(): void {
@@ -32,6 +38,13 @@ export class Markers extends THREE.Object3D {
       this.add(topicMarkers);
     }
     topicMarkers.addMarkerMessage(marker);
+  }
+
+  setTopicSettings(topic: string, settings: Partial<LayerSettingsMarker>): void {
+    const renderable = this.topics.get(topic);
+    if (renderable) {
+      renderable.userData.settings = { ...renderable.userData.settings, ...settings };
+    }
   }
 
   startFrame(currentTime: bigint): void {

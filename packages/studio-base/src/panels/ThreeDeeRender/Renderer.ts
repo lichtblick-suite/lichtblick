@@ -21,7 +21,14 @@ import { Markers } from "./renderables/Markers";
 import { OccupancyGrids } from "./renderables/OccupancyGrids";
 import { PointClouds } from "./renderables/PointClouds";
 import { Marker, OccupancyGrid, PointCloud2, TF } from "./ros";
-import { LayerSettingsPointCloud2, ThreeDeeRenderConfig } from "./settings";
+import {
+  FieldsProvider,
+  LayerSettingsMarker,
+  LayerSettingsOccupancyGrid,
+  LayerSettingsPointCloud2,
+  LayerType,
+  ThreeDeeRenderConfig,
+} from "./settings";
 import { TransformTree } from "./transforms/TransformTree";
 
 const log = Logger.getLogger(__filename);
@@ -35,15 +42,6 @@ export type RendererEvents = {
   showLabel: (labelId: string, labelMarker: Marker, renderer: Renderer) => void;
   removeLabel: (labelId: string, renderer: Renderer) => void;
 };
-
-export enum LayerType {
-  Transform,
-  // eslint-disable-next-line @typescript-eslint/no-shadow
-  Marker,
-  // eslint-disable-next-line @typescript-eslint/no-shadow
-  OccupancyGrid,
-  PointCloud,
-}
 
 const DEBUG_PICKING = false;
 
@@ -95,12 +93,17 @@ export class Renderer extends EventEmitter<RendererEvents> {
   transformTree = new TransformTree(TRANSFORM_STORAGE_TIME_NS);
   currentTime: bigint | undefined;
   fixedFrameId: string | undefined;
-  renderFrameId: string | undefined;
+  settingsFieldsProviders = new Map<LayerType, FieldsProvider>();
 
   frameAxes = new FrameAxes(this);
   occupancyGrids = new OccupancyGrids(this);
   pointClouds = new PointClouds(this);
   markers = new Markers(this);
+
+  // eslint-disable-next-line no-restricted-syntax
+  get renderFrameId(): string | undefined {
+    return this.config?.followTf;
+  }
 
   constructor(canvas: HTMLCanvasElement) {
     super();
@@ -194,6 +197,11 @@ export class Renderer extends EventEmitter<RendererEvents> {
     this.gl.dispose();
   }
 
+  setSettingsFieldsProvider(layerType: LayerType, provider: FieldsProvider): void {
+    this.settingsFieldsProviders.set(layerType, provider);
+    this.settingsFieldsProviders = new Map(this.settingsFieldsProviders);
+  }
+
   setColorScheme(colorScheme: "dark" | "light", backgroundColor: string | undefined): void {
     this.colorScheme = colorScheme;
 
@@ -214,8 +222,16 @@ export class Renderer extends EventEmitter<RendererEvents> {
     this.frameAxes.addTransformMessage(tf);
   }
 
+  setTransformSettings(_name: string, _settings: { visible?: boolean }): void {
+    //
+  }
+
   addOccupancyGridMessage(topic: string, occupancyGrid: OccupancyGrid): void {
     this.occupancyGrids.addOccupancyGridMessage(topic, occupancyGrid);
+  }
+
+  setOccupancyGridSettings(topic: string, settings: Partial<LayerSettingsOccupancyGrid>): void {
+    this.occupancyGrids.setTopicSettings(topic, settings);
   }
 
   addPointCloud2Message(topic: string, pointCloud: PointCloud2): void {
@@ -228,6 +244,10 @@ export class Renderer extends EventEmitter<RendererEvents> {
 
   addMarkerMessage(topic: string, marker: Marker): void {
     this.markers.addMarkerMessage(topic, marker);
+  }
+
+  setMarkerSettings(topic: string, settings: Partial<LayerSettingsMarker>): void {
+    this.markers.setTopicSettings(topic, settings);
   }
 
   markerWorldPosition(markerId: string): Readonly<THREE.Vector3> | undefined {

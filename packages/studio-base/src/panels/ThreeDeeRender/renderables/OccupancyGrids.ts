@@ -5,8 +5,9 @@
 import * as THREE from "three";
 
 import { Renderer } from "../Renderer";
-import { SRGBToLinear } from "../color";
+import { rgbaToCssString, SRGBToLinear, stringToRgba } from "../color";
 import { Pose, rosTimeToNanoSec, ColorRGBA, OccupancyGrid } from "../ros";
+import { LayerSettingsOccupancyGrid, LayerType } from "../settings";
 import { updatePose } from "../updatePose";
 import { missingTransformMessage, MISSING_TRANSFORM } from "./transforms";
 
@@ -14,16 +15,8 @@ import { missingTransformMessage, MISSING_TRANSFORM } from "./transforms";
 // use a custom ShaderMaterial with an isampler2D uniform to reimplement the
 // updateTexture() logic in a shader
 
-export type OccupancyGridSettings = {
-  minColor: ColorRGBA;
-  maxColor: ColorRGBA;
-  unknownColor: ColorRGBA;
-  invalidColor: ColorRGBA;
-  frameLocked: boolean;
-};
-
 // ts-prune-ignore-next
-export type StoredOccupancyGridSettings = Partial<OccupancyGridSettings>;
+export type StoredOccupancyGridSettings = Partial<LayerSettingsOccupancyGrid>;
 
 const INVALID_OCCUPANCY_GRID = "INVALID_OCCUPANCY_GRID";
 
@@ -32,10 +25,24 @@ const DEFAULT_MAX_COLOR = { r: 0, g: 0, b: 0, a: 0.5 }; // black
 const DEFAULT_UNKNOWN_COLOR = { r: 0.5, g: 0.5, b: 0.5, a: 0.5 }; // gray
 const DEFAULT_INVALID_COLOR = { r: 1, g: 0, b: 1, a: 1 }; // magenta
 
+const DEFAULT_MIN_COLOR_STR = rgbaToCssString(DEFAULT_MIN_COLOR);
+const DEFAULT_MAX_COLOR_STR = rgbaToCssString(DEFAULT_MAX_COLOR);
+const DEFAULT_UNKNOWN_COLOR_STR = rgbaToCssString(DEFAULT_UNKNOWN_COLOR);
+const DEFAULT_INVALID_COLOR_STR = rgbaToCssString(DEFAULT_INVALID_COLOR);
+
+const DEFAULT_SETTINGS: LayerSettingsOccupancyGrid = {
+  visible: true,
+  minColor: DEFAULT_MIN_COLOR_STR,
+  maxColor: DEFAULT_MAX_COLOR_STR,
+  unknownColor: DEFAULT_UNKNOWN_COLOR_STR,
+  invalidColor: DEFAULT_INVALID_COLOR_STR,
+  frameLocked: true,
+};
+
 type OccupancyGridRenderable = THREE.Object3D & {
   userData: {
     topic: string;
-    settings: OccupancyGridSettings;
+    settings: LayerSettingsOccupancyGrid;
     occupancyGrid: OccupancyGrid;
     pose: Pose;
     srcTime: bigint;
@@ -54,6 +61,22 @@ export class OccupancyGrids extends THREE.Object3D {
   constructor(renderer: Renderer) {
     super();
     this.renderer = renderer;
+
+    renderer.setSettingsFieldsProvider(LayerType.OccupancyGrid, (topicConfig) => {
+      const cur = topicConfig as Partial<LayerSettingsOccupancyGrid>;
+      const minColor = cur.minColor ?? DEFAULT_MIN_COLOR_STR;
+      const maxColor = cur.maxColor ?? DEFAULT_MAX_COLOR_STR;
+      const unknownColor = cur.unknownColor ?? DEFAULT_UNKNOWN_COLOR_STR;
+      const invalidColor = cur.invalidColor ?? DEFAULT_INVALID_COLOR_STR;
+      const frameLocked = cur.frameLocked ?? false;
+      return {
+        minColor: { label: "Min Color", input: "rgba", value: minColor },
+        maxColor: { label: "Max Color", input: "rgba", value: maxColor },
+        unknownColor: { label: "Unknown Color", input: "rgba", value: unknownColor },
+        invalidColor: { label: "Invalid Color", input: "rgba", value: invalidColor },
+        frameLocked: { label: "Frame lock", input: "boolean", value: frameLocked },
+      };
+    });
   }
 
   dispose(): void {
@@ -75,14 +98,11 @@ export class OccupancyGrids extends THREE.Object3D {
       renderable.name = topic;
       renderable.userData.topic = topic;
 
-      // TODO: How do we fetch the stored settings for this topic?
-      renderable.userData.settings = {
-        minColor: DEFAULT_MIN_COLOR,
-        maxColor: DEFAULT_MAX_COLOR,
-        unknownColor: DEFAULT_UNKNOWN_COLOR,
-        invalidColor: DEFAULT_INVALID_COLOR,
-        frameLocked: true,
-      };
+      // Set the initial settings from default values merged with any user settings
+      this.renderer.config?.topics[topic] as Partial<LayerSettingsOccupancyGrid> | undefined;
+      const userSettings = this.renderer.config?.topics[topic];
+      const settings = { ...DEFAULT_SETTINGS, ...userSettings };
+      renderable.userData.settings = settings;
 
       renderable.userData.occupancyGrid = occupancyGrid;
       renderable.userData.pose = occupancyGrid.info.origin;
@@ -106,6 +126,14 @@ export class OccupancyGrids extends THREE.Object3D {
     this._updateOccupancyGridRenderable(renderable, occupancyGrid);
   }
 
+  setTopicSettings(topic: string, settings: Partial<LayerSettingsOccupancyGrid>): void {
+    const renderable = this.occupancyGridsByTopic.get(topic);
+    if (renderable) {
+      renderable.userData.settings = { ...renderable.userData.settings, ...settings };
+      this._updateOccupancyGridRenderable(renderable, renderable.userData.occupancyGrid);
+    }
+  }
+
   startFrame(currentTime: bigint): void {
     const renderFrameId = this.renderer.renderFrameId;
     const fixedFrameId = this.renderer.fixedFrameId;
@@ -116,6 +144,12 @@ export class OccupancyGrids extends THREE.Object3D {
     this.visible = true;
 
     for (const renderable of this.occupancyGridsByTopic.values()) {
+      renderable.visible = renderable.userData.settings.visible;
+      if (!renderable.visible) {
+        this.renderer.layerErrors.clearTopic(renderable.userData.topic);
+        continue;
+      }
+
       const frameLocked = renderable.userData.settings.frameLocked;
       const srcTime = frameLocked ? currentTime : renderable.userData.srcTime;
       const frameId = renderable.userData.occupancyGrid.header.frame_id;
@@ -214,30 +248,19 @@ const tempMaxColor = { r: 0, g: 0, b: 0, a: 0 };
 function updateTexture(
   texture: THREE.DataTexture,
   occupancyGrid: OccupancyGrid,
-  settings: OccupancyGridSettings,
+  settings: LayerSettingsOccupancyGrid,
 ): void {
   const size = occupancyGrid.info.width * occupancyGrid.info.height;
   const rgba = texture.image.data;
+  stringToRgba(tempMinColor, settings.minColor);
+  stringToRgba(tempMaxColor, settings.maxColor);
+  stringToRgba(tempUnknownColor, settings.unknownColor);
+  stringToRgba(tempInvalidColor, settings.invalidColor);
 
-  tempUnknownColor.r = SRGBToLinear(settings.unknownColor.r) * 255;
-  tempUnknownColor.g = SRGBToLinear(settings.unknownColor.g) * 255;
-  tempUnknownColor.b = SRGBToLinear(settings.unknownColor.b) * 255;
-  tempUnknownColor.a = settings.unknownColor.a * 255;
-
-  tempInvalidColor.r = SRGBToLinear(settings.invalidColor.r) * 255;
-  tempInvalidColor.g = SRGBToLinear(settings.invalidColor.g) * 255;
-  tempInvalidColor.b = SRGBToLinear(settings.invalidColor.b) * 255;
-  tempInvalidColor.a = settings.invalidColor.a * 255;
-
-  tempMinColor.r = SRGBToLinear(settings.minColor.r) * 255;
-  tempMinColor.g = SRGBToLinear(settings.minColor.g) * 255;
-  tempMinColor.b = SRGBToLinear(settings.minColor.b) * 255;
-  tempMinColor.a = settings.minColor.a * 255;
-
-  tempMaxColor.r = SRGBToLinear(settings.maxColor.r) * 255;
-  tempMaxColor.g = SRGBToLinear(settings.maxColor.g) * 255;
-  tempMaxColor.b = SRGBToLinear(settings.maxColor.b) * 255;
-  tempMaxColor.a = settings.maxColor.a * 255;
+  srgbToLinearUint8(tempMinColor);
+  srgbToLinearUint8(tempMaxColor);
+  srgbToLinearUint8(tempUnknownColor);
+  srgbToLinearUint8(tempInvalidColor);
 
   const data = occupancyGrid.data;
   for (let i = 0; i < size; i++) {
@@ -316,11 +339,19 @@ function createPickingMaterial(texture: THREE.DataTexture): THREE.ShaderMaterial
   });
 }
 
-function occupancyGridHasTransparency(settings: OccupancyGridSettings): boolean {
+function occupancyGridHasTransparency(settings: LayerSettingsOccupancyGrid): boolean {
+  stringToRgba(tempMinColor, settings.minColor);
+  stringToRgba(tempMaxColor, settings.maxColor);
+  stringToRgba(tempUnknownColor, settings.unknownColor);
+  stringToRgba(tempInvalidColor, settings.invalidColor);
   return (
-    settings.minColor.a < 1 ||
-    settings.maxColor.a < 1 ||
-    settings.invalidColor.a < 1 ||
-    settings.unknownColor.a < 1
+    tempMinColor.a < 1 || tempMaxColor.a < 1 || tempInvalidColor.a < 1 || tempUnknownColor.a < 1
   );
+}
+
+function srgbToLinearUint8(color: ColorRGBA): void {
+  color.r = Math.trunc(SRGBToLinear(color.r) * 255);
+  color.g = Math.trunc(SRGBToLinear(color.g) * 255);
+  color.b = Math.trunc(SRGBToLinear(color.b) * 255);
+  color.a = Math.trunc(color.a * 255);
 }

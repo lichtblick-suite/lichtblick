@@ -25,7 +25,7 @@ import { normalizeMarker } from "@foxglove/studio-base/panels/ThreeDeeRender/nor
 
 import { DebugGui } from "./DebugGui";
 import { setOverlayPosition } from "./LabelOverlay";
-import { LayerType, Renderer } from "./Renderer";
+import { Renderer } from "./Renderer";
 import { RendererContext, useRenderer, useRendererEvent } from "./RendererContext";
 import { Stats } from "./Stats";
 import {
@@ -42,6 +42,7 @@ import {
 } from "./ros";
 import {
   buildSettingsTree,
+  LayerType,
   SelectEntry,
   SUPPORTED_DATATYPES,
   ThreeDeeRenderConfig,
@@ -175,7 +176,6 @@ export function ThreeDeeRender({ context }: { context: PanelExtensionContext }):
 
     return {
       cameraState,
-      enableStats: partialConfig?.enableStats ?? true,
       followTf: partialConfig?.followTf,
       scene: partialConfig?.scene ?? {},
       topics: partialConfig?.topics ?? {},
@@ -192,7 +192,6 @@ export function ThreeDeeRender({ context }: { context: PanelExtensionContext }):
   const [topics, setTopics] = useState<ReadonlyArray<Topic> | undefined>();
   const [messages, setMessages] = useState<ReadonlyArray<MessageEvent<unknown>> | undefined>();
   const [currentTime, setCurrentTime] = useState<bigint | undefined>();
-  const [pclFieldsByTopic, setPclFieldsByTopic] = useState(new Map<string, string[]>());
 
   const [renderDone, setRenderDone] = useState<(() => void) | undefined>();
 
@@ -263,10 +262,14 @@ export function ThreeDeeRender({ context }: { context: PanelExtensionContext }):
     return () => void renderer?.removeListener("transformTreeUpdated", updateCoordinateFrames);
   }, [renderer, updateCoordinateFrames]);
 
+  // Set the rendering frame (aka followTf) based on the configured frame, falling back to a
+  // heuristically chosen best frame for the current scene (defaultFrame)
   const followTf = useMemo(
     () => (configFollowTf ? configFollowTf : defaultFrame),
     [configFollowTf, defaultFrame],
   );
+
+  const fieldsProviders = renderer?.settingsFieldsProviders;
 
   useEffect(() => {
     // eslint-disable-next-line no-underscore-dangle, @typescript-eslint/no-explicit-any
@@ -275,20 +278,21 @@ export function ThreeDeeRender({ context }: { context: PanelExtensionContext }):
       settings: buildSettingsTree({
         config,
         coordinateFrames,
-        followTf,
         topics: topics ?? [],
-        pclFieldsByTopic,
+        topicsToLayerTypes,
+        fieldsProviders: fieldsProviders ?? new Map(),
       }),
     });
-  }, [actionHandler, config, context, coordinateFrames, followTf, pclFieldsByTopic, topics]);
-
-  // Config followTf
-  useEffect(() => {
-    if (renderer && followTf != undefined) {
-      renderer.renderFrameId = followTf;
-      renderer.animationFrame();
-    }
-  }, [followTf, renderer]);
+  }, [
+    actionHandler,
+    config,
+    context,
+    coordinateFrames,
+    fieldsProviders,
+    followTf,
+    topics,
+    topicsToLayerTypes,
+  ]);
 
   // Update the renderer's reference to `config` when it changes
   useEffect(() => {
@@ -296,6 +300,13 @@ export function ThreeDeeRender({ context }: { context: PanelExtensionContext }):
       renderer.config = config;
     }
   }, [config, renderer]);
+
+  // Draw a new frame when followTf changes
+  useEffect(() => {
+    if (renderer && followTf != undefined) {
+      renderer.animationFrame();
+    }
+  }, [followTf, renderer]);
 
   // Save panel settings whenever they change
   const throttledSave = useDebouncedCallback(
@@ -446,18 +457,6 @@ export function ThreeDeeRender({ context }: { context: PanelExtensionContext }):
       } else if (POINTCLOUD_DATATYPES.has(datatype)) {
         // sensor_msgs/PointCloud2 - Ingest this point cloud
         const pointCloud = message.message as PointCloud2;
-
-        // Update the mapping of topics to point cloud field names if needed
-        setPclFieldsByTopic((prev) => {
-          let fields = prev.get(message.topic);
-          if (fields && fields.length === pointCloud.fields.length) {
-            return prev;
-          }
-          fields = pointCloud.fields.map((field) => field.name);
-          prev.set(message.topic, fields);
-          return new Map(prev);
-        });
-
         renderer.addPointCloud2Message(message.topic, pointCloud);
       }
     }
@@ -492,7 +491,7 @@ export function ThreeDeeRender({ context }: { context: PanelExtensionContext }):
         <canvas ref={setCanvas} style={{ position: "absolute", top: 0, left: 0 }} />
       </CameraListener>
       <RendererContext.Provider value={renderer}>
-        <RendererOverlay colorScheme={colorScheme} enableStats={config.enableStats} />
+        <RendererOverlay colorScheme={colorScheme} enableStats={config.scene.enableStats ?? true} />
       </RendererContext.Provider>
     </div>
   );
@@ -587,8 +586,12 @@ function updateTopicSettings(
 
   switch (layerType) {
     case LayerType.Transform:
+      throw new Error(`Attempted to update topic settings for Transform "${topic}"`);
     case LayerType.Marker:
+      renderer.setMarkerSettings(topic, topicConfig);
+      break;
     case LayerType.OccupancyGrid:
+      renderer.setOccupancyGridSettings(topic, topicConfig);
       break;
     case LayerType.PointCloud:
       renderer.setPointCloud2Settings(topic, topicConfig);

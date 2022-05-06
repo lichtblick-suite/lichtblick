@@ -4,12 +4,15 @@
 
 import * as THREE from "three";
 
+import { Topic } from "@foxglove/studio";
+import { SettingsTreeFields } from "@foxglove/studio-base/components/SettingsTreeEditor/types";
+
 import { DynamicBufferGeometry } from "../DynamicBufferGeometry";
 import { MaterialCache, PointsVertexColor } from "../MaterialCache";
 import { Renderer } from "../Renderer";
 import { rgbaToCssString, stringToRgba } from "../color";
 import { Pose, PointCloud2, PointFieldType, rosTimeToNanoSec } from "../ros";
-import { LayerSettingsPointCloud2 } from "../settings";
+import { LayerSettings, LayerSettingsPointCloud2, LayerType } from "../settings";
 import { makePose } from "../transforms/geometry";
 import { updatePose } from "../updatePose";
 import { getColorConverter } from "./pointClouds/colors";
@@ -51,6 +54,12 @@ const DEFAULT_SETTINGS: LayerSettingsPointCloud2 = {
   maxValue: undefined,
 };
 
+const POINT_SHAPE_OPTIONS = [
+  { label: "Circle", value: "circle" },
+  { label: "Square", value: "square" },
+];
+const POINTCLOUD_REQUIRED_FIELDS = ["x", "y", "z"];
+
 const COLOR_FIELDS = new Set<string>(["rgb", "rgba", "bgr", "bgra", "abgr", "color"]);
 const INTENSITY_FIELDS = new Set<string>(["intensity", "i"]);
 
@@ -61,10 +70,15 @@ const tempColor = { r: 0, g: 0, b: 0, a: 0 };
 export class PointClouds extends THREE.Object3D {
   renderer: Renderer;
   pointCloudsByTopic = new Map<string, PointCloudRenderable>();
+  pointCloudFieldsByTopic = new Map<string, string[]>();
 
   constructor(renderer: Renderer) {
     super();
     this.renderer = renderer;
+
+    renderer.setSettingsFieldsProvider(LayerType.PointCloud, (topicConfig, topic) =>
+      settingsFields(this.pointCloudFieldsByTopic, topicConfig, topic),
+    );
   }
 
   dispose(): void {
@@ -114,6 +128,13 @@ export class PointClouds extends THREE.Object3D {
 
       this.add(renderable);
       this.pointCloudsByTopic.set(topic, renderable);
+    }
+
+    // Update the mapping of topic to point cloud field names if necessary
+    let fields = this.pointCloudFieldsByTopic.get(topic);
+    if (!fields || fields.length !== pointCloud.fields.length) {
+      fields = pointCloud.fields.map((field) => field.name);
+      this.pointCloudFieldsByTopic.set(topic, fields);
     }
 
     this._updatePointCloudRenderable(renderable, pointCloud);
@@ -411,6 +432,141 @@ function autoSelectColorField(output: LayerSettingsPointCloud2, pointCloud: Poin
     output.colorMap = "turbo";
     return;
   }
+}
+
+function bestColorByField(pclFields: string[]): string {
+  for (const field of pclFields) {
+    if (COLOR_FIELDS.has(field)) {
+      return field;
+    }
+  }
+  for (const field of pclFields) {
+    if (INTENSITY_FIELDS.has(field)) {
+      return field;
+    }
+  }
+  return "x";
+}
+
+function settingsFields(
+  pclFieldsByTopic: Map<string, string[]>,
+  topicConfig: Partial<LayerSettings>,
+  topic: Topic,
+): SettingsTreeFields {
+  const cur = topicConfig as Partial<LayerSettingsPointCloud2> | undefined;
+  const pclFields = pclFieldsByTopic.get(topic.name) ?? POINTCLOUD_REQUIRED_FIELDS;
+  const pointSize = cur?.pointSize;
+  const pointShape = cur?.pointShape ?? "circle";
+  const decayTime = cur?.decayTime;
+  const colorMode = cur?.colorMode ?? "flat";
+  const flatColor = cur?.flatColor ?? "#ffffff";
+  const colorField = cur?.colorField ?? bestColorByField(pclFields);
+  const colorFieldOptions = pclFields.map((field) => ({ label: field, value: field }));
+  // const gradient = cur?.gradient;
+  const colorMap = cur?.colorMap ?? "turbo";
+  const rgbByteOrder = cur?.rgbByteOrder ?? "rgba";
+  const minValue = cur?.minValue;
+  const maxValue = cur?.maxValue;
+
+  const fields: SettingsTreeFields = {};
+  fields.pointSize = {
+    label: "Point size",
+    input: "number",
+    value: pointSize,
+    placeholder: "2",
+  };
+  fields.pointShape = {
+    label: "Point shape",
+    input: "select",
+    options: POINT_SHAPE_OPTIONS,
+    value: pointShape,
+  };
+  fields.decayTime = {
+    label: "Decay time",
+    input: "number",
+    value: decayTime,
+    step: 0.5,
+    placeholder: "0 seconds",
+  };
+  fields.colorMode = {
+    label: "Color mode",
+    input: "select",
+    options: [
+      { label: "Flat", value: "flat" },
+      { label: "Color Map", value: "colormap" },
+      { label: "Gradient", value: "gradient" },
+      { label: "RGB", value: "rgb" },
+      { label: "RGBA", value: "rgba" },
+    ],
+    value: colorMode,
+  };
+  if (colorMode === "flat") {
+    fields.flatColor = { label: "Flat color", input: "rgba", value: flatColor };
+  } else {
+    fields.colorField = {
+      label: "Color by",
+      input: "select",
+      options: colorFieldOptions,
+      value: colorField,
+    };
+
+    switch (colorMode) {
+      case "gradient":
+        // node.fields.gradient = { label: "Gradient", input: "gradient", value: gradient };
+        break;
+      case "colormap":
+        fields.colorMap = {
+          label: "Color map",
+          input: "select",
+          options: [
+            { label: "Turbo", value: "turbo" },
+            { label: "Rainbow", value: "rainbow" },
+            { label: "Gradient", value: "gradient" },
+          ],
+          value: colorMap,
+        };
+        break;
+      case "rgb":
+        fields.rgbByteOrder = {
+          label: "RGB byte order",
+          input: "select",
+          options: [
+            { label: "RGB", value: "rgba" },
+            { label: "BGR", value: "bgra" },
+            { label: "XBGR", value: "abgr" },
+          ],
+          value: rgbByteOrder,
+        };
+        break;
+      case "rgba":
+        fields.rgbByteOrder = {
+          label: "RGBA byte order",
+          input: "select",
+          options: [
+            { label: "RGBA", value: "rgba" },
+            { label: "BGRA", value: "bgra" },
+            { label: "ABGR", value: "abgr" },
+          ],
+          value: rgbByteOrder,
+        };
+        break;
+    }
+
+    fields.minValue = {
+      label: "Value min",
+      input: "number",
+      value: minValue,
+      placeholder: "auto",
+    };
+    fields.maxValue = {
+      label: "Value max",
+      input: "number",
+      value: maxValue,
+      placeholder: "auto",
+    };
+  }
+
+  return fields;
 }
 
 function pointFieldTypeName(type: PointFieldType): string {
