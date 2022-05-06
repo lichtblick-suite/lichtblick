@@ -64,7 +64,6 @@ import {
 } from "@foxglove/studio-base/context/CurrentLayoutContext";
 import { useCurrentUser } from "@foxglove/studio-base/context/CurrentUserContext";
 import { useExtensionLoader } from "@foxglove/studio-base/context/ExtensionLoaderContext";
-import { useHelpInfo } from "@foxglove/studio-base/context/HelpInfoContext";
 import LinkHandlerContext from "@foxglove/studio-base/context/LinkHandlerContext";
 import { useNativeAppMenu } from "@foxglove/studio-base/context/NativeAppMenuContext";
 import {
@@ -78,6 +77,7 @@ import { useCalloutDismissalBlocker } from "@foxglove/studio-base/hooks/useCallo
 import useElectronFilesToOpen from "@foxglove/studio-base/hooks/useElectronFilesToOpen";
 import useNativeAppMenuEvent from "@foxglove/studio-base/hooks/useNativeAppMenuEvent";
 import { PlayerPresence } from "@foxglove/studio-base/players/types";
+import { HelpInfoStore, useHelpInfo } from "@foxglove/studio-base/providers/HelpInfoProvider";
 import { PanelSettingsEditorContextProvider } from "@foxglove/studio-base/providers/PanelSettingsEditorContextProvider";
 
 const log = Logger.getLogger(__filename);
@@ -156,6 +156,8 @@ const selectPause = (ctx: MessagePipelineContext) => ctx.pausePlayback;
 const selectPlay = (ctx: MessagePipelineContext) => ctx.startPlayback;
 const selectSeek = (ctx: MessagePipelineContext) => ctx.seekPlayback;
 
+const selectSetHelpInfo = (store: HelpInfoStore) => store.setHelpInfo;
+
 export default function Workspace(props: WorkspaceProps): JSX.Element {
   const classes = useStyles();
   const containerRef = useRef<HTMLDivElement>(ReactNull);
@@ -221,7 +223,7 @@ export default function Workspace(props: WorkspaceProps): JSX.Element {
     }
   }, [playerPresence]);
 
-  const { setHelpInfo } = useHelpInfo();
+  const setHelpInfo = useHelpInfo(selectSetHelpInfo);
 
   const handleInternalLink = useCallback(
     (event: React.MouseEvent, href: string) => {

@@ -11,11 +11,8 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { createContext, useCallback, useRef } from "react";
-
-import { useShallowMemo } from "@foxglove/hooks";
-import { IHelpInfo, HelpInfo } from "@foxglove/studio-base/context/HelpInfoContext";
 import { PanelCatalog, PanelInfo } from "@foxglove/studio-base/context/PanelCatalogContext";
+import HelpInfoProvider from "@foxglove/studio-base/providers/HelpInfoProvider";
 import PanelSetup from "@foxglove/studio-base/stories/PanelSetup";
 
 import HelpSidebar from ".";
@@ -44,30 +41,6 @@ class MockPanelCatalog implements PanelCatalog {
   }
 }
 
-const MockHelpInfoContext = createContext<IHelpInfo | undefined>(undefined);
-MockHelpInfoContext.displayName = "MockHelpInfoContext";
-function MockHelpInfoProvider({ children }: React.PropsWithChildren<unknown>): JSX.Element {
-  const helpInfo = useRef<HelpInfo>({ title: "Some title", content: <>Some help content</> });
-  const helpInfoListeners = useRef(new Set<(_: HelpInfo) => void>());
-
-  const getHelpInfo = useCallback((): HelpInfo => helpInfo.current, []);
-  const setHelpInfo = useCallback((info: HelpInfo): void => {
-    helpInfo.current = info;
-    for (const listener of [...helpInfoListeners.current]) {
-      listener(helpInfo.current);
-    }
-  }, []);
-
-  const value: IHelpInfo = useShallowMemo({
-    getHelpInfo,
-    setHelpInfo,
-    addHelpInfoListener: useCallback(() => {}, []),
-    removeHelpInfoListener: useCallback(() => {}, []),
-  });
-
-  return <MockHelpInfoContext.Provider value={value}>{children}</MockHelpInfoContext.Provider>;
-}
-
 export function Home(): JSX.Element {
   return (
     <div style={{ margin: 30, height: 400 }}>
@@ -76,9 +49,9 @@ export function Home(): JSX.Element {
         fixture={{ topics: [], datatypes: new Map(), frame: {}, layout: "Sample2!4co6n9d" }}
         omitDragAndDrop
       >
-        <MockHelpInfoProvider>
+        <HelpInfoProvider>
           <HelpSidebar />
-        </MockHelpInfoProvider>
+        </HelpInfoProvider>
       </PanelSetup>
     </div>
   );
@@ -101,9 +74,9 @@ export function PanelView(): JSX.Element {
         fixture={{ topics: [], datatypes: new Map(), frame: {}, layout: "Sample2!4co6n9d" }}
         omitDragAndDrop
       >
-        <MockHelpInfoProvider>
+        <HelpInfoProvider>
           <HelpSidebar />
-        </MockHelpInfoProvider>
+        </HelpInfoProvider>
       </PanelSetup>
     </div>
   );

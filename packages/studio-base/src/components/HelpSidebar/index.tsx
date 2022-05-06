@@ -13,9 +13,13 @@ import KeyboardShortcutHelp from "@foxglove/studio-base/components/KeyboardShort
 import MesssagePathSyntaxHelp from "@foxglove/studio-base/components/MessagePathSyntax/index.help.md";
 import { SidebarContent } from "@foxglove/studio-base/components/SidebarContent";
 import TextContent from "@foxglove/studio-base/components/TextContent";
-import { useHelpInfo, HelpInfo } from "@foxglove/studio-base/context/HelpInfoContext";
 import { PanelInfo, usePanelCatalog } from "@foxglove/studio-base/context/PanelCatalogContext";
-import { DEFAULT_HELP_INFO } from "@foxglove/studio-base/providers/HelpInfoProvider";
+import {
+  DEFAULT_HELP_INFO,
+  HelpInfo,
+  HelpInfoStore,
+  useHelpInfo,
+} from "@foxglove/studio-base/providers/HelpInfoProvider";
 import isDesktopApp from "@foxglove/studio-base/util/isDesktopApp";
 
 export const MESSAGE_PATH_SYNTAX_HELP_INFO = {
@@ -96,6 +100,9 @@ const useComponentStyles = (theme: ITheme) =>
     [theme],
   );
 
+const selectHelpInfo = (store: HelpInfoStore) => store.helpInfo;
+const selectsSetHelpInfo = (store: HelpInfoStore) => store.setHelpInfo;
+
 export default function HelpSidebar({
   isHomeViewForTests,
 }: React.PropsWithChildren<{
@@ -103,7 +110,8 @@ export default function HelpSidebar({
 }>): JSX.Element {
   const theme = useTheme();
   const styles = useComponentStyles(theme);
-  const { helpInfo, setHelpInfo } = useHelpInfo();
+  const helpInfo = useHelpInfo(selectHelpInfo);
+  const setHelpInfo = useHelpInfo(selectsSetHelpInfo);
 
   const panelCatalog = usePanelCatalog();
 

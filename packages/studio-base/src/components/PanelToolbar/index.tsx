@@ -10,6 +10,7 @@
 //   This source code is licensed under the Apache License, Version 2.0,
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
+
 import FullscreenExitIcon from "@mdi/svg/svg/fullscreen-exit.svg";
 import FullscreenIcon from "@mdi/svg/svg/fullscreen.svg";
 import HelpCircleOutlineIcon from "@mdi/svg/svg/help-circle-outline.svg";
@@ -19,9 +20,9 @@ import { useContext, useState, useMemo, useRef } from "react";
 
 import Icon from "@foxglove/studio-base/components/Icon";
 import PanelContext from "@foxglove/studio-base/components/PanelContext";
-import { useHelpInfo } from "@foxglove/studio-base/context/HelpInfoContext";
 import { useWorkspace } from "@foxglove/studio-base/context/WorkspaceContext";
 import { usePanelMousePresence } from "@foxglove/studio-base/hooks/usePanelMousePresence";
+import { HelpInfoStore, useHelpInfo } from "@foxglove/studio-base/providers/HelpInfoProvider";
 
 import { PanelToolbarControls } from "./PanelToolbarControls";
 
@@ -84,6 +85,8 @@ const useStyles = makeStyles((theme: Theme) => ({
   },
 }));
 
+const selectSetHelpInfo = (store: HelpInfoStore) => store.setHelpInfo;
+
 // Panel toolbar should be added to any panel that's part of the
 // react-mosaic layout.  It adds a drag handle, remove/replace controls
 // and has a place to add custom controls via it's children property
@@ -103,7 +106,7 @@ export default React.memo<Props>(function PanelToolbar({
   const panelContext = useContext(PanelContext);
   const { openHelp } = useWorkspace();
 
-  const { setHelpInfo } = useHelpInfo();
+  const setHelpInfo = useHelpInfo(selectSetHelpInfo);
 
   // Help-shown state must be hoisted outside the controls container so the modal can remain visible
   // when the panel is no longer hovered.

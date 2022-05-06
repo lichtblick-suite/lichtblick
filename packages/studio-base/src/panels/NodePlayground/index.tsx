@@ -34,12 +34,12 @@ import {
   useCurrentLayoutActions,
   useCurrentLayoutSelector,
 } from "@foxglove/studio-base/context/CurrentLayoutContext";
-import { useHelpInfo } from "@foxglove/studio-base/context/HelpInfoContext";
 import { useUserNodeState } from "@foxglove/studio-base/context/UserNodeStateContext";
 import { useWorkspace } from "@foxglove/studio-base/context/WorkspaceContext";
 import BottomBar from "@foxglove/studio-base/panels/NodePlayground/BottomBar";
 import Sidebar from "@foxglove/studio-base/panels/NodePlayground/Sidebar";
 import Playground from "@foxglove/studio-base/panels/NodePlayground/playground-icon.svg";
+import { HelpInfoStore, useHelpInfo } from "@foxglove/studio-base/providers/HelpInfoProvider";
 import { usePanelSettingsTreeUpdate } from "@foxglove/studio-base/providers/PanelSettingsEditorContextProvider";
 import { UserNodes } from "@foxglove/studio-base/types/panels";
 import { colors } from "@foxglove/studio-base/util/sharedStyleConstants";
@@ -129,8 +129,10 @@ function buildSettingsStree(config: Config): SettingsTreeNode {
   };
 }
 
+const selectSetHelpInfo = (store: HelpInfoStore) => store.setHelpInfo;
+
 const WelcomeScreen = ({ addNewNode }: { addNewNode: (code?: string) => void }) => {
-  const { setHelpInfo } = useHelpInfo();
+  const setHelpInfo = useHelpInfo(selectSetHelpInfo);
   const { openHelp } = useWorkspace();
   return (
     <SWelcomeScreen>
