@@ -50,13 +50,13 @@ export default function Root({
 
   const dataSources: IDataSourceFactory[] = useMemo(() => {
     const sources = [
+      new RosbridgeDataSourceFactory(),
+      new FoxgloveWebSocketDataSourceFactory(),
       new Ros1SocketDataSourceFactory(),
       new Ros1LocalBagDataSourceFactory({ useIterablePlayer: enableExperimentalBagPlayer }),
       new Ros1RemoteBagDataSourceFactory({ useIterablePlayer: enableExperimentalBagPlayer }),
       new Ros2SocketDataSourceFactory(),
       new Ros2LocalBagDataSourceFactory(),
-      new RosbridgeDataSourceFactory(),
-      new FoxgloveWebSocketDataSourceFactory(),
       new UlogLocalDataSourceFactory(),
       new VelodyneDataSourceFactory(),
       new FoxgloveDataPlatformDataSourceFactory({

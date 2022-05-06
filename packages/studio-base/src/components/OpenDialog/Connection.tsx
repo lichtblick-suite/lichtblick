@@ -110,8 +110,6 @@ export default function Connection(props: ConnectionProps): JSX.Element {
             </Text>
           )}
 
-          {selectedSource?.docsLink && <Link href={selectedSource.docsLink}>View docs.</Link>}
-
           {selectedSource?.formConfig != undefined && (
             <Stack flexGrow={1} justifyContent="space-between">
               <Stack spacing={2}>
@@ -144,6 +142,8 @@ export default function Connection(props: ConnectionProps): JSX.Element {
             </Stack>
           )}
           {selectedSource?.disabledReason}
+
+          {selectedSource?.docsLink && <Link href={selectedSource.docsLink}>View docs.</Link>}
         </Stack>
       </Stack>
     </View>
