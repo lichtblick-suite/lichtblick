@@ -3,13 +3,7 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 import { ColorPicker } from "@fluentui/react";
-import {
-  Card,
-  TextField,
-  styled as muiStyled,
-  TextFieldProps,
-  ClickAwayListener,
-} from "@mui/material";
+import { Card, TextField, styled as muiStyled, ClickAwayListener } from "@mui/material";
 import { useState } from "react";
 import tinycolor from "tinycolor2";
 
@@ -49,8 +43,9 @@ type ColorPickerInputProps = {
   alphaType: "none" | "alpha";
   value: undefined | string;
   onChange: (value: undefined | string) => void;
+  placeholder?: string;
   swatchOrientation?: "start" | "end";
-} & Omit<TextFieldProps, "onChange">;
+};
 
 export function ColorPickerInput(props: ColorPickerInputProps): JSX.Element {
   const { onChange, swatchOrientation = "start", value } = props;
@@ -64,10 +59,12 @@ export function ColorPickerInput(props: ColorPickerInputProps): JSX.Element {
   return (
     <Root>
       <StyledTextField
-        {...props}
-        value={value}
+        fullWidth
         onChange={(event) => onChange(event.target.value)}
         placeholder={props.placeholder}
+        size="small"
+        value={value}
+        variant="filled"
         InputProps={{
           startAdornment: swatchOrientation === "start" && (
             <ColorSwatch color={swatchColor} onClick={togglePicker} />

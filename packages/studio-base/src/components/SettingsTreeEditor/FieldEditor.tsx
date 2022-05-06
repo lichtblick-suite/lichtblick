@@ -193,11 +193,8 @@ function FieldInput({
       return (
         <ColorPickerInput
           alphaType="none"
-          fullWidth
           placeholder={field.placeholder}
-          size="small"
           value={field.value?.toString()}
-          variant="filled"
           onChange={(value) =>
             actionHandler({
               action: "update",
@@ -211,11 +208,8 @@ function FieldInput({
       return (
         <ColorPickerInput
           alphaType="alpha"
-          fullWidth
           placeholder={field.placeholder}
-          size="small"
           value={field.value?.toString()}
-          variant="filled"
           onChange={(value) =>
             actionHandler({
               action: "update",
