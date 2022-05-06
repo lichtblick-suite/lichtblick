@@ -28,9 +28,9 @@ import {
   IRemoteLayoutStorage,
   RemoteLayout,
 } from "@foxglove/studio-base/services/IRemoteLayoutStorage";
-import computeLayoutSyncOperations, {
-  SyncOperation,
-} from "@foxglove/studio-base/services/LayoutManager/computeLayoutSyncOperations";
+
+import { NamespacedLayoutStorage } from "./NamespacedLayoutStorage";
+import computeLayoutSyncOperations, { SyncOperation } from "./computeLayoutSyncOperations";
 
 const log = Logger.getLogger(__filename);
 
@@ -54,55 +54,6 @@ async function updateOrFetchLayout(
       log.info(`Layout update rejected, using server version: ${params.id}`);
       return remoteLayout;
     }
-  }
-}
-
-/**
- * A wrapper around ILayoutStorage for a particular namespace.
- */
-class NamespacedLayoutStorage {
-  private migration: Promise<void>;
-  constructor(
-    private storage: ILayoutStorage,
-    private namespace: string,
-    {
-      migrateUnnamespacedLayouts,
-      importFromNamespace,
-    }: { migrateUnnamespacedLayouts: boolean; importFromNamespace: string | undefined },
-  ) {
-    this.migration = (async function () {
-      if (migrateUnnamespacedLayouts) {
-        await storage
-          .migrateUnnamespacedLayouts?.(namespace)
-          .catch((error) => log.error("Migration failed:", error));
-      }
-
-      if (importFromNamespace != undefined) {
-        await storage
-          .importLayouts({
-            fromNamespace: importFromNamespace,
-            toNamespace: namespace,
-          })
-          .catch((error) => log.error("Import failed:", error));
-      }
-    })();
-  }
-
-  async list(): Promise<readonly Layout[]> {
-    await this.migration;
-    return await this.storage.list(this.namespace);
-  }
-  async get(id: LayoutID): Promise<Layout | undefined> {
-    await this.migration;
-    return await this.storage.get(this.namespace, id);
-  }
-  async put(layout: Layout): Promise<Layout> {
-    await this.migration;
-    return await this.storage.put(this.namespace, layout);
-  }
-  async delete(id: LayoutID): Promise<void> {
-    await this.migration;
-    await this.storage.delete(this.namespace, id);
   }
 }
 
@@ -209,9 +160,48 @@ export default class LayoutManager implements ILayoutManager {
   }
 
   async getLayout(id: LayoutID): Promise<Layout | undefined> {
+    const existingLocal = await this.local.runExclusive(async (local) => {
+      return await local.get(id);
+    });
+
+    if (existingLocal) {
+      return layoutAppearsDeleted(existingLocal) ? undefined : existingLocal;
+    }
+
+    log.debug(`No local layout id:${id}.`);
+
+    // If we are offline, there's nothing else we can do to load the layout
+    if (!this.isOnline) {
+      log.debug("LayoutManager offline");
+      return undefined;
+    }
+
+    log.debug(`Attempting to fetch from remote id:${id}`);
+    // We couldn't find an existing local layout for our id, so we attempt to load the remote one
+    const remoteLayout = await this.remote?.getLayout(id);
+    if (!remoteLayout) {
+      log.debug(`No remote layout with id:${id}`);
+      return undefined;
+    }
+
     return await this.local.runExclusive(async (local) => {
-      const layout = await local.get(id);
-      return layout && !layoutAppearsDeleted(layout) ? layout : undefined;
+      // Layout sync may have happened while we fetched the remote layout.
+      // We see if we have the layout locally and use that before caching the fetched remote layout.
+      const localLayout = await local.get(id);
+      if (localLayout) {
+        log.debug(`Local layout loaded while fetching remote id:${id}`);
+        return localLayout;
+      }
+
+      log.debug(`Adding layout to cache from getLayout: ${remoteLayout.id}`);
+      return await local.put({
+        id: remoteLayout.id,
+        name: remoteLayout.name,
+        permission: remoteLayout.permission,
+        baseline: { data: remoteLayout.data, savedAt: remoteLayout.savedAt },
+        working: undefined,
+        syncInfo: { status: "tracked", lastRemoteSavedAt: remoteLayout.savedAt },
+      });
     });
   }
 

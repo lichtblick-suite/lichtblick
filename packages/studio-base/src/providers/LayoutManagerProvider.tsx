@@ -16,7 +16,7 @@ import { useRemoteLayoutStorage } from "@foxglove/studio-base/context/RemoteLayo
 import { useAppConfigurationValue } from "@foxglove/studio-base/hooks/useAppConfigurationValue";
 import useCallbackWithToast from "@foxglove/studio-base/hooks/useCallbackWithToast";
 import { ISO8601Timestamp, LayoutID } from "@foxglove/studio-base/services/ILayoutStorage";
-import LayoutManager from "@foxglove/studio-base/services/LayoutManager";
+import LayoutManager from "@foxglove/studio-base/services/LayoutManager/LayoutManager";
 import delay from "@foxglove/studio-base/util/delay";
 
 const log = Logger.getLogger(__filename);

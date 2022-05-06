@@ -2,8 +2,8 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { DefaultButton, IconButton, Spinner, Toggle, useTheme } from "@fluentui/react";
-import { Box, Stack } from "@mui/material";
+import { IconButton, Spinner, useTheme } from "@fluentui/react";
+import { Box, Stack, Button, Switch, FormGroup, FormControlLabel } from "@mui/material";
 import { partition } from "lodash";
 import moment from "moment";
 import path from "path";
@@ -467,7 +467,7 @@ export default function LayoutBrowser({
         </div>
         <div style={{ flexGrow: 1 }} />
         {showSignInPrompt && <SignInPrompt onDismiss={() => void setHideSignInPrompt(true)} />}
-        {layoutDebug?.syncNow && (
+        {layoutDebug && (
           <Stack
             spacing={0.5}
             style={{
@@ -482,28 +482,30 @@ export default function LayoutBrowser({
           >
             <Box flexGrow={1} alignSelf="stretch">
               <Stack direction="row" flexShrink={0} spacing={1}>
-                <Box flexGrow={1}>
-                  <DefaultButton
-                    text="Sync"
-                    onClick={async () => {
-                      await layoutDebug.syncNow();
-                      await reloadLayouts();
-                    }}
-                    styles={{
-                      root: {
-                        display: "block",
-                        width: "100%",
-                        margin: 0,
-                      },
-                    }}
+                <Button
+                  onClick={async () => {
+                    await layoutDebug.syncNow();
+                    await reloadLayouts();
+                  }}
+                >
+                  Sync
+                </Button>
+
+                <Box flexGrow={1} />
+
+                <FormGroup>
+                  <FormControlLabel
+                    control={
+                      <Switch
+                        checked={layoutManager.isOnline}
+                        onChange={(_, checked) => {
+                          layoutDebug.setOnline(checked);
+                        }}
+                      />
+                    }
+                    label={layoutManager.isOnline ? "Online" : "Offline"}
                   />
-                </Box>
-                <Toggle
-                  checked={layoutManager.isOnline}
-                  onText="Online"
-                  offText="Offline"
-                  onChange={(_, checked) => checked != undefined && layoutDebug.setOnline(checked)}
-                />
+                </FormGroup>
               </Stack>
             </Box>
           </Stack>

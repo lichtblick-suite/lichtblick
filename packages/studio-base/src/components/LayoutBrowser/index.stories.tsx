@@ -19,7 +19,7 @@ import CurrentLayoutProvider from "@foxglove/studio-base/providers/CurrentLayout
 import { defaultPlaybackConfig } from "@foxglove/studio-base/providers/CurrentLayoutProvider/reducers";
 import LayoutManagerProvider from "@foxglove/studio-base/providers/LayoutManagerProvider";
 import { ISO8601Timestamp, Layout, LayoutID } from "@foxglove/studio-base/services/ILayoutStorage";
-import LayoutManager from "@foxglove/studio-base/services/LayoutManager";
+import LayoutManager from "@foxglove/studio-base/services/LayoutManager/LayoutManager";
 import MockLayoutStorage from "@foxglove/studio-base/services/MockLayoutStorage";
 import { useReadySignal } from "@foxglove/studio-base/stories/ReadySignalContext";
 import delay from "@foxglove/studio-base/util/delay";
