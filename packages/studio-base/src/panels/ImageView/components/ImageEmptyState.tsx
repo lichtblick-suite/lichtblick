@@ -17,7 +17,7 @@ import EmptyState from "@foxglove/studio-base/components/EmptyState";
 
 type Props = {
   cameraTopic: string;
-  markerTopics: string[];
+  markerTopics: readonly string[];
   shouldSynchronize: boolean;
 };
 
@@ -51,7 +51,7 @@ export function ImageEmptyState(props: Props): JSX.Element {
           <div>
             <code>{cameraTopic}</code>
           </div>
-          {markerTopics.sort().map((topic) => (
+          {[...markerTopics].sort().map((topic) => (
             <div key={topic}>
               <code>{topic}</code>
             </div>
