@@ -9,7 +9,7 @@ import { ChartData } from "@foxglove/studio-base/components/Chart";
 import { MessageAndData } from "@foxglove/studio-base/components/MessagePathSyntax/useCachedGetMessagePathDataItems";
 import { TimeBasedChartTooltipData } from "@foxglove/studio-base/components/TimeBasedChart";
 import { darkColor, lineColors } from "@foxglove/studio-base/util/plotColors";
-import { getTimestampForMessage } from "@foxglove/studio-base/util/time";
+import { getTimestampForMessageEvent } from "@foxglove/studio-base/util/time";
 import { grey } from "@foxglove/studio-base/util/toolsColorScheme";
 
 import positiveModulo from "./positiveModulo";
@@ -51,9 +51,7 @@ export default function messagesToDatasets(args: Args): DatasetInfo {
     }
 
     for (const itemByPath of messages) {
-      const headerStamp = getTimestampForMessage(itemByPath.messageEvent.message);
-      const timestamp =
-        path.timestampMethod === "headerStamp" ? headerStamp : itemByPath.messageEvent.receiveTime;
+      const timestamp = getTimestampForMessageEvent(itemByPath.messageEvent, path.timestampMethod);
       if (!timestamp) {
         continue;
       }
