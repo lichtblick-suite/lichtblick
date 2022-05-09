@@ -11,7 +11,7 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { Link, makeStyles } from "@fluentui/react";
+import { Link, styled as muiStyled } from "@mui/material";
 import { PropsWithChildren, useCallback, useContext, Suspense } from "react";
 import { useAsync } from "react-use";
 import { CSSProperties } from "styled-components";
@@ -22,123 +22,121 @@ import { fonts } from "@foxglove/studio-base/util/sharedStyleConstants";
 // workaround for ESM in jest: https://github.com/foxglove/studio/issues/1854
 const Markdown = React.lazy(async () => await import("react-markdown"));
 
-const useStyles = makeStyles((theme) => ({
-  root: {
-    ...theme.fonts.smallPlus,
-    lineHeight: "1.6",
-    backgroundColor: "transparent",
-    color: theme.semanticColors.bodySubtext,
+const TextContentRoot = muiStyled("div")(({ theme }) => ({
+  ...theme.typography.body2,
+  lineHeight: "1.6",
+  backgroundColor: "transparent",
+  color: theme.palette.text.secondary,
 
-    "h1, h2, h3, h4, h5, h6": {
-      color: theme.semanticColors.bodyText,
+  "h1, h2, h3, h4, h5, h6": {
+    color: theme.palette.text.primary,
 
-      ":first-child": {
-        marginTop: 0,
-      },
+    ":first-child": {
+      marginTop: 0,
     },
-    h1: {
-      ...theme.fonts.large,
-      marginBottom: theme.spacing.s1,
-      fontWeight: 500,
-    },
-    h2: {
-      ...theme.fonts.mediumPlus,
-      marginBottom: theme.spacing.s1,
-      fontWeight: 500,
-    },
-    h3: {
-      ...theme.fonts.medium,
-      marginBottom: theme.spacing.s1,
-      color: theme.semanticColors.bodySubtext,
-      fontWeight: 500,
-    },
-    h4: {
-      ...theme.fonts.smallPlus,
-      marginBottom: theme.spacing.s2,
-      color: theme.semanticColors.bodySubtext,
-      fontWeight: 500,
-    },
-    "h5, h6": {
-      ...theme.fonts.small,
-      marginBottom: theme.spacing.s2,
-      color: theme.semanticColors.bodySubtext,
-      fontWeight: 500,
-    },
-    "ol, ul": {
-      paddingLeft: theme.spacing.l1,
-      marginBottom: theme.spacing.m,
-    },
-    li: {
-      margin: `${theme.spacing.s2} 0`,
-    },
-    "b, strong": {
-      fontWeight: "700 !important",
-    },
-    "p, ul": {
-      margin: `${theme.spacing.s1} 0`,
+  },
+  h1: {
+    ...theme.typography.h4,
+    marginBottom: theme.spacing(1),
+    fontWeight: 500,
+  },
+  h2: {
+    ...theme.typography.h5,
+    marginBottom: theme.spacing(1),
+    fontWeight: 500,
+  },
+  h3: {
+    ...theme.typography.h6,
+    marginBottom: theme.spacing(1),
+    color: theme.palette.text.secondary,
+    fontWeight: 500,
+  },
+  h4: {
+    ...theme.typography.subtitle1,
+    marginBottom: theme.spacing(0.5),
+    color: theme.palette.text.secondary,
+    fontWeight: 500,
+  },
+  "h5, h6": {
+    ...theme.typography.body2,
+    marginBottom: theme.spacing(0.5),
+    color: theme.palette.text.secondary,
+    fontWeight: 500,
+  },
+  "ol, ul": {
+    paddingLeft: theme.spacing(2.5),
+    marginBottom: theme.spacing(2.5),
+  },
+  li: {
+    margin: theme.spacing(0.5, 0),
+  },
+  "b, strong": {
+    fontWeight: "700 !important",
+  },
+  "p, ul": {
+    margin: theme.spacing(1, 0),
 
-      ":only-child": {
-        margin: `${theme.spacing.s2} 0`,
-      },
+    ":only-child": {
+      margin: theme.spacing(0.5, 0),
     },
-    img: {
-      maxWidth: "100%",
-    },
-    pre: {
-      whiteSpace: "pre-wrap",
-      fontFamily: fonts.MONOSPACE,
-      backgroundColor: theme.semanticColors.bodyBackgroundHovered,
-      padding: `0 ${theme.spacing.s2}`,
-      borderRadius: theme.effects.roundedCorner2,
+  },
+  img: {
+    maxWidth: "100%",
+  },
+  pre: {
+    whiteSpace: "pre-wrap",
+    fontFamily: fonts.MONOSPACE,
+    backgroundColor: theme.palette.action.hover,
+    padding: `0 ${theme.spacing(0.5)}`,
+    borderRadius: theme.shadows[2],
 
-      code: {
-        backgroundColor: "transparent",
-        padding: 0,
-      },
-    },
     code: {
-      fontFamily: fonts.MONOSPACE,
-      backgroundColor: theme.semanticColors.bodyBackgroundHovered,
-      borderRadius: "0.2em",
-      padding: `0 ${theme.spacing.s2}`,
+      backgroundColor: "transparent",
+      padding: 0,
     },
-    kbd: {
-      display: "inline-flex",
-      flex: "none",
-      fontFamily: fonts.MONOSPACE,
-      color: theme.semanticColors.bodySubtext,
-      backgroundColor: theme.semanticColors.bodyBackground,
-      boxShadow: `inset 0 1px 0 ${theme.semanticColors.bodyBackgroundHovered}`,
-      borderRadius: theme.effects.roundedCorner2,
-      fontSize: theme.fonts.small.fontSize,
-      padding: `0 ${theme.spacing.s2}`,
-      fontWeight: 500,
-      minWidth: 20,
-      alignItems: "center",
-      justifyContent: "center",
-    },
-    table: {
-      borderCollapse: "collapse",
-      borderSpacing: 0,
-      margin: `${theme.spacing.s1} -${theme.spacing.s2}`,
-      border: `1px solid ${theme.semanticColors.bodyFrameDivider}`,
-    },
-    "td, th": {
-      padding: theme.spacing.s2,
-      borderBottom: `1px solid ${theme.semanticColors.bodyFrameDivider}`,
-      borderRight: `1px solid ${theme.semanticColors.bodyFrameDivider}`,
+  },
+  code: {
+    fontFamily: fonts.MONOSPACE,
+    backgroundColor: theme.palette.action.hover,
+    borderRadius: "0.2em",
+    padding: `0 ${theme.spacing(0.5)}`,
+  },
+  kbd: {
+    display: "inline-flex",
+    flex: "none",
+    fontFamily: fonts.MONOSPACE,
+    color: theme.palette.text.secondary,
+    backgroundColor: theme.palette.background.default,
+    boxShadow: `inset 0 1px 0 ${theme.palette.action.hover}`,
+    borderRadius: theme.shape.borderRadius,
+    fontSize: theme.typography.body2.fontSize,
+    padding: `0 ${theme.spacing(0.5)}`,
+    fontWeight: 500,
+    minWidth: 20,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  table: {
+    borderCollapse: "collapse",
+    borderSpacing: 0,
+    margin: `${theme.spacing(1)} -${theme.spacing(0.5)}`,
+    border: `1px solid ${theme.palette.divider}`,
+  },
+  "td, th": {
+    padding: theme.spacing(0.5),
+    borderBottom: `1px solid ${theme.palette.divider}`,
+    borderRight: `1px solid ${theme.palette.divider}`,
 
-      ":last-child": {
-        borderRight: "none",
-      },
+    ":last-child": {
+      borderRight: "none",
     },
-    th: {
-      whiteSpace: "nowrap",
-    },
-    tr: {
-      ":last-child": {
-        "td, th": { borderBottom: "none" },
-      },
+  },
+  th: {
+    whiteSpace: "nowrap",
+  },
+  tr: {
+    ":last-child": {
+      "td, th": { borderBottom: "none" },
     },
   },
 }));
@@ -152,13 +150,15 @@ export default function TextContent(
   props: PropsWithChildren<Props>,
 ): React.ReactElement | ReactNull {
   const { children, style, allowMarkdownHtml } = props;
-  const classes = useStyles();
   const handleLink = useContext(LinkHandlerContext);
 
   const linkRenderer = useCallback(
     (linkProps: { href?: string; children: React.ReactNode }) => {
       return (
         <Link
+          color="primary"
+          underline="hover"
+          variant="inherit"
           href={linkProps.href}
           rel="noopener noreferrer"
           onClick={(event) => handleLink(event, linkProps.href ?? "")}
@@ -178,7 +178,7 @@ export default function TextContent(
   }
 
   return (
-    <div className={classes.root} style={style}>
+    <TextContentRoot style={style}>
       {typeof children === "string" ? (
         <Suspense fallback={ReactNull}>
           <Markdown
@@ -191,6 +191,6 @@ export default function TextContent(
       ) : (
         children
       )}
-    </div>
+    </TextContentRoot>
   );
 }
