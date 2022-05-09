@@ -4,10 +4,9 @@
 
 import LayersIcon from "@mui/icons-material/Layers";
 import PushPinIcon from "@mui/icons-material/PushPin";
-import { IconButton as MuiIconButton, styled as muiStyled, Tooltip } from "@mui/material";
+import { IconButton as MuiIconButton, styled as muiStyled } from "@mui/material";
 import { useCallback } from "react";
 
-import KeyboardShortcut from "@foxglove/studio-base/components/KeyboardShortcut";
 import { Save3DConfig } from "@foxglove/studio-base/panels/ThreeDimensionalViz";
 
 export const SWITCHER_HEIGHT = 30;
@@ -21,7 +20,11 @@ const TopicTreeSwitcherRoot = muiStyled("div")({
   pointerEvents: "auto",
 });
 
-const PinIconButton = muiStyled(MuiIconButton)<{ renderTopicTree: boolean }>(
+function shouldForwardProp(prop: string) {
+  return prop !== "renderTopicTree" && prop !== "showErrorBadge";
+}
+
+const PinIconButton = muiStyled(MuiIconButton, { shouldForwardProp })<{ renderTopicTree: boolean }>(
   ({ theme, renderTopicTree }) => ({
     color: theme.palette.common.white,
     backgroundColor: "transparent",
@@ -38,7 +41,7 @@ const PinIconButton = muiStyled(MuiIconButton)<{ renderTopicTree: boolean }>(
   }),
 );
 
-const LayersIconButton = muiStyled(MuiIconButton)<{
+const LayersIconButton = muiStyled(MuiIconButton, { shouldForwardProp })<{
   renderTopicTree: boolean;
   showErrorBadge: boolean;
 }>(({ renderTopicTree, showErrorBadge, theme }) => ({
@@ -106,18 +109,16 @@ export default function TopicTreeSwitcher({
         <PushPinIcon fontSize="small" color={pinTopics ? "info" : "inherit"} />
       </PinIconButton>
 
-      <Tooltip arrow title={<KeyboardShortcut keys={["T"]} />}>
-        <LayersIconButton
-          showErrorBadge={showErrorBadge}
-          renderTopicTree={renderTopicTree}
-          onClick={onClick}
-          title={
-            showErrorBadge ? "Errors found in selected topics/namespaces" : "Open topic switcher"
-          }
-        >
-          <LayersIcon fontSize="small" />
-        </LayersIconButton>
-      </Tooltip>
+      <LayersIconButton
+        showErrorBadge={showErrorBadge}
+        renderTopicTree={renderTopicTree}
+        onClick={onClick}
+        title={
+          showErrorBadge ? "Errors found in selected topics/namespaces" : "Open topic switcher"
+        }
+      >
+        <LayersIcon fontSize="small" />
+      </LayersIconButton>
     </TopicTreeSwitcherRoot>
   );
 }
