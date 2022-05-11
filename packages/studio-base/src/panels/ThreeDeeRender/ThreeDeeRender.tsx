@@ -265,7 +265,7 @@ export function ThreeDeeRender({ context }: { context: PanelExtensionContext }):
   // Set the rendering frame (aka followTf) based on the configured frame, falling back to a
   // heuristically chosen best frame for the current scene (defaultFrame)
   const followTf = useMemo(
-    () => (configFollowTf ? configFollowTf : defaultFrame),
+    () => (configFollowTf != undefined ? configFollowTf : defaultFrame),
     [configFollowTf, defaultFrame],
   );
 
@@ -278,6 +278,7 @@ export function ThreeDeeRender({ context }: { context: PanelExtensionContext }):
       settings: buildSettingsTree({
         config,
         coordinateFrames,
+        followTf,
         topics: topics ?? [],
         topicsToLayerTypes,
         fieldsProviders: fieldsProviders ?? new Map(),
@@ -301,9 +302,10 @@ export function ThreeDeeRender({ context }: { context: PanelExtensionContext }):
     }
   }, [config, renderer]);
 
-  // Draw a new frame when followTf changes
+  // Update renderer and draw a new frame when followTf changes
   useEffect(() => {
-    if (renderer && followTf != undefined) {
+    if (renderer?.config && followTf != undefined) {
+      renderer.renderFrameId = followTf;
       renderer.animationFrame();
     }
   }, [followTf, renderer]);

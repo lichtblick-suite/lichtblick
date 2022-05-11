@@ -92,6 +92,7 @@ const ONE_DEGREE = Math.PI / 180;
 export type SettingsTreeOptions = {
   config: ThreeDeeRenderConfig;
   coordinateFrames: ReadonlyArray<SelectEntry>;
+  followTf: string | undefined;
   topics: ReadonlyArray<Topic>;
   topicsToLayerTypes: Map<string, LayerType>;
   fieldsProviders: Map<LayerType, FieldsProvider>;
@@ -124,8 +125,9 @@ function buildTopicNode(
 const memoBuildTopicNode = memoize(buildTopicNode);
 
 export function buildSettingsTree(options: SettingsTreeOptions): SettingsTreeNode {
-  const { config, coordinateFrames, topics, topicsToLayerTypes, fieldsProviders } = options;
-  const { cameraState, followTf, scene } = config;
+  const { config, coordinateFrames, followTf, topics, topicsToLayerTypes, fieldsProviders } =
+    options;
+  const { cameraState, scene } = config;
   const { backgroundColor } = scene;
 
   const topicsChildren: SettingsTreeChildren = {};

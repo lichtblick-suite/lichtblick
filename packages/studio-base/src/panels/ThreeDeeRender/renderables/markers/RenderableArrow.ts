@@ -163,6 +163,17 @@ export class RenderableArrow extends RenderableMarker {
     if (!RenderableArrow._shaftEdgesGeometry) {
       const geometry = RenderableArrow.shaftGeometry(lod);
       RenderableArrow._shaftEdgesGeometry = new THREE.EdgesGeometry(geometry, 40);
+
+      // We only want the outline of the base of the shaft, not the top of the
+      // cylinder where it connects to the cone. Create a new position buffer
+      // attribute with the first half of the vertices discarded
+      const positionsAttrib = RenderableArrow._shaftEdgesGeometry.getAttribute("position");
+      const positions = Array.from(positionsAttrib.array);
+      const newCount = (positions.length / 3 / 2) * 3;
+      const newVertices = positions.slice(newCount, positions.length);
+      const newPositionsAttrib = new THREE.Float32BufferAttribute(newVertices, 3);
+      RenderableArrow._shaftEdgesGeometry.setAttribute("position", newPositionsAttrib);
+
       RenderableArrow._shaftEdgesGeometry.computeBoundingSphere();
     }
     return RenderableArrow._shaftEdgesGeometry;

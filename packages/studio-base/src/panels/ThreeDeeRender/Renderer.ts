@@ -93,17 +93,13 @@ export class Renderer extends EventEmitter<RendererEvents> {
   transformTree = new TransformTree(TRANSFORM_STORAGE_TIME_NS);
   currentTime: bigint | undefined;
   fixedFrameId: string | undefined;
+  renderFrameId: string | undefined;
   settingsFieldsProviders = new Map<LayerType, FieldsProvider>();
 
   frameAxes = new FrameAxes(this);
   occupancyGrids = new OccupancyGrids(this);
   pointClouds = new PointClouds(this);
   markers = new Markers(this);
-
-  // eslint-disable-next-line no-restricted-syntax
-  get renderFrameId(): string | undefined {
-    return this.config?.followTf;
-  }
 
   constructor(canvas: HTMLCanvasElement) {
     super();
