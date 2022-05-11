@@ -20,7 +20,7 @@ import tick from "@foxglove/studio-base/util/tick";
 
 const baseProps = {
   hidden: false,
-  highlight: false,
+  highlight: undefined,
   innerRef: undefined,
   isActive: false,
   isDragging: false,
@@ -69,7 +69,7 @@ storiesOf("panels/Tab/ToolbarTab", module)
   ))
   .add("highlight", () => (
     <Container>
-      <ToolbarTab {...{ ...baseProps, highlight: true }} />
+      <ToolbarTab {...{ ...baseProps, highlight: "before" }} />
     </Container>
   ))
   .add("dragging", () => (

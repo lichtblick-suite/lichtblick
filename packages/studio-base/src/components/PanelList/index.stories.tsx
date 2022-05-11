@@ -11,7 +11,7 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { useTheme } from "@fluentui/react";
+import { useTheme } from "@mui/material";
 import { storiesOf } from "@storybook/react";
 import { DndProvider } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
@@ -79,7 +79,7 @@ const PanelListWithInteractions = ({
   const theme = useTheme();
   return (
     <div
-      style={{ margin: 50, height: 480, backgroundColor: theme.palette.neutralLighterAlt }}
+      style={{ margin: 50, height: 480, backgroundColor: theme.palette.background.paper }}
       ref={(el) => {
         if (el) {
           const input: HTMLInputElement | undefined = el.querySelector("input") as any;
@@ -131,7 +131,7 @@ storiesOf("components/PanelList", module)
   .add("panel list", () => {
     const theme = useTheme();
     return (
-      <div style={{ margin: 50, height: 480, backgroundColor: theme.palette.neutralLighterAlt }}>
+      <div style={{ margin: 50, height: 480, backgroundColor: theme.palette.background.paper }}>
         <PanelList onPanelSelect={() => {}} />
       </div>
     );
@@ -139,7 +139,7 @@ storiesOf("components/PanelList", module)
   .add("panel grid", () => {
     const theme = useTheme();
     return (
-      <div style={{ margin: 50, height: 480, backgroundColor: theme.palette.neutralLighterAlt }}>
+      <div style={{ margin: 50, height: 480, backgroundColor: theme.palette.background.paper }}>
         <PanelList mode="grid" onPanelSelect={() => {}} />
       </div>
     );

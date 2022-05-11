@@ -129,7 +129,7 @@ function AddPanel() {
           <Link onClick={openLayoutBrowser}>Select a layout</Link> to get started!
         </Text>
       ) : (
-        <PanelList onPanelSelect={addPanel} backgroundColor={theme.palette.neutralLighterAlt} />
+        <PanelList onPanelSelect={addPanel} />
       )}
     </SidebarContent>
   );

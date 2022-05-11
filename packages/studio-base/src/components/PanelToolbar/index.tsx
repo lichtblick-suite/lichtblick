@@ -29,6 +29,7 @@ import { PanelToolbarControls } from "./PanelToolbarControls";
 type Props = {
   additionalIcons?: React.ReactNode;
   alwaysVisible?: boolean;
+  backgroundColor?: string;
   children?: React.ReactNode;
   floating?: boolean;
   helpContent?: React.ReactNode;
@@ -38,18 +39,22 @@ type Props = {
 
 const PanelToolbarRoot = muiStyled("div", {
   shouldForwardProp: (prop) =>
-    prop !== "shouldShow" && prop !== "floating" && prop !== "hasChildren",
+    prop !== "backgroundColor" &&
+    prop !== "floating" &&
+    prop !== "hasChildren" &&
+    prop !== "shouldShow",
 })<{
-  shouldShow: boolean;
+  backgroundColor?: string;
   floating: boolean;
   hasChildren: boolean;
-}>(({ shouldShow, floating, hasChildren, theme }) => ({
+  shouldShow: boolean;
+}>(({ backgroundColor, floating, hasChildren, shouldShow, theme }) => ({
   transition: "transform 80ms ease-in-out, opacity 80ms ease-in-out",
   flex: "0 0 auto",
   justifyContent: "flex-end",
   padding: theme.spacing(0.5),
   display: !shouldShow ? "none" : "flex",
-  backgroundColor: floating ? "transparent" : theme.palette.background.paper,
+  backgroundColor: backgroundColor ?? theme.palette.background.paper,
 
   ...(floating && {
     position: "absolute",
@@ -93,6 +98,7 @@ const selectSetHelpInfo = (store: HelpInfoStore) => store.setHelpInfo;
 export default React.memo<Props>(function PanelToolbar({
   additionalIcons,
   alwaysVisible = false,
+  backgroundColor,
   children,
   floating = false,
   helpContent,
@@ -172,10 +178,11 @@ export default React.memo<Props>(function PanelToolbar({
 
   return (
     <PanelToolbarRoot
-      shouldShow={shouldShow}
+      backgroundColor={floating ? "transparent" : backgroundColor}
       floating={floating}
       hasChildren={Boolean(children)}
       ref={containerRef}
+      shouldShow={shouldShow}
     >
       {children}
       <PanelToolbarControls

@@ -13,9 +13,7 @@
 
 import SearchIcon from "@mui/icons-material/Search";
 import {
-  AppBar,
   Theme,
-  Toolbar,
   Card,
   CardActionArea,
   CardContent,
@@ -27,9 +25,9 @@ import {
   ListItemText,
   Stack,
   Typography,
+  styled as muiStyled,
 } from "@mui/material";
 import { makeStyles } from "@mui/styles";
-import cx from "classnames";
 import fuzzySort from "fuzzysort";
 import { isEmpty } from "lodash";
 import { useCallback, useEffect, useMemo } from "react";
@@ -72,19 +70,6 @@ const useStyles = makeStyles((theme: Theme) => {
         backgroundColor: "transparent",
       },
     },
-    appBar: {
-      top: 0,
-      zIndex: 2,
-    },
-    appBarBackground: ({ backgroundColor }: { backgroundColor?: string }) => ({
-      backgroundImage: `linear-gradient(to top, transparent, ${
-        backgroundColor ?? theme.palette.background.default
-      } ${theme.spacing(1.5)}) !important`,
-    }),
-    toolbar: {
-      padding: theme.spacing(2),
-      justifyContent: "stretch",
-    },
     inputWrapper: {
       display: "flex",
       flex: "auto",
@@ -110,16 +95,20 @@ const useStyles = makeStyles((theme: Theme) => {
       gridTemplateColumns: "repeat(auto-fill, minmax(240px, 1fr))",
       gap: theme.spacing(2),
     },
-    noResults: {
-      display: "flex",
-      flexDirection: "column",
-      alignItems: "center",
-      justifyContent: "center",
-      padding: theme.spacing(2, 1),
-      color: theme.palette.text.secondary,
-    },
   };
 });
+
+const StickyToolbar = muiStyled("div")(({ theme }) => ({
+  position: "sticky",
+  top: -0.5, // yep that's a half pixel to avoid a gap between the appbar and panel top
+  zIndex: 100,
+  display: "flex",
+  padding: theme.spacing(2),
+  justifyContent: "stretch",
+  backgroundImage: `linear-gradient(to top, transparent, ${
+    theme.palette.background.paper
+  } ${theme.spacing(1.5)}) !important`,
+}));
 
 type DropDescription = {
   type: string;
@@ -477,27 +466,20 @@ function PanelList(props: Props): JSX.Element {
 
   return (
     <div className={classes.fullHeight}>
-      <AppBar
-        className={cx(classes.appBar, { [classes.appBarBackground]: !backgroundColor })}
-        position="sticky"
-        color="transparent"
-        elevation={0}
-      >
-        <Toolbar disableGutters className={classes.toolbar}>
-          <div className={classes.inputWrapper}>
-            <SearchIcon fontSize="small" color="primary" />
-            <LegacyInput
-              className={classes.searchInput}
-              placeholder="Search panels"
-              value={searchQuery}
-              onChange={handleSearchChange}
-              onKeyDown={onKeyDown}
-              onBlur={() => setHighlightedPanelIdx(undefined)}
-              autoFocus
-            />
-          </div>
-        </Toolbar>
-      </AppBar>
+      <StickyToolbar>
+        <div className={classes.inputWrapper}>
+          <SearchIcon fontSize="small" color="primary" />
+          <LegacyInput
+            className={classes.searchInput}
+            placeholder="Search panels"
+            value={searchQuery}
+            onChange={handleSearchChange}
+            onKeyDown={onKeyDown}
+            onBlur={() => setHighlightedPanelIdx(undefined)}
+            autoFocus
+          />
+        </div>
+      </StickyToolbar>
       {mode === "grid" ? (
         <Container className={classes.grid} maxWidth={false}>
           {allFilteredPanels.map(displayPanelListItem)}
@@ -507,7 +489,13 @@ function PanelList(props: Props): JSX.Element {
           {allFilteredPanels.map(displayPanelListItem)}
         </List>
       )}
-      {noResults && <div className={classes.noResults}>No panels match search criteria.</div>}
+      {noResults && (
+        <Stack alignItems="center" justifyContent="center" paddingX={1} paddingY={2}>
+          <Typography variant="body2" color="text.secondary">
+            No panels match search criteria.
+          </Typography>
+        </Stack>
+      )}
     </div>
   );
 }

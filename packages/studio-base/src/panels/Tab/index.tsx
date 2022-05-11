@@ -11,15 +11,15 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { Stack } from "@mui/material";
+import { styled as muiStyled } from "@mui/material";
 import { useCallback, useMemo, useState } from "react";
 import { MosaicNode } from "react-mosaic-component";
-import styled from "styled-components";
 
 import { EmptyPanelLayout } from "@foxglove/studio-base/components/EmptyPanelLayout";
 import Panel from "@foxglove/studio-base/components/Panel";
 import { usePanelContext } from "@foxglove/studio-base/components/PanelContext";
 import { UnconnectedPanelLayout } from "@foxglove/studio-base/components/PanelLayout";
+import Stack from "@foxglove/studio-base/components/Stack";
 import {
   DraggingTabPanelState,
   TabDndContext,
@@ -30,13 +30,13 @@ import { SaveConfig } from "@foxglove/studio-base/types/panels";
 import { TAB_PANEL_TYPE } from "@foxglove/studio-base/util/globalConstants";
 import { DEFAULT_TAB_PANEL_CONFIG, updateTabPanelLayout } from "@foxglove/studio-base/util/layout";
 
-const SPanelCover = styled.div`
+const SPanelCover = muiStyled("div")`
   top: 0;
   left: 0;
   width: 100%;
   height: 100%;
   z-index: 1;
-  background: ${({ theme }) => theme.semanticColors.bodyBackground};
+  background: ${({ theme }) => theme.palette.background.paper};
   position: absolute;
 `;
 
@@ -114,7 +114,7 @@ function Tab({ config, saveConfig }: Props) {
         activeTabIdx={activeTabIdx}
         setDraggingTabState={setDraggingTabState}
       />
-      <Stack direction="row" flex="auto" overflow="hidden" position="relative">
+      <Stack direction="row" flex="auto" overflow="hidden" style={{ position: "relative" }}>
         {activeLayout != undefined ? (
           <TabDndContext.Provider value={{ preventTabDrop }}>
             <UnconnectedPanelLayout

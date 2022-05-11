@@ -11,14 +11,10 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 import { useRef } from "react";
-import { useDrag, useDrop } from "react-dnd";
+import { useDrag, useDrop, DropTargetMonitor } from "react-dnd";
 
 import { useCurrentLayoutActions } from "@foxglove/studio-base/context/CurrentLayoutContext";
-import {
-  DraggingTabItem,
-  TAB_DRAG_TYPE,
-  TabActions,
-} from "@foxglove/studio-base/panels/Tab/TabDndContext";
+import { TAB_DRAG_TYPE, TabActions } from "@foxglove/studio-base/panels/Tab/TabDndContext";
 import { ToolbarTab } from "@foxglove/studio-base/panels/Tab/ToolbarTab";
 import { TabLocation } from "@foxglove/studio-base/types/layouts";
 
@@ -29,7 +25,6 @@ type Props = {
   tabCount: number;
   tabIndex: number;
   tabTitle: string;
-  setDraggingTabState: (arg0: { isOver: boolean; item?: DraggingTabItem }) => void;
 };
 
 export function DraggableToolbarTab(props: Props): JSX.Element {
@@ -45,10 +40,18 @@ export function DraggableToolbarTab(props: Props): JSX.Element {
     }),
   });
 
-  const [{ isOver }, dropRef] = useDrop<TabLocation, void, { isOver: boolean }>({
+  const [{ highlight }, dropRef] = useDrop<
+    TabLocation,
+    void,
+    { highlight: "before" | "after" | undefined }
+  >({
     accept: TAB_DRAG_TYPE,
-    collect: (monitor) => ({
-      isOver: monitor.isOver(),
+    collect: (monitor: DropTargetMonitor<TabLocation, void>) => ({
+      highlight: monitor.isOver()
+        ? monitor.getItem().tabIndex! < tabIndex
+          ? "after"
+          : "before"
+        : undefined,
     }),
     drop: (sourceItem, _monitor) => {
       const source = {
@@ -71,7 +74,7 @@ export function DraggableToolbarTab(props: Props): JSX.Element {
     isDragging,
     innerRef: ref,
     hidden: isDragging,
-    highlight: isOver,
+    highlight,
   };
   return <ToolbarTab {...tabProps} />;
 }
