@@ -10,11 +10,13 @@ import { NumberInput } from "./NumberInput";
 
 export function Vec3Input({
   onChange,
+  step,
   value,
 }: {
   onChange: (
     value: undefined | readonly [undefined | number, undefined | number, undefined | number],
   ) => void;
+  step?: number;
   value: undefined | readonly [undefined | number, undefined | number, undefined | number];
 }): JSX.Element {
   const onChangeCallback = useCallback(
@@ -40,6 +42,7 @@ export function Vec3Input({
           size="small"
           variant="filled"
           fullWidth
+          step={step}
           value={pval}
           onChange={(newValue) => onChangeCallback(position, newValue)}
         />

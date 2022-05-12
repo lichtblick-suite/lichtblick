@@ -42,6 +42,7 @@ const BasicSettings: SettingsTreeNode = {
           input: "vec3",
           labels: ["U", "V", "W"],
           value: [1, 2, 3],
+          step: 2,
         },
         emptySelect: {
           label: "Empty Select",

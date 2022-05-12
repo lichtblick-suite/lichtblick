@@ -25,6 +25,7 @@ export type SettingsTreeFieldValue =
   | {
       input: "vec3";
       value?: readonly [undefined | number, undefined | number, undefined | number];
+      step?: number;
       labels?: [string, string, string];
     };
 

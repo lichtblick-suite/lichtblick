@@ -265,6 +265,7 @@ function FieldInput({
     case "vec3":
       return (
         <Vec3Input
+          step={field.step}
           value={field.value}
           onChange={(value) =>
             actionHandler({ action: "update", payload: { path, input: "vec3", value } })
