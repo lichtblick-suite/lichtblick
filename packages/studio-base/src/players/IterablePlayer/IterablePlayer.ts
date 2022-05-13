@@ -236,8 +236,11 @@ export class IterablePlayer implements Player {
       return;
     }
 
-    this._metricsCollector.seek(time);
-    this._seekTarget = time;
+    // Limit seek to within the valid range
+    const targetTime = clampTime(time, this._start, this._end);
+
+    this._metricsCollector.seek(targetTime);
+    this._seekTarget = targetTime;
     this._setState("seek-backfill");
   }
 
