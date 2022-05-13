@@ -40,6 +40,9 @@ export const fixture = {
             str: "a string",
             nothing: undefined,
           },
+          timestamp_array: Array(6)
+            .fill(undefined)
+            .map((_, i) => ({ sec: i, nsec: i })),
           timestamp_example_1: { sec: 0, nsec: 0 },
           timestamp_example_2: { sec: 1, nsec: 1 },
           timestamp_example_3: { sec: 1500000000, nsec: 1 },
