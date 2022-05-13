@@ -159,21 +159,23 @@ export default function PlayerManager(props: PropsWithChildren<PlayerManagerProp
         setBasePlayer(newPlayer);
 
         if (foundSource.sampleLayout) {
-          layoutStorage
-            .saveNewLayout({
-              name: foundSource.displayName,
-              data: foundSource.sampleLayout,
-              permission: "CREATOR_WRITE",
-            })
-            .then((newLayout) => {
-              if (!isMounted()) {
-                return;
-              }
-              setSelectedLayoutId(newLayout.id);
-            })
-            .catch((err) => {
-              addToast((err as Error).message, { appearance: "error" });
-            });
+          try {
+            const layouts = await layoutStorage.getLayouts();
+            let sourceLayout = layouts.find((layout) => layout.name === foundSource.displayName);
+            if (sourceLayout == undefined) {
+              sourceLayout = await layoutStorage.saveNewLayout({
+                name: foundSource.displayName,
+                data: foundSource.sampleLayout,
+                permission: "CREATOR_WRITE",
+              });
+            }
+
+            if (isMounted()) {
+              setSelectedLayoutId(sourceLayout.id);
+            }
+          } catch (err) {
+            addToast((err as Error).message, { appearance: "error" });
+          }
         }
 
         return;
