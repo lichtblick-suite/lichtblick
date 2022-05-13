@@ -37,6 +37,7 @@ import { MapPanelMessage, Point } from "./types";
 
 // Persisted panel state
 type Config = {
+  customTileUrl: string;
   disabledTopics: string[];
   layer: string;
   zoomLevel?: number;
@@ -69,19 +70,31 @@ function buildSettingsTree(config: Config, eligibleTopics: string[]): SettingsTr
     {} as SettingsTreeFields,
   );
 
-  return {
-    label: "General",
-    fields: {
-      layer: {
-        label: "Layer",
-        input: "select",
-        value: config.layer,
-        options: [
-          { label: "Map", value: "map" },
-          { label: "Satellite", value: "satellite" },
-        ],
-      },
+  const generalSettings: SettingsTreeFields = {
+    layer: {
+      label: "Tile Layer",
+      input: "select",
+      value: config.layer,
+      options: [
+        { label: "Map", value: "map" },
+        { label: "Satellite", value: "satellite" },
+        { label: "Custom", value: "custom" },
+      ],
     },
+  };
+
+  // Only show the custom url input when the user selects the custom layer
+  if (config.layer === "custom") {
+    generalSettings.customTileUrl = {
+      label: "Custom map tile URL",
+      input: "string",
+      value: config.customTileUrl,
+    };
+  }
+
+  const settings: SettingsTreeNode = {
+    label: "General",
+    fields: generalSettings,
     children: {
       topics: {
         label: "Topics",
@@ -89,6 +102,8 @@ function buildSettingsTree(config: Config, eligibleTopics: string[]): SettingsTr
       },
     },
   };
+
+  return settings;
 }
 
 function topicMessageType(topic: Topic) {
@@ -117,6 +132,7 @@ function MapPanel(props: MapPanelProps): JSX.Element {
     const initialConfig = props.context.initialState as Partial<Config>;
     initialConfig.disabledTopics = initialConfig.disabledTopics ?? [];
     initialConfig.layer = initialConfig.layer ?? "map";
+    initialConfig.customTileUrl = initialConfig.customTileUrl ?? "";
     return initialConfig as Config;
   });
 
@@ -138,6 +154,14 @@ function MapPanel(props: MapPanelProps): JSX.Element {
         maxZoom: 24,
       },
     ),
+  );
+
+  const [customLayer] = useState(
+    new TileLayer("https://example.com/{z}/{y}/{x}", {
+      attribution: "",
+      maxNativeZoom: 18,
+      maxZoom: 24,
+    }),
   );
 
   // Panel state management to update our set of messages
@@ -207,17 +231,43 @@ function MapPanel(props: MapPanelProps): JSX.Element {
         return { ...oldConfig, layer: String(value) };
       });
     }
+
+    if (path[0] === "customTileUrl" && input === "string") {
+      setConfig((oldConfig) => {
+        return { ...oldConfig, customTileUrl: String(value) };
+      });
+    }
   }, []);
 
   useEffect(() => {
     if (config.layer === "map") {
       currentMap?.addLayer(tileLayer);
       currentMap?.removeLayer(satelliteLayer);
-    } else {
+      currentMap?.removeLayer(customLayer);
+    } else if (config.layer === "satellite") {
       currentMap?.addLayer(satelliteLayer);
       currentMap?.removeLayer(tileLayer);
+      currentMap?.removeLayer(customLayer);
+    } else if (config.layer === "custom") {
+      currentMap?.addLayer(customLayer);
+      currentMap?.removeLayer(tileLayer);
+      currentMap?.removeLayer(satelliteLayer);
     }
-  }, [config.layer, currentMap, satelliteLayer, tileLayer]);
+  }, [config.layer, currentMap, customLayer, satelliteLayer, tileLayer]);
+
+  useEffect(() => {
+    if (config.layer === "custom") {
+      // validate URL to avoid leaflet map placeholder variable error
+      const placeholders = config.customTileUrl.match(/\{.+?\}/g) ?? [];
+      const validPlaceholders = ["{x}", "{y}", "{z}"];
+      for (const placeholder of placeholders) {
+        if (!validPlaceholders.includes(placeholder)) {
+          return;
+        }
+      }
+      customLayer.setUrl(config.customTileUrl);
+    }
+  }, [config.layer, config.customTileUrl, customLayer]);
 
   // Subscribe to eligible and enabled topics
   useEffect(() => {
