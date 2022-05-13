@@ -17,6 +17,7 @@ import { merge } from "lodash";
 import { useCallback, useMemo, useRef, useState } from "react";
 
 import { compare, Time } from "@foxglove/rostime";
+import { AppSetting } from "@foxglove/studio-base/AppSetting";
 import HoverableIconButton from "@foxglove/studio-base/components/HoverableIconButton";
 import KeyListener from "@foxglove/studio-base/components/KeyListener";
 import MessageOrderControls from "@foxglove/studio-base/components/MessageOrderControls";
@@ -28,6 +29,7 @@ import {
 import PlaybackSpeedControls from "@foxglove/studio-base/components/PlaybackSpeedControls";
 import Stack from "@foxglove/studio-base/components/Stack";
 import Tooltip from "@foxglove/studio-base/components/Tooltip";
+import { useAppConfigurationValue } from "@foxglove/studio-base/hooks/useAppConfigurationValue";
 
 import PlaybackTimeDisplay from "./PlaybackTimeDisplay";
 import RepeatAdapter from "./RepeatAdapter";
@@ -184,6 +186,10 @@ export default function PlaybackControls({
       },
     } as IButtonStyles);
 
+  const [enableMessageOrdering = false] = useAppConfigurationValue<boolean>(
+    AppSetting.EXPERIMENTAL_MESSAGE_ORDER,
+  );
+
   return (
     <>
       <RepeatAdapter
@@ -196,7 +202,7 @@ export default function PlaybackControls({
       <KeyListener global keyDownHandlers={keyDownHandlers} />
       <PlaybackControlsRoot>
         <Stack direction="row" alignItems="center" gap={1}>
-          <MessageOrderControls />
+          {enableMessageOrdering && <MessageOrderControls />}
           <PlaybackSpeedControls />
         </Stack>
         <Stack direction="row" alignItems="center" flex={1} gap={1} paddingX={0.5}>

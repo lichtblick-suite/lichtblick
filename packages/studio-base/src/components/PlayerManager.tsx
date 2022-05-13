@@ -93,6 +93,11 @@ export default function PlayerManager(props: PropsWithChildren<PlayerManagerProp
     AppSetting.UNLIMITED_MEMORY_CACHE,
   );
 
+  // Use the default message ordering unless this experimental flag is enabled
+  const [enableMessageOrdering = false] = useAppConfigurationValue<boolean>(
+    AppSetting.EXPERIMENTAL_MESSAGE_ORDER,
+  );
+
   // When we implement per-data-connector UI settings we will move this into the foxglove data platform source.
   const consoleApi = useContext(ConsoleApiContext);
 
@@ -101,7 +106,11 @@ export default function PlayerManager(props: PropsWithChildren<PlayerManagerProp
 
   const [basePlayer, setBasePlayer] = useState<Player | undefined>();
 
-  const messageOrder = useCurrentLayoutSelector(messageOrderSelector);
+  const configuredMessageOrder = useCurrentLayoutSelector(messageOrderSelector);
+  const messageOrder = useMemo(
+    () => (enableMessageOrdering ? configuredMessageOrder : DEFAULT_MESSAGE_ORDER),
+    [configuredMessageOrder, enableMessageOrdering],
+  );
   const userNodes = useCurrentLayoutSelector(userNodesSelector);
   const globalVariables = useCurrentLayoutSelector(globalVariablesSelector);
 
