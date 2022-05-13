@@ -25,7 +25,7 @@ export class RenderableCube extends RenderableMarker {
     // Cube mesh
     this.mesh = new THREE.Mesh(
       RenderableCube.geometry(),
-      standardMaterial(marker, renderer.materialCache),
+      standardMaterial(marker.color, renderer.materialCache),
     );
     this.mesh.castShadow = true;
     this.mesh.receiveShadow = true;
@@ -43,7 +43,7 @@ export class RenderableCube extends RenderableMarker {
   }
 
   override dispose(): void {
-    releaseStandardMaterial(this.userData.marker, this._renderer.materialCache);
+    releaseStandardMaterial(this.userData.marker.color, this._renderer.materialCache);
   }
 
   override update(marker: Marker): void {
@@ -51,8 +51,8 @@ export class RenderableCube extends RenderableMarker {
     super.update(marker);
 
     if (!rgbaEqual(marker.color, prevMarker.color)) {
-      releaseStandardMaterial(prevMarker, this._renderer.materialCache);
-      this.mesh.material = standardMaterial(marker, this._renderer.materialCache);
+      releaseStandardMaterial(prevMarker.color, this._renderer.materialCache);
+      this.mesh.material = standardMaterial(marker.color, this._renderer.materialCache);
     }
 
     this.scale.set(marker.scale.x, marker.scale.y, marker.scale.z);

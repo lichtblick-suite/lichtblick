@@ -14,7 +14,7 @@ import {
   StandardColor,
   StandardInstancedColor,
 } from "../../MaterialCache";
-import { Marker, MarkerType } from "../../ros";
+import { ColorRGBA, Marker, MarkerType } from "../../ros";
 
 export function markerHasTransparency(marker: Marker): boolean {
   switch (marker.type) {
@@ -42,18 +42,18 @@ export function markerHasTransparency(marker: Marker): boolean {
 }
 
 export function standardMaterial(
-  marker: Marker,
+  color: ColorRGBA,
   materialCache: MaterialCache,
 ): THREE.MeshStandardMaterial {
   return materialCache.acquire(
-    StandardColor.id(marker.color),
-    () => StandardColor.create(marker.color),
+    StandardColor.id(color),
+    () => StandardColor.create(color),
     StandardColor.dispose,
   );
 }
 
-export function releaseStandardMaterial(marker: Marker, materialCache: MaterialCache): void {
-  materialCache.release(StandardColor.id(marker.color));
+export function releaseStandardMaterial(color: ColorRGBA, materialCache: MaterialCache): void {
+  materialCache.release(StandardColor.id(color));
 }
 
 export function standardInstancedMaterial(

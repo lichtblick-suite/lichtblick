@@ -15,9 +15,6 @@ import { missingTransformMessage, MISSING_TRANSFORM } from "./transforms";
 // use a custom ShaderMaterial with an isampler2D uniform to reimplement the
 // updateTexture() logic in a shader
 
-// ts-prune-ignore-next
-export type StoredOccupancyGridSettings = Partial<LayerSettingsOccupancyGrid>;
-
 const INVALID_OCCUPANCY_GRID = "INVALID_OCCUPANCY_GRID";
 
 const DEFAULT_MIN_COLOR = { r: 1, g: 1, b: 1, a: 0.5 }; // white
@@ -99,8 +96,9 @@ export class OccupancyGrids extends THREE.Object3D {
       renderable.userData.topic = topic;
 
       // Set the initial settings from default values merged with any user settings
-      this.renderer.config?.topics[topic] as Partial<LayerSettingsOccupancyGrid> | undefined;
-      const userSettings = this.renderer.config?.topics[topic];
+      const userSettings = this.renderer.config?.topics[topic] as
+        | Partial<LayerSettingsOccupancyGrid>
+        | undefined;
       const settings = { ...DEFAULT_SETTINGS, ...userSettings };
       renderable.userData.settings = settings;
 

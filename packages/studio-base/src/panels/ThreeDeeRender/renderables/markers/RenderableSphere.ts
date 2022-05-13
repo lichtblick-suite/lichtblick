@@ -23,7 +23,7 @@ export class RenderableSphere extends RenderableMarker {
     super(topic, marker, renderer);
 
     // Sphere mesh
-    const material = standardMaterial(marker, renderer.materialCache);
+    const material = standardMaterial(marker.color, renderer.materialCache);
     this.mesh = new THREE.Mesh(RenderableSphere.geometry(renderer.maxLod), material);
     this.mesh.castShadow = true;
     this.mesh.receiveShadow = true;
@@ -33,7 +33,7 @@ export class RenderableSphere extends RenderableMarker {
   }
 
   override dispose(): void {
-    releaseStandardMaterial(this.userData.marker, this._renderer.materialCache);
+    releaseStandardMaterial(this.userData.marker.color, this._renderer.materialCache);
   }
 
   override update(marker: Marker): void {
@@ -41,8 +41,8 @@ export class RenderableSphere extends RenderableMarker {
     super.update(marker);
 
     if (!rgbaEqual(marker.color, prevMarker.color)) {
-      releaseStandardMaterial(prevMarker, this._renderer.materialCache);
-      this.mesh.material = standardMaterial(marker, this._renderer.materialCache);
+      releaseStandardMaterial(prevMarker.color, this._renderer.materialCache);
+      this.mesh.material = standardMaterial(marker.color, this._renderer.materialCache);
     }
 
     this.scale.set(marker.scale.x, marker.scale.y, marker.scale.z);

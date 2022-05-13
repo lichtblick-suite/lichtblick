@@ -20,12 +20,21 @@ import { FrameAxes } from "./renderables/FrameAxes";
 import { Markers } from "./renderables/Markers";
 import { OccupancyGrids } from "./renderables/OccupancyGrids";
 import { PointClouds } from "./renderables/PointClouds";
-import { Marker, OccupancyGrid, PointCloud2, TF } from "./ros";
+import { Poses } from "./renderables/Poses";
+import {
+  Marker,
+  OccupancyGrid,
+  PointCloud2,
+  PoseStamped,
+  PoseWithCovarianceStamped,
+  TF,
+} from "./ros";
 import {
   FieldsProvider,
   LayerSettingsMarker,
   LayerSettingsOccupancyGrid,
   LayerSettingsPointCloud2,
+  LayerSettingsPose,
   LayerType,
   ThreeDeeRenderConfig,
 } from "./settings";
@@ -100,6 +109,7 @@ export class Renderer extends EventEmitter<RendererEvents> {
   occupancyGrids = new OccupancyGrids(this);
   pointClouds = new PointClouds(this);
   markers = new Markers(this);
+  poses = new Poses(this);
 
   constructor(canvas: HTMLCanvasElement) {
     super();
@@ -139,6 +149,7 @@ export class Renderer extends EventEmitter<RendererEvents> {
     this.scene.add(this.occupancyGrids);
     this.scene.add(this.pointClouds);
     this.scene.add(this.markers);
+    this.scene.add(this.poses);
 
     this.dirLight = new THREE.DirectionalLight();
     this.dirLight.position.set(1, 1, 1);
@@ -246,6 +257,14 @@ export class Renderer extends EventEmitter<RendererEvents> {
     this.markers.setTopicSettings(topic, settings);
   }
 
+  addPoseMessage(topic: string, pose: PoseStamped | PoseWithCovarianceStamped): void {
+    this.poses.addPoseMessage(topic, pose);
+  }
+
+  setPoseSettings(topic: string, settings: Partial<LayerSettingsPose>): void {
+    this.poses.setTopicSettings(topic, settings);
+  }
+
   markerWorldPosition(markerId: string): Readonly<THREE.Vector3> | undefined {
     const renderable = this.renderables.get(markerId);
     if (!renderable) {
@@ -275,6 +294,7 @@ export class Renderer extends EventEmitter<RendererEvents> {
     this.occupancyGrids.startFrame(currentTime);
     this.pointClouds.startFrame(currentTime);
     this.markers.startFrame(currentTime);
+    this.poses.startFrame(currentTime);
 
     this.gl.clear();
     this.camera.layers.set(LAYER_DEFAULT);

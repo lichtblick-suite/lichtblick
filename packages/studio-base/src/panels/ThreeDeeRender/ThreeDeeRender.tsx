@@ -21,13 +21,17 @@ import { toNanoSec } from "@foxglove/rostime";
 import { PanelExtensionContext, RenderState, Topic, MessageEvent } from "@foxglove/studio";
 import { SettingsTreeAction } from "@foxglove/studio-base/components/SettingsTreeEditor/types";
 import useCleanup from "@foxglove/studio-base/hooks/useCleanup";
-import { normalizeMarker } from "@foxglove/studio-base/panels/ThreeDeeRender/normalizeMessages";
 
 import { DebugGui } from "./DebugGui";
 import { setOverlayPosition } from "./LabelOverlay";
 import { Renderer } from "./Renderer";
 import { RendererContext, useRenderer, useRendererEvent } from "./RendererContext";
 import { Stats } from "./Stats";
+import {
+  normalizeMarker,
+  normalizePoseStamped,
+  normalizePoseWithCovarianceStamped,
+} from "./normalizeMessages";
 import {
   TRANSFORM_STAMPED_DATATYPES,
   TF_DATATYPES,
@@ -39,6 +43,10 @@ import {
   POINTCLOUD_DATATYPES,
   OccupancyGrid,
   OCCUPANCY_GRID_DATATYPES,
+  POSE_STAMPED_DATATYPES,
+  POSE_WITH_COVARIANCE_STAMPED_DATATYPES,
+  PoseStamped,
+  PoseWithCovarianceStamped,
 } from "./ros";
 import {
   buildSettingsTree,
@@ -378,10 +386,8 @@ export function ThreeDeeRender({ context }: { context: PanelExtensionContext }):
       // Subscribe to all transform topics
       if (TF_DATATYPES.has(topic.datatype) || TRANSFORM_STAMPED_DATATYPES.has(topic.datatype)) {
         subscriptionList.push(topic.name);
-      }
-
-      // TODO: Allow disabling of subscriptions to non-TF topics
-      if (SUPPORTED_DATATYPES.has(topic.datatype)) {
+      } else if (SUPPORTED_DATATYPES.has(topic.datatype)) {
+        // TODO: Allow disabling of subscriptions to non-TF topics
         subscriptionList.push(topic.name);
       }
     }
@@ -460,6 +466,14 @@ export function ThreeDeeRender({ context }: { context: PanelExtensionContext }):
         // sensor_msgs/PointCloud2 - Ingest this point cloud
         const pointCloud = message.message as PointCloud2;
         renderer.addPointCloud2Message(message.topic, pointCloud);
+      } else if (POSE_STAMPED_DATATYPES.has(datatype)) {
+        const poseMesage = normalizePoseStamped(message.message as DeepPartial<PoseStamped>);
+        renderer.addPoseMessage(message.topic, poseMesage);
+      } else if (POSE_WITH_COVARIANCE_STAMPED_DATATYPES.has(datatype)) {
+        const poseMessage = normalizePoseWithCovarianceStamped(
+          message.message as DeepPartial<PoseWithCovarianceStamped>,
+        );
+        renderer.addPoseMessage(message.topic, poseMessage);
       }
     }
 
@@ -569,6 +583,11 @@ function buildTopicsToLayerTypes(topics: ReadonlyArray<Topic> | undefined): Map<
         map.set(topic.name, LayerType.OccupancyGrid);
       } else if (POINTCLOUD_DATATYPES.has(datatype)) {
         map.set(topic.name, LayerType.PointCloud);
+      } else if (
+        POSE_STAMPED_DATATYPES.has(datatype) ||
+        POSE_WITH_COVARIANCE_STAMPED_DATATYPES.has(datatype)
+      ) {
+        map.set(topic.name, LayerType.Pose);
       }
     }
   }
@@ -597,6 +616,9 @@ function updateTopicSettings(
       break;
     case LayerType.PointCloud:
       renderer.setPointCloud2Settings(topic, topicConfig);
+      break;
+    case LayerType.Pose:
+      renderer.setPoseSettings(topic, topicConfig);
       break;
   }
   renderer.animationFrame();

@@ -2,6 +2,16 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
+// prettier-ignore
+export type Matrix6 = [
+  number, number, number, number, number, number,
+  number, number, number, number, number, number,
+  number, number, number, number, number, number,
+  number, number, number, number, number, number,
+  number, number, number, number, number, number,
+  number, number, number, number, number, number,
+];
+
 export enum MarkerType {
   ARROW = 0,
   CUBE = 1,
@@ -73,6 +83,11 @@ export type Pose = {
   orientation: Quaternion;
 };
 
+export type PoseWithCovariance = {
+  pose: Pose;
+  covariance: Matrix6;
+};
+
 export type Header = {
   frame_id: string;
   stamp: RosTime;
@@ -139,6 +154,16 @@ export type OccupancyGrid = {
   data: Int8Array | number[];
 };
 
+export type PoseStamped = {
+  header: Header;
+  pose: Pose;
+};
+
+export type PoseWithCovarianceStamped = {
+  header: Header;
+  pose: PoseWithCovariance;
+};
+
 export const TRANSFORM_STAMPED_DATATYPES = new Set<string>();
 addRosDataType(TRANSFORM_STAMPED_DATATYPES, "geometry_msgs/TransformStamped");
 
@@ -157,6 +182,12 @@ addRosDataType(OCCUPANCY_GRID_DATATYPES, "nav_msgs/OccupancyGrid");
 
 export const POINTCLOUD_DATATYPES = new Set<string>();
 addRosDataType(POINTCLOUD_DATATYPES, "sensor_msgs/PointCloud2");
+
+export const POSE_STAMPED_DATATYPES = new Set<string>();
+addRosDataType(POSE_STAMPED_DATATYPES, "geometry_msgs/PoseStamped");
+
+export const POSE_WITH_COVARIANCE_STAMPED_DATATYPES = new Set<string>();
+addRosDataType(POSE_WITH_COVARIANCE_STAMPED_DATATYPES, "geometry_msgs/PoseWithCovarianceStamped");
 
 export function rosTimeToNanoSec(rosTime: { sec: number; nsec: number }): bigint {
   return BigInt(rosTime.sec) * BigInt(1e9) + BigInt(rosTime.nsec);

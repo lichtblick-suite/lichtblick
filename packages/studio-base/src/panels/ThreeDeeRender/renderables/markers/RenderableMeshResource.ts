@@ -25,7 +25,7 @@ export class RenderableMeshResource extends RenderableMarker {
   constructor(topic: string, marker: Marker, renderer: Renderer) {
     super(topic, marker, renderer);
 
-    this.material = standardMaterial(marker, renderer.materialCache);
+    this.material = standardMaterial(marker.color, renderer.materialCache);
 
     this._loadModel(marker.mesh_resource, {
       useEmbeddedMaterials: marker.mesh_use_embedded_materials,
@@ -35,7 +35,7 @@ export class RenderableMeshResource extends RenderableMarker {
   }
 
   override dispose(): void {
-    releaseStandardMaterial(this.userData.marker, this._renderer.materialCache);
+    releaseStandardMaterial(this.userData.marker.color, this._renderer.materialCache);
   }
 
   override update(marker: Marker): void {
@@ -43,8 +43,8 @@ export class RenderableMeshResource extends RenderableMarker {
     super.update(marker);
 
     if (!rgbaEqual(marker.color, prevMarker.color)) {
-      releaseStandardMaterial(prevMarker, this._renderer.materialCache);
-      this.material = standardMaterial(marker, this._renderer.materialCache);
+      releaseStandardMaterial(prevMarker.color, this._renderer.materialCache);
+      this.material = standardMaterial(marker.color, this._renderer.materialCache);
     }
 
     if (marker.mesh_resource !== prevMarker.mesh_resource) {

@@ -17,6 +17,8 @@ import {
   MARKER_DATATYPES,
   OCCUPANCY_GRID_DATATYPES,
   POINTCLOUD_DATATYPES,
+  POSE_STAMPED_DATATYPES,
+  POSE_WITH_COVARIANCE_STAMPED_DATATYPES,
   TF_DATATYPES,
   TRANSFORM_STAMPED_DATATYPES,
 } from "./ros";
@@ -62,6 +64,14 @@ export type LayerSettingsPointCloud2 = {
   maxValue: number | undefined;
 };
 
+export type LayerSettingsPose = {
+  visible: boolean;
+  scale: [number, number, number];
+  color: string;
+  showCovariance: boolean;
+  covarianceColor: string;
+};
+
 export type LayerSettings =
   | LayerSettingsMarker
   | LayerSettingsOccupancyGrid
@@ -72,6 +82,7 @@ export enum LayerType {
   Marker,
   OccupancyGrid,
   PointCloud,
+  Pose,
 }
 
 export type FieldsProvider = (
@@ -86,6 +97,8 @@ mergeSetInto(SUPPORTED_DATATYPES, MARKER_DATATYPES);
 mergeSetInto(SUPPORTED_DATATYPES, MARKER_ARRAY_DATATYPES);
 mergeSetInto(SUPPORTED_DATATYPES, OCCUPANCY_GRID_DATATYPES);
 mergeSetInto(SUPPORTED_DATATYPES, POINTCLOUD_DATATYPES);
+mergeSetInto(SUPPORTED_DATATYPES, POSE_STAMPED_DATATYPES);
+mergeSetInto(SUPPORTED_DATATYPES, POSE_WITH_COVARIANCE_STAMPED_DATATYPES);
 
 const ONE_DEGREE = Math.PI / 180;
 

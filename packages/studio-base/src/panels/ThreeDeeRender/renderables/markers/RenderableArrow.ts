@@ -49,7 +49,7 @@ export class RenderableArrow extends RenderableMarker {
     super(topic, marker, renderer);
 
     // Shaft mesh
-    const material = standardMaterial(marker, renderer.materialCache);
+    const material = standardMaterial(marker.color, renderer.materialCache);
     this.shaftMesh = new THREE.Mesh(RenderableArrow.shaftGeometry(renderer.maxLod), material);
     this.shaftMesh.castShadow = true;
     this.shaftMesh.receiveShadow = true;
@@ -81,7 +81,7 @@ export class RenderableArrow extends RenderableMarker {
   }
 
   override dispose(): void {
-    releaseStandardMaterial(this.userData.marker, this._renderer.materialCache);
+    releaseStandardMaterial(this.userData.marker.color, this._renderer.materialCache);
   }
 
   override update(marker: Marker): void {
@@ -89,8 +89,8 @@ export class RenderableArrow extends RenderableMarker {
     super.update(marker);
 
     if (!rgbaEqual(marker.color, prevMarker.color)) {
-      releaseStandardMaterial(prevMarker, this._renderer.materialCache);
-      this.shaftMesh.material = standardMaterial(marker, this._renderer.materialCache);
+      releaseStandardMaterial(prevMarker.color, this._renderer.materialCache);
+      this.shaftMesh.material = standardMaterial(marker.color, this._renderer.materialCache);
       this.headMesh.material = this.shaftMesh.material;
     }
 

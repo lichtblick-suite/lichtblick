@@ -6,7 +6,18 @@ import { DeepPartial } from "ts-essentials";
 
 import { Time } from "@foxglove/rostime";
 
-import { Header, Marker, Pose, Vector3, Quaternion, ColorRGBA } from "./ros";
+import {
+  Header,
+  Marker,
+  Pose,
+  Vector3,
+  Quaternion,
+  ColorRGBA,
+  PoseStamped,
+  PoseWithCovarianceStamped,
+  PoseWithCovariance,
+  Matrix6,
+} from "./ros";
 
 export function normalizeTime(time: Partial<Time> | undefined): Time {
   if (!time) {
@@ -27,6 +38,21 @@ export function normalizeVector3s(vectors: Partial<Vector3>[] | undefined): Vect
     return [];
   }
   return vectors.map(normalizeVector3);
+}
+
+export function normalizeMatrix6(mat: number[] | undefined): Matrix6 {
+  if (!mat || mat.length !== 36 || typeof mat[0] !== "number") {
+    // prettier-ignore
+    return [
+      1, 0, 0, 0, 0, 0,
+      0, 1, 0, 0, 0, 0,
+      0, 0, 1, 0, 0, 0,
+      0, 0, 0, 1, 0, 0,
+      0, 0, 0, 0, 1, 0,
+      0, 0, 0, 0, 0, 1
+    ];
+  }
+  return mat as Matrix6;
 }
 
 export function normalizeQuaternion(quat: Partial<Quaternion> | undefined): Quaternion {
@@ -58,6 +84,13 @@ export function normalizePose(pose: DeepPartial<Pose> | undefined): Pose {
   };
 }
 
+export function normalizePoseWithCovariance(
+  pose: DeepPartial<PoseWithCovariance> | undefined,
+): PoseWithCovariance {
+  const covariance = normalizeMatrix6(pose?.covariance as number[] | undefined);
+  return { pose: normalizePose(pose?.pose), covariance };
+}
+
 export function normalizeHeader(header: DeepPartial<Header> | undefined): Header {
   return {
     frame_id: header?.frame_id ?? "",
@@ -83,5 +116,21 @@ export function normalizeMarker(marker: DeepPartial<Marker>): Marker {
     text: marker.text ?? "",
     mesh_resource: marker.mesh_resource ?? "",
     mesh_use_embedded_materials: marker.mesh_use_embedded_materials ?? false,
+  };
+}
+
+export function normalizePoseStamped(pose: DeepPartial<PoseStamped>): PoseStamped {
+  return {
+    header: normalizeHeader(pose.header),
+    pose: normalizePose(pose.pose),
+  };
+}
+
+export function normalizePoseWithCovarianceStamped(
+  message: DeepPartial<PoseWithCovarianceStamped>,
+): PoseWithCovarianceStamped {
+  return {
+    header: normalizeHeader(message.header),
+    pose: normalizePoseWithCovariance(message.pose),
   };
 }
