@@ -28,6 +28,7 @@ import { Renderer } from "./Renderer";
 import { RendererContext, useRenderer, useRendererEvent } from "./RendererContext";
 import { Stats } from "./Stats";
 import {
+  normalizeCameraInfo,
   normalizeMarker,
   normalizePoseStamped,
   normalizePoseWithCovarianceStamped,
@@ -47,6 +48,8 @@ import {
   POSE_WITH_COVARIANCE_STAMPED_DATATYPES,
   PoseStamped,
   PoseWithCovarianceStamped,
+  CameraInfo,
+  CAMERA_INFO_DATATYPES,
 } from "./ros";
 import {
   buildSettingsTree,
@@ -256,11 +259,25 @@ export function ThreeDeeRender({ context }: { context: PanelExtensionContext }):
   const updateCoordinateFrames = useCallback(
     (curRenderer: Renderer) => {
       setCoordinateFrames(coordinateFrameList(curRenderer));
+
+      // Prefer frames from [REP-105](https://www.ros.org/reps/rep-0105.html)
       for (const frameId of DEFAULT_FRAME_IDS) {
         if (curRenderer.transformTree.hasFrame(frameId)) {
           setDefaultFrame(frameId);
-          break;
+          return;
         }
+      }
+
+      // Choose the root frame with the most children
+      const rootsToCounts = new Map<string, number>();
+      for (const frame of curRenderer.transformTree.frames().values()) {
+        const rootId = frame.root().id;
+        rootsToCounts.set(rootId, (rootsToCounts.get(rootId) ?? 0) + 1);
+      }
+      const rootsArray = Array.from(rootsToCounts.entries());
+      const rootId = rootsArray.sort((a, b) => b[1] - a[1])[0]?.[0];
+      if (rootId != undefined) {
+        setDefaultFrame(rootId);
       }
     },
     [setDefaultFrame],
@@ -273,8 +290,11 @@ export function ThreeDeeRender({ context }: { context: PanelExtensionContext }):
   // Set the rendering frame (aka followTf) based on the configured frame, falling back to a
   // heuristically chosen best frame for the current scene (defaultFrame)
   const followTf = useMemo(
-    () => (configFollowTf != undefined ? configFollowTf : defaultFrame),
-    [configFollowTf, defaultFrame],
+    () =>
+      configFollowTf != undefined && renderer && renderer.transformTree.hasFrame(configFollowTf)
+        ? configFollowTf
+        : defaultFrame,
+    [configFollowTf, defaultFrame, renderer],
   );
 
   const fieldsProviders = renderer?.settingsFieldsProviders;
@@ -474,6 +494,9 @@ export function ThreeDeeRender({ context }: { context: PanelExtensionContext }):
           message.message as DeepPartial<PoseWithCovarianceStamped>,
         );
         renderer.addPoseMessage(message.topic, poseMessage);
+      } else if (CAMERA_INFO_DATATYPES.has(datatype)) {
+        const cameraInfo = normalizeCameraInfo(message.message as DeepPartial<CameraInfo>);
+        renderer.addCameraInfoMessage(message.topic, cameraInfo);
       }
     }
 
@@ -588,6 +611,8 @@ function buildTopicsToLayerTypes(topics: ReadonlyArray<Topic> | undefined): Map<
         POSE_WITH_COVARIANCE_STAMPED_DATATYPES.has(datatype)
       ) {
         map.set(topic.name, LayerType.Pose);
+      } else if (CAMERA_INFO_DATATYPES.has(datatype)) {
+        map.set(topic.name, LayerType.CameraInfo);
       }
     }
   }
@@ -619,6 +644,9 @@ function updateTopicSettings(
       break;
     case LayerType.Pose:
       renderer.setPoseSettings(topic, topicConfig);
+      break;
+    case LayerType.CameraInfo:
+      renderer.setCameraInfoSettings(topic, topicConfig);
       break;
   }
   renderer.animationFrame();

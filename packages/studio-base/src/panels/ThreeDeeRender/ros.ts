@@ -2,6 +2,15 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
+export type Matrix3 = [number, number, number, number, number, number, number, number, number];
+
+// prettier-ignore
+export type Matrix3x4 = [
+  number, number, number, number,
+  number, number, number, number,
+  number, number, number, number
+];
+
 // prettier-ignore
 export type Matrix6 = [
   number, number, number, number, number, number,
@@ -164,6 +173,28 @@ export type PoseWithCovarianceStamped = {
   pose: PoseWithCovariance;
 };
 
+export type RegionOfInterest = {
+  x_offset: number;
+  y_offset: number;
+  height: number;
+  width: number;
+  do_rectify: boolean;
+};
+
+export type CameraInfo = {
+  header: Header;
+  height: number;
+  width: number;
+  distortion_model: string;
+  D: number[];
+  K: Matrix3 | [];
+  R: Matrix3 | [];
+  P: Matrix3x4 | [];
+  binning_x: number;
+  binning_y: number;
+  roi: RegionOfInterest;
+};
+
 export const TRANSFORM_STAMPED_DATATYPES = new Set<string>();
 addRosDataType(TRANSFORM_STAMPED_DATATYPES, "geometry_msgs/TransformStamped");
 
@@ -188,6 +219,9 @@ addRosDataType(POSE_STAMPED_DATATYPES, "geometry_msgs/PoseStamped");
 
 export const POSE_WITH_COVARIANCE_STAMPED_DATATYPES = new Set<string>();
 addRosDataType(POSE_WITH_COVARIANCE_STAMPED_DATATYPES, "geometry_msgs/PoseWithCovarianceStamped");
+
+export const CAMERA_INFO_DATATYPES = new Set<string>();
+addRosDataType(CAMERA_INFO_DATATYPES, "sensor_msgs/CameraInfo");
 
 export function rosTimeToNanoSec(rosTime: { sec: number; nsec: number }): bigint {
   return BigInt(rosTime.sec) * BigInt(1e9) + BigInt(rosTime.nsec);

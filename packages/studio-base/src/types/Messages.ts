@@ -35,6 +35,15 @@ export type MutablePoint2D = {
 };
 export type Point2D = Readonly<MutablePoint2D>;
 
+export type Matrix3 = [number, number, number, number, number, number, number, number, number];
+
+// prettier-ignore
+export type Matrix3x4 = [
+  number, number, number, number,
+  number, number, number, number,
+  number, number, number, number,
+];
+
 export type Header = Readonly<{
   frame_id: string;
   stamp: Time;
@@ -421,7 +430,7 @@ type Roi = Readonly<{
   y_offset: number;
   height: number;
   width: number;
-  do_rectify: false;
+  do_rectify: boolean;
 }>;
 
 // Empty string indicates no distortion model
@@ -433,7 +442,7 @@ export type CameraInfo = Readonly<{
   binning_x: number;
   binning_y: number;
   roi: Roi;
-  distortion_model: DistortionModel;
+  distortion_model: DistortionModel | string;
   D: FloatArray;
   K: FloatArray;
   P: FloatArray;

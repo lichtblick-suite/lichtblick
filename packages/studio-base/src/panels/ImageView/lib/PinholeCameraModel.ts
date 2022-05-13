@@ -11,36 +11,72 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { CameraInfo, FloatArray, Point2D } from "@foxglove/studio-base/types/Messages";
+import {
+  CameraInfo,
+  Matrix3,
+  Matrix3x4,
+  MutablePoint,
+  MutablePoint2D,
+  Point2D,
+} from "@foxglove/studio-base/types/Messages";
 
-const DISTORTION_STATE = {
-  NONE: "NONE",
-  CALIBRATED: "CALIBRATED",
-};
-
-type DistortionState = typeof DISTORTION_STATE[keyof typeof DISTORTION_STATE];
+type Vec8 = [number, number, number, number, number, number, number, number];
 
 // Essentially a copy of ROSPinholeCameraModel
 // but only the relevant methods, i.e.
-// fromCameraInfo() and unrectifyPoint()
+// fromCameraInfo() and unrectifyPixel()
 // http://docs.ros.org/diamondback/api/image_geometry/html/c++/pinhole__camera__model_8cpp_source.html
 export default class PinholeCameraModel {
-  private _distortionState: DistortionState = DISTORTION_STATE.NONE;
-  D: FloatArray = [];
-  K: FloatArray = [];
-  P: FloatArray = [];
-  R: FloatArray = [];
+  // [k1, k2, p1, p2, k3, ?, ?, ?]
+  D: Readonly<Vec8>;
+  //     [fx  0 cx]
+  // K = [ 0 fy cy]
+  //     [ 0  0  1]
+  K: Readonly<Matrix3>;
+  //     [fx'  0  cx' Tx]
+  // P = [ 0  fy' cy' Ty]
+  //     [ 0   0   1   0]
+  P: Readonly<Matrix3x4> | undefined;
+  R: Readonly<Matrix3>;
+  readonly width: number;
+  readonly height: number;
 
   // Mostly copied from `fromCameraInfo`
   // http://docs.ros.org/diamondback/api/image_geometry/html/c++/pinhole__camera__model_8cpp_source.html#l00062
   constructor(info: CameraInfo) {
-    const { binning_x, binning_y, roi, distortion_model, D, K, P, R } = info;
+    const { binning_x, binning_y, roi, distortion_model: model, D, K, P, R, width, height } = info;
+    const fx = P[0];
+    const fy = P[5];
 
-    if (distortion_model === "") {
-      // Allow CameraInfo with no model to indicate no distortion
-      this._distortionState = DISTORTION_STATE.NONE;
-      return;
+    if (width <= 0 || height <= 0) {
+      throw new Error(`Invalid image size ${width}x${height}`);
     }
+    if (model.length > 0 && model !== "plumb_bob" && model !== "rational_polynomial") {
+      throw new Error(`Unrecognized distortion_model "${model}"`);
+    }
+    if (K.length !== 0 && K.length !== 9) {
+      throw new Error(`K.length=${K.length}, expected 9`);
+    }
+    if (P.length !== 0 && P.length !== 12) {
+      throw new Error(`P.length=${K.length}, expected 12`);
+    }
+    if (R.length !== 0 && R.length !== 9) {
+      throw new Error(`R.length=${R.length}, expected 9`);
+    }
+    if (fx === 0 || fy === 0) {
+      throw new Error(`Invalid focal length (fx=${fx}, fy=${fy})`);
+    }
+
+    const D8 = [...D];
+    while (D8.length < 8) {
+      D8.push(0);
+    }
+    this.D = D8 as Vec8;
+    this.K = K.length === 9 ? (K as Matrix3) : [1, 0, 0, 0, 1, 0, 0, 0, 1];
+    this.P = P.length === 12 ? (P as Matrix3x4) : undefined;
+    this.R = R.length === 9 ? (R as Matrix3) : [1, 0, 0, 0, 1, 0, 0, 0, 1];
+    this.width = width;
+    this.height = height;
 
     // Binning = 0 is considered the same as binning = 1 (no binning).
     const binningX = binning_x !== 0 ? binning_x : 1;
@@ -54,42 +90,75 @@ export default class PinholeCameraModel {
         "Failed to initialize camera model: unable to handle adjusted binning and adjusted roi camera models.",
       );
     }
-
-    // See comments about Tx = 0, Ty = 0 in
-    // http://docs.ros.org/melodic/api/sensor_msgs/html/msg/CameraInfo.html
-    if (P[3] !== 0 || P[7] !== 0) {
-      throw new Error(
-        "Failed to initialize camera model: projection matrix implies non monocular camera - cannot handle at this time.",
-      );
-    }
-
-    // Figure out how to handle the distortion
-    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-    if (distortion_model === "plumb_bob" || distortion_model === "rational_polynomial") {
-      this._distortionState = D[0] === 0.0 ? DISTORTION_STATE.NONE : DISTORTION_STATE.CALIBRATED;
-    } else {
-      throw new Error(
-        "Failed to initialize camera model: distortion_model is unknown, only plumb_bob and rational_polynomial are supported.",
-      );
-    }
-    this.D = D;
-    this.P = P;
-    this.R = R;
-    this.K = K;
   }
 
-  unrectifyPoint(point: Point2D): Point2D {
-    if (this._distortionState === DISTORTION_STATE.NONE) {
-      return point;
+  projectPixelTo3dRay(out: MutablePoint, pixel: Point2D): boolean {
+    const P = this.P;
+    if (!P) {
+      return false;
+    }
+
+    const fx = P[0];
+    const fy = P[5];
+    const cx = P[2];
+    const cy = P[6];
+    const tx = P[3];
+    const ty = P[7];
+
+    out.x = (pixel.x - cx - tx) / fx;
+    out.y = (pixel.y - cy - ty) / fy;
+    out.z = 1.0;
+    return true;
+  }
+
+  rectifyPixel(out: MutablePoint2D, point: Point2D, iterations = 3): MutablePoint2D {
+    if (!this.P) {
+      out.x = point.x;
+      out.y = point.y;
+      return out;
+    }
+
+    const { P, D } = this;
+    const [k1, k2, p1, p2, k3] = D;
+
+    const fx = P[0];
+    const fy = P[5];
+    const cx = P[2];
+    const cy = P[6];
+
+    let x = (point.x - cx) / fx;
+    let y = (point.y - cy) / fy;
+
+    const x0 = x;
+    const y0 = y;
+    for (let i = 0; i < iterations; i++) {
+      const r2 = x ** 2 + y ** 2;
+      const k_inv = 1 / (1 + k1 * r2 + k2 * r2 ** 2 + k3 * r2 ** 3);
+      const delta_x = 2 * p1 * x * y + p2 * (r2 + 2 * x ** 2);
+      const delta_y = p1 * (r2 + 2 * y ** 2) + 2 * p2 * x * y;
+      x = (x0 - delta_x) * k_inv;
+      y = (y0 - delta_y) * k_inv;
+    }
+
+    out.x = x * this.width + cx;
+    out.y = y * this.height + cy;
+    return out;
+  }
+
+  unrectifyPixel(out: MutablePoint2D, point: Point2D): MutablePoint2D {
+    if (!this.P) {
+      out.x = point.x;
+      out.y = point.y;
+      return out;
     }
 
     const { P, R, D, K } = this;
-    const fx = P[0]!;
-    const fy = P[5]!;
-    const cx = P[2]!;
-    const cy = P[6]!;
-    const tx = P[3]!;
-    const ty = P[7]!;
+    const fx = P[0];
+    const fy = P[5];
+    const cx = P[2];
+    const cy = P[6];
+    const tx = P[3];
+    const ty = P[7];
 
     // Formulae from docs for cv::initUndistortRectifyMap,
     // http://opencv.willowgarage.com/documentation/cpp/camera_calibration_and_3d_reconstruction.html
@@ -100,9 +169,9 @@ export default class PinholeCameraModel {
     const x1 = (point.x - cx - tx) / fx;
     const y1 = (point.y - cy - ty) / fy;
     // [X Y W]^T <- R^-1 * [x y 1]^T
-    const X = R[0]! * x1 + R[1]! * y1 + R[2]!;
-    const Y = R[3]! * x1 + R[4]! * y1 + R[5]!;
-    const W = R[6]! * x1 + R[7]! * y1 + R[8]!;
+    const X = R[0] * x1 + R[1] * y1 + R[2];
+    const Y = R[3] * x1 + R[4] * y1 + R[5];
+    const W = R[6] * x1 + R[7] * y1 + R[8];
     const xp = X / W;
     const yp = Y / W;
 
@@ -119,15 +188,15 @@ export default class PinholeCameraModel {
     const p2 = D[3]!;
     const k3 = D[4]!;
     let barrel_correction = 1 + k1 * r2 + k2 * r4 + k3 * r6;
-    if (D.length === 8) {
-      barrel_correction /= 1.0 + D[5]! * r2 + D[6]! * r4 + D[7]! * r6;
-    }
+    barrel_correction /= 1.0 + D[5] * r2 + D[6] * r4 + D[7] * r6;
     const xpp = xp * barrel_correction + p1 * a1 + p2 * (r2 + 2 * (xp * xp));
     const ypp = yp * barrel_correction + p1 * (r2 + 2 * (yp * yp)) + p2 * a1;
 
     // map_x(u,v) <- x''fx + cx
     // map_y(u,v) <- y''fy + cy
     // cx, fx, etc. come from original camera matrix K.
-    return { x: xpp * K[0]! + K[2]!, y: ypp * K[4]! + K[5]! };
+    out.x = xpp * K[0] + K[2];
+    out.y = ypp * K[4] + K[5];
+    return out;
   }
 }

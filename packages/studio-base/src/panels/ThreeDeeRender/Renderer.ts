@@ -16,12 +16,14 @@ import { Picker } from "./Picker";
 import { ScreenOverlay } from "./ScreenOverlay";
 import { stringToRgb } from "./color";
 import { DetailLevel, msaaSamples } from "./lod";
+import { Cameras } from "./renderables/Cameras";
 import { FrameAxes } from "./renderables/FrameAxes";
 import { Markers } from "./renderables/Markers";
 import { OccupancyGrids } from "./renderables/OccupancyGrids";
 import { PointClouds } from "./renderables/PointClouds";
 import { Poses } from "./renderables/Poses";
 import {
+  CameraInfo,
   Marker,
   OccupancyGrid,
   PointCloud2,
@@ -31,6 +33,7 @@ import {
 } from "./ros";
 import {
   FieldsProvider,
+  LayerSettingsCameraInfo,
   LayerSettingsMarker,
   LayerSettingsOccupancyGrid,
   LayerSettingsPointCloud2,
@@ -110,6 +113,7 @@ export class Renderer extends EventEmitter<RendererEvents> {
   pointClouds = new PointClouds(this);
   markers = new Markers(this);
   poses = new Poses(this);
+  cameras = new Cameras(this);
 
   constructor(canvas: HTMLCanvasElement) {
     super();
@@ -150,6 +154,7 @@ export class Renderer extends EventEmitter<RendererEvents> {
     this.scene.add(this.pointClouds);
     this.scene.add(this.markers);
     this.scene.add(this.poses);
+    this.scene.add(this.cameras);
 
     this.dirLight = new THREE.DirectionalLight();
     this.dirLight.position.set(1, 1, 1);
@@ -265,6 +270,14 @@ export class Renderer extends EventEmitter<RendererEvents> {
     this.poses.setTopicSettings(topic, settings);
   }
 
+  addCameraInfoMessage(topic: string, cameraInfo: CameraInfo): void {
+    this.cameras.addCameraInfoMessage(topic, cameraInfo);
+  }
+
+  setCameraInfoSettings(topic: string, settings: Partial<LayerSettingsCameraInfo>): void {
+    this.cameras.setTopicSettings(topic, settings);
+  }
+
   markerWorldPosition(markerId: string): Readonly<THREE.Vector3> | undefined {
     const renderable = this.renderables.get(markerId);
     if (!renderable) {
@@ -295,6 +308,7 @@ export class Renderer extends EventEmitter<RendererEvents> {
     this.pointClouds.startFrame(currentTime);
     this.markers.startFrame(currentTime);
     this.poses.startFrame(currentTime);
+    this.cameras.startFrame(currentTime);
 
     this.gl.clear();
     this.camera.layers.set(LAYER_DEFAULT);

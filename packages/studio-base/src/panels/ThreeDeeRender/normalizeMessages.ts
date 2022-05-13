@@ -9,6 +9,8 @@ import { Time } from "@foxglove/rostime";
 import {
   Header,
   Marker,
+  Matrix3,
+  Matrix3x4,
   Pose,
   Vector3,
   Quaternion,
@@ -17,6 +19,8 @@ import {
   PoseWithCovarianceStamped,
   PoseWithCovariance,
   Matrix6,
+  CameraInfo,
+  RegionOfInterest,
 } from "./ros";
 
 export function normalizeTime(time: Partial<Time> | undefined): Time {
@@ -132,5 +136,50 @@ export function normalizePoseWithCovarianceStamped(
   return {
     header: normalizeHeader(message.header),
     pose: normalizePoseWithCovariance(message.pose),
+  };
+}
+
+export function normalizeRegionOfInterest(
+  roi: Partial<RegionOfInterest> | undefined,
+): RegionOfInterest {
+  if (!roi) {
+    return { x_offset: 0, y_offset: 0, height: 0, width: 0, do_rectify: false };
+  }
+  return {
+    x_offset: roi.x_offset ?? 0,
+    y_offset: roi.y_offset ?? 0,
+    height: roi.height ?? 0,
+    width: roi.width ?? 0,
+    do_rectify: roi.do_rectify ?? false,
+  };
+}
+
+export function normalizeCameraInfo(
+  message: DeepPartial<CameraInfo> &
+    DeepPartial<{ d: number[]; k: Matrix3; r: Matrix3; p: Matrix3x4 }>,
+): CameraInfo {
+  // Handle lowercase field names as well (ROS2 compatibility)
+  const D = message.D ?? message.d;
+  const K = message.K ?? message.k;
+  const R = message.R ?? message.r;
+  const P = message.P ?? message.p;
+
+  const Dlen = D?.length ?? 0;
+  const Klen = K?.length ?? 0;
+  const Rlen = R?.length ?? 0;
+  const Plen = P?.length ?? 0;
+
+  return {
+    header: normalizeHeader(message.header),
+    height: message.height ?? 0,
+    width: message.width ?? 0,
+    distortion_model: message.distortion_model ?? "",
+    D: Dlen > 0 ? D! : [],
+    K: Klen === 9 ? (K as Matrix3) : [],
+    R: Rlen === 9 ? (R as Matrix3) : [],
+    P: Plen === 12 ? (P as Matrix3x4) : [],
+    binning_x: message.binning_x ?? 0,
+    binning_y: message.binning_y ?? 0,
+    roi: normalizeRegionOfInterest(message.roi),
   };
 }

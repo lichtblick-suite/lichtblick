@@ -121,6 +121,7 @@ export class PointClouds extends THREE.Object3D {
 
       const material = pointsMaterial(renderable.userData.settings, this.renderer.materialCache);
       const points = new THREE.Points(geometry, material);
+      points.frustumCulled = false;
       points.name = `${topic}:PointCloud2:points`;
       points.userData.pickingMaterial = createPickingMaterial(renderable.userData.settings);
       renderable.userData.points = points;

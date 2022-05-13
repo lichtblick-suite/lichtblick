@@ -13,6 +13,7 @@ import {
 } from "@foxglove/studio-base/components/SettingsTreeEditor/types";
 
 import {
+  CAMERA_INFO_DATATYPES,
   MARKER_ARRAY_DATATYPES,
   MARKER_DATATYPES,
   OCCUPANCY_GRID_DATATYPES,
@@ -72,10 +73,18 @@ export type LayerSettingsPose = {
   covarianceColor: string;
 };
 
+export type LayerSettingsCameraInfo = {
+  visible: boolean;
+  distance: number;
+  width: number;
+  color: string;
+};
+
 export type LayerSettings =
   | LayerSettingsMarker
   | LayerSettingsOccupancyGrid
-  | LayerSettingsPointCloud2;
+  | LayerSettingsPointCloud2
+  | LayerSettingsPose;
 
 export enum LayerType {
   Transform,
@@ -83,6 +92,7 @@ export enum LayerType {
   OccupancyGrid,
   PointCloud,
   Pose,
+  CameraInfo,
 }
 
 export type FieldsProvider = (
@@ -99,6 +109,7 @@ mergeSetInto(SUPPORTED_DATATYPES, OCCUPANCY_GRID_DATATYPES);
 mergeSetInto(SUPPORTED_DATATYPES, POINTCLOUD_DATATYPES);
 mergeSetInto(SUPPORTED_DATATYPES, POSE_STAMPED_DATATYPES);
 mergeSetInto(SUPPORTED_DATATYPES, POSE_WITH_COVARIANCE_STAMPED_DATATYPES);
+mergeSetInto(SUPPORTED_DATATYPES, CAMERA_INFO_DATATYPES);
 
 const ONE_DEGREE = Math.PI / 180;
 
