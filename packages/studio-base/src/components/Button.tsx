@@ -118,7 +118,6 @@ export default function Button({
       onFocus={onFocus}
       {...eventHandlers}
       style={{ position: "relative", ...styles }}
-      title={tooltip}
       disabled={disabled}
       ref={innerRef}
     >
