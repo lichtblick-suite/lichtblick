@@ -6,7 +6,7 @@ import * as THREE from "three";
 
 import Logger from "@foxglove/log";
 import { SettingsTreeFields } from "@foxglove/studio-base/components/SettingsTreeEditor/types";
-import PinholeCameraModel from "@foxglove/studio-base/panels/ImageView/lib/PinholeCameraModel";
+import PinholeCameraModel from "@foxglove/studio-base/panels/Image/lib/PinholeCameraModel";
 import { MutablePoint } from "@foxglove/studio-base/types/Messages";
 
 import { Renderer } from "../Renderer";
@@ -215,7 +215,7 @@ export class Cameras extends THREE.Object3D {
 
     // If the CameraInfo message contents changed or the settings changed, redraw the wireframe
     if (
-      renderable.userData.cameraModel?.P &&
+      renderable.userData.cameraModel?.P != undefined &&
       (!dataEqual || !settingsEqual || !renderable.userData.lines)
     ) {
       this.renderer.layerErrors.removeFromTopic(topic, CAMERA_MODEL);

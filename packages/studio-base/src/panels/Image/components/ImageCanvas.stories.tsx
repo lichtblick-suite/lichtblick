@@ -212,7 +212,7 @@ function ShouldCallOnRenderImage({
 }
 
 export default {
-  title: "panels/ImageView/ImageCanvas",
+  title: "panels/Image/ImageCanvas",
   component: ImageCanvas,
   parameters: {
     chromatic: {

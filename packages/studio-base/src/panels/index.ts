@@ -4,10 +4,10 @@
 import { PanelInfo } from "@foxglove/studio-base/context/PanelCatalogContext";
 import { TAB_PANEL_TYPE } from "@foxglove/studio-base/util/globalConstants";
 
-import GlobalVariableSliderHelp from "./GlobalVariableSlider/index.help.md";
-import globalVariableSliderThumbnail from "./GlobalVariableSlider/thumbnail.png";
-import ImageViewHelp from "./ImageView/index.help.md";
-import imageViewThumbnail from "./ImageView/thumbnail.png";
+import DataSourceInfoHelp from "./DataSourceInfo/index.help.md";
+import dataSourceInfoThumbnail from "./DataSourceInfo/thumbnail.png";
+import ImageViewHelp from "./Image/index.help.md";
+import imageViewThumbnail from "./Image/thumbnail.png";
 import InternalLogsHelp from "./InternalLogs/index.help.md";
 import InternalsHelp from "./Internals/index.help.md";
 import LogHelp from "./Log/index.help.md";
@@ -24,8 +24,6 @@ import PublishHelp from "./Publish/index.help.md";
 import publishThumbnail from "./Publish/thumbnail.png";
 import RawMessagesHelp from "./RawMessages/index.help.md";
 import rawMessagesThumbnail from "./RawMessages/thumbnail.png";
-import SourceInfoHelp from "./SourceInfo/index.help.md";
-import sourceInfoThumbnail from "./SourceInfo/thumbnail.png";
 import StateTransitionsHelp from "./StateTransitions/index.help.md";
 import stateTransitionsThumbnail from "./StateTransitions/thumbnail.png";
 import TabHelp from "./Tab/index.help.md";
@@ -41,6 +39,8 @@ import TopicGraphHelp from "./TopicGraph/index.help.md";
 import topicGraphThumbnail from "./TopicGraph/thumbnail.png";
 import URDFViewerHelp from "./URDFViewer/index.help.md";
 import URDFViewerThumbnail from "./URDFViewer/thumbnail.png";
+import VariableSliderHelp from "./VariableSlider/index.help.md";
+import variableSliderThumbnail from "./VariableSlider/thumbnail.png";
 import DiagnosticStatusPanelHelp from "./diagnostics/DiagnosticStatusPanel.help.md";
 import DiagnosticSummaryHelp from "./diagnostics/DiagnosticSummary.help.md";
 import diagnosticStatusThumbnail from "./diagnostics/thumbnails/diagnostic-status.png";
@@ -77,7 +77,7 @@ const builtin: PanelInfo[] = [
     description: "Display annotated images.",
     help: ImageViewHelp,
     thumbnail: imageViewThumbnail,
-    module: async () => await import("./ImageView"),
+    module: async () => await import("./Image"),
   },
   {
     title: "Teleop",
@@ -170,17 +170,17 @@ const builtin: PanelInfo[] = [
     title: "Data Source Info",
     type: "SourceInfo",
     description: "View details like topics and timestamps for the current data source.",
-    help: SourceInfoHelp,
-    thumbnail: sourceInfoThumbnail,
-    module: async () => await import("./SourceInfo"),
+    help: DataSourceInfoHelp,
+    thumbnail: dataSourceInfoThumbnail,
+    module: async () => await import("./DataSourceInfo"),
   },
   {
     title: "Variable Slider",
     type: "GlobalVariableSliderPanel",
     description: "Update numerical variable values for a layout.",
-    help: GlobalVariableSliderHelp,
-    thumbnail: globalVariableSliderThumbnail,
-    module: async () => await import("./GlobalVariableSlider"),
+    help: VariableSliderHelp,
+    thumbnail: variableSliderThumbnail,
+    module: async () => await import("./VariableSlider"),
   },
   {
     title: "Node Playground",

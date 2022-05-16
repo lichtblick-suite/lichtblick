@@ -11,7 +11,7 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import GlobalVariableSliderPanel from "@foxglove/studio-base/panels/GlobalVariableSlider/index";
+import VariableSliderPanel from "@foxglove/studio-base/panels/VariableSlider/index";
 import PanelSetup from "@foxglove/studio-base/stories/PanelSetup";
 
 const fixture = {
@@ -27,14 +27,14 @@ const fixture = {
 };
 
 export default {
-  title: "panels/GlobalVariableSlider",
-  component: GlobalVariableSliderPanel,
+  title: "panels/VariableSlider",
+  component: VariableSliderPanel,
 };
 
 export function Example(): JSX.Element {
   return (
     <PanelSetup fixture={fixture}>
-      <GlobalVariableSliderPanel />
+      <VariableSliderPanel />
     </PanelSetup>
   );
 }
@@ -43,7 +43,7 @@ export function NarrowLayout(): JSX.Element {
   return (
     <PanelSetup fixture={fixture}>
       <div style={{ width: 400 }}>
-        <GlobalVariableSliderPanel />
+        <VariableSliderPanel />
       </div>
     </PanelSetup>
   );

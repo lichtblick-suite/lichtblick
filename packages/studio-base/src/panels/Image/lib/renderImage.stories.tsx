@@ -9,7 +9,7 @@ import { useCompressedImage, cameraInfo, annotations } from "../storySupport";
 import { renderImage } from "./renderImage";
 
 export default {
-  title: "panels/ImageView/renderImage",
+  title: "panels/Image/renderImage",
   parameters: {
     chromatic: {
       delay: 100,

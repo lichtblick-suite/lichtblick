@@ -9,7 +9,7 @@ import { Story } from "@storybook/react";
 import { TopicDropdown } from "./TopicDropdown";
 
 export default {
-  title: "panels/ImageView/TopicDropdown",
+  title: "panels/Image/TopicDropdown",
   component: TopicDropdown,
 };
 

@@ -11,7 +11,7 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { CircleAnnotation } from "@foxglove/studio-base/panels/ImageView/types";
+import { CircleAnnotation } from "@foxglove/studio-base/panels/Image/types";
 import { Topic } from "@foxglove/studio-base/players/types";
 
 import {

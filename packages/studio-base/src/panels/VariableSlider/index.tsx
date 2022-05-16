@@ -35,12 +35,12 @@ type SliderProps = {
   step: number;
 };
 
-export type GlobalVariableSliderConfig = {
+export type VariableSliderConfig = {
   sliderProps: SliderProps;
   globalVariableName: string;
 };
 
-function buildSettingsTree(config: GlobalVariableSliderConfig): SettingsTreeNode {
+function buildSettingsTree(config: VariableSliderConfig): SettingsTreeNode {
   return {
     fields: {
       min: { label: "Min", input: "number", value: config.sliderProps.min },
@@ -56,10 +56,10 @@ function buildSettingsTree(config: GlobalVariableSliderConfig): SettingsTreeNode
 }
 
 type Props = {
-  config: GlobalVariableSliderConfig;
+  config: VariableSliderConfig;
 };
 
-function GlobalVariableSliderPanel(props: Props): React.ReactElement {
+function VariableSliderPanel(props: Props): React.ReactElement {
   const { sliderProps, globalVariableName } = props.config;
   const { globalVariables, setGlobalVariables } = useGlobalVariables();
 
@@ -129,7 +129,7 @@ function GlobalVariableSliderPanel(props: Props): React.ReactElement {
 }
 
 export default Panel(
-  Object.assign(GlobalVariableSliderPanel, {
+  Object.assign(VariableSliderPanel, {
     panelType: "GlobalVariableSliderPanel",
     defaultConfig: {
       sliderProps: { min: 0, max: 10, step: 1 },
