@@ -230,6 +230,7 @@ export default function muiComponents(theme: Theme): ThemeOptions["components"] 
     },
     MuiInputLabel: {
       defaultProps: {
+        shrink: true,
         variant: "standard",
         sx: { position: "relative" },
       },
@@ -305,6 +306,9 @@ export default function muiComponents(theme: Theme): ThemeOptions["components"] 
           padding: theme.spacing(0.75, 1),
         },
       },
+      defaultProps: {
+        notched: false,
+      },
     },
     MuiSelect: {
       styleOverrides: {
@@ -348,16 +352,6 @@ export default function muiComponents(theme: Theme): ThemeOptions["components"] 
       styleOverrides: {
         stickyHeader: {
           backgroundColor: theme.palette.background.paper,
-        },
-      },
-    },
-    MuiTextField: {
-      defaultProps: {
-        InputLabelProps: {
-          shrink: true,
-        },
-        InputProps: {
-          notched: false,
         },
       },
     },
