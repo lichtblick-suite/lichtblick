@@ -135,85 +135,6 @@ class ConsoleApi {
     ).json;
   }
 
-  private async post<T>(apiPath: string, body?: unknown): Promise<T> {
-    return (
-      await this.request<T>(apiPath, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(body),
-      })
-    ).json;
-  }
-
-  private async patch<T>(apiPath: string, body?: unknown): Promise<ApiResponse<T>> {
-    return await this.request<T>(
-      apiPath,
-      {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(body),
-      },
-      { allowedStatuses: [409] },
-    );
-  }
-
-  private async delete<T>(
-    apiPath: string,
-    query?: Record<string, string>,
-  ): Promise<ApiResponse<T>> {
-    return await this.request<T>(
-      query == undefined ? apiPath : `${apiPath}?${new URLSearchParams(query).toString()}`,
-      { method: "DELETE" },
-      { allowedStatuses: [404] },
-    );
-  }
-
-  private async request<T>(
-    url: string,
-    config?: RequestInit,
-    {
-      allowedStatuses = [],
-    }: {
-      /** By default, status codes other than 200 will throw an error. */
-      allowedStatuses?: number[];
-    } = {},
-  ): Promise<ApiResponse<T>> {
-    const fullUrl = `${this._baseUrl}${url}`;
-
-    const headers: Record<string, string> = {};
-    if (this._authHeader != undefined) {
-      headers["Authorization"] = this._authHeader;
-    }
-    const fullConfig: RequestInit = {
-      ...config,
-      credentials: "include",
-      headers: { ...headers, ...config?.headers },
-    };
-
-    const res = await fetch(fullUrl, fullConfig);
-    this._responseObserver?.(res);
-    if (res.status !== 200 && !allowedStatuses.includes(res.status)) {
-      if (res.status === 401) {
-        throw new Error("Not logged in. Log in to your Foxglove account and try again.");
-      } else if (res.status === 403) {
-        throw new Error(
-          "Unauthorized. Check that you are logged in to the correct Foxglove organization.",
-        );
-      }
-      const json = (await res.json().catch((err) => {
-        throw new Error(`Status ${res.status}: ${err.message}`);
-      })) as { message?: string; error?: string };
-      const message = json.message ?? json.error;
-      throw new Error(`Status ${res.status}${message != undefined ? `: ${message}` : ""}`);
-    }
-
-    try {
-      return { status: res.status, json: (await res.json()) as T };
-    } catch (err) {
-      throw new Error("Request Failed.");
-    }
-  }
-
   async getLayouts(options: { includeData: boolean }): Promise<readonly ConsoleApiLayout[]> {
     return await this.get<ConsoleApiLayout[]>("/v1/layouts", {
       includeData: options.includeData ? "true" : "false",
@@ -300,6 +221,91 @@ class ConsoleApi {
     replayLookbackSeconds?: number;
   }): Promise<{ link: string }> {
     return await this.post<{ link: string }>("/v1/data/stream", params);
+  }
+
+  /// ----- private
+
+  private async request<T>(
+    url: string,
+    config?: RequestInit,
+    {
+      allowedStatuses = [],
+    }: {
+      /** By default, status codes other than 200 will throw an error. */
+      allowedStatuses?: number[];
+    } = {},
+  ): Promise<ApiResponse<T>> {
+    const fullUrl = `${this._baseUrl}${url}`;
+
+    const headers: Record<string, string> = {
+      // Include the version of studio in the request Useful when scraping logs to determine what
+      // versions of the app are making requests.
+      "fg-user-agent": FOXGLOVE_USER_AGENT,
+    };
+    if (this._authHeader != undefined) {
+      headers["Authorization"] = this._authHeader;
+    }
+    const fullConfig: RequestInit = {
+      ...config,
+      credentials: "include",
+      headers: { ...headers, ...config?.headers },
+    };
+
+    const res = await fetch(fullUrl, fullConfig);
+    this._responseObserver?.(res);
+    if (res.status !== 200 && !allowedStatuses.includes(res.status)) {
+      if (res.status === 401) {
+        throw new Error("Not logged in. Log in to your Foxglove account and try again.");
+      } else if (res.status === 403) {
+        throw new Error(
+          "Unauthorized. Check that you are logged in to the correct Foxglove organization.",
+        );
+      }
+      const json = (await res.json().catch((err) => {
+        throw new Error(`Status ${res.status}: ${err.message}`);
+      })) as { message?: string; error?: string };
+      const message = json.message ?? json.error;
+      throw new Error(`Status ${res.status}${message != undefined ? `: ${message}` : ""}`);
+    }
+
+    try {
+      return { status: res.status, json: (await res.json()) as T };
+    } catch (err) {
+      throw new Error("Request Failed.");
+    }
+  }
+
+  private async post<T>(apiPath: string, body?: unknown): Promise<T> {
+    return (
+      await this.request<T>(apiPath, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body),
+      })
+    ).json;
+  }
+
+  private async patch<T>(apiPath: string, body?: unknown): Promise<ApiResponse<T>> {
+    return await this.request<T>(
+      apiPath,
+      {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body),
+      },
+      { allowedStatuses: [409] },
+    );
+  }
+
+  private async delete<T>(
+    apiPath: string,
+    query?: Record<string, string>,
+  ): Promise<ApiResponse<T>> {
+    return await this.request<T>(
+      query == undefined ? apiPath : `${apiPath}?${new URLSearchParams(query).toString()}`,
+      { method: "DELETE" },
+      { allowedStatuses: [404] },
+    );
   }
 }
 

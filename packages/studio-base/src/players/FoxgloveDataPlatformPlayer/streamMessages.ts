@@ -81,7 +81,15 @@ export default async function* streamMessages({
   }
 
   // Since every request is signed with a new token, there's no benefit to caching.
-  const response = await fetch(mcapUrl, { signal: controller.signal, cache: "no-cache" });
+  const response = await fetch(mcapUrl, {
+    signal: controller.signal,
+    cache: "no-cache",
+    headers: {
+      // Include the version of studio in the request Useful when scraping logs to determine what
+      // versions of the app are making requests.
+      "fg-user-agent": FOXGLOVE_USER_AGENT,
+    },
+  });
   if (response.status === 404) {
     return;
   } else if (response.status !== 200) {
