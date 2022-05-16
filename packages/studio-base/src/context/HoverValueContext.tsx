@@ -12,34 +12,44 @@
 //   You may not use this file except in compliance with the License.
 
 import { isEqual } from "lodash";
-import { useCallback, useState } from "react";
+import { useCallback } from "react";
+import create, { StoreApi } from "zustand";
+import createContext from "zustand/context";
 
-import { useShallowMemo } from "@foxglove/hooks";
-import useContextSelector from "@foxglove/studio-base/hooks/useContextSelector";
 import type { HoverValue } from "@foxglove/studio-base/types/hoverValue";
-import createSelectableContext from "@foxglove/studio-base/util/createSelectableContext";
 
-type HoverValueContext = Readonly<{
-  value: HoverValue | undefined;
-  setHoverValue: (value: HoverValue) => void;
+type HoverValueStore = Readonly<{
+  value: undefined | HoverValue;
   clearHoverValue: (componentId: string) => void;
+  setHoverValue: (value: HoverValue) => void;
 }>;
 
-const Context = createSelectableContext<HoverValueContext>();
-Context.displayName = "HoverValueContext";
+const { Provider, useStore } = createContext<StoreApi<HoverValueStore>>();
 
-export function useClearHoverValue(): HoverValueContext["clearHoverValue"] {
-  return useContextSelector(
-    Context,
-    useCallback((ctx) => ctx.clearHoverValue, []),
-  );
+function createHoverValueStore(): StoreApi<HoverValueStore> {
+  return create((set) => {
+    return {
+      value: undefined,
+      clearHoverValue: (componentId) =>
+        set((store) => ({
+          value: store.value?.componentId === componentId ? undefined : store.value,
+        })),
+      setHoverValue: (newValue: HoverValue) =>
+        set((store) => ({ value: isEqual(newValue, store.value) ? store.value : newValue })),
+    };
+  });
 }
 
-export function useSetHoverValue(): HoverValueContext["setHoverValue"] {
-  return useContextSelector(
-    Context,
-    useCallback((ctx) => ctx.setHoverValue, []),
-  );
+const selectClearHoverValue = (store: HoverValueStore) => store.clearHoverValue;
+
+export function useClearHoverValue(): HoverValueStore["clearHoverValue"] {
+  return useStore(selectClearHoverValue);
+}
+
+const selectSetHoverValue = (store: HoverValueStore) => store.setHoverValue;
+
+export function useSetHoverValue(): HoverValueStore["setHoverValue"] {
+  return useStore(selectSetHoverValue);
 }
 
 export function useHoverValue(args?: {
@@ -49,45 +59,29 @@ export function useHoverValue(args?: {
   const hasArgs = !!args;
   const componentId = args?.componentId;
   const isTimestampScale = args?.isTimestampScale ?? false;
-  return useContextSelector(
-    Context,
-    useCallback(
-      (ctx) => {
-        if (!hasArgs) {
-          // Raw form -- user needs to check that the value should be shown.
-          return ctx.value;
-        }
-        if (ctx.value == undefined) {
-          return undefined;
-        }
-        if (ctx.value.type === "PLAYBACK_SECONDS" && isTimestampScale) {
-          // Always show playback-time hover values for timestamp-based charts.
-          return ctx.value;
-        }
-        // Otherwise just show hover bars when hovering over the panel itself.
-        return ctx.value.componentId === componentId ? ctx.value : undefined;
-      },
-      [hasArgs, componentId, isTimestampScale],
-    ),
+
+  const selector = useCallback(
+    (store: HoverValueStore) => {
+      if (!hasArgs) {
+        // Raw form -- user needs to check that the value should be shown.
+        return store.value;
+      }
+      if (store.value == undefined) {
+        return undefined;
+      }
+      if (store.value.type === "PLAYBACK_SECONDS" && isTimestampScale) {
+        // Always show playback-time hover values for timestamp-based charts.
+        return store.value;
+      }
+      // Otherwise just show hover bars when hovering over the panel itself.
+      return store.value.componentId === componentId ? store.value : undefined;
+    },
+    [hasArgs, componentId, isTimestampScale],
   );
+
+  return useStore(selector);
 }
 
 export function HoverValueProvider({ children }: React.PropsWithChildren<unknown>): JSX.Element {
-  const [value, rawSetHoverValue] = useState<HoverValue | undefined>();
-  const setHoverValue = useCallback(
-    (newValue: HoverValue) =>
-      rawSetHoverValue((oldValue) => (isEqual(newValue, oldValue) ? oldValue : newValue)),
-    [],
-  );
-  const clearHoverValue = useCallback((componentId: string) => {
-    rawSetHoverValue((currentValue) =>
-      currentValue?.componentId === componentId ? undefined : currentValue,
-    );
-  }, []);
-  const providerValue = useShallowMemo({
-    value,
-    setHoverValue,
-    clearHoverValue,
-  });
-  return <Context.Provider value={providerValue}>{children}</Context.Provider>;
+  return <Provider createStore={createHoverValueStore}>{children}</Provider>;
 }
