@@ -7,16 +7,15 @@ import {
   IChoiceGroupOption,
   Dialog,
   DialogFooter,
-  Text,
   TextField,
-  useTheme,
   DefaultButton,
   PrimaryButton,
 } from "@fluentui/react";
-import { Stack } from "@mui/material";
+import { Typography } from "@mui/material";
 import { useCallback, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { useLatest, useUnmount } from "react-use";
 
+import Stack from "@foxglove/studio-base/components/Stack";
 import { useDialogHostId } from "@foxglove/studio-base/context/DialogHostIdContext";
 import { useLayoutManager } from "@foxglove/studio-base/context/LayoutManagerContext";
 import { Layout } from "@foxglove/studio-base/services/ILayoutStorage";
@@ -40,7 +39,6 @@ export function UnsavedChangesPrompt({
   defaultSelectedKey?: Exclude<UnsavedChangesResolution["type"], "cancel">;
   defaultPersonalCopyName?: string;
 }): JSX.Element {
-  const theme = useTheme();
   const hostId = useDialogHostId();
 
   const options = useMemo<
@@ -116,7 +114,7 @@ export function UnsavedChangesPrompt({
       maxWidth={320}
     >
       <form onSubmit={handleSubmit}>
-        <Stack spacing={2} style={{ minHeight: 180 }}>
+        <Stack gap={2} style={{ minHeight: 180 }}>
           <ChoiceGroup
             selectedKey={selectedKey}
             options={options}
@@ -124,9 +122,9 @@ export function UnsavedChangesPrompt({
             required={true}
           />
           {selectedKey === "discard" && (
-            <Text styles={{ root: { color: theme.semanticColors.bodySubtext } }}>
+            <Typography color="text.secondary">
               Your changes will be permantly deleted. This cannot be undone.
-            </Text>
+            </Typography>
           )}
           {selectedKey === "makePersonal" && (
             <TextField

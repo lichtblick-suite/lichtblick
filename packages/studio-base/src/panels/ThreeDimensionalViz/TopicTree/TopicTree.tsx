@@ -15,14 +15,13 @@ import {
   DefaultButton,
   IconButton,
   IContextualMenuItemStyles,
-  Text,
   TextField,
   ITheme,
   ITextFieldStyles,
   IButtonStyles,
   useTheme,
 } from "@fluentui/react";
-import { Theme } from "@mui/material";
+import { Theme, Typography } from "@mui/material";
 import { makeStyles } from "@mui/styles";
 import { clamp, groupBy } from "lodash";
 import Tree from "rc-tree";
@@ -553,11 +552,11 @@ function TopicTree({
         {showNoMatchesState ? (
           <div className={classes.noResults}>
             <NoMatchesSvg />
-            <Text variant="smallPlus" styles={{ root: { textAlign: "center", lineHeight: "1.3" } }}>
+            <Typography variant="body2" align="center" lineHeight={1.3}>
               No results found.
               <br />
               Try searching a different term.
-            </Text>
+            </Typography>
           </div>
         ) : (
           <Tree

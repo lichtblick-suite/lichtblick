@@ -19,7 +19,7 @@ export const dark: PaletteOptions & CustomPaletteOptions = {
   info: { main: "#29bee7" },
   text: {
     primary: "#e1e1e4",
-    secondary: "#bbbac0",
+    secondary: "#a7a6af",
   },
   divider: "#414141",
   background: {
@@ -59,7 +59,7 @@ export const light: PaletteOptions & CustomPaletteOptions = {
   },
   text: {
     primary: "#393939",
-    secondary: "#5d5c65",
+    secondary: "#6f6d79",
   },
   divider: "#D6d6d6",
   grey: {

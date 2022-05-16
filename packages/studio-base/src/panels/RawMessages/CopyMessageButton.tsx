@@ -2,8 +2,8 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { Link } from "@fluentui/react";
 import ClipboardOutlineIcon from "@mdi/svg/svg/clipboard-outline.svg";
+import { Link } from "@mui/material";
 import { useCallback, MouseEvent } from "react";
 
 import Icon from "@foxglove/studio-base/components/Icon";
@@ -27,7 +27,7 @@ export default function CopyMessageButton({ text, data }: Props): JSX.Element {
   );
 
   return (
-    <Link onClick={onClick} href="#" style={{ textDecoration: "none", cursor: "pointer" }}>
+    <Link color="primary" underline="none" onClick={onClick} href="#">
       <Icon tooltip="Copy entire message to clipboard" style={{ position: "relative", top: -1 }}>
         <ClipboardOutlineIcon style={{ verticalAlign: "middle" }} />
       </Icon>{" "}

@@ -2,10 +2,11 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { ActionButton, Link, useTheme, Text } from "@fluentui/react";
-import { Stack } from "@mui/material";
+import { ActionButton, useTheme } from "@fluentui/react";
+import { Link, Typography } from "@mui/material";
 import { useState, useMemo, useCallback, useLayoutEffect } from "react";
 
+import Stack from "@foxglove/studio-base/components/Stack";
 import {
   IDataSourceFactory,
   usePlayerSelection,
@@ -75,8 +76,8 @@ export default function Connection(props: ConnectionProps): JSX.Element {
 
   return (
     <View onBack={onBack} onCancel={onCancel} onOpen={disableOpen ? undefined : onOpen}>
-      <Stack direction="row" flexGrow={1} height="100%" spacing={4}>
-        <Stack height="100%">
+      <Stack direction="row" flexGrow={1} fullHeight gap={4}>
+        <Stack fullHeight>
           {enabledSourcesFirst.map((source, idx) => {
             const { id, iconName, displayName } = source;
             return (
@@ -97,22 +98,14 @@ export default function Connection(props: ConnectionProps): JSX.Element {
             );
           })}
         </Stack>
-        <Stack
-          key={selectedSource?.id}
-          flexGrow={1}
-          height="100%"
-          spacing={2}
-          style={{ overflowX: "auto" }}
-        >
+        <Stack key={selectedSource?.id} flex="auto" fullHeight gap={2} overflowX="auto">
           {selectedSource?.description && (
-            <Text styles={{ root: { color: theme.semanticColors.bodySubtext } }}>
-              {selectedSource.description}
-            </Text>
+            <Typography color="text.secondary">{selectedSource.description}</Typography>
           )}
 
           {selectedSource?.formConfig != undefined && (
             <Stack flexGrow={1} justifyContent="space-between">
-              <Stack spacing={2}>
+              <Stack gap={2}>
                 {selectedSource.formConfig.fields.map((field) => (
                   <FormField
                     key={field.id}

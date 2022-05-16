@@ -2,7 +2,8 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { Dialog, Text, TextField, useTheme, IModalProps } from "@fluentui/react";
+import { Dialog, TextField, IModalProps } from "@fluentui/react";
+import { Typography, useTheme } from "@mui/material";
 
 import { useDialogHostId } from "@foxglove/studio-base/context/DialogHostIdContext";
 import { NotificationMessage } from "@foxglove/studio-base/util/sendNotification";
@@ -19,9 +20,9 @@ export default function NotificationModal({
   const hostId = useDialogHostId();
 
   const displayPropsBySeverity = {
-    error: theme.semanticColors.errorBackground,
-    warn: theme.semanticColors.warningBackground,
-    info: theme.palette.blueLight,
+    error: theme.palette.error.main,
+    warn: theme.palette.warning.main,
+    info: theme.palette.info.main,
   };
 
   return (
@@ -45,8 +46,8 @@ export default function NotificationModal({
         <TextField
           styles={{
             field: {
-              color: theme.semanticColors.bodyText,
-              fontSize: theme.fonts.small.fontSize,
+              color: theme.palette.text.primary,
+              fontSize: theme.typography.body2.fontSize,
               fontFamily: `${fonts.MONOSPACE} !important`,
               maxHeight: "50vh",
               overflowY: "auto",
@@ -61,9 +62,9 @@ export default function NotificationModal({
           underlined={false}
         />
       ) : details != undefined && details !== "" ? (
-        <Text style={{ whiteSpace: "pre-line" /* allow newlines in the details message */ }}>
+        <Typography style={{ whiteSpace: "pre-line" /* allow newlines in the details message */ }}>
           {details}
-        </Text>
+        </Typography>
       ) : (
         "No details provided"
       )}

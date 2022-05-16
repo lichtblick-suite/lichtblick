@@ -114,7 +114,7 @@ function Tab({ config, saveConfig }: Props) {
         activeTabIdx={activeTabIdx}
         setDraggingTabState={setDraggingTabState}
       />
-      <Stack direction="row" flex="auto" overflow="hidden" style={{ position: "relative" }}>
+      <Stack direction="row" flex="auto" overflow="hidden" position="relative">
         {activeLayout != undefined ? (
           <TabDndContext.Provider value={{ preventTabDrop }}>
             <UnconnectedPanelLayout

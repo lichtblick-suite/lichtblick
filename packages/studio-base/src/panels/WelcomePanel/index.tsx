@@ -2,21 +2,14 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import {
-  Checkbox,
-  DefaultButton,
-  Icon,
-  IIconStyles,
-  Text,
-  TextField,
-  useTheme,
-} from "@fluentui/react";
-import { Stack } from "@mui/material";
+import { Checkbox, DefaultButton, Icon, IIconStyles, TextField } from "@fluentui/react";
+import { Typography, useTheme } from "@mui/material";
 import { useMemo, useState } from "react";
 import { useAsyncFn } from "react-use";
 
 import Panel from "@foxglove/studio-base/components/Panel";
 import PanelToolbar from "@foxglove/studio-base/components/PanelToolbar";
+import Stack from "@foxglove/studio-base/components/Stack";
 import TextContent from "@foxglove/studio-base/components/TextContent";
 import { useAppConfigurationValue } from "@foxglove/studio-base/hooks/useAppConfigurationValue";
 import { useSubscribeContext } from "@foxglove/studio-base/panels/WelcomePanel/SubscribeContext";
@@ -71,7 +64,7 @@ function WelcomePanel() {
     !loading;
 
   return (
-    <Stack data-test="welcome-content" padding={2.5} style={{ overflowY: "auto" }}>
+    <Stack data-test="welcome-content" padding={2.5} overflowY="auto">
       <PanelToolbar floating />
       <TextContent>
         <h1>Welcome</h1>
@@ -102,20 +95,17 @@ function WelcomePanel() {
           <Icon iconName="Database" styles={iconStyles} /> in the upper left to select another data
           source.
         </p>
-        <Text
-          variant="smallPlus"
-          styles={{
-            root: {
-              display: "block",
-              margin: `${theme.spacing.l1} 0 ${theme.spacing.s1}`,
-              color: theme.semanticColors.bodyText,
-            },
+        <Typography
+          variant="body2"
+          fontWeight="bold"
+          style={{
+            margin: theme.spacing(4, 0, 1),
           }}
         >
-          <b>To learn more, join our Slack community and subscribe to our newsletter:</b>
-        </Text>
+          To learn more, join our Slack community and subscribe to our newsletter:
+        </Typography>
 
-        <Stack spacing={2}>
+        <Stack gap={2}>
           <TextField
             placeholder="me@example.com"
             value={emailValue}
@@ -140,11 +130,13 @@ function WelcomePanel() {
             </DefaultButton>
             &nbsp;
             {error ? (
-              <span style={{ color: theme.semanticColors.errorText }}>{error.toString()}</span>
+              <Typography display="span" color="error.main">
+                {error.toString()}
+              </Typography>
             ) : subscribed && !submitState.loading ? (
-              <span style={{ color: theme.semanticColors.successIcon }}>
+              <Typography display="span" color="success.main">
                 Thanks for signing up!
-              </span>
+              </Typography>
             ) : undefined}
           </Stack>
         </Stack>

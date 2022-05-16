@@ -2,21 +2,19 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { Link, Text } from "@fluentui/react";
+import { Link, Typography } from "@mui/material";
 
 import { IDataSourceFactory, Ros1SocketDataSourceFactory } from "@foxglove/studio-base";
 
 class Ros1UnavailableDataSourceFactory extends Ros1SocketDataSourceFactory {
   disabledReason = (
-    <>
-      <Text block as="p">
-        ROS 1 connections require TCP sockets, which are not available in a web browser.{" "}
-        <Link href="https://foxglove.dev/download" target="_blank" rel="noreferrer">
-          Download our desktop app
-        </Link>{" "}
-        to connect to a ROS 1 system.
-      </Text>
-    </>
+    <Typography>
+      ROS 1 connections require TCP sockets, which are not available in a web browser.{" "}
+      <Link href="https://foxglove.dev/download" target="_blank" rel="noreferrer">
+        Download our desktop app
+      </Link>{" "}
+      to connect to a ROS 1 system.
+    </Typography>
   );
 
   override initialize(): ReturnType<IDataSourceFactory["initialize"]> {

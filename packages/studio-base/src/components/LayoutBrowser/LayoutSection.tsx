@@ -2,33 +2,23 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { makeStyles, Text } from "@fluentui/react";
-import { Stack } from "@mui/material";
+import { Typography, styled as muiStyled } from "@mui/material";
 
+import Stack from "@foxglove/studio-base/components/Stack";
 import { Layout } from "@foxglove/studio-base/services/ILayoutStorage";
 
 import LayoutRow from "./LayoutRow";
 
-const useStyles = makeStyles((theme) => ({
-  sectionHeader: [
-    theme.fonts.medium,
-    {
-      fontVariant: "small-caps",
-      textTransform: "lowercase",
-      color: theme.palette.neutralSecondaryAlt,
-      letterSpacing: "0.5px",
-      paddingLeft: theme.spacing.m,
-      paddingRight: theme.spacing.m,
-      marginTop: theme.spacing.m,
-      marginBottom: theme.spacing.s1,
-    },
-  ],
+const SectionHeader = muiStyled(Typography)(({ theme }) => ({
+  paddingLeft: theme.spacing(2),
+  paddingRight: theme.spacing(2),
+  marginTop: theme.spacing(2),
+  marginBottom: theme.spacing(1),
+}));
 
-  emptyText: {
-    display: "block",
-    paddingLeft: theme.spacing.m,
-    paddingRight: theme.spacing.m,
-  },
+const EmptyText = muiStyled(Typography)(({ theme }) => ({
+  paddingLeft: theme.spacing(2),
+  paddingRight: theme.spacing(2),
 }));
 
 export default function LayoutSection({
@@ -60,18 +50,15 @@ export default function LayoutSection({
   onRevert: (item: Layout) => void;
   onMakePersonalCopy: (item: Layout) => void;
 }): JSX.Element {
-  const styles = useStyles();
   return (
     <Stack>
       {title != undefined && (
-        <Text as="h2" className={styles.sectionHeader}>
+        <SectionHeader as="h2" variant="overline">
           {title}
-        </Text>
+        </SectionHeader>
       )}
       <div>
-        <Text className={styles.emptyText} styles={{ root: { lineHeight: "1.3" } }}>
-          {items != undefined && items.length === 0 && emptyText}
-        </Text>
+        <EmptyText>{items != undefined && items.length === 0 && emptyText}</EmptyText>
         {items?.map((layout) => (
           <LayoutRow
             selected={layout.id === selectedId}

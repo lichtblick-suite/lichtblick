@@ -10,8 +10,7 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { Link, Text, useTheme } from "@fluentui/react";
-import { Box } from "@mui/material";
+import { Box, Link, Typography, useTheme } from "@mui/material";
 import { makeStyles } from "@mui/styles";
 import { extname } from "path";
 import {
@@ -125,11 +124,11 @@ function AddPanel() {
       helpContent={panelsHelpContent}
     >
       {selectedLayoutId == undefined ? (
-        <Text styles={{ root: { color: theme.palette.neutralTertiary } }}>
+        <Typography color="text.secondary">
           <Link onClick={openLayoutBrowser}>Select a layout</Link> to get started!
-        </Text>
+        </Typography>
       ) : (
-        <PanelList onPanelSelect={addPanel} />
+        <PanelList onPanelSelect={addPanel} backgroundColor={theme.palette.background.default} />
       )}
     </SidebarContent>
   );

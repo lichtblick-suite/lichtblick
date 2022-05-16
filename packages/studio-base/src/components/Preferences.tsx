@@ -11,12 +11,10 @@ import {
   IComboBoxOption,
   Label,
   SelectableOptionMenuItemType,
-  Text,
   TextField,
-  useTheme,
   VirtualizedComboBox,
 } from "@fluentui/react";
-import { Stack } from "@mui/material";
+import { Typography } from "@mui/material";
 import moment from "moment-timezone";
 import { useCallback, useMemo, useState } from "react";
 
@@ -25,6 +23,7 @@ import { AppSetting } from "@foxglove/studio-base/AppSetting";
 import OsContextSingleton from "@foxglove/studio-base/OsContextSingleton";
 import { ExperimentalFeatureSettings } from "@foxglove/studio-base/components/ExperimentalFeatureSettings";
 import { SidebarContent } from "@foxglove/studio-base/components/SidebarContent";
+import Stack from "@foxglove/studio-base/components/Stack";
 import { useAppTimeFormat } from "@foxglove/studio-base/hooks";
 import { useAppConfigurationValue } from "@foxglove/studio-base/hooks/useAppConfigurationValue";
 import { TimeDisplayMethod } from "@foxglove/studio-base/types/panels";
@@ -285,26 +284,7 @@ function RosPackagePath(): React.ReactElement {
   );
 }
 
-function SectionHeader({ children }: React.PropsWithChildren<unknown>) {
-  const theme = useTheme();
-  return (
-    <Text
-      block
-      as="h2"
-      variant="large"
-      style={{
-        marginBottom: theme.spacing.s1,
-        color: theme.palette.themeSecondary,
-      }}
-    >
-      {children}
-    </Text>
-  );
-}
-
 export default function Preferences(): React.ReactElement {
-  const theme = useTheme();
-
   const [crashReportingEnabled, setCrashReportingEnabled] = useAppConfigurationValue<boolean>(
     AppSetting.CRASH_REPORTING_ENABLED,
   );
@@ -321,10 +301,12 @@ export default function Preferences(): React.ReactElement {
 
   return (
     <SidebarContent title="Preferences">
-      <Stack spacing={3.75}>
-        <div>
-          <SectionHeader>General</SectionHeader>
-          <Stack spacing={1}>
+      <Stack gap={4}>
+        <section>
+          <Typography component="h2" variant="h5" gutterBottom color="primary">
+            General
+          </Typography>
+          <Stack gap={1}>
             <div>
               <ColorSchemeSettings />
             </div>
@@ -348,21 +330,27 @@ export default function Preferences(): React.ReactElement {
               </div>
             )}
           </Stack>
-        </div>
-        <div>
-          <SectionHeader>ROS</SectionHeader>
-          <Stack spacing={1}>
+        </section>
+
+        <section>
+          <Typography component="h2" variant="h5" gutterBottom color="primary">
+            ROS
+          </Typography>
+          <Stack gap={1}>
             <div>
               <RosPackagePath />
             </div>
           </Stack>
-        </div>
-        <div>
-          <SectionHeader>Privacy</SectionHeader>
-          <Stack spacing={1}>
-            <Text style={{ color: theme.palette.neutralSecondary }}>
+        </section>
+
+        <section>
+          <Typography component="h2" variant="h5" gutterBottom color="primary">
+            Privacy
+          </Typography>
+          <Stack gap={1}>
+            <Typography color="text.secondary">
               Changes will take effect the next time Foxglove Studio is launched.
-            </Text>
+            </Typography>
             <Checkbox
               checked={telemetryEnabled ?? true}
               onChange={(_event, checked) => void setTelemetryEnabled(checked)}
@@ -374,16 +362,19 @@ export default function Preferences(): React.ReactElement {
               label="Send anonymized crash reports"
             />
           </Stack>
-        </div>
-        <div>
-          <SectionHeader>Experimental features</SectionHeader>
-          <Stack spacing={1}>
-            <Text style={{ color: theme.palette.neutralSecondary }}>
+        </section>
+
+        <section>
+          <Typography component="h2" variant="h5" gutterBottom color="primary">
+            Experimental features
+          </Typography>
+          <Stack gap={1}>
+            <Typography color="text.secondary">
               These features are unstable and not recommended for daily use.
-            </Text>
+            </Typography>
             <ExperimentalFeatureSettings />
           </Stack>
-        </div>
+        </section>
       </Stack>
     </SidebarContent>
   );

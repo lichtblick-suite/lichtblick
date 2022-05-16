@@ -11,11 +11,11 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { Text, useTheme, Checkbox, Link } from "@fluentui/react";
-import { Theme } from "@mui/material";
-import { makeStyles } from "@mui/styles";
+import { Checkbox } from "@fluentui/react";
+import { Link, Typography } from "@mui/material";
 
 import { AppSetting } from "@foxglove/studio-base/AppSetting";
+import Stack from "@foxglove/studio-base/components/Stack";
 import { useAppConfigurationValue } from "@foxglove/studio-base/hooks/useAppConfigurationValue";
 
 type Feature = {
@@ -23,26 +23,6 @@ type Feature = {
   name: string;
   description: JSX.Element;
 };
-
-const useStyles = makeStyles((theme: Theme) => ({
-  root: {
-    display: "flex",
-    flexDirection: "column",
-    gap: theme.spacing(2),
-  },
-  item: {
-    display: "flex",
-    flexDirection: "column",
-    flexGrow: 1,
-    gap: theme.spacing(0.5),
-  },
-  label: {
-    display: "flex",
-    flexDirection: "column",
-    gap: theme.spacing(0.5),
-    paddingLeft: theme.spacing(0.5),
-  },
-}));
 
 const features: Feature[] = [
   {
@@ -127,55 +107,44 @@ if (process.env.NODE_ENV === "development") {
 }
 
 function ExperimentalFeatureItem(props: { feature: Feature }) {
-  const classes = useStyles();
-  const theme = useTheme();
   const { feature } = props;
 
   const [enabled, setEnabled] = useAppConfigurationValue<boolean>(feature.key);
   return (
-    <div className={classes.item}>
-      <Checkbox
-        onRenderLabel={() => {
-          return (
-            <div className={classes.label}>
-              <Text variant="medium" styles={{ root: { fontWeight: 600 } }}>
-                {feature.name}
-              </Text>
-              <Text
-                variant="smallPlus"
-                styles={{ root: { color: theme.semanticColors.bodySubtext } }}
-              >
-                {feature.description}
-              </Text>
-            </div>
-          );
-        }}
-        checked={enabled}
-        onChange={(_, checked) => void setEnabled(checked)}
-        styles={{
-          text: {
-            minWidth: 60,
-          },
-          label: { alignItems: "baseline" },
-        }}
-      />
-    </div>
+    <Stack gap={2}>
+      <Stack flexGrow={1} gap={0.5}>
+        <Checkbox
+          onRenderLabel={() => {
+            return (
+              <Stack gap={0.25} paddingLeft={0.5}>
+                <Typography fontWeight={600}>{feature.name}</Typography>
+                <Typography variant="body2" color="text.secondary">
+                  {feature.description}
+                </Typography>
+              </Stack>
+            );
+          }}
+          checked={enabled}
+          onChange={(_, checked) => void setEnabled(checked)}
+          styles={{
+            text: {
+              minWidth: 60,
+            },
+            label: { alignItems: "baseline" },
+          }}
+        />
+      </Stack>
+    </Stack>
   );
 }
 
-export function ExperimentalFeatureSettings(): React.ReactElement {
-  const classes = useStyles();
-
-  return (
-    <div className={classes.root}>
-      {features.length === 0 && (
-        <p>
-          <em>Currently there are no experimental features.</em>
-        </p>
-      )}
-      {features.map((feature) => (
-        <ExperimentalFeatureItem key={feature.key} feature={feature} />
-      ))}
-    </div>
-  );
-}
+export const ExperimentalFeatureSettings = (): React.ReactElement => (
+  <Stack gap={2}>
+    {features.length === 0 && (
+      <Typography fontStyle="italic">Currently there are no experimental features.</Typography>
+    )}
+    {features.map((feature) => (
+      <ExperimentalFeatureItem key={feature.key} feature={feature} />
+    ))}
+  </Stack>
+);

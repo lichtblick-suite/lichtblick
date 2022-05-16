@@ -2,26 +2,13 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { Theme, Typography, Link, Stack, Divider } from "@mui/material";
+import { Theme, Typography, Link, Divider } from "@mui/material";
 import { makeStyles } from "@mui/styles";
 import { ErrorInfo, useMemo, useState } from "react";
 
+import Stack from "@foxglove/studio-base/components/Stack";
+
 const useStyles = makeStyles((theme: Theme) => ({
-  root: {
-    display: "flex",
-    flexDirection: "column",
-    height: "100%",
-    padding: theme.spacing(2),
-    overflow: "auto",
-  },
-  alertContainer: {
-    display: "flex",
-    flexDirection: "column",
-    flexGrow: 1,
-  },
-  errorDetailHeader: {
-    fontWeight: "bold",
-  },
   errorDetailStack: {
     fontSize: theme.typography.body2.fontSize,
     lineHeight: "1.3em",
@@ -33,6 +20,7 @@ const useStyles = makeStyles((theme: Theme) => ({
     padding: theme.spacing(1),
   },
   actions: {
+    flex: "auto",
     paddingTop: theme.spacing(2),
     textAlign: "right",
   },
@@ -107,14 +95,14 @@ function ErrorDisplay(props: ErrorDisplayProps): JSX.Element {
 
     return (
       <div>
-        <Typography className={styles.errorDetailHeader}>Error stack:</Typography>
+        <Typography fontWeight="bold">Error stack:</Typography>
         <ErrorStacktrace
           stack={stackWithoutMessage}
           hideSourceLocations={hideErrorSourceLocations}
         />
         {errorInfo && (
           <>
-            <Typography className={styles.errorDetailHeader}>Component stack:</Typography>
+            <Typography fontWeight="bold">Component stack:</Typography>
             <ErrorStacktrace
               stack={errorInfo.componentStack}
               hideSourceLocations={hideErrorSourceLocations}
@@ -123,15 +111,15 @@ function ErrorDisplay(props: ErrorDisplayProps): JSX.Element {
         )}
       </div>
     );
-  }, [error, errorInfo, hideErrorSourceLocations, showErrorDetails, styles.errorDetailHeader]);
+  }, [error, errorInfo, hideErrorSourceLocations, showErrorDetails]);
 
   return (
-    <div className={styles.root}>
-      <div className={styles.alertContainer}>
-        <Typography variant="h4">
+    <Stack fullHeight padding={2} overflow="auto">
+      <Stack fullHeight flexGrow={1}>
+        <Typography variant="h4" gutterBottom>
           {props.title ?? "The app encountered an unexpected error"}
         </Typography>
-        <Stack spacing={2}>
+        <Stack gap={2}>
           <Typography variant="body1" component="div">
             {props.content}
           </Typography>
@@ -144,9 +132,9 @@ function ErrorDisplay(props: ErrorDisplayProps): JSX.Element {
           </Link>
           {errorDetails && <div className={styles.errorDetailContainer}>{errorDetails}</div>}
         </Stack>
-      </div>
+      </Stack>
       <div className={styles.actions}>{props.actions}</div>
-    </div>
+    </Stack>
   );
 }
 

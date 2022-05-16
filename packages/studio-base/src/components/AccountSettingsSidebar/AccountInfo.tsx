@@ -2,25 +2,20 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import {
-  DefaultButton,
-  Icon,
-  PrimaryButton,
-  Spinner,
-  SpinnerSize,
-  Text,
-  useTheme,
-} from "@fluentui/react";
-import { Stack } from "@mui/material";
+import { DefaultButton, Icon, PrimaryButton, Spinner, SpinnerSize } from "@fluentui/react";
+import { Typography, useTheme } from "@mui/material";
 import { useCallback } from "react";
 import { useToasts } from "react-toast-notifications";
 import { useAsyncFn } from "react-use";
 
 import Logger from "@foxglove/log";
+import Stack from "@foxglove/studio-base/components/Stack";
 import { useCurrentUser, User } from "@foxglove/studio-base/context/CurrentUserContext";
 import { useConfirm } from "@foxglove/studio-base/hooks/useConfirm";
 
 const log = Logger.getLogger(__filename);
+
+export const AVATAR_ICON_SIZE = 42;
 
 export default function AccountInfo(props: { currentUser?: User }): JSX.Element {
   const theme = useTheme();
@@ -53,34 +48,31 @@ export default function AccountInfo(props: { currentUser?: User }): JSX.Element 
   }
 
   return (
-    <Stack height="100%" justifyContent="space-between">
-      <Stack spacing={2}>
-        <Stack direction="row" alignItems="center" spacing={1}>
+    <Stack fullHeight justifyContent="space-between">
+      <Stack gap={2}>
+        <Stack direction="row" alignItems="center" gap={1}>
           <Icon
             iconName="BlockheadFilled"
             styles={{
               root: {
-                color: theme.palette.themePrimary,
-                fontSize: theme.fonts.superLarge.fontSize,
-                height: theme.fonts.superLarge.fontSize,
+                color: theme.palette.primary.main,
+                fontSize: AVATAR_ICON_SIZE,
+                height: AVATAR_ICON_SIZE,
               },
             }}
           />
-          <Stack justifyContent="center" spacing={0.5}>
-            <Text variant="medium">{props.currentUser.email}</Text>
-            <Text
-              variant="smallPlus"
-              styles={{ root: { color: theme.semanticColors.bodySubtext } }}
-            >
+          <Stack justifyContent="center">
+            <Typography variant="subtitle1">{props.currentUser.email}</Typography>
+            <Typography variant="body2" color="text.secondary">
               {props.currentUser.orgDisplayName ?? props.currentUser.orgSlug}
-            </Text>
+            </Typography>
           </Stack>
         </Stack>
         <PrimaryButton href={process.env.FOXGLOVE_ACCOUNT_DASHBOARD_URL} target="_blank">
           Account settings
         </PrimaryButton>
       </Stack>
-      <Stack spacing={1}>
+      <Stack gap={1}>
         <DefaultButton onClick={onSignoutClick}>
           Sign out&nbsp;{loading && <Spinner size={SpinnerSize.small} />}
         </DefaultButton>

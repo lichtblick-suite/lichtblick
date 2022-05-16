@@ -2,11 +2,12 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { CompoundButton, Text, IButtonProps, useTheme, Checkbox } from "@fluentui/react";
-import { Stack, styled as muiStyled } from "@mui/material";
+import { CompoundButton, IButtonProps, useTheme, Checkbox } from "@fluentui/react";
+import { styled as muiStyled, Typography } from "@mui/material";
 import { useMemo } from "react";
 
 import { AppSetting } from "@foxglove/studio-base/AppSetting";
+import Stack from "@foxglove/studio-base/components/Stack";
 import { usePlayerSelection } from "@foxglove/studio-base/context/PlayerSelectionContext";
 import { useAppConfigurationValue } from "@foxglove/studio-base/hooks";
 import TextMiddleTruncate from "@foxglove/studio-base/panels/ThreeDimensionalViz/TopicTree/TextMiddleTruncate";
@@ -146,31 +147,21 @@ export default function Start(props: IStartProps): JSX.Element {
         id: recent.id,
         children: (
           <RecentStack direction="row">
-            <Text
-              variant="small"
-              styles={{
-                root: {
-                  whiteSpace: "nowrap",
-                  overflow: "hidden",
-                  color: "inherit",
-                  paddingRight: theme.spacing.s1,
-                },
+            <Typography
+              variant="body2"
+              color="inherit"
+              noWrap
+              style={{
+                overflow: "hidden",
+                paddingRight: theme.spacing.s1,
               }}
             >
               <TextMiddleTruncate text={recent.title} />
-            </Text>
+            </Typography>
             {recent.label && (
-              <Text
-                variant="small"
-                styles={{
-                  root: {
-                    whiteSpace: "nowrap",
-                    color: theme.palette.neutralSecondaryAlt,
-                  },
-                }}
-              >
+              <Typography variant="body2" color="text.secondary" noWrap>
                 {recent.label}
-              </Text>
+              </Typography>
             )}
           </RecentStack>
         ),
@@ -180,14 +171,14 @@ export default function Start(props: IStartProps): JSX.Element {
   }, [recentSources, selectRecent, theme]);
 
   return (
-    <Stack spacing={2.5}>
-      <Stack direction="row" spacing={4}>
+    <Stack gap={2.5}>
+      <Stack direction="row" gap={4}>
         {/* Left column */}
-        <Stack flexGrow={1} spacing={2}>
-          <Text variant="large" styles={{ root: { color: theme.semanticColors.bodySubtext } }}>
+        <Stack flexGrow={1} gap={2}>
+          <Typography variant="h5" color="text.secondary">
             Open data source
-          </Text>
-          <Stack spacing={1}>
+          </Typography>
+          <Stack gap={1}>
             {startItems.map(({ id, ...item }) => (
               <CompoundButton {...item} key={id} id={id} styles={buttonStyles} />
             ))}
@@ -195,7 +186,7 @@ export default function Start(props: IStartProps): JSX.Element {
         </Stack>
 
         {/* Right column */}
-        <Stack flexGrow={1} minWidth={0} spacing={2.5}>
+        <Stack flexGrow={1} gap={2.5} style={{ minWidth: 0 }}>
           {recentItems.length > 0 && <ActionList title="Recent" items={recentItems} />}
           <ActionList title="Help" items={HELP_ITEMS} />
           <ActionList title="Contact" items={CONTACT_ITEMS} />

@@ -10,8 +10,8 @@
 //   This source code is licensed under the Apache License, Version 2.0,
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
-import { Link } from "@fluentui/react";
-import styled from "styled-components";
+
+import { Link, styled as muiStyled } from "@mui/material";
 
 import { MessageEvent } from "@foxglove/studio-base/players/types";
 import { formatTimeRaw } from "@foxglove/studio-base/util/time";
@@ -19,12 +19,13 @@ import { formatTimeRaw } from "@foxglove/studio-base/util/time";
 import CopyMessageButton from "./CopyMessageButton";
 import { getMessageDocumentationLink } from "./utils";
 
-const SMetadata = styled.div`
-  margin-top: 4px;
+const SMetadata = muiStyled("div")`
+  color: ${({ theme }) => theme.palette.text.secondary};
+  margin-top: ${({ theme }) => theme.spacing(0.5)};
   font-size: 11px;
   line-height: 1.3;
-  color: #aaa;
 `;
+
 type Props = {
   data: unknown;
   diffData: unknown;
@@ -46,7 +47,8 @@ export default function Metadata({
     <SMetadata>
       {!diffMessage && datatype && (
         <Link
-          style={{ color: "inherit" }}
+          color="inherit"
+          underline="hover"
           rel="noopener noreferrer"
           href={getMessageDocumentationLink(datatype)}
         >

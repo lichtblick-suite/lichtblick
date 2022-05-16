@@ -2,23 +2,13 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import {
-  Text,
-  Dialog,
-  DialogFooter,
-  DefaultButton,
-  PrimaryButton,
-  useTheme,
-  Link,
-  Spinner,
-  SpinnerSize,
-} from "@fluentui/react";
-import { Theme } from "@mui/material";
-import { makeStyles } from "@mui/styles";
+import { Dialog, DialogFooter, DefaultButton, PrimaryButton } from "@fluentui/react";
+import { Link, Typography, CircularProgress } from "@mui/material";
 import { useEffect, useMemo } from "react";
 import { useAsync, useMountedState } from "react-use";
 
 import Logger from "@foxglove/log";
+import Stack from "@foxglove/studio-base/components/Stack";
 import { useConsoleApi } from "@foxglove/studio-base/context/ConsoleApiContext";
 import { useDialogHostId } from "@foxglove/studio-base/context/DialogHostIdContext";
 import { Session } from "@foxglove/studio-base/services/ConsoleApi";
@@ -30,29 +20,8 @@ type DeviceCodePanelProps = {
   onClose?: (session?: Session) => void;
 };
 
-const useStyles = makeStyles((theme: Theme) => ({
-  content: {
-    display: "flex",
-    flexDirection: "column",
-    gap: theme.spacing(2.5),
-  },
-  contentStack: {
-    display: "flex",
-    flexDirection: "column",
-    gap: theme.spacing(1),
-    lineHeight: "1.3",
-  },
-  spinnerWrapper: {
-    display: "flex",
-    flexGrow: 1,
-    justifyContent: "space-between",
-  },
-}));
-
 // Show instructions on opening the browser and entering the device code
 export default function DeviceCodeDialog(props: DeviceCodePanelProps): JSX.Element {
-  const classes = useStyles();
-  const theme = useTheme();
   const isMounted = useMountedState();
   const api = useConsoleApi();
   const hostId = useDialogHostId();
@@ -130,30 +99,35 @@ export default function DeviceCodeDialog(props: DeviceCodePanelProps): JSX.Eleme
     }
     const { userCode, verificationUri } = deviceCode;
     return (
-      <div className={classes.content}>
-        <div className={classes.contentStack}>
-          <Text variant="medium" block>
+      <Stack gap={2.5}>
+        <Stack style={{ lineHeight: 1.3 }}>
+          <Typography>
             To complete sign in, follow the instructions in your browser with the code below.
-          </Text>
-          <Text
-            styles={{
-              root: {
-                fontSize: theme.fonts.superLarge.fontSize,
-                color: theme.semanticColors.disabledBodyText,
-                fontFamily: fonts.MONOSPACE,
-              },
-            }}
+          </Typography>
+          <Typography
+            fontSize="2.6rem"
+            fontFamily={fonts.MONOSPACE}
+            component="div"
+            color="text.disabled"
           >
             {userCode}
-          </Text>
-          <Text variant="medium" block>
+          </Typography>
+          <Typography>
             If your browser didn’t open automatically, please{" "}
-            <Link href={`${verificationUri}?user_code=${userCode}`}>click here</Link> to continue.
-          </Text>
-        </div>
-      </div>
+            <Link
+              underline="hover"
+              variant="inherit"
+              color="primary"
+              href={`${verificationUri}?user_code=${userCode}`}
+            >
+              click here
+            </Link>{" "}
+            to continue.
+          </Typography>
+        </Stack>
+      </Stack>
     );
-  }, [classes, deviceCode, theme.fonts.superLarge.fontSize, theme.semanticColors.disabledBodyText]);
+  }, [deviceCode]);
 
   if (
     deviceCodeError != undefined ||
@@ -174,20 +148,15 @@ export default function DeviceCodeDialog(props: DeviceCodePanelProps): JSX.Eleme
     <Dialog hidden={false} minWidth={440} title="Sign in" modalProps={{ layerProps: { hostId } }}>
       {dialogContent}
       <DialogFooter styles={{ action: { display: "block" } }}>
-        <div className={classes.spinnerWrapper}>
-          <Spinner
-            size={SpinnerSize.small}
-            label={deviceCode ? "Awaiting authentication…" : "Connecting…"}
-            labelPosition="right"
-            styles={{
-              label: {
-                fontSize: theme.fonts.medium.fontSize,
-                color: theme.semanticColors.bodyText,
-              },
-            }}
-          />
+        <Stack direction="row" flexGrow={1} justifyContent="space-between">
+          <Stack direction="row" alignItems="center" flex="auto" gap={2}>
+            <CircularProgress color="primary" size={16} />
+            <Typography color="text.secondary">
+              {deviceCode ? "Awaiting authentication…" : "Connecting…"}
+            </Typography>
+          </Stack>
           <DefaultButton text="Cancel" onClick={() => onClose?.()} />
-        </div>
+        </Stack>
       </DialogFooter>
     </Dialog>
   );

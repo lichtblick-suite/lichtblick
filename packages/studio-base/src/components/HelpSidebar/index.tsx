@@ -2,9 +2,8 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { useTheme, Text, Link, ITheme, ITextStyles, ILinkStyles } from "@fluentui/react";
 import ChevronLeftIcon from "@mdi/svg/svg/chevron-left.svg";
-import { Stack } from "@mui/material";
+import { Link, Typography } from "@mui/material";
 import { useMemo } from "react";
 import { useUnmount } from "react-use";
 
@@ -12,6 +11,7 @@ import Icon from "@foxglove/studio-base/components/Icon";
 import KeyboardShortcutHelp from "@foxglove/studio-base/components/KeyboardShortcut.help.md";
 import MesssagePathSyntaxHelp from "@foxglove/studio-base/components/MessagePathSyntax/index.help.md";
 import { SidebarContent } from "@foxglove/studio-base/components/SidebarContent";
+import Stack from "@foxglove/studio-base/components/Stack";
 import TextContent from "@foxglove/studio-base/components/TextContent";
 import { PanelInfo, usePanelCatalog } from "@foxglove/studio-base/context/PanelCatalogContext";
 import {
@@ -72,34 +72,6 @@ const helpMenuItems: Map<SectionKey, { subheader: string; links: HelpInfo[] }> =
   ],
 ]);
 
-const useComponentStyles = (theme: ITheme) =>
-  useMemo(
-    () => ({
-      subheader: {
-        root: {
-          ...theme.fonts.xSmall,
-          display: "block",
-          textTransform: "uppercase",
-          color: theme.palette.neutralSecondaryAlt,
-          letterSpacing: "0.025em",
-        },
-      } as Partial<ITextStyles>,
-      link: {
-        root: {
-          ...theme.fonts.smallPlus,
-          fontSize: 13,
-        } as Partial<ILinkStyles>,
-      },
-      footer: {
-        root: {
-          ...theme.fonts.xSmall,
-          color: theme.palette.neutralSecondaryAlt,
-        } as Partial<ITextStyles>,
-      },
-    }),
-    [theme],
-  );
-
 const selectHelpInfo = (store: HelpInfoStore) => store.helpInfo;
 const selectsSetHelpInfo = (store: HelpInfoStore) => store.setHelpInfo;
 
@@ -108,8 +80,6 @@ export default function HelpSidebar({
 }: React.PropsWithChildren<{
   isHomeViewForTests?: boolean;
 }>): JSX.Element {
-  const theme = useTheme();
-  const styles = useComponentStyles(theme);
   const helpInfo = useHelpInfo(selectHelpInfo);
   const setHelpInfo = useHelpInfo(selectsSetHelpInfo);
 
@@ -177,21 +147,24 @@ export default function HelpSidebar({
     >
       <Stack>
         {isHomeView ? (
-          <Stack spacing={2}>
+          <Stack gap={1.5}>
             {sectionKeys.map((key: SectionKey) => {
               const { subheader, links = [] } = sections.get(key) ?? {};
               return (
                 <div key={subheader}>
-                  <Text styles={styles.subheader}>{subheader}</Text>
-                  <Stack paddingY={2} spacing={1}>
+                  <Typography color="text.secondary" variant="overline" display="block">
+                    {subheader}
+                  </Typography>
+                  <Stack paddingY={2} gap={0.75}>
                     {links.map(({ title, url, content }: HelpInfo) => (
                       <Link
+                        color="inherit"
+                        variant="body2"
+                        underline="hover"
                         key={title}
                         data-test={title}
-                        style={{ color: theme.semanticColors.bodyText }}
-                        href={url ?? ""}
+                        href={url}
                         onClick={() => (url ? undefined : setHelpInfo({ title, content }))}
-                        styles={styles.link}
                       >
                         {title}
                       </Link>
@@ -200,10 +173,12 @@ export default function HelpSidebar({
                 </div>
               );
             })}
-            <Text styles={styles.footer}>Foxglove Studio version {FOXGLOVE_STUDIO_VERSION}</Text>
+            <Typography variant="caption">
+              Foxglove Studio version {FOXGLOVE_STUDIO_VERSION}
+            </Typography>
           </Stack>
         ) : (
-          <Stack spacing={0.5}>
+          <Stack gap={0.5}>
             {helpInfo.content != undefined ? (
               <TextContent allowMarkdownHtml={true}>{helpInfo.content}</TextContent>
             ) : (

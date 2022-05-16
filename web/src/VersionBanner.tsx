@@ -2,9 +2,9 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { DefaultButton, Text, Link } from "@fluentui/react";
+import { DefaultButton } from "@fluentui/react";
 import CloseIcon from "@mui/icons-material/Close";
-import { IconButton } from "@mui/material";
+import { IconButton, Typography, Link } from "@mui/material";
 import { makeStyles } from "@mui/styles";
 import cx from "classnames";
 import { useState, ReactElement } from "react";
@@ -80,26 +80,18 @@ const VersionBanner = function ({
           </IconButton>
         )}
 
-        <Text styles={{ root: { color: "white", fontSize: "1.1em" } }}>
+        <Typography color="common.white" fontSize="1.1em">
           {prompt} Foxglove Studio currently requires Chrome v{MINIMUM_CHROME_VERSION}+.
-        </Text>
+        </Typography>
 
         {!isChrome && (
-          <Text styles={{ root: { color: "white", fontSize: "1.1em" } }}>
+          <Typography color="common.white" fontSize="1.1em">
             Check out our cross-browser support progress in GitHub issue{" "}
-            <Link
-              styles={{
-                root: {
-                  color: "rgba(229, 218, 255, 0.9)",
-                  ":hover": { color: "rgba(247, 244, 255, 0.9)" },
-                },
-              }}
-              href="https://github.com/foxglove/studio/issues/1511"
-            >
+            <Link color="inherit" href="https://github.com/foxglove/studio/issues/1511">
               #1511
             </Link>
             .
-          </Text>
+          </Typography>
         )}
 
         <DefaultButton

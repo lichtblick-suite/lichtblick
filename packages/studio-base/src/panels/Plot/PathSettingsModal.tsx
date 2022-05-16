@@ -2,9 +2,8 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { DefaultButton, Dialog, DialogFooter, getColorFromString, Text } from "@fluentui/react";
-import { MenuItem, Select, Stack, Theme } from "@mui/material";
-import { makeStyles } from "@mui/styles";
+import { DefaultButton, Dialog, DialogFooter, getColorFromString } from "@fluentui/react";
+import { MenuItem, Select, Stack, styled as muiStyled, Typography } from "@mui/material";
 import { useCallback } from "react";
 
 import ColorPicker from "@foxglove/studio-base/components/ColorPicker";
@@ -25,12 +24,9 @@ type PathSettingsModalProps = {
   onDismiss: () => void;
 };
 
-const useStyles = makeStyles((theme: Theme) => ({
-  label: {
-    display: "block",
-    fontWeight: "bold",
-    margin: `${theme.spacing(0.5)} 0`,
-  },
+const TextLabel = muiStyled(Typography)(({ theme }) => ({
+  fontWeigh: "bold",
+  margin: theme.spacing(0.5, 0),
 }));
 
 export default function PathSettingsModal({
@@ -41,7 +37,6 @@ export default function PathSettingsModal({
   saveConfig,
   onDismiss,
 }: PathSettingsModalProps): JSX.Element {
-  const classes = useStyles();
   const hostId = useDialogHostId();
 
   const savePathConfig = useCallback(
@@ -79,9 +74,7 @@ export default function PathSettingsModal({
     >
       <Stack alignItems="flex-start" spacing={1}>
         <div>
-          <Text variant="medium" className={classes.label}>
-            Color
-          </Text>
+          <TextLabel>Color</TextLabel>
           <ColorPicker
             color={currentColor}
             onChange={(newColor) => savePathConfig({ color: colorObjToIColor(newColor).str })}
@@ -89,9 +82,7 @@ export default function PathSettingsModal({
         </div>
 
         <div>
-          <Text variant="medium" className={classes.label}>
-            Timestamp method
-          </Text>
+          <TextLabel>Timestamp method</TextLabel>
           <Select
             value={!supportsTimestampMethod ? "unsupported" : path.timestampMethod}
             disabled={!supportsTimestampMethod}

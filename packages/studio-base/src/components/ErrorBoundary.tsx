@@ -2,10 +2,11 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { Link, Stack, Button, Box } from "@mui/material";
+import { Link, Button, Typography } from "@mui/material";
 import { captureException } from "@sentry/core";
 import { Component, ErrorInfo, PropsWithChildren, ReactNode } from "react";
 
+import Stack from "@foxglove/studio-base/components/Stack";
 import { AppError } from "@foxglove/studio-base/util/errors";
 
 import ErrorDisplay from "./ErrorDisplay";
@@ -33,8 +34,13 @@ export default class ErrorBoundary extends Component<PropsWithChildren<Props>, S
   override render(): ReactNode {
     if (this.state.currentError) {
       const actions = this.props.actions ?? (
-        <Stack direction="row" spacing={1}>
-          <Box flexGrow={1} />
+        <Stack
+          fullHeight
+          flex="auto"
+          alignItems="flex-end"
+          justifyContent="flex-end"
+          direction="row"
+        >
           <Button
             variant="outlined"
             color="secondary"
@@ -51,13 +57,13 @@ export default class ErrorBoundary extends Component<PropsWithChildren<Props>, S
           error={this.state.currentError.error}
           errorInfo={this.state.currentError.errorInfo}
           content={
-            <p>
+            <Typography>
               Something went wrong.{" "}
               <Link color="inherit" onClick={() => this.setState({ currentError: undefined })}>
                 Dismiss this error
               </Link>{" "}
               to continue using the app. If the issue persists, try restarting the app.
-            </p>
+            </Typography>
           }
           actions={actions}
         />

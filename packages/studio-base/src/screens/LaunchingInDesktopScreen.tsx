@@ -2,11 +2,11 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { Link, Text } from "@fluentui/react";
-import { Stack } from "@mui/material";
+import { Link, Typography } from "@mui/material";
 import { ReactElement, useEffect } from "react";
 
 import { AppSetting } from "@foxglove/studio-base/AppSetting";
+import Stack from "@foxglove/studio-base/components/Stack";
 import { useSessionStorageValue } from "@foxglove/studio-base/hooks/useSessionStorageValue";
 
 export function LaunchingInDesktopScreen(): ReactElement {
@@ -55,24 +55,34 @@ export function LaunchingInDesktopScreen(): ReactElement {
   });
 
   return (
-    <Stack alignItems="center" justifyContent="center" height="100%">
+    <Stack alignItems="center" justifyContent="center" fullHeight>
       <Stack
         alignItems="center"
         justifyContent="center"
-        height="100%"
-        spacing={2.5}
-        style={{ textAlign: "center", maxWidth: 480 }}
+        fullHeight
+        gap={2.5}
+        style={{ maxWidth: 480 }}
       >
-        <Text variant="xxLarge">Launching Foxglove Studio…</Text>
-        <Text>We’ve directed you to the desktop app.</Text>
-        <Stack spacing={0.5}>
-          <Text>
-            You can also <Link onClick={openWeb}>open this link in your browser</Link>.
-          </Text>
-          <Text>
+        <Typography align="center" variant="h2" fontWeight={600}>
+          Launching Foxglove Studio…
+        </Typography>
+        <Typography align="center" fontWeight={600}>
+          We’ve directed you to the desktop app.
+        </Typography>
+        <Stack gap={0.5}>
+          <Typography align="center">
+            You can also{" "}
+            <Link color="primary" underline="hover" onClick={openWeb}>
+              open this link in your browser
+            </Link>
+            .
+          </Typography>
+          <Typography align="center">
             Don’t have the app installed?&nbsp;
-            <Link href="https://foxglove.dev/download">Download Foxglove Studio</Link>
-          </Text>
+            <Link color="primary" underline="hover" href="https://foxglove.dev/download">
+              Download Foxglove Studio
+            </Link>
+          </Typography>
         </Stack>
       </Stack>
     </Stack>

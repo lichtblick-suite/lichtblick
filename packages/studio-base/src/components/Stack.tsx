@@ -22,7 +22,14 @@ const StackRoot = muiStyled("div", {
   flex: ownerState.flex,
   order: ownerState.order,
   overflow: ownerState.overflow,
+  position: ownerState.position,
 
+  ...(ownerState.overflowX != undefined && {
+    overflowX: ownerState.overflowX,
+  }),
+  ...(ownerState.overflowY != undefined && {
+    overflowY: ownerState.overflowY,
+  }),
   ...(ownerState.zeroMinWidth === true && {
     minWidth: 0,
   }),
@@ -83,6 +90,8 @@ export default function Stack(props: PropsWithChildren<StackProps>): JSX.Element
     justifyContent,
     order,
     overflow,
+    overflowX,
+    overflowY,
     padding,
     paddingX,
     paddingY,
@@ -90,6 +99,7 @@ export default function Stack(props: PropsWithChildren<StackProps>): JSX.Element
     paddingBottom,
     paddingLeft,
     paddingRight,
+    position,
     wrap,
     style,
     zeroMinWidth = false,
@@ -112,6 +122,8 @@ export default function Stack(props: PropsWithChildren<StackProps>): JSX.Element
     justifyContent,
     order,
     overflow,
+    overflowX,
+    overflowY,
     padding,
     paddingX,
     paddingY,
@@ -119,6 +131,7 @@ export default function Stack(props: PropsWithChildren<StackProps>): JSX.Element
     paddingBottom,
     paddingLeft,
     paddingRight,
+    position,
     wrap,
     zeroMinWidth,
   };
@@ -186,6 +199,12 @@ export type StackProps = {
   /** Defines the `overflow` style property. */
   overflow?: CSSProperties["overflow"];
 
+  /** Defines the `overflow-x` style property. */
+  overflowX?: CSSProperties["overflowX"];
+
+  /** Defines the `overflow-y` style property. */
+  overflowY?: CSSProperties["overflowY"];
+
   /** Defines the `padding` style property using `theme.spacing` increments. */
   padding?: number;
 
@@ -206,6 +225,9 @@ export type StackProps = {
 
   /** Defines the vertical `padding-right` style property using `theme.spacing` increments. */
   paddingRight?: number;
+
+  /** Defines the `position` style property. */
+  position?: CSSProperties["position"];
 
   /** Defines the `flex` style property. */
   flex?: number | string;
