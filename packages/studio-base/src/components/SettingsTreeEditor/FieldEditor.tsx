@@ -16,6 +16,7 @@ import {
   ListProps,
   useTheme,
 } from "@mui/material";
+import { CSSProperties } from "react";
 import { DeepReadonly } from "ts-essentials";
 
 import MessagePathInput from "@foxglove/studio-base/components/MessagePathSyntax/MessagePathInput";
@@ -338,18 +339,20 @@ function FieldEditorComponent({
   actionHandler,
   field,
   path,
+  style,
 }: {
   actionHandler: (action: SettingsTreeAction) => void;
   field: DeepReadonly<SettingsTreeField>;
   path: readonly string[];
+  style?: CSSProperties;
 }): JSX.Element {
   const theme = useTheme();
   const indent = Math.min(path.length, 4);
-  const paddingLeft = theme.spacing(2 + 2 * Math.max(0, indent - 1));
+  const paddingLeft = 2 + 2 * Math.max(0, indent - 1);
 
   return (
     <>
-      <Stack direction="row" alignItems="center" style={{ paddingLeft }} fullHeight>
+      <Stack direction="row" alignItems="center" style={style} paddingLeft={paddingLeft} fullHeight>
         <FieldLabel field={field} />
       </Stack>
       <div style={{ paddingRight: theme.spacing(2) }}>

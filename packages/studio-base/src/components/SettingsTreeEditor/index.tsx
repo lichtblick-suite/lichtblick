@@ -4,7 +4,7 @@
 
 import ClearIcon from "@mui/icons-material/Clear";
 import SearchIcon from "@mui/icons-material/Search";
-import { AppBar, IconButton, TextField, styled as muiStyled, List } from "@mui/material";
+import { AppBar, IconButton, TextField, styled as muiStyled } from "@mui/material";
 import { useState } from "react";
 import { DeepReadonly } from "ts-essentials";
 
@@ -18,6 +18,13 @@ const StyledAppBar = muiStyled(AppBar, { skipSx: true })(({ theme }) => ({
   zIndex: theme.zIndex.appBar - 1,
   borderBottom: `1px solid ${theme.palette.divider}`,
   padding: theme.spacing(1),
+}));
+
+const FieldGrid = muiStyled("div", { skipSx: true })(({ theme }) => ({
+  display: "grid",
+  gridTemplateColumns: "minmax(4rem, 1fr) minmax(min-content, 12rem)",
+  columnGap: theme.spacing(1),
+  rowGap: theme.spacing(0.25),
 }));
 
 const ROOT_PATH: readonly string[] = [];
@@ -56,9 +63,9 @@ export default function SettingsTreeEditor({
           />
         </StyledAppBar>
       )}
-      <List dense disablePadding>
+      <FieldGrid>
         <NodeEditor path={ROOT_PATH} settings={settings.settings} actionHandler={actionHandler} />
-      </List>
+      </FieldGrid>
     </Stack>
   );
 }
