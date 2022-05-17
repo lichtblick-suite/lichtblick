@@ -14,12 +14,11 @@
 import { makeStyles } from "@fluentui/react";
 import CheckIcon from "@mdi/svg/svg/check.svg";
 import DatabaseIcon from "@mdi/svg/svg/database.svg";
-import cx from "classnames";
 import { uniq } from "lodash";
 import { useMemo } from "react";
 
 import Dropdown from "@foxglove/studio-base/components/Dropdown";
-import Icon from "@foxglove/studio-base/components/Icon";
+import ToolbarIconButton from "@foxglove/studio-base/components/PanelToolbar/ToolbarIconButton";
 import { Topic } from "@foxglove/studio-base/players/types";
 
 type Props = {
@@ -55,14 +54,6 @@ const useStyles = makeStyles((theme) => ({
       height: 15,
     },
   },
-  icon: {
-    fontSize: 14,
-    margin: "0 0.2em",
-    color: theme.semanticColors.warningBackground,
-  },
-  iconActive: {
-    color: theme.palette.neutralPrimary,
-  },
 }));
 
 export default function TopicToRenderMenu({
@@ -94,18 +85,13 @@ export default function TopicToRenderMenu({
   return (
     <Dropdown
       toggleComponent={
-        <Icon
-          fade
-          tooltip={`Supported datatypes: ${allowedDatatypes.join(", ")}`}
-          tooltipProps={{ placement: "top" }}
-          dataTest={"topic-set"}
+        <ToolbarIconButton
+          title={`Supported datatypes: ${allowedDatatypes.join(", ")}`}
+          data-test={"topic-set"}
+          color={topicToRender === defaultTopicToRender ? "secondary" : "error"}
         >
-          <DatabaseIcon
-            className={cx(styles.icon, {
-              [styles.iconActive]: topicToRender === defaultTopicToRender,
-            })}
-          />
-        </Icon>
+          <DatabaseIcon />
+        </ToolbarIconButton>
       }
     >
       {renderTopics.map((topic) => (

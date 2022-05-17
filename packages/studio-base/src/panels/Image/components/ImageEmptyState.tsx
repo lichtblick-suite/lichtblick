@@ -11,9 +11,8 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { makeStyles } from "@fluentui/react";
-
 import EmptyState from "@foxglove/studio-base/components/EmptyState";
+import Stack from "@foxglove/studio-base/components/Stack";
 
 type Props = {
   cameraTopic: string;
@@ -21,30 +20,18 @@ type Props = {
   shouldSynchronize: boolean;
 };
 
-const useStyles = makeStyles((theme) => ({
-  emptyStateWrapper: {
-    width: "100%",
-    height: "100%",
-    background: theme.palette.neutralLighterAlt,
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-  },
-}));
-
 export function ImageEmptyState(props: Props): JSX.Element {
   const { cameraTopic, markerTopics, shouldSynchronize } = props;
 
-  const classes = useStyles();
   if (cameraTopic === "") {
     return (
-      <div className={classes.emptyStateWrapper}>
+      <Stack fullHeight fullWidth justifyContent="center" alignItems="center">
         <EmptyState>Select a topic to view images</EmptyState>
-      </div>
+      </Stack>
     );
   }
   return (
-    <div className={classes.emptyStateWrapper}>
+    <Stack fullHeight fullWidth justifyContent="center" alignItems="center">
       <EmptyState>
         Waiting for images {markerTopics.length > 0 && "and markers"} on:
         <div>
@@ -64,6 +51,6 @@ export function ImageEmptyState(props: Props): JSX.Element {
           </>
         )}
       </EmptyState>
-    </div>
+    </Stack>
   );
 }

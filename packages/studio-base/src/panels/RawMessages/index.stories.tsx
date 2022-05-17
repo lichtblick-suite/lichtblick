@@ -49,14 +49,14 @@ const scrollToBottom = () => {
 storiesOf("panels/RawMessages", module)
   .add("folded", () => {
     return (
-      <PanelSetup fixture={fixture} style={{ width: 380 }}>
+      <PanelSetup fixture={fixture}>
         <RawMessages overrideConfig={{ topicPath: "/msgs/big_topic", ...noDiffConfig } as any} />
       </PanelSetup>
     );
   })
   .add("expanded", () => {
     return (
-      <PanelSetup fixture={fixture} style={{ width: 380 }}>
+      <PanelSetup fixture={fixture}>
         <RawMessages
           overrideConfig={
             { topicPath: "/msgs/big_topic", ...noDiffConfig, autoExpandMode: "all" } as any
@@ -67,7 +67,7 @@ storiesOf("panels/RawMessages", module)
   })
   .add("auto expanded", () => {
     return (
-      <PanelSetup fixture={fixture} style={{ width: 380 }}>
+      <PanelSetup fixture={fixture}>
         <RawMessages
           overrideConfig={
             { topicPath: "/msgs/big_topic", ...noDiffConfig, autoExpandMode: "auto" } as any
@@ -78,46 +78,42 @@ storiesOf("panels/RawMessages", module)
   })
   .add("with receiveTime", () => {
     return (
-      <PanelSetup fixture={fixture} style={{ width: 380 }}>
+      <PanelSetup fixture={fixture}>
         <RawMessages overrideConfig={{ topicPath: "/foo", ...noDiffConfig } as any} />
       </PanelSetup>
     );
   })
   .add("display big value - num", () => {
     return (
-      <PanelSetup fixture={fixture} style={{ width: 380 }}>
+      <PanelSetup fixture={fixture}>
         <RawMessages overrideConfig={{ topicPath: "/baz/num.value", ...noDiffConfig } as any} />
       </PanelSetup>
     );
   })
   .add("display message with bigint value", () => {
     return (
-      <PanelSetup fixture={fixture} style={{ width: 380 }}>
+      <PanelSetup fixture={fixture}>
         <RawMessages overrideConfig={{ topicPath: "/baz/bigint", ...noDiffConfig } as any} />
       </PanelSetup>
     );
   })
   .add("display bigint value", () => {
     return (
-      <PanelSetup fixture={fixture} style={{ width: 380 }}>
+      <PanelSetup fixture={fixture}>
         <RawMessages overrideConfig={{ topicPath: "/baz/bigint.value", ...noDiffConfig } as any} />
       </PanelSetup>
     );
   })
   .add("display big value - text", () => {
     return (
-      <PanelSetup fixture={fixture} style={{ width: 380 }}>
+      <PanelSetup fixture={fixture}>
         <RawMessages overrideConfig={{ topicPath: "/baz/text.value", ...noDiffConfig } as any} />
       </PanelSetup>
     );
   })
   .add("display big value - text truncated", () => {
     return (
-      <PanelSetup
-        fixture={fixture}
-        style={{ width: 380 }}
-        onMount={() => setImmediate(scrollToBottom)}
-      >
+      <PanelSetup fixture={fixture} onMount={() => setImmediate(scrollToBottom)}>
         <RawMessages
           overrideConfig={{ topicPath: "/baz/text.value_long", ...noDiffConfig } as any}
         />
@@ -126,11 +122,7 @@ storiesOf("panels/RawMessages", module)
   })
   .add("display big value - text with newlines", () => {
     return (
-      <PanelSetup
-        fixture={fixture}
-        style={{ width: 380 }}
-        onMount={() => setImmediate(scrollToBottom)}
-      >
+      <PanelSetup fixture={fixture} onMount={() => setImmediate(scrollToBottom)}>
         <RawMessages
           overrideConfig={{ topicPath: "/baz/text.value_with_newlines", ...noDiffConfig } as any}
         />
@@ -139,14 +131,14 @@ storiesOf("panels/RawMessages", module)
   })
   .add("display big value - single element array", () => {
     return (
-      <PanelSetup fixture={fixture} style={{ width: 380 }}>
+      <PanelSetup fixture={fixture}>
         <RawMessages overrideConfig={{ topicPath: "/baz/array.value", ...noDiffConfig } as any} />
       </PanelSetup>
     );
   })
   .add("display single object array", () => {
     return (
-      <PanelSetup fixture={fixture} style={{ width: 380 }}>
+      <PanelSetup fixture={fixture}>
         <RawMessages
           overrideConfig={{ topicPath: "/baz/array/obj.value", ...noDiffConfig } as any}
         />
@@ -155,42 +147,42 @@ storiesOf("panels/RawMessages", module)
   })
   .add("display basic enum", () => {
     return (
-      <PanelSetup fixture={enumFixture} style={{ width: 380 }}>
+      <PanelSetup fixture={enumFixture}>
         <RawMessages overrideConfig={{ topicPath: "/baz/enum", ...noDiffConfig } as any} />
       </PanelSetup>
     );
   })
   .add("display advanced enum usage", () => {
     return (
-      <PanelSetup fixture={enumAdvancedFixture} style={{ width: 380 }}>
+      <PanelSetup fixture={enumAdvancedFixture}>
         <RawMessages overrideConfig={{ topicPath: "/baz/enum_advanced", ...noDiffConfig } as any} />
       </PanelSetup>
     );
   })
   .add("with missing data", () => {
     return (
-      <PanelSetup fixture={withMissingData} style={{ width: 380 }}>
+      <PanelSetup fixture={withMissingData}>
         <RawMessages overrideConfig={{ topicPath: "/baz/missing_data", ...noDiffConfig } as any} />
       </PanelSetup>
     );
   })
   .add("with a truncated long string", () => {
     return (
-      <PanelSetup fixture={fixture} style={{ width: 380 }}>
+      <PanelSetup fixture={fixture}>
         <RawMessages overrideConfig={{ topicPath: "/baz/text", ...noDiffConfig } as any} />
       </PanelSetup>
     );
   })
   .add("display geometry types - length", () => {
     return (
-      <PanelSetup fixture={fixture} style={{ width: 380 }}>
+      <PanelSetup fixture={fixture}>
         <RawMessages overrideConfig={{ topicPath: "/geometry/types", ...noDiffConfig } as any} />
       </PanelSetup>
     );
   })
   .add("display diff", () => {
     return (
-      <PanelSetup fixture={topicsToDiffFixture} style={{ width: 500 }}>
+      <PanelSetup fixture={topicsToDiffFixture}>
         <RawMessages
           overrideConfig={
             { ...diffConfig, autoExpandMode: "all", showFullMessageForDiff: false } as any
@@ -201,7 +193,7 @@ storiesOf("panels/RawMessages", module)
   })
   .add("display full diff", () => {
     return (
-      <PanelSetup fixture={topicsToDiffFixture} style={{ width: 500 }}>
+      <PanelSetup fixture={topicsToDiffFixture}>
         <RawMessages
           overrideConfig={
             { ...diffConfig, autoExpandMode: "all", showFullMessageForDiff: true } as any
@@ -219,21 +211,21 @@ storiesOf("panels/RawMessages", module)
       autoExpandMode: "all",
     };
     return (
-      <PanelSetup fixture={topicsWithIdsToDiffFixture} style={{ width: 380 }}>
+      <PanelSetup fixture={topicsWithIdsToDiffFixture}>
         <RawMessages overrideConfig={config as any} />
       </PanelSetup>
     );
   })
   .add("empty diff message", () => {
     return (
-      <PanelSetup fixture={{ topics: [], frame: {} }} style={{ width: 380 }}>
+      <PanelSetup fixture={{ topics: [], frame: {} }}>
         <RawMessages overrideConfig={{ ...diffConfig, showFullMessageForDiff: false } as any} />
       </PanelSetup>
     );
   })
   .add("diff same messages", () => {
     return (
-      <PanelSetup fixture={fixture} style={{ width: 380 }}>
+      <PanelSetup fixture={fixture}>
         <RawMessages
           overrideConfig={{
             topicPath: "/foo",
@@ -248,7 +240,7 @@ storiesOf("panels/RawMessages", module)
   })
   .add("diff consecutive messages", () => {
     return (
-      <PanelSetup fixture={fixture} style={{ width: 380 }}>
+      <PanelSetup fixture={fixture}>
         <RawMessages
           overrideConfig={{
             topicPath: "/foo",
@@ -264,7 +256,7 @@ storiesOf("panels/RawMessages", module)
   })
   .add("diff consecutive messages with filter", () => {
     return (
-      <PanelSetup fixture={multipleMessagesFilter} style={{ width: 380 }}>
+      <PanelSetup fixture={multipleMessagesFilter}>
         <RawMessages
           overrideConfig={{
             topicPath: "/foo{type==2}",
@@ -280,7 +272,7 @@ storiesOf("panels/RawMessages", module)
   })
   .add("diff consecutive messages with bigint", () => {
     return (
-      <PanelSetup fixture={fixture} style={{ width: 380 }}>
+      <PanelSetup fixture={fixture}>
         <RawMessages
           overrideConfig={{
             topicPath: "/baz/bigint",
@@ -296,7 +288,7 @@ storiesOf("panels/RawMessages", module)
   })
   .add("display correct message when diff is disabled, even with diff method & topic set", () => {
     return (
-      <PanelSetup fixture={fixture} style={{ width: 380 }}>
+      <PanelSetup fixture={fixture}>
         <RawMessages
           overrideConfig={{
             topicPath: "/foo",
@@ -312,7 +304,7 @@ storiesOf("panels/RawMessages", module)
   })
   .add("multiple messages with top-level filter", () => {
     return (
-      <PanelSetup fixture={multipleNumberMessagesFixture} style={{ width: 380 }}>
+      <PanelSetup fixture={multipleNumberMessagesFixture}>
         <RawMessages
           overrideConfig={
             {

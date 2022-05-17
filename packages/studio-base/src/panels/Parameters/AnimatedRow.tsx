@@ -24,7 +24,7 @@ const AnimatedRow = styled.tr<{ animate: boolean; skipAnimation: boolean }>`
     ${AnimationDuration}s ease-in-out;
   animation-iteration-count: 1;
   animation-fill-mode: forwards;
-  border-bottom: 1px solid ${sharedColors.BORDER_LIGHT};
+  border-bottom: 1px solid ${({ theme }) => theme.semanticColors.bodyDivider};
 `;
 
 export default AnimatedRow;

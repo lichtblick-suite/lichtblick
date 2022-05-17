@@ -188,7 +188,7 @@ function Internals() {
 
   return (
     <Container>
-      <PanelToolbar floating helpContent={helpContent} />
+      <PanelToolbar helpContent={helpContent} />
       <h1>Recording</h1>
       <TextContent>
         Press to start recording topic data for debug purposes. The latest messages on each topic

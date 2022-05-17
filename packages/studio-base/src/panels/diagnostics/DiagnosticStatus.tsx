@@ -129,10 +129,10 @@ const useStyles = makeStyles((theme: Theme) => ({
     cursor: "pointer",
 
     "&:nth-child(odd)": {
-      backgroundColor: theme.palette.grey[50],
+      backgroundColor: theme.palette.action.hover,
     },
     "&:hover": {
-      backgroundColor: theme.palette.action.hover,
+      backgroundColor: theme.palette.action.focus,
 
       "& .icon": {
         visibility: "visible",

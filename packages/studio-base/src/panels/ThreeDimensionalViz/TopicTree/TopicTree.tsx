@@ -29,6 +29,7 @@ import React, { useCallback, useMemo, useRef } from "react";
 import { useResizeDetector } from "react-resize-detector";
 import { CSSTransition } from "react-transition-group";
 
+import { PANEL_TOOLBAR_MIN_HEIGHT } from "@foxglove/studio-base/components/PanelToolbar";
 import useChangeDetector from "@foxglove/studio-base/hooks/useChangeDetector";
 import { Save3DConfig } from "@foxglove/studio-base/panels/ThreeDimensionalViz";
 import useLinkedGlobalVariables from "@foxglove/studio-base/panels/ThreeDimensionalViz/Interactions/useLinkedGlobalVariables";
@@ -60,7 +61,7 @@ import {
   VisibleTopicsCountByKey,
 } from "./types";
 
-const CONTAINER_SPACING = 15;
+const CONTAINER_SPACING = 12;
 const DEFAULT_WIDTH = 360;
 const DEFAULT_XS_WIDTH = 240;
 const SEARCH_BAR_HEIGHT = 40;
@@ -69,10 +70,10 @@ const MAX_CONTAINER_WIDTH_RATIO = 0.9;
 const useStyles = makeStyles((theme: Theme) => ({
   wrapper: {
     position: "absolute",
-    top: CONTAINER_SPACING,
+    top: CONTAINER_SPACING + PANEL_TOOLBAR_MIN_HEIGHT,
     left: CONTAINER_SPACING,
     zIndex: 102,
-    maxEidth: `${MAX_CONTAINER_WIDTH_RATIO * 100}%`,
+    maxWidth: `${MAX_CONTAINER_WIDTH_RATIO * 100}%`,
     pointerEvents: "none", // Allow clicks right above the TopicTree to close it
   },
   tree: {

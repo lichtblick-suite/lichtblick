@@ -12,13 +12,14 @@
 //   You may not use this file except in compliance with the License.
 
 import { IconButton, IList, List } from "@fluentui/react";
-import { Box, Stack } from "@mui/material";
+import { Box } from "@mui/material";
 import { makeStyles } from "@mui/styles";
 import { useCallback, useLayoutEffect, useMemo, useRef, useState } from "react";
 
 import { useDataSourceInfo, useMessagesByTopic } from "@foxglove/studio-base/PanelAPI";
 import Panel from "@foxglove/studio-base/components/Panel";
 import PanelToolbar from "@foxglove/studio-base/components/PanelToolbar";
+import Stack from "@foxglove/studio-base/components/Stack";
 import TopicToRenderMenu from "@foxglove/studio-base/components/TopicToRenderMenu";
 import { useAppTimeFormat } from "@foxglove/studio-base/hooks";
 
@@ -123,16 +124,6 @@ const LogPanel = React.memo(({ config, saveConfig }: Props) => {
 
   const listRef = useRef<IList>(ReactNull);
 
-  const topicToRenderMenu = (
-    <TopicToRenderMenu
-      topicToRender={topicToRender}
-      onChange={(newTopicToRender) => saveConfig({ ...config, topicToRender: newTopicToRender })}
-      allowedDatatypes={SUPPORTED_DATATYPES}
-      topics={topics}
-      defaultTopicToRender={topicToRender}
-    />
-  );
-
   const [hasUserScrolled, setHasUserScrolled] = useState(false);
   const divRef = useRef<HTMLDivElement>(ReactNull);
 
@@ -164,8 +155,21 @@ const LogPanel = React.memo(({ config, saveConfig }: Props) => {
   }, []);
 
   return (
-    <Stack height="100%">
-      <PanelToolbar helpContent={helpContent} additionalIcons={topicToRenderMenu}>
+    <Stack fullHeight>
+      <PanelToolbar
+        helpContent={helpContent}
+        additionalIcons={
+          <TopicToRenderMenu
+            topicToRender={topicToRender}
+            onChange={(newTopicToRender) =>
+              saveConfig({ ...config, topicToRender: newTopicToRender })
+            }
+            allowedDatatypes={SUPPORTED_DATATYPES}
+            topics={topics}
+            defaultTopicToRender={topicToRender}
+          />
+        }
+      >
         <FilterBar
           searchTerms={searchTermsSet}
           minLogLevel={minLogLevel}

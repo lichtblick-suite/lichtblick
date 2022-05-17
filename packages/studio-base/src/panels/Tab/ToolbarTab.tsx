@@ -16,6 +16,7 @@ import { IconButton, InputBase, styled as muiStyled } from "@mui/material";
 import React, { Ref as ReactRef, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import textMetrics from "text-metrics";
 
+import { PANEL_TOOLBAR_MIN_HEIGHT } from "@foxglove/studio-base/components/PanelToolbar";
 import { TabActions } from "@foxglove/studio-base/panels/Tab/TabDndContext";
 import { fonts } from "@foxglove/studio-base/util/sharedStyleConstants";
 
@@ -37,7 +38,7 @@ const Tab = muiStyled("div")<{
   display: "flex",
   alignItems: "center",
   width: "100%",
-  height: 26,
+  height: PANEL_TOOLBAR_MIN_HEIGHT - 4,
   padding: theme.spacing(0, 0.75),
   userSelect: "none",
   border: "1px solid transparent",
@@ -67,7 +68,7 @@ const Tab = muiStyled("div")<{
 }));
 
 const StyledIconButton = muiStyled(IconButton)(({ theme }) => ({
-  padding: theme.spacing(0.25),
+  padding: theme.spacing(0.125),
 }));
 
 const DropIndicator = muiStyled("div")<{ dir: "before" | "after" }>(({ theme, dir }) => ({

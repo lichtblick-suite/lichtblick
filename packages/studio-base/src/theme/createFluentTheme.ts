@@ -22,6 +22,7 @@ export default function createFluentTheme({
         fontFeatureSettings: fonts.SANS_SERIF_FEATURE_SETTINGS,
       },
       semanticColors: {
+        bodyBackground: isInverted ? "#121217" : "#f4f4f5",
         menuBackground: isInverted ? "#242424" : "#f3f3f3",
         menuItemBackgroundHovered: isInverted ? "#2e2e2e" : "#e1e1e1",
         errorBackground: colors.RED1,

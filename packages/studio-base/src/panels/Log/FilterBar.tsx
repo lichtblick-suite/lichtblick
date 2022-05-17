@@ -11,12 +11,21 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { Dropdown, IDropdownOption, TagPicker, ISelectableOption, useTheme } from "@fluentui/react";
-import ClipboardOutlineIcon from "@mdi/svg/svg/clipboard-outline.svg";
-import { Stack } from "@mui/material";
+import {
+  Dropdown,
+  IDropdownOption,
+  TagPicker,
+  ISelectableOption,
+  useTheme,
+  IDropdownStyles,
+} from "@fluentui/react";
+import CopyAllIcon from "@mui/icons-material/CopyAll";
+import { Typography } from "@mui/material";
 import cx from "classnames";
+import { useMemo } from "react";
 
-import Icon from "@foxglove/studio-base/components/Icon";
+import ToolbarIconButton from "@foxglove/studio-base/components/PanelToolbar/ToolbarIconButton";
+import Stack from "@foxglove/studio-base/components/Stack";
 import useLogStyles from "@foxglove/studio-base/panels/Log/useLogStyles";
 import clipboard from "@foxglove/studio-base/util/clipboard";
 
@@ -25,26 +34,11 @@ import { LogMessageEvent, LogLevel } from "./types";
 
 // Create the log level options nodes once since they don't change per render.
 const LOG_LEVEL_OPTIONS: IDropdownOption[] = [
-  {
-    text: ">= DEBUG",
-    key: LogLevel.DEBUG,
-  },
-  {
-    text: ">= INFO",
-    key: LogLevel.INFO,
-  },
-  {
-    text: ">= WARN",
-    key: LogLevel.WARN,
-  },
-  {
-    text: ">= ERROR",
-    key: LogLevel.ERROR,
-  },
-  {
-    text: ">= FATAL",
-    key: LogLevel.FATAL,
-  },
+  { text: ">= DEBUG", key: LogLevel.DEBUG },
+  { text: ">= INFO", key: LogLevel.INFO },
+  { text: ">= WARN", key: LogLevel.WARN },
+  { text: ">= ERROR", key: LogLevel.ERROR },
+  { text: ">= FATAL", key: LogLevel.FATAL },
 ];
 
 type Filter = {
@@ -107,10 +101,42 @@ export default function FilterBar(props: FilterBarProps): JSX.Element {
   }));
   const theme = useTheme();
   const logStyles = useLogStyles();
+  const dropdownStyles: Partial<IDropdownStyles> = useMemo(
+    () => ({
+      root: {
+        minWidth: "100px",
+      },
+      caretDownWrapper: {
+        top: 0,
+        lineHeight: 16,
+        height: 16,
+      },
+      title: {
+        backgroundColor: "transparent",
+        fontSize: theme.fonts.small.fontSize,
+        borderColor: theme.semanticColors.bodyDivider,
+        lineHeight: 22,
+        height: 22,
+      },
+      dropdownItemSelected: {
+        fontSize: theme.fonts.small.fontSize,
+        lineHeight: 22,
+        height: 22,
+        minHeight: 22,
+      },
+      dropdownItem: {
+        lineHeight: 22,
+        height: 22,
+        minHeight: 22,
+        fontSize: theme.fonts.small.fontSize,
+      },
+    }),
+    [theme],
+  );
   return (
-    <Stack flexGrow={1} direction="row" spacing={1}>
+    <Stack flex="auto" direction="row" gap={0.5} alignItems="center">
       <Dropdown
-        styles={{ title: { background: "transparent" } }}
+        styles={dropdownStyles}
         onRenderOption={(option) => renderOption(option, logStyles)}
         onRenderTitle={(options) => renderTitle(options, logStyles)}
         onChange={(_ev, option) => {
@@ -124,15 +150,35 @@ export default function FilterBar(props: FilterBarProps): JSX.Element {
         options={LOG_LEVEL_OPTIONS}
         selectedKey={props.minLogLevel}
       />
-
-      <Stack flexGrow={1}>
+      <Stack flex="auto" gap={1}>
         <TagPicker
           inputProps={{
             placeholder: "Search filter",
           }}
           styles={{
-            text: { minWidth: 0 },
-            input: { width: 0 },
+            text: { minWidth: 0, minHeight: 22 },
+            input: {
+              width: 0,
+              height: 20,
+              fontSize: 11,
+
+              "::placeholder": {
+                fontSize: 11,
+              },
+            },
+            root: { height: 22 },
+            itemsWrapper: {
+              ".ms-TagItem": { lineHeight: 16, height: 16, fontSize: 11 },
+              ".ms-TagItem-text": { margin: "0 4px" },
+              ".ms-TagItem-close": {
+                fontSize: 11,
+                width: 20,
+
+                ".ms-Button-icon": {
+                  margin: 0,
+                },
+              },
+            },
           }}
           removeButtonAriaLabel="Remove"
           selectionAriaLabel="Filter"
@@ -154,25 +200,18 @@ export default function FilterBar(props: FilterBarProps): JSX.Element {
           }}
         />
       </Stack>
-      <Stack justifyContent="center">
-        <div
-          style={{
-            whiteSpace: "nowrap",
-            padding: "0px 8px",
-            color: theme.palette.neutralTertiary,
-          }}
-        >
+      <Stack direction="row" alignItems="center" gap={0.5}>
+        <Typography noWrap variant="body2" color="text.secondary">
           {props.messages.length} {props.messages.length === 1 ? "item" : "items"}
-          <Icon
-            style={{ padding: "1px 0px 0px 6px" }}
-            onClick={() => {
-              void clipboard.copy(JSON.stringify(props.messages, undefined, 2) ?? "");
-            }}
-            tooltip="Copy log to clipboard"
-          >
-            <ClipboardOutlineIcon />
-          </Icon>
-        </div>
+        </Typography>
+        <ToolbarIconButton
+          onClick={() => {
+            void clipboard.copy(JSON.stringify(props.messages, undefined, 2) ?? "");
+          }}
+          title="Copy log to clipboard"
+        >
+          <CopyAllIcon />
+        </ToolbarIconButton>
       </Stack>
     </Stack>
   );

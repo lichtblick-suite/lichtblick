@@ -36,6 +36,7 @@ import { LegacyInput } from "@foxglove/studio-base/components/LegacyStyledCompon
 import Panel from "@foxglove/studio-base/components/Panel";
 import { usePanelContext } from "@foxglove/studio-base/components/PanelContext";
 import PanelToolbar from "@foxglove/studio-base/components/PanelToolbar";
+import ToolbarIconButton from "@foxglove/studio-base/components/PanelToolbar/ToolbarIconButton";
 import {
   SettingsTreeAction,
   SettingsTreeNode,
@@ -184,26 +185,26 @@ function DiagnosticSummary(props: Props): JSX.Element {
         },
         caretDownWrapper: {
           top: 0,
-          lineHeight: 18,
-          height: 18,
+          lineHeight: 16,
+          height: 16,
         },
         title: {
           backgroundColor: "transparent",
           fontSize: theme.fonts.small.fontSize,
           borderColor: theme.semanticColors.bodyDivider,
-          lineHeight: 24,
-          height: 24,
+          lineHeight: 22,
+          height: 22,
         },
         dropdownItemSelected: {
           fontSize: theme.fonts.small.fontSize,
-          lineHeight: 24,
-          height: 24,
-          minHeight: 24,
+          lineHeight: 22,
+          height: 22,
+          minHeight: 22,
         },
         dropdownItem: {
-          lineHeight: 24,
-          height: 24,
-          minHeight: 24,
+          lineHeight: 22,
+          height: 22,
+          minHeight: 22,
           fontSize: theme.fonts.small.fontSize,
         },
       } as Partial<IDropdownStyles>),
@@ -321,18 +322,6 @@ function DiagnosticSummary(props: Props): JSX.Element {
     setTopicMenuOpen((isOpen) => !isOpen);
   }, []);
 
-  const topicMenuIcon = (
-    <Icon
-      fade
-      tooltip={`Supported datatypes: ${ALLOWED_DATATYPES.join(", ")}`}
-      tooltipProps={{ placement: "top" }}
-      dataTest={"topic-set"}
-      onClick={toggleTopicMenuAction}
-    >
-      <DatabaseIcon />
-    </Icon>
-  );
-
   const diagnostics = useDiagnostics(topicToRender);
   const summary = useMemo(() => {
     if (diagnostics.size === 0) {
@@ -406,8 +395,41 @@ function DiagnosticSummary(props: Props): JSX.Element {
 
   return (
     <Stack flex="auto">
-      <div ref={menuRef} style={{ position: "absolute" }}></div>
-      <PanelToolbar helpContent={helpContent} additionalIcons={topicMenuIcon}>
+      <PanelToolbar
+        helpContent={helpContent}
+        additionalIcons={
+          <>
+            <div ref={menuRef}>
+              <ToolbarIconButton
+                title={`Supported datatypes: ${ALLOWED_DATATYPES.join(", ")}`}
+                data-test={"topic-set"}
+                onClick={toggleTopicMenuAction}
+                subMenuActive={topicMenuOpen}
+              >
+                <DatabaseIcon />
+              </ToolbarIconButton>
+            </div>
+            <Menu
+              anchorEl={menuRef.current}
+              open={topicMenuOpen}
+              onClose={() => setTopicMenuOpen(false)}
+              MenuListProps={{
+                dense: true,
+              }}
+            >
+              {availableTopics.map((topic) => (
+                <MenuItem
+                  key={topic}
+                  onClick={() => changeTopicToRender(topic)}
+                  selected={topicToRender === topic}
+                >
+                  {topic}
+                </MenuItem>
+              ))}
+            </Menu>
+          </>
+        }
+      >
         <Dropdown
           styles={dropdownStyles}
           onRenderOption={renderOption}
@@ -423,21 +445,6 @@ function DiagnosticSummary(props: Props): JSX.Element {
           selectedKey={minLevel}
         />
         {hardwareFilter}
-        <Menu
-          anchorEl={menuRef.current}
-          open={topicMenuOpen}
-          onClose={() => setTopicMenuOpen(false)}
-        >
-          {availableTopics.map((topic) => (
-            <MenuItem
-              key={topic}
-              onClick={() => changeTopicToRender(topic)}
-              selected={topicToRender === topic}
-            >
-              {topic}
-            </MenuItem>
-          ))}
-        </Menu>
       </PanelToolbar>
       <Stack flex="auto">{summary}</Stack>
     </Stack>

@@ -33,6 +33,7 @@ const STabbedToolbar = muiStyled("div")(({ theme }) => ({
   flexDirection: "column",
   borderBottom: `1px solid ${theme.palette.divider}`,
   backgroundColor: theme.palette.background.default,
+  paddingLeft: theme.spacing(0.5),
 }));
 
 const STabs = muiStyled("div")({

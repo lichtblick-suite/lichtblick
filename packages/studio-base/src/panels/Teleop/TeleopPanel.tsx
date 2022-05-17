@@ -2,17 +2,18 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { Stack, Typography } from "@mui/material";
 import { set } from "lodash";
-import { ReactNode, useCallback, useEffect, useLayoutEffect, useState } from "react";
+import { useCallback, useEffect, useLayoutEffect, useState } from "react";
 import { DeepPartial } from "ts-essentials";
 
 import { definitions as commonDefs } from "@foxglove/rosmsg-msgs-common";
 import { PanelExtensionContext, Topic } from "@foxglove/studio";
+import EmptyState from "@foxglove/studio-base/components/EmptyState";
 import {
   SettingsTreeAction,
   SettingsTreeNode,
 } from "@foxglove/studio-base/components/SettingsTreeEditor/types";
+import Stack from "@foxglove/studio-base/components/Stack";
 import ThemeProvider from "@foxglove/studio-base/theme/ThemeProvider";
 
 import DirectionalPad, { DirectionalPadAction } from "./DirectionalPad";
@@ -102,26 +103,6 @@ function buildSettingsTree(config: Config, topics: readonly Topic[]): SettingsTr
       },
     },
   };
-}
-
-function ErrorMessage({
-  children,
-  message,
-}: {
-  children?: ReactNode;
-  message: string;
-}): JSX.Element {
-  return (
-    <Stack
-      alignItems="center"
-      direction="column"
-      spacing={3}
-      style={{ maxWidth: "60ch", textAlign: "center" }}
-    >
-      <Typography variant="h4">{message}</Typography>
-      {children}
-    </Stack>
-  );
 }
 
 function TeleopPanel(props: TeleopPanelProps): JSX.Element {
@@ -290,12 +271,19 @@ function TeleopPanel(props: TeleopPanelProps): JSX.Element {
 
   return (
     <ThemeProvider isDark={colorScheme === "dark"}>
-      <Stack height="100%" justifyContent="center" alignItems="center" padding="min(5%, 8px)">
+      <Stack
+        fullHeight
+        justifyContent="center"
+        alignItems="center"
+        style={{ padding: "min(5%, 8px)", textAlign: "center" }}
+      >
         {!canPublish && (
-          <ErrorMessage message="Please connect to a datasource that supports publishing in order to use this panel." />
+          <EmptyState>
+            Please connect to a datasource that supports publishing in order to use this panel
+          </EmptyState>
         )}
         {canPublish && !hasTopic && (
-          <ErrorMessage message="Please select a publish topic in the panel settings" />
+          <EmptyState>Please select a publish topic in the panel settings</EmptyState>
         )}
         {enabled && <DirectionalPad onAction={setCurrentAction} disabled={!enabled} />}
       </Stack>

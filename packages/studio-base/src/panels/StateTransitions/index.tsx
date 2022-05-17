@@ -11,6 +11,8 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
+import AddIcon from "@mui/icons-material/Add";
+import { Button, styled as muiStyled } from "@mui/material";
 import { ChartOptions, ScaleOptions } from "chart.js";
 import { uniq } from "lodash";
 import { useCallback, useMemo, useRef } from "react";
@@ -22,7 +24,6 @@ import { useShallowMemo } from "@foxglove/hooks";
 import { add as addTimes, fromSec, subtract as subtractTimes, toSec } from "@foxglove/rostime";
 import * as PanelAPI from "@foxglove/studio-base/PanelAPI";
 import { useBlocksByTopic } from "@foxglove/studio-base/PanelAPI";
-import Button from "@foxglove/studio-base/components/Button";
 import MessagePathInput from "@foxglove/studio-base/components/MessagePathSyntax/MessagePathInput";
 import { getTopicsFromPaths } from "@foxglove/studio-base/components/MessagePathSyntax/parseRosPath";
 import { useDecodeMessagePathsForMessagesByTopic } from "@foxglove/studio-base/components/MessagePathSyntax/useCachedGetMessagePathDataItems";
@@ -33,7 +34,9 @@ import {
   useMessagePipelineGetter,
 } from "@foxglove/studio-base/components/MessagePipeline";
 import Panel from "@foxglove/studio-base/components/Panel";
-import PanelToolbar from "@foxglove/studio-base/components/PanelToolbar";
+import PanelToolbar, {
+  PANEL_TOOLBAR_MIN_HEIGHT,
+} from "@foxglove/studio-base/components/PanelToolbar";
 import TimeBasedChart, {
   TimeBasedChartTooltipData,
 } from "@foxglove/studio-base/components/TimeBasedChart";
@@ -69,28 +72,34 @@ const fontFamily = fonts.MONOSPACE;
 const fontSize = 10;
 const fontWeight = "bold";
 
-const SRoot = styled.div`
+const SRoot = muiStyled("div")`
   display: flex;
+  flex-direction: column;
   flex-grow: 1;
   z-index: 0; // create new stacking context
   overflow: hidden;
 `;
 
-const SAddButton = styled.div`
-  position: absolute;
-  top: 30px;
-  right: 5px;
-  z-index: 1;
-`;
+const AddButton = muiStyled(Button, {
+  shouldForwardProp: (props) => props !== "mousePresent",
+})<{
+  mousePresent: boolean;
+}>(({ mousePresent, theme }) => ({
+  visibility: mousePresent ? "visible" : "hidden",
+  position: "absolute",
+  top: `calc(${PANEL_TOOLBAR_MIN_HEIGHT}px + ${theme.spacing(1)})`,
+  right: theme.spacing(1),
+  zIndex: 1,
+}));
 
-const SChartContainerOuter = styled.div`
+const SChartContainerOuter = muiStyled("div")`
   width: 100%;
-  flex-grow: 1;
+  flex: auto;
   overflow-x: hidden;
   overflow-y: auto;
 `;
 
-const SChartContainerInner = styled.div`
+const SChartContainerInner = muiStyled("div")`
   position: relative;
   margin-top: 10px;
 `;
@@ -371,18 +380,22 @@ const StateTransitions = React.memo(function StateTransitions(props: Props) {
 
   return (
     <SRoot ref={rootRef}>
-      <PanelToolbar floating helpContent={helpContent} />
-      <SAddButton style={{ visibility: mousePresent ? "visible" : "hidden" }}>
-        <Button
-          onClick={() =>
-            saveConfig({
-              paths: [...config.paths, { value: "", timestampMethod: "receiveTime" }],
-            })
-          }
-        >
-          add
-        </Button>
-      </SAddButton>
+      <PanelToolbar helpContent={helpContent} />
+      <AddButton
+        size="small"
+        variant="contained"
+        color="inherit"
+        startIcon={<AddIcon />}
+        disableRipple
+        mousePresent={mousePresent}
+        onClick={() =>
+          saveConfig({
+            paths: [...config.paths, { value: "", timestampMethod: "receiveTime" }],
+          })
+        }
+      >
+        Add topic
+      </AddButton>
       <SChartContainerOuter>
         <SChartContainerInner style={{ height }} ref={sizeRef}>
           <TimeBasedChart

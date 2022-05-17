@@ -12,14 +12,13 @@
 //   You may not use this file except in compliance with the License.
 
 import { ContextualMenu, IContextualMenuItem, useTheme } from "@fluentui/react";
-import CogIcon from "@mdi/svg/svg/cog.svg";
-import { makeStyles } from "@mui/styles";
+import SettingsIcon from "@mui/icons-material/Settings";
 import { useCallback, useContext, useMemo, useRef } from "react";
 import { MosaicContext, MosaicNode, MosaicWindowContext } from "react-mosaic-component";
 
-import Icon from "@foxglove/studio-base/components/Icon";
 import PanelContext from "@foxglove/studio-base/components/PanelContext";
 import PanelList, { PanelSelection } from "@foxglove/studio-base/components/PanelList";
+import ToolbarIconButton from "@foxglove/studio-base/components/PanelToolbar/ToolbarIconButton";
 import { getPanelTypeFromMosaic } from "@foxglove/studio-base/components/PanelToolbar/utils";
 import {
   useCurrentLayoutActions,
@@ -34,15 +33,7 @@ type Props = {
   isUnknownPanel: boolean;
 };
 
-const useStyles = makeStyles({
-  icon: {
-    fontSize: 14,
-    margin: "0 0.2em",
-  },
-});
-
 export function PanelActionsDropdown({ isOpen, setIsOpen, isUnknownPanel }: Props): JSX.Element {
-  const styles = useStyles();
   const panelContext = useContext(PanelContext);
   const tabId = panelContext?.tabId;
   const { mosaicActions } = useContext(MosaicContext);
@@ -206,9 +197,9 @@ export function PanelActionsDropdown({ isOpen, setIsOpen, isUnknownPanel }: Prop
         target={buttonRef}
         onDismiss={() => setIsOpen(false)}
       />
-      <Icon fade tooltip="More" dataTest="panel-menu" onClick={() => setIsOpen(!isOpen)}>
-        <CogIcon className={styles.icon} />
-      </Icon>
+      <ToolbarIconButton title="More" data-test="panel-menu" onClick={() => setIsOpen(!isOpen)}>
+        <SettingsIcon />
+      </ToolbarIconButton>
     </div>
   );
 }

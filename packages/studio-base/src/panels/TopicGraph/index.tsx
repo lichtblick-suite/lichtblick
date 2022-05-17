@@ -27,7 +27,9 @@ import EmptyState from "@foxglove/studio-base/components/EmptyState";
 import ExpandingToolbar, { ToolGroup } from "@foxglove/studio-base/components/ExpandingToolbar";
 import { useMessagePipeline } from "@foxglove/studio-base/components/MessagePipeline";
 import Panel from "@foxglove/studio-base/components/Panel";
-import PanelToolbar from "@foxglove/studio-base/components/PanelToolbar";
+import PanelToolbar, {
+  PANEL_TOOLBAR_MIN_HEIGHT,
+} from "@foxglove/studio-base/components/PanelToolbar";
 import Radio from "@foxglove/studio-base/components/Radio";
 
 import Graph, { GraphMutation } from "./Graph";
@@ -108,7 +110,7 @@ const useStyles = makeStyles((theme: Theme) => ({
     flexDirection: "column",
     alignItems: "flex-end",
     position: "absolute",
-    top: theme.spacing(4),
+    top: `calc(${PANEL_TOOLBAR_MIN_HEIGHT}px + ${theme.spacing(1)})`,
     right: theme.spacing(1),
     zIndex: 101,
     gap: theme.spacing(1),
@@ -372,7 +374,7 @@ function TopicGraph() {
   if (publishedTopics == undefined) {
     return (
       <>
-        <PanelToolbar floating helpContent={helpContent} />
+        <PanelToolbar helpContent={helpContent} />
         <EmptyState>Waiting for data...</EmptyState>
       </>
     );
@@ -380,7 +382,7 @@ function TopicGraph() {
 
   return (
     <>
-      <PanelToolbar floating helpContent={helpContent} />
+      <PanelToolbar helpContent={helpContent} />
       <div className={classes.root}>
         <Paper square={false} elevation={4} className={classes.pointerEventsAuto}>
           <div className={cx(classes.stack, classes.pointerEventsAuto)}>

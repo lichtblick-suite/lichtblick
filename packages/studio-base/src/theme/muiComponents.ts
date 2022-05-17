@@ -72,7 +72,7 @@ export default function muiComponents(theme: Theme): ThemeOptions["components"] 
             paddingBottom: 0,
 
             ".MuiAutocomplete-input.MuiInputBase-inputSizeSmall": {
-              padding: theme.spacing(0.75, 1),
+              padding: theme.spacing(0.5, 1),
             },
           },
           ".MuiInputBase-root .MuiAutocomplete-endAdornment": {

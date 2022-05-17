@@ -13,7 +13,7 @@ export const PanelRoot = styled.div<{ fullscreen: boolean; selected: boolean }>`
   flex: 1 1 auto;
   overflow: hidden;
   z-index: ${({ fullscreen }) => (fullscreen ? 10000 : 1)};
-  background-color: ${({ theme }) => (theme.isInverted ? colors.DARK : colors.LIGHT)};
+  background-color: ${({ theme }) => theme.semanticColors.bodyBackground};
   position: ${({ fullscreen }) => (fullscreen ? "fixed" : "relative")};
   border: ${({ fullscreen }) => (fullscreen ? "4px solid rgba(110, 81, 238, 0.3)" : "none")};
   top: 0;

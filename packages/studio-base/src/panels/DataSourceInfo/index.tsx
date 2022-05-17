@@ -3,7 +3,7 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 import { ITextStyles, DetailsList, Text, useTheme, CheckboxVisibility } from "@fluentui/react";
-import { Theme } from "@mui/material";
+import { Divider, Theme } from "@mui/material";
 import { makeStyles } from "@mui/styles";
 import { useCallback, useMemo } from "react";
 
@@ -83,7 +83,7 @@ function SourceInfo() {
   if (!startTime || !endTime) {
     return (
       <>
-        <PanelToolbar helpContent={helpContent} floating />
+        <PanelToolbar helpContent={helpContent} />
         <EmptyState>Waiting for data...</EmptyState>
       </>
     );
@@ -92,7 +92,8 @@ function SourceInfo() {
   const duration = subtractTimes(endTime, startTime);
   return (
     <>
-      <PanelToolbar helpContent={helpContent} floating />
+      <PanelToolbar helpContent={helpContent} />
+      <Divider />
       <div className={classes.root}>
         <header className={classes.header}>
           <div className={classes.row}>

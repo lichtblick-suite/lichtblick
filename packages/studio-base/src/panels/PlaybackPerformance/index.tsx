@@ -118,7 +118,7 @@ export function UnconnectedPlaybackPerformance({
 
   return (
     <Stack flex="auto">
-      <PanelToolbar floating helpContent={helpContent} />
+      <PanelToolbar helpContent={helpContent} />
       <Stack
         flex="auto"
         flexWrap="wrap"

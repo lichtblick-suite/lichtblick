@@ -400,7 +400,7 @@ function ImageView(props: Props) {
       The annotation dropdown allows multiple selection and remains open.
       */}
       <div ref={rootRef}></div>
-      <PanelToolbar floating={cameraTopic !== ""} helpContent={helpContent}>
+      <PanelToolbar helpContent={helpContent}>
         <div className={classes.controls}>
           {imageTopicDropdown}
           {annotationDropdown}

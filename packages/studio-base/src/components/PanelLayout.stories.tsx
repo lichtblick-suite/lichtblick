@@ -50,7 +50,7 @@ const allPanels: readonly PanelInfo[] = [
             function OkayPanel({ config: { x } }: { config: { x: number } }) {
               return (
                 <>
-                  <PanelToolbar floating />
+                  <PanelToolbar />
                   Hi {x}
                 </>
               );

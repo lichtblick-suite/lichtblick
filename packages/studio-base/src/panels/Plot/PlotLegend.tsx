@@ -28,6 +28,7 @@ import { ComponentProps, useCallback, useMemo, useRef } from "react";
 import Dropdown from "@foxglove/studio-base/components/Dropdown";
 import DropdownItem from "@foxglove/studio-base/components/Dropdown/DropdownItem";
 import MessagePathInput from "@foxglove/studio-base/components/MessagePathSyntax/MessagePathInput";
+import { PANEL_TOOLBAR_MIN_HEIGHT } from "@foxglove/studio-base/components/PanelToolbar";
 import TimeBasedChart from "@foxglove/studio-base/components/TimeBasedChart";
 import PlotLegendRow from "@foxglove/studio-base/panels/Plot/PlotLegendRow";
 
@@ -200,7 +201,7 @@ const useStyles = makeStyles((theme: Theme) => ({
     cursor: "pointer",
     position: "absolute",
     left: theme.spacing(4),
-    top: theme.spacing(1),
+    top: `calc(${theme.spacing(1)} + ${PANEL_TOOLBAR_MIN_HEIGHT}px)`,
     bottom: theme.spacing(3),
     maxWidth: `calc(100% - ${theme.spacing(8)})`,
     backgroundColor: "transparent",

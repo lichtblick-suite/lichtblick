@@ -25,13 +25,12 @@ import {
 } from "@foxglove/studio-base/components/MessagePipeline";
 import Panel from "@foxglove/studio-base/components/Panel";
 import PanelToolbar from "@foxglove/studio-base/components/PanelToolbar";
+import Stack from "@foxglove/studio-base/components/Stack";
 import { JSONInput } from "@foxglove/studio-base/components/input/JSONInput";
 import { PlayerCapabilities } from "@foxglove/studio-base/players/types";
 
 import AnimatedRow from "./AnimatedRow";
-import ParametersPanel from "./ParametersPanel";
 import ParametersTable from "./ParametersTable";
-import Scrollable from "./Scrollable";
 import helpContent from "./index.help.md";
 
 // The minimum amount of time to wait between showing the parameter update animation again
@@ -101,17 +100,17 @@ function Parameters(): ReactElement {
 
   if (!canGetParams) {
     return (
-      <>
-        <PanelToolbar floating helpContent={helpContent} />
+      <Stack fullHeight>
+        <PanelToolbar helpContent={helpContent} />
         <EmptyState>Connect to a ROS source to view parameters</EmptyState>
-      </>
+      </Stack>
     );
   }
 
   return (
-    <ParametersPanel>
-      <PanelToolbar helpContent={helpContent} floating />
-      <Scrollable>
+    <Stack fullHeight>
+      <PanelToolbar helpContent={helpContent} />
+      <Stack flex="auto" overflowX="hidden" overflowY="auto">
         <ParametersTable>
           <LegacyTable>
             <thead>
@@ -149,8 +148,8 @@ function Parameters(): ReactElement {
             </tbody>
           </LegacyTable>
         </ParametersTable>
-      </Scrollable>
-    </ParametersPanel>
+      </Stack>
+    </Stack>
   );
 }
 

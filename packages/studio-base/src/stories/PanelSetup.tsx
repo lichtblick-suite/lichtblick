@@ -11,7 +11,7 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { setWarningCallback } from "@fluentui/react";
+import { setWarningCallback, useTheme } from "@fluentui/react";
 import { flatten } from "lodash";
 import { ComponentProps, useLayoutEffect, useRef, useState } from "react";
 import { DndProvider } from "react-dnd";
@@ -52,6 +52,7 @@ import {
 import MockCurrentLayoutProvider from "@foxglove/studio-base/providers/CurrentLayoutProvider/MockCurrentLayoutProvider";
 import HelpInfoProvider from "@foxglove/studio-base/providers/HelpInfoProvider";
 import { PanelSettingsEditorContextProvider } from "@foxglove/studio-base/providers/PanelSettingsEditorContextProvider";
+import ThemeProvider from "@foxglove/studio-base/theme/ThemeProvider";
 import { RosDatatypes } from "@foxglove/studio-base/types/RosDatatypes";
 import { SavedProps, UserNodes } from "@foxglove/studio-base/types/panels";
 
@@ -304,13 +305,16 @@ type Props = UnconnectedProps & {
   onLayoutAction?: (action: PanelsActions) => void;
 };
 export default function PanelSetup(props: Props): JSX.Element {
+  const theme = useTheme();
   return (
     <UserNodeStateProvider>
       <HoverValueProvider>
         <MockCurrentLayoutProvider onAction={props.onLayoutAction}>
           <PanelSettingsEditorContextProvider>
             <HelpInfoProvider>
-              <UnconnectedPanelSetup {...props} />
+              <ThemeProvider isDark={theme.isInverted}>
+                <UnconnectedPanelSetup {...props} />
+              </ThemeProvider>
             </HelpInfoProvider>
           </PanelSettingsEditorContextProvider>
         </MockCurrentLayoutProvider>

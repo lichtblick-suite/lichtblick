@@ -1,43 +1,30 @@
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
-//
-// This file incorporates work covered by the following copyright and
-// permission notice:
-//
-//   Copyright 2018-2021 Cruise LLC
-//
-//   This source code is licensed under the Apache License, Version 2.0,
-//   found at http://www.apache.org/licenses/LICENSE-2.0
-//   You may not use this file except in compliance with the License.
 
-import styled from "styled-components";
+import { Container, Typography, styled as muiStyled } from "@mui/material";
+import { PropsWithChildren } from "react";
 
-type Props = {
-  children: React.ReactNode;
-  alignLeft?: boolean;
-};
+import Stack from "@foxglove/studio-base/components/Stack";
 
-const Container = styled.div<Props>`
-  flex: 1 1 auto;
-  display: flex;
-  align-items: center;
-  justify-content: ${({ alignLeft = false }) => (alignLeft ? "left" : "center")};
-  margin: 20px;
-  line-height: 1.4;
-  color: ${({ theme }) => theme.semanticColors.disabledText};
+const StyledStack = muiStyled(Stack)(({ theme }) => ({
+  backgroundColor: theme.palette.background.default,
 
-  code {
-    color: ${({ theme }) => theme.palette.accent};
-    background: transparent;
-    padding: 0;
-  }
-`;
+  code: {
+    color: theme.palette.primary.main,
+    background: "transparent",
+    padding: 0,
+  },
+}));
 
-export default function EmptyState({ children, alignLeft }: Props): JSX.Element {
+export default function EmptyState({ children }: PropsWithChildren<unknown>): JSX.Element {
   return (
-    <Container alignLeft={alignLeft}>
-      <div>{children}</div>
-    </Container>
+    <StyledStack flex="auto" alignItems="center" justifyContent="center">
+      <Container maxWidth={false}>
+        <Typography variant="body2" color="text.secondary" lineHeight={1.4} align="center">
+          {children}
+        </Typography>
+      </Container>
+    </StyledStack>
   );
 }

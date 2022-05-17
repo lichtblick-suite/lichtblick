@@ -36,6 +36,9 @@ const StackRoot = muiStyled("div", {
   ...(ownerState.fullHeight === true && {
     height: "100%",
   }),
+  ...(ownerState.fullWidth === true && {
+    width: "100%",
+  }),
   ...(ownerState.gap != undefined && {
     gap: theme.spacing(ownerState.gap),
   }),
@@ -84,6 +87,7 @@ export default function Stack(props: PropsWithChildren<StackProps>): JSX.Element
     flexGrow,
     flexShrink,
     fullHeight = false,
+    fullWidth = false,
     gap,
     gapX,
     gapY,
@@ -116,6 +120,7 @@ export default function Stack(props: PropsWithChildren<StackProps>): JSX.Element
     flexGrow,
     flexShrink,
     fullHeight,
+    fullWidth,
     gap,
     gapX,
     gapY,
@@ -171,6 +176,9 @@ export type StackProps = {
 
   /** Make stack 100% height. */
   fullHeight?: boolean;
+
+  /** Make stack 100% height. */
+  fullWidth?: boolean;
 
   /** Defines the `flex-wrap` style property. */
   wrap?: CSSProperties["flexWrap"];
