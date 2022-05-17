@@ -9,6 +9,7 @@ import Logger from "@foxglove/log";
 import { CameraState } from "@foxglove/regl-worldview";
 
 import { Input } from "./Input";
+import { Labels } from "./Labels";
 import { LayerErrors } from "./LayerErrors";
 import { MaterialCache } from "./MaterialCache";
 import { ModelCache } from "./ModelCache";
@@ -51,8 +52,6 @@ export type RendererEvents = {
   cameraMove: (renderer: Renderer) => void;
   renderableSelected: (renderable: THREE.Object3D | undefined, renderer: Renderer) => void;
   transformTreeUpdated: (renderer: Renderer) => void;
-  showLabel: (labelId: string, labelMarker: Marker, renderer: Renderer) => void;
-  removeLabel: (labelId: string, renderer: Renderer) => void;
 };
 
 const DEBUG_PICKING = false;
@@ -99,7 +98,7 @@ export class Renderer extends EventEmitter<RendererEvents> {
   selectedObject: THREE.Object3D | undefined;
   materialCache = new MaterialCache();
   layerErrors = new LayerErrors();
-  colorScheme: "dark" | "light" | undefined;
+  colorScheme: "dark" | "light" = "light";
   modelCache: ModelCache;
   renderables = new Map<string, THREE.Object3D>();
   transformTree = new TransformTree(TRANSFORM_STORAGE_TIME_NS);
@@ -108,6 +107,7 @@ export class Renderer extends EventEmitter<RendererEvents> {
   renderFrameId: string | undefined;
   settingsFieldsProviders = new Map<LayerType, FieldsProvider>();
 
+  labels = new Labels(this);
   frameAxes = new FrameAxes(this);
   occupancyGrids = new OccupancyGrids(this);
   pointClouds = new PointClouds(this);
@@ -136,6 +136,7 @@ export class Renderer extends EventEmitter<RendererEvents> {
     this.gl.info.autoReset = false;
     this.gl.shadowMap.enabled = false;
     this.gl.shadowMap.type = THREE.VSMShadowMap;
+    this.gl.sortObjects = false;
     this.gl.setPixelRatio(window.devicePixelRatio);
 
     let width = canvas.width;
@@ -149,6 +150,7 @@ export class Renderer extends EventEmitter<RendererEvents> {
     this.modelCache = new ModelCache({ ignoreColladaUpAxis: true });
 
     this.scene = new THREE.Scene();
+    this.scene.add(this.labels);
     this.scene.add(this.frameAxes);
     this.scene.add(this.occupancyGrids);
     this.scene.add(this.pointClouds);
@@ -218,6 +220,8 @@ export class Renderer extends EventEmitter<RendererEvents> {
     this.colorScheme = colorScheme;
 
     const bgColor = backgroundColor ? stringToRgb(tempColor, backgroundColor) : undefined;
+
+    this.labels.setColorScheme(colorScheme, bgColor);
 
     if (colorScheme === "dark") {
       this.gl.setClearColor(bgColor ?? DARK_BACKDROP);
@@ -303,6 +307,7 @@ export class Renderer extends EventEmitter<RendererEvents> {
     this._updateFrames();
     this.materialCache.update(this.input.canvasSize);
 
+    this.labels.startFrame(currentTime);
     this.frameAxes.startFrame(currentTime);
     this.occupancyGrids.startFrame(currentTime);
     this.pointClouds.startFrame(currentTime);

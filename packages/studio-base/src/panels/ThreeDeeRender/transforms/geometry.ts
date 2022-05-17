@@ -121,6 +121,27 @@ export function approxEq(v1: number, v2: number, epsilon = 0.00001): boolean {
 }
 
 /**
+ * Test if two quaternions are approximately equal.
+ */
+export function quatAproxEq(q1: Orientation, q2: Orientation): boolean {
+  return (
+    approxEq(q1.x, q2.x) && approxEq(q1.y, q2.y) && approxEq(q1.z, q2.z) && approxEq(q1.w, q2.w)
+  );
+}
+
+/**
+ * Test if two poses are approximately equal.
+ */
+export function poseApproxEq(p1: Pose, p2: Pose): boolean {
+  return (
+    approxEq(p1.position.x, p2.position.x) &&
+    approxEq(p1.position.y, p2.position.y) &&
+    approxEq(p1.position.z, p2.position.z) &&
+    quatAproxEq(p1.orientation, p2.orientation)
+  );
+}
+
+/**
  * Returns a quaternion representing the rotational component of a
  * transformation matrix. The matrix must not have any scaling applied to it.
  * @param out Quaternion to receive the rotation component

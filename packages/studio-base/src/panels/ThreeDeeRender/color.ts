@@ -12,6 +12,14 @@ export function SRGBToLinear(c: number): number {
   return c < 0.04045 ? c * 0.0773993808 : Math.pow(c * 0.9478672986 + 0.0521327014, 2.4);
 }
 
+export function rgbaToLinear(output: ColorRGBA, color: Readonly<ColorRGBA>): ColorRGBA {
+  output.r = SRGBToLinear(color.r);
+  output.g = SRGBToLinear(color.g);
+  output.b = SRGBToLinear(color.b);
+  output.a = color.a;
+  return output;
+}
+
 export function stringToRgba(output: ColorRGBA, colorStr: string): ColorRGBA {
   const color = tinycolor(colorStr);
   if (!color.isValid()) {
@@ -24,6 +32,10 @@ export function stringToRgba(output: ColorRGBA, colorStr: string): ColorRGBA {
   output.b = rgb.b / 255;
   output.a = rgb.a;
   return output;
+}
+
+export function makeRgba(): ColorRGBA {
+  return { r: 0, g: 0, b: 0, a: 0 };
 }
 
 export function stringToRgb<T extends ColorRGB | THREE.Color>(output: T, colorStr: string): T {

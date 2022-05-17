@@ -10,16 +10,8 @@ import PinholeCameraModel from "@foxglove/studio-base/panels/Image/lib/PinholeCa
 import { MutablePoint } from "@foxglove/studio-base/types/Messages";
 
 import { Renderer } from "../Renderer";
-import { rgbaToCssString, stringToRgba } from "../color";
-import {
-  CameraInfo,
-  Pose,
-  rosTimeToNanoSec,
-  ColorRGBA,
-  Marker,
-  MarkerAction,
-  MarkerType,
-} from "../ros";
+import { makeRgba, rgbaToCssString, stringToRgba } from "../color";
+import { CameraInfo, Marker, MarkerAction, MarkerType, Pose, rosTimeToNanoSec } from "../ros";
 import { LayerSettingsCameraInfo, LayerType } from "../settings";
 import { makePose } from "../transforms/geometry";
 import { updatePose } from "../updatePose";
@@ -234,10 +226,6 @@ export class Cameras extends THREE.Object3D {
       }
     }
   }
-}
-
-function makeRgba(): ColorRGBA {
-  return { r: 0, g: 0, b: 0, a: 0 };
 }
 
 function vec3(): MutablePoint {

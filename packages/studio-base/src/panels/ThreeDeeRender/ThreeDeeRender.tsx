@@ -2,10 +2,9 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import css from "@emotion/css";
 import produce from "immer";
 import { cloneDeep, merge, set } from "lodash";
-import React, { useCallback, useRef, useLayoutEffect, useEffect, useState, useMemo } from "react";
+import React, { useCallback, useLayoutEffect, useEffect, useState, useMemo } from "react";
 import { useResizeDetector } from "react-resize-detector";
 import { DeepPartial } from "ts-essentials";
 import { useDebouncedCallback } from "use-debounce";
@@ -23,9 +22,8 @@ import { SettingsTreeAction } from "@foxglove/studio-base/components/SettingsTre
 import useCleanup from "@foxglove/studio-base/hooks/useCleanup";
 
 import { DebugGui } from "./DebugGui";
-import { setOverlayPosition } from "./LabelOverlay";
 import { Renderer } from "./Renderer";
-import { RendererContext, useRenderer, useRendererEvent } from "./RendererContext";
+import { RendererContext, useRendererEvent } from "./RendererContext";
 import { Stats } from "./Stats";
 import {
   normalizeCameraInfo,
@@ -40,6 +38,7 @@ import {
   MARKER_ARRAY_DATATYPES,
   TF,
   Marker,
+  MarkerArray,
   PointCloud2,
   POINTCLOUD_DATATYPES,
   OccupancyGrid,
@@ -64,94 +63,10 @@ const DEFAULT_FRAME_IDS = ["base_link", "odom", "map", "earth"];
 
 const log = Logger.getLogger(__filename);
 
-const labelLight = css`
-  position: relative;
-  color: #27272b;
-  background-color: #ececec99;
-`;
-
-const labelDark = css`
-  position: relative;
-  color: #e1e1e4;
-  background-color: #181818cc;
-`;
-
-function RendererOverlay(props: {
-  colorScheme: "dark" | "light" | undefined;
-  enableStats: boolean;
-}): JSX.Element {
-  const colorScheme = props.colorScheme;
-  const [_selectedRenderable, setSelectedRenderable] = useState<THREE.Object3D | undefined>(
-    undefined,
-  );
-  const [labelsMap, setLabelsMap] = useState(new Map<string, Marker>());
-  const labelsRef = useRef<HTMLDivElement>(ReactNull);
-  const renderer = useRenderer();
+function RendererOverlay(props: { enableStats: boolean }): JSX.Element {
+  const [_, setSelectedRenderable] = useState<THREE.Object3D | undefined>(undefined);
 
   useRendererEvent("renderableSelected", (renderable) => setSelectedRenderable(renderable));
-
-  useRendererEvent("showLabel", (labelId: string, labelMarker: Marker) => {
-    const curLabelMarker = labelsMap.get(labelId);
-    if (curLabelMarker === labelMarker) {
-      return;
-    }
-    setLabelsMap(new Map(labelsMap.set(labelId, labelMarker)));
-  });
-
-  useRendererEvent("removeLabel", (labelId: string) => {
-    if (!labelsMap.has(labelId)) {
-      return;
-    }
-    labelsMap.delete(labelId);
-    setLabelsMap(new Map(labelsMap));
-  });
-
-  useRendererEvent("endFrame", (_, curRenderer) => {
-    if (labelsRef.current) {
-      for (const labelId of labelsMap.keys()) {
-        const labelEl = document.getElementById(`label-${labelId}`);
-        if (labelEl) {
-          const worldPosition = curRenderer.markerWorldPosition(labelId);
-          if (worldPosition) {
-            setOverlayPosition(
-              labelEl.style,
-              worldPosition,
-              curRenderer.input.canvasSize,
-              curRenderer.camera,
-            );
-          }
-        }
-      }
-    }
-  });
-
-  // Create a div for each label
-  const labelElements = useMemo(() => {
-    const newLabelElements: JSX.Element[] = [];
-    if (!renderer) {
-      return newLabelElements;
-    }
-    const style = { left: "", top: "", transform: "" };
-    const labelCss = colorScheme === "dark" ? labelDark : labelLight;
-    for (const [labelId, labelMarker] of labelsMap) {
-      const worldPosition = renderer.markerWorldPosition(labelId);
-      if (worldPosition) {
-        setOverlayPosition(style, worldPosition, renderer.input.canvasSize, renderer.camera);
-        newLabelElements.push(
-          <div id={`label-${labelId}`} key={labelId} className={labelCss.name} style={style}>
-            {labelMarker.text}
-          </div>,
-        );
-      }
-    }
-    return newLabelElements;
-  }, [renderer, labelsMap, colorScheme]);
-
-  const labels = (
-    <div id="labels" ref={labelsRef} style={{ position: "absolute", top: 0 }}>
-      {labelElements}
-    </div>
-  );
 
   const stats = props.enableStats ? (
     <div id="stats" style={{ position: "absolute", top: 0 }}>
@@ -167,7 +82,6 @@ function RendererOverlay(props: {
 
   return (
     <React.Fragment>
-      {labels}
       {stats}
       {debug}
     </React.Fragment>
@@ -470,8 +384,9 @@ export function ThreeDeeRender({ context }: { context: PanelExtensionContext }):
         renderer.addTransformMessage(tf);
       } else if (MARKER_ARRAY_DATATYPES.has(datatype)) {
         // visualization_msgs/MarkerArray - Ingest the list of markers
-        const markerArray = message.message as { markers: Marker[] };
-        for (const marker of markerArray.markers) {
+        const markerArray = message.message as DeepPartial<MarkerArray>;
+        for (const markerMsg of markerArray.markers ?? []) {
+          const marker = normalizeMarker(markerMsg);
           renderer.addMarkerMessage(message.topic, marker);
         }
       } else if (MARKER_DATATYPES.has(datatype)) {
@@ -530,7 +445,7 @@ export function ThreeDeeRender({ context }: { context: PanelExtensionContext }):
         <canvas ref={setCanvas} style={{ position: "absolute", top: 0, left: 0 }} />
       </CameraListener>
       <RendererContext.Provider value={renderer}>
-        <RendererOverlay colorScheme={colorScheme} enableStats={config.scene.enableStats ?? true} />
+        <RendererOverlay enableStats={config.scene.enableStats ?? true} />
       </RendererContext.Provider>
     </div>
   );

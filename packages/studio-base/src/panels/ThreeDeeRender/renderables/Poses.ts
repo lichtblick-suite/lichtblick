@@ -7,11 +7,10 @@ import * as THREE from "three";
 import { SettingsTreeFields } from "@foxglove/studio-base/components/SettingsTreeEditor/types";
 
 import { Renderer } from "../Renderer";
-import { rgbaToCssString, stringToRgba } from "../color";
+import { makeRgba, rgbaToCssString, stringToRgba } from "../color";
 import {
   Pose,
   rosTimeToNanoSec,
-  ColorRGBA,
   Marker,
   PoseWithCovarianceStamped,
   PoseStamped,
@@ -209,10 +208,6 @@ export class Poses extends THREE.Object3D {
       }
     }
   }
-}
-
-function makeRgba(): ColorRGBA {
-  return { r: 0, g: 0, b: 0, a: 0 };
 }
 
 function createArrowMarker(

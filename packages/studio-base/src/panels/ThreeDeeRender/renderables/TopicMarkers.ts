@@ -19,6 +19,7 @@ import { RenderableMeshResource } from "./markers/RenderableMeshResource";
 import { RenderablePoints } from "./markers/RenderablePoints";
 import { RenderableSphere } from "./markers/RenderableSphere";
 import { RenderableSphereList } from "./markers/RenderableSphereList";
+import { RenderableTextViewFacing } from "./markers/RenderableTextViewFacing";
 import { getMarkerId } from "./markers/markerId";
 import { missingTransformMessage, MISSING_TRANSFORM } from "./transforms";
 
@@ -245,8 +246,7 @@ export class TopicMarkers extends THREE.Object3D {
         }
         return new RenderablePoints(this.topic, marker, this.renderer);
       case MarkerType.TEXT_VIEW_FACING:
-        // return new RenderableTextViewFacing(this.topic, marker, this.renderer);
-        return undefined;
+        return new RenderableTextViewFacing(this.topic, marker, this.renderer);
       case MarkerType.MESH_RESOURCE:
         return new RenderableMeshResource(this.topic, marker, this.renderer);
       case MarkerType.TRIANGLE_LIST:

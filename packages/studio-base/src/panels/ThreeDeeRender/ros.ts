@@ -130,6 +130,10 @@ export type Marker = {
   mesh_use_embedded_materials: boolean;
 };
 
+export type MarkerArray = {
+  markers: Marker[];
+};
+
 export type PointField = {
   name: string;
   offset: number;

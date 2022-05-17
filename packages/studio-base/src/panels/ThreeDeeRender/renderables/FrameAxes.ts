@@ -215,12 +215,14 @@ export class FrameAxes extends THREE.Object3D {
     renderable.userData.shaftMesh = shaftInstances;
     renderable.userData.headMesh = headInstances;
 
-    // TODO: <div> floating label
-
     const frame = this.renderer.transformTree.frame(frameId);
     if (!frame) {
       throw new Error(`CoordinateFrame "${frameId}" was not created`);
     }
+
+    // Text label
+    const position = { x: 0, y: 0, z: 0.4 };
+    this.renderer.labels.setLabel(`tf:${frameId}`, { text: frameId, frameId, position });
 
     // Check if this frame's parent exists
     const parentFrame = frame.parent();
