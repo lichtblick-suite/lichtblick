@@ -83,7 +83,7 @@ export function NumberInput(
   return (
     <StyledTextField
       {...props}
-      value={value}
+      value={value ?? ""}
       onChange={(event) =>
         updateValue(event.target.value.length > 0 ? Number(event.target.value) : undefined)
       }

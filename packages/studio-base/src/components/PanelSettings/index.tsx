@@ -162,7 +162,7 @@ export default function PanelSettings({
       {shareModal}
       <Stack gap={2} justifyContent="flex-start">
         <div>
-          {settingsTree && <SettingsEditor settings={settingsTree} />}
+          {settingsTree && <SettingsEditor key={selectedPanelId} settings={settingsTree} />}
           {!settingsTree && (
             <Typography color="text.secondary">No additional settings available.</Typography>
           )}

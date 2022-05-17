@@ -58,7 +58,7 @@ export function ColorPickerInput(props: ColorPickerInputProps): JSX.Element {
         onChange={(event) => onChange(event.target.value)}
         placeholder={props.placeholder}
         size="small"
-        value={value}
+        value={value ?? ""}
         variant="filled"
         InputProps={{
           startAdornment: swatchOrientation === "start" && (
