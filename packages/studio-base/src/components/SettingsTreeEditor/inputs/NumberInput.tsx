@@ -66,13 +66,15 @@ export function NumberInput(
   const stepAmount = shiftPressed ? step * 10 : step;
 
   const updateValue = useCallback(
-    (newValue: number) => {
+    (newValue: undefined | number) => {
       onChange(
-        clamp(
-          newValue,
-          props.min ?? Number.NEGATIVE_INFINITY,
-          props.max ?? Number.POSITIVE_INFINITY,
-        ),
+        newValue == undefined
+          ? undefined
+          : clamp(
+              newValue,
+              props.min ?? Number.NEGATIVE_INFINITY,
+              props.max ?? Number.POSITIVE_INFINITY,
+            ),
       );
     },
     [onChange, props.max, props.min],
@@ -83,7 +85,7 @@ export function NumberInput(
       {...props}
       value={value}
       onChange={(event) =>
-        event.target.value.length > 0 ? updateValue(Number(event.target.value)) : undefined
+        updateValue(event.target.value.length > 0 ? Number(event.target.value) : undefined)
       }
       type="number"
       inputProps={{ max: props.max, min: props.min, step: stepAmount }}
