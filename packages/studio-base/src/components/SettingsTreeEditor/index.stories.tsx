@@ -23,6 +23,11 @@ const BasicSettings: SettingsTreeNode = {
     firstRootField: { input: "string", label: "Root Field" },
     gradient: { input: "gradient", label: "Gradient" },
     emptyNumber: { input: "number", label: "Empty Number" },
+    fieldWithError: {
+      input: "string",
+      label: "Field With Error",
+      error: "This field has an error message that should be displayed to the user",
+    },
   },
   children: {
     complex_inputs: {

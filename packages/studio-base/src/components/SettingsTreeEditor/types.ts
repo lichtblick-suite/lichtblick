@@ -45,6 +45,11 @@ export type SettingsTreeField = SettingsTreeFieldValue & {
    * absence of a value.
    */
   placeholder?: string;
+
+  /**
+   * Optional message indicating any error state for the field.
+   */
+  error?: string;
 };
 
 export type SettingsTreeFields = Record<string, SettingsTreeField>;

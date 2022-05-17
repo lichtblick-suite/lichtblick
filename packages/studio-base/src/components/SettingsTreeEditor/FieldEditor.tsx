@@ -3,6 +3,7 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 import ClearIcon from "@mui/icons-material/Clear";
+import ErrorIcon from "@mui/icons-material/ErrorOutline";
 import {
   Autocomplete,
   ToggleButton,
@@ -12,6 +13,7 @@ import {
   List,
   MenuItem,
   Select,
+  Tooltip,
   TextField,
   ListProps,
   useTheme,
@@ -354,8 +356,22 @@ function FieldEditorComponent({
     <>
       <Stack direction="row" alignItems="center" style={style} paddingLeft={paddingLeft} fullHeight>
         <FieldLabel field={field} />
+        {field.error && (
+          <Tooltip
+            arrow
+            placement="top"
+            title={<Typography variant="subtitle1">{field.error}</Typography>}
+          >
+            <ErrorIcon color="error" fontSize="small" />
+          </Tooltip>
+        )}
       </Stack>
-      <div style={{ paddingRight: theme.spacing(2) }}>
+      <div
+        style={{
+          border: field.error ? `1px solid ${theme.palette.error.main}` : 0,
+          marginRight: theme.spacing(2),
+        }}
+      >
         <FieldInput actionHandler={actionHandler} field={field} path={path} />
       </div>
     </>
