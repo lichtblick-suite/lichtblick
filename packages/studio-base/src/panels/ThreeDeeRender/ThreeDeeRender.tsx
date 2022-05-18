@@ -459,7 +459,10 @@ export function ThreeDeeRender({ context }: { context: PanelExtensionContext }):
     refreshMode: "debounce",
   });
   return (
-    <div style={{ width: "100%", height: "100%", display: "flex" }} ref={resizeRef}>
+    <div
+      style={{ width: "100%", height: "100%", display: "flex", position: "relative" }}
+      ref={resizeRef}
+    >
       <CameraListener cameraStore={cameraStore} shiftKeys={true}>
         <div
           // This element forces CameraListener to fill its container. We need this instead of just

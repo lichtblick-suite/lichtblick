@@ -557,9 +557,20 @@ function PanelExtensionAdapter(props: PanelExtensionAdapterProps): JSX.Element {
   }
 
   return (
-    <div style={{ width: "100%", height: "100%", overflow: "hidden", zIndex: 0, ...style }}>
+    <div
+      style={{
+        alignItems: "stretch",
+        display: "flex",
+        flexDirection: "column",
+        height: "100%",
+        overflow: "hidden",
+        width: "100%",
+        zIndex: 0,
+        ...style,
+      }}
+    >
       <PanelToolbar helpContent={props.help} />
-      <div style={{ width: "100%", height: "100%", overflow: "hidden" }} ref={panelContainerRef} />
+      <div style={{ flex: 1, overflow: "hidden" }} ref={panelContainerRef} />
     </div>
   );
 }
