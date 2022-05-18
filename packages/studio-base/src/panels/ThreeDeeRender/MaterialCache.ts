@@ -110,6 +110,27 @@ export const StandardColor = {
   dispose: disposeStandardMaterial,
 };
 
+export const StandardVertexColor = {
+  id: (transparent: boolean): string => "StandardVertexColor" + (transparent ? "-t" : ""),
+
+  create: (transparent: boolean): THREE.MeshStandardMaterial => {
+    const material = new THREE.MeshStandardMaterial({
+      metalness: 0,
+      roughness: 1,
+      dithering: true,
+      vertexColors: true,
+      side: THREE.DoubleSide,
+    });
+    material.name = StandardVertexColor.id(transparent);
+    material.opacity = 1;
+    material.transparent = transparent;
+    material.depthWrite = !material.transparent;
+    return material;
+  },
+
+  dispose: disposeStandardMaterial,
+};
+
 export const StandardInstancedColor = {
   id: (transparent: boolean): string => "StandardInstancedColor" + (transparent ? "-t" : ""),
 
@@ -139,7 +160,7 @@ export const PointsVertexColor = {
     const material = new THREE.PointsMaterial({
       vertexColors: true,
       size: scale.x, // TODO: Support scale.y
-      sizeAttenuation: false,
+      sizeAttenuation: true,
     });
     material.name = PointsVertexColor.id(scale, transparent);
     material.transparent = transparent;

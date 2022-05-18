@@ -2,23 +2,14 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
+import { SRGBToLinear } from "three/src/math/ColorManagement";
 import { clamp } from "three/src/math/MathUtils";
 import tinycolor from "tinycolor2";
 
 import { approxEquals, uint8Equals } from "./math";
 import { ColorRGB, ColorRGBA } from "./ros";
 
-export function SRGBToLinear(c: number): number {
-  return c < 0.04045 ? c * 0.0773993808 : Math.pow(c * 0.9478672986 + 0.0521327014, 2.4);
-}
-
-export function rgbaToLinear(output: ColorRGBA, color: Readonly<ColorRGBA>): ColorRGBA {
-  output.r = SRGBToLinear(color.r);
-  output.g = SRGBToLinear(color.g);
-  output.b = SRGBToLinear(color.b);
-  output.a = color.a;
-  return output;
-}
+export { SRGBToLinear } from "three/src/math/ColorManagement";
 
 export function stringToRgba(output: ColorRGBA, colorStr: string): ColorRGBA {
   const color = tinycolor(colorStr);
@@ -65,6 +56,14 @@ export function rgbaToCssString(color: ColorRGBA): string {
   const g = Math.trunc(color.g * 255);
   const b = Math.trunc(color.b * 255);
   return `rgba(${r}, ${g}, ${b}, ${color.a})`;
+}
+
+export function rgbaToLinear(output: ColorRGBA, color: ColorRGBA): ColorRGBA {
+  output.r = SRGBToLinear(color.r);
+  output.g = SRGBToLinear(color.g);
+  output.b = SRGBToLinear(color.b);
+  output.a = color.a;
+  return output;
 }
 
 export function rgbaEqual(a: ColorRGBA, b: ColorRGBA): boolean {

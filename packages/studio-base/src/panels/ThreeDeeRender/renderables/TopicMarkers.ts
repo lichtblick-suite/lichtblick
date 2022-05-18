@@ -20,6 +20,7 @@ import { RenderablePoints } from "./markers/RenderablePoints";
 import { RenderableSphere } from "./markers/RenderableSphere";
 import { RenderableSphereList } from "./markers/RenderableSphereList";
 import { RenderableTextViewFacing } from "./markers/RenderableTextViewFacing";
+import { RenderableTriangleList } from "./markers/RenderableTriangleList";
 import { getMarkerId } from "./markers/markerId";
 import { missingTransformMessage, MISSING_TRANSFORM } from "./transforms";
 
@@ -250,8 +251,7 @@ export class TopicMarkers extends THREE.Object3D {
       case MarkerType.MESH_RESOURCE:
         return new RenderableMeshResource(this.topic, marker, this.renderer);
       case MarkerType.TRIANGLE_LIST:
-        // return new RenderableTriangleList(this.topic, marker, this.renderer);
-        return undefined;
+        return new RenderableTriangleList(this.topic, marker, this.renderer);
       default: {
         const markerId = getMarkerId(this.topic, marker.ns, marker.id);
         this.renderer.layerErrors.addToTopic(
