@@ -9,7 +9,14 @@ export type SettingsTreeFieldValue =
   | { input: "rgba"; value?: string }
   | { input: "gradient"; value?: [string, string] }
   | { input: "messagepath"; value?: string; validTypes?: string[] }
-  | { input: "number"; value?: number; step?: number; max?: number; min?: number }
+  | {
+      input: "number";
+      value?: number;
+      step?: number;
+      max?: number;
+      min?: number;
+      precision?: number;
+    }
   | {
       input: "select";
       value?: number | ReadonlyArray<number>;
@@ -26,6 +33,7 @@ export type SettingsTreeFieldValue =
       input: "vec3";
       value?: readonly [undefined | number, undefined | number, undefined | number];
       step?: number;
+      precision?: number;
       labels?: [string, string, string];
     };
 

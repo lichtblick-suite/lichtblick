@@ -20,7 +20,12 @@ export default {
 
 const BasicSettings: SettingsTreeNode = {
   fields: {
-    firstRootField: { input: "string", label: "Root Field" },
+    numberWithPrecision: {
+      input: "number",
+      value: 10.123456789,
+      label: "Number with precision",
+      precision: 4,
+    },
     gradient: { input: "gradient", label: "Gradient" },
     emptyNumber: { input: "number", label: "Empty Number" },
     fieldWithError: {
@@ -46,7 +51,8 @@ const BasicSettings: SettingsTreeNode = {
           label: "Vec3",
           input: "vec3",
           labels: ["U", "V", "W"],
-          value: [1, 2, 3],
+          value: [1.111, 2.222, 3.333],
+          precision: 2,
           step: 2,
         },
         emptySelect: {

@@ -129,6 +129,7 @@ function FieldInput({
           fullWidth
           max={field.max}
           min={field.min}
+          precision={field.precision}
           step={field.step}
           onChange={(value) =>
             actionHandler({ action: "update", payload: { path, input: "number", value } })
@@ -269,6 +270,7 @@ function FieldInput({
         <Vec3Input
           step={field.step}
           value={field.value}
+          precision={field.precision}
           onChange={(value) =>
             actionHandler({ action: "update", payload: { path, input: "vec3", value } })
           }
