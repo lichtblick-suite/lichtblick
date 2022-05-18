@@ -26,7 +26,7 @@ import { usePanelContext } from "@foxglove/studio-base/components/PanelContext";
 import PanelToolbar from "@foxglove/studio-base/components/PanelToolbar";
 import {
   SettingsTreeAction,
-  SettingsTreeNode,
+  SettingsTreeRoots,
 } from "@foxglove/studio-base/components/SettingsTreeEditor/types";
 import TextContent from "@foxglove/studio-base/components/TextContent";
 import {
@@ -117,13 +117,15 @@ const SWelcomeScreen = styled.div`
 
 export type Explorer = undefined | "nodes" | "utils" | "templates";
 
-function buildSettingsStree(config: Config): SettingsTreeNode {
+function buildSettingsTree(config: Config): SettingsTreeRoots {
   return {
-    fields: {
-      autoFormatOnSave: {
-        input: "boolean",
-        label: "Auto-format on save",
-        value: config.autoFormatOnSave,
+    general: {
+      fields: {
+        autoFormatOnSave: {
+          input: "boolean",
+          label: "Auto-format on save",
+          value: config.autoFormatOnSave,
+        },
       },
     },
   };
@@ -217,17 +219,17 @@ function NodePlayground(props: Props) {
   const actionHandler = useCallback(
     (action: SettingsTreeAction) => {
       const { input, value, path } = action.payload;
-      if (input === "boolean" && path[0] === "autoFormatOnSave") {
-        saveConfig({ ...config, autoFormatOnSave: value });
+      if (input === "boolean" && path[1] === "autoFormatOnSave") {
+        saveConfig({ autoFormatOnSave: value });
       }
     },
-    [config, saveConfig],
+    [saveConfig],
   );
 
   useEffect(() => {
     updatePanelSettingsTree(panelId, {
       actionHandler,
-      settings: buildSettingsStree(config),
+      roots: buildSettingsTree(config),
     });
   }, [actionHandler, config, panelId, updatePanelSettingsTree]);
 

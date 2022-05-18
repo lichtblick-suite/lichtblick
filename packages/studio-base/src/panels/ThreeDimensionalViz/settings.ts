@@ -4,12 +4,12 @@
 
 import {
   SettingsTreeFields,
-  SettingsTreeNode,
+  SettingsTreeRoots,
 } from "@foxglove/studio-base/components/SettingsTreeEditor/types";
 
 import { ThreeDimensionalVizConfig } from "./types";
 
-export function buildSettingsTree(config: ThreeDimensionalVizConfig): SettingsTreeNode {
+export function buildSettingsTree(config: ThreeDimensionalVizConfig): SettingsTreeRoots {
   const rootFields: SettingsTreeFields = {
     flattenMarkers: {
       label: "Flatten markers",
@@ -40,58 +40,59 @@ export function buildSettingsTree(config: ThreeDimensionalVizConfig): SettingsTr
   }
 
   return {
-    fields: rootFields,
-    children: {
-      meshRendering: {
-        label: "Mesh rendering",
-        fields: {
-          ignoreColladaUpAxis: {
-            label: "Ignore COLLADA up_axis",
-            input: "boolean",
-            value: config.ignoreColladaUpAxis ?? false,
-            help: "Ignore <up_axis> in COLLADA meshes",
-          },
+    general: {
+      label: "General",
+      fields: rootFields,
+    },
+    meshRendering: {
+      label: "Mesh rendering",
+      fields: {
+        ignoreColladaUpAxis: {
+          label: "Ignore COLLADA up_axis",
+          input: "boolean",
+          value: config.ignoreColladaUpAxis ?? false,
+          help: "Ignore <up_axis> in COLLADA meshes",
         },
       },
-      publish: {
-        label: "Publish",
-        fields: {
-          clickToPublishPoseEstimateTopic: {
-            label: "Pose estimate topic",
-            input: "string",
-            value: config.clickToPublishPoseEstimateTopic,
-            help: "The topic on which to publish pose estimates",
-          },
-          clickToPublishPoseTopic: {
-            label: "Pose topic",
-            input: "string",
-            value: config.clickToPublishPoseTopic,
-            help: "The topic on which to publish poses",
-          },
-          clickToPublishPointTopic: {
-            label: "Point topic",
-            input: "string",
-            value: config.clickToPublishPointTopic,
-            help: "The topic on which to publish points",
-          },
-          clickToPublishPoseEstimateXDeviation: {
-            label: "X deviation",
-            input: "number",
-            value: config.clickToPublishPoseEstimateXDeviation,
-            help: "The X standard deviation to publish with poses",
-          },
-          clickToPublishPoseEstimateYDeviation: {
-            label: "Y deviation",
-            input: "number",
-            value: config.clickToPublishPoseEstimateYDeviation,
-            help: "The Y standard deviation to publish with poses",
-          },
-          clickToPublishPoseEstimateThetaDeviation: {
-            label: "Theta deviation",
-            input: "number",
-            value: config.clickToPublishPoseEstimateThetaDeviation,
-            help: "The theta standard deviation to publish with poses",
-          },
+    },
+    publish: {
+      label: "Publish",
+      fields: {
+        clickToPublishPoseEstimateTopic: {
+          label: "Pose estimate topic",
+          input: "string",
+          value: config.clickToPublishPoseEstimateTopic,
+          help: "The topic on which to publish pose estimates",
+        },
+        clickToPublishPoseTopic: {
+          label: "Pose topic",
+          input: "string",
+          value: config.clickToPublishPoseTopic,
+          help: "The topic on which to publish poses",
+        },
+        clickToPublishPointTopic: {
+          label: "Point topic",
+          input: "string",
+          value: config.clickToPublishPointTopic,
+          help: "The topic on which to publish points",
+        },
+        clickToPublishPoseEstimateXDeviation: {
+          label: "X deviation",
+          input: "number",
+          value: config.clickToPublishPoseEstimateXDeviation,
+          help: "The X standard deviation to publish with poses",
+        },
+        clickToPublishPoseEstimateYDeviation: {
+          label: "Y deviation",
+          input: "number",
+          value: config.clickToPublishPoseEstimateYDeviation,
+          help: "The Y standard deviation to publish with poses",
+        },
+        clickToPublishPoseEstimateThetaDeviation: {
+          label: "Theta deviation",
+          input: "number",
+          value: config.clickToPublishPoseEstimateThetaDeviation,
+          help: "The theta standard deviation to publish with poses",
         },
       },
     },

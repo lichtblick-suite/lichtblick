@@ -9,6 +9,7 @@ import { Topic } from "@foxglove/studio";
 import {
   SettingsTreeChildren,
   SettingsTreeNode,
+  SettingsTreeRoots,
 } from "@foxglove/studio-base/components/SettingsTreeEditor/types";
 
 import {
@@ -147,7 +148,7 @@ function buildTopicNode(
 
 const memoBuildTopicNode = memoize(buildTopicNode);
 
-export function buildSettingsTree(options: SettingsTreeOptions): SettingsTreeNode {
+export function buildSettingsTree(options: SettingsTreeOptions): SettingsTreeRoots {
   const { config, coordinateFrames, followTf, topics, topicsToLayerTypes, settingsNodeProviders } =
     options;
   const { cameraState, scene } = config;
@@ -174,39 +175,54 @@ export function buildSettingsTree(options: SettingsTreeOptions): SettingsTreeNod
     }
   }
 
-  // prettier-ignore
   return {
-    fields: {
-      followTf: { label: "Frame", input: "select", options: coordinateFrames, value: followTf },
+    general: {
+      label: "General",
+      fields: {
+        followTf: { label: "Frame", input: "select", options: coordinateFrames, value: followTf },
+      },
     },
-    children: {
-      scene: {
-        label: "Scene",
-        fields: {
-          enableStats: { label: "Render stats", input: "boolean", value: config.scene.enableStats },
-          backgroundColor: { label: "Color", input: "rgb", value: backgroundColor },
+    scene: {
+      label: "Scene",
+      fields: {
+        enableStats: { label: "Render stats", input: "boolean", value: config.scene.enableStats },
+        backgroundColor: { label: "Color", input: "rgb", value: backgroundColor },
+      },
+      defaultExpansionState: "collapsed",
+    },
+    cameraState: {
+      label: "Camera",
+      fields: {
+        distance: { label: "Distance", input: "number", value: cameraState.distance, step: 1 },
+        perspective: { label: "Perspective", input: "boolean", value: cameraState.perspective },
+        targetOffset: {
+          label: "Target",
+          input: "vec3",
+          labels: ["X", "Y", "Z"],
+          value: cameraState.targetOffset,
         },
-        defaultExpansionState: "collapsed",
-      },
-      cameraState: {
-        label: "Camera",
-        fields: {
-          distance: { label: "Distance", input: "number", value: cameraState.distance, step: 1 },
-          perspective: { label: "Perspective", input: "boolean", value: cameraState.perspective },
-          targetOffset: { label: "Target", input: "vec3", labels: ["X", "Y", "Z"], value: cameraState.targetOffset },
-          thetaOffset: { label: "Theta", input: "number", value: cameraState.thetaOffset, step: ONE_DEGREE },
-          phi: { label: "Phi", input: "number", value: cameraState.phi, step: ONE_DEGREE },
-          fovy: { label: "Y-Axis FOV", input: "number", value: cameraState.fovy, step: ONE_DEGREE },
-          near: { label: "Near", input: "number", value: cameraState.near, step: DEFAULT_CAMERA_STATE.near },
-          far: { label: "Far", input: "number", value: cameraState.far, step: 1 },
+        thetaOffset: {
+          label: "Theta",
+          input: "number",
+          value: cameraState.thetaOffset,
+          step: ONE_DEGREE,
         },
-        defaultExpansionState: "collapsed",
+        phi: { label: "Phi", input: "number", value: cameraState.phi, step: ONE_DEGREE },
+        fovy: { label: "Y-Axis FOV", input: "number", value: cameraState.fovy, step: ONE_DEGREE },
+        near: {
+          label: "Near",
+          input: "number",
+          value: cameraState.near,
+          step: DEFAULT_CAMERA_STATE.near,
+        },
+        far: { label: "Far", input: "number", value: cameraState.far, step: 1 },
       },
-      topics: {
-        label: "Topics",
-        children: topicsChildren,
-        defaultExpansionState: "expanded",
-      },
+      defaultExpansionState: "collapsed",
+    },
+    topics: {
+      label: "Topics",
+      children: topicsChildren,
+      defaultExpansionState: "expanded",
     },
   };
 }

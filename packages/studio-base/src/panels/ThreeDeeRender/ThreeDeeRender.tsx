@@ -236,7 +236,7 @@ export function ThreeDeeRender({ context }: { context: PanelExtensionContext }):
     // eslint-disable-next-line no-underscore-dangle, @typescript-eslint/no-explicit-any
     (context as unknown as any).__updatePanelSettingsTree({
       actionHandler,
-      settings: buildSettingsTree({
+      roots: buildSettingsTree({
         config,
         coordinateFrames,
         followTf,

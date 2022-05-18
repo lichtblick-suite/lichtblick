@@ -111,6 +111,8 @@ export type SettingsTreeAction = {
   >;
 };
 
+export type SettingsTreeRoots = Record<string, SettingsTreeNode>;
+
 /**
  * A settings tree is a tree of panel settings that can be managed by
  * a default user interface in Studio.
@@ -127,8 +129,8 @@ export type SettingsTree = {
   enableFilter?: boolean;
 
   /**
-   * The actual settings tree. Updates to this will automatically be reflected in the
+   * The actual settings tree roots. Updates to these will automatically be reflected in the
    * editor UI.
    */
-  settings: SettingsTreeNode;
+  roots: SettingsTreeRoots;
 };

@@ -39,7 +39,7 @@ import PanelToolbar from "@foxglove/studio-base/components/PanelToolbar";
 import ToolbarIconButton from "@foxglove/studio-base/components/PanelToolbar/ToolbarIconButton";
 import {
   SettingsTreeAction,
-  SettingsTreeNode,
+  SettingsTreeRoots,
 } from "@foxglove/studio-base/components/SettingsTreeEditor/types";
 import { Config as DiagnosticStatusConfig } from "@foxglove/studio-base/panels/diagnostics/DiagnosticStatusPanel";
 import helpContent from "@foxglove/studio-base/panels/diagnostics/DiagnosticSummary.help.md";
@@ -160,10 +160,13 @@ type Props = {
   saveConfig: (arg0: Partial<Config>) => void;
 };
 
-function buildSettingsTree(config: Config): SettingsTreeNode {
+function buildSettingsTree(config: Config): SettingsTreeRoots {
   return {
-    fields: {
-      sortByLevel: { label: "Sort By Level", input: "boolean", value: config.sortByLevel },
+    general: {
+      label: "General",
+      fields: {
+        sortByLevel: { label: "Sort By Level", input: "boolean", value: config.sortByLevel },
+      },
     },
   };
 }
@@ -226,7 +229,7 @@ function DiagnosticSummary(props: Props): JSX.Element {
   const actionHandler = useCallback(
     (action: SettingsTreeAction) => {
       const { input, path, value } = action.payload;
-      if (input === "boolean" && path[0] === "sortByLevel") {
+      if (input === "boolean" && path[1] === "sortByLevel") {
         saveConfig(
           produce(config, (draft) => {
             draft.sortByLevel = value;
@@ -240,7 +243,7 @@ function DiagnosticSummary(props: Props): JSX.Element {
   useEffect(() => {
     updatePanelSettingsTree(panelId, {
       actionHandler,
-      settings: buildSettingsTree(config),
+      roots: buildSettingsTree(config),
     });
   }, [actionHandler, config, panelId, updatePanelSettingsTree]);
 

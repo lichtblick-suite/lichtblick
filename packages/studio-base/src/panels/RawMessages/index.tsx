@@ -227,7 +227,7 @@ function RawMessages(props: Props) {
   useEffect(() => {
     updateSettingsTree(panelId, {
       actionHandler: settingsActionHandler,
-      settings: buildSettingsTree(config),
+      roots: buildSettingsTree(config),
     });
   }, [config, panelId, settingsActionHandler, updateSettingsTree]);
 

@@ -28,7 +28,7 @@ import { usePanelContext } from "@foxglove/studio-base/components/PanelContext";
 import PanelToolbar from "@foxglove/studio-base/components/PanelToolbar";
 import {
   SettingsTreeAction,
-  SettingsTreeNode,
+  SettingsTreeRoots,
 } from "@foxglove/studio-base/components/SettingsTreeEditor/types";
 import { usePanelSettingsTreeUpdate } from "@foxglove/studio-base/providers/PanelSettingsEditorContextProvider";
 import inScreenshotTests from "@foxglove/studio-base/stories/inScreenshotTests";
@@ -104,52 +104,54 @@ const useStyles = makeStyles((theme: Theme) => ({
   },
 }));
 
-function buildSettingsTree(config: Config): SettingsTreeNode {
+function buildSettingsTree(config: Config): SettingsTreeRoots {
   return {
-    label: "General",
-    fields: {
-      transformMarkers: {
-        input: "boolean",
-        label: "Synchronize Markers",
-        value: config.transformMarkers,
-      },
-      smooth: {
-        input: "boolean",
-        label: "Bilinear Smoothing",
-        value: config.smooth ?? false,
-      },
-      flipHorizontal: {
-        input: "boolean",
-        label: "Flip Horizontal",
-        value: config.flipHorizontal ?? false,
-      },
-      flipVertical: {
-        input: "boolean",
-        label: "Flip Vertical",
-        value: config.flipVertical ?? false,
-      },
-      rotation: {
-        input: "select",
-        label: "Rotation",
-        value: config.rotation ?? 0,
-        options: [
-          { label: "0°", value: 0 },
-          { label: "90°", value: 90 },
-          { label: "180°", value: 180 },
-          { label: "270°", value: 270 },
-        ],
-      },
-      minValue: {
-        input: "number",
-        label: "Minimum Value (depth images)",
-        placeholder: "0",
-        value: config.minValue,
-      },
-      maxValue: {
-        input: "number",
-        label: "Maximum Value (depth images)",
-        placeholder: "10000",
-        value: config.maxValue,
+    general: {
+      label: "General",
+      fields: {
+        transformMarkers: {
+          input: "boolean",
+          label: "Synchronize Markers",
+          value: config.transformMarkers,
+        },
+        smooth: {
+          input: "boolean",
+          label: "Bilinear Smoothing",
+          value: config.smooth ?? false,
+        },
+        flipHorizontal: {
+          input: "boolean",
+          label: "Flip Horizontal",
+          value: config.flipHorizontal ?? false,
+        },
+        flipVertical: {
+          input: "boolean",
+          label: "Flip Vertical",
+          value: config.flipVertical ?? false,
+        },
+        rotation: {
+          input: "select",
+          label: "Rotation",
+          value: config.rotation ?? 0,
+          options: [
+            { label: "0°", value: 0 },
+            { label: "90°", value: 90 },
+            { label: "180°", value: 180 },
+            { label: "270°", value: 270 },
+          ],
+        },
+        minValue: {
+          input: "number",
+          label: "Minimum Value (depth images)",
+          placeholder: "0",
+          value: config.minValue,
+        },
+        maxValue: {
+          input: "number",
+          label: "Maximum Value (depth images)",
+          placeholder: "10000",
+          value: config.maxValue,
+        },
       },
     },
   };
@@ -200,7 +202,7 @@ function ImageView(props: Props) {
     (action: SettingsTreeAction) => {
       saveConfig(
         produce(config, (draft) => {
-          set(draft, action.payload.path, action.payload.value);
+          set(draft, action.payload.path.slice(1), action.payload.value);
         }),
       );
     },
@@ -210,7 +212,7 @@ function ImageView(props: Props) {
   useEffect(() => {
     updatePanelSettingsTree(panelId, {
       actionHandler,
-      settings: buildSettingsTree(config),
+      roots: buildSettingsTree(config),
     });
   }, [actionHandler, config, panelId, updatePanelSettingsTree]);
 

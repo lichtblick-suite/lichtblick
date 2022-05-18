@@ -27,7 +27,7 @@ import { usePanelContext } from "@foxglove/studio-base/components/PanelContext";
 import PanelToolbar from "@foxglove/studio-base/components/PanelToolbar";
 import {
   SettingsTreeAction,
-  SettingsTreeNode,
+  SettingsTreeRoots,
 } from "@foxglove/studio-base/components/SettingsTreeEditor/types";
 import Stack from "@foxglove/studio-base/components/Stack";
 import usePublisher from "@foxglove/studio-base/hooks/usePublisher";
@@ -52,13 +52,15 @@ type Props = {
   saveConfig: (config: Partial<Config>) => void;
 };
 
-function buildSettingsTree(config: Config): SettingsTreeNode {
+function buildSettingsTree(config: Config): SettingsTreeRoots {
   return {
-    fields: {
-      advancedView: { label: "Editing Mode", input: "boolean", value: config.advancedView },
-      buttonText: { label: "Button Title", input: "string", value: config.buttonText },
-      buttonTooltip: { label: "Button Tooltip", input: "string", value: config.buttonTooltip },
-      buttonColor: { label: "Button Color", input: "rgb", value: config.buttonColor },
+    general: {
+      fields: {
+        advancedView: { label: "Editing Mode", input: "boolean", value: config.advancedView },
+        buttonText: { label: "Button Title", input: "string", value: config.buttonText },
+        buttonTooltip: { label: "Button Tooltip", input: "string", value: config.buttonTooltip },
+        buttonColor: { label: "Button Color", input: "rgb", value: config.buttonColor },
+      },
     },
   };
 }
@@ -139,7 +141,7 @@ function Publish(props: Props) {
     (action: SettingsTreeAction) => {
       saveConfig(
         produce(props.config, (draft) => {
-          set(draft, action.payload.path, action.payload.value);
+          set(draft, action.payload.path.slice(1), action.payload.value);
         }),
       );
     },
@@ -149,7 +151,7 @@ function Publish(props: Props) {
   useEffect(() => {
     updatePanelSettingsTree(panelId, {
       actionHandler,
-      settings: buildSettingsTree(props.config),
+      roots: buildSettingsTree(props.config),
     });
   }, [actionHandler, panelId, props.config, updatePanelSettingsTree]);
 

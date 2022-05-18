@@ -454,11 +454,7 @@ function Plot(props: Props) {
       const { path, value } = action.payload;
       saveConfig(
         produce(config, (draft) => {
-          if (path[0] === "timeSeriesOnly") {
-            set(draft, path.slice(1), value);
-          } else {
-            set(draft, path, value);
-          }
+          set(draft, path.slice(1), value);
         }),
       );
     },
@@ -467,7 +463,7 @@ function Plot(props: Props) {
   useEffect(() => {
     updatePanelSettingsTree(panelId, {
       actionHandler,
-      settings: buildSettingsTree(config),
+      roots: buildSettingsTree(config),
     });
   }, [actionHandler, config, panelId, updatePanelSettingsTree]);
 
