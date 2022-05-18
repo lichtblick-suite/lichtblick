@@ -5,10 +5,13 @@
 import * as THREE from "three";
 
 import { Topic } from "@foxglove/studio";
-import { SettingsTreeFields } from "@foxglove/studio-base/components/SettingsTreeEditor/types";
+import {
+  SettingsTreeFields,
+  SettingsTreeNode,
+} from "@foxglove/studio-base/components/SettingsTreeEditor/types";
 
 import { DynamicBufferGeometry } from "../DynamicBufferGeometry";
-import { MaterialCache, PointsVertexColor } from "../MaterialCache";
+import { MaterialCache, PointCloudColor } from "../MaterialCache";
 import { Renderer } from "../Renderer";
 import { rgbaToCssString, stringToRgba } from "../color";
 import { Pose, PointCloud2, PointFieldType, rosTimeToNanoSec } from "../ros";
@@ -76,7 +79,7 @@ export class PointClouds extends THREE.Object3D {
     super();
     this.renderer = renderer;
 
-    renderer.setSettingsFieldsProvider(LayerType.PointCloud, (topicConfig, topic) =>
+    renderer.setSettingsNodeProvider(LayerType.PointCloud, (topicConfig, topic) =>
       settingsFields(this.pointCloudFieldsByTopic, topicConfig, topic),
     );
   }
@@ -328,11 +331,11 @@ function pointsMaterial(
   materialCache: MaterialCache,
 ): THREE.PointsMaterial {
   const transparent = pointCloudHasTransparency(settings);
-  const scale = { x: settings.pointSize, y: settings.pointSize };
+  const scale = settings.pointSize;
   return materialCache.acquire(
-    PointsVertexColor.id(scale, transparent),
-    () => PointsVertexColor.create(scale, transparent),
-    PointsVertexColor.dispose,
+    PointCloudColor.id(scale, transparent),
+    () => PointCloudColor.create(scale, transparent),
+    PointCloudColor.dispose,
   );
 }
 
@@ -341,8 +344,8 @@ function releasePointsMaterial(
   materialCache: MaterialCache,
 ): void {
   const transparent = pointCloudHasTransparency(settings);
-  const scale = { x: settings.pointSize, y: settings.pointSize };
-  materialCache.release(PointsVertexColor.id(scale, transparent));
+  const scale = settings.pointSize;
+  materialCache.release(PointCloudColor.id(scale, transparent));
 }
 
 function createPickingMaterial(settings: LayerSettingsPointCloud2): THREE.ShaderMaterial {
@@ -453,7 +456,7 @@ function settingsFields(
   pclFieldsByTopic: Map<string, string[]>,
   topicConfig: Partial<LayerSettings>,
   topic: Topic,
-): SettingsTreeFields {
+): SettingsTreeNode {
   const cur = topicConfig as Partial<LayerSettingsPointCloud2> | undefined;
   const pclFields = pclFieldsByTopic.get(topic.name) ?? POINTCLOUD_REQUIRED_FIELDS;
   const pointSize = cur?.pointSize;
@@ -567,7 +570,7 @@ function settingsFields(
     };
   }
 
-  return fields;
+  return { fields };
 }
 
 function pointFieldTypeName(type: PointFieldType): string {

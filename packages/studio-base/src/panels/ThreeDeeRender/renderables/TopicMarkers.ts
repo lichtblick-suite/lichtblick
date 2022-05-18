@@ -6,7 +6,7 @@ import * as THREE from "three";
 
 import { Renderer } from "../Renderer";
 import { Marker, MarkerAction, MarkerType } from "../ros";
-import { LayerSettingsMarker } from "../settings";
+import { LayerSettingsMarker, LayerSettingsMarkerNamespace } from "../settings";
 import { updatePose } from "../updatePose";
 import { RenderableArrow } from "./markers/RenderableArrow";
 import { RenderableCube } from "./markers/RenderableCube";
@@ -32,16 +32,37 @@ const INVALID_MARKER_TYPE = "INVALID_MARKER_TYPE";
 const INVALID_POINTS_LIST = "INVALID_POINTS_LIST";
 const INVALID_SPHERE_LIST = "INVALID_SPHERE_LIST";
 
-const DEFAULT_SETTINGS: LayerSettingsMarker = {
+const DEFAULT_TOPIC_SETTINGS: LayerSettingsMarker = {
   visible: true,
-  color: undefined,
+  namespaces: {},
 };
+
+const DEFAULT_NAMESPACE_SETTINGS: LayerSettingsMarkerNamespace = {
+  visible: true,
+};
+
+type PartialMarkerSettings = Partial<LayerSettingsMarker> | undefined;
+
+export class MarkersNamespace {
+  namespace: string;
+  markersById = new Map<number, RenderableMarker>();
+  settings: LayerSettingsMarkerNamespace;
+
+  constructor(topic: string, namespace: string, renderer: Renderer) {
+    this.namespace = namespace;
+
+    // Set the initial settings from default values merged with any user settings
+    const topicSettings = renderer.config?.topics[topic] as PartialMarkerSettings;
+    const userSettings = topicSettings?.namespaces?.[namespace];
+    this.settings = { ...DEFAULT_NAMESPACE_SETTINGS, ...userSettings };
+  }
+}
 
 export class TopicMarkers extends THREE.Object3D {
   readonly topic: string;
   readonly renderer: Renderer;
   override userData: { settings: LayerSettingsMarker };
-  namespaces = new Map<string, Map<number, RenderableMarker>>();
+  namespaces = new Map<string, MarkersNamespace>();
 
   constructor(topic: string, renderer: Renderer) {
     super();
@@ -49,14 +70,13 @@ export class TopicMarkers extends THREE.Object3D {
     this.renderer = renderer;
 
     // Set the initial settings from default values merged with any user settings
-    renderer.config?.topics[topic] as Partial<LayerSettingsMarker> | undefined;
-    const userSettings = renderer.config?.topics[topic];
-    this.userData = { settings: { ...DEFAULT_SETTINGS, ...userSettings } };
+    const userSettings = renderer.config?.topics[topic] as PartialMarkerSettings;
+    this.userData = { settings: { ...DEFAULT_TOPIC_SETTINGS, ...userSettings } };
   }
 
   dispose(): void {
     for (const ns of this.namespaces.values()) {
-      for (const marker of ns.values()) {
+      for (const marker of ns.markersById.values()) {
         this.remove(marker);
         marker.dispose();
       }
@@ -74,11 +94,11 @@ export class TopicMarkers extends THREE.Object3D {
         // Delete this marker
         const ns = this.namespaces.get(marker.ns);
         if (ns) {
-          const renderable = ns.get(marker.id);
+          const renderable = ns.markersById.get(marker.id);
           if (renderable) {
             this.remove(renderable);
             renderable.dispose();
-            ns.delete(marker.id);
+            ns.markersById.delete(marker.id);
           }
         }
         break;
@@ -86,7 +106,7 @@ export class TopicMarkers extends THREE.Object3D {
       case MarkerAction.DELETEALL: {
         // Delete all markers on this topic
         for (const ns of this.namespaces.values()) {
-          for (const renderable of ns.values()) {
+          for (const renderable of ns.markersById.values()) {
             this.remove(renderable);
             renderable.dispose();
           }
@@ -112,7 +132,12 @@ export class TopicMarkers extends THREE.Object3D {
     }
 
     for (const ns of this.namespaces.values()) {
-      for (const renderable of ns.values()) {
+      for (const renderable of ns.markersById.values()) {
+        renderable.visible = ns.settings.visible;
+        if (!renderable.visible) {
+          continue;
+        }
+
         const marker = renderable.userData.marker;
         const frameId = marker.header.frame_id;
         const srcTime = marker.frame_locked ? currentTime : renderable.userData.srcTime;
@@ -141,18 +166,18 @@ export class TopicMarkers extends THREE.Object3D {
   private _addOrUpdateMarker(marker: Marker): void {
     let ns = this.namespaces.get(marker.ns);
     if (!ns) {
-      ns = new Map<number, RenderableMarker>();
+      ns = new MarkersNamespace(this.topic, marker.ns, this.renderer);
       this.namespaces.set(marker.ns, ns);
     }
 
-    let renderable = ns.get(marker.id);
+    let renderable = ns.markersById.get(marker.id);
     if (!renderable) {
       renderable = this._createMarkerRenderable(marker);
       if (!renderable) {
         return;
       }
       this.add(renderable);
-      ns.set(marker.id, renderable);
+      ns.markersById.set(marker.id, renderable);
     } else {
       renderable.update(marker);
     }

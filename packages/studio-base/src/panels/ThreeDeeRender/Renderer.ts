@@ -4,6 +4,7 @@
 
 import EventEmitter from "eventemitter3";
 import * as THREE from "three";
+import { DeepPartial } from "ts-essentials";
 
 import Logger from "@foxglove/log";
 import { CameraState } from "@foxglove/regl-worldview";
@@ -33,13 +34,14 @@ import {
   TF,
 } from "./ros";
 import {
-  FieldsProvider,
   LayerSettingsCameraInfo,
   LayerSettingsMarker,
+  LayerSettingsMarkerNamespace,
   LayerSettingsOccupancyGrid,
   LayerSettingsPointCloud2,
   LayerSettingsPose,
   LayerType,
+  SettingsNodeProvider,
   ThreeDeeRenderConfig,
 } from "./settings";
 import { TransformTree } from "./transforms/TransformTree";
@@ -52,9 +54,10 @@ export type RendererEvents = {
   cameraMove: (renderer: Renderer) => void;
   renderableSelected: (renderable: THREE.Object3D | undefined, renderer: Renderer) => void;
   transformTreeUpdated: (renderer: Renderer) => void;
+  settingsTreeChange: (update: { path: string[] }) => void;
 };
 
-const DEBUG_PICKING = false;
+const DEBUG_PICKING: true | false = false;
 
 // NOTE: These do not use .convertSRGBToLinear() since background color is not
 // affected by gamma correction
@@ -105,7 +108,7 @@ export class Renderer extends EventEmitter<RendererEvents> {
   currentTime: bigint | undefined;
   fixedFrameId: string | undefined;
   renderFrameId: string | undefined;
-  settingsFieldsProviders = new Map<LayerType, FieldsProvider>();
+  settingsNodeProviders = new Map<LayerType, SettingsNodeProvider>();
 
   labels = new Labels(this);
   frameAxes = new FrameAxes(this);
@@ -211,9 +214,9 @@ export class Renderer extends EventEmitter<RendererEvents> {
     this.gl.dispose();
   }
 
-  setSettingsFieldsProvider(layerType: LayerType, provider: FieldsProvider): void {
-    this.settingsFieldsProviders.set(layerType, provider);
-    this.settingsFieldsProviders = new Map(this.settingsFieldsProviders);
+  setSettingsNodeProvider(layerType: LayerType, provider: SettingsNodeProvider): void {
+    this.settingsNodeProviders.set(layerType, provider);
+    this.settingsNodeProviders = new Map(this.settingsNodeProviders);
   }
 
   setColorScheme(colorScheme: "dark" | "light", backgroundColor: string | undefined): void {
@@ -262,8 +265,18 @@ export class Renderer extends EventEmitter<RendererEvents> {
     this.markers.addMarkerMessage(topic, marker);
   }
 
-  setMarkerSettings(topic: string, settings: Partial<LayerSettingsMarker>): void {
-    this.markers.setTopicSettings(topic, settings);
+  setMarkerSettings(topic: string, settings: Record<string, unknown>): void {
+    // Convert the { visible, ns:a, ns:b, ... } format to { visible, namespaces: { a, b, ... } }
+    const topicSettings: DeepPartial<LayerSettingsMarker> = { namespaces: {} };
+    topicSettings.visible = settings.visible as boolean | undefined;
+    for (const [key, value] of Object.entries(settings)) {
+      if (key.startsWith("ns:")) {
+        const ns = key.substring(3);
+        topicSettings.namespaces![ns] = value as Partial<LayerSettingsMarkerNamespace>;
+      }
+    }
+
+    this.markers.setTopicSettings(topic, topicSettings);
   }
 
   addPoseMessage(topic: string, pose: PoseStamped | PoseWithCovarianceStamped): void {
@@ -368,8 +381,10 @@ export class Renderer extends EventEmitter<RendererEvents> {
   };
 
   clickHandler = (cursorCoords: THREE.Vector2): void => {
-    // Deselect the currently selected object
+    // Deselect the currently selected object, if one is selected
+    let prevSelected: THREE.Object3D | undefined;
     if (this.selectedObject) {
+      prevSelected = this.selectedObject;
       deselectObject(this.selectedObject);
       this.selectedObject = undefined;
     }
@@ -395,6 +410,16 @@ export class Renderer extends EventEmitter<RendererEvents> {
     while (selectedObj && selectedObj.name === "") {
       selectedObj = selectedObj.parent ?? undefined;
     }
+
+    if (selectedObj === prevSelected) {
+      log.debug(`Deselecting previously selected object ${prevSelected?.id}`);
+      if (!DEBUG_PICKING) {
+        // Re-render with no object selected
+        this.animationFrame();
+      }
+      return;
+    }
+
     this.selectedObject = selectedObj;
 
     if (!selectedObj) {
@@ -408,7 +433,6 @@ export class Renderer extends EventEmitter<RendererEvents> {
     this.emit("renderableSelected", selectedObj, this);
     log.debug(`Selected object ${selectedObj.name}`);
 
-    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
     if (!DEBUG_PICKING) {
       // Re-render with the selected object
       this.animationFrame();

@@ -8,7 +8,6 @@ import { CameraState, DEFAULT_CAMERA_STATE } from "@foxglove/regl-worldview";
 import { Topic } from "@foxglove/studio";
 import {
   SettingsTreeChildren,
-  SettingsTreeFields,
   SettingsTreeNode,
 } from "@foxglove/studio-base/components/SettingsTreeEditor/types";
 
@@ -36,9 +35,13 @@ export type ThreeDeeRenderConfig = {
 
 export type SelectEntry = { label: string; value: string };
 
+export type LayerSettingsMarkerNamespace = {
+  visible: boolean;
+};
+
 export type LayerSettingsMarker = {
   visible: boolean;
-  color: string | undefined;
+  namespaces: Record<string, LayerSettingsMarkerNamespace>;
 };
 
 export type LayerSettingsOccupancyGrid = {
@@ -95,10 +98,10 @@ export enum LayerType {
   CameraInfo,
 }
 
-export type FieldsProvider = (
+export type SettingsNodeProvider = (
   topicConfig: Partial<LayerSettings>,
   topic: Topic,
-) => SettingsTreeFields;
+) => SettingsTreeNode;
 
 export const SUPPORTED_DATATYPES = new Set<string>();
 mergeSetInto(SUPPORTED_DATATYPES, TRANSFORM_STAMPED_DATATYPES);
@@ -119,37 +122,33 @@ export type SettingsTreeOptions = {
   followTf: string | undefined;
   topics: ReadonlyArray<Topic>;
   topicsToLayerTypes: Map<string, LayerType>;
-  fieldsProviders: Map<LayerType, FieldsProvider>;
+  settingsNodeProviders: Map<LayerType, SettingsNodeProvider>;
 };
 
 function buildTopicNode(
   topicConfigOrTopicName: string | Record<string, unknown>,
   topic: Topic,
   layerType: LayerType,
-  fieldsProvider: FieldsProvider,
+  settingsNodeProvider: SettingsNodeProvider,
 ): undefined | SettingsTreeNode {
   // Transform settings are handled elsewhere
   if (layerType === LayerType.Transform) {
     return;
   }
 
-  type SettingsTreeNodeWithFields = SettingsTreeNode & { fields: SettingsTreeFields };
   const topicConfig = typeof topicConfigOrTopicName === "string" ? {} : topicConfigOrTopicName;
   const visible = Boolean(topicConfig["visible"] ?? true);
-  const fields = fieldsProvider(topicConfig, topic);
-  const node: SettingsTreeNodeWithFields = {
-    label: topic.name,
-    fields,
-    visible,
-    defaultExpansionState: "collapsed",
-  };
+  const node = settingsNodeProvider(topicConfig, topic);
+  node.label ??= topic.name;
+  node.visible = visible;
+  node.defaultExpansionState ??= "collapsed";
   return node;
 }
 
 const memoBuildTopicNode = memoize(buildTopicNode);
 
 export function buildSettingsTree(options: SettingsTreeOptions): SettingsTreeNode {
-  const { config, coordinateFrames, followTf, topics, topicsToLayerTypes, fieldsProviders } =
+  const { config, coordinateFrames, followTf, topics, topicsToLayerTypes, settingsNodeProviders } =
     options;
   const { cameraState, scene } = config;
   const { backgroundColor } = scene;
@@ -162,14 +161,14 @@ export function buildSettingsTree(options: SettingsTreeOptions): SettingsTreeNod
     if (layerType == undefined) {
       continue;
     }
-    const fieldsProvider = fieldsProviders.get(layerType);
-    if (fieldsProvider == undefined) {
+    const settingsNodeProvider = settingsNodeProviders.get(layerType);
+    if (settingsNodeProvider == undefined) {
       continue;
     }
     // We key our memoized function by the first argument. Since the config
     // maybe be undefined we use the config or the topic name.
     const topicConfig = config.topics[topic.name] ?? topic.name;
-    const newNode = memoBuildTopicNode(topicConfig, topic, layerType, fieldsProvider);
+    const newNode = memoBuildTopicNode(topicConfig, topic, layerType, settingsNodeProvider);
     if (newNode) {
       topicsChildren[topic.name] = newNode;
     }

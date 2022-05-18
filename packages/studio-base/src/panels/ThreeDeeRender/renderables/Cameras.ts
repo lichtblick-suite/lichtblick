@@ -56,7 +56,7 @@ export class Cameras extends THREE.Object3D {
     super();
     this.renderer = renderer;
 
-    renderer.setSettingsFieldsProvider(LayerType.CameraInfo, (topicConfig, _topic) => {
+    renderer.setSettingsNodeProvider(LayerType.CameraInfo, (topicConfig, _topic) => {
       const cur = topicConfig as Partial<LayerSettingsCameraInfo>;
       const color = cur.color ?? DEFAULT_COLOR_STR;
 
@@ -67,7 +67,7 @@ export class Cameras extends THREE.Object3D {
         color: { label: "Color", input: "rgba", value: color },
       };
 
-      return fields;
+      return { fields };
     });
   }
 

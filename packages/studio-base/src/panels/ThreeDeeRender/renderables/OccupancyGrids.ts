@@ -59,7 +59,7 @@ export class OccupancyGrids extends THREE.Object3D {
     super();
     this.renderer = renderer;
 
-    renderer.setSettingsFieldsProvider(LayerType.OccupancyGrid, (topicConfig) => {
+    renderer.setSettingsNodeProvider(LayerType.OccupancyGrid, (topicConfig) => {
       const cur = topicConfig as Partial<LayerSettingsOccupancyGrid>;
       const minColor = cur.minColor ?? DEFAULT_MIN_COLOR_STR;
       const maxColor = cur.maxColor ?? DEFAULT_MAX_COLOR_STR;
@@ -67,11 +67,13 @@ export class OccupancyGrids extends THREE.Object3D {
       const invalidColor = cur.invalidColor ?? DEFAULT_INVALID_COLOR_STR;
       const frameLocked = cur.frameLocked ?? false;
       return {
-        minColor: { label: "Min Color", input: "rgba", value: minColor },
-        maxColor: { label: "Max Color", input: "rgba", value: maxColor },
-        unknownColor: { label: "Unknown Color", input: "rgba", value: unknownColor },
-        invalidColor: { label: "Invalid Color", input: "rgba", value: invalidColor },
-        frameLocked: { label: "Frame lock", input: "boolean", value: frameLocked },
+        fields: {
+          minColor: { label: "Min Color", input: "rgba", value: minColor },
+          maxColor: { label: "Max Color", input: "rgba", value: maxColor },
+          unknownColor: { label: "Unknown Color", input: "rgba", value: unknownColor },
+          invalidColor: { label: "Invalid Color", input: "rgba", value: invalidColor },
+          frameLocked: { label: "Frame lock", input: "boolean", value: frameLocked },
+        },
       };
     });
   }

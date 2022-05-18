@@ -175,6 +175,29 @@ export const PointsVertexColor = {
   },
 };
 
+export const PointCloudColor = {
+  id: (scale: number, transparent: boolean): string =>
+    `PointCloudColor-${scale}${transparent ? "-t" : ""}`,
+
+  create: (scale: number, transparent: boolean): THREE.PointsMaterial => {
+    const material = new THREE.PointsMaterial({
+      vertexColors: true,
+      size: scale,
+      sizeAttenuation: false,
+    });
+    material.name = PointCloudColor.id(scale, transparent);
+    material.transparent = transparent;
+    material.depthWrite = !transparent;
+    return material;
+  },
+
+  dispose: (material: THREE.PointsMaterial): void => {
+    material.map?.dispose();
+    material.alphaMap?.dispose();
+    material.dispose();
+  },
+};
+
 export const LineVertexColorPrepass = {
   id: (lineWidth: number, transparent: boolean): string =>
     `LineVertexColorPrepass-${lineWidth.toFixed(4)}-${transparent ? "-t" : ""}`,

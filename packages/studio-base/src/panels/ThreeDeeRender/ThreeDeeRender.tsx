@@ -3,7 +3,8 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 import produce from "immer";
-import { cloneDeep, merge, set } from "lodash";
+// eslint-disable-next-line no-restricted-imports
+import { cloneDeep, merge, get, set } from "lodash";
 import React, { useCallback, useLayoutEffect, useEffect, useState, useMemo, useRef } from "react";
 import { useResizeDetector } from "react-resize-detector";
 import { DeepPartial } from "ts-essentials";
@@ -167,6 +168,22 @@ export function ThreeDeeRender({ context }: { context: PanelExtensionContext }):
     [renderer, topicsToLayerTypes],
   );
 
+  // Handle internal changes to the settings sidebar
+  useRendererEvent(
+    "settingsTreeChange",
+    (update) => {
+      setConfig((oldConfig) => {
+        const newConfig = produce(oldConfig, (draft) => {
+          const entry = get(draft, update.path);
+          set(draft, update.path, { ...entry });
+        });
+
+        return newConfig;
+      });
+    },
+    renderer,
+  );
+
   // Maintain a list of coordinate frames for the settings sidebar
   const [coordinateFrames, setCoordinateFrames] = useState<SelectEntry[]>(
     coordinateFrameList(renderer),
@@ -213,7 +230,7 @@ export function ThreeDeeRender({ context }: { context: PanelExtensionContext }):
     [configFollowTf, defaultFrame, renderer],
   );
 
-  const fieldsProviders = renderer?.settingsFieldsProviders;
+  const settingsNodeProviders = renderer?.settingsNodeProviders;
 
   useEffect(() => {
     // eslint-disable-next-line no-underscore-dangle, @typescript-eslint/no-explicit-any
@@ -225,7 +242,7 @@ export function ThreeDeeRender({ context }: { context: PanelExtensionContext }):
         followTf,
         topics: topics ?? [],
         topicsToLayerTypes,
-        fieldsProviders: fieldsProviders ?? new Map(),
+        settingsNodeProviders: settingsNodeProviders ?? new Map(),
       }),
     });
   }, [
@@ -233,8 +250,8 @@ export function ThreeDeeRender({ context }: { context: PanelExtensionContext }):
     config,
     context,
     coordinateFrames,
-    fieldsProviders,
     followTf,
+    settingsNodeProviders,
     topics,
     topicsToLayerTypes,
   ]);

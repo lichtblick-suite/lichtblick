@@ -3,6 +3,13 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 import * as THREE from "three";
+import { DeepPartial } from "ts-essentials";
+
+import { Topic } from "@foxglove/studio";
+import {
+  SettingsTreeChildren,
+  SettingsTreeNode,
+} from "@foxglove/studio-base/components/SettingsTreeEditor/types";
 
 import { Renderer } from "../Renderer";
 import { Marker } from "../ros";
@@ -17,10 +24,9 @@ export class Markers extends THREE.Object3D {
     super();
     this.renderer = renderer;
 
-    renderer.setSettingsFieldsProvider(LayerType.Marker, (topicConfig) => {
-      const cur = topicConfig as Partial<LayerSettingsMarker>;
-      return { color: { label: "Color", input: "rgba", value: cur.color } };
-    });
+    renderer.setSettingsNodeProvider(LayerType.Marker, (topicConfig, topic) =>
+      settingsFields(topicConfig, topic, this.topics),
+    );
   }
 
   dispose(): void {
@@ -37,13 +43,34 @@ export class Markers extends THREE.Object3D {
       this.topics.set(topic, topicMarkers);
       this.add(topicMarkers);
     }
+    const prevNsCount = topicMarkers.namespaces.size;
     topicMarkers.addMarkerMessage(marker);
+
+    // If the topic has a new namespace, rebuild the settings node for th
+    if (prevNsCount !== topicMarkers.namespaces.size) {
+      const path = ["topics", topic];
+      this.renderer.emit("settingsTreeChange", { path });
+    }
   }
 
-  setTopicSettings(topic: string, settings: Partial<LayerSettingsMarker>): void {
-    const renderable = this.topics.get(topic);
-    if (renderable) {
-      renderable.userData.settings = { ...renderable.userData.settings, ...settings };
+  setTopicSettings(topic: string, settings: DeepPartial<LayerSettingsMarker>): void {
+    const topicMarkers = this.topics.get(topic);
+    if (topicMarkers) {
+      // Update the top-level marker topic settings
+      const curSettings = topicMarkers.userData.settings;
+      curSettings.visible = settings.visible ?? curSettings.visible;
+
+      if (settings.namespaces) {
+        // Update individual marker namespace settings
+        for (const [ns, entry] of Object.entries(settings.namespaces)) {
+          if (entry) {
+            const markerNs = topicMarkers.namespaces.get(ns);
+            if (markerNs) {
+              markerNs.settings.visible = entry.visible ?? markerNs.settings.visible;
+            }
+          }
+        }
+      }
     }
   }
 
@@ -60,4 +87,31 @@ export class Markers extends THREE.Object3D {
       topicMarker.startFrame(currentTime, renderFrameId, fixedFrameId);
     }
   }
+}
+
+function settingsFields(
+  _topicConfig: Partial<LayerSettingsMarker>,
+  topic: Topic,
+  topicMarkersByTopic: Map<string, TopicMarkers>,
+): SettingsTreeNode {
+  const node: SettingsTreeNode = {};
+
+  // Create a list of all the namespaces for this topic
+  const topicMarkers = topicMarkersByTopic.get(topic.name);
+  const namespaces = Array.from(topicMarkers?.namespaces.values() ?? [])
+    .filter((ns) => ns.namespace !== "")
+    .sort((a, b) => a.namespace.localeCompare(b.namespace));
+  if (namespaces.length > 0) {
+    const children: SettingsTreeChildren = {};
+    node.children = children;
+    for (const ns of namespaces) {
+      children[`ns:${ns.namespace}`] = {
+        label: ns.namespace,
+        visible: ns.settings.visible,
+        defaultExpansionState: namespaces.length > 1 ? "collapsed" : "expanded",
+      };
+    }
+  }
+
+  return node;
 }
