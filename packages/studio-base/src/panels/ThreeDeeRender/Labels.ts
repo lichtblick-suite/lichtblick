@@ -176,7 +176,7 @@ export class Labels extends THREE.Object3D {
 
     const color = rgbaToLinear(makeRgba(), label.color ?? fgColor);
     const fontSize = label.fontSize ?? 14;
-    const fontFamily = fonts.SANS_SERIF;
+    const fontFamily = fonts.MONOSPACE;
     const fontWeight = 400;
     // const padding = label.padding ?? 2;
     const backgroundColor = rgbaToLinear(makeRgba(), label.backgroundColor ?? bgColor);

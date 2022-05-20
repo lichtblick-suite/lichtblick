@@ -107,12 +107,16 @@ export function ThreeDeeRender({ context }: { context: PanelExtensionContext }):
       topics: partialConfig?.topics ?? {},
     };
   });
+  const configRef = useRef(config);
   const { cameraState, followTf: configFollowTf } = config;
   const backgroundColor = config.scene.backgroundColor;
 
   const [canvas, setCanvas] = useState<HTMLCanvasElement | ReactNull>(ReactNull);
   const [renderer, setRenderer] = useState<Renderer | ReactNull>(ReactNull);
-  useEffect(() => setRenderer(canvas ? new Renderer(canvas) : ReactNull), [canvas]);
+  useEffect(
+    () => setRenderer(canvas ? new Renderer(canvas, configRef.current) : ReactNull),
+    [canvas],
+  );
 
   const [colorScheme, setColorScheme] = useState<"dark" | "light" | undefined>();
   const [topics, setTopics] = useState<ReadonlyArray<Topic> | undefined>();

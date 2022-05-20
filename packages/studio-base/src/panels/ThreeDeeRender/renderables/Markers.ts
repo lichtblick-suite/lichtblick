@@ -46,10 +46,9 @@ export class Markers extends THREE.Object3D {
     const prevNsCount = topicMarkers.namespaces.size;
     topicMarkers.addMarkerMessage(marker);
 
-    // If the topic has a new namespace, rebuild the settings node for th
+    // If the topic has a new namespace, rebuild the settings node for this topic
     if (prevNsCount !== topicMarkers.namespaces.size) {
-      const path = ["topics", topic];
-      this.renderer.emit("settingsTreeChange", { path });
+      this.renderer.emit("settingsTreeChange", { path: ["topics", topic] });
     }
   }
 

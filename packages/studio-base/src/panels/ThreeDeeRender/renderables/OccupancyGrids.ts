@@ -98,7 +98,7 @@ export class OccupancyGrids extends THREE.Object3D {
       renderable.userData.topic = topic;
 
       // Set the initial settings from default values merged with any user settings
-      const userSettings = this.renderer.config?.topics[topic] as
+      const userSettings = this.renderer.config.topics[topic] as
         | Partial<LayerSettingsOccupancyGrid>
         | undefined;
       const settings = { ...DEFAULT_SETTINGS, ...userSettings };

@@ -105,7 +105,7 @@ export class Poses extends THREE.Object3D {
       renderable.userData.topic = topic;
 
       // Set the initial settings from default values merged with any user settings
-      const userSettings = this.renderer.config?.topics[topic] as
+      const userSettings = this.renderer.config.topics[topic] as
         | Partial<LayerSettingsPose>
         | undefined;
       const settings = { ...DEFAULT_SETTINGS, ...userSettings };

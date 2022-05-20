@@ -52,7 +52,7 @@ export class MarkersNamespace {
     this.namespace = namespace;
 
     // Set the initial settings from default values merged with any user settings
-    const topicSettings = renderer.config?.topics[topic] as PartialMarkerSettings;
+    const topicSettings = renderer.config.topics[topic] as PartialMarkerSettings;
     const userSettings = topicSettings?.namespaces?.[namespace];
     this.settings = { ...DEFAULT_NAMESPACE_SETTINGS, ...userSettings };
   }
@@ -70,7 +70,7 @@ export class TopicMarkers extends THREE.Object3D {
     this.renderer = renderer;
 
     // Set the initial settings from default values merged with any user settings
-    const userSettings = renderer.config?.topics[topic] as PartialMarkerSettings;
+    const userSettings = renderer.config.topics[topic] as PartialMarkerSettings;
     this.userData = { settings: { ...DEFAULT_TOPIC_SETTINGS, ...userSettings } };
   }
 

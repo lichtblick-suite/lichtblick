@@ -4,7 +4,7 @@
 
 import * as THREE from "three";
 
-import { SRGBToLinear, stringToRgba } from "../../color";
+import { rgbaToLinear, SRGBToLinear, stringToRgba } from "../../color";
 import { clamp, lerp } from "../../math";
 import { ColorRGBA } from "../../ros";
 import { LayerSettingsPointCloud2 } from "../../settings";
@@ -19,25 +19,28 @@ export function getColorConverter(
   minValue: number,
   maxValue: number,
 ): ColorConverter {
-  const valueDelta = maxValue - minValue;
+  const valueDelta = Math.max(maxValue - minValue, Number.EPSILON);
   switch (settings.colorMode) {
     case "flat": {
       const flatColor = stringToRgba(tempColor1, settings.flatColor);
+      rgbaToLinear(flatColor, flatColor);
       return (output: ColorRGBA, _colorValue: number) => {
-        output.r = SRGBToLinear(flatColor.r);
-        output.g = SRGBToLinear(flatColor.g);
-        output.b = SRGBToLinear(flatColor.b);
+        output.r = flatColor.r;
+        output.g = flatColor.g;
+        output.b = flatColor.b;
         output.a = flatColor.a;
       };
     }
     case "gradient": {
       const minColor = stringToRgba(tempColor1, settings.gradient[0]);
       const maxColor = stringToRgba(tempColor2, settings.gradient[1]);
+      rgbaToLinear(minColor, minColor);
+      rgbaToLinear(maxColor, maxColor);
       return (output: ColorRGBA, colorValue: number) => {
         const t = (colorValue - minValue) / valueDelta;
-        output.r = SRGBToLinear(lerp(minColor.r, maxColor.r, t));
-        output.g = SRGBToLinear(lerp(minColor.g, maxColor.g, t));
-        output.b = SRGBToLinear(lerp(minColor.b, maxColor.b, t));
+        output.r = lerp(minColor.r, maxColor.r, t);
+        output.g = lerp(minColor.g, maxColor.g, t);
+        output.b = lerp(minColor.b, maxColor.b, t);
         output.a = lerp(minColor.a, maxColor.a, t);
       };
     }
@@ -81,54 +84,54 @@ export function getColorConverter(
 // 0xrrggbb00
 function getColorRgb(output: ColorRGBA, colorValue: number): void {
   const num = colorValue >>> 0;
-  output.r = SRGBToLinear(((num & 0xff000000) >>> 24) / 255);
-  output.g = SRGBToLinear(((num & 0x00ff0000) >>> 16) / 255);
-  output.b = SRGBToLinear(((num & 0x0000ff00) >>> 8) / 255);
+  output.r = ((num & 0xff000000) >>> 24) / 255;
+  output.g = ((num & 0x00ff0000) >>> 16) / 255;
+  output.b = ((num & 0x0000ff00) >>> 8) / 255;
   output.a = 1;
 }
 
 // 0xrrggbbaa
 function getColorRgba(output: ColorRGBA, colorValue: number): void {
   const num = colorValue >>> 0;
-  output.r = SRGBToLinear(((num & 0xff000000) >>> 24) / 255);
-  output.g = SRGBToLinear(((num & 0x00ff0000) >>> 16) / 255);
-  output.b = SRGBToLinear(((num & 0x0000ff00) >>> 8) / 255);
+  output.r = ((num & 0xff000000) >>> 24) / 255;
+  output.g = ((num & 0x00ff0000) >>> 16) / 255;
+  output.b = ((num & 0x0000ff00) >>> 8) / 255;
   output.a = ((num & 0x000000ff) >>> 0) / 255;
 }
 
 // 0xbbggrr00
 function getColorBgr(output: ColorRGBA, colorValue: number): void {
   const num = colorValue >>> 0;
-  output.r = SRGBToLinear(((num & 0x0000ff00) >>> 8) / 255);
-  output.g = SRGBToLinear(((num & 0x00ff0000) >>> 16) / 255);
-  output.b = SRGBToLinear(((num & 0xff000000) >>> 24) / 255);
+  output.r = ((num & 0x0000ff00) >>> 8) / 255;
+  output.g = ((num & 0x00ff0000) >>> 16) / 255;
+  output.b = ((num & 0xff000000) >>> 24) / 255;
   output.a = 1;
 }
 
 // 0xbbggrraa
 function getColorBgra(output: ColorRGBA, colorValue: number): void {
   const num = colorValue >>> 0;
-  output.r = SRGBToLinear(((num & 0x0000ff00) >>> 8) / 255);
-  output.g = SRGBToLinear(((num & 0x00ff0000) >>> 16) / 255);
-  output.b = SRGBToLinear(((num & 0xff000000) >>> 24) / 255);
+  output.r = ((num & 0x0000ff00) >>> 8) / 255;
+  output.g = ((num & 0x00ff0000) >>> 16) / 255;
+  output.b = ((num & 0xff000000) >>> 24) / 255;
   output.a = ((num & 0x000000ff) >>> 0) / 255;
 }
 
 // 0x00bbggrr
 function getColor0bgr(output: ColorRGBA, colorValue: number): void {
   const num = colorValue >>> 0;
-  output.r = SRGBToLinear(((num & 0x000000ff) >>> 0) / 255);
-  output.g = SRGBToLinear(((num & 0x0000ff00) >>> 8) / 255);
-  output.b = SRGBToLinear(((num & 0x00ff0000) >>> 16) / 255);
+  output.r = ((num & 0x000000ff) >>> 0) / 255;
+  output.g = ((num & 0x0000ff00) >>> 8) / 255;
+  output.b = ((num & 0x00ff0000) >>> 16) / 255;
   output.a = 1;
 }
 
 // 0xaabbggrr
 function getColorAbgr(output: ColorRGBA, colorValue: number): void {
   const num = colorValue >>> 0;
-  output.r = SRGBToLinear(((num & 0x000000ff) >>> 0) / 255);
-  output.g = SRGBToLinear(((num & 0x0000ff00) >>> 8) / 255);
-  output.b = SRGBToLinear(((num & 0x00ff0000) >>> 16) / 255);
+  output.r = ((num & 0x000000ff) >>> 0) / 255;
+  output.g = ((num & 0x0000ff00) >>> 8) / 255;
+  output.b = ((num & 0x00ff0000) >>> 16) / 255;
   output.a = ((num & 0xff000000) >>> 24) / 255;
 }
 

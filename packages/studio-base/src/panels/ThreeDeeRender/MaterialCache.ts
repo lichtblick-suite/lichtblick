@@ -18,6 +18,34 @@ type MaterialCacheEntry = {
   disposer: DisposeMaterial;
 };
 
+// Fragment shader chunk to convert sRGB to linear RGB. This is used by some
+// PointCloud materials to avoid expensive per-point colorspace conversion on
+// the CPU. Source: <https://github.com/mrdoob/three.js/blob/13b67d96/src/renderers/shaders/ShaderChunk/encodings_pars_fragment.glsl.js#L16-L18>
+const FS_SRGB_TO_LINEAR = /* glsl */ `
+vec3 sRGBToLinear(in vec3 value) {
+	return vec3(mix(
+    pow(value.rgb * 0.9478672986 + vec3(0.0521327014), vec3(2.4)),
+    value.rgb * 0.0773993808,
+    vec3(lessThanEqual(value.rgb, vec3(0.04045)))
+  ));
+}
+
+vec4 sRGBToLinear(in vec4 value) {
+  return vec4(sRGBToLinear(value.rgb), value.a);
+}
+`;
+
+// Fragment shader chunk to convert sRGB to linear RGB
+const FS_POINTCLOUD_SRGB_TO_LINEAR = /* glsl */ `
+outgoingLight = sRGBToLinear(outgoingLight);
+`;
+
+// Fragment shader chunk to render a GL_POINT as a circle
+const FS_POINTCLOUD_CIRCLE = /* glsl */ `
+vec2 cxy = 2.0 * gl_PointCoord - 1.0;
+if (dot(cxy, cxy) > 1.0) { discard; }
+`;
+
 export class MaterialCache {
   materials = new Map<string, MaterialCacheEntry>();
   outlineMaterial = new THREE.LineBasicMaterial({ dithering: true });
@@ -176,18 +204,44 @@ export const PointsVertexColor = {
 };
 
 export const PointCloudColor = {
-  id: (scale: number, transparent: boolean): string =>
-    `PointCloudColor-${scale}${transparent ? "-t" : ""}`,
+  id: (
+    shape: "circle" | "square",
+    encoding: "srgb" | "linear",
+    scale: number,
+    transparent: boolean,
+  ): string => `PointCloudColor-${shape}-${encoding}-${scale}${transparent ? "-t" : ""}`,
 
-  create: (scale: number, transparent: boolean): THREE.PointsMaterial => {
+  create: (
+    shape: "circle" | "square",
+    encoding: "srgb" | "linear",
+    scale: number,
+    transparent: boolean,
+  ): THREE.PointsMaterial => {
     const material = new THREE.PointsMaterial({
       vertexColors: true,
       size: scale,
       sizeAttenuation: false,
     });
-    material.name = PointCloudColor.id(scale, transparent);
+    material.name = PointCloudColor.id(shape, encoding, scale, transparent);
     material.transparent = transparent;
     material.depthWrite = !transparent;
+    // Tell three.js to recompile the shader when `shape` or `encoding` change
+    material.customProgramCacheKey = () => `${shape}-${encoding}`;
+    material.onBeforeCompile = (shader) => {
+      const SEARCH = "#include <output_fragment>";
+      if (shape === "circle") {
+        // Patch the fragment shader to render points as circles
+        shader.fragmentShader =
+          FS_SRGB_TO_LINEAR + shader.fragmentShader.replace(SEARCH, FS_POINTCLOUD_CIRCLE + SEARCH);
+      }
+      if (encoding === "srgb") {
+        // Patch the fragment shader to add sRGB->linear color conversion
+        shader.fragmentShader = shader.fragmentShader.replace(
+          SEARCH,
+          FS_POINTCLOUD_SRGB_TO_LINEAR + SEARCH,
+        );
+      }
+    };
     return material;
   },
 

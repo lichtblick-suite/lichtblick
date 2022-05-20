@@ -90,7 +90,7 @@ export class Renderer extends EventEmitter<RendererEvents> {
   // target: THREE.WebGLRenderTarget;
   // composer: EffectComposer;
   // outlinePass: OutlinePass;
-  config: ThreeDeeRenderConfig | undefined;
+  config: ThreeDeeRenderConfig;
   scene: THREE.Scene;
   dirLight: THREE.DirectionalLight;
   hemiLight: THREE.HemisphereLight;
@@ -118,13 +118,14 @@ export class Renderer extends EventEmitter<RendererEvents> {
   poses = new Poses(this);
   cameras = new Cameras(this);
 
-  constructor(canvas: HTMLCanvasElement) {
+  constructor(canvas: HTMLCanvasElement, config: ThreeDeeRenderConfig) {
     super();
 
     // NOTE: Global side effect
     THREE.Object3D.DefaultUp = new THREE.Vector3(0, 0, 1);
 
     this.canvas = canvas;
+    this.config = config;
     this.gl = new THREE.WebGLRenderer({
       canvas,
       alpha: true,

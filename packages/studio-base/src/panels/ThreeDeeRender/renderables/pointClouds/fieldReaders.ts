@@ -38,8 +38,12 @@ export function float64Reader(fieldOffset: number): FieldReader {
   return (view: DataView, pointOffset: number) => view.getFloat64(pointOffset + fieldOffset, true);
 }
 
-export function getReader(field: PointField, pointStep: number): FieldReader | undefined {
-  switch (field.datatype) {
+export function getReader(
+  field: PointField,
+  pointStep: number,
+  forceType?: PointFieldType,
+): FieldReader | undefined {
+  switch (forceType ?? field.datatype) {
     case PointFieldType.INT8:
       return field.offset + 1 <= pointStep ? int8Reader(field.offset) : undefined;
     case PointFieldType.UINT8:
