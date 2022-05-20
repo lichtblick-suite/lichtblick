@@ -11,7 +11,7 @@ import type { Renderer } from "../../Renderer";
 import { rgbaEqual } from "../../color";
 import { arrowHeadSubdivisions, arrowShaftSubdivisions, DetailLevel } from "../../lod";
 import { getRotationTo } from "../../math";
-import { Marker, Vector3 } from "../../ros";
+import { Marker } from "../../ros";
 import { RenderableMarker } from "./RenderableMarker";
 import { releaseStandardMaterial, standardMaterial } from "./materials";
 
@@ -116,15 +116,14 @@ export class RenderableArrow extends RenderableMarker {
       this.shaftMesh.scale.set(shaftLength, shaftDiameter, shaftDiameter);
       this.headMesh.scale.set(headLength, headDiameter, headDiameter);
       this.scale.set(1, 1, 1);
-      this.headMesh.position.set((shaftLength + headLength) / 2, 0, 0);
-      this.shaftMesh.position.set(0, 0, 0);
+      this.shaftMesh.position.set(pointA.x, pointA.y, pointA.z);
+      this.shaftMesh.position.addScaledVector(tempDirection, 0.5 * (shaftLength / distance));
+      this.headMesh.position.set(pointB.x, pointB.y, pointB.z);
+      this.headMesh.position.addScaledVector(tempDirection, -0.5 * (headLength / distance));
 
-      // Override this.pose
-      tempDirection.normalize();
-      copyPoint(pointA, this.userData.pose.position);
-      const sign = tempDirection.x > 0 ? 1 : -1;
-      this.userData.pose.position.x += (sign * shaftLength) / 2;
-      this.userData.pose.orientation = getRotationTo(UNIT_X, tempDirection);
+      const rotation = getRotationTo(UNIT_X, tempDirection);
+      this.shaftMesh.setRotationFromQuaternion(rotation);
+      this.headMesh.rotation.copy(this.shaftMesh.rotation);
     } else {
       this.shaftMesh.scale.set(SHAFT_LENGTH, SHAFT_DIAMETER, SHAFT_DIAMETER);
       this.headMesh.scale.set(HEAD_LENGTH, HEAD_DIAMETER, HEAD_DIAMETER);
@@ -134,6 +133,8 @@ export class RenderableArrow extends RenderableMarker {
       const halfHeadLength = HEAD_LENGTH / 2;
       this.shaftMesh.position.set(halfShaftLength, 0, 0);
       this.headMesh.position.set(halfShaftLength * 2 + halfHeadLength, 0, 0);
+      this.shaftMesh.rotation.set(0, 0, 0);
+      this.headMesh.rotation.set(0, 0, 0);
     }
   }
 
@@ -187,10 +188,4 @@ export class RenderableArrow extends RenderableMarker {
     }
     return RenderableArrow._headEdgesGeometry;
   }
-}
-
-function copyPoint(from: Vector3, to: Vector3): void {
-  to.x = from.x;
-  to.y = from.y;
-  to.z = from.z;
 }

@@ -34,7 +34,8 @@ export default {
   component: ThreeDeeRender,
 };
 
-const SENSOR_FRAME_ID = "base_link";
+const SENSOR_FRAME_ID = "sensor";
+const BASE_LINK_FRAME_ID = "base_link";
 const FIXED_FRAME_ID = "map";
 
 Markers.parameters = { colorScheme: "dark", chromatic: { delay: 100 } };
@@ -62,7 +63,7 @@ export function Markers(): JSX.Element {
     receiveTime: { sec: 10, nsec: 0 },
     message: {
       header: { seq: 0, stamp: { sec: 0, nsec: 0 }, frame_id: "base_link" },
-      child_frame_id: "sensor",
+      child_frame_id: SENSOR_FRAME_ID,
       transform: {
         translation: { x: 0, y: 1, z: 0 },
         rotation: QUAT_IDENTITY,
@@ -75,7 +76,7 @@ export function Markers(): JSX.Element {
     topic: "/markers",
     receiveTime: { sec: 10, nsec: 0 },
     message: {
-      header: { seq: 0, stamp: { sec: 0, nsec: 0 }, frame_id: "sensor" },
+      header: { seq: 0, stamp: { sec: 0, nsec: 0 }, frame_id: SENSOR_FRAME_ID },
       id: 0,
       ns: "",
       type: 0,
@@ -96,7 +97,7 @@ export function Markers(): JSX.Element {
     topic: "/markers",
     receiveTime: { sec: 10, nsec: 0 },
     message: {
-      header: { seq: 0, stamp: { sec: 0, nsec: 0 }, frame_id: "sensor" },
+      header: { seq: 0, stamp: { sec: 0, nsec: 0 }, frame_id: SENSOR_FRAME_ID },
       id: 1,
       ns: "",
       type: 1,
@@ -117,7 +118,7 @@ export function Markers(): JSX.Element {
     topic: "/markers",
     receiveTime: { sec: 10, nsec: 0 },
     message: {
-      header: { seq: 0, stamp: { sec: 0, nsec: 0 }, frame_id: "sensor" },
+      header: { seq: 0, stamp: { sec: 0, nsec: 0 }, frame_id: SENSOR_FRAME_ID },
       id: 2,
       ns: "",
       type: 2,
@@ -138,7 +139,7 @@ export function Markers(): JSX.Element {
     topic: "/markers",
     receiveTime: { sec: 10, nsec: 0 },
     message: {
-      header: { seq: 0, stamp: { sec: 0, nsec: 0 }, frame_id: "sensor" },
+      header: { seq: 0, stamp: { sec: 0, nsec: 0 }, frame_id: SENSOR_FRAME_ID },
       id: 3,
       ns: "",
       type: 3,
@@ -159,7 +160,7 @@ export function Markers(): JSX.Element {
     topic: "/markers",
     receiveTime: { sec: 10, nsec: 0 },
     message: {
-      header: { seq: 0, stamp: { sec: 0, nsec: 0 }, frame_id: "sensor" },
+      header: { seq: 0, stamp: { sec: 0, nsec: 0 }, frame_id: SENSOR_FRAME_ID },
       id: 4,
       ns: "",
       type: 4,
@@ -192,7 +193,7 @@ export function Markers(): JSX.Element {
     topic: "/markers",
     receiveTime: { sec: 10, nsec: 0 },
     message: {
-      header: { seq: 0, stamp: { sec: 0, nsec: 0 }, frame_id: "sensor" },
+      header: { seq: 0, stamp: { sec: 0, nsec: 0 }, frame_id: SENSOR_FRAME_ID },
       id: 5,
       ns: "",
       type: 5,
@@ -229,7 +230,7 @@ export function Markers(): JSX.Element {
     topic: "/markers",
     receiveTime: { sec: 10, nsec: 0 },
     message: {
-      header: { seq: 0, stamp: { sec: 0, nsec: 0 }, frame_id: "sensor" },
+      header: { seq: 0, stamp: { sec: 0, nsec: 0 }, frame_id: SENSOR_FRAME_ID },
       id: 6,
       ns: "",
       type: 6,
@@ -256,7 +257,7 @@ export function Markers(): JSX.Element {
     topic: "/markers",
     receiveTime: { sec: 10, nsec: 0 },
     message: {
-      header: { seq: 0, stamp: { sec: 0, nsec: 0 }, frame_id: "sensor" },
+      header: { seq: 0, stamp: { sec: 0, nsec: 0 }, frame_id: SENSOR_FRAME_ID },
       id: 7,
       ns: "",
       type: 7,
@@ -283,7 +284,7 @@ export function Markers(): JSX.Element {
     topic: "/markers",
     receiveTime: { sec: 10, nsec: 0 },
     message: {
-      header: { seq: 0, stamp: { sec: 0, nsec: 0 }, frame_id: "sensor" },
+      header: { seq: 0, stamp: { sec: 0, nsec: 0 }, frame_id: SENSOR_FRAME_ID },
       id: 8,
       ns: "",
       type: 8,
@@ -311,7 +312,7 @@ export function Markers(): JSX.Element {
     topic: "/markers",
     receiveTime: { sec: 10, nsec: 0 },
     message: {
-      header: { seq: 0, stamp: { sec: 0, nsec: 0 }, frame_id: "sensor" },
+      header: { seq: 0, stamp: { sec: 0, nsec: 0 }, frame_id: SENSOR_FRAME_ID },
       id: 9,
       ns: "",
       type: 9,
@@ -333,7 +334,7 @@ export function Markers(): JSX.Element {
     topic: "/markers",
     receiveTime: { sec: 10, nsec: 0 },
     message: {
-      header: { seq: 0, stamp: { sec: 0, nsec: 0 }, frame_id: "sensor" },
+      header: { seq: 0, stamp: { sec: 0, nsec: 0 }, frame_id: SENSOR_FRAME_ID },
       id: 10,
       ns: "",
       type: 10,
@@ -356,7 +357,7 @@ export function Markers(): JSX.Element {
     topic: "/markers",
     receiveTime: { sec: 10, nsec: 0 },
     message: {
-      header: { seq: 0, stamp: { sec: 0, nsec: 0 }, frame_id: "sensor" },
+      header: { seq: 0, stamp: { sec: 0, nsec: 0 }, frame_id: SENSOR_FRAME_ID },
       id: 11,
       ns: "",
       type: 11,
@@ -436,7 +437,7 @@ export function Markers(): JSX.Element {
     topic: "/markers",
     receiveTime: { sec: 10, nsec: 0 },
     message: {
-      header: { seq: 0, stamp: { sec: 0, nsec: 0 }, frame_id: "sensor" },
+      header: { seq: 0, stamp: { sec: 0, nsec: 0 }, frame_id: SENSOR_FRAME_ID },
       id: 12,
       ns: "",
       type: 11,
@@ -561,7 +562,7 @@ export function ArrowMarkers(): JSX.Element {
     receiveTime: { sec: 10, nsec: 0 },
     message: {
       header: { seq: 0, stamp: { sec: 0, nsec: 0 }, frame_id: FIXED_FRAME_ID },
-      child_frame_id: SENSOR_FRAME_ID,
+      child_frame_id: BASE_LINK_FRAME_ID,
       transform: {
         translation: { x: 1e7, y: 0, z: 0 },
         rotation: QUAT_IDENTITY,
@@ -573,8 +574,8 @@ export function ArrowMarkers(): JSX.Element {
     topic: "/tf",
     receiveTime: { sec: 10, nsec: 0 },
     message: {
-      header: { seq: 0, stamp: { sec: 0, nsec: 0 }, frame_id: SENSOR_FRAME_ID },
-      child_frame_id: "sensor",
+      header: { seq: 0, stamp: { sec: 0, nsec: 0 }, frame_id: BASE_LINK_FRAME_ID },
+      child_frame_id: SENSOR_FRAME_ID,
       transform: {
         translation: { x: 0, y: 0, z: 1 },
         rotation: { x: 0.383, y: 0, z: 0, w: 0.924 },
@@ -587,7 +588,7 @@ export function ArrowMarkers(): JSX.Element {
     topic: "/arrows",
     receiveTime: { sec: 10, nsec: 0 },
     message: {
-      header: { seq: 0, stamp: { sec: 0, nsec: 0 }, frame_id: SENSOR_FRAME_ID },
+      header: { seq: 0, stamp: { sec: 0, nsec: 0 }, frame_id: BASE_LINK_FRAME_ID },
       id: 0,
       ns: "",
       type: 0,
@@ -699,7 +700,7 @@ export function AutoSelectFrame(): JSX.Element {
     receiveTime: { sec: 10, nsec: 0 },
     message: {
       header: { seq: 0, stamp: { sec: 0, nsec: 0 }, frame_id: FIXED_FRAME_ID },
-      child_frame_id: SENSOR_FRAME_ID,
+      child_frame_id: BASE_LINK_FRAME_ID,
       transform: {
         translation: { x: 1e7, y: 0, z: 0 },
         rotation: QUAT_IDENTITY,
@@ -711,8 +712,8 @@ export function AutoSelectFrame(): JSX.Element {
     topic: "/tf",
     receiveTime: { sec: 10, nsec: 0 },
     message: {
-      header: { seq: 0, stamp: { sec: 0, nsec: 0 }, frame_id: SENSOR_FRAME_ID },
-      child_frame_id: "sensor",
+      header: { seq: 0, stamp: { sec: 0, nsec: 0 }, frame_id: BASE_LINK_FRAME_ID },
+      child_frame_id: SENSOR_FRAME_ID,
       transform: {
         translation: { x: 0, y: 0, z: 1 },
         rotation: { x: 0.383, y: 0, z: 0, w: 0.924 },
@@ -725,7 +726,7 @@ export function AutoSelectFrame(): JSX.Element {
     topic: "/markers",
     receiveTime: { sec: 10, nsec: 0 },
     message: {
-      header: { seq: 0, stamp: { sec: 0, nsec: 0 }, frame_id: SENSOR_FRAME_ID },
+      header: { seq: 0, stamp: { sec: 0, nsec: 0 }, frame_id: BASE_LINK_FRAME_ID },
       id: 1,
       ns: "",
       type: 0,
@@ -793,7 +794,7 @@ export function PoseMarkers(): JSX.Element {
     receiveTime: { sec: 10, nsec: 0 },
     message: {
       header: { seq: 0, stamp: { sec: 0, nsec: 0 }, frame_id: FIXED_FRAME_ID },
-      child_frame_id: SENSOR_FRAME_ID,
+      child_frame_id: BASE_LINK_FRAME_ID,
       transform: {
         translation: { x: 1e7, y: 0, z: 0 },
         rotation: QUAT_IDENTITY,
@@ -805,8 +806,8 @@ export function PoseMarkers(): JSX.Element {
     topic: "/tf",
     receiveTime: { sec: 10, nsec: 0 },
     message: {
-      header: { seq: 0, stamp: { sec: 0, nsec: 0 }, frame_id: SENSOR_FRAME_ID },
-      child_frame_id: "sensor",
+      header: { seq: 0, stamp: { sec: 0, nsec: 0 }, frame_id: BASE_LINK_FRAME_ID },
+      child_frame_id: SENSOR_FRAME_ID,
       transform: {
         translation: { x: 0, y: 0, z: 1 },
         rotation: { x: 0.383, y: 0, z: 0, w: 0.924 },
@@ -819,7 +820,7 @@ export function PoseMarkers(): JSX.Element {
     topic: "/pose",
     receiveTime: { sec: 10, nsec: 0 },
     message: {
-      header: { seq: 0, stamp: { sec: 0, nsec: 0 }, frame_id: "sensor" },
+      header: { seq: 0, stamp: { sec: 0, nsec: 0 }, frame_id: SENSOR_FRAME_ID },
       pose: {
         position: { x: 0, y: 0, z: -1 },
         orientation: { x: 0, y: -Math.SQRT1_2, z: 0, w: Math.SQRT1_2 },
@@ -832,7 +833,7 @@ export function PoseMarkers(): JSX.Element {
     topic: "/pose_with_covariance",
     receiveTime: { sec: 10, nsec: 0 },
     message: {
-      header: { seq: 0, stamp: { sec: 0, nsec: 0 }, frame_id: SENSOR_FRAME_ID },
+      header: { seq: 0, stamp: { sec: 0, nsec: 0 }, frame_id: BASE_LINK_FRAME_ID },
       pose: {
         pose: {
           position: { x: 0, y: 0, z: 0 },
@@ -856,7 +857,7 @@ export function PoseMarkers(): JSX.Element {
     topic: "/pose_with_hidden_covariance",
     receiveTime: { sec: 10, nsec: 0 },
     message: {
-      header: { seq: 0, stamp: { sec: 0, nsec: 0 }, frame_id: "sensor" },
+      header: { seq: 0, stamp: { sec: 0, nsec: 0 }, frame_id: SENSOR_FRAME_ID },
       pose: {
         pose: {
           position: { x: -1, y: 0, z: -1 },
@@ -948,7 +949,7 @@ export function LabelMarkers(): JSX.Element {
     receiveTime: { sec: 10, nsec: 0 },
     message: {
       header: { seq: 0, stamp: { sec: 0, nsec: 0 }, frame_id: "base_link" },
-      child_frame_id: "sensor",
+      child_frame_id: SENSOR_FRAME_ID,
       transform: {
         translation: { x: 0, y: 1, z: 0 },
         rotation: QUAT_IDENTITY,
@@ -968,7 +969,7 @@ export function LabelMarkers(): JSX.Element {
       topic: "/labels",
       receiveTime: { sec: 10, nsec: 0 },
       message: {
-        header: { seq: 0, stamp: { sec: 0, nsec: 0 }, frame_id: "sensor" },
+        header: { seq: 0, stamp: { sec: 0, nsec: 0 }, frame_id: SENSOR_FRAME_ID },
         id: id++,
         ns: "",
         action: 0,
@@ -1046,7 +1047,7 @@ export function CameraInfoRender(): JSX.Element {
     receiveTime: { sec: 10, nsec: 0 },
     message: {
       header: { seq: 0, stamp: { sec: 0, nsec: 0 }, frame_id: FIXED_FRAME_ID },
-      child_frame_id: SENSOR_FRAME_ID,
+      child_frame_id: BASE_LINK_FRAME_ID,
       transform: {
         translation: { x: 1e7, y: 0, z: 0 },
         rotation: QUAT_IDENTITY,
@@ -1058,8 +1059,8 @@ export function CameraInfoRender(): JSX.Element {
     topic: "/tf",
     receiveTime: { sec: 10, nsec: 0 },
     message: {
-      header: { seq: 0, stamp: { sec: 0, nsec: 0 }, frame_id: SENSOR_FRAME_ID },
-      child_frame_id: "sensor",
+      header: { seq: 0, stamp: { sec: 0, nsec: 0 }, frame_id: BASE_LINK_FRAME_ID },
+      child_frame_id: SENSOR_FRAME_ID,
       transform: {
         translation: { x: 0, y: 0, z: 1 },
         rotation: { x: 0.383, y: 0, z: 0, w: 0.924 },
@@ -1072,7 +1073,7 @@ export function CameraInfoRender(): JSX.Element {
     topic: "/rational_polynomial",
     receiveTime: { sec: 10, nsec: 0 },
     message: {
-      header: { seq: 0, stamp: { sec: 0, nsec: 0 }, frame_id: "sensor" },
+      header: { seq: 0, stamp: { sec: 0, nsec: 0 }, frame_id: SENSOR_FRAME_ID },
       height: 480,
       width: 640,
       distortion_model: "rational_polynomial",
@@ -1094,7 +1095,7 @@ export function CameraInfoRender(): JSX.Element {
     topic: "/none",
     receiveTime: { sec: 10, nsec: 0 },
     message: {
-      header: { seq: 0, stamp: { sec: 0, nsec: 0 }, frame_id: "sensor" },
+      header: { seq: 0, stamp: { sec: 0, nsec: 0 }, frame_id: SENSOR_FRAME_ID },
       height: 900,
       width: 1600,
       distortion_model: "",
@@ -1115,7 +1116,7 @@ export function CameraInfoRender(): JSX.Element {
     topic: "/empty",
     receiveTime: { sec: 10, nsec: 0 },
     message: {
-      header: { seq: 0, stamp: { sec: 0, nsec: 0 }, frame_id: "sensor" },
+      header: { seq: 0, stamp: { sec: 0, nsec: 0 }, frame_id: SENSOR_FRAME_ID },
       height: 1080,
       width: 1920,
     },
@@ -1141,7 +1142,7 @@ export function CameraInfoRender(): JSX.Element {
       <ThreeDeeRender
         overrideConfig={{
           ...ThreeDeeRender.defaultConfig,
-          followTf: "sensor",
+          followTf: SENSOR_FRAME_ID,
           scene: { enableStats: false },
           cameraState: {
             distance: 1.25,
