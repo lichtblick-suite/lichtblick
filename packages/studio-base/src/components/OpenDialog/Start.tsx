@@ -150,6 +150,7 @@ export default function Start(props: IStartProps): JSX.Element {
             <Typography
               variant="body2"
               color="inherit"
+              component="div"
               noWrap
               style={{
                 overflow: "hidden",
@@ -159,7 +160,7 @@ export default function Start(props: IStartProps): JSX.Element {
               <TextMiddleTruncate text={recent.title} />
             </Typography>
             {recent.label && (
-              <Typography variant="body2" color="text.secondary" noWrap>
+              <Typography component="div" variant="body2" color="text.secondary" noWrap>
                 {recent.label}
               </Typography>
             )}

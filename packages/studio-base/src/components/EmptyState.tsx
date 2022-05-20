@@ -21,7 +21,13 @@ export default function EmptyState({ children }: PropsWithChildren<unknown>): JS
   return (
     <StyledStack flex="auto" alignItems="center" justifyContent="center">
       <Container maxWidth={false}>
-        <Typography variant="body2" color="text.secondary" lineHeight={1.4} align="center">
+        <Typography
+          component="div"
+          variant="body2"
+          color="text.secondary"
+          lineHeight={1.4}
+          align="center"
+        >
           {children}
         </Typography>
       </Container>
