@@ -361,6 +361,7 @@ export function ThreeDeeRender({ context }: { context: PanelExtensionContext }):
   useEffect(() => {
     if (renderer && currentTime != undefined) {
       renderer.currentTime = currentTime;
+      renderRef.current.needsRender = true;
     }
   }, [currentTime, renderer]);
 
@@ -432,15 +433,18 @@ export function ThreeDeeRender({ context }: { context: PanelExtensionContext }):
 
   // Update the renderer when the camera moves
   useEffect(() => {
+    cameraStore.setCameraState(cameraState);
     renderer?.setCameraState(cameraState);
     renderRef.current.needsRender = true;
-  }, [cameraState, renderer]);
+  }, [cameraState, cameraStore, renderer]);
 
-  // Render a new frame if requested
-  if (renderer && renderRef.current.needsRender) {
-    renderer.animationFrame();
-    renderRef.current.needsRender = false;
-  }
+  useEffect(() => {
+    // Render a new frame if requested
+    if (renderer && renderRef.current.needsRender) {
+      renderer.animationFrame();
+      renderRef.current.needsRender = false;
+    }
+  });
 
   // Invoke the done callback once the render is complete
   useEffect(() => {
