@@ -2,6 +2,8 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
+import icons from "./icons";
+
 export type SettingsTreeFieldValue =
   | { input: "autocomplete"; value?: string; items: ReadonlyArray<string> }
   | { input: "boolean"; value?: boolean }
@@ -79,6 +81,11 @@ export type SettingsTreeNode = {
    * Field inputs attached directly to this node.
    */
   fields?: SettingsTreeFields;
+
+  /**
+   * Optional icon to display next to the node label.
+   */
+  icon?: keyof typeof icons;
 
   /**
    * An optional label shown at the top of this node.

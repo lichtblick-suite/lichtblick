@@ -44,6 +44,7 @@ function buildSettingsTree(config: VariableSliderConfig): SettingsTreeRoots {
   return {
     general: {
       label: "General",
+      icon: "Settings",
       fields: {
         min: { label: "Min", input: "number", value: config.sliderProps.min },
         max: { label: "Max", input: "number", value: config.sliderProps.max },

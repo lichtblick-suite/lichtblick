@@ -95,6 +95,7 @@ function buildSettingsTree(config: Config, eligibleTopics: string[]): SettingsTr
   const settings: SettingsTreeRoots = {
     general: {
       label: "General",
+      icon: "Settings",
       fields: generalSettings,
     },
     topics: {

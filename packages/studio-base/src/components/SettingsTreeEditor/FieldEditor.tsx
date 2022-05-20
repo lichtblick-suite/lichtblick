@@ -349,7 +349,7 @@ function FieldEditorComponent({
 }): JSX.Element {
   const theme = useTheme();
   const indent = Math.min(path.length, 4);
-  const paddingLeft = 1.5 + 2 * (indent - 1);
+  const paddingLeft = 3 * (indent - 1) - (indent - 2);
 
   return (
     <>
@@ -368,12 +368,12 @@ function FieldEditorComponent({
       <div
         style={{
           border: field.error ? `1px solid ${theme.palette.error.main}` : 0,
-          marginRight: theme.spacing(2),
+          marginRight: theme.spacing(1.25),
         }}
       >
         <FieldInput actionHandler={actionHandler} field={field} path={path} />
       </div>
-      <div style={{ gridColumn: "span 2", height: theme.spacing(0.25) }} />
+      <Stack paddingBottom={0.25} style={{ gridColumn: "span 2" }} />
     </>
   );
 }

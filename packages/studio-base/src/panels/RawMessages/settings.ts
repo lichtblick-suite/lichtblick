@@ -10,6 +10,7 @@ export function buildSettingsTree(config: RawMessagesPanelConfig): SettingsTreeR
   return {
     general: {
       label: "General",
+      icon: "Settings",
       fields: {
         expansionMode: {
           label: "Auto Expand",

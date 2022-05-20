@@ -4,12 +4,13 @@
 
 import ArrowDownIcon from "@mui/icons-material/ArrowDropDown";
 import ArrowRightIcon from "@mui/icons-material/ArrowRight";
-import { Divider, ListItemProps, styled as muiStyled, Typography } from "@mui/material";
+import { Divider, ListItemProps, styled as muiStyled, Typography, useTheme } from "@mui/material";
 import { useMemo, useState } from "react";
 import { DeepReadonly } from "ts-essentials";
 
 import { FieldEditor } from "./FieldEditor";
 import { VisibilityToggle } from "./VisibilityToggle";
+import icons from "./icons";
 import { SettingsTreeAction, SettingsTreeNode } from "./types";
 
 export type NodeEditorProps = {
@@ -22,7 +23,7 @@ export type NodeEditorProps = {
   updateSettings?: (path: readonly string[], value: unknown) => void;
 };
 
-const FieldsBottomPad = muiStyled("div", { skipSx: true })(({ theme }) => ({
+const FieldPadding = muiStyled("div", { skipSx: true })(({ theme }) => ({
   gridColumn: "span 2",
   height: theme.spacing(0.5),
 }));
@@ -30,32 +31,47 @@ const FieldsBottomPad = muiStyled("div", { skipSx: true })(({ theme }) => ({
 const NodeHeader = muiStyled("div")(({ theme }) => {
   return {
     display: "flex",
+    gridColumn: "span 2",
+    paddingRight: theme.spacing(1.5),
+
     "&:hover": {
       outline: `1px solid ${theme.palette.primary.main}`,
       outlineOffset: -1,
     },
-    gridColumn: "span 2",
-    paddingRight: theme.spacing(2.25),
   };
 });
 
-const NodeHeaderToggle = muiStyled("div")<{ indent: number }>(({ theme, indent }) => {
+const NodeHeaderToggle = muiStyled("div", {
+  shouldForwardProp: (prop) => prop !== "indent" && prop !== "visible",
+})<{ indent: number; visible: boolean }>(({ theme, indent, visible }) => {
   return {
     display: "flex",
     alignItems: "center",
     cursor: "pointer",
-    paddingLeft: theme.spacing(1.5 + 2 * indent),
+    marginLeft: theme.spacing(1.5 + 2 * indent),
+    opacity: visible ? 1 : 0.6,
+    position: "relative",
     userSelect: "none",
     width: "100%",
   };
 });
 
+const IconWrapper = muiStyled("div")({
+  position: "absolute",
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "center",
+  top: "50%",
+  left: 0,
+  transform: "translate(-125%, -50%)",
+});
+
 function ExpansionArrow({ expanded }: { expanded: boolean }): JSX.Element {
   const Component = expanded ? ArrowDownIcon : ArrowRightIcon;
   return (
-    <Component
-      style={{ position: "absolute", top: 0, left: 0, transform: "translate(-112%, -50%)" }}
-    />
+    <IconWrapper>
+      <Component />
+    </IconWrapper>
   );
 }
 
@@ -63,6 +79,7 @@ function NodeEditorComponent(props: NodeEditorProps): JSX.Element {
   const { actionHandler, defaultOpen = true, settings = {} } = props;
   const [open, setOpen] = useState(defaultOpen);
 
+  const theme = useTheme();
   const indent = props.path.length;
   const allowVisibilityToggle = props.settings?.visible != undefined;
   const visible = props.settings?.visible !== false;
@@ -101,22 +118,35 @@ function NodeEditorComponent(props: NodeEditorProps): JSX.Element {
     );
   });
 
+  const IconComponent =
+    settings.icon != undefined
+      ? icons[settings.icon] // if the icon is a custom icon, use it
+      : childNodes.length > 0
+      ? open // if there are children, use the folder icon
+        ? icons.FolderOpen
+        : icons.Folder
+      : open // if there are no children, use the note icon
+      ? icons.Note
+      : icons.NoteFilled;
+
   return (
     <>
       <NodeHeader>
-        <NodeHeaderToggle indent={indent} onClick={() => setOpen(!open)}>
-          <div
+        <NodeHeaderToggle indent={indent} onClick={() => setOpen(!open)} visible={visible}>
+          {hasProperties && <ExpansionArrow expanded={open} />}
+          <IconComponent
+            fontSize="small"
+            color="inherit"
             style={{
-              display: "inline-flex",
-              opacity: visible ? 0.6 : 0.3,
-              position: "relative",
+              marginRight: theme.spacing(0.5),
+              marginLeft: theme.spacing(-0.75),
+              opacity: 0.8,
             }}
-          >
-            {hasProperties && <ExpansionArrow expanded={open} />}
-          </div>
+          />
           <Typography
             noWrap={true}
             variant="subtitle2"
+            fontWeight={600}
             color={visible ? "text.primary" : "text.disabled"}
           >
             {settings.label ?? "General"}
@@ -133,8 +163,9 @@ function NodeEditorComponent(props: NodeEditorProps): JSX.Element {
       </NodeHeader>
       {open && fieldEditors.length > 0 && (
         <>
+          <FieldPadding />
           {fieldEditors}
-          <FieldsBottomPad />
+          <FieldPadding />
         </>
       )}
       {open && childNodes}

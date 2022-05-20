@@ -164,6 +164,7 @@ function buildSettingsTree(config: Config): SettingsTreeRoots {
   return {
     general: {
       label: "General",
+      icon: "Settings",
       fields: {
         sortByLevel: { label: "Sort By Level", input: "boolean", value: config.sortByLevel },
       },

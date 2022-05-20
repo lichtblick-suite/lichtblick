@@ -10,6 +10,7 @@ export function buildSettingsTree(config: PlotConfig): SettingsTreeRoots {
   return {
     general: {
       label: "General",
+      icon: "Settings",
       fields: {
         title: { label: "Title", input: "string", value: config.title },
         isSynced: { label: "Sync with other plots", input: "boolean", value: config.isSynced },

@@ -178,6 +178,7 @@ export function buildSettingsTree(options: SettingsTreeOptions): SettingsTreeRoo
   return {
     general: {
       label: "General",
+      icon: "Settings",
       fields: {
         followTf: { label: "Frame", input: "select", options: coordinateFrames, value: followTf },
       },

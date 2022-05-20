@@ -42,6 +42,7 @@ export function buildSettingsTree(config: ThreeDimensionalVizConfig): SettingsTr
   return {
     general: {
       label: "General",
+      icon: "Settings",
       fields: rootFields,
     },
     meshRendering: {

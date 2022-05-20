@@ -108,6 +108,7 @@ function buildSettingsTree(config: Config): SettingsTreeRoots {
   return {
     general: {
       label: "General",
+      icon: "Settings",
       fields: {
         transformMarkers: {
           input: "boolean",
