@@ -7,7 +7,7 @@ import { areEqual } from "@foxglove/rostime";
 import { LabelRenderable } from "../../Labels";
 import type { Renderer } from "../../Renderer";
 import { rgbaEqual } from "../../color";
-import { Marker, rosTimeToNanoSec } from "../../ros";
+import { Marker } from "../../ros";
 import { poseApproxEq } from "../../transforms/geometry";
 import { RenderableMarker } from "./RenderableMarker";
 
@@ -39,15 +39,16 @@ export class RenderableTextViewFacing extends RenderableMarker {
       (!marker.frame_locked && !areEqual(marker.header.stamp, prevMarker.header.stamp)) ||
       !rgbaEqual(marker.color, prevMarker.color)
     ) {
+      if (this.label) {
+        this.remove(this.label);
+      }
+
       // A field that affects the label appearance has changed, rebuild the label
       this.label = this._renderer.labels.setLabel(this.name, {
         text: marker.text,
-        frameId: marker.header.frame_id,
-        timestamp: rosTimeToNanoSec(marker.header.stamp),
-        position: marker.pose.position,
         color: marker.color,
-        frameLocked: marker.frame_locked,
       });
+      this.add(this.label);
     } else if (!poseApproxEq(marker.pose, prevMarker.pose)) {
       // Just update the label pose
       this.label.userData.pose = { position: marker.pose.position, orientation: QUAT_IDENTITY };

@@ -104,6 +104,7 @@ export function ThreeDeeRender({ context }: { context: PanelExtensionContext }):
       cameraState,
       followTf: partialConfig?.followTf,
       scene: partialConfig?.scene ?? {},
+      transforms: {},
       topics: partialConfig?.topics ?? {},
     };
   });
@@ -155,14 +156,26 @@ export function ThreeDeeRender({ context }: { context: PanelExtensionContext }):
           set(draft, action.payload.path, action.payload.value);
         });
 
-        // If a topic setting was changed, inform the renderer about it and
-        // draw a new frame
-        if (renderer && action.payload.path[0] === "topics") {
-          const topic = action.payload.path[1]!;
-          const layerType = topicsToLayerTypes.get(topic);
-          if (layerType != undefined) {
-            updateTopicSettings(renderer, topic, layerType, newConfig);
-            renderRef.current.needsRender = true;
+        if (renderer) {
+          const basePath = action.payload.path[0];
+          if (basePath === "transforms") {
+            // A transform setting was changed, inform the renderer about it and
+            // draw a new frame
+            const frameId = action.payload.path[1]!;
+            const transformConfig = newConfig.transforms[frameId];
+            if (transformConfig) {
+              renderer.setTransformSettings(frameId, transformConfig);
+              renderRef.current.needsRender = true;
+            }
+          } else if (basePath === "topics") {
+            // A topic setting was changed, inform the renderer about it and
+            // draw a new frame
+            const topic = action.payload.path[1]!;
+            const layerType = topicsToLayerTypes.get(topic);
+            if (layerType != undefined) {
+              updateTopicSettings(renderer, topic, layerType, newConfig);
+              renderRef.current.needsRender = true;
+            }
           }
         }
 

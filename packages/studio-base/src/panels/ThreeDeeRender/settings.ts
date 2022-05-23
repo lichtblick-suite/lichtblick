@@ -24,6 +24,10 @@ import {
   TRANSFORM_STAMPED_DATATYPES,
 } from "./ros";
 
+export type LayerSettingsTransform = {
+  visible: boolean;
+};
+
 export type ThreeDeeRenderConfig = {
   cameraState: CameraState;
   followTf: string | undefined;
@@ -31,6 +35,7 @@ export type ThreeDeeRenderConfig = {
     enableStats?: boolean;
     backgroundColor?: string;
   };
+  transforms: Record<string, LayerSettingsTransform>;
   topics: Record<string, Record<string, unknown> | undefined>;
 };
 
@@ -117,6 +122,10 @@ mergeSetInto(SUPPORTED_DATATYPES, CAMERA_INFO_DATATYPES);
 
 const ONE_DEGREE = Math.PI / 180;
 
+// This is the unused topic parameter passed to the SettingsNodeProvider for
+// LayerType.Transform, since transforms do not map 1:1 to topics
+const EMPTY_TOPIC = { name: "", datatype: "" };
+
 export type SettingsTreeOptions = {
   config: ThreeDeeRenderConfig;
   coordinateFrames: ReadonlyArray<SelectEntry>;
@@ -126,8 +135,21 @@ export type SettingsTreeOptions = {
   settingsNodeProviders: Map<LayerType, SettingsNodeProvider>;
 };
 
+function buildTransformNode(
+  tfConfigOrFrameId: string | Partial<LayerSettingsTransform>,
+  frameId: string,
+  settingsNodeProvider: SettingsNodeProvider,
+): undefined | SettingsTreeNode {
+  const tfConfig = typeof tfConfigOrFrameId === "string" ? {} : tfConfigOrFrameId;
+  const node = settingsNodeProvider(tfConfig, EMPTY_TOPIC);
+  node.label ??= frameId;
+  node.visible ??= tfConfig.visible ?? true;
+  node.defaultExpansionState ??= "collapsed";
+  return node;
+}
+
 function buildTopicNode(
-  topicConfigOrTopicName: string | Record<string, unknown>,
+  topicConfigOrTopicName: string | Partial<LayerSettings>,
   topic: Topic,
   layerType: LayerType,
   settingsNodeProvider: SettingsNodeProvider,
@@ -138,14 +160,14 @@ function buildTopicNode(
   }
 
   const topicConfig = typeof topicConfigOrTopicName === "string" ? {} : topicConfigOrTopicName;
-  const visible = Boolean(topicConfig["visible"] ?? true);
   const node = settingsNodeProvider(topicConfig, topic);
   node.label ??= topic.name;
-  node.visible = visible;
+  node.visible ??= topicConfig.visible ?? true;
   node.defaultExpansionState ??= "collapsed";
   return node;
 }
 
+const memoBuildTransformNode = memoize(buildTransformNode);
 const memoBuildTopicNode = memoize(buildTopicNode);
 
 export function buildSettingsTree(options: SettingsTreeOptions): SettingsTreeRoots {
@@ -154,8 +176,23 @@ export function buildSettingsTree(options: SettingsTreeOptions): SettingsTreeRoo
   const { cameraState, scene } = config;
   const { backgroundColor } = scene;
 
-  const topicsChildren: SettingsTreeChildren = {};
+  // Build the settings tree for transforms
+  const transformsChildren: SettingsTreeChildren = {};
+  const tfSettingsNodeProvider = settingsNodeProviders.get(LayerType.Transform);
+  if (tfSettingsNodeProvider != undefined) {
+    for (const { value: frameId } of options.coordinateFrames) {
+      // We key our memoized function by the first argument. Since the config
+      // may be undefined we use the config or the topic name
+      const transformConfig = config.transforms[frameId] ?? frameId;
+      const newNode = memoBuildTransformNode(transformConfig, frameId, tfSettingsNodeProvider);
+      if (newNode) {
+        transformsChildren[frameId] = newNode;
+      }
+    }
+  }
 
+  // Build the settings tree for topics
+  const topicsChildren: SettingsTreeChildren = {};
   const sortedTopics = sorted(topics, (a, b) => a.name.localeCompare(b.name));
   for (const topic of sortedTopics) {
     const layerType = topicsToLayerTypes.get(topic.name);
@@ -167,7 +204,7 @@ export function buildSettingsTree(options: SettingsTreeOptions): SettingsTreeRoo
       continue;
     }
     // We key our memoized function by the first argument. Since the config
-    // maybe be undefined we use the config or the topic name.
+    // may be undefined we use the config or the topic name
     const topicConfig = config.topics[topic.name] ?? topic.name;
     const newNode = memoBuildTopicNode(topicConfig, topic, layerType, settingsNodeProvider);
     if (newNode) {
@@ -219,6 +256,11 @@ export function buildSettingsTree(options: SettingsTreeOptions): SettingsTreeRoo
         far: { label: "Far", input: "number", value: cameraState.far, step: 1 },
       },
       defaultExpansionState: "collapsed",
+    },
+    transforms: {
+      label: "Transforms",
+      children: transformsChildren,
+      defaultExpansionState: "expanded",
     },
     topics: {
       label: "Topics",

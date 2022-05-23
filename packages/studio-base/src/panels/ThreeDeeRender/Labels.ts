@@ -11,8 +11,7 @@ import { fonts } from "@foxglove/studio-base/util/sharedStyleConstants";
 import { Renderer } from "./Renderer";
 import { makeRgba, rgbaToCssString, stringToRgba, rgbaToLinear } from "./color";
 import { DetailLevel } from "./lod";
-import { ColorRGBA, Pose, Vector3 } from "./ros";
-import { updatePose } from "./updatePose";
+import { ColorRGBA } from "./ros";
 
 const log = Logger.getLogger(__filename);
 
@@ -29,17 +28,6 @@ const DARK_BACKGROUND_COLOR = stringToRgba(makeRgba(), DARK_BACKGROUND_COLOR_STR
 export type LabelOptions = {
   /** Text string of the label. */
   text: string;
-  /** Coordinate frame to render the label in. */
-  frameId: string;
-  /** World position of the label relative to the origin of frameId. */
-  position: Vector3;
-
-  /** If true, the label position is recomputed each frame as the scene
-   * coordinate frames move. Defaults to true. */
-  frameLocked?: boolean;
-  /** Timestamp when the label first appears. Only used when frameLocked is
-   * false. Defaults to 0 */
-  timestamp?: bigint;
   /** Text color. Defaults to a theme-derived color. */
   color?: ColorRGBA;
   /** Font size in pixels. Defaults to 14. */
@@ -74,7 +62,6 @@ export type LabelRenderable = THREE.Sprite & {
   userData: {
     id: string;
     label: LabelOptions;
-    pose: Pose;
   };
 };
 
@@ -99,9 +86,8 @@ export class Labels extends THREE.Object3D {
         sizeAttenuation: true,
       }),
     ) as LabelRenderable;
-    const pose = { position: label.position, orientation: { x: 0, y: 0, z: 0, w: 1 } };
     sprite.name = `label:${id}`;
-    sprite.userData = { id, label, pose };
+    sprite.userData = { id, label };
     const width = canvas.width / scale;
     const height = canvas.height / scale;
     const pixelsPerUnit = label.pixelsPerUnit ?? 100;
@@ -116,7 +102,6 @@ export class Labels extends THREE.Object3D {
     if (prevSprite) {
       this.remove(prevSprite);
     }
-    this.add(sprite);
     this.sprites.set(id, sprite);
 
     return sprite;
@@ -125,7 +110,6 @@ export class Labels extends THREE.Object3D {
   removeById(id: string): boolean {
     const sprite = this.sprites.get(id);
     if (sprite) {
-      this.remove(sprite);
       this.sprites.delete(id);
       return true;
     }
@@ -140,32 +124,6 @@ export class Labels extends THREE.Object3D {
     // Redraw all of the labels to use the new color scheme
     for (const [id, sprite] of this.sprites.entries()) {
       this.setLabel(id, sprite.userData.label);
-    }
-  }
-
-  startFrame(currentTime: bigint): void {
-    const renderFrameId = this.renderer.renderFrameId;
-    const fixedFrameId = this.renderer.fixedFrameId;
-    if (renderFrameId == undefined || fixedFrameId == undefined) {
-      this.visible = false;
-      return;
-    }
-    this.visible = true;
-
-    for (const sprite of this.sprites.values()) {
-      const frameLocked = sprite.userData.label.frameLocked ?? true;
-      const srcTime = frameLocked ? currentTime : sprite.userData.label.timestamp ?? 0n;
-      const frameId = sprite.userData.label.frameId;
-      const updated = updatePose(
-        sprite,
-        this.renderer.transformTree,
-        renderFrameId,
-        fixedFrameId,
-        frameId,
-        currentTime,
-        srcTime,
-      );
-      sprite.visible = updated;
     }
   }
 
