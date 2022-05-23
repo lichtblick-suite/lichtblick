@@ -49,7 +49,7 @@ export function ColorPickerInput(props: ColorPickerInputProps): JSX.Element {
   const open = Boolean(anchorElement);
 
   const isValidColor = value != undefined && tinycolor(value).isValid();
-  const swatchColor = isValidColor ? value : "#00000044";
+  const swatchColor = isValidColor ? tinycolor(value).toHex8String() : "#00000044";
 
   return (
     <Root>
