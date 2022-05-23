@@ -215,6 +215,10 @@ function RawMessages(props: Props) {
 
   const settingsActionHandler = useCallback(
     (action: SettingsTreeAction) => {
+      if (action.action !== "update") {
+        return;
+      }
+
       if (action.payload.input === "select") {
         saveConfig({
           autoExpandMode: action.payload.value as RawMessagesPanelConfig["autoExpandMode"],

@@ -369,6 +369,10 @@ function BaseRenderer(props: Props): JSX.Element {
 
   const actionHandler = useCallback(
     (action: SettingsTreeAction) => {
+      if (action.action !== "update") {
+        return;
+      }
+
       const { path, value } = action.payload;
       saveConfig(
         produce(config, (draft) => {

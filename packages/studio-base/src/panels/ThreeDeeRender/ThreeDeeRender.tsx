@@ -152,6 +152,10 @@ export function ThreeDeeRender({ context }: { context: PanelExtensionContext }):
   // Handle user changes in the settings sidebar
   const actionHandler = useCallback(
     (action: SettingsTreeAction) => {
+      if (action.action !== "update") {
+        return;
+      }
+
       setConfig((oldConfig) => {
         const newConfig = produce(oldConfig, (draft) => {
           set(draft, action.payload.path, action.payload.value);

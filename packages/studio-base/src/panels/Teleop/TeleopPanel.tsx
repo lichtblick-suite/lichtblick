@@ -136,6 +136,10 @@ function TeleopPanel(props: TeleopPanelProps): JSX.Element {
   });
 
   const settingsActionHandler = useCallback((action: SettingsTreeAction) => {
+    if (action.action !== "update") {
+      return;
+    }
+
     setConfig((previous) => {
       const newConfig = { ...previous };
       set(newConfig, action.payload.path, action.payload.value);

@@ -66,7 +66,33 @@ export type SettingsTreeFields = Record<string, SettingsTreeField>;
 
 export type SettingsTreeChildren = Record<string, SettingsTreeNode>;
 
+/**
+ * An action that can be offered to the user to perform at the
+ * level of a settings node.
+ */
+export type SettingsTreeNodeAction = {
+  /**
+   * A unique idenfier for the action.
+   */
+  id: string;
+
+  /**
+   * A descriptive label for the action.
+   */
+  label: string;
+
+  /**
+   * Optional icon to display with the action.
+   */
+  icon?: keyof typeof icons;
+};
+
 export type SettingsTreeNode = {
+  /**
+   * An array of actions that can be performeed on this node.
+   */
+  actions?: SettingsTreeNodeAction[];
+
   /**
    * Other settings tree nodes nested under this node.
    */
@@ -110,13 +136,18 @@ type DistributivePick<T, K extends keyof T> = T extends unknown ? Pick<T, K> : n
  * Represents actions that can be dispatched to source of the SettingsTree to implement
  * edits and updates.
  */
-export type SettingsTreeAction = {
-  action: "update";
-  payload: { path: ReadonlyArray<string> } & DistributivePick<
-    SettingsTreeFieldValue,
-    "input" | "value"
-  >;
-};
+export type SettingsTreeAction =
+  | {
+      action: "update";
+      payload: { path: ReadonlyArray<string> } & DistributivePick<
+        SettingsTreeFieldValue,
+        "input" | "value"
+      >;
+    }
+  | {
+      action: "perform-node-action";
+      payload: { id: string; path: readonly string[] };
+    };
 
 export type SettingsTreeRoots = Record<string, SettingsTreeNode>;
 

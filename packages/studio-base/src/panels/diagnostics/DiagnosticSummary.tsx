@@ -229,6 +229,10 @@ function DiagnosticSummary(props: Props): JSX.Element {
 
   const actionHandler = useCallback(
     (action: SettingsTreeAction) => {
+      if (action.action !== "update") {
+        return;
+      }
+
       const { input, path, value } = action.payload;
       if (input === "boolean" && path[1] === "sortByLevel") {
         saveConfig(

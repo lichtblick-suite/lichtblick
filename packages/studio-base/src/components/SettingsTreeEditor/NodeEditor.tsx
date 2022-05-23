@@ -4,11 +4,21 @@
 
 import ArrowDownIcon from "@mui/icons-material/ArrowDropDown";
 import ArrowRightIcon from "@mui/icons-material/ArrowRight";
-import { Divider, ListItemProps, styled as muiStyled, Typography, useTheme } from "@mui/material";
+import {
+  Divider,
+  IconButton,
+  ListItemProps,
+  styled as muiStyled,
+  Typography,
+  useTheme,
+} from "@mui/material";
 import { useMemo, useState } from "react";
 import { DeepReadonly } from "ts-essentials";
 
+import Stack from "@foxglove/studio-base/components/Stack";
+
 import { FieldEditor } from "./FieldEditor";
+import { NodeActionsMenu } from "./NodeActionsMenu";
 import { VisibilityToggle } from "./VisibilityToggle";
 import icons from "./icons";
 import { SettingsTreeAction, SettingsTreeNode } from "./types";
@@ -91,6 +101,10 @@ function NodeEditorComponent(props: NodeEditorProps): JSX.Element {
     });
   };
 
+  const handleNodeAction = (actionId: string) => {
+    actionHandler({ action: "perform-node-action", payload: { id: actionId, path: props.path } });
+  };
+
   const { fields, children } = settings;
   const hasProperties = fields != undefined || children != undefined;
 
@@ -152,14 +166,25 @@ function NodeEditorComponent(props: NodeEditorProps): JSX.Element {
             {settings.label ?? "General"}
           </Typography>
         </NodeHeaderToggle>
-        <VisibilityToggle
-          edge="end"
-          size="small"
-          checked={visible}
-          onChange={toggleVisibility}
-          style={{ opacity: allowVisibilityToggle ? 1 : 0 }}
-          disabled={!allowVisibilityToggle}
-        />
+        <Stack alignItems="center" direction="row">
+          {/* this is just here to get consistent height */}
+          <IconButton style={{ visibility: "hidden" }}>
+            <ArrowDownIcon fontSize="small" color="inherit" />
+          </IconButton>
+          {settings.actions && (
+            <NodeActionsMenu actions={settings.actions} onSelectAction={handleNodeAction} />
+          )}
+          {settings.visible != undefined && (
+            <VisibilityToggle
+              edge="end"
+              size="small"
+              checked={visible}
+              onChange={toggleVisibility}
+              style={{ opacity: allowVisibilityToggle ? 1 : 0 }}
+              disabled={!allowVisibilityToggle}
+            />
+          )}
+        </Stack>
       </NodeHeader>
       {open && fieldEditors.length > 0 && (
         <>

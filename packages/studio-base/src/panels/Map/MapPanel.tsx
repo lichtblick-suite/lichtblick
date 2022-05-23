@@ -210,6 +210,10 @@ function MapPanel(props: MapPanelProps): JSX.Element {
   }, [topics]);
 
   const settingsActionHandler = useCallback((action: SettingsTreeAction) => {
+    if (action.action !== "update") {
+      return;
+    }
+
     const { path, input, value } = action.payload;
 
     if (path[0] === "topics" && input === "boolean") {

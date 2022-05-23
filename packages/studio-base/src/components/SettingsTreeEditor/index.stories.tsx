@@ -4,7 +4,8 @@
 
 import { Box } from "@mui/material";
 import produce from "immer";
-import { useCallback, useMemo } from "react";
+import { last } from "lodash";
+import { useCallback, useMemo, useState, useEffect } from "react";
 
 import { MessagePathInputStoryFixture } from "@foxglove/studio-base/components/MessagePathSyntax/fixture";
 import MockPanelContextProvider from "@foxglove/studio-base/components/MockPanelContextProvider";
@@ -28,6 +29,11 @@ const BasicSettings: SettingsTreeRoots = {
     label: "General",
     icon: "Settings",
     visible: true,
+    actions: [
+      { id: "add-grid", label: "Add new grid", icon: "Grid" },
+      { id: "add-background", label: "Add new background", icon: "Background" },
+      { id: "reset-values", label: "Reset values" },
+    ],
     fields: {
       numberWithPrecision: {
         input: "number",
@@ -43,6 +49,7 @@ const BasicSettings: SettingsTreeRoots = {
         error: "This field has an error message that should be displayed to the user",
       },
     },
+    children: {},
   },
   complex_inputs: {
     label: "Complex Inputs",
@@ -349,14 +356,66 @@ function updateSettingsTreeRoots(
   });
 }
 
-function Wrapper({ roots }: { roots: SettingsTreeRoots }): JSX.Element {
-  const [settingsRoots, setSettingsRoots] = React.useState({ ...roots });
+function makeBackgroundNode(index: number): SettingsTreeNode {
+  return {
+    label: `Background ${index}`,
+    icon: "Background",
+    fields: {
+      url: { label: "URL", input: "string", value: "http://example.com/img.jpg" },
+    },
+    actions: [{ id: "remove-background", label: "Remove Background" }],
+  };
+}
 
-  const actionHandler = useCallback((action: SettingsTreeAction) => {
-    setSettingsRoots((previous) =>
-      updateSettingsTreeRoots(previous, action.payload.path, action.payload.value),
-    );
-  }, []);
+function makeGridNode(index: number): SettingsTreeNode {
+  return {
+    label: `Grid ${index}`,
+    icon: "Grid",
+    fields: {
+      xsize: { label: "X Size", input: "number", value: 1 },
+      ysize: { label: "Y Size", input: "number", value: 2 },
+    },
+    actions: [{ id: "remove-grid", label: "Remove Grid" }],
+  };
+}
+
+function Wrapper({ roots }: { roots: SettingsTreeRoots }): JSX.Element {
+  const [settingsRoots, setSettingsRoots] = useState({ ...roots });
+  const [dynamicNodes, setDynamicNodes] = useState<Record<string, SettingsTreeNode>>({});
+
+  const actionHandler = useCallback(
+    (action: SettingsTreeAction) => {
+      if (action.action === "perform-node-action") {
+        if (action.payload.id === "add-grid") {
+          const nodeCount = Object.keys(dynamicNodes).length;
+          setDynamicNodes((oldNodes) => ({
+            ...oldNodes,
+            [`grid${nodeCount + 1}`]: makeGridNode(nodeCount + 1),
+          }));
+        }
+        if (action.payload.id === "add-background") {
+          const nodeCount = Object.keys(dynamicNodes).length;
+          setDynamicNodes((oldNodes) => ({
+            ...oldNodes,
+            [`background{nodeCount + 1}`]: makeBackgroundNode(nodeCount + 1),
+          }));
+        }
+        if (action.payload.id === "remove-grid" || action.payload.id === "remove-background") {
+          setDynamicNodes((oldNodes) => {
+            const newNodes = { ...oldNodes };
+            delete newNodes[last(action.payload.path)!];
+            return newNodes;
+          });
+        }
+        return;
+      }
+
+      setSettingsRoots((previous) =>
+        updateSettingsTreeRoots(previous, action.payload.path, action.payload.value),
+      );
+    },
+    [dynamicNodes],
+  );
 
   const settingsTree = useMemo(
     () => ({
@@ -366,6 +425,16 @@ function Wrapper({ roots }: { roots: SettingsTreeRoots }): JSX.Element {
     }),
     [settingsRoots, actionHandler],
   );
+
+  useEffect(() => {
+    setSettingsRoots(
+      produce((draft) => {
+        if ("general" in draft) {
+          (draft as any).general.children = dynamicNodes;
+        }
+      }),
+    );
+  }, [dynamicNodes]);
 
   return (
     <MockPanelContextProvider>

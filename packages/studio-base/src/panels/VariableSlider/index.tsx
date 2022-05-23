@@ -76,6 +76,10 @@ function VariableSliderPanel(props: Props): React.ReactElement {
 
   const actionHandler = useCallback(
     (action: SettingsTreeAction) => {
+      if (action.action !== "update") {
+        return;
+      }
+
       saveConfig(
         produce(props.config, (draft) => {
           const path = action.payload.path.slice(1);
