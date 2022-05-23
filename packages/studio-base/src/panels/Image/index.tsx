@@ -11,25 +11,19 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { useTheme } from "@fluentui/react";
-import WavesIcon from "@mdi/svg/svg/waves.svg";
 import { Stack, Theme } from "@mui/material";
 import { makeStyles } from "@mui/styles";
 import cx from "classnames";
 import produce from "immer";
-import { set } from "lodash";
+import { difference, set, union } from "lodash";
 import { useEffect, useState, useMemo, useCallback, useRef } from "react";
 
 import { useDataSourceInfo } from "@foxglove/studio-base/PanelAPI";
-import Icon from "@foxglove/studio-base/components/Icon";
 import { useMessagePipeline } from "@foxglove/studio-base/components/MessagePipeline";
 import Panel from "@foxglove/studio-base/components/Panel";
 import { usePanelContext } from "@foxglove/studio-base/components/PanelContext";
 import PanelToolbar from "@foxglove/studio-base/components/PanelToolbar";
-import {
-  SettingsTreeAction,
-  SettingsTreeRoots,
-} from "@foxglove/studio-base/components/SettingsTreeEditor/types";
+import { SettingsTreeAction } from "@foxglove/studio-base/components/SettingsTreeEditor/types";
 import { usePanelSettingsTreeUpdate } from "@foxglove/studio-base/providers/PanelSettingsEditorContextProvider";
 import inScreenshotTests from "@foxglove/studio-base/stories/inScreenshotTests";
 import { CameraInfo } from "@foxglove/studio-base/types/Messages";
@@ -42,6 +36,7 @@ import { useCameraInfo, ANNOTATION_DATATYPES, useImagePanelMessages } from "./ho
 import helpContent from "./index.help.md";
 import { NORMALIZABLE_IMAGE_DATATYPES } from "./lib/normalizeMessage";
 import { getRelatedMarkerTopics, getMarkerOptions } from "./lib/util";
+import { buildSettingsTree } from "./settings";
 import type { Config, SaveImagePanelConfig, PixelData } from "./types";
 
 type Props = {
@@ -104,60 +99,6 @@ const useStyles = makeStyles((theme: Theme) => ({
   },
 }));
 
-function buildSettingsTree(config: Config): SettingsTreeRoots {
-  return {
-    general: {
-      label: "General",
-      icon: "Settings",
-      fields: {
-        transformMarkers: {
-          input: "boolean",
-          label: "Synchronize Markers",
-          value: config.transformMarkers,
-        },
-        smooth: {
-          input: "boolean",
-          label: "Bilinear Smoothing",
-          value: config.smooth ?? false,
-        },
-        flipHorizontal: {
-          input: "boolean",
-          label: "Flip Horizontal",
-          value: config.flipHorizontal ?? false,
-        },
-        flipVertical: {
-          input: "boolean",
-          label: "Flip Vertical",
-          value: config.flipVertical ?? false,
-        },
-        rotation: {
-          input: "select",
-          label: "Rotation",
-          value: config.rotation ?? 0,
-          options: [
-            { label: "0°", value: 0 },
-            { label: "90°", value: 90 },
-            { label: "180°", value: 180 },
-            { label: "270°", value: 270 },
-          ],
-        },
-        minValue: {
-          input: "number",
-          label: "Minimum Value (depth images)",
-          placeholder: "0",
-          value: config.minValue,
-        },
-        maxValue: {
-          input: "number",
-          label: "Maximum Value (depth images)",
-          placeholder: "10000",
-          value: config.maxValue,
-        },
-      },
-    },
-  };
-}
-
 const BottomBar = ({ children }: { children?: React.ReactNode }) => {
   const classes = useStyles();
   return (
@@ -175,7 +116,6 @@ function ImageView(props: Props) {
   const classes = useStyles();
   const { config, saveConfig } = props;
   const { cameraTopic, enabledMarkerTopics, transformMarkers } = config;
-  const theme = useTheme();
   const { topics } = useDataSourceInfo();
   const cameraTopicFullObject = useMemo(
     () => getTopicsByTopicName(topics)[cameraTopic],
@@ -199,39 +139,6 @@ function ImageView(props: Props) {
     }
   }, [allImageTopics, config, saveConfig]);
 
-  const actionHandler = useCallback(
-    (action: SettingsTreeAction) => {
-      if (action.action !== "update") {
-        return;
-      }
-
-      saveConfig(
-        produce(config, (draft) => {
-          set(draft, action.payload.path.slice(1), action.payload.value);
-        }),
-      );
-    },
-    [config, saveConfig],
-  );
-
-  useEffect(() => {
-    updatePanelSettingsTree(panelId, {
-      actionHandler,
-      roots: buildSettingsTree(config),
-    });
-  }, [actionHandler, config, panelId, updatePanelSettingsTree]);
-
-  const relatedAnnotationTopics = useMemo(
-    () => getMarkerOptions(cameraTopic, topics, ANNOTATION_DATATYPES),
-    [cameraTopic, topics],
-  );
-
-  const allAnnotationTopics = useMemo(() => {
-    return topics
-      .filter((topic) => (ANNOTATION_DATATYPES as readonly string[]).includes(topic.datatype))
-      .map((topic) => topic.name);
-  }, [topics]);
-
   const onChangeCameraTopic = useCallback(
     (newCameraTopic: string) => {
       const newAvailableMarkerTopics = getMarkerOptions(
@@ -252,29 +159,56 @@ function ImageView(props: Props) {
     },
     [enabledMarkerTopics, saveConfig, topics],
   );
-  const imageTopicDropdown = useMemo(() => {
-    const items = allImageTopics.map((topic) => {
-      return {
-        name: topic.name,
-        selected: topic.name === cameraTopic,
-      };
-    });
 
-    function onChange(newTopics: string[]) {
-      const newTopic = newTopics[0];
-      if (newTopic) {
-        onChangeCameraTopic(newTopic);
+  const actionHandler = useCallback(
+    (action: SettingsTreeAction) => {
+      if (action.action !== "update") {
+        return;
       }
-    }
 
-    const title = cameraTopic
-      ? cameraTopic
-      : items.length === 0
-      ? "No camera topics"
-      : "Select a camera topic";
+      const { path, value } = action.payload;
+      saveConfig(
+        produce(config, (draft) => {
+          if (path[0] === "markers") {
+            const markerTopic = path[1] ?? "unknown";
+            const newValue =
+              value === true
+                ? union(draft.enabledMarkerTopics, [markerTopic])
+                : difference(draft.enabledMarkerTopics, [markerTopic]);
+            draft.enabledMarkerTopics = newValue;
+          } else {
+            set(draft, path.slice(1), value);
+          }
+        }),
+      );
 
-    return <TopicDropdown multiple={false} title={title} items={items} onChange={onChange} />;
-  }, [cameraTopic, allImageTopics, onChangeCameraTopic]);
+      if (path[1] === "cameraTopic" && typeof value === "string") {
+        onChangeCameraTopic(value);
+      }
+    },
+    [config, onChangeCameraTopic, saveConfig],
+  );
+
+  const allAnnotationTopics = useMemo(() => {
+    return topics
+      .filter((topic) => (ANNOTATION_DATATYPES as readonly string[]).includes(topic.datatype))
+      .map((topic) => topic.name);
+  }, [topics]);
+
+  useEffect(() => {
+    updatePanelSettingsTree(panelId, {
+      actionHandler,
+      roots: buildSettingsTree(config, allImageTopics, allAnnotationTopics, enabledMarkerTopics),
+    });
+  }, [
+    actionHandler,
+    allAnnotationTopics,
+    allImageTopics,
+    config,
+    enabledMarkerTopics,
+    panelId,
+    updatePanelSettingsTree,
+  ]);
 
   const cameraInfo = useCameraInfo(cameraTopic);
 
@@ -285,49 +219,6 @@ function ImageView(props: Props) {
     annotationTopics: enabledMarkerTopics,
     synchronize: shouldSynchronize,
   });
-
-  const rootRef = useRef<HTMLDivElement>(ReactNull);
-
-  const annotationDropdown = useMemo(() => {
-    const allSet = new Set(allAnnotationTopics);
-    const enabledAnnotationTopics = new Set(enabledMarkerTopics);
-
-    const dropdownTopics = [];
-
-    // Related topics come first since those are more likely to be what the user wants to show
-    for (const topic of relatedAnnotationTopics) {
-      dropdownTopics.push({
-        name: topic,
-        selected: enabledAnnotationTopics.has(topic),
-      });
-
-      allSet.delete(topic);
-    }
-
-    // Then add all the other available annotation topics
-    for (const topic of allSet) {
-      dropdownTopics.push({
-        name: topic,
-        selected: enabledAnnotationTopics.has(topic),
-      });
-    }
-
-    function onChange(activeTopics: string[]) {
-      saveConfig({
-        enabledMarkerTopics: activeTopics,
-      });
-    }
-
-    return (
-      <TopicDropdown
-        anchorEl={rootRef.current}
-        multiple={true}
-        title="Annotations"
-        items={dropdownTopics}
-        onChange={onChange}
-      />
-    );
-  }, [allAnnotationTopics, enabledMarkerTopics, relatedAnnotationTopics, saveConfig]);
 
   const lastImageMessageRef = useRef(image);
   if (image) {
@@ -366,52 +257,39 @@ function ImageView(props: Props) {
       />
     );
 
-    return (
-      <BottomBar>
-        {topicTimestamp}
-        <Icon
-          onClick={() => saveConfig({ transformMarkers: !transformMarkers })}
-          tooltip={
-            transformMarkers
-              ? "Markers are being transformed by Foxglove Studio based on the camera model. Click to turn it off."
-              : `Markers can be transformed by Foxglove Studio based on the camera model. Click to turn it on.`
-          }
-          fade
-          size="medium"
-        >
-          <WavesIcon
-            style={{
-              color: transformMarkers
-                ? theme.semanticColors.warningBackground
-                : theme.semanticColors.disabledText,
-            }}
-          />
-        </Icon>
-      </BottomBar>
-    );
+    return <BottomBar>{topicTimestamp}</BottomBar>;
   };
+
+  const imageTopicDropdown = useMemo(() => {
+    const items = allImageTopics.map((topic) => {
+      return {
+        name: topic.name,
+        selected: topic.name === cameraTopic,
+      };
+    });
+
+    function onChange(newTopics: string[]) {
+      const newTopic = newTopics[0];
+      if (newTopic) {
+        onChangeCameraTopic(newTopic);
+      }
+    }
+
+    const title = cameraTopic
+      ? cameraTopic
+      : items.length === 0
+      ? "No camera topics"
+      : "Select a camera topic";
+
+    return <TopicDropdown multiple={false} title={title} items={items} onChange={onChange} />;
+  }, [cameraTopic, allImageTopics, onChangeCameraTopic]);
 
   const showEmptyState = !image;
 
   return (
     <Stack flex="auto" overflow="hidden" position="relative">
-      {/*
-      HACK:
-      When the floating panel toolbar disappears, it also removes the anchor elements for
-      the dropdown menus. When the anchor element is removed, the dropdown menu re-positions to a
-      different part of the screen. To prevent the re-positioning of the open menu, we use an empty
-      div as the anchor for our annotation dropdown. This keeps the annotation dropdown stable even
-      when the toolbar goes away.
-
-      The image topic dropdown does not need the anchor because it closes after an image is selected.
-      The annotation dropdown allows multiple selection and remains open.
-      */}
-      <div ref={rootRef}></div>
       <PanelToolbar helpContent={helpContent}>
-        <div className={classes.controls}>
-          {imageTopicDropdown}
-          {annotationDropdown}
-        </div>
+        <div className={classes.controls}>{imageTopicDropdown}</div>
       </PanelToolbar>
       <Stack width="100%" height="100%">
         {/* Always render the ImageCanvas because it's expensive to unmount and start up. */}

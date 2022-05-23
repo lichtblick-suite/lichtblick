@@ -64,9 +64,10 @@ const NodeHeaderToggle = muiStyled("div", {
   shouldForwardProp: (prop) => prop !== "indent" && prop !== "visible",
 })<{ indent: number; visible: boolean }>(({ theme, indent, visible }) => {
   return {
-    display: "flex",
+    display: "grid",
     alignItems: "center",
     cursor: "pointer",
+    gridTemplateColumns: "auto 1fr auto",
     marginLeft: theme.spacing(1.5 + 2 * indent),
     opacity: visible ? 1 : 0.6,
     position: "relative",
