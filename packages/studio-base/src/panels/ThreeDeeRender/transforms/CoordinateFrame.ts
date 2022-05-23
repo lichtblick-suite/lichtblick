@@ -128,25 +128,24 @@ export class CoordinateFrame {
     maxDelta: Duration,
   ): boolean {
     // perf-sensitive: function params instead of options object to avoid allocations
-    if (this._transforms.size === 0) {
+    const transformCount = this._transforms.size;
+    if (transformCount === 0) {
+      return false;
+    } else if (transformCount === 1) {
+      // If only a single transform exists, check if `time` is before or equal to
+      // `latestTime + maxDelta`
+      const [latestTime, latestTf] = this._transforms.maxEntry()!;
+      if (time <= latestTime + maxDelta) {
+        outLower[0] = outUpper[0] = latestTime;
+        outLower[1] = outUpper[1] = latestTf;
+        return true;
+      }
       return false;
     }
 
     // If there is no transform at or before `time`, early exit
     const lte = this._transforms.findLessThanOrEqual(time);
     if (!lte) {
-      return false;
-    }
-
-    // If only a single transform exists, check if `time` is before or equal to
-    // `latestTime + maxDelta`
-    if (this._transforms.size === 1) {
-      const [latestTime, latestTf] = lte;
-      if (time <= latestTime + maxDelta) {
-        outLower[0] = outUpper[0] = latestTime;
-        outLower[1] = outUpper[1] = latestTf;
-        return true;
-      }
       return false;
     }
 
@@ -388,7 +387,7 @@ export class CoordinateFrame {
     }
 
     mat4.multiply(tempMatrix, tempMatrix, tempTransform.setPose(input).matrix());
-    tempTransform.setMatrix(tempMatrix).toPose(out);
+    tempTransform.setMatrixUnscaled(tempMatrix).toPose(out);
     return true;
   }
 }

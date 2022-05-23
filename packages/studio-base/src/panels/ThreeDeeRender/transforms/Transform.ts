@@ -4,16 +4,7 @@
 
 import { mat4, vec3, quat, ReadonlyMat4, ReadonlyVec3, ReadonlyQuat } from "gl-matrix";
 
-import {
-  Pose,
-  approxEq,
-  getRotationNoScaling,
-  mat4Identity,
-  quatIdentity,
-  vec3Identity,
-} from "./geometry";
-
-const tempScale = vec3Identity();
+import { Pose, getRotationNoScaling, mat4Identity, quatIdentity, vec3Identity } from "./geometry";
 
 /**
  * Transform represents a position and rotation in 3D space. It can be set and
@@ -86,19 +77,9 @@ export class Transform {
   }
 
   /**
-   * Update position and rotation from a matrix
+   * Update position and rotation from a matrix with unit scale
    */
-  setMatrix(matrix: ReadonlyMat4): this {
-    // Ensure the matrix has no scaling
-    mat4.getScaling(tempScale, matrix);
-    if (!approxEq(tempScale[0], 1) || !approxEq(tempScale[1], 1) || !approxEq(tempScale[2], 1)) {
-      throw new Error(
-        `setMatrix given a matrix with non-unit scale [${tempScale[0]}, ${tempScale[1]}, ${
-          tempScale[2]
-        }]: ${mat4.str(matrix)}`,
-      );
-    }
-
+  setMatrixUnscaled(matrix: ReadonlyMat4): this {
     mat4.copy(this._matrix, matrix);
     mat4.getTranslation(this._position, matrix);
     getRotationNoScaling(this._rotation, matrix); // A faster mat4.getRotation when there is no scaling
