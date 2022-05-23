@@ -30,7 +30,7 @@ function getNormalizedLevel(datatype: string, raw: LogMessageEvent["message"]) {
     case "foxglove.Log":
       return (raw as FoxgloveMessages[typeof datatype]).level;
     case "rosgraph_msgs/Log":
-    case "rosgraph_msgs/msg/Log":
+    case "rcl_interfaces/msg/Log":
       return rosLevelToLogLevel((raw as Ros1RosgraphMsgs$Log).level);
   }
 
@@ -48,7 +48,7 @@ function getNormalizedStamp(datatype: string, raw: LogMessageEvent["message"]): 
     }
     case "rosgraph_msgs/Log":
       return (raw as Ros1RosgraphMsgs$Log).header.stamp;
-    case "rosgraph_msgs/msg/Log":
+    case "rcl_interfaces/msg/Log":
       return (raw as Ros2RosgraphMsgs$Log).stamp;
   }
 

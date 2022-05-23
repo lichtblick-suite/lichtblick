@@ -47,6 +47,7 @@ export default function Metadata({
     <SMetadata>
       {!diffMessage && datatype && (
         <Link
+          target="_blank"
           color="inherit"
           underline="hover"
           rel="noopener noreferrer"
