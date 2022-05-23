@@ -126,13 +126,32 @@ export default class PinholeCameraModel {
     const cx = P[2];
     const cy = P[6];
 
+    // This method does three things:
+    //   1. Undo the camera matrix
+    //   2. Iterative optimization to undo distortion
+    //   3. Reapply the camera matrix
+    // The distortion model is non-linear, so we use fixed-point iteration to
+    // incrementally iterate to an approximation of the solution. This approach
+    // is described at <http://peterabeles.com/blog/?p=73>. The Jacobi method is
+    // used here, balancing accuracy and speed. A more precise method such as
+    // Levenberg-Marquardt or the exact formula described in
+    // <https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4934233/> could be used,
+    // but they are slower and less suitable for real-time applications such as
+    // visualization. Note that our method is only locally convergent, requiring
+    // a good "initial guess". This means we may not converge for extreme values
+    // such as points close to the focal plane.
+    //
+    // The implementation is based on code from
+    // <https://yangyushi.github.io/code/2020/03/04/opencv-undistort.html>
+    // You can read more about the equations used in the pinhole camera model at
+    // <https://docs.opencv.org/4.x/d9/d0c/group__calib3d.html#details>
     let x = (point.x - cx) / fx;
     let y = (point.y - cy) / fy;
 
     const x0 = x;
     const y0 = y;
     for (let i = 0; i < iterations; i++) {
-      const r2 = x ** 2 + y ** 2;
+      const r2 = x ** 2 + y ** 2; // squared distance in the image projected by the pinhole model
       const k_inv = 1 / (1 + k1 * r2 + k2 * r2 ** 2 + k3 * r2 ** 3);
       const delta_x = 2 * p1 * x * y + p2 * (r2 + 2 * x ** 2);
       const delta_y = p1 * (r2 + 2 * y ** 2) + 2 * p2 * x * y;
