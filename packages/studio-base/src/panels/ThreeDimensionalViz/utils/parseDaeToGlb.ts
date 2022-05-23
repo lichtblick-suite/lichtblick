@@ -2,8 +2,7 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import type { Object3D } from "three";
-import { GLTFExporter, GLTFExporterOptions } from "three/examples/jsm/exporters/GLTFExporter";
+import { GLTFExporter } from "three/examples/jsm/exporters/GLTFExporter";
 import { ColladaLoader } from "three/examples/jsm/loaders/ColladaLoader";
 
 import { parseGLB } from "@foxglove/regl-worldview";
@@ -12,16 +11,6 @@ import { MeshPrimitive } from "@foxglove/studio-base/panels/ThreeDimensionalViz/
 
 const UNSIGNED_INT = 5125;
 const DEFAULT_COLOR = [36 / 255, 142 / 255, 255 / 255, 1];
-
-// The type declaration for GLTFExporter.parse is not correct in THREE.js 0.135.0
-type FixedExporter = {
-  parse: (
-    input: Object3D,
-    onCompleted: (gltf: object) => void,
-    onError: (err: Error) => void,
-    options: GLTFExporterOptions,
-  ) => void;
-};
 
 type ParseDaeOptions = {
   ignoreColladaUpAxis?: boolean;
@@ -66,7 +55,7 @@ export async function parseDaeToGlb(
 
   const exporter = new GLTFExporter();
   return await new Promise((resolve, reject) => {
-    (exporter as FixedExporter).parse(
+    exporter.parse(
       collada.scene,
       async (glbBuffer) => {
         const glb = (await parseGLB(glbBuffer)) as GlbModel;
