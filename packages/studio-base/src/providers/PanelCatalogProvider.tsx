@@ -7,7 +7,6 @@ import { PropsWithChildren, useMemo } from "react";
 import { AppSetting } from "@foxglove/studio-base/AppSetting";
 import Panel from "@foxglove/studio-base/components/Panel";
 import PanelExtensionAdapter from "@foxglove/studio-base/components/PanelExtensionAdapter";
-import PanelToolbar from "@foxglove/studio-base/components/PanelToolbar";
 import { useExtensionRegistry } from "@foxglove/studio-base/context/ExtensionRegistryContext";
 import PanelCatalogContext, {
   PanelCatalog,
@@ -43,7 +42,6 @@ export default function PanelCatalogProvider(
       const PanelWrapper = (panelProps: PanelProps) => {
         return (
           <>
-            <PanelToolbar />
             <PanelExtensionAdapter
               config={panelProps.config}
               saveConfig={panelProps.saveConfig}
