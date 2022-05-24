@@ -42,13 +42,13 @@ export function buildSettingsTree(config: PlotConfig): SettingsTreeRoots {
         minYValue: {
           label: "Y min",
           input: "number",
-          value: Number(config.minYValue),
+          value: config.minYValue != undefined ? Number(config.minYValue) : undefined,
           placeholder: "auto",
         },
         maxYValue: {
           label: "Y max",
           input: "number",
-          value: Number(config.maxYValue),
+          value: config.maxYValue != undefined ? Number(config.maxYValue) : undefined,
           placeholder: "auto",
         },
       },

@@ -539,8 +539,8 @@ function Plot(props: Props) {
 const defaultConfig: PlotConfig = {
   title: undefined,
   paths: [{ value: "", enabled: true, timestampMethod: "receiveTime" }],
-  minYValue: "",
-  maxYValue: "",
+  minYValue: undefined,
+  maxYValue: undefined,
   showXAxisLabels: true,
   showYAxisLabels: true,
   showLegend: true,
