@@ -316,8 +316,8 @@ export default function LayoutBrowser({
     if (!(await promptForUnsavedChanges())) {
       return;
     }
-    const [fileHandle] = await showOpenFilePicker({
-      multiple: false,
+    const fileHandles = await showOpenFilePicker({
+      multiple: true,
       excludeAcceptAllOption: false,
       types: [
         {
@@ -328,32 +328,51 @@ export default function LayoutBrowser({
         },
       ],
     });
-    if (!fileHandle) {
+    if (fileHandles.length === 0) {
       return;
     }
 
-    const file = await fileHandle.getFile();
-    const layoutName = path.basename(file.name, path.extname(file.name));
-    const content = await file.text();
-    const parsedState: unknown = JSON.parse(content);
+    const newLayouts = await Promise.all(
+      fileHandles.map(async (fileHandle) => {
+        const file = await fileHandle.getFile();
+        const layoutName = path.basename(file.name, path.extname(file.name));
+        const content = await file.text();
+
+        if (!isMounted()) {
+          return;
+        }
+
+        let parsedState: unknown;
+        try {
+          parsedState = JSON.parse(content);
+        } catch (err) {
+          addToast(`${file.name} is not a valid layout: ${err.message}`, { appearance: "error" });
+          return;
+        }
+
+        if (typeof parsedState !== "object" || !parsedState) {
+          addToast(`${file.name} is not a valid layout`, { appearance: "error" });
+          return;
+        }
+
+        const data = parsedState as PanelsState;
+        const newLayout = await layoutManager.saveNewLayout({
+          name: layoutName,
+          data,
+          permission: "CREATOR_WRITE",
+        });
+        return newLayout;
+      }),
+    );
 
     if (!isMounted()) {
       return;
     }
-
-    if (typeof parsedState !== "object" || !parsedState) {
-      addToast(`${file.name} is not a valid layout`, { appearance: "error" });
-      return;
+    const newLayout = newLayouts.find((layout) => layout != undefined);
+    if (newLayout) {
+      void onSelectLayout(newLayout);
     }
-
-    const data = parsedState as PanelsState;
-    const newLayout = await layoutManager.saveNewLayout({
-      name: layoutName,
-      data,
-      permission: "CREATOR_WRITE",
-    });
-    void onSelectLayout(newLayout);
-    void analytics.logEvent(AppEvent.LAYOUT_IMPORT);
+    void analytics.logEvent(AppEvent.LAYOUT_IMPORT, { numLayouts: fileHandles.length });
   }, [promptForUnsavedChanges, isMounted, layoutManager, onSelectLayout, analytics, addToast]);
 
   const createLayoutTooltip = useTooltip({ contents: "Create new layout" });
