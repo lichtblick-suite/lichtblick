@@ -271,16 +271,10 @@ export type SubscriptionPreloadType =
   | "partial"; // Fetch messages as needed.
 
 // Represents a subscription to a single topic, for use in `setSubscriptions`.
-// TODO(JP): Pull this into two types, one for the Player (which does not care about the
-// `requester`) and one for the Internals panel (which does).
 export type SubscribePayload = {
   // The topic name to subscribe to.
   topic: string;
-
   preloadType?: SubscriptionPreloadType;
-
-  // Optionally, where the request came from. Used in the "Internals" panel to improve debugging.
-  requester?: { type: "panel" | "node" | "other"; name: string };
 };
 
 // Represents a single topic publisher, for use in `setPublishers`.

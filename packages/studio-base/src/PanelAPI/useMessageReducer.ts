@@ -11,7 +11,7 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { useRef, useMemo, useState, useEffect, useContext, useCallback } from "react";
+import { useRef, useMemo, useState, useEffect, useCallback } from "react";
 import { v4 as uuidv4 } from "uuid";
 
 import { useShallowMemo } from "@foxglove/hooks";
@@ -20,7 +20,6 @@ import {
   useMessagePipeline,
   MessagePipelineContext,
 } from "@foxglove/studio-base/components/MessagePipeline";
-import PanelContext from "@foxglove/studio-base/components/PanelContext";
 import useCleanup from "@foxglove/studio-base/hooks/useCleanup";
 import useShouldNotChangeOften from "@foxglove/studio-base/hooks/useShouldNotChangeOften";
 import {
@@ -57,7 +56,6 @@ function selectSetSubscriptions(ctx: MessagePipelineContext) {
 
 export function useMessageReducer<T>(props: Params<T>): T {
   const [id] = useState(() => uuidv4());
-  const { type: panelType = undefined } = useContext(PanelContext) ?? {};
   const { restore, addMessage, addMessages, preloadType = "partial" } = props;
 
   // only one of the add message callbacks should be provided
@@ -92,11 +90,8 @@ export function useMessageReducer<T>(props: Params<T>): T {
   const requestedTopics = useShallowMemo(props.topics);
 
   const subscriptions = useMemo<SubscribePayload[]>(() => {
-    const requester: SubscribePayload["requester"] =
-      panelType != undefined ? { type: "panel", name: panelType } : undefined;
-
-    return requestedTopics.map((topic) => ({ requester, topic, preloadType }));
-  }, [panelType, preloadType, requestedTopics]);
+    return requestedTopics.map((topic) => ({ topic, preloadType }));
+  }, [preloadType, requestedTopics]);
 
   const setSubscriptions = useMessagePipeline(selectSetSubscriptions);
   useEffect(() => setSubscriptions(id, subscriptions), [id, setSubscriptions, subscriptions]);

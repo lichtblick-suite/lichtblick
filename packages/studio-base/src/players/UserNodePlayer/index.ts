@@ -776,7 +776,6 @@ export default class UserNodePlayer implements Player {
       for (const inputTopic of nodeRegistration.inputs) {
         realTopicSubscriptions.push({
           topic: inputTopic,
-          requester: { type: "node", name: nodeRegistration.output.name },
         });
       }
     }

@@ -12,7 +12,7 @@
 //   You may not use this file except in compliance with the License.
 
 import memoizeWeak from "memoize-weak";
-import { useCallback, useContext, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { v4 as uuidv4 } from "uuid";
 
 import { useShallowMemo } from "@foxglove/hooks";
@@ -20,7 +20,6 @@ import {
   useMessagePipeline,
   MessagePipelineContext,
 } from "@foxglove/studio-base/components/MessagePipeline";
-import PanelContext from "@foxglove/studio-base/components/PanelContext";
 import useCleanup from "@foxglove/studio-base/hooks/useCleanup";
 import {
   SubscribePayload,
@@ -59,7 +58,6 @@ const filterBlockByTopics = memoizeWeak(
 
 const useSubscribeToTopicsForBlocks = (topics: readonly string[]) => {
   const [id] = useState(() => uuidv4());
-  const { type: panelType = undefined } = useContext(PanelContext) ?? {};
 
   const setSubscriptions = useMessagePipeline(
     useCallback(
@@ -69,10 +67,8 @@ const useSubscribeToTopicsForBlocks = (topics: readonly string[]) => {
     ),
   );
   const subscriptions: SubscribePayload[] = useMemo(() => {
-    const requester: SubscribePayload["requester"] =
-      panelType != undefined ? { type: "panel", name: panelType } : undefined;
-    return topics.map((topic) => ({ topic, requester, preloadType: "full" }));
-  }, [panelType, topics]);
+    return topics.map((topic) => ({ topic, preloadType: "full" }));
+  }, [topics]);
   useEffect(() => setSubscriptions(id, subscriptions), [id, setSubscriptions, subscriptions]);
   useCleanup(() => setSubscriptions(id, []));
 };

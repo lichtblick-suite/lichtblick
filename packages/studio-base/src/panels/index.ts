@@ -9,7 +9,6 @@ import dataSourceInfoThumbnail from "./DataSourceInfo/thumbnail.png";
 import ImageViewHelp from "./Image/index.help.md";
 import imageViewThumbnail from "./Image/thumbnail.png";
 import InternalLogsHelp from "./InternalLogs/index.help.md";
-import InternalsHelp from "./Internals/index.help.md";
 import LogHelp from "./Log/index.help.md";
 import logThumbnail from "./Log/thumbnail.png";
 import MapHelp from "./Map/index.help.md";
@@ -207,13 +206,6 @@ const debug: PanelInfo[] = [
     description: "Display playback and data-streaming performance statistics.",
     help: PlaybackPerformanceHelp,
     module: async () => await import("./PlaybackPerformance"),
-  },
-  {
-    title: "Studio - Internals",
-    type: "Internals",
-    description: "View data publishers and subscribers, and record data for testing.",
-    help: InternalsHelp,
-    module: async () => await import("./Internals"),
   },
   {
     title: "Studio - Logs",
