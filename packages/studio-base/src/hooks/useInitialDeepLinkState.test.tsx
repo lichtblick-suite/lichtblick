@@ -3,10 +3,11 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 import { renderHook } from "@testing-library/react-hooks";
-import { ReactNode } from "react";
+import { PropsWithChildren } from "react";
 
 import MockMessagePipelineProvider from "@foxglove/studio-base/components/MessagePipeline/MockMessagePipelineProvider";
 import { useCurrentLayoutActions } from "@foxglove/studio-base/context/CurrentLayoutContext";
+import CurrentUserContext, { User } from "@foxglove/studio-base/context/CurrentUserContext";
 import PlayerSelectionContext, {
   PlayerSelection,
 } from "@foxglove/studio-base/context/PlayerSelectionContext";
@@ -16,13 +17,17 @@ import { useSessionStorageValue } from "@foxglove/studio-base/hooks/useSessionSt
 jest.mock("@foxglove/studio-base/hooks/useSessionStorageValue");
 jest.mock("@foxglove/studio-base/context/CurrentLayoutContext");
 
-function Wrapper({
-  children,
-  playerSelection,
-}: {
-  children?: ReactNode;
+type WrapperProps = {
+  currentUser?: User;
   playerSelection: PlayerSelection;
-}) {
+};
+
+function Wrapper({ children, currentUser, playerSelection }: PropsWithChildren<WrapperProps>) {
+  const userContextValue = {
+    currentUser,
+    signIn: () => undefined,
+    signOut: async () => undefined,
+  };
   return (
     <MockMessagePipelineProvider
       topics={[]}
@@ -32,9 +37,11 @@ function Wrapper({
       urlState={{ sourceId: "test", parameters: { url: "testurl", param: "one" } }}
       startTime={{ sec: 0, nsec: 1 }}
     >
-      <PlayerSelectionContext.Provider value={playerSelection}>
-        {children}
-      </PlayerSelectionContext.Provider>
+      <CurrentUserContext.Provider value={userContextValue}>
+        <PlayerSelectionContext.Provider value={playerSelection}>
+          {children}
+        </PlayerSelectionContext.Provider>
+      </CurrentUserContext.Provider>
     </MockMessagePipelineProvider>
   );
 }
@@ -53,6 +60,8 @@ describe("Initial deep link state", () => {
   beforeEach(() => {
     (useSessionStorageValue as jest.Mock).mockReturnValue(["web", jest.fn()]);
     (useCurrentLayoutActions as jest.Mock).mockReturnValue({ setSelectedLayoutId });
+    selectSource.mockClear();
+    setSelectedLayoutId.mockClear();
   });
 
   it("doesn't select a source without ds params", () => {
@@ -94,5 +103,44 @@ describe("Initial deep link state", () => {
       type: "connection",
     });
     expect(setSelectedLayoutId).toHaveBeenCalledWith("a288e116-d177-4b57-8f30-6ada61919638");
+  });
+
+  it("waits for a current user to select a data platform source", () => {
+    const { result, rerender } = renderHook<
+      WrapperProps,
+      ReturnType<typeof useInitialDeepLinkState>
+    >(
+      () =>
+        useInitialDeepLinkState([
+          "https://studio.foxglove.dev/?ds=foxglove-data-platform&ds.deviceId=dev&layoutId=12345",
+        ]),
+      {
+        initialProps: { currentUser: undefined, playerSelection: emptyPlayerSelection },
+        wrapper: Wrapper,
+      },
+    );
+
+    expect(result.current.currentUserRequired).toBeTruthy();
+
+    expect(selectSource).not.toHaveBeenCalled();
+
+    rerender({
+      currentUser: {
+        id: "id",
+        email: "email",
+        orgId: "org",
+        orgDisplayName: "org name",
+        orgSlug: "org",
+        orgPaid: true,
+      },
+      playerSelection: emptyPlayerSelection,
+    });
+
+    expect(selectSource).toHaveBeenCalledWith("foxglove-data-platform", {
+      params: { deviceId: "dev" },
+      type: "connection",
+    });
+
+    expect(setSelectedLayoutId).toHaveBeenCalledWith("12345");
   });
 });

@@ -53,6 +53,7 @@ import Preferences from "@foxglove/studio-base/components/Preferences";
 import RemountOnValueChange from "@foxglove/studio-base/components/RemountOnValueChange";
 import Sidebar, { SidebarItem } from "@foxglove/studio-base/components/Sidebar";
 import { SidebarContent } from "@foxglove/studio-base/components/SidebarContent";
+import { SignInFormModal } from "@foxglove/studio-base/components/SignInFormModal";
 import Stack from "@foxglove/studio-base/components/Stack";
 import { URLStateSyncAdapter } from "@foxglove/studio-base/components/URLStateSyncAdapter";
 import { useAssets } from "@foxglove/studio-base/context/AssetsContext";
@@ -73,7 +74,9 @@ import { useWorkspace, WorkspaceContext } from "@foxglove/studio-base/context/Wo
 import { useAppConfigurationValue } from "@foxglove/studio-base/hooks";
 import useAddPanel from "@foxglove/studio-base/hooks/useAddPanel";
 import { useCalloutDismissalBlocker } from "@foxglove/studio-base/hooks/useCalloutDismissalBlocker";
+import { useDefaultWebLaunchPreference } from "@foxglove/studio-base/hooks/useDefaultWebLaunchPreference";
 import useElectronFilesToOpen from "@foxglove/studio-base/hooks/useElectronFilesToOpen";
+import { useInitialDeepLinkState } from "@foxglove/studio-base/hooks/useInitialDeepLinkState";
 import useNativeAppMenuEvent from "@foxglove/studio-base/hooks/useNativeAppMenuEvent";
 import { PlayerPresence } from "@foxglove/studio-base/players/types";
 import { HelpInfoStore, useHelpInfo } from "@foxglove/studio-base/providers/HelpInfoProvider";
@@ -146,6 +149,8 @@ type WorkspaceProps = {
   deepLinks?: string[];
 };
 
+const DEFAULT_DEEPLINKS = Object.freeze([]);
+
 const selectPlayerPresence = ({ playerState }: MessagePipelineContext) => playerState.presence;
 const selectRequestBackfill = ({ requestBackfill }: MessagePipelineContext) => requestBackfill;
 const selectPlayerProblems = ({ playerState }: MessagePipelineContext) => playerState.problems;
@@ -185,13 +190,21 @@ export default function Workspace(props: WorkspaceProps): JSX.Element {
 
   const [enableOpenDialog] = useAppConfigurationValue(AppSetting.OPEN_DIALOG);
 
+  const { currentUser } = useCurrentUser();
+
+  const { currentUserRequired } = useInitialDeepLinkState(props.deepLinks ?? DEFAULT_DEEPLINKS);
+
+  useDefaultWebLaunchPreference();
+
   const [showOpenDialogOnStartup = true] = useAppConfigurationValue<boolean>(
     AppSetting.SHOW_OPEN_DIALOG_ON_STARTUP,
   );
 
+  const showSignInForm = currentUserRequired && currentUser == undefined;
+
   const [showOpenDialog, setShowOpenDialog] = useState<
     { view: OpenDialogViews; activeDataSource?: IDataSourceFactory } | undefined
-  >(isPlayerPresent || !showOpenDialogOnStartup ? undefined : { view: "start" });
+  >(isPlayerPresent || !showOpenDialogOnStartup || showSignInForm ? undefined : { view: "start" });
 
   const [selectedSidebarItem, setSelectedSidebarItem] = useState<SidebarItemKey | undefined>(() => {
     // When using the open dialog ui - we always start with the connection sidebar open.
@@ -478,8 +491,6 @@ export default function Workspace(props: WorkspaceProps): JSX.Element {
     [selectedSidebarItem, supportsAccountSettings],
   );
 
-  const { currentUser } = useCurrentUser();
-
   // Since the _component_ field of a sidebar item entry is a component and accepts no additional
   // props we need to wrap our DataSourceSidebar component to connect the open data source action to
   // open the data source dialog.
@@ -556,6 +567,7 @@ export default function Workspace(props: WorkspaceProps): JSX.Element {
         /* eslint-enable react/jsx-key */
       ]}
     >
+      {showSignInForm && <SignInFormModal />}
       {enableOpenDialog === true && showOpenDialog != undefined && (
         <OpenDialog
           activeView={showOpenDialog.view}
@@ -568,7 +580,7 @@ export default function Workspace(props: WorkspaceProps): JSX.Element {
           <div className={classes.dropzone}>Drop a file here</div>
         </DropOverlay>
       </DocumentDropListener>
-      <URLStateSyncAdapter deepLinks={props.deepLinks ?? []} />
+      <URLStateSyncAdapter />
       <div className={classes.container} ref={containerRef} tabIndex={0}>
         <Sidebar
           items={sidebarItems}
