@@ -213,6 +213,62 @@ const PanelExamplesSettings: SettingsTreeRoots = {
   },
 };
 
+const IconExamplesSettings: SettingsTreeRoots = {
+  noIcon1: {
+    label: "No Icon",
+    fields: {
+      message_path: {
+        label: "Message path",
+        input: "string",
+        value: "/gps/fix",
+      },
+    },
+    children: {
+      child1: {
+        label: "Child 1",
+        fields: {
+          field1: { label: "Field 1", input: "string" },
+        },
+      },
+      child2: {
+        label: "Child 2",
+        icon: "Move",
+        fields: {
+          field1: { label: "Field 1", input: "string" },
+        },
+      },
+    },
+  },
+  grid: {
+    label: "Grid",
+    icon: "Grid",
+    fields: {
+      color: {
+        label: "Color",
+        value: "#248eff",
+        input: "rgb",
+      },
+    },
+  },
+  noIcon2: {
+    label: "No Icon2",
+    fields: {
+      message_path: {
+        label: "Message path",
+        input: "string",
+        value: "/gps/fix",
+      },
+    },
+  },
+  pose: {
+    label: "Pose",
+    icon: "Walk",
+    fields: {
+      color: { label: "Color", value: "#ffffff", input: "rgb" },
+    },
+  },
+};
+
 const TopicSettings: SettingsTreeRoots = {
   topics: {
     label: "Topics",
@@ -459,6 +515,10 @@ export function Basics(): JSX.Element {
 
 export function PanelExamples(): JSX.Element {
   return <Wrapper roots={PanelExamplesSettings} />;
+}
+
+export function IconExamples(): JSX.Element {
+  return <Wrapper roots={IconExamplesSettings} />;
 }
 
 export function Topics(): JSX.Element {
