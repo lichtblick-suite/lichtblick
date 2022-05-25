@@ -13,7 +13,7 @@
 
 import { setWarningCallback, useTheme } from "@fluentui/react";
 import { flatten } from "lodash";
-import { ComponentProps, useLayoutEffect, useRef, useState } from "react";
+import { ComponentProps, ReactNode, useLayoutEffect, useRef, useState } from "react";
 import { DndProvider } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
 import { Mosaic, MosaicNode, MosaicWindow } from "react-mosaic-component";
@@ -22,6 +22,7 @@ import { useShallowMemo } from "@foxglove/hooks";
 import Logger from "@foxglove/log";
 import { MessageEvent } from "@foxglove/studio";
 import MockMessagePipelineProvider from "@foxglove/studio-base/components/MessagePipeline/MockMessagePipelineProvider";
+import SettingsTreeEditor from "@foxglove/studio-base/components/SettingsTreeEditor";
 import AppConfigurationContext from "@foxglove/studio-base/context/AppConfigurationContext";
 import {
   CurrentLayoutActions,
@@ -51,7 +52,10 @@ import {
 } from "@foxglove/studio-base/players/types";
 import MockCurrentLayoutProvider from "@foxglove/studio-base/providers/CurrentLayoutProvider/MockCurrentLayoutProvider";
 import HelpInfoProvider from "@foxglove/studio-base/providers/HelpInfoProvider";
-import { PanelSettingsEditorContextProvider } from "@foxglove/studio-base/providers/PanelSettingsEditorContextProvider";
+import {
+  PanelSettingsEditorContextProvider,
+  usePanelSettingsEditorStore,
+} from "@foxglove/studio-base/providers/PanelSettingsEditorContextProvider";
 import ThemeProvider from "@foxglove/studio-base/theme/ThemeProvider";
 import { RosDatatypes } from "@foxglove/studio-base/types/RosDatatypes";
 import { SavedProps, UserNodes } from "@foxglove/studio-base/types/panels";
@@ -93,6 +97,7 @@ export type Fixture = {
 type UnconnectedProps = {
   children: React.ReactNode;
   fixture?: Fixture;
+  includeSettings?: boolean;
   panelCatalog?: PanelCatalog;
   omitDragAndDrop?: boolean;
   pauseFrame?: ComponentProps<typeof MockMessagePipelineProvider>["pauseFrame"];
@@ -165,6 +170,23 @@ class MockPanelCatalog implements PanelCatalog {
   getPanelByType(_type: string): PanelInfo | undefined {
     return undefined;
   }
+}
+
+function PanelWrapper({
+  children,
+  includeSettings,
+}: {
+  children?: ReactNode;
+  includeSettings?: boolean;
+}): JSX.Element {
+  const settings = usePanelSettingsEditorStore((store) => Object.values(store.settingsTrees)[0]);
+
+  return (
+    <>
+      {settings && includeSettings && <SettingsTreeEditor settings={settings} />}
+      {children}
+    </>
+  );
 }
 
 function UnconnectedPanelSetup(props: UnconnectedProps): JSX.Element | ReactNull {
@@ -257,6 +279,7 @@ function UnconnectedPanelSetup(props: UnconnectedProps): JSX.Element | ReactNull
     dTypes = dummyDatatypes;
   }
   const allData = flatten(Object.values(frame));
+
   const inner = (
     <div
       style={{ width: "100%", height: "100%", display: "flex", ...props.style }}
@@ -285,7 +308,7 @@ function UnconnectedPanelSetup(props: UnconnectedProps): JSX.Element | ReactNull
       >
         <PanelCatalogContext.Provider value={mockPanelCatalog}>
           <AppConfigurationContext.Provider value={mockAppConfiguration}>
-            {props.children}
+            <PanelWrapper includeSettings={props.includeSettings}>{props.children}</PanelWrapper>
           </AppConfigurationContext.Provider>
         </PanelCatalogContext.Provider>
       </MockMessagePipelineProvider>
@@ -302,8 +325,10 @@ function UnconnectedPanelSetup(props: UnconnectedProps): JSX.Element | ReactNull
 }
 
 type Props = UnconnectedProps & {
+  includeSettings?: boolean;
   onLayoutAction?: (action: PanelsActions) => void;
 };
+
 export default function PanelSetup(props: Props): JSX.Element {
   const theme = useTheme();
   return (

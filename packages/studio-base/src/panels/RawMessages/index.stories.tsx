@@ -65,6 +65,17 @@ storiesOf("panels/RawMessages", module)
       </PanelSetup>
     );
   })
+  .add("expanded with settings", () => {
+    return (
+      <PanelSetup fixture={fixture} includeSettings>
+        <RawMessages
+          overrideConfig={
+            { topicPath: "/msgs/big_topic", ...noDiffConfig, autoExpandMode: "all" } as any
+          }
+        />
+      </PanelSetup>
+    );
+  })
   .add("auto expanded", () => {
     return (
       <PanelSetup fixture={fixture}>
