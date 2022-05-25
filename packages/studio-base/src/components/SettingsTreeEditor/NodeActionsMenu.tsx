@@ -3,10 +3,7 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 import MoreVertIcon from "@mui/icons-material/MoreVert";
-import { ListItemIcon, ListItemText } from "@mui/material";
-import IconButton from "@mui/material/Button";
-import Menu from "@mui/material/Menu";
-import MenuItem from "@mui/material/MenuItem";
+import { Menu, MenuItem, IconButton, ListItemIcon, ListItemText } from "@mui/material";
 import { useState } from "react";
 
 import icons from "./icons";
@@ -34,15 +31,15 @@ export function NodeActionsMenu({
   return (
     <>
       <IconButton
+        title="More actions"
         id="node-actions-button"
         aria-controls={open ? "noce-actions-menu" : undefined}
         aria-haspopup="true"
         aria-expanded={open ? "true" : undefined}
         onClick={handleClick}
         size="small"
-        style={{ minWidth: "auto" }}
       >
-        <MoreVertIcon />
+        <MoreVertIcon fontSize="small" />
       </IconButton>
       <Menu
         id="basic-menu"

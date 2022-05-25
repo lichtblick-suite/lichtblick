@@ -29,6 +29,7 @@ const BasicSettings: SettingsTreeRoots = {
     label: "General",
     icon: "Settings",
     visible: true,
+    error: "This topic has an error",
     actions: [
       { id: "add-grid", label: "Add new grid", icon: "Grid" },
       { id: "add-background", label: "Add new background", icon: "Background" },
@@ -55,6 +56,7 @@ const BasicSettings: SettingsTreeRoots = {
     label: "Complex Inputs",
     icon: "Hive",
     visible: true,
+    actions: [{ id: "action", label: "Action" }],
     fields: {
       messagepath: {
         label: "Message Path",

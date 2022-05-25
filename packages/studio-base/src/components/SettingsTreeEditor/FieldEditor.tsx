@@ -3,7 +3,7 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 import ClearIcon from "@mui/icons-material/Clear";
-import ErrorIcon from "@mui/icons-material/ErrorOutline";
+import ErrorIcon from "@mui/icons-material/Error";
 import {
   Autocomplete,
   ToggleButton,
@@ -16,7 +16,6 @@ import {
   Tooltip,
   TextField,
   ListProps,
-  useTheme,
 } from "@mui/material";
 import { DeepReadonly } from "ts-essentials";
 
@@ -80,6 +79,28 @@ const PsuedoInputWrapper = muiStyled(Stack)(({ theme }) => {
     },
   };
 });
+
+const MultiLabelWrapper = muiStyled("div")(({ theme }) => ({
+  display: "grid",
+  gridTemplateColumns: "1fr auto",
+  columnGap: theme.spacing(0.5),
+  height: "100%",
+  width: "100%",
+  alignItems: "center",
+}));
+
+const FieldWrapper = muiStyled("div", {
+  shouldForwardProp: (prop) => prop !== "error",
+})<{ error: boolean }>(({ error, theme }) => ({
+  marginRight: theme.spacing(1.25),
+
+  ...(error && {
+    ".MuiInputBase-root": {
+      outline: `1px ${theme.palette.error.main} solid`,
+      outlineOffset: -1,
+    },
+  }),
+}));
 
 function FieldInput({
   actionHandler,
@@ -280,22 +301,11 @@ function FieldInput({
 }
 
 function FieldLabel({ field }: { field: DeepReadonly<SettingsTreeField> }): JSX.Element {
-  const theme = useTheme();
-
   if (field.input === "vec3") {
     const labels = field.labels ?? ["X", "Y", "Z"];
     return (
       <>
-        <div
-          style={{
-            display: "grid",
-            gridTemplateColumns: "1fr auto",
-            columnGap: theme.spacing(0.5),
-            height: "100%",
-            width: "100%",
-            alignItems: "center",
-          }}
-        >
+        <MultiLabelWrapper>
           <Typography
             title={field.label}
             variant="subtitle2"
@@ -318,7 +328,7 @@ function FieldLabel({ field }: { field: DeepReadonly<SettingsTreeField> }): JSX.
               {label}
             </Typography>
           ))}
-        </div>
+        </MultiLabelWrapper>
       </>
     );
   } else {
@@ -347,7 +357,6 @@ function FieldEditorComponent({
   field: DeepReadonly<SettingsTreeField>;
   path: readonly string[];
 }): JSX.Element {
-  const theme = useTheme();
   const indent = Math.min(path.length, 4);
   const paddingLeft = 0.75 + 2 * (indent - 1);
 
@@ -359,20 +368,15 @@ function FieldEditorComponent({
           <Tooltip
             arrow
             placement="top"
-            title={<Typography variant="subtitle1">{field.error}</Typography>}
+            title={<Typography variant="subtitle2">{field.error}</Typography>}
           >
             <ErrorIcon color="error" fontSize="small" />
           </Tooltip>
         )}
       </Stack>
-      <div
-        style={{
-          border: field.error ? `1px solid ${theme.palette.error.main}` : 0,
-          marginRight: theme.spacing(1.25),
-        }}
-      >
+      <FieldWrapper error={field.error != undefined}>
         <FieldInput actionHandler={actionHandler} field={field} path={path} />
-      </div>
+      </FieldWrapper>
       <Stack paddingBottom={0.25} style={{ gridColumn: "span 2" }} />
     </>
   );

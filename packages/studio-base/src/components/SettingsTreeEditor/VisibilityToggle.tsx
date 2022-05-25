@@ -2,15 +2,37 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { Checkbox, CheckboxProps, SvgIcon } from "@mui/material";
+import {
+  Checkbox,
+  CheckboxProps,
+  SvgIcon,
+  styled as muiStyled,
+  IconButtonProps,
+} from "@mui/material";
 
-export function VisibilityToggle(props: CheckboxProps): JSX.Element {
+const StyledCheckbox = muiStyled(Checkbox, {
+  shouldForwardProp: (prop) => prop !== "size",
+})<{ size: IconButtonProps["size"] }>(({ theme, size = "medium" }) => ({
+  borderRadius: theme.shape.borderRadius,
+  padding: theme.spacing(1),
+
+  "&:hover": {
+    backgroundColor: theme.palette.action.hover,
+  },
+  ...(size === "small" && {
+    padding: theme.spacing(0.625),
+  }),
+}));
+
+export function VisibilityToggle(
+  props: CheckboxProps & { size: IconButtonProps["size"] },
+): JSX.Element {
   return (
-    <Checkbox
+    <StyledCheckbox
       {...props}
       title="Toggle visibility"
       icon={
-        <SvgIcon viewBox="0 0 16 16" color="disabled">
+        <SvgIcon fontSize="small" viewBox="0 0 16 16" color="disabled">
           {/* Eye open */}
           <path
             fill="currentColor"
@@ -20,7 +42,7 @@ export function VisibilityToggle(props: CheckboxProps): JSX.Element {
         </SvgIcon>
       }
       checkedIcon={
-        <SvgIcon viewBox="0 0 16 16">
+        <SvgIcon fontSize="small" viewBox="0 0 16 16">
           {/* Eye closed */}
           <g fill="currentColor">
             <path

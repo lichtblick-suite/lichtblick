@@ -104,6 +104,11 @@ export type SettingsTreeNode = {
   defaultExpansionState?: "collapsed" | "expanded";
 
   /**
+   * Optional message indicating any error state for the node.
+   */
+  error?: string;
+
+  /**
    * Field inputs attached directly to this node.
    */
   fields?: SettingsTreeFields;
