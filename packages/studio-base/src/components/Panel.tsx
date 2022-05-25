@@ -39,6 +39,7 @@ import {
   updateTree,
   MosaicNode,
 } from "react-mosaic-component";
+import { Transition } from "react-transition-group";
 import { useMountedState } from "react-use";
 
 import { useShallowMemo } from "@foxglove/hooks";
@@ -48,7 +49,10 @@ import Icon from "@foxglove/studio-base/components/Icon";
 import KeyListener from "@foxglove/studio-base/components/KeyListener";
 import PanelContext from "@foxglove/studio-base/components/PanelContext";
 import PanelErrorBoundary from "@foxglove/studio-base/components/PanelErrorBoundary";
-import { PanelRoot } from "@foxglove/studio-base/components/PanelRoot";
+import {
+  FULLSCREEN_TRANSITION_DURATION_MS,
+  PanelRoot,
+} from "@foxglove/studio-base/components/PanelRoot";
 import {
   useCurrentLayoutActions,
   useSelectedPanels,
@@ -243,7 +247,12 @@ export default function Panel<
     const [quickActionsKeyPressed, setQuickActionsKeyPressed] = useState(false);
     const [shiftKeyPressed, setShiftKeyPressed] = useState(false);
     const [cmdKeyPressed, setCmdKeyPressed] = useState(false);
-    const [fullScreen, setFullscreen] = useState(false);
+    const [fullscreen, setFullscreen] = useState(false);
+    const [fullscreenSourceRect, setFullscreenSourceRect] = useState<DOMRect | undefined>(
+      undefined,
+    );
+    const [hasFullscreenDescendant, _setHasFullscreenDescendant] = useState(false);
+    const panelRootRef = useRef<HTMLDivElement>(ReactNull);
     const panelCatalog = usePanelCatalog();
     const isTopLevelPanel = mosaicWindowActions.getPath().length === 0 && tabId == undefined;
 
@@ -477,18 +486,28 @@ export default function Panel<
           }
         }) as MouseEventHandler<HTMLDivElement>,
         enterFullscreen: () => {
+          setFullscreenSourceRect(panelRootRef.current?.getBoundingClientRect());
           setFullscreen(true);
 
-          // When entering fullscreen for a panel within a tab we need to put the tab into fullscreen mode
-          // to have our panel properly overlay other panels outside the tab.
-          parentPanelContext?.enterFullscreen();
+          // When entering fullscreen for a panel within a tab, we need to adjust the ancestor
+          // tab(s)'s z-index to have our panel properly overlay other panels outside the tab.
+          parentPanelContext?.setHasFullscreenDescendant(true);
         },
         exitFullscreen: () => {
+          // Don't clear fullscreenSourceRect or hasFullscreenDescendant, they are needed during the exit transition
           setFullscreen(false);
-          parentPanelContext?.exitFullscreen();
         },
       }),
       [cmdKeyPressed, parentPanelContext],
+    );
+
+    const setHasFullscreenDescendant = useCallback(
+      // eslint-disable-next-line @foxglove/no-boolean-parameters
+      (value: boolean) => {
+        _setHasFullscreenDescendant(value);
+        parentPanelContext?.setHasFullscreenDescendant(value);
+      },
+      [parentPanelContext],
     );
 
     // We use two separate sets of key handlers because the panel context and exitFullScreen
@@ -594,73 +613,86 @@ export default function Panel<
             openSiblingPanel,
             enterFullscreen,
             exitFullscreen,
-            isFullscreen: fullScreen,
+            setHasFullscreenDescendant,
+            isFullscreen: fullscreen,
             tabId,
             // disallow dragging the root panel in a layout
             connectToolbarDragHandle: isTopLevelPanel ? undefined : connectToolbarDragHandle,
           }}
         >
           <KeyListener global keyUpHandlers={keyUpHandlers} keyDownHandlers={keyDownHandlers} />
-          <KeyListener global keyDownHandlers={fullScreenKeyHandlers} />
-          <PanelRoot
-            onClick={onPanelRootClick}
-            onMouseMove={onMouseMove}
-            fullscreen={fullScreen}
-            selected={isSelected}
-            data-test={`panel-mouseenter-container ${childId ?? ""}`}
-            ref={(el) => {
-              // disallow dragging the root panel in a layout
-              if (!isTopLevelPanel) {
-                connectOverlayDragPreview(el);
-                connectToolbarDragPreview(el);
-              }
-            }}
+          {fullscreen && <KeyListener global keyDownHandlers={fullScreenKeyHandlers} />}
+          <Transition
+            in={fullscreen}
+            timeout={{ exit: FULLSCREEN_TRANSITION_DURATION_MS }}
+            onExited={() => setHasFullscreenDescendant(false)}
+            nodeRef={panelRootRef}
           >
-            {isSelected && !fullScreen && numSelectedPanelsIfSelected > 1 && (
-              <ActionsOverlay>
-                <Button className={classes.tabActionsOverlayButton} onClick={groupPanels}>
-                  <Icon size="small" style={{ marginBottom: 5 }}>
-                    <BorderAllIcon />
-                  </Icon>
-                  Group in tab
-                </Button>
-                <Button className={classes.tabActionsOverlayButton} onClick={createTabs}>
-                  <Icon size="small" style={{ marginBottom: 5 }}>
-                    <ExpandAllOutlineIcon />
-                  </Icon>
-                  Create {numSelectedPanelsIfSelected} tabs
-                </Button>
-              </ActionsOverlay>
-            )}
-            {type !== TAB_PANEL_TYPE && quickActionsKeyPressed && !fullScreen && (
-              <ActionsOverlay
+            {(fullscreenState) => (
+              <PanelRoot
+                onClick={onPanelRootClick}
+                onMouseMove={onMouseMove}
+                hasFullscreenDescendant={hasFullscreenDescendant}
+                fullscreenState={fullscreenState}
+                sourceRect={fullscreenSourceRect}
+                selected={isSelected}
+                data-test={`panel-mouseenter-container ${childId ?? ""}`}
                 ref={(el) => {
-                  quickActionsOverlayRef.current = el;
+                  panelRootRef.current = el;
                   // disallow dragging the root panel in a layout
                   if (!isTopLevelPanel) {
-                    connectOverlayDragSource(el);
+                    connectOverlayDragPreview(el);
+                    connectToolbarDragPreview(el);
                   }
                 }}
               >
-                <div>
-                  <Button className={classes.quickActionsOverlayButton} onClick={removePanel}>
-                    <TrashCanOutlineIcon />
-                    Remove
-                  </Button>
-                  <Button className={classes.quickActionsOverlayButton} onClick={splitPanel}>
-                    <GridLargeIcon />
-                    Split
-                  </Button>
-                </div>
-              </ActionsOverlay>
+                {isSelected && !fullscreen && numSelectedPanelsIfSelected > 1 && (
+                  <ActionsOverlay>
+                    <Button className={classes.tabActionsOverlayButton} onClick={groupPanels}>
+                      <Icon size="small" style={{ marginBottom: 5 }}>
+                        <BorderAllIcon />
+                      </Icon>
+                      Group in tab
+                    </Button>
+                    <Button className={classes.tabActionsOverlayButton} onClick={createTabs}>
+                      <Icon size="small" style={{ marginBottom: 5 }}>
+                        <ExpandAllOutlineIcon />
+                      </Icon>
+                      Create {numSelectedPanelsIfSelected} tabs
+                    </Button>
+                  </ActionsOverlay>
+                )}
+                {type !== TAB_PANEL_TYPE && quickActionsKeyPressed && !fullscreen && (
+                  <ActionsOverlay
+                    ref={(el) => {
+                      quickActionsOverlayRef.current = el;
+                      // disallow dragging the root panel in a layout
+                      if (!isTopLevelPanel) {
+                        connectOverlayDragSource(el);
+                      }
+                    }}
+                  >
+                    <div>
+                      <Button className={classes.quickActionsOverlayButton} onClick={removePanel}>
+                        <TrashCanOutlineIcon />
+                        Remove
+                      </Button>
+                      <Button className={classes.quickActionsOverlayButton} onClick={splitPanel}>
+                        <GridLargeIcon />
+                        Split
+                      </Button>
+                    </div>
+                  </ActionsOverlay>
+                )}
+                <PanelErrorBoundary onRemovePanel={removePanel} onResetPanel={resetPanel}>
+                  <React.StrictMode>{child}</React.StrictMode>
+                </PanelErrorBoundary>
+                {process.env.NODE_ENV !== "production" && (
+                  <div className={classes.perfInfo} ref={perfInfo} />
+                )}
+              </PanelRoot>
             )}
-            <PanelErrorBoundary onRemovePanel={removePanel} onResetPanel={resetPanel}>
-              <React.StrictMode>{child}</React.StrictMode>
-            </PanelErrorBoundary>
-            {process.env.NODE_ENV !== "production" && (
-              <div className={classes.perfInfo} ref={perfInfo} />
-            )}
-          </PanelRoot>
+          </Transition>
         </PanelContext.Provider>
       </Profiler>
     );

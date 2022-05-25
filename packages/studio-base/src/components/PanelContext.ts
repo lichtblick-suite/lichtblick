@@ -29,6 +29,10 @@ export type PanelContextType<T> = {
   exitFullscreen: () => void;
   isFullscreen: boolean;
 
+  /** Used to adjust z-index settings on parent panels when children are fullscreen */
+  // eslint-disable-next-line @foxglove/no-boolean-parameters
+  setHasFullscreenDescendant: (hasFullscreenDescendant: boolean) => void;
+
   connectToolbarDragHandle?: (el: Element | ReactNull) => void;
 };
 
