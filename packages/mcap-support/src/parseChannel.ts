@@ -3,7 +3,7 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 import protobufjs from "protobufjs";
-import { FileDescriptorSet } from "protobufjs/ext/descriptor";
+import { FileDescriptorSet, IFileDescriptorSet } from "protobufjs/ext/descriptor";
 
 import { parse as parseMessageDefinition, RosMsgDefinition } from "@foxglove/rosmsg";
 import { LazyMessageReader } from "@foxglove/rosmsg-serialization";
@@ -90,7 +90,27 @@ export function parseChannel(channel: Channel): ParsedChannel {
         } is not supported (expected protobuf)`,
       );
     }
-    const root = protobufjs.Root.fromDescriptor(FileDescriptorSet.decode(channel.schema.data));
+    const descriptorSet = FileDescriptorSet.decode(channel.schema.data);
+
+    // Modify the definition of google.protobuf.Timestamp so it gets parsed as {sec, nsec},
+    // compatible with the rest of Studio.
+    for (const file of (descriptorSet as unknown as IFileDescriptorSet).file) {
+      if (file.package === "google.protobuf") {
+        for (const message of file.messageType ?? []) {
+          if (message.name === "Timestamp" || message.name === "Duration") {
+            for (const field of message.field ?? []) {
+              if (field.name === "seconds") {
+                field.name = "sec";
+              } else if (field.name === "nanos") {
+                field.name = "nsec";
+              }
+            }
+          }
+        }
+      }
+    }
+
+    const root = protobufjs.Root.fromDescriptor(descriptorSet);
     root.resolveAll();
     const type = root.lookupType(channel.schema.name);
 
