@@ -20,7 +20,10 @@ import {
 } from "@foxglove/regl-worldview";
 import { toNanoSec } from "@foxglove/rostime";
 import { PanelExtensionContext, RenderState, Topic, MessageEvent } from "@foxglove/studio";
-import { SettingsTreeAction } from "@foxglove/studio-base/components/SettingsTreeEditor/types";
+import {
+  EXPERIMENTAL_PanelExtensionContextWithSettings,
+  SettingsTreeAction,
+} from "@foxglove/studio-base/components/SettingsTreeEditor/types";
 import useCleanup from "@foxglove/studio-base/hooks/useCleanup";
 
 import { DebugGui } from "./DebugGui";
@@ -255,8 +258,10 @@ export function ThreeDeeRender({ context }: { context: PanelExtensionContext }):
   const settingsNodeProviders = renderer?.settingsNodeProviders;
 
   useEffect(() => {
-    // eslint-disable-next-line no-underscore-dangle, @typescript-eslint/no-explicit-any
-    (context as unknown as any).__updatePanelSettingsTree({
+    // eslint-disable-next-line no-underscore-dangle
+    (
+      context as unknown as EXPERIMENTAL_PanelExtensionContextWithSettings
+    ).__updatePanelSettingsTree({
       actionHandler,
       roots: buildSettingsTree({
         config,

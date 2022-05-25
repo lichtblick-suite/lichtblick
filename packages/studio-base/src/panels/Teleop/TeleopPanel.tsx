@@ -10,8 +10,10 @@ import { definitions as commonDefs } from "@foxglove/rosmsg-msgs-common";
 import { PanelExtensionContext, Topic } from "@foxglove/studio";
 import EmptyState from "@foxglove/studio-base/components/EmptyState";
 import {
+  EXPERIMENTAL_PanelExtensionContextWithSettings,
   SettingsTreeAction,
   SettingsTreeNode,
+  SettingsTreeRoots,
 } from "@foxglove/studio-base/components/SettingsTreeEditor/types";
 import Stack from "@foxglove/studio-base/components/Stack";
 import ThemeProvider from "@foxglove/studio-base/theme/ThemeProvider";
@@ -40,8 +42,8 @@ type Config = {
   rightButton: { field: string; value: number };
 };
 
-function buildSettingsTree(config: Config, topics: readonly Topic[]): SettingsTreeNode {
-  return {
+function buildSettingsTree(config: Config, topics: readonly Topic[]): SettingsTreeRoots {
+  const general: SettingsTreeNode = {
     label: "General",
     fields: {
       publishRate: { label: "Publish Rate", input: "number", value: config.publishRate },
@@ -103,6 +105,8 @@ function buildSettingsTree(config: Config, topics: readonly Topic[]): SettingsTr
       },
     },
   };
+
+  return { general };
 }
 
 function TeleopPanel(props: TeleopPanelProps): JSX.Element {
@@ -142,7 +146,7 @@ function TeleopPanel(props: TeleopPanelProps): JSX.Element {
 
     setConfig((previous) => {
       const newConfig = { ...previous };
-      set(newConfig, action.payload.path, action.payload.value);
+      set(newConfig, action.payload.path.slice(1), action.payload.value);
       return newConfig;
     });
   }, []);
@@ -165,10 +169,12 @@ function TeleopPanel(props: TeleopPanelProps): JSX.Element {
 
   useEffect(() => {
     const tree = buildSettingsTree(config, topics);
-    // eslint-disable-next-line no-underscore-dangle, @typescript-eslint/no-explicit-any
-    (context as unknown as any).__updatePanelSettingsTree({
+    // eslint-disable-next-line no-underscore-dangle
+    (
+      context as unknown as EXPERIMENTAL_PanelExtensionContextWithSettings
+    ).__updatePanelSettingsTree({
       actionHandler: settingsActionHandler,
-      settings: tree,
+      roots: tree,
     });
     saveState(config);
   }, [config, context, saveState, settingsActionHandler, topics]);

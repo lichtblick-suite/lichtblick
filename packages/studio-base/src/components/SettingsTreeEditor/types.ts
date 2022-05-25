@@ -172,3 +172,8 @@ export type SettingsTree = {
    */
   roots: SettingsTreeRoots;
 };
+
+// To be moved to PanelExtensionContext in index.d.ts when settings API is finalized.
+export type EXPERIMENTAL_PanelExtensionContextWithSettings = {
+  __updatePanelSettingsTree(settings: SettingsTree): void;
+};

@@ -21,6 +21,7 @@ import { toSec } from "@foxglove/rostime";
 import { PanelExtensionContext, MessageEvent } from "@foxglove/studio";
 import EmptyState from "@foxglove/studio-base/components/EmptyState";
 import {
+  EXPERIMENTAL_PanelExtensionContextWithSettings,
   SettingsTreeAction,
   SettingsTreeFields,
   SettingsTreeRoots,
@@ -280,8 +281,10 @@ function MapPanel(props: MapPanelProps): JSX.Element {
     context.subscribe(eligibleEnabled);
 
     const tree = buildSettingsTree(config, eligibleTopics);
-    // eslint-disable-next-line no-underscore-dangle, @typescript-eslint/no-explicit-any
-    (context as unknown as any).__updatePanelSettingsTree({
+    // eslint-disable-next-line no-underscore-dangle
+    (
+      context as unknown as EXPERIMENTAL_PanelExtensionContextWithSettings
+    ).__updatePanelSettingsTree({
       actionHandler: settingsActionHandler,
       roots: tree,
     });
