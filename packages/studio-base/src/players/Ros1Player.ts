@@ -393,9 +393,11 @@ export default class Ros1Player implements Player {
         const newDatatypes = this._getRosDatatypes(datatype, msgdef);
         this._providerDatatypes = new Map([...this._providerDatatypes, ...newDatatypes]);
       });
-      subscription.on("message", (message, data, _pub) =>
-        this._handleMessage(topicName, message, data.byteLength, true),
-      );
+      subscription.on("message", (message, data, _pub) => {
+        this._handleMessage(topicName, message, data.byteLength, true);
+        // Clear any existing subscription problems for this topic if we're receiving messages again.
+        this._clearProblem(`subscribe:${topicName}`, { skipEmit: true });
+      });
       subscription.on("error", (error) => {
         this._addProblem(`subscribe:${topicName}`, {
           severity: "warn",

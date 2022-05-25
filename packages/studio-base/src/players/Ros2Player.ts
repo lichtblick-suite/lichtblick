@@ -440,9 +440,11 @@ export default class Ros2Player implements Player {
         msgDefinition,
       });
 
-      subscription.on("message", (timestamp, message, data, _pub) =>
-        this._handleMessage(topicName, timestamp, message, data.byteLength, true),
-      );
+      subscription.on("message", (timestamp, message, data, _pub) => {
+        this._handleMessage(topicName, timestamp, message, data.byteLength, true);
+        // Clear any existing subscription problems for this topic if we're receiving messages again.
+        this._problems.removeProblem(`subscription:${topicName}`);
+      });
       subscription.on("error", (err) => {
         log.error(`Subscription error for ${topicName}: ${err}`);
         this._problems.addProblem(`subscription:${topicName}`, {
