@@ -2,14 +2,23 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { IconButton, Link, Pivot, PivotItem } from "@fluentui/react";
+import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
+import {
+  IconButton,
+  Button,
+  Link,
+  Tab,
+  Tabs,
+  Typography,
+  Divider,
+  styled as muiStyled,
+} from "@mui/material";
 import { useCallback, useState } from "react";
 import { useToasts } from "react-toast-notifications";
 import { useAsync, useMountedState } from "react-use";
-import styled from "styled-components";
 
-import Button from "@foxglove/studio-base/components/Button";
 import { SidebarContent } from "@foxglove/studio-base/components/SidebarContent";
+import Stack from "@foxglove/studio-base/components/Stack";
 import TextContent from "@foxglove/studio-base/components/TextContent";
 import { useAnalytics } from "@foxglove/studio-base/context/AnalyticsContext";
 import { useExtensionLoader } from "@foxglove/studio-base/context/ExtensionLoaderContext";
@@ -25,31 +34,11 @@ type Props = {
   onClose: () => void;
 };
 
-const Publisher = styled.div`
-  color: #e2dce9;
-  margin-top: 8px;
-  margin-bottom: 16px;
-`;
-
-const Version = styled.span`
-  color: #7a777d;
-  font-size: 80%;
-  margin-left: 8px;
-`;
-
-const License = styled.span`
-  color: #7a777d;
-  font-size: 80%;
-  margin-left: 8px;
-`;
-
-const Description = styled.div`
-  margin-top: 16px;
-  margin-bottom: 16px;
-`;
+const StyledButton = muiStyled(Button)({ minWidth: 100 });
 
 export function ExtensionDetails({ extension, onClose, installed }: Props): React.ReactElement {
   const [isInstalled, setIsInstalled] = useState(installed);
+  const [activeTab, setActiveTab] = useState<number>(0);
   const isMounted = useMountedState();
   const extensionLoader = useExtensionLoader();
   const marketplace = useExtensionMarketplace();
@@ -101,43 +90,73 @@ export function ExtensionDetails({ extension, onClose, installed }: Props): Reac
       title={extension.name}
       leadingItems={[
         // eslint-disable-next-line react/jsx-key
-        <IconButton iconProps={{ iconName: "ChevronLeft" }} onClick={onClose} />,
+        <IconButton onClick={onClose} color="primary" edge="start">
+          <ChevronLeftIcon />
+        </IconButton>,
       ]}
     >
-      <Link href={extension.homepage}>{extension.id}</Link>
-      <Version>{`v${extension.version}`}</Version>
-      <License>{extension.license}</License>
-      <Publisher>{extension.publisher}</Publisher>
-      <Description>{extension.description}</Description>
-      {isInstalled ? (
-        <UninstallButton onClick={uninstall} />
-      ) : canInstall ? (
-        <InstallButton onClick={install} />
-      ) : undefined}
-      <Pivot style={{ marginTop: "16px" }}>
-        <PivotItem headerText="README">
-          <TextContent>{readmeContent}</TextContent>
-        </PivotItem>
-        <PivotItem headerText="CHANGELOG">
-          <TextContent>{changelogContent}</TextContent>
-        </PivotItem>
-      </Pivot>
+      <Stack gap={1} alignItems="flex-start">
+        <Stack gap={0.5} paddingBottom={1}>
+          <Stack direction="row" gap={1} alignItems="baseline">
+            <Link variant="body2" color="primary" href={extension.homepage} underline="hover">
+              {extension.id}
+            </Link>
+            <Typography
+              variant="caption"
+              color="text.secondary"
+            >{`v${extension.version}`}</Typography>
+            <Typography variant="caption" color="text.secondary">
+              {extension.license}
+            </Typography>
+          </Stack>
+          <Typography variant="subtitle2" gutterBottom>
+            {extension.publisher}
+          </Typography>
+          <Typography variant="body2" gutterBottom>
+            {extension.description}
+          </Typography>
+        </Stack>
+        {isInstalled ? (
+          <StyledButton
+            size="small"
+            key="uninstall"
+            color="inherit"
+            variant="contained"
+            onClick={uninstall}
+          >
+            Uninstall
+          </StyledButton>
+        ) : (
+          canInstall && (
+            <StyledButton
+              size="small"
+              key="install"
+              color="inherit"
+              variant="contained"
+              onClick={install}
+            >
+              Install
+            </StyledButton>
+          )
+        )}
+      </Stack>
+
+      <Stack paddingTop={2} style={{ marginLeft: -16, marginRight: -16 }}>
+        <Tabs
+          textColor="inherit"
+          value={activeTab}
+          onChange={(_event, newValue: number) => setActiveTab(newValue)}
+        >
+          <Tab disableRipple label="README" value={0} />
+          <Tab disableRipple label="CHANGELOG" value={1} />
+        </Tabs>
+        <Divider />
+      </Stack>
+
+      <Stack flex="auto" paddingY={2}>
+        {activeTab === 0 && <TextContent>{readmeContent}</TextContent>}
+        {activeTab === 1 && <TextContent>{changelogContent}</TextContent>}
+      </Stack>
     </SidebarContent>
-  );
-}
-
-function UninstallButton({ onClick }: { onClick: () => void }): React.ReactElement {
-  return (
-    <Button style={{ minWidth: "100px" }} onClick={onClick}>
-      Uninstall
-    </Button>
-  );
-}
-
-function InstallButton({ onClick }: { onClick: () => void }): React.ReactElement {
-  return (
-    <Button style={{ minWidth: "100px" }} onClick={onClick}>
-      Install
-    </Button>
   );
 }

@@ -2,14 +2,21 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { MessageBar, MessageBarType, makeStyles } from "@fluentui/react";
-import { Stack } from "@mui/material";
+import {
+  Button,
+  List,
+  ListItem,
+  ListItemButton,
+  ListItemText,
+  Typography,
+  styled as muiStyled,
+} from "@mui/material";
 import { useMemo, useState } from "react";
 import { useAsync } from "react-use";
 
-import Button from "@foxglove/studio-base/components/Button";
 import { ExtensionDetails } from "@foxglove/studio-base/components/ExtensionDetails";
 import { SidebarContent } from "@foxglove/studio-base/components/SidebarContent";
+import Stack from "@foxglove/studio-base/components/Stack";
 import { useExtensionLoader } from "@foxglove/studio-base/context/ExtensionLoaderContext";
 import {
   ExtensionMarketplaceDetail,
@@ -18,49 +25,51 @@ import {
 
 import helpContent from "./index.help.md";
 
-const useStyles = makeStyles((theme) => ({
-  name: {
-    fontWeight: "bold",
-  },
-  version: {
-    color: theme.palette.neutralSecondaryAlt,
-    fontSize: "80%",
-    marginLeft: 8,
-  },
-  description: {
-    color: theme.palette.neutralSecondaryAlt,
-    textOverflow: "ellipsis",
-    whiteSpace: "nowrap",
-    width: "100%",
-    display: "inline-block",
-    overflow: "hidden",
-  },
-  publisher: {
-    color: theme.semanticColors.bodyText,
-  },
-  sectionHeader: {
-    ...theme.fonts.xSmall,
-    display: "block",
-    textTransform: "uppercase",
-    color: theme.palette.neutralSecondaryAlt,
-    letterSpacing: "0.025em",
-    marginBottom: theme.spacing.s1,
-  },
-  extensionListStack: {
-    margin: `0 -${theme.spacing.m}`,
-    borderBottom: `1px solid ${theme.semanticColors.bodyBackground}`,
-    borderTop: `1px solid ${theme.semanticColors.bodyBackground}`,
-
-    "&:hover": {
-      backgroundColor: theme.semanticColors.menuItemBackgroundHovered,
-      color: theme.semanticColors.accentButtonBackground,
-      cursor: "pointer",
-    },
+const StyledListItemButton = muiStyled(ListItemButton)(({ theme }) => ({
+  "&:hover": {
+    color: theme.palette.primary.main,
   },
 }));
 
+function ExtensionListEntry(props: {
+  entry: ExtensionMarketplaceDetail;
+  onClick: () => void;
+}): JSX.Element {
+  const {
+    entry: { id, description, name, publisher, version },
+    onClick,
+  } = props;
+  return (
+    <ListItem disablePadding key={id}>
+      <StyledListItemButton onClick={onClick}>
+        <ListItemText
+          primary={
+            <Stack direction="row" alignItems="baseline" gap={0.5}>
+              <Typography variant="subtitle2" fontWeight={600}>
+                {name}
+              </Typography>
+              <Typography variant="caption" color="text.secondary">
+                {version}
+              </Typography>
+            </Stack>
+          }
+          secondary={
+            <Stack gap={0.5}>
+              <Typography variant="body2" color="text.secondary">
+                {description}
+              </Typography>
+              <Typography color="text.primary" variant="body2">
+                {publisher}
+              </Typography>
+            </Stack>
+          }
+        />
+      </StyledListItemButton>
+    </ListItem>
+  );
+}
+
 export default function ExtensionsSidebar(): React.ReactElement {
-  const classes = useStyles();
   const [shouldFetch, setShouldFetch] = useState<boolean>(true);
   const [marketplaceEntries, setMarketplaceEntries] = useState<ExtensionMarketplaceDetail[]>([]);
   const [focusedExtension, setFocusedExtension] = useState<
@@ -138,105 +147,57 @@ export default function ExtensionsSidebar(): React.ReactElement {
   }
 
   if (availableError) {
-    return <FetchError onRetry={() => setShouldFetch(true)}></FetchError>;
+    return (
+      <SidebarContent title="Extensions">
+        <Stack gap={1} alignItems="center" justifyContent="center" fullHeight>
+          <Typography align="center" variant="body2" color="text.secondary">
+            Failed to fetch the list of available extensions. Check your Internet connection and try
+            again.
+          </Typography>
+          <Button onClick={() => setShouldFetch(true)}>Retry Fetching Extensions</Button>
+        </Stack>
+      </SidebarContent>
+    );
   }
 
   return (
-    <SidebarContent title="Extensions" helpContent={helpContent}>
-      <Stack spacing={3.75}>
-        <div>
-          <h2 className={classes.sectionHeader}>Installed</h2>
-          <Stack spacing={1}>
-            {installedEntries.length > 0
-              ? installedEntries.map((entry) => (
-                  <ExtensionListEntry
-                    key={entry.id}
-                    entry={entry}
-                    onClick={() =>
-                      setFocusedExtension({
-                        installed: true,
-                        entry,
-                      })
-                    }
-                  />
-                ))
-              : "No installed extensions"}
+    <SidebarContent title="Extensions" helpContent={helpContent} disablePadding>
+      <Stack gap={1}>
+        <List>
+          <Stack paddingY={0.25} paddingX={2}>
+            <Typography component="li" variant="overline" color="text.secondary">
+              Installed
+            </Typography>
           </Stack>
-        </div>
-        <div>
-          <h2 className={classes.sectionHeader}>Available</h2>
-          <Stack spacing={1}>
-            {filteredMarketplaceEntries.map((entry) => (
+          {installedEntries.length > 0 ? (
+            installedEntries.map((entry) => (
               <ExtensionListEntry
                 key={entry.id}
                 entry={entry}
-                onClick={() =>
-                  setFocusedExtension({
-                    installed: false,
-                    entry,
-                  })
-                }
+                onClick={() => setFocusedExtension({ installed: true, entry })}
               />
-            ))}
+            ))
+          ) : (
+            <ListItem>
+              <ListItemText primary="No installed extensions" />
+            </ListItem>
+          )}
+        </List>
+        <List>
+          <Stack paddingY={0.25} paddingX={2}>
+            <Typography component="li" variant="overline" color="text.secondary">
+              Avaiable
+            </Typography>
           </Stack>
-        </div>
+          {filteredMarketplaceEntries.map((entry) => (
+            <ExtensionListEntry
+              key={entry.id}
+              entry={entry}
+              onClick={() => setFocusedExtension({ installed: false, entry })}
+            />
+          ))}
+        </List>
       </Stack>
-    </SidebarContent>
-  );
-}
-
-function ExtensionListEntry(props: {
-  entry: ExtensionMarketplaceDetail;
-  onClick: () => void;
-}): JSX.Element {
-  const { entry } = props;
-  const classes = useStyles();
-  return (
-    <Stack
-      key={entry.id}
-      onClick={props.onClick}
-      className={classes.extensionListStack}
-      spacing={0.75}
-      paddingX={2}
-      paddingY={1}
-    >
-      <div>
-        <span className={classes.name}>{entry.name}</span>
-        <span className={classes.version}>{entry.version}</span>
-      </div>
-      <div>
-        <span className={classes.description}>{entry.description}</span>
-      </div>
-      <div>
-        <span className={classes.publisher}>{entry.publisher}</span>
-      </div>
-    </Stack>
-  );
-}
-
-function FetchError(props: { onRetry: () => void }): React.ReactElement {
-  const errorMsg =
-    "Failed to fetch the list of available extensions. Check your Internet connection and try again.";
-  return (
-    <SidebarContent title="Extensions">
-      <MessageBar
-        messageBarType={MessageBarType.error}
-        isMultiline={true}
-        dismissButtonAriaLabel="Close"
-      >
-        {errorMsg}
-      </MessageBar>
-      <Button
-        style={{
-          position: "absolute",
-          top: "50%",
-          left: "50%",
-          transform: "translate(-50%, -50%)",
-        }}
-        onClick={props.onRetry}
-      >
-        Retry Fetching Extensions
-      </Button>
     </SidebarContent>
   );
 }
