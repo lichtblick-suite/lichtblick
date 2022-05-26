@@ -3,8 +3,10 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 import { ActionButton, DefaultButton, PrimaryButton, useTheme } from "@fluentui/react";
-import { Stack, styled as muiStyled } from "@mui/material";
+import { styled as muiStyled } from "@mui/material";
 import { PropsWithChildren } from "react";
+
+import Stack from "@foxglove/studio-base/components/Stack";
 
 type ViewProps = {
   onBack?: () => void;
@@ -22,7 +24,7 @@ export default function View(props: PropsWithChildren<ViewProps>): JSX.Element {
 
   return (
     <>
-      <ViewStack flexGrow={1} height="100%" justifyContent="space-between" spacing={2}>
+      <ViewStack flexGrow={1} fullHeight justifyContent="space-between" gap={2}>
         {props.children}
       </ViewStack>
       <Stack direction="row" justifyContent="space-between" alignItems="center">
@@ -36,7 +38,7 @@ export default function View(props: PropsWithChildren<ViewProps>): JSX.Element {
         >
           Back
         </ActionButton>
-        <Stack direction="row" spacing={2}>
+        <Stack direction="row" gap={2}>
           <DefaultButton onClick={onCancel}>Cancel</DefaultButton>
           <PrimaryButton onClick={onOpen} disabled={onOpen == undefined}>
             Open

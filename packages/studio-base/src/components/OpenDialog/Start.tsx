@@ -175,7 +175,7 @@ export default function Start(props: IStartProps): JSX.Element {
     <Stack gap={2.5}>
       <Stack direction="row" gap={4}>
         {/* Left column */}
-        <Stack flexGrow={1} gap={2}>
+        <Stack flex="1 1 50%" gap={2}>
           <Typography variant="h5" color="text.secondary">
             Open data source
           </Typography>
@@ -187,7 +187,7 @@ export default function Start(props: IStartProps): JSX.Element {
         </Stack>
 
         {/* Right column */}
-        <Stack flexGrow={1} gap={2.5} style={{ minWidth: 0 }}>
+        <Stack flex="1 1 50%" gap={2.5} zeroMinWidth>
           {recentItems.length > 0 && <ActionList title="Recent" items={recentItems} />}
           <ActionList title="Help" items={HELP_ITEMS} />
           <ActionList title="Contact" items={CONTACT_ITEMS} />

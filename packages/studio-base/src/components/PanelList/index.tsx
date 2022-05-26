@@ -23,7 +23,6 @@ import {
   ListItem,
   ListItemButton,
   ListItemText,
-  Stack,
   Typography,
   styled as muiStyled,
 } from "@mui/material";
@@ -35,6 +34,7 @@ import { useDrag } from "react-dnd";
 import { MosaicDragType, MosaicPath } from "react-mosaic-component";
 
 import { LegacyInput } from "@foxglove/studio-base/components/LegacyStyledComponents";
+import Stack from "@foxglove/studio-base/components/Stack";
 import TextHighlight from "@foxglove/studio-base/components/TextHighlight";
 import { useTooltip } from "@foxglove/studio-base/components/Tooltip";
 import {
@@ -202,9 +202,9 @@ function DraggablePanelItem({
       mode === "grid" ? (
         panel.description
       ) : (
-        <Stack width={200}>
+        <Stack style={{ width: 200 }}>
           {panel.thumbnail != undefined && <img src={panel.thumbnail} alt={panel.title} />}
-          <Stack padding={1} spacing={0.5}>
+          <Stack padding={1} gap={0.5}>
             <Typography variant="body2" style={{ fontWeight: "bold" }}>
               {panel.title}
             </Typography>
@@ -229,27 +229,24 @@ function DraggablePanelItem({
     case "grid":
       return (
         <Card className={classes.fullHeight}>
-          <CardActionArea
-            component={Stack}
-            ref={mergedRef}
-            onClick={onClick}
-            className={classes.fullHeight}
-          >
-            {panel.thumbnail != undefined ? (
-              <CardMedia component="img" image={panel.thumbnail} alt={panel.title} />
-            ) : (
-              <div className={classes.imagePlaceholder} />
-            )}
-            <CardContent className={classes.cardContent}>
-              <Typography variant="subtitle2" gutterBottom>
-                <span data-test={`panel-menu-item ${panel.title}`}>
-                  <TextHighlight targetStr={panel.title} searchText={searchQuery} />
-                </span>
-              </Typography>
-              <Typography variant="body2" color="text.secondary">
-                {panel.description}
-              </Typography>
-            </CardContent>
+          <CardActionArea ref={mergedRef} onClick={onClick} className={classes.fullHeight}>
+            <Stack>
+              {panel.thumbnail != undefined ? (
+                <CardMedia component="img" image={panel.thumbnail} alt={panel.title} />
+              ) : (
+                <div className={classes.imagePlaceholder} />
+              )}
+              <CardContent className={classes.cardContent}>
+                <Typography variant="subtitle2" gutterBottom>
+                  <span data-test={`panel-menu-item ${panel.title}`}>
+                    <TextHighlight targetStr={panel.title} searchText={searchQuery} />
+                  </span>
+                </Typography>
+                <Typography variant="body2" color="text.secondary">
+                  {panel.description}
+                </Typography>
+              </CardContent>
+            </Stack>
           </CardActionArea>
         </Card>
       );

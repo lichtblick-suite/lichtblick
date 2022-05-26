@@ -3,7 +3,7 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 import { IconButton, Spinner, useTheme } from "@fluentui/react";
-import { Box, Stack, Button, Switch, FormGroup, FormControlLabel } from "@mui/material";
+import { Button, Switch, FormGroup, FormControlLabel } from "@mui/material";
 import { partition } from "lodash";
 import moment from "moment";
 import path from "path";
@@ -16,6 +16,7 @@ import { AppSetting } from "@foxglove/studio-base/AppSetting";
 import SignInPrompt from "@foxglove/studio-base/components/LayoutBrowser/SignInPrompt";
 import { useUnsavedChangesPrompt } from "@foxglove/studio-base/components/LayoutBrowser/UnsavedChangesPrompt";
 import { SidebarContent } from "@foxglove/studio-base/components/SidebarContent";
+import Stack from "@foxglove/studio-base/components/Stack";
 import { useTooltip } from "@foxglove/studio-base/components/Tooltip";
 import { useAnalytics } from "@foxglove/studio-base/context/AnalyticsContext";
 import ConsoleApiContext from "@foxglove/studio-base/context/ConsoleApiContext";
@@ -447,7 +448,7 @@ export default function LayoutBrowser({
       ].filter(Boolean)}
     >
       {unsavedChangesPrompt}
-      <Stack height="100%">
+      <Stack fullHeight>
         <div>
           <LayoutSection
             title={layoutManager.supportsSharing ? "Personal" : undefined}
@@ -484,49 +485,47 @@ export default function LayoutBrowser({
             />
           )}
         </div>
-        <div style={{ flexGrow: 1 }} />
+        <Stack flexGrow={1} />
         {showSignInPrompt && <SignInPrompt onDismiss={() => void setHideSignInPrompt(true)} />}
         {layoutDebug && (
           <Stack
-            spacing={0.5}
+            gap={0.5}
+            padding={1}
+            position="sticky"
             style={{
-              position: "sticky",
               bottom: 0,
               left: 0,
               right: 0,
               background: theme.semanticColors.bodyBackground,
-              padding: theme.spacing.s1,
               ...debugBorder,
             }}
           >
-            <Box flexGrow={1} alignSelf="stretch">
-              <Stack direction="row" flexShrink={0} spacing={1}>
-                <Button
-                  onClick={async () => {
-                    await layoutDebug.syncNow();
-                    await reloadLayouts();
-                  }}
-                >
-                  Sync
-                </Button>
+            <Stack direction="row" flex="auto" gap={1}>
+              <Button
+                onClick={async () => {
+                  await layoutDebug.syncNow();
+                  await reloadLayouts();
+                }}
+              >
+                Sync
+              </Button>
 
-                <Box flexGrow={1} />
+              <Stack flex="auto" />
 
-                <FormGroup>
-                  <FormControlLabel
-                    control={
-                      <Switch
-                        checked={layoutManager.isOnline}
-                        onChange={(_, checked) => {
-                          layoutDebug.setOnline(checked);
-                        }}
-                      />
-                    }
-                    label={layoutManager.isOnline ? "Online" : "Offline"}
-                  />
-                </FormGroup>
-              </Stack>
-            </Box>
+              <FormGroup>
+                <FormControlLabel
+                  control={
+                    <Switch
+                      checked={layoutManager.isOnline}
+                      onChange={(_, checked) => {
+                        layoutDebug.setOnline(checked);
+                      }}
+                    />
+                  }
+                  label={layoutManager.isOnline ? "Online" : "Offline"}
+                />
+              </FormGroup>
+            </Stack>
           </Stack>
         )}
       </Stack>

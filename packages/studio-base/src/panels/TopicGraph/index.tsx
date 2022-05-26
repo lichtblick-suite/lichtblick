@@ -31,6 +31,7 @@ import PanelToolbar, {
   PANEL_TOOLBAR_MIN_HEIGHT,
 } from "@foxglove/studio-base/components/PanelToolbar";
 import Radio from "@foxglove/studio-base/components/Radio";
+import Stack from "@foxglove/studio-base/components/Stack";
 
 import Graph, { GraphMutation } from "./Graph";
 import helpContent from "./index.help.md";
@@ -118,10 +119,6 @@ const useStyles = makeStyles((theme: Theme) => ({
     pointerEvents: "none",
   },
   stack: {
-    display: "flex",
-    flexDirection: "column",
-    flex: "0 0",
-
     "& > .MuiIconButton-root": {
       "&:not(:first-child)": {
         borderTopRightRadius: 0,
@@ -385,7 +382,7 @@ function TopicGraph() {
       <PanelToolbar helpContent={helpContent} />
       <div className={classes.root}>
         <Paper square={false} elevation={4} className={classes.pointerEventsAuto}>
-          <div className={cx(classes.stack, classes.pointerEventsAuto)}>
+          <Stack flex="0 0" className={cx(classes.stack, classes.pointerEventsAuto)}>
             <IconButton title="Zoom fit" onClick={onZoomFit} className={classes.icon}>
               <FitToPageIcon />
             </IconButton>
@@ -400,7 +397,7 @@ function TopicGraph() {
             >
               <ServiceIcon />
             </IconButton>
-          </div>
+          </Stack>
         </Paper>
 
         <ExpandingToolbar

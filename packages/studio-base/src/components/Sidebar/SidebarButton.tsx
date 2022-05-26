@@ -8,9 +8,10 @@ import {
   IIconProps,
   IRenderFunction,
 } from "@fluentui/react";
-import { Box, Stack, useTheme } from "@mui/material";
+import { Box, useTheme } from "@mui/material";
 import { useCallback } from "react";
 
+import Stack from "@foxglove/studio-base/components/Stack";
 import { useTooltip } from "@foxglove/studio-base/components/Tooltip";
 
 import { Badge as StatusBadge } from "./Badge";

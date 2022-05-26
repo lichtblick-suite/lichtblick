@@ -20,7 +20,7 @@ import {
 } from "@fluentui/react";
 import DatabaseIcon from "@mdi/svg/svg/database.svg";
 import PinIcon from "@mdi/svg/svg/pin.svg";
-import { Stack, Theme, Menu, MenuItem } from "@mui/material";
+import { Theme, Menu, MenuItem } from "@mui/material";
 import { makeStyles } from "@mui/styles";
 import cx from "classnames";
 import produce from "immer";
@@ -41,6 +41,7 @@ import {
   SettingsTreeAction,
   SettingsTreeRoots,
 } from "@foxglove/studio-base/components/SettingsTreeEditor/types";
+import Stack from "@foxglove/studio-base/components/Stack";
 import { Config as DiagnosticStatusConfig } from "@foxglove/studio-base/panels/diagnostics/DiagnosticStatusPanel";
 import helpContent from "@foxglove/studio-base/panels/diagnostics/DiagnosticSummary.help.md";
 import useDiagnostics from "@foxglove/studio-base/panels/diagnostics/useDiagnostics";

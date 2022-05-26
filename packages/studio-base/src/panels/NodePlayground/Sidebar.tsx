@@ -21,7 +21,6 @@ import {
   ListItem,
   ListItemButton,
   ListItemText,
-  Stack,
   IconButton,
   Tabs,
   Tab,
@@ -33,6 +32,7 @@ import {
 import * as monacoApi from "monaco-editor/esm/vs/editor/editor.api";
 import { ReactNode, useCallback, useMemo } from "react";
 
+import Stack from "@foxglove/studio-base/components/Stack";
 import { Explorer } from "@foxglove/studio-base/panels/NodePlayground";
 import { Script } from "@foxglove/studio-base/panels/NodePlayground/script";
 import { getNodeProjectConfig } from "@foxglove/studio-base/players/UserNodePlayer/nodeTransformerWorker/typescript/projectConfig";
@@ -285,7 +285,7 @@ const Sidebar = ({
 
   return (
     <Paper>
-      <Stack direction="row" height="100%">
+      <Stack direction="row" fullHeight>
         <STabs orientation="vertical" value={activeExplorerTab}>
           <STab
             disableRipple

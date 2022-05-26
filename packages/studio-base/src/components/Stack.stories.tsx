@@ -22,11 +22,11 @@ function Box({ children }: PropsWithChildren<StackProps>): JSX.Element {
       alignItems="center"
       justifyContent="center"
       padding={1}
+      fullHeight
       style={{
         textAlign: "center",
         border: `1px solid ${theme.palette.divider}`,
         backgroundColor: theme.palette.action.hover,
-        height: "100%",
       }}
     >
       {children}
