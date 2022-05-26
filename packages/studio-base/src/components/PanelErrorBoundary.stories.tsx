@@ -38,3 +38,17 @@ export const Default: Story = () => {
     </DndProvider>
   );
 };
+
+export const ShowingDetails: Story = () => {
+  return (
+    <DndProvider backend={HTML5Backend}>
+      <PanelErrorBoundary
+        showErrorDetails
+        onRemovePanel={action("onRemovePanel")}
+        onResetPanel={action("onResetPanel")}
+      >
+        <Broken />
+      </PanelErrorBoundary>
+    </DndProvider>
+  );
+};

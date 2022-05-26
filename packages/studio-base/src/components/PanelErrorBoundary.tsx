@@ -11,6 +11,7 @@ import { AppError } from "@foxglove/studio-base/util/errors";
 import ErrorDisplay from "./ErrorDisplay";
 
 type Props = {
+  showErrorDetails?: boolean;
   onResetPanel: () => void;
   onRemovePanel: () => void;
 };
@@ -36,6 +37,7 @@ export default class PanelErrorBoundary extends Component<PropsWithChildren<Prop
           title="This panel encountered an unexpected error"
           error={this.state.currentError.error}
           errorInfo={this.state.currentError.errorInfo}
+          showErrorDetails={this.props.showErrorDetails}
           content={
             <p>
               Something went wrong in this panel.{" "}

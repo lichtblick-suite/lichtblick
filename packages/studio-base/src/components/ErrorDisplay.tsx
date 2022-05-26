@@ -2,7 +2,7 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { Theme, Typography, Link, Divider } from "@mui/material";
+import { Theme, Typography, Link, Divider, styled as muiStyled } from "@mui/material";
 import { makeStyles } from "@mui/styles";
 import { ErrorInfo, useMemo, useState } from "react";
 
@@ -24,6 +24,13 @@ const useStyles = makeStyles((theme: Theme) => ({
     paddingTop: theme.spacing(2),
     textAlign: "right",
   },
+}));
+
+const Container = muiStyled("div")(({ theme }) => ({
+  display: "grid",
+  gridTemplateRows: "auto 1fr auto",
+  height: "100%",
+  padding: theme.spacing(2),
 }));
 
 /**
@@ -114,27 +121,28 @@ function ErrorDisplay(props: ErrorDisplayProps): JSX.Element {
   }, [error, errorInfo, hideErrorSourceLocations, showErrorDetails]);
 
   return (
-    <Stack fullHeight padding={2} overflow="auto">
-      <Stack fullHeight flexGrow={1}>
-        <Typography variant="h4" gutterBottom>
-          {props.title ?? "The app encountered an unexpected error"}
-        </Typography>
-        <Stack gap={2}>
+    <Container>
+      <Stack gap={2} paddingBottom={2}>
+        <Stack>
+          <Typography variant="h4" gutterBottom>
+            {props.title ?? "The app encountered an unexpected error"}
+          </Typography>
           <Typography variant="body1" component="div">
             {props.content}
           </Typography>
-          <Divider />
-          <Typography variant="subtitle2" component="code" fontWeight="bold">
-            {error?.message}
-          </Typography>
-          <Link color="secondary" onClick={() => setShowErrorDetails(!showErrorDetails)}>
-            {showErrorDetails ? "Hide" : "Show"} details
-          </Link>
-          {errorDetails && <div className={styles.errorDetailContainer}>{errorDetails}</div>}
         </Stack>
+        <Divider />
+        <Typography variant="subtitle2" component="code" fontWeight="bold">
+          {error?.message}
+        </Typography>
+        <Link color="secondary" onClick={() => setShowErrorDetails(!showErrorDetails)}>
+          {showErrorDetails ? "Hide" : "Show"} details
+        </Link>
       </Stack>
+      {errorDetails && <div className={styles.errorDetailContainer}>{errorDetails}</div>}
+      {!errorDetails && <div />}
       <div className={styles.actions}>{props.actions}</div>
-    </Stack>
+    </Container>
   );
 }
 
