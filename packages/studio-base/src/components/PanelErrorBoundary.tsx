@@ -12,6 +12,7 @@ import ErrorDisplay from "./ErrorDisplay";
 
 type Props = {
   showErrorDetails?: boolean;
+  hideErrorSourceLocations?: boolean;
   onResetPanel: () => void;
   onRemovePanel: () => void;
 };
@@ -38,6 +39,7 @@ export default class PanelErrorBoundary extends Component<PropsWithChildren<Prop
           error={this.state.currentError.error}
           errorInfo={this.state.currentError.errorInfo}
           showErrorDetails={this.props.showErrorDetails}
+          hideErrorSourceLocations={this.props.hideErrorSourceLocations}
           content={
             <p>
               Something went wrong in this panel.{" "}
