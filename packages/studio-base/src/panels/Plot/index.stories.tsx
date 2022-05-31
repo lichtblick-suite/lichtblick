@@ -332,8 +332,6 @@ const paths: PlotConfig["paths"] = [
 
 const exampleConfig: PlotConfig = {
   paths,
-  minYValue: "",
-  maxYValue: "",
   xAxisVal: "timestamp",
   showLegend: true,
   isSynced: true,
@@ -385,7 +383,13 @@ LineGraphWithSettings.storyName = "line graph with settings";
 export function LineGraphWithSettings(): JSX.Element {
   const readySignal = useReadySignal({ count: 3 });
   const pauseFrame = useCallback(() => readySignal, [readySignal]);
-  return <PlotWrapper pauseFrame={pauseFrame} config={exampleConfig} includeSettings />;
+  return (
+    <PlotWrapper
+      pauseFrame={pauseFrame}
+      config={{ ...exampleConfig, minYValue: 1, maxYValue: -1 }}
+      includeSettings
+    />
+  );
 }
 LineGraphWithSettings.parameters = {
   useReadySignal: true,
