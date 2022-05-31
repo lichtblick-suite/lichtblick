@@ -63,7 +63,7 @@ function makePoseMessage(topic: string, start: Point, end: Point, frameId: strin
     msg: {
       header: { seq: 0, stamp: time, frame_id: frameId },
       pose: {
-        position: { x: end.x, y: end.y, z: 0 },
+        position: { x: start.x, y: start.y, z: 0 },
         orientation: quaternionFromPoints(start, end),
       },
     },
