@@ -7,8 +7,8 @@ import { IconButton, IconButtonProps, styled as muiStyled } from "@mui/material"
 const StyledIconButton = muiStyled(IconButton, {
   shouldForwardProp: (prop) => prop !== "subMenuActive",
 })<{ subMenuActive: boolean }>(({ subMenuActive, theme }) => ({
+  padding: theme.spacing(0.375),
   fontSize: "0.875rem",
-  padding: theme.spacing(0.25),
 
   ...(subMenuActive && {
     visibility: "visible",
