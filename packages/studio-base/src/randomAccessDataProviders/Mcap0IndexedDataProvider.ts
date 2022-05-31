@@ -140,7 +140,8 @@ export default class Mcap0IndexedDataProvider implements RandomAccessDataProvide
       } catch (error) {
         if (!this.reportedChannelsWithInvalidMessages.has(message.channelId)) {
           (problems ??= []).push({
-            message: `Received message on channel ${message.channelId} without prior channel info`,
+            message: `Error decoding message on ${channelInfo.channel.topic}`,
+            error,
             severity: "error",
           });
           this.reportedChannelsWithInvalidMessages.add(message.channelId);
