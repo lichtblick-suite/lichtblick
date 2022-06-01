@@ -94,6 +94,8 @@ export function Toolbar({ pixelData }: { pixelData: PixelData | undefined }): JS
   useEffect(() => {
     if (pixelData) {
       setSelectedTab(TabName.SELECTED_POINT);
+    } else {
+      setSelectedTab(undefined);
     }
   }, [pixelData]);
 
