@@ -331,7 +331,9 @@ export function ImageCanvas(props: Props): JSX.Element {
       finishRender();
     }
   }, [
-    config,
+    config.flipHorizontal,
+    config.flipVertical,
+    config.rotation,
     devicePixelRatio,
     doRenderImage,
     height,
