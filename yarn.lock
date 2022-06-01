@@ -2308,6 +2308,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@foxglove/mcap-support@workspace:packages/mcap-support"
   dependencies:
+    "@foxglove/schemas": 0.1.2
     "@foxglove/wasm-bz2": 0.1.0
     "@protobufjs/base64": 1.1.2
     "@types/zstd-codec": "workspace:*"
@@ -2423,7 +2424,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@foxglove/rosmsg-msgs-common@npm:1.1.0, @foxglove/rosmsg-msgs-common@npm:^1.1.0":
+"@foxglove/rosmsg-msgs-common@npm:1.1.0, @foxglove/rosmsg-msgs-common@npm:^1.0.4, @foxglove/rosmsg-msgs-common@npm:^1.1.0":
   version: 1.1.0
   resolution: "@foxglove/rosmsg-msgs-common@npm:1.1.0"
   dependencies:
@@ -2486,6 +2487,16 @@ __metadata:
     avl: ^1.5.3
     eventemitter3: ^4.0.7
   checksum: d109eaf5bef135afe0f7c8636c6147ede65999e50cb9c7c5b9016bacaf87d2a603eb0a258a57c9e2003ec3e2baa6334789076fe3b4bf397bb92154ba8cb1a27d
+  languageName: node
+  linkType: hard
+
+"@foxglove/schemas@npm:0.1.2":
+  version: 0.1.2
+  resolution: "@foxglove/schemas@npm:0.1.2"
+  dependencies:
+    "@foxglove/rosmsg-msgs-common": ^1.0.4
+    tslib: ^2
+  checksum: 6e9cbdc07a307e0c86bbea9bdb3932a7a09041ed47894709a66c3145e104ec5f98f04b322d98ca67d272fa95116dda5d717b57f0f92125a49c3f7079a3b6600c
   languageName: node
   linkType: hard
 

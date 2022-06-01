@@ -21,6 +21,7 @@
     "prepack": "tsc -b"
   },
   "devDependencies": {
+    "@foxglove/schemas": "0.1.2",
     "@types/zstd-codec": "workspace:*",
     "typescript": "4.6.2"
   },

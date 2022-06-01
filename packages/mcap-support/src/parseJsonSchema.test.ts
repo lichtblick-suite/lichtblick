@@ -4,6 +4,8 @@
 
 import * as protobufjs from "protobufjs";
 
+import { foxgloveMessageSchemas, generateJsonSchema } from "@foxglove/schemas";
+
 import { parseJsonSchema } from "./parseJsonSchema";
 
 describe("parseJsonSchema", () => {
@@ -13,7 +15,7 @@ describe("parseJsonSchema", () => {
     expect(() => parseJsonSchema({ type: "string" }, "X")).toThrow(`Expected "type": "object"`);
     expect(() =>
       parseJsonSchema({ type: "object", properties: { x: { type: "null" } } }, "X"),
-    ).toThrow(`Unsupported object field type for x: "null"`);
+    ).toThrow(`Unsupported type "null" for x`);
     expect(() =>
       parseJsonSchema(
         { type: "object", properties: { x: { type: "string", contentEncoding: "X" } } },
@@ -239,5 +241,40 @@ describe("parseJsonSchema", () => {
       "Root",
     );
     expect(postprocessValue({ arr: [{ foo: 3 }] })).toEqual({ arr: [{ foo: 3 }] });
+  });
+
+  it("converts oneOf to enum", () => {
+    const { datatypes } = parseJsonSchema(
+      {
+        type: "object",
+        properties: {
+          level: {
+            oneOf: [
+              { title: "X", const: 1 },
+              { title: "Y", const: 2 },
+            ],
+          },
+        },
+      },
+      "Log",
+    );
+    expect(datatypes).toEqual(
+      new Map([
+        [
+          "Log",
+          {
+            definitions: [
+              { name: "X", type: "uint32", isConstant: true, value: 1 },
+              { name: "Y", type: "uint32", isConstant: true, value: 2 },
+              { name: "level", type: "uint32" },
+            ],
+          },
+        ],
+      ]),
+    );
+  });
+
+  it.each(Object.values(foxgloveMessageSchemas))("handles Foxglove schema '$name'", (schema) => {
+    expect(() => parseJsonSchema(generateJsonSchema(schema), schema.name)).not.toThrow();
   });
 });

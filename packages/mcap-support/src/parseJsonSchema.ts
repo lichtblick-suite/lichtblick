@@ -37,6 +37,26 @@ export function parseJsonSchema(
     for (const [fieldName, fieldSchema] of Object.entries(
       schema.properties as Record<string, Record<string, unknown>>,
     )) {
+      if (Array.isArray(fieldSchema.oneOf)) {
+        if (fieldSchema.oneOf.every((alternative) => typeof alternative.const === "number")) {
+          for (const alternative of fieldSchema.oneOf) {
+            fields.push({
+              name: alternative.title,
+              type: "uint32",
+              isConstant: true,
+              value: alternative.const,
+            });
+          }
+          fields.push({ name: fieldName, type: "uint32" });
+          continue;
+        } else {
+          throw new Error(
+            `Unsupported type for ${keyPath
+              .concat(fieldName)
+              .join(".")}: oneOf alternatives must have number values`,
+          );
+        }
+      }
       switch (fieldSchema.type) {
         case "boolean":
           fields.push({ name: fieldName, type: "bool" });
@@ -55,7 +75,7 @@ export function parseJsonSchema(
                   const decoded = new Uint8Array(base64.length(str));
                   if (base64.decode(str, decoded, 0) !== decoded.byteLength) {
                     throw new Error(
-                      `Failed to decode base64 data for ${keyPath.join(".")}.${fieldName}`,
+                      `Failed to decode base64 data for ${keyPath.concat(fieldName).join(".")}`,
                     );
                   }
                   value[fieldName] = decoded;
@@ -66,7 +86,9 @@ export function parseJsonSchema(
             }
             default:
               throw new Error(
-                `Unsupported contentEncoding ${JSON.stringify(fieldSchema.contentEncoding)}`,
+                `Unsupported contentEncoding ${JSON.stringify(
+                  fieldSchema.contentEncoding,
+                )} in ${keyPath.concat(fieldName).join(".")}`,
               );
           }
           break;
@@ -103,7 +125,7 @@ export function parseJsonSchema(
                 throw new Error(
                   `Unsupported contentEncoding ${JSON.stringify(
                     itemSchema.contentEncoding,
-                  )} for array item`,
+                  )} for array item ${keyPath.concat(fieldName).join(".")}`,
                 );
               }
               fields.push({ name: fieldName, type: "string", isArray: true });
@@ -136,14 +158,20 @@ export function parseJsonSchema(
               break;
             }
             default:
-              throw new Error(`Unsupported array item type: ${JSON.stringify(itemSchema.type)}`);
+              throw new Error(
+                `Unsupported type ${JSON.stringify(itemSchema.type)} for array item ${keyPath
+                  .concat(fieldName)
+                  .join(".")}`,
+              );
           }
           break;
         }
         case "null":
         default:
           throw new Error(
-            `Unsupported object field type for ${fieldName}: ${JSON.stringify(fieldSchema.type)}`,
+            `Unsupported type ${JSON.stringify(fieldSchema.type)} for ${keyPath
+              .concat(fieldName)
+              .join(".")}`,
           );
       }
     }
