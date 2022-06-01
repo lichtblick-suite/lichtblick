@@ -11,14 +11,14 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { getNormalizedMessage } from "./conversion";
+import { getNormalizedMessage, getNormalizedLevel } from "./conversion";
 import { LogMessageEvent } from "./types";
 
 export default function filterMessages(
   events: readonly LogMessageEvent[],
-  filter: { minLogLevel: number; searchTerms: string[] },
+  filter: { minLogLevel: number; searchTerms: string[]; topicDatatype: string },
 ): readonly LogMessageEvent[] {
-  const { minLogLevel, searchTerms } = filter;
+  const { minLogLevel, searchTerms, topicDatatype } = filter;
   const hasActiveFilters = minLogLevel > 1 || searchTerms.length > 0;
   // return all messages if we wouldn't filter anything
   if (!hasActiveFilters) {
@@ -29,7 +29,8 @@ export default function filterMessages(
 
   return events.filter((event) => {
     const logMessage = event.message;
-    if (logMessage.level < minLogLevel) {
+    const effectiveLogLevel = getNormalizedLevel(topicDatatype, logMessage);
+    if (effectiveLogLevel < minLogLevel) {
       return false;
     }
 

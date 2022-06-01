@@ -117,9 +117,15 @@ const LogPanel = React.memo(({ config, saveConfig }: Props) => {
 
   const searchTermsSet = useMemo(() => new Set(searchTerms), [searchTerms]);
 
+  const topicDatatype = useMemo(
+    () => availableTopics.find((topic) => topic.name === topicToRender)?.datatype,
+    [availableTopics, topicToRender],
+  );
+
   const filteredMessages = useMemo(
-    () => filterMessages(msgEvents, { minLogLevel, searchTerms }),
-    [msgEvents, minLogLevel, searchTerms],
+    () =>
+      topicDatatype ? filterMessages(msgEvents, { minLogLevel, searchTerms, topicDatatype }) : [],
+    [msgEvents, minLogLevel, searchTerms, topicDatatype],
   );
 
   const listRef = useRef<IList>(ReactNull);

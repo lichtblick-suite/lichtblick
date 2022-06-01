@@ -25,7 +25,7 @@ export function getNormalizedMessage(logMessage: LogMessageEvent["message"]): st
   return "";
 }
 
-function getNormalizedLevel(datatype: string, raw: LogMessageEvent["message"]) {
+export function getNormalizedLevel(datatype: string, raw: LogMessageEvent["message"]): number {
   switch (datatype) {
     case "foxglove.Log":
       return (raw as FoxgloveMessages[typeof datatype]).level;
