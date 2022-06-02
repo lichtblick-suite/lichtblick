@@ -21,7 +21,7 @@ export const dark: PaletteOptions & CustomPaletteOptions = {
     primary: "#e1e1e4",
     secondary: "#a7a6af",
   },
-  divider: "#414141",
+  divider: "#585858",
   background: {
     default: "#121217",
     paper: "#27272b",
