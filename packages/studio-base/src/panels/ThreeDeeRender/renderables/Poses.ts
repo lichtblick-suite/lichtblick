@@ -84,7 +84,7 @@ export class Poses extends THREE.Object3D {
         }
       }
 
-      return { fields };
+      return { icon: "Flag", fields };
     });
   }
 

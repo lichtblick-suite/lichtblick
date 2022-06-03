@@ -25,7 +25,7 @@ export class Markers extends THREE.Object3D {
     this.renderer = renderer;
 
     renderer.setSettingsNodeProvider(LayerType.Marker, (topicConfig, topic) =>
-      settingsFields(topicConfig, topic, this.topics),
+      settingsNode(topicConfig, topic, this.topics),
     );
   }
 
@@ -88,12 +88,12 @@ export class Markers extends THREE.Object3D {
   }
 }
 
-function settingsFields(
+function settingsNode(
   _topicConfig: Partial<LayerSettingsMarker>,
   topic: Topic,
   topicMarkersByTopic: Map<string, TopicMarkers>,
 ): SettingsTreeNode {
-  const node: SettingsTreeNode = {};
+  const node: SettingsTreeNode = { icon: "Shapes" };
 
   // Create a list of all the namespaces for this topic
   const topicMarkers = topicMarkersByTopic.get(topic.name);
@@ -106,6 +106,7 @@ function settingsFields(
     for (const ns of namespaces) {
       children[`ns:${ns.namespace}`] = {
         label: ns.namespace,
+        icon: "Shapes",
         visible: ns.settings.visible,
         defaultExpansionState: namespaces.length > 1 ? "collapsed" : "expanded",
       };

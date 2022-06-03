@@ -126,6 +126,10 @@ export class FrameAxes extends THREE.Object3D {
     }
   }
 
+  addCoordinateFrame(frameId: string): void {
+    this._addFrameAxis(frameId);
+  }
+
   setTransformSettings(frameId: string, settings: Partial<LayerSettingsTransform>): void {
     const renderable = this.axesByFrameId.get(frameId);
     if (renderable) {
@@ -238,8 +242,13 @@ export class FrameAxes extends THREE.Object3D {
       throw new Error(`CoordinateFrame "${frameId}" was not created`);
     }
 
+    const frameDisplayName =
+      frame.id === "" || frame.id.startsWith(" ") || frame.id.endsWith(" ")
+        ? `"${frame.id}"`
+        : frame.id;
+
     // Text label
-    const label = this.renderer.labels.setLabel(`tf:${frameId}`, { text: frameId });
+    const label = this.renderer.labels.setLabel(`tf:${frameId}`, { text: frameDisplayName });
     label.position.set(0, 0, 0.4);
     renderable.add(label);
 

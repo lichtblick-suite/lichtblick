@@ -199,6 +199,22 @@ export type CameraInfo = {
   roi: RegionOfInterest;
 };
 
+export type Image = {
+  header: Header;
+  height: number;
+  width: number;
+  encoding: string;
+  is_bigendian: boolean;
+  step: number;
+  data: Int8Array | Uint8Array;
+};
+
+export type CompressedImage = {
+  header: Header;
+  format: string;
+  data: Uint8Array;
+};
+
 export const TRANSFORM_STAMPED_DATATYPES = new Set<string>();
 addRosDataType(TRANSFORM_STAMPED_DATATYPES, "geometry_msgs/TransformStamped");
 
@@ -226,6 +242,12 @@ addRosDataType(POSE_WITH_COVARIANCE_STAMPED_DATATYPES, "geometry_msgs/PoseWithCo
 
 export const CAMERA_INFO_DATATYPES = new Set<string>();
 addRosDataType(CAMERA_INFO_DATATYPES, "sensor_msgs/CameraInfo");
+
+export const IMAGE_DATATYPES = new Set<string>();
+addRosDataType(IMAGE_DATATYPES, "sensor_msgs/Image");
+
+export const COMPRESSED_IMAGE_DATATYPES = new Set<string>();
+addRosDataType(COMPRESSED_IMAGE_DATATYPES, "sensor_msgs/CompressedImage");
 
 export function rosTimeToNanoSec(rosTime: { sec: number; nsec: number }): bigint {
   return BigInt(rosTime.sec) * BigInt(1e9) + BigInt(rosTime.nsec);

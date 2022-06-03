@@ -36,7 +36,7 @@ const DEFAULT_SETTINGS: LayerSettingsCameraInfo = {
   color: DEFAULT_COLOR_STR,
 };
 
-type CameraInfoRenderable = THREE.Object3D & {
+export type CameraInfoRenderable = THREE.Object3D & {
   userData: {
     topic: string;
     settings: LayerSettingsCameraInfo;
@@ -67,7 +67,7 @@ export class Cameras extends THREE.Object3D {
         color: { label: "Color", input: "rgba", value: color },
       };
 
-      return { fields };
+      return { icon: "Camera", fields };
     });
   }
 

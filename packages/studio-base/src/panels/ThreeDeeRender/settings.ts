@@ -14,6 +14,8 @@ import {
 
 import {
   CAMERA_INFO_DATATYPES,
+  IMAGE_DATATYPES,
+  COMPRESSED_IMAGE_DATATYPES,
   MARKER_ARRAY_DATATYPES,
   MARKER_DATATYPES,
   OCCUPANCY_GRID_DATATYPES,
@@ -89,11 +91,20 @@ export type LayerSettingsCameraInfo = {
   color: string;
 };
 
+export type LayerSettingsImage = {
+  visible: boolean;
+  cameraInfoTopic: string | undefined;
+  distance: number;
+  color: string;
+};
+
 export type LayerSettings =
   | LayerSettingsMarker
   | LayerSettingsOccupancyGrid
   | LayerSettingsPointCloud2
-  | LayerSettingsPose;
+  | LayerSettingsPose
+  | LayerSettingsCameraInfo
+  | LayerSettingsImage;
 
 export enum LayerType {
   Transform,
@@ -102,6 +113,7 @@ export enum LayerType {
   PointCloud,
   Pose,
   CameraInfo,
+  Image,
 }
 
 export type SettingsNodeProvider = (
@@ -119,6 +131,8 @@ mergeSetInto(SUPPORTED_DATATYPES, POINTCLOUD_DATATYPES);
 mergeSetInto(SUPPORTED_DATATYPES, POSE_STAMPED_DATATYPES);
 mergeSetInto(SUPPORTED_DATATYPES, POSE_WITH_COVARIANCE_STAMPED_DATATYPES);
 mergeSetInto(SUPPORTED_DATATYPES, CAMERA_INFO_DATATYPES);
+mergeSetInto(SUPPORTED_DATATYPES, IMAGE_DATATYPES);
+mergeSetInto(SUPPORTED_DATATYPES, COMPRESSED_IMAGE_DATATYPES);
 
 const ONE_DEGREE = Math.PI / 180;
 
@@ -137,12 +151,12 @@ export type SettingsTreeOptions = {
 
 function buildTransformNode(
   tfConfigOrFrameId: string | Partial<LayerSettingsTransform>,
-  frameId: string,
+  frameDisplayName: string,
   settingsNodeProvider: SettingsNodeProvider,
 ): undefined | SettingsTreeNode {
   const tfConfig = typeof tfConfigOrFrameId === "string" ? {} : tfConfigOrFrameId;
   const node = settingsNodeProvider(tfConfig, EMPTY_TOPIC);
-  node.label ??= frameId;
+  node.label ??= frameDisplayName;
   node.visible ??= tfConfig.visible ?? true;
   node.defaultExpansionState ??= "collapsed";
   return node;
@@ -168,7 +182,6 @@ function buildTopicNode(
 }
 
 const memoBuildTransformNode = memoize(buildTransformNode);
-const memoBuildTopicNode = memoize(buildTopicNode);
 
 export function buildSettingsTree(options: SettingsTreeOptions): SettingsTreeRoots {
   const { config, coordinateFrames, followTf, topics, topicsToLayerTypes, settingsNodeProviders } =
@@ -180,11 +193,11 @@ export function buildSettingsTree(options: SettingsTreeOptions): SettingsTreeRoo
   const transformsChildren: SettingsTreeChildren = {};
   const tfSettingsNodeProvider = settingsNodeProviders.get(LayerType.Transform);
   if (tfSettingsNodeProvider != undefined) {
-    for (const { value: frameId } of options.coordinateFrames) {
+    for (const { label: frameName, value: frameId } of options.coordinateFrames) {
       // We key our memoized function by the first argument. Since the config
       // may be undefined we use the config or the topic name
       const transformConfig = config.transforms[frameId] ?? frameId;
-      const newNode = memoBuildTransformNode(transformConfig, frameId, tfSettingsNodeProvider);
+      const newNode = memoBuildTransformNode(transformConfig, frameName, tfSettingsNodeProvider);
       if (newNode) {
         transformsChildren[frameId] = newNode;
       }
@@ -206,7 +219,7 @@ export function buildSettingsTree(options: SettingsTreeOptions): SettingsTreeRoo
     // We key our memoized function by the first argument. Since the config
     // may be undefined we use the config or the topic name
     const topicConfig = config.topics[topic.name] ?? topic.name;
-    const newNode = memoBuildTopicNode(topicConfig, topic, layerType, settingsNodeProvider);
+    const newNode = buildTopicNode(topicConfig, topic, layerType, settingsNodeProvider);
     if (newNode) {
       topicsChildren[topic.name] = newNode;
     }

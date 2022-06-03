@@ -80,7 +80,7 @@ export class PointClouds extends THREE.Object3D {
     this.renderer = renderer;
 
     renderer.setSettingsNodeProvider(LayerType.PointCloud, (topicConfig, topic) =>
-      settingsFields(this.pointCloudFieldsByTopic, topicConfig, topic),
+      settingsNode(this.pointCloudFieldsByTopic, topicConfig, topic),
     );
   }
 
@@ -112,7 +112,7 @@ export class PointClouds extends THREE.Object3D {
         autoSelectColorField(settings, pointCloud);
 
         // Update user settings with the newly selected color field
-        const updatedUserSettings = userSettings ?? {};
+        const updatedUserSettings = { ...userSettings };
         updatedUserSettings.colorField = settings.colorField;
         updatedUserSettings.colorMode = settings.colorMode;
         updatedUserSettings.colorMap = settings.colorMap;
@@ -495,7 +495,7 @@ function bestColorByField(pclFields: string[]): string {
   return "x";
 }
 
-function settingsFields(
+function settingsNode(
   pclFieldsByTopic: Map<string, string[]>,
   topicConfig: Partial<LayerSettings>,
   topic: Topic,
@@ -613,7 +613,7 @@ function settingsFields(
     };
   }
 
-  return { fields };
+  return { icon: "Points", fields };
 }
 
 function pointFieldTypeName(type: PointFieldType): string {

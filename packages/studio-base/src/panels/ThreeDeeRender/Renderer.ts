@@ -20,12 +20,15 @@ import { stringToRgb } from "./color";
 import { DetailLevel, msaaSamples } from "./lod";
 import { Cameras } from "./renderables/Cameras";
 import { FrameAxes } from "./renderables/FrameAxes";
+import { Images } from "./renderables/Images";
 import { Markers } from "./renderables/Markers";
 import { OccupancyGrids } from "./renderables/OccupancyGrids";
 import { PointClouds } from "./renderables/PointClouds";
 import { Poses } from "./renderables/Poses";
 import {
   CameraInfo,
+  CompressedImage,
+  Image,
   Marker,
   OccupancyGrid,
   PointCloud2,
@@ -35,6 +38,7 @@ import {
 } from "./ros";
 import {
   LayerSettingsCameraInfo,
+  LayerSettingsImage,
   LayerSettingsMarker,
   LayerSettingsMarkerNamespace,
   LayerSettingsOccupancyGrid,
@@ -118,6 +122,7 @@ export class Renderer extends EventEmitter<RendererEvents> {
   markers = new Markers(this);
   poses = new Poses(this);
   cameras = new Cameras(this);
+  images = new Images(this);
 
   constructor(canvas: HTMLCanvasElement, config: ThreeDeeRenderConfig) {
     super();
@@ -162,6 +167,7 @@ export class Renderer extends EventEmitter<RendererEvents> {
     this.scene.add(this.markers);
     this.scene.add(this.poses);
     this.scene.add(this.cameras);
+    this.scene.add(this.images);
 
     this.dirLight = new THREE.DirectionalLight();
     this.dirLight.position.set(1, 1, 1);
@@ -243,6 +249,10 @@ export class Renderer extends EventEmitter<RendererEvents> {
     this.frameAxes.addTransformMessage(tf);
   }
 
+  addCoordinateFrame(frameId: string): void {
+    this.frameAxes.addCoordinateFrame(frameId);
+  }
+
   setTransformSettings(frameId: string, settings: Partial<LayerSettingsTransform>): void {
     this.frameAxes.setTransformSettings(frameId, settings);
   }
@@ -291,10 +301,19 @@ export class Renderer extends EventEmitter<RendererEvents> {
 
   addCameraInfoMessage(topic: string, cameraInfo: CameraInfo): void {
     this.cameras.addCameraInfoMessage(topic, cameraInfo);
+    this.images.addCameraInfoMessage(topic, cameraInfo);
   }
 
   setCameraInfoSettings(topic: string, settings: Partial<LayerSettingsCameraInfo>): void {
     this.cameras.setTopicSettings(topic, settings);
+  }
+
+  addImageMessage(topic: string, image: Image | CompressedImage): void {
+    this.images.addImageMessage(topic, image);
+  }
+
+  setImageSettings(topic: string, settings: Partial<LayerSettingsImage>): void {
+    this.images.setTopicSettings(topic, settings);
   }
 
   markerWorldPosition(markerId: string): Readonly<THREE.Vector3> | undefined {
@@ -328,6 +347,7 @@ export class Renderer extends EventEmitter<RendererEvents> {
     this.markers.startFrame(currentTime);
     this.poses.startFrame(currentTime);
     this.cameras.startFrame(currentTime);
+    this.images.startFrame(currentTime);
 
     this.gl.clear();
     this.camera.layers.set(LAYER_DEFAULT);

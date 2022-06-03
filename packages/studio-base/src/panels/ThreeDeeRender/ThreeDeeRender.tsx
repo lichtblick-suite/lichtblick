@@ -32,28 +32,35 @@ import { RendererContext, useRendererEvent } from "./RendererContext";
 import { Stats } from "./Stats";
 import {
   normalizeCameraInfo,
+  normalizeCompressedImage,
+  normalizeImage,
   normalizeMarker,
   normalizePoseStamped,
   normalizePoseWithCovarianceStamped,
 } from "./normalizeMessages";
 import {
-  TRANSFORM_STAMPED_DATATYPES,
-  TF_DATATYPES,
-  MARKER_DATATYPES,
+  CAMERA_INFO_DATATYPES,
+  CameraInfo,
+  COMPRESSED_IMAGE_DATATYPES,
+  CompressedImage,
+  IMAGE_DATATYPES,
+  Image,
   MARKER_ARRAY_DATATYPES,
-  TF,
+  MARKER_DATATYPES,
   Marker,
   MarkerArray,
-  PointCloud2,
-  POINTCLOUD_DATATYPES,
-  OccupancyGrid,
   OCCUPANCY_GRID_DATATYPES,
+  OccupancyGrid,
+  POINTCLOUD_DATATYPES,
+  PointCloud2,
   POSE_STAMPED_DATATYPES,
   POSE_WITH_COVARIANCE_STAMPED_DATATYPES,
   PoseStamped,
   PoseWithCovarianceStamped,
-  CameraInfo,
-  CAMERA_INFO_DATATYPES,
+  TF_DATATYPES,
+  TF,
+  TRANSFORM_STAMPED_DATATYPES,
+  Header,
 } from "./ros";
 import {
   buildSettingsTree,
@@ -199,7 +206,7 @@ export function ThreeDeeRender({ context }: { context: PanelExtensionContext }):
     (update) => {
       setConfig((oldConfig) => {
         const newConfig = produce(oldConfig, (draft) => {
-          const entry = get(draft, update.path);
+          const entry = get(renderer?.config ?? draft, update.path);
           set(draft, update.path, { ...entry });
         });
 
@@ -415,6 +422,15 @@ export function ThreeDeeRender({ context }: { context: PanelExtensionContext }):
         continue;
       }
 
+      // If this message has a Header, scrape the frame_id from it
+      const frameId = (message.message as Partial<{ header: Header }>).header?.frame_id;
+      if (frameId != undefined && !renderer.transformTree.hasFrame(frameId)) {
+        renderer.transformTree.getOrCreateFrame(frameId);
+        log.debug(`Added coordinate frame "${frameId}"`);
+        renderer.emit("transformTreeUpdated", renderer);
+        renderer.addCoordinateFrame(frameId);
+      }
+
       if (TF_DATATYPES.has(datatype)) {
         // tf2_msgs/TFMessage - Ingest the list of transforms into our TF tree
         const tfMessage = message.message as { transforms: TF[] };
@@ -455,6 +471,14 @@ export function ThreeDeeRender({ context }: { context: PanelExtensionContext }):
       } else if (CAMERA_INFO_DATATYPES.has(datatype)) {
         const cameraInfo = normalizeCameraInfo(message.message as DeepPartial<CameraInfo>);
         renderer.addCameraInfoMessage(message.topic, cameraInfo);
+      } else if (IMAGE_DATATYPES.has(datatype)) {
+        const image = normalizeImage(message.message as DeepPartial<Image>);
+        renderer.addImageMessage(message.topic, image);
+      } else if (COMPRESSED_IMAGE_DATATYPES.has(datatype)) {
+        const compressedImage = normalizeCompressedImage(
+          message.message as DeepPartial<CompressedImage>,
+        );
+        renderer.addImageMessage(message.topic, compressedImage);
       }
     }
 
@@ -589,6 +613,8 @@ function buildTopicsToLayerTypes(topics: ReadonlyArray<Topic> | undefined): Map<
         map.set(topic.name, LayerType.Pose);
       } else if (CAMERA_INFO_DATATYPES.has(datatype)) {
         map.set(topic.name, LayerType.CameraInfo);
+      } else if (IMAGE_DATATYPES.has(datatype) || COMPRESSED_IMAGE_DATATYPES.has(datatype)) {
+        map.set(topic.name, LayerType.Image);
       }
     }
   }
@@ -623,6 +649,9 @@ function updateTopicSettings(
       break;
     case LayerType.CameraInfo:
       renderer.setCameraInfoSettings(topic, topicConfig);
+      break;
+    case LayerType.Image:
+      renderer.setImageSettings(topic, topicConfig);
       break;
   }
 }

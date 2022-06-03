@@ -67,6 +67,7 @@ export class OccupancyGrids extends THREE.Object3D {
       const invalidColor = cur.invalidColor ?? DEFAULT_INVALID_COLOR_STR;
       const frameLocked = cur.frameLocked ?? false;
       return {
+        icon: "Cells",
         fields: {
           minColor: { label: "Min Color", input: "rgba", value: minColor },
           maxColor: { label: "Max Color", input: "rgba", value: maxColor },
@@ -234,9 +235,9 @@ function createTexture(occupancyGrid: OccupancyGrid): THREE.DataTexture {
     THREE.ClampToEdgeWrapping,
     THREE.ClampToEdgeWrapping,
     THREE.NearestFilter,
-    THREE.NearestFilter,
+    THREE.LinearMipmapLinearFilter,
     1,
-    THREE.LinearEncoding,
+    THREE.LinearEncoding, // OccupancyGrid carries linear grayscale values, not sRGB
   );
 }
 

@@ -11,8 +11,6 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { RenderOptions } from "../types";
-
 export function decodeYUV(
   yuv: Int8Array,
   width: number,
@@ -65,6 +63,28 @@ export function decodeRGB8(
     output[outIdx++] = g;
     output[outIdx++] = b;
     output[outIdx++] = 255;
+  }
+}
+
+export function decodeRGBA8(
+  rgba: Uint8Array,
+  width: number,
+  height: number,
+  output: Uint8ClampedArray,
+): void {
+  let inIdx = 0;
+  let outIdx = 0;
+
+  for (let i = 0; i < width * height; i++) {
+    const r = rgba[inIdx++]!;
+    const g = rgba[inIdx++]!;
+    const b = rgba[inIdx++]!;
+    const a = rgba[inIdx++]!;
+
+    output[outIdx++] = r;
+    output[outIdx++] = g;
+    output[outIdx++] = b;
+    output[outIdx++] = a;
   }
 }
 
@@ -134,7 +154,7 @@ export function decodeMono16(
   // eslint-disable-next-line @foxglove/no-boolean-parameters
   is_bigendian: boolean,
   output: Uint8ClampedArray,
-  options?: RenderOptions,
+  options?: { minValue?: number; maxValue?: number },
 ): void {
   const view = new DataView(mono16.buffer, mono16.byteOffset);
 
