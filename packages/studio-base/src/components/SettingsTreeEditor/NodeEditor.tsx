@@ -123,9 +123,10 @@ function NodeEditorComponent(props: NodeEditorProps): JSX.Element {
   const { fields, children } = settings;
   const hasProperties = fields != undefined || children != undefined;
 
-  // Provide stable subpaths so that memoization works.
+  // Provide stable subpaths so that memoization works. We force a dependency on path
+  // here to make sure we reset the cache if the path changes.
   const stablePaths = useMemo<Record<string, readonly string[]>>(
-    () => ({ "": props.path }),
+    () => ({ [Symbol()]: props.path }),
     [props.path],
   );
 
