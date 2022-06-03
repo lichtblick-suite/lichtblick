@@ -27,6 +27,7 @@ import {
 import useCleanup from "@foxglove/studio-base/hooks/useCleanup";
 
 import { DebugGui } from "./DebugGui";
+import { NodeError } from "./LayerErrors";
 import { Renderer } from "./Renderer";
 import { RendererContext, useRendererEvent } from "./RendererContext";
 import { Stats } from "./Stats";
@@ -220,6 +221,8 @@ export function ThreeDeeRender({ context }: { context: PanelExtensionContext }):
   const [coordinateFrames, setCoordinateFrames] = useState<SelectEntry[]>(
     coordinateFrameList(renderer),
   );
+  // Maintain a tree of settings node errors
+  const [layerErrors, setLayerErrors] = useState<NodeError>(new NodeError([]));
   const [defaultFrame, setDefaultFrame] = useState<string | undefined>(undefined);
   const updateCoordinateFrames = useCallback(
     (curRenderer: Renderer) => {
@@ -247,10 +250,16 @@ export function ThreeDeeRender({ context }: { context: PanelExtensionContext }):
     },
     [setDefaultFrame],
   );
+  const updateLayerErrors = useCallback(
+    (_: unknown, __: unknown, ___: unknown, curRenderer: Renderer) =>
+      setLayerErrors(curRenderer.layerErrors.errors.clone()),
+    [],
+  );
   useEffect(() => {
     renderer?.addListener("transformTreeUpdated", updateCoordinateFrames);
+    renderer?.addListener("layerErrorUpdate", updateLayerErrors);
     return () => void renderer?.removeListener("transformTreeUpdated", updateCoordinateFrames);
-  }, [renderer, updateCoordinateFrames]);
+  }, [renderer, updateCoordinateFrames, updateLayerErrors]);
 
   // Set the rendering frame (aka followTf) based on the configured frame, falling back to a
   // heuristically chosen best frame for the current scene (defaultFrame)
@@ -273,6 +282,7 @@ export function ThreeDeeRender({ context }: { context: PanelExtensionContext }):
       roots: buildSettingsTree({
         config,
         coordinateFrames,
+        layerErrors,
         followTf,
         topics: topics ?? [],
         topicsToLayerTypes,
@@ -285,6 +295,7 @@ export function ThreeDeeRender({ context }: { context: PanelExtensionContext }):
     context,
     coordinateFrames,
     followTf,
+    layerErrors,
     settingsNodeProviders,
     topics,
     topicsToLayerTypes,

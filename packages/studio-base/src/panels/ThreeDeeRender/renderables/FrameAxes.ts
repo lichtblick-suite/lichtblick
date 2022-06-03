@@ -167,7 +167,7 @@ export class FrameAxes extends THREE.Object3D {
       renderable.visible = updated;
       if (!updated) {
         const message = missingTransformMessage(renderFrameId, fixedFrameId, frameId);
-        this.renderer.layerErrors.addToLayer(`f:${frameId}`, MISSING_TRANSFORM, message);
+        this.renderer.layerErrors.add(["transforms", frameId], MISSING_TRANSFORM, message);
       }
     }
 

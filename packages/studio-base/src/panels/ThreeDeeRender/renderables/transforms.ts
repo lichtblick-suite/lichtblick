@@ -10,5 +10,11 @@ export function missingTransformMessage(
   srcFrameId: string,
 ): string {
   const dstFrameId = renderFrameId === srcFrameId ? fixedFrameId : renderFrameId;
-  return `Missing transform from frame <${srcFrameId}> to frame <${dstFrameId}>`;
+  if (srcFrameId !== dstFrameId) {
+    return `Missing transform from frame <${srcFrameId}> to frame <${dstFrameId}>`;
+  } else if (srcFrameId !== fixedFrameId) {
+    return `Missing transform from frame <${srcFrameId}> to fixed frame <${fixedFrameId}> to frame <${dstFrameId}>`;
+  } else {
+    return `Identity transform failed for frame <${srcFrameId}>`;
+  }
 }

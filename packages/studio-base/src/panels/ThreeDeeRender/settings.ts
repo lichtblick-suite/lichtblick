@@ -12,6 +12,7 @@ import {
   SettingsTreeRoots,
 } from "@foxglove/studio-base/components/SettingsTreeEditor/types";
 
+import { NodeError } from "./LayerErrors";
 import {
   CAMERA_INFO_DATATYPES,
   IMAGE_DATATYPES,
@@ -140,9 +141,16 @@ const ONE_DEGREE = Math.PI / 180;
 // LayerType.Transform, since transforms do not map 1:1 to topics
 const EMPTY_TOPIC = { name: "", datatype: "" };
 
+const PATH_GENERAL = ["general"];
+const PATH_SCENE = ["scene"];
+const PATH_CAMERA_STATE = ["cameraState"];
+const PATH_TRANSFORMS = ["transforms"];
+const PATH_TOPICS = ["topics"];
+
 export type SettingsTreeOptions = {
   config: ThreeDeeRenderConfig;
   coordinateFrames: ReadonlyArray<SelectEntry>;
+  layerErrors: NodeError;
   followTf: string | undefined;
   topics: ReadonlyArray<Topic>;
   topicsToLayerTypes: Map<string, LayerType>;
@@ -184,8 +192,15 @@ function buildTopicNode(
 const memoBuildTransformNode = memoize(buildTransformNode);
 
 export function buildSettingsTree(options: SettingsTreeOptions): SettingsTreeRoots {
-  const { config, coordinateFrames, followTf, topics, topicsToLayerTypes, settingsNodeProviders } =
-    options;
+  const {
+    config,
+    coordinateFrames,
+    layerErrors,
+    followTf,
+    topics,
+    topicsToLayerTypes,
+    settingsNodeProviders,
+  } = options;
   const { cameraState, scene } = config;
   const { backgroundColor } = scene;
 
@@ -199,6 +214,7 @@ export function buildSettingsTree(options: SettingsTreeOptions): SettingsTreeRoo
       const transformConfig = config.transforms[frameId] ?? frameId;
       const newNode = memoBuildTransformNode(transformConfig, frameName, tfSettingsNodeProvider);
       if (newNode) {
+        newNode.error = layerErrors.errorAtPath(["transforms", frameId]);
         transformsChildren[frameId] = newNode;
       }
     }
@@ -221,12 +237,14 @@ export function buildSettingsTree(options: SettingsTreeOptions): SettingsTreeRoo
     const topicConfig = config.topics[topic.name] ?? topic.name;
     const newNode = buildTopicNode(topicConfig, topic, layerType, settingsNodeProvider);
     if (newNode) {
+      newNode.error = layerErrors.errorAtPath(["topics", topic.name]);
       topicsChildren[topic.name] = newNode;
     }
   }
 
   return {
     general: {
+      error: layerErrors.errorAtPath(PATH_GENERAL),
       label: "General",
       icon: "Settings",
       fields: {
@@ -234,6 +252,7 @@ export function buildSettingsTree(options: SettingsTreeOptions): SettingsTreeRoo
       },
     },
     scene: {
+      error: layerErrors.errorAtPath(PATH_SCENE),
       label: "Scene",
       fields: {
         enableStats: { label: "Render stats", input: "boolean", value: config.scene.enableStats },
@@ -242,6 +261,7 @@ export function buildSettingsTree(options: SettingsTreeOptions): SettingsTreeRoo
       defaultExpansionState: "collapsed",
     },
     cameraState: {
+      error: layerErrors.errorAtPath(PATH_CAMERA_STATE),
       label: "Camera",
       fields: {
         distance: { label: "Distance", input: "number", value: cameraState.distance, step: 1 },
@@ -271,11 +291,13 @@ export function buildSettingsTree(options: SettingsTreeOptions): SettingsTreeRoo
       defaultExpansionState: "collapsed",
     },
     transforms: {
+      error: layerErrors.errorAtPath(PATH_TRANSFORMS),
       label: "Transforms",
       children: transformsChildren,
       defaultExpansionState: "expanded",
     },
     topics: {
+      error: layerErrors.errorAtPath(PATH_TOPICS),
       label: "Topics",
       children: topicsChildren,
       defaultExpansionState: "expanded",

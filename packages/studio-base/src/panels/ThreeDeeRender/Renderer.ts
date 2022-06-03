@@ -60,6 +60,12 @@ export type RendererEvents = {
   renderableSelected: (renderable: THREE.Object3D | undefined, renderer: Renderer) => void;
   transformTreeUpdated: (renderer: Renderer) => void;
   settingsTreeChange: (update: { path: string[] }) => void;
+  layerErrorUpdate: (
+    path: ReadonlyArray<string>,
+    errorId: string | undefined,
+    errorMessage: string | undefined,
+    renderer: Renderer,
+  ) => void;
 };
 
 const DEBUG_PICKING: true | false = false;
@@ -129,6 +135,16 @@ export class Renderer extends EventEmitter<RendererEvents> {
 
     // NOTE: Global side effect
     THREE.Object3D.DefaultUp = new THREE.Vector3(0, 0, 1);
+
+    this.layerErrors.on("update", (path, errorId, errorMessage) =>
+      this.emit("layerErrorUpdate", path, errorId, errorMessage, this),
+    );
+    this.layerErrors.on("remove", (path, errorId) =>
+      this.emit("layerErrorUpdate", path, errorId, undefined, this),
+    );
+    this.layerErrors.on("clear", (path) =>
+      this.emit("layerErrorUpdate", path, undefined, undefined, this),
+    );
 
     this.canvas = canvas;
     this.config = config;
