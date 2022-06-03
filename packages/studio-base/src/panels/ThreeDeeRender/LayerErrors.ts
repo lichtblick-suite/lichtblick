@@ -8,6 +8,8 @@ import Logger from "@foxglove/log";
 
 type Path = ReadonlyArray<string>;
 
+const TOPIC_PATH: [string, string] = ["topics", ""];
+
 export class NodeError {
   path: Path;
   errorsById?: Map<string, string>;
@@ -76,7 +78,7 @@ export class LayerErrors extends EventEmitter<LayerErrorEvents> {
     // Onlu log the first error message per path+id for performance
     const prevErrorMessage = node.errorsById.get(errorId);
     if (prevErrorMessage == undefined) {
-      log.warn(`[${path.join("/")}] ${errorMessage}`);
+      log.warn(`[${path.join(" > ")}] ${errorMessage}`);
     }
 
     // Add or update the error
@@ -87,7 +89,8 @@ export class LayerErrors extends EventEmitter<LayerErrorEvents> {
   }
 
   addToTopic(topicId: string, errorId: string, errorMessage: string): void {
-    this.add(["topics", topicId], errorId, errorMessage);
+    TOPIC_PATH[1] = topicId;
+    this.add(TOPIC_PATH, errorId, errorMessage);
   }
 
   remove(path: Path, errorId: string): void {
@@ -99,7 +102,8 @@ export class LayerErrors extends EventEmitter<LayerErrorEvents> {
   }
 
   removeFromTopic(topicId: string, errorId: string): void {
-    this.remove(["topics", topicId], errorId);
+    TOPIC_PATH[1] = topicId;
+    this.remove(TOPIC_PATH, errorId);
   }
 
   clearPath(path: Path): void {
@@ -112,7 +116,8 @@ export class LayerErrors extends EventEmitter<LayerErrorEvents> {
   }
 
   clearTopic(topicId: string): void {
-    this.clearPath(["topics", topicId]);
+    TOPIC_PATH[1] = topicId;
+    this.clearPath(TOPIC_PATH);
   }
 
   clear(): void {

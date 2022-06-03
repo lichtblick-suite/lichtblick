@@ -206,6 +206,8 @@ export class Images extends THREE.Object3D {
       if (!updated) {
         const message = missingTransformMessage(renderFrameId, fixedFrameId, frameId);
         this.renderer.layerErrors.addToTopic(renderable.userData.topic, MISSING_TRANSFORM, message);
+      } else {
+        this.renderer.layerErrors.removeFromTopic(renderable.userData.topic, MISSING_TRANSFORM);
       }
     }
   }
@@ -264,21 +266,11 @@ export class Images extends THREE.Object3D {
             log.debug(
               `Creating texture for ${bitmap.width}x${bitmap.height} "${compressed.format}" camera image on "${topic}"`,
             );
-            const texture = new THREE.CanvasTexture(
-              bitmap,
-              THREE.UVMapping,
-              THREE.ClampToEdgeWrapping,
-              THREE.ClampToEdgeWrapping,
-              THREE.NearestFilter,
-              THREE.LinearMipmapLinearFilter,
-              THREE.RGBAFormat,
-              THREE.UnsignedByteType,
-            );
-            texture.encoding = THREE.sRGBEncoding;
-            renderable.userData.texture = texture;
+            renderable.userData.texture = createCanvasTexture(bitmap);
             rebuildMaterial(renderable);
             tryCreateMesh(renderable, this.renderer);
           } else {
+            renderable.userData.texture.image.close();
             renderable.userData.texture.image = bitmap;
             renderable.userData.texture.needsUpdate = true;
           }
@@ -305,7 +297,7 @@ export class Images extends THREE.Object3D {
         log.debug(
           `Creating data texture for ${width}x${height} "${raw.encoding}" camera image on "${topic}"`,
         );
-        renderable.userData.texture = createTexture(width, height);
+        renderable.userData.texture = createDataTexture(width, height);
         rebuildMaterial(renderable);
         tryCreateMesh(renderable, this.renderer);
       }
@@ -348,7 +340,23 @@ function rebuildMaterial(renderable: ImageRenderable): void {
   }
 }
 
-function createTexture(width: number, height: number): THREE.DataTexture {
+function createCanvasTexture(bitmap: ImageBitmap): THREE.CanvasTexture {
+  const texture = new THREE.CanvasTexture(
+    bitmap,
+    THREE.UVMapping,
+    THREE.ClampToEdgeWrapping,
+    THREE.ClampToEdgeWrapping,
+    THREE.NearestFilter,
+    THREE.LinearFilter,
+    THREE.RGBAFormat,
+    THREE.UnsignedByteType,
+  );
+  texture.generateMipmaps = false;
+  texture.encoding = THREE.sRGBEncoding;
+  return texture;
+}
+
+function createDataTexture(width: number, height: number): THREE.DataTexture {
   const size = width * height;
   const rgba = new Uint8ClampedArray(size * 4);
   return new THREE.DataTexture(
@@ -361,7 +369,7 @@ function createTexture(width: number, height: number): THREE.DataTexture {
     THREE.ClampToEdgeWrapping,
     THREE.ClampToEdgeWrapping,
     THREE.NearestFilter,
-    THREE.LinearMipmapLinearFilter,
+    THREE.LinearFilter,
     1,
     THREE.sRGBEncoding,
   );

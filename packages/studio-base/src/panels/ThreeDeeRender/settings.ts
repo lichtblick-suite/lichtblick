@@ -2,8 +2,6 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { memoize } from "lodash";
-
 import { CameraState, DEFAULT_CAMERA_STATE } from "@foxglove/regl-worldview";
 import { Topic } from "@foxglove/studio";
 import {
@@ -189,8 +187,6 @@ function buildTopicNode(
   return node;
 }
 
-const memoBuildTransformNode = memoize(buildTransformNode);
-
 export function buildSettingsTree(options: SettingsTreeOptions): SettingsTreeRoots {
   const {
     config,
@@ -212,7 +208,7 @@ export function buildSettingsTree(options: SettingsTreeOptions): SettingsTreeRoo
       // We key our memoized function by the first argument. Since the config
       // may be undefined we use the config or the topic name
       const transformConfig = config.transforms[frameId] ?? frameId;
-      const newNode = memoBuildTransformNode(transformConfig, frameName, tfSettingsNodeProvider);
+      const newNode = buildTransformNode(transformConfig, frameName, tfSettingsNodeProvider);
       if (newNode) {
         newNode.error = layerErrors.errorAtPath(["transforms", frameId]);
         transformsChildren[frameId] = newNode;

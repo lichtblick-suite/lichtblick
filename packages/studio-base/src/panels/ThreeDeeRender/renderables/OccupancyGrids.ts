@@ -166,6 +166,8 @@ export class OccupancyGrids extends THREE.Object3D {
       if (!updated) {
         const message = missingTransformMessage(renderFrameId, fixedFrameId, frameId);
         this.renderer.layerErrors.addToTopic(renderable.userData.topic, MISSING_TRANSFORM, message);
+      } else {
+        this.renderer.layerErrors.removeFromTopic(renderable.userData.topic, MISSING_TRANSFORM);
       }
     }
   }
@@ -225,7 +227,7 @@ function createTexture(occupancyGrid: OccupancyGrid): THREE.DataTexture {
   const height = occupancyGrid.info.height;
   const size = width * height;
   const rgba = new Uint8ClampedArray(size * 4);
-  return new THREE.DataTexture(
+  const texture = new THREE.DataTexture(
     rgba,
     width,
     height,
@@ -235,10 +237,12 @@ function createTexture(occupancyGrid: OccupancyGrid): THREE.DataTexture {
     THREE.ClampToEdgeWrapping,
     THREE.ClampToEdgeWrapping,
     THREE.NearestFilter,
-    THREE.LinearMipmapLinearFilter,
+    THREE.LinearFilter,
     1,
     THREE.LinearEncoding, // OccupancyGrid carries linear grayscale values, not sRGB
   );
+  texture.generateMipmaps = false;
+  return texture;
 }
 
 const tempUnknownColor = { r: 0, g: 0, b: 0, a: 0 };

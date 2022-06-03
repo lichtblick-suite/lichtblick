@@ -4,7 +4,7 @@
 
 import produce from "immer";
 // eslint-disable-next-line no-restricted-imports
-import { cloneDeep, merge, get, set } from "lodash";
+import { isEqual, cloneDeep, merge, get, set } from "lodash";
 import React, { useCallback, useLayoutEffect, useEffect, useState, useMemo, useRef } from "react";
 import ReactDOM from "react-dom";
 import { useResizeDetector } from "react-resize-detector";
@@ -65,8 +65,11 @@ import {
 } from "./ros";
 import {
   buildSettingsTree,
+  LayerSettings,
+  LayerSettingsImage,
   LayerType,
   SelectEntry,
+  SettingsTreeOptions,
   SUPPORTED_DATATYPES,
   ThreeDeeRenderConfig,
 } from "./settings";
@@ -273,21 +276,29 @@ export function ThreeDeeRender({ context }: { context: PanelExtensionContext }):
 
   const settingsNodeProviders = renderer?.settingsNodeProviders;
 
+  const throttledUpdatePanelSettingsTree = useDebouncedCallback(
+    (handler: (action: SettingsTreeAction) => void, options: SettingsTreeOptions) => {
+      // eslint-disable-next-line no-underscore-dangle
+      (
+        context as unknown as EXPERIMENTAL_PanelExtensionContextWithSettings
+      ).__updatePanelSettingsTree({
+        actionHandler: handler,
+        roots: buildSettingsTree(options),
+      });
+    },
+    250,
+    { leading: true, trailing: true, maxWait: 250 },
+  );
+
   useEffect(() => {
-    // eslint-disable-next-line no-underscore-dangle
-    (
-      context as unknown as EXPERIMENTAL_PanelExtensionContextWithSettings
-    ).__updatePanelSettingsTree({
-      actionHandler,
-      roots: buildSettingsTree({
-        config,
-        coordinateFrames,
-        layerErrors,
-        followTf,
-        topics: topics ?? [],
-        topicsToLayerTypes,
-        settingsNodeProviders: settingsNodeProviders ?? new Map(),
-      }),
+    throttledUpdatePanelSettingsTree(actionHandler, {
+      config,
+      coordinateFrames,
+      layerErrors,
+      followTf,
+      topics: topics ?? [],
+      topicsToLayerTypes,
+      settingsNodeProviders: settingsNodeProviders ?? new Map(),
     });
   }, [
     actionHandler,
@@ -297,6 +308,7 @@ export function ThreeDeeRender({ context }: { context: PanelExtensionContext }):
     followTf,
     layerErrors,
     settingsNodeProviders,
+    throttledUpdatePanelSettingsTree,
     topics,
     topicsToLayerTypes,
   ]);
@@ -321,6 +333,7 @@ export function ThreeDeeRender({ context }: { context: PanelExtensionContext }):
   const throttledSave = useDebouncedCallback(
     (newConfig: ThreeDeeRenderConfig) => saveState(newConfig),
     1000,
+    { leading: false, trailing: true, maxWait: 1000 },
   );
   useEffect(() => throttledSave(config), [config, throttledSave]);
 
@@ -377,24 +390,38 @@ export function ThreeDeeRender({ context }: { context: PanelExtensionContext }):
   }, [context]);
 
   // Build a list of topics to subscribe to
-  const topicsToSubscribe = useMemo(() => {
-    const subscriptionList: string[] = [];
+  const [topicsToSubscribe, setTopicsToSubscribe] = useState<string[] | undefined>(undefined);
+  useEffect(() => {
+    const subscriptions = new Set<string>();
     if (!topics) {
-      return undefined;
+      setTopicsToSubscribe(undefined);
+      return;
     }
 
     for (const topic of topics) {
       // Subscribe to all transform topics
       if (TF_DATATYPES.has(topic.datatype) || TRANSFORM_STAMPED_DATATYPES.has(topic.datatype)) {
-        subscriptionList.push(topic.name);
+        subscriptions.add(topic.name);
       } else if (SUPPORTED_DATATYPES.has(topic.datatype)) {
-        // TODO: Allow disabling of subscriptions to non-TF topics
-        subscriptionList.push(topic.name);
+        // Subscribe to known datatypes if the topic has not been toggled off
+        const topicConfig = config.topics[topic.name] as Partial<LayerSettings> | undefined;
+        if (topicConfig?.visible !== false) {
+          subscriptions.add(topic.name);
+        }
       }
     }
 
-    return subscriptionList;
-  }, [topics]);
+    // For camera imge topics, subscribe to their corresponding sensor_msgs/CameraInfo topic
+    for (const configEntry of Object.values(config.topics)) {
+      const topicConfig = configEntry as Partial<LayerSettingsImage> | undefined;
+      if (topicConfig?.visible !== false && topicConfig?.cameraInfoTopic != undefined) {
+        subscriptions.add(topicConfig.cameraInfoTopic);
+      }
+    }
+
+    const newTopics = Array.from(subscriptions.keys()).sort();
+    setTopicsToSubscribe((prevTopics) => (isEqual(prevTopics, newTopics) ? prevTopics : newTopics));
+  }, [topics, config.topics]);
 
   // Notify the extension context when our subscription list changes
   useEffect(() => {
@@ -638,9 +665,14 @@ function updateTopicSettings(
   layerType: LayerType,
   config: ThreeDeeRenderConfig,
 ) {
-  const topicConfig = config.topics[topic];
+  const topicConfig = config.topics[topic] as Partial<LayerSettings> | undefined;
   if (!topicConfig) {
     return;
+  }
+
+  // If visibility is toggled off for this topic, clear its topic errors
+  if (topicConfig.visible === false) {
+    renderer.layerErrors.clearTopic(topic);
   }
 
   switch (layerType) {

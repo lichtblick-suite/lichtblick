@@ -47,6 +47,7 @@ const tempVecB = new THREE.Vector3();
 type FrameAxisRenderable = THREE.Object3D & {
   userData: {
     frameId: string;
+    path: ReadonlyArray<string>;
     pose: Pose;
     settings: LayerSettingsTransform;
     shaftMesh: THREE.InstancedMesh;
@@ -134,6 +135,10 @@ export class FrameAxes extends THREE.Object3D {
     const renderable = this.axesByFrameId.get(frameId);
     if (renderable) {
       renderable.userData.settings = { ...renderable.userData.settings, ...settings };
+      // Clear errors for this frame if visibility is toggled off
+      if (!renderable.userData.settings.visible) {
+        this.renderer.layerErrors.clearPath(renderable.userData.path);
+      }
     }
   }
 
@@ -167,7 +172,9 @@ export class FrameAxes extends THREE.Object3D {
       renderable.visible = updated;
       if (!updated) {
         const message = missingTransformMessage(renderFrameId, fixedFrameId, frameId);
-        this.renderer.layerErrors.add(["transforms", frameId], MISSING_TRANSFORM, message);
+        this.renderer.layerErrors.add(renderable.userData.path, MISSING_TRANSFORM, message);
+      } else {
+        this.renderer.layerErrors.remove(renderable.userData.path, MISSING_TRANSFORM);
       }
     }
 
@@ -260,6 +267,7 @@ export class FrameAxes extends THREE.Object3D {
 
     renderable.userData = {
       frameId,
+      path: ["transforms", frameId],
       pose: makePose(),
       settings,
       shaftMesh: shaftInstances,

@@ -151,13 +151,12 @@ export class TopicMarkers extends THREE.Object3D {
           srcTime,
         );
         renderable.visible = updated;
+        const topic = renderable.userData.topic;
         if (!updated) {
           const message = missingTransformMessage(renderFrameId, fixedFrameId, frameId);
-          this.renderer.layerErrors.addToTopic(
-            renderable.userData.topic,
-            MISSING_TRANSFORM,
-            message,
-          );
+          this.renderer.layerErrors.addToTopic(topic, MISSING_TRANSFORM, message);
+        } else {
+          this.renderer.layerErrors.removeFromTopic(topic, MISSING_TRANSFORM);
         }
       }
     }
