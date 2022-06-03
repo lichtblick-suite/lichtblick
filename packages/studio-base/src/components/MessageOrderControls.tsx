@@ -2,10 +2,18 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { DefaultButton, DirectionalHint, useTheme } from "@fluentui/react";
-import { useCallback } from "react";
+import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown";
+import CheckIcon from "@mui/icons-material/Check";
+import {
+  Button,
+  ListItemIcon,
+  ListItemText,
+  Menu,
+  MenuItem,
+  styled as muiStyled,
+} from "@mui/material";
+import { useCallback, useState } from "react";
 
-import { useTooltip } from "@foxglove/studio-base/components/Tooltip";
 import {
   LayoutState,
   useCurrentLayoutActions,
@@ -18,11 +26,19 @@ const messageOrderLabel = {
   headerStamp: "Header stamp",
 };
 
+const StyledButton = muiStyled(Button)(({ theme }) => ({
+  paddingTop: theme.spacing(1),
+  paddingBottom: theme.spacing(1),
+  minWidth: 140,
+  justifyContent: "space-between",
+}));
+
 const messageOrderSelector = (state: LayoutState) =>
   state.selectedLayout?.data?.playbackConfig.messageOrder ?? "receiveTime";
 
 export default function MessageOrderControls(): JSX.Element {
-  const theme = useTheme();
+  const [anchorEl, setAnchorEl] = useState<undefined | HTMLElement>(undefined);
+  const open = Boolean(anchorEl);
   const messageOrder = useCurrentLayoutSelector(messageOrderSelector);
   const { setPlaybackConfig } = useCurrentLayoutActions();
 
@@ -33,59 +49,66 @@ export default function MessageOrderControls(): JSX.Element {
     [setPlaybackConfig],
   );
 
-  const orderText = messageOrderLabel[messageOrder];
-  const messageOrderTooltip = useTooltip({
-    contents: `Order messages by ${orderText.toLowerCase()}`,
-  });
+  const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
+    setAnchorEl(event.currentTarget);
+  };
+
+  const handleClose = () => {
+    setAnchorEl(undefined);
+  };
 
   return (
-    <div>
-      {messageOrderTooltip.tooltip}
-      <DefaultButton
-        elementRef={messageOrderTooltip.ref}
-        styles={{
-          root: {
-            background: theme.semanticColors.buttonBackgroundHovered,
-            border: "none",
-            margin: 0, // Remove this once global.scss has gone away
-            minWidth: "100px",
-            padding: theme.spacing.s1,
-          },
-          rootHovered: {
-            background: theme.semanticColors.buttonBackgroundPressed,
-          },
-          label: {
-            ...theme.fonts.small,
-            whiteSpace: "nowrap",
-          },
-          menuIcon: {
-            fontSize: theme.fonts.tiny.fontSize,
-          },
+    <>
+      <StyledButton
+        id="message-order-button"
+        aria-controls={open ? "message-order-menu" : undefined}
+        aria-haspopup="true"
+        aria-expanded={open ? "true" : undefined}
+        onClick={handleClick}
+        disableRipple
+        variant="contained"
+        color="inherit"
+        endIcon={<ArrowDropDownIcon />}
+        title={`Order messages by ${messageOrderLabel[messageOrder].toLowerCase()}`}
+      >
+        {messageOrderLabel[messageOrder]}
+      </StyledButton>
+      <Menu
+        id="message-order-menu"
+        anchorEl={anchorEl}
+        open={open}
+        onClose={handleClose}
+        MenuListProps={{
+          "aria-labelledby": "message-order-button",
         }}
-        menuProps={{
-          directionalHint: DirectionalHint.topLeftEdge,
-          directionalHintFixed: true,
-          gapSpace: 3,
-          items: [
-            {
-              canCheck: true,
-              key: "receiveTime",
-              text: "Receive time",
-              isChecked: messageOrder === "receiveTime",
-              onClick: () => setMessageOrder("receiveTime"),
-            },
-            {
-              canCheck: true,
-              key: "headerStamp",
-              text: "Header stamp",
-              isChecked: messageOrder === "headerStamp",
-              onClick: () => setMessageOrder("headerStamp"),
-            },
-          ],
+        anchorOrigin={{
+          vertical: "top",
+          horizontal: "left",
+        }}
+        transformOrigin={{
+          vertical: "bottom",
+          horizontal: "left",
         }}
       >
-        {orderText}
-      </DefaultButton>
-    </div>
+        {Object.entries(messageOrderLabel).map(([key, label]) => (
+          <MenuItem
+            key={key}
+            selected={messageOrder === key}
+            onClick={async () => setMessageOrder(key as TimestampMethod)}
+          >
+            {messageOrder === key && (
+              <ListItemIcon>
+                <CheckIcon fontSize="small" />
+              </ListItemIcon>
+            )}
+            <ListItemText
+              inset={messageOrder !== key}
+              primary={label}
+              primaryTypographyProps={{ variant: "body2" }}
+            />
+          </MenuItem>
+        ))}
+      </Menu>
+    </>
   );
 }

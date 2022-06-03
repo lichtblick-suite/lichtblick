@@ -2,20 +2,16 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { IconButton, IButtonProps, IIconProps } from "@fluentui/react";
+import { IconButton, IconButtonProps } from "@mui/material";
 import { forwardRef, useCallback, useEffect, useState } from "react";
 
 type Props = {
-  iconProps: {
-    iconNameActive?: RegisteredIconNames | undefined;
-  } & IIconProps;
-} & Omit<IButtonProps, "allowDisabledFocus">;
+  icon: React.ReactNode;
+  activeIcon?: React.ReactNode;
+} & Omit<IconButtonProps, "children">;
 
-const HoverableIconButton = forwardRef<HTMLElement, Props>((props, ref) => {
-  const {
-    iconProps: { iconName, iconNameActive, ...restIcon },
-    ...restProps
-  } = props;
+const HoverableIconButton = forwardRef<HTMLButtonElement, Props>((props, ref) => {
+  const { icon, activeIcon } = props;
 
   const [hovered, setHovered] = useState(false);
 
@@ -38,18 +34,17 @@ const HoverableIconButton = forwardRef<HTMLElement, Props>((props, ref) => {
 
   return (
     <IconButton
-      elementRef={ref}
-      {...restProps}
-      iconProps={{
-        ...restIcon,
-        iconName: iconNameActive != undefined ? (hovered ? iconNameActive : iconName) : iconName,
-      }}
-      allowDisabledFocus={true /* required to support mouse leave events for disabled buttons */}
+      ref={ref}
+      {...props}
+      component="button"
       onMouseEnter={onMouseOver}
       onMouseLeave={onMouseLeave}
-    />
+    >
+      {activeIcon != undefined ? (hovered ? activeIcon : icon) : icon}
+    </IconButton>
   );
 });
+
 HoverableIconButton.displayName = "HoverableIconButton";
 
 export default HoverableIconButton;

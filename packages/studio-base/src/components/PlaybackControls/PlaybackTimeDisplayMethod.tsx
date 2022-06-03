@@ -1,28 +1,25 @@
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
-//
-// This file incorporates work covered by the following copyright and
-// permission notice:
-//
-//   Copyright 2020-2021 Cruise LLC
-//
-//   This source code is licensed under the Apache License, Version 2.0,
-//   found at http://www.apache.org/licenses/LICENSE-2.0
-//   You may not use this file except in compliance with the License.
 
+import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown";
+import CheckIcon from "@mui/icons-material/Check";
+import WarningIcon from "@mui/icons-material/Warning";
 import {
-  DefaultButton,
-  DirectionalHint,
-  ITextFieldStyles,
   TextField,
-  useTheme,
-} from "@fluentui/react";
-import { Stack } from "@mui/material";
-import { useState, useCallback, useMemo, useRef, useEffect } from "react";
+  IconButton,
+  Menu,
+  MenuItem,
+  ListItemIcon,
+  ListItemText,
+  styled as muiStyled,
+} from "@mui/material";
+import { useState, useCallback, useMemo, useEffect, MouseEvent } from "react";
 
 import { Time, isTimeInRangeInclusive } from "@foxglove/rostime";
+import Stack from "@foxglove/studio-base/components/Stack";
 import { useAppTimeFormat } from "@foxglove/studio-base/hooks";
+import { TimeDisplayMethod } from "@foxglove/studio-base/types/panels";
 import {
   formatDate,
   formatTime,
@@ -31,15 +28,7 @@ import {
 import { fonts } from "@foxglove/studio-base/util/sharedStyleConstants";
 import { formatTimeRaw } from "@foxglove/studio-base/util/time";
 
-const PlaybackTimeDisplayMethod = ({
-  currentTime,
-  startTime,
-  endTime,
-  timezone,
-  onSeek,
-  onPause,
-  isPlaying,
-}: {
+type PlaybackTimeDisplayMethodProps = {
   currentTime?: Time;
   startTime?: Time;
   endTime?: Time;
@@ -47,8 +36,111 @@ const PlaybackTimeDisplayMethod = ({
   onSeek: (arg0: Time) => void;
   onPause: () => void;
   isPlaying: boolean;
-}): JSX.Element => {
-  const timestampInputRef = useRef<HTMLInputElement>(ReactNull);
+};
+
+const StyledTextField = muiStyled(TextField)<{ error?: boolean }>(({ error, theme }) => ({
+  fontFeatureSettings: `${fonts.SANS_SERIF_FEATURE_SETTINGS}, 'zero'`,
+  borderRadius: theme.shape.borderRadius,
+
+  ".MuiInputBase-input": {
+    minWidth: "20ch",
+  },
+  ".MuiIconButton-root": {
+    borderTopLeftRadius: 0,
+    borderBottomLeftRadius: 0,
+    borderLeft: `1px solid ${theme.palette.background.paper}`,
+  },
+  ...(error === true && {
+    outline: `1px solid ${theme.palette.error.main}`,
+  }),
+}));
+
+function PlaybackTimeMethodMenu({
+  timeFormat,
+  timeRawString,
+  timeOfDayString,
+  setTimeFormat,
+}: {
+  timeFormat: TimeDisplayMethod;
+  timeRawString?: string;
+  timeOfDayString?: string;
+  setTimeFormat: (format: TimeDisplayMethod) => Promise<void>;
+}): JSX.Element {
+  const [anchorEl, setAnchorEl] = useState<undefined | HTMLElement>(undefined);
+  const open = Boolean(anchorEl);
+
+  const handleClick = (event: MouseEvent<HTMLButtonElement>) => {
+    setAnchorEl(event.currentTarget);
+  };
+
+  const handleClose = () => {
+    setAnchorEl(undefined);
+  };
+
+  return (
+    <>
+      <IconButton
+        edge="end"
+        id="playback-time-display-toggle-button"
+        aria-controls={open ? "playback-time-display-toggle-menu" : undefined}
+        aria-haspopup="true"
+        aria-expanded={open ? "true" : undefined}
+        onClick={handleClick}
+      >
+        <ArrowDropDownIcon />
+      </IconButton>
+      <Menu
+        id="playback-time-display-toggle-menu"
+        anchorEl={anchorEl}
+        open={open}
+        onClose={handleClose}
+        MenuListProps={{
+          "aria-labelledby": "playback-time-display-toggle-button",
+        }}
+        anchorOrigin={{
+          vertical: "top",
+          horizontal: "right",
+        }}
+        transformOrigin={{
+          vertical: "bottom",
+          horizontal: "right",
+        }}
+      >
+        {[
+          { key: "TOD", label: timeOfDayString ?? "Time of Day" },
+          { key: "SEC", label: timeRawString ?? "Seconds" },
+        ].map((option) => (
+          <MenuItem
+            key={option.key}
+            selected={timeFormat === option.key}
+            onClick={async () => await setTimeFormat(option.key as TimeDisplayMethod)}
+          >
+            {timeFormat === option.key && (
+              <ListItemIcon>
+                <CheckIcon fontSize="small" />
+              </ListItemIcon>
+            )}
+            <ListItemText
+              inset={timeFormat !== option.key}
+              primary={option.label}
+              primaryTypographyProps={{ variant: "body2" }}
+            />
+          </MenuItem>
+        ))}
+      </Menu>
+    </>
+  );
+}
+
+export default function PlaybackTimeDisplayMethod({
+  currentTime,
+  startTime,
+  endTime,
+  timezone,
+  onSeek,
+  onPause,
+  isPlaying,
+}: PlaybackTimeDisplayMethodProps): JSX.Element {
   const timeFormat = useAppTimeFormat();
   const timeRawString = useMemo(
     () => (currentTime ? formatTimeRaw(currentTime) : undefined),
@@ -65,51 +157,6 @@ const PlaybackTimeDisplayMethod = ({
   const [isEditing, setIsEditing] = useState<boolean>(false);
   const [inputText, setInputText] = useState<string | undefined>(currentTimeString ?? undefined);
   const [hasError, setHasError] = useState<boolean>(false);
-
-  const theme = useTheme();
-  const textFieldStyles = useMemo(
-    () =>
-      ({
-        errorMessage: {
-          display: "none",
-        },
-        field: {
-          margin: 0,
-          padding: "0px 8px",
-          whiteSpace: "nowrap",
-          fontFeatureSettings: `${fonts.SANS_SERIF_FEATURE_SETTINGS}, 'zero'`,
-          backgroundColor: "transparent",
-
-          ":hover": {
-            borderRadius: 2,
-            backgroundColor: theme.semanticColors.inputBackground,
-          },
-          ":focus": {
-            backgroundColor: theme.semanticColors.inputBackground,
-          },
-        },
-        fieldGroup: {
-          border: "none",
-          backgroundColor: "transparent",
-          // The flex-sizing does not correctly calculate the <input> field width for all font
-          // sizes, so we increase the width to compensate
-          width: "102%",
-        },
-        icon: {
-          height: 20,
-          color: hasError ? theme.semanticColors.errorIcon : undefined,
-        },
-        root: {
-          marginLeft: theme.spacing.s1,
-
-          "&.is-disabled input[disabled]": {
-            background: "transparent",
-            cursor: "not-allowed",
-          },
-        },
-      } as Partial<ITextFieldStyles>),
-    [hasError, theme],
-  );
 
   const onSubmit = useCallback(
     (e: React.FormEvent) => {
@@ -158,15 +205,30 @@ const PlaybackTimeDisplayMethod = ({
   }, [hasError, inputText, isPlaying]);
 
   return (
-    <Stack direction="row" alignItems="center" flexGrow={0} spacing={0.5}>
+    <Stack direction="row" alignItems="center" flexGrow={0} gap={0.5}>
       {currentTime ? (
         <form onSubmit={onSubmit} style={{ width: "100%" }}>
-          <TextField
-            ariaLabel="Playback Time Method"
+          <StyledTextField
+            aria-label="Playback Time Method"
             data-test="PlaybackTime-text"
-            elementRef={timestampInputRef}
             value={isEditing ? inputText : currentTimeString}
-            errorMessage={hasError ? "Invalid Time" : undefined}
+            error={hasError}
+            variant="filled"
+            InputProps={{
+              startAdornment: hasError ? <WarningIcon color="error" /> : undefined,
+              endAdornment: (
+                <PlaybackTimeMethodMenu
+                  {...{
+                    currentTime,
+                    timezone,
+                    timeOfDayString,
+                    timeRawString,
+                    timeFormat: timeFormat.timeFormat,
+                    setTimeFormat: timeFormat.setTimeFormat,
+                  }}
+                />
+              ),
+            }}
             onFocus={(e) => {
               onPause();
               setHasError(false);
@@ -179,55 +241,22 @@ const PlaybackTimeDisplayMethod = ({
               setIsEditing(false);
               setTimeout(() => setHasError(false), 600);
             }}
-            iconProps={{ iconName: hasError ? "Warning" : undefined }}
-            size={21}
-            styles={textFieldStyles}
-            onChange={(_, newValue) => setInputText(newValue)}
+            onChange={(event) => setInputText(event.target.value)}
           />
         </form>
       ) : (
-        <TextField disabled size={13} styles={textFieldStyles} defaultValue="–" />
+        <StyledTextField
+          disabled
+          defaultValue="–"
+          InputProps={{
+            endAdornment: (
+              <IconButton edge="end" disabled>
+                <ArrowDropDownIcon />
+              </IconButton>
+            ),
+          }}
+        />
       )}
-      <DefaultButton
-        menuProps={{
-          directionalHint: DirectionalHint.topLeftEdge,
-          directionalHintFixed: true,
-          gapSpace: 3,
-          items: [
-            {
-              canCheck: true,
-              key: "TOD",
-              text: timeOfDayString ? timeOfDayString : "Time of Day",
-              isChecked: timeFormat.timeFormat === "TOD",
-              onClick: () => void timeFormat.setTimeFormat("TOD"),
-            },
-            {
-              canCheck: true,
-              key: "SEC",
-              text: timeRawString ? timeRawString : "Seconds",
-              isChecked: timeFormat.timeFormat === "SEC",
-              onClick: () => void timeFormat.setTimeFormat("SEC"),
-            },
-          ],
-        }}
-        styles={{
-          root: {
-            border: "none",
-            background: theme.semanticColors.buttonBackgroundHovered,
-            padding: 0,
-            minWidth: "24px",
-          },
-          rootHovered: {
-            background: theme.semanticColors.buttonBackgroundPressed,
-          },
-          label: theme.fonts.small,
-          menuIcon: {
-            fontSize: theme.fonts.tiny.fontSize,
-          },
-        }}
-      ></DefaultButton>
     </Stack>
   );
-};
-
-export default PlaybackTimeDisplayMethod;
+}

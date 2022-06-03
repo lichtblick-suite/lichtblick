@@ -11,15 +11,24 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { IButtonStyles, useTheme } from "@fluentui/react";
-import { styled as muiStyled } from "@mui/material";
-import { merge } from "lodash";
+import {
+  Pause20Filled,
+  Pause20Regular,
+  Play20Filled,
+  Play20Regular,
+  Next20Filled,
+  Next20Regular,
+  Previous20Filled,
+  Previous20Regular,
+} from "@fluentui/react-icons";
+import { Divider, styled as muiStyled } from "@mui/material";
 import { useCallback, useMemo, useRef, useState } from "react";
 
 import { compare, Time } from "@foxglove/rostime";
 import { AppSetting } from "@foxglove/studio-base/AppSetting";
 import HoverableIconButton from "@foxglove/studio-base/components/HoverableIconButton";
 import KeyListener from "@foxglove/studio-base/components/KeyListener";
+import LoopIcon from "@foxglove/studio-base/components/LoopIcon";
 import MessageOrderControls from "@foxglove/studio-base/components/MessageOrderControls";
 import { useMessagePipeline } from "@foxglove/studio-base/components/MessagePipeline";
 import {
@@ -28,7 +37,6 @@ import {
 } from "@foxglove/studio-base/components/PlaybackControls/sharedHelpers";
 import PlaybackSpeedControls from "@foxglove/studio-base/components/PlaybackSpeedControls";
 import Stack from "@foxglove/studio-base/components/Stack";
-import Tooltip from "@foxglove/studio-base/components/Tooltip";
 import { useAppConfigurationValue } from "@foxglove/studio-base/hooks/useAppConfigurationValue";
 
 import PlaybackTimeDisplay from "./PlaybackTimeDisplay";
@@ -44,6 +52,27 @@ const PlaybackControlsRoot = muiStyled("div")(({ theme }) => ({
   borderTop: `1px solid ${theme.palette.divider}`,
 }));
 
+const ButtonGroup = muiStyled("div")(({ theme }) => ({
+  display: "flex",
+  backgroundColor: theme.palette.action.focus,
+  borderRadius: theme.shape.borderRadius,
+
+  ".MuiIconButton-root": {
+    "&:not(:first-child)": {
+      borderTopLeftRadius: 0,
+      borderBottomLeftRadius: 0,
+    },
+    "&:not(:last-child)": {
+      borderTopRightRadius: 0,
+      borderBottomRightRadius: 0,
+    },
+  },
+  ".MuiDivider-root": {
+    borderColor: theme.palette.background.paper,
+    borderRightWidth: 2,
+  },
+}));
+
 export default function PlaybackControls({
   play,
   pause,
@@ -57,7 +86,6 @@ export default function PlaybackControls({
   isPlaying: boolean;
   getTimeInfo: () => { startTime?: Time; endTime?: Time; currentTime?: Time };
 }): JSX.Element {
-  const theme = useTheme();
   const [repeat, setRepeat] = useState(false);
   const stopAtTime = useRef<Time | undefined>(undefined);
 
@@ -148,44 +176,6 @@ export default function PlaybackControls({
     [seekBackwardAction, seekForwardAction, togglePlayPause],
   );
 
-  const iconButtonStyles: IButtonStyles = {
-    icon: { height: 20 },
-    root: {
-      color: theme.semanticColors.buttonText,
-    },
-    rootChecked: {
-      color: theme.palette.themePrimary,
-      backgroundColor: "transparent",
-    },
-    rootCheckedHovered: { color: theme.palette.themePrimary },
-    rootHovered: { color: theme.semanticColors.buttonTextHovered },
-    rootPressed: { color: theme.semanticColors.buttonTextPressed },
-  };
-
-  const seekIconButttonStyles = ({
-    left = false,
-    right = false,
-  }: {
-    left?: boolean | undefined;
-    right?: boolean | undefined;
-  }) =>
-    ({
-      root: {
-        background: theme.semanticColors.buttonBackgroundHovered,
-        ...(left && {
-          borderTopRightRadius: 0,
-          borderBottomRightRadius: 0,
-        }),
-        ...(right && {
-          borderTopLeftRadius: 0,
-          borderBottomLeftRadius: 0,
-        }),
-      },
-      rootHovered: {
-        background: theme.semanticColors.buttonBackgroundPressed,
-      },
-    } as IButtonStyles);
-
   const [enableMessageOrdering = false] = useAppConfigurationValue<boolean>(
     AppSetting.EXPERIMENTAL_MESSAGE_ORDER,
   );
@@ -205,63 +195,40 @@ export default function PlaybackControls({
           {enableMessageOrdering && <MessageOrderControls />}
           <PlaybackSpeedControls />
         </Stack>
-        <Stack direction="row" alignItems="center" flex={1} gap={1} paddingX={0.5}>
-          <Stack direction="row" alignItems="center" gap={0.5}>
-            <div>
-              <Tooltip contents="Loop playback">
-                <HoverableIconButton
-                  checked={repeat}
-                  onClick={toggleRepeat}
-                  iconProps={{
-                    iconName: repeat ? "LoopFilled" : "Loop",
-                    iconNameActive: "LoopFilled",
-                  }}
-                  styles={merge(iconButtonStyles, {
-                    rootDisabled: { background: "transparent" },
-                  })}
-                />
-              </Tooltip>
-            </div>
-            <div>
-              <HoverableIconButton
-                onClick={isPlaying ? pause : resumePlay}
-                iconProps={{
-                  iconName: isPlaying ? "Pause" : "Play",
-                  iconNameActive: isPlaying ? "PauseFilled" : "PlayFilled",
-                }}
-                styles={merge(iconButtonStyles, {
-                  rootDisabled: { background: "transparent" },
-                })}
-              />
-            </div>
+        <Stack direction="row" alignItems="center" flex={1} gap={1}>
+          <Stack direction="row" alignItems="center" gap={1}>
+            <HoverableIconButton
+              title="Loop playback"
+              color={repeat ? "primary" : "inherit"}
+              onClick={toggleRepeat}
+              icon={repeat ? <LoopIcon strokeWidth={1.9375} /> : <LoopIcon strokeWidth={1.375} />}
+              activeIcon={<LoopIcon strokeWidth={1.875} />}
+            />
+            <HoverableIconButton
+              title={isPlaying ? "Pause" : "Play"}
+              onClick={isPlaying ? pause : resumePlay}
+              icon={isPlaying ? <Pause20Regular /> : <Play20Regular />}
+              activeIcon={isPlaying ? <Pause20Filled /> : <Play20Filled />}
+            />
           </Stack>
           <Scrubber onSeek={seek} />
           <PlaybackTimeDisplay onSeek={seek} onPause={pause} />
         </Stack>
-        <Stack direction="row" alignItems="center" gap={0.25}>
-          <div>
-            <Tooltip contents="Seek backward">
-              <HoverableIconButton
-                iconProps={{ iconName: "Previous", iconNameActive: "PreviousFilled" }}
-                onClick={() => {
-                  seekBackwardAction();
-                }}
-                styles={merge(seekIconButttonStyles({ left: true }), iconButtonStyles)}
-              />
-            </Tooltip>
-          </div>
-          <div>
-            <Tooltip contents="Seek forward">
-              <HoverableIconButton
-                iconProps={{ iconName: "Next", iconNameActive: "NextFilled" }}
-                onClick={() => {
-                  seekForwardAction();
-                }}
-                styles={merge(seekIconButttonStyles({ right: true }), iconButtonStyles)}
-              />
-            </Tooltip>
-          </div>
-        </Stack>
+        <ButtonGroup>
+          <HoverableIconButton
+            title="Seek backward"
+            icon={<Previous20Regular />}
+            activeIcon={<Previous20Filled />}
+            onClick={() => seekBackwardAction()}
+          />
+          <Divider flexItem orientation="vertical" />
+          <HoverableIconButton
+            title="Seek forward"
+            icon={<Next20Regular />}
+            activeIcon={<Next20Filled />}
+            onClick={() => seekForwardAction()}
+          />
+        </ButtonGroup>
       </PlaybackControlsRoot>
     </>
   );
