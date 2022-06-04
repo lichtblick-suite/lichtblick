@@ -25,7 +25,7 @@ import {
 import { MessageEvent, PlayerStateActiveData, Topic } from "@foxglove/studio-base/players/types";
 import { RosDatatypes } from "@foxglove/studio-base/types/RosDatatypes";
 import { UserNode } from "@foxglove/studio-base/types/panels";
-import { basicDatatypes } from "@foxglove/studio-base/util/datatypes";
+import { basicDatatypes } from "@foxglove/studio-base/util/basicDatatypes";
 import { DEFAULT_STUDIO_NODE_PREFIX } from "@foxglove/studio-base/util/globalConstants";
 
 const nodeId = "nodeId";

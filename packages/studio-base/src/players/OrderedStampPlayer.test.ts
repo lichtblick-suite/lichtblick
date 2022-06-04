@@ -21,7 +21,7 @@ import {
   PlayerStateActiveData,
 } from "@foxglove/studio-base/players/types";
 import { RosDatatypes } from "@foxglove/studio-base/types/RosDatatypes";
-import { basicDatatypes } from "@foxglove/studio-base/util/datatypes";
+import { basicDatatypes } from "@foxglove/studio-base/util/basicDatatypes";
 import { TimestampMethod } from "@foxglove/studio-base/util/time";
 
 import OrderedStampPlayer, { BUFFER_DURATION_SECS } from "./OrderedStampPlayer";

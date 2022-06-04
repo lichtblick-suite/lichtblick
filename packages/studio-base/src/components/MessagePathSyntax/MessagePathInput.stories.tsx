@@ -17,7 +17,7 @@ import { storiesOf } from "@storybook/react";
 import MockPanelContextProvider from "@foxglove/studio-base/components/MockPanelContextProvider";
 import { Topic } from "@foxglove/studio-base/players/types";
 import PanelSetup, { Fixture } from "@foxglove/studio-base/stories/PanelSetup";
-import { basicDatatypes } from "@foxglove/studio-base/util/datatypes";
+import { basicDatatypes } from "@foxglove/studio-base/util/basicDatatypes";
 
 import MessagePathInput from "./MessagePathInput";
 import { MessagePathInputStoryFixture } from "./fixture";

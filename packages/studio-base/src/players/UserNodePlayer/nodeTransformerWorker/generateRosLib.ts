@@ -102,6 +102,11 @@ export const generateTypeDefs = (datatypes: RosDatatypes): InterfaceDeclarations
   const interfaceDeclarations: InterfaceDeclarations = {};
 
   for (const [datatype, definition] of datatypes) {
+    if (datatype.includes(".")) {
+      // Skip newer types that are not supported by generateRosLib; these will have interfaces
+      // generated via generateTypesLib and can be used that way.
+      continue;
+    }
     if (interfaceDeclarations[datatype]) {
       continue;
     }

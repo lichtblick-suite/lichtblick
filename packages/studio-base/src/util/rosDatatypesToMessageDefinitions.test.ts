@@ -15,7 +15,7 @@ import { uniqBy } from "lodash";
 
 import { RosDatatypes } from "@foxglove/studio-base/types/RosDatatypes";
 
-import { basicDatatypes } from "./datatypes";
+import { basicDatatypes } from "./basicDatatypes";
 import rosDatatypesToMessageDefinition from "./rosDatatypesToMessageDefinition";
 
 describe("rosDatatypesToMessageDefinition", () => {

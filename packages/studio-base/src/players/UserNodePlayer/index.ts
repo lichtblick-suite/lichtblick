@@ -50,7 +50,7 @@ import {
 import { RosDatatypes } from "@foxglove/studio-base/types/RosDatatypes";
 import { UserNode, UserNodes } from "@foxglove/studio-base/types/panels";
 import Rpc from "@foxglove/studio-base/util/Rpc";
-import { basicDatatypes, foxgloveDatatypes } from "@foxglove/studio-base/util/datatypes";
+import { basicDatatypes } from "@foxglove/studio-base/util/basicDatatypes";
 
 const log = Log.getLogger(__filename);
 
@@ -152,7 +152,7 @@ export default class UserNodePlayer implements Player {
     this._typesLibGenerator = new MemoizedLibGenerator(async (args) => {
       const lib = generateTypesLib({
         topics: args.topics,
-        datatypes: new Map([...basicDatatypes, ...foxgloveDatatypes, ...args.datatypes]),
+        datatypes: new Map([...basicDatatypes, ...args.datatypes]),
       });
 
       return await getPrettifiedCode(lib);
@@ -277,11 +277,7 @@ export default class UserNodePlayer implements Player {
     // Pass all the nodes a set of basic datatypes that we know how to render.
     // These could be overwritten later by bag datatypes, but these datatype definitions should be very stable.
     const { topics = [], datatypes = new Map() } = this._lastPlayerStateActiveData ?? {};
-    const nodeDatatypes: RosDatatypes = new Map([
-      ...basicDatatypes,
-      ...foxgloveDatatypes,
-      ...datatypes,
-    ]);
+    const nodeDatatypes: RosDatatypes = new Map([...basicDatatypes, ...datatypes]);
 
     const rosLib = await this._getRosLib();
     const typesLib = await this._getTypesLib();
