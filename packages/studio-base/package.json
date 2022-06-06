@@ -44,7 +44,6 @@
     "@foxglove/rosbag2-web": "4.0.4",
     "@foxglove/rosmsg": "3.0.0",
     "@foxglove/rosmsg-msgs-common": "1.1.0",
-    "@foxglove/rosmsg-msgs-foxglove": "2.0.3",
     "@foxglove/rosmsg-serialization": "1.3.0",
     "@foxglove/rosmsg2-serialization": "1.0.6",
     "@foxglove/rostime": "1.1.2",

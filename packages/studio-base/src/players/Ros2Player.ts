@@ -10,9 +10,9 @@ import Logger from "@foxglove/log";
 import { RosNode } from "@foxglove/ros2";
 import { RosMsgDefinition } from "@foxglove/rosmsg";
 import { definitions as commonDefs } from "@foxglove/rosmsg-msgs-common";
-import { definitions as foxgloveDefs } from "@foxglove/rosmsg-msgs-foxglove";
 import { Time, fromMillis, toSec, isGreaterThan } from "@foxglove/rostime";
 import { Durability, Reliability } from "@foxglove/rtps";
+import { foxgloveMessageSchemas, generateRosMsgDefinition } from "@foxglove/schemas";
 import { ParameterValue } from "@foxglove/studio";
 import OsContextSingleton from "@foxglove/studio-base/OsContextSingleton";
 import PlayerProblemManager from "@foxglove/studio-base/players/PlayerProblemManager";
@@ -100,13 +100,22 @@ export default class Ros2Player implements Player {
       this._providerDatatypes.set(dataType, msgDef);
       this._providerDatatypes.set(ros1ToRos2Type(dataType), msgDef);
     }
-    for (const dataType in foxgloveDefs) {
-      const msgDef = (foxgloveDefs as Record<string, RosMsgDefinition>)[dataType]!;
-      if (!this._providerDatatypes.has(dataType)) {
-        this._providerDatatypes.set(dataType, msgDef);
-        this._providerDatatypes.set(ros1ToRos2Type(dataType), msgDef);
-      }
+    for (const schema of Object.values(foxgloveMessageSchemas)) {
+      const { fields, qualifiedRosName } = generateRosMsgDefinition(schema, { rosVersion: 2 });
+      const msgDef: RosMsgDefinition = { name: qualifiedRosName, definitions: fields };
+      this._providerDatatypes.set(qualifiedRosName, msgDef);
+      this._providerDatatypes.set(ros1ToRos2Type(qualifiedRosName), msgDef);
     }
+    this._providerDatatypes.set("foxglove_msgs/ImageMarkerArray", {
+      definitions: [
+        { name: "markers", type: "visualization_msgs/ImageMarker", isComplex: true, isArray: true },
+      ],
+    });
+    this._providerDatatypes.set("foxglove_msgs/msg/ImageMarkerArray", {
+      definitions: [
+        { name: "markers", type: "visualization_msgs/ImageMarker", isComplex: true, isArray: true },
+      ],
+    });
 
     // Fix std_msgs/Header, which changed in ROS 2
     const definitions = [
