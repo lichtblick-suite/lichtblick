@@ -33,7 +33,9 @@ const Root = muiStyled("div")(({ theme }) => ({
   overflowY: "auto",
 }));
 
-const DropTarget = muiStyled("div", { shouldForwardProp: (prop) => prop !== "isOver" })<{
+const DropTarget = muiStyled("div", {
+  shouldForwardProp: (prop) => prop !== "isOver",
+})<{
   isOver: boolean;
 }>(({ isOver, theme }) => ({
   width: "100%",

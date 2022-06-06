@@ -11,7 +11,7 @@ type Props = {
 } & Omit<IconButtonProps, "children">;
 
 const HoverableIconButton = forwardRef<HTMLButtonElement, Props>((props, ref) => {
-  const { icon, activeIcon } = props;
+  const { icon, activeIcon, ...rest } = props;
 
   const [hovered, setHovered] = useState(false);
 
@@ -35,7 +35,7 @@ const HoverableIconButton = forwardRef<HTMLButtonElement, Props>((props, ref) =>
   return (
     <IconButton
       ref={ref}
-      {...props}
+      {...rest}
       component="button"
       onMouseEnter={onMouseOver}
       onMouseLeave={onMouseLeave}

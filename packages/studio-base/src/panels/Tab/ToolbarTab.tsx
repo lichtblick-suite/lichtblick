@@ -24,7 +24,10 @@ const MAX_TAB_WIDTH = 120;
 const MIN_ACTIVE_TAB_WIDTH = 40;
 const MIN_OTHER_TAB_WIDTH = 14;
 
-const Tab = muiStyled("div")<{
+const Tab = muiStyled("div", {
+  shouldForwardProp: (prop) =>
+    prop !== "active" && prop !== "dragging" && prop !== "hidden" && prop !== "tabCount",
+})<{
   active: boolean;
   dragging: boolean;
   hidden: boolean;
@@ -71,7 +74,11 @@ const StyledIconButton = muiStyled(IconButton)(({ theme }) => ({
   padding: theme.spacing(0.125),
 }));
 
-const DropIndicator = muiStyled("div")<{ dir: "before" | "after" }>(({ theme, dir }) => ({
+const DropIndicator = muiStyled("div", {
+  shouldForwardProp: (prop) => prop !== "direction",
+})<{
+  direction: "before" | "after";
+}>(({ theme, direction }) => ({
   position: "absolute",
   top: 0,
   bottom: 0,
@@ -81,8 +88,8 @@ const DropIndicator = muiStyled("div")<{ dir: "before" | "after" }>(({ theme, di
   opacity: 0.8,
   borderRadius: theme.shape.borderRadius,
   zIndex: 1,
-  left: dir === "before" ? 0 : "auto",
-  right: dir === "before" ? "auto" : 0,
+  left: direction === "before" ? 0 : "auto",
+  right: direction === "before" ? "auto" : 0,
 }));
 
 const fontFamily = fonts.SANS_SERIF;
@@ -208,7 +215,7 @@ export function ToolbarTab(props: Props): JSX.Element {
       title={tabTitle ? tabTitle : "Enter tab name"}
       tabCount={tabCount}
     >
-      {highlight != undefined && <DropIndicator dir={highlight} />}
+      {highlight != undefined && <DropIndicator direction={highlight} />}
       <InputBase
         readOnly={!editingTitle}
         placeholder="Enter tab name"

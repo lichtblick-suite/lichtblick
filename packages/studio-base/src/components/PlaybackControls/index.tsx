@@ -58,11 +58,11 @@ const ButtonGroup = muiStyled("div")(({ theme }) => ({
   borderRadius: theme.shape.borderRadius,
 
   ".MuiIconButton-root": {
-    "&:not(:first-child)": {
+    "&:not(:first-of-type)": {
       borderTopLeftRadius: 0,
       borderBottomLeftRadius: 0,
     },
-    "&:not(:last-child)": {
+    "&:not(:last-of-type)": {
       borderTopRightRadius: 0,
       borderBottomRightRadius: 0,
     },

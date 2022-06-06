@@ -95,7 +95,9 @@ const STableRow = muiStyled("tr")(({ theme }) => ({
   },
 }));
 
-const STableHeader = muiStyled("th")<{ id: string; isSortedAsc: boolean; isSortedDesc: boolean }>(
+const STableHeader = muiStyled("th", {
+  shouldForwardProp: (prop) => prop !== "isSortedAsc" && prop !== "isSortedDesc" && prop !== "id",
+})<{ id: string; isSortedAsc: boolean; isSortedDesc: boolean }>(
   ({ theme, id, isSortedAsc, isSortedDesc }) => ({
     borderLeftColor: "transparent !important",
     borderRightColor: "transparent !important",

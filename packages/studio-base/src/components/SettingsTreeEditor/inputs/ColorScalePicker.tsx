@@ -118,7 +118,9 @@ const StyledButton = muiStyled(Button)(({ theme }) => ({
   display: "flex",
 }));
 
-const ColorScale = muiStyled("div")<{ colorScale: string[] }>(({ theme, colorScale }) => ({
+const ColorScale = muiStyled("div", {
+  shouldForwardProp: (prop) => prop !== "colorScale",
+})<{ colorScale: string[] }>(({ theme, colorScale }) => ({
   paddingBottom: theme.spacing(2.5),
   backgroundImage: `linear-gradient(to right, ${colorScale.join(",")})`,
   flex: "auto",
