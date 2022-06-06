@@ -45,7 +45,9 @@ function isRosPrimitive(type: string): type is RosPrimitive {
 }
 
 function structureItemIsIntegerPrimitive(item: MessagePathStructureItem) {
-  return item.structureType === "primitive" && STRUCTURE_ITEM_INTEGER_TYPES.includes(item.datatype);
+  return (
+    item.structureType === "primitive" && STRUCTURE_ITEM_INTEGER_TYPES.includes(item.primitiveType)
+  );
 }
 
 // Generate an easily navigable flat structure given some `datatypes`. We cache
