@@ -2,14 +2,11 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import {
   MenuItem,
   Select,
   ListItemText,
   SelectChangeEvent,
-  Radio,
-  ListSubheader,
   SelectProps,
   MenuProps,
 } from "@mui/material";
@@ -23,7 +20,6 @@ type TopicDropdownItem = {
 type Props = {
   title: string;
   items: TopicDropdownItem[];
-  multiple: boolean;
   size?: SelectProps["size"];
   open?: boolean;
   anchorEl?: Element | ReactNull;
@@ -32,7 +28,7 @@ type Props = {
 };
 
 export function TopicDropdown(props: Props): JSX.Element {
-  const { items, onChange, multiple, title, size = "small" } = props;
+  const { items, onChange, title, size = "small" } = props;
 
   const selectedTopics = useMemo<string[]>(() => {
     return items.filter((item) => item.selected).map((item) => item.name);
@@ -48,7 +44,6 @@ export function TopicDropdown(props: Props): JSX.Element {
   const menuProps: Partial<MenuProps> = {
     MenuListProps: {
       dense: true,
-      subheader: multiple ? <ListSubheader>Select multiple topics</ListSubheader> : undefined,
     },
   };
 
@@ -69,7 +64,6 @@ export function TopicDropdown(props: Props): JSX.Element {
         title={title}
         size={size}
         onChange={handleChange}
-        multiple={multiple}
         open={props.open}
         MenuProps={menuProps}
       >
@@ -83,12 +77,6 @@ export function TopicDropdown(props: Props): JSX.Element {
         )}
         {items.map((item) => (
           <MenuItem key={item.name} value={item.name}>
-            <Radio
-              checked={selectedTopics.includes(item.name)}
-              size="small"
-              edge="start"
-              checkedIcon={<CheckCircleIcon />}
-            />
             <ListItemText primary={item.name} primaryTypographyProps={{ variant: "inherit" }} />
           </MenuItem>
         ))}

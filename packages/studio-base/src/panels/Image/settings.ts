@@ -3,26 +3,33 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 import { Immutable } from "immer";
+import { chain } from "lodash";
 
 import { Topic } from "@foxglove/studio";
-import {
-  SettingsTreeNode,
-  SettingsTreeRoots,
-} from "@foxglove/studio-base/components/SettingsTreeEditor/types";
+import { SettingsTreeRoots } from "@foxglove/studio-base/components/SettingsTreeEditor/types";
 
 import { Config } from "./types";
 
-export function buildSettingsTree(
-  config: Immutable<Config>,
-  imageTopics: readonly Topic[],
-  allMarkerTopics: readonly string[],
-  enabledMarkerTopics: readonly string[],
-): SettingsTreeRoots {
-  const markerFields: Record<string, SettingsTreeNode> = Object.fromEntries(
-    [...allMarkerTopics]
-      .sort()
-      .map((topic) => [topic, { label: topic, visible: enabledMarkerTopics.includes(topic) }]),
-  );
+export function buildSettingsTree({
+  config,
+  imageTopics,
+  markerTopics,
+  enabledMarkerTopics,
+  relatedMarkerTopics,
+}: {
+  config: Immutable<Config>;
+  imageTopics: readonly Topic[];
+  markerTopics: readonly string[];
+  enabledMarkerTopics: readonly string[];
+  relatedMarkerTopics: readonly string[];
+}): SettingsTreeRoots {
+  const markerFields = chain(markerTopics)
+    .sort()
+    .partition((topic) => relatedMarkerTopics.includes(topic))
+    .thru((topics) => topics.flat())
+    .map((topic) => [topic, { label: topic, visible: enabledMarkerTopics.includes(topic) }])
+    .fromPairs()
+    .value();
 
   return {
     general: {
