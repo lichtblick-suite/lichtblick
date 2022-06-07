@@ -18,12 +18,16 @@ import {
   ListProps,
 } from "@mui/material";
 import { DeepReadonly } from "ts-essentials";
+import { v4 as uuid } from "uuid";
 
 import MessagePathInput from "@foxglove/studio-base/components/MessagePathSyntax/MessagePathInput";
 import Stack from "@foxglove/studio-base/components/Stack";
 
 import { ColorPickerInput, ColorGradientInput, NumberInput, Vec3Input } from "./inputs";
 import { SettingsTreeAction, SettingsTreeField } from "./types";
+
+// Used to both undefined and empty string in select inputs.
+const UNDEFINED_SENTINEL_VALUE = uuid();
 
 const StyledToggleButtonGroup = muiStyled(ToggleButtonGroup)(({ theme }) => ({
   backgroundColor: theme.palette.action.hover,
@@ -261,16 +265,21 @@ function FieldInput({
           displayEmpty
           fullWidth
           variant="filled"
-          value={field.value ?? ""}
+          value={field.value ?? UNDEFINED_SENTINEL_VALUE}
           onChange={(event) =>
             actionHandler({
               action: "update",
-              payload: { path, input: "select", value: event.target.value },
+              payload: {
+                path,
+                input: "select",
+                value:
+                  event.target.value === UNDEFINED_SENTINEL_VALUE ? undefined : event.target.value,
+              },
             })
           }
           MenuProps={{ MenuListProps: { dense: true } }}
         >
-          {field.options.map(({ label, value }) => (
+          {field.options.map(({ label, value = UNDEFINED_SENTINEL_VALUE }) => (
             <MenuItem key={value} value={value}>
               {label}
             </MenuItem>
