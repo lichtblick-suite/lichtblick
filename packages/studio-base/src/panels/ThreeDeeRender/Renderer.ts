@@ -20,6 +20,7 @@ import { stringToRgb } from "./color";
 import { DetailLevel, msaaSamples } from "./lod";
 import { Cameras } from "./renderables/Cameras";
 import { FrameAxes } from "./renderables/FrameAxes";
+import { Grids } from "./renderables/Grids";
 import { Images } from "./renderables/Images";
 import { Markers } from "./renderables/Markers";
 import { OccupancyGrids } from "./renderables/OccupancyGrids";
@@ -38,6 +39,7 @@ import {
 } from "./ros";
 import {
   LayerSettingsCameraInfo,
+  LayerSettingsGrid,
   LayerSettingsImage,
   LayerSettingsMarker,
   LayerSettingsMarkerNamespace,
@@ -129,6 +131,7 @@ export class Renderer extends EventEmitter<RendererEvents> {
   poses = new Poses(this);
   cameras = new Cameras(this);
   images = new Images(this);
+  grids = new Grids(this);
 
   constructor(canvas: HTMLCanvasElement, config: ThreeDeeRenderConfig) {
     super();
@@ -184,6 +187,7 @@ export class Renderer extends EventEmitter<RendererEvents> {
     this.scene.add(this.poses);
     this.scene.add(this.cameras);
     this.scene.add(this.images);
+    this.scene.add(this.grids);
 
     this.dirLight = new THREE.DirectionalLight();
     this.dirLight.position.set(1, 1, 1);
@@ -332,6 +336,10 @@ export class Renderer extends EventEmitter<RendererEvents> {
     this.images.setTopicSettings(topic, settings);
   }
 
+  setGridSettings(id: string, settings: Partial<LayerSettingsGrid> | undefined): void {
+    this.grids.setLayerSettings(id, settings);
+  }
+
   markerWorldPosition(markerId: string): Readonly<THREE.Vector3> | undefined {
     const renderable = this.renderables.get(markerId);
     if (!renderable) {
@@ -364,6 +372,7 @@ export class Renderer extends EventEmitter<RendererEvents> {
     this.poses.startFrame(currentTime);
     this.cameras.startFrame(currentTime);
     this.images.startFrame(currentTime);
+    this.grids.startFrame(currentTime);
 
     this.gl.clear();
     this.camera.layers.set(LAYER_DEFAULT);

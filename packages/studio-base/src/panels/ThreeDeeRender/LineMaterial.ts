@@ -41,7 +41,7 @@ import {
   gapSize: { value: 1 }, // todo FIX - maybe change to totalSize
 };
 
-ShaderLib["line"] = {
+ShaderLib["foxglove.line"] = {
   uniforms: UniformsUtils.merge([UniformsLib.common, UniformsLib.fog, (UniformsLib as any).line]),
 
   vertexShader: /* glsl */ `
@@ -479,10 +479,10 @@ export class LineMaterial extends ShaderMaterial {
     super({
       type: "LineMaterial",
 
-      uniforms: UniformsUtils.clone((ShaderLib["line"] as any).uniforms),
+      uniforms: UniformsUtils.clone((ShaderLib["foxglove.line"] as any).uniforms),
 
-      vertexShader: (ShaderLib["line"] as any).vertexShader,
-      fragmentShader: (ShaderLib["line"] as any).fragmentShader,
+      vertexShader: (ShaderLib["foxglove.line"] as any).vertexShader,
+      fragmentShader: (ShaderLib["foxglove.line"] as any).fragmentShader,
 
       clipping: true, // required for clipping support
     } as any);

@@ -531,25 +531,3 @@ function rawImageToDataTexture(
       throw new Error(`Unsupported encoding ${encoding}`);
   }
 }
-
-// const Float64Type: THREE.TextureDataType = -1;
-
-// function textureDataTypeForArray(array: Iterable<number>): THREE.TextureDataType {
-//   if (array instanceof Uint8Array || array instanceof Uint8ClampedArray) {
-//     return THREE.UnsignedByteType;
-//   } else if (array instanceof Int8Array) {
-//     return THREE.ByteType;
-//   } else if (array instanceof Uint16Array) {
-//     return THREE.UnsignedShortType;
-//   } else if (array instanceof Int16Array) {
-//     return THREE.ShortType;
-//   } else if (array instanceof Uint32Array) {
-//     return THREE.UnsignedIntType;
-//   } else if (array instanceof Int32Array) {
-//     return THREE.IntType;
-//   } else if (array instanceof Float32Array) {
-//     return THREE.FloatType;
-//   } else {
-//     return Float64Type;
-//   }
-// }

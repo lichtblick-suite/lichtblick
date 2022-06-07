@@ -60,9 +60,15 @@ export class RenderableLineList extends RenderableMarker {
     const pickingLineWidth = Math.max(this.userData.marker.scale.x, MIN_PICKING_LINE_SIZE);
     releaseLinePickingMaterial(pickingLineWidth, this._renderer.materialCache);
     this.line.userData.pickingMaterial = undefined;
+
+    this.geometry.dispose();
   }
 
   override update(marker: Marker): void {
+    if (marker.points.length % 2 !== 0) {
+      throw new Error(`LineList marker has odd number of points (${marker.points.length})`);
+    }
+
     const prevMarker = this.userData.marker;
     super.update(marker);
 
@@ -81,7 +87,8 @@ export class RenderableLineList extends RenderableMarker {
     this._setPositions(marker);
     this._setColors(marker);
 
-    this.linePrepass.computeLineDistances();
+    // These both update the same `LineSegmentsGeometry` reference, so no need to call both
+    // this.linePrepass.computeLineDistances();
     this.line.computeLineDistances();
   }
 

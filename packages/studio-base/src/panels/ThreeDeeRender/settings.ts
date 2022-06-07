@@ -2,6 +2,8 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
+import { v4 as uuidv4 } from "uuid";
+
 import { CameraState, DEFAULT_CAMERA_STATE } from "@foxglove/regl-worldview";
 import { Topic } from "@foxglove/studio";
 import {
@@ -27,17 +29,6 @@ import {
 
 export type LayerSettingsTransform = {
   visible: boolean;
-};
-
-export type ThreeDeeRenderConfig = {
-  cameraState: CameraState;
-  followTf: string | undefined;
-  scene: {
-    enableStats?: boolean;
-    backgroundColor?: string;
-  };
-  transforms: Record<string, LayerSettingsTransform>;
-  topics: Record<string, Record<string, unknown> | undefined>;
 };
 
 export type SelectEntry = { label: string; value: string };
@@ -97,6 +88,23 @@ export type LayerSettingsImage = {
   color: string;
 };
 
+export type CustomLayerSettings = {
+  visible: boolean;
+  label: string;
+  type: LayerType;
+};
+
+export type LayerSettingsGrid = CustomLayerSettings & {
+  type: LayerType.Grid;
+  frameId: string | undefined;
+  size: number;
+  divisions: number;
+  lineWidth: number;
+  color: string;
+  position: [number, number, number];
+  rotation: [number, number, number];
+};
+
 export type LayerSettings =
   | LayerSettingsMarker
   | LayerSettingsOccupancyGrid
@@ -113,7 +121,20 @@ export enum LayerType {
   Pose,
   CameraInfo,
   Image,
+  Grid,
 }
+
+export type ThreeDeeRenderConfig = {
+  cameraState: CameraState;
+  followTf: string | undefined;
+  scene: {
+    enableStats?: boolean;
+    backgroundColor?: string;
+  };
+  transforms: Record<string, LayerSettingsTransform>;
+  topics: Record<string, Record<string, unknown> | undefined>;
+  layers: Record<string, CustomLayerSettings>;
+};
 
 export type SettingsNodeProvider = (
   topicConfig: Partial<LayerSettings>,
@@ -133,10 +154,14 @@ mergeSetInto(SUPPORTED_DATATYPES, CAMERA_INFO_DATATYPES);
 mergeSetInto(SUPPORTED_DATATYPES, IMAGE_DATATYPES);
 mergeSetInto(SUPPORTED_DATATYPES, COMPRESSED_IMAGE_DATATYPES);
 
+export const PRECISION_DISTANCE = 3; // [1mm]
+export const PRECISION_DEGREES = 1;
+
 const ONE_DEGREE = Math.PI / 180;
 
 // This is the unused topic parameter passed to the SettingsNodeProvider for
-// LayerType.Transform, since transforms do not map 1:1 to topics
+// LayerType.Transform, since transforms do not map 1:1 to topics, and custom
+// layers which do not have a topic name or datatype
 const EMPTY_TOPIC = { name: "", datatype: "" };
 
 const PATH_GENERAL = ["general"];
@@ -144,6 +169,7 @@ const PATH_SCENE = ["scene"];
 const PATH_CAMERA_STATE = ["cameraState"];
 const PATH_TRANSFORMS = ["transforms"];
 const PATH_TOPICS = ["topics"];
+const PATH_LAYERS = ["layers"];
 
 export type SettingsTreeOptions = {
   config: ThreeDeeRenderConfig;
@@ -156,11 +182,10 @@ export type SettingsTreeOptions = {
 };
 
 function buildTransformNode(
-  tfConfigOrFrameId: string | Partial<LayerSettingsTransform>,
+  tfConfig: Partial<LayerSettingsTransform>,
   frameDisplayName: string,
   settingsNodeProvider: SettingsNodeProvider,
 ): undefined | SettingsTreeNode {
-  const tfConfig = typeof tfConfigOrFrameId === "string" ? {} : tfConfigOrFrameId;
   const node = settingsNodeProvider(tfConfig, EMPTY_TOPIC);
   node.label ??= frameDisplayName;
   node.visible ??= tfConfig.visible ?? true;
@@ -169,21 +194,47 @@ function buildTransformNode(
 }
 
 function buildTopicNode(
-  topicConfigOrTopicName: string | Partial<LayerSettings>,
+  topicConfig: Partial<LayerSettings>,
   topic: Topic,
   layerType: LayerType,
   settingsNodeProvider: SettingsNodeProvider,
+  coordinateFrames: ReadonlyArray<SelectEntry>,
 ): undefined | SettingsTreeNode {
   // Transform settings are handled elsewhere
   if (layerType === LayerType.Transform) {
     return;
   }
 
-  const topicConfig = typeof topicConfigOrTopicName === "string" ? {} : topicConfigOrTopicName;
   const node = settingsNodeProvider(topicConfig, topic);
   node.label ??= topic.name;
   node.visible ??= topicConfig.visible ?? true;
   node.defaultExpansionState ??= "collapsed";
+
+  // Populate coordinateFrames into options for the "frameId" field
+  const frameIdField = node.fields?.["frameId"];
+  if (frameIdField && frameIdField.input === "select") {
+    frameIdField.options = [...frameIdField.options, ...coordinateFrames] as SelectEntry[];
+  }
+
+  return node;
+}
+
+function buildLayerNode(
+  layer: CustomLayerSettings,
+  settingsNodeProvider: SettingsNodeProvider,
+  coordinateFrames: ReadonlyArray<SelectEntry>,
+): undefined | SettingsTreeNode {
+  const node = settingsNodeProvider(layer, EMPTY_TOPIC);
+  node.label ??= layer.label;
+  node.visible ??= layer.visible;
+  node.defaultExpansionState ??= "collapsed";
+
+  // Populate coordinateFrames into options for the "frameId" field
+  const frameIdField = node.fields?.["frameId"];
+  if (frameIdField && frameIdField.input === "select") {
+    frameIdField.options = [...frameIdField.options, ...coordinateFrames] as SelectEntry[];
+  }
+
   return node;
 }
 
@@ -205,9 +256,7 @@ export function buildSettingsTree(options: SettingsTreeOptions): SettingsTreeRoo
   const tfSettingsNodeProvider = settingsNodeProviders.get(LayerType.Transform);
   if (tfSettingsNodeProvider != undefined) {
     for (const { label: frameName, value: frameId } of options.coordinateFrames) {
-      // We key our memoized function by the first argument. Since the config
-      // may be undefined we use the config or the topic name
-      const transformConfig = config.transforms[frameId] ?? frameId;
+      const transformConfig = config.transforms[frameId] ?? {};
       const newNode = buildTransformNode(transformConfig, frameName, tfSettingsNodeProvider);
       if (newNode) {
         newNode.error = layerErrors.errorAtPath(["transforms", frameId]);
@@ -228,13 +277,36 @@ export function buildSettingsTree(options: SettingsTreeOptions): SettingsTreeRoo
     if (settingsNodeProvider == undefined) {
       continue;
     }
-    // We key our memoized function by the first argument. Since the config
-    // may be undefined we use the config or the topic name
-    const topicConfig = config.topics[topic.name] ?? topic.name;
-    const newNode = buildTopicNode(topicConfig, topic, layerType, settingsNodeProvider);
+    const topicConfig = config.topics[topic.name] ?? {};
+    const newNode = buildTopicNode(
+      topicConfig,
+      topic,
+      layerType,
+      settingsNodeProvider,
+      coordinateFrames,
+    );
     if (newNode) {
       newNode.error = layerErrors.errorAtPath(["topics", topic.name]);
       topicsChildren[topic.name] = newNode;
+    }
+  }
+
+  // Build the settings tree for custom layers
+  const layersChildren: SettingsTreeChildren = {};
+  for (const [layerId, layer] of Object.entries(config.layers)) {
+    const layerType = layer.type;
+    const settingsNodeProvider = settingsNodeProviders.get(layerType);
+    if (settingsNodeProvider == undefined) {
+      continue;
+    }
+    const newNode = buildLayerNode(layer, settingsNodeProvider, coordinateFrames);
+    if (newNode) {
+      newNode.error = layerErrors.errorAtPath(["layers", layerId]);
+      newNode.actions ??= [];
+      if (newNode.actions.find((action) => action.id === "delete") == undefined) {
+        newNode.actions.push({ id: "delete", label: "Delete" });
+      }
+      layersChildren[layerId] = newNode;
     }
   }
 
@@ -297,6 +369,13 @@ export function buildSettingsTree(options: SettingsTreeOptions): SettingsTreeRoo
       label: "Topics",
       children: topicsChildren,
       defaultExpansionState: "expanded",
+    },
+    layers: {
+      error: layerErrors.errorAtPath(PATH_LAYERS),
+      label: "Custom Layers",
+      children: layersChildren,
+      defaultExpansionState: "expanded",
+      actions: [{ id: "add-grid " + uuidv4(), label: "Add Grid", icon: "Grid" }],
     },
   };
 }

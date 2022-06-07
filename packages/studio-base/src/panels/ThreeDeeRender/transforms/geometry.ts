@@ -2,7 +2,7 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import type { vec3, quat, mat4, ReadonlyMat4 } from "gl-matrix";
+import { vec3, quat, mat4, ReadonlyMat4 } from "gl-matrix";
 
 // ts-prune-ignore-next
 export type Point = {
@@ -27,6 +27,14 @@ export type Pose = {
 // ts-prune-ignore-next
 export function makePose(): Pose {
   return { position: { x: 0, y: 0, z: 0 }, orientation: { x: 0, y: 0, z: 0, w: 1 } };
+}
+
+export function xyzrpyToPose(xyz: vec3, rpy: vec3): Pose {
+  const o = quat.fromEuler([0, 0, 0, 1], rpy[0], rpy[1], rpy[2]);
+  return {
+    position: { x: xyz[0], y: xyz[1], z: xyz[2] },
+    orientation: { x: o[0], y: o[1], z: o[2], w: o[3] },
+  };
 }
 
 // Helper functions for constructing geometry primitives that can be used with

@@ -2,9 +2,9 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import produce from "immer";
+import { produce } from "immer";
 // eslint-disable-next-line no-restricted-imports
-import { isEqual, cloneDeep, merge, get, set } from "lodash";
+import { isEqual, cloneDeep, merge, get, set, unset } from "lodash";
 import React, { useCallback, useLayoutEffect, useEffect, useState, useMemo, useRef } from "react";
 import ReactDOM from "react-dom";
 import { useResizeDetector } from "react-resize-detector";
@@ -65,7 +65,9 @@ import {
 } from "./ros";
 import {
   buildSettingsTree,
+  CustomLayerSettings,
   LayerSettings,
+  LayerSettingsGrid,
   LayerSettingsImage,
   LayerType,
   SelectEntry,
@@ -115,12 +117,20 @@ export function ThreeDeeRender({ context }: { context: PanelExtensionContext }):
       partialConfig?.cameraState,
     );
 
+    const layers: Record<string, CustomLayerSettings> = {};
+    for (const [layerId, layer] of Object.entries(partialConfig?.layers ?? {})) {
+      if (layer?.type != undefined) {
+        layers[layerId] = layer as CustomLayerSettings;
+      }
+    }
+
     return {
       cameraState,
       followTf: partialConfig?.followTf,
       scene: partialConfig?.scene ?? {},
       transforms: {},
       topics: partialConfig?.topics ?? {},
+      layers,
     };
   });
   const configRef = useRef(config);
@@ -129,10 +139,17 @@ export function ThreeDeeRender({ context }: { context: PanelExtensionContext }):
 
   const [canvas, setCanvas] = useState<HTMLCanvasElement | ReactNull>(ReactNull);
   const [renderer, setRenderer] = useState<Renderer | ReactNull>(ReactNull);
-  useEffect(
-    () => setRenderer(canvas ? new Renderer(canvas, configRef.current) : ReactNull),
-    [canvas],
-  );
+  useEffect(() => {
+    const curRenderer = canvas ? new Renderer(canvas, configRef.current) : ReactNull;
+    setRenderer(curRenderer);
+
+    if (curRenderer) {
+      // Initialize all custom layers
+      for (const [layerId, layerConfig] of Object.entries(configRef.current.layers)) {
+        updateLayerSettings(curRenderer, layerId, layerConfig.type, layerConfig);
+      }
+    }
+  }, [canvas]);
 
   const [colorScheme, setColorScheme] = useState<"dark" | "light" | undefined>();
   const [topics, setTopics] = useState<ReadonlyArray<Topic> | undefined>();
@@ -165,42 +182,8 @@ export function ThreeDeeRender({ context }: { context: PanelExtensionContext }):
 
   // Handle user changes in the settings sidebar
   const actionHandler = useCallback(
-    (action: SettingsTreeAction) => {
-      if (action.action !== "update") {
-        return;
-      }
-
-      setConfig((oldConfig) => {
-        const newConfig = produce(oldConfig, (draft) => {
-          set(draft, action.payload.path, action.payload.value);
-        });
-
-        if (renderer) {
-          const basePath = action.payload.path[0];
-          if (basePath === "transforms") {
-            // A transform setting was changed, inform the renderer about it and
-            // draw a new frame
-            const frameId = action.payload.path[1]!;
-            const transformConfig = newConfig.transforms[frameId];
-            if (transformConfig) {
-              renderer.setTransformSettings(frameId, transformConfig);
-              renderRef.current.needsRender = true;
-            }
-          } else if (basePath === "topics") {
-            // A topic setting was changed, inform the renderer about it and
-            // draw a new frame
-            const topic = action.payload.path[1]!;
-            const layerType = topicsToLayerTypes.get(topic);
-            if (layerType != undefined) {
-              updateTopicSettings(renderer, topic, layerType, newConfig);
-              renderRef.current.needsRender = true;
-            }
-          }
-        }
-
-        return newConfig;
-      });
-    },
+    (action: SettingsTreeAction) =>
+      settingsTreeActionHandler(action, renderer, setConfig, renderRef, topicsToLayerTypes),
     [renderer, topicsToLayerTypes],
   );
 
@@ -574,6 +557,89 @@ export function ThreeDeeRender({ context }: { context: PanelExtensionContext }):
   );
 }
 
+function settingsTreeActionHandler(
+  action: SettingsTreeAction,
+  renderer: Renderer | ReactNull,
+  setConfig: React.Dispatch<React.SetStateAction<ThreeDeeRenderConfig>>,
+  renderRef: React.MutableRefObject<{ needsRender: boolean }>,
+  topicsToLayerTypes: Map<string, LayerType>,
+) {
+  setConfig((oldConfig) => {
+    if (action.action === "perform-node-action") {
+      log.debug(`[${action.action}][${action.payload.id}]`);
+
+      if (!renderer) {
+        return oldConfig;
+      }
+
+      const [actionId, actionLayerId] = action.payload.id.split(" ");
+      if (actionId === "add-grid" && actionLayerId != undefined) {
+        log.debug(`Creating grid layer ${actionLayerId}`);
+        const layerConfig = { label: "Grid", type: LayerType.Grid, visible: true };
+        const newConfig = produce(oldConfig, (draft) =>
+          set(draft, [...action.payload.path, actionLayerId], layerConfig),
+        );
+
+        updateLayerSettings(renderer, actionLayerId, layerConfig.type, layerConfig);
+        renderRef.current.needsRender = true;
+        return newConfig;
+      } else if (action.payload.id === "delete") {
+        const pathLayerId = action.payload.path[action.payload.path.length - 1]!;
+        const layerConfig = get(oldConfig, action.payload.path) as
+          | Partial<CustomLayerSettings>
+          | undefined;
+        const newConfig = produce(oldConfig, (draft) => void unset(draft, action.payload.path));
+
+        if (layerConfig?.type != undefined) {
+          updateLayerSettings(renderer, pathLayerId, layerConfig.type, undefined);
+        }
+        renderRef.current.needsRender = true;
+        return newConfig;
+      } else {
+        return oldConfig;
+      }
+    } else {
+      const newConfig = produce(oldConfig, (draft) =>
+        set(draft, action.payload.path, action.payload.value),
+      );
+
+      if (renderer) {
+        const basePath = action.payload.path[0];
+        if (basePath === "transforms") {
+          // A transform setting was changed, inform the renderer about it and
+          // draw a new frame
+          const frameId = action.payload.path[1]!;
+          const transformConfig = newConfig.transforms[frameId];
+          if (transformConfig) {
+            renderer.setTransformSettings(frameId, transformConfig);
+            renderRef.current.needsRender = true;
+          }
+        } else if (basePath === "topics") {
+          // A topic setting was changed, inform the renderer about it and
+          // draw a new frame
+          const topic = action.payload.path[1]!;
+          const layerType = topicsToLayerTypes.get(topic);
+          if (layerType != undefined) {
+            updateTopicSettings(renderer, topic, layerType, newConfig);
+            renderRef.current.needsRender = true;
+          }
+        } else if (basePath === "layers") {
+          // A custom layer setting was changed, inform the renderer about
+          // it and draw a new frame
+          const layerId = action.payload.path[1]!;
+          const layerConfig = newConfig.layers[layerId];
+          if (layerConfig != undefined) {
+            updateLayerSettings(renderer, layerId, layerConfig.type, layerConfig);
+            renderRef.current.needsRender = true;
+          }
+        }
+      }
+
+      return newConfig;
+    }
+  });
+}
+
 function coordinateFrameList(renderer: Renderer | ReactNull | undefined): SelectEntry[] {
   if (!renderer) {
     return [];
@@ -676,8 +742,6 @@ function updateTopicSettings(
   }
 
   switch (layerType) {
-    case LayerType.Transform:
-      throw new Error(`Attempted to update topic settings for Transform "${topic}"`);
     case LayerType.Marker:
       renderer.setMarkerSettings(topic, topicConfig);
       break;
@@ -696,5 +760,31 @@ function updateTopicSettings(
     case LayerType.Image:
       renderer.setImageSettings(topic, topicConfig);
       break;
+    case LayerType.Grid:
+    case LayerType.Transform:
+    default:
+      throw new Error(
+        `Attempted to update topic settings for type ${layerType} (topic "${topic}")`,
+      );
+  }
+}
+
+function updateLayerSettings(
+  renderer: Renderer,
+  id: string,
+  layerType: LayerType,
+  layerConfig: Partial<CustomLayerSettings> | undefined,
+) {
+  // If visibility is toggled off for this layer, clear its layer errors
+  if (layerConfig?.visible === false) {
+    renderer.layerErrors.clearPath(["layers", id]);
+  }
+
+  switch (layerType) {
+    case LayerType.Grid:
+      renderer.setGridSettings(id, layerConfig as Partial<LayerSettingsGrid> | undefined);
+      break;
+    default:
+      throw new Error(`Attempted to update layer settings for type ${layerType} (id "${id}")`);
   }
 }

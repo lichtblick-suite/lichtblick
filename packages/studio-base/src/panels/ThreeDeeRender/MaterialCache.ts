@@ -6,6 +6,8 @@
 
 import * as THREE from "three";
 
+import Logger from "@foxglove/log";
+
 import { LineMaterial } from "./LineMaterial";
 import { rgbaToHexString } from "./color";
 import { ColorRGBA } from "./ros";
@@ -17,6 +19,8 @@ type MaterialCacheEntry = {
   refCount: number;
   disposer: DisposeMaterial;
 };
+
+const log = Logger.getLogger(__filename);
 
 // Fragment shader chunk to convert sRGB to linear RGB. This is used by some
 // PointCloud materials to avoid expensive per-point colorspace conversion on
@@ -57,6 +61,7 @@ export class MaterialCache {
   ): TMaterial {
     let entry = this.materials.get(id);
     if (!entry) {
+      log.debug(`Creating material ${id}`);
       entry = { material: create(), refCount: 0, disposer: dispose as DisposeMaterial };
       this.materials.set(id, entry);
     }
@@ -71,6 +76,7 @@ export class MaterialCache {
     }
     entry.refCount--;
     if (entry.refCount === 0) {
+      log.debug(`Disposing material ${id}`);
       entry.disposer(entry.material);
       this.materials.delete(id);
     }
@@ -254,7 +260,7 @@ export const PointCloudColor = {
 
 export const LineVertexColorPrepass = {
   id: (lineWidth: number, transparent: boolean): string =>
-    `LineVertexColorPrepass-${lineWidth.toFixed(4)}-${transparent ? "-t" : ""}`,
+    `LineVertexColorPrepass-${lineWidth.toFixed(4)}${transparent ? "-t" : ""}`,
 
   create: (lineWidth: number, transparent: boolean): LineMaterial => {
     const material = new LineMaterial({
@@ -279,7 +285,7 @@ export const LineVertexColorPrepass = {
 
 export const LineVertexColor = {
   id: (lineWidth: number, transparent: boolean): string =>
-    `LineVertexColor-${lineWidth.toFixed(4)}-${transparent ? "-t" : ""}`,
+    `LineVertexColor-${lineWidth.toFixed(4)}${transparent ? "-t" : ""}`,
 
   create: (lineWidth: number, transparent: boolean): LineMaterial => {
     const material = new LineMaterial({
