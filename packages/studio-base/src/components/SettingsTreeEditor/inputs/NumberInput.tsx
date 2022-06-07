@@ -5,7 +5,7 @@
 import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import { IconButton, TextFieldProps, TextField, styled as muiStyled } from "@mui/material";
-import { clamp } from "lodash";
+import { clamp, isFinite } from "lodash";
 import { ReactNode, useCallback } from "react";
 import { useKeyPress } from "react-use";
 
@@ -71,6 +71,10 @@ export function NumberInput(
 
   const stepAmount = shiftPressed ? step * 10 : step;
 
+  const placeHolderValue = isFinite(Number(props.placeholder))
+    ? Number(props.placeholder)
+    : undefined;
+
   const updateValue = useCallback(
     (newValue: undefined | number) => {
       const clampedValue =
@@ -109,7 +113,7 @@ export function NumberInput(
           <StyledIconButton
             size="small"
             edge="start"
-            onClick={() => updateValue((value ?? 0) - stepAmount)}
+            onClick={() => updateValue((value ?? placeHolderValue ?? 0) - stepAmount)}
           >
             {iconDown ?? <ChevronLeftIcon fontSize="small" />}
           </StyledIconButton>
@@ -118,7 +122,7 @@ export function NumberInput(
           <StyledIconButton
             size="small"
             edge="end"
-            onClick={() => updateValue((value ?? 0) + stepAmount)}
+            onClick={() => updateValue((value ?? placeHolderValue ?? 0) + stepAmount)}
           >
             {iconUp ?? <ChevronRightIcon fontSize="small" />}
           </StyledIconButton>

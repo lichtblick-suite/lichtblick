@@ -43,7 +43,12 @@ const BasicSettings: SettingsTreeRoots = {
         precision: 4,
       },
       gradient: { input: "gradient", label: "Gradient" },
-      emptyNumber: { input: "number", label: "Empty Number" },
+      numberWithPlaceholder: {
+        input: "number",
+        label: "Number with placeholder",
+        step: 10,
+        placeholder: "3",
+      },
       fieldWithError: {
         input: "string",
         label: "Field With Error",
