@@ -14,7 +14,8 @@ import {
   Typography,
   useTheme,
 } from "@mui/material";
-import { useMemo, useState } from "react";
+import memoizeWeak from "memoize-weak";
+import { useState } from "react";
 import { DeepReadonly } from "ts-essentials";
 
 import Stack from "@foxglove/studio-base/components/Stack";
@@ -100,6 +101,8 @@ function ExpansionArrow({ expanded }: { expanded: boolean }): JSX.Element {
   );
 }
 
+const makeStablePath = memoizeWeak((path: readonly string[], key: string) => [...path, key]);
+
 function NodeEditorComponent(props: NodeEditorProps): JSX.Element {
   const { actionHandler, defaultOpen = true, settings = {} } = props;
   const [open, setOpen] = useState(defaultOpen);
@@ -123,20 +126,13 @@ function NodeEditorComponent(props: NodeEditorProps): JSX.Element {
   const { fields, children } = settings;
   const hasProperties = fields != undefined || children != undefined;
 
-  // Provide stable subpaths so that memoization works. We force a dependency on path
-  // here to make sure we reset the cache if the path changes.
-  const stablePaths = useMemo<Record<string, readonly string[]>>(
-    () => ({ [Symbol()]: props.path }),
-    [props.path],
-  );
-
   const fieldEditors = Object.entries(fields ?? {}).map(([key, field]) => {
-    const stablePath = (stablePaths[key] ??= [...props.path, key]);
+    const stablePath = makeStablePath(props.path, key);
     return <FieldEditor key={key} field={field} path={stablePath} actionHandler={actionHandler} />;
   });
 
   const childNodes = Object.entries(children ?? {}).map(([key, child]) => {
-    const stablePath = (stablePaths[key] ??= [...props.path, key]);
+    const stablePath = makeStablePath(props.path, key);
     return (
       <NodeEditor
         actionHandler={actionHandler}
