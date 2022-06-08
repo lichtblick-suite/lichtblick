@@ -27,7 +27,6 @@ import { usePanelMousePresence } from "@foxglove/studio-base/hooks/usePanelMouse
 import { Topic } from "@foxglove/studio-base/players/types";
 import Rpc from "@foxglove/studio-base/util/Rpc";
 import WebWorkerManager from "@foxglove/studio-base/util/WebWorkerManager";
-import { downloadFiles } from "@foxglove/studio-base/util/download";
 
 import { renderImage } from "../lib/renderImage";
 import { Config, SaveImagePanelConfig } from "../types";
@@ -48,6 +47,7 @@ type Props = {
   rawMarkerData: RawMarkerData;
   config: Config;
   saveConfig: SaveImagePanelConfig;
+  onDownloadImage?: () => void;
   onStartRenderImage: () => OnFinishRenderImage;
   renderInMainThread?: boolean;
   setActivePixelData: (data: PixelData | undefined) => void;
@@ -153,10 +153,10 @@ const supportsOffscreenCanvas =
 export function ImageCanvas(props: Props): JSX.Element {
   const {
     rawMarkerData,
-    topic,
     image: normalizedImageMessage,
     config,
     saveConfig,
+    onDownloadImage,
     onStartRenderImage,
   } = props;
   const { mode } = config;
@@ -435,54 +435,6 @@ export function ImageCanvas(props: Props): JSX.Element {
     ev.stopPropagation();
     setContextMenuEvent(ev.nativeEvent);
   }, []);
-
-  const onDownloadImage = useCallback(() => {
-    const canvas = canvasRef.current;
-
-    if (!canvas || !normalizedImageMessage || !topic || width == undefined || height == undefined) {
-      return;
-    }
-
-    // re-render the image onto a new canvas to download the original image
-    const tempCanvas = document.createElement("canvas");
-    void renderImage({
-      canvas: tempCanvas,
-      hitmapCanvas: undefined,
-      geometry: {
-        flipHorizontal: config.flipHorizontal ?? false,
-        flipVertical: config.flipVertical ?? false,
-        panZoom: { x: 0, y: 0, scale: 1 },
-        rotation: config.rotation ?? 0,
-        viewport: { width, height },
-        zoomMode: "other",
-      },
-      imageMessage: normalizedImageMessage,
-      rawMarkerData: { markers: [], transformMarkers: false },
-      options: { ...renderOptions, resizeCanvas: true },
-    }).then((dimensions) => {
-      if (!dimensions) {
-        return;
-      }
-
-      // context: https://stackoverflow.com/questions/37135417/download-canvas-as-png-in-fabric-js-giving-network-error
-      // read the canvas data as an image (png)
-      tempCanvas.toBlob((blob) => {
-        if (!blob) {
-          setError(
-            new Error(`Failed to create an image from ${canvas.width}x${canvas.height} canvas`),
-          );
-          return;
-        }
-        // name the image the same name as the topic
-        // note: the / characters in the file name will be replaced with _ by the browser
-        // remove any leading / so the image name doesn't start with _
-        const topicName = topic.name.replace(/^\/+/, "");
-        const stamp = normalizedImageMessage.stamp;
-        const fileName = `${topicName}-${stamp.sec}-${stamp.nsec}`;
-        downloadFiles([{ blob, fileName }]);
-      }, "image/png");
-    });
-  }, [normalizedImageMessage, topic, width, height, config, renderOptions]);
 
   function onCanvasClick(event: MouseEvent<HTMLCanvasElement>) {
     const boundingRect = event.currentTarget.getBoundingClientRect();
