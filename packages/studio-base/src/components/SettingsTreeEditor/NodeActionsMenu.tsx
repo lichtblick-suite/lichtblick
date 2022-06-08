@@ -45,7 +45,7 @@ export function NodeActionsMenu({
         id="basic-menu"
         anchorEl={anchorEl}
         open={open}
-        onClose={handleClose}
+        onClose={() => setAnchorEl(undefined)}
         MenuListProps={{
           "aria-labelledby": "node-actions-button",
         }}
