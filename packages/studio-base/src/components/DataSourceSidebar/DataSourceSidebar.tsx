@@ -111,8 +111,8 @@ export default function DataSourceSidebar(props: Props): JSX.Element {
       disablePadding
       trailingItems={[
         isLoading && (
-          <Stack alignItems="center" justifyContent="center" padding={1}>
-            <CircularProgress size={20} variant="indeterminate" />
+          <Stack key="loading" alignItems="center" justifyContent="center" padding={1}>
+            <CircularProgress size={18} variant="indeterminate" />
           </Stack>
         ),
         enableOpenDialog === true && (

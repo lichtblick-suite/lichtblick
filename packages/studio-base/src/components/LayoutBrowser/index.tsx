@@ -2,8 +2,8 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { IconButton, Spinner, useTheme } from "@fluentui/react";
-import { Button, Switch, FormGroup, FormControlLabel } from "@mui/material";
+import { IconButton, useTheme } from "@fluentui/react";
+import { Button, Switch, FormGroup, FormControlLabel, CircularProgress } from "@mui/material";
 import { partition } from "lodash";
 import moment from "moment";
 import path from "path";
@@ -395,7 +395,11 @@ export default function LayoutBrowser({
       helpContent={helpContent}
       disablePadding
       trailingItems={[
-        (layouts.loading || isBusy) && <Spinner key="spinner" />,
+        (layouts.loading || isBusy) && (
+          <Stack key="loading" alignItems="center" justifyContent="center" padding={1}>
+            <CircularProgress size={18} variant="indeterminate" />
+          </Stack>
+        ),
         !isOnline && (
           <IconButton
             key="offline"

@@ -13,7 +13,6 @@ import {
   ILayerStyles,
   IModalStyles,
   IOverlayStyles,
-  ISpinnerStyles,
   ITextFieldStyles,
   IToggleStyles,
   ITooltipStyleProps,
@@ -136,14 +135,6 @@ const fluentComponents: PartialTheme["components"] = {
         alignItems: "baseline",
       },
     } as IToggleStyles,
-  },
-  Spinner: {
-    styles: {
-      circle: {
-        animationTimingFunction: "linear",
-        borderWidth: 2,
-      },
-    } as Partial<ISpinnerStyles>,
   },
 };
 

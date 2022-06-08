@@ -11,8 +11,7 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { Link, Spinner, SpinnerSize } from "@fluentui/react";
-import { Stack } from "@mui/material";
+import { CircularProgress, Link } from "@mui/material";
 import React, {
   useCallback,
   useMemo,
@@ -35,6 +34,7 @@ import styled from "styled-components";
 import { EmptyPanelLayout } from "@foxglove/studio-base/components/EmptyPanelLayout";
 import EmptyState from "@foxglove/studio-base/components/EmptyState";
 import PanelToolbar from "@foxglove/studio-base/components/PanelToolbar";
+import Stack from "@foxglove/studio-base/components/Stack";
 import {
   LayoutState,
   useCurrentLayoutActions,
@@ -148,7 +148,7 @@ export function UnconnectedPanelLayout(props: Props): React.ReactElement {
           <Suspense
             fallback={
               <EmptyState>
-                <Spinner size={SpinnerSize.large} />
+                <CircularProgress size={28} />
               </EmptyState>
             }
           >
@@ -208,13 +208,16 @@ export default function PanelLayout(): JSX.Element {
   } else if (layoutLoading === true) {
     return (
       <EmptyState>
-        <Spinner size={SpinnerSize.large} />
+        <CircularProgress size={28} />
       </EmptyState>
     );
   } else {
     return (
       <EmptyState>
-        <Link onClick={openLayoutBrowser}>Select a layout</Link> in the sidebar to get started!
+        <Link onClick={openLayoutBrowser} underline="hover">
+          Select a layout
+        </Link>{" "}
+        in the sidebar to get started!
       </EmptyState>
     );
   }

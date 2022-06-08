@@ -2,8 +2,8 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { DefaultButton, Icon, PrimaryButton, Spinner, SpinnerSize } from "@fluentui/react";
-import { Typography, useTheme } from "@mui/material";
+import { DefaultButton, Icon, PrimaryButton } from "@fluentui/react";
+import { CircularProgress, Typography, useTheme } from "@mui/material";
 import { useCallback } from "react";
 import { useToasts } from "react-toast-notifications";
 import { useAsyncFn } from "react-use";
@@ -74,7 +74,7 @@ export default function AccountInfo(props: { currentUser?: User }): JSX.Element 
       </Stack>
       <Stack gap={1}>
         <DefaultButton onClick={onSignoutClick}>
-          Sign out&nbsp;{loading && <Spinner size={SpinnerSize.small} />}
+          Sign out&nbsp;{loading && <CircularProgress size={16} />}
         </DefaultButton>
       </Stack>
     </Stack>

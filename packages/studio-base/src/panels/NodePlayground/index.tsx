@@ -11,10 +11,10 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { useTheme, Spinner, SpinnerSize } from "@fluentui/react";
+import { useTheme } from "@fluentui/react";
 import ArrowLeftIcon from "@mdi/svg/svg/arrow-left.svg";
 import PlusIcon from "@mdi/svg/svg/plus.svg";
-import { Divider, Input, Link, Stack } from "@mui/material";
+import { CircularProgress, Divider, Input, Link, Stack } from "@mui/material";
 import { Suspense, useCallback, useEffect, useState } from "react";
 import styled from "styled-components";
 import { v4 as uuidv4 } from "uuid";
@@ -408,7 +408,7 @@ function NodePlayground(props: Props) {
                     width="100%"
                     height="100%"
                   >
-                    <Spinner size={SpinnerSize.large} />
+                    <CircularProgress size={28} />
                   </Stack>
                 }
               >
