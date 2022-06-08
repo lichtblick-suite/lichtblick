@@ -13,14 +13,11 @@
 
 import FullscreenIcon from "@mui/icons-material/Fullscreen";
 import FullscreenExitIcon from "@mui/icons-material/FullscreenExit";
-import HelpOutlineIcon from "@mui/icons-material/HelpOutline";
 import { styled as muiStyled, Typography } from "@mui/material";
 import { useContext, useState, useMemo, CSSProperties } from "react";
 
 import PanelContext from "@foxglove/studio-base/components/PanelContext";
 import ToolbarIconButton from "@foxglove/studio-base/components/PanelToolbar/ToolbarIconButton";
-import { useWorkspace } from "@foxglove/studio-base/context/WorkspaceContext";
-import { HelpInfoStore, useHelpInfo } from "@foxglove/studio-base/providers/HelpInfoProvider";
 
 import { PanelToolbarControls } from "./PanelToolbarControls";
 
@@ -30,6 +27,9 @@ type Props = {
   additionalIcons?: React.ReactNode;
   backgroundColor?: CSSProperties["backgroundColor"];
   children?: React.ReactNode;
+  // Keeping this prop for now in case we decide to expose it via some other mechanism
+  // like a context menu item.
+  // eslint-disable-next-line react/no-unused-prop-types
   helpContent?: React.ReactNode;
   isUnknownPanel?: boolean;
 };
@@ -50,8 +50,6 @@ const PanelToolbarRoot = muiStyled("div", {
   zIndex: theme.zIndex.appBar,
 }));
 
-const selectSetHelpInfo = (store: HelpInfoStore) => store.setHelpInfo;
-
 // Panel toolbar should be added to any panel that's part of the
 // react-mosaic layout.  It adds a drag handle, remove/replace controls
 // and has a place to add custom controls via it's children property
@@ -59,16 +57,12 @@ export default React.memo<Props>(function PanelToolbar({
   additionalIcons,
   backgroundColor,
   children,
-  helpContent,
   isUnknownPanel = false,
 }: Props) {
   const { isFullscreen, enterFullscreen, exitFullscreen } = useContext(PanelContext) ?? {};
   const [menuOpen, setMenuOpen] = useState(false);
 
   const panelContext = useContext(PanelContext);
-  const { openHelp } = useWorkspace();
-
-  const setHelpInfo = useHelpInfo(selectSetHelpInfo);
 
   // Help-shown state must be hoisted outside the controls container so the modal can remain visible
   // when the panel is no longer hovered.
@@ -76,20 +70,6 @@ export default React.memo<Props>(function PanelToolbar({
     return (
       <>
         {additionalIcons}
-        {Boolean(helpContent) && (
-          <ToolbarIconButton
-            value="help"
-            title="Help"
-            onClick={() => {
-              if (panelContext?.title != undefined) {
-                setHelpInfo({ title: panelContext.title, content: helpContent });
-                openHelp();
-              }
-            }}
-          >
-            <HelpOutlineIcon />
-          </ToolbarIconButton>
-        )}
         {isFullscreen === false && (
           <ToolbarIconButton
             title="Fullscreen"
@@ -111,16 +91,7 @@ export default React.memo<Props>(function PanelToolbar({
         )}
       </>
     );
-  }, [
-    additionalIcons,
-    openHelp,
-    setHelpInfo,
-    panelContext?.title,
-    helpContent,
-    isFullscreen,
-    enterFullscreen,
-    exitFullscreen,
-  ]);
+  }, [additionalIcons, isFullscreen, enterFullscreen, exitFullscreen]);
 
   return (
     <PanelToolbarRoot backgroundColor={backgroundColor}>
