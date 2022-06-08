@@ -736,7 +736,11 @@ export default class SceneBuilder implements MarkerProvider {
       return;
     }
     let finalColor: Color;
-    if (datatype === "foxglove.Color") {
+    if (
+      datatype === "foxglove.Color" ||
+      datatype === "foxglove_msgs/Color" ||
+      datatype === "foxglove_msgs/msg/Color"
+    ) {
       finalColor = msg.message as FoxgloveMessages["foxglove.Color"];
     } else {
       finalColor = { r: color.r / 255, g: color.g / 255, b: color.b / 255, a: color.a ?? 1 };
@@ -830,6 +834,8 @@ export default class SceneBuilder implements MarkerProvider {
       case "geometry_msgs/PoseArray":
       case "geometry_msgs/msg/PoseArray":
       case "ros.geometry_msgs.PoseArray":
+      case "foxglove_msgs/PosesInFrame":
+      case "foxglove_msgs/msg/PosesInFrame":
       case "foxglove.PosesInFrame": {
         const topicSettings = this._settingsByKey[`t:${topic}`] as PoseListSettings | undefined;
         const normalized = normalizePoseArray(
@@ -846,6 +852,8 @@ export default class SceneBuilder implements MarkerProvider {
       case "geometry_msgs/PoseStamped":
       case "geometry_msgs/msg/PoseStamped":
       case "ros.geometry_msgs.PoseStamped":
+      case "foxglove_msgs/PoseInFrame":
+      case "foxglove_msgs/msg/PoseInFrame":
       case "foxglove.PoseInFrame": {
         const poseMsg = msg as MessageEvent<PoseStamped | FoxgloveMessages["foxglove.PoseInFrame"]>;
         this.collectors[topic]!.addNonMarker(
@@ -862,11 +870,13 @@ export default class SceneBuilder implements MarkerProvider {
       case "ros.nav_msgs.OccupancyGrid":
         this._consumeOccupancyGrid(topic, message as NavMsgs$OccupancyGrid);
         break;
+      case "foxglove_msgs/Grid":
+      case "foxglove_msgs/msg/Grid":
       case "foxglove.Grid":
         try {
           this._consumeOccupancyGrid(
             topic,
-            foxgloveGridToOccupancyGrid(message as FoxgloveMessages[typeof datatype]),
+            foxgloveGridToOccupancyGrid(message as FoxgloveMessages["foxglove.Grid"]),
           );
         } catch (err) {
           this._setTopicError(topic, (err as Error).message);
@@ -883,11 +893,13 @@ export default class SceneBuilder implements MarkerProvider {
       case "ros.sensor_msgs.PointCloud2":
         this._consumeNonMarkerMessage(topic, message as StampedMessage, 102);
         break;
+      case "foxglove_msgs/PointCloud":
+      case "foxglove_msgs/msg/PointCloud":
       case "foxglove.PointCloud":
         try {
           this._consumeNonMarkerMessage(
             topic,
-            foxglovePointCloudToPointCloud2(message as FoxgloveMessages[typeof datatype]),
+            foxglovePointCloudToPointCloud2(message as FoxgloveMessages["foxglove.PointCloud"]),
             102,
             message,
           );
@@ -909,11 +921,13 @@ export default class SceneBuilder implements MarkerProvider {
       case "ros.sensor_msgs.LaserScan":
         this._consumeLaserScan(topic, message as LaserScan);
         break;
+      case "foxglove_msgs/LaserScan":
+      case "foxglove_msgs/msg/LaserScan":
       case "foxglove.LaserScan":
         try {
           this._consumeLaserScan(
             topic,
-            foxgloveLaserScanToLaserScan(message as FoxgloveMessages[typeof datatype]),
+            foxgloveLaserScanToLaserScan(message as FoxgloveMessages["foxglove.LaserScan"]),
           );
         } catch (err) {
           this._setTopicError(topic, (err as Error).message);
@@ -922,6 +936,8 @@ export default class SceneBuilder implements MarkerProvider {
       case "std_msgs/ColorRGBA":
       case "std_msgs/msg/ColorRGBA":
       case "ros.std_msgs.ColorRGBA":
+      case "foxglove_msgs/Color":
+      case "foxglove_msgs/msg/Color":
       case "foxglove.Color":
         this._consumeColor(
           msg as MessageEvent<Color | FoxgloveMessages["foxglove.Color"]>,

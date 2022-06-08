@@ -48,6 +48,8 @@ const SUPPORTED_DATATYPES = [
   "rcl_interfaces/msg/Log",
   "ros.rosgraph_msgs.Log",
   "ros.rcl_interfaces.Log",
+  "foxglove_msgs/Log",
+  "foxglove_msgs/msg/Log",
   "foxglove.Log",
 ];
 

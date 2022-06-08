@@ -189,8 +189,12 @@ function normalizeAnnotations(
     case "webviz_msgs/ImageMarkerArray":
       break;
     // foxglove
+    case "foxglove_msgs/ImageAnnotations":
+    case "foxglove_msgs/msg/ImageAnnotations":
     case "foxglove.ImageAnnotations": {
-      return normalizeFoxgloveImageAnnotations(message as FoxgloveMessages[typeof datatype]);
+      return normalizeFoxgloveImageAnnotations(
+        message as FoxgloveMessages["foxglove.ImageAnnotations"],
+      );
     }
   }
 

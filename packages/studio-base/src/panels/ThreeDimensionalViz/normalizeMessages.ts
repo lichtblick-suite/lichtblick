@@ -22,13 +22,17 @@ export function normalizePose(
   msg: PoseStamped | FoxgloveMessages["foxglove.PoseInFrame"],
   datatype: string,
 ): NormalizedPose {
-  if (datatype === "foxglove.PoseInFrame") {
+  if (
+    datatype === "foxglove.PoseInFrame" ||
+    datatype === "foxglove_msgs/PoseInFrame" ||
+    datatype === "foxglove_msgs/msg/PoseInFrame"
+  ) {
     return {
       header: {
-        stamp: (msg as FoxgloveMessages[typeof datatype]).timestamp,
-        frame_id: (msg as FoxgloveMessages[typeof datatype]).frame_id,
+        stamp: (msg as FoxgloveMessages["foxglove.PoseInFrame"]).timestamp,
+        frame_id: (msg as FoxgloveMessages["foxglove.PoseInFrame"]).frame_id,
       },
-      pose: (msg as FoxgloveMessages[typeof datatype]).pose,
+      pose: (msg as FoxgloveMessages["foxglove.PoseInFrame"]).pose,
     };
   }
   return msg as PoseStamped;
@@ -38,13 +42,17 @@ export function normalizePoseArray(
   msg: GeometryMsgs$PoseArray | FoxgloveMessages["foxglove.PosesInFrame"],
   datatype: string,
 ): NormalizedPoseArray {
-  if (datatype === "foxglove.PosesInFrame") {
+  if (
+    datatype === "foxglove.PosesInFrame" ||
+    datatype === "foxglove_msgs/PosesInFrame" ||
+    datatype === "foxglove_msgs/msg/PosesInFrame"
+  ) {
     return {
       header: {
-        stamp: (msg as FoxgloveMessages[typeof datatype]).timestamp,
-        frame_id: (msg as FoxgloveMessages[typeof datatype]).frame_id,
+        stamp: (msg as FoxgloveMessages["foxglove.PosesInFrame"]).timestamp,
+        frame_id: (msg as FoxgloveMessages["foxglove.PosesInFrame"]).frame_id,
       },
-      poses: (msg as FoxgloveMessages[typeof datatype]).poses,
+      poses: (msg as FoxgloveMessages["foxglove.PosesInFrame"]).poses,
     };
   }
   return msg as GeometryMsgs$PoseArray;

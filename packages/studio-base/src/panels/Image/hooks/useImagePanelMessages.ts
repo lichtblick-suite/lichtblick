@@ -56,6 +56,8 @@ export const ANNOTATION_DATATYPES = [
   // backwards compat with webviz
   "webviz_msgs/ImageMarkerArray",
   // foxglove
+  "foxglove_msgs/ImageAnnotations",
+  "foxglove_msgs/msg/ImageAnnotations",
   "foxglove.ImageAnnotations",
 ] as const;
 

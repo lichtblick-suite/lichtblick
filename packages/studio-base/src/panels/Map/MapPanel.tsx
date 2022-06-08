@@ -109,20 +109,21 @@ function buildSettingsTree(config: Config, eligibleTopics: string[]): SettingsTr
 }
 
 function topicMessageType(topic: Topic) {
-  if (
-    topic.datatype === "sensor_msgs/NavSatFix" ||
-    topic.datatype === "sensor_msgs/msg/NavSatFix" ||
-    topic.datatype === "ros.sensor_msgs.NavSatFix" ||
-    topic.datatype === "foxglove.LocationFix"
-  ) {
-    return "navsat";
+  switch (topic.datatype) {
+    case "sensor_msgs/NavSatFix":
+    case "sensor_msgs/msg/NavSatFix":
+    case "ros.sensor_msgs.NavSatFix":
+    case "foxglove_msgs/LocationFix":
+    case "foxglove_msgs/msg/LocationFix":
+    case "foxglove.LocationFix":
+      return "navsat";
+    case "foxglove_msgs/GeoJSON":
+    case "foxglove_msgs/msg/GeoJSON":
+    case "foxglove.GeoJSON":
+      return "geojson";
+    default:
+      return undefined;
   }
-
-  if (topic.datatype === "foxglove.GeoJSON") {
-    return "geojson";
-  }
-
-  return undefined;
 }
 
 function MapPanel(props: MapPanelProps): JSX.Element {

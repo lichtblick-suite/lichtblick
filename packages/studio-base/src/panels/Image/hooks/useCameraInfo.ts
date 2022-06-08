@@ -16,8 +16,10 @@ function normalizeCameraInfo(message: unknown, datatype: string): CameraInfo | u
     case "sensor_msgs/CameraInfo":
     case "sensor_msgs/msg/CameraInfo":
       return message as CameraInfo;
+    case "foxglove_msgs/CameraCalibration":
+    case "foxglove_msgs/msg/CameraCalibration":
     case "foxglove.CameraCalibration": {
-      const typedMessage = message as FoxgloveMessages[typeof datatype];
+      const typedMessage = message as FoxgloveMessages["foxglove.CameraCalibration"];
       // prettier-ignore
       const mat3Identity = [
         1, 0, 0,

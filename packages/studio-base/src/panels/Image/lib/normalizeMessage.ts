@@ -18,6 +18,10 @@ export const NORMALIZABLE_IMAGE_DATATYPES = [
   "ros.sensor_msgs.CompressedImage",
   "foxglove.RawImage",
   "foxglove.CompressedImage",
+  "foxglove_msgs/RawImage",
+  "foxglove_msgs/msg/RawImage",
+  "foxglove_msgs/CompressedImage",
+  "foxglove_msgs/msg/CompressedImage",
 ];
 
 /**
@@ -29,8 +33,10 @@ export function normalizeImageMessage(
   datatype: string,
 ): NormalizedImageMessage | undefined {
   switch (datatype) {
+    case "foxglove_msgs/RawImage":
+    case "foxglove_msgs/msg/RawImage":
     case "foxglove.RawImage": {
-      const typedMessage = message as FoxgloveMessages[typeof datatype];
+      const typedMessage = message as FoxgloveMessages["foxglove.RawImage"];
       const stamp =
         typeof typedMessage.timestamp === "bigint"
           ? fromNanoSec(typedMessage.timestamp)
@@ -72,8 +78,10 @@ export function normalizeImageMessage(
         data: typedMessage.data,
       };
     }
+    case "foxglove_msgs/CompressedImage":
+    case "foxglove_msgs/msg/CompressedImage":
     case "foxglove.CompressedImage": {
-      const typedMessage = message as FoxgloveMessages[typeof datatype];
+      const typedMessage = message as FoxgloveMessages["foxglove.CompressedImage"];
       const stamp =
         typeof typedMessage.timestamp === "bigint"
           ? fromNanoSec(typedMessage.timestamp)
