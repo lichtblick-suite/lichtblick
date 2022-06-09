@@ -6,7 +6,8 @@ import MoreVertIcon from "@mui/icons-material/MoreVert";
 import { Menu, MenuItem, IconButton, ListItemIcon, ListItemText } from "@mui/material";
 import { useState } from "react";
 
-import icons from "./icons";
+import CommonIcons from "@foxglove/studio-base/components/CommonIcons";
+
 import { SettingsTreeNodeAction } from "./types";
 
 export function NodeActionsMenu({
@@ -51,7 +52,7 @@ export function NodeActionsMenu({
         }}
       >
         {actions.map((action) => {
-          const Icon = action.icon ? icons[action.icon] : undefined;
+          const Icon = action.icon ? CommonIcons[action.icon] : undefined;
           return (
             <MenuItem key={action.id} onClick={() => handleClose(action.id)}>
               {Icon && (

@@ -18,12 +18,12 @@ import memoizeWeak from "memoize-weak";
 import { useState } from "react";
 import { DeepReadonly } from "ts-essentials";
 
+import CommonIcons from "@foxglove/studio-base/components/CommonIcons";
 import Stack from "@foxglove/studio-base/components/Stack";
 
 import { FieldEditor } from "./FieldEditor";
 import { NodeActionsMenu } from "./NodeActionsMenu";
 import { VisibilityToggle } from "./VisibilityToggle";
-import icons from "./icons";
 import { SettingsTreeAction, SettingsTreeNode } from "./types";
 
 export type NodeEditorProps = {
@@ -146,7 +146,7 @@ function NodeEditorComponent(props: NodeEditorProps): JSX.Element {
     );
   });
 
-  const IconComponent = settings.icon ? icons[settings.icon] : undefined;
+  const IconComponent = settings.icon ? CommonIcons[settings.icon] : undefined;
 
   return (
     <>

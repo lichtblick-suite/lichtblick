@@ -21,6 +21,10 @@ import { useDataSourceInfo } from "@foxglove/studio-base/PanelAPI";
 import { useMessagePipeline } from "@foxglove/studio-base/components/MessagePipeline";
 import Panel from "@foxglove/studio-base/components/Panel";
 import { usePanelContext } from "@foxglove/studio-base/components/PanelContext";
+import {
+  PanelContextMenu,
+  PanelContextMenuItem,
+} from "@foxglove/studio-base/components/PanelContextMenu";
 import PanelToolbar from "@foxglove/studio-base/components/PanelToolbar";
 import { SettingsTreeAction } from "@foxglove/studio-base/components/SettingsTreeEditor/types";
 import Stack from "@foxglove/studio-base/components/Stack";
@@ -203,6 +207,42 @@ function ImageView(props: Props) {
     lastImageMessageRef.current = undefined;
   }, [cameraTopic]);
 
+  const doDownloadImage = useCallback(async () => {
+    if (!imageMessageToRender) {
+      return;
+    }
+
+    const topic = imageTopics.find((top) => top.name === cameraTopic);
+    if (!topic) {
+      return;
+    }
+
+    await downloadImage(imageMessageToRender, topic, config);
+  }, [imageTopics, cameraTopic, config, imageMessageToRender]);
+
+  const contextMenuItemsForClickPosition = useCallback<() => PanelContextMenuItem[]>(
+    () => [
+      { type: "item", label: "Download image", onclick: doDownloadImage },
+      { type: "divider" },
+      {
+        type: "item",
+        label: "Flip horizontal",
+        onclick: () => saveConfig({ flipHorizontal: !(config.flipHorizontal ?? false) }),
+      },
+      {
+        type: "item",
+        label: "Flip vertical",
+        onclick: () => saveConfig({ flipVertical: !(config.flipVertical ?? false) }),
+      },
+      {
+        type: "item",
+        label: "Rotate 90°",
+        onclick: () => saveConfig({ rotation: ((config.rotation ?? 0) + 90) % 360 }),
+      },
+    ],
+    [config.flipHorizontal, config.flipVertical, config.rotation, doDownloadImage, saveConfig],
+  );
+
   const pauseFrame = useMessagePipeline(
     useCallback((messagePipeline) => messagePipeline.pauseFrame, []),
   );
@@ -224,19 +264,6 @@ function ImageView(props: Props) {
     };
   }, [annotations, cameraInfo, transformMarkers]);
 
-  const onDownloadImage = useCallback(async () => {
-    if (!imageMessageToRender) {
-      return;
-    }
-
-    const topic = imageTopics.find((top) => top.name === cameraTopic);
-    if (!topic) {
-      return;
-    }
-
-    await downloadImage(imageMessageToRender, topic, config);
-  }, [imageTopics, cameraTopic, config, imageMessageToRender]);
-
   return (
     <Stack flex="auto" overflow="hidden" position="relative">
       <PanelToolbar helpContent={helpContent}>
@@ -248,6 +275,7 @@ function ImageView(props: Props) {
           />
         </Stack>
       </PanelToolbar>
+      <PanelContextMenu itemsForClickPosition={contextMenuItemsForClickPosition} />
       <Stack fullWidth fullHeight>
         {/* Always render the ImageCanvas because it's expensive to unmount and start up. */}
         {imageMessageToRender && (
@@ -257,7 +285,6 @@ function ImageView(props: Props) {
             rawMarkerData={rawMarkerData}
             config={config}
             saveConfig={saveConfig}
-            onDownloadImage={onDownloadImage}
             onStartRenderImage={onStartRenderImage}
             setActivePixelData={setActivePixelData}
           />
