@@ -143,9 +143,11 @@ export class Images extends THREE.Object3D {
       // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
       if (settings.cameraInfoTopic != undefined) {
         // Update user settings with the newly selected CameraInfo topic
-        const updatedUserSettings = { ...userSettings };
-        updatedUserSettings.cameraInfoTopic = settings.cameraInfoTopic;
-        this.renderer.config.topics[topic] = updatedUserSettings;
+        this.renderer.updateConfig((draft) => {
+          const updatedUserSettings = { ...userSettings };
+          updatedUserSettings.cameraInfoTopic = settings.cameraInfoTopic;
+          draft.topics[topic] = updatedUserSettings;
+        });
 
         this.renderer.emit("settingsTreeChange", { path: ["topics", topic] });
       }
