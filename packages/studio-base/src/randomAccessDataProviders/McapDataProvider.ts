@@ -7,7 +7,8 @@ import {
   DETECT_VERSION_BYTES_REQUIRED,
   Mcap0IndexedReader,
   Mcap0Types,
-} from "@foxglove/mcap";
+} from "@mcap/core";
+
 import { loadDecompressHandlers } from "@foxglove/mcap-support";
 import { Time } from "@foxglove/rostime";
 import {

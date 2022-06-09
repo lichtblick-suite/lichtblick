@@ -2,9 +2,8 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
+import { Mcap0Types } from "@mcap/core";
 import type { ZstdModule, ZstdStreaming } from "zstd-codec";
-
-import { Mcap0Types } from "@foxglove/mcap";
 
 let handlersPromise: Promise<Mcap0Types.DecompressHandlers> | undefined;
 export async function loadDecompressHandlers(): Promise<Mcap0Types.DecompressHandlers> {
