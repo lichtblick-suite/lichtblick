@@ -46,7 +46,7 @@ import {
   ChartData,
   OnClickArg as OnChartClickArgs,
 } from "@foxglove/studio-base/src/components/Chart";
-import { OpenSiblingPanel, PanelConfig } from "@foxglove/studio-base/types/panels";
+import { OpenSiblingPanel, PanelConfig, SaveConfig } from "@foxglove/studio-base/types/panels";
 import { fonts } from "@foxglove/studio-base/util/sharedStyleConstants";
 import { TimestampMethod } from "@foxglove/studio-base/util/time";
 
@@ -208,7 +208,7 @@ function selectCurrentTime(ctx: MessagePipelineContext) {
 
 type Props = {
   config: StateTransitionConfig;
-  saveConfig: (arg0: Partial<StateTransitionConfig>) => void;
+  saveConfig: SaveConfig<StateTransitionConfig>;
 };
 
 const StateTransitions = React.memo(function StateTransitions(props: Props) {

@@ -131,7 +131,7 @@ function ImageView(props: Props) {
 
       const { path, value } = action.payload;
       saveConfig(
-        produce(config, (draft) => {
+        produce<Config>((draft) => {
           if (path[0] === "markers") {
             const markerTopic = path[1] ?? "unknown";
             const newValue =
@@ -149,7 +149,7 @@ function ImageView(props: Props) {
         onChangeCameraTopic(value);
       }
     },
-    [config, onChangeCameraTopic, saveConfig],
+    [onChangeCameraTopic, saveConfig],
   );
 
   const markerTopics = useMemo(() => {

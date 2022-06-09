@@ -39,7 +39,9 @@ export type UserNodes = {
   [nodeId: string]: UserNode;
 };
 
-export type SaveConfig<Config> = (arg0: Partial<Config>) => void;
+export type SaveConfig<Config> = (
+  newConfig: Partial<Config> | ((oldConfig: Config) => Partial<Config>),
+) => void;
 
 export type SavedProps = {
   [panelId: string]: PanelConfig;

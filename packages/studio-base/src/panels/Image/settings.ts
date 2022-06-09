@@ -4,11 +4,36 @@
 
 import { Immutable } from "immer";
 import { chain } from "lodash";
+import memoizeWeak from "memoize-weak";
 
 import { Topic } from "@foxglove/studio";
-import { SettingsTreeRoots } from "@foxglove/studio-base/components/SettingsTreeEditor/types";
+import {
+  SettingsTreeNode,
+  SettingsTreeRoots,
+} from "@foxglove/studio-base/components/SettingsTreeEditor/types";
 
 import { Config } from "./types";
+
+function buildMarkersNode(
+  markerTopics: readonly string[],
+  enabledMarkerTopics: readonly string[],
+  relatedMarkerTopics: readonly string[],
+): SettingsTreeNode {
+  const markerFields = chain(markerTopics)
+    .sort()
+    .partition((topic) => relatedMarkerTopics.includes(topic))
+    .thru((topics) => topics.flat())
+    .map((topic) => [topic, { label: topic, visible: enabledMarkerTopics.includes(topic) }])
+    .fromPairs()
+    .value();
+
+  return {
+    label: "Markers",
+    children: markerFields,
+  };
+}
+
+const memoBuildMarkersNode = memoizeWeak(buildMarkersNode);
 
 export function buildSettingsTree({
   config,
@@ -23,14 +48,6 @@ export function buildSettingsTree({
   enabledMarkerTopics: readonly string[];
   relatedMarkerTopics: readonly string[];
 }): SettingsTreeRoots {
-  const markerFields = chain(markerTopics)
-    .sort()
-    .partition((topic) => relatedMarkerTopics.includes(topic))
-    .thru((topics) => topics.flat())
-    .map((topic) => [topic, { label: topic, visible: enabledMarkerTopics.includes(topic) }])
-    .fromPairs()
-    .value();
-
   return {
     general: {
       label: "General",
@@ -89,9 +106,6 @@ export function buildSettingsTree({
         },
       },
     },
-    markers: {
-      label: "Markers",
-      children: markerFields,
-    },
+    markers: memoBuildMarkersNode(markerTopics, enabledMarkerTopics, relatedMarkerTopics),
   };
 }

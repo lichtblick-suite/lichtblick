@@ -29,6 +29,7 @@ import Panel from "@foxglove/studio-base/components/Panel";
 import PanelToolbar from "@foxglove/studio-base/components/PanelToolbar";
 import { useTooltip } from "@foxglove/studio-base/components/Tooltip";
 import useDeepChangeDetector from "@foxglove/studio-base/hooks/useDeepChangeDetector";
+import { SaveConfig } from "@foxglove/studio-base/types/panels";
 
 import { TwoDimensionalTooltip } from "./Tooltip";
 import { safeParseFloat } from "./helpers";
@@ -84,7 +85,7 @@ type Config = {
 };
 type Props = {
   config: Config;
-  saveConfig: (arg0: Partial<Config>) => void;
+  saveConfig: SaveConfig<Config>;
   onFinishRender?: () => void;
 };
 export type Line = {

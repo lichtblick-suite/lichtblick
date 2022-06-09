@@ -20,7 +20,7 @@ import { maybeCast } from "@foxglove/studio-base/util/maybeCast";
 export default function useConfigById<Config extends Record<string, unknown>>(
   panelId: string | undefined,
 ): [Config | undefined, SaveConfig<Config>] {
-  const { savePanelConfigs } = useCurrentLayoutActions();
+  const { getCurrentLayoutState, savePanelConfigs } = useCurrentLayoutActions();
 
   const configSelector = useCallback(
     (state: DeepPartial<LayoutState>) => {
@@ -36,13 +36,28 @@ export default function useConfigById<Config extends Record<string, unknown>>(
 
   const saveConfig: SaveConfig<Config> = useCallback(
     (newConfig) => {
-      if (panelId != undefined) {
+      if (panelId == undefined) {
+        return;
+      }
+
+      if (typeof newConfig === "function") {
+        // We use a getter here instead of referring directly to the config object
+        // so that this callback is stable across config changes.
+        const currentConfig = getCurrentLayoutState().selectedLayout?.data?.configById[panelId] as
+          | undefined
+          | Config;
+        if (currentConfig) {
+          savePanelConfigs({
+            configs: [{ id: panelId, config: newConfig(currentConfig) }],
+          });
+        }
+      } else {
         savePanelConfigs({
           configs: [{ id: panelId, config: newConfig }],
         });
       }
     },
-    [panelId, savePanelConfigs],
+    [getCurrentLayoutState, panelId, savePanelConfigs],
   );
 
   return [config, saveConfig];
