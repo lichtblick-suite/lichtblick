@@ -2,85 +2,106 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import {
-  MenuItem,
-  Select,
-  ListItemText,
-  SelectChangeEvent,
-  SelectProps,
-  MenuProps,
-} from "@mui/material";
-import { useMemo } from "react";
+import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown";
+import { Button, styled as muiStyled, Menu, MenuItem } from "@mui/material";
+import { MouseEvent, useState, useCallback } from "react";
 
-type TopicDropdownItem = {
-  name: string;
-  selected: boolean;
+import { Topic } from "@foxglove/studio";
+import TextMiddleTruncate from "@foxglove/studio-base/panels/ThreeDimensionalViz/TopicTree/TextMiddleTruncate";
+
+type TopicDropdownProps = {
+  topics: Topic[];
+  currentTopic?: Topic["name"];
+  onChange: (topic: Topic["name"]) => void;
 };
 
-type Props = {
-  title: string;
-  items: TopicDropdownItem[];
-  size?: SelectProps["size"];
-  open?: boolean;
-  anchorEl?: Element | ReactNull;
+const StyledButton = muiStyled(Button)(({ theme }) => ({
+  backgroundColor: "transparent",
+  paddingTop: theme.spacing(0.375),
+  paddingBottom: theme.spacing(0.375),
+  color: theme.palette.text.secondary,
+  overflow: "hidden",
 
-  onChange: (activeTopics: string[]) => void;
-};
+  "&:hover": {
+    backgroundColor: theme.palette.action.hover,
+    color: theme.palette.text.primary,
+  },
+}));
 
-export function TopicDropdown(props: Props): JSX.Element {
-  const { items, onChange, title, size = "small" } = props;
+export function TopicDropdown(props: TopicDropdownProps): JSX.Element {
+  const { topics, currentTopic, onChange } = props;
+  const [anchorEl, setAnchorEl] = useState<undefined | HTMLElement>(undefined);
+  const open = Boolean(anchorEl);
 
-  const selectedTopics = useMemo<string[]>(() => {
-    return items.filter((item) => item.selected).map((item) => item.name);
-  }, [items]);
-
-  const handleChange = (event: SelectChangeEvent<string[]>) => {
-    const {
-      target: { value },
-    } = event;
-    onChange(typeof value === "string" ? [value] : value);
+  const handleButtonClick = (event: MouseEvent<HTMLButtonElement>) => {
+    setAnchorEl(event.currentTarget);
   };
 
-  const menuProps: Partial<MenuProps> = {
-    MenuListProps: {
-      dense: true,
+  const handleClose = useCallback(() => {
+    setAnchorEl(undefined);
+  }, []);
+
+  const handleMenuClick = useCallback(
+    (value: Topic["name"]) => {
+      onChange(value);
+      handleClose();
     },
-  };
-
-  // We avoid setting the anchorEl property unless it is specified.
-  // The underlying menu component treats the presence of the property (even if undefined or null)
-  // as a value.
-  if ("anchorEl" in props) {
-    menuProps.anchorEl = props.anchorEl;
-  }
+    [handleClose, onChange],
+  );
 
   return (
     <>
-      <Select
-        value={selectedTopics}
-        disabled={items.length === 0}
-        displayEmpty
-        renderValue={(_selected) => title}
-        title={title}
-        size={size}
-        onChange={handleChange}
-        open={props.open}
-        MenuProps={menuProps}
+      <StyledButton
+        size="small"
+        id="topic-button"
+        disableRipple
+        aria-controls={open ? "topic-menu" : undefined}
+        aria-haspopup="true"
+        aria-expanded={open ? "true" : undefined}
+        onClick={handleButtonClick}
+        endIcon={<ArrowDropDownIcon />}
+        color="inherit"
+        title={
+          currentTopic
+            ? currentTopic
+            : topics.length === 0
+            ? "No camera topics"
+            : "Select a camera topic"
+        }
       >
-        {items.length === 0 && (
-          <MenuItem disabled value="">
-            <ListItemText
-              primary="No topics"
-              primaryTypographyProps={{ variant: "inherit", color: "text.secondary" }}
-            />
-          </MenuItem>
+        {currentTopic ? (
+          <TextMiddleTruncate
+            endTextLength={10}
+            text={currentTopic}
+            style={{ overflow: "hidden" }}
+          />
+        ) : topics.length === 0 ? (
+          "No camera topics"
+        ) : (
+          "Select a camera topic"
         )}
-        {items.map((item) => (
-          <MenuItem key={item.name} value={item.name}>
-            <ListItemText primary={item.name} primaryTypographyProps={{ variant: "inherit" }} />
+      </StyledButton>
+      <Menu
+        id="topic-menu"
+        anchorEl={anchorEl}
+        open={open}
+        onClose={handleClose}
+        MenuListProps={{
+          "aria-labelledby": "topic-button",
+          dense: true,
+        }}
+      >
+        {topics.length === 0 && <MenuItem disabled>No topics</MenuItem>}
+        {topics.map((topic) => (
+          <MenuItem
+            key={topic.name}
+            selected={topic.name === currentTopic}
+            onClick={() => handleMenuClick(topic.name)}
+          >
+            {topic.name}
           </MenuItem>
         ))}
-      </Select>
+      </Menu>
     </>
   );
 }

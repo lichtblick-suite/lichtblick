@@ -3,9 +3,7 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 import CursorIcon from "@mdi/svg/svg/cursor-default.svg";
-import { Theme, Typography } from "@mui/material";
-import { makeStyles } from "@mui/styles";
-import cx from "classnames";
+import { Typography, styled as muiStyled } from "@mui/material";
 import { ReactElement, useEffect, useRef, useState } from "react";
 import Tree from "react-json-tree";
 
@@ -13,36 +11,27 @@ import ExpandingToolbar, {
   ToolGroup,
   ToolGroupFixedSizePane,
 } from "@foxglove/studio-base/components/ExpandingToolbar";
+import { PANEL_TOOLBAR_MIN_HEIGHT } from "@foxglove/studio-base/components/PanelToolbar";
+import Stack from "@foxglove/studio-base/components/Stack";
 import { usePanelMousePresence } from "@foxglove/studio-base/hooks/usePanelMousePresence";
 import { useJsonTreeTheme } from "@foxglove/studio-base/util/globalConstants";
 
 import { PixelData } from "../types";
 
-const useStyles = makeStyles((theme: Theme) => ({
-  root: {
-    displauy: "flex",
-    flexDirection: "column",
-    position: "absolute",
-    top: 0,
-    right: 0,
-    marginRight: theme.spacing(2),
-    marginTop: theme.spacing(8),
-    visibility: "hidden",
-    zIndex: "drawer",
-  },
-  visible: {
-    visibility: "visible",
-  },
-  objectPane: {
-    display: "flex",
-    flexDirection: "column",
-    gap: theme.spacing(1),
-  },
-  values: {
-    display: "flex",
-    color: theme.palette.info.main,
-    gap: theme.spacing(1),
-  },
+const ToolbarRoot = muiStyled("div", {
+  shouldForwardProp: (prop) => prop !== "visible",
+})<{
+  visible: boolean;
+}>(({ visible, theme }) => ({
+  displauy: "flex",
+  flexDirection: "column",
+  position: "absolute",
+  top: 0,
+  right: 0,
+  marginRight: theme.spacing(0.75),
+  marginTop: `calc(${theme.spacing(0.75)} + ${PANEL_TOOLBAR_MIN_HEIGHT}px)`,
+  zIndex: theme.zIndex.tooltip,
+  visibility: visible ? "visible" : "hidden",
 }));
 
 enum TabName {
@@ -50,26 +39,37 @@ enum TabName {
 }
 
 function ObjectPane({ pixelData }: { pixelData: PixelData | undefined }): ReactElement {
-  const classes = useStyles();
   const jsonTreeTheme = useJsonTreeTheme();
 
   return (
-    <div className={classes.objectPane}>
+    <Stack gap={1}>
       <div>
         <Typography variant="caption">Position:</Typography>
-        <div className={classes.values}>
-          <div>X:{pixelData?.position.x}</div>
-          <div>Y:{pixelData?.position.y}</div>
-        </div>
+        <Stack direction="row" gap={1}>
+          <Typography color="info.main" variant="body2">
+            X:{pixelData?.position.x}
+          </Typography>
+          <Typography color="info.main" variant="body2">
+            Y:{pixelData?.position.y}
+          </Typography>
+        </Stack>
       </div>
       <div>
         <Typography variant="caption">Color:</Typography>
-        <div className={classes.values}>
-          <div>R:{pixelData?.color.r}</div>
-          <div>G:{pixelData?.color.g}</div>
-          <div>B:{pixelData?.color.b}</div>
-          <div>A:{pixelData?.color.a}</div>
-        </div>
+        <Stack direction="row" gap={1}>
+          <Typography color="info.main" variant="body2">
+            R:{pixelData?.color.r}
+          </Typography>
+          <Typography color="info.main" variant="body2">
+            G:{pixelData?.color.g}
+          </Typography>
+          <Typography color="info.main" variant="body2">
+            B:{pixelData?.color.b}
+          </Typography>
+          <Typography color="info.main" variant="body2">
+            A:{pixelData?.color.a}
+          </Typography>
+        </Stack>
       </div>
       {pixelData?.marker && (
         <div>
@@ -82,12 +82,11 @@ function ObjectPane({ pixelData }: { pixelData: PixelData | undefined }): ReactE
           />
         </div>
       )}
-    </div>
+    </Stack>
   );
 }
 
 export function Toolbar({ pixelData }: { pixelData: PixelData | undefined }): JSX.Element {
-  const classes = useStyles();
   const ref = useRef<HTMLDivElement>(ReactNull);
   const [selectedTab, setSelectedTab] = useState<TabName | undefined>();
 
@@ -102,12 +101,7 @@ export function Toolbar({ pixelData }: { pixelData: PixelData | undefined }): JS
   const mousePresent = usePanelMousePresence(ref);
 
   return (
-    <div
-      ref={ref}
-      className={cx(classes.root, {
-        [classes.visible]: mousePresent,
-      })}
-    >
+    <ToolbarRoot ref={ref} visible={mousePresent}>
       <ExpandingToolbar
         tooltip="Inspect objects"
         icon={<CursorIcon />}
@@ -124,6 +118,6 @@ export function Toolbar({ pixelData }: { pixelData: PixelData | undefined }): JS
           </ToolGroupFixedSizePane>
         </ToolGroup>
       </ExpandingToolbar>
-    </div>
+    </ToolbarRoot>
   );
 }

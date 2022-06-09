@@ -94,6 +94,11 @@ export default function muiComponents(theme: Theme): ThemeOptions["components"] 
         },
       },
     },
+    MuiButtonBase: {
+      defaultProps: {
+        disableRipple: true,
+      },
+    },
     MuiCard: {
       defaultProps: {
         variant: "outlined",
@@ -284,17 +289,6 @@ export default function muiComponents(theme: Theme): ThemeOptions["components"] 
     MuiMenuItem: {
       defaultProps: {
         disableRipple: true,
-      },
-      styleOverrides: {
-        dense: {
-          minHeight: theme.spacing(3),
-          paddingTop: 0,
-          paddingBottom: 0,
-
-          "& .MuiSvgIcon-root.MuiSvgIcon-fontSizeSmall": {
-            fontSize: "1rem",
-          },
-        },
       },
     },
     MuiOutlinedInput: {

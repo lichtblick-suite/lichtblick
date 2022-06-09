@@ -6,4 +6,3 @@ export * from "./ImageCanvas";
 export * from "./ImageEmptyState";
 export * from "./Toolbar";
 export * from "./TopicDropdown";
-export * from "./TopicTimestamp";

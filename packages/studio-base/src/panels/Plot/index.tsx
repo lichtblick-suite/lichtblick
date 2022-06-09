@@ -12,7 +12,7 @@
 //   You may not use this file except in compliance with the License.
 
 import { useTheme } from "@fluentui/react";
-import ArrowDownBoldIcon from "@mdi/svg/svg/arrow-down-bold.svg";
+import DownloadIcon from "@mui/icons-material/Download";
 import { Typography } from "@mui/material";
 import produce from "immer";
 import { compact, set, uniq } from "lodash";
@@ -492,7 +492,7 @@ function Plot(props: Props) {
             onClick={() => downloadCSV(datasets, xAxisVal)}
             title="Download plot data as CSV"
           >
-            <ArrowDownBoldIcon />
+            <DownloadIcon fontSize="small" />
           </ToolbarIconButton>
         }
       >

@@ -11,9 +11,7 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { Theme } from "@mui/material";
-import { makeStyles } from "@mui/styles";
-import cx from "classnames";
+import { Typography, styled as muiStyled } from "@mui/material";
 import produce from "immer";
 import { difference, set, union } from "lodash";
 import { useEffect, useState, useMemo, useCallback, useRef } from "react";
@@ -31,9 +29,10 @@ import inScreenshotTests from "@foxglove/studio-base/stories/inScreenshotTests";
 import { CameraInfo } from "@foxglove/studio-base/types/Messages";
 import { mightActuallyBePartial } from "@foxglove/studio-base/util/mightActuallyBePartial";
 import { getTopicsByTopicName } from "@foxglove/studio-base/util/selectors";
+import { fonts } from "@foxglove/studio-base/util/sharedStyleConstants";
 import { formatTimeRaw } from "@foxglove/studio-base/util/time";
 
-import { ImageCanvas, ImageEmptyState, Toolbar, TopicDropdown, TopicTimestamp } from "./components";
+import { ImageCanvas, ImageEmptyState, Toolbar, TopicDropdown } from "./components";
 import { useCameraInfo, ANNOTATION_DATATYPES, useImagePanelMessages } from "./hooks";
 import helpContent from "./index.help.md";
 import { downloadImage } from "./lib/downloadImage";
@@ -47,76 +46,28 @@ type Props = {
   saveConfig: SaveImagePanelConfig;
 };
 
-const useStyles = makeStyles((theme: Theme) => ({
-  controls: {
-    display: "flex",
-    flexWrap: "wrap",
-    flex: "1 1 auto",
-    alignItems: "center",
-    overflow: "hidden",
-    gap: theme.spacing(0.5),
-  },
-  bottomBar: {
-    transition: "opacity 0.1s ease-in-out",
-    display: "flex",
-    flex: "0 0 auto",
-    flexDirection: "row",
-    backgroundColor: "transparent",
-    textAlign: "right",
-    position: "absolute",
-    right: 4,
-    paddingRight: 5,
-    bottom: 8,
-    zIndex: 100,
-    opacity: "0",
+const Timestamp = muiStyled(Typography, {
+  shouldForwardProp: (prop) => prop !== "screenshotTest",
+})<{ screenshotTest: boolean }>(({ screenshotTest, theme }) => ({
+  position: "absolute",
+  margin: theme.spacing(0.5),
+  right: 0,
+  bottom: 0,
+  zIndex: theme.zIndex.tooltip,
+  transition: "opacity 0.1s ease-in-out",
+  opacity: 0,
+  padding: theme.spacing(0.25, 0.5),
+  userSelect: "all",
 
-    "&.inScreenshotTests": {
-      opacity: 1,
-    },
-    ".mosaic-window:hover &": {
-      opacity: "1",
-    },
+  ".mosaic-window:hover &": {
+    opacity: "1",
   },
-  dropdown: {
-    padding: "4px 8px !important",
-  },
-  dropdownTitle: {
-    overflow: "hidden",
-    whiteSpace: "nowrap",
-    textOverflow: "ellipsis",
-    flexShrink: 1,
-    display: "flex",
-    alignItems: "center",
-  },
-  dropdownItem: {
-    position: "relative",
-  },
-  toggleButton: {
-    display: "flex",
-    alignItems: "center",
-  },
-  emptyStateContainer: {
-    width: "100%",
-    height: "100%",
-    position: "absolute",
-  },
+  ...(screenshotTest && {
+    opacity: 1,
+  }),
 }));
 
-const BottomBar = ({ children }: { children?: React.ReactNode }) => {
-  const classes = useStyles();
-  return (
-    <div
-      className={cx(classes.bottomBar, {
-        inScreenshotTests: inScreenshotTests(),
-      })}
-    >
-      {children}
-    </div>
-  );
-};
-
 function ImageView(props: Props) {
-  const classes = useStyles();
   const { config, saveConfig } = props;
   const { cameraTopic, enabledMarkerTopics, transformMarkers } = config;
   const { topics } = useDataSourceInfo();
@@ -273,17 +224,6 @@ function ImageView(props: Props) {
     };
   }, [annotations, cameraInfo, transformMarkers]);
 
-  const renderBottomBar = () => {
-    const topicTimestamp = (
-      <TopicTimestamp
-        style={{ padding: "8px 8px 0px 0px" }}
-        text={image ? formatTimeRaw(image.stamp) : ""}
-      />
-    );
-
-    return <BottomBar>{topicTimestamp}</BottomBar>;
-  };
-
   const onDownloadImage = useCallback(async () => {
     if (!imageMessageToRender) {
       return;
@@ -297,36 +237,16 @@ function ImageView(props: Props) {
     await downloadImage(imageMessageToRender, topic, config);
   }, [imageTopics, cameraTopic, config, imageMessageToRender]);
 
-  const imageTopicDropdown = useMemo(() => {
-    const items = imageTopics.map((topic) => {
-      return {
-        name: topic.name,
-        selected: topic.name === cameraTopic,
-      };
-    });
-
-    function onChange(newTopics: string[]) {
-      const newTopic = newTopics[0];
-      if (newTopic) {
-        onChangeCameraTopic(newTopic);
-      }
-    }
-
-    const title = cameraTopic
-      ? cameraTopic
-      : items.length === 0
-      ? "No camera topics"
-      : "Select a camera topic";
-
-    return <TopicDropdown title={title} items={items} onChange={onChange} />;
-  }, [cameraTopic, imageTopics, onChangeCameraTopic]);
-
-  const showEmptyState = !imageMessageToRender;
-
   return (
     <Stack flex="auto" overflow="hidden" position="relative">
       <PanelToolbar helpContent={helpContent}>
-        <div className={classes.controls}>{imageTopicDropdown}</div>
+        <Stack direction="row" flex="auto" alignItems="center" overflow="hidden">
+          <TopicDropdown
+            topics={imageTopics}
+            currentTopic={cameraTopic}
+            onChange={(value) => saveConfig({ cameraTopic: value })}
+          />
+        </Stack>
       </PanelToolbar>
       <Stack fullWidth fullHeight>
         {/* Always render the ImageCanvas because it's expensive to unmount and start up. */}
@@ -343,16 +263,23 @@ function ImageView(props: Props) {
           />
         )}
         {/* If rendered, EmptyState will hide the always-present ImageCanvas */}
-        {showEmptyState && (
-          <div className={classes.emptyStateContainer}>
-            <ImageEmptyState
-              cameraTopic={cameraTopic}
-              markerTopics={enabledMarkerTopics}
-              shouldSynchronize={shouldSynchronize}
-            />
-          </div>
+        {!image && (
+          <ImageEmptyState
+            cameraTopic={cameraTopic}
+            markerTopics={enabledMarkerTopics}
+            shouldSynchronize={shouldSynchronize}
+          />
         )}
-        {!showEmptyState && renderBottomBar()}
+        {image && (
+          <Timestamp
+            fontFamily={fonts.MONOSPACE}
+            variant="caption"
+            align="right"
+            screenshotTest={inScreenshotTests()}
+          >
+            {formatTimeRaw(image.stamp)}
+          </Timestamp>
+        )}
       </Stack>
       <Toolbar pixelData={activePixelData} />
     </Stack>

@@ -19,7 +19,7 @@ const StyledStack = muiStyled(Stack)(({ theme }) => ({
 
 export default function EmptyState({ children }: PropsWithChildren<unknown>): JSX.Element {
   return (
-    <StyledStack flex="auto" alignItems="center" justifyContent="center">
+    <StyledStack flex="auto" alignItems="center" justifyContent="center" fullWidth>
       <Container maxWidth={false}>
         <Typography
           component="div"
