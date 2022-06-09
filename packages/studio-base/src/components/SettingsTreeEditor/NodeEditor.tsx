@@ -67,20 +67,22 @@ const NodeHeader = muiStyled("div")(({ theme }) => {
 });
 
 const NodeHeaderToggle = muiStyled("div", {
-  shouldForwardProp: (prop) => prop !== "indent" && prop !== "visible",
-})<{ indent: number; visible: boolean }>(({ theme, indent, visible }) => {
-  return {
-    display: "grid",
-    alignItems: "center",
-    cursor: "pointer",
-    gridTemplateColumns: "auto 1fr auto",
-    marginLeft: theme.spacing(0.75 + 2 * indent),
-    opacity: visible ? 1 : 0.6,
-    position: "relative",
-    userSelect: "none",
-    width: "100%",
-  };
-});
+  shouldForwardProp: (prop) => prop !== "hasProperties" && prop !== "indent" && prop !== "visible",
+})<{ hasProperties: boolean; indent: number; visible: boolean }>(
+  ({ hasProperties, theme, indent, visible }) => {
+    return {
+      display: "grid",
+      alignItems: "center",
+      cursor: hasProperties ? "pointer" : "auto",
+      gridTemplateColumns: "auto 1fr auto",
+      marginLeft: theme.spacing(0.75 + 2 * indent),
+      opacity: visible ? 1 : 0.6,
+      position: "relative",
+      userSelect: "none",
+      width: "100%",
+    };
+  },
+);
 
 const IconWrapper = muiStyled("div")({
   position: "absolute",
@@ -149,7 +151,12 @@ function NodeEditorComponent(props: NodeEditorProps): JSX.Element {
   return (
     <>
       <NodeHeader>
-        <NodeHeaderToggle indent={indent} onClick={() => setOpen(!open)} visible={visible}>
+        <NodeHeaderToggle
+          hasProperties={hasProperties}
+          indent={indent}
+          onClick={() => setOpen(!open)}
+          visible={visible}
+        >
           {hasProperties && <ExpansionArrow expanded={open} />}
           {IconComponent && (
             <IconComponent
