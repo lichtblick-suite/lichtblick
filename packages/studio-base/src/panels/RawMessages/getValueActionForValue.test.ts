@@ -75,6 +75,50 @@ describe("getValueActionForValue", () => {
     });
   });
 
+  it("returns paths with bigints inside object inside array", () => {
+    const structureItem: MessagePathStructureItem = {
+      structureType: "message",
+      nextByName: {
+        msg1: {
+          structureType: "array",
+          next: {
+            structureType: "message",
+            nextByName: {
+              msg2: {
+                structureType: "message",
+                datatype: "",
+                nextByName: {
+                  msg3: {
+                    datatype: "",
+                    structureType: "primitive",
+                    primitiveType: "int64",
+                  },
+                },
+              },
+            },
+            datatype: "",
+          },
+          datatype: "",
+        },
+      },
+      datatype: "",
+    };
+
+    expect(
+      getValueActionForValue({ msg1: [{ msg2: { msg3: 1234n } }] }, structureItem, [
+        "msg1",
+        0,
+        "msg2",
+        "msg3",
+      ]),
+    ).toEqual({
+      filterPath: "",
+      multiSlicePath: ".msg1[:].msg2.msg3",
+      primitiveType: "int64",
+      singleSlicePath: ".msg1[0].msg2.msg3",
+    });
+  });
+
   it("returns slice paths when pointing at a number (even when it looks like an id)", () => {
     const structureItem: MessagePathStructureItem = {
       structureType: "message",

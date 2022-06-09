@@ -64,9 +64,8 @@ export function getValueActionForValue(
           ? structureItem.nextByName[pathItem]
           : { structureType: "primitive", primitiveType: "json", datatype: "" };
       value = (value as Record<string, unknown>)[pathItem];
-      if (multiSlicePath.endsWith("[:]")) {
+      if (multiSlicePath.endsWith("[:]") && structureItem?.structureType === "primitive") {
         // We're just inside a message that is inside an array, so we might want to pivot on this new value.
-
         if (typeof value === "bigint") {
           filterPath = `${multiSlicePath}{${pathItem}==${value.toString()}}`;
         } else {
