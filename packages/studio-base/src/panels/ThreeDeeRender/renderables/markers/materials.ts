@@ -131,17 +131,24 @@ export function releaseLineMaterial(marker: Marker, materialCache: MaterialCache
 
 export function linePickingMaterial(
   lineWidth: number,
+  // eslint-disable-next-line @foxglove/no-boolean-parameters
+  worldUnits: boolean,
   materialCache: MaterialCache,
 ): THREE.ShaderMaterial {
   return materialCache.acquire(
-    LineVertexColorPicking.id(lineWidth),
-    () => LineVertexColorPicking.create(lineWidth),
+    LineVertexColorPicking.id(lineWidth, worldUnits),
+    () => LineVertexColorPicking.create(lineWidth, worldUnits),
     LineVertexColorPicking.dispose,
   );
 }
 
-export function releaseLinePickingMaterial(lineWidth: number, materialCache: MaterialCache): void {
-  materialCache.release(LineVertexColorPicking.id(lineWidth));
+export function releaseLinePickingMaterial(
+  lineWidth: number,
+  // eslint-disable-next-line @foxglove/no-boolean-parameters
+  worldUnits: boolean,
+  materialCache: MaterialCache,
+): void {
+  materialCache.release(LineVertexColorPicking.id(lineWidth, worldUnits));
 }
 
 export function pointsMaterial(marker: Marker, materialCache: MaterialCache): THREE.PointsMaterial {

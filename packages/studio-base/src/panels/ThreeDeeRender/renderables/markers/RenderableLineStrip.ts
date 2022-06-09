@@ -20,8 +20,6 @@ import {
   releaseLinePickingMaterial,
 } from "./materials";
 
-const MIN_PICKING_LINE_SIZE = 6;
-
 export class RenderableLineStrip extends RenderableMarker {
   geometry: LineGeometry;
   linePrepass: Line2;
@@ -43,9 +41,10 @@ export class RenderableLineStrip extends RenderableMarker {
     const matLine = lineMaterial(marker, renderer.materialCache);
     this.line = new Line2(this.geometry, matLine);
     this.line.renderOrder = 2;
-    const pickingLineWidth = Math.max(marker.scale.x, MIN_PICKING_LINE_SIZE);
+    const pickingLineWidth = marker.scale.x * 1.2;
     this.line.userData.pickingMaterial = linePickingMaterial(
       pickingLineWidth,
+      true,
       renderer.materialCache,
     );
     this.add(this.line);
@@ -57,8 +56,8 @@ export class RenderableLineStrip extends RenderableMarker {
     releaseLinePrepassMaterial(this.userData.marker, this._renderer.materialCache);
     releaseLineMaterial(this.userData.marker, this._renderer.materialCache);
 
-    const pickingLineWidth = Math.max(this.userData.marker.scale.x, MIN_PICKING_LINE_SIZE);
-    releaseLinePickingMaterial(pickingLineWidth, this._renderer.materialCache);
+    const pickingLineWidth = this.userData.marker.scale.x * 1.2;
+    releaseLinePickingMaterial(pickingLineWidth, true, this._renderer.materialCache);
     this.line.userData.pickingMaterial = undefined;
   }
 

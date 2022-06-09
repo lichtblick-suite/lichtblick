@@ -311,11 +311,12 @@ export const LineVertexColor = {
 };
 
 export const LineVertexColorPicking = {
-  id: (lineWidth: number): string => `LineVertexColorPicking-${lineWidth.toFixed(4)}`,
+  id: (lineWidth: number, worldUnits: boolean): string =>
+    `LineVertexColorPicking-${lineWidth.toFixed(4)}${worldUnits ? "-w" : ""}`,
 
-  create: (lineWidth: number): THREE.ShaderMaterial => {
+  create: (lineWidth: number, worldUnits: boolean): THREE.ShaderMaterial => {
     return new THREE.ShaderMaterial({
-      vertexShader: THREE.ShaderLib["line"]!.vertexShader,
+      vertexShader: THREE.ShaderLib["foxglove.line"]!.vertexShader,
       fragmentShader: /* glsl */ `
         uniform vec4 objectId;
         void main() {
@@ -325,7 +326,6 @@ export const LineVertexColorPicking = {
       clipping: true,
       uniforms: {
         objectId: { value: [NaN, NaN, NaN, NaN] },
-        worldUnits: { value: 0 },
         linewidth: { value: lineWidth },
         resolution: { value: new THREE.Vector2(1, 1) },
         dashOffset: { value: 0 },
@@ -333,6 +333,7 @@ export const LineVertexColorPicking = {
         dashSize: { value: 1 },
         gapSize: { value: 1 },
       },
+      defines: worldUnits ? { WORLD_UNITS: "" } : {},
     });
   },
 

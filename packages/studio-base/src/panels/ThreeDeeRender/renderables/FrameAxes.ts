@@ -76,7 +76,11 @@ export class FrameAxes extends THREE.Object3D {
     this.lineMaterial = new LineMaterial({ linewidth: 2 });
     this.lineMaterial.color = YELLOW_COLOR;
 
-    this.linePickingMaterial = linePickingMaterial(PICKING_LINE_SIZE, this.renderer.materialCache);
+    this.linePickingMaterial = linePickingMaterial(
+      PICKING_LINE_SIZE,
+      false,
+      this.renderer.materialCache,
+    );
 
     renderer.setSettingsNodeProvider(LayerType.Transform, (_topicConfig) => {
       // const cur = topicConfig as Partial<LayerSettingsTransform>;
@@ -95,7 +99,7 @@ export class FrameAxes extends THREE.Object3D {
     this.children.length = 0;
     this.axesByFrameId.clear();
     this.lineMaterial.dispose();
-    releaseLinePickingMaterial(PICKING_LINE_SIZE, this.renderer.materialCache);
+    releaseLinePickingMaterial(PICKING_LINE_SIZE, false, this.renderer.materialCache);
   }
 
   addTransformMessage(tf: TF): void {

@@ -450,10 +450,9 @@ export class Renderer extends EventEmitter<RendererEvents> {
     // Traverse the scene looking for this objectId
     const obj = this.scene.getObjectById(objectId);
 
-    // Find the first ancestor of the clicked object that has a name
-    // TODO: We should probably use a better way to identify the clicked object
+    // Find the first ancestor of the clicked object that has a Pose
     let selectedObj = obj;
-    while (selectedObj && selectedObj.name === "") {
+    while (selectedObj && selectedObj.userData.pose == undefined) {
       selectedObj = selectedObj.parent ?? undefined;
     }
 
