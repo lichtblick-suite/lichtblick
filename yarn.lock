@@ -2320,6 +2320,17 @@ __metadata:
   languageName: unknown
   linkType: soft
 
+"@foxglove/mcap@github:foxglove/mcap#workspace=@foxglove/mcap&commit=e79355a9e99efd5094b15f21bb361a85d9e748bc":
+  version: 0.1.0
+  resolution: "@foxglove/mcap@https://github.com/foxglove/mcap.git#workspace=%40foxglove%2Fmcap&commit=e79355a9e99efd5094b15f21bb361a85d9e748bc"
+  dependencies:
+    "@foxglove/crc": ^0.0.3
+    heap-js: ^2.1.6
+    tslib: ^2
+  checksum: bb66f59045cfdf1c1e5e9e01e2ed95399ead759afcb684668e37213fd739d4055694bc7b4beb4ca19cd618e730490934a357855417f644479a2cb25c56e8cb6a
+  languageName: node
+  linkType: hard
+
 "@foxglove/node-fetch@npm:3.1.0":
   version: 3.1.0
   resolution: "@foxglove/node-fetch@npm:3.1.0"
@@ -2503,6 +2514,7 @@ __metadata:
     "@foxglove/den": "workspace:*"
     "@foxglove/electron-socket": 2.0.0
     "@foxglove/hooks": "workspace:*"
+    "@foxglove/mcap": "github:foxglove/mcap#workspace=@foxglove/mcap&commit=e79355a9e99efd5094b15f21bb361a85d9e748bc"
     "@foxglove/mcap-support": "workspace:*"
     "@foxglove/regl-worldview": 2.4.0
     "@foxglove/ros1": 1.5.0
@@ -2520,7 +2532,6 @@ __metadata:
     "@foxglove/velodyne-cloud": 1.0.1
     "@foxglove/wasm-bz2": 0.1.0
     "@foxglove/ws-protocol": 0.0.8
-    "@mcap/core": 0.2.0
     "@mdi/svg": 6.5.95
     "@mui/icons-material": 5.4.1
     "@mui/material": 5.4.1
@@ -3089,17 +3100,6 @@ __metadata:
   version: 1.2.5
   resolution: "@mapbox/tiny-sdf@npm:1.2.5"
   checksum: d4cfd700c8ccd8b9183da78a943e314cada4184966a52758857cc7141391829a2da31b733046ee0a57e169396314533ffbde8445ce3476a193c6aefcc7bc883a
-  languageName: node
-  linkType: hard
-
-"@mcap/core@npm:0.2.0":
-  version: 0.2.0
-  resolution: "@mcap/core@npm:0.2.0"
-  dependencies:
-    "@foxglove/crc": ^0.0.3
-    heap-js: ^2.1.6
-    tslib: ^2
-  checksum: 07201dbdfd717e25611b715f98db5ced7716ec5c89bdf58fe1d27c89606cb9391c360b2468ff7191637b933b6dab53c54d972064315cef12b10d3ee889e2fa83
   languageName: node
   linkType: hard
 
