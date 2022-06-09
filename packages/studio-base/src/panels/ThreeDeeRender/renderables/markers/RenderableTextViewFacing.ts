@@ -16,19 +16,19 @@ const QUAT_IDENTITY = { x: 0, y: 0, z: 0, w: 1 };
 export class RenderableTextViewFacing extends RenderableMarker {
   label: LabelRenderable | undefined;
 
-  constructor(topic: string, marker: Marker, renderer: Renderer) {
-    super(topic, marker, renderer);
+  constructor(topic: string, marker: Marker, receiveTime: bigint | undefined, renderer: Renderer) {
+    super(topic, marker, receiveTime, renderer);
 
-    this.update(marker);
+    this.update(marker, receiveTime);
   }
 
   override dispose(): void {
     this._renderer.labels.removeById(this.name);
   }
 
-  override update(marker: Marker): void {
+  override update(marker: Marker, receiveTime: bigint | undefined): void {
     const prevMarker = this.userData.marker;
-    super.update(marker);
+    super.update(marker, receiveTime);
 
     // Check if any relevant fields have changed
     if (

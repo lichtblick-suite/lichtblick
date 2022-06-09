@@ -116,7 +116,7 @@ export class Poses extends THREE.Object3D {
 
       // Synthesize an arrow marker to instantiate a RenderableArrow
       const arrowMarker = createArrowMarker(poseMessage, settings);
-      renderable.userData.arrow = new RenderableArrow(topic, arrowMarker, this.renderer);
+      renderable.userData.arrow = new RenderableArrow(topic, arrowMarker, undefined, this.renderer);
       renderable.add(renderable.userData.arrow);
 
       if ("covariance" in poseMessage.pose) {
@@ -125,7 +125,12 @@ export class Poses extends THREE.Object3D {
         const poseWithCovariance = poseMessage as PoseWithCovarianceStamped;
         const sphereMarker = createSphereMarker(poseWithCovariance, settings);
         if (sphereMarker) {
-          renderable.userData.sphere = new RenderableSphere(topic, sphereMarker, this.renderer);
+          renderable.userData.sphere = new RenderableSphere(
+            topic,
+            sphereMarker,
+            undefined,
+            this.renderer,
+          );
           renderable.add(renderable.userData.sphere);
         }
       } else {
@@ -192,7 +197,7 @@ export class Poses extends THREE.Object3D {
     poseMessage: PoseStamped | PoseWithCovarianceStamped,
   ): void {
     const arrowMarker = createArrowMarker(poseMessage, renderable.userData.settings);
-    renderable.userData.arrow.update(arrowMarker);
+    renderable.userData.arrow.update(arrowMarker, undefined);
 
     if ("covariance" in poseMessage.pose) {
       const poseWithCovariance = poseMessage as PoseWithCovarianceStamped;
@@ -202,11 +207,12 @@ export class Poses extends THREE.Object3D {
           renderable.userData.sphere = new RenderableSphere(
             renderable.userData.topic,
             sphereMarker,
+            undefined,
             this.renderer,
           );
         }
         renderable.userData.sphere.visible = true;
-        renderable.userData.sphere.update(sphereMarker);
+        renderable.userData.sphere.update(sphereMarker, undefined);
       } else if (renderable.userData.sphere) {
         renderable.userData.sphere.visible = false;
       }

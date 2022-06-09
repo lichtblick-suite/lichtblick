@@ -32,36 +32,17 @@ import { Renderer } from "./Renderer";
 import { RendererContext, useRendererEvent } from "./RendererContext";
 import { Stats } from "./Stats";
 import {
-  normalizeCameraInfo,
-  normalizeCompressedImage,
-  normalizeImage,
-  normalizeMarker,
-  normalizePoseStamped,
-  normalizePoseWithCovarianceStamped,
-} from "./normalizeMessages";
-import {
   CAMERA_INFO_DATATYPES,
-  CameraInfo,
   COMPRESSED_IMAGE_DATATYPES,
-  CompressedImage,
   IMAGE_DATATYPES,
-  Image,
   MARKER_ARRAY_DATATYPES,
   MARKER_DATATYPES,
-  Marker,
-  MarkerArray,
   OCCUPANCY_GRID_DATATYPES,
-  OccupancyGrid,
   POINTCLOUD_DATATYPES,
-  PointCloud2,
   POSE_STAMPED_DATATYPES,
   POSE_WITH_COVARIANCE_STAMPED_DATATYPES,
-  PoseStamped,
-  PoseWithCovarianceStamped,
   TF_DATATYPES,
-  TF,
   TRANSFORM_STAMPED_DATATYPES,
-  Header,
 } from "./ros";
 import {
   buildSettingsTree,
@@ -191,14 +172,12 @@ export function ThreeDeeRender({ context }: { context: PanelExtensionContext }):
   useRendererEvent(
     "settingsTreeChange",
     (update) => {
-      setConfig((oldConfig) => {
-        const newConfig = produce(oldConfig, (draft) => {
+      setConfig((oldConfig) =>
+        produce(oldConfig, (draft) => {
           const entry = get(renderer?.config ?? draft, update.path);
           set(draft, update.path, { ...entry });
-        });
-
-        return newConfig;
-      });
+        }),
+      );
     },
     renderer,
   );
@@ -241,11 +220,9 @@ export function ThreeDeeRender({ context }: { context: PanelExtensionContext }):
       setLayerErrors(curRenderer.layerErrors.errors.clone()),
     [],
   );
-  useEffect(() => {
-    renderer?.addListener("transformTreeUpdated", updateCoordinateFrames);
-    renderer?.addListener("layerErrorUpdate", updateLayerErrors);
-    return () => void renderer?.removeListener("transformTreeUpdated", updateCoordinateFrames);
-  }, [renderer, updateCoordinateFrames, updateLayerErrors]);
+
+  useRendererEvent("transformTreeUpdated", updateCoordinateFrames, renderer);
+  useRendererEvent("layerErrorUpdate", updateLayerErrors, renderer);
 
   // Set the rendering frame (aka followTf) based on the configured frame, falling back to a
   // heuristically chosen best frame for the current scene (defaultFrame)
@@ -338,18 +315,14 @@ export function ThreeDeeRender({ context }: { context: PanelExtensionContext }):
           setCurrentTime(toNanoSec(renderState.currentTime));
         }
 
-        // render functions receive a _done_ callback. You MUST call this callback to indicate your panel has finished rendering.
-        // Your panel will not receive another render callback until _done_ is called from a prior render. If your panel is not done
-        // rendering before the next render call, studio shows a notification to the user that your panel is delayed.
-        //
         // Set the done callback into a state variable to trigger a re-render
         setRenderDone(done);
 
         // Keep UI elements and the renderer aware of the current color scheme
         setColorScheme(renderState.colorScheme);
 
-        // We may have new topics - since we are also watching for messages in the current frame, topics may not have changed
-        // It is up to you to determine the correct action when state has not changed
+        // We may have new topics - since we are also watching for messages in
+        // the current frame, topics may not have changed
         setTopics(renderState.topics);
 
         // currentFrame has messages on subscribed topics since the last render call
@@ -443,64 +416,7 @@ export function ThreeDeeRender({ context }: { context: PanelExtensionContext }):
         continue;
       }
 
-      // If this message has a Header, scrape the frame_id from it
-      const frameId = (message.message as Partial<{ header: Header }>).header?.frame_id;
-      if (frameId != undefined && !renderer.transformTree.hasFrame(frameId)) {
-        renderer.transformTree.getOrCreateFrame(frameId);
-        log.debug(`Added coordinate frame "${frameId}"`);
-        renderer.emit("transformTreeUpdated", renderer);
-        renderer.addCoordinateFrame(frameId);
-      }
-
-      if (TF_DATATYPES.has(datatype)) {
-        // tf2_msgs/TFMessage - Ingest the list of transforms into our TF tree
-        const tfMessage = message.message as { transforms: TF[] };
-        for (const tf of tfMessage.transforms) {
-          renderer.addTransformMessage(tf);
-        }
-      } else if (TRANSFORM_STAMPED_DATATYPES.has(datatype)) {
-        // geometry_msgs/TransformStamped - Ingest this single transform into our TF tree
-        const tf = message.message as TF;
-        renderer.addTransformMessage(tf);
-      } else if (MARKER_ARRAY_DATATYPES.has(datatype)) {
-        // visualization_msgs/MarkerArray - Ingest the list of markers
-        const markerArray = message.message as DeepPartial<MarkerArray>;
-        for (const markerMsg of markerArray.markers ?? []) {
-          const marker = normalizeMarker(markerMsg);
-          renderer.addMarkerMessage(message.topic, marker);
-        }
-      } else if (MARKER_DATATYPES.has(datatype)) {
-        // visualization_msgs/Marker - Ingest this single marker
-        const marker = normalizeMarker(message.message as DeepPartial<Marker>);
-        renderer.addMarkerMessage(message.topic, marker);
-      } else if (OCCUPANCY_GRID_DATATYPES.has(datatype)) {
-        // nav_msgs/OccupancyGrid - Ingest this occupancy grid
-        const occupancyGrid = message.message as OccupancyGrid;
-        renderer.addOccupancyGridMessage(message.topic, occupancyGrid);
-      } else if (POINTCLOUD_DATATYPES.has(datatype)) {
-        // sensor_msgs/PointCloud2 - Ingest this point cloud
-        const pointCloud = message.message as PointCloud2;
-        renderer.addPointCloud2Message(message.topic, pointCloud);
-      } else if (POSE_STAMPED_DATATYPES.has(datatype)) {
-        const poseMesage = normalizePoseStamped(message.message as DeepPartial<PoseStamped>);
-        renderer.addPoseMessage(message.topic, poseMesage);
-      } else if (POSE_WITH_COVARIANCE_STAMPED_DATATYPES.has(datatype)) {
-        const poseMessage = normalizePoseWithCovarianceStamped(
-          message.message as DeepPartial<PoseWithCovarianceStamped>,
-        );
-        renderer.addPoseMessage(message.topic, poseMessage);
-      } else if (CAMERA_INFO_DATATYPES.has(datatype)) {
-        const cameraInfo = normalizeCameraInfo(message.message as DeepPartial<CameraInfo>);
-        renderer.addCameraInfoMessage(message.topic, cameraInfo);
-      } else if (IMAGE_DATATYPES.has(datatype)) {
-        const image = normalizeImage(message.message as DeepPartial<Image>);
-        renderer.addImageMessage(message.topic, image);
-      } else if (COMPRESSED_IMAGE_DATATYPES.has(datatype)) {
-        const compressedImage = normalizeCompressedImage(
-          message.message as DeepPartial<CompressedImage>,
-        );
-        renderer.addImageMessage(message.topic, compressedImage);
-      }
+      renderer.addMessageEvent(message, datatype);
     }
 
     renderRef.current.needsRender = true;

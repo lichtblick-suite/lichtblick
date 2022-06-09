@@ -27,8 +27,8 @@ export class RenderableTriangleList extends RenderableMarker {
   vertices: Float32Array;
   colors: Float32Array;
 
-  constructor(topic: string, marker: Marker, renderer: Renderer) {
-    super(topic, marker, renderer);
+  constructor(topic: string, marker: Marker, receiveTime: bigint | undefined, renderer: Renderer) {
+    super(topic, marker, receiveTime, renderer);
 
     this.geometry = new THREE.BufferGeometry();
 
@@ -41,7 +41,7 @@ export class RenderableTriangleList extends RenderableMarker {
     this.mesh.receiveShadow = true;
     this.add(this.mesh);
 
-    this.update(marker);
+    this.update(marker, receiveTime);
   }
 
   override dispose(): void {
@@ -51,9 +51,9 @@ export class RenderableTriangleList extends RenderableMarker {
     this.colors = new Float32Array();
   }
 
-  override update(marker: Marker): void {
+  override update(marker: Marker, receiveTime: bigint | undefined): void {
     const prevMarker = this.userData.marker;
-    super.update(marker);
+    super.update(marker, receiveTime);
 
     let vertexCount = marker.points.length;
     const count = vertexCount * 3;

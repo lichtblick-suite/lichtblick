@@ -8,6 +8,8 @@ import { DeepPartial } from "ts-essentials";
 
 import Logger from "@foxglove/log";
 import { CameraState } from "@foxglove/regl-worldview";
+import { toNanoSec } from "@foxglove/rostime";
+import { MessageEvent } from "@foxglove/studio";
 
 import { Input } from "./Input";
 import { Labels } from "./Labels";
@@ -18,6 +20,14 @@ import { Picker } from "./Picker";
 import { ScreenOverlay } from "./ScreenOverlay";
 import { stringToRgb } from "./color";
 import { DetailLevel, msaaSamples } from "./lod";
+import {
+  normalizeCameraInfo,
+  normalizeCompressedImage,
+  normalizeImage,
+  normalizeMarker,
+  normalizePoseStamped,
+  normalizePoseWithCovarianceStamped,
+} from "./normalizeMessages";
 import { Cameras } from "./renderables/Cameras";
 import { FrameAxes } from "./renderables/FrameAxes";
 import { Grids } from "./renderables/Grids";
@@ -28,14 +38,27 @@ import { PointClouds } from "./renderables/PointClouds";
 import { Poses } from "./renderables/Poses";
 import {
   CameraInfo,
+  CAMERA_INFO_DATATYPES,
   CompressedImage,
+  COMPRESSED_IMAGE_DATATYPES,
+  Header,
   Image,
+  IMAGE_DATATYPES,
   Marker,
+  MarkerArray,
+  MARKER_ARRAY_DATATYPES,
+  MARKER_DATATYPES,
   OccupancyGrid,
+  OCCUPANCY_GRID_DATATYPES,
   PointCloud2,
+  POINTCLOUD_DATATYPES,
   PoseStamped,
   PoseWithCovarianceStamped,
+  POSE_STAMPED_DATATYPES,
+  POSE_WITH_COVARIANCE_STAMPED_DATATYPES,
   TF,
+  TF_DATATYPES,
+  TRANSFORM_STAMPED_DATATYPES,
 } from "./ros";
 import {
   LayerSettingsCameraInfo,
@@ -88,6 +111,8 @@ const TRANSFORM_STORAGE_TIME_NS = 60n * BigInt(1e9);
 const UNIT_X = new THREE.Vector3(1, 0, 0);
 const PI_2 = Math.PI / 2;
 
+const TRANSFORMS_PATH = ["transforms"];
+
 const tempColor = new THREE.Color();
 const tempVec = new THREE.Vector3();
 const tempVec2 = new THREE.Vector2();
@@ -116,7 +141,6 @@ export class Renderer extends EventEmitter<RendererEvents> {
   layerErrors = new LayerErrors();
   colorScheme: "dark" | "light" = "light";
   modelCache: ModelCache;
-  renderables = new Map<string, THREE.Object3D>();
   transformTree = new TransformTree(TRANSFORM_STORAGE_TIME_NS);
   currentTime: bigint | undefined;
   fixedFrameId: string | undefined;
@@ -265,36 +289,85 @@ export class Renderer extends EventEmitter<RendererEvents> {
     }
   }
 
-  addTransformMessage(tf: TF): void {
-    this.frameAxes.addTransformMessage(tf);
-  }
+  addMessageEvent(messageEvent: Readonly<MessageEvent<unknown>>, datatype: string): void {
+    const { topic, message } = messageEvent;
 
-  addCoordinateFrame(frameId: string): void {
-    this.frameAxes.addCoordinateFrame(frameId);
+    // If this message has a Header, scrape the frame_id from it
+    const maybeHasHeader = message as Partial<{ header: Partial<Header> }>;
+    if (maybeHasHeader.header) {
+      const frameId = maybeHasHeader.header.frame_id ?? "";
+      if (!this.transformTree.hasFrame(frameId)) {
+        this.transformTree.getOrCreateFrame(frameId);
+        log.debug(`Added coordinate frame "${frameId}"`);
+        this.emit("transformTreeUpdated", this);
+        this.frameAxes.addCoordinateFrame(frameId);
+      }
+    }
+
+    if (TF_DATATYPES.has(datatype)) {
+      // tf2_msgs/TFMessage - Ingest the list of transforms into our TF tree
+      const tfMessage = message as { transforms: TF[] };
+      for (const tf of tfMessage.transforms) {
+        this.frameAxes.addTransformMessage(tf);
+      }
+      this.emit("settingsTreeChange", { path: TRANSFORMS_PATH });
+    } else if (TRANSFORM_STAMPED_DATATYPES.has(datatype)) {
+      // geometry_msgs/TransformStamped - Ingest this single transform into our TF tree
+      const tf = message as TF;
+      this.frameAxes.addTransformMessage(tf);
+      this.emit("settingsTreeChange", { path: TRANSFORMS_PATH });
+    } else if (MARKER_ARRAY_DATATYPES.has(datatype)) {
+      // visualization_msgs/MarkerArray - Ingest the list of markers
+      const receiveTime = toNanoSec(messageEvent.receiveTime);
+      const markerArray = message as DeepPartial<MarkerArray>;
+      for (const markerMsg of markerArray.markers ?? []) {
+        const marker = normalizeMarker(markerMsg);
+        this.markers.addMarkerMessage(topic, marker, receiveTime);
+      }
+    } else if (MARKER_DATATYPES.has(datatype)) {
+      // visualization_msgs/Marker - Ingest this single marker
+      const receiveTime = toNanoSec(messageEvent.receiveTime);
+      const marker = normalizeMarker(message as DeepPartial<Marker>);
+      this.markers.addMarkerMessage(topic, marker, receiveTime);
+    } else if (OCCUPANCY_GRID_DATATYPES.has(datatype)) {
+      // nav_msgs/OccupancyGrid - Ingest this occupancy grid
+      const occupancyGrid = message as OccupancyGrid;
+      this.occupancyGrids.addOccupancyGridMessage(topic, occupancyGrid);
+    } else if (POINTCLOUD_DATATYPES.has(datatype)) {
+      // sensor_msgs/PointCloud2 - Ingest this point cloud
+      const pointCloud = message as PointCloud2;
+      this.pointClouds.addPointCloud2Message(topic, pointCloud);
+    } else if (POSE_STAMPED_DATATYPES.has(datatype)) {
+      const poseMesage = normalizePoseStamped(message as DeepPartial<PoseStamped>);
+      this.poses.addPoseMessage(topic, poseMesage);
+    } else if (POSE_WITH_COVARIANCE_STAMPED_DATATYPES.has(datatype)) {
+      const poseMessage = normalizePoseWithCovarianceStamped(
+        message as DeepPartial<PoseWithCovarianceStamped>,
+      );
+      this.poses.addPoseMessage(topic, poseMessage);
+    } else if (CAMERA_INFO_DATATYPES.has(datatype)) {
+      const cameraInfo = normalizeCameraInfo(message as DeepPartial<CameraInfo>);
+      this.cameras.addCameraInfoMessage(topic, cameraInfo);
+      this.images.addCameraInfoMessage(topic, cameraInfo);
+    } else if (IMAGE_DATATYPES.has(datatype)) {
+      const image = normalizeImage(message as DeepPartial<Image>);
+      this.images.addImageMessage(topic, image);
+    } else if (COMPRESSED_IMAGE_DATATYPES.has(datatype)) {
+      const compressedImage = normalizeCompressedImage(message as DeepPartial<CompressedImage>);
+      this.images.addImageMessage(topic, compressedImage);
+    }
   }
 
   setTransformSettings(frameId: string, settings: Partial<LayerSettingsTransform>): void {
     this.frameAxes.setTransformSettings(frameId, settings);
   }
 
-  addOccupancyGridMessage(topic: string, occupancyGrid: OccupancyGrid): void {
-    this.occupancyGrids.addOccupancyGridMessage(topic, occupancyGrid);
-  }
-
   setOccupancyGridSettings(topic: string, settings: Partial<LayerSettingsOccupancyGrid>): void {
     this.occupancyGrids.setTopicSettings(topic, settings);
   }
 
-  addPointCloud2Message(topic: string, pointCloud: PointCloud2): void {
-    this.pointClouds.addPointCloud2Message(topic, pointCloud);
-  }
-
   setPointCloud2Settings(topic: string, settings: Partial<LayerSettingsPointCloud2>): void {
     this.pointClouds.setTopicSettings(topic, settings);
-  }
-
-  addMarkerMessage(topic: string, marker: Marker): void {
-    this.markers.addMarkerMessage(topic, marker);
   }
 
   setMarkerSettings(topic: string, settings: Record<string, unknown>): void {
@@ -311,25 +384,12 @@ export class Renderer extends EventEmitter<RendererEvents> {
     this.markers.setTopicSettings(topic, topicSettings);
   }
 
-  addPoseMessage(topic: string, pose: PoseStamped | PoseWithCovarianceStamped): void {
-    this.poses.addPoseMessage(topic, pose);
-  }
-
   setPoseSettings(topic: string, settings: Partial<LayerSettingsPose>): void {
     this.poses.setTopicSettings(topic, settings);
   }
 
-  addCameraInfoMessage(topic: string, cameraInfo: CameraInfo): void {
-    this.cameras.addCameraInfoMessage(topic, cameraInfo);
-    this.images.addCameraInfoMessage(topic, cameraInfo);
-  }
-
   setCameraInfoSettings(topic: string, settings: Partial<LayerSettingsCameraInfo>): void {
     this.cameras.setTopicSettings(topic, settings);
-  }
-
-  addImageMessage(topic: string, image: Image | CompressedImage): void {
-    this.images.addImageMessage(topic, image);
   }
 
   setImageSettings(topic: string, settings: Partial<LayerSettingsImage>): void {
@@ -338,17 +398,6 @@ export class Renderer extends EventEmitter<RendererEvents> {
 
   setGridSettings(id: string, settings: Partial<LayerSettingsGrid> | undefined): void {
     this.grids.setLayerSettings(id, settings);
-  }
-
-  markerWorldPosition(markerId: string): Readonly<THREE.Vector3> | undefined {
-    const renderable = this.renderables.get(markerId);
-    if (!renderable) {
-      return undefined;
-    }
-
-    tempVec.set(0, 0, 0);
-    tempVec.applyMatrix4(renderable.matrixWorld);
-    return tempVec;
   }
 
   // Callback handlers

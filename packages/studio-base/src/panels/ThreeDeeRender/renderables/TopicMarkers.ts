@@ -84,25 +84,15 @@ export class TopicMarkers extends THREE.Object3D {
     this.namespaces.clear();
   }
 
-  addMarkerMessage(marker: Marker): void {
+  addMarkerMessage(marker: Marker, receiveTime: bigint): void {
     switch (marker.action) {
       case MarkerAction.ADD:
       case MarkerAction.MODIFY:
-        this._addOrUpdateMarker(marker);
+        this._addOrUpdateMarker(marker, receiveTime);
         break;
-      case MarkerAction.DELETE: {
-        // Delete this marker
-        const ns = this.namespaces.get(marker.ns);
-        if (ns) {
-          const renderable = ns.markersById.get(marker.id);
-          if (renderable) {
-            this.remove(renderable);
-            renderable.dispose();
-            ns.markersById.delete(marker.id);
-          }
-        }
+      case MarkerAction.DELETE:
+        this._deleteMarker(marker.ns, marker.id);
         break;
-      }
       case MarkerAction.DELETEALL: {
         // Delete all markers on this topic
         for (const ns of this.namespaces.values()) {
@@ -139,6 +129,17 @@ export class TopicMarkers extends THREE.Object3D {
         }
 
         const marker = renderable.userData.marker;
+        const receiveTime = renderable.userData.receiveTime;
+        const expiresIn = renderable.userData.expiresIn;
+
+        // Check if this marker has expired
+        if (receiveTime != undefined && expiresIn != undefined) {
+          if (currentTime > receiveTime + expiresIn) {
+            this._deleteMarker(ns.namespace, marker.id);
+            continue;
+          }
+        }
+
         const frameId = marker.header.frame_id;
         const srcTime = marker.frame_locked ? currentTime : renderable.userData.srcTime;
         const updated = updatePose(
@@ -162,7 +163,7 @@ export class TopicMarkers extends THREE.Object3D {
     }
   }
 
-  private _addOrUpdateMarker(marker: Marker): void {
+  private _addOrUpdateMarker(marker: Marker, receiveTime: bigint): void {
     let ns = this.namespaces.get(marker.ns);
     if (!ns) {
       ns = new MarkersNamespace(this.topic, marker.ns, this.renderer);
@@ -171,27 +172,44 @@ export class TopicMarkers extends THREE.Object3D {
 
     let renderable = ns.markersById.get(marker.id);
     if (!renderable) {
-      renderable = this._createMarkerRenderable(marker);
+      renderable = this._createMarkerRenderable(marker, receiveTime);
       if (!renderable) {
         return;
       }
       this.add(renderable);
       ns.markersById.set(marker.id, renderable);
     } else {
-      renderable.update(marker);
+      renderable.update(marker, receiveTime);
     }
   }
 
-  private _createMarkerRenderable(marker: Marker): RenderableMarker | undefined {
+  private _deleteMarker(ns: string, id: number): boolean {
+    const namespace = this.namespaces.get(ns);
+    if (namespace) {
+      const renderable = namespace.markersById.get(id);
+      if (renderable) {
+        this.remove(renderable);
+        renderable.dispose();
+        namespace.markersById.delete(id);
+        return true;
+      }
+    }
+    return false;
+  }
+
+  private _createMarkerRenderable(
+    marker: Marker,
+    receiveTime: bigint,
+  ): RenderableMarker | undefined {
     switch (marker.type) {
       case MarkerType.ARROW:
-        return new RenderableArrow(this.topic, marker, this.renderer);
+        return new RenderableArrow(this.topic, marker, receiveTime, this.renderer);
       case MarkerType.CUBE:
-        return new RenderableCube(this.topic, marker, this.renderer);
+        return new RenderableCube(this.topic, marker, receiveTime, this.renderer);
       case MarkerType.SPHERE:
-        return new RenderableSphere(this.topic, marker, this.renderer);
+        return new RenderableSphere(this.topic, marker, receiveTime, this.renderer);
       case MarkerType.CYLINDER:
-        return new RenderableCylinder(this.topic, marker, this.renderer);
+        return new RenderableCylinder(this.topic, marker, receiveTime, this.renderer);
       case MarkerType.LINE_STRIP:
         if (marker.points.length === 0) {
           const markerId = getMarkerId(this.topic, marker.ns, marker.id);
@@ -210,7 +228,7 @@ export class TopicMarkers extends THREE.Object3D {
           );
           return;
         }
-        return new RenderableLineStrip(this.topic, marker, this.renderer);
+        return new RenderableLineStrip(this.topic, marker, receiveTime, this.renderer);
       case MarkerType.LINE_LIST:
         if (marker.points.length === 0) {
           const markerId = getMarkerId(this.topic, marker.ns, marker.id);
@@ -236,7 +254,7 @@ export class TopicMarkers extends THREE.Object3D {
           );
           return;
         }
-        return new RenderableLineList(this.topic, marker, this.renderer);
+        return new RenderableLineList(this.topic, marker, receiveTime, this.renderer);
       case MarkerType.CUBE_LIST:
         if (marker.points.length === 0) {
           const markerId = getMarkerId(this.topic, marker.ns, marker.id);
@@ -247,7 +265,7 @@ export class TopicMarkers extends THREE.Object3D {
           );
           return;
         }
-        return new RenderableCubeList(this.topic, marker, this.renderer);
+        return new RenderableCubeList(this.topic, marker, receiveTime, this.renderer);
       case MarkerType.SPHERE_LIST:
         if (marker.points.length === 0) {
           const markerId = getMarkerId(this.topic, marker.ns, marker.id);
@@ -258,7 +276,7 @@ export class TopicMarkers extends THREE.Object3D {
           );
           return;
         }
-        return new RenderableSphereList(this.topic, marker, this.renderer);
+        return new RenderableSphereList(this.topic, marker, receiveTime, this.renderer);
       case MarkerType.POINTS:
         if (marker.points.length === 0) {
           const markerId = getMarkerId(this.topic, marker.ns, marker.id);
@@ -269,13 +287,13 @@ export class TopicMarkers extends THREE.Object3D {
           );
           return;
         }
-        return new RenderablePoints(this.topic, marker, this.renderer);
+        return new RenderablePoints(this.topic, marker, receiveTime, this.renderer);
       case MarkerType.TEXT_VIEW_FACING:
-        return new RenderableTextViewFacing(this.topic, marker, this.renderer);
+        return new RenderableTextViewFacing(this.topic, marker, receiveTime, this.renderer);
       case MarkerType.MESH_RESOURCE:
-        return new RenderableMeshResource(this.topic, marker, this.renderer);
+        return new RenderableMeshResource(this.topic, marker, receiveTime, this.renderer);
       case MarkerType.TRIANGLE_LIST:
-        return new RenderableTriangleList(this.topic, marker, this.renderer);
+        return new RenderableTriangleList(this.topic, marker, receiveTime, this.renderer);
       default: {
         const markerId = getMarkerId(this.topic, marker.ns, marker.id);
         this.renderer.layerErrors.addToTopic(

@@ -12,14 +12,17 @@ import FolderOpenIcon from "@mui/icons-material/FolderOpen";
 import GridOnIcon from "@mui/icons-material/GridOn";
 import HiveOutlinedIcon from "@mui/icons-material/HiveOutlined";
 import InterestsIcon from "@mui/icons-material/Interests";
+import Language from "@mui/icons-material/Language";
 import LayersIcon from "@mui/icons-material/Layers";
 import MapIcon from "@mui/icons-material/Map";
+import NorthWest from "@mui/icons-material/NorthWest";
 import NoteIcon from "@mui/icons-material/Note";
 import NoteOutlinedIcon from "@mui/icons-material/NoteOutlined";
 import OpenWithIcon from "@mui/icons-material/OpenWith";
 import PhotoCameraIcon from "@mui/icons-material/PhotoCamera";
 import SettingsIcon from "@mui/icons-material/Settings";
 import ShareIcon from "@mui/icons-material/Share";
+import SouthEast from "@mui/icons-material/SouthEast";
 import TopicIcon from "@mui/icons-material/Topic";
 import UnfoldLessIcon from "@mui/icons-material/UnfoldLess";
 import UnfoldMoreIcon from "@mui/icons-material/UnfoldMore";
@@ -44,12 +47,15 @@ export default {
   ImageProjection: VrpanoIcon,
   Map: MapIcon,
   Move: OpenWithIcon,
+  NorthWest,
   Note: NoteOutlinedIcon,
   NoteFilled: NoteIcon,
   Points: BlurOnIcon,
   Settings: SettingsIcon,
   Shapes: InterestsIcon,
   Share: ShareIcon,
+  SouthEast,
   Topic: TopicIcon,
   Walk: DirectionsWalkIcon,
+  World: Language,
 };

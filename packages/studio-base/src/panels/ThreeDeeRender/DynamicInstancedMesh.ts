@@ -9,7 +9,6 @@ import { ColorRGBA, Vector3 } from "./ros";
 const INITIAL_CAPACITY = 4;
 
 const tempMat4 = new THREE.Matrix4();
-const tempScale = new THREE.Vector3();
 const tempColor = new THREE.Color();
 
 /**
@@ -37,12 +36,14 @@ export class DynamicInstancedMesh<
     for (let i = 0; i < count; i++) {
       const point = points[i]!;
       const color = colors[i] ?? defaultColor;
+
       tempMat4.makeTranslation(point.x, point.y, point.z);
-      tempScale.set(scale.x, scale.y, scale.z);
-      tempMat4.scale(tempScale);
-      tempColor.setRGB(color.r, color.g, color.b);
+      tempMat4.scale(scale as THREE.Vector3);
       this.setMatrixAt(i, tempMat4);
+
+      tempColor.setRGB(color.r, color.g, color.b);
       this.setColorAt(i, tempColor);
+
       // TODO: Need to adapt InstancedMesh to use an opacity instance buffer attribute
       // this.setOpacityAt(i, color.a);
     }

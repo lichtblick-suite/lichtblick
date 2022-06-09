@@ -21,16 +21,19 @@ export class TransformTree {
     this._maxStorageTime = maxStorageTime;
   }
 
-  addTransform(frameId: string, parentFrameId: string, time: Time, transform: Transform): void {
+  addTransform(frameId: string, parentFrameId: string, time: Time, transform: Transform): boolean {
     const frame = this.getOrCreateFrame(frameId);
     const curParentFrame = frame.parent();
+    let updated = false;
     if (curParentFrame == undefined || curParentFrame.id !== parentFrameId) {
       // This frame was previously unparented but now we know its parent, or we
       // are reparenting this frame
       frame.setParent(this.getOrCreateFrame(parentFrameId));
+      updated = true;
     }
 
     frame.addTransform(time, transform);
+    return updated;
   }
 
   hasFrame(id: string): boolean {

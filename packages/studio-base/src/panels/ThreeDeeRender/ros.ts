@@ -67,6 +67,8 @@ export type Vector3 = {
   z: number;
 };
 
+export type Point = Vector3;
+
 export type Quaternion = {
   x: number;
   y: number;

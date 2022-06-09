@@ -25,8 +25,8 @@ export class RenderableLineList extends RenderableMarker {
   linePrepass: LineSegments2;
   line: LineSegments2;
 
-  constructor(topic: string, marker: Marker, renderer: Renderer) {
-    super(topic, marker, renderer);
+  constructor(topic: string, marker: Marker, receiveTime: bigint | undefined, renderer: Renderer) {
+    super(topic, marker, receiveTime, renderer);
 
     this.geometry = new LineSegmentsGeometry();
 
@@ -49,7 +49,7 @@ export class RenderableLineList extends RenderableMarker {
     );
     this.add(this.line);
 
-    this.update(marker);
+    this.update(marker, receiveTime);
   }
 
   override dispose(): void {
@@ -63,13 +63,13 @@ export class RenderableLineList extends RenderableMarker {
     this.geometry.dispose();
   }
 
-  override update(marker: Marker): void {
+  override update(marker: Marker, receiveTime: bigint | undefined): void {
     if (marker.points.length % 2 !== 0) {
       throw new Error(`LineList marker has odd number of points (${marker.points.length})`);
     }
 
     const prevMarker = this.userData.marker;
-    super.update(marker);
+    super.update(marker, receiveTime);
 
     const prevLineWidth = prevMarker.scale.x;
     const prevTransparent = markerHasTransparency(prevMarker);

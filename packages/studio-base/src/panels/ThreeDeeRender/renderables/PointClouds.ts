@@ -234,6 +234,10 @@ export class PointClouds extends THREE.Object3D {
       // Allow this error for now since we currently ignore row_step
     }
 
+    // Determine the minimum bytes needed per point based on offset/size of each
+    // field, so we can ensure point_step is >= this value
+    let minBytesPerPoint = 0;
+
     // Parse the fields and create typed readers for x/y/z and color
     let xReader: FieldReader | undefined;
     let yReader: FieldReader | undefined;
@@ -241,6 +245,17 @@ export class PointClouds extends THREE.Object3D {
     let colorReader: FieldReader | undefined;
     for (let i = 0; i < pointCloud.fields.length; i++) {
       const field = pointCloud.fields[i]!;
+
+      if (field.count !== 1) {
+        const message = `PointCloud2 field "${field.name}" has invalid count ${field.count}. Only 1 is supported`;
+        invalidPointCloudError(this.renderer, renderable, message);
+        return;
+      } else if (field.offset < 0) {
+        const message = `PointCloud2 field "${field.name}" has invalid offset ${field.offset}. Must be >= 0`;
+        invalidPointCloudError(this.renderer, renderable, message);
+        return;
+      }
+
       if (field.name === "x") {
         xReader = getReader(field, pointCloud.point_step);
         if (!xReader) {
@@ -267,15 +282,16 @@ export class PointClouds extends THREE.Object3D {
         }
       }
 
+      const byteWidth = pointFieldWidth(field.datatype);
+      minBytesPerPoint = Math.max(minBytesPerPoint, field.offset + byteWidth);
+
       if (field.name === settings.colorField) {
         // If the selected color mode is rgb/rgba and the field only has one channel with at least a
         // four byte width, force the color data to be interpreted as four individual bytes. This
         // overcomes a common problem where the color field data type is set to float32 or something
         // other than uint32
         const forceType =
-          (settings.colorMode === "rgb" || settings.colorMode === "rgba") &&
-          field.count === 1 &&
-          pointFieldWidth(field.datatype) >= 4
+          (settings.colorMode === "rgb" || settings.colorMode === "rgba") && byteWidth >= 4
             ? PointFieldType.UINT32
             : undefined;
         colorReader = getReader(field, pointCloud.point_step, forceType);
@@ -286,10 +302,12 @@ export class PointClouds extends THREE.Object3D {
           return;
         }
       }
+    }
 
-      if (xReader && yReader && zReader && colorReader) {
-        break;
-      }
+    if (minBytesPerPoint > pointCloud.point_step) {
+      const message = `PointCloud2 point_step ${pointCloud.point_step} is less than minimum bytes per point ${minBytesPerPoint}`;
+      invalidPointCloudError(this.renderer, renderable, message);
+      return;
     }
 
     const positionReaderCount = (xReader ? 1 : 0) + (yReader ? 1 : 0) + (zReader ? 1 : 0);

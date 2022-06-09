@@ -15,8 +15,8 @@ export class RenderablePoints extends RenderableMarker {
   geometry: DynamicBufferGeometry<Float32Array, Float32ArrayConstructor>;
   points: THREE.Points;
 
-  constructor(topic: string, marker: Marker, renderer: Renderer) {
-    super(topic, marker, renderer);
+  constructor(topic: string, marker: Marker, receiveTime: bigint | undefined, renderer: Renderer) {
+    super(topic, marker, receiveTime, renderer);
 
     this.geometry = new DynamicBufferGeometry(Float32Array);
     this.geometry.createAttribute("position", 3);
@@ -26,16 +26,16 @@ export class RenderablePoints extends RenderableMarker {
     this.points = new THREE.Points(this.geometry, material);
     this.add(this.points);
 
-    this.update(marker);
+    this.update(marker, receiveTime);
   }
 
   override dispose(): void {
     releasePointsMaterial(this.userData.marker, this._renderer.materialCache);
   }
 
-  override update(marker: Marker): void {
+  override update(marker: Marker, receiveTime: bigint | undefined): void {
     const prevMarker = this.userData.marker;
-    super.update(marker);
+    super.update(marker, receiveTime);
 
     const prevWidth = prevMarker.scale.x;
     const prevHeight = prevMarker.scale.y;

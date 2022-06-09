@@ -62,6 +62,13 @@ export class CoordinateFrame {
   }
 
   /**
+   * Returns true if this frame has no parent frame.
+   */
+  isRoot(): boolean {
+    return this._parent == undefined;
+  }
+
+  /**
    * Set the parent frame for this frame. If the parent frame is already set to
    * a different frame, the transform history is cleared.
    */

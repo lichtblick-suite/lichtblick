@@ -221,10 +221,10 @@ export class Cameras extends THREE.Object3D {
         renderable.userData.settings,
       );
       if (!renderable.userData.lines) {
-        renderable.userData.lines = new RenderableLineList(topic, marker, this.renderer);
+        renderable.userData.lines = new RenderableLineList(topic, marker, undefined, this.renderer);
         renderable.add(renderable.userData.lines);
       } else {
-        renderable.userData.lines.update(marker);
+        renderable.userData.lines.update(marker, undefined);
       }
     }
   }

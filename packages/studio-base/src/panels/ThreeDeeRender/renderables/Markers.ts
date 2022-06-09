@@ -36,7 +36,7 @@ export class Markers extends THREE.Object3D {
     this.topics.clear();
   }
 
-  addMarkerMessage(topic: string, marker: Marker): void {
+  addMarkerMessage(topic: string, marker: Marker, receiveTime: bigint): void {
     let topicMarkers = this.topics.get(topic);
     if (!topicMarkers) {
       topicMarkers = new TopicMarkers(topic, this.renderer);
@@ -44,7 +44,7 @@ export class Markers extends THREE.Object3D {
       this.add(topicMarkers);
     }
     const prevNsCount = topicMarkers.namespaces.size;
-    topicMarkers.addMarkerMessage(marker);
+    topicMarkers.addMarkerMessage(marker, receiveTime);
 
     // If the topic has a new namespace, rebuild the settings node for this topic
     if (prevNsCount !== topicMarkers.namespaces.size) {

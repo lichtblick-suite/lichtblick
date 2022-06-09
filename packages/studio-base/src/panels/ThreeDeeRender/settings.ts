@@ -183,10 +183,11 @@ export type SettingsTreeOptions = {
 
 function buildTransformNode(
   tfConfig: Partial<LayerSettingsTransform>,
+  frameId: string,
   frameDisplayName: string,
   settingsNodeProvider: SettingsNodeProvider,
 ): undefined | SettingsTreeNode {
-  const node = settingsNodeProvider(tfConfig, EMPTY_TOPIC);
+  const node = settingsNodeProvider(tfConfig, { name: frameId, datatype: "" });
   node.label ??= frameDisplayName;
   node.visible ??= tfConfig.visible ?? true;
   node.defaultExpansionState ??= "collapsed";
@@ -257,7 +258,12 @@ export function buildSettingsTree(options: SettingsTreeOptions): SettingsTreeRoo
   if (tfSettingsNodeProvider != undefined) {
     for (const { label: frameName, value: frameId } of options.coordinateFrames) {
       const transformConfig = config.transforms[frameId] ?? {};
-      const newNode = buildTransformNode(transformConfig, frameName, tfSettingsNodeProvider);
+      const newNode = buildTransformNode(
+        transformConfig,
+        frameId,
+        frameName,
+        tfSettingsNodeProvider,
+      );
       if (newNode) {
         newNode.error = layerErrors.errorAtPath(["transforms", frameId]);
         transformsChildren[frameId] = newNode;

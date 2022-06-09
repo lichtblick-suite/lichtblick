@@ -25,8 +25,8 @@ export class RenderableLineStrip extends RenderableMarker {
   linePrepass: Line2;
   line: Line2;
 
-  constructor(topic: string, marker: Marker, renderer: Renderer) {
-    super(topic, marker, renderer);
+  constructor(topic: string, marker: Marker, receiveTime: bigint | undefined, renderer: Renderer) {
+    super(topic, marker, receiveTime, renderer);
 
     this.geometry = new LineGeometry();
 
@@ -49,7 +49,7 @@ export class RenderableLineStrip extends RenderableMarker {
     );
     this.add(this.line);
 
-    this.update(marker);
+    this.update(marker, receiveTime);
   }
 
   override dispose(): void {
@@ -61,9 +61,9 @@ export class RenderableLineStrip extends RenderableMarker {
     this.line.userData.pickingMaterial = undefined;
   }
 
-  override update(marker: Marker): void {
+  override update(marker: Marker, receiveTime: bigint | undefined): void {
     const prevMarker = this.userData.marker;
-    super.update(marker);
+    super.update(marker, receiveTime);
 
     const prevLineWidth = prevMarker.scale.x;
     const prevTransparent = markerHasTransparency(prevMarker);

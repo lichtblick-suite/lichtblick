@@ -99,7 +99,7 @@ export class Grids extends THREE.Object3D {
         path: ["layers", id],
         settings: { ...DEFAULT_SETTINGS },
         pose: makePose(),
-        lineList: new RenderableLineList(renderable.name, marker, this.renderer),
+        lineList: new RenderableLineList(renderable.name, marker, undefined, this.renderer),
       };
       renderable.add(renderable.userData.lineList);
 
@@ -121,7 +121,7 @@ export class Grids extends THREE.Object3D {
     // If the marker settings changed, generate a new marker and update the renderable
     if (!markersEqual) {
       const marker = createMarker(newSettings);
-      renderable.userData.lineList.update(marker);
+      renderable.userData.lineList.update(marker, undefined);
     }
 
     // Update the pose if it changed

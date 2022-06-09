@@ -22,8 +22,8 @@ export class RenderableMeshResource extends RenderableMarker {
   mesh: THREE.Group | undefined;
   material: THREE.MeshStandardMaterial;
 
-  constructor(topic: string, marker: Marker, renderer: Renderer) {
-    super(topic, marker, renderer);
+  constructor(topic: string, marker: Marker, receiveTime: bigint | undefined, renderer: Renderer) {
+    super(topic, marker, receiveTime, renderer);
 
     this.material = standardMaterial(marker.color, renderer.materialCache);
 
@@ -31,16 +31,16 @@ export class RenderableMeshResource extends RenderableMarker {
       useEmbeddedMaterials: marker.mesh_use_embedded_materials,
     }).catch(() => {});
 
-    this.update(marker);
+    this.update(marker, receiveTime);
   }
 
   override dispose(): void {
     releaseStandardMaterial(this.userData.marker.color, this._renderer.materialCache);
   }
 
-  override update(marker: Marker): void {
+  override update(marker: Marker, receiveTime: bigint | undefined): void {
     const prevMarker = this.userData.marker;
-    super.update(marker);
+    super.update(marker, receiveTime);
 
     if (!rgbaEqual(marker.color, prevMarker.color)) {
       releaseStandardMaterial(prevMarker.color, this._renderer.materialCache);

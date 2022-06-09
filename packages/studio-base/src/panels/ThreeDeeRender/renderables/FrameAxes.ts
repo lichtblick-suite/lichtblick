@@ -82,9 +82,10 @@ export class FrameAxes extends THREE.Object3D {
       this.renderer.materialCache,
     );
 
-    renderer.setSettingsNodeProvider(LayerType.Transform, (_topicConfig) => {
-      // const cur = topicConfig as Partial<LayerSettingsTransform>;
-      return {};
+    renderer.setSettingsNodeProvider(LayerType.Transform, (_tfConfig, { name: frameId }) => {
+      const frame = this.renderer.transformTree.frame(frameId);
+      const isRoot = frame?.isRoot();
+      return { icon: isRoot === true ? "SouthEast" : isRoot === false ? "NorthWest" : undefined };
     });
   }
 
@@ -111,7 +112,7 @@ export class FrameAxes extends THREE.Object3D {
     const t = tf.transform.translation;
     const q = tf.transform.rotation;
     const transform = new Transform([t.x, t.y, t.z], [q.x, q.y, q.z, q.w]);
-    this.renderer.transformTree.addTransform(
+    const updated = this.renderer.transformTree.addTransform(
       tf.child_frame_id,
       tf.header.frame_id,
       stamp,
@@ -127,6 +128,9 @@ export class FrameAxes extends THREE.Object3D {
 
     if (addParent || addChild) {
       log.debug(`Added transform "${tf.header.frame_id}_T_${tf.child_frame_id}"`);
+      this.renderer.emit("transformTreeUpdated", this.renderer);
+    } else if (updated) {
+      log.debug(`Updated transform "${tf.header.frame_id}_T_${tf.child_frame_id}"`);
       this.renderer.emit("transformTreeUpdated", this.renderer);
     }
   }

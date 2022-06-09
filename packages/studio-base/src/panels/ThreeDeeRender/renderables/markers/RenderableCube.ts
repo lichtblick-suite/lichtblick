@@ -19,8 +19,8 @@ export class RenderableCube extends RenderableMarker {
   mesh: THREE.Mesh<THREE.BoxGeometry, THREE.Material>;
   outline: THREE.LineSegments | undefined;
 
-  constructor(topic: string, marker: Marker, renderer: Renderer) {
-    super(topic, marker, renderer);
+  constructor(topic: string, marker: Marker, receiveTime: bigint | undefined, renderer: Renderer) {
+    super(topic, marker, receiveTime, renderer);
 
     // Cube mesh
     this.mesh = new THREE.Mesh(
@@ -39,16 +39,16 @@ export class RenderableCube extends RenderableMarker {
     this.outline.userData.picking = false;
     this.mesh.add(this.outline);
 
-    this.update(marker);
+    this.update(marker, receiveTime);
   }
 
   override dispose(): void {
     releaseStandardMaterial(this.userData.marker.color, this._renderer.materialCache);
   }
 
-  override update(marker: Marker): void {
+  override update(marker: Marker, receiveTime: bigint | undefined): void {
     const prevMarker = this.userData.marker;
-    super.update(marker);
+    super.update(marker, receiveTime);
 
     if (!rgbaEqual(marker.color, prevMarker.color)) {
       releaseStandardMaterial(prevMarker.color, this._renderer.materialCache);
