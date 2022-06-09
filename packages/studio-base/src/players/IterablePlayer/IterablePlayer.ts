@@ -222,10 +222,10 @@ export class IterablePlayer implements Player {
     this._speed = speed;
     this._metricsCollector.setSpeed(speed);
 
-    // If we are idling then we emit state to reflect the new speed in the player state.
-    // For other states, we let them emit their own state update
+    // If we are idling then we might not emit any new state so we use a state change to idle state
+    // to trigger an emit so listeners get updated with the new speed setting.
     if (this._state === "idle") {
-      void this._emitState();
+      this._setState("idle");
     }
   }
 
@@ -262,8 +262,16 @@ export class IterablePlayer implements Player {
   }
 
   requestBackfill(): void {
-    // Once we are in an active state (i.e. done initializing), we use seeking to indicate
-    // that subscriptions have changed so restart our loading
+    // The message pipeline invokes requestBackfill after setting subscriptions. It does this so any
+    // new panels that subscribe receive their messages even if the topic was already subscribed.
+    //
+    // Note(Roman): This behavior was designed around RandomAccessPlayer (I think) which does not do
+    // anything in setSubscriptions other than update internal members. While we still have
+    // RandomAccessPlayer we mimick that behavior in this player. Eventually we can update
+    // MessagePipeline to remove requestBackfill.
+    //
+    // We only seek playback if the player is not playing. If the player is playing, the
+    // playing state will detect any subscription changes and emit new messages.
     if (this._state === "idle" || this._state === "seek-backfill" || this._state === "play") {
       if (!this._isPlaying && this._currentTime) {
         this.seekPlayback(this._currentTime);
@@ -599,7 +607,7 @@ export class IterablePlayer implements Player {
   /** Emit the player state to the registered listener */
   private async _emitState() {
     if (!this._listener) {
-      return undefined;
+      return;
     }
 
     if (this._hasError) {
