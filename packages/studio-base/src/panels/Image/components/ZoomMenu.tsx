@@ -45,14 +45,14 @@ export default function ZoomMenu({
   zoom,
   setZoom,
   setZoomMode,
-  setPan,
+  resetPanZoom,
   open = false,
   ...props
 }: {
   zoom: number;
   setZoom: (zoom: number) => void;
   setZoomMode: (zoomMode: "fit" | "fill" | "other") => void;
-  setPan: (pan: { x: number; y: number }) => void;
+  resetPanZoom: () => void;
   open?: boolean;
 }): JSX.Element {
   const [anchorEl, setAnchorEl] = useState<undefined | HTMLElement>(undefined);
@@ -75,11 +75,6 @@ export default function ZoomMenu({
   const zoomOut = useCallback(() => {
     setZoom(zoom - 1 * 0.5);
   }, [setZoom, zoom]);
-
-  const resetPanZoom = useCallback(() => {
-    setPan({ x: 0, y: 0 });
-    setZoom(1);
-  }, [setPan, setZoom]);
 
   const onZoomFit = useCallback(() => {
     setZoomMode("fit");

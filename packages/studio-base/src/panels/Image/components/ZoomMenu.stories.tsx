@@ -14,7 +14,7 @@ export default {
 export const Dark: Story = () => {
   return (
     <div style={{ height: 250, margin: 10, position: "relative" }}>
-      <ZoomMenu open zoom={1} setZoom={() => {}} setZoomMode={() => {}} setPan={() => {}} />
+      <ZoomMenu open zoom={1} setZoom={() => {}} setZoomMode={() => {}} resetPanZoom={() => {}} />
     </div>
   );
 };
@@ -24,7 +24,7 @@ Dark.parameters = { colorScheme: "dark" };
 export const Light: Story = () => {
   return (
     <div style={{ height: 250, margin: 10, position: "relative" }}>
-      <ZoomMenu open zoom={1} setZoom={() => {}} setZoomMode={() => {}} setPan={() => {}} />
+      <ZoomMenu open zoom={1} setZoom={() => {}} setZoomMode={() => {}} resetPanZoom={() => {}} />
     </div>
   );
 };
