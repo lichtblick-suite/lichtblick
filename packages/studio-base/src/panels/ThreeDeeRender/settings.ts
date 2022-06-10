@@ -13,19 +13,6 @@ import {
 } from "@foxglove/studio-base/components/SettingsTreeEditor/types";
 
 import { NodeError } from "./LayerErrors";
-import {
-  CAMERA_INFO_DATATYPES,
-  IMAGE_DATATYPES,
-  COMPRESSED_IMAGE_DATATYPES,
-  MARKER_ARRAY_DATATYPES,
-  MARKER_DATATYPES,
-  OCCUPANCY_GRID_DATATYPES,
-  POINTCLOUD_DATATYPES,
-  POSE_STAMPED_DATATYPES,
-  POSE_WITH_COVARIANCE_STAMPED_DATATYPES,
-  TF_DATATYPES,
-  TRANSFORM_STAMPED_DATATYPES,
-} from "./ros";
 
 export type LayerSettingsTransform = {
   visible: boolean;
@@ -64,6 +51,12 @@ export type LayerSettingsPointCloud2 = {
   rgbByteOrder: "rgba" | "bgra" | "abgr";
   minValue: number | undefined;
   maxValue: number | undefined;
+};
+
+export type LayerSettingsPolygon = {
+  visible: boolean;
+  lineWidth: number;
+  color: string;
 };
 
 export type LayerSettingsPose = {
@@ -118,6 +111,7 @@ export enum LayerType {
   Marker,
   OccupancyGrid,
   PointCloud,
+  Polygon,
   Pose,
   CameraInfo,
   Image,
@@ -140,19 +134,6 @@ export type SettingsNodeProvider = (
   topicConfig: Partial<LayerSettings>,
   topic: Topic,
 ) => SettingsTreeNode;
-
-export const SUPPORTED_DATATYPES = new Set<string>();
-mergeSetInto(SUPPORTED_DATATYPES, TRANSFORM_STAMPED_DATATYPES);
-mergeSetInto(SUPPORTED_DATATYPES, TF_DATATYPES);
-mergeSetInto(SUPPORTED_DATATYPES, MARKER_DATATYPES);
-mergeSetInto(SUPPORTED_DATATYPES, MARKER_ARRAY_DATATYPES);
-mergeSetInto(SUPPORTED_DATATYPES, OCCUPANCY_GRID_DATATYPES);
-mergeSetInto(SUPPORTED_DATATYPES, POINTCLOUD_DATATYPES);
-mergeSetInto(SUPPORTED_DATATYPES, POSE_STAMPED_DATATYPES);
-mergeSetInto(SUPPORTED_DATATYPES, POSE_WITH_COVARIANCE_STAMPED_DATATYPES);
-mergeSetInto(SUPPORTED_DATATYPES, CAMERA_INFO_DATATYPES);
-mergeSetInto(SUPPORTED_DATATYPES, IMAGE_DATATYPES);
-mergeSetInto(SUPPORTED_DATATYPES, COMPRESSED_IMAGE_DATATYPES);
 
 export const PRECISION_DISTANCE = 3; // [1mm]
 export const PRECISION_DEGREES = 1;
@@ -384,12 +365,6 @@ export function buildSettingsTree(options: SettingsTreeOptions): SettingsTreeRoo
       actions: [{ id: "add-grid " + uuidv4(), label: "Add Grid", icon: "Grid" }],
     },
   };
-}
-
-function mergeSetInto(output: Set<string>, input: ReadonlySet<string>) {
-  for (const value of input) {
-    output.add(value);
-  }
 }
 
 function sorted<T>(array: ReadonlyArray<T>, compare: (a: T, b: T) => number): Array<T> {

@@ -7,7 +7,7 @@ import * as THREE from "three";
 import { toNanoSec } from "@foxglove/rostime";
 
 import type { Renderer } from "../../Renderer";
-import { Marker, Pose, rosTimeToNanoSec } from "../../ros";
+import { Marker, Pose } from "../../ros";
 import { getMarkerId } from "./markerId";
 
 const tempColor = new THREE.Color();
@@ -40,7 +40,7 @@ export class RenderableMarker extends THREE.Object3D {
       topic,
       marker,
       pose: marker.pose,
-      srcTime: rosTimeToNanoSec(marker.header.stamp),
+      srcTime: toNanoSec(marker.header.stamp),
       receiveTime,
       expiresIn: hasLifetime ? toNanoSec(marker.lifetime) : undefined,
     };
@@ -54,7 +54,7 @@ export class RenderableMarker extends THREE.Object3D {
     const hasLifetime = marker.lifetime.sec !== 0 || marker.lifetime.nsec !== 0;
 
     this.userData.marker = marker;
-    this.userData.srcTime = rosTimeToNanoSec(marker.header.stamp);
+    this.userData.srcTime = toNanoSec(marker.header.stamp);
     this.userData.pose = marker.pose;
     this.userData.receiveTime = receiveTime;
     this.userData.expiresIn = hasLifetime ? toNanoSec(marker.lifetime) : undefined;

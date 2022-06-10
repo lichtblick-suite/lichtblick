@@ -2,6 +2,8 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
+import { Time } from "@foxglove/rostime";
+
 export type Matrix3 = [number, number, number, number, number, number, number, number, number];
 
 // prettier-ignore
@@ -54,10 +56,7 @@ export enum PointFieldType {
   FLOAT64 = 8,
 }
 
-export type RosTime = {
-  sec: number;
-  nsec: number;
-};
+export type RosTime = Time;
 
 export type RosDuration = RosTime;
 
@@ -68,6 +67,7 @@ export type Vector3 = {
 };
 
 export type Point = Vector3;
+export type Point32 = Vector3;
 
 export type Quaternion = {
   x: number;
@@ -97,6 +97,10 @@ export type Pose = {
 export type PoseWithCovariance = {
   pose: Pose;
   covariance: Matrix6;
+};
+
+export type Polygon = {
+  points: Point32[];
 };
 
 export type Header = {
@@ -174,6 +178,11 @@ export type PoseStamped = {
   pose: Pose;
 };
 
+export type PolygonStamped = {
+  header: Header;
+  polygon: Polygon;
+};
+
 export type PoseWithCovarianceStamped = {
   header: Header;
   pose: PoseWithCovariance;
@@ -217,6 +226,8 @@ export type CompressedImage = {
   data: Uint8Array;
 };
 
+export const TIME_ZERO = { sec: 0, nsec: 0 };
+
 export const TRANSFORM_STAMPED_DATATYPES = new Set<string>();
 addRosDataType(TRANSFORM_STAMPED_DATATYPES, "geometry_msgs/TransformStamped");
 
@@ -251,9 +262,8 @@ addRosDataType(IMAGE_DATATYPES, "sensor_msgs/Image");
 export const COMPRESSED_IMAGE_DATATYPES = new Set<string>();
 addRosDataType(COMPRESSED_IMAGE_DATATYPES, "sensor_msgs/CompressedImage");
 
-export function rosTimeToNanoSec(rosTime: { sec: number; nsec: number }): bigint {
-  return BigInt(rosTime.sec) * BigInt(1e9) + BigInt(rosTime.nsec);
-}
+export const POLYGON_STAMPED_DATATYPES = new Set<string>();
+addRosDataType(POLYGON_STAMPED_DATATYPES, "geometry_msgs/PolygonStamped");
 
 // Expand a single ROS1 dataType into variations for ROS2 and protobufs,
 // then add them to the given output set

@@ -26,6 +26,7 @@ import {
   normalizeCompressedImage,
   normalizeImage,
   normalizeMarker,
+  normalizePolygonStamped,
   normalizePoseStamped,
   normalizePoseWithCovarianceStamped,
 } from "./normalizeMessages";
@@ -36,29 +37,32 @@ import { Images } from "./renderables/Images";
 import { Markers } from "./renderables/Markers";
 import { OccupancyGrids } from "./renderables/OccupancyGrids";
 import { PointClouds } from "./renderables/PointClouds";
+import { Polygons } from "./renderables/Polygons";
 import { Poses } from "./renderables/Poses";
 import {
-  CameraInfo,
   CAMERA_INFO_DATATYPES,
-  CompressedImage,
+  CameraInfo,
   COMPRESSED_IMAGE_DATATYPES,
+  CompressedImage,
   Header,
-  Image,
   IMAGE_DATATYPES,
-  Marker,
-  MarkerArray,
+  Image,
   MARKER_ARRAY_DATATYPES,
   MARKER_DATATYPES,
-  OccupancyGrid,
+  Marker,
+  MarkerArray,
   OCCUPANCY_GRID_DATATYPES,
-  PointCloud2,
+  OccupancyGrid,
   POINTCLOUD_DATATYPES,
-  PoseStamped,
-  PoseWithCovarianceStamped,
+  PointCloud2,
+  POLYGON_STAMPED_DATATYPES,
+  PolygonStamped,
   POSE_STAMPED_DATATYPES,
   POSE_WITH_COVARIANCE_STAMPED_DATATYPES,
-  TF,
+  PoseStamped,
+  PoseWithCovarianceStamped,
   TF_DATATYPES,
+  TF,
   TRANSFORM_STAMPED_DATATYPES,
 } from "./ros";
 import {
@@ -69,6 +73,7 @@ import {
   LayerSettingsMarkerNamespace,
   LayerSettingsOccupancyGrid,
   LayerSettingsPointCloud2,
+  LayerSettingsPolygon,
   LayerSettingsPose,
   LayerSettingsTransform,
   LayerType,
@@ -114,6 +119,20 @@ const PI_2 = Math.PI / 2;
 
 const TRANSFORMS_PATH = ["transforms"];
 
+export const SUPPORTED_DATATYPES = new Set<string>();
+mergeSetInto(SUPPORTED_DATATYPES, TRANSFORM_STAMPED_DATATYPES);
+mergeSetInto(SUPPORTED_DATATYPES, TF_DATATYPES);
+mergeSetInto(SUPPORTED_DATATYPES, MARKER_DATATYPES);
+mergeSetInto(SUPPORTED_DATATYPES, MARKER_ARRAY_DATATYPES);
+mergeSetInto(SUPPORTED_DATATYPES, OCCUPANCY_GRID_DATATYPES);
+mergeSetInto(SUPPORTED_DATATYPES, POINTCLOUD_DATATYPES);
+mergeSetInto(SUPPORTED_DATATYPES, POLYGON_STAMPED_DATATYPES);
+mergeSetInto(SUPPORTED_DATATYPES, POSE_STAMPED_DATATYPES);
+mergeSetInto(SUPPORTED_DATATYPES, POSE_WITH_COVARIANCE_STAMPED_DATATYPES);
+mergeSetInto(SUPPORTED_DATATYPES, CAMERA_INFO_DATATYPES);
+mergeSetInto(SUPPORTED_DATATYPES, IMAGE_DATATYPES);
+mergeSetInto(SUPPORTED_DATATYPES, COMPRESSED_IMAGE_DATATYPES);
+
 const tempColor = new THREE.Color();
 const tempVec = new THREE.Vector3();
 const tempVec2 = new THREE.Vector2();
@@ -153,6 +172,7 @@ export class Renderer extends EventEmitter<RendererEvents> {
   occupancyGrids = new OccupancyGrids(this);
   pointClouds = new PointClouds(this);
   markers = new Markers(this);
+  polygons = new Polygons(this);
   poses = new Poses(this);
   cameras = new Cameras(this);
   images = new Images(this);
@@ -209,6 +229,7 @@ export class Renderer extends EventEmitter<RendererEvents> {
     this.scene.add(this.occupancyGrids);
     this.scene.add(this.pointClouds);
     this.scene.add(this.markers);
+    this.scene.add(this.polygons);
     this.scene.add(this.poses);
     this.scene.add(this.cameras);
     this.scene.add(this.images);
@@ -343,13 +364,16 @@ export class Renderer extends EventEmitter<RendererEvents> {
       const pointCloud = message as PointCloud2;
       this.pointClouds.addPointCloud2Message(topic, pointCloud);
     } else if (POSE_STAMPED_DATATYPES.has(datatype)) {
-      const poseMesage = normalizePoseStamped(message as DeepPartial<PoseStamped>);
-      this.poses.addPoseMessage(topic, poseMesage);
+      const poseStamped = normalizePoseStamped(message as DeepPartial<PoseStamped>);
+      this.poses.addPoseMessage(topic, poseStamped);
     } else if (POSE_WITH_COVARIANCE_STAMPED_DATATYPES.has(datatype)) {
-      const poseMessage = normalizePoseWithCovarianceStamped(
+      const poseWithCovariance = normalizePoseWithCovarianceStamped(
         message as DeepPartial<PoseWithCovarianceStamped>,
       );
-      this.poses.addPoseMessage(topic, poseMessage);
+      this.poses.addPoseMessage(topic, poseWithCovariance);
+    } else if (POLYGON_STAMPED_DATATYPES.has(datatype)) {
+      const polygonStamped = normalizePolygonStamped(message as DeepPartial<PolygonStamped>);
+      this.polygons.addPolygonStamped(topic, polygonStamped);
     } else if (CAMERA_INFO_DATATYPES.has(datatype)) {
       const cameraInfo = normalizeCameraInfo(message as DeepPartial<CameraInfo>);
       this.cameras.addCameraInfoMessage(topic, cameraInfo);
@@ -389,6 +413,10 @@ export class Renderer extends EventEmitter<RendererEvents> {
     this.markers.setTopicSettings(topic, topicSettings);
   }
 
+  setPolygonSettings(topic: string, settings: Partial<LayerSettingsPolygon>): void {
+    this.polygons.setTopicSettings(topic, settings);
+  }
+
   setPoseSettings(topic: string, settings: Partial<LayerSettingsPose>): void {
     this.poses.setTopicSettings(topic, settings);
   }
@@ -423,6 +451,7 @@ export class Renderer extends EventEmitter<RendererEvents> {
     this.occupancyGrids.startFrame(currentTime);
     this.pointClouds.startFrame(currentTime);
     this.markers.startFrame(currentTime);
+    this.polygons.startFrame(currentTime);
     this.poses.startFrame(currentTime);
     this.cameras.startFrame(currentTime);
     this.images.startFrame(currentTime);
@@ -571,4 +600,10 @@ function deselectObject(object: THREE.Object3D) {
   object.traverse((child) => {
     child.layers.set(LAYER_DEFAULT);
   });
+}
+
+function mergeSetInto(output: Set<string>, input: ReadonlySet<string>) {
+  for (const value of input) {
+    output.add(value);
+  }
 }

@@ -16,6 +16,8 @@ import {
   Matrix3,
   Matrix3x4,
   Matrix6,
+  Polygon,
+  PolygonStamped,
   Pose,
   PoseStamped,
   PoseWithCovariance,
@@ -112,6 +114,12 @@ export function normalizePose(pose: DeepPartial<Pose> | undefined): Pose {
   };
 }
 
+export function normalizePolygon(polygon: DeepPartial<Polygon> | undefined): Polygon {
+  return {
+    points: normalizeVector3s(polygon?.points),
+  };
+}
+
 export function normalizePoseWithCovariance(
   pose: DeepPartial<PoseWithCovariance> | undefined,
 ): PoseWithCovariance {
@@ -151,6 +159,13 @@ export function normalizePoseStamped(pose: DeepPartial<PoseStamped>): PoseStampe
   return {
     header: normalizeHeader(pose.header),
     pose: normalizePose(pose.pose),
+  };
+}
+
+export function normalizePolygonStamped(polygon: DeepPartial<PolygonStamped>): PolygonStamped {
+  return {
+    header: normalizeHeader(polygon.header),
+    polygon: normalizePolygon(polygon.polygon),
   };
 }
 

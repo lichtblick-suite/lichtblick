@@ -10,7 +10,7 @@ import { RenderableLineList } from "@foxglove/studio-base/panels/ThreeDeeRender/
 
 import { Renderer } from "../Renderer";
 import { stringToRgba } from "../color";
-import { Marker, Pose, Vector3 } from "../ros";
+import { Marker, Pose, TIME_ZERO, Vector3 } from "../ros";
 import { LayerSettingsGrid, LayerType, PRECISION_DEGREES, PRECISION_DISTANCE } from "../settings";
 import { makePose, xyzrpyToPose } from "../transforms/geometry";
 import { updatePose } from "../updatePose";
@@ -35,7 +35,7 @@ const DEFAULT_SETTINGS: LayerSettingsGrid = {
   rotation: [0, 0, 0],
 };
 
-type GridRenderable = THREE.Object3D & {
+type GridRenderable = Omit<THREE.Object3D, "userData"> & {
   userData: {
     path: ReadonlyArray<string>;
     settings: LayerSettingsGrid;
@@ -192,7 +192,7 @@ function createMarker(settings: LayerSettingsGrid): Marker {
   return {
     header: {
       frame_id: "", // unused, settings.frameId is used instead
-      stamp: { sec: 0, nsec: 0 },
+      stamp: TIME_ZERO,
     },
     ns: "",
     id: 0,
@@ -201,7 +201,7 @@ function createMarker(settings: LayerSettingsGrid): Marker {
     pose: makePose(),
     scale: { x: settings.lineWidth, y: 1, z: 1 },
     color,
-    lifetime: { sec: 0, nsec: 0 },
+    lifetime: TIME_ZERO,
     frame_locked: true,
     points,
     colors: [],

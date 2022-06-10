@@ -4,19 +4,20 @@
 
 import * as THREE from "three";
 
+import { toNanoSec } from "@foxglove/rostime";
 import { SettingsTreeFields } from "@foxglove/studio-base/components/SettingsTreeEditor/types";
 
 import { Renderer } from "../Renderer";
 import { makeRgba, rgbaToCssString, stringToRgba } from "../color";
 import {
   Pose,
-  rosTimeToNanoSec,
   Marker,
   PoseWithCovarianceStamped,
   PoseStamped,
   POSE_WITH_COVARIANCE_STAMPED_DATATYPES,
   MarkerAction,
   MarkerType,
+  TIME_ZERO,
 } from "../ros";
 import { LayerSettingsPose, LayerType } from "../settings";
 import { makePose } from "../transforms/geometry";
@@ -40,7 +41,7 @@ const DEFAULT_SETTINGS: LayerSettingsPose = {
   covarianceColor: DEFAULT_COVARIANCE_COLOR_STR,
 };
 
-type PoseRenderable = THREE.Object3D & {
+type PoseRenderable = Omit<THREE.Object3D, "userData"> & {
   userData: {
     topic: string;
     settings: LayerSettingsPose;
@@ -109,20 +110,27 @@ export class Poses extends THREE.Object3D {
         | Partial<LayerSettingsPose>
         | undefined;
       const settings = { ...DEFAULT_SETTINGS, ...userSettings };
-      renderable.userData.settings = settings;
-
-      renderable.userData.poseMessage = poseMessage;
-      renderable.userData.srcTime = rosTimeToNanoSec(poseMessage.header.stamp);
 
       // Synthesize an arrow marker to instantiate a RenderableArrow
       const arrowMarker = createArrowMarker(poseMessage, settings);
-      renderable.userData.arrow = new RenderableArrow(topic, arrowMarker, undefined, this.renderer);
-      renderable.add(renderable.userData.arrow);
+      const arrow = new RenderableArrow(topic, arrowMarker, undefined, this.renderer);
+      renderable.add(arrow);
 
-      if ("covariance" in poseMessage.pose) {
-        renderable.userData.pose = poseMessage.pose.pose;
+      const poseWithCovariance = ("covariance" in poseMessage.pose ? poseMessage : undefined) as
+        | PoseWithCovarianceStamped
+        | undefined;
 
-        const poseWithCovariance = poseMessage as PoseWithCovarianceStamped;
+      renderable.userData = {
+        topic,
+        settings,
+        poseMessage,
+        pose: (poseWithCovariance?.pose.pose ?? poseMessage.pose) as Pose,
+        srcTime: toNanoSec(poseMessage.header.stamp),
+        arrow,
+        sphere: undefined,
+      };
+
+      if (poseWithCovariance) {
         const sphereMarker = createSphereMarker(poseWithCovariance, settings);
         if (sphereMarker) {
           renderable.userData.sphere = new RenderableSphere(
@@ -133,8 +141,6 @@ export class Poses extends THREE.Object3D {
           );
           renderable.add(renderable.userData.sphere);
         }
-      } else {
-        renderable.userData.pose = poseMessage.pose;
       }
 
       this.add(renderable);
@@ -196,10 +202,15 @@ export class Poses extends THREE.Object3D {
     renderable: PoseRenderable,
     poseMessage: PoseStamped | PoseWithCovarianceStamped,
   ): void {
+    renderable.userData.poseMessage = poseMessage;
+    renderable.userData.srcTime = toNanoSec(poseMessage.header.stamp);
+
     const arrowMarker = createArrowMarker(poseMessage, renderable.userData.settings);
     renderable.userData.arrow.update(arrowMarker, undefined);
 
     if ("covariance" in poseMessage.pose) {
+      renderable.userData.pose = poseMessage.pose.pose;
+
       const poseWithCovariance = poseMessage as PoseWithCovarianceStamped;
       const sphereMarker = createSphereMarker(poseWithCovariance, renderable.userData.settings);
       if (sphereMarker) {
@@ -216,6 +227,8 @@ export class Poses extends THREE.Object3D {
       } else if (renderable.userData.sphere) {
         renderable.userData.sphere.visible = false;
       }
+    } else {
+      renderable.userData.pose = poseMessage.pose;
     }
   }
 }
@@ -233,7 +246,7 @@ function createArrowMarker(
     pose: makePose(),
     scale: { x: settings.scale[0], y: settings.scale[1], z: settings.scale[2] },
     color: stringToRgba(makeRgba(), settings.color),
-    lifetime: { sec: 0, nsec: 0 },
+    lifetime: TIME_ZERO,
     frame_locked: true,
     points: [],
     colors: [],
@@ -268,7 +281,7 @@ function createSphereMarker(
     pose: makePose(),
     scale,
     color: stringToRgba(makeRgba(), settings.covarianceColor),
-    lifetime: { sec: 0, nsec: 0 },
+    lifetime: TIME_ZERO,
     frame_locked: true,
     points: [],
     colors: [],

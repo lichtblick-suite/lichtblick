@@ -4,6 +4,7 @@
 
 import * as THREE from "three";
 
+import { toNanoSec } from "@foxglove/rostime";
 import { Topic } from "@foxglove/studio";
 import {
   SettingsTreeFields,
@@ -14,7 +15,7 @@ import { DynamicBufferGeometry } from "../DynamicBufferGeometry";
 import { MaterialCache, PointCloudColor } from "../MaterialCache";
 import { Renderer } from "../Renderer";
 import { rgbaToCssString, stringToRgba } from "../color";
-import { Pose, PointCloud2, PointFieldType, rosTimeToNanoSec } from "../ros";
+import { Pose, PointCloud2, PointFieldType } from "../ros";
 import { LayerSettings, LayerSettingsPointCloud2, LayerType } from "../settings";
 import { makePose } from "../transforms/geometry";
 import { updatePose } from "../updatePose";
@@ -22,7 +23,7 @@ import { getColorConverter } from "./pointClouds/colors";
 import { FieldReader, getReader } from "./pointClouds/fieldReaders";
 import { missingTransformMessage, MISSING_TRANSFORM } from "./transforms";
 
-type PointCloudRenderable = THREE.Object3D & {
+type PointCloudRenderable = Omit<THREE.Object3D, "userData"> & {
   userData: {
     topic: string;
     settings: LayerSettingsPointCloud2;
@@ -127,7 +128,7 @@ export class PointClouds extends THREE.Object3D {
 
       renderable.userData.pointCloud = pointCloud;
       renderable.userData.pose = makePose();
-      renderable.userData.srcTime = rosTimeToNanoSec(pointCloud.header.stamp);
+      renderable.userData.srcTime = toNanoSec(pointCloud.header.stamp);
 
       const geometry = new DynamicBufferGeometry(Float32Array);
       geometry.name = `${topic}:PointCloud2:geometry`;
@@ -208,7 +209,7 @@ export class PointClouds extends THREE.Object3D {
 
   _updatePointCloudRenderable(renderable: PointCloudRenderable, pointCloud: PointCloud2): void {
     renderable.userData.pointCloud = pointCloud;
-    renderable.userData.srcTime = rosTimeToNanoSec(pointCloud.header.stamp);
+    renderable.userData.srcTime = toNanoSec(pointCloud.header.stamp);
 
     const settings = renderable.userData.settings;
     const data = pointCloud.data;

@@ -8,11 +8,12 @@ import { LineGeometry } from "three/examples/jsm/lines/LineGeometry";
 import { LineMaterial } from "three/examples/jsm/lines/LineMaterial";
 
 import Logger from "@foxglove/log";
+import { toNanoSec } from "@foxglove/rostime";
 
 import { MaterialCache, StandardColor } from "../MaterialCache";
 import { Renderer } from "../Renderer";
 import { arrowHeadSubdivisions, arrowShaftSubdivisions, DetailLevel } from "../lod";
-import { Pose, rosTimeToNanoSec, TF } from "../ros";
+import { Pose, TF } from "../ros";
 import { LayerSettingsTransform, LayerType } from "../settings";
 import { Transform } from "../transforms/Transform";
 import { makePose } from "../transforms/geometry";
@@ -44,7 +45,7 @@ const tempMat4 = new THREE.Matrix4();
 const tempVec = new THREE.Vector3();
 const tempVecB = new THREE.Vector3();
 
-type FrameAxisRenderable = THREE.Object3D & {
+type FrameAxisRenderable = Omit<THREE.Object3D, "userData"> & {
   userData: {
     frameId: string;
     path: ReadonlyArray<string>;
@@ -108,7 +109,7 @@ export class FrameAxes extends THREE.Object3D {
     const addChild = !this.renderer.transformTree.hasFrame(tf.child_frame_id);
 
     // Create a new transform and add it to the renderer's TransformTree
-    const stamp = rosTimeToNanoSec(tf.header.stamp);
+    const stamp = toNanoSec(tf.header.stamp);
     const t = tf.transform.translation;
     const q = tf.transform.rotation;
     const transform = new Transform([t.x, t.y, t.z], [q.x, q.y, q.z, q.w]);

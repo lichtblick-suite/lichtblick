@@ -2591,6 +2591,7 @@ __metadata:
     cytoscape: 3.21.0
     cytoscape-dagre: 2.4.0
     dat.gui: 0.7.9
+    env-paths: 3.0.0
     enzyme: 3.11.0
     esbuild-loader: 2.18.0
     escape-html: 1.0.3
@@ -11350,6 +11351,13 @@ __metadata:
   version: 2.2.0
   resolution: "entities@npm:2.2.0"
   checksum: 19010dacaf0912c895ea262b4f6128574f9ccf8d4b3b65c7e8334ad0079b3706376360e28d8843ff50a78aabcb8f08f0a32dbfacdc77e47ed77ca08b713669b3
+  languageName: node
+  linkType: hard
+
+"env-paths@npm:3.0.0":
+  version: 3.0.0
+  resolution: "env-paths@npm:3.0.0"
+  checksum: b2b0a0d0d9931a13d279c22ed94d78648a1cc5f408f05d47ff3e0c1616f0aa0c38fb33deec5e5be50497225d500607d57f9c8652c4d39c2f2b7608cd45768128
   languageName: node
   linkType: hard
 

@@ -28,7 +28,7 @@ import useCleanup from "@foxglove/studio-base/hooks/useCleanup";
 
 import { DebugGui } from "./DebugGui";
 import { NodeError } from "./LayerErrors";
-import { Renderer } from "./Renderer";
+import { SUPPORTED_DATATYPES, Renderer } from "./Renderer";
 import { RendererContext, useRendererEvent } from "./RendererContext";
 import { Stats } from "./Stats";
 import {
@@ -53,7 +53,6 @@ import {
   LayerType,
   SelectEntry,
   SettingsTreeOptions,
-  SUPPORTED_DATATYPES,
   ThreeDeeRenderConfig,
 } from "./settings";
 
