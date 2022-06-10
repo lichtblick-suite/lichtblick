@@ -22,6 +22,7 @@ export default class PlayerProblemManager {
   }
 
   addProblem(id: string, problem: PlayerProblem): void {
+    console[problem.severity].call(console, "Player problem", id, problem);
     this._problemsById.set(id, problem);
     this._problems = undefined;
   }

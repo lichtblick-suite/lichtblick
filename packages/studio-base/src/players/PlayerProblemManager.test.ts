@@ -16,6 +16,10 @@ describe("PlayerProblemManager", () => {
       { severity: "warn", message: "A2" },
       { severity: "error", message: "B" },
     ]);
+    expect(console.warn).toHaveBeenCalledTimes(1);
+    expect(console.error).toHaveBeenCalledTimes(2);
+    (console.warn as jest.Mock).mockClear();
+    (console.error as jest.Mock).mockClear();
   });
 
   it("allows removing problems by id", () => {
@@ -28,6 +32,10 @@ describe("PlayerProblemManager", () => {
       { severity: "warn", message: "A" },
       { severity: "error", message: "C" },
     ]);
+    expect(console.warn).toHaveBeenCalledTimes(2);
+    expect(console.error).toHaveBeenCalledTimes(1);
+    (console.warn as jest.Mock).mockClear();
+    (console.error as jest.Mock).mockClear();
   });
 
   it("allows removing problems with a predicate", () => {
@@ -40,6 +48,10 @@ describe("PlayerProblemManager", () => {
       true,
     );
     expect(manager.problems()).toEqual([{ severity: "error", message: "D" }]);
+    expect(console.warn).toHaveBeenCalledTimes(2);
+    expect(console.error).toHaveBeenCalledTimes(2);
+    (console.warn as jest.Mock).mockClear();
+    (console.error as jest.Mock).mockClear();
   });
 
   it("keeps array identity until problems change", () => {
@@ -77,5 +89,7 @@ describe("PlayerProblemManager", () => {
     result = manager.problems();
     expect(result).toEqual([]);
     expect(manager.problems()).toBe(result);
+    expect(console.error).toHaveBeenCalledTimes(2);
+    (console.error as jest.Mock).mockClear();
   });
 });

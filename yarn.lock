@@ -2520,7 +2520,7 @@ __metadata:
     "@foxglove/velodyne-cloud": 1.0.1
     "@foxglove/wasm-bz2": 0.1.0
     "@foxglove/ws-protocol": 0.0.8
-    "@mcap/core": 0.1.1
+    "@mcap/core": 0.2.1
     "@mdi/svg": 6.5.95
     "@mui/icons-material": 5.4.1
     "@mui/material": 5.4.1
@@ -3092,14 +3092,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@mcap/core@npm:0.1.1":
-  version: 0.1.1
-  resolution: "@mcap/core@npm:0.1.1"
+"@mcap/core@npm:0.2.1":
+  version: 0.2.1
+  resolution: "@mcap/core@npm:0.2.1"
   dependencies:
     "@foxglove/crc": ^0.0.3
     heap-js: ^2.1.6
     tslib: ^2
-  checksum: e1fd79421c33e710d826b8996407e0347c377b7934f68601dfda3b660dd454fd23bd6d2b7e0e2dd8afc8eab7ab683a7744a244008de5337bd2c6e541f05cc7a4
+  checksum: cdbacbf1592ccdc6352fa80074d80fd3d0445e1f27cbafc63cce33e41fc3a40a29a1d5419102cdd2731018ad4c46b9728f32362719d8dc997a4853b262927a0e
   languageName: node
   linkType: hard
 
