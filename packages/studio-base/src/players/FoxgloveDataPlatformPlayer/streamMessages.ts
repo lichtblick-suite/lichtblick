@@ -2,11 +2,11 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
+import { Mcap0StreamReader, Mcap0Types } from "@mcap/core";
 import { captureException } from "@sentry/core";
 import { isEqual } from "lodash";
 
 import Logger from "@foxglove/log";
-import { Mcap0StreamReader, Mcap0Types } from "@foxglove/mcap";
 import { loadDecompressHandlers, parseChannel, ParsedChannel } from "@foxglove/mcap-support";
 import { fromNanoSec, Time, toRFC3339String } from "@foxglove/rostime";
 import { MessageEvent } from "@foxglove/studio-base/players/types";

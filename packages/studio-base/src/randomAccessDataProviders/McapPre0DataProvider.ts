@@ -2,11 +2,11 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
+import { McapPre0Reader as McapReader, McapPre0Types } from "@mcap/core";
 import { isEqual } from "lodash";
 import protobufjs from "protobufjs";
 import descriptor from "protobufjs/ext/descriptor";
 
-import { McapPre0Reader as McapReader, McapPre0Types } from "@foxglove/mcap";
 import { loadDecompressHandlers } from "@foxglove/mcap-support";
 import { parse as parseMessageDefinition } from "@foxglove/rosmsg";
 import { LazyMessageReader } from "@foxglove/rosmsg-serialization";

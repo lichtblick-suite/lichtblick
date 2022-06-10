@@ -2,8 +2,9 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
+import { Mcap0IndexedReader, Mcap0Types } from "@mcap/core";
+
 import Logger from "@foxglove/log";
-import { Mcap0IndexedReader, Mcap0Types } from "@foxglove/mcap";
 import { loadDecompressHandlers } from "@foxglove/mcap-support";
 import { FileReadable } from "@foxglove/studio-base/players/IterablePlayer/Mcap/FileReadable";
 import { MessageEvent } from "@foxglove/studio-base/players/types";

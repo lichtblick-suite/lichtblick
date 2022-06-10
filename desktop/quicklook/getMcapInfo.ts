@@ -2,13 +2,14 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import Logger from "@foxglove/log";
 import {
   Mcap0StreamReader,
   McapPre0Reader,
   detectVersion,
   DETECT_VERSION_BYTES_REQUIRED,
-} from "@foxglove/mcap";
+} from "@mcap/core";
+
+import Logger from "@foxglove/log";
 import { loadDecompressHandlers } from "@foxglove/mcap-support";
 
 import getIndexedMcapInfo from "./getIndexedMcapInfo";
