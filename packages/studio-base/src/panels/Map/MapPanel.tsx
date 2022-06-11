@@ -12,7 +12,7 @@ import {
   geoJSON,
   Layer,
 } from "leaflet";
-import { difference, minBy, partition, transform, union } from "lodash";
+import { difference, minBy, partition, union } from "lodash";
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { useResizeDetector } from "react-resize-detector";
 import { useDebouncedCallback } from "use-debounce";
@@ -23,8 +23,6 @@ import EmptyState from "@foxglove/studio-base/components/EmptyState";
 import {
   EXPERIMENTAL_PanelExtensionContextWithSettings,
   SettingsTreeAction,
-  SettingsTreeFields,
-  SettingsTreeRoots,
 } from "@foxglove/studio-base/components/SettingsTreeEditor/types";
 import FilteredPointLayer, {
   POINT_MARKER_RADIUS,
@@ -33,16 +31,9 @@ import { Topic } from "@foxglove/studio-base/players/types";
 import { FoxgloveMessages } from "@foxglove/studio-base/types/FoxgloveMessages";
 import { darkColor, lightColor, lineColors } from "@foxglove/studio-base/util/plotColors";
 
+import { Config, validateCustomUrl, buildSettingsTree } from "./config";
 import { hasFix } from "./support";
 import { MapPanelMessage, Point } from "./types";
-
-// Persisted panel state
-type Config = {
-  customTileUrl: string;
-  disabledTopics: string[];
-  layer: string;
-  zoomLevel?: number;
-};
 
 type MapPanelProps = {
   context: PanelExtensionContext;
@@ -56,56 +47,6 @@ function isGeoJSONMessage(
     message.message != undefined &&
     "geojson" in message.message
   );
-}
-
-function buildSettingsTree(config: Config, eligibleTopics: string[]): SettingsTreeRoots {
-  const topics: SettingsTreeFields = transform(
-    eligibleTopics,
-    (result, topic) => {
-      result[topic] = {
-        label: topic,
-        input: "boolean",
-        value: !config.disabledTopics.includes(topic),
-      };
-    },
-    {} as SettingsTreeFields,
-  );
-
-  const generalSettings: SettingsTreeFields = {
-    layer: {
-      label: "Tile Layer",
-      input: "select",
-      value: config.layer,
-      options: [
-        { label: "Map", value: "map" },
-        { label: "Satellite", value: "satellite" },
-        { label: "Custom", value: "custom" },
-      ],
-    },
-  };
-
-  // Only show the custom url input when the user selects the custom layer
-  if (config.layer === "custom") {
-    generalSettings.customTileUrl = {
-      label: "Custom map tile URL",
-      input: "string",
-      value: config.customTileUrl,
-    };
-  }
-
-  const settings: SettingsTreeRoots = {
-    general: {
-      label: "General",
-      icon: "Settings",
-      fields: generalSettings,
-    },
-    topics: {
-      label: "Topics",
-      fields: topics,
-    },
-  };
-
-  return settings;
 }
 
 function topicMessageType(topic: Topic) {
@@ -265,13 +206,11 @@ function MapPanel(props: MapPanelProps): JSX.Element {
   useEffect(() => {
     if (config.layer === "custom") {
       // validate URL to avoid leaflet map placeholder variable error
-      const placeholders = config.customTileUrl.match(/\{.+?\}/g) ?? [];
-      const validPlaceholders = ["{x}", "{y}", "{z}"];
-      for (const placeholder of placeholders) {
-        if (!validPlaceholders.includes(placeholder)) {
-          return;
-        }
+      // Ignore urls with an error - the settings tree will inform the user that their valid is invalid
+      if (validateCustomUrl(config.customTileUrl)) {
+        return;
       }
+
       customLayer.setUrl(config.customTileUrl);
     }
   }, [config.layer, config.customTileUrl, customLayer]);
