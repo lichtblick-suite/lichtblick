@@ -4,7 +4,7 @@
 
 import { styled as muiStyled, Theme, useTheme } from "@mui/material";
 import cx from "classnames";
-import { ElementType, CSSProperties, PropsWithChildren } from "react";
+import { ElementType, CSSProperties, PropsWithChildren, forwardRef } from "react";
 
 const StackRoot = muiStyled("div", {
   name: "FoxgloveStack",
@@ -75,7 +75,10 @@ const StackRoot = muiStyled("div", {
   }),
 }));
 
-export default function Stack(props: PropsWithChildren<StackProps>): JSX.Element {
+export default forwardRef<HTMLDivElement, PropsWithChildren<StackProps>>(function Stack(
+  props,
+  ref,
+): JSX.Element {
   const theme = useTheme();
 
   const {
@@ -146,6 +149,7 @@ export default function Stack(props: PropsWithChildren<StackProps>): JSX.Element
   return (
     <StackRoot
       as={component}
+      ref={ref}
       className={cx("FoxgloveStack-root", className)} // add className for ergonimic styling purposes
       ownerState={ownerState}
       theme={theme}
@@ -153,7 +157,7 @@ export default function Stack(props: PropsWithChildren<StackProps>): JSX.Element
       {...other}
     />
   );
-}
+});
 
 export type StackProps = {
   /** Override or extend the styles applied to the component. */
