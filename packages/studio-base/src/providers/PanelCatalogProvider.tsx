@@ -66,7 +66,6 @@ export default function PanelCatalogProvider(
       ...panels.new3DPanel,
       ...panels.builtin,
       ...panels.debug,
-      ...panels.hidden,
       ...panels.legacyPlot,
       ...wrappedExtensionPanels,
     ];

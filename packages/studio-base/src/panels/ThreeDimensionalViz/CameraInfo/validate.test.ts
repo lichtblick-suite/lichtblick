@@ -11,21 +11,7 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { isEmail, cameraStateValidator, point2DValidator } from "./validators";
-
-describe("isEmail", () => {
-  it("validates email", () => {
-    expect(isEmail()).toBe(false);
-    expect(isEmail(1)).toBe(false);
-    expect(isEmail("")).toBe(false);
-    expect(isEmail("@")).toBe(false);
-    expect(isEmail("a@b")).toBe(false);
-    expect(isEmail("some.one@example.com")).toBe(true);
-    expect(isEmail("example.com@example.com")).toBe(true);
-    expect(isEmail("a@b.com")).toBe(true);
-    expect(isEmail("some_one@example.com")).toBe(true);
-  });
-});
+import { cameraStateValidator, point2DValidator } from "./validate";
 
 describe("cameraStateValidator", () => {
   it("returns undefined for empty object input", () => {

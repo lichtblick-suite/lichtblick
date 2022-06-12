@@ -216,14 +216,6 @@ const debug: PanelInfo[] = [
   },
 ];
 
-const hidden: PanelInfo[] = [
-  {
-    title: "Welcome",
-    type: "onboarding.welcome",
-    module: async () => await import("./WelcomePanel"),
-  },
-];
-
 const legacyPlot: PanelInfo[] = [
   {
     title: "Legacy Plot",
@@ -243,4 +235,4 @@ const new3DPanel: PanelInfo[] = [
   },
 ];
 
-export default { builtin, debug, hidden, legacyPlot, new3DPanel };
+export default { builtin, debug, legacyPlot, new3DPanel };
