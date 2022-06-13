@@ -137,7 +137,9 @@ type AutocompleteProps<T = unknown> = {
   minWidth?: number;
   menuStyle?: CSSProperties;
   inputStyle?: CSSProperties;
+  disabled?: boolean;
   disableAutoSelect?: boolean;
+  readOnly?: boolean;
 };
 
 export interface IAutocomplete {
@@ -235,7 +237,9 @@ export default React.forwardRef(function Autocomplete<T = unknown>(
     onChange: onChangeCallback,
     onSelect: onSelectCallback,
     onBlur: onBlurCallback,
+    disabled,
     disableAutoSelect,
+    readOnly,
   }: AutocompleteProps<T> = props;
 
   const autocompleteItems: FzfResultItem<T>[] = useMemo(
@@ -382,7 +386,7 @@ export default React.forwardRef(function Autocomplete<T = unknown>(
       };
       document.addEventListener("mouseup", onMouseUp, true);
     },
-    [focused, disableAutoSelect],
+    [disableAutoSelect, focused],
   );
 
   // When scrolling down by even a little bit, just show all items. In most cases people won't
@@ -436,6 +440,8 @@ export default React.forwardRef(function Autocomplete<T = unknown>(
         }),
         autoCorrect: "off",
         autoCapitalize: "off",
+        disabled,
+        readOnly,
         spellCheck: "false",
         placeholder,
         style: {
@@ -443,6 +449,7 @@ export default React.forwardRef(function Autocomplete<T = unknown>(
           fontFamily,
           fontSize,
           paddingLeft: 4,
+          pointerEvents: readOnly === true ? "none" : "auto",
           width: autoSize
             ? Math.max(
                 measureText(value != undefined && value.length > 0 ? value : placeholder ?? ""),

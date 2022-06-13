@@ -122,6 +122,8 @@ function FieldInput({
           size="small"
           freeSolo={true}
           value={field.value}
+          disabled={field.disabled}
+          readOnly={field.readOnly}
           ListboxComponent={List}
           ListboxProps={{ dense: true } as Partial<ListProps>}
           renderOption={(props, option, { selected }) => (
@@ -150,6 +152,8 @@ function FieldInput({
           size="small"
           variant="filled"
           value={field.value}
+          disabled={field.disabled}
+          readOnly={field.readOnly}
           placeholder={field.placeholder}
           fullWidth
           max={field.max}
@@ -167,10 +171,13 @@ function FieldInput({
           fullWidth
           value={field.value}
           exclusive
+          disabled={field.disabled}
           size="small"
-          onChange={(_event, value) =>
-            actionHandler({ action: "update", payload: { path, input: "toggle", value } })
-          }
+          onChange={(_event, value) => {
+            if (field.readOnly !== true) {
+              actionHandler({ action: "update", payload: { path, input: "toggle", value } });
+            }
+          }}
         >
           {field.options.map((opt) => (
             <ToggleButton key={opt} value={opt}>
@@ -185,8 +192,12 @@ function FieldInput({
           variant="filled"
           size="small"
           fullWidth
+          disabled={field.disabled}
           value={field.value ?? ""}
           placeholder={field.placeholder}
+          InputProps={{
+            readOnly: field.readOnly,
+          }}
           onChange={(event) =>
             actionHandler({
               action: "update",
@@ -201,9 +212,10 @@ function FieldInput({
           fullWidth
           value={field.value ?? false}
           exclusive
+          disabled={field.disabled}
           size="small"
           onChange={(_event, value) => {
-            if (value != undefined) {
+            if (value != undefined && field.readOnly !== true) {
               actionHandler({
                 action: "update",
                 payload: { path, input: "boolean", value },
@@ -219,6 +231,8 @@ function FieldInput({
       return (
         <ColorPickerInput
           alphaType="none"
+          disabled={field.disabled}
+          readOnly={field.readOnly}
           placeholder={field.placeholder}
           value={field.value?.toString()}
           onChange={(value) =>
@@ -233,6 +247,8 @@ function FieldInput({
       return (
         <ColorPickerInput
           alphaType="alpha"
+          disabled={field.disabled}
+          readOnly={field.readOnly}
           placeholder={field.placeholder}
           value={field.value?.toString()}
           onChange={(value) =>
@@ -248,6 +264,8 @@ function FieldInput({
         <PsuedoInputWrapper direction="row">
           <MessagePathInput
             path={field.value ?? ""}
+            disabled={field.disabled}
+            readOnly={field.readOnly}
             onChange={(value) =>
               actionHandler({
                 action: "update",
@@ -264,6 +282,8 @@ function FieldInput({
           size="small"
           displayEmpty
           fullWidth
+          disabled={field.disabled}
+          readOnly={field.readOnly}
           variant="filled"
           value={field.value ?? UNDEFINED_SENTINEL_VALUE}
           onChange={(event) =>
@@ -290,6 +310,8 @@ function FieldInput({
       return (
         <ColorGradientInput
           colors={field.value}
+          disabled={field.disabled}
+          readOnly={field.readOnly}
           onChange={(value) =>
             actionHandler({ action: "update", payload: { path, input: "gradient", value } })
           }
@@ -301,6 +323,8 @@ function FieldInput({
           step={field.step}
           value={field.value}
           precision={field.precision}
+          disabled={field.disabled}
+          readOnly={field.readOnly}
           onChange={(value) =>
             actionHandler({ action: "update", payload: { path, input: "vec3", value } })
           }

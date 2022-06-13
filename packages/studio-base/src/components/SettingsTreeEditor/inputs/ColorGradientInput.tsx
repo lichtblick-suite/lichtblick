@@ -14,23 +14,41 @@ import { ColorSwatch } from "./ColorSwatch";
 
 export function ColorGradientInput({
   colors,
+  disabled = false,
   onChange,
+  readOnly = false,
 }: {
   colors: undefined | readonly [string, string];
+  disabled?: boolean;
   onChange: (colors: [string, string]) => void;
+  readOnly?: boolean;
 }): JSX.Element {
   const [leftAnchor, setLeftAnchor] = useState<undefined | HTMLDivElement>(undefined);
   const [rightAnchor, setRightAnchor] = useState<undefined | HTMLDivElement>(undefined);
 
-  const handleLeftClick = useCallback((event: React.MouseEvent<HTMLDivElement>) => {
-    setLeftAnchor(event.currentTarget);
-    setRightAnchor(undefined);
-  }, []);
+  const handleLeftClick = useCallback(
+    (event: React.MouseEvent<HTMLDivElement>) => {
+      if (readOnly) {
+        return;
+      }
 
-  const handleRightClick = useCallback((event: React.MouseEvent<HTMLDivElement>) => {
-    setLeftAnchor(undefined);
-    setRightAnchor(event.currentTarget);
-  }, []);
+      setLeftAnchor(event.currentTarget);
+      setRightAnchor(undefined);
+    },
+    [readOnly],
+  );
+
+  const handleRightClick = useCallback(
+    (event: React.MouseEvent<HTMLDivElement>) => {
+      if (readOnly) {
+        return;
+      }
+
+      setLeftAnchor(undefined);
+      setRightAnchor(event.currentTarget);
+    },
+    [readOnly],
+  );
 
   const handleClose = useCallback(() => {
     setLeftAnchor(undefined);
@@ -46,6 +64,8 @@ export function ColorGradientInput({
     <Stack
       direction="row"
       style={{
+        opacity: disabled ? 0.5 : 1,
+        pointerEvents: disabled ? "none" : "auto",
         position: "relative",
         backgroundImage: `linear-gradient(to right, ${safeLeftColor}, ${safeRightColor})`,
       }}
