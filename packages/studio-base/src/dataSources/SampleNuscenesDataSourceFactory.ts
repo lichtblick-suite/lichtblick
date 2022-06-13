@@ -30,8 +30,7 @@ class SampleNuscenesDataSourceFactory implements IDataSourceFactory {
   }
 
   initialize(args: DataSourceFactoryInitializeArgs): ReturnType<IDataSourceFactory["initialize"]> {
-    const bagUrl =
-      "https://storage.googleapis.com/foxglove-public-assets/nuScenes-v1.0-mini-scene-0061.bag";
+    const bagUrl = "https://assets.foxglove.dev/nuScenes-v1.0-mini-scene-0061.bag";
 
     if (this.enableIterablePlayer) {
       const bagSource = new BagIterableSource({ type: "remote", url: bagUrl });

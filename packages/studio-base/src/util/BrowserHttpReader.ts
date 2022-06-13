@@ -32,8 +32,11 @@ export default class BrowserHttpReader implements FileReader {
       // Note that we cannot use `range: "bytes=0-1"` or so, because then we can't get the actual
       // file size without making Content-Range a CORS header, therefore making all this a bit less
       // robust.
+      // "no-store" forces an unconditional remote request. When the browser's cache is populated,
+      // it may add a `range` header to the request, which causes some servers to omit the
+      // `accept-ranges` header in the response.
       const controller = new AbortController();
-      response = await fetch(this._url, { signal: controller.signal });
+      response = await fetch(this._url, { signal: controller.signal, cache: "no-store" });
       controller.abort();
     } catch (error) {
       let errMsg = `Fetching remote file failed. ${error}`;
