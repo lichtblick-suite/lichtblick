@@ -30,6 +30,7 @@ import {
 } from "@foxglove/studio-base/services/IRemoteLayoutStorage";
 
 import { NamespacedLayoutStorage } from "./NamespacedLayoutStorage";
+import WriteThroughLayoutCache from "./WriteThroughLayoutCache";
 import computeLayoutSyncOperations, { SyncOperation } from "./computeLayoutSyncOperations";
 
 const log = Logger.getLogger(__filename);
@@ -119,7 +120,7 @@ export default class LayoutManager implements ILayoutManager {
   }) {
     this.local = new MutexLocked(
       new NamespacedLayoutStorage(
-        local,
+        new WriteThroughLayoutCache(local),
         remote
           ? LayoutManager.REMOTE_STORAGE_NAMESPACE_PREFIX + remote.namespace
           : LayoutManager.LOCAL_STORAGE_NAMESPACE,
