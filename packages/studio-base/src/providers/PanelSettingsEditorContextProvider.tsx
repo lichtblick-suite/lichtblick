@@ -11,7 +11,7 @@ import { SettingsTree } from "@foxglove/studio-base/components/SettingsTreeEdito
 
 type ImmutableSettingsTree = DeepReadonly<SettingsTree>;
 
-type PanelSettingsEditorStore = {
+export type PanelSettingsEditorStore = {
   settingsTrees: Record<string, ImmutableSettingsTree>;
   updateSettingsTree: (panelId: string, settingsTree: ImmutableSettingsTree) => void;
 };

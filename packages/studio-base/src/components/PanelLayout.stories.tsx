@@ -90,7 +90,9 @@ export const PanelNotFound = (): JSX.Element => {
         fixture={{ topics: [], datatypes: new Map(), frame: {}, layout: "UnknownPanel!4co6n9d" }}
         omitDragAndDrop
       >
-        <PanelLayout />
+        <MockPanelContextProvider>
+          <PanelLayout />
+        </MockPanelContextProvider>
       </PanelSetup>
     </DndProvider>
   );
@@ -108,7 +110,9 @@ export const PanelWithError = (): JSX.Element => {
         fixture={{ topics: [], datatypes: new Map(), frame: {}, layout: "Sample2!4co6n9d" }}
         omitDragAndDrop
       >
-        <PanelLayout />
+        <MockPanelContextProvider>
+          <PanelLayout />
+        </MockPanelContextProvider>
       </PanelSetup>
     </DndProvider>
   );

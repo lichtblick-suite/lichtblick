@@ -12,13 +12,17 @@
 //   You may not use this file except in compliance with the License.
 
 import SettingsIcon from "@mui/icons-material/Settings";
-import { useCallback, useContext } from "react";
+import { useCallback } from "react";
 
-import PanelContext from "@foxglove/studio-base/components/PanelContext";
+import { usePanelContext } from "@foxglove/studio-base/components/PanelContext";
 import ToolbarIconButton from "@foxglove/studio-base/components/PanelToolbar/ToolbarIconButton";
 import Stack from "@foxglove/studio-base/components/Stack";
 import { useSelectedPanels } from "@foxglove/studio-base/context/CurrentLayoutContext";
 import { useWorkspace } from "@foxglove/studio-base/context/WorkspaceContext";
+import {
+  PanelSettingsEditorStore,
+  usePanelSettingsEditorStore,
+} from "@foxglove/studio-base/providers/PanelSettingsEditorContextProvider";
 
 import { PanelActionsDropdown } from "./PanelActionsDropdown";
 
@@ -38,23 +42,30 @@ export const PanelToolbarControls = React.memo(function PanelToolbarControls({
   menuOpen,
   setMenuOpen,
 }: PanelToolbarControlsProps) {
-  const panelContext = useContext(PanelContext);
+  const { id: panelId } = usePanelContext();
   const { setSelectedPanelIds } = useSelectedPanels();
   const { openPanelSettings } = useWorkspace();
 
+  const hasSettingsSelector = useCallback(
+    (store: PanelSettingsEditorStore) => store.settingsTrees[panelId] != undefined,
+    [panelId],
+  );
+
+  const hasSettings = usePanelSettingsEditorStore(hasSettingsSelector);
+
   const openSettings = useCallback(() => {
-    if (panelContext?.id != undefined) {
-      setSelectedPanelIds([panelContext.id]);
-      openPanelSettings();
-    }
-  }, [setSelectedPanelIds, openPanelSettings, panelContext?.id]);
+    setSelectedPanelIds([panelId]);
+    openPanelSettings();
+  }, [setSelectedPanelIds, openPanelSettings, panelId]);
 
   return (
     <Stack direction="row" alignItems="center" paddingLeft={1}>
       {additionalIcons}
-      <ToolbarIconButton title="Settings" onClick={openSettings}>
-        <SettingsIcon />
-      </ToolbarIconButton>
+      {hasSettings && (
+        <ToolbarIconButton title="Settings" onClick={openSettings}>
+          <SettingsIcon />
+        </ToolbarIconButton>
+      )}
       <PanelActionsDropdown
         isOpen={menuOpen}
         setIsOpen={setMenuOpen}
