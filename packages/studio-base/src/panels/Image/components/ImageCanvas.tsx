@@ -353,8 +353,9 @@ export function ImageCanvas(props: Props): JSX.Element {
     };
   }, [onZoom100, zoomIn, zoomOut]);
 
+  // We have to set tabIndex here so we can be focused and receive keyboard events.
   return (
-    <div ref={rootRef} className={classes.root}>
+    <div ref={rootRef} className={classes.root} tabIndex={0}>
       <KeyListener keyDownHandlers={keyDownHandlers} />
       {error && <div className={classes.errorMessage}>Error: {error.message}</div>}
       {renderError && <div className={classes.errorMessage}>Error: {renderError.message}</div>}
