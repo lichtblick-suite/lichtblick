@@ -44,6 +44,14 @@ interface ToString {
   toString(): string;
 }
 
+export type DiagnosticStatusConfig = {
+  selectedHardwareId?: string;
+  selectedName?: string;
+  splitFraction?: number;
+  topicToRender: string;
+  collapsedSections: { name: string; section: string }[];
+};
+
 export type DiagnosticId = string & ToString;
 
 export type KeyValue = { key: string; value: string };

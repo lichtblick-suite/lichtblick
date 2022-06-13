@@ -29,11 +29,16 @@ import Stack from "@foxglove/studio-base/components/Stack";
 import Tooltip from "@foxglove/studio-base/components/Tooltip";
 import { openSiblingPlotPanel } from "@foxglove/studio-base/panels/Plot";
 import { openSiblingStateTransitionsPanel } from "@foxglove/studio-base/panels/StateTransitions";
-import { Config } from "@foxglove/studio-base/panels/diagnostics/DiagnosticStatusPanel";
-import { OpenSiblingPanel } from "@foxglove/studio-base/types/panels";
+import { OpenSiblingPanel, SaveConfig } from "@foxglove/studio-base/types/panels";
 import { colors } from "@foxglove/studio-base/util/sharedStyleConstants";
 
-import { LEVEL_NAMES, DiagnosticInfo, KeyValue, DiagnosticStatusMessage } from "./util";
+import {
+  LEVEL_NAMES,
+  DiagnosticInfo,
+  DiagnosticStatusConfig,
+  KeyValue,
+  DiagnosticStatusMessage,
+} from "./util";
 
 const MIN_SPLIT_FRACTION = 0.1;
 
@@ -44,7 +49,7 @@ type Props = {
   topicToRender: string;
   openSiblingPanel: OpenSiblingPanel;
   collapsedSections: { name: string; section: string }[];
-  saveConfig: (arg0: Partial<Config>) => void;
+  saveConfig: SaveConfig<DiagnosticStatusConfig>;
 };
 
 type FormattedKeyValue = {

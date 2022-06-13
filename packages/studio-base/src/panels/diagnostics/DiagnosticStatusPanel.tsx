@@ -11,37 +11,32 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import DatabaseIcon from "@mdi/svg/svg/database.svg";
-import { Autocomplete, Menu, MenuItem, TextField } from "@mui/material";
-import { sortBy, uniq } from "lodash";
-import { useCallback, useMemo, useRef, useState, MouseEvent } from "react";
+import { Autocomplete, TextField } from "@mui/material";
+import produce from "immer";
+import { set, sortBy, uniq } from "lodash";
+import { useCallback, useMemo, useEffect } from "react";
 
 import { useDataSourceInfo } from "@foxglove/studio-base/PanelAPI";
 import EmptyState from "@foxglove/studio-base/components/EmptyState";
 import Panel from "@foxglove/studio-base/components/Panel";
 import { usePanelContext } from "@foxglove/studio-base/components/PanelContext";
 import PanelToolbar from "@foxglove/studio-base/components/PanelToolbar";
-import ToolbarIconButton from "@foxglove/studio-base/components/PanelToolbar/ToolbarIconButton";
+import { SettingsTreeAction } from "@foxglove/studio-base/components/SettingsTreeEditor/types";
 import Stack from "@foxglove/studio-base/components/Stack";
+import { usePanelSettingsTreeUpdate } from "@foxglove/studio-base/providers/PanelSettingsEditorContextProvider";
+import { SaveConfig } from "@foxglove/studio-base/types/panels";
 import { DIAGNOSTIC_TOPIC } from "@foxglove/studio-base/util/globalConstants";
 
 import DiagnosticStatus from "./DiagnosticStatus";
 import helpContent from "./DiagnosticStatusPanel.help.md";
+import { buildStatusPanelSettingsTree } from "./settings";
 import useAvailableDiagnostics from "./useAvailableDiagnostics";
 import useDiagnostics from "./useDiagnostics";
-import { getDisplayName } from "./util";
-
-export type Config = {
-  selectedHardwareId?: string;
-  selectedName?: string;
-  splitFraction?: number;
-  topicToRender: string;
-  collapsedSections: { name: string; section: string }[];
-};
+import { DiagnosticStatusConfig as Config, getDisplayName } from "./util";
 
 type Props = {
   config: Config;
-  saveConfig: (arg0: Partial<Config>) => void;
+  saveConfig: SaveConfig<Config>;
 };
 
 const ALLOWED_DATATYPES: string[] = [
@@ -54,7 +49,7 @@ const ALLOWED_DATATYPES: string[] = [
 function DiagnosticStatusPanel(props: Props) {
   const { saveConfig, config } = props;
   const { topics } = useDataSourceInfo();
-  const { openSiblingPanel } = usePanelContext();
+  const { id: panelId, openSiblingPanel } = usePanelContext();
   const {
     selectedHardwareId,
     selectedName,
@@ -63,8 +58,7 @@ function DiagnosticStatusPanel(props: Props) {
     collapsedSections = [],
   } = config;
 
-  const menuRef = useRef<HTMLDivElement>(ReactNull);
-  const [topicMenuOpen, setTopicMenuOpen] = useState(false);
+  const updatePanelSettingsTree = usePanelSettingsTreeUpdate();
 
   // Filter down all topics to those that conform to our supported datatypes
   const availableTopics = useMemo(() => {
@@ -75,21 +69,6 @@ function DiagnosticStatusPanel(props: Props) {
     // Keeps only the first occurrence of each topic.
     return uniq([DIAGNOSTIC_TOPIC, ...filtered, topicToRender]);
   }, [topics, topicToRender]);
-
-  const changeTopicToRender = useCallback(
-    (newTopicToRender: string) => {
-      saveConfig({ topicToRender: newTopicToRender });
-      setTopicMenuOpen(false);
-    },
-    [saveConfig],
-  );
-
-  const toggleTopicMenuAction = useCallback((ev: MouseEvent<HTMLElement>) => {
-    // To accurately position the topic dropdown menu we set the location of our menu ref to the
-    // click location
-    menuRef.current!.style.left = `${ev.clientX}px`;
-    setTopicMenuOpen((isOpen) => !isOpen);
-  }, []);
 
   const availableDiagnostics = useAvailableDiagnostics(topicToRender);
 
@@ -149,43 +128,28 @@ function DiagnosticStatusPanel(props: Props) {
   const noOptionsText =
     autocompleteOptions.length > 0 ? "No matches" : "Waiting for diagnostics...";
 
+  const actionHandler = useCallback(
+    (action: SettingsTreeAction) => {
+      if (action.action !== "update") {
+        return;
+      }
+
+      const { path, value } = action.payload;
+      saveConfig(produce<Config>((draft) => set(draft, path.slice(1), value)));
+    },
+    [saveConfig],
+  );
+
+  useEffect(() => {
+    updatePanelSettingsTree(panelId, {
+      actionHandler,
+      roots: buildStatusPanelSettingsTree(topicToRender, availableTopics),
+    });
+  }, [actionHandler, availableTopics, panelId, topicToRender, updatePanelSettingsTree]);
+
   return (
     <Stack flex="auto" overflow="hidden">
-      <PanelToolbar
-        helpContent={helpContent}
-        additionalIcons={
-          <>
-            <div ref={menuRef}>
-              <ToolbarIconButton
-                title={`Supported datatypes: ${ALLOWED_DATATYPES.join(", ")}`}
-                data-test={"topic-set"}
-                onClick={toggleTopicMenuAction}
-                subMenuActive={topicMenuOpen}
-              >
-                <DatabaseIcon />
-              </ToolbarIconButton>
-            </div>
-            <Menu
-              anchorEl={menuRef.current}
-              open={topicMenuOpen}
-              onClose={() => setTopicMenuOpen(false)}
-              MenuListProps={{
-                dense: true,
-              }}
-            >
-              {availableTopics.map((topic) => (
-                <MenuItem
-                  key={topic}
-                  onClick={() => changeTopicToRender(topic)}
-                  selected={topicToRender === topic}
-                >
-                  {topic}
-                </MenuItem>
-              ))}
-            </Menu>
-          </>
-        }
-      >
+      <PanelToolbar helpContent={helpContent}>
         <Autocomplete
           disablePortal
           blurOnSelect={true}

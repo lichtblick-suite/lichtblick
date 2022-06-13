@@ -37,6 +37,21 @@ export function Empty(): JSX.Element {
   );
 }
 
+export function WithSettings(): JSX.Element {
+  return (
+    <PanelSetup fixture={fixture} includeSettings>
+      <DiagnosticStatusPanel
+        overrideConfig={{
+          topicToRender: "/diagnostics",
+          selectedHardwareId: "hardware_id1",
+          selectedName: "name2",
+          collapsedSections: [],
+        }}
+      />
+    </PanelSetup>
+  );
+}
+
 export function SelectedHardwareIDOnly(): JSX.Element {
   return (
     <PanelSetup fixture={fixture}>

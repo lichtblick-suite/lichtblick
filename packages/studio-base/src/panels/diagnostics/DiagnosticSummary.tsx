@@ -42,7 +42,6 @@ import {
   SettingsTreeRoots,
 } from "@foxglove/studio-base/components/SettingsTreeEditor/types";
 import Stack from "@foxglove/studio-base/components/Stack";
-import { Config as DiagnosticStatusConfig } from "@foxglove/studio-base/panels/diagnostics/DiagnosticStatusPanel";
 import helpContent from "@foxglove/studio-base/panels/diagnostics/DiagnosticSummary.help.md";
 import useDiagnostics from "@foxglove/studio-base/panels/diagnostics/useDiagnostics";
 import { usePanelSettingsTreeUpdate } from "@foxglove/studio-base/providers/PanelSettingsEditorContextProvider";
@@ -52,6 +51,7 @@ import toggle from "@foxglove/studio-base/util/toggle";
 import {
   DiagnosticId,
   DiagnosticInfo,
+  DiagnosticStatusConfig,
   getDiagnosticsByLevel,
   filterAndSortDiagnostics,
   LEVEL_NAMES,
