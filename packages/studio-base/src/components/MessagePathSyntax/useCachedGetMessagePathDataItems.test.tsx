@@ -206,6 +206,50 @@ describe("useCachedGetMessagePathDataItems", () => {
     ]);
   });
 
+  it("supports types with reference cycles (i.e. reference themselves within their children)", () => {
+    const topics = [{ name: "/topic", datatype: "datatype" }];
+    const datatypes: RosDatatypes = new Map(
+      Object.entries({
+        datatype: {
+          definitions: [
+            { name: "field", type: "uint32", isComplex: false },
+            { name: "self", type: "datatype", isComplex: true },
+          ],
+        },
+      }),
+    );
+
+    const { result } = renderHook(
+      () => useCachedGetMessagePathDataItems(["/topic", "/topic.self"]),
+      {
+        wrapper: function Wrapper({ children }) {
+          return (
+            <MockCurrentLayoutProvider>
+              <MockMessagePipelineProvider topics={topics} datatypes={datatypes}>
+                {children}
+              </MockMessagePipelineProvider>
+            </MockCurrentLayoutProvider>
+          );
+        },
+      },
+    );
+
+    const message: MessageEvent<unknown> = {
+      topic: "/topic",
+      receiveTime: { sec: 0, nsec: 0 },
+      message: { field: 0, self: { field: 1 } },
+      sizeInBytes: 0,
+    };
+
+    expect(result.current("/topic", message)).toEqual([
+      { constantName: undefined, path: "/topic", value: { field: 0, self: { field: 1 } } },
+    ]);
+
+    expect(result.current("/topic.self", message)).toEqual([
+      { constantName: undefined, path: "/topic.self", value: { field: 1 } },
+    ]);
+  });
+
   describe("getMessagePathDataItems", () => {
     it("traverses down the path for every item", () => {
       const messages: MessageEvent<unknown>[] = [

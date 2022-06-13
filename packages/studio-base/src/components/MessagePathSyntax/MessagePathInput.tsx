@@ -58,7 +58,7 @@ function getFieldPaths(
 ): Map<string, RosMsgField> {
   const output = new Map<string, RosMsgField>();
   for (const topic of topics) {
-    addFieldPathsForType(quoteTopicNameIfNeeded(topic.name), topic.datatype, datatypes, output);
+    addFieldPathsForType(quoteTopicNameIfNeeded(topic.name), topic.datatype, datatypes, [], output);
   }
   return output;
 }
@@ -67,16 +67,26 @@ function addFieldPathsForType(
   curPath: string,
   typeName: string,
   datatypes: RosDatatypes,
+  seenTypes: string[],
   output: Map<string, RosMsgField>,
 ): void {
   const msgdef = datatypes.get(typeName);
   if (msgdef) {
     for (const field of msgdef.definitions) {
+      if (seenTypes.includes(field.type)) {
+        continue;
+      }
       if (field.isConstant !== true) {
         const fieldPath = `${curPath}.${quoteFieldNameIfNeeded(field.name)}`;
         output.set(fieldPath, field);
         if (field.isComplex === true) {
-          addFieldPathsForType(fieldPath, field.type, datatypes, output);
+          addFieldPathsForType(
+            fieldPath,
+            field.type,
+            datatypes,
+            [...seenTypes, field.type],
+            output,
+          );
         }
       }
     }

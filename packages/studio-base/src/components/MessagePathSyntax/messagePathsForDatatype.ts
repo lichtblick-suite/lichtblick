@@ -82,56 +82,62 @@ export function messagePathStructures(
   }
 
   lastDatatypes = undefined;
-  const structureFor = memoize((datatype: string): MessagePathStructureItemMessage => {
-    if (datatype === "time" || datatype === "duration") {
-      return {
-        structureType: "message",
-        nextByName: {
-          sec: {
-            structureType: "primitive",
-            primitiveType: "uint32",
-            datatype: "",
+  const structureFor = memoize(
+    (datatype: string, seenDatatypes: string[]): MessagePathStructureItemMessage => {
+      if (datatype === "time" || datatype === "duration") {
+        return {
+          structureType: "message",
+          nextByName: {
+            sec: {
+              structureType: "primitive",
+              primitiveType: "uint32",
+              datatype: "",
+            },
+            nsec: {
+              structureType: "primitive",
+              primitiveType: "uint32",
+              datatype: "",
+            },
           },
-          nsec: {
-            structureType: "primitive",
-            primitiveType: "uint32",
-            datatype: "",
-          },
-        },
-        datatype,
-      };
-    }
-
-    const nextByName: Record<string, MessagePathStructureItem> = {};
-    const rosDatatype = datatypes.get(datatype);
-    if (!rosDatatype) {
-      throw new Error(`datatype not found: "${datatype}"`);
-    }
-    rosDatatype.definitions.forEach((msgField) => {
-      if (msgField.isConstant === true) {
-        return;
+          datatype,
+        };
       }
 
-      const next: MessagePathStructureItem = isRosPrimitive(msgField.type)
-        ? {
-            structureType: "primitive",
-            primitiveType: msgField.type,
-            datatype,
-          }
-        : structureFor(msgField.type);
-
-      if (msgField.isArray === true) {
-        nextByName[msgField.name] = { structureType: "array", next, datatype };
-      } else {
-        nextByName[msgField.name] = next;
+      const nextByName: Record<string, MessagePathStructureItem> = {};
+      const rosDatatype = datatypes.get(datatype);
+      if (!rosDatatype) {
+        throw new Error(`datatype not found: "${datatype}"`);
       }
-    });
-    return { structureType: "message", nextByName, datatype };
-  });
+      rosDatatype.definitions.forEach((msgField) => {
+        if (msgField.isConstant === true) {
+          return;
+        }
+
+        if (seenDatatypes.includes(msgField.type)) {
+          return;
+        }
+
+        const next: MessagePathStructureItem = isRosPrimitive(msgField.type)
+          ? {
+              structureType: "primitive",
+              primitiveType: msgField.type,
+              datatype,
+            }
+          : structureFor(msgField.type, [...seenDatatypes, msgField.type]);
+
+        if (msgField.isArray === true) {
+          nextByName[msgField.name] = { structureType: "array", next, datatype };
+        } else {
+          nextByName[msgField.name] = next;
+        }
+      });
+      return { structureType: "message", nextByName, datatype };
+    },
+  );
 
   lastStructures = {};
   for (const [datatype] of datatypes) {
-    lastStructures[datatype] = structureFor(datatype);
+    lastStructures[datatype] = structureFor(datatype, []);
   }
   lastDatatypes = datatypes; // Set at the very end, in case there's an error earlier.
   return lastStructures;

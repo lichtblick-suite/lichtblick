@@ -408,6 +408,30 @@ describe("messagePathStructures", () => {
     expect(messagePathStructures(datatypes)).toBe(messagePathStructures(datatypes));
     expect(messagePathStructures(cloneDeep(datatypes))).not.toBe(messagePathStructures(datatypes));
   });
+
+  it("supports types which reference themselves", () => {
+    const selfReferencingDatatypes: RosDatatypes = new Map(
+      Object.entries({
+        "some.type": {
+          definitions: [{ name: "foo", type: "some.type" }],
+        },
+      }),
+    );
+
+    expect(messagePathStructures(selfReferencingDatatypes)).toEqual({
+      "some.type": {
+        datatype: "some.type",
+        nextByName: {
+          foo: {
+            datatype: "some.type",
+            nextByName: {},
+            structureType: "message",
+          },
+        },
+        structureType: "message",
+      },
+    });
+  });
 });
 
 describe("messagePathsForDatatype", () => {

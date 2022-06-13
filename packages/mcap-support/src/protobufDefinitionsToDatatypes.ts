@@ -44,6 +44,8 @@ export function protobufDefinitionsToDatatypes(
   type: protobufjs.Type,
 ): void {
   const definitions: RosMsgField[] = [];
+  // The empty list reference is added to the map so a `.has` lookup below can prevent infinite recursion on cyclical types
+  datatypes.set(stripLeadingDot(type.fullName), { definitions });
   for (const field of type.fieldsArray) {
     if (field.resolvedType instanceof protobufjs.Enum) {
       for (const [name, value] of Object.entries(field.resolvedType.values)) {
@@ -54,13 +56,19 @@ export function protobufDefinitionsToDatatypes(
       }
       definitions.push({ type: "int32", name: field.name });
     } else if (field.resolvedType) {
+      const fullName = stripLeadingDot(field.resolvedType.fullName);
       definitions.push({
-        type: stripLeadingDot(field.resolvedType.fullName),
+        type: fullName,
         name: field.name,
         isComplex: true,
         isArray: field.repeated,
       });
-      protobufDefinitionsToDatatypes(datatypes, field.resolvedType);
+
+      // If we've already processed this datatype we should skip it.
+      // This avoid infinite recursion with datatypes that reference themselves.
+      if (!datatypes.has(fullName)) {
+        protobufDefinitionsToDatatypes(datatypes, field.resolvedType);
+      }
     } else if (field.type === "bytes") {
       if (field.repeated) {
         throw new Error("Repeated bytes are not currently supported");
@@ -74,5 +82,4 @@ export function protobufDefinitionsToDatatypes(
       });
     }
   }
-  datatypes.set(stripLeadingDot(type.fullName), { definitions });
 }
