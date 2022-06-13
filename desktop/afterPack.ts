@@ -85,12 +85,15 @@ async function configureQuickLookExtension(context: AfterPackContext) {
   const arch = new Map([
     [Arch.arm64, "arm64"],
     [Arch.x64, "x86_64"],
+    [Arch.universal, "universal"],
   ]).get(context.arch);
   if (arch == undefined) {
     throw new Error(`Unsupported arch ${context.arch}`);
   }
-  await exec("lipo", ["-extract", arch, appexExecutablePath, "-output", appexExecutablePath]);
-  log.info(`Extracted ${arch} from appex executable`);
+  if (arch !== "universal") {
+    await exec("lipo", ["-extract", arch, appexExecutablePath, "-output", appexExecutablePath]);
+    log.info(`Extracted ${arch} from appex executable`);
+  }
 
   // The notarization step requires a valid signature from our "Developer ID Application"
   // certificate. However this certificate is only available in CI, so for packaging to succeed in a
