@@ -48,7 +48,7 @@ rules:
   # The _sx_ property is slow
   # https://stackoverflow.com/questions/68383046/is-there-a-performance-difference-between-the-sx-prop-and-the-makestyles-function
   react/forbid-component-props:
-    - warn
+    - error
     - forbid:
         - propName: "sx"
           message: "Use of the sx prop is not advised due to performance issues. Consider using alternative styling methods instead."
