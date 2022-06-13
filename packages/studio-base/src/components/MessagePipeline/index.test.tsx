@@ -75,6 +75,7 @@ describe("MessagePipelineProvider/useMessagePipeline", () => {
         setSubscriptions: expect.any(Function),
         setPublishers: expect.any(Function),
         publish: expect.any(Function),
+        callService: expect.any(Function),
         startPlayback: undefined,
         pausePlayback: undefined,
         setPlaybackSpeed: undefined,

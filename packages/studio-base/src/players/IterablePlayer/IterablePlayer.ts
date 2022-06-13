@@ -291,6 +291,10 @@ export class IterablePlayer implements Player {
     throw new Error("Publishing is not supported by this data source");
   }
 
+  async callService(): Promise<unknown> {
+    throw new Error("Service calls are not supported by this data source");
+  }
+
   close(): void {
     this._setState("close");
   }

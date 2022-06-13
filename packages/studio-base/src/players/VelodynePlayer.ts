@@ -296,6 +296,10 @@ export default class VelodynePlayer implements Player {
     throw new Error(`Publishing is not supported for VelodynePlayer`);
   }
 
+  async callService(): Promise<unknown> {
+    throw new Error("Service calls are not supported for VelodynePlayer");
+  }
+
   requestBackfill(): void {
     // no-op
   }

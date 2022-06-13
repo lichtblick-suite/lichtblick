@@ -477,6 +477,16 @@ function PanelExtensionAdapter(props: PanelExtensionAdapterProps): JSX.Element {
           }
         : undefined,
 
+      callService: capabilities.includes(PlayerCapabilities.callServices)
+        ? async (service, request): Promise<unknown> => {
+            const ctx = latestPipelineContextRef.current;
+            if (!ctx) {
+              throw new Error("Unable to call service. There is no active connection.");
+            }
+            return await ctx.callService(service, request);
+          }
+        : undefined,
+
       unsubscribeAll: () => {
         subscribedTopicsRef.current.clear();
         setSubscriptions(panelId, []);

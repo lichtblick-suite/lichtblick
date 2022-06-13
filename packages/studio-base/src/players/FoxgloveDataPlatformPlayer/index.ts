@@ -527,6 +527,10 @@ export default class FoxgloveDataPlatformPlayer implements Player {
     throw new Error(`Publishing is not supported in ${this.constructor.name}`);
   }
 
+  async callService(): Promise<unknown> {
+    throw new Error(`Service calls are not supported in ${this.constructor.name}`);
+  }
+
   startPlayback(): void {
     if (this._isPlaying) {
       return;

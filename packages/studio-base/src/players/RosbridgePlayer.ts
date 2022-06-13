@@ -44,11 +44,15 @@ import { TimestampMethod } from "@foxglove/studio-base/util/time";
 
 const log = Log.getLogger(__dirname);
 
-const CAPABILITIES = [PlayerCapabilities.advertise];
+const CAPABILITIES = [PlayerCapabilities.advertise, PlayerCapabilities.callServices];
 
 function isClockMessage(topic: string, msg: unknown): msg is { clock: Time } {
   const maybeClockMsg = msg as { clock?: Time };
   return topic === "/clock" && maybeClockMsg.clock != undefined && !isNaN(maybeClockMsg.clock.sec);
+}
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value != undefined;
 }
 
 // Connects to `rosbridge_server` instance using `roslibjs`. Currently doesn't support seeking or
@@ -89,6 +93,7 @@ export default class RosbridgePlayer implements Player {
   private _presence: PlayerPresence = PlayerPresence.NOT_PRESENT;
   private _problems = new PlayerProblemManager();
   private _emitTimer?: ReturnType<typeof setTimeout>;
+  private _serviceTypeCache = new Map<string, Promise<string>>();
   private readonly _sourceId: string;
 
   constructor({
@@ -578,6 +583,55 @@ export default class RosbridgePlayer implements Player {
       );
     }
     publisher.publish(msg);
+  }
+
+  // Query the type name for this service. Cache the query to avoid looking it up again.
+  private async getServiceType(service: string): Promise<string> {
+    if (!this._rosClient) {
+      throw new Error("Not connected");
+    }
+
+    const existing = this._serviceTypeCache.get(service);
+    if (existing) {
+      return await existing;
+    }
+
+    const rosClient = this._rosClient;
+    const serviceTypePromise = new Promise<string>((resolve, reject) => {
+      rosClient.getServiceType(service, resolve, reject);
+    });
+
+    this._serviceTypeCache.set(service, serviceTypePromise);
+
+    return await serviceTypePromise;
+  }
+
+  async callService(service: string, request: unknown): Promise<unknown> {
+    if (!this._rosClient) {
+      throw new Error("Not connected");
+    }
+
+    if (!isRecord(request)) {
+      throw new Error("RosbridgePlayer#callService request must be an object");
+    }
+
+    const serviceType = await this.getServiceType(service);
+
+    // Create a proxy object for dispatching our service call
+    const proxy = new roslib.Service({
+      ros: this._rosClient,
+      name: service,
+      serviceType,
+    });
+
+    // Send the service request
+    return await new Promise<Record<string, unknown>>((resolve, reject) => {
+      proxy.callService(
+        request,
+        (response: Record<string, unknown>) => resolve(response),
+        (error: Error) => reject(error),
+      );
+    });
   }
 
   // Bunch of unsupported stuff. Just don't do anything for these.

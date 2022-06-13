@@ -612,6 +612,10 @@ export default class Ros2Player implements Player {
     // }
   }
 
+  async callService(): Promise<unknown> {
+    throw new Error("Service calls are not supported by this data source");
+  }
+
   // Bunch of unsupported stuff. Just don't do anything for these.
   requestBackfill(): void {
     // no-op

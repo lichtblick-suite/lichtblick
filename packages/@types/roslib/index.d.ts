@@ -29,6 +29,12 @@ declare module "roslib" {
       errorCallback: (error: Error) => void,
     ): void;
 
+    getServiceType(
+      service: string,
+      cb: (result: string) => void,
+      errorCallback: (error: Error) => void,
+    ): void;
+
     close(): void;
   }
 
@@ -50,5 +56,20 @@ declare module "roslib" {
     unadvertise(): void;
   }
 
-  export { Ros, Topic };
+  type ServiceOptions = {
+    ros: Ros;
+    name: string;
+    serviceType: string;
+  };
+
+  class Service {
+    constructor(options: ServiceOptions);
+    callService(
+      request: Message,
+      cb: (response: Message) => void,
+      errorCallback: (error: Error) => void,
+    ): void;
+  }
+
+  export { Ros, Topic, Service };
 }

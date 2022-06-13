@@ -177,6 +177,8 @@ export default class OrderedStampPlayer implements Player {
   setParameter = (key: string, value: ParameterValue): void =>
     this._player.setParameter(key, value);
   publish = (request: PublishPayload): void => this._player.publish(request);
+  callService = async (service: string, request: unknown): Promise<unknown> =>
+    await this._player.callService(service, request);
   startPlayback = (): void => this._player.startPlayback();
   pausePlayback = (): void => this._player.pausePlayback();
   setPlaybackSpeed = (speed: number): void => this._player.setPlaybackSpeed(speed);

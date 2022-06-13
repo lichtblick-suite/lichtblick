@@ -66,6 +66,9 @@ export default class FakePlayer implements Player {
   publish = (): void => {
     // no-op
   };
+  callService = async (): Promise<void> => {
+    // no-op
+  };
   setPublishers = (pubs: AdvertiseOptions[]): void => {
     this.publishers = pubs;
   };

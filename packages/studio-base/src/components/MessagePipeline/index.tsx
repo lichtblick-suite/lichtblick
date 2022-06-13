@@ -54,6 +54,7 @@ export type MessagePipelineContext = {
   setPublishers: (id: string, publishersForId: AdvertiseOptions[]) => void;
   setParameter: (key: string, value: ParameterValue) => void;
   publish: (request: PublishPayload) => void;
+  callService: (service: string, request: unknown) => Promise<unknown>;
   startPlayback?: () => void;
   pausePlayback?: () => void;
   setPlaybackSpeed?: (speed: number) => void;
@@ -188,6 +189,11 @@ export function MessagePipelineProvider({
     (request: PublishPayload) => (player ? player.publish(request) : undefined),
     [player],
   );
+  const callService = useCallback(
+    async (service: string, request: unknown) =>
+      await (player ? player.callService(service, request) : Promise.reject()),
+    [player],
+  );
   const startPlayback = useMemo(
     () =>
       capabilities.includes(PlayerCapabilities.playbackControl)
@@ -245,6 +251,7 @@ export function MessagePipelineProvider({
         setPublishers,
         setParameter,
         publish,
+        callService,
         startPlayback,
         pausePlayback,
         setPlaybackSpeed,

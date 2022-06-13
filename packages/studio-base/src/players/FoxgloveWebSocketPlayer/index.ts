@@ -449,6 +449,10 @@ export default class FoxgloveWebSocketPlayer implements Player {
     throw new Error("Publishing is not supported by the Foxglove WebSocket connection");
   }
 
+  async callService(): Promise<unknown> {
+    throw new Error("Service calls are not supported by the Foxglove WebSocket connection");
+  }
+
   requestBackfill(): void {}
   setGlobalVariables(): void {}
 }
