@@ -4,6 +4,38 @@
 
 import { SettingsTreeRoots } from "@foxglove/studio-base/components/SettingsTreeEditor/types";
 
+import { DiagnosticSummaryConfig } from "./util";
+
+export function buildSummarySettingsTree(
+  config: DiagnosticSummaryConfig,
+  topicToRender: string,
+  availableTopics: readonly string[],
+): SettingsTreeRoots {
+  const topicOptions = availableTopics.map((topic) => ({ label: topic, value: topic }));
+  const topicIsAvailable = availableTopics.includes(topicToRender);
+  if (!topicIsAvailable) {
+    topicOptions.unshift({ value: topicToRender, label: topicToRender });
+  }
+  const topicError = topicIsAvailable ? undefined : `Topic ${topicToRender} is not available`;
+
+  return {
+    general: {
+      label: "General",
+      icon: "Settings",
+      fields: {
+        topicToRender: {
+          label: "Topic",
+          input: "select",
+          value: topicToRender,
+          error: topicError,
+          options: topicOptions,
+        },
+        sortByLevel: { label: "Sort By Level", input: "boolean", value: config.sortByLevel },
+      },
+    },
+  };
+}
+
 export function buildStatusPanelSettingsTree(
   topicToRender: string,
   availableTopics: readonly string[],

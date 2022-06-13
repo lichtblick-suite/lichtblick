@@ -18,14 +18,13 @@ import {
   ISelectableOption,
   useTheme,
 } from "@fluentui/react";
-import DatabaseIcon from "@mdi/svg/svg/database.svg";
 import PinIcon from "@mdi/svg/svg/pin.svg";
-import { Theme, Menu, MenuItem } from "@mui/material";
+import { Theme } from "@mui/material";
 import { makeStyles } from "@mui/styles";
 import cx from "classnames";
 import produce from "immer";
-import { compact, uniq } from "lodash";
-import { useCallback, useEffect, useMemo, useRef, useState, MouseEvent } from "react";
+import { compact, set, uniq } from "lodash";
+import { useCallback, useEffect, useMemo } from "react";
 import { List, AutoSizer, ListRowProps } from "react-virtualized";
 
 import { filterMap } from "@foxglove/den/collection";
@@ -36,20 +35,18 @@ import { LegacyInput } from "@foxglove/studio-base/components/LegacyStyledCompon
 import Panel from "@foxglove/studio-base/components/Panel";
 import { usePanelContext } from "@foxglove/studio-base/components/PanelContext";
 import PanelToolbar from "@foxglove/studio-base/components/PanelToolbar";
-import ToolbarIconButton from "@foxglove/studio-base/components/PanelToolbar/ToolbarIconButton";
-import {
-  SettingsTreeAction,
-  SettingsTreeRoots,
-} from "@foxglove/studio-base/components/SettingsTreeEditor/types";
+import { SettingsTreeAction } from "@foxglove/studio-base/components/SettingsTreeEditor/types";
 import Stack from "@foxglove/studio-base/components/Stack";
 import helpContent from "@foxglove/studio-base/panels/diagnostics/DiagnosticSummary.help.md";
 import useDiagnostics from "@foxglove/studio-base/panels/diagnostics/useDiagnostics";
 import { usePanelSettingsTreeUpdate } from "@foxglove/studio-base/providers/PanelSettingsEditorContextProvider";
+import { SaveConfig } from "@foxglove/studio-base/types/panels";
 import { DIAGNOSTIC_TOPIC } from "@foxglove/studio-base/util/globalConstants";
 import toggle from "@foxglove/studio-base/util/toggle";
 
+import { buildSummarySettingsTree } from "./settings";
 import {
-  DiagnosticId,
+  DiagnosticSummaryConfig,
   DiagnosticInfo,
   DiagnosticStatusConfig,
   getDiagnosticsByLevel,
@@ -148,30 +145,10 @@ const NodeRow = React.memo(function NodeRow(props: NodeRowProps) {
   );
 });
 
-type Config = {
-  minLevel: number;
-  pinnedIds: DiagnosticId[];
-  topicToRender: string;
-  hardwareIdFilter: string;
-  sortByLevel?: boolean;
-};
-
 type Props = {
-  config: Config;
-  saveConfig: (arg0: Partial<Config>) => void;
+  config: DiagnosticSummaryConfig;
+  saveConfig: SaveConfig<DiagnosticSummaryConfig>;
 };
-
-function buildSettingsTree(config: Config): SettingsTreeRoots {
-  return {
-    general: {
-      label: "General",
-      icon: "Settings",
-      fields: {
-        sortByLevel: { label: "Sort By Level", input: "boolean", value: config.sortByLevel },
-      },
-    },
-  };
-}
 
 const ALLOWED_DATATYPES: string[] = [
   "diagnostic_msgs/DiagnosticArray",
@@ -228,31 +205,6 @@ function DiagnosticSummary(props: Props): JSX.Element {
     [pinnedIds, saveConfig],
   );
 
-  const actionHandler = useCallback(
-    (action: SettingsTreeAction) => {
-      if (action.action !== "update") {
-        return;
-      }
-
-      const { input, path, value } = action.payload;
-      if (input === "boolean" && path[1] === "sortByLevel") {
-        saveConfig(
-          produce(config, (draft) => {
-            draft.sortByLevel = value;
-          }),
-        );
-      }
-    },
-    [config, saveConfig],
-  );
-
-  useEffect(() => {
-    updatePanelSettingsTree(panelId, {
-      actionHandler,
-      roots: buildSettingsTree(config),
-    });
-  }, [actionHandler, config, panelId, updatePanelSettingsTree]);
-
   const showDetails = useCallback(
     (info: DiagnosticInfo) => {
       openSiblingPanel({
@@ -303,9 +255,6 @@ function DiagnosticSummary(props: Props): JSX.Element {
     />
   );
 
-  const menuRef = useRef<HTMLDivElement>(ReactNull);
-  const [topicMenuOpen, setTopicMenuOpen] = useState(false);
-
   // Filter down all topics to those that conform to our supported datatypes
   const availableTopics = useMemo(() => {
     const filtered = topics
@@ -315,21 +264,6 @@ function DiagnosticSummary(props: Props): JSX.Element {
     // Keeps only the first occurrence of each topic.
     return uniq([DIAGNOSTIC_TOPIC, ...filtered, topicToRender]);
   }, [topics, topicToRender]);
-
-  const changeTopicToRender = useCallback(
-    (newTopicToRender: string) => {
-      saveConfig({ topicToRender: newTopicToRender });
-      setTopicMenuOpen(false);
-    },
-    [saveConfig],
-  );
-
-  const toggleTopicMenuAction = useCallback((ev: MouseEvent<HTMLElement>) => {
-    // To accurately position the topic dropdown menu we set the location of our menu ref to the
-    // click location
-    menuRef.current!.style.left = `${ev.clientX}px`;
-    setTopicMenuOpen((isOpen) => !isOpen);
-  }, []);
 
   const diagnostics = useDiagnostics(topicToRender);
   const summary = useMemo(() => {
@@ -386,6 +320,25 @@ function DiagnosticSummary(props: Props): JSX.Element {
     );
   }, [diagnostics, hardwareIdFilter, pinnedIds, renderRow, sortByLevel, minLevel, topicToRender]);
 
+  const actionHandler = useCallback(
+    (action: SettingsTreeAction) => {
+      if (action.action !== "update") {
+        return;
+      }
+
+      const { path, value } = action.payload;
+      saveConfig(produce<DiagnosticSummaryConfig>((draft) => set(draft, path.slice(1), value)));
+    },
+    [saveConfig],
+  );
+
+  useEffect(() => {
+    updatePanelSettingsTree(panelId, {
+      actionHandler,
+      roots: buildSummarySettingsTree(config, topicToRender, availableTopics),
+    });
+  }, [actionHandler, availableTopics, config, panelId, topicToRender, updatePanelSettingsTree]);
+
   const renderOption = (option: ISelectableOption | undefined) =>
     option ? (
       <div
@@ -404,41 +357,7 @@ function DiagnosticSummary(props: Props): JSX.Element {
 
   return (
     <Stack flex="auto">
-      <PanelToolbar
-        helpContent={helpContent}
-        additionalIcons={
-          <>
-            <div ref={menuRef}>
-              <ToolbarIconButton
-                title={`Supported datatypes: ${ALLOWED_DATATYPES.join(", ")}`}
-                data-test={"topic-set"}
-                onClick={toggleTopicMenuAction}
-                subMenuActive={topicMenuOpen}
-              >
-                <DatabaseIcon />
-              </ToolbarIconButton>
-            </div>
-            <Menu
-              anchorEl={menuRef.current}
-              open={topicMenuOpen}
-              onClose={() => setTopicMenuOpen(false)}
-              MenuListProps={{
-                dense: true,
-              }}
-            >
-              {availableTopics.map((topic) => (
-                <MenuItem
-                  key={topic}
-                  onClick={() => changeTopicToRender(topic)}
-                  selected={topicToRender === topic}
-                >
-                  {topic}
-                </MenuItem>
-              ))}
-            </Menu>
-          </>
-        }
-      >
+      <PanelToolbar helpContent={helpContent}>
         <Dropdown
           styles={dropdownStyles}
           onRenderOption={renderOption}
@@ -460,7 +379,7 @@ function DiagnosticSummary(props: Props): JSX.Element {
   );
 }
 
-const defaultConfig: Config = {
+const defaultConfig: DiagnosticSummaryConfig = {
   minLevel: 0,
   pinnedIds: [],
   hardwareIdFilter: "",

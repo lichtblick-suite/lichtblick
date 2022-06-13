@@ -64,6 +64,14 @@ export function Basic(): JSX.Element {
   );
 }
 
+export function WithSettings(): JSX.Element {
+  return (
+    <PanelSetup fixture={fixture} includeSettings>
+      <DiagnosticSummary />
+    </PanelSetup>
+  );
+}
+
 export function WithPinnedNodes(): JSX.Element {
   return (
     <PanelSetup fixture={fixture}>

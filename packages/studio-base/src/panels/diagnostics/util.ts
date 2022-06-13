@@ -52,6 +52,14 @@ export type DiagnosticStatusConfig = {
   collapsedSections: { name: string; section: string }[];
 };
 
+export type DiagnosticSummaryConfig = {
+  minLevel: number;
+  pinnedIds: DiagnosticId[];
+  topicToRender: string;
+  hardwareIdFilter: string;
+  sortByLevel?: boolean;
+};
+
 export type DiagnosticId = string & ToString;
 
 export type KeyValue = { key: string; value: string };
