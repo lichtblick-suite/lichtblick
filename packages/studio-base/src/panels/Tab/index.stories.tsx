@@ -366,7 +366,7 @@ storiesOf("panels/Tab", module)
         onMount={() => {
           setTimeout(async () => {
             await tick();
-            const tabs = document.querySelectorAll("[draggable=true]");
+            const tabs = document.querySelectorAll("[data-test=toolbar-tab]");
             const toolbar = document.querySelectorAll('[data-test="toolbar-droppable"]')[1];
 
             // Drag and drop the first tab onto the toolbar of the second tab panel

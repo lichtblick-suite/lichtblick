@@ -214,6 +214,7 @@ export function ToolbarTab(props: Props): JSX.Element {
       ref={innerRef}
       title={tabTitle ? tabTitle : "Enter tab name"}
       tabCount={tabCount}
+      data-test="toolbar-tab"
     >
       {highlight != undefined && <DropIndicator direction={highlight} />}
       <InputBase

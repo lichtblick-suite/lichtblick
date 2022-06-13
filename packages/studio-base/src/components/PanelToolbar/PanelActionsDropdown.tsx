@@ -12,7 +12,7 @@
 //   You may not use this file except in compliance with the License.
 
 import { ContextualMenu, IContextualMenuItem, useTheme } from "@fluentui/react";
-import SettingsIcon from "@mui/icons-material/Settings";
+import MoreVertIcon from "@mui/icons-material/MoreVert";
 import { useCallback, useContext, useMemo, useRef } from "react";
 import { MosaicContext, MosaicNode, MosaicWindowContext } from "react-mosaic-component";
 
@@ -20,11 +20,7 @@ import PanelContext from "@foxglove/studio-base/components/PanelContext";
 import PanelList, { PanelSelection } from "@foxglove/studio-base/components/PanelList";
 import ToolbarIconButton from "@foxglove/studio-base/components/PanelToolbar/ToolbarIconButton";
 import { getPanelTypeFromMosaic } from "@foxglove/studio-base/components/PanelToolbar/utils";
-import {
-  useCurrentLayoutActions,
-  useSelectedPanels,
-} from "@foxglove/studio-base/context/CurrentLayoutContext";
-import { useWorkspace } from "@foxglove/studio-base/context/WorkspaceContext";
+import { useCurrentLayoutActions } from "@foxglove/studio-base/context/CurrentLayoutContext";
 
 type Props = {
   isOpen: boolean;
@@ -44,8 +40,6 @@ export function PanelActionsDropdown({ isOpen, setIsOpen, isUnknownPanel }: Prop
     splitPanel,
     swapPanel,
   } = useCurrentLayoutActions();
-  const { setSelectedPanelIds } = useSelectedPanels();
-
   const getPanelType = useCallback(
     () => getPanelTypeFromMosaic(mosaicWindowActions, mosaicActions),
     [mosaicActions, mosaicWindowActions],
@@ -101,28 +95,14 @@ export function PanelActionsDropdown({ isOpen, setIsOpen, isUnknownPanel }: Prop
     [mosaicActions, mosaicWindowActions, panelContext?.type, setIsOpen, swapPanel, tabId],
   );
 
-  const { openPanelSettings } = useWorkspace();
-  const openSettings = useCallback(() => {
-    if (panelContext?.id != undefined) {
-      setSelectedPanelIds([panelContext.id]);
-      openPanelSettings();
-    }
-  }, [setSelectedPanelIds, openPanelSettings, panelContext?.id]);
-
   const theme = useTheme();
 
   const menuItems: IContextualMenuItem[] = useMemo(() => {
     const items: IContextualMenuItem[] = [
       {
-        key: "settings",
-        text: "Panel settings",
-        onClick: openSettings,
-        iconProps: { iconName: "SingleColumnEdit" },
-      },
-      {
         key: "change-panel",
         text: "Change panel",
-        onClick: openSettings,
+        onClick: () => undefined,
         iconProps: {
           iconName: "ShapeSubtract",
           styles: { root: { height: 24, marginLeft: 2, marginRight: 6 } },
@@ -172,6 +152,20 @@ export function PanelActionsDropdown({ isOpen, setIsOpen, isUnknownPanel }: Prop
         },
       );
     }
+
+    if (panelContext?.isFullscreen !== true) {
+      items.push({
+        key: "enter-fullscreen",
+        text: "Fullscreen",
+        onClick: panelContext?.enterFullscreen,
+        iconProps: {
+          iconName: "FullScreenMaximize",
+          styles: { root: { height: 24, marginLeft: 2, marginRight: 6 } },
+        },
+        "data-test": "panel-menu-fullscreen",
+      });
+    }
+
     items.push({
       key: "remove",
       text: "Remove panel",
@@ -179,8 +173,19 @@ export function PanelActionsDropdown({ isOpen, setIsOpen, isUnknownPanel }: Prop
       iconProps: { iconName: "Delete" },
       "data-test": "panel-menu-remove",
     });
+
     return items;
-  }, [close, isUnknownPanel, openSettings, panelContext, split, swap, theme]);
+  }, [
+    close,
+    isUnknownPanel,
+    panelContext?.enterFullscreen,
+    panelContext?.id,
+    panelContext?.isFullscreen,
+    panelContext?.title,
+    split,
+    swap,
+    theme.semanticColors.menuBackground,
+  ]);
 
   const buttonRef = useRef<HTMLDivElement>(ReactNull);
 
@@ -198,7 +203,7 @@ export function PanelActionsDropdown({ isOpen, setIsOpen, isUnknownPanel }: Prop
         onDismiss={() => setIsOpen(false)}
       />
       <ToolbarIconButton title="More" data-test="panel-menu" onClick={() => setIsOpen(!isOpen)}>
-        <SettingsIcon />
+        <MoreVertIcon />
       </ToolbarIconButton>
     </div>
   );
