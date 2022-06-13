@@ -2,6 +2,7 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
+import CheckIcon from "@mui/icons-material/Check";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
 import { Menu, MenuItem, IconButton, ListItemIcon, ListItemText } from "@mui/material";
 import { useState } from "react";
@@ -29,15 +30,17 @@ export function NodeActionsMenu({
     setAnchorEl(undefined);
   };
 
+  const anyItemHasIcon = actions.some((action) => action.icon);
+
   return (
     <>
       <IconButton
         title="More actions"
-        id="node-actions-button"
-        aria-controls={open ? "noce-actions-menu" : undefined}
+        aria-controls={open ? "node-actions-menu" : undefined}
         aria-haspopup="true"
         aria-expanded={open ? "true" : undefined}
         onClick={handleClick}
+        data-test="node-actions-menu-button"
         size="small"
       >
         <MoreVertIcon fontSize="small" />
@@ -48,7 +51,7 @@ export function NodeActionsMenu({
         open={open}
         onClose={() => setAnchorEl(undefined)}
         MenuListProps={{
-          "aria-labelledby": "node-actions-button",
+          "aria-label": "node actions button",
         }}
       >
         {actions.map((action) => {
@@ -58,6 +61,12 @@ export function NodeActionsMenu({
               {Icon && (
                 <ListItemIcon>
                   <Icon fontSize="small" />
+                </ListItemIcon>
+              )}
+              {/* Use hidden icon for consistent padding */}
+              {anyItemHasIcon && !Icon && (
+                <ListItemIcon style={{ visibility: "hidden" }}>
+                  <CheckIcon />
                 </ListItemIcon>
               )}
               <ListItemText>{action.label}</ListItemText>

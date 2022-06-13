@@ -4,6 +4,7 @@
 
 import AccessTimeIcon from "@mui/icons-material/AccessTime";
 import BlurOnIcon from "@mui/icons-material/BlurOn";
+import CheckIcon from "@mui/icons-material/Check";
 import CircleIcon from "@mui/icons-material/Circle";
 import DirectionsWalkIcon from "@mui/icons-material/DirectionsWalk";
 import FlagIcon from "@mui/icons-material/Flag";
@@ -35,6 +36,7 @@ export default {
   Background: LayersIcon,
   Camera: PhotoCameraIcon,
   Cells: ViewComfyIcon,
+  Check: CheckIcon,
   Circle: CircleIcon,
   Clock: AccessTimeIcon,
   Collapse: UnfoldLessIcon,
