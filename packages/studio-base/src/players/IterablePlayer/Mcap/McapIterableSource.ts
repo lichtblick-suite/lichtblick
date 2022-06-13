@@ -81,7 +81,11 @@ export class McapIterableSource implements IIterableSource {
     return this._sourceImpl.messageIterator(opt);
   }
 
-  async getBackfillMessages(_args: GetBackfillMessagesArgs): Promise<MessageEvent<unknown>[]> {
-    return [];
+  async getBackfillMessages(args: GetBackfillMessagesArgs): Promise<MessageEvent<unknown>[]> {
+    if (!this._sourceImpl) {
+      throw new Error("Invariant: uninitialized");
+    }
+
+    return await this._sourceImpl.getBackfillMessages(args);
   }
 }
