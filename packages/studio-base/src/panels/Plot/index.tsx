@@ -15,7 +15,7 @@ import { useTheme } from "@fluentui/react";
 import DownloadIcon from "@mui/icons-material/Download";
 import { Typography } from "@mui/material";
 import produce from "immer";
-import { compact, set, uniq } from "lodash";
+import { compact, isEmpty, set, uniq } from "lodash";
 import memoizeWeak from "memoize-weak";
 import { useEffect, useCallback, useMemo, ComponentProps } from "react";
 
@@ -497,7 +497,7 @@ function Plot(props: Props) {
         }
       >
         <Typography noWrap variant="body2" color="text.secondary" flex="auto">
-          {title}
+          {isEmpty(title) ? "Plot" : title}
         </Typography>
       </PanelToolbar>
       <Stack

@@ -379,6 +379,16 @@ LineGraph.parameters = {
   useReadySignal: true,
 };
 
+LineGraphWithNoTitle.storyName = "line graph with no title";
+export function LineGraphWithNoTitle(): JSX.Element {
+  const readySignal = useReadySignal({ count: 3 });
+  const pauseFrame = useCallback(() => readySignal, [readySignal]);
+  return <PlotWrapper pauseFrame={pauseFrame} config={{ ...exampleConfig, title: undefined }} />;
+}
+LineGraphWithNoTitle.parameters = {
+  useReadySignal: true,
+};
+
 LineGraphWithSettings.storyName = "line graph with settings";
 export function LineGraphWithSettings(): JSX.Element {
   const readySignal = useReadySignal({ count: 3 });
