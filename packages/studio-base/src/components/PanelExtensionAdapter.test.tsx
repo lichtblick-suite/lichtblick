@@ -5,8 +5,9 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 import { mount } from "enzyme";
+import { act } from "react-dom/test-utils";
 
-import { PanelExtensionContext } from "@foxglove/studio";
+import { PanelExtensionContext, RenderState } from "@foxglove/studio";
 import MockPanelContextProvider from "@foxglove/studio-base/components/MockPanelContextProvider";
 import PanelExtensionAdapter from "@foxglove/studio-base/components/PanelExtensionAdapter";
 import { PlayerCapabilities } from "@foxglove/studio-base/players/types";
@@ -45,6 +46,74 @@ describe("PanelExtensionAdapter", () => {
 
     // force a re-render to make sure we call init panel once
     handle.setProps({});
+  });
+
+  it("sets didSeek=true when seeking", async () => {
+    const mockRAF = jest
+      .spyOn(window, "requestAnimationFrame")
+      .mockImplementation((cb) => queueMicrotask(() => cb(performance.now())) as any);
+
+    const renderStates: RenderState[] = [];
+
+    const initPanel = jest.fn((context: PanelExtensionContext) => {
+      context.watch("currentFrame");
+      context.watch("didSeek");
+      context.subscribe(["x"]);
+      context.onRender = (renderState, done) => {
+        renderStates.push({ ...renderState });
+        done();
+      };
+    });
+
+    const config = {};
+    const saveConfig = () => {};
+
+    const message = { topic: "x", receiveTime: { sec: 0, nsec: 1 }, sizeInBytes: 0, message: 42 };
+
+    const Wrapper = ({ lastSeekTime }: { lastSeekTime?: number }) => {
+      return (
+        <ThemeProvider isDark>
+          <MockPanelContextProvider>
+            <PanelSetup
+              fixture={{
+                activeData: { lastSeekTime },
+                frame: {
+                  x: [message],
+                },
+              }}
+            >
+              <PanelExtensionAdapter
+                config={config}
+                saveConfig={saveConfig}
+                initPanel={initPanel}
+              />
+            </PanelSetup>
+          </MockPanelContextProvider>
+        </ThemeProvider>
+      );
+    };
+
+    const wrapper = mount(<Wrapper lastSeekTime={undefined} />);
+    expect(initPanel).toHaveBeenCalled();
+
+    wrapper.setProps({ lastSeekTime: 1 });
+    await act(async () => await Promise.resolve());
+    wrapper.setProps({ lastSeekTime: 1 });
+    await act(async () => await Promise.resolve());
+    wrapper.setProps({ lastSeekTime: 2 });
+    await act(async () => await Promise.resolve());
+    expect(renderStates).toEqual([
+      { currentFrame: [message], didSeek: true },
+      { currentFrame: [message], didSeek: false },
+      { currentFrame: [message], didSeek: false },
+      { currentFrame: [message], didSeek: false },
+      { currentFrame: [message], didSeek: false },
+      { currentFrame: [message], didSeek: false },
+      { currentFrame: [message], didSeek: false },
+      { currentFrame: [message], didSeek: true },
+      { currentFrame: [message], didSeek: false },
+    ]);
+    mockRAF.mockRestore();
   });
 
   it("should support advertising on a topic", (done) => {

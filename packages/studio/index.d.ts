@@ -102,6 +102,13 @@ declare module "@foxglove/studio" {
     currentFrame?: readonly MessageEvent<unknown>[];
 
     /**
+     * True if the data source performed a seek. This indicates that some data may have been skipped
+     * (never appeared in the `currentFrame`), so panels should clear out any stale state to avoid
+     * displaying incorrect data.
+     */
+    didSeek?: boolean;
+
+    /**
      * All available messages. Best-effort list of all available messages.
      */
     allFrames?: readonly MessageEvent<unknown>[];
