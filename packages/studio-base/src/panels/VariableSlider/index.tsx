@@ -69,7 +69,7 @@ function VariableSliderPanel(props: Props): React.ReactElement {
 
   const globalVariableValue = globalVariables[globalVariableName];
 
-  const { id: panelId, saveConfig } = usePanelContext();
+  const { saveConfig } = usePanelContext();
   const updatePanelSettingsTree = usePanelSettingsTreeUpdate();
 
   const theme = useTheme();
@@ -81,7 +81,7 @@ function VariableSliderPanel(props: Props): React.ReactElement {
       }
 
       saveConfig(
-        produce(props.config, (draft) => {
+        produce((draft) => {
           const path = action.payload.path.slice(1);
           if (["min", "max"].includes(path[0] ?? "")) {
             set(draft, ["sliderProps", ...path], action.payload.value);
@@ -98,15 +98,15 @@ function VariableSliderPanel(props: Props): React.ReactElement {
         }),
       );
     },
-    [props.config, saveConfig],
+    [saveConfig],
   );
 
   useEffect(() => {
-    updatePanelSettingsTree(panelId, {
+    updatePanelSettingsTree({
       actionHandler,
       roots: buildSettingsTree(props.config),
     });
-  }, [actionHandler, panelId, props.config, updatePanelSettingsTree]);
+  }, [actionHandler, props.config, updatePanelSettingsTree]);
 
   const sliderOnChange = (_event: Event, value: number | number[]) => {
     if (value !== globalVariableValue) {

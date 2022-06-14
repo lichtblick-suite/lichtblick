@@ -20,7 +20,6 @@ import { useUpdateEffect } from "react-use";
 import { useDataSourceInfo } from "@foxglove/studio-base/PanelAPI";
 import { useMessagePipeline } from "@foxglove/studio-base/components/MessagePipeline";
 import Panel from "@foxglove/studio-base/components/Panel";
-import { usePanelContext } from "@foxglove/studio-base/components/PanelContext";
 import {
   PanelContextMenu,
   PanelContextMenuItem,
@@ -81,7 +80,6 @@ function ImageView(props: Props) {
   );
   const [activePixelData, setActivePixelData] = useState<PixelData | undefined>();
   const updatePanelSettingsTree = usePanelSettingsTreeUpdate();
-  const { id: panelId } = usePanelContext();
 
   const imageTopics = useMemo(() => {
     return topics.filter(({ datatype }) => NORMALIZABLE_IMAGE_DATATYPES.includes(datatype));
@@ -159,7 +157,7 @@ function ImageView(props: Props) {
   }, [topics]);
 
   useEffect(() => {
-    updatePanelSettingsTree(panelId, {
+    updatePanelSettingsTree({
       actionHandler,
       roots: buildSettingsTree({
         config,
@@ -175,7 +173,6 @@ function ImageView(props: Props) {
     enabledMarkerTopics,
     imageTopics,
     markerTopics,
-    panelId,
     relatedMarkerTopics,
     updatePanelSettingsTree,
   ]);

@@ -347,13 +347,12 @@ function PanelExtensionAdapter(props: PanelExtensionAdapterProps): JSX.Element {
   useMessagePipeline(messagePipelineSelector);
 
   const updatePanelSettingsTree = usePanelSettingsTreeUpdate();
-  const { id: panelLayoutId } = usePanelContext();
 
   const updateSettings = useCallback(
     (settings: SettingsTree) => {
-      updatePanelSettingsTree(panelLayoutId, settings);
+      updatePanelSettingsTree(settings);
     },
-    [panelLayoutId, updatePanelSettingsTree],
+    [updatePanelSettingsTree],
   );
 
   type PartialPanelExtensionContext = Omit<PanelExtensionContext, "panelElement">;

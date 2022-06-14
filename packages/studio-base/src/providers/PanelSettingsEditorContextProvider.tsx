@@ -2,11 +2,12 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { ReactNode } from "react";
+import { ReactNode, useCallback } from "react";
 import { DeepReadonly } from "ts-essentials";
 import create, { StoreApi } from "zustand";
 import createContext from "zustand/context";
 
+import { usePanelContext } from "@foxglove/studio-base/components/PanelContext";
 import { SettingsTree } from "@foxglove/studio-base/components/SettingsTreeEditor/types";
 
 type ImmutableSettingsTree = DeepReadonly<SettingsTree>;
@@ -36,8 +37,23 @@ export function createSettingsEditorStore(): StoreApi<PanelSettingsEditorStore> 
 
 export const usePanelSettingsEditorStore = useStore;
 
-export function usePanelSettingsTreeUpdate(): PanelSettingsEditorStore["updateSettingsTree"] {
-  return useStore((state) => state.updateSettingsTree);
+const updateSettingsTreeSelector = (store: PanelSettingsEditorStore) => store.updateSettingsTree;
+
+/**
+ * Returns updater function for the current panels settings tree.
+ */
+export function usePanelSettingsTreeUpdate(): (newTree: ImmutableSettingsTree) => void {
+  const { id } = usePanelContext();
+  const updateStoreTree = useStore(updateSettingsTreeSelector);
+
+  const updateSettingsTree = useCallback(
+    (newTree: ImmutableSettingsTree) => {
+      updateStoreTree(id, newTree);
+    },
+    [id, updateStoreTree],
+  );
+
+  return updateSettingsTree;
 }
 
 export function PanelSettingsEditorContextProvider({

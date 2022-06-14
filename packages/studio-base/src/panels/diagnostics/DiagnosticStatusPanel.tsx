@@ -49,7 +49,7 @@ const ALLOWED_DATATYPES: string[] = [
 function DiagnosticStatusPanel(props: Props) {
   const { saveConfig, config } = props;
   const { topics } = useDataSourceInfo();
-  const { id: panelId, openSiblingPanel } = usePanelContext();
+  const { openSiblingPanel } = usePanelContext();
   const {
     selectedHardwareId,
     selectedName,
@@ -135,17 +135,17 @@ function DiagnosticStatusPanel(props: Props) {
       }
 
       const { path, value } = action.payload;
-      saveConfig(produce<Config>((draft) => set(draft, path.slice(1), value)));
+      saveConfig(produce((draft) => set(draft, path.slice(1), value)));
     },
     [saveConfig],
   );
 
   useEffect(() => {
-    updatePanelSettingsTree(panelId, {
+    updatePanelSettingsTree({
       actionHandler,
       roots: buildStatusPanelSettingsTree(topicToRender, availableTopics),
     });
-  }, [actionHandler, availableTopics, panelId, topicToRender, updatePanelSettingsTree]);
+  }, [actionHandler, availableTopics, topicToRender, updatePanelSettingsTree]);
 
   return (
     <Stack flex="auto" overflow="hidden">

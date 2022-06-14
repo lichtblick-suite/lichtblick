@@ -20,7 +20,6 @@ import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } fr
 
 import { useDataSourceInfo, useMessagesByTopic } from "@foxglove/studio-base/PanelAPI";
 import Panel from "@foxglove/studio-base/components/Panel";
-import { usePanelContext } from "@foxglove/studio-base/components/PanelContext";
 import PanelToolbar from "@foxglove/studio-base/components/PanelToolbar";
 import { SettingsTreeAction } from "@foxglove/studio-base/components/SettingsTreeEditor/types";
 import Stack from "@foxglove/studio-base/components/Stack";
@@ -67,7 +66,6 @@ const LogPanel = React.memo(({ config, saveConfig }: Props) => {
   const { topics } = useDataSourceInfo();
   const { minLogLevel, searchTerms } = config;
   const { timeFormat, timeZone } = useAppTimeFormat();
-  const { id: panelId } = usePanelContext();
 
   const updatePanelSettingsTree = usePanelSettingsTreeUpdate();
 
@@ -118,11 +116,11 @@ const LogPanel = React.memo(({ config, saveConfig }: Props) => {
   );
 
   useEffect(() => {
-    updatePanelSettingsTree(panelId, {
+    updatePanelSettingsTree({
       actionHandler,
       roots: buildSettingsTree(topicToRender, availableTopics),
     });
-  }, [actionHandler, availableTopics, panelId, topicToRender, updatePanelSettingsTree]);
+  }, [actionHandler, availableTopics, topicToRender, updatePanelSettingsTree]);
 
   // avoid making new sets for node names
   // the filter bar uses the node names during on-demand filtering

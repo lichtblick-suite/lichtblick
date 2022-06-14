@@ -45,7 +45,6 @@ import {
   useMessagePipelineGetter,
 } from "@foxglove/studio-base/components/MessagePipeline";
 import Panel from "@foxglove/studio-base/components/Panel";
-import { usePanelContext } from "@foxglove/studio-base/components/PanelContext";
 import PanelToolbar, {
   PANEL_TOOLBAR_MIN_HEIGHT,
 } from "@foxglove/studio-base/components/PanelToolbar";
@@ -58,7 +57,7 @@ import {
 } from "@foxglove/studio-base/components/TimeBasedChart";
 import { usePanelSettingsTreeUpdate } from "@foxglove/studio-base/providers/PanelSettingsEditorContextProvider";
 import { OnClickArg as OnChartClickArgs } from "@foxglove/studio-base/src/components/Chart";
-import { OpenSiblingPanel, PanelConfig } from "@foxglove/studio-base/types/panels";
+import { OpenSiblingPanel, PanelConfig, SaveConfig } from "@foxglove/studio-base/types/panels";
 import { getTimestampForMessage } from "@foxglove/studio-base/util/time";
 
 import PlotChart from "./PlotChart";
@@ -92,7 +91,7 @@ export function openSiblingPlotPanel(openSiblingPanel: OpenSiblingPanel, topicNa
 
 type Props = {
   config: PlotConfig;
-  saveConfig: (arg0: Partial<PlotConfig>) => void;
+  saveConfig: SaveConfig<PlotConfig>;
 };
 
 // messagePathItems contains the whole parsed message, and we don't need to cache all of that.
@@ -447,7 +446,6 @@ function Plot(props: Props) {
     [messagePipeline, xAxisVal],
   );
 
-  const { id: panelId } = usePanelContext();
   const updatePanelSettingsTree = usePanelSettingsTreeUpdate();
 
   const actionHandler = useCallback(
@@ -458,19 +456,19 @@ function Plot(props: Props) {
 
       const { path, value } = action.payload;
       saveConfig(
-        produce(config, (draft) => {
+        produce((draft) => {
           set(draft, path.slice(1), value);
         }),
       );
     },
-    [config, saveConfig],
+    [saveConfig],
   );
   useEffect(() => {
-    updatePanelSettingsTree(panelId, {
+    updatePanelSettingsTree({
       actionHandler,
       roots: buildSettingsTree(config),
     });
-  }, [actionHandler, config, panelId, updatePanelSettingsTree]);
+  }, [actionHandler, config, updatePanelSettingsTree]);
 
   const stackDirection = useMemo(
     () => (legendDisplay === "top" ? "column" : "row"),

@@ -195,7 +195,7 @@ function DiagnosticSummary(props: Props): JSX.Element {
   const { config, saveConfig } = props;
   const { topics } = useDataSourceInfo();
   const { minLevel, topicToRender, pinnedIds, hardwareIdFilter, sortByLevel = true } = config;
-  const { id: panelId, openSiblingPanel } = usePanelContext();
+  const { openSiblingPanel } = usePanelContext();
   const updatePanelSettingsTree = usePanelSettingsTreeUpdate();
 
   const togglePinned = useCallback(
@@ -333,11 +333,11 @@ function DiagnosticSummary(props: Props): JSX.Element {
   );
 
   useEffect(() => {
-    updatePanelSettingsTree(panelId, {
+    updatePanelSettingsTree({
       actionHandler,
       roots: buildSummarySettingsTree(config, topicToRender, availableTopics),
     });
-  }, [actionHandler, availableTopics, config, panelId, topicToRender, updatePanelSettingsTree]);
+  }, [actionHandler, availableTopics, config, topicToRender, updatePanelSettingsTree]);
 
   const renderOption = (option: ISelectableOption | undefined) =>
     option ? (

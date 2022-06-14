@@ -23,7 +23,6 @@ import Autocomplete, { IAutocomplete } from "@foxglove/studio-base/components/Au
 import Button from "@foxglove/studio-base/components/Button";
 import { LegacyTextarea } from "@foxglove/studio-base/components/LegacyStyledComponents";
 import Panel from "@foxglove/studio-base/components/Panel";
-import { usePanelContext } from "@foxglove/studio-base/components/PanelContext";
 import PanelToolbar from "@foxglove/studio-base/components/PanelToolbar";
 import {
   SettingsTreeAction,
@@ -33,6 +32,7 @@ import Stack from "@foxglove/studio-base/components/Stack";
 import usePublisher from "@foxglove/studio-base/hooks/usePublisher";
 import { PlayerCapabilities, Topic } from "@foxglove/studio-base/players/types";
 import { usePanelSettingsTreeUpdate } from "@foxglove/studio-base/providers/PanelSettingsEditorContextProvider";
+import { SaveConfig } from "@foxglove/studio-base/types/panels";
 
 import buildSampleMessage from "./buildSampleMessage";
 import helpContent from "./index.help.md";
@@ -49,7 +49,7 @@ type Config = Partial<{
 
 type Props = {
   config: Config;
-  saveConfig: (config: Partial<Config>) => void;
+  saveConfig: SaveConfig<Config>;
 };
 
 function buildSettingsTree(config: Config): SettingsTreeRoots {
@@ -115,7 +115,6 @@ function Publish(props: Props) {
 
   const datatypeNames = useMemo(() => Array.from(datatypes.keys()).sort(), [datatypes]);
   const { error, parsedObject } = useMemo(() => parseInput(value), [value]);
-  const { id: panelId } = usePanelContext();
   const updatePanelSettingsTree = usePanelSettingsTreeUpdate();
 
   // when the selected datatype changes, replace the textarea contents with a sample message of the correct shape
@@ -145,20 +144,20 @@ function Publish(props: Props) {
       }
 
       saveConfig(
-        produce(props.config, (draft) => {
+        produce((draft) => {
           set(draft, action.payload.path.slice(1), action.payload.value);
         }),
       );
     },
-    [props.config, saveConfig],
+    [saveConfig],
   );
 
   useEffect(() => {
-    updatePanelSettingsTree(panelId, {
+    updatePanelSettingsTree({
       actionHandler,
       roots: buildSettingsTree(props.config),
     });
-  }, [actionHandler, panelId, props.config, updatePanelSettingsTree]);
+  }, [actionHandler, props.config, updatePanelSettingsTree]);
 
   const onChangeTopic = useCallback(
     (_event: unknown, name: string) => {

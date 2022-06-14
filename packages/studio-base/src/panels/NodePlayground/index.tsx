@@ -30,7 +30,6 @@ import { v4 as uuidv4 } from "uuid";
 
 import EmptyState from "@foxglove/studio-base/components/EmptyState";
 import Panel from "@foxglove/studio-base/components/Panel";
-import { usePanelContext } from "@foxglove/studio-base/components/PanelContext";
 import PanelToolbar from "@foxglove/studio-base/components/PanelToolbar";
 import {
   SettingsTreeAction,
@@ -49,7 +48,7 @@ import Sidebar from "@foxglove/studio-base/panels/NodePlayground/Sidebar";
 import PlaygroundIcon from "@foxglove/studio-base/panels/NodePlayground/playground-icon.svg";
 import { HelpInfoStore, useHelpInfo } from "@foxglove/studio-base/providers/HelpInfoProvider";
 import { usePanelSettingsTreeUpdate } from "@foxglove/studio-base/providers/PanelSettingsEditorContextProvider";
-import { UserNodes } from "@foxglove/studio-base/types/panels";
+import { SaveConfig, UserNodes } from "@foxglove/studio-base/types/panels";
 
 import Config from "./Config";
 import helpContent from "./index.help.md";
@@ -94,7 +93,7 @@ export default function node(event: Input<"/input/topic">): Output {
 
 type Props = {
   config: Config;
-  saveConfig: (config: Partial<Config>) => void;
+  saveConfig: SaveConfig<Config>;
 };
 
 const UnsavedDot = muiStyled("div", {
@@ -185,7 +184,6 @@ const userNodeSelector = (state: LayoutState) =>
 function NodePlayground(props: Props) {
   const { config, saveConfig } = props;
   const { autoFormatOnSave = false, selectedNodeId, editorForStorybook } = config;
-  const { id: panelId } = usePanelContext();
   const updatePanelSettingsTree = usePanelSettingsTreeUpdate();
 
   const theme = useTheme();
@@ -246,11 +244,11 @@ function NodePlayground(props: Props) {
   );
 
   useEffect(() => {
-    updatePanelSettingsTree(panelId, {
+    updatePanelSettingsTree({
       actionHandler,
       roots: buildSettingsTree(config),
     });
-  }, [actionHandler, config, panelId, updatePanelSettingsTree]);
+  }, [actionHandler, config, updatePanelSettingsTree]);
 
   React.useLayoutEffect(() => {
     if (selectedNode) {
