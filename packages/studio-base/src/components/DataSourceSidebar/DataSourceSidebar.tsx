@@ -37,6 +37,11 @@ const StyledTab = muiStyled(Tab)(({ theme }) => ({
   minHeight: "auto",
   minWidth: theme.spacing(8),
   padding: theme.spacing(1.5, 2),
+  color: theme.palette.text.secondary,
+
+  "&.Mui-selected": {
+    color: theme.palette.text.primary,
+  },
 }));
 
 const StyledTabs = muiStyled(Tabs)({
