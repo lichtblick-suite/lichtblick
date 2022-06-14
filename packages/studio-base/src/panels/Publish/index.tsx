@@ -11,17 +11,14 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { Typography } from "@mui/material";
+import { Button, Typography, styled as muiStyled, OutlinedInput } from "@mui/material";
 import produce from "immer";
 import { set } from "lodash";
 import { useCallback, useEffect, useMemo, useRef } from "react";
-import styled from "styled-components";
 
 import { useRethrow } from "@foxglove/hooks";
 import { useDataSourceInfo } from "@foxglove/studio-base/PanelAPI";
 import Autocomplete, { IAutocomplete } from "@foxglove/studio-base/components/Autocomplete";
-import Button from "@foxglove/studio-base/components/Button";
-import { LegacyTextarea } from "@foxglove/studio-base/components/LegacyStyledComponents";
 import Panel from "@foxglove/studio-base/components/Panel";
 import PanelToolbar from "@foxglove/studio-base/components/PanelToolbar";
 import {
@@ -33,6 +30,7 @@ import usePublisher from "@foxglove/studio-base/hooks/usePublisher";
 import { PlayerCapabilities, Topic } from "@foxglove/studio-base/players/types";
 import { usePanelSettingsTreeUpdate } from "@foxglove/studio-base/providers/PanelSettingsEditorContextProvider";
 import { SaveConfig } from "@foxglove/studio-base/types/panels";
+import { fonts } from "@foxglove/studio-base/util/sharedStyleConstants";
 
 import buildSampleMessage from "./buildSampleMessage";
 import helpContent from "./index.help.md";
@@ -66,11 +64,44 @@ function buildSettingsTree(config: Config): SettingsTreeRoots {
   };
 }
 
-const STextArea = styled(LegacyTextarea)`
-  width: 100%;
-  height: 100%;
-  resize: none;
-`;
+const StyledButton = muiStyled(Button, {
+  shouldForwardProp: (prop) => prop !== "buttonColor",
+})<{ buttonColor?: string }>(({ theme, buttonColor }) => {
+  if (buttonColor == undefined) {
+    return {};
+  }
+  const augmentedButtonColor = theme.palette.augmentColor({
+    color: { main: buttonColor },
+  });
+
+  return {
+    backgroundColor: augmentedButtonColor.main,
+    color: augmentedButtonColor.contrastText,
+
+    "&:hover": {
+      backgroundColor: augmentedButtonColor.dark,
+    },
+  };
+});
+
+const StyledTextarea = muiStyled(OutlinedInput)(({ theme }) => ({
+  width: "100%",
+  height: "100%",
+  textAlign: "left",
+  backgroundColor: theme.palette.background.paper,
+  overflow: "hidden",
+  padding: theme.spacing(1, 0.5),
+
+  ".MuiInputBase-input": {
+    height: "100% !important",
+    font: "inherit",
+    lineHeight: 1.4,
+    fontFamily: fonts.MONOSPACE,
+    fontSize: "100%",
+    overflow: "auto !important",
+    resize: "none",
+  },
+}));
 
 function getTopicName(topic: Topic): string {
   return topic.name;
@@ -193,13 +224,6 @@ function Publish(props: Props) {
     }, [publish, parsedObject, topicName]),
   );
 
-  const onChange = useCallback(
-    (event: React.SyntheticEvent<HTMLTextAreaElement>) => {
-      saveConfig({ value: (event.target as { value?: string }).value });
-    },
-    [saveConfig],
-  );
-
   const canPublish = capabilities.includes(PlayerCapabilities.advertise);
 
   return (
@@ -237,10 +261,11 @@ function Publish(props: Props) {
             </Stack>
           </div>
           <Stack flex="auto">
-            <STextArea
+            <StyledTextarea
+              multiline
               placeholder="Enter message content as JSON"
               value={value}
-              onChange={onChange}
+              onChange={(event) => saveConfig({ value: event.target.value })}
             />
           </Stack>
         </Stack>
@@ -250,7 +275,7 @@ function Publish(props: Props) {
         flex="0 0 auto"
         alignItems="flex-start"
         justifyContent={advancedView ? "flex-end" : "center"}
-        padding={1.5}
+        padding={2}
       >
         {error && (
           <Stack flex="auto" padding={0.5} justifyContent="center">
@@ -259,15 +284,16 @@ function Publish(props: Props) {
             </Typography>
           </Stack>
         )}
-        <Button
-          style={{ backgroundColor: buttonColor }}
-          tooltip={canPublish ? buttonTooltip : "Connect to ROS to publish data"}
+        <StyledButton
+          variant="contained"
+          size="large"
+          buttonColor={buttonColor ? buttonColor : undefined}
+          title={canPublish ? buttonTooltip : "Connect to ROS to publish data"}
           disabled={!canPublish || parsedObject == undefined}
-          primary={canPublish && parsedObject != undefined}
           onClick={onPublishClicked}
         >
           {buttonText}
-        </Button>
+        </StyledButton>
       </Stack>
     </Stack>
   );
