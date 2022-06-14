@@ -109,6 +109,14 @@ export const Simple = (): JSX.Element => {
   );
 };
 
+export const WithSettings = (): JSX.Element => {
+  return (
+    <PanelSetup fixture={fixture} includeSettings>
+      <Log />
+    </PanelSetup>
+  );
+};
+
 export const TopicToRender = (): JSX.Element => {
   function makeMessages(topic: any) {
     return fixture.frame["/rosout"].map((msg) => ({
@@ -162,7 +170,7 @@ export const FilteredTerms = (): JSX.Element => {
 
 FilteredTerms.title = `filtered terms: "multiple", "/some_topic"`;
 
-export const CaseInsitiveFilter = (): JSX.Element => {
+export const CaseInsensitiveFilter = (): JSX.Element => {
   return (
     <PanelSetup fixture={fixture}>
       <Log
@@ -176,7 +184,7 @@ export const CaseInsitiveFilter = (): JSX.Element => {
   );
 };
 
-CaseInsitiveFilter.title = `case insensitive message filtering: "could", "Ipsum"`;
+CaseInsensitiveFilter.title = `case insensitive message filtering: "could", "Ipsum"`;
 
 export const FoxgloveLog = (): JSX.Element => {
   const foxgloveLogFixture = {

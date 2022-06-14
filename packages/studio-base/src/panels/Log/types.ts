@@ -6,6 +6,12 @@ import { Time, MessageEvent } from "@foxglove/studio";
 import { FoxgloveMessages } from "@foxglove/studio-base/types/FoxgloveMessages";
 import { Header } from "@foxglove/studio-base/types/Messages";
 
+export type Config = {
+  searchTerms: string[];
+  minLogLevel: number;
+  topicToRender?: string;
+};
+
 export enum LogLevel {
   UNKNOWN = 0,
   DEBUG = 1,

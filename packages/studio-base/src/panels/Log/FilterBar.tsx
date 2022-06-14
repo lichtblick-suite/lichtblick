@@ -20,7 +20,7 @@ import {
   IDropdownStyles,
 } from "@fluentui/react";
 import CopyAllIcon from "@mui/icons-material/CopyAll";
-import { Typography } from "@mui/material";
+import { useTheme as useMuiTheme } from "@mui/material";
 import cx from "classnames";
 import { useMemo } from "react";
 
@@ -100,6 +100,7 @@ export default function FilterBar(props: FilterBarProps): JSX.Element {
     key: term,
   }));
   const theme = useTheme();
+  const muiTheme = useMuiTheme();
   const logStyles = useLogStyles();
   const dropdownStyles: Partial<IDropdownStyles> = useMemo(
     () => ({
@@ -133,8 +134,15 @@ export default function FilterBar(props: FilterBarProps): JSX.Element {
     }),
     [theme],
   );
+
   return (
-    <Stack flex="auto" direction="row" gap={0.5} alignItems="center">
+    <Stack
+      flex="auto"
+      direction="row"
+      gap={0.5}
+      alignItems="center"
+      style={{ marginRight: muiTheme.spacing(-1) }} // Spacing hack until we can unify the toolbar items.
+    >
       <Dropdown
         styles={dropdownStyles}
         onRenderOption={(option) => renderOption(option, logStyles)}
@@ -201,9 +209,6 @@ export default function FilterBar(props: FilterBarProps): JSX.Element {
         />
       </Stack>
       <Stack direction="row" alignItems="center" gap={0.5}>
-        <Typography noWrap variant="body2" color="text.secondary">
-          {props.messages.length} {props.messages.length === 1 ? "item" : "items"}
-        </Typography>
         <ToolbarIconButton
           onClick={() => {
             void clipboard.copy(JSON.stringify(props.messages, undefined, 2) ?? "");
