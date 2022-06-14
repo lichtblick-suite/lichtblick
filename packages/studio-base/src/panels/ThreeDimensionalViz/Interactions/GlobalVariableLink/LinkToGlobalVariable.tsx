@@ -12,19 +12,18 @@
 //   You may not use this file except in compliance with the License.
 
 import LinkPlusIcon from "@mdi/svg/svg/link-plus.svg";
+import { Button, Card, FilledInput, Typography } from "@mui/material";
 import classNames from "classnames";
 import React, { CSSProperties, FormEvent } from "react";
 
-import Button from "@foxglove/studio-base/components/Button";
 import ChildToggle from "@foxglove/studio-base/components/ChildToggle";
 import Icon from "@foxglove/studio-base/components/Icon";
-import { LegacyInput } from "@foxglove/studio-base/components/LegacyStyledComponents";
+import Stack from "@foxglove/studio-base/components/Stack";
 import useGlobalVariables from "@foxglove/studio-base/hooks/useGlobalVariables";
 import GlobalVariableName from "@foxglove/studio-base/panels/ThreeDimensionalViz/Interactions/GlobalVariableName";
 import { colors } from "@foxglove/studio-base/util/sharedStyleConstants";
 
 import useLinkedGlobalVariables from "../useLinkedGlobalVariables";
-import SGlobalVariableForm from "./SGlobalVariableForm";
 import UnlinkGlobalVariables from "./UnlinkGlobalVariables";
 
 type AddToLinkedGlobalVariable = {
@@ -92,25 +91,42 @@ export default function LinkToGlobalVariable({
       >
         <LinkPlusIcon />
       </Icon>
-      <SGlobalVariableForm onSubmit={addLink} data-test="link-form">
-        <p style={{ marginTop: 0, lineHeight: "1.4" }}>
-          When linked, clicking a new object from {topic} will update the global variable&nbsp;
-          <GlobalVariableName name={name} />.
-        </p>
-        <UnlinkGlobalVariables name={name} showList />
-        <LegacyInput
-          autoFocus
-          type="text"
-          value={`$${name}`}
-          onChange={(e) => setName(e.target.value.replace(/^\$/, ""))}
-        />
-        <p data-test="action-buttons">
-          <Button primary={name.length > 0} disabled={name.length === 0} onClick={addLink}>
-            Add Link
-          </Button>
-          <Button onClick={() => setIsOpen(false)}>Cancel</Button>
-        </p>
-      </SGlobalVariableForm>
+      <Card
+        elevation={4}
+        component="form"
+        variant="elevation"
+        style={{ overflowWrap: "break-word", pointerEvents: "auto", width: 240 }}
+        onSubmit={addLink}
+        data-test="link-form"
+      >
+        <Stack padding={2} gap={1}>
+          <Typography variant="body2">
+            When linked, clicking a new object from {topic} will update the global variable&nbsp;
+            <GlobalVariableName name={name} />.
+          </Typography>
+          <UnlinkGlobalVariables name={name} showList />
+          <FilledInput
+            size="small"
+            autoFocus
+            type="text"
+            value={`$${name}`}
+            onChange={(e) => setName(e.target.value.replace(/^\$/, ""))}
+          />
+          <Stack direction="row" gap={1} data-test="action-buttons">
+            <Button
+              variant="contained"
+              color={name.length > 0 ? "primary" : "inherit"}
+              disabled={name.length === 0}
+              onClick={addLink}
+            >
+              Add Link
+            </Button>
+            <Button variant="contained" color="inherit" onClick={() => setIsOpen(false)}>
+              Cancel
+            </Button>
+          </Stack>
+        </Stack>
+      </Card>
     </ChildToggle>
   );
 }

@@ -13,23 +13,20 @@
 
 import { useTheme } from "@fluentui/react";
 import CameraControlIcon from "@mdi/svg/svg/camera-control.svg";
-import { Stack } from "@mui/material";
+import { Button, Tooltip, styled as muiStyled } from "@mui/material";
 import { vec3 } from "gl-matrix";
 import { isEqual } from "lodash";
-import styled from "styled-components";
 
 import { CameraState, cameraStateSelectors, Vec3 } from "@foxglove/regl-worldview";
-import Button from "@foxglove/studio-base/components/Button";
 import ExpandingToolbar, { ToolGroup } from "@foxglove/studio-base/components/ExpandingToolbar";
 import JsonInput from "@foxglove/studio-base/components/JsonInput";
 import { LegacyInput } from "@foxglove/studio-base/components/LegacyStyledComponents";
 import { usePanelContext } from "@foxglove/studio-base/components/PanelContext";
-import Tooltip from "@foxglove/studio-base/components/Tooltip";
+import Stack from "@foxglove/studio-base/components/Stack";
 import {
   SValue,
   SLabel,
 } from "@foxglove/studio-base/panels/ThreeDimensionalViz/Interactions/styling";
-import useSharedStyles from "@foxglove/studio-base/panels/ThreeDimensionalViz/sharedStyles";
 import { getNewCameraStateOnFollowChange } from "@foxglove/studio-base/panels/ThreeDimensionalViz/threeDimensionalVizUtils";
 import {
   FollowMode,
@@ -46,15 +43,15 @@ const TEMP_VEC3: vec3 = [0, 0, 0];
 const ZERO_VEC3 = Object.freeze([0, 0, 0]) as Readonly<vec3>;
 const DEFAULT_CAMERA_INFO_WIDTH = 260;
 
-const SRow = styled.div`
-  display: flex;
-  align-items: center;
-`;
-
 type CameraStateInfoProps = {
   cameraState: Partial<CameraState>;
   onAlignXYAxis: () => void;
 };
+
+const StyledButton = muiStyled(Button)({
+  lineHeight: 1.25,
+  minWidth: 40,
+});
 
 export type CameraInfoPropsWithoutCameraState = {
   followMode: FollowMode;
@@ -72,7 +69,6 @@ export type CameraInfoProps = {
 } & CameraInfoPropsWithoutCameraState;
 
 function CameraStateInfo({ cameraState, onAlignXYAxis }: CameraStateInfoProps) {
-  const classes = useSharedStyles();
   return (
     <>
       {(Object.keys(cameraState) as (keyof CameraState)[])
@@ -89,18 +85,20 @@ function CameraStateInfo({ cameraState, onAlignXYAxis }: CameraStateInfoProps) {
           return [key, val as string];
         })
         .map(([key, val]) => (
-          <SRow key={key}>
+          <Stack key={key} direction="row" alignItems="center" gap={1}>
             <SLabel width={LABEL_WIDTH}>{key}:</SLabel> <SValue>{val}</SValue>
             {key === "thetaOffset" && (
-              <Button
-                className={classes.button}
+              <StyledButton
+                color="inherit"
+                variant="text"
+                size="small"
                 onClick={onAlignXYAxis}
-                tooltip="Align XY axis by reseting thetaOffset to 0. Will no longer follow orientation."
+                title="Align XY axis by reseting thetaOffset to 0. Will no longer follow orientation."
               >
-                RESET
-              </Button>
+                Reset
+              </StyledButton>
             )}
-          </SRow>
+          </Stack>
         ))}
     </>
   );
@@ -118,7 +116,6 @@ export default function CameraInfo({
   defaultSelectedTab,
 }: CameraInfoProps): JSX.Element {
   const theme = useTheme();
-  const classes = useSharedStyles();
   const [selectedTab, setSelectedTab] = React.useState(defaultSelectedTab);
   const { updatePanelConfigs, saveConfig } = usePanelContext();
   const [edit, setEdit] = React.useState<boolean>(false);
@@ -157,21 +154,24 @@ export default function CameraInfo({
     >
       <ToolGroup name={CAMERA_TAB_TYPE}>
         <>
-          <Stack direction="row-reverse" paddingTop={0.5} paddingRight={0.5}>
-            <Button
-              className={classes.button}
-              tooltip="Copy cameraState"
-              small
+          <Stack direction="row-reverse" gap={0.5} padding={0.5}>
+            <StyledButton
+              title="Copy cameraState"
+              color="inherit"
+              variant="text"
+              size="small"
               onClick={() => {
                 void clipboard.copy(JSON.stringify(cameraState, undefined, 2) ?? "");
               }}
             >
               Copy
-            </Button>
-            <Button
-              className={classes.button}
+            </StyledButton>
+            <StyledButton
               disabled={isPlaying}
-              tooltip={
+              color="inherit"
+              variant="text"
+              size="small"
+              title={
                 isPlaying
                   ? "Pause player to edit raw camera state object"
                   : "Edit raw camera state object"
@@ -179,16 +179,18 @@ export default function CameraInfo({
               onClick={onEditToggle}
             >
               {edit ? "Done" : "Edit"}
-            </Button>
-            <Button
-              className={classes.button}
-              tooltip="Sync camera state across all 3D panels"
+            </StyledButton>
+            <StyledButton
+              color="inherit"
+              variant="text"
+              size="small"
+              title="Sync camera state across all 3D panels"
               onClick={syncCameraState}
             >
               Sync
-            </Button>
+            </StyledButton>
           </Stack>
-          <Stack flex="auto" minWidth={DEFAULT_CAMERA_INFO_WIDTH} padding={1}>
+          <Stack flex="auto" padding={1} style={{ minWidth: DEFAULT_CAMERA_INFO_WIDTH }}>
             {edit && !isPlaying ? (
               <JsonInput
                 value={cameraState}
@@ -198,12 +200,9 @@ export default function CameraInfo({
             ) : (
               <Stack flex="auto">
                 <CameraStateInfo cameraState={cameraState} onAlignXYAxis={onAlignXYAxis} />
-                <Stack flex="auto">
-                  <SRow style={{ marginBottom: 8 }}>
-                    <Tooltip
-                      placement="top"
-                      contents="Automatically sync camera across all 3D panels"
-                    >
+                <Stack flex="auto" gap={1}>
+                  <Stack direction="row" alignItems="center">
+                    <Tooltip placement="top" title="Automatically sync camera across all 3D panels">
                       <SLabel>Auto sync:</SLabel>
                     </Tooltip>
                     <SValue>
@@ -219,8 +218,8 @@ export default function CameraInfo({
                         }
                       />
                     </SValue>
-                  </SRow>
-                  <SRow style={{ marginBottom: 8 }}>
+                  </Stack>
+                  <Stack direction="row" alignItems="center">
                     <SLabel
                       style={
                         cameraState.perspective ? { color: theme.semanticColors.disabledText } : {}
@@ -236,9 +235,9 @@ export default function CameraInfo({
                         onChange={() => saveConfig({ showCrosshair: !showCrosshair })}
                       />
                     </SValue>
-                  </SRow>
+                  </Stack>
                   {showCrosshair && !cameraState.perspective && (
-                    <SRow style={{ paddingLeft: LABEL_WIDTH, marginBottom: 8 }}>
+                    <Stack paddingLeft={LABEL_WIDTH / 8}>
                       <SValue>
                         <JsonInput
                           inputStyle={{ width: 140 }}
@@ -263,18 +262,18 @@ export default function CameraInfo({
                           dataValidator={point2DValidator}
                         />
                       </SValue>
-                    </SRow>
+                    </Stack>
                   )}
                 </Stack>
                 {followMode === "no-follow" && <p>Not following</p>}
                 {followMode !== "no-follow" && (
-                  <SRow>
+                  <Stack direction="row" alignItems="center">
                     <SLabel>Following frame:</SLabel>
                     <SValue>
                       <code>{followTf}</code>
                       {followMode === "follow-orientation" && " with orientation"}
                     </SValue>
-                  </SRow>
+                  </Stack>
                 )}
               </Stack>
             )}

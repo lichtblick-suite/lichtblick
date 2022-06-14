@@ -11,19 +11,15 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
+import { Button, Card, Typography } from "@mui/material";
 import { isEqual } from "lodash";
-import styled from "styled-components";
+import { useCallback } from "react";
 
-import Button from "@foxglove/studio-base/components/Button";
+import Stack from "@foxglove/studio-base/components/Stack";
 import GlobalVariableName from "@foxglove/studio-base/panels/ThreeDimensionalViz/Interactions/GlobalVariableName";
 
 import { getPath } from "../interactionUtils";
 import useLinkedGlobalVariables, { LinkedGlobalVariable } from "../useLinkedGlobalVariables";
-import SGlobalVariableForm from "./SGlobalVariableForm";
-
-const SPath = styled.span`
-  opacity: 0.8;
-`;
 
 type Props = {
   linkedGlobalVariable: LinkedGlobalVariable;
@@ -36,30 +32,43 @@ export default function UnlinkGlobalVariable({
   setIsOpen,
 }: Props): JSX.Element {
   const { linkedGlobalVariables, setLinkedGlobalVariables } = useLinkedGlobalVariables();
+  const handleClick = useCallback(() => {
+    const newLinkedGlobalVariables = linkedGlobalVariables.filter(
+      (linkedGlobalVariable) =>
+        !(
+          linkedGlobalVariable.topic === topic &&
+          isEqual(linkedGlobalVariable.markerKeyPath, markerKeyPath) &&
+          linkedGlobalVariable.name === name
+        ),
+    );
+    setLinkedGlobalVariables(newLinkedGlobalVariables);
+    setIsOpen(false);
+  }, [linkedGlobalVariables, markerKeyPath, name, setIsOpen, setLinkedGlobalVariables, topic]);
+
   return (
-    <SGlobalVariableForm style={{ marginLeft: 8 }} data-test="unlink-form">
-      <p style={{ marginTop: 0, lineHeight: "1.4" }}>
-        Unlink <GlobalVariableName name={name} /> from {topic}.
-        <SPath>{getPath(markerKeyPath)}</SPath>?
-      </p>
-      <Button
-        danger
-        onClick={() => {
-          const newLinkedGlobalVariables = linkedGlobalVariables.filter(
-            (linkedGlobalVariable) =>
-              !(
-                linkedGlobalVariable.topic === topic &&
-                isEqual(linkedGlobalVariable.markerKeyPath, markerKeyPath) &&
-                linkedGlobalVariable.name === name
-              ),
-          );
-          setLinkedGlobalVariables(newLinkedGlobalVariables);
-          setIsOpen(false);
-        }}
-      >
-        Unlink
-      </Button>
-      <Button onClick={() => setIsOpen(false)}>Cancel</Button>
-    </SGlobalVariableForm>
+    <Card
+      elevation={4}
+      component="form"
+      variant="elevation"
+      data-test="unlink-form"
+      style={{ overflowWrap: "break-word", pointerEvents: "auto" }}
+    >
+      <Stack padding={2} gap={1.5}>
+        <Typography variant="body2" noWrap>
+          Unlink <GlobalVariableName name={name} /> from {topic}.
+          <Typography variant="inherit" display="inline" color="text.secondary">
+            {getPath(markerKeyPath)}?
+          </Typography>
+        </Typography>
+        <Stack direction="row" gap={1}>
+          <Button size="small" color="error" variant="contained" onClick={handleClick}>
+            Unlink
+          </Button>
+          <Button size="small" variant="contained" color="inherit" onClick={() => setIsOpen(false)}>
+            Cancel
+          </Button>
+        </Stack>
+      </Stack>
+    </Card>
   );
 }
