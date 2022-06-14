@@ -4,10 +4,13 @@
 
 import ArrowDownIcon from "@mui/icons-material/ArrowDropDown";
 import ArrowRightIcon from "@mui/icons-material/ArrowRight";
+import CheckIcon from "@mui/icons-material/Check";
+import EditIcon from "@mui/icons-material/Edit";
 import ErrorIcon from "@mui/icons-material/Error";
 import {
   Divider,
   IconButton,
+  InputBase,
   ListItemProps,
   styled as muiStyled,
   Tooltip,
@@ -15,8 +18,9 @@ import {
   useTheme,
 } from "@mui/material";
 import memoizeWeak from "memoize-weak";
-import { useState } from "react";
+import { ChangeEvent, useCallback } from "react";
 import { DeepReadonly } from "ts-essentials";
+import { useImmer } from "use-immer";
 
 import CommonIcons from "@foxglove/studio-base/components/CommonIcons";
 import Stack from "@foxglove/studio-base/components/Stack";
@@ -43,6 +47,10 @@ const FieldPadding = muiStyled("div", { skipSx: true })(({ theme }) => ({
   height: theme.spacing(0.5),
 }));
 
+const EditButton = muiStyled(IconButton)(({ theme }) => ({
+  padding: theme.spacing(0.5),
+}));
+
 const NodeHeader = muiStyled("div")(({ theme }) => {
   return {
     display: "flex",
@@ -54,11 +62,20 @@ const NodeHeader = muiStyled("div")(({ theme }) => {
       ".MuiCheckbox-root": {
         visibility: "hidden",
       },
+
+      "[data-node-function=edit-label]": {
+        visibility: "hidden",
+      },
+
       "&:hover": {
         outline: `1px solid ${theme.palette.primary.main}`,
         outlineOffset: -1,
 
         ".MuiCheckbox-root": {
+          visibility: "visible",
+        },
+
+        "[data-node-function=edit-label]": {
           visibility: "visible",
         },
       },
@@ -107,7 +124,7 @@ const makeStablePath = memoizeWeak((path: readonly string[], key: string) => [..
 
 function NodeEditorComponent(props: NodeEditorProps): JSX.Element {
   const { actionHandler, defaultOpen = true, settings = {} } = props;
-  const [open, setOpen] = useState(defaultOpen);
+  const [state, setState] = useImmer({ open: defaultOpen, editing: false });
 
   const theme = useTheme();
   const indent = props.path.length;
@@ -148,16 +165,51 @@ function NodeEditorComponent(props: NodeEditorProps): JSX.Element {
 
   const IconComponent = settings.icon ? CommonIcons[settings.icon] : undefined;
 
+  const onEditLabel = useCallback(
+    (event: ChangeEvent<HTMLInputElement>) => {
+      if (settings.renamable === true) {
+        actionHandler({
+          action: "update",
+          payload: { path: [...props.path, "label"], input: "string", value: event.target.value },
+        });
+      }
+    },
+    [actionHandler, props.path, settings.renamable],
+  );
+
+  const toggleEditing = useCallback(() => {
+    setState((draft) => {
+      draft.editing = !draft.editing;
+    });
+  }, [setState]);
+
+  const toggleOpen = useCallback(() => {
+    setState((draft) => {
+      if (!draft.editing) {
+        draft.open = !draft.open;
+      }
+    });
+  }, [setState]);
+
+  const onLabelKeyDown = useCallback(
+    (event: React.KeyboardEvent) => {
+      if (event.key === "Enter" || event.key === "Escape") {
+        toggleEditing();
+      }
+    },
+    [toggleEditing],
+  );
+
   return (
     <>
       <NodeHeader>
         <NodeHeaderToggle
           hasProperties={hasProperties}
           indent={indent}
-          onClick={() => setOpen(!open)}
+          onClick={toggleOpen}
           visible={visible}
         >
-          {hasProperties && <ExpansionArrow expanded={open} />}
+          {hasProperties && <ExpansionArrow expanded={state.open} />}
           {IconComponent && (
             <IconComponent
               fontSize="small"
@@ -168,16 +220,42 @@ function NodeEditorComponent(props: NodeEditorProps): JSX.Element {
               }}
             />
           )}
-          <Typography
-            noWrap={true}
-            variant="subtitle2"
-            fontWeight={indent < 2 ? 600 : 400}
-            color={visible ? "text.primary" : "text.disabled"}
-          >
-            {settings.label ?? "General"}
-          </Typography>
+          {state.editing ? (
+            <InputBase
+              autoFocus
+              fullWidth
+              onChange={onEditLabel}
+              value={settings.label}
+              onKeyDown={onLabelKeyDown}
+              onFocus={(event) => event.target.select()}
+              style={{ font: "inherit" }}
+            />
+          ) : (
+            <Typography
+              noWrap={true}
+              flex="auto"
+              variant="subtitle2"
+              fontWeight={indent < 2 ? 600 : 400}
+              color={visible ? "text.primary" : "text.disabled"}
+            >
+              {settings.label ?? "General"}
+            </Typography>
+          )}
         </NodeHeaderToggle>
         <Stack alignItems="center" direction="row">
+          {settings.renamable === true && (
+            <EditButton
+              title="Rename"
+              data-node-function="edit-label"
+              color="primary"
+              onClick={(event) => {
+                event.stopPropagation();
+                toggleEditing();
+              }}
+            >
+              {state.editing ? <CheckIcon fontSize="small" /> : <EditIcon fontSize="small" />}
+            </EditButton>
+          )}
           {settings.visible != undefined && (
             <VisibilityToggle
               size="small"
@@ -202,14 +280,14 @@ function NodeEditorComponent(props: NodeEditorProps): JSX.Element {
           )}
         </Stack>
       </NodeHeader>
-      {open && fieldEditors.length > 0 && (
+      {state.open && fieldEditors.length > 0 && (
         <>
           <FieldPadding />
           {fieldEditors}
           <FieldPadding />
         </>
       )}
-      {open && childNodes}
+      {state.open && childNodes}
       {indent === 1 && <Divider style={{ gridColumn: "span 2" }} />}
     </>
   );

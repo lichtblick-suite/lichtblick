@@ -138,6 +138,11 @@ export type SettingsTreeNode = {
   label?: string;
 
   /**
+   * True if the node label can be edited by the user.
+   */
+  renamable?: boolean;
+
+  /**
    * An optional visibility status. If this is not undefined, the node
    * editor will display a visiblity toggle button and send update actions
    * to the action handler.

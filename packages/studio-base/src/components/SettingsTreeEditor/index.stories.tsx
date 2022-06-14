@@ -34,6 +34,7 @@ const BasicSettings: SettingsTreeRoots = {
     icon: "Settings",
     visible: true,
     error: "This topic has an error",
+    renamable: true,
     actions: [
       { type: "action", id: "add-grid", label: "Add new grid", icon: "Grid" },
       { type: "action", id: "add-background", label: "Add new background", icon: "Background" },
@@ -305,6 +306,7 @@ const PanelExamplesSettings: SettingsTreeRoots = {
   map: {
     label: "Map",
     icon: "Map",
+    renamable: true,
     fields: {
       message_path: {
         label: "Message path",
@@ -348,6 +350,7 @@ const PanelExamplesSettings: SettingsTreeRoots = {
   grid: {
     label: "Grid",
     icon: "Grid",
+    renamable: true,
     fields: {
       color: {
         label: "Color",
@@ -377,6 +380,7 @@ const PanelExamplesSettings: SettingsTreeRoots = {
   pose: {
     label: "Pose",
     icon: "Walk",
+    renamable: true,
     fields: {
       color: { label: "Color", value: "#ffffff", input: "rgb" },
       shaft_length: { label: "Shaft length", value: 1.5, input: "number" },
@@ -577,6 +581,8 @@ function updateSettingsTreeRoots(
     const key = workingPath.shift()!;
     if (key === "visible") {
       node.visible = Boolean(value);
+    } else if (key === "label") {
+      node.label = String(value);
     } else {
       const field = node.fields?.[key];
       if (field != undefined) {
@@ -689,7 +695,9 @@ export function Basics(): JSX.Element {
 }
 
 Basics.play = () => {
-  fireEvent.click(document.querySelector("[data-test=node-actions-menu-button]")!);
+  Array.from(document.querySelectorAll("[data-test=node-actions-menu-button]"))
+    .slice(0, 1)
+    .forEach((node) => fireEvent.click(node));
 };
 
 export function DisabledFields(): JSX.Element {
@@ -703,6 +711,16 @@ export function ReadonlyFields(): JSX.Element {
 export function PanelExamples(): JSX.Element {
   return <Wrapper roots={PanelExamplesSettings} />;
 }
+
+PanelExamples.play = () => {
+  Array.from(document.querySelectorAll("[data-node-function=edit-label]"))
+    .slice(0, 1)
+    .forEach((node) => {
+      fireEvent.click(node);
+      fireEvent.change(document.activeElement!, { target: { value: "Renamed Node" } });
+      fireEvent.keyDown(document.activeElement!, { key: "Enter" });
+    });
+};
 
 export function IconExamples(): JSX.Element {
   return <Wrapper roots={IconExamplesSettings} />;
