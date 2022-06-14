@@ -245,7 +245,8 @@ function main() {
       "style-src": "'self' 'unsafe-inline'",
       "connect-src": "'self' ws: wss: http: https: package:",
       "font-src": "'self' data:",
-      "img-src": "'self' data: https: package: x-foxglove-converted-tiff:",
+      // Include http in the CSP to allow loading images (i.e. map tiles) from http endpoints like localhost
+      "img-src": "'self' data: https: package: x-foxglove-converted-tiff: http:",
     };
     const cspHeader = Object.entries(contentSecurityPolicy)
       .map(([key, val]) => `${key} ${val}`)
