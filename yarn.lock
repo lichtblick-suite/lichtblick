@@ -2310,7 +2310,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@foxglove/mcap-support@workspace:packages/mcap-support"
   dependencies:
-    "@foxglove/schemas": 0.1.2
+    "@foxglove/schemas": 0.2.0
     "@foxglove/wasm-bz2": 0.1.0
     "@protobufjs/base64": 1.1.2
     "@types/zstd-codec": "workspace:*"
@@ -2391,15 +2391,15 @@ __metadata:
   linkType: hard
 
 "@foxglove/rosbag2@npm:^4.1.2":
-  version: 4.2.0
-  resolution: "@foxglove/rosbag2@npm:4.2.0"
+  version: 4.2.1
+  resolution: "@foxglove/rosbag2@npm:4.2.1"
   dependencies:
     "@foxglove/rosmsg-msgs-common": ^1.1.0
     "@foxglove/rosmsg2-serialization": ^1.0.6
     "@foxglove/rostime": ^1.1.2
-    "@foxglove/schemas": ^0.1.2
+    "@foxglove/schemas": ^0.2.0
     js-yaml: ^4.1.0
-  checksum: 4bf52fb680e68c15f54d007c354b485fdbe8834be3d71ace6854e369f8c46081cd60307cb4edef69cefe405fdd9e1a5de8ed9d7bb04b42cbe7dcddbd9437bee1
+  checksum: a2df6bf12694de134a3e7bf90a98165bf1736ea9a2d48feadfe1dbf91b192406ea12fc6dff769b9274eb5e4fdfce164e3401678d31a420aec99e02ee1919181d
   languageName: node
   linkType: hard
 
@@ -2472,13 +2472,13 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@foxglove/schemas@npm:0.1.2, @foxglove/schemas@npm:^0.1.2":
-  version: 0.1.2
-  resolution: "@foxglove/schemas@npm:0.1.2"
+"@foxglove/schemas@npm:0.2.0, @foxglove/schemas@npm:^0.2.0":
+  version: 0.2.0
+  resolution: "@foxglove/schemas@npm:0.2.0"
   dependencies:
     "@foxglove/rosmsg-msgs-common": ^1.0.4
     tslib: ^2
-  checksum: 6e9cbdc07a307e0c86bbea9bdb3932a7a09041ed47894709a66c3145e104ec5f98f04b322d98ca67d272fa95116dda5d717b57f0f92125a49c3f7079a3b6600c
+  checksum: 2da4d8cd535dc6929550c632dab16ee3a3bd505aa5b409bf47383eb6909bb473f0caff0b244a4109c02ffff41506037fc8e0f409894d8b392ad39d5d65ba0c67
   languageName: node
   linkType: hard
 
@@ -2514,7 +2514,7 @@ __metadata:
     "@foxglove/rosmsg-serialization": 1.3.0
     "@foxglove/rosmsg2-serialization": 1.0.6
     "@foxglove/rostime": 1.1.2
-    "@foxglove/schemas": 0.1.2
+    "@foxglove/schemas": 0.2.0
     "@foxglove/studio": "workspace:*"
     "@foxglove/ulog": 2.1.2
     "@foxglove/velodyne-cloud": 1.0.1

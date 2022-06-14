@@ -25,8 +25,8 @@ for (const schema of Object.values(foxgloveMessageSchemas)) {
       { name: "markers", type: "visualization_msgs/ImageMarker", isComplex: true, isArray: true },
     ],
   });
-  basicDatatypes.set(definition.qualifiedRosName, {
-    name: definition.qualifiedRosName,
+  basicDatatypes.set(definition.rosMsgInterfaceName, {
+    name: definition.rosMsgInterfaceName,
     definitions: definition.fields,
   });
   basicDatatypes.set(`foxglove.${schema.name}`, {
