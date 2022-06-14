@@ -64,7 +64,7 @@ export type SettingsTreeField = SettingsTreeFieldValue & {
   /**
    * True if the field is readonly.
    */
-  readOnly?: boolean;
+  readonly?: boolean;
 
   /**
    * Optional message indicating any error state for the field.

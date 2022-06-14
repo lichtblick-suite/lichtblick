@@ -123,7 +123,7 @@ function FieldInput({
           freeSolo={true}
           value={field.value}
           disabled={field.disabled}
-          readOnly={field.readOnly}
+          readOnly={field.readonly}
           ListboxComponent={List}
           ListboxProps={{ dense: true } as Partial<ListProps>}
           renderOption={(props, option, { selected }) => (
@@ -153,7 +153,7 @@ function FieldInput({
           variant="filled"
           value={field.value}
           disabled={field.disabled}
-          readOnly={field.readOnly}
+          readOnly={field.readonly}
           placeholder={field.placeholder}
           fullWidth
           max={field.max}
@@ -174,7 +174,7 @@ function FieldInput({
           disabled={field.disabled}
           size="small"
           onChange={(_event, value) => {
-            if (field.readOnly !== true) {
+            if (field.readonly !== true) {
               actionHandler({ action: "update", payload: { path, input: "toggle", value } });
             }
           }}
@@ -196,7 +196,7 @@ function FieldInput({
           value={field.value ?? ""}
           placeholder={field.placeholder}
           InputProps={{
-            readOnly: field.readOnly,
+            readOnly: field.readonly,
           }}
           onChange={(event) =>
             actionHandler({
@@ -215,7 +215,7 @@ function FieldInput({
           disabled={field.disabled}
           size="small"
           onChange={(_event, value) => {
-            if (value != undefined && field.readOnly !== true) {
+            if (value != undefined && field.readonly !== true) {
               actionHandler({
                 action: "update",
                 payload: { path, input: "boolean", value },
@@ -232,7 +232,7 @@ function FieldInput({
         <ColorPickerInput
           alphaType="none"
           disabled={field.disabled}
-          readOnly={field.readOnly}
+          readOnly={field.readonly}
           placeholder={field.placeholder}
           value={field.value?.toString()}
           onChange={(value) =>
@@ -248,7 +248,7 @@ function FieldInput({
         <ColorPickerInput
           alphaType="alpha"
           disabled={field.disabled}
-          readOnly={field.readOnly}
+          readOnly={field.readonly}
           placeholder={field.placeholder}
           value={field.value?.toString()}
           onChange={(value) =>
@@ -265,7 +265,7 @@ function FieldInput({
           <MessagePathInput
             path={field.value ?? ""}
             disabled={field.disabled}
-            readOnly={field.readOnly}
+            readOnly={field.readonly}
             onChange={(value) =>
               actionHandler({
                 action: "update",
@@ -283,7 +283,7 @@ function FieldInput({
           displayEmpty
           fullWidth
           disabled={field.disabled}
-          readOnly={field.readOnly}
+          readOnly={field.readonly}
           variant="filled"
           value={field.value ?? UNDEFINED_SENTINEL_VALUE}
           onChange={(event) =>
@@ -311,7 +311,7 @@ function FieldInput({
         <ColorGradientInput
           colors={field.value}
           disabled={field.disabled}
-          readOnly={field.readOnly}
+          readOnly={field.readonly}
           onChange={(value) =>
             actionHandler({ action: "update", payload: { path, input: "gradient", value } })
           }
@@ -324,7 +324,7 @@ function FieldInput({
           value={field.value}
           precision={field.precision}
           disabled={field.disabled}
-          readOnly={field.readOnly}
+          readOnly={field.readonly}
           onChange={(value) =>
             actionHandler({ action: "update", payload: { path, input: "vec3", value } })
           }
