@@ -43,6 +43,7 @@ const BasicSettings: SettingsTreeRoots = {
       { type: "action", id: "reset-values", label: "Reset values" },
     ],
     fields: {
+      emptyField: undefined,
       numberWithPrecision: {
         input: "number",
         label: "Number with precision",
@@ -62,7 +63,9 @@ const BasicSettings: SettingsTreeRoots = {
         error: "This field has an error message that should be displayed to the user",
       },
     },
-    children: {},
+    children: {
+      emptyChild: undefined,
+    },
   },
   complex_inputs: {
     label: "Complex Inputs",
@@ -140,6 +143,7 @@ For ROS users, we also support package:// URLs
       },
     },
   },
+  empty: undefined,
 };
 
 const DisabledSettings: SettingsTreeRoots = {

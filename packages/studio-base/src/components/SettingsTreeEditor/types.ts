@@ -72,9 +72,9 @@ export type SettingsTreeField = SettingsTreeFieldValue & {
   error?: string;
 };
 
-export type SettingsTreeFields = Record<string, SettingsTreeField>;
+export type SettingsTreeFields = Record<string, undefined | SettingsTreeField>;
 
-export type SettingsTreeChildren = Record<string, SettingsTreeNode>;
+export type SettingsTreeChildren = Record<string, undefined | SettingsTreeNode>;
 
 /**
  * An action that can be offered to the user to perform at the
@@ -173,7 +173,7 @@ export type SettingsTreeAction =
       payload: { id: string; path: readonly string[] };
     };
 
-export type SettingsTreeRoots = Record<string, SettingsTreeNode>;
+export type SettingsTreeRoots = Record<string, undefined | SettingsTreeNode>;
 
 /**
  * A settings tree is a tree of panel settings that can be managed by
