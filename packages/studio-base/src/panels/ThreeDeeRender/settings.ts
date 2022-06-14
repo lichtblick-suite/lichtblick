@@ -290,8 +290,11 @@ export function buildSettingsTree(options: SettingsTreeOptions): SettingsTreeRoo
     if (newNode) {
       newNode.error = layerErrors.errorAtPath(["layers", layerId]);
       newNode.actions ??= [];
-      if (newNode.actions.find((action) => action.id === "delete") == undefined) {
-        newNode.actions.push({ id: "delete", label: "Delete" });
+      if (
+        newNode.actions.find((action) => action.type === "action" && action.id === "delete") ==
+        undefined
+      ) {
+        newNode.actions.push({ type: "action", id: "delete", label: "Delete" });
       }
       layersChildren[layerId] = newNode;
     }
@@ -362,7 +365,7 @@ export function buildSettingsTree(options: SettingsTreeOptions): SettingsTreeRoo
       label: "Custom Layers",
       children: layersChildren,
       defaultExpansionState: "expanded",
-      actions: [{ id: "add-grid " + uuidv4(), label: "Add Grid", icon: "Grid" }],
+      actions: [{ type: "action", id: "add-grid " + uuidv4(), label: "Add Grid", icon: "Grid" }],
     },
   };
 }

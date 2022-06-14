@@ -2,9 +2,8 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import CheckIcon from "@mui/icons-material/Check";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
-import { Menu, MenuItem, IconButton, ListItemIcon, ListItemText } from "@mui/material";
+import { Menu, MenuItem, IconButton, ListItemIcon, ListItemText, Divider } from "@mui/material";
 import { useState } from "react";
 
 import CommonIcons from "@foxglove/studio-base/components/CommonIcons";
@@ -30,7 +29,7 @@ export function NodeActionsMenu({
     setAnchorEl(undefined);
   };
 
-  const anyItemHasIcon = actions.some((action) => action.icon);
+  const anyItemHasIcon = actions.some((action) => action.type === "action" && action.icon);
 
   return (
     <>
@@ -54,7 +53,12 @@ export function NodeActionsMenu({
           "aria-label": "node actions button",
         }}
       >
-        {actions.map((action) => {
+        {actions.map((action, index) => {
+          if (action.type === "divider") {
+            return (
+              <Divider variant={anyItemHasIcon ? "inset" : "fullWidth"} key={`divider_${index}`} />
+            );
+          }
           const Icon = action.icon ? CommonIcons[action.icon] : undefined;
           return (
             <MenuItem key={action.id} onClick={() => handleClose(action.id)}>
@@ -63,13 +67,7 @@ export function NodeActionsMenu({
                   <Icon fontSize="small" />
                 </ListItemIcon>
               )}
-              {/* Use hidden icon for consistent padding */}
-              {anyItemHasIcon && !Icon && (
-                <ListItemIcon style={{ visibility: "hidden" }}>
-                  <CheckIcon />
-                </ListItemIcon>
-              )}
-              <ListItemText>{action.label}</ListItemText>
+              <ListItemText inset={!Icon && anyItemHasIcon}>{action.label}</ListItemText>
             </MenuItem>
           );
         })}

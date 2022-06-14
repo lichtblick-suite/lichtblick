@@ -290,6 +290,11 @@ export default function muiComponents(theme: Theme): ThemeOptions["components"] 
       defaultProps: {
         disableRipple: true,
       },
+      styleOverrides: {
+        root: {
+          minHeight: 32,
+        },
+      },
     },
     MuiOutlinedInput: {
       styleOverrides: {

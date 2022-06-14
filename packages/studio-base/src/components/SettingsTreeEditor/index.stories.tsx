@@ -35,10 +35,11 @@ const BasicSettings: SettingsTreeRoots = {
     visible: true,
     error: "This topic has an error",
     actions: [
-      { id: "add-grid", label: "Add new grid", icon: "Grid" },
-      { id: "add-background", label: "Add new background", icon: "Background" },
-      { id: "toggle-value", label: "Toggle Value", icon: "Check" },
-      { id: "reset-values", label: "Reset values" },
+      { type: "action", id: "add-grid", label: "Add new grid", icon: "Grid" },
+      { type: "action", id: "add-background", label: "Add new background", icon: "Background" },
+      { type: "action", id: "toggle-value", label: "Toggle Value", icon: "Check" },
+      { type: "divider" },
+      { type: "action", id: "reset-values", label: "Reset values" },
     ],
     fields: {
       numberWithPrecision: {
@@ -66,7 +67,7 @@ const BasicSettings: SettingsTreeRoots = {
     label: "Complex Inputs",
     icon: "Hive",
     visible: true,
-    actions: [{ id: "action", label: "Action" }],
+    actions: [{ type: "action", id: "action", label: "Action" }],
     fields: {
       messagepath: {
         label: "Message Path",
@@ -592,7 +593,7 @@ function makeBackgroundNode(index: number): SettingsTreeNode {
     fields: {
       url: { label: "URL", input: "string", value: "http://example.com/img.jpg" },
     },
-    actions: [{ id: "remove-background", label: "Remove Background" }],
+    actions: [{ type: "action", id: "remove-background", label: "Remove Background" }],
   };
 }
 
@@ -604,7 +605,7 @@ function makeGridNode(index: number): SettingsTreeNode {
       xsize: { label: "X Size", input: "number", value: 1 },
       ysize: { label: "Y Size", input: "number", value: 2 },
     },
-    actions: [{ id: "remove-grid", label: "Remove Grid" }],
+    actions: [{ type: "action", id: "remove-grid", label: "Remove Grid" }],
   };
 }
 

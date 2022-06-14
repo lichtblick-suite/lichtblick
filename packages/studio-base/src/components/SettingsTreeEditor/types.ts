@@ -80,22 +80,26 @@ export type SettingsTreeChildren = Record<string, SettingsTreeNode>;
  * An action that can be offered to the user to perform at the
  * level of a settings node.
  */
-export type SettingsTreeNodeAction = {
-  /**
-   * A unique idenfier for the action.
-   */
-  id: string;
+export type SettingsTreeNodeAction =
+  | {
+      type: "action";
 
-  /**
-   * A descriptive label for the action.
-   */
-  label: string;
+      /**
+       * A unique idenfier for the action.
+       */
+      id: string;
 
-  /**
-   * Optional icon to display with the action.
-   */
-  icon?: keyof typeof CommonIcons;
-};
+      /**
+       * A descriptive label for the action.
+       */
+      label: string;
+
+      /**
+       * Optional icon to display with the action.
+       */
+      icon?: keyof typeof CommonIcons;
+    }
+  | { type: "divider" };
 
 export type SettingsTreeNode = {
   /**
