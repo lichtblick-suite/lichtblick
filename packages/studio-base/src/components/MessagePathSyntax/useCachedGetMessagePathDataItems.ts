@@ -29,7 +29,8 @@ import {
   getTopicsByTopicName,
 } from "@foxglove/studio-base/util/selectors";
 
-import { MessagePathFilter, MessagePathStructureItem, RosPath } from "./constants";
+import { MessagePathStructureItem, RosPath } from "./constants";
+import { filterMatches } from "./filterMatches";
 import { TypicalFilterNames } from "./isTypicalFilterName";
 import { messagePathStructures } from "./messagePathsForDatatype";
 import parseRosPath, { quoteTopicNameIfNeeded } from "./parseRosPath";
@@ -177,26 +178,6 @@ export function useCachedGetMessagePathDataItems(
     },
     [relevantDatatypes, memoizedFilledInPaths, memoizedPaths, relevantTopics],
   );
-}
-
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-function filterMatches(filter: MessagePathFilter, value: any) {
-  if (typeof filter.value === "object") {
-    throw new Error("filterMatches only works on paths where global variables have been filled in");
-  }
-
-  let currentValue = value;
-  for (const name of filter.path) {
-    currentValue = currentValue[name];
-    if (currentValue == undefined) {
-      return false;
-    }
-  }
-
-  // Test equality using `==` so we can be forgiving for comparing booleans with integers,
-  // comparing numbers with strings, bigints with numbers, and so on.
-  // eslint-disable-next-line @foxglove/strict-equality
-  return currentValue == filter.value;
 }
 
 export function fillInGlobalVariablesInPath(
