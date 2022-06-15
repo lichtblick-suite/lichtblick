@@ -12,9 +12,9 @@
 //   You may not use this file except in compliance with the License.
 
 import SettingsIcon from "@mui/icons-material/Settings";
-import { useCallback } from "react";
+import { useCallback, useContext } from "react";
 
-import { usePanelContext } from "@foxglove/studio-base/components/PanelContext";
+import PanelContext from "@foxglove/studio-base/components/PanelContext";
 import ToolbarIconButton from "@foxglove/studio-base/components/PanelToolbar/ToolbarIconButton";
 import Stack from "@foxglove/studio-base/components/Stack";
 import { useSelectedPanels } from "@foxglove/studio-base/context/CurrentLayoutContext";
@@ -42,20 +42,23 @@ export const PanelToolbarControls = React.memo(function PanelToolbarControls({
   menuOpen,
   setMenuOpen,
 }: PanelToolbarControlsProps) {
-  const { id: panelId } = usePanelContext();
+  const panelId = useContext(PanelContext)?.id;
   const { setSelectedPanelIds } = useSelectedPanels();
   const { openPanelSettings } = useWorkspace();
 
   const hasSettingsSelector = useCallback(
-    (store: PanelSettingsEditorStore) => store.settingsTrees[panelId] != undefined,
+    (store: PanelSettingsEditorStore) =>
+      panelId ? store.settingsTrees[panelId] != undefined : false,
     [panelId],
   );
 
   const hasSettings = usePanelSettingsEditorStore(hasSettingsSelector);
 
   const openSettings = useCallback(() => {
-    setSelectedPanelIds([panelId]);
-    openPanelSettings();
+    if (panelId) {
+      setSelectedPanelIds([panelId]);
+      openPanelSettings();
+    }
   }, [setSelectedPanelIds, openPanelSettings, panelId]);
 
   return (
