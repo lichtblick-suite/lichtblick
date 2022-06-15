@@ -74,11 +74,12 @@ function MapPanel(props: MapPanelProps): JSX.Element {
 
   const [config, setConfig] = useState<Config>(() => {
     const initialConfig = props.context.initialState as Partial<Config>;
-    initialConfig.disabledTopics = initialConfig.disabledTopics ?? [];
-    initialConfig.layer = initialConfig.layer ?? "map";
-    initialConfig.customTileUrl = initialConfig.customTileUrl ?? "";
-    initialConfig.followTopic = initialConfig.followTopic ?? "";
-    return initialConfig as Config;
+    return {
+      disabledTopics: initialConfig.disabledTopics ?? [],
+      layer: initialConfig.layer ?? "map",
+      customTileUrl: initialConfig.customTileUrl ?? "",
+      followTopic: initialConfig.followTopic ?? "",
+    };
   });
 
   const [tileLayer] = useState(
@@ -375,7 +376,7 @@ function MapPanel(props: MapPanelProps): JSX.Element {
   useEffect(() => {
     setCenter((old) => {
       if (!config.followTopic) {
-        // set center only once
+        // When not following a topic center the map from the first message at startup
         if (old) {
           return old;
         }
@@ -570,19 +571,19 @@ function MapPanel(props: MapPanelProps): JSX.Element {
     };
   }, [currentMap, moveHandler]);
 
-  const [resetZoom, setResetZoom] = useState(true);
-
-  // Update the map view when centerpoint changes
+  // Update the map view to focus on the centerpoint when it changes
+  // Zoom is reset only once
+  const didResetZoomRef = useRef(false);
   useEffect(() => {
     if (!center) {
       return;
     }
 
-    // Only reset zoom once
-    const zoom = resetZoom ? config.zoomLevel ?? 10 : currentMap?.getZoom();
+    // If center updates when following a topic we don't want to keep resetting the zoom.
+    const zoom = didResetZoomRef.current ? currentMap?.getZoom() : config.zoomLevel ?? 10;
     currentMap?.setView([center.lat, center.lon], zoom);
-    setResetZoom(false);
-  }, [center, config.zoomLevel, currentMap, resetZoom]);
+    didResetZoomRef.current = true;
+  }, [center, config.zoomLevel, currentMap]);
 
   // Indicate render is complete - the effect runs after the dom is updated
   useEffect(() => {
