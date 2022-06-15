@@ -24,12 +24,34 @@ declare module "@foxglove/studio" {
     nsec: number;
   }
 
-  // A topic is a namespace for specific types of messages
+  /**
+   * A topic is a namespace for specific types of messages
+   */
   export type Topic = {
-    // topic name i.e. "/some/topic"
+    /**
+     * topic name i.e. "/some/topic"
+     */
     name: string;
-    // topic datatype
+    /**
+     * The datatype is an identifier for the types of messages on this topic. Typically this is the
+     * fully-qualified name of the message type. The fully-qualified name depends on the data source
+     * and data loaded by the data source.
+     *
+     * i.e. package.Message in protobuf-like serialization or pkg/Msg in ROS systems.
+     */
     datatype: string;
+  };
+
+  export type Subscription = {
+    topic: string;
+
+    /**
+     * Setting preload to _true_ hints to the data source that it should attempt to load all available
+     * messages for the topic. The default behavior is to only load messages for the current frame.
+     *
+     * **Only** topics with `preload: true` are available in the `allFrames` render state.
+     */
+    preload?: boolean;
   };
 
   /**
@@ -196,11 +218,20 @@ declare module "@foxglove/studio" {
      *
      * Subscribe will update the current subscriptions to the list of topic names. Passing an empty
      * array will unsubscribe from all topics.
+     *
+     * Calling subscribe with an empty array of topics is analagous to unsubscribeAll.
      */
     subscribe(topics: string[]): void;
 
     /**
+     * Subscribe to an array of topics with additional options for each subscription.
+     */
+    subscribe(subscriptions: Subscription[]): void;
+
+    /**
      * Unsubscribe from all topics.
+     *
+     * Note: This is analagous to calling subscribe([]) with an empty array of topics.
      */
     unsubscribeAll(): void;
 
