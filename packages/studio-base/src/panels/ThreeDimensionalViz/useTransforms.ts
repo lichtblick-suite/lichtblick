@@ -14,7 +14,8 @@
 import { useMemo, useRef } from "react";
 
 import {
-  TF_DATATYPES,
+  ROS_TF_DATATYPES,
+  FOXGLOVE_TF_DATATYPES,
   TRANSFORM_STAMPED_DATATYPES,
 } from "@foxglove/studio-base/panels/ThreeDimensionalViz/constants";
 import {
@@ -150,21 +151,18 @@ function useTransforms(args: Args): IImmutableTransformTree {
       }
 
       // Process all TF topics (ex: /tf and /tf_static)
-      if (TF_DATATYPES.includes(datatype)) {
+      if (ROS_TF_DATATYPES.includes(datatype)) {
         consumeTfs(msgs as MessageEvent<TfMessage>[], transforms);
         updated = true;
       } else if (TRANSFORM_STAMPED_DATATYPES.includes(datatype)) {
         consumeSingleTfs(msgs as MessageEvent<TF>[], transforms);
         updated = true;
-      } else if (
-        datatype === "foxglove.FrameTransform" ||
-        datatype === "foxglove_msgs/FrameTransform" ||
-        datatype === "foxglove_msgs/msg/FrameTransform"
-      ) {
+      } else if (FOXGLOVE_TF_DATATYPES.includes(datatype)) {
         consumeFoxgloveFrameTransform(
           msgs as MessageEvent<FoxgloveMessages["foxglove.FrameTransform"]>[],
           transforms,
         );
+        updated = true;
       }
     }
 

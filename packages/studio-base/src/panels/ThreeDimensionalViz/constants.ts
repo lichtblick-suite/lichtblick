@@ -27,10 +27,18 @@ export const TRANSFORM_STAMPED_DATATYPES = [
   "ros.geometry_msgs.TransformStamped",
   "geometry_msgs/msg/TransformStamped",
 ];
-export const TF_DATATYPES = [
+
+export const ROS_TF_DATATYPES = [
   "tf/tfMessage",
-  "ros.tf.tfMessage",
   "tf2_msgs/TFMessage",
   "tf2_msgs/msg/TFMessage",
+  // legacy protobuf formats from when we published protobuf copies of ROS messages
+  "ros.tf.tfMessage",
   "ros.tf2_msgs.TFMessage",
 ];
+export const FOXGLOVE_TF_DATATYPES = [
+  "foxglove.FrameTransform",
+  "foxglove_msgs/FrameTransform",
+  "foxglove_msgs/msg/FrameTransform",
+];
+export const TF_DATATYPES = [...ROS_TF_DATATYPES, ...FOXGLOVE_TF_DATATYPES];
