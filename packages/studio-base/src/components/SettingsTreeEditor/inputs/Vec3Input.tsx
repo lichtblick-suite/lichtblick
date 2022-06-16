@@ -18,7 +18,7 @@ export function Vec3Input({
 }: {
   disabled?: boolean;
   onChange: (
-    value: undefined | readonly [undefined | number, undefined | number, undefined | number],
+    value: undefined | [undefined | number, undefined | number, undefined | number],
   ) => void;
   precision?: number;
   readOnly?: boolean;

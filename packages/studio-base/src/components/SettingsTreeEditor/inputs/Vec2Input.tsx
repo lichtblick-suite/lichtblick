@@ -17,7 +17,7 @@ export function Vec2Input({
   value,
 }: {
   disabled?: boolean;
-  onChange: (value: undefined | readonly [undefined | number, undefined | number]) => void;
+  onChange: (value: undefined | [undefined | number, undefined | number]) => void;
   precision?: number;
   readOnly?: boolean;
   step?: number;

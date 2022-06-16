@@ -2,10 +2,12 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
+import { DeepReadonly } from "ts-essentials";
+
 import CommonIcons from "@foxglove/studio-base/components/CommonIcons";
 
 export type SettingsTreeFieldValue =
-  | { input: "autocomplete"; value?: string; items: ReadonlyArray<string> }
+  | { input: "autocomplete"; value?: string; items: string[] }
   | { input: "boolean"; value?: boolean }
   | { input: "rgb"; value?: string }
   | { input: "rgba"; value?: string }
@@ -21,26 +23,26 @@ export type SettingsTreeFieldValue =
     }
   | {
       input: "select";
-      value?: number | ReadonlyArray<number>;
-      options: ReadonlyArray<{ label: string; value: undefined | number }>;
+      value?: number | number[];
+      options: Array<{ label: string; value: undefined | number }>;
     }
   | {
       input: "select";
-      value?: string | ReadonlyArray<string>;
-      options: ReadonlyArray<{ label: string; value: undefined | string }>;
+      value?: string | string[];
+      options: Array<{ label: string; value: undefined | string }>;
     }
   | { input: "string"; value?: string }
-  | { input: "toggle"; value?: string; options: ReadonlyArray<string> }
+  | { input: "toggle"; value?: string; options: string[] }
   | {
       input: "vec3";
-      value?: readonly [undefined | number, undefined | number, undefined | number];
+      value?: [undefined | number, undefined | number, undefined | number];
       step?: number;
       precision?: number;
       labels?: [string, string, string];
     }
   | {
       input: "vec2";
-      value?: readonly [undefined | number, undefined | number];
+      value?: [undefined | number, undefined | number];
       step?: number;
       precision?: number;
       labels?: [string, string];
@@ -170,7 +172,7 @@ type DistributivePick<T, K extends keyof T> = T extends unknown ? Pick<T, K> : n
 export type SettingsTreeAction =
   | {
       action: "update";
-      payload: { path: ReadonlyArray<string> } & DistributivePick<
+      payload: { path: readonly string[] } & DistributivePick<
         SettingsTreeFieldValue,
         "input" | "value"
       >;
@@ -206,5 +208,5 @@ export type SettingsTree = {
 
 // To be moved to PanelExtensionContext in index.d.ts when settings API is finalized.
 export type EXPERIMENTAL_PanelExtensionContextWithSettings = {
-  __updatePanelSettingsTree(settings: SettingsTree): void;
+  __updatePanelSettingsTree(settings: DeepReadonly<SettingsTree>): void;
 };

@@ -293,7 +293,9 @@ function FieldInput({
                 path,
                 input: "select",
                 value:
-                  event.target.value === UNDEFINED_SENTINEL_VALUE ? undefined : event.target.value,
+                  event.target.value === UNDEFINED_SENTINEL_VALUE
+                    ? undefined
+                    : (event.target.value as undefined | string | string[]),
               },
             })
           }
