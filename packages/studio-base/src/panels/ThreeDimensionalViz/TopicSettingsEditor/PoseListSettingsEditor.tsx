@@ -11,9 +11,7 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { Stack } from "@mui/material";
-
-import Radio from "@foxglove/studio-base/components/Radio";
+import { Stack, Radio, FormControlLabel, RadioGroup, FormLabel, FormControl } from "@mui/material";
 
 import { TopicSettingsEditorProps } from ".";
 import PoseSettingsEditor, { PoseSettings } from "./PoseSettingsEditor";
@@ -33,15 +31,17 @@ export default function PoseListSettingsEditor(
 
   return (
     <Stack flex="auto">
-      <SLabel>Display poses as</SLabel>
-      <Radio
-        selectedId={displayType}
-        onChange={(id) => onFieldChange("displayType", id)}
-        options={[
-          { id: "arrows", label: "Arrows" },
-          { id: "line", label: "Line" },
-        ]}
-      />
+      <FormControl>
+        <FormLabel id="pose-display-radio-buttons-group">Display poses as</FormLabel>
+        <RadioGroup
+          aria-labelledby="pose-display-radio-buttons-group"
+          defaultValue={displayType}
+          onChange={(_event, value) => onFieldChange("displayType", value)}
+        >
+          <FormControlLabel value="arrows" label="Arrows" control={<Radio />} />
+          <FormControlLabel value="line" label="Lise" control={<Radio />} />
+        </RadioGroup>
+      </FormControl>
       {displayType === "line" && (
         <>
           <SLabel>Line thickness</SLabel>

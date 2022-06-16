@@ -11,7 +11,7 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { Box, Stack } from "@mui/material";
+import { Box, FormControlLabel, Radio, RadioGroup, Stack } from "@mui/material";
 import React from "react";
 import styled from "styled-components";
 
@@ -19,17 +19,17 @@ import ColorPicker from "@foxglove/studio-base/components/ColorPicker";
 import DropdownItem from "@foxglove/studio-base/components/Dropdown/DropdownItem";
 import Dropdown from "@foxglove/studio-base/components/Dropdown/index";
 import GradientPicker from "@foxglove/studio-base/components/GradientPicker";
-import Radio from "@foxglove/studio-base/components/Radio";
 import SegmentedControl from "@foxglove/studio-base/components/SegmentedControl";
 import {
+  ColorMode,
+  DEFAULT_FLAT_COLOR,
   DEFAULT_MAX_COLOR,
   DEFAULT_MIN_COLOR,
   DEFAULT_RGB_BYTE_ORDER,
   getDefaultColorMode,
-  ColorMode,
   isMappedColorMode,
-  DEFAULT_FLAT_COLOR,
   isRgbColorMode,
+  isValidRgbByteOrder,
 } from "@foxglove/studio-base/panels/ThreeDimensionalViz/utils/pointCloudColors";
 import { PointCloud2 } from "@foxglove/studio-base/types/Messages";
 import { mightActuallyBePartial } from "@foxglove/studio-base/util/mightActuallyBePartial";
@@ -164,23 +164,23 @@ export default function PointCloudSettingsEditor(
       </Stack>
 
       {isRgbColorMode(colorMode) && (
-        <Radio
-          selectedId={colorMode.rgbByteOrder ?? DEFAULT_RGB_BYTE_ORDER}
-          onChange={(id) =>
+        <RadioGroup
+          defaultValue={colorMode.rgbByteOrder ?? DEFAULT_RGB_BYTE_ORDER}
+          name="rgb-color-mode-radio-buttons-group"
+          onChange={(_event, value: string) => {
             onColorModeChange((prevColorMode) => {
-              if (isRgbColorMode(prevColorMode)) {
+              if (isRgbColorMode(prevColorMode) && isValidRgbByteOrder(value)) {
                 const { mode } = prevColorMode;
-                return { rgbByteOrder: id, mode };
+                return { rgbByteOrder: value, mode };
               }
               return prevColorMode;
-            })
-          }
-          options={[
-            { id: "rgba", label: "Byte order RGBA" },
-            { id: "abgr", label: "Byte order ABGR" },
-            { id: "bgra", label: "Byte order BGRA (RViz/PCL)" },
-          ]}
-        />
+            });
+          }}
+        >
+          <FormControlLabel value="rgba" control={<Radio />} label="Byte order RGBA" />
+          <FormControlLabel value="abgr" control={<Radio />} label="Byte order ABGR" />
+          <FormControlLabel value="bgra" control={<Radio />} label="Byte order BGRA (RViz/PCL)" />
+        </RadioGroup>
       )}
 
       {isMappedColorMode(colorMode) && (
@@ -214,15 +214,15 @@ export default function PointCloudSettingsEditor(
               />
             </Stack>
           </Stack>
-          <Radio
-            selectedId={colorMode.mode}
-            onChange={(id) =>
+          <RadioGroup
+            defaultValue={colorMode.mode}
+            onChange={(_event, value) =>
               onColorModeChange((prevColorMode) => {
                 if (isMappedColorMode(prevColorMode)) {
                   const { colorField, minValue, maxValue } = prevColorMode;
-                  return id === "rainbow"
+                  return value === "rainbow"
                     ? { mode: "rainbow", colorField, minValue, maxValue }
-                    : id === "turbo"
+                    : value === "turbo"
                     ? { mode: "turbo", colorField, minValue, maxValue }
                     : {
                         mode: "gradient",
@@ -236,18 +236,19 @@ export default function PointCloudSettingsEditor(
                 return prevColorMode;
               })
             }
-            options={[
-              {
-                id: "turbo",
-                label: <TurboText>Turbo</TurboText>,
-              },
-              {
-                id: "rainbow",
-                label: <RainbowText>Rainbow</RainbowText>,
-              },
-              { id: "gradient", label: "Custom gradient" },
-            ]}
-          />
+          >
+            <FormControlLabel
+              value="turbo"
+              control={<Radio />}
+              label={<TurboText>Turbo</TurboText>}
+            />
+            <FormControlLabel
+              value="rainbow"
+              control={<Radio />}
+              label={<RainbowText>Rainbow</RainbowText>}
+            />
+            <FormControlLabel value="gradient" control={<Radio />} label="Custom gradient" />
+          </RadioGroup>
         </Stack>
       )}
       {colorMode.mode === "gradient" && (

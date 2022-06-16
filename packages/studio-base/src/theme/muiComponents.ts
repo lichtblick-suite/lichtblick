@@ -332,6 +332,7 @@ export default function muiComponents(theme: Theme): ThemeOptions["components"] 
     MuiRadio: {
       defaultProps: {
         disableRipple: true,
+        size: "small",
       },
     },
     MuiTab: {

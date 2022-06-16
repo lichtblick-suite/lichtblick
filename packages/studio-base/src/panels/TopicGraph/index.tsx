@@ -16,7 +16,7 @@ import ArrowUpDownIcon from "@mdi/svg/svg/arrow-up-down.svg";
 import FitToPageIcon from "@mdi/svg/svg/fit-to-page-outline.svg";
 import ServiceIcon from "@mdi/svg/svg/rectangle-outline.svg";
 import TopicIcon from "@mdi/svg/svg/rhombus.svg";
-import { IconButton, Paper, Theme } from "@mui/material";
+import { FormControlLabel, IconButton, Paper, Radio, RadioGroup, Theme } from "@mui/material";
 import { makeStyles } from "@mui/styles";
 import cx from "classnames";
 import Cytoscape from "cytoscape";
@@ -30,7 +30,6 @@ import Panel from "@foxglove/studio-base/components/Panel";
 import PanelToolbar, {
   PANEL_TOOLBAR_MIN_HEIGHT,
 } from "@foxglove/studio-base/components/PanelToolbar";
-import Radio from "@foxglove/studio-base/components/Radio";
 import Stack from "@foxglove/studio-base/components/Stack";
 
 import Graph, { GraphMutation } from "./Graph";
@@ -412,17 +411,17 @@ function TopicGraph() {
         >
           <ToolGroup name="Topics">
             <div className={classes.toolbarContent}>
-              <Radio
-                selectedId={topicVisibility}
-                onChange={(id) => {
+              <RadioGroup
+                defaultValue={topicVisibility}
+                onChange={(_event, value) => {
                   graph.current?.resetUserPanZoom();
-                  setTopicVisibility(id as TopicVisibility);
+                  setTopicVisibility(value as TopicVisibility);
                 }}
-                options={Object.entries(topicVisibilityToLabelMap).map(([id, label]) => ({
-                  id,
-                  label,
-                }))}
-              />
+              >
+                {Object.entries(topicVisibilityToLabelMap).map(([id, label]) => (
+                  <FormControlLabel key={id} value={id} control={<Radio />} label={label} />
+                ))}
+              </RadioGroup>
             </div>
           </ToolGroup>
         </ExpandingToolbar>

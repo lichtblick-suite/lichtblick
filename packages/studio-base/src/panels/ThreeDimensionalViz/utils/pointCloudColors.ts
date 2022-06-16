@@ -82,6 +82,11 @@ export function isRgbColorMode(mode: ColorMode): mode is RgbColorMode {
 export function isMappedColorMode(mode: ColorMode): mode is MappedColorMode {
   return mode.mode === "turbo" || mode.mode === "rainbow" || mode.mode === "gradient";
 }
+export function isValidRgbByteOrder(
+  value: string,
+): value is NonNullable<RgbColorMode["rgbByteOrder"]> {
+  return value === "rgba" || value === "bgra" || value === "abgr";
+}
 
 /**
  * Return the default field to be used when coloring by field value (excluding RGB/RGBA)
