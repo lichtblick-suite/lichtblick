@@ -12,15 +12,15 @@
 //   You may not use this file except in compliance with the License.
 
 import MinusIcon from "@mdi/svg/svg/minus-box-outline.svg";
+import { styled as muiStyled } from "@mui/material";
 import { PropsWithChildren } from "react";
 import { Row } from "react-table";
-import styled from "styled-components";
 
 import Icon from "@foxglove/studio-base/components/Icon";
 
 import { sanitizeAccessorPath } from "./sanitizeAccessorPath";
 
-const ObjectCell = styled.span`
+const ObjectCell = muiStyled("span")`
   font-style: italic;
   cursor: pointer;
 `;

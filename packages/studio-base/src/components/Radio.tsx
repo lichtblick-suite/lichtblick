@@ -12,13 +12,10 @@
 //   You may not use this file except in compliance with the License.
 import RadioButtonUncheckedIcon from "@mdi/svg/svg/radiobox-blank.svg";
 import RadioButtonCheckedIcon from "@mdi/svg/svg/radiobox-marked.svg";
+import { alpha, styled as muiStyled } from "@mui/material";
 import { ReactElement } from "react";
-import styled from "styled-components";
-
-import { colors } from "@foxglove/studio-base/util/sharedStyleConstants";
 
 import Icon from "./Icon";
-import { colorToAlpha } from "./SegmentedControl";
 
 export type RadioOption<Key extends string> = {
   id: Key;
@@ -31,36 +28,34 @@ export type RadioProps<Key extends string> = {
   onChange: (selectedId: Key) => void;
 };
 
-const SOption = styled.div`
-  display: flex;
-  align-items: center;
-  cursor: pointer;
-  outline: 0;
-  &:not(:last-child) {
-    margin-bottom: 8px;
-  }
-  > .icon svg {
-    flex: none;
-    transition: all 80ms ease-in-out;
-    border-radius: 50%;
-  }
-  &:hover {
-    > .icon svg {
-      opacity: 0.8;
-    }
-  }
-  &:focus-within,
-  &:focus,
-  &:active {
-    > .icon svg {
-      box-shadow: 0 0 0 2px ${colorToAlpha(colors.LIGHT, 0.2)};
-    }
-  }
-`;
-const SLabel = styled.div`
-  margin-left: 8px;
-  overflow: hidden;
-`;
+const SOption = muiStyled("div")(({ theme }) => ({
+  display: "flex",
+  alignItems: "center",
+  cursor: "pointer",
+  outline: 0,
+
+  "&:not(:last-child)": {
+    marginBottom: theme.spacing(1),
+  },
+  "> .icon svg": {
+    flex: "none",
+    transition: "all 80ms ease-in-out",
+    borderRadius: "50%",
+  },
+  "&:hover > .icon svg": {
+    opacity: 0.8,
+  },
+  "&:focus-within, &:focus, &:active": {
+    "> .icon svg": {
+      boxShadow: `0 0 0 2px ${alpha(theme.palette.common.white, 0.2)}`,
+    },
+  },
+}));
+
+const SLabel = muiStyled("div")(({ theme }) => ({
+  marginLeft: theme.spacing(1),
+  overflow: "hidden",
+}));
 
 export default function Radio<Key extends string>(props: RadioProps<Key>): ReactElement {
   const { options, selectedId, onChange, ...restProps } = props;

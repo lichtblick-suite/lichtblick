@@ -11,46 +11,44 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import styled from "styled-components";
+import { styled as muiStyled } from "@mui/material";
 
-import { colors, textSize, rounded, fonts } from "@foxglove/studio-base/util/sharedStyleConstants";
+import { colors, fonts } from "@foxglove/studio-base/util/sharedStyleConstants";
 
-const SKeyboardShortcut = styled.div`
-  padding: 4px 0;
-  max-width: 400px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-`;
+const SKeyboardShortcut = muiStyled("div")(({ theme }) => ({
+  padding: theme.spacing(0.5, 0),
+  maxWidth: 400,
+  display: "flex",
+  justifyContent: "space-between",
+  alignItems: "center",
+}));
 
-const SDescription = styled.div`
-  margin-right: 16px;
-`;
+const SDescription = muiStyled("div")(({ theme }) => ({
+  marginRight: theme.spacing(2),
+}));
 
-const SKeyWrapper = styled.div`
-  display: inline-flex;
-  flex: none;
-  color: ${colors.GRAY};
-  border: 1px solid ${colors.DARK9};
-  border-radius: ${rounded.SMALL};
-  font-size: ${textSize.SMALL};
-  font-weight: 500;
-  min-width: 20px;
-  align-items: center;
-  justify-content: center;
-`;
+const SKeyWrapper = muiStyled("div")(({ theme }) => ({
+  display: "inline-flex",
+  flex: "none",
+  color: theme.palette.text.secondary,
+  border: `1px solid ${theme.palette.text.secondary}`,
+  borderRadius: theme.shape.borderRadius,
+  fontSize: theme.typography.body2.fontSize,
+  fontWeight: 500,
+  minWidth: 20,
+  alignItems: "center",
+  justifyContent: "center",
+}));
 
-const SKey = styled.kbd`
-  color: ${colors.GRAY};
-  padding: 0 3px;
-  font-size: 12px;
-  line-height: 1.5;
-  font-family: ${fonts.SANS_SERIF};
+const SKey = muiStyled("kbd")(({ theme }) => ({
+  padding: theme.spacing(0, 0.5),
+  lineHeight: 1.5,
+  fontFamily: fonts.SANS_SERIF,
 
-  :not(:last-child) {
-    border-right: 1px solid ${colors.DARK9};
-  }
-`;
+  "&:not(:last-child)": {
+    borderRight: `1px solid ${colors.DARK9}`,
+  },
+}));
 
 type Props = {
   keys: string[];

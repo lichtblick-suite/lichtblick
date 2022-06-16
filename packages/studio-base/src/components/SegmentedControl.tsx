@@ -11,45 +11,40 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
+import { styled as muiStyled } from "@mui/material";
 import { ReactElement } from "react";
-import styled from "styled-components";
-import tinyColor from "tinycolor2";
 
-import { colors } from "@foxglove/studio-base/util/sharedStyleConstants";
+const SSegmentedControl = muiStyled("div")(({ theme }) => ({
+  whiteSpace: "nowrap",
+  display: "inline-flex",
+  padding: theme.spacing(0.5),
+  borderRadius: 6,
+  backgroundColor: theme.palette.action.hover,
+  outline: 0,
 
-export const colorToAlpha = (hex: string, alpha: number): string => {
-  const color = tinyColor(hex);
-  color.setAlpha(alpha);
-  return color.toRgbString();
-};
+  "&:focus-within, &:focus, &:active": {
+    outline: `solid 2px ${theme.palette.action.selected}`,
+    outlineOffset: -2,
+  },
+}));
 
-const SSegmentedControl = styled.div`
-  white-space: nowrap;
-  display: inline-flex;
-  padding: 4px;
-  border-radius: 6px;
-  background-color: ${({ theme }) => colorToAlpha(theme.palette.neutralPrimary, 0.15)};
-  outline: 0;
-  &:focus-within,
-  &:focus,
-  &:active {
-    box-shadow: inset 0 0 0 2px ${({ theme }) => colorToAlpha(theme.palette.neutralPrimary, 0.1)};
-  }
-`;
+const SOption = muiStyled("div", {
+  shouldForwardProp: (prop) => prop !== "isSelected",
+})<{
+  isSelected: boolean;
+}>(({ theme, isSelected }) => ({
+  flex: "none",
+  cursor: "pointer",
+  transition: "all 80ms ease-in-out",
+  borderRadius: 4,
+  backgroundColor: isSelected ? theme.palette.primary.main : "transparent",
+  color: isSelected ? theme.palette.primary.contrastText : theme.palette.text.secondary,
+  padding: theme.spacing(1, 2),
 
-const SOption = styled.div<{ isSelected: boolean }>`
-  flex: none;
-  cursor: pointer;
-  transition: all 80ms ease-in-out;
-  border-radius: 4px;
-  background-color: ${(props) => (props.isSelected ? colors.PRIMARY : "transparent")};
-  color: ${({ isSelected, theme }) =>
-    isSelected ? theme.palette.white : theme.palette.neutralDark};
-  padding: 8px 16px;
-  &:hover {
-    opacity: 0.8;
-  }
-`;
+  "&:hover": {
+    color: theme.palette.text.primary,
+  },
+}));
 
 export type Option = {
   id: string;

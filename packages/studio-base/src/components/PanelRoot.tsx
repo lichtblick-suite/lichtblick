@@ -5,8 +5,6 @@
 import { TransitionStatus } from "react-transition-group";
 import styled, { css } from "styled-components";
 
-import { spacing } from "@foxglove/studio-base/util/sharedStyleConstants";
-
 export const FULLSCREEN_TRANSITION_DURATION_MS = 200;
 
 // This is in a separate file to prevent circular import issues.
@@ -46,7 +44,7 @@ export const PanelRoot = styled.div<{
           top: 0;
           left: 0;
           right: 0;
-          bottom: ${spacing.PLAYBACK_CONTROL_HEIGHT};
+          bottom: 50px;
           z-index: 10000;
         `;
       case "exiting":

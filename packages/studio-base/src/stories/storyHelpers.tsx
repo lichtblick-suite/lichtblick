@@ -10,7 +10,8 @@
 //   This source code is licensed under the Apache License, Version 2.0,
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
-import styled from "styled-components";
+
+import { styled as muiStyled } from "@mui/material";
 
 export const SCREENSHOT_VIEWPORT = {
   width: 1001,
@@ -21,7 +22,7 @@ export const ScreenshotSizedContainer = (props: {
   children: React.ReactNode;
 }): React.ReactElement => <div style={SCREENSHOT_VIEWPORT}>{props.children}</div>;
 
-export const SExpectedResult = styled.div`
+export const SExpectedResult = muiStyled("div")`
   position: fixed;
   top: 25px;
   left: 0;

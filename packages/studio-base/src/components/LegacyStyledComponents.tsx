@@ -4,7 +4,7 @@
 
 import styled from "styled-components";
 
-import { fonts, spacing } from "@foxglove/studio-base/util/sharedStyleConstants";
+import { fonts } from "@foxglove/studio-base/util/sharedStyleConstants";
 
 /**
  * @deprecated The LegacyButton should not be used for new features. use fluentui/react instead
@@ -19,7 +19,7 @@ export const LegacyButton = styled.button`
   font-family: ${fonts.SANS_SERIF};
   font-feature-settings: ${fonts.SANS_SERIF_FEATURE_SETTINGS};
   font-size: 100%;
-  margin: ${spacing.CONTROL_MARGIN};
+  margin: 0 0.2em;
   padding: 8px 12px;
   position: relative;
   text-align: center;
@@ -70,7 +70,7 @@ export const LegacyInput = styled.input`
   font-family: ${fonts.SANS_SERIF};
   font-feature-settings: ${fonts.SANS_SERIF_FEATURE_SETTINGS};
   font-size: 100%;
-  margin: ${spacing.CONTROL_MARGIN};
+  margin: 0 0.2em;
   padding: 8px 12px;
   text-align: left;
 
@@ -96,7 +96,7 @@ export const LegacyTextarea = styled.textarea`
   line-height: 1.4;
   font-family: ${fonts.MONOSPACE};
   font-size: 100%;
-  margin: ${spacing.CONTROL_MARGIN};
+  margin: 0 0.2em;
   padding: 8px 12px;
   text-align: left;
 
@@ -121,7 +121,7 @@ export const LegacySelect = styled.select`
   font-family: ${fonts.SANS_SERIF};
   font-feature-settings: ${fonts.SANS_SERIF_FEATURE_SETTINGS};
   font-size: 100%;
-  margin: ${spacing.CONTROL_MARGIN};
+  margin: 0 0.2em;
   padding: 8px 12px;
   text-align: left;
 

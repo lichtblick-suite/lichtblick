@@ -11,17 +11,17 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
+import { styled as muiStyled } from "@mui/material";
 import fuzzySort from "fuzzysort";
-import styled from "styled-components";
 
-import { colors } from "@foxglove/studio-base/util/sharedStyleConstants";
-
-const STextHighlight = styled.span`
+const STextHighlight = muiStyled("span")(
+  ({ theme }) => `
   .TextHighlight-highlight {
-    color: ${colors.PURPLE};
+    color: ${theme.palette.primary.main};
     font-weight: bold;
   }
-`;
+`,
+);
 
 type Props = {
   targetStr: string;

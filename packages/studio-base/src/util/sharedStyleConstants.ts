@@ -101,36 +101,6 @@ export const colors = {
   ACCENT: "#248eff",
 };
 
-export const spacing = {
-  PADDING: "8px",
-  CONTROL_PADDING: "8px 8px 8px 16px",
-  CONTROL_MARGIN: "0 0.2em",
-  TEXT_SIZE: "12px",
-  TOP_BAR_HEIGHT: "36px",
-  PANEL_TOOLBAR_HEIGHT: "26px",
-  PANEL_TOOLBAR_SPACING: "4px",
-  PLAYBACK_CONTROL_HEIGHT: "50px",
-};
-
-export const textSize = {
-  SMALL: "12px",
-  NORMAL: "14px",
-  LARGE: "16px",
-  H5: "20px",
-  H4: "24px",
-  H3: "32px",
-  H2: "48px",
-  H1: "64px",
-};
-
-export const rounded = {
-  SMALL: "2px",
-  NORMAL: "4px",
-  LARGE: "8px",
-  PILL: "999px",
-  CIRCLE: "50%",
-};
-
 export const fonts = {
   // We explicitly avoid fallback fonts (such as 'monospace') here to work around a bug in
   // Chrome/Chromium on Windows that causes crashes when multiple Workers try to access fonts that

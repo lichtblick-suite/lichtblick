@@ -11,26 +11,23 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
+import { styled as muiStyled } from "@mui/material";
 import { isEqual } from "lodash";
-import styled from "styled-components";
 
 import { LegacyTextarea } from "@foxglove/studio-base/components/LegacyStyledComponents";
 import { validationErrorToString, ValidationResult } from "@foxglove/studio-base/util/validators";
 
 const { useState, useCallback, useRef, useLayoutEffect, useEffect } = React;
 
-const SEditBox = styled.div`
+const SEditBox = muiStyled("div")`
   display: flex;
   flex-direction: column;
   min-height: 200px;
   max-height: 800px;
 `;
-const StyledTextarea = styled(LegacyTextarea)`
-  flex: 1 1 auto;
-  resize: none;
-`;
-const SError = styled.div`
-  color: ${({ theme }) => theme.semanticColors.errorText};
+
+const SError = muiStyled("div")`
+  color: ${({ theme }) => theme.palette.error.main};
   padding: 8px 4px;
 `;
 
@@ -160,9 +157,13 @@ export function ValidatedInputBase({
 
   return (
     <>
-      <StyledTextarea
+      <LegacyTextarea
         data-test="validated-input"
-        style={inputStyle}
+        style={{
+          flex: "auto",
+          resize: "none",
+          ...inputStyle,
+        }}
         ref={inputRef}
         value={inputStr}
         onChange={handleChange}

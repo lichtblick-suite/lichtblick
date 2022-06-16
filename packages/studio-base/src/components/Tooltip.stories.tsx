@@ -11,13 +11,9 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import styled from "styled-components";
+import { Box } from "@mui/material";
 
 import Tooltip from "@foxglove/studio-base/components/Tooltip";
-
-const Spacer = styled.div`
-  width: 10px;
-`;
 
 export default {
   title: "components/Tooltip",
@@ -25,31 +21,26 @@ export default {
 };
 
 export function BasicExamples(): React.ReactElement {
-  const containerStyle = {
-    padding: "100px",
-    display: "flex",
-    width: "400px",
-    height: "300px",
-  } as const;
   const style = {
-    width: "50px",
-    height: "50px",
+    width: 50,
+    height: 50,
     backgroundColor: "gray",
   } as const;
+
   return (
-    <div style={containerStyle}>
+    <div style={{ padding: 100, display: "flex", width: 400, height: 300 }}>
       <Tooltip contents="Top" placement="top" shown>
         <div style={style} />
       </Tooltip>
-      <Spacer />
+      <Box width={10} />
       <Tooltip contents="Left" placement="left" shown>
         <div style={style} />
       </Tooltip>
-      <Spacer />
+      <Box width={10} />
       <Tooltip contents="Right" placement="right" shown>
         <div style={style} />
       </Tooltip>
-      <Spacer />
+      <Box width={10} />
       <Tooltip contents="Bottom" placement="bottom" shown>
         <div style={style} />
       </Tooltip>

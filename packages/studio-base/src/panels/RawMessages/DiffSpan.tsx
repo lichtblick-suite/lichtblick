@@ -11,12 +11,12 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import styled from "styled-components";
+import { styled as muiStyled } from "@mui/material";
 
-const DiffSpan = styled.span`
-  padding: 0px 4px;
-  text-decoration: inherit;
-  white-space: pre-line;
-`;
+const DiffSpan = muiStyled("span")(({ theme }) => ({
+  padding: theme.spacing(0, 0.5),
+  textDecoration: "inherit",
+  whiteSpace: "pre-line",
+}));
 
 export default DiffSpan;

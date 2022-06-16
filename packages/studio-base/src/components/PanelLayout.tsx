@@ -11,7 +11,7 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { CircularProgress, Link } from "@mui/material";
+import { CircularProgress, Link, styled as muiStyled } from "@mui/material";
 import React, {
   useCallback,
   useMemo,
@@ -29,7 +29,6 @@ import {
   MosaicPath,
 } from "react-mosaic-component";
 import "react-mosaic-component/react-mosaic-component.css";
-import styled from "styled-components";
 
 import { EmptyPanelLayout } from "@foxglove/studio-base/components/EmptyPanelLayout";
 import EmptyState from "@foxglove/studio-base/components/EmptyState";
@@ -58,7 +57,9 @@ type Props = {
 // place the dropped item as a sibling of the Tab), as well as the "root drop targets" inside the
 // nested mosaic (that would place the dropped item as a direct child of the Tab). Makes it easier
 // to drop panels into a tab layout.
-const HideTopLevelDropTargets = styled.div.attrs({ style: { margin: 0 } })`
+const HideTopLevelDropTargets = muiStyled("div")`
+  margin: 0;
+
   .mosaic-root + .drop-target-container {
     display: none !important;
   }

@@ -11,13 +11,15 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
+import { styled as muiStyled } from "@mui/material";
 import { Story } from "@storybook/react";
 import { useState } from "react";
-import styled from "styled-components";
 
 import Slider from "./Slider";
 
-const StyledRange = styled.div<{ width?: number }>`
+const StyledRange = muiStyled("div", {
+  shouldForwardProp: (prop) => prop !== "width",
+})<{ width?: number }>`
   position: absolute;
   top: 40%;
   left: 0;
@@ -27,7 +29,9 @@ const StyledRange = styled.div<{ width?: number }>`
   border-radius: 2px;
 `;
 
-const StyledMarker = styled.div<{ width?: number }>`
+const StyledMarker = muiStyled("div", {
+  shouldForwardProp: (prop) => prop !== "width",
+})<{ width?: number }>`
   background-color: white;
   position: absolute;
   height: 150%;

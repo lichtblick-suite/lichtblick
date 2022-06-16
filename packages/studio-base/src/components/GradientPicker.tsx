@@ -11,8 +11,8 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
+import { styled as muiStyled } from "@mui/material";
 import { useCallback } from "react";
-import styled from "styled-components";
 
 import { Color } from "@foxglove/regl-worldview";
 import AutoSizingCanvas from "@foxglove/studio-base/components/AutoSizingCanvas";
@@ -26,13 +26,13 @@ const GRADIENT_COLOR_PICKER_SIZE = 25;
 const GRADIENT_BAR_INSET = (GRADIENT_COLOR_PICKER_SIZE - GRADIENT_LINE_WIDTH) / 2;
 const GRADIENT_BAR_HEIGHT = 10;
 
-const SPickerWrapper = styled.div`
+const SPickerWrapper = muiStyled("div")`
   flex: 1 1 auto;
   display: flex;
   flex-direction: row;
   justify-content: space-between;
 `;
-const SBarWrapper = styled.div`
+const SBarWrapper = muiStyled("div")`
   flex: 1 1 auto;
   display: flex;
   flex-direction: row;
@@ -40,13 +40,13 @@ const SBarWrapper = styled.div`
   margin-left: ${GRADIENT_BAR_INSET}px;
   margin-right: ${GRADIENT_BAR_INSET}px;
 `;
-const SLine = styled.div`
+const SLine = muiStyled("div")`
   flex: 0 0 auto;
   width: ${GRADIENT_LINE_WIDTH}px;
   height: ${GRADIENT_BAR_HEIGHT + GRADIENT_LINE_HEIGHT}px;
   background-color: ${colors.LIGHT2};
 `;
-const SBar = styled.div`
+const SBar = muiStyled("div")`
   flex: 1 1 auto;
   height: ${GRADIENT_BAR_HEIGHT}px;
 `;
