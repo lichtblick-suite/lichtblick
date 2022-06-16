@@ -215,6 +215,12 @@ const DisabledSettings: SettingsTreeRoots = {
         options: ["One", "Two"],
         disabled: true,
       },
+      vec2: {
+        input: "vec2",
+        label: "Vec2",
+        value: [1, 2],
+        disabled: true,
+      },
       vec3: {
         input: "vec3",
         label: "Vec3",
@@ -293,6 +299,12 @@ const ReadonlySettings: SettingsTreeRoots = {
         label: "Toggle",
         value: "One",
         options: ["One", "Two"],
+        readonly: true,
+      },
+      vec2: {
+        input: "vec2",
+        label: "Vec2",
+        value: [1, 2],
         readonly: true,
       },
       vec3: {

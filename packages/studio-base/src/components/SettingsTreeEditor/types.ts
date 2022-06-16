@@ -37,6 +37,13 @@ export type SettingsTreeFieldValue =
       step?: number;
       precision?: number;
       labels?: [string, string, string];
+    }
+  | {
+      input: "vec2";
+      value?: readonly [undefined | number, undefined | number];
+      step?: number;
+      precision?: number;
+      labels?: [string, string];
     };
 
 export type SettingsTreeField = SettingsTreeFieldValue & {
