@@ -2,53 +2,46 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { Pivot, PivotItem, useTheme } from "@fluentui/react";
-import ArrowCollapseIcon from "@mdi/svg/svg/arrow-collapse.svg";
-import { Paper, IconButton as MuiIconButton, Theme } from "@mui/material";
-import { makeStyles } from "@mui/styles";
-import cx from "classnames";
+import CloseFullscreenIcon from "@mui/icons-material/CloseFullscreen";
+import { Paper, IconButton, Tabs, Tab, styled as muiStyled } from "@mui/material";
 import { ReactElement, ReactNode } from "react";
 
-import { useTooltip } from "@foxglove/studio-base/components/Tooltip";
+import Stack from "@foxglove/studio-base/components/Stack";
 
 const PANE_HEIGHT = 240;
 
-const useStyles = makeStyles((theme: Theme) => ({
-  root: {
-    position: "relative",
-    pointerEvents: "auto",
-  },
-  rootExpanded: {
-    display: "flex",
-    flexDirection: "column",
-    width: 280,
-  },
-  icon: {
+const StyledIconButton = muiStyled(IconButton)({
+  fontSize: "1rem !important",
+
+  "& svg:not(.MuiSvgIcon-root)": {
     fontSize: "1rem !important",
-
-    "& svg:not(.MuiSvgIcon-root)": {
-      fontSize: "1rem !important",
-    },
   },
-  iconCollapse: {
-    right: 0,
-    top: 0,
+});
 
-    "&.MuiIconButton-root": {
-      // doing this because the type will not allow !important
-      position: "absolute",
+const StyledTab = muiStyled(Tab)(({ theme }) => ({
+  minHeight: "auto",
+  minWidth: "auto",
+  padding: theme.spacing(1, 1.5, 1.125),
+  color: theme.palette.text.secondary,
 
-      "&:hover": {
-        backgroundColor: "transparent",
-      },
-    },
+  "&.Mui-selected": {
+    color: theme.palette.text.primary,
   },
-  toolGroupFixedSizePanel: {
-    overflowX: "hidden",
-    overflowY: "auto",
-    padding: theme.spacing(1),
-    maxHeight: PANE_HEIGHT,
+}));
+
+const StyledTabs = muiStyled(Tabs)({
+  minHeight: "auto",
+
+  ".MuiTabs-indicator": {
+    transform: "scaleX(0.75)",
+    height: 2,
   },
+});
+
+const Content = muiStyled("div")(({ theme }) => ({
+  position: "relative",
+  backgroundColor: theme.palette.background.default,
+  width: 280,
 }));
 
 export function ToolGroup<T>({ children }: { name: T; children: React.ReactElement }): JSX.Element {
@@ -56,8 +49,11 @@ export function ToolGroup<T>({ children }: { name: T; children: React.ReactEleme
 }
 
 export function ToolGroupFixedSizePane({ children }: { children: ReactNode }): JSX.Element {
-  const classes = useStyles();
-  return <div className={classes.toolGroupFixedSizePanel}>{children}</div>;
+  return (
+    <Stack padding={1} overflowX="hidden" overflowY="auto" style={{ maxHeight: PANE_HEIGHT }}>
+      {children}
+    </Stack>
+  );
 }
 
 type Props<T extends string> = {
@@ -79,13 +75,7 @@ export default function ExpandingToolbar<T extends string>({
   tooltip,
   dataTest,
 }: Props<T>): JSX.Element {
-  const classes = useStyles();
-  const theme = useTheme();
   const expanded = selectedTab != undefined;
-
-  const expandingToolbarButton = useTooltip({
-    contents: tooltip,
-  });
 
   if (!expanded) {
     let selectedTabLocal: T | undefined = selectedTab;
@@ -97,17 +87,15 @@ export default function ExpandingToolbar<T extends string>({
     });
 
     return (
-      <Paper className={classes.root} square={false} elevation={4}>
-        {expandingToolbarButton.tooltip}
-        <MuiIconButton
-          className={classes.icon}
+      <Paper square={false} elevation={4} style={{ pointerEvents: "auto" }}>
+        <StyledIconButton
           color={checked === true ? "info" : "default"}
           title={tooltip}
           data-test={`ExpandingToolbar-${tooltip}`}
           onClick={() => onSelectTab(selectedTabLocal)}
         >
           {icon}
-        </MuiIconButton>
+        </StyledIconButton>
       </Paper>
     );
   }
@@ -119,38 +107,34 @@ export default function ExpandingToolbar<T extends string>({
     }
   });
 
+  const handleChange = (_event: React.SyntheticEvent, value: T | undefined) => {
+    if (value != undefined) {
+      onSelectTab(value);
+    }
+  };
+
   return (
     <Paper
-      className={cx(classes.root, classes.rootExpanded)}
       data-test={dataTest}
       square={false}
       elevation={4}
+      style={{
+        pointerEvents: "auto",
+      }}
     >
-      <Pivot
-        styles={{
-          root: {
-            paddingRight: theme.spacing.l2,
-          },
-          link: {
-            fontSize: theme.fonts.small.fontSize,
-            marginRight: 0,
-            height: 32,
-          },
-          itemContainer: {
-            backgroundColor: theme.semanticColors.bodyBackground,
-          },
-        }}
-      >
-        {React.Children.map(children, (child) => {
-          return <PivotItem headerText={child.props.name}>{child}</PivotItem>;
-        })}
-      </Pivot>
-      <MuiIconButton
-        onClick={() => onSelectTab(undefined)}
-        className={cx(classes.icon, classes.iconCollapse)}
-      >
-        <ArrowCollapseIcon />
-      </MuiIconButton>
+      <Paper>
+        <Stack direction="row" justifyContent="space-between" alignItems="center">
+          <StyledTabs textColor="inherit" value={selectedTab} onChange={handleChange}>
+            {React.Children.map(children, (child) => (
+              <StyledTab label={child.props.name} value={child.props.name} />
+            ))}
+          </StyledTabs>
+          <StyledIconButton onClick={() => onSelectTab(undefined)}>
+            <CloseFullscreenIcon fontSize="small" />
+          </StyledIconButton>
+        </Stack>
+      </Paper>
+      <Content>{selectedChild}</Content>
     </Paper>
   );
 }
