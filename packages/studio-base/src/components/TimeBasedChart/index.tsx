@@ -10,7 +10,8 @@
 //   This source code is licensed under the Apache License, Version 2.0,
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
-import { useTheme } from "@fluentui/react";
+
+import { Button, useTheme, styled as muiStyled } from "@mui/material";
 import { ChartOptions, ScaleOptions } from "chart.js";
 import { AnnotationOptions } from "chartjs-plugin-annotation";
 import React, {
@@ -23,14 +24,12 @@ import React, {
   MouseEvent,
 } from "react";
 import { useMountedState, useThrottle } from "react-use";
-import styled from "styled-components";
 import { useDebouncedCallback } from "use-debounce";
 import { v4 as uuidv4 } from "uuid";
 
 import type { ZoomOptions } from "@foxglove/chartjs-plugin-zoom/types/options";
 import { filterMap } from "@foxglove/den/collection";
 import Logger from "@foxglove/log";
-import Button from "@foxglove/studio-base/components/Button";
 import ChartComponent from "@foxglove/studio-base/components/Chart/index";
 import { RpcElement, RpcScales } from "@foxglove/studio-base/components/Chart/types";
 import KeyListener from "@foxglove/studio-base/components/KeyListener";
@@ -58,36 +57,40 @@ export type TimeBasedChartTooltipData = {
   constantName?: string;
 };
 
-const SRoot = styled.div`
-  position: relative;
-`;
+const SRoot = muiStyled("div")({
+  position: "relative",
+});
 
-const SResetZoom = styled.div`
-  position: absolute;
-  bottom: 33px;
-  right: 10px;
-`;
+const SResetZoom = muiStyled("div")(({ theme }) => ({
+  position: "absolute",
+  bottom: theme.spacing(4),
+  right: theme.spacing(1),
+}));
 
-const SLegend = styled.div`
-  display: flex;
-  width: 10%;
-  min-width: 90px;
-  overflow-y: auto;
-  flex-direction: column;
-  align-items: flex-start;
-  justify-content: start;
-  padding: 30px 0px 10px 0px;
-`;
+const SLegend = muiStyled("div")(({ theme }) => ({
+  display: "flex",
+  width: "10%",
+  minWidth: 90,
+  overflowY: "auto",
+  flexDirection: "column",
+  alignItems: "flex-start",
+  justifyContent: "start",
+  padding: theme.spacing(4, 0, 1, 0),
+}));
 
-const SBar = styled.div<{ xAxisIsPlaybackTime: boolean }>`
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  width: 1px;
-  margin-left: -1px;
-  display: block;
-  background-color: ${(props) => (props.xAxisIsPlaybackTime ? "#F7BE00" : "#248EFF")};
-`;
+const SBar = muiStyled("div", {
+  shouldForwardProp: (prop) => prop !== "xAxisIsPlaybackTime",
+})<{
+  xAxisIsPlaybackTime: boolean;
+}>(({ xAxisIsPlaybackTime, theme }) => ({
+  position: "absolute",
+  top: 0,
+  bottom: 0,
+  width: 1,
+  marginLeft: -1,
+  display: "block",
+  backgroundColor: xAxisIsPlaybackTime ? theme.palette.warning.main : theme.palette.info.main,
+}));
 
 type ChartComponentProps = ComponentProps<typeof ChartComponent>;
 
@@ -514,12 +517,12 @@ export default function TimeBasedChart(props: Props): JSX.Element {
         family: fonts.MONOSPACE,
         size: 10,
       },
-      color: theme.palette.neutralSecondary,
+      color: theme.palette.text.secondary,
       maxRotation: 0,
     };
 
     const scale: ScaleOptions<"linear"> = {
-      grid: { color: theme.palette.neutralLighter },
+      grid: { color: theme.palette.divider },
       ...xAxes,
       min: minX,
       max: maxX,
@@ -531,14 +534,7 @@ export default function TimeBasedChart(props: Props): JSX.Element {
     };
 
     return scale;
-  }, [
-    theme.palette.neutralSecondary,
-    showXAxisLabels,
-    theme.palette.neutralLighter,
-    xAxes,
-    minX,
-    maxX,
-  ]);
+  }, [theme.palette, showXAxisLabels, xAxes, minX, maxX]);
 
   const yScale = useMemo<ScaleOptions>(() => {
     const defaultYTicksSettings: ScaleOptions["ticks"] = {
@@ -546,7 +542,7 @@ export default function TimeBasedChart(props: Props): JSX.Element {
         family: fonts.MONOSPACE,
         size: 10,
       },
-      color: theme.palette.neutralSecondary,
+      color: theme.palette.text.secondary,
       padding: 0,
     };
 
@@ -571,7 +567,7 @@ export default function TimeBasedChart(props: Props): JSX.Element {
         ...yAxes.ticks,
       },
     } as ScaleOptions;
-  }, [datasetBounds.y, yAxes, theme.palette.neutralSecondary]);
+  }, [datasetBounds.y, yAxes, theme.palette]);
 
   const datasetBoundsRef = useRef(datasetBounds);
   datasetBoundsRef.current = datasetBounds;
@@ -860,8 +856,13 @@ export default function TimeBasedChart(props: Props): JSX.Element {
 
           <SResetZoom>
             {showReset && (
-              <Button tooltip="(shortcut: double-click)" onClick={onResetZoom}>
-                reset view
+              <Button
+                variant="contained"
+                color="inherit"
+                title="(shortcut: double-click)"
+                onClick={onResetZoom}
+              >
+                Reset view
               </Button>
             )}
           </SResetZoom>
