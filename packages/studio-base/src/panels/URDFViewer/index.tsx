@@ -2,8 +2,10 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { ComboBox, IDropdownOption, Toggle } from "@fluentui/react";
+import { IDropdownOption } from "@fluentui/react";
 import { makeStyles } from "@mui/styles";
+import produce from "immer";
+import { isEmpty, set } from "lodash";
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { useResizeDetector } from "react-resize-detector";
 
@@ -18,9 +20,11 @@ import * as PanelAPI from "@foxglove/studio-base/PanelAPI";
 import EmptyState from "@foxglove/studio-base/components/EmptyState";
 import Panel from "@foxglove/studio-base/components/Panel";
 import PanelToolbar from "@foxglove/studio-base/components/PanelToolbar";
+import { SettingsTreeAction } from "@foxglove/studio-base/components/SettingsTreeEditor/types";
 import { useAssets } from "@foxglove/studio-base/context/AssetsContext";
 import useCleanup from "@foxglove/studio-base/hooks/useCleanup";
 import { MessageEvent } from "@foxglove/studio-base/players/types";
+import { usePanelSettingsTreeUpdate } from "@foxglove/studio-base/providers/PanelSettingsEditorContextProvider";
 import { JointState } from "@foxglove/studio-base/types/Messages";
 import { SaveConfig } from "@foxglove/studio-base/types/panels";
 import { ROBOT_DESCRIPTION_PARAM } from "@foxglove/studio-base/util/globalConstants";
@@ -29,27 +33,27 @@ import { JointValueSliders } from "./JointValueSliders";
 import OverlayControls from "./OverlayControls";
 import { Renderer } from "./Renderer";
 import helpContent from "./index.help.md";
+import { buildSettingsTree } from "./settings";
+import { Config } from "./types";
 import useRobotDescriptionAsset from "./useRobotDescriptionAsset";
 
-export type EventTypes = {
-  cameraMove: () => void;
-};
-type Config = {
-  jointStatesTopic?: string;
-  customJointValues?: Record<string, number>;
-  opacity?: number;
-};
-export type Props = {
+const DEFAULT_DISTANCE = 5;
+
+type Props = {
   config: Config;
   saveConfig: SaveConfig<Config>;
 };
-
-const DEFAULT_DISTANCE = 5;
 
 const defaultConfig: Config = {
   jointStatesTopic: "/joint_states",
   opacity: 0.75,
 };
+
+const DATA_TYPES = Object.freeze([
+  "sensor_msgs/JointState",
+  "sensor_msgs/msg/JointState",
+  "ros.sensor_msgs.JointState",
+]);
 
 const useStyles = makeStyles({
   root: {
@@ -102,6 +106,8 @@ function URDFViewer({ config, saveConfig }: Props) {
   const { assets } = useAssets();
   const [selectedAssetId, setSelectedAssetId] = useState<string | undefined>();
 
+  const updatePanelSettingsTree = usePanelSettingsTreeUpdate();
+
   const model = useMemo(() => {
     // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
     const asset = assets.find(({ type, uuid }) => uuid === selectedAssetId && type === "urdf");
@@ -151,9 +157,10 @@ function URDFViewer({ config, saveConfig }: Props) {
     },
   ) as Record<string, readonly MessageEvent<JointState>[]>;
 
-  const useCustomJointValues = jointStatesTopic == undefined;
+  const manualJointControl = isEmpty(config.jointStatesTopic);
+
   const jointValues = useMemo(() => {
-    if (useCustomJointValues) {
+    if (manualJointControl) {
       return customJointValues;
     }
     const values: Record<string, number> = {};
@@ -167,7 +174,7 @@ function URDFViewer({ config, saveConfig }: Props) {
       });
     }
     return values;
-  }, [customJointValues, latestJointStatesMessage, useCustomJointValues]);
+  }, [customJointValues, manualJointControl, latestJointStatesMessage?.message]);
 
   useLayoutEffect(() => {
     if (jointValues) {
@@ -204,24 +211,6 @@ function URDFViewer({ config, saveConfig }: Props) {
   );
 
   const { topics } = PanelAPI.useDataSourceInfo();
-  const topicOptions = useMemo(() => {
-    const options = filterMap(topics, ({ name, datatype }) =>
-      datatype === "sensor_msgs/JointState" ||
-      datatype === "sensor_msgs/msg/JointState" ||
-      datatype === "ros.sensor_msgs.JointState"
-        ? { key: name, text: name }
-        : undefined,
-    );
-    // Include a custom option that may not be present (yet) in the list of topics
-    if (
-      jointStatesTopic != undefined &&
-      jointStatesTopic !== "" &&
-      !options.some(({ key }) => key === jointStatesTopic)
-    ) {
-      options.unshift({ key: jointStatesTopic, text: jointStatesTopic });
-    }
-    return options;
-  }, [jointStatesTopic, topics]);
 
   const { robotDescriptionAsset, messageBar } = useRobotDescriptionAsset();
 
@@ -236,37 +225,41 @@ function URDFViewer({ config, saveConfig }: Props) {
     return options;
   }, [assets, robotDescriptionAsset]);
 
+  const actionHandler = useCallback(
+    (action: SettingsTreeAction) => {
+      if (action.action !== "update") {
+        return;
+      }
+
+      const { input, path, value } = action.payload;
+
+      if (input === "boolean" && path[1] === "manualControl") {
+        saveConfig({
+          jointStatesTopic: value === true ? undefined : defaultConfig.jointStatesTopic,
+        });
+        return;
+      }
+
+      saveConfig(produce((draft) => set(draft, path.slice(1), value)));
+    },
+    [saveConfig],
+  );
+
+  const availableTopics = useMemo(
+    () => topics.filter((topic) => DATA_TYPES.includes(topic.datatype)),
+    [topics],
+  );
+
+  useEffect(() => {
+    updatePanelSettingsTree({
+      actionHandler,
+      roots: buildSettingsTree(config, availableTopics),
+    });
+  }, [actionHandler, availableTopics, config, updatePanelSettingsTree]);
+
   return (
     <div className={classes.root}>
-      <PanelToolbar helpContent={helpContent}>
-        <div className={classes.toolbar}>
-          <Toggle
-            inlineLabel
-            offText="Manual joint control"
-            onText="Topic"
-            checked={!useCustomJointValues}
-            onChange={(_event, checked) =>
-              saveConfig({
-                jointStatesTopic: checked ?? false ? defaultConfig.jointStatesTopic : undefined,
-              })
-            }
-          />
-          {!useCustomJointValues && (
-            <ComboBox
-              allowFreeform
-              options={topicOptions}
-              selectedKey={jointStatesTopic}
-              onChange={(_event, option, _index, value) => {
-                if (option) {
-                  saveConfig({ jointStatesTopic: option.key as string });
-                } else if (value != undefined) {
-                  saveConfig({ jointStatesTopic: value });
-                }
-              }}
-            />
-          )}
-        </div>
-      </PanelToolbar>
+      <PanelToolbar helpContent={helpContent} />
       <div className={classes.content}>
         {messageBar}
         {model == undefined ? (
@@ -299,7 +292,7 @@ function URDFViewer({ config, saveConfig }: Props) {
                 }}
               />
             </div>
-            {useCustomJointValues && (
+            {manualJointControl && (
               <JointValueSliders
                 model={model}
                 customJointValues={customJointValues}

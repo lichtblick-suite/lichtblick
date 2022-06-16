@@ -46,6 +46,16 @@ export function Default(): JSX.Element {
   );
 }
 
+export function WithSettings(): JSX.Element {
+  return (
+    <ExampleAssetsProvider>
+      <PanelSetup includeSettings>
+        <URDFViewer />
+      </PanelSetup>
+    </ExampleAssetsProvider>
+  );
+}
+
 export function CustomOpacity(): JSX.Element {
   return (
     <ExampleAssetsProvider>

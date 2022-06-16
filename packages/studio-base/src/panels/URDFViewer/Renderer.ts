@@ -7,7 +7,7 @@ import { URDFRobot } from "urdf-loader";
 
 import { CameraState } from "@foxglove/regl-worldview";
 
-import { EventTypes } from "./index";
+import { EventTypes } from "./types";
 
 // https://github.com/gkjohnson/urdf-loaders/issues/205
 function cloneModel(robot: URDFRobot): URDFRobot {
