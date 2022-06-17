@@ -45,13 +45,6 @@ const useStyles = makeStyles((theme) => ({
     "b, strong": {
       fontWeight: 700,
     },
-    table: {
-      borderCollapse: "collapse",
-      borderSpacing: 0,
-    },
-    "th, td": {
-      verticalAlign: "top",
-    },
 
     // container styling
     height: "100%",

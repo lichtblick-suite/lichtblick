@@ -50,13 +50,7 @@ function DiagnosticStatusPanel(props: Props) {
   const { saveConfig, config } = props;
   const { topics } = useDataSourceInfo();
   const { openSiblingPanel } = usePanelContext();
-  const {
-    selectedHardwareId,
-    selectedName,
-    splitFraction,
-    topicToRender,
-    collapsedSections = [],
-  } = config;
+  const { selectedHardwareId, selectedName, splitFraction, topicToRender } = config;
 
   const updatePanelSettingsTree = usePanelSettingsTreeUpdate();
 
@@ -178,7 +172,7 @@ function DiagnosticStatusPanel(props: Props) {
               variant="standard"
               {...params}
               InputProps={{ ...params.InputProps, disableUnderline: true }}
-              placeholder={selectedDisplayName}
+              placeholder={selectedDisplayName ?? "Filter"}
             />
           )}
         />
@@ -195,8 +189,6 @@ function DiagnosticStatusPanel(props: Props) {
               }
               topicToRender={topicToRender}
               openSiblingPanel={openSiblingPanel}
-              saveConfig={saveConfig}
-              collapsedSections={collapsedSections}
             />
           ))}
         </Stack>
@@ -211,7 +203,7 @@ function DiagnosticStatusPanel(props: Props) {
   );
 }
 
-const defaultConfig: Config = { topicToRender: DIAGNOSTIC_TOPIC, collapsedSections: [] };
+const defaultConfig: Config = { topicToRender: DIAGNOSTIC_TOPIC };
 
 export default Panel(
   Object.assign(DiagnosticStatusPanel, {

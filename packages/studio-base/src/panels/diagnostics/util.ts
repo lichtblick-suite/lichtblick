@@ -49,7 +49,6 @@ export type DiagnosticStatusConfig = {
   selectedName?: string;
   splitFraction?: number;
   topicToRender: string;
-  collapsedSections: { name: string; section: string }[];
 };
 
 export type DiagnosticSummaryConfig = {

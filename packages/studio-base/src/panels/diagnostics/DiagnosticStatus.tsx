@@ -11,34 +11,29 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { useTheme } from "@fluentui/react";
-import ChartLineVariantIcon from "@mdi/svg/svg/chart-line-variant.svg";
-import DotsHorizontalIcon from "@mdi/svg/svg/dots-horizontal.svg";
-import ChevronDownIcon from "@mdi/svg/svg/unfold-less-horizontal.svg";
-import ChevronUpIcon from "@mdi/svg/svg/unfold-more-horizontal.svg";
-import { Theme } from "@mui/material";
-import { makeStyles } from "@mui/styles";
-import cx from "classnames";
+import PowerInputIcon from "@mui/icons-material/PowerInput";
+import ShowChartIcon from "@mui/icons-material/ShowChart";
+import {
+  Tooltip,
+  Table,
+  TableBody,
+  TableCell,
+  TableRow,
+  IconButton,
+  Typography,
+  styled as muiStyled,
+} from "@mui/material";
 import { clamp } from "lodash";
 import { ReactElement, useCallback, useEffect, useRef, useState } from "react";
 import { createSelector } from "reselect";
 import sanitizeHtml from "sanitize-html";
 
-import Icon from "@foxglove/studio-base/components/Icon";
 import Stack from "@foxglove/studio-base/components/Stack";
-import Tooltip from "@foxglove/studio-base/components/Tooltip";
 import { openSiblingPlotPanel } from "@foxglove/studio-base/panels/Plot";
 import { openSiblingStateTransitionsPanel } from "@foxglove/studio-base/panels/StateTransitions";
-import { OpenSiblingPanel, SaveConfig } from "@foxglove/studio-base/types/panels";
-import { colors } from "@foxglove/studio-base/util/sharedStyleConstants";
+import { OpenSiblingPanel } from "@foxglove/studio-base/types/panels";
 
-import {
-  LEVEL_NAMES,
-  DiagnosticInfo,
-  DiagnosticStatusConfig,
-  KeyValue,
-  DiagnosticStatusMessage,
-} from "./util";
+import { DiagnosticInfo, KeyValue, DiagnosticStatusMessage } from "./util";
 
 const MIN_SPLIT_FRACTION = 0.1;
 
@@ -48,8 +43,6 @@ type Props = {
   onChangeSplitFraction: (arg0: number) => void;
   topicToRender: string;
   openSiblingPanel: OpenSiblingPanel;
-  collapsedSections: { name: string; section: string }[];
-  saveConfig: SaveConfig<DiagnosticStatusConfig>;
 };
 
 type FormattedKeyValue = {
@@ -74,6 +67,18 @@ const allowedTags = [
   "tr",
   "tt",
   "u",
+  "h1",
+  "h2",
+  "h3",
+  "h4",
+  "h5",
+  "h6",
+  "H1",
+  "H2",
+  "H3",
+  "H4",
+  "H5",
+  "H6",
 ];
 
 function sanitize(value: string): { __html: string } {
@@ -89,95 +94,57 @@ function sanitize(value: string): { __html: string } {
   };
 }
 
-const useStyles = makeStyles((theme: Theme) => ({
-  table: {
-    tableLayout: "fixed",
-    width: "100%",
-    lineHeight: "1.3em",
-    whiteSpace: "pre-line",
-    overflowWrap: "break-word",
-    textAlign: "left",
-    border: "none",
+const ResizeHandle = muiStyled("div", {
+  shouldForwardProp: (prop) => prop !== "splitFraction",
+})<{ splitFraction: number }>(({ theme, splitFraction }) => ({
+  position: "absolute",
+  top: 0,
+  bottom: 0,
+  width: 12,
+  marginLeft: -6,
+  cursor: "col-resize",
+  left: `${100 * splitFraction}%`,
 
-    "& td": {
-      lineHeight: "1.3em",
-      border: "none",
-      padding: "1px 3px",
-    },
-    "& th": {
-      lineHeight: "1.3em",
-      padding: "1px 3px",
-    },
-  },
-  name: {
-    fontWeight: "bold",
-  },
-  sectionHeader: {
-    color: colors.HIGHLIGHT,
-    textAlign: "center",
-    fontSize: "1.2em",
-    padding: 4,
-    cursor: "pointer",
-    border: "none",
-  },
-  // // Status classes
-  ok: { color: `${theme.palette.success.main} !important` },
-  warn: { color: `${theme.palette.warning.main} !important` },
-  error: { color: `${theme.palette.error.main} !important` },
-  stale: { color: `${theme.palette.info.main} !important` },
-  unknown: { color: `${theme.palette.error.main} !important` },
+  "&:hover, &:active, &:focus": {
+    outline: "none",
 
-  collapsedSection: {
-    textAlign: "center",
-    color: theme.palette.error.main,
-  },
-  interactiveRow: {
-    cursor: "pointer",
-
-    "&:nth-child(odd)": {
-      backgroundColor: theme.palette.action.hover,
-    },
-    "&:hover": {
+    "&::after": {
+      content: '""',
+      position: "absolute",
+      top: 0,
+      bottom: 0,
+      left: 6,
+      marginLeft: -2,
+      width: 4,
       backgroundColor: theme.palette.action.focus,
-
-      "& .icon": {
-        visibility: "visible",
-      },
-    },
-  },
-  icon: {
-    color: theme.palette.primary.main,
-    marginLeft: 4,
-    visibility: "hidden",
-
-    "& > svg": {
-      verticalAlign: -2,
-    },
-  },
-  resizeHandle: {
-    position: "absolute",
-    top: 0,
-    bottom: 0,
-    width: 12,
-    marginLeft: -6,
-    cursor: "col-resize",
-
-    "&:hover, &:active, &:focus": {
-      outline: "none",
-
-      "&::after": {
-        content: '""',
-        position: "absolute",
-        top: 0,
-        bottom: 0,
-        left: 6,
-        marginLeft: -2,
-        width: 4,
-        backgroundColor: "rgba(127, 127, 127, 0.4)",
-      },
     },
   },
 }));
+
+const StyledTable = muiStyled(Table)({
+  "@media (pointer: fine)": {
+    ".MuiTableRow-root .MuiIconButton-root": { visibility: "hidden" },
+    ".MuiTableRow-root:hover .MuiIconButton-root": { visibility: "visible" },
+  },
+});
+
+const HeaderTableRow = muiStyled(TableRow)(({ theme }) => ({
+  backgroundColor: theme.palette.background.paper,
+}));
+
+const HTMLTableCell = muiStyled(TableCell)(({ theme }) => ({
+  "h1, h2, h3, h4, h5, h6": {
+    ...theme.typography.subtitle2,
+    fontWeight: 800,
+    margin: 0,
+  },
+}));
+
+const StyledIconButton = muiStyled(IconButton)({
+  "&:hover, &:active, &:focus": {
+    backgroundColor: "transparent",
+  },
+});
 
 // preliminary check to avoid expensive operations when there is no html
 const HAS_ANY_HTML = new RegExp(`<(${allowedTags.join("|")})`);
@@ -199,8 +166,6 @@ const getFormattedKeyValues = createSelector(
 // component to display a single diagnostic status
 export default function DiagnosticStatus(props: Props): JSX.Element {
   const {
-    saveConfig,
-    collapsedSections,
     onChangeSplitFraction,
     info,
     topicToRender,
@@ -208,34 +173,12 @@ export default function DiagnosticStatus(props: Props): JSX.Element {
     splitFraction = 0.5,
   } = props;
   const tableRef = useRef<HTMLTableElement>(ReactNull);
-  const classes = useStyles();
-  const theme = useTheme();
-
-  const onClickSection = useCallback(
-    (sectionObj: { name: string; section: string }): void => {
-      const clickedSelectionIsCollapsed = collapsedSections.find(
-        ({ name, section }) => name === sectionObj.name && section === sectionObj.section,
-      );
-      if (clickedSelectionIsCollapsed) {
-        saveConfig({
-          collapsedSections: collapsedSections.filter(
-            ({ name, section }) => name !== sectionObj.name || section !== sectionObj.section,
-          ),
-        });
-      } else {
-        saveConfig({ collapsedSections: [...collapsedSections, sectionObj] });
-      }
-    },
-    [collapsedSections, saveConfig],
-  );
 
   const resizeMouseDown = useCallback((event: React.MouseEvent<Element>) => {
     setResizing(true);
     event.preventDefault();
   }, []);
-
   const resizeMouseUp = useCallback(() => setResizing(false), []);
-
   const resizeMouseMove = useCallback(
     (event: MouseEvent) => {
       if (!tableRef.current) {
@@ -274,13 +217,23 @@ export default function DiagnosticStatus(props: Props): JSX.Element {
       openPlotPanelIconElem?: React.ReactNode,
     ): ReactElement => {
       if (html) {
-        return <td dangerouslySetInnerHTML={html} />;
+        return <HTMLTableCell dangerouslySetInnerHTML={html} />;
       }
       return (
-        <td>
-          {str ? str : "\xa0"}
-          {openPlotPanelIconElem}
-        </td>
+        <>
+          <TableCell padding="checkbox">
+            <Stack
+              direction="row"
+              gap={1}
+              alignItems="center"
+              flex="auto"
+              justifyContent="space-between"
+            >
+              {str ? str : "\xa0"}
+              {openPlotPanelIconElem}
+            </Stack>
+          </TableCell>
+        </>
       );
     },
     [],
@@ -288,206 +241,130 @@ export default function DiagnosticStatus(props: Props): JSX.Element {
 
   const renderKeyValueSections = useCallback((): React.ReactNode => {
     const formattedKeyVals: FormattedKeyValue[] = getFormattedKeyValues(info.status);
-    let inCollapsedSection = false;
-    let ellipsisShown = false;
+
     return formattedKeyVals.map(({ key, value, keyHtml, valueHtml }, idx) => {
-      const keyIsSection = value.length === 0 && (key.startsWith("==") || key.startsWith("--"));
-      const valIsSection = key.length === 0 && (key.startsWith("==") || value.startsWith("--"));
-      if (keyIsSection || valIsSection) {
-        const sectionObj = { name: info.status.name, section: `${key}${value}` };
-        inCollapsedSection = collapsedSections.some(
-          ({ name, section }) => name === sectionObj.name && section === sectionObj.section,
-        );
-        ellipsisShown = false;
-        return (
-          <tr key={idx} onClick={() => onClickSection(sectionObj)}>
-            <th className={classes.sectionHeader} colSpan={2}>
-              {key}
-              {value}
-            </th>
-          </tr>
-        );
-      } else if (inCollapsedSection) {
-        if (ellipsisShown) {
-          return ReactNull;
-        }
-        ellipsisShown = true;
-        return (
-          <tr key={idx}>
-            <td colSpan={2} className={classes.collapsedSection}>
-              &hellip;
-            </td>
-          </tr>
-        );
-      }
       // We need both `hardware_id` and `name`; one of them is not enough. That's also how we identify
       // what to show in this very panel; see `selectedHardwareId` AND `selectedName` in the config.
       const valuePath = `${topicToRender}.status[:]{hardware_id=="${info.status.hardware_id}"}{name=="${info.status.name}"}.values[:]{key=="${key}"}.value`;
+
       let openPlotPanelIconElem = undefined;
       if (value.length > 0) {
         openPlotPanelIconElem = !isNaN(Number(value)) ? (
-          <Icon
-            fade
-            dataTest="open-plot-icon"
-            className={classes.icon}
+          <StyledIconButton
+            title="Open in Plot panel"
+            color="inherit"
+            size="small"
+            data-test="open-plot-icon"
             onClick={() => openSiblingPlotPanel(openSiblingPanel, valuePath)}
-            tooltip="Line chart"
           >
-            <ChartLineVariantIcon />
-          </Icon>
+            <ShowChartIcon fontSize="inherit" />
+          </StyledIconButton>
         ) : (
-          <Icon
-            fade
-            className={classes.icon}
+          <StyledIconButton
+            title="Open in State Transitions panel"
+            color="inherit"
+            size="small"
             onClick={() => openSiblingStateTransitionsPanel(openSiblingPanel, valuePath)}
-            tooltip="State Transitions"
           >
-            <DotsHorizontalIcon />
-          </Icon>
+            <PowerInputIcon fontSize="inherit" />
+          </StyledIconButton>
         );
       }
       return (
-        <tr className={classes.interactiveRow} key={idx}>
+        <TableRow key={idx} hover>
           {renderKeyValueCell(keyHtml, key)}
           {renderKeyValueCell(valueHtml, value, openPlotPanelIconElem)}
-        </tr>
+        </TableRow>
       );
     });
-  }, [
-    classes,
-    collapsedSections,
-    info.status,
-    onClickSection,
-    openSiblingPanel,
-    renderKeyValueCell,
-    topicToRender,
-  ]);
+  }, [info.status, openSiblingPanel, renderKeyValueCell, topicToRender]);
 
-  const getSectionsCollapsedForCurrentName = useCallback((): {
-    name: string;
-    section: string;
-  }[] => {
-    return collapsedSections.filter(({ name }) => name === info.status.name);
-  }, [collapsedSections, info.status.name]);
-
-  const getSectionsThatCanBeCollapsed = useCallback((): FormattedKeyValue[] => {
-    const formattedKeyVals = getFormattedKeyValues(info.status);
-    return formattedKeyVals.filter(({ key, value }) => {
-      const keyIsSection = value.length === 0 && (key.startsWith("==") || key.startsWith("--"));
-      const valIsSection = key.length === 0 && (value.startsWith("==") || value.startsWith("--"));
-      return keyIsSection || valIsSection;
-    });
-  }, [info.status]);
-
-  const toggleSections = useCallback((): void => {
-    const newSectionsForCurrentName =
-      getSectionsCollapsedForCurrentName().length > 0
-        ? []
-        : getSectionsThatCanBeCollapsed().map(({ key, value }) => ({
-            name: info.status.name,
-            section: `${key}${value}`,
-          }));
-    const otherSections = collapsedSections.filter(({ name }) => name !== info.status.name);
-    saveConfig({ collapsedSections: newSectionsForCurrentName.concat(otherSections) });
-  }, [
-    collapsedSections,
-    getSectionsCollapsedForCurrentName,
-    getSectionsThatCanBeCollapsed,
-    info.status.name,
-    saveConfig,
-  ]);
-
-  const statusClass = cx({
-    [classes.ok]: LEVEL_NAMES[info.status.level] === "ok",
-    [classes.error]: LEVEL_NAMES[info.status.level] === "error",
-    [classes.warn]: LEVEL_NAMES[info.status.level] === "warn",
-    [classes.stale]: LEVEL_NAMES[info.status.level] === "stale",
-    [classes.unknown]: LEVEL_NAMES[info.status.level] === "unknown",
-  });
+  const STATUS_COLORS: { [key: number]: string } = {
+    0: "success.main",
+    1: "error.main",
+    2: "warning.main",
+    3: "info.main",
+  };
 
   return (
     <div>
-      <div
-        className={classes.resizeHandle}
-        style={{ left: `${100 * splitFraction}%` }}
+      <ResizeHandle
+        splitFraction={splitFraction}
         onMouseDown={resizeMouseDown}
         data-test-resizehandle
       />
-      <table className={classes.table} ref={tableRef}>
-        <tbody>
+      <StyledTable size="small" ref={tableRef}>
+        <TableBody>
           {/* Use a dummy row to fix the column widths */}
-          <tr style={{ height: 0 }}>
-            <td style={{ padding: 0, width: `${100 * splitFraction}%`, borderRight: "none" }} />
-            <td style={{ padding: 0, borderLeft: "none" }} />
-          </tr>
-          <tr>
-            <th
-              className={cx(classes.sectionHeader, statusClass)}
-              data-test="DiagnosticStatus-display-name"
-              colSpan={2}
-            >
+          <TableRow style={{ height: 0 }}>
+            <TableCell
+              padding="none"
+              style={{ width: `${100 * splitFraction}%`, borderRight: "none" }}
+            />
+            <TableCell padding="none" style={{ borderLeft: "none" }} />
+          </TableRow>
+          <HeaderTableRow>
+            <TableCell variant="head" data-test="DiagnosticStatus-display-name" colSpan={2}>
               <Tooltip
-                placement="bottom"
-                contents={
-                  <div>
-                    Hardware ID: <code>{info.status.hardware_id}</code>
-                    <br />
-                    Name: <code>{info.status.name}</code>
-                  </div>
+                arrow
+                title={
+                  <>
+                    <Typography variant="body2">
+                      Hardware ID: <code>{info.status.hardware_id}</code>
+                    </Typography>
+                    <Typography variant="body2">
+                      Name: <code>{info.status.name}</code>
+                    </Typography>
+                  </>
                 }
               >
-                <span>{info.displayName}</span>
+                <Typography
+                  color={STATUS_COLORS[info.status.level]}
+                  variant="subtitle1"
+                  fontWeight={800}
+                >
+                  {info.displayName}
+                </Typography>
               </Tooltip>
-            </th>
-          </tr>
-          <tr className={cx(classes.interactiveRow, statusClass)}>
-            <td colSpan={2}>
-              <Stack direction="row" flex="auto" justifyContent="space-between">
-                <div>
-                  {info.status.message}{" "}
-                  <Icon
-                    fade
-                    className={classes.icon}
+            </TableCell>
+          </HeaderTableRow>
+          <TableRow hover>
+            <TableCell colSpan={2} padding="checkbox">
+              <Stack
+                direction="row"
+                flex="auto"
+                alignItems="center"
+                justifyContent="space-between"
+                gap={1}
+              >
+                <Typography
+                  flex="auto"
+                  color={STATUS_COLORS[info.status.level]}
+                  variant="inherit"
+                  fontWeight={800}
+                >
+                  {info.status.message}
+                </Typography>
+                <Stack direction="row" alignItems="center" justifyContent="space-between" gap={1}>
+                  <StyledIconButton
+                    title="Open in State Transitions panel"
+                    size="small"
                     onClick={() =>
                       openSiblingStateTransitionsPanel(
                         openSiblingPanel,
                         `${topicToRender}.status[:]{hardware_id=="${info.status.hardware_id}"}{name=="${info.status.name}"}.message`,
                       )
                     }
-                    tooltip="State Transitions"
                   >
-                    <DotsHorizontalIcon />
-                  </Icon>
-                </div>
-                {getSectionsThatCanBeCollapsed().length > 0 && (
-                  <div
-                    style={{ color: theme.semanticColors.bodyText, cursor: "pointer" }}
-                    onClick={toggleSections}
-                  >
-                    <Icon
-                      size="medium"
-                      fade
-                      style={{ padding: 4 }}
-                      tooltip={
-                        getSectionsCollapsedForCurrentName().length > 0
-                          ? "Expand all"
-                          : "Collapse all"
-                      }
-                    >
-                      {getSectionsCollapsedForCurrentName().length > 0 ? (
-                        <ChevronUpIcon />
-                      ) : (
-                        <ChevronDownIcon />
-                      )}
-                    </Icon>
-                  </div>
-                )}
+                    <PowerInputIcon fontSize="inherit" />
+                  </StyledIconButton>
+                </Stack>
               </Stack>
-            </td>
-          </tr>
+            </TableCell>
+          </TableRow>
           {renderKeyValueSections()}
-        </tbody>
-      </table>
+        </TableBody>
+      </StyledTable>
     </div>
   );
 }
