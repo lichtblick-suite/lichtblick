@@ -25,7 +25,7 @@ export function DefaultIndex0(): JSX.Element {
       paths={paths}
       index={index}
       onDismiss={action("onDismiss")}
-      saveConfig={action("saveConfig")}
+      savePaths={action("savePaths")}
     />
   );
 }
@@ -43,7 +43,7 @@ export function DefaultIndex1(): JSX.Element {
       paths={paths}
       index={index}
       onDismiss={action("onDismiss")}
-      saveConfig={action("saveConfig")}
+      savePaths={action("savePaths")}
     />
   );
 }
@@ -61,7 +61,7 @@ export function CustomColor(): JSX.Element {
       paths={paths}
       index={index}
       onDismiss={action("onDismiss")}
-      saveConfig={action("saveConfig")}
+      savePaths={action("savePaths")}
     />
   );
 }
@@ -78,7 +78,7 @@ export function CustomXAxis(): JSX.Element {
       paths={paths}
       index={index}
       onDismiss={action("onDismiss")}
-      saveConfig={action("saveConfig")}
+      savePaths={action("savePaths")}
     />
   );
 }
@@ -93,7 +93,7 @@ export function ReferenceLine(): JSX.Element {
       paths={paths}
       index={index}
       onDismiss={action("onDismiss")}
-      saveConfig={action("saveConfig")}
+      savePaths={action("savePaths")}
     />
   );
 }

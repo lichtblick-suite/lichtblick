@@ -261,13 +261,18 @@ export default React.memo<MessagePathInputBaseProps>(function MessagePathInput(
     return topics.find(({ name }) => name === topicName);
   }, [rosPath, topics]);
 
+  const messagePathStructuresForDataype = useMemo(
+    () => messagePathStructures(datatypes),
+    [datatypes],
+  );
+
   const structureTraversalResult = useMemo(() => {
     if (!topic || !rosPath?.messagePath) {
       return undefined;
     }
 
-    return traverseStructure(messagePathStructures(datatypes)[topic.datatype], rosPath.messagePath);
-  }, [datatypes, rosPath?.messagePath, topic]);
+    return traverseStructure(messagePathStructuresForDataype[topic.datatype], rosPath.messagePath);
+  }, [messagePathStructuresForDataype, rosPath?.messagePath, topic]);
 
   const invalidGlobalVariablesVariable = useMemo(() => {
     if (!rosPath) {

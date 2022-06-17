@@ -177,9 +177,6 @@ export default function TimeBasedChart(props: Props): JSX.Element {
   // when data changes, we pause and wait for onFinishRender to resume
   const onStartRender = useCallback(() => {
     if (resumeFrame.current) {
-      if (process.env.NODE_ENV === "development") {
-        log.warn("force resumed paused frame");
-      }
       resumeFrame.current();
     }
     // during streaming the message pipeline should not give us any more data until we finish

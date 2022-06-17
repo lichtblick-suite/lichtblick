@@ -21,7 +21,7 @@ import { getLineColor } from "@foxglove/studio-base/util/plotColors";
 
 import PathSettingsModal from "./PathSettingsModal";
 import { PlotPath, isReferenceLinePlotPathType } from "./internalTypes";
-import { plotableRosTypes, PlotConfig, PlotXAxisVal } from "./types";
+import { plotableRosTypes, PlotXAxisVal } from "./types";
 
 type PlotLegendRowProps = {
   index: number;
@@ -31,7 +31,7 @@ type PlotLegendRowProps = {
   hasMismatchedDataLength: boolean;
   datasets: ComponentProps<typeof TimeBasedChart>["data"]["datasets"];
   currentTime?: number;
-  saveConfig: (arg0: Partial<PlotConfig>) => void;
+  savePaths: (paths: PlotPath[]) => void;
   showPlotValuesInLegend: boolean;
 };
 
@@ -110,7 +110,7 @@ export default function PlotLegendRow({
   hasMismatchedDataLength,
   datasets,
   currentTime,
-  saveConfig,
+  savePaths,
   showPlotValuesInLegend,
 }: PlotLegendRowProps): JSX.Element {
   const correspondingData = useMemo(() => {
@@ -175,12 +175,16 @@ export default function PlotLegendRow({
       if (newPath) {
         newPaths[idx] = { ...newPath, value: value.trim() };
       }
-      saveConfig({ paths: newPaths });
+      savePaths(newPaths);
     },
-    [paths, saveConfig],
+    [paths, savePaths],
   );
 
   const [settingsModalOpen, setSettingsModalOpen] = useState(false);
+
+  const messagePathInputStyle = useMemo(() => {
+    return { textDecoration: !path.enabled ? "line-through" : undefined };
+  }, [path.enabled]);
 
   return (
     <div className={classes.root}>
@@ -191,7 +195,7 @@ export default function PlotLegendRow({
             path={path}
             paths={paths}
             index={index}
-            saveConfig={saveConfig}
+            savePaths={savePaths}
             onDismiss={() => setSettingsModalOpen(false)}
           />
         )}
@@ -208,7 +212,7 @@ export default function PlotLegendRow({
             if (newPath) {
               newPaths[index] = { ...newPath, enabled: !newPath.enabled };
             }
-            saveConfig({ paths: newPaths });
+            savePaths(newPaths);
           }}
         >
           <RemoveIcon style={{ color: legendIconColor }} color="inherit" />
@@ -224,7 +228,7 @@ export default function PlotLegendRow({
           index={index}
           autoSize
           disableAutocomplete={isReferenceLinePlotPath}
-          inputStyle={{ textDecoration: !path.enabled ? "line-through" : undefined }}
+          inputStyle={messagePathInputStyle}
         />
         {hasMismatchedDataLength && (
           <Tooltip
@@ -258,7 +262,7 @@ export default function PlotLegendRow({
           onClick={() => {
             const newPaths = paths.slice();
             newPaths.splice(index, 1);
-            saveConfig({ paths: newPaths });
+            savePaths(newPaths);
           }}
         >
           <CloseIcon fontSize="small" />
