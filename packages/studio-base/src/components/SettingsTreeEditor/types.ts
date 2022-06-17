@@ -152,6 +152,15 @@ export type SettingsTreeNode = {
   renamable?: boolean;
 
   /**
+   * Optional sort order to override natural object ordering. All nodes
+   * with a sort order will be rendered before nodes all with no sort order.
+   *
+   * Nodes without an explicit order will be ordered according to ES2015
+   * object ordering rules.
+   */
+  order?: number;
+
+  /**
    * An optional visibility status. If this is not undefined, the node
    * editor will display a visiblity toggle button and send update actions
    * to the action handler.

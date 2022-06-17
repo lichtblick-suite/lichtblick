@@ -24,6 +24,7 @@ import { useImmer } from "use-immer";
 
 import { filterMap } from "@foxglove/den/collection";
 import CommonIcons from "@foxglove/studio-base/components/CommonIcons";
+import { prepareSettingsRoots } from "@foxglove/studio-base/components/SettingsTreeEditor/utils";
 import Stack from "@foxglove/studio-base/components/Stack";
 
 import { FieldEditor } from "./FieldEditor";
@@ -157,8 +158,8 @@ function NodeEditorComponent(props: NodeEditorProps): JSX.Element {
     ) : undefined;
   });
 
-  const childNodes = filterMap(Object.entries(children ?? {}), ([key, child]) => {
-    return child ? (
+  const childNodes = prepareSettingsRoots(children ?? {}).map(([key, child]) => {
+    return (
       <NodeEditor
         actionHandler={actionHandler}
         defaultOpen={child.defaultExpansionState === "collapsed" ? false : true}
@@ -166,7 +167,7 @@ function NodeEditorComponent(props: NodeEditorProps): JSX.Element {
         settings={child}
         path={makeStablePath(props.path, key)}
       />
-    ) : undefined;
+    );
   });
 
   const IconComponent = settings.icon ? CommonIcons[settings.icon] : undefined;

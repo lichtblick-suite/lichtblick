@@ -323,6 +323,7 @@ const PanelExamplesSettings: SettingsTreeRoots = {
     label: "Map",
     icon: "Map",
     renamable: true,
+    order: 3,
     fields: {
       message_path: {
         label: "Message path",
@@ -367,6 +368,7 @@ const PanelExamplesSettings: SettingsTreeRoots = {
     label: "Grid",
     icon: "Grid",
     renamable: true,
+    order: 2,
     fields: {
       color: {
         label: "Color",
@@ -397,6 +399,7 @@ const PanelExamplesSettings: SettingsTreeRoots = {
     label: "Pose",
     icon: "Walk",
     renamable: true,
+    order: 1,
     fields: {
       color: { label: "Color", value: "#ffffff", input: "rgb" },
       shaft_length: { label: "Shaft length", value: 1.5, input: "number" },
