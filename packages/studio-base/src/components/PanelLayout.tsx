@@ -138,6 +138,10 @@ export function UnconnectedPanelLayout(props: Props): React.ReactElement {
         panelCompoentCache.current.set(type, Panel);
       }
 
+      // When a panel changes from being the only panel to one of many in a layout and
+      // is no longer the top level panel we need to force it to update to recalculate
+      // whether it should be draggable or not. Since the panel component is memoized we use
+      // a key to break through the memoization when the panel's layout path changes.
       const mosaicWindow = (
         <MosaicWindow
           title=""
@@ -153,7 +157,7 @@ export function UnconnectedPanelLayout(props: Props): React.ReactElement {
               </EmptyState>
             }
           >
-            <Panel childId={id} tabId={tabId} />
+            <Panel childId={id} tabId={tabId} key={`${id}${tabId}${path.length}`} />
           </Suspense>
         </MosaicWindow>
       );
