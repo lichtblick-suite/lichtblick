@@ -71,23 +71,21 @@ export function useInitialDeepLinkState(deepLinks: readonly string[]): {
 
   // Select layout from URL.
   useEffect(() => {
-    if (!unappliedUrlState) {
+    if (!unappliedUrlState?.layoutId) {
       return;
     }
 
-    // If we have a target datasource then wait until the player has loaded to select the layout.
-    // This also handles the case where the datasource requires a logged in user
-    // since the player won't start until we have a current user.
-    if (targetUrlState?.ds && playerPresence !== PlayerPresence.PRESENT) {
+    // If our datasource requires a current user then wait until the player is
+    // available to load the layout since we may need to sync layouts first and
+    // that's only possible after the user has logged in.
+    if (currentUserRequired && playerPresence !== PlayerPresence.PRESENT) {
       return;
     }
 
-    if (unappliedUrlState.layoutId != undefined) {
-      log.debug(`Initializing layout from url: ${unappliedUrlState.layoutId}`);
-      setSelectedLayoutId(unappliedUrlState.layoutId);
-      setUnappliedUrlState((oldState) => ({ ...oldState, layoutId: undefined }));
-    }
-  }, [playerPresence, setSelectedLayoutId, targetUrlState, unappliedUrlState]);
+    log.debug(`Initializing layout from url: ${unappliedUrlState.layoutId}`);
+    setSelectedLayoutId(unappliedUrlState.layoutId);
+    setUnappliedUrlState((oldState) => ({ ...oldState, layoutId: undefined }));
+  }, [currentUserRequired, playerPresence, setSelectedLayoutId, unappliedUrlState?.layoutId]);
 
   // Seek to time in URL.
   useEffect(() => {
