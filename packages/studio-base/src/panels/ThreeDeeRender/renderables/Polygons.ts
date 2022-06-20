@@ -2,19 +2,35 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import * as THREE from "three";
-
 import { toNanoSec } from "@foxglove/rostime";
-import { SettingsTreeFields } from "@foxglove/studio-base/components/SettingsTreeEditor/types";
+import {
+  SettingsTreeAction,
+  SettingsTreeFields,
+} from "@foxglove/studio-base/components/SettingsTreeEditor/types";
 
+import { BaseUserData, Renderable } from "../Renderable";
 import { Renderer } from "../Renderer";
+import { PartialMessage, PartialMessageEvent, SceneExtension } from "../SceneExtension";
+import { SettingsTreeEntry } from "../SettingsManager";
 import { makeRgba, rgbaToCssString, stringToRgba } from "../color";
-import { Marker, MarkerAction, MarkerType, PolygonStamped, Pose, TIME_ZERO } from "../ros";
-import { LayerSettingsPolygon, LayerType } from "../settings";
-import { makePose } from "../transforms/geometry";
-import { updatePose } from "../updatePose";
+import { normalizeHeader, normalizeVector3s } from "../normalizeMessages";
+import {
+  Marker,
+  MarkerAction,
+  MarkerType,
+  Polygon,
+  PolygonStamped,
+  POLYGON_STAMPED_DATATYPES,
+  TIME_ZERO,
+} from "../ros";
+import { BaseSettings } from "../settings";
+import { makePose } from "../transforms";
 import { RenderableLineStrip } from "./markers/RenderableLineStrip";
-import { missingTransformMessage, MISSING_TRANSFORM } from "./transforms";
+
+export type LayerSettingsPolygon = BaseSettings & {
+  lineWidth: number;
+  color: string;
+};
 
 const DEFAULT_COLOR = { r: 124 / 255, g: 107 / 255, b: 1, a: 1 };
 const DEFAULT_LINE_WIDTH = 0.1;
@@ -27,50 +43,86 @@ const DEFAULT_SETTINGS: LayerSettingsPolygon = {
   color: DEFAULT_COLOR_STR,
 };
 
-export type PolygonRenderable = Omit<THREE.Object3D, "userData"> & {
-  userData: {
-    topic: string;
-    settings: LayerSettingsPolygon;
-    polygonStamped: PolygonStamped;
-    pose: Pose;
-    srcTime: bigint;
-    lines: RenderableLineStrip | undefined;
-  };
+export type PolygonUserData = BaseUserData & {
+  settings: LayerSettingsPolygon;
+  topic: string;
+  polygonStamped: PolygonStamped;
+  lines: RenderableLineStrip | undefined;
 };
 
-export class Polygons extends THREE.Object3D {
-  renderer: Renderer;
-  polygonsByTopic = new Map<string, PolygonRenderable>();
+export class PolygonRenderable extends Renderable<PolygonUserData> {
+  override dispose(): void {
+    this.userData.lines?.dispose();
+    super.dispose();
+  }
+}
 
+export class Polygons extends SceneExtension<PolygonRenderable> {
   constructor(renderer: Renderer) {
-    super();
-    this.renderer = renderer;
+    super("foxglove.Polygons", renderer);
 
-    renderer.setSettingsNodeProvider(LayerType.Polygon, (topicConfig, _topic) => {
-      const cur = topicConfig as Partial<LayerSettingsPolygon>;
-      const color = cur.color ?? DEFAULT_COLOR_STR;
-
-      // prettier-ignore
-      const fields: SettingsTreeFields = {
-        lineWidth: { label: "Line Width", input: "number", min: 0, value: cur.lineWidth, placeholder: String(DEFAULT_LINE_WIDTH), step: 0.005 },
-        color: { label: "Color", input: "rgba", value: color },
-      };
-
-      return { icon: "Star", fields };
-    });
+    renderer.addDatatypeSubscriptions(POLYGON_STAMPED_DATATYPES, this.handlePolygon);
   }
 
-  dispose(): void {
-    for (const renderable of this.polygonsByTopic.values()) {
-      renderable.userData.lines?.dispose();
-      renderable.userData.lines = undefined;
+  override settingsNodes(): SettingsTreeEntry[] {
+    const configTopics = this.renderer.config.topics;
+    const handler = this.handleSettingsAction;
+    const entries: SettingsTreeEntry[] = [];
+    for (const topic of this.renderer.topics ?? []) {
+      if (POLYGON_STAMPED_DATATYPES.has(topic.datatype)) {
+        const config = (configTopics[topic.name] ?? {}) as Partial<LayerSettingsPolygon>;
+
+        // prettier-ignore
+        const fields: SettingsTreeFields = {
+          lineWidth: { label: "Line Width", input: "number", min: 0, placeholder: String(DEFAULT_LINE_WIDTH), step: 0.005, precision: 3, value: config.lineWidth },
+          color: { label: "Color", input: "rgba", value: config.color ?? DEFAULT_COLOR_STR },
+        };
+
+        entries.push({
+          path: ["topics", topic.name],
+          node: {
+            label: topic.name,
+            icon: "Star",
+            fields,
+            visible: config.visible ?? true,
+            handler,
+          },
+        });
+      }
     }
-    this.children.length = 0;
-    this.polygonsByTopic.clear();
+    return entries;
   }
 
-  addPolygonStamped(topic: string, polygonStamped: PolygonStamped): void {
-    let renderable = this.polygonsByTopic.get(topic);
+  handleSettingsAction = (action: SettingsTreeAction): void => {
+    const path = action.payload.path;
+    if (action.action !== "update" || path.length !== 3) {
+      return;
+    }
+
+    this.saveSetting(path, action.payload.value);
+
+    // Update the renderable
+    const topicName = path[1]!;
+    const renderable = this.renderables.get(topicName);
+    if (renderable) {
+      const settings = this.renderer.config.topics[topicName] as
+        | Partial<LayerSettingsPolygon>
+        | undefined;
+      renderable.userData.settings = { ...renderable.userData.settings, ...settings };
+      this._updatePolygonRenderable(
+        renderable,
+        renderable.userData.polygonStamped,
+        renderable.userData.receiveTime,
+      );
+    }
+  };
+
+  handlePolygon = (messageEvent: PartialMessageEvent<PolygonStamped>): void => {
+    const topic = messageEvent.topic;
+    const polygonStamped = normalizePolygonStamped(messageEvent.message);
+    const receiveTime = toNanoSec(messageEvent.receiveTime);
+
+    let renderable = this.renderables.get(topic);
     if (!renderable) {
       // Set the initial settings from default values merged with any user settings
       const userSettings = this.renderer.config.topics[topic] as
@@ -78,73 +130,36 @@ export class Polygons extends THREE.Object3D {
         | undefined;
       const settings = { ...DEFAULT_SETTINGS, ...userSettings };
 
-      renderable = new THREE.Object3D() as PolygonRenderable;
-      renderable.name = topic;
-      renderable.userData = {
-        topic,
-        settings,
-        polygonStamped,
+      renderable = new PolygonRenderable(topic, this.renderer, {
+        receiveTime,
+        messageTime: toNanoSec(polygonStamped.header.stamp),
+        frameId: polygonStamped.header.frame_id,
         pose: makePose(),
-        srcTime: toNanoSec(polygonStamped.header.stamp),
+        settingsPath: ["topics", topic],
+        settings,
+        topic,
+        polygonStamped,
         lines: undefined,
-      };
+      });
 
       this.add(renderable);
-      this.polygonsByTopic.set(topic, renderable);
+      this.renderables.set(topic, renderable);
     }
 
-    this._updatePolygonRenderable(renderable, polygonStamped);
-  }
+    this._updatePolygonRenderable(renderable, polygonStamped, receiveTime);
+  };
 
-  setTopicSettings(topic: string, settings: Partial<LayerSettingsPolygon>): void {
-    const renderable = this.polygonsByTopic.get(topic);
-    if (renderable) {
-      renderable.userData.settings = { ...renderable.userData.settings, ...settings };
-      this._updatePolygonRenderable(renderable, renderable.userData.polygonStamped);
-    }
-  }
-
-  startFrame(currentTime: bigint): void {
-    const renderFrameId = this.renderer.renderFrameId;
-    const fixedFrameId = this.renderer.fixedFrameId;
-    if (renderFrameId == undefined || fixedFrameId == undefined) {
-      this.visible = false;
-      return;
-    }
-    this.visible = true;
-
-    for (const renderable of this.polygonsByTopic.values()) {
-      renderable.visible = renderable.userData.settings.visible;
-      if (!renderable.visible) {
-        this.renderer.layerErrors.clearTopic(renderable.userData.topic);
-        continue;
-      }
-
-      const srcTime = currentTime;
-      const frameId = renderable.userData.polygonStamped.header.frame_id;
-      const updated = updatePose(
-        renderable,
-        this.renderer.transformTree,
-        renderFrameId,
-        fixedFrameId,
-        frameId,
-        currentTime,
-        srcTime,
-      );
-      if (!updated) {
-        const message = missingTransformMessage(renderFrameId, fixedFrameId, frameId);
-        this.renderer.layerErrors.addToTopic(renderable.userData.topic, MISSING_TRANSFORM, message);
-      } else {
-        this.renderer.layerErrors.removeFromTopic(renderable.userData.topic, MISSING_TRANSFORM);
-      }
-    }
-  }
-
-  _updatePolygonRenderable(renderable: PolygonRenderable, polygonStamped: PolygonStamped): void {
+  _updatePolygonRenderable(
+    renderable: PolygonRenderable,
+    polygonStamped: PolygonStamped,
+    receiveTime: bigint,
+  ): void {
     const settings = renderable.userData.settings;
 
+    renderable.userData.receiveTime = receiveTime;
+    renderable.userData.messageTime = toNanoSec(polygonStamped.header.stamp);
+    renderable.userData.frameId = polygonStamped.header.frame_id;
     renderable.userData.polygonStamped = polygonStamped;
-    renderable.userData.srcTime = toNanoSec(polygonStamped.header.stamp);
 
     const topic = renderable.userData.topic;
     const linesMarker = createLineStripMarker(polygonStamped, settings);
@@ -152,12 +167,12 @@ export class Polygons extends THREE.Object3D {
       renderable.userData.lines = new RenderableLineStrip(
         topic,
         linesMarker,
-        undefined,
+        receiveTime,
         this.renderer,
       );
       renderable.add(renderable.userData.lines);
     } else {
-      renderable.userData.lines.update(linesMarker, undefined);
+      renderable.userData.lines.update(linesMarker, receiveTime);
     }
   }
 }
@@ -190,4 +205,17 @@ function createLineStripMarker(
     mesh_use_embedded_materials: false,
   };
   return linesMarker;
+}
+
+function normalizePolygon(polygon: PartialMessage<Polygon> | undefined): Polygon {
+  return {
+    points: normalizeVector3s(polygon?.points),
+  };
+}
+
+function normalizePolygonStamped(polygon: PartialMessage<PolygonStamped>): PolygonStamped {
+  return {
+    header: normalizeHeader(polygon.header),
+    polygon: normalizePolygon(polygon.polygon),
+  };
 }

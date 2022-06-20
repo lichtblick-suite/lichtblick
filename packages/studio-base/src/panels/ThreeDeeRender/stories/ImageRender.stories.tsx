@@ -7,7 +7,7 @@ import useDelayedFixture from "@foxglove/studio-base/panels/ThreeDimensionalViz/
 import PanelSetup from "@foxglove/studio-base/stories/PanelSetup";
 
 import ThreeDeeRender from "../index";
-import { CameraInfo, CompressedImage, Image, TF } from "../ros";
+import { CameraInfo, CompressedImage, Image, TransformStamped } from "../ros";
 import {
   BASE_LINK_FRAME_ID,
   FIXED_FRAME_ID,
@@ -31,7 +31,7 @@ export function ImageRender(): JSX.Element {
     { name: "/cam2/raw", datatype: "sensor_msgs/Image" },
   ];
 
-  const tf1: MessageEvent<TF> = {
+  const tf1: MessageEvent<TransformStamped> = {
     topic: "/tf",
     receiveTime: { sec: 10, nsec: 0 },
     message: {
@@ -44,7 +44,7 @@ export function ImageRender(): JSX.Element {
     },
     sizeInBytes: 0,
   };
-  const tf2: MessageEvent<TF> = {
+  const tf2: MessageEvent<TransformStamped> = {
     topic: "/tf",
     receiveTime: { sec: 10, nsec: 0 },
     message: {

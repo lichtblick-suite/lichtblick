@@ -30,7 +30,7 @@ export class RenderablePoints extends RenderableMarker {
   }
 
   override dispose(): void {
-    releasePointsMaterial(this.userData.marker, this._renderer.materialCache);
+    releasePointsMaterial(this.userData.marker, this.renderer.materialCache);
   }
 
   override update(marker: Marker, receiveTime: bigint | undefined): void {
@@ -49,8 +49,8 @@ export class RenderablePoints extends RenderableMarker {
       !approxEquals(prevHeight, height) ||
       prevTransparent !== transparent
     ) {
-      releasePointsMaterial(prevMarker, this._renderer.materialCache);
-      this.points.material = pointsMaterial(marker, this._renderer.materialCache);
+      releasePointsMaterial(prevMarker, this.renderer.materialCache);
+      this.points.material = pointsMaterial(marker, this.renderer.materialCache);
     }
 
     this.geometry.resize(marker.points.length);

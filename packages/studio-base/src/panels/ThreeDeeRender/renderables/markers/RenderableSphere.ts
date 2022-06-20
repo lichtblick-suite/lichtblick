@@ -33,7 +33,7 @@ export class RenderableSphere extends RenderableMarker {
   }
 
   override dispose(): void {
-    releaseStandardMaterial(this.userData.marker.color, this._renderer.materialCache);
+    releaseStandardMaterial(this.userData.marker.color, this.renderer.materialCache);
   }
 
   override update(marker: Marker, receiveTime: bigint | undefined): void {
@@ -41,8 +41,8 @@ export class RenderableSphere extends RenderableMarker {
     super.update(marker, receiveTime);
 
     if (!rgbaEqual(marker.color, prevMarker.color)) {
-      releaseStandardMaterial(prevMarker.color, this._renderer.materialCache);
-      this.mesh.material = standardMaterial(marker.color, this._renderer.materialCache);
+      releaseStandardMaterial(prevMarker.color, this.renderer.materialCache);
+      this.mesh.material = standardMaterial(marker.color, this.renderer.materialCache);
     }
 
     this.scale.set(marker.scale.x, marker.scale.y, marker.scale.z);

@@ -2,24 +2,44 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import * as THREE from "three";
-
 import Logger from "@foxglove/log";
 import { toNanoSec } from "@foxglove/rostime";
-import { SettingsTreeFields } from "@foxglove/studio-base/components/SettingsTreeEditor/types";
+import {
+  SettingsTreeAction,
+  SettingsTreeFields,
+} from "@foxglove/studio-base/components/SettingsTreeEditor/types";
 import PinholeCameraModel from "@foxglove/studio-base/panels/Image/lib/PinholeCameraModel";
 import { MutablePoint } from "@foxglove/studio-base/types/Messages";
 
+import { BaseUserData, Renderable } from "../Renderable";
 import { Renderer } from "../Renderer";
+import { PartialMessage, PartialMessageEvent, SceneExtension } from "../SceneExtension";
+import { SettingsTreeEntry } from "../SettingsManager";
 import { makeRgba, rgbaToCssString, stringToRgba } from "../color";
-import { CameraInfo, Marker, MarkerAction, MarkerType, Pose, TIME_ZERO } from "../ros";
-import { LayerSettingsCameraInfo, LayerType } from "../settings";
-import { makePose } from "../transforms/geometry";
-import { updatePose } from "../updatePose";
+import { normalizeHeader } from "../normalizeMessages";
+import {
+  CameraInfo,
+  CAMERA_INFO_DATATYPES,
+  IncomingCameraInfo,
+  Marker,
+  MarkerAction,
+  MarkerType,
+  Matrix3,
+  Matrix3x4,
+  RegionOfInterest,
+  TIME_ZERO,
+} from "../ros";
+import { BaseSettings, PRECISION_DISTANCE } from "../settings";
+import { makePose } from "../transforms";
 import { RenderableLineList } from "./markers/RenderableLineList";
-import { missingTransformMessage, MISSING_TRANSFORM } from "./transforms";
 
 const log = Logger.getLogger(__filename);
+
+export type LayerSettingsCameraInfo = BaseSettings & {
+  distance: number;
+  width: number;
+  color: string;
+};
 
 const DEFAULT_DISTANCE = 1;
 const DEFAULT_WIDTH = 0.01;
@@ -32,146 +52,126 @@ const CAMERA_MODEL = "CameraModel";
 
 const DEFAULT_SETTINGS: LayerSettingsCameraInfo = {
   visible: true,
+  frameLocked: true,
   distance: DEFAULT_DISTANCE,
   width: DEFAULT_WIDTH,
   color: DEFAULT_COLOR_STR,
 };
 
-export type CameraInfoRenderable = Omit<THREE.Object3D, "userData"> & {
-  userData: {
-    topic: string;
-    settings: LayerSettingsCameraInfo;
-    cameraInfo: CameraInfo;
-    cameraModel: PinholeCameraModel | undefined;
-    pose: Pose;
-    srcTime: bigint;
-    lines: RenderableLineList | undefined;
-  };
+export type CameraInfoUserData = BaseUserData & {
+  settings: LayerSettingsCameraInfo;
+  topic: string;
+  cameraInfo: CameraInfo | undefined;
+  cameraModel: PinholeCameraModel | undefined;
+  lines: RenderableLineList | undefined;
 };
 
-export class Cameras extends THREE.Object3D {
-  renderer: Renderer;
-  camerasByTopic = new Map<string, CameraInfoRenderable>();
+export class CameraInfoRenderable extends Renderable<CameraInfoUserData> {
+  override dispose(): void {
+    this.userData.lines?.dispose();
+    super.dispose();
+  }
+}
 
+export class Cameras extends SceneExtension<CameraInfoRenderable> {
   constructor(renderer: Renderer) {
-    super();
-    this.renderer = renderer;
+    super("foxglove.Cameras", renderer);
 
-    renderer.setSettingsNodeProvider(LayerType.CameraInfo, (topicConfig, _topic) => {
-      const cur = topicConfig as Partial<LayerSettingsCameraInfo>;
-      const color = cur.color ?? DEFAULT_COLOR_STR;
-
-      // prettier-ignore
-      const fields: SettingsTreeFields = {
-        distance: { label: "Distance", input: "number", min: 0, value: cur.distance, placeholder: String(DEFAULT_DISTANCE), step: 0.1 },
-        width: { label: "Line Width", input: "number", min: 0, value: cur.width, placeholder: String(DEFAULT_WIDTH), step: 0.005 },
-        color: { label: "Color", input: "rgba", value: color },
-      };
-
-      return { icon: "Camera", fields };
-    });
+    renderer.addDatatypeSubscriptions(CAMERA_INFO_DATATYPES, this.handleCameraInfo);
   }
 
-  dispose(): void {
-    for (const renderable of this.camerasByTopic.values()) {
-      renderable.userData.lines?.dispose();
-      renderable.userData.cameraModel = undefined;
-      renderable.userData.lines = undefined;
+  override settingsNodes(): SettingsTreeEntry[] {
+    const configTopics = this.renderer.config.topics;
+    const handler = this.handleSettingsAction;
+    const entries: SettingsTreeEntry[] = [];
+    for (const topic of this.renderer.topics ?? []) {
+      if (CAMERA_INFO_DATATYPES.has(topic.datatype)) {
+        const config = (configTopics[topic.name] ?? {}) as Partial<LayerSettingsCameraInfo>;
+
+        // prettier-ignore
+        const fields: SettingsTreeFields = {
+          distance: { label: "Distance", input: "number", min: 0, placeholder: String(DEFAULT_DISTANCE), step: 0.1, precision: PRECISION_DISTANCE, value: config.distance },
+          width: { label: "Line Width", input: "number", min: 0, placeholder: String(DEFAULT_WIDTH), step: 0.005, precision: 4, value: config.width },
+          color: { label: "Color", input: "rgba", value: config.color ?? DEFAULT_COLOR_STR },
+        };
+
+        entries.push({
+          path: ["topics", topic.name],
+          node: { icon: "Camera", fields, visible: config.visible ?? true, handler },
+        });
+      }
     }
-    this.children.length = 0;
-    this.camerasByTopic.clear();
+    return entries;
   }
 
-  addCameraInfoMessage(topic: string, cameraInfo: CameraInfo): void {
-    let renderable = this.camerasByTopic.get(topic);
+  handleSettingsAction = (action: SettingsTreeAction): void => {
+    const path = action.payload.path;
+    if (action.action !== "update" || path.length !== 3) {
+      return;
+    }
+
+    this.saveSetting(path, action.payload.value);
+
+    // Update the renderable
+    const topicName = path[1]!;
+    const renderable = this.renderables.get(topicName);
+    if (renderable) {
+      const { cameraInfo, receiveTime } = renderable.userData;
+      if (cameraInfo) {
+        const settings = this.renderer.config.topics[topicName] as
+          | Partial<LayerSettingsCameraInfo>
+          | undefined;
+        this._updateCameraInfoRenderable(renderable, cameraInfo, receiveTime, settings);
+      }
+    }
+  };
+
+  handleCameraInfo = (messageEvent: PartialMessageEvent<IncomingCameraInfo>): void => {
+    const topic = messageEvent.topic;
+    const cameraInfo = normalizeCameraInfo(messageEvent.message);
+    const receiveTime = toNanoSec(messageEvent.receiveTime);
+
+    let renderable = this.renderables.get(topic);
     if (!renderable) {
+      const messageTime = toNanoSec(cameraInfo.header.stamp);
+      const frameId = cameraInfo.header.frame_id;
+
       // Set the initial settings from default values merged with any user settings
       const userSettings = this.renderer.config.topics[topic] as
         | Partial<LayerSettingsCameraInfo>
         | undefined;
       const settings = { ...DEFAULT_SETTINGS, ...userSettings };
 
-      renderable = new THREE.Object3D() as CameraInfoRenderable;
-      renderable.name = topic;
-      renderable.userData = {
-        topic,
-        settings,
-        cameraInfo,
-        cameraModel: undefined,
+      renderable = new CameraInfoRenderable(topic, this.renderer, {
+        receiveTime,
+        messageTime,
+        frameId,
         pose: makePose(),
-        srcTime: toNanoSec(cameraInfo.header.stamp),
+        settingsPath: ["topics", topic],
+        settings,
+        topic,
+        cameraInfo: undefined,
+        cameraModel: undefined,
         lines: undefined,
-      };
-
-      if (cameraInfo.P.length === 12) {
-        try {
-          renderable.userData.cameraModel = new PinholeCameraModel(cameraInfo);
-        } catch (errUnk) {
-          const err = errUnk as Error;
-          this.renderer.layerErrors.addToTopic(topic, CAMERA_MODEL, err.message);
-        }
-      } else {
-        this.renderer.layerErrors.addToTopic(
-          topic,
-          CAMERA_MODEL,
-          `P has length ${cameraInfo.P.length}, not a 3x4 matrix`,
-        );
-      }
+      });
 
       this.add(renderable);
-      this.camerasByTopic.set(topic, renderable);
+      this.renderables.set(topic, renderable);
     }
 
-    this._updateCameraInfoRenderable(renderable, cameraInfo, renderable.userData.settings);
-  }
+    this._updateCameraInfoRenderable(
+      renderable,
+      cameraInfo,
+      receiveTime,
+      renderable.userData.settings,
+    );
+  };
 
-  setTopicSettings(topic: string, settings: Partial<LayerSettingsCameraInfo>): void {
-    const renderable = this.camerasByTopic.get(topic);
-    if (renderable) {
-      this._updateCameraInfoRenderable(renderable, renderable.userData.cameraInfo, settings);
-    }
-  }
-
-  startFrame(currentTime: bigint): void {
-    const renderFrameId = this.renderer.renderFrameId;
-    const fixedFrameId = this.renderer.fixedFrameId;
-    if (renderFrameId == undefined || fixedFrameId == undefined) {
-      this.visible = false;
-      return;
-    }
-    this.visible = true;
-
-    for (const renderable of this.camerasByTopic.values()) {
-      renderable.visible = renderable.userData.settings.visible;
-      if (!renderable.visible) {
-        this.renderer.layerErrors.clearTopic(renderable.userData.topic);
-        continue;
-      }
-
-      const srcTime = currentTime;
-      const frameId = renderable.userData.cameraInfo.header.frame_id;
-      const updated = updatePose(
-        renderable,
-        this.renderer.transformTree,
-        renderFrameId,
-        fixedFrameId,
-        frameId,
-        currentTime,
-        srcTime,
-      );
-      if (!updated) {
-        const message = missingTransformMessage(renderFrameId, fixedFrameId, frameId);
-        this.renderer.layerErrors.addToTopic(renderable.userData.topic, MISSING_TRANSFORM, message);
-      } else {
-        this.renderer.layerErrors.removeFromTopic(renderable.userData.topic, MISSING_TRANSFORM);
-      }
-    }
-  }
-
-  _updateCameraInfoRenderable(
+  private _updateCameraInfoRenderable(
     renderable: CameraInfoRenderable,
     cameraInfo: CameraInfo,
-    settings: Partial<LayerSettingsCameraInfo>,
+    receiveTime: bigint,
+    settings: Partial<LayerSettingsCameraInfo> | undefined,
   ): void {
     const prevSettings = renderable.userData.settings;
     const newSettings = { ...prevSettings, ...settings };
@@ -181,8 +181,10 @@ export class Cameras extends THREE.Object3D {
       newSettings.width === prevSettings.width;
     const topic = renderable.userData.topic;
 
+    renderable.userData.receiveTime = receiveTime;
+    renderable.userData.messageTime = toNanoSec(cameraInfo.header.stamp);
+    renderable.userData.frameId = cameraInfo.header.frame_id;
     renderable.userData.settings = newSettings;
-    renderable.userData.srcTime = toNanoSec(cameraInfo.header.stamp);
 
     // If the CameraInfo message contents changed, rebuild cameraModel
     const dataEqual = cameraInfosEqual(renderable.userData.cameraInfo, cameraInfo);
@@ -195,7 +197,7 @@ export class Cameras extends THREE.Object3D {
           renderable.userData.cameraModel = new PinholeCameraModel(cameraInfo);
         } catch (errUnk) {
           const err = errUnk as Error;
-          this.renderer.layerErrors.addToTopic(topic, CAMERA_MODEL, err.message);
+          this.renderer.settings.errors.addToTopic(topic, CAMERA_MODEL, err.message);
           renderable.userData.cameraModel = undefined;
           if (renderable.userData.lines) {
             renderable.remove(renderable.userData.lines);
@@ -204,7 +206,7 @@ export class Cameras extends THREE.Object3D {
           }
         }
       } else {
-        this.renderer.layerErrors.addToTopic(
+        this.renderer.settings.errors.addToTopic(
           topic,
           CAMERA_MODEL,
           `P has length ${cameraInfo.P.length}, not a 3x4 matrix`,
@@ -217,7 +219,7 @@ export class Cameras extends THREE.Object3D {
       renderable.userData.cameraModel?.P != undefined &&
       (!dataEqual || !settingsEqual || !renderable.userData.lines)
     ) {
-      this.renderer.layerErrors.removeFromTopic(topic, CAMERA_MODEL);
+      this.renderer.settings.errors.removeFromTopic(topic, CAMERA_MODEL);
 
       // Synthesize a LINE_LIST marker to instantiate or update a RenderableLineList
       const marker = createLineListMarker(
@@ -351,7 +353,13 @@ function verticalLine(
   }
 }
 
-function cameraInfosEqual(a: CameraInfo, b: CameraInfo): boolean {
+function cameraInfosEqual(a: CameraInfo | undefined, b: CameraInfo | undefined): boolean {
+  if (!a || !b) {
+    return a === b;
+  } else if (a === b) {
+    return true;
+  }
+
   if (
     !(
       a.header.frame_id === b.header.frame_id &&
@@ -397,4 +405,46 @@ function multiplyScalar(vec: MutablePoint, scalar: number): void {
   vec.x *= scalar;
   vec.y *= scalar;
   vec.z *= scalar;
+}
+
+function normalizeRegionOfInterest(
+  roi: PartialMessage<RegionOfInterest> | undefined,
+): RegionOfInterest {
+  if (!roi) {
+    return { x_offset: 0, y_offset: 0, height: 0, width: 0, do_rectify: false };
+  }
+  return {
+    x_offset: roi.x_offset ?? 0,
+    y_offset: roi.y_offset ?? 0,
+    height: roi.height ?? 0,
+    width: roi.width ?? 0,
+    do_rectify: roi.do_rectify ?? false,
+  };
+}
+
+function normalizeCameraInfo(message: PartialMessage<IncomingCameraInfo>): CameraInfo {
+  // Handle lowercase field names as well (ROS2 compatibility)
+  const D = message.D ?? message.d;
+  const K = message.K ?? message.k;
+  const R = message.R ?? message.r;
+  const P = message.P ?? message.p;
+
+  const Dlen = D?.length ?? 0;
+  const Klen = K?.length ?? 0;
+  const Rlen = R?.length ?? 0;
+  const Plen = P?.length ?? 0;
+
+  return {
+    header: normalizeHeader(message.header),
+    height: message.height ?? 0,
+    width: message.width ?? 0,
+    distortion_model: message.distortion_model ?? "",
+    D: Dlen > 0 ? (D as number[]) : [],
+    K: Klen === 9 ? (K as Matrix3) : [],
+    R: Rlen === 9 ? (R as Matrix3) : [],
+    P: Plen === 12 ? (P as Matrix3x4) : [],
+    binning_x: message.binning_x ?? 0,
+    binning_y: message.binning_y ?? 0,
+    roi: normalizeRegionOfInterest(message.roi),
+  };
 }

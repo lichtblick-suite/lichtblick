@@ -4,11 +4,12 @@
 
 import * as base64 from "@protobufjs/base64";
 
-import { Time } from "@foxglove/rostime";
-import { MessageEvent } from "@foxglove/studio";
+import type { Time } from "@foxglove/rostime";
+import type { MessageEvent } from "@foxglove/studio";
 
 import { stringToRgba } from "../color";
-import { ColorRGBA, Marker, Point, Pose } from "../ros";
+import type { ColorRGBA, Marker, Point } from "../ros";
+import type { Pose } from "../transforms";
 
 // ts-prune-ignore-next
 export type MarkerArgs = {

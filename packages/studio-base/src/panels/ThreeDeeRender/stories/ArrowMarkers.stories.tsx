@@ -7,7 +7,7 @@ import useDelayedFixture from "@foxglove/studio-base/panels/ThreeDimensionalViz/
 import PanelSetup from "@foxglove/studio-base/stories/PanelSetup";
 
 import ThreeDeeRender from "../index";
-import { Marker, TF } from "../ros";
+import { Marker, TransformStamped } from "../ros";
 import {
   BASE_LINK_FRAME_ID,
   FIXED_FRAME_ID,
@@ -28,7 +28,7 @@ export function ArrowMarkers(): JSX.Element {
     { name: "/arrows", datatype: "visualization_msgs/Marker" },
   ];
 
-  const tf1: MessageEvent<TF> = {
+  const tf1: MessageEvent<TransformStamped> = {
     topic: "/tf",
     receiveTime: { sec: 10, nsec: 0 },
     message: {
@@ -41,7 +41,7 @@ export function ArrowMarkers(): JSX.Element {
     },
     sizeInBytes: 0,
   };
-  const tf2: MessageEvent<TF> = {
+  const tf2: MessageEvent<TransformStamped> = {
     topic: "/tf",
     receiveTime: { sec: 10, nsec: 0 },
     message: {

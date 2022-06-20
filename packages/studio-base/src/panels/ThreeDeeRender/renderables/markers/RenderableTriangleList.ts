@@ -45,7 +45,7 @@ export class RenderableTriangleList extends RenderableMarker {
   }
 
   override dispose(): void {
-    releaseStandardVertexColorMaterial(this.userData.marker, this._renderer.materialCache);
+    releaseStandardVertexColorMaterial(this.userData.marker, this.renderer.materialCache);
     this.geometry.dispose();
     this.vertices = new Float32Array();
     this.colors = new Float32Array();
@@ -58,7 +58,7 @@ export class RenderableTriangleList extends RenderableMarker {
     let vertexCount = marker.points.length;
     const count = vertexCount * 3;
     if (vertexCount === 0) {
-      this._renderer.layerErrors.addToTopic(
+      this.renderer.settings.errors.addToTopic(
         this.userData.topic,
         EMPTY_ERR,
         `TRIANGLE_LIST: points is empty`,
@@ -67,7 +67,7 @@ export class RenderableTriangleList extends RenderableMarker {
       return;
     }
     if (vertexCount % 3 !== 0) {
-      this._renderer.layerErrors.addToTopic(
+      this.renderer.settings.errors.addToTopic(
         this.userData.topic,
         NOT_DIVISIBLE_ERR,
         `TRIANGLE_LIST: points[${vertexCount}] is not divisible by 3`,
@@ -75,7 +75,7 @@ export class RenderableTriangleList extends RenderableMarker {
       vertexCount = Math.floor(vertexCount / 3) * 3;
     }
     if (marker.colors.length !== 0 && marker.colors.length !== vertexCount) {
-      this._renderer.layerErrors.addToTopic(
+      this.renderer.settings.errors.addToTopic(
         this.userData.topic,
         COLORS_MISMATCH_ERR,
         `TRIANGLE_LIST: colors[${marker.colors.length}] != points[${vertexCount}]`,
@@ -83,11 +83,11 @@ export class RenderableTriangleList extends RenderableMarker {
       // Non-critical, we'll fall back to the default color if needed
     }
 
-    this._renderer.layerErrors.clearTopic(this.userData.topic);
+    this.renderer.settings.errors.clearTopic(this.userData.topic);
 
     if (markerHasTransparency(marker) !== markerHasTransparency(prevMarker)) {
-      releaseStandardVertexColorMaterial(prevMarker, this._renderer.materialCache);
-      this.mesh.material = standardVertexColorMaterial(marker, this._renderer.materialCache);
+      releaseStandardVertexColorMaterial(prevMarker, this.renderer.materialCache);
+      this.mesh.material = standardVertexColorMaterial(marker, this.renderer.materialCache);
     }
 
     let dataChanged = false;

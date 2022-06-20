@@ -6,7 +6,10 @@ import * as THREE from "three";
 
 import Logger from "@foxglove/log";
 import { toNanoSec } from "@foxglove/rostime";
-import { SettingsTreeFields } from "@foxglove/studio-base/components/SettingsTreeEditor/types";
+import {
+  SettingsTreeAction,
+  SettingsTreeFields,
+} from "@foxglove/studio-base/components/SettingsTreeEditor/types";
 import PinholeCameraModel from "@foxglove/studio-base/panels/Image/lib/PinholeCameraModel";
 import {
   decodeYUV,
@@ -23,117 +26,166 @@ import {
 } from "@foxglove/studio-base/panels/Image/lib/decodings";
 import { MutablePoint } from "@foxglove/studio-base/types/Messages";
 
+import { BaseUserData, Renderable } from "../Renderable";
 import { Renderer } from "../Renderer";
+import { PartialMessage, PartialMessageEvent, SceneExtension } from "../SceneExtension";
+import { SettingsTreeEntry } from "../SettingsManager";
 import { stringToRgba } from "../color";
-import { CameraInfo, Pose, Image, CompressedImage } from "../ros";
-import { LayerSettingsImage, LayerType } from "../settings";
-import { makePose } from "../transforms/geometry";
-import { updatePose } from "../updatePose";
-import { missingTransformMessage, MISSING_TRANSFORM } from "./transforms";
+import { normalizeByteArray, normalizeHeader } from "../normalizeMessages";
+import {
+  CameraInfo,
+  Image,
+  CompressedImage,
+  IMAGE_DATATYPES,
+  COMPRESSED_IMAGE_DATATYPES,
+  CAMERA_INFO_DATATYPES,
+} from "../ros";
+import { BaseSettings, PRECISION_DISTANCE } from "../settings";
+import { makePose } from "../transforms";
+import { CameraInfoUserData } from "./Cameras";
 
 const log = Logger.getLogger(__filename);
 
+export type LayerSettingsImage = BaseSettings & {
+  cameraInfoTopic: string | undefined;
+  distance: number;
+  color: string;
+};
+
 const CREATE_BITMAP_ERR = "CreateBitmap";
 
+const DEFAULT_IMAGE_WIDTH = 512;
 const DEFAULT_DISTANCE = 1;
 
 const DEFAULT_SETTINGS: LayerSettingsImage = {
   visible: true,
+  frameLocked: true,
   cameraInfoTopic: undefined,
   distance: DEFAULT_DISTANCE,
   color: "#ffffff",
 };
 
-type ImageRenderable = Omit<THREE.Object3D, "userData"> & {
-  userData: {
-    topic: string;
-    settings: LayerSettingsImage;
-    image: Image | CompressedImage;
-    pose: Pose;
-    srcTime: bigint;
-    texture: THREE.Texture | undefined;
-    material: THREE.MeshBasicMaterial | undefined;
-    geometry: THREE.PlaneGeometry | undefined;
-    mesh: THREE.Mesh | undefined;
-  };
+export type ImageUserData = BaseUserData & {
+  topic: string;
+  settings: LayerSettingsImage;
+  image: Image | CompressedImage;
+  texture: THREE.Texture | undefined;
+  material: THREE.MeshBasicMaterial | undefined;
+  geometry: THREE.PlaneGeometry | undefined;
+  mesh: THREE.Mesh | undefined;
 };
 
-type RawImageOptions = {
-  minValue?: number;
-  maxValue?: number;
-};
+export class ImageRenderable extends Renderable<ImageUserData> {
+  override dispose(): void {
+    this.userData.texture?.dispose();
+    this.userData.material?.dispose();
+    this.userData.geometry?.dispose();
+    super.dispose();
+  }
+}
 
-const tempColor = { r: 0, g: 0, b: 0, a: 0 };
-
-export class Images extends THREE.Object3D {
-  renderer: Renderer;
-  imagesByTopic = new Map<string, ImageRenderable>();
+export class Images extends SceneExtension<ImageRenderable> {
   cameraInfoTopics = new Set<string>();
 
   constructor(renderer: Renderer) {
-    super();
-    this.renderer = renderer;
+    super("foxglove.Images", renderer);
 
-    renderer.setSettingsNodeProvider(LayerType.Image, (topicConfig, topic) => {
-      const cur = topicConfig as Partial<LayerSettingsImage>;
+    renderer.addDatatypeSubscriptions(IMAGE_DATATYPES, this.handleRawImage);
+    renderer.addDatatypeSubscriptions(COMPRESSED_IMAGE_DATATYPES, this.handleCompressedImage);
+    renderer.addDatatypeSubscriptions(CAMERA_INFO_DATATYPES, this.handleCameraInfo);
+  }
 
-      // Build a list of all CameraInfo topics
-      const cameraInfoOptions: Array<{ label: string; value: string }> = [];
-      for (const cameraInfoTopic of this.cameraInfoTopics) {
-        if (cameraInfoTopicMatches(topic.name, cameraInfoTopic)) {
-          cameraInfoOptions.push({ label: cameraInfoTopic, value: cameraInfoTopic });
+  override settingsNodes(): SettingsTreeEntry[] {
+    const configTopics = this.renderer.config.topics;
+    const handler = this.handleSettingsAction;
+    const entries: SettingsTreeEntry[] = [];
+    for (const topic of this.renderer.topics ?? []) {
+      if (IMAGE_DATATYPES.has(topic.datatype) || COMPRESSED_IMAGE_DATATYPES.has(topic.datatype)) {
+        const config = (configTopics[topic.name] ?? {}) as Partial<LayerSettingsImage>;
+
+        // Build a list of all matching CameraInfo topics
+        const cameraInfoOptions: Array<{ label: string; value: string }> = [];
+        for (const cameraInfoTopic of this.cameraInfoTopics) {
+          if (cameraInfoTopicMatches(topic.name, cameraInfoTopic)) {
+            cameraInfoOptions.push({ label: cameraInfoTopic, value: cameraInfoTopic });
+          }
         }
+
+        // prettier-ignore
+        const fields: SettingsTreeFields = {
+          cameraInfoTopic: { label: "Camera Info", input: "select", options: cameraInfoOptions, value: config.cameraInfoTopic },
+          distance: { label: "Distance", input: "number", placeholder: String(DEFAULT_DISTANCE), step: 0.1, precision: PRECISION_DISTANCE, value: config.distance },
+          color: { label: "Color", input: "rgba", value: config.color },
+        };
+
+        entries.push({
+          path: ["topics", topic.name],
+          node: { icon: "ImageProjection", fields, visible: config.visible ?? true, handler },
+        });
       }
-
-      // prettier-ignore
-      const fields: SettingsTreeFields = {
-        cameraInfoTopic: { label: "Camera Info", input: "select", options: cameraInfoOptions, value: cur.cameraInfoTopic },
-        distance: { label: "Distance", input: "number", value: cur.distance, placeholder: String(DEFAULT_DISTANCE), step: 0.1 },
-        color: { label: "Color", input: "rgba", value: cur.color },
-      };
-
-      return { icon: "ImageProjection", fields };
-    });
-  }
-
-  dispose(): void {
-    for (const renderable of this.imagesByTopic.values()) {
-      renderable.userData.texture?.dispose();
-      renderable.userData.material?.dispose();
-      renderable.userData.geometry?.dispose();
-      renderable.userData.texture = undefined;
-      renderable.userData.material = undefined;
-      renderable.userData.geometry = undefined;
-      renderable.userData.mesh = undefined;
     }
-    this.children.length = 0;
-    this.imagesByTopic.clear();
+    return entries;
   }
 
-  addImageMessage(topic: string, image: Image | CompressedImage): void {
+  handleSettingsAction = (action: SettingsTreeAction): void => {
+    const path = action.payload.path;
+    if (action.action !== "update" || path.length !== 3) {
+      return;
+    }
+
+    this.saveSetting(path, action.payload.value);
+
+    // Update the renderable
+    const topicName = path[1]!;
+    const renderable = this.renderables.get(topicName);
+    if (renderable) {
+      const { image, receiveTime } = renderable.userData;
+      const settings = this.renderer.config.topics[topicName] as
+        | Partial<LayerSettingsImage>
+        | undefined;
+      this._updateImageRenderable(renderable, image, receiveTime, settings);
+    }
+  };
+
+  handleRawImage = (messageEvent: PartialMessageEvent<Image>): void => {
+    this.handleImage(messageEvent, normalizeImage(messageEvent.message));
+  };
+
+  handleCompressedImage = (messageEvent: PartialMessageEvent<CompressedImage>): void => {
+    this.handleImage(messageEvent, normalizeCompressedImage(messageEvent.message));
+  };
+
+  handleImage = (
+    messageEvent: PartialMessageEvent<Image | CompressedImage>,
+    image: Image | CompressedImage,
+  ): void => {
+    const topic = messageEvent.topic;
+    const receiveTime = toNanoSec(messageEvent.receiveTime);
+
     const userSettings = this.renderer.config.topics[topic] as
       | Partial<LayerSettingsImage>
       | undefined;
 
     // Create an ImageRenderable for this topic if it doesn't already exist
-    let renderable = this.imagesByTopic.get(topic);
+    let renderable = this.renderables.get(topic);
     if (!renderable) {
-      renderable = new THREE.Object3D() as ImageRenderable;
-      renderable.name = topic;
-      renderable.userData = {
+      renderable = new ImageRenderable(topic, this.renderer, {
+        receiveTime,
+        messageTime: toNanoSec(image.header.stamp),
+        frameId: image.header.frame_id,
+        pose: makePose(),
+        settingsPath: ["topics", topic],
         topic,
         settings: { ...DEFAULT_SETTINGS, ...userSettings },
         image,
-        pose: makePose(),
-        srcTime: toNanoSec(image.header.stamp),
         texture: undefined,
         material: undefined,
         geometry: undefined,
         mesh: undefined,
-      };
+      });
 
       this.add(renderable);
-      this.imagesByTopic.set(topic, renderable);
+      this.renderables.set(topic, renderable);
     }
 
     // Auto-select settings.cameraInfoTopic if it's not already set
@@ -148,76 +200,40 @@ export class Images extends THREE.Object3D {
           updatedUserSettings.cameraInfoTopic = settings.cameraInfoTopic;
           draft.topics[topic] = updatedUserSettings;
         });
-
-        this.renderer.emit("settingsTreeChange", { path: ["topics", topic] });
+        this.updateSettingsTree();
       }
     }
 
-    this._updateImageRenderable(renderable, image, renderable.userData.settings);
-  }
+    this._updateImageRenderable(renderable, image, receiveTime, renderable.userData.settings);
+  };
 
-  addCameraInfoMessage(topic: string, _cameraInfo: CameraInfo): void {
+  handleCameraInfo = (messageEvent: PartialMessageEvent<CameraInfo>): void => {
+    const topic = messageEvent.topic;
     const updated = !this.cameraInfoTopics.has(topic);
     this.cameraInfoTopics.add(topic);
 
-    const renderable = this.imagesByTopic.get(topic);
+    const renderable = this.renderables.get(topic);
     if (renderable) {
       const { image, settings } = renderable.userData;
-      this._updateImageRenderable(renderable, image, settings);
+      this._updateImageRenderable(renderable, image, renderable.userData.receiveTime, settings);
     }
 
     if (updated) {
-      this.renderer.emit("settingsTreeChange", { path: ["topics"] });
+      this.updateSettingsTree();
     }
+  };
+
+  private _camerasExtension() {
+    return this.renderer.sceneExtensions.get("foxglove.Cameras") as
+      | SceneExtension<Renderable<CameraInfoUserData>>
+      | undefined;
   }
 
-  setTopicSettings(topic: string, settings: Partial<LayerSettingsImage>): void {
-    const renderable = this.imagesByTopic.get(topic);
-    if (renderable) {
-      this._updateImageRenderable(renderable, renderable.userData.image, settings);
-    }
-  }
-
-  startFrame(currentTime: bigint): void {
-    const renderFrameId = this.renderer.renderFrameId;
-    const fixedFrameId = this.renderer.fixedFrameId;
-    if (renderFrameId == undefined || fixedFrameId == undefined) {
-      this.visible = false;
-      return;
-    }
-    this.visible = true;
-
-    for (const renderable of this.imagesByTopic.values()) {
-      renderable.visible = renderable.userData.settings.visible;
-      if (!renderable.visible) {
-        this.renderer.layerErrors.clearTopic(renderable.userData.topic);
-        continue;
-      }
-
-      const srcTime = currentTime;
-      const frameId = renderable.userData.image.header.frame_id;
-      const updated = updatePose(
-        renderable,
-        this.renderer.transformTree,
-        renderFrameId,
-        fixedFrameId,
-        frameId,
-        currentTime,
-        srcTime,
-      );
-      if (!updated) {
-        const message = missingTransformMessage(renderFrameId, fixedFrameId, frameId);
-        this.renderer.layerErrors.addToTopic(renderable.userData.topic, MISSING_TRANSFORM, message);
-      } else {
-        this.renderer.layerErrors.removeFromTopic(renderable.userData.topic, MISSING_TRANSFORM);
-      }
-    }
-  }
-
-  _updateImageRenderable(
+  private _updateImageRenderable(
     renderable: ImageRenderable,
     image: Image | CompressedImage,
-    settings: Partial<LayerSettingsImage>,
+    receiveTime: bigint,
+    settings: Partial<LayerSettingsImage> | undefined,
   ): void {
     const prevSettings = renderable.userData.settings;
     const newSettings = { ...prevSettings, ...settings };
@@ -228,7 +244,8 @@ export class Images extends THREE.Object3D {
     const topic = renderable.userData.topic;
 
     renderable.userData.image = image;
-    renderable.userData.srcTime = toNanoSec(image.header.stamp);
+    renderable.userData.receiveTime = receiveTime;
+    renderable.userData.messageTime = toNanoSec(image.header.stamp);
     renderable.userData.settings = newSettings;
 
     // Dispose of the current geometry if the settings have changed
@@ -242,8 +259,8 @@ export class Images extends THREE.Object3D {
     }
 
     // Create the plane geometry if needed
-    if (settings.cameraInfoTopic != undefined && renderable.userData.geometry == undefined) {
-      const cameraRenderable = this.renderer.cameras.camerasByTopic.get(settings.cameraInfoTopic);
+    if (settings?.cameraInfoTopic != undefined && renderable.userData.geometry == undefined) {
+      const cameraRenderable = this._camerasExtension()?.renderables.get(settings.cameraInfoTopic);
       const cameraModel = cameraRenderable?.userData.cameraModel;
       if (cameraModel) {
         log.debug(
@@ -264,7 +281,7 @@ export class Images extends THREE.Object3D {
       const compressed = image as CompressedImage;
       const bitmapData = new Blob([image.data], { type: `image/${compressed.format}` });
       self
-        .createImageBitmap(bitmapData)
+        .createImageBitmap(bitmapData, { resizeWidth: DEFAULT_IMAGE_WIDTH })
         .then((bitmap) => {
           if (renderable.userData.texture == undefined) {
             log.debug(
@@ -279,10 +296,10 @@ export class Images extends THREE.Object3D {
             renderable.userData.texture.needsUpdate = true;
           }
 
-          this.renderer.layerErrors.removeFromTopic(topic, CREATE_BITMAP_ERR);
+          this.renderer.settings.errors.removeFromTopic(topic, CREATE_BITMAP_ERR);
         })
         .catch((err) => {
-          this.renderer.layerErrors.addToTopic(
+          this.renderer.settings.errors.addToTopic(
             topic,
             CREATE_BITMAP_ERR,
             `createBitmap failed: ${err.message}`,
@@ -320,6 +337,13 @@ export class Images extends THREE.Object3D {
     tryCreateMesh(renderable, this.renderer);
   }
 }
+
+type RawImageOptions = {
+  minValue?: number;
+  maxValue?: number;
+};
+
+const tempColor = { r: 0, g: 0, b: 0, a: 0 };
 
 function tryCreateMesh(renderable: ImageRenderable, renderer: Renderer): void {
   const { topic, mesh, geometry, material } = renderable.userData;
@@ -534,4 +558,34 @@ function rawImageToDataTexture(
     default:
       throw new Error(`Unsupported encoding ${encoding}`);
   }
+}
+
+function normalizeImageData(data: unknown): Int8Array | Uint8Array {
+  if (data == undefined) {
+    return new Uint8Array(0);
+  } else if (data instanceof Int8Array || data instanceof Uint8Array) {
+    return data;
+  } else {
+    return new Uint8Array(0);
+  }
+}
+
+function normalizeImage(message: PartialMessage<Image>): Image {
+  return {
+    header: normalizeHeader(message.header),
+    height: message.height ?? 0,
+    width: message.width ?? 0,
+    encoding: message.encoding ?? "",
+    is_bigendian: message.is_bigendian ?? false,
+    step: message.step ?? 0,
+    data: normalizeImageData(message.data),
+  };
+}
+
+function normalizeCompressedImage(message: PartialMessage<CompressedImage>): CompressedImage {
+  return {
+    header: normalizeHeader(message.header),
+    format: message.format ?? "",
+    data: normalizeByteArray(message.data),
+  };
 }

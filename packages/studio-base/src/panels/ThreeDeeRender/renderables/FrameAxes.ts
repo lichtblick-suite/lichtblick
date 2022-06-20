@@ -7,21 +7,19 @@ import { Line2 } from "three/examples/jsm/lines/Line2";
 import { LineGeometry } from "three/examples/jsm/lines/LineGeometry";
 import { LineMaterial } from "three/examples/jsm/lines/LineMaterial";
 
-import Logger from "@foxglove/log";
-import { toNanoSec } from "@foxglove/rostime";
+import { SettingsTreeAction } from "@foxglove/studio-base/components/SettingsTreeEditor/types";
 
 import { MaterialCache, StandardColor } from "../MaterialCache";
+import { BaseUserData, Renderable } from "../Renderable";
 import { Renderer } from "../Renderer";
+import { SceneExtension } from "../SceneExtension";
+import { SettingsTreeEntry } from "../SettingsManager";
 import { arrowHeadSubdivisions, arrowShaftSubdivisions, DetailLevel } from "../lod";
-import { Pose, TF } from "../ros";
-import { LayerSettingsTransform, LayerType } from "../settings";
-import { Transform } from "../transforms/Transform";
-import { makePose } from "../transforms/geometry";
-import { updatePose } from "../updatePose";
+import { BaseSettings } from "../settings";
+import { makePose } from "../transforms";
 import { linePickingMaterial, releaseLinePickingMaterial } from "./markers/materials";
-import { missingTransformMessage, MISSING_TRANSFORM } from "./transforms";
 
-const log = Logger.getLogger(__filename);
+export type LayerSettingsTransform = BaseSettings;
 
 const SHAFT_LENGTH = 0.154;
 const SHAFT_DIAMETER = 0.02;
@@ -33,46 +31,51 @@ const GREEN_COLOR = new THREE.Color(0x88dd04).convertSRGBToLinear();
 const BLUE_COLOR = new THREE.Color(0x2b90fb).convertSRGBToLinear();
 const YELLOW_COLOR = new THREE.Color(0xffff00).convertSRGBToLinear();
 
+const COLOR_WHITE = { r: 1, g: 1, b: 1, a: 1 };
+
 const PI_2 = Math.PI / 2;
 
 const PICKING_LINE_SIZE = 6;
 
 const DEFAULT_SETTINGS: LayerSettingsTransform = {
   visible: true,
+  frameLocked: true,
 };
 
 const tempMat4 = new THREE.Matrix4();
 const tempVec = new THREE.Vector3();
 const tempVecB = new THREE.Vector3();
 
-type FrameAxisRenderable = Omit<THREE.Object3D, "userData"> & {
-  userData: {
-    frameId: string;
-    path: ReadonlyArray<string>;
-    pose: Pose;
-    settings: LayerSettingsTransform;
-    shaftMesh: THREE.InstancedMesh;
-    headMesh: THREE.InstancedMesh;
-    label: THREE.Sprite;
-    parentLine?: Line2;
-  };
+export type FrameAxisUserData = BaseUserData & {
+  settings: LayerSettingsTransform;
+  shaftMesh: THREE.InstancedMesh;
+  headMesh: THREE.InstancedMesh;
+  label: THREE.Sprite;
+  parentLine?: Line2;
 };
 
-export class FrameAxes extends THREE.Object3D {
+export class FrameAxisRenderable extends Renderable<FrameAxisUserData> {
+  override dispose(): void {
+    releaseStandardMaterial(this.renderer.materialCache);
+    this.userData.shaftMesh.dispose();
+    this.userData.headMesh.dispose();
+    this.renderer.labels.removeById(`tf:${this.userData.frameId}`);
+    super.dispose();
+  }
+}
+
+export class FrameAxes extends SceneExtension<FrameAxisRenderable> {
   private static shaftLod: DetailLevel | undefined;
   private static headLod: DetailLevel | undefined;
   private static shaftGeometry: THREE.CylinderGeometry | undefined;
   private static headGeometry: THREE.ConeGeometry | undefined;
   private static lineGeometry: LineGeometry | undefined;
 
-  renderer: Renderer;
-  axesByFrameId = new Map<string, FrameAxisRenderable>();
   lineMaterial: LineMaterial;
   linePickingMaterial: THREE.ShaderMaterial;
 
   constructor(renderer: Renderer) {
-    super();
-    this.renderer = renderer;
+    super("foxglove.FrameAxes", renderer);
 
     this.lineMaterial = new LineMaterial({ linewidth: 2 });
     this.lineMaterial.color = YELLOW_COLOR;
@@ -80,125 +83,60 @@ export class FrameAxes extends THREE.Object3D {
     this.linePickingMaterial = linePickingMaterial(
       PICKING_LINE_SIZE,
       false,
-      this.renderer.materialCache,
+      renderer.materialCache,
     );
 
-    renderer.setSettingsNodeProvider(LayerType.Transform, (_tfConfig, { name: frameId }) => {
-      const frame = this.renderer.transformTree.frame(frameId);
-      const isRoot = frame?.isRoot();
-      return { icon: isRoot === true ? "SouthEast" : isRoot === false ? "NorthWest" : undefined };
-    });
+    renderer.on("transformTreeUpdated", this.handleTransformTreeUpdated);
   }
 
-  dispose(): void {
-    for (const renderable of this.axesByFrameId.values()) {
-      releaseStandardMaterial(this.renderer.materialCache);
-      renderable.userData.shaftMesh.dispose();
-      renderable.userData.headMesh.dispose();
-      this.renderer.labels.removeById(`tf:${renderable.userData.frameId}`);
-      renderable.children.length = 0;
-    }
-    this.children.length = 0;
-    this.axesByFrameId.clear();
+  override dispose(): void {
+    this.renderer.off("transformTreeUpdated", this.handleTransformTreeUpdated);
     this.lineMaterial.dispose();
     releaseLinePickingMaterial(PICKING_LINE_SIZE, false, this.renderer.materialCache);
+    super.dispose();
   }
 
-  addTransformMessage(tf: TF): void {
-    const addParent = !this.renderer.transformTree.hasFrame(tf.header.frame_id);
-    const addChild = !this.renderer.transformTree.hasFrame(tf.child_frame_id);
+  override settingsNodes(): SettingsTreeEntry[] {
+    // Clear the transforms children so we can re-add them in the correct order
+    this.renderer.settings.clearChildren(["transforms"]);
 
-    // Create a new transform and add it to the renderer's TransformTree
-    const stamp = toNanoSec(tf.header.stamp);
-    const t = tf.transform.translation;
-    const q = tf.transform.rotation;
-    const transform = new Transform([t.x, t.y, t.z], [q.x, q.y, q.z, q.w]);
-    const updated = this.renderer.transformTree.addTransform(
-      tf.child_frame_id,
-      tf.header.frame_id,
-      stamp,
-      transform,
-    );
+    const configTransforms = this.renderer.config.transforms;
+    const handler = this.handleSettingsAction;
+    const entries: SettingsTreeEntry[] = [];
+    for (const { label, value: frameId } of this.renderer.coordinateFrameList) {
+      const config = (configTransforms[frameId] ?? {}) as Partial<LayerSettingsTransform>;
+      // TODO(jhurliman): readonly fields and icons for root vs non-root frames
+      // const frame = this.renderer.transformTree.frame(frameId);
+      // const isRoot = frame?.isRoot();
 
-    if (addParent) {
-      this._addFrameAxis(tf.header.frame_id);
-    }
-    if (addChild) {
-      this._addFrameAxis(tf.child_frame_id);
-    }
+      // const fields: SettingsTreeFields = {};
+      // const icon = isRoot === true ? "SouthEast" : isRoot === false ? "NorthWest" : undefined;
 
-    if (addParent || addChild) {
-      log.debug(`Added transform "${tf.header.frame_id}_T_${tf.child_frame_id}"`);
-      this.renderer.emit("transformTreeUpdated", this.renderer);
-    } else if (updated) {
-      log.debug(`Updated transform "${tf.header.frame_id}_T_${tf.child_frame_id}"`);
-      this.renderer.emit("transformTreeUpdated", this.renderer);
+      entries.push({
+        path: ["transforms", frameId],
+        node: { label, visible: config.visible ?? true, handler },
+      });
     }
+    return entries;
   }
 
-  addCoordinateFrame(frameId: string): void {
-    this._addFrameAxis(frameId);
-  }
-
-  setTransformSettings(frameId: string, settings: Partial<LayerSettingsTransform>): void {
-    const renderable = this.axesByFrameId.get(frameId);
-    if (renderable) {
-      renderable.userData.settings = { ...renderable.userData.settings, ...settings };
-      // Clear errors for this frame if visibility is toggled off
-      if (!renderable.userData.settings.visible) {
-        this.renderer.layerErrors.clearPath(renderable.userData.path);
-      }
-    }
-  }
-
-  startFrame(currentTime: bigint): void {
+  override startFrame(currentTime: bigint, renderFrameId: string, fixedFrameId: string): void {
     this.lineMaterial.resolution = this.renderer.input.canvasSize;
 
-    const renderFrameId = this.renderer.renderFrameId;
-    const fixedFrameId = this.renderer.fixedFrameId;
-    if (renderFrameId == undefined || fixedFrameId == undefined) {
-      this.visible = false;
-      return;
-    }
-    this.visible = true;
-
-    // Update the arrow poses
-    for (const [frameId, renderable] of this.axesByFrameId.entries()) {
-      renderable.visible = renderable.userData.settings.visible;
-      if (!renderable.visible) {
-        continue;
-      }
-
-      const updated = updatePose(
-        renderable,
-        this.renderer.transformTree,
-        renderFrameId,
-        fixedFrameId,
-        frameId,
-        currentTime,
-        currentTime,
-      );
-      renderable.visible = updated;
-      if (!updated) {
-        const message = missingTransformMessage(renderFrameId, fixedFrameId, frameId);
-        this.renderer.layerErrors.add(renderable.userData.path, MISSING_TRANSFORM, message);
-      } else {
-        this.renderer.layerErrors.remove(renderable.userData.path, MISSING_TRANSFORM);
-      }
-    }
+    super.startFrame(currentTime, renderFrameId, fixedFrameId);
 
     // Update the lines between coordinate frames
-    for (const [_frameId, childRenderable] of this.axesByFrameId.entries()) {
-      const line = childRenderable.userData.parentLine;
+    for (const renderable of this.renderables.values()) {
+      const line = renderable.userData.parentLine;
       if (line) {
         line.visible = false;
-        const childFrame = this.renderer.transformTree.frame(childRenderable.userData.frameId);
+        const childFrame = this.renderer.transformTree.frame(renderable.userData.frameId);
         const parentFrame = childFrame?.parent();
         if (parentFrame) {
-          const parentRenderable = this.axesByFrameId.get(parentFrame.id);
+          const parentRenderable = this.renderables.get(parentFrame.id);
           if (parentRenderable?.visible === true) {
             parentRenderable.getWorldPosition(tempVec);
-            const dist = tempVec.distanceTo(childRenderable.getWorldPosition(tempVecB));
+            const dist = tempVec.distanceTo(renderable.getWorldPosition(tempVecB));
             line.lookAt(tempVec);
             line.rotateY(-PI_2);
             line.scale.set(dist, 1, 1);
@@ -209,15 +147,26 @@ export class FrameAxes extends THREE.Object3D {
     }
   }
 
-  private _addFrameAxis(frameId: string): void {
-    if (this.axesByFrameId.has(frameId)) {
+  handleSettingsAction = (action: SettingsTreeAction): void => {
+    const path = action.payload.path;
+    if (action.action !== "update" || path.length !== 3) {
       return;
     }
 
-    // Create a scene graph object to hold the three arrows, a text label, and a
-    // line to the parent frame if it exists
-    const renderable = new THREE.Object3D() as FrameAxisRenderable;
-    renderable.name = frameId;
+    this.saveSetting(path, action.payload.value);
+  };
+
+  handleTransformTreeUpdated = (): void => {
+    for (const frameId of this.renderer.transformTree.frames().keys()) {
+      this._addFrameAxis(frameId);
+    }
+    this.updateSettingsTree();
+  };
+
+  private _addFrameAxis(frameId: string): void {
+    if (this.renderables.has(frameId)) {
+      return;
+    }
 
     // Create three arrow shafts
     const arrowMaterial = standardMaterial(this.renderer.materialCache);
@@ -225,7 +174,7 @@ export class FrameAxes extends THREE.Object3D {
     const shaftInstances = new THREE.InstancedMesh(shaftGeometry, arrowMaterial, 3);
     shaftInstances.castShadow = true;
     shaftInstances.receiveShadow = true;
-    renderable.add(shaftInstances);
+
     // Set x, y, and z axis arrow shaft directions
     tempVec.set(SHAFT_LENGTH, SHAFT_DIAMETER, SHAFT_DIAMETER);
     shaftInstances.setMatrixAt(0, tempMat4.identity().scale(tempVec));
@@ -240,7 +189,7 @@ export class FrameAxes extends THREE.Object3D {
     const headInstances = new THREE.InstancedMesh(headGeometry, arrowMaterial, 3);
     headInstances.castShadow = true;
     headInstances.receiveShadow = true;
-    renderable.add(headInstances);
+
     // Set x, y, and z axis arrow head directions
     tempVec.set(HEAD_LENGTH, HEAD_DIAMETER, HEAD_DIAMETER);
     tempMat4.identity().scale(tempVec).setPosition(SHAFT_LENGTH, 0, 0);
@@ -266,7 +215,6 @@ export class FrameAxes extends THREE.Object3D {
     // Text label
     const label = this.renderer.labels.setLabel(`tf:${frameId}`, { text: frameDisplayName });
     label.position.set(0, 0, 0.4);
-    renderable.add(label);
 
     // Set the initial settings from default values merged with any user settings
     const userSettings = this.renderer.config.transforms[frameId] as
@@ -274,21 +222,29 @@ export class FrameAxes extends THREE.Object3D {
       | undefined;
     const settings = { ...DEFAULT_SETTINGS, ...userSettings };
 
-    renderable.userData = {
+    // Create a scene graph object to hold the three arrows, a text label, and a
+    // line to the parent frame if it exists
+    const renderable = new FrameAxisRenderable(frameId, this.renderer, {
+      receiveTime: 0n,
+      messageTime: 0n,
       frameId,
-      path: ["transforms", frameId],
       pose: makePose(),
+      settingsPath: ["transforms", frameId],
       settings,
       shaftMesh: shaftInstances,
       headMesh: headInstances,
       label,
       parentLine: undefined,
-    };
+    });
+
+    renderable.add(shaftInstances);
+    renderable.add(headInstances);
+    renderable.add(label);
 
     // Check if this frame's parent exists
     const parentFrame = frame.parent();
     if (parentFrame) {
-      const parentRenderable = this.axesByFrameId.get(parentFrame.id);
+      const parentRenderable = this.renderables.get(parentFrame.id);
       if (parentRenderable) {
         this._addChildParentLine(renderable);
       }
@@ -297,7 +253,7 @@ export class FrameAxes extends THREE.Object3D {
     // Find all children of this frame
     for (const curFrame of this.renderer.transformTree.frames().values()) {
       if (curFrame.parent() === frame) {
-        const curRenderable = this.axesByFrameId.get(curFrame.id);
+        const curRenderable = this.renderables.get(curFrame.id);
         if (curRenderable) {
           this._addChildParentLine(curRenderable);
         }
@@ -305,7 +261,7 @@ export class FrameAxes extends THREE.Object3D {
     }
 
     this.add(renderable);
-    this.axesByFrameId.set(frameId, renderable);
+    this.renderables.set(frameId, renderable);
   }
 
   private _addChildParentLine(renderable: FrameAxisRenderable): void {
@@ -353,8 +309,6 @@ export class FrameAxes extends THREE.Object3D {
     return FrameAxes.lineGeometry;
   }
 }
-
-const COLOR_WHITE = { r: 1, g: 1, b: 1, a: 1 };
 
 function standardMaterial(materialCache: MaterialCache): THREE.MeshStandardMaterial {
   return materialCache.acquire(

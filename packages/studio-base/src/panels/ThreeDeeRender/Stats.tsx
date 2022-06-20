@@ -105,7 +105,7 @@ class THREEStats {
     this.beginTime = performance.now();
     this.prevTime = this.beginTime;
 
-    this.msPanel = this.addPanel(new Panel("MS", "#0f0", "#020"));
+    this.msPanel = this.addPanel(new Panel("MS", "#9480ed", "#1e1a2f"));
     // this.fpsPanel = this.addPanel(new Panel("FPS", "#0ff", "#002"));
     this.memPanel = this.addPanel(new Panel("MB", "#f08", "#201"));
 

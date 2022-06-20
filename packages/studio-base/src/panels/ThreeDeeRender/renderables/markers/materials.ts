@@ -2,6 +2,9 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
+// This file provides helper functions to acquire and release materials used for
+// rendering markers from a MaterialCache instance
+
 import * as THREE from "three";
 
 import { LineMaterial } from "../../LineMaterial";

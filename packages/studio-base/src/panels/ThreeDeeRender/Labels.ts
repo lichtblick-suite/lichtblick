@@ -65,6 +65,9 @@ export type LabelRenderable = THREE.Sprite & {
   };
 };
 
+/**
+ * Manages creation and rendering of canvas-based billboard labels in the 3D scene.
+ */
 export class Labels extends THREE.Object3D {
   renderer: Renderer;
   sprites = new Map<string, LabelRenderable>();

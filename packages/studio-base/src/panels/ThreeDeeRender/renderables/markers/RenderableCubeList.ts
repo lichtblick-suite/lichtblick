@@ -42,7 +42,7 @@ export class RenderableCubeList extends RenderableMarker {
   }
 
   override dispose(): void {
-    releaseStandardInstancedMaterial(this.userData.marker, this._renderer.materialCache);
+    releaseStandardInstancedMaterial(this.userData.marker, this.renderer.materialCache);
   }
 
   override update(marker: Marker, receiveTime: bigint | undefined): void {
@@ -50,8 +50,8 @@ export class RenderableCubeList extends RenderableMarker {
     super.update(marker, receiveTime);
 
     if (markerHasTransparency(marker) !== markerHasTransparency(prevMarker)) {
-      releaseStandardInstancedMaterial(prevMarker, this._renderer.materialCache);
-      this.mesh.material = standardInstancedMaterial(marker, this._renderer.materialCache);
+      releaseStandardInstancedMaterial(prevMarker, this.renderer.materialCache);
+      this.mesh.material = standardInstancedMaterial(marker, this.renderer.materialCache);
     }
 
     this.mesh.set(marker.points, marker.scale, marker.colors, marker.color);

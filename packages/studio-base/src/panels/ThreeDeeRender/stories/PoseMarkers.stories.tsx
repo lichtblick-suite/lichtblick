@@ -7,7 +7,7 @@ import useDelayedFixture from "@foxglove/studio-base/panels/ThreeDimensionalViz/
 import PanelSetup from "@foxglove/studio-base/stories/PanelSetup";
 
 import ThreeDeeRender from "../index";
-import { PoseStamped, PoseWithCovarianceStamped, TF } from "../ros";
+import { PoseStamped, PoseWithCovarianceStamped, TransformStamped } from "../ros";
 import { BASE_LINK_FRAME_ID, FIXED_FRAME_ID, QUAT_IDENTITY, SENSOR_FRAME_ID } from "./common";
 
 export default {
@@ -24,7 +24,7 @@ export function PoseMarkers(): JSX.Element {
     { name: "/pose_with_hidden_covariance", datatype: "geometry_msgs/PoseWithCovarianceStamped" },
   ];
 
-  const tf1: MessageEvent<TF> = {
+  const tf1: MessageEvent<TransformStamped> = {
     topic: "/tf",
     receiveTime: { sec: 10, nsec: 0 },
     message: {
@@ -37,7 +37,7 @@ export function PoseMarkers(): JSX.Element {
     },
     sizeInBytes: 0,
   };
-  const tf2: MessageEvent<TF> = {
+  const tf2: MessageEvent<TransformStamped> = {
     topic: "/tf",
     receiveTime: { sec: 10, nsec: 0 },
     message: {

@@ -2,30 +2,49 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { isEqual } from "lodash";
-import * as THREE from "three";
+import Logger from "@foxglove/log";
+import {
+  SettingsTreeAction,
+  SettingsTreeFields,
+} from "@foxglove/studio-base/components/SettingsTreeEditor/types";
 
-import { SettingsTreeFields } from "@foxglove/studio-base/components/SettingsTreeEditor/types";
-import { RenderableLineList } from "@foxglove/studio-base/panels/ThreeDeeRender/renderables/markers/RenderableLineList";
-
+import { BaseUserData, Renderable } from "../Renderable";
 import { Renderer } from "../Renderer";
+import { SceneExtension } from "../SceneExtension";
+import { SettingsTreeEntry } from "../SettingsManager";
 import { stringToRgba } from "../color";
-import { Marker, Pose, TIME_ZERO, Vector3 } from "../ros";
-import { LayerSettingsGrid, LayerType, PRECISION_DEGREES, PRECISION_DISTANCE } from "../settings";
-import { makePose, xyzrpyToPose } from "../transforms/geometry";
-import { updatePose } from "../updatePose";
-import { missingTransformMessage, MISSING_TRANSFORM } from "./transforms";
+import { vec3TupleApproxEquals } from "../math";
+import { Marker, TIME_ZERO, Vector3 } from "../ros";
+import { CustomLayerSettings, PRECISION_DEGREES, PRECISION_DISTANCE } from "../settings";
+import { makePose, xyzrpyToPose } from "../transforms";
+import { RenderableLineList } from "./markers/RenderableLineList";
 
+const log = Logger.getLogger(__filename);
+
+export type LayerSettingsGrid = CustomLayerSettings & {
+  layerId: "foxglove.Grid";
+  frameId: string | undefined;
+  size: number;
+  divisions: number;
+  lineWidth: number;
+  color: string;
+  position: [number, number, number];
+  rotation: [number, number, number];
+};
+
+const LAYER_ID = "foxglove.Grid";
 const DEFAULT_SIZE = 10;
 const DEFAULT_DIVISIONS = 10;
 const DEFAULT_LINE_WIDTH = 0.1;
-const DEFAULT_COLOR = "#ffffff";
+const DEFAULT_COLOR = "#248eff";
 const MAX_DIVISIONS = 4096; // The JS heap size is a limiting factor
 
 const DEFAULT_SETTINGS: LayerSettingsGrid = {
-  label: "Grid",
-  type: LayerType.Grid,
   visible: true,
+  frameLocked: true,
+  label: "Grid",
+  instanceId: "invalid",
+  layerId: LAYER_ID,
   frameId: undefined,
   size: DEFAULT_SIZE,
   divisions: DEFAULT_DIVISIONS,
@@ -35,76 +54,183 @@ const DEFAULT_SETTINGS: LayerSettingsGrid = {
   rotation: [0, 0, 0],
 };
 
-type GridRenderable = Omit<THREE.Object3D, "userData"> & {
-  userData: {
-    path: ReadonlyArray<string>;
-    settings: LayerSettingsGrid;
-    pose: Pose;
-    lineList: RenderableLineList;
-  };
+export type GridUserData = BaseUserData & {
+  settings: LayerSettingsGrid;
+  lineList: RenderableLineList;
 };
 
-export class Grids extends THREE.Object3D {
-  renderer: Renderer;
-  gridsById = new Map<string, GridRenderable>();
+export class GridRenderable extends Renderable<GridUserData> {
+  override dispose(): void {
+    this.userData.lineList.dispose();
+    super.dispose();
+  }
+}
 
+export class Grids extends SceneExtension<GridRenderable> {
   constructor(renderer: Renderer) {
-    super();
-    this.renderer = renderer;
+    super("foxglove.Grids", renderer);
 
-    renderer.setSettingsNodeProvider(LayerType.Grid, (layerConfig, _) => {
-      const cur = layerConfig as Partial<LayerSettingsGrid>;
+    renderer.addCustomLayerAction({
+      layerId: LAYER_ID,
+      label: "Add Grid",
+      icon: "Grid",
+      handler: this.handleAddGrid,
+    });
+
+    renderer.on("transformTreeUpdated", this.handleTransformTreeUpdated);
+
+    // Load existing grid layers from the config
+    for (const [instanceId, entry] of Object.entries(renderer.config.layers)) {
+      if (entry?.layerId === LAYER_ID) {
+        this._updateGrid(instanceId, entry as Partial<LayerSettingsGrid>);
+      }
+    }
+  }
+
+  override dispose(): void {
+    this.renderer.off("transformTreeUpdated", this.handleTransformTreeUpdated);
+    super.dispose();
+  }
+
+  override settingsNodes(): SettingsTreeEntry[] {
+    const handler = this.handleSettingsAction;
+    const entries: SettingsTreeEntry[] = [];
+    for (const [instanceId, layerConfig] of Object.entries(this.renderer.config.layers)) {
+      if (layerConfig?.layerId !== LAYER_ID) {
+        continue;
+      }
+
+      const config = layerConfig as Partial<LayerSettingsGrid>;
+      const frameIdOptions = [
+        { label: "<Render Frame>", value: undefined },
+        ...this.renderer.coordinateFrameList,
+      ];
 
       // prettier-ignore
       const fields: SettingsTreeFields = {
-        frameId: { label: "Frame", input: "select", options: [{ label: "<Render Frame>", value: undefined }], value: cur.frameId }, // options is extended in `settings.ts:buildTopicNode()`
-        size: { label: "Size", input: "number", min: 0, step: 0.5, precision: PRECISION_DISTANCE, value: cur.size, placeholder: String(DEFAULT_SIZE) },
-        divisions: { label: "Divisions", input: "number", min: 1, max: MAX_DIVISIONS, step: 1, precision: 0, value: cur.divisions, placeholder: String(DEFAULT_DIVISIONS) },
-        lineWidth: { label: "Line Width", input: "number", min: 0, step: 0.01, precision: PRECISION_DISTANCE, value: cur.lineWidth, placeholder: String(DEFAULT_LINE_WIDTH) },
-        color: { label: "Color", input: "rgba", value: cur.color ?? DEFAULT_COLOR },
-        position: { label: "Position", input: "vec3", labels: ["X", "Y", "Z"], precision: PRECISION_DISTANCE, value: cur.position ?? [0, 0, 0] },
-        rotation: { label: "Rotation", input: "vec3", labels: ["R", "P", "Y"], precision: PRECISION_DEGREES, value: cur.rotation ?? [0, 0, 0] },
+        frameId: { label: "Frame", input: "select", options: frameIdOptions, value: config.frameId }, // options is extended in `settings.ts:buildTopicNode()`
+        size: { label: "Size", input: "number", min: 0, step: 0.5, precision: PRECISION_DISTANCE, value: config.size, placeholder: String(DEFAULT_SIZE) },
+        divisions: { label: "Divisions", input: "number", min: 1, max: MAX_DIVISIONS, step: 1, precision: 0, value: config.divisions, placeholder: String(DEFAULT_DIVISIONS) },
+        lineWidth: { label: "Line Width", input: "number", min: 0, step: 0.01, precision: PRECISION_DISTANCE, value: config.lineWidth, placeholder: String(DEFAULT_LINE_WIDTH) },
+        color: { label: "Color", input: "rgba", value: config.color ?? DEFAULT_COLOR },
+        position: { label: "Position", input: "vec3", labels: ["X", "Y", "Z"], precision: PRECISION_DISTANCE, value: config.position ?? [0, 0, 0] },
+        rotation: { label: "Rotation", input: "vec3", labels: ["R", "P", "Y"], precision: PRECISION_DEGREES, value: config.rotation ?? [0, 0, 0] },
       };
 
-      return { icon: "Grid", fields };
-    });
-  }
-
-  dispose(): void {
-    for (const renderable of this.gridsById.values()) {
-      renderable.userData.lineList.dispose();
+      entries.push({
+        path: ["layers", instanceId],
+        node: {
+          label: config.label ?? "Grid",
+          icon: "Grid",
+          fields,
+          visible: config.visible ?? true,
+          actions: [{ type: "action", id: "delete", label: "Delete" }],
+          handler,
+        },
+      });
     }
-    this.children.length = 0;
-    this.gridsById.clear();
+    return entries;
   }
 
-  setLayerSettings(id: string, settings: Partial<LayerSettingsGrid> | undefined): void {
-    let renderable = this.gridsById.get(id);
+  override startFrame(currentTime: bigint, renderFrameId: string, fixedFrameId: string): void {
+    // Set the `frameId` to use for `updatePose()`
+    for (const renderable of this.renderables.values()) {
+      renderable.userData.frameId = renderable.userData.settings.frameId ?? renderFrameId;
+    }
+    super.startFrame(currentTime, renderFrameId, fixedFrameId);
+  }
+
+  handleSettingsAction = (action: SettingsTreeAction): void => {
+    const path = action.payload.path;
+
+    // Handle menu actions (delete)
+    if (action.action === "perform-node-action") {
+      if (path.length === 2 && action.payload.id === "delete") {
+        const instanceId = path[1]!;
+
+        // Remove this instance from the config
+        this.renderer.updateConfig((draft) => {
+          delete draft.layers[instanceId];
+        });
+
+        // Remove the renderable
+        this._updateGrid(instanceId, undefined);
+
+        // Update the settings tree
+        this.updateSettingsTree();
+      }
+      return;
+    }
+
+    if (path.length !== 3) {
+      return;
+    }
+
+    this.saveSetting(path, action.payload.value);
+
+    // Update the renderable
+    const instanceId = path[1]!;
+    const renderable = this.renderables.get(instanceId);
+    if (renderable) {
+      const settings = this.renderer.config.layers[instanceId] as
+        | Partial<LayerSettingsGrid>
+        | undefined;
+      this._updateGrid(instanceId, settings);
+    }
+  };
+
+  handleAddGrid = (instanceId: string): void => {
+    log.info(`Creating ${LAYER_ID} layer ${instanceId}`);
+
+    const config: LayerSettingsGrid = { ...DEFAULT_SETTINGS };
+    config.instanceId = instanceId;
+
+    // Add this instance to the config
+    this.renderer.updateConfig((draft) => {
+      draft.layers[instanceId] = config;
+    });
+
+    // Add a renderable
+    this._updateGrid(instanceId, config);
+
+    // Update the settings tree
+    this.updateSettingsTree();
+  };
+
+  handleTransformTreeUpdated = (): void => {
+    this.updateSettingsTree();
+  };
+
+  private _updateGrid(instanceId: string, settings: Partial<LayerSettingsGrid> | undefined): void {
+    let renderable = this.renderables.get(instanceId);
 
     // Handle deletes
     if (settings == undefined) {
       if (renderable != undefined) {
         renderable.userData.lineList.dispose();
         this.remove(renderable);
-        this.gridsById.delete(id);
+        this.renderables.delete(instanceId);
       }
       return;
     }
 
     if (!renderable) {
-      renderable = new THREE.Object3D() as GridRenderable;
-      renderable.name = `grid:${id}`;
       const marker = createMarker(DEFAULT_SETTINGS);
-      renderable.userData = {
-        path: ["layers", id],
-        settings: { ...DEFAULT_SETTINGS },
+      const lineListId = `${instanceId}:LINE_LIST`;
+      const lineList = new RenderableLineList(lineListId, marker, undefined, this.renderer);
+      renderable = new GridRenderable(instanceId, this.renderer, {
+        receiveTime: 0n,
+        messageTime: 0n,
+        frameId: "", // This will be updated in `startFrame()`
         pose: makePose(),
-        lineList: new RenderableLineList(renderable.name, marker, undefined, this.renderer),
-      };
-      renderable.add(renderable.userData.lineList);
+        settingsPath: ["layers", instanceId],
+        settings: DEFAULT_SETTINGS,
+        lineList,
+      });
+      renderable.add(lineList);
 
       this.add(renderable);
-      this.gridsById.set(id, renderable);
+      this.renderables.set(instanceId, renderable);
     }
 
     const prevSettings = renderable.userData.settings;
@@ -126,48 +252,10 @@ export class Grids extends THREE.Object3D {
 
     // Update the pose if it changed
     if (
-      !isEqual(newSettings.position, prevSettings.position) ||
-      !isEqual(newSettings.rotation, prevSettings.rotation)
+      !vec3TupleApproxEquals(newSettings.position, prevSettings.position) ||
+      !vec3TupleApproxEquals(newSettings.rotation, prevSettings.rotation)
     ) {
       renderable.userData.pose = xyzrpyToPose(newSettings.position, newSettings.rotation);
-    }
-  }
-
-  startFrame(currentTime: bigint): void {
-    const renderFrameId = this.renderer.renderFrameId;
-    const fixedFrameId = this.renderer.fixedFrameId;
-    if (renderFrameId == undefined || fixedFrameId == undefined) {
-      this.visible = false;
-      return;
-    }
-    this.visible = true;
-
-    for (const renderable of this.gridsById.values()) {
-      const path = renderable.userData.path;
-      const frameId = renderable.userData.settings.frameId ?? renderFrameId;
-
-      renderable.visible = renderable.userData.settings.visible;
-      if (!renderable.visible) {
-        this.renderer.layerErrors.clearPath(path);
-        continue;
-      }
-
-      const updated = updatePose(
-        renderable,
-        this.renderer.transformTree,
-        renderFrameId,
-        fixedFrameId,
-        frameId,
-        currentTime,
-        currentTime,
-      );
-      renderable.visible = updated;
-      if (!updated) {
-        const message = missingTransformMessage(renderFrameId, fixedFrameId, frameId);
-        this.renderer.layerErrors.add(path, MISSING_TRANSFORM, message);
-      } else {
-        this.renderer.layerErrors.remove(path, MISSING_TRANSFORM);
-      }
     }
   }
 }

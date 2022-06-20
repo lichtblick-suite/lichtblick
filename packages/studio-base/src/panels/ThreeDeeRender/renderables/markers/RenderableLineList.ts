@@ -53,11 +53,11 @@ export class RenderableLineList extends RenderableMarker {
   }
 
   override dispose(): void {
-    releaseLinePrepassMaterial(this.userData.marker, this._renderer.materialCache);
-    releaseLineMaterial(this.userData.marker, this._renderer.materialCache);
+    releaseLinePrepassMaterial(this.userData.marker, this.renderer.materialCache);
+    releaseLineMaterial(this.userData.marker, this.renderer.materialCache);
 
     const pickingLineWidth = this.userData.marker.scale.x * 1.2;
-    releaseLinePickingMaterial(pickingLineWidth, true, this._renderer.materialCache);
+    releaseLinePickingMaterial(pickingLineWidth, true, this.renderer.materialCache);
     this.line.userData.pickingMaterial = undefined;
 
     this.geometry.dispose();
@@ -77,10 +77,10 @@ export class RenderableLineList extends RenderableMarker {
     const transparent = markerHasTransparency(marker);
 
     if (!approxEquals(prevLineWidth, lineWidth) || prevTransparent !== transparent) {
-      releaseLinePrepassMaterial(prevMarker, this._renderer.materialCache);
-      releaseLineMaterial(prevMarker, this._renderer.materialCache);
-      this.linePrepass.material = linePrepassMaterial(marker, this._renderer.materialCache);
-      this.line.material = lineMaterial(marker, this._renderer.materialCache);
+      releaseLinePrepassMaterial(prevMarker, this.renderer.materialCache);
+      releaseLineMaterial(prevMarker, this.renderer.materialCache);
+      this.linePrepass.material = linePrepassMaterial(marker, this.renderer.materialCache);
+      this.line.material = lineMaterial(marker, this.renderer.materialCache);
     }
 
     this._setPositions(marker);

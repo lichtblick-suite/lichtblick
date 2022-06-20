@@ -5,13 +5,32 @@
 import * as THREE from "three";
 
 import { toNanoSec } from "@foxglove/rostime";
+import {
+  SettingsTreeAction,
+  SettingsTreeFields,
+} from "@foxglove/studio-base/components/SettingsTreeEditor/types";
 
+import { BaseUserData, Renderable } from "../Renderable";
 import { Renderer } from "../Renderer";
+import { PartialMessage, PartialMessageEvent, SceneExtension } from "../SceneExtension";
+import { SettingsTreeEntry } from "../SettingsManager";
 import { rgbaToCssString, SRGBToLinear, stringToRgba } from "../color";
-import { Pose, ColorRGBA, OccupancyGrid } from "../ros";
-import { LayerSettingsOccupancyGrid, LayerType } from "../settings";
-import { updatePose } from "../updatePose";
-import { missingTransformMessage, MISSING_TRANSFORM } from "./transforms";
+import {
+  normalizeHeader,
+  normalizePose,
+  normalizeInt8Array,
+  normalizeTime,
+} from "../normalizeMessages";
+import { ColorRGBA, OccupancyGrid, OCCUPANCY_GRID_DATATYPES } from "../ros";
+import { BaseSettings } from "../settings";
+
+export type LayerSettingsOccupancyGrid = BaseSettings & {
+  frameLocked: boolean;
+  minColor: string;
+  maxColor: string;
+  unknownColor: string;
+  invalidColor: string;
+};
 
 // TODO(jhurliman): Upload the OccupancyGrid data directly as a R8I texture and
 // use a custom ShaderMaterial with an isampler2D uniform to reimplement the
@@ -31,70 +50,102 @@ const DEFAULT_INVALID_COLOR_STR = rgbaToCssString(DEFAULT_INVALID_COLOR);
 
 const DEFAULT_SETTINGS: LayerSettingsOccupancyGrid = {
   visible: true,
+  frameLocked: false,
   minColor: DEFAULT_MIN_COLOR_STR,
   maxColor: DEFAULT_MAX_COLOR_STR,
   unknownColor: DEFAULT_UNKNOWN_COLOR_STR,
   invalidColor: DEFAULT_INVALID_COLOR_STR,
-  frameLocked: true,
 };
 
-type OccupancyGridRenderable = Omit<THREE.Object3D, "userData"> & {
-  userData: {
-    topic: string;
-    settings: LayerSettingsOccupancyGrid;
-    occupancyGrid: OccupancyGrid;
-    pose: Pose;
-    srcTime: bigint;
-    mesh: THREE.Mesh;
-    texture: THREE.DataTexture;
-    material: THREE.MeshStandardMaterial | THREE.MeshBasicMaterial;
-  };
+export type OccupancyGridUserData = BaseUserData & {
+  settings: LayerSettingsOccupancyGrid;
+  topic: string;
+  occupancyGrid: OccupancyGrid;
+  mesh: THREE.Mesh;
+  texture: THREE.DataTexture;
+  material: THREE.MeshStandardMaterial | THREE.MeshBasicMaterial;
+  pickingMaterial: THREE.ShaderMaterial;
 };
 
-export class OccupancyGrids extends THREE.Object3D {
+export class OccupancyGridRenderable extends Renderable<OccupancyGridUserData> {
+  override dispose(): void {
+    this.userData.texture.dispose();
+    this.userData.material.dispose();
+    this.userData.pickingMaterial.dispose();
+  }
+}
+
+export class OccupancyGrids extends SceneExtension<OccupancyGridRenderable> {
   private static geometry: THREE.PlaneGeometry | undefined;
 
-  renderer: Renderer;
-  occupancyGridsByTopic = new Map<string, OccupancyGridRenderable>();
-
   constructor(renderer: Renderer) {
-    super();
-    this.renderer = renderer;
+    super("foxglove.OccupancyGrids", renderer);
 
-    renderer.setSettingsNodeProvider(LayerType.OccupancyGrid, (topicConfig) => {
-      const cur = topicConfig as Partial<LayerSettingsOccupancyGrid>;
-      const minColor = cur.minColor ?? DEFAULT_MIN_COLOR_STR;
-      const maxColor = cur.maxColor ?? DEFAULT_MAX_COLOR_STR;
-      const unknownColor = cur.unknownColor ?? DEFAULT_UNKNOWN_COLOR_STR;
-      const invalidColor = cur.invalidColor ?? DEFAULT_INVALID_COLOR_STR;
-      const frameLocked = cur.frameLocked ?? false;
-      return {
-        icon: "Cells",
-        fields: {
-          minColor: { label: "Min Color", input: "rgba", value: minColor },
-          maxColor: { label: "Max Color", input: "rgba", value: maxColor },
-          unknownColor: { label: "Unknown Color", input: "rgba", value: unknownColor },
-          invalidColor: { label: "Invalid Color", input: "rgba", value: invalidColor },
-          frameLocked: { label: "Frame lock", input: "boolean", value: frameLocked },
-        },
-      };
-    });
+    renderer.addDatatypeSubscriptions(OCCUPANCY_GRID_DATATYPES, this.handleOccupancyGrid);
   }
 
-  dispose(): void {
-    for (const renderable of this.occupancyGridsByTopic.values()) {
-      renderable.userData.texture.dispose();
-      renderable.userData.material.dispose();
-      const pickingMaterial = renderable.userData.mesh.userData
-        .pickingMaterial as THREE.ShaderMaterial;
-      pickingMaterial.dispose();
+  override settingsNodes(): SettingsTreeEntry[] {
+    const configTopics = this.renderer.config.topics;
+    const handler = this.handleSettingsAction;
+    const entries: SettingsTreeEntry[] = [];
+    for (const topic of this.renderer.topics ?? []) {
+      if (OCCUPANCY_GRID_DATATYPES.has(topic.datatype)) {
+        const config = (configTopics[topic.name] ?? {}) as Partial<LayerSettingsOccupancyGrid>;
+
+        // prettier-ignore
+        const fields: SettingsTreeFields = {
+          minColor: { label: "Min Color", input: "rgba", value: config.minColor ?? DEFAULT_MIN_COLOR_STR },
+          maxColor: { label: "Max Color", input: "rgba", value: config.maxColor ?? DEFAULT_MAX_COLOR_STR },
+          unknownColor: { label: "Unknown Color", input: "rgba", value: config.unknownColor ?? DEFAULT_UNKNOWN_COLOR_STR },
+          invalidColor: { label: "Invalid Color", input: "rgba", value: config.invalidColor ?? DEFAULT_INVALID_COLOR_STR },
+          frameLocked: { label: "Frame lock", input: "boolean", value: config.frameLocked ?? false },
+        };
+
+        entries.push({
+          path: ["topics", topic.name],
+          node: {
+            label: topic.name,
+            icon: "Cells",
+            fields,
+            visible: config.visible ?? true,
+            handler,
+          },
+        });
+      }
     }
-    this.children.length = 0;
-    this.occupancyGridsByTopic.clear();
+    return entries;
   }
 
-  addOccupancyGridMessage(topic: string, occupancyGrid: OccupancyGrid): void {
-    let renderable = this.occupancyGridsByTopic.get(topic);
+  handleSettingsAction = (action: SettingsTreeAction): void => {
+    const path = action.payload.path;
+    if (action.action !== "update" || path.length !== 3) {
+      return;
+    }
+
+    this.saveSetting(path, action.payload.value);
+
+    // Update the renderable
+    const topicName = path[1]!;
+    const renderable = this.renderables.get(topicName);
+    if (renderable) {
+      const settings = this.renderer.config.topics[topicName] as
+        | Partial<LayerSettingsOccupancyGrid>
+        | undefined;
+      renderable.userData.settings = { ...renderable.userData.settings, ...settings };
+      this._updateOccupancyGridRenderable(
+        renderable,
+        renderable.userData.occupancyGrid,
+        renderable.userData.receiveTime,
+      );
+    }
+  };
+
+  handleOccupancyGrid = (messageEvent: PartialMessageEvent<OccupancyGrid>): void => {
+    const topic = messageEvent.topic;
+    const occupancyGrid = normalizeOccupancyGrid(messageEvent.message);
+    const receiveTime = toNanoSec(messageEvent.receiveTime);
+
+    let renderable = this.renderables.get(topic);
     if (!renderable) {
       // Set the initial settings from default values merged with any user settings
       const userSettings = this.renderer.config.topics[topic] as
@@ -104,86 +155,48 @@ export class OccupancyGrids extends THREE.Object3D {
 
       // Create the texture, material, and mesh
       const texture = createTexture(occupancyGrid);
+      const pickingMaterial = createPickingMaterial(texture);
       const material = createMaterial(texture, topic, settings);
       const mesh = new THREE.Mesh(OccupancyGrids.Geometry(), material);
-      mesh.userData.pickingMaterial = createPickingMaterial(texture);
       mesh.castShadow = true;
       mesh.receiveShadow = true;
+      // This overrides the picking material used for `mesh`. See Picker.ts
+      mesh.userData.pickingMaterial = pickingMaterial;
 
       // Create the renderable
-      renderable = new THREE.Object3D() as OccupancyGridRenderable;
-      renderable.name = topic;
-      renderable.userData = {
-        topic,
-        settings,
-        occupancyGrid,
+      renderable = new OccupancyGridRenderable(topic, this.renderer, {
+        receiveTime,
+        messageTime: toNanoSec(occupancyGrid.header.stamp),
+        frameId: occupancyGrid.header.frame_id,
         pose: occupancyGrid.info.origin,
-        srcTime: toNanoSec(occupancyGrid.header.stamp),
+        settingsPath: ["topics", topic],
+        settings,
+        topic,
+        occupancyGrid,
         mesh,
         texture,
         material,
-      };
+        pickingMaterial,
+      });
       renderable.add(mesh);
 
       this.add(renderable);
-      this.occupancyGridsByTopic.set(topic, renderable);
+      this.renderables.set(topic, renderable);
     }
 
-    this._updateOccupancyGridRenderable(renderable, occupancyGrid);
-  }
-
-  setTopicSettings(topic: string, settings: Partial<LayerSettingsOccupancyGrid>): void {
-    const renderable = this.occupancyGridsByTopic.get(topic);
-    if (renderable) {
-      renderable.userData.settings = { ...renderable.userData.settings, ...settings };
-      this._updateOccupancyGridRenderable(renderable, renderable.userData.occupancyGrid);
-    }
-  }
-
-  startFrame(currentTime: bigint): void {
-    const renderFrameId = this.renderer.renderFrameId;
-    const fixedFrameId = this.renderer.fixedFrameId;
-    if (renderFrameId == undefined || fixedFrameId == undefined) {
-      this.visible = false;
-      return;
-    }
-    this.visible = true;
-
-    for (const renderable of this.occupancyGridsByTopic.values()) {
-      renderable.visible = renderable.userData.settings.visible;
-      if (!renderable.visible) {
-        this.renderer.layerErrors.clearTopic(renderable.userData.topic);
-        continue;
-      }
-
-      const frameLocked = renderable.userData.settings.frameLocked;
-      const srcTime = frameLocked ? currentTime : renderable.userData.srcTime;
-      const frameId = renderable.userData.occupancyGrid.header.frame_id;
-      const updated = updatePose(
-        renderable,
-        this.renderer.transformTree,
-        renderFrameId,
-        fixedFrameId,
-        frameId,
-        currentTime,
-        srcTime,
-      );
-      if (!updated) {
-        const message = missingTransformMessage(renderFrameId, fixedFrameId, frameId);
-        this.renderer.layerErrors.addToTopic(renderable.userData.topic, MISSING_TRANSFORM, message);
-      } else {
-        this.renderer.layerErrors.removeFromTopic(renderable.userData.topic, MISSING_TRANSFORM);
-      }
-    }
-  }
+    this._updateOccupancyGridRenderable(renderable, occupancyGrid, receiveTime);
+  };
 
   _updateOccupancyGridRenderable(
     renderable: OccupancyGridRenderable,
     occupancyGrid: OccupancyGrid,
+    receiveTime: bigint,
   ): void {
     renderable.userData.occupancyGrid = occupancyGrid;
     renderable.userData.pose = occupancyGrid.info.origin;
-    renderable.userData.srcTime = toNanoSec(occupancyGrid.header.stamp);
+    renderable.userData.receiveTime = receiveTime;
+    renderable.userData.messageTime = toNanoSec(occupancyGrid.header.stamp);
+    renderable.userData.frameId = occupancyGrid.header.frame_id;
 
     const size = occupancyGrid.info.width * occupancyGrid.info.height;
     if (occupancyGrid.data.length !== size) {
@@ -226,7 +239,7 @@ function invalidOccupancyGridError(
   renderable: OccupancyGridRenderable,
   message: string,
 ): void {
-  renderer.layerErrors.addToTopic(renderable.userData.topic, INVALID_OCCUPANCY_GRID, message);
+  renderer.settings.errors.addToTopic(renderable.userData.topic, INVALID_OCCUPANCY_GRID, message);
 }
 
 function createTexture(occupancyGrid: OccupancyGrid): THREE.DataTexture {
@@ -367,4 +380,20 @@ function srgbToLinearUint8(color: ColorRGBA): void {
   color.g = Math.trunc(SRGBToLinear(color.g) * 255);
   color.b = Math.trunc(SRGBToLinear(color.b) * 255);
   color.a = Math.trunc(color.a * 255);
+}
+
+function normalizeOccupancyGrid(message: PartialMessage<OccupancyGrid>): OccupancyGrid {
+  const info = message.info ?? {};
+
+  return {
+    header: normalizeHeader(message.header),
+    info: {
+      map_load_time: normalizeTime(info.map_load_time),
+      resolution: info.resolution ?? 0,
+      width: info.width ?? 0,
+      height: info.height ?? 0,
+      origin: normalizePose(info.origin),
+    },
+    data: normalizeInt8Array(message.data),
+  };
 }

@@ -6,7 +6,7 @@ import EventEmitter from "eventemitter3";
 
 import Logger from "@foxglove/log";
 
-type Path = ReadonlyArray<string>;
+export type Path = ReadonlyArray<string>;
 
 const TOPIC_PATH: [string, string] = ["topics", ""];
 

@@ -7,7 +7,7 @@ import useDelayedFixture from "@foxglove/studio-base/panels/ThreeDimensionalViz/
 import PanelSetup from "@foxglove/studio-base/stories/PanelSetup";
 
 import ThreeDeeRender from "../index";
-import { ColorRGBA, Marker, TF } from "../ros";
+import { ColorRGBA, Marker, TransformStamped } from "../ros";
 import { makeColor, QUAT_IDENTITY, SENSOR_FRAME_ID } from "./common";
 
 export default {
@@ -22,7 +22,7 @@ export function Markers(): JSX.Element {
     { name: "/markers", datatype: "visualization_msgs/Marker" },
   ];
 
-  const tf1: MessageEvent<TF> = {
+  const tf1: MessageEvent<TransformStamped> = {
     topic: "/tf",
     receiveTime: { sec: 10, nsec: 0 },
     message: {
@@ -35,7 +35,7 @@ export function Markers(): JSX.Element {
     },
     sizeInBytes: 0,
   };
-  const tf2: MessageEvent<TF> = {
+  const tf2: MessageEvent<TransformStamped> = {
     topic: "/tf",
     receiveTime: { sec: 10, nsec: 0 },
     message: {

@@ -81,7 +81,7 @@ export class RenderableArrow extends RenderableMarker {
   }
 
   override dispose(): void {
-    releaseStandardMaterial(this.userData.marker.color, this._renderer.materialCache);
+    releaseStandardMaterial(this.userData.marker.color, this.renderer.materialCache);
   }
 
   override update(marker: Marker, receiveTime: bigint | undefined): void {
@@ -89,8 +89,8 @@ export class RenderableArrow extends RenderableMarker {
     super.update(marker, receiveTime);
 
     if (!rgbaEqual(marker.color, prevMarker.color)) {
-      releaseStandardMaterial(prevMarker.color, this._renderer.materialCache);
-      this.shaftMesh.material = standardMaterial(marker.color, this._renderer.materialCache);
+      releaseStandardMaterial(prevMarker.color, this.renderer.materialCache);
+      this.shaftMesh.material = standardMaterial(marker.color, this.renderer.materialCache);
       this.headMesh.material = this.shaftMesh.material;
     }
 

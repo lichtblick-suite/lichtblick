@@ -35,7 +35,7 @@ export class RenderableMeshResource extends RenderableMarker {
   }
 
   override dispose(): void {
-    releaseStandardMaterial(this.userData.marker.color, this._renderer.materialCache);
+    releaseStandardMaterial(this.userData.marker.color, this.renderer.materialCache);
   }
 
   override update(marker: Marker, receiveTime: bigint | undefined): void {
@@ -43,8 +43,8 @@ export class RenderableMeshResource extends RenderableMarker {
     super.update(marker, receiveTime);
 
     if (!rgbaEqual(marker.color, prevMarker.color)) {
-      releaseStandardMaterial(prevMarker.color, this._renderer.materialCache);
-      this.material = standardMaterial(marker.color, this._renderer.materialCache);
+      releaseStandardMaterial(prevMarker.color, this.renderer.materialCache);
+      this.material = standardMaterial(marker.color, this.renderer.materialCache);
     }
 
     if (marker.mesh_resource !== prevMarker.mesh_resource) {
@@ -62,8 +62,8 @@ export class RenderableMeshResource extends RenderableMarker {
       this.mesh = undefined;
     }
 
-    const cachedModel = await this._renderer.modelCache.load(url, (err) => {
-      this._renderer.layerErrors.addToTopic(
+    const cachedModel = await this.renderer.modelCache.load(url, (err) => {
+      this.renderer.settings.errors.addToTopic(
         this.userData.topic,
         MESH_FETCH_FAILED,
         `Failed to load mesh resource from "${url}": ${err.message}`,
@@ -90,7 +90,7 @@ export class RenderableMeshResource extends RenderableMarker {
       const edgesGeometry = new THREE.EdgesGeometry(child.geometry, 40);
       const line = new THREE.LineSegments(
         edgesGeometry,
-        this._renderer.materialCache.outlineMaterial,
+        this.renderer.materialCache.outlineMaterial,
       );
       edgesToAdd.push([line, child]);
 

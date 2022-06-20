@@ -85,30 +85,32 @@ export type SettingsTreeFields = Record<string, undefined | SettingsTreeField>;
 
 export type SettingsTreeChildren = Record<string, undefined | SettingsTreeNode>;
 
+export type SettingsTreeNodeActionItem = {
+  type: "action";
+
+  /**
+   * A unique idenfier for the action.
+   */
+  id: string;
+
+  /**
+   * A descriptive label for the action.
+   */
+  label: string;
+
+  /**
+   * Optional icon to display with the action.
+   */
+  icon?: keyof typeof CommonIcons;
+};
+
+export type SettingsTreeNodeActionDivider = { type: "divider" };
+
 /**
  * An action that can be offered to the user to perform at the
  * level of a settings node.
  */
-export type SettingsTreeNodeAction =
-  | {
-      type: "action";
-
-      /**
-       * A unique idenfier for the action.
-       */
-      id: string;
-
-      /**
-       * A descriptive label for the action.
-       */
-      label: string;
-
-      /**
-       * Optional icon to display with the action.
-       */
-      icon?: keyof typeof CommonIcons;
-    }
-  | { type: "divider" };
+export type SettingsTreeNodeAction = SettingsTreeNodeActionItem | SettingsTreeNodeActionDivider;
 
 export type SettingsTreeNode = {
   /**

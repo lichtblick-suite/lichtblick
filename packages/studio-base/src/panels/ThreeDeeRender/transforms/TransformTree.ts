@@ -77,6 +77,56 @@ export class TransformTree {
     return frame.apply(output, input, rootFrame, srcFrame, dstTime, srcTime, maxDelta);
   }
 
+  frameList(): { label: string; value: string }[] {
+    type FrameEntry = { id: string; children: FrameEntry[] };
+
+    const frames = Array.from(this._frames.values());
+    const frameMap = new Map<string, FrameEntry>(
+      frames.map((frame) => [frame.id, { id: frame.id, children: [] }]),
+    );
+
+    // Create a hierarchy of coordinate frames
+    const rootFrames: FrameEntry[] = [];
+    for (const frame of frames) {
+      const frameEntry = frameMap.get(frame.id)!;
+      const parentId = frame.parent()?.id;
+      if (parentId == undefined) {
+        rootFrames.push(frameEntry);
+      } else {
+        const parent = frameMap.get(parentId);
+        if (parent == undefined) {
+          continue;
+        }
+        parent.children.push(frameEntry);
+      }
+    }
+
+    // Convert the `rootFrames` hierarchy into a flat list of coordinate frames with depth
+    const output: { label: string; value: string }[] = [];
+
+    function addFrame(frame: FrameEntry, depth: number) {
+      const frameName =
+        frame.id === "" || frame.id.startsWith(" ") || frame.id.endsWith(" ")
+          ? `"${frame.id}"`
+          : frame.id;
+      output.push({
+        value: frame.id,
+        label: `${"\u00A0\u00A0".repeat(depth)}${frameName}`,
+      });
+      frame.children.sort((a, b) => a.id.localeCompare(b.id));
+      for (const child of frame.children) {
+        addFrame(child, depth + 1);
+      }
+    }
+
+    rootFrames.sort((a, b) => a.id.localeCompare(b.id));
+    for (const entry of rootFrames) {
+      addFrame(entry, 0);
+    }
+
+    return output;
+  }
+
   static Clone(tree: TransformTree): TransformTree {
     // eslint-disable-next-line no-underscore-dangle
     const newTree = new TransformTree(tree._maxStorageTime);

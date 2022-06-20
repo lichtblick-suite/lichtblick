@@ -2,27 +2,28 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import * as THREE from "three";
-
+import { BaseUserData, Renderable } from "../Renderable";
 import { Renderer } from "../Renderer";
 import { Marker, MarkerAction, MarkerType } from "../ros";
-import { LayerSettingsMarker, LayerSettingsMarkerNamespace } from "../settings";
+import { BaseSettings } from "../settings";
 import { updatePose } from "../updatePose";
+import type { LayerSettingsMarker } from "./Markers";
 import { RenderableArrow } from "./markers/RenderableArrow";
 import { RenderableCube } from "./markers/RenderableCube";
 import { RenderableCubeList } from "./markers/RenderableCubeList";
 import { RenderableCylinder } from "./markers/RenderableCylinder";
 import { RenderableLineList } from "./markers/RenderableLineList";
 import { RenderableLineStrip } from "./markers/RenderableLineStrip";
-import { RenderableMarker } from "./markers/RenderableMarker";
+import { RenderableMarker, getMarkerId } from "./markers/RenderableMarker";
 import { RenderableMeshResource } from "./markers/RenderableMeshResource";
 import { RenderablePoints } from "./markers/RenderablePoints";
 import { RenderableSphere } from "./markers/RenderableSphere";
 import { RenderableSphereList } from "./markers/RenderableSphereList";
 import { RenderableTextViewFacing } from "./markers/RenderableTextViewFacing";
 import { RenderableTriangleList } from "./markers/RenderableTriangleList";
-import { getMarkerId } from "./markers/markerId";
 import { missingTransformMessage, MISSING_TRANSFORM } from "./transforms";
+
+export type LayerSettingsMarkerNamespace = BaseSettings;
 
 const INVALID_CUBE_LIST = "INVALID_CUBE_LIST";
 const INVALID_LINE_LIST = "INVALID_LINE_LIST";
@@ -32,13 +33,13 @@ const INVALID_MARKER_TYPE = "INVALID_MARKER_TYPE";
 const INVALID_POINTS_LIST = "INVALID_POINTS_LIST";
 const INVALID_SPHERE_LIST = "INVALID_SPHERE_LIST";
 
-const DEFAULT_TOPIC_SETTINGS: LayerSettingsMarker = {
-  visible: true,
-  namespaces: {},
-};
-
 const DEFAULT_NAMESPACE_SETTINGS: LayerSettingsMarkerNamespace = {
   visible: true,
+};
+
+export type MarkerUserData = BaseUserData & {
+  topic: string;
+  settings: LayerSettingsMarker;
 };
 
 type PartialMarkerSettings = Partial<LayerSettingsMarker> | undefined;
@@ -58,29 +59,21 @@ export class MarkersNamespace {
   }
 }
 
-export class TopicMarkers extends THREE.Object3D {
-  readonly topic: string;
-  readonly renderer: Renderer;
-  override userData: { settings: LayerSettingsMarker };
+export class TopicMarkers extends Renderable<MarkerUserData> {
   namespaces = new Map<string, MarkersNamespace>();
 
-  constructor(topic: string, renderer: Renderer) {
-    super();
-    this.topic = topic;
-    this.renderer = renderer;
-
-    // Set the initial settings from default values merged with any user settings
-    const userSettings = renderer.config.topics[topic] as PartialMarkerSettings;
-    this.userData = { settings: { ...DEFAULT_TOPIC_SETTINGS, ...userSettings } };
+  // eslint-disable-next-line no-restricted-syntax
+  get topic(): string {
+    return this.userData.topic;
   }
 
-  dispose(): void {
+  override dispose(): void {
     for (const ns of this.namespaces.values()) {
       for (const marker of ns.markersById.values()) {
-        this.remove(marker);
         marker.dispose();
       }
     }
+    this.children.length = 0;
     this.namespaces.clear();
   }
 
@@ -106,7 +99,7 @@ export class TopicMarkers extends THREE.Object3D {
       }
       default:
         // Unknown action
-        this.renderer.layerErrors.addToTopic(
+        this.renderer.settings.errors.addToTopic(
           this.topic,
           INVALID_MARKER_ACTION,
           `Invalid marker action ${marker.action}`,
@@ -117,7 +110,7 @@ export class TopicMarkers extends THREE.Object3D {
   startFrame(currentTime: bigint, renderFrameId: string, fixedFrameId: string): void {
     this.visible = this.userData.settings.visible;
     if (!this.visible) {
-      this.renderer.layerErrors.clearTopic(this.topic);
+      this.renderer.settings.errors.clearTopic(this.topic);
       return;
     }
 
@@ -133,7 +126,7 @@ export class TopicMarkers extends THREE.Object3D {
         const expiresIn = renderable.userData.expiresIn;
 
         // Check if this marker has expired
-        if (receiveTime != undefined && expiresIn != undefined) {
+        if (expiresIn != undefined) {
           if (currentTime > receiveTime + expiresIn) {
             this._deleteMarker(ns.namespace, marker.id);
             continue;
@@ -141,7 +134,7 @@ export class TopicMarkers extends THREE.Object3D {
         }
 
         const frameId = marker.header.frame_id;
-        const srcTime = marker.frame_locked ? currentTime : renderable.userData.srcTime;
+        const srcTime = marker.frame_locked ? currentTime : renderable.userData.messageTime;
         const updated = updatePose(
           renderable,
           this.renderer.transformTree,
@@ -155,9 +148,9 @@ export class TopicMarkers extends THREE.Object3D {
         const topic = renderable.userData.topic;
         if (!updated) {
           const message = missingTransformMessage(renderFrameId, fixedFrameId, frameId);
-          this.renderer.layerErrors.addToTopic(topic, MISSING_TRANSFORM, message);
+          this.renderer.settings.errors.addToTopic(topic, MISSING_TRANSFORM, message);
         } else {
-          this.renderer.layerErrors.removeFromTopic(topic, MISSING_TRANSFORM);
+          this.renderer.settings.errors.removeFromTopic(topic, MISSING_TRANSFORM);
         }
       }
     }
@@ -213,7 +206,7 @@ export class TopicMarkers extends THREE.Object3D {
       case MarkerType.LINE_STRIP:
         if (marker.points.length === 0) {
           const markerId = getMarkerId(this.topic, marker.ns, marker.id);
-          this.renderer.layerErrors.addToTopic(
+          this.renderer.settings.errors.addToTopic(
             this.topic,
             INVALID_LINE_STRIP,
             `LINE_STRIP marker ${markerId} has no points`,
@@ -221,7 +214,7 @@ export class TopicMarkers extends THREE.Object3D {
           return;
         } else if (marker.points.length === 1) {
           const markerId = getMarkerId(this.topic, marker.ns, marker.id);
-          this.renderer.layerErrors.addToTopic(
+          this.renderer.settings.errors.addToTopic(
             this.topic,
             INVALID_LINE_STRIP,
             `LINE_STRIP marker ${markerId} only has one point`,
@@ -232,14 +225,14 @@ export class TopicMarkers extends THREE.Object3D {
       case MarkerType.LINE_LIST:
         if (marker.points.length === 0) {
           const markerId = getMarkerId(this.topic, marker.ns, marker.id);
-          this.renderer.layerErrors.addToTopic(
+          this.renderer.settings.errors.addToTopic(
             this.topic,
             INVALID_LINE_LIST,
             `LINE_LIST marker ${markerId} has no points`,
           );
         } else if (marker.points.length === 1) {
           const markerId = getMarkerId(this.topic, marker.ns, marker.id);
-          this.renderer.layerErrors.addToTopic(
+          this.renderer.settings.errors.addToTopic(
             this.topic,
             INVALID_LINE_LIST,
             `LINE_LIST marker ${markerId} only has one point`,
@@ -247,7 +240,7 @@ export class TopicMarkers extends THREE.Object3D {
           return;
         } else if (marker.points.length % 2 !== 0) {
           const markerId = getMarkerId(this.topic, marker.ns, marker.id);
-          this.renderer.layerErrors.addToTopic(
+          this.renderer.settings.errors.addToTopic(
             this.topic,
             INVALID_LINE_LIST,
             `LINE_LIST marker ${markerId} has an odd number of points (${marker.points.length})`,
@@ -258,7 +251,7 @@ export class TopicMarkers extends THREE.Object3D {
       case MarkerType.CUBE_LIST:
         if (marker.points.length === 0) {
           const markerId = getMarkerId(this.topic, marker.ns, marker.id);
-          this.renderer.layerErrors.addToTopic(
+          this.renderer.settings.errors.addToTopic(
             this.topic,
             INVALID_CUBE_LIST,
             `CUBE_LIST marker ${markerId} has no points`,
@@ -269,7 +262,7 @@ export class TopicMarkers extends THREE.Object3D {
       case MarkerType.SPHERE_LIST:
         if (marker.points.length === 0) {
           const markerId = getMarkerId(this.topic, marker.ns, marker.id);
-          this.renderer.layerErrors.addToTopic(
+          this.renderer.settings.errors.addToTopic(
             this.topic,
             INVALID_SPHERE_LIST,
             `SPHERE_LIST marker ${markerId} has no points`,
@@ -280,7 +273,7 @@ export class TopicMarkers extends THREE.Object3D {
       case MarkerType.POINTS:
         if (marker.points.length === 0) {
           const markerId = getMarkerId(this.topic, marker.ns, marker.id);
-          this.renderer.layerErrors.addToTopic(
+          this.renderer.settings.errors.addToTopic(
             this.topic,
             INVALID_POINTS_LIST,
             `POINTS marker ${markerId} has no points`,
@@ -296,7 +289,7 @@ export class TopicMarkers extends THREE.Object3D {
         return new RenderableTriangleList(this.topic, marker, receiveTime, this.renderer);
       default: {
         const markerId = getMarkerId(this.topic, marker.ns, marker.id);
-        this.renderer.layerErrors.addToTopic(
+        this.renderer.settings.errors.addToTopic(
           this.topic,
           INVALID_MARKER_TYPE,
           `Marker ${markerId} has invalid type ${marker.type}`,

@@ -7,7 +7,7 @@ import useDelayedFixture from "@foxglove/studio-base/panels/ThreeDimensionalViz/
 import PanelSetup from "@foxglove/studio-base/stories/PanelSetup";
 
 import ThreeDeeRender from "../index";
-import { PolygonStamped, TF } from "../ros";
+import { PolygonStamped, TransformStamped } from "../ros";
 import { QUAT_IDENTITY } from "./common";
 
 export default {
@@ -21,7 +21,7 @@ export function GeometryMsgs_Polygon(): JSX.Element {
     { name: "/polygon", datatype: "geometry_msgs/PolygonStamped" },
     { name: "/tf", datatype: "geometry_msgs/TransformStamped" },
   ];
-  const tf1: MessageEvent<TF> = {
+  const tf1: MessageEvent<TransformStamped> = {
     topic: "/tf",
     receiveTime: { sec: 10, nsec: 0 },
     message: {
@@ -34,7 +34,7 @@ export function GeometryMsgs_Polygon(): JSX.Element {
     },
     sizeInBytes: 0,
   };
-  const tf2: MessageEvent<TF> = {
+  const tf2: MessageEvent<TransformStamped> = {
     topic: "/tf",
     receiveTime: { sec: 10, nsec: 0 },
     message: {
