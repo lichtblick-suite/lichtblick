@@ -1,7 +1,7 @@
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
-import { isEqual } from "lodash";
+import { difference, isEqual } from "lodash";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { getNodeAtPath } from "react-mosaic-component";
 import { useToasts } from "react-toast-notifications";
@@ -308,7 +308,16 @@ export default function CurrentLayoutProvider({
       },
       splitPanel: (payload: SplitPanelPayload) => performAction({ type: "SPLIT_PANEL", payload }),
       swapPanel: (payload: SwapPanelPayload) => {
+        // Select the new panel. We don't know what the new panel id will be so we diff
+        // the panelIds of the old and new layout so we can select the new panel.
+        const beforePanelIds = Object.keys(
+          layoutStateRef.current.selectedLayout?.data?.configById ?? {},
+        );
         performAction({ type: "SWAP_PANEL", payload });
+        const afterPanelIds = Object.keys(
+          layoutStateRef.current.selectedLayout?.data?.configById ?? {},
+        );
+        setSelectedPanelIds(difference(afterPanelIds, beforePanelIds));
         void analytics.logEvent(AppEvent.PANEL_ADD, { type: payload.type, action: "swap" });
         void analytics.logEvent(AppEvent.PANEL_DELETE, {
           type: getPanelTypeFromId(payload.originalId),
