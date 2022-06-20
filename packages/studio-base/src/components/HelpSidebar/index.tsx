@@ -164,6 +164,7 @@ export default function HelpSidebar({
                         key={title}
                         data-test={title}
                         href={url}
+                        target="_blank"
                         onClick={() => (url ? undefined : setHelpInfo({ title, content }))}
                       >
                         {title}
