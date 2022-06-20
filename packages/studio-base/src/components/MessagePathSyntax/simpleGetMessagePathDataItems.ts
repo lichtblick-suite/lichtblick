@@ -10,7 +10,6 @@ import { filterMatches } from "./filterMatches";
 /**
  * Execute the given message path to extract item(s) from the message.
  */
-// ts-prune-ignore-next
 export function simpleGetMessagePathDataItems(
   message: MessageEvent<unknown>,
   filledInPath: RosPath,

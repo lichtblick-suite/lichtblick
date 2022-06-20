@@ -23,7 +23,7 @@ import { DeepReadonly } from "ts-essentials";
 import { useImmer } from "use-immer";
 
 import { filterMap } from "@foxglove/den/collection";
-import CommonIcons from "@foxglove/studio-base/components/CommonIcons";
+import * as CommonIcons from "@foxglove/studio-base/components/CommonIcons";
 import { prepareSettingsRoots } from "@foxglove/studio-base/components/SettingsTreeEditor/utils";
 import Stack from "@foxglove/studio-base/components/Stack";
 

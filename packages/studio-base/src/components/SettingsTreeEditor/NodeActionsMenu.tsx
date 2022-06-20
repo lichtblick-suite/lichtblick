@@ -6,7 +6,7 @@ import MoreVertIcon from "@mui/icons-material/MoreVert";
 import { Menu, MenuItem, IconButton, ListItemIcon, ListItemText, Divider } from "@mui/material";
 import { useState } from "react";
 
-import CommonIcons from "@foxglove/studio-base/components/CommonIcons";
+import * as CommonIcons from "@foxglove/studio-base/components/CommonIcons";
 
 import { SettingsTreeNodeAction } from "./types";
 

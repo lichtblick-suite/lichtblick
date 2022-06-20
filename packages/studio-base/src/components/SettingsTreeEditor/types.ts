@@ -4,7 +4,7 @@
 
 import { DeepReadonly } from "ts-essentials";
 
-import CommonIcons from "@foxglove/studio-base/components/CommonIcons";
+import * as CommonIcons from "@foxglove/studio-base/components/CommonIcons";
 
 export type SettingsTreeFieldValue =
   | { input: "autocomplete"; value?: string; items: string[] }
@@ -112,7 +112,7 @@ export type SettingsTreeNodeAction =
 
 export type SettingsTreeNode = {
   /**
-   * An array of actions that can be performeed on this node.
+   * An array of actions that can be performed on this node.
    */
   actions?: SettingsTreeNodeAction[];
 

@@ -8,6 +8,8 @@ import DataSourceInfoHelp from "./DataSourceInfo/index.help.md";
 import dataSourceInfoThumbnail from "./DataSourceInfo/thumbnail.png";
 import ImageViewHelp from "./Image/index.help.md";
 import imageViewThumbnail from "./Image/thumbnail.png";
+import IndicatorHelp from "./Indicator/index.help.md";
+import indicatorThumbnail from "./Indicator/thumbnail.png";
 import InternalLogsHelp from "./InternalLogs/index.help.md";
 import LogHelp from "./Log/index.help.md";
 import logThumbnail from "./Log/thumbnail.png";
@@ -77,6 +79,14 @@ const builtin: PanelInfo[] = [
     help: ImageViewHelp,
     thumbnail: imageViewThumbnail,
     module: async () => await import("./Image"),
+  },
+  {
+    title: "Indicator",
+    type: "Indicator",
+    description: "Display a colored and/or textual indicator based on a threshold value.",
+    help: IndicatorHelp,
+    thumbnail: indicatorThumbnail,
+    module: async () => await import("./Indicator"),
   },
   {
     title: "Teleop",
