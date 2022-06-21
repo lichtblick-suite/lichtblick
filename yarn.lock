@@ -11173,16 +11173,16 @@ __metadata:
   languageName: node
   linkType: hard
 
-"electron@npm:19.0.3":
-  version: 19.0.3
-  resolution: "electron@npm:19.0.3"
+"electron@npm:19.0.5":
+  version: 19.0.5
+  resolution: "electron@npm:19.0.5"
   dependencies:
     "@electron/get": ^1.14.1
     "@types/node": ^16.11.26
     extract-zip: ^1.0.3
   bin:
     electron: cli.js
-  checksum: 9f1a310a9e18b228f6702871b18ebb12ea1b87250833dfb17ddc3ce23120e73763a23c46b9a84e39c63666bea52323fb08a7e2faebd142fb9aa519eccf125e90
+  checksum: d5097c52f75c56fb44bb9317f28339a9cce4a07b29b0ed54f351a35b737ecacc20f6a8a58c5bcbbf518c324b2b8e616e1c6a51ed34d66d29447ba5aab6aa8088
   languageName: node
   linkType: hard
 
@@ -12947,7 +12947,7 @@ __metadata:
     clean-webpack-plugin: 4.0.0
     colors: 1.4.0
     cross-env: 7.0.3
-    electron: 19.0.3
+    electron: 19.0.5
     electron-builder: 23.1.0
     electron-devtools-installer: 3.2.0
     electron-notarize: 1.2.1
