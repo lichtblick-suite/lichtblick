@@ -138,6 +138,25 @@ export default function muiComponents(theme: Theme): ThemeOptions["components"] 
         disableRipple: true,
       },
     },
+    MuiFormLabel: {
+      styleOverrides: {
+        root: {
+          marginBottom: theme.spacing(0.5),
+        },
+      },
+    },
+    MuiTextField: {
+      defaultProps: {
+        InputLabelProps: {
+          shrink: false,
+          sx: {
+            position: "relative",
+            transform: "none",
+            marginBottom: 0.5,
+          },
+        },
+      },
+    },
     MuiFilledInput: {
       defaultProps: {
         disableUnderline: true,

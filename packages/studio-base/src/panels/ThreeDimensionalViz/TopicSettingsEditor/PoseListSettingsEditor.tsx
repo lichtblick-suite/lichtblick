@@ -11,11 +11,18 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { Stack, Radio, FormControlLabel, RadioGroup, FormLabel, FormControl } from "@mui/material";
+import {
+  Stack,
+  Radio,
+  FormControlLabel,
+  RadioGroup,
+  FormLabel,
+  FormControl,
+  TextField,
+} from "@mui/material";
 
 import { TopicSettingsEditorProps } from ".";
 import PoseSettingsEditor, { PoseSettings } from "./PoseSettingsEditor";
-import { SInput, SLabel } from "./common";
 
 export type PoseListSettings = PoseSettings & {
   displayType?: "arrows" | "line";
@@ -30,7 +37,7 @@ export default function PoseListSettingsEditor(
   const { displayType = "arrows", lineThickness = 0.2 } = settings;
 
   return (
-    <Stack flex="auto">
+    <Stack flex="auto" gap={1}>
       <FormControl>
         <FormLabel id="pose-display-radio-buttons-group">Display poses as</FormLabel>
         <RadioGroup
@@ -39,19 +46,18 @@ export default function PoseListSettingsEditor(
           onChange={(_event, value) => onFieldChange("displayType", value)}
         >
           <FormControlLabel value="arrows" label="Arrows" control={<Radio />} />
-          <FormControlLabel value="line" label="Lise" control={<Radio />} />
+          <FormControlLabel value="line" label="Line" control={<Radio />} />
         </RadioGroup>
       </FormControl>
       {displayType === "line" && (
-        <>
-          <SLabel>Line thickness</SLabel>
-          <SInput
-            type="number"
-            value={lineThickness}
-            placeholder="2"
-            onChange={(e) => onFieldChange("lineThickness", parseFloat(e.target.value))}
-          />
-        </>
+        <TextField
+          label="Line thickness"
+          variant="filled"
+          type="number"
+          value={lineThickness}
+          placeholder="2"
+          onChange={(e) => onFieldChange("lineThickness", parseFloat(e.target.value))}
+        />
       )}
       {displayType === "arrows" && <PoseSettingsEditor {...props} />}
     </Stack>

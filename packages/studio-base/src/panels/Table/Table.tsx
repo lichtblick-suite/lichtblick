@@ -13,9 +13,20 @@
 
 /// <reference types="./react-table-config" />
 
-import MinusIcon from "@mdi/svg/svg/minus-box-outline.svg";
-import PlusIcon from "@mdi/svg/svg/plus-box-outline.svg";
-import { styled as muiStyled } from "@mui/material";
+import PlusIcon from "@mui/icons-material/AddBoxOutlined";
+import MinusIcon from "@mui/icons-material/IndeterminateCheckBoxOutlined";
+import KeyboardArrowLeftIcon from "@mui/icons-material/KeyboardArrowLeft";
+import KeyboardArrowRightIcon from "@mui/icons-material/KeyboardArrowRight";
+import KeyboardDoubleArrowLeftIcon from "@mui/icons-material/KeyboardDoubleArrowLeft";
+import KeyboardDoubleArrowRightIcon from "@mui/icons-material/KeyboardDoubleArrowRight";
+import {
+  Container,
+  IconButton,
+  MenuItem,
+  Select,
+  styled as muiStyled,
+  Typography,
+} from "@mui/material";
 import { noop } from "lodash";
 import {
   useTable,
@@ -27,64 +38,17 @@ import {
 } from "react-table";
 
 import EmptyState from "@foxglove/studio-base/components/EmptyState";
-import Icon from "@foxglove/studio-base/components/Icon";
-import {
-  LegacyButton,
-  LegacyTable,
-  LegacySelect,
-} from "@foxglove/studio-base/components/LegacyStyledComponents";
+import { LegacyTable } from "@foxglove/studio-base/components/LegacyStyledComponents";
+import Stack from "@foxglove/studio-base/components/Stack";
 
 import TableCell from "./TableCell";
 import { sanitizeAccessorPath } from "./sanitizeAccessorPath";
 
-function getColumnsFromObject(
-  val: { toJSON?: () => Record<string, unknown> },
-  accessorPath: string,
-): Column[] {
-  const obj = val.toJSON?.() ?? val;
-  const columns = [
-    ...Object.keys(obj).map((accessor) => {
-      const id = accessorPath.length !== 0 ? `${accessorPath}.${accessor}` : accessor;
-      return {
-        Header: accessor,
-        accessor,
-        id,
-        Cell({ value, row }) {
-          if (Array.isArray(value) && typeof value[0] !== "object") {
-            return JSON.stringify(value);
-          }
-
-          // eslint-disable-next-line no-restricted-syntax
-          if (typeof value === "object" && value != null) {
-            return (
-              <TableCell row={row} accessorPath={id}>
-                <Table value={value} accessorPath={accessorPath} />
-              </TableCell>
-            );
-          }
-
-          // In case the value is null.
-          return `${value}`;
-        },
-      } as Column;
-    }),
-  ];
-
-  const Cell: ColumnWithLooseAccessor["Cell"] = ({ row }) => (
-    <Icon size="medium" {...row.getToggleRowExpandedProps()} dataTest={`expand-row-${row.index}`}>
-      {row.isExpanded ? <MinusIcon /> : <PlusIcon />}
-    </Icon>
-  );
-
-  if (accessorPath.length === 0) {
-    columns.unshift({
-      id: "expander",
-      Cell,
-    });
-  }
-
-  return columns;
-}
+const SIconButton = muiStyled(IconButton)({
+  "&:hover": {
+    backgroundColor: "transparent",
+  },
+});
 
 const STableRow = muiStyled("tr")(({ theme }) => ({
   "&:nth-child(even)": {
@@ -124,6 +88,60 @@ const STableData = muiStyled("td")(({ theme }) => ({
   whiteSpace: "nowrap",
   textOverflow: "ellipsis",
 }));
+
+function getColumnsFromObject(
+  val: { toJSON?: () => Record<string, unknown> },
+  accessorPath: string,
+): Column[] {
+  const obj = val.toJSON?.() ?? val;
+  const columns = [
+    ...Object.keys(obj).map((accessor) => {
+      const id = accessorPath.length !== 0 ? `${accessorPath}.${accessor}` : accessor;
+      return {
+        Header: accessor,
+        accessor,
+        id,
+        Cell({ value, row }) {
+          if (Array.isArray(value) && typeof value[0] !== "object") {
+            return JSON.stringify(value);
+          }
+
+          // eslint-disable-next-line no-restricted-syntax
+          if (typeof value === "object" && value != null) {
+            return (
+              <TableCell row={row} accessorPath={id}>
+                <Table value={value} accessorPath={accessorPath} />
+              </TableCell>
+            );
+          }
+
+          // In case the value is null.
+          return `${value}`;
+        },
+      } as Column;
+    }),
+  ];
+
+  const Cell: ColumnWithLooseAccessor["Cell"] = ({ row }) => (
+    <SIconButton
+      {...row.getToggleRowExpandedProps()}
+      size="small"
+      data-test={`expand-row-${row.index}`}
+      style={{ margin: -4 }}
+    >
+      {row.isExpanded ? <MinusIcon fontSize="small" /> : <PlusIcon fontSize="small" />}
+    </SIconButton>
+  );
+
+  if (accessorPath.length === 0) {
+    columns.unshift({
+      id: "expander",
+      Cell,
+    });
+  }
+
+  return columns;
+}
 
 export default function Table({
   value,
@@ -239,38 +257,45 @@ export default function Table({
         </tbody>
       </LegacyTable>
       {!isNested && (
-        <div style={{ margin: "4px auto 0" }}>
-          <LegacyButton onClick={() => gotoPage(0)} disabled={!canPreviousPage}>
-            {"<<"}
-          </LegacyButton>{" "}
-          <LegacyButton onClick={() => previousPage()} disabled={!canPreviousPage}>
-            {"<"}
-          </LegacyButton>{" "}
-          <span>
-            Page{" "}
-            <strong>
-              {pageIndex + 1} of {pageOptions.length}
-            </strong>{" "}
-          </span>
-          <LegacyButton onClick={() => nextPage()} disabled={!canNextPage}>
-            {">"}
-          </LegacyButton>{" "}
-          <LegacyButton onClick={() => gotoPage(pageCount - 1)} disabled={!canNextPage}>
-            {">>"}
-          </LegacyButton>{" "}
-          <LegacySelect
-            value={pageSize}
-            onChange={(e) => {
-              setPageSize(Number(e.target.value));
-            }}
+        <Container maxWidth="xs" disableGutters>
+          <Stack
+            direction="row"
+            flexWrap="wrap"
+            gap={1}
+            paddingX={0.5}
+            paddingTop={0.5}
+            alignItems="center"
           >
-            {[10, 20, 30, 40, 50].map((size) => (
-              <option key={size} value={size}>
-                Show {size}
-              </option>
-            ))}
-          </LegacySelect>
-        </div>
+            <IconButton onClick={() => gotoPage(0)} disabled={!canPreviousPage}>
+              <KeyboardDoubleArrowLeftIcon fontSize="small" />
+            </IconButton>
+            <IconButton onClick={() => previousPage()} disabled={!canPreviousPage}>
+              <KeyboardArrowLeftIcon fontSize="small" />
+            </IconButton>
+            <Typography flex="auto" variant="inherit" align="center" noWrap>
+              Page{" "}
+              <strong>
+                {pageIndex + 1} of {pageOptions.length}
+              </strong>
+            </Typography>
+            <IconButton onClick={() => nextPage()} disabled={!canNextPage}>
+              <KeyboardArrowRightIcon fontSize="small" />
+            </IconButton>
+            <IconButton onClick={() => gotoPage(pageCount - 1)} disabled={!canNextPage}>
+              <KeyboardDoubleArrowRightIcon fontSize="small" />
+            </IconButton>
+            <Select
+              value={pageSize}
+              size="small"
+              onChange={(e) => setPageSize(Number(e.target.value))}
+              MenuProps={{ MenuListProps: { dense: true } }}
+            >
+              {[10, 20, 30, 40, 50].map((size) => (
+                <MenuItem key={size} value={size}>{`Show ${size}`}</MenuItem>
+              ))}
+            </Select>
+          </Stack>
+        </Container>
       )}
     </>
   );

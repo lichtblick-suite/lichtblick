@@ -11,12 +11,10 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import MinusIcon from "@mdi/svg/svg/minus-box-outline.svg";
-import { styled as muiStyled } from "@mui/material";
+import MinusIcon from "@mui/icons-material/IndeterminateCheckBoxOutlined";
+import { IconButton, styled as muiStyled } from "@mui/material";
 import { PropsWithChildren } from "react";
 import { Row } from "react-table";
-
-import Icon from "@foxglove/studio-base/components/Icon";
 
 import { sanitizeAccessorPath } from "./sanitizeAccessorPath";
 
@@ -24,6 +22,12 @@ const ObjectCell = muiStyled("span")`
   font-style: italic;
   cursor: pointer;
 `;
+
+const SIconButton = muiStyled(IconButton)({
+  "&:hover": {
+    backgroundColor: "transparent",
+  },
+});
 
 type TableCellProps = {
   row: Row;
@@ -40,14 +44,15 @@ export default function TableCell({
 
   if (row.isExpanded || isExpanded) {
     return (
-      <div style={{ position: "relative" }}>
+      <div>
         {isExpanded && (
-          <Icon
-            style={{ position: "absolute", top: "2px", right: "2px" }}
+          <SIconButton
+            size="small"
             onClick={toggleIsExpanded}
+            style={{ marginTop: -4, marginLeft: -4 }}
           >
-            <MinusIcon />
-          </Icon>
+            <MinusIcon fontSize="small" />
+          </SIconButton>
         )}
         {children}
       </div>

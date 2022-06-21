@@ -11,14 +11,20 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { Checkbox, FormControlLabel, Stack } from "@mui/material";
+import {
+  Checkbox,
+  FormControl,
+  FormControlLabel,
+  FormLabel,
+  FormHelperText,
+  Stack,
+} from "@mui/material";
 
 import { Color } from "@foxglove/regl-worldview";
 import ColorPicker from "@foxglove/studio-base/components/ColorPicker";
 import { Marker, MarkerArray } from "@foxglove/studio-base/types/Messages";
 
 import { TopicSettingsEditorProps } from ".";
-import { SLabel, SDescription } from "./common";
 
 type MarkerSettings = {
   overrideColor?: Color;
@@ -31,31 +37,36 @@ export default function MarkerSettingsEditor(
   const { settings = {}, onFieldChange } = props;
   return (
     <Stack flex="auto">
-      <SLabel>Color</SLabel>
-      <SDescription>
-        Overrides <code>color</code>/<code>colors</code> for all markers on this topic.
-      </SDescription>
-      <ColorPicker
-        color={settings.overrideColor}
-        onChange={(newColor) => onFieldChange("overrideColor", newColor)}
-      />
-      <SLabel>Line marker click events override</SLabel>
-      <FormControlLabel
-        control={
-          <Checkbox
-            checked={settings.overrideCommand === "LinedConvexHull"}
-            onChange={(_ev, checked) =>
-              onFieldChange("overrideCommand", checked ? "LinedConvexHull" : undefined)
-            }
-          />
-        }
-        label="Allow clicking inside line markers that form polygons"
-      />
-      <SDescription>
-        Treating line markers as polygons. Clicking inside the lines in the marker selects the
-        marker. The default behavior for line markers requires the user to click exactly on the line
-        to select the line marker. <em>This option can reduce performance</em>.
-      </SDescription>
+      <FormControl>
+        <FormLabel>Color</FormLabel>
+        <FormHelperText>
+          Overrides <code>color</code>/<code>colors</code> for all markers on this topic.
+        </FormHelperText>
+        <ColorPicker
+          color={settings.overrideColor}
+          onChange={(newColor) => onFieldChange("overrideColor", newColor)}
+        />
+      </FormControl>
+
+      <FormControl>
+        <FormLabel>Line marker click events override</FormLabel>
+        <FormControlLabel
+          control={
+            <Checkbox
+              checked={settings.overrideCommand === "LinedConvexHull"}
+              onChange={(_ev, checked) =>
+                onFieldChange("overrideCommand", checked ? "LinedConvexHull" : undefined)
+              }
+            />
+          }
+          label="Allow clicking inside line markers that form polygons"
+        />
+        <FormHelperText variant="standard">
+          Treating line markers as polygons. Clicking inside the lines in the marker selects the
+          marker. The default behavior for line markers requires the user to click exactly on the
+          line to select the line marker. <em>This option can reduce performance</em>.
+        </FormHelperText>
+      </FormControl>
     </Stack>
   );
 }

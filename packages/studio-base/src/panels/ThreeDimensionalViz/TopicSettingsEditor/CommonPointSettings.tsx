@@ -11,13 +11,15 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { Stack } from "@mui/material";
-import { upperFirst } from "lodash";
-
-import DropdownItem from "@foxglove/studio-base/components/Dropdown/DropdownItem";
-import Dropdown from "@foxglove/studio-base/components/Dropdown/index";
-
-import { SLabel, SInput } from "./common";
+import {
+  FormControl,
+  FormLabel,
+  MenuItem,
+  Select,
+  SelectChangeEvent,
+  Stack,
+  TextField,
+} from "@mui/material";
 
 export default function CommonPointSettings({
   defaultPointSize,
@@ -37,42 +39,46 @@ export default function CommonPointSettings({
 
   const pointShape = settings.pointShape;
   const pointShapeVal = pointShape ?? defaultPointShape;
-  const pointShapeOpts = ["circle", "square"].map((field) => (
-    <DropdownItem key={field} value={field}>
-      {upperFirst(field)}
-    </DropdownItem>
-  ));
 
   return (
-    <Stack flex="auto">
-      <SLabel>Point size</SLabel>
-      <SInput
+    <Stack flex="auto" gap={1}>
+      <TextField
+        label="Point size"
         data-test="point-size-input"
         type="number"
         placeholder={defaultPointSize.toString()}
         value={pointSizeVal}
-        min={1}
-        max={50}
-        step={1}
+        variant="filled"
+        inputProps={{
+          min: 1,
+          max: 50,
+          step: 1,
+        }}
         onChange={(e) => {
           const isInputValid = !isNaN(parseFloat(e.target.value));
           onFieldChange("pointSize", isInputValid ? parseFloat(e.target.value) : undefined);
         }}
       />
 
-      <SLabel>Point shape</SLabel>
-      <Dropdown
-        text={upperFirst(pointShapeVal)}
-        value={pointShapeVal}
-        onChange={(value) => onFieldChange("pointShape", value)}
-        btnStyle={{
-          padding: "8px 12px",
-          display: "flex",
-          justifyContent: "space-between",
-        }}
-      >
-        {pointShapeOpts}
-      </Dropdown>
+      <FormControl>
+        <FormLabel id="point-shape-label">Point shape</FormLabel>
+        <Select
+          id="point-shape-select"
+          labelId="point-shape-label"
+          value={pointShapeVal}
+          onChange={(event: SelectChangeEvent) => onFieldChange("pointShape", event.target.value)}
+          variant="filled"
+          MenuProps={{
+            disablePortal: true,
+            MenuListProps: {
+              dense: true,
+            },
+          }}
+        >
+          <MenuItem value="circle">Circle</MenuItem>
+          <MenuItem value="square">Square</MenuItem>
+        </Select>
+      </FormControl>
     </Stack>
   );
 }

@@ -18,16 +18,15 @@ import {
   KeyboardArrowRight as KeyboardArrowRightIcon,
   KeyboardArrowUp as KeyboardArrowUpIcon,
   KeyboardArrowDown as KeyboardArrowDownIcon,
+  ArrowDropDown as ArrowDropDownIcon,
 } from "@mui/icons-material";
-import { Button, IconButton, Theme, alpha } from "@mui/material";
+import { Button, IconButton, Theme, alpha, MenuItem, Menu } from "@mui/material";
 import { makeStyles } from "@mui/styles";
 import cx from "classnames";
 import { last } from "lodash";
 import { ComponentProps, useCallback, useMemo, useRef, useState } from "react";
 import { useDebouncedCallback } from "use-debounce";
 
-import Dropdown from "@foxglove/studio-base/components/Dropdown";
-import DropdownItem from "@foxglove/studio-base/components/Dropdown/DropdownItem";
 import MessagePathInput from "@foxglove/studio-base/components/MessagePathSyntax/MessagePathInput";
 import { PANEL_TOOLBAR_MIN_HEIGHT } from "@foxglove/studio-base/components/PanelToolbar";
 import TimeBasedChart from "@foxglove/studio-base/components/TimeBasedChart";
@@ -228,6 +227,75 @@ const useStyles = makeStyles((theme: Theme) => ({
   }),
 }));
 
+function AxisDropdown({
+  xAxisVal,
+  onChange,
+}: {
+  xAxisVal: PlotXAxisVal;
+  onChange: (xAxisVal: PlotXAxisVal) => void;
+}): JSX.Element {
+  const [anchorEl, setAnchorEl] = useState<undefined | HTMLElement>(undefined);
+  const open = Boolean(anchorEl);
+
+  const handleButtonClick = useCallback((event: React.MouseEvent<HTMLButtonElement>) => {
+    setAnchorEl(event.currentTarget);
+  }, []);
+
+  const handleClose = useCallback(() => {
+    setAnchorEl(undefined);
+  }, []);
+
+  const handleItemClick = useCallback(
+    (value: PlotXAxisVal) => {
+      onChange(value);
+      handleClose();
+    },
+    [handleClose, onChange],
+  );
+
+  return (
+    <>
+      <Button
+        id="x-axis-button"
+        aria-controls={open ? "x-axis-menu" : undefined}
+        aria-haspopup="true"
+        aria-expanded={open ? "true" : undefined}
+        onClick={handleButtonClick}
+        color="inherit"
+        variant="text"
+        size="small"
+        endIcon={<ArrowDropDownIcon />}
+      >
+        &nbsp;
+        {`x: ${shortXAxisLabel(xAxisVal)}`}
+      </Button>
+      <Menu
+        id="x-axis-menu"
+        anchorEl={anchorEl}
+        open={open}
+        onClose={handleClose}
+        MenuListProps={{
+          "aria-labelledby": "x-axis-button",
+          dense: true,
+        }}
+      >
+        <MenuItem value="timestamp" onClick={() => handleItemClick("timestamp")}>
+          timestamp
+        </MenuItem>
+        <MenuItem value="index" onClick={() => handleItemClick("index")}>
+          index
+        </MenuItem>
+        <MenuItem value="currentCustom" onClick={() => handleItemClick("currentCustom")}>
+          msg path (current)
+        </MenuItem>
+        <MenuItem value="custom" onClick={() => handleItemClick("custom")}>
+          msg path (accumulated)
+        </MenuItem>
+      </Menu>
+    </>
+  );
+}
+
 export default function PlotLegend(props: PlotLegendProps): JSX.Element {
   const {
     currentTime,
@@ -312,20 +380,10 @@ export default function PlotLegend(props: PlotLegendProps): JSX.Element {
     () => (
       <div className={classes.legendContent}>
         <header className={classes.header}>
-          <div className={classes.dropdownWrapper}>
-            <Dropdown
-              value={xAxisVal}
-              text={`x: ${shortXAxisLabel(xAxisVal)}`}
-              btnClassname={classes.dropdown}
-              onChange={(newXAxisVal) => saveConfig({ xAxisVal: newXAxisVal })}
-              noPortal
-            >
-              <DropdownItem value="timestamp">timestamp</DropdownItem>
-              <DropdownItem value="index">index</DropdownItem>
-              <DropdownItem value="currentCustom">msg path (current)</DropdownItem>
-              <DropdownItem value="custom">msg path (accumulated)</DropdownItem>
-            </Dropdown>
-          </div>
+          <AxisDropdown
+            xAxisVal={xAxisVal}
+            onChange={(value: PlotXAxisVal) => saveConfig({ xAxisVal: value })}
+          />
           {(xAxisVal === "custom" || xAxisVal === "currentCustom") && (
             <MessagePathInput
               path={xAxisPath?.value ? xAxisPath.value : "/"}
@@ -385,8 +443,6 @@ export default function PlotLegend(props: PlotLegendProps): JSX.Element {
     ),
     [
       classes.addButton,
-      classes.dropdown,
-      classes.dropdownWrapper,
       classes.footer,
       classes.grid,
       classes.header,

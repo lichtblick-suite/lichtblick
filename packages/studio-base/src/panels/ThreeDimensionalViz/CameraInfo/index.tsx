@@ -240,7 +240,6 @@ export default function CameraInfo({
                     <Stack paddingLeft={LABEL_WIDTH / 8}>
                       <SValue>
                         <JsonInput
-                          inputStyle={{ width: 140 }}
                           value={{ x: camPos2DTrimmed[0], y: camPos2DTrimmed[1] }}
                           onChange={(data) => {
                             const point = data as { x: number; y: number };

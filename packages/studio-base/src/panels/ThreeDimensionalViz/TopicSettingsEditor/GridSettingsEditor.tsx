@@ -11,13 +11,12 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { Stack } from "@mui/material";
+import { FormControl, FormLabel, Stack, TextField } from "@mui/material";
 
 import { Color } from "@foxglove/regl-worldview";
 import ColorPicker from "@foxglove/studio-base/components/ColorPicker";
 
 import { TopicSettingsEditorProps } from ".";
-import { SLabel, SDescription, SInput } from "./common";
 
 export type GridSettings = {
   overrideColor?: Color;
@@ -34,53 +33,48 @@ export default function GridSettingsEditor(
   const { settings = {}, onFieldChange } = props;
 
   return (
-    <Stack flex="auto">
-      <SLabel>Color</SLabel>
-      <SDescription>Set the grid color.</SDescription>
-      <ColorPicker
-        color={settings.overrideColor ?? DEFAULT_GRID_COLOR}
-        onChange={(newColor) => onFieldChange("overrideColor", newColor)}
-      />
-
-      <SLabel>Width</SLabel>
-      <SInput
+    <Stack flex="auto" gap={1}>
+      <FormControl>
+        <FormLabel>Color</FormLabel>
+        <ColorPicker
+          color={settings.overrideColor ?? DEFAULT_GRID_COLOR}
+          onChange={(newColor) => onFieldChange("overrideColor", newColor)}
+        />
+      </FormControl>
+      <TextField
+        label="Width"
+        variant="filled"
         data-test="width-input"
         type="number"
         placeholder={"10"}
         value={settings.width ?? ""}
-        min={1}
-        max={1000}
-        step={1}
+        inputProps={{ min: 1, max: 1000, step: 1 }}
         onChange={(e) => {
           const isInputValid = !isNaN(parseFloat(e.target.value));
           onFieldChange("width", isInputValid ? parseFloat(e.target.value) : undefined);
         }}
       />
-
-      <SLabel>Subdivisions</SLabel>
-      <SInput
+      <TextField
+        label="Subdivisions"
+        variant="filled"
         data-test="subdivisions-input"
         type="number"
         placeholder={"9"}
         value={settings.subdivisions ?? ""}
-        min={0}
-        max={1000}
-        step={1}
+        inputProps={{ min: 0, max: 1000, step: 1 }}
         onChange={(e) => {
           const isInputValid = !isNaN(parseFloat(e.target.value));
           onFieldChange("subdivisions", isInputValid ? parseFloat(e.target.value) : undefined);
         }}
       />
-
-      <SLabel>Height offset</SLabel>
-      <SInput
+      <TextField
+        label="Height offset"
+        variant="filled"
         data-test="height-offset-input"
         type="number"
         placeholder={"0"}
         value={settings.heightOffset ?? ""}
-        min={-1000}
-        max={1000}
-        step={0.1}
+        inputProps={{ min: -1000, max: 1000, step: 0.1 }}
         onChange={(e) => {
           const isInputValid = !isNaN(parseFloat(e.target.value));
           onFieldChange("heightOffset", isInputValid ? parseFloat(e.target.value) : undefined);

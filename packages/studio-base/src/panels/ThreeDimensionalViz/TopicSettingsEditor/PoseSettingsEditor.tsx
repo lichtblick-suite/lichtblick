@@ -11,13 +11,12 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { Stack } from "@mui/material";
+import { FormControl, FormLabel, Stack, TextField } from "@mui/material";
 
 import ColorPicker from "@foxglove/studio-base/components/ColorPicker";
 import { Color } from "@foxglove/studio-base/types/Messages";
 
 import { TopicSettingsEditorProps } from ".";
-import { SLabel, SInput } from "./common";
 
 export type PoseSettings = {
   overrideColor?: Color;
@@ -41,16 +40,19 @@ export default function PoseSettingsEditor(
   const currentHeadLength = settings.size?.headLength ?? 0.3;
 
   return (
-    <Stack flex="auto">
-      <SLabel>Color</SLabel>
-      <ColorPicker
-        color={settings.overrideColor}
-        onChange={(newColor) => onFieldChange("overrideColor", newColor)}
-        alphaType="alpha"
-      />
-      <SLabel>Shaft length</SLabel>
-      <SInput
+    <Stack flex="auto" gap={1}>
+      <FormControl>
+        <FormLabel>Color</FormLabel>
+        <ColorPicker
+          color={settings.overrideColor}
+          onChange={(newColor) => onFieldChange("overrideColor", newColor)}
+          alphaType="alpha"
+        />
+      </FormControl>
+      <TextField
+        label="Shaft length"
         type="number"
+        variant="filled"
         value={currentLength}
         placeholder="2"
         onChange={(e) =>
@@ -60,8 +62,9 @@ export default function PoseSettingsEditor(
           })
         }
       />
-      <SLabel>Shaft width</SLabel>
-      <SInput
+      <TextField
+        label="Shaft width"
+        variant="filled"
         type="number"
         value={currentShaftWidth}
         placeholder="2"
@@ -72,8 +75,9 @@ export default function PoseSettingsEditor(
           })
         }
       />
-      <SLabel>Head width</SLabel>
-      <SInput
+      <TextField
+        label="Head width"
+        variant="filled"
         type="number"
         value={currentHeadWidth}
         placeholder="2"
@@ -84,8 +88,9 @@ export default function PoseSettingsEditor(
           })
         }
       />
-      <SLabel>Head length</SLabel>
-      <SInput
+      <TextField
+        label="Head length"
+        variant="filled"
         type="number"
         value={currentHeadLength}
         placeholder="0.1"

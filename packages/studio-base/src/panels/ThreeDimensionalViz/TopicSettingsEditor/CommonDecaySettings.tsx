@@ -11,9 +11,7 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { Stack } from "@mui/material";
-
-import { SLabel, SDescription, SInput } from "./common";
+import { Stack, TextField } from "@mui/material";
 
 export default function CommonDecaySettings({
   settings,
@@ -27,14 +25,15 @@ export default function CommonDecaySettings({
 
   return (
     <Stack flex="auto">
-      <SLabel>Decay time (seconds)</SLabel>
-      <SDescription>When set to 0, only the latest received data will be displayed.</SDescription>
-      <SInput
+      <TextField
+        label="Decay time (seconds)"
+        helperText="When set to 0, only the latest received data will be displayed."
+        variant="filled"
         type="number"
         placeholder="0"
+        FormHelperTextProps={{ variant: "standard" }}
         value={decayTimeValue}
-        min={0}
-        step={0.1}
+        inputProps={{ min: 0, step: 0.1 }}
         onChange={(e) => {
           const isInputValid = !isNaN(parseFloat(e.target.value));
           onFieldChange("decayTime", isInputValid ? parseFloat(e.target.value) : undefined);

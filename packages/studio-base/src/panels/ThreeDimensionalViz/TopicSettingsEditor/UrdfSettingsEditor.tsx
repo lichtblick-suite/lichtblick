@@ -11,8 +11,7 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { TextField } from "@fluentui/react";
-import { Link, Typography } from "@mui/material";
+import { Link, TextField, Typography } from "@mui/material";
 
 import Stack from "@foxglove/studio-base/components/Stack";
 import isDesktopApp from "@foxglove/studio-base/util/isDesktopApp";
@@ -39,11 +38,10 @@ export default function UrdfSettingsEditor(
   return (
     <Stack flex="auto" gap={1}>
       <TextField
+        variant="filled"
         label={descriptionString}
         value={settings.urdfUrl ?? ""}
-        onChange={(_, newValue) => {
-          onFieldChange("urdfUrl", newValue);
-        }}
+        onChange={(event) => onFieldChange("urdfUrl", event.target.value)}
       />
       {!supportsPackageUrl && (
         <Typography>

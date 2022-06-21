@@ -35,7 +35,7 @@ const useStyles = makeStyles((theme) => ({
         borderRadius: 2,
       },
     },
-    "p:not(.MuiTypography-root)": {
+    "p:not([class^='Mui')": {
       margin: "1em 0",
 
       ":last-child": {
