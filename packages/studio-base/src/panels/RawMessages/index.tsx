@@ -193,11 +193,7 @@ function RawMessages(props: Props) {
   const latestExpandedFields = useLatest(expandedFields);
 
   useEffect(() => {
-    if (
-      latestExpandedFields.current.keys.length === 0 &&
-      baseItem &&
-      config.autoExpandMode === "auto"
-    ) {
+    if (latestExpandedFields.current.size === 0 && baseItem && config.autoExpandMode === "auto") {
       const data = dataWithoutWrappingArray(baseItem.queriedData.map(({ value }) => value));
       const newExpandedFields = generateDeepKeyPaths(maybeDeepParse(data), 5);
       setExpandedFields(newExpandedFields);
