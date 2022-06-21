@@ -308,16 +308,20 @@ export default function CurrentLayoutProvider({
       },
       splitPanel: (payload: SplitPanelPayload) => performAction({ type: "SPLIT_PANEL", payload }),
       swapPanel: (payload: SwapPanelPayload) => {
-        // Select the new panel. We don't know what the new panel id will be so we diff
-        // the panelIds of the old and new layout so we can select the new panel.
+        // Select the new panel if the original panel was selected. We don't know what
+        // the new panel id will be so we diff the panelIds of the old and
+        // new layout so we can select the new panel.
+        const originalIsSelected = selectedPanelIds.current.includes(payload.originalId);
         const beforePanelIds = Object.keys(
           layoutStateRef.current.selectedLayout?.data?.configById ?? {},
         );
         performAction({ type: "SWAP_PANEL", payload });
-        const afterPanelIds = Object.keys(
-          layoutStateRef.current.selectedLayout?.data?.configById ?? {},
-        );
-        setSelectedPanelIds(difference(afterPanelIds, beforePanelIds));
+        if (originalIsSelected) {
+          const afterPanelIds = Object.keys(
+            layoutStateRef.current.selectedLayout?.data?.configById ?? {},
+          );
+          setSelectedPanelIds(difference(afterPanelIds, beforePanelIds));
+        }
         void analytics.logEvent(AppEvent.PANEL_ADD, { type: payload.type, action: "swap" });
         void analytics.logEvent(AppEvent.PANEL_DELETE, {
           type: getPanelTypeFromId(payload.originalId),
