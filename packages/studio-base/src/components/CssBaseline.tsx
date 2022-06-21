@@ -171,6 +171,34 @@ const useStyles = makeStyles((theme) => ({
         },
       },
     },
+
+    // leaflet GUI styling
+    ".leaflet-bar a": {
+      userSelect: "none",
+      backgroundColor: theme.semanticColors.bodyStandoutBackground,
+      color: theme.semanticColors.buttonText,
+      borderBottomColor: theme.semanticColors.bodyDivider,
+
+      ":hover": {
+        backgroundColor: theme.semanticColors.bodyBackgroundHovered,
+        color: theme.semanticColors.buttonTextHovered,
+        borderBottomColor: theme.semanticColors.bodyDivider,
+      },
+      ":focus": {
+        color: theme.semanticColors.buttonTextPressed,
+      },
+      ":active": {
+        color: theme.semanticColors.buttonTextPressed,
+      },
+    },
+    ".leaflet-bar a.leaflet-disabled": {
+      backgroundColor: theme.semanticColors.bodyBackground,
+      color: theme.semanticColors.disabledBodyText,
+
+      "&:hover": {
+        backgroundColor: theme.semanticColors.bodyBackgroundHovered,
+      },
+    },
   },
 }));
 

@@ -75,7 +75,6 @@ const GeoJsonContent = JSON.stringify({
 export default {
   title: "panels/Map",
   component: MapPanel,
-  parameters: { colorScheme: "dark" },
   decorators: [
     (StoryComponent: Story, { parameters }: StoryContext): JSX.Element => {
       return (

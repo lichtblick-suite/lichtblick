@@ -12,7 +12,6 @@ import ReactDOM from "react-dom";
 import { PanelExtensionContext } from "@foxglove/studio";
 import Panel from "@foxglove/studio-base/components/Panel";
 import PanelExtensionAdapter from "@foxglove/studio-base/components/PanelExtensionAdapter";
-import ThemeProvider from "@foxglove/studio-base/theme/ThemeProvider";
 import { SaveConfig } from "@foxglove/studio-base/types/panels";
 
 import MapPanel from "./MapPanel";
@@ -36,9 +35,7 @@ L.Marker.prototype.options.icon = L.icon({
 function initPanel(context: PanelExtensionContext) {
   ReactDOM.render(
     <StrictMode>
-      <ThemeProvider isDark>
-        <MapPanel context={context} />
-      </ThemeProvider>
+      <MapPanel context={context} />
     </StrictMode>,
     context.panelElement,
   );

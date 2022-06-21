@@ -19,11 +19,11 @@ import { useDebouncedCallback } from "use-debounce";
 
 import { toSec } from "@foxglove/rostime";
 import { PanelExtensionContext, MessageEvent } from "@foxglove/studio";
-import EmptyState from "@foxglove/studio-base/components/EmptyState";
 import {
   EXPERIMENTAL_PanelExtensionContextWithSettings,
   SettingsTreeAction,
 } from "@foxglove/studio-base/components/SettingsTreeEditor/types";
+import Stack from "@foxglove/studio-base/components/Stack";
 import FilteredPointLayer, {
   POINT_MARKER_RADIUS,
 } from "@foxglove/studio-base/panels/Map/FilteredPointLayer";
@@ -591,13 +591,29 @@ function MapPanel(props: MapPanelProps): JSX.Element {
   }, [renderDone]);
 
   return (
-    <div ref={sizeRef} style={{ width: "100%", height: "100%" }}>
-      {!center && <EmptyState>Waiting for first GPS point...</EmptyState>}
-      <div
+    <Stack ref={sizeRef} fullHeight fullWidth position="relative">
+      {!center && (
+        <Stack
+          alignItems="center"
+          justifyContent="center"
+          position="absolute"
+          style={{ top: 0, right: 0, bottom: 0, left: 0 }}
+        >
+          Waiting for first GPS point...
+        </Stack>
+      )}
+      <Stack
+        position="absolute"
         ref={mapContainerRef}
-        style={{ width: "100%", height: "100%", visibility: center ? "visible" : "hidden" }}
+        style={{
+          top: 0,
+          right: 0,
+          bottom: 0,
+          left: 0,
+          visibility: center ? "visible" : "hidden",
+        }}
       />
-    </div>
+    </Stack>
   );
 }
 
