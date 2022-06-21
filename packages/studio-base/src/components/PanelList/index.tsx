@@ -11,6 +11,7 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
+import CloseIcon from "@mui/icons-material/Close";
 import SearchIcon from "@mui/icons-material/Search";
 import {
   Theme,
@@ -25,6 +26,8 @@ import {
   ListItemText,
   Typography,
   styled as muiStyled,
+  TextField,
+  IconButton,
 } from "@mui/material";
 import { makeStyles } from "@mui/styles";
 import fuzzySort from "fuzzysort";
@@ -33,7 +36,6 @@ import { useCallback, useEffect, useMemo } from "react";
 import { useDrag } from "react-dnd";
 import { MosaicDragType, MosaicPath } from "react-mosaic-component";
 
-import { LegacyInput } from "@foxglove/studio-base/components/LegacyStyledComponents";
 import Stack from "@foxglove/studio-base/components/Stack";
 import TextHighlight from "@foxglove/studio-base/components/TextHighlight";
 import { useTooltip } from "@foxglove/studio-base/components/Tooltip";
@@ -58,31 +60,6 @@ const useStyles = makeStyles((theme: Theme) => {
     imagePlaceholder: {
       paddingBottom: `${(200 / 280) * 100}%`,
       backgroundColor: theme.palette.background.default,
-    },
-    searchInput: {
-      backgroundColor: "transparent !important",
-      padding: `${theme.spacing(1)} !important`,
-      margin: "0 !important",
-      width: "100%",
-      minWidth: 0,
-
-      "&:hover, :focus": {
-        backgroundColor: "transparent",
-      },
-    },
-    inputWrapper: {
-      display: "flex",
-      flex: "auto",
-      alignItems: "center",
-      justifyContent: "center",
-      paddingLeft: theme.spacing(1),
-      backgroundColor: theme.palette.background.default,
-      borderRadius: theme.shape.borderRadius,
-      border: `1px solid ${theme.palette.text.primary}`,
-
-      "&:focus-within": {
-        borderColor: theme.palette.primary.main,
-      },
     },
     cardContent: {
       flex: "auto",
@@ -230,7 +207,7 @@ function DraggablePanelItem({
       return (
         <Card className={classes.fullHeight}>
           <CardActionArea ref={mergedRef} onClick={onClick} className={classes.fullHeight}>
-            <Stack>
+            <Stack fullHeight>
               {panel.thumbnail != undefined ? (
                 <CardMedia component="img" image={panel.thumbnail} alt={panel.title} />
               ) : (
@@ -338,8 +315,8 @@ function PanelList(props: Props): JSX.Element {
     [dropPanel],
   );
 
-  const handleSearchChange = React.useCallback((e: React.SyntheticEvent<HTMLInputElement>) => {
-    const query = e.currentTarget.value;
+  const handleSearchChange = React.useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
+    const query = event.target.value;
     setSearchQuery(query);
 
     // When there is a search query, automatically highlight the first (0th) item.
@@ -464,18 +441,23 @@ function PanelList(props: Props): JSX.Element {
   return (
     <div className={classes.fullHeight}>
       <StickyToolbar>
-        <div className={classes.inputWrapper}>
-          <SearchIcon fontSize="small" color="primary" />
-          <LegacyInput
-            className={classes.searchInput}
-            placeholder="Search panels"
-            value={searchQuery}
-            onChange={handleSearchChange}
-            onKeyDown={onKeyDown}
-            onBlur={() => setHighlightedPanelIdx(undefined)}
-            autoFocus
-          />
-        </div>
+        <TextField
+          fullWidth
+          placeholder="Search panels"
+          value={searchQuery}
+          onChange={handleSearchChange}
+          onKeyDown={onKeyDown}
+          onBlur={() => setHighlightedPanelIdx(undefined)}
+          autoFocus
+          InputProps={{
+            startAdornment: <SearchIcon fontSize="small" color="primary" />,
+            endAdornment: searchQuery && (
+              <IconButton size="small" edge="end" onClick={() => setSearchQuery("")}>
+                <CloseIcon fontSize="small" />
+              </IconButton>
+            ),
+          }}
+        />
       </StickyToolbar>
       {mode === "grid" ? (
         <Container className={classes.grid} maxWidth={false}>
