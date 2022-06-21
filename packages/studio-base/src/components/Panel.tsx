@@ -199,8 +199,6 @@ export default function Panel<
     } = useCurrentLayoutActions();
 
     const [quickActionsKeyPressed, setQuickActionsKeyPressed] = useState(false);
-    const [shiftKeyPressed, setShiftKeyPressed] = useState(false);
-    const [cmdKeyPressed, setCmdKeyPressed] = useState(false);
     const [fullscreen, setFullscreen] = useState(false);
     const [fullscreenSourceRect, setFullscreenSourceRect] = useState<DOMRect | undefined>(
       undefined,
@@ -344,20 +342,12 @@ export default function Panel<
           // Allow clicking with no modifiers to select a panel (and deselect others) when panel settings are open
           e.stopPropagation(); // select the deepest clicked panel, not parent tab panels
           setSelectedPanelIds([childId]);
-        } else if (e.metaKey || shiftKeyPressed || isSelected) {
+        } else if (e.metaKey || e.shiftKey || isSelected) {
           e.stopPropagation(); // select the deepest clicked panel, not parent tab panels
           togglePanelSelected(childId, tabId);
         }
       },
-      [
-        childId,
-        tabId,
-        togglePanelSelected,
-        shiftKeyPressed,
-        isSelected,
-        setSelectedPanelIds,
-        panelSettingsOpen,
-      ],
+      [childId, tabId, togglePanelSelected, isSelected, setSelectedPanelIds, panelSettingsOpen],
     );
 
     const groupPanels = useCallback(() => {
@@ -432,13 +422,8 @@ export default function Panel<
       tabId,
     ]);
 
-    const { onMouseMove, enterFullscreen, exitFullscreen } = useMemo(
+    const { enterFullscreen, exitFullscreen } = useMemo(
       () => ({
-        onMouseMove: ((e) => {
-          if (e.metaKey !== cmdKeyPressed) {
-            setCmdKeyPressed(e.metaKey);
-          }
-        }) as MouseEventHandler<HTMLDivElement>,
         enterFullscreen: () => {
           setFullscreenSourceRect(panelRootRef.current?.getBoundingClientRect());
           setFullscreen(true);
@@ -452,7 +437,7 @@ export default function Panel<
           setFullscreen(false);
         },
       }),
-      [cmdKeyPressed, parentPanelContext],
+      [parentPanelContext],
     );
 
     const setHasFullscreenDescendant = useCallback(
@@ -471,23 +456,19 @@ export default function Panel<
         keyUpHandlers: {
           "`": () => setQuickActionsKeyPressed(false),
           "~": () => setQuickActionsKeyPressed(false),
-          Shift: () => setShiftKeyPressed(false),
-          Meta: () => setCmdKeyPressed(false),
         },
         keyDownHandlers: {
           a: (e: KeyboardEvent) => {
             e.preventDefault();
-            if (cmdKeyPressed) {
+            if (e.metaKey) {
               selectAllPanels();
             }
           },
           "`": () => setQuickActionsKeyPressed(true),
           "~": () => setQuickActionsKeyPressed(true),
-          Shift: () => setShiftKeyPressed(true),
-          Meta: () => setCmdKeyPressed(true),
         },
       }),
-      [selectAllPanels, cmdKeyPressed],
+      [selectAllPanels],
     );
 
     const fullScreenKeyHandlers = useMemo(
@@ -501,8 +482,6 @@ export default function Panel<
     useEffect(() => {
       const listener = () => {
         exitFullscreen();
-        setCmdKeyPressed(false);
-        setShiftKeyPressed(false);
         setQuickActionsKeyPressed(false);
       };
       window.addEventListener("blur", listener);
@@ -585,7 +564,6 @@ export default function Panel<
             {(fullscreenState) => (
               <PanelRoot
                 onClick={onPanelRootClick}
-                onMouseMove={onMouseMove}
                 hasFullscreenDescendant={hasFullscreenDescendant}
                 fullscreenState={fullscreenState}
                 sourceRect={fullscreenSourceRect}
