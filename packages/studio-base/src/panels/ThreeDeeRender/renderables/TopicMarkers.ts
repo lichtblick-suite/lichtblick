@@ -37,7 +37,7 @@ const DEFAULT_NAMESPACE_SETTINGS: LayerSettingsMarkerNamespace = {
   visible: true,
 };
 
-export type MarkerUserData = BaseUserData & {
+export type MarkerTopicUserData = BaseUserData & {
   topic: string;
   settings: LayerSettingsMarker;
 };
@@ -59,7 +59,7 @@ export class MarkersNamespace {
   }
 }
 
-export class TopicMarkers extends Renderable<MarkerUserData> {
+export class TopicMarkers extends Renderable<MarkerTopicUserData> {
   namespaces = new Map<string, MarkersNamespace>();
 
   // eslint-disable-next-line no-restricted-syntax

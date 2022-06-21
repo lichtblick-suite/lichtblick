@@ -4,12 +4,12 @@
 
 import { fromSec } from "@foxglove/rostime";
 import { MessageEvent, Topic } from "@foxglove/studio";
-import useDelayedFixture from "@foxglove/studio-base/panels/ThreeDimensionalViz/stories/useDelayedFixture";
 import PanelSetup from "@foxglove/studio-base/stories/PanelSetup";
 
 import ThreeDeeRender from "../index";
 import { TransformStamped } from "../ros";
 import { makeFail, makePass, QUAT_IDENTITY, TEST_COLORS, VEC3_ZERO } from "./common";
+import useDelayedFixture from "./useDelayedFixture";
 
 export default {
   title: "panels/ThreeDeeRender",

@@ -17,7 +17,13 @@ import {
   DEFAULT_CAMERA_STATE,
 } from "@foxglove/regl-worldview";
 import { toNanoSec } from "@foxglove/rostime";
-import { PanelExtensionContext, RenderState, Topic, MessageEvent } from "@foxglove/studio";
+import {
+  PanelExtensionContext,
+  RenderState,
+  Topic,
+  MessageEvent,
+  LayoutActions,
+} from "@foxglove/studio";
 import {
   EXPERIMENTAL_PanelExtensionContextWithSettings,
   SettingsTreeAction,
@@ -26,9 +32,17 @@ import {
 import useCleanup from "@foxglove/studio-base/hooks/useCleanup";
 
 import { DebugGui } from "./DebugGui";
+import Interactions, {
+  InteractionContextMenu,
+  OBJECT_TAB_TYPE,
+  SelectionObject,
+  TabType,
+} from "./Interactions";
+import type { Renderable } from "./Renderable";
 import { Renderer, RendererConfig } from "./Renderer";
 import { RendererContext, useRendererEvent } from "./RendererContext";
 import { Stats } from "./Stats";
+import type { MarkerUserData } from "./renderables/markers/RenderableMarker";
 import { TF_DATATYPES, TRANSFORM_STAMPED_DATATYPES } from "./ros";
 
 const log = Logger.getLogger(__filename);
@@ -45,25 +59,81 @@ const CANVAS_STYLE: React.CSSProperties = { position: "absolute", top: 0, left: 
 /**
  * Provides DOM overlay elements on top of the 3D scene (e.g. stats, debug GUI).
  */
-function RendererOverlay(props: { enableStats: boolean }): JSX.Element {
-  const [_, setSelectedRenderable] = useState<THREE.Object3D | undefined>(undefined);
+function RendererOverlay(props: {
+  addPanel: LayoutActions["addPanel"];
+  enableStats: boolean;
+}): JSX.Element {
+  const [selectedRenderable, setSelectedRenderable] = useState<Renderable | undefined>(undefined);
+  const [interactionsTabType, setInteractionsTabType] = useState<TabType | undefined>(undefined);
 
-  useRendererEvent("renderableSelected", (renderable) => setSelectedRenderable(renderable));
+  useRendererEvent("renderableSelected", (renderable) => {
+    setSelectedRenderable(renderable);
+    setInteractionsTabType(renderable ? OBJECT_TAB_TYPE : undefined);
+  });
 
   const stats = props.enableStats ? (
-    <div id="stats" style={{ position: "absolute", top: 0 }}>
+    <div id="stats" style={{ position: "absolute", top: "10px", left: "10px" }}>
       <Stats />
     </div>
   ) : undefined;
 
   const debug = SHOW_DEBUG ? (
-    <div id="debug" style={{ position: "absolute", top: 60 }}>
+    <div id="debug" style={{ position: "absolute", top: "70px", left: "10px" }}>
       <DebugGui />
     </div>
   ) : undefined;
 
+  const selectedObject = useMemo<SelectionObject | undefined>(() => {
+    if (!selectedRenderable) {
+      return undefined;
+    }
+
+    // Retrieve the original message for Markers. This needs to be rethought for
+    // other renderables that are generated from received messages
+    const maybeMarkerUserData = selectedRenderable.userData as Partial<MarkerUserData>;
+    const topic = maybeMarkerUserData.topic ?? "";
+    const originalMessage = maybeMarkerUserData.marker ?? {};
+
+    return {
+      object: {
+        pose: selectedRenderable.userData.pose,
+        interactionData: {
+          topic,
+          highlighted: true,
+          originalMessage,
+        },
+      },
+      instanceIndex: undefined,
+    };
+  }, [selectedRenderable]);
+
+  const clickedObjects = useMemo<SelectionObject[]>(() => {
+    return [];
+  }, []);
+
   return (
     <React.Fragment>
+      <div
+        style={{
+          position: "absolute",
+          top: "10px",
+          right: "10px",
+        }}
+      >
+        <Interactions
+          addPanel={props.addPanel}
+          selectedObject={selectedObject}
+          interactionsTabType={interactionsTabType}
+          setInteractionsTabType={setInteractionsTabType}
+        />
+      </div>
+      {clickedObjects.length > 1 && !selectedObject && (
+        <InteractionContextMenu
+          clickedPosition={{ clientX: 0, clientY: 0 }}
+          clickedObjects={[]}
+          selectObject={() => {}}
+        />
+      )}
       {stats}
       {debug}
     </React.Fragment>
@@ -329,6 +399,13 @@ export function ThreeDeeRender({ context }: { context: PanelExtensionContext }):
     refreshMode: "debounce",
   });
 
+  // Create a useCallback wrapper for adding a new panel to the layout, used to open the
+  // "Raw Messages" panel from the object inspector
+  const addPanel = useCallback(
+    (params: Parameters<LayoutActions["addPanel"]>[0]) => context.layout.addPanel(params),
+    [context.layout],
+  );
+
   return (
     <div style={PANEL_STYLE} ref={resizeRef}>
       <CameraListener cameraStore={cameraStore} shiftKeys={true}>
@@ -341,7 +418,7 @@ export function ThreeDeeRender({ context }: { context: PanelExtensionContext }):
         <canvas ref={setCanvas} style={CANVAS_STYLE} />
       </CameraListener>
       <RendererContext.Provider value={renderer}>
-        <RendererOverlay enableStats={config.scene.enableStats ?? true} />
+        <RendererOverlay addPanel={addPanel} enableStats={config.scene.enableStats ?? true} />
       </RendererContext.Provider>
     </div>
   );

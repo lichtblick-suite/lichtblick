@@ -24,6 +24,7 @@ import { Labels } from "./Labels";
 import { MaterialCache } from "./MaterialCache";
 import { ModelCache } from "./ModelCache";
 import { Picker } from "./Picker";
+import type { Renderable } from "./Renderable";
 import { SceneExtension } from "./SceneExtension";
 import { ScreenOverlay } from "./ScreenOverlay";
 import { SettingsManager, SettingsTreeEntry } from "./SettingsManager";
@@ -56,7 +57,7 @@ export type RendererEvents = {
   startFrame: (currentTime: bigint, renderer: Renderer) => void;
   endFrame: (currentTime: bigint, renderer: Renderer) => void;
   cameraMove: (renderer: Renderer) => void;
-  renderableSelected: (renderable: THREE.Object3D | undefined, renderer: Renderer) => void;
+  renderableSelected: (renderable: Renderable | undefined, renderer: Renderer) => void;
   transformTreeUpdated: (renderer: Renderer) => void;
   settingsTreeChange: (renderer: Renderer) => void;
   configChange: (renderer: Renderer) => void;
@@ -147,7 +148,7 @@ export class Renderer extends EventEmitter<RendererEvents> {
   camera: THREE.PerspectiveCamera;
   picker: Picker;
   selectionBackdrop: ScreenOverlay;
-  selectedObject: THREE.Object3D | undefined;
+  selectedObject: Renderable | undefined;
   materialCache = new MaterialCache();
   colorScheme: "dark" | "light" = "light";
   modelCache: ModelCache;
@@ -559,17 +560,18 @@ export class Renderer extends EventEmitter<RendererEvents> {
     }
 
     // Traverse the scene looking for this objectId
-    const obj = this.scene.getObjectById(objectId);
+    const pickedObject = this.scene.getObjectById(objectId);
 
-    // Find the first ancestor of the clicked object that has a Pose
-    let selectedObj = obj;
-    while (selectedObj && selectedObj.userData.pose == undefined) {
-      selectedObj = selectedObj.parent ?? undefined;
+    // Find the first ancestor of the picked object that is a Renderable
+    let maybeRenderable = pickedObject as Partial<Renderable> | undefined;
+    while (maybeRenderable && maybeRenderable.isRenderable !== true) {
+      maybeRenderable = (maybeRenderable.parent ?? undefined) as Partial<Renderable> | undefined;
     }
 
-    if (selectedObj === prevSelected) {
+    const selectedRenderable = maybeRenderable as Renderable | undefined;
+    if (selectedRenderable === prevSelected) {
       log.debug(
-        `Deselecting previously selected object ${prevSelected?.id} (${prevSelected?.name})`,
+        `Deselecting previously selected Renderable ${prevSelected?.id} (${prevSelected?.name})`,
       );
       if (!DEBUG_PICKING) {
         // Re-render with no object selected
@@ -578,18 +580,18 @@ export class Renderer extends EventEmitter<RendererEvents> {
       return;
     }
 
-    this.selectedObject = selectedObj;
+    this.selectedObject = selectedRenderable;
 
-    if (!selectedObj) {
-      log.warn(`No renderable found for objectId ${objectId}`);
+    if (!selectedRenderable) {
+      log.warn(`No Renderable found for objectId ${objectId}`);
       this.emit("renderableSelected", undefined, this);
       return;
     }
 
     // Select the newly selected object
-    selectObject(selectedObj);
-    this.emit("renderableSelected", selectedObj, this);
-    log.debug(`Selected object ${selectedObj.id} (${selectedObj.name})`);
+    selectObject(selectedRenderable);
+    this.emit("renderableSelected", selectedRenderable, this);
+    log.debug(`Selected Renderable ${selectedRenderable.id} (${selectedRenderable.name})`);
 
     if (!DEBUG_PICKING) {
       // Re-render with the selected object

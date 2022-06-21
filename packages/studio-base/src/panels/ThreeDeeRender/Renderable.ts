@@ -17,7 +17,7 @@ export type BaseUserData = {
   settings: BaseSettings;
 };
 
-export class Renderable<TUserData extends BaseUserData> extends THREE.Object3D {
+export class Renderable<TUserData extends BaseUserData = BaseUserData> extends THREE.Object3D {
   readonly isRenderable = true;
   readonly renderer: Renderer;
   override userData: TUserData;
