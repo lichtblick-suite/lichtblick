@@ -12,8 +12,8 @@ import {
   SettingsTreeAction,
   SettingsTreeNode,
   SettingsTreeNodeAction,
-  SettingsTreeRoots,
-} from "@foxglove/studio-base/components/SettingsTreeEditor/types";
+  SettingsTreeNodes,
+} from "@foxglove/studio";
 
 import { Config, Rule } from "./types";
 
@@ -139,7 +139,7 @@ export function useSettingsTree(
   config: Config,
   pathParseError: string | undefined,
   error: string | undefined,
-): SettingsTreeRoots {
+): SettingsTreeNodes {
   const { path, style, rules } = config;
   const generalSettings: SettingsTreeNode = useMemo(
     () => ({

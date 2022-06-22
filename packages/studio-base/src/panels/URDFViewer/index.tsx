@@ -16,11 +16,11 @@ import {
   CameraState,
   DEFAULT_CAMERA_STATE,
 } from "@foxglove/regl-worldview";
+import { SettingsTreeAction } from "@foxglove/studio";
 import * as PanelAPI from "@foxglove/studio-base/PanelAPI";
 import EmptyState from "@foxglove/studio-base/components/EmptyState";
 import Panel from "@foxglove/studio-base/components/Panel";
 import PanelToolbar from "@foxglove/studio-base/components/PanelToolbar";
-import { SettingsTreeAction } from "@foxglove/studio-base/components/SettingsTreeEditor/types";
 import { useAssets } from "@foxglove/studio-base/context/AssetsContext";
 import useCleanup from "@foxglove/studio-base/hooks/useCleanup";
 import { MessageEvent } from "@foxglove/studio-base/players/types";
@@ -253,7 +253,7 @@ function URDFViewer({ config, saveConfig }: Props) {
   useEffect(() => {
     updatePanelSettingsTree({
       actionHandler,
-      roots: buildSettingsTree(config, availableTopics),
+      nodes: buildSettingsTree(config, availableTopics),
     });
   }, [actionHandler, availableTopics, config, updatePanelSettingsTree]);
 

@@ -7,8 +7,8 @@ import { DeepReadonly } from "ts-essentials";
 import create, { StoreApi } from "zustand";
 import createContext from "zustand/context";
 
+import { SettingsTree } from "@foxglove/studio";
 import { usePanelContext } from "@foxglove/studio-base/components/PanelContext";
-import { SettingsTree } from "@foxglove/studio-base/components/SettingsTreeEditor/types";
 
 type ImmutableSettingsTree = DeepReadonly<SettingsTree>;
 

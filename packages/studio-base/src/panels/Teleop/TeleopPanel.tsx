@@ -7,14 +7,14 @@ import { useCallback, useEffect, useLayoutEffect, useState } from "react";
 import { DeepPartial } from "ts-essentials";
 
 import { definitions as commonDefs } from "@foxglove/rosmsg-msgs-common";
-import { PanelExtensionContext, Topic } from "@foxglove/studio";
-import EmptyState from "@foxglove/studio-base/components/EmptyState";
 import {
-  EXPERIMENTAL_PanelExtensionContextWithSettings,
+  PanelExtensionContext,
   SettingsTreeAction,
   SettingsTreeNode,
-  SettingsTreeRoots,
-} from "@foxglove/studio-base/components/SettingsTreeEditor/types";
+  SettingsTreeNodes,
+  Topic,
+} from "@foxglove/studio";
+import EmptyState from "@foxglove/studio-base/components/EmptyState";
 import Stack from "@foxglove/studio-base/components/Stack";
 import ThemeProvider from "@foxglove/studio-base/theme/ThemeProvider";
 
@@ -42,7 +42,7 @@ type Config = {
   rightButton: { field: string; value: number };
 };
 
-function buildSettingsTree(config: Config, topics: readonly Topic[]): SettingsTreeRoots {
+function buildSettingsTree(config: Config, topics: readonly Topic[]): SettingsTreeNodes {
   const general: SettingsTreeNode = {
     label: "General",
     fields: {
@@ -169,12 +169,9 @@ function TeleopPanel(props: TeleopPanelProps): JSX.Element {
 
   useEffect(() => {
     const tree = buildSettingsTree(config, topics);
-    // eslint-disable-next-line no-underscore-dangle
-    (
-      context as unknown as EXPERIMENTAL_PanelExtensionContextWithSettings
-    ).__updatePanelSettingsTree({
+    context.updatePanelSettingsEditor({
       actionHandler: settingsActionHandler,
-      roots: tree,
+      nodes: tree,
     });
     saveState(config);
   }, [config, context, saveState, settingsActionHandler, topics]);

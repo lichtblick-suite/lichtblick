@@ -23,6 +23,7 @@ import {
   PanelExtensionContext,
   ParameterValue,
   RenderState,
+  SettingsTree,
   Subscription,
   Topic,
 } from "@foxglove/studio";
@@ -32,7 +33,6 @@ import {
 } from "@foxglove/studio-base/components/MessagePipeline";
 import { usePanelContext } from "@foxglove/studio-base/components/PanelContext";
 import PanelToolbar from "@foxglove/studio-base/components/PanelToolbar";
-import { SettingsTree } from "@foxglove/studio-base/components/SettingsTreeEditor/types";
 import { useAppConfiguration } from "@foxglove/studio-base/context/AppConfigurationContext";
 import {
   useClearHoverValue,
@@ -389,9 +389,6 @@ function PanelExtensionAdapter(props: PanelExtensionAdapterProps): JSX.Element {
     };
 
     return {
-      // This is here temporarily until the new panel settings API is ready. Do not use.
-      __updatePanelSettingsTree: updateSettings,
-
       initialState: configRef.current,
 
       saveState: saveConfig,
@@ -520,6 +517,8 @@ function PanelExtensionAdapter(props: PanelExtensionAdapterProps): JSX.Element {
       subscribeAppSettings: (settings: string[]) => {
         setSubscribedAppSettings(settings);
       },
+
+      updatePanelSettingsEditor: updateSettings,
     };
   }, [
     capabilities,

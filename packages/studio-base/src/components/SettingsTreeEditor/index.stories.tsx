@@ -9,17 +9,16 @@ import { last } from "lodash";
 import { useCallback, useMemo, useState, useEffect } from "react";
 
 import Logger from "@foxglove/log";
+import {
+  SettingsTreeNode,
+  SettingsTreeNodes,
+  SettingsTreeFieldValue,
+  SettingsTreeAction,
+} from "@foxglove/studio";
 import { MessagePathInputStoryFixture } from "@foxglove/studio-base/components/MessagePathSyntax/fixture";
 import MockPanelContextProvider from "@foxglove/studio-base/components/MockPanelContextProvider";
 import SettingsTreeEditor from "@foxglove/studio-base/components/SettingsTreeEditor";
 import PanelSetup from "@foxglove/studio-base/stories/PanelSetup";
-
-import {
-  SettingsTreeNode,
-  SettingsTreeRoots,
-  SettingsTreeFieldValue,
-  SettingsTreeAction,
-} from "./types";
 
 export default {
   title: "components/SettingsTreeEditor",
@@ -28,7 +27,7 @@ export default {
 
 const log = Logger.getLogger(__filename);
 
-const BasicSettings: SettingsTreeRoots = {
+const BasicSettings: SettingsTreeNodes = {
   general: {
     label: "General",
     icon: "Settings",
@@ -146,7 +145,7 @@ For ROS users, we also support package:// URLs
   empty: undefined,
 };
 
-const DisabledSettings: SettingsTreeRoots = {
+const DisabledSettings: SettingsTreeNodes = {
   general: {
     label: "Disabled Fields",
     icon: "Grid",
@@ -232,7 +231,7 @@ const DisabledSettings: SettingsTreeRoots = {
   },
 };
 
-const ReadonlySettings: SettingsTreeRoots = {
+const ReadonlySettings: SettingsTreeNodes = {
   general: {
     label: "ReadOnly Fields",
     icon: "Grid",
@@ -318,7 +317,7 @@ const ReadonlySettings: SettingsTreeRoots = {
   },
 };
 
-const PanelExamplesSettings: SettingsTreeRoots = {
+const PanelExamplesSettings: SettingsTreeNodes = {
   map: {
     label: "Map",
     icon: "Map",
@@ -410,7 +409,7 @@ const PanelExamplesSettings: SettingsTreeRoots = {
   },
 };
 
-const IconExamplesSettings: SettingsTreeRoots = {
+const IconExamplesSettings: SettingsTreeNodes = {
   noIcon1: {
     label: "No Icon",
     fields: {
@@ -466,7 +465,7 @@ const IconExamplesSettings: SettingsTreeRoots = {
   },
 };
 
-const TopicSettings: SettingsTreeRoots = {
+const TopicSettings: SettingsTreeNodes = {
   topics: {
     label: "Topics",
     icon: "Topic",
@@ -578,11 +577,11 @@ const TopicSettings: SettingsTreeRoots = {
   },
 };
 
-function updateSettingsTreeRoots(
-  previous: SettingsTreeRoots,
+function updateSettingsTreeNodes(
+  previous: SettingsTreeNodes,
   path: readonly string[],
   value: unknown,
-): SettingsTreeRoots {
+): SettingsTreeNodes {
   const workingPath = [...path];
   return produce(previous, (draft) => {
     let node: undefined | Partial<SettingsTreeNode> = draft[workingPath[0]!];
@@ -634,8 +633,8 @@ function makeGridNode(index: number): SettingsTreeNode {
   };
 }
 
-function Wrapper({ roots }: { roots: SettingsTreeRoots }): JSX.Element {
-  const [settingsRoots, setSettingsRoots] = useState({ ...roots });
+function Wrapper({ nodes }: { nodes: SettingsTreeNodes }): JSX.Element {
+  const [settingsNodes, setSettingsNodes] = useState({ ...nodes });
   const [dynamicNodes, setDynamicNodes] = useState<Record<string, SettingsTreeNode>>({});
 
   const actionHandler = useCallback(
@@ -666,8 +665,8 @@ function Wrapper({ roots }: { roots: SettingsTreeRoots }): JSX.Element {
         return;
       }
 
-      setSettingsRoots((previous) =>
-        updateSettingsTreeRoots(previous, action.payload.path, action.payload.value),
+      setSettingsNodes((previous) =>
+        updateSettingsTreeNodes(previous, action.payload.path, action.payload.value),
       );
     },
     [dynamicNodes],
@@ -677,13 +676,13 @@ function Wrapper({ roots }: { roots: SettingsTreeRoots }): JSX.Element {
     () => ({
       actionHandler,
       enableFilter: true,
-      roots: settingsRoots,
+      nodes: settingsNodes,
     }),
-    [settingsRoots, actionHandler],
+    [settingsNodes, actionHandler],
   );
 
   useEffect(() => {
-    setSettingsRoots(
+    setSettingsNodes(
       produce((draft) => {
         if ("general" in draft) {
           (draft as any).general.children = dynamicNodes;
@@ -710,7 +709,7 @@ function Wrapper({ roots }: { roots: SettingsTreeRoots }): JSX.Element {
 }
 
 export function Basics(): JSX.Element {
-  return <Wrapper roots={BasicSettings} />;
+  return <Wrapper nodes={BasicSettings} />;
 }
 
 Basics.play = () => {
@@ -720,15 +719,15 @@ Basics.play = () => {
 };
 
 export function DisabledFields(): JSX.Element {
-  return <Wrapper roots={DisabledSettings} />;
+  return <Wrapper nodes={DisabledSettings} />;
 }
 
 export function ReadonlyFields(): JSX.Element {
-  return <Wrapper roots={ReadonlySettings} />;
+  return <Wrapper nodes={ReadonlySettings} />;
 }
 
 export function PanelExamples(): JSX.Element {
-  return <Wrapper roots={PanelExamplesSettings} />;
+  return <Wrapper nodes={PanelExamplesSettings} />;
 }
 
 PanelExamples.play = () => {
@@ -742,9 +741,9 @@ PanelExamples.play = () => {
 };
 
 export function IconExamples(): JSX.Element {
-  return <Wrapper roots={IconExamplesSettings} />;
+  return <Wrapper nodes={IconExamplesSettings} />;
 }
 
 export function Topics(): JSX.Element {
-  return <Wrapper roots={TopicSettings} />;
+  return <Wrapper nodes={TopicSettings} />;
 }

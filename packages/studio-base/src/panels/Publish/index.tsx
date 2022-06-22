@@ -17,14 +17,11 @@ import { set } from "lodash";
 import { useCallback, useEffect, useMemo, useRef } from "react";
 
 import { useRethrow } from "@foxglove/hooks";
+import { SettingsTreeAction, SettingsTreeNodes } from "@foxglove/studio";
 import { useDataSourceInfo } from "@foxglove/studio-base/PanelAPI";
 import Autocomplete, { IAutocomplete } from "@foxglove/studio-base/components/Autocomplete";
 import Panel from "@foxglove/studio-base/components/Panel";
 import PanelToolbar from "@foxglove/studio-base/components/PanelToolbar";
-import {
-  SettingsTreeAction,
-  SettingsTreeRoots,
-} from "@foxglove/studio-base/components/SettingsTreeEditor/types";
 import Stack from "@foxglove/studio-base/components/Stack";
 import usePublisher from "@foxglove/studio-base/hooks/usePublisher";
 import { PlayerCapabilities, Topic } from "@foxglove/studio-base/players/types";
@@ -50,7 +47,7 @@ type Props = {
   saveConfig: SaveConfig<Config>;
 };
 
-function buildSettingsTree(config: Config): SettingsTreeRoots {
+function buildSettingsTree(config: Config): SettingsTreeNodes {
   return {
     general: {
       icon: "Settings",
@@ -186,7 +183,7 @@ function Publish(props: Props) {
   useEffect(() => {
     updatePanelSettingsTree({
       actionHandler,
-      roots: buildSettingsTree(props.config),
+      nodes: buildSettingsTree(props.config),
     });
   }, [actionHandler, props.config, updatePanelSettingsTree]);
 

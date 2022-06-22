@@ -5,10 +5,7 @@
 import { transform } from "lodash";
 
 import { filterMap } from "@foxglove/den/collection";
-import {
-  SettingsTreeFields,
-  SettingsTreeRoots,
-} from "@foxglove/studio-base/components/SettingsTreeEditor/types";
+import { SettingsTreeFields, SettingsTreeNodes } from "@foxglove/studio";
 
 // Persisted panel state
 export type Config = {
@@ -31,7 +28,7 @@ export function validateCustomUrl(url: string): Error | undefined {
   return undefined;
 }
 
-export function buildSettingsTree(config: Config, eligibleTopics: string[]): SettingsTreeRoots {
+export function buildSettingsTree(config: Config, eligibleTopics: string[]): SettingsTreeNodes {
   const topics: SettingsTreeFields = transform(
     eligibleTopics,
     (result, topic) => {
@@ -82,7 +79,7 @@ export function buildSettingsTree(config: Config, eligibleTopics: string[]): Set
     };
   }
 
-  const settings: SettingsTreeRoots = {
+  const settings: SettingsTreeNodes = {
     general: {
       label: "General",
       icon: "Settings",

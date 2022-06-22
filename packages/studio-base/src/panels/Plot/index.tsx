@@ -28,7 +28,7 @@ import {
   subtract as subtractTimes,
   toSec,
 } from "@foxglove/rostime";
-import { MessageEvent } from "@foxglove/studio";
+import { MessageEvent, SettingsTreeAction } from "@foxglove/studio";
 import { useBlocksByTopic, useMessageReducer } from "@foxglove/studio-base/PanelAPI";
 import { MessageBlock } from "@foxglove/studio-base/PanelAPI/useBlocksByTopic";
 import parseRosPath, {
@@ -49,7 +49,6 @@ import PanelToolbar, {
   PANEL_TOOLBAR_MIN_HEIGHT,
 } from "@foxglove/studio-base/components/PanelToolbar";
 import ToolbarIconButton from "@foxglove/studio-base/components/PanelToolbar/ToolbarIconButton";
-import { SettingsTreeAction } from "@foxglove/studio-base/components/SettingsTreeEditor/types";
 import Stack from "@foxglove/studio-base/components/Stack";
 import {
   ChartDefaultView,
@@ -466,7 +465,7 @@ function Plot(props: Props) {
   useEffect(() => {
     updatePanelSettingsTree({
       actionHandler,
-      roots: buildSettingsTree(config),
+      nodes: buildSettingsTree(config),
     });
   }, [actionHandler, config, updatePanelSettingsTree]);
 

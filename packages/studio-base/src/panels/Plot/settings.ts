@@ -4,11 +4,11 @@
 
 import { isNumber } from "lodash";
 
-import { SettingsTreeRoots } from "@foxglove/studio-base/components/SettingsTreeEditor/types";
+import { SettingsTreeNodes } from "@foxglove/studio";
 
 import { PlotConfig } from "./types";
 
-export function buildSettingsTree(config: PlotConfig): SettingsTreeRoots {
+export function buildSettingsTree(config: PlotConfig): SettingsTreeNodes {
   const maxYError =
     isNumber(config.minYValue) && isNumber(config.maxYValue) && config.minYValue >= config.maxYValue
       ? "Y max must be greater than Y min."

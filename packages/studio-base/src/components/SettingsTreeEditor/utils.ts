@@ -5,13 +5,13 @@
 import { sortBy } from "lodash";
 import { DeepReadonly } from "ts-essentials";
 
-import { SettingsTreeRoots, SettingsTreeNode } from "./types";
+import { SettingsTreeNode, SettingsTreeNodes } from "@foxglove/studio";
 
 /**
  * Filters and sorts roots to prepare them for rendering.
  */
-export function prepareSettingsRoots(
-  roots: DeepReadonly<SettingsTreeRoots>,
+export function prepareSettingsNodes(
+  roots: DeepReadonly<SettingsTreeNodes>,
 ): DeepReadonly<Array<[string, SettingsTreeNode]>> {
   // Use sortBy here for stable sorting.
   return sortBy(

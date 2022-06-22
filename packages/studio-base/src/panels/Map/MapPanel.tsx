@@ -18,11 +18,7 @@ import { useResizeDetector } from "react-resize-detector";
 import { useDebouncedCallback } from "use-debounce";
 
 import { toSec } from "@foxglove/rostime";
-import { PanelExtensionContext, MessageEvent } from "@foxglove/studio";
-import {
-  EXPERIMENTAL_PanelExtensionContextWithSettings,
-  SettingsTreeAction,
-} from "@foxglove/studio-base/components/SettingsTreeEditor/types";
+import { PanelExtensionContext, MessageEvent, SettingsTreeAction } from "@foxglove/studio";
 import Stack from "@foxglove/studio-base/components/Stack";
 import FilteredPointLayer, {
   POINT_MARKER_RADIUS,
@@ -229,12 +225,9 @@ function MapPanel(props: MapPanelProps): JSX.Element {
     context.subscribe(eligibleEnabled);
 
     const tree = buildSettingsTree(config, eligibleTopics);
-    // eslint-disable-next-line no-underscore-dangle
-    (
-      context as unknown as EXPERIMENTAL_PanelExtensionContextWithSettings
-    ).__updatePanelSettingsTree({
+    context.updatePanelSettingsEditor({
       actionHandler: settingsActionHandler,
-      roots: tree,
+      nodes: tree,
     });
 
     return () => {

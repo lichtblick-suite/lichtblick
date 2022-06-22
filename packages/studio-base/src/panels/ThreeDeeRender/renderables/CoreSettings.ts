@@ -5,7 +5,7 @@
 import { cloneDeep, set } from "lodash";
 
 import { DEFAULT_CAMERA_STATE } from "@foxglove/regl-worldview";
-import { SettingsTreeAction } from "@foxglove/studio-base/components/SettingsTreeEditor/types";
+import { SettingsTreeAction } from "@foxglove/studio";
 
 import { Renderer } from "../Renderer";
 import { SceneExtension } from "../SceneExtension";

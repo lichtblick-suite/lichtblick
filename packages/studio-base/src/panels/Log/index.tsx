@@ -18,10 +18,10 @@ import produce from "immer";
 import { set } from "lodash";
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 
+import { SettingsTreeAction } from "@foxglove/studio";
 import { useDataSourceInfo, useMessagesByTopic } from "@foxglove/studio-base/PanelAPI";
 import Panel from "@foxglove/studio-base/components/Panel";
 import PanelToolbar from "@foxglove/studio-base/components/PanelToolbar";
-import { SettingsTreeAction } from "@foxglove/studio-base/components/SettingsTreeEditor/types";
 import Stack from "@foxglove/studio-base/components/Stack";
 import { useAppTimeFormat } from "@foxglove/studio-base/hooks";
 import { usePanelSettingsTreeUpdate } from "@foxglove/studio-base/providers/PanelSettingsEditorContextProvider";
@@ -118,7 +118,7 @@ const LogPanel = React.memo(({ config, saveConfig }: Props) => {
   useEffect(() => {
     updatePanelSettingsTree({
       actionHandler,
-      roots: buildSettingsTree(topicToRender, availableTopics),
+      nodes: buildSettingsTree(topicToRender, availableTopics),
     });
   }, [actionHandler, availableTopics, topicToRender, updatePanelSettingsTree]);
 

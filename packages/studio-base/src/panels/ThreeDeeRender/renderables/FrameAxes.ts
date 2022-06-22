@@ -7,7 +7,7 @@ import { Line2 } from "three/examples/jsm/lines/Line2";
 import { LineGeometry } from "three/examples/jsm/lines/LineGeometry";
 import { LineMaterial } from "three/examples/jsm/lines/LineMaterial";
 
-import { SettingsTreeAction } from "@foxglove/studio-base/components/SettingsTreeEditor/types";
+import { SettingsTreeAction } from "@foxglove/studio";
 
 import { MaterialCache, StandardColor } from "../MaterialCache";
 import { BaseUserData, Renderable } from "../Renderable";

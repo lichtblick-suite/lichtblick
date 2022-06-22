@@ -28,13 +28,10 @@ import {
 import { Suspense, useCallback, useEffect, useState } from "react";
 import { v4 as uuidv4 } from "uuid";
 
+import { SettingsTreeAction, SettingsTreeNodes } from "@foxglove/studio";
 import EmptyState from "@foxglove/studio-base/components/EmptyState";
 import Panel from "@foxglove/studio-base/components/Panel";
 import PanelToolbar from "@foxglove/studio-base/components/PanelToolbar";
-import {
-  SettingsTreeAction,
-  SettingsTreeRoots,
-} from "@foxglove/studio-base/components/SettingsTreeEditor/types";
 import Stack from "@foxglove/studio-base/components/Stack";
 import {
   LayoutState,
@@ -120,7 +117,7 @@ const StyledInput = muiStyled(Input)(({ theme }) => ({
 
 export type Explorer = undefined | "nodes" | "utils" | "templates";
 
-function buildSettingsTree(config: Config): SettingsTreeRoots {
+function buildSettingsTree(config: Config): SettingsTreeNodes {
   return {
     general: {
       icon: "Settings",
@@ -246,7 +243,7 @@ function NodePlayground(props: Props) {
   useEffect(() => {
     updatePanelSettingsTree({
       actionHandler,
-      roots: buildSettingsTree(config),
+      nodes: buildSettingsTree(config),
     });
   }, [actionHandler, config, updatePanelSettingsTree]);
 

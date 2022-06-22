@@ -6,9 +6,9 @@ import MoreVertIcon from "@mui/icons-material/MoreVert";
 import { Menu, MenuItem, IconButton, ListItemIcon, ListItemText, Divider } from "@mui/material";
 import { useState } from "react";
 
-import * as CommonIcons from "@foxglove/studio-base/components/CommonIcons";
+import { SettingsTreeNodeAction } from "@foxglove/studio";
 
-import { SettingsTreeNodeAction } from "./types";
+import { icons } from "./icons";
 
 export function NodeActionsMenu({
   actions,
@@ -59,7 +59,7 @@ export function NodeActionsMenu({
               <Divider variant={anyItemHasIcon ? "inset" : "fullWidth"} key={`divider_${index}`} />
             );
           }
-          const Icon = action.icon ? CommonIcons[action.icon] : undefined;
+          const Icon = action.icon ? icons[action.icon] : undefined;
           return (
             <MenuItem key={action.id} onClick={() => handleClose(action.id)}>
               {Icon && (

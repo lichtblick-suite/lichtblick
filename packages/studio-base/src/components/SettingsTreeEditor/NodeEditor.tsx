@@ -23,14 +23,14 @@ import { DeepReadonly } from "ts-essentials";
 import { useImmer } from "use-immer";
 
 import { filterMap } from "@foxglove/den/collection";
-import * as CommonIcons from "@foxglove/studio-base/components/CommonIcons";
-import { prepareSettingsRoots } from "@foxglove/studio-base/components/SettingsTreeEditor/utils";
+import { SettingsTreeAction, SettingsTreeNode } from "@foxglove/studio";
 import Stack from "@foxglove/studio-base/components/Stack";
 
 import { FieldEditor } from "./FieldEditor";
 import { NodeActionsMenu } from "./NodeActionsMenu";
 import { VisibilityToggle } from "./VisibilityToggle";
-import { SettingsTreeAction, SettingsTreeNode } from "./types";
+import { icons } from "./icons";
+import { prepareSettingsNodes } from "./utils";
 
 export type NodeEditorProps = {
   actionHandler: (action: SettingsTreeAction) => void;
@@ -158,7 +158,7 @@ function NodeEditorComponent(props: NodeEditorProps): JSX.Element {
     ) : undefined;
   });
 
-  const childNodes = prepareSettingsRoots(children ?? {}).map(([key, child]) => {
+  const childNodes = prepareSettingsNodes(children ?? {}).map(([key, child]) => {
     return (
       <NodeEditor
         actionHandler={actionHandler}
@@ -170,7 +170,7 @@ function NodeEditorComponent(props: NodeEditorProps): JSX.Element {
     );
   });
 
-  const IconComponent = settings.icon ? CommonIcons[settings.icon] : undefined;
+  const IconComponent = settings.icon ? icons[settings.icon] : undefined;
 
   const onEditLabel = useCallback(
     (event: ChangeEvent<HTMLInputElement>) => {

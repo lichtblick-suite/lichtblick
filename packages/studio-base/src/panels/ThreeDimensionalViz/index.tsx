@@ -17,6 +17,7 @@ import { useCallback, useMemo, useState, useRef, useEffect, useLayoutEffect } fr
 import { useLatest } from "react-use";
 
 import { CameraState } from "@foxglove/regl-worldview";
+import { SettingsTreeAction } from "@foxglove/studio";
 import { useDataSourceInfo } from "@foxglove/studio-base/PanelAPI";
 import {
   MessagePipelineContext,
@@ -24,7 +25,6 @@ import {
 } from "@foxglove/studio-base/components/MessagePipeline";
 import Panel from "@foxglove/studio-base/components/Panel";
 import { usePanelContext } from "@foxglove/studio-base/components/PanelContext";
-import { SettingsTreeAction } from "@foxglove/studio-base/components/SettingsTreeEditor/types";
 import useCallbackWithToast from "@foxglove/studio-base/hooks/useCallbackWithToast";
 import Layout from "@foxglove/studio-base/panels/ThreeDimensionalViz/Layout";
 import UrdfBuilder from "@foxglove/studio-base/panels/ThreeDimensionalViz/UrdfBuilder";
@@ -387,7 +387,7 @@ function BaseRenderer(props: Props): JSX.Element {
   useEffect(() => {
     updatePanelSettingsTree({
       actionHandler,
-      roots: buildSettingsTree(config),
+      nodes: buildSettingsTree(config),
     });
   }, [actionHandler, config, updatePanelSettingsTree]);
 

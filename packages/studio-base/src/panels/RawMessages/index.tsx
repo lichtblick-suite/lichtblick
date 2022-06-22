@@ -27,6 +27,7 @@ import ReactHoverObserver from "react-hover-observer";
 import Tree from "react-json-tree";
 import { useLatest } from "react-use";
 
+import { SettingsTreeAction } from "@foxglove/studio";
 import { useDataSourceInfo } from "@foxglove/studio-base/PanelAPI";
 import EmptyState from "@foxglove/studio-base/components/EmptyState";
 import Icon from "@foxglove/studio-base/components/Icon";
@@ -46,7 +47,6 @@ import { useMessageDataItem } from "@foxglove/studio-base/components/MessagePath
 import Panel from "@foxglove/studio-base/components/Panel";
 import { usePanelContext } from "@foxglove/studio-base/components/PanelContext";
 import PanelToolbar from "@foxglove/studio-base/components/PanelToolbar";
-import { SettingsTreeAction } from "@foxglove/studio-base/components/SettingsTreeEditor/types";
 import getDiff, {
   diffLabels,
   diffLabelsByLabelText,
@@ -224,7 +224,7 @@ function RawMessages(props: Props) {
   useEffect(() => {
     updateSettingsTree({
       actionHandler: settingsActionHandler,
-      roots: buildSettingsTree(config),
+      nodes: buildSettingsTree(config),
     });
   }, [config, settingsActionHandler, updateSettingsTree]);
 

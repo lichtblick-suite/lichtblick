@@ -3,10 +3,7 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 import Logger from "@foxglove/log";
-import {
-  SettingsTreeAction,
-  SettingsTreeFields,
-} from "@foxglove/studio-base/components/SettingsTreeEditor/types";
+import { SettingsTreeAction, SettingsTreeFields } from "@foxglove/studio";
 
 import { BaseUserData, Renderable } from "../Renderable";
 import { Renderer } from "../Renderer";

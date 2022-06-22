@@ -28,6 +28,7 @@ import { useCallback, useEffect, useMemo } from "react";
 import { List, AutoSizer, ListRowProps } from "react-virtualized";
 
 import { filterMap } from "@foxglove/den/collection";
+import { SettingsTreeAction } from "@foxglove/studio";
 import { useDataSourceInfo } from "@foxglove/studio-base/PanelAPI";
 import EmptyState from "@foxglove/studio-base/components/EmptyState";
 import Icon from "@foxglove/studio-base/components/Icon";
@@ -35,7 +36,6 @@ import { LegacyInput } from "@foxglove/studio-base/components/LegacyStyledCompon
 import Panel from "@foxglove/studio-base/components/Panel";
 import { usePanelContext } from "@foxglove/studio-base/components/PanelContext";
 import PanelToolbar from "@foxglove/studio-base/components/PanelToolbar";
-import { SettingsTreeAction } from "@foxglove/studio-base/components/SettingsTreeEditor/types";
 import Stack from "@foxglove/studio-base/components/Stack";
 import helpContent from "@foxglove/studio-base/panels/diagnostics/DiagnosticSummary.help.md";
 import useDiagnostics from "@foxglove/studio-base/panels/diagnostics/useDiagnostics";
@@ -335,7 +335,7 @@ function DiagnosticSummary(props: Props): JSX.Element {
   useEffect(() => {
     updatePanelSettingsTree({
       actionHandler,
-      roots: buildSummarySettingsTree(config, topicToRender, availableTopics),
+      nodes: buildSummarySettingsTree(config, topicToRender, availableTopics),
     });
   }, [actionHandler, availableTopics, config, topicToRender, updatePanelSettingsTree]);
 

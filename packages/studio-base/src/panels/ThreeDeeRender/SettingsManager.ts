@@ -5,11 +5,7 @@
 import EventEmitter from "eventemitter3";
 import { produce } from "immer";
 
-import {
-  SettingsTreeAction,
-  SettingsTreeNode,
-  SettingsTreeRoots,
-} from "@foxglove/studio-base/components/SettingsTreeEditor/types";
+import { SettingsTreeAction, SettingsTreeNode, SettingsTreeNodes } from "@foxglove/studio";
 
 import { LayerErrors, Path } from "./LayerErrors";
 
@@ -29,7 +25,7 @@ export class SettingsManager extends EventEmitter<SettingsManagerEvents> {
   private _nodesByKey = new Map<string, SettingsTreeEntry[]>();
   private _root: SettingsTreeNodeWithActionHandler = { children: {} };
 
-  constructor(baseTree: SettingsTreeRoots) {
+  constructor(baseTree: SettingsTreeNodes) {
     super();
 
     this._root = { children: baseTree };
@@ -71,7 +67,7 @@ export class SettingsManager extends EventEmitter<SettingsManagerEvents> {
     this.emit("update");
   }
 
-  tree(): SettingsTreeRoots {
+  tree(): SettingsTreeNodes {
     return this._root.children!;
   }
 

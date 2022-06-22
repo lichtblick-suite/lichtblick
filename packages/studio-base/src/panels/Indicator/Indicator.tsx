@@ -6,14 +6,10 @@ import { getColorFromString, hsv2hsl, Stack, useTheme } from "@fluentui/react";
 import { last } from "lodash";
 import { useCallback, useEffect, useLayoutEffect, useMemo, useReducer, useState } from "react";
 
-import { MessageEvent, PanelExtensionContext } from "@foxglove/studio";
+import { MessageEvent, PanelExtensionContext, SettingsTreeAction } from "@foxglove/studio";
 import { RosPath } from "@foxglove/studio-base/components/MessagePathSyntax/constants";
 import parseRosPath from "@foxglove/studio-base/components/MessagePathSyntax/parseRosPath";
 import { simpleGetMessagePathDataItems } from "@foxglove/studio-base/components/MessagePathSyntax/simpleGetMessagePathDataItems";
-import {
-  EXPERIMENTAL_PanelExtensionContextWithSettings,
-  SettingsTreeAction,
-} from "@foxglove/studio-base/components/SettingsTreeEditor/types";
 import { fonts } from "@foxglove/studio-base/util/sharedStyleConstants";
 
 import { getMatchingRule } from "./getMatchingRule";
@@ -185,12 +181,9 @@ export function Indicator({ context }: Props): JSX.Element {
 
   const settingsTree = useSettingsTree(config, state.pathParseError, state.error?.message);
   useEffect(() => {
-    // eslint-disable-next-line no-underscore-dangle
-    (
-      context as unknown as EXPERIMENTAL_PanelExtensionContextWithSettings
-    ).__updatePanelSettingsTree({
+    context.updatePanelSettingsEditor({
       actionHandler: settingsActionHandler,
-      roots: settingsTree,
+      nodes: settingsTree,
     });
   }, [context, settingsActionHandler, settingsTree]);
 

@@ -11,13 +11,14 @@ import { v4 as uuidv4 } from "uuid";
 import Logger from "@foxglove/log";
 import { CameraState } from "@foxglove/regl-worldview";
 import { toNanoSec } from "@foxglove/rostime";
-import { MessageEvent, Topic } from "@foxglove/studio";
-import type * as CommonIcons from "@foxglove/studio-base/components/CommonIcons";
 import {
+  MessageEvent,
+  SettingsIcon,
   SettingsTreeAction,
   SettingsTreeNodeActionItem,
-  SettingsTreeRoots,
-} from "@foxglove/studio-base/components/SettingsTreeEditor/types";
+  SettingsTreeNodes,
+  Topic,
+} from "@foxglove/studio";
 
 import { Input } from "./Input";
 import { Labels } from "./Labels";
@@ -318,7 +319,7 @@ export class Renderer extends EventEmitter<RendererEvents> {
   addCustomLayerAction(options: {
     layerId: string;
     label: string;
-    icon?: keyof typeof CommonIcons;
+    icon?: SettingsIcon;
     handler: (instanceId: string) => void;
   }): void {
     const handler = options.handler;
@@ -711,7 +712,7 @@ function deselectObject(object: THREE.Object3D) {
 }
 
 // Creates a skeleton settings tree. The tree contents are filled in by scene extensions
-function baseSettingsTree(): SettingsTreeRoots {
+function baseSettingsTree(): SettingsTreeNodes {
   return {
     general: {},
     scene: {},

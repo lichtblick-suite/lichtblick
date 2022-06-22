@@ -4,12 +4,11 @@
 
 import { isEmpty } from "lodash";
 
-import { Topic } from "@foxglove/studio";
-import { SettingsTreeRoots } from "@foxglove/studio-base/components/SettingsTreeEditor/types";
+import { SettingsTreeNodes, Topic } from "@foxglove/studio";
 
 import { Config } from "./types";
 
-export function buildSettingsTree(config: Config, topics: readonly Topic[]): SettingsTreeRoots {
+export function buildSettingsTree(config: Config, topics: readonly Topic[]): SettingsTreeNodes {
   const manualControl = isEmpty(config.jointStatesTopic);
   const topicOptions = topics.map((topic) => ({ label: topic.name, value: topic.name }));
 
@@ -23,7 +22,7 @@ export function buildSettingsTree(config: Config, topics: readonly Topic[]): Set
     topicOptions.unshift({ label: config.jointStatesTopic, value: config.jointStatesTopic });
   }
 
-  const settings: SettingsTreeRoots = {
+  const settings: SettingsTreeNodes = {
     general: {
       icon: "Settings",
       fields: {

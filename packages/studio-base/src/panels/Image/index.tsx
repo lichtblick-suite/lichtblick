@@ -17,6 +17,7 @@ import { difference, set, union } from "lodash";
 import { useEffect, useState, useMemo, useCallback, useRef } from "react";
 import { useUpdateEffect } from "react-use";
 
+import { SettingsTreeAction } from "@foxglove/studio";
 import { useDataSourceInfo } from "@foxglove/studio-base/PanelAPI";
 import { useMessagePipeline } from "@foxglove/studio-base/components/MessagePipeline";
 import Panel from "@foxglove/studio-base/components/Panel";
@@ -25,7 +26,6 @@ import {
   PanelContextMenuItem,
 } from "@foxglove/studio-base/components/PanelContextMenu";
 import PanelToolbar from "@foxglove/studio-base/components/PanelToolbar";
-import { SettingsTreeAction } from "@foxglove/studio-base/components/SettingsTreeEditor/types";
 import Stack from "@foxglove/studio-base/components/Stack";
 import { usePanelSettingsTreeUpdate } from "@foxglove/studio-base/providers/PanelSettingsEditorContextProvider";
 import inScreenshotTests from "@foxglove/studio-base/stories/inScreenshotTests";
@@ -159,7 +159,7 @@ function ImageView(props: Props) {
   useEffect(() => {
     updatePanelSettingsTree({
       actionHandler,
-      roots: buildSettingsTree({
+      nodes: buildSettingsTree({
         config,
         imageTopics,
         markerTopics,

@@ -9,11 +9,11 @@ import memoizeWeak from "memoize-weak";
 import { useMemo, useState } from "react";
 import { DeepReadonly } from "ts-essentials";
 
+import { SettingsTree } from "@foxglove/studio";
 import Stack from "@foxglove/studio-base/components/Stack";
 
 import { NodeEditor } from "./NodeEditor";
-import { SettingsTree } from "./types";
-import { prepareSettingsRoots } from "./utils";
+import { prepareSettingsNodes } from "./utils";
 
 const StyledAppBar = muiStyled(AppBar, { skipSx: true })(({ theme }) => ({
   top: -1,
@@ -38,7 +38,7 @@ export default function SettingsTreeEditor({
   const { actionHandler } = settings;
   const [filterText, setFilterText] = useState<string>("");
 
-  const definedRoots = useMemo(() => prepareSettingsRoots(settings.roots), [settings.roots]);
+  const definedNodes = useMemo(() => prepareSettingsNodes(settings.nodes), [settings.nodes]);
 
   return (
     <Stack fullHeight>
@@ -67,7 +67,7 @@ export default function SettingsTreeEditor({
         </StyledAppBar>
       )}
       <FieldGrid>
-        {definedRoots.map(([key, root]) => (
+        {definedNodes.map(([key, root]) => (
           <NodeEditor
             key={key}
             path={makeStablePath(key)}

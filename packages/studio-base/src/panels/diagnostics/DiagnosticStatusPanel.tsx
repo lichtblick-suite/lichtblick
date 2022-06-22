@@ -16,12 +16,12 @@ import produce from "immer";
 import { set, sortBy, uniq } from "lodash";
 import { useCallback, useMemo, useEffect } from "react";
 
+import { SettingsTreeAction } from "@foxglove/studio";
 import { useDataSourceInfo } from "@foxglove/studio-base/PanelAPI";
 import EmptyState from "@foxglove/studio-base/components/EmptyState";
 import Panel from "@foxglove/studio-base/components/Panel";
 import { usePanelContext } from "@foxglove/studio-base/components/PanelContext";
 import PanelToolbar from "@foxglove/studio-base/components/PanelToolbar";
-import { SettingsTreeAction } from "@foxglove/studio-base/components/SettingsTreeEditor/types";
 import Stack from "@foxglove/studio-base/components/Stack";
 import { usePanelSettingsTreeUpdate } from "@foxglove/studio-base/providers/PanelSettingsEditorContextProvider";
 import { SaveConfig } from "@foxglove/studio-base/types/panels";
@@ -137,7 +137,7 @@ function DiagnosticStatusPanel(props: Props) {
   useEffect(() => {
     updatePanelSettingsTree({
       actionHandler,
-      roots: buildStatusPanelSettingsTree(topicToRender, availableTopics),
+      nodes: buildStatusPanelSettingsTree(topicToRender, availableTopics),
     });
   }, [actionHandler, availableTopics, topicToRender, updatePanelSettingsTree]);
 

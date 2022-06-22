@@ -2,14 +2,11 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import {
-  SettingsTreeFields,
-  SettingsTreeRoots,
-} from "@foxglove/studio-base/components/SettingsTreeEditor/types";
+import { SettingsTreeFields, SettingsTreeNodes } from "@foxglove/studio";
 
 import { ThreeDimensionalVizConfig } from "./types";
 
-export function buildSettingsTree(config: ThreeDimensionalVizConfig): SettingsTreeRoots {
+export function buildSettingsTree(config: ThreeDimensionalVizConfig): SettingsTreeNodes {
   const rootFields: SettingsTreeFields = {
     flattenMarkers: {
       label: "Flatten markers",
