@@ -2,7 +2,7 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { set } from "lodash";
+import { cloneDeep, set } from "lodash";
 
 import { DEFAULT_CAMERA_STATE } from "@foxglove/regl-worldview";
 import { SettingsTreeAction } from "@foxglove/studio-base/components/SettingsTreeEditor/types";
@@ -70,6 +70,7 @@ export class CoreSettings extends SceneExtension {
         path: ["cameraState"],
         node: {
           label: "Camera",
+          actions: [{ type: "action", id: "reset-camera", label: "Reset" }],
           fields: {
             distance: {
               label: "Distance",
@@ -93,20 +94,22 @@ export class CoreSettings extends SceneExtension {
               precision: PRECISION_DEGREES,
               value: camera.thetaOffset,
             },
-            phi: {
-              label: "Phi",
-              input: "number",
-              step: ONE_DEGREE,
-              precision: PRECISION_DEGREES,
-              value: camera.phi,
-            },
-            fovy: {
-              label: "Y-Axis FOV",
-              input: "number",
-              step: ONE_DEGREE,
-              precision: PRECISION_DEGREES,
-              value: camera.fovy,
-            },
+            ...(camera.perspective && {
+              phi: {
+                label: "Phi",
+                input: "number",
+                step: ONE_DEGREE,
+                precision: PRECISION_DEGREES,
+                value: camera.phi,
+              },
+              fovy: {
+                label: "Y-Axis FOV",
+                input: "number",
+                step: ONE_DEGREE,
+                precision: PRECISION_DEGREES,
+                value: camera.fovy,
+              },
+            }),
             near: {
               label: "Near",
               input: "number",
@@ -130,6 +133,13 @@ export class CoreSettings extends SceneExtension {
   }
 
   handleSettingsAction = (action: SettingsTreeAction): void => {
+    if (action.action === "perform-node-action" && action.payload.id === "reset-camera") {
+      this.renderer.updateConfig((draft) => {
+        draft.cameraState = cloneDeep(DEFAULT_CAMERA_STATE);
+      });
+      return;
+    }
+
     if (action.action !== "update" || action.payload.path.length === 0) {
       return;
     }

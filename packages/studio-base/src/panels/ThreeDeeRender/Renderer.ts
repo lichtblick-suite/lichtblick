@@ -92,7 +92,7 @@ export type CustomLayerAction = {
 };
 
 // Enable this to render the hitmap to the screen after clicking
-const DEBUG_PICKING: true | false = false;
+const DEBUG_PICKING: boolean = false;
 
 // NOTE: These do not use .convertSRGBToLinear() since background color is not
 // affected by gamma correction
@@ -145,7 +145,11 @@ export class Renderer extends EventEmitter<RendererEvents> {
   dirLight: THREE.DirectionalLight;
   hemiLight: THREE.HemisphereLight;
   input: Input;
-  camera: THREE.PerspectiveCamera;
+
+  perspectiveCamera: THREE.PerspectiveCamera;
+  orthographicCamera: THREE.OrthographicCamera;
+  aspect: number;
+
   picker: Picker;
   selectionBackdrop: ScreenOverlay;
   selectedObject: Renderable | undefined;
@@ -226,15 +230,10 @@ export class Renderer extends EventEmitter<RendererEvents> {
     this.input.on("resize", (size) => this.resizeHandler(size));
     this.input.on("click", (cursorCoords) => this.clickHandler(cursorCoords));
 
-    const fov = 79;
-    const near = 0.01; // 1cm
-    const far = 10_000; // 10km
-    this.camera = new THREE.PerspectiveCamera(fov, width / height, near, far);
-    this.camera.up.set(0, 0, 1);
-    this.camera.position.set(1, -3, 1);
-    this.camera.lookAt(0, 0, 0);
+    this.perspectiveCamera = new THREE.PerspectiveCamera();
+    this.orthographicCamera = new THREE.OrthographicCamera();
 
-    this.picker = new Picker(this.gl, this.scene, this.camera, { debug: DEBUG_PICKING });
+    this.picker = new Picker(this.gl, this.scene, { debug: DEBUG_PICKING });
 
     this.selectionBackdrop = new ScreenOverlay();
     this.selectionBackdrop.visible = false;
@@ -244,6 +243,7 @@ export class Renderer extends EventEmitter<RendererEvents> {
 
     const samples = msaaSamples(this.maxLod, this.gl.capabilities);
     const renderSize = this.gl.getDrawingBufferSize(tempVec2);
+    this.aspect = renderSize.width / renderSize.height;
     log.debug(`Initialized ${renderSize.width}x${renderSize.height} renderer (${samples}x MSAA)`);
 
     this.addSceneExtension(new CoreSettings(this));
@@ -257,6 +257,7 @@ export class Renderer extends EventEmitter<RendererEvents> {
     this.addSceneExtension(new Polygons(this));
     this.addSceneExtension(new Poses(this));
 
+    this._updateCameras(config.cameraState);
     this.animationFrame();
   }
 
@@ -394,28 +395,55 @@ export class Renderer extends EventEmitter<RendererEvents> {
   }
 
   /** Translate a @foxglove/regl-worldview CameraState to the three.js coordinate system */
-  setCameraState(cameraState: CameraState): void {
-    this.camera.position
-      .setFromSpherical(
-        tempSpherical.set(cameraState.distance, cameraState.phi, -cameraState.thetaOffset),
-      )
-      .applyAxisAngle(UNIT_X, PI_2);
-    this.camera.position.add(
-      tempVec.set(
+  private _updateCameras(cameraState: CameraState): void {
+    if (cameraState.perspective) {
+      this.perspectiveCamera.position
+        .setFromSpherical(
+          tempSpherical.set(cameraState.distance, cameraState.phi, -cameraState.thetaOffset),
+        )
+        .applyAxisAngle(UNIT_X, PI_2);
+      this.perspectiveCamera.position.add(
+        tempVec.set(
+          cameraState.targetOffset[0],
+          cameraState.targetOffset[1],
+          cameraState.targetOffset[2], // always 0 in Worldview CameraListener
+        ),
+      );
+      this.perspectiveCamera.quaternion.setFromEuler(
+        tempEuler.set(cameraState.phi, 0, -cameraState.thetaOffset, "ZYX"),
+      );
+      this.perspectiveCamera.fov = cameraState.fovy * (180 / Math.PI);
+      this.perspectiveCamera.near = cameraState.near;
+      this.perspectiveCamera.far = cameraState.far;
+      this.perspectiveCamera.aspect = this.aspect;
+      this.perspectiveCamera.updateProjectionMatrix();
+    } else {
+      this.orthographicCamera.position.set(
         cameraState.targetOffset[0],
         cameraState.targetOffset[1],
-        cameraState.targetOffset[2], // always 0 in Worldview CameraListener
-      ),
-    );
-    this.camera.quaternion.setFromEuler(
-      tempEuler.set(cameraState.phi, 0, -cameraState.thetaOffset, "ZYX"),
-    );
-    this.camera.fov = cameraState.fovy * (180 / Math.PI);
-    this.camera.near = cameraState.near;
-    this.camera.far = cameraState.far;
-    this.camera.updateProjectionMatrix();
+        cameraState.far / 2,
+      );
+      this.orthographicCamera.quaternion.setFromAxisAngle(
+        tempVec.set(0, 0, 1),
+        -cameraState.thetaOffset,
+      );
+      this.orthographicCamera.left = (-cameraState.distance / 2) * this.aspect;
+      this.orthographicCamera.right = (cameraState.distance / 2) * this.aspect;
+      this.orthographicCamera.top = cameraState.distance / 2;
+      this.orthographicCamera.bottom = -cameraState.distance / 2;
+      this.orthographicCamera.near = cameraState.near;
+      this.orthographicCamera.far = cameraState.far;
+      this.orthographicCamera.updateProjectionMatrix();
+    }
+  }
 
+  setCameraState(cameraState: CameraState): void {
+    this._updateCameras(cameraState);
     this.emit("cameraMove", this);
+  }
+
+  activeCamera(): THREE.PerspectiveCamera | THREE.OrthographicCamera {
+    return this.config.cameraState.perspective ? this.perspectiveCamera : this.orthographicCamera;
   }
 
   addMessageEvent(messageEvent: Readonly<MessageEvent<unknown>>, datatype: string): void {
@@ -493,13 +521,14 @@ export class Renderer extends EventEmitter<RendererEvents> {
   };
 
   frameHandler = (currentTime: bigint): void => {
+    const camera = this.activeCamera();
     this.emit("startFrame", currentTime, this);
 
     this._updateFrames();
     this.materialCache.update(this.input.canvasSize);
 
     this.gl.clear();
-    this.camera.layers.set(LAYER_DEFAULT);
+    camera.layers.set(LAYER_DEFAULT);
     this.selectionBackdrop.visible = this.selectedObject != undefined;
 
     const renderFrameId = this.renderFrameId;
@@ -512,13 +541,13 @@ export class Renderer extends EventEmitter<RendererEvents> {
       sceneExtension.startFrame(currentTime, renderFrameId, fixedFrameId);
     }
 
-    this.gl.render(this.scene, this.camera);
+    this.gl.render(this.scene, camera);
 
     if (this.selectedObject) {
       this.gl.clearDepth();
-      this.camera.layers.set(LAYER_SELECTED);
+      camera.layers.set(LAYER_SELECTED);
       this.selectionBackdrop.visible = false;
-      this.gl.render(this.scene, this.camera);
+      this.gl.render(this.scene, camera);
     }
 
     this.emit("endFrame", currentTime, this);
@@ -531,8 +560,8 @@ export class Renderer extends EventEmitter<RendererEvents> {
     this.gl.setSize(size.width, size.height);
 
     const renderSize = this.gl.getDrawingBufferSize(tempVec2);
-    this.camera.aspect = renderSize.width / renderSize.height;
-    this.camera.updateProjectionMatrix();
+    this.aspect = renderSize.width / renderSize.height;
+    this._updateCameras(this.config.cameraState);
 
     log.debug(`Resized renderer to ${renderSize.width}x${renderSize.height}`);
     this.animationFrame();
@@ -552,7 +581,7 @@ export class Renderer extends EventEmitter<RendererEvents> {
 
     // Render a single pixel using a fragment shader that writes object IDs as
     // colors, then read the value of that single pixel back
-    const objectId = this.picker.pick(cursorCoords.x, cursorCoords.y);
+    const objectId = this.picker.pick(cursorCoords.x, cursorCoords.y, this.activeCamera());
     if (objectId < 0) {
       log.debug(`Background selected`);
       this.emit("renderableSelected", undefined, this);

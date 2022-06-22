@@ -39,7 +39,7 @@ export type PickerOptions = {
 export class Picker {
   private gl: THREE.WebGLRenderer;
   private scene: THREE.Scene;
-  private camera: Camera;
+  private camera?: Camera;
   private shouldPickObjectCB: (object: THREE.Object3D) => boolean;
   private materialCache = new Map<number, THREE.ShaderMaterial>();
   private emptyScene: THREE.Scene;
@@ -49,15 +49,9 @@ export class Picker {
   private debug: boolean;
   private isDebugPass = false;
 
-  constructor(
-    gl: THREE.WebGLRenderer,
-    scene: THREE.Scene,
-    camera: Camera,
-    options: PickerOptions = {},
-  ) {
+  constructor(gl: THREE.WebGLRenderer, scene: THREE.Scene, options: PickerOptions = {}) {
     this.gl = gl;
     this.scene = scene;
-    this.camera = camera;
     this.shouldPickObjectCB = AlwaysPickObject;
     this.debug = options.debug ?? false;
 
@@ -83,7 +77,13 @@ export class Picker {
     this.pickingTarget.dispose();
   }
 
-  pick(x: number, y: number, shouldPickObject = AlwaysPickObject): number {
+  pick(
+    x: number,
+    y: number,
+    camera: THREE.OrthographicCamera | THREE.PerspectiveCamera,
+    shouldPickObject = AlwaysPickObject,
+  ): number {
+    this.camera = camera;
     this.shouldPickObjectCB = shouldPickObject;
     const hw = Math.floor(PIXEL_WIDTH / 2);
     const pixelRatio = this.gl.getPixelRatio();
@@ -92,7 +92,7 @@ export class Picker {
     const w = this.gl.domElement.width;
     const h = this.gl.domElement.height;
     // Set the projection matrix to only look at the pixel we are interested in
-    this.camera.setViewOffset(w, h, xi, yi, PIXEL_WIDTH, PIXEL_WIDTH);
+    camera.setViewOffset(w, h, xi, yi, PIXEL_WIDTH, PIXEL_WIDTH);
     const currRenderTarget = this.gl.getRenderTarget();
     const currAlpha = this.gl.getClearAlpha();
     this.gl.getClearColor(this.currClearColor);
@@ -100,7 +100,7 @@ export class Picker {
     this.gl.setClearColor(WHITE_COLOR);
     this.gl.setClearAlpha(1);
     this.gl.clear();
-    this.gl.render(this.emptyScene, this.camera);
+    this.gl.render(this.emptyScene, camera);
     this.gl.readRenderTargetPixels(
       this.pickingTarget,
       0,
@@ -111,7 +111,7 @@ export class Picker {
     );
     this.gl.setRenderTarget(currRenderTarget);
     this.gl.setClearColor(this.currClearColor, currAlpha);
-    this.camera.clearViewOffset();
+    camera.clearViewOffset();
 
     const xo = Math.min(hw, xi);
     const yo = Math.min(hw, yi);
@@ -123,20 +123,20 @@ export class Picker {
       this.pixelBuffer[offset + 3]!;
 
     if (this.debug) {
-      this.pickDebugRender();
+      this.pickDebugRender(camera);
     }
 
     return val;
   }
 
-  pickDebugRender(): void {
+  pickDebugRender(camera: THREE.OrthographicCamera | THREE.PerspectiveCamera): void {
     this.isDebugPass = true;
     const currAlpha = this.gl.getClearAlpha();
     this.gl.getClearColor(this.currClearColor);
     this.gl.setClearColor(WHITE_COLOR);
     this.gl.setClearAlpha(1);
     this.gl.clear();
-    this.gl.render(this.emptyScene, this.camera);
+    this.gl.render(this.emptyScene, camera);
     this.gl.setClearColor(this.currClearColor, currAlpha);
     this.isDebugPass = false;
   }
@@ -151,6 +151,9 @@ export class Picker {
   };
 
   private processItem = (renderItem: THREE.RenderItem): void => {
+    if (!this.camera) {
+      return;
+    }
     const object = renderItem.object;
     const objId = this.isDebugPass ? hashInt(object.id) : object.id;
     const material = renderItem.material;
