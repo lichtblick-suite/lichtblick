@@ -188,8 +188,6 @@ export default function Workspace(props: WorkspaceProps): JSX.Element {
 
   const isPlayerPresent = playerPresence !== PlayerPresence.NOT_PRESENT;
 
-  const [enableOpenDialog] = useAppConfigurationValue(AppSetting.OPEN_DIALOG);
-
   const { currentUser } = useCurrentUser();
 
   const { currentUserRequired } = useInitialDeepLinkState(props.deepLinks ?? DEFAULT_DEEPLINKS);
@@ -206,15 +204,9 @@ export default function Workspace(props: WorkspaceProps): JSX.Element {
     { view: OpenDialogViews; activeDataSource?: IDataSourceFactory } | undefined
   >(isPlayerPresent || !showOpenDialogOnStartup || showSignInForm ? undefined : { view: "start" });
 
-  const [selectedSidebarItem, setSelectedSidebarItem] = useState<SidebarItemKey | undefined>(() => {
-    // When using the open dialog ui - we always start with the connection sidebar open.
-    // This is to help the user find where to select a connection should they dismiss the open dialog
-    if (enableOpenDialog === true) {
-      return "connection";
-    }
-    // Start with the sidebar open if no connection has been made
-    return isPlayerPresent ? undefined : "connection";
-  });
+  const [selectedSidebarItem, setSelectedSidebarItem] = useState<SidebarItemKey | undefined>(
+    "connection",
+  );
 
   // When a player is present we hide the connection sidebar. To prevent hiding the connection sidebar
   // when the user wants to select a new connection we track whether the sidebar item opened
@@ -568,7 +560,7 @@ export default function Workspace(props: WorkspaceProps): JSX.Element {
       ]}
     >
       {showSignInForm && <SignInFormModal />}
-      {enableOpenDialog === true && showOpenDialog != undefined && (
+      {showOpenDialog != undefined && (
         <OpenDialog
           activeView={showOpenDialog.view}
           activeDataSource={showOpenDialog.activeDataSource}

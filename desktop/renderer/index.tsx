@@ -76,7 +76,6 @@ async function main() {
     (global as { storageBridge?: Storage }).storageBridge!,
     {
       defaults: {
-        [AppSetting.OPEN_DIALOG]: true,
         [AppSetting.ENABLE_REACT_STRICT_MODE]: isDevelopment,
         [AppSetting.EXPERIMENTAL_BAG_PLAYER]: false,
         [AppSetting.EXPERIMENTAL_DATA_PLATFORM_PLAYER]: isDevelopment,

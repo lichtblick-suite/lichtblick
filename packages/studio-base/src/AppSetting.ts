@@ -30,7 +30,6 @@ export enum AppSetting {
   // Miscellaneous
   HIDE_SIGN_IN_PROMPT = "hideSignInPrompt",
   LAUNCH_PREFERENCE = "launchPreference",
-  OPEN_DIALOG = "ui.open-dialog",
   SHOW_OPEN_DIALOG_ON_STARTUP = "ui.open-dialog-startup",
 
   // Dev only
