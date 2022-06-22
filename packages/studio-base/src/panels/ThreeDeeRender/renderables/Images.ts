@@ -45,6 +45,7 @@ import { makePose } from "../transforms";
 import { CameraInfoUserData } from "./Cameras";
 
 const log = Logger.getLogger(__filename);
+void log;
 
 export type LayerSettingsImage = BaseSettings & {
   cameraInfoTopic: string | undefined;
@@ -263,9 +264,9 @@ export class Images extends SceneExtension<ImageRenderable> {
       const cameraRenderable = this._camerasExtension()?.renderables.get(settings.cameraInfoTopic);
       const cameraModel = cameraRenderable?.userData.cameraModel;
       if (cameraModel) {
-        log.debug(
-          `Constructing geometry for ${cameraModel.width}x${cameraModel.height} camera image on "${topic}"`,
-        );
+        // log.debug(
+        //   `Constructing geometry for ${cameraModel.width}x${cameraModel.height} camera image on "${topic}"`,
+        // );
         const distance = renderable.userData.settings.distance;
         const geometry = createGeometry(cameraModel, distance);
         renderable.userData.geometry = geometry;
@@ -284,9 +285,9 @@ export class Images extends SceneExtension<ImageRenderable> {
         .createImageBitmap(bitmapData, { resizeWidth: DEFAULT_IMAGE_WIDTH })
         .then((bitmap) => {
           if (renderable.userData.texture == undefined) {
-            log.debug(
-              `Creating texture for ${bitmap.width}x${bitmap.height} "${compressed.format}" camera image on "${topic}"`,
-            );
+            // log.debug(
+            //   `Creating texture for ${bitmap.width}x${bitmap.height} "${compressed.format}" camera image on "${topic}"`,
+            // );
             renderable.userData.texture = createCanvasTexture(bitmap);
             rebuildMaterial(renderable);
             tryCreateMesh(renderable, this.renderer);
@@ -315,9 +316,9 @@ export class Images extends SceneExtension<ImageRenderable> {
         prevTexture.image.height !== height
       ) {
         prevTexture?.dispose();
-        log.debug(
-          `Creating data texture for ${width}x${height} "${raw.encoding}" camera image on "${topic}"`,
-        );
+        // log.debug(
+        //   `Creating data texture for ${width}x${height} "${raw.encoding}" camera image on "${topic}"`,
+        // );
         renderable.userData.texture = createDataTexture(width, height);
         rebuildMaterial(renderable);
         tryCreateMesh(renderable, this.renderer);
@@ -346,9 +347,9 @@ type RawImageOptions = {
 const tempColor = { r: 0, g: 0, b: 0, a: 0 };
 
 function tryCreateMesh(renderable: ImageRenderable, renderer: Renderer): void {
-  const { topic, mesh, geometry, material } = renderable.userData;
+  const { mesh, geometry, material } = renderable.userData;
   if (!mesh && geometry && material) {
-    log.debug(`Building mesh for camera image on "${topic}"`);
+    // log.debug(`Building mesh for camera image on "${renderable.userData.topic}"`);
     renderable.userData.mesh = new THREE.Mesh(geometry, renderable.userData.material);
     renderable.add(renderable.userData.mesh);
     renderer.animationFrame();

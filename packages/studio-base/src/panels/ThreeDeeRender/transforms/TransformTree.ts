@@ -36,6 +36,10 @@ export class TransformTree {
     return updated;
   }
 
+  clear(): void {
+    this._frames.clear();
+  }
+
   hasFrame(id: string): boolean {
     return this._frames.has(id);
   }

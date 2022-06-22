@@ -14,6 +14,7 @@ import { DetailLevel } from "./lod";
 import { ColorRGBA } from "./ros";
 
 const log = Logger.getLogger(__filename);
+void log;
 
 const LIGHT_COLOR_STR = "#27272b";
 const LIGHT_BACKGROUND_COLOR_STR = "#ececec";
@@ -167,7 +168,7 @@ export class Labels extends THREE.Object3D {
     if (!context) {
       throw new Error("Could not create canvas context for ThreeDeeRender.Labels");
     }
-    log.debug(`Created ${canvas.width}x${canvas.height}@${scale}x canvas, text="${label.text}"`);
+    // log.debug(`Created ${canvas.width}x${canvas.height}@${scale}x canvas, text="${label.text}"`);
     context.scale(scale, scale);
     context.font = `${fontWeight} ${fontSize}px ${fontFamily}`;
 

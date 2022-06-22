@@ -180,6 +180,7 @@ export function ThreeDeeRender({ context }: { context: PanelExtensionContext }):
   const [topics, setTopics] = useState<ReadonlyArray<Topic> | undefined>();
   const [messages, setMessages] = useState<ReadonlyArray<MessageEvent<unknown>> | undefined>();
   const [currentTime, setCurrentTime] = useState<bigint | undefined>();
+  const [didSeek, setDidSeek] = useState<boolean>(false);
 
   const renderRef = useRef({ needsRender: false });
   const [renderDone, setRenderDone] = useState<(() => void) | undefined>();
@@ -268,6 +269,12 @@ export function ThreeDeeRender({ context }: { context: PanelExtensionContext }):
           setCurrentTime(toNanoSec(renderState.currentTime));
         }
 
+        // Increment the seek count if didSeek is set to true, to trigger a
+        // state flush in Renderer
+        if (renderState.didSeek === true) {
+          setDidSeek(true);
+        }
+
         // Set the done callback into a state variable to trigger a re-render
         setRenderDone(done);
 
@@ -292,10 +299,11 @@ export function ThreeDeeRender({ context }: { context: PanelExtensionContext }):
       });
     };
 
-    context.watch("currentTime");
     context.watch("colorScheme");
-    context.watch("topics");
     context.watch("currentFrame");
+    context.watch("currentTime");
+    context.watch("didSeek");
+    context.watch("topics");
   }, [context]);
 
   // Build a list of topics to subscribe to
@@ -340,6 +348,14 @@ export function ThreeDeeRender({ context }: { context: PanelExtensionContext }):
       renderRef.current.needsRender = true;
     }
   }, [currentTime, renderer]);
+
+  // Flush the renderer's state when the seek count changes
+  useEffect(() => {
+    if (renderer && didSeek) {
+      renderer.clear();
+      setDidSeek(false);
+    }
+  }, [renderer, didSeek]);
 
   // Keep the renderer colorScheme and backgroundColor up to date
   useEffect(() => {

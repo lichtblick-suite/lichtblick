@@ -34,6 +34,7 @@ import { makePose } from "../transforms";
 import { RenderableLineList } from "./markers/RenderableLineList";
 
 const log = Logger.getLogger(__filename);
+void log;
 
 export type LayerSettingsCameraInfo = BaseSettings & {
   distance: number;
@@ -189,7 +190,7 @@ export class Cameras extends SceneExtension<CameraInfoRenderable> {
     // If the CameraInfo message contents changed, rebuild cameraModel
     const dataEqual = cameraInfosEqual(renderable.userData.cameraInfo, cameraInfo);
     if (!dataEqual) {
-      log.warn(`CameraInfo changed on topic "${topic}", updating rectification model`);
+      // log.warn(`CameraInfo changed on topic "${topic}", updating rectification model`);
       renderable.userData.cameraInfo = cameraInfo;
 
       if (cameraInfo.P.length === 12) {
