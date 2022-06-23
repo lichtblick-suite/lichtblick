@@ -62,6 +62,17 @@ const RecentStack = muiStyled(Stack)(({ theme }) => ({
   "&:hover": { color: theme.palette.primary.dark },
 }));
 
+const Grid = muiStyled("div")(({ theme }) => ({
+  // See comment below for explanation of grid properties
+  display: "grid",
+  gap: theme.spacing(2.5, 4),
+  gridTemplateRows: "repeat(2, auto) 1fr",
+  "@media(max-width: 800px)": {
+    display: "flex",
+    flexDirection: "column",
+  },
+}));
+
 export default function Start(props: IStartProps): JSX.Element {
   const {
     supportedLocalFileExtensions = [],
@@ -78,7 +89,7 @@ export default function Start(props: IStartProps): JSX.Element {
   const buttonStyles = useMemo(
     () => ({
       root: {
-        width: 340,
+        width: "100%",
         maxWidth: "none",
       },
       rootHovered: { backgroundColor: theme.palette.neutralLighterAlt },
@@ -171,11 +182,18 @@ export default function Start(props: IStartProps): JSX.Element {
     });
   }, [recentSources, selectRecent, theme]);
 
+  // This layout uses `display: grid` at large widths, and `display: flex` at small widths. When
+  // using flex, the elements flow in source order within the column.
+  //
+  // At the larger width (when using grid), `gridColumn: 2` makes the Recent, Help, and Contact
+  // items go in the 2nd column, while the larger "Open data source" section occupies the first
+  // column. `gridTemplateRows: "repeat(2, auto) 1fr"` and `gridRow: "1 / 4"` makes it so the Open
+  // section doesn't affect the heights of the Recent and Help sections.
   return (
     <Stack gap={2.5}>
-      <Stack direction="row" gap={4}>
-        {/* Left column */}
-        <Stack flex="1 1 50%" gap={2}>
+      <Grid>
+        {recentItems.length > 0 && <ActionList gridColumn={2} title="Recent" items={recentItems} />}
+        <Stack flex="1 1 0" gap={2} style={{ minWidth: 340, gridRow: "1 / 4" }}>
           <Typography variant="h5" color="text.secondary">
             Open data source
           </Typography>
@@ -185,14 +203,9 @@ export default function Start(props: IStartProps): JSX.Element {
             ))}
           </Stack>
         </Stack>
-
-        {/* Right column */}
-        <Stack flex="1 1 50%" gap={2.5} zeroMinWidth>
-          {recentItems.length > 0 && <ActionList title="Recent" items={recentItems} />}
-          <ActionList title="Help" items={HELP_ITEMS} />
-          <ActionList title="Contact" items={CONTACT_ITEMS} />
-        </Stack>
-      </Stack>
+        <ActionList gridColumn={2} title="Help" items={HELP_ITEMS} />
+        <ActionList gridColumn={2} title="Contact" items={CONTACT_ITEMS} />
+      </Grid>
       <Checkbox
         label="Show on startup"
         checked={showOnStartup}

@@ -142,8 +142,7 @@ export default function OpenDialog(props: OpenDialogProps): JSX.Element {
   return (
     <Dialog
       hidden={false}
-      maxWidth={800}
-      minWidth={800}
+      maxWidth="calc(min(800px, 100% - 32px))"
       modalProps={{
         layerProps: {
           // We enable event bubbling so a user can drag&drop files or folders onto the app even when
@@ -168,29 +167,24 @@ export default function OpenDialog(props: OpenDialogProps): JSX.Element {
         title: view.title,
         styles: {
           content: {
-            overflow: "hidden",
-            // Keep a consistent height for the dialog so changing views does not change the height
+            overflow: "visible",
             display: "flex",
             flexDirection: "column",
-            minHeight: 520,
+            // Keep a consistent height for the dialog so changing views does not change the height
+            flexBasis: 520,
+            maxHeight: 520,
             padding: theme.spacing.l1,
-
-            "@media (max-height: 552px)": { overflowY: "auto" },
           },
           inner: {
             flex: 1,
             display: "flex",
             flexDirection: "column",
-
-            "@media (min-height: 552px)": { overflow: "hidden" },
           },
           innerContent: {
             height: "100%",
             display: "flex",
             flexDirection: "column",
             flex: 1,
-
-            "@media (min-height: 552px)": { overflow: "hidden" },
           },
         },
       }}

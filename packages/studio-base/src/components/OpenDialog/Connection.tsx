@@ -76,8 +76,8 @@ export default function Connection(props: ConnectionProps): JSX.Element {
 
   return (
     <View onBack={onBack} onCancel={onCancel} onOpen={disableOpen ? undefined : onOpen}>
-      <Stack direction="row" flexGrow={1} fullHeight gap={4}>
-        <Stack fullHeight>
+      <Stack direction="row" flexGrow={1} flexWrap="wrap" fullHeight gap={4}>
+        <Stack flex="0 0 240px">
           {enabledSourcesFirst.map((source, idx) => {
             const { id, iconName, displayName } = source;
             return (
@@ -87,7 +87,6 @@ export default function Connection(props: ConnectionProps): JSX.Element {
                 iconProps={{ iconName }}
                 onClick={() => setSelectedConnectionIdx(idx)}
                 styles={{
-                  root: { minWidth: 240 },
                   rootChecked: { backgroundColor: theme.semanticColors.bodyBackgroundHovered },
                   icon: { "> span": { display: "flex" } },
                   iconChecked: { color: theme.palette.themePrimary },
@@ -98,7 +97,7 @@ export default function Connection(props: ConnectionProps): JSX.Element {
             );
           })}
         </Stack>
-        <Stack key={selectedSource?.id} flex="auto" fullHeight gap={2} overflowX="auto">
+        <Stack key={selectedSource?.id} flex="1 0 240px" gap={2}>
           {selectedSource?.description && (
             <Typography color="text.secondary">{selectedSource.description}</Typography>
           )}

@@ -11,10 +11,11 @@ import Stack from "@foxglove/studio-base/components/Stack";
 type IActionListProps = {
   title?: ReactNode;
   items: IButtonProps[];
+  gridColumn?: number | string;
 };
 
 export default function ActionList(props: IActionListProps): JSX.Element {
-  const { items, title } = props;
+  const { items, title, gridColumn } = props;
   const theme = useTheme();
 
   const actionButtonStyles = useMemo(
@@ -23,7 +24,6 @@ export default function ActionList(props: IActionListProps): JSX.Element {
         root: {
           padding: 0,
           color: theme.palette.themePrimary,
-          minWidth: 320,
           height: 24,
         },
         flexContainer: {
@@ -47,7 +47,7 @@ export default function ActionList(props: IActionListProps): JSX.Element {
   );
 
   return (
-    <Stack gap={1}>
+    <Stack gap={1} style={{ gridColumn }}>
       {title != undefined && (
         <Typography variant="h5" color="text.secondary">
           {title}
