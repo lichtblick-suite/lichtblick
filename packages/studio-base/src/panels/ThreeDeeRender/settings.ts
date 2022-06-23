@@ -25,6 +25,8 @@ export type CustomLayerSettings = BaseSettings & {
   layerId: string;
   /** The label to use for this layer in the settings tree, under "Custom Layers". */
   label: string;
+  /** Optional value specifying order in the custom layer list */
+  order?: number;
 };
 
 export const PRECISION_DISTANCE = 3; // [1mm]

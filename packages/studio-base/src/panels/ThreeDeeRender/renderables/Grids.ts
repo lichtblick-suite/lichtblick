@@ -2,6 +2,8 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
+import { maxBy } from "lodash";
+
 import Logger from "@foxglove/log";
 import { SettingsTreeAction, SettingsTreeFields } from "@foxglove/studio";
 
@@ -122,6 +124,7 @@ export class Grids extends SceneExtension<GridRenderable> {
           fields,
           visible: config.visible ?? true,
           actions: [{ type: "action", id: "delete", label: "Delete" }],
+          order: layerConfig.order,
           handler,
         },
       });
@@ -184,7 +187,9 @@ export class Grids extends SceneExtension<GridRenderable> {
 
     // Add this instance to the config
     this.renderer.updateConfig((draft) => {
-      draft.layers[instanceId] = config;
+      const maxOrderLayer = maxBy(Object.values(draft.layers), (layer) => layer?.order);
+      const order = 1 + (maxOrderLayer?.order ?? 0);
+      draft.layers[instanceId] = { ...config, order };
     });
 
     // Add a renderable
