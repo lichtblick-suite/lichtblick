@@ -12,7 +12,7 @@ import { Renderer } from "../Renderer";
 import { PartialMessage, PartialMessageEvent, SceneExtension } from "../SceneExtension";
 import { SettingsTreeEntry } from "../SettingsManager";
 import { makeRgba, rgbaToCssString, stringToRgba } from "../color";
-import { vec3TupleEquals } from "../math";
+import { vecEqual } from "../math";
 import { normalizeHeader, normalizeMatrix6, normalizePose } from "../normalizeMessages";
 import {
   Marker,
@@ -24,10 +24,11 @@ import {
   TIME_ZERO,
   POSE_STAMPED_DATATYPES,
   PoseWithCovariance,
+  ColorRGBA,
 } from "../ros";
 import { BaseSettings, PRECISION_DISTANCE } from "../settings";
 import { makePose } from "../transforms";
-import { AxisRenderable } from "./AxisRenderable";
+import { AxisRenderable, AXIS_LENGTH } from "./AxisRenderable";
 import { RenderableArrow } from "./markers/RenderableArrow";
 import { RenderableSphere } from "./markers/RenderableSphere";
 
@@ -43,7 +44,7 @@ export type LayerSettingsPose = BaseSettings & {
 };
 
 const DEFAULT_TYPE: DisplayType = "axis";
-const DEFAULT_AXIS_SCALE = 2;
+const DEFAULT_AXIS_SCALE = AXIS_LENGTH;
 const DEFAULT_ARROW_SCALE: THREE.Vector3Tuple = [1, 0.15, 0.15];
 const DEFAULT_COLOR = { r: 124 / 255, g: 107 / 255, b: 1, a: 1 };
 const DEFAULT_SHOW_COVARIANCE = true;
@@ -117,6 +118,7 @@ export class Poses extends SceneExtension<PoseRenderable> {
             label: "Scale",
             input: "number",
             step: 0.5,
+            min: 0,
             precision: PRECISION_DISTANCE,
             value: config.axisScale ?? DEFAULT_AXIS_SCALE,
           };
@@ -263,7 +265,7 @@ export class Poses extends SceneExtension<PoseRenderable> {
     const axisOrArrowSettingsChanged =
       settings.type !== prevSettings.type ||
       settings.axisScale !== prevSettings.axisScale ||
-      !vec3TupleEquals(settings.arrowScale, prevSettings.arrowScale) ||
+      !vecEqual(settings.arrowScale, prevSettings.arrowScale) ||
       settings.color !== prevSettings.color ||
       (!renderable.userData.arrow && !renderable.userData.axis);
 
@@ -291,7 +293,7 @@ export class Poses extends SceneExtension<PoseRenderable> {
           renderable.add(axis);
         }
 
-        const scale = renderable.userData.settings.axisScale;
+        const scale = renderable.userData.settings.axisScale * (1 / AXIS_LENGTH);
         renderable.userData.axis.scale.set(scale, scale, scale);
       } else {
         if (renderable.userData.axis) {
@@ -300,7 +302,8 @@ export class Poses extends SceneExtension<PoseRenderable> {
           renderable.userData.axis = undefined;
         }
 
-        const arrowMarker = createArrowMarker(settings);
+        const color = stringToRgba(makeRgba(), settings.color);
+        const arrowMarker = createArrowMarker(settings.arrowScale, color);
 
         // Create a RenderableArrow if needed
         if (!renderable.userData.arrow) {
@@ -339,8 +342,8 @@ export class Poses extends SceneExtension<PoseRenderable> {
   }
 }
 
-function createArrowMarker(settings: LayerSettingsPose): Marker {
-  const [x, y, z] = settings.arrowScale;
+export function createArrowMarker(arrowScale: [number, number, number], color: ColorRGBA): Marker {
+  const [x, y, z] = arrowScale;
   return {
     header: { frame_id: "", stamp: { sec: 0, nsec: 0 } },
     ns: "",
@@ -349,7 +352,7 @@ function createArrowMarker(settings: LayerSettingsPose): Marker {
     action: MarkerAction.ADD,
     pose: makePose(),
     scale: { x, y, z },
-    color: stringToRgba(makeRgba(), settings.color),
+    color,
     lifetime: TIME_ZERO,
     frame_locked: true,
     points: [],

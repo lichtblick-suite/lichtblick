@@ -180,6 +180,11 @@ export type PoseStamped = {
   pose: Pose;
 };
 
+export type PoseArray = Readonly<{
+  header: Header;
+  poses: Pose[];
+}>;
+
 export type PolygonStamped = {
   header: Header;
   polygon: Polygon;
@@ -275,6 +280,9 @@ addRosDataType(POSE_STAMPED_DATATYPES, "geometry_msgs/PoseStamped");
 
 export const POSE_WITH_COVARIANCE_STAMPED_DATATYPES = new Set<string>();
 addRosDataType(POSE_WITH_COVARIANCE_STAMPED_DATATYPES, "geometry_msgs/PoseWithCovarianceStamped");
+
+export const POSE_ARRAY_DATATYPES = new Set<string>();
+addRosDataType(POSE_ARRAY_DATATYPES, "geometry_msgs/PoseArray");
 
 export const CAMERA_INFO_DATATYPES = new Set<string>();
 addRosDataType(CAMERA_INFO_DATATYPES, "sensor_msgs/CameraInfo");

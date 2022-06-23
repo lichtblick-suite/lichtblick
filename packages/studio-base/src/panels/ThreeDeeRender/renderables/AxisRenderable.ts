@@ -16,6 +16,8 @@ const SHAFT_DIAMETER = 0.02;
 const HEAD_LENGTH = 0.046;
 const HEAD_DIAMETER = 0.05;
 
+export const AXIS_LENGTH = SHAFT_LENGTH + HEAD_LENGTH;
+
 const RED_COLOR = new THREE.Color(0x9c3948).convertSRGBToLinear();
 const GREEN_COLOR = new THREE.Color(0x88dd04).convertSRGBToLinear();
 const BLUE_COLOR = new THREE.Color(0x2b90fb).convertSRGBToLinear();

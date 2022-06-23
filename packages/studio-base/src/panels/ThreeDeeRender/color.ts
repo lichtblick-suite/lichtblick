@@ -80,7 +80,7 @@ export function rgbaEqual(a: ColorRGBA, b: ColorRGBA): boolean {
  * match CSS linear gradients. The inputs are assumed to not have pre-multiplied
  * alpha, and the output will have pre-multiplied alpha.
  */
-export function rgbaGradient(output: ColorRGBA, a: ColorRGBA, b: ColorRGBA, t: number): void {
+export function rgbaGradient(output: ColorRGBA, a: ColorRGBA, b: ColorRGBA, t: number): ColorRGBA {
   const aR = a.r * a.a;
   const aG = a.g * a.a;
   const aB = a.b * a.a;
@@ -92,4 +92,5 @@ export function rgbaGradient(output: ColorRGBA, a: ColorRGBA, b: ColorRGBA, t: n
   output.g = lerp(aG, bG, t);
   output.b = lerp(aB, bB, t);
   output.a = lerp(a.a, b.a, t);
+  return output;
 }

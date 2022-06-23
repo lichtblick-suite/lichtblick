@@ -509,6 +509,9 @@ export function Markers(): JSX.Element {
           ...ThreeDeeRender.defaultConfig,
           followTf: "base_link",
           scene: { enableStats: false },
+          layers: {
+            grid: { layerId: "foxglove.Grid" },
+          },
           cameraState: {
             distance: 5.5,
             perspective: true,

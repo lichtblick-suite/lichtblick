@@ -55,8 +55,13 @@ export function approxEquals(a: number, b: number, epsilon = 0.00001): boolean {
   return Math.abs(a - b) < epsilon;
 }
 
-export function vec3TupleEquals(a: THREE.Vector3Tuple, b: THREE.Vector3Tuple): boolean {
-  return a[0] === b[0] && a[1] === b[1] && a[2] === b[2];
+export function vecEqual<T>(a: T[], b: T[]): boolean {
+  for (let i = 0; i < a.length; i++) {
+    if (a[i] !== b[i]) {
+      return false;
+    }
+  }
+  return true;
 }
 
 export function vec3TupleApproxEquals(

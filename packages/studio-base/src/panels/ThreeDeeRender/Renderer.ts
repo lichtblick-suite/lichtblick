@@ -41,6 +41,7 @@ import { Markers } from "./renderables/Markers";
 import { OccupancyGrids } from "./renderables/OccupancyGrids";
 import { PointClouds } from "./renderables/PointClouds";
 import { Polygons } from "./renderables/Polygons";
+import { PoseArrays } from "./renderables/PoseArrays";
 import { Poses } from "./renderables/Poses";
 import {
   Header,
@@ -257,6 +258,7 @@ export class Renderer extends EventEmitter<RendererEvents> {
     this.addSceneExtension(new PointClouds(this));
     this.addSceneExtension(new Polygons(this));
     this.addSceneExtension(new Poses(this));
+    this.addSceneExtension(new PoseArrays(this));
 
     this._updateCameras(config.cameraState);
     this.animationFrame();
