@@ -109,13 +109,10 @@ export class TransformTree {
     const output: { label: string; value: string }[] = [];
 
     function addFrame(frame: FrameEntry, depth: number) {
-      const frameName =
-        frame.id === "" || frame.id.startsWith(" ") || frame.id.endsWith(" ")
-          ? `"${frame.id}"`
-          : frame.id;
+      const displayName = CoordinateFrame.DisplayName(frame.id);
       output.push({
         value: frame.id,
-        label: `${"\u00A0\u00A0".repeat(depth)}${frameName}`,
+        label: `${"\u00A0\u00A0".repeat(depth)}${displayName}`,
       });
       frame.children.sort((a, b) => a.id.localeCompare(b.id));
       for (const child of frame.children) {

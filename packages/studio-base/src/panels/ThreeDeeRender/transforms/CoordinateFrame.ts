@@ -291,6 +291,14 @@ export class CoordinateFrame {
   }
 
   /**
+   * Returns a display-friendly rendition of `id`, quoting the frame id if it is
+   * an empty string or starts or ends with whitespace.
+   */
+  displayName(): string {
+    return CoordinateFrame.DisplayName(this.id);
+  }
+
+  /**
    * Interpolate between two [time, transform] pairs.
    * @param outTime Optional output parameter for the interpolated time
    * @param outTf Output parameter for the interpolated transform
@@ -396,6 +404,16 @@ export class CoordinateFrame {
     mat4.multiply(tempMatrix, tempMatrix, tempTransform.setPose(input).matrix());
     tempTransform.setMatrixUnscaled(tempMatrix).toPose(out);
     return true;
+  }
+
+  /**
+   * Returns a display-friendly rendition of `frameId`, quoting the id if it is
+   * an empty string or starts or ends with whitespace.
+   */
+  static DisplayName(frameId: string): string {
+    return frameId === "" || frameId.startsWith(" ") || frameId.endsWith(" ")
+      ? `"${frameId}"`
+      : frameId;
   }
 }
 

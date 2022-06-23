@@ -12,6 +12,7 @@ import { Renderer } from "../Renderer";
 import { PartialMessage, PartialMessageEvent, SceneExtension } from "../SceneExtension";
 import { SettingsTreeEntry } from "../SettingsManager";
 import { makeRgba, rgbaToCssString, stringToRgba } from "../color";
+import { vec3TupleEquals } from "../math";
 import { normalizeHeader, normalizeMatrix6, normalizePose } from "../normalizeMessages";
 import {
   Marker,
@@ -24,44 +25,61 @@ import {
   POSE_STAMPED_DATATYPES,
   PoseWithCovariance,
 } from "../ros";
-import { BaseSettings } from "../settings";
-import { makePose, Pose } from "../transforms";
+import { BaseSettings, PRECISION_DISTANCE } from "../settings";
+import { makePose } from "../transforms";
+import { AxisRenderable } from "./AxisRenderable";
 import { RenderableArrow } from "./markers/RenderableArrow";
 import { RenderableSphere } from "./markers/RenderableSphere";
 
+type DisplayType = "axis" | "arrow";
+
 export type LayerSettingsPose = BaseSettings & {
-  scale: [number, number, number];
+  type: DisplayType;
+  axisScale: number;
+  arrowScale: [number, number, number];
   color: string;
   showCovariance: boolean;
   covarianceColor: string;
 };
 
-const DEFAULT_SCALE: THREE.Vector3Tuple = [1, 0.15, 0.15];
+const DEFAULT_TYPE: DisplayType = "axis";
+const DEFAULT_AXIS_SCALE = 2;
+const DEFAULT_ARROW_SCALE: THREE.Vector3Tuple = [1, 0.15, 0.15];
 const DEFAULT_COLOR = { r: 124 / 255, g: 107 / 255, b: 1, a: 1 };
+const DEFAULT_SHOW_COVARIANCE = true;
 const DEFAULT_COVARIANCE_COLOR = { r: 198 / 255, g: 107 / 255, b: 1, a: 0.25 };
 
 const DEFAULT_COLOR_STR = rgbaToCssString(DEFAULT_COLOR);
 const DEFAULT_COVARIANCE_COLOR_STR = rgbaToCssString(DEFAULT_COVARIANCE_COLOR);
 
 const DEFAULT_SETTINGS: LayerSettingsPose = {
+  type: DEFAULT_TYPE,
   visible: true,
-  scale: DEFAULT_SCALE,
+  axisScale: DEFAULT_AXIS_SCALE,
+  arrowScale: DEFAULT_ARROW_SCALE,
   color: DEFAULT_COLOR_STR,
-  showCovariance: true,
+  showCovariance: DEFAULT_SHOW_COVARIANCE,
   covarianceColor: DEFAULT_COVARIANCE_COLOR_STR,
 };
+
+const TYPE_OPTIONS = [
+  { label: "Axis", value: "axis" },
+  { label: "Arrow", value: "arrow" },
+];
 
 export type PoseUserData = BaseUserData & {
   settings: LayerSettingsPose;
   topic: string;
   poseMessage: PoseStamped | PoseWithCovarianceStamped;
-  arrow: RenderableArrow;
+  axis?: AxisRenderable;
+  arrow?: RenderableArrow;
   sphere?: RenderableSphere;
 };
 
 export class PoseRenderable extends Renderable<PoseUserData> {
   override dispose(): void {
-    this.userData.arrow.dispose();
+    this.userData.axis?.dispose();
+    this.userData.arrow?.dispose();
     this.userData.sphere?.dispose();
     super.dispose();
   }
@@ -89,15 +107,37 @@ export class Poses extends SceneExtension<PoseRenderable> {
         : POSE_WITH_COVARIANCE_STAMPED_DATATYPES.has(topic.datatype);
       if (isPoseStamped || isPoseWithCovarianceStamped) {
         const config = (configTopics[topic.name] ?? {}) as Partial<LayerSettingsPose>;
+        const type = config.type ?? DEFAULT_TYPE;
 
-        // prettier-ignore
         const fields: SettingsTreeFields = {
-          scale: { label: "Scale", input: "vec3", labels: ["X", "Y", "Z"], step: 0.5, precision: 3, value: config.scale ?? DEFAULT_SCALE },
-          color: { label: "Color", input: "rgba", value: config.color ?? DEFAULT_COLOR_STR },
+          type: { label: "Type", input: "select", options: TYPE_OPTIONS, value: type },
         };
+        if (type === "axis") {
+          fields["axisScale"] = {
+            label: "Scale",
+            input: "number",
+            step: 0.5,
+            precision: PRECISION_DISTANCE,
+            value: config.axisScale ?? DEFAULT_AXIS_SCALE,
+          };
+        } else {
+          fields["arrowScale"] = {
+            label: "Scale",
+            input: "vec3",
+            labels: ["X", "Y", "Z"],
+            step: 0.5,
+            precision: PRECISION_DISTANCE,
+            value: config.arrowScale ?? DEFAULT_ARROW_SCALE,
+          };
+          fields["color"] = {
+            label: "Color",
+            input: "rgba",
+            value: config.color ?? DEFAULT_COLOR_STR,
+          };
+        }
 
         if (isPoseWithCovarianceStamped) {
-          const showCovariance = config.showCovariance ?? true;
+          const showCovariance = config.showCovariance ?? DEFAULT_SHOW_COVARIANCE;
           const covarianceColor = config.covarianceColor ?? DEFAULT_COVARIANCE_COLOR_STR;
 
           fields["showCovariance"] = {
@@ -145,11 +185,11 @@ export class Poses extends SceneExtension<PoseRenderable> {
       const settings = this.renderer.config.topics[topicName] as
         | Partial<LayerSettingsPose>
         | undefined;
-      renderable.userData.settings = { ...renderable.userData.settings, ...settings };
       this._updatePoseRenderable(
         renderable,
         renderable.userData.poseMessage,
         renderable.userData.receiveTime,
+        { ...renderable.userData.settings, ...settings },
       );
     }
   };
@@ -181,60 +221,97 @@ export class Poses extends SceneExtension<PoseRenderable> {
         | undefined;
       const settings = { ...DEFAULT_SETTINGS, ...userSettings };
 
-      // Synthesize an arrow marker to instantiate a RenderableArrow
-      const arrowMarker = createArrowMarker(poseMessage, settings);
-      const arrow = new RenderableArrow(topic, arrowMarker, undefined, this.renderer);
-
-      const poseWithCovariance = ("covariance" in poseMessage.pose ? poseMessage : undefined) as
-        | PoseWithCovarianceStamped
-        | undefined;
-
       renderable = new PoseRenderable(topic, this.renderer, {
         receiveTime,
         messageTime: toNanoSec(poseMessage.header.stamp),
         frameId: poseMessage.header.frame_id,
-        pose: (poseWithCovariance?.pose.pose ?? poseMessage.pose) as Pose,
+        pose: makePose(),
         settingsPath: ["topics", topic],
         settings,
         topic,
         poseMessage,
-        arrow,
+        axis: undefined,
+        arrow: undefined,
         sphere: undefined,
       });
-      renderable.add(arrow);
-
-      if (poseWithCovariance) {
-        const sphereMarker = createSphereMarker(poseWithCovariance, settings);
-        if (sphereMarker) {
-          renderable.userData.sphere = new RenderableSphere(
-            topic,
-            sphereMarker,
-            undefined,
-            this.renderer,
-          );
-          renderable.add(renderable.userData.sphere);
-        }
-      }
 
       this.add(renderable);
       this.renderables.set(topic, renderable);
     }
 
-    this._updatePoseRenderable(renderable, poseMessage, receiveTime);
+    this._updatePoseRenderable(renderable, poseMessage, receiveTime, renderable.userData.settings);
   }
 
   _updatePoseRenderable(
     renderable: PoseRenderable,
     poseMessage: PoseStamped | PoseWithCovarianceStamped,
     receiveTime: bigint,
+    settings: LayerSettingsPose,
   ): void {
     renderable.userData.receiveTime = receiveTime;
     renderable.userData.messageTime = toNanoSec(poseMessage.header.stamp);
     renderable.userData.frameId = poseMessage.header.frame_id;
     renderable.userData.poseMessage = poseMessage;
 
-    const arrowMarker = createArrowMarker(poseMessage, renderable.userData.settings);
-    renderable.userData.arrow.update(arrowMarker, undefined);
+    // Default the covariance sphere to hidden. If showCovariance is set and a valid covariance
+    // matrix is present, it will be shown
+    if (renderable.userData.sphere) {
+      renderable.userData.sphere.visible = false;
+    }
+
+    const { topic, settings: prevSettings } = renderable.userData;
+    const axisOrArrowSettingsChanged =
+      settings.type !== prevSettings.type ||
+      settings.axisScale !== prevSettings.axisScale ||
+      !vec3TupleEquals(settings.arrowScale, prevSettings.arrowScale) ||
+      settings.color !== prevSettings.color ||
+      (!renderable.userData.arrow && !renderable.userData.axis);
+
+    renderable.userData.settings = settings;
+
+    if (axisOrArrowSettingsChanged) {
+      if (renderable.userData.settings.type === "axis") {
+        if (renderable.userData.arrow) {
+          renderable.remove(renderable.userData.arrow);
+          renderable.userData.arrow.dispose();
+          renderable.userData.arrow = undefined;
+        }
+
+        // Create an AxisRenderable if needed
+        if (!renderable.userData.axis) {
+          const axis = new AxisRenderable(topic, this.renderer, {
+            receiveTime: 0n,
+            messageTime: 0n,
+            frameId: "",
+            pose: makePose(),
+            settingsPath: [],
+            settings: { visible: true },
+          });
+          renderable.userData.axis = axis;
+          renderable.add(axis);
+        }
+
+        const scale = renderable.userData.settings.axisScale;
+        renderable.userData.axis.scale.set(scale, scale, scale);
+      } else {
+        if (renderable.userData.axis) {
+          renderable.remove(renderable.userData.axis);
+          renderable.userData.axis.dispose();
+          renderable.userData.axis = undefined;
+        }
+
+        const arrowMarker = createArrowMarker(settings);
+
+        // Create a RenderableArrow if needed
+        if (!renderable.userData.arrow) {
+          const arrow = new RenderableArrow(topic, arrowMarker, undefined, this.renderer);
+          renderable.userData.arrow = arrow;
+          renderable.add(arrow);
+        }
+
+        renderable.userData.arrow.update(arrowMarker, undefined);
+      }
+    }
 
     if ("covariance" in poseMessage.pose) {
       renderable.userData.pose = poseMessage.pose.pose;
@@ -249,6 +326,7 @@ export class Poses extends SceneExtension<PoseRenderable> {
             undefined,
             this.renderer,
           );
+          renderable.add(renderable.userData.sphere);
         }
         renderable.userData.sphere.visible = renderable.userData.settings.showCovariance;
         renderable.userData.sphere.update(sphereMarker, undefined);
@@ -261,18 +339,16 @@ export class Poses extends SceneExtension<PoseRenderable> {
   }
 }
 
-function createArrowMarker(
-  poseMessage: PoseStamped | PoseWithCovarianceStamped,
-  settings: LayerSettingsPose,
-): Marker {
+function createArrowMarker(settings: LayerSettingsPose): Marker {
+  const [x, y, z] = settings.arrowScale;
   return {
-    header: poseMessage.header,
+    header: { frame_id: "", stamp: { sec: 0, nsec: 0 } },
     ns: "",
     id: 0,
     type: MarkerType.ARROW,
     action: MarkerAction.ADD,
     pose: makePose(),
-    scale: { x: settings.scale[0], y: settings.scale[1], z: settings.scale[2] },
+    scale: { x, y, z },
     color: stringToRgba(makeRgba(), settings.color),
     lifetime: TIME_ZERO,
     frame_locked: true,

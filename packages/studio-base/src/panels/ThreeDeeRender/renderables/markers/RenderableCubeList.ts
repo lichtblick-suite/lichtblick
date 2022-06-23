@@ -24,7 +24,7 @@ export class RenderableCubeList extends RenderableMarker {
 
     // Cube instanced mesh
     const material = standardInstancedMaterial(marker, renderer.materialCache);
-    this.mesh = new DynamicInstancedMesh(RenderableCube.geometry(), material, marker.points.length);
+    this.mesh = new DynamicInstancedMesh(RenderableCube.Geometry(), material, marker.points.length);
     this.mesh.castShadow = true;
     this.mesh.receiveShadow = true;
     this.add(this.mesh);

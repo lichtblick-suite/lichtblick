@@ -76,7 +76,7 @@ export type RendererConfig = {
     backgroundColor?: string;
   };
   /** frameId -> settings */
-  transforms: Record<string, Partial<LayerSettingsTransform>>;
+  transforms: Record<string, Partial<LayerSettingsTransform> | undefined>;
   /** topicName -> settings */
   topics: Record<string, Partial<BaseSettings> | undefined>;
   /** instanceId -> settings */

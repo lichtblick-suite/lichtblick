@@ -24,7 +24,7 @@ export class RenderableSphereList extends RenderableMarker {
     // Sphere instanced mesh
     const material = standardInstancedMaterial(marker, renderer.materialCache);
     this.mesh = new DynamicInstancedMesh(
-      RenderableSphere.geometry(renderer.maxLod),
+      RenderableSphere.Geometry(renderer.maxLod),
       material,
       marker.points.length,
     );

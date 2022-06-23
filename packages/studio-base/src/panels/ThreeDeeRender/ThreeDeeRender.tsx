@@ -157,7 +157,7 @@ export function ThreeDeeRender({ context }: { context: PanelExtensionContext }):
       cameraState,
       followTf: partialConfig?.followTf,
       scene: partialConfig?.scene ?? {},
-      transforms: {},
+      transforms: partialConfig?.transforms ?? {},
       topics: partialConfig?.topics ?? {},
       layers: partialConfig?.layers ?? {},
     };
