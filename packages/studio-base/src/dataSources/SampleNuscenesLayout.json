@@ -9,7 +9,13 @@
       "customMarkerTopicOptions": [],
       "transformMarkers": false,
       "synchronize": false,
-      "mode": "fit"
+      "mode": "fit",
+      "pan": {
+        "x": 0,
+        "y": 0
+      },
+      "rotation": 0,
+      "zoom": 1
     },
     "ImageViewPanel!15kmj7r": {
       "cameraTopic": "/CAM_FRONT/image_rect_compressed",
@@ -20,7 +26,13 @@
       "customMarkerTopicOptions": [],
       "transformMarkers": false,
       "synchronize": false,
-      "mode": "fit"
+      "mode": "fit",
+      "pan": {
+        "x": 0,
+        "y": 0
+      },
+      "rotation": 0,
+      "zoom": 1
     },
     "ImageViewPanel!1jn49st": {
       "cameraTopic": "/CAM_FRONT_RIGHT/image_rect_compressed",
@@ -31,7 +43,13 @@
       "customMarkerTopicOptions": [],
       "transformMarkers": false,
       "synchronize": false,
-      "mode": "fit"
+      "mode": "fit",
+      "pan": {
+        "x": 0,
+        "y": 0
+      },
+      "rotation": 0,
+      "zoom": 1
     },
     "3D Panel!3bempa7": {
       "checkedKeys": [
@@ -73,11 +91,20 @@
       "autoTextBackgroundColor": true,
       "diffModeEnabled": true,
       "useThemeBackgroundColor": true,
-      "customBackgroundColor": "#000000"
+      "customBackgroundColor": "#000000",
+      "clickToPublishPoseTopic": "/move_base_simple/goal",
+      "clickToPublishPointTopic": "/clicked_point",
+      "clickToPublishPoseEstimateTopic": "/initialpose",
+      "clickToPublishPoseEstimateXDeviation": 0.5,
+      "clickToPublishPoseEstimateYDeviation": 0.5,
+      "clickToPublishPoseEstimateThetaDeviation": 0.26179939
     },
     "map!2vkib4e": {
       "disabledTopics": [],
-      "zoomLevel": 17
+      "zoomLevel": 17,
+      "layer": "map",
+      "customTileUrl": "",
+      "followTopic": ""
     },
     "3D Panel!4ey2b8s": {
       "checkedKeys": [
@@ -117,7 +144,13 @@
       "diffModeEnabled": true,
       "useThemeBackgroundColor": true,
       "customBackgroundColor": "#000000",
-      "followMode": "follow"
+      "followMode": "follow",
+      "clickToPublishPoseTopic": "/move_base_simple/goal",
+      "clickToPublishPointTopic": "/clicked_point",
+      "clickToPublishPoseEstimateTopic": "/initialpose",
+      "clickToPublishPoseEstimateXDeviation": 0.5,
+      "clickToPublishPoseEstimateYDeviation": 0.5,
+      "clickToPublishPoseEstimateThetaDeviation": 0.26179939
     },
     "Plot!2pb7zl7": {
       "paths": [
@@ -194,7 +227,8 @@
       "diffTopicPath": "",
       "diffMethod": "custom",
       "diffEnabled": false,
-      "showFullMessageForDiff": false
+      "showFullMessageForDiff": false,
+      "autoExpandMode": "auto"
     },
     "Tab!1xyw5ix": {
       "activeTabIdx": 0,
@@ -240,15 +274,15 @@
           "title": "Diagnostics",
           "layout": {
             "first": {
-              "first": {
-                "first": "StateTransitions!3i4dk1l",
-                "second": "DiagnosticSummary!3equ26v",
+              "first": "StateTransitions!3i4dk1l",
+              "second": {
+                "first": "DiagnosticSummary!3equ26v",
+                "second": "DiagnosticStatusPanel!4bdyip2",
                 "direction": "column",
-                "splitPercentage": 45
+                "splitPercentage": 27
               },
-              "second": "DiagnosticStatusPanel!4bdyip2",
               "direction": "column",
-              "splitPercentage": 40
+              "splitPercentage": 18
             },
             "second": {
               "first": "SourceInfo!7dc2bd",
