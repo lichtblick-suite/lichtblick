@@ -43,6 +43,7 @@ function ExtensionListEntry(props: {
     <ListItem disablePadding key={id}>
       <StyledListItemButton onClick={onClick}>
         <ListItemText
+          disableTypography
           primary={
             <Stack direction="row" alignItems="baseline" gap={0.5}>
               <Typography variant="subtitle2" fontWeight={600}>
