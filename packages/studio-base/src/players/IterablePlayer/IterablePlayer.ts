@@ -90,7 +90,8 @@ type IterablePlayerState =
   | "idle"
   | "seek-backfill"
   | "play"
-  | "close";
+  | "close"
+  | "reset-playback-iterator";
 
 /**
  * IterablePlayer implements the Player interface for IIterableSource instances.
@@ -152,13 +153,6 @@ export class IterablePlayer implements Player {
 
   private _problemManager = new PlayerProblemManager();
 
-  // How long of a duration to use for requesting messages from an iterator. This determines the end arg to
-  // iterator calls.
-  //
-  // NOTE: It is important that iterators are created with a bounded end so that loops which want to
-  // exit after reaching a specific time can do so even if the iterator does not emit any messages.
-  private _iteratorDurationNanos: number = 1e9;
-
   // Blocks is a sparse array of MessageBlock.
   private _blocks: (MessageBlock | undefined)[] = [];
   private _blockDurationNanos: number = 0;
@@ -168,8 +162,8 @@ export class IterablePlayer implements Player {
   // Some states register an abort controller to signal they should abort
   private _abort?: AbortController;
 
-  // The iterator for processing ticks. This persists between tick calls and is cleared when changing state.
-  private _tickIterator?: AsyncIterator<Readonly<IteratorResult>>;
+  // The iterator for reading messages during playback
+  private _playbackIterator?: AsyncIterator<Readonly<IteratorResult>>;
 
   private readonly _sourceId: string;
 
@@ -312,9 +306,11 @@ export class IterablePlayer implements Player {
       this._abort = undefined;
     }
 
-    if (this._tickIterator) {
-      this._tickIterator.return?.().catch((err) => log.error(err));
-      this._tickIterator = undefined;
+    // Support moving between idle (pause) and play and preserving the playback iterator
+    if (newState !== "idle" && newState !== "play") {
+      void this._playbackIterator?.return?.().catch((err) => {
+        log.error(err);
+      });
     }
 
     void this._runState();
@@ -364,6 +360,8 @@ export class IterablePlayer implements Player {
           case "close":
             await this._stateClose();
             break;
+          case "reset-playback-iterator":
+            await this._stateResetPlaybackIterator();
         }
 
         log.debug(`Done state ${state}`);
@@ -445,7 +443,6 @@ export class IterablePlayer implements Player {
       );
 
       if (blockDurationNanos != undefined) {
-        this._iteratorDurationNanos = blockDurationNanos;
         this._blockDurationNanos = blockDurationNanos;
       }
 
@@ -473,6 +470,25 @@ export class IterablePlayer implements Player {
     }
 
     this._setState("start-play");
+  }
+
+  private async _stateResetPlaybackIterator() {
+    if (!this._currentTime) {
+      throw new Error("Invariant: Tried to reset playback iterator with no current time.");
+    }
+
+    await this._playbackIterator?.return?.();
+
+    const next = add(this._currentTime, { sec: 0, nsec: 1 });
+
+    // set the playIterator to the seek time
+    log.debug("Initializing forward iterator from", next);
+    this._playbackIterator = this._iterableSource.messageIterator({
+      topics: Array.from(this._allTopics),
+      start: next,
+    });
+
+    this._setState(this._isPlaying ? "play" : "idle");
   }
 
   // Read a small amount of data from the datasource with the hope of producing a message or two.
@@ -605,7 +621,7 @@ export class IterablePlayer implements Player {
       return;
     }
 
-    this._setState(this._isPlaying ? "play" : "idle");
+    this._setState("reset-playback-iterator");
   }
 
   /** Emit the player state to the registered listener */
@@ -706,11 +722,6 @@ export class IterablePlayer implements Player {
       this._end,
     );
 
-    // The last message time tracks the receiveTime of the last message we've emitted.
-    // Iterator bounds are inclusive so when making a new iterator we need to avoid including
-    // a time which we've already emitted.
-    let lastMessageTime: Time = this._currentTime;
-
     const msgEvents: MessageEvent<unknown>[] = [];
 
     // When ending the previous tick, we might have already read a message from the iterator which
@@ -725,51 +736,17 @@ export class IterablePlayer implements Player {
       }
 
       msgEvents.push(this._lastMessage);
-      lastMessageTime = this._lastMessage.receiveTime;
       this._lastMessage = undefined;
     }
 
+    // Read from the iterator through the end of the tick time
     for (;;) {
-      // If we have no forward iterator then we create one at 1 nanosecond past the current time.
-      // currentTime is assumed to have already been read previously
-      if (!this._tickIterator) {
-        const next = add(lastMessageTime, { sec: 0, nsec: 1 });
-        // Next would be past our desired range
-        if (compare(next, end) > 0) {
-          break;
-        }
-
-        const iteratorEnd = add(next, fromNanoSec(BigInt(this._iteratorDurationNanos)));
-
-        // Our iterator might not produce any messages, so we set the lastMessageTime to the iterator
-        // end range so if we need to make another iterator in this same tick we don't include time
-        // which we've already iterated over.
-        lastMessageTime = iteratorEnd;
-
-        log.debug("Initializing forward iterator from", next, "to", iteratorEnd);
-
-        this._tickIterator = this._iterableSource.messageIterator({
-          topics: Array.from(this._allTopics),
-          start: next,
-          end: iteratorEnd,
-        });
+      if (!this._playbackIterator) {
+        break;
       }
 
-      const result = await this._tickIterator.next();
-      if (result.done === true) {
-        if (this._nextState) {
-          return;
-        }
-
-        // Our current iterator has completed but we might still have more to read to reach _end_.
-        // Start a new iterator at 1 nanosecond past the last message we've processed. Iterators
-        // are always inclusive so when our iterator has ended we know we've seen every message up-to
-        // and-at that time.
-        if (compare(lastMessageTime, end) <= 0) {
-          this._tickIterator = undefined;
-          continue;
-        }
-
+      const result = await this._playbackIterator.next();
+      if (result.done === true || this._nextState) {
         break;
       }
       const iterResult = result.value;
@@ -777,18 +754,11 @@ export class IterablePlayer implements Player {
         this._problemManager.addProblem(`connid-${iterResult.connectionId}`, iterResult.problem);
       }
 
-      // State change request during playback
-      if (this._nextState) {
-        return;
-      }
-
-      lastMessageTime = iterResult.msgEvent?.receiveTime ?? lastMessageTime;
-
       if (iterResult.problem) {
         continue;
       }
 
-      // The message is past the end time, we need to save it for next tick
+      // The message is past the tick end time, we need to save it for next tick
       if (compare(iterResult.msgEvent.receiveTime, end) > 0) {
         this._lastMessage = iterResult.msgEvent;
         break;
@@ -826,7 +796,7 @@ export class IterablePlayer implements Player {
 
     // Track the identity of allTopics, if this changes we need to reset our iterator to
     // get new messages for new topics
-    let allTopics = this._allTopics;
+    const allTopics = this._allTopics;
 
     const blockLoading = this.loadBlocks(this._currentTime, { emit: false });
     try {
@@ -844,11 +814,10 @@ export class IterablePlayer implements Player {
           // Discard any last message event since the new iterator will repeat it
           this._lastMessage = undefined;
 
-          // Clear the current forward iterator and tick will initialize it again
-          await this._tickIterator?.return?.();
-          this._tickIterator = undefined;
-
-          allTopics = this._allTopics;
+          // Bail playback and reset the playback iterator when topics have changed so we can load
+          // the new topics
+          this._setState("reset-playback-iterator");
+          return;
         }
 
         // Eslint doesn't understand that this._nextState could change
@@ -876,8 +845,8 @@ export class IterablePlayer implements Player {
     this._isPlaying = false;
     this._closed = true;
     this._metricsCollector.close();
-    this._tickIterator?.return?.().catch((err) => log.error(err));
-    this._tickIterator = undefined;
+    this._playbackIterator?.return?.().catch((err) => log.error(err));
+    this._playbackIterator = undefined;
   }
 
   private async loadBlocks(time: Time, opt?: { emit: boolean }) {

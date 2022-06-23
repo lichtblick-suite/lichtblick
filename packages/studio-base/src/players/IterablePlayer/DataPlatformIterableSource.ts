@@ -53,6 +53,7 @@ export class DataPlatformIterableSource implements IIterableSource {
   private _end: Time;
   private _deviceId: string;
   private readonly _requestDurationSecs = 5;
+  private _knownTopicNames: string[] = [];
 
   /**
    * Cached readers for each schema so we don't have to re-parse definitions on each stream request.
@@ -102,6 +103,7 @@ export class DataPlatformIterableSource implements IIterableSource {
         }`,
       );
     }
+
     if (isLessThan(this._start, coverageStartTime)) {
       log.debug("Increased start time from", this._start, "to", coverageStartTime);
       this._start = coverageStartTime;
@@ -112,8 +114,6 @@ export class DataPlatformIterableSource implements IIterableSource {
     }
 
     const topics: Topic[] = [];
-    // TODO(jhurliman): Fill numMessages into topicStats per topic. Bonus points if we can get
-    // firstMessageTime / lastMessageTime per topic as well
     const topicStats = new Map<string, TopicStats>();
     const datatypes: RosDatatypes = new Map();
     const problems: PlayerProblem[] = [];
@@ -153,6 +153,7 @@ export class DataPlatformIterableSource implements IIterableSource {
       }
     }
 
+    this._knownTopicNames = topics.map((topic) => topic.name);
     return {
       topics,
       topicStats,
@@ -173,6 +174,15 @@ export class DataPlatformIterableSource implements IIterableSource {
     // Data platform treats topic array length 0 as "all topics". Until that is changed, we filter out
     // empty topic requests
     if (args.topics.length === 0) {
+      return;
+    }
+
+    // If the topics available to us don't overlap with the topics we know about then we avoid
+    // making any requests since there's no data to return
+    const matchingTopics = args.topics.reduce((count, topicName) => {
+      return this._knownTopicNames.includes(topicName) ? count + 1 : count;
+    }, 0);
+    if (matchingTopics === 0) {
       return;
     }
 
