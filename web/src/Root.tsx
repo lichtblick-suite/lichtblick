@@ -2,7 +2,7 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 
 import {
   IDataSourceFactory,
@@ -17,6 +17,7 @@ import {
   McapLocalDataSourceFactory,
   SampleNuscenesDataSourceFactory,
   IAppConfiguration,
+  IdbExtensionLoader,
   McapRemoteDataSourceFactory,
   App,
   ConsoleApi,
@@ -26,7 +27,6 @@ import Ros1UnavailableDataSourceFactory from "./dataSources/Ros1UnavailableDataS
 import Ros2UnavailableDataSourceFactory from "./dataSources/Ros2UnavailableDataSourceFactory";
 import VelodyneUnavailableDataSourceFactory from "./dataSources/VelodyneUnavailableDataSourceFactory";
 import { IdbLayoutStorage } from "./services/IdbLayoutStorage";
-import { NoopExtensionLoader } from "./services/NoopExtensionLoader";
 
 export function Root({ appConfiguration }: { appConfiguration: IAppConfiguration }): JSX.Element {
   const enableExperimentalBagPlayer: boolean =
@@ -64,7 +64,7 @@ export function Root({ appConfiguration }: { appConfiguration: IAppConfiguration
   ]);
 
   const layoutStorage = useMemo(() => new IdbLayoutStorage(), []);
-  const extensionLoader = useMemo(() => new NoopExtensionLoader(), []);
+  const [extensionLoaders] = useState(() => [new IdbExtensionLoader("local")]);
   const consoleApi = useMemo(() => new ConsoleApi(process.env.FOXGLOVE_API_URL!), []);
 
   // Enable dialog auth in development since using cookie auth does not work between
@@ -80,7 +80,7 @@ export function Root({ appConfiguration }: { appConfiguration: IAppConfiguration
       appConfiguration={appConfiguration}
       layoutStorage={layoutStorage}
       consoleApi={consoleApi}
-      extensionLoader={extensionLoader}
+      extensionLoaders={extensionLoaders}
     />
   );
 }

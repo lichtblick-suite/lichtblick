@@ -30,9 +30,9 @@ export default {
 };
 
 const MockExtensionLoader: ExtensionLoader = {
+  namespace: "local",
   getExtensions: async () => [],
   loadExtension: async (_id: string) => "",
-  downloadExtension: async (_url: string) => new Uint8Array(),
   installExtension: async (_foxeFileData: Uint8Array) => {
     throw new Error("MockExtensionLoader cannot install extensions");
   },
@@ -71,7 +71,7 @@ export function Details(): JSX.Element {
 
   return (
     <AppConfigurationContext.Provider value={config}>
-      <ExtensionLoaderContext.Provider value={MockExtensionLoader}>
+      <ExtensionLoaderContext.Provider value={[MockExtensionLoader]}>
         <ExtensionMarketplaceContext.Provider value={MockExtensionMarketplace}>
           <ExtensionDetails extension={extension} onClose={() => {}} installed={false} />
         </ExtensionMarketplaceContext.Provider>

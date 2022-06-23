@@ -90,7 +90,7 @@ export default function Root({
   }, [appConfiguration]);
 
   const layoutStorage = useMemo(() => new NativeStorageLayoutStorage(storageBridge), []);
-  const extensionLoader = useMemo(() => new DesktopExtensionLoader(desktopBridge), []);
+  const [extensionLoaders] = useState(() => [new DesktopExtensionLoader(desktopBridge)]);
   const consoleApi = useMemo(() => new ConsoleApi(process.env.FOXGLOVE_API_URL!), []);
   const nativeAppMenu = useMemo(() => new NativeAppMenu(menuBridge), []);
   const nativeWindow = useMemo(() => new NativeWindow(desktopBridge), []);
@@ -114,7 +114,7 @@ export default function Root({
       appConfiguration={appConfiguration}
       consoleApi={consoleApi}
       layoutStorage={layoutStorage}
-      extensionLoader={extensionLoader}
+      extensionLoaders={extensionLoaders}
       nativeAppMenu={nativeAppMenu}
       nativeWindow={nativeWindow}
     />

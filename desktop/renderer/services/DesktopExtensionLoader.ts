@@ -4,6 +4,7 @@
 
 import Logger from "@foxglove/log";
 import { ExtensionInfo, ExtensionLoader } from "@foxglove/studio-base";
+import { ExtensionNamespace } from "@foxglove/studio-base/src/context/ExtensionLoaderContext";
 
 import { Desktop } from "../../common/types";
 
@@ -11,6 +12,7 @@ const log = Logger.getLogger(__filename);
 
 export class DesktopExtensionLoader implements ExtensionLoader {
   private bridge?: Desktop;
+  readonly namespace: ExtensionNamespace = "local";
 
   constructor(bridge: Desktop) {
     this.bridge = bridge;
@@ -25,6 +27,9 @@ export class DesktopExtensionLoader implements ExtensionLoader {
       return {
         id: item.id,
         name: pkgInfo.displayName,
+        namespace: this.namespace,
+        // Qualified name is display name for backwards compatibility with existing layouts.
+        qualifiedName: pkgInfo.displayName,
         displayName: pkgInfo.displayName,
         description: pkgInfo.description,
         publisher: pkgInfo.publisher,
@@ -40,11 +45,6 @@ export class DesktopExtensionLoader implements ExtensionLoader {
 
   async loadExtension(id: string): Promise<string> {
     return (await this.bridge?.loadExtension(id)) ?? "";
-  }
-
-  async downloadExtension(url: string): Promise<Uint8Array> {
-    const res = await fetch(url);
-    return new Uint8Array(await res.arrayBuffer());
   }
 
   async installExtension(foxeFileData: Uint8Array): Promise<ExtensionInfo> {
@@ -63,6 +63,9 @@ export class DesktopExtensionLoader implements ExtensionLoader {
     return {
       id: detail.id,
       name: pkgInfo.displayName,
+      namespace: this.namespace,
+      // Qualified name is display name for backwards compatibility with existing layouts.
+      qualifiedName: pkgInfo.displayName,
       displayName: pkgInfo.displayName,
       description: pkgInfo.description,
       publisher: pkgInfo.publisher,

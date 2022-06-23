@@ -27,6 +27,7 @@ import {
   useExtensionMarketplace,
 } from "@foxglove/studio-base/context/ExtensionMarketplaceContext";
 import { AppEvent } from "@foxglove/studio-base/services/IAnalytics";
+import isDesktopApp from "@foxglove/studio-base/util/isDesktopApp";
 
 type Props = {
   installed: boolean;
@@ -59,13 +60,18 @@ export function ExtensionDetails({ extension, onClose, installed }: Props): Reac
   const analytics = useAnalytics();
 
   const install = useCallback(async () => {
+    if (!isDesktopApp()) {
+      addToast("Download the desktop app to use marketplace extensions.", { appearance: "error" });
+      return;
+    }
+
     const url = extension.foxe;
     try {
       if (url == undefined) {
         throw new Error(`Cannot install extension ${extension.id}, "foxe" URL is missing`);
       }
       const data = await extensionLoader.downloadExtension(url);
-      await extensionLoader.installExtension(data);
+      await extensionLoader.installExtension("local", data);
       if (isMounted()) {
         setIsInstalled(true);
         void analytics.logEvent(AppEvent.EXTENSION_INSTALL, { type: extension.id });

@@ -49,7 +49,7 @@ type AppProps = {
   dataSources: IDataSourceFactory[];
   consoleApi: ConsoleApi;
   layoutStorage: ILayoutStorage;
-  extensionLoader: ExtensionLoader;
+  extensionLoaders: readonly ExtensionLoader[];
   nativeAppMenu?: INativeAppMenu;
   nativeWindow?: INativeWindow;
   enableDialogAuth?: boolean;
@@ -64,7 +64,7 @@ export function App(props: AppProps): JSX.Element {
     dataSources,
     layoutStorage,
     consoleApi,
-    extensionLoader,
+    extensionLoaders,
     nativeAppMenu,
     nativeWindow,
     enableDialogAuth,
@@ -85,7 +85,7 @@ export function App(props: AppProps): JSX.Element {
     <StudioToastProvider />,
     <LayoutStorageContext.Provider value={layoutStorage} />,
     <UserProfileLocalStorageProvider />,
-    <ExtensionLoaderContext.Provider value={extensionLoader} />,
+    <ExtensionLoaderContext.Provider value={extensionLoaders} />,
     <AnalyticsProvider amplitudeApiKey={process.env.AMPLITUDE_API_KEY} />,
     <LayoutManagerProvider />,
     <ModalHost />, // render modal elements inside the ThemeProvider

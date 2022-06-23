@@ -8,6 +8,7 @@ import { ExtensionPanelRegistration } from "@foxglove/studio";
 
 export type RegisteredPanel = {
   extensionName: string;
+  namespace?: string;
   registration: ExtensionPanelRegistration;
 };
 

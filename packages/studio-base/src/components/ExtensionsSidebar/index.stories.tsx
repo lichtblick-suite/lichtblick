@@ -33,6 +33,7 @@ const installedExtensions: ExtensionInfo[] = [
   {
     id: "publisher.storyextension",
     name: "storyextension",
+    qualifiedName: "storyextension",
     displayName: "Extension Name",
     description: "Extension sample description",
     publisher: "Publisher",
@@ -47,6 +48,7 @@ const marketplaceExtensions: ExtensionInfo[] = [
   {
     id: "publisher.storyextension",
     name: "storyextension",
+    qualifiedName: "storyextension",
     displayName: "Extension Name",
     description: "Extension sample description",
     publisher: "Publisher",
@@ -58,9 +60,9 @@ const marketplaceExtensions: ExtensionInfo[] = [
 ];
 
 const MockExtensionLoader: ExtensionLoader = {
+  namespace: "local",
   getExtensions: async () => installedExtensions,
   loadExtension: async (_id: string) => "",
-  downloadExtension: async (_url: string) => new Uint8Array(),
   installExtension: async (_foxeFileData: Uint8Array) => {
     throw new Error("MockExtensionLoader cannot install extensions");
   },
@@ -78,7 +80,7 @@ export function Sidebar(): JSX.Element {
 
   return (
     <AppConfigurationContext.Provider value={config}>
-      <ExtensionLoaderContext.Provider value={MockExtensionLoader}>
+      <ExtensionLoaderContext.Provider value={[MockExtensionLoader]}>
         <ExtensionMarketplaceContext.Provider value={MockExtensionMarketplace}>
           <ExtensionsSidebar />
         </ExtensionMarketplaceContext.Provider>
