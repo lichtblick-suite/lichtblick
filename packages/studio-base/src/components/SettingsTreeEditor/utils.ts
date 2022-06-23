@@ -15,7 +15,9 @@ export function prepareSettingsNodes(
 ): DeepReadonly<Array<[string, SettingsTreeNode]>> {
   // Use sortBy here for stable sorting.
   return sortBy(
-    Object.entries(roots).filter((kv): kv is [string, SettingsTreeNode] => kv[1] != undefined),
-    (kv) => kv[1].order ?? Number.MAX_SAFE_INTEGER,
+    Object.entries(roots).filter(
+      (entry): entry is [string, SettingsTreeNode] => entry[1] != undefined,
+    ),
+    (entry) => entry[1].order,
   );
 }

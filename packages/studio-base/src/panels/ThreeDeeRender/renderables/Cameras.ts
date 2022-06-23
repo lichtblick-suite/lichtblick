@@ -95,7 +95,13 @@ export class Cameras extends SceneExtension<CameraInfoRenderable> {
 
         entries.push({
           path: ["topics", topic.name],
-          node: { icon: "Camera", fields, visible: config.visible ?? true, handler },
+          node: {
+            icon: "Camera",
+            fields,
+            visible: config.visible ?? true,
+            handler,
+            order: topic.name.toLocaleLowerCase(),
+          },
         });
       }
     }

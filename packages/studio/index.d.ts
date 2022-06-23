@@ -507,7 +507,7 @@ declare module "@foxglove/studio" {
      *
      * https://262.ecma-international.org/6.0/#sec-ordinary-object-internal-methods-and-internal-slots-ownpropertykeys
      */
-    order?: number;
+    order?: number | string;
 
     /**
      * An optional visibility status. If this is not undefined, the node

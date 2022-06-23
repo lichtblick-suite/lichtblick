@@ -105,6 +105,7 @@ export class OccupancyGrids extends SceneExtension<OccupancyGridRenderable> {
             icon: "Cells",
             fields,
             visible: config.visible ?? true,
+            order: topic.name.toLocaleLowerCase(),
             handler,
           },
         });

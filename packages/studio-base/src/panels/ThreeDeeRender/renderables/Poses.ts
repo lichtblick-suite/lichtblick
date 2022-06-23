@@ -121,6 +121,7 @@ export class Poses extends SceneExtension<PoseRenderable> {
             icon: "Flag",
             fields,
             visible: config.visible ?? true,
+            order: topic.name.toLocaleLowerCase(),
             handler,
           },
         });

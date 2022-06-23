@@ -664,7 +664,7 @@ function settingsNode(
     };
   }
 
-  return { icon: "Points", fields };
+  return { icon: "Points", fields, order: topic.name.toLocaleLowerCase() };
 }
 
 function pointFieldTypeName(type: PointFieldType): string {

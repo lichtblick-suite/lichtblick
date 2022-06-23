@@ -118,7 +118,13 @@ export class Images extends SceneExtension<ImageRenderable> {
 
         entries.push({
           path: ["topics", topic.name],
-          node: { icon: "ImageProjection", fields, visible: config.visible ?? true, handler },
+          node: {
+            icon: "ImageProjection",
+            fields,
+            visible: config.visible ?? true,
+            order: topic.name.toLocaleLowerCase(),
+            handler,
+          },
         });
       }
     }

@@ -51,6 +51,7 @@ export class Markers extends SceneExtension<TopicMarkers> {
         const node: SettingsTreeNodeWithActionHandler = {
           label: topic.name,
           icon: "Shapes",
+          order: topic.name.toLocaleLowerCase(),
           visible: config.visible ?? true,
           handler: this.handleSettingsActionTopic,
         };
