@@ -72,7 +72,7 @@ storiesOf("components/ShareJsonModal", module)
           <ShareJsonModal
             title="Foo"
             onRequestClose={() => {}}
-            initialValue={""}
+            initialValue=""
             onChange={() => {}}
             noun="layout"
           />

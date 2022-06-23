@@ -148,7 +148,7 @@ describe("<SearchText />", () => {
         });
         return <span>{searchText}</span>;
       };
-      const root = mount(<Wrapper searchText={"hello"} />);
+      const root = mount(<Wrapper searchText="hello" />);
       root.update();
       const originalGlText = glTextMarkers;
       root.setProps({ searchText: "bye" });

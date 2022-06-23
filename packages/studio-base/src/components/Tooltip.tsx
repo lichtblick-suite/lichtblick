@@ -13,6 +13,7 @@ import { useCallback, Fragment, useRef, useState } from "react";
 
 type Contents = React.ReactNode | (() => React.ReactNode);
 
+/* eslint-disable react/no-unused-prop-types */
 export type Props = {
   contents?: Contents;
   placement?: "top" | "left" | "right" | "bottom";
@@ -28,6 +29,7 @@ export type Props = {
   // Milliseconds to wait before showing tooltip
   delay?: number;
 };
+/* eslint-enable react/no-unused-prop-types */
 
 // Returns a tooltip element that must be rendered into the React tree, and a ref that can be
 // attached to a native HTML element so the tooltip can be shown when the mouse enters/leaves the

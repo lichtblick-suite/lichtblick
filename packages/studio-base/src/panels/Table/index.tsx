@@ -68,7 +68,7 @@ function TablePanel({ config, saveConfig }: Props) {
       )}
       {topicPath.length !== 0 && firstCachedMessage && (
         <Stack overflow="auto" fontFamily={fonts.MONOSPACE}>
-          <Table value={firstCachedMessage.value} accessorPath={""} />
+          <Table value={firstCachedMessage.value} accessorPath="" />
         </Stack>
       )}
     </Stack>

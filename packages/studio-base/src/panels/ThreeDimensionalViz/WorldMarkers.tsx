@@ -115,7 +115,6 @@ export type WorldMarkerProps = {
   layerIndex?: number;
   markersByType: InteractiveMarkersByType;
   clearCachedMarkers: boolean;
-  cameraDistance: number;
   loadModelOptions: LoadModelOptions;
 };
 

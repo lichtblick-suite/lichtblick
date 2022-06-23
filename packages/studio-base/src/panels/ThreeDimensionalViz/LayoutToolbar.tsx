@@ -33,7 +33,7 @@ import { MeasuringTool } from "@foxglove/studio-base/panels/ThreeDimensionalViz/
 import { PublishClickTool } from "@foxglove/studio-base/panels/ThreeDimensionalViz/PublishClickTool";
 import { PublishMarker } from "@foxglove/studio-base/panels/ThreeDimensionalViz/PublishMarker";
 import SearchText, {
-  SearchTextProps,
+  SearchTextParams,
 } from "@foxglove/studio-base/panels/ThreeDimensionalViz/SearchText";
 import {
   MouseEventHandlerProps,
@@ -42,7 +42,7 @@ import {
 
 type Props = LayoutToolbarSharedProps &
   MouseEventHandlerProps &
-  SearchTextProps & {
+  SearchTextParams & {
     autoSyncCameraState: boolean;
     config: ThreeDimensionalVizConfig;
     currentTime: Time;

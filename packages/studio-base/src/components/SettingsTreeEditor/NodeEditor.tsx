@@ -11,7 +11,6 @@ import {
   Divider,
   IconButton,
   InputBase,
-  ListItemProps,
   styled as muiStyled,
   Tooltip,
   Typography,
@@ -35,11 +34,8 @@ import { prepareSettingsNodes } from "./utils";
 export type NodeEditorProps = {
   actionHandler: (action: SettingsTreeAction) => void;
   defaultOpen?: boolean;
-  divider?: ListItemProps["divider"];
-  group?: string;
   path: readonly string[];
   settings?: DeepReadonly<SettingsTreeNode>;
-  updateSettings?: (path: readonly string[], value: unknown) => void;
 };
 
 export const NODE_HEADER_MIN_HEIGHT = 35;

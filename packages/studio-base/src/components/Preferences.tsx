@@ -354,7 +354,7 @@ export default function Preferences(): React.ReactElement {
             <Checkbox
               checked={telemetryEnabled ?? true}
               onChange={(_event, checked) => void setTelemetryEnabled(checked)}
-              label={`Send anonymized usage data to help us improve Foxglove Studio`}
+              label="Send anonymized usage data to help us improve Foxglove Studio"
             />
             <Checkbox
               checked={crashReportingEnabled ?? true}

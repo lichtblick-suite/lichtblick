@@ -149,13 +149,13 @@ export default function ZoomMenu({
           </StyledToggleButtonGroup>
         </Stack>
         <Divider />
-        <MenuItem divider onClick={onZoom100} data-test={"hundred-zoom"}>
+        <MenuItem divider onClick={onZoom100} data-test="hundred-zoom">
           Zoom to 100%
         </MenuItem>
-        <MenuItem divider onClick={onZoomFit} data-test={"fit-zoom"}>
+        <MenuItem divider onClick={onZoomFit} data-test="fit-zoom">
           Zoom to fit
         </MenuItem>
-        <MenuItem onClick={onZoomFill} data-test={"fill-zoom"}>
+        <MenuItem onClick={onZoomFill} data-test="fill-zoom">
           Zoom to fill
         </MenuItem>
       </Menu>

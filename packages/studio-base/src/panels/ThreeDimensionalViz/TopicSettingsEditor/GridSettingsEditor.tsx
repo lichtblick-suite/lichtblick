@@ -46,7 +46,7 @@ export default function GridSettingsEditor(
         variant="filled"
         data-test="width-input"
         type="number"
-        placeholder={"10"}
+        placeholder="10"
         value={settings.width ?? ""}
         inputProps={{ min: 1, max: 1000, step: 1 }}
         onChange={(e) => {
@@ -59,7 +59,7 @@ export default function GridSettingsEditor(
         variant="filled"
         data-test="subdivisions-input"
         type="number"
-        placeholder={"9"}
+        placeholder="9"
         value={settings.subdivisions ?? ""}
         inputProps={{ min: 0, max: 1000, step: 1 }}
         onChange={(e) => {
@@ -72,7 +72,7 @@ export default function GridSettingsEditor(
         variant="filled"
         data-test="height-offset-input"
         type="number"
-        placeholder={"0"}
+        placeholder="0"
         value={settings.heightOffset ?? ""}
         inputProps={{ min: -1000, max: 1000, step: 0.1 }}
         onChange={(e) => {

@@ -23,7 +23,7 @@ import {
 import { Time } from "@foxglove/rostime";
 import { Interactive } from "@foxglove/studio-base/panels/ThreeDimensionalViz/Interactions/types";
 import {
-  WorldSearchTextProps,
+  WorldSearchTextParams,
   useGLText,
 } from "@foxglove/studio-base/panels/ThreeDimensionalViz/SearchText";
 import WorldMarkers, {
@@ -57,7 +57,7 @@ import { mightActuallyBePartial } from "@foxglove/studio-base/util/mightActually
 import { MarkerCollector, MarkerProvider } from "./types";
 import withHighlights from "./withHighlights";
 
-type Props = WorldSearchTextProps & {
+type Props = WorldSearchTextParams & {
   autoTextBackgroundColor: boolean;
   canvasBackgroundColor: string;
   cameraState: CameraState;

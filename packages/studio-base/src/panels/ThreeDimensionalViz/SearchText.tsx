@@ -38,15 +38,16 @@ export type GLTextMarker = TextMarker & {
   highlightColor?: Color;
 };
 
-export type WorldSearchTextProps = {
+export type WorldSearchTextParams = {
   searchTextOpen: boolean;
   searchText: string;
+  // eslint-disable-next-line react/no-unused-prop-types
   setSearchTextMatches: (markers: GLTextMarker[]) => void;
   searchTextMatches: GLTextMarker[];
   selectedMatchIndex: number;
 };
 
-export type SearchTextProps = WorldSearchTextProps & {
+export type SearchTextParams = WorldSearchTextParams & {
   // eslint-disable-next-line @foxglove/no-boolean-parameters
   toggleSearchTextOpen: (bool: boolean) => void;
   setSearchText: (searchText: string) => void;
@@ -77,7 +78,7 @@ export const useGLText = ({
   selectedMatchIndex,
   setSearchTextMatches,
   searchTextMatches,
-}: WorldSearchTextProps & {
+}: WorldSearchTextParams & {
   text: Interactive<TextMarker>[];
 }): Interactive<GLTextMarker>[] => {
   let numMatches = 0;
@@ -127,7 +128,7 @@ export const useGLText = ({
   return glText;
 };
 
-export const useSearchText = (): SearchTextProps => {
+export const useSearchText = (): SearchTextParams => {
   const [searchTextOpen, toggleSearchTextOpen] = useState<boolean>(false);
   const [searchText, setSearchText] = useState<string>("");
   const [searchTextMatches, setSearchTextMatches] = useState<GLTextMarker[]>([]);
@@ -146,7 +147,7 @@ export const useSearchText = (): SearchTextProps => {
     searchInputRef,
   };
 };
-type SearchTextComponentProps = SearchTextProps & {
+type SearchTextComponentProps = SearchTextParams & {
   onCameraStateChange: (arg0: CameraState) => void;
   cameraState: CameraState;
   renderFrameId?: string;

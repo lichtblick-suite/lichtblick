@@ -142,7 +142,7 @@ export default function NamespaceMenu({
                 <SColorPickerWrapper style={colorPickerWrapperStyle}>
                   <ColorPicker
                     color={overrideColor}
-                    buttonShape={"circle"}
+                    buttonShape="circle"
                     onChange={(newColor) => onNamespaceOverrideColorChange(newColor, nodeKey)}
                   />
                   {hasNamespaceOverrideColorChanged && (

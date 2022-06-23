@@ -35,8 +35,8 @@ storiesOf("components/Autocomplete", module)
           <div style={{ padding: 20 }} ref={focusInput}>
             <Autocomplete
               items={["one", "two", "three"]}
-              filterText={"o"}
-              value={"o"}
+              filterText="o"
+              value="o"
               onSelect={() => {}}
               hasError
             />
@@ -55,8 +55,8 @@ storiesOf("components/Autocomplete", module)
             <div style={{ padding: 20 }} ref={focusInput}>
               <Autocomplete
                 items={["one", "two", "three"]}
-                filterText={"o"}
-                value={"o"}
+                filterText="o"
+                value="o"
                 onSelect={() => {}}
                 hasError
               />
@@ -78,8 +78,8 @@ storiesOf("components/Autocomplete", module)
             { value: "three", text: "THREE" },
           ]}
           getItemText={({ text }: any) => text}
-          filterText={"o"}
-          value={"o"}
+          filterText="o"
+          value="o"
           onSelect={() => {}}
         />
       </div>
@@ -166,7 +166,7 @@ storiesOf("components/Autocomplete", module)
         <Autocomplete
           items={[{ value: "bab" }, { value: "bb" }, { value: "a2" }, { value: "a1" }]}
           getItemText={({ value }: any) => `item: ${value.toUpperCase()}`}
-          value={"b"}
+          value="b"
           onSelect={() => {}}
           sortWhenFiltering={false}
         />

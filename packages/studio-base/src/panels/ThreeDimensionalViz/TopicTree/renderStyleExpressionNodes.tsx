@@ -196,7 +196,7 @@ function StyleExpressionNode(props: {
                 <span style={{ paddingRight: 8 }}>Marker color</span>
                 <ColorPicker
                   color={colorOverride.color}
-                  buttonShape={"circle"}
+                  buttonShape="circle"
                   onChange={(newColor) => {
                     updateSettingsForGlobalVariable(name, {
                       color: newColor,

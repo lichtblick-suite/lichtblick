@@ -833,7 +833,7 @@ export default function TimeBasedChart(props: Props): JSX.Element {
       <Tooltip
         shown
         noPointerEvents={true}
-        placement={"right"}
+        placement="right"
         targetPosition={{ x: activeTooltip?.x ?? 0, y: activeTooltip?.y ?? 0 }}
         contents={tooltipContent}
       />

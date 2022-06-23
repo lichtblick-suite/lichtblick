@@ -44,6 +44,7 @@ rules:
   react-hooks/exhaustive-deps:
     - error
     - additionalHooks: "(useAsync(?!AppConfigurationValue))|useCallbackWithToast"
+  react/jsx-curly-brace-presence: [error, never]
 
   # The _sx_ property is slow
   # https://stackoverflow.com/questions/68383046/is-there-a-performance-difference-between-the-sx-prop-and-the-makestyles-function

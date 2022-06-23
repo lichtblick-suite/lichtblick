@@ -129,7 +129,7 @@ function NamespaceNodeRow({
           isXSWidth={isXSWidth}
           maxWidth={maxNodeNameLen}
           displayName={namespace}
-          topicName={""}
+          topicName=""
           tooltips={[
             <TooltipRow key={namespace}>
               <TooltipTable>
