@@ -11,17 +11,17 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
+import PushPinIcon from "@mui/icons-material/PushPin";
 import {
-  Dropdown,
-  IDropdownOption,
-  IDropdownStyles,
-  ISelectableOption,
-  useTheme,
-} from "@fluentui/react";
-import PinIcon from "@mdi/svg/svg/pin.svg";
-import { Theme } from "@mui/material";
-import { makeStyles } from "@mui/styles";
-import cx from "classnames";
+  ListItem,
+  ListItemText,
+  styled as muiStyled,
+  ListItemButton,
+  MenuItem,
+  Select,
+  InputBase,
+  IconButton,
+} from "@mui/material";
 import produce from "immer";
 import { compact, set, uniq } from "lodash";
 import { useCallback, useEffect, useMemo } from "react";
@@ -31,8 +31,6 @@ import { filterMap } from "@foxglove/den/collection";
 import { SettingsTreeAction } from "@foxglove/studio";
 import { useDataSourceInfo } from "@foxglove/studio-base/PanelAPI";
 import EmptyState from "@foxglove/studio-base/components/EmptyState";
-import Icon from "@foxglove/studio-base/components/Icon";
-import { LegacyInput } from "@foxglove/studio-base/components/LegacyStyledComponents";
 import Panel from "@foxglove/studio-base/components/Panel";
 import { usePanelContext } from "@foxglove/studio-base/components/PanelContext";
 import PanelToolbar from "@foxglove/studio-base/components/PanelToolbar";
@@ -62,86 +60,82 @@ type NodeRowProps = {
   onClickPin: (info: DiagnosticInfo) => void;
 };
 
-const useStyles = makeStyles((theme: Theme) => ({
-  ok: { color: theme.palette.success.main },
-  warn: { color: theme.palette.warning.main },
-  error: { color: theme.palette.error.main },
-  stale: { color: theme.palette.text.secondary },
-  pinIcon: {
-    marginRight: 4,
-    marginLeft: 4,
-    verticalAlign: "middle",
-    visibility: "hidden",
+const MESSAGE_COLORS: { [key: string]: string } = {
+  ok: "success.main",
+  warn: "warning.main",
+  error: "error.main",
+  stale: "text.secondary",
+};
 
-    "& svg": {
-      fontSize: 16,
-      position: "relative",
-      top: -1,
-    },
-  },
-  pinIconActive: {
-    visibility: "visible",
-  },
-  nodeRow: {
-    textDecoration: "none",
-    cursor: "pointer",
-    userSelect: "none",
-    display: "flex",
-    alignItems: "center",
-    padding: 0,
-    lineHeight: "24px",
-    overflow: "hidden",
-    whiteSpace: "nowrap",
-    textOverflow: "ellipsis",
+const StyledListItemButton = muiStyled(ListItemButton, {
+  shouldForwardProp: (prop) => prop !== "isPinned",
+})<{
+  isPinned: boolean;
+}>(({ isPinned, theme }) => ({
+  padding: 0,
+
+  ".MuiIconButton-root": {
+    visibility: isPinned ? "visibile" : "hidden",
 
     "&:hover": {
-      backgroundColor: theme.palette.action.hover,
+      backgroundColor: "transparent",
     },
-    "&:hover .icon": {
-      visibility: "visible",
-    },
+  },
+  ".MuiListItemText-root": {
+    gap: theme.spacing(1),
+    display: "flex",
+  },
+  "&:hover .MuiIconButton-root": {
+    visibility: "visible",
+  },
+}));
+
+const StyledSelect = muiStyled(Select)(() => ({
+  ".MuiInputBase-input.MuiSelect-select.MuiInputBase-inputSizeSmall": {
+    paddingTop: 0,
+    paddingBottom: 0,
+    minWidth: 40,
+  },
+  ".MuiListItemText-root": {
+    marginTop: 0,
+    marginBottom: 0,
   },
 }));
 
 const NodeRow = React.memo(function NodeRow(props: NodeRowProps) {
-  const handleClick = useCallback(() => {
-    const info = props.info;
-    const onClick = props.onClick;
-    onClick(info);
-  }, [props.onClick, props.info]);
-  const handleClickPin = useCallback(() => {
-    const info = props.info;
-    const onClickPin = props.onClickPin;
-    onClickPin(info);
-  }, [props.onClickPin, props.info]);
+  const { info, isPinned, onClick, onClickPin } = props;
 
-  const { info, isPinned } = props;
+  const handleClick = useCallback(() => {
+    onClick(info);
+  }, [onClick, info]);
+
+  const handleClickPin = useCallback(() => {
+    onClickPin(info);
+  }, [onClickPin, info]);
+
   const levelName = LEVEL_NAMES[info.status.level];
-  const classes = useStyles();
+
   return (
-    <div className={classes.nodeRow} onClick={handleClick} data-test-diagnostic-row>
-      <Icon
-        fade={!isPinned}
-        onClick={handleClickPin}
-        className={cx(classes.pinIcon, {
-          [classes.pinIconActive]: isPinned,
-        })}
-      >
-        <PinIcon />
-      </Icon>
-      <div>{info.displayName}</div>
-      &nbsp;–&nbsp;
-      <div
-        className={cx({
-          [classes.ok]: levelName === "ok",
-          [classes.warn]: levelName === "warn",
-          [classes.error]: levelName === "error",
-          [classes.stale]: levelName === "stale",
-        })}
-      >
-        {info.status.message}
-      </div>
-    </div>
+    <ListItem dense disablePadding data-test-diagnostic-row>
+      <StyledListItemButton disableGutters isPinned={isPinned} onClick={handleClick}>
+        <IconButton
+          size="small"
+          onClick={(event) => {
+            handleClickPin();
+            event.stopPropagation();
+          }}
+        >
+          <PushPinIcon fontSize="small" color={isPinned ? "inherit" : "disabled"} />
+        </IconButton>
+        <ListItemText
+          primary={info.displayName}
+          secondary={info.status.message}
+          secondaryTypographyProps={{
+            color: MESSAGE_COLORS[levelName ?? "stale"],
+          }}
+        />
+      </StyledListItemButton>
+    </ListItem>
   );
 });
 
@@ -157,41 +151,6 @@ const ALLOWED_DATATYPES: string[] = [
 ];
 
 function DiagnosticSummary(props: Props): JSX.Element {
-  const theme = useTheme();
-  const classes = useStyles();
-  const dropdownStyles = useMemo(
-    () =>
-      ({
-        root: {
-          minWidth: "100px",
-        },
-        caretDownWrapper: {
-          top: 0,
-          lineHeight: 16,
-          height: 16,
-        },
-        title: {
-          backgroundColor: "transparent",
-          fontSize: theme.fonts.small.fontSize,
-          borderColor: theme.semanticColors.bodyDivider,
-          lineHeight: 22,
-          height: 22,
-        },
-        dropdownItemSelected: {
-          fontSize: theme.fonts.small.fontSize,
-          lineHeight: 22,
-          height: 22,
-          minHeight: 22,
-        },
-        dropdownItem: {
-          lineHeight: 22,
-          height: 22,
-          minHeight: 22,
-          fontSize: theme.fonts.small.fontSize,
-        },
-      } as Partial<IDropdownStyles>),
-    [theme],
-  );
   const { config, saveConfig } = props;
   const { topics } = useDataSourceInfo();
   const { minLevel, topicToRender, pinnedIds, hardwareIdFilter, sortByLevel = true } = config;
@@ -224,35 +183,18 @@ function DiagnosticSummary(props: Props): JSX.Element {
 
   const renderRow = useCallback(
     // eslint-disable-next-line react/no-unused-prop-types
-    ({ item, style, key }: ListRowProps & { item: DiagnosticInfo }) => {
+    ({ item, key }: ListRowProps & { item: DiagnosticInfo }) => {
       return (
-        <div key={key} style={style}>
-          <NodeRow
-            info={item}
-            isPinned={pinnedIds.includes(item.id)}
-            onClick={showDetails}
-            onClickPin={togglePinned}
-          />
-        </div>
+        <NodeRow
+          key={key}
+          info={item}
+          isPinned={pinnedIds.includes(item.id)}
+          onClick={showDetails}
+          onClickPin={togglePinned}
+        />
       );
     },
     [pinnedIds, showDetails, togglePinned],
-  );
-
-  const hardwareFilter = (
-    <LegacyInput
-      style={{
-        width: "100%",
-        padding: "0",
-        backgroundColor: "transparent",
-        opacity: "0.5",
-        marginLeft: "10px",
-        fontSize: "12px",
-      }}
-      value={hardwareIdFilter}
-      placeholder="Filter"
-      onChange={(e) => saveConfig({ hardwareIdFilter: e.target.value })}
-    />
   );
 
   // Filter down all topics to those that conform to our supported datatypes
@@ -266,6 +208,7 @@ function DiagnosticSummary(props: Props): JSX.Element {
   }, [topics, topicToRender]);
 
   const diagnostics = useDiagnostics(topicToRender);
+
   const summary = useMemo(() => {
     if (diagnostics.size === 0) {
       return (
@@ -310,7 +253,7 @@ function DiagnosticSummary(props: Props): JSX.Element {
             width={width}
             height={height}
             style={{ outline: "none" }}
-            rowHeight={25}
+            rowHeight={30}
             rowRenderer={(rowProps) => renderRow({ ...rowProps, item: nodes[rowProps.index]! })}
             rowCount={nodes.length}
             overscanRowCount={10}
@@ -339,40 +282,37 @@ function DiagnosticSummary(props: Props): JSX.Element {
     });
   }, [actionHandler, availableTopics, config, topicToRender, updatePanelSettingsTree]);
 
-  const renderOption = (option: ISelectableOption | undefined) =>
-    option ? (
-      <div
-        className={cx({
-          [classes.ok]: option.text === "ok",
-          [classes.warn]: option.text === "warn",
-          [classes.error]: option.text === "error",
-          [classes.stale]: option.text === "stale",
-        })}
-      >
-        &gt;= {option.text.toUpperCase()}
-      </div>
-    ) : (
-      ReactNull
-    );
-
   return (
     <Stack flex="auto">
       <PanelToolbar helpContent={helpContent}>
-        <Dropdown
-          styles={dropdownStyles}
-          onRenderOption={renderOption}
-          onRenderTitle={(options: IDropdownOption[] | undefined) =>
-            options?.[0] ? renderOption(options[0]) : ReactNull
-          }
-          onChange={(_ev, option) => {
-            if (option) {
-              saveConfig({ minLevel: option.key as number });
-            }
-          }}
-          options={KNOWN_LEVELS.map((key: number) => ({ key, text: LEVEL_NAMES[key] ?? "" }))}
-          selectedKey={minLevel}
-        />
-        {hardwareFilter}
+        <Stack flex="auto" direction="row" gap={1}>
+          <StyledSelect
+            value={minLevel}
+            id="status-filter-menu"
+            color="secondary"
+            size="small"
+            onChange={(event) => saveConfig({ minLevel: event.target.value as number })}
+            MenuProps={{ MenuListProps: { dense: true } }}
+          >
+            {KNOWN_LEVELS.map((level) => (
+              <MenuItem key={level} value={level}>
+                <ListItemText
+                  primary={LEVEL_NAMES[level]?.toUpperCase()}
+                  primaryTypographyProps={{
+                    variant: "inherit",
+                    color: MESSAGE_COLORS[LEVEL_NAMES[level] ?? "stale"],
+                  }}
+                />
+              </MenuItem>
+            ))}
+          </StyledSelect>
+          <InputBase
+            value={hardwareIdFilter}
+            placeholder="Filter"
+            onChange={(e) => saveConfig({ hardwareIdFilter: e.target.value })}
+            style={{ flex: "auto", font: "inherit" }}
+          />
+        </Stack>
       </PanelToolbar>
       <Stack flex="auto">{summary}</Stack>
     </Stack>
@@ -386,6 +326,7 @@ const defaultConfig: DiagnosticSummaryConfig = {
   topicToRender: DIAGNOSTIC_TOPIC,
   sortByLevel: true,
 };
+
 export default Panel(
   Object.assign(DiagnosticSummary, {
     panelType: "DiagnosticSummary",
