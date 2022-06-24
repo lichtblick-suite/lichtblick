@@ -230,7 +230,9 @@ export const PointCloudColor = {
     });
     material.name = PointCloudColor.id(shape, encoding, scale, transparent);
     material.transparent = transparent;
-    material.depthWrite = !transparent;
+    // The sorting issues caused by writing semi-transparent pixels to the depth buffer are less
+    // distracting for point clouds than the self-sorting artifacts when depth writing is disabled
+    material.depthWrite = true;
     // Tell three.js to recompile the shader when `shape` or `encoding` change
     material.customProgramCacheKey = () => `${shape}-${encoding}`;
     material.onBeforeCompile = (shader) => {

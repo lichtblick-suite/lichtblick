@@ -185,6 +185,11 @@ export type PoseArray = Readonly<{
   poses: Pose[];
 }>;
 
+export type NavPath = Readonly<{
+  header: Header;
+  poses: PoseStamped[];
+}>;
+
 export type PolygonStamped = {
   header: Header;
   polygon: Polygon;
@@ -283,6 +288,9 @@ addRosDataType(POSE_WITH_COVARIANCE_STAMPED_DATATYPES, "geometry_msgs/PoseWithCo
 
 export const POSE_ARRAY_DATATYPES = new Set<string>();
 addRosDataType(POSE_ARRAY_DATATYPES, "geometry_msgs/PoseArray");
+
+export const NAV_PATH_DATATYPES = new Set<string>();
+addRosDataType(NAV_PATH_DATATYPES, "nav_msgs/Path");
 
 export const CAMERA_INFO_DATATYPES = new Set<string>();
 addRosDataType(CAMERA_INFO_DATATYPES, "sensor_msgs/CameraInfo");

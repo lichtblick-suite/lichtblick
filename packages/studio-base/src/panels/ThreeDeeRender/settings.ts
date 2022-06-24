@@ -2,7 +2,12 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
+import type { SettingsTreeField } from "@foxglove/studio";
+
 export type SelectEntry = { label: string; value: string };
+
+export type TwoColors = [string, string];
+export type Vec3 = [number, number, number];
 
 /**
  * Common settings for all persisted SceneExtension settings.
@@ -31,3 +36,50 @@ export type CustomLayerSettings = BaseSettings & {
 
 export const PRECISION_DISTANCE = 3; // [1mm]
 export const PRECISION_DEGREES = 1;
+
+export function fieldSize(
+  label: string,
+  value: number | undefined,
+  placeholder?: string | number,
+): SettingsTreeField {
+  return {
+    label,
+    input: "number",
+    min: 0,
+    step: 0.5,
+    precision: PRECISION_DISTANCE,
+    value,
+    placeholder: String(placeholder),
+  };
+}
+
+export function fieldScaleVec3(label: string, value: Vec3): SettingsTreeField {
+  return {
+    label,
+    input: "vec3",
+    labels: ["X", "Y", "Z"],
+    step: 0.5,
+    precision: PRECISION_DISTANCE,
+    value,
+  };
+}
+
+export function fieldLineWidth(
+  label: string,
+  value: number | undefined,
+  placeholder?: string | number,
+): SettingsTreeField {
+  return {
+    label,
+    input: "number",
+    min: 0,
+    step: 0.005,
+    precision: 4,
+    value,
+    placeholder: String(placeholder),
+  };
+}
+
+export function fieldGradient(label: string, value: TwoColors): SettingsTreeField {
+  return { label, input: "gradient", value };
+}

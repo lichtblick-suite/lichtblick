@@ -66,12 +66,6 @@ export class FrameAxes extends SceneExtension<AxisRenderable> {
     let i = 0;
     for (const { label, value: frameId } of this.renderer.coordinateFrameList) {
       const config = (configTransforms[frameId] ?? {}) as Partial<LayerSettingsTransform>;
-      // TODO(jhurliman): readonly fields and icons for root vs non-root frames
-      // const frame = this.renderer.transformTree.frame(frameId);
-      // const isRoot = frame?.isRoot();
-
-      // const fields: SettingsTreeFields = {};
-      // const icon = isRoot === true ? "SouthEast" : isRoot === false ? "NorthWest" : undefined;
 
       entries.push({
         path: ["transforms", frameId],
