@@ -44,16 +44,20 @@ export const hasTransformerErrors = (nodeData: NodeData): boolean =>
   nodeData.diagnostics.some(({ severity }) => severity === DiagnosticSeverity.Error);
 
 export const getInputTopics = (nodeData: NodeData): NodeData => {
-  // Do not attempt to run if there were any previous errors.
-  if (hasTransformerErrors(nodeData)) {
-    return nodeData;
-  }
-
   const { sourceFile, typeChecker } = nodeData;
   if (!sourceFile || !typeChecker) {
-    throw new Error(
-      "Either the 'sourceFile' or 'typeChecker' is absent. There is a problem with the `compile` step.",
-    );
+    const error = {
+      severity: DiagnosticSeverity.Error,
+      message:
+        "Either the 'sourceFile' or 'typeChecker' is absent. There is a problem with the `compile` step.",
+      source: Sources.InputTopicsChecker,
+      code: ErrorCodes.InputTopicsChecker.BAD_INPUTS_TYPE,
+    };
+
+    return {
+      ...nodeData,
+      diagnostics: [...nodeData.diagnostics, error],
+    };
   }
 
   const symbol = typeChecker.getSymbolAtLocation(sourceFile);
@@ -279,10 +283,17 @@ export const compile = (nodeData: NodeData): NodeData => {
   program.emit();
   // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
   if (!codeEmitted) {
-    // TODO: Remove after this has been running in prod for a while, and we haven't seen anything in Sentry.
-    throw new Error(
-      "Program code was not emitted. This should never happen as program.emit() is supposed to be synchronous.",
-    );
+    const error = {
+      severity: DiagnosticSeverity.Error,
+      message: "Program code was not emitted.",
+      source: Sources.InputTopicsChecker,
+      code: ErrorCodes.InputTopicsChecker.BAD_INPUTS_TYPE,
+    };
+
+    return {
+      ...nodeData,
+      diagnostics: [...nodeData.diagnostics, error],
+    };
   }
 
   const diagnostics = [...program.getSemanticDiagnostics(), ...program.getSyntacticDiagnostics()];

@@ -104,15 +104,16 @@ describe("pipeline", () => {
       expect(inputTopics).toEqual(expectedTopics);
     });
 
-    it("should not run getInputTopics if there were any compile time errors", () => {
+    it("should run getInputTopics even if there were compile time errors", () => {
       const nodeData = compose(compile, getInputTopics)(
         {
           ...baseNodeData,
-          sourceCode: "const x: string = 41",
+          sourceCode: "export const inputs = ['foo']; const x: DoesNotExist = 41",
         },
         [],
       );
       expect(nodeData.diagnostics.map(({ source }) => source)).toEqual([Sources.Typescript]);
+      expect(nodeData.inputTopics).toEqual(["foo"]);
     });
 
     it.each([

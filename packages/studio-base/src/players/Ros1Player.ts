@@ -389,7 +389,7 @@ export default class Ros1Player implements Player {
 
       subscription.on("header", (_header, msgdef, _reader) => {
         // We have to create a new object instead of just updating _providerDatatypes to support
-        // shallow memo
+        // shallow memo downstream.
         const newDatatypes = this._getRosDatatypes(datatype, msgdef);
         this._providerDatatypes = new Map([...this._providerDatatypes, ...newDatatypes]);
       });

@@ -110,7 +110,6 @@ const BottomBar = ({ nodeId, isSaved, save, diagnostics, logs }: Props): ReactEl
           paddingRight={1}
         >
           <StyledTabs
-            disableRipple
             textColor="inherit"
             value={bottomBarDisplay !== "closed" ? bottomBarDisplay : false}
             onChange={handleChange}

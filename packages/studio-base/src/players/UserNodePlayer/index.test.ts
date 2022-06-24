@@ -39,6 +39,12 @@ const nodeUserCode = `
   };
 `;
 
+const nodeUserCodeWithCompileError = `
+  export const inputs = ["/np_input"];
+  export const output = "some_output";
+  export default
+`;
+
 const nodeUserCodeWithPointClouds = `
   import { convertToRangeView } from "./pointClouds";
   import { RGBA } from "./types";
@@ -396,6 +402,31 @@ describe("UserNodePlayer", () => {
       });
       userNodePlayer.setSubscriptions(topicNames.map((topic) => ({ topic })));
       expect(fakePlayer.subscriptions).toEqual([{ topic: "/np_input" }]);
+    });
+
+    it("subscribes to underlying topics even when user script has a compilation error", async () => {
+      const fakePlayer = new FakePlayer();
+      const userNodePlayer = new UserNodePlayer(fakePlayer, defaultUserNodeActions);
+
+      const [done] = setListenerHelper(userNodePlayer);
+
+      void userNodePlayer.setUserNodes({
+        nodeId: { name: "someNodeName", sourceCode: nodeUserCodeWithCompileError },
+      });
+      void fakePlayer.emit({
+        activeData: {
+          ...basicPlayerState,
+          messages: [],
+          messageOrder: "receiveTime",
+          currentTime: { sec: 0, nsec: 0 },
+          topics: [],
+          datatypes: new Map(Object.entries({ foo: { definitions: [] } })),
+        },
+      });
+      await done;
+
+      userNodePlayer.setSubscriptions([{ topic: "some_output" }]);
+      expect(fakePlayer.subscriptions).toEqual([{ topic: "/np_input", preloadType: "partial" }]);
     });
 
     it("does not produce messages from UserNodes if not subscribed to", async () => {
