@@ -131,6 +131,23 @@ export default class Ros2Player implements Player {
       name: "std_msgs/msg/Header",
       definitions,
     });
+
+    // Add Time and Duration builtin interfaces
+    this._providerDatatypes.set("builtin_interfaces/Time", {
+      name: "builtin_interfaces/Time",
+      definitions: [
+        { name: "sec", type: "int32" },
+        { name: "nanosec", type: "uint32" },
+      ],
+    });
+
+    this._providerDatatypes.set("builtin_interfaces/Duration", {
+      name: "builtin_interfaces/Duration",
+      definitions: [
+        { name: "sec", type: "int32" },
+        { name: "nanosec", type: "uint32" },
+      ],
+    });
   }
 
   private _open = async (): Promise<void> => {

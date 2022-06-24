@@ -84,28 +84,30 @@ export function messagePathStructures(
   lastDatatypes = undefined;
   const structureFor = memoize(
     (datatype: string, seenDatatypes: string[]): MessagePathStructureItemMessage => {
-      if (datatype === "time" || datatype === "duration") {
-        return {
-          structureType: "message",
-          nextByName: {
-            sec: {
-              structureType: "primitive",
-              primitiveType: "uint32",
-              datatype: "",
-            },
-            nsec: {
-              structureType: "primitive",
-              primitiveType: "uint32",
-              datatype: "",
-            },
-          },
-          datatype,
-        };
-      }
-
       const nextByName: Record<string, MessagePathStructureItem> = {};
       const rosDatatype = datatypes.get(datatype);
       if (!rosDatatype) {
+        // "time" and "duration" are considered "built-in" types in ROS
+        // If we can't find a datatype in our datatypes list we fall-back to our hard-coded versions
+        if (datatype === "time" || datatype === "duration") {
+          return {
+            structureType: "message",
+            nextByName: {
+              sec: {
+                structureType: "primitive",
+                primitiveType: "uint32",
+                datatype: "",
+              },
+              nsec: {
+                structureType: "primitive",
+                primitiveType: "uint32",
+                datatype: "",
+              },
+            },
+            datatype,
+          };
+        }
+
         throw new Error(`datatype not found: "${datatype}"`);
       }
       rosDatatype.definitions.forEach((msgField) => {
