@@ -24,7 +24,8 @@ import { Button, IconButton, Theme, alpha, MenuItem, Menu } from "@mui/material"
 import { makeStyles } from "@mui/styles";
 import cx from "classnames";
 import { last } from "lodash";
-import { ComponentProps, useCallback, useMemo, useRef, useState } from "react";
+import { ComponentProps, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useLatest } from "react-use";
 import { useDebouncedCallback } from "use-debounce";
 
 import MessagePathInput from "@foxglove/studio-base/components/MessagePathSyntax/MessagePathInput";
@@ -334,6 +335,13 @@ export default function PlotLegend(props: PlotLegendProps): JSX.Element {
   );
 
   const lastPath = last(localPaths);
+
+  // The set of paths we plot can be changed externally by other panels so
+  // we replace our local path state with the config path state when this happens.
+  const latestPropsPaths = useLatest(props.paths);
+  useEffect(() => {
+    setLocalPaths(latestPropsPaths.current);
+  }, [latestPropsPaths, props.paths.length]);
 
   const toggleLegend = useCallback(
     () => saveConfig({ showLegend: !showLegend }),
