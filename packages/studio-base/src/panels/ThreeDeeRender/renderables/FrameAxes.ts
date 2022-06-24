@@ -7,13 +7,13 @@ import { Line2 } from "three/examples/jsm/lines/Line2";
 import { LineGeometry } from "three/examples/jsm/lines/LineGeometry";
 import { LineMaterial } from "three/examples/jsm/lines/LineMaterial";
 
-import { SettingsTreeAction } from "@foxglove/studio";
+import { SettingsTreeAction, SettingsTreeFields } from "@foxglove/studio";
 
 import { Renderer } from "../Renderer";
 import { SceneExtension } from "../SceneExtension";
 import { SettingsTreeEntry } from "../SettingsManager";
 import { BaseSettings } from "../settings";
-import { makePose } from "../transforms";
+import { Duration, Transform, makePose, CoordinateFrame, MAX_DURATION } from "../transforms";
 import { AxisRenderable } from "./AxisRenderable";
 import { linePickingMaterial, releaseLinePickingMaterial } from "./markers/materials";
 
@@ -30,6 +30,10 @@ const DEFAULT_SETTINGS: LayerSettingsTransform = {
 
 const tempVec = new THREE.Vector3();
 const tempVecB = new THREE.Vector3();
+const tempLower: [Duration, Transform] = [0n, Transform.Identity()];
+const tempUpper: [Duration, Transform] = [0n, Transform.Identity()];
+const tempQuaternion = new THREE.Quaternion();
+const tempEuler = new THREE.Euler();
 
 export class FrameAxes extends SceneExtension<AxisRenderable> {
   private static lineGeometry: LineGeometry | undefined;
@@ -50,6 +54,7 @@ export class FrameAxes extends SceneExtension<AxisRenderable> {
     );
 
     renderer.on("transformTreeUpdated", this.handleTransformTreeUpdated);
+    renderer.on("startFrame", () => this.updateSettingsTree());
   }
 
   override dispose(): void {
@@ -66,10 +71,14 @@ export class FrameAxes extends SceneExtension<AxisRenderable> {
     let i = 0;
     for (const { label, value: frameId } of this.renderer.coordinateFrameList) {
       const config = (configTransforms[frameId] ?? {}) as Partial<LayerSettingsTransform>;
+      const fields = buildSettingsFields(
+        this.renderer.transformTree.frame(frameId),
+        this.renderer.currentTime,
+      );
 
       entries.push({
         path: ["transforms", frameId],
-        node: { label, visible: config.visible ?? true, order: i++, handler },
+        node: { label, fields, visible: config.visible ?? true, order: i++, handler },
       });
     }
     return entries;
@@ -182,4 +191,96 @@ export class FrameAxes extends SceneExtension<AxisRenderable> {
     }
     return FrameAxes.lineGeometry;
   }
+}
+
+function buildSettingsFields(
+  frame: CoordinateFrame | undefined,
+  currentTime: bigint | undefined,
+): SettingsTreeFields {
+  let ageValue: string | undefined;
+  let xyzValue: THREE.Vector3Tuple | undefined;
+  let rpyValue: THREE.Vector3Tuple | undefined;
+  const parentFrameId = frame?.parent()?.id;
+
+  if (parentFrameId == undefined) {
+    return { parent: { label: "Parent", input: "string", readonly: true, value: "<root>" } };
+  }
+
+  if (currentTime != undefined && frame) {
+    if (frame.findClosestTransforms(tempLower, tempUpper, currentTime, MAX_DURATION)) {
+      const [transformTime, transform] = tempUpper;
+      ageValue =
+        transformTime < currentTime ? formatShortDuration(currentTime - transformTime) : "0 ns";
+      const p = transform.position() as THREE.Vector3Tuple;
+      const q = transform.rotation() as THREE.Vector4Tuple;
+      xyzValue = [round(p[0], 3), round(p[1], 3), round(p[2], 3)];
+      tempQuaternion.set(q[0], q[1], q[2], q[3]);
+      tempEuler.setFromQuaternion(tempQuaternion, "XYZ");
+      rpyValue = [
+        round(THREE.MathUtils.radToDeg(tempEuler.x), 3),
+        round(THREE.MathUtils.radToDeg(tempEuler.y), 3),
+        round(THREE.MathUtils.radToDeg(tempEuler.z), 3),
+      ];
+    }
+  }
+
+  return {
+    parent: {
+      label: "Parent",
+      input: "string",
+      readonly: true,
+      value: parentFrameId,
+    },
+    age: {
+      label: "Age",
+      input: "string",
+      readonly: true,
+      value: ageValue,
+    },
+    xyz: {
+      label: "Translation",
+      input: "vec3",
+      precision: 3,
+      labels: ["X", "Y", "Z"],
+      readonly: true,
+      value: xyzValue,
+    },
+    rpy: {
+      label: "Rotation",
+      input: "vec3",
+      precision: 3,
+      labels: ["R", "P", "Y"],
+      readonly: true,
+      value: rpyValue,
+    },
+  };
+}
+
+const MS_TENTH_NS = BigInt(1e5);
+const MS_NS = BigInt(1e6);
+const SEC_NS = BigInt(1e9);
+const MIN_NS = BigInt(6e10);
+const HOUR_NS = BigInt(3.6e12);
+
+function formatShortDuration(duration: Duration): string {
+  const absDuration = abs(duration);
+  if (absDuration < MS_TENTH_NS) {
+    return `${duration} ns`;
+  } else if (absDuration < SEC_NS) {
+    return `${Number(duration / MS_NS).toFixed(1)} ms`;
+  } else if (absDuration < MIN_NS) {
+    return `${Number(duration / SEC_NS).toFixed(1)} s`;
+  } else if (absDuration < HOUR_NS) {
+    return `${Number(duration / MIN_NS).toFixed(1)} min`;
+  } else {
+    return `${Number(duration / HOUR_NS).toFixed(1)} hr`;
+  }
+}
+
+function abs(x: bigint): bigint {
+  return x < 0n ? -x : x;
+}
+
+function round(x: number, precision: number): number {
+  return Number(x.toFixed(precision));
 }

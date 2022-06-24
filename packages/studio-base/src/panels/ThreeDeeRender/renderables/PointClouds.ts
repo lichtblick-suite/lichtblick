@@ -664,7 +664,12 @@ function settingsNode(
     };
   }
 
-  return { icon: "Points", fields, order: topic.name.toLocaleLowerCase() };
+  return {
+    icon: "Points",
+    fields,
+    order: topic.name.toLocaleLowerCase(),
+    visible: config.visible ?? true,
+  };
 }
 
 function pointFieldTypeName(type: PointFieldType): string {

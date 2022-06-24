@@ -15,7 +15,7 @@ import { compareTime, Duration, interpolate, percentOf, Time } from "./time";
 
 type TimeAndTransform = [time: Time, transform: Transform];
 
-const INFINITE_DURATION: Duration = 4_294_967_295n * BigInt(1e9);
+export const MAX_DURATION: Duration = 4_294_967_295n * BigInt(1e9);
 
 const tempLower: TimeAndTransform = [0n, Transform.Identity()];
 const tempUpper: TimeAndTransform = [0n, Transform.Identity()];
@@ -213,7 +213,7 @@ export class CoordinateFrame {
     input: Readonly<Pose>,
     srcFrame: CoordinateFrame,
     time: Time,
-    maxDelta: Duration = INFINITE_DURATION,
+    maxDelta: Duration = MAX_DURATION,
   ): Pose | undefined {
     // perf-sensitive: function params instead of options object to avoid allocations
     if (srcFrame === this) {
@@ -278,7 +278,7 @@ export class CoordinateFrame {
     srcFrame: CoordinateFrame,
     dstTime: Time,
     srcTime: Time,
-    maxDelta: Duration = INFINITE_DURATION,
+    maxDelta: Duration = MAX_DURATION,
   ): Pose | undefined {
     // perf-sensitive: function params instead of options object to avoid allocations
 
