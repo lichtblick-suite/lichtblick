@@ -13,7 +13,7 @@ import Ros1MemoryCacheDataProvider from "@foxglove/studio-base/randomAccessDataP
 import WorkerBagDataProvider from "@foxglove/studio-base/randomAccessDataProviders/WorkerBagDataProvider";
 import { getSeekToTime } from "@foxglove/studio-base/util/time";
 
-import * as SampleNuscenesLayout from "./SampleNuscenesLayout.json";
+import SampleNuscenesLayout from "./SampleNuscenesLayout.json";
 
 class SampleNuscenesDataSourceFactory implements IDataSourceFactory {
   id = "sample-nuscenes";
