@@ -17,6 +17,7 @@ import WebWorkerManager from "./WebWorkerManager";
 
 jest.mock("@foxglove/studio-base/util/Rpc", () => {
   return class FakeRpc {
+    terminate() {}
     receive() {
       // no-op
     }

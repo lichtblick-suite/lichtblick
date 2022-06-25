@@ -89,6 +89,7 @@ export default class WebWorkerManager<W extends Channel> {
       if (workerState.listenerIds.length === 0) {
         this._workerStates[workerStateIndex] = undefined;
         workerState.worker.terminate();
+        workerState.rpc.terminate();
       }
     }
   }

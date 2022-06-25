@@ -132,6 +132,17 @@ export default class Rpc {
       });
   };
 
+  /** Call this when the channel has been terminated to reject any outstanding send callbacks. */
+  terminate(): void {
+    for (const [id, callback] of Object.entries(this._pendingCallbacks)) {
+      callback({
+        topic: RESPONSE,
+        id,
+        data: { [ERROR]: true, name: "Error", message: "Rpc terminated", stack: "" },
+      });
+    }
+  }
+
   // send a message across the rpc boundary to a receiver on the other side
   // this returns a promise for the receiver's response.  If there is no registered
   // receiver for the given topic, this method throws

@@ -103,6 +103,7 @@ export default class WorkerBagDataProvider implements RandomAccessDataProvider {
       await this.rpc?.send("close");
     } finally {
       this.worker?.terminate();
+      this.rpc?.terminate();
     }
   }
 }

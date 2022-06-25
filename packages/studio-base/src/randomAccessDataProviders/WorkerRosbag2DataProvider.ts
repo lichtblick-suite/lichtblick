@@ -103,6 +103,7 @@ export default class WorkerRosbag2DataProvider implements RandomAccessDataProvid
       await this.rpc?.send("close");
     } finally {
       this.worker?.terminate();
+      this.rpc?.terminate();
     }
   }
 }
