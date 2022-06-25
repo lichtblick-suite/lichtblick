@@ -7,7 +7,7 @@ import * as THREE from "three";
 import { rgbaGradient, rgbaToLinear, SRGBToLinear, stringToRgba } from "../../color";
 import { clamp } from "../../math";
 import type { ColorRGBA } from "../../ros";
-import type { LayerSettingsPointCloud2 } from "../PointClouds";
+import type { LayerSettingsPointCloudAndLaserScan } from "../PointCloudsAndLaserScans";
 
 export type ColorConverter = (output: ColorRGBA, colorValue: number) => void;
 
@@ -15,7 +15,7 @@ const tempColor1 = { r: 0, g: 0, b: 0, a: 0 };
 const tempColor2 = { r: 0, g: 0, b: 0, a: 0 };
 
 export function getColorConverter(
-  settings: LayerSettingsPointCloud2,
+  settings: LayerSettingsPointCloudAndLaserScan,
   minValue: number,
   maxValue: number,
 ): ColorConverter {

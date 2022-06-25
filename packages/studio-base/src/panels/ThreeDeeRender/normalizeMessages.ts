@@ -48,6 +48,18 @@ export function normalizeInt8Array(int8Array: unknown): Int8Array {
   }
 }
 
+export function normalizeFloat32Array(array: unknown): Float32Array {
+  if (array == undefined) {
+    return new Float32Array(0);
+  } else if (array instanceof Float32Array) {
+    return array;
+  } else if (Array.isArray(array) || array instanceof ArrayBuffer) {
+    return new Float32Array(array);
+  } else {
+    return new Float32Array(0);
+  }
+}
+
 export function normalizeVector3(vector: Partial<Vector3> | undefined): Vector3 {
   if (!vector) {
     return { x: 0, y: 0, z: 0 };

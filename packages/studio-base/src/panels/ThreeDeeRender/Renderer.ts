@@ -39,7 +39,7 @@ import { Grids } from "./renderables/Grids";
 import { Images } from "./renderables/Images";
 import { Markers } from "./renderables/Markers";
 import { OccupancyGrids } from "./renderables/OccupancyGrids";
-import { PointClouds } from "./renderables/PointClouds";
+import { PointCloudsAndLaserScans } from "./renderables/PointCloudsAndLaserScans";
 import { Polygons } from "./renderables/Polygons";
 import { PoseArrays } from "./renderables/PoseArrays";
 import { Poses } from "./renderables/Poses";
@@ -263,7 +263,7 @@ export class Renderer extends EventEmitter<RendererEvents> {
     this.addSceneExtension(new Images(this));
     this.addSceneExtension(new Markers(this));
     this.addSceneExtension(new OccupancyGrids(this));
-    this.addSceneExtension(new PointClouds(this));
+    this.addSceneExtension(new PointCloudsAndLaserScans(this));
     this.addSceneExtension(new Polygons(this));
     this.addSceneExtension(new Poses(this));
     this.addSceneExtension(new PoseArrays(this));

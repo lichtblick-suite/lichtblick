@@ -161,6 +161,19 @@ export type PointCloud2 = {
   is_dense: boolean;
 };
 
+export type LaserScan = {
+  header: Header;
+  angle_min: number;
+  angle_max: number;
+  angle_increment: number;
+  time_increment: number;
+  scan_time: number;
+  range_min: number;
+  range_max: number;
+  ranges: Float32Array;
+  intensities: Float32Array;
+};
+
 export type MapMetaData = {
   map_load_time: RosTime;
   resolution: number;
@@ -279,6 +292,9 @@ addRosDataType(OCCUPANCY_GRID_DATATYPES, "nav_msgs/OccupancyGrid");
 
 export const POINTCLOUD_DATATYPES = new Set<string>();
 addRosDataType(POINTCLOUD_DATATYPES, "sensor_msgs/PointCloud2");
+
+export const LASERSCAN_DATATYPES = new Set<string>();
+addRosDataType(LASERSCAN_DATATYPES, "sensor_msgs/LaserScan");
 
 export const POSE_STAMPED_DATATYPES = new Set<string>();
 addRosDataType(POSE_STAMPED_DATATYPES, "geometry_msgs/PoseStamped");

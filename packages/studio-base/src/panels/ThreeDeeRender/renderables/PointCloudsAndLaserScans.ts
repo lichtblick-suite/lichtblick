@@ -14,14 +14,21 @@ import { Renderer } from "../Renderer";
 import { PartialMessage, PartialMessageEvent, SceneExtension } from "../SceneExtension";
 import { SettingsTreeEntry, SettingsTreeNodeWithActionHandler } from "../SettingsManager";
 import { rgbaToCssString, stringToRgba } from "../color";
-import { normalizeByteArray, normalizeHeader } from "../normalizeMessages";
-import { PointCloud2, POINTCLOUD_DATATYPES, PointField, PointFieldType } from "../ros";
+import { normalizeByteArray, normalizeHeader, normalizeFloat32Array } from "../normalizeMessages";
+import {
+  LASERSCAN_DATATYPES,
+  LaserScan,
+  PointCloud2,
+  POINTCLOUD_DATATYPES,
+  PointField,
+  PointFieldType,
+} from "../ros";
 import { BaseSettings } from "../settings";
 import { makePose } from "../transforms";
 import { getColorConverter } from "./pointClouds/colors";
 import { FieldReader, getReader } from "./pointClouds/fieldReaders";
 
-export type LayerSettingsPointCloud2 = BaseSettings & {
+export type LayerSettingsPointCloudAndLaserScan = BaseSettings & {
   pointSize: number;
   pointShape: "circle" | "square";
   decayTime: number;
@@ -43,7 +50,7 @@ const DEFAULT_MIN_COLOR = { r: 100, g: 47, b: 105, a: 1 };
 const DEFAULT_MAX_COLOR = { r: 227, g: 177, b: 135, a: 1 };
 const DEFAULT_RGB_BYTE_ORDER = "rgba";
 
-const DEFAULT_SETTINGS: LayerSettingsPointCloud2 = {
+const DEFAULT_SETTINGS: LayerSettingsPointCloudAndLaserScan = {
   visible: true,
   pointSize: DEFAULT_POINT_SIZE,
   pointShape: DEFAULT_POINT_SHAPE,
@@ -63,39 +70,45 @@ const POINT_SHAPE_OPTIONS = [
   { label: "Square", value: "square" },
 ];
 const POINTCLOUD_REQUIRED_FIELDS = ["x", "y", "z"];
+const LASERSCAN_FIELDS = ["range", "intensity"];
 
 const COLOR_FIELDS = new Set<string>(["rgb", "rgba", "bgr", "bgra", "abgr", "color"]);
 const INTENSITY_FIELDS = new Set<string>(["intensity", "i"]);
 
-const INVALID_POINT_CLOUD = "INVALID_POINT_CLOUD";
+const INVALID_POINTCLOUD_OR_LASERSCAN = "INVALID_POINTCLOUD_OR_LASERSCAN";
 
 const tempColor = { r: 0, g: 0, b: 0, a: 0 };
 
-export type PointCloudUserData = BaseUserData & {
-  settings: LayerSettingsPointCloud2;
+export type PointCloudAndLaserScanUserData = BaseUserData & {
+  settings: LayerSettingsPointCloudAndLaserScan;
   topic: string;
-  pointCloud: PointCloud2;
+  pointCloud?: PointCloud2;
+  laserScan?: LaserScan;
   geometry: DynamicBufferGeometry<Float32Array, Float32ArrayConstructor>;
   points: THREE.Points;
-  pickingMaterial: THREE.ShaderMaterial;
+  pointCloudMaterial?: THREE.PointsMaterial;
+  laserScanMaterial?: LaserScanMaterial;
+  pickingMaterial: THREE.ShaderMaterial | LaserScanMaterial;
 };
 
-export class PointCloudRenderable extends Renderable<PointCloudUserData> {
+export class PointCloudAndLaserScanRenderable extends Renderable<PointCloudAndLaserScanUserData> {
   override dispose(): void {
-    releasePointsMaterial(this.userData.settings, this.renderer.materialCache);
+    releasePointCloudMaterial(this.userData.settings, this.renderer.materialCache);
     this.userData.geometry.dispose();
     this.userData.pickingMaterial.dispose();
+    this.userData.laserScanMaterial?.dispose();
     super.dispose();
   }
 }
 
-export class PointClouds extends SceneExtension<PointCloudRenderable> {
-  pointCloudFieldsByTopic = new Map<string, string[]>();
+export class PointCloudsAndLaserScans extends SceneExtension<PointCloudAndLaserScanRenderable> {
+  private pointCloudFieldsByTopic = new Map<string, string[]>();
 
   constructor(renderer: Renderer) {
-    super("foxglove.PointClouds", renderer);
+    super("foxglove.PointCloudsAndLaserScans", renderer);
 
     renderer.addDatatypeSubscriptions(POINTCLOUD_DATATYPES, this.handlePointCloud);
+    renderer.addDatatypeSubscriptions(LASERSCAN_DATATYPES, this.handleLaserScan);
   }
 
   override settingsNodes(): SettingsTreeEntry[] {
@@ -103,12 +116,16 @@ export class PointClouds extends SceneExtension<PointCloudRenderable> {
     const handler = this.handleSettingsAction;
     const entries: SettingsTreeEntry[] = [];
     for (const topic of this.renderer.topics ?? []) {
-      if (POINTCLOUD_DATATYPES.has(topic.datatype)) {
-        const config = (configTopics[topic.name] ?? {}) as Partial<LayerSettingsPointCloud2>;
+      const isPointCloud = POINTCLOUD_DATATYPES.has(topic.datatype);
+      const isLaserScan = !isPointCloud && LASERSCAN_DATATYPES.has(topic.datatype);
+      if (isPointCloud || isLaserScan) {
+        const config = (configTopics[topic.name] ??
+          {}) as Partial<LayerSettingsPointCloudAndLaserScan>;
         const node: SettingsTreeNodeWithActionHandler = settingsNode(
           this.pointCloudFieldsByTopic,
           config,
           topic,
+          isPointCloud ? "pointcloud" : "laserscan",
         );
         node.handler = handler;
         entries.push({ path: ["topics", topic.name], node });
@@ -129,20 +146,27 @@ export class PointClouds extends SceneExtension<PointCloudRenderable> {
     const topicName = path[1]!;
     const renderable = this.renderables.get(topicName);
     if (renderable) {
-      releasePointsMaterial(renderable.userData.settings, this.renderer.materialCache);
+      releasePointCloudMaterial(renderable.userData.settings, this.renderer.materialCache);
       const settings = this.renderer.config.topics[topicName] as
-        | Partial<LayerSettingsPointCloud2>
+        | Partial<LayerSettingsPointCloudAndLaserScan>
         | undefined;
       renderable.userData.settings = { ...renderable.userData.settings, ...settings };
-      renderable.userData.points.material = pointsMaterial(
-        renderable.userData.settings,
-        this.renderer.materialCache,
-      );
-      this._updatePointCloudRenderable(
-        renderable,
-        renderable.userData.pointCloud,
-        renderable.userData.receiveTime,
-      );
+      if (renderable.userData.pointCloud) {
+        renderable.userData.laserScanMaterial = undefined;
+        renderable.userData.points.material = renderable.userData.pointCloudMaterial =
+          pointCloudMaterial(renderable.userData.settings, this.renderer.materialCache);
+        this._updatePointCloudRenderable(
+          renderable,
+          renderable.userData.pointCloud,
+          renderable.userData.receiveTime,
+        );
+      } else if (renderable.userData.laserScan) {
+        this._updateLaserScanRenderable(
+          renderable,
+          renderable.userData.laserScan,
+          renderable.userData.receiveTime,
+        );
+      }
     }
   };
 
@@ -155,7 +179,7 @@ export class PointClouds extends SceneExtension<PointCloudRenderable> {
     if (!renderable) {
       // Set the initial settings from default values merged with any user settings
       const userSettings = this.renderer.config.topics[topic] as
-        | Partial<LayerSettingsPointCloud2>
+        | Partial<LayerSettingsPointCloudAndLaserScan>
         | undefined;
       const settings = { ...DEFAULT_SETTINGS, ...userSettings };
       if (settings.colorField == undefined) {
@@ -176,14 +200,14 @@ export class PointClouds extends SceneExtension<PointCloudRenderable> {
       geometry.createAttribute("position", 3);
       geometry.createAttribute("color", 4);
 
-      const material = pointsMaterial(settings, this.renderer.materialCache);
+      const material = pointCloudMaterial(settings, this.renderer.materialCache);
       const pickingMaterial = createPickingMaterial(settings);
       const points = new THREE.Points(geometry, material);
       points.frustumCulled = false;
       points.name = `${topic}:PointCloud2:points`;
       points.userData.pickingMaterial = pickingMaterial;
 
-      renderable = new PointCloudRenderable(topic, this.renderer, {
+      renderable = new PointCloudAndLaserScanRenderable(topic, this.renderer, {
         receiveTime,
         messageTime: toNanoSec(pointCloud.header.stamp),
         frameId: pointCloud.header.frame_id,
@@ -194,6 +218,7 @@ export class PointClouds extends SceneExtension<PointCloudRenderable> {
         pointCloud,
         geometry,
         points,
+        pointCloudMaterial: material,
         pickingMaterial,
       });
       renderable.add(points);
@@ -214,7 +239,7 @@ export class PointClouds extends SceneExtension<PointCloudRenderable> {
   };
 
   _updatePointCloudRenderable(
-    renderable: PointCloudRenderable,
+    renderable: PointCloudAndLaserScanRenderable,
     pointCloud: PointCloud2,
     receiveTime: bigint,
   ): void {
@@ -222,6 +247,7 @@ export class PointClouds extends SceneExtension<PointCloudRenderable> {
     renderable.userData.messageTime = toNanoSec(pointCloud.header.stamp);
     renderable.userData.frameId = pointCloud.header.frame_id;
     renderable.userData.pointCloud = pointCloud;
+    renderable.userData.laserScan = undefined;
 
     const settings = renderable.userData.settings;
     const data = pointCloud.data;
@@ -230,21 +256,21 @@ export class PointClouds extends SceneExtension<PointCloudRenderable> {
     // Invalid point cloud checks
     if (pointCloud.is_bigendian) {
       const message = `PointCloud2 is_bigendian=true is not supported`;
-      invalidPointCloudError(this.renderer, renderable, message);
+      invalidPointCloudOrLaserScanError(this.renderer, renderable, message);
       return;
     } else if (data.length % pointCloud.point_step !== 0) {
       const message = `PointCloud2 data length ${data.length} is not a multiple of point_step ${pointCloud.point_step}`;
-      invalidPointCloudError(this.renderer, renderable, message);
+      invalidPointCloudOrLaserScanError(this.renderer, renderable, message);
       return;
     } else if (pointCloud.fields.length === 0) {
       const message = `PointCloud2 has no fields`;
-      invalidPointCloudError(this.renderer, renderable, message);
+      invalidPointCloudOrLaserScanError(this.renderer, renderable, message);
       return;
     } else if (data.length < pointCloud.height * pointCloud.row_step) {
       const message = `PointCloud2 data length ${data.length} is less than height ${pointCloud.height} * row_step ${pointCloud.row_step}`;
       this.renderer.settings.errors.addToTopic(
         renderable.userData.topic,
-        INVALID_POINT_CLOUD,
+        INVALID_POINTCLOUD_OR_LASERSCAN,
         message,
       );
       // Allow this error for now since we currently ignore row_step
@@ -252,7 +278,7 @@ export class PointClouds extends SceneExtension<PointCloudRenderable> {
       const message = `PointCloud2 width ${pointCloud.width} * point_step ${pointCloud.point_step} is greater than row_step ${pointCloud.row_step}`;
       this.renderer.settings.errors.addToTopic(
         renderable.userData.topic,
-        INVALID_POINT_CLOUD,
+        INVALID_POINTCLOUD_OR_LASERSCAN,
         message,
       );
       // Allow this error for now since we currently ignore row_step
@@ -272,11 +298,11 @@ export class PointClouds extends SceneExtension<PointCloudRenderable> {
 
       if (field.count !== 1) {
         const message = `PointCloud2 field "${field.name}" has invalid count ${field.count}. Only 1 is supported`;
-        invalidPointCloudError(this.renderer, renderable, message);
+        invalidPointCloudOrLaserScanError(this.renderer, renderable, message);
         return;
       } else if (field.offset < 0) {
         const message = `PointCloud2 field "${field.name}" has invalid offset ${field.offset}. Must be >= 0`;
-        invalidPointCloudError(this.renderer, renderable, message);
+        invalidPointCloudOrLaserScanError(this.renderer, renderable, message);
         return;
       }
 
@@ -285,7 +311,7 @@ export class PointClouds extends SceneExtension<PointCloudRenderable> {
         if (!xReader) {
           const typeName = pointFieldTypeName(field.datatype);
           const message = `PointCloud2 field "x" is invalid. type=${typeName}, offset=${field.offset}, point_step=${pointCloud.point_step}`;
-          invalidPointCloudError(this.renderer, renderable, message);
+          invalidPointCloudOrLaserScanError(this.renderer, renderable, message);
           return;
         }
       } else if (field.name === "y") {
@@ -293,7 +319,7 @@ export class PointClouds extends SceneExtension<PointCloudRenderable> {
         if (!yReader) {
           const typeName = pointFieldTypeName(field.datatype);
           const message = `PointCloud2 field "y" is invalid. type=${typeName}, offset=${field.offset}, point_step=${pointCloud.point_step}`;
-          invalidPointCloudError(this.renderer, renderable, message);
+          invalidPointCloudOrLaserScanError(this.renderer, renderable, message);
           return;
         }
       } else if (field.name === "z") {
@@ -301,7 +327,7 @@ export class PointClouds extends SceneExtension<PointCloudRenderable> {
         if (!zReader) {
           const typeName = pointFieldTypeName(field.datatype);
           const message = `PointCloud2 field "z" is invalid. type=${typeName}, offset=${field.offset}, point_step=${pointCloud.point_step}`;
-          invalidPointCloudError(this.renderer, renderable, message);
+          invalidPointCloudOrLaserScanError(this.renderer, renderable, message);
           return;
         }
       }
@@ -322,7 +348,7 @@ export class PointClouds extends SceneExtension<PointCloudRenderable> {
         if (!colorReader) {
           const typeName = pointFieldTypeName(field.datatype);
           const message = `PointCloud2 field "${field.name}" is invalid. type=${typeName}, offset=${field.offset}, point_step=${pointCloud.point_step}`;
-          invalidPointCloudError(this.renderer, renderable, message);
+          invalidPointCloudOrLaserScanError(this.renderer, renderable, message);
           return;
         }
       }
@@ -330,14 +356,14 @@ export class PointClouds extends SceneExtension<PointCloudRenderable> {
 
     if (minBytesPerPoint > pointCloud.point_step) {
       const message = `PointCloud2 point_step ${pointCloud.point_step} is less than minimum bytes per point ${minBytesPerPoint}`;
-      invalidPointCloudError(this.renderer, renderable, message);
+      invalidPointCloudOrLaserScanError(this.renderer, renderable, message);
       return;
     }
 
     const positionReaderCount = (xReader ? 1 : 0) + (yReader ? 1 : 0) + (zReader ? 1 : 0);
     if (positionReaderCount < 2) {
       const message = `PointCloud2 must contain at least two of x/y/z fields`;
-      invalidPointCloudError(this.renderer, renderable, message);
+      invalidPointCloudOrLaserScanError(this.renderer, renderable, message);
       return;
     }
 
@@ -389,13 +415,153 @@ export class PointClouds extends SceneExtension<PointCloudRenderable> {
     positionAttribute.needsUpdate = true;
     colorAttribute.needsUpdate = true;
   }
+
+  handleLaserScan = (messageEvent: PartialMessageEvent<LaserScan>): void => {
+    const topic = messageEvent.topic;
+    const laserScan = normalizeLaserScan(messageEvent.message);
+    const receiveTime = toNanoSec(messageEvent.receiveTime);
+
+    let renderable = this.renderables.get(topic);
+    if (!renderable) {
+      // Set the initial settings from default values merged with any user settings
+      const userSettings = this.renderer.config.topics[topic] as
+        | Partial<LayerSettingsPointCloudAndLaserScan>
+        | undefined;
+      const settings = { ...DEFAULT_SETTINGS, ...userSettings };
+      if (settings.colorField == undefined) {
+        settings.colorField = "intensity";
+        settings.colorMode = "colormap";
+        settings.colorMap = "turbo";
+
+        // Update user settings with the newly selected color field
+        this.renderer.updateConfig((draft) => {
+          const updatedUserSettings = { ...userSettings };
+          updatedUserSettings.colorField = settings.colorField;
+          updatedUserSettings.colorMode = settings.colorMode;
+          updatedUserSettings.colorMap = settings.colorMap;
+          draft.topics[topic] = updatedUserSettings;
+        });
+      }
+
+      const geometry = new DynamicBufferGeometry(Float32Array);
+      geometry.name = `${topic}:LaserScan:geometry`;
+      // Three.JS doesn't render anything if there is no attribute named position, so we use the name position for the "range" parameter.
+      geometry.createAttribute("position", 1);
+      geometry.createAttribute("color", 4);
+
+      const material = new LaserScanMaterial();
+      const pickingMaterial = new LaserScanMaterial({ picking: true });
+      const points = new THREE.Points(geometry, material);
+      points.frustumCulled = false;
+      points.name = `${topic}:LaserScan:points`;
+      points.userData.pickingMaterial = pickingMaterial;
+
+      material.update(settings, laserScan);
+      pickingMaterial.update(settings, laserScan);
+
+      renderable = new PointCloudAndLaserScanRenderable(topic, this.renderer, {
+        receiveTime,
+        messageTime: toNanoSec(laserScan.header.stamp),
+        frameId: laserScan.header.frame_id,
+        pose: makePose(),
+        settingsPath: ["topics", topic],
+        settings,
+        topic,
+        laserScan,
+        geometry,
+        points,
+        pointCloudMaterial: undefined,
+        laserScanMaterial: material,
+        pickingMaterial,
+      });
+      renderable.add(points);
+
+      this.add(renderable);
+      this.renderables.set(topic, renderable);
+    }
+
+    this._updateLaserScanRenderable(renderable, laserScan, receiveTime);
+  };
+
+  _updateLaserScanRenderable(
+    renderable: PointCloudAndLaserScanRenderable,
+    laserScan: LaserScan,
+    receiveTime: bigint,
+  ): void {
+    renderable.userData.receiveTime = receiveTime;
+    renderable.userData.messageTime = toNanoSec(laserScan.header.stamp);
+    renderable.userData.frameId = laserScan.header.frame_id;
+    renderable.userData.pointCloud = undefined;
+    renderable.userData.laserScan = laserScan;
+
+    const settings = renderable.userData.settings;
+    const { colorField } = settings;
+    const { intensities, ranges } = laserScan;
+
+    // Invalid laser scan checks
+    if (intensities.length !== 0 && intensities.length !== ranges.length) {
+      const message = `LaserScan intensities length (${intensities.length}) does not match ranges length (${ranges.length})`;
+      invalidPointCloudOrLaserScanError(this.renderer, renderable, message);
+      return;
+    }
+    if (colorField !== "intensity" && colorField !== "range") {
+      const message = `LaserScan color field must be either 'intensity' or 'range', found '${colorField}'`;
+      invalidPointCloudOrLaserScanError(this.renderer, renderable, message);
+      return;
+    }
+
+    const geometry = renderable.userData.geometry;
+    geometry.resize(ranges.length);
+    const rangeAttribute = geometry.attributes.position!;
+    const colorAttribute = geometry.attributes.color!;
+    rangeAttribute.set(ranges);
+
+    // Update material uniforms
+    renderable.userData.laserScanMaterial?.update(settings, laserScan);
+    if (renderable.userData.pickingMaterial instanceof LaserScanMaterial) {
+      renderable.userData.pickingMaterial.update(settings, laserScan);
+    }
+
+    // Determine min/max color values (if needed)
+    let minColorValue = settings.minValue ?? Number.POSITIVE_INFINITY;
+    let maxColorValue = settings.maxValue ?? Number.NEGATIVE_INFINITY;
+    if (settings.minValue == undefined || settings.maxValue == undefined) {
+      for (let i = 0; i < ranges.length; i++) {
+        let colorValue: number | undefined;
+        if (colorField === "range") {
+          colorValue = ranges[i]!;
+        } else {
+          colorValue = intensities[i];
+        }
+        if (colorValue != undefined) {
+          minColorValue = Math.min(minColorValue, colorValue);
+          maxColorValue = Math.max(maxColorValue, colorValue);
+        }
+      }
+      minColorValue = settings.minValue ?? minColorValue;
+      maxColorValue = settings.maxValue ?? maxColorValue;
+    }
+
+    // Build a method to convert raw color field values to RGBA
+    const colorConverter = getColorConverter(settings, minColorValue, maxColorValue);
+
+    // Iterate the point cloud data to update color attribute
+    for (let i = 0; i < ranges.length; i++) {
+      const colorValue = colorField === "range" ? ranges[i]! : intensities[i] ?? 0;
+      colorConverter(tempColor, colorValue);
+      colorAttribute.setXYZW(i, tempColor.r, tempColor.g, tempColor.b, tempColor.a);
+    }
+
+    rangeAttribute.needsUpdate = true;
+    colorAttribute.needsUpdate = true;
+  }
 }
 
-function pointsMaterial(
-  settings: LayerSettingsPointCloud2,
+function pointCloudMaterial(
+  settings: LayerSettingsPointCloudAndLaserScan,
   materialCache: MaterialCache,
 ): THREE.PointsMaterial {
-  const transparent = pointCloudHasTransparency(settings);
+  const transparent = colorHasTransparency(settings);
   const encoding = pointCloudColorEncoding(settings);
   const scale = settings.pointSize;
   return materialCache.acquire(
@@ -405,17 +571,99 @@ function pointsMaterial(
   );
 }
 
-function releasePointsMaterial(
-  settings: LayerSettingsPointCloud2,
+function releasePointCloudMaterial(
+  settings: LayerSettingsPointCloudAndLaserScan,
   materialCache: MaterialCache,
 ): void {
-  const transparent = pointCloudHasTransparency(settings);
+  const transparent = colorHasTransparency(settings);
   const encoding = pointCloudColorEncoding(settings);
   const scale = settings.pointSize;
   materialCache.release(PointCloudColor.id(settings.pointShape, encoding, scale, transparent));
 }
 
-function createPickingMaterial(settings: LayerSettingsPointCloud2): THREE.ShaderMaterial {
+class LaserScanMaterial extends THREE.RawShaderMaterial {
+  static MIN_PICKING_POINT_SIZE = 8;
+
+  constructor({ picking = false }: { picking?: boolean } = {}) {
+    super({
+      vertexShader: `\
+        #version 300 es
+        precision highp float;
+        precision highp int;
+        uniform mat4 projectionMatrix, modelViewMatrix;
+
+        uniform float pointSize;
+        uniform float angleMin, angleIncrement;
+        uniform float rangeMin, rangeMax;
+        in float position; // range, but must be named position in order for three.js to render anything
+        in mediump vec4 color;
+        out mediump vec4 vColor;
+        void main() {
+          if (position < rangeMin || position > rangeMax) {
+            gl_PointSize = 0.0;
+            return;
+          }
+          vColor = color;
+          float angle = angleMin + angleIncrement * float(gl_VertexID);
+          vec4 pos = vec4(position * cos(angle), position * sin(angle), 0, 1.0);
+          gl_Position = projectionMatrix * modelViewMatrix * pos;
+          ${
+            picking
+              ? `gl_PointSize = max(pointSize, ${LaserScanMaterial.MIN_PICKING_POINT_SIZE.toFixed(
+                  1,
+                )});`
+              : "gl_PointSize = pointSize;"
+          }
+
+        }
+      `,
+      fragmentShader: `\
+        #version 300 es
+        #ifdef GL_FRAGMENT_PRECISION_HIGH
+          precision highp float;
+        #else
+          precision mediump float;
+        #endif
+        uniform bool isCircle;
+        ${picking ? "uniform vec4 objectId;" : "in mediump vec4 vColor;"}
+        out vec4 outColor;
+        void main() {
+          if (isCircle) {
+            vec2 cxy = 2.0 * gl_PointCoord - 1.0;
+            if (dot(cxy, cxy) > 1.0) { discard; }
+          }
+          ${picking ? "outColor = objectId;" : "outColor = vColor;"}
+        }
+      `,
+    });
+    this.uniforms = {
+      isCircle: { value: false },
+      pointSize: { value: 1 },
+      angleMin: { value: NaN },
+      angleIncrement: { value: NaN },
+      rangeMin: { value: NaN },
+      rangeMax: { value: NaN },
+    };
+    if (picking) {
+      this.uniforms.objectId = { value: [NaN, NaN, NaN, NaN] };
+    }
+  }
+
+  update(settings: LayerSettingsPointCloudAndLaserScan, laserScan: LaserScan): void {
+    this.transparent = colorHasTransparency(settings);
+    this.depthWrite = !this.transparent;
+    this.uniforms.isCircle!.value = settings.pointShape === "circle";
+    this.uniforms.pointSize!.value = settings.pointSize;
+    this.uniforms.angleMin!.value = laserScan.angle_min;
+    this.uniforms.angleIncrement!.value = laserScan.angle_increment;
+    this.uniforms.rangeMin!.value = laserScan.range_min;
+    this.uniforms.rangeMax!.value = laserScan.range_max;
+  }
+}
+
+function createPickingMaterial(
+  settings: LayerSettingsPointCloudAndLaserScan,
+): THREE.ShaderMaterial {
   const MIN_PICKING_POINT_SIZE = 8;
 
   // Use a custom shader for picking that sets a minimum point size to make
@@ -440,7 +688,7 @@ function createPickingMaterial(settings: LayerSettingsPointCloud2): THREE.Shader
   });
 }
 
-function pointCloudHasTransparency(settings: LayerSettingsPointCloud2): boolean {
+function colorHasTransparency(settings: LayerSettingsPointCloudAndLaserScan): boolean {
   switch (settings.colorMode) {
     case "flat":
       return stringToRgba(tempColor, settings.flatColor).a < 1.0;
@@ -458,7 +706,7 @@ function pointCloudHasTransparency(settings: LayerSettingsPointCloud2): boolean 
   }
 }
 
-function pointCloudColorEncoding(settings: LayerSettingsPointCloud2): "srgb" | "linear" {
+function pointCloudColorEncoding(settings: LayerSettingsPointCloudAndLaserScan): "srgb" | "linear" {
   switch (settings.colorMode) {
     case "flat":
     case "colormap":
@@ -470,7 +718,10 @@ function pointCloudColorEncoding(settings: LayerSettingsPointCloud2): "srgb" | "
   }
 }
 
-function autoSelectColorField(output: LayerSettingsPointCloud2, pointCloud: PointCloud2): void {
+function autoSelectColorField(
+  output: LayerSettingsPointCloudAndLaserScan,
+  pointCloud: PointCloud2,
+): void {
   // Prefer color fields first
   for (const field of pointCloud.fields) {
     const fieldNameLower = field.name.toLowerCase();
@@ -525,13 +776,13 @@ function autoSelectColorField(output: LayerSettingsPointCloud2, pointCloud: Poin
   }
 }
 
-function bestColorByField(pclFields: string[]): string {
-  for (const field of pclFields) {
+function bestColorByField(fields: string[]): string {
+  for (const field of fields) {
     if (COLOR_FIELDS.has(field)) {
       return field;
     }
   }
-  for (const field of pclFields) {
+  for (const field of fields) {
     if (INTENSITY_FIELDS.has(field)) {
       return field;
     }
@@ -541,17 +792,21 @@ function bestColorByField(pclFields: string[]): string {
 
 function settingsNode(
   pclFieldsByTopic: Map<string, string[]>,
-  config: Partial<LayerSettingsPointCloud2>,
+  config: Partial<LayerSettingsPointCloudAndLaserScan>,
   topic: Topic,
+  kind: "pointcloud" | "laserscan",
 ): SettingsTreeNode {
-  const pclFields = pclFieldsByTopic.get(topic.name) ?? POINTCLOUD_REQUIRED_FIELDS;
+  const msgFields =
+    kind === "laserscan"
+      ? LASERSCAN_FIELDS
+      : pclFieldsByTopic.get(topic.name) ?? POINTCLOUD_REQUIRED_FIELDS;
   const pointSize = config.pointSize;
   const pointShape = config.pointShape ?? "circle";
   const decayTime = config.decayTime;
   const colorMode = config.colorMode ?? "flat";
   const flatColor = config.flatColor ?? "#ffffff";
-  const colorField = config.colorField ?? bestColorByField(pclFields);
-  const colorFieldOptions = pclFields.map((field) => ({ label: field, value: field }));
+  const colorField = config.colorField ?? bestColorByField(msgFields);
+  const colorFieldOptions = msgFields.map((field) => ({ label: field, value: field }));
   const gradient = config.gradient;
   const colorMap = config.colorMap ?? "turbo";
   const rgbByteOrder = config.rgbByteOrder ?? "rgba";
@@ -588,9 +843,14 @@ function settingsNode(
       { label: "Flat", value: "flat" },
       { label: "Color map", value: "colormap" },
       { label: "Gradient", value: "gradient" },
-      { label: "RGB", value: "rgb" },
-      { label: "RGBA", value: "rgba" },
-    ],
+    ].concat(
+      kind === "pointcloud"
+        ? [
+            { label: "RGB", value: "rgb" },
+            { label: "RGBA", value: "rgba" },
+          ]
+        : [],
+    ),
     value: colorMode,
   };
   if (colorMode === "flat") {
@@ -665,7 +925,7 @@ function settingsNode(
   }
 
   return {
-    icon: "Points",
+    icon: kind === "pointcloud" ? "Points" : "Radar",
     fields,
     order: topic.name.toLocaleLowerCase(),
     visible: config.visible ?? true,
@@ -695,12 +955,16 @@ function pointFieldWidth(type: PointFieldType): number {
   }
 }
 
-function invalidPointCloudError(
+function invalidPointCloudOrLaserScanError(
   renderer: Renderer,
-  renderable: PointCloudRenderable,
+  renderable: PointCloudAndLaserScanRenderable,
   message: string,
 ): void {
-  renderer.settings.errors.addToTopic(renderable.userData.topic, INVALID_POINT_CLOUD, message);
+  renderer.settings.errors.addToTopic(
+    renderable.userData.topic,
+    INVALID_POINTCLOUD_OR_LASERSCAN,
+    message,
+  );
   renderable.userData.geometry.resize(0);
 }
 
@@ -731,5 +995,20 @@ function normalizePointCloud2(message: PartialMessage<PointCloud2>): PointCloud2
     row_step: message.row_step ?? 0,
     data: normalizeByteArray(message.data),
     is_dense: message.is_dense ?? false,
+  };
+}
+
+function normalizeLaserScan(message: PartialMessage<LaserScan>): LaserScan {
+  return {
+    header: normalizeHeader(message.header),
+    angle_min: message.angle_min ?? 0,
+    angle_max: message.angle_max ?? 0,
+    angle_increment: message.angle_increment ?? 0,
+    time_increment: message.time_increment ?? 0,
+    scan_time: message.scan_time ?? 0,
+    range_min: message.range_min ?? -Infinity,
+    range_max: message.range_max ?? Infinity,
+    ranges: normalizeFloat32Array(message.ranges),
+    intensities: normalizeFloat32Array(message.intensities),
   };
 }

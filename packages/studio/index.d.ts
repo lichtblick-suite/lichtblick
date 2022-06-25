@@ -339,6 +339,7 @@ declare module "@foxglove/studio" {
     | "Note"
     | "NoteFilled"
     | "Points"
+    | "Radar"
     | "Settings"
     | "Shapes"
     | "Share"
