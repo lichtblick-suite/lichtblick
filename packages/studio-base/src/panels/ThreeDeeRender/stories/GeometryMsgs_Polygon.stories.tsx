@@ -82,7 +82,6 @@ export function GeometryMsgs_Polygon(): JSX.Element {
         overrideConfig={{
           ...ThreeDeeRender.defaultConfig,
           followTf: "base_link",
-          scene: { enableStats: false },
           cameraState: {
             distance: 8.25,
             perspective: true,

@@ -150,7 +150,6 @@ f 5/6/6 1/12/6 8/11/6`),
     <PanelSetup fixture={fixture}>
       <ThreeDeeRender
         overrideConfig={{
-          scene: { enableStats: false },
           layers: {
             grid: { layerId: "foxglove.Grid" },
           },

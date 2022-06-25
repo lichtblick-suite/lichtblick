@@ -116,7 +116,6 @@ export function GeometryMsgs_PoseStamped(): JSX.Element {
       <ThreeDeeRender
         overrideConfig={{
           followTf: "base_link",
-          scene: { enableStats: false },
           topics: {
             "/pose1": {
               type: "arrow",

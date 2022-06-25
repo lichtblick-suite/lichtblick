@@ -106,7 +106,6 @@ export function SphereListPointsTransform(): JSX.Element {
       <ThreeDeeRender
         overrideConfig={{
           followTf: "camera_link",
-          scene: { enableStats: false },
           layers: {
             grid: { layerId: "foxglove.Grid" },
           },

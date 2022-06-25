@@ -119,7 +119,6 @@ export function NavMsgs_Path(): JSX.Element {
       <ThreeDeeRender
         overrideConfig={{
           followTf: "base_link",
-          scene: { enableStats: false },
           layers: {
             grid: { layerId: "foxglove.Grid" },
           },

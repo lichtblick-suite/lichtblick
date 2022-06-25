@@ -508,7 +508,6 @@ export function Markers(): JSX.Element {
         overrideConfig={{
           ...ThreeDeeRender.defaultConfig,
           followTf: "base_link",
-          scene: { enableStats: false },
           layers: {
             grid: { layerId: "foxglove.Grid" },
           },

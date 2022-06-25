@@ -157,7 +157,6 @@ export function MarkerLifetimes(): JSX.Element {
         overrideConfig={{
           ...ThreeDeeRender.defaultConfig,
           followTf: "base_link",
-          scene: { enableStats: false },
           cameraState: {
             distance: 3,
             perspective: true,

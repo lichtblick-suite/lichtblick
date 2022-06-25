@@ -133,7 +133,6 @@ function SensorMsgs_PointCloud2({ rgbaFieldName }: { rgbaFieldName: string }): J
       <ThreeDeeRender
         overrideConfig={{
           followTf: "base_link",
-          scene: { enableStats: false },
           topics: {
             "/pointcloud": {
               pointSize: 10,
@@ -307,7 +306,6 @@ export function SensorMsgs_PointCloud2_Intensity(): JSX.Element {
       <ThreeDeeRender
         overrideConfig={{
           followTf: "base_link",
-          scene: { enableStats: false },
           topics: {
             "/pointcloud": {
               pointSize: 5,
@@ -392,7 +390,6 @@ export function SensorMsgs_PointCloud2_TwoDimensions(): JSX.Element {
       <ThreeDeeRender
         overrideConfig={{
           followTf: "sensor",
-          scene: { enableStats: false },
           layers: {
             grid: { layerId: "foxglove.Grid" },
           },

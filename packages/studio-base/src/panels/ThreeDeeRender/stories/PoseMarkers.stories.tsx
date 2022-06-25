@@ -158,7 +158,6 @@ export function PoseMarkers(): JSX.Element {
         overrideConfig={{
           ...ThreeDeeRender.defaultConfig,
           followTf: "base_link",
-          scene: { enableStats: false },
           cameraState: {
             distance: 4,
             perspective: true,

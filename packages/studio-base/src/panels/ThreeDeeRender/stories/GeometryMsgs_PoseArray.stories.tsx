@@ -133,7 +133,6 @@ function GeometryMsgs_PoseArray(): JSX.Element {
       <ThreeDeeRender
         overrideConfig={{
           followTf: "base_link",
-          scene: { enableStats: false },
           topics: {
             "/sensor_path": {
               type: "arrow",

@@ -28,9 +28,6 @@ export default function PanelCatalogProvider(
   const [enableLegacyPlotPanel = false] = useAppConfigurationValue<boolean>(
     AppSetting.ENABLE_LEGACY_PLOT_PANEL,
   );
-  const [enableNew3DPanel = false] = useAppConfigurationValue<boolean>(
-    AppSetting.EXPERIMENTAL_3D_PANEL,
-  );
 
   const extensionRegistry = useExtensionRegistry();
 
@@ -62,30 +59,17 @@ export default function PanelCatalogProvider(
   }, [extensionRegistry]);
 
   const allPanels = useMemo(() => {
-    return [
-      ...panels.new3DPanel,
-      ...panels.builtin,
-      ...panels.debug,
-      ...panels.legacyPlot,
-      ...wrappedExtensionPanels,
-    ];
+    return [...panels.builtin, ...panels.debug, ...panels.legacyPlot, ...wrappedExtensionPanels];
   }, [wrappedExtensionPanels]);
 
   const visiblePanels = useMemo(() => {
-    const new3DPanels = enableNew3DPanel ? panels.new3DPanel : [];
     const legacyPlotPanels = enableLegacyPlotPanel ? panels.legacyPlot : [];
 
     // debug panels are hidden by default, users can enable them within app settings
     return showDebugPanels
-      ? [
-          ...new3DPanels,
-          ...panels.builtin,
-          ...panels.debug,
-          ...legacyPlotPanels,
-          ...wrappedExtensionPanels,
-        ]
-      : [...new3DPanels, ...panels.builtin, ...legacyPlotPanels, ...wrappedExtensionPanels];
-  }, [enableNew3DPanel, enableLegacyPlotPanel, showDebugPanels, wrappedExtensionPanels]);
+      ? [...panels.builtin, ...panels.debug, ...legacyPlotPanels, ...wrappedExtensionPanels]
+      : [...panels.builtin, ...legacyPlotPanels, ...wrappedExtensionPanels];
+  }, [enableLegacyPlotPanel, showDebugPanels, wrappedExtensionPanels]);
 
   const panelsByType = useMemo(() => {
     const byType = new Map<string, PanelInfo>();

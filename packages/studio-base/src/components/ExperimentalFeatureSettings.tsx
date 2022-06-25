@@ -69,11 +69,6 @@ const features: Feature[] = [
       <>The experimental mcap player uses a new approach to loading messages from mcap files.</>
     ),
   },
-  {
-    key: AppSetting.EXPERIMENTAL_3D_PANEL,
-    name: "Experimental 3D panel",
-    description: <>Enable the experimental 3D panel.</>,
-  },
 ];
 if (process.env.NODE_ENV === "development") {
   features.push({

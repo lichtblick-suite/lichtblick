@@ -161,7 +161,6 @@ export function ImageRender(): JSX.Element {
         overrideConfig={{
           ...ThreeDeeRender.defaultConfig,
           followTf: SENSOR_FRAME_ID,
-          scene: { enableStats: false },
           cameraState: {
             distance: 1.5,
             perspective: true,

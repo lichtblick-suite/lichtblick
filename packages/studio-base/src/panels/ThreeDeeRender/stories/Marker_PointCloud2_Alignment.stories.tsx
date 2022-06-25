@@ -142,9 +142,6 @@ export function Marker_PointCloud2_Alignment(): JSX.Element {
       <ThreeDeeRender
         overrideConfig={{
           ...ThreeDeeRender.defaultConfig,
-          scene: {
-            enableStats: false,
-          },
           topics: {
             "/pointcloud": {
               pointSize: 30,

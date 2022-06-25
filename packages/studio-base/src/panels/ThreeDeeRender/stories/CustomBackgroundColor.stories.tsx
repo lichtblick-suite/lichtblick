@@ -27,10 +27,7 @@ export function CustomBackgroundColor(): JSX.Element {
       <ThreeDeeRender
         overrideConfig={{
           ...ThreeDeeRender.defaultConfig,
-          scene: {
-            enableStats: false,
-            backgroundColor: "#2d7566",
-          },
+          scene: { backgroundColor: "#2d7566" },
         }}
       />
     </PanelSetup>

@@ -428,7 +428,7 @@ export function ThreeDeeRender({ context }: { context: PanelExtensionContext }):
         <canvas ref={setCanvas} style={CANVAS_STYLE} />
       </CameraListener>
       <RendererContext.Provider value={renderer}>
-        <RendererOverlay addPanel={addPanel} enableStats={config.scene.enableStats ?? true} />
+        <RendererOverlay addPanel={addPanel} enableStats={config.scene.enableStats ?? false} />
       </RendererContext.Provider>
     </div>
   );

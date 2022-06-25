@@ -104,7 +104,6 @@ export function LabelMarkers(): JSX.Element {
         overrideConfig={{
           ...ThreeDeeRender.defaultConfig,
           followTf: "base_link",
-          scene: { enableStats: false },
           cameraState: {
             distance: 5.5,
             perspective: true,
