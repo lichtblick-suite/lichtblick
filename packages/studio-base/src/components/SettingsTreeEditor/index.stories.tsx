@@ -402,9 +402,7 @@ const PanelExamplesSettings: SettingsTreeNodes = {
     fields: {
       color: { label: "Color", value: "#ffffff", input: "rgb" },
       shaft_length: { label: "Shaft length", value: 1.5, input: "number" },
-      shaft_width: { label: "Shaft width", value: 1.5, input: "number" },
-      head_length: { label: "Head length", value: 2, input: "number" },
-      head_width: { label: "Head width", value: 2, input: "number" },
+      shaft_position: { label: "Shaft Position", value: [1, 2, 3], input: "vec3", min: 0, max: 5 },
     },
   },
 };

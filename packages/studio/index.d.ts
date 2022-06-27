@@ -387,6 +387,8 @@ declare module "@foxglove/studio" {
         step?: number;
         precision?: number;
         labels?: [string, string, string];
+        max?: number;
+        min?: number;
       }
     | {
         input: "vec2";
@@ -394,6 +396,8 @@ declare module "@foxglove/studio" {
         step?: number;
         precision?: number;
         labels?: [string, string];
+        max?: number;
+        min?: number;
       };
 
   export type SettingsTreeField = SettingsTreeFieldValue & {

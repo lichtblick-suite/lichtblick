@@ -15,6 +15,8 @@ export function Vec3Input({
   readOnly = false,
   step,
   value,
+  min,
+  max,
 }: {
   disabled?: boolean;
   onChange: (
@@ -24,6 +26,8 @@ export function Vec3Input({
   readOnly?: boolean;
   step?: number;
   value: undefined | readonly [undefined | number, undefined | number, undefined | number];
+  min?: number;
+  max?: number;
 }): JSX.Element {
   const onChangeCallback = useCallback(
     (position: number, inputValue: undefined | number) => {
@@ -53,6 +57,8 @@ export function Vec3Input({
           precision={precision}
           step={step}
           value={pval}
+          min={min}
+          max={max}
           onChange={(newValue) => onChangeCallback(position, newValue)}
         />
       ))}
