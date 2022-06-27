@@ -394,7 +394,7 @@ export default function PlotLegend(props: PlotLegendProps): JSX.Element {
           />
           {(xAxisVal === "custom" || xAxisVal === "currentCustom") && (
             <MessagePathInput
-              path={xAxisPath?.value ? xAxisPath.value : "/"}
+              path={xAxisPath?.value ?? ""}
               onChange={(newXAxisPath) =>
                 saveConfig({
                   xAxisPath: {
