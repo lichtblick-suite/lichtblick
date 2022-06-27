@@ -577,6 +577,42 @@ const TopicSettings: SettingsTreeNodes = {
   },
 };
 
+const FilterSettings: SettingsTreeNodes = {
+  matchA: {
+    label: "MatchA",
+    children: {
+      childA: {
+        label: "ChildA",
+      },
+      matchA: {
+        label: "MatchA",
+      },
+    },
+  },
+  matchB: {
+    label: "MatchB",
+    children: {
+      childB: {
+        label: "ChildB",
+      },
+      matchA: {
+        label: "MatchA",
+      },
+    },
+  },
+  matchC: {
+    label: "MatchC",
+    children: {
+      childC: {
+        label: "ChildB",
+      },
+      matchA: {
+        label: "MatchC",
+      },
+    },
+  },
+};
+
 function updateSettingsTreeNodes(
   previous: SettingsTreeNodes,
   path: readonly string[],
@@ -747,3 +783,14 @@ export function IconExamples(): JSX.Element {
 export function Topics(): JSX.Element {
   return <Wrapper nodes={TopicSettings} />;
 }
+
+export function Filter(): JSX.Element {
+  return <Wrapper nodes={FilterSettings} />;
+}
+Filter.play = () => {
+  const node = document.querySelector("[data-test=settings-filter-field] input");
+  if (node) {
+    fireEvent.click(node);
+    fireEvent.change(node, { target: { value: "matcha" } });
+  }
+};

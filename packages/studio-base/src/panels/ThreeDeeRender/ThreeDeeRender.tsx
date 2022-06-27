@@ -224,6 +224,7 @@ export function ThreeDeeRender({ context }: { context: PanelExtensionContext }):
   useEffect(() => {
     context.updatePanelSettingsEditor({
       actionHandler,
+      enableFilter: true,
       nodes: settingsTree ?? {},
     });
   }, [actionHandler, context, settingsTree]);

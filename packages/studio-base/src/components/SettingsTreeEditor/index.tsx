@@ -13,7 +13,7 @@ import { SettingsTree } from "@foxglove/studio";
 import Stack from "@foxglove/studio-base/components/Stack";
 
 import { NodeEditor } from "./NodeEditor";
-import { prepareSettingsNodes } from "./utils";
+import { filterTreeNodes, prepareSettingsNodes } from "./utils";
 
 const StyledAppBar = muiStyled(AppBar, { skipSx: true })(({ theme }) => ({
   top: -1,
@@ -38,13 +38,22 @@ export default function SettingsTreeEditor({
   const { actionHandler } = settings;
   const [filterText, setFilterText] = useState<string>("");
 
-  const definedNodes = useMemo(() => prepareSettingsNodes(settings.nodes), [settings.nodes]);
+  const filteredNodes = useMemo(() => {
+    if (filterText.length > 0) {
+      return filterTreeNodes(settings.nodes, filterText);
+    } else {
+      return settings.nodes;
+    }
+  }, [settings.nodes, filterText]);
+
+  const definedNodes = useMemo(() => prepareSettingsNodes(filteredNodes), [filteredNodes]);
 
   return (
     <Stack fullHeight>
       {settings.enableFilter === true && (
         <StyledAppBar position="sticky" color="default" elevation={0}>
           <TextField
+            data-test="settings-filter-field"
             onChange={(event) => setFilterText(event.target.value)}
             value={filterText}
             variant="filled"
@@ -70,10 +79,11 @@ export default function SettingsTreeEditor({
         {definedNodes.map(([key, root]) => (
           <NodeEditor
             key={key}
+            actionHandler={actionHandler}
+            defaultOpen={root.defaultExpansionState === "collapsed" ? false : true}
+            filter={filterText}
             path={makeStablePath(key)}
             settings={root}
-            defaultOpen={root.defaultExpansionState === "collapsed" ? false : true}
-            actionHandler={actionHandler}
           />
         ))}
       </FieldGrid>
