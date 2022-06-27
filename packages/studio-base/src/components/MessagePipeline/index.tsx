@@ -88,6 +88,7 @@ function defaultPlayerState(): PlayerState {
     presence: PlayerPresence.NOT_PRESENT,
     progress: {},
     capabilities: [],
+    profile: undefined,
     playerId: "",
     activeData: undefined,
   };

@@ -65,6 +65,7 @@ type MemoryDataProviderOptions = {
   parsedMessageDefinitionsByTopic?: ParsedMessageDefinitionsByTopic;
   initiallyLoaded?: boolean;
   providesParsedMessages?: boolean;
+  profile: string;
 };
 
 // in-memory data provider for tests
@@ -79,6 +80,7 @@ export default class MemoryDataProvider implements RandomAccessDataProvider {
   extensionPoint?: ExtensionPoint;
   initiallyLoaded: boolean;
   providesParsedMessages: boolean;
+  profile: string;
 
   constructor({
     messages,
@@ -89,6 +91,7 @@ export default class MemoryDataProvider implements RandomAccessDataProvider {
     messageDefinitionsByTopic,
     parsedMessageDefinitionsByTopic,
     providesParsedMessages,
+    profile,
   }: MemoryDataProviderOptions) {
     this.messages = messages;
     this.topics = topics;
@@ -98,6 +101,7 @@ export default class MemoryDataProvider implements RandomAccessDataProvider {
     this.parsedMessageDefinitionsByTopic = parsedMessageDefinitionsByTopic;
     this.initiallyLoaded = initiallyLoaded;
     this.providesParsedMessages = providesParsedMessages ?? messages.parsedMessages != undefined;
+    this.profile = profile;
   }
 
   async initialize(extensionPoint: ExtensionPoint): Promise<InitializationResult> {
@@ -143,6 +147,7 @@ export default class MemoryDataProvider implements RandomAccessDataProvider {
       connections: [],
       messageDefinitions,
       providesParsedMessages: this.providesParsedMessages,
+      profile: this.profile,
       problems: [],
     };
   }

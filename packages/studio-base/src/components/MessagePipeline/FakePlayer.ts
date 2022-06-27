@@ -29,6 +29,7 @@ export default class FakePlayer implements Player {
   subscriptions: SubscribePayload[] = [];
   publishers: AdvertiseOptions[] | undefined;
   private _capabilities: typeof PlayerCapabilities[keyof typeof PlayerCapabilities][] = [];
+  private _profile: string | undefined;
 
   setListener(listener: (arg0: PlayerState) => Promise<void>): void {
     this.listener = listener;
@@ -49,6 +50,7 @@ export default class FakePlayer implements Player {
       playerId: this.playerId,
       presence: presence ?? PlayerPresence.PRESENT,
       capabilities: this._capabilities,
+      profile: this._profile,
       progress: {},
       activeData,
     });
@@ -82,6 +84,9 @@ export default class FakePlayer implements Player {
     capabilities: typeof PlayerCapabilities[keyof typeof PlayerCapabilities][],
   ): void => {
     this._capabilities = capabilities;
+  };
+  setProfile = (profile: string | undefined): void => {
+    this._profile = profile;
   };
   startPlayback = (): void => {
     // no-op

@@ -176,7 +176,7 @@ export class Markers extends SceneExtension<TopicMarkers> {
       topicMarkers = new TopicMarkers(topic, this.renderer, {
         receiveTime,
         messageTime: toNanoSec(marker.header.stamp),
-        frameId: marker.header.frame_id,
+        frameId: this.renderer.normalizeFrameId(marker.header.frame_id),
         pose: makePose(),
         settingsPath: ["topics", topic],
         topic,

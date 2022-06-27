@@ -182,6 +182,14 @@ declare module "@foxglove/studio" {
     readonly layout: LayoutActions;
 
     /**
+     * Identifies the semantics of the data being played back, such as which topics or parameters
+     * are semantically meaningful or normalization conventions to use. This typically maps to a
+     * shorthand identifier for a robotics framework such as "ros1", "ros2", or "ulog". See the MCAP
+     * profiles concept at <https://github.com/foxglove/mcap/blob/main/docs/specification/appendix.md#well-known-profiles>.
+     */
+    readonly dataSourceProfile?: string;
+
+    /**
      * Subscribe to updates on this field within the render state. Render will only be invoked when
      * this field changes.
      */

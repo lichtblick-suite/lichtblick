@@ -57,6 +57,7 @@ export default function MockMessagePipelineProvider(props: {
   noActiveData?: boolean;
   activeData?: Partial<PlayerStateActiveData>;
   capabilities?: string[];
+  profile?: string;
   startPlayback?: () => void;
   pausePlayback?: () => void;
   seekPlayback?: (arg0: Time) => void;
@@ -118,6 +119,7 @@ export default function MockMessagePipelineProvider(props: {
       playerId: props.playerId ?? "1",
       progress: props.progress ?? {},
       capabilities,
+      profile: props.profile,
       problems: props.problems,
       urlState: props.urlState,
       activeData:
@@ -143,6 +145,7 @@ export default function MockMessagePipelineProvider(props: {
       props.presence,
       props.playerId,
       props.progress,
+      props.profile,
       props.problems,
       props.urlState,
       props.noActiveData,

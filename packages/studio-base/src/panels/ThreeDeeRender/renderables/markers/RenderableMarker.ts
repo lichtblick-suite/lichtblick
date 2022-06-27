@@ -32,7 +32,7 @@ export class RenderableMarker extends Renderable<MarkerUserData> {
     super(name, renderer, {
       receiveTime: receiveTime ?? 0n,
       messageTime: toNanoSec(marker.header.stamp),
-      frameId: marker.header.frame_id,
+      frameId: renderer.normalizeFrameId(marker.header.frame_id),
       pose: marker.pose,
       settingsPath: ["topics", topic, marker.ns, String(marker.id)], // unused
       settings: { visible: true, frameLocked: marker.frame_locked },
@@ -49,7 +49,7 @@ export class RenderableMarker extends Renderable<MarkerUserData> {
       this.userData.receiveTime = receiveTime;
     }
     this.userData.messageTime = toNanoSec(marker.header.stamp);
-    this.userData.frameId = marker.header.frame_id;
+    this.userData.frameId = this.renderer.normalizeFrameId(marker.header.frame_id);
     this.userData.pose = marker.pose;
     this.userData.marker = marker;
     this.userData.expiresIn = hasLifetime ? toNanoSec(marker.lifetime) : undefined;

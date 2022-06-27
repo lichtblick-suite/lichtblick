@@ -78,6 +78,10 @@ function selectCapabilities(ctx: MessagePipelineContext) {
   return ctx.playerState.capabilities;
 }
 
+function selectProfile(ctx: MessagePipelineContext) {
+  return ctx.playerState.profile;
+}
+
 function selectSeekPlayback(ctx: MessagePipelineContext) {
   return ctx.seekPlayback;
 }
@@ -98,6 +102,7 @@ function PanelExtensionAdapter(props: PanelExtensionAdapterProps): JSX.Element {
   const setSubscriptions = useMessagePipeline(selectSetSubscriptions);
   const requestBackfill = useMessagePipeline(selectRequestBackfill);
   const capabilities = useMessagePipeline(selectCapabilities);
+  const dataSourceProfile = useMessagePipeline(selectProfile);
   const seekPlayback = useMessagePipeline(selectSeekPlayback);
   const { openSiblingPanel } = usePanelContext();
 
@@ -397,6 +402,8 @@ function PanelExtensionAdapter(props: PanelExtensionAdapterProps): JSX.Element {
 
       seekPlayback: seekPlayback ? (stamp: number) => seekPlayback(fromSec(stamp)) : undefined,
 
+      dataSourceProfile,
+
       setParameter: (name: string, value: ParameterValue) => {
         const ctx = latestPipelineContextRef.current;
         ctx?.setParameter(name, value);
@@ -523,14 +530,15 @@ function PanelExtensionAdapter(props: PanelExtensionAdapterProps): JSX.Element {
   }, [
     capabilities,
     clearHoverValue,
+    dataSourceProfile,
     openSiblingPanel,
     panelId,
-    updateSettings,
     requestBackfill,
     saveConfig,
     seekPlayback,
     setHoverValue,
     setSubscriptions,
+    updateSettings,
   ]);
 
   const panelContainerRef = useRef<HTMLDivElement>(ReactNull);

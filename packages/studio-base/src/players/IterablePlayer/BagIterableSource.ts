@@ -157,6 +157,7 @@ export class BagIterableSource implements IIterableSource {
       start: this._bag.startTime ?? { sec: 0, nsec: 0 },
       end: this._bag.endTime ?? { sec: 0, nsec: 0 },
       problems,
+      profile: "ros1",
       datatypes,
       publishersByTopic,
     };

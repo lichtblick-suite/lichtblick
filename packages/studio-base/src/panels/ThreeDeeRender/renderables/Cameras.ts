@@ -138,7 +138,7 @@ export class Cameras extends SceneExtension<CameraInfoRenderable> {
     let renderable = this.renderables.get(topic);
     if (!renderable) {
       const messageTime = toNanoSec(cameraInfo.header.stamp);
-      const frameId = cameraInfo.header.frame_id;
+      const frameId = this.renderer.normalizeFrameId(cameraInfo.header.frame_id);
 
       // Set the initial settings from default values merged with any user settings
       const userSettings = this.renderer.config.topics[topic] as
@@ -187,7 +187,7 @@ export class Cameras extends SceneExtension<CameraInfoRenderable> {
 
     renderable.userData.receiveTime = receiveTime;
     renderable.userData.messageTime = toNanoSec(cameraInfo.header.stamp);
-    renderable.userData.frameId = cameraInfo.header.frame_id;
+    renderable.userData.frameId = this.renderer.normalizeFrameId(cameraInfo.header.frame_id);
     renderable.userData.settings = newSettings;
 
     // If the CameraInfo message contents changed, rebuild cameraModel

@@ -238,7 +238,7 @@ export class PoseArrays extends SceneExtension<PoseArrayRenderable> {
       renderable = new PoseArrayRenderable(topic, this.renderer, {
         receiveTime,
         messageTime: toNanoSec(poseArrayMessage.header.stamp),
-        frameId: poseArrayMessage.header.frame_id,
+        frameId: this.renderer.normalizeFrameId(poseArrayMessage.header.frame_id),
         pose: makePose(),
         settingsPath: ["topics", topic],
         settings,
@@ -268,7 +268,7 @@ export class PoseArrays extends SceneExtension<PoseArrayRenderable> {
   ): void {
     renderable.userData.receiveTime = receiveTime;
     renderable.userData.messageTime = toNanoSec(poseArrayMessage.header.stamp);
-    renderable.userData.frameId = poseArrayMessage.header.frame_id;
+    renderable.userData.frameId = this.renderer.normalizeFrameId(poseArrayMessage.header.frame_id);
     renderable.userData.poseArrayMessage = poseArrayMessage;
 
     const { topic, settings: prevSettings } = renderable.userData;
@@ -462,9 +462,9 @@ function normalizeNavPathToPoseArray(navPath: PartialMessage<NavPath>): PoseArra
 function validateNavPath(messageEvent: PartialMessageEvent<NavPath>, renderer: Renderer): boolean {
   const { topic, message: navPath } = messageEvent;
   if (navPath.poses) {
-    const baseFrameId = navPath.header?.frame_id;
+    const baseFrameId = renderer.normalizeFrameId(navPath.header?.frame_id ?? "");
     for (const pose of navPath.poses) {
-      const curFrameId = pose.header?.frame_id;
+      const curFrameId = renderer.normalizeFrameId(pose.header?.frame_id ?? "");
       if (baseFrameId !== curFrameId) {
         renderer.settings.errors.addToTopic(
           topic,

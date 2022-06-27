@@ -165,7 +165,7 @@ export class OccupancyGrids extends SceneExtension<OccupancyGridRenderable> {
       renderable = new OccupancyGridRenderable(topic, this.renderer, {
         receiveTime,
         messageTime: toNanoSec(occupancyGrid.header.stamp),
-        frameId: occupancyGrid.header.frame_id,
+        frameId: this.renderer.normalizeFrameId(occupancyGrid.header.frame_id),
         pose: occupancyGrid.info.origin,
         settingsPath: ["topics", topic],
         settings,
@@ -194,7 +194,7 @@ export class OccupancyGrids extends SceneExtension<OccupancyGridRenderable> {
     renderable.userData.pose = occupancyGrid.info.origin;
     renderable.userData.receiveTime = receiveTime;
     renderable.userData.messageTime = toNanoSec(occupancyGrid.header.stamp);
-    renderable.userData.frameId = occupancyGrid.header.frame_id;
+    renderable.userData.frameId = this.renderer.normalizeFrameId(occupancyGrid.header.frame_id);
 
     const size = occupancyGrid.info.width * occupancyGrid.info.height;
     if (occupancyGrid.data.length !== size) {

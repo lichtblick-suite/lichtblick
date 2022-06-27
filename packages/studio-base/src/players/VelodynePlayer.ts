@@ -233,6 +233,7 @@ export default class VelodynePlayer implements Player {
       presence: this._presence,
       progress: {},
       capabilities: CAPABILITIES,
+      profile: "velodyne",
       playerId: this._id,
       problems: this._problems,
 

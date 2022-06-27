@@ -133,7 +133,7 @@ export class TopicMarkers extends Renderable<MarkerTopicUserData> {
           }
         }
 
-        const frameId = marker.header.frame_id;
+        const frameId = this.renderer.normalizeFrameId(marker.header.frame_id);
         const srcTime = marker.frame_locked ? currentTime : renderable.userData.messageTime;
         const updated = updatePose(
           renderable,

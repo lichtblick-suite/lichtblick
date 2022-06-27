@@ -94,6 +94,7 @@ export class McapIndexedIterableSource implements IIterableSource {
       end: this.end,
       topics: [...topicsByName.values()],
       datatypes,
+      profile: this.reader.header.profile,
       problems,
       publishersByTopic: new Map(),
       topicStats,

@@ -230,6 +230,7 @@ export default class BagDataProvider implements RandomAccessDataProvider {
         messageDefinitionsByTopic,
       },
       providesParsedMessages: false,
+      profile: "ros1",
       problems: [],
     };
   }

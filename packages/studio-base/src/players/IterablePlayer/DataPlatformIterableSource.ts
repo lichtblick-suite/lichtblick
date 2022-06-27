@@ -160,6 +160,7 @@ export class DataPlatformIterableSource implements IIterableSource {
       datatypes,
       start: this._start,
       end: this._end,
+      profile: undefined,
       problems,
       publishersByTopic: new Map(),
       blockDurationNanos: this._requestDurationSecs * 1e9,

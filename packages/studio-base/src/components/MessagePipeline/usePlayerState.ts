@@ -183,6 +183,7 @@ const initialInternalState: InternalState = {
     presence: PlayerPresence.NOT_PRESENT,
     progress: {},
     capabilities: [],
+    profile: undefined,
     playerId: "",
     activeData: undefined,
   },

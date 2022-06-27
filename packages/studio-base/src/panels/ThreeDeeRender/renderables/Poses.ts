@@ -226,7 +226,7 @@ export class Poses extends SceneExtension<PoseRenderable> {
       renderable = new PoseRenderable(topic, this.renderer, {
         receiveTime,
         messageTime: toNanoSec(poseMessage.header.stamp),
-        frameId: poseMessage.header.frame_id,
+        frameId: this.renderer.normalizeFrameId(poseMessage.header.frame_id),
         pose: makePose(),
         settingsPath: ["topics", topic],
         settings,
@@ -252,7 +252,7 @@ export class Poses extends SceneExtension<PoseRenderable> {
   ): void {
     renderable.userData.receiveTime = receiveTime;
     renderable.userData.messageTime = toNanoSec(poseMessage.header.stamp);
-    renderable.userData.frameId = poseMessage.header.frame_id;
+    renderable.userData.frameId = this.renderer.normalizeFrameId(poseMessage.header.frame_id);
     renderable.userData.poseMessage = poseMessage;
 
     // Default the covariance sphere to hidden. If showCovariance is set and a valid covariance

@@ -210,7 +210,7 @@ export class PointCloudsAndLaserScans extends SceneExtension<PointCloudAndLaserS
       renderable = new PointCloudAndLaserScanRenderable(topic, this.renderer, {
         receiveTime,
         messageTime: toNanoSec(pointCloud.header.stamp),
-        frameId: pointCloud.header.frame_id,
+        frameId: this.renderer.normalizeFrameId(pointCloud.header.frame_id),
         pose: makePose(),
         settingsPath: ["topics", topic],
         settings,
@@ -245,7 +245,7 @@ export class PointCloudsAndLaserScans extends SceneExtension<PointCloudAndLaserS
   ): void {
     renderable.userData.receiveTime = receiveTime;
     renderable.userData.messageTime = toNanoSec(pointCloud.header.stamp);
-    renderable.userData.frameId = pointCloud.header.frame_id;
+    renderable.userData.frameId = this.renderer.normalizeFrameId(pointCloud.header.frame_id);
     renderable.userData.pointCloud = pointCloud;
     renderable.userData.laserScan = undefined;
 
@@ -462,7 +462,7 @@ export class PointCloudsAndLaserScans extends SceneExtension<PointCloudAndLaserS
       renderable = new PointCloudAndLaserScanRenderable(topic, this.renderer, {
         receiveTime,
         messageTime: toNanoSec(laserScan.header.stamp),
-        frameId: laserScan.header.frame_id,
+        frameId: this.renderer.normalizeFrameId(laserScan.header.frame_id),
         pose: makePose(),
         settingsPath: ["topics", topic],
         settings,
@@ -490,7 +490,7 @@ export class PointCloudsAndLaserScans extends SceneExtension<PointCloudAndLaserS
   ): void {
     renderable.userData.receiveTime = receiveTime;
     renderable.userData.messageTime = toNanoSec(laserScan.header.stamp);
-    renderable.userData.frameId = laserScan.header.frame_id;
+    renderable.userData.frameId = this.renderer.normalizeFrameId(laserScan.header.frame_id);
     renderable.userData.pointCloud = undefined;
     renderable.userData.laserScan = laserScan;
 

@@ -94,6 +94,7 @@ export default class Mcap0IndexedDataProvider implements RandomAccessDataProvide
       topicStats,
       connections,
       providesParsedMessages: true,
+      profile: this.reader.header.profile,
       messageDefinitions: {
         type: "parsed",
         datatypes,

@@ -245,6 +245,13 @@ export function ThreeDeeRender({ context }: { context: PanelExtensionContext }):
     }
   }, [topics, renderer]);
 
+  // Tell the renderer if we are connected to a ROS data source
+  useEffect(() => {
+    if (renderer) {
+      renderer.ros = context.dataSourceProfile === "ros1" || context.dataSourceProfile === "ros2";
+    }
+  }, [context.dataSourceProfile, renderer]);
+
   // Save panel settings whenever they change
   const throttledSave = useDebouncedCallback(
     (newConfig: RendererConfig) => saveState(newConfig),

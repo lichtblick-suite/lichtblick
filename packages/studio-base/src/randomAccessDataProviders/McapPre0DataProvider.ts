@@ -165,6 +165,7 @@ export default class McapPre0DataProvider implements RandomAccessDataProvider {
       topicStats: new Map<string, TopicStats>(),
       connections,
       providesParsedMessages: true,
+      profile: undefined,
       messageDefinitions: {
         type: "parsed",
         datatypes,

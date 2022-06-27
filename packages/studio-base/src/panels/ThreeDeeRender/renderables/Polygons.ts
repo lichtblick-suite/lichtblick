@@ -130,7 +130,7 @@ export class Polygons extends SceneExtension<PolygonRenderable> {
       renderable = new PolygonRenderable(topic, this.renderer, {
         receiveTime,
         messageTime: toNanoSec(polygonStamped.header.stamp),
-        frameId: polygonStamped.header.frame_id,
+        frameId: this.renderer.normalizeFrameId(polygonStamped.header.frame_id),
         pose: makePose(),
         settingsPath: ["topics", topic],
         settings,
@@ -155,7 +155,7 @@ export class Polygons extends SceneExtension<PolygonRenderable> {
 
     renderable.userData.receiveTime = receiveTime;
     renderable.userData.messageTime = toNanoSec(polygonStamped.header.stamp);
-    renderable.userData.frameId = polygonStamped.header.frame_id;
+    renderable.userData.frameId = this.renderer.normalizeFrameId(polygonStamped.header.frame_id);
     renderable.userData.polygonStamped = polygonStamped;
 
     const topic = renderable.userData.topic;
