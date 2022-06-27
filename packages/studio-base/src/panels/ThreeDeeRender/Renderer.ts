@@ -306,6 +306,10 @@ export class Renderer extends EventEmitter<RendererEvents> {
     this.gl.dispose();
   }
 
+  getPixelRatio(): number {
+    return this.gl.getPixelRatio();
+  }
+
   /**
    * Clears internal state such as the TransformTree and removes Renderables from SceneExtensions.
    * This is useful when seeking to a new playback position or when a new data source is loaded.
