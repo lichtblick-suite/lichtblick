@@ -3,8 +3,7 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 import Logger from "@foxglove/log";
-import { ExtensionInfo, ExtensionLoader } from "@foxglove/studio-base";
-import { ExtensionNamespace } from "@foxglove/studio-base/src/context/ExtensionLoaderContext";
+import { ExtensionInfo, ExtensionLoader, ExtensionNamespace } from "@foxglove/studio-base";
 
 import { Desktop } from "../../common/types";
 
@@ -55,11 +54,6 @@ export class DesktopExtensionLoader implements ExtensionLoader {
 
     const pkgInfo = detail.packageJson as ExtensionInfo;
 
-    // Unfortunately because we do not provide a subscriber interface for extension loader
-    // callers don't have a good way of being notified when the extension list changes
-    // instead of working around this we reload the entire display
-    window.location.reload();
-
     return {
       id: detail.id,
       name: pkgInfo.displayName,
@@ -77,10 +71,6 @@ export class DesktopExtensionLoader implements ExtensionLoader {
   }
 
   async uninstallExtension(id: string): Promise<boolean> {
-    const uninstalled = (await this.bridge?.uninstallExtension(id)) ?? false;
-
-    // see comments for window.location.reload() in installExtension
-    window.location.reload();
-    return uninstalled;
+    return (await this.bridge?.uninstallExtension(id)) ?? false;
   }
 }

@@ -19,6 +19,7 @@ import React, {
   Suspense,
   useRef,
   LazyExoticComponent,
+  useEffect,
 } from "react";
 import { useDrop } from "react-dnd";
 import {
@@ -110,9 +111,15 @@ export function UnconnectedPanelLayout(props: Props): React.ReactElement {
 
   const panelCatalog = usePanelCatalog();
 
-  const panelCompoentCache = useRef(
+  const panelComponentCache = useRef(
     new Map<string, LazyExoticComponent<PanelComponent> | (() => JSX.Element)>(),
   );
+
+  // Clear panel cache when panel catalog changes.
+  useEffect(() => {
+    panelComponentCache.current.clear();
+  }, [panelCatalog]);
+
   const renderTile = useCallback(
     (id: string | Record<string, never> | undefined, path: MosaicPath) => {
       // `id` is usually a string. But when `layout` is empty, `id` will be an empty object, in which case we don't need to render Tile
@@ -121,7 +128,7 @@ export function UnconnectedPanelLayout(props: Props): React.ReactElement {
       }
       const type = getPanelTypeFromId(id);
 
-      let Panel = panelCompoentCache.current.get(type);
+      let Panel = panelComponentCache.current.get(type);
 
       // cache the lazy created panel component to avoid making the component again
       if (!Panel) {
@@ -135,7 +142,7 @@ export function UnconnectedPanelLayout(props: Props): React.ReactElement {
                 <EmptyState>Unknown panel type: {type}.</EmptyState>
               </Stack>
             );
-        panelCompoentCache.current.set(type, Panel);
+        panelComponentCache.current.set(type, Panel);
       }
 
       // When a panel changes from being the only panel to one of many in a layout and

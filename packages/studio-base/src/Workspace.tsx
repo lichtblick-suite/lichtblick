@@ -63,7 +63,7 @@ import {
   useCurrentLayoutSelector,
 } from "@foxglove/studio-base/context/CurrentLayoutContext";
 import { useCurrentUser } from "@foxglove/studio-base/context/CurrentUserContext";
-import { useExtensionLoader } from "@foxglove/studio-base/context/ExtensionLoaderContext";
+import { useExtensionRegistry } from "@foxglove/studio-base/context/ExtensionRegistryContext";
 import LinkHandlerContext from "@foxglove/studio-base/context/LinkHandlerContext";
 import { useNativeAppMenu } from "@foxglove/studio-base/context/NativeAppMenuContext";
 import {
@@ -347,7 +347,7 @@ export default function Workspace(props: WorkspaceProps): JSX.Element {
 
   const { loadFromFile } = useAssets();
 
-  const extensionLoader = useExtensionLoader();
+  const extensionRegistry = useExtensionRegistry();
 
   const openHandle = useCallback(
     async (handle: FileSystemFileHandle) => {
@@ -361,7 +361,7 @@ export default function Workspace(props: WorkspaceProps): JSX.Element {
         try {
           const arrayBuffer = await file.arrayBuffer();
           const data = new Uint8Array(arrayBuffer);
-          const extension = await extensionLoader.installExtension("local", data);
+          const extension = await extensionRegistry.installExtension("local", data);
           addToast(`Installed extension ${extension.id}`, { appearance: "success" });
         } catch (err) {
           log.error(err);
@@ -391,7 +391,7 @@ export default function Workspace(props: WorkspaceProps): JSX.Element {
         selectSource(matchedSource.id, { type: "file", handle });
       }
     },
-    [addToast, availableSources, extensionLoader, loadFromFile, selectSource],
+    [addToast, availableSources, extensionRegistry, loadFromFile, selectSource],
   );
 
   const openFiles = useCallback(
@@ -408,7 +408,7 @@ export default function Workspace(props: WorkspaceProps): JSX.Element {
           try {
             const arrayBuffer = await file.arrayBuffer();
             const data = new Uint8Array(arrayBuffer);
-            const extension = await extensionLoader.installExtension("local", data);
+            const extension = await extensionRegistry.installExtension("local", data);
             addToast(`Installed extension ${extension.id}`, { appearance: "success" });
           } catch (err) {
             log.error(err);
@@ -446,7 +446,7 @@ export default function Workspace(props: WorkspaceProps): JSX.Element {
         }
       }
     },
-    [addToast, availableSources, extensionLoader, loadFromFile, selectSource],
+    [addToast, availableSources, extensionRegistry, loadFromFile, selectSource],
   );
 
   // files the main thread told us to open

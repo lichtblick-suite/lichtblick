@@ -3,8 +3,10 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 import { createContext, useContext } from "react";
+import { DeepReadonly } from "ts-essentials";
 
 import { ExtensionPanelRegistration } from "@foxglove/studio";
+import { ExtensionInfo, ExtensionNamespace } from "@foxglove/studio-base/types/Extensions";
 
 export type RegisteredPanel = {
   extensionName: string;
@@ -12,18 +14,25 @@ export type RegisteredPanel = {
   registration: ExtensionPanelRegistration;
 };
 
-export interface ExtensionRegistry {
-  // Get registered panel matching fullId
-  getRegisteredPanel(fullId: string): RegisteredPanel | undefined;
+export type ExtensionRegistry = {
+  downloadExtension: (url: string) => Promise<Uint8Array>;
+  installExtension: (
+    namespace: ExtensionNamespace,
+    foxeFileData: Uint8Array,
+  ) => Promise<ExtensionInfo>;
+  loadExtension(id: string): Promise<string>;
+  refreshExtensions: () => Promise<void>;
+  registeredExtensions: ExtensionInfo[];
+  registeredPanels: Record<string, RegisteredPanel>;
+  uninstallExtension(id: string): Promise<boolean>;
+};
 
-  // Get a list of all registered panels
-  getRegisteredPanels(): RegisteredPanel[];
-}
-
-const ExtensionRegistryContext = createContext<ExtensionRegistry | undefined>(undefined);
+const ExtensionRegistryContext = createContext<DeepReadonly<ExtensionRegistry> | undefined>(
+  undefined,
+);
 ExtensionRegistryContext.displayName = "ExtensionRegistryContext";
 
-export function useExtensionRegistry(): ExtensionRegistry {
+export function useExtensionRegistry(): DeepReadonly<ExtensionRegistry> {
   const extensionRegistry = useContext(ExtensionRegistryContext);
   if (extensionRegistry == undefined) {
     throw new Error("An ExtensionRegistryContext provider is required to useExtensionRegistry");

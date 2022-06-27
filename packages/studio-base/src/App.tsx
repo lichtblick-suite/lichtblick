@@ -20,7 +20,6 @@ import AnalyticsProvider from "./context/AnalyticsProvider";
 import AppConfigurationContext, { IAppConfiguration } from "./context/AppConfigurationContext";
 import { AssetsProvider } from "./context/AssetsContext";
 import ConsoleApiContext from "./context/ConsoleApiContext";
-import ExtensionLoaderContext, { ExtensionLoader } from "./context/ExtensionLoaderContext";
 import { HoverValueProvider } from "./context/HoverValueContext";
 import LayoutStorageContext from "./context/LayoutStorageContext";
 import ModalHost from "./context/ModalHost";
@@ -33,13 +32,14 @@ import { ConsoleApiDialogCurrentUserProvider } from "./providers/ConsoleApiDialo
 import ConsoleApiRemoteLayoutStorageProvider from "./providers/ConsoleApiRemoteLayoutStorageProvider";
 import CurrentLayoutProvider from "./providers/CurrentLayoutProvider";
 import ExtensionMarketplaceProvider from "./providers/ExtensionMarketplaceProvider";
-import ExtensionRegistryProvider from "./providers/ExtensionRegistryProvider";
+import ExtensionRegistryProvider from "./providers/ExtensionRegistryProvider/ExtensionRegistryProvider";
 import HelpInfoProvider from "./providers/HelpInfoProvider";
 import LayoutManagerProvider from "./providers/LayoutManagerProvider";
 import PanelCatalogProvider from "./providers/PanelCatalogProvider";
 import UserProfileLocalStorageProvider from "./providers/UserProfileLocalStorageProvider";
 import { LaunchPreference } from "./screens/LaunchPreference";
 import ConsoleApi from "./services/ConsoleApi";
+import { ExtensionLoader } from "./services/ExtensionLoader";
 import { ILayoutStorage } from "./services/ILayoutStorage";
 import URDFAssetLoader from "./services/URDFAssetLoader";
 
@@ -85,7 +85,6 @@ export function App(props: AppProps): JSX.Element {
     <StudioToastProvider />,
     <LayoutStorageContext.Provider value={layoutStorage} />,
     <UserProfileLocalStorageProvider />,
-    <ExtensionLoaderContext.Provider value={extensionLoaders} />,
     <AnalyticsProvider amplitudeApiKey={process.env.AMPLITUDE_API_KEY} />,
     <LayoutManagerProvider />,
     <ModalHost />, // render modal elements inside the ThemeProvider
@@ -95,7 +94,7 @@ export function App(props: AppProps): JSX.Element {
     <UserNodeStateProvider />,
     <CurrentLayoutProvider />,
     <ExtensionMarketplaceProvider />,
-    <ExtensionRegistryProvider />,
+    <ExtensionRegistryProvider loaders={extensionLoaders} />,
     <PlayerManager playerSources={dataSources} />,
     /* eslint-enable react/jsx-key */
   ];

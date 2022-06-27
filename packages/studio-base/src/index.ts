@@ -21,7 +21,6 @@ export type {
   ChangeHandler,
 } from "./context/AppConfigurationContext";
 export type { Layout, LayoutID, ISO8601Timestamp, ILayoutStorage } from "./services/ILayoutStorage";
-export type { IExtensionStorage, StoredExtension } from "./services/IExtensionStorage";
 export { migrateLayout } from "./services/ILayoutStorage";
 export type { INativeAppMenu, NativeAppMenuEvent } from "./context/NativeAppMenuContext";
 export { default as NativeWindowContext } from "./context/NativeWindowContext";
@@ -30,8 +29,9 @@ export type { IDataSourceFactory } from "./context/PlayerSelectionContext";
 export { default as installDevtoolsFormatters } from "./util/installDevtoolsFormatters";
 export { default as overwriteFetch } from "./util/overwriteFetch";
 export { default as waitForFonts } from "./util/waitForFonts";
-export type { ExtensionLoader, ExtensionInfo } from "./context/ExtensionLoaderContext";
 export { IdbExtensionLoader } from "./services/IdbExtensionLoader";
+export type { ExtensionLoader } from "./services/ExtensionLoader";
+export type { ExtensionInfo, ExtensionNamespace } from "./types/Extensions";
 export { AppSetting } from "./AppSetting";
 export { default as FoxgloveDataPlatformDataSourceFactory } from "./dataSources/FoxgloveDataPlatformDataSourceFactory";
 export { default as FoxgloveWebSocketDataSourceFactory } from "./dataSources/FoxgloveWebSocketDataSourceFactory";

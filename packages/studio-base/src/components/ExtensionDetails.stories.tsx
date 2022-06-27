@@ -15,13 +15,12 @@ import { useState } from "react";
 
 import { ExtensionDetails } from "@foxglove/studio-base/components/ExtensionDetails";
 import AppConfigurationContext from "@foxglove/studio-base/context/AppConfigurationContext";
-import ExtensionLoaderContext, {
-  ExtensionLoader,
-} from "@foxglove/studio-base/context/ExtensionLoaderContext";
 import ExtensionMarketplaceContext, {
   ExtensionMarketplace,
   ExtensionMarketplaceDetail,
 } from "@foxglove/studio-base/context/ExtensionMarketplaceContext";
+import ExtensionRegistryProvider from "@foxglove/studio-base/providers/ExtensionRegistryProvider/ExtensionRegistryProvider";
+import { ExtensionLoader } from "@foxglove/studio-base/services/ExtensionLoader";
 import { makeMockAppConfiguration } from "@foxglove/studio-base/util/makeMockAppConfiguration";
 
 export default {
@@ -71,11 +70,11 @@ export function Details(): JSX.Element {
 
   return (
     <AppConfigurationContext.Provider value={config}>
-      <ExtensionLoaderContext.Provider value={[MockExtensionLoader]}>
+      <ExtensionRegistryProvider loaders={[MockExtensionLoader]}>
         <ExtensionMarketplaceContext.Provider value={MockExtensionMarketplace}>
           <ExtensionDetails extension={extension} onClose={() => {}} installed={false} />
         </ExtensionMarketplaceContext.Provider>
-      </ExtensionLoaderContext.Provider>
+      </ExtensionRegistryProvider>
     </AppConfigurationContext.Provider>
   );
 }

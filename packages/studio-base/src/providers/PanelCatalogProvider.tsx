@@ -32,9 +32,9 @@ export default function PanelCatalogProvider(
   const extensionRegistry = useExtensionRegistry();
 
   const wrappedExtensionPanels = useMemo<PanelInfo[]>(() => {
-    const extensionPanels = extensionRegistry.getRegisteredPanels();
+    const extensionPanels = extensionRegistry.registeredPanels;
 
-    return extensionPanels.map((panel) => {
+    return Object.values(extensionPanels).map((panel) => {
       const panelType = `${panel.extensionName}.${panel.registration.name}`;
       const PanelWrapper = (panelProps: PanelProps) => {
         return (

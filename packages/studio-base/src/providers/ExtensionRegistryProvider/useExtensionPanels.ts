@@ -2,32 +2,28 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { PropsWithChildren } from "react";
 import ReactDOM from "react-dom";
 import { useAsync } from "react-use";
+import { AsyncState } from "react-use/lib/useAsyncFn";
 
 import Logger from "@foxglove/log";
 import { ExtensionContext, ExtensionModule } from "@foxglove/studio";
-import { useExtensionLoader } from "@foxglove/studio-base/context/ExtensionLoaderContext";
-import ExtensionRegistryContext, {
-  ExtensionRegistry,
-  RegisteredPanel,
-} from "@foxglove/studio-base/context/ExtensionRegistryContext";
+import { RegisteredPanel } from "@foxglove/studio-base/context/ExtensionRegistryContext";
+import { ExtensionLoader } from "@foxglove/studio-base/services/ExtensionLoader";
+import { ExtensionInfo } from "@foxglove/studio-base/types/Extensions";
 
 const log = Logger.getLogger(__filename);
 
-export default function ExtensionRegistryProvider(props: PropsWithChildren<unknown>): JSX.Element {
-  const extensionLoader = useExtensionLoader();
-
-  const { value: registry, error } = useAsync(async () => {
-    const extensionList = await extensionLoader.getExtensions();
-    log.debug(`Found ${extensionList.length} extension(s)`);
-
+export function useExtensionPanels(
+  extensions: ExtensionInfo[],
+  extensionLoaders: Pick<ExtensionLoader, "loadExtension">,
+): AsyncState<Record<string, RegisteredPanel>> {
+  const registeredPanels = useAsync(async () => {
     // registered panels stored by their fully qualified id
     // the fully qualified id is the extension name + panel name
-    const registeredPanels = new Map<string, RegisteredPanel>();
+    const panels: Record<string, RegisteredPanel> = {};
 
-    for (const extension of extensionList) {
+    for (const extension of extensions) {
       log.debug(`Activating extension ${extension.qualifiedName}`);
 
       const module = { exports: {} };
@@ -49,20 +45,20 @@ export default function ExtensionRegistryProvider(props: PropsWithChildren<unkno
           log.debug(`Extension ${extension.qualifiedName} registering panel: ${params.name}`);
 
           const fullId = `${extension.qualifiedName}.${params.name}`;
-          if (registeredPanels.has(fullId)) {
+          if (panels[fullId]) {
             log.warn(`Panel ${fullId} is already registered`);
             return;
           }
 
-          registeredPanels.set(fullId, {
+          panels[fullId] = {
             extensionName: extension.qualifiedName,
             registration: params,
-          });
+          };
         },
       };
 
       try {
-        const unwrappedExtensionSource = await extensionLoader.loadExtension(extension.id);
+        const unwrappedExtensionSource = await extensionLoaders.loadExtension(extension.id);
 
         // eslint-disable-next-line no-new-func
         const fn = new Function("module", "require", unwrappedExtensionSource);
@@ -77,24 +73,8 @@ export default function ExtensionRegistryProvider(props: PropsWithChildren<unkno
       }
     }
 
-    const reg: ExtensionRegistry = {
-      getRegisteredPanel: (fullId: string) => registeredPanels.get(fullId),
-      getRegisteredPanels: () => Array.from(registeredPanels.values()),
-    };
-    return reg;
-  }, [extensionLoader]);
+    return panels;
+  }, [extensionLoaders, extensions]);
 
-  if (error) {
-    throw error;
-  }
-
-  if (!registry) {
-    return <></>;
-  }
-
-  return (
-    <ExtensionRegistryContext.Provider value={registry}>
-      {props.children}
-    </ExtensionRegistryContext.Provider>
-  );
+  return registeredPanels;
 }

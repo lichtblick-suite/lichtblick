@@ -5,7 +5,11 @@
 import * as IDB from "idb/with-async-ittr";
 
 import Log from "@foxglove/log";
-import { StoredExtension, IExtensionStorage, ExtensionInfo } from "@foxglove/studio-base";
+import {
+  IExtensionStorage,
+  StoredExtension,
+} from "@foxglove/studio-base/services/IExtensionStorage";
+import { ExtensionInfo } from "@foxglove/studio-base/types/Extensions";
 
 const log = Log.getLogger(__filename);
 
