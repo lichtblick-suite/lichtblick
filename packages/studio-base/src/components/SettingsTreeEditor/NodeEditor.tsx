@@ -51,7 +51,9 @@ const EditButton = muiStyled(IconButton)(({ theme }) => ({
   padding: theme.spacing(0.5),
 }));
 
-const NodeHeader = muiStyled("div")(({ theme }) => {
+const NodeHeader = muiStyled("div", {
+  shouldForwardProp: (prop) => prop !== "visible",
+})<{ visible: boolean }>(({ theme, visible }) => {
   return {
     display: "flex",
     gridColumn: "span 2",
@@ -60,7 +62,7 @@ const NodeHeader = muiStyled("div")(({ theme }) => {
 
     "@media (pointer: fine)": {
       ".MuiCheckbox-root": {
-        visibility: "hidden",
+        visibility: visible ? "hidden" : "visible",
       },
 
       "[data-node-function=edit-label]": {
@@ -208,7 +210,7 @@ function NodeEditorComponent(props: NodeEditorProps): JSX.Element {
 
   return (
     <>
-      <NodeHeader>
+      <NodeHeader visible={visible}>
         <NodeHeaderToggle
           hasProperties={hasProperties}
           indent={indent}
