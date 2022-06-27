@@ -37,7 +37,7 @@ import {
   COMPRESSED_IMAGE_DATATYPES,
   CAMERA_INFO_DATATYPES,
 } from "../ros";
-import { BaseSettings, PRECISION_DISTANCE } from "../settings";
+import { BaseSettings, PRECISION_DISTANCE, SelectEntry } from "../settings";
 import { makePose } from "../transforms";
 import { CameraInfoUserData } from "./Cameras";
 
@@ -102,12 +102,16 @@ export class Images extends SceneExtension<ImageRenderable> {
         const config = (configTopics[topic.name] ?? {}) as Partial<LayerSettingsImage>;
 
         // Build a list of all matching CameraInfo topics
-        const cameraInfoOptions: Array<{ label: string; value: string }> = [];
+        const bestCameraInfoOptions: SelectEntry[] = [];
+        const otherCameraInfoOptions: SelectEntry[] = [];
         for (const cameraInfoTopic of this.cameraInfoTopics) {
           if (cameraInfoTopicMatches(topic.name, cameraInfoTopic)) {
-            cameraInfoOptions.push({ label: cameraInfoTopic, value: cameraInfoTopic });
+            bestCameraInfoOptions.push({ label: cameraInfoTopic, value: cameraInfoTopic });
+          } else {
+            otherCameraInfoOptions.push({ label: cameraInfoTopic, value: cameraInfoTopic });
           }
         }
+        const cameraInfoOptions = [...bestCameraInfoOptions, ...otherCameraInfoOptions];
 
         // prettier-ignore
         const fields: SettingsTreeFields = {

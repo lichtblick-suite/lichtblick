@@ -6,12 +6,14 @@ import textMetrics from "text-metrics";
 import * as THREE from "three";
 
 import Logger from "@foxglove/log";
+import { DEFAULT_LABEL_PPU } from "@foxglove/studio-base/panels/ThreeDeeRender/renderables/CoreSettings";
 import { fonts } from "@foxglove/studio-base/util/sharedStyleConstants";
 
 import { Renderer } from "./Renderer";
 import { makeRgba, rgbaToCssString, stringToRgba, rgbaToLinear } from "./color";
 import { DetailLevel } from "./lod";
 import { ColorRGBA } from "./ros";
+import { makePose, Pose } from "./transforms";
 
 const log = Logger.getLogger(__filename);
 void log;
@@ -59,10 +61,13 @@ export type LabelOptions = {
   pixelsPerUnit?: number;
 };
 
-export type LabelRenderable = THREE.Sprite & {
+export type LabelRenderable = Omit<THREE.Sprite, "userData"> & {
   userData: {
     id: string;
     label: LabelOptions;
+    pose: Pose;
+    width: number;
+    height: number;
   };
 };
 
@@ -82,31 +87,34 @@ export class Labels extends THREE.Object3D {
     const extraScale = scaleFactor(this.renderer.maxLod);
     const scale = window.devicePixelRatio + extraScale;
     const canvas = this.createCanvas(label, extraScale);
-    const sprite = new THREE.Sprite(
-      new THREE.SpriteMaterial({
-        map: new THREE.CanvasTexture(canvas),
-        dithering: true,
-        transparent: true,
-        sizeAttenuation: true,
-      }),
-    ) as LabelRenderable;
-    sprite.name = `label:${id}`;
-    sprite.userData = { id, label };
+    const texture = new THREE.CanvasTexture(canvas);
     const width = canvas.width / scale;
     const height = canvas.height / scale;
-    const pixelsPerUnit = label.pixelsPerUnit ?? 100;
-    sprite.scale.set(width / pixelsPerUnit, height / pixelsPerUnit, 1);
-    this.setSprite(id, sprite);
 
-    return sprite;
-  }
-
-  setSprite(id: string, sprite: LabelRenderable): LabelRenderable {
-    const prevSprite = this.sprites.get(id);
-    if (prevSprite) {
-      this.remove(prevSprite);
+    let sprite = this.sprites.get(id);
+    if (!sprite) {
+      sprite = new THREE.Sprite(
+        new THREE.SpriteMaterial({
+          name: `label:${id}`,
+          map: texture,
+          dithering: true,
+          transparent: true,
+          sizeAttenuation: true,
+        }),
+      ) as LabelRenderable;
+      sprite.userData = { id, label, pose: makePose(), width, height };
+      this.sprites.set(id, sprite);
+    } else {
+      sprite.material.map = texture;
+      sprite.material.needsUpdate = true;
+      sprite.userData.label = label;
+      sprite.userData.width = width;
+      sprite.userData.height = height;
     }
-    this.sprites.set(id, sprite);
+
+    const pixelsPerUnit =
+      label.pixelsPerUnit ?? this.renderer.config.scene.labelPixelsPerUnit ?? DEFAULT_LABEL_PPU;
+    sprite.scale.set(width / pixelsPerUnit, height / pixelsPerUnit, 1);
 
     return sprite;
   }
@@ -114,6 +122,9 @@ export class Labels extends THREE.Object3D {
   removeById(id: string): boolean {
     const sprite = this.sprites.get(id);
     if (sprite) {
+      this.remove(sprite);
+      sprite.material.map?.dispose();
+      sprite.material.dispose();
       this.sprites.delete(id);
       return true;
     }
@@ -128,6 +139,15 @@ export class Labels extends THREE.Object3D {
     // Redraw all of the labels to use the new color scheme
     for (const [id, sprite] of this.sprites.entries()) {
       this.setLabel(id, sprite.userData.label);
+    }
+  }
+
+  setPixelsPerUnit(pixelsPerUnit: number): void {
+    // Resize all of the labels using the new PPU
+    for (const sprite of this.sprites.values()) {
+      sprite.userData.label.pixelsPerUnit = pixelsPerUnit;
+      const { width, height } = sprite.userData;
+      sprite.scale.set(width / pixelsPerUnit, height / pixelsPerUnit, 1);
     }
   }
 

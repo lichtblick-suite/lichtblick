@@ -8,6 +8,7 @@ import { toNanoSec } from "@foxglove/rostime";
 
 import { BaseUserData, Renderable } from "../../Renderable";
 import type { Renderer } from "../../Renderer";
+import { rgbToThreeColor } from "../../color";
 import { Marker } from "../../ros";
 
 const tempColor = new THREE.Color();
@@ -60,14 +61,14 @@ export class RenderableMarker extends Renderable<MarkerUserData> {
     marker: Marker,
     callback: (color: THREE.Vector4Tuple, i: number) => void,
   ): void {
-    tempColor.setRGB(marker.color.r, marker.color.g, marker.color.b).convertSRGBToLinear();
+    rgbToThreeColor(tempColor, marker.color);
 
     const length = marker.points.length;
     for (let i = 0; i < length; i++) {
       const srgb = marker.colors[i];
       if (srgb) {
         // Per-point color
-        tempColor2.setRGB(srgb.r, srgb.g, srgb.b).convertSRGBToLinear();
+        rgbToThreeColor(tempColor2, srgb);
         tempTuple4[0] = tempColor2.r;
         tempTuple4[1] = tempColor2.g;
         tempTuple4[2] = tempColor2.b;

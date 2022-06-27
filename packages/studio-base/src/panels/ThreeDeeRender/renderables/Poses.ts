@@ -28,7 +28,7 @@ import {
 } from "../ros";
 import { BaseSettings, PRECISION_DISTANCE } from "../settings";
 import { makePose } from "../transforms";
-import { AxisRenderable, AXIS_LENGTH } from "./AxisRenderable";
+import { Axis, AXIS_LENGTH } from "./Axis";
 import { RenderableArrow } from "./markers/RenderableArrow";
 import { RenderableSphere } from "./markers/RenderableSphere";
 
@@ -72,7 +72,7 @@ export type PoseUserData = BaseUserData & {
   settings: LayerSettingsPose;
   topic: string;
   poseMessage: PoseStamped | PoseWithCovarianceStamped;
-  axis?: AxisRenderable;
+  axis?: Axis;
   arrow?: RenderableArrow;
   sphere?: RenderableSphere;
 };
@@ -281,14 +281,7 @@ export class Poses extends SceneExtension<PoseRenderable> {
 
         // Create an AxisRenderable if needed
         if (!renderable.userData.axis) {
-          const axis = new AxisRenderable(topic, this.renderer, {
-            receiveTime: 0n,
-            messageTime: 0n,
-            frameId: "",
-            pose: makePose(),
-            settingsPath: [],
-            settings: { visible: true },
-          });
+          const axis = new Axis(topic, this.renderer);
           renderable.userData.axis = axis;
           renderable.add(axis);
         }

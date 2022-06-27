@@ -33,7 +33,7 @@ import {
   PRECISION_DISTANCE,
 } from "../settings";
 import { makePose, Pose } from "../transforms";
-import { AxisRenderable, AXIS_LENGTH } from "./AxisRenderable";
+import { Axis, AXIS_LENGTH } from "./Axis";
 import { createArrowMarker } from "./Poses";
 import { RenderableArrow } from "./markers/RenderableArrow";
 import { RenderableLineStrip } from "./markers/RenderableLineStrip";
@@ -92,7 +92,7 @@ export type PoseArrayUserData = BaseUserData & {
   settings: LayerSettingsPoseArray;
   topic: string;
   poseArrayMessage: PoseArray;
-  axes: AxisRenderable[];
+  axes: Axis[];
   arrows: RenderableArrow[];
   lineStrip?: RenderableLineStrip;
 };
@@ -293,14 +293,7 @@ export class PoseArrays extends SceneExtension<PoseArrayRenderable> {
 
             // Create any AxisRenderables needed
             while (renderable.userData.axes.length < poseArrayMessage.poses.length) {
-              const axis = new AxisRenderable(topic, this.renderer, {
-                receiveTime: 0n,
-                messageTime: 0n,
-                frameId: "",
-                pose: makePose(),
-                settingsPath: [],
-                settings: { visible: true },
-              });
+              const axis = new Axis(topic, this.renderer);
               renderable.userData.axes.push(axis);
               renderable.add(axis);
             }
@@ -369,12 +362,12 @@ export class PoseArrays extends SceneExtension<PoseArrayRenderable> {
     switch (settings.type) {
       case "axis":
         for (let i = 0; i < poseArrayMessage.poses.length; i++) {
-          setRenderablePose(renderable.userData.axes[i]!, poseArrayMessage.poses[i]!);
+          setObjectPose(renderable.userData.axes[i]!, poseArrayMessage.poses[i]!);
         }
         break;
       case "arrow":
         for (let i = 0; i < poseArrayMessage.poses.length; i++) {
-          setRenderablePose(renderable.userData.arrows[i]!, poseArrayMessage.poses[i]!);
+          setObjectPose(renderable.userData.arrows[i]!, poseArrayMessage.poses[i]!);
         }
         break;
       case "line": {
@@ -405,12 +398,12 @@ function getDefaultType(topic: Topic | undefined): DisplayType {
   return topic != undefined && NAV_PATH_DATATYPES.has(topic.datatype) ? "line" : DEFAULT_TYPE;
 }
 
-function setRenderablePose(renderable: Renderable, pose: Pose): void {
+function setObjectPose(object: THREE.Object3D, pose: Pose): void {
   const p = pose.position;
   const q = pose.orientation;
-  renderable.position.set(p.x, p.y, p.z);
-  renderable.quaternion.set(q.x, q.y, q.z, q.w);
-  renderable.updateMatrix();
+  object.position.set(p.x, p.y, p.z);
+  object.quaternion.set(q.x, q.y, q.z, q.w);
+  object.updateMatrix();
 }
 
 function createLineStripMarker(

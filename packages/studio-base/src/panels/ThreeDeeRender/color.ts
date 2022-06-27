@@ -42,6 +42,11 @@ export function stringToRgb<T extends ColorRGB | THREE.Color>(output: T, colorSt
   return output;
 }
 
+/** Converts a ColorRGB to THREE.Color and converts from sRGB to linear RGB. */
+export function rgbToThreeColor(output: THREE.Color, rgb: ColorRGB): THREE.Color {
+  return output.setRGB(rgb.r, rgb.g, rgb.b).convertSRGBToLinear();
+}
+
 export function rgbaToHexString(color: ColorRGBA): string {
   const rgba =
     (clamp(color.r * 255, 0, 255) << 24) ^

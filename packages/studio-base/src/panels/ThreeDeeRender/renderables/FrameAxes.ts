@@ -9,17 +9,20 @@ import { LineMaterial } from "three/examples/jsm/lines/LineMaterial";
 
 import { SettingsTreeAction, SettingsTreeFields } from "@foxglove/studio";
 
+import { LabelRenderable } from "../Labels";
+import { BaseUserData, Renderable } from "../Renderable";
 import { Renderer } from "../Renderer";
 import { SceneExtension } from "../SceneExtension";
 import { SettingsTreeEntry } from "../SettingsManager";
+import { stringToRgb } from "../color";
 import { BaseSettings } from "../settings";
 import { Duration, Transform, makePose, CoordinateFrame, MAX_DURATION } from "../transforms";
-import { AxisRenderable } from "./AxisRenderable";
+import { Axis } from "./Axis";
+import { DEFAULT_AXIS_SCALE, DEFAULT_LINE_COLOR_STR, DEFAULT_LINE_WIDTH_PX } from "./CoreSettings";
 import { linePickingMaterial, releaseLinePickingMaterial } from "./markers/materials";
 
 export type LayerSettingsTransform = BaseSettings;
 
-const YELLOW_COLOR = new THREE.Color(0xffff00).convertSRGBToLinear();
 const PICKING_LINE_SIZE = 6;
 const PI_2 = Math.PI / 2;
 
@@ -28,6 +31,19 @@ const DEFAULT_SETTINGS: LayerSettingsTransform = {
   frameLocked: true,
 };
 
+export type FrameAxisUserData = BaseUserData & {
+  axis: Axis;
+  label: LabelRenderable;
+  parentLine: Line2;
+};
+
+class FrameAxisRenderable extends Renderable<FrameAxisUserData> {
+  override dispose(): void {
+    this.renderer.labels.removeById(this.userData.label.userData.id);
+    super.dispose();
+  }
+}
+
 const tempVec = new THREE.Vector3();
 const tempVecB = new THREE.Vector3();
 const tempLower: [Duration, Transform] = [0n, Transform.Identity()];
@@ -35,7 +51,7 @@ const tempUpper: [Duration, Transform] = [0n, Transform.Identity()];
 const tempQuaternion = new THREE.Quaternion();
 const tempEuler = new THREE.Euler();
 
-export class FrameAxes extends SceneExtension<AxisRenderable> {
+export class FrameAxes extends SceneExtension<FrameAxisRenderable> {
   private static lineGeometry: LineGeometry | undefined;
 
   lineMaterial: LineMaterial;
@@ -44,8 +60,13 @@ export class FrameAxes extends SceneExtension<AxisRenderable> {
   constructor(renderer: Renderer) {
     super("foxglove.FrameAxes", renderer);
 
-    this.lineMaterial = new LineMaterial({ linewidth: 2 });
-    this.lineMaterial.color = YELLOW_COLOR;
+    const linewidth = this.renderer.config.scene.transforms?.lineWidth ?? DEFAULT_LINE_WIDTH_PX;
+    const color = stringToRgb(
+      new THREE.Color(),
+      this.renderer.config.scene.transforms?.lineColor ?? DEFAULT_LINE_COLOR_STR,
+    );
+    this.lineMaterial = new LineMaterial({ linewidth });
+    this.lineMaterial.color = color;
 
     this.linePickingMaterial = linePickingMaterial(
       PICKING_LINE_SIZE,
@@ -55,6 +76,8 @@ export class FrameAxes extends SceneExtension<AxisRenderable> {
 
     renderer.on("transformTreeUpdated", this.handleTransformTreeUpdated);
     renderer.on("startFrame", () => this.updateSettingsTree());
+
+    this.visible = renderer.config.scene.transforms?.visible ?? true;
   }
 
   override dispose(): void {
@@ -67,7 +90,17 @@ export class FrameAxes extends SceneExtension<AxisRenderable> {
   override settingsNodes(): SettingsTreeEntry[] {
     const configTransforms = this.renderer.config.transforms;
     const handler = this.handleSettingsAction;
-    const entries: SettingsTreeEntry[] = [];
+    const entries: SettingsTreeEntry[] = [
+      {
+        path: ["transforms"],
+        node: {
+          label: "Transforms",
+          visible: this.renderer.config.scene.transforms?.visible ?? true,
+          defaultExpansionState: "expanded",
+          handler,
+        },
+      },
+    ];
     let i = 0;
     for (const { label, value: frameId } of this.renderer.coordinateFrameList) {
       const config = (configTransforms[frameId] ?? {}) as Partial<LayerSettingsTransform>;
@@ -92,28 +125,62 @@ export class FrameAxes extends SceneExtension<AxisRenderable> {
     // Update the lines between coordinate frames
     for (const renderable of this.renderables.values()) {
       const line = renderable.userData.parentLine;
-      if (line) {
-        line.visible = false;
-        const childFrame = this.renderer.transformTree.frame(renderable.userData.frameId);
-        const parentFrame = childFrame?.parent();
-        if (parentFrame) {
-          const parentRenderable = this.renderables.get(parentFrame.id);
-          if (parentRenderable?.visible === true) {
-            parentRenderable.getWorldPosition(tempVec);
-            const dist = tempVec.distanceTo(renderable.getWorldPosition(tempVecB));
-            line.lookAt(tempVec);
-            line.rotateY(-PI_2);
-            line.scale.set(dist, 1, 1);
-            line.visible = true;
-          }
+      line.visible = false;
+      const childFrame = this.renderer.transformTree.frame(renderable.userData.frameId);
+      const parentFrame = childFrame?.parent();
+      if (parentFrame) {
+        const parentRenderable = this.renderables.get(parentFrame.id);
+        if (parentRenderable?.visible === true) {
+          parentRenderable.getWorldPosition(tempVec);
+          const dist = tempVec.distanceTo(renderable.getWorldPosition(tempVecB));
+          line.lookAt(tempVec);
+          line.rotateY(-PI_2);
+          line.scale.set(dist, 1, 1);
+          line.visible = true;
         }
       }
     }
   }
 
+  // eslint-disable-next-line @foxglove/no-boolean-parameters
+  setLabelVisible(visible: boolean): void {
+    for (const renderable of this.renderables.values()) {
+      renderable.userData.label.visible = visible;
+    }
+  }
+
+  setAxisScale(scale: number): void {
+    for (const renderable of this.renderables.values()) {
+      renderable.userData.axis.scale.set(scale, scale, scale);
+    }
+  }
+
+  setLineWidth(width: number): void {
+    this.lineMaterial.linewidth = width;
+  }
+
+  setLineColor(color: string): void {
+    stringToRgb(this.lineMaterial.color, color);
+  }
+
   handleSettingsAction = (action: SettingsTreeAction): void => {
     const path = action.payload.path;
-    if (action.action !== "update" || path.length !== 3) {
+    if (action.action !== "update") {
+      return;
+    }
+
+    if (path.length === 2 && path[0] === "transforms") {
+      const visible = action.payload.value as boolean | undefined;
+      this.saveSetting(["scene", "transforms", "visible"], visible);
+
+      if (path[1] === "visible") {
+        this.visible = visible ?? true;
+      }
+
+      return;
+    }
+
+    if (path.length !== 3) {
       return;
     }
 
@@ -146,11 +213,12 @@ export class FrameAxes extends SceneExtension<AxisRenderable> {
     if (!frame) {
       throw new Error(`CoordinateFrame "${frameId}" was not created`);
     }
-    const displayName = frame.displayName();
 
     // Text label
-    const label = this.renderer.labels.setLabel(`tf:${frameId}`, { text: displayName });
+    const text = frame.displayName();
+    const label = this.renderer.labels.setLabel(`tf:${frameId}`, { text });
     label.position.set(0, 0, 0.4);
+    label.visible = this.renderer.config.scene.transforms?.showLabel ?? true;
 
     // Set the initial settings from default values merged with any user settings
     const userSettings = this.renderer.config.transforms[frameId] as
@@ -163,20 +231,27 @@ export class FrameAxes extends SceneExtension<AxisRenderable> {
     parentLine.castShadow = true;
     parentLine.receiveShadow = false;
     parentLine.userData.pickingMaterial = this.linePickingMaterial;
+    parentLine.visible = false;
 
-    // Create a scene graph object to hold the three arrows, a text label, and a
-    // line to the parent frame
-    const renderable = new AxisRenderable(frameId, this.renderer, {
+    // Three arrow axis
+    const axis = new Axis(frameId, this.renderer);
+    const axisScale = this.renderer.config.scene.transforms?.axisScale ?? DEFAULT_AXIS_SCALE;
+    axis.scale.set(axisScale, axisScale, axisScale);
+
+    // Create a scene graph object to hold the axis, a text label, and a line to
+    // the parent frame
+    const renderable = new FrameAxisRenderable(frameId, this.renderer, {
       receiveTime: 0n,
       messageTime: 0n,
       frameId,
       pose: makePose(),
       settingsPath: ["transforms", frameId],
       settings,
+      axis,
       label,
       parentLine,
     });
-
+    renderable.add(axis);
     renderable.add(label);
     renderable.add(parentLine);
 

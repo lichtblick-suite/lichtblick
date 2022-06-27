@@ -11,8 +11,6 @@ import { Marker } from "../../ros";
 import { poseApproxEq } from "../../transforms";
 import { RenderableMarker } from "./RenderableMarker";
 
-const QUAT_IDENTITY = { x: 0, y: 0, z: 0, w: 1 };
-
 export class RenderableTextViewFacing extends RenderableMarker {
   label: LabelRenderable | undefined;
 
@@ -51,7 +49,7 @@ export class RenderableTextViewFacing extends RenderableMarker {
       this.add(this.label);
     } else if (!poseApproxEq(marker.pose, prevMarker.pose)) {
       // Just update the label pose
-      this.label.userData.pose = { position: marker.pose.position, orientation: QUAT_IDENTITY };
+      this.label.userData.pose.position = marker.pose.position;
     } else {
       // No change
     }

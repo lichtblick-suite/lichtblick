@@ -10,7 +10,13 @@ import { SettingsTreeAction } from "@foxglove/studio";
 import { Renderer } from "../Renderer";
 import { SceneExtension } from "../SceneExtension";
 import { SettingsTreeEntry } from "../SettingsManager";
-import { PRECISION_DEGREES, PRECISION_DISTANCE } from "../settings";
+import { fieldSize, PRECISION_DEGREES, PRECISION_DISTANCE } from "../settings";
+import type { FrameAxes } from "./FrameAxes";
+
+export const DEFAULT_LABEL_PPU = 100;
+export const DEFAULT_AXIS_SCALE = 1;
+export const DEFAULT_LINE_WIDTH_PX = 2;
+export const DEFAULT_LINE_COLOR_STR = "#ffff00";
 
 const ONE_DEGREE = Math.PI / 180;
 
@@ -61,6 +67,47 @@ export class CoreSettings extends SceneExtension {
               value: config.scene.enableStats,
             },
             backgroundColor: { label: "Color", input: "rgb", value: config.scene.backgroundColor },
+            labelPixelsPerUnit: {
+              label: "Label size",
+              help: "Controls the size of labels by setting the pixel density per unit of world space (usually meters)",
+              input: "number",
+              min: 0,
+              step: 10,
+              precision: 0,
+              value: config.scene.labelPixelsPerUnit,
+              placeholder: String(DEFAULT_LABEL_PPU),
+            },
+          },
+          children: {
+            transforms: {
+              label: "Transforms",
+              fields: {
+                showLabel: {
+                  label: "Labels",
+                  input: "boolean",
+                  value: config.scene.transforms?.showLabel ?? true,
+                },
+                axisScale: fieldSize(
+                  "Axis scale",
+                  config.scene.transforms?.axisScale,
+                  DEFAULT_AXIS_SCALE,
+                ),
+                lineWidth: {
+                  label: "Line width",
+                  input: "number",
+                  min: 0,
+                  step: 0.5,
+                  precision: 1,
+                  value: config.scene.transforms?.lineWidth,
+                  placeholder: String(DEFAULT_LINE_WIDTH_PX),
+                },
+                lineColor: {
+                  label: "Line color",
+                  input: "rgb",
+                  value: config.scene.transforms?.lineColor ?? DEFAULT_LINE_COLOR_STR,
+                },
+              },
+            },
           },
           defaultExpansionState: "collapsed",
           handler,
@@ -146,10 +193,9 @@ export class CoreSettings extends SceneExtension {
 
     const path = action.payload.path;
     const category = path[0]!;
-    const field = path[1];
     const value = action.payload.value;
     if (category === "general") {
-      if (field === "followTf") {
+      if (path[1] === "followTf") {
         const followTf = value as string | undefined;
         // Update the configuration. This is done manually since followTf is at the top level of
         // config, not under `general`
@@ -163,9 +209,30 @@ export class CoreSettings extends SceneExtension {
       // Update the configuration
       this.renderer.updateConfig((draft) => set(draft, path, value));
 
-      if (field === "backgroundColor") {
+      if (path[1] === "backgroundColor") {
         const backgroundColor = value as string | undefined;
         this.renderer.setColorScheme(this.renderer.colorScheme, backgroundColor);
+      } else if (path[1] === "labelPixelsPerUnit") {
+        const labelPixelsPerUnit = value as number | undefined;
+        this.renderer.labels.setPixelsPerUnit(labelPixelsPerUnit ?? DEFAULT_LABEL_PPU);
+      } else if (path[1] === "transforms") {
+        const frameAxes = this.renderer.sceneExtensions.get("foxglove.FrameAxes") as
+          | FrameAxes
+          | undefined;
+
+        if (path[2] === "showLabel") {
+          const showLabel = value as boolean | undefined;
+          frameAxes?.setLabelVisible(showLabel ?? true);
+        } else if (path[2] === "axisScale") {
+          const axisScale = value as number | undefined;
+          frameAxes?.setAxisScale(axisScale ?? DEFAULT_AXIS_SCALE);
+        } else if (path[2] === "lineWidth") {
+          const lineWidth = value as number | undefined;
+          frameAxes?.setLineWidth(lineWidth ?? DEFAULT_LINE_WIDTH_PX);
+        } else if (path[2] === "lineColor") {
+          const lineColor = value as string | undefined;
+          frameAxes?.setLineColor(lineColor ?? DEFAULT_LINE_COLOR_STR);
+        }
       }
     } else if (category === "cameraState") {
       // Update the configuration

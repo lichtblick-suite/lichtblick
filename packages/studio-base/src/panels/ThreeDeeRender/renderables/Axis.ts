@@ -3,11 +3,8 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 import * as THREE from "three";
-import { Line2 } from "three/examples/jsm/lines/Line2";
 
-import { LabelRenderable } from "../Labels";
 import { MaterialCache, StandardColor } from "../MaterialCache";
-import { BaseUserData, Renderable } from "../Renderable";
 import { Renderer } from "../Renderer";
 import { arrowHeadSubdivisions, arrowShaftSubdivisions, DetailLevel } from "../lod";
 
@@ -29,51 +26,44 @@ const PI_2 = Math.PI / 2;
 const tempMat4 = new THREE.Matrix4();
 const tempVec = new THREE.Vector3();
 
-export type AxisUserData = BaseUserData & {
-  label?: LabelRenderable;
-  parentLine?: Line2;
-};
-
-export class AxisRenderable extends Renderable<AxisUserData> {
+export class Axis extends THREE.Object3D {
   private static shaftLod: DetailLevel | undefined;
   private static headLod: DetailLevel | undefined;
   private static shaftGeometry: THREE.CylinderGeometry | undefined;
   private static headGeometry: THREE.ConeGeometry | undefined;
 
+  readonly renderer: Renderer;
   shaftMesh: THREE.InstancedMesh;
   headMesh: THREE.InstancedMesh;
 
-  constructor(name: string, renderer: Renderer, userData: AxisUserData) {
-    super(name, renderer, userData);
+  constructor(name: string, renderer: Renderer) {
+    super();
+    this.name = name;
+    this.renderer = renderer;
 
     // Create three arrow shafts
     const arrowMaterial = standardMaterial(this.renderer.materialCache);
-    const shaftGeometry = AxisRenderable.ShaftGeometry(this.renderer.maxLod);
+    const shaftGeometry = Axis.ShaftGeometry(this.renderer.maxLod);
     this.shaftMesh = new THREE.InstancedMesh(shaftGeometry, arrowMaterial, 3);
     this.shaftMesh.castShadow = true;
     this.shaftMesh.receiveShadow = true;
 
     // Create three arrow heads
-    const headGeometry = AxisRenderable.HeadGeometry(this.renderer.maxLod);
+    const headGeometry = Axis.HeadGeometry(this.renderer.maxLod);
     this.headMesh = new THREE.InstancedMesh(headGeometry, arrowMaterial, 3);
     this.headMesh.castShadow = true;
     this.headMesh.receiveShadow = true;
 
-    AxisRenderable.UpdateInstances(this.shaftMesh, this.headMesh, 0);
+    Axis.UpdateInstances(this.shaftMesh, this.headMesh, 0);
 
     this.add(this.shaftMesh);
     this.add(this.headMesh);
   }
 
-  override dispose(): void {
+  dispose(): void {
     releaseStandardMaterial(this.renderer.materialCache);
     this.shaftMesh.dispose();
     this.headMesh.dispose();
-    if (this.userData.label) {
-      this.renderer.labels.removeById(this.userData.label.userData.id);
-      this.userData.label = undefined;
-    }
-    super.dispose();
   }
 
   static UpdateInstances(
@@ -112,27 +102,27 @@ export class AxisRenderable extends Renderable<AxisUserData> {
   }
 
   static ShaftGeometry(lod: DetailLevel): THREE.CylinderGeometry {
-    if (!AxisRenderable.shaftGeometry || lod !== AxisRenderable.shaftLod) {
+    if (!Axis.shaftGeometry || lod !== Axis.shaftLod) {
       const subdivs = arrowShaftSubdivisions(lod);
-      AxisRenderable.shaftGeometry = new THREE.CylinderGeometry(0.5, 0.5, 1, subdivs, 1, false);
-      AxisRenderable.shaftGeometry.rotateZ(-PI_2);
-      AxisRenderable.shaftGeometry.translate(0.5, 0, 0);
-      AxisRenderable.shaftGeometry.computeBoundingSphere();
-      AxisRenderable.shaftLod = lod;
+      Axis.shaftGeometry = new THREE.CylinderGeometry(0.5, 0.5, 1, subdivs, 1, false);
+      Axis.shaftGeometry.rotateZ(-PI_2);
+      Axis.shaftGeometry.translate(0.5, 0, 0);
+      Axis.shaftGeometry.computeBoundingSphere();
+      Axis.shaftLod = lod;
     }
-    return AxisRenderable.shaftGeometry;
+    return Axis.shaftGeometry;
   }
 
   static HeadGeometry(lod: DetailLevel): THREE.ConeGeometry {
-    if (!AxisRenderable.headGeometry || lod !== AxisRenderable.headLod) {
+    if (!Axis.headGeometry || lod !== Axis.headLod) {
       const subdivs = arrowHeadSubdivisions(lod);
-      AxisRenderable.headGeometry = new THREE.ConeGeometry(0.5, 1, subdivs, 1, false);
-      AxisRenderable.headGeometry.rotateZ(-PI_2);
-      AxisRenderable.headGeometry.translate(0.5, 0, 0);
-      AxisRenderable.headGeometry.computeBoundingSphere();
-      AxisRenderable.headLod = lod;
+      Axis.headGeometry = new THREE.ConeGeometry(0.5, 1, subdivs, 1, false);
+      Axis.headGeometry.rotateZ(-PI_2);
+      Axis.headGeometry.translate(0.5, 0, 0);
+      Axis.headGeometry.computeBoundingSphere();
+      Axis.headLod = lod;
     }
-    return AxisRenderable.headGeometry;
+    return Axis.headGeometry;
   }
 }
 
