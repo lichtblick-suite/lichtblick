@@ -289,8 +289,22 @@ export class Renderer extends EventEmitter<RendererEvents> {
     this.addSceneExtension(new Poses(this));
     this.addSceneExtension(new PoseArrays(this));
 
+    this._watchDevicePixelRatio();
+
     this._updateCameras(config.cameraState);
     this.animationFrame();
+  }
+
+  private _watchDevicePixelRatio() {
+    window.matchMedia(`(resolution: ${window.devicePixelRatio}dppx)`).addEventListener(
+      "change",
+      () => {
+        log.debug(`devicePixelRatio changed to ${window.devicePixelRatio}`);
+        this.resizeHandler(this.input.canvasSize);
+        this._watchDevicePixelRatio();
+      },
+      { once: true },
+    );
   }
 
   dispose(): void {
