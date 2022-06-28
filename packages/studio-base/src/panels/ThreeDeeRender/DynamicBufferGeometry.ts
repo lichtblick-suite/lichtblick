@@ -15,6 +15,11 @@ interface TypedArrayConstructor<T extends TypedArray> {
   new (length: number): T;
 }
 
+export type DynamicFloatBufferGeometry = DynamicBufferGeometry<
+  Float32Array,
+  Float32ArrayConstructor
+>;
+
 export class DynamicBufferGeometry<
   T extends TypedArray,
   C extends TypedArrayConstructor<T>,

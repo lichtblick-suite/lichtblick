@@ -4,9 +4,9 @@
 
 import * as THREE from "three";
 
-import { MaterialCache, StandardColor } from "../MaterialCache";
 import { Renderer } from "../Renderer";
 import { arrowHeadSubdivisions, arrowShaftSubdivisions, DetailLevel } from "../lod";
+import { ColorRGBA } from "../ros";
 
 const SHAFT_LENGTH = 0.154;
 const SHAFT_DIAMETER = 0.02;
@@ -33,8 +33,8 @@ export class Axis extends THREE.Object3D {
   private static headGeometry: THREE.ConeGeometry | undefined;
 
   readonly renderer: Renderer;
-  shaftMesh: THREE.InstancedMesh;
-  headMesh: THREE.InstancedMesh;
+  shaftMesh: THREE.InstancedMesh<THREE.BufferGeometry, THREE.MeshStandardMaterial>;
+  headMesh: THREE.InstancedMesh<THREE.BufferGeometry, THREE.MeshStandardMaterial>;
 
   constructor(name: string, renderer: Renderer) {
     super();
@@ -42,15 +42,14 @@ export class Axis extends THREE.Object3D {
     this.renderer = renderer;
 
     // Create three arrow shafts
-    const arrowMaterial = standardMaterial(this.renderer.materialCache);
     const shaftGeometry = Axis.ShaftGeometry(this.renderer.maxLod);
-    this.shaftMesh = new THREE.InstancedMesh(shaftGeometry, arrowMaterial, 3);
+    this.shaftMesh = new THREE.InstancedMesh(shaftGeometry, standardMaterial(COLOR_WHITE), 3);
     this.shaftMesh.castShadow = true;
     this.shaftMesh.receiveShadow = true;
 
     // Create three arrow heads
     const headGeometry = Axis.HeadGeometry(this.renderer.maxLod);
-    this.headMesh = new THREE.InstancedMesh(headGeometry, arrowMaterial, 3);
+    this.headMesh = new THREE.InstancedMesh(headGeometry, standardMaterial(COLOR_WHITE), 3);
     this.headMesh.castShadow = true;
     this.headMesh.receiveShadow = true;
 
@@ -61,8 +60,9 @@ export class Axis extends THREE.Object3D {
   }
 
   dispose(): void {
-    releaseStandardMaterial(this.renderer.materialCache);
+    this.shaftMesh.material.dispose();
     this.shaftMesh.dispose();
+    this.headMesh.material.dispose();
     this.headMesh.dispose();
   }
 
@@ -126,14 +126,14 @@ export class Axis extends THREE.Object3D {
   }
 }
 
-function standardMaterial(materialCache: MaterialCache): THREE.MeshStandardMaterial {
-  return materialCache.acquire(
-    StandardColor.id(COLOR_WHITE),
-    () => StandardColor.create(COLOR_WHITE),
-    StandardColor.dispose,
-  );
-}
-
-function releaseStandardMaterial(materialCache: MaterialCache): void {
-  materialCache.release(StandardColor.id(COLOR_WHITE));
+function standardMaterial(color: ColorRGBA): THREE.MeshStandardMaterial {
+  return new THREE.MeshStandardMaterial({
+    color: new THREE.Color(color.r, color.g, color.b).convertSRGBToLinear(),
+    metalness: 0,
+    roughness: 1,
+    dithering: true,
+    opacity: color.a,
+    transparent: color.a < 1,
+    depthWrite: color.a === 1,
+  });
 }

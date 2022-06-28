@@ -7,17 +7,13 @@ import { LineSegments2 } from "three/examples/jsm/lines/LineSegments2";
 import { LineSegmentsGeometry } from "three/examples/jsm/lines/LineSegmentsGeometry";
 
 import type { Renderer } from "../../Renderer";
-import { approxEquals } from "../../math";
 import { Marker } from "../../ros";
 import { RenderableMarker } from "./RenderableMarker";
 import {
-  lineMaterial,
-  linePrepassMaterial,
-  linePickingMaterial,
+  makeLineMaterial,
+  makeLinePrepassMaterial,
+  makeLinePickingMaterial,
   markerHasTransparency,
-  releaseLineMaterial,
-  releaseLinePrepassMaterial,
-  releaseLinePickingMaterial,
 } from "./materials";
 
 export class RenderableLineList extends RenderableMarker {
@@ -31,34 +27,29 @@ export class RenderableLineList extends RenderableMarker {
     this.geometry = new LineSegmentsGeometry();
 
     // Stencil and depth pass 1
-    const matLinePrepass = linePrepassMaterial(marker, renderer.materialCache);
+    const matLinePrepass = makeLinePrepassMaterial(marker);
     this.linePrepass = new LineSegments2(this.geometry, matLinePrepass);
     this.linePrepass.renderOrder = 1;
     this.linePrepass.userData.picking = false;
     this.add(this.linePrepass);
 
     // Color pass 2
-    const matLine = lineMaterial(marker, renderer.materialCache);
+    const matLine = makeLineMaterial(marker);
     this.line = new LineSegments2(this.geometry, matLine);
     this.line.renderOrder = 2;
     const pickingLineWidth = marker.scale.x * 1.2;
-    this.line.userData.pickingMaterial = linePickingMaterial(
-      pickingLineWidth,
-      true,
-      renderer.materialCache,
-    );
+    this.line.userData.pickingMaterial = makeLinePickingMaterial(pickingLineWidth, true);
     this.add(this.line);
 
     this.update(marker, receiveTime);
   }
 
   override dispose(): void {
-    releaseLinePrepassMaterial(this.userData.marker, this.renderer.materialCache);
-    releaseLineMaterial(this.userData.marker, this.renderer.materialCache);
+    this.linePrepass.material.dispose();
+    this.line.material.dispose();
 
-    const pickingLineWidth = this.userData.marker.scale.x * 1.2;
-    releaseLinePickingMaterial(pickingLineWidth, true, this.renderer.materialCache);
-    this.line.userData.pickingMaterial = undefined;
+    const pickingMaterial = this.line.userData.pickingMaterial as THREE.ShaderMaterial;
+    pickingMaterial.dispose();
 
     this.geometry.dispose();
   }
@@ -71,17 +62,20 @@ export class RenderableLineList extends RenderableMarker {
     const prevMarker = this.userData.marker;
     super.update(marker, receiveTime);
 
-    const prevLineWidth = prevMarker.scale.x;
-    const prevTransparent = markerHasTransparency(prevMarker);
     const lineWidth = marker.scale.x;
     const transparent = markerHasTransparency(marker);
 
-    if (!approxEquals(prevLineWidth, lineWidth) || prevTransparent !== transparent) {
-      releaseLinePrepassMaterial(prevMarker, this.renderer.materialCache);
-      releaseLineMaterial(prevMarker, this.renderer.materialCache);
-      this.linePrepass.material = linePrepassMaterial(marker, this.renderer.materialCache);
-      this.line.material = lineMaterial(marker, this.renderer.materialCache);
+    if (transparent !== markerHasTransparency(prevMarker)) {
+      this.linePrepass.material.transparent = transparent;
+      this.linePrepass.material.depthWrite = !transparent;
+      this.linePrepass.material.needsUpdate = true;
+      this.line.material.transparent = transparent;
+      this.line.material.depthWrite = !transparent;
+      this.line.material.needsUpdate = true;
     }
+
+    this.linePrepass.material.linewidth = lineWidth;
+    this.line.material.linewidth = lineWidth;
 
     this._setPositions(marker);
     this._setColors(marker);

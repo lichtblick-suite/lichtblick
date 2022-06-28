@@ -4,13 +4,12 @@
 
 import * as THREE from "three";
 
-import { StandardColor } from "../../MaterialCache";
 import { LoadedModel } from "../../ModelCache";
 import type { Renderer } from "../../Renderer";
-import { rgbaEqual } from "../../color";
+import { rgbToThreeColor } from "../../color";
 import { Marker } from "../../ros";
 import { RenderableMarker } from "./RenderableMarker";
-import { releaseStandardMaterial, standardMaterial } from "./materials";
+import { makeStandardMaterial } from "./materials";
 
 type GltfMesh = THREE.Mesh<
   THREE.BufferGeometry,
@@ -26,12 +25,12 @@ export class RenderableMeshResource extends RenderableMarker {
   constructor(topic: string, marker: Marker, receiveTime: bigint | undefined, renderer: Renderer) {
     super(topic, marker, receiveTime, renderer);
 
-    this.material = standardMaterial(marker.color, renderer.materialCache);
+    this.material = makeStandardMaterial(marker.color);
     this.update(marker, receiveTime, true);
   }
 
   override dispose(): void {
-    releaseStandardMaterial(this.userData.marker.color, this.renderer.materialCache);
+    this.material.dispose();
   }
 
   // eslint-disable-next-line @foxglove/no-boolean-parameters
@@ -39,10 +38,15 @@ export class RenderableMeshResource extends RenderableMarker {
     const prevMarker = this.userData.marker;
     super.update(marker, receiveTime);
 
-    if (!rgbaEqual(marker.color, prevMarker.color)) {
-      releaseStandardMaterial(prevMarker.color, this.renderer.materialCache);
-      this.material = standardMaterial(marker.color, this.renderer.materialCache);
+    const transparent = marker.color.a < 1;
+    if (transparent !== this.material.transparent) {
+      this.material.transparent = transparent;
+      this.material.depthWrite = !transparent;
+      this.material.needsUpdate = true;
     }
+
+    rgbToThreeColor(this.material.color, marker.color);
+    this.material.opacity = marker.color.a;
 
     if (forceLoad === true || marker.mesh_resource !== prevMarker.mesh_resource) {
       const opts = { useEmbeddedMaterials: marker.mesh_use_embedded_materials };
@@ -104,12 +108,28 @@ function replaceMaterials(model: LoadedModel, material: THREE.MeshStandardMateri
     const meshChild = child as GltfMesh;
     if (Array.isArray(meshChild.material)) {
       for (const embeddedMaterial of meshChild.material) {
-        StandardColor.dispose(embeddedMaterial);
+        disposeStandardMaterial(embeddedMaterial);
       }
     } else {
-      StandardColor.dispose(meshChild.material);
+      disposeStandardMaterial(meshChild.material);
     }
     meshChild.material = material;
   });
   return newModel;
+}
+
+/** Generic MeshStandardMaterial dispose function for materials loaded from an external source */
+function disposeStandardMaterial(material: THREE.MeshStandardMaterial): void {
+  material.map?.dispose();
+  material.lightMap?.dispose();
+  material.aoMap?.dispose();
+  material.emissiveMap?.dispose();
+  material.bumpMap?.dispose();
+  material.normalMap?.dispose();
+  material.displacementMap?.dispose();
+  material.roughnessMap?.dispose();
+  material.metalnessMap?.dispose();
+  material.alphaMap?.dispose();
+  material.envMap?.dispose();
+  material.dispose();
 }

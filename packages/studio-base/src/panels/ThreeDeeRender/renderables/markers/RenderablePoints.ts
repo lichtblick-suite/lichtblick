@@ -4,16 +4,15 @@
 
 import * as THREE from "three";
 
-import { DynamicBufferGeometry } from "../../DynamicBufferGeometry";
+import { DynamicBufferGeometry, DynamicFloatBufferGeometry } from "../../DynamicBufferGeometry";
 import type { Renderer } from "../../Renderer";
-import { approxEquals } from "../../math";
 import { Marker } from "../../ros";
 import { RenderableMarker } from "./RenderableMarker";
-import { markerHasTransparency, pointsMaterial, releasePointsMaterial } from "./materials";
+import { markerHasTransparency, makePointsMaterial } from "./materials";
 
 export class RenderablePoints extends RenderableMarker {
-  geometry: DynamicBufferGeometry<Float32Array, Float32ArrayConstructor>;
-  points: THREE.Points;
+  geometry: DynamicFloatBufferGeometry;
+  points: THREE.Points<DynamicFloatBufferGeometry, THREE.PointsMaterial>;
 
   constructor(topic: string, marker: Marker, receiveTime: bigint | undefined, renderer: Renderer) {
     super(topic, marker, receiveTime, renderer);
@@ -22,36 +21,28 @@ export class RenderablePoints extends RenderableMarker {
     this.geometry.createAttribute("position", 3);
     this.geometry.createAttribute("color", 4);
 
-    const material = pointsMaterial(marker, renderer.materialCache);
-    this.points = new THREE.Points(this.geometry, material);
+    this.points = new THREE.Points(this.geometry, makePointsMaterial(marker));
     this.add(this.points);
 
     this.update(marker, receiveTime);
   }
 
   override dispose(): void {
-    releasePointsMaterial(this.userData.marker, this.renderer.materialCache);
+    this.points.material.dispose();
   }
 
   override update(marker: Marker, receiveTime: bigint | undefined): void {
     const prevMarker = this.userData.marker;
     super.update(marker, receiveTime);
 
-    const prevWidth = prevMarker.scale.x;
-    const prevHeight = prevMarker.scale.y;
-    const prevTransparent = markerHasTransparency(prevMarker);
-    const width = marker.scale.x;
-    const height = marker.scale.y;
     const transparent = markerHasTransparency(marker);
-
-    if (
-      !approxEquals(prevWidth, width) ||
-      !approxEquals(prevHeight, height) ||
-      prevTransparent !== transparent
-    ) {
-      releasePointsMaterial(prevMarker, this.renderer.materialCache);
-      this.points.material = pointsMaterial(marker, this.renderer.materialCache);
+    if (transparent !== markerHasTransparency(prevMarker)) {
+      this.points.material.transparent = transparent;
+      this.points.material.depthWrite = !transparent;
+      this.points.material.needsUpdate = true;
     }
+
+    this.points.material.size = marker.scale.x;
 
     this.geometry.resize(marker.points.length);
     this._setPositions(marker);

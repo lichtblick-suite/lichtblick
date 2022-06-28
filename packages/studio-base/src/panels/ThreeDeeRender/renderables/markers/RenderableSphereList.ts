@@ -9,25 +9,18 @@ import type { Renderer } from "../../Renderer";
 import { Marker } from "../../ros";
 import { RenderableMarker } from "./RenderableMarker";
 import { RenderableSphere } from "./RenderableSphere";
-import {
-  markerHasTransparency,
-  releaseStandardInstancedMaterial,
-  standardInstancedMaterial,
-} from "./materials";
+import { markerHasTransparency, makeStandardInstancedMaterial } from "./materials";
 
 export class RenderableSphereList extends RenderableMarker {
-  mesh: DynamicInstancedMesh<THREE.SphereGeometry, THREE.Material>;
+  mesh: DynamicInstancedMesh<THREE.SphereGeometry, THREE.MeshStandardMaterial>;
 
   constructor(topic: string, marker: Marker, receiveTime: bigint | undefined, renderer: Renderer) {
     super(topic, marker, receiveTime, renderer);
 
     // Sphere instanced mesh
-    const material = standardInstancedMaterial(marker, renderer.materialCache);
-    this.mesh = new DynamicInstancedMesh(
-      RenderableSphere.Geometry(renderer.maxLod),
-      material,
-      marker.points.length,
-    );
+    const geometry = RenderableSphere.Geometry(renderer.maxLod);
+    const material = makeStandardInstancedMaterial(marker);
+    this.mesh = new DynamicInstancedMesh(geometry, material, marker.points.length);
     this.mesh.castShadow = true;
     this.mesh.receiveShadow = true;
     this.add(this.mesh);
@@ -36,16 +29,18 @@ export class RenderableSphereList extends RenderableMarker {
   }
 
   override dispose(): void {
-    releaseStandardInstancedMaterial(this.userData.marker, this.renderer.materialCache);
+    this.mesh.material.dispose();
   }
 
   override update(marker: Marker, receiveTime: bigint | undefined): void {
     const prevMarker = this.userData.marker;
     super.update(marker, receiveTime);
 
-    if (markerHasTransparency(marker) !== markerHasTransparency(prevMarker)) {
-      releaseStandardInstancedMaterial(prevMarker, this.renderer.materialCache);
-      this.mesh.material = standardInstancedMaterial(marker, this.renderer.materialCache);
+    const transparent = markerHasTransparency(marker);
+    if (transparent !== markerHasTransparency(prevMarker)) {
+      this.mesh.material.transparent = transparent;
+      this.mesh.material.depthWrite = !transparent;
+      this.mesh.material.needsUpdate = true;
     }
 
     this.mesh.set(marker.points, marker.scale, marker.colors, marker.color);

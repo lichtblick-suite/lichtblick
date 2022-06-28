@@ -5,24 +5,24 @@
 import * as THREE from "three";
 
 import type { Renderer } from "../../Renderer";
-import { rgbaEqual } from "../../color";
+import { rgbToThreeColor } from "../../color";
 import { DetailLevel, sphereSubdivisions } from "../../lod";
 import { Marker } from "../../ros";
 import { RenderableMarker } from "./RenderableMarker";
-import { releaseStandardMaterial, standardMaterial } from "./materials";
+import { makeStandardMaterial } from "./materials";
 
 export class RenderableSphere extends RenderableMarker {
   private static lod: DetailLevel | undefined;
   private static geometry: THREE.SphereGeometry | undefined;
 
-  mesh: THREE.Mesh<THREE.SphereGeometry, THREE.Material>;
+  mesh: THREE.Mesh<THREE.SphereGeometry, THREE.MeshStandardMaterial>;
 
   constructor(topic: string, marker: Marker, receiveTime: bigint | undefined, renderer: Renderer) {
     super(topic, marker, receiveTime, renderer);
 
     // Sphere mesh
-    const material = standardMaterial(marker.color, renderer.materialCache);
-    this.mesh = new THREE.Mesh(RenderableSphere.Geometry(renderer.maxLod), material);
+    const geometry = RenderableSphere.Geometry(renderer.maxLod);
+    this.mesh = new THREE.Mesh(geometry, makeStandardMaterial(marker.color));
     this.mesh.castShadow = true;
     this.mesh.receiveShadow = true;
     this.add(this.mesh);
@@ -31,17 +31,21 @@ export class RenderableSphere extends RenderableMarker {
   }
 
   override dispose(): void {
-    releaseStandardMaterial(this.userData.marker.color, this.renderer.materialCache);
+    this.mesh.material.dispose();
   }
 
   override update(marker: Marker, receiveTime: bigint | undefined): void {
-    const prevMarker = this.userData.marker;
     super.update(marker, receiveTime);
 
-    if (!rgbaEqual(marker.color, prevMarker.color)) {
-      releaseStandardMaterial(prevMarker.color, this.renderer.materialCache);
-      this.mesh.material = standardMaterial(marker.color, this.renderer.materialCache);
+    const transparent = marker.color.a < 1;
+    if (transparent !== this.mesh.material.transparent) {
+      this.mesh.material.transparent = transparent;
+      this.mesh.material.depthWrite = !transparent;
+      this.mesh.material.needsUpdate = true;
     }
+
+    rgbToThreeColor(this.mesh.material.color, marker.color);
+    this.mesh.material.opacity = marker.color.a;
 
     this.scale.set(marker.scale.x, marker.scale.y, marker.scale.z);
   }

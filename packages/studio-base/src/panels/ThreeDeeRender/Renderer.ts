@@ -22,7 +22,7 @@ import {
 
 import { Input } from "./Input";
 import { Labels } from "./Labels";
-import { MaterialCache } from "./MaterialCache";
+import { LineMaterial } from "./LineMaterial";
 import { ModelCache } from "./ModelCache";
 import { Picker } from "./Picker";
 import type { Renderable } from "./Renderable";
@@ -169,6 +169,7 @@ export class Renderer extends EventEmitter<RendererEvents> {
   dirLight: THREE.DirectionalLight;
   hemiLight: THREE.HemisphereLight;
   input: Input;
+  outlineMaterial = new THREE.LineBasicMaterial({ dithering: true });
 
   perspectiveCamera: THREE.PerspectiveCamera;
   orthographicCamera: THREE.OrthographicCamera;
@@ -181,7 +182,6 @@ export class Renderer extends EventEmitter<RendererEvents> {
   picker: Picker;
   selectionBackdrop: ScreenOverlay;
   selectedObject: Renderable | undefined;
-  materialCache = new MaterialCache();
   colorScheme: "dark" | "light" = "light";
   modelCache: ModelCache;
   transformTree = new TransformTree(TRANSFORM_STORAGE_TIME_NS);
@@ -234,7 +234,7 @@ export class Renderer extends EventEmitter<RendererEvents> {
 
     this.modelCache = new ModelCache({
       ignoreColladaUpAxis: true,
-      edgeMaterial: this.materialCache.outlineMaterial,
+      edgeMaterial: this.outlineMaterial,
     });
 
     this.scene = new THREE.Scene();
@@ -419,12 +419,12 @@ export class Renderer extends EventEmitter<RendererEvents> {
 
     if (colorScheme === "dark") {
       this.gl.setClearColor(bgColor ?? DARK_BACKDROP);
-      this.materialCache.outlineMaterial.color.set(DARK_OUTLINE);
-      this.materialCache.outlineMaterial.needsUpdate = true;
+      this.outlineMaterial.color.set(DARK_OUTLINE);
+      this.outlineMaterial.needsUpdate = true;
     } else {
       this.gl.setClearColor(bgColor ?? LIGHT_BACKDROP);
-      this.materialCache.outlineMaterial.color.set(LIGHT_OUTLINE);
-      this.materialCache.outlineMaterial.needsUpdate = true;
+      this.outlineMaterial.color.set(LIGHT_OUTLINE);
+      this.outlineMaterial.needsUpdate = true;
     }
   }
 
@@ -591,7 +591,7 @@ export class Renderer extends EventEmitter<RendererEvents> {
     this.emit("startFrame", currentTime, this);
 
     this._updateFrames();
-    this.materialCache.update(this.input.canvasSize);
+    this._updateMaterials(this.input.canvasSize);
 
     this.gl.clear();
     camera.layers.set(LAYER_DEFAULT);
@@ -756,6 +756,25 @@ export class Renderer extends EventEmitter<RendererEvents> {
     }
 
     this.settings.errors.clearPath(FOLLOW_TF_PATH);
+  }
+
+  private _updateMaterials(resolution: THREE.Vector2): void {
+    this.scene.traverse((object) => {
+      if ((object as Partial<THREE.Mesh>).isMesh) {
+        const mesh = object as THREE.Mesh;
+        const material = mesh.material as THREE.Material;
+
+        // Update render resolution uniforms
+        if (material instanceof LineMaterial) {
+          material.resolution = resolution;
+        } else if (
+          material instanceof THREE.ShaderMaterial &&
+          material.uniforms.resolution != undefined
+        ) {
+          material.uniforms.resolution.value = resolution;
+        }
+      }
+    });
   }
 }
 

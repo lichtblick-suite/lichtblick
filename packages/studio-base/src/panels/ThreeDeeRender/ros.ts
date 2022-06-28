@@ -286,6 +286,8 @@ addRosDataType(MARKER_DATATYPES, "visualization_msgs/Marker");
 
 export const MARKER_ARRAY_DATATYPES = new Set<string>();
 addRosDataType(MARKER_ARRAY_DATATYPES, "visualization_msgs/MarkerArray");
+// Support the legacy "studio_msgs/MarkerArray" datatype name
+addRosDataType(MARKER_ARRAY_DATATYPES, "studio_msgs/MarkerArray");
 
 export const OCCUPANCY_GRID_DATATYPES = new Set<string>();
 addRosDataType(OCCUPANCY_GRID_DATATYPES, "nav_msgs/OccupancyGrid");

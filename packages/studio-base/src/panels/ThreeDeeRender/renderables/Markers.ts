@@ -167,6 +167,35 @@ export class Markers extends SceneExtension<TopicMarkers> {
   };
 
   addMarker(topic: string, marker: Marker, receiveTime: bigint): void {
+    const topicMarkers = this._getTopicMarkers(topic, marker, receiveTime);
+    const prevNsCount = topicMarkers.namespaces.size;
+    topicMarkers.addMarkerMessage(marker, receiveTime);
+
+    // If the topic has a new namespace, rebuild the settings node for this topic
+    if (prevNsCount !== topicMarkers.namespaces.size) {
+      this.updateSettingsTree();
+    }
+  }
+
+  addMarkerArray(topic: string, markerArray: Marker[], receiveTime: bigint): void {
+    const firstMarker = markerArray[0];
+    if (!firstMarker) {
+      return;
+    }
+
+    const topicMarkers = this._getTopicMarkers(topic, firstMarker, receiveTime);
+    const prevNsCount = topicMarkers.namespaces.size;
+    for (const marker of markerArray) {
+      topicMarkers.addMarkerMessage(marker, receiveTime);
+    }
+
+    // If the topic has a new namespace, rebuild the settings node for this topic
+    if (prevNsCount !== topicMarkers.namespaces.size) {
+      this.updateSettingsTree();
+    }
+  }
+
+  private _getTopicMarkers(topic: string, marker: Marker, receiveTime: bigint): TopicMarkers {
     let topicMarkers = this.renderables.get(topic);
     if (!topicMarkers) {
       const userSettings = this.renderer.config.topics[topic] as
@@ -185,14 +214,7 @@ export class Markers extends SceneExtension<TopicMarkers> {
       this.renderables.set(topic, topicMarkers);
       this.add(topicMarkers);
     }
-
-    const prevNsCount = topicMarkers.namespaces.size;
-    topicMarkers.addMarkerMessage(marker, receiveTime);
-
-    // If the topic has a new namespace, rebuild the settings node for this topic
-    if (prevNsCount !== topicMarkers.namespaces.size) {
-      this.updateSettingsTree();
-    }
+    return topicMarkers;
   }
 }
 

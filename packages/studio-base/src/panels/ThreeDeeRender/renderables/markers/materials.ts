@@ -2,22 +2,9 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-// This file provides helper functions to acquire and release materials used for
-// rendering markers from a MaterialCache instance
-
 import * as THREE from "three";
 
 import { LineMaterial } from "../../LineMaterial";
-import {
-  LineVertexColor,
-  LineVertexColorPicking,
-  LineVertexColorPrepass,
-  MaterialCache,
-  PointsVertexColor,
-  StandardColor,
-  StandardInstancedColor,
-  StandardVertexColor,
-} from "../../MaterialCache";
 import { ColorRGBA, Marker, MarkerType } from "../../ros";
 
 export function markerHasTransparency(marker: Marker): boolean {
@@ -45,125 +32,116 @@ export function markerHasTransparency(marker: Marker): boolean {
   }
 }
 
-export function standardMaterial(
-  color: ColorRGBA,
-  materialCache: MaterialCache,
-): THREE.MeshStandardMaterial {
-  return materialCache.acquire(
-    StandardColor.id(color),
-    () => StandardColor.create(color),
-    StandardColor.dispose,
-  );
+export function makeStandardMaterial(color: ColorRGBA): THREE.MeshStandardMaterial {
+  return new THREE.MeshStandardMaterial({
+    color: new THREE.Color(color.r, color.g, color.b).convertSRGBToLinear(),
+    metalness: 0,
+    roughness: 1,
+    dithering: true,
+    opacity: color.a,
+    transparent: color.a < 1,
+    depthWrite: color.a === 1,
+  });
 }
 
-export function releaseStandardMaterial(color: ColorRGBA, materialCache: MaterialCache): void {
-  materialCache.release(StandardColor.id(color));
-}
-
-export function standardVertexColorMaterial(
-  marker: Marker,
-  materialCache: MaterialCache,
-): THREE.MeshStandardMaterial {
+export function makeStandardVertexColorMaterial(marker: Marker): THREE.MeshStandardMaterial {
   const transparent = markerHasTransparency(marker);
-  return materialCache.acquire(
-    StandardVertexColor.id(transparent),
-    () => StandardVertexColor.create(transparent),
-    StandardVertexColor.dispose,
-  );
+  return new THREE.MeshStandardMaterial({
+    metalness: 0,
+    roughness: 1,
+    dithering: true,
+    vertexColors: true,
+    side: THREE.DoubleSide,
+    opacity: 1,
+    transparent,
+    depthWrite: !transparent,
+  });
 }
 
-export function releaseStandardVertexColorMaterial(
-  marker: Marker,
-  materialCache: MaterialCache,
-): void {
+export function makeStandardInstancedMaterial(marker: Marker): THREE.MeshStandardMaterial {
   const transparent = markerHasTransparency(marker);
-  materialCache.release(StandardVertexColor.id(transparent));
+  return new THREE.MeshStandardMaterial({
+    metalness: 0,
+    roughness: 1,
+    dithering: true,
+    opacity: 1,
+    transparent,
+    depthWrite: !transparent,
+  });
 }
 
-export function standardInstancedMaterial(
-  marker: Marker,
-  materialCache: MaterialCache,
-): THREE.MeshStandardMaterial {
-  const transparent = markerHasTransparency(marker);
-  return materialCache.acquire(
-    StandardInstancedColor.id(transparent),
-    () => StandardInstancedColor.create(transparent),
-    StandardInstancedColor.dispose,
-  );
-}
-
-export function releaseStandardInstancedMaterial(
-  marker: Marker,
-  materialCache: MaterialCache,
-): void {
-  const transparent = markerHasTransparency(marker);
-  materialCache.release(StandardInstancedColor.id(transparent));
-}
-
-export function linePrepassMaterial(marker: Marker, materialCache: MaterialCache): LineMaterial {
+export function makeLinePrepassMaterial(marker: Marker): LineMaterial {
   const lineWidth = marker.scale.x;
   const transparent = markerHasTransparency(marker);
-  return materialCache.acquire(
-    LineVertexColorPrepass.id(lineWidth, transparent),
-    () => LineVertexColorPrepass.create(lineWidth, transparent),
-    LineVertexColorPrepass.dispose,
-  );
+  const material = new LineMaterial({
+    worldUnits: true,
+    colorWrite: false,
+    transparent,
+    depthWrite: !transparent,
+    linewidth: lineWidth,
+
+    stencilWrite: true,
+    stencilRef: 1,
+    stencilZPass: THREE.ReplaceStencilOp,
+  });
+  material.lineWidth = lineWidth; // Fix for THREE.js type annotations
+  return material;
 }
 
-export function releaseLinePrepassMaterial(marker: Marker, materialCache: MaterialCache): void {
+export function makeLineMaterial(marker: Marker): LineMaterial {
   const lineWidth = marker.scale.x;
   const transparent = markerHasTransparency(marker);
-  materialCache.release(LineVertexColorPrepass.id(lineWidth, transparent));
+  const material = new LineMaterial({
+    worldUnits: true,
+    vertexColors: true,
+    linewidth: lineWidth,
+    transparent,
+    depthWrite: !transparent,
+
+    stencilWrite: true,
+    stencilRef: 0,
+    stencilFunc: THREE.NotEqualStencilFunc,
+    stencilFail: THREE.ReplaceStencilOp,
+    stencilZPass: THREE.ReplaceStencilOp,
+  });
+  material.lineWidth = lineWidth; // Fix for THREE.js type annotations
+  return material;
 }
 
-export function lineMaterial(marker: Marker, materialCache: MaterialCache): LineMaterial {
-  const lineWidth = marker.scale.x;
-  const transparent = markerHasTransparency(marker);
-  return materialCache.acquire(
-    LineVertexColor.id(lineWidth, transparent),
-    () => LineVertexColor.create(lineWidth, transparent),
-    LineVertexColor.dispose,
-  );
-}
-
-export function releaseLineMaterial(marker: Marker, materialCache: MaterialCache): void {
-  const lineWidth = marker.scale.x;
-  const transparent = markerHasTransparency(marker);
-  materialCache.release(LineVertexColor.id(lineWidth, transparent));
-}
-
-export function linePickingMaterial(
+export function makeLinePickingMaterial(
   lineWidth: number,
   // eslint-disable-next-line @foxglove/no-boolean-parameters
   worldUnits: boolean,
-  materialCache: MaterialCache,
 ): THREE.ShaderMaterial {
-  return materialCache.acquire(
-    LineVertexColorPicking.id(lineWidth, worldUnits),
-    () => LineVertexColorPicking.create(lineWidth, worldUnits),
-    LineVertexColorPicking.dispose,
-  );
+  return new THREE.ShaderMaterial({
+    vertexShader: THREE.ShaderLib["foxglove.line"]!.vertexShader,
+    fragmentShader: /* glsl */ `
+      uniform vec4 objectId;
+      void main() {
+        gl_FragColor = objectId;
+      }
+    `,
+    clipping: true,
+    uniforms: {
+      objectId: { value: [NaN, NaN, NaN, NaN] },
+      linewidth: { value: lineWidth },
+      resolution: { value: new THREE.Vector2(1, 1) },
+      dashOffset: { value: 0 },
+      dashScale: { value: 1 },
+      dashSize: { value: 1 },
+      gapSize: { value: 1 },
+    },
+    defines: worldUnits ? { WORLD_UNITS: "" } : {},
+  });
 }
 
-export function releaseLinePickingMaterial(
-  lineWidth: number,
-  // eslint-disable-next-line @foxglove/no-boolean-parameters
-  worldUnits: boolean,
-  materialCache: MaterialCache,
-): void {
-  materialCache.release(LineVertexColorPicking.id(lineWidth, worldUnits));
-}
-
-export function pointsMaterial(marker: Marker, materialCache: MaterialCache): THREE.PointsMaterial {
+export function makePointsMaterial(marker: Marker): THREE.PointsMaterial {
   const transparent = markerHasTransparency(marker);
-  return materialCache.acquire(
-    PointsVertexColor.id(marker.scale, transparent),
-    () => PointsVertexColor.create(marker.scale, transparent),
-    PointsVertexColor.dispose,
-  );
-}
-
-export function releasePointsMaterial(marker: Marker, materialCache: MaterialCache): void {
-  const transparent = markerHasTransparency(marker);
-  materialCache.release(PointsVertexColor.id(marker.scale, transparent));
+  return new THREE.PointsMaterial({
+    vertexColors: true,
+    size: marker.scale.x, // TODO: Support scale.y
+    sizeAttenuation: true,
+    transparent,
+    depthWrite: !transparent,
+  });
 }

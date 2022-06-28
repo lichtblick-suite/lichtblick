@@ -6,12 +6,12 @@ import * as THREE from "three";
 import { clamp } from "three/src/math/MathUtils";
 
 import type { Renderer } from "../../Renderer";
-import { rgbaEqual } from "../../color";
+import { rgbToThreeColor } from "../../color";
 import { arrowHeadSubdivisions, arrowShaftSubdivisions, DetailLevel } from "../../lod";
 import { getRotationTo } from "../../math";
 import { Marker } from "../../ros";
 import { RenderableMarker } from "./RenderableMarker";
-import { releaseStandardMaterial, standardMaterial } from "./materials";
+import { makeStandardMaterial } from "./materials";
 
 // const SHAFT_LENGTH = 1;
 // const SHAFT_DIAMETER = 0.1;
@@ -38,8 +38,8 @@ export class RenderableArrow extends RenderableMarker {
   private static shaftEdgesGeometry: THREE.EdgesGeometry | undefined;
   private static headEdgesGeometry: THREE.EdgesGeometry | undefined;
 
-  shaftMesh: THREE.Mesh<THREE.CylinderGeometry, THREE.Material>;
-  headMesh: THREE.Mesh<THREE.ConeGeometry, THREE.Material>;
+  shaftMesh: THREE.Mesh<THREE.CylinderGeometry, THREE.MeshStandardMaterial>;
+  headMesh: THREE.Mesh<THREE.ConeGeometry, THREE.MeshStandardMaterial>;
   shaftOutline: THREE.LineSegments | undefined;
   headOutline: THREE.LineSegments | undefined;
 
@@ -47,14 +47,19 @@ export class RenderableArrow extends RenderableMarker {
     super(topic, marker, receiveTime, renderer);
 
     // Shaft mesh
-    const material = standardMaterial(marker.color, renderer.materialCache);
-    this.shaftMesh = new THREE.Mesh(RenderableArrow.ShaftGeometry(renderer.maxLod), material);
+    this.shaftMesh = new THREE.Mesh(
+      RenderableArrow.ShaftGeometry(renderer.maxLod),
+      makeStandardMaterial(marker.color),
+    );
     this.shaftMesh.castShadow = true;
     this.shaftMesh.receiveShadow = true;
     this.add(this.shaftMesh);
 
     // Head mesh
-    this.headMesh = new THREE.Mesh(RenderableArrow.HeadGeometry(renderer.maxLod), material);
+    this.headMesh = new THREE.Mesh(
+      RenderableArrow.HeadGeometry(renderer.maxLod),
+      makeStandardMaterial(marker.color),
+    );
     this.headMesh.castShadow = true;
     this.headMesh.receiveShadow = true;
     this.add(this.headMesh);
@@ -62,7 +67,7 @@ export class RenderableArrow extends RenderableMarker {
     // Shaft outline
     this.shaftOutline = new THREE.LineSegments(
       RenderableArrow.ShaftEdgesGeometry(renderer.maxLod),
-      renderer.materialCache.outlineMaterial,
+      renderer.outlineMaterial,
     );
     this.shaftOutline.userData.picking = false;
     this.shaftMesh.add(this.shaftOutline);
@@ -70,7 +75,7 @@ export class RenderableArrow extends RenderableMarker {
     // Head outline
     this.headOutline = new THREE.LineSegments(
       RenderableArrow.HeadEdgesGeometry(renderer.maxLod),
-      renderer.materialCache.outlineMaterial,
+      renderer.outlineMaterial,
     );
     this.headOutline.userData.picking = false;
     this.headMesh.add(this.headOutline);
@@ -79,18 +84,28 @@ export class RenderableArrow extends RenderableMarker {
   }
 
   override dispose(): void {
-    releaseStandardMaterial(this.userData.marker.color, this.renderer.materialCache);
+    this.shaftMesh.material.dispose();
+    this.headMesh.material.dispose();
+    super.dispose();
   }
 
   override update(marker: Marker, receiveTime: bigint | undefined): void {
-    const prevMarker = this.userData.marker;
     super.update(marker, receiveTime);
 
-    if (!rgbaEqual(marker.color, prevMarker.color)) {
-      releaseStandardMaterial(prevMarker.color, this.renderer.materialCache);
-      this.shaftMesh.material = standardMaterial(marker.color, this.renderer.materialCache);
-      this.headMesh.material = this.shaftMesh.material;
+    const transparent = marker.color.a < 1;
+    if (transparent !== this.shaftMesh.material.transparent) {
+      this.shaftMesh.material.transparent = transparent;
+      this.shaftMesh.material.depthWrite = !transparent;
+      this.shaftMesh.material.needsUpdate = true;
+      this.headMesh.material.transparent = transparent;
+      this.headMesh.material.depthWrite = !transparent;
+      this.headMesh.material.needsUpdate = true;
     }
+
+    rgbToThreeColor(this.shaftMesh.material.color, marker.color);
+    this.shaftMesh.material.opacity = marker.color.a;
+    this.headMesh.material.color.set(this.shaftMesh.material.color);
+    this.headMesh.material.opacity = marker.color.a;
 
     // Adapted from <https://github.com/ros-visualization/rviz/blob/noetic-devel/src/rviz/default_plugin/markers/arrow_marker.cpp
     if (marker.points.length === 2) {

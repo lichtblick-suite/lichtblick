@@ -5,35 +5,34 @@
 import * as THREE from "three";
 
 import type { Renderer } from "../../Renderer";
-import { rgbaEqual } from "../../color";
+import { rgbToThreeColor } from "../../color";
 import { cylinderSubdivisions, DetailLevel } from "../../lod";
 import { Marker } from "../../ros";
 import { RenderableMarker } from "./RenderableMarker";
-import { releaseStandardMaterial, standardMaterial } from "./materials";
+import { makeStandardMaterial } from "./materials";
 
 export class RenderableCylinder extends RenderableMarker {
   private static lod: DetailLevel | undefined;
   private static geometry: THREE.CylinderGeometry | undefined;
   private static edgesGeometry: THREE.EdgesGeometry | undefined;
 
-  mesh: THREE.Mesh<THREE.CylinderGeometry, THREE.Material>;
+  mesh: THREE.Mesh<THREE.CylinderGeometry, THREE.MeshStandardMaterial>;
   outline: THREE.LineSegments | undefined;
 
   constructor(topic: string, marker: Marker, receiveTime: bigint | undefined, renderer: Renderer) {
     super(topic, marker, receiveTime, renderer);
 
     // Cylinder mesh
-    const material = standardMaterial(marker.color, renderer.materialCache);
-    this.mesh = new THREE.Mesh(RenderableCylinder.Geometry(renderer.maxLod), material);
+    const material = makeStandardMaterial(marker.color);
+    const cylinderGeometry = RenderableCylinder.Geometry(renderer.maxLod);
+    this.mesh = new THREE.Mesh(cylinderGeometry, material);
     this.mesh.castShadow = true;
     this.mesh.receiveShadow = true;
     this.add(this.mesh);
 
     // Cylinder outline
-    this.outline = new THREE.LineSegments(
-      RenderableCylinder.EdgesGeometry(renderer.maxLod),
-      renderer.materialCache.outlineMaterial,
-    );
+    const edgesGeometry = RenderableCylinder.EdgesGeometry(renderer.maxLod);
+    this.outline = new THREE.LineSegments(edgesGeometry, renderer.outlineMaterial);
     this.outline.userData.picking = false;
     this.mesh.add(this.outline);
 
@@ -41,17 +40,21 @@ export class RenderableCylinder extends RenderableMarker {
   }
 
   override dispose(): void {
-    releaseStandardMaterial(this.userData.marker.color, this.renderer.materialCache);
+    this.mesh.material.dispose();
   }
 
   override update(marker: Marker, receiveTime: bigint | undefined): void {
-    const prevMarker = this.userData.marker;
     super.update(marker, receiveTime);
 
-    if (!rgbaEqual(marker.color, prevMarker.color)) {
-      releaseStandardMaterial(prevMarker.color, this.renderer.materialCache);
-      this.mesh.material = standardMaterial(marker.color, this.renderer.materialCache);
+    const transparent = marker.color.a < 1;
+    if (transparent !== this.mesh.material.transparent) {
+      this.mesh.material.transparent = transparent;
+      this.mesh.material.depthWrite = !transparent;
+      this.mesh.material.needsUpdate = true;
     }
+
+    rgbToThreeColor(this.mesh.material.color, marker.color);
+    this.mesh.material.opacity = marker.color.a;
 
     this.scale.set(marker.scale.x, marker.scale.y, marker.scale.z);
   }

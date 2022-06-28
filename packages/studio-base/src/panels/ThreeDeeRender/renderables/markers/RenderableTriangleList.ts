@@ -8,11 +8,7 @@ import type { Renderer } from "../../Renderer";
 import { rgbaToLinear } from "../../color";
 import { Marker } from "../../ros";
 import { RenderableMarker } from "./RenderableMarker";
-import {
-  markerHasTransparency,
-  releaseStandardVertexColorMaterial,
-  standardVertexColorMaterial,
-} from "./materials";
+import { markerHasTransparency, makeStandardVertexColorMaterial } from "./materials";
 
 const NOT_DIVISIBLE_ERR = "NOT_DIVISIBLE";
 const EMPTY_ERR = "EMPTY";
@@ -22,21 +18,17 @@ const EMPTY_FLOAT32 = new Float32Array();
 const tempColor = { r: 0, g: 0, b: 0, a: 0 };
 
 export class RenderableTriangleList extends RenderableMarker {
-  geometry: THREE.BufferGeometry;
-  mesh: THREE.Mesh;
+  mesh: THREE.Mesh<THREE.BufferGeometry, THREE.MeshStandardMaterial>;
   vertices: Float32Array;
   colors: Float32Array;
 
   constructor(topic: string, marker: Marker, receiveTime: bigint | undefined, renderer: Renderer) {
     super(topic, marker, receiveTime, renderer);
 
-    this.geometry = new THREE.BufferGeometry();
-
     this.vertices = new Float32Array(marker.points.length * 3);
     this.colors = new Float32Array(marker.colors.length * 4);
 
-    const material = standardVertexColorMaterial(marker, renderer.materialCache);
-    this.mesh = new THREE.Mesh(this.geometry, material);
+    this.mesh = new THREE.Mesh(new THREE.BufferGeometry(), makeStandardVertexColorMaterial(marker));
     this.mesh.castShadow = true;
     this.mesh.receiveShadow = true;
     this.add(this.mesh);
@@ -45,8 +37,8 @@ export class RenderableTriangleList extends RenderableMarker {
   }
 
   override dispose(): void {
-    releaseStandardVertexColorMaterial(this.userData.marker, this.renderer.materialCache);
-    this.geometry.dispose();
+    this.mesh.material.dispose();
+    this.mesh.geometry.dispose();
     this.vertices = new Float32Array();
     this.colors = new Float32Array();
   }
@@ -56,42 +48,44 @@ export class RenderableTriangleList extends RenderableMarker {
     super.update(marker, receiveTime);
 
     let vertexCount = marker.points.length;
-    const count = vertexCount * 3;
     if (vertexCount === 0) {
       this.renderer.settings.errors.addToTopic(
         this.userData.topic,
         EMPTY_ERR,
         `TRIANGLE_LIST: points is empty`,
       );
-      this.geometry.setAttribute("position", new THREE.BufferAttribute(EMPTY_FLOAT32, 3));
+      this.mesh.geometry.setAttribute("position", new THREE.BufferAttribute(EMPTY_FLOAT32, 3));
       return;
     }
     if (vertexCount % 3 !== 0) {
+      const markerId = `${marker.ns.length > 0 ? marker.ns + ":" : ""}${marker.id}`;
       this.renderer.settings.errors.addToTopic(
         this.userData.topic,
         NOT_DIVISIBLE_ERR,
-        `TRIANGLE_LIST: points[${vertexCount}] is not divisible by 3`,
+        `TRIANGLE_LIST: points.length ${vertexCount} is not divisible by 3 for marker ${markerId}`,
       );
       vertexCount = Math.floor(vertexCount / 3) * 3;
     }
     if (marker.colors.length !== 0 && marker.colors.length !== vertexCount) {
+      const markerId = `${marker.ns.length > 0 ? marker.ns + ":" : ""}${marker.id}`;
       this.renderer.settings.errors.addToTopic(
         this.userData.topic,
         COLORS_MISMATCH_ERR,
-        `TRIANGLE_LIST: colors[${marker.colors.length}] != points[${vertexCount}]`,
+        `TRIANGLE_LIST: colors.length ${marker.colors.length} != points.length ${vertexCount} for marker ${markerId}`,
       );
       // Non-critical, we'll fall back to the default color if needed
     }
 
-    this.renderer.settings.errors.clearTopic(this.userData.topic);
-
-    if (markerHasTransparency(marker) !== markerHasTransparency(prevMarker)) {
-      releaseStandardVertexColorMaterial(prevMarker, this.renderer.materialCache);
-      this.mesh.material = standardVertexColorMaterial(marker, this.renderer.materialCache);
+    const transparent = markerHasTransparency(marker);
+    if (transparent !== markerHasTransparency(prevMarker)) {
+      this.mesh.material.transparent = transparent;
+      this.mesh.material.depthWrite = !transparent;
+      this.mesh.material.needsUpdate = true;
     }
 
     let dataChanged = false;
 
+    const count = vertexCount * 3;
     if (count !== this.vertices.length) {
       this.vertices = new Float32Array(count);
       dataChanged = true;
@@ -128,14 +122,15 @@ export class RenderableTriangleList extends RenderableMarker {
     }
 
     if (dataChanged) {
-      this.geometry.setAttribute("position", new THREE.BufferAttribute(vertices, 3));
-      this.geometry.setAttribute("color", new THREE.BufferAttribute(colors, 4));
+      const geometry = this.mesh.geometry;
+      geometry.setAttribute("position", new THREE.BufferAttribute(vertices, 3));
+      geometry.setAttribute("color", new THREE.BufferAttribute(colors, 4));
       // Explicitly tell three.js to send position and color buffers to the GPU
-      this.geometry.attributes.position!.needsUpdate = true;
-      this.geometry.attributes.color!.needsUpdate = true;
+      geometry.attributes.position!.needsUpdate = true;
+      geometry.attributes.color!.needsUpdate = true;
       // Build the vertex normal attribute from the position buffer (averaging face normals)
-      this.geometry.computeVertexNormals();
-      this.geometry.computeBoundingSphere();
+      geometry.computeVertexNormals();
+      geometry.computeBoundingSphere();
     }
   }
 }

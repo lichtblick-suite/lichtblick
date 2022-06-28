@@ -47,6 +47,7 @@ export function rgbToThreeColor(output: THREE.Color, rgb: ColorRGB): THREE.Color
   return output.setRGB(rgb.r, rgb.g, rgb.b).convertSRGBToLinear();
 }
 
+// ts-prune-ignore-next
 export function rgbaToHexString(color: ColorRGBA): string {
   const rgba =
     (clamp(color.r * 255, 0, 255) << 24) ^

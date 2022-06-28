@@ -93,8 +93,8 @@ export class TopicMarkers extends Renderable<MarkerTopicUserData> {
             this.remove(renderable);
             renderable.dispose();
           }
+          ns.markersById.clear();
         }
-        this.namespaces.clear();
         break;
       }
       default:
