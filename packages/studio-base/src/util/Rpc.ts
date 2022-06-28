@@ -138,7 +138,12 @@ export default class Rpc {
       callback({
         topic: RESPONSE,
         id,
-        data: { [ERROR]: true, name: "Error", message: "Rpc terminated", stack: "" },
+        data: {
+          [ERROR]: true,
+          name: "Error",
+          message: "Rpc terminated",
+          stack: new Error().stack,
+        },
       });
     }
   }

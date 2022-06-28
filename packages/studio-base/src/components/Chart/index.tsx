@@ -144,10 +144,11 @@ function Chart(props: Props): JSX.Element {
     return () => {
       log.info(`Unregister chart ${id}`);
       rpcSendRef.current = undefined;
-      void sendWrapper("destroy");
-      if (supportsOffscreenCanvas) {
-        webWorkerManager.unregisterWorkerListener(id);
-      }
+      sendWrapper("destroy").finally(() => {
+        if (supportsOffscreenCanvas) {
+          webWorkerManager.unregisterWorkerListener(id);
+        }
+      });
     };
   }, [id]);
 
