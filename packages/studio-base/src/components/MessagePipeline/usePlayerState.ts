@@ -58,7 +58,13 @@ function updateSubscriberAction(
   }
 
   const newSubscriptionsById = new Map(previousSubscriptionsById);
-  newSubscriptionsById.set(action.id, action.payloads);
+
+  if (action.payloads.length === 0) {
+    // When a subscription id has no topics we removed it from our map
+    newSubscriptionsById.delete(action.id);
+  } else {
+    newSubscriptionsById.set(action.id, action.payloads);
+  }
 
   const subscriberIdsByTopic: InternalState["subscriberIdsByTopic"] = new Map();
 

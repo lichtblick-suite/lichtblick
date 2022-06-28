@@ -784,12 +784,6 @@ export default class UserNodePlayer implements Player {
     // the map of output topics -> inputs. Add these required input topics to the set of topic
     // subscriptions to the underlying player.
     for (const subscription of subscriptions) {
-      // When subscribing to the same node multiple times, only subscribe to the underlying
-      // topics once. This is not strictly necessary, but it makes debugging a bit easier.
-      if (nodeSubscriptions.has(subscription.topic)) {
-        continue;
-      }
-
       const inputs = this._inputsByOutputTopic.get(subscription.topic);
       if (!inputs) {
         nodeSubscriptions.add(subscription.topic);
