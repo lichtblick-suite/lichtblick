@@ -638,12 +638,15 @@ class LaserScanMaterial extends THREE.RawShaderMaterial {
         uniform bool isCircle;
         ${picking ? "uniform vec4 objectId;" : "in mediump vec4 vColor;"}
         out vec4 outColor;
+
+        ${THREE.ShaderChunk.encodings_pars_fragment /* for LinearTosRGB() */}
+
         void main() {
           if (isCircle) {
             vec2 cxy = 2.0 * gl_PointCoord - 1.0;
             if (dot(cxy, cxy) > 1.0) { discard; }
           }
-          ${picking ? "outColor = objectId;" : "outColor = vColor;"}
+          ${picking ? "outColor = objectId;" : "outColor = LinearTosRGB(vColor);"}
         }
       `,
     });
