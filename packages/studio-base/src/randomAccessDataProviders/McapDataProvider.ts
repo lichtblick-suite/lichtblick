@@ -151,12 +151,12 @@ export default class McapDataProvider implements RandomAccessDataProvider {
           return {
             ...result,
             problems: [
-              ...result.problems,
               {
                 message: "MCAP file is unindexed, falling back to streamed reading",
                 severity: "warn",
                 error,
               },
+              ...result.problems,
             ],
           };
         }

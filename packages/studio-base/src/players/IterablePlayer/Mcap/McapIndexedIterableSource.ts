@@ -67,7 +67,17 @@ export class McapIndexedIterableSource implements IIterableSource {
         continue;
       }
 
-      const parsedChannel = parseChannel({ messageEncoding: channel.messageEncoding, schema });
+      let parsedChannel;
+      try {
+        parsedChannel = parseChannel({ messageEncoding: channel.messageEncoding, schema });
+      } catch (error) {
+        problems.push({
+          severity: "error",
+          message: `Error in topic ${channel.topic} (channel ${channel.id}): ${error.message}`,
+          error,
+        });
+        continue;
+      }
       this.channelInfoById.set(channel.id, { channel, parsedChannel });
 
       let topic = topicsByName.get(channel.topic);
