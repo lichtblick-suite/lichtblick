@@ -27,6 +27,7 @@ import {
   Topic,
 } from "@foxglove/studio";
 import useCleanup from "@foxglove/studio-base/hooks/useCleanup";
+import ThemeProvider from "@foxglove/studio-base/theme/ThemeProvider";
 
 import { DebugGui } from "./DebugGui";
 import Interactions, {
@@ -425,19 +426,21 @@ export function ThreeDeeRender({ context }: { context: PanelExtensionContext }):
   );
 
   return (
-    <div style={PANEL_STYLE} ref={resizeRef}>
-      <CameraListener cameraStore={cameraStore} shiftKeys={true}>
-        <div
-          // This element forces CameraListener to fill its container. We need this instead of just
-          // the canvas since three.js manages the size of the canvas element and we use
-          // position:absolute
-          style={{ width, height }}
-        />
-        <canvas ref={setCanvas} style={CANVAS_STYLE} />
-      </CameraListener>
-      <RendererContext.Provider value={renderer}>
-        <RendererOverlay addPanel={addPanel} enableStats={config.scene.enableStats ?? false} />
-      </RendererContext.Provider>
-    </div>
+    <ThemeProvider isDark={colorScheme === "dark"}>
+      <div style={PANEL_STYLE} ref={resizeRef}>
+        <CameraListener cameraStore={cameraStore} shiftKeys={true}>
+          <div
+            // This element forces CameraListener to fill its container. We need this instead of just
+            // the canvas since three.js manages the size of the canvas element and we use
+            // position:absolute
+            style={{ width, height }}
+          />
+          <canvas ref={setCanvas} style={CANVAS_STYLE} />
+        </CameraListener>
+        <RendererContext.Provider value={renderer}>
+          <RendererOverlay addPanel={addPanel} enableStats={config.scene.enableStats ?? false} />
+        </RendererContext.Provider>
+      </div>
+    </ThemeProvider>
   );
 }

@@ -8,7 +8,6 @@ import ReactDOM from "react-dom";
 import { PanelExtensionContext } from "@foxglove/studio";
 import Panel from "@foxglove/studio-base/components/Panel";
 import PanelExtensionAdapter from "@foxglove/studio-base/components/PanelExtensionAdapter";
-import ThemeProvider from "@foxglove/studio-base/theme/ThemeProvider";
 import { SaveConfig } from "@foxglove/studio-base/types/panels";
 
 import { ThreeDeeRender } from "./ThreeDeeRender";
@@ -17,9 +16,7 @@ import helpContent from "./index.help.md";
 function initPanel(context: PanelExtensionContext) {
   ReactDOM.render(
     <StrictMode>
-      <ThemeProvider isDark>
-        <ThreeDeeRender context={context} />
-      </ThemeProvider>
+      <ThreeDeeRender context={context} />
     </StrictMode>,
     context.panelElement,
   );
