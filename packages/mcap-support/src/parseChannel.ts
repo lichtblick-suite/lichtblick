@@ -9,6 +9,7 @@ import { parse as parseMessageDefinition, RosMsgDefinition } from "@foxglove/ros
 import { LazyMessageReader } from "@foxglove/rosmsg-serialization";
 import { MessageReader as ROS2MessageReader } from "@foxglove/rosmsg2-serialization";
 
+import { parseFlatbufferSchema } from "./parseFlatbufferSchema";
 import { parseJsonSchema } from "./parseJsonSchema";
 import { protobufDefinitionsToDatatypes, stripLeadingDot } from "./protobufDefinitionsToDatatypes";
 import { RosDatatypes } from "./types";
@@ -74,10 +75,24 @@ export function parseChannel(channel: Channel): ParsedChannel {
         channel.schema.name,
       );
       datatypes = parsedDatatypes;
-      deserializer = (data) =>
+      deserializer = (data) => {
         postprocessValue(JSON.parse(textDecoder.decode(data)) as Record<string, unknown>);
+      };
     }
     return { fullSchemaName: channel.schema.name, deserializer, datatypes };
+  }
+
+  if (channel.messageEncoding === "flatbuffer") {
+    if (channel.schema?.encoding !== "flatbuffer") {
+      throw new Error(
+        `Message encoding ${channel.messageEncoding} with ${
+          channel.schema == undefined
+            ? "no encoding"
+            : `schema encoding '${channel.schema.encoding}'`
+        } is not supported (expected flatbuffer)`,
+      );
+    }
+    return parseFlatbufferSchema(channel.schema.name, channel.schema.data);
   }
 
   if (channel.messageEncoding === "protobuf") {

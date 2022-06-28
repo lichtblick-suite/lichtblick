@@ -2314,6 +2314,8 @@ __metadata:
     "@foxglove/wasm-bz2": 0.1.0
     "@protobufjs/base64": 1.1.2
     "@types/zstd-codec": "workspace:*"
+    flatbuffers: 2.0.6
+    flatbuffers_reflection: 0.0.1
     typescript: 4.6.2
     wasm-lz4: 2.0.0
     zstd-codec: "patch:zstd-codec@0.1.4#../../patches/zstd-codec.patch"
@@ -12767,6 +12769,20 @@ __metadata:
     flatted: ^3.1.0
     rimraf: ^3.0.2
   checksum: 4fdd10ecbcbf7d520f9040dd1340eb5dfe951e6f0ecf2252edeec03ee68d989ec8b9a20f4434270e71bcfd57800dc09b3344fca3966b2eb8f613072c7d9a2365
+  languageName: node
+  linkType: hard
+
+"flatbuffers@npm:2.0.6":
+  version: 2.0.6
+  resolution: "flatbuffers@npm:2.0.6"
+  checksum: 88d907d3c9404c2e10c3e45e23a39ed5517b77c036738f88973933f50454a44f49336cbfbc5f3758b3eeb8e644902d84fdedd94c3fd0a54dfda724d4adb1155f
+  languageName: node
+  linkType: hard
+
+"flatbuffers_reflection@npm:0.0.1":
+  version: 0.0.1
+  resolution: "flatbuffers_reflection@npm:0.0.1"
+  checksum: 6ea9cceade8f25d4f7d564efe93c7c513869aa85c6d55884f6cc5462097e115d36d311a0acbeedd655c346721a5cc699676a20ea215cad07ab71d637e0b96227
   languageName: node
   linkType: hard
 
