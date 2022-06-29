@@ -5,7 +5,7 @@
 import { useEffect, useState } from "react";
 
 import { Renderer } from "./Renderer";
-import { useRenderer, useRendererEvent } from "./RendererContext";
+import { useRendererEvent } from "./RendererContext";
 
 let stats: THREEStats | undefined;
 let drawCallsPanel: Panel | undefined;
@@ -32,15 +32,8 @@ function update(renderer: Renderer) {
 
 export function Stats(): JSX.Element {
   const [div, setDiv] = useState<HTMLDivElement | ReactNull>(ReactNull);
-  const renderer = useRenderer();
 
-  useRendererEvent("startFrame", () => stats?.begin());
-  useRendererEvent("endFrame", () => {
-    stats?.end();
-    if (renderer) {
-      update(renderer);
-    }
-  });
+  useRendererEvent("endFrame", (_curTime, curRenderer) => update(curRenderer));
 
   useEffect(() => {
     if (!div) {

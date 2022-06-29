@@ -43,6 +43,7 @@ import { PointCloudsAndLaserScans } from "./renderables/PointCloudsAndLaserScans
 import { Polygons } from "./renderables/Polygons";
 import { PoseArrays } from "./renderables/PoseArrays";
 import { Poses } from "./renderables/Poses";
+import { MarkerPool } from "./renderables/markers/MarkerPool";
 import {
   Header,
   TFMessage,
@@ -189,8 +190,10 @@ export class Renderer extends EventEmitter<RendererEvents> {
   currentTime: bigint | undefined;
   fixedFrameId: string | undefined;
   renderFrameId: string | undefined;
+  followFrameId: string | undefined;
 
   labels = new Labels(this);
+  markerPool = new MarkerPool(this);
 
   constructor(canvas: HTMLCanvasElement, config: RendererConfig) {
     super();
@@ -270,7 +273,7 @@ export class Renderer extends EventEmitter<RendererEvents> {
     this.selectionBackdrop.visible = false;
     this.scene.add(this.selectionBackdrop);
 
-    this.renderFrameId = config.followTf;
+    this.followFrameId = config.followTf;
 
     const samples = msaaSamples(this.maxLod, this.gl.capabilities);
     const renderSize = this.gl.getDrawingBufferSize(tempVec2);
@@ -315,6 +318,8 @@ export class Renderer extends EventEmitter<RendererEvents> {
     }
     this.sceneExtensions.clear();
 
+    this.markerPool.dispose();
+    this.labels.dispose();
     this.picker.dispose();
     this.input.dispose();
     this.gl.dispose();
@@ -400,6 +405,16 @@ export class Renderer extends EventEmitter<RendererEvents> {
   }
 
   defaultFrameId(): string | undefined {
+    const allFrames = this.transformTree.frames();
+    if (allFrames.size === 0) {
+      return undefined;
+    }
+
+    // Top priority is the followFrameId
+    if (this.followFrameId != undefined && this.transformTree.hasFrame(this.followFrameId)) {
+      return this.followFrameId;
+    }
+
     // Prefer frames from [REP-105](https://www.ros.org/reps/rep-0105.html)
     for (const frameId of DEFAULT_FRAME_IDS) {
       const frame = this.transformTree.frame(frameId);
@@ -410,7 +425,7 @@ export class Renderer extends EventEmitter<RendererEvents> {
 
     // Choose the root frame with the most children
     const rootsToCounts = new Map<string, number>();
-    for (const frame of this.transformTree.frames().values()) {
+    for (const frame of allFrames.values()) {
       const rootId = frame.root().id;
       rootsToCounts.set(rootId, (rootsToCounts.get(rootId) ?? 0) + 1);
     }
@@ -736,11 +751,23 @@ export class Renderer extends EventEmitter<RendererEvents> {
   };
 
   private _updateFrames(): void {
-    if (this.renderFrameId == undefined) {
+    if (
+      this.followFrameId != undefined &&
+      this.renderFrameId !== this.followFrameId &&
+      this.transformTree.hasFrame(this.followFrameId)
+    ) {
+      // followFrameId is set and is a valid frame, use it
+      this.renderFrameId = this.followFrameId;
+    } else if (
+      this.renderFrameId == undefined ||
+      !this.transformTree.hasFrame(this.renderFrameId)
+    ) {
+      // No valid renderFrameId set, fall back to selecting the heuristically
+      // most valid frame (if any frames are present)
       this.renderFrameId = this.defaultFrameId();
 
       if (this.renderFrameId == undefined) {
-        this.settings.errors.add(FOLLOW_TF_PATH, NO_FRAME_SELECTED, `No frame selected`);
+        this.settings.errors.add(FOLLOW_TF_PATH, NO_FRAME_SELECTED, `No coordinate frames found`);
         this.fixedFrameId = undefined;
         return;
       } else {
@@ -750,6 +777,7 @@ export class Renderer extends EventEmitter<RendererEvents> {
 
     const frame = this.transformTree.frame(this.renderFrameId);
     if (!frame) {
+      this.renderFrameId = undefined;
       this.fixedFrameId = undefined;
       this.settings.errors.add(
         FOLLOW_TF_PATH,

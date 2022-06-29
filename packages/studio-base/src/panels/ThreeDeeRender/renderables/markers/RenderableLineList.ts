@@ -55,8 +55,9 @@ export class RenderableLineList extends RenderableMarker {
   }
 
   override update(marker: Marker, receiveTime: bigint | undefined): void {
-    if (marker.points.length % 2 !== 0) {
-      throw new Error(`LineList marker has odd number of points (${marker.points.length})`);
+    let pointsLength = marker.points.length;
+    if (pointsLength % 2 !== 0) {
+      pointsLength--;
     }
 
     const prevMarker = this.userData.marker;
@@ -77,17 +78,17 @@ export class RenderableLineList extends RenderableMarker {
     this.linePrepass.material.linewidth = lineWidth;
     this.line.material.linewidth = lineWidth;
 
-    this._setPositions(marker);
-    this._setColors(marker);
+    this._setPositions(marker, pointsLength);
+    this._setColors(marker, pointsLength);
 
     // These both update the same `LineSegmentsGeometry` reference, so no need to call both
     // this.linePrepass.computeLineDistances();
     this.line.computeLineDistances();
   }
 
-  private _setPositions(marker: Marker): void {
-    const linePositions = new Float32Array(3 * marker.points.length);
-    for (let i = 0; i < marker.points.length; i++) {
+  private _setPositions(marker: Marker, pointsLength: number): void {
+    const linePositions = new Float32Array(3 * pointsLength);
+    for (let i = 0; i < pointsLength; i++) {
       const point = marker.points[i]!;
       linePositions[i * 3 + 0] = point.x;
       linePositions[i * 3 + 1] = point.y;
@@ -97,10 +98,10 @@ export class RenderableLineList extends RenderableMarker {
     this.geometry.setPositions(linePositions);
   }
 
-  private _setColors(marker: Marker): void {
+  private _setColors(marker: Marker, pointsLength: number): void {
     // Converts color-per-point to a flattened typed array
-    const rgbaData = new Float32Array(4 * marker.points.length);
-    this._markerColorsToLinear(marker, (color, i) => {
+    const rgbaData = new Float32Array(4 * pointsLength);
+    this._markerColorsToLinear(marker, pointsLength, (color, i) => {
       rgbaData[4 * i + 0] = color[0];
       rgbaData[4 * i + 1] = color[1];
       rgbaData[4 * i + 2] = color[2];

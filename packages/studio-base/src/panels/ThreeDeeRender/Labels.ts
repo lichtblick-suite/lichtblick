@@ -83,6 +83,15 @@ export class Labels extends THREE.Object3D {
     this.renderer = renderer;
   }
 
+  dispose(): void {
+    for (const sprite of this.sprites.values()) {
+      sprite.material.map?.dispose();
+      sprite.material.dispose();
+    }
+    this.children.length = 0;
+    this.sprites.clear();
+  }
+
   setLabel(id: string, label: LabelOptions): LabelRenderable {
     const extraScale = scaleFactor(this.renderer.maxLod);
     const scale = window.devicePixelRatio + extraScale;

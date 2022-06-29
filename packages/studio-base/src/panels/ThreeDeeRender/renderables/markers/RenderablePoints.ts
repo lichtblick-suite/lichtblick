@@ -44,15 +44,16 @@ export class RenderablePoints extends RenderableMarker {
 
     this.points.material.size = marker.scale.x;
 
-    this.geometry.resize(marker.points.length);
-    this._setPositions(marker);
-    this._setColors(marker);
+    const pointsLength = marker.points.length;
+    this.geometry.resize(pointsLength);
+    this._setPositions(marker, pointsLength);
+    this._setColors(marker, pointsLength);
   }
 
-  private _setPositions(marker: Marker): void {
+  private _setPositions(marker: Marker, pointsLength: number): void {
     const attribute = this.geometry.getAttribute("position") as THREE.BufferAttribute;
     const positions = attribute.array as Float32Array;
-    for (let i = 0; i < marker.points.length; i++) {
+    for (let i = 0; i < pointsLength; i++) {
       const point = marker.points[i]!;
       positions[i * 3 + 0] = point.x;
       positions[i * 3 + 1] = point.y;
@@ -61,11 +62,11 @@ export class RenderablePoints extends RenderableMarker {
     attribute.needsUpdate = true;
   }
 
-  private _setColors(marker: Marker): void {
+  private _setColors(marker: Marker, pointsLength: number): void {
     // Converts color-per-point to a flattened typed array
     const attribute = this.geometry.getAttribute("color") as THREE.BufferAttribute;
     const rgbaData = attribute.array as Float32Array;
-    this._markerColorsToLinear(marker, (color, i) => {
+    this._markerColorsToLinear(marker, pointsLength, (color, i) => {
       rgbaData[4 * i + 0] = color[0];
       rgbaData[4 * i + 1] = color[1];
       rgbaData[4 * i + 2] = color[2];

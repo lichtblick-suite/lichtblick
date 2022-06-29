@@ -13,8 +13,8 @@ import { makeStandardMaterial } from "./materials";
 
 export class RenderableCylinder extends RenderableMarker {
   private static lod: DetailLevel | undefined;
-  private static geometry: THREE.CylinderGeometry | undefined;
-  private static edgesGeometry: THREE.EdgesGeometry | undefined;
+  private static cylinderGeometry: THREE.CylinderGeometry | undefined;
+  private static cylinderEdgesGeometry: THREE.EdgesGeometry | undefined;
 
   mesh: THREE.Mesh<THREE.CylinderGeometry, THREE.MeshStandardMaterial>;
   outline: THREE.LineSegments | undefined;
@@ -60,22 +60,22 @@ export class RenderableCylinder extends RenderableMarker {
   }
 
   static Geometry(lod: DetailLevel): THREE.CylinderGeometry {
-    if (!RenderableCylinder.geometry || lod !== RenderableCylinder.lod) {
+    if (!RenderableCylinder.cylinderGeometry || lod !== RenderableCylinder.lod) {
       const subdivisions = cylinderSubdivisions(lod);
-      RenderableCylinder.geometry = new THREE.CylinderGeometry(0.5, 0.5, 1, subdivisions);
-      RenderableCylinder.geometry.rotateX(Math.PI / 2); // Make the cylinder geometry stand upright
-      RenderableCylinder.geometry.computeBoundingSphere();
+      RenderableCylinder.cylinderGeometry = new THREE.CylinderGeometry(0.5, 0.5, 1, subdivisions);
+      RenderableCylinder.cylinderGeometry.rotateX(Math.PI / 2); // Make the cylinder geometry stand upright
+      RenderableCylinder.cylinderGeometry.computeBoundingSphere();
       RenderableCylinder.lod = lod;
     }
-    return RenderableCylinder.geometry;
+    return RenderableCylinder.cylinderGeometry;
   }
 
   static EdgesGeometry(lod: DetailLevel): THREE.EdgesGeometry {
-    if (!RenderableCylinder.edgesGeometry) {
+    if (!RenderableCylinder.cylinderEdgesGeometry) {
       const geometry = RenderableCylinder.Geometry(lod);
-      RenderableCylinder.edgesGeometry = new THREE.EdgesGeometry(geometry, 40);
-      RenderableCylinder.edgesGeometry.computeBoundingSphere();
+      RenderableCylinder.cylinderEdgesGeometry = new THREE.EdgesGeometry(geometry, 40);
+      RenderableCylinder.cylinderEdgesGeometry.computeBoundingSphere();
     }
-    return RenderableCylinder.edgesGeometry;
+    return RenderableCylinder.cylinderEdgesGeometry;
   }
 }

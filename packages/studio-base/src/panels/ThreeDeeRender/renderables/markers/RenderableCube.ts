@@ -11,8 +11,8 @@ import { RenderableMarker } from "./RenderableMarker";
 import { makeStandardMaterial } from "./materials";
 
 export class RenderableCube extends RenderableMarker {
-  private static geometry: THREE.BoxGeometry | undefined;
-  private static edgesGeometry: THREE.EdgesGeometry | undefined;
+  private static cubeGeometry: THREE.BoxGeometry | undefined;
+  private static cubeEdgesGeometry: THREE.EdgesGeometry | undefined;
 
   mesh: THREE.Mesh<THREE.BoxGeometry, THREE.MeshStandardMaterial>;
   outline: THREE.LineSegments | undefined;
@@ -55,18 +55,18 @@ export class RenderableCube extends RenderableMarker {
   }
 
   static Geometry(): THREE.BoxGeometry {
-    if (!RenderableCube.geometry) {
-      RenderableCube.geometry = new THREE.BoxGeometry(1, 1, 1);
-      RenderableCube.geometry.computeBoundingSphere();
+    if (!RenderableCube.cubeGeometry) {
+      RenderableCube.cubeGeometry = new THREE.BoxGeometry(1, 1, 1);
+      RenderableCube.cubeGeometry.computeBoundingSphere();
     }
-    return RenderableCube.geometry;
+    return RenderableCube.cubeGeometry;
   }
 
   static EdgesGeometry(): THREE.EdgesGeometry {
-    if (!RenderableCube.edgesGeometry) {
-      RenderableCube.edgesGeometry = new THREE.EdgesGeometry(RenderableCube.Geometry(), 40);
-      RenderableCube.edgesGeometry.computeBoundingSphere();
+    if (!RenderableCube.cubeEdgesGeometry) {
+      RenderableCube.cubeEdgesGeometry = new THREE.EdgesGeometry(RenderableCube.Geometry(), 40);
+      RenderableCube.cubeEdgesGeometry.computeBoundingSphere();
     }
-    return RenderableCube.edgesGeometry;
+    return RenderableCube.cubeEdgesGeometry;
   }
 }

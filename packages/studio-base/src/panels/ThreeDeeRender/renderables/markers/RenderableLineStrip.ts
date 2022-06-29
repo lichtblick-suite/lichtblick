@@ -72,16 +72,17 @@ export class RenderableLineStrip extends RenderableMarker {
     this.linePrepass.material.linewidth = lineWidth;
     this.line.material.linewidth = lineWidth;
 
-    this._setPositions(marker);
-    this._setColors(marker);
+    const pointsLength = marker.points.length;
+    this._setPositions(marker, pointsLength);
+    this._setColors(marker, pointsLength);
 
     this.linePrepass.computeLineDistances();
     this.line.computeLineDistances();
   }
 
-  private _setPositions(marker: Marker): void {
-    const linePositions = new Float32Array(3 * marker.points.length);
-    for (let i = 0; i < marker.points.length; i++) {
+  private _setPositions(marker: Marker, pointsLength: number): void {
+    const linePositions = new Float32Array(3 * pointsLength);
+    for (let i = 0; i < pointsLength; i++) {
       const point = marker.points[i]!;
       linePositions[i * 3 + 0] = point.x;
       linePositions[i * 3 + 1] = point.y;
@@ -91,11 +92,11 @@ export class RenderableLineStrip extends RenderableMarker {
     this.geometry.setPositions(linePositions);
   }
 
-  private _setColors(marker: Marker): void {
+  private _setColors(marker: Marker, pointsLength: number): void {
     // Converts color-per-point to pairs format in a flattened typed array
-    const rgbaData = new Float32Array(8 * marker.points.length);
+    const rgbaData = new Float32Array(8 * pointsLength);
     const color1: THREE.Vector4Tuple = [0, 0, 0, 0];
-    this._markerColorsToLinear(marker, (color2, ii) => {
+    this._markerColorsToLinear(marker, pointsLength, (color2, ii) => {
       if (ii === 0) {
         copyTuple4(color2, color1);
         return;

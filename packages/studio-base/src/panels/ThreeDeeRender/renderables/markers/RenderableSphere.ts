@@ -13,7 +13,7 @@ import { makeStandardMaterial } from "./materials";
 
 export class RenderableSphere extends RenderableMarker {
   private static lod: DetailLevel | undefined;
-  private static geometry: THREE.SphereGeometry | undefined;
+  private static sphereGeometry: THREE.SphereGeometry | undefined;
 
   mesh: THREE.Mesh<THREE.SphereGeometry, THREE.MeshStandardMaterial>;
 
@@ -51,12 +51,12 @@ export class RenderableSphere extends RenderableMarker {
   }
 
   static Geometry(lod: DetailLevel): THREE.SphereGeometry {
-    if (!RenderableSphere.geometry || lod !== RenderableSphere.lod) {
+    if (!RenderableSphere.sphereGeometry || lod !== RenderableSphere.lod) {
       const subdivisions = sphereSubdivisions(lod);
-      RenderableSphere.geometry = new THREE.SphereGeometry(0.5, subdivisions, subdivisions);
-      RenderableSphere.geometry.computeBoundingSphere();
+      RenderableSphere.sphereGeometry = new THREE.SphereGeometry(0.5, subdivisions, subdivisions);
+      RenderableSphere.sphereGeometry.computeBoundingSphere();
       RenderableSphere.lod = lod;
     }
-    return RenderableSphere.geometry;
+    return RenderableSphere.sphereGeometry;
   }
 }
