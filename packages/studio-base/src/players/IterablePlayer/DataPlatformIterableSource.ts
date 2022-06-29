@@ -163,7 +163,6 @@ export class DataPlatformIterableSource implements IIterableSource {
       profile: undefined,
       problems,
       publishersByTopic: new Map(),
-      blockDurationNanos: this._requestDurationSecs * 1e9,
     };
   }
 

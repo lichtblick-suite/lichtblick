@@ -14,7 +14,6 @@ export type Initalization = {
   topicStats: Map<string, TopicStats>;
   datatypes: RosDatatypes;
   profile: string | undefined;
-  blockDurationNanos?: number;
 
   /** Publisher names by topic **/
   publishersByTopic: Map<string, Set<string>>;
