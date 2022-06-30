@@ -75,9 +75,8 @@ export function parseChannel(channel: Channel): ParsedChannel {
         channel.schema.name,
       );
       datatypes = parsedDatatypes;
-      deserializer = (data) => {
+      deserializer = (data) =>
         postprocessValue(JSON.parse(textDecoder.decode(data)) as Record<string, unknown>);
-      };
     }
     return { fullSchemaName: channel.schema.name, deserializer, datatypes };
   }
