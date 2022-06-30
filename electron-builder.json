@@ -238,7 +238,9 @@
     "afterInstall": "./resources/linux/deb/postinst"
   },
   "snap": {
-    "confinement": "classic"
+    "confinement": "strict",
+    "grade": "stable",
+    "summary": "Integrated visualization and diagnosis tool for robotics"
   },
   "publish": [
     {

@@ -1,0 +1,10 @@
+diff --git a/templates/snap/snapcraft.yaml b/templates/snap/snapcraft.yaml
+index 08ed9604b8e0e6b8901dcd253c2e793983da989e..f0d706d3c0b276d5a2f23fa5ac400b11dc22a594 100644
+--- a/templates/snap/snapcraft.yaml
++++ b/templates/snap/snapcraft.yaml
+@@ -1,4 +1,4 @@
+-base: core18
++base: core20
+ grade: stable
+ confinement: strict
+ parts:
