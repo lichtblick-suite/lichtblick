@@ -53,21 +53,7 @@ export class McapIterableSource implements IIterableSource {
     const readable = new FileReadable(source.file);
     const reader = await tryCreateIndexedReader(readable);
     if (!reader) {
-      return {
-        start: { sec: 0, nsec: 0 },
-        end: { sec: 0, nsec: 0 },
-        topics: [],
-        datatypes: new Map(),
-        profile: undefined,
-        problems: [
-          {
-            severity: "error",
-            message: "The mcap file is unindexed. Only indexed files are supported.",
-          },
-        ],
-        publishersByTopic: new Map(),
-        topicStats: new Map(),
-      };
+      throw new Error("The mcap file is unindexed. Only indexed files are supported.");
     }
 
     this._sourceImpl = new McapIndexedIterableSource(reader);
