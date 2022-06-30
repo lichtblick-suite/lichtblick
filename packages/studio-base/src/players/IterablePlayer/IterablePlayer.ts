@@ -307,8 +307,9 @@ export class IterablePlayer implements Player {
     }
 
     // Support moving between idle (pause) and play and preserving the playback iterator
-    if (newState !== "idle" && newState !== "play") {
-      void this._playbackIterator?.return?.().catch((err) => {
+    if (newState !== "idle" && newState !== "play" && this._playbackIterator) {
+      log.info("Ending playback iterator because next state is not IDLE or PLAY");
+      void this._playbackIterator.return?.().catch((err) => {
         log.error(err);
       });
     }
@@ -481,8 +482,6 @@ export class IterablePlayer implements Player {
   // Without an initial read, the user would be looking at a blank layout since no messages have yet
   // been delivered.
   private async _stateStartPlay() {
-    const allTopics = this._allTopics;
-
     const stopTime = clampTime(
       add(this._start, fromNanoSec(SEEK_ON_START_NS)),
       this._start,
@@ -491,11 +490,14 @@ export class IterablePlayer implements Player {
 
     log.debug(`Playing from ${toString(this._start)} to ${toString(stopTime)}`);
 
-    // This iterator is setup to only read the start messages. For playback another iterator is used.
-    const iterator = this._iterableSource.messageIterator({
-      topics: Array.from(allTopics),
+    if (this._playbackIterator) {
+      throw new Error("Invariant. playbackIterator was already set");
+    }
+
+    log.debug("Initializing forward iterator from", this._start);
+    this._playbackIterator = this._iterableSource.messageIterator({
+      topics: Array.from(this._allTopics),
       start: this._start,
-      end: stopTime,
     });
 
     this._lastMessage = undefined;
@@ -504,7 +506,7 @@ export class IterablePlayer implements Player {
     const messageEvents: MessageEvent<unknown>[] = [];
 
     for (;;) {
-      const result = await iterator.next();
+      const result = await this._playbackIterator.next();
       if (result.done === true) {
         break;
       }
@@ -512,8 +514,6 @@ export class IterablePlayer implements Player {
       // Bail if a new state is requested while we are loading messages
       // This usually happens when seeking before the initial load is complete
       if (this._nextState) {
-        log.info("Exit startPlay for new state");
-        void iterator.return?.();
         return;
       }
 
@@ -522,15 +522,13 @@ export class IterablePlayer implements Player {
         continue;
       }
 
-      // Just in case the iterator decides it is going to ignore our _end_ param
       if (compare(iterResult.msgEvent.receiveTime, stopTime) > 0) {
+        this._lastMessage = iterResult.msgEvent;
         break;
       }
 
       messageEvents.push(iterResult.msgEvent);
     }
-
-    void iterator.return?.();
 
     this._currentTime = stopTime;
     this._messages = messageEvents;
