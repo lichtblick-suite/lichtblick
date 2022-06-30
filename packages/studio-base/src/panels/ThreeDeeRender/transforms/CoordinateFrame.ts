@@ -150,9 +150,16 @@ export class CoordinateFrame {
       return false;
     }
 
-    // If there is no transform at or before `time`, early exit
+    // If the time is before the first transform, check if `time` is within
+    // `maxDelta` of the first transform
     const lte = this._transforms.findLessThanOrEqual(time);
     if (!lte) {
+      const [earliestTime, earliestTf] = this._transforms.minEntry()!;
+      if (earliestTime + maxDelta >= time) {
+        outLower[0] = outUpper[0] = earliestTime;
+        outLower[1] = outUpper[1] = earliestTf;
+        return true;
+      }
       return false;
     }
 

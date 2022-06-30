@@ -27,11 +27,13 @@ export class DynamicBufferGeometry<
   override attributes: { [name: string]: THREE.BufferAttribute } = {};
 
   private _dataConstructor: C;
+  private _usage: THREE.Usage;
   private _itemCapacity = 0;
 
-  constructor(arrayConstructor: C) {
+  constructor(arrayConstructor: C, usage: THREE.Usage = THREE.DynamicDrawUsage) {
     super();
     this._dataConstructor = arrayConstructor;
+    this._usage = usage;
   }
 
   createAttribute(
@@ -40,7 +42,7 @@ export class DynamicBufferGeometry<
   ): THREE.BufferGeometry {
     const data = new this._dataConstructor(this._itemCapacity * itemSize);
     const attribute = new THREE.BufferAttribute(data, itemSize);
-    attribute.setUsage(THREE.DynamicDrawUsage);
+    attribute.setUsage(this._usage);
     return this.setAttribute(name, attribute);
   }
 
@@ -58,7 +60,7 @@ export class DynamicBufferGeometry<
       const attribute = this.attributes[attributeName]!;
       const data = new this._dataConstructor(itemCount * attribute.itemSize);
       const newAttrib = new THREE.BufferAttribute(data, attribute.itemSize, attribute.normalized);
-      newAttrib.setUsage(THREE.DynamicDrawUsage);
+      newAttrib.setUsage(this._usage);
       this.attributes[attributeName] = newAttrib;
     }
 

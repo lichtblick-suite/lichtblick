@@ -52,7 +52,7 @@ import {
   TRANSFORM_STAMPED_DATATYPES,
 } from "./ros";
 import { BaseSettings, CustomLayerSettings, SelectEntry } from "./settings";
-import { Transform, TransformTree } from "./transforms";
+import { MAX_DURATION, Transform, TransformTree } from "./transforms";
 
 const log = Logger.getLogger(__filename);
 
@@ -126,9 +126,6 @@ const DARK_OUTLINE = new THREE.Color(0xffffff).convertSRGBToLinear();
 const LAYER_DEFAULT = 0;
 const LAYER_SELECTED = 1;
 
-// Keep a 60 second window of transforms by default
-const TRANSFORM_STORAGE_TIME_NS = 60n * BigInt(1e9);
-
 const UNIT_X = new THREE.Vector3(1, 0, 0);
 const PI_2 = Math.PI / 2;
 
@@ -185,7 +182,7 @@ export class Renderer extends EventEmitter<RendererEvents> {
   selectedObject: Renderable | undefined;
   colorScheme: "dark" | "light" = "light";
   modelCache: ModelCache;
-  transformTree = new TransformTree(TRANSFORM_STORAGE_TIME_NS);
+  transformTree = new TransformTree(MAX_DURATION);
   coordinateFrameList: SelectEntry[] = [];
   currentTime: bigint | undefined;
   fixedFrameId: string | undefined;

@@ -88,6 +88,7 @@ export class SceneExtension<
    */
   removeAllRenderables(): void {
     for (const renderable of this.renderables.values()) {
+      renderable.dispose();
       this.remove(renderable);
     }
     this.renderables.clear();
