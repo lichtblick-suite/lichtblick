@@ -2,24 +2,12 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { Typography, styled as muiStyled } from "@mui/material";
+import { Typography, List } from "@mui/material";
 
 import Stack from "@foxglove/studio-base/components/Stack";
 import { Layout } from "@foxglove/studio-base/services/ILayoutStorage";
 
 import LayoutRow from "./LayoutRow";
-
-const SectionHeader = muiStyled(Typography)(({ theme }) => ({
-  paddingLeft: theme.spacing(2),
-  paddingRight: theme.spacing(2),
-  marginTop: theme.spacing(2),
-  marginBottom: theme.spacing(1),
-}));
-
-const EmptyText = muiStyled(Typography)(({ theme }) => ({
-  paddingLeft: theme.spacing(2),
-  paddingRight: theme.spacing(2),
-}));
 
 export default function LayoutSection({
   title,
@@ -53,12 +41,20 @@ export default function LayoutSection({
   return (
     <Stack>
       {title != undefined && (
-        <SectionHeader as="h2" variant="overline">
-          {title}
-        </SectionHeader>
+        <Stack paddingX={2}>
+          <Typography variant="overline" color="text.secondary">
+            {title}
+          </Typography>
+        </Stack>
       )}
-      <div>
-        <EmptyText>{items != undefined && items.length === 0 && emptyText}</EmptyText>
+      <List>
+        {items != undefined && items.length === 0 && (
+          <Stack paddingX={2}>
+            <Typography variant="body2" color="text.secondary">
+              {emptyText}
+            </Typography>
+          </Stack>
+        )}
         {items?.map((layout) => (
           <LayoutRow
             selected={layout.id === selectedId}
@@ -75,7 +71,7 @@ export default function LayoutSection({
             onMakePersonalCopy={onMakePersonalCopy}
           />
         ))}
-      </div>
+      </List>
     </Stack>
   );
 }

@@ -178,7 +178,7 @@ export function MenuOpen(_args: unknown): JSX.Element {
 
   useAsyncThrowing(async () => {
     await delay(100);
-    document.querySelectorAll<HTMLElement>(`[data-test="layout-actions"]`)[1]!.click();
+    document.querySelectorAll<HTMLElement>("#layout-actions")[1]!.click();
     await delay(10);
     readySignal();
   }, [readySignal]);
@@ -194,7 +194,7 @@ export function EditingName(_args: unknown): JSX.Element {
 
   useAsyncThrowing(async () => {
     await delay(100);
-    document.querySelectorAll<HTMLElement>(`[data-test="layout-actions"]`)[1]!.click();
+    document.querySelectorAll<HTMLElement>("#layout-actions")[1]!.click();
     await delay(10);
     document.querySelector<HTMLElement>(`[data-test="rename-layout"]`)!.click();
     readySignal();
@@ -209,7 +209,7 @@ export function CancelRenameWithEscape(_args: unknown): JSX.Element {
 
   useAsyncThrowing(async () => {
     await delay(100);
-    document.querySelectorAll<HTMLElement>(`[data-test="layout-actions"]`)[1]!.click();
+    document.querySelectorAll<HTMLElement>("#layout-actions")[1]!.click();
     await delay(10);
     document.querySelector<HTMLElement>(`[data-test="rename-layout"]`)!.click();
     await delay(10);
@@ -227,7 +227,7 @@ export function CommitRenameWithTab(_args: unknown): JSX.Element {
 
   useAsyncThrowing(async () => {
     await delay(100);
-    document.querySelectorAll<HTMLElement>(`[data-test="layout-actions"]`)[1]!.click();
+    document.querySelectorAll<HTMLElement>("#layout-actions")[1]!.click();
     await delay(10);
     document.querySelector<HTMLElement>(`[data-test="rename-layout"]`)!.click();
     await delay(10);
@@ -257,7 +257,7 @@ export function Duplicate(_args: unknown): JSX.Element {
 
   useAsyncThrowing(async () => {
     await delay(100);
-    document.querySelectorAll<HTMLElement>(`[data-test="layout-actions"]`)[1]!.click();
+    document.querySelectorAll<HTMLElement>("#layout-actions")[1]!.click();
     await delay(10);
     document.querySelector<HTMLElement>(`[data-test="duplicate-layout"]`)!.click();
     await delay(10);
@@ -288,7 +288,7 @@ function DeleteStory({
   const layoutStorage = useLayoutStorage();
   useAsyncThrowing(async () => {
     await delay(100);
-    document.querySelectorAll<HTMLElement>(`[data-test="layout-actions"]`)[index]!.click();
+    document.querySelectorAll<HTMLElement>("#layout-actions")[index]!.click();
     await delay(10);
     document.querySelector<HTMLElement>(`[data-test="delete-layout"]`)!.click();
     await delay(10);

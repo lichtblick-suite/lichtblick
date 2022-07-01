@@ -2,8 +2,18 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { IconButton, useTheme } from "@fluentui/react";
-import { Button, Switch, FormGroup, FormControlLabel, CircularProgress } from "@mui/material";
+import AddIcon from "@mui/icons-material/Add";
+import CloudOffIcon from "@mui/icons-material/CloudOff";
+import FileOpenOutlinedIcon from "@mui/icons-material/FileOpenOutlined";
+import {
+  Button,
+  IconButton,
+  Switch,
+  FormGroup,
+  FormControlLabel,
+  CircularProgress,
+  useTheme,
+} from "@mui/material";
 import { partition } from "lodash";
 import moment from "moment";
 import path from "path";
@@ -17,7 +27,6 @@ import SignInPrompt from "@foxglove/studio-base/components/LayoutBrowser/SignInP
 import { useUnsavedChangesPrompt } from "@foxglove/studio-base/components/LayoutBrowser/UnsavedChangesPrompt";
 import { SidebarContent } from "@foxglove/studio-base/components/SidebarContent";
 import Stack from "@foxglove/studio-base/components/Stack";
-import { useTooltip } from "@foxglove/studio-base/components/Tooltip";
 import { useAnalytics } from "@foxglove/studio-base/context/AnalyticsContext";
 import ConsoleApiContext from "@foxglove/studio-base/context/ConsoleApiContext";
 import {
@@ -376,10 +385,6 @@ export default function LayoutBrowser({
     void analytics.logEvent(AppEvent.LAYOUT_IMPORT, { numLayouts: fileHandles.length });
   }, [promptForUnsavedChanges, isMounted, layoutManager, onSelectLayout, analytics, addToast]);
 
-  const createLayoutTooltip = useTooltip({ contents: "Create new layout" });
-  const importLayoutTooltip = useTooltip({ contents: "Import layout" });
-  const offlineTooltip = useTooltip({ contents: "Offline" });
-
   const layoutDebug = useContext(LayoutStorageDebuggingContext);
   const supportsSignIn = useContext(ConsoleApiContext) != undefined;
 
@@ -401,63 +406,53 @@ export default function LayoutBrowser({
           </Stack>
         ),
         !isOnline && (
-          <IconButton
-            key="offline"
-            checked
-            elementRef={offlineTooltip.ref}
-            iconProps={{ iconName: "CloudOffFilled" }}
-            styles={{
-              rootChecked: { backgroundColor: "transparent" },
-              rootCheckedHovered: { backgroundColor: "transparent" },
-              icon: {
-                color: theme.semanticColors.disabledBodyText,
-                svg: { fill: "currentColor", height: "1em", width: "1em" },
-              },
-            }}
-          >
-            {offlineTooltip.tooltip}
+          <IconButton color="primary" key="offline" disabled title="Offline">
+            <CloudOffIcon />
           </IconButton>
         ),
         <IconButton
+          color="primary"
           key="add-layout"
-          elementRef={createLayoutTooltip.ref}
-          iconProps={{ iconName: "Add" }}
           onClick={createNewLayout}
-          ariaLabel="Create new layout"
+          aria-label="Create new layout"
           data-test="add-layout"
-          styles={{
-            icon: {
-              svg: { height: "1em", width: "1em" },
-              "> span": { display: "flex" },
-            },
-          }}
+          title="Create new layout"
         >
-          {createLayoutTooltip.tooltip}
+          <AddIcon />
         </IconButton>,
         <IconButton
+          color="primary"
           key="import-layout"
-          elementRef={importLayoutTooltip.ref}
-          iconProps={{ iconName: "OpenFile" }}
           onClick={importLayout}
-          ariaLabel="Import layout"
-          styles={{
-            icon: {
-              svg: { height: "1em", width: "1em" },
-              "> span": { display: "flex" },
-            },
-          }}
+          aria-label="Import layout"
+          title="Import layout"
         >
-          {importLayoutTooltip.tooltip}
+          <FileOpenOutlinedIcon />
         </IconButton>,
       ].filter(Boolean)}
     >
       {unsavedChangesPrompt}
-      <Stack fullHeight>
-        <div>
+      <Stack fullHeight gap={2}>
+        <LayoutSection
+          title={layoutManager.supportsSharing ? "Personal" : undefined}
+          emptyText="Add a new layout to get started with Foxglove Studio!"
+          items={layouts.value?.personal}
+          selectedId={currentLayoutId}
+          onSelect={onSelectLayout}
+          onRename={onRenameLayout}
+          onDuplicate={onDuplicateLayout}
+          onDelete={onDeleteLayout}
+          onShare={onShareLayout}
+          onExport={onExportLayout}
+          onOverwrite={onOverwriteLayout}
+          onRevert={onRevertLayout}
+          onMakePersonalCopy={onMakePersonalCopy}
+        />
+        {layoutManager.supportsSharing && (
           <LayoutSection
-            title={layoutManager.supportsSharing ? "Personal" : undefined}
-            emptyText="Add a new layout to get started with Foxglove Studio!"
-            items={layouts.value?.personal}
+            title="Team"
+            emptyText="Your organization doesn’t have any shared layouts yet. Share a personal layout to collaborate with other team members."
+            items={layouts.value?.shared}
             selectedId={currentLayoutId}
             onSelect={onSelectLayout}
             onRename={onRenameLayout}
@@ -469,26 +464,7 @@ export default function LayoutBrowser({
             onRevert={onRevertLayout}
             onMakePersonalCopy={onMakePersonalCopy}
           />
-        </div>
-        <div>
-          {layoutManager.supportsSharing && (
-            <LayoutSection
-              title="Team"
-              emptyText="Your organization doesn’t have any shared layouts yet. Share a personal layout to collaborate with other team members."
-              items={layouts.value?.shared}
-              selectedId={currentLayoutId}
-              onSelect={onSelectLayout}
-              onRename={onRenameLayout}
-              onDuplicate={onDuplicateLayout}
-              onDelete={onDeleteLayout}
-              onShare={onShareLayout}
-              onExport={onExportLayout}
-              onOverwrite={onOverwriteLayout}
-              onRevert={onRevertLayout}
-              onMakePersonalCopy={onMakePersonalCopy}
-            />
-          )}
-        </div>
+        )}
         <Stack flexGrow={1} />
         {showSignInPrompt && <SignInPrompt onDismiss={() => void setHideSignInPrompt(true)} />}
         {layoutDebug && (
@@ -500,7 +476,7 @@ export default function LayoutBrowser({
               bottom: 0,
               left: 0,
               right: 0,
-              background: theme.semanticColors.bodyBackground,
+              background: theme.palette.background.default,
               ...debugBorder,
             }}
           >

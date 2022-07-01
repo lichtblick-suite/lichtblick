@@ -2,19 +2,22 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
+import ErrorIcon from "@mui/icons-material/Error";
+import MoreVertIcon from "@mui/icons-material/MoreVert";
 import {
-  ContextualMenuItemType,
+  ListItem,
+  ListItemButton,
+  ListItemText,
   IconButton,
+  Menu,
+  MenuItem,
+  SvgIcon,
+  Divider,
+  Typography,
   TextField,
-  ITextField,
-  makeStyles,
-  useTheme,
-  IContextualMenuItem,
-  ContextualMenu,
-} from "@fluentui/react";
-import { Box, Stack } from "@mui/material";
-import cx from "classnames";
-import { SetStateAction, useCallback, useContext, useLayoutEffect, useState } from "react";
+  styled as muiStyled,
+} from "@mui/material";
+import { useCallback, useContext, useLayoutEffect, useMemo, useState } from "react";
 import { useMountedState } from "react-use";
 
 import { useLayoutManager } from "@foxglove/studio-base/context/LayoutManagerContext";
@@ -22,71 +25,88 @@ import LayoutStorageDebuggingContext from "@foxglove/studio-base/context/LayoutS
 import { useConfirm } from "@foxglove/studio-base/hooks/useConfirm";
 import { Layout, layoutIsShared } from "@foxglove/studio-base/services/ILayoutStorage";
 
-import { debugBorder } from "./styles";
-
-const useStyles = makeStyles((theme) => ({
-  layoutRow: {
-    cursor: "pointer",
-    paddingLeft: theme.spacing.m,
-    paddingRight: theme.spacing.s1,
-    marginBottom: 1,
-    marginTop: 1,
-
-    ":hover": {
-      background: theme.semanticColors.menuItemBackgroundHovered,
+const StyledListItem = muiStyled(ListItem, {
+  shouldForwardProp: (prop) =>
+    prop !== "hasModifications" && prop !== "deletedOnServer" && prop !== "editingName",
+})<{ editingName: boolean; hasModifications: boolean; deletedOnServer: boolean }>(
+  ({ editingName, hasModifications, deletedOnServer, theme }) => ({
+    ".MuiListItemSecondaryAction-root": {
+      right: theme.spacing(0.25),
     },
-    ":hover > .ms-Button--hasMenu": {
-      opacity: 1,
+    ".MuiListItemButton-root": {
+      maxWidth: "100%",
     },
-  },
-
-  layoutRowSelected: {
-    background: theme.semanticColors.menuItemBackgroundHovered,
-
-    ":hover": {
-      background: theme.semanticColors.menuItemBackgroundHovered,
+    "@media (pointer: fine)": {
+      ".MuiListItemButton-root": {
+        paddingRight: theme.spacing(4.5),
+      },
+      ".MuiListItemSecondaryAction-root": {
+        visibility: !hasModifications && !deletedOnServer && "hidden",
+      },
+      "&:hover .MuiListItemSecondaryAction-root": {
+        visibility: "visible",
+      },
     },
-  },
+    ...(editingName && {
+      ".MuiListItemButton-root": {
+        paddingTop: theme.spacing(0.5),
+        paddingBottom: theme.spacing(0.5),
+        paddingLeft: theme.spacing(1),
+      },
+      ".MuiListItemText-root": {
+        margin: 0,
+      },
+    }),
+  }),
+);
 
-  // Pin the "hover" style when the right-click menu is open
-  layoutRowWithOpenMenu: {
-    background: theme.semanticColors.menuItemBackgroundHovered,
+const StyledMenuItem = muiStyled(MenuItem, {
+  shouldForwardProp: (prop) => prop !== "debug",
+})<{ debug?: boolean }>(({ theme, debug = false }) => ({
+  position: "relative",
 
-    "& .ms-Button--hasMenu": {
-      opacity: 1,
+  ...(debug && {
+    "&:before": {
+      content: "''",
+      position: "absolute",
+      left: 0,
+      top: 0,
+      bottom: 0,
+      width: 4,
+      backgroundColor: theme.palette.warning.main,
+      backgroundImage: `repeating-linear-gradient(${[
+        "-35deg",
+        "transparent",
+        "transparent 6px",
+        `${theme.palette.common.black} 6px`,
+        `${theme.palette.common.black} 12px`,
+      ].join(",")})`,
     },
-  },
-
-  layoutRowSelectedWithOpenMenu: {
-    background: theme.semanticColors.menuItemBackgroundHovered,
-
-    "& .ms-Button--hasMenu": {
-      opacity: 1,
-    },
-  },
-
-  layoutName: {
-    textOverflow: "ellipsis",
-    whiteSpace: "nowrap",
-    overflow: "hidden",
-    lineHeight: theme.spacing.l2, // avoid descenders being cut off
-    userSelect: "none",
-  },
-  layoutNameSelected: {
-    color: theme.palette.themePrimary,
-  },
-
-  menuButton: {
-    opacity: 0,
-
-    "&.is-expanded, :focus": {
-      opacity: 1,
-    },
-  },
-  menuButtonModified: {
-    opacity: 1,
-  },
+  }),
 }));
+
+export type LayoutActionMenuItem =
+  | {
+      type: "item";
+      text: string;
+      secondaryText?: string;
+      key: string;
+      onClick?: (event: React.MouseEvent<HTMLLIElement>) => void;
+      disabled?: boolean;
+      debug?: boolean;
+      "data-test"?: string;
+    }
+  | {
+      type: "divider";
+      key: string;
+      debug?: boolean;
+    }
+  | {
+      type: "header";
+      key: string;
+      text: string;
+      debug?: boolean;
+    };
 
 export default React.memo(function LayoutRow({
   layout,
@@ -113,24 +133,23 @@ export default React.memo(function LayoutRow({
   onRevert: (item: Layout) => void;
   onMakePersonalCopy: (item: Layout) => void;
 }): JSX.Element {
-  const styles = useStyles();
-  const theme = useTheme();
   const isMounted = useMountedState();
   const confirm = useConfirm();
+  const layoutDebug = useContext(LayoutStorageDebuggingContext);
+  const layoutManager = useLayoutManager();
 
   const [editingName, setEditingName] = useState(false);
   const [nameFieldValue, setNameFieldValue] = useState("");
-  const [menuOpen, setMenuOpen] = useState<boolean>(false);
+  const [isOnline, setIsOnline] = useState(layoutManager.isOnline);
+  const [contextMenuTarget, setContextMenuTarget] = useState<
+    | { type: "position"; mouseX: number; mouseY: number; element?: undefined }
+    | { type: "element"; element: Element }
+    | undefined
+  >(undefined);
 
-  const onMenuOpened = useCallback(() => setMenuOpen(true), []);
-  const onMenuDismissed = useCallback(() => setMenuOpen(false), []);
-
-  const layoutDebug = useContext(LayoutStorageDebuggingContext);
-  const layoutManager = useLayoutManager();
   const deletedOnServer = layout.syncInfo?.status === "remotely-deleted";
   const hasModifications = layout.working != undefined;
 
-  const [isOnline, setIsOnline] = useState(layoutManager.isOnline);
   useLayoutEffect(() => {
     const onlineListener = () => setIsOnline(layoutManager.isOnline);
     onlineListener();
@@ -143,16 +162,23 @@ export default React.memo(function LayoutRow({
   const overwriteAction = useCallback(() => {
     onOverwrite(layout);
   }, [layout, onOverwrite]);
+
   const revertAction = useCallback(() => {
     onRevert(layout);
   }, [layout, onRevert]);
+
   const makePersonalCopyAction = useCallback(() => {
     onMakePersonalCopy(layout);
   }, [layout, onMakePersonalCopy]);
 
   const renameAction = useCallback(() => {
-    setEditingName(true);
-    setNameFieldValue(layout.name);
+    // Give the menu time to close before focusing the text field. The MUI Menu auto-focuses itself
+    // which results in an immediate onBlur of the text field if we try to focus it while the menu
+    // is still visible.
+    setTimeout(() => {
+      setEditingName(true);
+      setNameFieldValue(layout.name);
+    }, 0);
   }, [layout]);
 
   const onClick = useCallback(() => {
@@ -162,7 +188,6 @@ export default React.memo(function LayoutRow({
   }, [layout, onSelect, selected]);
 
   const duplicateAction = useCallback(() => onDuplicate(layout), [layout, onDuplicate]);
-
   const shareAction = useCallback(() => onShare(layout), [layout, onShare]);
   const exportAction = useCallback(() => onExport(layout), [layout, onExport]);
 
@@ -194,11 +219,8 @@ export default React.memo(function LayoutRow({
     [onSubmit],
   );
 
-  const onTextFieldMount = useCallback((field: ITextField | ReactNull) => {
-    // When focusing via right-click we need an extra tick to be able to successfully focus the field
-    setTimeout(() => {
-      field?.select();
-    }, 0);
+  const onTextFieldMount = useCallback((field: HTMLInputElement | ReactNull) => {
+    field?.select();
   }, []);
 
   const confirmDelete = useCallback(() => {
@@ -216,265 +238,271 @@ export default React.memo(function LayoutRow({
     });
   }, [confirm, isMounted, layout, onDelete]);
 
-  const menuItems: (boolean | IContextualMenuItem)[] = [
+  const handleContextMenu = useCallback((event: React.MouseEvent) => {
+    event.preventDefault();
+    setContextMenuTarget((target) =>
+      target == undefined
+        ? { type: "position", mouseX: event.clientX, mouseY: event.clientY }
+        : undefined,
+    );
+  }, []);
+
+  const handleMenuButtonClick = useCallback((event: React.MouseEvent) => {
+    event.preventDefault();
+    setContextMenuTarget((target) =>
+      target == undefined ? { type: "element", element: event.currentTarget } : undefined,
+    );
+  }, []);
+
+  const handleClose = useCallback(() => {
+    setContextMenuTarget(undefined);
+  }, []);
+
+  const menuItems: (boolean | LayoutActionMenuItem)[] = [
     {
+      type: "item",
       key: "rename",
       text: "Rename",
-      iconProps: { iconName: "Rename" },
       onClick: renameAction,
-      ["data-test"]: "rename-layout",
+      "data-test": "rename-layout",
       disabled: layoutIsShared(layout) && !isOnline,
       secondaryText: layoutIsShared(layout) && !isOnline ? "Offline" : undefined,
     },
     // For shared layouts, duplicate first requires saving or discarding changes
     !(layoutIsShared(layout) && hasModifications) && {
+      type: "item",
       key: "duplicate",
       text:
         layoutManager.supportsSharing && layoutIsShared(layout)
           ? "Make a personal copy"
           : "Duplicate",
-      iconProps: { iconName: "Copy" },
       onClick: duplicateAction,
-      ["data-test"]: "duplicate-layout",
+      "data-test": "duplicate-layout",
     },
     layoutManager.supportsSharing &&
       !layoutIsShared(layout) && {
+        type: "item",
         key: "share",
         text: "Share with team…",
-        iconProps: { iconName: "Share" },
         onClick: shareAction,
         disabled: !isOnline,
         secondaryText: !isOnline ? "Offline" : undefined,
       },
     {
+      type: "item",
       key: "export",
       text: "Export…",
-      iconProps: { iconName: "DownloadDocument" },
       onClick: exportAction,
     },
-    { key: "divider_1", itemType: ContextualMenuItemType.Divider },
+    { key: "divider_1", type: "divider" },
     {
+      type: "item",
       key: "delete",
       text: "Delete",
-      iconProps: {
-        iconName: "Delete",
-        styles: { root: { color: theme.semanticColors.errorText } },
-      },
       onClick: confirmDelete,
-      ["data-test"]: "delete-layout",
+      "data-test": "delete-layout",
     },
   ];
 
   if (hasModifications) {
-    const sectionItems: IContextualMenuItem[] = [
+    const sectionItems: LayoutActionMenuItem[] = [
       {
+        type: "item",
         key: "overwrite",
-        text: "Save",
-        iconProps: { iconName: "Upload" },
+        text: "Save changes",
         onClick: overwriteAction,
         disabled: deletedOnServer || (layoutIsShared(layout) && !isOnline),
         secondaryText: layoutIsShared(layout) && !isOnline ? "Offline" : undefined,
       },
       {
+        type: "item",
         key: "revert",
         text: "Revert",
-        iconProps: { iconName: "Undo" },
         onClick: revertAction,
         disabled: deletedOnServer,
       },
     ];
     if (layoutIsShared(layout)) {
       sectionItems.push({
+        type: "item",
         key: "copy_to_personal",
         text: "Make a personal copy",
-        iconProps: { iconName: "DependencyAdd" },
         onClick: makePersonalCopyAction,
       });
     }
-    menuItems.unshift({
-      key: "changes",
-      itemType: ContextualMenuItemType.Section,
-      sectionProps: {
-        bottomDivider: true,
-        title: deletedOnServer
-          ? "Someone else has deleted this layout."
-          : "This layout has been modified since it was last saved.",
-        items: sectionItems,
+    menuItems.unshift(
+      {
+        key: "changes",
+        type: "header",
+        text: deletedOnServer
+          ? "Someone else has deleted this layout"
+          : "This layout has unsaved changes",
       },
-    });
+      ...sectionItems,
+      { key: "changes_divider", type: "divider" },
+    );
   }
 
   if (layoutDebug) {
     menuItems.push(
-      { key: "debug_divider", itemType: ContextualMenuItemType.Divider },
+      { key: "debug_divider", type: "divider" },
       {
+        type: "item",
         key: "debug_id",
         text: layout.id,
         disabled: true,
-        itemProps: {
-          styles: {
-            root: { ...debugBorder, borderRight: "none", borderTop: "none", borderBottom: "none" },
-          },
-        },
+        debug: true,
       },
       {
+        type: "item",
         key: "debug_updated_at",
         text: `Saved at: ${layout.working?.savedAt ?? layout.baseline.savedAt}`,
         disabled: true,
-        itemProps: {
-          styles: {
-            root: { ...debugBorder, borderRight: "none", borderTop: "none", borderBottom: "none" },
-          },
-        },
+        debug: true,
       },
       {
+        type: "item",
         key: "debug_sync_status",
         text: `Sync status: ${layout.syncInfo?.status}`,
         disabled: true,
-        itemProps: {
-          styles: {
-            root: { ...debugBorder, borderRight: "none", borderTop: "none", borderBottom: "none" },
-          },
-        },
+        debug: true,
       },
       {
+        type: "item",
         key: "debug_edit",
         text: "Inject edit",
-        iconProps: { iconName: "TestBeakerSolid" },
         onClick: () => void layoutDebug.injectEdit(layout.id),
-        itemProps: {
-          styles: {
-            root: { ...debugBorder, borderRight: "none", borderTop: "none", borderBottom: "none" },
-          },
-        },
+        debug: true,
       },
       {
+        type: "item",
         key: "debug_rename",
         text: "Inject rename",
-        iconProps: { iconName: "TestBeakerSolid" },
         onClick: () => void layoutDebug.injectRename(layout.id),
-        itemProps: {
-          styles: {
-            root: { ...debugBorder, borderRight: "none", borderTop: "none", borderBottom: "none" },
-          },
-        },
+        debug: true,
       },
       {
+        type: "item",
         key: "debug_delete",
         text: "Inject delete",
-        iconProps: { iconName: "TestBeakerSolid" },
         onClick: () => void layoutDebug.injectDelete(layout.id),
-        itemProps: {
-          styles: {
-            root: { ...debugBorder, borderRight: "none", borderTop: "none", borderBottom: "none" },
-          },
-        },
+        debug: true,
       },
     );
   }
 
   const filteredItems = menuItems.filter(
-    (item): item is IContextualMenuItem => typeof item === "object",
+    (item): item is LayoutActionMenuItem => typeof item === "object",
   );
 
-  const [contextMenuEvent, setContextMenuEvent] = useState<MouseEvent | undefined>();
+  const actionIcon = useMemo(
+    () =>
+      deletedOnServer ? (
+        <ErrorIcon fontSize="small" color="error" />
+      ) : hasModifications ? (
+        <SvgIcon fontSize="small" color="primary">
+          <circle cx={12} cy={12} r={4} />
+        </SvgIcon>
+      ) : (
+        <MoreVertIcon fontSize="small" />
+      ),
+    [deletedOnServer, hasModifications],
+  );
 
   return (
-    <Stack
-      component="form"
-      direction="row"
-      alignItems="center"
-      className={cx(styles.layoutRow, {
-        [styles.layoutRowSelected]: selected,
-        [styles.layoutRowWithOpenMenu]: contextMenuEvent != undefined || menuOpen,
-        [styles.layoutRowSelectedWithOpenMenu]:
-          (selected && contextMenuEvent != undefined) || menuOpen,
-      })}
-      onClick={editingName ? undefined : onClick}
-      onSubmit={onSubmit}
-      onContextMenu={(event: {
-        preventDefault: () => void;
-        nativeEvent: SetStateAction<MouseEvent | undefined>;
-      }) => {
-        event.preventDefault();
-        setContextMenuEvent(event.nativeEvent);
-      }}
-    >
-      {contextMenuEvent && (
-        <ContextualMenu
-          target={contextMenuEvent}
-          items={filteredItems}
-          onDismiss={() => setContextMenuEvent(undefined)}
-        />
-      )}
-      {editingName ? (
-        <TextField
-          componentRef={onTextFieldMount}
-          value={nameFieldValue}
-          onChange={(_event, newValue) => newValue != undefined && setNameFieldValue(newValue)}
-          onKeyDown={onTextFieldKeyDown}
-          onBlur={onBlur}
-          styles={{
-            root: {
-              flex: 1,
-            },
-            fieldGroup: {
-              marginLeft: `-${theme.spacing.s1}`,
-            },
-          }}
-        />
-      ) : (
-        <Box
-          flexGrow={1}
-          title={layout.name}
-          className={cx(styles.layoutName, { [styles.layoutNameSelected]: selected })}
-        >
-          {layout.name}
-        </Box>
-      )}
-
-      {!editingName && (
+    <StyledListItem
+      editingName={editingName}
+      hasModifications={hasModifications}
+      deletedOnServer={deletedOnServer}
+      disablePadding
+      secondaryAction={
         <IconButton
-          ariaLabel="Layout actions"
-          className={cx(styles.menuButton, {
-            [styles.menuButtonModified]: hasModifications,
-          })}
-          data-test="layout-actions"
-          iconProps={{
-            iconName: deletedOnServer ? "Error" : hasModifications ? "LocationDot" : "More",
-            styles: {
-              root: {
-                color: deletedOnServer ? theme.semanticColors.errorIcon : undefined,
-              },
-            },
-          }}
-          onRenderMenuIcon={() => ReactNull}
-          menuProps={{
-            items: filteredItems,
-            onMenuOpened,
-            onMenuDismissed,
-            styles: {
-              header: {
-                height: 30,
-
-                "& i": {
-                  display: "none",
-                },
-              },
-            },
-          }}
-          styles={{
-            icon: {
-              height: 20,
-            },
-            root: {
-              marginRight: `-${theme.spacing.s1}`,
-              borderRadius: "none",
-            },
-            rootHovered: { background: "transparent" },
-          }}
-        />
-      )}
-    </Stack>
+          id="layout-actions"
+          aria-controls={contextMenuTarget != undefined ? "layout-action-menu" : undefined}
+          aria-haspopup="true"
+          aria-expanded={contextMenuTarget != undefined ? "true" : undefined}
+          onClick={handleMenuButtonClick}
+          onContextMenu={handleContextMenu}
+        >
+          {actionIcon}
+        </IconButton>
+      }
+    >
+      <ListItemButton
+        selected={selected}
+        onSubmit={onSubmit}
+        onClick={editingName ? undefined : onClick}
+        onContextMenu={editingName ? undefined : handleContextMenu}
+        component="form"
+      >
+        <ListItemText disableTypography>
+          {editingName ? (
+            <TextField
+              inputRef={onTextFieldMount}
+              value={nameFieldValue}
+              onChange={(event) => setNameFieldValue(event.target.value)}
+              onKeyDown={onTextFieldKeyDown}
+              onBlur={onBlur}
+              fullWidth
+              style={{ font: "inherit" }}
+              size="small"
+              variant="filled"
+            />
+          ) : (
+            <Typography variant="inherit" color="inherit" noWrap>
+              {layout.name}
+            </Typography>
+          )}
+        </ListItemText>
+      </ListItemButton>
+      <Menu
+        id="layout-action-menu"
+        open={contextMenuTarget != undefined}
+        anchorReference={contextMenuTarget?.type === "position" ? "anchorPosition" : "anchorEl"}
+        anchorPosition={
+          contextMenuTarget?.type === "position"
+            ? { top: contextMenuTarget.mouseY, left: contextMenuTarget.mouseX }
+            : undefined
+        }
+        anchorEl={contextMenuTarget?.element}
+        onClose={handleClose}
+        MenuListProps={{
+          "aria-labelledby": "layout-actions",
+          dense: true,
+        }}
+      >
+        {filteredItems.map((item) => {
+          switch (item.type) {
+            case "divider":
+              return <Divider key={item.key} variant="middle" />;
+            case "item":
+              return (
+                <StyledMenuItem
+                  debug={item.debug}
+                  disabled={item.disabled}
+                  key={item.key}
+                  data-test={item["data-test"]}
+                  onClick={(event) => {
+                    item.onClick?.(event);
+                    handleClose();
+                  }}
+                >
+                  <Typography variant="inherit" color={item.key === "delete" ? "error" : undefined}>
+                    {item.text}
+                  </Typography>
+                </StyledMenuItem>
+              );
+            case "header":
+              return (
+                <MenuItem disabled key={item.key}>
+                  {item.text}
+                </MenuItem>
+              );
+            default:
+              return undefined;
+          }
+        })}
+      </Menu>
+    </StyledListItem>
   );
 });

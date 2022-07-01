@@ -131,7 +131,7 @@ export function PanelContextMenu(props: PanelContextMenuProps): JSX.Element {
       >
         {completeItems.map((item, index) => {
           if (item.type === "divider") {
-            return <Divider key={`divider_${index}`} />;
+            return <Divider variant="middle" key={`divider_${index}`} />;
           }
 
           return (
