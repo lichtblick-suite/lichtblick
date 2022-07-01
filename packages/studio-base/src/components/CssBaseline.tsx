@@ -195,7 +195,7 @@ const useStyles = makeStyles((theme) => ({
       backgroundColor: theme.semanticColors.bodyBackground,
       color: theme.semanticColors.disabledBodyText,
 
-      "&:hover": {
+      ":hover": {
         backgroundColor: theme.semanticColors.bodyBackgroundHovered,
       },
     },
