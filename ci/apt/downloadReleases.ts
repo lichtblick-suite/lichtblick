@@ -31,7 +31,7 @@ async function main(): Promise<void> {
     .slice(0, NUM_VERSIONS_TO_PUBLISH)) {
     for (const asset of release.assets) {
       // Download debs for this release
-      if (asset.name.match(/\.deb$/)) {
+      if (asset.name.match(/\.(deb|snap)$/)) {
         await exec("curl", ["-fsSL", "-o", `packages/${asset.name}`, asset.browser_download_url]);
       }
     }

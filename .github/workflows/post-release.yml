@@ -90,7 +90,7 @@ jobs:
         run: |
           set -x
           aptly -config aptly.conf.json repo create -distribution stable stable
-          aptly -config aptly.conf.json repo add stable packages/*
+          aptly -config aptly.conf.json repo add stable packages/*.deb
           aptly -config aptly.conf.json publish -gpg-key="$GPG_KEY" repo stable filesystem:public:studio
 
       - name: Publish apt repo
@@ -181,3 +181,35 @@ jobs:
           platforms: linux/amd64,linux/arm64
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
+
+  snap:
+    name: Publish snap
+    runs-on: ubuntu-20.04
+
+    steps:
+      - name: Checkout ${{ github.event.release.tag_name || github.event.inputs.tag_name }}
+        uses: actions/checkout@v3
+        with:
+          ref: ${{ github.event.release.tag_name || github.event.inputs.tag_name }}
+          token: ${{ secrets.FOXGLOVEBOT_GITHUB_TOKEN }}
+          lfs: true
+
+      - uses: actions/setup-node@v3.3.0
+        with:
+          node-version: 14.x
+          cache: yarn
+
+      - run: yarn install --immutable
+
+      - name: Download release binaries
+        working-directory: ci/apt
+        run: yarn ts-node downloadReleases.ts
+
+      - run: ls -la ci/apt/packages
+
+      - uses: snapcore/action-publish@v1
+        env:
+          SNAPCRAFT_STORE_CREDENTIALS: ${{ secrets.SNAPCRAFT_STORE_LOGIN }}
+        with:
+          snap: ci/apt/packages/foxglove-studio-${{ github.event.release.tag_name || github.event.inputs.tag_name }}-linux-amd64.snap
+          release: candidate
