@@ -48,16 +48,20 @@ async function tryCreateIndexedReader(readable: Mcap0Types.IReadable) {
   const decompressHandlers = await loadDecompressHandlers();
   const reader = await Mcap0IndexedReader.Initialize({ readable, decompressHandlers });
 
-  let hasMissingSchemas = false;
   for (const channel of reader.channelsById.values()) {
     if (channel.schemaId !== 0 && !reader.schemasById.has(channel.schemaId)) {
-      hasMissingSchemas = true;
       break;
     }
   }
-  if (reader.chunkIndexes.length === 0 || reader.channelsById.size === 0 || hasMissingSchemas) {
-    throw new Error("Summary does not contain chunk indexes, schemas, and channels");
+
+  if (reader.chunkIndexes.length === 0 || reader.channelsById.size === 0) {
+    if (reader.summaryOffsetsByOpcode.size > 0) {
+      throw new Error("The MCAP file is empty or has an incomplete summary section.");
+    } else {
+      throw new Error("The MCAP file is unindexed. Only indexed files are supported.");
+    }
   }
+
   return reader;
 }
 
