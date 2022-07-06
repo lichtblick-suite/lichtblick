@@ -15,6 +15,9 @@ const StyledTextField = muiStyled(TextField)({
   ".MuiInputBase-formControl.MuiInputBase-root": {
     padding: 0,
   },
+  ".MuiInputBase-root": {
+    cursor: "pointer",
+  },
   ".MuiInputBase-input": {
     fontFamily: fonts.MONOSPACE,
     alignItems: "center",
@@ -39,7 +42,7 @@ type ColorPickerInputProps = {
 };
 
 export function ColorPickerInput(props: ColorPickerInputProps): JSX.Element {
-  const { disabled, onChange, readOnly, swatchOrientation = "start", value } = props;
+  const { alphaType, disabled, onChange, readOnly, swatchOrientation = "start", value } = props;
 
   const [anchorElement, setAnchorElement] = useState<undefined | HTMLDivElement>(undefined);
 
@@ -53,21 +56,22 @@ export function ColorPickerInput(props: ColorPickerInputProps): JSX.Element {
 
   const open = Boolean(anchorElement);
 
-  const isValidColor = value != undefined && tinycolor(value).isValid();
-  const swatchColor = isValidColor ? tinycolor(value).toHex8String() : "#00000044";
+  const parsedValue = value ? tinycolor(value) : undefined;
+  const displayValue =
+    alphaType === "alpha" ? parsedValue?.toHex8String() : parsedValue?.toHexString();
+  const swatchColor = displayValue ?? "#00000044";
 
   return (
     <Root disabled={disabled === true || readOnly === true}>
       <StyledTextField
         fullWidth
         disabled={disabled}
-        onChange={(event) => onChange(event.target.value)}
         placeholder={props.placeholder}
         size="small"
-        value={value ?? ""}
+        value={displayValue}
         variant="filled"
         InputProps={{
-          readOnly,
+          readOnly: true,
           startAdornment: swatchOrientation === "start" && (
             <ColorSwatch color={swatchColor} onClick={handleClick} />
           ),
