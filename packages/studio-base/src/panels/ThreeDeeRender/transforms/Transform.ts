@@ -16,11 +16,21 @@ export class Transform {
   private _rotation: quat;
   private _matrix: mat4;
 
-  constructor(position: vec3, rotation: quat) {
-    this._position = position;
-    this._rotation = rotation;
-    quat.normalize(this._rotation, this._rotation);
-    this._matrix = mat4.fromRotationTranslation(mat4Identity(), this._rotation, this._position);
+  constructor(matrixOrPosition: mat4 | vec3, rotation?: quat) {
+    if (matrixOrPosition.length === 16) {
+      this._matrix = matrixOrPosition;
+      this._position = [0, 0, 0];
+      this._rotation = [0, 0, 0, 1];
+      mat4.getTranslation(this._position, this._matrix);
+      getRotationNoScaling(this._rotation, this._matrix);
+    } else if (matrixOrPosition.length === 3 && rotation != undefined) {
+      this._position = matrixOrPosition;
+      this._rotation = rotation;
+      quat.normalize(this._rotation, this._rotation);
+      this._matrix = mat4.fromRotationTranslation(mat4Identity(), this._rotation, this._position);
+    } else {
+      throw new Error(`new Transform() expected either mat4 or vec3 + quat`);
+    }
   }
 
   position(): ReadonlyVec3 {

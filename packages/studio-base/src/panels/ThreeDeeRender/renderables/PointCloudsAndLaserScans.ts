@@ -100,6 +100,8 @@ const INTENSITY_FIELDS = new Set<string>(["intensity", "i"]);
 
 const INVALID_POINTCLOUD_OR_LASERSCAN = "INVALID_POINTCLOUD_OR_LASERSCAN";
 
+const VEC3_ZERO = new THREE.Vector3();
+
 // Fragment shader chunk to convert sRGB to linear RGB. This is used by some
 // PointCloud materials to avoid expensive per-point colorspace conversion on
 // the CPU. Source: <https://github.com/mrdoob/three.js/blob/13b67d96/src/renderers/shaders/ShaderChunk/encodings_pars_fragment.glsl.js#L16-L18>
@@ -196,6 +198,11 @@ export class PointCloudsAndLaserScans extends SceneExtension<PointCloudAndLaserS
       renderable.visible = renderable.userData.settings.visible;
       if (!renderable.visible) {
         this.renderer.settings.errors.clearPath(path);
+        const pointsHistory = renderable.userData.pointsHistory;
+        for (const entry of pointsHistory.splice(0, pointsHistory.length - 1)) {
+          entry.points.geometry.dispose();
+          renderable.remove(entry.points);
+        }
         continue;
       }
 
@@ -767,17 +774,17 @@ export class PointCloudsAndLaserScans extends SceneExtension<PointCloudAndLaserS
     laserScanMaterial.update(settings, laserScan);
     pickingMaterial.update(settings, laserScan);
 
-    // Determine min/max color values (if needed)
+    // Determine min/max color values (if needed) and max range
     let minColorValue = settings.minValue ?? Number.POSITIVE_INFINITY;
     let maxColorValue = settings.maxValue ?? Number.NEGATIVE_INFINITY;
     if (settings.minValue == undefined || settings.maxValue == undefined) {
+      let maxRange = 0;
+
       for (let i = 0; i < ranges.length; i++) {
-        let colorValue: number | undefined;
-        if (colorField === "range") {
-          colorValue = ranges[i]!;
-        } else {
-          colorValue = intensities[i];
-        }
+        const range = ranges[i]!;
+        maxRange = Math.max(maxRange, range);
+
+        const colorValue = colorField === "range" ? range : intensities[i];
         if (colorValue != undefined) {
           minColorValue = Math.min(minColorValue, colorValue);
           maxColorValue = Math.max(maxColorValue, colorValue);
@@ -785,6 +792,14 @@ export class PointCloudsAndLaserScans extends SceneExtension<PointCloudAndLaserS
       }
       minColorValue = settings.minValue ?? minColorValue;
       maxColorValue = settings.maxValue ?? maxColorValue;
+
+      // Update the LaserScan bounding sphere
+      latestEntry.points.geometry.boundingSphere ??= new THREE.Sphere();
+      latestEntry.points.geometry.boundingSphere.set(VEC3_ZERO, maxRange);
+      latestEntry.points.frustumCulled = true;
+    } else {
+      latestEntry.points.geometry.boundingSphere = ReactNull;
+      latestEntry.points.frustumCulled = false;
     }
 
     // Build a method to convert raw color field values to RGBA

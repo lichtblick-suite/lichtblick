@@ -13,7 +13,7 @@ import { SceneExtension } from "../SceneExtension";
 import { SettingsTreeEntry } from "../SettingsManager";
 import { stringToRgba } from "../color";
 import { vec3TupleApproxEquals } from "../math";
-import { Marker, TIME_ZERO, Vector3 } from "../ros";
+import { Marker, MarkerAction, MarkerType, TIME_ZERO, Vector3 } from "../ros";
 import { CustomLayerSettings, PRECISION_DEGREES, PRECISION_DISTANCE } from "../settings";
 import { makePose, xyzrpyToPose } from "../transforms";
 import { RenderableLineList } from "./markers/RenderableLineList";
@@ -34,7 +34,7 @@ export type LayerSettingsGrid = CustomLayerSettings & {
 const LAYER_ID = "foxglove.Grid";
 const DEFAULT_SIZE = 10;
 const DEFAULT_DIVISIONS = 10;
-const DEFAULT_LINE_WIDTH = 0.01;
+const DEFAULT_LINE_WIDTH = 0.02;
 const DEFAULT_COLOR = "#248eff";
 const MAX_DIVISIONS = 4096; // The JS heap size is a limiting factor
 
@@ -132,6 +132,11 @@ export class Grids extends SceneExtension<GridRenderable> {
           handler,
         },
       });
+
+      // Create renderables for new grid layers
+      if (!this.renderables.has(instanceId)) {
+        this._updateGrid(instanceId, config);
+      }
     }
     return entries;
   }
@@ -162,6 +167,7 @@ export class Grids extends SceneExtension<GridRenderable> {
 
         // Update the settings tree
         this.updateSettingsTree();
+        this.renderer.updateCustomLayersCount();
       }
       return;
     }
@@ -172,15 +178,11 @@ export class Grids extends SceneExtension<GridRenderable> {
 
     this.saveSetting(path, action.payload.value);
 
-    // Update the renderable
     const instanceId = path[1]!;
-    const renderable = this.renderables.get(instanceId);
-    if (renderable) {
-      const settings = this.renderer.config.layers[instanceId] as
-        | Partial<LayerSettingsGrid>
-        | undefined;
-      this._updateGrid(instanceId, settings);
-    }
+    const settings = this.renderer.config.layers[instanceId] as
+      | Partial<LayerSettingsGrid>
+      | undefined;
+    this._updateGrid(instanceId, settings);
   };
 
   handleAddGrid = (instanceId: string): void => {
@@ -221,22 +223,7 @@ export class Grids extends SceneExtension<GridRenderable> {
     }
 
     if (!renderable) {
-      const marker = createMarker(DEFAULT_SETTINGS);
-      const lineListId = `${instanceId}:LINE_LIST`;
-      const lineList = new RenderableLineList(lineListId, marker, undefined, this.renderer);
-      renderable = new GridRenderable(instanceId, this.renderer, {
-        receiveTime: 0n,
-        messageTime: 0n,
-        frameId: "", // This will be updated in `startFrame()`
-        pose: makePose(),
-        settingsPath: ["layers", instanceId],
-        settings: DEFAULT_SETTINGS,
-        lineList,
-      });
-      renderable.add(lineList);
-
-      this.add(renderable);
-      this.renderables.set(instanceId, renderable);
+      renderable = this._createRenderable(instanceId);
     }
 
     const prevSettings = renderable.userData.settings;
@@ -264,6 +251,26 @@ export class Grids extends SceneExtension<GridRenderable> {
       renderable.userData.pose = xyzrpyToPose(newSettings.position, newSettings.rotation);
     }
   }
+
+  private _createRenderable(instanceId: string): GridRenderable {
+    const marker = createMarker(DEFAULT_SETTINGS);
+    const lineListId = `${instanceId}:LINE_LIST`;
+    const lineList = new RenderableLineList(lineListId, marker, undefined, this.renderer);
+    const renderable = new GridRenderable(instanceId, this.renderer, {
+      receiveTime: 0n,
+      messageTime: 0n,
+      frameId: "", // This will be updated in `startFrame()`
+      pose: makePose(),
+      settingsPath: ["layers", instanceId],
+      settings: DEFAULT_SETTINGS,
+      lineList,
+    });
+    renderable.add(lineList);
+
+    this.add(renderable);
+    this.renderables.set(instanceId, renderable);
+    return renderable;
+  }
 }
 
 function createMarker(settings: LayerSettingsGrid): Marker {
@@ -271,7 +278,7 @@ function createMarker(settings: LayerSettingsGrid): Marker {
   const step = size / divisions;
   const halfSize = size / 2;
   const points: Vector3[] = [];
-  // Create a grid of line segments
+  // Create a grid of line segments centered around <0, 0>
   for (let i = 0; i <= divisions; i++) {
     const x = -halfSize + i * step;
     points.push({ x, y: -halfSize, z: 0 });
@@ -290,8 +297,8 @@ function createMarker(settings: LayerSettingsGrid): Marker {
     },
     ns: "",
     id: 0,
-    type: 0,
-    action: 0,
+    type: MarkerType.LINE_LIST,
+    action: MarkerAction.ADD,
     pose: makePose(),
     scale: { x: settings.lineWidth, y: 1, z: 1 },
     color,

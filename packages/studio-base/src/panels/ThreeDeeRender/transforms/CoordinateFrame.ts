@@ -7,11 +7,11 @@
 
 import { mat4 } from "gl-matrix";
 
-import { AVLTree } from "@foxglove/avl";
+import { ArrayMap } from "@foxglove/den/collection/ArrayMap";
 
 import { Transform } from "./Transform";
 import { Pose, mat4Identity } from "./geometry";
-import { compareTime, Duration, interpolate, percentOf, Time } from "./time";
+import { Duration, interpolate, percentOf, Time } from "./time";
 
 type TimeAndTransform = [time: Time, transform: Transform];
 
@@ -20,7 +20,6 @@ export const MAX_DURATION: Duration = 4_294_967_295n * BigInt(1e9);
 const tempLower: TimeAndTransform = [0n, Transform.Identity()];
 const tempUpper: TimeAndTransform = [0n, Transform.Identity()];
 const tempTransform = Transform.Identity();
-const tempTimeAndTransform: TimeAndTransform = [0n, tempTransform];
 const tempMatrix = mat4Identity();
 
 /**
@@ -33,15 +32,22 @@ const tempMatrix = mat4Identity();
 export class CoordinateFrame {
   readonly id: string;
   maxStorageTime: Duration;
+  maxCapacity: number;
 
   private _parent?: CoordinateFrame;
-  private _transforms: AVLTree<Time, Transform>;
+  private _transforms: ArrayMap<Time, Transform>;
 
-  constructor(id: string, parent: CoordinateFrame | undefined, maxStorageTime: Duration) {
+  constructor(
+    id: string,
+    parent: CoordinateFrame | undefined,
+    maxStorageTime: Duration,
+    maxCapacity: number,
+  ) {
     this.id = id;
     this.maxStorageTime = maxStorageTime;
+    this.maxCapacity = maxCapacity;
     this._parent = parent;
-    this._transforms = new AVLTree<Time, Transform>(compareTime);
+    this._transforms = new ArrayMap<Time, Transform>();
   }
 
   parent(): CoordinateFrame | undefined {
@@ -112,6 +118,11 @@ export class CoordinateFrame {
     while (this._transforms.size > 1 && this._transforms.minKey()! < startTime) {
       this._transforms.shift();
     }
+
+    // Trim down to the maximum history size
+    if (this._transforms.size > this.maxCapacity) {
+      this._transforms.shift();
+    }
   }
 
   /**
@@ -150,33 +161,19 @@ export class CoordinateFrame {
       return false;
     }
 
-    // If the time is before the first transform, check if `time` is within
-    // `maxDelta` of the first transform
-    const lte = this._transforms.findLessThanOrEqual(time);
-    if (!lte) {
-      const [earliestTime, earliestTf] = this._transforms.minEntry()!;
-      if (earliestTime + maxDelta >= time) {
-        outLower[0] = outUpper[0] = earliestTime;
-        outLower[1] = outUpper[1] = earliestTf;
-        return true;
-      }
-      return false;
-    }
-
-    const [lteTime, lteTf] = lte;
-
-    // Check if an exact match was found
-    if (lteTime === time) {
-      outLower[0] = outUpper[0] = lteTime;
-      outLower[1] = outUpper[1] = lteTf;
+    const index = this._transforms.binarySearch(time);
+    if (index >= 0) {
+      // If the time is exactly on an existing transform, return it
+      const [_, tf] = this._transforms.at(index)!;
+      outLower[0] = outUpper[0] = time;
+      outLower[1] = outUpper[1] = tf;
       return true;
     }
 
-    const gt = this._transforms.findGreaterThan(time);
-
-    // If the time is after the last transform, check if `time` is before or
-    // equal to `latestTime + maxDelta`
-    if (!gt) {
+    const greaterThanIndex = ~index;
+    if (greaterThanIndex >= this._transforms.size) {
+      // If the time is greater than all existing transforms, return the last
+      // transform
       const [latestTime, latestTf] = this._transforms.maxEntry()!;
       if (time <= latestTime + maxDelta) {
         outLower[0] = outUpper[0] = latestTime;
@@ -186,8 +183,21 @@ export class CoordinateFrame {
       return false;
     }
 
-    // Return the transforms closest to the requested time
-    const [gtTime, gtTf] = gt;
+    const lessThanIndex = greaterThanIndex - 1;
+    if (lessThanIndex < 0) {
+      // If the time is less than all existing transforms, return the first
+      // transform
+      const [earliestTime, earliestTf] = this._transforms.minEntry()!;
+      if (earliestTime + maxDelta >= time) {
+        outLower[0] = outUpper[0] = earliestTime;
+        outLower[1] = outUpper[1] = earliestTf;
+        return true;
+      }
+      return false;
+    }
+
+    const [lteTime, lteTf] = this._transforms.at(lessThanIndex)!;
+    const [gtTime, gtTf] = this._transforms.at(greaterThanIndex)!;
     outLower[0] = lteTime;
     outLower[1] = lteTf;
     outUpper[0] = gtTime;
@@ -307,12 +317,10 @@ export class CoordinateFrame {
 
   /**
    * Interpolate between two [time, transform] pairs.
-   * @param outTime Optional output parameter for the interpolated time
-   * @param outTf Output parameter for the interpolated transform
+   * @param output Output parameter for the interpolated time and transform
    * @param lower Start [time, transform]
    * @param upper End [time, transform]
    * @param time Interpolant in the range [lower[0], upper[0]]
-   * @returns
    */
   static Interpolate(
     output: TimeAndTransform,
@@ -334,6 +342,33 @@ export class CoordinateFrame {
     const fraction = Math.max(0, Math.min(1, percentOf(lowerTime, upperTime, time)));
     output[0] = interpolate(lowerTime, upperTime, fraction);
     Transform.Interpolate(output[1], lowerTf, upperTf, fraction);
+  }
+
+  /**
+   * Interpolate the transform between two [time, transform] pairs.
+   * @param output Output parameter for the interpolated transform
+   * @param lower Start [time, transform]
+   * @param upper End [time, transform]
+   * @param time Interpolant in the range [lower[0], upper[0]]
+   */
+  static InterpolateTransform(
+    output: Transform,
+    lower: TimeAndTransform,
+    upper: TimeAndTransform,
+    time: Time,
+  ): void {
+    // perf-sensitive: function params instead of options object to avoid allocations
+    const [lowerTime, lowerTf] = lower;
+    const [upperTime, upperTf] = upper;
+
+    if (lowerTime === upperTime) {
+      output.copy(upperTf);
+      return;
+    }
+
+    // Interpolate times and transforms
+    const fraction = Math.max(0, Math.min(1, percentOf(lowerTime, upperTime, time)));
+    Transform.Interpolate(output, lowerTf, upperTf, fraction);
   }
 
   /**
@@ -363,8 +398,8 @@ export class CoordinateFrame {
       if (!curFrame.findClosestTransforms(tempLower, tempUpper, time, maxDelta)) {
         return false;
       }
-      CoordinateFrame.Interpolate(tempTimeAndTransform, tempLower, tempUpper, time);
-      mat4.multiply(out, tempTimeAndTransform[1].matrix(), out);
+      CoordinateFrame.InterpolateTransform(tempTransform, tempLower, tempUpper, time);
+      mat4.multiply(out, tempTransform.matrix(), out);
 
       if (curFrame._parent == undefined) {
         throw new Error(`Frame "${parentFrame.id}" is not a parent of "${childFrame.id}"`);

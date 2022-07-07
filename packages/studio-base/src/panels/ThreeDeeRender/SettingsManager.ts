@@ -59,6 +59,14 @@ export class SettingsManager extends EventEmitter<SettingsManagerEvents> {
     this.emit("update");
   }
 
+  setLabel(path: Path, label: string): void {
+    this._root = produce(this._root, (draft) => {
+      setLabelAtPath(draft, path, label);
+    });
+
+    this.emit("update");
+  }
+
   clearChildren(path: Path): void {
     this._root = produce(this._root, (draft) => {
       clearChildren(draft, path);
@@ -158,7 +166,8 @@ function addNodeAtPath(root: SettingsTreeNode, path: Path, node: SettingsTreeNod
     throw new Error(`Empty path for settings node "${node.label}"`);
   }
 
-  // Recursively walk/build the settings tree down to the end of the path
+  // Recursively walk/build the settings tree down to the end of the path except
+  // for the last segment, which is the node to add
   let curNode = root;
   for (let i = 0; i < path.length - 1; i++) {
     const segment = path[i]!;
@@ -177,4 +186,25 @@ function addNodeAtPath(root: SettingsTreeNode, path: Path, node: SettingsTreeNod
     curNode.children = {};
   }
   curNode.children[lastSegment] = node;
+}
+
+function setLabelAtPath(root: SettingsTreeNode, path: Path, label: string): void {
+  if (path.length === 0) {
+    throw new Error(`Empty path for settings label "${label}"`);
+  }
+
+  // Recursively walk/build the settings tree down to the end of the path
+  let curNode = root;
+  for (let i = 0; i < path.length; i++) {
+    const segment = path[i]!;
+    if (!curNode.children) {
+      curNode.children = {};
+    }
+    if (!curNode.children[segment]) {
+      curNode.children[segment] = {};
+    }
+    curNode = curNode.children[segment]!;
+  }
+
+  curNode.label = label;
 }

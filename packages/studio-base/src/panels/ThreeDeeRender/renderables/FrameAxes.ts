@@ -86,17 +86,18 @@ export class FrameAxes extends SceneExtension<FrameAxisRenderable> {
   override settingsNodes(): SettingsTreeEntry[] {
     const configTransforms = this.renderer.config.transforms;
     const handler = this.handleSettingsAction;
+    const frameCount = this.renderer.coordinateFrameList.length;
     const entries: SettingsTreeEntry[] = [
       {
         path: ["transforms"],
         node: {
-          label: "Transforms",
+          label: `Transforms${frameCount > 0 ? ` (${frameCount})` : ""}`,
           visible: this.renderer.config.scene.transforms?.visible ?? true,
-          defaultExpansionState: "expanded",
           handler,
         },
       },
     ];
+
     let i = 0;
     for (const { label, value: frameId } of this.renderer.coordinateFrameList) {
       const config = (configTransforms[frameId] ?? {}) as Partial<LayerSettingsTransform>;
@@ -110,6 +111,7 @@ export class FrameAxes extends SceneExtension<FrameAxisRenderable> {
         node: { label, fields, visible: config.visible ?? true, order: i++, handler },
       });
     }
+
     return entries;
   }
 

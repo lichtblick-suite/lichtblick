@@ -2,12 +2,12 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { CoordinateFrame } from "./CoordinateFrame";
+import { CoordinateFrame, MAX_DURATION } from "./CoordinateFrame";
 import { Transform } from "./Transform";
 import { Pose } from "./geometry";
 import { Duration, Time } from "./time";
 
-const DEFAULT_MAX_STORAGE_TIME: Duration = 10n * BigInt(1e9);
+const DEFAULT_MAX_CAPACITY_PER_FRAME = 10_000;
 
 /**
  * TransformTree is a collection of coordinate frames with convenience methods
@@ -16,9 +16,11 @@ const DEFAULT_MAX_STORAGE_TIME: Duration = 10n * BigInt(1e9);
 export class TransformTree {
   private _frames = new Map<string, CoordinateFrame>();
   private _maxStorageTime: Duration;
+  private _maxCapacityPerFrame: number;
 
-  constructor(maxStorageTime = DEFAULT_MAX_STORAGE_TIME) {
+  constructor(maxStorageTime = MAX_DURATION, maxCapacityPerFrame = DEFAULT_MAX_CAPACITY_PER_FRAME) {
     this._maxStorageTime = maxStorageTime;
+    this._maxCapacityPerFrame = maxCapacityPerFrame;
   }
 
   addTransform(frameId: string, parentFrameId: string, time: Time, transform: Transform): boolean {
@@ -51,7 +53,7 @@ export class TransformTree {
   getOrCreateFrame(id: string): CoordinateFrame {
     let frame = this._frames.get(id);
     if (!frame) {
-      frame = new CoordinateFrame(id, undefined, this._maxStorageTime);
+      frame = new CoordinateFrame(id, undefined, this._maxStorageTime, this._maxCapacityPerFrame);
       this._frames.set(id, frame);
     }
     return frame;
@@ -130,7 +132,7 @@ export class TransformTree {
 
   static Clone(tree: TransformTree): TransformTree {
     // eslint-disable-next-line no-underscore-dangle
-    const newTree = new TransformTree(tree._maxStorageTime);
+    const newTree = new TransformTree(tree._maxStorageTime, tree._maxCapacityPerFrame);
     // eslint-disable-next-line no-underscore-dangle
     newTree._frames = tree._frames;
     return newTree;
