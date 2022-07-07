@@ -78,7 +78,10 @@ export default {
   decorators: [
     (StoryComponent: Story, { parameters }: StoryContext): JSX.Element => {
       return (
-        <PanelSetup fixture={parameters.panelSetup?.fixture}>
+        <PanelSetup
+          fixture={parameters.panelSetup?.fixture}
+          includeSettings={parameters.includeSettings}
+        >
           <StoryComponent />
         </PanelSetup>
       );
@@ -98,6 +101,31 @@ SinglePoint.parameters = {
   chromatic: {
     delay: 1000,
   },
+  panelSetup: {
+    fixture: {
+      topics: [{ name: "/gps", datatype: "sensor_msgs/NavSatFix" }],
+      frame: {
+        "/gps": [
+          {
+            topic: "/gps",
+            receiveTime: { sec: 123, nsec: 456 },
+            message: EMPTY_MESSAGE,
+          },
+        ],
+      },
+    },
+  },
+};
+
+export const SinglePointWithSettings = (): JSX.Element => {
+  return <MapPanel overrideConfig={{ layer: "custom" }} />;
+};
+
+SinglePointWithSettings.parameters = {
+  chromatic: {
+    delay: 1000,
+  },
+  includeSettings: true,
   panelSetup: {
     fixture: {
       topics: [{ name: "/gps", datatype: "sensor_msgs/NavSatFix" }],

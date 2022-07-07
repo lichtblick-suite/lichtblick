@@ -56,12 +56,6 @@ export function buildSettingsTree(config: Config, eligibleTopics: string[]): Set
         { label: "Custom", value: "custom" },
       ],
     },
-    followTopic: {
-      label: "Follow topic",
-      input: "select",
-      value: config.followTopic,
-      options: followTopicOptions,
-    },
   };
 
   // Only show the custom url input when the user selects the custom layer
@@ -78,6 +72,13 @@ export function buildSettingsTree(config: Config, eligibleTopics: string[]): Set
       error,
     };
   }
+
+  generalSettings.followTopic = {
+    label: "Follow topic",
+    input: "select",
+    value: config.followTopic,
+    options: followTopicOptions,
+  };
 
   const settings: SettingsTreeNodes = {
     general: {
