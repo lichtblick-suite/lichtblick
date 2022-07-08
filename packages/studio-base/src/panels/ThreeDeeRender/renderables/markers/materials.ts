@@ -7,6 +7,11 @@ import * as THREE from "three";
 import { LineMaterial } from "../../LineMaterial";
 import { ColorRGBA, Marker, MarkerType } from "../../ros";
 
+export type LineOptions = {
+  resolution: THREE.Vector2;
+  worldUnits?: boolean;
+};
+
 export function markerHasTransparency(marker: Marker): boolean {
   switch (marker.type) {
     case MarkerType.ARROW:
@@ -70,15 +75,16 @@ export function makeStandardInstancedMaterial(marker: Marker): THREE.MeshStandar
   });
 }
 
-export function makeLinePrepassMaterial(marker: Marker): LineMaterial {
+export function makeLinePrepassMaterial(marker: Marker, options: LineOptions): LineMaterial {
   const lineWidth = marker.scale.x;
   const transparent = markerHasTransparency(marker);
   const material = new LineMaterial({
-    worldUnits: true,
+    worldUnits: options.worldUnits ?? true,
     colorWrite: false,
     transparent,
     depthWrite: !transparent,
     linewidth: lineWidth,
+    resolution: options.resolution,
 
     stencilWrite: true,
     stencilRef: 1,
@@ -88,15 +94,16 @@ export function makeLinePrepassMaterial(marker: Marker): LineMaterial {
   return material;
 }
 
-export function makeLineMaterial(marker: Marker): LineMaterial {
+export function makeLineMaterial(marker: Marker, options: LineOptions): LineMaterial {
   const lineWidth = marker.scale.x;
   const transparent = markerHasTransparency(marker);
   const material = new LineMaterial({
-    worldUnits: true,
+    worldUnits: options.worldUnits ?? true,
     vertexColors: true,
     linewidth: lineWidth,
     transparent,
     depthWrite: !transparent,
+    resolution: options.resolution,
 
     stencilWrite: true,
     stencilRef: 0,
@@ -110,8 +117,7 @@ export function makeLineMaterial(marker: Marker): LineMaterial {
 
 export function makeLinePickingMaterial(
   lineWidth: number,
-  // eslint-disable-next-line @foxglove/no-boolean-parameters
-  worldUnits: boolean,
+  options: LineOptions,
 ): THREE.ShaderMaterial {
   return new THREE.ShaderMaterial({
     vertexShader: THREE.ShaderLib["foxglove.line"]!.vertexShader,
@@ -125,13 +131,13 @@ export function makeLinePickingMaterial(
     uniforms: {
       objectId: { value: [NaN, NaN, NaN, NaN] },
       linewidth: { value: lineWidth },
-      resolution: { value: new THREE.Vector2(1, 1) },
+      resolution: { value: options.resolution },
       dashOffset: { value: 0 },
       dashScale: { value: 1 },
       dashSize: { value: 1 },
       gapSize: { value: 1 },
     },
-    defines: worldUnits ? { WORLD_UNITS: "" } : {},
+    defines: options.worldUnits ?? true ? { WORLD_UNITS: "" } : {},
   });
 }
 

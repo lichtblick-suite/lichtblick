@@ -10,22 +10,10 @@ export enum DetailLevel {
   High,
 }
 
-/**
- * Returns the number of samples to use for Multi-Sample Anti-Aliasing (MSAA)
- * for the given level of detail.
- */
-export function msaaSamples(lod: DetailLevel, capabilities: WebGLCapabilities): number {
+/** Returns the number of samples used for Multi-Sample Anti-Aliasing (MSAA) */
+export function msaaSamples(capabilities: WebGLCapabilities): number {
   // NOTE: Type definition workaround
-  const maxSamples = (capabilities as unknown as { maxSamples: number }).maxSamples;
-
-  switch (lod) {
-    case DetailLevel.Low:
-      return Math.min(2, maxSamples);
-    case DetailLevel.Medium:
-      return Math.min(4, maxSamples);
-    case DetailLevel.High:
-      return maxSamples;
-  }
+  return (capabilities as { maxSamples?: number }).maxSamples ?? 0;
 }
 
 export function arrowShaftSubdivisions(lod: DetailLevel): number {

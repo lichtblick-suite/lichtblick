@@ -68,7 +68,8 @@ export class FrameAxes extends SceneExtension<FrameAxisRenderable> {
     this.lineMaterial = new LineMaterial({ linewidth });
     this.lineMaterial.color = color;
 
-    this.linePickingMaterial = makeLinePickingMaterial(PICKING_LINE_SIZE, false);
+    const options = { resolution: renderer.input.canvasSize, worldUnits: false };
+    this.linePickingMaterial = makeLinePickingMaterial(PICKING_LINE_SIZE, options);
 
     renderer.on("transformTreeUpdated", this.handleTransformTreeUpdated);
     renderer.on("startFrame", () => this.updateSettingsTree());

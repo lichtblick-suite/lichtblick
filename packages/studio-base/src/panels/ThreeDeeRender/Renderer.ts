@@ -194,7 +194,7 @@ export class Renderer extends EventEmitter<RendererEvents> {
   labels = new Labels(this);
   markerPool = new MarkerPool(this);
 
-  private _prevResolution: THREE.Vector2 | undefined;
+  private _prevResolution = new THREE.Vector2();
 
   constructor(canvas: HTMLCanvasElement, config: RendererConfig) {
     super();
@@ -278,7 +278,7 @@ export class Renderer extends EventEmitter<RendererEvents> {
 
     this.followFrameId = config.followTf;
 
-    const samples = msaaSamples(this.maxLod, this.gl.capabilities);
+    const samples = msaaSamples(this.gl.capabilities);
     const renderSize = this.gl.getDrawingBufferSize(tempVec2);
     this.aspect = renderSize.width / renderSize.height;
     log.debug(`Initialized ${renderSize.width}x${renderSize.height} renderer (${samples}x MSAA)`);
@@ -832,23 +832,21 @@ export class Renderer extends EventEmitter<RendererEvents> {
 
   private _updateResolution(): void {
     const resolution = this.input.canvasSize;
-    if (this._prevResolution?.equals(resolution) === true) {
+    if (this._prevResolution.equals(resolution)) {
       return;
     }
-    this._prevResolution = resolution;
+    this._prevResolution.copy(resolution);
 
     this.scene.traverse((object) => {
-      if ((object as Partial<THREE.Mesh>).isMesh) {
+      if ((object as Partial<THREE.Mesh>).material) {
         const mesh = object as THREE.Mesh;
-        const material = mesh.material as THREE.Material;
+        const material = mesh.material as Partial<LineMaterial>;
 
         // Update render resolution uniforms
-        if (material instanceof LineMaterial) {
-          material.resolution = resolution;
-        } else if (
-          material instanceof THREE.ShaderMaterial &&
-          material.uniforms.resolution != undefined
-        ) {
+        if (material.resolution) {
+          material.resolution.copy(resolution);
+        }
+        if (material.uniforms?.resolution) {
           material.uniforms.resolution.value = resolution;
         }
       }

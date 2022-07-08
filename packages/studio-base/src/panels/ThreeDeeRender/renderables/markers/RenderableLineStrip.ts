@@ -27,19 +27,21 @@ export class RenderableLineStrip extends RenderableMarker {
 
     this.geometry = new LineGeometry();
 
+    const options = { resolution: renderer.input.canvasSize, worldUnits: true };
+
     // Stencil and depth pass 1
-    const matLinePrepass = makeLinePrepassMaterial(marker);
+    const matLinePrepass = makeLinePrepassMaterial(marker, options);
     this.linePrepass = new Line2(this.geometry, matLinePrepass);
     this.linePrepass.renderOrder = 1;
     this.linePrepass.userData.picking = false;
     this.add(this.linePrepass);
 
     // Color pass 2
-    const matLine = makeLineMaterial(marker);
+    const matLine = makeLineMaterial(marker, options);
     this.line = new Line2(this.geometry, matLine);
     this.line.renderOrder = 2;
     const pickingLineWidth = marker.scale.x * 1.2;
-    this.line.userData.pickingMaterial = makeLinePickingMaterial(pickingLineWidth, true);
+    this.line.userData.pickingMaterial = makeLinePickingMaterial(pickingLineWidth, options);
     this.add(this.line);
 
     this.update(marker, receiveTime);
@@ -66,10 +68,12 @@ export class RenderableLineStrip extends RenderableMarker {
     const transparent = markerHasTransparency(marker);
 
     if (transparent !== markerHasTransparency(prevMarker)) {
-      this.linePrepass.material.dispose();
-      this.line.material.dispose();
-      this.linePrepass.material = makeLinePrepassMaterial(marker);
-      this.line.material = makeLineMaterial(marker);
+      this.linePrepass.material.transparent = transparent;
+      this.linePrepass.material.depthWrite = !transparent;
+      this.linePrepass.material.needsUpdate = true;
+      this.line.material.transparent = transparent;
+      this.line.material.depthWrite = !transparent;
+      this.line.material.needsUpdate = true;
     }
 
     const matLinePrepass = this.linePrepass.material as LineMaterial;

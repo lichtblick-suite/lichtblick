@@ -22,24 +22,33 @@ export class RenderableLineList extends RenderableMarker {
   linePrepass: LineSegments2;
   line: LineSegments2;
 
-  constructor(topic: string, marker: Marker, receiveTime: bigint | undefined, renderer: Renderer) {
+  constructor(
+    topic: string,
+    marker: Marker,
+    receiveTime: bigint | undefined,
+    renderer: Renderer,
+    options: { worldUnits?: boolean } = {},
+  ) {
     super(topic, marker, receiveTime, renderer);
 
     this.geometry = new LineSegmentsGeometry();
 
+    const { worldUnits = true } = options;
+    const lineOptions = { resolution: this.renderer.input.canvasSize, worldUnits };
+
     // Stencil and depth pass 1
-    const matLinePrepass = makeLinePrepassMaterial(marker);
+    const matLinePrepass = makeLinePrepassMaterial(marker, lineOptions);
     this.linePrepass = new LineSegments2(this.geometry, matLinePrepass);
     this.linePrepass.renderOrder = 1;
     this.linePrepass.userData.picking = false;
     this.add(this.linePrepass);
 
     // Color pass 2
-    const matLine = makeLineMaterial(marker);
+    const matLine = makeLineMaterial(marker, lineOptions);
     this.line = new LineSegments2(this.geometry, matLine);
     this.line.renderOrder = 2;
     const pickingLineWidth = marker.scale.x * 1.2;
-    this.line.userData.pickingMaterial = makeLinePickingMaterial(pickingLineWidth, true);
+    this.line.userData.pickingMaterial = makeLinePickingMaterial(pickingLineWidth, lineOptions);
     this.add(this.line);
 
     this.update(marker, receiveTime);
