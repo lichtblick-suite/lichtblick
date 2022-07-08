@@ -13,9 +13,9 @@ jobs:
     steps:
       - uses: actions/stale@v5
         with:
-          stale-issue-message: "This issue has been marked as stale because there has been no activity in the past 6 months. Please add a comment to keep it open."
+          stale-issue-message: "This issue has been marked as stale because there has been no activity in the past 12 months. Please add a comment to keep it open."
           stale-issue-label: stale
-          days-before-issue-stale: 180
+          days-before-issue-stale: 365
           days-before-issue-close: 30
 
           stale-pr-message: "This PR has been marked as stale because there has been no activity in the past 3 months. Please add a comment to keep it open."
