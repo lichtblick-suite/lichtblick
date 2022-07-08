@@ -11,19 +11,5 @@
     "name": "Foxglove Technologies",
     "email": "support@foxglove.dev"
   },
-  "homepage": "https://foxglove.dev/",
-  "main": "./src/index.ts",
-  "files": [
-    "dist",
-    "src"
-  ],
-  "scripts": {
-    "prepack": "tsc -b"
-  },
-  "devDependencies": {
-    "typescript": "4.6.2"
-  },
-  "dependencies": {
-    "async-mutex": "0.3.2"
-  }
+  "homepage": "https://foxglove.dev/"
 }

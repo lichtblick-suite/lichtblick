@@ -2,10 +2,10 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
+import { PinholeCameraModel } from "@foxglove/den/image";
 import Logger from "@foxglove/log";
 import { toNanoSec } from "@foxglove/rostime";
 import { SettingsTreeAction, SettingsTreeFields } from "@foxglove/studio";
-import PinholeCameraModel from "@foxglove/studio-base/panels/Image/lib/PinholeCameraModel";
 import { MutablePoint } from "@foxglove/studio-base/types/Messages";
 
 import { BaseUserData, Renderable } from "../Renderable";

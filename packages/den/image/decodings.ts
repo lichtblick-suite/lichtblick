@@ -88,6 +88,28 @@ export function decodeRGBA8(
   }
 }
 
+export function decodeBGRA8(
+  rgba: Uint8Array,
+  width: number,
+  height: number,
+  output: Uint8ClampedArray,
+): void {
+  let inIdx = 0;
+  let outIdx = 0;
+
+  for (let i = 0; i < width * height; i++) {
+    const b = rgba[inIdx++]!;
+    const g = rgba[inIdx++]!;
+    const r = rgba[inIdx++]!;
+    const a = rgba[inIdx++]!;
+
+    output[outIdx++] = r;
+    output[outIdx++] = g;
+    output[outIdx++] = b;
+    output[outIdx++] = a;
+  }
+}
+
 export function decodeBGR8(
   bgr: Uint8Array,
   width: number,

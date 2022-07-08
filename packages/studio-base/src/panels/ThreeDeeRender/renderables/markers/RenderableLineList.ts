@@ -36,7 +36,13 @@ export class RenderableLineList extends RenderableMarker {
     const { worldUnits = true } = options;
     const lineOptions = { resolution: this.renderer.input.canvasSize, worldUnits };
 
-    // Stencil and depth pass 1
+    // We alleviate corner artifacts using a two-pass render for lines. The
+    // first pass writes to depth only, followed by a color pass with stencil
+    // operations. The source for this technique is:
+    // <https://github.com/mrdoob/three.js/issues/23680#issuecomment-1063294691>
+    // <https://gkjohnson.github.io/threejs-sandbox/fat-line-opacity/webgl_lines_fat.html>
+
+    // Depth pass 1
     const matLinePrepass = makeLinePrepassMaterial(marker, lineOptions);
     this.linePrepass = new LineSegments2(this.geometry, matLinePrepass);
     this.linePrepass.renderOrder = 1;

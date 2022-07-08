@@ -2248,9 +2248,6 @@ __metadata:
 "@foxglove/den@workspace:*, @foxglove/den@workspace:packages/den":
   version: 0.0.0-use.local
   resolution: "@foxglove/den@workspace:packages/den"
-  dependencies:
-    async-mutex: 0.3.2
-    typescript: 4.6.2
   languageName: unknown
   linkType: soft
 

@@ -2,11 +2,10 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { Time } from "@foxglove/studio";
+import type { PinholeCameraModel } from "@foxglove/den/image";
+import type { Time } from "@foxglove/studio";
 import type { CameraInfo, Color, ImageMarker, Point2D } from "@foxglove/studio-base/types/Messages";
 import type { SaveConfig } from "@foxglove/studio-base/types/panels";
-
-import type PinholeCameraModel from "./lib/PinholeCameraModel";
 
 export type DefaultConfig = {
   cameraTopic: string;

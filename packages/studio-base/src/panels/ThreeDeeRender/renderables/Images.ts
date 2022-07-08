@@ -4,14 +4,12 @@
 
 import * as THREE from "three";
 
-import Logger from "@foxglove/log";
-import { toNanoSec } from "@foxglove/rostime";
-import { SettingsTreeAction, SettingsTreeFields } from "@foxglove/studio";
-import PinholeCameraModel from "@foxglove/studio-base/panels/Image/lib/PinholeCameraModel";
 import {
+  PinholeCameraModel,
   decodeYUV,
   decodeRGB8,
   decodeRGBA8,
+  decodeBGRA8,
   decodeBGR8,
   decodeFloat1c,
   decodeBayerRGGB8,
@@ -20,7 +18,10 @@ import {
   decodeBayerGRBG8,
   decodeMono8,
   decodeMono16,
-} from "@foxglove/studio-base/panels/Image/lib/decodings";
+} from "@foxglove/den/image";
+import Logger from "@foxglove/log";
+import { toNanoSec } from "@foxglove/rostime";
+import { SettingsTreeAction, SettingsTreeFields } from "@foxglove/studio";
 import { MutablePoint } from "@foxglove/studio-base/types/Messages";
 
 import { BaseUserData, Renderable } from "../Renderable";
@@ -536,6 +537,9 @@ function rawImageToDataTexture(
       break;
     case "rgba8":
       decodeRGBA8(rawData, width, height, output.image.data);
+      break;
+    case "bgra8":
+      decodeBGRA8(rawData, width, height, output.image.data);
       break;
     case "bgr8":
     case "8UC3":
