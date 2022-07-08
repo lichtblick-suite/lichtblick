@@ -5,47 +5,45 @@
 import { IconButton, IconButtonProps } from "@mui/material";
 import { forwardRef, useCallback, useEffect, useState } from "react";
 
-export type HoverableIconButtonProps = {
+type Props = {
   icon: React.ReactNode;
   activeIcon?: React.ReactNode;
 } & Omit<IconButtonProps, "children">;
 
-const HoverableIconButton = forwardRef<HTMLButtonElement, HoverableIconButtonProps>(
-  (props, ref) => {
-    const { icon, activeIcon, ...rest } = props;
+const HoverableIconButton = forwardRef<HTMLButtonElement, Props>((props, ref) => {
+  const { icon, activeIcon, ...rest } = props;
 
-    const [hovered, setHovered] = useState(false);
+  const [hovered, setHovered] = useState(false);
 
-    const onMouseOver = useCallback(() => {
-      if (props.disabled === true) {
-        return;
-      }
-      setHovered(true);
-    }, [props.disabled]);
+  const onMouseOver = useCallback(() => {
+    if (props.disabled === true) {
+      return;
+    }
+    setHovered(true);
+  }, [props.disabled]);
 
-    const onMouseLeave = useCallback(() => {
+  const onMouseLeave = useCallback(() => {
+    setHovered(false);
+  }, []);
+
+  useEffect(() => {
+    if (props.disabled === true) {
       setHovered(false);
-    }, []);
+    }
+  }, [props.disabled]);
 
-    useEffect(() => {
-      if (props.disabled === true) {
-        setHovered(false);
-      }
-    }, [props.disabled]);
-
-    return (
-      <IconButton
-        ref={ref}
-        {...rest}
-        component="button"
-        onMouseEnter={onMouseOver}
-        onMouseLeave={onMouseLeave}
-      >
-        {activeIcon != undefined ? (hovered ? activeIcon : icon) : icon}
-      </IconButton>
-    );
-  },
-);
+  return (
+    <IconButton
+      ref={ref}
+      {...rest}
+      component="button"
+      onMouseEnter={onMouseOver}
+      onMouseLeave={onMouseLeave}
+    >
+      {activeIcon != undefined ? (hovered ? activeIcon : icon) : icon}
+    </IconButton>
+  );
+});
 
 HoverableIconButton.displayName = "HoverableIconButton";
 

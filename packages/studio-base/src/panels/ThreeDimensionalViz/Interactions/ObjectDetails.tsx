@@ -15,11 +15,11 @@ import { first, omit, sortBy } from "lodash";
 import Tree from "react-json-tree";
 import styled from "styled-components";
 
-import GlobalVariableLink from "@foxglove/studio-base/components/GlobalVariableLink";
 import useGetItemStringWithTimezone from "@foxglove/studio-base/components/JsonTree/useGetItemStringWithTimezone";
 import { RosValue } from "@foxglove/studio-base/players/types";
 import { useJsonTreeTheme } from "@foxglove/studio-base/util/globalConstants";
 
+import GlobalVariableLink from "./GlobalVariableLink/index";
 import { InteractionData } from "./types";
 
 // Sort the keys of objects to make their presentation more predictable
@@ -113,6 +113,7 @@ function ObjectDetails({ interactionData, selectedObject }: Props): JSX.Element 
             return (
               <GlobalVariableLink
                 hasNestedValue
+                style={{ marginLeft: 4 }}
                 label={label?.toString()}
                 markerKeyPath={markerKeyPath.map((item) => item.toString())}
                 topic={topic}
@@ -129,6 +130,7 @@ function ObjectDetails({ interactionData, selectedObject }: Props): JSX.Element 
         ) => {
           return (
             <GlobalVariableLink
+              style={{ marginLeft: 16 }}
               label={label}
               markerKeyPath={markerKeyPath.map((item) => item.toString())}
               topic={topic}

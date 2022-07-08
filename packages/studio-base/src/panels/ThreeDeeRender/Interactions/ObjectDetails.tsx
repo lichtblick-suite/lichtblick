@@ -16,12 +16,12 @@ import { ReactNode } from "react";
 import Tree from "react-json-tree";
 import styled from "styled-components";
 
-import GlobalVariableLink from "@foxglove/studio-base/components/GlobalVariableLink";
 import { isTypicalFilterName } from "@foxglove/studio-base/components/MessagePathSyntax/isTypicalFilterName";
 import { RosValue } from "@foxglove/studio-base/players/types";
 import { format, formatDuration } from "@foxglove/studio-base/util/formatTime";
 import { useJsonTreeTheme } from "@foxglove/studio-base/util/globalConstants";
 
+import GlobalVariableLink from "./GlobalVariableLink/index";
 import { InteractionData } from "./types";
 
 const DURATION_20_YEARS_SEC = 20 * 365 * 24 * 60 * 60;
@@ -115,6 +115,7 @@ function ObjectDetails({ interactionData, selectedObject }: Props): JSX.Element 
             return (
               <GlobalVariableLink
                 hasNestedValue
+                style={{ marginLeft: 4 }}
                 label={label?.toString()}
                 markerKeyPath={markerKeyPath.map((item) => item.toString())}
                 topic={topic}
@@ -131,6 +132,7 @@ function ObjectDetails({ interactionData, selectedObject }: Props): JSX.Element 
         ) => {
           return (
             <GlobalVariableLink
+              style={{ marginLeft: 16 }}
               label={label}
               markerKeyPath={markerKeyPath.map((item) => item.toString())}
               topic={topic}

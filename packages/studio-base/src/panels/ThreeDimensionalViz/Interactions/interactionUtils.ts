@@ -1,10 +1,6 @@
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
-
-// This Source Code Form is subject to the terms of the Mozilla Public
-// License, v2.0. If a copy of the MPL was not distributed with this
-// file, You can obtain one at http://mozilla.org/MPL/2.0/
 //
 // This file incorporates work covered by the following copyright and
 // permission notice:
@@ -21,10 +17,6 @@ import {
   LinkedGlobalVariables,
   LinkedGlobalVariable,
 } from "@foxglove/studio-base/panels/ThreeDimensionalViz/Interactions/useLinkedGlobalVariables";
-
-export function getInitialName(markerKeyPath: string[]): string {
-  return markerKeyPath.slice(0, 2).reverse().join("_");
-}
 
 export function getTopicWithPath({
   topic,

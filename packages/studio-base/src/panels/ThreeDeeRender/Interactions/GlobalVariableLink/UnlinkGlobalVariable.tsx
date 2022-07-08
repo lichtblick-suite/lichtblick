@@ -11,27 +11,27 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { Button, Typography } from "@mui/material";
+import { Button, Card, Typography } from "@mui/material";
 import { isEqual } from "lodash";
 import { useCallback } from "react";
 
-import GlobalVariableName from "@foxglove/studio-base/components/GlobalVariableName";
 import Stack from "@foxglove/studio-base/components/Stack";
 
-import useLinkedGlobalVariables, { LinkedGlobalVariable } from "./useLinkedGlobalVariables";
-import { getPath } from "./utils";
+import GlobalVariableName from "../GlobalVariableName";
+import { getPath } from "../interactionUtils";
+import useLinkedGlobalVariables, { LinkedGlobalVariable } from "../useLinkedGlobalVariables";
 
 type Props = {
   linkedGlobalVariable: LinkedGlobalVariable;
-  onClose: () => void;
+  // eslint-disable-next-line @foxglove/no-boolean-parameters
+  setIsOpen: (arg0: boolean) => void;
 };
 
 export default function UnlinkGlobalVariable({
   linkedGlobalVariable: { topic, markerKeyPath, name },
-  onClose,
+  setIsOpen,
 }: Props): JSX.Element {
   const { linkedGlobalVariables, setLinkedGlobalVariables } = useLinkedGlobalVariables();
-
   const handleClick = useCallback(() => {
     const newLinkedGlobalVariables = linkedGlobalVariables.filter(
       (linkedGlobalVariable) =>
@@ -42,11 +42,17 @@ export default function UnlinkGlobalVariable({
         ),
     );
     setLinkedGlobalVariables(newLinkedGlobalVariables);
-    onClose();
-  }, [linkedGlobalVariables, markerKeyPath, name, onClose, setLinkedGlobalVariables, topic]);
+    setIsOpen(false);
+  }, [linkedGlobalVariables, markerKeyPath, name, setIsOpen, setLinkedGlobalVariables, topic]);
 
   return (
-    <form data-test="unlink-form" style={{ overflowWrap: "break-word", pointerEvents: "auto" }}>
+    <Card
+      elevation={4}
+      component="form"
+      variant="elevation"
+      data-test="unlink-form"
+      style={{ overflowWrap: "break-word", pointerEvents: "auto" }}
+    >
       <Stack padding={2} gap={1.5}>
         <Typography variant="body2" noWrap>
           Unlink <GlobalVariableName name={name} /> from {topic}.
@@ -58,11 +64,11 @@ export default function UnlinkGlobalVariable({
           <Button size="small" color="error" variant="contained" onClick={handleClick}>
             Unlink
           </Button>
-          <Button size="small" variant="contained" color="inherit" onClick={onClose}>
+          <Button size="small" variant="contained" color="inherit" onClick={() => setIsOpen(false)}>
             Cancel
           </Button>
         </Stack>
       </Stack>
-    </form>
+    </Card>
   );
 }
