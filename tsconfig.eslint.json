@@ -17,7 +17,7 @@
 // https://github.com/typescript-eslint/typescript-eslint/issues/1192#issuecomment-846491212
 {
   "extends": "@foxglove/tsconfig/base",
-  "include": ["**/*", ".storybook/**/*"],
+  "include": ["**/*", "**/.storybook/**/*"],
   "compilerOptions": {
     "jsx": "react-jsx",
     "lib": ["dom", "dom.iterable", "es2020"],

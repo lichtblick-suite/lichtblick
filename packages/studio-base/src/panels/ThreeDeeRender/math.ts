@@ -76,12 +76,6 @@ export function vec3TupleApproxEquals(
   );
 }
 
-export function uint8Equals(a: number, b: number): boolean {
-  const ai = Math.trunc(a * 255);
-  const bi = Math.trunc(b * 255);
-  return ai === bi;
-}
-
 export function clamp(value: number, min: number, max: number): number {
   return Math.max(min, Math.min(max, value));
 }

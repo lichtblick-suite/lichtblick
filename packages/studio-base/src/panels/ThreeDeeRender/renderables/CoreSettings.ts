@@ -13,10 +13,11 @@ import { SettingsTreeEntry } from "../SettingsManager";
 import { fieldSize, PRECISION_DEGREES, PRECISION_DISTANCE } from "../settings";
 import type { FrameAxes } from "./FrameAxes";
 
-export const DEFAULT_LABEL_PPU = 100;
+export const DEFAULT_LABEL_SCALE_FACTOR = 1;
 export const DEFAULT_AXIS_SCALE = 1;
 export const DEFAULT_LINE_WIDTH_PX = 2;
 export const DEFAULT_LINE_COLOR_STR = "#ffff00";
+export const DEFAULT_TF_LABEL_SIZE = 0.2;
 
 const ONE_DEGREE = Math.PI / 180;
 
@@ -71,6 +72,7 @@ export class CoreSettings extends SceneExtension {
         path: ["scene"],
         node: {
           label: "Scene",
+          actions: [{ type: "action", id: "reset-scene", label: "Reset" }],
           fields: {
             enableStats: {
               label: "Render stats",
@@ -78,15 +80,15 @@ export class CoreSettings extends SceneExtension {
               value: config.scene.enableStats,
             },
             backgroundColor: { label: "Color", input: "rgb", value: config.scene.backgroundColor },
-            labelPixelsPerUnit: {
-              label: "Label size",
-              help: "Controls the size of labels by setting the pixel density per unit of world space (usually meters)",
+            labelScaleFactor: {
+              label: "Label scale",
+              help: "Scale factor to apply to all labels",
               input: "number",
               min: 0,
-              step: 10,
-              precision: 0,
-              value: config.scene.labelPixelsPerUnit,
-              placeholder: String(DEFAULT_LABEL_PPU),
+              step: 0.1,
+              precision: 2,
+              value: config.scene.labelScaleFactor,
+              placeholder: String(DEFAULT_LABEL_SCALE_FACTOR),
             },
           },
           children: {
@@ -98,6 +100,17 @@ export class CoreSettings extends SceneExtension {
                   input: "boolean",
                   value: config.scene.transforms?.showLabel ?? true,
                 },
+                ...((config.scene.transforms?.showLabel ?? true) && {
+                  labelSize: {
+                    label: "Label size",
+                    input: "number",
+                    min: 0,
+                    step: 0.01,
+                    precision: 2,
+                    placeholder: String(DEFAULT_TF_LABEL_SIZE),
+                    value: config.scene.transforms?.labelSize,
+                  },
+                }),
                 axisScale: fieldSize(
                   "Axis scale",
                   config.scene.transforms?.axisScale,
@@ -195,6 +208,15 @@ export class CoreSettings extends SceneExtension {
       this.renderer.updateConfig((draft) => {
         draft.cameraState = cloneDeep(DEFAULT_CAMERA_STATE);
       });
+      this.updateSettingsTree();
+      return;
+    }
+
+    if (action.action === "perform-node-action" && action.payload.id === "reset-scene") {
+      this.renderer.updateConfig((draft) => {
+        draft.scene = {};
+      });
+      this.updateSettingsTree();
       return;
     }
 
@@ -223,9 +245,9 @@ export class CoreSettings extends SceneExtension {
       if (path[1] === "backgroundColor") {
         const backgroundColor = value as string | undefined;
         this.renderer.setColorScheme(this.renderer.colorScheme, backgroundColor);
-      } else if (path[1] === "labelPixelsPerUnit") {
-        const labelPixelsPerUnit = value as number | undefined;
-        this.renderer.labels.setPixelsPerUnit(labelPixelsPerUnit ?? DEFAULT_LABEL_PPU);
+      } else if (path[1] === "labelScaleFactor") {
+        const labelScaleFactor = value as number | undefined;
+        this.renderer.labelPool.setScaleFactor(labelScaleFactor ?? DEFAULT_LABEL_SCALE_FACTOR);
       } else if (path[1] === "transforms") {
         const frameAxes = this.renderer.sceneExtensions.get("foxglove.FrameAxes") as
           | FrameAxes
@@ -234,6 +256,9 @@ export class CoreSettings extends SceneExtension {
         if (path[2] === "showLabel") {
           const showLabel = value as boolean | undefined;
           frameAxes?.setLabelVisible(showLabel ?? true);
+        } else if (path[2] === "labelSize") {
+          const labelSize = value as number | undefined;
+          frameAxes?.setLabelSize(labelSize ?? DEFAULT_TF_LABEL_SIZE);
         } else if (path[2] === "axisScale") {
           const axisScale = value as number | undefined;
           frameAxes?.setAxisScale(axisScale ?? DEFAULT_AXIS_SCALE);

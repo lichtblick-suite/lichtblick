@@ -2,56 +2,48 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { areEqual } from "@foxglove/rostime";
+import { Label } from "@foxglove/three-text";
 
-import { LabelRenderable } from "../../Labels";
 import type { Renderer } from "../../Renderer";
-import { rgbaEqual } from "../../color";
+import { getLuminance, SRGBToLinear } from "../../color";
 import { Marker } from "../../ros";
-import { poseApproxEq } from "../../transforms";
 import { RenderableMarker } from "./RenderableMarker";
 
 export class RenderableTextViewFacing extends RenderableMarker {
-  label: LabelRenderable | undefined;
+  label: Label;
 
   constructor(topic: string, marker: Marker, receiveTime: bigint | undefined, renderer: Renderer) {
     super(topic, marker, receiveTime, renderer);
 
+    this.label = renderer.labelPool.acquire();
+    this.label.setBillboard(true);
+
+    this.add(this.label);
     this.update(marker, receiveTime);
   }
 
   override dispose(): void {
-    this.renderer.labels.removeById(this.name);
+    this.renderer.labelPool.release(this.label);
   }
 
   override update(marker: Marker, receiveTime: bigint | undefined): void {
-    const prevMarker = this.userData.marker;
     super.update(marker, receiveTime);
 
-    // Check if any relevant fields have changed
-    if (
-      this.label == undefined ||
-      marker.text !== prevMarker.text ||
-      marker.header.frame_id !== prevMarker.header.frame_id ||
-      marker.frame_locked !== prevMarker.frame_locked ||
-      (!marker.frame_locked && !areEqual(marker.header.stamp, prevMarker.header.stamp)) ||
-      !rgbaEqual(marker.color, prevMarker.color)
-    ) {
-      if (this.label) {
-        this.remove(this.label);
-      }
+    this.label.setText(marker.text);
+    this.label.setColor(
+      SRGBToLinear(marker.color.r),
+      SRGBToLinear(marker.color.g),
+      SRGBToLinear(marker.color.b),
+    );
 
-      // A field that affects the label appearance has changed, rebuild the label
-      this.label = this.renderer.labels.setLabel(this.name, {
-        text: marker.text,
-        color: marker.color,
-      });
-      this.add(this.label);
-    } else if (!poseApproxEq(marker.pose, prevMarker.pose)) {
-      // Just update the label pose
-      this.label.userData.pose.position = marker.pose.position;
+    const foregroundIsDark = getLuminance(marker.color.r, marker.color.g, marker.color.b) < 0.5;
+    if (foregroundIsDark) {
+      this.label.setBackgroundColor(1, 1, 1);
     } else {
-      // No change
+      this.label.setBackgroundColor(0, 0, 0);
     }
+    this.label.setOpacity(marker.color.a);
+    this.label.setLineHeight(marker.scale.z);
+    this.label.userData.pose = marker.pose;
   }
 }

@@ -299,7 +299,7 @@ export function Markers(): JSX.Element {
         position: { x: -1, y: -1, z: 0 },
         orientation: { x: 0, y: 0, z: 0, w: 1 },
       },
-      scale: { x: 1, y: 1, z: 1 },
+      scale: { x: 0, y: 0, z: 0.1 },
       color: makeColor("#4caf50", 0.5),
       text: "Lorem Ipsum\nDolor Sit Amet",
       lifetime: { sec: 0, nsec: 0 },

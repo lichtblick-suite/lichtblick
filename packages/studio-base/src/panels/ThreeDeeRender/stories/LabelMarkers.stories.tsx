@@ -68,6 +68,7 @@ export function LabelMarkers(): JSX.Element {
         frame_locked: true,
         color: makeColor(colorHex, alpha),
         pose: { position, orientation: QUAT_IDENTITY },
+        scale: { x: 0, y: 0, z: 0.1 },
       },
       sizeInBytes: 0,
     };
@@ -115,6 +116,9 @@ export function LabelMarkers(): JSX.Element {
             far: 5000,
             target: [0, 0, 0],
             targetOrientation: [0, 0, 0, 1],
+          },
+          layers: {
+            grid: { layerId: "foxglove.Grid" },
           },
         }}
       />

@@ -2518,6 +2518,7 @@ __metadata:
     "@foxglove/rostime": 1.1.2
     "@foxglove/schemas": 0.2.0
     "@foxglove/studio": "workspace:*"
+    "@foxglove/three-text": "workspace:*"
     "@foxglove/ulog": 2.1.2
     "@foxglove/velodyne-cloud": 1.0.1
     "@foxglove/wasm-bz2": 0.1.0
@@ -2684,6 +2685,24 @@ __metadata:
 "@foxglove/studio@workspace:*, @foxglove/studio@workspace:packages/studio":
   version: 0.0.0-use.local
   resolution: "@foxglove/studio@workspace:packages/studio"
+  languageName: unknown
+  linkType: soft
+
+"@foxglove/three-text@workspace:*, @foxglove/three-text@workspace:packages/three-text":
+  version: 0.0.0-use.local
+  resolution: "@foxglove/three-text@workspace:packages/three-text"
+  dependencies:
+    "@mapbox/tiny-sdf": 2.0.5
+    "@storybook/addon-actions": 6.4.18
+    "@storybook/addon-essentials": 6.4.18
+    "@storybook/builder-webpack5": 6.4.18
+    "@storybook/manager-webpack5": 6.4.18
+    "@storybook/react": 6.4.18
+    three: 0.140.2
+    ts-loader: 9.2.7
+    typescript: 4.6.2
+  peerDependencies:
+    three: ">=0.140.2"
   languageName: unknown
   linkType: soft
 
@@ -3085,6 +3104,13 @@ __metadata:
     lodash: ^4.17.15
     tmp-promise: ^3.0.2
   checksum: 12527e42c2865504eb2a91cc419e52dd7a68c1eda1138c0713a1520a5413ef9dabfa9d21b7908d211998b75c60035d1d5ae87c00fe8ff5be8fa8449525235dd5
+  languageName: node
+  linkType: hard
+
+"@mapbox/tiny-sdf@npm:2.0.5":
+  version: 2.0.5
+  resolution: "@mapbox/tiny-sdf@npm:2.0.5"
+  checksum: 23fd158ea795592cf1f825fcac20d48230c54a6985a931f609af8b4e69cd99f1c798dc893baec63f4fd6f42ffc3e7292b39f4126966412edd4606eb3dbf86b54
   languageName: node
   linkType: hard
 
