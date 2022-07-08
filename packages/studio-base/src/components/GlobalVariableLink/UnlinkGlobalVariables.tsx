@@ -11,16 +11,16 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { Button, Card, Typography, styled as muiStyled } from "@mui/material";
+import { Button, Typography, styled as muiStyled, Menu, Tooltip } from "@mui/material";
 import { isEqual } from "lodash";
+import { useState } from "react";
 
+import GlobalVariableName from "@foxglove/studio-base/components/GlobalVariableName";
 import Stack from "@foxglove/studio-base/components/Stack";
 
-import GlobalVariableName from "../GlobalVariableName";
-import { getPath } from "../interactionUtils";
-import useLinkedGlobalVariables, { LinkedGlobalVariable } from "../useLinkedGlobalVariables";
-import SGlobalVariableLink from "./SGlobalVariableLink";
-import UnlinkWrapper from "./UnlinkWrapper";
+import GlobalVariableLinkButton from "./GlobalVariableLinkButton";
+import useLinkedGlobalVariables, { LinkedGlobalVariable } from "./useLinkedGlobalVariables";
+import { getPath } from "./utils";
 
 type Props = {
   name: string;
@@ -36,6 +36,17 @@ export default function UnlinkGlobalVariables({
   name,
   showList = false,
 }: Props): JSX.Element | ReactNull {
+  const [anchorEl, setAnchorEl] = useState<undefined | HTMLElement>(undefined);
+  const open = Boolean(anchorEl);
+
+  const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
+    setAnchorEl(event.currentTarget);
+  };
+
+  const handleClose = () => {
+    setAnchorEl(undefined);
+  };
+
   const { linkedGlobalVariables, linkedGlobalVariablesByName, setLinkedGlobalVariables } =
     useLinkedGlobalVariables();
 
@@ -99,27 +110,47 @@ export default function UnlinkGlobalVariables({
   }
 
   return (
-    <SGlobalVariableLink>
-      <UnlinkWrapper
-        tooltip={
-          <span>
+    <Stack
+      direction="row"
+      align-items="center"
+      style={{ wordBreak: "normal", display: "inline-flex" }}
+      gap={0.5}
+    >
+      <Tooltip
+        title={
+          <Typography variant="body2" component="span">
             Unlink <GlobalVariableName name={name} />
-          </span>
+          </Typography>
         }
-        linkedGlobalVariable={firstLink}
       >
-        {() => (
-          <Card
-            elevation={4}
-            variant="elevation"
-            component="form"
-            data-test="unlink-form"
-            style={{ pointerEvents: "auto", maxWidth: 320 }}
-          >
-            {listHtml}
-          </Card>
-        )}
-      </UnlinkWrapper>
-    </SGlobalVariableLink>
+        <GlobalVariableLinkButton
+          color="info"
+          linked
+          size="small"
+          id={`unlink-${firstLink.name}-button`}
+          aria-controls={open ? `unlink-${firstLink.name}-menu` : undefined}
+          aria-haspopup="true"
+          aria-expanded={open ? "true" : undefined}
+          onClick={handleClick}
+          data-test={`unlink-${firstLink.name}`}
+        />
+      </Tooltip>
+      <GlobalVariableName name={firstLink.name} paddingLeft />
+      <Menu
+        id={`unlink-${firstLink.name}-menu`}
+        anchorEl={anchorEl}
+        open
+        onClose={handleClose}
+        MenuListProps={{
+          disablePadding: true,
+          "aria-labelledby": `unlink-${firstLink.name}-menu`,
+        }}
+        PaperProps={{
+          style: { pointerEvents: "auto", maxWidth: 320 },
+        }}
+      >
+        <form data-test="unlink-form">{listHtml}</form>
+      </Menu>
+    </Stack>
   );
 }

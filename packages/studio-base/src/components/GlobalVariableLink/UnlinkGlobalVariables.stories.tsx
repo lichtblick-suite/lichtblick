@@ -40,10 +40,7 @@ const linkedGlobalVariables = [
   },
 ];
 
-storiesOf(
-  "panels/ThreeDeeRender/Interactions/GlobalVariableLink/UnlinkGlobalVariables",
-  module,
-).add("default", () => {
+storiesOf("components/GlobalVariableLink/UnlinkGlobalVariables", module).add("default", () => {
   return (
     <PanelSetup
       fixture={{
