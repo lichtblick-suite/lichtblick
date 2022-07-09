@@ -23,13 +23,11 @@ import { PointCloud2 } from "@foxglove/studio-base/types/Messages";
 import { maybeCast } from "@foxglove/studio-base/util/maybeCast";
 
 import { Pose } from "../transforms";
-import LinkedGlobalVariableList from "./LinkedGlobalVariableList";
 import ObjectDetails from "./ObjectDetails";
 import PointCloudDetails from "./PointCloudDetails";
 import TopicLink from "./TopicLink";
 import { SEmptyState, SRow, SValue } from "./styling";
 import { InteractionData } from "./types";
-import useLinkedGlobalVariables from "./useLinkedGlobalVariables";
 
 export const OBJECT_TAB_TYPE = "Selected object";
 export const LINKED_VARIABLES_TAB_TYPE = "Linked variables";
@@ -70,8 +68,6 @@ const InteractionsBaseComponent = React.memo<Props>(function InteractionsBaseCom
     [isPointCloud, originalMessage],
   );
 
-  const { linkedGlobalVariables } = useLinkedGlobalVariables();
-
   return (
     <ExpandingToolbar
       tooltip="Inspect objects"
@@ -99,11 +95,6 @@ const InteractionsBaseComponent = React.memo<Props>(function InteractionsBaseCom
           ) : (
             <SEmptyState>Click an object in the 3D view to select it.</SEmptyState>
           )}
-        </ToolGroupFixedSizePane>
-      </ToolGroup>
-      <ToolGroup name={LINKED_VARIABLES_TAB_TYPE}>
-        <ToolGroupFixedSizePane>
-          <LinkedGlobalVariableList linkedGlobalVariables={linkedGlobalVariables} />
         </ToolGroupFixedSizePane>
       </ToolGroup>
     </ExpandingToolbar>

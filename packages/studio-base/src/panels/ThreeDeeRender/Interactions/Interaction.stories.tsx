@@ -16,26 +16,20 @@ import { storiesOf } from "@storybook/react";
 import styled from "styled-components";
 
 import MockPanelContextProvider from "@foxglove/studio-base/components/MockPanelContextProvider";
-import useGlobalVariables from "@foxglove/studio-base/hooks/useGlobalVariables";
 import { decodeMarker } from "@foxglove/studio-base/panels/ThreeDimensionalViz/commands/PointClouds/decodeMarker";
 import {
   POINT_CLOUD_MESSAGE,
   POINT_CLOUD_WITH_ADDITIONAL_FIELDS,
 } from "@foxglove/studio-base/panels/ThreeDimensionalViz/commands/PointClouds/fixture/pointCloudData";
-import PanelSetup, { triggerInputChange } from "@foxglove/studio-base/stories/PanelSetup";
+import PanelSetup from "@foxglove/studio-base/stories/PanelSetup";
 
 import Interactions, { OBJECT_TAB_TYPE, LINKED_VARIABLES_TAB_TYPE } from "./Interactions";
-import useLinkedGlobalVariables from "./useLinkedGlobalVariables";
 
 const SWrapper = styled.div`
   background: ${({ theme }) => theme.palette.neutralLighterAlt};
   display: flex;
   flex-wrap: wrap;
   height: 100%;
-`;
-
-const SP = styled.p`
-  color: ${({ theme }) => theme.semanticColors.disabledText};
 `;
 
 const markerObject = {
@@ -85,36 +79,13 @@ const sharedProps = {
   },
 };
 
-function GlobalVariablesDisplay() {
-  const { globalVariables } = useGlobalVariables();
-  return (
-    <SP>
-      <strong>Global variables: </strong>
-      {JSON.stringify(globalVariables)}
-    </SP>
-  );
-}
-function LinkedGlobalVariablesDisplay() {
-  const { linkedGlobalVariables } = useLinkedGlobalVariables();
-  return (
-    <SP>
-      <strong>Global variable links: </strong>
-      {JSON.stringify(linkedGlobalVariables)}
-    </SP>
-  );
-}
-
 function PanelSetupWithData({
   children,
-  showGlobalVariables = false,
-  showLinkedGlobalVariables = false,
   title,
   onMount,
   disableAutoOpenClickedObject = true,
 }: {
   children: React.ReactNode;
-  showGlobalVariables?: boolean;
-  showLinkedGlobalVariables?: boolean;
   title: React.ReactNode;
   onMount?: (el: HTMLDivElement) => void;
   disableAutoOpenClickedObject?: boolean;
@@ -177,10 +148,6 @@ function PanelSetupWithData({
         >
           <p>{title}</p>
           <Stack direction="row" flex="auto">
-            <Stack flex={1}>
-              {showGlobalVariables && <GlobalVariablesDisplay />}
-              {showLinkedGlobalVariables && <LinkedGlobalVariablesDisplay />}
-            </Stack>
             {children}
           </Stack>
         </div>
@@ -284,129 +251,6 @@ storiesOf("panels/ThreeDeeRender/Interactions/Interaction", module)
               },
             }}
           />
-        </PanelSetupWithData>
-      </SWrapper>
-    );
-  })
-  .add("link and multi-link global variables", () => {
-    return (
-      <SWrapper>
-        <PanelSetupWithData showGlobalVariables showLinkedGlobalVariables title="Default">
-          <Interactions {...(sharedProps as any)} />
-        </PanelSetupWithData>
-
-        <PanelSetupWithData
-          showGlobalVariables
-          showLinkedGlobalVariables
-          title={
-            <>
-              Added a new link between <code>id</code> field and <code>$id</code> variable
-            </>
-          }
-          onMount={(el) => {
-            const btn = el.querySelector("[data-test='link-id']");
-            if (btn) {
-              (btn as any).click();
-              setImmediate(() => {
-                const linkFormBtn = document.querySelector("[data-test='link-form'] button");
-                if (linkFormBtn) {
-                  (linkFormBtn as any).click();
-                }
-              });
-            }
-          }}
-        >
-          <Interactions {...(sharedProps as any)} />
-        </PanelSetupWithData>
-        <PanelSetupWithData
-          showGlobalVariables
-          showLinkedGlobalVariables
-          title={
-            <>
-              Added another field <code>scale</code> to <code>$id</code> variable
-            </>
-          }
-          onMount={(el) => {
-            // click the "link" icon button, manually change the input from "scale" to "id", then click "link" icon
-            const btn = el.querySelector("[data-test='link-scale']");
-            if (btn) {
-              (btn as any).click();
-              setImmediate(() => {
-                const linkNameInput = document.querySelector<HTMLInputElement>(
-                  "[data-test='link-form'] input",
-                );
-                if (linkNameInput) {
-                  triggerInputChange(linkNameInput, "id");
-                  const linkFormBtn = document.querySelector(
-                    "[data-test='link-form'] [data-test='action-buttons'] button",
-                  );
-                  if (linkFormBtn) {
-                    (linkFormBtn as any).click();
-                  }
-                }
-              });
-            }
-          }}
-        >
-          <Interactions {...(sharedProps as any)} />
-        </PanelSetupWithData>
-      </SWrapper>
-    );
-  })
-  .add("unlink single linked global variable", () => {
-    return (
-      <SWrapper>
-        <PanelSetupWithData
-          title={
-            <>
-              Unlinked <code>type</code> field from <code>$type</code> variable
-            </>
-          }
-          showGlobalVariables
-          showLinkedGlobalVariables
-          onMount={(el) => {
-            const btn = el.querySelector("[data-test='unlink-type']");
-            if (btn) {
-              (btn as any).click();
-              setImmediate(() => {
-                const unlinkBtn = document.querySelector("[data-test='unlink-form'] button");
-                if (unlinkBtn) {
-                  (unlinkBtn as any).click();
-                }
-              });
-            }
-          }}
-        >
-          <Interactions {...(sharedProps as any)} />
-        </PanelSetupWithData>
-      </SWrapper>
-    );
-  })
-  .add("unlink multi-linked global variable", () => {
-    return (
-      <SWrapper>
-        <PanelSetupWithData
-          title={
-            <>
-              Unlinked <code>header.frame_id</code> field from <code>$some_val</code> variable{" "}
-            </>
-          }
-          showGlobalVariables
-          showLinkedGlobalVariables
-          onMount={(el) => {
-            const btn = el.querySelector("[data-test='unlink-some_val']");
-            if (btn) {
-              (btn as any).click();
-              setImmediate(() => {
-                const unlinkBtn = document.querySelector("[data-test='unlink-form'] button");
-                if (unlinkBtn) {
-                  (unlinkBtn as any).click();
-                }
-              });
-            }
-          }}
-        >
-          <Interactions {...(sharedProps as any)} />
         </PanelSetupWithData>
       </SWrapper>
     );
