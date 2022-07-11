@@ -63,8 +63,8 @@ Note: All contributors must agree to our [Contributor License Agreement](https:/
 
 ```sh
 # To launch the desktop app (run both scripts concurrently):
-$ yarn serve        # start webpack
-$ yarn start        # launch electron
+$ yarn desktop:serve        # start webpack
+$ yarn desktop:start        # launch electron
 
 # To launch the browser app:
 $ yarn web:serve
@@ -76,12 +76,12 @@ $ yarn web:serve:local
 $ yarn storybook
 
 # Advanced usage: running webpack and electron on different computers (or VMs) on the same network
-$ yarn serve --host 192.168.xxx.yyy         # the address where electron can reach the webpack dev server
+$ yarn desktop:serve --host 192.168.xxx.yyy         # the address where electron can reach the webpack dev server
 $ yarn dlx electron@13.0.0-beta.13 .webpack # launch the version of electron for the current computer's platform
 
 # To launch the desktop app using production API endpoints
-$ yarn serve --env FOXGLOVE_BACKEND=production
-$ yarn start
+$ yarn desktop:serve --env FOXGLOVE_BACKEND=production
+$ yarn desktop:start
 
 # NOTE: yarn web:serve does not support connecting to the production endpoints
 ```
