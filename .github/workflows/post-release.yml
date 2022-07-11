@@ -207,9 +207,14 @@ jobs:
 
       - run: ls -la ci/apt/packages
 
+      # Stip the 'v' prefix from the tag to get just the version
+      # We need the version without the 'v' prefix to build the snap filename
+      - run: echo "::set-output name=version::$(echo ${{ github.event.release.tag_name || github.event.inputs.tag_name }} | sed -e 's/^v//')"
+        id: studio-version
+
       - uses: snapcore/action-publish@v1
         env:
           SNAPCRAFT_STORE_CREDENTIALS: ${{ secrets.SNAPCRAFT_STORE_LOGIN }}
         with:
-          snap: ci/apt/packages/foxglove-studio-${{ github.event.release.tag_name || github.event.inputs.tag_name }}-linux-amd64.snap
+          snap: ci/apt/packages/foxglove-studio-${{ steps.studio-version.outputs.version }}-linux-amd64.snap
           release: candidate
