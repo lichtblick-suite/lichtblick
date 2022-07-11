@@ -143,7 +143,7 @@ export class PoseArrays extends SceneExtension<PoseArrayRenderable> {
     const handler = this.handleSettingsAction;
     const entries: SettingsTreeEntry[] = [];
     for (const topic of this.renderer.topics ?? []) {
-      if (POSE_ARRAY_DATATYPES.has(topic.datatype)) {
+      if (POSE_ARRAY_DATATYPES.has(topic.datatype) || NAV_PATH_DATATYPES.has(topic.datatype)) {
         const config = (configTopics[topic.name] ?? {}) as Partial<LayerSettingsPoseArray>;
         const displayType = config.type ?? getDefaultType(topic);
         const { axisScale, lineWidth } = config;
