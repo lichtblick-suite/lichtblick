@@ -3,7 +3,7 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 import { ActionButton, useTheme } from "@fluentui/react";
-import { Link, Typography } from "@mui/material";
+import { Alert, Link, Typography } from "@mui/material";
 import { useState, useMemo, useCallback, useLayoutEffect } from "react";
 
 import Stack from "@foxglove/studio-base/components/Stack";
@@ -98,6 +98,8 @@ export default function Connection(props: ConnectionProps): JSX.Element {
           })}
         </Stack>
         <Stack key={selectedSource?.id} flex="1 0 240px" gap={2}>
+          {selectedSource?.warning && <Alert severity="warning">{selectedSource.warning}</Alert>}
+
           {selectedSource?.description && (
             <Typography color="text.secondary">{selectedSource.description}</Typography>
           )}
