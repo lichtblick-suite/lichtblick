@@ -569,7 +569,14 @@ export default class MemoryCacheDataProvider implements RandomAccessDataProvider
         topics.length > 0
           ? await this._provider.getMessages(startTime, endTime, { parsedMessages: topics })
           : { parsedMessages: [] };
-      const { parsedMessages = [] } = messages;
+      const { parsedMessages = [], problems } = messages;
+
+      if (problems != undefined && problems.length > 0) {
+        for (const { error, message, severity } of problems) {
+          console.error(error);
+          sendNotification(`Failure parsing messages: ${message}`, error, "user", severity);
+        }
+      }
 
       // If we're not current any more, discard the messages, because otherwise we might write duplicate messages.
       if (!isCurrent()) {
