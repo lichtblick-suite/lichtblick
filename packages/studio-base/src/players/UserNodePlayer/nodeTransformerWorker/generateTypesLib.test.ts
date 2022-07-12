@@ -88,12 +88,43 @@ describe("generateTypesLib", () => {
     });
   });
 
-  it("full", async () => {
+  it("should generate types lib", async () => {
     const src = generateTypesLib({
       topics: [
         {
           name: "/my_topic",
           datatype: "std_msgs/ColorRGBA",
+        },
+      ],
+      datatypes: new Map(
+        Object.entries({
+          "std_msgs/ColorRGBA": {
+            definitions: [{ type: "float32", name: "r", isArray: false, isComplex: false }],
+          },
+        }),
+      ),
+    });
+
+    const prettified = await getPrettifiedCode(src);
+
+    const { diagnostics } = compile({ ...baseNodeData, sourceCode: src });
+    expect(diagnostics).toEqual([]);
+
+    expect(prettified).toMatchSnapshot();
+  });
+
+  // A topic may reference a datatype which is not yet known (hasn't been subscribed or won't be)
+  // The types library must still compile.
+  it("should work when a datatype is not known", async () => {
+    const src = generateTypesLib({
+      topics: [
+        {
+          name: "/my_topic",
+          datatype: "std_msgs/ColorRGBA",
+        },
+        {
+          name: "/another_topic",
+          datatype: "unknown_datatype",
         },
       ],
       datatypes: new Map(

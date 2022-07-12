@@ -1,43 +1,5 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`generateTypesLib full 1`] = `
-"// NOTE:
-// This file is generated from the current data source.
-// It contains helper types for looking up message definitions by schema name or topic.
-//
-// You likely want to use the higher-level types in \`./types\` rather than the types in this file directly.
-
-type Time = {
-  sec: number;
-  nsec: number;
-};
-
-type Duration = Time;
-
-/**
- * MessageTypeBySchemaName enumerates the message types for for all the schema names
- * in the current data source.
- *
- * You probably want to use Message<...> instead.
- */
-export type MessageTypeBySchemaName = {
-  \\"std_msgs/ColorRGBA\\": {
-    r: number;
-  };
-};
-
-/**
- * MessageTypeByTopic enumerates the Messages types for all the topics in
- * the current data source.
- *
- * You probably want to use Input<\\"/my-topic\\"> instead of MessageTypeByTopic.
- */
-export type MessageTypeByTopic = {
-  \\"/my_topic\\": MessageTypeBySchemaName[\\"std_msgs/ColorRGBA\\"];
-};
-"
-`;
-
 exports[`generateTypesLib generateDatatypesInterface should generate basic Datatypes interface 1`] = `
 "/**
  * MessageTypeBySchemaName enumerates the message types for for all the schema names
@@ -85,6 +47,84 @@ export type MessageTypeBySchemaName = {
   \\"std_msgs\\\\\\\\ColorRGBA\\": {
     r: number;
   };
+};
+"
+`;
+
+exports[`generateTypesLib should generate types lib 1`] = `
+"// NOTE:
+// This file is generated from the current data source.
+// It contains helper types for looking up message definitions by schema name or topic.
+//
+// You likely want to use the higher-level types in \`./types\` rather than the types in this file directly.
+
+type Time = {
+  sec: number;
+  nsec: number;
+};
+
+type Duration = Time;
+
+/**
+ * MessageTypeBySchemaName enumerates the message types for for all the schema names
+ * in the current data source.
+ *
+ * You probably want to use Message<...> instead.
+ */
+export type MessageTypeBySchemaName = {
+  \\"std_msgs/ColorRGBA\\": {
+    r: number;
+  };
+};
+
+/**
+ * MessageTypeByTopic enumerates the Messages types for all the topics in
+ * the current data source.
+ *
+ * You probably want to use Input<\\"/my-topic\\"> instead of MessageTypeByTopic.
+ */
+export type MessageTypeByTopic = {
+  \\"/my_topic\\": MessageTypeBySchemaName[\\"std_msgs/ColorRGBA\\"];
+};
+"
+`;
+
+exports[`generateTypesLib should work when a datatype is not known 1`] = `
+"// NOTE:
+// This file is generated from the current data source.
+// It contains helper types for looking up message definitions by schema name or topic.
+//
+// You likely want to use the higher-level types in \`./types\` rather than the types in this file directly.
+
+type Time = {
+  sec: number;
+  nsec: number;
+};
+
+type Duration = Time;
+
+/**
+ * MessageTypeBySchemaName enumerates the message types for for all the schema names
+ * in the current data source.
+ *
+ * You probably want to use Message<...> instead.
+ */
+export type MessageTypeBySchemaName = {
+  \\"std_msgs/ColorRGBA\\": {
+    r: number;
+  };
+  unknown_datatype: {};
+};
+
+/**
+ * MessageTypeByTopic enumerates the Messages types for all the topics in
+ * the current data source.
+ *
+ * You probably want to use Input<\\"/my-topic\\"> instead of MessageTypeByTopic.
+ */
+export type MessageTypeByTopic = {
+  \\"/my_topic\\": MessageTypeBySchemaName[\\"std_msgs/ColorRGBA\\"];
+  \\"/another_topic\\": MessageTypeBySchemaName[\\"unknown_datatype\\"];
 };
 "
 `;
