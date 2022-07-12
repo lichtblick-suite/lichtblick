@@ -40,6 +40,7 @@ import type { Renderable } from "./Renderable";
 import { Renderer, RendererConfig } from "./Renderer";
 import { RendererContext, useRendererEvent } from "./RendererContext";
 import { Stats } from "./Stats";
+import { FRAME_TRANSFORM_DATATYPES } from "./foxglove";
 import type { MarkerUserData } from "./renderables/markers/RenderableMarker";
 import { TF_DATATYPES, TRANSFORM_STAMPED_DATATYPES } from "./ros";
 
@@ -320,7 +321,11 @@ export function ThreeDeeRender({ context }: { context: PanelExtensionContext }):
 
     for (const topic of topics) {
       // Subscribe to all transform topics
-      if (TF_DATATYPES.has(topic.datatype) || TRANSFORM_STAMPED_DATATYPES.has(topic.datatype)) {
+      if (
+        FRAME_TRANSFORM_DATATYPES.has(topic.datatype) ||
+        TF_DATATYPES.has(topic.datatype) ||
+        TRANSFORM_STAMPED_DATATYPES.has(topic.datatype)
+      ) {
         subscriptions.add(topic.name);
       } else if (datatypeHandlers.has(topic.datatype)) {
         // Subscribe to known datatypes if the topic has not been toggled off

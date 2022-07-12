@@ -24,9 +24,9 @@ export class TransformTree {
   }
 
   addTransform(frameId: string, parentFrameId: string, time: Time, transform: Transform): boolean {
+    let updated = !this.hasFrame(frameId);
     const frame = this.getOrCreateFrame(frameId);
     const curParentFrame = frame.parent();
-    let updated = false;
     if (curParentFrame == undefined || curParentFrame.id !== parentFrameId) {
       // This frame was previously unparented but now we know its parent, or we
       // are reparenting this frame
