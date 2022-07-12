@@ -10,7 +10,7 @@ import { SettingsTreeAction } from "@foxglove/studio";
 import { Renderer } from "../Renderer";
 import { SceneExtension } from "../SceneExtension";
 import { SettingsTreeEntry } from "../SettingsManager";
-import { fieldSize, PRECISION_DEGREES, PRECISION_DISTANCE } from "../settings";
+import { fieldSize, PRECISION_DEGREES, PRECISION_DISTANCE, SelectEntry } from "../settings";
 import type { FrameAxes } from "./FrameAxes";
 
 export const DEFAULT_LABEL_SCALE_FACTOR = 1;
@@ -41,14 +41,10 @@ export class CoreSettings extends SceneExtension {
     const handler = this.handleSettingsAction;
 
     const followTfOptions = this.renderer.coordinateFrameList;
-    let followTfValue =
-      this.renderer.followFrameId ?? config.followTf ?? this.renderer.renderFrameId;
-    if (
-      followTfValue != undefined &&
-      !followTfOptions.find((option) => option.value === followTfValue)
-    ) {
-      followTfValue = undefined;
-    }
+    const followTfValue = selectBest(
+      [this.renderer.followFrameId, config.followTf, this.renderer.renderFrameId],
+      followTfOptions,
+    );
 
     return [
       {
@@ -288,4 +284,14 @@ export class CoreSettings extends SceneExtension {
   handleCameraMove = (): void => {
     this.updateSettingsTree();
   };
+}
+
+function selectBest(
+  choices: ReadonlyArray<string | undefined>,
+  validEntries: ReadonlyArray<SelectEntry>,
+): string | undefined {
+  const validChoices = choices.filter((choice) =>
+    validEntries.some((entry) => entry.value === choice),
+  );
+  return validChoices[0];
 }

@@ -345,6 +345,7 @@ export class Renderer extends EventEmitter<RendererEvents> {
    * This is useful when seeking to a new playback position or when a new data source is loaded.
    */
   clear(): void {
+    this.settings.errors.clear();
     this.transformTree.clear();
     for (const extension of this.sceneExtensions.values()) {
       extension.removeAllRenderables();
@@ -843,8 +844,6 @@ export class Renderer extends EventEmitter<RendererEvents> {
         `Frame "${this.renderFrameId}" not found`,
       );
       return;
-    } else {
-      this.settings.errors.remove(FOLLOW_TF_PATH, FRAME_NOT_FOUND);
     }
 
     const rootFrameId = frame.root().id;

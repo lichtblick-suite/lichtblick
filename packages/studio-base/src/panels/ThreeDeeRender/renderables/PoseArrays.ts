@@ -260,6 +260,76 @@ export class PoseArrays extends SceneExtension<PoseArrayRenderable> {
     );
   }
 
+  _createAxesToMatchPoses(
+    renderable: PoseArrayRenderable,
+    poseArray: PoseArray,
+    topic: string,
+  ): void {
+    const scale = renderable.userData.settings.axisScale * (1 / AXIS_LENGTH);
+
+    // Update the scale and visibility of existing AxisRenderables as needed
+    const existingUpdateCount = Math.min(renderable.userData.axes.length, poseArray.poses.length);
+    for (let i = 0; i < existingUpdateCount; i++) {
+      const axis = renderable.userData.axes[i]!;
+      axis.visible = true;
+      axis.scale.set(scale, scale, scale);
+    }
+
+    // Create any AxisRenderables as needed
+    for (let i = renderable.userData.axes.length; i < poseArray.poses.length; i++) {
+      const axis = new Axis(topic, this.renderer);
+      renderable.userData.axes.push(axis);
+      renderable.add(axis);
+
+      // Set the scale for each new axis
+      axis.scale.set(scale, scale, scale);
+    }
+
+    // Hide any AxisRenderables as needed
+    for (let i = poseArray.poses.length; i < renderable.userData.axes.length; i++) {
+      const axis = renderable.userData.axes[i]!;
+      axis.visible = false;
+    }
+  }
+
+  _createArrowsToMatchPoses(
+    renderable: PoseArrayRenderable,
+    poseArray: PoseArray,
+    topic: string,
+    colorStart: ColorRGBA,
+    colorEnd: ColorRGBA,
+  ): void {
+    // Generate a Marker with the right scale and color
+    const createArrowMarkerFromIndex = (i: number): Marker => {
+      const t = i / (poseArray.poses.length - 1);
+      const color = rgbaGradient(tempColor3, colorStart, colorEnd, t);
+      return createArrowMarker(renderable.userData.settings.arrowScale, color);
+    };
+
+    // Update the arrowMarker of existing RenderableArrow as needed
+    const existingUpdateCount = Math.min(renderable.userData.arrows.length, poseArray.poses.length);
+    for (let i = 0; i < existingUpdateCount; i++) {
+      const arrowMarker = createArrowMarkerFromIndex(i);
+      const arrow = renderable.userData.arrows[i]!;
+      arrow.visible = true;
+      arrow.update(arrowMarker, undefined);
+    }
+
+    // Create any RenderableArrow as needed
+    for (let i = renderable.userData.arrows.length; i < poseArray.poses.length; i++) {
+      const arrowMarker = createArrowMarkerFromIndex(i);
+      const arrow = new RenderableArrow(topic, arrowMarker, undefined, this.renderer);
+      renderable.userData.arrows.push(arrow);
+      renderable.add(arrow);
+    }
+
+    // Hide any RenderableArrow as needed
+    for (let i = poseArray.poses.length; i < renderable.userData.arrows.length; i++) {
+      const arrow = renderable.userData.arrows[i]!;
+      arrow.visible = false;
+    }
+  }
+
   _updatePoseArrayRenderable(
     renderable: PoseArrayRenderable,
     poseArrayMessage: PoseArray,
@@ -287,46 +357,12 @@ export class PoseArrays extends SceneExtension<PoseArrayRenderable> {
     if (axisOrArrowSettingsChanged) {
       switch (renderable.userData.settings.type) {
         case "axis":
-          {
-            renderable.removeArrows();
-            renderable.removeLineStrip();
-
-            // Create any AxisRenderables needed
-            while (renderable.userData.axes.length < poseArrayMessage.poses.length) {
-              const axis = new Axis(topic, this.renderer);
-              renderable.userData.axes.push(axis);
-              renderable.add(axis);
-            }
-
-            // Update the scale for each axis
-            const scale = renderable.userData.settings.axisScale * (1 / AXIS_LENGTH);
-            for (const axis of renderable.userData.axes) {
-              axis.scale.set(scale, scale, scale);
-            }
-          }
+          renderable.removeArrows();
+          renderable.removeLineStrip();
           break;
         case "arrow":
-          {
-            renderable.removeAxes();
-            renderable.removeLineStrip();
-
-            for (let i = 0; i < poseArrayMessage.poses.length; i++) {
-              // Update the scale and color for each arrow by regenerating a Marker
-              const t = i / (poseArrayMessage.poses.length - 1);
-              const color = rgbaGradient(tempColor3, colorStart, colorEnd, t);
-              const arrowMarker = createArrowMarker(settings.arrowScale, color);
-
-              // Create this RenderableArrow if needed
-              if (i >= renderable.userData.arrows.length) {
-                const arrow = new RenderableArrow(topic, arrowMarker, undefined, this.renderer);
-                renderable.userData.arrows.push(arrow);
-                renderable.add(arrow);
-              }
-
-              const arrow = renderable.userData.arrows[i]!;
-              arrow.update(arrowMarker, undefined);
-            }
-          }
+          renderable.removeAxes();
+          renderable.removeLineStrip();
           break;
         case "line":
           {
@@ -361,11 +397,13 @@ export class PoseArrays extends SceneExtension<PoseArrayRenderable> {
     // Update the pose for each pose renderable
     switch (settings.type) {
       case "axis":
+        this._createAxesToMatchPoses(renderable, poseArrayMessage, topic);
         for (let i = 0; i < poseArrayMessage.poses.length; i++) {
           setObjectPose(renderable.userData.axes[i]!, poseArrayMessage.poses[i]!);
         }
         break;
       case "arrow":
+        this._createArrowsToMatchPoses(renderable, poseArrayMessage, topic, colorStart, colorEnd);
         for (let i = 0; i < poseArrayMessage.poses.length; i++) {
           setObjectPose(renderable.userData.arrows[i]!, poseArrayMessage.poses[i]!);
         }
