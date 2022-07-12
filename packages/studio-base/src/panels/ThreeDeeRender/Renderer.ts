@@ -53,6 +53,7 @@ import { Poses } from "./renderables/Poses";
 import { MarkerPool } from "./renderables/markers/MarkerPool";
 import {
   Header,
+  MarkerArray,
   Quaternion,
   TFMessage,
   TF_DATATYPES,
@@ -551,16 +552,22 @@ export class Renderer extends EventEmitter<RendererEvents> {
   addMessageEvent(messageEvent: Readonly<MessageEvent<unknown>>, datatype: string): void {
     const { message } = messageEvent;
 
-    // If this message has a Header, scrape the frame_id from it
     const maybeHasHeader = message as Partial<{ header: Partial<Header> }>;
+    const maybeHasMarkers = message as DeepPartial<MarkerArray>;
+    const maybeHasFrameId = message as Partial<{ frame_id: string }>;
+
     if (maybeHasHeader.header) {
+      // If this message has a Header, scrape the frame_id from it
       const frameId = maybeHasHeader.header.frame_id ?? "";
       this.addCoordinateFrame(frameId);
-    }
-
-    // If this message has a top-level frame_id, scrape it
-    const maybeHasFrameId = message as Partial<{ frame_id: string }>;
-    if (typeof maybeHasFrameId.frame_id === "string") {
+    } else if (Array.isArray(maybeHasMarkers.markers)) {
+      // If this message has an array called markers, scrape frame_id from all markers
+      for (const marker of maybeHasMarkers.markers) {
+        const frameId = marker.header?.frame_id ?? "";
+        this.addCoordinateFrame(frameId);
+      }
+    } else if (typeof maybeHasFrameId.frame_id === "string") {
+      // If this message has a top-level frame_id, scrape it
       this.addCoordinateFrame(maybeHasFrameId.frame_id);
     }
 
