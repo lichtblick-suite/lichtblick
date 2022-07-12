@@ -74,6 +74,9 @@ import BlockheadIcon from "@foxglove/studio-base/components/BlockheadIcon";
 import LoopIcon from "@foxglove/studio-base/components/LoopIcon";
 import RosIcon from "@foxglove/studio-base/components/RosIcon";
 
+import DatabaseSettings from "../assets/database-settings.svg";
+import PanelSettings from "../assets/panel-settings.svg";
+
 const icons: {
   // This makes it a type error to forget to add an icon here once it has been added to RegisteredIconNames.
   [N in RegisteredIconNames]: React.ReactElement;
@@ -123,7 +126,7 @@ const icons: {
   CrosshairsGps: <CrosshairsGpsIcon />,
   CursorDefault: <CursorDefaultIcon />,
   Database: <DatabaseIcon />,
-  DataManagementSettings: <Icons.DataManagementSettingsIcon />,
+  DatabaseSettings: <DatabaseSettings />,
   Delete: <Icons.DeleteIcon />,
   DependencyAdd: <Icons.DependencyAddIcon />,
   DoubleChevronDown: <Icons.DoubleChevronDownIcon />,
@@ -156,6 +159,7 @@ const icons: {
   NextFilled: <Next20Filled />,
   OpenFile: <Icons.OpenFileIcon />,
   OpenFolder: <Icons.OpenFolderHorizontalIcon />,
+  PanelSettings: <PanelSettings />,
   Pause: <Pause20Regular />,
   PauseFilled: <Pause20Filled />,
   Pencil: <PencilIcon />,

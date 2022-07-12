@@ -499,7 +499,7 @@ export default function Workspace(props: WorkspaceProps): JSX.Element {
       [
         "connection",
         {
-          iconName: "DataManagementSettings",
+          iconName: "DatabaseSettings",
           title: "Data source",
           component: DataSourceSidebarItem,
           badge:
@@ -512,7 +512,7 @@ export default function Workspace(props: WorkspaceProps): JSX.Element {
       ["add-panel", { iconName: "RectangularClipping", title: "Add panel", component: AddPanel }],
       [
         "panel-settings",
-        { iconName: "SingleColumnEdit", title: "Panel settings", component: PanelSettings },
+        { iconName: "PanelSettings", title: "Panel settings", component: PanelSettings },
       ],
       ["variables", { iconName: "Variable2", title: "Variables", component: Variables }],
       ["preferences", { iconName: "Settings", title: "Preferences", component: Preferences }],
