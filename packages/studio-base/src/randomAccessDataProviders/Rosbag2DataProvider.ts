@@ -139,8 +139,15 @@ export default class Rosbag2DataProvider implements RandomAccessDataProvider {
       return {};
     }
 
+    // Add 1 nsec to the end time because rosbag2 treats the time range as non-inclusive
+    // of the exact end time.
+    const inclusiveEndTime = { sec: end.sec, nsec: end.nsec + 1 };
     const parsedMessages: MessageEvent<unknown>[] = [];
-    for await (const msg of this.bag_.readMessages({ startTime: start, endTime: end, topics })) {
+    for await (const msg of this.bag_.readMessages({
+      startTime: start,
+      endTime: inclusiveEndTime,
+      topics,
+    })) {
       parsedMessages.push({
         topic: msg.topic.name,
         receiveTime: msg.timestamp,
