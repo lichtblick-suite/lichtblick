@@ -361,7 +361,7 @@ function tryCreateMesh(renderable: ImageRenderable, renderer: Renderer): void {
     // log.debug(`Building mesh for camera image on "${renderable.userData.topic}"`);
     renderable.userData.mesh = new THREE.Mesh(geometry, renderable.userData.material);
     renderable.add(renderable.userData.mesh);
-    renderer.animationFrame();
+    renderer.queueAnimationFrame();
   }
 }
 

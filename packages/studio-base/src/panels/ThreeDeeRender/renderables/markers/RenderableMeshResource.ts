@@ -56,7 +56,7 @@ export class RenderableMeshResource extends RenderableMarker {
           // Remove any mesh fetch error message since loading was successful
           errors.removeFromTopic(this.userData.topic, MESH_FETCH_FAILED);
           // Render a new frame now that the model is loaded
-          this.renderer.animationFrame();
+          this.renderer.queueAnimationFrame();
         })
         .catch((err) => {
           errors.addToTopic(

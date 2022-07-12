@@ -2,6 +2,8 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
+import RulerIcon from "@mdi/svg/svg/ruler.svg";
+import { IconButton, Paper } from "@mui/material";
 import { isEqual, cloneDeep, merge } from "lodash";
 import React, { useCallback, useLayoutEffect, useEffect, useState, useMemo, useRef } from "react";
 import ReactDOM from "react-dom";
@@ -53,7 +55,6 @@ const PANEL_STYLE: React.CSSProperties = {
   display: "flex",
   position: "relative",
 };
-const CANVAS_STYLE: React.CSSProperties = { position: "absolute", top: 0, left: 0 };
 
 /**
  * Provides DOM overlay elements on top of the 3D scene (e.g. stats, debug GUI).
@@ -61,6 +62,9 @@ const CANVAS_STYLE: React.CSSProperties = { position: "absolute", top: 0, left: 
 function RendererOverlay(props: {
   addPanel: LayoutActions["addPanel"];
   enableStats: boolean;
+  measureActive: boolean;
+  measureDistance?: number;
+  onClickMeasure: () => void;
 }): JSX.Element {
   const [selectedRenderable, setSelectedRenderable] = useState<Renderable | undefined>(undefined);
   const [interactionsTabType, setInteractionsTabType] = useState<TabType | undefined>(undefined);
@@ -117,6 +121,10 @@ function RendererOverlay(props: {
           position: "absolute",
           top: "10px",
           right: "10px",
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "flex-end",
+          gap: 10,
         }}
       >
         <Interactions
@@ -125,6 +133,17 @@ function RendererOverlay(props: {
           interactionsTabType={interactionsTabType}
           setInteractionsTabType={setInteractionsTabType}
         />
+        <Paper square={false} elevation={4}>
+          <IconButton
+            data-test="measure-button"
+            color={props.measureActive ? "info" : "inherit"}
+            title={props.measureActive ? "Cancel measuring" : "Measure distance"}
+            onClick={props.onClickMeasure}
+          >
+            <RulerIcon style={{ width: 16, height: 16 }} />
+          </IconButton>
+        </Paper>
+        <div>{props.measureDistance?.toFixed(2)}</div>
       </div>
       {clickedObjects.length > 1 && !selectedObject && (
         <InteractionContextMenu
@@ -430,6 +449,30 @@ export function ThreeDeeRender({ context }: { context: PanelExtensionContext }):
     [context.layout],
   );
 
+  const [measureActive, setMeasureActive] = useState(false);
+  const [measureDistance, setMeasureDistance] = useState<number | undefined>();
+  useEffect(() => {
+    const onStart = () => setMeasureActive(true);
+    const onChange = () => setMeasureDistance(renderer?.measurementTool.distance);
+    const onEnd = () => setMeasureActive(false);
+    renderer?.measurementTool.addEventListener("foxglove.measure-start", onStart);
+    renderer?.measurementTool.addEventListener("foxglove.measure-change", onChange);
+    renderer?.measurementTool.addEventListener("foxglove.measure-end", onEnd);
+    return () => {
+      renderer?.measurementTool.removeEventListener("foxglove.measure-start", onStart);
+      renderer?.measurementTool.removeEventListener("foxglove.measure-change", onChange);
+      renderer?.measurementTool.removeEventListener("foxglove.measure-end", onEnd);
+    };
+  }, [renderer?.measurementTool]);
+
+  const onClickMeasure = useCallback(() => {
+    if (measureActive) {
+      renderer?.measurementTool.stopMeasuring();
+    } else {
+      renderer?.measurementTool.startMeasuring();
+    }
+  }, [measureActive, renderer?.measurementTool]);
+
   return (
     <ThemeProvider isDark={colorScheme === "dark"}>
       <div style={PANEL_STYLE} ref={resizeRef}>
@@ -440,10 +483,24 @@ export function ThreeDeeRender({ context }: { context: PanelExtensionContext }):
             // position:absolute
             style={{ width, height }}
           />
-          <canvas ref={setCanvas} style={CANVAS_STYLE} />
+          <canvas
+            ref={setCanvas}
+            style={{
+              position: "absolute",
+              top: 0,
+              left: 0,
+              ...(measureActive && { cursor: "crosshair" }),
+            }}
+          />
         </CameraListener>
         <RendererContext.Provider value={renderer}>
-          <RendererOverlay addPanel={addPanel} enableStats={config.scene.enableStats ?? false} />
+          <RendererOverlay
+            addPanel={addPanel}
+            enableStats={config.scene.enableStats ?? false}
+            measureActive={measureActive}
+            measureDistance={measureDistance}
+            onClickMeasure={onClickMeasure}
+          />
         </RendererContext.Provider>
       </div>
     </ThemeProvider>

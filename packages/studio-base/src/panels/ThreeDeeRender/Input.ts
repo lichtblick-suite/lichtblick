@@ -10,11 +10,30 @@ const MAX_DIST = 1;
 
 const tempVec2 = new THREE.Vector2();
 
+const XY_PLANE = new THREE.Plane(new THREE.Vector3(0, 0, 1), 0);
+
 export type InputEvents = {
   resize: (windowSize: THREE.Vector2) => void;
-  click: (cursorCoords: THREE.Vector2, event: MouseEvent) => void;
-  mousedown: (cursorCoords: THREE.Vector2, event: MouseEvent) => void;
-  mousemove: (cursorCoords: THREE.Vector2, event: MouseEvent) => void;
+  click: (
+    cursorCoords: THREE.Vector2,
+    worldSpaceCursorCoords: THREE.Vector3 | undefined,
+    event: MouseEvent,
+  ) => void;
+  mousedown: (
+    cursorCoords: THREE.Vector2,
+    worldSpaceCursorCoords: THREE.Vector3 | undefined,
+    event: MouseEvent,
+  ) => void;
+  mousemove: (
+    cursorCoords: THREE.Vector2,
+    worldSpaceCursorCoords: THREE.Vector3 | undefined,
+    event: MouseEvent,
+  ) => void;
+  mouseup: (
+    cursorCoords: THREE.Vector2,
+    worldSpaceCursorCoords: THREE.Vector3 | undefined,
+    event: MouseEvent,
+  ) => void;
   keydown: (key: Key, event: KeyboardEvent) => void;
 };
 
@@ -24,8 +43,10 @@ export class Input extends EventEmitter<InputEvents> {
   resizeObserver: ResizeObserver;
   startClientPos?: THREE.Vector2;
   cursorCoords = new THREE.Vector2();
+  worldSpaceCursorCoords?: THREE.Vector3;
+  raycaster = new THREE.Raycaster();
 
-  constructor(canvas: HTMLCanvasElement) {
+  constructor(canvas: HTMLCanvasElement, private getCamera: () => THREE.Camera) {
     super();
 
     const parentEl = canvas.parentElement;
@@ -41,6 +62,7 @@ export class Input extends EventEmitter<InputEvents> {
 
     canvas.addEventListener("mousedown", this.onMouseDown);
     canvas.addEventListener("mousemove", this.onMouseMove);
+    canvas.addEventListener("mouseup", this.onMouseUp);
     canvas.addEventListener("click", this.onClick);
     canvas.addEventListener("touchstart", this.onTouchStart, { passive: false });
     canvas.addEventListener("touchend", this.onTouchEnd, { passive: false });
@@ -56,6 +78,7 @@ export class Input extends EventEmitter<InputEvents> {
 
     canvas.removeEventListener("mousedown", this.onMouseDown);
     canvas.removeEventListener("mousemove", this.onMouseMove);
+    canvas.removeEventListener("mouseup", this.onMouseUp);
     canvas.removeEventListener("click", this.onClick);
     canvas.removeEventListener("touchstart", this.onTouchStart);
     canvas.removeEventListener("touchend", this.onTouchEnd);
@@ -79,12 +102,18 @@ export class Input extends EventEmitter<InputEvents> {
 
   onMouseDown = (event: MouseEvent): void => {
     this.startClientPos = new THREE.Vector2(event.offsetX, event.offsetY);
-    this.emit("mousedown", this.cursorCoords, event);
+    this.updateCursorCoords(event);
+    this.emit("mousedown", this.cursorCoords, this.worldSpaceCursorCoords, event);
   };
 
   onMouseMove = (event: MouseEvent): void => {
     this.updateCursorCoords(event);
-    this.emit("mousemove", this.cursorCoords, event);
+    this.emit("mousemove", this.cursorCoords, this.worldSpaceCursorCoords, event);
+  };
+
+  onMouseUp = (event: MouseEvent): void => {
+    this.updateCursorCoords(event);
+    this.emit("mouseup", this.cursorCoords, this.worldSpaceCursorCoords, event);
   };
 
   onClick = (event: MouseEvent): void => {
@@ -100,7 +129,7 @@ export class Input extends EventEmitter<InputEvents> {
     }
 
     this.updateCursorCoords(event);
-    this.emit("click", this.cursorCoords, event);
+    this.emit("click", this.cursorCoords, this.worldSpaceCursorCoords, event);
   };
 
   onTouchStart = (event: TouchEvent): void => {
@@ -126,6 +155,20 @@ export class Input extends EventEmitter<InputEvents> {
   private updateCursorCoords(event: MouseEvent): void {
     this.cursorCoords.x = event.offsetX;
     this.cursorCoords.y = event.offsetY;
+
+    this.raycaster.setFromCamera(
+      // Cursor position in NDC
+      tempVec2.set(
+        (event.offsetX / this.canvasSize.width) * 2 - 1,
+        -((event.offsetY / this.canvasSize.height) * 2 - 1),
+      ),
+      this.getCamera(),
+    );
+    this.worldSpaceCursorCoords =
+      this.raycaster.ray.intersectPlane(
+        XY_PLANE,
+        this.worldSpaceCursorCoords ?? new THREE.Vector3(),
+      ) ?? undefined;
   }
 }
 
