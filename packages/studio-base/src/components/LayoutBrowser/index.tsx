@@ -72,16 +72,21 @@ export default function LayoutBrowser({
 
   const [isBusy, setIsBusy] = useState(layoutManager.isBusy);
   const [isOnline, setIsOnline] = useState(layoutManager.isOnline);
+  const [error, setError] = useState(layoutManager.error);
   useLayoutEffect(() => {
     const busyListener = () => setIsBusy(layoutManager.isBusy);
     const onlineListener = () => setIsOnline(layoutManager.isOnline);
+    const errorListener = () => setError(layoutManager.error);
     busyListener();
     onlineListener();
+    errorListener();
     layoutManager.on("busychange", busyListener);
     layoutManager.on("onlinechange", onlineListener);
+    layoutManager.on("errorchange", errorListener);
     return () => {
       layoutManager.off("busychange", busyListener);
       layoutManager.off("onlinechange", onlineListener);
+      layoutManager.off("errorchange", errorListener);
     };
   }, [layoutManager]);
 
@@ -405,7 +410,7 @@ export default function LayoutBrowser({
             <CircularProgress size={18} variant="indeterminate" />
           </Stack>
         ),
-        !isOnline && (
+        (!isOnline || error != undefined) && (
           <IconButton color="primary" key="offline" disabled title="Offline">
             <CloudOffIcon />
           </IconButton>

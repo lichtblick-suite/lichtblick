@@ -105,10 +105,17 @@ export default class LayoutManager implements ILayoutManager {
 
   isOnline = false;
 
+  error: undefined | Error = undefined;
+
   // eslint-disable-next-line @foxglove/no-boolean-parameters
   setOnline(online: boolean): void {
     this.isOnline = online;
     this.emitter.emit("onlinechange");
+  }
+
+  setError(error: undefined | Error): void {
+    this.error = error;
+    this.emitter.emit("errorchange");
   }
 
   constructor({
@@ -478,6 +485,12 @@ export default class LayoutManager implements ILayoutManager {
       this.currentSync = this.syncWithRemoteImpl(abortSignal);
       await this.currentSync;
       this.notifyChangeListeners({ type: "change", updatedLayout: undefined });
+      if (this.error) {
+        this.setError(undefined);
+      }
+    } catch (error) {
+      this.setError(error);
+      throw error;
     } finally {
       this.currentSync = undefined;
       log.debug(`Completed sync in ${((performance.now() - start) / 1000).toFixed(2)}s`);

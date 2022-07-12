@@ -60,7 +60,6 @@ export default function LayoutManagerProvider({
           failures = 0;
         } catch (error) {
           log.error("Sync failed:", error);
-          addToast((error as Error).toString(), { appearance: "error", autoDismiss: true });
           failures++;
         }
         // Exponential backoff with jitter:
