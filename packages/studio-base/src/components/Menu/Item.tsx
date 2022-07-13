@@ -181,4 +181,4 @@ const Item = (props: ItemProps): JSX.Element => {
 Item.displayName = "Menu.Item";
 Item.isMenuItem = true;
 
-export default Item;
+export { Item };

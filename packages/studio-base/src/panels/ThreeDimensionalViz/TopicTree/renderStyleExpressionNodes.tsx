@@ -20,7 +20,7 @@ import styled from "styled-components";
 import ChildToggle from "@foxglove/studio-base/components/ChildToggle";
 import ColorPicker from "@foxglove/studio-base/components/ColorPicker";
 import Icon from "@foxglove/studio-base/components/Icon";
-import Menu, { Item } from "@foxglove/studio-base/components/Menu";
+import { Menu, Item } from "@foxglove/studio-base/components/Menu";
 import Tooltip from "@foxglove/studio-base/components/Tooltip";
 import useGlobalVariables from "@foxglove/studio-base/hooks/useGlobalVariables";
 import { LinkedGlobalVariable } from "@foxglove/studio-base/panels/ThreeDimensionalViz/Interactions/useLinkedGlobalVariables";

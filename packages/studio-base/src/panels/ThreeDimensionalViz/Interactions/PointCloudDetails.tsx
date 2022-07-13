@@ -18,8 +18,7 @@ import styled from "styled-components";
 import { MouseEventObject } from "@foxglove/regl-worldview";
 import ChildToggle from "@foxglove/studio-base/components/ChildToggle";
 import Icon from "@foxglove/studio-base/components/Icon";
-import Menu from "@foxglove/studio-base/components/Menu";
-import Item from "@foxglove/studio-base/components/Menu/Item";
+import { Menu, Item } from "@foxglove/studio-base/components/Menu";
 import { DecodedMarker } from "@foxglove/studio-base/panels/ThreeDimensionalViz/commands/PointClouds/decodeMarker";
 import {
   getClickedInfo,

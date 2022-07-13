@@ -19,7 +19,7 @@ import styled, { css, FlattenSimpleInterpolation, keyframes } from "styled-compo
 
 import Icon from "@foxglove/studio-base/components/Icon";
 import { LegacyTable } from "@foxglove/studio-base/components/LegacyStyledComponents";
-import Menu, { Item } from "@foxglove/studio-base/components/Menu";
+import { Item, Menu } from "@foxglove/studio-base/components/Menu";
 import Tooltip from "@foxglove/studio-base/components/Tooltip";
 import { JSONInput } from "@foxglove/studio-base/components/input/JSONInput";
 import { ValidatedResizingInput } from "@foxglove/studio-base/components/input/ValidatedResizingInput";

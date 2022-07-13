@@ -46,11 +46,7 @@ const useStyles = makeStyles((theme) => ({
 // a small component which wraps its children in menu styles
 // and provides a helper { Item } component which can be used
 // to render typical menu items with text & an icon
-export default function Menu({
-  className,
-  style,
-  children,
-}: React.PropsWithChildren<Props>): JSX.Element {
+export function Menu({ className, style, children }: React.PropsWithChildren<Props>): JSX.Element {
   const styles = useStyles();
   return (
     <div className={cx(styles.container, className)} style={style}>

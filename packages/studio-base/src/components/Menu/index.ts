@@ -11,11 +11,5 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import ExpandableMenu from "./ExpandableMenu";
-import Item from "./Item";
-import Menu from "./Menu";
-import SubMenu from "./SubMenu";
-
-export { Item, SubMenu, ExpandableMenu };
-
-export default Menu;
+export * from "./Menu";
+export * from "./Item";
