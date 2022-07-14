@@ -93,6 +93,11 @@ export class LayerErrors extends EventEmitter<LayerErrorEvents> {
     this.add(TOPIC_PATH, errorId, errorMessage);
   }
 
+  hasError(path: Path, errorId: string): boolean {
+    const node = this._getNode(path);
+    return node?.errorsById?.has(errorId) === true;
+  }
+
   remove(path: Path, errorId: string): void {
     const node = this._getNode(path);
     if (node?.errorsById?.has(errorId) === true) {

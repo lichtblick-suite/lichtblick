@@ -8,7 +8,7 @@ import PanelSetup from "@foxglove/studio-base/stories/PanelSetup";
 
 import ThreeDeeRender from "../index";
 import { Marker } from "../ros";
-import { makeColor } from "./common";
+import { makeColor, STL_CUBE_MESH_RESOURCE } from "./common";
 import useDelayedFixture from "./useDelayedFixture";
 
 export default {
@@ -39,20 +39,7 @@ export function MeshMarkers(): JSX.Element {
       points: [],
       colors: [],
       text: "",
-      mesh_resource: encodeURI(`data:model/stl;utf8,solid AssimpScene
-  facet normal 0 0 -1 outer loop vertex -0.5 -0.5 -0.5 vertex -0.5 0.5 -0.5 vertex 0.5 0.5 -0.5 endloop endfacet
-  facet normal 0 0 -1 outer loop vertex 0.5 0.5 -0.5 vertex 0.5 -0.5 -0.5 vertex -0.5 -0.5 -0.5 endloop endfacet
-  facet normal 0 0 1 outer loop vertex 0.5 -0.5 0.5 vertex 0.5 0.5 0.5 vertex -0.5 0.5 0.5 endloop endfacet
-  facet normal 0 0 1 outer loop vertex -0.5 0.5 0.5 vertex -0.5 -0.5 0.5 vertex 0.5 -0.5 0.5 endloop endfacet
-  facet normal 0 1 0 outer loop vertex -0.5 0.5 0.5 vertex 0.5 0.5 0.5 vertex 0.5 0.5 -0.5 endloop endfacet
-  facet normal 0 1 0 outer loop vertex 0.5 0.5 -0.5 vertex -0.5 0.5 -0.5 vertex -0.5 0.5 0.5 endloop endfacet
-  facet normal 1 0 0 outer loop vertex 0.5 0.5 0.5 vertex 0.5 -0.5 0.5 vertex 0.5 -0.5 -0.5 endloop endfacet
-  facet normal 1 0 0 outer loop vertex 0.5 -0.5 -0.5 vertex 0.5 0.5 -0.5 vertex 0.5 0.5 0.5 endloop endfacet
-  facet normal 0 -1 0 outer loop vertex 0.5 -0.5 0.5 vertex -0.5 -0.5 0.5 vertex -0.5 -0.5 -0.5 endloop endfacet
-  facet normal 0 -1 0 outer loop vertex -0.5 -0.5 -0.5 vertex 0.5 -0.5 -0.5 vertex 0.5 -0.5 0.5 endloop endfacet
-  facet normal -1 0 0 outer loop vertex -0.5 -0.5 0.5 vertex -0.5 0.5 0.5 vertex -0.5 0.5 -0.5 endloop endfacet
-  facet normal -1 0 0 outer loop vertex -0.5 0.5 -0.5 vertex -0.5 -0.5 -0.5 vertex -0.5 -0.5 0.5 endloop endfacet
-endsolid AssimpScene`),
+      mesh_resource: STL_CUBE_MESH_RESOURCE,
       mesh_use_embedded_materials: true,
       lifetime: { sec: 0, nsec: 0 },
     },

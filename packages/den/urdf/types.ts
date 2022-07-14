@@ -57,10 +57,7 @@ export type UrdfCollider = {
   geometry: UrdfGeometry;
 };
 
-export type UrdfVisual = {
-  name?: string;
-  origin: Pose;
-  geometry: UrdfGeometry;
+export type UrdfVisual = UrdfCollider & {
   material?: UrdfMaterial;
 };
 

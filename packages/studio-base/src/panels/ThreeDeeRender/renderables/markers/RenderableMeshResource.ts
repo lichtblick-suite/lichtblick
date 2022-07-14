@@ -51,20 +51,13 @@ export class RenderableMeshResource extends RenderableMarker {
     if (forceLoad === true || marker.mesh_resource !== prevMarker.mesh_resource) {
       const opts = { useEmbeddedMaterials: marker.mesh_use_embedded_materials };
       const errors = this.renderer.settings.errors;
-      this._loadModel(marker.mesh_resource, opts)
-        .then(() => {
-          // Remove any mesh fetch error message since loading was successful
-          errors.removeFromTopic(this.userData.topic, MESH_FETCH_FAILED);
-          // Render a new frame now that the model is loaded
-          this.renderer.queueAnimationFrame();
-        })
-        .catch((err) => {
-          errors.addToTopic(
-            this.userData.topic,
-            MESH_FETCH_FAILED,
-            `Unhandled error loading mesh resource from "${marker.mesh_resource}": ${err.message}`,
-          );
-        });
+      this._loadModel(marker.mesh_resource, opts).catch((err) => {
+        errors.add(
+          this.userData.settingsPath,
+          MESH_FETCH_FAILED,
+          `Unhandled error loading mesh from "${marker.mesh_resource}": ${err.message}`,
+        );
+      });
     }
 
     this.scale.set(marker.scale.x, marker.scale.y, marker.scale.z);
@@ -77,28 +70,39 @@ export class RenderableMeshResource extends RenderableMarker {
     }
 
     const cachedModel = await this.renderer.modelCache.load(url, (err) => {
-      this.renderer.settings.errors.addToTopic(
-        this.userData.topic,
+      this.renderer.settings.errors.add(
+        this.userData.settingsPath,
         MESH_FETCH_FAILED,
-        `Failed to load mesh resource from "${url}": ${err.message}`,
+        `Error loading mesh from "${url}": ${err.message}`,
       );
     });
 
     if (!cachedModel) {
+      if (!this.renderer.settings.errors.hasError(this.userData.settingsPath, MESH_FETCH_FAILED)) {
+        this.renderer.settings.errors.add(
+          this.userData.settingsPath,
+          MESH_FETCH_FAILED,
+          `Failed to load mesh from "${url}"`,
+        );
+      }
       return;
     }
 
     const mesh = opts.useEmbeddedMaterials
-      ? cachedModel
-      : replaceMaterials(cachedModel, this.material);
+      ? cachedModel.clone(true)
+      : replaceMaterials(cachedModel.clone(true), this.material);
     this.mesh = mesh;
     this.add(mesh);
+
+    // Remove any mesh fetch error message since loading was successful
+    this.renderer.settings.errors.remove(this.userData.settingsPath, MESH_FETCH_FAILED);
+    // Render a new frame now that the model is loaded
+    this.renderer.queueAnimationFrame();
   }
 }
 
 function replaceMaterials(model: LoadedModel, material: THREE.MeshStandardMaterial): LoadedModel {
-  const newModel = model.clone(true);
-  newModel.traverse((child: THREE.Object3D) => {
+  model.traverse((child: THREE.Object3D) => {
     if (!(child instanceof THREE.Mesh)) {
       return;
     }
@@ -115,7 +119,7 @@ function replaceMaterials(model: LoadedModel, material: THREE.MeshStandardMateri
     }
     meshChild.material = material;
   });
-  return newModel;
+  return model;
 }
 
 /** Generic MeshStandardMaterial dispose function for materials loaded from an external source */

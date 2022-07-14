@@ -233,6 +233,7 @@ export class CoreSettings extends SceneExtension {
         });
 
         this.renderer.followFrameId = followTf;
+        this.renderer.settings.errors.clearPath(["general", "followTf"]);
       }
     } else if (category === "scene") {
       // Update the configuration

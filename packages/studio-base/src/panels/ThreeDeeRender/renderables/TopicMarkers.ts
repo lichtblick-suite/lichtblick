@@ -2,6 +2,8 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
+import { RenderableMeshResource } from "@foxglove/studio-base/panels/ThreeDeeRender/renderables/markers/RenderableMeshResource";
+
 import { BaseUserData, Renderable } from "../Renderable";
 import { Renderer } from "../Renderer";
 import { Marker, MarkerAction, MarkerType } from "../ros";
@@ -298,8 +300,12 @@ export class TopicMarkers extends Renderable<MarkerTopicUserData> {
         return pool.acquire(MarkerType.POINTS, this.topic, marker, receiveTime);
       case MarkerType.TEXT_VIEW_FACING:
         return pool.acquire(MarkerType.TEXT_VIEW_FACING, this.topic, marker, receiveTime);
-      case MarkerType.MESH_RESOURCE:
-        return pool.acquire(MarkerType.MESH_RESOURCE, this.topic, marker, receiveTime);
+      case MarkerType.MESH_RESOURCE: {
+        const renderable = pool.acquire(MarkerType.MESH_RESOURCE, this.topic, marker, receiveTime);
+        // Force reload the mesh
+        (renderable as RenderableMeshResource).update(marker, receiveTime, true);
+        return renderable;
+      }
       case MarkerType.TRIANGLE_LIST:
         return pool.acquire(MarkerType.TRIANGLE_LIST, this.topic, marker, receiveTime);
       default: {

@@ -25,6 +25,7 @@ import NoteFilled from "@mui/icons-material/Note";
 import Note from "@mui/icons-material/NoteOutlined";
 import Move from "@mui/icons-material/OpenWith";
 import Camera from "@mui/icons-material/PhotoCamera";
+import PrecisionManufacturing from "@mui/icons-material/PrecisionManufacturing";
 import Radar from "@mui/icons-material/Radar";
 import Settings from "@mui/icons-material/Settings";
 import Share from "@mui/icons-material/Share";
@@ -66,12 +67,13 @@ const icons: Record<SettingsIcon, typeof Add> = {
   Note,
   NoteFilled,
   Points,
+  PrecisionManufacturing,
   Radar,
   Settings,
   Shapes,
   Share,
-  Star,
   SouthEast,
+  Star,
   Timeline,
   Topic,
   Walk,

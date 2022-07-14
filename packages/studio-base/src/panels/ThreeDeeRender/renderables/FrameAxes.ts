@@ -221,7 +221,7 @@ export class FrameAxes extends SceneExtension<FrameAxisRenderable> {
     }
 
     if (path.length !== 3) {
-      return;
+      return; // Doesn't match the pattern of ["transforms", frameId, field]
     }
 
     this.saveSetting(path, action.payload.value);

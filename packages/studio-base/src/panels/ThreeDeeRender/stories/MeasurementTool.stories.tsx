@@ -16,7 +16,7 @@ export default {
   component: ThreeDeeRender,
 };
 
-MeasurementTool.parameters = { colorScheme: "dark", chromatic: { delay: 100 } };
+MeasurementTool.parameters = { colorScheme: "dark", chromatic: { delay: 200 } };
 MeasurementTool.play = async () => {
   document.querySelector<HTMLElement>("[data-test=measure-button]")!.click();
   await delay(100);

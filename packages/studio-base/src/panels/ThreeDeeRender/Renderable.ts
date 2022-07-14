@@ -9,14 +9,25 @@ import type { BaseSettings } from "./settings";
 import type { Pose } from "./transforms";
 
 export type BaseUserData = {
+  /** Timestamp when the associated `MessageEvent` was received */
   receiveTime: bigint;
+  /** Timestamp extracted from a field in the associated message, such as `header.stamp` */
   messageTime: bigint;
+  /** Coordinate frame this Renderable exists in */
   frameId: string;
+  /** Local position and orientation of the Renderable */
   pose: Pose;
+  /** Settings tree path where errors will be displayed */
   settingsPath: ReadonlyArray<string>;
+  /** User-customizable settings for this Renderable */
   settings: BaseSettings;
 };
 
+/**
+ * Renderables are generic THREE.js scene graph entities with additional
+ * properties from `BaseUserData` that allow coordinate frame transforms to
+ * automatically be applied and settings tree errors to be displayed.
+ */
 export class Renderable<TUserData extends BaseUserData = BaseUserData> extends THREE.Object3D {
   readonly isRenderable = true;
   readonly renderer: Renderer;
@@ -29,6 +40,10 @@ export class Renderable<TUserData extends BaseUserData = BaseUserData> extends T
     this.userData = userData;
   }
 
+  /**
+   * Dispose of any unmanaged resources uniquely associated with this Renderable
+   * such as GPU buffers.
+   */
   dispose(): void {
     this.children.length = 0;
   }

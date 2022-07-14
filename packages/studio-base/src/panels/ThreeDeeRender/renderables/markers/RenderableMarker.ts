@@ -35,7 +35,7 @@ export class RenderableMarker extends Renderable<MarkerUserData> {
       messageTime: toNanoSec(marker.header.stamp),
       frameId: renderer.normalizeFrameId(marker.header.frame_id),
       pose: marker.pose,
-      settingsPath: ["topics", topic, marker.ns, String(marker.id)], // unused
+      settingsPath: ["topics", topic],
       settings: { visible: true, frameLocked: marker.frame_locked },
       topic,
       marker,

@@ -51,7 +51,7 @@ export class MarkerPool {
     if (renderables) {
       const renderable = renderables.pop();
       if (renderable) {
-        renderable.userData.settingsPath = ["topics", topic, marker.ns, String(marker.id)];
+        renderable.userData.settingsPath = ["topics", topic];
         renderable.userData.settings = { visible: true, frameLocked: marker.frame_locked };
         renderable.userData.topic = topic;
         renderable.update(marker, receiveTime);
