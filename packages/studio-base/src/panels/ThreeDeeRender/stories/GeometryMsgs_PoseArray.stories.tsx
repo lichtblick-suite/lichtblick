@@ -135,14 +135,17 @@ function GeometryMsgs_PoseArray(): JSX.Element {
           followTf: "base_link",
           topics: {
             "/sensor_path": {
+              visible: true,
               type: "arrow",
               gradient: ["rgba(0, 255, 0, 0.2)", "rgba(0, 255, 127, 1.0)"],
               arrowScale: [1, 0.5, 0.01],
             },
             "/sensor_path2": {
+              visible: true,
               axisScale: 0.5,
             },
             "/baselink_path": {
+              visible: true,
               type: "arrow",
             },
           },

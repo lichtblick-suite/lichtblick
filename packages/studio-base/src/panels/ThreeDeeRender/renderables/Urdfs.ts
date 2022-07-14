@@ -47,7 +47,7 @@ export type LayerSettingsCustomUrdf = CustomLayerSettings & {
 };
 
 const DEFAULT_SETTINGS: LayerSettingsUrdf = {
-  visible: true,
+  visible: false,
   frameLocked: true,
   instanceId: "invalid",
 };
@@ -147,7 +147,7 @@ export class Urdfs extends SceneExtension<UrdfRenderable> {
           label: TOPIC_NAME,
           icon: "PrecisionManufacturing",
           fields,
-          visible: config.visible ?? true,
+          visible: config.visible ?? DEFAULT_SETTINGS.visible,
           handler: topicHandler,
         },
       });
@@ -172,7 +172,7 @@ export class Urdfs extends SceneExtension<UrdfRenderable> {
             label: config.label ?? "Grid",
             icon: "PrecisionManufacturing",
             fields,
-            visible: config.visible ?? true,
+            visible: config.visible ?? DEFAULT_CUSTOM_SETTINGS.visible,
             actions: [{ type: "action", id: "delete", label: "Delete" }],
             order: layerConfig.order,
             handler: layerHandler,

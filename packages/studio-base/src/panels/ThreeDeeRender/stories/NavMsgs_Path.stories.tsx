@@ -134,6 +134,10 @@ export function NavMsgs_Path(): JSX.Element {
             target: [0, 0, 0],
             targetOrientation: [0, 0, 0, 1],
           },
+          topics: {
+            "/baselink_path": { visible: true },
+            "/sensor_path": { visible: true },
+          },
         }}
       />
     </PanelSetup>

@@ -143,7 +143,9 @@ export function Marker_PointCloud2_Alignment(): JSX.Element {
         overrideConfig={{
           ...ThreeDeeRender.defaultConfig,
           topics: {
+            "/markers": { visible: true },
             "/pointcloud": {
+              visible: true,
               pointSize: 30,
               colorMode: "rgba",
               colorField: "rgba",

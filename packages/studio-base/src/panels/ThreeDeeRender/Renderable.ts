@@ -4,6 +4,8 @@
 
 import * as THREE from "three";
 
+import type { RosValue } from "@foxglove/studio-base/players/types";
+
 import type { Renderer } from "./Renderer";
 import type { BaseSettings } from "./settings";
 import type { Pose } from "./transforms";
@@ -30,6 +32,7 @@ export type BaseUserData = {
  */
 export class Renderable<TUserData extends BaseUserData = BaseUserData> extends THREE.Object3D {
   readonly isRenderable = true;
+  readonly pickable: boolean = true;
   readonly renderer: Renderer;
   override userData: TUserData;
 
@@ -46,5 +49,9 @@ export class Renderable<TUserData extends BaseUserData = BaseUserData> extends T
    */
   dispose(): void {
     this.children.length = 0;
+  }
+
+  details(): Record<string, RosValue> {
+    return {};
   }
 }

@@ -199,7 +199,7 @@ export class CoreSettings extends SceneExtension {
     ];
   }
 
-  handleSettingsAction = (action: SettingsTreeAction): void => {
+  override handleSettingsAction = (action: SettingsTreeAction): void => {
     if (action.action === "perform-node-action" && action.payload.id === "reset-camera") {
       this.renderer.updateConfig((draft) => {
         draft.cameraState = cloneDeep(DEFAULT_CAMERA_STATE);

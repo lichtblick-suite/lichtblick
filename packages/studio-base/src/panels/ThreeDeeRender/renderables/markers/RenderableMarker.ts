@@ -5,6 +5,7 @@
 import * as THREE from "three";
 
 import { toNanoSec } from "@foxglove/rostime";
+import { RosValue } from "@foxglove/studio-base/players/types";
 
 import { BaseUserData, Renderable } from "../../Renderable";
 import type { Renderer } from "../../Renderer";
@@ -41,6 +42,10 @@ export class RenderableMarker extends Renderable<MarkerUserData> {
       marker,
       expiresIn: hasLifetime ? toNanoSec(marker.lifetime) : undefined,
     });
+  }
+
+  override details(): Record<string, RosValue> {
+    return this.userData.marker;
   }
 
   update(marker: Marker, receiveTime: bigint | undefined): void {

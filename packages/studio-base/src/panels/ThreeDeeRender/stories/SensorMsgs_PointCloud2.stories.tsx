@@ -135,6 +135,7 @@ function SensorMsgs_PointCloud2({ rgbaFieldName }: { rgbaFieldName: string }): J
           followTf: "base_link",
           topics: {
             "/pointcloud": {
+              visible: true,
               pointSize: 10,
               colorMode: rgbaFieldName,
               colorField: rgbaFieldName,
@@ -308,6 +309,7 @@ export function SensorMsgs_PointCloud2_Intensity(): JSX.Element {
           followTf: "base_link",
           topics: {
             "/pointcloud": {
+              visible: true,
               pointSize: 5,
             },
           },
@@ -404,6 +406,9 @@ export function SensorMsgs_PointCloud2_TwoDimensions(): JSX.Element {
             far: 5000,
             target: [0, 0, 0],
             targetOrientation: [0, 0, 0, 1],
+          },
+          topics: {
+            "/pointcloud": { visible: true },
           },
         }}
       />

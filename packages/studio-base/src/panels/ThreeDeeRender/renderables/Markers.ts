@@ -29,7 +29,7 @@ export type LayerSettingsMarker = BaseSettings & {
 };
 
 const DEFAULT_SETTINGS: LayerSettingsMarker = {
-  visible: true,
+  visible: false,
   namespaces: {},
 };
 
@@ -52,8 +52,8 @@ export class Markers extends SceneExtension<TopicMarkers> {
           label: topic.name,
           icon: "Shapes",
           order: topic.name.toLocaleLowerCase(),
-          visible: config.visible ?? true,
-          handler: this.handleSettingsActionTopic,
+          visible: config.visible ?? DEFAULT_SETTINGS.visible,
+          handler: this.handleSettingsAction,
         };
 
         // Create a list of all the namespaces for this topic
@@ -89,7 +89,7 @@ export class Markers extends SceneExtension<TopicMarkers> {
     }
   }
 
-  handleSettingsActionTopic = (action: SettingsTreeAction): void => {
+  override handleSettingsAction = (action: SettingsTreeAction): void => {
     const path = action.payload.path;
     if (action.action !== "update" || path.length !== 3) {
       return;

@@ -22,6 +22,7 @@ import {
 import Logger from "@foxglove/log";
 import { toNanoSec } from "@foxglove/rostime";
 import { SettingsTreeAction, SettingsTreeFields } from "@foxglove/studio";
+import type { RosValue } from "@foxglove/studio-base/players/types";
 import { MutablePoint } from "@foxglove/studio-base/types/Messages";
 
 import { BaseUserData, Renderable } from "../Renderable";
@@ -57,7 +58,7 @@ const DEFAULT_IMAGE_WIDTH = 512;
 const DEFAULT_DISTANCE = 1;
 
 const DEFAULT_SETTINGS: LayerSettingsImage = {
-  visible: true,
+  visible: false,
   frameLocked: true,
   cameraInfoTopic: undefined,
   distance: DEFAULT_DISTANCE,
@@ -80,6 +81,17 @@ export class ImageRenderable extends Renderable<ImageUserData> {
     this.userData.material?.dispose();
     this.userData.geometry?.dispose();
     super.dispose();
+  }
+
+  override details(): Record<string, RosValue> {
+    const cameraInfoTopic = this.userData.settings.cameraInfoTopic;
+    const cameraInfoRenderable = cameraInfoTopic
+      ? camerasExtension(this.renderer)?.renderables.get(cameraInfoTopic)
+      : undefined;
+    return {
+      image: this.userData.image,
+      camera_info: cameraInfoRenderable?.userData.cameraInfo,
+    };
   }
 }
 
@@ -126,7 +138,7 @@ export class Images extends SceneExtension<ImageRenderable> {
           node: {
             icon: "ImageProjection",
             fields,
-            visible: config.visible ?? true,
+            visible: config.visible ?? DEFAULT_SETTINGS.visible,
             order: topic.name.toLocaleLowerCase(),
             handler,
           },
@@ -136,7 +148,7 @@ export class Images extends SceneExtension<ImageRenderable> {
     return entries;
   }
 
-  handleSettingsAction = (action: SettingsTreeAction): void => {
+  override handleSettingsAction = (action: SettingsTreeAction): void => {
     const path = action.payload.path;
     if (action.action !== "update" || path.length !== 3) {
       return;
@@ -232,12 +244,6 @@ export class Images extends SceneExtension<ImageRenderable> {
     }
   };
 
-  private _camerasExtension() {
-    return this.renderer.sceneExtensions.get("foxglove.Cameras") as
-      | SceneExtension<Renderable<CameraInfoUserData>>
-      | undefined;
-  }
-
   private _updateImageRenderable(
     renderable: ImageRenderable,
     image: Image | CompressedImage,
@@ -245,7 +251,7 @@ export class Images extends SceneExtension<ImageRenderable> {
     settings: Partial<LayerSettingsImage> | undefined,
   ): void {
     const prevSettings = renderable.userData.settings;
-    const newSettings = { ...prevSettings, ...settings };
+    const newSettings = { ...DEFAULT_SETTINGS, ...settings };
     const geometrySettingsEqual =
       newSettings.cameraInfoTopic === prevSettings.cameraInfoTopic &&
       newSettings.distance === prevSettings.distance;
@@ -270,7 +276,9 @@ export class Images extends SceneExtension<ImageRenderable> {
 
     // Create the plane geometry if needed
     if (settings?.cameraInfoTopic != undefined && renderable.userData.geometry == undefined) {
-      const cameraRenderable = this._camerasExtension()?.renderables.get(settings.cameraInfoTopic);
+      const cameraRenderable = camerasExtension(this.renderer)?.renderables.get(
+        settings.cameraInfoTopic,
+      );
       const cameraModel = cameraRenderable?.userData.cameraModel;
       if (cameraModel) {
         // log.debug(
@@ -504,6 +512,12 @@ function cameraInfoTopicMatches(topic: string, cameraInfoTopic: string): boolean
   }
 
   return true;
+}
+
+function camerasExtension(renderer: Renderer) {
+  return renderer.sceneExtensions.get("foxglove.Cameras") as
+    | SceneExtension<Renderable<CameraInfoUserData>>
+    | undefined;
 }
 
 function autoSelectCameraInfoTopic(

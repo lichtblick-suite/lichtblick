@@ -40,7 +40,7 @@ import Interactions, {
 } from "./Interactions";
 import type { Renderable } from "./Renderable";
 import { MessageHandler, Renderer, RendererConfig } from "./Renderer";
-import { RendererContext, useRendererEvent } from "./RendererContext";
+import { RendererContext, useRenderer, useRendererEvent } from "./RendererContext";
 import { Stats } from "./Stats";
 import { FRAME_TRANSFORM_DATATYPES } from "./foxglove";
 import type { MarkerUserData } from "./renderables/markers/RenderableMarker";
@@ -68,10 +68,20 @@ function RendererOverlay(props: {
 }): JSX.Element {
   const [selectedRenderable, setSelectedRenderable] = useState<Renderable | undefined>(undefined);
   const [interactionsTabType, setInteractionsTabType] = useState<TabType | undefined>(undefined);
+  const renderer = useRenderer();
+
+  // Toggle object selection mode on/off in the renderer
+  useEffect(() => {
+    if (renderer) {
+      renderer.setPickingEnabled(interactionsTabType != undefined);
+    }
+  }, [interactionsTabType, renderer]);
 
   useRendererEvent("renderableSelected", (renderable) => {
     setSelectedRenderable(renderable);
-    setInteractionsTabType(renderable ? OBJECT_TAB_TYPE : undefined);
+    if (renderable) {
+      setInteractionsTabType(OBJECT_TAB_TYPE);
+    }
   });
 
   const stats = props.enableStats ? (
@@ -94,8 +104,8 @@ function RendererOverlay(props: {
     // Retrieve the original message for Markers. This needs to be rethought for
     // other renderables that are generated from received messages
     const maybeMarkerUserData = selectedRenderable.userData as Partial<MarkerUserData>;
-    const topic = maybeMarkerUserData.topic ?? "";
-    const originalMessage = maybeMarkerUserData.marker ?? {};
+    const topic = maybeMarkerUserData.topic ?? selectedRenderable.name;
+    const originalMessage = selectedRenderable.details();
 
     return {
       object: {
@@ -208,6 +218,7 @@ export function ThreeDeeRender({ context }: { context: PanelExtensionContext }):
     () => renderer?.datatypeHandlers ?? new Map<string, MessageHandler[]>(),
     [renderer],
   );
+
   const topicHandlers = useMemo(
     () => renderer?.topicHandlers ?? new Map<string, MessageHandler[]>(),
     [renderer],
@@ -351,19 +362,23 @@ export function ThreeDeeRender({ context }: { context: PanelExtensionContext }):
     }
 
     for (const topic of topics) {
-      // Subscribe to all transform topics
       if (
         FRAME_TRANSFORM_DATATYPES.has(topic.datatype) ||
         TF_DATATYPES.has(topic.datatype) ||
         TRANSFORM_STAMPED_DATATYPES.has(topic.datatype)
       ) {
+        // Subscribe to all transform topics
         subscriptions.add(topic.name);
-      } else if (topicHandlers.has(topic.name) || datatypeHandlers.has(topic.datatype)) {
-        // Subscribe to known topics/datatypes if the topic has not been toggled off
-        const topicConfig = config.topics[topic.name];
-        if (topicConfig?.visible !== false) {
-          subscriptions.add(topic.name);
-        }
+      } else if (config.topics[topic.name]?.visible === true) {
+        // Subscribe if the topic is visible
+        subscriptions.add(topic.name);
+      } else if (
+        // prettier-ignore
+        (topicHandlers.get(topic.name)?.length ?? 0) +
+        (datatypeHandlers.get(topic.datatype)?.length ?? 0) > 1
+      ) {
+        // Subscribe if there are multiple handlers registered for this topic
+        subscriptions.add(topic.name);
       }
     }
 

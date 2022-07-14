@@ -8,6 +8,7 @@ import { LineGeometry } from "three/examples/jsm/lines/LineGeometry";
 import { LineMaterial } from "three/examples/jsm/lines/LineMaterial";
 
 import { SettingsTreeAction, SettingsTreeFields } from "@foxglove/studio";
+import type { RosValue } from "@foxglove/studio-base/players/types";
 import { Label } from "@foxglove/three-text";
 
 import { BaseUserData, Renderable } from "../Renderable";
@@ -46,6 +47,18 @@ class FrameAxisRenderable extends Renderable<FrameAxisUserData> {
   override dispose(): void {
     this.renderer.labelPool.release(this.userData.label);
     super.dispose();
+  }
+
+  override details(): Record<string, RosValue> {
+    const frame = this.renderer.transformTree.frame(this.userData.frameId);
+    const parent = frame?.parent();
+    const fixed = frame?.root();
+
+    return {
+      child_frame_id: frame?.displayName() ?? "<unknown>",
+      parent_frame_id: parent?.displayName() ?? "<unknown>",
+      fixed_frame_id: fixed?.displayName() ?? "<unknown>",
+    };
   }
 }
 
@@ -203,7 +216,7 @@ export class FrameAxes extends SceneExtension<FrameAxisRenderable> {
     stringToRgb(this.lineMaterial.color, color);
   }
 
-  handleSettingsAction = (action: SettingsTreeAction): void => {
+  override handleSettingsAction = (action: SettingsTreeAction): void => {
     const path = action.payload.path;
     if (action.action !== "update") {
       return;

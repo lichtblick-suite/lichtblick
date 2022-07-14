@@ -122,6 +122,7 @@ function SensorMsgs_LaserScan({
           scene: { enableStats: false },
           topics: {
             "/scan": {
+              visible: true,
               pointSize: 10,
               colorMode: "colormap",
               colorMap: "turbo",
@@ -312,12 +313,14 @@ export function ComparisonWithPointCloudColors(): JSX.Element {
           scene: { enableStats: false },
           topics: {
             "/scan": {
+              visible: true,
               pointSize: 10,
               colorMode: "colormap",
               colorMap: "turbo",
               colorField: "intensity",
             },
             "/cloud": {
+              visible: true,
               pointSize: 10,
               colorMode: "colormap",
               colorMap: "turbo",

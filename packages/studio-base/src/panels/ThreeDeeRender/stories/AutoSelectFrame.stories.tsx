@@ -80,7 +80,7 @@ export function AutoSelectFrame(): JSX.Element {
     topics,
     frame: {
       "/tf": [tf1, tf2],
-      "/arrows": [arrow],
+      "/markers": [arrow],
     },
     capabilities: [],
     activeData: {
@@ -105,6 +105,9 @@ export function AutoSelectFrame(): JSX.Element {
             far: 5000,
             target: [0, 0, 0],
             targetOrientation: [0, 0, 0, 1],
+          },
+          topics: {
+            "/markers": { visible: true },
           },
         }}
       />

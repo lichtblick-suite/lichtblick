@@ -175,18 +175,22 @@ export function ImageRender(): JSX.Element {
           },
           topics: {
             "/cam1/info": {
+              visible: true,
               color: "rgba(0, 255, 0, 1)",
               distance: 0.5,
             },
             "/cam2/info": {
+              visible: true,
               color: "rgba(0, 255, 255, 1)",
               distance: 0.25,
             },
             "/cam1/png": {
+              visible: true,
               color: "rgba(255, 255, 255, 1)",
               distance: 0.5,
             },
             "/cam2/raw": {
+              visible: true,
               color: "rgba(255, 255, 255, 0.75)",
               distance: 0.25,
             },

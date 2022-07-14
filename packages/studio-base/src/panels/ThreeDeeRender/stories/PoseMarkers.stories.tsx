@@ -172,18 +172,23 @@ export function PoseMarkers(): JSX.Element {
           },
           topics: {
             "/pose": {
+              visible: true,
               type: "arrow",
               color: "rgba(107, 220, 255, 0.5)",
             },
             "/pose_with_covariance": {
+              visible: true,
               type: "arrow",
             },
             "/pose_with_hidden_covariance": {
+              visible: true,
               type: "arrow",
               showCovariance: false,
               covarianceColor: "rgba(255, 0, 0, 1)",
             },
-            // "/pose_axis_with_covariance": {}, // Default settings
+            "/pose_axis_with_covariance": {
+              visible: true,
+            },
           },
         }}
       />

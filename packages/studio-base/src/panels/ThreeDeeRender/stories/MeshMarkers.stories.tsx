@@ -141,6 +141,9 @@ f 5/6/6 1/12/6 8/11/6`),
             grid: { layerId: "foxglove.Grid" },
           },
           cameraState: { ...DEFAULT_CAMERA_STATE, distance: 5, thetaOffset: 1 },
+          topics: {
+            "/markers": { visible: true },
+          },
         }}
       />
     </PanelSetup>

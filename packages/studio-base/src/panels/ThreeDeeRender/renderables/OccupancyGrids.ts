@@ -6,6 +6,7 @@ import * as THREE from "three";
 
 import { toNanoSec } from "@foxglove/rostime";
 import { SettingsTreeAction, SettingsTreeFields } from "@foxglove/studio";
+import type { RosValue } from "@foxglove/studio-base/players/types";
 
 import { BaseUserData, Renderable } from "../Renderable";
 import { Renderer } from "../Renderer";
@@ -46,7 +47,7 @@ const DEFAULT_UNKNOWN_COLOR_STR = rgbaToCssString(DEFAULT_UNKNOWN_COLOR);
 const DEFAULT_INVALID_COLOR_STR = rgbaToCssString(DEFAULT_INVALID_COLOR);
 
 const DEFAULT_SETTINGS: LayerSettingsOccupancyGrid = {
-  visible: true,
+  visible: false,
   frameLocked: false,
   minColor: DEFAULT_MIN_COLOR_STR,
   maxColor: DEFAULT_MAX_COLOR_STR,
@@ -69,6 +70,10 @@ export class OccupancyGridRenderable extends Renderable<OccupancyGridUserData> {
     this.userData.texture.dispose();
     this.userData.material.dispose();
     this.userData.pickingMaterial.dispose();
+  }
+
+  override details(): Record<string, RosValue> {
+    return this.userData.occupancyGrid;
   }
 }
 
@@ -104,7 +109,7 @@ export class OccupancyGrids extends SceneExtension<OccupancyGridRenderable> {
             label: topic.name,
             icon: "Cells",
             fields,
-            visible: config.visible ?? true,
+            visible: config.visible ?? DEFAULT_SETTINGS.visible,
             order: topic.name.toLocaleLowerCase(),
             handler,
           },
@@ -114,7 +119,7 @@ export class OccupancyGrids extends SceneExtension<OccupancyGridRenderable> {
     return entries;
   }
 
-  handleSettingsAction = (action: SettingsTreeAction): void => {
+  override handleSettingsAction = (action: SettingsTreeAction): void => {
     const path = action.payload.path;
     if (action.action !== "update" || path.length !== 3) {
       return;

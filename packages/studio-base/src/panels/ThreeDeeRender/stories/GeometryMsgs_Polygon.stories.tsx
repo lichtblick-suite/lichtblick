@@ -94,6 +94,9 @@ export function GeometryMsgs_Polygon(): JSX.Element {
             target: [0, 0, 0],
             targetOrientation: [0, 0, 0, 1],
           },
+          topics: {
+            "/polygon": { visible: true },
+          },
         }}
       />
     </PanelSetup>

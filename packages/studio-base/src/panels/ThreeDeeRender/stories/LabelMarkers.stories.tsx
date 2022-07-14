@@ -120,6 +120,9 @@ export function LabelMarkers(): JSX.Element {
           layers: {
             grid: { layerId: "foxglove.Grid" },
           },
+          topics: {
+            "/labels": { visible: true },
+          },
         }}
       />
     </PanelSetup>

@@ -169,6 +169,9 @@ export function MarkerLifetimes(): JSX.Element {
             target: [0, 0, 0],
             targetOrientation: [0, 0, 0, 1],
           },
+          topics: {
+            "/markers": { visible: true },
+          },
         }}
       />
     </PanelSetup>

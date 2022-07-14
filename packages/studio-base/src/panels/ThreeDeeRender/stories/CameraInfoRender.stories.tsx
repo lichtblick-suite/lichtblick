@@ -139,14 +139,17 @@ export function CameraInfoRender(): JSX.Element {
           },
           topics: {
             "/rational_polynomial": {
+              visible: true,
               color: "rgba(0, 255, 0, 1)",
               distance: 0.25,
             },
             "/none": {
+              visible: true,
               color: "rgba(0, 255, 255, 1)",
               distance: 0.5,
             },
             "/empty": {
+              visible: true,
               color: "rgba(255, 0, 0, 1)",
               distance: 0.75,
             },

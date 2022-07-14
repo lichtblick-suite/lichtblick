@@ -6,6 +6,7 @@ import * as THREE from "three";
 
 import { toNanoSec } from "@foxglove/rostime";
 import { SettingsTreeAction, SettingsTreeFields } from "@foxglove/studio";
+import type { RosValue } from "@foxglove/studio-base/players/types";
 
 import { BaseUserData, Renderable } from "../Renderable";
 import { Renderer } from "../Renderer";
@@ -55,7 +56,7 @@ const DEFAULT_COVARIANCE_COLOR_STR = rgbaToCssString(DEFAULT_COVARIANCE_COLOR);
 
 const DEFAULT_SETTINGS: LayerSettingsPose = {
   type: DEFAULT_TYPE,
-  visible: true,
+  visible: false,
   axisScale: DEFAULT_AXIS_SCALE,
   arrowScale: DEFAULT_ARROW_SCALE,
   color: DEFAULT_COLOR_STR,
@@ -83,6 +84,10 @@ export class PoseRenderable extends Renderable<PoseUserData> {
     this.userData.arrow?.dispose();
     this.userData.sphere?.dispose();
     super.dispose();
+  }
+
+  override details(): Record<string, RosValue> {
+    return this.userData.poseMessage;
   }
 }
 
@@ -162,7 +167,7 @@ export class Poses extends SceneExtension<PoseRenderable> {
             label: topic.name,
             icon: "Flag",
             fields,
-            visible: config.visible ?? true,
+            visible: config.visible ?? DEFAULT_SETTINGS.visible,
             order: topic.name.toLocaleLowerCase(),
             handler,
           },
@@ -172,7 +177,7 @@ export class Poses extends SceneExtension<PoseRenderable> {
     return entries;
   }
 
-  handleSettingsAction = (action: SettingsTreeAction): void => {
+  override handleSettingsAction = (action: SettingsTreeAction): void => {
     const path = action.payload.path;
     if (action.action !== "update" || path.length !== 3) {
       return;

@@ -118,14 +118,17 @@ export function GeometryMsgs_PoseStamped(): JSX.Element {
           followTf: "base_link",
           topics: {
             "/pose1": {
+              visible: true,
               type: "arrow",
             },
             "/pose2": {
+              visible: true,
               type: "arrow",
               arrowScale: [2, 1, 1],
               color: "rgba(0, 255, 0, 0.3)",
             },
             "/pose3": {
+              visible: true,
               axisScale: Math.sqrt(8),
             },
           },

@@ -6,6 +6,7 @@ import { PinholeCameraModel } from "@foxglove/den/image";
 import Logger from "@foxglove/log";
 import { toNanoSec } from "@foxglove/rostime";
 import { SettingsTreeAction, SettingsTreeFields } from "@foxglove/studio";
+import type { RosValue } from "@foxglove/studio-base/players/types";
 import { MutablePoint } from "@foxglove/studio-base/types/Messages";
 
 import { BaseUserData, Renderable } from "../Renderable";
@@ -49,7 +50,7 @@ const DEFAULT_COLOR_STR = rgbaToCssString(DEFAULT_COLOR);
 const CAMERA_MODEL = "CameraModel";
 
 const DEFAULT_SETTINGS: LayerSettingsCameraInfo = {
-  visible: true,
+  visible: false,
   frameLocked: true,
   distance: DEFAULT_DISTANCE,
   width: DEFAULT_WIDTH,
@@ -68,6 +69,10 @@ export class CameraInfoRenderable extends Renderable<CameraInfoUserData> {
   override dispose(): void {
     this.userData.lines?.dispose();
     super.dispose();
+  }
+
+  override details(): Record<string, RosValue> {
+    return this.userData.cameraInfo ?? {};
   }
 }
 
@@ -98,7 +103,7 @@ export class Cameras extends SceneExtension<CameraInfoRenderable> {
           node: {
             icon: "Camera",
             fields,
-            visible: config.visible ?? true,
+            visible: config.visible ?? DEFAULT_SETTINGS.visible,
             handler,
             order: topic.name.toLocaleLowerCase(),
           },
@@ -108,7 +113,7 @@ export class Cameras extends SceneExtension<CameraInfoRenderable> {
     return entries;
   }
 
-  handleSettingsAction = (action: SettingsTreeAction): void => {
+  override handleSettingsAction = (action: SettingsTreeAction): void => {
     const path = action.payload.path;
     if (action.action !== "update" || path.length !== 3) {
       return;
@@ -178,7 +183,7 @@ export class Cameras extends SceneExtension<CameraInfoRenderable> {
     settings: Partial<LayerSettingsCameraInfo> | undefined,
   ): void {
     const prevSettings = renderable.userData.settings;
-    const newSettings = { ...prevSettings, ...settings };
+    const newSettings = { ...DEFAULT_SETTINGS, ...settings };
     const settingsEqual =
       newSettings.color === prevSettings.color &&
       newSettings.distance === prevSettings.distance &&

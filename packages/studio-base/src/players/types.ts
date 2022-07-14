@@ -239,12 +239,21 @@ export type TopicStats = {
   lastMessageTime?: Time;
 };
 
+type RosTypedArray =
+  | Int8Array
+  | Uint8Array
+  | Int16Array
+  | Uint16Array
+  | Int32Array
+  | Uint32Array
+  | Float32Array
+  | Float64Array;
+
 type RosSingularField = number | string | boolean | RosObject; // No time -- consider it a message.
 export type RosValue =
   | RosSingularField
   | readonly RosSingularField[]
-  | Uint8Array
-  | Int8Array
+  | RosTypedArray
   | undefined
   // eslint-disable-next-line no-restricted-syntax
   | null;

@@ -6,6 +6,7 @@ import * as THREE from "three";
 
 import { toNanoSec } from "@foxglove/rostime";
 import { SettingsTreeAction, SettingsTreeFields, Topic } from "@foxglove/studio";
+import type { RosValue } from "@foxglove/studio-base/players/types";
 
 import { BaseUserData, Renderable } from "../Renderable";
 import { Renderer } from "../Renderer";
@@ -70,7 +71,7 @@ const DEFAULT_GRADIENT_STR: Gradient = [
 ];
 
 const DEFAULT_SETTINGS: LayerSettingsPoseArray = {
-  visible: true,
+  visible: false,
   type: DEFAULT_TYPE,
   axisScale: DEFAULT_AXIS_SCALE,
   arrowScale: DEFAULT_ARROW_SCALE,
@@ -103,6 +104,10 @@ export class PoseArrayRenderable extends Renderable<PoseArrayUserData> {
     this.userData.arrows.forEach((arrow) => arrow.dispose());
     this.userData.lineStrip?.dispose();
     super.dispose();
+  }
+
+  override details(): Record<string, RosValue> {
+    return this.userData.poseArrayMessage;
   }
 
   removeArrows(): void {
@@ -176,7 +181,7 @@ export class PoseArrays extends SceneExtension<PoseArrayRenderable> {
             label: topic.name,
             icon: NAV_PATH_DATATYPES.has(topic.datatype) ? "Timeline" : "Flag",
             fields,
-            visible: config.visible ?? true,
+            visible: config.visible ?? DEFAULT_SETTINGS.visible,
             handler,
           },
         });
@@ -185,7 +190,7 @@ export class PoseArrays extends SceneExtension<PoseArrayRenderable> {
     return entries;
   }
 
-  handleSettingsAction = (action: SettingsTreeAction): void => {
+  override handleSettingsAction = (action: SettingsTreeAction): void => {
     const path = action.payload.path;
     if (action.action !== "update" || path.length !== 3) {
       return;

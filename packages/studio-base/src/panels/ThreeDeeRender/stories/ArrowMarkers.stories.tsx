@@ -152,6 +152,9 @@ export function ArrowMarkers(): JSX.Element {
             target: [0, 0, 0],
             targetOrientation: [0, 0, 0, 1],
           },
+          topics: {
+            "/arrows": { visible: true },
+          },
         }}
       />
     </PanelSetup>

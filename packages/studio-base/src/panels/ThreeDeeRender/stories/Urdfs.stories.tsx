@@ -144,6 +144,9 @@ export function Urdfs(): JSX.Element {
           cameraState: {
             distance: 6,
           },
+          topics: {
+            "/robot_description": { visible: true },
+          },
         }}
       />
     </PanelSetup>
