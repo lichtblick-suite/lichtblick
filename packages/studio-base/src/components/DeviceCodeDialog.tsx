@@ -2,15 +2,22 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { Dialog, DialogFooter, DefaultButton, PrimaryButton } from "@fluentui/react";
-import { Link, Typography, CircularProgress } from "@mui/material";
+import {
+  Dialog,
+  Button,
+  Link,
+  Typography,
+  CircularProgress,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+} from "@mui/material";
 import { useEffect, useMemo } from "react";
 import { useAsync, useMountedState } from "react-use";
 
 import Logger from "@foxglove/log";
 import Stack from "@foxglove/studio-base/components/Stack";
 import { useConsoleApi } from "@foxglove/studio-base/context/ConsoleApiContext";
-import { useDialogHostId } from "@foxglove/studio-base/context/DialogHostIdContext";
 import { Session } from "@foxglove/studio-base/services/ConsoleApi";
 import { fonts } from "@foxglove/studio-base/util/sharedStyleConstants";
 
@@ -24,7 +31,6 @@ type DeviceCodePanelProps = {
 export default function DeviceCodeDialog(props: DeviceCodePanelProps): JSX.Element {
   const isMounted = useMountedState();
   const api = useConsoleApi();
-  const hostId = useDialogHostId();
   const { onClose } = props;
 
   const { value: deviceCode, error: deviceCodeError } = useAsync(async () => {
@@ -135,19 +141,25 @@ export default function DeviceCodeDialog(props: DeviceCodePanelProps): JSX.Eleme
     signinError != undefined
   ) {
     return (
-      <Dialog hidden={false} title="Error" modalProps={{ layerProps: { hostId } }}>
-        {deviceCodeError?.message ?? deviceResponseError?.message ?? signinError?.message}
-        <DialogFooter>
-          <PrimaryButton text="Done" onClick={() => onClose?.()} />
-        </DialogFooter>
+      <Dialog open maxWidth="xs" fullWidth>
+        <DialogTitle>Error</DialogTitle>
+        <DialogContent>
+          {deviceCodeError?.message ?? deviceResponseError?.message ?? signinError?.message}
+        </DialogContent>
+        <DialogActions>
+          <Button variant="contained" size="large" onClick={() => onClose?.()}>
+            Done
+          </Button>
+        </DialogActions>
       </Dialog>
     );
   }
 
   return (
-    <Dialog hidden={false} minWidth={440} title="Sign in" modalProps={{ layerProps: { hostId } }}>
-      {dialogContent}
-      <DialogFooter styles={{ action: { display: "block" } }}>
+    <Dialog open maxWidth="xs" fullWidth>
+      <DialogTitle>Sign in</DialogTitle>
+      <DialogContent>{dialogContent}</DialogContent>
+      <DialogActions>
         <Stack direction="row" flexGrow={1} justifyContent="space-between">
           <Stack direction="row" alignItems="center" flex="auto" gap={2}>
             <CircularProgress color="primary" size={16} />
@@ -155,9 +167,12 @@ export default function DeviceCodeDialog(props: DeviceCodePanelProps): JSX.Eleme
               {deviceCode ? "Awaiting authentication…" : "Connecting…"}
             </Typography>
           </Stack>
-          <DefaultButton text="Cancel" onClick={() => onClose?.()} />
+
+          <Button variant="outlined" size="large" color="inherit" onClick={() => onClose?.()}>
+            Cancel
+          </Button>
         </Stack>
-      </DialogFooter>
+      </DialogActions>
     </Dialog>
   );
 }

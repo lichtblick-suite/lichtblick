@@ -2,18 +2,25 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
+import FileDownloadIcon from "@mdi/svg/svg/file-download-outline.svg";
+import CheckIcon from "@mui/icons-material/Check";
+import CloseIcon from "@mui/icons-material/Close";
+import ContentCopyIcon from "@mui/icons-material/ContentCopy";
+import DeleteOutline from "@mui/icons-material/DeleteOutline";
 import {
-  DefaultButton,
-  Dialog,
-  DialogFooter,
+  Button,
   IconButton,
+  Dialog,
+  DialogContent,
+  DialogActions,
   TextField,
-  useTheme,
-} from "@fluentui/react";
-import { Stack } from "@mui/material";
+  Typography,
+  styled as muiStyled,
+} from "@mui/material";
 import { useCallback, useMemo, useState } from "react";
 
-import { useDialogHostId } from "@foxglove/studio-base/context/DialogHostIdContext";
+import HoverableIconButton from "@foxglove/studio-base/components/HoverableIconButton";
+import Stack from "@foxglove/studio-base/components/Stack";
 import clipboard from "@foxglove/studio-base/util/clipboard";
 import { downloadTextFile } from "@foxglove/studio-base/util/download";
 import { fonts } from "@foxglove/studio-base/util/sharedStyleConstants";
@@ -26,15 +33,23 @@ type Props = {
   title: string;
 };
 
+const StyledTextarea = muiStyled(TextField)(({ theme }) => ({
+  ".MuiOutlinedInput-root": {
+    backgroundColor: theme.palette.action.hover,
+    fontFamily: fonts.MONOSPACE,
+    maxHeight: "60vh",
+    overflowY: "auto",
+    padding: theme.spacing(0.25),
+  },
+}));
+
 export default function ShareJsonModal({
   initialValue = {},
   onChange,
   onRequestClose,
   noun,
   title,
-}: Props): React.ReactElement {
-  const theme = useTheme();
-  const hostId = useDialogHostId();
+}: Props): JSX.Element {
   const [value, setValue] = useState(JSON.stringify(initialValue, undefined, 2) ?? "");
   const [copied, setCopied] = useState(false);
 
@@ -63,85 +78,76 @@ export default function ShareJsonModal({
   }, [value]);
 
   return (
-    <Dialog
-      hidden={false}
-      onDismiss={onRequestClose}
-      dialogContentProps={{
-        title,
-        subText: `Paste a new ${noun} to use it, or copy this one to share it:`,
-        showCloseButton: true,
-      }}
-      modalProps={{ layerProps: { hostId } }}
-      maxWidth={`calc(100vw - ${theme.spacing.l2})`}
-    >
-      <TextField
-        multiline
-        rows={10}
-        autoAdjustHeight
-        value={value}
-        onChange={(_, newValue) => newValue != undefined && setValue(newValue)}
-        autoFocus
-        errorMessage={error && "The JSON provided is invalid."}
-        spellCheck={false}
-        styles={{
-          field: {
-            fontFamily: `${fonts.MONOSPACE} !important`,
-            maxHeight: "60vh",
-            overflowY: "auto",
-          },
-        }}
-      />
-      <DialogFooter
-        styles={{
-          action: {
-            margin: 0,
-          },
-          actionsRight: {
-            display: "flex",
-            justifyContent: "space-between",
-          },
-        }}
+    <Dialog open onClose={onRequestClose} maxWidth="sm" fullWidth>
+      <Stack
+        direction="row"
+        justifyContent="space-between"
+        alignItems="flex-start"
+        paddingX={3}
+        paddingTop={2}
       >
-        <Stack direction="row" spacing={1}>
-          <IconButton
-            onClick={handleDownload}
-            iconProps={{ iconName: "Download" }}
-            title="Download"
-            ariaLabel="Download"
-            styles={{
-              root: { color: theme.palette.neutralPrimary },
-            }}
-          />
+        <Stack>
+          <Typography variant="h4" fontWeight={600} gutterBottom>
+            {title}
+          </Typography>
+          <Typography variant="body1" color="text.secondary">
+            {`Paste a new ${noun} to use it, or copy this one to share it:`}
+          </Typography>
+        </Stack>
+
+        <IconButton onClick={onRequestClose} edge="end">
+          <CloseIcon />
+        </IconButton>
+      </Stack>
+      <DialogContent>
+        <StyledTextarea
+          fullWidth
+          multiline
+          rows={10}
+          value={value}
+          onChange={(event) => setValue(event.target.value)}
+          autoFocus
+          error={error != undefined}
+          helperText={
+            error ? "The JSON provided is invalid." : " " // pass whitespace to prevent height from jumping
+          }
+          FormHelperTextProps={{ variant: "standard" }}
+          spellCheck={false}
+        />
+      </DialogContent>
+      <DialogActions>
+        <Stack direction="row" gap={1}>
+          <IconButton onClick={handleDownload} title="Download" aria-label="Download">
+            <FileDownloadIcon />
+          </IconButton>
           <IconButton
             onClick={handleCopy}
-            iconProps={{ iconName: copied ? "CheckMark" : "ClipboardList" }}
             title={copied ? "Copied" : "Copy to Clipboard"}
-            ariaLabel={copied ? "Copied" : "Copy to Clipboard"}
-            styles={{
-              root: {
-                color: copied ? theme.semanticColors.successIcon : theme.palette.neutralPrimary,
-              },
-              rootFocused: {
-                color: copied ? theme.semanticColors.successIcon : theme.palette.themePrimary,
-              },
-            }}
-          />
-          <IconButton
+            aria-label={copied ? "Copied" : "Copy to Clipboard"}
+            color={copied ? "success" : "default"}
+          >
+            {copied ? <CheckIcon /> : <ContentCopyIcon />}
+          </IconButton>
+          <HoverableIconButton
+            activeColor="error"
             onClick={() => setValue("{}")}
-            iconProps={{ iconName: "Delete" }}
             title="Clear"
-            ariaLabel="Clear"
-            styles={{
-              root: { color: theme.palette.neutralPrimary },
-              rootHovered: { color: theme.semanticColors.errorText },
-            }}
+            aria-label="Clear"
+            icon={<DeleteOutline />}
           />
         </Stack>
 
-        <DefaultButton disabled={error != undefined} primary onClick={handleSubmit}>
+        <Stack flex="auto" />
+
+        <Button
+          disabled={error != undefined}
+          variant="contained"
+          size="large"
+          onClick={handleSubmit}
+        >
           Apply
-        </DefaultButton>
-      </DialogFooter>
+        </Button>
+      </DialogActions>
     </Dialog>
   );
 }

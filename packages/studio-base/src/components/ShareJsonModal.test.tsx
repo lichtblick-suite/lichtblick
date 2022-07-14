@@ -31,12 +31,12 @@ describe("<ShareJsonModal />", () => {
       </ThemeProvider>,
     );
 
-    const newValue = JSON.stringify({ id: "foo" });
-    wrapper.find("textarea").simulate("change", { target: { value: newValue } });
-    wrapper.find(".ms-Button--primary").first().simulate("click");
-    expect(
-      wrapper.find("TextFieldBase[errorMessage='The JSON provided is invalid.']").exists(),
-    ).toBe(false);
+    const value = JSON.stringify({ id: "foo" });
+
+    wrapper.find("textarea").first().simulate("change", { target: { value } });
+    wrapper.find(".MuiButton-root.MuiButton-containedPrimary").first().simulate("click");
+
+    expect(wrapper.find(".MuiFormHelperText-root.Mui-error").exists()).toBe(false);
   });
 
   it("fires no change callback and shows error if bad input is used", (done) => {
@@ -58,13 +58,12 @@ describe("<ShareJsonModal />", () => {
         </div>
       </ThemeProvider>,
     );
-    const newValue = "asdlkfjasdf:";
+    const value = "asdlkfjasdf:";
 
-    wrapper.find("textarea").simulate("change", { target: { value: newValue } });
-    wrapper.find(".ms-Button--primary").first().simulate("click");
-    expect(
-      wrapper.find("TextFieldBase[errorMessage='The JSON provided is invalid.']").exists(),
-    ).toBe(true);
+    wrapper.find("textarea").first().simulate("change", { target: { value } });
+    wrapper.find(".MuiButton-root.MuiButton-containedPrimary").first().simulate("click");
+
+    expect(wrapper.find(".MuiFormHelperText-root.Mui-error").exists()).toBe(true);
     done();
   });
 
@@ -88,15 +87,14 @@ describe("<ShareJsonModal />", () => {
         </div>
       </ThemeProvider>,
     );
-    const newValue = JSON.stringify({
+    const value = JSON.stringify({
       layout: "RosOut!cuuf9u",
       savedProps: {},
       globalVariables: {},
     });
-    wrapper.find("textarea").simulate("change", { target: { value: newValue } });
-    wrapper.find(".ms-Button--primary").first().simulate("click");
-    expect(
-      wrapper.find("TextFieldBase[errorMessage='The JSON provided is invalid.']").exists(),
-    ).toBe(false);
+    wrapper.find("textarea").first().simulate("change", { target: { value } });
+    wrapper.find(".MuiButton-root.MuiButton-containedPrimary").first().simulate("click");
+
+    expect(wrapper.find(".MuiFormHelperText-root.Mui-error").exists()).toBe(false);
   });
 });

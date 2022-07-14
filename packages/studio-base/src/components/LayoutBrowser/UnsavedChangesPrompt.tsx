@@ -3,20 +3,21 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 import {
-  ChoiceGroup,
-  IChoiceGroupOption,
+  Button,
   Dialog,
-  DialogFooter,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  FormControlLabel,
+  Radio,
+  RadioGroup,
   TextField,
-  DefaultButton,
-  PrimaryButton,
-} from "@fluentui/react";
-import { Typography } from "@mui/material";
-import { useCallback, useLayoutEffect, useMemo, useRef, useState } from "react";
+  Typography,
+} from "@mui/material";
+import { ChangeEvent, useCallback, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { useLatest, useUnmount } from "react-use";
 
 import Stack from "@foxglove/studio-base/components/Stack";
-import { useDialogHostId } from "@foxglove/studio-base/context/DialogHostIdContext";
 import { useLayoutManager } from "@foxglove/studio-base/context/LayoutManagerContext";
 import { Layout } from "@foxglove/studio-base/services/ILayoutStorage";
 
@@ -39,31 +40,11 @@ export function UnsavedChangesPrompt({
   defaultSelectedKey?: Exclude<UnsavedChangesResolution["type"], "cancel">;
   defaultPersonalCopyName?: string;
 }): JSX.Element {
-  const hostId = useDialogHostId();
-
-  const options = useMemo<
-    (IChoiceGroupOption & { key: Exclude<UnsavedChangesResolution["type"], "cancel"> })[]
-  >(
-    () => [
-      { key: "discard", text: "Discard changes" },
-      {
-        key: "overwrite",
-        text: `Update team layout “${layout.name}”${
-          !isOnline ? " (unavailable while offline)" : ""
-        }`,
-        disabled: !isOnline,
-      },
-      { key: "makePersonal", text: "Save a personal copy" },
-    ],
-    [isOnline, layout.name],
-  );
-  const [selectedKey, setSelectedKey] = useState(defaultSelectedKey);
+  const [selectedKey, setSelectedKey] = useState<string>(defaultSelectedKey);
 
   const handleChoiceGroupChange = React.useCallback(
-    (_event: React.FormEvent | undefined, option: IChoiceGroupOption | undefined): void => {
-      if (option) {
-        setSelectedKey(option.key as typeof options[0]["key"]);
-      }
+    (event: ChangeEvent<HTMLInputElement>): void => {
+      setSelectedKey((event.target as HTMLInputElement).value);
     },
     [],
   );
@@ -72,11 +53,11 @@ export function UnsavedChangesPrompt({
     defaultPersonalCopyName ?? `${layout.name} copy`,
   );
   const personalCopyNameRef = useLatest(personalCopyName);
-  const handleNameChange = useCallback((_event: React.FormEvent, value: string | undefined) => {
-    if (value != undefined) {
-      setPersonalCopyName(value);
-    }
+
+  const handleNameChange = useCallback((event: ChangeEvent<HTMLInputElement>) => {
+    setPersonalCopyName(event.target.value);
   }, []);
+
   const nameError = useMemo(
     () => (personalCopyName.length === 0 ? "Name cannot be empty" : undefined),
     [personalCopyName],
@@ -105,62 +86,65 @@ export function UnsavedChangesPrompt({
   }, [onComplete]);
 
   return (
-    <Dialog
-      hidden={false}
-      onDismiss={handleCancel}
-      dialogContentProps={{ title: `“${layout.name}” has unsaved changes` }}
-      modalProps={{ layerProps: { hostId } }}
-      minWidth={320}
-      maxWidth={320}
-    >
+    <Dialog open onClose={handleCancel} maxWidth="xs" fullWidth>
       <form onSubmit={handleSubmit}>
-        <Stack gap={2} style={{ minHeight: 180 }}>
-          <ChoiceGroup
-            selectedKey={selectedKey}
-            options={options}
-            onChange={handleChoiceGroupChange}
-            required={true}
-          />
-          {selectedKey === "discard" && (
-            <Typography color="text.secondary">
-              Your changes will be permantly deleted. This cannot be undone.
-            </Typography>
-          )}
-          {selectedKey === "makePersonal" && (
-            <TextField
-              autoFocus
-              label="Layout name"
-              value={personalCopyName}
-              onChange={handleNameChange}
-              errorMessage={nameError}
-            />
-          )}
-        </Stack>
-        <DialogFooter styles={{ actions: { whiteSpace: "nowrap" } }}>
-          <DefaultButton text="Cancel" onClick={handleCancel} />
-          <PrimaryButton
+        <DialogTitle>{`“${layout.name}” has unsaved changes`}</DialogTitle>
+        <DialogContent>
+          <Stack gap={2} style={{ minHeight: 180 }}>
+            <RadioGroup defaultValue="discard" onChange={handleChoiceGroupChange}>
+              <FormControlLabel value="discard" label="Discard changes" control={<Radio />} />
+              <FormControlLabel
+                value="overwrite"
+                label={[
+                  `Update team layout “${layout.name}”`,
+                  !isOnline && "(unavailable while offline)",
+                ]
+                  .filter(Boolean)
+                  .join(" ")}
+                control={<Radio />}
+                disabled={!isOnline}
+              />
+              <FormControlLabel
+                value="makePersonal"
+                label="Save a personal copy"
+                control={<Radio />}
+              />
+            </RadioGroup>
+            {selectedKey === "discard" && (
+              <Typography variant="body2" color="error.main">
+                Your changes will be permantly deleted. This cannot be undone.
+              </Typography>
+            )}
+            {selectedKey === "makePersonal" && (
+              <TextField
+                autoFocus
+                variant="outlined"
+                label="Layout name"
+                value={personalCopyName}
+                onChange={handleNameChange}
+                error={nameError != undefined}
+                helperText={nameError}
+                FormHelperTextProps={{
+                  variant: "standard",
+                }}
+              />
+            )}
+          </Stack>
+        </DialogContent>
+        <DialogActions>
+          <Button variant="outlined" size="large" color="inherit" onClick={handleCancel}>
+            Cancel
+          </Button>
+          <Button
             type="submit"
-            text={selectedKey === "discard" ? "Discard changes" : "Save"}
-            styles={
-              selectedKey === "discard"
-                ? {
-                    root: { backgroundColor: "#c72121", borderColor: "#c72121", color: "white" },
-                    rootHovered: {
-                      backgroundColor: "#b31b1b",
-                      borderColor: "#b31b1b",
-                      color: "white",
-                    },
-                    rootPressed: {
-                      backgroundColor: "#771010",
-                      borderColor: "#771010",
-                      color: "white",
-                    },
-                  }
-                : {}
-            }
+            size="large"
+            variant="contained"
+            color={selectedKey === "discard" ? "error" : "primary"}
             disabled={selectedKey === "makePersonal" && nameError != undefined}
-          />
-        </DialogFooter>
+          >
+            {selectedKey === "discard" ? "Discard changes" : "Save"}
+          </Button>
+        </DialogActions>
       </form>
     </Dialog>
   );
@@ -175,6 +159,7 @@ export function useUnsavedChangesPrompt(): {
 
   const layoutManager = useLayoutManager();
   const [isOnline, setIsOnline] = useState(layoutManager.isOnline);
+
   useLayoutEffect(() => {
     const onlineListener = () => setIsOnline(layoutManager.isOnline);
     onlineListener();

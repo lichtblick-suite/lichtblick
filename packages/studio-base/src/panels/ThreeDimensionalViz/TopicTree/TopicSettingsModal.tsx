@@ -11,12 +11,20 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { DefaultButton, Dialog, DialogFooter } from "@fluentui/react";
+import CloseIcon from "@mui/icons-material/Close";
+import {
+  Button,
+  Dialog,
+  DialogContent,
+  DialogActions,
+  Typography,
+  IconButton,
+} from "@mui/material";
 import { isEmpty, omit } from "lodash";
 import React, { useCallback } from "react";
 
 import ErrorBoundary from "@foxglove/studio-base/components/ErrorBoundary";
-import { useDialogHostId } from "@foxglove/studio-base/context/DialogHostIdContext";
+import Stack from "@foxglove/studio-base/components/Stack";
 import { topicSettingsEditorForDatatype } from "@foxglove/studio-base/panels/ThreeDimensionalViz/TopicSettingsEditor";
 import { Topic } from "@foxglove/studio-base/players/types";
 
@@ -50,20 +58,27 @@ function MainEditor({
 
   return (
     <ErrorBoundary>
-      <div>
+      <DialogContent>
         <Editor
           message={collectorMessage}
           onFieldChange={onFieldChange}
           settings={settings}
           onSettingsChange={onSettingsChange}
         />
-        <DialogFooter>
-          <DefaultButton onClick={() => onSettingsChange({})}>Reset to defaults</DefaultButton>
-          <DefaultButton primary onClick={() => setCurrentEditingTopic(undefined)}>
-            Done
-          </DefaultButton>
-        </DialogFooter>
-      </div>
+      </DialogContent>
+      <DialogActions>
+        <Button
+          size="large"
+          variant="outlined"
+          color="inherit"
+          onClick={() => onSettingsChange({})}
+        >
+          Reset to defaults
+        </Button>
+        <Button size="large" variant="contained" onClick={() => setCurrentEditingTopic(undefined)}>
+          Done
+        </Button>
+      </DialogActions>
     </ErrorBoundary>
   );
 }
@@ -86,7 +101,6 @@ function TopicSettingsModal({
   setCurrentEditingTopic,
   settingsByKey,
 }: Props) {
-  const hostId = useDialogHostId();
   const topicSettingsKey = `t:${topicName}`;
   const onSettingsChange = useCallback(
     (
@@ -123,18 +137,27 @@ function TopicSettingsModal({
   );
 
   return (
-    <Dialog
-      hidden={false}
-      onDismiss={() => setCurrentEditingTopic(undefined)}
-      dialogContentProps={{
-        title: currentEditingTopic.name,
-        subText: currentEditingTopic.datatype,
-        showCloseButton: true,
-      }}
-      modalProps={{ layerProps: { hostId } }}
-      maxWidth={480}
-      minWidth={480}
-    >
+    <Dialog open onClose={() => setCurrentEditingTopic(undefined)} maxWidth="xs" fullWidth>
+      <Stack
+        direction="row"
+        justifyContent="space-between"
+        alignItems="flex-start"
+        paddingX={3}
+        paddingTop={2}
+      >
+        <Stack>
+          <Typography variant="h4" fontWeight={600} gutterBottom>
+            {currentEditingTopic.name}
+          </Typography>
+          <Typography variant="body1" color="text.secondary">
+            {currentEditingTopic.datatype}
+          </Typography>
+        </Stack>
+
+        <IconButton onClick={() => setCurrentEditingTopic(undefined)} edge="end">
+          <CloseIcon />
+        </IconButton>
+      </Stack>
       <MainEditor
         collectorMessage={sceneBuilderMessage}
         datatype={datatype}

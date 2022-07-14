@@ -84,6 +84,11 @@ export default function muiComponents(theme: Theme): ThemeOptions["components"] 
         },
       },
     },
+    MuiFormControl: {
+      defaultProps: {
+        variant: "standard",
+      },
+    },
     MuiButton: {
       defaultProps: {
         disableElevation: true,
@@ -180,6 +185,39 @@ export default function muiComponents(theme: Theme): ThemeOptions["components"] 
           ".MuiAutocomplete-root &": {
             paddingTop: 0,
           },
+        },
+      },
+    },
+    MuiDialog: {
+      defaultProps: {
+        PaperProps: {
+          elevation: 0,
+        },
+      },
+    },
+    MuiDialogActions: {
+      styleOverrides: {
+        root: {
+          padding: theme.spacing(3),
+        },
+      },
+    },
+    MuiDialogContent: {
+      styleOverrides: {
+        root: {
+          ...theme.typography.body1,
+
+          "& + .MuiDialogActions-root": {
+            paddingTop: 0,
+          },
+        },
+      },
+    },
+    MuiDialogTitle: {
+      styleOverrides: {
+        root: {
+          ...theme.typography.h4,
+          fontWeight: 600,
         },
       },
     },
@@ -329,6 +367,9 @@ export default function muiComponents(theme: Theme): ThemeOptions["components"] 
       },
     },
     MuiSelect: {
+      defaultProps: {
+        variant: "outlined",
+      },
       styleOverrides: {
         select: {
           "&.MuiInputBase-input": {

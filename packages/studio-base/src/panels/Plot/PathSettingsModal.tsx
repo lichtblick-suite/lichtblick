@@ -2,13 +2,25 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { DefaultButton, Dialog, DialogFooter, getColorFromString } from "@fluentui/react";
-import { MenuItem, Select, styled as muiStyled, Typography } from "@mui/material";
+import { getColorFromString } from "@fluentui/react";
+import CloseIcon from "@mui/icons-material/Close";
+import {
+  Button,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  FormControl,
+  FormLabel,
+  IconButton,
+  MenuItem,
+  Select,
+  styled as muiStyled,
+} from "@mui/material";
 import { useCallback } from "react";
 
 import ColorPicker from "@foxglove/studio-base/components/ColorPicker";
 import Stack from "@foxglove/studio-base/components/Stack";
-import { useDialogHostId } from "@foxglove/studio-base/context/DialogHostIdContext";
 import { colorObjToIColor, getColorFromIRGB } from "@foxglove/studio-base/util/colorUtils";
 import { getLineColor } from "@foxglove/studio-base/util/plotColors";
 import { TimestampMethod } from "@foxglove/studio-base/util/time";
@@ -25,10 +37,11 @@ type PathSettingsModalProps = {
   onDismiss: () => void;
 };
 
-const TextLabel = muiStyled(Typography)(({ theme }) => ({
-  fontWeigh: "bold",
-  margin: theme.spacing(0.5, 0),
-}));
+const StyledDialogTitle = muiStyled(DialogTitle)({
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "space-between",
+});
 
 export default function PathSettingsModal({
   xAxisVal,
@@ -38,8 +51,6 @@ export default function PathSettingsModal({
   savePaths,
   onDismiss,
 }: PathSettingsModalProps): JSX.Element {
-  const hostId = useDialogHostId();
-
   const savePathConfig = useCallback(
     (newConfig: Partial<PlotPath>) => {
       const newPaths = paths.slice();
@@ -65,52 +76,55 @@ export default function PathSettingsModal({
   const supportsTimestampMethod = isTimestampBased && !isReferenceLine;
 
   return (
-    <Dialog
-      hidden={false}
-      onDismiss={onDismiss}
-      dialogContentProps={{ title: path.value, showCloseButton: true }}
-      modalProps={{ layerProps: { hostId } }}
-      maxWidth={480}
-      minWidth={480}
-    >
-      <Stack alignItems="flex-start" gap={1}>
-        <div>
-          <TextLabel>Color</TextLabel>
-          <ColorPicker
-            color={currentColor}
-            onChange={(newColor) => savePathConfig({ color: colorObjToIColor(newColor).str })}
-          />
-        </div>
+    <Dialog open onClose={onDismiss} maxWidth="xs" fullWidth>
+      <StyledDialogTitle>
+        {path.value}
+        <IconButton onClick={onDismiss} edge="end">
+          <CloseIcon />
+        </IconButton>
+      </StyledDialogTitle>
+      <DialogContent>
+        <Stack alignItems="flex-start" gap={1}>
+          <FormControl>
+            <FormLabel>Color</FormLabel>
+            <ColorPicker
+              color={currentColor}
+              onChange={(newColor) => savePathConfig({ color: colorObjToIColor(newColor).str })}
+            />
+          </FormControl>
 
-        <div>
-          <TextLabel>Timestamp method</TextLabel>
-          <Select
-            value={!supportsTimestampMethod ? "unsupported" : path.timestampMethod}
-            disabled={!supportsTimestampMethod}
-            onChange={(event) =>
-              savePathConfig({ timestampMethod: event.target.value as TimestampMethod })
-            }
-            MenuProps={{ disablePortal: true }}
-          >
-            {!supportsTimestampMethod && (
-              <MenuItem disabled value="unsupported">
-                {!isTimestampBased
-                  ? "Only supported when x-axis is timestamp-based"
-                  : "Not supported for reference lines"}
-              </MenuItem>
-            )}
-            <MenuItem value="receiveTime">Receive time</MenuItem>
-            <MenuItem value="headerStamp">header.stamp</MenuItem>
-          </Select>
-        </div>
-      </Stack>
+          <FormControl>
+            <FormLabel>Timestamp method</FormLabel>
+            <Select
+              value={!supportsTimestampMethod ? "unsupported" : path.timestampMethod}
+              disabled={!supportsTimestampMethod}
+              onChange={(event) =>
+                savePathConfig({ timestampMethod: event.target.value as TimestampMethod })
+              }
+              MenuProps={{ disablePortal: true }}
+            >
+              {!supportsTimestampMethod && (
+                <MenuItem disabled value="unsupported">
+                  {!isTimestampBased
+                    ? "Only supported when x-axis is timestamp-based"
+                    : "Not supported for reference lines"}
+                </MenuItem>
+              )}
+              <MenuItem value="receiveTime">Receive time</MenuItem>
+              <MenuItem value="headerStamp">header.stamp</MenuItem>
+            </Select>
+          </FormControl>
+        </Stack>
+      </DialogContent>
 
-      <DialogFooter>
-        <DefaultButton onClick={resetToDefaults}>Reset to defaults</DefaultButton>
-        <DefaultButton primary onClick={onDismiss}>
+      <DialogActions>
+        <Button size="large" variant="outlined" color="inherit" onClick={resetToDefaults}>
+          Reset to defaults
+        </Button>
+        <Button size="large" variant="contained" onClick={onDismiss}>
           Done
-        </DefaultButton>
-      </DialogFooter>
+        </Button>
+      </DialogActions>
     </Dialog>
   );
 }
