@@ -9,11 +9,11 @@ import { createStore, StoreApi } from "zustand";
 import Logger from "@foxglove/log";
 import { ExtensionContext, ExtensionModule } from "@foxglove/studio";
 import {
-  ExtensionRegistry,
-  ExtensionRegistryContext,
+  ExtensionCatalog,
+  ExtensionCatalogContext,
   RegisteredPanel,
-  useExtensionRegistry,
-} from "@foxglove/studio-base/context/ExtensionRegistryContext";
+  useExtensionCatalog,
+} from "@foxglove/studio-base/context/ExtensionCatalogContext";
 import { ExtensionLoader } from "@foxglove/studio-base/services/ExtensionLoader";
 import { ExtensionInfo, ExtensionNamespace } from "@foxglove/studio-base/types/Extensions";
 
@@ -83,7 +83,7 @@ async function registerExtensionPanels(
 
 export function createExtensionRegistryStore(
   loaders: readonly ExtensionLoader[],
-): StoreApi<ExtensionRegistry> {
+): StoreApi<ExtensionCatalog> {
   return createStore((set, get) => ({
     downloadExtension: async (url: string) => {
       const res = await fetch(url);
@@ -123,12 +123,12 @@ export function createExtensionRegistryStore(
         extensionList,
         async (id: string) => await get().loadExtension(id),
       );
-      set({ registeredExtensions: extensionList, registeredPanels: panels });
+      set({ installedExtensions: extensionList, installedPanels: panels });
     },
 
-    registeredExtensions: undefined,
+    installedExtensions: undefined,
 
-    registeredPanels: undefined,
+    installedPanels: undefined,
 
     uninstallExtension: async (namespace: ExtensionNamespace, id: string) => {
       const namespacedLoader = loaders.find((loader) => loader.namespace === namespace);
@@ -142,7 +142,7 @@ export function createExtensionRegistryStore(
 }
 
 function InitialRefreshAdapter(): ReactNull {
-  const refreshExtensions = useExtensionRegistry((state) => state.refreshExtensions);
+  const refreshExtensions = useExtensionCatalog((state) => state.refreshExtensions);
   useEffect(() => {
     refreshExtensions().catch((err) => log.error(err));
   }, [refreshExtensions]);
@@ -150,16 +150,16 @@ function InitialRefreshAdapter(): ReactNull {
   return ReactNull;
 }
 
-export default function ExtensionRegistryProvider({
+export default function ExtensionCatalogProvider({
   children,
   loaders,
 }: PropsWithChildren<{ loaders: readonly ExtensionLoader[] }>): JSX.Element {
   const [store] = useState(createExtensionRegistryStore(loaders));
 
   return (
-    <ExtensionRegistryContext.Provider value={store}>
+    <ExtensionCatalogContext.Provider value={store}>
       <InitialRefreshAdapter />
       {children}
-    </ExtensionRegistryContext.Provider>
+    </ExtensionCatalogContext.Provider>
   );
 }

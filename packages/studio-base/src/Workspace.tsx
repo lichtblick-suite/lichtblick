@@ -64,7 +64,7 @@ import {
   useCurrentLayoutSelector,
 } from "@foxglove/studio-base/context/CurrentLayoutContext";
 import { useCurrentUser } from "@foxglove/studio-base/context/CurrentUserContext";
-import { useExtensionRegistry } from "@foxglove/studio-base/context/ExtensionRegistryContext";
+import { useExtensionCatalog } from "@foxglove/studio-base/context/ExtensionCatalogContext";
 import LinkHandlerContext from "@foxglove/studio-base/context/LinkHandlerContext";
 import { useNativeAppMenu } from "@foxglove/studio-base/context/NativeAppMenuContext";
 import {
@@ -348,7 +348,7 @@ export default function Workspace(props: WorkspaceProps): JSX.Element {
 
   const { loadFromFile } = useAssets();
 
-  const installExtension = useExtensionRegistry((state) => state.installExtension);
+  const installExtension = useExtensionCatalog((state) => state.installExtension);
 
   const openHandle = useCallback(
     async (handle: FileSystemFileHandle) => {

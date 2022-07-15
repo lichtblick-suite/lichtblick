@@ -7,7 +7,7 @@ import { PropsWithChildren, useMemo } from "react";
 import { AppSetting } from "@foxglove/studio-base/AppSetting";
 import Panel from "@foxglove/studio-base/components/Panel";
 import PanelExtensionAdapter from "@foxglove/studio-base/components/PanelExtensionAdapter";
-import { useExtensionRegistry } from "@foxglove/studio-base/context/ExtensionRegistryContext";
+import { useExtensionCatalog } from "@foxglove/studio-base/context/ExtensionCatalogContext";
 import PanelCatalogContext, {
   PanelCatalog,
   PanelInfo,
@@ -29,7 +29,7 @@ export default function PanelCatalogProvider(
     AppSetting.ENABLE_LEGACY_PLOT_PANEL,
   );
 
-  const extensionPanels = useExtensionRegistry((state) => state.registeredPanels);
+  const extensionPanels = useExtensionCatalog((state) => state.installedPanels);
 
   const wrappedExtensionPanels = useMemo<PanelInfo[]>(() => {
     return Object.values(extensionPanels ?? {}).map((panel) => {

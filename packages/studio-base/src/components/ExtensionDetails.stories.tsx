@@ -19,7 +19,7 @@ import ExtensionMarketplaceContext, {
   ExtensionMarketplace,
   ExtensionMarketplaceDetail,
 } from "@foxglove/studio-base/context/ExtensionMarketplaceContext";
-import ExtensionRegistryProvider from "@foxglove/studio-base/providers/ExtensionRegistryProvider";
+import ExtensionCatalogProvider from "@foxglove/studio-base/providers/ExtensionCatalogProvider";
 import { ExtensionLoader } from "@foxglove/studio-base/services/ExtensionLoader";
 import { makeMockAppConfiguration } from "@foxglove/studio-base/util/makeMockAppConfiguration";
 
@@ -71,11 +71,11 @@ export function Details(): JSX.Element {
 
   return (
     <AppConfigurationContext.Provider value={config}>
-      <ExtensionRegistryProvider loaders={[MockExtensionLoader]}>
+      <ExtensionCatalogProvider loaders={[MockExtensionLoader]}>
         <ExtensionMarketplaceContext.Provider value={MockExtensionMarketplace}>
           <ExtensionDetails extension={extension} onClose={() => {}} installed={false} />
         </ExtensionMarketplaceContext.Provider>
-      </ExtensionRegistryProvider>
+      </ExtensionCatalogProvider>
     </AppConfigurationContext.Provider>
   );
 }

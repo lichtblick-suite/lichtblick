@@ -41,7 +41,7 @@ import {
   useCurrentLayoutSelector,
   usePanelMosaicId,
 } from "@foxglove/studio-base/context/CurrentLayoutContext";
-import { useExtensionRegistry } from "@foxglove/studio-base/context/ExtensionRegistryContext";
+import { useExtensionCatalog } from "@foxglove/studio-base/context/ExtensionCatalogContext";
 import { PanelComponent, usePanelCatalog } from "@foxglove/studio-base/context/PanelCatalogContext";
 import { useWorkspace } from "@foxglove/studio-base/context/WorkspaceContext";
 import { MosaicDropResult, PanelConfig } from "@foxglove/studio-base/types/panels";
@@ -219,7 +219,7 @@ export default function PanelLayout(): JSX.Element {
   const layoutExists = useCurrentLayoutSelector(selectedLayoutExistsSelector);
   const layoutLoading = useCurrentLayoutSelector(selectedLayoutLoadingSelector);
   const mosaicLayout = useCurrentLayoutSelector(selectedLayoutMosaicSelector);
-  const registeredExtensions = useExtensionRegistry((state) => state.registeredExtensions);
+  const registeredExtensions = useExtensionCatalog((state) => state.installedExtensions);
 
   const onChange = useCallback(
     (newLayout: MosaicNode<string> | undefined) => {

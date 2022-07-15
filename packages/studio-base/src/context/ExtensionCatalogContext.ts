@@ -15,7 +15,7 @@ export type RegisteredPanel = {
   registration: ExtensionPanelRegistration;
 };
 
-export type ExtensionRegistry = {
+export type ExtensionCatalog = {
   downloadExtension: (url: string) => Promise<Uint8Array>;
   installExtension: (
     namespace: ExtensionNamespace,
@@ -23,19 +23,20 @@ export type ExtensionRegistry = {
   ) => Promise<ExtensionInfo>;
   loadExtension(id: string): Promise<string>;
   refreshExtensions: () => Promise<void>;
-  registeredExtensions: undefined | ExtensionInfo[];
-  registeredPanels: undefined | Record<string, RegisteredPanel>;
   uninstallExtension: (namespace: ExtensionNamespace, id: string) => Promise<void>;
+
+  installedExtensions: undefined | ExtensionInfo[];
+  installedPanels: undefined | Record<string, RegisteredPanel>;
 };
 
-export const ExtensionRegistryContext = createContext<undefined | StoreApi<ExtensionRegistry>>(
+export const ExtensionCatalogContext = createContext<undefined | StoreApi<ExtensionCatalog>>(
   undefined,
 );
 
-export function useExtensionRegistry<T>(
-  selector: (registry: ExtensionRegistry) => T,
+export function useExtensionCatalog<T>(
+  selector: (registry: ExtensionCatalog) => T,
   equalityFn?: (a: T, b: T) => boolean,
 ): T {
-  const context = useGuaranteedContext(ExtensionRegistryContext);
+  const context = useGuaranteedContext(ExtensionCatalogContext);
   return useStore(context, selector, equalityFn);
 }

@@ -8,8 +8,8 @@ import fetchMock from "fetch-mock";
 
 import { useConsoleApi } from "@foxglove/studio-base/context/ConsoleApiContext";
 import { useCurrentUser } from "@foxglove/studio-base/context/CurrentUserContext";
-import { useExtensionRegistry } from "@foxglove/studio-base/context/ExtensionRegistryContext";
-import ExtensionRegistryProvider from "@foxglove/studio-base/providers/ExtensionRegistryProvider";
+import { useExtensionCatalog } from "@foxglove/studio-base/context/ExtensionCatalogContext";
+import ExtensionCatalogProvider from "@foxglove/studio-base/providers/ExtensionCatalogProvider";
 import { ExtensionLoader } from "@foxglove/studio-base/services/ExtensionLoader";
 import { ExtensionInfo } from "@foxglove/studio-base/types/Extensions";
 
@@ -40,7 +40,7 @@ const source = `
 `;
 
 function Wrapper(): JSX.Element {
-  const registeredExtensions = useExtensionRegistry((state) => state.registeredExtensions);
+  const registeredExtensions = useExtensionCatalog((state) => state.installedExtensions);
   return registeredExtensions ? <OrgExtensionRegistrySyncAdapter /> : <></>;
 }
 
@@ -80,9 +80,9 @@ describe("Private registry sync adapter", () => {
     };
 
     render(
-      <ExtensionRegistryProvider loaders={[mockPrivateLoader as ExtensionLoader]}>
+      <ExtensionCatalogProvider loaders={[mockPrivateLoader as ExtensionLoader]}>
         <Wrapper />
-      </ExtensionRegistryProvider>,
+      </ExtensionCatalogProvider>,
     );
 
     await waitFor(() => expect(mockPrivateLoader.installExtension).toHaveBeenCalledTimes(3));

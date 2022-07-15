@@ -19,7 +19,7 @@ import AppConfigurationContext from "@foxglove/studio-base/context/AppConfigurat
 import ExtensionMarketplaceContext, {
   ExtensionMarketplace,
 } from "@foxglove/studio-base/context/ExtensionMarketplaceContext";
-import ExtensionRegistryProvider from "@foxglove/studio-base/providers/ExtensionRegistryProvider";
+import ExtensionCatalogProvider from "@foxglove/studio-base/providers/ExtensionCatalogProvider";
 import { makeMockAppConfiguration } from "@foxglove/studio-base/util/makeMockAppConfiguration";
 
 export default {
@@ -92,11 +92,11 @@ export function Sidebar(): JSX.Element {
 
   return (
     <AppConfigurationContext.Provider value={config}>
-      <ExtensionRegistryProvider loaders={[MockExtensionLoader]}>
+      <ExtensionCatalogProvider loaders={[MockExtensionLoader]}>
         <ExtensionMarketplaceContext.Provider value={MockExtensionMarketplace}>
           <ExtensionsSidebar />
         </ExtensionMarketplaceContext.Provider>
-      </ExtensionRegistryProvider>
+      </ExtensionCatalogProvider>
     </AppConfigurationContext.Provider>
   );
 }

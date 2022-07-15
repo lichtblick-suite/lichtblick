@@ -22,11 +22,11 @@ import { SidebarContent } from "@foxglove/studio-base/components/SidebarContent"
 import Stack from "@foxglove/studio-base/components/Stack";
 import TextContent from "@foxglove/studio-base/components/TextContent";
 import { useAnalytics } from "@foxglove/studio-base/context/AnalyticsContext";
+import { useExtensionCatalog } from "@foxglove/studio-base/context/ExtensionCatalogContext";
 import {
   ExtensionMarketplaceDetail,
   useExtensionMarketplace,
 } from "@foxglove/studio-base/context/ExtensionMarketplaceContext";
-import { useExtensionRegistry } from "@foxglove/studio-base/context/ExtensionRegistryContext";
 import { AppEvent } from "@foxglove/studio-base/services/IAnalytics";
 import isDesktopApp from "@foxglove/studio-base/util/isDesktopApp";
 
@@ -42,9 +42,9 @@ export function ExtensionDetails({ extension, onClose, installed }: Props): Reac
   const [isInstalled, setIsInstalled] = useState(installed);
   const [activeTab, setActiveTab] = useState<number>(0);
   const isMounted = useMountedState();
-  const downloadExtension = useExtensionRegistry((state) => state.downloadExtension);
-  const installExtension = useExtensionRegistry((state) => state.installExtension);
-  const uninstallExtension = useExtensionRegistry((state) => state.uninstallExtension);
+  const downloadExtension = useExtensionCatalog((state) => state.downloadExtension);
+  const installExtension = useExtensionCatalog((state) => state.installExtension);
+  const uninstallExtension = useExtensionCatalog((state) => state.uninstallExtension);
   const marketplace = useExtensionMarketplace();
   const { addToast } = useToasts();
   const readmeUrl = extension.readme;

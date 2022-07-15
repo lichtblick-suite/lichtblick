@@ -31,8 +31,8 @@ import { ConsoleApiCookieCurrentUserProvider } from "./providers/ConsoleApiCooki
 import { ConsoleApiDialogCurrentUserProvider } from "./providers/ConsoleApiDialogCurrentUserProvider";
 import ConsoleApiRemoteLayoutStorageProvider from "./providers/ConsoleApiRemoteLayoutStorageProvider";
 import CurrentLayoutProvider from "./providers/CurrentLayoutProvider";
+import ExtensionCatalogProvider from "./providers/ExtensionCatalogProvider";
 import ExtensionMarketplaceProvider from "./providers/ExtensionMarketplaceProvider";
-import ExtensionRegistryProvider from "./providers/ExtensionRegistryProvider";
 import HelpInfoProvider from "./providers/HelpInfoProvider";
 import LayoutManagerProvider from "./providers/LayoutManagerProvider";
 import PanelCatalogProvider from "./providers/PanelCatalogProvider";
@@ -94,7 +94,7 @@ export function App(props: AppProps): JSX.Element {
     <UserNodeStateProvider />,
     <CurrentLayoutProvider />,
     <ExtensionMarketplaceProvider />,
-    <ExtensionRegistryProvider loaders={extensionLoaders} />,
+    <ExtensionCatalogProvider loaders={extensionLoaders} />,
     <PlayerManager playerSources={dataSources} />,
     /* eslint-enable react/jsx-key */
   ];

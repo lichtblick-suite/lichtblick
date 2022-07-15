@@ -20,11 +20,11 @@ import Log from "@foxglove/log";
 import { ExtensionDetails } from "@foxglove/studio-base/components/ExtensionDetails";
 import { SidebarContent } from "@foxglove/studio-base/components/SidebarContent";
 import Stack from "@foxglove/studio-base/components/Stack";
+import { useExtensionCatalog } from "@foxglove/studio-base/context/ExtensionCatalogContext";
 import {
   ExtensionMarketplaceDetail,
   useExtensionMarketplace,
 } from "@foxglove/studio-base/context/ExtensionMarketplaceContext";
-import { useExtensionRegistry } from "@foxglove/studio-base/context/ExtensionRegistryContext";
 
 import helpContent from "./index.help.md";
 
@@ -92,7 +92,7 @@ export default function ExtensionsSidebar(): React.ReactElement {
       }
     | undefined
   >(undefined);
-  const installed = useExtensionRegistry((state) => state.registeredExtensions);
+  const installed = useExtensionCatalog((state) => state.installedExtensions);
   const marketplace = useExtensionMarketplace();
 
   const [marketplaceEntries, refreshMarketplaceEntries] = useAsyncFn(

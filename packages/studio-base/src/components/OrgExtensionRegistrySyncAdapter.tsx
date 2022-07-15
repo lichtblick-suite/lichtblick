@@ -9,7 +9,7 @@ import { useLatest, useTimeoutFn } from "react-use";
 import Logger from "@foxglove/log";
 import { useConsoleApi } from "@foxglove/studio-base/context/ConsoleApiContext";
 import { useCurrentUser } from "@foxglove/studio-base/context/CurrentUserContext";
-import { useExtensionRegistry } from "@foxglove/studio-base/context/ExtensionRegistryContext";
+import { useExtensionCatalog } from "@foxglove/studio-base/context/ExtensionCatalogContext";
 
 const log = Logger.getLogger(__filename);
 
@@ -19,9 +19,9 @@ const SYNC_INTERVAL = 10 * 60 * 1_000; // 10 minutes
  * Implements organization registry extension syncing.
  */
 export function OrgExtensionRegistrySyncAdapter(): ReactNull {
-  const installedExtensions = useExtensionRegistry((state) => state.registeredExtensions);
-  const installExtension = useExtensionRegistry((state) => state.installExtension);
-  const uninstallExtension = useExtensionRegistry((state) => state.uninstallExtension);
+  const installedExtensions = useExtensionCatalog((state) => state.installedExtensions);
+  const installExtension = useExtensionCatalog((state) => state.installExtension);
+  const uninstallExtension = useExtensionCatalog((state) => state.uninstallExtension);
 
   const api = useConsoleApi();
   const user = useCurrentUser();
@@ -44,7 +44,6 @@ export function OrgExtensionRegistrySyncAdapter(): ReactNull {
     [api, installExtension],
   );
 
-  // Use polling for now. To be replaced with some kind of notification mechanism.
   const [_ready, _cancel, resetTimeout] = useTimeoutFn(
     async () => await syncExtensions(),
     SYNC_INTERVAL,
