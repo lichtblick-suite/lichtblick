@@ -64,7 +64,10 @@ export function Root({ appConfiguration }: { appConfiguration: IAppConfiguration
   ]);
 
   const layoutStorage = useMemo(() => new IdbLayoutStorage(), []);
-  const [extensionLoaders] = useState(() => [new IdbExtensionLoader("local")]);
+  const [extensionLoaders] = useState(() => [
+    new IdbExtensionLoader("org"),
+    new IdbExtensionLoader("local"),
+  ]);
   const consoleApi = useMemo(() => new ConsoleApi(process.env.FOXGLOVE_API_URL!), []);
 
   // Enable dialog auth in development since using cookie auth does not work between

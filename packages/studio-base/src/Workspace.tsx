@@ -44,6 +44,7 @@ import {
 } from "@foxglove/studio-base/components/MessagePipeline";
 import MultiProvider from "@foxglove/studio-base/components/MultiProvider";
 import { OpenDialog, OpenDialogViews } from "@foxglove/studio-base/components/OpenDialog";
+import { OrgExtensionRegistrySyncAdapter } from "@foxglove/studio-base/components/OrgExtensionRegistrySyncAdapter";
 import PanelLayout from "@foxglove/studio-base/components/PanelLayout";
 import PanelList from "@foxglove/studio-base/components/PanelList";
 import panelsHelpContent from "@foxglove/studio-base/components/PanelList/index.help.md";
@@ -347,7 +348,7 @@ export default function Workspace(props: WorkspaceProps): JSX.Element {
 
   const { loadFromFile } = useAssets();
 
-  const extensionRegistry = useExtensionRegistry();
+  const installExtension = useExtensionRegistry((state) => state.installExtension);
 
   const openHandle = useCallback(
     async (handle: FileSystemFileHandle) => {
@@ -361,8 +362,11 @@ export default function Workspace(props: WorkspaceProps): JSX.Element {
         try {
           const arrayBuffer = await file.arrayBuffer();
           const data = new Uint8Array(arrayBuffer);
-          const extension = await extensionRegistry.installExtension("local", data);
-          addToast(`Installed extension ${extension.id}`, { appearance: "success" });
+          const extension = await installExtension("local", data);
+          addToast(`Installed extension ${extension.id}`, {
+            appearance: "success",
+            autoDismiss: true,
+          });
         } catch (err) {
           log.error(err);
           addToast(`Failed to install extension ${file.name}: ${err.message}`, {
@@ -391,7 +395,7 @@ export default function Workspace(props: WorkspaceProps): JSX.Element {
         selectSource(matchedSource.id, { type: "file", handle });
       }
     },
-    [addToast, availableSources, extensionRegistry, loadFromFile, selectSource],
+    [addToast, availableSources, installExtension, loadFromFile, selectSource],
   );
 
   const openFiles = useCallback(
@@ -408,8 +412,11 @@ export default function Workspace(props: WorkspaceProps): JSX.Element {
           try {
             const arrayBuffer = await file.arrayBuffer();
             const data = new Uint8Array(arrayBuffer);
-            const extension = await extensionRegistry.installExtension("local", data);
-            addToast(`Installed extension ${extension.id}`, { appearance: "success" });
+            const extension = await installExtension("local", data);
+            addToast(`Installed extension ${extension.id}`, {
+              appearance: "success",
+              autoDismiss: true,
+            });
           } catch (err) {
             log.error(err);
             addToast(`Failed to install extension ${file.name}: ${err.message}`, {
@@ -446,7 +453,7 @@ export default function Workspace(props: WorkspaceProps): JSX.Element {
         }
       }
     },
-    [addToast, availableSources, extensionRegistry, loadFromFile, selectSource],
+    [addToast, availableSources, installExtension, loadFromFile, selectSource],
   );
 
   // files the main thread told us to open
@@ -572,6 +579,7 @@ export default function Workspace(props: WorkspaceProps): JSX.Element {
           <div className={classes.dropzone}>Drop a file here</div>
         </DropOverlay>
       </DocumentDropListener>
+      <OrgExtensionRegistrySyncAdapter />
       <URLStateSyncAdapter />
       <div className={classes.container} ref={containerRef} tabIndex={0}>
         <Sidebar

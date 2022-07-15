@@ -19,7 +19,7 @@ import ExtensionMarketplaceContext, {
   ExtensionMarketplace,
   ExtensionMarketplaceDetail,
 } from "@foxglove/studio-base/context/ExtensionMarketplaceContext";
-import ExtensionRegistryProvider from "@foxglove/studio-base/providers/ExtensionRegistryProvider/ExtensionRegistryProvider";
+import ExtensionRegistryProvider from "@foxglove/studio-base/providers/ExtensionRegistryProvider";
 import { ExtensionLoader } from "@foxglove/studio-base/services/ExtensionLoader";
 import { makeMockAppConfiguration } from "@foxglove/studio-base/util/makeMockAppConfiguration";
 
@@ -35,7 +35,7 @@ const MockExtensionLoader: ExtensionLoader = {
   installExtension: async (_foxeFileData: Uint8Array) => {
     throw new Error("MockExtensionLoader cannot install extensions");
   },
-  uninstallExtension: async (_id: string) => false,
+  uninstallExtension: async (_id: string) => undefined,
 };
 
 const MockExtensionMarketplace: ExtensionMarketplace = {
@@ -49,6 +49,7 @@ const extension: ExtensionMarketplaceDetail = {
   id: "publisher.storyextension",
   name: "Extension Name",
   description: "Extension sample description",
+  qualifiedName: "Qualified Extension Name",
   publisher: "Publisher",
   homepage: "https://foxglove.dev/",
   license: "MIT",

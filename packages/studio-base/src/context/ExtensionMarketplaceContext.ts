@@ -4,9 +4,13 @@
 
 import { createContext, useContext } from "react";
 
+import { ExtensionNamespace } from "@foxglove/studio-base/types/Extensions";
+
 export type ExtensionMarketplaceDetail = {
   id: string;
   name: string;
+  qualifiedName: string;
+  namespace?: ExtensionNamespace;
   description: string;
   publisher: string;
   homepage: string;

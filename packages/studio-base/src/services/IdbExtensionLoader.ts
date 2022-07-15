@@ -13,27 +13,41 @@ import { IdbExtensionStorage } from "./IdbExtensionStorage";
 
 const log = Log.getLogger(__filename);
 
-function qualifiedName(namespace: ExtensionNamespace, info: ExtensionInfo): string {
+function parsePackageName(name: string): { publisher?: string; name: string } {
+  const res = /^@([^/]+)\/(.+)/.exec(name);
+  if (res == undefined) {
+    return { name };
+  }
+  return { publisher: res[1], name: res[2] as string };
+}
+
+function qualifiedName(
+  namespace: ExtensionNamespace,
+  publisher: string,
+  info: ExtensionInfo,
+): string {
   switch (namespace) {
     case "local":
       // For local namespace we follow the legacy naming convention of using displayName
       // in order to stay compatible with existing layouts.
       return info.displayName;
-    case "private":
+    case "org":
       // For private registry we use namespace and package name.
-      return [namespace, info.name].join(":");
+      return [namespace, publisher, info.name].join(":");
   }
 }
 
 function validatePackageInfo(info: Partial<ExtensionInfo>): ExtensionInfo {
-  if (info.publisher == undefined || info.publisher.length === 0) {
-    throw new Error("Invalid extension: missing publisher");
-  }
   if (info.name == undefined || info.name.length === 0) {
     throw new Error("Invalid extension: missing name");
   }
+  const { publisher: parsedPublisher, name } = parsePackageName(info.name);
+  const publisher = info.publisher ?? parsedPublisher;
+  if (publisher == undefined || publisher.length === 0) {
+    throw new Error("Invalid extension: missing publisher");
+  }
 
-  return info as ExtensionInfo;
+  return { ...info, publisher, name: name.toLowerCase() } as ExtensionInfo;
 }
 
 export class IdbExtensionLoader implements ExtensionLoader {
@@ -83,12 +97,13 @@ export class IdbExtensionLoader implements ExtensionLoader {
     }
 
     const rawInfo = validatePackageInfo(JSON.parse(pkgInfoText) as Partial<ExtensionInfo>);
-    const normalizedPublisher = rawInfo.publisher.toLowerCase().replace(/[\W_]+/g, "_");
+    const normalizedPublisher = rawInfo.publisher.replace(/[^A-Za-z0-9_\s]+/g, "");
+
     const info: ExtensionInfo = {
       ...rawInfo,
       id: `${normalizedPublisher}.${rawInfo.name}`,
       namespace: this.namespace,
-      qualifiedName: qualifiedName(this.namespace, rawInfo),
+      qualifiedName: qualifiedName(this.namespace, normalizedPublisher, rawInfo),
     };
     await this.#storage.put({
       content: foxeFileData,
@@ -98,10 +113,9 @@ export class IdbExtensionLoader implements ExtensionLoader {
     return info;
   }
 
-  async uninstallExtension(id: string): Promise<boolean> {
+  async uninstallExtension(id: string): Promise<void> {
     log.debug("Uninstalling extension", id);
 
     await this.#storage.delete(id);
-    return true;
   }
 }

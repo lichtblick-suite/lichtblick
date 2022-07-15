@@ -23,6 +23,7 @@ import {
   AppSetting,
   App,
   ConsoleApi,
+  IdbExtensionLoader,
 } from "@foxglove/studio-base";
 
 import { Desktop, NativeMenuBridge, Storage } from "../common/types";
@@ -90,7 +91,10 @@ export default function Root({
   }, [appConfiguration]);
 
   const layoutStorage = useMemo(() => new NativeStorageLayoutStorage(storageBridge), []);
-  const [extensionLoaders] = useState(() => [new DesktopExtensionLoader(desktopBridge)]);
+  const [extensionLoaders] = useState(() => [
+    new IdbExtensionLoader("org"),
+    new DesktopExtensionLoader(desktopBridge),
+  ]);
   const consoleApi = useMemo(() => new ConsoleApi(process.env.FOXGLOVE_API_URL!), []);
   const nativeAppMenu = useMemo(() => new NativeAppMenu(menuBridge), []);
   const nativeWindow = useMemo(() => new NativeWindow(desktopBridge), []);

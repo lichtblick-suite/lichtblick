@@ -3,6 +3,11 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 /**
+ * Extensions are installed into separate namespaces enumerated here.
+ */
+export type ExtensionNamespace = "local" | "org";
+
+/**
  * Metadata describing an extension.
  */
 export type ExtensionInfo = {
@@ -13,13 +18,8 @@ export type ExtensionInfo = {
   keywords: string[];
   license: string;
   name: string;
-  namespace?: string;
+  namespace?: ExtensionNamespace;
   publisher: string;
   qualifiedName: string;
   version: string;
 };
-
-/**
- * Extensions are installed into separate namespaces enumerated here.
- */
-export type ExtensionNamespace = "local" | "private";

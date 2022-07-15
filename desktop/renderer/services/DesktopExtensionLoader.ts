@@ -70,7 +70,7 @@ export class DesktopExtensionLoader implements ExtensionLoader {
     };
   }
 
-  async uninstallExtension(id: string): Promise<boolean> {
-    return (await this.bridge?.uninstallExtension(id)) ?? false;
+  async uninstallExtension(id: string): Promise<void> {
+    await this.bridge?.uninstallExtension(id);
   }
 }

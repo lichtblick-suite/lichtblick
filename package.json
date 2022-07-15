@@ -21,6 +21,7 @@
     "build:dev": "webpack --mode development --progress --config desktop/webpack.config.ts",
     "build:prod": "webpack --mode production --progress --config desktop/webpack.config.ts",
     "desktop:serve": "webpack serve --mode development --progress --config desktop/webpack.config.ts",
+    "desktop:serve:local": "webpack serve --mode development --progress --config desktop/webpack.config.ts --env FOXGLOVE_BACKEND=local",
     "desktop:serve:quicklook": "webpack serve --mode development --progress --config desktop/webpack.quicklook.config.ts",
     "desktop:start": "electron desktop/.webpack",
     "web:build:dev": "webpack --mode development --progress --config web/webpack.config.ts",

@@ -19,11 +19,11 @@ const pkgInfo = {
     typescript: "4.3.2",
   },
   displayName: "turtlesim",
-  id: "foxglove.studio-extension-turtlesim",
+  id: "Foxglove Inc.studio-extension-turtlesim",
   license: "MPL-2.0",
   main: "./dist/extension.js",
   name: "studio-extension-turtlesim",
-  publisher: "foxglove",
+  publisher: "Foxglove Inc.",
   scripts: {
     build: "fox build",
     "foxglove:prepublish": "fox build --mode production",
@@ -81,13 +81,38 @@ describe("IdbExtensionLoader", () => {
 
       const expectedInfo = {
         ...pkgInfo,
-        namespace: "private",
-        qualifiedName: "private:studio-extension-turtlesim",
+        namespace: "org",
+        qualifiedName: "org:Foxglove Inc:studio-extension-turtlesim",
       };
 
       mockDBGetAll.mockReturnValue([expectedInfo]);
 
-      const loader = new IdbExtensionLoader("private");
+      const loader = new IdbExtensionLoader("org");
+      await loader.installExtension(foxe);
+
+      expect(mockDBPut).toHaveBeenCalledWith("metadata", expectedInfo);
+
+      expect(mockDBPut).toHaveBeenCalledWith("extensions", {
+        content: foxe,
+        info: expectedInfo,
+      });
+
+      expect((await loader.getExtensions())[0]).toBe(expectedInfo);
+    });
+
+    it("Parses package prefixes", async () => {
+      const foxe = fs.readFileSync(`${__dirname}/../test/fixtures/prefixed-name-extension.foxe`);
+      const expectedInfo = {
+        id: "Prefix.package-name",
+        name: "package-name",
+        namespace: "org",
+        publisher: "Prefix",
+        qualifiedName: "org:Prefix:package-name",
+      };
+
+      mockDBGetAll.mockReturnValue([expectedInfo]);
+
+      const loader = new IdbExtensionLoader("org");
       await loader.installExtension(foxe);
 
       expect(mockDBPut).toHaveBeenCalledWith("metadata", expectedInfo);

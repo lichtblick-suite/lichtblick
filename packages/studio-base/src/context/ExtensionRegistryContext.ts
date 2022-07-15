@@ -2,10 +2,11 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { createContext, useContext } from "react";
-import { DeepReadonly } from "ts-essentials";
+import { createContext } from "react";
+import { StoreApi, useStore } from "zustand";
 
 import { ExtensionPanelRegistration } from "@foxglove/studio";
+import useGuaranteedContext from "@foxglove/studio-base/hooks/useGuaranteedContext";
 import { ExtensionInfo, ExtensionNamespace } from "@foxglove/studio-base/types/Extensions";
 
 export type RegisteredPanel = {
@@ -22,22 +23,19 @@ export type ExtensionRegistry = {
   ) => Promise<ExtensionInfo>;
   loadExtension(id: string): Promise<string>;
   refreshExtensions: () => Promise<void>;
-  registeredExtensions: ExtensionInfo[];
-  registeredPanels: Record<string, RegisteredPanel>;
-  uninstallExtension(id: string): Promise<boolean>;
+  registeredExtensions: undefined | ExtensionInfo[];
+  registeredPanels: undefined | Record<string, RegisteredPanel>;
+  uninstallExtension: (namespace: ExtensionNamespace, id: string) => Promise<void>;
 };
 
-const ExtensionRegistryContext = createContext<DeepReadonly<ExtensionRegistry> | undefined>(
+export const ExtensionRegistryContext = createContext<undefined | StoreApi<ExtensionRegistry>>(
   undefined,
 );
-ExtensionRegistryContext.displayName = "ExtensionRegistryContext";
 
-export function useExtensionRegistry(): DeepReadonly<ExtensionRegistry> {
-  const extensionRegistry = useContext(ExtensionRegistryContext);
-  if (extensionRegistry == undefined) {
-    throw new Error("An ExtensionRegistryContext provider is required to useExtensionRegistry");
-  }
-  return extensionRegistry;
+export function useExtensionRegistry<T>(
+  selector: (registry: ExtensionRegistry) => T,
+  equalityFn?: (a: T, b: T) => boolean,
+): T {
+  const context = useGuaranteedContext(ExtensionRegistryContext);
+  return useStore(context, selector, equalityFn);
 }
-
-export default ExtensionRegistryContext;

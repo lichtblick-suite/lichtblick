@@ -259,10 +259,11 @@ export type PanelSelection = {
     [panelId: string]: PanelConfig;
   };
 };
+
 type Props = {
   mode?: "grid" | "list";
   onPanelSelect: (arg0: PanelSelection) => void;
-  selectedPanelTitle?: string;
+  selectedPanelType?: string;
   backgroundColor?: string;
 };
 
@@ -292,7 +293,7 @@ function verifyPanels(panels: readonly PanelInfo[]) {
 function PanelList(props: Props): JSX.Element {
   const [searchQuery, setSearchQuery] = React.useState("");
   const [highlightedPanelIdx, setHighlightedPanelIdx] = React.useState<number | undefined>();
-  const { mode, onPanelSelect, selectedPanelTitle, backgroundColor } = props;
+  const { mode, onPanelSelect, selectedPanelType, backgroundColor } = props;
   const classes = useStyles({ backgroundColor });
 
   const { dropPanel } = useCurrentLayoutActions();
@@ -421,20 +422,20 @@ function PanelList(props: Props): JSX.Element {
             onPanelSelect({ type, config, relatedConfigs });
             blurActiveElement();
           }}
-          checked={title === selectedPanelTitle}
+          checked={type === selectedPanelType}
           highlighted={highlightedPanel?.title === title}
           searchQuery={searchQuery}
         />
       );
     },
     [
+      highlightedPanel?.title,
       mode,
-      highlightedPanel,
       mosaicId,
       onPanelMenuItemDrop,
       onPanelSelect,
       searchQuery,
-      selectedPanelTitle,
+      selectedPanelType,
     ],
   );
 

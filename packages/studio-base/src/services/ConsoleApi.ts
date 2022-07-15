@@ -39,6 +39,16 @@ type DeviceCodeResponse = {
   interval: number;
 };
 
+type ExtensionResponse = {
+  activeVersion: string;
+  description?: string;
+  foxe: string;
+  id: string;
+  name: string;
+  publisher: string;
+  sha256Sum?: string;
+};
+
 type TokenArgs = {
   deviceCode: string;
   clientId: string;
@@ -133,6 +143,14 @@ class ConsoleApi {
         { method: "GET" },
       )
     ).json;
+  }
+
+  async getExtensions(): Promise<ExtensionResponse[]> {
+    return await this.get<ExtensionResponse[]>("/v1/extensions");
+  }
+
+  async getExtension(id: string): Promise<ExtensionResponse> {
+    return await this.get<ExtensionResponse>(`/v1/extensions/${id}`);
   }
 
   async getLayouts(options: { includeData: boolean }): Promise<readonly ConsoleApiLayout[]> {

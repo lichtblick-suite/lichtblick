@@ -21,6 +21,5 @@ export interface ExtensionLoader {
   installExtension(foxeFileData: Uint8Array): Promise<ExtensionInfo>;
 
   // uninstall extension with id
-  // return true if the extension was found and uninstalled, false if not found
-  uninstallExtension(id: string): Promise<boolean>;
+  uninstallExtension(id: string): Promise<void>;
 }

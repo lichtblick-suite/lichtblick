@@ -122,7 +122,7 @@ export function PanelActionsDropdown({ isOpen, setIsOpen, isUnknownPanel }: Prop
           },
           onRenderMenuList: () => (
             <PanelList
-              selectedPanelTitle={panelContext?.title}
+              selectedPanelType={panelContext?.type}
               onPanelSelect={swap(panelContext?.id)}
               backgroundColor={theme.semanticColors.menuBackground}
             />
@@ -181,7 +181,7 @@ export function PanelActionsDropdown({ isOpen, setIsOpen, isUnknownPanel }: Prop
     panelContext?.enterFullscreen,
     panelContext?.id,
     panelContext?.isFullscreen,
-    panelContext?.title,
+    panelContext?.type,
     split,
     swap,
     theme.semanticColors.menuBackground,

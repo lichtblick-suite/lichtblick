@@ -29,12 +29,10 @@ export default function PanelCatalogProvider(
     AppSetting.ENABLE_LEGACY_PLOT_PANEL,
   );
 
-  const extensionRegistry = useExtensionRegistry();
+  const extensionPanels = useExtensionRegistry((state) => state.registeredPanels);
 
   const wrappedExtensionPanels = useMemo<PanelInfo[]>(() => {
-    const extensionPanels = extensionRegistry.registeredPanels;
-
-    return Object.values(extensionPanels).map((panel) => {
+    return Object.values(extensionPanels ?? {}).map((panel) => {
       const panelType = `${panel.extensionName}.${panel.registration.name}`;
       const PanelWrapper = (panelProps: PanelProps) => {
         return (
@@ -56,7 +54,7 @@ export default function PanelCatalogProvider(
         module: async () => ({ default: Panel(PanelWrapper) }),
       };
     });
-  }, [extensionRegistry]);
+  }, [extensionPanels]);
 
   const allPanels = useMemo(() => {
     return [...panels.builtin, ...panels.debug, ...panels.legacyPlot, ...wrappedExtensionPanels];

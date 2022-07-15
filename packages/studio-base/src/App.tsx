@@ -32,7 +32,7 @@ import { ConsoleApiDialogCurrentUserProvider } from "./providers/ConsoleApiDialo
 import ConsoleApiRemoteLayoutStorageProvider from "./providers/ConsoleApiRemoteLayoutStorageProvider";
 import CurrentLayoutProvider from "./providers/CurrentLayoutProvider";
 import ExtensionMarketplaceProvider from "./providers/ExtensionMarketplaceProvider";
-import ExtensionRegistryProvider from "./providers/ExtensionRegistryProvider/ExtensionRegistryProvider";
+import ExtensionRegistryProvider from "./providers/ExtensionRegistryProvider";
 import HelpInfoProvider from "./providers/HelpInfoProvider";
 import LayoutManagerProvider from "./providers/LayoutManagerProvider";
 import PanelCatalogProvider from "./providers/PanelCatalogProvider";
