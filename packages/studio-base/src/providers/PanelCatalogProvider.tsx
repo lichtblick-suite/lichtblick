@@ -52,6 +52,7 @@ export default function PanelCatalogProvider(
         title: panel.registration.name,
         type: panelType,
         module: async () => ({ default: Panel(PanelWrapper) }),
+        extensionNamespace: panel.extensionNamespace,
       };
     });
   }, [extensionPanels]);

@@ -56,7 +56,7 @@ async function registerExtensionPanels(
 
         panels[fullId] = {
           extensionName: extension.qualifiedName,
-          namespace: extension.namespace,
+          extensionNamespace: extension.namespace,
           registration: params,
         };
       },

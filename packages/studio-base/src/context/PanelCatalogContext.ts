@@ -5,6 +5,7 @@
 import { ComponentType, createContext, useContext } from "react";
 
 import { PanelStatics } from "@foxglove/studio-base/components/Panel";
+import { ExtensionNamespace } from "@foxglove/studio-base/types/Extensions";
 import { PanelConfig } from "@foxglove/studio-base/types/panels";
 
 export type PanelComponent = ComponentType<{ childId?: string; tabId?: string }> &
@@ -25,6 +26,7 @@ export type PanelInfo = {
   config?: PanelConfig;
   relatedConfigs?: { [panelId: string]: PanelConfig };
   preconfigured?: boolean;
+  extensionNamespace?: ExtensionNamespace;
 };
 
 /** PanelCatalog describes the interface for getting available panels */
