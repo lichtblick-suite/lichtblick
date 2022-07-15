@@ -74,7 +74,7 @@ class PanelToolbarWithOpenMenu extends React.PureComponent {
           if (el) {
             // wait for Dimensions
             setTimeout(() => {
-              const gearIcon = el.querySelector("[data-test=panel-menu] > svg");
+              const gearIcon = el.querySelector("[data-testid=panel-menu] > svg");
               gearIcon?.parentElement?.click();
             }, 100);
           }

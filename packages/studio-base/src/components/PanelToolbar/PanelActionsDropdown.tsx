@@ -162,7 +162,7 @@ export function PanelActionsDropdown({ isOpen, setIsOpen, isUnknownPanel }: Prop
           iconName: "FullScreenMaximize",
           styles: { root: { height: 24, marginLeft: 2, marginRight: 6 } },
         },
-        "data-test": "panel-menu-fullscreen",
+        "data-testid": "panel-menu-fullscreen",
       });
     }
 
@@ -171,7 +171,7 @@ export function PanelActionsDropdown({ isOpen, setIsOpen, isUnknownPanel }: Prop
       text: "Remove panel",
       onClick: close,
       iconProps: { iconName: "Delete" },
-      "data-test": "panel-menu-remove",
+      "data-testid": "panel-menu-remove",
     });
 
     return items;
@@ -202,7 +202,7 @@ export function PanelActionsDropdown({ isOpen, setIsOpen, isUnknownPanel }: Prop
         target={buttonRef}
         onDismiss={() => setIsOpen(false)}
       />
-      <ToolbarIconButton title="More" data-test="panel-menu" onClick={() => setIsOpen(!isOpen)}>
+      <ToolbarIconButton title="More" data-testid="panel-menu" onClick={() => setIsOpen(!isOpen)}>
         <MoreVertIcon />
       </ToolbarIconButton>
     </div>

@@ -11,6 +11,7 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
+import { fireEvent, screen } from "@testing-library/dom";
 import { DndProvider } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
 
@@ -21,6 +22,16 @@ import { PanelCatalog, PanelInfo } from "@foxglove/studio-base/context/PanelCata
 import PanelSetup from "@foxglove/studio-base/stories/PanelSetup";
 
 import PanelLayout from "./PanelLayout";
+
+async function openPanelMenu() {
+  const buttons = await screen.findAllByTestId("panel-menu");
+  fireEvent.click(buttons[0]!);
+}
+
+async function goFullScreen() {
+  await openPanelMenu();
+  fireEvent.click(screen.getAllByTestId("panel-menu-fullscreen")[0]!);
+}
 
 const allPanels: readonly PanelInfo[] = [
   { title: "Some Panel", type: "Sample1", module: async () => await new Promise(() => {}) },
@@ -72,8 +83,6 @@ class MockPanelCatalog implements PanelCatalog {
   }
 }
 
-const DEFAULT_CLICK_DELAY = 100;
-
 export default {
   title: "components/PanelLayout",
 };
@@ -82,11 +91,6 @@ export const PanelNotFound = (): JSX.Element => {
   return (
     <DndProvider backend={HTML5Backend}>
       <PanelSetup
-        onMount={() => {
-          setTimeout(() => {
-            (document.querySelectorAll("[data-test=panel-menu]")[0] as any).click();
-          }, DEFAULT_CLICK_DELAY);
-        }}
         fixture={{ topics: [], datatypes: new Map(), frame: {}, layout: "UnknownPanel!4co6n9d" }}
         omitDragAndDrop
       >
@@ -98,9 +102,12 @@ export const PanelNotFound = (): JSX.Element => {
   );
 };
 PanelNotFound.parameters = { colorScheme: "dark" };
+PanelNotFound.play = openPanelMenu;
+
 export const PanelNotFoundLight = Object.assign(PanelNotFound.bind(undefined), {
   parameters: { colorScheme: "light" },
 });
+PanelNotFoundLight.play = openPanelMenu;
 
 export const PanelWithError = (): JSX.Element => {
   return (
@@ -122,12 +129,6 @@ export const RemoveUnknownPanel = (): JSX.Element => {
   return (
     <DndProvider backend={HTML5Backend}>
       <PanelSetup
-        onMount={() => {
-          setTimeout(() => {
-            (document.querySelectorAll("[data-test=panel-menu]")[0] as any).click();
-            (document.querySelectorAll("[data-test=panel-menu-remove]")[0] as any).click();
-          }, DEFAULT_CLICK_DELAY);
-        }}
         fixture={{ topics: [], datatypes: new Map(), frame: {}, layout: "UnknownPanel!4co6n9d" }}
         omitDragAndDrop
       >
@@ -137,6 +138,10 @@ export const RemoveUnknownPanel = (): JSX.Element => {
       </PanelSetup>
     </DndProvider>
   );
+};
+RemoveUnknownPanel.play = async () => {
+  (await screen.findAllByTestId("panel-menu")).forEach((button) => fireEvent.click(button));
+  (await screen.findAllByTestId("panel-menu-remove")).forEach((button) => fireEvent.click(button));
 };
 
 export const PanelLoading = (): JSX.Element => {
@@ -171,14 +176,6 @@ export const FullScreen = (): JSX.Element => {
           },
         }}
         omitDragAndDrop
-        onMount={() => {
-          setTimeout(() => {
-            (document.querySelectorAll("[data-test=panel-menu]")[0] as any).click();
-          }, DEFAULT_CLICK_DELAY);
-          setTimeout(() => {
-            (document.querySelectorAll("[data-test=panel-menu-fullscreen]")[0] as any).click();
-          }, DEFAULT_CLICK_DELAY);
-        }}
       >
         <MockPanelContextProvider>
           <PanelLayout />
@@ -188,6 +185,9 @@ export const FullScreen = (): JSX.Element => {
   );
 };
 FullScreen.parameters = { colorScheme: "dark" };
+FullScreen.play = goFullScreen;
+
 export const FullScreenLight = Object.assign(FullScreen.bind(undefined), {
   parameters: { colorScheme: "light" },
 });
+FullScreenLight.play = goFullScreen;
