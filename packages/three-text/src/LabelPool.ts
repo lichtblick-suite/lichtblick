@@ -7,6 +7,8 @@ import { EventDispatcher } from "three";
 
 import { FontManager, FontManagerOptions } from "./FontManager";
 
+const tempVec2 = new THREE.Vector2();
+
 class LabelMaterial extends THREE.RawShaderMaterial {
   constructor(params: { atlasTexture?: THREE.Texture; picking?: boolean }) {
     super({
@@ -17,10 +19,12 @@ precision highp int;
 uniform mat4 projectionMatrix, modelViewMatrix, modelMatrix;
 
 uniform bool uBillboard;
+uniform bool uSizeAttenuation;
 uniform float uScale;
 uniform vec2 uLabelSize;
 uniform vec2 uTextureSize;
 uniform vec2 uAnchorPoint;
+uniform vec2 uCanvasSize;
 
 in vec2 uv;
 in vec2 position;
@@ -37,20 +41,28 @@ void main() {
   vUv = (instanceUv + boxUv * instanceCharSize) / uTextureSize;
   vec2 vertexPos = (instanceBoxPosition + position * instanceBoxSize - uAnchorPoint * uLabelSize) * uScale;
   vPosInLabel = (instanceBoxPosition + position * instanceBoxSize);
-  gl_Position = projectionMatrix * modelViewMatrix * vec4(vertexPos, 0.0, 1.0);
 
   // Adapted from THREE.ShaderLib.sprite
   if (uBillboard) {
-    vec4 mvPosition = modelViewMatrix * vec4( 0.0, 0.0, 0.0, 1.0 );
-    // vec2 scale;
-    // scale.x = length(modelMatrix[0].xyz);
-    // scale.y = length(modelMatrix[1].xyz);
-    // #ifndef USE_SIZEATTENUATION
-    //   bool isPerspective = isPerspectiveMatrix( projectionMatrix );
-    //   if ( isPerspective ) scale *= - mvPosition.z;
-    // #endif
-    mvPosition.xy += vertexPos;
-    gl_Position = projectionMatrix * mvPosition;
+    if (uSizeAttenuation) {
+      vec4 mvPosition = modelViewMatrix * vec4( 0.0, 0.0, 0.0, 1.0 );
+      mvPosition.xy += vertexPos;
+      gl_Position = projectionMatrix * mvPosition;
+    } else {
+      vec4 mvPosition = modelViewMatrix * vec4(0., 0., 0., 1.);
+
+      // Adapted from THREE.ShaderLib.sprite
+      vec2 scale;
+      scale.x = length(vec3(modelMatrix[0].xyz));
+      scale.y = length(vec3(modelMatrix[1].xyz));
+
+      gl_Position = projectionMatrix * mvPosition;
+
+      // Add position after projection to maintain constant pixel size
+      gl_Position.xy += vertexPos * 2. / uCanvasSize * scale * gl_Position.w;
+    }
+  } else {
+    gl_Position = projectionMatrix * modelViewMatrix * vec4(vertexPos, 0.0, 1.0);
   }
 }
 `,
@@ -108,7 +120,9 @@ void main() {
         objectId: { value: [NaN, NaN, NaN, NaN] },
         uAnchorPoint: { value: [0.5, 0.5] },
         uBillboard: { value: false },
+        uSizeAttenuation: { value: true },
         uLabelSize: { value: [0, 0] },
+        uCanvasSize: { value: [0, 0] },
         uScale: { value: 0 },
         uTextureSize: {
           value: [params.atlasTexture?.image.width ?? 0, params.atlasTexture?.image.height ?? 0],
@@ -170,6 +184,14 @@ export class Label extends THREE.Object3D {
 
     this.mesh = new THREE.InstancedMesh(this.geometry, this.material, 0);
     this.mesh.userData.pickingMaterial = this.pickingMaterial;
+
+    this.mesh.onBeforeRender = (renderer, _scene, _camera, _geometry, _material, _group) => {
+      renderer.getSize(tempVec2);
+      this.material.uniforms.uCanvasSize!.value[0] = tempVec2.x;
+      this.material.uniforms.uCanvasSize!.value[1] = tempVec2.y;
+      this.pickingMaterial.uniforms.uCanvasSize!.value[0] = tempVec2.x;
+      this.pickingMaterial.uniforms.uCanvasSize!.value[1] = tempVec2.y;
+    };
 
     this.add(this.mesh);
     this.setOpacity(1);
@@ -281,6 +303,16 @@ export class Label extends THREE.Object3D {
   setBillboard(billboard: boolean): void {
     this.material.uniforms.uBillboard!.value = billboard;
     this.pickingMaterial.uniforms.uBillboard!.value = billboard;
+  }
+
+  /**
+   * Enable or disable size attenuation. Setting this to `false` also requires that billboarding is
+   * enabled.
+   */
+  // eslint-disable-next-line @foxglove/no-boolean-parameters
+  setSizeAttenuation(sizeAttenuation: boolean): void {
+    this.material.uniforms.uSizeAttenuation!.value = sizeAttenuation;
+    this.pickingMaterial.uniforms.uSizeAttenuation!.value = sizeAttenuation;
   }
 
   setAnchorPoint(x: number, y: number): void {

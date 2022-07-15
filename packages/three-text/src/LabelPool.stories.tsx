@@ -74,6 +74,7 @@ export const Basic = Object.assign(BasicTemplate.bind({}), {
     opacity: 1,
     cameraMode: "perspective",
     billboard: false,
+    sizeAttenuation: true,
     anchorPointX: 0.5,
     anchorPointY: 0.5,
     positionX: 0,
@@ -82,7 +83,7 @@ export const Basic = Object.assign(BasicTemplate.bind({}), {
   },
   argTypes: {
     cameraMode: { control: "inline-radio", options: ["perspective", "orthographic"] },
-    lineHeight: { control: { type: "range", min: 0.5, max: 5, step: 0.01 } },
+    lineHeight: { control: { type: "range", min: 0.5, max: 20, step: 0.01 } },
     scaleFactor: { control: { type: "range", min: 0, max: 2, step: 0.01 } },
     opacity: { control: { type: "range", min: 0, max: 1, step: 0.01 } },
     anchorPointX: { control: { type: "range", min: 0, max: 1, step: 0.01 } },
@@ -99,7 +100,8 @@ function BasicTemplate({
   scaleFactor,
   opacity,
   billboard,
-  cameraMode,
+  sizeAttenuation,
+  cameraMode = "perspective",
   anchorPointX,
   anchorPointY,
   positionX,
@@ -112,6 +114,7 @@ function BasicTemplate({
   opacity: number;
   cameraMode: "perspective" | "orthographic";
   billboard: boolean;
+  sizeAttenuation: boolean;
   anchorPointX: number;
   anchorPointY: number;
   positionX: number;
@@ -177,6 +180,13 @@ function BasicTemplate({
       storyScene.render();
     }
   }, [billboard, label, storyScene]);
+
+  useEffect(() => {
+    if (label) {
+      label.setSizeAttenuation(sizeAttenuation);
+      storyScene.render();
+    }
+  }, [sizeAttenuation, label, storyScene]);
 
   useEffect(() => {
     if (label) {

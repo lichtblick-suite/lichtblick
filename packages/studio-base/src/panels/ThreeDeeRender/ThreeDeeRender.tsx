@@ -130,7 +130,6 @@ function RendererOverlay(props: {
   addPanel: LayoutActions["addPanel"];
   enableStats: boolean;
   measureActive: boolean;
-  measureDistance?: number;
   onClickMeasure: () => void;
   canPublish: boolean;
   publishActive: boolean;
@@ -259,17 +258,6 @@ function RendererOverlay(props: {
             style={{ position: "relative", pointerEvents: "auto" }}
           >
             <RulerIcon style={{ width: 16, height: 16 }} />
-            <div
-              style={{
-                position: "absolute",
-                top: "50%",
-                left: theme.spacing(-0.75),
-                fontSize: "0.75rem",
-                transform: "translate(-100%, -50%)",
-              }}
-            >
-              {props.measureDistance?.toFixed(2)}
-            </div>
           </IconButton>
 
           {props.canPublish && (
@@ -679,17 +667,13 @@ export function ThreeDeeRender({ context }: { context: PanelExtensionContext }):
   );
 
   const [measureActive, setMeasureActive] = useState(false);
-  const [measureDistance, setMeasureDistance] = useState<number | undefined>();
   useEffect(() => {
     const onStart = () => setMeasureActive(true);
-    const onChange = () => setMeasureDistance(renderer?.measurementTool.distance);
     const onEnd = () => setMeasureActive(false);
     renderer?.measurementTool.addEventListener("foxglove.measure-start", onStart);
-    renderer?.measurementTool.addEventListener("foxglove.measure-change", onChange);
     renderer?.measurementTool.addEventListener("foxglove.measure-end", onEnd);
     return () => {
       renderer?.measurementTool.removeEventListener("foxglove.measure-start", onStart);
-      renderer?.measurementTool.removeEventListener("foxglove.measure-change", onChange);
       renderer?.measurementTool.removeEventListener("foxglove.measure-end", onEnd);
     };
   }, [renderer?.measurementTool]);
@@ -832,7 +816,6 @@ export function ThreeDeeRender({ context }: { context: PanelExtensionContext }):
             addPanel={addPanel}
             enableStats={config.scene.enableStats ?? false}
             measureActive={measureActive}
-            measureDistance={measureDistance}
             onClickMeasure={onClickMeasure}
             canPublish={context.publish != undefined}
             publishActive={publishActive}
