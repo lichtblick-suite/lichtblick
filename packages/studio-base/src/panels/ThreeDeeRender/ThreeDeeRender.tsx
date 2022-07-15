@@ -3,6 +3,7 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 import RulerIcon from "@mdi/svg/svg/ruler.svg";
+import Video3dIcon from "@mdi/svg/svg/video-3d.svg";
 import {
   IconButton,
   ListItemIcon,
@@ -129,6 +130,8 @@ function RendererOverlay(props: {
   canvas: HTMLCanvasElement | ReactNull;
   addPanel: LayoutActions["addPanel"];
   enableStats: boolean;
+  perspective: boolean;
+  onTogglePerspective: () => void;
   measureActive: boolean;
   onClickMeasure: () => void;
   canPublish: boolean;
@@ -250,6 +253,14 @@ function RendererOverlay(props: {
           setInteractionsTabType={setInteractionsTabType}
         />
         <Paper square={false} elevation={4} style={{ display: "flex", flexDirection: "column" }}>
+          <IconButton
+            color={props.perspective ? "info" : "inherit"}
+            title={props.perspective ? "Switch to 2D camera" : "Switch to 3D camera"}
+            onClick={props.onTogglePerspective}
+            style={{ pointerEvents: "auto" }}
+          >
+            <Video3dIcon style={{ width: 16, height: 16 }} />
+          </IconButton>
           <IconButton
             data-test="measure-button"
             color={props.measureActive ? "info" : "inherit"}
@@ -790,9 +801,27 @@ export function ThreeDeeRender({ context }: { context: PanelExtensionContext }):
     }
   }, [publishActive, renderer]);
 
+  const onTogglePerspective = useCallback(() => {
+    setConfig((prevConfig) => ({
+      ...prevConfig,
+      cameraState: { ...prevConfig.cameraState, perspective: !prevConfig.cameraState.perspective },
+    }));
+  }, []);
+
+  const onKeyDown = useCallback(
+    (event: React.KeyboardEvent) => {
+      if (event.key === "3") {
+        onTogglePerspective();
+        event.stopPropagation();
+        event.preventDefault();
+      }
+    },
+    [onTogglePerspective],
+  );
+
   return (
     <ThemeProvider isDark={colorScheme === "dark"}>
-      <div style={PANEL_STYLE} ref={resizeRef}>
+      <div style={PANEL_STYLE} ref={resizeRef} onKeyDown={onKeyDown}>
         <CameraListener cameraStore={cameraStore} shiftKeys={true}>
           <div
             // This element forces CameraListener to fill its container. We need this instead of just
@@ -815,6 +844,8 @@ export function ThreeDeeRender({ context }: { context: PanelExtensionContext }):
             canvas={canvas}
             addPanel={addPanel}
             enableStats={config.scene.enableStats ?? false}
+            perspective={config.cameraState.perspective}
+            onTogglePerspective={onTogglePerspective}
             measureActive={measureActive}
             onClickMeasure={onClickMeasure}
             canPublish={context.publish != undefined}
