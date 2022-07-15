@@ -3,17 +3,18 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 import * as THREE from "three";
 
+import { Renderable, BaseUserData } from "../Renderable";
 import { Renderer } from "../Renderer";
 import { SceneExtension } from "../SceneExtension";
 
-export type MeasurementState = "idle" | "place-first-point" | "place-second-point";
+type MeasurementState = "idle" | "place-first-point" | "place-second-point";
 
 /**
  * A material that interprets the input mesh coordinates in pixel space, regardless of the camera
  * perspective/zoom level.
  */
 class FixedSizeMeshMaterial extends THREE.ShaderMaterial {
-  constructor() {
+  constructor({ color }: { color: THREE.ColorRepresentation }) {
     super({
       vertexShader: /* glsl */ `
         #include <common>
@@ -33,20 +34,27 @@ class FixedSizeMeshMaterial extends THREE.ShaderMaterial {
         }
       `,
       fragmentShader: /* glsl */ `
+        uniform vec3 color;
         void main() {
-          gl_FragColor = vec4(1.0, 0.0, 0.0, 1.0);
+          gl_FragColor = vec4(color, 1.0);
         }
       `,
       uniforms: {
         canvasSize: { value: [0, 0] },
+        color: { value: new THREE.Color(color).convertSRGBToLinear() },
       },
     });
   }
 }
 
-export class MeasurementTool extends SceneExtension {
+type MeasurementEvent =
+  | { type: "foxglove.measure-start" }
+  | { type: "foxglove.measure-change" }
+  | { type: "foxglove.measure-end" };
+
+export class MeasurementTool extends SceneExtension<Renderable<BaseUserData>, MeasurementEvent> {
   private circleGeometry = new THREE.CircleGeometry(5, 16);
-  private circleMaterial = new FixedSizeMeshMaterial();
+  private circleMaterial = new FixedSizeMeshMaterial({ color: 0xff0000 });
   private circle1 = new THREE.Mesh(this.circleGeometry, this.circleMaterial);
   private circle2 = new THREE.Mesh(this.circleGeometry, this.circleMaterial);
 
@@ -70,6 +78,8 @@ export class MeasurementTool extends SceneExtension {
 
     this.line.frustumCulled = false;
     this.line.geometry.setAttribute("position", this.linePositionAttribute);
+    this.circle1.visible = false;
+    this.circle2.visible = false;
     this.add(this.circle1);
     this.add(this.circle2);
     this.add(this.line);
@@ -91,6 +101,7 @@ export class MeasurementTool extends SceneExtension {
   }
 
   stopMeasuring(): void {
+    this.point1 = this.point2 = this.distance = undefined;
     this._setState("idle");
   }
 
@@ -113,12 +124,12 @@ export class MeasurementTool extends SceneExtension {
         this.renderer.input.addListener("click", this._handleClick);
         this.renderer.input.addListener("mousemove", this._handleMouseMove);
         this.dispatchEvent({ type: "foxglove.measure-start" });
-        this._render();
         break;
       case "place-second-point":
         break;
     }
     this._updateDistance();
+    this._render();
   }
 
   private _handleMouseMove = (

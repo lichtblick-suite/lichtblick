@@ -51,6 +51,7 @@ import { PointCloudsAndLaserScans } from "./renderables/PointCloudsAndLaserScans
 import { Polygons } from "./renderables/Polygons";
 import { PoseArrays } from "./renderables/PoseArrays";
 import { Poses } from "./renderables/Poses";
+import { PublishClickTool, PublishClickType } from "./renderables/PublishClickTool";
 import { Urdfs } from "./renderables/Urdfs";
 import { MarkerPool } from "./renderables/markers/MarkerPool";
 import {
@@ -110,6 +111,22 @@ export type RendererConfig = {
     };
     /** Toggles visibility of all topics */
     topicsVisible?: boolean;
+  };
+  publish: {
+    /** The type of message to publish when clicking in the scene */
+    type: PublishClickType;
+    /** The topic on which to publish poses */
+    poseTopic: string;
+    /** The topic on which to publish points */
+    pointTopic: string;
+    /** The topic on which to publish pose estimates */
+    poseEstimateTopic: string;
+    /** The X standard deviation to publish with poses */
+    poseEstimateXDeviation: number;
+    /** The Y standard deviation to publish with poses */
+    poseEstimateYDeviation: number;
+    /** The theta standard deviation to publish with poses */
+    poseEstimateThetaDeviation: number;
   };
   /** frameId -> settings */
   transforms: Record<string, Partial<LayerSettingsTransform> | undefined>;
@@ -191,6 +208,7 @@ export class Renderer extends EventEmitter<RendererEvents> {
   outlineMaterial = new THREE.LineBasicMaterial({ dithering: true });
 
   measurementTool: MeasurementTool;
+  publishClickTool: PublishClickTool;
 
   perspectiveCamera: THREE.PerspectiveCamera;
   orthographicCamera: THREE.OrthographicCamera;
@@ -304,6 +322,9 @@ export class Renderer extends EventEmitter<RendererEvents> {
     this.aspect = renderSize.width / renderSize.height;
     log.debug(`Initialized ${renderSize.width}x${renderSize.height} renderer (${samples}x MSAA)`);
 
+    this.measurementTool = new MeasurementTool(this);
+    this.publishClickTool = new PublishClickTool(this);
+
     this.addSceneExtension(new CoreSettings(this));
     this.addSceneExtension(new Cameras(this));
     this.addSceneExtension(new FrameAxes(this));
@@ -316,8 +337,8 @@ export class Renderer extends EventEmitter<RendererEvents> {
     this.addSceneExtension(new Poses(this));
     this.addSceneExtension(new PoseArrays(this));
     this.addSceneExtension(new Urdfs(this));
-
-    this.addSceneExtension((this.measurementTool = new MeasurementTool(this)));
+    this.addSceneExtension(this.measurementTool);
+    this.addSceneExtension(this.publishClickTool);
 
     this._watchDevicePixelRatio();
 
@@ -805,8 +826,8 @@ export class Renderer extends EventEmitter<RendererEvents> {
       return;
     }
 
-    // Disable picking while the measurement tool is active
-    if (this.measurementTool.state !== "idle") {
+    // Disable picking while a tool is active
+    if (this.measurementTool.state !== "idle" || this.publishClickTool.state !== "idle") {
       return;
     }
 
@@ -969,6 +990,8 @@ export class Renderer extends EventEmitter<RendererEvents> {
         `Frame "${this.renderFrameId}" not found`,
       );
       return;
+    } else {
+      this.settings.errors.remove(FOLLOW_TF_PATH, FRAME_NOT_FOUND);
     }
 
     const rootFrameId = frame.root().id;

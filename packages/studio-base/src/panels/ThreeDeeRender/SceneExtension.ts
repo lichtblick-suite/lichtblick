@@ -41,7 +41,8 @@ const SETTINGS_DEBOUNCE_MS = 100;
  */
 export class SceneExtension<
   TRenderable extends Renderable<BaseUserData> = Renderable<BaseUserData>,
-> extends THREE.Object3D {
+  E extends THREE.BaseEvent = THREE.Event,
+> extends THREE.Object3D<E> {
   /** A unique identifier for this SceneExtension, such as `foxglove.Markers`. */
   readonly extensionId: string;
   /** A reference to the parent `Renderer` instance. */
