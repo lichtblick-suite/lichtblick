@@ -12,11 +12,6 @@ export const SRow = styled.div`
   padding: 0;
   margin: 4px 0;
 `;
-export const SLabel = styled.label<{ width?: number }>`
-  width: ${(props) => `${props.width ?? 80}px`};
-  margin: 4px 0;
-  font-size: 10px;
-`;
 export const SValue = styled.div`
   color: ${colors.HIGHLIGHT};
   word-break: break-word;

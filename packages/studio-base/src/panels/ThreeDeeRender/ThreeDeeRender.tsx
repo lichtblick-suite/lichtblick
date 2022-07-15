@@ -26,6 +26,7 @@ import {
   CameraState,
   CameraStore,
   DEFAULT_CAMERA_STATE,
+  MouseEventObject,
 } from "@foxglove/regl-worldview";
 import { definitions as commonDefs } from "@foxglove/rosmsg-msgs-common";
 import { fromDate, toNanoSec } from "@foxglove/rostime";
@@ -47,19 +48,13 @@ import ThemeProvider from "@foxglove/studio-base/theme/ThemeProvider";
 import { Point, makeCovarianceArray } from "@foxglove/studio-base/util/geometry";
 
 import { DebugGui } from "./DebugGui";
-import Interactions, {
-  InteractionContextMenu,
-  OBJECT_TAB_TYPE,
-  SelectionObject,
-  TabType,
-} from "./Interactions";
+import Interactions, { InteractionContextMenu, SelectionObject, TabType } from "./Interactions";
 import type { Renderable } from "./Renderable";
 import { MessageHandler, Renderer, RendererConfig } from "./Renderer";
 import { RendererContext, useRenderer, useRendererEvent } from "./RendererContext";
 import { Stats } from "./Stats";
 import { FRAME_TRANSFORM_DATATYPES } from "./foxglove";
 import { PublishClickEvent, PublishClickType } from "./renderables/PublishClickTool";
-import type { MarkerUserData } from "./renderables/markers/RenderableMarker";
 import { TF_DATATYPES, TRANSFORM_STAMPED_DATATYPES } from "./ros";
 import { Pose } from "./transforms/geometry";
 
@@ -131,6 +126,7 @@ function makePoseEstimateMessage(
  * Provides DOM overlay elements on top of the 3D scene (e.g. stats, debug GUI).
  */
 function RendererOverlay(props: {
+  canvas: HTMLCanvasElement | ReactNull;
   addPanel: LayoutActions["addPanel"];
   enableStats: boolean;
   measureActive: boolean;
@@ -142,6 +138,11 @@ function RendererOverlay(props: {
   onChangePublishClickType: (_: PublishClickType) => void;
   onClickPublish: () => void;
 }): JSX.Element {
+  const [clickedPosition, setClickedPosition] = useState<{ clientX: number; clientY: number }>({
+    clientX: 0,
+    clientY: 0,
+  });
+  const [selectedRenderables, setSelectedRenderables] = useState<Renderable[]>([]);
   const [selectedRenderable, setSelectedRenderable] = useState<Renderable | undefined>(undefined);
   const [interactionsTabType, setInteractionsTabType] = useState<TabType | undefined>(undefined);
   const renderer = useRenderer();
@@ -153,11 +154,11 @@ function RendererOverlay(props: {
     }
   }, [interactionsTabType, renderer]);
 
-  useRendererEvent("renderableSelected", (renderable) => {
-    setSelectedRenderable(renderable);
-    if (renderable) {
-      setInteractionsTabType(OBJECT_TAB_TYPE);
-    }
+  useRendererEvent("renderablesClicked", (renderables, cursorCoords) => {
+    const rect = props.canvas!.getBoundingClientRect();
+    setClickedPosition({ clientX: rect.left + cursorCoords.x, clientY: rect.top + cursorCoords.y });
+    setSelectedRenderables(renderables);
+    setSelectedRenderable(renderables.length === 1 ? renderables[0] : undefined);
   });
 
   const stats = props.enableStats ? (
@@ -172,33 +173,51 @@ function RendererOverlay(props: {
     </div>
   ) : undefined;
 
-  const selectedObject = useMemo<SelectionObject | undefined>(() => {
-    if (!selectedRenderable) {
-      return undefined;
-    }
-
-    // Retrieve the original message for Markers. This needs to be rethought for
-    // other renderables that are generated from received messages
-    const maybeMarkerUserData = selectedRenderable.userData as Partial<MarkerUserData>;
-    const topic = maybeMarkerUserData.topic ?? selectedRenderable.name;
-    const originalMessage = selectedRenderable.details();
-
-    return {
-      object: {
-        pose: selectedRenderable.userData.pose,
-        interactionData: {
-          topic,
-          highlighted: true,
-          originalMessage,
+  // Convert the list of selected renderables (if any) into MouseEventObjects
+  // that can be passed to <InteractionContextMenu>, which shows a context menu
+  // of candidate objects to select
+  const clickedObjects = useMemo<MouseEventObject[]>(
+    () =>
+      selectedRenderables.map((renderable) => ({
+        object: {
+          pose: renderable.userData.pose,
+          scale: renderable.scale,
+          color: undefined,
+          interactionData: {
+            topic: renderable.name,
+            highlighted: undefined,
+            renderable,
+          },
         },
-      },
-      instanceIndex: undefined,
-    };
-  }, [selectedRenderable]);
+        instanceIndex: undefined,
+      })),
+    [selectedRenderables],
+  );
 
-  const clickedObjects = useMemo<SelectionObject[]>(() => {
-    return [];
-  }, []);
+  // Once a single renderable is selected, convert it to the SelectionObject
+  // format to populate the object inspection dialog (<Interactions>)
+  const selectedObject = useMemo<SelectionObject | undefined>(
+    () =>
+      selectedRenderable
+        ? {
+            object: {
+              pose: selectedRenderable.userData.pose,
+              interactionData: {
+                topic: selectedRenderable.name,
+                highlighted: true,
+                originalMessage: selectedRenderable.details(),
+              },
+            },
+            instanceIndex: undefined,
+          }
+        : undefined,
+    [selectedRenderable],
+  );
+
+  // Inform the Renderer when a renderable is selected
+  useEffect(() => {
+    renderer?.setSelectedRenderable(selectedRenderable);
+  }, [renderer, selectedRenderable]);
 
   const publickClickButtonRef = useRef<HTMLButtonElement>(ReactNull);
   const [publishMenuExpanded, setPublishMenuExpanded] = useState(false);
@@ -222,6 +241,7 @@ function RendererOverlay(props: {
           flexDirection: "column",
           alignItems: "flex-end",
           gap: 10,
+          pointerEvents: "none",
         }}
       >
         <Interactions
@@ -236,7 +256,7 @@ function RendererOverlay(props: {
             color={props.measureActive ? "info" : "inherit"}
             title={props.measureActive ? "Cancel measuring" : "Measure distance"}
             onClick={props.onClickMeasure}
-            style={{ position: "relative" }}
+            style={{ position: "relative", pointerEvents: "auto" }}
           >
             <RulerIcon style={{ width: 16, height: 16 }} />
             <div
@@ -261,7 +281,7 @@ function RendererOverlay(props: {
                 ref={publickClickButtonRef}
                 onClick={props.onClickPublish}
                 data-test="publish-button"
-                style={{ fontSize: "1rem" }}
+                style={{ fontSize: "1rem", pointerEvents: "auto" }}
               >
                 {selectedPublishClickIcon}
                 <div
@@ -322,9 +342,17 @@ function RendererOverlay(props: {
       </div>
       {clickedObjects.length > 1 && !selectedObject && (
         <InteractionContextMenu
-          clickedPosition={{ clientX: 0, clientY: 0 }}
-          clickedObjects={[]}
-          selectObject={() => {}}
+          clickedPosition={clickedPosition}
+          clickedObjects={clickedObjects}
+          selectObject={(selection) => {
+            if (selection) {
+              const renderable = (
+                selection.object as unknown as { interactionData: { renderable: Renderable } }
+              ).interactionData.renderable;
+              setSelectedRenderables([]);
+              setSelectedRenderable(renderable);
+            }
+          }}
         />
       )}
       {stats}
@@ -800,6 +828,7 @@ export function ThreeDeeRender({ context }: { context: PanelExtensionContext }):
         </CameraListener>
         <RendererContext.Provider value={renderer}>
           <RendererOverlay
+            canvas={canvas}
             addPanel={addPanel}
             enableStats={config.scene.enableStats ?? false}
             measureActive={measureActive}

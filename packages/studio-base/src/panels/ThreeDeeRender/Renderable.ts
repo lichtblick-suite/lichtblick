@@ -31,9 +31,13 @@ export type BaseUserData = {
  * automatically be applied and settings tree errors to be displayed.
  */
 export class Renderable<TUserData extends BaseUserData = BaseUserData> extends THREE.Object3D {
+  /** Identifies this class as inheriting from `Renderable` */
   readonly isRenderable = true;
+  /** Allow this object to be selected during picking and shown in the Object Details view */
   readonly pickable: boolean = true;
+  /** A reference to the parent `Renderer` that owns the scene graph containing this object */
   readonly renderer: Renderer;
+  /** Additional data associated with this entity */
   override userData: TUserData;
 
   constructor(name: string, renderer: Renderer, userData: TUserData) {

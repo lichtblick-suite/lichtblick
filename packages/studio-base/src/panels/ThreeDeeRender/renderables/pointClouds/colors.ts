@@ -19,7 +19,6 @@ export function getColorConverter(
   minValue: number,
   maxValue: number,
 ): ColorConverter {
-  const valueDelta = Math.max(maxValue - minValue, Number.EPSILON);
   switch (settings.colorMode) {
     case "flat": {
       const flatColor = stringToRgba(tempColor1, settings.flatColor);
@@ -32,6 +31,7 @@ export function getColorConverter(
       };
     }
     case "gradient": {
+      const valueDelta = Math.max(maxValue - minValue, Number.EPSILON);
       const minColor = stringToRgba(tempColor1, settings.gradient[0]);
       const maxColor = stringToRgba(tempColor2, settings.gradient[1]);
       rgbaToLinear(minColor, minColor);
@@ -41,7 +41,8 @@ export function getColorConverter(
         rgbaGradient(output, minColor, maxColor, t);
       };
     }
-    case "colormap":
+    case "colormap": {
+      const valueDelta = Math.max(maxValue - minValue, Number.EPSILON);
       switch (settings.colorMap) {
         case "turbo":
           return (output: ColorRGBA, colorValue: number) => {
@@ -55,6 +56,7 @@ export function getColorConverter(
           };
       }
       throw new Error(`Unrecognized color map: ${settings.colorMap}`);
+    }
     case "rgb":
       switch (settings.rgbByteOrder) {
         default:

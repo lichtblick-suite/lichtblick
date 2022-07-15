@@ -13,7 +13,7 @@
 
 import Interactions from "./Interactions";
 
-export { default as Interactions, OBJECT_TAB_TYPE } from "./Interactions";
+export { default as Interactions } from "./Interactions";
 export type { SelectionObject, TabType } from "./Interactions";
 export { default as InteractionContextMenu } from "./InteractionContextMenu";
 

@@ -13,7 +13,7 @@ type Camera = THREE.PerspectiveCamera | THREE.OrthographicCamera;
 
 // The width and height of the output viewport. This could be 1 to sample a
 // single pixel, but GL_POINTS with a >1 point size would be clipped
-const PIXEL_WIDTH = 9;
+const PIXEL_WIDTH = 31;
 
 const WHITE_COLOR = new THREE.Color(0xffffff);
 
@@ -61,8 +61,9 @@ export class Picker {
       magFilter: THREE.NearestFilter,
       format: THREE.RGBAFormat, // stores objectIds as uint32
       encoding: THREE.LinearEncoding,
+      generateMipmaps: false,
     });
-    this.pixelBuffer = new Uint8Array(4 * this.pickingTarget.width * this.pickingTarget.height);
+    this.pixelBuffer = new Uint8Array(4);
     // We need to be inside of .render in order to call renderBufferDirect in renderList() so create an empty scene
     // and use the onAfterRender callback to actually render geometry for picking.
     this.emptyScene = new THREE.Scene();
@@ -85,7 +86,7 @@ export class Picker {
   ): number {
     this.camera = camera;
     this.shouldPickObjectCB = shouldPickObject;
-    const hw = Math.floor(PIXEL_WIDTH / 2);
+    const hw = (PIXEL_WIDTH / 2) | 0;
     const pixelRatio = this.gl.getPixelRatio();
     const xi = Math.max(0, x * pixelRatio - hw);
     const yi = Math.max(0, y * pixelRatio - hw);
@@ -101,26 +102,16 @@ export class Picker {
     this.gl.setClearAlpha(1);
     this.gl.clear();
     this.gl.render(this.emptyScene, camera);
-    this.gl.readRenderTargetPixels(
-      this.pickingTarget,
-      0,
-      0,
-      this.pickingTarget.width,
-      this.pickingTarget.height,
-      this.pixelBuffer,
-    );
+    this.gl.readRenderTargetPixels(this.pickingTarget, hw, hw, 1, 1, this.pixelBuffer);
     this.gl.setRenderTarget(currRenderTarget);
     this.gl.setClearColor(this.currClearColor, currAlpha);
     camera.clearViewOffset();
 
-    const xo = Math.min(hw, xi);
-    const yo = Math.min(hw, yi);
-    const offset = (yo * PIXEL_WIDTH + xo) * 4;
     const val =
-      (this.pixelBuffer[offset + 0]! << 24) +
-      (this.pixelBuffer[offset + 1]! << 16) +
-      (this.pixelBuffer[offset + 2]! << 8) +
-      this.pixelBuffer[offset + 3]!;
+      (this.pixelBuffer[0]! << 24) +
+      (this.pixelBuffer[1]! << 16) +
+      (this.pixelBuffer[2]! << 8) +
+      this.pixelBuffer[3]!;
 
     if (this.debug) {
       this.pickDebugRender(camera);

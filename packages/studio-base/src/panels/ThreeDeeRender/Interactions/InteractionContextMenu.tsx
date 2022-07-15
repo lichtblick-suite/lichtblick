@@ -67,10 +67,6 @@ const STopic = styled.div`
   overflow: hidden;
 `;
 
-const SId = styled.span`
-  color: ${colors.YELLOW1};
-`;
-
 type Props = {
   clickedPosition: ClickedPosition;
   clickedObjects: MouseEventObject[];
@@ -110,27 +106,7 @@ function InteractionContextMenuItem({
   interactiveObject?: MouseEventObject;
 }) {
   const object = getObject(interactiveObject) as Partial<Interactive<BaseMarker>>;
-  // const topic = getInteractionData(interactiveObject)?.topic;
-  const menuText = (
-    <>
-      {object.id != undefined && object.id !== "" && <SId>{object.id}</SId>}
-      {object.interactionData?.topic}
-    </>
-  );
-
-  // const { setHoveredMarkerMatchers } = useContext(ThreeDimensionalVizContext);
-  // const onMouseEnter = useCallback(() => {
-  //   if (topic) {
-  //     const { id, ns } = object;
-  //     const checks = [{ markerKeyPath: ["id"], value: id }];
-  //     if (ns != undefined && ns !== "") {
-  //       checks.push({ markerKeyPath: ["ns"], value: ns });
-  //     }
-  //     return setHoveredMarkerMatchers([{ topic, checks }]);
-  //   }
-  // }, [object, setHoveredMarkerMatchers, topic]);
-  // const onMouseLeave = useCallback(() => setHoveredMarkerMatchers([]), [setHoveredMarkerMatchers]);
-  // useEffect(() => onMouseLeave, [onMouseLeave]);
+  const menuText = <>{object.interactionData?.topic}</>;
 
   const selectItemObject = useCallback(
     () => selectObject(interactiveObject as SelectedObject),
@@ -138,11 +114,7 @@ function InteractionContextMenuItem({
   );
 
   return (
-    <SMenuItem
-      // onMouseEnter={onMouseEnter}
-      // onMouseLeave={onMouseLeave}
-      data-test="InteractionContextMenuItem"
-    >
+    <SMenuItem data-test="InteractionContextMenuItem">
       <STopic onClick={selectItemObject}>
         {menuText}
         <STooltip>{menuText}</STooltip>

@@ -16,9 +16,7 @@ export class ScreenOverlay extends THREE.Object3D {
 
     this.material = new THREE.ShaderMaterial({
       transparent: true,
-      depthTest: false,
-      depthWrite: false,
-      uniforms: { color: { value: [0, 0, 0, 0.8] } },
+      uniforms: { color: { value: [1, 0, 1, 1] } },
       vertexShader: /* glsl */ `
         void main() {
           gl_Position = vec4(position.xy, 0.0, 1.0);
@@ -32,6 +30,7 @@ export class ScreenOverlay extends THREE.Object3D {
     });
 
     const mesh = new THREE.Mesh(ScreenOverlay.Geometry(), this.material);
+    mesh.frustumCulled = false;
     this.add(mesh);
   }
 
@@ -46,7 +45,6 @@ export class ScreenOverlay extends THREE.Object3D {
   static Geometry(): THREE.PlaneGeometry {
     if (!ScreenOverlay.geometry) {
       ScreenOverlay.geometry = new THREE.PlaneGeometry(2, 2, 1, 1);
-      ScreenOverlay.geometry.computeBoundingSphere();
     }
     return ScreenOverlay.geometry;
   }
