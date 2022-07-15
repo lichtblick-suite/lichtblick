@@ -45,13 +45,6 @@ const STab = muiStyled(Tab)(({ theme }) => ({
   padding: theme.spacing(1, 1.125),
 }));
 
-const STabs = muiStyled(Tabs)({
-  ".MuiTabs-indicator": {
-    right: "auto",
-    left: 1,
-  },
-});
-
 const ExplorerWrapper = muiStyled("div")(({ theme }) => ({
   backgroundColor: theme.palette.grey[200],
   width: 350,
@@ -284,7 +277,7 @@ const Sidebar = ({
   return (
     <Paper elevation={0}>
       <Stack direction="row" fullHeight>
-        <STabs orientation="vertical" value={activeExplorerTab}>
+        <Tabs orientation="vertical" value={activeExplorerTab}>
           <STab
             disableRipple
             value="nodes"
@@ -309,7 +302,7 @@ const Sidebar = ({
             data-test="templates-explorer"
             onClick={() => updateExplorer(templatesSelected ? undefined : "templates")}
           />
-        </STabs>
+        </Tabs>
         {explorer != undefined && (
           <>
             <Divider flexItem orientation="vertical" />

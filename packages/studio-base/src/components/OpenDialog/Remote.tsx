@@ -2,8 +2,7 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { TextField } from "@fluentui/react";
-import { Typography } from "@mui/material";
+import { Typography, TextField } from "@mui/material";
 import path from "path";
 import { useCallback, useState, useMemo } from "react";
 
@@ -85,11 +84,10 @@ export default function Remote(props: RemoteProps): JSX.Element {
       <Stack gap={2}>
         <TextField
           label="Remote file URL"
-          errorMessage={errorMessage}
+          error={errorMessage != undefined}
+          helperText={errorMessage}
           placeholder="https://example.com/file.bag"
-          onChange={(_, newValue) => {
-            setCurrentUrl(newValue);
-          }}
+          onChange={(event) => setCurrentUrl(event.target.value)}
         />
         <Typography color="text.secondary">
           {`${supportedExtensions} files are supported.`}

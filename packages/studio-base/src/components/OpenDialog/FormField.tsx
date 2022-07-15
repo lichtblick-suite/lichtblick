@@ -2,8 +2,8 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { TextField } from "@fluentui/react";
-import { useState } from "react";
+import { FormHelperText, TextField } from "@mui/material";
+import { ChangeEvent, useState } from "react";
 
 import { Field } from "@foxglove/studio-base/context/PlayerSelectionContext";
 
@@ -18,31 +18,37 @@ export function FormField(props: Props): JSX.Element {
   const [error, setError] = useState<string | undefined>();
   const field = props.field;
 
-  const onChange = (_: unknown, newValue: string | undefined) => {
+  const onChange = (event: ChangeEvent<HTMLInputElement>) => {
     setError(undefined);
 
-    if (newValue != undefined) {
-      const maybeError = field.validate?.(newValue);
-      if (maybeError instanceof Error) {
-        setError(maybeError.message);
-        props.onError(maybeError.message);
-        return;
-      }
+    const maybeError = field.validate?.(event.target.value);
+
+    if (maybeError instanceof Error) {
+      setError(maybeError.message);
+      props.onError(maybeError.message);
+      return;
     }
 
-    props.onChange(newValue ?? field.defaultValue);
+    props.onChange(event.target.value);
   };
 
   return (
-    <TextField
-      disabled={props.disabled}
-      key={field.label}
-      label={field.label}
-      errorMessage={error}
-      description={field.description}
-      placeholder={field.placeholder}
-      defaultValue={field.defaultValue}
-      onChange={onChange}
-    />
+    <div>
+      <TextField
+        fullWidth
+        disabled={props.disabled}
+        key={field.label}
+        label={field.label}
+        error={error != undefined}
+        helperText={error}
+        FormHelperTextProps={{
+          variant: "standard",
+        }}
+        placeholder={field.placeholder}
+        defaultValue={field.defaultValue}
+        onChange={onChange}
+      />
+      <FormHelperText>{field.description}</FormHelperText>
+    </div>
   );
 }

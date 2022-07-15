@@ -2,12 +2,12 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { Dialog, useTheme } from "@fluentui/react";
-import { Stack } from "@mui/material";
+import CloseIcon from "@mui/icons-material/Close";
+import { Dialog, DialogTitle, IconButton, styled as muiStyled } from "@mui/material";
 import { useCallback, useLayoutEffect, useMemo, useState } from "react";
 import { useMountedState } from "react-use";
 
-import { useDialogHostId } from "@foxglove/studio-base/context/DialogHostIdContext";
+import Stack from "@foxglove/studio-base/components/Stack";
 import {
   IDataSourceFactory,
   usePlayerSelection,
@@ -25,16 +25,21 @@ type OpenDialogProps = {
   onDismiss?: () => void;
 };
 
+const StyledDialogTitle = muiStyled(DialogTitle)(({ theme }) => ({
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "space-between",
+  padding: theme.spacing(4, 5, 0, 5),
+}));
+
 export default function OpenDialog(props: OpenDialogProps): JSX.Element {
   const { activeView: defaultActiveView, onDismiss, activeDataSource } = props;
   const { availableSources, selectSource } = usePlayerSelection();
 
   const isMounted = useMountedState();
   const [activeView, setActiveView] = useState<OpenDialogViews>(defaultActiveView ?? "start");
-  const theme = useTheme();
 
   const openFile = useOpenFile(availableSources);
-  const hostId = useDialogHostId();
 
   const firstSampleSource = useMemo(() => {
     return availableSources.find((source) => source.type === "sample");
@@ -141,55 +146,30 @@ export default function OpenDialog(props: OpenDialogProps): JSX.Element {
 
   return (
     <Dialog
-      hidden={false}
-      maxWidth="calc(min(800px, 100% - 32px))"
-      modalProps={{
-        layerProps: {
-          // We enable event bubbling so a user can drag&drop files or folders onto the app even when
-          // the dialog is shown.
-          eventBubblingEnabled: true,
-          hostId,
-        },
-        styles: {
-          main: {
-            display: "flex",
-            flexDirection: "column",
-          },
-          scrollableContent: {
-            display: "flex",
-            flexDirection: "column",
-          },
-        },
-      }}
-      onDismiss={onDismiss}
-      dialogContentProps={{
-        showCloseButton: true,
-        title: view.title,
-        styles: {
-          content: {
-            overflow: "visible",
-            display: "flex",
-            flexDirection: "column",
-            // Keep a consistent height for the dialog so changing views does not change the height
-            flexBasis: 520,
-            maxHeight: 520,
-            padding: theme.spacing.l1,
-          },
-          inner: {
-            flex: 1,
-            display: "flex",
-            flexDirection: "column",
-          },
-          innerContent: {
-            height: "100%",
-            display: "flex",
-            flexDirection: "column",
-            flex: 1,
-          },
-        },
+      open
+      onClose={onDismiss}
+      fullWidth
+      maxWidth="md"
+      PaperProps={{
+        elevation: 4,
+        style: { maxWidth: "calc(min(768px, 100% - 32px))" },
       }}
     >
-      <Stack flexGrow={1} height="100%" justifyContent="space-between" spacing={2}>
+      <StyledDialogTitle>
+        {view.title}
+        <IconButton onClick={onDismiss} edge="end">
+          <CloseIcon />
+        </IconButton>
+      </StyledDialogTitle>
+      <Stack
+        flexGrow={1}
+        flexBasis={450}
+        fullHeight
+        justifyContent="space-between"
+        gap={2}
+        paddingX={5}
+        paddingY={3}
+      >
         {view.component}
       </Stack>
     </Dialog>

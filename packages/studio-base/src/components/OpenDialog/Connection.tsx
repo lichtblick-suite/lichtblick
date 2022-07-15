@@ -2,8 +2,8 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { ActionButton, useTheme } from "@fluentui/react";
-import { Alert, Link, Typography } from "@mui/material";
+import { Icon } from "@fluentui/react";
+import { Alert, Link, Tab, Tabs, Typography, styled as muiStyled } from "@mui/material";
 import { useState, useMemo, useCallback, useLayoutEffect } from "react";
 
 import Stack from "@foxglove/studio-base/components/Stack";
@@ -22,11 +22,42 @@ type ConnectionProps = {
   activeSource?: IDataSourceFactory;
 };
 
+const StyledTabs = muiStyled(Tabs)(({ theme }) => ({
+  ".MuiTabs-indicator": {
+    right: 0,
+    width: "100%",
+    backgroundColor: theme.palette.action.hover,
+    borderRadius: theme.shape.borderRadius,
+  },
+  ".MuiTab-root": {
+    textAlign: "right",
+    flexDirection: "row",
+    justifyContent: "flex-start",
+    alignItems: "center",
+    minHeight: "auto",
+    paddingTop: theme.spacing(1.5),
+    paddingBottom: theme.spacing(1.5),
+
+    ".MuiTab-iconWrapper": {
+      marginBottom: 0,
+      marginRight: theme.spacing(1.5),
+      fontSize: theme.typography.pxToRem(24),
+      color: theme.palette.primary.main,
+
+      "> span": {
+        display: "flex",
+      },
+      svg: {
+        fontSize: "inherit",
+      },
+    },
+  },
+}));
+
 export default function Connection(props: ConnectionProps): JSX.Element {
   const { availableSources, activeSource, onCancel, onBack } = props;
 
   const { selectSource } = usePlayerSelection();
-  const theme = useTheme();
   const [selectedConnectionIdx, setSelectedConnectionIdx] = useState<number>(() => {
     const foundIdx = availableSources.findIndex((source) => source === activeSource);
     return foundIdx < 0 ? 0 : foundIdx;
@@ -77,33 +108,24 @@ export default function Connection(props: ConnectionProps): JSX.Element {
   return (
     <View onBack={onBack} onCancel={onCancel} onOpen={disableOpen ? undefined : onOpen}>
       <Stack direction="row" flexGrow={1} flexWrap="wrap" fullHeight gap={4}>
-        <Stack flex="0 0 240px">
-          {enabledSourcesFirst.map((source, idx) => {
-            const { id, iconName, displayName } = source;
-            return (
-              <ActionButton
-                checked={idx === selectedConnectionIdx}
-                key={id}
-                iconProps={{ iconName }}
-                onClick={() => setSelectedConnectionIdx(idx)}
-                styles={{
-                  rootChecked: { backgroundColor: theme.semanticColors.bodyBackgroundHovered },
-                  icon: { "> span": { display: "flex" } },
-                  iconChecked: { color: theme.palette.themePrimary },
-                }}
-              >
-                {displayName}
-              </ActionButton>
-            );
-          })}
+        <Stack flexBasis={240}>
+          <StyledTabs
+            textColor="inherit"
+            orientation="vertical"
+            onChange={(_event, newValue: number) => setSelectedConnectionIdx(newValue)}
+            value={selectedConnectionIdx}
+          >
+            {enabledSourcesFirst.map((source, idx) => {
+              const { id, iconName, displayName } = source;
+              return (
+                <Tab value={idx} key={id} icon={<Icon iconName={iconName} />} label={displayName} />
+              );
+            })}
+          </StyledTabs>
         </Stack>
-        <Stack key={selectedSource?.id} flex="1 0 240px" gap={2}>
+        <Stack key={selectedSource?.id} flex="1 0" gap={2}>
           {selectedSource?.warning && <Alert severity="warning">{selectedSource.warning}</Alert>}
-
-          {selectedSource?.description && (
-            <Typography color="text.secondary">{selectedSource.description}</Typography>
-          )}
-
+          {selectedSource?.description && <Typography>{selectedSource.description}</Typography>}
           {selectedSource?.formConfig != undefined && (
             <Stack flexGrow={1} justifyContent="space-between">
               <Stack gap={2}>
@@ -135,9 +157,16 @@ export default function Connection(props: ConnectionProps): JSX.Element {
               </Stack>
             </Stack>
           )}
-          {selectedSource?.disabledReason}
-
-          {selectedSource?.docsLink && <Link href={selectedSource.docsLink}>View docs.</Link>}
+          {selectedSource?.disabledReason != undefined && (
+            <Typography color="text.secondary" variant="body2">
+              {selectedSource.disabledReason}
+            </Typography>
+          )}
+          {selectedSource?.docsLink && (
+            <Link color="primary" href={selectedSource.docsLink}>
+              View docs.
+            </Link>
+          )}
         </Stack>
       </Stack>
     </View>

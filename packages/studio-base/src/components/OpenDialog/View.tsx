@@ -2,8 +2,8 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { ActionButton, DefaultButton, PrimaryButton, useTheme } from "@fluentui/react";
-import { styled as muiStyled } from "@mui/material";
+import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
+import { Button, styled as muiStyled } from "@mui/material";
 import { PropsWithChildren } from "react";
 
 import Stack from "@foxglove/studio-base/components/Stack";
@@ -20,7 +20,6 @@ const ViewStack = muiStyled(Stack)({
 
 export default function View(props: PropsWithChildren<ViewProps>): JSX.Element {
   const { onCancel, onOpen, onBack } = props;
-  const theme = useTheme();
 
   return (
     <>
@@ -28,21 +27,17 @@ export default function View(props: PropsWithChildren<ViewProps>): JSX.Element {
         {props.children}
       </ViewStack>
       <Stack direction="row" justifyContent="space-between" alignItems="center">
-        <ActionButton
-          iconProps={{ iconName: "ChevronLeft" }}
-          onClick={onBack}
-          styles={{
-            root: { color: theme.palette.themePrimary, padding: 0 },
-            icon: { svg: { height: "1em", width: "1em" }, "> span": { display: "flex" } },
-          }}
-        >
+        <Button startIcon={<ChevronLeftIcon fontSize="large" />} onClick={onBack} size="large">
           Back
-        </ActionButton>
+        </Button>
+
         <Stack direction="row" gap={2}>
-          <DefaultButton onClick={onCancel}>Cancel</DefaultButton>
-          <PrimaryButton onClick={onOpen} disabled={onOpen == undefined}>
+          <Button size="large" color="inherit" variant="outlined" onClick={onCancel}>
+            Cancel
+          </Button>
+          <Button size="large" variant="contained" onClick={onOpen} disabled={onOpen == undefined}>
             Open
-          </PrimaryButton>
+          </Button>
         </Stack>
       </Stack>
     </>
