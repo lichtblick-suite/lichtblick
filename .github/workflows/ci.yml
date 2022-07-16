@@ -48,7 +48,7 @@ jobs:
         with:
           lfs: true
 
-      - uses: actions/setup-node@v3.4.0
+      - uses: actions/setup-node@v3.4.1
         with:
           node-version: 14.x
 
@@ -75,7 +75,7 @@ jobs:
           fetch-depth: 0 # Required for Chromatic
           lfs: true
 
-      - uses: actions/setup-node@v3.4.0
+      - uses: actions/setup-node@v3.4.1
         with:
           node-version: 14.x
 
@@ -117,7 +117,7 @@ jobs:
         with:
           lfs: true
 
-      - uses: actions/setup-node@v3.4.0
+      - uses: actions/setup-node@v3.4.1
         with:
           node-version: 14.x
 
