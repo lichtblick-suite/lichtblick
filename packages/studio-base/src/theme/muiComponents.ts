@@ -2,7 +2,7 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { Theme, ThemeOptions } from "@mui/material/styles";
+import { alpha, Theme, ThemeOptions } from "@mui/material/styles";
 import { CSSProperties } from "@mui/styles";
 
 type MuiLabComponents = {
@@ -192,6 +192,13 @@ export default function muiComponents(theme: Theme): ThemeOptions["components"] 
       defaultProps: {
         PaperProps: {
           elevation: 4,
+        },
+      },
+      styleOverrides: {
+        root: {
+          ".MuiBackdrop-root": {
+            backgroundColor: alpha(theme.palette.common.black, 0.4),
+          },
         },
       },
     },
@@ -387,6 +394,11 @@ export default function muiComponents(theme: Theme): ThemeOptions["components"] 
       defaultProps: {
         elevation: 2,
         square: true,
+      },
+      styleOverrides: {
+        elevation: {
+          backgroundImage: "none !important",
+        },
       },
     },
     MuiRadio: {
