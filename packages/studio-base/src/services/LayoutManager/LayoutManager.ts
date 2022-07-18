@@ -416,9 +416,10 @@ export default class LayoutManager implements ILayoutManager {
               savedAt: now,
             },
             working: undefined,
-            syncInfo: this.remote
-              ? { status: "updated", lastRemoteSavedAt: localLayout.syncInfo?.lastRemoteSavedAt }
-              : localLayout.syncInfo,
+            syncInfo:
+              this.remote && localLayout.syncInfo?.status !== "new"
+                ? { status: "updated", lastRemoteSavedAt: localLayout.syncInfo?.lastRemoteSavedAt }
+                : localLayout.syncInfo,
           }),
       );
       this.notifyChangeListeners({ type: "change", updatedLayout: result });
@@ -542,6 +543,9 @@ export default class LayoutManager implements ILayoutManager {
           }
 
           case "delete-local":
+            log.debug(
+              `Deleting local layout ${operation.localLayout.id}, whose sync status was ${operation.localLayout.syncInfo?.status}`,
+            );
             await local.delete(operation.localLayout.id);
             this.notifyChangeListeners({ type: "delete", layoutId: operation.localLayout.id });
             break;
