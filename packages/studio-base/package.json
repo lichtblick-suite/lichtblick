@@ -140,6 +140,7 @@
     "idb-keyval": "6.1.0",
     "immer": "9.0.12",
     "intervals-fn": "3.0.3",
+    "jszip": "3.10.0",
     "leaflet": "1.7.1",
     "lodash": "4.17.21",
     "mathjs": "10.1.1",

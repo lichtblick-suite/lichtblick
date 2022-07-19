@@ -3,8 +3,7 @@
   "private": true,
   "dependencies": {
     "@foxglove/electron-socket": "2.0.0",
-    "@foxglove/studio-base": "workspace:*",
-    "jszip": "3.7.1"
+    "@foxglove/studio-base": "workspace:*"
   },
   "devDependencies": {
     "@types/plist": "^3.0.2",
