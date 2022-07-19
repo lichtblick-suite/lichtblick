@@ -19,63 +19,94 @@ export default {
 };
 
 export const Point = Object.assign(PublishClickToolTemplate.bind({}), {
-  parameters: { colorScheme: "dark", chromatic: { delay: 200 } },
+  parameters: { colorScheme: "dark" },
   args: { type: "point" },
   play: async () => {
     document.querySelector<HTMLElement>("[data-test=publish-button]")!.click();
     await delay(100);
     const canvas = document.querySelector("canvas")!;
+    for (let tries = 0; tries < 10 && (canvas.offsetWidth === 0 || canvas.offsetHeight === 0); ) {
+      await delay(10);
+    }
     canvas.dispatchEvent(new MouseEvent("mousemove", { clientX: 400, clientY: 400 }));
+    await delay(10);
+    await new Promise((resolve) => requestAnimationFrame(resolve));
   },
 });
 
 export const PosePosition = Object.assign(PublishClickToolTemplate.bind({}), {
-  parameters: { colorScheme: "dark", chromatic: { delay: 200 } },
+  parameters: { colorScheme: "dark" },
   args: { type: "pose" },
   play: async () => {
     document.querySelector<HTMLElement>("[data-test=publish-button]")!.click();
     await delay(100);
     const canvas = document.querySelector("canvas")!;
+    for (let tries = 0; tries < 10 && (canvas.offsetWidth === 0 || canvas.offsetHeight === 0); ) {
+      await delay(10);
+    }
     canvas.dispatchEvent(new MouseEvent("mousemove", { clientX: 400, clientY: 400 }));
+    await delay(10);
+    await new Promise((resolve) => requestAnimationFrame(resolve));
   },
 });
 
 export const PoseComplete = Object.assign(PublishClickToolTemplate.bind({}), {
-  parameters: { colorScheme: "dark", chromatic: { delay: 200 } },
+  parameters: { colorScheme: "dark" },
   args: { type: "pose" },
   play: async () => {
     document.querySelector<HTMLElement>("[data-test=publish-button]")!.click();
     await delay(100);
     const canvas = document.querySelector("canvas")!;
+    for (let tries = 0; tries < 10 && (canvas.offsetWidth === 0 || canvas.offsetHeight === 0); ) {
+      await delay(10);
+    }
     canvas.dispatchEvent(new MouseEvent("mousemove", { clientX: 400, clientY: 400 }));
+    await delay(10);
     canvas.dispatchEvent(new MouseEvent("mousedown", { clientX: 400, clientY: 400 }));
+    await delay(10);
     canvas.dispatchEvent(new MouseEvent("click", { clientX: 400, clientY: 400 }));
+    await delay(10);
     canvas.dispatchEvent(new MouseEvent("mousemove", { clientX: 500, clientY: 300 }));
+    await delay(100);
+    await new Promise((resolve) => requestAnimationFrame(resolve));
   },
 });
 
 export const PoseEstimatePosition = Object.assign(PublishClickToolTemplate.bind({}), {
-  parameters: { colorScheme: "dark", chromatic: { delay: 200 } },
+  parameters: { colorScheme: "dark" },
   args: { type: "pose_estimate" },
   play: async () => {
     document.querySelector<HTMLElement>("[data-test=publish-button]")!.click();
     await delay(100);
     const canvas = document.querySelector("canvas")!;
+    for (let tries = 0; tries < 10 && (canvas.offsetWidth === 0 || canvas.offsetHeight === 0); ) {
+      await delay(10);
+    }
     canvas.dispatchEvent(new MouseEvent("mousemove", { clientX: 400, clientY: 400 }));
+    await delay(100);
+    await new Promise((resolve) => requestAnimationFrame(resolve));
   },
 });
 
 export const PoseEstimateComplete = Object.assign(PublishClickToolTemplate.bind({}), {
-  parameters: { colorScheme: "dark", chromatic: { delay: 200 } },
+  parameters: { colorScheme: "dark" },
   args: { type: "pose_estimate" },
   play: async () => {
     document.querySelector<HTMLElement>("[data-test=publish-button]")!.click();
     await delay(100);
     const canvas = document.querySelector("canvas")!;
+    for (let tries = 0; tries < 10 && (canvas.offsetWidth === 0 || canvas.offsetHeight === 0); ) {
+      await delay(10);
+    }
     canvas.dispatchEvent(new MouseEvent("mousemove", { clientX: 400, clientY: 400 }));
+    await delay(10);
     canvas.dispatchEvent(new MouseEvent("mousedown", { clientX: 400, clientY: 400 }));
+    await delay(10);
     canvas.dispatchEvent(new MouseEvent("click", { clientX: 400, clientY: 400 }));
+    await delay(10);
     canvas.dispatchEvent(new MouseEvent("mousemove", { clientX: 500, clientY: 300 }));
+    await delay(100);
+    await new Promise((resolve) => requestAnimationFrame(resolve));
   },
 });
 
@@ -103,6 +134,7 @@ function PublishClickToolTemplate({ type }: { type: PublishClickType }): JSX.Ele
       currentTime: { sec: 0, nsec: 0 },
     },
   });
+
   return (
     <PanelSetup fixture={fixture}>
       <ThreeDeeRender

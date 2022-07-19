@@ -32,6 +32,7 @@ MeasurementTool.play = async () => {
   document
     .querySelector("canvas")!
     .dispatchEvent(new MouseEvent("click", { clientX: 300, clientY: 200 }));
+  await delay(100);
 };
 export function MeasurementTool(): JSX.Element {
   const topics: Topic[] = [{ name: "/tf", datatype: "geometry_msgs/TransformStamped" }];
