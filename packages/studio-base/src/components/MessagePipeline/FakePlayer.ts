@@ -38,9 +38,11 @@ export default class FakePlayer implements Player {
   async emit({
     activeData,
     presence,
+    progress,
   }: {
     activeData?: PlayerStateActiveData;
     presence?: PlayerPresence;
+    progress?: PlayerState["progress"];
   } = {}): Promise<void> {
     if (!this.listener) {
       return undefined;
@@ -51,7 +53,7 @@ export default class FakePlayer implements Player {
       presence: presence ?? PlayerPresence.PRESENT,
       capabilities: this._capabilities,
       profile: this._profile,
-      progress: {},
+      progress: progress ?? {},
       activeData,
     });
   }
