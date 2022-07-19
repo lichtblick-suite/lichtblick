@@ -217,4 +217,4 @@ jobs:
           SNAPCRAFT_STORE_CREDENTIALS: ${{ secrets.SNAPCRAFT_STORE_LOGIN }}
         with:
           snap: ci/apt/packages/foxglove-studio-${{ steps.studio-version.outputs.version }}-linux-amd64.snap
-          release: candidate
+          release: stable
