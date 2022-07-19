@@ -122,8 +122,8 @@ const selectTopicStats = (ctx: MessagePipelineContext) =>
 const messageFrequency = (topic: TopicWithStats, duration: Time | undefined) => {
   const { numMessages, firstMessageTime, lastMessageTime } = topic;
 
-  if (numMessages == undefined) {
-    // No message count, so no frequency
+  if (numMessages == undefined || numMessages < 2) {
+    // Not enough messages to calculate a frequency
     return undefined;
   }
   if (firstMessageTime == undefined || lastMessageTime == undefined) {
@@ -132,12 +132,16 @@ const messageFrequency = (topic: TopicWithStats, duration: Time | undefined) => 
     }
 
     // Message count but no timestamps, use the full connection duration
-    const value = numMessages / toSec(duration);
+    const durationSec = toSec(duration);
+    if (durationSec === 0) {
+      return undefined;
+    }
+    const value = numMessages / durationSec;
     const digits = value >= 1000 ? 0 : value >= 100 ? 1 : 2;
     return `${value.toFixed(digits)} Hz`;
   }
-  if (numMessages < 2 || areEqual(firstMessageTime, lastMessageTime)) {
-    // Not enough messages or time span to calculate a frequency
+  if (areEqual(firstMessageTime, lastMessageTime)) {
+    // Not enough time span to calculate a frequency
     return undefined;
   }
   const topicDurationSec = toSec(subtractTimes(lastMessageTime, firstMessageTime));
