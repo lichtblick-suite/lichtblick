@@ -2,90 +2,81 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { styled as muiStyled, Theme, useTheme } from "@mui/material";
-import cx from "classnames";
-import { ElementType, CSSProperties, PropsWithChildren, forwardRef } from "react";
+import { CSSProperties, PropsWithChildren, forwardRef } from "react";
+import { makeStyles } from "tss-react/mui";
 
-const StackRoot = muiStyled("div", {
-  name: "FoxgloveStack",
-  slot: "Root",
-  skipSx: true,
-})(({ theme, ownerState }: { theme: Theme; ownerState: StackProps }) => ({
-  display: "flex",
-  flexDirection: ownerState.direction,
-  flex: ownerState.flex,
-  flexBasis: ownerState.flexBasis,
-  flexShrink: ownerState.flexShrink,
-  flexGrow: ownerState.flexGrow,
-  flexWrap: ownerState.flexWrap,
-  justifyContent: ownerState.justifyContent,
-  alignItems: ownerState.alignItems,
-  alignContent: ownerState.alignContent,
-  alignSelf: ownerState.alignSelf,
-  order: ownerState.order,
-  overflow: ownerState.overflow,
-  position: ownerState.position,
+const useStyles = makeStyles<StackProps>()((theme, props) => ({
+  root: {
+    display: props.inline === true ? "inline-flex" : "flex",
+    flexDirection: props.direction,
+    flex: props.flex,
+    flexBasis: props.flexBasis,
+    flexShrink: props.flexShrink,
+    flexGrow: props.flexGrow,
+    flexWrap: props.flexWrap,
+    justifyContent: props.justifyContent,
+    alignItems: props.alignItems,
+    alignContent: props.alignContent,
+    alignSelf: props.alignSelf,
+    order: props.order,
+    overflow: props.overflow,
+    overflowX: props.overflowX,
+    overflowY: props.overflowY,
+    position: props.position,
 
-  ...(ownerState.overflowX != undefined && {
-    overflowX: ownerState.overflowX,
-  }),
-  ...(ownerState.overflowY != undefined && {
-    overflowY: ownerState.overflowY,
-  }),
-  ...(ownerState.zeroMinWidth === true && {
-    minWidth: 0,
-  }),
-  ...(ownerState.fullHeight === true && {
-    height: "100%",
-  }),
-  ...(ownerState.fullWidth === true && {
-    width: "100%",
-  }),
-  ...(ownerState.gap != undefined && {
-    gap: theme.spacing(ownerState.gap),
-  }),
-  ...(ownerState.gapX != undefined && {
-    rowGap: theme.spacing(ownerState.gapX),
-  }),
-  ...(ownerState.gapY != undefined && {
-    columnGap: theme.spacing(ownerState.gapY),
-  }),
-  ...(ownerState.padding != undefined && {
-    padding: theme.spacing(ownerState.padding),
-  }),
-  ...(ownerState.paddingX != undefined && {
-    paddingLeft: theme.spacing(ownerState.paddingX),
-    paddingRight: theme.spacing(ownerState.paddingX),
-  }),
-  ...(ownerState.paddingY != undefined && {
-    paddingTop: theme.spacing(ownerState.paddingY),
-    paddingBottom: theme.spacing(ownerState.paddingY),
-  }),
-  ...(ownerState.paddingTop != undefined && {
-    paddingTop: theme.spacing(ownerState.paddingTop),
-  }),
-  ...(ownerState.paddingBottom != undefined && {
-    paddingBottom: theme.spacing(ownerState.paddingBottom),
-  }),
-  ...(ownerState.paddingLeft != undefined && {
-    paddingLeft: theme.spacing(ownerState.paddingLeft),
-  }),
-  ...(ownerState.paddingRight != undefined && {
-    paddingRight: theme.spacing(ownerState.paddingRight),
-  }),
+    ...(props.zeroMinWidth === true && {
+      minWidth: 0,
+    }),
+    ...(props.fullHeight === true && {
+      height: "100%",
+    }),
+    ...(props.fullWidth === true && {
+      width: "100%",
+    }),
+    ...(props.gap != undefined && {
+      gap: theme.spacing(props.gap),
+    }),
+    ...(props.gapX != undefined && {
+      rowGap: theme.spacing(props.gapX),
+    }),
+    ...(props.gapY != undefined && {
+      columnGap: theme.spacing(props.gapY),
+    }),
+    ...(props.padding != undefined && {
+      padding: theme.spacing(props.padding),
+    }),
+    ...(props.paddingX != undefined && {
+      paddingLeft: theme.spacing(props.paddingX),
+      paddingRight: theme.spacing(props.paddingX),
+    }),
+    ...(props.paddingY != undefined && {
+      paddingTop: theme.spacing(props.paddingY),
+      paddingBottom: theme.spacing(props.paddingY),
+    }),
+    ...(props.paddingTop != undefined && {
+      paddingTop: theme.spacing(props.paddingTop),
+    }),
+    ...(props.paddingBottom != undefined && {
+      paddingBottom: theme.spacing(props.paddingBottom),
+    }),
+    ...(props.paddingLeft != undefined && {
+      paddingLeft: theme.spacing(props.paddingLeft),
+    }),
+    ...(props.paddingRight != undefined && {
+      paddingRight: theme.spacing(props.paddingRight),
+    }),
+  },
 }));
 
 export default forwardRef<HTMLDivElement, PropsWithChildren<StackProps>>(function Stack(
   props,
   ref,
 ): JSX.Element {
-  const theme = useTheme();
-
   const {
     alignItems,
     alignSelf,
+    children,
     className,
-    component = "div",
     direction = "column",
     flex,
     flexBasis,
@@ -97,26 +88,26 @@ export default forwardRef<HTMLDivElement, PropsWithChildren<StackProps>>(functio
     gap,
     gapX,
     gapY,
+    inline = false,
     justifyContent,
     order,
     overflow,
     overflowX,
     overflowY,
     padding,
-    paddingX,
-    paddingY,
-    paddingTop,
     paddingBottom,
     paddingLeft,
     paddingRight,
+    paddingTop,
+    paddingX,
+    paddingY,
     position,
     style,
     zeroMinWidth = false,
-    ...other
+    ...rest
   } = props;
 
-  const ownerState = {
-    ...props,
+  const { classes, cx } = useStyles({
     alignItems,
     alignSelf,
     direction,
@@ -130,49 +121,33 @@ export default forwardRef<HTMLDivElement, PropsWithChildren<StackProps>>(functio
     gap,
     gapX,
     gapY,
+    inline,
     justifyContent,
     order,
     overflow,
     overflowX,
     overflowY,
     padding,
-    paddingX,
-    paddingY,
-    paddingTop,
     paddingBottom,
     paddingLeft,
     paddingRight,
+    paddingTop,
+    paddingX,
+    paddingY,
     position,
     zeroMinWidth,
-  };
+  });
 
   return (
-    <StackRoot
-      as={component}
-      ref={ref}
-      className={cx("FoxgloveStack-root", className)} // add className for ergonimic styling purposes
-      ownerState={ownerState}
-      theme={theme}
-      style={style}
-      {...other}
-    />
+    <div ref={ref} className={cx(classes.root, className)} style={style} {...rest}>
+      {children}
+    </div>
   );
 });
 
 export type StackProps = {
-  /** Override or extend the styles applied to the component. */
-  classes?: {
-    root: string;
-  };
-
   /** Class name applied to the root element. */
   className?: string;
-
-  /**
-   * The component used for the root node.
-   * Either a string to use a HTML element or a component.
-   */
-  component?: ElementType;
 
   /**
    * Defines the `flex-direction` style property.
@@ -185,6 +160,9 @@ export type StackProps = {
 
   /** Make stack 100% height. */
   fullWidth?: boolean;
+
+  /** Sets the display to inline-flex property. */
+  inline?: boolean;
 
   /** Defines the `justify-content` style property. */
   justifyContent?: CSSProperties["justifyContent"];

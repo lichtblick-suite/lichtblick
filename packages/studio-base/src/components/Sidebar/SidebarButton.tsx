@@ -36,10 +36,6 @@ export default function SidebarButton(props: SidebarButtonProps): JSX.Element {
   const theme = useTheme();
 
   const { ref: tooltipRef, tooltip } = useTooltip({ contents: title, placement: "right" });
-  const renderStack = useCallback(
-    (divProps: React.HTMLAttributes<HTMLElement>) => <div {...divProps} ref={tooltipRef} />,
-    [tooltipRef],
-  );
 
   const renderIcon = useCallback(
     (buttonProps?: IButtonProps, defaultRender?: IRenderFunction<IButtonProps>) => {
@@ -57,7 +53,7 @@ export default function SidebarButton(props: SidebarButtonProps): JSX.Element {
   );
 
   return (
-    <Stack component={renderStack} position="relative" flexGrow={1}>
+    <Stack ref={tooltipRef} position="relative" flexGrow={1}>
       {tooltip}
       <CommandBarButton
         data-sidebar-key={dataSidebarKey}
