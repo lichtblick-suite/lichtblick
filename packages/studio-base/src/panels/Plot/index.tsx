@@ -11,9 +11,8 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { useTheme } from "@fluentui/react";
 import DownloadIcon from "@mui/icons-material/Download";
-import { Typography } from "@mui/material";
+import { Typography, useTheme } from "@mui/material";
 import produce from "immer";
 import { compact, isEmpty, set, uniq } from "lodash";
 import memoizeWeak from "memoize-weak";
@@ -402,17 +401,9 @@ function Plot(props: Props) {
       startTime: startTime ?? ZERO_TIME,
       xAxisVal,
       xAxisPath,
-      invertedTheme: theme.isInverted,
+      invertedTheme: theme.palette.mode === "dark",
     });
-  }, [
-    plotDataByPath,
-    plotDataForBlocks,
-    yAxisPaths,
-    startTime,
-    xAxisVal,
-    xAxisPath,
-    theme.isInverted,
-  ]);
+  }, [plotDataByPath, plotDataForBlocks, yAxisPaths, startTime, xAxisVal, xAxisPath, theme]);
 
   const tooltips = useMemo(() => {
     if (showLegend && showPlotValuesInLegend) {

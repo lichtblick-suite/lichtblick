@@ -2,14 +2,16 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { getColorFromString, hsv2hsl, Stack, useTheme } from "@fluentui/react";
+import { Typography, useTheme } from "@mui/material";
 import { last } from "lodash";
 import { useCallback, useEffect, useLayoutEffect, useMemo, useReducer, useState } from "react";
+import { withStyles } from "tss-react/mui";
 
 import { MessageEvent, PanelExtensionContext, SettingsTreeAction } from "@foxglove/studio";
 import { RosPath } from "@foxglove/studio-base/components/MessagePathSyntax/constants";
 import parseRosPath from "@foxglove/studio-base/components/MessagePathSyntax/parseRosPath";
 import { simpleGetMessagePathDataItems } from "@foxglove/studio-base/components/MessagePathSyntax/simpleGetMessagePathDataItems";
+import Stack from "@foxglove/studio-base/components/Stack";
 import { fonts } from "@foxglove/studio-base/util/sharedStyleConstants";
 
 import { getMatchingRule } from "./getMatchingRule";
@@ -20,14 +22,6 @@ type Props = {
   context: PanelExtensionContext;
 };
 
-function getTextColorForBackground(backgroundColor: string) {
-  const color = getColorFromString(backgroundColor);
-  if (!color) {
-    return "white";
-  }
-  const hsl = hsv2hsl(color.h, color.s, color.v);
-  return hsl.l >= 50 ? "black" : "white";
-}
 const defaultConfig: Config = {
   path: "",
   style: "bulb",
@@ -35,6 +29,20 @@ const defaultConfig: Config = {
   fallbackLabel: "False",
   rules: [{ operator: "=", rawValue: "true", color: "#68e24a", label: "True" }],
 };
+
+const IndicatorBulb = withStyles("div", {
+  root: {
+    width: 40,
+    height: 40,
+    borderRadius: "50%",
+    position: "relative",
+    backgroundImage: [
+      `radial-gradient(transparent, transparent 55%, rgba(255,255,255,0.4) 80%, rgba(255,255,255,0.4))`,
+      `radial-gradient(circle at 38% 35%, rgba(255,255,255,0.8), transparent 30%, transparent)`,
+      `radial-gradient(circle at 46% 44%, transparent, transparent 61%, rgba(0,0,0,0.7) 74%, rgba(0,0,0,0.7))`,
+    ].join(","),
+  },
+});
 
 type State = {
   path: string;
@@ -123,6 +131,9 @@ export function Indicator({ context }: Props): JSX.Element {
   // panel extensions must notify when they've completed rendering
   // onRender will setRenderDone to a done callback which we can invoke after we've rendered
   const [renderDone, setRenderDone] = useState<() => void>(() => () => {});
+  const {
+    palette: { augmentColor },
+  } = useTheme();
 
   const [config, setConfig] = useState(() => ({
     ...defaultConfig,
@@ -149,8 +160,6 @@ export function Indicator({ context }: Props): JSX.Element {
   useEffect(() => {
     context.saveState(config);
   }, [config, context]);
-
-  const theme = useTheme();
 
   useEffect(() => {
     context.onRender = (renderState, done) => {
@@ -210,52 +219,38 @@ export function Indicator({ context }: Props): JSX.Element {
   const { style, rules, fallbackColor, fallbackLabel } = config;
   const matchingRule = useMemo(() => getMatchingRule(rawValue, rules), [rawValue, rules]);
   return (
-    <Stack verticalFill>
-      <Stack.Item
-        grow
+    <Stack fullHeight>
+      <Stack
+        flexGrow={1}
+        justifyContent="space-around"
+        alignItems="center"
+        overflow="hidden"
+        padding={1}
         style={{
-          display: "flex",
-          flexDirection: "column",
-          justifyContent: "space-around",
-          alignItems: "center",
-          overflow: "hidden",
-          padding: 8,
           backgroundColor:
             style === "background" ? matchingRule?.color ?? fallbackColor : undefined,
         }}
       >
-        <Stack horizontal verticalAlign="center" tokens={{ childrenGap: theme.spacing.m }}>
+        <Stack direction="row" alignItems="center" gap={2}>
           {style === "bulb" && (
-            <div
-              style={{
-                width: "40px",
-                height: "40px",
-                backgroundColor: matchingRule?.color ?? fallbackColor,
-                borderRadius: "50%",
-                backgroundImage: [
-                  `radial-gradient(transparent, transparent 55%, rgba(255,255,255,0.4) 80%, rgba(255,255,255,0.4))`,
-                  `radial-gradient(circle at 38% 35%, rgba(255,255,255,0.8), transparent 30%, transparent)`,
-                  `radial-gradient(circle at 46% 44%, transparent, transparent 61%, rgba(0,0,0,0.7) 74%, rgba(0,0,0,0.7))`,
-                ].join(","),
-                position: "relative",
-              }}
-            />
+            <IndicatorBulb style={{ backgroundColor: matchingRule?.color ?? fallbackColor }} />
           )}
-          <div
-            style={{
-              fontFamily: fonts.MONOSPACE,
-              color:
-                style === "background"
-                  ? getTextColorForBackground(matchingRule?.color ?? fallbackColor)
-                  : matchingRule?.color ?? fallbackColor,
-              fontSize: theme.fonts.xxLarge.fontSize,
-              whiteSpace: "pre",
-            }}
+          <Typography
+            color={
+              style === "background"
+                ? augmentColor({
+                    color: { main: matchingRule?.color ?? fallbackColor },
+                  }).contrastText
+                : matchingRule?.color ?? fallbackColor
+            }
+            fontFamily={fonts.MONOSPACE}
+            variant="h1"
+            whiteSpace="pre"
           >
             {matchingRule?.label ?? fallbackLabel}
-          </div>
+          </Typography>
         </Stack>
-      </Stack.Item>
+      </Stack>
     </Stack>
   );
 }

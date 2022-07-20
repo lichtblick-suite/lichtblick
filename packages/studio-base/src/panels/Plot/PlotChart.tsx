@@ -11,7 +11,7 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { useTheme } from "@fluentui/react";
+import { useTheme } from "@mui/material";
 import { ScaleOptions } from "chart.js";
 import { AnnotationOptions } from "chartjs-plugin-annotation";
 import { ComponentProps, useMemo } from "react";
@@ -99,10 +99,10 @@ export default function PlotChart(props: PlotChartProps): JSX.Element {
         precision: 3,
       },
       grid: {
-        color: theme.palette.neutralLighter,
+        color: theme.palette.divider,
       },
     };
-  }, [maxYValue, minYValue, showYAxisLabels, theme.palette.neutralLighter]);
+  }, [maxYValue, minYValue, showYAxisLabels, theme]);
 
   // Use a debounce and 0 refresh rate to avoid triggering a resize observation while handling
   // an existing resize observation.

@@ -11,7 +11,7 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { useTheme } from "@fluentui/react";
+import { useTheme } from "@mui/material";
 import * as monacoApi from "monaco-editor/esm/vs/editor/editor.api";
 // @ts-expect-error StaticServices does not have type information in the monaco-editor package
 import { StaticServices } from "monaco-editor/esm/vs/editor/standalone/browser/standaloneServices";
@@ -87,7 +87,7 @@ const Editor = ({
   const autoFormatOnSaveRef = React.useRef(autoFormatOnSave);
   autoFormatOnSaveRef.current = autoFormatOnSave;
 
-  const editorTheme = useTheme().isInverted ? "vs-studio-dark" : "vs-studio-light";
+  const editorTheme = useTheme().palette.mode === "dark" ? "vs-studio-dark" : "vs-studio-light";
 
   React.useEffect(() => {
     const disposable = monacoApi.languages.typescript.typescriptDefaults.addExtraLib(

@@ -11,7 +11,8 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { setWarningCallback, useTheme } from "@fluentui/react";
+import { setWarningCallback } from "@fluentui/react";
+import { useTheme } from "@mui/material";
 import { flatten } from "lodash";
 import { ComponentProps, ReactNode, useLayoutEffect, useRef, useState } from "react";
 import { DndProvider } from "react-dnd";
@@ -339,7 +340,7 @@ export default function PanelSetup(props: Props): JSX.Element {
           <PanelSettingsEditorContextProvider>
             <ExtensionCatalogProvider loaders={[]}>
               <HelpInfoProvider>
-                <ThemeProvider isDark={theme.isInverted}>
+                <ThemeProvider isDark={theme.palette.mode === "dark"}>
                   <UnconnectedPanelSetup {...props} />
                 </ThemeProvider>
               </HelpInfoProvider>

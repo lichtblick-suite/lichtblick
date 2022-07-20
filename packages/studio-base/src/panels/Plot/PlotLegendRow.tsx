@@ -2,7 +2,6 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { useTheme as useFluentUITheme } from "@fluentui/react";
 import {
   Close as CloseIcon,
   Error as ErrorIcon,
@@ -126,7 +125,6 @@ export default function PlotLegendRow({
     isTimestampScale: true,
   });
 
-  const fluentUITheme = useFluentUITheme();
   const theme = useTheme();
 
   const currentDisplay = useMemo(() => {
@@ -147,15 +145,9 @@ export default function PlotLegendRow({
     }
     return {
       value,
-      color: hoverValue?.value != undefined ? fluentUITheme.palette.yellowDark : "inherit",
+      color: hoverValue?.value != undefined ? theme.palette.warning.main : "inherit",
     };
-  }, [
-    showPlotValuesInLegend,
-    hoverValue?.value,
-    currentTime,
-    fluentUITheme.palette.yellowDark,
-    correspondingData,
-  ]);
+  }, [showPlotValuesInLegend, hoverValue?.value, currentTime, theme.palette, correspondingData]);
 
   const legendIconColor = path.enabled
     ? getLineColor(path.color, index)

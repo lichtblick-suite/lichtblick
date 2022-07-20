@@ -11,9 +11,8 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { useTheme } from "@fluentui/react";
 import CameraControlIcon from "@mdi/svg/svg/camera-control.svg";
-import { Button, Tooltip, styled as muiStyled } from "@mui/material";
+import { Button, Tooltip, styled as muiStyled, useTheme } from "@mui/material";
 import { vec3 } from "gl-matrix";
 import { isEqual } from "lodash";
 
@@ -221,9 +220,7 @@ export default function CameraInfo({
                   </Stack>
                   <Stack direction="row" alignItems="center">
                     <SLabel
-                      style={
-                        cameraState.perspective ? { color: theme.semanticColors.disabledText } : {}
-                      }
+                      style={cameraState.perspective ? { color: theme.palette.text.disabled } : {}}
                     >
                       Show crosshair:
                     </SLabel>
