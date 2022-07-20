@@ -11,6 +11,8 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
+import { useMemo } from "react";
+
 import { useMessageReducer } from "@foxglove/studio-base/PanelAPI";
 import { MessageEvent } from "@foxglove/studio-base/players/types";
 
@@ -23,9 +25,7 @@ export function addMessages(
   prevResult: UseDiagnosticsResult,
   msgEvents: readonly MessageEvent<unknown>[],
 ): UseDiagnosticsResult {
-  // maybeAddMessageToBuffer mutates the buffer instead of doing an immutable update for performance
-  // reasons. There are large numbers of diagnostics messages, and often many diagnostics panels in
-  // a layout.
+  // Mutates the previous value since there might be many diagnostic messages
   let modified = false;
   for (const msgEvent of msgEvents as MessageEvent<DiagnosticStatusArrayMsg>[]) {
     const { header, status: statusArray }: DiagnosticStatusArrayMsg = msgEvent.message;
@@ -49,9 +49,16 @@ export function addMessages(
 
 const EmptyMap = () => new Map();
 
-export default function useDiagnostics(topic: string): UseDiagnosticsResult {
+export default function useDiagnostics(topic?: string): UseDiagnosticsResult {
+  const topics = useMemo(() => {
+    if (topic) {
+      return [topic];
+    }
+    return [];
+  }, [topic]);
+
   return useMessageReducer<UseDiagnosticsResult>({
-    topics: [topic],
+    topics,
     restore: EmptyMap,
     addMessages,
   });

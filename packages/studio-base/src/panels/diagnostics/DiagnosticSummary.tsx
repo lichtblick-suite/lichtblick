@@ -39,7 +39,6 @@ import helpContent from "@foxglove/studio-base/panels/diagnostics/DiagnosticSumm
 import useDiagnostics from "@foxglove/studio-base/panels/diagnostics/useDiagnostics";
 import { usePanelSettingsTreeUpdate } from "@foxglove/studio-base/providers/PanelSettingsEditorContextProvider";
 import { SaveConfig } from "@foxglove/studio-base/types/panels";
-import { DIAGNOSTIC_TOPIC } from "@foxglove/studio-base/util/globalConstants";
 import toggle from "@foxglove/studio-base/util/toggle";
 
 import { buildSummarySettingsTree } from "./settings";
@@ -204,10 +203,15 @@ function DiagnosticSummary(props: Props): JSX.Element {
       .map((topic) => topic.name);
 
     // Keeps only the first occurrence of each topic.
-    return uniq([DIAGNOSTIC_TOPIC, ...filtered, topicToRender]);
-  }, [topics, topicToRender]);
+    return uniq([...filtered]);
+  }, [topics]);
 
-  const diagnostics = useDiagnostics(topicToRender);
+  // If the topicToRender is not in the availableTopics, then we should not try to use it
+  const diagnosticTopic = useMemo(() => {
+    return availableTopics.includes(topicToRender) ? topicToRender : undefined;
+  }, [availableTopics, topicToRender]);
+
+  const diagnostics = useDiagnostics(diagnosticTopic);
 
   const summary = useMemo(() => {
     if (diagnostics.size === 0) {
@@ -323,7 +327,7 @@ const defaultConfig: DiagnosticSummaryConfig = {
   minLevel: 0,
   pinnedIds: [],
   hardwareIdFilter: "",
-  topicToRender: DIAGNOSTIC_TOPIC,
+  topicToRender: "/diagnostics",
   sortByLevel: true,
 };
 

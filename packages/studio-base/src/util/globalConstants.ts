@@ -15,8 +15,6 @@ import type { Base16Theme } from "base16";
 
 export const DEFAULT_STUDIO_NODE_PREFIX = "/studio_node/";
 
-export const DIAGNOSTIC_TOPIC = "/diagnostics";
-
 export const FOXGLOVE_GRID_TOPIC = "/foxglove/grid";
 export const FOXGLOVE_GRID_DATATYPE = "foxglove/Grid";
 
