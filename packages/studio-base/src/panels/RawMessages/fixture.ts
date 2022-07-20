@@ -51,6 +51,8 @@ export const fixture = {
           some_short_data: new Int8Array(6),
           some_long_data: new Uint8ClampedArray(2000),
           some_float_data: new Float64Array(10),
+          items: [],
+          points: [],
         },
         sizeInBytes: 0,
       },

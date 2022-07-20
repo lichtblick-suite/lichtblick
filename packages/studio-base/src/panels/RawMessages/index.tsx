@@ -11,14 +11,20 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { useTheme } from "@fluentui/react";
-import CheckboxBlankOutlineIcon from "@mdi/svg/svg/checkbox-blank-outline.svg";
-import CheckboxMarkedIcon from "@mdi/svg/svg/checkbox-marked.svg";
-import PlusMinusIcon from "@mdi/svg/svg/plus-minus.svg";
-import LessIcon from "@mdi/svg/svg/unfold-less-horizontal.svg";
-import MoreIcon from "@mdi/svg/svg/unfold-more-horizontal.svg";
-import { MenuItem, Select, SelectChangeEvent, Theme } from "@mui/material";
-import { makeStyles } from "@mui/styles";
+import DiffIcon from "@mui/icons-material/Difference";
+import DiffOutlinedIcon from "@mui/icons-material/DifferenceOutlined";
+import UnfoldLessIcon from "@mui/icons-material/UnfoldLess";
+import UnfoldMoreIcon from "@mui/icons-material/UnfoldMore";
+import {
+  Checkbox,
+  FormControlLabel,
+  IconButton,
+  MenuItem,
+  Select,
+  SelectChangeEvent,
+  useTheme,
+  Typography,
+} from "@mui/material";
 import { Immutable } from "immer";
 // eslint-disable-next-line no-restricted-imports
 import { first, isEqual, get, last, padStart } from "lodash";
@@ -26,11 +32,11 @@ import { useState, useCallback, useMemo, useEffect } from "react";
 import ReactHoverObserver from "react-hover-observer";
 import Tree from "react-json-tree";
 import { useLatest } from "react-use";
+import { makeStyles } from "tss-react/mui";
 
 import { SettingsTreeAction } from "@foxglove/studio";
 import { useDataSourceInfo } from "@foxglove/studio-base/PanelAPI";
 import EmptyState from "@foxglove/studio-base/components/EmptyState";
-import Icon from "@foxglove/studio-base/components/Icon";
 import useGetItemStringWithTimezone from "@foxglove/studio-base/components/JsonTree/useGetItemStringWithTimezone";
 import MessagePathInput from "@foxglove/studio-base/components/MessagePathSyntax/MessagePathInput";
 import {
@@ -47,6 +53,7 @@ import { useMessageDataItem } from "@foxglove/studio-base/components/MessagePath
 import Panel from "@foxglove/studio-base/components/Panel";
 import { usePanelContext } from "@foxglove/studio-base/components/PanelContext";
 import PanelToolbar from "@foxglove/studio-base/components/PanelToolbar";
+import Stack from "@foxglove/studio-base/components/Stack";
 import getDiff, {
   diffLabels,
   diffLabelsByLabelText,
@@ -100,50 +107,27 @@ function maybeDeepParse(val: unknown) {
   return val;
 }
 
-const useStyles = makeStyles((theme: Theme) => ({
-  root: {
-    display: "flex",
-    flexDirection: "column",
-    flex: "auto",
-    overflow: "hidden",
-    position: "relative",
+const useStyles = makeStyles()((theme) => ({
+  iconButton: {
+    "&.MuiIconButton-root": {
+      padding: theme.spacing(0.25),
+    },
   },
   topic: {
-    display: "flex",
-    flexDirection: "column",
-    flex: "auto",
-    overflow: "hidden auto",
-    paddingLeft: theme.spacing(0.75),
     fontFamily: fonts.SANS_SERIF,
     fontFeatureSettings: `${fonts.SANS_SERIF_FEATURE_SETTINGS}, "zero"`,
   },
-  diff: {
-    display: "flex",
-    flex: "auto",
-  },
-  iconWrapper: {
-    display: "inline",
-    paddingRight: 40, // To make it so the icons appear when you move the mouse somewhat close.
-  },
-  singleVal: {
-    fontSize: "2.5em",
-    wordWrap: "break-word",
-    fontWeight: "bold",
-    whiteSpace: "pre-line",
-  },
-  topicInputs: {
-    width: "100%",
-    lineHeight: "20px",
-  },
-  invisibleSpace: {
-    // https://stackoverflow.com/questions/62319014/make-text-selection-treat-adjacent-elements-as-separate-words
-    fontSize: 0,
+  hoverObserver: {
+    display: "inline-flex",
+    alignItems: "center",
   },
 }));
 
 function RawMessages(props: Props) {
-  const theme = useTheme();
-  const classes = useStyles();
+  const {
+    palette: { mode: themePreference },
+  } = useTheme();
+  const { classes } = useStyles();
   const jsonTreeTheme = useJsonTreeTheme();
   const { config, saveConfig } = props;
   const { openSiblingPanel } = usePanelContext();
@@ -155,9 +139,14 @@ function RawMessages(props: Props) {
     () =>
       diffEnabled
         ? (type: string, data: DiffObject, itemType: React.ReactNode) =>
-            getItemStringForDiff({ type, data, itemType, isInverted: theme.isInverted })
+            getItemStringForDiff({
+              type,
+              data,
+              itemType,
+              isInverted: themePreference === "dark",
+            })
         : defaultGetItemString,
-    [defaultGetItemString, diffEnabled, theme.isInverted],
+    [defaultGetItemString, diffEnabled, themePreference],
   );
 
   const topicRosPath: RosPath | undefined = useMemo(() => parseRosPath(topicPath), [topicPath]);
@@ -344,7 +333,7 @@ function RawMessages(props: Props) {
       itemValue: unknown,
       ...keyPath: (number | string)[]
     ) => (
-      <ReactHoverObserver className={classes.iconWrapper}>
+      <ReactHoverObserver className={classes.hoverObserver}>
         {({ isHovering }: { isHovering: boolean }) => {
           const lastKeyPath = last(keyPath) as number;
           let valueAction: ValueAction | undefined;
@@ -393,7 +382,7 @@ function RawMessages(props: Props) {
         }}
       </ReactHoverObserver>
     ),
-    [classes, datatypes, getValueLabels, onTopicPathChange, openSiblingPanel],
+    [classes.hoverObserver, datatypes, getValueLabels, onTopicPathChange, openSiblingPanel],
   );
 
   const renderSingleTopicOrDiffOutput = useCallback(() => {
@@ -440,12 +429,8 @@ function RawMessages(props: Props) {
         })
       : {};
 
-    const CheckboxComponent = showFullMessageForDiff
-      ? CheckboxMarkedIcon
-      : CheckboxBlankOutlineIcon;
-
     return (
-      <div className={classes.topic}>
+      <Stack className={classes.topic} flex="auto" overflowX="hidden" paddingLeft={0.75}>
         <Metadata
           data={data}
           diffData={diffData}
@@ -455,29 +440,38 @@ function RawMessages(props: Props) {
           {...(diffItem ? { diffMessage: diffItem.messageEvent } : undefined)}
         />
         {shouldDisplaySingleVal ? (
-          <div className={classes.singleVal}>
+          <Typography
+            variant="h1"
+            fontWeight="bold"
+            whiteSpace="pre-line"
+            style={{ wordWrap: "break-word" }}
+          >
             <MaybeCollapsedValue itemLabel={String(singleVal)} />
-          </div>
+          </Typography>
         ) : diffEnabled && isEqual({}, diff) ? (
           <EmptyState>No difference found</EmptyState>
         ) : (
           <>
             {diffEnabled && (
-              <div
-                style={{ cursor: "pointer", fontSize: "11px" }}
-                onClick={() => saveConfig({ showFullMessageForDiff: !showFullMessageForDiff })}
-              >
-                <Icon style={{ verticalAlign: "middle" }}>
-                  <CheckboxComponent />
-                </Icon>{" "}
-                Show full msg
-              </div>
+              <FormControlLabel
+                disableTypography
+                checked={showFullMessageForDiff}
+                control={
+                  <Checkbox
+                    size="small"
+                    defaultChecked
+                    onChange={() => saveConfig({ showFullMessageForDiff: !showFullMessageForDiff })}
+                  />
+                }
+                label="Show full msg"
+              />
             )}
             <Tree
               labelRenderer={(raw) => (
                 <>
                   <DiffSpan>{first(raw)}</DiffSpan>
-                  <span className={classes.invisibleSpace}>&nbsp;</span>
+                  {/* https://stackoverflow.com/questions/62319014/make-text-selection-treat-adjacent-elements-as-separate-words */}
+                  <span style={{ fontSize: 0 }}>&nbsp;</span>
                 </>
               )}
               shouldExpandNode={shouldExpandNode}
@@ -546,7 +540,8 @@ function RawMessages(props: Props) {
                 nestedNode: ({ style }, keyPath: any) => {
                   const baseStyle = {
                     ...style,
-                    padding: "2px 0 2px 0",
+                    paddingTop: 2,
+                    paddingBottom: 2,
                     marginTop: 2,
                     textDecoration: "inherit",
                   };
@@ -556,11 +551,12 @@ function RawMessages(props: Props) {
                   let backgroundColor;
                   let textDecoration;
                   if (diffLabelsByLabelText[keyPath[0]]) {
-                    backgroundColor = theme.isInverted
-                      ? // @ts-expect-error backgroundColor is not a property?
-                        diffLabelsByLabelText[keyPath[0]].invertedBackgroundColor
-                      : // @ts-expect-error backgroundColor is not a property?
-                        diffLabelsByLabelText[keyPath[0]].backgroundColor;
+                    backgroundColor =
+                      themePreference === "dark"
+                        ? // @ts-expect-error backgroundColor is not a property?
+                          diffLabelsByLabelText[keyPath[0]].invertedBackgroundColor
+                        : // @ts-expect-error backgroundColor is not a property?
+                          diffLabelsByLabelText[keyPath[0]].backgroundColor;
                     textDecoration =
                       keyPath[0] === diffLabels.DELETED.labelText ? "line-through" : "none";
                   }
@@ -568,11 +564,12 @@ function RawMessages(props: Props) {
                   // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
                   const nestedObjKey = Object.keys(nestedObj)[0];
                   if (nestedObjKey != undefined && diffLabelsByLabelText[nestedObjKey]) {
-                    backgroundColor = theme.isInverted
-                      ? // @ts-expect-error backgroundColor is not a property?
-                        diffLabelsByLabelText[nestedObjKey].invertedBackgroundColor
-                      : // @ts-expect-error backgroundColor is not a property?
-                        diffLabelsByLabelText[nestedObjKey].backgroundColor;
+                    backgroundColor =
+                      themePreference === "dark"
+                        ? // @ts-expect-error backgroundColor is not a property?
+                          diffLabelsByLabelText[nestedObjKey].invertedBackgroundColor
+                        : // @ts-expect-error backgroundColor is not a property?
+                          diffLabelsByLabelText[nestedObjKey].backgroundColor;
                     textDecoration =
                       nestedObjKey === diffLabels.DELETED.labelText ? "line-through" : "none";
                   }
@@ -602,11 +599,12 @@ function RawMessages(props: Props) {
                   // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
                   const nestedObjKey = Object.keys(nestedObj)[0];
                   if (nestedObjKey != undefined && diffLabelsByLabelText[nestedObjKey]) {
-                    backgroundColor = theme.isInverted
-                      ? // @ts-expect-error backgroundColor is not a property?
-                        diffLabelsByLabelText[nestedObjKey].invertedBackgroundColor
-                      : // @ts-expect-error backgroundColor is not a property?
-                        diffLabelsByLabelText[nestedObjKey].backgroundColor;
+                    backgroundColor =
+                      themePreference === "dark"
+                        ? // @ts-expect-error backgroundColor is not a property?
+                          diffLabelsByLabelText[nestedObjKey].invertedBackgroundColor
+                        : // @ts-expect-error backgroundColor is not a property?
+                          diffLabelsByLabelText[nestedObjKey].backgroundColor;
                     textDecoration =
                       nestedObjKey === diffLabels.DELETED.labelText ? "line-through" : "none";
                   }
@@ -624,7 +622,7 @@ function RawMessages(props: Props) {
             />
           </>
         )}
-      </div>
+      </Stack>
     );
   }, [
     topicPath,
@@ -633,8 +631,8 @@ function RawMessages(props: Props) {
     baseItem,
     diffItem,
     showFullMessageForDiff,
+    classes.topic,
     topic,
-    classes,
     getItemString,
     jsonTreeTheme,
     expandAll,
@@ -645,26 +643,35 @@ function RawMessages(props: Props) {
     valueRenderer,
     rootStructureItem,
     renderDiffLabel,
-    theme,
+    themePreference,
   ]);
 
   return (
-    <div className={classes.root}>
+    <Stack flex="auto" overflow="hidden" position="relative">
       <PanelToolbar helpContent={helpContent}>
-        <Icon tooltip="Toggle diff" size="medium" fade onClick={onToggleDiff} active={diffEnabled}>
-          <PlusMinusIcon />
-        </Icon>
-        <Icon
-          tooltip={expandAll ?? false ? "Collapse all" : "Expand all"}
-          size="medium"
-          fade
-          dataTest="expand-all"
-          onClick={onToggleExpandAll}
-          style={{ position: "relative", top: 1 }}
+        <IconButton
+          className={classes.iconButton}
+          title="Toggle diff"
+          onClick={onToggleDiff}
+          color={diffEnabled ? "default" : "inherit"}
+          size="small"
         >
-          {expandAll ?? false ? <LessIcon /> : <MoreIcon />}
-        </Icon>
-        <div className={classes.topicInputs}>
+          {diffEnabled ? <DiffIcon fontSize="small" /> : <DiffOutlinedIcon fontSize="small" />}
+        </IconButton>
+        <IconButton
+          className={classes.iconButton}
+          title={expandAll ?? false ? "Collapse all" : "Expand all"}
+          onClick={onToggleExpandAll}
+          data-test="expand-all"
+          size="small"
+        >
+          {expandAll ?? false ? (
+            <UnfoldLessIcon fontSize="small" />
+          ) : (
+            <UnfoldMoreIcon fontSize="small" />
+          )}
+        </IconButton>
+        <Stack fullWidth paddingLeft={0.25}>
           <MessagePathInput
             index={0}
             path={topicPath}
@@ -672,7 +679,7 @@ function RawMessages(props: Props) {
             inputStyle={{ height: 20 }}
           />
           {diffEnabled && (
-            <div className={classes.diff}>
+            <Stack direction="row" flex="auto">
               <Select
                 variant="filled"
                 size="small"
@@ -688,7 +695,7 @@ function RawMessages(props: Props) {
                 <MenuItem value={PREV_MSG_METHOD}>{PREV_MSG_METHOD}</MenuItem>
                 <MenuItem value={CUSTOM_METHOD}>custom</MenuItem>
               </Select>
-              {diffMethod === CUSTOM_METHOD ? (
+              {diffMethod === CUSTOM_METHOD && (
                 <MessagePathInput
                   index={1}
                   path={diffTopicPath}
@@ -696,13 +703,13 @@ function RawMessages(props: Props) {
                   inputStyle={{ height: "100%" }}
                   {...(topic ? { prioritizedDatatype: topic.datatype } : {})}
                 />
-              ) : undefined}
-            </div>
+              )}
+            </Stack>
           )}
-        </div>
+        </Stack>
       </PanelToolbar>
       {renderSingleTopicOrDiffOutput()}
-    </div>
+    </Stack>
   );
 }
 

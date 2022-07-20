@@ -5,7 +5,7 @@
 import FileDownloadIcon from "@mdi/svg/svg/file-download-outline.svg";
 import CheckIcon from "@mui/icons-material/Check";
 import CloseIcon from "@mui/icons-material/Close";
-import ContentCopyIcon from "@mui/icons-material/ContentCopy";
+import CopyAllIcon from "@mui/icons-material/CopyAll";
 import DeleteOutline from "@mui/icons-material/DeleteOutline";
 import {
   Button,
@@ -126,7 +126,7 @@ export default function ShareJsonModal({
             aria-label={copied ? "Copied" : "Copy to Clipboard"}
             color={copied ? "success" : "default"}
           >
-            {copied ? <CheckIcon /> : <ContentCopyIcon />}
+            {copied ? <CheckIcon /> : <CopyAllIcon />}
           </IconButton>
           <HoverableIconButton
             activeColor="error"

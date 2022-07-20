@@ -10,7 +10,8 @@
 //   This source code is licensed under the Apache License, Version 2.0,
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
-import { useTheme } from "@fluentui/react";
+import { useTheme } from "@mui/material";
+import { lightBlue, orange, pink, red, teal } from "@mui/material/colors";
 import type { Base16Theme } from "base16";
 
 export const DEFAULT_STUDIO_NODE_PREFIX = "/studio_node/";
@@ -60,16 +61,30 @@ export function useJsonTreeTheme(): Pick<
   Base16Theme,
   "base00" | "base07" | "base0B" | "base09" | "base08" | "base0D" | "base03"
 > {
-  const theme = useTheme();
+  const {
+    palette: { mode, text },
+  } = useTheme();
+
   return {
-    base00: "transparent", // bg
-    base07: theme.isInverted ? theme.palette.blueLight : theme.palette.blue, // text
-    base0B: theme.palette.orangeLighter, // string & date, item string
-    base09: theme.palette.tealLight, // # & boolean
-    base08: theme.palette.red, // null, undefined, function, & symbol
-    base0D: theme.isInverted ? theme.palette.blueLight : theme.palette.blue, // label & arrow
-    base03: theme.palette.neutralTertiary, // item string expanded
-  };
+    dark: {
+      base00: "transparent", // bg
+      base0B: orange[500], // string & date, item string
+      base09: teal.A400, // # & boolean
+      base07: lightBlue[500], // text
+      base08: pink[500], // null, undefined, function, & symbol
+      base0D: lightBlue[500], // label & arrow
+      base03: text.secondary, // item string expanded
+    },
+    light: {
+      base00: "transparent", // bg
+      base0B: orange[900], // string & date, item string
+      base09: teal[800], // # & boolean
+      base07: lightBlue[800], // text
+      base08: red[700], // null, undefined, function, & symbol
+      base0D: lightBlue[800], // label & arrow
+      base03: text.secondary, // item string expanded
+    },
+  }[mode];
 }
 
 export const TAB_PANEL_TYPE = "Tab";
