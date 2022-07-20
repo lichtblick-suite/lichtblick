@@ -11,7 +11,7 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { Stack } from "@mui/material";
+import { Typography } from "@mui/material";
 import { last, sumBy } from "lodash";
 import { ReactElement } from "react";
 
@@ -20,6 +20,7 @@ import { useMessagePipeline } from "@foxglove/studio-base/components/MessagePipe
 import Panel from "@foxglove/studio-base/components/Panel";
 import PanelToolbar from "@foxglove/studio-base/components/PanelToolbar";
 import { Sparkline, SparklinePoint } from "@foxglove/studio-base/components/Sparkline";
+import Stack from "@foxglove/studio-base/components/Stack";
 import { PlayerStateActiveData } from "@foxglove/studio-base/players/types";
 
 import helpContent from "./index.help.md";
@@ -30,12 +31,12 @@ type PlaybackPerformanceItemProps = {
   points: SparklinePoint[];
   maximum: number;
   decimalPlaces: number;
-  children: React.ReactNode;
+  label: React.ReactNode;
 };
 
 function PlaybackPerformanceItem(props: PlaybackPerformanceItemProps): ReactElement {
   return (
-    <div style={{ margin: 8 }}>
+    <Stack direction="row" alignItems="center" gap={1}>
       <Sparkline
         points={props.points}
         maximum={props.maximum}
@@ -43,14 +44,16 @@ function PlaybackPerformanceItem(props: PlaybackPerformanceItemProps): ReactElem
         height={30}
         timeRange={TIME_RANGE}
       />
-      <div style={{ display: "inline-block", marginLeft: 12, verticalAlign: "middle" }}>
-        {(last(props.points) ?? { value: 0 }).value.toFixed(props.decimalPlaces)}
-        {props.children}
-        <div style={{ color: "#aaa" }}>
+      <Stack>
+        <Typography variant="body2">
+          {(last(props.points) ?? { value: 0 }).value.toFixed(props.decimalPlaces)}
+          {props.label}
+        </Typography>
+        <Typography variant="body2" color="text.secondary">
           {(sumBy(props.points, "value") / props.points.length).toFixed(props.decimalPlaces)} avg
-        </div>
-      </div>
-    </div>
+        </Typography>
+      </Stack>
+    </Stack>
   );
 }
 
@@ -119,38 +122,31 @@ export function UnconnectedPlaybackPerformance({
   return (
     <Stack flex="auto">
       <PanelToolbar helpContent={helpContent} />
-      <Stack
-        flex="auto"
-        flexWrap="wrap"
-        alignItems="flex-start"
-        justifyContent="center"
-        lineHeight={1}
-        whiteSpace="nowrap"
-      >
-        <PlaybackPerformanceItem points={perfPoints.current.speed} maximum={1.6} decimalPlaces={2}>
-          &times; realtime
-        </PlaybackPerformanceItem>
+      <Stack flex="auto" justifyContent="center" gap={2} padding={1}>
+        <PlaybackPerformanceItem
+          points={perfPoints.current.speed}
+          maximum={1.6}
+          decimalPlaces={2}
+          label={<>&times; realtime</>}
+        />
         <PlaybackPerformanceItem
           points={perfPoints.current.framerate}
           maximum={30}
           decimalPlaces={1}
-        >
-          fps
-        </PlaybackPerformanceItem>
+          label="fps"
+        />
         <PlaybackPerformanceItem
           points={perfPoints.current.bagTimeMs}
           maximum={300}
           decimalPlaces={0}
-        >
-          ms bag frame
-        </PlaybackPerformanceItem>
+          label="ms bag frame"
+        />
         <PlaybackPerformanceItem
           points={perfPoints.current.megabitsPerSecond}
           maximum={100}
           decimalPlaces={1}
-        >
-          Mbps
-        </PlaybackPerformanceItem>
+          label="Mbps"
+        />
       </Stack>
     </Stack>
   );

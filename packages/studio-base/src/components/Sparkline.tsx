@@ -11,8 +11,8 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { useTheme } from "@fluentui/react";
 import { useCallback } from "react";
+import { makeStyles } from "tss-react/mui";
 
 import AutoSizingCanvas from "@foxglove/studio-base/components/AutoSizingCanvas";
 
@@ -26,6 +26,13 @@ type SparklineProps = {
   maximum?: number;
   nowStamp?: number; // Mostly for testing.
 };
+
+const useStyles = makeStyles()((theme) => ({
+  root: {
+    flex: "none",
+    backgroundColor: theme.palette.grey[300],
+  },
+}));
 
 function draw(
   points: SparklinePoint[],
@@ -56,7 +63,7 @@ function draw(
 }
 
 export function Sparkline(props: SparklineProps): JSX.Element {
-  const theme = useTheme();
+  const { classes, theme } = useStyles();
   const drawCallback = useCallback(
     (context: CanvasRenderingContext2D, width: number, height: number) => {
       draw(
@@ -67,21 +74,13 @@ export function Sparkline(props: SparklineProps): JSX.Element {
         context,
         width,
         height,
-        theme.palette.neutralDark,
+        theme.palette.text.primary,
       );
     },
-    [props.maximum, props.nowStamp, props.points, props.timeRange, theme.palette.neutralDark],
+    [props.maximum, props.nowStamp, props.points, props.timeRange, theme.palette],
   );
   return (
-    <div
-      style={{
-        display: "inline-block",
-        verticalAlign: "-10px",
-        backgroundColor: theme.palette.neutralLight,
-        width: props.width,
-        height: props.height,
-      }}
-    >
+    <div className={classes.root} style={{ height: props.height, width: props.width }}>
       <AutoSizingCanvas draw={drawCallback} />
     </div>
   );
