@@ -1,0 +1,20 @@
+# A workflow to add bug issues to the roadmap project
+# https://github.com/actions/add-to-project
+
+name: Issues
+
+on:
+  issues:
+    types:
+      - opened
+
+jobs:
+  add-to-project:
+    name: Add issue to project
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/add-to-project@v0.1.0
+        with:
+          project-url: https://github.com/orgs/foxglove/projects/8
+          github-token: ${{ secrets.FOXGLOVEBOT_GITHUB_TOKEN }}
+          labeled: bug
