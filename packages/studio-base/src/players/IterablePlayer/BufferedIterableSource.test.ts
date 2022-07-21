@@ -39,7 +39,7 @@ class TestSource implements IIterableSource {
   async initialize(): Promise<Initalization> {
     return {
       start: { sec: 0, nsec: 0 },
-      end: { sec: 1, nsec: 0 },
+      end: { sec: 10, nsec: 0 },
       topics: [],
       topicStats: new Map(),
       profile: undefined,
@@ -80,7 +80,7 @@ describe("BufferedIterableSource", () => {
         yield {
           msgEvent: {
             topic: "a",
-            receiveTime: { sec: 0, nsec: i * 1e8 },
+            receiveTime: { sec: i, nsec: 0 },
             message: undefined,
             sizeInBytes: 0,
           },
@@ -103,7 +103,7 @@ describe("BufferedIterableSource", () => {
           problem: undefined,
           connectionId: undefined,
           msgEvent: {
-            receiveTime: { sec: 0, nsec: i * 1e8 },
+            receiveTime: { sec: i, nsec: 0 },
             message: undefined,
             sizeInBytes: 0,
             topic: "a",
@@ -139,7 +139,7 @@ describe("BufferedIterableSource", () => {
         yield {
           msgEvent: {
             topic: "a",
-            receiveTime: { sec: 0, nsec: i * 1e8 },
+            receiveTime: { sec: i, nsec: 0 },
             message: undefined,
             sizeInBytes: 0,
           },
@@ -164,7 +164,7 @@ describe("BufferedIterableSource", () => {
             problem: undefined,
             connectionId: undefined,
             msgEvent: {
-              receiveTime: { sec: 0, nsec: i * 1e8 },
+              receiveTime: { sec: i, nsec: 0 },
               message: undefined,
               sizeInBytes: 0,
               topic: "a",
@@ -198,7 +198,7 @@ describe("BufferedIterableSource", () => {
         yield {
           msgEvent: {
             topic: "a",
-            receiveTime: { sec: 0, nsec: i * 1e8 },
+            receiveTime: { sec: i, nsec: 0 },
             message: undefined,
             sizeInBytes: 0,
           },
@@ -226,7 +226,7 @@ describe("BufferedIterableSource", () => {
           problem: undefined,
           connectionId: undefined,
           msgEvent: {
-            receiveTime: { sec: 0, nsec: i * 1e8 },
+            receiveTime: { sec: i, nsec: 0 },
             message: undefined,
             sizeInBytes: 0,
             topic: "a",
@@ -258,7 +258,7 @@ describe("BufferedIterableSource", () => {
         yield {
           msgEvent: {
             topic: "a",
-            receiveTime: { sec: 0, nsec: i * 1e8 },
+            receiveTime: { sec: i, nsec: 0 },
             message: undefined,
             sizeInBytes: 0,
           },
@@ -276,7 +276,7 @@ describe("BufferedIterableSource", () => {
 
     await partialBuffer.wait();
 
-    expect(bufferedSource.loadedRanges()).toEqual([{ start: 0, end: 0.499999999 }]);
+    expect(bufferedSource.loadedRanges()).toEqual([{ start: 0, end: 0.4999999999 }]);
 
     // When the underlying source has finished loading, the _end_ is reached even if the last message is not at the end time
     await doneYield.wait();
@@ -298,7 +298,7 @@ describe("BufferedIterableSource", () => {
         yield {
           msgEvent: {
             topic: "a",
-            receiveTime: { sec: 0, nsec: 500000000 },
+            receiveTime: { sec: 5, nsec: 0 },
             message: undefined,
             sizeInBytes: 0,
           },
@@ -310,7 +310,7 @@ describe("BufferedIterableSource", () => {
 
       const messageIterator = bufferedSource.messageIterator({
         topics: ["a"],
-        start: { sec: 0, nsec: 500000000 },
+        start: { sec: 5, nsec: 0 },
       });
 
       await doneYield.wait();
@@ -329,7 +329,7 @@ describe("BufferedIterableSource", () => {
         yield {
           msgEvent: {
             topic: "a",
-            receiveTime: { sec: 0, nsec: 1 },
+            receiveTime: { sec: 1, nsec: 0 },
             message: undefined,
             sizeInBytes: 0,
           },
@@ -347,7 +347,7 @@ describe("BufferedIterableSource", () => {
       await doneYield.wait();
 
       expect(bufferedSource.loadedRanges()).toEqual([
-        { start: 0, end: 0.499999999 },
+        { start: 0, end: 0.4999999999 },
         { start: 0.5, end: 1 },
       ]);
 
@@ -360,7 +360,7 @@ describe("BufferedIterableSource", () => {
               problem: undefined,
               connectionId: undefined,
               msgEvent: {
-                receiveTime: { sec: 0, nsec: 1 },
+                receiveTime: { sec: 1, nsec: 0 },
                 message: undefined,
                 sizeInBytes: 0,
                 topic: "a",
@@ -377,7 +377,7 @@ describe("BufferedIterableSource", () => {
               problem: undefined,
               connectionId: undefined,
               msgEvent: {
-                receiveTime: { sec: 0, nsec: 500000000 },
+                receiveTime: { sec: 5, nsec: 0 },
                 message: undefined,
                 sizeInBytes: 0,
                 topic: "a",
@@ -394,5 +394,71 @@ describe("BufferedIterableSource", () => {
         });
       }
     }
+  });
+
+  it("should wait to buffer more messages until reading moves forward", async () => {
+    const source = new TestSource();
+    const bufferedSource = new BufferedIterableSource(source, {
+      readAheadDuration: { sec: 1, nsec: 0 },
+    });
+
+    await bufferedSource.initialize();
+
+    let signal = waiter(1);
+
+    let count = 0;
+    source.messageIterator = async function* messageIterator(
+      args: MessageIteratorArgs,
+    ): AsyncIterableIterator<Readonly<IteratorResult>> {
+      count += 1;
+
+      const start = args.start?.sec ?? 0;
+      const end = args.end?.sec ?? 1000;
+      for (let i = 0; i < 8; ++i) {
+        if (i < start || i > end) {
+          continue;
+        }
+        yield {
+          msgEvent: {
+            topic: "a",
+            receiveTime: { sec: i, nsec: 0 },
+            message: undefined,
+            sizeInBytes: 0,
+          },
+          problem: undefined,
+          connectionId: undefined,
+        };
+      }
+      signal.notify();
+    };
+
+    const messageIterator = bufferedSource.messageIterator({
+      topics: ["a"],
+    });
+
+    // Reading the first message buffers some data
+    await messageIterator.next();
+
+    // Wait for the producer to finish
+    await signal.wait();
+
+    expect(count).toEqual(1);
+    expect(bufferedSource.loadedRanges()).toEqual([{ start: 0, end: 0.2 }]);
+
+    // Reading the second message does not need to buffer any data because we still have enough data
+    // to read
+    await messageIterator.next();
+    expect(count).toEqual(1);
+    expect(bufferedSource.loadedRanges()).toEqual([{ start: 0, end: 0.2 }]);
+
+    // Reading the third message pushes us to buffer more data
+    signal = waiter(1);
+    await messageIterator.next();
+    await signal.wait();
+    expect(count).toEqual(2);
+    expect(bufferedSource.loadedRanges()).toEqual([
+      { start: 0, end: 0.2 },
+      { start: 0.2000000001, end: 0.4000000001 },
+    ]);
   });
 });

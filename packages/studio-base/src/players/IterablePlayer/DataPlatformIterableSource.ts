@@ -7,11 +7,8 @@ import { isEqual, maxBy, minBy } from "lodash";
 import Logger from "@foxglove/log";
 import { parseChannel } from "@foxglove/mcap-support";
 import {
-  add,
   clampTime,
-  compare,
   fromRFC3339String,
-  fromSec,
   isGreaterThan,
   isLessThan,
   Time,
@@ -49,10 +46,10 @@ type DataPlatformIterableSourceOptions = {
 
 export class DataPlatformIterableSource implements IIterableSource {
   private readonly _consoleApi: ConsoleApi;
+
   private _start: Time;
   private _end: Time;
   private _deviceId: string;
-  private readonly _requestDurationSecs = 5;
   private _knownTopicNames: string[] = [];
 
   /**
@@ -188,47 +185,19 @@ export class DataPlatformIterableSource implements IIterableSource {
       return;
     }
 
-    let currentStart = args.start ?? this._start;
-    const end = args.end ?? this._end;
+    const streamStart = args.start ?? this._start;
+    const streamEnd = clampTime(args.end ?? this._end, this._start, this._end);
 
-    let currentEnd = clampTime(
-      add(currentStart, fromSec(this._requestDurationSecs)),
-      this._start,
-      end,
-    );
+    const stream = streamMessages({
+      api,
+      parsedChannelsByTopic,
+      params: { deviceId, start: streamStart, end: streamEnd, topics: args.topics },
+    });
 
-    let stream: AsyncGenerator<MessageEvent<unknown>[]> | undefined;
-
-    for (;;) {
-      if (!stream) {
-        stream = streamMessages({
-          api,
-          parsedChannelsByTopic,
-          params: { deviceId, start: currentStart, end: currentEnd, topics: args.topics },
-        });
+    for await (const messages of stream) {
+      for (const message of messages) {
+        yield { connectionId: undefined, msgEvent: message, problem: undefined };
       }
-
-      for await (const messages of stream) {
-        for (const message of messages) {
-          yield { connectionId: undefined, msgEvent: message, problem: undefined };
-        }
-      }
-
-      stream = undefined;
-
-      // The next stream will start 1 nanosecond after the previous end
-      currentStart = add(currentEnd, { sec: 0, nsec: 1 });
-
-      // If the next stream is after our desired end then we have no more stream
-      if (compare(currentStart, end) >= 0) {
-        break;
-      }
-
-      currentEnd = clampTime(
-        add(currentStart, fromSec(this._requestDurationSecs)),
-        this._start,
-        end,
-      );
     }
   }
 

@@ -4,7 +4,7 @@
 
 import { signal, Signal } from "@foxglove/den/async";
 import Log from "@foxglove/log";
-import { add as addTime, compare } from "@foxglove/rostime";
+import { add as addTime, compare, clampTime } from "@foxglove/rostime";
 import { Time, MessageEvent } from "@foxglove/studio";
 import { Range } from "@foxglove/studio-base/util/ranges";
 
@@ -18,6 +18,13 @@ import {
 } from "./IIterableSource";
 
 const log = Log.getLogger(__filename);
+
+const DEFAULT_READ_AHEAD_DURATION = { sec: 5, nsec: 0 };
+
+type Options = {
+  // How far ahead to buffer
+  readAheadDuration?: Time;
+};
 
 /**
  * BufferedIterableSource proxies access to IIterableSource. It buffers the messageIterator by
@@ -42,9 +49,8 @@ class BufferedIterableSource implements IIterableSource {
   // The producer loads results into the cache and the consumer reads from the cache.
   private cache: IteratorResult[] = [];
 
-  // Keep caching more data until the cache has reached this time. As the cache is read, this time moves forward
-  // to let the loading "process" know it should fetch more data
-  private readUntil: Time = { sec: 0, nsec: 0 };
+  // The location of the consumer read head
+  private readHead: Time = { sec: 0, nsec: 0 };
 
   // The promise for the current producer. The message generator starts a producer and awaits the
   // producer before exiting.
@@ -52,7 +58,11 @@ class BufferedIterableSource implements IIterableSource {
 
   private initResult?: Initalization;
 
-  constructor(source: IIterableSource) {
+  // How far ahead of the read head we should try to keep buffering
+  private readAheadDuration: Time;
+
+  constructor(source: IIterableSource, opt?: Options) {
+    this.readAheadDuration = opt?.readAheadDuration ?? DEFAULT_READ_AHEAD_DURATION;
     this.source = new CachingIterableSource(source);
   }
 
@@ -62,6 +72,10 @@ class BufferedIterableSource implements IIterableSource {
   }
 
   private async startProducer(args: MessageIteratorArgs): Promise<void> {
+    if (!this.initResult) {
+      throw new Error("Invariant: uninitialized");
+    }
+
     if (args.topics.length === 0) {
       this.readDone = true;
       return;
@@ -73,38 +87,70 @@ class BufferedIterableSource implements IIterableSource {
     // the start of the array.
     this.cache.length = 0;
 
-    const sourceIterator = this.source.messageIterator({
-      topics: args.topics,
-      start: args.start,
-      end: args.end,
-    });
+    // Streaming starts where the read head is and adjust as data is buffered and read
+    let streamStart = this.readHead;
 
     try {
-      for await (const result of sourceIterator) {
+      for (;;) {
         if (this.aborted) {
           break;
         }
 
-        const lastResult = this.cache[this.cache.length - 1];
-        const msgEvent = lastResult?.msgEvent;
+        const readUntil = addTime(
+          streamStart,
+          addTime(this.readAheadDuration, this.readAheadDuration),
+        );
+        const streamEnd = clampTime(readUntil, this.initResult.start, this.initResult.end);
 
-        // If the last message we have has a receive time after readUntil, then there's no reading for us to do
-        // We wait until the readUntil moves forward.
-        if (msgEvent && compare(msgEvent.receiveTime, this.readUntil) >= 0) {
+        const sourceIterator = this.source.messageIterator({
+          topics: args.topics,
+          start: streamStart,
+          end: streamEnd,
+        });
+
+        for await (const result of sourceIterator) {
+          // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+          if (this.aborted) {
+            break;
+          }
+
+          if (result.msgEvent && compare(result.msgEvent.receiveTime, streamEnd) > 0) {
+            throw new Error("Invariant: out of bounds result");
+          }
+
+          this.cache.push(result);
+
+          // Indicate to the consumer that it can try reading again
+          this.readSignal?.resolve();
+        }
+
+        // We've streamed through the end of our data source
+        if (compare(streamEnd, this.initResult.end) >= 0) {
+          return;
+        }
+
+        // Wait until we've consumed enough data that we should read more
+        for (;;) {
+          // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+          if (this.aborted) {
+            break;
+          }
+
+          // If this.readHead + readAheadTime > streamEnd, we start another stream for buffering
+          // otherwise we wait
+          const targetUntil = addTime(this.readHead, this.readAheadDuration);
+          if (compare(targetUntil, streamEnd) > 0 || this.cache.length === 0) {
+            streamStart = addTime(streamEnd, { sec: 0, nsec: 1 });
+            break;
+          }
+
+          // if readUntil hasn't changed, then we wait for it to change?
           this.writeSignal = signal();
           await this.writeSignal;
           this.writeSignal = undefined;
-
-          continue;
         }
-
-        this.cache.push(result);
-
-        // Indicate to the consumer that it can try reading again
-        this.readSignal?.resolve();
       }
     } finally {
-      await sourceIterator.return?.();
       // Indicate to the consumer that it can try reading again
       this.readSignal?.resolve();
       this.readDone = true;
@@ -135,10 +181,8 @@ class BufferedIterableSource implements IIterableSource {
 
     const start = args.start ?? this.initResult.start;
 
-    const readAheadTime = { sec: 10, nsec: 0 };
-
     // Setup the initial cacheUntilTime to start buffing data
-    this.readUntil = addTime(start, readAheadTime);
+    this.readHead = start;
 
     this.aborted = false;
     this.readDone = false;
@@ -176,8 +220,10 @@ class BufferedIterableSource implements IIterableSource {
             continue;
           }
 
+          // When there is a new message update the readHead for the producer to know where we are
+          // currently reading
           if (item.msgEvent) {
-            self.readUntil = addTime(item.msgEvent.receiveTime, readAheadTime);
+            self.readHead = item.msgEvent.receiveTime;
           }
 
           self.writeSignal?.resolve();
