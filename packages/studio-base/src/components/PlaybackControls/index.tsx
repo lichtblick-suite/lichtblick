@@ -21,8 +21,9 @@ import {
   Previous20Filled,
   Previous20Regular,
 } from "@fluentui/react-icons";
-import { Divider, styled as muiStyled } from "@mui/material";
+import { Divider } from "@mui/material";
 import { useCallback, useMemo, useRef, useState } from "react";
+import { makeStyles } from "tss-react/mui";
 
 import { compare, Time } from "@foxglove/rostime";
 import { AppSetting } from "@foxglove/studio-base/AppSetting";
@@ -43,33 +44,31 @@ import PlaybackTimeDisplay from "./PlaybackTimeDisplay";
 import RepeatAdapter from "./RepeatAdapter";
 import Scrubber from "./Scrubber";
 
-const PlaybackControlsRoot = muiStyled("div")(({ theme }) => ({
-  display: "flex",
-  alignItems: "center",
-  gap: theme.spacing(1),
-  padding: theme.spacing(1),
-  backgroundColor: theme.palette.background.paper,
-  borderTop: `1px solid ${theme.palette.divider}`,
-}));
-
-const ButtonGroup = muiStyled("div")(({ theme }) => ({
-  display: "flex",
-  backgroundColor: theme.palette.action.focus,
-  borderRadius: theme.shape.borderRadius,
-
-  ".MuiIconButton-root": {
-    "&:not(:first-of-type)": {
-      borderTopLeftRadius: 0,
-      borderBottomLeftRadius: 0,
-    },
-    "&:not(:last-of-type)": {
-      borderTopRightRadius: 0,
-      borderBottomRightRadius: 0,
-    },
+const useStyles = makeStyles()((theme) => ({
+  root: {
+    label: "PlaybackControls-root",
+    backgroundColor: theme.palette.background.paper,
+    borderTop: `1px solid ${theme.palette.divider}`,
   },
-  ".MuiDivider-root": {
-    borderColor: theme.palette.background.paper,
-    borderRightWidth: 2,
+  buttonGroup: {
+    label: "PlaybackControls-buttonGroup",
+    backgroundColor: theme.palette.action.focus,
+    borderRadius: theme.shape.borderRadius,
+
+    ".MuiIconButton-root": {
+      "&:not(:first-of-type)": {
+        borderTopLeftRadius: 0,
+        borderBottomLeftRadius: 0,
+      },
+      "&:not(:last-of-type)": {
+        borderTopRightRadius: 0,
+        borderBottomRightRadius: 0,
+      },
+    },
+    ".MuiDivider-root": {
+      borderColor: theme.palette.background.paper,
+      borderRightWidth: 2,
+    },
   },
 }));
 
@@ -86,6 +85,7 @@ export default function PlaybackControls({
   isPlaying: boolean;
   getTimeInfo: () => { startTime?: Time; endTime?: Time; currentTime?: Time };
 }): JSX.Element {
+  const { classes } = useStyles();
   const [repeat, setRepeat] = useState(false);
   const stopAtTime = useRef<Time | undefined>(undefined);
 
@@ -190,7 +190,7 @@ export default function PlaybackControls({
         isPlaying={isPlaying}
       />
       <KeyListener global keyDownHandlers={keyDownHandlers} />
-      <PlaybackControlsRoot>
+      <Stack className={classes.root} direction="row" alignItems="center" gap={1} padding={1}>
         <Stack direction="row" alignItems="center" gap={1}>
           {enableMessageOrdering && <MessageOrderControls />}
           <PlaybackSpeedControls />
@@ -214,7 +214,7 @@ export default function PlaybackControls({
           <Scrubber onSeek={seek} />
           <PlaybackTimeDisplay onSeek={seek} onPause={pause} />
         </Stack>
-        <ButtonGroup>
+        <Stack direction="row" className={classes.buttonGroup}>
           <HoverableIconButton
             title="Seek backward"
             icon={<Previous20Regular />}
@@ -228,8 +228,8 @@ export default function PlaybackControls({
             activeIcon={<Next20Filled />}
             onClick={() => seekForwardAction()}
           />
-        </ButtonGroup>
-      </PlaybackControlsRoot>
+        </Stack>
+      </Stack>
     </>
   );
 }

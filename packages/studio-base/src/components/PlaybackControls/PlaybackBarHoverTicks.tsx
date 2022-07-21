@@ -10,9 +10,11 @@
 //   This source code is licensed under the Apache License, Version 2.0,
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
+
+import { Typography } from "@mui/material";
 import { useMemo } from "react";
 import { useResizeDetector } from "react-resize-detector";
-import styled, { css } from "styled-components";
+import { makeStyles } from "tss-react/mui";
 
 import { add, fromSec, toSec } from "@foxglove/rostime";
 import { RpcScales } from "@foxglove/studio-base/components/Chart/types";
@@ -20,45 +22,37 @@ import {
   MessagePipelineContext,
   useMessagePipeline,
 } from "@foxglove/studio-base/components/MessagePipeline";
+import Stack from "@foxglove/studio-base/components/Stack";
 import HoverBar from "@foxglove/studio-base/components/TimeBasedChart/HoverBar";
 import { useHoverValue } from "@foxglove/studio-base/context/HoverValueContext";
 import { useAppTimeFormat } from "@foxglove/studio-base/hooks";
 import { fonts } from "@foxglove/studio-base/util/sharedStyleConstants";
 
-const sharedTickStyles = css`
-  position: absolute;
-  left: 0px;
-  width: 0px;
-  height: 0px;
-
-  border-left: 5px solid transparent;
-  border-right: 5px solid transparent;
-
-  margin-left: -5px;
-`;
-
-const TopTick = styled.div`
-  ${sharedTickStyles}
-  top: 8px;
-  border-top: 5px solid #f7be00;
-`;
-
-const BottomTick = styled.div`
-  ${sharedTickStyles}
-  bottom: 8px;
-  border-bottom: 5px solid #f7be00;
-`;
-
-const TimeLabel = styled.div`
-  position: absolute;
-  left: 0;
-  top: 0px;
-  font-family: ${fonts.MONOSPACE};
-  font-size: ${({ theme }) => theme.fonts.xSmall.fontSize};
-  color: ${({ theme }) => theme.palette.yellowDark};
-  transform: translate(-50%, -50%);
-  white-space: nowrap;
-`;
+const useStyles = makeStyles()((theme) => ({
+  tick: {
+    position: "absolute",
+    left: 0,
+    width: 0,
+    height: 0,
+    borderLeft: "5px solid transparent",
+    borderRight: "5px solid transparent",
+    marginLeft: -5,
+  },
+  tickTop: {
+    top: 8,
+    borderTop: `5px solid ${theme.palette.warning.main}`,
+  },
+  tickBottom: {
+    bottom: 8,
+    borderBottom: `5px solid ${theme.palette.warning.main}`,
+  },
+  label: {
+    position: "absolute",
+    left: 0,
+    top: 0,
+    transform: "translate(-50%, -50%)",
+  },
+}));
 
 function getStartTime(ctx: MessagePipelineContext) {
   return ctx.playerState.activeData?.startTime;
@@ -74,6 +68,7 @@ type Props = {
 
 export default function PlaybackBarHoverTicks(props: Props): JSX.Element {
   const { componentId } = props;
+  const { classes, cx } = useStyles();
 
   const startTime = useMessagePipeline(getStartTime);
   const endTime = useMessagePipeline(getEndTime);
@@ -121,14 +116,25 @@ export default function PlaybackBarHoverTicks(props: Props): JSX.Element {
   const displayHoverTime = hoverValue != undefined && hoverValue.componentId !== componentId;
 
   return (
-    <div ref={ref} style={{ width: "100%" }}>
+    <Stack ref={ref} flex="auto">
       {scaleBounds && (
         <HoverBar componentId={componentId} scales={scaleBounds} isTimestampScale>
-          {displayHoverTime && <TimeLabel>{hoverTimeDisplay}</TimeLabel>}
-          <TopTick />
-          <BottomTick />
+          {displayHoverTime && (
+            <Typography
+              className={classes.label}
+              align="center"
+              variant="caption"
+              color="warning.main"
+              fontFamily={fonts.MONOSPACE}
+              noWrap
+            >
+              {hoverTimeDisplay}
+            </Typography>
+          )}
+          <div className={cx(classes.tick, classes.tickTop)} />
+          <div className={cx(classes.tick, classes.tickBottom)} />
         </HoverBar>
       )}
-    </div>
+    </Stack>
   );
 }

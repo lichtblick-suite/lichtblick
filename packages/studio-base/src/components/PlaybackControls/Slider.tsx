@@ -12,7 +12,7 @@ import {
   useState,
   useLayoutEffect,
 } from "react";
-import styled from "styled-components";
+import { makeStyles } from "tss-react/mui";
 
 import Logger from "@foxglove/log";
 
@@ -30,28 +30,34 @@ type Props = {
   renderSlider?: (value?: number) => ReactNode;
 };
 
-const StyledSlider = styled.div<{ disabled?: boolean }>`
-  width: 100%;
-  height: 100%;
-  position: relative;
-  cursor: ${({ disabled = false }) => (disabled ? "not-allowed" : "pointer")};
-  border-radius: 2px;
-`;
+const useStyles = makeStyles()((theme) => ({
+  root: {
+    label: "Slider-root",
+    display: "flex",
+    width: "100%",
+    height: "100%",
+    position: "relative",
+    alignItems: "center",
+    cursor: "pointer",
+  },
+  rootDisabled: {
+    label: "Slider-rootDisabled",
+    cursor: "not-allowed",
+    opacity: theme.palette.action.disabledOpacity,
+  },
+  range: {
+    label: "Slider-range",
+    backgroundColor: theme.palette.action.active,
+    position: "absolute",
+    height: "100%",
+  },
+}));
 
-const StyledRange = styled.div.attrs<{ width: number }>(({ width }) => ({
-  style: { width: `${width * 100}%` },
-}))<{ width: number }>`
-  background-color: rgba(255, 255, 255, 0.2);
-  position: absolute;
-  height: 100%;
-  border-radius: 2px;
-`;
-
-function defaultRenderSlider(value: number | undefined): ReactNode {
+function defaultRenderSlider(value: number | undefined, className: string): ReactNode {
   if (value == undefined || isNaN(value)) {
     return ReactNull;
   }
-  return <StyledRange width={value} />;
+  return <div className={className} style={{ width: `${value * 100}%` }} />;
 }
 
 export default function Slider(props: Props): JSX.Element {
@@ -66,6 +72,7 @@ export default function Slider(props: Props): JSX.Element {
     onHoverOut,
     onChange,
   } = props;
+  const { classes, cx } = useStyles();
 
   const elRef = useRef<HTMLDivElement | ReactNull>(ReactNull);
 
@@ -174,15 +181,17 @@ export default function Slider(props: Props): JSX.Element {
   }, [mouseDown, onMouseMove, onMouseUp]);
 
   return (
-    <StyledSlider
-      disabled={disabled}
+    <div
       ref={elRef}
       onMouseDown={onMouseDown}
       onMouseMove={onMouseMove}
       onMouseEnter={onMouseEnter}
       onMouseLeave={onMouseLeave}
+      className={cx(classes.root, {
+        [classes.rootDisabled]: disabled,
+      })}
     >
-      {renderSlider(sliderValue)}
-    </StyledSlider>
+      {renderSlider(sliderValue, classes.range)}
+    </div>
   );
 }

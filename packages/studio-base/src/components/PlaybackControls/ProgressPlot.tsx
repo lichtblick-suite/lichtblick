@@ -1,52 +1,84 @@
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
-//
-// This file incorporates work covered by the following copyright and
-// permission notice:
-//
-//   Copyright 2019-2021 Cruise LLC
-//
-//   This source code is licensed under the Apache License, Version 2.0,
-//   found at http://www.apache.org/licenses/LICENSE-2.0
-//   You may not use this file except in compliance with the License.
-import { useTheme } from "@fluentui/react";
-import { complement } from "intervals-fn";
-import { useCallback } from "react";
 
-import AutoSizingCanvas from "@foxglove/studio-base/components/AutoSizingCanvas";
-import { Progress } from "@foxglove/studio-base/players/types";
+import { keyframes } from "@emotion/react";
+import { simplify } from "intervals-fn";
+import { useMemo } from "react";
+import { makeStyles } from "tss-react/mui";
 
-const BAR_HEIGHT = 28;
-const LINE_START = 12;
-const LINE_HEIGHT = 4;
+import Stack from "@foxglove/studio-base/components/Stack";
+import { Range } from "@foxglove/studio-base/util/ranges";
 
 type ProgressProps = {
-  progress: Progress;
+  loading: boolean;
+  availableRanges?: Range[];
 };
 
+const STRIPE_WIDTH = 8;
+
+const animatedBackground = keyframes`
+  0% { background-position: 0 0; }
+  100% { background-position: ${STRIPE_WIDTH * 2}px 0; }
+`;
+
+const useStyles = makeStyles()((theme) => ({
+  loadingIndicator: {
+    label: "ProgressPlot-loadingIndicator",
+    position: "absolute",
+    width: "100%",
+    height: "100%",
+    animation: `${animatedBackground} 300ms linear infinite`,
+    backgroundRepeat: "repeat-x",
+    backgroundSize: `${STRIPE_WIDTH * 2}px 100%`,
+    backgroundImage: `repeating-linear-gradient(${[
+      "90deg",
+      `${theme.palette.background.paper}`,
+      `${theme.palette.background.paper} ${STRIPE_WIDTH / 2}px`,
+      `transparent ${STRIPE_WIDTH / 2}px`,
+      `transparent ${STRIPE_WIDTH}px`,
+    ].join(",")})`,
+  },
+  range: {
+    label: "ProgressPlot-range",
+    position: "absolute",
+    backgroundColor: theme.palette.text.secondary,
+    height: "100%",
+  },
+}));
+
 export function ProgressPlot(props: ProgressProps): JSX.Element {
-  const { fullyLoadedFractionRanges } = props.progress;
-  const theme = useTheme();
-  const draw = useCallback(
-    (context: CanvasRenderingContext2D, width: number, height: number) => {
-      context.clearRect(0, 0, width, height);
-      if (fullyLoadedFractionRanges) {
-        context.fillStyle = theme.palette.neutralLight;
-        const invertedRanges = complement({ start: 0, end: 1 }, fullyLoadedFractionRanges);
-        for (const range of invertedRanges) {
-          const start = width * range.start;
-          const end = width * range.end;
-          context.fillRect(start, LINE_START, end - start, LINE_HEIGHT);
-        }
+  const { availableRanges, loading } = props;
+  const { classes } = useStyles();
+
+  const ranges = useMemo(() => {
+    if (!availableRanges) {
+      return <></>;
+    }
+    const mergedRanges = simplify(availableRanges);
+
+    return mergedRanges.map((range, idx) => {
+      const width = range.end - range.start;
+      if (width === 0) {
+        return <></>;
       }
-    },
-    [fullyLoadedFractionRanges, theme.palette.neutralLight],
-  );
+      return (
+        <div
+          className={classes.range}
+          key={idx}
+          style={{
+            width: `${width * 100}%`,
+            left: `${range.start * 100}%`,
+          }}
+        />
+      );
+    });
+  }, [availableRanges, classes.range]);
 
   return (
-    <div style={{ height: BAR_HEIGHT }}>
-      <AutoSizingCanvas draw={draw} />
-    </div>
+    <Stack position="relative" fullHeight>
+      {loading && <div className={classes.loadingIndicator} />}
+      {ranges}
+    </Stack>
   );
 }

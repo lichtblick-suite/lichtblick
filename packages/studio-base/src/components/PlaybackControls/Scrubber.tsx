@@ -2,10 +2,10 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { makeStyles } from "@fluentui/react";
-import cx from "classnames";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { Typography } from "@mui/material";
+import { Fragment, useCallback, useEffect, useRef, useState } from "react";
 import { useLatest } from "react-use";
+import { makeStyles } from "tss-react/mui";
 import { v4 as uuidv4 } from "uuid";
 
 import { subtract as subtractTimes, toSec, fromSec, Time } from "@foxglove/rostime";
@@ -13,94 +13,60 @@ import {
   MessagePipelineContext,
   useMessagePipeline,
 } from "@foxglove/studio-base/components/MessagePipeline";
+import Stack from "@foxglove/studio-base/components/Stack";
 import { useTooltip } from "@foxglove/studio-base/components/Tooltip";
 import {
   useClearHoverValue,
   useSetHoverValue,
 } from "@foxglove/studio-base/context/HoverValueContext";
 import { useAppTimeFormat } from "@foxglove/studio-base/hooks";
+import { PlayerPresence } from "@foxglove/studio-base/players/types";
 import { fonts } from "@foxglove/studio-base/util/sharedStyleConstants";
 
 import PlaybackBarHoverTicks from "./PlaybackBarHoverTicks";
 import { ProgressPlot } from "./ProgressPlot";
 import Slider from "./Slider";
 
-const useStyles = makeStyles((theme) => ({
-  root: {
-    display: "flex",
-    flexGrow: 1,
-    alignItems: "center",
-    height: 28,
-    position: "relative",
-  },
-  fullWidthBar: {
-    position: "absolute",
-    top: "12px",
-    left: "0",
-    right: "0",
-    height: "4px",
-    backgroundColor: theme.palette.neutralLighterAlt,
-  },
-  fullWidthBarActive: {
-    backgroundColor: theme.palette.neutralQuaternary,
-  },
-  marker: {
-    backgroundColor: "white",
-    position: "absolute",
-    height: "36%",
-    border: `1px solid ${theme.semanticColors.bodyText}`,
-    width: "2px",
-    top: "32%",
-  },
-  sliderContainer: {
-    position: "absolute",
-    zIndex: "2",
-    flex: "1",
-    width: "100%",
-    height: "100%",
-  },
-  stateBar: {
-    display: "flex",
-    flexDirection: "column",
-    position: "absolute",
-    zIndex: 1,
-    flex: 1,
-    width: "100%",
-    height: "100%",
-
-    "& canvas": {
-      minWidth: "100%",
-      minHeight: "100%",
-      flex: "1 0 100%",
-    },
-  },
-  tooltip: {
+const useStyles = makeStyles()((theme) => ({
+  tooltipWrapper: {
+    label: "Scrubber-tooltipWrapper",
+    fontFeatureSettings: `${fonts.SANS_SERIF_FEATURE_SETTINGS}, "zero"`,
     fontFamily: fonts.SANS_SERIF,
     whiteSpace: "nowrap",
+    gap: theme.spacing(0.5),
+    display: "grid",
+    gridTemplateColumns: "auto 1fr",
+    flexDirection: "column",
   },
-  tooltipRow: {
-    paddingBottom: theme.spacing.s2,
-
-    "&:last-child": {
-      paddingBottom: 0,
-    },
+  marker: {
+    label: "Scrubber-marker",
+    backgroundColor: theme.palette.text.primary,
+    position: "absolute",
+    height: 8,
+    borderRadius: 1,
+    width: 2,
+    transform: "translate(-50%, 0)",
   },
-  tooltipTitle: {
-    width: "50px",
-    textAlign: "right",
-    marginRight: theme.spacing.s2,
-    display: "inline-block",
+  track: {
+    label: "Scrubber-track",
+    position: "absolute",
+    left: 0,
+    right: 0,
+    height: 4,
+    backgroundColor: theme.palette.action.focus,
   },
-  tooltipValue: {
-    fontFeatureSettings: `${fonts.SANS_SERIF_FEATURE_SETTINGS}, "zero"`,
-    opacity: 0.7,
+  trackDisabled: {
+    label: "Scrubber-trackDisabled",
+    opacity: theme.palette.action.disabledOpacity,
   },
 }));
 
 const selectStartTime = (ctx: MessagePipelineContext) => ctx.playerState.activeData?.startTime;
 const selectCurrentTime = (ctx: MessagePipelineContext) => ctx.playerState.activeData?.currentTime;
 const selectEndTime = (ctx: MessagePipelineContext) => ctx.playerState.activeData?.endTime;
-const selectProgress = (ctx: MessagePipelineContext) => ctx.playerState.progress;
+const selectRanges = (ctx: MessagePipelineContext) =>
+  ctx.playerState.progress.fullyLoadedFractionRanges;
+const selectPresence = (ctx: MessagePipelineContext) => ctx.playerState.presence;
 
 type Props = {
   onSeek: (seekTo: Time) => void;
@@ -108,6 +74,7 @@ type Props = {
 
 export default function Scrubber(props: Props): JSX.Element {
   const { onSeek } = props;
+  const { classes, cx } = useStyles();
 
   const [hoverComponentId] = useState<string>(() => uuidv4());
   const el = useRef<HTMLDivElement>(ReactNull);
@@ -117,10 +84,9 @@ export default function Scrubber(props: Props): JSX.Element {
   const startTime = useMessagePipeline(selectStartTime);
   const currentTime = useMessagePipeline(selectCurrentTime);
   const endTime = useMessagePipeline(selectEndTime);
+  const presence = useMessagePipeline(selectPresence);
+  const ranges = useMessagePipeline(selectRanges);
 
-  const progress = useMessagePipeline(selectProgress);
-
-  const classes = useStyles();
   const setHoverValue = useSetHoverValue();
 
   const onChange = useCallback((value: number) => onSeek(fromSec(value)), [onSeek]);
@@ -152,12 +118,16 @@ export default function Scrubber(props: Props): JSX.Element {
       tooltipItems.push({ title: "Elapsed", value: `${toSec(timeFromStart).toFixed(9)} sec` });
 
       const tip = (
-        <div className={classes.tooltip}>
+        <div className={classes.tooltipWrapper}>
           {tooltipItems.map((item) => (
-            <div key={item.title} className={classes.tooltipRow}>
-              <span className={classes.tooltipTitle}>{item.title}:</span>
-              <span className={classes.tooltipValue}>{item.value}</span>
-            </div>
+            <Fragment key={item.title}>
+              <Typography align="right" variant="body2">
+                {item.title}:
+              </Typography>
+              <Typography variant="body2" color="text.secondary">
+                {item.value}
+              </Typography>
+            </Fragment>
           ))}
         </div>
       );
@@ -168,7 +138,14 @@ export default function Scrubber(props: Props): JSX.Element {
         value: toSec(timeFromStart),
       });
     },
-    [latestStartTime, classes, setHoverValue, hoverComponentId, formatTime, timeFormat],
+    [
+      latestStartTime,
+      timeFormat,
+      classes.tooltipWrapper,
+      setHoverValue,
+      hoverComponentId,
+      formatTime,
+    ],
   );
 
   const clearHoverValue = useClearHoverValue();
@@ -186,7 +163,7 @@ export default function Scrubber(props: Props): JSX.Element {
       if (val == undefined) {
         return undefined;
       }
-      return <div className={classes.marker} style={{ left: `calc(${val * 100}% - 2px)` }} />;
+      return <div className={classes.marker} style={{ left: `${val * 100}%` }} />;
     },
     [classes.marker],
   );
@@ -209,14 +186,23 @@ export default function Scrubber(props: Props): JSX.Element {
   const value = currentTime == undefined ? undefined : toSec(currentTime);
   const step = ((max ?? 100) - (min ?? 0)) / 500;
 
+  const loading = presence === PlayerPresence.INITIALIZING || presence === PlayerPresence.BUFFERING;
+
   return (
-    <div className={classes.root}>
+    <Stack
+      direction="row"
+      flexGrow={1}
+      alignItems="center"
+      position="relative"
+      style={{ height: 28 }}
+    >
       {tooltip}
-      <div className={cx(classes.fullWidthBar, { [classes.fullWidthBarActive]: startTime })} />
-      <div className={classes.stateBar}>
-        <ProgressPlot progress={progress} />
-      </div>
-      <div ref={el} className={classes.sliderContainer}>
+      <div className={cx(classes.track, { [classes.trackDisabled]: !startTime })} />
+      <Stack position="absolute" flex="auto" fullWidth style={{ height: 4 }}>
+        <ProgressPlot loading={loading} availableRanges={ranges} />
+      </Stack>
+      <PlaybackBarHoverTicks componentId={hoverComponentId} />
+      <Stack ref={el} fullHeight fullWidth position="absolute" flex={1}>
         <Slider
           min={min ?? 0}
           max={max ?? 100}
@@ -228,8 +214,7 @@ export default function Scrubber(props: Props): JSX.Element {
           onChange={onChange}
           renderSlider={renderSlider}
         />
-      </div>
-      <PlaybackBarHoverTicks componentId={hoverComponentId} />
-    </div>
+      </Stack>
+    </Stack>
   );
 }

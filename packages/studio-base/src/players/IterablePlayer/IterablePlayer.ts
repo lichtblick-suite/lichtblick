@@ -442,7 +442,6 @@ export class IterablePlayer implements Player {
     } catch (error) {
       this._setError(`Error initializing: ${error.message}`, error);
     }
-
     await this._emitState();
     if (!this._hasError) {
       this._setState("start-delay");
@@ -507,35 +506,49 @@ export class IterablePlayer implements Player {
 
     const messageEvents: MessageEvent<unknown>[] = [];
 
-    for (;;) {
-      const result = await this._playbackIterator.next();
-      if (result.done === true) {
-        break;
-      }
-      const iterResult = result.value;
-      // Bail if a new state is requested while we are loading messages
-      // This usually happens when seeking before the initial load is complete
-      if (this._nextState) {
-        return;
-      }
+    // If we take too long to read the data, we set the player into a BUFFERING presence. This
+    // indicates that the player is waiting to load more data.
+    let tickEmit: Promise<void> | undefined;
+    const tickTimeout = setTimeout(() => {
+      this._presence = PlayerPresence.BUFFERING;
+      tickEmit = this._emitState();
+    }, 100);
 
-      if (iterResult.problem) {
-        this._problemManager.addProblem(`connid-${iterResult.connectionId}`, iterResult.problem);
-        continue;
-      }
+    try {
+      for (;;) {
+        const result = await this._playbackIterator.next();
+        if (result.done === true) {
+          break;
+        }
+        const iterResult = result.value;
+        // Bail if a new state is requested while we are loading messages
+        // This usually happens when seeking before the initial load is complete
+        if (this._nextState) {
+          return;
+        }
 
-      if (compare(iterResult.msgEvent.receiveTime, stopTime) > 0) {
-        this._lastMessage = iterResult.msgEvent;
-        break;
-      }
+        if (iterResult.problem) {
+          this._problemManager.addProblem(`connid-${iterResult.connectionId}`, iterResult.problem);
+          continue;
+        }
 
-      messageEvents.push(iterResult.msgEvent);
+        if (compare(iterResult.msgEvent.receiveTime, stopTime) > 0) {
+          this._lastMessage = iterResult.msgEvent;
+          break;
+        }
+
+        messageEvents.push(iterResult.msgEvent);
+      }
+    } finally {
+      clearTimeout(tickTimeout);
+      await tickEmit;
     }
 
     this._currentTime = stopTime;
     this._messages = messageEvents;
     this._presence = PlayerPresence.PRESENT;
     await this._emitState();
+
     if (this._nextState) {
       return;
     }
@@ -560,6 +573,7 @@ export class IterablePlayer implements Player {
     // If the backfill does not complete within 100 milliseconds, we emit a seek event with no messages.
     // This provides feedback to the user that we've acknowledged their seek request but haven't loaded the data.
     const seekAckTimeout = setTimeout(() => {
+      this._presence = PlayerPresence.BUFFERING;
       this._messages = [];
       this._currentTime = targetTime;
       this._lastSeekEmitTime = Date.now();
@@ -601,6 +615,7 @@ export class IterablePlayer implements Player {
 
     this._currentTime = targetTime;
     this._lastSeekEmitTime = Date.now();
+    this._presence = PlayerPresence.PRESENT;
     await this._emitState();
     // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition, @typescript-eslint/strict-boolean-expressions
     if (this._nextState) {
@@ -727,33 +742,50 @@ export class IterablePlayer implements Player {
       this._lastMessage = undefined;
     }
 
-    // Read from the iterator through the end of the tick time
-    for (;;) {
-      if (!this._playbackIterator) {
-        break;
-      }
+    // If we take too long to read the tick data, we set the player into a BUFFERING presence. This
+    // indicates that the player is waiting to load more data. When the tick finally finishes, we
+    // clear this timeout.
+    let tickEmit: Promise<void> | undefined;
+    const tickTimeout = setTimeout(() => {
+      this._presence = PlayerPresence.BUFFERING;
+      tickEmit = this._emitState();
+    }, 100);
 
-      const result = await this._playbackIterator.next();
-      if (result.done === true || this._nextState) {
-        break;
-      }
-      const iterResult = result.value;
-      if (iterResult.problem) {
-        this._problemManager.addProblem(`connid-${iterResult.connectionId}`, iterResult.problem);
-      }
+    try {
+      // Read from the iterator through the end of the tick time
+      for (;;) {
+        if (!this._playbackIterator) {
+          break;
+        }
 
-      if (iterResult.problem) {
-        continue;
-      }
+        const result = await this._playbackIterator.next();
+        if (result.done === true || this._nextState) {
+          break;
+        }
+        const iterResult = result.value;
+        if (iterResult.problem) {
+          this._problemManager.addProblem(`connid-${iterResult.connectionId}`, iterResult.problem);
+        }
 
-      // The message is past the tick end time, we need to save it for next tick
-      if (compare(iterResult.msgEvent.receiveTime, end) > 0) {
-        this._lastMessage = iterResult.msgEvent;
-        break;
-      }
+        if (iterResult.problem) {
+          continue;
+        }
 
-      msgEvents.push(iterResult.msgEvent);
+        // The message is past the tick end time, we need to save it for next tick
+        if (compare(iterResult.msgEvent.receiveTime, end) > 0) {
+          this._lastMessage = iterResult.msgEvent;
+          break;
+        }
+
+        msgEvents.push(iterResult.msgEvent);
+      }
+    } finally {
+      clearTimeout(tickTimeout);
+      await tickEmit;
     }
+
+    // Set the presence back to PRESENT since we are no longer buffering
+    this._presence = PlayerPresence.PRESENT;
 
     if (this._nextState) {
       return;
@@ -765,6 +797,7 @@ export class IterablePlayer implements Player {
   }
 
   private async _stateIdle() {
+    this._presence = PlayerPresence.PRESENT;
     await this._emitState();
     if (this._nextState) {
       return;
@@ -812,6 +845,8 @@ export class IterablePlayer implements Player {
   }
 
   private async _statePlay() {
+    this._presence = PlayerPresence.PRESENT;
+
     if (!this._currentTime) {
       throw new Error("Invariant: currentTime not set before statePlay");
     }
