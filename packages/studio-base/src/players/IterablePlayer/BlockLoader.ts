@@ -201,16 +201,8 @@ export class BlockLoader {
       let currentBlockId = span.beginId;
 
       let sizeInBytes = 0;
-      for (;;) {
-        const result = await iterator.next();
-        // Code after the for loop handles adding any aggregated messages to the current blockId
-        if (result.done === true) {
-          break;
-        }
-        const iterResult = result.value;
-
+      for await (const iterResult of iterator) {
         if (args.abortSignal.aborted) {
-          await iterator.return?.();
           return;
         }
 
