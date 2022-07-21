@@ -52,6 +52,7 @@ export type LayerSettingsImage = BaseSettings & {
   color: string;
 };
 
+const NO_CAMERA_INFO_ERR = "NoCameraInfo";
 const CREATE_BITMAP_ERR = "CreateBitmap";
 
 const DEFAULT_IMAGE_WIDTH = 512;
@@ -222,6 +223,12 @@ export class Images extends SceneExtension<ImageRenderable> {
           draft.topics[topic] = updatedUserSettings;
         });
         this.updateSettingsTree();
+      } else {
+        this.renderer.settings.errors.addToTopic(
+          topic,
+          NO_CAMERA_INFO_ERR,
+          "No CameraInfo topic found",
+        );
       }
     }
 
@@ -274,10 +281,15 @@ export class Images extends SceneExtension<ImageRenderable> {
       }
     }
 
+    const hasCameraInfo = settings?.cameraInfoTopic != undefined;
+    if (hasCameraInfo) {
+      this.renderer.settings.errors.removeFromTopic(topic, NO_CAMERA_INFO_ERR);
+    }
+
     // Create the plane geometry if needed
-    if (settings?.cameraInfoTopic != undefined && renderable.userData.geometry == undefined) {
+    if (hasCameraInfo && renderable.userData.geometry == undefined) {
       const cameraRenderable = camerasExtension(this.renderer)?.renderables.get(
-        settings.cameraInfoTopic,
+        settings.cameraInfoTopic!,
       );
       const cameraModel = cameraRenderable?.userData.cameraModel;
       if (cameraModel) {

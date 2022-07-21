@@ -10,8 +10,7 @@ import { SettingsTreeAction } from "@foxglove/studio";
 import { Renderer, RendererConfig } from "../Renderer";
 import { SceneExtension } from "../SceneExtension";
 import { SettingsTreeEntry } from "../SettingsManager";
-import { fieldSize, PRECISION_DEGREES, PRECISION_DISTANCE, SelectEntry } from "../settings";
-import type { FrameAxes } from "./FrameAxes";
+import { PRECISION_DEGREES, PRECISION_DISTANCE, SelectEntry } from "../settings";
 import { PublishClickType } from "./PublishClickTool";
 
 export const DEFAULT_LABEL_SCALE_FACTOR = 1;
@@ -64,19 +63,21 @@ export class CoreSettings extends SceneExtension {
       [this.renderer.followFrameId, config.followTf, this.renderer.renderFrameId],
       followTfOptions,
     );
+    const followTfError = this.renderer.settings.errors.errors.errorAtPath(["general", "followTf"]);
 
     return [
       {
         path: ["general"],
         node: {
-          label: "General",
+          label: "Frame",
           fields: {
             followTf: {
-              label: "Frame",
+              label: "Display Frame",
+              help: "The coordinate frame to place the camera in. The camera position and orientation will be relative to the origin of this frame.",
               input: "select",
               options: followTfOptions,
               value: followTfValue,
-              error: this.renderer.settings.errors.errors.errorAtPath(["general", "followTf"]),
+              error: followTfError,
             },
           },
           defaultExpansionState: "expanded",
@@ -94,7 +95,11 @@ export class CoreSettings extends SceneExtension {
               input: "boolean",
               value: config.scene.enableStats,
             },
-            backgroundColor: { label: "Color", input: "rgb", value: config.scene.backgroundColor },
+            backgroundColor: {
+              label: "Background",
+              input: "rgb",
+              value: config.scene.backgroundColor,
+            },
             labelScaleFactor: {
               label: "Label scale",
               help: "Scale factor to apply to all labels",
@@ -107,108 +112,63 @@ export class CoreSettings extends SceneExtension {
             },
           },
           children: {
-            transforms: {
-              label: "Transforms",
+            cameraState: {
+              label: "View",
+              actions: [{ type: "action", id: "reset-camera", label: "Reset" }],
               fields: {
-                showLabel: {
-                  label: "Labels",
-                  input: "boolean",
-                  value: config.scene.transforms?.showLabel ?? true,
+                distance: {
+                  label: "Distance",
+                  input: "number",
+                  step: 1,
+                  precision: PRECISION_DISTANCE,
+                  value: camera.distance,
                 },
-                ...((config.scene.transforms?.showLabel ?? true) && {
-                  labelSize: {
-                    label: "Label size",
+                perspective: { label: "Perspective", input: "boolean", value: camera.perspective },
+                targetOffset: {
+                  label: "Target",
+                  input: "vec3",
+                  labels: ["X", "Y", "Z"],
+                  precision: PRECISION_DISTANCE,
+                  value: [...camera.targetOffset],
+                },
+                thetaOffset: {
+                  label: "Theta",
+                  input: "number",
+                  step: ONE_DEGREE,
+                  precision: PRECISION_DEGREES,
+                  value: camera.thetaOffset,
+                },
+                ...(camera.perspective && {
+                  phi: {
+                    label: "Phi",
                     input: "number",
-                    min: 0,
-                    step: 0.01,
-                    precision: 2,
-                    placeholder: String(DEFAULT_TF_LABEL_SIZE),
-                    value: config.scene.transforms?.labelSize,
+                    step: ONE_DEGREE,
+                    precision: PRECISION_DEGREES,
+                    value: camera.phi,
+                  },
+                  fovy: {
+                    label: "Y-Axis FOV",
+                    input: "number",
+                    step: ONE_DEGREE,
+                    precision: PRECISION_DEGREES,
+                    value: camera.fovy,
                   },
                 }),
-                axisScale: fieldSize(
-                  "Axis scale",
-                  config.scene.transforms?.axisScale,
-                  DEFAULT_AXIS_SCALE,
-                ),
-                lineWidth: {
-                  label: "Line width",
+                near: {
+                  label: "Near",
                   input: "number",
-                  min: 0,
-                  step: 0.5,
-                  precision: 1,
-                  value: config.scene.transforms?.lineWidth,
-                  placeholder: String(DEFAULT_LINE_WIDTH_PX),
+                  step: DEFAULT_CAMERA_STATE.near,
+                  precision: PRECISION_DISTANCE,
+                  value: camera.near,
                 },
-                lineColor: {
-                  label: "Line color",
-                  input: "rgb",
-                  value: config.scene.transforms?.lineColor ?? DEFAULT_LINE_COLOR_STR,
+                far: {
+                  label: "Far",
+                  input: "number",
+                  step: 1,
+                  precision: PRECISION_DISTANCE,
+                  value: camera.far,
                 },
               },
-            },
-          },
-          defaultExpansionState: "collapsed",
-          handler,
-        },
-      },
-      {
-        path: ["cameraState"],
-        node: {
-          label: "Camera",
-          actions: [{ type: "action", id: "reset-camera", label: "Reset" }],
-          fields: {
-            distance: {
-              label: "Distance",
-              input: "number",
-              step: 1,
-              precision: PRECISION_DISTANCE,
-              value: camera.distance,
-            },
-            perspective: { label: "Perspective", input: "boolean", value: camera.perspective },
-            targetOffset: {
-              label: "Target",
-              input: "vec3",
-              labels: ["X", "Y", "Z"],
-              precision: PRECISION_DISTANCE,
-              value: [...camera.targetOffset],
-            },
-            thetaOffset: {
-              label: "Theta",
-              input: "number",
-              step: ONE_DEGREE,
-              precision: PRECISION_DEGREES,
-              value: camera.thetaOffset,
-            },
-            ...(camera.perspective && {
-              phi: {
-                label: "Phi",
-                input: "number",
-                step: ONE_DEGREE,
-                precision: PRECISION_DEGREES,
-                value: camera.phi,
-              },
-              fovy: {
-                label: "Y-Axis FOV",
-                input: "number",
-                step: ONE_DEGREE,
-                precision: PRECISION_DEGREES,
-                value: camera.fovy,
-              },
-            }),
-            near: {
-              label: "Near",
-              input: "number",
-              step: DEFAULT_CAMERA_STATE.near,
-              precision: PRECISION_DISTANCE,
-              value: camera.near,
-            },
-            far: {
-              label: "Far",
-              input: "number",
-              step: 1,
-              precision: PRECISION_DISTANCE,
-              value: camera.far,
             },
           },
           defaultExpansionState: "collapsed",
@@ -311,40 +271,22 @@ export class CoreSettings extends SceneExtension {
         this.renderer.settings.errors.clearPath(["general", "followTf"]);
       }
     } else if (category === "scene") {
-      // Update the configuration
-      this.renderer.updateConfig((draft) => set(draft, path, value));
+      if (path[1] === "cameraState") {
+        // Update the configuration. This is done manually since cameraState is at the top level of
+        // config, not under `scene`
+        this.renderer.updateConfig((draft) => set(draft, path.slice(1), value));
+      } else {
+        // Update the configuration
+        this.renderer.updateConfig((draft) => set(draft, path, value));
 
-      if (path[1] === "backgroundColor") {
-        const backgroundColor = value as string | undefined;
-        this.renderer.setColorScheme(this.renderer.colorScheme, backgroundColor);
-      } else if (path[1] === "labelScaleFactor") {
-        const labelScaleFactor = value as number | undefined;
-        this.renderer.labelPool.setScaleFactor(labelScaleFactor ?? DEFAULT_LABEL_SCALE_FACTOR);
-      } else if (path[1] === "transforms") {
-        const frameAxes = this.renderer.sceneExtensions.get("foxglove.FrameAxes") as
-          | FrameAxes
-          | undefined;
-
-        if (path[2] === "showLabel") {
-          const showLabel = value as boolean | undefined;
-          frameAxes?.setLabelVisible(showLabel ?? true);
-        } else if (path[2] === "labelSize") {
-          const labelSize = value as number | undefined;
-          frameAxes?.setLabelSize(labelSize ?? DEFAULT_TF_LABEL_SIZE);
-        } else if (path[2] === "axisScale") {
-          const axisScale = value as number | undefined;
-          frameAxes?.setAxisScale(axisScale ?? DEFAULT_AXIS_SCALE);
-        } else if (path[2] === "lineWidth") {
-          const lineWidth = value as number | undefined;
-          frameAxes?.setLineWidth(lineWidth ?? DEFAULT_LINE_WIDTH_PX);
-        } else if (path[2] === "lineColor") {
-          const lineColor = value as string | undefined;
-          frameAxes?.setLineColor(lineColor ?? DEFAULT_LINE_COLOR_STR);
+        if (path[1] === "backgroundColor") {
+          const backgroundColor = value as string | undefined;
+          this.renderer.setColorScheme(this.renderer.colorScheme, backgroundColor);
+        } else if (path[1] === "labelScaleFactor") {
+          const labelScaleFactor = value as number | undefined;
+          this.renderer.labelPool.setScaleFactor(labelScaleFactor ?? DEFAULT_LABEL_SCALE_FACTOR);
         }
       }
-    } else if (category === "cameraState") {
-      // Update the configuration
-      this.renderer.updateConfig((draft) => set(draft, path, value));
     } else if (category === "publish") {
       // Update the configuration
       if (path[1] === "topic") {

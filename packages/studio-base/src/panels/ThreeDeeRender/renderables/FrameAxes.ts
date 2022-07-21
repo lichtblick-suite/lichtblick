@@ -7,7 +7,7 @@ import { Line2 } from "three/examples/jsm/lines/Line2";
 import { LineGeometry } from "three/examples/jsm/lines/LineGeometry";
 import { LineMaterial } from "three/examples/jsm/lines/LineMaterial";
 
-import { SettingsTreeAction, SettingsTreeFields } from "@foxglove/studio";
+import { SettingsTreeAction, SettingsTreeChildren, SettingsTreeFields } from "@foxglove/studio";
 import type { RosValue } from "@foxglove/studio-base/players/types";
 import { Label } from "@foxglove/three-text";
 
@@ -16,7 +16,7 @@ import { Renderer } from "../Renderer";
 import { SceneExtension } from "../SceneExtension";
 import { SettingsTreeEntry } from "../SettingsManager";
 import { getLuminance, stringToRgb } from "../color";
-import { BaseSettings } from "../settings";
+import { BaseSettings, fieldSize } from "../settings";
 import { Duration, Transform, makePose, CoordinateFrame, MAX_DURATION } from "../transforms";
 import { Axis } from "./Axis";
 import {
@@ -93,9 +93,6 @@ export class FrameAxes extends SceneExtension<FrameAxisRenderable> {
     this.linePickingMaterial = makeLinePickingMaterial(PICKING_LINE_SIZE, options);
 
     renderer.on("transformTreeUpdated", this.handleTransformTreeUpdated);
-    renderer.on("startFrame", () => this.updateSettingsTree());
-
-    this.visible = renderer.config.scene.transforms?.visible ?? true;
   }
 
   override dispose(): void {
@@ -106,39 +103,95 @@ export class FrameAxes extends SceneExtension<FrameAxisRenderable> {
   }
 
   override settingsNodes(): SettingsTreeEntry[] {
-    const configTransforms = this.renderer.config.transforms;
+    const config = this.renderer.config;
+    const configTransforms = config.transforms;
     const handler = this.handleSettingsAction;
     const frameCount = this.renderer.coordinateFrameList.length;
-    const entries: SettingsTreeEntry[] = [
+    const children: SettingsTreeChildren = {
+      settings: {
+        label: "Settings",
+        icon: "Settings",
+        defaultExpansionState: "collapsed",
+        order: 0,
+        fields: {
+          showLabel: {
+            label: "Labels",
+            input: "boolean",
+            value: config.scene.transforms?.showLabel ?? true,
+          },
+          ...((config.scene.transforms?.showLabel ?? true) && {
+            labelSize: {
+              label: "Label size",
+              input: "number",
+              min: 0,
+              step: 0.01,
+              precision: 2,
+              placeholder: String(DEFAULT_TF_LABEL_SIZE),
+              value: config.scene.transforms?.labelSize,
+            },
+          }),
+          axisScale: fieldSize(
+            "Axis scale",
+            config.scene.transforms?.axisScale,
+            DEFAULT_AXIS_SCALE,
+          ),
+          lineWidth: {
+            label: "Line width",
+            input: "number",
+            min: 0,
+            step: 0.5,
+            precision: 1,
+            value: config.scene.transforms?.lineWidth,
+            placeholder: String(DEFAULT_LINE_WIDTH_PX),
+          },
+          lineColor: {
+            label: "Line color",
+            input: "rgb",
+            value: config.scene.transforms?.lineColor ?? DEFAULT_LINE_COLOR_STR,
+          },
+        },
+      },
+    };
+
+    let order = 1;
+    for (const { label, value: frameId } of this.renderer.coordinateFrameList) {
+      const frameIdSanitized = frameId === "settings" ? "$settings" : frameId;
+      const tfConfig = (configTransforms[frameIdSanitized] ??
+        {}) as Partial<LayerSettingsTransform>;
+      const frame = this.renderer.transformTree.frame(frameId);
+      const fields = buildSettingsFields(frame, this.renderer.currentTime);
+      children[frameIdSanitized] = {
+        label,
+        fields,
+        visible: tfConfig.visible ?? true,
+        order: order++,
+        defaultExpansionState: "collapsed",
+      };
+    }
+
+    return [
       {
         path: ["transforms"],
         node: {
           label: `Transforms${frameCount > 0 ? ` (${frameCount})` : ""}`,
-          visible: this.renderer.config.scene.transforms?.visible ?? true,
+          actions: [
+            { id: "show-all", type: "action", label: "Show All" },
+            { id: "hide-all", type: "action", label: "Hide All" },
+          ],
           handler,
+          children,
         },
       },
     ];
-
-    let i = 0;
-    for (const { label, value: frameId } of this.renderer.coordinateFrameList) {
-      const config = (configTransforms[frameId] ?? {}) as Partial<LayerSettingsTransform>;
-      const fields = buildSettingsFields(
-        this.renderer.transformTree.frame(frameId),
-        this.renderer.currentTime,
-      );
-
-      entries.push({
-        path: ["transforms", frameId],
-        node: { label, fields, visible: config.visible ?? true, order: i++, handler },
-      });
-    }
-
-    return entries;
   }
 
   override startFrame(currentTime: bigint, renderFrameId: string, fixedFrameId: string): void {
+    // Keep the material's `resolution` uniform in sync with the actual canvas size
     this.lineMaterial.resolution = this.renderer.input.canvasSize;
+
+    // Update all the transforms settings nodes each frame since they contain
+    // fields that change when currentTime changes
+    this.updateSettingsTree();
 
     super.startFrame(currentTime, renderFrameId, fixedFrameId);
 
@@ -218,35 +271,73 @@ export class FrameAxes extends SceneExtension<FrameAxisRenderable> {
 
   override handleSettingsAction = (action: SettingsTreeAction): void => {
     const path = action.payload.path;
-    if (action.action !== "update") {
-      return;
-    }
 
-    if (path.length === 2 && path[0] === "transforms") {
-      const visible = action.payload.value as boolean | undefined;
-      this.saveSetting(["scene", "transforms", "visible"], visible);
-
-      if (path[1] === "visible") {
-        this.visible = visible ?? true;
+    // eslint-disable-next-line @foxglove/no-boolean-parameters
+    const toggleFrameVisibility = (value: boolean) => {
+      for (const renderable of this.renderables.values()) {
+        renderable.userData.settings.visible = value;
       }
 
+      this.renderer.updateConfig((draft) => {
+        for (const frameId of this.renderables.keys()) {
+          const frameIdSanitized = frameId === "settings" ? "$settings" : frameId;
+          draft.transforms[frameIdSanitized] ??= {};
+          draft.transforms[frameIdSanitized]!.visible = value;
+        }
+      });
+
+      this.updateSettingsTree();
+    };
+
+    if (action.action === "perform-node-action") {
+      if (action.payload.id === "show-all") {
+        // Show all frames
+        toggleFrameVisibility(true);
+      } else if (action.payload.id === "hide-all") {
+        // Hide all frames
+        toggleFrameVisibility(false);
+      }
       return;
     }
 
     if (path.length !== 3) {
-      return; // Doesn't match the pattern of ["transforms", frameId, field]
+      return; // Doesn't match the pattern of ["transforms", "settings" | frameId, field]
     }
 
-    this.saveSetting(path, action.payload.value);
+    if (path[1] === "settings") {
+      const setting = path[2]!;
+      const value = action.payload.value;
 
-    // Update the renderable
-    const frameId = path[1]!;
-    const renderable = this.renderables.get(frameId);
-    if (renderable) {
-      const settings = this.renderer.config.transforms[frameId] as
-        | Partial<LayerSettingsTransform>
-        | undefined;
-      renderable.userData.settings = { ...DEFAULT_SETTINGS, ...settings };
+      this.saveSetting(["scene", "transforms", setting], value);
+
+      if (setting === "showLabel") {
+        const showLabel = value as boolean | undefined;
+        this.setLabelVisible(showLabel ?? true);
+      } else if (setting === "labelSize") {
+        const labelSize = value as number | undefined;
+        this.setLabelSize(labelSize ?? DEFAULT_TF_LABEL_SIZE);
+      } else if (setting === "axisScale") {
+        const axisScale = value as number | undefined;
+        this.setAxisScale(axisScale ?? DEFAULT_AXIS_SCALE);
+      } else if (setting === "lineWidth") {
+        const lineWidth = value as number | undefined;
+        this.setLineWidth(lineWidth ?? DEFAULT_LINE_WIDTH_PX);
+      } else if (setting === "lineColor") {
+        const lineColor = value as string | undefined;
+        this.setLineColor(lineColor ?? DEFAULT_LINE_COLOR_STR);
+      }
+    } else {
+      this.saveSetting(path, action.payload.value);
+
+      // Update the renderable
+      const frameId = path[1]!;
+      const renderable = this.renderables.get(frameId);
+      if (renderable) {
+        const settings = this.renderer.config.transforms[frameId] as
+          | Partial<LayerSettingsTransform>
+          | undefined;
+        renderable.userData.settings = { ...DEFAULT_SETTINGS, ...settings };
+      }
     }
   };
 
@@ -262,6 +353,7 @@ export class FrameAxes extends SceneExtension<FrameAxisRenderable> {
       return;
     }
 
+    const config = this.renderer.config;
     const frame = this.renderer.transformTree.frame(frameId);
     if (!frame) {
       throw new Error(`CoordinateFrame "${frameId}" was not created`);
@@ -273,8 +365,8 @@ export class FrameAxes extends SceneExtension<FrameAxisRenderable> {
     label.setBillboard(true);
     label.setText(text);
     label.position.set(0, 0, 0.4);
-    label.setLineHeight(this.renderer.config.scene.transforms?.labelSize ?? DEFAULT_TF_LABEL_SIZE);
-    label.visible = this.renderer.config.scene.transforms?.showLabel ?? true;
+    label.setLineHeight(config.scene.transforms?.labelSize ?? DEFAULT_TF_LABEL_SIZE);
+    label.visible = config.scene.transforms?.showLabel ?? true;
     label.setColor(this.labelForegroundColor, this.labelForegroundColor, this.labelForegroundColor);
     label.setBackgroundColor(
       this.labelBackgroundColor.r,
@@ -283,9 +375,7 @@ export class FrameAxes extends SceneExtension<FrameAxisRenderable> {
     );
 
     // Set the initial settings from default values merged with any user settings
-    const userSettings = this.renderer.config.transforms[frameId] as
-      | Partial<LayerSettingsTransform>
-      | undefined;
+    const userSettings = config.transforms[frameId] as Partial<LayerSettingsTransform> | undefined;
     const settings = { ...DEFAULT_SETTINGS, ...userSettings };
 
     // Parent line
@@ -297,7 +387,7 @@ export class FrameAxes extends SceneExtension<FrameAxisRenderable> {
 
     // Three arrow axis
     const axis = new Axis(frameId, this.renderer);
-    const axisScale = this.renderer.config.scene.transforms?.axisScale ?? DEFAULT_AXIS_SCALE;
+    const axisScale = config.scene.transforms?.axisScale ?? DEFAULT_AXIS_SCALE;
     axis.scale.set(axisScale, axisScale, axisScale);
 
     // Create a scene graph object to hold the axis, a text label, and a line to
