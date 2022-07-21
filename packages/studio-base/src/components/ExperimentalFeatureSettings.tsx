@@ -79,16 +79,6 @@ if (process.env.NODE_ENV === "development") {
       </>
     ),
   });
-  features.push({
-    key: AppSetting.EXPERIMENTAL_MESSAGE_ORDER,
-    name: "Configurable message playback order",
-    description: (
-      <>
-        Allow messages to be sorted by either receive time or header.stamp during playback. Playback
-        with header.stamp mode is experimental and not fully implemented.
-      </>
-    ),
-  });
 }
 
 function ExperimentalFeatureItem(props: { feature: Feature }) {

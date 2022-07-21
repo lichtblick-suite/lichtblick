@@ -392,7 +392,6 @@ describe("useMessageReducer", () => {
         await player.emit({
           activeData: {
             messages: [message1, message2],
-            messageOrder: "receiveTime",
             currentTime: { sec: 0, nsec: 0 },
             startTime: { sec: 0, nsec: 0 },
             endTime: { sec: 1, nsec: 0 },
@@ -430,7 +429,6 @@ describe("useMessageReducer", () => {
         await player.emit({
           activeData: {
             messages: [message1, message2],
-            messageOrder: "receiveTime",
             currentTime: { sec: 0, nsec: 0 },
             startTime: { sec: 0, nsec: 0 },
             endTime: { sec: 1, nsec: 0 },

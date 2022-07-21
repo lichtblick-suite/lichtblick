@@ -23,7 +23,6 @@ export enum AppSetting {
   EXPERIMENTAL_BAG_PLAYER = "experimental.bag-player",
   EXPERIMENTAL_DATA_PLATFORM_PLAYER = "experimental.data-platform-player",
   EXPERIMENTAL_MCAP_PLAYER = "experimental.mcap-player",
-  EXPERIMENTAL_MESSAGE_ORDER = "experimental.message-order",
 
   // Miscellaneous
   HIDE_SIGN_IN_PROMPT = "hideSignInPrompt",

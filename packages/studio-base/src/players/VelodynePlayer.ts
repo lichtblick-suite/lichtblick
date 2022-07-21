@@ -240,7 +240,6 @@ export default class VelodynePlayer implements Player {
       activeData: {
         messages,
         totalBytesReceived: this._totalBytesReceived,
-        messageOrder: "receiveTime",
         startTime: this._start,
         endTime: currentTime,
         currentTime,

@@ -32,7 +32,6 @@ import {
 } from "@foxglove/studio-base/players/types";
 import rosDatatypesToMessageDefinition from "@foxglove/studio-base/util/rosDatatypesToMessageDefinition";
 import { getTopicsByTopicName } from "@foxglove/studio-base/util/selectors";
-import { TimestampMethod } from "@foxglove/studio-base/util/time";
 
 const log = Logger.getLogger(__filename);
 const rosLog = Logger.getLogger("ROS2");
@@ -70,7 +69,6 @@ export default class Ros2Player implements Player {
   private _clockTime?: Time; // The most recent published `/clock` time, if available
   private _requestedSubscriptions: SubscribePayload[] = []; // Requested subscriptions by setSubscriptions()
   private _parsedMessages: MessageEvent<unknown>[] = []; // Queue of messages that we'll send in next _emitState() call.
-  private _messageOrder: TimestampMethod = "receiveTime";
   private _updateTopicsTimeout?: ReturnType<typeof setTimeout>; // setTimeout() handle for _updateTopics().
   private _hasReceivedMessage = false;
   private _metricsCollector: PlayerMetricsCollectorInterface;
@@ -353,7 +351,6 @@ export default class Ros2Player implements Player {
       activeData: {
         messages,
         totalBytesReceived: this._rosNode?.receivedBytes() ?? 0,
-        messageOrder: this._messageOrder,
         startTime: start,
         endTime: currentTime,
         currentTime,

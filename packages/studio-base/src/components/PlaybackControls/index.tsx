@@ -26,11 +26,9 @@ import { useCallback, useMemo, useRef, useState } from "react";
 import { makeStyles } from "tss-react/mui";
 
 import { compare, Time } from "@foxglove/rostime";
-import { AppSetting } from "@foxglove/studio-base/AppSetting";
 import HoverableIconButton from "@foxglove/studio-base/components/HoverableIconButton";
 import KeyListener from "@foxglove/studio-base/components/KeyListener";
 import LoopIcon from "@foxglove/studio-base/components/LoopIcon";
-import MessageOrderControls from "@foxglove/studio-base/components/MessageOrderControls";
 import { useMessagePipeline } from "@foxglove/studio-base/components/MessagePipeline";
 import {
   jumpSeek,
@@ -38,7 +36,6 @@ import {
 } from "@foxglove/studio-base/components/PlaybackControls/sharedHelpers";
 import PlaybackSpeedControls from "@foxglove/studio-base/components/PlaybackSpeedControls";
 import Stack from "@foxglove/studio-base/components/Stack";
-import { useAppConfigurationValue } from "@foxglove/studio-base/hooks/useAppConfigurationValue";
 
 import PlaybackTimeDisplay from "./PlaybackTimeDisplay";
 import RepeatAdapter from "./RepeatAdapter";
@@ -176,10 +173,6 @@ export default function PlaybackControls({
     [seekBackwardAction, seekForwardAction, togglePlayPause],
   );
 
-  const [enableMessageOrdering = false] = useAppConfigurationValue<boolean>(
-    AppSetting.EXPERIMENTAL_MESSAGE_ORDER,
-  );
-
   return (
     <>
       <RepeatAdapter
@@ -192,7 +185,6 @@ export default function PlaybackControls({
       <KeyListener global keyDownHandlers={keyDownHandlers} />
       <Stack className={classes.root} direction="row" alignItems="center" gap={1} padding={1}>
         <Stack direction="row" alignItems="center" gap={1}>
-          {enableMessageOrdering && <MessageOrderControls />}
           <PlaybackSpeedControls />
         </Stack>
         <Stack direction="row" alignItems="center" flex={1} gap={1}>

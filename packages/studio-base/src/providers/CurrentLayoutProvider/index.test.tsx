@@ -29,7 +29,6 @@ const TEST_LAYOUT: PanelsState = {
   linkedGlobalVariables: [],
   playbackConfig: {
     speed: 0.2,
-    messageOrder: "receiveTime",
   },
 };
 
@@ -107,7 +106,7 @@ describe("CurrentLayoutProvider", () => {
       globalVariables: { var: "hello" },
       linkedGlobalVariables: [{ topic: "/test", markerKeyPath: [], name: "var" }],
       userNodes: { node1: { name: "node", sourceCode: "node()" } },
-      playbackConfig: { speed: 0.1, messageOrder: "headerStamp" },
+      playbackConfig: { speed: 0.1 },
     };
     const layoutStorageGetCalled = signal();
     const mockLayoutManager = makeMockLayoutManager();

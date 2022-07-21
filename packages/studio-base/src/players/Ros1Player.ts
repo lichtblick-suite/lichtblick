@@ -31,7 +31,6 @@ import {
 import { RosDatatypes } from "@foxglove/studio-base/types/RosDatatypes";
 import rosDatatypesToMessageDefinition from "@foxglove/studio-base/util/rosDatatypesToMessageDefinition";
 import { getTopicsByTopicName } from "@foxglove/studio-base/util/selectors";
-import { TimestampMethod } from "@foxglove/studio-base/util/time";
 import { HttpServer } from "@foxglove/xmlrpc";
 
 const log = Logger.getLogger(__filename);
@@ -78,7 +77,6 @@ export default class Ros1Player implements Player {
   private _requestedPublishers: AdvertiseOptions[] = []; // Requested publishers by setPublishers()
   private _requestedSubscriptions: SubscribePayload[] = []; // Requested subscriptions by setSubscriptions()
   private _parsedMessages: MessageEvent<unknown>[] = []; // Queue of messages that we'll send in next _emitState() call.
-  private _messageOrder: TimestampMethod = "receiveTime";
   private _requestTopicsTimeout?: ReturnType<typeof setTimeout>; // setTimeout() handle for _requestTopics().
   private _hasReceivedMessage = false;
   private _metricsCollector: PlayerMetricsCollectorInterface;
@@ -324,7 +322,6 @@ export default class Ros1Player implements Player {
       activeData: {
         messages,
         totalBytesReceived: this._rosNode?.receivedBytes() ?? 0,
-        messageOrder: this._messageOrder,
         startTime: start,
         endTime: currentTime,
         currentTime,

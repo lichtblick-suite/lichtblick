@@ -301,8 +301,7 @@
   "userNodes": {},
   "linkedGlobalVariables": [],
   "playbackConfig": {
-    "speed": 1,
-    "messageOrder": "receiveTime"
+    "speed": 1
   },
   "layout": "Tab!1xyw5ix"
 }

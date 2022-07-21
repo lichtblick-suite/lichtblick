@@ -23,7 +23,6 @@ import {
   TopicStats,
 } from "@foxglove/studio-base/players/types";
 import { RosDatatypes } from "@foxglove/studio-base/types/RosDatatypes";
-import { TimestampMethod } from "@foxglove/studio-base/util/time";
 import { Channel, ChannelId, FoxgloveClient, SubscriptionId } from "@foxglove/ws-protocol";
 
 const log = Log.getLogger(__dirname);
@@ -49,7 +48,6 @@ export default class FoxgloveWebSocketPlayer implements Player {
   private _datatypes?: RosDatatypes; // Datatypes as published by the WebSocket.
   private _start?: Time; // The time at which we started playing.
   private _parsedMessages: MessageEvent<unknown>[] = []; // Queue of messages that we'll send in next _emitState() call.
-  private _messageOrder: TimestampMethod = "receiveTime";
   private _receivedBytes: number = 0;
   private _metricsCollector: PlayerMetricsCollectorInterface;
   private _hasReceivedMessage = false;
@@ -355,7 +353,6 @@ export default class FoxgloveWebSocketPlayer implements Player {
       activeData: {
         messages,
         totalBytesReceived: this._receivedBytes,
-        messageOrder: this._messageOrder,
         startTime: this._start ?? ZERO_TIME,
         endTime: this._currentTime ?? ZERO_TIME,
         currentTime: this._currentTime ?? ZERO_TIME,

@@ -287,7 +287,6 @@ export default class FoxgloveDataPlatformPlayer implements Player {
       activeData: {
         messages,
         totalBytesReceived: this._totalBytesReceived,
-        messageOrder: "receiveTime",
         startTime: this._start,
         endTime: this._end,
         currentTime: this._currentTime,

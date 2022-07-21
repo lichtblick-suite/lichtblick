@@ -25,7 +25,6 @@ import {
 import { RosDatatypes } from "@foxglove/studio-base/types/RosDatatypes";
 import { Range } from "@foxglove/studio-base/util/ranges";
 import { NotificationSeverity } from "@foxglove/studio-base/util/sendNotification";
-import { TimestampMethod } from "@foxglove/studio-base/util/time";
 
 // re-exported until other import sites are updated from players/types to @foxglove/studio
 export type { MessageEvent };
@@ -179,9 +178,6 @@ export type PlayerStateActiveData = {
   // PlayerCapabilities.setSpeed), this represents that speed as a fraction of real time.
   // E.g. 1.0 is real time, 0.2 is 20% of real time.
   speed: number;
-
-  // The order in which messages are published.
-  messageOrder: TimestampMethod;
 
   // The last time a seek / discontinuity in messages happened. This will clear out data within
   // `PanelAPI` so we're not looking at stale data.

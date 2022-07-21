@@ -178,7 +178,6 @@ describe("MessagePipelineProvider/useMessagePipeline", () => {
                 sizeInBytes: 0,
               },
             ],
-            messageOrder: "receiveTime",
             currentTime: { sec: 0, nsec: 0 },
             startTime: { sec: 0, nsec: 0 },
             endTime: { sec: 1, nsec: 0 },

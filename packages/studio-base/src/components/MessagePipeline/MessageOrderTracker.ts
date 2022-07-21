@@ -14,7 +14,7 @@
 import Logger from "@foxglove/log";
 import { Time, isLessThan, subtract as subtractTimes, toSec } from "@foxglove/rostime";
 import { PlayerState, MessageEvent, PlayerProblem } from "@foxglove/studio-base/players/types";
-import { formatFrame, getTimestampForMessageEvent } from "@foxglove/studio-base/util/time";
+import { formatFrame } from "@foxglove/studio-base/util/time";
 
 const DRIFT_THRESHOLD_SEC = 1; // Maximum amount of drift allowed.
 const WAIT_FOR_SEEK_SEC = 1; // How long we wait for a change in `lastSeekTime` before warning.
@@ -51,7 +51,7 @@ class MessageOrderTracker {
 
     const problems: PlayerProblem[] = [];
 
-    const { messages, messageOrder, currentTime, lastSeekTime } = playerState.activeData;
+    const { messages, currentTime, lastSeekTime } = playerState.activeData;
     let didSeek = false;
 
     if (this.lastLastSeekTime !== lastSeekTime) {
@@ -69,22 +69,7 @@ class MessageOrderTracker {
       this.lastMessages = messages;
       this.lastCurrentTime = currentTime;
       for (const message of messages) {
-        const messageTime = getTimestampForMessageEvent(message, messageOrder);
-        if (!messageTime) {
-          const formattedTime = formatFrame(currentTime);
-          const msg =
-            `Received a message on topic ${message.topic} around ${formattedTime} with ` +
-            `no ${messageOrder}.`;
-          problems.push({
-            severity: "warn",
-            error: new Error(msg),
-            message: "Unsortable message",
-          });
-
-          this.lastMessageTopic = message.topic;
-          this.lastMessageTime = undefined;
-          continue;
-        }
+        const messageTime = message.receiveTime;
 
         // The first emit after a seek occurs from a backfill. This backfill might produce messages
         // much older than the seek time.
@@ -104,7 +89,6 @@ class MessageOrderTracker {
                 const info = {
                   currentTime,
                   lastSeekTime,
-                  messageOrder,
                   messageTime,
                   incorrectMessages: this.trackIncorrectMessages
                     ? this.incorrectMessages
@@ -112,7 +96,7 @@ class MessageOrderTracker {
                 };
                 this.incorrectMessages = [];
                 log.warn(
-                  `${messageOrder} very different from player.currentTime; without updating lastSeekTime`,
+                  `Message receiveTime very different from player.currentTime; without updating lastSeekTime`,
                   info,
                 );
               }, WAIT_FOR_SEEK_SEC * 1000);

@@ -56,7 +56,6 @@ import {
   getSeekTimeFromSpec,
   SEEK_ON_START_NS,
   SeekToTimeSpec,
-  TimestampMethod,
 } from "@foxglove/studio-base/util/time";
 
 const log = Logger.getLogger(__filename);
@@ -132,7 +131,6 @@ export default class RandomAccessPlayer implements Player {
   private _id: string = uuidv4();
   private _messages: MessageEvent<unknown>[] = [];
   private _receivedBytes: number = 0;
-  private _messageOrder: TimestampMethod = "receiveTime";
   private _hasError = false;
   private _closed = false;
   private _seekToTime: SeekToTimeSpec;
@@ -360,7 +358,6 @@ export default class RandomAccessPlayer implements Player {
         : {
             messages,
             totalBytesReceived: this._receivedBytes,
-            messageOrder: this._messageOrder,
             currentTime: this._currentTime,
             startTime: this._start,
             endTime: this._end,

@@ -126,7 +126,6 @@ describe("RandomAccessPlayer", () => {
           lastSeekTime: 0,
           messages: [],
           totalBytesReceived: 0,
-          messageOrder: "receiveTime",
           speed: 0.2,
           startTime: { sec: 10, nsec: 0 },
           topics: [

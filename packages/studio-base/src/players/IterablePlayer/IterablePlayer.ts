@@ -34,7 +34,7 @@ import {
 } from "@foxglove/studio-base/players/types";
 import { RosDatatypes } from "@foxglove/studio-base/types/RosDatatypes";
 import delay from "@foxglove/studio-base/util/delay";
-import { SEEK_ON_START_NS, TimestampMethod } from "@foxglove/studio-base/util/time";
+import { SEEK_ON_START_NS } from "@foxglove/studio-base/util/time";
 
 import { BlockLoader } from "./BlockLoader";
 import { BufferedIterableSource } from "./BufferedIterableSource";
@@ -137,7 +137,6 @@ export class IterablePlayer implements Player {
   private _id: string = uuidv4();
   private _messages: MessageEvent<unknown>[] = [];
   private _receivedBytes: number = 0;
-  private _messageOrder: TimestampMethod = "receiveTime";
   private _hasError = false;
   private _lastRangeMillis?: number;
   private _closed: boolean = false;
@@ -666,7 +665,6 @@ export class IterablePlayer implements Player {
       activeData: {
         messages,
         totalBytesReceived: this._receivedBytes,
-        messageOrder: this._messageOrder,
         currentTime,
         startTime: this._start,
         endTime: this._end,

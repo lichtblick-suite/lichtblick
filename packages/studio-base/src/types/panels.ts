@@ -13,8 +13,6 @@
 
 import type { MosaicPath } from "react-mosaic-component";
 
-import { TimestampMethod } from "@foxglove/studio-base/util/time";
-
 // Mosaic Types
 export type MosaicDropTargetPosition = "top" | "bottom" | "left" | "right";
 export type MosaicDropResult = {
@@ -31,7 +29,6 @@ export type TimeDisplayMethod = "SEC" | "TOD";
 
 export type PlaybackConfig = {
   speed: number;
-  messageOrder: TimestampMethod;
 };
 
 export type UserNode = { name: string; sourceCode: string };

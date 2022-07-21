@@ -40,7 +40,6 @@ import {
 import { RosDatatypes } from "@foxglove/studio-base/types/RosDatatypes";
 import { bagConnectionsToDatatypes } from "@foxglove/studio-base/util/bagConnectionsHelper";
 import { getTopicsByTopicName } from "@foxglove/studio-base/util/selectors";
-import { TimestampMethod } from "@foxglove/studio-base/util/time";
 
 const log = Log.getLogger(__dirname);
 
@@ -80,7 +79,6 @@ export default class RosbridgePlayer implements Player {
   private _topicSubscriptions = new Map<string, roslib.Topic>();
   private _requestedSubscriptions: SubscribePayload[] = []; // Requested subscriptions by setSubscriptions()
   private _parsedMessages: MessageEvent<unknown>[] = []; // Queue of messages that we'll send in next _emitState() call.
-  private _messageOrder: TimestampMethod = "receiveTime";
   private _requestTopicsTimeout?: ReturnType<typeof setTimeout>; // setTimeout() handle for _requestTopics().
   // active publishers for the current connection
   private _topicPublishers = new Map<string, roslib.Topic>();
@@ -388,7 +386,6 @@ export default class RosbridgePlayer implements Player {
       activeData: {
         messages,
         totalBytesReceived: this._receivedBytes,
-        messageOrder: this._messageOrder,
         startTime: _start,
         endTime: currentTime,
         currentTime,
