@@ -27,9 +27,7 @@ class Ros2LocalBagDataSourceFactory implements IDataSourceFactory {
         files: args.files ?? [],
       });
 
-      const messageCacheProvider = new MemoryCacheDataProvider(bagWorkerDataProvider, {
-        unlimitedCache: args.unlimitedMemoryCache,
-      });
+      const messageCacheProvider = new MemoryCacheDataProvider(bagWorkerDataProvider);
 
       return new RandomAccessPlayer(messageCacheProvider, {
         metricsCollector: args.metricsCollector,
@@ -42,9 +40,7 @@ class Ros2LocalBagDataSourceFactory implements IDataSourceFactory {
         file: args.file,
       });
 
-      const messageCacheProvider = new MemoryCacheDataProvider(bagWorkerDataProvider, {
-        unlimitedCache: args.unlimitedMemoryCache,
-      });
+      const messageCacheProvider = new MemoryCacheDataProvider(bagWorkerDataProvider);
 
       return new RandomAccessPlayer(messageCacheProvider, {
         metricsCollector: args.metricsCollector,

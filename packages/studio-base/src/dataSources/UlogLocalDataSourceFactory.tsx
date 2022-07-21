@@ -26,9 +26,7 @@ class UlogLocalDataSourceFactory implements IDataSourceFactory {
     }
 
     const ulogDataProvider = new UlogDataProvider({ file });
-    const messageCacheProvider = new MemoryCacheDataProvider(ulogDataProvider, {
-      unlimitedCache: args.unlimitedMemoryCache,
-    });
+    const messageCacheProvider = new MemoryCacheDataProvider(ulogDataProvider);
 
     return new RandomAccessPlayer(messageCacheProvider, {
       metricsCollector: args.metricsCollector,

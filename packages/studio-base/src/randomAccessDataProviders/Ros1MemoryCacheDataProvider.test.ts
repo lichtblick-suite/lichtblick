@@ -76,10 +76,7 @@ function generateMessagesForLongInput(): MessageEvent<ArrayBuffer>[] {
   ]);
 }
 
-function getProvider(
-  messages: MessageEvent<ArrayBuffer>[],
-  { unlimitedCache = false }: { unlimitedCache?: boolean } = {},
-) {
+function getProvider(messages: MessageEvent<ArrayBuffer>[]) {
   const memoryDataProvider = new MemoryDataProvider({
     messages: { parsedMessages: undefined, encodedMessages: messages },
     topicStats: new Map(),
@@ -91,7 +88,7 @@ function getProvider(
     },
   });
   return {
-    provider: new Ros1MemoryCacheDataProvider(memoryDataProvider, { unlimitedCache }),
+    provider: new Ros1MemoryCacheDataProvider(memoryDataProvider),
     memoryDataProvider,
   };
 }
@@ -237,29 +234,6 @@ describe("MemoryCacheDataProvider", () => {
     expect(last(mockProgressCallback.mock.calls)).toEqual([
       {
         fullyLoadedFractionRanges: [{ start: 0, end: 81 / 201 }],
-        messageCache: {
-          startTime: { sec: 0, nsec: 0 },
-          blocks: expect.arrayContaining([]),
-        },
-      },
-    ]);
-  });
-
-  it("does not stop prefetching with unlimitedCache", async () => {
-    const { provider } = getProvider(generateLargeMessages(), { unlimitedCache: true });
-    const { extensionPoint } = mockExtensionPoint();
-    const mockProgressCallback = jest.spyOn(extensionPoint, "progressCallback");
-
-    await provider.initialize(extensionPoint);
-    await provider.getMessages(
-      { sec: 0, nsec: 0 },
-      { sec: 0, nsec: 0 },
-      { parsedMessages: ["/foo"] },
-    );
-    await delay(10);
-    expect(last(mockProgressCallback.mock.calls)).toEqual([
-      {
-        fullyLoadedFractionRanges: [{ start: 0, end: 1 }],
         messageCache: {
           startTime: { sec: 0, nsec: 0 },
           blocks: expect.arrayContaining([]),

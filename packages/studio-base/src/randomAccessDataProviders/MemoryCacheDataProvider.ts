@@ -274,9 +274,8 @@ export default class MemoryCacheDataProvider implements RandomAccessDataProvider
   private _readAheadBlocks: number = 0;
   private _memCacheBlockSizeNs: number = 0;
 
-  constructor(provider: RandomAccessDataProvider, options: { unlimitedCache?: boolean }) {
-    const { unlimitedCache = false } = options;
-    this._cacheSizeBytes = unlimitedCache ? Infinity : DEFAULT_CACHE_SIZE_BYTES;
+  constructor(provider: RandomAccessDataProvider) {
+    this._cacheSizeBytes = DEFAULT_CACHE_SIZE_BYTES;
     this._provider = provider;
   }
 

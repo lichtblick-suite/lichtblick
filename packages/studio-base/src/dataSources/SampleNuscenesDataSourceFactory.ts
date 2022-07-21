@@ -45,9 +45,7 @@ class SampleNuscenesDataSourceFactory implements IDataSourceFactory {
       });
     } else {
       const bagWorkerDataProvider = new WorkerBagDataProvider({ type: "remote", url: bagUrl });
-      const messageCacheProvider = new Ros1MemoryCacheDataProvider(bagWorkerDataProvider, {
-        unlimitedCache: args.unlimitedMemoryCache,
-      });
+      const messageCacheProvider = new Ros1MemoryCacheDataProvider(bagWorkerDataProvider);
 
       return new RandomAccessPlayer(messageCacheProvider, {
         isSampleDataSource: true,

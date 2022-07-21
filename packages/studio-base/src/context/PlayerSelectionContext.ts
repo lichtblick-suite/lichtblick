@@ -10,7 +10,6 @@ import ConsoleApi from "@foxglove/studio-base/services/ConsoleApi";
 
 export type DataSourceFactoryInitializeArgs = {
   metricsCollector: PlayerMetricsCollectorInterface;
-  unlimitedMemoryCache: boolean;
   folder?: FileSystemDirectoryHandle;
   file?: File;
   files?: File[];

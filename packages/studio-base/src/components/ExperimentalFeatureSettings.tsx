@@ -26,16 +26,6 @@ type Feature = {
 
 const features: Feature[] = [
   {
-    key: AppSetting.UNLIMITED_MEMORY_CACHE,
-    name: "Unlimited in-memory cache",
-    description: (
-      <>
-        Fully buffer a bag into memory. This may use up a lot of system memory. Changing this
-        setting requires a restart.
-      </>
-    ),
-  },
-  {
     key: AppSetting.SHOW_DEBUG_PANELS,
     name: "Studio debug panels",
     description: <>Show Foxglove Studio debug panels in the &ldquo;Add panel&rdquo; list.</>,

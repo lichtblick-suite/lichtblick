@@ -288,11 +288,8 @@ export default class Ros1MemoryCacheDataProvider implements RandomAccessDataProv
 
   private _lazyMessageReadersByTopic = new Map<string, LazyMessageReader>();
 
-  constructor(
-    provider: RandomAccessDataProvider,
-    { unlimitedCache = false }: { unlimitedCache?: boolean },
-  ) {
-    this._cacheSizeBytes = unlimitedCache ? Infinity : DEFAULT_CACHE_SIZE_BYTES;
+  constructor(provider: RandomAccessDataProvider) {
+    this._cacheSizeBytes = DEFAULT_CACHE_SIZE_BYTES;
     this._provider = provider;
   }
 

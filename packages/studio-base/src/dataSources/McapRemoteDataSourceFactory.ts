@@ -28,9 +28,7 @@ export default class McapRemoteDataSourceFactory implements IDataSourceFactory {
     }
 
     const mcapProvider = new McapDataProvider({ source: { type: "remote", url } });
-    const messageCacheProvider = new MemoryCacheDataProvider(mcapProvider, {
-      unlimitedCache: args.unlimitedMemoryCache,
-    });
+    const messageCacheProvider = new MemoryCacheDataProvider(mcapProvider);
 
     return new RandomAccessPlayer(messageCacheProvider, {
       metricsCollector: args.metricsCollector,

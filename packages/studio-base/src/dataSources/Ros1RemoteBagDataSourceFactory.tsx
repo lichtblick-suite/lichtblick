@@ -50,9 +50,7 @@ class Ros1RemoteBagDataSourceFactory implements IDataSourceFactory {
       });
     } else {
       const bagWorkerDataProvider = new WorkerBagDataProvider({ type: "remote", url });
-      const messageCacheProvider = new Ros1MemoryCacheDataProvider(bagWorkerDataProvider, {
-        unlimitedCache: args.unlimitedMemoryCache,
-      });
+      const messageCacheProvider = new Ros1MemoryCacheDataProvider(bagWorkerDataProvider);
 
       return new RandomAccessPlayer(messageCacheProvider, {
         metricsCollector: args.metricsCollector,
