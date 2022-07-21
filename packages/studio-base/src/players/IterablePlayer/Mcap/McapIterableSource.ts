@@ -50,7 +50,7 @@ export class McapIterableSource implements IIterableSource {
     return await this._sourceImpl.initialize();
   }
 
-  messageIterator(opt: MessageIteratorArgs): AsyncIterator<Readonly<IteratorResult>> {
+  messageIterator(opt: MessageIteratorArgs): AsyncIterableIterator<Readonly<IteratorResult>> {
     if (!this._sourceImpl) {
       throw new Error("Invariant: uninitialized");
     }

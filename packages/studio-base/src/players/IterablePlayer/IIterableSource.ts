@@ -86,7 +86,7 @@ export interface IIterableSource {
    * generator function, and a `finally` block to do any necessary cleanup tasks when the request
    * finishes or is canceled.
    */
-  messageIterator(args: MessageIteratorArgs): AsyncIterator<Readonly<IteratorResult>>;
+  messageIterator(args: MessageIteratorArgs): AsyncIterableIterator<Readonly<IteratorResult>>;
 
   /**
    * Load the most recent messages per topic that occurred before or at the target time, if

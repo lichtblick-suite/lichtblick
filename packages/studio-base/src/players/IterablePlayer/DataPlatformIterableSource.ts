@@ -166,7 +166,9 @@ export class DataPlatformIterableSource implements IIterableSource {
     };
   }
 
-  async *messageIterator(args: MessageIteratorArgs): AsyncIterator<Readonly<IteratorResult>> {
+  async *messageIterator(
+    args: MessageIteratorArgs,
+  ): AsyncIterableIterator<Readonly<IteratorResult>> {
     const api = this._consoleApi;
     const deviceId = this._deviceId;
     const parsedChannelsByTopic = this._parsedChannelsByTopic;

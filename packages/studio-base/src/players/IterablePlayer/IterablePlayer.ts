@@ -37,6 +37,7 @@ import delay from "@foxglove/studio-base/util/delay";
 import { SEEK_ON_START_NS, TimestampMethod } from "@foxglove/studio-base/util/time";
 
 import { BlockLoader } from "./BlockLoader";
+import { BufferedIterableSource } from "./BufferedIterableSource";
 import { IIterableSource, IteratorResult } from "./IIterableSource";
 
 const log = Log.getLogger(__filename);
@@ -152,6 +153,7 @@ export class IterablePlayer implements Player {
   private _problemManager = new PlayerProblemManager();
 
   private _iterableSource: IIterableSource;
+  private _bufferedSource: BufferedIterableSource;
 
   // Some states register an abort controller to signal they should abort
   private _abort?: AbortController;
@@ -167,6 +169,7 @@ export class IterablePlayer implements Player {
     const { metricsCollector, urlParams, source, name, enablePreload, sourceId } = options;
 
     this._iterableSource = source;
+    this._bufferedSource = new BufferedIterableSource(source);
     this._name = name;
     this._urlParams = urlParams;
     this._metricsCollector = metricsCollector ?? new NoopMetricsCollector();
@@ -301,10 +304,8 @@ export class IterablePlayer implements Player {
   private _setState(newState: IterablePlayerState) {
     log.debug(`Set next state: ${newState}`);
     this._nextState = newState;
-    if (this._abort) {
-      this._abort.abort();
-      this._abort = undefined;
-    }
+    this._abort?.abort();
+    this._abort = undefined;
 
     // Support moving between idle (pause) and play and preserving the playback iterator
     if (newState !== "idle" && newState !== "play" && this._playbackIterator) {
@@ -393,7 +394,7 @@ export class IterablePlayer implements Player {
 
     try {
       const { start, end, topics, profile, topicStats, problems, publishersByTopic, datatypes } =
-        await this._iterableSource.initialize();
+        await this._bufferedSource.initialize();
 
       this._profile = profile;
       this._start = this._currentTime = start;
@@ -464,13 +465,14 @@ export class IterablePlayer implements Player {
       throw new Error("Invariant: Tried to reset playback iterator with no current time.");
     }
 
-    await this._playbackIterator?.return?.();
-
     const next = add(this._currentTime, { sec: 0, nsec: 1 });
+
+    await this._playbackIterator?.return?.();
 
     // set the playIterator to the seek time
     log.debug("Initializing forward iterator from", next);
-    this._playbackIterator = this._iterableSource.messageIterator({
+    await this._bufferedSource.stopProducer();
+    this._playbackIterator = this._bufferedSource.messageIterator({
       topics: Array.from(this._allTopics),
       start: next,
     });
@@ -495,7 +497,7 @@ export class IterablePlayer implements Player {
     }
 
     log.debug("Initializing forward iterator from", this._start);
-    this._playbackIterator = this._iterableSource.messageIterator({
+    this._playbackIterator = this._bufferedSource.messageIterator({
       topics: Array.from(this._allTopics),
       start: this._start,
     });
@@ -569,7 +571,7 @@ export class IterablePlayer implements Player {
 
     try {
       this._abort = new AbortController();
-      const messages = await this._iterableSource.getBackfillMessages({
+      const messages = await this._bufferedSource.getBackfillMessages({
         topics,
         time: targetTime,
         abortSignal: this._abort.signal,
@@ -773,6 +775,40 @@ export class IterablePlayer implements Player {
       await this.loadBlocks(this._currentTime);
       log.info(`Block load took: ${performance.now() - start} ms`);
     }
+
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition, @typescript-eslint/strict-boolean-expressions
+    if (this._nextState) {
+      return;
+    }
+
+    if (this._abort) {
+      throw new Error("Invariant: some other abort controller exists");
+    }
+
+    const abort = (this._abort = new AbortController());
+
+    const aborted = new Promise<void>((resolve) => {
+      abort.signal.addEventListener("abort", () => {
+        resolve();
+      });
+    });
+
+    for (;;) {
+      this._progress = {
+        fullyLoadedFractionRanges: this._bufferedSource.loadedRanges(),
+        messageCache: this._progress.messageCache,
+      };
+      await this._emitState();
+
+      // When idling nothing is querying the source, but our buffered source might be
+      // buffering behind the scenes. Every second we emit state with an update to show that
+      // buffering is happening.
+      await Promise.race([delay(1000), aborted]);
+      // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition, @typescript-eslint/strict-boolean-expressions
+      if (this._nextState) {
+        break;
+      }
+    }
   }
 
   private async _statePlay() {
@@ -812,6 +848,11 @@ export class IterablePlayer implements Player {
           return;
         }
 
+        this._progress = {
+          fullyLoadedFractionRanges: this._bufferedSource.loadedRanges(),
+          messageCache: this._progress.messageCache,
+        };
+
         const time = Date.now() - start;
         // make sure we've slept at least 16 millis or so (aprox 1 frame)
         // to give the UI some time to breathe and not burn in a tight loop
@@ -831,7 +872,8 @@ export class IterablePlayer implements Player {
     this._isPlaying = false;
     this._closed = true;
     this._metricsCollector.close();
-    this._playbackIterator?.return?.().catch((err) => log.error(err));
+    await this._bufferedSource.stopProducer();
+    await this._playbackIterator?.return?.();
     this._playbackIterator = undefined;
   }
 
@@ -857,7 +899,10 @@ export class IterablePlayer implements Player {
         abortSignal: this._abort.signal,
         startTime: time,
         progress: async (progress) => {
-          this._progress = progress;
+          this._progress = {
+            fullyLoadedFractionRanges: this._bufferedSource.loadedRanges(),
+            messageCache: progress.messageCache,
+          };
 
           // We throttle emitting the state since we could be loading blocks faster than 60fps and it
           // is actually slower to try rendering with each new block compared to spacing out the

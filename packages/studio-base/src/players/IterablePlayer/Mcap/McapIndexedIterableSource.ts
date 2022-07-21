@@ -111,7 +111,9 @@ export class McapIndexedIterableSource implements IIterableSource {
     };
   }
 
-  async *messageIterator(args: MessageIteratorArgs): AsyncIterator<Readonly<IteratorResult>> {
+  async *messageIterator(
+    args: MessageIteratorArgs,
+  ): AsyncIterableIterator<Readonly<IteratorResult>> {
     const topics = args.topics;
     const start = args.start ?? this.start;
     const end = args.end ?? this.end;

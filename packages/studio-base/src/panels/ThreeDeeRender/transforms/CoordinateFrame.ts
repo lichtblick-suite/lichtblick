@@ -7,7 +7,7 @@
 
 import { mat4 } from "gl-matrix";
 
-import { ArrayMap } from "@foxglove/den/collection/ArrayMap";
+import { ArrayMap } from "@foxglove/den/collection";
 
 import { Transform } from "./Transform";
 import { Pose, mat4Identity } from "./geometry";

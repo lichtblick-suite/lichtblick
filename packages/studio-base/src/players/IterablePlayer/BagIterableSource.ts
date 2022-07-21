@@ -163,7 +163,9 @@ export class BagIterableSource implements IIterableSource {
     };
   }
 
-  async *messageIterator(opt: MessageIteratorArgs): AsyncGenerator<Readonly<IteratorResult>> {
+  async *messageIterator(
+    opt: MessageIteratorArgs,
+  ): AsyncIterableIterator<Readonly<IteratorResult>> {
     yield* this._messageIterator({ ...opt, reverse: false });
   }
 

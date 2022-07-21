@@ -29,7 +29,9 @@ class TestSource implements IIterableSource {
     };
   }
 
-  async *messageIterator(_args: MessageIteratorArgs): AsyncIterator<Readonly<IteratorResult>> {}
+  async *messageIterator(
+    _args: MessageIteratorArgs,
+  ): AsyncIterableIterator<Readonly<IteratorResult>> {}
 
   async getBackfillMessages(_args: GetBackfillMessagesArgs): Promise<MessageEvent<unknown>[]> {
     return [];
