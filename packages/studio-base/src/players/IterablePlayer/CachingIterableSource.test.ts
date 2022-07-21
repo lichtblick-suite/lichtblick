@@ -400,4 +400,132 @@ describe("CachingIterableSource", () => {
     await messageIterator.next();
     expect(bufferedSource.loadedRanges()).toEqual([{ start: 0, end: 1 }]);
   });
+
+  it("should respect end bounds when loading the cache", async () => {
+    const source = new TestSource();
+    const bufferedSource = new CachingIterableSource(source);
+
+    await bufferedSource.initialize();
+
+    source.messageIterator = async function* messageIterator(
+      args: MessageIteratorArgs,
+    ): AsyncIterableIterator<Readonly<IteratorResult>> {
+      yield {
+        msgEvent: {
+          topic: "a",
+          receiveTime: { sec: 3, nsec: 0 },
+          message: undefined,
+          sizeInBytes: 0,
+        },
+        problem: undefined,
+        connectionId: undefined,
+      };
+
+      if ((args.end?.sec ?? 100) < 6) {
+        return;
+      }
+
+      yield {
+        msgEvent: {
+          topic: "a",
+          receiveTime: { sec: 6, nsec: 0 },
+          message: undefined,
+          sizeInBytes: 0,
+        },
+        problem: undefined,
+        connectionId: undefined,
+      };
+    };
+
+    const messageIterator = bufferedSource.messageIterator({
+      topics: ["a"],
+      end: { sec: 4, nsec: 0 },
+    });
+
+    {
+      const res = await messageIterator.next();
+      expect(res.value).toEqual({
+        msgEvent: {
+          topic: "a",
+          receiveTime: { sec: 3, nsec: 0 },
+          message: undefined,
+          sizeInBytes: 0,
+        },
+        problem: undefined,
+        connectionId: undefined,
+      });
+    }
+
+    {
+      const res = await messageIterator.next();
+      expect(res.done).toEqual(true);
+    }
+  });
+
+  it("should respect end bounds when reading the cache", async () => {
+    const source = new TestSource();
+    const bufferedSource = new CachingIterableSource(source);
+
+    await bufferedSource.initialize();
+
+    source.messageIterator = async function* messageIterator(
+      _args: MessageIteratorArgs,
+    ): AsyncIterableIterator<Readonly<IteratorResult>> {
+      yield {
+        msgEvent: {
+          topic: "a",
+          receiveTime: { sec: 3, nsec: 0 },
+          message: undefined,
+          sizeInBytes: 0,
+        },
+        problem: undefined,
+        connectionId: undefined,
+      };
+
+      yield {
+        msgEvent: {
+          topic: "a",
+          receiveTime: { sec: 6, nsec: 0 },
+          message: undefined,
+          sizeInBytes: 0,
+        },
+        problem: undefined,
+        connectionId: undefined,
+      };
+    };
+
+    {
+      const messageIterator = bufferedSource.messageIterator({
+        topics: ["a"],
+      });
+
+      for await (const _ of messageIterator) {
+        // no-op
+      }
+    }
+
+    const messageIterator = bufferedSource.messageIterator({
+      topics: ["a"],
+      end: { sec: 4, nsec: 0 },
+    });
+
+    {
+      const res = await messageIterator.next();
+      expect(res.value).toEqual({
+        msgEvent: {
+          topic: "a",
+          receiveTime: { sec: 3, nsec: 0 },
+          message: undefined,
+          sizeInBytes: 0,
+        },
+        problem: undefined,
+        connectionId: undefined,
+      });
+    }
+
+    {
+      const res = await messageIterator.next();
+      expect(res.done).toEqual(true);
+    }
+  });
 });

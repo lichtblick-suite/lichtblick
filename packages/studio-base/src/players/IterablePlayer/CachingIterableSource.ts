@@ -108,6 +108,9 @@ class CachingIterableSource implements IIterableSource {
       throw new Error("Invariant: uninitialized");
     }
 
+    const maxEnd = args.end ?? this.initResult.end;
+    const maxEndNanos = toNanoSec(maxEnd);
+
     const newTopics = [...args.topics].sort();
 
     // When the list of topics we want changes we purge the entire cache and start again.
@@ -124,7 +127,7 @@ class CachingIterableSource implements IIterableSource {
     let readHead = args.start ?? this.initResult.start;
 
     for (;;) {
-      if (compare(readHead, this.initResult.end) > 0) {
+      if (compare(readHead, maxEnd) > 0) {
         break;
       }
 
@@ -151,6 +154,12 @@ class CachingIterableSource implements IIterableSource {
           const cachedItem = block.items[idx];
           if (!cachedItem) {
             break;
+          }
+
+          // We may have found a cached time that is after our max iterator time.
+          // We bail with no return when that happens.
+          if (cachedItem[0] > maxEndNanos) {
+            return;
           }
 
           // update the last time this block was accessed
@@ -182,12 +191,17 @@ class CachingIterableSource implements IIterableSource {
       // If we have a next block (this is the block ours would come before), then we only need
       // to read up to that block.
       const nextBlock = this.cache[nextBlockIndex];
-      const sourceReadEnd = nextBlock
-        ? subtract(nextBlock.start, { sec: 0, nsec: 1 })
-        : this.initResult.end;
+
+      let sourceReadEnd = nextBlock ? subtract(nextBlock.start, { sec: 0, nsec: 1 }) : maxEnd;
 
       if (compare(sourceReadStart, sourceReadEnd) > 0) {
         throw new Error("Invariant: sourceReadStart > sourceReadEnd");
+      }
+
+      // When reading for our message iterator, we might have a nextBlock that starts
+      // after the end time we want to read. This limits our reading to the end time of the iterator.
+      if (compare(sourceReadEnd, maxEnd) > 0) {
+        sourceReadEnd = maxEnd;
       }
 
       const sourceMessageIterator = this.source.messageIterator({
