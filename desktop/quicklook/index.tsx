@@ -94,10 +94,10 @@ function Root(): JSX.Element {
   return (
     <div>
       {state.loading && "Loading…"}
-      {state.error && <Flash type="error">{state.error.toString()}</Flash>}
+      {state.error && <Flash color="error">{state.error.toString()}</Flash>}
       {fileStats && <FileInfoDisplay fileStats={fileStats} fileInfo={fileInfo} error={fileError} />}
       {loadMoreInfo && (!shouldLoadMoreInfo || moreInfo.loading) && (
-        <Flash type="info">
+        <Flash color="info">
           This file cannot be summarized without a full scan.{" "}
           {moreInfo.loading ? (
             <progress ref={progressRef} style={{ margin: 0 }} />

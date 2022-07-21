@@ -2,42 +2,49 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import styled from "styled-components";
+import { PropsWithChildren } from "react";
+import { makeStyles } from "tss-react/mui";
 
-const colors = {
-  error: {
-    color: undefined,
-    background: "#ffeaea",
-    border: "#cc5f5f",
-
-    darkColor: undefined,
-    darkBackground: "#673636",
-    darkBorder: "#bb5959",
+const useStyles = makeStyles()(() => ({
+  root: {
+    padding: 12,
+    borderRadius: 4,
+    border: "1px dashed",
   },
   info: {
     color: "#8a8a8a",
-    background: "#f5f5f5",
-    border: "#dfdfdf",
+    backgroundColor: "#f5f5f5",
+    borderColor: "#dfdfdf",
 
-    darkColor: "#bbbbbb",
-    darkBackground: "#4e4e4e",
-    darkBorder: "#727272",
+    "@media (prefers-color-scheme: dark)": {
+      color: "#bbbbbb",
+      backgroundColor: "#4e4e4e",
+      borderColor: "#727272",
+    },
   },
-};
+  error: {
+    backgroundColor: "#ffeaea",
+    borderColor: "#cc5f5f",
 
-const Flash = styled.div<{ type: "error" | "info" }>`
-  padding: 12px;
-  border-radius: 4px;
+    "@media (prefers-color-scheme: dark)": {
+      backgroundColor: "#673636",
+      borderColor: "#bb5959",
+    },
+  },
+}));
 
-  color: ${({ type }) => colors[type].color};
-  background: ${({ type }) => colors[type].background};
-  border: 1px dashed ${({ type }) => colors[type].border};
+export default function Flash(props: PropsWithChildren<{ color?: "error" | "info" }>): JSX.Element {
+  const { children, color = "info" } = props;
+  const { classes, cx } = useStyles();
 
-  @media (prefers-color-scheme: dark) {
-    color: ${({ type }) => colors[type].darkColor};
-    background: ${({ type }) => colors[type].darkBackground};
-    border: 1px dashed ${({ type }) => colors[type].darkBorder};
-  }
-`;
-
-export default Flash;
+  return (
+    <div
+      className={cx(classes.root, {
+        [classes.info]: color === "info",
+        [classes.error]: color === "error",
+      })}
+    >
+      {children}
+    </div>
+  );
+}
