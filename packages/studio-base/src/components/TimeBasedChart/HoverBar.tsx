@@ -12,19 +12,21 @@
 //   You may not use this file except in compliance with the License.
 
 import { CSSProperties, useMemo } from "react";
-import styled from "styled-components";
+import { withStyles } from "tss-react/mui";
 
 import { RpcScales } from "@foxglove/studio-base/components/Chart/types";
 import { useHoverValue } from "@foxglove/studio-base/context/HoverValueContext";
 
-const SWrapper = styled.div`
-  top: 0;
-  bottom: 0;
-  position: absolute;
-  pointer-events: none;
-  will-change: transform;
-  visibility: hidden;
-`;
+const Wrapper = withStyles("div", () => ({
+  root: {
+    top: 0,
+    bottom: 0,
+    position: "absolute",
+    pointerEvents: "none",
+    willChange: "transform",
+    visibility: "hidden",
+  },
+}));
 
 type Props = {
   children?: React.ReactNode;
@@ -69,5 +71,5 @@ export default React.memo<Props>(function HoverBar({
     return { visibility: "visible", transform: `translateX(${positionX}px)` };
   }, [positionX]);
 
-  return <SWrapper style={{ visibility, transform }}>{children}</SWrapper>;
+  return <Wrapper style={{ visibility, transform }}>{children}</Wrapper>;
 });
