@@ -189,9 +189,13 @@ export class IterablePlayer implements Player {
     if (this._isPlaying) {
       return;
     }
+
     this._metricsCollector.play(this._speed);
     this._isPlaying = true;
-    if (this._state === "idle") {
+
+    // If we are idling we can start playing, if we have a next state queued we let that state
+    // finish and it will see that we should be playing
+    if (this._state === "idle" && (!this._nextState || this._nextState === "idle")) {
       this._setState("play");
     }
   }
