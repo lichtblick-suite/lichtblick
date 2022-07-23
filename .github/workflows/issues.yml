@@ -14,7 +14,7 @@ jobs:
     name: Add issue to project
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/add-to-project@v0.2.0
+      - uses: actions/add-to-project@v0.3.0
         with:
           project-url: https://github.com/orgs/foxglove/projects/8
           github-token: ${{ secrets.FOXGLOVEBOT_GITHUB_TOKEN }}
