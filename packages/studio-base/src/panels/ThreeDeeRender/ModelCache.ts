@@ -266,6 +266,13 @@ function toStandard(
   const standard = new THREE.MeshStandardMaterial({ name: material.name });
   const shininess = (material as Partial<THREE.MeshPhongMaterial>).shininess ?? 0; // [0-100]
 
+  // MeshStandardMaterial.copy() assumes the normalScale property exists, which
+  // is true for other MeshStandardMaterials or MeshPhongMaterial but not
+  // MeshLambertMaterial. Default initialize this property if needed so the
+  // `standard.copy(material)` below succeeds
+  const maybePhong = material as Partial<THREE.MeshPhongMaterial>;
+  maybePhong.normalScale ??= new THREE.Vector2(1, 1);
+
   standard.copy(material);
   standard.metalness = 0;
   standard.roughness = 1 - shininess / 100;
