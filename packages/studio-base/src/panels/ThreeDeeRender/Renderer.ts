@@ -495,8 +495,8 @@ export class Renderer extends EventEmitter<RendererEvents> {
     }
 
     // Top priority is the followFrameId
-    if (this.followFrameId != undefined && this.transformTree.hasFrame(this.followFrameId)) {
-      return this.followFrameId;
+    if (this.followFrameId != undefined) {
+      return this.transformTree.hasFrame(this.followFrameId) ? this.followFrameId : undefined;
     }
 
     // Prefer frames from [REP-105](https://www.ros.org/reps/rep-0105.html)
@@ -998,7 +998,15 @@ export class Renderer extends EventEmitter<RendererEvents> {
       this._lastTransformFrameCount = this.transformTree.frames().size;
 
       if (this.renderFrameId == undefined) {
-        this.settings.errors.add(FOLLOW_TF_PATH, NO_FRAME_SELECTED, `No coordinate frames found`);
+        if (this.followFrameId != undefined) {
+          this.settings.errors.add(
+            FOLLOW_TF_PATH,
+            FRAME_NOT_FOUND,
+            `Frame "${this.followFrameId}" not found`,
+          );
+        } else {
+          this.settings.errors.add(FOLLOW_TF_PATH, NO_FRAME_SELECTED, `No coordinate frames found`);
+        }
         this.fixedFrameId = undefined;
         return;
       } else {
@@ -1031,15 +1039,7 @@ export class Renderer extends EventEmitter<RendererEvents> {
       this.fixedFrameId = rootFrameId;
     }
 
-    if (this.followFrameId != undefined && this.renderFrameId !== this.followFrameId) {
-      this.settings.errors.add(
-        FOLLOW_TF_PATH,
-        FRAME_NOT_FOUND,
-        `Frame "${this.followFrameId}" not found, rendering in "${this.renderFrameId}"`,
-      );
-    } else {
-      this.settings.errors.clearPath(FOLLOW_TF_PATH);
-    }
+    this.settings.errors.clearPath(FOLLOW_TF_PATH);
   }
 
   private _updateResolution(): void {

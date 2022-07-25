@@ -11,6 +11,7 @@ import { Renderer, RendererConfig } from "../Renderer";
 import { SceneExtension } from "../SceneExtension";
 import { SettingsTreeEntry } from "../SettingsManager";
 import { PRECISION_DEGREES, PRECISION_DISTANCE, SelectEntry } from "../settings";
+import { CoordinateFrame } from "../transforms";
 import { PublishClickType } from "./PublishClickTool";
 
 export const DEFAULT_LABEL_SCALE_FACTOR = 1;
@@ -58,7 +59,17 @@ export class CoreSettings extends SceneExtension {
     const { cameraState: camera, publish } = config;
     const handler = this.handleSettingsAction;
 
-    const followTfOptions = this.renderer.coordinateFrameList;
+    // If the user-selected frame does not exist, show it in the dropdown
+    // anyways. A settings node error will be displayed
+    let followTfOptions = this.renderer.coordinateFrameList;
+    const followFrameId = this.renderer.followFrameId;
+    if (followFrameId != undefined && !this.renderer.transformTree.hasFrame(followFrameId)) {
+      followTfOptions = [
+        { label: CoordinateFrame.DisplayName(followFrameId), value: followFrameId },
+        ...followTfOptions,
+      ];
+    }
+
     const followTfValue = selectBest(
       [this.renderer.followFrameId, config.followTf, this.renderer.renderFrameId],
       followTfOptions,
