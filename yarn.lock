@@ -2677,7 +2677,7 @@ __metadata:
     wasm-lz4: 2.0.0
     webpack: 5.68.0
     xacro-parser: 0.3.8
-    zustand: 4.0.0-rc.1
+    zustand: 4.0.0
   languageName: unknown
   linkType: soft
 
@@ -24513,12 +24513,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"use-sync-external-store@npm:1.1.0":
-  version: 1.1.0
-  resolution: "use-sync-external-store@npm:1.1.0"
+"use-sync-external-store@npm:1.2.0":
+  version: 1.2.0
+  resolution: "use-sync-external-store@npm:1.2.0"
   peerDependencies:
     react: ^16.8.0 || ^17.0.0 || ^18.0.0
-  checksum: 8993a0b642f91d7fcdbb02b7b3ac984bd3af4769686f38291fe7fcfe73dfb73d6c64d20dfb7e5e7fbf5a6da8f5392d6f8e5b00c243a04975595946e82c02b883
+  checksum: 5c639e0f8da3521d605f59ce5be9e094ca772bd44a4ce7322b055a6f58eeed8dda3c94cabd90c7a41fb6fa852210092008afe48f7038792fd47501f33299116a
   languageName: node
   linkType: hard
 
@@ -25666,11 +25666,11 @@ __metadata:
   languageName: node
   linkType: hard
 
-"zustand@npm:4.0.0-rc.1":
-  version: 4.0.0-rc.1
-  resolution: "zustand@npm:4.0.0-rc.1"
+"zustand@npm:4.0.0":
+  version: 4.0.0
+  resolution: "zustand@npm:4.0.0"
   dependencies:
-    use-sync-external-store: 1.1.0
+    use-sync-external-store: 1.2.0
   peerDependencies:
     immer: ">=9.0"
     react: ">=16.8"
@@ -25679,7 +25679,7 @@ __metadata:
       optional: true
     react:
       optional: true
-  checksum: c88ae96286229b3c463cf7989c860fcde8ec9cf885eb50a0e0eaf9642388d407a854e5e07b9f80676454732bf15e1c7645201cff21fd9feacd5df8bbd62fcd46
+  checksum: b8ae5971dff79a1007d46f9a6bfa39ed5cc5b101a877eeec069ebdb6c8285ec8e3463e40cfa7c0f1507a41f43fe26ffb44b556063cb70ac03bccf1ea6e0f69d6
   languageName: node
   linkType: hard
 
