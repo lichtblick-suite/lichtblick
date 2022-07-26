@@ -7,6 +7,7 @@ import { getLeaves } from "react-mosaic-component";
 
 import { useShallowMemo } from "@foxglove/hooks";
 import Logger from "@foxglove/log";
+import { VariableValue } from "@foxglove/studio";
 import { selectWithUnstableIdentityWarning } from "@foxglove/studio-base/hooks/selectWithUnstableIdentityWarning";
 import useGuaranteedContext from "@foxglove/studio-base/hooks/useGuaranteedContext";
 import useShouldNotChangeOften from "@foxglove/studio-base/hooks/useShouldNotChangeOften";
@@ -74,8 +75,8 @@ export interface ICurrentLayout {
     updatePanelConfigs: (panelType: string, updater: (config: PanelConfig) => PanelConfig) => void;
     createTabPanel: (payload: CreateTabPanelPayload) => void;
     changePanelLayout: (payload: ChangePanelLayoutPayload) => void;
-    overwriteGlobalVariables: (payload: { [key: string]: unknown }) => void;
-    setGlobalVariables: (payload: { [key: string]: unknown }) => void;
+    overwriteGlobalVariables: (payload: Record<string, VariableValue>) => void;
+    setGlobalVariables: (payload: Record<string, VariableValue>) => void;
     setUserNodes: (payload: Partial<UserNodes>) => void;
     setLinkedGlobalVariables: (payload: LinkedGlobalVariables) => void;
     setPlaybackConfig: (payload: Partial<PlaybackConfig>) => void;

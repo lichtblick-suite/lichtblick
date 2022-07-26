@@ -16,6 +16,17 @@ declare module "@foxglove/studio" {
 
   export type ParameterStruct = Record<string, ParameterValue>;
 
+  // Valid types for global variables
+  export type VariableValue =
+    | undefined
+    | boolean
+    | number
+    | string
+    | VariableValue[]
+    | VariableStruct;
+
+  export type VariableStruct = Record<string, VariableValue>;
+
   // Valid types for application settings
   export type AppSettingValue = string | number | boolean | undefined;
 
@@ -136,9 +147,18 @@ declare module "@foxglove/studio" {
     allFrames?: readonly MessageEvent<unknown>[];
 
     /**
-     * Map of current parameter values.
+     * Map of current parameter values. Parameters are key/value pairs associated with the data
+     * source, and may not be available for all data sources. For example, ROS 1 live connections
+     * support parameters through the Parameter Server <http://wiki.ros.org/Parameter%20Server>.
      */
     parameters?: ReadonlyMap<string, ParameterValue>;
+
+    /**
+     * Map of current Studio variables. Variables are key/value pairs that are globally accessible
+     * to panels and scripts in the current layout. See
+     * <https://foxglove.dev/docs/studio/app-concepts/variables> for more information.
+     */
+    variables?: ReadonlyMap<string, VariableValue>;
 
     /**
      * List of available topics. This list includes subscribed and unsubscribed topics.
@@ -210,6 +230,14 @@ declare module "@foxglove/studio" {
      * @param value The new value of the parameter.
      */
     setParameter: (name: string, value: ParameterValue) => void;
+
+    /**
+     * Set the value of variable name to value.
+     *
+     * @param name The name of the variable to set.
+     * @param value The new value of the variable.
+     */
+    setVariable: (name: string, value: VariableValue) => void;
 
     /**
      * Set the active preview time. Setting the preview time to undefined clears the preview time.

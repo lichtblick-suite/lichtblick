@@ -12,6 +12,7 @@
 //   You may not use this file except in compliance with the License.
 import { MosaicNode, MosaicPath } from "react-mosaic-component";
 
+import { VariableValue } from "@foxglove/studio";
 import { GlobalVariables } from "@foxglove/studio-base/hooks/useGlobalVariables";
 import { LinkedGlobalVariables } from "@foxglove/studio-base/panels/ThreeDimensionalViz/Interactions/useLinkedGlobalVariables";
 import { TabLocation } from "@foxglove/studio-base/types/layouts";
@@ -76,16 +77,12 @@ export type CHANGE_PANEL_LAYOUT = {
 
 export type OVERWRITE_GLOBAL_DATA = {
   type: "OVERWRITE_GLOBAL_DATA";
-  payload: {
-    [key: string]: unknown;
-  };
+  payload: Record<string, VariableValue>;
 };
 
 export type SET_GLOBAL_DATA = {
   type: "SET_GLOBAL_DATA";
-  payload: {
-    [key: string]: unknown;
-  };
+  payload: Record<string, VariableValue>;
 };
 
 export type SET_STUDIO_NODES = { type: "SET_USER_NODES"; payload: Partial<UserNodes> };

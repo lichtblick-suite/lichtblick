@@ -476,4 +476,70 @@ describe("PanelExtensionAdapter", () => {
       </ThemeProvider>,
     );
   });
+
+  it("should get and set variables", async () => {
+    const mockRAF = jest
+      .spyOn(window, "requestAnimationFrame")
+      .mockImplementation((cb) => queueMicrotask(() => cb(performance.now())) as any);
+
+    let sequence = 0;
+    const renderStates: RenderState[] = [];
+
+    const initPanel = jest.fn((context: PanelExtensionContext) => {
+      context.watch("variables");
+      context.onRender = (renderState, done) => {
+        renderStates.push({ ...renderState });
+        if (sequence === 0) {
+          context.setVariable("foo", "bar");
+        } else if (sequence === 1) {
+          context.setVariable("foo", true);
+        } else if (sequence === 2) {
+          context.setVariable("foo", { nested: [1, 2, 3] });
+        } else if (sequence === 3) {
+          context.setVariable("foo", undefined);
+        }
+        sequence++;
+        done();
+      };
+    });
+
+    const config = {};
+    const saveConfig = () => {};
+
+    const Wrapper = () => {
+      return (
+        <ThemeProvider isDark>
+          <MockPanelContextProvider>
+            <PanelSetup>
+              <PanelExtensionAdapter
+                config={config}
+                saveConfig={saveConfig}
+                initPanel={initPanel}
+              />
+            </PanelSetup>
+          </MockPanelContextProvider>
+        </ThemeProvider>
+      );
+    };
+
+    const handle = mount(<Wrapper />);
+
+    handle.setProps({});
+    await act(async () => await Promise.resolve());
+    handle.setProps({});
+    await act(async () => await Promise.resolve());
+    handle.setProps({});
+    await act(async () => await Promise.resolve());
+    handle.setProps({});
+    await act(async () => await Promise.resolve());
+
+    expect(renderStates).toEqual([
+      { variables: new Map() },
+      { variables: new Map([["foo", "bar"]]) },
+      { variables: new Map([["foo", true]]) },
+      { variables: new Map([["foo", { nested: [1, 2, 3] }]]) },
+      { variables: new Map() },
+    ]);
+    mockRAF.mockRestore();
+  });
 });

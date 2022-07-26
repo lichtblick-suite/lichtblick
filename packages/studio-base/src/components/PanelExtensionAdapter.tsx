@@ -26,6 +26,7 @@ import {
   SettingsTree,
   Subscription,
   Topic,
+  VariableValue,
 } from "@foxglove/studio";
 import {
   MessagePipelineContext,
@@ -39,6 +40,10 @@ import {
   useHoverValue,
   useSetHoverValue,
 } from "@foxglove/studio-base/context/HoverValueContext";
+import useGlobalVariables, {
+  EMPTY_GLOBAL_VARIABLES,
+  GlobalVariables,
+} from "@foxglove/studio-base/hooks/useGlobalVariables";
 import {
   AdvertiseOptions,
   PlayerCapabilities,
@@ -128,10 +133,13 @@ function PanelExtensionAdapter(props: PanelExtensionAdapterProps): JSX.Element {
 
   const renderingRef = useRef<boolean>(false);
   const prevRenderState = useRef<RenderState>({});
+  const prevVariablesRef = useRef<GlobalVariables>(EMPTY_GLOBAL_VARIABLES);
 
   const latestPipelineContextRef = useRef<MessagePipelineContext | undefined>(undefined);
 
   const [slowRender, setSlowRender] = useState(false);
+
+  const { globalVariables, setGlobalVariables } = useGlobalVariables();
 
   // we use message pipeline selector to capture updates and don't need to request animation frames
   // multiple times so we gate requesting new message frames
@@ -216,6 +224,15 @@ function PanelExtensionAdapter(props: PanelExtensionAdapterProps): JSX.Element {
       if (parameters !== renderState.parameters) {
         shouldRender = true;
         renderState.parameters = parameters;
+      }
+    }
+
+    if (watchedFieldsRef.current.has("variables")) {
+      const variables = globalVariables;
+      if (variables !== prevVariablesRef.current) {
+        shouldRender = true;
+        prevVariablesRef.current = variables;
+        renderState.variables = new Map(Object.entries(variables));
       }
     }
 
@@ -317,7 +334,7 @@ function PanelExtensionAdapter(props: PanelExtensionAdapterProps): JSX.Element {
     } catch (err) {
       setError(err);
     }
-  }, [colorScheme, panelId, renderFn]);
+  }, [colorScheme, globalVariables, panelId, renderFn]);
 
   const queueRender = useCallback(() => {
     if (!renderFn || rafRequestedRef.current != undefined) {
@@ -409,6 +426,10 @@ function PanelExtensionAdapter(props: PanelExtensionAdapterProps): JSX.Element {
       setParameter: (name: string, value: ParameterValue) => {
         const ctx = latestPipelineContextRef.current;
         ctx?.setParameter(name, value);
+      },
+
+      setVariable: (name: string, value: VariableValue) => {
+        setGlobalVariables({ [name]: value });
       },
 
       setPreviewTime: (stamp: number | undefined) => {
@@ -538,6 +559,7 @@ function PanelExtensionAdapter(props: PanelExtensionAdapterProps): JSX.Element {
     requestBackfill,
     saveConfig,
     seekPlayback,
+    setGlobalVariables,
     setHoverValue,
     setSubscriptions,
     updateSettings,

@@ -10,6 +10,7 @@ import { v4 as uuidv4 } from "uuid";
 
 import { useShallowMemo } from "@foxglove/hooks";
 import Logger from "@foxglove/log";
+import { VariableValue } from "@foxglove/studio";
 import { useAnalytics } from "@foxglove/studio-base/context/AnalyticsContext";
 import CurrentLayoutContext, {
   ICurrentLayout,
@@ -284,9 +285,9 @@ export default function CurrentLayoutProvider({
       },
       changePanelLayout: (payload: ChangePanelLayoutPayload) =>
         performAction({ type: "CHANGE_PANEL_LAYOUT", payload }),
-      overwriteGlobalVariables: (payload: { [key: string]: unknown }) =>
+      overwriteGlobalVariables: (payload: Record<string, VariableValue>) =>
         performAction({ type: "OVERWRITE_GLOBAL_DATA", payload }),
-      setGlobalVariables: (payload: { [key: string]: unknown }) =>
+      setGlobalVariables: (payload: Record<string, VariableValue>) =>
         performAction({ type: "SET_GLOBAL_DATA", payload }),
       setUserNodes: (payload: Partial<UserNodes>) =>
         performAction({ type: "SET_USER_NODES", payload }),

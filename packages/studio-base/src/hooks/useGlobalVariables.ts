@@ -11,15 +11,16 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
+import type { VariableValue } from "@foxglove/studio";
 import {
   LayoutState,
   useCurrentLayoutActions,
   useCurrentLayoutSelector,
 } from "@foxglove/studio-base/context/CurrentLayoutContext";
 
-export type GlobalVariables = { [key: string]: unknown };
+export type GlobalVariables = { [key: string]: VariableValue };
 
-const EMPTY_GLOBAL_VARIABLES: GlobalVariables = Object.freeze({});
+export const EMPTY_GLOBAL_VARIABLES: GlobalVariables = Object.freeze({});
 
 const globalVariablesSelector = (state: LayoutState) =>
   state.selectedLayout?.data?.globalVariables ?? EMPTY_GLOBAL_VARIABLES;
