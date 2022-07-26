@@ -2,6 +2,7 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
+import produce from "immer";
 import {
   Map as LeafMap,
   TileLayer,
@@ -75,6 +76,7 @@ function MapPanel(props: MapPanelProps): JSX.Element {
       layer: initialConfig.layer ?? "map",
       customTileUrl: initialConfig.customTileUrl ?? "",
       followTopic: initialConfig.followTopic ?? "",
+      topicColors: initialConfig.topicColors ?? {},
     };
   });
 
@@ -160,15 +162,40 @@ function MapPanel(props: MapPanelProps): JSX.Element {
     if (path[0] === "topics" && input === "boolean") {
       const topic = path[1];
       if (topic) {
-        setConfig((oldConfig) => {
-          return {
-            ...oldConfig,
-            disabledTopics:
+        setConfig(
+          produce((draft) => {
+            draft.disabledTopics =
               value === true
-                ? difference(oldConfig.disabledTopics, [topic])
-                : union(oldConfig.disabledTopics, [topic]),
-          };
-        });
+                ? difference(draft.disabledTopics, [topic])
+                : union(draft.disabledTopics, [topic]);
+          }),
+        );
+      }
+    }
+
+    if (path[0] === "topics" && path[2] === "coloring") {
+      const topic = path[1];
+      if (topic) {
+        setConfig(
+          produce((draft) => {
+            if (value === "Custom") {
+              draft.topicColors[topic] = lineColors[0]!;
+            } else {
+              delete draft.topicColors[topic];
+            }
+          }),
+        );
+      }
+    }
+
+    if (path[0] === "topics" && path[2] === "color" && input === "rgb" && value != undefined) {
+      const topic = path[1];
+      if (topic) {
+        setConfig(
+          produce((draft) => {
+            draft.topicColors[topic] = value;
+          }),
+        );
       }
     }
 
@@ -255,12 +282,12 @@ function MapPanel(props: MapPanelProps): JSX.Element {
         topicGroup,
         allFrames,
         currentFrame,
-        baseColor: lineColors[i]!,
+        baseColor: config.topicColors[topic] ?? lineColors[i]!,
       });
       i = (i + 1) % lineColors.length;
     }
     return topicLayerMap;
-  }, [eligibleTopics]);
+  }, [config.topicColors, eligibleTopics]);
 
   useLayoutEffect(() => {
     if (!currentMap) {

@@ -14,6 +14,7 @@ export type Config = {
   layer: string;
   zoomLevel?: number;
   followTopic: string;
+  topicColors: Record<string, string>;
 };
 
 export function validateCustomUrl(url: string): Error | undefined {
@@ -29,16 +30,38 @@ export function validateCustomUrl(url: string): Error | undefined {
 }
 
 export function buildSettingsTree(config: Config, eligibleTopics: string[]): SettingsTreeNodes {
-  const topics: SettingsTreeFields = transform(
+  const topics: SettingsTreeNodes = transform(
     eligibleTopics,
     (result, topic) => {
+      const coloring = config.topicColors[topic];
       result[topic] = {
         label: topic,
-        input: "boolean",
-        value: !config.disabledTopics.includes(topic),
+        fields: {
+          enabled: {
+            label: "Enabled",
+            input: "boolean",
+            value: !config.disabledTopics.includes(topic),
+          },
+          coloring: {
+            label: "Coloring",
+            input: "select",
+            value: coloring ? "Custom" : "Automatic",
+            options: [
+              { label: "Automatic", value: "Automatic" },
+              { label: "Custom", value: "Custom" },
+            ],
+          },
+          color: coloring
+            ? {
+                label: "Color",
+                input: "rgb",
+                value: coloring,
+              }
+            : undefined,
+        },
       };
     },
-    {} as SettingsTreeFields,
+    {} as SettingsTreeNodes,
   );
 
   const eligibleFollowTopicOptions = filterMap(eligibleTopics, (topic) =>
@@ -88,7 +111,7 @@ export function buildSettingsTree(config: Config, eligibleTopics: string[]): Set
     },
     topics: {
       label: "Topics",
-      fields: topics,
+      children: topics,
     },
   };
 

@@ -120,26 +120,17 @@ SinglePoint.parameters = {
 export const SinglePointWithSettings = (): JSX.Element => {
   return <MapPanel overrideConfig={{ layer: "custom" }} />;
 };
-
 SinglePointWithSettings.parameters = {
-  chromatic: {
-    delay: 1000,
-  },
+  ...SinglePoint.parameters,
   includeSettings: true,
-  panelSetup: {
-    fixture: {
-      topics: [{ name: "/gps", datatype: "sensor_msgs/NavSatFix" }],
-      frame: {
-        "/gps": [
-          {
-            topic: "/gps",
-            receiveTime: { sec: 123, nsec: 456 },
-            message: EMPTY_MESSAGE,
-          },
-        ],
-      },
-    },
-  },
+};
+
+export const SinglePointWithSettingsOverride = (): JSX.Element => {
+  return <MapPanel overrideConfig={{ layer: "custom", topicColors: { "/gps": "#ffc0cb" } }} />;
+};
+SinglePointWithSettingsOverride.parameters = {
+  ...SinglePoint.parameters,
+  includeSettings: true,
 };
 
 export const MultipleTopics = (): JSX.Element => {
