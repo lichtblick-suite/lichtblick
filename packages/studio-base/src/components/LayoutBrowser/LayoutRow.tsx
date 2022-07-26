@@ -172,13 +172,8 @@ export default React.memo(function LayoutRow({
   }, [layout, onMakePersonalCopy]);
 
   const renameAction = useCallback(() => {
-    // Give the menu time to close before focusing the text field. The MUI Menu auto-focuses itself
-    // which results in an immediate onBlur of the text field if we try to focus it while the menu
-    // is still visible.
-    setTimeout(() => {
-      setEditingName(true);
-      setNameFieldValue(layout.name);
-    }, 0);
+    setNameFieldValue(layout.name);
+    setEditingName(true);
   }, [layout]);
 
   const onClick = useCallback(() => {
@@ -458,6 +453,8 @@ export default React.memo(function LayoutRow({
       <Menu
         id="layout-action-menu"
         open={contextMenuTarget != undefined}
+        disableAutoFocus
+        disableRestoreFocus
         anchorReference={contextMenuTarget?.type === "position" ? "anchorPosition" : "anchorEl"}
         anchorPosition={
           contextMenuTarget?.type === "position"
