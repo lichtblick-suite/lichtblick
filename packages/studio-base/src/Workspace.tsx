@@ -36,6 +36,7 @@ import variablesHelpContent from "@foxglove/studio-base/components/GlobalVariabl
 import HelpSidebar, {
   MESSAGE_PATH_SYNTAX_HELP_INFO,
 } from "@foxglove/studio-base/components/HelpSidebar";
+import KeyListener from "@foxglove/studio-base/components/KeyListener";
 import LayoutBrowser from "@foxglove/studio-base/components/LayoutBrowser";
 import {
   MessagePipelineContext,
@@ -114,6 +115,21 @@ type SidebarItemKey =
   | "help";
 
 const selectedLayoutIdSelector = (state: LayoutState) => state.selectedLayout?.id;
+
+function activeElementIsInput() {
+  return (
+    document.activeElement instanceof HTMLInputElement ||
+    document.activeElement instanceof HTMLTextAreaElement
+  );
+}
+
+function keyboardEventHasModifier(event: KeyboardEvent) {
+  if (navigator.userAgent.includes("Mac")) {
+    return event.metaKey;
+  } else {
+    return event.ctrlKey;
+  }
+}
 
 function AddPanel() {
   const addPanel = useAddPanel();
@@ -546,6 +562,24 @@ export default function Workspace(props: WorkspaceProps): JSX.Element {
     return supportsAccountSettings ? ["help", "account", "preferences"] : ["help", "preferences"];
   }, [supportsAccountSettings]);
 
+  const keyDownHandlers = useMemo(
+    () => ({
+      b: (ev: KeyboardEvent) => {
+        if (
+          !keyboardEventHasModifier(ev) ||
+          activeElementIsInput() ||
+          selectedSidebarItem == undefined
+        ) {
+          return;
+        }
+
+        ev.preventDefault();
+        setSelectedSidebarItem(undefined);
+      },
+    }),
+    [selectedSidebarItem],
+  );
+
   const play = useMessagePipeline(selectPlay);
   const pause = useMessagePipeline(selectPause);
   const seek = useMessagePipeline(selectSeek);
@@ -581,6 +615,7 @@ export default function Workspace(props: WorkspaceProps): JSX.Element {
       </DocumentDropListener>
       <OrgExtensionRegistrySyncAdapter />
       <URLStateSyncAdapter />
+      <KeyListener global keyDownHandlers={keyDownHandlers} />
       <div className={classes.container} ref={containerRef} tabIndex={0}>
         <Sidebar
           items={sidebarItems}
