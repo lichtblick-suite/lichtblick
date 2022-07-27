@@ -148,6 +148,10 @@ describe("IterablePlayer", () => {
         ...baseState,
         presence: PlayerPresence.PRESENT,
         activeData: { ...baseState.activeData, currentTime: { sec: 0, nsec: 99000000 } },
+        progress: {
+          fullyLoadedFractionRanges: [{ start: 0, end: 0 }],
+          messageCache: undefined,
+        },
       },
     ]);
 
@@ -169,7 +173,7 @@ describe("IterablePlayer", () => {
     await store.done;
 
     // Reset store to get state from the seeks
-    store.reset(2);
+    store.reset(3);
 
     // replace the message iterator with our own implementation
     // This implementation performs a seekPlayback during backfill.
@@ -217,7 +221,10 @@ describe("IterablePlayer", () => {
       capabilities: [PlayerCapabilities.setSpeed, PlayerCapabilities.playbackControl],
       profile: undefined,
       presence: PlayerPresence.PRESENT,
-      progress: {},
+      progress: {
+        fullyLoadedFractionRanges: [{ start: 0, end: 1 }],
+        messageCache: undefined,
+      },
       filePath: undefined,
       urlState: {
         sourceId: "test",
@@ -246,7 +253,7 @@ describe("IterablePlayer", () => {
     // The state order:
     // 1. a state update completing the second seek
     // 1. a state update for moving to idle
-    expect(playerStates).toEqual([withMessages, baseState]);
+    expect(playerStates).toEqual([withMessages, baseState, baseState]);
 
     player.close();
   });
