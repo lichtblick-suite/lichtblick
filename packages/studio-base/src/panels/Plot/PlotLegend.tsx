@@ -24,7 +24,15 @@ import { Button, IconButton, Theme, alpha, MenuItem, Menu } from "@mui/material"
 import { makeStyles } from "@mui/styles";
 import cx from "classnames";
 import { last } from "lodash";
-import { ComponentProps, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import {
+  ComponentProps,
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { useLatest } from "react-use";
 import { useDebouncedCallback } from "use-debounce";
 
@@ -113,14 +121,12 @@ const useStyles = makeStyles((theme: Theme) => ({
     backgroundColor: "transparent !important",
     padding: "4px !important",
   },
-  footer: ({ legendDisplay }: StyleProps) => ({
+  footer: ({ showPlotValuesInLegend = false }: StyleProps) => ({
     padding: theme.spacing(0.5),
-    gridColumn: "span 4",
-    ...(legendDisplay !== "floating" && {
-      position: "sticky",
-      right: 0,
-      left: 0,
-    }),
+    gridColumn: showPlotValuesInLegend ? "span 4" : "span 3",
+    position: "sticky",
+    right: 0,
+    left: 0,
   }),
   floatingWrapper: {
     overflow: "hidden",
@@ -384,9 +390,11 @@ export default function PlotLegend(props: PlotLegendProps): JSX.Element {
     document.removeEventListener("mousemove", handleMouseMove, true);
   };
 
+  const contentRef = useRef<HTMLDivElement>(ReactNull);
+
   const legendContent = useMemo(
     () => (
-      <div className={classes.legendContent}>
+      <div ref={contentRef} className={classes.legendContent}>
         <header className={classes.header}>
           <AxisDropdown
             xAxisVal={xAxisVal}
@@ -467,6 +475,37 @@ export default function PlotLegend(props: PlotLegendProps): JSX.Element {
       xAxisVal,
     ],
   );
+
+  // Hack to fix nested input scrolling on Linux Chrome. Manually scroll content to the
+  // far left or right when the user navigates to the start or end of the
+  // message path input.
+  useLayoutEffect(() => {
+    const content = contentRef.current;
+    if (!content) {
+      return;
+    }
+
+    const listener = (event: KeyboardEvent) => {
+      if (event.target instanceof HTMLInputElement) {
+        if (event.target.selectionStart === 0) {
+          content.scrollTo(0, 0);
+        }
+        if (event.target.selectionStart === event.target.value.length) {
+          content.scrollTo(content.scrollWidth, 0);
+        }
+      }
+    };
+
+    content.querySelectorAll("input").forEach((input) => {
+      input.addEventListener("keydown", listener);
+    });
+
+    return () => {
+      content.querySelectorAll("input").forEach((input) => {
+        input.removeEventListener("keydown", listener);
+      });
+    };
+  }, []);
 
   return (
     <div className={cx(classes.root, { [classes.rootFloating]: legendDisplay === "floating" })}>
