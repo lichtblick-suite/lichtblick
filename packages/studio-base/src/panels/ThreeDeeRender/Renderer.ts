@@ -5,6 +5,7 @@
 import EventEmitter from "eventemitter3";
 import { Immutable, produce } from "immer";
 import * as THREE from "three";
+import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
 import { DeepPartial } from "ts-essentials";
 import { v4 as uuidv4 } from "uuid";
 
@@ -218,6 +219,7 @@ export class Renderer extends EventEmitter<RendererEvents> {
   perspectiveCamera: THREE.PerspectiveCamera;
   orthographicCamera: THREE.OrthographicCamera;
   aspect: number;
+  controls: OrbitControls;
 
   // Are we connected to a ROS data source? Normalize coordinate frames if so by
   // stripping any leading "/" prefix. See `normalizeFrameId()` for details.
@@ -240,6 +242,7 @@ export class Renderer extends EventEmitter<RendererEvents> {
 
   private _prevResolution = new THREE.Vector2();
   private _pickingEnabled = false;
+  private _isUpdatingCameraState = false;
 
   constructor(canvas: HTMLCanvasElement, config: RendererConfig) {
     super();
@@ -310,6 +313,23 @@ export class Renderer extends EventEmitter<RendererEvents> {
     this.perspectiveCamera = new THREE.PerspectiveCamera();
     this.orthographicCamera = new THREE.OrthographicCamera();
 
+    this.controls = new OrbitControls(this.perspectiveCamera, this.canvas);
+    this.controls.screenSpacePanning = false; // only allow panning in the XY plane
+    this.controls.mouseButtons.LEFT = THREE.MOUSE.PAN;
+    this.controls.mouseButtons.RIGHT = THREE.MOUSE.ROTATE;
+    this.controls.touches.ONE = THREE.TOUCH.DOLLY_PAN;
+    this.controls.touches.TWO = THREE.TOUCH.ROTATE;
+    this.controls.addEventListener("change", () => {
+      if (!this._isUpdatingCameraState) {
+        this.emit("cameraMove", this);
+      }
+    });
+
+    // Make the canvas able to receive keyboard events and setup WASD controls
+    canvas.tabIndex = 1000;
+    this.controls.keys = { LEFT: "KeyA", RIGHT: "KeyD", UP: "KeyW", BOTTOM: "KeyS" };
+    this.controls.listenToKeyEvents(canvas);
+
     this.input = new Input(canvas, () => this.activeCamera());
     this.input.on("resize", (size) => this.resizeHandler(size));
     this.input.on("click", (cursorCoords) => this.clickHandler(cursorCoords));
@@ -370,6 +390,7 @@ export class Renderer extends EventEmitter<RendererEvents> {
     this.settings.off("update");
     this.input.off("resize", this.resizeHandler);
     this.input.off("click", this.clickHandler);
+    this.controls.dispose();
 
     for (const extension of this.sceneExtensions.values()) {
       extension.dispose();
@@ -593,6 +614,10 @@ export class Renderer extends EventEmitter<RendererEvents> {
   /** Translate a @foxglove/regl-worldview CameraState to the three.js coordinate system */
   private _updateCameras(cameraState: CameraState): void {
     if (cameraState.perspective) {
+      // Unlock the polar angle (pitch axis)
+      this.controls.minPolarAngle = 0;
+      this.controls.maxPolarAngle = Math.PI;
+
       this.perspectiveCamera.position
         .setFromSpherical(
           tempSpherical.set(cameraState.distance, cameraState.phi, -cameraState.thetaOffset),
@@ -613,7 +638,16 @@ export class Renderer extends EventEmitter<RendererEvents> {
       this.perspectiveCamera.far = cameraState.far;
       this.perspectiveCamera.aspect = this.aspect;
       this.perspectiveCamera.updateProjectionMatrix();
+      this.controls.target.set(
+        cameraState.targetOffset[0],
+        cameraState.targetOffset[1],
+        cameraState.targetOffset[2],
+      );
     } else {
+      // Lock the polar angle during 2D mode
+      const curPolarAngle = this.controls.getPolarAngle();
+      this.controls.minPolarAngle = this.controls.maxPolarAngle = curPolarAngle;
+
       this.orthographicCamera.position.set(
         cameraState.targetOffset[0],
         cameraState.targetOffset[1],
@@ -634,8 +668,25 @@ export class Renderer extends EventEmitter<RendererEvents> {
   }
 
   setCameraState(cameraState: CameraState): void {
+    this._isUpdatingCameraState = true;
     this._updateCameras(cameraState);
-    this.emit("cameraMove", this);
+    this.controls.update();
+    this._isUpdatingCameraState = false;
+  }
+
+  getCameraState(): CameraState {
+    return {
+      perspective: this.config.cameraState.perspective,
+      distance: this.controls.getDistance(),
+      phi: this.controls.getPolarAngle(),
+      thetaOffset: -this.controls.getAzimuthalAngle(),
+      targetOffset: [this.controls.target.x, this.controls.target.y, this.controls.target.z],
+      target: this.config.cameraState.target,
+      targetOrientation: this.config.cameraState.targetOrientation,
+      fovy: this.config.cameraState.fovy,
+      near: this.config.cameraState.near,
+      far: this.config.cameraState.far,
+    };
   }
 
   setSelectedRenderable(selectedRenderable: Renderable | undefined): void {

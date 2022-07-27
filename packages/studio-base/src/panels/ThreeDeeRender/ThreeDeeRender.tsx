@@ -16,19 +16,12 @@ import {
 import { isEqual, cloneDeep, merge } from "lodash";
 import React, { useCallback, useLayoutEffect, useEffect, useState, useMemo, useRef } from "react";
 import ReactDOM from "react-dom";
-import { useResizeDetector } from "react-resize-detector";
 import { useLatest, useLongPress } from "react-use";
 import { DeepPartial } from "ts-essentials";
 import { useDebouncedCallback } from "use-debounce";
 
 import Logger from "@foxglove/log";
-import {
-  CameraListener,
-  CameraState,
-  CameraStore,
-  DEFAULT_CAMERA_STATE,
-  MouseEventObject,
-} from "@foxglove/regl-worldview";
+import { CameraState, DEFAULT_CAMERA_STATE, MouseEventObject } from "@foxglove/regl-worldview";
 import { definitions as commonDefs } from "@foxglove/rosmsg-msgs-common";
 import { fromDate, toNanoSec } from "@foxglove/rostime";
 import {
@@ -419,10 +412,15 @@ export function ThreeDeeRender({ context }: { context: PanelExtensionContext }):
   );
 
   // Config cameraState
-  const setCameraState = useCallback((state: CameraState) => {
-    setConfig((prevConfig) => ({ ...prevConfig, cameraState: state }));
-  }, []);
-  const [cameraStore] = useState(() => new CameraStore(setCameraState, cameraState));
+  useEffect(() => {
+    const listener = () => {
+      if (renderer) {
+        setConfig((prevConfig) => ({ ...prevConfig, cameraState: renderer.getCameraState() }));
+      }
+    };
+    renderer?.addListener("cameraMove", listener);
+    return () => void renderer?.removeListener("cameraMove", listener);
+  }, [renderer]);
 
   // Build a map from topic name to datatype
   const topicsToDatatypes = useMemo(() => {
@@ -640,10 +638,9 @@ export function ThreeDeeRender({ context }: { context: PanelExtensionContext }):
 
   // Update the renderer when the camera moves
   useEffect(() => {
-    cameraStore.setCameraState(cameraState);
     renderer?.setCameraState(cameraState);
     renderRef.current.needsRender = true;
-  }, [cameraState, cameraStore, renderer]);
+  }, [cameraState, renderer]);
 
   // Render a new frame if requested
   useEffect(() => {
@@ -657,18 +654,6 @@ export function ThreeDeeRender({ context }: { context: PanelExtensionContext }):
   useEffect(() => {
     renderDone?.();
   }, [renderDone]);
-
-  // Use a debounce and 0 refresh rate to avoid triggering a resize observation while handling
-  // an existing resize observation.
-  // https://github.com/maslianok/react-resize-detector/issues/45
-  const {
-    ref: resizeRef,
-    width,
-    height,
-  } = useResizeDetector({
-    refreshRate: 0,
-    refreshMode: "debounce",
-  });
 
   // Create a useCallback wrapper for adding a new panel to the layout, used to open the
   // "Raw Messages" panel from the object inspector
@@ -821,24 +806,16 @@ export function ThreeDeeRender({ context }: { context: PanelExtensionContext }):
 
   return (
     <ThemeProvider isDark={colorScheme === "dark"}>
-      <div style={PANEL_STYLE} ref={resizeRef} onKeyDown={onKeyDown}>
-        <CameraListener cameraStore={cameraStore} shiftKeys={true}>
-          <div
-            // This element forces CameraListener to fill its container. We need this instead of just
-            // the canvas since three.js manages the size of the canvas element and we use
-            // position:absolute
-            style={{ width, height }}
-          />
-          <canvas
-            ref={setCanvas}
-            style={{
-              position: "absolute",
-              top: 0,
-              left: 0,
-              ...((measureActive || publishActive) && { cursor: "crosshair" }),
-            }}
-          />
-        </CameraListener>
+      <div style={PANEL_STYLE} onKeyDown={onKeyDown}>
+        <canvas
+          ref={setCanvas}
+          style={{
+            position: "absolute",
+            top: 0,
+            left: 0,
+            ...((measureActive || publishActive) && { cursor: "crosshair" }),
+          }}
+        />
         <RendererContext.Provider value={renderer}>
           <RendererOverlay
             canvas={canvas}
