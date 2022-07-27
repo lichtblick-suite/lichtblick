@@ -65,7 +65,7 @@ export default function Root({
       }),
       new SampleNuscenesDataSourceFactory({ useIterablePlayer: enableExperimentalBagPlayer }),
       new McapLocalDataSourceFactory({ useIterablePlayer: enableExperimentalMcapPlayer }),
-      new McapRemoteDataSourceFactory(),
+      new McapRemoteDataSourceFactory({ useIterablePlayer: enableExperimentalMcapPlayer }),
     ];
 
     return sources;
