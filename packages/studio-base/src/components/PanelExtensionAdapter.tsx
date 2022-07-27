@@ -3,6 +3,7 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 import { useTheme } from "@mui/material";
+import { isEqual } from "lodash";
 import {
   CSSProperties,
   useCallback,
@@ -12,6 +13,7 @@ import {
   useRef,
   useState,
 } from "react";
+import { useUpdateEffect } from "react-use";
 import { v4 as uuid } from "uuid";
 
 import Logger from "@foxglove/log";
@@ -101,8 +103,8 @@ type RenderFn = (renderState: Readonly<RenderState>, done: () => void) => void;
 function PanelExtensionAdapter(props: PanelExtensionAdapterProps): JSX.Element {
   const { initPanel, config, saveConfig } = props;
 
-  // We don't want changes to the config value to re-invoke initPanel in useLayoutEffect
-  const configRef = useRef(config);
+  // Buffer initial state so initPanel is not called on every config update.
+  const [initialState, setInitialState] = useState(config);
 
   const setSubscriptions = useMessagePipeline(selectSetSubscriptions);
   const requestBackfill = useMessagePipeline(selectRequestBackfill);
@@ -162,6 +164,13 @@ function PanelExtensionAdapter(props: PanelExtensionAdapterProps): JSX.Element {
   hoverValueRef.current = hoverValue;
 
   const lastSeekTimeRef = useRef<number | undefined>();
+
+  // Reset panel when config is cleared.
+  useUpdateEffect(() => {
+    if (isEqual(config, {})) {
+      setInitialState(config);
+    }
+  }, [config]);
 
   const {
     palette: { mode: colorScheme },
@@ -413,7 +422,7 @@ function PanelExtensionAdapter(props: PanelExtensionAdapterProps): JSX.Element {
     };
 
     return {
-      initialState: configRef.current,
+      initialState,
 
       saveState: saveConfig,
 
@@ -554,6 +563,7 @@ function PanelExtensionAdapter(props: PanelExtensionAdapterProps): JSX.Element {
     capabilities,
     clearHoverValue,
     dataSourceProfile,
+    initialState,
     openSiblingPanel,
     panelId,
     requestBackfill,
