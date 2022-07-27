@@ -4,6 +4,7 @@
 
 import AddIcon from "@mui/icons-material/Add";
 import CloudOffIcon from "@mui/icons-material/CloudOff";
+import DeleteIcon from "@mui/icons-material/Delete";
 import FileOpenOutlinedIcon from "@mui/icons-material/FileOpenOutlined";
 import {
   Button,
@@ -17,11 +18,12 @@ import {
 import { partition } from "lodash";
 import moment from "moment";
 import path from "path";
-import { useCallback, useContext, useEffect, useLayoutEffect, useState } from "react";
+import { MouseEvent, useCallback, useContext, useEffect, useLayoutEffect } from "react";
 import { useToasts } from "react-toast-notifications";
 import { useMountedState } from "react-use";
 import useAsyncFn from "react-use/lib/useAsyncFn";
 
+import Logger from "@foxglove/log";
 import { AppSetting } from "@foxglove/studio-base/AppSetting";
 import SignInPrompt from "@foxglove/studio-base/components/LayoutBrowser/SignInPrompt";
 import { useUnsavedChangesPrompt } from "@foxglove/studio-base/components/LayoutBrowser/UnsavedChangesPrompt";
@@ -43,13 +45,16 @@ import { useConfirm } from "@foxglove/studio-base/hooks/useConfirm";
 import { usePrompt } from "@foxglove/studio-base/hooks/usePrompt";
 import { defaultPlaybackConfig } from "@foxglove/studio-base/providers/CurrentLayoutProvider/reducers";
 import { AppEvent } from "@foxglove/studio-base/services/IAnalytics";
-import { Layout, layoutIsShared } from "@foxglove/studio-base/services/ILayoutStorage";
+import { Layout, LayoutID, layoutIsShared } from "@foxglove/studio-base/services/ILayoutStorage";
 import { downloadTextFile } from "@foxglove/studio-base/util/download";
 import showOpenFilePicker from "@foxglove/studio-base/util/showOpenFilePicker";
 
 import LayoutSection from "./LayoutSection";
 import helpContent from "./index.help.md";
+import { useLayoutBrowserReducer } from "./reducer";
 import { debugBorder } from "./styles";
+
+const log = Logger.getLogger(__filename);
 
 const selectedLayoutIdSelector = (state: LayoutState) => state.selectedLayout?.id;
 
@@ -70,13 +75,16 @@ export default function LayoutBrowser({
   const currentLayoutId = useCurrentLayoutSelector(selectedLayoutIdSelector);
   const { setSelectedLayoutId } = useCurrentLayoutActions();
 
-  const [isBusy, setIsBusy] = useState(layoutManager.isBusy);
-  const [isOnline, setIsOnline] = useState(layoutManager.isOnline);
-  const [error, setError] = useState(layoutManager.error);
+  const [state, dispatch] = useLayoutBrowserReducer({
+    busy: layoutManager.isBusy,
+    error: layoutManager.error,
+    online: layoutManager.isOnline,
+  });
+
   useLayoutEffect(() => {
-    const busyListener = () => setIsBusy(layoutManager.isBusy);
-    const onlineListener = () => setIsOnline(layoutManager.isOnline);
-    const errorListener = () => setError(layoutManager.error);
+    const busyListener = () => dispatch({ type: "set-busy", value: layoutManager.isBusy });
+    const onlineListener = () => dispatch({ type: "set-online", value: layoutManager.isOnline });
+    const errorListener = () => dispatch({ type: "set-error", value: layoutManager.error });
     busyListener();
     onlineListener();
     errorListener();
@@ -88,7 +96,7 @@ export default function LayoutBrowser({
       layoutManager.off("onlinechange", onlineListener);
       layoutManager.off("errorchange", errorListener);
     };
-  }, [layoutManager]);
+  }, [dispatch, layoutManager]);
 
   const [layouts, reloadLayouts] = useAsyncFn(
     async () => {
@@ -105,6 +113,37 @@ export default function LayoutBrowser({
     { loading: true },
   );
 
+  const queueMultipleLayoutsForDelete = useCallback(async () => {
+    const response = await confirm({
+      title: `Delete multiple layouts?`,
+      prompt: `Are you sure you want to delete ${state.selectedIds.length} layouts?. This cannot be undone.`,
+      ok: "Delete",
+      variant: "danger",
+    });
+    if (response !== "ok") {
+      return;
+    }
+
+    dispatch({ type: "queue-deletes" });
+  }, [confirm, dispatch, state.selectedIds.length]);
+
+  useEffect(() => {
+    const deleteLayouts = async () => {
+      const toDelete = state.queuedDeleteIds[0];
+      if (toDelete) {
+        try {
+          await layoutManager.deleteLayout({ id: toDelete as LayoutID });
+          dispatch({ type: "shift-queued-deletes" });
+        } catch (err) {
+          addToast(`Error deleting layouts: ${err.message}`, { appearance: "error" });
+          dispatch({ type: "clear-queued-deletes" });
+        }
+      }
+    };
+
+    deleteLayouts().catch((err) => log.error(err));
+  }, [addToast, dispatch, layoutManager, state.queuedDeleteIds]);
+
   useEffect(() => {
     const listener = () => void reloadLayouts();
     layoutManager.on("change", listener);
@@ -113,7 +152,7 @@ export default function LayoutBrowser({
 
   // Start loading on first mount
   useEffect(() => {
-    void reloadLayouts();
+    reloadLayouts().catch((err) => log.error(err));
   }, [reloadLayouts]);
 
   /**
@@ -161,22 +200,31 @@ export default function LayoutBrowser({
           });
           return true;
       }
-      return false;
     }
     return true;
   }, [analytics, currentLayoutId, layoutManager, openUnsavedChangesPrompt]);
 
   const onSelectLayout = useCallbackWithToast(
-    async (item: Layout, { selectedViaClick = false }: { selectedViaClick?: boolean } = {}) => {
+    async (
+      item: Layout,
+      { selectedViaClick = false, event }: { selectedViaClick?: boolean; event?: MouseEvent } = {},
+    ) => {
       if (selectedViaClick) {
         if (!(await promptForUnsavedChanges())) {
           return;
         }
         void analytics.logEvent(AppEvent.LAYOUT_SELECT, { permission: item.permission });
       }
-      setSelectedLayoutId(item.id);
+      if (event?.ctrlKey === true || event?.metaKey === true) {
+        if (item.id !== currentLayoutId) {
+          dispatch({ type: "toggle-selected", id: item.id });
+        }
+      } else {
+        setSelectedLayoutId(item.id);
+        dispatch({ type: "select-id", id: item.id });
+      }
     },
-    [analytics, promptForUnsavedChanges, setSelectedLayoutId],
+    [analytics, currentLayoutId, dispatch, promptForUnsavedChanges, setSelectedLayoutId],
   );
 
   const onRenameLayout = useCallbackWithToast(
@@ -216,10 +264,11 @@ export default function LayoutBrowser({
         const storedLayouts = await layoutManager.getLayouts();
         const targetLayout = storedLayouts.find((layout) => layout.id !== currentLayoutId);
         setSelectedLayoutId(targetLayout?.id);
+        dispatch({ type: "select-id", id: targetLayout?.id });
       }
       await layoutManager.deleteLayout({ id: item.id });
     },
-    [analytics, currentLayoutId, layoutManager, setSelectedLayoutId],
+    [analytics, currentLayoutId, dispatch, layoutManager, setSelectedLayoutId],
   );
 
   const createNewLayout = useCallbackWithToast(async () => {
@@ -229,7 +278,7 @@ export default function LayoutBrowser({
     const name = `Unnamed layout ${moment(currentDateForStorybook).format("l")} at ${moment(
       currentDateForStorybook,
     ).format("LT")}`;
-    const state: Omit<PanelsState, "name" | "id"> = {
+    const panelState: Omit<PanelsState, "name" | "id"> = {
       configById: {},
       globalVariables: {},
       userNodes: {},
@@ -238,7 +287,7 @@ export default function LayoutBrowser({
     };
     const newLayout = await layoutManager.saveNewLayout({
       name,
-      data: state as PanelsState,
+      data: panelState as PanelsState,
       permission: "CREATOR_WRITE",
     });
     void onSelectLayout(newLayout);
@@ -399,18 +448,31 @@ export default function LayoutBrowser({
 
   const showSignInPrompt = supportsSignIn && !layoutManager.supportsSharing && !hideSignInPrompt;
 
+  const queuedMultiActions = state.queuedDeleteIds.length > 0;
+
   return (
     <SidebarContent
       title="Layouts"
       helpContent={helpContent}
       disablePadding
       trailingItems={[
-        (layouts.loading || isBusy) && (
+        (layouts.loading || state.busy || queuedMultiActions) && (
           <Stack key="loading" alignItems="center" justifyContent="center" padding={1}>
             <CircularProgress size={18} variant="indeterminate" />
           </Stack>
         ),
-        (!isOnline || error != undefined) && (
+        state.selectedIds.length > 1 && (
+          <IconButton
+            color="primary"
+            key="delete"
+            disabled={queuedMultiActions}
+            title="Delete Selected"
+            onClick={queueMultipleLayoutsForDelete}
+          >
+            <DeleteIcon />
+          </IconButton>
+        ),
+        (!state.online || state.error != undefined) && (
           <IconButton color="primary" key="offline" disabled title="Offline">
             <CloudOffIcon />
           </IconButton>
@@ -437,11 +499,12 @@ export default function LayoutBrowser({
       ].filter(Boolean)}
     >
       {unsavedChangesPrompt}
-      <Stack fullHeight gap={2}>
+      <Stack fullHeight gap={2} style={{ pointerEvents: queuedMultiActions ? "none" : "auto" }}>
         <LayoutSection
           title={layoutManager.supportsSharing ? "Personal" : undefined}
           emptyText="Add a new layout to get started with Foxglove Studio!"
           items={layouts.value?.personal}
+          multiSelectedIds={state.selectedIds}
           selectedId={currentLayoutId}
           onSelect={onSelectLayout}
           onRename={onRenameLayout}
@@ -458,6 +521,7 @@ export default function LayoutBrowser({
             title="Team"
             emptyText="Your organization doesn’t have any shared layouts yet. Share a personal layout to collaborate with other team members."
             items={layouts.value?.shared}
+            multiSelectedIds={state.selectedIds}
             selectedId={currentLayoutId}
             onSelect={onSelectLayout}
             onRename={onRenameLayout}

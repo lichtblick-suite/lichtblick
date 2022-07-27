@@ -3,6 +3,7 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 import { Story, StoryContext } from "@storybook/react";
+import { fireEvent, screen } from "@testing-library/dom";
 import { useEffect, useMemo } from "react";
 import TestUtils from "react-dom/test-utils";
 import { useAsync } from "react-use";
@@ -128,6 +129,28 @@ Empty.parameters = { mockLayouts: [] };
 export function LayoutList(): JSX.Element {
   return <LayoutBrowser />;
 }
+
+export function MultiSelect(): JSX.Element {
+  return <LayoutBrowser />;
+}
+MultiSelect.play = async () => {
+  const layouts = await screen.findAllByTestId("layout-list-item");
+  layouts.forEach((layout) => fireEvent.click(layout, { ctrlKey: true }));
+};
+
+export function MultiDelete(): JSX.Element {
+  return <LayoutBrowser />;
+}
+MultiDelete.play = async () => {
+  const layouts = await screen.findAllByTestId("layout-list-item");
+  layouts.forEach((layout) => fireEvent.click(layout, { ctrlKey: true }));
+  const deleteButton = await screen.findAllByTitle("Delete Selected");
+  if (deleteButton[0]) {
+    fireEvent.click(deleteButton[0]);
+  }
+  const confirmButton = await screen.findByText("Delete");
+  fireEvent.click(confirmButton);
+};
 
 TruncatedLayoutName.parameters = {
   mockLayouts: [

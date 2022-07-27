@@ -17,7 +17,7 @@ import {
   TextField,
   styled as muiStyled,
 } from "@mui/material";
-import { useCallback, useContext, useLayoutEffect, useMemo, useState } from "react";
+import { useCallback, useContext, useLayoutEffect, useMemo, useState, MouseEvent } from "react";
 import { useMountedState } from "react-use";
 
 import { useLayoutManager } from "@foxglove/studio-base/context/LayoutManagerContext";
@@ -110,6 +110,7 @@ export type LayoutActionMenuItem =
 
 export default React.memo(function LayoutRow({
   layout,
+  multiSelected,
   selected,
   onSelect,
   onRename,
@@ -122,8 +123,9 @@ export default React.memo(function LayoutRow({
   onMakePersonalCopy,
 }: {
   layout: Layout;
+  multiSelected: boolean;
   selected: boolean;
-  onSelect: (item: Layout, params?: { selectedViaClick?: boolean }) => void;
+  onSelect: (item: Layout, params?: { selectedViaClick?: boolean; event?: MouseEvent }) => void;
   onRename: (item: Layout, newName: string) => void;
   onDuplicate: (item: Layout) => void;
   onDelete: (item: Layout) => void;
@@ -176,11 +178,12 @@ export default React.memo(function LayoutRow({
     setEditingName(true);
   }, [layout]);
 
-  const onClick = useCallback(() => {
-    if (!selected) {
-      onSelect(layout, { selectedViaClick: true });
-    }
-  }, [layout, onSelect, selected]);
+  const onClick = useCallback(
+    (event: MouseEvent) => {
+      onSelect(layout, { selectedViaClick: true, event });
+    },
+    [layout, onSelect],
+  );
 
   const duplicateAction = useCallback(() => onDuplicate(layout), [layout, onDuplicate]);
   const shareAction = useCallback(() => onShare(layout), [layout, onShare]);
@@ -424,7 +427,8 @@ export default React.memo(function LayoutRow({
       }
     >
       <ListItemButton
-        selected={selected}
+        data-testid="layout-list-item"
+        selected={selected || multiSelected}
         onSubmit={onSubmit}
         onClick={editingName ? undefined : onClick}
         onContextMenu={editingName ? undefined : handleContextMenu}
