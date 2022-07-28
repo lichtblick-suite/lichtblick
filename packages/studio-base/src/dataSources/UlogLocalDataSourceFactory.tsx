@@ -6,11 +6,9 @@ import {
   IDataSourceFactory,
   DataSourceFactoryInitializeArgs,
 } from "@foxglove/studio-base/context/PlayerSelectionContext";
-import RandomAccessPlayer from "@foxglove/studio-base/players/RandomAccessPlayer";
+import { IterablePlayer } from "@foxglove/studio-base/players/IterablePlayer";
+import { UlogIterableSource } from "@foxglove/studio-base/players/IterablePlayer/ulog/UlogIterableSource";
 import { Player } from "@foxglove/studio-base/players/types";
-import MemoryCacheDataProvider from "@foxglove/studio-base/randomAccessDataProviders/MemoryCacheDataProvider";
-import UlogDataProvider from "@foxglove/studio-base/randomAccessDataProviders/UlogDataProvider";
-import { getSeekToTime } from "@foxglove/studio-base/util/time";
 
 class UlogLocalDataSourceFactory implements IDataSourceFactory {
   id = "ulog-local-file";
@@ -25,12 +23,10 @@ class UlogLocalDataSourceFactory implements IDataSourceFactory {
       return;
     }
 
-    const ulogDataProvider = new UlogDataProvider({ file });
-    const messageCacheProvider = new MemoryCacheDataProvider(ulogDataProvider);
-
-    return new RandomAccessPlayer(messageCacheProvider, {
+    const source = new UlogIterableSource({ type: "file", file });
+    return new IterablePlayer({
       metricsCollector: args.metricsCollector,
-      seekToTime: getSeekToTime(),
+      source,
       name: file.name,
       sourceId: this.id,
     });
