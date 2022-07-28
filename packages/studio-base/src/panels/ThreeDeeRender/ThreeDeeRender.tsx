@@ -510,7 +510,7 @@ export function ThreeDeeRender({ context }: { context: PanelExtensionContext }):
         }
 
         // Set the done callback into a state variable to trigger a re-render
-        setRenderDone(done);
+        setRenderDone(() => done);
 
         // Keep UI elements and the renderer aware of the current color scheme
         setColorScheme(renderState.colorScheme);
