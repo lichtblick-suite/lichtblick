@@ -644,4 +644,94 @@ describe("CachingIterableSource", () => {
       { message: undefined, receiveTime: { sec: 1, nsec: 0 }, sizeInBytes: 101, topic: "a" },
     ]);
   });
+
+  it("should evict blocks as cache fills up", async () => {
+    const source = new TestSource();
+    const bufferedSource = new CachingIterableSource(source, {
+      maxBlockSize: 102,
+      maxTotalSize: 202,
+    });
+
+    await bufferedSource.initialize();
+
+    source.messageIterator = async function* messageIterator(
+      _args: MessageIteratorArgs,
+    ): AsyncIterableIterator<Readonly<IteratorResult>> {
+      for (let i = 0; i < 8; ++i) {
+        yield {
+          msgEvent: {
+            topic: "a",
+            receiveTime: { sec: i, nsec: 0 },
+            message: undefined,
+            sizeInBytes: 101,
+          },
+          problem: undefined,
+          connectionId: undefined,
+        };
+      }
+    };
+
+    {
+      const messageIterator = bufferedSource.messageIterator({
+        topics: ["a"],
+      });
+
+      // load all the messages into cache
+      for await (const _ of messageIterator) {
+        // no-op
+      }
+
+      expect(bufferedSource.loadedRanges()).toEqual([{ start: 0.6, end: 1 }]);
+    }
+  });
+
+  it("should clear the cache when topics change", async () => {
+    const source = new TestSource();
+    const bufferedSource = new CachingIterableSource(source, {
+      maxBlockSize: 1000,
+      maxTotalSize: 1000,
+    });
+
+    await bufferedSource.initialize();
+
+    source.messageIterator = async function* messageIterator(
+      _args: MessageIteratorArgs,
+    ): AsyncIterableIterator<Readonly<IteratorResult>> {
+      for (let i = 0; i < 10; ++i) {
+        yield {
+          msgEvent: {
+            topic: "a",
+            receiveTime: { sec: i, nsec: 0 },
+            message: undefined,
+            sizeInBytes: 100,
+          },
+          problem: undefined,
+          connectionId: undefined,
+        };
+      }
+    };
+
+    {
+      const messageIterator = bufferedSource.messageIterator({
+        topics: ["a"],
+      });
+
+      // load all the messages into cache
+      for await (const _ of messageIterator) {
+        // no-op
+      }
+
+      expect(bufferedSource.loadedRanges()).toEqual([{ start: 0, end: 1 }]);
+    }
+
+    {
+      const messageIterator = bufferedSource.messageIterator({
+        topics: ["a", "b"],
+      });
+
+      await messageIterator.next();
+
+      expect(bufferedSource.loadedRanges()).toEqual([{ start: 0, end: 0 }]);
+    }
+  });
 });
