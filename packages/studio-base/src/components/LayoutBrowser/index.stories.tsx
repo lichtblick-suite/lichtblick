@@ -4,16 +4,11 @@
 
 import { Story, StoryContext } from "@storybook/react";
 import { fireEvent, screen } from "@testing-library/dom";
-import { useEffect, useMemo } from "react";
-import TestUtils from "react-dom/test-utils";
-import { useAsync } from "react-use";
-import { AsyncState } from "react-use/lib/useAsyncFn";
+import { useMemo } from "react";
 
 import AnalyticsProvider from "@foxglove/studio-base/context/AnalyticsProvider";
 import { PanelsState } from "@foxglove/studio-base/context/CurrentLayoutContext/actions";
-import LayoutStorageContext, {
-  useLayoutStorage,
-} from "@foxglove/studio-base/context/LayoutStorageContext";
+import LayoutStorageContext from "@foxglove/studio-base/context/LayoutStorageContext";
 import ModalHost from "@foxglove/studio-base/context/ModalHost";
 import { UserProfileStorageContext } from "@foxglove/studio-base/context/UserProfileStorageContext";
 import CurrentLayoutProvider from "@foxglove/studio-base/providers/CurrentLayoutProvider";
@@ -22,8 +17,6 @@ import LayoutManagerProvider from "@foxglove/studio-base/providers/LayoutManager
 import { ISO8601Timestamp, Layout, LayoutID } from "@foxglove/studio-base/services/ILayoutStorage";
 import LayoutManager from "@foxglove/studio-base/services/LayoutManager/LayoutManager";
 import MockLayoutStorage from "@foxglove/studio-base/services/MockLayoutStorage";
-import { useReadySignal } from "@foxglove/studio-base/stories/ReadySignalContext";
-import delay from "@foxglove/studio-base/util/delay";
 
 import LayoutBrowser from "./index";
 
@@ -46,6 +39,18 @@ const exampleCurrentLayout: Layout = {
   working: undefined,
   syncInfo: undefined,
 };
+
+const deleteLayoutInteraction = async (index: number) => {
+  const actions = await screen.findAllByTestId("layout-actions");
+  if (actions[index]) {
+    fireEvent.click(actions[index]!);
+  }
+  const deleteButton = await screen.findByText("Delete");
+  fireEvent.click(deleteButton);
+  const confirmButton = await screen.findByText("Delete");
+  fireEvent.click(confirmButton);
+};
+
 function WithSetup(Child: Story, ctx: StoryContext): JSX.Element {
   const storage = useMemo(
     () =>
@@ -105,16 +110,6 @@ function WithSetup(Child: Story, ctx: StoryContext): JSX.Element {
   );
 }
 
-/** Throw errors from the async function during render so they appear in the storybook */
-function useAsyncThrowing(fn: () => Promise<void>, deps: unknown[]): AsyncState<void> {
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  const result = useAsync(fn, deps);
-  if (result.error) {
-    throw result.error;
-  }
-  return result;
-}
-
 export default {
   title: "components/LayoutBrowser",
   component: LayoutBrowser,
@@ -133,6 +128,7 @@ export function LayoutList(): JSX.Element {
 export function MultiSelect(): JSX.Element {
   return <LayoutBrowser />;
 }
+MultiSelect.parameters = { colorScheme: "dark" };
 MultiSelect.play = async () => {
   const layouts = await screen.findAllByTestId("layout-list-item");
   layouts.forEach((layout) => fireEvent.click(layout, { ctrlKey: true }));
@@ -141,6 +137,7 @@ MultiSelect.play = async () => {
 export function MultiDelete(): JSX.Element {
   return <LayoutBrowser />;
 }
+MultiDelete.parameters = { colorScheme: "dark" };
 MultiDelete.play = async () => {
   const layouts = await screen.findAllByTestId("layout-list-item");
   layouts.forEach((layout) => fireEvent.click(layout, { ctrlKey: true }));
@@ -178,179 +175,117 @@ export function TruncatedLayoutNameSelected(): JSX.Element {
   return <LayoutBrowser />;
 }
 
-AddLayout.parameters = { useReadySignal: true, colorScheme: "dark" };
 export function AddLayout(_args: unknown): JSX.Element {
-  const readySignal = useReadySignal();
-
-  useAsyncThrowing(async () => {
-    await delay(100);
-    document.querySelector<HTMLElement>(`[data-test="add-layout"]`)!.click();
-    await delay(10);
-    readySignal();
-  }, [readySignal]);
   return (
     <LayoutBrowser
       currentDateForStorybook={useMemo(() => new Date("2021-06-16T04:28:33.549Z"), [])}
     />
   );
 }
+AddLayout.parameters = { colorScheme: "dark" };
+AddLayout.play = async () => {
+  const button = await screen.findByTestId("add-layout");
+  fireEvent.click(button);
+};
 
-MenuOpen.parameters = { useReadySignal: true, colorScheme: "dark" };
 export function MenuOpen(_args: unknown): JSX.Element {
-  const readySignal = useReadySignal();
-
-  useAsyncThrowing(async () => {
-    await delay(100);
-    document.querySelectorAll<HTMLElement>("#layout-actions")[1]!.click();
-    await delay(10);
-    readySignal();
-  }, [readySignal]);
-
   return <LayoutBrowser />;
 }
+MenuOpen.parameters = { colorScheme: "dark" };
+MenuOpen.play = async () => {
+  const actions = await screen.findAllByTestId("layout-actions");
+  if (actions[1]) {
+    fireEvent.click(actions[1]);
+  }
+};
+
 export const MenuOpenLight = MenuOpen.bind(undefined);
-MenuOpenLight.parameters = { useReadySignal: true, colorScheme: "light" };
+MenuOpenLight.parameters = { colorScheme: "light" };
+MenuOpenLight.play = async () => {
+  const actions = await screen.findAllByTestId("layout-actions");
+  if (actions[1]) {
+    fireEvent.click(actions[1]);
+  }
+};
 
-EditingName.parameters = { useReadySignal: true, colorScheme: "dark" };
 export function EditingName(_args: unknown): JSX.Element {
-  const readySignal = useReadySignal();
-
-  useAsyncThrowing(async () => {
-    await delay(100);
-    document.querySelectorAll<HTMLElement>("#layout-actions")[1]!.click();
-    await delay(10);
-    document.querySelector<HTMLElement>(`[data-test="rename-layout"]`)!.click();
-    readySignal();
-  }, [readySignal]);
-
   return <LayoutBrowser />;
 }
+EditingName.parameters = { colorScheme: "dark" };
+EditingName.play = async () => {
+  const actions = await screen.findAllByTestId("layout-actions");
+  if (actions[1]) {
+    fireEvent.click(actions[1]);
+  }
+  const button = await screen.findByText("Rename");
+  fireEvent.click(button);
+};
 
-CancelRenameWithEscape.parameters = { useReadySignal: true, colorScheme: "dark" };
 export function CancelRenameWithEscape(_args: unknown): JSX.Element {
-  const readySignal = useReadySignal();
-
-  useAsyncThrowing(async () => {
-    await delay(100);
-    document.querySelectorAll<HTMLElement>("#layout-actions")[1]!.click();
-    await delay(10);
-    document.querySelector<HTMLElement>(`[data-test="rename-layout"]`)!.click();
-    await delay(10);
-    TestUtils.Simulate.keyDown(document.activeElement!, { key: "Escape" });
-    await delay(10);
-    readySignal();
-  }, [readySignal]);
-
   return <LayoutBrowser />;
 }
+CancelRenameWithEscape.parameters = { colorScheme: "dark" };
+CancelRenameWithEscape.play = async () => {
+  const actions = await screen.findAllByTestId("layout-actions");
+  if (actions[1]) {
+    fireEvent.click(actions[1]);
+  }
+  const button = await screen.findByText("Rename");
+  fireEvent.click(button);
+  fireEvent.keyDown(document.activeElement!, { key: "Escape" });
+};
 
-CommitRenameWithTab.parameters = { useReadySignal: true, colorScheme: "dark" };
 export function CommitRenameWithTab(_args: unknown): JSX.Element {
-  const readySignal = useReadySignal();
-
-  useAsyncThrowing(async () => {
-    await delay(100);
-    document.querySelectorAll<HTMLElement>("#layout-actions")[1]!.click();
-    await delay(10);
-    document.querySelector<HTMLElement>(`[data-test="rename-layout"]`)!.click();
-    await delay(10);
-    (document.activeElement as HTMLInputElement).value = "New name";
-    TestUtils.Simulate.change(document.activeElement!);
-    await delay(10);
-    TestUtils.Simulate.blur(document.activeElement!);
-    readySignal();
-  }, [readySignal]);
-
-  const layoutStorage = useLayoutStorage();
-  useEffect(() => {
-    void layoutStorage.list(LayoutManager.LOCAL_STORAGE_NAMESPACE).then((layouts) => {
-      if (layouts.some((layout) => layout.name === "New name")) {
-        readySignal();
-      }
-    });
-  });
-
   return <LayoutBrowser />;
 }
+CommitRenameWithTab.parameters = { colorScheme: "dark" };
+CommitRenameWithTab.play = async () => {
+  const actions = await screen.findAllByTestId("layout-actions");
+  if (actions[1]) {
+    fireEvent.click(actions[1]);
+  }
+  const button = await screen.findByText("Rename");
+  fireEvent.click(button);
+  fireEvent.change(document.activeElement!, { target: { value: "New name" } });
+  fireEvent.focusOut(document.activeElement!);
+};
 
-Duplicate.parameters = { useReadySignal: true, colorScheme: "dark" };
 export function Duplicate(_args: unknown): JSX.Element {
-  const layoutStorage = useLayoutStorage();
-  const readySignal = useReadySignal();
-
-  useAsyncThrowing(async () => {
-    await delay(100);
-    document.querySelectorAll<HTMLElement>("#layout-actions")[1]!.click();
-    await delay(10);
-    document.querySelector<HTMLElement>(`[data-test="duplicate-layout"]`)!.click();
-    await delay(10);
-
-    if (
-      (await layoutStorage.list(LayoutManager.LOCAL_STORAGE_NAMESPACE)).some(
-        (layout) => layout.name === "Current Layout copy",
-      )
-    ) {
-      readySignal();
-    } else {
-      throw new Error("Duplicate failed");
-    }
-  }, [readySignal, layoutStorage]);
-
   return <LayoutBrowser />;
 }
-
-function DeleteStory({
-  index,
-  name,
-  signal: sig,
-}: {
-  index: number;
-  name: string;
-  signal: () => void;
-}) {
-  const layoutStorage = useLayoutStorage();
-  useAsyncThrowing(async () => {
-    await delay(100);
-    document.querySelectorAll<HTMLElement>("#layout-actions")[index]!.click();
-    await delay(10);
-    document.querySelector<HTMLElement>(`[data-test="delete-layout"]`)!.click();
-    await delay(10);
-    document.querySelector<HTMLElement>(`button[type="submit"]`)!.click();
-    await delay(10);
-
-    if (
-      !(await layoutStorage.list(LayoutManager.LOCAL_STORAGE_NAMESPACE)).some(
-        (layout) => layout.name === name,
-      )
-    ) {
-      sig();
-    } else {
-      throw new Error("Delete failed");
-    }
-  }, [sig, index, layoutStorage, name]);
-
-  return <LayoutBrowser />;
-}
+Duplicate.parameters = { colorScheme: "dark" };
+Duplicate.play = async () => {
+  const actions = await screen.findAllByTestId("layout-actions");
+  if (actions[1]) {
+    fireEvent.click(actions[1]);
+  }
+  const button = await screen.findByText("Duplicate");
+  fireEvent.click(button);
+};
 
 export function DeleteLayout(_args: unknown): JSX.Element {
-  const readySignal = useReadySignal();
-  return <DeleteStory index={0} name="Another Layout" signal={readySignal} />;
+  return <LayoutBrowser />;
 }
-DeleteLayout.parameters = { useReadySignal: true, colorScheme: "dark" };
+DeleteLayout.parameters = { colorScheme: "dark" };
+DeleteLayout.play = async () => await deleteLayoutInteraction(0);
 
 export function DeleteSelectedLayout(_args: unknown): JSX.Element {
-  const readySignal = useReadySignal();
-  return <DeleteStory index={1} name="Current Layout" signal={readySignal} />;
+  return <LayoutBrowser />;
 }
-DeleteSelectedLayout.parameters = { useReadySignal: true, colorScheme: "dark" };
+DeleteSelectedLayout.play = async () => {
+  const layouts = await screen.findAllByTestId("layout-list-item");
+  if (layouts[1]) {
+    fireEvent.click(layouts[1]);
+  }
+  await deleteLayoutInteraction(1);
+};
+DeleteSelectedLayout.parameters = { colorScheme: "dark" };
 
 export function DeleteLastLayout(_args: unknown): JSX.Element {
-  const readySignal = useReadySignal();
-
-  return <DeleteStory index={0} name="Current Layout" signal={readySignal} />;
+  return <LayoutBrowser />;
 }
 DeleteLastLayout.parameters = {
-  useReadySignal: true,
   mockLayouts: [exampleCurrentLayout],
   colorScheme: "dark",
 };
+DeleteLastLayout.play = async () => await deleteLayoutInteraction(0);

@@ -482,7 +482,7 @@ export default function LayoutBrowser({
           key="add-layout"
           onClick={createNewLayout}
           aria-label="Create new layout"
-          data-test="add-layout"
+          data-testid="add-layout"
           title="Create new layout"
         >
           <AddIcon />

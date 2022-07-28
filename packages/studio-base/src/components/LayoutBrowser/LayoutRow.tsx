@@ -415,7 +415,7 @@ export default React.memo(function LayoutRow({
       disablePadding
       secondaryAction={
         <IconButton
-          id="layout-actions"
+          data-testid="layout-actions"
           aria-controls={contextMenuTarget != undefined ? "layout-action-menu" : undefined}
           aria-haspopup="true"
           aria-expanded={contextMenuTarget != undefined ? "true" : undefined}
