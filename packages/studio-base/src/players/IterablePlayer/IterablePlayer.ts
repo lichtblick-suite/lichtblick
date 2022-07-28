@@ -749,7 +749,7 @@ export class IterablePlayer implements Player {
     const tickTimeout = setTimeout(() => {
       this._presence = PlayerPresence.BUFFERING;
       this._emitState();
-    }, 100);
+    }, 500);
 
     try {
       // Read from the iterator through the end of the tick time

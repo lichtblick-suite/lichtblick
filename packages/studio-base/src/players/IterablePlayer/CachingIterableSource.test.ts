@@ -528,4 +528,120 @@ describe("CachingIterableSource", () => {
       expect(res.done).toEqual(true);
     }
   });
+
+  it("should getBackfillMessages from cache", async () => {
+    const source = new TestSource();
+    const bufferedSource = new CachingIterableSource(source);
+
+    await bufferedSource.initialize();
+
+    source.messageIterator = async function* messageIterator(
+      _args: MessageIteratorArgs,
+    ): AsyncIterableIterator<Readonly<IteratorResult>> {
+      for (let i = 0; i < 8; ++i) {
+        yield {
+          msgEvent: {
+            topic: "a",
+            receiveTime: { sec: 0, nsec: i * 1e8 },
+            message: undefined,
+            sizeInBytes: 0,
+          },
+          problem: undefined,
+          connectionId: undefined,
+        };
+      }
+    };
+
+    {
+      const messageIterator = bufferedSource.messageIterator({
+        topics: ["a"],
+      });
+
+      // load all the messages into cache
+      for await (const _ of messageIterator) {
+        // no-op
+      }
+
+      expect(bufferedSource.loadedRanges()).toEqual([{ start: 0, end: 1 }]);
+    }
+
+    // because we have cached we shouldn't be calling source anymore
+    source.messageIterator = function messageIterator(
+      _args: MessageIteratorArgs,
+    ): AsyncIterableIterator<Readonly<IteratorResult>> {
+      throw new Error("should not be called");
+    };
+
+    const backfill = await bufferedSource.getBackfillMessages({
+      topics: ["a"],
+      time: { sec: 2, nsec: 0 },
+    });
+    expect(backfill).toEqual([
+      { message: undefined, receiveTime: { sec: 0, nsec: 700000000 }, sizeInBytes: 0, topic: "a" },
+    ]);
+  });
+
+  it("should getBackfillMessages from multiple cache blocks", async () => {
+    const source = new TestSource();
+    const bufferedSource = new CachingIterableSource(source, { maxBlockSize: 100 });
+
+    await bufferedSource.initialize();
+
+    source.messageIterator = async function* messageIterator(
+      _args: MessageIteratorArgs,
+    ): AsyncIterableIterator<Readonly<IteratorResult>> {
+      yield {
+        msgEvent: {
+          topic: "a",
+          receiveTime: { sec: 1, nsec: 0 },
+          message: undefined,
+          sizeInBytes: 101,
+        },
+        problem: undefined,
+        connectionId: undefined,
+      };
+      yield {
+        msgEvent: {
+          topic: "b",
+          receiveTime: { sec: 2, nsec: 0 },
+          message: undefined,
+          sizeInBytes: 101,
+        },
+        problem: undefined,
+        connectionId: undefined,
+      };
+    };
+
+    {
+      const messageIterator = bufferedSource.messageIterator({
+        topics: ["a", "b"],
+      });
+
+      // load all the messages into cache
+      for await (const _ of messageIterator) {
+        // no-op
+      }
+
+      expect(bufferedSource.loadedRanges()).toEqual([
+        { start: 0, end: 0.1999999999 },
+        { start: 0.2, end: 1 },
+      ]);
+    }
+
+    // because we have cached we shouldn't be calling source anymore
+    source.messageIterator = function messageIterator(
+      _args: MessageIteratorArgs,
+    ): AsyncIterableIterator<Readonly<IteratorResult>> {
+      throw new Error("should not be called");
+    };
+
+    const backfill = await bufferedSource.getBackfillMessages({
+      topics: ["a", "b"],
+      time: { sec: 2, nsec: 500 },
+    });
+    expect(backfill).toEqual([
+      { message: undefined, receiveTime: { sec: 2, nsec: 0 }, sizeInBytes: 101, topic: "b" },
+      { message: undefined, receiveTime: { sec: 1, nsec: 0 }, sizeInBytes: 101, topic: "a" },
+    ]);
+  });
 });

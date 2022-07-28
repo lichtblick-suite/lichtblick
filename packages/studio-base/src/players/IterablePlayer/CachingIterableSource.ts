@@ -89,7 +89,7 @@ class CachingIterableSource implements IIterableSource {
   constructor(source: IIterableSource, opt?: Options) {
     this.source = source;
     this.maxTotalSizeBytes = opt?.maxTotalSize ?? 1e9;
-    this.maxBlockSizeBytes = opt?.maxBlockSize ?? 50000000;
+    this.maxBlockSizeBytes = opt?.maxBlockSize ?? 5000000;
   }
 
   async initialize(): Promise<Initalization> {
@@ -363,7 +363,7 @@ class CachingIterableSource implements IIterableSource {
     // We must stop going backwards when we have a gap because we can no longer know if the source
     // actually does have messages in the gap.
     for (let idx = cacheBlockIndex; idx >= 0 && needsTopics.size > 0; --idx) {
-      const cacheBlock = this.cache[cacheBlockIndex];
+      const cacheBlock = this.cache[idx];
       if (!cacheBlock) {
         break;
       }
@@ -387,14 +387,13 @@ class CachingIterableSource implements IIterableSource {
         }
 
         const msgEvent = record[1].msgEvent;
-
         if (needsTopics.has(msgEvent.topic)) {
           needsTopics.delete(msgEvent.topic);
+          out.push(msgEvent);
         }
-        out.push(msgEvent);
       }
 
-      const prevBlock = this.cache[cacheBlockIndex - 1];
+      const prevBlock = this.cache[idx - 1];
       // If we have a gap between the start of our block and the previous block, then we must stop
       // trying to read from the block cache
       if (prevBlock && compare(add(prevBlock.end, { sec: 0, nsec: 1 }), cacheBlock.start) !== 0) {

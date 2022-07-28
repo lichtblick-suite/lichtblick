@@ -7,6 +7,7 @@ import { simplify } from "intervals-fn";
 import { useMemo } from "react";
 import { makeStyles } from "tss-react/mui";
 
+import { filterMap } from "@foxglove/den/collection";
 import Stack from "@foxglove/studio-base/components/Stack";
 import { Range } from "@foxglove/studio-base/util/ranges";
 
@@ -57,11 +58,12 @@ export function ProgressPlot(props: ProgressProps): JSX.Element {
     }
     const mergedRanges = simplify(availableRanges);
 
-    return mergedRanges.map((range, idx) => {
+    return filterMap(mergedRanges, (range, idx) => {
       const width = range.end - range.start;
       if (width === 0) {
-        return <></>;
+        return;
       }
+
       return (
         <div
           className={classes.range}
