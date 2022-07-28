@@ -29,19 +29,14 @@ import VelodyneUnavailableDataSourceFactory from "./dataSources/VelodyneUnavaila
 import { IdbLayoutStorage } from "./services/IdbLayoutStorage";
 
 export function Root({ appConfiguration }: { appConfiguration: IAppConfiguration }): JSX.Element {
-  const enableExperimentalBagPlayer: boolean =
-    (appConfiguration.get(AppSetting.EXPERIMENTAL_BAG_PLAYER) as boolean | undefined) ?? false;
-  const enableExperimentalDataPlatformPlayer: boolean =
-    (appConfiguration.get(AppSetting.EXPERIMENTAL_DATA_PLATFORM_PLAYER) as boolean | undefined) ??
-    false;
-  const enableExperimentalMcapPlayer: boolean =
-    (appConfiguration.get(AppSetting.EXPERIMENTAL_MCAP_PLAYER) as boolean | undefined) ?? false;
+  const enableExperimentalLatching: boolean =
+    (appConfiguration.get(AppSetting.EXPERIMENTAL_LATCHING) as boolean | undefined) ?? true;
 
   const dataSources: IDataSourceFactory[] = useMemo(() => {
     const sources = [
       new Ros1UnavailableDataSourceFactory(),
-      new Ros1LocalBagDataSourceFactory({ useIterablePlayer: enableExperimentalBagPlayer }),
-      new Ros1RemoteBagDataSourceFactory({ useIterablePlayer: enableExperimentalBagPlayer }),
+      new Ros1LocalBagDataSourceFactory({ useIterablePlayer: enableExperimentalLatching }),
+      new Ros1RemoteBagDataSourceFactory({ useIterablePlayer: enableExperimentalLatching }),
       new Ros2UnavailableDataSourceFactory(),
       new Ros2LocalBagDataSourceFactory(),
       new RosbridgeDataSourceFactory(),
@@ -49,19 +44,15 @@ export function Root({ appConfiguration }: { appConfiguration: IAppConfiguration
       new UlogLocalDataSourceFactory(),
       new VelodyneUnavailableDataSourceFactory(),
       new FoxgloveDataPlatformDataSourceFactory({
-        useIterablePlayer: enableExperimentalDataPlatformPlayer,
+        useIterablePlayer: enableExperimentalLatching,
       }),
-      new SampleNuscenesDataSourceFactory({ useIterablePlayer: enableExperimentalBagPlayer }),
-      new McapLocalDataSourceFactory({ useIterablePlayer: enableExperimentalMcapPlayer }),
-      new McapRemoteDataSourceFactory({ useIterablePlayer: enableExperimentalMcapPlayer }),
+      new SampleNuscenesDataSourceFactory({ useIterablePlayer: enableExperimentalLatching }),
+      new McapLocalDataSourceFactory({ useIterablePlayer: enableExperimentalLatching }),
+      new McapRemoteDataSourceFactory({ useIterablePlayer: enableExperimentalLatching }),
     ];
 
     return sources;
-  }, [
-    enableExperimentalBagPlayer,
-    enableExperimentalDataPlatformPlayer,
-    enableExperimentalMcapPlayer,
-  ]);
+  }, [enableExperimentalLatching]);
 
   const layoutStorage = useMemo(() => new IdbLayoutStorage(), []);
   const [extensionLoaders] = useState(() => [
