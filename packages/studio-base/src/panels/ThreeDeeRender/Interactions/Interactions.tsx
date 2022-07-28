@@ -66,11 +66,15 @@ const InteractionsBaseComponent = React.memo<Props>(function InteractionsBaseCom
         <ToolGroupFixedSizePane>
           {originalMessage ? (
             <>
-              <SRow>
-                <SValue>
-                  <TopicLink addPanel={addPanel} topic={selectedInteractionData.topic} />
-                </SValue>
-              </SRow>
+              {selectedInteractionData.topic ? (
+                <SRow>
+                  <SValue>
+                    <TopicLink addPanel={addPanel} topic={selectedInteractionData.topic} />
+                  </SValue>
+                </SRow>
+              ) : (
+                <></>
+              )}
               <ObjectDetails
                 selectedObject={originalMessage}
                 interactionData={selectedInteractionData}

@@ -198,7 +198,7 @@ function RendererOverlay(props: {
             object: {
               pose: selectedRenderable.userData.pose,
               interactionData: {
-                topic: selectedRenderable.name,
+                topic: (selectedRenderable.userData as { topic?: string }).topic,
                 highlighted: true,
                 originalMessage: selectedRenderable.details(),
               },

@@ -15,7 +15,7 @@ import { RosObject } from "@foxglove/studio-base/players/types";
 import { Marker } from "@foxglove/studio-base/types/Messages";
 
 export type InteractionData = {
-  readonly topic: string;
+  readonly topic: string | undefined;
   highlighted?: boolean;
   readonly originalMessage: RosObject;
 };
