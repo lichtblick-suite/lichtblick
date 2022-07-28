@@ -23,7 +23,7 @@ import { compile } from "@foxglove/studio-base/players/UserNodePlayer/nodeTransf
 import { NodeData } from "@foxglove/studio-base/players/UserNodePlayer/types";
 
 const baseNodeData: NodeData = {
-  name: "/studio_node/main",
+  name: "/studio_script/main",
   sourceCode: "",
   transpiledCode: "",
   diagnostics: [],

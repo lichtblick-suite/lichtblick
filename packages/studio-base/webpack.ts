@@ -19,7 +19,7 @@ if (monacoPkg.version !== "0.30.1") {
   throw new Error(`
     It looks like you are trying to change the version of Monaco.
 
-    Please make a node playground node and confirm that loading a data source properly updates
+    Please make a User Script and confirm that loading a data source properly updates
     the "ros" library and that Input and Message interfaces are usable:
       - Messages. should autocomplete
       - Input<""> should autocomplete
@@ -128,7 +128,7 @@ export function makeConfig(
           ],
         },
         {
-          // "?raw" imports are used to load stringified typescript in Node Playground
+          // "?raw" imports are used to load stringified typescript in User Scripts
           // https://webpack.js.org/guides/asset-modules/#replacing-inline-loader-syntax
           resourceQuery: /raw/,
           type: "asset/source",

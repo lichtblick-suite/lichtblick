@@ -100,7 +100,7 @@ const Editor = ({
   }, [rosLib]);
 
   React.useEffect(() => {
-    const filePath = monacoApi.Uri.parse(`file:///studio_node/generatedTypes.ts`);
+    const filePath = monacoApi.Uri.parse(`file:///studio_script/generatedTypes.ts`);
     const model =
       monacoApi.editor.getModel(filePath) ??
       monacoApi.editor.createModel(typesLib, "typescript", filePath);

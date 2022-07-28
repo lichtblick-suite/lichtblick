@@ -1,7 +1,7 @@
 // This example shows how to subscribe to multiple input topics.
 //
 // NOTE:
-// Node Playground scripts can subscribe to multiple input topics, but can only publish on a single topic.
+// User Scripts can subscribe to multiple input topics, but can only publish on a single topic.
 
 import { Input } from "./types";
 
@@ -10,7 +10,7 @@ type GlobalVariables = { id: number };
 
 // List all the input topics in the `input` array
 export const inputs = ["/input/topic", "/input/another"];
-export const output = "/studio_node/output_topic";
+export const output = "/studio_script/output_topic";
 
 // Make an InputEvent type alias. Since our node will get a message from either input topic, we need to enumerate the topics.
 type InputEvent = Input<"/input/topic"> | Input<"/input/another">;

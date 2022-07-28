@@ -8,7 +8,7 @@
 import { Input, Message } from "./types";
 
 export const inputs = ["/input/topic"];
-export const output = "/studio_node/my_gps";
+export const output = "/studio_script/my_gps";
 
 // Our node will output a LocationFix message
 type LocationFix = Message<"foxglove.LocationFix">;

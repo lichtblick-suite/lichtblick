@@ -51,7 +51,7 @@ import lib_es5_dts from "typescript/lib/lib.es5.d.ts?raw";
 
 export const lib_filename = "lib.d.ts";
 
-// For users debugging in Node Playground.
+// For users debugging in User Scripts.
 const lib_logger = `
   declare type BaseTypes<T> = number | string | boolean | void | null | T;
   declare type LogArgs = { [key: string]: BaseTypes<LogArgs> | BaseTypes<LogArgs>[] };

@@ -112,7 +112,7 @@ export const registerNode = ({
 
     const require = (id: string) => requireImplementation(id, projectCode);
 
-    // Using new Function in order to execute user-input text in Node Playground as code
+    // Using new Function in order to execute user-input text in User Scripts as code
     // eslint-disable-next-line no-new-func
     new Function("exports", "require", nodeCode)(nodeExports, require);
     nodeCallback = nodeExports.default!;

@@ -217,14 +217,14 @@ export const compile = (nodeData: NodeData): NodeData => {
   const { sourceCode, rosLib, typesLib } = nodeData;
 
   const options: ts.CompilerOptions = baseCompilerOptions;
-  const nodeFileName = "/studio_node/index.ts";
+  const nodeFileName = "/studio_script/index.ts";
   const projectConfig = getNodeProjectConfig();
   const projectCode = new Map<string, string>();
 
   const sourceCodeMap = new Map<string, string>();
   sourceCodeMap.set(nodeFileName, sourceCode);
   sourceCodeMap.set(projectConfig.rosLib.filePath, rosLib);
-  sourceCodeMap.set("/studio_node/generatedTypes.ts", typesLib ? typesLib : generatedTypesLibSrc);
+  sourceCodeMap.set("/studio_script/generatedTypes.ts", typesLib ? typesLib : generatedTypesLibSrc);
 
   projectConfig.utilityFiles.forEach((file) => sourceCodeMap.set(file.filePath, file.sourceCode));
   projectConfig.declarations.forEach((lib) => sourceCodeMap.set(lib.filePath, lib.sourceCode));
@@ -259,7 +259,7 @@ export const compile = (nodeData: NodeData): NodeData => {
     },
     writeFile: (name: string, data: string) => {
       codeEmitted = true;
-      if (name === "/studio_node/index.js") {
+      if (name === "/studio_script/index.js") {
         transpiledCode = data;
       } else {
         // It's one of our utility files

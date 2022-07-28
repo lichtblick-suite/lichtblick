@@ -279,7 +279,7 @@ export const constructDatatypes = (
   // In this case, we've detected that the return type comes from the generated types file.
   // We can look up the datatype name by finding it in the file. The name will be the property name
   // under which the type exists.
-  if (node.getSourceFile().fileName === "/studio_node/generatedTypes.ts") {
+  if (node.getSourceFile().fileName === "/studio_script/generatedTypes.ts") {
     if (ts.isPropertySignature(node.parent) && ts.isStringLiteral(node.parent.name)) {
       const datatype = node.parent.name.text;
       return {

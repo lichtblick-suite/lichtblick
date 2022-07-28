@@ -3,7 +3,7 @@ import { Input, Message } from "./types";
 type Output = {};
 
 export const inputs = ["/topic"];
-export const output = "/studio_node/output_topic";
+export const output = "/studio_script/output_topic";
 
 export default function node(event: Input<"/topic">): Output {
   return {};

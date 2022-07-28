@@ -19,22 +19,22 @@ import skeleton from "./skeleton.ts.template";
 export default [
   {
     name: "Skeleton",
-    description: "An empty node script",
+    description: "An empty script",
     template: skeleton,
   },
   {
     name: "Markers",
-    description: "A node that publishes one or more markers",
+    description: "A script that publishes one or more markers",
     template: marker,
   },
   {
     name: "Multiple Inputs",
-    description: "A node that receives inputs on multiple topics",
+    description: "A script that receives inputs on multiple topics",
     template: multipleInputs,
   },
   {
     name: "GPS Location",
-    description: "A node that publishes foxglove.LocationFix",
+    description: "A script that publishes foxglove.LocationFix",
     template: locationFix,
   },
 ];

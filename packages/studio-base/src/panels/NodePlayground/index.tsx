@@ -42,7 +42,6 @@ import { useUserNodeState } from "@foxglove/studio-base/context/UserNodeStateCon
 import { useWorkspace } from "@foxglove/studio-base/context/WorkspaceContext";
 import BottomBar from "@foxglove/studio-base/panels/NodePlayground/BottomBar";
 import Sidebar from "@foxglove/studio-base/panels/NodePlayground/Sidebar";
-import PlaygroundIcon from "@foxglove/studio-base/panels/NodePlayground/playground-icon.svg";
 import { HelpInfoStore, useHelpInfo } from "@foxglove/studio-base/providers/HelpInfoProvider";
 import { usePanelSettingsTreeUpdate } from "@foxglove/studio-base/providers/PanelSettingsEditorContextProvider";
 import { SaveConfig, UserNodes } from "@foxglove/studio-base/types/panels";
@@ -59,30 +58,30 @@ const skeletonBody = `\
 // The ./types module provides helper types for your Input events and messages.
 import { Input, Message } from "./types";
 
-// Your node can output well-known message types, any of your custom message types, or
+// Your script can output well-known message types, any of your custom message types, or
 // complete custom message types.
 //
 // Use \`Message\` to access your data source types or well-known types:
 // type Twist = Message<"geometry_msgs/Twist">;
 //
-// Conventionally, it's common to make a _type alias_ for your node's output type
-// and use that type name as the return type for your node function.
+// Conventionally, it's common to make a _type alias_ for your script's output type
+// and use that type name as the return type for your script function.
 // Here we've called the type \`Output\` but you can pick any type name.
 type Output = {
   hello: string;
 };
 
-// These are the topics your node "subscribes" to. Studio will invoke your node function
+// These are the topics your script "subscribes" to. Studio will invoke your script function
 // when any message is received on one of these topics.
 export const inputs = ["/input/topic"];
 
-// Any output your node produces is "published" to this topic. Published messages are only visible within Studio, not to your original data source.
-export const output = "/studio_node/output_topic";
+// Any output your script produces is "published" to this topic. Published messages are only visible within Studio, not to your original data source.
+export const output = "/studio_script/output_topic";
 
 // This function is called with messages from your input topics.
 // The first argument is an event with the topic, receive time, and message.
 // Use the \`Input<...>\` helper to get the correct event type for your input topic messages.
-export default function node(event: Input<"/input/topic">): Output {
+export default function script(event: Input<"/input/topic">): Output {
   return {
     hello: "world!",
   };
@@ -141,9 +140,8 @@ const WelcomeScreen = ({ addNewNode }: { addNewNode: (code?: string) => void }) 
     <EmptyState>
       <Container maxWidth="xs">
         <Stack justifyContent="center" alignItems="center" gap={1} fullHeight>
-          <PlaygroundIcon />
           <Typography variant="inherit" gutterBottom>
-            Welcome to Node Playground!
+            Welcome to User Scripts!
             <br />
             Get started by reading the{" "}
             <Link
@@ -157,7 +155,7 @@ const WelcomeScreen = ({ addNewNode }: { addNewNode: (code?: string) => void }) 
             >
               docs
             </Link>
-            , or just create a new node.
+            , or just create a new script.
           </Typography>
           <Button
             color="inherit"
@@ -165,7 +163,7 @@ const WelcomeScreen = ({ addNewNode }: { addNewNode: (code?: string) => void }) 
             onClick={() => addNewNode()}
             startIcon={<AddIcon />}
           >
-            New node
+            New script
           </Button>
         </Stack>
       </Container>
@@ -216,7 +214,7 @@ function NodePlayground(props: Props) {
   const [inputTitle, setInputTitle] = useState<string>(() => {
     return currentScript
       ? currentScript.filePath + (currentScript.readOnly ? " (READONLY)" : "")
-      : "node name";
+      : "script name";
   });
 
   const prefersDarkMode = theme.palette.mode === "dark";
@@ -261,7 +259,7 @@ function NodePlayground(props: Props) {
     setInputTitle(() => {
       return currentScript
         ? currentScript.filePath + (currentScript.readOnly ? " (READONLY)" : "")
-        : "node name";
+        : "script name";
     });
   }, [currentScript]);
 
@@ -370,7 +368,7 @@ function NodePlayground(props: Props) {
                 <StyledInput
                   size="small"
                   disableUnderline
-                  placeholder="node name"
+                  placeholder="script name"
                   value={inputTitle}
                   disabled={!currentScript || currentScript.readOnly}
                   onChange={(ev) => {

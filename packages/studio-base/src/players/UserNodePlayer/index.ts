@@ -405,7 +405,7 @@ export default class UserNodePlayer implements Player {
               log.error(event);
 
               this._problemStore.set(problemKey, {
-                message: `Node playground runtime error: ${event.message}`,
+                message: `User script runtime error: ${event.message}`,
                 severity: "error",
               });
 
@@ -419,7 +419,7 @@ export default class UserNodePlayer implements Player {
 
               this._problemStore.set(problemKey, {
                 severity: "error",
-                message: `Node playground runtime error: ${String(event.data)}`,
+                message: `User script runtime error: ${String(event.data)}`,
               });
 
               void this._emitState();
@@ -432,7 +432,7 @@ export default class UserNodePlayer implements Player {
 
               this._problemStore.set(problemKey, {
                 severity: "error",
-                message: `Node playground runtime error: ${msg}`,
+                message: `User script runtime error: ${msg}`,
               });
 
               void this._emitState();
@@ -478,7 +478,7 @@ export default class UserNodePlayer implements Player {
 
         if (!result) {
           this._problemStore.set(problemKey, {
-            message: `Node playground node ${nodeId} timed out`,
+            message: `User Script ${nodeId} timed out`,
             severity: "warn",
           });
           return;
@@ -503,7 +503,7 @@ export default class UserNodePlayer implements Player {
         if (!result.message) {
           this._problemStore.set(problemKey, {
             severity: "warn",
-            message: `Node playground node ${nodeId} did not produce a message`,
+            message: `User Script ${nodeId} did not produce a message`,
           });
           return;
         }
@@ -556,7 +556,7 @@ export default class UserNodePlayer implements Player {
 
         this._problemStore.set("worker-error", {
           severity: "error",
-          message: `Node playground error: ${event.message}`,
+          message: `User Script error: ${event.message}`,
         });
 
         void this._emitState();
@@ -568,7 +568,7 @@ export default class UserNodePlayer implements Player {
 
         this._problemStore.set("worker-error", {
           severity: "error",
-          message: `Node playground error: ${String(event.data)}`,
+          message: `User Script error: ${String(event.data)}`,
         });
 
         void this._emitState();
@@ -581,7 +581,7 @@ export default class UserNodePlayer implements Player {
 
         this._problemStore.set("worker-error", {
           severity: "error",
-          message: `Node playground error: ${msg}`,
+          message: `User Script error: ${msg}`,
         });
 
         void this._emitState();

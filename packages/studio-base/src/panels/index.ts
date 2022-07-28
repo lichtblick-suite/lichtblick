@@ -200,7 +200,7 @@ const builtin: PanelInfo[] = [
     module: async () => await import("./VariableSlider"),
   },
   {
-    title: "Node Playground",
+    title: "User Scripts",
     type: "NodePlayground",
     description: "Write custom data transformations in TypeScript.",
     help: NodePlaygroundHelp,

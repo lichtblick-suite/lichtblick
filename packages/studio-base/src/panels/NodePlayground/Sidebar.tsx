@@ -62,7 +62,7 @@ type NodesListProps = {
 const NodesList = ({ nodes, selectNode, deleteNode, collapse, selectedNodeId }: NodesListProps) => {
   return (
     <Stack flex="auto">
-      <SidebarHeader title="Nodes" collapse={collapse} />
+      <SidebarHeader title="Scripts" collapse={collapse} />
       <List dense>
         {Object.keys(nodes).map((nodeId) => {
           return (
@@ -206,7 +206,7 @@ const Sidebar = ({
             title="Utilities"
             subheader={
               <Typography variant="body2" color="text.secondary" component="div">
-                You can import any of these modules into your node using the following syntax:{" "}
+                You can import any of these modules into your script using the following syntax:{" "}
                 <pre>{`import { ... } from "./pointClouds.ts".`}</pre>
               </Typography>
             }
@@ -226,8 +226,8 @@ const Sidebar = ({
             ))}
             <ListItem
               disablePadding
-              onClick={gotoUtils.bind(undefined, "/studio_node/generatedTypes.ts")}
-              selected={script ? script.filePath === "/studio_node/generatedTypes.ts" : false}
+              onClick={gotoUtils.bind(undefined, "/studio_script/generatedTypes.ts")}
+              selected={script ? script.filePath === "/studio_script/generatedTypes.ts" : false}
             >
               <ListItemButton>
                 <ListItemText
@@ -243,7 +243,7 @@ const Sidebar = ({
         <Stack flex="auto">
           <SidebarHeader
             title="Templates"
-            subheader="Create nodes from these templates, click a template to create a new node."
+            subheader="Create scripts from these templates, click a template to create a new script."
             collapse={() => updateExplorer(undefined)}
           />
           <List dense>
@@ -281,7 +281,7 @@ const Sidebar = ({
           <STab
             disableRipple
             value="nodes"
-            title="Nodes"
+            title="Scripts"
             icon={<NoteIcon fontSize="large" />}
             data-test="node-explorer"
             onClick={() => updateExplorer(nodesSelected ? undefined : "nodes")}

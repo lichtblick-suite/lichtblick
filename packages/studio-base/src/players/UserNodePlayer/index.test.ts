@@ -298,7 +298,7 @@ describe("UserNodePlayer", () => {
       const { topics: firstTopics, datatypes: firstDatatypes }: any = await done1;
       expect(firstTopics).toEqual([
         { name: "/np_input", datatype: "/np_input_datatype" },
-        { name: "/studio_node/1", datatype: `${DEFAULT_STUDIO_NODE_PREFIX}1` },
+        { name: "/studio_script/1", datatype: `${DEFAULT_STUDIO_NODE_PREFIX}1` },
       ]);
       expect(firstDatatypes).toEqual(
         new Map([

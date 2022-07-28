@@ -29,7 +29,7 @@ let unsentErrors: string[] = [];
 if (!inSharedWorker()) {
   // In Chrome, web workers currently (as of March 2020) inherit their Content Security Policy from
   // their associated page, ignoring any policy in the headers of their source file. SharedWorkers
-  // use the headers from their source files, though, and we use a CSP to prohibit node playground
+  // use the headers from their source files, though, and we use a CSP to prohibit user scripts
   // workers from making web requests (using enforceFetchIsBlocked, below.)
   // TODO(steel): Change this back to a web worker if/when Chrome changes its behavior:
   // https://bugs.chromium.org/p/chromium/issues/detail?id=1012640

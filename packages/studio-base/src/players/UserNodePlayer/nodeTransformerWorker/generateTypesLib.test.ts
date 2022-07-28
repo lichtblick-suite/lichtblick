@@ -9,7 +9,7 @@ import { generateTypesLib, generateTypesInterface } from "./generateTypesLib";
 import { compile } from "./transform";
 
 const baseNodeData: NodeData = {
-  name: "/studio_node/main",
+  name: "/studio_script/main",
   sourceCode: "",
   transpiledCode: "",
   diagnostics: [],

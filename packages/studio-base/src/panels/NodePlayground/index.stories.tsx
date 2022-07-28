@@ -21,8 +21,8 @@ import { SExpectedResult } from "@foxglove/studio-base/stories/storyHelpers";
 import { DEFAULT_STUDIO_NODE_PREFIX } from "@foxglove/studio-base/util/globalConstants";
 
 const userNodes = {
-  nodeId1: { name: "/studio_node/node", sourceCode: "const someVariableName = 1;" },
-  nodeId2: { name: "/studio_node/node2", sourceCode: "const anotherVariableName = 2;" },
+  nodeId1: { name: "/studio_script/script", sourceCode: "const someVariableName = 1;" },
+  nodeId2: { name: "/studio_script/script2", sourceCode: "const anotherVariableName = 2;" },
 };
 
 const userNodeRosLib = `
@@ -144,7 +144,7 @@ storiesOf("panels/NodePlayground", module)
         ...fixture,
         userNodes: {
           nodeId1: {
-            name: "/studio_node/node",
+            name: "/studio_script/script",
             sourceCode: sourceCodeWithUtils,
           },
         },
@@ -161,7 +161,7 @@ storiesOf("panels/NodePlayground", module)
         ...fixture,
         userNodes: {
           nodeId1: {
-            name: "/studio_node/node",
+            name: "/studio_script/script",
             sourceCode: sourceCodeWithUtils,
           },
         },
@@ -173,7 +173,7 @@ storiesOf("panels/NodePlayground", module)
           // Change the userNodes to confirm the code in the Editor updates
           actions.setUserNodes({
             nodeId1: {
-              name: "/studio_node/node",
+              name: "/studio_script/script",
               sourceCode: utilsSourceCode,
             },
           });
@@ -193,7 +193,7 @@ storiesOf("panels/NodePlayground", module)
         ...fixture,
         userNodes: {
           nodeId1: {
-            name: "/studio_node/node",
+            name: "/studio_script/script",
             sourceCode: sourceCodeWithUtils,
           },
         },
@@ -206,7 +206,7 @@ storiesOf("panels/NodePlayground", module)
           selectedNodeId: "nodeId1",
           additionalBackStackItems: [
             {
-              filePath: "/studio_node/pointClouds",
+              filePath: "/studio_script/pointClouds",
               code: utilsSourceCode,
               readOnly: true,
             },
@@ -221,7 +221,7 @@ storiesOf("panels/NodePlayground", module)
         ...fixture,
         userNodes: {
           nodeId1: {
-            name: "/studio_node/node",
+            name: "/studio_script/script",
             sourceCode: sourceCodeWithUtils,
           },
         },
@@ -239,7 +239,7 @@ storiesOf("panels/NodePlayground", module)
           selectedNodeId: "nodeId1",
           additionalBackStackItems: [
             {
-              filePath: "/studio_node/pointClouds",
+              filePath: "/studio_script/pointClouds",
               code: utilsSourceCode,
               readOnly: true,
             },
@@ -322,7 +322,7 @@ storiesOf("panels/NodePlayground", module)
     <PanelSetup
       fixture={{
         ...fixture,
-        userNodes: { nodeId1: { name: "/studio_node/node", sourceCode: "" } },
+        userNodes: { nodeId1: { name: "/studio_script/script", sourceCode: "" } },
         userNodeDiagnostics: { nodeId1: [] },
       }}
     >
@@ -333,7 +333,7 @@ storiesOf("panels/NodePlayground", module)
     <PanelSetup
       fixture={{
         ...fixture,
-        userNodes: { nodeId1: { name: "/studio_node/node", sourceCode: "" } },
+        userNodes: { nodeId1: { name: "/studio_script/script", sourceCode: "" } },
         userNodeDiagnostics: { nodeId1: [] },
       }}
       onMount={(el) => {
@@ -352,7 +352,7 @@ storiesOf("panels/NodePlayground", module)
     <PanelSetup
       fixture={{
         ...fixture,
-        userNodes: { nodeId1: { name: "/studio_node/node", sourceCode: "" } },
+        userNodes: { nodeId1: { name: "/studio_script/script", sourceCode: "" } },
         userNodeDiagnostics: { nodeId1: [] },
       }}
       onMount={(el) => {
@@ -371,7 +371,7 @@ storiesOf("panels/NodePlayground", module)
     <PanelSetup
       fixture={{
         ...fixture,
-        userNodes: { nodeId1: { name: "/studio_node/node", sourceCode: "" } },
+        userNodes: { nodeId1: { name: "/studio_script/script", sourceCode: "" } },
         userNodeDiagnostics: {
           nodeId1: [
             {
@@ -415,7 +415,7 @@ storiesOf("panels/NodePlayground", module)
     <PanelSetup
       fixture={{
         ...fixture,
-        userNodes: { nodeId1: { name: "/studio_node/node", sourceCode: "" } },
+        userNodes: { nodeId1: { name: "/studio_script/script", sourceCode: "" } },
         userNodeDiagnostics: {
           nodeId1: [
             {
@@ -469,7 +469,7 @@ storiesOf("panels/NodePlayground", module)
         ...fixture,
         userNodes: {
           nodeId1: {
-            name: "/studio_node/node",
+            name: "/studio_script/script",
             sourceCode: sourceCodeWithLogs,
           },
         },
@@ -486,7 +486,7 @@ storiesOf("panels/NodePlayground", module)
         ...fixture,
         userNodes: {
           nodeId1: {
-            name: "/studio_node/node",
+            name: "/studio_script/script",
             sourceCode: sourceCodeWithLogs,
           },
         },
@@ -509,7 +509,7 @@ storiesOf("panels/NodePlayground", module)
     <PanelSetup
       fixture={{
         ...fixture,
-        userNodes: { nodeId1: { name: "/studio_node/node", sourceCode: "" } },
+        userNodes: { nodeId1: { name: "/studio_script/script", sourceCode: "" } },
         userNodeDiagnostics: { nodeId1: [] },
         userNodeLogs: { nodeId1: logs },
       }}
