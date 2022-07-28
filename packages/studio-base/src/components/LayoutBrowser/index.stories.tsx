@@ -141,10 +141,12 @@ MultiDelete.parameters = { colorScheme: "dark" };
 MultiDelete.play = async () => {
   const layouts = await screen.findAllByTestId("layout-list-item");
   layouts.forEach((layout) => fireEvent.click(layout, { ctrlKey: true }));
-  const deleteButton = await screen.findAllByTitle("Delete Selected");
-  if (deleteButton[0]) {
-    fireEvent.click(deleteButton[0]);
+  const actions = await screen.findAllByTestId("layout-actions");
+  if (actions[0]) {
+    fireEvent.click(actions[0]!);
   }
+  const deleteButton = await screen.findByText("Delete");
+  fireEvent.click(deleteButton);
   const confirmButton = await screen.findByText("Delete");
   fireEvent.click(confirmButton);
 };
@@ -278,6 +280,9 @@ DeleteSelectedLayout.play = async () => {
     fireEvent.click(layouts[1]);
   }
   await deleteLayoutInteraction(1);
+  if (layouts[0]) {
+    fireEvent.click(layouts[0]);
+  }
 };
 DeleteSelectedLayout.parameters = { colorScheme: "dark" };
 

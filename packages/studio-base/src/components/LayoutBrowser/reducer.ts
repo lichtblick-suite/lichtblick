@@ -6,34 +6,36 @@ import { compact, pull, xor } from "lodash";
 import { Dispatch } from "react";
 import { useImmerReducer } from "use-immer";
 
+type MultiAction = "delete";
+
 type State = {
   busy: boolean;
   error: undefined | Error;
   online: boolean;
+  multiAction: undefined | { action: MultiAction; ids: string[] };
   selectedIds: string[];
-  queuedDeleteIds: string[];
 };
 
 type Action =
-  | { type: "clear-queued-deletes" }
-  | { type: "queue-deletes" }
+  | { type: "clear-multi-action" }
+  | { type: "queue-multi-action"; action: MultiAction }
   | { type: "set-busy"; value: boolean }
   | { type: "set-error"; value: undefined | Error }
   | { type: "set-online"; value: boolean }
   | { type: "select-id"; id?: string }
-  | { type: "shift-queued-deletes" }
+  | { type: "shift-multi-action" }
   | { type: "toggle-selected"; id: string };
 
 function reducer(draft: State, action: Action) {
   switch (action.type) {
-    case "clear-queued-deletes":
-      draft.queuedDeleteIds = [];
+    case "clear-multi-action":
+      draft.multiAction = undefined;
       break;
-    case "queue-deletes":
-      draft.queuedDeleteIds = draft.selectedIds;
+    case "queue-multi-action":
+      draft.multiAction = { action: action.action, ids: draft.selectedIds };
       break;
     case "select-id":
-      draft.queuedDeleteIds = [];
+      draft.multiAction = undefined;
       draft.selectedIds = compact([action.id]);
       break;
     case "set-busy":
@@ -45,9 +47,12 @@ function reducer(draft: State, action: Action) {
     case "set-online":
       draft.online = action.value;
       break;
-    case "shift-queued-deletes": {
-      const toDelete = draft.queuedDeleteIds.shift();
-      pull(draft.selectedIds, toDelete);
+    case "shift-multi-action": {
+      const id = draft.multiAction?.ids.shift();
+      if (draft.multiAction?.ids.length === 0) {
+        draft.multiAction = undefined;
+      }
+      pull(draft.selectedIds, id);
       break;
     }
     case "toggle-selected":
@@ -59,5 +64,5 @@ function reducer(draft: State, action: Action) {
 export function useLayoutBrowserReducer(
   props: Pick<State, "busy" | "error" | "online">,
 ): [State, Dispatch<Action>] {
-  return useImmerReducer(reducer, { ...props, selectedIds: [], queuedDeleteIds: [] });
+  return useImmerReducer(reducer, { ...props, selectedIds: [], multiAction: undefined });
 }

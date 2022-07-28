@@ -60,7 +60,7 @@ export default function LayoutSection({
         )}
         {items?.map((layout) => (
           <LayoutRow
-            multiSelected={multiSelectedIds.includes(layout.id)}
+            multiSelectedIds={multiSelectedIds}
             selected={layout.id === selectedId}
             key={layout.id}
             layout={layout}

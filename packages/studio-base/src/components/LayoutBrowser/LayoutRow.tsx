@@ -110,7 +110,7 @@ export type LayoutActionMenuItem =
 
 export default React.memo(function LayoutRow({
   layout,
-  multiSelected,
+  multiSelectedIds,
   selected,
   onSelect,
   onRename,
@@ -123,7 +123,7 @@ export default React.memo(function LayoutRow({
   onMakePersonalCopy,
 }: {
   layout: Layout;
-  multiSelected: boolean;
+  multiSelectedIds: readonly string[];
   selected: boolean;
   onSelect: (item: Layout, params?: { selectedViaClick?: boolean; event?: MouseEvent }) => void;
   onRename: (item: Layout, newName: string) => void;
@@ -151,6 +151,7 @@ export default React.memo(function LayoutRow({
 
   const deletedOnServer = layout.syncInfo?.status === "remotely-deleted";
   const hasModifications = layout.working != undefined;
+  const multiSelection = multiSelectedIds.length > 1;
 
   useLayoutEffect(() => {
     const onlineListener = () => setIsOnline(layoutManager.isOnline);
@@ -222,11 +223,15 @@ export default React.memo(function LayoutRow({
   }, []);
 
   const confirmDelete = useCallback(() => {
+    const layoutWarning =
+      !multiSelection && layoutIsShared(layout)
+        ? "Team members will no longer be able to access this layout. "
+        : "";
+    const prompt = `${layoutWarning}This action cannot be undone.`;
+    const title = multiSelection ? "Delete selected layouts?" : `Delete “${layout.name}”?`;
     void confirm({
-      title: `Delete “${layout.name}”?`,
-      prompt: `${
-        layoutIsShared(layout) ? "Team members will no longer be able to access this layout." : ""
-      } This action cannot be undone.`,
+      title,
+      prompt,
       ok: "Delete",
       variant: "danger",
     }).then((response) => {
@@ -234,7 +239,7 @@ export default React.memo(function LayoutRow({
         onDelete(layout);
       }
     });
-  }, [confirm, isMounted, layout, onDelete]);
+  }, [confirm, isMounted, layout, multiSelection, onDelete]);
 
   const handleContextMenu = useCallback((event: React.MouseEvent) => {
     event.preventDefault();
@@ -263,7 +268,7 @@ export default React.memo(function LayoutRow({
       text: "Rename",
       onClick: renameAction,
       "data-test": "rename-layout",
-      disabled: layoutIsShared(layout) && !isOnline,
+      disabled: (layoutIsShared(layout) && !isOnline) || multiSelection,
       secondaryText: layoutIsShared(layout) && !isOnline ? "Offline" : undefined,
     },
     // For shared layouts, duplicate first requires saving or discarding changes
@@ -275,6 +280,7 @@ export default React.memo(function LayoutRow({
           ? "Make a personal copy"
           : "Duplicate",
       onClick: duplicateAction,
+      disabled: multiSelection,
       "data-test": "duplicate-layout",
     },
     layoutManager.supportsSharing &&
@@ -283,13 +289,14 @@ export default React.memo(function LayoutRow({
         key: "share",
         text: "Share with team…",
         onClick: shareAction,
-        disabled: !isOnline,
+        disabled: !isOnline || multiSelection,
         secondaryText: !isOnline ? "Offline" : undefined,
       },
     {
       type: "item",
       key: "export",
       text: "Export…",
+      disabled: multiSelection,
       onClick: exportAction,
     },
     { key: "divider_1", type: "divider" },
@@ -309,7 +316,7 @@ export default React.memo(function LayoutRow({
         key: "overwrite",
         text: "Save changes",
         onClick: overwriteAction,
-        disabled: deletedOnServer || (layoutIsShared(layout) && !isOnline),
+        disabled: deletedOnServer || (layoutIsShared(layout) && !isOnline) || multiSelection,
         secondaryText: layoutIsShared(layout) && !isOnline ? "Offline" : undefined,
       },
       {
@@ -317,7 +324,7 @@ export default React.memo(function LayoutRow({
         key: "revert",
         text: "Revert",
         onClick: revertAction,
-        disabled: deletedOnServer,
+        disabled: deletedOnServer || multiSelection,
       },
     ];
     if (layoutIsShared(layout)) {
@@ -325,6 +332,7 @@ export default React.memo(function LayoutRow({
         type: "item",
         key: "copy_to_personal",
         text: "Make a personal copy",
+        disabled: multiSelection,
         onClick: makePersonalCopyAction,
       });
     }
@@ -428,7 +436,7 @@ export default React.memo(function LayoutRow({
     >
       <ListItemButton
         data-testid="layout-list-item"
-        selected={selected || multiSelected}
+        selected={selected || multiSelectedIds.includes(layout.id)}
         onSubmit={onSubmit}
         onClick={editingName ? undefined : onClick}
         onContextMenu={editingName ? undefined : handleContextMenu}
