@@ -42,14 +42,14 @@ function TopicsStory({
 
   useAsync(async () => {
     await delay(10);
-    document.querySelector<HTMLElement>(`[data-test="set-topic-visibility"] button`)!.click();
+    document.querySelector<HTMLElement>(`[data-testid="set-topic-visibility"] button`)!.click();
     const radioOption = document.querySelector<HTMLElement>(
-      `[data-test="${initialTopicVisibility}"]`,
+      `[data-testid="${initialTopicVisibility}"]`,
     );
     if (radioOption) {
       radioOption.click();
       document
-        .querySelector<HTMLElement>(`[data-test="set-topic-visibility"] div button:last-child`)!
+        .querySelector<HTMLElement>(`[data-testid="set-topic-visibility"] div button:last-child`)!
         .click();
     }
   }, [initialTopicVisibility]);

@@ -114,7 +114,7 @@ function InteractionContextMenuItem({
   );
 
   return (
-    <SMenuItem data-test="InteractionContextMenuItem">
+    <SMenuItem data-testid="InteractionContextMenuItem">
       <STopic onClick={selectItemObject}>
         {menuText}
         <STooltip>{menuText}</STooltip>

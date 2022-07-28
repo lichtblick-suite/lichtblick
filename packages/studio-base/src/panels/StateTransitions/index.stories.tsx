@@ -146,7 +146,7 @@ export function MultiplePathsWithHover(): JSX.Element {
       pauseFrame={pauseFrame}
       onMount={() => {
         const mouseEnterContainer = document.querySelectorAll(
-          "[data-test~=panel-mouseenter-container",
+          "[data-testid~=panel-mouseenter-container",
         )[0]!;
         TestUtils.Simulate.mouseEnter(mouseEnterContainer);
       }}

@@ -146,7 +146,7 @@ const Icon = (props: Props): JSX.Element => {
       className={classNames}
       onClick={clickHandler}
       style={style}
-      data-test={dataTest}
+      data-testid={dataTest}
       {...rest}
     >
       {children}

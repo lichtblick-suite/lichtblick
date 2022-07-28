@@ -73,7 +73,7 @@ export function TabbedToolbar(props: Props): JSX.Element {
   return (
     <STabbedToolbar>
       <PanelToolbar backgroundColor={theme.palette.background.default} helpContent={helpContent}>
-        <STabs role="tab" ref={dropRef} data-test="toolbar-droppable">
+        <STabs role="tab" ref={dropRef} data-testid="toolbar-droppable">
           {tabs.map((tab, i) => (
             <DraggableToolbarTab
               isActive={activeTabIdx === i}
@@ -87,7 +87,7 @@ export function TabbedToolbar(props: Props): JSX.Element {
           ))}
           <StyledIconButton
             size="small"
-            data-test="add-tab"
+            data-testid="add-tab"
             title="Add tab"
             onClick={actions.addTab}
           >

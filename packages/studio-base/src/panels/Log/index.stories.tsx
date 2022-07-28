@@ -141,10 +141,10 @@ export const TopicToRender = (): JSX.Element => {
       }}
       onMount={() => {
         TestUtils.Simulate.mouseEnter(
-          document.querySelectorAll("[data-test~=panel-mouseenter-container]")[0]!,
+          document.querySelectorAll("[data-testid~=panel-mouseenter-container]")[0]!,
         );
         setTimeout(() => {
-          TestUtils.Simulate.click(document.querySelectorAll("[data-test=topic-set]")[0]!);
+          TestUtils.Simulate.click(document.querySelectorAll("[data-testid=topic-set]")[0]!);
         });
       }}
     >

@@ -39,7 +39,7 @@ export function NodeActionsMenu({
         aria-haspopup="true"
         aria-expanded={open ? "true" : undefined}
         onClick={handleClick}
-        data-test="node-actions-menu-button"
+        data-testid="node-actions-menu-button"
         size="small"
       >
         <MoreVertIcon fontSize="small" />

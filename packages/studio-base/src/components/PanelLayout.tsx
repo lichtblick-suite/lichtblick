@@ -138,7 +138,7 @@ export function UnconnectedPanelLayout(props: Props): React.ReactElement {
         Panel = panelInfo
           ? React.lazy(panelInfo.module)
           : () => (
-              <Stack flex="auto" alignItems="center" justifyContent="center" data-test={id}>
+              <Stack flex="auto" alignItems="center" justifyContent="center" data-testid={id}>
                 <PanelToolbar isUnknownPanel />
                 <EmptyState>Unknown panel type: {type}.</EmptyState>
               </Stack>

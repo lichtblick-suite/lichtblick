@@ -25,7 +25,7 @@ function ControlsStory() {
       ref={(el) => {
         setImmediate(() => {
           if (el) {
-            (el as any).querySelector("[data-test=PlaybackSpeedControls-Dropdown]").click();
+            (el as any).querySelector("[data-testid=PlaybackSpeedControls-Dropdown]").click();
           }
         });
       }}

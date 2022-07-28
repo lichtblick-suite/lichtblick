@@ -150,7 +150,7 @@ function StyleExpressionNode(props: {
         marginLeft: `-${OUTER_LEFT_MARGIN}px`,
       }}
     >
-      <SLeft data-test={`ns~${name}`}>
+      <SLeft data-testid={`ns~${name}`}>
         <Icon style={{ color: "rgba(255,255,255, 0.3)" }}>
           <EarthIcon style={{ width: 16, height: 16 }} />
         </Icon>

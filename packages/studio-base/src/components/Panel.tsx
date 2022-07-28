@@ -568,7 +568,7 @@ export default function Panel<
                 fullscreenState={fullscreenState}
                 sourceRect={fullscreenSourceRect}
                 selected={isSelected}
-                data-test={`panel-mouseenter-container ${childId ?? ""}`}
+                data-testid={`panel-mouseenter-container ${childId ?? ""}`}
                 ref={(el) => {
                   panelRootRef.current = el;
                   // disallow dragging the root panel in a layout

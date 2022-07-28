@@ -144,7 +144,7 @@ const Item = (props: ItemProps): JSX.Element => {
     <div
       className={itemClasses}
       onClick={disabled ? noop : onClick}
-      data-test={dataTest}
+      data-testid={dataTest}
       style={style}
     >
       {hasSubMenu && direction === "left" && (

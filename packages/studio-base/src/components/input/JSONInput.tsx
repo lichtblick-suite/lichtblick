@@ -48,7 +48,7 @@ export function JSONInput(props: {
   const isValid = parsedValue != undefined;
   return (
     <InputBase
-      data-test={props.dataTest ?? "json-input"}
+      data-testid={props.dataTest ?? "json-input"}
       type="text"
       value={internalValue}
       error={!isValid}

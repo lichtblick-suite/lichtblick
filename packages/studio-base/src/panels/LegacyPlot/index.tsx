@@ -444,7 +444,7 @@ function TwoDimensionalPlot(props: Props) {
             />
             {hasUserPannedOrZoomed && (
               <StyledButton
-                data-test="reset-zoom"
+                data-testid="reset-zoom"
                 variant="contained"
                 color="inherit"
                 title="(shortcut: double-click)"

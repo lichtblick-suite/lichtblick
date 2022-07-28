@@ -61,7 +61,7 @@ export default function TableCell({
 
   return (
     <ObjectCell
-      data-test={`expand-cell-${sanitizeAccessorPath(accessorPath)}-${row.index}`}
+      data-testid={`expand-cell-${sanitizeAccessorPath(accessorPath)}-${row.index}`}
       onClick={toggleIsExpanded}
     >
       Object

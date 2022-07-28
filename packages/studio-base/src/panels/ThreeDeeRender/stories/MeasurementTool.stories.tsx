@@ -18,7 +18,7 @@ export default {
 
 MeasurementTool.parameters = { colorScheme: "dark", chromatic: { delay: 200 } };
 MeasurementTool.play = async () => {
-  document.querySelector<HTMLElement>("[data-test=measure-button]")!.click();
+  document.querySelector<HTMLElement>("[data-testid=measure-button]")!.click();
   await delay(100);
   document
     .querySelector("canvas")!

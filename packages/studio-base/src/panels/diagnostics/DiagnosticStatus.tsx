@@ -254,7 +254,7 @@ export default function DiagnosticStatus(props: Props): JSX.Element {
             title="Open in Plot panel"
             color="inherit"
             size="small"
-            data-test="open-plot-icon"
+            data-testid="open-plot-icon"
             onClick={() => openSiblingPlotPanel(openSiblingPanel, valuePath)}
           >
             <ShowChartIcon fontSize="inherit" />
@@ -291,7 +291,7 @@ export default function DiagnosticStatus(props: Props): JSX.Element {
       <ResizeHandle
         splitFraction={splitFraction}
         onMouseDown={resizeMouseDown}
-        data-test-resizehandle
+        data-testid-resizehandle
       />
       <StyledTable size="small" ref={tableRef}>
         <TableBody>
@@ -304,7 +304,7 @@ export default function DiagnosticStatus(props: Props): JSX.Element {
             <TableCell padding="none" style={{ borderLeft: "none" }} />
           </TableRow>
           <HeaderTableRow>
-            <TableCell variant="head" data-test="DiagnosticStatus-display-name" colSpan={2}>
+            <TableCell variant="head" data-testid="DiagnosticStatus-display-name" colSpan={2}>
               <Tooltip
                 arrow
                 title={

@@ -162,7 +162,7 @@ export default function HelpSidebar({
                         variant="body2"
                         underline="hover"
                         key={title}
-                        data-test={title}
+                        data-testid={title}
                         href={url}
                         target="_blank"
                         onClick={() => (url ? undefined : setHelpInfo({ title, content }))}

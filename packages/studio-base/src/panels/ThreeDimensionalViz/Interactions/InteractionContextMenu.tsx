@@ -146,7 +146,7 @@ function InteractionContextMenuItem({
     <SMenuItem
       onMouseEnter={onMouseEnter}
       onMouseLeave={onMouseLeave}
-      data-test="InteractionContextMenuItem"
+      data-testid="InteractionContextMenuItem"
     >
       <STopic onClick={selectItemObject}>
         {menuText}

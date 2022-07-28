@@ -359,7 +359,7 @@ function NodePlayground(props: Props) {
         >
           <Stack direction="row" alignItems="center">
             {scriptBackStack.length > 1 && (
-              <IconButton title="Go back" data-test="go-back" size="small" onClick={goBack}>
+              <IconButton title="Go back" data-testid="go-back" size="small" onClick={goBack}>
                 <ArrowBackIcon />
               </IconButton>
             )}
@@ -386,7 +386,7 @@ function NodePlayground(props: Props) {
             )}
             <IconButton
               title="New node"
-              data-test="new-node"
+              data-testid="new-node"
               size="small"
               onClick={() => addNewNode()}
             >

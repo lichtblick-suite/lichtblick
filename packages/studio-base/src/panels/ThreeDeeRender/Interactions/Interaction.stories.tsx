@@ -179,7 +179,7 @@ function DefaultStory() {
       <PanelSetupWithData
         title="Clicked link button"
         onMount={(el) => {
-          const btn = el.querySelector("[data-test='link-id']");
+          const btn = el.querySelector("[data-testid='link-id']");
           if (btn) {
             (btn as any).click();
           }
@@ -193,7 +193,7 @@ function DefaultStory() {
       <PanelSetupWithData
         title="Add link to existing linked global variable"
         onMount={(el) => {
-          const btn = el.querySelector("[data-test='link-scale']");
+          const btn = el.querySelector("[data-testid='link-scale']");
           if (btn) {
             (btn as any).click();
           }

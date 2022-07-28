@@ -50,7 +50,7 @@ export default function UnlinkGlobalVariable({
       elevation={4}
       component="form"
       variant="elevation"
-      data-test="unlink-form"
+      data-testid="unlink-form"
       style={{ overflowWrap: "break-word", pointerEvents: "auto" }}
     >
       <Stack padding={2} gap={1.5}>

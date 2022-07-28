@@ -172,7 +172,7 @@ export function CleansUpTooltipOnUnmount(_args: unknown): JSX.Element | ReactNul
     for (let i = 0; !tooltip && i < 20; i++) {
       TestUtils.Simulate.mouseMove(canvas!, { clientX: 330 + left, clientY: 339 + top });
       await new Promise((resolve) => setTimeout(resolve, 100));
-      tooltip = document.querySelector("[data-test~=TimeBasedChartTooltipContent]") ?? undefined;
+      tooltip = document.querySelector("[data-testid~=TimeBasedChartTooltipContent]") ?? undefined;
     }
     if (tooltip == undefined) {
       throw new Error("could not find tooltip");

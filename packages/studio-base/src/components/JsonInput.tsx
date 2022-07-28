@@ -174,7 +174,7 @@ export function ValidatedInputBase({
   return (
     <>
       <StyledTextarea
-        data-test="validated-input"
+        data-testid="validated-input"
         ref={inputRef}
         value={inputStr}
         onChange={handleChange}

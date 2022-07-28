@@ -662,7 +662,7 @@ function RawMessages(props: Props) {
           className={classes.iconButton}
           title={expandAll ?? false ? "Collapse all" : "Expand all"}
           onClick={onToggleExpandAll}
-          data-test="expand-all"
+          data-testid="expand-all"
           size="small"
         >
           {expandAll ?? false ? (

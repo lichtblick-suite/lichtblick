@@ -62,7 +62,7 @@ export function PanelView(): JSX.Element {
     <div style={{ margin: 30, height: 400 }}>
       <PanelSetup
         onMount={(el) => {
-          const buttonsForPanel = el.querySelectorAll("[data-test='Another Panel']") as any;
+          const buttonsForPanel = el.querySelectorAll("[data-testid='Another Panel']") as any;
 
           for (const buttonForPanel of buttonsForPanel) {
             if (buttonForPanel != undefined) {

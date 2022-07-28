@@ -283,7 +283,7 @@ const Sidebar = ({
             value="nodes"
             title="Scripts"
             icon={<NoteIcon fontSize="large" />}
-            data-test="node-explorer"
+            data-testid="node-explorer"
             onClick={() => updateExplorer(nodesSelected ? undefined : "nodes")}
           />
           <STab
@@ -291,7 +291,7 @@ const Sidebar = ({
             value="utils"
             title="Utilities"
             icon={<ConstructionOutlinedIcon fontSize="large" />}
-            data-test="utils-explorer"
+            data-testid="utils-explorer"
             onClick={() => updateExplorer(utilsSelected ? undefined : "utils")}
           />
           <STab
@@ -299,7 +299,7 @@ const Sidebar = ({
             value="templates"
             title="Templates"
             icon={<TemplateIcon fontSize="large" />}
-            data-test="templates-explorer"
+            data-testid="templates-explorer"
             onClick={() => updateExplorer(templatesSelected ? undefined : "templates")}
           />
         </Tabs>

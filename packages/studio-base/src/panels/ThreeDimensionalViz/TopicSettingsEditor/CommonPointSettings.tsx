@@ -44,7 +44,7 @@ export default function CommonPointSettings({
     <Stack flex="auto" gap={1}>
       <TextField
         label="Point size"
-        data-test="point-size-input"
+        data-testid="point-size-input"
         type="number"
         placeholder={defaultPointSize.toString()}
         value={pointSizeVal}

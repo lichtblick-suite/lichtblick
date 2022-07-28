@@ -111,7 +111,7 @@ storiesOf("panels/Tab", module)
           setTimeout(async () => {
             await tick();
             (
-              document.querySelectorAll('[data-test="panel-menu-item Some Panel"]')[0] as any
+              document.querySelectorAll('[data-testid="panel-menu-item Some Panel"]')[0] as any
             ).click();
           }, DEFAULT_TIMEOUT);
         }}
@@ -137,7 +137,7 @@ storiesOf("panels/Tab", module)
           setTimeout(async () => {
             await tick();
             (
-              document.querySelectorAll('[data-test="panel-menu-item Some Panel"]')[0] as any
+              document.querySelectorAll('[data-testid="panel-menu-item Some Panel"]')[0] as any
             ).click();
           }, DEFAULT_TIMEOUT);
         }}
@@ -164,9 +164,9 @@ storiesOf("panels/Tab", module)
             await tick();
 
             const imageItem = document.querySelectorAll(
-              '[data-test="panel-menu-item Some Panel"]',
+              '[data-testid="panel-menu-item Some Panel"]',
             )[0];
-            const panel = document.querySelectorAll('[data-test="empty-drop-target"]')[0];
+            const panel = document.querySelectorAll('[data-testid="empty-drop-target"]')[0];
             await dragAndDrop(imageItem, panel);
           }, DEFAULT_TIMEOUT);
         }}
@@ -193,9 +193,9 @@ storiesOf("panels/Tab", module)
             await tick();
 
             const imageItem = document.querySelectorAll(
-              '[data-test="panel-menu-item Some Panel"]',
+              '[data-testid="panel-menu-item Some Panel"]',
             )[0];
-            const panel = document.querySelectorAll('[data-test="empty-drop-target"]')[0];
+            const panel = document.querySelectorAll('[data-testid="empty-drop-target"]')[0];
             await dragAndDrop(imageItem, panel);
           }, DEFAULT_TIMEOUT);
         }}
@@ -258,7 +258,7 @@ storiesOf("panels/Tab", module)
         style={{ width: "100%" }}
         onMount={() => {
           setTimeout(async () => {
-            const addTabBtn = document.querySelector("[data-test=add-tab]");
+            const addTabBtn = document.querySelector("[data-testid=add-tab]");
             if (addTabBtn) {
               (addTabBtn as any).click();
             }
@@ -282,7 +282,7 @@ storiesOf("panels/Tab", module)
         style={{ width: "100%" }}
         onMount={() => {
           setTimeout(async () => {
-            const removeTabBtn = document.querySelector("[data-test=tab-icon]");
+            const removeTabBtn = document.querySelector("[data-testid=tab-icon]");
             if (removeTabBtn) {
               (removeTabBtn as any).click();
             }
@@ -334,7 +334,7 @@ storiesOf("panels/Tab", module)
           setTimeout(async () => {
             await tick();
             const tabs = document.querySelectorAll("[draggable=true]");
-            const toolbar = document.querySelectorAll('[data-test="toolbar-droppable"]')[0];
+            const toolbar = document.querySelectorAll('[data-testid="toolbar-droppable"]')[0];
 
             // Drag and drop the first tab onto the toolbar
             await dragAndDrop(tabs[0], toolbar);
@@ -367,8 +367,8 @@ storiesOf("panels/Tab", module)
         onMount={() => {
           setTimeout(async () => {
             await tick();
-            const tabs = document.querySelectorAll("[data-test=toolbar-tab]");
-            const toolbar = document.querySelectorAll('[data-test="toolbar-droppable"]')[1];
+            const tabs = document.querySelectorAll("[data-testid=toolbar-tab]");
+            const toolbar = document.querySelectorAll('[data-testid="toolbar-droppable"]')[1];
 
             // Drag and drop the first tab onto the toolbar of the second tab panel
             await dragAndDrop(tabs[1], toolbar);
@@ -400,7 +400,7 @@ storiesOf("panels/Tab", module)
           setTimeout(async () => {
             await tick();
             const tabs = document.querySelectorAll("[draggable=true]");
-            const toolbar = document.querySelectorAll('[data-test="toolbar-droppable"]')[0];
+            const toolbar = document.querySelectorAll('[data-testid="toolbar-droppable"]')[0];
 
             // Drag the first tab in the parent tab panel over the second tab in the child tab panel
             tabs[0]?.dispatchEvent(new MouseEvent("dragstart", { bubbles: true }));
@@ -429,18 +429,21 @@ storiesOf("panels/Tab", module)
           setTimeout(async () => {
             // Create a new tab on the left side
             (
-              document.querySelectorAll('[data-test~="Tab!Left"] [data-test="add-tab"]')[0] as any
+              document.querySelectorAll(
+                '[data-testid~="Tab!Left"] [data-testid="add-tab"]',
+              )[0] as any
             ).click();
 
             const dragHandle =
               document.querySelector(
-                '[data-test~="Tab!RightInner"] [data-test="mosaic-drag-handle"]',
+                '[data-testid~="Tab!RightInner"] [data-testid="mosaic-drag-handle"]',
               ) ?? undefined;
             await dragAndDrop(
               dragHandle,
               () =>
-                document.querySelector('[data-test~="Tab!Left"] [data-test="empty-drop-target"]') ??
-                undefined,
+                document.querySelector(
+                  '[data-testid~="Tab!Left"] [data-testid="empty-drop-target"]',
+                ) ?? undefined,
             );
           }, DEFAULT_TIMEOUT);
         }}
@@ -457,20 +460,20 @@ storiesOf("panels/Tab", module)
         style={{ width: "100%" }}
         onMount={() => {
           setTimeout(async () => {
-            const mouseEnterContainer = document.querySelectorAll('[data-test~="Plot!1"]')[0];
+            const mouseEnterContainer = document.querySelectorAll('[data-testid~="Plot!1"]')[0];
             if (!mouseEnterContainer) {
               throw new Error("missing plot panel");
             }
             TestUtils.Simulate.mouseEnter(mouseEnterContainer);
             const dragHandle = document.querySelector(
-              '[data-test~="Plot!1"] [data-test="mosaic-drag-handle"]',
+              '[data-testid~="Plot!1"] [data-testid="mosaic-drag-handle"]',
             );
             if (!dragHandle) {
               throw new Error("missing drag handle");
             }
             await dragAndDrop(dragHandle, () => {
               const dropTarget = document
-                .querySelector('[data-test~="unknown!inner4"]')
+                .querySelector('[data-testid~="unknown!inner4"]')
                 ?.parentElement?.parentElement?.querySelector(".drop-target.left");
               if (!dropTarget) {
                 throw new Error("missing drop target");

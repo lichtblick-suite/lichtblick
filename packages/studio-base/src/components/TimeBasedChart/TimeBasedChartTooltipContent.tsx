@@ -83,7 +83,7 @@ export default function TimeBasedChartTooltipContent(
   // not include all datasets
   if (!multiDataset) {
     return (
-      <div className={classes.root} data-test="TimeBasedChartTooltipContent">
+      <div className={classes.root} data-testid="TimeBasedChartTooltipContent">
         {take(content, 1).map((item, idx) => {
           const value =
             typeof item.value === "string"
@@ -104,7 +104,7 @@ export default function TimeBasedChartTooltipContent(
   }
 
   return (
-    <div className={classes.root} data-test="TimeBasedChartTooltipContent">
+    <div className={classes.root} data-testid="TimeBasedChartTooltipContent">
       {Array.from(itemsByPath.out.entries(), ([path, items], idx) => {
         return (
           <div key={idx} className={classes.multiValueItem}>

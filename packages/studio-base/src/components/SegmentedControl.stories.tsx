@@ -62,7 +62,7 @@ function ControlledExample() {
     <Box
       title="clicked the 2nd option manually"
       onMount={(el) => {
-        const secondOptionEl = el.querySelector("[data-test='second']");
+        const secondOptionEl = el.querySelector("[data-testid='second']");
         if (secondOptionEl) {
           (secondOptionEl as any).click();
         }

@@ -204,7 +204,7 @@ export default function TreeNodeRow({
     <STreeNodeRow visibleInScene={nodeVisibleInScene} style={{ width: rowWidth }}>
       <SLeft
         style={{ cursor: hasChildren && filterText.length === 0 ? "pointer" : "default" }}
-        data-test={`name~${key}`}
+        data-testid={`name~${key}`}
         onClick={hasChildren ? () => toggleNodeExpanded(key) : undefined}
       >
         <NodeName

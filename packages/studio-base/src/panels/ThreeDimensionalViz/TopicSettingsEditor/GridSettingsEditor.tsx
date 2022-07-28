@@ -44,7 +44,7 @@ export default function GridSettingsEditor(
       <TextField
         label="Width"
         variant="filled"
-        data-test="width-input"
+        data-testid="width-input"
         type="number"
         placeholder="10"
         value={settings.width ?? ""}
@@ -57,7 +57,7 @@ export default function GridSettingsEditor(
       <TextField
         label="Subdivisions"
         variant="filled"
-        data-test="subdivisions-input"
+        data-testid="subdivisions-input"
         type="number"
         placeholder="9"
         value={settings.subdivisions ?? ""}
@@ -70,7 +70,7 @@ export default function GridSettingsEditor(
       <TextField
         label="Height offset"
         variant="filled"
-        data-test="height-offset-input"
+        data-testid="height-offset-input"
         type="number"
         placeholder="0"
         value={settings.heightOffset ?? ""}

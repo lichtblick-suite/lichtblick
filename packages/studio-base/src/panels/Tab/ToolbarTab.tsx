@@ -214,7 +214,7 @@ export function ToolbarTab(props: Props): JSX.Element {
       ref={innerRef}
       title={tabTitle ? tabTitle : "Enter tab name"}
       tabCount={tabCount}
-      data-test="toolbar-tab"
+      data-testid="toolbar-tab"
     >
       {highlight != undefined && <DropIndicator direction={highlight} />}
       <InputBase
@@ -231,7 +231,7 @@ export function ToolbarTab(props: Props): JSX.Element {
         <StyledIconButton
           edge="end"
           size="small"
-          data-test="tab-icon"
+          data-testid="tab-icon"
           title="Remove tab"
           onClick={removeTab}
         >

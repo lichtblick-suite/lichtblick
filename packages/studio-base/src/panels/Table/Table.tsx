@@ -126,7 +126,7 @@ function getColumnsFromObject(
     <SIconButton
       {...row.getToggleRowExpandedProps()}
       size="small"
-      data-test={`expand-row-${row.index}`}
+      data-testid={`expand-row-${row.index}`}
       style={{ margin: -4 }}
     >
       {row.isExpanded ? <MinusIcon fontSize="small" /> : <PlusIcon fontSize="small" />}
@@ -229,7 +229,7 @@ export default function Table({
                       id={column.id}
                       {...column.getHeaderProps(column.getSortByToggleProps())}
                       key={column.id}
-                      data-test={`column-header-${sanitizeAccessorPath(column.id)}`}
+                      data-testid={`column-header-${sanitizeAccessorPath(column.id)}`}
                     >
                       {column.render("Header")}
                     </STableHeader>

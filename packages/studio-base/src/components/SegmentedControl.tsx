@@ -67,7 +67,7 @@ export default function SegmentedControl({ options, selectedId, onChange }: Prop
       {options.map(({ id, label }) => (
         <SOption
           key={id}
-          data-test={id}
+          data-testid={id}
           onClick={() => onChange(id)}
           isSelected={selectedId === id}
         >

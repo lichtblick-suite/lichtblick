@@ -78,7 +78,7 @@ export const EmptyPanelLayout = ({ tabId }: Props): JSX.Element => {
   );
 
   return (
-    <DropTarget isOver={isOver} ref={drop} data-test="empty-drop-target">
+    <DropTarget isOver={isOver} ref={drop} data-testid="empty-drop-target">
       <Root>
         <Stack paddingBottom={2}>
           <Typography variant="body2" paddingX={2} paddingTop={2}>

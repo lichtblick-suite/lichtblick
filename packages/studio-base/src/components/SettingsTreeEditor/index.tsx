@@ -53,7 +53,7 @@ export default function SettingsTreeEditor({
       {settings.enableFilter === true && (
         <StyledAppBar position="sticky" color="default" elevation={0}>
           <TextField
-            data-test="settings-filter-field"
+            data-testid="settings-filter-field"
             onChange={(event) => setFilterText(event.target.value)}
             value={filterText}
             variant="filled"

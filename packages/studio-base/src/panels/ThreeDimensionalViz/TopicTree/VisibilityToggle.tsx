@@ -107,7 +107,7 @@ export default function VisibilityToggle(props: VisibilityToggleProps): JSX.Elem
         [classes.unavailable]: !available,
       })}
       disabled={!available}
-      data-test={dataTest}
+      data-testid={dataTest}
       title={!available ? "Unavailable" : "Toggle visibility"}
       tabIndex={0}
       onKeyDown={(event: KeyboardEvent) => {

@@ -253,7 +253,7 @@ export default function ChildToggle(props: Props): ReactElement {
           event.preventDefault();
           setIsOpen(!isOpen);
         }}
-        data-test={dataTest}
+        data-testid={dataTest}
       >
         {children[0]}
       </div>

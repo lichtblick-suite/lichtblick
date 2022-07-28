@@ -318,7 +318,7 @@ function GlobalVariablesTable(): ReactElement {
               skipAnimation={skipAnimation.current}
               animate={changedVariables.includes(name)}
             >
-              <td data-test="global-variable-key">
+              <td data-testid="global-variable-key">
                 <ValidatedResizingInput
                   value={name}
                   dataTest={`global-variable-key-input-${name}`}

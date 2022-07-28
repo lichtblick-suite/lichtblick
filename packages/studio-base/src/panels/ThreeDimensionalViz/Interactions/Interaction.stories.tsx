@@ -212,7 +212,7 @@ function DefaultStory() {
       <PanelSetupWithData
         title="Clicked link button"
         onMount={(el) => {
-          const btn = el.querySelector("[data-test='link-id']");
+          const btn = el.querySelector("[data-testid='link-id']");
           if (btn) {
             (btn as any).click();
           }
@@ -226,7 +226,7 @@ function DefaultStory() {
       <PanelSetupWithData
         title="Add link to existing linked global variable"
         onMount={(el) => {
-          const btn = el.querySelector("[data-test='link-scale']");
+          const btn = el.querySelector("[data-testid='link-scale']");
           if (btn) {
             (btn as any).click();
           }
@@ -322,11 +322,11 @@ storiesOf("panels/ThreeDimensionalViz/Interactions/Interaction", module)
             </>
           }
           onMount={(el) => {
-            const btn = el.querySelector("[data-test='link-id']");
+            const btn = el.querySelector("[data-testid='link-id']");
             if (btn) {
               (btn as any).click();
               setImmediate(() => {
-                const linkFormBtn = document.querySelector("[data-test='link-form'] button");
+                const linkFormBtn = document.querySelector("[data-testid='link-form'] button");
                 if (linkFormBtn) {
                   (linkFormBtn as any).click();
                 }
@@ -346,17 +346,17 @@ storiesOf("panels/ThreeDimensionalViz/Interactions/Interaction", module)
           }
           onMount={(el) => {
             // click the "link" icon button, manually change the input from "scale" to "id", then click "link" icon
-            const btn = el.querySelector("[data-test='link-scale']");
+            const btn = el.querySelector("[data-testid='link-scale']");
             if (btn) {
               (btn as any).click();
               setImmediate(() => {
                 const linkNameInput = document.querySelector<HTMLInputElement>(
-                  "[data-test='link-form'] input",
+                  "[data-testid='link-form'] input",
                 );
                 if (linkNameInput) {
                   triggerInputChange(linkNameInput, "id");
                   const linkFormBtn = document.querySelector(
-                    "[data-test='link-form'] [data-test='action-buttons'] button",
+                    "[data-testid='link-form'] [data-testid='action-buttons'] button",
                   );
                   if (linkFormBtn) {
                     (linkFormBtn as any).click();
@@ -383,11 +383,11 @@ storiesOf("panels/ThreeDimensionalViz/Interactions/Interaction", module)
           showGlobalVariables
           showLinkedGlobalVariables
           onMount={(el) => {
-            const btn = el.querySelector("[data-test='unlink-type']");
+            const btn = el.querySelector("[data-testid='unlink-type']");
             if (btn) {
               (btn as any).click();
               setImmediate(() => {
-                const unlinkBtn = document.querySelector("[data-test='unlink-form'] button");
+                const unlinkBtn = document.querySelector("[data-testid='unlink-form'] button");
                 if (unlinkBtn) {
                   (unlinkBtn as any).click();
                 }
@@ -412,11 +412,11 @@ storiesOf("panels/ThreeDimensionalViz/Interactions/Interaction", module)
           showGlobalVariables
           showLinkedGlobalVariables
           onMount={(el) => {
-            const btn = el.querySelector("[data-test='unlink-some_val']");
+            const btn = el.querySelector("[data-testid='unlink-some_val']");
             if (btn) {
               (btn as any).click();
               setImmediate(() => {
-                const unlinkBtn = document.querySelector("[data-test='unlink-form'] button");
+                const unlinkBtn = document.querySelector("[data-testid='unlink-form'] button");
                 if (unlinkBtn) {
                   (unlinkBtn as any).click();
                 }

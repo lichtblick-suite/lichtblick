@@ -104,7 +104,7 @@ export default function TopicTreeSwitcher({
           saveConfig({ pinTopics: !pinTopics });
         }}
         renderTopicTree={renderTopicTree}
-        data-test="open-topic-picker"
+        data-testid="open-topic-picker"
       >
         <PushPinIcon fontSize="small" color={pinTopics ? "info" : "inherit"} />
       </PinIconButton>

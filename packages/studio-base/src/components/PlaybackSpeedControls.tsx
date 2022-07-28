@@ -75,7 +75,7 @@ export default function PlaybackSpeedControls(): JSX.Element {
         aria-haspopup="true"
         aria-expanded={open ? "true" : undefined}
         onClick={handleClick}
-        data-test="PlaybackSpeedControls-Dropdown"
+        data-testid="PlaybackSpeedControls-Dropdown"
         disabled={setPlaybackSpeed == undefined}
         disableRipple
         variant="contained"

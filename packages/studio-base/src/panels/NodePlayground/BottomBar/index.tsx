@@ -125,7 +125,7 @@ const BottomBar = ({ nodeId, isSaved, save, diagnostics, logs }: Props): ReactEl
                 </StyledBadge>
               }
               value="diagnostics"
-              data-test="np-errors"
+              data-testid="np-errors"
               onClick={() => handleClick("diagnostics")}
             />
             <StyledTab
@@ -135,7 +135,7 @@ const BottomBar = ({ nodeId, isSaved, save, diagnostics, logs }: Props): ReactEl
                 </StyledBadge>
               }
               value="logs"
-              data-test="np-logs"
+              data-testid="np-logs"
               onClick={() => handleClick("logs")}
             />
           </StyledTabs>
@@ -145,7 +145,7 @@ const BottomBar = ({ nodeId, isSaved, save, diagnostics, logs }: Props): ReactEl
                 size="small"
                 color="primary"
                 variant="contained"
-                data-test="np-logs-clear"
+                data-testid="np-logs-clear"
                 disabled={logs.length === 0}
                 onClick={() => {
                   if (nodeId != undefined) {

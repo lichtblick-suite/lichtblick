@@ -293,7 +293,7 @@ export function ResetZoom(): JSX.Element {
   const step = useStepSequence(
     zoomOut,
     useCallback(() => {
-      elRef.current?.querySelector<HTMLButtonElement>("button[data-test='reset-zoom']")?.click();
+      elRef.current?.querySelector<HTMLButtonElement>("button[data-testid='reset-zoom']")?.click();
     }, []),
     readySignal,
   );

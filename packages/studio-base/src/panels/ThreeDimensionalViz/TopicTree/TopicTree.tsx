@@ -505,7 +505,7 @@ function TopicTree({
         <div className={classes.inputWrapper}>
           <TextField
             iconProps={{ iconName: "Search" }}
-            data-test="topic-tree-filter-input"
+            data-testid="topic-tree-filter-input"
             value={filterText}
             placeholder="Type to filter" // FIX ME: this should be "Search by Topic or Filter by topic"
             onChange={(_, newValue) => setFilterText(newValue ?? "")}
@@ -516,7 +516,7 @@ function TopicTree({
           {filterText.length > 0 && (
             <IconButton
               iconProps={{ iconName: "Close" }}
-              data-test="clear-filter-icon"
+              data-testid="clear-filter-icon"
               onClick={() => setFilterText("")}
               styles={styles.clearIcon}
             />
@@ -539,7 +539,7 @@ function TopicTree({
           text={TOPIC_DISPLAY_MODES[topicDisplayMode].label}
         />
         <IconButton
-          data-test="expand-all-icon"
+          data-testid="expand-all-icon"
           disabled={!rootTreeNode.providerAvailable || filterText.length !== 0}
           iconProps={{ iconName: topLevelNodesCollapsed ? "UnfoldMore" : "UnfoldLess" }}
           onClick={() => {

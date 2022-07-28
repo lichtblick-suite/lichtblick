@@ -28,7 +28,7 @@ export function ValidatedResizingInput(props: {
   return (
     <ReactInputAutosize
       value={`$${internalValue}`}
-      data-test={props.dataTest}
+      data-testid={props.dataTest}
       onChange={(event) => {
         const value = event.target.value.slice(1);
         setInternalValue(value);

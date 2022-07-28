@@ -802,7 +802,7 @@ export default function Layout({
           tabIndex={-1}
           className={classes.container}
           style={{ cursor: cursorType }}
-          data-test="3dviz-layout"
+          data-testid="3dviz-layout"
         >
           <KeyListener keyDownHandlers={keyDownHandlers} />
           <PanelToolbar helpContent={helpContent} />

@@ -177,7 +177,7 @@ storiesOf("panels/NodePlayground", module)
               sourceCode: utilsSourceCode,
             },
           });
-          el.querySelectorAll<HTMLElement>("[data-test=node-explorer]")[0]?.click();
+          el.querySelectorAll<HTMLElement>("[data-testid=node-explorer]")[0]?.click();
         }, 500);
       }}
     >
@@ -230,7 +230,7 @@ storiesOf("panels/NodePlayground", module)
       }}
       onMount={(el) => {
         setTimeout(() => {
-          el.querySelectorAll<HTMLElement>("[data-test=go-back]")[0]!.click();
+          el.querySelectorAll<HTMLElement>("[data-testid=go-back]")[0]!.click();
         }, 500);
       }}
     >
@@ -254,7 +254,7 @@ storiesOf("panels/NodePlayground", module)
         fixture={{ ...fixture, userNodes }}
         onMount={(el) => {
           setTimeout(() => {
-            el.querySelectorAll<HTMLElement>("[data-test=node-explorer]")[0]!.click();
+            el.querySelectorAll<HTMLElement>("[data-testid=node-explorer]")[0]!.click();
           }, SIDEBAR_OPEN_CLICK_TIMEOUT);
         }}
       >
@@ -268,7 +268,7 @@ storiesOf("panels/NodePlayground", module)
         fixture={{ ...fixture, userNodes }}
         onMount={(el) => {
           setTimeout(() => {
-            el.querySelectorAll<HTMLElement>("[data-test=node-explorer]")[0]!.click();
+            el.querySelectorAll<HTMLElement>("[data-testid=node-explorer]")[0]!.click();
           }, SIDEBAR_OPEN_CLICK_TIMEOUT);
         }}
       >
@@ -282,7 +282,7 @@ storiesOf("panels/NodePlayground", module)
         fixture={{ ...fixture, userNodes }}
         onMount={(el) => {
           setTimeout(() => {
-            el.querySelectorAll<HTMLElement>("[data-test=utils-explorer]")[0]!.click();
+            el.querySelectorAll<HTMLElement>("[data-testid=utils-explorer]")[0]!.click();
           }, SIDEBAR_OPEN_CLICK_TIMEOUT);
         }}
       >
@@ -296,7 +296,7 @@ storiesOf("panels/NodePlayground", module)
         fixture={{ ...fixture, userNodes }}
         onMount={(el) => {
           setTimeout(() => {
-            el.querySelectorAll<HTMLElement>("[data-test=templates-explorer]")[0]!.click();
+            el.querySelectorAll<HTMLElement>("[data-testid=templates-explorer]")[0]!.click();
           }, SIDEBAR_OPEN_CLICK_TIMEOUT);
         }}
       >
@@ -338,7 +338,7 @@ storiesOf("panels/NodePlayground", module)
       }}
       onMount={(el) => {
         setTimeout(() => {
-          const diagnosticsErrorsLabel = el.querySelector<HTMLElement>("[data-test=np-errors]");
+          const diagnosticsErrorsLabel = el.querySelector<HTMLElement>("[data-testid=np-errors]");
           if (diagnosticsErrorsLabel) {
             diagnosticsErrorsLabel.click();
           }
@@ -357,7 +357,7 @@ storiesOf("panels/NodePlayground", module)
       }}
       onMount={(el) => {
         setTimeout(() => {
-          const logsLabel = el.querySelector<HTMLElement>("[data-test=np-logs]");
+          const logsLabel = el.querySelector<HTMLElement>("[data-testid=np-logs]");
           if (logsLabel) {
             logsLabel.click();
           }
@@ -453,7 +453,7 @@ storiesOf("panels/NodePlayground", module)
       }}
       onMount={(el) => {
         setTimeout(() => {
-          const diagnosticsErrorsLabel = el.querySelector<HTMLElement>("[data-test=np-errors]");
+          const diagnosticsErrorsLabel = el.querySelector<HTMLElement>("[data-testid=np-errors]");
           if (diagnosticsErrorsLabel) {
             diagnosticsErrorsLabel.click();
           }
@@ -495,7 +495,7 @@ storiesOf("panels/NodePlayground", module)
       }}
       onMount={(el) => {
         setTimeout(() => {
-          const logsLabel = el.querySelector<HTMLElement>("[data-test=np-logs]");
+          const logsLabel = el.querySelector<HTMLElement>("[data-testid=np-logs]");
           if (logsLabel) {
             logsLabel.click();
           }
@@ -515,10 +515,10 @@ storiesOf("panels/NodePlayground", module)
       }}
       onFirstMount={(el) => {
         setTimeout(() => {
-          const logsLabel = el.querySelector<HTMLElement>("[data-test=np-logs]");
+          const logsLabel = el.querySelector<HTMLElement>("[data-testid=np-logs]");
           if (logsLabel) {
             logsLabel.click();
-            const clearBtn = el.querySelector<HTMLElement>("button[data-test=np-logs-clear]");
+            const clearBtn = el.querySelector<HTMLElement>("button[data-testid=np-logs-clear]");
             if (clearBtn) {
               clearBtn.click();
             }

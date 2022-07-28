@@ -124,7 +124,7 @@ function NamespaceNodeRow({
         marginLeft: `-${OUTER_LEFT_MARGIN}px`,
       }}
     >
-      <SLeft data-test={`ns~${namespace}`}>
+      <SLeft data-testid={`ns~${namespace}`}>
         <NodeName
           isXSWidth={isXSWidth}
           maxWidth={maxNodeNameLen}

@@ -762,7 +762,7 @@ export function Basics(): JSX.Element {
 }
 
 Basics.play = () => {
-  Array.from(document.querySelectorAll("[data-test=node-actions-menu-button]"))
+  Array.from(document.querySelectorAll("[data-testid=node-actions-menu-button]"))
     .slice(0, 1)
     .forEach((node) => fireEvent.click(node));
 };
@@ -801,7 +801,7 @@ export function Filter(): JSX.Element {
   return <Wrapper nodes={FilterSettings} />;
 }
 Filter.play = () => {
-  const node = document.querySelector("[data-test=settings-filter-field] input");
+  const node = document.querySelector("[data-testid=settings-filter-field] input");
   if (node) {
     fireEvent.click(node);
     fireEvent.change(node, { target: { value: "matcha" } });

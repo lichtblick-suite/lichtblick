@@ -60,7 +60,7 @@ storiesOf(
       <div
         ref={(el) => {
           if (el) {
-            const btn = el.querySelector<HTMLElement>("[data-test='unlink-some_id']");
+            const btn = el.querySelector<HTMLElement>("[data-testid='unlink-some_id']");
             if (btn) {
               btn.click();
             }

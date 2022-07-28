@@ -113,7 +113,7 @@ export default function UnlinkGlobalVariables({
             elevation={4}
             variant="elevation"
             component="form"
-            data-test="unlink-form"
+            data-testid="unlink-form"
             style={{ pointerEvents: "auto", maxWidth: 320 }}
           >
             {listHtml}

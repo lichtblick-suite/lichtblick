@@ -115,7 +115,7 @@ const NodeRow = React.memo(function NodeRow(props: NodeRowProps) {
   const levelName = LEVEL_NAMES[info.status.level];
 
   return (
-    <ListItem dense disablePadding data-test-diagnostic-row>
+    <ListItem dense disablePadding data-testid-diagnostic-row>
       <StyledListItemButton disableGutters isPinned={isPinned} onClick={handleClick}>
         <IconButton
           size="small"

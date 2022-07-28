@@ -97,7 +97,7 @@ export default function LinkToGlobalVariable({
         variant="elevation"
         style={{ overflowWrap: "break-word", pointerEvents: "auto", width: 240 }}
         onSubmit={addLink}
-        data-test="link-form"
+        data-testid="link-form"
       >
         <Stack padding={2} gap={1}>
           <Typography variant="body2">
@@ -112,7 +112,7 @@ export default function LinkToGlobalVariable({
             value={`$${name}`}
             onChange={(e) => setName(e.target.value.replace(/^\$/, ""))}
           />
-          <Stack direction="row" gap={1} data-test="action-buttons">
+          <Stack direction="row" gap={1} data-testid="action-buttons">
             <Button
               variant="contained"
               color={name.length > 0 ? "primary" : "inherit"}

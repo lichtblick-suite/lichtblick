@@ -210,7 +210,7 @@ export default function PlaybackTimeDisplayMethod({
         <form onSubmit={onSubmit} style={{ width: "100%" }}>
           <StyledTextField
             aria-label="Playback Time Method"
-            data-test="PlaybackTime-text"
+            data-testid="PlaybackTime-text"
             value={isEditing ? inputText : currentTimeString}
             error={hasError}
             variant="filled"

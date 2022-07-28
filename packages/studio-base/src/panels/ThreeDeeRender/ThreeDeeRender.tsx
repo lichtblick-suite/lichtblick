@@ -255,7 +255,7 @@ function RendererOverlay(props: {
             <Video3dIcon style={{ width: 16, height: 16 }} />
           </IconButton>
           <IconButton
-            data-test="measure-button"
+            data-testid="measure-button"
             color={props.measureActive ? "info" : "inherit"}
             title={props.measureActive ? "Cancel measuring" : "Measure distance"}
             onClick={props.onClickMeasure}
@@ -272,7 +272,7 @@ function RendererOverlay(props: {
                 title={props.publishActive ? "Click to cancel" : "Click to publish"}
                 ref={publickClickButtonRef}
                 onClick={props.onClickPublish}
-                data-test="publish-button"
+                data-testid="publish-button"
                 style={{ fontSize: "1rem", pointerEvents: "auto" }}
               >
                 {selectedPublishClickIcon}
