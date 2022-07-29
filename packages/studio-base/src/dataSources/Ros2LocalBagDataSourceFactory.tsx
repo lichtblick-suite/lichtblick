@@ -6,6 +6,8 @@ import {
   IDataSourceFactory,
   DataSourceFactoryInitializeArgs,
 } from "@foxglove/studio-base/context/PlayerSelectionContext";
+import { IterablePlayer } from "@foxglove/studio-base/players/IterablePlayer";
+import { RosDb3IterableSource } from "@foxglove/studio-base/players/IterablePlayer/rosdb3";
 import RandomAccessPlayer from "@foxglove/studio-base/players/RandomAccessPlayer";
 import { Player } from "@foxglove/studio-base/players/types";
 import MemoryCacheDataProvider from "@foxglove/studio-base/randomAccessDataProviders/MemoryCacheDataProvider";
@@ -20,7 +22,30 @@ class Ros2LocalBagDataSourceFactory implements IDataSourceFactory {
   supportedFileTypes = [".db3"];
   supportsMultiFile = true;
 
+  private enableIterablePlayer = false;
+
+  constructor(opt?: { useIterablePlayer: boolean }) {
+    this.enableIterablePlayer = opt?.useIterablePlayer ?? false;
+  }
+
   initialize(args: DataSourceFactoryInitializeArgs): Player | undefined {
+    if (this.enableIterablePlayer) {
+      const files = args.file ? [args.file] : args.files;
+      const name = args.file ? args.file.name : args.files?.map((file) => file.name).join(", ");
+
+      if (!files) {
+        return undefined;
+      }
+
+      const bagSource = new RosDb3IterableSource(files);
+      return new IterablePlayer({
+        metricsCollector: args.metricsCollector,
+        source: bagSource,
+        name,
+        sourceId: this.id,
+      });
+    }
+
     if ((args.files?.length ?? 0) > 0) {
       const bagWorkerDataProvider = new WorkerRosbag2DataProvider({
         type: "files",

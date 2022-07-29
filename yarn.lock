@@ -2238,6 +2238,14 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@foxglove/comlink-transfer-handlers@workspace:*, @foxglove/comlink-transfer-handlers@workspace:packages/comlink-transfer-handlers":
+  version: 0.0.0-use.local
+  resolution: "@foxglove/comlink-transfer-handlers@workspace:packages/comlink-transfer-handlers"
+  dependencies:
+    typescript: 4.6.2
+  languageName: unknown
+  linkType: soft
+
 "@foxglove/crc@npm:^0.0.3":
   version: 0.0.3
   resolution: "@foxglove/crc@npm:0.0.3"
@@ -2499,6 +2507,7 @@ __metadata:
     "@fluentui/react-icons-mdl2": 1.2.14
     "@foxglove/avl": 1.0.0
     "@foxglove/chartjs-plugin-zoom": 2.0.4
+    "@foxglove/comlink-transfer-handlers": "workspace:*"
     "@foxglove/den": "workspace:*"
     "@foxglove/electron-socket": 2.0.0
     "@foxglove/hooks": "workspace:*"
@@ -2585,6 +2594,7 @@ __metadata:
     chromatic: 6.4.3
     circular-dependency-plugin: 5.2.2
     classnames: 2.3.1
+    comlink: 4.3.1
     cross-env: 7.0.3
     crypto-browserify: 3.12.0
     css-loader: 6.6.0
@@ -9452,6 +9462,13 @@ __metadata:
   dependencies:
     delayed-stream: ~1.0.0
   checksum: 49fa4aeb4916567e33ea81d088f6584749fc90c7abec76fd516bf1c5aa5c79f3584b5ba3de6b86d26ddd64bae5329c4c7479343250cfe71c75bb366eae53bb7c
+  languageName: node
+  linkType: hard
+
+"comlink@npm:4.3.1":
+  version: 4.3.1
+  resolution: "comlink@npm:4.3.1"
+  checksum: 557360a6558708c55aff74a25f834bfb9bfca8a42444682c4d5aead57681534a0206202be2a2760b4de124c3ba6d485b08978b6d5469cb3d26bf1438ee28a4f1
   languageName: node
   linkType: hard
 

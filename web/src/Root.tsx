@@ -38,7 +38,7 @@ export function Root({ appConfiguration }: { appConfiguration: IAppConfiguration
       new Ros1LocalBagDataSourceFactory({ useIterablePlayer: enableExperimentalLatching }),
       new Ros1RemoteBagDataSourceFactory({ useIterablePlayer: enableExperimentalLatching }),
       new Ros2UnavailableDataSourceFactory(),
-      new Ros2LocalBagDataSourceFactory(),
+      new Ros2LocalBagDataSourceFactory({ useIterablePlayer: enableExperimentalLatching }),
       new RosbridgeDataSourceFactory(),
       new FoxgloveWebSocketDataSourceFactory(),
       new UlogLocalDataSourceFactory(),

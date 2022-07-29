@@ -52,7 +52,7 @@ export default function Root({
       new Ros1LocalBagDataSourceFactory({ useIterablePlayer: enableExperimentalLatching }),
       new Ros1RemoteBagDataSourceFactory({ useIterablePlayer: enableExperimentalLatching }),
       new Ros2SocketDataSourceFactory(),
-      new Ros2LocalBagDataSourceFactory(),
+      new Ros2LocalBagDataSourceFactory({ useIterablePlayer: enableExperimentalLatching }),
       new UlogLocalDataSourceFactory(),
       new VelodyneDataSourceFactory(),
       new FoxgloveDataPlatformDataSourceFactory({
