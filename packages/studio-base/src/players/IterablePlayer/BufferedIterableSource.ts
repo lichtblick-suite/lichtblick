@@ -2,7 +2,7 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { signal, Signal } from "@foxglove/den/async";
+import { Condvar } from "@foxglove/den/async";
 import Log from "@foxglove/log";
 import { add as addTime, compare, clampTime } from "@foxglove/rostime";
 import { Time, MessageEvent } from "@foxglove/studio";
@@ -41,10 +41,10 @@ class BufferedIterableSource implements IIterableSource {
   private aborted = false;
 
   // The producer uses this signal to notify a waiting consumer there is data to consume.
-  private readSignal?: Signal<void>;
+  private readSignal = new Condvar();
 
   // The consumer uses this signal to notify a waiting producer that something has been consumed.
-  private writeSignal?: Signal<void>;
+  private writeSignal = new Condvar();
 
   // The producer loads results into the cache and the consumer reads from the cache.
   private cache: IteratorResult[] = [];
@@ -121,7 +121,7 @@ class BufferedIterableSource implements IIterableSource {
           this.cache.push(result);
 
           // Indicate to the consumer that it can try reading again
-          this.readSignal?.resolve();
+          this.readSignal.notifyAll();
         }
 
         // We've streamed through the end of our data source
@@ -144,15 +144,12 @@ class BufferedIterableSource implements IIterableSource {
             break;
           }
 
-          // if readUntil hasn't changed, then we wait for it to change?
-          this.writeSignal = signal();
-          await this.writeSignal;
-          this.writeSignal = undefined;
+          await this.writeSignal.wait();
         }
       }
     } finally {
       // Indicate to the consumer that it can try reading again
-      this.readSignal?.resolve();
+      this.readSignal.notifyAll();
       this.readDone = true;
     }
 
@@ -161,7 +158,7 @@ class BufferedIterableSource implements IIterableSource {
 
   async stopProducer(): Promise<void> {
     this.aborted = true;
-    this.writeSignal?.resolve();
+    this.writeSignal.notifyAll();
     await this.producer;
     this.producer = undefined;
   }
@@ -213,10 +210,7 @@ class BufferedIterableSource implements IIterableSource {
             }
 
             // Wait for more stuff to load
-            self.readSignal = signal();
-            await self.readSignal;
-            self.readSignal = undefined;
-
+            await self.readSignal.wait();
             continue;
           }
 
@@ -226,7 +220,7 @@ class BufferedIterableSource implements IIterableSource {
             self.readHead = item.msgEvent.receiveTime;
           }
 
-          self.writeSignal?.resolve();
+          self.writeSignal.notifyAll();
 
           yield item;
         }
