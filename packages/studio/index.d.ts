@@ -394,8 +394,24 @@ declare module "@foxglove/studio" {
   export type SettingsTreeFieldValue =
     | { input: "autocomplete"; value?: string; items: string[] }
     | { input: "boolean"; value?: boolean }
-    | { input: "rgb"; value?: string }
-    | { input: "rgba"; value?: string }
+    | {
+        input: "rgb";
+        value?: string;
+
+        /**
+         * Optional placeholder text displayed in the field input when value is undefined
+         */
+        placeholder?: string;
+      }
+    | {
+        input: "rgba";
+        value?: string;
+
+        /**
+         * Optional placeholder text displayed in the field input when value is undefined
+         */
+        placeholder?: string;
+      }
     | { input: "gradient"; value?: [string, string] }
     | { input: "messagepath"; value?: string; validTypes?: string[] }
     | {
@@ -405,6 +421,11 @@ declare module "@foxglove/studio" {
         max?: number;
         min?: number;
         precision?: number;
+
+        /**
+         * Optional placeholder text displayed in the field input when value is undefined
+         */
+        placeholder?: string;
       }
     | {
         input: "select";
@@ -416,11 +437,20 @@ declare module "@foxglove/studio" {
         value?: string | string[];
         options: Array<{ label: string; value: undefined | string }>;
       }
-    | { input: "string"; value?: string }
+    | {
+        input: "string";
+        value?: string;
+
+        /**
+         * Optional placeholder text displayed in the field input when value is undefined
+         */
+        placeholder?: string;
+      }
     | { input: "toggle"; value?: string; options: string[] }
     | {
         input: "vec3";
         value?: [undefined | number, undefined | number, undefined | number];
+        placeholder?: [undefined | string, undefined | string, undefined | string];
         step?: number;
         precision?: number;
         labels?: [string, string, string];
@@ -430,6 +460,7 @@ declare module "@foxglove/studio" {
     | {
         input: "vec2";
         value?: [undefined | number, undefined | number];
+        placeholder?: [undefined | string, undefined | string];
         step?: number;
         precision?: number;
         labels?: [string, string];
@@ -452,12 +483,6 @@ declare module "@foxglove/studio" {
      * The label displayed alongside the field.
      */
     label: string;
-
-    /**
-     * Optional placeholder text displayed in the field input in the
-     * absence of a value.
-     */
-    placeholder?: string;
 
     /**
      * True if the field is readonly.

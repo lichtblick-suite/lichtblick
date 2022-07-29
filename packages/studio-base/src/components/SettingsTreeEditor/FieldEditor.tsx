@@ -323,6 +323,7 @@ function FieldInput({
       return (
         <Vec3Input
           step={field.step}
+          placeholder={field.placeholder}
           value={field.value}
           precision={field.precision}
           disabled={field.disabled}
@@ -339,6 +340,7 @@ function FieldInput({
         <Vec2Input
           step={field.step}
           value={field.value}
+          placeholder={field.placeholder}
           precision={field.precision}
           disabled={field.disabled}
           readOnly={field.readonly}

@@ -8,16 +8,7 @@ import Stack from "@foxglove/studio-base/components/Stack";
 
 import { NumberInput } from "./NumberInput";
 
-export function Vec3Input({
-  disabled = false,
-  onChange,
-  precision,
-  readOnly = false,
-  step,
-  value,
-  min,
-  max,
-}: {
+type Vec3Props = {
   disabled?: boolean;
   onChange: (
     value: undefined | [undefined | number, undefined | number, undefined | number],
@@ -25,10 +16,25 @@ export function Vec3Input({
   precision?: number;
   readOnly?: boolean;
   step?: number;
+  placeholder?: readonly [undefined | string, undefined | string, undefined | string];
   value: undefined | readonly [undefined | number, undefined | number, undefined | number];
   min?: number;
   max?: number;
-}): JSX.Element {
+};
+
+export function Vec3Input(props: Vec3Props): JSX.Element {
+  const {
+    disabled = false,
+    onChange,
+    precision,
+    readOnly = false,
+    step,
+    value,
+    min,
+    max,
+    placeholder,
+  } = props;
+
   const onChangeCallback = useCallback(
     (position: number, inputValue: undefined | number) => {
       const newValue: [undefined | number, undefined | number, undefined | number] = [
@@ -40,28 +46,50 @@ export function Vec3Input({
     [onChange, value],
   );
 
-  if (value == undefined) {
-    return <div />;
-  }
-
   return (
     <Stack gap={0.25}>
-      {value.map((pval, position) => (
-        <NumberInput
-          key={position}
-          size="small"
-          disabled={disabled}
-          readOnly={readOnly}
-          variant="filled"
-          fullWidth
-          precision={precision}
-          step={step}
-          value={pval}
-          min={min}
-          max={max}
-          onChange={(newValue) => onChangeCallback(position, newValue)}
-        />
-      ))}
+      <NumberInput
+        size="small"
+        disabled={disabled}
+        readOnly={readOnly}
+        variant="filled"
+        fullWidth
+        precision={precision}
+        step={step}
+        placeholder={placeholder?.[0]}
+        value={value?.[0]}
+        min={min}
+        max={max}
+        onChange={(newValue) => onChangeCallback(0, newValue)}
+      />
+      <NumberInput
+        size="small"
+        disabled={disabled}
+        readOnly={readOnly}
+        variant="filled"
+        fullWidth
+        precision={precision}
+        step={step}
+        placeholder={placeholder?.[1]}
+        value={value?.[1]}
+        min={min}
+        max={max}
+        onChange={(newValue) => onChangeCallback(1, newValue)}
+      />
+      <NumberInput
+        size="small"
+        disabled={disabled}
+        readOnly={readOnly}
+        variant="filled"
+        fullWidth
+        precision={precision}
+        step={step}
+        placeholder={placeholder?.[2]}
+        value={value?.[2]}
+        min={min}
+        max={max}
+        onChange={(newValue) => onChangeCallback(2, newValue)}
+      />
     </Stack>
   );
 }
