@@ -263,8 +263,22 @@ function NodePlayground(props: Props) {
     });
   }, [currentScript]);
 
+  const saveCurrentNode = useCallback(() => {
+    if (
+      selectedNodeId != undefined &&
+      selectedNode &&
+      currentScript &&
+      isCurrentScriptSelectedNode
+    ) {
+      setUserNodes({
+        [selectedNodeId]: { ...selectedNode, sourceCode: currentScript.code },
+      });
+    }
+  }, [currentScript, isCurrentScriptSelectedNode, selectedNode, selectedNodeId, setUserNodes]);
+
   const addNewNode = React.useCallback(
     (code?: string) => {
+      saveCurrentNode();
       const newNodeId = uuidv4();
       const sourceCode = code ?? skeletonBody;
       setUserNodes({
@@ -275,7 +289,7 @@ function NodePlayground(props: Props) {
       });
       saveConfig({ selectedNodeId: newNodeId });
     },
-    [saveConfig, setUserNodes],
+    [saveConfig, saveCurrentNode, setUserNodes],
   );
 
   const saveNode = React.useCallback(
@@ -326,17 +340,7 @@ function NodePlayground(props: Props) {
           explorer={explorer}
           updateExplorer={updateExplorer}
           selectNode={(nodeId) => {
-            if (
-              selectedNodeId != undefined &&
-              selectedNode &&
-              currentScript &&
-              isCurrentScriptSelectedNode
-            ) {
-              // Save current state so that user can seamlessly go back to previous work.
-              setUserNodes({
-                [selectedNodeId]: { ...selectedNode, sourceCode: currentScript.code },
-              });
-            }
+            saveCurrentNode();
             saveConfig({ selectedNodeId: nodeId });
           }}
           deleteNode={(nodeId) => {
