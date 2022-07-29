@@ -28,7 +28,7 @@ import {
 } from "./fixture";
 
 const noDiffConfig = {
-  autoExpandMode: "off",
+  expansion: "off",
   diffMethod: "custom",
   diffTopicPath: "",
   diffEnabled: false,
@@ -47,10 +47,21 @@ const scrollToBottom = () => {
 };
 
 storiesOf("panels/RawMessages", module)
-  .add("folded", () => {
+  .add("default", () => {
     return (
       <PanelSetup fixture={fixture}>
         <RawMessages overrideConfig={{ topicPath: "/msgs/big_topic", ...noDiffConfig } as any} />
+      </PanelSetup>
+    );
+  })
+  .add("collapsed", () => {
+    return (
+      <PanelSetup fixture={fixture}>
+        <RawMessages
+          overrideConfig={
+            { topicPath: "/msgs/big_topic", ...noDiffConfig, expansion: "none" } as any
+          }
+        />
       </PanelSetup>
     );
   })
@@ -59,29 +70,22 @@ storiesOf("panels/RawMessages", module)
       <PanelSetup fixture={fixture}>
         <RawMessages
           overrideConfig={
-            { topicPath: "/msgs/big_topic", ...noDiffConfig, autoExpandMode: "all" } as any
+            { topicPath: "/msgs/big_topic", ...noDiffConfig, expansion: "all" } as any
           }
         />
       </PanelSetup>
     );
   })
-  .add("expanded with settings", () => {
+  .add("overridden", () => {
     return (
       <PanelSetup fixture={fixture} includeSettings>
         <RawMessages
           overrideConfig={
-            { topicPath: "/msgs/big_topic", ...noDiffConfig, autoExpandMode: "all" } as any
-          }
-        />
-      </PanelSetup>
-    );
-  })
-  .add("auto expanded", () => {
-    return (
-      <PanelSetup fixture={fixture}>
-        <RawMessages
-          overrideConfig={
-            { topicPath: "/msgs/big_topic", ...noDiffConfig, autoExpandMode: "auto" } as any
+            {
+              topicPath: "/msgs/big_topic",
+              ...noDiffConfig,
+              expansion: { LotsOfStuff: "c", timestamp_array: "e" },
+            } as any
           }
         />
       </PanelSetup>
@@ -195,9 +199,7 @@ storiesOf("panels/RawMessages", module)
     return (
       <PanelSetup fixture={topicsToDiffFixture}>
         <RawMessages
-          overrideConfig={
-            { ...diffConfig, autoExpandMode: "all", showFullMessageForDiff: false } as any
-          }
+          overrideConfig={{ ...diffConfig, expansion: "all", showFullMessageForDiff: false } as any}
         />
       </PanelSetup>
     );
@@ -206,9 +208,7 @@ storiesOf("panels/RawMessages", module)
     return (
       <PanelSetup fixture={topicsToDiffFixture}>
         <RawMessages
-          overrideConfig={
-            { ...diffConfig, autoExpandMode: "all", showFullMessageForDiff: true } as any
-          }
+          overrideConfig={{ ...diffConfig, expansion: "all", showFullMessageForDiff: true } as any}
         />
       </PanelSetup>
     );
@@ -219,7 +219,7 @@ storiesOf("panels/RawMessages", module)
       topicPath: "/baz/enum_advanced_array.value",
       diffTopicPath: "/another/baz/enum_advanced_array.value",
       showFullMessageForDiff: false,
-      autoExpandMode: "all",
+      expansion: "all",
     };
     return (
       <PanelSetup fixture={topicsWithIdsToDiffFixture}>
@@ -259,7 +259,7 @@ storiesOf("panels/RawMessages", module)
             diffTopicPath: "",
             diffEnabled: true,
             showFullMessageForDiff: true,
-            autoExpandMode: "all",
+            expansion: "all",
           }}
         />
       </PanelSetup>
@@ -275,7 +275,7 @@ storiesOf("panels/RawMessages", module)
             diffTopicPath: "",
             diffEnabled: true,
             showFullMessageForDiff: true,
-            autoExpandMode: "all",
+            expansion: "all",
           }}
         />
       </PanelSetup>
@@ -291,7 +291,7 @@ storiesOf("panels/RawMessages", module)
             diffTopicPath: "",
             diffEnabled: true,
             showFullMessageForDiff: true,
-            autoExpandMode: "all",
+            expansion: "all",
           }}
         />
       </PanelSetup>
@@ -307,7 +307,7 @@ storiesOf("panels/RawMessages", module)
             diffTopicPath: "/another/baz/enum_advanced",
             diffEnabled: false,
             showFullMessageForDiff: true,
-            autoExpandMode: "all",
+            expansion: "all",
           }}
         />
       </PanelSetup>

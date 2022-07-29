@@ -25,16 +25,14 @@ import {
   useTheme,
   Typography,
 } from "@mui/material";
-import { Immutable } from "immer";
 // eslint-disable-next-line no-restricted-imports
 import { first, isEqual, get, last, padStart } from "lodash";
 import { useState, useCallback, useMemo, useEffect } from "react";
 import ReactHoverObserver from "react-hover-observer";
 import Tree from "react-json-tree";
-import { useLatest } from "react-use";
+import { DeepReadonly } from "ts-essentials";
 import { makeStyles } from "tss-react/mui";
 
-import { SettingsTreeAction } from "@foxglove/studio";
 import { useDataSourceInfo } from "@foxglove/studio-base/PanelAPI";
 import EmptyState from "@foxglove/studio-base/components/EmptyState";
 import useGetItemStringWithTimezone from "@foxglove/studio-base/components/JsonTree/useGetItemStringWithTimezone";
@@ -60,7 +58,6 @@ import getDiff, {
   DiffObject,
 } from "@foxglove/studio-base/panels/RawMessages/getDiff";
 import { Topic } from "@foxglove/studio-base/players/types";
-import { usePanelSettingsTreeUpdate } from "@foxglove/studio-base/providers/PanelSettingsEditorContextProvider";
 import { SaveConfig } from "@foxglove/studio-base/types/panels";
 import { useJsonTreeTheme } from "@foxglove/studio-base/util/globalConstants";
 import { enumValuesByDatatypeAndField } from "@foxglove/studio-base/util/selectors";
@@ -76,7 +73,6 @@ import {
   getStructureItemForPath,
 } from "./getValueActionForValue";
 import helpContent from "./index.help.md";
-import { buildSettingsTree } from "./settings";
 import { RawMessagesPanelConfig } from "./types";
 import { DATA_ARRAY_PREVIEW_LIMIT, generateDeepKeyPaths, getItemStringForDiff } from "./utils";
 
@@ -84,7 +80,7 @@ export const CUSTOM_METHOD = "custom";
 export const PREV_MSG_METHOD = "previous message";
 
 type Props = {
-  config: Immutable<RawMessagesPanelConfig>;
+  config: DeepReadonly<RawMessagesPanelConfig>;
   saveConfig: SaveConfig<RawMessagesPanelConfig>;
 };
 
@@ -94,6 +90,7 @@ const isSingleElemArray = (obj: unknown): obj is unknown[] => {
   }
   return obj.filter((a) => a != undefined).length === 1;
 };
+
 const dataWithoutWrappingArray = (data: unknown) => {
   return isSingleElemArray(data) && typeof data[0] === "object" ? data[0] : data;
 };
@@ -164,10 +161,7 @@ function RawMessages(props: Props) {
     ).structureItem;
   }, [datatypes, topic, topicRosPath]);
 
-  // When expandAll is unset, we'll use expandedFields to get expanded info
-  const [expandAll, setExpandAll] = useState<boolean | undefined>(config.autoExpandMode === "all");
-  const [expandedFields, setExpandedFields] = useState(new Set<string>());
-
+  const [expansion, setExpansion] = useState(config.expansion);
   const matchedMessages = useMessageDataItem(topicPath, { historySize: 2 });
   const diffMessages = useMessageDataItem(diffEnabled ? diffTopicPath : "");
 
@@ -179,46 +173,33 @@ function RawMessages(props: Props) {
   const baseItem = inTimetickDiffMode ? prevTickObj : currTickObj;
   const diffItem = inTimetickDiffMode ? currTickObj : diffTopicObj;
 
-  const latestExpandedFields = useLatest(expandedFields);
-
-  useEffect(() => {
-    if (latestExpandedFields.current.size === 0 && baseItem && config.autoExpandMode === "auto") {
+  const autoExpandPaths = useMemo(() => {
+    if (baseItem) {
       const data = dataWithoutWrappingArray(baseItem.queriedData.map(({ value }) => value));
-      const newExpandedFields = generateDeepKeyPaths(maybeDeepParse(data), 5);
-      setExpandedFields(newExpandedFields);
-      setExpandAll(undefined);
-    } else if (config.autoExpandMode === "all") {
-      setExpandedFields(new Set());
-      setExpandAll(true);
+      return generateDeepKeyPaths(maybeDeepParse(data), 5);
+    } else {
+      return new Set<string>();
     }
-  }, [baseItem, config.autoExpandMode, latestExpandedFields]);
+  }, [baseItem]);
 
-  const updateSettingsTree = usePanelSettingsTreeUpdate();
+  const canExpandAll = useMemo(() => {
+    if (expansion === "none") {
+      return true;
+    }
+    if (expansion === "all") {
+      return false;
+    }
 
-  const settingsActionHandler = useCallback(
-    (action: SettingsTreeAction) => {
-      if (action.action !== "update") {
-        return;
-      }
-
-      if (action.payload.input === "select") {
-        saveConfig({
-          autoExpandMode: action.payload.value as RawMessagesPanelConfig["autoExpandMode"],
-        });
-      }
-    },
-    [saveConfig],
-  );
-
-  useEffect(() => {
-    updateSettingsTree({
-      actionHandler: settingsActionHandler,
-      nodes: buildSettingsTree(config),
-    });
-  }, [config, settingsActionHandler, updateSettingsTree]);
+    if (typeof expansion === "object" && Object.values(expansion).some((v) => v === "c")) {
+      return true;
+    } else {
+      return false;
+    }
+  }, [expansion]);
 
   const onTopicPathChange = useCallback(
     (newTopicPath: string) => {
+      setExpansion(undefined);
       saveConfig({ topicPath: newTopicPath });
     },
     [saveConfig],
@@ -236,26 +217,34 @@ function RawMessages(props: Props) {
   }, [diffEnabled, saveConfig]);
 
   const onToggleExpandAll = useCallback(() => {
-    setExpandedFields(new Set());
-    setExpandAll((currVal) => !(currVal ?? false));
-  }, []);
+    setExpansion(canExpandAll ? "all" : "none");
+  }, [canExpandAll]);
 
   const onLabelClick = useCallback(
     (keypath: (string | number)[]) => {
-      // Create a unique key according to the keypath / raw
       const key = keypath.join("~");
-      const expandedFieldsCopy = new Set(expandedFields);
-      if (expandedFieldsCopy.has(key)) {
-        expandedFieldsCopy.delete(key);
-        setExpandedFields(expandedFieldsCopy);
-      } else {
-        expandedFieldsCopy.add(key);
-        setExpandedFields(expandedFieldsCopy);
-      }
-      setExpandAll(undefined);
+      setExpansion((old) => {
+        if (old === "all") {
+          return { [key]: "c" };
+        } else if (old === "none") {
+          return { [key]: "e" };
+        } else if (old == undefined) {
+          return { [key]: autoExpandPaths.has(key) ? "c" : "e" };
+        } else {
+          if (old[key]) {
+            return { ...old, [key]: old[key] === "c" ? "e" : "c" };
+          } else {
+            return { ...old, [key]: autoExpandPaths.has(key) ? "c" : "e" };
+          }
+        }
+      });
     },
-    [expandedFields],
+    [autoExpandPaths],
   );
+
+  useEffect(() => {
+    saveConfig({ expansion });
+  }, [expansion, saveConfig]);
 
   const getValueLabels = useCallback(
     ({
@@ -387,11 +376,22 @@ function RawMessages(props: Props) {
 
   const renderSingleTopicOrDiffOutput = useCallback(() => {
     const shouldExpandNode = (keypath: (string | number)[]) => {
-      if (expandAll != undefined) {
-        return expandAll;
+      if (expansion === "all") {
+        return true;
+      }
+      if (expansion === "none") {
+        return false;
       }
 
-      return expandedFields.has(keypath.join("~"));
+      const joinedPath = keypath.join("~");
+      if (expansion && expansion[joinedPath] === "c") {
+        return false;
+      }
+      if (expansion && expansion[joinedPath] === "e") {
+        return true;
+      }
+
+      return autoExpandPaths.has(joinedPath);
     };
 
     if (topicPath.length === 0) {
@@ -625,25 +625,25 @@ function RawMessages(props: Props) {
       </Stack>
     );
   }, [
-    topicPath,
-    diffEnabled,
-    diffMethod,
+    autoExpandPaths,
     baseItem,
-    diffItem,
-    showFullMessageForDiff,
     classes.topic,
-    topic,
+    diffEnabled,
+    diffItem,
+    diffMethod,
+    diffTopicPath,
+    expansion,
     getItemString,
     jsonTreeTheme,
-    expandAll,
-    expandedFields,
-    diffTopicPath,
-    saveConfig,
     onLabelClick,
-    valueRenderer,
-    rootStructureItem,
     renderDiffLabel,
+    rootStructureItem,
+    saveConfig,
+    showFullMessageForDiff,
     themePreference,
+    topic,
+    topicPath,
+    valueRenderer,
   ]);
 
   return (
@@ -660,16 +660,12 @@ function RawMessages(props: Props) {
         </IconButton>
         <IconButton
           className={classes.iconButton}
-          title={expandAll ?? false ? "Collapse all" : "Expand all"}
+          title={canExpandAll ? "Expand all" : "Collapse all"}
           onClick={onToggleExpandAll}
           data-testid="expand-all"
           size="small"
         >
-          {expandAll ?? false ? (
-            <UnfoldLessIcon fontSize="small" />
-          ) : (
-            <UnfoldMoreIcon fontSize="small" />
-          )}
+          {canExpandAll ? <UnfoldMoreIcon fontSize="small" /> : <UnfoldLessIcon fontSize="small" />}
         </IconButton>
         <Stack fullWidth paddingLeft={0.25}>
           <MessagePathInput
@@ -714,7 +710,6 @@ function RawMessages(props: Props) {
 }
 
 const defaultConfig: RawMessagesPanelConfig = {
-  autoExpandMode: "auto",
   diffEnabled: false,
   diffMethod: CUSTOM_METHOD,
   diffTopicPath: "",
