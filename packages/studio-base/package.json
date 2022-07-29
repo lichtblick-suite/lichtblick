@@ -65,6 +65,7 @@
     "@testing-library/dom": "8.11.3",
     "@testing-library/react": "12.1.2",
     "@testing-library/react-hooks": "7.0.2",
+    "@testing-library/user-event": "14.3.0",
     "@types/amplitude-js": "8.16.0",
     "@types/argparse": "2.0.10",
     "@types/circular-dependency-plugin": "5.0.5",

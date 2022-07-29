@@ -210,16 +210,29 @@ export default function LayoutBrowser({
         }
         void analytics.logEvent(AppEvent.LAYOUT_SELECT, { permission: item.permission });
       }
-      if (event?.ctrlKey === true || event?.metaKey === true) {
+      if (event?.ctrlKey === true || event?.metaKey === true || event?.shiftKey === true) {
         if (item.id !== currentLayoutId) {
-          dispatch({ type: "toggle-selected", id: item.id });
+          dispatch({
+            type: "select-id",
+            id: item.id,
+            layouts: layouts.value,
+            modKey: event.ctrlKey || event.metaKey,
+            shiftKey: event.shiftKey,
+          });
         }
       } else {
         setSelectedLayoutId(item.id);
         dispatch({ type: "select-id", id: item.id });
       }
     },
-    [analytics, currentLayoutId, dispatch, promptForUnsavedChanges, setSelectedLayoutId],
+    [
+      analytics,
+      currentLayoutId,
+      dispatch,
+      layouts.value,
+      promptForUnsavedChanges,
+      setSelectedLayoutId,
+    ],
   );
 
   const onRenameLayout = useCallbackWithToast(

@@ -4,6 +4,7 @@
 
 import { Story, StoryContext } from "@storybook/react";
 import { fireEvent, screen } from "@testing-library/dom";
+import userEvent from "@testing-library/user-event";
 import { useMemo } from "react";
 
 import AnalyticsProvider from "@foxglove/studio-base/context/AnalyticsProvider";
@@ -128,10 +129,34 @@ export function LayoutList(): JSX.Element {
 export function MultiSelect(): JSX.Element {
   return <LayoutBrowser />;
 }
-MultiSelect.parameters = { colorScheme: "dark" };
+MultiSelect.parameters = {
+  colorScheme: "dark",
+  mockLayouts: Array(8)
+    .fill(undefined)
+    .map((_, idx) => ({
+      id: `layout-${idx + 1}`,
+      name: `Layout ${idx + 1}`,
+      baseline: { data: DEFAULT_LAYOUT_FOR_TESTS, updatedAt: new Date(10).toISOString() },
+    })),
+};
 MultiSelect.play = async () => {
   const layouts = await screen.findAllByTestId("layout-list-item");
-  layouts.forEach((layout) => fireEvent.click(layout, { ctrlKey: true }));
+  const user = userEvent.setup();
+
+  await user.click(layouts[0]!);
+
+  await user.keyboard("{Meta>}");
+  await user.click(layouts[1]!);
+  await user.click(layouts[3]!);
+  await user.keyboard("{/Meta}");
+
+  await user.keyboard("{Shift>}");
+  await user.click(layouts[6]!);
+  await user.keyboard("{/Shift}");
+
+  await user.keyboard("{Meta>}");
+  await user.click(layouts[4]!);
+  await user.keyboard("{/Meta}");
 };
 
 export function MultiDelete(): JSX.Element {
