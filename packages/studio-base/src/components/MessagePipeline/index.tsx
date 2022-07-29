@@ -13,7 +13,7 @@
 
 import { debounce, flatten } from "lodash";
 
-import { signal } from "@foxglove/den/async";
+import { Condvar } from "@foxglove/den/async";
 import { useShallowMemo } from "@foxglove/hooks";
 import { Time } from "@foxglove/rostime";
 import { MessageEvent, ParameterValue } from "@foxglove/studio";
@@ -224,10 +224,10 @@ export function MessagePipelineProvider({
     [player, capabilities],
   );
   const pauseFrame = useCallback((name: string) => {
-    const promise = signal();
-    promisesToWaitForRef.current.push({ name, promise });
+    const condvar = new Condvar();
+    promisesToWaitForRef.current.push({ name, promise: condvar.wait() });
     return () => {
-      promise.resolve();
+      condvar.notifyAll();
     };
   }, []);
   const requestBackfill = useMemo(

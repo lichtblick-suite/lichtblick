@@ -6,7 +6,7 @@ import { Story, StoryContext } from "@storybook/react";
 import { useMemo, useRef } from "react";
 import { ToastProvider } from "react-toast-notifications";
 
-import { signal } from "@foxglove/den/async";
+import { Condvar } from "@foxglove/den/async";
 import CssBaseline from "@foxglove/studio-base/components/CssBaseline";
 import GlobalCss from "@foxglove/studio-base/components/GlobalCss";
 import MultiProvider from "@foxglove/studio-base/components/MultiProvider";
@@ -55,10 +55,10 @@ function StudioContextProviders({
   ctx,
 }: React.PropsWithChildren<{ ctx: StoryContext }>): JSX.Element {
   if (ctx.parameters.useReadySignal === true) {
-    const sig = signal();
-    ctx.parameters.storyReady = sig;
+    const condvar = new Condvar();
+    ctx.parameters.storyReady = condvar.wait();
     ctx.parameters.readySignal = () => {
-      sig.resolve();
+      condvar.notifyAll();
     };
   }
 
