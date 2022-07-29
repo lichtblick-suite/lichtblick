@@ -47,6 +47,7 @@ const allPanels: PanelInfo[] = [
   {
     title: "Preconfigured Panel AAA",
     type: "Sample1",
+    description: "Panel description",
     module: async () => ({ default: MockPanel1 }),
     config: { text: "def" },
   },
@@ -146,6 +147,9 @@ storiesOf("components/PanelList", module)
   })
   .add("filtered panel list", () => <PanelListWithInteractions inputValue="AAA" />)
   .add("filtered panel grid", () => <PanelListWithInteractions mode="grid" inputValue="AAA" />)
+  .add("filtered panel grid with description", () => (
+    <PanelListWithInteractions mode="grid" inputValue="description" />
+  ))
   .add("filtered panel list light", () => <PanelListWithInteractions inputValue="AAA" />, {
     colorScheme: "light",
   })

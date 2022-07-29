@@ -202,7 +202,8 @@ const builtin: PanelInfo[] = [
   {
     title: "User Scripts",
     type: "NodePlayground",
-    description: "Write custom data transformations in TypeScript.",
+    description:
+      "Write custom data transformations in TypeScript. Previously known as Node Playground.",
     help: NodePlaygroundHelp,
     thumbnail: nodePlaygroundThumbnail,
     module: async () => await import("./NodePlayground"),
