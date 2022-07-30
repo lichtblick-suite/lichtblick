@@ -28,6 +28,7 @@
     "web:build:prod": "webpack --mode production --progress --config web/webpack.config.ts",
     "web:serve": "webpack serve --mode development --progress --config web/webpack.config.ts",
     "web:serve:local": "webpack serve --mode development --progress --config web/webpack.config.ts --env FOXGLOVE_BACKEND=local",
+    "benchmark:serve": "webpack serve --mode development --progress --config benchmark/webpack.config.ts",
     "license-check": "ts-node ci/license-check.ts",
     "lint": "TIMING=1 eslint --report-unused-disable-directives --fix .",
     "lint:ci": "TIMING=1 eslint --report-unused-disable-directives --config .eslintrc.ci.yaml .",

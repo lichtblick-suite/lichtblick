@@ -1,0 +1,12 @@
+{
+  "name": "benchmark",
+  "private": true,
+  "dependencies": {
+    "@foxglove/studio-base": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/copy-webpack-plugin": "10.1.0",
+    "copy-webpack-plugin": "10.2.4",
+    "webpack": "5.68.0"
+  }
+}

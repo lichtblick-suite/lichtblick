@@ -86,7 +86,7 @@ export default function Root({
     new IdbExtensionLoader("org"),
     new DesktopExtensionLoader(desktopBridge),
   ]);
-  const consoleApi = useMemo(() => new ConsoleApi(process.env.FOXGLOVE_API_URL!), []);
+  const consoleApi = useMemo(() => new ConsoleApi(process.env.FOXGLOVE_API_URL ?? ""), []);
   const nativeAppMenu = useMemo(() => new NativeAppMenu(menuBridge), []);
   const nativeWindow = useMemo(() => new NativeWindow(desktopBridge), []);
 

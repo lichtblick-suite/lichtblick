@@ -1,0 +1,14 @@
+{
+  "extends": "@foxglove/tsconfig/base",
+  "include": ["./**/*"],
+  "compilerOptions": {
+    "noEmit": true,
+    "jsx": "react-jsx",
+    "lib": ["dom", "dom.iterable", "es2020", "webworker"],
+    "experimentalDecorators": true,
+    "useUnknownInCatchVariables": false,
+    "paths": {
+      "@foxglove/studio-base/*": ["../../packages/studio-base/src/*"]
+    }
+  }
+}

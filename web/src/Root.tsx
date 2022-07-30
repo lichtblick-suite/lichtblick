@@ -59,7 +59,7 @@ export function Root({ appConfiguration }: { appConfiguration: IAppConfiguration
     new IdbExtensionLoader("org"),
     new IdbExtensionLoader("local"),
   ]);
-  const consoleApi = useMemo(() => new ConsoleApi(process.env.FOXGLOVE_API_URL!), []);
+  const consoleApi = useMemo(() => new ConsoleApi(process.env.FOXGLOVE_API_URL ?? ""), []);
 
   // Enable dialog auth in development since using cookie auth does not work between
   // localhost and the hosted dev deployment due to browser cookie/host security.

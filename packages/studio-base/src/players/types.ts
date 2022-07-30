@@ -46,7 +46,7 @@ export interface Player {
   // should return a promise from the listener that resolves when the UI has finished updating, so
   // that we don't get overwhelmed with new state that we can't keep up with. The Player is
   // responsible for appropriately throttling based on when we resolve this promise.
-  setListener(listener: (arg0: PlayerState) => Promise<void>): void;
+  setListener(listener: (playerState: PlayerState) => Promise<void>): void;
   // Close the player; i.e. terminate any connections it might have open.
   close(): void;
   // Set a new set of subscriptions/advertisers. This might trigger fetching
