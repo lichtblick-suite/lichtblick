@@ -17,7 +17,16 @@ import {
   TextField,
   styled as muiStyled,
 } from "@mui/material";
-import { useCallback, useContext, useLayoutEffect, useMemo, useState, MouseEvent } from "react";
+import {
+  useCallback,
+  useContext,
+  useLayoutEffect,
+  useMemo,
+  useState,
+  MouseEvent,
+  useEffect,
+  useRef,
+} from "react";
 import { useMountedState } from "react-use";
 
 import { useLayoutManager } from "@foxglove/studio-base/context/LayoutManagerContext";
@@ -218,9 +227,7 @@ export default React.memo(function LayoutRow({
     [onSubmit],
   );
 
-  const onTextFieldMount = useCallback((field: HTMLInputElement | ReactNull) => {
-    field?.select();
-  }, []);
+  const nameInputRef = useRef<HTMLInputElement>(ReactNull);
 
   const confirmDelete = useCallback(() => {
     const layoutWarning =
@@ -415,6 +422,13 @@ export default React.memo(function LayoutRow({
     [deletedOnServer, hasModifications],
   );
 
+  useEffect(() => {
+    if (editingName) {
+      nameInputRef.current?.focus();
+      nameInputRef.current?.select();
+    }
+  }, [editingName]);
+
   return (
     <StyledListItem
       editingName={editingName}
@@ -443,23 +457,29 @@ export default React.memo(function LayoutRow({
         component="form"
       >
         <ListItemText disableTypography>
-          {editingName ? (
-            <TextField
-              inputRef={onTextFieldMount}
-              value={nameFieldValue}
-              onChange={(event) => setNameFieldValue(event.target.value)}
-              onKeyDown={onTextFieldKeyDown}
-              onBlur={onBlur}
-              fullWidth
-              style={{ font: "inherit" }}
-              size="small"
-              variant="filled"
-            />
-          ) : (
-            <Typography variant="inherit" color="inherit" noWrap>
-              {layout.name}
-            </Typography>
-          )}
+          <TextField
+            inputRef={nameInputRef}
+            value={nameFieldValue}
+            onChange={(event) => setNameFieldValue(event.target.value)}
+            onKeyDown={onTextFieldKeyDown}
+            onBlur={onBlur}
+            fullWidth
+            style={{
+              font: "inherit",
+              display: editingName ? "inline" : "none",
+            }}
+            size="small"
+            variant="filled"
+          />
+          <Typography
+            component="span"
+            variant="inherit"
+            color="inherit"
+            noWrap
+            style={{ display: editingName ? "none" : "block" }}
+          >
+            {layout.name}
+          </Typography>
         </ListItemText>
       </ListItemButton>
       <Menu
