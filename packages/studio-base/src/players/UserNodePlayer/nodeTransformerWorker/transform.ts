@@ -396,14 +396,21 @@ export const extractDatatypes = (nodeData: NodeData): NodeData => {
       return { ...nodeData, diagnostics: [...nodeData.diagnostics, error.diagnostic] };
     }
 
-    throw error;
+    return {
+      ...nodeData,
+      diagnostics: [
+        ...nodeData.diagnostics,
+        {
+          message: error.message,
+          severity: DiagnosticSeverity.Error,
+          source: Sources.DatatypeExtraction,
+          code: ErrorCodes.DatatypeExtraction.UNKNOWN_ERROR,
+        },
+      ],
+    };
   }
 };
 
-/*
-TODO:
-  - what happens when the `register` portion of the node pipeline fails to instantiate the code? can we get the stack trace?
-*/
 export const compose = (...transformers: NodeDataTransformer[]): NodeDataTransformer => {
   return (nodeData: NodeData, topics: Topic[]) => {
     let newNodeData = nodeData;
