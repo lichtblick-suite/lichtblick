@@ -2,110 +2,72 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { makeStyles as fluentMakeStyles } from "@fluentui/react";
-import { makeStyles } from "@mui/styles";
-import cx from "classnames";
+import { alpha } from "@mui/material";
 import { useCallback, useState } from "react";
+import { makeStyles } from "tss-react/mui";
 
-const useStyles = makeStyles({
-  root: {
-    display: "flex",
-    flexDirection: "column",
-    justifyContent: "center",
-    alignItems: "center",
-    userSelect: "none",
-    width: "100%",
-    height: "100%",
-  },
-  control: {
+import Stack from "@foxglove/studio-base/components/Stack";
+
+const useStyles = makeStyles<void, "buttonIcon">()((theme, _params, classes) => ({
+  svg: {
+    label: "DirectionalPad-svg",
     maxHeight: "100%",
     maxWidth: "100%",
   },
-});
-
-const useButtonStyles = fluentMakeStyles(({ semanticColors }) => ({
-  background: {
+  button: {
+    label: "DirectionalPad-button",
     cursor: "pointer",
-    fill: semanticColors.bodyBackgroundHovered,
-    stroke: semanticColors.buttonBorder,
+    fill: theme.palette.action.hover,
+    stroke: theme.palette.divider,
     strokeWidth: 0.5,
 
     "&:hover": {
-      fill: semanticColors.bodyBackgroundChecked,
+      fill: alpha(
+        theme.palette.primary.main,
+        theme.palette.action.selectedOpacity + theme.palette.action.hoverOpacity,
+      ),
+      stroke: theme.palette.primary.main,
 
-      "& + path": {
-        fill: semanticColors.buttonTextHovered,
+      [`& + .${classes.buttonIcon}`]: {
+        fill: theme.palette.primary.main,
+      },
+    },
+    "&.active": {
+      fill: `${theme.palette.primary.main} !important`,
+      stroke: `${theme.palette.primary.dark} !important`,
+
+      "&:hover": {
+        [`& + .${classes.buttonIcon}`]: {
+          fill: theme.palette.common.white,
+        },
+      },
+    },
+    "&.disabled": {
+      cursor: "auto",
+      strokeWidth: 0,
+      fill: theme.palette.action.disabledBackground,
+
+      "&:hover": {
+        fill: theme.palette.action.disabledBackground,
+
+        [`& + .${classes.buttonIcon}`]: {
+          fill: theme.palette.background.default,
+        },
       },
     },
   },
-  backgroundDisabled: {
-    cursor: "not-allowed",
-    strokeWidth: 0,
-
-    fill: semanticColors.buttonBackgroundDisabled,
-    "&:hover": {
-      fill: semanticColors.buttonBackgroundDisabled,
-
-      "& + path": {
-        fill: semanticColors.bodyBackground,
-      },
-    },
-  },
-  backgroundPressed: {
-    fill: `${semanticColors.primaryButtonBackground} !important`,
-    stroke: `${semanticColors.primaryButtonBackgroundPressed} !important`,
-
-    "&:hover": {
-      "& + path": {
-        fill: semanticColors.buttonTextHovered,
-      },
-    },
-  },
-  icon: {
+  buttonIcon: {
     pointerEvents: "none",
-    fill: semanticColors.buttonText,
-  },
-  iconDisabled: {
-    fill: semanticColors.bodyBackground,
-  },
-}));
+    label: "DirectionalPad-buttonIcon",
+    fill: theme.palette.text.primary,
 
-const useStopButtonStyles = fluentMakeStyles(({ fonts, semanticColors }) => ({
-  background: {
-    cursor: "pointer",
-    fill: semanticColors.errorBackground,
-    stroke: semanticColors.errorText,
-    strokeWidth: 0.5,
-
-    "&:hover": {
-      stroke: semanticColors.buttonText,
-
-      "& + text": {
-        fill: semanticColors.buttonText,
-      },
+    "&.disabled": {
+      fill: theme.palette.background.default,
     },
-  },
-  backgroundDisabled: {
-    cursor: "auto !important",
-    opacity: 0.4,
-    stroke: semanticColors.errorBackground,
-
-    "&:hover": {
-      stroke: `${semanticColors.errorBackground} !important`,
-    },
-  },
-  text: {
-    ...fonts.xxLarge,
-    pointerEvents: "none",
-    fill: semanticColors.errorText,
-  },
-  textDisabled: {
-    fill: `${semanticColors.bodyBackground} !important`,
   },
 }));
 
 export enum DirectionalPadAction {
-  STOP = 0,
   UP,
   DOWN,
   LEFT,
@@ -115,17 +77,14 @@ export enum DirectionalPadAction {
 type DirectionalPadProps = {
   disabled?: boolean;
   onAction?: (action?: DirectionalPadAction) => void;
-  disableStop?: boolean;
 };
 
 function DirectionalPad(props: DirectionalPadProps): JSX.Element {
-  const { onAction, disableStop = true, disabled = false } = props;
+  const { onAction, disabled = false } = props;
 
   const [currentAction, setCurrentAction] = useState<DirectionalPadAction | undefined>();
 
-  const classes = useStyles();
-  const buttonClasses = useButtonStyles();
-  const stopButtonClasses = useStopButtonStyles();
+  const { classes, cx } = useStyles();
 
   const handleMouseDown = useCallback(
     (action: DirectionalPadAction) => {
@@ -153,20 +112,26 @@ function DirectionalPad(props: DirectionalPadProps): JSX.Element {
         };
 
   return (
-    <div className={classes.root}>
-      <svg className={classes.control} viewBox="0 0 256 256">
+    <Stack
+      justifyContent="center"
+      alignItems="center"
+      fullWidth
+      fullHeight
+      style={{ userSelect: "none" }}
+    >
+      <svg className={classes.svg} viewBox="0 0 256 256">
         <g opacity={1}>
           {/* UP button */}
           <g {...makeMouseHandlers(DirectionalPadAction.UP)} role="button">
             <path
-              className={cx(buttonClasses.background, {
-                [buttonClasses.backgroundDisabled]: disabled,
-                [buttonClasses.backgroundPressed]: currentAction === DirectionalPadAction.UP,
+              className={cx(classes.button, {
+                active: currentAction === DirectionalPadAction.UP,
+                disabled,
               })}
               d="M162.707,78.945c-20.74,-14.771 -48.795,-14.771 -69.535,-0l-42.723,-42.723c44.594,-37.791 110.372,-37.794 154.981,-0l-42.723,42.723Z"
             />
             <path
-              className={cx(buttonClasses.icon, { [buttonClasses.iconDisabled]: disabled })}
+              className={cx(classes.buttonIcon, { disabled })}
               d="M128,30.364l20,20l-40,-0l20,-20Z"
             />
           </g>
@@ -174,14 +139,14 @@ function DirectionalPad(props: DirectionalPadProps): JSX.Element {
           {/* DOWN button */}
           <g {...makeMouseHandlers(DirectionalPadAction.DOWN)} role="button">
             <path
-              className={cx(buttonClasses.background, {
-                [buttonClasses.backgroundDisabled]: disabled,
-                [buttonClasses.backgroundPressed]: currentAction === DirectionalPadAction.DOWN,
+              className={cx(classes.button, {
+                active: currentAction === DirectionalPadAction.DOWN,
+                disabled,
               })}
               d="M93.172,176.764c20.74,14.771 48.795,14.771 69.535,0l42.723,42.723c-44.594,37.791 -110.372,37.794 -154.981,0l42.723,-42.723Z"
             />
             <path
-              className={cx(buttonClasses.icon, { [buttonClasses.iconDisabled]: disabled })}
+              className={cx(classes.buttonIcon, { disabled })}
               d="M128,225.345l-20,-20l40,0l-20,20Z"
             />
           </g>
@@ -191,14 +156,14 @@ function DirectionalPad(props: DirectionalPadProps): JSX.Element {
           {/* LEFT button */}
           <g {...makeMouseHandlers(DirectionalPadAction.LEFT)} role="button">
             <path
-              className={cx(buttonClasses.background, {
-                [buttonClasses.backgroundDisabled]: disabled,
-                [buttonClasses.backgroundPressed]: currentAction === DirectionalPadAction.LEFT,
+              className={cx(classes.button, {
+                active: currentAction === DirectionalPadAction.LEFT,
+                disabled,
               })}
               d="M36.307,205.345c-37.793,-44.609 -37.791,-110.387 -0,-154.981l42.723,42.723c-14.771,20.74 -14.771,48.795 -0,69.535l-42.723,42.723Z"
             />
             <path
-              className={cx(buttonClasses.icon, { [buttonClasses.iconDisabled]: disabled })}
+              className={cx(classes.buttonIcon, { disabled })}
               d="M30.449,127.854l20,-20l0,40l-20,-20Z"
             />
           </g>
@@ -206,45 +171,20 @@ function DirectionalPad(props: DirectionalPadProps): JSX.Element {
           {/* RIGHT button */}
           <g {...makeMouseHandlers(DirectionalPadAction.RIGHT)} role="button">
             <path
-              className={cx(buttonClasses.background, {
-                [buttonClasses.backgroundDisabled]: disabled,
-                [buttonClasses.backgroundPressed]: currentAction === DirectionalPadAction.RIGHT,
+              className={cx(classes.button, {
+                active: currentAction === DirectionalPadAction.RIGHT,
+                disabled,
               })}
               d="M219.572,50.364c37.794,44.609 37.791,110.387 0.001,154.981l-42.724,-42.723c14.771,-20.74 14.771,-48.795 0,-69.535l42.723,-42.723Z"
             />
             <path
-              className={cx(buttonClasses.icon, { [buttonClasses.iconDisabled]: disabled })}
+              className={cx(classes.buttonIcon, { disabled })}
               d="M225.43,127.854l-20,20l0,-40l20,20Z"
             />
           </g>
         </g>
-
-        {/* STOP button */}
-        {!disableStop && (
-          <g {...makeMouseHandlers(DirectionalPadAction.STOP)} role="button">
-            <circle
-              className={cx(stopButtonClasses.background, {
-                [stopButtonClasses.backgroundDisabled]: false,
-              })}
-              cx="128"
-              cy="128"
-              r="45"
-            />
-            <text
-              x={128}
-              dy={12}
-              y={128}
-              textAnchor="middle"
-              className={cx(stopButtonClasses.text, {
-                [stopButtonClasses.textDisabled]: false,
-              })}
-            >
-              <tspan>STOP</tspan>
-            </text>
-          </g>
-        )}
       </svg>
-    </div>
+    </Stack>
   );
 }
 

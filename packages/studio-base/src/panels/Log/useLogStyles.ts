@@ -2,25 +2,23 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { makeStyles } from "@fluentui/react";
+import { makeStyles } from "tss-react/mui";
 
-const useLogStyles = makeStyles((theme) => ({
+export default makeStyles()(({ palette }) => ({
   fatal: {
-    color: theme.semanticColors.errorText,
+    color: palette.error.main,
     fontWeight: "bold",
   },
   error: {
-    color: theme.semanticColors.errorText,
+    color: palette.error.main,
   },
   warn: {
-    color: theme.semanticColors.warningBackground,
+    color: palette.warning.main,
   },
   info: {
-    color: theme.semanticColors.bodyText,
+    color: palette.info.main,
   },
   debug: {
-    color: theme.palette.neutralTertiary,
+    color: palette.text.secondary,
   },
 }));
-
-export default useLogStyles;

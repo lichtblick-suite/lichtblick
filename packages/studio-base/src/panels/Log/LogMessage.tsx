@@ -11,9 +11,8 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { makeStyles } from "@mui/styles";
-import cx from "classnames";
 import { padStart } from "lodash";
+import { makeStyles } from "tss-react/mui";
 
 import useLogStyles from "@foxglove/studio-base/panels/Log/useLogStyles";
 import { TimeDisplayMethod } from "@foxglove/studio-base/types/panels";
@@ -23,16 +22,16 @@ import LevelToString from "./LevelToString";
 import Stamp from "./Stamp";
 import { NormalizedLogMessage } from "./types";
 
-const useStyles = makeStyles({
+const useStyles = makeStyles()({
   root: {
     // Subsequent lines are indented bu using left padding, so we undo the padding for the first line
     // with textIndent
-    textIndent: "-20px",
-    paddingLeft: "20px",
+    textIndent: -20,
+    paddingLeft: 20,
     whiteSpace: "pre-wrap",
-    paddingTop: "1px",
-    paddingBottom: "1px",
-    lineHeight: "1",
+    paddingTop: 1,
+    paddingBottom: 1,
+    lineHeight: 1,
     fontFamily: fonts.MONOSPACE,
   },
 });
@@ -44,7 +43,9 @@ export default React.memo(function LogMessage(props: {
 }) {
   const { value: msg, timestampFormat, timeZone } = props;
 
-  const classes = useStyles();
+  const { classes, cx } = useStyles();
+  const { classes: logClasses } = useLogStyles();
+
   const altStr = `${msg.file}:${msg.line}`;
   const strLevel = LevelToString(msg.level);
   const stamp = msg.stamp;
@@ -52,17 +53,16 @@ export default React.memo(function LogMessage(props: {
   // the first message line is rendered with the info/stamp/name
   // following newlines are rendered on their own line
   const lines = msg.message.split("\n");
-  const logStyles = useLogStyles();
 
   return (
     <div
       title={altStr}
       className={cx(classes.root, {
-        [logStyles.fatal]: strLevel === "FATAL",
-        [logStyles.error]: strLevel === "ERROR",
-        [logStyles.warn]: strLevel === "WARN",
-        [logStyles.info]: strLevel === "INFO",
-        [logStyles.debug]: strLevel === "DEBUG",
+        [logClasses.fatal]: strLevel === "FATAL",
+        [logClasses.error]: strLevel === "ERROR",
+        [logClasses.warn]: strLevel === "WARN",
+        [logClasses.info]: strLevel === "INFO",
+        [logClasses.debug]: strLevel === "DEBUG",
       })}
     >
       <div>

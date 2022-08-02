@@ -39,10 +39,10 @@ type PlaybackTimeDisplayMethodProps = {
 };
 
 const StyledTextField = muiStyled(TextField)<{ error?: boolean }>(({ error, theme }) => ({
-  fontFeatureSettings: `${fonts.SANS_SERIF_FEATURE_SETTINGS}, 'zero'`,
   borderRadius: theme.shape.borderRadius,
 
   ".MuiInputBase-input": {
+    fontFeatureSettings: `${fonts.SANS_SERIF_FEATURE_SETTINGS}, 'zero' !important`,
     minWidth: "20ch",
   },
   ".MuiIconButton-root": {

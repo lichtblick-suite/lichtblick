@@ -101,7 +101,7 @@ export function ColorPickerInput(props: ColorPickerInputProps): JSX.Element {
             tableHexCell: { width: "35%" },
             input: {
               input: {
-                fontFeatureSettings: `${fonts.SANS_SERIF_FEATURE_SETTINGS}, 'zero'`,
+                fontFeatureSettings: `${fonts.SANS_SERIF_FEATURE_SETTINGS}, 'zero' !important`,
               },
             },
           }}

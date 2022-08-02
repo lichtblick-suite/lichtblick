@@ -99,7 +99,7 @@ export function ColorGradientInput({
             tableHexCell: { width: "35%" },
             input: {
               input: {
-                fontFeatureSettings: `${fonts.SANS_SERIF_FEATURE_SETTINGS}, 'zero'`,
+                fontFeatureSettings: `${fonts.SANS_SERIF_FEATURE_SETTINGS}, 'zero' !important`,
               },
             },
           }}
@@ -126,7 +126,7 @@ export function ColorGradientInput({
             tableHexCell: { width: "35%" },
             input: {
               input: {
-                fontFeatureSettings: `${fonts.SANS_SERIF_FEATURE_SETTINGS}, 'zero'`,
+                fontFeatureSettings: `${fonts.SANS_SERIF_FEATURE_SETTINGS}, 'zero' !important`,
               },
             },
           }}

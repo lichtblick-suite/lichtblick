@@ -2,12 +2,12 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { makeStyles } from "@fluentui/react";
 import { PropsWithChildren } from "react";
+import { makeStyles } from "tss-react/mui";
 
 const radius = 7;
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles()((theme) => ({
   badge: {
     position: "absolute",
     bottom: -radius,
@@ -15,19 +15,19 @@ const useStyles = makeStyles((theme) => ({
     width: radius * 2,
     height: radius * 2,
     borderRadius: radius,
-    backgroundColor: theme.semanticColors.errorBackground,
-    color: "rgba(255, 255, 255, 0.8)",
+    backgroundColor: theme.palette.error.main,
+    color: theme.palette.error.contrastText,
     fontSize: 8,
     fontWeight: 700,
     fontFeatureSettings: "normal",
     letterSpacing: "-0.025em",
-    lineHeight: radius * 2,
+    lineHeight: `${radius * 2}px`,
     textAlign: "center",
   },
 }));
 
 export function Badge(props: PropsWithChildren<{ count?: number }>): JSX.Element {
-  const classes = useStyles();
+  const { classes } = useStyles();
   const { count } = props;
 
   return (

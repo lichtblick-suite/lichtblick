@@ -58,7 +58,7 @@ export type FilterBarProps = {
 // custom renderer for item in dropdown list to color text
 function renderOption(
   option: ISelectableOption | undefined,
-  logStyles: ReturnType<typeof useLogStyles>,
+  logStyles: ReturnType<typeof useLogStyles>["classes"],
 ) {
   if (!option) {
     return ReactNull;
@@ -84,7 +84,7 @@ function renderOption(
 // custom renderer for selected dropdown item to color the text
 function renderTitle(
   options: IDropdownOption[] | undefined,
-  logStyles: ReturnType<typeof useLogStyles>,
+  logStyles: ReturnType<typeof useLogStyles>["classes"],
 ) {
   if (!options) {
     return ReactNull;
@@ -93,6 +93,7 @@ function renderTitle(
 }
 
 export default function FilterBar(props: FilterBarProps): JSX.Element {
+  const { classes: logStyles } = useLogStyles();
   const nodeNameOptions = Array.from(props.nodeNames, (name) => ({ name, key: name }));
 
   const selectedItems = Array.from(props.searchTerms, (term) => ({
@@ -101,7 +102,6 @@ export default function FilterBar(props: FilterBarProps): JSX.Element {
   }));
   const theme = useTheme();
   const muiTheme = useMuiTheme();
-  const logStyles = useLogStyles();
   const dropdownStyles: Partial<IDropdownStyles> = useMemo(
     () => ({
       root: {

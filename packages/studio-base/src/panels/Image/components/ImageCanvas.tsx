@@ -11,8 +11,6 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { makeStyles } from "@fluentui/react";
-import cx from "classnames";
 import {
   useCallback,
   useLayoutEffect,
@@ -24,6 +22,7 @@ import {
 } from "react";
 import { useResizeDetector } from "react-resize-detector";
 import { useAsync } from "react-use";
+import { makeStyles } from "tss-react/mui";
 import usePanZoom from "use-pan-and-zoom";
 import { v4 as uuidv4 } from "uuid";
 
@@ -57,7 +56,7 @@ type Props = {
   setActivePixelData: (data: PixelData | undefined) => void;
 };
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles()((theme) => ({
   root: {
     overflow: "hidden",
     width: "100%",
@@ -73,7 +72,7 @@ const useStyles = makeStyles((theme) => ({
     position: "absolute",
     alignItems: "center",
     justifyContent: "center",
-    color: theme.semanticColors.errorText,
+    color: theme.palette.error.main,
   },
   canvas: {
     position: "absolute",
@@ -108,7 +107,7 @@ export function ImageCanvas(props: Props): JSX.Element {
     onStartRenderImage,
   } = props;
   const { mode } = config;
-  const classes = useStyles();
+  const { classes, cx } = useStyles();
 
   const renderInMainThread = (props.renderInMainThread ?? false) || !supportsOffscreenCanvas;
 

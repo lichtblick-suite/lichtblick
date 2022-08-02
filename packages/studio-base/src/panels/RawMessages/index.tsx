@@ -114,6 +114,11 @@ const useStyles = makeStyles()((theme) => ({
     fontFamily: fonts.SANS_SERIF,
     fontFeatureSettings: `${fonts.SANS_SERIF_FEATURE_SETTINGS}, "zero"`,
   },
+  big: {
+    "&.MuiTypography-root": {
+      fontFeatureSettings: `${fonts.SANS_SERIF_FEATURE_SETTINGS}, "zero"`,
+    },
+  },
   hoverObserver: {
     display: "inline-flex",
     alignItems: "center",
@@ -441,6 +446,7 @@ function RawMessages(props: Props) {
         />
         {shouldDisplaySingleVal ? (
           <Typography
+            className={classes.big}
             variant="h1"
             fontWeight="bold"
             whiteSpace="pre-line"
@@ -627,6 +633,7 @@ function RawMessages(props: Props) {
   }, [
     autoExpandPaths,
     baseItem,
+    classes.big,
     classes.topic,
     diffEnabled,
     diffItem,

@@ -2,15 +2,15 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { makeStyles } from "@fluentui/react";
 import { PropsWithChildren } from "react";
+import { makeStyles } from "tss-react/mui";
 
 import "@foxglove/studio-base/styles/assets/inter.css";
 import "@foxglove/studio-base/styles/assets/plex-mono.css";
 
-import { colors, fonts } from "@foxglove/studio-base/util/sharedStyleConstants";
+import { fonts } from "@foxglove/studio-base/util/sharedStyleConstants";
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles()(({ palette, typography }) => ({
   root: {
     "*,*:before,*:after": {
       boxSizing: "inherit",
@@ -31,14 +31,14 @@ const useStyles = makeStyles((theme) => ({
         background: "transparent",
       },
       "::-webkit-scrollbar-thumb": {
-        background: theme.palette.blackTranslucent40,
+        background: palette.action.focus,
         borderRadius: 2,
       },
     },
     "p:not([class^='Mui')": {
       margin: "1em 0",
 
-      ":last-child": {
+      "&:last-child": {
         marginBottom: 0,
       },
     },
@@ -54,10 +54,10 @@ const useStyles = makeStyles((theme) => ({
     position: "relative",
     flex: "1 1 100%",
     overflow: "hidden",
-    background: theme.semanticColors.bodyBackground,
-    color: theme.semanticColors.bodyText,
+    background: palette.background.default,
+    color: palette.text.primary,
     font: "inherit",
-    ...theme.fonts.small,
+    fontSize: typography.body2.fontSize,
     fontFeatureSettings: fonts.SANS_SERIF_FEATURE_SETTINGS,
 
     // mosaic styling
@@ -69,8 +69,8 @@ const useStyles = makeStyles((theme) => ({
         right: 0,
 
         ".drop-target-container .drop-target": {
-          backgroundColor: theme.palette.neutralQuaternary,
-          border: `2px solid ${theme.palette.neutralDark}`,
+          backgroundColor: palette.action.hover,
+          border: `2px solid ${palette.divider}`,
         },
         ".drop-target-container .drop-target-hover": {
           opacity: 0.3,
@@ -139,20 +139,19 @@ const useStyles = makeStyles((theme) => ({
         zIndex: "unset",
       },
       ".mosaic-window-title": {
-        fontSize: "12px",
+        fontSize: 12,
         lineHeight: "30px",
-        paddingLeft: "5px",
-        color: colors.GREY,
+        paddingLeft: 5,
       },
       ".mosaic-split": {
         background: "none !important",
         zIndex: 99,
 
         ".mosaic-split-line": {
-          boxShadow: `0 0 0 1px ${theme.palette.neutralLighter}`,
+          boxShadow: `0 0 0 1px ${palette.grey[palette.mode === "dark" ? "A200" : "A100"]}`,
         },
-        ":hover .mosaic-split-line": {
-          boxShadow: `0 0 0 1px ${theme.palette.neutralQuaternary}`,
+        "&:hover .mosaic-split-line": {
+          boxShadow: `0 0 0 1px ${palette.grey[palette.mode === "dark" ? "A200" : "A100"]}`,
         },
         "&.-row": {
           marginTop: 2,
@@ -173,40 +172,43 @@ const useStyles = makeStyles((theme) => ({
     },
 
     // leaflet GUI styling
-    ".leaflet-bar a": {
+    ".leaflet-bar": {
       userSelect: "none",
-      backgroundColor: theme.semanticColors.bodyStandoutBackground,
-      color: theme.semanticColors.buttonText,
-      borderBottomColor: theme.semanticColors.bodyDivider,
+      backgroundColor: palette.background.paper,
+      borderRadius: 4,
 
-      ":hover": {
-        backgroundColor: theme.semanticColors.bodyBackgroundHovered,
-        color: theme.semanticColors.buttonTextHovered,
-        borderBottomColor: theme.semanticColors.bodyDivider,
-      },
-      ":focus": {
-        color: theme.semanticColors.buttonTextPressed,
-      },
-      ":active": {
-        color: theme.semanticColors.buttonTextPressed,
+      a: {
+        lineHeight: 1.2,
+        backgroundColor: "transparent",
+        color: palette.text.primary,
+        borderBottomColor: palette.divider,
+
+        "&:hover": {
+          backgroundColor: palette.action.hover,
+          color: palette.text.primary,
+          borderBottomColor: palette.divider,
+        },
+        "&:focus": {
+          color: palette.text.primary,
+        },
+        "&:active": {
+          color: palette.text.primary,
+        },
       },
     },
     ".leaflet-bar a.leaflet-disabled": {
-      backgroundColor: theme.semanticColors.bodyBackground,
-      color: theme.semanticColors.disabledBodyText,
+      backgroundColor: palette.action.disabledBackground,
+      color: palette.text.disabled,
 
-      ":hover": {
-        backgroundColor: theme.semanticColors.bodyBackgroundHovered,
+      "&:hover": {
+        backgroundColor: palette.action.disabledBackground,
       },
     },
   },
 }));
 
 export default function CssBaseline(props: PropsWithChildren<unknown>): JSX.Element {
-  const styles = useStyles();
+  const { classes } = useStyles();
 
-  // styles scoped to our container
-  const className = styles.root;
-
-  return <div className={className}>{props.children}</div>;
+  return <div className={classes.root}>{props.children}</div>;
 }
