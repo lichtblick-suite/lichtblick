@@ -11,32 +11,32 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 import {
-  colorObjToIRGB,
-  colorObjToIColor,
+  colorObjToRGBA,
+  colorObjToHex,
   getColorFromIRGB,
   defaultedRGBStringFromColorObj,
 } from "@foxglove/studio-base/util/colorUtils";
 
 describe("colorUtils", () => {
-  it("colorObjToIRGB", () => {
-    expect(colorObjToIRGB({ r: 1, g: 1, b: 1, a: 1 })).toEqual({ r: 255, g: 255, b: 255, a: 100 });
-    expect(colorObjToIRGB({ r: 0, g: 1, b: 1, a: 0.5 })).toEqual({
+  it("colorObjToRGBA", () => {
+    expect(colorObjToRGBA({ r: 1, g: 1, b: 1, a: 1 })).toEqual({ r: 255, g: 255, b: 255, a: 100 });
+    expect(colorObjToRGBA({ r: 0, g: 1, b: 1, a: 0.5 })).toEqual({
       r: 0,
       g: 255,
       b: 255,
       a: 50,
     });
-    expect(colorObjToIRGB({ r: 0, g: 0, b: 0, a: 0 })).toEqual({
+    expect(colorObjToRGBA({ r: 0, g: 0, b: 0, a: 0 })).toEqual({
       r: 0,
       g: 0,
       b: 0,
       a: 0,
     });
   });
-  it("colorObjToIColor", () => {
-    expect(colorObjToIColor({ r: 1, g: 1, b: 0.5, a: 0 }).hex).toEqual("ffff80");
-    expect(colorObjToIColor({ r: 1, g: 1, b: 0.5, a: 1 }).hex).toEqual("ffff80");
-    expect(colorObjToIColor({ r: 0.7, g: 0.5, b: 0.5, a: 0 }).hex).toEqual("b38080");
+  it("colorObjToHex", () => {
+    expect(colorObjToHex({ r: 1, g: 1, b: 0.5, a: 0 })).toEqual("#ffff80");
+    expect(colorObjToHex({ r: 1, g: 1, b: 0.5, a: 1 })).toEqual("#ffff80");
+    expect(colorObjToHex({ r: 0.7, g: 0.5, b: 0.5, a: 0 })).toEqual("#b38080");
   });
   it("defaultedRGBStringFromColorObj", () => {
     expect(defaultedRGBStringFromColorObj(undefined)).toEqual("rgba(255, 255, 255, 1)");

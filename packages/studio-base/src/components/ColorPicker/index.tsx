@@ -12,7 +12,7 @@ import {
 import { useRef, useState } from "react";
 
 import { Color } from "@foxglove/regl-worldview";
-import { colorObjToIColor, getColorFromIRGB } from "@foxglove/studio-base/util/colorUtils";
+import { colorObjToHex, getColorFromIRGB } from "@foxglove/studio-base/util/colorUtils";
 import { fonts } from "@foxglove/studio-base/util/sharedStyleConstants";
 
 type Props = {
@@ -31,7 +31,7 @@ export default function ColorPicker({
   buttonShape,
   alphaType,
 }: Props): JSX.Element {
-  const fluentColor = colorObjToIColor(color);
+  const hexColor = colorObjToHex(color);
   const colorButtonRef = useRef<HTMLElement>(ReactNull);
   const [colorPickerShown, setColorPickerShown] = useState(false);
 
@@ -43,13 +43,13 @@ export default function ColorPicker({
           elementRef={colorButtonRef}
           styles={{
             root: {
-              backgroundColor: fluentColor.str,
+              backgroundColor: hexColor,
               width: `${circleSize}px`,
               height: `${circleSize}px`,
               borderRadius: "50%",
             },
-            rootHovered: { backgroundColor: fluentColor.str, opacity: 0.8 },
-            rootPressed: { backgroundColor: fluentColor.str, opacity: 0.6 },
+            rootHovered: { backgroundColor: hexColor, opacity: 0.8 },
+            rootPressed: { backgroundColor: hexColor, opacity: 0.6 },
           }}
           onClick={() => setColorPickerShown(!colorPickerShown)}
         />
@@ -60,9 +60,9 @@ export default function ColorPicker({
         <DefaultButton
           elementRef={colorButtonRef}
           styles={{
-            root: { backgroundColor: fluentColor.str },
-            rootHovered: { backgroundColor: fluentColor.str, opacity: 0.8 },
-            rootPressed: { backgroundColor: fluentColor.str, opacity: 0.6 },
+            root: { backgroundColor: hexColor },
+            rootHovered: { backgroundColor: hexColor, opacity: 0.8 },
+            rootPressed: { backgroundColor: hexColor, opacity: 0.6 },
           }}
           onClick={() => setColorPickerShown(!colorPickerShown)}
         />
@@ -82,7 +82,7 @@ export default function ColorPicker({
           }}
         >
           <Picker
-            color={colorObjToIColor(color)}
+            color={hexColor}
             alphaType={alphaType ?? "none"}
             styles={{
               tableHexCell: { width: "35%" },

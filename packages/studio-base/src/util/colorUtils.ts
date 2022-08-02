@@ -11,7 +11,7 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { IColor, getColorFromRGBA, IRGB } from "@fluentui/react";
+import tinycolor, { ColorFormats } from "tinycolor2";
 
 import { Color } from "@foxglove/studio-base/types/Messages";
 
@@ -34,7 +34,7 @@ export const hexToColorObj = (hex: string, alpha?: number): Color => {
 
 // Convert a color object (scaled to 1, 1, 1, 1) to a fluentUI IRGB by scaling
 // the RGB values to 255 and the alpha to 100.
-export const colorObjToIRGB = (color: Color): IRGB => {
+export const colorObjToRGBA = (color: Color): Color => {
   return {
     r: Math.round(255 * color.r),
     g: Math.round(255 * color.g),
@@ -43,22 +43,21 @@ export const colorObjToIRGB = (color: Color): IRGB => {
   };
 };
 
-// Convert a color object to a FluentUI IColor. Disregards the alpha value.
-export const colorObjToIColor = (color?: Color): IColor => {
-  return getColorFromRGBA(colorObjToIRGB(color ?? DEFAULT_RGBA));
+// Convert a color object to a hex color. Disregards the alpha value.
+export const colorObjToHex = (color?: Color): string => {
+  return tinycolor.fromRatio(color ?? DEFAULT_RGBA).toHexString();
 };
 
 // Returns an RGB string for a regl-worldview color. The scale of the formatted
 // tuple is (255, 255, 255, 1).
 export function defaultedRGBStringFromColorObj(color?: Color): string {
-  const rgba = colorObjToIRGB(color ?? DEFAULT_RGBA);
-  const alpha = rgba.a ?? 100;
-  return `rgba(${rgba.r}, ${rgba.g}, ${rgba.b}, ${alpha / 100})`;
+  const rgba = colorObjToRGBA(color ?? DEFAULT_RGBA);
+  return `rgba(${rgba.r}, ${rgba.g}, ${rgba.b}, ${rgba.a / 100})`;
 }
 
 // Translate a fluentui IRGB to our internal Color interface, defaulting the
 // alpha value to 1 if it is not present.
-export function getColorFromIRGB(rgba: IRGB): Color {
+export function getColorFromIRGB(rgba: ColorFormats.RGB & { a?: number }): Color {
   const alpha = rgba.a ?? 100;
   return {
     r: rgba.r / 255,

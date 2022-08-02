@@ -21,7 +21,7 @@ import { useCallback } from "react";
 
 import ColorPicker from "@foxglove/studio-base/components/ColorPicker";
 import Stack from "@foxglove/studio-base/components/Stack";
-import { colorObjToIColor, getColorFromIRGB } from "@foxglove/studio-base/util/colorUtils";
+import { colorObjToHex, getColorFromIRGB } from "@foxglove/studio-base/util/colorUtils";
 import { getLineColor } from "@foxglove/studio-base/util/plotColors";
 import { TimestampMethod } from "@foxglove/studio-base/util/time";
 
@@ -89,7 +89,7 @@ export default function PathSettingsModal({
             <FormLabel>Color</FormLabel>
             <ColorPicker
               color={currentColor}
-              onChange={(newColor) => savePathConfig({ color: colorObjToIColor(newColor).str })}
+              onChange={(newColor) => savePathConfig({ color: colorObjToHex(newColor) })}
             />
           </FormControl>
 
