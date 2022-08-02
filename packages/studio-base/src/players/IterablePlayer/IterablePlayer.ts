@@ -790,6 +790,11 @@ export class IterablePlayer implements Player {
       return;
     }
 
+    // Wait on any active emit state to finish as part of this tick
+    // Without waiting on the emit state to finish we might drop messages since our emitState
+    // might get debounced
+    await this._emitState.currentPromise;
+
     this._currentTime = end;
     this._messages = msgEvents;
     this._emitState();
