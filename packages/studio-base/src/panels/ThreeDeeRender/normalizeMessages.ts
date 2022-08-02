@@ -3,10 +3,7 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 import type { Time } from "@foxglove/rostime";
-import type {
-  FrameTransform,
-  Transform as TransformWithTime,
-} from "@foxglove/schemas/schemas/typescript";
+import type { FrameTransform } from "@foxglove/schemas/schemas/typescript";
 
 import type { PartialMessage } from "./SceneExtension";
 import {
@@ -36,6 +33,20 @@ enum NumericType {
   FLOAT32 = 7,
   FLOAT64 = 8,
 }
+
+// Legacy foxglove.Transform type -- see https://github.com/foxglove/schemas/pull/46
+type LegacyTransform = {
+  timestamp: Time;
+  translation: Vector3;
+  rotation: Quaternion;
+};
+// Legacy foxglove.FrameTransform type -- see https://github.com/foxglove/schemas/pull/46
+export type LegacyFrameTransform = {
+  timestamp: Time;
+  parent_frame_id: string;
+  child_frame_id: string;
+  transform: LegacyTransform;
+};
 
 export function normalizeTime(time: Partial<Time> | undefined): Time {
   if (!time) {
@@ -153,16 +164,6 @@ export function normalizeTransform(transform: PartialMessage<Transform> | undefi
   };
 }
 
-export function normalizeTransformWithTime(
-  transform: PartialMessage<TransformWithTime> | undefined,
-): TransformWithTime {
-  return {
-    timestamp: normalizeTime(transform?.timestamp),
-    translation: normalizeVector3(transform?.translation),
-    rotation: normalizeQuaternion(transform?.rotation),
-  };
-}
-
 export function normalizeTransformStamped(
   transform: PartialMessage<TransformStamped> | undefined,
 ): TransformStamped {
@@ -180,13 +181,18 @@ export function normalizeTFMessage(tfMessage: PartialMessage<TFMessage> | undefi
 }
 
 export function normalizeFrameTransform(
-  frameTransform: PartialMessage<FrameTransform> | undefined,
+  frameTransform:
+    | (PartialMessage<FrameTransform> & PartialMessage<LegacyFrameTransform>)
+    | undefined,
 ): FrameTransform {
   return {
     timestamp: normalizeTime(frameTransform?.timestamp),
     parent_frame_id: frameTransform?.parent_frame_id ?? "",
     child_frame_id: frameTransform?.child_frame_id ?? "",
-    transform: normalizeTransformWithTime(frameTransform?.transform),
+    translation: normalizeVector3(
+      frameTransform?.translation ?? frameTransform?.transform?.translation,
+    ),
+    rotation: normalizeQuaternion(frameTransform?.rotation ?? frameTransform?.transform?.rotation),
   };
 }
 

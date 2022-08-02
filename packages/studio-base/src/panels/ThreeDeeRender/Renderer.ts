@@ -800,8 +800,8 @@ export class Renderer extends EventEmitter<RendererEvents> {
     // top-level timestamp for now until the ambiguity is resolved. See
     // <https://github.com/foxglove/schemas/issues/45>
     const stamp = toNanoSec(transform.timestamp);
-    const t = transform.transform.translation;
-    const q = transform.transform.rotation;
+    const t = transform.translation;
+    const q = transform.rotation;
 
     this.addTransform(parentId, childId, stamp, t, q);
   }

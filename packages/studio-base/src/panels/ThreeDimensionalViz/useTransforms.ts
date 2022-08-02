@@ -57,7 +57,11 @@ function consumeFoxgloveFrameTransform(
   transformTree: TransformTree,
 ): void {
   for (const { message } of msgEvents) {
-    const { translation, rotation } = message.transform;
+    const translation = message.translation ?? message.transform?.translation;
+    const rotation = message.rotation ?? message.transform?.rotation;
+    if (!translation || !rotation) {
+      continue;
+    }
     const transform = new Transform(
       vec3FromValues(translation.x, translation.y, translation.z),
       quatFromValues(rotation.x, rotation.y, rotation.z, rotation.w),

@@ -105,10 +105,12 @@ export type FoxgloveMessages = {
     };
     parent_frame_id: string;
     child_frame_id: string;
-    transform: {
+    transform?: {
       translation: { x: number; y: number; z: number };
       rotation: { x: number; y: number; z: number; w: number };
     };
+    translation?: { x: number; y: number; z: number };
+    rotation?: { x: number; y: number; z: number; w: number };
   };
 
   "foxglove.Pose": {
