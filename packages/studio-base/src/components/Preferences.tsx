@@ -3,20 +3,20 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 import {
+  Autocomplete,
   Checkbox,
-  ChoiceGroup,
-  DirectionalHint,
-  Dropdown,
-  IChoiceGroupOption,
-  IComboBoxOption,
-  Label,
-  SelectableOptionMenuItemType,
+  Divider,
+  FormControl,
+  FormControlLabel,
+  FormLabel,
+  MenuItem,
+  Select,
   TextField,
-  VirtualizedComboBox,
-} from "@fluentui/react";
-import { Typography } from "@mui/material";
+  Typography,
+} from "@mui/material";
 import moment from "moment-timezone";
-import { useCallback, useMemo, useState } from "react";
+import { useMemo } from "react";
+import { makeStyles } from "tss-react/mui";
 
 import { filterMap } from "@foxglove/den/collection";
 import { AppSetting } from "@foxglove/studio-base/AppSetting";
@@ -27,12 +27,29 @@ import Stack from "@foxglove/studio-base/components/Stack";
 import { useAppTimeFormat } from "@foxglove/studio-base/hooks";
 import { useAppConfigurationValue } from "@foxglove/studio-base/hooks/useAppConfigurationValue";
 import { TimeDisplayMethod } from "@foxglove/studio-base/types/panels";
-import fuzzyFilter from "@foxglove/studio-base/util/fuzzyFilter";
 import isDesktopApp from "@foxglove/studio-base/util/isDesktopApp";
 
 const MESSAGE_RATES = [1, 3, 5, 10, 15, 20, 30, 60];
 
 const os = OsContextSingleton; // workaround for https://github.com/webpack/webpack/issues/12960
+
+const useStyles = makeStyles()({
+  autocompleteInput: {
+    "&.MuiOutlinedInput-input": {
+      padding: 0,
+    },
+  },
+  checkbox: {
+    "&.MuiCheckbox-root": {
+      paddingTop: 0,
+    },
+  },
+  formControlLabel: {
+    "&.MuiFormControlLabel-root": {
+      alignItems: "start",
+    },
+  },
+});
 
 function formatTimezone(name: string) {
   const tz = moment.tz(name);
@@ -50,7 +67,7 @@ function ColorSchemeSettings(): JSX.Element {
   const [colorScheme = "dark", setColorScheme] = useAppConfigurationValue<string>(
     AppSetting.COLOR_SCHEME,
   );
-  const options: IChoiceGroupOption[] = useMemo(
+  const options = useMemo(
     () => [
       { key: "light", text: "Light", iconProps: { iconName: "WeatherSunny" } },
       { key: "dark", text: "Dark", iconProps: { iconName: "WeatherMoon" } },
@@ -59,27 +76,33 @@ function ColorSchemeSettings(): JSX.Element {
     [],
   );
   return (
-    <ChoiceGroup
-      label="Color scheme"
-      options={options}
-      selectedKey={colorScheme}
-      onChange={(_event, option) => {
-        if (option != undefined) {
-          void setColorScheme(option.key);
-        }
-      }}
-    />
+    <Stack>
+      <FormLabel>Color scheme:</FormLabel>
+      <Select
+        value={colorScheme}
+        fullWidth
+        onChange={(event) => void setColorScheme(event.target.value)}
+      >
+        {options.map((option) => (
+          <MenuItem key={option.key} value={option.key}>
+            {option.text}
+          </MenuItem>
+        ))}
+      </Select>
+    </Stack>
   );
 }
 
 function TimezoneSettings(): React.ReactElement {
-  type Option = Omit<IComboBoxOption, "data"> & { data: string | undefined };
+  type Option = { key: string; label: string; data?: string; divider?: boolean };
+
+  const { classes } = useStyles();
 
   const [timezone, setTimezone] = useAppConfigurationValue<string>(AppSetting.TIMEZONE);
-  const detectItem = useMemo(
+  const detectItem: Option = useMemo(
     () => ({
       key: "detect",
-      text: `Detect from system: ${formatTimezone(moment.tz.guess())}`,
+      label: `Detect from system: ${formatTimezone(moment.tz.guess())}`,
       data: undefined,
     }),
     [],
@@ -87,11 +110,16 @@ function TimezoneSettings(): React.ReactElement {
   const fixedItems: Option[] = useMemo(
     () => [
       detectItem,
-      { key: "zone:UTC", text: `${formatTimezone("UTC")}`, data: "UTC" },
-      { key: "sep", text: "", data: "-separator-", itemType: SelectableOptionMenuItemType.Divider },
+      { key: "zone:UTC", label: `${formatTimezone("UTC")}`, data: "UTC" },
+      {
+        key: "sep",
+        label: "",
+        divider: true,
+      },
     ],
     [detectItem],
   );
+
   const timezoneItems: Option[] = useMemo(
     () =>
       filterMap(moment.tz.names(), (name) => {
@@ -99,95 +127,63 @@ function TimezoneSettings(): React.ReactElement {
         if (name === "UTC") {
           return undefined;
         }
-        return { key: `zone:${name}`, text: formatTimezone(name), data: name };
+        return { key: `zone:${name}`, label: formatTimezone(name), data: name };
       }),
     [],
   );
 
-  const itemsByData = useMemo(() => {
-    const map = new Map<string, Option>();
-    for (const item of fixedItems) {
-      if (item.data != undefined) {
-        map.set(item.data, item);
-      }
-    }
-    for (const item of timezoneItems) {
-      if (item.data != undefined) {
-        map.set(item.data, item);
-      }
-    }
-    return map;
-  }, [fixedItems, timezoneItems]);
+  const allItems = useMemo(() => [...fixedItems, ...timezoneItems], [fixedItems, timezoneItems]);
 
   const selectedItem = useMemo(
-    () => (timezone != undefined && itemsByData.get(timezone)) || detectItem,
-    [itemsByData, timezone, detectItem],
-  );
-
-  const [filterText, setFilterText] = useState<string>("");
-  const filteredItems = useMemo(() => {
-    const matchingItems = fuzzyFilter({
-      options: timezoneItems,
-      filter: filterText,
-      getText: (item) => item.text,
-    });
-    return [...fixedItems, ...matchingItems];
-  }, [fixedItems, timezoneItems, filterText]);
-
-  const onPendingValueChanged = useCallback(
-    (_option?: IComboBoxOption, _index?: number, value?: string) => {
-      if (value != undefined) {
-        setFilterText(value);
-      }
-    },
-    [],
+    () => (timezone != undefined && allItems.find((item) => item.data === timezone)) || detectItem,
+    [allItems, detectItem, timezone],
   );
 
   return (
-    <VirtualizedComboBox
-      label="Display timestamps in:"
-      options={filteredItems}
-      allowFreeform
-      autoComplete="on"
-      openOnKeyboardFocus
-      selectedKey={selectedItem.key}
-      onChange={(_event, option) => {
-        if (option) {
-          void setTimezone(option.data as string);
+    <FormControl fullWidth>
+      <Typography color="text.secondary" marginBottom={0.5}>
+        Display timestamps in:
+      </Typography>
+      <Autocomplete
+        options={[...fixedItems, ...timezoneItems]}
+        value={selectedItem}
+        renderOption={(props, option: Option) =>
+          option.divider === true ? <Divider /> : <li {...props}>{option.label}</li>
         }
-      }}
-      onPendingValueChanged={onPendingValueChanged}
-      calloutProps={{
-        directionalHint: DirectionalHint.bottomLeftEdge,
-        directionalHintFixed: true,
-      }}
-    />
+        renderInput={(params) => (
+          <TextField
+            {...params}
+            inputProps={{ ...params.inputProps, className: classes.autocompleteInput }}
+          />
+        )}
+        onChange={(_event, value) => void setTimezone(value ? String(value.key) : undefined)}
+      />
+    </FormControl>
   );
 }
 
 function TimeFormat(): React.ReactElement {
   const { timeFormat, setTimeFormat } = useAppTimeFormat();
-  const entries: Array<{ key: TimeDisplayMethod; text: string }> = [
+  const options: Array<{ key: TimeDisplayMethod; text: string }> = [
     { key: "SEC", text: "Seconds" },
     { key: "TOD", text: "Local" },
   ];
 
   return (
-    <Dropdown
-      label="Timestamp format:"
-      options={entries}
-      openOnKeyboardFocus
-      selectedKey={timeFormat}
-      onChange={(_event, option) => {
-        if (option) {
-          void setTimeFormat(String(option.key) as TimeDisplayMethod);
-        }
-      }}
-      calloutProps={{
-        directionalHint: DirectionalHint.bottomLeftEdge,
-        directionalHintFixed: true,
-      }}
-    />
+    <Stack>
+      <FormLabel>Timestamp format:</FormLabel>
+      <Select
+        value={timeFormat}
+        fullWidth
+        onChange={(event) => void setTimeFormat(event.target.value as TimeDisplayMethod)}
+      >
+        {options.map((option) => (
+          <MenuItem key={option.key} value={option.key}>
+            {option.text}
+          </MenuItem>
+        ))}
+      </Select>
+    </Stack>
   );
 }
 
@@ -196,55 +192,52 @@ function LaunchDefault(): React.ReactElement {
     AppSetting.LAUNCH_PREFERENCE,
   );
 
-  const entries: Array<{ key: string; text: string }> = [
+  const options: Array<{ key: string; text: string }> = [
     { key: "unknown", text: "Ask each time" },
     { key: "web", text: "Web app" },
     { key: "desktop", text: "Desktop app" },
   ];
 
   return (
-    <Dropdown
-      label="Open links in:"
-      options={entries}
-      openOnKeyboardFocus
-      selectedKey={preference}
-      onChange={(_event, option) => {
-        if (option) {
-          void setPreference(String(option.key));
-        }
-      }}
-      calloutProps={{
-        directionalHint: DirectionalHint.bottomLeftEdge,
-        directionalHintFixed: true,
-      }}
-    />
+    <Stack>
+      <FormLabel>Open links in:</FormLabel>
+      <Select
+        value={preference}
+        fullWidth
+        onChange={(event) => void setPreference(event.target.value)}
+      >
+        {options.map((option) => (
+          <MenuItem key={option.key} value={option.key}>
+            {option.text}
+          </MenuItem>
+        ))}
+      </Select>
+    </Stack>
   );
 }
 
 function MessageFramerate(): React.ReactElement {
   const [messageRate, setMessageRate] = useAppConfigurationValue<number>(AppSetting.MESSAGE_RATE);
-  const entries = useMemo(
+  const options = useMemo(
     () => MESSAGE_RATES.map((rate) => ({ key: rate, text: `${rate}`, data: rate })),
     [],
   );
 
   return (
-    <VirtualizedComboBox
-      label="Message rate (Hz):"
-      options={entries}
-      autoComplete="on"
-      openOnKeyboardFocus
-      selectedKey={messageRate ?? 60}
-      onChange={(_event, option) => {
-        if (option) {
-          void setMessageRate(option.data as number);
-        }
-      }}
-      calloutProps={{
-        directionalHint: DirectionalHint.bottomLeftEdge,
-        directionalHintFixed: true,
-      }}
-    />
+    <Stack>
+      <FormLabel>Message rate (Hz):</FormLabel>
+      <Select
+        value={messageRate ?? 60}
+        fullWidth
+        onChange={(event) => void setMessageRate(event.target.value as number)}
+      >
+        {options.map((option) => (
+          <MenuItem key={option.key} value={option.key}>
+            {option.text}
+          </MenuItem>
+        ))}
+      </Select>
+    </Stack>
   );
 }
 
@@ -253,15 +246,23 @@ function AutoUpdate(): React.ReactElement {
     AppSetting.UPDATES_ENABLED,
   );
 
+  const { classes } = useStyles();
+
   return (
     <>
-      <Label>Updates:</Label>
-      <Checkbox
-        checked={updatesEnabled}
-        label="Automatically install updates"
-        onChange={(_, newValue) => {
-          void setUpdatedEnabled(newValue ?? true);
-        }}
+      <Typography color="text.secondary" marginBottom={0.5}>
+        Updates:
+      </Typography>
+      <FormControlLabel
+        className={classes.formControlLabel}
+        control={
+          <Checkbox
+            className={classes.checkbox}
+            checked={updatesEnabled}
+            onChange={(_event, checked) => void setUpdatedEnabled(checked)}
+          />
+        }
+        label="Send anonymized crash reports"
       />
     </>
   );
@@ -276,10 +277,11 @@ function RosPackagePath(): React.ReactElement {
 
   return (
     <TextField
+      fullWidth
       label="ROS_PACKAGE_PATH"
       placeholder={rosPackagePathPlaceholder}
       value={rosPackagePath ?? ""}
-      onChange={(_event, newValue) => void setRosPackagePath(newValue ? newValue : undefined)}
+      onChange={(event) => void setRosPackagePath(event.target.value)}
     />
   );
 }
@@ -299,6 +301,8 @@ export default function Preferences(): React.ReactElement {
   // with our .deb package install method on linux.
   const supportsAppUpdates = isDesktopApp() && os?.platform !== "linux";
 
+  const { classes } = useStyles();
+
   return (
     <SidebarContent title="Preferences">
       <Stack gap={4}>
@@ -306,7 +310,7 @@ export default function Preferences(): React.ReactElement {
           <Typography component="h2" variant="h5" gutterBottom color="primary">
             General
           </Typography>
-          <Stack gap={1}>
+          <Stack gap={2}>
             <div>
               <ColorSchemeSettings />
             </div>
@@ -347,18 +351,30 @@ export default function Preferences(): React.ReactElement {
           <Typography component="h2" variant="h5" gutterBottom color="primary">
             Privacy
           </Typography>
-          <Stack gap={1}>
+          <Stack gap={2}>
             <Typography color="text.secondary">
               Changes will take effect the next time Foxglove Studio is launched.
             </Typography>
-            <Checkbox
-              checked={telemetryEnabled ?? true}
-              onChange={(_event, checked) => void setTelemetryEnabled(checked)}
+            <FormControlLabel
+              className={classes.formControlLabel}
+              control={
+                <Checkbox
+                  className={classes.checkbox}
+                  checked={telemetryEnabled ?? true}
+                  onChange={(_event, checked) => void setTelemetryEnabled(checked)}
+                />
+              }
               label="Send anonymized usage data to help us improve Foxglove Studio"
             />
-            <Checkbox
-              checked={crashReportingEnabled ?? true}
-              onChange={(_event, checked) => void setCrashReportingEnabled(checked)}
+            <FormControlLabel
+              className={classes.formControlLabel}
+              control={
+                <Checkbox
+                  className={classes.checkbox}
+                  checked={crashReportingEnabled ?? true}
+                  onChange={(_event, checked) => void setCrashReportingEnabled(checked)}
+                />
+              }
               label="Send anonymized crash reports"
             />
           </Stack>
