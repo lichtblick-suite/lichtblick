@@ -3,7 +3,8 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 import { Button, Dialog, DialogActions, DialogContent, TextField, Typography } from "@mui/material";
-import { useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
+import { FormEvent, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
+import { useKeyPressEvent } from "react-use";
 
 import Stack from "@foxglove/studio-base/components/Stack";
 import ModalContext from "@foxglove/studio-base/context/ModalContext";
@@ -48,6 +49,19 @@ function ModalPrompt({
     }
   }, [transformer, value]);
 
+  const onConfirmAction = () => {
+    try {
+      onComplete(transformer ? transformer(value) : value);
+    } catch (err) {
+      onComplete(undefined);
+    }
+  };
+
+  const onSubmitAction = (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    onConfirmAction();
+  };
+
   const completed = useRef(false);
   const onComplete = useCallback(
     (result: string | undefined) => {
@@ -58,6 +72,9 @@ function ModalPrompt({
     },
     [originalOnComplete],
   );
+
+  useKeyPressEvent("Enter", onConfirmAction);
+
   // Ensure we still call onComplete(undefined) when the component unmounts, if it hasn't been
   // called already
   useEffect(() => {
@@ -66,16 +83,7 @@ function ModalPrompt({
 
   return (
     <Dialog open maxWidth="xs" fullWidth onClose={() => onComplete(undefined)}>
-      <form
-        onSubmit={(event) => {
-          event.preventDefault();
-          try {
-            onComplete(transformer ? transformer(value) : value);
-          } catch (err) {
-            onComplete(undefined);
-          }
-        }}
-      >
+      <form onSubmit={onSubmitAction}>
         <Stack paddingX={3} paddingTop={2}>
           <Typography variant="h4" fontWeight={600} gutterBottom>
             {title}
