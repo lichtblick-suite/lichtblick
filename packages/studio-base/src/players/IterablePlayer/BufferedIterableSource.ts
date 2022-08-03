@@ -3,6 +3,7 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 import { Condvar } from "@foxglove/den/async";
+import { VecQueue } from "@foxglove/den/collection";
 import Log from "@foxglove/log";
 import { add as addTime, compare, clampTime } from "@foxglove/rostime";
 import { Time, MessageEvent } from "@foxglove/studio";
@@ -47,7 +48,7 @@ class BufferedIterableSource implements IIterableSource {
   private writeSignal = new Condvar();
 
   // The producer loads results into the cache and the consumer reads from the cache.
-  private cache: IteratorResult[] = [];
+  private cache = new VecQueue<IteratorResult>();
 
   // The location of the consumer read head
   private readHead: Time = { sec: 0, nsec: 0 };
@@ -85,7 +86,7 @@ class BufferedIterableSource implements IIterableSource {
 
     // Clear the cache and start producing into an empty array, the consumer removes elements from
     // the start of the array.
-    this.cache.length = 0;
+    this.cache.clear();
 
     // Streaming starts where the read head is and adjust as data is buffered and read
     let streamStart = this.readHead;
@@ -118,7 +119,7 @@ class BufferedIterableSource implements IIterableSource {
             throw new Error("Invariant: out of bounds result");
           }
 
-          this.cache.push(result);
+          this.cache.enqueue(result);
 
           // Indicate to the consumer that it can try reading again
           this.readSignal.notifyAll();
@@ -139,7 +140,7 @@ class BufferedIterableSource implements IIterableSource {
           // If this.readHead + readAheadTime > streamEnd, we start another stream for buffering
           // otherwise we wait
           const targetUntil = addTime(this.readHead, this.readAheadDuration);
-          if (compare(targetUntil, streamEnd) > 0 || this.cache.length === 0) {
+          if (compare(targetUntil, streamEnd) > 0 || this.cache.size() === 0) {
             streamStart = addTime(streamEnd, { sec: 0, nsec: 1 });
             break;
           }
@@ -203,7 +204,7 @@ class BufferedIterableSource implements IIterableSource {
         }
 
         for (;;) {
-          const item = self.cache.shift();
+          const item = self.cache.dequeue();
           if (!item) {
             if (self.readDone) {
               break;
