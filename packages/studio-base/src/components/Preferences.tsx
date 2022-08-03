@@ -135,7 +135,7 @@ function TimezoneSettings(): React.ReactElement {
   const allItems = useMemo(() => [...fixedItems, ...timezoneItems], [fixedItems, timezoneItems]);
 
   const selectedItem = useMemo(
-    () => (timezone != undefined && allItems.find((item) => item.data === timezone)) || detectItem,
+    () => (timezone != undefined && allItems.find((item) => item.key === timezone)) || detectItem,
     [allItems, detectItem, timezone],
   );
 
@@ -148,7 +148,13 @@ function TimezoneSettings(): React.ReactElement {
         options={[...fixedItems, ...timezoneItems]}
         value={selectedItem}
         renderOption={(props, option: Option) =>
-          option.divider === true ? <Divider /> : <li {...props}>{option.label}</li>
+          option.divider === true ? (
+            <Divider />
+          ) : (
+            <li {...props} key={option.key}>
+              {option.label}
+            </li>
+          )
         }
         renderInput={(params) => (
           <TextField
