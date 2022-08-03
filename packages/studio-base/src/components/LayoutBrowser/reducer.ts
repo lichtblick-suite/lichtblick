@@ -8,7 +8,7 @@ import { useImmerReducer } from "use-immer";
 
 import { Layout } from "@foxglove/studio-base/services/ILayoutStorage";
 
-type MultiAction = "delete";
+type MultiAction = "delete" | "duplicate" | "revert" | "save";
 
 type State = {
   busy: boolean;

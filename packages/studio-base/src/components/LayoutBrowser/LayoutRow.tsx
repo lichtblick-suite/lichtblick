@@ -175,9 +175,19 @@ export default React.memo(function LayoutRow({
     onOverwrite(layout);
   }, [layout, onOverwrite]);
 
-  const revertAction = useCallback(() => {
+  const confirmRevert = useCallback(async () => {
+    const response = await confirm({
+      title: multiSelection ? `Revert layouts` : `Revert “${layout.name}”?`,
+      prompt: "Your changes will be permantly discarded. This cannot be undone.",
+      ok: "Discard changes",
+      variant: "danger",
+    });
+    if (response !== "ok") {
+      return;
+    }
+
     onRevert(layout);
-  }, [layout, onRevert]);
+  }, [confirm, layout, multiSelection, onRevert]);
 
   const makePersonalCopyAction = useCallback(() => {
     onMakePersonalCopy(layout);
@@ -287,7 +297,6 @@ export default React.memo(function LayoutRow({
           ? "Make a personal copy"
           : "Duplicate",
       onClick: duplicateAction,
-      disabled: multiSelection,
       "data-testid": "duplicate-layout",
     },
     layoutManager.supportsSharing &&
@@ -323,15 +332,15 @@ export default React.memo(function LayoutRow({
         key: "overwrite",
         text: "Save changes",
         onClick: overwriteAction,
-        disabled: deletedOnServer || (layoutIsShared(layout) && !isOnline) || multiSelection,
+        disabled: deletedOnServer || (layoutIsShared(layout) && !isOnline),
         secondaryText: layoutIsShared(layout) && !isOnline ? "Offline" : undefined,
       },
       {
         type: "item",
         key: "revert",
         text: "Revert",
-        onClick: revertAction,
-        disabled: deletedOnServer || multiSelection,
+        onClick: confirmRevert,
+        disabled: deletedOnServer,
       },
     ];
     if (layoutIsShared(layout)) {

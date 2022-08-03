@@ -128,9 +128,29 @@ export default function LayoutBrowser({
               await layoutManager.deleteLayout({ id: id as LayoutID });
               dispatch({ type: "shift-multi-action" });
               break;
+            case "duplicate": {
+              const layout = await layoutManager.getLayout(id as LayoutID);
+              if (layout) {
+                await layoutManager.saveNewLayout({
+                  name: `${layout.name} copy`,
+                  data: layout.working?.data ?? layout.baseline.data,
+                  permission: "CREATOR_WRITE",
+                });
+              }
+              dispatch({ type: "shift-multi-action" });
+              break;
+            }
+            case "revert":
+              await layoutManager.revertLayout({ id: id as LayoutID });
+              dispatch({ type: "shift-multi-action" });
+              break;
+            case "save":
+              await layoutManager.overwriteLayout({ id: id as LayoutID });
+              dispatch({ type: "shift-multi-action" });
+              break;
           }
         } catch (err) {
-          addToast(`Error deleting layouts: ${err.message}`, { appearance: "error" });
+          addToast(`Error processing layouts: ${err.message}`, { appearance: "error" });
           dispatch({ type: "clear-multi-action" });
         }
       }
@@ -245,6 +265,11 @@ export default function LayoutBrowser({
 
   const onDuplicateLayout = useCallbackWithToast(
     async (item: Layout) => {
+      if (state.selectedIds.length > 1) {
+        dispatch({ type: "queue-multi-action", action: "duplicate" });
+        return;
+      }
+
       if (!(await promptForUnsavedChanges())) {
         return;
       }
@@ -256,12 +281,19 @@ export default function LayoutBrowser({
       await onSelectLayout(newLayout);
       void analytics.logEvent(AppEvent.LAYOUT_DUPLICATE, { permission: item.permission });
     },
-    [analytics, layoutManager, onSelectLayout, promptForUnsavedChanges],
+    [
+      analytics,
+      dispatch,
+      layoutManager,
+      onSelectLayout,
+      promptForUnsavedChanges,
+      state.selectedIds.length,
+    ],
   );
 
   const onDeleteLayout = useCallbackWithToast(
     async (item: Layout) => {
-      if (state.selectedIds.length > 0) {
+      if (state.selectedIds.length > 1) {
         dispatch({ type: "queue-multi-action", action: "delete" });
         return;
       }
@@ -347,6 +379,14 @@ export default function LayoutBrowser({
 
   const onOverwriteLayout = useCallbackWithToast(
     async (item: Layout) => {
+      // We don't need to confirm the multiple selection case because we force users to save
+      // or abandon changes before selecting another layout with unsaved changes to the current
+      // shared layout.
+      if (state.selectedIds.length > 1) {
+        dispatch({ type: "queue-multi-action", action: "save" });
+        return;
+      }
+
       if (layoutIsShared(item)) {
         const response = await confirm({
           title: `Update “${item.name}”?`,
@@ -361,24 +401,20 @@ export default function LayoutBrowser({
       await layoutManager.overwriteLayout({ id: item.id });
       void analytics.logEvent(AppEvent.LAYOUT_OVERWRITE, { permission: item.permission });
     },
-    [analytics, confirm, layoutManager],
+    [analytics, confirm, dispatch, layoutManager, state.selectedIds.length],
   );
 
   const onRevertLayout = useCallbackWithToast(
     async (item: Layout) => {
-      const response = await confirm({
-        title: `Revert “${item.name}”?`,
-        prompt: "Your changes will be permantly deleted. This cannot be undone.",
-        ok: "Discard changes",
-        variant: "danger",
-      });
-      if (response !== "ok") {
+      if (state.selectedIds.length > 1) {
+        dispatch({ type: "queue-multi-action", action: "revert" });
         return;
       }
+
       await layoutManager.revertLayout({ id: item.id });
       void analytics.logEvent(AppEvent.LAYOUT_REVERT, { permission: item.permission });
     },
-    [analytics, confirm, layoutManager],
+    [analytics, dispatch, layoutManager, state.selectedIds.length],
   );
 
   const onMakePersonalCopy = useCallbackWithToast(

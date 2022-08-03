@@ -41,16 +41,71 @@ const exampleCurrentLayout: Layout = {
   syncInfo: undefined,
 };
 
-const deleteLayoutInteraction = async (index: number) => {
+const notCurrentLayout: Layout = {
+  id: "not-current" as LayoutID,
+  name: "Another Layout",
+  baseline: {
+    data: DEFAULT_LAYOUT_FOR_TESTS,
+    savedAt: new Date(10).toISOString() as ISO8601Timestamp,
+  },
+  permission: "CREATOR_WRITE",
+  working: undefined,
+  syncInfo: undefined,
+};
+
+const shortLayout: Layout = {
+  id: "short-id" as LayoutID,
+  name: "Short",
+  baseline: {
+    data: DEFAULT_LAYOUT_FOR_TESTS,
+    savedAt: new Date(10).toISOString() as ISO8601Timestamp,
+  },
+  permission: "CREATOR_WRITE",
+  working: undefined,
+  syncInfo: undefined,
+};
+
+function makeUnsavedLayout(id: number): Layout {
+  return {
+    id: `unsaved-id-${id}` as LayoutID,
+    name: `Unsaved Layout ${id}`,
+    baseline: {
+      data: DEFAULT_LAYOUT_FOR_TESTS,
+      savedAt: new Date(10).toISOString() as ISO8601Timestamp,
+    },
+    permission: "CREATOR_WRITE",
+    working: { data: DEFAULT_LAYOUT_FOR_TESTS, savedAt: undefined },
+    syncInfo: undefined,
+  };
+}
+
+async function clickMenuButtonAction(index: number) {
   const actions = await screen.findAllByTestId("layout-actions");
   if (actions[index]) {
     fireEvent.click(actions[index]!);
   }
+}
+
+async function deleteLayoutInteraction(index: number) {
+  await clickMenuButtonAction(index);
+
   const deleteButton = await screen.findByText("Delete");
   fireEvent.click(deleteButton);
   const confirmButton = await screen.findByText("Delete");
   fireEvent.click(confirmButton);
-};
+}
+
+async function doMultiAction(action: string) {
+  await selectAllAction();
+  await clickMenuButtonAction(0);
+  const button = await screen.findByText(action);
+  fireEvent.click(button);
+}
+
+async function selectAllAction() {
+  const layouts = await screen.findAllByTestId("layout-list-item");
+  layouts.forEach((layout) => fireEvent.click(layout, { ctrlKey: true }));
+}
 
 function WithSetup(Child: Story, ctx: StoryContext): JSX.Element {
   const storage = useMemo(
@@ -58,29 +113,9 @@ function WithSetup(Child: Story, ctx: StoryContext): JSX.Element {
       new MockLayoutStorage(
         LayoutManager.LOCAL_STORAGE_NAMESPACE,
         (ctx.parameters.mockLayouts as Layout[] | undefined) ?? [
-          {
-            id: "not-current" as LayoutID,
-            name: "Another Layout",
-            baseline: {
-              data: DEFAULT_LAYOUT_FOR_TESTS,
-              savedAt: new Date(10).toISOString() as ISO8601Timestamp,
-            },
-            permission: "CREATOR_WRITE",
-            working: undefined,
-            syncInfo: undefined,
-          },
+          notCurrentLayout,
           exampleCurrentLayout,
-          {
-            id: "short-id" as LayoutID,
-            name: "Short",
-            baseline: {
-              data: DEFAULT_LAYOUT_FOR_TESTS,
-              savedAt: new Date(10).toISOString() as ISO8601Timestamp,
-            },
-            permission: "CREATOR_WRITE",
-            working: undefined,
-            syncInfo: undefined,
-          },
+          shortLayout,
         ],
       ),
     [ctx.parameters.mockLayouts],
@@ -164,16 +199,46 @@ export function MultiDelete(): JSX.Element {
 }
 MultiDelete.parameters = { colorScheme: "dark" };
 MultiDelete.play = async () => {
-  const layouts = await screen.findAllByTestId("layout-list-item");
-  layouts.forEach((layout) => fireEvent.click(layout, { ctrlKey: true }));
-  const actions = await screen.findAllByTestId("layout-actions");
-  if (actions[0]) {
-    fireEvent.click(actions[0]!);
-  }
-  const deleteButton = await screen.findByText("Delete");
-  fireEvent.click(deleteButton);
+  await doMultiAction("Delete");
+
   const confirmButton = await screen.findByText("Delete");
   fireEvent.click(confirmButton);
+};
+
+export function MultiDuplicate(): JSX.Element {
+  return <LayoutBrowser />;
+}
+MultiDuplicate.parameters = {
+  colorScheme: "dark",
+  mockLayouts: [exampleCurrentLayout, makeUnsavedLayout(1), shortLayout],
+};
+MultiDuplicate.play = async () => {
+  await doMultiAction("Duplicate");
+};
+
+export function MultiRevert(): JSX.Element {
+  return <LayoutBrowser />;
+}
+MultiRevert.parameters = {
+  colorScheme: "dark",
+  mockLayouts: [makeUnsavedLayout(1), makeUnsavedLayout(2), makeUnsavedLayout(3)],
+};
+MultiRevert.play = async () => {
+  await doMultiAction("Revert");
+
+  const revertButton = await screen.findByText("Discard changes");
+  fireEvent.click(revertButton);
+};
+
+export function MultiSave(): JSX.Element {
+  return <LayoutBrowser />;
+}
+MultiSave.parameters = {
+  colorScheme: "dark",
+  mockLayouts: [makeUnsavedLayout(1), makeUnsavedLayout(2), makeUnsavedLayout(3)],
+};
+MultiSave.play = async () => {
+  await doMultiAction("Save changes");
 };
 
 TruncatedLayoutName.parameters = {
