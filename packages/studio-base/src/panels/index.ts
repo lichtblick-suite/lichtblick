@@ -6,6 +6,8 @@ import { TAB_PANEL_TYPE } from "@foxglove/studio-base/util/globalConstants";
 
 import DataSourceInfoHelp from "./DataSourceInfo/index.help.md";
 import dataSourceInfoThumbnail from "./DataSourceInfo/thumbnail.png";
+import GaugeHelp from "./Gauge/index.help.md";
+import gaugeThumbnail from "./Gauge/thumbnail.png";
 import ImageViewHelp from "./Image/index.help.md";
 import imageViewThumbnail from "./Image/thumbnail.png";
 import IndicatorHelp from "./Indicator/index.help.md";
@@ -95,6 +97,14 @@ const builtin: PanelInfo[] = [
     help: IndicatorHelp,
     thumbnail: indicatorThumbnail,
     module: async () => await import("./Indicator"),
+  },
+  {
+    title: "Gauge",
+    type: "Gauge",
+    description: "Display a colored gauge based on a continuous value.",
+    help: GaugeHelp,
+    thumbnail: gaugeThumbnail,
+    module: async () => await import("./Gauge"),
   },
   {
     title: "Teleop",
