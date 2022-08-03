@@ -135,7 +135,7 @@ function TimezoneSettings(): React.ReactElement {
   const allItems = useMemo(() => [...fixedItems, ...timezoneItems], [fixedItems, timezoneItems]);
 
   const selectedItem = useMemo(
-    () => (timezone != undefined && allItems.find((item) => item.key === timezone)) || detectItem,
+    () => (timezone != undefined && allItems.find((item) => item.data === timezone)) || detectItem,
     [allItems, detectItem, timezone],
   );
 
@@ -162,7 +162,7 @@ function TimezoneSettings(): React.ReactElement {
             inputProps={{ ...params.inputProps, className: classes.autocompleteInput }}
           />
         )}
-        onChange={(_event, value) => void setTimezone(value ? String(value.key) : undefined)}
+        onChange={(_event, value) => void setTimezone(value ? String(value.data) : undefined)}
       />
     </FormControl>
   );

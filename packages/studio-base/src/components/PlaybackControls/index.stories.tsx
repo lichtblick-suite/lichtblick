@@ -57,7 +57,13 @@ function getPlayerState(): PlayerState {
 }
 
 const mockAppConfiguration: IAppConfiguration = {
-  get: () => undefined,
+  get: (key: string) => {
+    if (key === "timezone") {
+      return "America/Los_Angeles";
+    } else {
+      return undefined;
+    }
+  },
   set: async () => {},
   addChangeListener: () => {},
   removeChangeListener: () => {},

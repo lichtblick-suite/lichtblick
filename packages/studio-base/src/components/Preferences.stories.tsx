@@ -15,11 +15,17 @@ import { storiesOf } from "@storybook/react";
 import { useState } from "react";
 
 import Preferences from "@foxglove/studio-base/components/Preferences";
-import AppConfigurationContext from "@foxglove/studio-base/context/AppConfigurationContext";
+import AppConfigurationContext, {
+  AppConfigurationValue,
+} from "@foxglove/studio-base/context/AppConfigurationContext";
 import { makeMockAppConfiguration } from "@foxglove/studio-base/util/makeMockAppConfiguration";
 
-export function Default(): React.ReactElement {
-  const [config] = useState(() => makeMockAppConfiguration());
+export function Default({
+  entries,
+}: {
+  entries?: [string, AppConfigurationValue][];
+}): React.ReactElement {
+  const [config] = useState(() => makeMockAppConfiguration(entries));
   return (
     <AppConfigurationContext.Provider value={config}>
       <Preferences />
@@ -27,6 +33,10 @@ export function Default(): React.ReactElement {
   );
 }
 
-storiesOf("components/Preferences", module).add("default", () => {
-  return Default();
-});
+storiesOf("components/Preferences", module)
+  .add("default", () => {
+    return <Default />;
+  })
+  .add("with timezone", () => {
+    return <Default entries={[["timezone", "America/Los_Angeles"]]} />;
+  });
