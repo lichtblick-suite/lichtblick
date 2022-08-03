@@ -10,9 +10,6 @@ describe("quaternions", () => {
     };
 
     const euler = quaternionToEuler(quaternion);
-    expect(euler.x).toBeCloseTo(10);
-    expect(euler.y).toBeCloseTo(20);
-    expect(euler.z).toBeCloseTo(30);
     expect(euler.roll).toBeCloseTo(10);
     expect(euler.pitch).toBeCloseTo(20);
     expect(euler.yaw).toBeCloseTo(30);

@@ -10,9 +10,6 @@ export type Quaternion = {
 };
 
 export type Euler = {
-  x: number;
-  y: number;
-  z: number;
   roll: number;
   pitch: number;
   yaw: number;
@@ -37,9 +34,6 @@ export function quaternionToEuler(quaternion: Quaternion): Euler {
   const pitch = toDegrees * Math.asin(-dcm20);
   const yaw = toDegrees * Math.atan2(dcm10, dcm00);
   return {
-    x: roll,
-    y: pitch,
-    z: yaw,
     roll,
     pitch,
     yaw,
