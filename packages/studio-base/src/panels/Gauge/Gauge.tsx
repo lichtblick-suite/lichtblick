@@ -10,6 +10,7 @@ import { MessageEvent, PanelExtensionContext, SettingsTreeAction } from "@foxglo
 import { RosPath } from "@foxglove/studio-base/components/MessagePathSyntax/constants";
 import parseRosPath from "@foxglove/studio-base/components/MessagePathSyntax/parseRosPath";
 import { simpleGetMessagePathDataItems } from "@foxglove/studio-base/components/MessagePathSyntax/simpleGetMessagePathDataItems";
+import { turboColorString } from "@foxglove/studio-base/util/colorUtils";
 
 import { settingsActionReducer, useSettingsTree } from "./settings";
 import type { Config } from "./types";
@@ -22,6 +23,10 @@ const defaultConfig: Config = {
   path: "",
   minValue: 0,
   maxValue: 1,
+  colorMap: "red-yellow-green",
+  colorMode: "colormap",
+  gradient: ["#0000ff", "#ff00ff"],
+  reverse: false,
 };
 
 type State = {
@@ -105,6 +110,58 @@ function reducer(state: State, action: Action): State {
   } catch (error) {
     return { ...state, latestMatchingQueriedData: undefined, error };
   }
+}
+
+function getConicGradient(config: Config, width: number, height: number, gaugeAngle: number) {
+  let colorStops: { color: string; location: number }[];
+  switch (config.colorMode) {
+    case "colormap":
+      switch (config.colorMap) {
+        case "red-yellow-green":
+          colorStops = [
+            { color: "#f00", location: 0 },
+            { color: "#ff0", location: 0.5 },
+            { color: "#0c0", location: 1 },
+          ];
+          break;
+        case "rainbow":
+          colorStops = [
+            { color: "#f0f", location: 0 },
+            { color: "#00f", location: 1 / 5 },
+            { color: "#0ff", location: 2 / 5 },
+            { color: "#0f0", location: 3 / 5 },
+            { color: "#ff0", location: 4 / 5 },
+            { color: "#f00", location: 5 / 5 },
+          ];
+          break;
+        case "turbo": {
+          const numStops = 20;
+          colorStops = new Array(numStops).fill(undefined).map((_, i) => ({
+            color: turboColorString(i / (numStops - 1)),
+            location: i / (numStops - 1),
+          }));
+          break;
+        }
+      }
+      break;
+    case "gradient":
+      colorStops = [
+        { color: config.gradient[0], location: 0 },
+        { color: config.gradient[1], location: 1 },
+      ];
+      break;
+  }
+  if (config.reverse) {
+    colorStops = colorStops
+      .map((stop) => ({ color: stop.color, location: 1 - stop.location }))
+      .reverse();
+  }
+
+  return `conic-gradient(from ${-Math.PI / 2 + gaugeAngle}rad at 50% ${
+    100 * (width / 2 / height)
+  }%, ${colorStops
+    .map((stop) => `${stop.color} ${stop.location * 2 * (Math.PI / 2 - gaugeAngle)}rad`)
+    .join(",")}, ${colorStops[0]!.color})`;
 }
 
 export function Gauge({ context }: Props): JSX.Element {
@@ -236,9 +293,7 @@ export function Gauge({ context }: Props): JSX.Element {
             style={{
               width: "100%",
               height: "100%",
-              background: `conic-gradient(from ${-Math.PI / 2 + gaugeAngle}rad at 50% ${
-                50 / height
-              }%, #f00, #ff0, #0c0 ${2 * (Math.PI / 2 - gaugeAngle)}rad, #f00)`,
+              background: getConicGradient(config, width, height, gaugeAngle),
               clipPath: `url(#${clipPathId})`,
               opacity: state.latestMatchingQueriedData == undefined ? 0.5 : 1,
             }}

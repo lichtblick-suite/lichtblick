@@ -49,6 +49,83 @@ export const InvalidValue = (): JSX.Element => {
 };
 InvalidValue.parameters = { panelSetup: { fixture: makeFixture(NaN) } };
 
+export const Rainbow = (): JSX.Element => {
+  return (
+    <GaugePanel
+      overrideConfig={{
+        path: "/data.value",
+        minValue: 0,
+        maxValue: 1,
+        colorMode: "colormap",
+        colorMap: "rainbow",
+      }}
+    />
+  );
+};
+Rainbow.parameters = { panelSetup: { fixture: makeFixture(0.3) } };
+
+export const Turbo = (): JSX.Element => {
+  return (
+    <GaugePanel
+      overrideConfig={{
+        path: "/data.value",
+        minValue: 0,
+        maxValue: 1,
+        colorMode: "colormap",
+        colorMap: "turbo",
+      }}
+    />
+  );
+};
+Turbo.parameters = { panelSetup: { fixture: makeFixture(0.3) } };
+
+export const TurboReverse = (): JSX.Element => {
+  return (
+    <GaugePanel
+      overrideConfig={{
+        path: "/data.value",
+        minValue: 0,
+        maxValue: 1,
+        colorMode: "colormap",
+        colorMap: "turbo",
+        reverse: true,
+      }}
+    />
+  );
+};
+TurboReverse.parameters = { panelSetup: { fixture: makeFixture(0.3) } };
+
+export const CustomGradient = (): JSX.Element => {
+  return (
+    <GaugePanel
+      overrideConfig={{
+        path: "/data.value",
+        minValue: 0,
+        maxValue: 1,
+        colorMode: "gradient",
+        gradient: ["#ec9a57", "#65c6ff"],
+      }}
+    />
+  );
+};
+CustomGradient.parameters = { panelSetup: { fixture: makeFixture(0.3) } };
+
+export const CustomGradientReverse = (): JSX.Element => {
+  return (
+    <GaugePanel
+      overrideConfig={{
+        path: "/data.value",
+        minValue: 0,
+        maxValue: 1,
+        colorMode: "gradient",
+        gradient: ["#ec9a57", "#65c6ff"],
+        reverse: true,
+      }}
+    />
+  );
+};
+CustomGradientReverse.parameters = { panelSetup: { fixture: makeFixture(0.3) } };
+
 export const MinValue = (): JSX.Element => {
   return <GaugePanel overrideConfig={{ path: "/data.value", minValue: 0, maxValue: 1 }} />;
 };

@@ -45,31 +45,63 @@ export function useSettingsTree(
   pathParseError: string | undefined,
   error: string | undefined,
 ): SettingsTreeNodes {
-  const { path, minValue, maxValue } = config;
-  const generalSettings: SettingsTreeNode = useMemo(
-    () => ({
+  const generalSettings = useMemo(
+    (): SettingsTreeNode => ({
       error,
       fields: {
         path: {
           label: "Data",
           input: "messagepath",
-          value: path,
+          value: config.path,
           error: pathParseError,
           validTypes: supportedDataTypes,
         },
         minValue: {
           label: "Minimum",
           input: "number",
-          value: minValue,
+          value: config.minValue,
         },
         maxValue: {
           label: "Maximum",
           input: "number",
-          value: maxValue,
+          value: config.maxValue,
+        },
+        colorMode: {
+          label: "Color mode",
+          input: "select",
+          value: config.colorMode,
+          options: [
+            { label: "Color map", value: "colormap" },
+            { label: "Gradient", value: "gradient" },
+          ],
+        },
+        ...(config.colorMode === "colormap" && {
+          colorMap: {
+            label: "Color map",
+            input: "select",
+            value: config.colorMap,
+            options: [
+              { label: "Red to green", value: "red-yellow-green" },
+              { label: "Rainbow", value: "rainbow" },
+              { label: "Turbo", value: "turbo" },
+            ],
+          },
+        }),
+        ...(config.colorMode === "gradient" && {
+          gradient: {
+            label: "Gradient",
+            input: "gradient",
+            value: config.gradient,
+          },
+        }),
+        reverse: {
+          label: "Reverse",
+          input: "boolean",
+          value: config.reverse,
         },
       },
     }),
-    [error, maxValue, minValue, path, pathParseError],
+    [error, config, pathParseError],
   );
   return useShallowMemo({
     general: generalSettings,
