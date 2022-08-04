@@ -9,7 +9,9 @@ import { FontManager, FontManagerOptions } from "./FontManager";
 
 const tempVec2 = new THREE.Vector2();
 
-class LabelMaterial extends THREE.RawShaderMaterial {
+export class LabelMaterial extends THREE.RawShaderMaterial {
+  picking: boolean;
+
   constructor(params: { atlasTexture?: THREE.Texture; picking?: boolean }) {
     super({
       vertexShader: /* glsl */ `\
@@ -137,6 +139,8 @@ void main() {
       transparent: false,
       depthWrite: true,
     });
+
+    this.picking = params.picking ?? false;
   }
 }
 

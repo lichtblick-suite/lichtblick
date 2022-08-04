@@ -30,7 +30,6 @@ export function updatePose(
     const q = tempPose.orientation;
     renderable.position.set(p.x, p.y, p.z);
     renderable.quaternion.set(q.x, q.y, q.z, q.w);
-    renderable.updateMatrix();
   }
   return poseApplied;
 }
