@@ -436,7 +436,7 @@ storiesOf("panels/Tab", module)
 
             const dragHandle =
               document.querySelector(
-                '[data-testid~="Tab!RightInner"] [data-testid="mosaic-drag-handle"]',
+                '[data-testid~="Tab!RightInner"] [data-testid="panel-menu"]',
               ) ?? undefined;
             await dragAndDrop(
               dragHandle,

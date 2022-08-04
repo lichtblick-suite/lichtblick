@@ -12,7 +12,7 @@
 //   You may not use this file except in compliance with the License.
 
 import SettingsIcon from "@mui/icons-material/Settings";
-import { useCallback, useContext } from "react";
+import { forwardRef, useCallback, useContext } from "react";
 
 import PanelContext from "@foxglove/studio-base/components/PanelContext";
 import ToolbarIconButton from "@foxglove/studio-base/components/PanelToolbar/ToolbarIconButton";
@@ -34,46 +34,48 @@ type PanelToolbarControlsProps = {
   setMenuOpen: (_: boolean) => void;
 };
 
+const PanelToolbarControlsComponent = forwardRef<HTMLDivElement, PanelToolbarControlsProps>(
+  (props, ref) => {
+    const { additionalIcons, isUnknownPanel, menuOpen, setMenuOpen } = props;
+    const panelId = useContext(PanelContext)?.id;
+    const { setSelectedPanelIds } = useSelectedPanels();
+    const { openPanelSettings } = useWorkspace();
+
+    const hasSettingsSelector = useCallback(
+      (store: PanelSettingsEditorStore) =>
+        panelId ? store.settingsTrees[panelId] != undefined : false,
+      [panelId],
+    );
+
+    const hasSettings = usePanelSettingsEditorStore(hasSettingsSelector);
+
+    const openSettings = useCallback(() => {
+      if (panelId) {
+        setSelectedPanelIds([panelId]);
+        openPanelSettings();
+      }
+    }, [setSelectedPanelIds, openPanelSettings, panelId]);
+
+    return (
+      <Stack direction="row" alignItems="center" paddingLeft={1} ref={ref}>
+        {additionalIcons}
+        {hasSettings && (
+          <ToolbarIconButton title="Settings" onClick={openSettings}>
+            <SettingsIcon />
+          </ToolbarIconButton>
+        )}
+        <PanelActionsDropdown
+          isOpen={menuOpen}
+          setIsOpen={setMenuOpen}
+          isUnknownPanel={isUnknownPanel}
+        />
+      </Stack>
+    );
+  },
+);
+
+PanelToolbarControlsComponent.displayName = "PanelToolbarControls";
+
 // Keep controls, which don't change often, in a pure component in order to avoid re-rendering the
 // whole PanelToolbar when only children change.
-export const PanelToolbarControls = React.memo(function PanelToolbarControls({
-  additionalIcons,
-  isUnknownPanel,
-  menuOpen,
-  setMenuOpen,
-}: PanelToolbarControlsProps) {
-  const panelId = useContext(PanelContext)?.id;
-  const { setSelectedPanelIds } = useSelectedPanels();
-  const { openPanelSettings } = useWorkspace();
-
-  const hasSettingsSelector = useCallback(
-    (store: PanelSettingsEditorStore) =>
-      panelId ? store.settingsTrees[panelId] != undefined : false,
-    [panelId],
-  );
-
-  const hasSettings = usePanelSettingsEditorStore(hasSettingsSelector);
-
-  const openSettings = useCallback(() => {
-    if (panelId) {
-      setSelectedPanelIds([panelId]);
-      openPanelSettings();
-    }
-  }, [setSelectedPanelIds, openPanelSettings, panelId]);
-
-  return (
-    <Stack direction="row" alignItems="center" paddingLeft={1}>
-      {additionalIcons}
-      {hasSettings && (
-        <ToolbarIconButton title="Settings" onClick={openSettings}>
-          <SettingsIcon />
-        </ToolbarIconButton>
-      )}
-      <PanelActionsDropdown
-        isOpen={menuOpen}
-        setIsOpen={setMenuOpen}
-        isUnknownPanel={isUnknownPanel}
-      />
-    </Stack>
-  );
-});
+export const PanelToolbarControls = React.memo(PanelToolbarControlsComponent);

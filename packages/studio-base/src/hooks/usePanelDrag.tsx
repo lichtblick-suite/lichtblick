@@ -11,7 +11,7 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import _ from "lodash";
+import { defer } from "lodash";
 import { useContext } from "react";
 import { useDrag, ConnectDragSource, ConnectDragPreview } from "react-dnd";
 import { MosaicDragType, MosaicNode, MosaicWindowContext } from "react-mosaic-component";
@@ -63,7 +63,7 @@ export default function usePanelDrag(props: {
 
       // The defer is necessary as the element must be present on start for HTML DnD to not cry
       const path = mosaicWindowActions.getPath();
-      const deferredHide = _.defer(() => {
+      const deferredHide = defer(() => {
         startDrag({ path, sourceTabId });
       });
       return { mosaicId, deferredHide, originalLayout, originalConfigById };

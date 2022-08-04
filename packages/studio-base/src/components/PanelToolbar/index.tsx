@@ -85,12 +85,20 @@ export default React.memo<Props>(function PanelToolbar({
     );
   }, [additionalIcons, isFullscreen, exitFullscreen]);
 
+  // If we have children then we limit the drag area to the controls. Otherwise the entire
+  // toolbar is draggable.
+  const rootDragRef =
+    isUnknownPanel || children != undefined ? undefined : panelContext?.connectToolbarDragHandle;
+
+  const controlsDragRef =
+    isUnknownPanel || children == undefined ? undefined : panelContext?.connectToolbarDragHandle;
+
   return (
     <PanelToolbarRoot
       backgroundColor={backgroundColor}
       data-testid="mosaic-drag-handle"
-      enableDrag={panelContext?.connectToolbarDragHandle != undefined}
-      ref={isUnknownPanel ? undefined : panelContext?.connectToolbarDragHandle}
+      enableDrag={rootDragRef != undefined}
+      ref={rootDragRef}
     >
       {children ??
         (panelContext != undefined && (
@@ -102,6 +110,7 @@ export default React.memo<Props>(function PanelToolbar({
         additionalIcons={additionalIconsWithHelp}
         isUnknownPanel={!!isUnknownPanel}
         menuOpen={menuOpen}
+        ref={controlsDragRef}
         setMenuOpen={setMenuOpen}
       />
     </PanelToolbarRoot>
