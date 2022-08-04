@@ -2,14 +2,17 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { SRGBToLinear } from "three/src/math/ColorManagement";
-import { clamp } from "three/src/math/MathUtils";
+import * as THREE from "three";
 import tinycolor from "tinycolor2";
 
 import { lerp } from "./math";
 import { ColorRGB, ColorRGBA } from "./ros";
 
-export { SRGBToLinear } from "three/src/math/ColorManagement";
+// From https://github.com/mrdoob/three.js/blob/dev/src/math/ColorManagement.js
+// which is not exported
+export function SRGBToLinear(c: number): number {
+  return c < 0.04045 ? c * 0.0773993808 : Math.pow(c * 0.9478672986 + 0.0521327014, 2.4);
+}
 
 export function stringToRgba(output: ColorRGBA, colorStr: string): ColorRGBA {
   const color = tinycolor(colorStr);
@@ -50,10 +53,10 @@ export function rgbToThreeColor(output: THREE.Color, rgb: ColorRGB): THREE.Color
 // ts-prune-ignore-next
 export function rgbaToHexString(color: ColorRGBA): string {
   const rgba =
-    (clamp(color.r * 255, 0, 255) << 24) ^
-    (clamp(color.g * 255, 0, 255) << 16) ^
-    (clamp(color.b * 255, 0, 255) << 8) ^
-    (clamp(color.a * 255, 0, 255) << 0);
+    (THREE.MathUtils.clamp(color.r * 255, 0, 255) << 24) ^
+    (THREE.MathUtils.clamp(color.g * 255, 0, 255) << 16) ^
+    (THREE.MathUtils.clamp(color.b * 255, 0, 255) << 8) ^
+    (THREE.MathUtils.clamp(color.a * 255, 0, 255) << 0);
   return ("00000000" + rgba.toString(16)).slice(-8);
 }
 

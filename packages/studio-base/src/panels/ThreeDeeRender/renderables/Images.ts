@@ -510,14 +510,11 @@ function multiplyScalar(vec: MutablePoint, scalar: number): void {
   vec.z *= scalar;
 }
 
-function cameraInfoTopicMatches(topic: string, cameraInfoTopic: string): boolean {
+export function cameraInfoTopicMatches(topic: string, cameraInfoTopic: string): boolean {
   const imageParts = topic.split("/");
   const infoParts = cameraInfoTopic.split("/");
-  if (imageParts.length !== infoParts.length) {
-    return false;
-  }
 
-  for (let i = 0; i < imageParts.length - 1; i++) {
+  for (let i = 0; i < imageParts.length - 1 && i < infoParts.length - 1; i++) {
     if (imageParts[i] !== infoParts[i]) {
       return false;
     }
