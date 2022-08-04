@@ -2,10 +2,10 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { DEFAULT_CAMERA_STATE } from "@foxglove/regl-worldview";
 import { MessageEvent, Topic } from "@foxglove/studio";
 import PanelSetup from "@foxglove/studio-base/stories/PanelSetup";
 
+import { DEFAULT_CAMERA_STATE } from "../camera";
 import ThreeDeeRender from "../index";
 import { Marker } from "../ros";
 import { makeColor, STL_CUBE_MESH_RESOURCE } from "./common";
@@ -140,7 +140,7 @@ f 5/6/6 1/12/6 8/11/6`),
           layers: {
             grid: { layerId: "foxglove.Grid" },
           },
-          cameraState: { ...DEFAULT_CAMERA_STATE, distance: 5, thetaOffset: 1 },
+          cameraState: { ...DEFAULT_CAMERA_STATE, distance: 5, thetaOffset: 50 },
           topics: {
             "/markers": { visible: true },
           },

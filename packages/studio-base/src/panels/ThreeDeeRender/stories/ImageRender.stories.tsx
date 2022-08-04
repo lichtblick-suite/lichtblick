@@ -12,6 +12,7 @@ import {
   FIXED_FRAME_ID,
   PNG_TEST_IMAGE,
   QUAT_IDENTITY,
+  rad2deg,
   SENSOR_FRAME_ID,
 } from "./common";
 import useDelayedFixture from "./useDelayedFixture";
@@ -164,10 +165,10 @@ export function ImageRender(): JSX.Element {
           cameraState: {
             distance: 1.5,
             perspective: true,
-            phi: 0.975,
+            phi: rad2deg(0.975),
             targetOffset: [0, 0.4, 0],
-            thetaOffset: 0,
-            fovy: 0.75,
+            thetaOffset: rad2deg(0),
+            fovy: rad2deg(0.75),
             near: 0.01,
             far: 5000,
             target: [0, 0, 0],

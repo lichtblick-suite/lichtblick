@@ -10,7 +10,7 @@ import PanelSetup from "@foxglove/studio-base/stories/PanelSetup";
 
 import ThreeDeeRender from "../index";
 import { TransformStamped } from "../ros";
-import { QUAT_IDENTITY, VEC3_ZERO } from "./common";
+import { QUAT_IDENTITY, rad2deg, VEC3_ZERO } from "./common";
 import useDelayedFixture from "./useDelayedFixture";
 
 export default {
@@ -146,10 +146,10 @@ function Foxglove_PointCloud({ rgbaFieldName }: { rgbaFieldName: string }): JSX.
           cameraState: {
             distance: 13.5,
             perspective: true,
-            phi: 1.22,
+            phi: rad2deg(1.22),
             targetOffset: [0.25, -0.5, 0],
-            thetaOffset: -0.33,
-            fovy: 0.75,
+            thetaOffset: rad2deg(-0.33),
+            fovy: rad2deg(0.75),
             near: 0.01,
             far: 5000,
             target: [0, 0, 0],
@@ -314,10 +314,10 @@ export function Foxglove_PointCloud_Intensity(): JSX.Element {
           cameraState: {
             distance: 13.5,
             perspective: true,
-            phi: 1.22,
+            phi: rad2deg(1.22),
             targetOffset: [0.25, -0.5, 3],
-            thetaOffset: -0.33,
-            fovy: 0.75,
+            thetaOffset: rad2deg(-0.33),
+            fovy: rad2deg(0.75),
             near: 0.01,
             far: 5000,
             target: [0, 0, 0],
@@ -390,10 +390,10 @@ export function Foxglove_PointCloud_TwoDimensions(): JSX.Element {
           cameraState: {
             distance: 13.5,
             perspective: true,
-            phi: 1.22,
+            phi: rad2deg(1.22),
             targetOffset: [0.25, -0.5, 0],
-            thetaOffset: -0.33,
-            fovy: 0.75,
+            thetaOffset: rad2deg(-0.33),
+            fovy: rad2deg(0.75),
             near: 0.01,
             far: 5000,
             target: [0, 0, 0],

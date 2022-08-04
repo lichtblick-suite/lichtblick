@@ -4,12 +4,12 @@
 
 import { cloneDeep, round, set } from "lodash";
 
-import { DEFAULT_CAMERA_STATE } from "@foxglove/regl-worldview";
 import { SettingsTreeAction } from "@foxglove/studio";
 
 import { Renderer, RendererConfig } from "../Renderer";
 import { SceneExtension } from "../SceneExtension";
 import { SettingsTreeEntry } from "../SettingsManager";
+import { DEFAULT_CAMERA_STATE } from "../camera";
 import { PRECISION_DEGREES, PRECISION_DISTANCE, SelectEntry } from "../settings";
 import { CoordinateFrame } from "../transforms";
 import { PublishClickType } from "./PublishClickTool";

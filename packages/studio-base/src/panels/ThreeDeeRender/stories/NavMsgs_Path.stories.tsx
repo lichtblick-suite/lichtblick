@@ -9,7 +9,7 @@ import PanelSetup from "@foxglove/studio-base/stories/PanelSetup";
 
 import ThreeDeeRender from "../index";
 import { NavPath, TransformStamped } from "../ros";
-import { QUAT_IDENTITY } from "./common";
+import { QUAT_IDENTITY, rad2deg } from "./common";
 import useDelayedFixture from "./useDelayedFixture";
 
 export default {
@@ -125,10 +125,10 @@ export function NavMsgs_Path(): JSX.Element {
           cameraState: {
             distance: 15,
             perspective: true,
-            phi: 1,
+            phi: rad2deg(1),
             targetOffset: [0, 2, 0],
-            thetaOffset: -0.25,
-            fovy: 0.75,
+            thetaOffset: rad2deg(-0.25),
+            fovy: rad2deg(0.75),
             near: 0.01,
             far: 5000,
             target: [0, 0, 0],

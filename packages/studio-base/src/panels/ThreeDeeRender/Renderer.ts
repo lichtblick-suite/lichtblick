@@ -10,7 +10,6 @@ import { DeepPartial } from "ts-essentials";
 import { v4 as uuidv4 } from "uuid";
 
 import Logger from "@foxglove/log";
-import { CameraState } from "@foxglove/regl-worldview";
 import { toNanoSec } from "@foxglove/rostime";
 import type { FrameTransform } from "@foxglove/schemas/schemas/typescript";
 import {
@@ -32,6 +31,7 @@ import type { Renderable } from "./Renderable";
 import { SceneExtension } from "./SceneExtension";
 import { ScreenOverlay } from "./ScreenOverlay";
 import { SettingsManager, SettingsTreeEntry } from "./SettingsManager";
+import { CameraState } from "./camera";
 import { stringToRgb } from "./color";
 import { FRAME_TRANSFORM_DATATYPES } from "./foxglove";
 import { DetailLevel, msaaSamples } from "./lod";
@@ -167,6 +167,7 @@ const LAYER_DEFAULT = 0;
 const LAYER_SELECTED = 1;
 
 const UNIT_X = new THREE.Vector3(1, 0, 0);
+const UNIT_Z = new THREE.Vector3(0, 0, 1);
 const PI_2 = Math.PI / 2;
 
 // Coordinate frames named in [REP-105](https://www.ros.org/reps/rep-0105.html)
@@ -181,7 +182,7 @@ const FRAME_NOT_FOUND = "FRAME_NOT_FOUND";
 const RENDERER_ID = "foxglove.Renderer";
 
 const tempColor = new THREE.Color();
-const tempVec = new THREE.Vector3();
+const tempVec3 = new THREE.Vector3();
 const tempVec2 = new THREE.Vector2();
 const tempSpherical = new THREE.Spherical();
 const tempEuler = new THREE.Euler();
@@ -611,52 +612,42 @@ export class Renderer extends EventEmitter<RendererEvents> {
     return topicCount === 0 && vizCount === 0 ? "Topics" : `Topics (${vizCount}/${topicCount})`;
   }
 
-  /** Translate a @foxglove/regl-worldview CameraState to the three.js coordinate system */
+  /** Translate a CameraState to the three.js coordinate system */
   private _updateCameras(cameraState: CameraState): void {
+    const targetOffset = tempVec3;
+    targetOffset.fromArray(cameraState.targetOffset);
+
+    const phi = THREE.MathUtils.degToRad(cameraState.phi);
+    const theta = -THREE.MathUtils.degToRad(cameraState.thetaOffset);
+
     if (cameraState.perspective) {
       // Unlock the polar angle (pitch axis)
       this.controls.minPolarAngle = 0;
       this.controls.maxPolarAngle = Math.PI;
 
-      this.perspectiveCamera.position
-        .setFromSpherical(
-          tempSpherical.set(cameraState.distance, cameraState.phi, -cameraState.thetaOffset),
-        )
-        .applyAxisAngle(UNIT_X, PI_2);
-      this.perspectiveCamera.position.add(
-        tempVec.set(
-          cameraState.targetOffset[0],
-          cameraState.targetOffset[1],
-          cameraState.targetOffset[2], // always 0 in Worldview CameraListener
-        ),
-      );
-      this.perspectiveCamera.quaternion.setFromEuler(
-        tempEuler.set(cameraState.phi, 0, -cameraState.thetaOffset, "ZYX"),
-      );
-      this.perspectiveCamera.fov = cameraState.fovy * (180 / Math.PI);
+      // Convert the camera spherical coordinates (radius, phi, theta) to Cartesian (X, Y, Z)
+      tempSpherical.set(cameraState.distance, phi, theta);
+      this.perspectiveCamera.position.setFromSpherical(tempSpherical).applyAxisAngle(UNIT_X, PI_2);
+
+      // Add the camera offset
+      this.perspectiveCamera.position.add(targetOffset);
+
+      // Convert the camera spherical coordinates (phi, theta) to a quaternion rotation
+      this.perspectiveCamera.quaternion.setFromEuler(tempEuler.set(phi, 0, theta, "ZYX"));
+      this.perspectiveCamera.fov = cameraState.fovy;
       this.perspectiveCamera.near = cameraState.near;
       this.perspectiveCamera.far = cameraState.far;
       this.perspectiveCamera.aspect = this.aspect;
       this.perspectiveCamera.updateProjectionMatrix();
-      this.controls.target.set(
-        cameraState.targetOffset[0],
-        cameraState.targetOffset[1],
-        cameraState.targetOffset[2],
-      );
+
+      this.controls.target.copy(targetOffset);
     } else {
       // Lock the polar angle during 2D mode
       const curPolarAngle = this.controls.getPolarAngle();
       this.controls.minPolarAngle = this.controls.maxPolarAngle = curPolarAngle;
 
-      this.orthographicCamera.position.set(
-        cameraState.targetOffset[0],
-        cameraState.targetOffset[1],
-        cameraState.far / 2,
-      );
-      this.orthographicCamera.quaternion.setFromAxisAngle(
-        tempVec.set(0, 0, 1),
-        -cameraState.thetaOffset,
-      );
+      this.orthographicCamera.position.set(targetOffset.x, targetOffset.y, cameraState.far / 2);
+      this.orthographicCamera.quaternion.setFromAxisAngle(UNIT_Z, theta);
       this.orthographicCamera.left = (-cameraState.distance / 2) * this.aspect;
       this.orthographicCamera.right = (cameraState.distance / 2) * this.aspect;
       this.orthographicCamera.top = cameraState.distance / 2;
@@ -678,8 +669,8 @@ export class Renderer extends EventEmitter<RendererEvents> {
     return {
       perspective: this.config.cameraState.perspective,
       distance: this.controls.getDistance(),
-      phi: this.controls.getPolarAngle(),
-      thetaOffset: -this.controls.getAzimuthalAngle(),
+      phi: THREE.MathUtils.radToDeg(this.controls.getPolarAngle()),
+      thetaOffset: THREE.MathUtils.radToDeg(-this.controls.getAzimuthalAngle()),
       targetOffset: [this.controls.target.x, this.controls.target.y, this.controls.target.z],
       target: this.config.cameraState.target,
       targetOrientation: this.config.cameraState.targetOrientation,
@@ -851,13 +842,14 @@ export class Renderer extends EventEmitter<RendererEvents> {
   }
 
   frameHandler = (currentTime: bigint): void => {
-    const camera = this.activeCamera();
-    this.emit("startFrame", currentTime, this);
-
+    this.currentTime = currentTime;
     this._updateFrames();
     this._updateResolution();
 
     this.gl.clear();
+    this.emit("startFrame", currentTime, this);
+
+    const camera = this.activeCamera();
     camera.layers.set(LAYER_DEFAULT);
     this.selectionBackdrop.visible = this.selectedRenderable != undefined;
 
@@ -1080,14 +1072,15 @@ export class Renderer extends EventEmitter<RendererEvents> {
       this.settings.errors.remove(FOLLOW_TF_PATH, FRAME_NOT_FOUND);
     }
 
-    const rootFrameId = frame.root().id;
-    if (this.fixedFrameId !== rootFrameId) {
+    const fixedFrame = frame.root();
+    const fixedFrameId = fixedFrame.id;
+    if (this.fixedFrameId !== fixedFrameId) {
       if (this.fixedFrameId == undefined) {
-        log.debug(`Setting fixed frame to ${rootFrameId}`);
+        log.debug(`Setting fixed frame to ${fixedFrameId}`);
       } else {
-        log.debug(`Changing fixed frame from "${this.fixedFrameId}" to "${rootFrameId}"`);
+        log.debug(`Changing fixed frame from "${this.fixedFrameId}" to "${fixedFrameId}"`);
       }
-      this.fixedFrameId = rootFrameId;
+      this.fixedFrameId = fixedFrameId;
     }
 
     this.settings.errors.clearPath(FOLLOW_TF_PATH);

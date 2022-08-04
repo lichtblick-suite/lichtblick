@@ -7,7 +7,7 @@ import PanelSetup from "@foxglove/studio-base/stories/PanelSetup";
 
 import ThreeDeeRender from "../index";
 import { TransformStamped } from "../ros";
-import { makeColor } from "./common";
+import { makeColor, rad2deg } from "./common";
 import useDelayedFixture from "./useDelayedFixture";
 
 export default {
@@ -112,10 +112,10 @@ export function SphereListPointsTransform(): JSX.Element {
           cameraState: {
             distance: 4,
             perspective: true,
-            phi: 1.2,
+            phi: rad2deg(1.2),
             targetOffset: [0.5, 0, 0],
-            thetaOffset: -0.5,
-            fovy: 0.75,
+            thetaOffset: rad2deg(-0.5),
+            fovy: rad2deg(0.75),
             near: 0.01,
             far: 5000,
             target: [0, 0, 0],

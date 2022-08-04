@@ -6,7 +6,6 @@ import { maxBy } from "lodash";
 
 import { UrdfGeometryMesh, UrdfRobot, UrdfVisual, parseRobot } from "@foxglove/den/urdf";
 import Logger from "@foxglove/log";
-import { Pose } from "@foxglove/regl-worldview";
 import { SettingsTreeAction, SettingsTreeFields } from "@foxglove/studio";
 import { eulerToQuaternion } from "@foxglove/studio-base/util/geometry";
 import isDesktopApp from "@foxglove/studio-base/util/isDesktopApp";
@@ -17,7 +16,7 @@ import { PartialMessageEvent, SceneExtension } from "../SceneExtension";
 import { SettingsTreeEntry } from "../SettingsManager";
 import { ColorRGBA, Marker, MarkerAction, MarkerType, Quaternion, Vector3 } from "../ros";
 import { BaseSettings, CustomLayerSettings } from "../settings";
-import { makePose } from "../transforms";
+import { Pose, makePose } from "../transforms";
 import { updatePose } from "../updatePose";
 import { RenderableCube } from "./markers/RenderableCube";
 import { RenderableCylinder } from "./markers/RenderableCylinder";

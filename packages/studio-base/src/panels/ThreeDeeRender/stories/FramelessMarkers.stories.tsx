@@ -7,7 +7,7 @@ import PanelSetup from "@foxglove/studio-base/stories/PanelSetup";
 
 import ThreeDeeRender from "../index";
 import { Header, Marker } from "../ros";
-import { makeColor, TEST_COLORS } from "./common";
+import { makeColor, rad2deg, TEST_COLORS } from "./common";
 import useDelayedFixture from "./useDelayedFixture";
 
 export default {
@@ -70,10 +70,10 @@ export function FramelessMarkers(): JSX.Element {
           cameraState: {
             distance: 5.5,
             perspective: true,
-            phi: 0.5,
+            phi: rad2deg(0.5),
             targetOffset: [-0.5, 0.75, 0],
-            thetaOffset: -0.25,
-            fovy: 0.75,
+            thetaOffset: rad2deg(-0.25),
+            fovy: rad2deg(0.75),
             near: 0.01,
             far: 5000,
             target: [0, 0, 0],

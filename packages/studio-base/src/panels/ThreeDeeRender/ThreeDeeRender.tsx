@@ -21,7 +21,6 @@ import { DeepPartial } from "ts-essentials";
 import { useDebouncedCallback } from "use-debounce";
 
 import Logger from "@foxglove/log";
-import { CameraState, DEFAULT_CAMERA_STATE, MouseEventObject } from "@foxglove/regl-worldview";
 import { definitions as commonDefs } from "@foxglove/rosmsg-msgs-common";
 import { fromDate, toNanoSec } from "@foxglove/rostime";
 import {
@@ -47,6 +46,7 @@ import type { Renderable } from "./Renderable";
 import { MessageHandler, Renderer, RendererConfig } from "./Renderer";
 import { RendererContext, useRenderer, useRendererEvent } from "./RendererContext";
 import { Stats } from "./Stats";
+import { CameraState, DEFAULT_CAMERA_STATE, MouseEventObject } from "./camera";
 import { FRAME_TRANSFORM_DATATYPES } from "./foxglove";
 import { PublishClickEvent, PublishClickType } from "./renderables/PublishClickTool";
 import { TF_DATATYPES, TRANSFORM_STAMPED_DATATYPES } from "./ros";

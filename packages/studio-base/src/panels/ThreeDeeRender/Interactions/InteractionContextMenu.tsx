@@ -14,11 +14,11 @@
 import { useCallback } from "react";
 import styled from "styled-components";
 
-import { MouseEventObject } from "@foxglove/regl-worldview";
 import { getObject } from "@foxglove/studio-base/panels/ThreeDimensionalViz/threeDimensionalVizUtils";
 import { BaseMarker } from "@foxglove/studio-base/types/Messages";
 import { colors } from "@foxglove/studio-base/util/sharedStyleConstants";
 
+import { MouseEventObject } from "../camera";
 import { Interactive, SelectedObject } from "./types";
 
 type ClickedPosition = { clientX: number; clientY: number };

@@ -12,6 +12,7 @@ import {
   FIXED_FRAME_ID,
   makeColor,
   QUAT_IDENTITY,
+  rad2deg,
   SENSOR_FRAME_ID,
 } from "./common";
 import useDelayedFixture from "./useDelayedFixture";
@@ -97,10 +98,10 @@ export function AutoSelectFrame(): JSX.Element {
           cameraState: {
             distance: 4,
             perspective: true,
-            phi: 1,
+            phi: rad2deg(1),
             targetOffset: [-0.6, 0.5, 0],
-            thetaOffset: -1,
-            fovy: 0.75,
+            thetaOffset: rad2deg(-1),
+            fovy: rad2deg(0.75),
             near: 0.01,
             far: 5000,
             target: [0, 0, 0],

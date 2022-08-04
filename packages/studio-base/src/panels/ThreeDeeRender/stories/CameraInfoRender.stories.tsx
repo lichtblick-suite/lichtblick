@@ -7,7 +7,13 @@ import PanelSetup from "@foxglove/studio-base/stories/PanelSetup";
 
 import ThreeDeeRender from "../index";
 import { CameraInfo, TransformStamped } from "../ros";
-import { BASE_LINK_FRAME_ID, FIXED_FRAME_ID, QUAT_IDENTITY, SENSOR_FRAME_ID } from "./common";
+import {
+  BASE_LINK_FRAME_ID,
+  FIXED_FRAME_ID,
+  QUAT_IDENTITY,
+  rad2deg,
+  SENSOR_FRAME_ID,
+} from "./common";
 import useDelayedFixture from "./useDelayedFixture";
 
 export default {
@@ -128,10 +134,10 @@ export function CameraInfoRender(): JSX.Element {
           cameraState: {
             distance: 1.25,
             perspective: true,
-            phi: 0,
+            phi: rad2deg(0),
             targetOffset: [0, 0, 0],
-            thetaOffset: 0,
-            fovy: 0.75,
+            thetaOffset: rad2deg(0),
+            fovy: rad2deg(0.75),
             near: 0.01,
             far: 5000,
             target: [0, 0, 0],
