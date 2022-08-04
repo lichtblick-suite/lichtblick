@@ -2,6 +2,7 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
+import { MeshoptDecoder } from "meshoptimizer";
 import * as THREE from "three";
 import dracoDecoderWasmUrl from "three/examples/jsm/../js/libs/draco/draco_decoder.wasm";
 import dracoWasmWrapperJs from "three/examples/jsm/../js/libs/draco/draco_wasm_wrapper.js?raw";
@@ -124,6 +125,7 @@ async function loadGltf(url: string, reportError: ErrorCallback): Promise<Loaded
   const manager = new THREE.LoadingManager(undefined, undefined, onError);
   manager.setURLModifier(rewriteUrl);
   const gltfLoader = new GLTFLoader(manager);
+  gltfLoader.setMeshoptDecoder(MeshoptDecoder);
   gltfLoader.setDRACOLoader(createDracoLoader(manager));
 
   manager.itemStart(url);

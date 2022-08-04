@@ -2633,6 +2633,7 @@ __metadata:
     lodash: 4.17.21
     mathjs: 10.1.1
     memoize-weak: 1.0.2
+    meshoptimizer: 0.18.0
     moment: 2.29.4
     moment-duration-format: 2.3.2
     moment-timezone: 0.5.34
@@ -17384,6 +17385,13 @@ __metadata:
   version: 1.4.1
   resolution: "merge2@npm:1.4.1"
   checksum: 7268db63ed5169466540b6fb947aec313200bcf6d40c5ab722c22e242f651994619bcd85601602972d3c85bd2cc45a358a4c61937e9f11a061919a1da569b0c2
+  languageName: node
+  linkType: hard
+
+"meshoptimizer@npm:0.18.0":
+  version: 0.18.0
+  resolution: "meshoptimizer@npm:0.18.0"
+  checksum: d9f07b4659315b18f677edea0c7eb25aa0ca8c8ec5d67c7ee3f0d90237144d6bcdc4098dfb5d1de166f5bcd57a735455851b9841fa3f9c52f3aa5cbc2178ecec
   languageName: node
   linkType: hard
 
