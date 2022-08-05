@@ -250,7 +250,7 @@ function main() {
       "script-src": `'self' 'unsafe-inline' 'unsafe-eval'`,
       "worker-src": `'self' blob:`,
       "style-src": "'self' 'unsafe-inline'",
-      "connect-src": "'self' ws: wss: http: https: package: blob: file:",
+      "connect-src": "'self' ws: wss: http: https: package: blob: data: file:",
       "font-src": "'self' data:",
       // Include http in the CSP to allow loading images (i.e. map tiles) from http endpoints like localhost
       "img-src": "'self' data: https: package: x-foxglove-converted-tiff: http:",
