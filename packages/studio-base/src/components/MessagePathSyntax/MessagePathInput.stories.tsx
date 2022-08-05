@@ -13,6 +13,7 @@
 
 import { Stack } from "@mui/material";
 import { storiesOf } from "@storybook/react";
+import TestUtils from "react-dom/test-utils";
 
 import MockPanelContextProvider from "@foxglove/studio-base/components/MockPanelContextProvider";
 import { Topic } from "@foxglove/studio-base/players/types";
@@ -45,6 +46,18 @@ const clickInput = (el: HTMLDivElement) => {
   }
 };
 
+const clickInputAndSelectNthResult = (el: HTMLDivElement, selectIndex: number) => {
+  clickInput(el);
+  setTimeout(() => {
+    const select: HTMLDivElement | undefined = document.querySelectorAll("[data-test-auto-item]")[
+      selectIndex
+    ] as any;
+    if (select) {
+      TestUtils.Simulate.click(select);
+    }
+  });
+};
+
 function MessagePathInputStory(props: { path: string; prioritizedDatatype?: string }) {
   const [path, setPath] = React.useState(props.path);
 
@@ -56,6 +69,33 @@ function MessagePathInputStory(props: { path: string; prioritizedDatatype?: stri
             autoSize={false}
             path={path}
             prioritizedDatatype={props.prioritizedDatatype}
+            onChange={(newPath) => setPath(newPath)}
+          />
+        </Stack>
+      </PanelSetup>
+    </MockPanelContextProvider>
+  );
+}
+
+function MessagePathInputSelectionStory(props: {
+  path: string;
+  validTypes: string[];
+  selectInput: number;
+}) {
+  const [path, setPath] = React.useState(props.path);
+
+  const onMount = (el: HTMLDivElement) => {
+    clickInputAndSelectNthResult(el, props.selectInput);
+  };
+
+  return (
+    <MockPanelContextProvider>
+      <PanelSetup fixture={MessagePathInputStoryFixture} onFirstMount={onMount}>
+        <Stack direction="row" flex="auto" margin={1.25}>
+          <MessagePathInput
+            autoSize={false}
+            path={path}
+            validTypes={props.validTypes}
             onChange={(newPath) => setPath(newPath)}
           />
         </Stack>
@@ -90,6 +130,20 @@ storiesOf("components/MessagePathInput", module)
   })
   .add("autocomplete topics", () => {
     return <MessagePathInputStory path="/" />;
+  })
+  .add("autocomplete scalar from topic", () => {
+    return (
+      <MessagePathInputSelectionStory path="/some_logs_" validTypes={["int32"]} selectInput={1} />
+    );
+  })
+  .add("autocomplete scalar from full topic", () => {
+    return (
+      <MessagePathInputSelectionStory
+        path="/some_logs_topic"
+        validTypes={["int32"]}
+        selectInput={0}
+      />
+    );
   })
   .add("autocomplete messagePath", () => {
     return <MessagePathInputStory path="/some_topic/location.po" />;
