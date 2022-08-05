@@ -12,9 +12,6 @@ import { fonts } from "@foxglove/studio-base/util/sharedStyleConstants";
 
 const useStyles = makeStyles()(({ palette, typography }) => ({
   root: {
-    "*,*:before,*:after": {
-      boxSizing: "inherit",
-    },
     "code, pre, tt": {
       fontFamily: fonts.MONOSPACE,
       overflowWrap: "break-word",

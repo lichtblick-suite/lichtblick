@@ -363,6 +363,7 @@ export default function muiComponents(theme: Theme): ThemeOptions["components"] 
     MuiOutlinedInput: {
       styleOverrides: {
         input: {
+          boxSizing: "content-box",
           padding: theme.spacing(1, 1.25),
         },
         inputSizeSmall: {

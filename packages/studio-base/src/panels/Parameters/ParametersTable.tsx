@@ -2,52 +2,56 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { styled as muiStyled } from "@mui/material";
+import { PropsWithChildren } from "react";
+import { makeStyles } from "tss-react/mui";
 
-const ParametersTable = muiStyled("div")`
-  display: flex;
-  flex-direction: column;
-  white-space: nowrap;
-  color: ${({ theme }) => theme.palette.text.primary};
-  flex: auto;
+const useStyles = makeStyles()((theme) => ({
+  root: {
+    display: "flex",
+    flexDirection: "column",
+    whiteSpace: "nowrap",
+    color: theme.palette.text.primary,
+    flex: "auto",
+    table: {
+      width: "calc(100% + 1px)",
+    },
 
-  table {
-    width: calc(100% + 1px);
-  }
+    thead: {
+      userSelect: "none",
+      borderBottom: `1px solid ${theme.palette.divider}`,
+    },
 
-  thead {
-    user-select: none;
-    border-bottom: 1px solid ${({ theme }) => theme.palette.divider};
-  }
+    "& table th, & table td": {
+      padding: "6px 16px",
+      lineHeight: "100%",
+      border: "none",
+    },
 
-  th,
-  td {
-    padding: 6px 16px;
-    line-height: 100%;
-    border: none;
-  }
+    "tr:first-child th": {
+      padding: "6px 16px",
+      border: "none",
+      textAlign: "left",
+      color: theme.palette.text.secondary,
+      minWidth: "120px",
+    },
 
-  tr:first-child th {
-    padding: 6px 16px;
-    border: none;
-    text-align: left;
-    color: ${({ theme }) => theme.palette.text.secondary};
-    min-width: 120px;
-  }
+    td: {
+      input: {
+        background: "none !important",
+        color: "inherit",
+        width: "100%",
+        paddingLeft: 0,
+        paddingRight: 0,
+        minWidth: "40px",
+      },
+      "&:last-child": {
+        color: theme.palette.text.secondary,
+      },
+    },
+  },
+}));
 
-  td {
-    input {
-      background: none !important;
-      color: inherit;
-      width: 100%;
-      padding-left: 0;
-      padding-right: 0;
-      min-width: 40px;
-    }
-    &:last-child {
-      color: ${({ theme }) => theme.palette.text.secondary};
-    }
-  }
-`;
-
-export default ParametersTable;
+export default function ParametersTable(props: PropsWithChildren<unknown>): JSX.Element {
+  const { classes } = useStyles();
+  return <div className={classes.root}>{props.children}</div>;
+}
