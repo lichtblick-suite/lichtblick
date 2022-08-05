@@ -194,12 +194,16 @@ Object.defineProperty(LabelMaterial.prototype, "vertexShaderKey", {
   get() {
     return "LabelMaterial-VertexShader";
   },
+  enumerable: true,
+  configurable: true,
 });
 Object.defineProperty(LabelMaterial.prototype, "fragmentShaderKey", {
   get() {
     // eslint-disable-next-line @typescript-eslint/strict-boolean-expressions
     return this.picking ? "LabelMaterial-FragmentShader-picking" : "LabelMaterial-FragmentShader";
   },
+  enumerable: true,
+  configurable: true,
 });
 
 /**
