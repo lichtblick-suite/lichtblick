@@ -464,7 +464,7 @@ export function LineGraphAfterZoom(): JSX.Element {
     // Zoom is a continuous event, so we need to simulate wheel multiple times
     if (canvasEl) {
       for (let i = 0; i < 5; i++) {
-        triggerWheel(canvasEl, 1);
+        triggerWheel(canvasEl.parentElement!, 1);
       }
     }
 

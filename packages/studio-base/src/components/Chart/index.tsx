@@ -67,7 +67,7 @@ const devicePixelRatio = mightActuallyBePartial(window).devicePixelRatio ?? 1;
 const webWorkerManager = new WebWorkerManager(makeChartJSWorker, 4);
 
 // turn a React.MouseEvent into an object we can send over rpc
-function rpcMouseEvent(event: React.MouseEvent<HTMLCanvasElement>) {
+function rpcMouseEvent(event: React.MouseEvent<HTMLElement>) {
   const boundingRect = event.currentTarget.getBoundingClientRect();
 
   return {
@@ -95,7 +95,8 @@ function Chart(props: Props): JSX.Element {
   const [id] = useState(() => uuidv4());
 
   const initialized = useRef(false);
-  const canvasRef = useRef<HTMLCanvasElement>(ReactNull);
+  const canvasRef = useRef<HTMLCanvasElement>();
+  const containerRef = useRef<HTMLDivElement>(ReactNull);
   const isMounted = useMountedState();
 
   // to avoid changing useCallback deps for callbacks which access the scale value
@@ -110,15 +111,10 @@ function Chart(props: Props): JSX.Element {
   const sendWrapperRef = useRef<RpcSend | undefined>();
   const rpcSendRef = useRef<RpcSend | undefined>();
 
-  useLayoutEffect(() => {
-    if (initialized.current) {
-      if (process.env.NODE_ENV === "development") {
-        throw new Error("Chart does not support hot-reloading - please reload the panel");
-      } else {
-        throw new Error("Chart has re-initialized unexpectedly");
-      }
-    }
+  const hasPannedSinceMouseDown = useRef(false);
+  const previousUpdateMessage = useRef<Record<string, unknown>>({});
 
+  useLayoutEffect(() => {
     log.info(`Register Chart ${id}`);
     let rpc: Rpc;
     if (supportsOffscreenCanvas) {
@@ -143,12 +139,16 @@ function Chart(props: Props): JSX.Element {
 
     return () => {
       log.info(`Unregister chart ${id}`);
+      sendWrapper("destroy").catch(() => {}); // may fail if worker is torn down
       rpcSendRef.current = undefined;
-      sendWrapper("destroy").finally(() => {
-        if (supportsOffscreenCanvas) {
-          webWorkerManager.unregisterWorkerListener(id);
-        }
-      });
+      sendWrapperRef.current = undefined;
+      initialized.current = false;
+      previousUpdateMessage.current = {};
+      canvasRef.current?.remove();
+      canvasRef.current = undefined;
+      if (supportsOffscreenCanvas) {
+        webWorkerManager.unregisterWorkerListener(id);
+      }
     };
   }, [id]);
 
@@ -176,9 +176,6 @@ function Chart(props: Props): JSX.Element {
     [isMounted],
   );
 
-  const hasPannedSinceMouseDown = useRef(false);
-  const previousUpdateMessage = useRef<Record<string, unknown>>({});
-
   // getNewUpdateMessage returns an update message for the changed fields from the last
   // call to get an update message
   //
@@ -186,7 +183,8 @@ function Chart(props: Props): JSX.Element {
   // if they are unchanged from a previous initialization or update.
   const getNewUpdateMessage = useCallback(() => {
     const prev = previousUpdateMessage.current;
-    const out: Record<string, unknown> = {};
+    const out: Partial<{ width: number; height: number; data: ChartData; options: ChartOptions }> =
+      {};
 
     // NOTE(Roman): I don't know why this happens but when I initialize a chart using some data
     // and width/height of 0. Even when I later send an update for correct width/height the chart
@@ -226,8 +224,7 @@ function Chart(props: Props): JSX.Element {
 
     // first time initialization
     if (!initialized.current) {
-      const canvas = canvasRef.current;
-      if (!canvas) {
+      if (!containerRef.current) {
         return;
       }
 
@@ -236,6 +233,17 @@ function Chart(props: Props): JSX.Element {
         return;
       }
 
+      if (canvasRef.current) {
+        throw new Error("Canvas has already been initialized");
+      }
+      const canvas = document.createElement("canvas");
+      canvas.style.width = "100%";
+      canvas.style.height = "100%";
+      canvas.width = newUpdateMessage.width ?? 0;
+      canvas.height = newUpdateMessage.height ?? 0;
+      containerRef.current.appendChild(canvas);
+
+      canvasRef.current = canvas;
       initialized.current = true;
 
       onStartRender?.();
@@ -252,7 +260,11 @@ function Chart(props: Props): JSX.Element {
           width: newUpdateMessage.width,
           height: newUpdateMessage.height,
         },
-        [offscreenCanvas],
+        [
+          // If this is actually a HTMLCanvasElement then it will not be transferred because we
+          // don't use a worker
+          offscreenCanvas as OffscreenCanvas,
+        ],
       );
 
       // once we are initialized, we can allow other handlers to send to the rpc endpoint
@@ -279,12 +291,12 @@ function Chart(props: Props): JSX.Element {
   }, [getNewUpdateMessage, maybeUpdateScales, onFinishRender, onStartRender, type]);
 
   useLayoutEffect(() => {
-    const canvas = canvasRef.current;
-    if (!canvas || !panEnabled) {
+    const container = containerRef.current;
+    if (!container || !panEnabled) {
       return;
     }
 
-    const hammerManager = new Hammer.Manager(canvas);
+    const hammerManager = new Hammer.Manager(container);
     const threshold = props.options.plugins?.zoom?.pan?.threshold ?? 10;
     hammerManager.add(new Hammer.Pan({ threshold }));
 
@@ -356,7 +368,7 @@ function Chart(props: Props): JSX.Element {
   }, [maybeUpdateScales, panEnabled, props.options.plugins?.zoom?.pan?.threshold]);
 
   const onWheel = useCallback(
-    async (event: React.WheelEvent<HTMLCanvasElement>) => {
+    async (event: React.WheelEvent<HTMLElement>) => {
       if (!zoomEnabled || !rpcSendRef.current) {
         return;
       }
@@ -380,7 +392,7 @@ function Chart(props: Props): JSX.Element {
   );
 
   const onMouseDown = useCallback(
-    async (event: React.MouseEvent<HTMLCanvasElement>) => {
+    async (event: React.MouseEvent<HTMLElement>) => {
       hasPannedSinceMouseDown.current = false;
 
       if (!rpcSendRef.current) {
@@ -396,7 +408,7 @@ function Chart(props: Props): JSX.Element {
     [maybeUpdateScales],
   );
 
-  const onMouseUp = useCallback(async (event: React.MouseEvent<HTMLCanvasElement>) => {
+  const onMouseUp = useCallback(async (event: React.MouseEvent<HTMLElement>) => {
     if (!rpcSendRef.current) {
       return;
     }
@@ -413,7 +425,7 @@ function Chart(props: Props): JSX.Element {
 
   const { onHover } = props;
   const onMouseMove = useCallback(
-    async (event: React.MouseEvent<HTMLCanvasElement>) => {
+    async (event: React.MouseEvent<HTMLElement>) => {
       mousePresentRef.current = true; // The mouse must be present if we're getting this event.
 
       if (onHover == undefined || rpcSendRef.current == undefined) {
@@ -444,7 +456,7 @@ function Chart(props: Props): JSX.Element {
   }, [onHover]);
 
   const onClick = useCallback(
-    async (event: React.MouseEvent<HTMLCanvasElement>): Promise<void> => {
+    async (event: React.MouseEvent<HTMLElement>): Promise<void> => {
       if (
         !props.onClick ||
         !rpcSendRef.current ||
@@ -495,10 +507,8 @@ function Chart(props: Props): JSX.Element {
   }
 
   return (
-    <canvas
-      ref={canvasRef}
-      height={height}
-      width={width}
+    <div
+      ref={containerRef}
       onWheel={onWheel}
       onClick={onClick}
       onMouseDown={onMouseDown}
@@ -506,7 +516,7 @@ function Chart(props: Props): JSX.Element {
       onMouseLeave={onMouseLeave}
       onMouseEnter={onMouseEnter}
       onMouseUp={onMouseUp}
-      style={{ width, height, cursor: "crosshair" }}
+      style={{ width, height, cursor: "crosshair", position: "relative" }}
     />
   );
 }
