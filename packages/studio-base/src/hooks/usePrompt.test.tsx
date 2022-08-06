@@ -3,8 +3,7 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { screen, fireEvent, act } from "@testing-library/react";
-import { renderHook } from "@testing-library/react-hooks/dom";
+import { render, screen, fireEvent, act } from "@testing-library/react";
 
 import ModalHost from "@foxglove/studio-base/context/ModalHost";
 
@@ -12,25 +11,42 @@ import { usePrompt } from "./usePrompt";
 
 describe("usePrompt", () => {
   it("cleans up extra nodes added", async () => {
+    let prompt: ReturnType<typeof usePrompt> | undefined;
+    const Test = () => {
+      prompt = usePrompt();
+      return ReactNull;
+    };
+    const root = render(
+      <ModalHost>
+        <Test />
+      </ModalHost>,
+    );
     const start = document.body.childNodes.length;
-    const { result, unmount } = renderHook(() => usePrompt(), { wrapper: ModalHost });
-    expect(document.body.childNodes.length).toEqual(start);
     let promise: Promise<string | undefined> | undefined;
     act(() => {
-      promise = result.current({ title: "Hello" });
+      promise = prompt!({ title: "Hello" });
     });
     expect(promise).toBeDefined();
     expect(document.body.childNodes.length).toEqual(start + 1);
-    unmount();
+    root.unmount();
     expect(document.body.childNodes.length).toEqual(start);
     await expect(promise).resolves.toBeUndefined();
   });
 
   it("should support a title and placeholder", async () => {
-    const { result, unmount } = renderHook(() => usePrompt(), { wrapper: ModalHost });
+    let prompt: ReturnType<typeof usePrompt> | undefined;
+    const Test = () => {
+      prompt = usePrompt();
+      return ReactNull;
+    };
+    const root = render(
+      <ModalHost>
+        <Test />
+      </ModalHost>,
+    );
 
     act(() => {
-      void result.current({
+      void prompt!({
         title: "test-title",
         placeholder: "test-placeholder",
       });
@@ -39,14 +55,23 @@ describe("usePrompt", () => {
     await expect(screen.findByText("test-title")).resolves.not.toBeNullOrUndefined();
     const input = await screen.findByPlaceholderText<HTMLInputElement>("test-placeholder");
     expect(input.value).toEqual("");
-    unmount();
+    root.unmount();
   });
 
   it("should return entered value", async () => {
-    const { result, unmount } = renderHook(() => usePrompt(), { wrapper: ModalHost });
+    let prompt: ReturnType<typeof usePrompt> | undefined;
+    const Test = () => {
+      prompt = usePrompt();
+      return ReactNull;
+    };
+    const root = render(
+      <ModalHost>
+        <Test />
+      </ModalHost>,
+    );
     let valPromise: Promise<string | undefined> | undefined;
     act(() => {
-      valPromise = result.current({
+      valPromise = prompt!({
         title: "test-title",
         placeholder: "test-placeholder",
       });
@@ -57,17 +82,26 @@ describe("usePrompt", () => {
     fireEvent.change(input, { target: { value: "something" } });
 
     const submitButton = screen.getByText("OK");
-    submitButton.click();
+    act(() => submitButton.click());
 
     await expect(valPromise).resolves.toEqual("something");
-    unmount();
+    root.unmount();
   });
 
   it("should use an initial value", async () => {
-    const { result, unmount } = renderHook(() => usePrompt(), { wrapper: ModalHost });
+    let prompt: ReturnType<typeof usePrompt> | undefined;
+    const Test = () => {
+      prompt = usePrompt();
+      return ReactNull;
+    };
+    const root = render(
+      <ModalHost>
+        <Test />
+      </ModalHost>,
+    );
     let valPromise: Promise<string | undefined> | undefined;
     act(() => {
-      valPromise = result.current({
+      valPromise = prompt!({
         title: "test-title",
         initialValue: "initial-value",
         placeholder: "some-placeholder",
@@ -79,9 +113,9 @@ describe("usePrompt", () => {
     expect(input.value).toEqual("initial-value");
 
     const submitButton = screen.getByText("OK");
-    submitButton.click();
+    act(() => submitButton.click());
 
     await expect(valPromise).resolves.toEqual("initial-value");
-    unmount();
+    root.unmount();
   });
 });

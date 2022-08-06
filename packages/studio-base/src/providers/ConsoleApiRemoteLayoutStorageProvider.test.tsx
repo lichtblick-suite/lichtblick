@@ -1,9 +1,9 @@
+/** @jest-environment jsdom */
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 import { renderHook } from "@testing-library/react-hooks";
-import { PropsWithChildren } from "react";
 
 import ConsoleApiContext from "@foxglove/studio-base/context/ConsoleApiContext";
 import CurrentUserContext, { User } from "@foxglove/studio-base/context/CurrentUserContext";
@@ -29,9 +29,10 @@ describe("ConsoleApiRemoteLayoutStorageProvider", () => {
       orgSlug: "bigco",
       orgPaid: true,
     };
+    let user = initialUser;
     const { result, rerender } = renderHook(() => useRemoteLayoutStorage(), {
       initialProps: { user: initialUser },
-      wrapper: ({ children, user }: PropsWithChildren<{ user: User }>) => (
+      wrapper: ({ children }) => (
         <ConsoleApiContext.Provider value={fakeApi}>
           <CurrentUserContext.Provider
             value={{ currentUser: user, signIn: () => {}, signOut: async () => {} }}
@@ -45,9 +46,11 @@ describe("ConsoleApiRemoteLayoutStorageProvider", () => {
     });
 
     const initialResult = result.current;
-    rerender({ user: { ...initialUser } });
+    user = { ...initialUser };
+    rerender();
     expect(result.current).toBe(initialResult);
-    rerender({ user: { ...initialUser, id: "id2" } });
+    user = { ...initialUser, id: "id2" };
+    rerender();
     expect(result.current).not.toBe(initialResult);
   });
 });

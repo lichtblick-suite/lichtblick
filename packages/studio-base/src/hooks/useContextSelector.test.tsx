@@ -12,8 +12,8 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
+import { render } from "@testing-library/react";
 import { renderHook } from "@testing-library/react-hooks";
-import { mount } from "enzyme";
 import { PropsWithChildren } from "react";
 
 import useContextSelector from "@foxglove/studio-base/hooks/useContextSelector";
@@ -38,7 +38,7 @@ describe("createSelectableContext/useContextSelector", () => {
     const C = createSelectableContext();
     const Consumer = createTestConsumer(C, (x) => x);
 
-    expect(() => mount(<Consumer />)).toThrow(
+    expect(() => render(<Consumer />)).toThrow(
       "useContextSelector was used outside a corresponding <Provider />.",
     );
 
@@ -49,14 +49,15 @@ describe("createSelectableContext/useContextSelector", () => {
     const C = createSelectableContext();
     const Consumer = createTestConsumer(C, (x) => x);
 
-    const root = mount(
+    const rootEl = (
       <C.Provider value={1}>
         <Consumer />
-      </C.Provider>,
+      </C.Provider>
     );
+    const root = render(rootEl);
 
-    root.update();
-    root.update();
+    root.rerender(rootEl);
+    root.rerender(rootEl);
 
     expect(Consumer.selectorFn.mock.calls).toEqual([[1]]);
     expect(Consumer.renderFn.mock.calls).toEqual([[1]]);
@@ -67,18 +68,17 @@ describe("createSelectableContext/useContextSelector", () => {
   it("doesn't render again when provided value and selector result change at the same time", () => {
     const C = createSelectableContext<number>();
 
-    type Props = { value: number; selector: (x: number) => number };
-    const wrapper = ({ children, value }: PropsWithChildren<Props>) => (
-      <C.Provider value={value}>{children}</C.Provider>
-    );
-    const { result, rerender } = renderHook(({ selector }) => useContextSelector(C, selector), {
-      wrapper,
-      initialProps: { value: 1, selector: (x) => x * 2 },
+    let value = 1;
+    const all: number[] = [];
+    const { rerender } = renderHook(({ selector }) => all.push(useContextSelector(C, selector)), {
+      initialProps: { selector: (x: number) => x * 2 },
+      wrapper: ({ children }) => <C.Provider value={value}>{children}</C.Provider>,
     });
 
-    expect(result.all).toEqual([2]);
-    rerender({ value: 2, selector: (x) => x * 3 });
-    expect(result.all).toEqual([2, 6]);
+    expect(all).toEqual([2]);
+    value = 2;
+    rerender({ selector: (x) => x * 3 });
+    expect(all).toEqual([2, 6]);
   });
 
   it("re-renders when selector returns new value", () => {
@@ -92,25 +92,22 @@ describe("createSelectableContext/useContextSelector", () => {
       return num;
     });
 
-    const root = mount(
-      <C.Provider value={{ num: 1 }}>
-        <Consumer />
-      </C.Provider>,
-    );
+    const consumer = <Consumer />;
+    const root = render(<C.Provider value={{ num: 1 }}>{consumer}</C.Provider>);
 
     expect(Consumer.selectorFn.mock.calls).toEqual([[{ num: 1 }]]);
     expect(Consumer.renderFn.mock.calls).toEqual([[1]]);
 
-    root.setProps({ value: { num: 1 } });
+    root.rerender(<C.Provider value={{ num: 1 }}>{consumer}</C.Provider>);
     expect(Consumer.selectorFn.mock.calls).toEqual([[{ num: 1 }], [{ num: 1 }]]);
     expect(Consumer.renderFn.mock.calls).toEqual([[1]]);
 
-    root.setProps({ value: { num: 2 } });
+    root.rerender(<C.Provider value={{ num: 2 }}>{consumer}</C.Provider>);
     expect(Consumer.selectorFn.mock.calls).toEqual([[{ num: 1 }], [{ num: 1 }], [{ num: 2 }]]);
     expect(Consumer.renderFn.mock.calls).toEqual([[1], [2]]);
 
     // Selector returns the same value, so no update should occur
-    root.setProps({ value: { num: 3 } });
+    root.rerender(<C.Provider value={{ num: 3 }}>{consumer}</C.Provider>);
     expect(Consumer.selectorFn.mock.calls).toEqual([
       [{ num: 1 }],
       [{ num: 1 }],
@@ -119,7 +116,7 @@ describe("createSelectableContext/useContextSelector", () => {
     ]);
     expect(Consumer.renderFn.mock.calls).toEqual([[1], [2]]);
 
-    root.setProps({ value: { num: 4 } });
+    root.rerender(<C.Provider value={{ num: 4 }}>{consumer}</C.Provider>);
     expect(Consumer.selectorFn.mock.calls).toEqual([
       [{ num: 1 }],
       [{ num: 1 }],
@@ -141,27 +138,28 @@ describe("createSelectableContext/useContextSelector", () => {
       return <div>{children}</div>;
     });
 
-    const root = mount(
-      <C.Provider value={{ one: 1, two: 2 }}>
+    const children = (
+      <>
         <Consumer1 />
         <Memoized>
           <Consumer2 />
         </Memoized>
-      </C.Provider>,
+      </>
     );
+    const root = render(<C.Provider value={{ one: 1, two: 2 }}>{children}</C.Provider>);
 
     expect(Consumer1.selectorFn).toHaveBeenCalledTimes(1);
     expect(Consumer1.renderFn.mock.calls).toEqual([[1]]);
     expect(Consumer2.selectorFn).toHaveBeenCalledTimes(1);
     expect(Consumer2.renderFn.mock.calls).toEqual([[2]]);
 
-    root.setProps({ value: { one: 1, two: 22 } });
+    root.rerender(<C.Provider value={{ one: 1, two: 22 }}>{children}</C.Provider>);
     expect(Consumer1.selectorFn).toHaveBeenCalledTimes(2);
     expect(Consumer1.renderFn.mock.calls).toEqual([[1]]);
     expect(Consumer2.selectorFn).toHaveBeenCalledTimes(2);
     expect(Consumer2.renderFn.mock.calls).toEqual([[2], [22]]);
 
-    root.setProps({ value: { one: 11, two: 22 } });
+    root.rerender(<C.Provider value={{ one: 11, two: 22 }}>{children}</C.Provider>);
     expect(Consumer1.selectorFn).toHaveBeenCalledTimes(3);
     expect(Consumer1.renderFn.mock.calls).toEqual([[1], [11]]);
     expect(Consumer2.selectorFn).toHaveBeenCalledTimes(3);
@@ -174,25 +172,21 @@ describe("createSelectableContext/useContextSelector", () => {
     const C = createSelectableContext<{ num: number }>();
     const Consumer = createTestConsumer(C, ({ num }) => num);
 
-    const root = mount(
-      <C.Provider value={{ num: 1 }}>
-        <Consumer />
-      </C.Provider>,
-    );
+    const children = <Consumer />;
+    const root = render(<C.Provider value={{ num: 1 }}>{children}</C.Provider>);
 
     expect(Consumer.selectorFn.mock.calls).toEqual([[{ num: 1 }]]);
     expect(Consumer.renderFn.mock.calls).toEqual([[1]]);
 
-    root.setProps({ value: { num: 2 } });
+    root.rerender(<C.Provider value={{ num: 2 }}>{children}</C.Provider>);
     expect(Consumer.selectorFn.mock.calls).toEqual([[{ num: 1 }], [{ num: 2 }]]);
     expect(Consumer.renderFn.mock.calls).toEqual([[1], [2]]);
 
-    // eslint-disable-next-line no-restricted-syntax
-    root.setProps({ children: null, value: { num: 2 } });
+    root.rerender(<C.Provider value={{ num: 2 }}></C.Provider>);
     expect(Consumer.selectorFn.mock.calls).toEqual([[{ num: 1 }], [{ num: 2 }]]);
     expect(Consumer.renderFn.mock.calls).toEqual([[1], [2]]);
 
-    root.setProps({ value: { num: 3 } });
+    root.rerender(<C.Provider value={{ num: 3 }}></C.Provider>);
     expect(Consumer.selectorFn.mock.calls).toEqual([[{ num: 1 }], [{ num: 2 }]]);
     expect(Consumer.renderFn.mock.calls).toEqual([[1], [2]]);
 
@@ -223,11 +217,8 @@ describe("createSelectableContext/useContextSelector", () => {
       return ReactNull;
     }
 
-    const root = mount(
-      <C.Provider value={{ x: 0, y: 0, z: 0 }}>
-        <Test />
-      </C.Provider>,
-    );
+    const children = <Test />;
+    const root = render(<C.Provider value={{ x: 0, y: 0, z: 0 }}>{children}</C.Provider>);
 
     expect(selector1.mock.calls).toEqual([[{ x: 0, y: 0, z: 0 }]]);
     expect(selector2.mock.calls).toEqual([[{ x: 0, y: 0, z: 0 }]]);
@@ -235,14 +226,14 @@ describe("createSelectableContext/useContextSelector", () => {
     expect(renderFn.mock.calls).toEqual([[[0, 0, 0]]]);
 
     clearMocks();
-    root.setProps({ value: { x: 1, y: 0, z: 0 } });
+    root.rerender(<C.Provider value={{ x: 1, y: 0, z: 0 }}>{children}</C.Provider>);
     expect(selector1.mock.calls).toEqual([[{ x: 1, y: 0, z: 0 }]]);
     expect(selector2.mock.calls).toEqual([[{ x: 1, y: 0, z: 0 }]]);
     expect(selector3.mock.calls).toEqual([[{ x: 1, y: 0, z: 0 }]]);
     expect(renderFn.mock.calls).toEqual([[[1, 0, 0]]]);
 
     clearMocks();
-    root.setProps({ value: { x: 1, y: 2, z: 3 } });
+    root.rerender(<C.Provider value={{ x: 1, y: 2, z: 3 }}>{children}</C.Provider>);
     expect(selector1.mock.calls).toEqual([[{ x: 1, y: 2, z: 3 }]]);
     expect(selector2.mock.calls).toEqual([[{ x: 1, y: 2, z: 3 }]]);
     expect(selector3.mock.calls).toEqual([[{ x: 1, y: 2, z: 3 }]]);
@@ -261,13 +252,10 @@ describe("createSelectableContext/useContextSelector", () => {
     const fn2 = () => {
       throw new Error("should not be called");
     };
-    const root = mount(
-      <C.Provider value={fn1}>
-        <Consumer />
-      </C.Provider>,
-    );
+    const children = <Consumer />;
+    const root = render(<C.Provider value={fn1}>{children}</C.Provider>);
 
-    root.setProps({ value: fn2 });
+    root.rerender(<C.Provider value={fn2}>{children}</C.Provider>);
 
     expect(Consumer.selectorFn.mock.calls).toEqual([[fn1], [fn2]]);
     expect(Consumer.renderFn.mock.calls).toEqual([[fn1], [fn2]]);

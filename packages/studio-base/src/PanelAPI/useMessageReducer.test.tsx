@@ -12,97 +12,60 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { renderHook } from "@testing-library/react-hooks/dom";
-import { mount } from "enzyme";
+import { renderHook, act } from "@testing-library/react-hooks";
 import { PropsWithChildren, useState } from "react";
-import { act } from "react-dom/test-utils";
 
 import { MessagePipelineProvider } from "@foxglove/studio-base/components/MessagePipeline";
 import FakePlayer from "@foxglove/studio-base/components/MessagePipeline/FakePlayer";
 import MockMessagePipelineProvider from "@foxglove/studio-base/components/MessagePipeline/MockMessagePipelineProvider";
 import AppConfigurationContext from "@foxglove/studio-base/context/AppConfigurationContext";
-import { MessageEvent, Player } from "@foxglove/studio-base/players/types";
+import { Player, PlayerStateActiveData, Topic } from "@foxglove/studio-base/players/types";
 import { makeMockAppConfiguration } from "@foxglove/studio-base/util/makeMockAppConfiguration";
 
 import * as PanelAPI from ".";
 
 describe("useMessageReducer", () => {
-  // Create a helper component that exposes restore, addMessage, and the results of the hook for mocking
-  function createTest({
-    useAddMessage = true,
-    useAddMessages = false,
-  }: { useAddMessage?: boolean; useAddMessages?: boolean } = {}) {
-    function Test({
-      topics,
-      addMessagesOverride,
-    }: {
-      topics: string[];
-      addMessagesOverride?: (value: unknown, messages: readonly MessageEvent<unknown>[]) => unknown;
-    }) {
-      try {
-        const result = PanelAPI.useMessageReducer({
-          topics,
-          addMessage: useAddMessage ? Test.addMessage : undefined,
-          addMessages: useAddMessages ? addMessagesOverride ?? Test.addMessages : undefined,
-          restore: Test.restore,
-        });
-        Test.result(result);
-      } catch (e) {
-        Test.error(e);
-      }
-      return ReactNull;
-    }
-    Test.result = jest.fn();
-    Test.error = jest.fn();
-    Test.restore = jest.fn();
-    Test.addMessage = jest.fn();
-    Test.addMessages = jest.fn();
-    return Test;
-  }
-
   it("calls restore to initialize without messages", async () => {
-    const Test = createTest();
-    Test.restore.mockReturnValue(1);
-
-    const root = mount(
-      <MockMessagePipelineProvider>
-        <Test topics={["/foo"]} />
-      </MockMessagePipelineProvider>,
+    const addMessage = jest.fn();
+    const restore = jest.fn().mockReturnValue(1);
+    const { result } = renderHook(
+      () =>
+        PanelAPI.useMessageReducer({
+          topics: ["/foo"],
+          restore,
+          addMessage,
+        }),
+      {
+        wrapper: ({ children }) => (
+          <MockMessagePipelineProvider>{children}</MockMessagePipelineProvider>
+        ),
+      },
     );
 
-    await Promise.resolve();
-    expect(Test.restore.mock.calls).toEqual([[undefined]]);
-    expect(Test.addMessage.mock.calls).toEqual([]);
-    expect(Test.result.mock.calls).toEqual([[1]]);
-
-    root.unmount();
+    expect(restore.mock.calls).toEqual([[undefined]]);
+    expect(addMessage.mock.calls).toEqual([]);
+    expect(result.current).toEqual(1);
   });
 
-  it.each([
-    [{ useAddMessage: false, useAddMessages: false, shouldThrow: true }],
-    [{ useAddMessage: false, useAddMessages: true, shouldThrow: false }],
-    [{ useAddMessage: true, useAddMessages: false, shouldThrow: false }],
-    [{ useAddMessage: true, useAddMessages: true, shouldThrow: true }],
-  ])(
-    "requires exactly one 'add' callback (%p)",
-    async ({ useAddMessage, useAddMessages, shouldThrow }) => {
-      const Test = createTest({ useAddMessage, useAddMessages });
-      mount(
-        <MockMessagePipelineProvider>
-          <Test topics={["/foo"]} />
-        </MockMessagePipelineProvider>,
-      );
-      expect(Test.result.mock.calls).toHaveLength(shouldThrow ? 0 : 1);
-      expect(Test.error.mock.calls).toHaveLength(shouldThrow ? 1 : 0);
-    },
-  );
+  it("requires exactly one 'add' callback", () => {
+    const restore = jest.fn().mockReturnValue(1);
+    const addMessage = jest.fn();
+    const addMessages = jest.fn();
+    const { result: result1 } = renderHook(() =>
+      PanelAPI.useMessageReducer({ topics: ["/foo"], restore }),
+    );
+    expect(result1.error).toEqual(
+      new Error("useMessageReducer must be provided with exactly one of addMessage or addMessages"),
+    );
+    const { result: result2 } = renderHook(() =>
+      PanelAPI.useMessageReducer({ topics: ["/foo"], restore, addMessage, addMessages }),
+    );
+    expect(result2.error).toEqual(
+      new Error("useMessageReducer must be provided with exactly one of addMessage or addMessages"),
+    );
+  });
 
   it("calls restore to initialize and addMessage for initial messages", async () => {
-    const Test = createTest();
-
-    Test.restore.mockReturnValue(1);
-    Test.addMessage.mockImplementation((_, msg) => msg.message.value);
-
     const message = {
       topic: "/foo",
       receiveTime: { sec: 0, nsec: 0 },
@@ -110,26 +73,28 @@ describe("useMessageReducer", () => {
       sizeInBytes: 0,
     };
 
-    const root = mount(
-      <MockMessagePipelineProvider messages={[message]}>
-        <Test topics={["/foo"]} />
-      </MockMessagePipelineProvider>,
+    const restore = jest.fn().mockReturnValue(1);
+    const addMessage = jest.fn().mockImplementation((_, msg) => msg.message.value);
+    const { result } = renderHook(
+      () =>
+        PanelAPI.useMessageReducer({
+          topics: ["/foo"],
+          restore,
+          addMessage,
+        }),
+      {
+        wrapper: ({ children }) => (
+          <MockMessagePipelineProvider messages={[message]}>{children}</MockMessagePipelineProvider>
+        ),
+      },
     );
 
-    expect(Test.restore.mock.calls).toEqual([[undefined]]);
-    expect(Test.addMessage.mock.calls).toEqual([[1, message]]);
-    expect(Test.addMessages.mock.calls).toEqual([]);
-    expect(Test.result.mock.calls).toEqual([[1], [2]]);
-
-    root.unmount();
+    expect(restore.mock.calls).toEqual([[undefined]]);
+    expect(addMessage.mock.calls).toEqual([[1, message]]);
+    expect(result.current).toEqual(2);
   });
 
   it("calls restore to initialize and addMessages for initial messages", async () => {
-    const Test = createTest({ useAddMessage: false, useAddMessages: true });
-
-    Test.restore.mockReturnValue(1);
-    Test.addMessages.mockImplementation((_, msgs) => msgs[msgs.length - 1].message.value);
-
     const message = {
       topic: "/foo",
       receiveTime: { sec: 0, nsec: 0 },
@@ -137,26 +102,30 @@ describe("useMessageReducer", () => {
       sizeInBytes: 0,
     };
 
-    const root = mount(
-      <MockMessagePipelineProvider messages={[message]}>
-        <Test topics={["/foo"]} />
-      </MockMessagePipelineProvider>,
+    const restore = jest.fn().mockReturnValue(1);
+    const addMessages = jest
+      .fn()
+      .mockImplementation((_, msgs) => msgs[msgs.length - 1].message.value);
+    const { result } = renderHook(
+      () =>
+        PanelAPI.useMessageReducer({
+          topics: ["/foo"],
+          restore,
+          addMessages,
+        }),
+      {
+        wrapper: ({ children }) => (
+          <MockMessagePipelineProvider messages={[message]}>{children}</MockMessagePipelineProvider>
+        ),
+      },
     );
 
-    expect(Test.restore.mock.calls).toEqual([[undefined]]);
-    expect(Test.addMessage.mock.calls).toEqual([]);
-    expect(Test.addMessages.mock.calls).toEqual([[1, [message]]]);
-    expect(Test.result.mock.calls).toEqual([[1], [2]]);
-
-    root.unmount();
+    expect(restore.mock.calls).toEqual([[undefined]]);
+    expect(addMessages.mock.calls).toEqual([[1, [message]]]);
+    expect(result.current).toEqual(2);
   });
 
   it("calls addMessage for messages added later", async () => {
-    const Test = createTest();
-
-    Test.restore.mockReturnValue(1);
-    Test.addMessage.mockImplementation((_, msg) => msg.message.value);
-
     const message1 = {
       topic: "/foo",
       receiveTime: { sec: 0, nsec: 0 },
@@ -170,43 +139,51 @@ describe("useMessageReducer", () => {
       sizeInBytes: 0,
     };
 
-    const root = mount(
-      <MockMessagePipelineProvider messages={[]}>
-        <Test topics={["/foo"]} />
-      </MockMessagePipelineProvider>,
+    const restore = jest.fn().mockReturnValue(1);
+    const addMessage = jest.fn().mockImplementation((_, msg) => msg.message.value);
+
+    let messages: typeof message1[] = [];
+    const { result, rerender } = renderHook(
+      ({ topics }) =>
+        PanelAPI.useMessageReducer({
+          topics,
+          restore,
+          addMessage,
+        }),
+      {
+        initialProps: { topics: ["/foo"] },
+        wrapper: ({ children }) => (
+          <MockMessagePipelineProvider messages={messages}>{children}</MockMessagePipelineProvider>
+        ),
+      },
     );
 
-    root.setProps({ messages: [message1] });
+    messages = [message1];
+    rerender({ topics: ["/foo"] });
 
-    expect(Test.restore.mock.calls).toEqual([[undefined]]);
-    expect(Test.addMessage.mock.calls).toEqual([[1, message1]]);
-    expect(Test.result.mock.calls).toEqual([[1], [2]]);
+    expect(restore.mock.calls).toEqual([[undefined]]);
+    expect(addMessage.mock.calls).toEqual([[1, message1]]);
+    expect(result.current).toEqual(2);
 
     // Subscribe to a new topic, then receive a message on that topic
-    root.setProps({ children: <Test topics={["/foo", "/bar"]} /> });
+    rerender({ topics: ["/foo", "/bar"] });
 
-    expect(Test.restore.mock.calls).toEqual([[undefined]]);
-    expect(Test.addMessage.mock.calls).toEqual([[1, message1]]);
-    expect(Test.result.mock.calls).toEqual([[1], [2], [2]]);
+    expect(restore.mock.calls).toEqual([[undefined]]);
+    expect(addMessage.mock.calls).toEqual([[1, message1]]);
+    expect(result.current).toEqual(2);
 
-    root.setProps({ messages: [message2] });
+    messages = [message2];
+    rerender({ topics: ["/foo", "/bar"] });
 
-    expect(Test.restore.mock.calls).toEqual([[undefined]]);
-    expect(Test.addMessage.mock.calls).toEqual([
+    expect(restore.mock.calls).toEqual([[undefined]]);
+    expect(addMessage.mock.calls).toEqual([
       [1, message1],
       [2, message2],
     ]);
-    expect(Test.result.mock.calls).toEqual([[1], [2], [2], [3]]);
-
-    root.unmount();
+    expect(result.current).toEqual(3);
   });
 
   it("calls addMessages for messages added later", async () => {
-    const Test = createTest({ useAddMessage: false, useAddMessages: true });
-
-    Test.restore.mockReturnValue(1);
-    Test.addMessages.mockImplementation((_prevValue, msgs) => msgs[msgs.length - 1].message.value);
-
     const message1 = {
       topic: "/foo",
       receiveTime: { sec: 0, nsec: 0 },
@@ -226,57 +203,82 @@ describe("useMessageReducer", () => {
       sizeInBytes: 0,
     };
 
-    const root = mount(
-      <MockMessagePipelineProvider messages={[]}>
-        <Test topics={["/foo"]} />
-      </MockMessagePipelineProvider>,
+    const restore = jest.fn().mockReturnValue(1);
+    const addMessages = jest
+      .fn()
+      .mockImplementation((_, msgs) => msgs[msgs.length - 1].message.value);
+
+    let messages: typeof message1[] = [];
+    const { result, rerender } = renderHook(
+      ({ topics }) =>
+        PanelAPI.useMessageReducer({
+          topics,
+          restore,
+          addMessages,
+        }),
+      {
+        initialProps: { topics: ["/foo"] },
+        wrapper: ({ children }) => (
+          <MockMessagePipelineProvider messages={messages}>{children}</MockMessagePipelineProvider>
+        ),
+      },
     );
 
-    root.setProps({ messages: [message1] });
+    messages = [message1];
+    rerender({ topics: ["/foo"] });
 
-    expect(Test.restore.mock.calls).toEqual([[undefined]]);
-    expect(Test.addMessage.mock.calls).toEqual([]);
-    expect(Test.addMessages.mock.calls).toEqual([[1, [message1]]]);
-    expect(Test.result.mock.calls).toEqual([[1], [2]]);
+    expect(restore.mock.calls).toEqual([[undefined]]);
+    expect(addMessages.mock.calls).toEqual([[1, [message1]]]);
+    expect(result.current).toEqual(2);
 
     // Subscribe to a new topic, then receive a message on that topic
-    root.setProps({ children: <Test topics={["/foo", "/bar"]} /> });
+    rerender({ topics: ["/foo", "/bar"] });
 
-    expect(Test.restore.mock.calls).toEqual([[undefined]]);
-    expect(Test.addMessage.mock.calls).toEqual([]);
-    expect(Test.addMessages.mock.calls).toEqual([[1, [message1]]]);
-    expect(Test.result.mock.calls).toEqual([[1], [2], [2]]);
+    expect(restore.mock.calls).toEqual([[undefined]]);
+    expect(addMessages.mock.calls).toEqual([[1, [message1]]]);
+    expect(result.current).toEqual(2);
 
-    root.setProps({ messages: [message2, message3] });
+    messages = [message2, message3];
+    rerender({ topics: ["/foo", "/bar"] });
 
-    expect(Test.restore.mock.calls).toEqual([[undefined]]);
-    expect(Test.addMessage.mock.calls).toEqual([]);
-    expect(Test.addMessages.mock.calls).toEqual([
+    expect(restore.mock.calls).toEqual([[undefined]]);
+    expect(addMessages.mock.calls).toEqual([
       [1, [message1]],
       [2, [message2, message3]],
     ]);
-    expect(Test.result.mock.calls).toEqual([[1], [2], [2], [4]]);
-
-    root.unmount();
+    expect(result.current).toEqual(4);
   });
 
   it("does not filter out non-existing topics", () => {
-    const Test = createTest();
-
     // Initial mount. Note that we haven't received any topics yet.
     const setSubscriptions = jest.fn();
-    const root = mount(
-      <MockMessagePipelineProvider setSubscriptions={setSubscriptions}>
-        <Test topics={["/foo"]} />
-      </MockMessagePipelineProvider>,
+
+    const restore = jest.fn().mockReturnValue(1);
+    const addMessage = jest.fn().mockImplementation((_, msg) => msg.message.value);
+
+    const { rerender, unmount } = renderHook(
+      ({ topics }) =>
+        PanelAPI.useMessageReducer({
+          topics,
+          restore,
+          addMessage,
+        }),
+      {
+        initialProps: { topics: ["/foo"] },
+        wrapper: ({ children }) => (
+          <MockMessagePipelineProvider setSubscriptions={setSubscriptions}>
+            {children}
+          </MockMessagePipelineProvider>
+        ),
+      },
     );
 
     // Updating to change topics.
-    root.setProps({ children: <Test topics={["/foo", "/bar"]} /> });
+    rerender({ topics: ["/foo", "/bar"] });
 
     // And unsubscribes properly, too.
     act(() => {
-      root.unmount();
+      unmount();
     });
     expect(setSubscriptions.mock.calls).toEqual([
       [expect.any(String), [{ topic: "/foo", preloadType: "partial", requestor: undefined }]],
@@ -292,11 +294,6 @@ describe("useMessageReducer", () => {
   });
 
   it("clears everything on seek", () => {
-    const Test = createTest();
-
-    Test.restore.mockReturnValue(1);
-    Test.addMessage.mockImplementation((_, msg) => msg.message.value);
-
     const message1 = {
       topic: "/foo",
       receiveTime: { sec: 0, nsec: 0 },
@@ -304,41 +301,50 @@ describe("useMessageReducer", () => {
       sizeInBytes: 0,
     };
 
-    const root = mount(
-      <MockMessagePipelineProvider messages={[]}>
-        <Test topics={["/foo"]} />
-      </MockMessagePipelineProvider>,
+    const restore = jest.fn().mockReturnValue(1);
+    const addMessage = jest.fn().mockImplementation((_, msg) => msg.message.value);
+
+    let messages: typeof message1[] = [];
+    let activeData: Partial<PlayerStateActiveData> = {};
+    const { result, rerender } = renderHook(
+      () => PanelAPI.useMessageReducer({ topics: ["/foo"], restore, addMessage }),
+      {
+        wrapper: ({ children }) => (
+          <MockMessagePipelineProvider messages={messages} activeData={activeData}>
+            {children}
+          </MockMessagePipelineProvider>
+        ),
+      },
     );
 
-    root.setProps({ messages: [message1] });
+    messages = [message1];
+    rerender();
 
-    expect(Test.restore.mock.calls).toEqual([[undefined]]);
-    expect(Test.addMessage.mock.calls).toEqual([[1, message1]]);
-    expect(Test.result.mock.calls).toEqual([[1], [2]]);
+    expect(restore.mock.calls).toEqual([[undefined]]);
+    expect(addMessage.mock.calls).toEqual([[1, message1]]);
+    expect(result.current).toEqual(2);
 
-    root.setProps({ messages: [], activeData: { lastSeekTime: 1 } });
+    messages = [];
+    activeData = { lastSeekTime: 1 };
+    rerender();
 
-    expect(Test.restore.mock.calls).toEqual([[undefined], [undefined]]);
-    expect(Test.addMessage.mock.calls).toEqual([[1, message1]]);
-    expect(Test.result.mock.calls).toEqual([[1], [2], [1]]);
-
-    root.unmount();
+    expect(restore.mock.calls).toEqual([[undefined], [undefined]]);
+    expect(addMessage.mock.calls).toEqual([[1, message1]]);
+    expect(result.current).toEqual(1);
   });
 
-  type WrapperProps = {
-    player?: Player;
-    topics: string[];
-  };
-
-  function Wrapper({ children, player }: PropsWithChildren<WrapperProps>) {
-    const [config] = useState(() => makeMockAppConfiguration());
-    return (
-      <AppConfigurationContext.Provider value={config}>
-        <MessagePipelineProvider player={player} globalVariables={{}}>
-          {children}
-        </MessagePipelineProvider>
-      </AppConfigurationContext.Provider>
-    );
+  function makeWrapper(player: Player) {
+    function Wrapper({ children }: PropsWithChildren<unknown>) {
+      const [config] = useState(() => makeMockAppConfiguration());
+      return (
+        <AppConfigurationContext.Provider value={config}>
+          <MessagePipelineProvider player={player} globalVariables={{}}>
+            {children}
+          </MessagePipelineProvider>
+        </AppConfigurationContext.Provider>
+      );
+    }
+    return Wrapper;
   }
 
   it("doesn't call addMessage when requested topics change player", async () => {
@@ -362,34 +368,31 @@ describe("useMessageReducer", () => {
     };
 
     const player = new FakePlayer();
-    const { result, rerender } = renderHook<WrapperProps, number>(
-      (props) => {
-        return PanelAPI.useMessageReducer<number>({
-          topics: props.topics,
-          restore,
-          addMessage,
-        });
+    const { result, rerender } = renderHook(
+      ({ topics }: { topics: string[] }) => {
+        return PanelAPI.useMessageReducer<number>({ topics, restore, addMessage });
       },
       {
-        wrapper: Wrapper,
-        initialProps: { player, topics: [] },
+        wrapper: makeWrapper(player),
+        initialProps: { topics: [] as string[] },
       },
     );
 
     expect(restore.mock.calls).toEqual([[undefined]]);
     expect(addMessage.mock.calls).toEqual([]);
-    expect(result.all).toEqual([0]);
+    expect(result.current).toEqual(0);
 
-    rerender({ player, topics: ["/bar"] });
+    rerender({ topics: ["/bar"] });
 
     // Subscribing does not invoke restore or add message
     expect(restore.mock.calls).toEqual([[undefined]]);
     expect(addMessage.mock.calls).toEqual([]);
-    expect(result.all).toEqual([0, 0]);
+    expect(result.current).toEqual(0);
 
-    await act(
-      async () =>
-        await player.emit({
+    let promise: Promise<void>;
+    act(
+      () =>
+        void (promise = player.emit({
           activeData: {
             messages: [message1, message2],
             currentTime: { sec: 0, nsec: 0 },
@@ -408,25 +411,27 @@ describe("useMessageReducer", () => {
             ),
             totalBytesReceived: 1234,
           },
-        }),
+        })),
     );
+    await act(async () => await promise);
 
     // restore call with undefined, then add message called with our subscribed message
     expect(restore.mock.calls).toEqual([[undefined], [undefined]]);
     expect(addMessage.mock.calls).toEqual([[0, message2]]);
-    expect(result.all).toEqual([0, 0, 2]);
+    expect(result.current).toEqual(2);
 
-    rerender({ player, topics: ["/bar", "/foo"] });
+    rerender({ topics: ["/bar", "/foo"] });
 
     // no additional calls
     expect(restore.mock.calls).toEqual([[undefined], [undefined]]);
     expect(addMessage.mock.calls).toEqual([[0, message2]]);
     // the same result is repeated
-    expect(result.all).toEqual([0, 0, 2, 2]);
+    expect(result.current).toEqual(2);
 
-    await act(
-      async () =>
-        await player.emit({
+    let promise2: Promise<void>;
+    act(
+      () =>
+        void (promise2 = player.emit({
           activeData: {
             messages: [message1, message2],
             currentTime: { sec: 0, nsec: 0 },
@@ -445,8 +450,9 @@ describe("useMessageReducer", () => {
             ),
             totalBytesReceived: 1234,
           },
-        }),
+        })),
     );
+    await act(async () => await promise2);
 
     expect(restore.mock.calls).toEqual([[undefined], [undefined]]);
     expect(addMessage.mock.calls).toEqual([
@@ -455,15 +461,10 @@ describe("useMessageReducer", () => {
       [1, message2],
     ]);
     // the same result is repeated
-    expect(result.all).toEqual([0, 0, 2, 2]);
+    expect(result.current).toEqual(2);
   });
 
   it("doesn't re-render when player topics or other playerState changes", async () => {
-    const Test = createTest();
-
-    Test.restore.mockReturnValue(1);
-    Test.addMessage.mockImplementation((_, msg) => msg.message.value);
-
     const message = {
       topic: "/foo",
       receiveTime: { sec: 0, nsec: 0 },
@@ -471,95 +472,115 @@ describe("useMessageReducer", () => {
       sizeInBytes: 0,
     };
 
-    const root = mount(
-      <MockMessagePipelineProvider messages={[message]}>
-        <Test topics={["/foo"]} />
-      </MockMessagePipelineProvider>,
+    const restore = jest.fn().mockReturnValue(1);
+    const addMessage = jest.fn().mockImplementation((_, msg) => msg.message.value);
+
+    const messages = [message];
+    let topics: Topic[] = [];
+    let capabilities: string[] = [];
+    const { result, rerender } = renderHook(
+      () => PanelAPI.useMessageReducer({ topics: ["/foo"], restore, addMessage }),
+      {
+        wrapper: ({ children }) => (
+          <MockMessagePipelineProvider
+            messages={messages}
+            topics={topics}
+            capabilities={capabilities}
+          >
+            {children}
+          </MockMessagePipelineProvider>
+        ),
+      },
     );
 
-    expect(Test.restore.mock.calls).toEqual([[undefined]]);
-    expect(Test.addMessage.mock.calls).toEqual([[1, message]]);
-    expect(Test.result.mock.calls).toEqual([[1], [2]]);
+    expect(restore.mock.calls).toEqual([[undefined]]);
+    expect(addMessage.mock.calls).toEqual([[1, message]]);
+    expect(result.current).toEqual(2);
 
-    root.setProps({ topics: ["/foo", "/bar"] });
-    root.setProps({ capabilities: ["some_capability"] });
+    topics = [{ name: "/bar", datatype: "Bar" }];
+    rerender();
+    capabilities = ["some_capability"];
+    rerender();
 
-    expect(Test.restore.mock.calls).toEqual([[undefined]]);
-    expect(Test.addMessage.mock.calls).toEqual([[1, message]]);
-    expect(Test.result.mock.calls).toEqual([[1], [2]]);
-
-    root.unmount();
+    expect(restore.mock.calls).toEqual([[undefined]]);
+    expect(addMessage.mock.calls).toEqual([[1, message]]);
+    expect(result.current).toEqual(2);
   });
 
   it("doesn't re-render when activeData is empty", async () => {
-    const Test = createTest();
+    const restore = jest.fn().mockReturnValue(1);
+    const addMessage = jest.fn().mockImplementation((_, msg) => msg.message.value);
 
-    Test.restore.mockReturnValue(1);
-    Test.addMessage.mockImplementation((_, msg) => msg.message.value);
-
-    const root = mount(
-      <MockMessagePipelineProvider noActiveData>
-        <Test topics={["/foo"]} />
-      </MockMessagePipelineProvider>,
+    let capabilities: string[] | undefined = undefined;
+    const { result, rerender } = renderHook(
+      () => PanelAPI.useMessageReducer({ topics: ["/foo"], restore, addMessage }),
+      {
+        wrapper: ({ children }) => (
+          <MockMessagePipelineProvider noActiveData capabilities={capabilities}>
+            {children}
+          </MockMessagePipelineProvider>
+        ),
+      },
     );
 
-    expect(Test.restore.mock.calls).toEqual([[undefined]]);
-    expect(Test.addMessage.mock.calls).toEqual([]);
-    expect(Test.result.mock.calls).toEqual([[1]]);
+    expect(restore.mock.calls).toEqual([[undefined]]);
+    expect(addMessage.mock.calls).toEqual([]);
+    expect(result.current).toEqual(1);
 
-    root.setProps({ capabilities: ["some_capability"] });
+    capabilities = ["some_capability"];
+    rerender();
 
-    expect(Test.restore.mock.calls).toEqual([[undefined]]);
-    expect(Test.addMessage.mock.calls).toEqual([]);
-    expect(Test.result.mock.calls).toEqual([[1]]);
-
-    root.unmount();
+    expect(restore.mock.calls).toEqual([[undefined]]);
+    expect(addMessage.mock.calls).toEqual([]);
+    expect(result.current).toEqual(1);
   });
 
   it("calls requestBackfill when topics change", async () => {
-    const Test = createTest();
     const requestBackfill = jest.fn();
+    const initialRestore = jest.fn().mockReturnValue(1);
+    const initialAddMessage = jest.fn().mockImplementation((_, msg) => msg.message.value);
+
+    const { rerender } = renderHook(
+      ({ topics, addMessage, restore }) =>
+        PanelAPI.useMessageReducer({ topics, restore, addMessage }),
+      {
+        initialProps: { topics: ["/foo"], addMessage: initialAddMessage, restore: initialRestore },
+        wrapper: ({ children }) => (
+          <MockMessagePipelineProvider requestBackfill={requestBackfill}>
+            {children}
+          </MockMessagePipelineProvider>
+        ),
+      },
+    );
 
     // Calls `requestBackfill` initially.
-    const root = mount(
-      <MockMessagePipelineProvider requestBackfill={requestBackfill}>
-        <Test topics={["/foo"]} />
-      </MockMessagePipelineProvider>,
-    );
     expect(requestBackfill.mock.calls.length).toEqual(1);
     requestBackfill.mockClear();
 
     // Rendering again with the same topics should NOT result in any calls.
-    root.setProps({ children: <Test topics={["/foo"]} /> });
+    rerender({ topics: ["/foo"], restore: initialRestore, addMessage: initialAddMessage });
     expect(requestBackfill.mock.calls.length).toEqual(0);
     requestBackfill.mockClear();
 
     // However, changing the topics results in another `requestBackfill` call.
-    root.setProps({ children: <Test topics={["/foo", "/bar"]} /> });
+    rerender({ topics: ["/foo", "/bar"], restore: initialRestore, addMessage: initialAddMessage });
     expect(requestBackfill.mock.calls.length).toEqual(1);
     requestBackfill.mockClear();
 
     // Passing in a different `addMessage` function should NOT result in any calls.
-    Test.addMessage = jest.fn();
-    root.setProps({ children: <Test topics={["/foo", "/bar"]} /> });
+    const newAddMessage = jest.fn();
+    rerender({ topics: ["/foo", "/bar"], restore: initialRestore, addMessage: newAddMessage });
     expect(requestBackfill.mock.calls.length).toEqual(0);
     requestBackfill.mockClear();
 
     // Passing in a different `restore` function should NOT result in any calls.
-    Test.restore = jest.fn();
-    root.setProps({ children: <Test topics={["/foo", "/bar"]} /> });
+    const newRestore = jest.fn();
+    rerender({ topics: ["/foo", "/bar"], restore: newRestore, addMessage: newAddMessage });
     expect(requestBackfill.mock.calls.length).toEqual(0);
     requestBackfill.mockClear();
-
-    root.unmount();
   });
 
   it("restore called when addMessages changes", async () => {
-    const Test = createTest({ useAddMessage: false, useAddMessages: true });
-
-    Test.restore.mockReturnValue(1);
-    Test.addMessages.mockImplementation((_, msgs) => msgs[msgs.length - 1].message.value);
-
     const message1 = {
       topic: "/foo",
       receiveTime: { sec: 0, nsec: 0 },
@@ -567,17 +588,25 @@ describe("useMessageReducer", () => {
       sizeInBytes: 0,
     };
 
-    const root = mount(
-      <MockMessagePipelineProvider messages={[message1]}>
-        <Test topics={["/foo"]} />
-      </MockMessagePipelineProvider>,
+    const restore = jest.fn().mockReturnValue(1);
+    const initialAddMessages = jest
+      .fn()
+      .mockImplementation((_, msgs) => msgs[msgs.length - 1].message.value);
+
+    const messages = [message1];
+    const { result, rerender } = renderHook(
+      ({ addMessages }) => PanelAPI.useMessageReducer({ topics: ["/foo"], restore, addMessages }),
+      {
+        initialProps: { addMessages: initialAddMessages },
+        wrapper: ({ children }) => (
+          <MockMessagePipelineProvider messages={messages}>{children}</MockMessagePipelineProvider>
+        ),
+      },
     );
 
-    expect(Test.restore.mock.calls).toEqual([[undefined]]);
-    expect(Test.result.mock.calls).toEqual([[1], [2]]);
-    root.setProps({ children: <Test topics={["/foo"]} addMessagesOverride={jest.fn()} /> });
-    expect(Test.restore.mock.calls).toEqual([[undefined], [2]]);
-
-    root.unmount();
+    expect(restore.mock.calls).toEqual([[undefined]]);
+    expect(result.current).toEqual(2);
+    rerender({ addMessages: jest.fn() });
+    expect(restore.mock.calls).toEqual([[undefined], [2]]);
   });
 });

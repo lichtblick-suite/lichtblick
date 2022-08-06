@@ -59,6 +59,8 @@ describe("useCachedGetMessagePathDataItems", () => {
   );
 
   function setup(initialPaths: string[], initialGlobalVariables?: GlobalVariables) {
+    let topics = initialTopics;
+    let datatypes = initialDatatypes;
     const initialProps = {
       paths: initialPaths,
       topics: initialTopics,
@@ -72,7 +74,7 @@ describe("useCachedGetMessagePathDataItems", () => {
       }),
       {
         initialProps,
-        wrapper: function Wrapper({ topics, datatypes, children }) {
+        wrapper: function Wrapper({ children }) {
           return (
             <MockCurrentLayoutProvider initialState={{ globalVariables: initialGlobalVariables }}>
               <MockMessagePipelineProvider topics={topics} datatypes={datatypes}>
@@ -86,7 +88,19 @@ describe("useCachedGetMessagePathDataItems", () => {
 
     return {
       result,
-      rerender,
+      rerender: ({
+        paths,
+        topics: newTopics,
+        datatypes: newDatatypes,
+      }: {
+        paths: string[];
+        topics: Topic[];
+        datatypes: RosDatatypes;
+      }) => {
+        topics = newTopics;
+        datatypes = newDatatypes;
+        rerender({ paths, topics, datatypes });
+      },
       initialProps,
     };
   }
@@ -923,8 +937,10 @@ describe("useDecodeMessagePathsForMessagesByTopic", () => {
         },
       }),
     );
-    const { result } = renderHook((paths) => useDecodeMessagePathsForMessagesByTopic(paths), {
-      initialProps: ["/topic1.value", "/topic2.value", "/topic3.value", "/topic3..value"],
+    const { result } = renderHook(({ paths }) => useDecodeMessagePathsForMessagesByTopic(paths), {
+      initialProps: {
+        paths: ["/topic1.value", "/topic2.value", "/topic3.value", "/topic3..value"],
+      },
       wrapper({ children }) {
         return (
           <MockCurrentLayoutProvider>

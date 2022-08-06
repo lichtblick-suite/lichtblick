@@ -13,19 +13,18 @@
 //   You may not use this file except in compliance with the License.
 
 import CircleIcon from "@mdi/svg/svg/circle.svg";
-import { mount } from "enzyme";
+import { render } from "@testing-library/react";
 
 import Icon from "./Icon";
 
 describe("<Icon />", () => {
   it("renders simple icon", () => {
-    const wrapper = mount(
+    const result = render(
       <Icon>
         <CircleIcon />
       </Icon>,
     );
-    const iconTag = wrapper.find("svg");
-    expect(iconTag.length).toBe(1);
+    expect(result.container.querySelector("svg")).not.toBeNullOrUndefined();
   });
 
   it("stops click event with custom handler", (done) => {
@@ -37,8 +36,10 @@ describe("<Icon />", () => {
         </Icon>
       </div>
     );
-    const wrapper = mount(<Container />);
-    wrapper.find(".icon").simulate("click");
+    const result = render(<Container />);
+    result.container
+      .querySelector(".icon")
+      ?.dispatchEvent(new MouseEvent("click", { bubbles: true }));
   });
 
   it("does not prevent click by default", (done) => {
@@ -50,7 +51,9 @@ describe("<Icon />", () => {
         </Icon>
       </div>
     );
-    const wrapper = mount(<Container />);
-    wrapper.find(".icon").simulate("click");
+    const result = render(<Container />);
+    result.container
+      .querySelector(".icon")
+      ?.dispatchEvent(new MouseEvent("click", { bubbles: true }));
   });
 });

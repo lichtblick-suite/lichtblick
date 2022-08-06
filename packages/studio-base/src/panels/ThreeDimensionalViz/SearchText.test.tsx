@@ -12,7 +12,6 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 import { renderHook, act } from "@testing-library/react-hooks";
-import { mount } from "enzyme";
 
 import { CameraState, DEFAULT_CAMERA_STATE } from "@foxglove/regl-worldview";
 import { Interactive } from "@foxglove/studio-base/panels/ThreeDimensionalViz/Interactions/types";
@@ -65,22 +64,19 @@ const runUseGLTextTest = (
   selectedMatchIndex: number = 0,
 ) => {
   const originalMarkers: Interactive<TextMarker>[] = text;
-  let glTextMarkers: any = [];
-  const Wrapper = () => {
-    glTextMarkers = useGLText({
+  const { result, unmount } = renderHook(() =>
+    useGLText({
       text: originalMarkers,
       searchText,
       searchTextOpen: true,
       selectedMatchIndex,
       setSearchTextMatches,
       searchTextMatches,
-    });
-    return ReactNull;
-  };
-  const root = mount(<Wrapper />);
-  root.update();
-  root.unmount();
-  return glTextMarkers;
+    }),
+  );
+  const value = result.current;
+  unmount();
+  return value;
 };
 
 describe("<SearchText />", () => {
@@ -104,14 +100,14 @@ describe("<SearchText />", () => {
         setSearchTextMatches,
       );
       expect(glTextMarkers.length).toEqual(1);
-      expect(glTextMarkers[0].highlightedIndices).toEqual([0, 1, 2, 3, 4]);
+      expect(glTextMarkers[0]!.highlightedIndices).toEqual([0, 1, 2, 3, 4]);
       expect(setSearchTextMatches).toHaveBeenCalledWith(glTextMarkers);
     });
     it("works with empy text markers", async () => {
       const setSearchTextMatches = jest.fn();
       const glTextMarkers = runUseGLTextTest([createMarker("")], "hello", [], setSearchTextMatches);
       expect(glTextMarkers.length).toEqual(1);
-      expect(glTextMarkers[0].highlightedIndices).toEqual(undefined);
+      expect(glTextMarkers[0]!.highlightedIndices).toEqual(undefined);
       expect(setSearchTextMatches).not.toHaveBeenCalled();
     });
     it("updates matches to empty", async () => {
@@ -119,7 +115,7 @@ describe("<SearchText />", () => {
       const marker = createMarker("hello");
       const glTextMarkers = runUseGLTextTest([marker], "bye", [marker], setSearchTextMatches);
       expect(glTextMarkers.length).toEqual(1);
-      expect(glTextMarkers[0].highlightedIndices).toEqual(undefined);
+      expect(glTextMarkers[0]!.highlightedIndices).toEqual(undefined);
       expect(setSearchTextMatches).toHaveBeenCalledWith([]);
     });
     it("sets a custom highlight color to the correct index", async () => {
@@ -131,52 +127,46 @@ describe("<SearchText />", () => {
       ];
       const glTextMarkers = runUseGLTextTest(markers, "hello", [], setSearchTextMatches, 2);
       expect(glTextMarkers.length).toEqual(3);
-      expect(glTextMarkers[2].highlightColor).toEqual(ORANGE);
+      expect(glTextMarkers[2]!.highlightColor).toEqual(ORANGE);
     });
     it("does update the markers if search text has changed", async () => {
       const marker = createMarker("hello");
       const originalMarkers: Interactive<TextMarker>[] = [marker];
-      let glTextMarkers: any = [];
-      const Wrapper = ({ searchText }: { searchText: string }) => {
-        glTextMarkers = useGLText({
-          text: originalMarkers,
-          searchText,
-          searchTextOpen: true,
-          selectedMatchIndex: 0,
-          setSearchTextMatches: jest.fn(),
-          searchTextMatches: [],
-        });
-        return <span>{searchText}</span>;
-      };
-      const root = mount(<Wrapper searchText="hello" />);
-      root.update();
-      const originalGlText = glTextMarkers;
-      root.setProps({ searchText: "bye" });
-      expect(glTextMarkers).not.toEqual(originalGlText);
-      root.unmount();
+      const { result, rerender, unmount } = renderHook(
+        ({ searchText }) =>
+          useGLText({
+            text: originalMarkers,
+            searchText,
+            searchTextOpen: true,
+            selectedMatchIndex: 0,
+            setSearchTextMatches: jest.fn(),
+            searchTextMatches: [],
+          }),
+        { initialProps: { searchText: "hello" } },
+      );
+      const originalGlText = result.current;
+      rerender({ searchText: "bye" });
+      expect(result.current).not.toEqual(originalGlText);
+      unmount();
     });
 
     it("does not update the markers if nothing has changed", async () => {
       const marker = createMarker("hello");
       const originalMarkers: Interactive<TextMarker>[] = [marker];
-      let glTextMarkers: any = [];
-      const Wrapper = ({ randomNum }: { randomNum: number }) => {
-        glTextMarkers = useGLText({
+      const { result, rerender, unmount } = renderHook(() =>
+        useGLText({
           text: originalMarkers,
           searchText: "hello",
           searchTextOpen: true,
           selectedMatchIndex: 0,
           setSearchTextMatches: jest.fn(),
           searchTextMatches: [],
-        });
-        return <span>{randomNum}</span>;
-      };
-      const root = mount(<Wrapper randomNum={1} />);
-      root.update();
-      const originalGlText = glTextMarkers;
-      root.setProps({ randomNum: 2 });
-      expect(glTextMarkers).toEqual(originalGlText);
-      root.unmount();
+        }),
+      );
+      const originalGlText = result.current;
+      rerender();
+      expect(result.current).toEqual(originalGlText);
+      unmount();
     });
   });
   describe("useCurrentMatchPosition", () => {

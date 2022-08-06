@@ -1,3 +1,4 @@
+/** @jest-environment jsdom */
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
@@ -11,13 +12,15 @@ import { LayoutState, useCurrentLayoutActions, useCurrentLayoutSelector } from "
 describe("useCurrentLayoutSelector", () => {
   it("updates when layout changes", () => {
     const { result } = renderHook(
-      (selector) => ({
+      ({ selector }) => ({
         actions: useCurrentLayoutActions(),
         value: useCurrentLayoutSelector(selector),
       }),
       {
-        initialProps: (layoutState: LayoutState) =>
-          layoutState.selectedLayout?.data?.configById["foo"],
+        initialProps: {
+          selector: (layoutState: LayoutState) =>
+            layoutState.selectedLayout?.data?.configById["foo"],
+        },
         wrapper({ children }) {
           return (
             <MockCurrentLayoutProvider initialState={{ configById: { foo: { value: 42 } } }}>
@@ -28,28 +31,25 @@ describe("useCurrentLayoutSelector", () => {
       },
     );
 
-    expect(result.all.map((item) => (item instanceof Error ? undefined : item.value))).toEqual([
-      { value: 42 },
-    ]);
+    expect(result.current.value).toEqual({ value: 42 });
 
     act(() => {
       result.current.actions.savePanelConfigs({ configs: [{ id: "foo", config: { value: 1 } }] });
     });
-    expect(result.all.map((item) => (item instanceof Error ? undefined : item.value))).toEqual([
-      { value: 42 },
-      { value: 1 },
-    ]);
+    expect(result.current.value).toEqual({ value: 1 });
   });
 
   it("updates when selector changes", () => {
     const { result, rerender } = renderHook(
-      (selector) => ({
+      ({ selector }) => ({
         actions: useCurrentLayoutActions(),
         value: useCurrentLayoutSelector(selector),
       }),
       {
-        initialProps: (layoutState: LayoutState) =>
-          layoutState.selectedLayout?.data?.configById["foo"],
+        initialProps: {
+          selector: (layoutState: LayoutState) =>
+            layoutState.selectedLayout?.data?.configById["foo"],
+        },
         wrapper({ children }) {
           return (
             <MockCurrentLayoutProvider
@@ -67,15 +67,10 @@ describe("useCurrentLayoutSelector", () => {
       },
     );
 
-    expect(result.all.map((item) => (item instanceof Error ? undefined : item.value))).toEqual([
-      { value: 42 },
-    ]);
+    expect(result.current.value).toEqual({ value: 42 });
 
-    rerender((layoutState) => layoutState.selectedLayout?.data?.configById["bar"]);
-    expect(result.all.map((item) => (item instanceof Error ? undefined : item.value))).toEqual([
-      { value: 42 },
-      { otherValue: 0 },
-    ]);
+    rerender({ selector: (layoutState) => layoutState.selectedLayout?.data?.configById["bar"] });
+    expect(result.current.value).toEqual({ otherValue: 0 });
   });
 
   it("updates when state changes before subscribe", () => {
@@ -94,14 +89,21 @@ describe("useCurrentLayoutSelector", () => {
       return ReactNull;
     }
 
-    const { result } = renderHook(
-      (selector) => ({
-        actions: useCurrentLayoutActions(),
-        value: useCurrentLayoutSelector(selector),
-      }),
+    const all: unknown[] = [];
+    renderHook(
+      ({ selector }) => {
+        const value = useCurrentLayoutSelector(selector);
+        all.push(value);
+        return {
+          actions: useCurrentLayoutActions(),
+          value,
+        };
+      },
       {
-        initialProps: (layoutState: LayoutState) =>
-          layoutState.selectedLayout?.data?.configById["foo"],
+        initialProps: {
+          selector: (layoutState: LayoutState) =>
+            layoutState.selectedLayout?.data?.configById["foo"],
+        },
         wrapper({ children }) {
           return (
             <MockCurrentLayoutProvider
@@ -120,9 +122,6 @@ describe("useCurrentLayoutSelector", () => {
       },
     );
 
-    expect(result.all.map((item) => (item instanceof Error ? undefined : item.value))).toEqual([
-      { value: 42 },
-      { value: 43 },
-    ]);
+    expect(all).toEqual([{ value: 42 }, { value: 43 }]);
   });
 });

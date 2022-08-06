@@ -12,7 +12,7 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { mount } from "enzyme";
+import { renderHook } from "@testing-library/react-hooks";
 
 import MockMessagePipelineProvider from "@foxglove/studio-base/components/MessagePipeline/MockMessagePipelineProvider";
 import { RosDatatypes } from "@foxglove/studio-base/types/RosDatatypes";
@@ -41,88 +41,70 @@ describe("useDataSourceInfo", () => {
     }),
   );
 
-  // Create a helper component that exposes the results of the hook in a Jest mock function
-  function createTest() {
-    function Test() {
-      Test.renderFn(PanelAPI.useDataSourceInfo());
-      return ReactNull;
-    }
-    Test.renderFn = jest.fn();
-    return Test;
-  }
-
   it("returns data from MessagePipelineContext", () => {
-    const Test = createTest();
-    const root = mount(
-      <MockMessagePipelineProvider
-        topics={topics}
-        datatypes={datatypes}
-        capabilities={["hello"]}
-        messages={messages.slice(0, 1)}
-        startTime={{ sec: 0, nsec: 1 }}
-      >
-        <Test />
-      </MockMessagePipelineProvider>,
-    );
-    expect(Test.renderFn.mock.calls).toEqual([
-      [
-        {
-          topics: [{ name: "/foo", datatype: "Foo" }],
-          datatypes: new Map(Object.entries({ Foo: { definitions: [] } })),
-          capabilities: ["hello"],
-          startTime: { sec: 0, nsec: 1 },
-          playerId: "1",
-        },
-      ],
-    ]);
-    root.unmount();
+    const { result } = renderHook(() => PanelAPI.useDataSourceInfo(), {
+      wrapper: ({ children }) => (
+        <MockMessagePipelineProvider
+          topics={topics}
+          datatypes={datatypes}
+          capabilities={["hello"]}
+          messages={messages.slice(0, 1)}
+          startTime={{ sec: 0, nsec: 1 }}
+        >
+          {children}
+        </MockMessagePipelineProvider>
+      ),
+    });
+    expect(result.current).toEqual({
+      topics: [{ name: "/foo", datatype: "Foo" }],
+      datatypes: new Map(Object.entries({ Foo: { definitions: [] } })),
+      capabilities: ["hello"],
+      startTime: { sec: 0, nsec: 1 },
+      playerId: "1",
+    });
   });
 
   it("doesn't change when messages change", () => {
-    const Test = createTest();
-    const root = mount(
-      <MockMessagePipelineProvider
-        topics={topics}
-        datatypes={datatypes}
-        capabilities={["hello"]}
-        messages={messages.slice(0, 1)}
-        startTime={{ sec: 0, nsec: 1 }}
-      >
-        <Test />
-      </MockMessagePipelineProvider>,
-    );
-    expect(Test.renderFn.mock.calls).toEqual([
-      [
-        {
-          topics: [{ name: "/foo", datatype: "Foo" }],
-          datatypes: new Map(Object.entries({ Foo: { definitions: [] } })),
-          capabilities: ["hello"],
-          startTime: { sec: 0, nsec: 1 },
-          playerId: "1",
-        },
+    let currentMessages = messages.slice(0, 1);
+    let currentTopics = topics;
+    const capabilities = ["hello"];
+    const startTime = { sec: 0, nsec: 1 };
+    const { result, rerender } = renderHook(() => PanelAPI.useDataSourceInfo(), {
+      wrapper: ({ children }) => (
+        <MockMessagePipelineProvider
+          topics={currentTopics}
+          datatypes={datatypes}
+          capabilities={capabilities}
+          messages={currentMessages}
+          startTime={startTime}
+        >
+          {children}
+        </MockMessagePipelineProvider>
+      ),
+    });
+    expect(result.current).toEqual({
+      topics: [{ name: "/foo", datatype: "Foo" }],
+      datatypes: new Map(Object.entries({ Foo: { definitions: [] } })),
+      capabilities: ["hello"],
+      startTime: { sec: 0, nsec: 1 },
+      playerId: "1",
+    });
+    const firstResult = result.current;
+    currentMessages = [messages[1]!];
+    rerender();
+    expect(result.current).toBe(firstResult);
+
+    currentTopics = [...topics, { name: "/bar", datatype: "Bar" }];
+    rerender();
+    expect(result.current).toEqual({
+      topics: [
+        { name: "/bar", datatype: "Bar" },
+        { name: "/foo", datatype: "Foo" },
       ],
-    ]);
-    Test.renderFn.mockClear();
-
-    root.setProps({ messages: [messages[1]] });
-    expect(Test.renderFn).toHaveBeenCalledTimes(0);
-
-    root.setProps({ topics: [...topics, { name: "/bar", datatype: "Bar" }] });
-    expect(Test.renderFn.mock.calls).toEqual([
-      [
-        {
-          topics: [
-            { name: "/bar", datatype: "Bar" },
-            { name: "/foo", datatype: "Foo" },
-          ],
-          datatypes: new Map(Object.entries({ Foo: { definitions: [] } })),
-          capabilities: ["hello"],
-          startTime: { sec: 0, nsec: 1 },
-          playerId: "1",
-        },
-      ],
-    ]);
-
-    root.unmount();
+      datatypes: new Map(Object.entries({ Foo: { definitions: [] } })),
+      capabilities: ["hello"],
+      startTime: { sec: 0, nsec: 1 },
+      playerId: "1",
+    });
   });
 });

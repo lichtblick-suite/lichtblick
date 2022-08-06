@@ -12,7 +12,7 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { mount } from "enzyme";
+import { renderHook } from "@testing-library/react-hooks";
 import { cloneDeep } from "lodash";
 
 import MockMessagePipelineProvider from "@foxglove/studio-base/components/MessagePipeline/MockMessagePipelineProvider";
@@ -20,41 +20,28 @@ import MockMessagePipelineProvider from "@foxglove/studio-base/components/Messag
 import * as PanelAPI from ".";
 
 describe("useBlocksByTopic", () => {
-  // Create a helper component that exposes the results of the hook for mocking.
-  function createTest() {
-    function Test({ topics }: { topics: string[] }) {
-      Test.result(PanelAPI.useBlocksByTopic(topics));
-      return ReactNull;
-    }
-    Test.result = jest.fn();
-    return Test;
-  }
-
   it("returns an empty structure when there are no blocks", async () => {
-    const Test = createTest();
+    const { result } = renderHook(({ topics }) => PanelAPI.useBlocksByTopic(topics), {
+      initialProps: { topics: ["/foo"] },
+      wrapper: ({ children }) => (
+        <MockMessagePipelineProvider>{children}</MockMessagePipelineProvider>
+      ),
+    });
 
-    const root = mount(
-      <MockMessagePipelineProvider>
-        <Test topics={["/foo"]} />
-      </MockMessagePipelineProvider>,
-    );
-
-    expect(Test.result.mock.calls).toEqual([[[]]]);
-
-    root.unmount();
+    expect(result.current).toEqual([]);
   });
 
   it("returns no messagesByTopic when the player does not provide blocks", async () => {
-    const Test = createTest();
-    const root = mount(
-      <MockMessagePipelineProvider activeData={{}}>
-        <Test topics={["/topic1"]} />
-      </MockMessagePipelineProvider>,
-    );
+    const { result } = renderHook(({ topics }) => PanelAPI.useBlocksByTopic(topics), {
+      initialProps: { topics: ["/topic1"] },
+      wrapper: ({ children }) => (
+        <MockMessagePipelineProvider activeData={{}}>{children}</MockMessagePipelineProvider>
+      ),
+    });
+
     // Consumers just need to check in one place to see whether they need a fallback for a topic:
     // in messageReadersByTopic. (They don't also need to check the presence of blocks.)
-    expect(Test.result.mock.calls).toEqual([[[]]]);
-    root.unmount();
+    expect(result.current).toEqual([]);
   });
 
   it("handles uninitialized block states", async () => {
@@ -67,59 +54,61 @@ describe("useBlocksByTopic", () => {
         startTime: { sec: 0, nsec: 0 },
       },
     };
-    const Test = createTest();
-    const root = mount(
-      <MockMessagePipelineProvider activeData={activeData} progress={progress}>
-        <Test topics={["/topic1"]} />
-      </MockMessagePipelineProvider>,
-    );
+    const { result } = renderHook(({ topics }) => PanelAPI.useBlocksByTopic(topics), {
+      initialProps: { topics: ["/topic1"] },
+      wrapper: ({ children }) => (
+        <MockMessagePipelineProvider activeData={activeData} progress={progress}>
+          {children}
+        </MockMessagePipelineProvider>
+      ),
+    });
+
     // No message readers, even though we have a definition and we try to subscribe to the topic.
     // This means the data will never be provided.
-    expect(Test.result.mock.calls).toEqual([[[undefined, undefined]]]);
-    root.unmount();
+    expect(result.current).toEqual([undefined, undefined]);
   });
 
   it("maintains block identity across repeated renders", async () => {
     const activeData = {};
-    const progress = {
+    let progress = {
       messageCache: {
         blocks: [{ sizeInBytes: 0, messagesByTopic: { "/topic": [] } }],
         startTime: { sec: 0, nsec: 0 },
       },
     };
-    const Test = createTest();
-
-    const root = mount(
-      <MockMessagePipelineProvider activeData={activeData} progress={progress}>
-        <Test topics={["/topic"]} />
-      </MockMessagePipelineProvider>,
-    );
-
-    // Make sure the calls are actual rerenders caused
-    const expectedCall = [[{ "/topic": [] }]];
-    expect(Test.result.mock.calls).toEqual([expectedCall]);
-
-    // Same identity on everything. useBlocksByTopic does not run again.
-    root.setProps({ activeData, progress: { messageCache: { ...progress.messageCache } } });
-
-    // Block identity is the same, but blocks array identity changes.
-    root.setProps({
-      activeData,
-      progress: {
-        messageCache: { ...progress.messageCache, blocks: progress.messageCache.blocks.slice() },
-      },
+    const { result, rerender } = renderHook(({ topics }) => PanelAPI.useBlocksByTopic(topics), {
+      initialProps: { topics: ["/topic"] },
+      wrapper: ({ children }) => (
+        <MockMessagePipelineProvider activeData={activeData} progress={progress}>
+          {children}
+        </MockMessagePipelineProvider>
+      ),
     });
 
-    // Both identities change.
-    root.setProps({ activeData, progress: { messageCache: cloneDeep(progress.messageCache) } });
+    const c1 = result.current;
+    expect(result.current).toEqual([{ "/topic": [] }]);
 
-    expect(Test.result.mock.calls).toEqual([expectedCall, expectedCall, expectedCall]);
-    const [[c1], [c3], [c4]] = Test.result.mock.calls;
+    // Same identity on everything. useBlocksByTopic does not run again.
+    progress = { messageCache: { ...progress.messageCache } };
+    rerender({ topics: ["/topic"] });
+    expect(result.current).toBe(c1);
+
+    // Block identity is the same, but blocks array identity changes.
+    progress = {
+      messageCache: { ...progress.messageCache, blocks: progress.messageCache.blocks.slice() },
+    };
+    rerender({ topics: ["/topic"] });
+    const c3 = result.current;
+
+    // Both identities change.
+    progress = { messageCache: cloneDeep(progress.messageCache) };
+    rerender({ topics: ["/topic"] });
+    const c4 = result.current;
+
     expect(c1).not.toBe(c3);
     expect(c1[0]).toBe(c3[0]);
 
     expect(c3).not.toBe(c4);
     expect(c3[0]).not.toBe(c4[0]);
-    root.unmount();
   });
 });

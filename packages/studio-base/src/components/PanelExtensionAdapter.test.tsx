@@ -4,7 +4,7 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { mount } from "enzyme";
+import { render } from "@testing-library/react";
 import { act } from "react-dom/test-utils";
 
 import { PanelExtensionContext, RenderState } from "@foxglove/studio";
@@ -42,10 +42,10 @@ describe("PanelExtensionAdapter", () => {
       );
     };
 
-    const handle = mount(<Wrapper />);
+    const handle = render(<Wrapper />);
 
     // force a re-render to make sure we call init panel once
-    handle.setProps({});
+    handle.rerender(<Wrapper />);
   });
 
   it("sets didSeek=true when seeking", async () => {
@@ -93,14 +93,14 @@ describe("PanelExtensionAdapter", () => {
       );
     };
 
-    const wrapper = mount(<Wrapper lastSeekTime={undefined} />);
+    const wrapper = render(<Wrapper lastSeekTime={undefined} />);
     expect(initPanel).toHaveBeenCalled();
 
-    wrapper.setProps({ lastSeekTime: 1 });
+    wrapper.rerender(<Wrapper lastSeekTime={1} />);
     await act(async () => await Promise.resolve());
-    wrapper.setProps({ lastSeekTime: 1 });
+    wrapper.rerender(<Wrapper lastSeekTime={1} />);
     await act(async () => await Promise.resolve());
-    wrapper.setProps({ lastSeekTime: 2 });
+    wrapper.rerender(<Wrapper lastSeekTime={2} />);
     await act(async () => await Promise.resolve());
     expect(renderStates).toEqual([
       { currentFrame: [message], didSeek: true },
@@ -121,7 +121,8 @@ describe("PanelExtensionAdapter", () => {
       context.advertise?.("/some/topic", "some_datatype");
     };
 
-    mount(
+    let passed = false;
+    render(
       <ThemeProvider isDark>
         <MockPanelContextProvider>
           <PanelSetup
@@ -132,6 +133,9 @@ describe("PanelExtensionAdapter", () => {
               frame: {},
               layout: "UnknownPanel!4co6n9d",
               setPublishers: (id, advertisements) => {
+                if (passed) {
+                  return;
+                }
                 expect(id).toBeDefined();
                 expect(advertisements).toEqual(
                   expect.arrayContaining([
@@ -142,6 +146,7 @@ describe("PanelExtensionAdapter", () => {
                     },
                   ]),
                 );
+                passed = true;
                 done();
               },
             }}
@@ -161,7 +166,7 @@ describe("PanelExtensionAdapter", () => {
       context.advertise?.("/another/topic", "another_datatype");
     };
 
-    mount(
+    render(
       <ThemeProvider isDark>
         <MockPanelContextProvider>
           <PanelSetup
@@ -224,7 +229,8 @@ describe("PanelExtensionAdapter", () => {
       });
     };
 
-    mount(
+    let passed = false;
+    render(
       <ThemeProvider isDark>
         <MockPanelContextProvider>
           <PanelSetup
@@ -235,6 +241,9 @@ describe("PanelExtensionAdapter", () => {
               frame: {},
               layout: "UnknownPanel!4co6n9d",
               setPublishers: (id, advertisements) => {
+                if (passed) {
+                  return;
+                }
                 expect(id).toBeDefined();
                 expect(advertisements).toEqual(
                   expect.arrayContaining([
@@ -247,7 +256,11 @@ describe("PanelExtensionAdapter", () => {
                 );
               },
               publish: (request) => {
+                if (passed) {
+                  return;
+                }
                 expect(request).toEqual({ topic: "/some/topic", msg: { foo: "bar" } });
+                passed = true;
                 done();
               },
             }}
@@ -268,7 +281,7 @@ describe("PanelExtensionAdapter", () => {
       context.unadvertise?.("/some/topic");
     };
 
-    mount(
+    render(
       <ThemeProvider isDark>
         <MockPanelContextProvider>
           <PanelSetup
@@ -392,8 +405,8 @@ describe("PanelExtensionAdapter", () => {
       );
     };
 
-    const handle = mount(<Wrapper mounted />);
-    handle.setProps({ mounted: false });
+    const handle = render(<Wrapper mounted />);
+    handle.rerender(<Wrapper mounted={false} />);
   });
 
   it("supports adding new panels to the layout", (done) => {
@@ -443,10 +456,10 @@ describe("PanelExtensionAdapter", () => {
       );
     };
 
-    const handle = mount(<Wrapper />);
+    const handle = render(<Wrapper />);
 
     // force a re-render to make sure we call init panel once
-    handle.setProps({});
+    handle.rerender(<Wrapper />);
   });
 
   it("should unsubscribe from all topics when subscribing to empty topics array", (done) => {
@@ -454,7 +467,7 @@ describe("PanelExtensionAdapter", () => {
       context.subscribe([]);
     };
 
-    mount(
+    render(
       <ThemeProvider isDark>
         <MockPanelContextProvider>
           <PanelSetup
@@ -522,15 +535,15 @@ describe("PanelExtensionAdapter", () => {
       );
     };
 
-    const handle = mount(<Wrapper />);
+    const handle = render(<Wrapper />);
 
-    handle.setProps({});
+    handle.rerender(<Wrapper />);
     await act(async () => await Promise.resolve());
-    handle.setProps({});
+    handle.rerender(<Wrapper />);
     await act(async () => await Promise.resolve());
-    handle.setProps({});
+    handle.rerender(<Wrapper />);
     await act(async () => await Promise.resolve());
-    handle.setProps({});
+    handle.rerender(<Wrapper />);
     await act(async () => await Promise.resolve());
 
     expect(renderStates).toEqual([

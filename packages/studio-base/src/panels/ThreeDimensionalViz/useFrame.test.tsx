@@ -13,7 +13,6 @@
 //   You may not use this file except in compliance with the License.
 
 import { renderHook } from "@testing-library/react-hooks";
-import { PropsWithChildren } from "react";
 
 import { MessageEvent } from "@foxglove/studio";
 import MockMessagePipelineProvider from "@foxglove/studio-base/components/MessagePipeline/MockMessagePipelineProvider";
@@ -48,8 +47,6 @@ const messageEventFixtures = [
   },
 ] as const;
 
-type WrapperProps = PropsWithChildren<{ messages: MessageEvent<unknown>[] }>;
-
 describe("useFrame", () => {
   it("should pass in a frame of messages", () => {
     const topics = [
@@ -57,15 +54,17 @@ describe("useFrame", () => {
       { name: "/foo", datatype: "foo_msgs/Foo" },
     ];
 
-    const { result, rerender } = renderHook(
+    const all: ReturnType<typeof useFrame>[] = [];
+
+    const messages = [messageEventFixtures[0]];
+    const { rerender } = renderHook(
       () => {
-        return useFrame(["/some/topic"]);
+        const value = useFrame(["/some/topic"]);
+        all.push(value);
+        return value;
       },
       {
-        initialProps: {
-          messages: [messageEventFixtures[0]],
-        },
-        wrapper({ children, messages }: WrapperProps) {
+        wrapper({ children }) {
           return (
             <MockMessagePipelineProvider messages={messages} datatypes={datatypes} topics={topics}>
               {children}
@@ -75,7 +74,7 @@ describe("useFrame", () => {
       },
     );
 
-    expect(result.all).toEqual([
+    expect(all).toEqual([
       { reset: true, frame: {} },
       {
         reset: false,
@@ -93,7 +92,7 @@ describe("useFrame", () => {
     ]);
     // re-render keeps reset value since no new messages have been fed in
     rerender();
-    expect(result.all).toEqual([
+    expect(all).toEqual([
       { reset: true, frame: {} },
       {
         reset: false,
@@ -122,9 +121,7 @@ describe("useFrame", () => {
         },
       },
     ]);
-    expect((result.all[1]! as Record<string, unknown>).frame).toBe(
-      (result.all[2]! as Record<string, unknown>).frame,
-    );
+    expect(all[1]!.frame).toBe(all[2]!.frame);
   });
 
   it("should pass in another frame of messages", () => {
@@ -133,15 +130,16 @@ describe("useFrame", () => {
       { name: "/foo", datatype: "foo_msgs/Foo" },
     ];
 
-    const { result, rerender } = renderHook(
+    const all: ReturnType<typeof useFrame>[] = [];
+    let messages: MessageEvent<unknown>[] = [messageEventFixtures[0]];
+    const { rerender } = renderHook(
       () => {
-        return useFrame(["/some/topic"]);
+        const value = useFrame(["/some/topic"]);
+        all.push(value);
+        return value;
       },
       {
-        initialProps: {
-          messages: [messageEventFixtures[0]],
-        },
-        wrapper({ children, messages }: WrapperProps) {
+        wrapper({ children }) {
           return (
             <MockMessagePipelineProvider messages={messages} datatypes={datatypes} topics={topics}>
               {children}
@@ -150,7 +148,7 @@ describe("useFrame", () => {
         },
       },
     );
-    expect(result.all).toEqual([
+    expect(all).toEqual([
       { reset: true, frame: {} },
       {
         reset: false,
@@ -167,9 +165,10 @@ describe("useFrame", () => {
       },
     ]);
 
-    rerender({ messages: [messageEventFixtures[1]] });
+    messages = [messageEventFixtures[1]];
+    rerender();
 
-    expect(result.all).toEqual([
+    expect(all).toEqual([
       { reset: true, frame: {} },
       {
         reset: false,

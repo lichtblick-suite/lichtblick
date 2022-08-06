@@ -1,3 +1,4 @@
+/** @jest-environment jsdom */
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
@@ -22,17 +23,7 @@ jest.mock("@foxglove/studio-base/components/MessagePipeline");
 
 describe("useStateToURLSynchronization", () => {
   it("updates the url with a stable source & player state", () => {
-    const replaceState = jest.fn();
-
-    // eslint-disable-next-line id-denylist
-    (global as unknown as any).window = {
-      history: { replaceState },
-      location: new URL("http://example.com/"),
-    };
-
-    replaceState.mockImplementation(
-      (_data, _unused, newLocation: string) => (window.location = new URL(newLocation) as any),
-    );
+    const spy = jest.spyOn(window.history, "replaceState");
 
     (useCurrentLayoutSelector as jest.Mock).mockReturnValue(undefined);
     (useMessagePipeline as jest.Mock).mockImplementation((selector) =>
@@ -52,15 +43,15 @@ describe("useStateToURLSynchronization", () => {
 
     const { rerender } = renderHook(useStateToURLSynchronization);
 
-    expect(replaceState).toHaveBeenCalledWith(
+    expect(spy).toHaveBeenCalledWith(
       undefined,
       "",
-      "http://example.com/?time=1970-01-01T00%3A00%3A01.000000001Z",
+      "http://localhost/?time=1970-01-01T00%3A00%3A01.000000001Z",
     );
-    expect(replaceState).toHaveBeenLastCalledWith(
+    expect(spy).toHaveBeenLastCalledWith(
       undefined,
       "",
-      "http://example.com/?ds=test-source&ds.a=one&ds.b=two&time=1970-01-01T00%3A00%3A01.000000001Z",
+      "http://localhost/?ds=test-source&ds.a=one&ds.b=two&time=1970-01-01T00%3A00%3A01.000000001Z",
     );
 
     (useMessagePipeline as jest.Mock).mockImplementation((selector) =>
@@ -79,10 +70,10 @@ describe("useStateToURLSynchronization", () => {
     );
     (useCurrentLayoutSelector as jest.Mock).mockReturnValue("test-layout");
     rerender();
-    expect(replaceState).toHaveBeenLastCalledWith(
+    expect(spy).toHaveBeenLastCalledWith(
       undefined,
       "",
-      "http://example.com/?ds=test-source2&ds.b=two&ds.c=three&layoutId=test-layout&time=1970-01-01T00%3A00%3A01.000000001Z",
+      "http://localhost/?ds=test-source2&ds.b=two&ds.c=three&layoutId=test-layout&time=1970-01-01T00%3A00%3A01.000000001Z",
     );
   });
 });

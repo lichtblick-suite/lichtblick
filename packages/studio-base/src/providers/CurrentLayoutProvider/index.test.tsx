@@ -8,6 +8,8 @@ import { ToastProvider } from "react-toast-notifications";
 
 import { Condvar } from "@foxglove/den/async";
 import {
+  CurrentLayoutActions,
+  LayoutState,
   useCurrentLayoutActions,
   useCurrentLayoutSelector,
 } from "@foxglove/studio-base/context/CurrentLayoutContext";
@@ -75,12 +77,21 @@ function renderTest({
 }) {
   const childMounted = new Condvar();
   const childMountedWait = childMounted.wait();
+  const all: Array<{
+    actions: CurrentLayoutActions;
+    layoutState: LayoutState;
+    childMounted: Promise<void>;
+  }> = [];
   const { result } = renderHook(
-    () => ({
-      actions: useCurrentLayoutActions(),
-      layoutState: useCurrentLayoutSelector((state) => state),
-      childMounted: childMountedWait,
-    }),
+    () => {
+      const value = {
+        actions: useCurrentLayoutActions(),
+        layoutState: useCurrentLayoutSelector((state) => state),
+        childMounted: childMountedWait,
+      };
+      all.push(value);
+      return value;
+    },
     {
       wrapper: function Wrapper({ children }) {
         useEffect(() => childMounted.notifyAll(), []);
@@ -96,7 +107,7 @@ function renderTest({
       },
     },
   );
-  return result;
+  return { result, all };
 }
 
 describe("CurrentLayoutProvider", () => {
@@ -124,13 +135,11 @@ describe("CurrentLayoutProvider", () => {
     const mockUserProfile = makeMockUserProfile();
     mockUserProfile.getUserProfile.mockResolvedValue({ currentLayoutId: "example" });
 
-    const result = renderTest({ mockLayoutManager, mockUserProfile });
+    const { all } = renderTest({ mockLayoutManager, mockUserProfile });
     await act(async () => await layoutStorageGetCalledWait);
 
     expect(mockLayoutManager.getLayout.mock.calls).toEqual([["example"], ["example"]]);
-    expect(
-      result.all.map((item) => (item instanceof Error ? undefined : item.layoutState)),
-    ).toEqual([
+    expect(all.map((item) => (item instanceof Error ? undefined : item.layoutState))).toEqual([
       { selectedLayout: undefined },
       { selectedLayout: { loading: true, id: "example", data: undefined } },
       { selectedLayout: { loading: false, id: "example", data: expectedState } },
@@ -166,7 +175,7 @@ describe("CurrentLayoutProvider", () => {
       condvar.notifyAll();
     });
 
-    const result = renderTest({
+    const { result, all } = renderTest({
       mockLayoutManager,
       mockUserProfile,
     });
@@ -176,9 +185,7 @@ describe("CurrentLayoutProvider", () => {
     await act(async () => await userProfileSetCalled);
 
     expect(mockUserProfile.setUserProfile.mock.calls).toEqual([[{ currentLayoutId: "example2" }]]);
-    expect(
-      result.all.map((item) => (item instanceof Error ? undefined : item.layoutState)),
-    ).toEqual([
+    expect(all.map((item) => (item instanceof Error ? undefined : item.layoutState))).toEqual([
       { selectedLayout: undefined },
       { selectedLayout: { loading: true, id: "example", data: undefined } },
       { selectedLayout: { loading: false, id: "example", data: TEST_LAYOUT } },
@@ -204,7 +211,7 @@ describe("CurrentLayoutProvider", () => {
     const mockUserProfile = makeMockUserProfile();
     mockUserProfile.getUserProfile.mockResolvedValue({ currentLayoutId: "example" });
 
-    const result = renderTest({
+    const { result, all } = renderTest({
       mockLayoutManager,
       mockUserProfile,
     });
@@ -224,9 +231,7 @@ describe("CurrentLayoutProvider", () => {
     expect(mockLayoutManager.updateLayout.mock.calls).toEqual([
       [{ id: "example", data: newState }],
     ]);
-    expect(
-      result.all.map((item) => (item instanceof Error ? undefined : item.layoutState)),
-    ).toEqual([
+    expect(all.map((item) => (item instanceof Error ? undefined : item.layoutState))).toEqual([
       { selectedLayout: undefined },
       { selectedLayout: { loading: true, id: "example", data: undefined } },
       { selectedLayout: { loading: false, id: "example", data: TEST_LAYOUT } },
@@ -257,7 +262,7 @@ describe("CurrentLayoutProvider", () => {
     const mockUserProfile = makeMockUserProfile();
     mockUserProfile.getUserProfile.mockResolvedValue({ currentLayoutId: "example" });
 
-    const result = renderTest({
+    const { result } = renderTest({
       mockLayoutManager,
       mockUserProfile,
     });

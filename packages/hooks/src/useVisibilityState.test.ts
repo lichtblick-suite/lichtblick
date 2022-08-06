@@ -13,14 +13,14 @@ describe("useVisibilityState", () => {
     visibilityState.mockImplementation(() => "hidden");
 
     const { result } = renderHook(() => useVisibilityState());
-    expect(result.all).toEqual(["hidden"]);
+    expect(result.current).toEqual("hidden");
 
     visibilityState.mockImplementation(() => "visible");
     act(() => void document.dispatchEvent(new Event("visibilitychange")));
-    expect(result.all).toEqual(["hidden", "visible"]);
+    expect(result.current).toEqual("visible");
 
     visibilityState.mockImplementation(() => "hidden");
     act(() => void document.dispatchEvent(new Event("visibilitychange")));
-    expect(result.all).toEqual(["hidden", "visible", "hidden"]);
+    expect(result.current).toEqual("hidden");
   });
 });

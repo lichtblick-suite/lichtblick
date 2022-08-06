@@ -128,7 +128,6 @@
     "cytoscape-dagre": "2.4.0",
     "dat.gui": "0.7.9",
     "env-paths": "3.0.0",
-    "enzyme": "3.11.0",
     "esbuild-loader": "2.18.0",
     "escape-html": "1.0.3",
     "fake-indexeddb": "3.1.7",
