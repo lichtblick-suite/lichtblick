@@ -53,6 +53,11 @@ const features: Feature[] = [
     name: "Latching",
     description: <>Enable message latching for bag, mcap, and data platform sources.</>,
   },
+  {
+    key: AppSetting.ENABLE_MEMORY_USE_INDICATOR,
+    name: "Memory use indicator",
+    description: <>Show the app memory use in the sidebar.</>,
+  },
 ];
 if (process.env.NODE_ENV === "development") {
   features.push({

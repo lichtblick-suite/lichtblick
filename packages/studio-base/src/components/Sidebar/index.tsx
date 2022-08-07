@@ -16,9 +16,12 @@ import { useCallback, useLayoutEffect, useRef, useState } from "react";
 import { MosaicNode, MosaicWithoutDragDropContext } from "react-mosaic-component";
 
 import { filterMap } from "@foxglove/den/collection";
+import { AppSetting } from "@foxglove/studio-base/AppSetting";
 import ErrorBoundary from "@foxglove/studio-base/components/ErrorBoundary";
 import Stack from "@foxglove/studio-base/components/Stack";
+import { useAppConfigurationValue } from "@foxglove/studio-base/hooks";
 
+import { MemoryUseIndicator } from "./MemoryUseIndicator";
 import SidebarButton, { BUTTON_SIZE } from "./SidebarButton";
 import { Badge } from "./types";
 
@@ -77,6 +80,9 @@ export default function Sidebar<K extends string>({
   selectedKey: K | undefined;
   onSelectKey: (key: K | undefined) => void;
 }>): JSX.Element {
+  const [enableMemoryUseIndicator = false] = useAppConfigurationValue<boolean>(
+    AppSetting.ENABLE_MEMORY_USE_INDICATOR,
+  );
   const [mosaicValue, setMosaicValue] = useState<MosaicNode<"sidebar" | "children">>("children");
 
   const theme = useTheme();
@@ -215,6 +221,7 @@ export default function Sidebar<K extends string>({
           onGrowData={onGrowData}
         />
         {bottomItems.map((key) => onRenderItem({ key }))}
+        {enableMemoryUseIndicator && <MemoryUseIndicator />}
       </Stack>
       {
         // By always rendering the mosaic, even if we are only showing children, we can prevent the
