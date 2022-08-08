@@ -11,32 +11,64 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { storiesOf } from "@storybook/react";
+import { screen } from "@testing-library/dom";
+import userEvent from "@testing-library/user-event";
 import { useState } from "react";
 
+import { fromDate } from "@foxglove/rostime";
 import Preferences from "@foxglove/studio-base/components/Preferences";
+import Timestamp from "@foxglove/studio-base/components/Timestamp";
 import AppConfigurationContext, {
   AppConfigurationValue,
 } from "@foxglove/studio-base/context/AppConfigurationContext";
 import { makeMockAppConfiguration } from "@foxglove/studio-base/util/makeMockAppConfiguration";
 
-export function Default({
-  entries,
-}: {
-  entries?: [string, AppConfigurationValue][];
-}): React.ReactElement {
+export default {
+  title: "components/Preferences",
+  component: Preferences,
+};
+
+function Wrapper({ entries }: { entries?: [string, AppConfigurationValue][] }): React.ReactElement {
   const [config] = useState(() => makeMockAppConfiguration(entries));
+  const timeVal = fromDate(new Date("2020-01-01"));
+
   return (
     <AppConfigurationContext.Provider value={config}>
+      <Timestamp time={timeVal} />
       <Preferences />
     </AppConfigurationContext.Provider>
   );
 }
 
-storiesOf("components/Preferences", module)
-  .add("default", () => {
-    return <Default />;
-  })
-  .add("with timezone", () => {
-    return <Default entries={[["timezone", "America/Los_Angeles"]]} />;
-  });
+export function Default(): JSX.Element {
+  return <Wrapper />;
+}
+
+export function DefaultWithTimezone(): JSX.Element {
+  return <Wrapper entries={[["timezone", "America/Los_Angeles"]]} />;
+}
+
+export function ChangingTimezone(): JSX.Element {
+  return <Wrapper />;
+}
+ChangingTimezone.play = async () => {
+  const user = userEvent.setup();
+  const inputs = await screen.findAllByDisplayValue("Detect from system", { exact: false });
+  await user.click(inputs[0]!);
+
+  await userEvent.keyboard("New_York");
+  const item = await screen.findByText("New_York", { exact: false });
+  await user.click(item);
+};
+
+export function ChangingTimeFormat(): JSX.Element {
+  return <Wrapper />;
+}
+ChangingTimeFormat.play = async () => {
+  const user = userEvent.setup();
+  const inputs = await screen.findAllByText("Local", { exact: false });
+  await user.click(inputs[0]!);
+
+  const item = await screen.findByText("Seconds", { exact: false });
+  await user.click(item);
+};

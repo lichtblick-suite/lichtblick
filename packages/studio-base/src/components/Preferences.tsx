@@ -149,7 +149,7 @@ function TimezoneSettings(): React.ReactElement {
         value={selectedItem}
         renderOption={(props, option: Option) =>
           option.divider === true ? (
-            <Divider />
+            <Divider key={option.key} />
           ) : (
             <li {...props} key={option.key}>
               {option.label}
@@ -162,7 +162,7 @@ function TimezoneSettings(): React.ReactElement {
             inputProps={{ ...params.inputProps, className: classes.autocompleteInput }}
           />
         )}
-        onChange={(_event, value) => void setTimezone(value ? String(value.data) : undefined)}
+        onChange={(_event, value) => void setTimezone(value?.data)}
       />
     </FormControl>
   );
