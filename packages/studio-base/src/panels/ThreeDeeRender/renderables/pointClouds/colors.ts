@@ -48,11 +48,13 @@ export function getColorConverter(
           return (output: ColorRGBA, colorValue: number) => {
             const t = (colorValue - minValue) / valueDelta;
             turboCached(output, t);
+            output.a = settings.explicitAlpha;
           };
         case "rainbow":
           return (output: ColorRGBA, colorValue: number) => {
             const t = (colorValue - minValue) / valueDelta;
             rainbow(output, t);
+            output.a = settings.explicitAlpha;
           };
       }
       throw new Error(`Unrecognized color map: ${settings.colorMap}`);
@@ -61,11 +63,20 @@ export function getColorConverter(
       switch (settings.rgbByteOrder) {
         default:
         case "rgba":
-          return getColorRgb;
+          return (output: ColorRGBA, colorValue: number) => {
+            getColorRgb(output, colorValue);
+            output.a = settings.explicitAlpha;
+          };
         case "bgra":
-          return getColorBgr;
+          return (output: ColorRGBA, colorValue: number) => {
+            getColorBgr(output, colorValue);
+            output.a = settings.explicitAlpha;
+          };
         case "abgr":
-          return getColor0bgr;
+          return (output: ColorRGBA, colorValue: number) => {
+            getColor0bgr(output, colorValue);
+            output.a = settings.explicitAlpha;
+          };
       }
     case "rgba":
       switch (settings.rgbByteOrder) {
