@@ -733,6 +733,9 @@ export class IterablePlayer implements Player {
     if (this._lastMessage) {
       // If the last message we saw is still ahead of the tick end time, we don't emit anything
       if (compare(this._lastMessage.receiveTime, end) > 0) {
+        // Wait for the previous render frame to finish
+        await this._emitState.currentPromise;
+
         this._currentTime = end;
         this._messages = msgEvents;
         this._emitState();
