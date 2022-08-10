@@ -2,10 +2,26 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import styled, { css } from "styled-components";
+import styled, { css, keyframes, FlattenSimpleInterpolation } from "styled-components";
 
-import { makeFlashAnimation } from "@foxglove/studio-base/components/GlobalVariablesTable";
 import { colors as sharedColors } from "@foxglove/studio-base/util/sharedStyleConstants";
+
+// Returns an keyframe object that animates between two styles– "highlight twice then return to normal"
+export const makeFlashAnimation = (
+  initialCssProps: FlattenSimpleInterpolation,
+  highlightCssProps: FlattenSimpleInterpolation,
+): FlattenSimpleInterpolation => {
+  return css`
+    ${keyframes`
+      0%, 20%, 100% {
+        ${initialCssProps}
+      }
+      10%, 30%, 80% {
+        ${highlightCssProps}
+      }
+    `}
+  `;
+};
 
 const FlashRowAnimation = makeFlashAnimation(
   css`

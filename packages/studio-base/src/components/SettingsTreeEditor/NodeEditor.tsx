@@ -70,8 +70,7 @@ const NodeHeader = muiStyled("div", {
       },
 
       "&:hover": {
-        outline: `1px solid ${theme.palette.primary.main}`,
-        outlineOffset: -1,
+        backgroundColor: theme.palette.action.hover,
 
         ".MuiCheckbox-root": {
           visibility: "visible",

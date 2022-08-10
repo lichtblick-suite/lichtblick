@@ -109,6 +109,7 @@
     "@types/uuid": "8.3.4",
     "@types/wicg-file-system-access": "2020.9.5",
     "@types/ws": "8.5.2",
+    "@uiw/react-textarea-code-editor": "2.0.3",
     "@wojtekmaj/enzyme-adapter-react-17": "0.6.7",
     "amplitude-js": "8.16.1",
     "argparse": "2.0.1",

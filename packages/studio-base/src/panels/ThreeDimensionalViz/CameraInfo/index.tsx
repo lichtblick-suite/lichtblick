@@ -195,6 +195,7 @@ export default function CameraInfo({
                 value={cameraState}
                 onChange={(newCameraState) => saveConfig({ cameraState: newCameraState })}
                 dataValidator={cameraStateValidator}
+                maxHeight={220}
               />
             ) : (
               <Stack flex="auto">
@@ -235,7 +236,13 @@ export default function CameraInfo({
                   </Stack>
                   {showCrosshair && !cameraState.perspective && (
                     <Stack paddingLeft={LABEL_WIDTH / 8}>
-                      <SValue>
+                      <div
+                        style={{
+                          background: theme.palette.action.hover,
+                          borderRadius: theme.shape.borderRadius,
+                          border: `1px solid ${theme.palette.divider}`,
+                        }}
+                      >
                         <JsonInput
                           value={{ x: camPos2DTrimmed[0], y: camPos2DTrimmed[1] }}
                           onChange={(data) => {
@@ -257,7 +264,7 @@ export default function CameraInfo({
                           }}
                           dataValidator={point2DValidator}
                         />
-                      </SValue>
+                      </div>
                     </Stack>
                   )}
                 </Stack>

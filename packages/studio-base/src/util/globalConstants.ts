@@ -11,7 +11,6 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 import { useTheme } from "@mui/material";
-import { lightBlue, orange, pink, red, teal } from "@mui/material/colors";
 import type { Base16Theme } from "base16";
 
 export const DEFAULT_STUDIO_NODE_PREFIX = "/studio_script/";
@@ -68,20 +67,20 @@ export function useJsonTreeTheme(): Pick<
   return {
     dark: {
       base00: "transparent", // bg
-      base0B: orange[500], // string & date, item string
-      base09: teal.A400, // # & boolean
-      base07: lightBlue[500], // text
-      base08: pink[500], // null, undefined, function, & symbol
-      base0D: lightBlue[500], // label & arrow
+      base0B: "#ffa657", // string & date, item string
+      base09: "#7ee787", // # & boolean
+      base07: "#79c0ff", // text
+      base08: "#ff7b72", // null, undefined, function, & symbol
+      base0D: "#79c0ff", // label & arrow
       base03: text.secondary, // item string expanded
     },
     light: {
       base00: "transparent", // bg
-      base0B: orange[900], // string & date, item string
-      base09: teal[800], // # & boolean
-      base07: lightBlue[800], // text
-      base08: red[700], // null, undefined, function, & symbol
-      base0D: lightBlue[800], // label & arrow
+      base0B: "#953800", // string & date, item string
+      base09: "#116329", // # & boolean
+      base07: "#0550ae", // text
+      base08: "#cf222e", // null, undefined, function, & symbol
+      base0D: "#0550ae", // label & arrow
       base03: text.secondary, // item string expanded
     },
   }[mode];

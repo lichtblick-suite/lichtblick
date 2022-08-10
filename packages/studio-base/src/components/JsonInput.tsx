@@ -11,43 +11,29 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { OutlinedInput, styled as muiStyled, Typography } from "@mui/material";
+import ErrorIcon from "@mui/icons-material/Error";
+import { Typography } from "@mui/material";
+import CodeEditor from "@uiw/react-textarea-code-editor";
 import { isEqual } from "lodash";
+import { makeStyles } from "tss-react/mui";
 
+import Stack from "@foxglove/studio-base/components/Stack";
 import { fonts } from "@foxglove/studio-base/util/sharedStyleConstants";
 import { validationErrorToString, ValidationResult } from "@foxglove/studio-base/util/validators";
 
 const { useState, useCallback, useRef, useLayoutEffect, useEffect } = React;
 
-const SEditBox = muiStyled("div")`
-  display: flex;
-  flex-direction: column;
-  min-height: 200px;
-  max-height: 800px;
-`;
-
-const StyledTextarea = muiStyled(OutlinedInput)(({ theme }) => ({
-  width: "100%",
-  height: "100%",
-  maxHeight: 200,
-  textAlign: "left",
-  backgroundColor: theme.palette.background.paper,
-  overflow: "hidden",
-  padding: theme.spacing(1, 0.5),
-  flex: "auto",
-  display: "flex",
-  flexDirection: "column",
-  resize: "none",
-
-  ".MuiInputBase-input": {
-    flex: "auto",
-    // height: "100% !important",
+const useStyles = makeStyles()((theme) => ({
+  editor: {
+    backgroundColor: "transparent",
     font: "inherit",
-    lineHeight: 1.4,
     fontFamily: fonts.MONOSPACE,
-    fontSize: theme.typography.body2.fontSize,
-    overflow: "auto !important",
-    resize: "none",
+    overflow: "auto",
+  },
+  error: {
+    "*": {
+      color: `${theme.palette.error.main} !important`,
+    },
   },
 }));
 
@@ -61,6 +47,8 @@ export type BaseProps = {
   dataValidator?: (data: unknown) => ValidationResult | undefined;
   onChange?: OnChange;
   onError?: (err: string) => void;
+  readOnly?: boolean;
+  maxHeight?: number;
   value: Value;
 };
 
@@ -69,14 +57,17 @@ export type BaseProps = {
  * Any external value change will cause the input string to change and trigger new validations.
  * Only valid internal value change will call onChange. Any data processing and validation error will trigger onError.
  */
-export function ValidatedInputBase({
+function ValidatedInputBase({
   dataValidator = () => undefined,
   onChange,
   onError,
   parse,
+  readOnly = false,
+  maxHeight,
   stringify,
   value,
 }: BaseProps & ParseAndStringifyFn): JSX.Element {
+  const { classes, cx } = useStyles();
   const [error, setError] = useState<string>("");
   const [inputStr, setInputStr] = useState<string>("");
   const prevIncomingVal = useRef<unknown>("");
@@ -116,7 +107,10 @@ export function ValidatedInputBase({
     [dataValidator, parse, value],
   );
 
-  // when not in editing mode, whenever the incoming value changes, we'll compare the new value with prevIncomingVal, and reset local state values if they are different
+  /**
+   * when not in editing mode whenever the incoming value changes
+   * we'll compare the new value with prevIncomingVal and reset local state values if they are different
+   */
   useLayoutEffect(() => {
     if (!isEditing && value !== prevIncomingVal.current) {
       if (isEqual(value, prevIncomingVal.current)) {
@@ -173,18 +167,24 @@ export function ValidatedInputBase({
 
   return (
     <>
-      <StyledTextarea
-        data-testid="validated-input"
+      <CodeEditor
+        className={cx(classes.editor, { [classes.error]: error.length > 0 })}
+        readOnly={readOnly}
+        data-testid={`validated-input-${JSON.stringify(inputStr)}`}
         ref={inputRef}
         value={inputStr}
         onChange={handleChange}
-        multiline
-        error={error.length > 0}
+        language="json"
+        padding={12}
+        style={{ maxHeight: maxHeight ?? 300 }}
       />
       {error.length > 0 && (
-        <Typography variant="caption" color="error.main" paddingX={0.5} paddingY={1}>
-          {error}
-        </Typography>
+        <Stack direction="row" alignItems="center" gap={0.25} padding={0.5}>
+          <ErrorIcon fontSize="inherit" color="error" />
+          <Typography variant="caption" color="error.main">
+            {error}
+          </Typography>
+        </Stack>
       )}
     </>
   );
@@ -192,12 +192,16 @@ export function ValidatedInputBase({
 
 export default function JsonInput(props: BaseProps): JSX.Element {
   function stringify(val: unknown) {
+    if (val === '""') {
+      return val;
+    }
+
     return JSON.stringify(val, undefined, 2) ?? "";
   }
 
   return (
-    <SEditBox>
+    <Stack style={{ maxHeight: 800 }} overflowY="auto">
       <ValidatedInputBase parse={JSON.parse} stringify={stringify} {...props} />
-    </SEditBox>
+    </Stack>
   );
 }

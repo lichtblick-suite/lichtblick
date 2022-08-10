@@ -17,7 +17,6 @@ import { useDebouncedCallback } from "use-debounce";
 
 import { ParameterValue } from "@foxglove/studio";
 import EmptyState from "@foxglove/studio-base/components/EmptyState";
-import { isActiveElementEditable } from "@foxglove/studio-base/components/GlobalVariablesTable";
 import { LegacyTable } from "@foxglove/studio-base/components/LegacyStyledComponents";
 import {
   MessagePipelineContext,
@@ -35,6 +34,16 @@ import helpContent from "./index.help.md";
 
 // The minimum amount of time to wait between showing the parameter update animation again
 export const ANIMATION_RESET_DELAY_MS = 3000;
+
+function isActiveElementEditable(): boolean {
+  const activeEl = document.activeElement;
+  return (
+    activeEl != undefined &&
+    ((activeEl as HTMLElement).isContentEditable ||
+      activeEl.tagName === "INPUT" ||
+      activeEl.tagName === "TEXTAREA")
+  );
+}
 
 // Keep a single empty map so selector return value is reference-equal
 const EMPTY_PARAMETERS = new Map<string, ParameterValue>();

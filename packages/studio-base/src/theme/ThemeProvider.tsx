@@ -7,7 +7,7 @@ import { CacheProvider } from "@emotion/react";
 import { ThemeProvider as FluentThemeProvider } from "@fluentui/react";
 import { registerIcons, unregisterIcons } from "@fluentui/style-utilities";
 import { ThemeProvider as MuiThemeProvider } from "@mui/material";
-import { useLayoutEffect, useMemo, useState } from "react";
+import { useEffect, useLayoutEffect, useMemo, useState } from "react";
 import { ThemeProvider as StyledThemeProvider } from "styled-components";
 
 import { createMuiTheme, createFluentTheme } from "@foxglove/studio-base/theme";
@@ -33,6 +33,12 @@ export default function ThemeProvider({
 }: React.PropsWithChildren<{ isDark: boolean }>): React.ReactElement | ReactNull {
   // Icons need to be registered before other components are rendered. But we need to register them in an effect so that hot module reloading can run cleanups in the right order when the ThemeProvider is replaced. So we render nothing until after we've registered them.
   const [iconsRegistered, setIconsRegistered] = useState(false);
+
+  useEffect(() => {
+    // Trick CodeEditor into sync with our theme
+    document.documentElement.setAttribute("data-color-mode", isDark ? "dark" : "light");
+  }, [isDark]);
+
   useLayoutEffect(() => {
     if (iconsRegistered) {
       return () => unregisterIcons(Object.keys(icons));
