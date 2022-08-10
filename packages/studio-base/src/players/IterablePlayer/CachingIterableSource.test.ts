@@ -302,10 +302,7 @@ describe("CachingIterableSource", () => {
         });
       }
 
-      expect(bufferedSource.loadedRanges()).toEqual([
-        { start: 0, end: 0.4999999999 },
-        { start: 0.5, end: 1 },
-      ]);
+      expect(bufferedSource.loadedRanges()).toEqual([{ start: 0, end: 1 }]);
     }
   });
 
@@ -372,10 +369,7 @@ describe("CachingIterableSource", () => {
     expect(bufferedSource.loadedRanges()).toEqual([{ start: 0.5000000001, end: 0.9999999999 }]);
 
     await messageIterator.next();
-    expect(bufferedSource.loadedRanges()).toEqual([
-      { start: 0.5000000001, end: 0.9999999999 },
-      { start: 1, end: 1 },
-    ]);
+    expect(bufferedSource.loadedRanges()).toEqual([{ start: 0.5000000001, end: 1 }]);
   });
 
   it("should return fully cached when there is no data in the source", async () => {
@@ -622,10 +616,7 @@ describe("CachingIterableSource", () => {
         // no-op
       }
 
-      expect(bufferedSource.loadedRanges()).toEqual([
-        { start: 0, end: 0.1999999999 },
-        { start: 0.2, end: 1 },
-      ]);
+      expect(bufferedSource.loadedRanges()).toEqual([{ start: 0, end: 1 }]);
     }
 
     // because we have cached we shouldn't be calling source anymore

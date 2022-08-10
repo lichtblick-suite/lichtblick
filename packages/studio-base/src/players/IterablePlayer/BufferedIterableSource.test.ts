@@ -346,10 +346,7 @@ describe("BufferedIterableSource", () => {
 
       await doneYield.wait();
 
-      expect(bufferedSource.loadedRanges()).toEqual([
-        { start: 0, end: 0.4999999999 },
-        { start: 0.5, end: 1 },
-      ]);
+      expect(bufferedSource.loadedRanges()).toEqual([{ start: 0, end: 1 }]);
 
       {
         {
@@ -456,9 +453,6 @@ describe("BufferedIterableSource", () => {
     await messageIterator.next();
     await signal.wait();
     expect(count).toEqual(2);
-    expect(bufferedSource.loadedRanges()).toEqual([
-      { start: 0, end: 0.2 },
-      { start: 0.2000000001, end: 0.4000000001 },
-    ]);
+    expect(bufferedSource.loadedRanges()).toEqual([{ start: 0, end: 0.4000000001 }]);
   });
 });
