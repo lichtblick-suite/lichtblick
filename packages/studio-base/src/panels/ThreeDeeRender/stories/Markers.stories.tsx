@@ -2,8 +2,11 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
+import { useEffect, useState } from "react";
+
 import { MessageEvent, Topic } from "@foxglove/studio";
-import PanelSetup from "@foxglove/studio-base/stories/PanelSetup";
+import PanelSetup, { Fixture } from "@foxglove/studio-base/stories/PanelSetup";
+import { useReadySignal } from "@foxglove/studio-base/stories/ReadySignalContext";
 
 import ThreeDeeRender from "../index";
 import { ColorRGBA, Marker, TransformStamped } from "../ros";
@@ -501,6 +504,134 @@ export function Markers(): JSX.Element {
       currentTime: { sec: 0, nsec: 0 },
     },
   });
+
+  return (
+    <PanelSetup fixture={fixture}>
+      <ThreeDeeRender
+        overrideConfig={{
+          ...ThreeDeeRender.defaultConfig,
+          followTf: "base_link",
+          layers: {
+            grid: { layerId: "foxglove.Grid" },
+          },
+          cameraState: {
+            distance: 5.5,
+            perspective: true,
+            phi: rad2deg(0.5),
+            targetOffset: [-0.5, 0.75, 0],
+            thetaOffset: rad2deg(-0.25),
+            fovy: rad2deg(0.75),
+            near: 0.01,
+            far: 5000,
+            target: [0, 0, 0],
+            targetOrientation: [0, 0, 0, 1],
+          },
+          topics: {
+            "/markers": { visible: true },
+          },
+        }}
+      />
+    </PanelSetup>
+  );
+}
+
+EmptyLineStrip.parameters = {
+  colorScheme: "dark",
+  chromatic: { delay: 100 },
+  useReadySignal: true,
+};
+/**
+ * Regression test: ability to reduce the number of points in a LineStrip marker to 0 after it is first rendered.
+ * @see https://github.com/foxglove/studio/issues/3954
+ */
+export function EmptyLineStrip(): JSX.Element {
+  const readySignal = useReadySignal();
+  const topics: Topic[] = [
+    { name: "/tf", datatype: "geometry_msgs/TransformStamped" },
+    { name: "/markers", datatype: "visualization_msgs/Marker" },
+  ];
+
+  const tf1: MessageEvent<TransformStamped> = {
+    topic: "/tf",
+    receiveTime: { sec: 10, nsec: 0 },
+    message: {
+      header: { seq: 0, stamp: { sec: 0, nsec: 0 }, frame_id: "map" },
+      child_frame_id: "base_link",
+      transform: {
+        translation: { x: 1e7, y: 0, z: 0 },
+        rotation: QUAT_IDENTITY,
+      },
+    },
+    sizeInBytes: 0,
+  };
+
+  const lineStrip: MessageEvent<Partial<Marker>> = {
+    topic: "/markers",
+    receiveTime: { sec: 10, nsec: 0 },
+    message: {
+      header: { seq: 0, stamp: { sec: 0, nsec: 0 }, frame_id: "base_link" },
+      id: 4,
+      ns: "",
+      type: 4,
+      action: 0,
+      frame_locked: false,
+      pose: {
+        position: { x: -2, y: 0, z: 0 },
+        orientation: { x: 0, y: 0, z: 0, w: 1 },
+      },
+      scale: { x: 0.1, y: 0.1, z: 0.1 },
+      color: makeColor("#3f51b5", 0.5),
+      points: [
+        { x: 0, y: 0.25, z: 0 },
+        { x: 0.25, y: -0.25, z: 0 },
+        { x: -0.25, y: -0.25, z: 0 },
+        { x: 0, y: 0.25, z: 0 },
+      ],
+      colors: [
+        makeColor("#f44336", 0.5),
+        makeColor("#4caf50", 1),
+        makeColor("#2196f3", 1),
+        makeColor("#ffeb3b", 0.5),
+      ],
+      lifetime: { sec: 0, nsec: 0 },
+    },
+    sizeInBytes: 0,
+  };
+
+  const [fixture, setFixture] = useState<Fixture>({
+    topics,
+    frame: {
+      "/tf": [tf1],
+      "/markers": [lineStrip],
+    },
+    capabilities: [],
+    activeData: {
+      currentTime: { sec: 0, nsec: 0 },
+    },
+  });
+
+  useEffect(() => {
+    setTimeout(() => {
+      setFixture((oldFixture) => ({
+        ...oldFixture,
+        frame: {
+          "/markers": [
+            {
+              topic: "/markers",
+              receiveTime: { sec: 11, nsec: 0 },
+              sizeInBytes: 0,
+              message: {
+                ...(oldFixture.frame!["/markers"]![0]!.message as Marker),
+                points: [],
+                colors: [],
+              },
+            },
+          ],
+        },
+      }));
+      setTimeout(() => readySignal(), 100);
+    }, 500);
+  }, [readySignal]);
 
   return (
     <PanelSetup fixture={fixture}>
