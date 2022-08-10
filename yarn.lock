@@ -2315,7 +2315,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@foxglove/mcap-support@workspace:packages/mcap-support"
   dependencies:
-    "@foxglove/schemas": 0.3.0
+    "@foxglove/schemas": 0.4.0
     "@foxglove/wasm-bz2": 0.1.0
     "@protobufjs/base64": 1.1.2
     "@types/zstd-codec": "workspace:*"
@@ -2479,13 +2479,13 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@foxglove/schemas@npm:0.3.0":
-  version: 0.3.0
-  resolution: "@foxglove/schemas@npm:0.3.0"
+"@foxglove/schemas@npm:0.4.0":
+  version: 0.4.0
+  resolution: "@foxglove/schemas@npm:0.4.0"
   dependencies:
     "@foxglove/rosmsg-msgs-common": ^1.0.4
     tslib: ^2
-  checksum: d0cdcaf9ec264f5395b3636b5fd11925f8893d31dbe9ed1d4de7c988b8aa6d7b6580728d9cbe0b4504c511324835f8bfea02656facb1f0a5c66f4fd4be043b39
+  checksum: 76abd73451cbbf0885c3ab834b17f0d3ed9bb59b0201f48790ececf1b4d2b6a69dbffb0e081ee055e760418924ade2403f2078889b015094cf0fb92b123168f8
   languageName: node
   linkType: hard
 
@@ -2532,7 +2532,7 @@ __metadata:
     "@foxglove/rosmsg-serialization": 1.5.0
     "@foxglove/rosmsg2-serialization": 1.0.6
     "@foxglove/rostime": 1.1.2
-    "@foxglove/schemas": 0.3.0
+    "@foxglove/schemas": 0.4.0
     "@foxglove/studio": "workspace:*"
     "@foxglove/three-text": "workspace:*"
     "@foxglove/ulog": 2.1.2

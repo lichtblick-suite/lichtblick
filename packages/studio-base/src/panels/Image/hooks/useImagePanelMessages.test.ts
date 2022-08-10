@@ -4,6 +4,7 @@
 
 import { AVLTree } from "@foxglove/avl";
 import { Time, compare as compareTime, toNanoSec } from "@foxglove/rostime";
+import { ImageAnnotations } from "@foxglove/schemas/schemas/typescript";
 import { FoxgloveMessages } from "@foxglove/studio-base/types/FoxgloveMessages";
 
 import { synchronizedAddMessage, SynchronizationItem } from "./useImagePanelMessages";
@@ -23,17 +24,19 @@ function GenerateImage(stamp: Time): FoxgloveMessages["foxglove.CompressedImage"
   };
 }
 
-function GenerateAnnotations(stamp: Time): FoxgloveMessages["foxglove.ImageAnnotations"] {
+function GenerateAnnotations(stamp: Time): ImageAnnotations {
   return {
     circles: [
       {
-        timestamp: toNanoSec(stamp),
+        timestamp: stamp,
         diameter: 1,
         position: { x: 0, y: 0 },
         thickness: 1,
         outline_color: { r: 0, g: 0, b: 0, a: 1 },
+        fill_color: { r: 0, g: 0, b: 0, a: 1 },
       },
     ],
+    points: [],
   };
 }
 
@@ -178,22 +181,11 @@ describe("synchronizedAddMessage", () => {
           Object.entries({
             "/annotation": [
               {
-                fillColor: undefined,
-                outlineColor: {
-                  a: 1,
-                  b: 0,
-                  g: 0,
-                  r: 0,
-                },
-                position: {
-                  x: 0,
-                  y: 0,
-                },
+                fillColor: { r: 0, g: 0, b: 0, a: 1 },
+                outlineColor: { a: 1, b: 0, g: 0, r: 0 },
+                position: { x: 0, y: 0 },
                 radius: 0.5,
-                stamp: {
-                  nsec: 0,
-                  sec: 2,
-                },
+                stamp: { nsec: 0, sec: 2 },
                 thickness: 1,
                 type: "circle",
               },

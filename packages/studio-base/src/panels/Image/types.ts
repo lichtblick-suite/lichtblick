@@ -106,7 +106,7 @@ export type PointsAnnotation = {
   points: readonly Point2D[];
   outlineColors: readonly Color[];
   outlineColor?: Color;
-  thickness?: number;
+  thickness: number;
   fillColor?: Color;
 };
 

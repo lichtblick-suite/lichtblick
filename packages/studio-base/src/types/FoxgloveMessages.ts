@@ -34,20 +34,6 @@ export type FoxgloveMessages = {
     R?: readonly number[];
   };
 
-  "foxglove.ImageAnnotations": {
-    circles?: Array<FoxgloveMessages["foxglove.ImageAnnotations.Circle"]>;
-    points?: Array<FoxgloveMessages["foxglove.ImageAnnotations.Points"]>;
-  };
-
-  "foxglove.ImageAnnotations.Circle": {
-    timestamp: bigint | { sec: number; nsec: number };
-    position: FoxgloveMessages["foxglove.ImageAnnotations.Point2D"];
-    diameter: number;
-    thickness: number;
-    fill_color?: FoxgloveMessages["foxglove.Color"];
-    outline_color: FoxgloveMessages["foxglove.Color"];
-  };
-
   "foxglove.Color": {
     r: number;
     g: number;
@@ -57,21 +43,6 @@ export type FoxgloveMessages = {
 
   "foxglove.GeoJSON": {
     geojson: string;
-  };
-
-  "foxglove.ImageAnnotations.Point2D": {
-    x: number;
-    y: number;
-  };
-
-  "foxglove.ImageAnnotations.Points": {
-    timestamp: bigint | { sec: number; nsec: number };
-    type: number;
-    points: Array<FoxgloveMessages["foxglove.ImageAnnotations.Point2D"]>;
-    outline_colors: Array<FoxgloveMessages["foxglove.Color"]>;
-    outline_color?: FoxgloveMessages["foxglove.Color"];
-    fill_color?: FoxgloveMessages["foxglove.Color"];
-    thickness: number;
   };
 
   "foxglove.RawImage": {

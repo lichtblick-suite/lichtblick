@@ -5,7 +5,8 @@
 import { Story } from "@storybook/react";
 import { useEffect, useMemo, useRef } from "react";
 
-import { useCompressedImage, cameraInfo, annotations } from "../storySupport";
+import { useCompressedImage, cameraInfo, annotations, foxgloveAnnotations } from "../storySupport";
+import { normalizeAnnotations } from "./normalizeAnnotations";
 import { renderImage } from "./renderImage";
 
 export default {
@@ -124,3 +125,45 @@ export const MarkersWithRotations: Story = (_args) => {
     </div>
   );
 };
+
+export function FoxgloveAnnotations(): JSX.Element {
+  const imageMessage = useCompressedImage();
+  const canvasRef = useRef<HTMLCanvasElement>(ReactNull);
+
+  const width = 400;
+  const height = 300;
+
+  useEffect(() => {
+    if (!canvasRef.current) {
+      return;
+    }
+
+    canvasRef.current.width = 2 * width;
+    canvasRef.current.height = 2 * height;
+
+    void renderImage({
+      canvas: canvasRef.current,
+      hitmapCanvas: undefined,
+      geometry: {
+        flipHorizontal: false,
+        flipVertical: false,
+        panZoom: { x: 0, y: 0, scale: 1 },
+        rotation: 0,
+        viewport: { width, height },
+        zoomMode: "fill",
+      },
+      imageMessage,
+      rawMarkerData: {
+        markers: normalizeAnnotations(foxgloveAnnotations, "foxglove.ImageAnnotations")!,
+        cameraInfo,
+        transformMarkers: false,
+      },
+    });
+  }, [imageMessage]);
+
+  return (
+    <div style={{ backgroundColor: "white", padding: "1rem" }}>
+      <canvas ref={canvasRef} style={{ width, height }} />
+    </div>
+  );
+}

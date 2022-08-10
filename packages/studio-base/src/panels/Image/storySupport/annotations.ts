@@ -4,6 +4,7 @@
 
 import { range } from "lodash";
 
+import { ImageAnnotations } from "@foxglove/schemas/schemas/typescript";
 import { normalizeAnnotations } from "@foxglove/studio-base/panels/Image/lib/normalizeAnnotations";
 import { ImageMarker, ImageMarkerType } from "@foxglove/studio-base/types/Messages";
 
@@ -179,6 +180,61 @@ const markers: ImageMarker[] = [
   }),
 ];
 
-const annotations = normalizeAnnotations({ markers }, "foxglove_msgs/ImageMarkerArray") ?? [];
+export const annotations =
+  normalizeAnnotations({ markers }, "foxglove_msgs/ImageMarkerArray") ?? [];
 
-export { annotations };
+const points = [
+  { x: 40, y: 40 },
+  { x: 70, y: 80 },
+  { x: 40, y: 120 },
+  { x: 110, y: 90 },
+  { x: 150, y: 50 },
+];
+const outlineColors = [
+  { r: 1, g: 0, b: 0, a: 1 },
+  { r: 0, g: 1, b: 0, a: 1 },
+  { r: 0, g: 0, b: 1, a: 1 },
+  { r: 1, g: 1, b: 0, a: 1 },
+  { r: 1, g: 0, b: 1, a: 1 },
+];
+export const foxgloveAnnotations: ImageAnnotations = {
+  circles: [],
+  points: [
+    {
+      timestamp: { sec: 0, nsec: 0 },
+      type: 1,
+      points,
+      outline_colors: outlineColors,
+      outline_color: { r: 1, g: 0.5, b: 0, a: 1 },
+      fill_color: { r: 1, g: 0, b: 0, a: 1 },
+      thickness: 10,
+    },
+    {
+      timestamp: { sec: 0, nsec: 0 },
+      type: 2,
+      points: points.map(({ x, y }) => ({ x: x + 130, y })),
+      outline_colors: outlineColors,
+      outline_color: { r: 1, g: 0.5, b: 0, a: 1 },
+      fill_color: { r: 1, g: 0, b: 0, a: 1 },
+      thickness: 5,
+    },
+    {
+      timestamp: { sec: 0, nsec: 0 },
+      type: 3,
+      points: points.map(({ x, y }) => ({ x, y: y + 100 })),
+      outline_colors: outlineColors,
+      outline_color: { r: 1, g: 0.5, b: 0, a: 1 },
+      fill_color: { r: 1, g: 0, b: 0, a: 1 },
+      thickness: 5,
+    },
+    {
+      timestamp: { sec: 0, nsec: 0 },
+      type: 4,
+      points: points.map(({ x, y }) => ({ x: x + 130, y: y + 100 })),
+      outline_colors: outlineColors,
+      outline_color: { r: 1, g: 0.5, b: 0, a: 1 },
+      fill_color: { r: 1, g: 0, b: 0, a: 1 },
+      thickness: 5,
+    },
+  ],
+};
