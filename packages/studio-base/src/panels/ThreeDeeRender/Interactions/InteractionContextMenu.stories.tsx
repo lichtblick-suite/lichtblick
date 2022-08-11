@@ -11,9 +11,9 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { storiesOf } from "@storybook/react";
+import { Box } from "@mui/material";
 
-import InteractionContextMenu from "./InteractionContextMenu";
+import { InteractionContextMenu } from "./InteractionContextMenu";
 
 const selectedObject = {
   id: "obj-1",
@@ -21,35 +21,16 @@ const selectedObject = {
   action: 0,
   ns: "",
   type: 0,
-  scale: {
-    x: 2,
-    y: 2,
-    z: 4,
-  },
-  color: {
-    r: 1,
-    g: 0.1,
-    b: 0,
-    a: 0.7,
-  },
+  scale: { x: 2, y: 2, z: 4 },
+  color: { r: 1, g: 0.1, b: 0, a: 0.7 },
   pose: {
-    position: {
-      x: -1,
-      y: 1,
-      z: -5,
-    },
-    orientation: {
-      x: 0,
-      y: 0,
-      z: 0,
-      w: 1,
-    },
+    position: { x: -1, y: 1, z: -5 },
+    orientation: { x: 0, y: 0, z: 0, w: 1 },
   },
 };
+
 const sharedProps = {
-  selectObject: () => {
-    // no-op
-  },
+  selectObject: () => {},
   clickedObjects: [
     {
       object: { ...selectedObject, interactionData: { topic: "/foo/bar" } },
@@ -79,15 +60,27 @@ const sharedProps = {
   clickedPosition: { clientX: 100, clientY: 200 },
 };
 
-storiesOf("panels/ThreeDeeRender/Interactions/InteractionContextMenu", module).add(
-  "default",
-  () => {
-    return (
-      <div
-        style={{ background: "#2d2c33", display: "flex", flexDirection: "row", flexWrap: "wrap" }}
-      >
-        <InteractionContextMenu {...sharedProps} />
-      </div>
-    );
-  },
-);
+export default {
+  title: "panels/ThreeDeeRender/Interactions/InteractionContextMenu",
+  component: InteractionContextMenu,
+};
+
+export function Light(): JSX.Element {
+  return (
+    <Box height="100vh" width="100vh" bgcolor="background.default">
+      <InteractionContextMenu onClose={() => {}} {...sharedProps} />
+    </Box>
+  );
+}
+
+Light.parameters = { colorScheme: "light" };
+
+export function Dark(): JSX.Element {
+  return (
+    <Box height="100vh" width="100vh" bgcolor="background.default">
+      <InteractionContextMenu onClose={() => {}} {...sharedProps} />
+    </Box>
+  );
+}
+
+Dark.parameters = { colorScheme: "dark" };

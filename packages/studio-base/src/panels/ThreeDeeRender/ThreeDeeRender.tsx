@@ -41,7 +41,7 @@ import ThemeProvider from "@foxglove/studio-base/theme/ThemeProvider";
 import { Point, makeCovarianceArray } from "@foxglove/studio-base/util/geometry";
 
 import { DebugGui } from "./DebugGui";
-import Interactions, { InteractionContextMenu, SelectionObject, TabType } from "./Interactions";
+import { Interactions, InteractionContextMenu, SelectionObject, TabType } from "./Interactions";
 import type { Renderable } from "./Renderable";
 import { MessageHandler, Renderer, RendererConfig } from "./Renderer";
 import { RendererContext, useRenderer, useRendererEvent } from "./RendererContext";
@@ -55,6 +55,7 @@ import { Pose } from "./transforms/geometry";
 const log = Logger.getLogger(__filename);
 
 const SHOW_DEBUG: true | false = false;
+
 const PANEL_STYLE: React.CSSProperties = {
   width: "100%",
   height: "100%",
@@ -334,6 +335,7 @@ function RendererOverlay(props: {
       </div>
       {clickedObjects.length > 1 && !selectedObject && (
         <InteractionContextMenu
+          onClose={() => setSelectedRenderables([])}
           clickedPosition={clickedPosition}
           clickedObjects={clickedObjects}
           selectObject={(selection) => {

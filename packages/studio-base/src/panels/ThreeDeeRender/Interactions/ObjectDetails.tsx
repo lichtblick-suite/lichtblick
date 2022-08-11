@@ -14,9 +14,9 @@
 import { first, omit } from "lodash";
 import { ReactNode } from "react";
 import Tree from "react-json-tree";
-import styled from "styled-components";
 
 import { isTypicalFilterName } from "@foxglove/studio-base/components/MessagePathSyntax/isTypicalFilterName";
+import Stack from "@foxglove/studio-base/components/Stack";
 import { RosValue } from "@foxglove/studio-base/players/types";
 import { format, formatDuration } from "@foxglove/studio-base/util/formatTime";
 import { useJsonTreeTheme } from "@foxglove/studio-base/util/globalConstants";
@@ -24,10 +24,6 @@ import { useJsonTreeTheme } from "@foxglove/studio-base/util/globalConstants";
 import { InteractionData } from "./types";
 
 const DURATION_20_YEARS_SEC = 20 * 365 * 24 * 60 * 60;
-
-const TreeContainer = styled.div`
-  padding: 12px 0 16px 0;
-`;
 
 type Props = {
   readonly interactionData?: InteractionData;
@@ -53,7 +49,7 @@ function ObjectDetails({ interactionData, selectedObject }: Props): JSX.Element 
   if (topic.length === 0) {
     // show the original object directly if there is no interaction data
     return (
-      <TreeContainer>
+      <Stack paddingY={1}>
         <Tree
           data={selectedObject}
           shouldExpandNode={(_markerKeyPath, _data, level) => level < 2}
@@ -62,12 +58,12 @@ function ObjectDetails({ interactionData, selectedObject }: Props): JSX.Element 
           theme={{ ...jsonTreeTheme, tree: { margin: 0 } }}
           hideRoot
         />
-      </TreeContainer>
+      </Stack>
     );
   }
 
   return (
-    <TreeContainer>
+    <Stack paddingY={1}>
       <Tree
         data={originalObject}
         shouldExpandNode={() => false}
@@ -84,7 +80,7 @@ function ObjectDetails({ interactionData, selectedObject }: Props): JSX.Element 
           return <span>{label}</span>;
         }}
       />
-    </TreeContainer>
+    </Stack>
   );
 }
 

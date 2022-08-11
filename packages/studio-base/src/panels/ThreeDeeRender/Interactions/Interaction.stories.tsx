@@ -13,7 +13,6 @@
 
 import { Stack } from "@mui/material";
 import { storiesOf } from "@storybook/react";
-import styled from "styled-components";
 
 import MockPanelContextProvider from "@foxglove/studio-base/components/MockPanelContextProvider";
 import { decodeMarker } from "@foxglove/studio-base/panels/ThreeDimensionalViz/commands/PointClouds/decodeMarker";
@@ -24,13 +23,6 @@ import {
 import PanelSetup from "@foxglove/studio-base/stories/PanelSetup";
 
 import Interactions, { OBJECT_TAB_TYPE, LINKED_VARIABLES_TAB_TYPE } from "./Interactions";
-
-const SWrapper = styled.div`
-  background: ${({ theme }) => theme.palette.neutralLighterAlt};
-  display: flex;
-  flex-wrap: wrap;
-  height: 100%;
-`;
 
 const markerObject = {
   id: "12345",
@@ -158,7 +150,7 @@ function PanelSetupWithData({
 
 function DefaultStory() {
   return (
-    <SWrapper>
+    <Stack direction="row" flexWrap="wrap" height="100%" bgcolor="background.paper">
       <PanelSetupWithData title="Link Tab">
         <Interactions
           {...(sharedProps as any)}
@@ -204,7 +196,7 @@ function DefaultStory() {
           selectedObject={{ ...selectedObject, interactionData: { topic: "/foo/bar" } }}
         />
       </PanelSetupWithData>
-    </SWrapper>
+    </Stack>
   );
 }
 
@@ -222,7 +214,7 @@ storiesOf("panels/ThreeDeeRender/Interactions/Interaction", module)
     };
 
     return (
-      <SWrapper>
+      <Stack direction="row" flexWrap="wrap" height="100%" bgcolor="background.paper">
         <PanelSetupWithData title="default with point color">
           <Interactions
             {...(sharedProps as any)}
@@ -252,6 +244,6 @@ storiesOf("panels/ThreeDeeRender/Interactions/Interaction", module)
             }}
           />
         </PanelSetupWithData>
-      </SWrapper>
+      </Stack>
     );
   });

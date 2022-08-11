@@ -11,16 +11,11 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import styled from "styled-components";
+import OpenInNewIcon from "@mui/icons-material/OpenInNew";
+import { CardActionArea, Typography } from "@mui/material";
 
 import type { LayoutActions } from "@foxglove/studio";
-import Tooltip from "@foxglove/studio-base/components/Tooltip";
-import { colors } from "@foxglove/studio-base/util/sharedStyleConstants";
-
-const STopicLink = styled.span`
-  cursor: pointer;
-  color: ${colors.HIGHLIGHT};
-`;
+import Stack from "@foxglove/studio-base/components/Stack";
 
 type Props = {
   topic: string;
@@ -41,11 +36,11 @@ export default function TopicLink({ addPanel, topic }: Props): JSX.Element {
   }, [addPanel, topic]);
 
   return (
-    <Tooltip placement="top" contents={`View ${topic} in Raw Messages panel`}>
-      {/* extra span to work around tooltip NaN positioning bug */}
-      <span>
-        <STopicLink onClick={openRawMessages}>{topic}</STopicLink>
-      </span>
-    </Tooltip>
+    <CardActionArea onClick={openRawMessages} title="Open in Raw Message panel">
+      <Stack direction="row" alignItems="center" justifyContent="space-between" padding={1}>
+        <Typography variant="body2">{topic}</Typography>
+        <OpenInNewIcon fontSize="small" color="primary" />
+      </Stack>
+    </CardActionArea>
   );
 }

@@ -12,6 +12,7 @@
 //   You may not use this file except in compliance with the License.
 
 import CursorIcon from "@mdi/svg/svg/cursor-default.svg";
+import { Typography } from "@mui/material";
 
 import type { LayoutActions } from "@foxglove/studio";
 import ExpandingToolbar, {
@@ -22,7 +23,6 @@ import ExpandingToolbar, {
 import { Pose } from "../transforms";
 import ObjectDetails from "./ObjectDetails";
 import TopicLink from "./TopicLink";
-import { SEmptyState, SRow, SValue } from "./styling";
 import { InteractionData } from "./types";
 
 // ts-prune-ignore-next
@@ -66,14 +66,8 @@ const InteractionsBaseComponent = React.memo<Props>(function InteractionsBaseCom
         <ToolGroupFixedSizePane>
           {originalMessage ? (
             <>
-              {selectedInteractionData.topic ? (
-                <SRow>
-                  <SValue>
-                    <TopicLink addPanel={addPanel} topic={selectedInteractionData.topic} />
-                  </SValue>
-                </SRow>
-              ) : (
-                <></>
+              {selectedInteractionData.topic && (
+                <TopicLink addPanel={addPanel} topic={selectedInteractionData.topic} />
               )}
               <ObjectDetails
                 selectedObject={originalMessage}
@@ -81,7 +75,9 @@ const InteractionsBaseComponent = React.memo<Props>(function InteractionsBaseCom
               />
             </>
           ) : (
-            <SEmptyState>Click an object in the 3D view to select it.</SEmptyState>
+            <Typography variant="body2" color="text.disabled" gutterBottom>
+              Click an object in the 3D view to select it.
+            </Typography>
           )}
         </ToolGroupFixedSizePane>
       </ToolGroup>
