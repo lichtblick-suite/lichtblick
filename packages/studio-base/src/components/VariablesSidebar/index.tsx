@@ -19,16 +19,6 @@ import helpContent from "./index.help.md";
 
 const ANIMATION_RESET_DELAY_MS = 1500;
 
-function isActiveElementEditable(): boolean {
-  const activeEl = document.activeElement;
-  return (
-    activeEl != undefined &&
-    ((activeEl as HTMLElement).isContentEditable ||
-      activeEl.tagName === "INPUT" ||
-      activeEl.tagName === "TEXTAREA")
-  );
-}
-
 export default function VariablesSidebar(): ReactElement {
   const { globalVariables, setGlobalVariables } = useGlobalVariables();
   const { linkedGlobalVariablesByName } = useLinkedGlobalVariables();
@@ -50,7 +40,7 @@ export default function VariablesSidebar(): ReactElement {
   const [changedVariables, setChangedVariables] = useState<string[]>([]);
 
   useEffect(() => {
-    if (skipAnimation.current || isActiveElementEditable()) {
+    if (skipAnimation.current) {
       previousGlobalVariablesRef.current = globalVariables;
       return;
     }

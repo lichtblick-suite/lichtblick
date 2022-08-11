@@ -21,7 +21,7 @@ import {
   InputBase,
 } from "@mui/material";
 import { pick } from "lodash";
-import { useMemo, useCallback, useState } from "react";
+import { useMemo, useCallback, useState, useRef } from "react";
 import { makeStyles } from "tss-react/mui";
 
 import JsonInput from "@foxglove/studio-base/components/JsonInput";
@@ -183,8 +183,14 @@ export default function Variable({
 
   const nameIsInError = name !== editedName && globalVariables[editedName] != undefined;
 
+  const rootRef = useRef<HTMLDivElement>(ReactNull);
+
+  const activeElementIsChild = rootRef.current?.contains(document.activeElement) === true;
+
+  const isSelected = selected && !activeElementIsChild;
+
   return (
-    <Stack className={classes.root}>
+    <Stack className={classes.root} ref={rootRef}>
       <ListItem
         dense
         disablePadding
@@ -210,7 +216,7 @@ export default function Variable({
                   )
                 }
               >
-                <LinkIcon color={selected ? "primary" : "info"} style={{ opacity: 0.8 }} />
+                <LinkIcon color={isSelected ? "primary" : "info"} style={{ opacity: 0.8 }} />
               </Tooltip>
             )}
             <IconButton
@@ -259,7 +265,7 @@ export default function Variable({
       >
         <ListItemButton
           className={classes.listItemButton}
-          selected={selected}
+          selected={isSelected}
           onClick={() => setOpen(!open)}
         >
           <ListItemText
