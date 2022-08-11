@@ -18,14 +18,12 @@ import IAnalytics, {
 
 const log = Logger.getLogger("Analytics");
 
-const os = OsContextSingleton; // workaround for https://github.com/webpack/webpack/issues/12960
-
 export class AmplitudeAnalytics implements IAnalytics {
   private _amp?: AmplitudeClient;
 
   constructor(options: { enableTelemetry: boolean; amplitudeApiKey?: string }) {
     const platform = getPlatformName();
-    const appVersion = os?.getAppVersion();
+    const appVersion = OsContextSingleton?.getAppVersion();
     const { glVendor, glRenderer } = getWebGLInfo() ?? {
       glVendor: "(unknown)",
       glRenderer: "(unknown)",
@@ -94,7 +92,7 @@ export class AmplitudeAnalytics implements IAnalytics {
 }
 
 function getPlatformName(): string {
-  const platform = os?.platform ?? "web";
+  const platform = OsContextSingleton?.platform ?? "web";
   switch (platform) {
     case "darwin":
       return "macOS";

@@ -149,8 +149,7 @@ export default class Ros2Player implements Player {
   }
 
   private _open = async (): Promise<void> => {
-    const os = OsContextSingleton;
-    if (this._closed || os == undefined) {
+    if (this._closed || OsContextSingleton == undefined) {
       return;
     }
     this._presence = PlayerPresence.INITIALIZING;
@@ -161,10 +160,10 @@ export default class Ros2Player implements Player {
 
     if (this._rosNode == undefined) {
       const rosNode = new RosNode({
-        name: `/foxglovestudio_${os.pid}`,
+        name: `/foxglovestudio_${OsContextSingleton.pid}`,
         domainId: this._domainId,
         udpSocketCreate,
-        getNetworkInterfaces: os.getNetworkInterfaces,
+        getNetworkInterfaces: OsContextSingleton.getNetworkInterfaces,
         log: rosLog,
       });
       this._rosNode = rosNode;

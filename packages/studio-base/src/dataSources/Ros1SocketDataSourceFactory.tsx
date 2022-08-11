@@ -11,8 +11,6 @@ import {
 import Ros1Player from "@foxglove/studio-base/players/Ros1Player";
 import { Player } from "@foxglove/studio-base/players/types";
 
-const os = OsContextSingleton; // workaround for https://github.com/webpack/webpack/issues/12960
-
 class Ros1SocketDataSourceFactory implements IDataSourceFactory {
   id = "ros1-socket";
   type: IDataSourceFactory["type"] = "connection";
@@ -27,14 +25,18 @@ class Ros1SocketDataSourceFactory implements IDataSourceFactory {
       {
         id: "url",
         label: "ROS_MASTER_URI",
-        defaultValue: os?.getEnvVar("ROS_MASTER_URI") ?? "http://localhost:11311",
+        defaultValue: OsContextSingleton?.getEnvVar("ROS_MASTER_URI") ?? "http://localhost:11311",
         description: "Tells ROS nodes where they can locate the master",
       },
       {
         id: "hostname",
         label: "ROS_HOSTNAME",
-        defaultValue: os
-          ? RosNode.GetRosHostname(os.getEnvVar, os.getHostname, os.getNetworkInterfaces)
+        defaultValue: OsContextSingleton
+          ? RosNode.GetRosHostname(
+              OsContextSingleton.getEnvVar,
+              OsContextSingleton.getHostname,
+              OsContextSingleton.getNetworkInterfaces,
+            )
           : "localhost",
         description: "Acts as the declared network address of a ROS node or tool",
       },

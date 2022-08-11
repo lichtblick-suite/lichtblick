@@ -7,6 +7,6 @@
   "devDependencies": {
     "@types/copy-webpack-plugin": "10.1.0",
     "copy-webpack-plugin": "10.2.4",
-    "webpack": "5.68.0"
+    "webpack": "5.74.0"
   }
 }
