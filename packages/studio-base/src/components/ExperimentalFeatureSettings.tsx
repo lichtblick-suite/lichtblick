@@ -91,7 +91,7 @@ function ExperimentalFeatureItem(props: { feature: Feature }) {
       control={
         <Checkbox
           className={classes.checkbox}
-          checked={enabled}
+          checked={enabled ?? false}
           onChange={(_, checked) => void setEnabled(checked)}
         />
       }
