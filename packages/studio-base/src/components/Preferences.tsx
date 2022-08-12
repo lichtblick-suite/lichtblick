@@ -2,6 +2,11 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
+import Brightness5Icon from "@mui/icons-material/Brightness5";
+import ComputerIcon from "@mui/icons-material/Computer";
+import DarkModeIcon from "@mui/icons-material/DarkMode";
+import QuestionAnswerOutlinedIcon from "@mui/icons-material/QuestionAnswerOutlined";
+import WebIcon from "@mui/icons-material/Web";
 import {
   Autocomplete,
   Checkbox,
@@ -13,9 +18,11 @@ import {
   Select,
   TextField,
   Typography,
+  ToggleButtonGroup,
+  ToggleButton,
 } from "@mui/material";
 import moment from "moment-timezone";
-import { useMemo } from "react";
+import { MouseEvent, useCallback, useMemo } from "react";
 import { makeStyles } from "tss-react/mui";
 
 import { filterMap } from "@foxglove/den/collection";
@@ -27,11 +34,13 @@ import Stack from "@foxglove/studio-base/components/Stack";
 import { useAppTimeFormat } from "@foxglove/studio-base/hooks";
 import { useAppConfigurationValue } from "@foxglove/studio-base/hooks/useAppConfigurationValue";
 import { TimeDisplayMethod } from "@foxglove/studio-base/types/panels";
+import { formatTime } from "@foxglove/studio-base/util/formatTime";
 import isDesktopApp from "@foxglove/studio-base/util/isDesktopApp";
+import { formatTimeRaw } from "@foxglove/studio-base/util/time";
 
 const MESSAGE_RATES = [1, 3, 5, 10, 15, 20, 30, 60];
 
-const useStyles = makeStyles()({
+const useStyles = makeStyles()((theme) => ({
   autocompleteInput: {
     "&.MuiOutlinedInput-input": {
       padding: 0,
@@ -47,7 +56,13 @@ const useStyles = makeStyles()({
       alignItems: "start",
     },
   },
-});
+  toggleButton: {
+    display: "flex !important",
+    flexDirection: "column",
+    gap: theme.spacing(0.75),
+    lineHeight: "1 !important",
+  },
+}));
 
 function formatTimezone(name: string) {
   const tz = moment.tz(name);
@@ -62,31 +77,41 @@ function formatTimezone(name: string) {
 }
 
 function ColorSchemeSettings(): JSX.Element {
+  const { classes } = useStyles();
   const [colorScheme = "dark", setColorScheme] = useAppConfigurationValue<string>(
     AppSetting.COLOR_SCHEME,
   );
-  const options = useMemo(
-    () => [
-      { key: "light", text: "Light", iconProps: { iconName: "WeatherSunny" } },
-      { key: "dark", text: "Dark", iconProps: { iconName: "WeatherMoon" } },
-      { key: "system", text: "Follow system", iconProps: { iconName: "CircleHalfFill" } },
-    ],
-    [],
+
+  const handleChange = useCallback(
+    (_event: MouseEvent<HTMLElement>, value?: string) => {
+      if (value != undefined) {
+        void setColorScheme(value);
+      }
+    },
+    [setColorScheme],
   );
+
   return (
     <Stack>
       <FormLabel>Color scheme:</FormLabel>
-      <Select
-        value={colorScheme}
+      <ToggleButtonGroup
+        color="primary"
+        size="small"
         fullWidth
-        onChange={(event) => void setColorScheme(event.target.value)}
+        exclusive
+        value={colorScheme}
+        onChange={handleChange}
       >
-        {options.map((option) => (
-          <MenuItem key={option.key} value={option.key}>
-            {option.text}
-          </MenuItem>
-        ))}
-      </Select>
+        <ToggleButton className={classes.toggleButton} value="dark">
+          <DarkModeIcon /> Dark
+        </ToggleButton>
+        <ToggleButton className={classes.toggleButton} value="light">
+          <Brightness5Icon /> Light
+        </ToggleButton>
+        <ToggleButton className={classes.toggleButton} value="system">
+          <ComputerIcon /> Follow system
+        </ToggleButton>
+      </ToggleButtonGroup>
     </Stack>
   );
 }
@@ -168,54 +193,61 @@ function TimezoneSettings(): React.ReactElement {
 
 function TimeFormat(): React.ReactElement {
   const { timeFormat, setTimeFormat } = useAppTimeFormat();
-  const options: Array<{ key: TimeDisplayMethod; text: string }> = [
-    { key: "SEC", text: "Seconds" },
-    { key: "TOD", text: "Local" },
-  ];
+
+  const [timezone] = useAppConfigurationValue<string>(AppSetting.TIMEZONE);
+
+  const exampleTime = { sec: 946713600, nsec: 0 };
 
   return (
     <Stack>
       <FormLabel>Timestamp format:</FormLabel>
-      <Select
-        value={timeFormat}
+      <ToggleButtonGroup
+        color="primary"
+        size="small"
+        orientation="vertical"
         fullWidth
-        onChange={(event) => void setTimeFormat(event.target.value as TimeDisplayMethod)}
+        exclusive
+        value={timeFormat}
+        onChange={(_, value?: TimeDisplayMethod) => value != undefined && void setTimeFormat(value)}
       >
-        {options.map((option) => (
-          <MenuItem key={option.key} value={option.key}>
-            {option.text}
-          </MenuItem>
-        ))}
-      </Select>
+        <ToggleButton value="SEC" data-testid="timeformat-seconds">
+          {formatTimeRaw(exampleTime)}
+        </ToggleButton>
+        <ToggleButton value="TOD" data-testid="timeformat-local">
+          {formatTime(exampleTime, timezone)}
+        </ToggleButton>
+      </ToggleButtonGroup>
     </Stack>
   );
 }
 
 function LaunchDefault(): React.ReactElement {
+  const { classes } = useStyles();
   const [preference = "unknown", setPreference] = useAppConfigurationValue<string | undefined>(
     AppSetting.LAUNCH_PREFERENCE,
   );
 
-  const options: Array<{ key: string; text: string }> = [
-    { key: "unknown", text: "Ask each time" },
-    { key: "web", text: "Web app" },
-    { key: "desktop", text: "Desktop app" },
-  ];
-
   return (
     <Stack>
       <FormLabel>Open links in:</FormLabel>
-      <Select
-        value={preference}
+      <ToggleButtonGroup
+        color="primary"
+        size="small"
         fullWidth
-        onChange={(event) => void setPreference(event.target.value)}
+        exclusive
+        value={preference}
+        onChange={(_, value?: string) => value != undefined && void setPreference(value)}
       >
-        {options.map((option) => (
-          <MenuItem key={option.key} value={option.key}>
-            {option.text}
-          </MenuItem>
-        ))}
-      </Select>
+        <ToggleButton value="web" className={classes.toggleButton}>
+          <WebIcon /> Web app
+        </ToggleButton>
+        <ToggleButton value="desktop" className={classes.toggleButton}>
+          <ComputerIcon /> Desktop app
+        </ToggleButton>
+        <ToggleButton value="unknown" className={classes.toggleButton}>
+          <QuestionAnswerOutlinedIcon /> Ask each time
+        </ToggleButton>
+      </ToggleButtonGroup>
     </Stack>
   );
 }
