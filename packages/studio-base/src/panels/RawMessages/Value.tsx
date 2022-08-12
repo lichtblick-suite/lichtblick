@@ -87,10 +87,13 @@ export default function Value(props: ValueProps): JSX.Element {
   );
 
   const handleCopy = useCallback((value: string) => {
-    void clipboard.copy(value).then(() => {
-      setCopied(true);
-      setTimeout(() => setCopied(false), 1500);
-    });
+    clipboard
+      .copy(value)
+      .then(() => {
+        setCopied(true);
+        setTimeout(() => setCopied(false), 1500);
+      })
+      .catch((e) => console.warn(e));
   }, []);
 
   const availableActions = useMemo(() => {

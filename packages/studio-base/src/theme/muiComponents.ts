@@ -2,6 +2,8 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
+import type {} from "@mui/x-data-grid/themeAugmentation";
+
 import { alpha, Theme, ThemeOptions } from "@mui/material/styles";
 import { CSSProperties } from "@mui/styles";
 
