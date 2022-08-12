@@ -268,9 +268,8 @@ SinglePointFullCovariance.parameters = {
 };
 
 export const GeoJSON = (): JSX.Element => {
-  return <MapPanel />;
+  return <MapPanel overrideConfig={{ topicColors: { "/geo": "#00ffaa", "/gps": "#ffc0cb" } }} />;
 };
-
 GeoJSON.parameters = {
   chromatic: {
     delay: 1000,

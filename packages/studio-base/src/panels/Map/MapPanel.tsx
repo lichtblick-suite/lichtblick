@@ -32,13 +32,13 @@ import { Config, validateCustomUrl, buildSettingsTree } from "./config";
 import { hasFix } from "./support";
 import { MapPanelMessage, Point } from "./types";
 
+type GeoJsonMessage = MessageEvent<FoxgloveMessages["foxglove.GeoJSON"]>;
+
 type MapPanelProps = {
   context: PanelExtensionContext;
 };
 
-function isGeoJSONMessage(
-  message: MessageEvent<unknown>,
-): message is MessageEvent<FoxgloveMessages["foxglove.GeoJSON"]> {
+function isGeoJSONMessage(message: MessageEvent<unknown>): message is GeoJsonMessage {
   return (
     typeof message.message === "object" &&
     message.message != undefined &&
@@ -372,6 +372,11 @@ function MapPanel(props: MapPanelProps): JSX.Element {
     [context],
   );
 
+  /// --- the remaining code is unrelated to the extension api ----- ///
+
+  const [center, setCenter] = useState<Point | undefined>();
+  const [filterBounds, setFilterBounds] = useState<LatLngBounds | undefined>();
+
   const addGeoFeatureEventHandlers = useCallback(
     (message: MessageEvent<unknown>, layer: Layer) => {
       layer.on("mouseover", () => {
@@ -387,10 +392,18 @@ function MapPanel(props: MapPanelProps): JSX.Element {
     [onClick, onHover],
   );
 
-  /// --- the remaining code is unrelated to the extension api ----- ///
-
-  const [center, setCenter] = useState<Point | undefined>();
-  const [filterBounds, setFilterBounds] = useState<LatLngBounds | undefined>();
+  const addGeoJsonMessage = useCallback(
+    (message: GeoJsonMessage, topicLayer: TopicGroups) => {
+      const parsed = JSON.parse(message.message.geojson) as Parameters<typeof geoJSON>[0];
+      geoJSON(parsed, {
+        onEachFeature: (_feature, layer) => addGeoFeatureEventHandlers(message, layer),
+        style: config.topicColors[message.topic]
+          ? { color: config.topicColors[message.topic] }
+          : {},
+      }).addTo(topicLayer.allFrames);
+    },
+    [addGeoFeatureEventHandlers, config.topicColors],
+  );
 
   // calculate center point from blocks if we don't have a center point
   useEffect(() => {
@@ -442,16 +455,12 @@ function MapPanel(props: MapPanelProps): JSX.Element {
 
       topicLayer.allFrames.addLayer(pointLayer);
 
-      const geoMessages = allGeoMessages.filter((message) => message.topic === topic);
-      for (const geoMessage of geoMessages) {
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
-        geoJSON(JSON.parse(geoMessage.message.geojson), {
-          onEachFeature: (_feature, layer) => addGeoFeatureEventHandlers(geoMessage, layer),
-        }).addTo(topicLayer.allFrames);
-      }
+      allGeoMessages
+        .filter((message) => message.topic === topic)
+        .forEach((message) => addGeoJsonMessage(message, topicLayer));
     }
   }, [
-    addGeoFeatureEventHandlers,
+    addGeoJsonMessage,
     allGeoMessages,
     allNavMessages,
     currentMap,
@@ -495,16 +504,12 @@ function MapPanel(props: MapPanelProps): JSX.Element {
       topicLayer.currentFrame.addLayer(pointLayerNoFix);
       topicLayer.currentFrame.addLayer(pointLayerFix);
 
-      const geoMessages = currentGeoMessages.filter((message) => message.topic === topic);
-      for (const geoMessage of geoMessages) {
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
-        geoJSON(JSON.parse(geoMessage.message.geojson), {
-          onEachFeature: (_feature, layer) => addGeoFeatureEventHandlers(geoMessage, layer),
-        }).addTo(topicLayer.currentFrame);
-      }
+      currentGeoMessages
+        .filter((message) => message.topic === topic)
+        .forEach((message) => addGeoJsonMessage(message, topicLayer));
     }
   }, [
-    addGeoFeatureEventHandlers,
+    addGeoJsonMessage,
     currentGeoMessages,
     currentMap,
     currentNavMessages,
