@@ -65,6 +65,7 @@ export interface Player {
   startPlayback?(): void;
   pausePlayback?(): void;
   seekPlayback?(time: Time, backfillDuration?: Time): void;
+  playUntil?(time: Time): void;
   // Seek to a particular time. Might trigger backfilling.
   // If the Player supports non-real-time speeds (i.e. PlayerState#capabilities contains
   // PlayerCapabilities.setSpeed), set that speed. E.g. 1.0 is real time, 0.2 is 20% of real time.

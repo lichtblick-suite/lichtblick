@@ -22,20 +22,20 @@ import {
   Previous20Regular,
 } from "@fluentui/react-icons";
 import { Divider } from "@mui/material";
-import { useCallback, useMemo, useRef, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { makeStyles } from "tss-react/mui";
 
-import { compare, Time } from "@foxglove/rostime";
+import { Time } from "@foxglove/rostime";
 import HoverableIconButton from "@foxglove/studio-base/components/HoverableIconButton";
 import KeyListener from "@foxglove/studio-base/components/KeyListener";
 import LoopIcon from "@foxglove/studio-base/components/LoopIcon";
-import { useMessagePipeline } from "@foxglove/studio-base/components/MessagePipeline";
 import {
   jumpSeek,
   DIRECTION,
 } from "@foxglove/studio-base/components/PlaybackControls/sharedHelpers";
 import PlaybackSpeedControls from "@foxglove/studio-base/components/PlaybackSpeedControls";
 import Stack from "@foxglove/studio-base/components/Stack";
+import { Player } from "@foxglove/studio-base/players/types";
 
 import PlaybackTimeDisplay from "./PlaybackTimeDisplay";
 import RepeatAdapter from "./RepeatAdapter";
@@ -69,63 +69,30 @@ const useStyles = makeStyles()((theme) => ({
   },
 }));
 
-export default function PlaybackControls({
-  play,
-  pause,
-  seek,
-  isPlaying,
-  getTimeInfo,
-}: {
-  play: () => void;
-  pause: () => void;
-  seek: (time: Time) => void;
+export default function PlaybackControls(props: {
+  play: NonNullable<Player["startPlayback"]>;
+  pause: NonNullable<Player["pausePlayback"]>;
+  seek: NonNullable<Player["seekPlayback"]>;
+  playUntil?: Player["playUntil"];
   isPlaying: boolean;
   getTimeInfo: () => { startTime?: Time; endTime?: Time; currentTime?: Time };
 }): JSX.Element {
+  const { play, pause, seek, isPlaying, getTimeInfo, playUntil } = props;
+
   const { classes } = useStyles();
   const [repeat, setRepeat] = useState(false);
-  const stopAtTime = useRef<Time | undefined>(undefined);
-
-  // See comments below in seekForwardAction for how seeking is handled
-  useMessagePipeline(
-    useCallback(
-      (ctx) => {
-        const currentTime = ctx.playerState.activeData?.currentTime;
-        if (stopAtTime.current && currentTime && compare(currentTime, stopAtTime.current) >= 0) {
-          stopAtTime.current = undefined;
-          pause();
-        }
-      },
-      [pause],
-    ),
-  );
-
-  const resumePlay = useCallback(() => {
-    const { startTime: start, endTime: end, currentTime: current } = getTimeInfo();
-    // if we are at the end, we need to go back to start
-    if (current && end && start && compare(current, end) >= 0) {
-      // If the resume is a result of a forward seek and we are at the end, reset the stop marker
-      // to the start.
-      if (stopAtTime.current) {
-        stopAtTime.current = start;
-      }
-      seek(start);
-    }
-    play();
-  }, [getTimeInfo, play, seek]);
 
   const toggleRepeat = useCallback(() => {
     setRepeat((old) => !old);
   }, []);
 
   const togglePlayPause = useCallback(() => {
-    stopAtTime.current = undefined;
     if (isPlaying) {
       pause();
     } else {
-      resumePlay();
+      play();
     }
-  }, [pause, resumePlay, isPlaying]);
+  }, [pause, play, isPlaying]);
 
   const seekForwardAction = useCallback(
     (ev?: KeyboardEvent) => {
@@ -134,19 +101,24 @@ export default function PlaybackControls({
         return;
       }
 
-      // We implement forward seek by playing at least up to the desired seek time rather than
-      // the "jump" seek behavior of the backwards seek.
+      // If playUntil is available, we prefer to use that rather than seek, which performs a jump
+      // seek.
       //
-      // Playing forward at least up to the desired seek time will play all messages to the panels
-      // which mirrors the behavior panels would expect when playing without stepping. This behavior
-      // is important for some message types which convey state information.
+      // Playing forward up to the desired seek time will play all messages to the panels which
+      // mirrors the behavior panels would expect when playing without stepping. This behavior is
+      // important for some message types which convey state information.
       //
       // i.e. Skipping coordinate frame messages may result in incorrectly rendered markers or
       // missing markers altogther.
-      stopAtTime.current = jumpSeek(DIRECTION.FORWARD, currentTime, ev);
-      resumePlay();
+      const targetTime = jumpSeek(DIRECTION.FORWARD, currentTime, ev);
+
+      if (playUntil) {
+        playUntil(targetTime);
+      } else {
+        seek(targetTime);
+      }
     },
-    [getTimeInfo, resumePlay],
+    [getTimeInfo, playUntil, seek],
   );
 
   const seekBackwardAction = useCallback(
@@ -198,7 +170,7 @@ export default function PlaybackControls({
             />
             <HoverableIconButton
               title={isPlaying ? "Pause" : "Play"}
-              onClick={isPlaying ? pause : resumePlay}
+              onClick={togglePlayPause}
               icon={isPlaying ? <Pause20Regular /> : <Play20Regular />}
               activeIcon={isPlaying ? <Pause20Filled /> : <Play20Filled />}
             />

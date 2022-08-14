@@ -166,6 +166,8 @@ export class IterablePlayer implements Player {
 
   private readonly _sourceId: string;
 
+  private _untilTime?: Time;
+
   constructor(options: IterablePlayerOptions) {
     const { metricsCollector, urlParams, source, name, enablePreload, sourceId } = options;
 
@@ -192,10 +194,24 @@ export class IterablePlayer implements Player {
   }
 
   startPlayback(): void {
-    if (this._isPlaying) {
+    this.startPlayImpl();
+  }
+
+  playUntil(time: Time): void {
+    this.startPlayImpl({ untilTime: time });
+  }
+
+  private startPlayImpl(opt?: { untilTime: Time }): void {
+    if (this._isPlaying || this._untilTime) {
       return;
     }
 
+    if (opt?.untilTime) {
+      if (this._currentTime && compare(opt.untilTime, this._currentTime) <= 0) {
+        throw new Error("Invariant: playUntil time must be after the current time");
+      }
+      this._untilTime = clampTime(opt.untilTime, this._start, this._end);
+    }
     this._metricsCollector.play(this._speed);
     this._isPlaying = true;
 
@@ -214,6 +230,7 @@ export class IterablePlayer implements Player {
     // clear out last tick millis so we don't read a huge chunk when we unpause
     this._lastTickMillis = undefined;
     this._isPlaying = false;
+    this._untilTime = undefined;
     if (this._state === "play") {
       this._setState("idle");
     }
@@ -243,6 +260,7 @@ export class IterablePlayer implements Player {
 
     this._metricsCollector.seek(targetTime);
     this._seekTarget = targetTime;
+    this._untilTime = undefined;
 
     this._blockLoader?.setActiveTime(targetTime);
     this._setState("seek-backfill");
@@ -720,11 +738,8 @@ export class IterablePlayer implements Player {
 
     // The end time when we want to stop reading messages and emit state for the tick
     // The end time is inclusive.
-    const end: Time = clampTime(
-      add(this._currentTime, fromMillis(rangeMillis)),
-      this._start,
-      this._end,
-    );
+    const targetTime = add(this._currentTime, fromMillis(rangeMillis));
+    const end: Time = clampTime(targetTime, this._start, this._untilTime ?? this._end);
 
     const msgEvents: MessageEvent<unknown>[] = [];
 
@@ -739,6 +754,10 @@ export class IterablePlayer implements Player {
         this._currentTime = end;
         this._messages = msgEvents;
         this._emitState();
+
+        if (this._untilTime && compare(this._currentTime, this._untilTime) >= 0) {
+          this.pausePlayback();
+        }
         return;
       }
 
@@ -801,9 +820,15 @@ export class IterablePlayer implements Player {
     this._currentTime = end;
     this._messages = msgEvents;
     this._emitState();
+
+    // This tick has reached the end of the untilTime so we go back to pause
+    if (this._untilTime && compare(this._currentTime, this._untilTime) >= 0) {
+      this.pausePlayback();
+    }
   }
 
   private async _stateIdle() {
+    this._isPlaying = false;
     this._presence = PlayerPresence.PRESENT;
     this._emitState();
 

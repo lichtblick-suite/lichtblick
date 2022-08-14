@@ -57,6 +57,7 @@ export type MessagePipelineContext = {
   callService: (service: string, request: unknown) => Promise<unknown>;
   startPlayback?: () => void;
   pausePlayback?: () => void;
+  playUntil?: (time: Time) => void;
   setPlaybackSpeed?: (speed: number) => void;
   seekPlayback?: (time: Time) => void;
   // Don't render the next frame until the returned function has been called.
@@ -202,6 +203,10 @@ export function MessagePipelineProvider({
         : undefined,
     [player, capabilities],
   );
+  const playUntil = useMemo(
+    () => (player?.playUntil ? player.playUntil.bind(player) : undefined),
+    [player],
+  );
   const pausePlayback = useMemo(
     () =>
       capabilities.includes(PlayerCapabilities.playbackControl)
@@ -254,6 +259,7 @@ export function MessagePipelineProvider({
         publish,
         callService,
         startPlayback,
+        playUntil,
         pausePlayback,
         setPlaybackSpeed,
         seekPlayback,

@@ -167,6 +167,7 @@ const selectIsPlaying = (ctx: MessagePipelineContext) =>
 const selectPause = (ctx: MessagePipelineContext) => ctx.pausePlayback;
 const selectPlay = (ctx: MessagePipelineContext) => ctx.startPlayback;
 const selectSeek = (ctx: MessagePipelineContext) => ctx.seekPlayback;
+const selectPlayUntil = (ctx: MessagePipelineContext) => ctx.playUntil;
 
 const selectSetHelpInfo = (store: HelpInfoStore) => store.setHelpInfo;
 
@@ -572,6 +573,7 @@ export default function Workspace(props: WorkspaceProps): JSX.Element {
   );
 
   const play = useMessagePipeline(selectPlay);
+  const playUntil = useMessagePipeline(selectPlayUntil);
   const pause = useMessagePipeline(selectPause);
   const seek = useMessagePipeline(selectSeek);
   const isPlaying = useMessagePipeline(selectIsPlaying);
@@ -624,6 +626,7 @@ export default function Workspace(props: WorkspaceProps): JSX.Element {
                     play={play}
                     pause={pause}
                     seek={seek}
+                    playUntil={playUntil}
                     isPlaying={isPlaying}
                     getTimeInfo={getTimeInfo}
                   />
