@@ -1,30 +1,31 @@
 diff --git a/dist/esm/client/preview/render.js b/dist/esm/client/preview/render.js
-index 4a388101c8db468e1a4c9805c5b5a6a364655487..43a5fda1a29a58df0ee07c4c999d02d282589665 100644
+index 5bf30e1d97021f22c529384316e215df1537f302..43567af6f9b47d550f59898caa21e75a9b4121bc 100644
 --- a/dist/esm/client/preview/render.js
 +++ b/dist/esm/client/preview/render.js
-@@ -53,14 +53,16 @@ export var render = function render(args, context) {
+@@ -57,7 +57,7 @@ export var render = function render(args, context) {
  };
 
  var renderElement = /*#__PURE__*/function () {
 -  var _ref = _asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee(node, el) {
 +  var _ref = _asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee(node, el, storyContext) {
+     var root;
      return regeneratorRuntime.wrap(function _callee$(_context) {
        while (1) {
-         switch (_context.prev = _context.next) {
-           case 0:
-             return _context.abrupt("return", new Promise(function (resolve) {
-               ReactDOM.render(node, el, function () {
--                return resolve(null);
-+                // access the parameters in the render callback to allow decorators to set storyReady
-+                var maybeSignal = storyContext.parameters?.storyReady;
-+                maybeSignal ? maybeSignal.then(() => resolve(null)) : resolve(null);
-               });
+@@ -76,7 +76,9 @@ var renderElement = /*#__PURE__*/function () {
+                 }, 0);
+               } else {
+                 ReactDOM.render(node, el, function () {
+-                  return resolve(null);
++		  // access the parameters in the render callback to allow decorators to set storyReady
++                  var maybeSignal = storyContext.parameters?.storyReady;
++                  maybeSignal ? maybeSignal.then(() => resolve(null)) : resolve(null);
+                 });
+               }
              }));
-
-@@ -164,7 +166,7 @@ function _renderToDOM() {
+@@ -242,7 +244,7 @@ function _renderToDOM() {
              }
 
-             _context2.next = 7;
+             _context3.next = 7;
 -            return renderElement(element, domElement);
 +            return renderElement(element, domElement, storyContext);
 

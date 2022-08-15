@@ -376,8 +376,8 @@ storiesOf("panels/Tab", module)
         }}
       >
         <PanelLayout />
-        <SExpectedResult css="left: 0">Should have only #2</SExpectedResult>
-        <SExpectedResult css="left: 50%">Should have #3 and #1</SExpectedResult>
+        <SExpectedResult style={{ left: 0 }}>Should have only #2</SExpectedResult>
+        <SExpectedResult style={{ left: "50%" }}>Should have #3 and #1</SExpectedResult>
       </PanelSetup>
     );
   })
@@ -412,10 +412,10 @@ storiesOf("panels/Tab", module)
         }}
       >
         <PanelLayout />
-        <SExpectedResult css="left: 0">
+        <SExpectedResult style={{ left: 0 }}>
           the first tab should be hidden (we never dropped it)
         </SExpectedResult>
-        <SExpectedResult css="top: 50px">tab content should be hidden</SExpectedResult>
+        <SExpectedResult style={{ top: "50px" }}>tab content should be hidden</SExpectedResult>
       </PanelSetup>
     );
   })

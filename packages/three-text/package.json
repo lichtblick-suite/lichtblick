@@ -29,11 +29,11 @@
     "three": ">=0.140.2"
   },
   "devDependencies": {
-    "@storybook/addon-actions": "6.4.18",
-    "@storybook/addon-essentials": "6.4.18",
-    "@storybook/builder-webpack5": "6.4.18",
-    "@storybook/manager-webpack5": "6.4.18",
-    "@storybook/react": "6.4.18",
+    "@storybook/addon-actions": "6.5.10",
+    "@storybook/addon-essentials": "6.5.10",
+    "@storybook/builder-webpack5": "6.5.10",
+    "@storybook/manager-webpack5": "6.5.10",
+    "@storybook/react": "6.5.10",
     "three": "0.140.2",
     "ts-loader": "9.2.7",
     "typescript": "4.6.2"
