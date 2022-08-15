@@ -3,7 +3,6 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 import { setUser as setSentryUser, addBreadcrumb as addSentryBreadcrumb } from "@sentry/core";
-import { Severity } from "@sentry/types";
 import amplitude, { AmplitudeClient } from "amplitude-js";
 import moment from "moment";
 
@@ -76,7 +75,7 @@ export class AmplitudeAnalytics implements IAnalytics {
       type: getEventBreadcrumbType(event),
       category: `studio.${getEventCategory(event).toLowerCase()}`,
       message: event,
-      level: Severity.Info,
+      level: "info",
       data,
       timestamp: Date.now() / 1000,
     });
