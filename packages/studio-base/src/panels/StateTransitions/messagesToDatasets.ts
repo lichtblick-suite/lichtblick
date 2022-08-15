@@ -8,7 +8,7 @@ import { Time, toSec, subtract as subtractTimes } from "@foxglove/rostime";
 import { ChartData } from "@foxglove/studio-base/components/Chart";
 import { MessageAndData } from "@foxglove/studio-base/components/MessagePathSyntax/useCachedGetMessagePathDataItems";
 import { TimeBasedChartTooltipData } from "@foxglove/studio-base/components/TimeBasedChart";
-import { darkColor, lineColors } from "@foxglove/studio-base/util/plotColors";
+import { darkColor, expandedLineColors } from "@foxglove/studio-base/util/plotColors";
 import { getTimestampForMessageEvent } from "@foxglove/studio-base/util/time";
 import { grey } from "@foxglove/studio-base/util/toolsColorScheme";
 
@@ -20,7 +20,7 @@ type DatasetInfo = {
   tooltips: TimeBasedChartTooltipData[];
 };
 
-const baseColors = [grey, ...lineColors];
+const baseColors = [grey, ...expandedLineColors];
 
 type Args = {
   path: StateTransitionPath;

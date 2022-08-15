@@ -17,6 +17,7 @@ import TestUtils from "react-dom/test-utils";
 import { BlockCache } from "@foxglove/studio-base/players/types";
 import PanelSetup from "@foxglove/studio-base/stories/PanelSetup";
 import { useReadySignal } from "@foxglove/studio-base/stories/ReadySignalContext";
+import { expandedLineColors } from "@foxglove/studio-base/util/plotColors";
 
 import StateTransitions from "./index";
 
@@ -75,6 +76,7 @@ const fixture = {
   ),
   topics: [
     { name: "/some/topic/with/state", datatype: "msgs/SystemState" },
+    { name: "/some/topic/with/string_state", datatype: "msgs/SystemState" },
     { name: "/blocks", datatype: "msgs/SystemState" },
   ],
   activeData: {
@@ -90,6 +92,15 @@ const fixture = {
       message: { ...message, data: { value: idx } },
       sizeInBytes: 0,
     })),
+    "/some/topic/with/string_state": systemStateMessages.map((message, idx) => {
+      const values = "abcdefghijklmnopqrstuvwxyz".split("");
+      return {
+        topic: "/some/topic/with/string_state",
+        receiveTime: message.header.stamp,
+        message: { ...message, data: { value: values[idx % values.length] } },
+        sizeInBytes: 0,
+      };
+    }),
   },
 };
 
@@ -102,6 +113,16 @@ export default {
     },
   },
 };
+
+export function ColorPalette(): JSX.Element {
+  return (
+    <div style={{ width: "100%", padding: "1rem" }}>
+      {expandedLineColors.map((color) => (
+        <div key={color} style={{ backgroundColor: color, height: "1rem" }} />
+      ))}
+    </div>
+  );
+}
 
 OnePath.parameters = { useReadySignal: true };
 export function OnePath(): JSX.Element {
@@ -188,6 +209,23 @@ export function JsonPath(): JSX.Element {
       <StateTransitions
         overrideConfig={{
           paths: [{ value: "/some/topic/with/state.data.value", timestampMethod: "receiveTime" }],
+        }}
+      />
+    </PanelSetup>
+  );
+}
+
+ColorClash.parameters = { useReadySignal: true };
+export function ColorClash(): JSX.Element {
+  const readySignal = useReadySignal({ count: 3 });
+  const pauseFrame = useCallback(() => readySignal, [readySignal]);
+  return (
+    <PanelSetup fixture={fixture} pauseFrame={pauseFrame}>
+      <StateTransitions
+        overrideConfig={{
+          paths: [
+            { value: "/some/topic/with/string_state.data.value", timestampMethod: "receiveTime" },
+          ],
         }}
       />
     </PanelSetup>
