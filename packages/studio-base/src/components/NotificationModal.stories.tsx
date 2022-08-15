@@ -44,6 +44,24 @@ ErrorModal.parameters = { colorScheme: "light" };
 export const ErrorModalDark = ErrorModal.bind(undefined);
 ErrorModalDark.parameters = { colorScheme: "dark" };
 
+export const ErrorModalWithSubtext = (): JSX.Element => {
+  return (
+    <NotificationModal
+      onRequestClose={() => {}}
+      notification={{
+        id: "1",
+        message: "Error 1",
+        details: fakeError(),
+        read: false,
+        created: new Date(),
+        severity: "error",
+        subText: "This error has a subtext.",
+      }}
+    />
+  );
+};
+ErrorModalWithSubtext.parameters = { colorScheme: "light" };
+
 export const Warning = (): JSX.Element => {
   return (
     <NotificationModal
