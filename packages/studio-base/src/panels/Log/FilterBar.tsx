@@ -11,21 +11,14 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import {
-  Dropdown,
-  IDropdownOption,
-  TagPicker,
-  ISelectableOption,
-  useTheme,
-  IDropdownStyles,
-} from "@fluentui/react";
 import CopyAllIcon from "@mui/icons-material/CopyAll";
-import { useTheme as useMuiTheme } from "@mui/material";
-import cx from "classnames";
-import { useMemo } from "react";
+import { MenuItem, Select, Typography } from "@mui/material";
+import { useCallback } from "react";
+import { makeStyles } from "tss-react/mui";
 
 import ToolbarIconButton from "@foxglove/studio-base/components/PanelToolbar/ToolbarIconButton";
 import Stack from "@foxglove/studio-base/components/Stack";
+import { FilterTagInput } from "@foxglove/studio-base/panels/Log/FilterTagInput";
 import useLogStyles from "@foxglove/studio-base/panels/Log/useLogStyles";
 import clipboard from "@foxglove/studio-base/util/clipboard";
 
@@ -33,13 +26,25 @@ import LevelToString from "./LevelToString";
 import { LogMessageEvent, LogLevel } from "./types";
 
 // Create the log level options nodes once since they don't change per render.
-const LOG_LEVEL_OPTIONS: IDropdownOption[] = [
+const LOG_LEVEL_OPTIONS = [
   { text: ">= DEBUG", key: LogLevel.DEBUG },
   { text: ">= INFO", key: LogLevel.INFO },
   { text: ">= WARN", key: LogLevel.WARN },
   { text: ">= ERROR", key: LogLevel.ERROR },
   { text: ">= FATAL", key: LogLevel.FATAL },
 ];
+
+const useStyles = makeStyles()((theme) => ({
+  root: {
+    marginRight: theme.spacing(-1),
+  },
+  levelSelect: {
+    ".MuiSelect-select.MuiInputBase-inputSizeSmall": {
+      paddingBottom: theme.spacing(0.375),
+      paddingTop: theme.spacing(0.375),
+    },
+  },
+}));
 
 type Filter = {
   minLogLevel: number;
@@ -55,159 +60,68 @@ export type FilterBarProps = {
   onFilterChange: (filter: Filter) => void;
 };
 
-// custom renderer for item in dropdown list to color text
-function renderOption(
-  option: ISelectableOption | undefined,
-  logStyles: ReturnType<typeof useLogStyles>["classes"],
-) {
-  if (!option) {
-    return ReactNull;
-  }
-  const strLevel = LevelToString(option.key as number);
+export default function FilterBar(props: FilterBarProps): JSX.Element {
+  const { classes: logStyles } = useLogStyles();
+  const { classes, cx } = useStyles();
 
-  return (
-    <div
-      key={option.key}
-      className={cx({
+  const logLevelToClass = useCallback(
+    (level: number) => {
+      const strLevel = LevelToString(level);
+      return cx({
         [logStyles.fatal]: strLevel === "FATAL",
         [logStyles.error]: strLevel === "ERROR",
         [logStyles.warn]: strLevel === "WARN",
         [logStyles.info]: strLevel === "INFO",
         [logStyles.debug]: strLevel === "DEBUG",
-      })}
-    >
-      {option.text}
-    </div>
+      });
+    },
+    [cx, logStyles.debug, logStyles.error, logStyles.fatal, logStyles.info, logStyles.warn],
   );
-}
 
-// custom renderer for selected dropdown item to color the text
-function renderTitle(
-  options: IDropdownOption[] | undefined,
-  logStyles: ReturnType<typeof useLogStyles>["classes"],
-) {
-  if (!options) {
-    return ReactNull;
-  }
-  return <>{options.map((option) => renderOption(option, logStyles))}</>;
-}
+  const logLevelItems = LOG_LEVEL_OPTIONS.map((option, index) => {
+    const className = logLevelToClass(option.key);
+    return (
+      <MenuItem key={index} value={option.key} className={className}>
+        <Typography variant="body2">{option.text}</Typography>
+      </MenuItem>
+    );
+  });
 
-export default function FilterBar(props: FilterBarProps): JSX.Element {
-  const { classes: logStyles } = useLogStyles();
-  const nodeNameOptions = Array.from(props.nodeNames, (name) => ({ name, key: name }));
-
-  const selectedItems = Array.from(props.searchTerms, (term) => ({
-    name: term,
-    key: term,
-  }));
-  const theme = useTheme();
-  const muiTheme = useMuiTheme();
-  const dropdownStyles: Partial<IDropdownStyles> = useMemo(
-    () => ({
-      root: {
-        minWidth: "100px",
-      },
-      caretDownWrapper: {
-        top: 0,
-        lineHeight: 16,
-        height: 16,
-      },
-      title: {
-        backgroundColor: "transparent",
-        fontSize: theme.fonts.small.fontSize,
-        borderColor: theme.semanticColors.bodyDivider,
-        lineHeight: 22,
-        height: 22,
-      },
-      dropdownItemSelected: {
-        fontSize: theme.fonts.small.fontSize,
-        lineHeight: 22,
-        height: 22,
-        minHeight: 22,
-      },
-      dropdownItem: {
-        lineHeight: 22,
-        height: 22,
-        minHeight: 22,
-        fontSize: theme.fonts.small.fontSize,
-      },
-    }),
-    [theme],
+  const renderLogLevelValue = useCallback(
+    (value: number) => {
+      const option = LOG_LEVEL_OPTIONS.find((o) => o.key === value);
+      const className = logLevelToClass(Number(option?.key ?? LogLevel.DEBUG));
+      return <div className={className}>{option?.text}</div>;
+    },
+    [logLevelToClass],
   );
 
   return (
-    <Stack
-      flex="auto"
-      direction="row"
-      gap={0.5}
-      alignItems="center"
-      style={{ marginRight: muiTheme.spacing(-1) }} // Spacing hack until we can unify the toolbar items.
-    >
-      <Dropdown
-        styles={dropdownStyles}
-        onRenderOption={(option) => renderOption(option, logStyles)}
-        onRenderTitle={(options) => renderTitle(options, logStyles)}
-        onChange={(_ev, option) => {
-          if (option) {
-            props.onFilterChange({
-              minLogLevel: option.key as number,
-              searchTerms: Array.from(props.searchTerms),
-            });
-          }
+    <Stack className={classes.root} flex="auto" direction="row" gap={0.5} alignItems="center">
+      <Select
+        className={classes.levelSelect}
+        value={props.minLogLevel}
+        size="small"
+        renderValue={renderLogLevelValue}
+        onChange={(event) => {
+          props.onFilterChange({
+            minLogLevel: Number(event.target.value),
+            searchTerms: Array.from(props.searchTerms),
+          });
         }}
-        options={LOG_LEVEL_OPTIONS}
-        selectedKey={props.minLogLevel}
+      >
+        {logLevelItems}
+      </Select>
+      <FilterTagInput
+        items={[...props.searchTerms]}
+        suggestions={[...props.nodeNames]}
+        onChange={(items: string[]) => {
+          props.onFilterChange({
+            minLogLevel: props.minLogLevel,
+            searchTerms: items,
+          });
+        }}
       />
-      <Stack flex="auto" gap={1}>
-        <TagPicker
-          inputProps={{
-            placeholder: "Search filter",
-          }}
-          styles={{
-            text: { minWidth: 0, minHeight: 22 },
-            input: {
-              width: 0,
-              height: 20,
-              fontSize: 11,
-
-              "::placeholder": {
-                fontSize: 11,
-              },
-            },
-            root: { height: 22 },
-            itemsWrapper: {
-              ".ms-TagItem": { lineHeight: 16, height: 16, fontSize: 11 },
-              ".ms-TagItem-text": { margin: "0 4px" },
-              ".ms-TagItem-close": {
-                fontSize: 11,
-                width: 20,
-
-                ".ms-Button-icon": {
-                  margin: 0,
-                },
-              },
-            },
-          }}
-          removeButtonAriaLabel="Remove"
-          selectionAriaLabel="Filter"
-          resolveDelay={50}
-          selectedItems={selectedItems}
-          onResolveSuggestions={(filter: string) => {
-            return [
-              { name: filter, key: filter },
-              ...nodeNameOptions.filter(({ key }) =>
-                selectedItems.every((item) => item.key !== key),
-              ),
-            ];
-          }}
-          onChange={(items) => {
-            props.onFilterChange({
-              minLogLevel: props.minLogLevel,
-              searchTerms: items?.map((item) => item.name) ?? [],
-            });
-          }}
-        />
-      </Stack>
       <Stack direction="row" alignItems="center" gap={0.5}>
         <ToolbarIconButton
           onClick={() => {
