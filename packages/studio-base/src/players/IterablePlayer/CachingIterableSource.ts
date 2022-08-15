@@ -83,8 +83,8 @@ class CachingIterableSource implements IIterableSource {
 
   constructor(source: IIterableSource, opt?: Options) {
     this.source = source;
-    this.maxTotalSizeBytes = opt?.maxTotalSize ?? 1e9;
-    this.maxBlockSizeBytes = opt?.maxBlockSize ?? 5000000;
+    this.maxTotalSizeBytes = opt?.maxTotalSize ?? 1073741824; // 1GB
+    this.maxBlockSizeBytes = opt?.maxBlockSize ?? 52428800; // 50MB
   }
 
   async initialize(): Promise<Initalization> {
