@@ -2,14 +2,13 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { ColorPicker } from "@fluentui/react";
 import { Popover, TextField } from "@mui/material";
 import { useCallback, useState } from "react";
 import tinycolor from "tinycolor2";
 
 import Stack from "@foxglove/studio-base/components/Stack";
-import { fonts } from "@foxglove/studio-base/util/sharedStyleConstants";
 
+import { ColorPickerControl } from "./ColorPickerControl";
 import { ColorSwatch } from "./ColorSwatch";
 
 export function ColorGradientInput({
@@ -92,18 +91,10 @@ export function ColorGradientInput({
           horizontal: "center",
         }}
       >
-        <ColorPicker
-          color={leftColor}
+        <ColorPickerControl
+          value={leftColor}
           alphaType="alpha"
-          styles={{
-            tableHexCell: { width: "35%" },
-            input: {
-              input: {
-                fontFeatureSettings: `${fonts.SANS_SERIF_FEATURE_SETTINGS}, 'zero' !important`,
-              },
-            },
-          }}
-          onChange={(_event, newValue) => onChange([newValue.str, rightColor])}
+          onChange={(newValue) => onChange([newValue, rightColor])}
         />
       </Popover>
       <Popover
@@ -119,18 +110,10 @@ export function ColorGradientInput({
           horizontal: "center",
         }}
       >
-        <ColorPicker
-          color={rightColor}
+        <ColorPickerControl
+          value={rightColor}
           alphaType="alpha"
-          styles={{
-            tableHexCell: { width: "35%" },
-            input: {
-              input: {
-                fontFeatureSettings: `${fonts.SANS_SERIF_FEATURE_SETTINGS}, 'zero' !important`,
-              },
-            },
-          }}
-          onChange={(_event, newValue) => onChange([leftColor, newValue.str])}
+          onChange={(newValue) => onChange([leftColor, newValue])}
         />
       </Popover>
     </Stack>

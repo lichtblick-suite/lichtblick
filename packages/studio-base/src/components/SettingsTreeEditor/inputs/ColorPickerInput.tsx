@@ -2,30 +2,21 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { ColorPicker } from "@fluentui/react";
 import ClearIcon from "@mui/icons-material/Clear";
 import { TextField, Popover, IconButton } from "@mui/material";
-import { useCallback, MouseEvent, useState } from "react";
+import { useCallback, MouseEvent, useState, useMemo } from "react";
 import tinycolor from "tinycolor2";
 import { makeStyles } from "tss-react/mui";
 
+import Stack from "@foxglove/studio-base/components/Stack";
 import { fonts } from "@foxglove/studio-base/util/sharedStyleConstants";
 
+import { ColorPickerControl } from "./ColorPickerControl";
 import { ColorSwatch } from "./ColorSwatch";
 
 const useStyles = makeStyles()({
-  clearButton: {
-    "&.MuiIconButton-root": {
-      cursor: "pointer",
-      position: "absolute",
-      right: 0,
-      top: "50%",
-      transform: "translate(0, -50%)",
-    },
-  },
   root: {
     position: "relative",
-    pointerEvents: "auto",
   },
   rootDisabled: {
     pointerEvents: "none",
@@ -60,6 +51,11 @@ export function ColorPickerInput(props: ColorPickerInputProps): JSX.Element {
 
   const [anchorElement, setAnchorElement] = useState<undefined | HTMLDivElement>(undefined);
 
+  const parsedValue = useMemo(() => (value ? tinycolor(value) : undefined), [value]);
+  const displayValue =
+    alphaType === "alpha" ? parsedValue?.toHex8String() : parsedValue?.toHexString();
+  const swatchColor = displayValue ?? "#00000044";
+
   const handleClick = useCallback((event: MouseEvent<HTMLDivElement>) => {
     setAnchorElement(event.currentTarget);
   }, []);
@@ -74,13 +70,8 @@ export function ColorPickerInput(props: ColorPickerInputProps): JSX.Element {
 
   const open = Boolean(anchorElement);
 
-  const parsedValue = value ? tinycolor(value) : undefined;
-  const displayValue =
-    alphaType === "alpha" ? parsedValue?.toHex8String() : parsedValue?.toHexString();
-  const swatchColor = displayValue ?? "#00000044";
-
   return (
-    <div
+    <Stack
       className={cx(classes.root, {
         [classes.rootDisabled]: disabled === true || readOnly === true,
       })}
@@ -97,12 +88,7 @@ export function ColorPickerInput(props: ColorPickerInputProps): JSX.Element {
           readOnly: true,
           startAdornment: <ColorSwatch color={swatchColor} onClick={handleClick} />,
           endAdornment: (
-            <IconButton
-              className={classes.clearButton}
-              onClick={clearValue}
-              size="small"
-              color="primary"
-            >
+            <IconButton onClick={clearValue} size="small" color="primary">
               <ClearIcon />
             </IconButton>
           ),
@@ -121,21 +107,8 @@ export function ColorPickerInput(props: ColorPickerInputProps): JSX.Element {
           horizontal: "center",
         }}
       >
-        <ColorPicker
-          color={swatchColor}
-          alphaType={props.alphaType}
-          styles={{
-            root: { minWidth: 216 },
-            tableHexCell: { width: "35%" },
-            input: {
-              input: {
-                fontFeatureSettings: `${fonts.SANS_SERIF_FEATURE_SETTINGS}, 'zero' !important`,
-              },
-            },
-          }}
-          onChange={(_event, newValue) => onChange(newValue.str)}
-        />
+        <ColorPickerControl alphaType={alphaType} value={value} onChange={onChange} />
       </Popover>
-    </div>
+    </Stack>
   );
 }

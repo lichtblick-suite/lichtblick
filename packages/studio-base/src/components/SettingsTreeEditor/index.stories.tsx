@@ -622,6 +622,7 @@ const ColorSettings: SettingsTreeNodes = {
       rgba: { label: "RGBA", input: "rgba", value: "rgba(255, 0, 0, 0.5)" },
       rgbaBlack: { label: "RGBA Black", input: "rgba", value: "rgba(0, 0, 0, 1)" },
       rgbaWhite: { label: "RGBA White", input: "rgba", value: "rgba(255, 255, 255, 1)" },
+      gradient: { label: "Gradient", input: "gradient", value: ["#000000", "#ffffff"] },
     },
   },
 };

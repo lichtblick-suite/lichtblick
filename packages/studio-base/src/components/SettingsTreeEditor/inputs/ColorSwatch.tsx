@@ -8,7 +8,7 @@ export const ColorSwatch = muiStyled("div", {
   shouldForwardProp: (prop) => prop !== "color",
 })<{ color: string }>(({ theme, color }) => ({
   backgroundColor: color,
-  height: theme.spacing(2.5),
+  aspectRatio: "1/1",
   width: theme.spacing(3),
   margin: theme.spacing(0.625),
   borderRadius: 1,
