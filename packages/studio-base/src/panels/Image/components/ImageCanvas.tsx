@@ -11,15 +11,7 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import {
-  useCallback,
-  useLayoutEffect,
-  useRef,
-  MouseEvent,
-  useState,
-  useMemo,
-  useReducer,
-} from "react";
+import { useCallback, useLayoutEffect, useRef, useState, useMemo, useReducer } from "react";
 import { useResizeDetector } from "react-resize-detector";
 import { useAsync } from "react-use";
 import { makeStyles } from "tss-react/mui";
@@ -74,16 +66,23 @@ const useStyles = makeStyles()((theme) => ({
     justifyContent: "center",
     color: theme.palette.error.main,
   },
-  canvas: {
+  canvasContainer: {
     position: "absolute",
     top: 0,
     left: 0,
     width: "100%",
     height: "100%",
-    imageRendering: "pixelated",
+
+    canvas: {
+      width: "100%",
+      height: "100%",
+      imageRendering: "pixelated",
+    },
   },
   canvasImageRenderingSmooth: {
-    imageRendering: "auto",
+    canvas: {
+      imageRendering: "auto",
+    },
   },
 }));
 
@@ -118,7 +117,8 @@ export function ImageCanvas(props: Props): JSX.Element {
 
   const [zoomMode, setZoomMode] = useState<Config["mode"]>(mode);
 
-  const canvasRef = useRef<HTMLCanvasElement>(ReactNull);
+  const [canvas, setCanvas] = useState<HTMLCanvasElement | undefined>();
+  const canvasContainerRef = useRef<HTMLDivElement>(ReactNull);
 
   // Use a debounce and 0 refresh rate to avoid triggering a resize observation while handling
   // an existing resize observation.
@@ -135,20 +135,17 @@ export function ImageCanvas(props: Props): JSX.Element {
   // The render function dispatches rendering to the main thread or a worker
   const [doRenderImage, setDoRenderImage] = useState<RenderImage | undefined>(undefined);
 
-  // the canvas can only be transferred once, so we keep the transfer around
-  const transfferedCanvasRef = useRef<OffscreenCanvas | undefined>(undefined);
-
   const workerRef = useRef<Rpc | undefined>();
 
-  const [workerId] = useState(uuidv4());
+  const [workerId] = useState(() => uuidv4());
 
   // setup the render function to render in the main thread or in the worker
   useLayoutEffect(() => {
-    const canvas = canvasRef.current;
-    if (!canvas) {
-      return;
-    }
+    const newCanvas = document.createElement("canvas");
+    setCanvas(newCanvas);
+    canvasContainerRef.current?.appendChild(newCanvas);
 
+    let mounted = true;
     const id = workerId;
 
     if (renderInMainThread) {
@@ -158,11 +155,11 @@ export function ImageCanvas(props: Props): JSX.Element {
         const targetWidth = args.geometry.viewport.width;
         const targetHeight = args.geometry.viewport.height;
 
-        if (targetWidth !== canvas.width) {
-          canvas.width = targetWidth;
+        if (targetWidth !== newCanvas.width) {
+          newCanvas.width = targetWidth;
         }
-        if (targetHeight !== canvas.height) {
-          canvas.height = targetHeight;
+        if (targetHeight !== newCanvas.height) {
+          newCanvas.height = targetHeight;
         }
         return renderImage({ ...args, hitmapCanvas: undefined });
       };
@@ -186,25 +183,31 @@ export function ImageCanvas(props: Props): JSX.Element {
         });
       };
 
-      transfferedCanvasRef.current ??= canvas.transferControlToOffscreen();
+      const transferredCanvas = newCanvas.transferControlToOffscreen();
 
       worker
-        .send<void>("initialize", { id, canvas: transfferedCanvasRef.current }, [
-          transfferedCanvasRef.current,
-        ])
+        .send<void>("initialize", { id, canvas: transferredCanvas }, [transferredCanvas])
         .then(() => {
-          setDoRenderImage(() => workerRender);
+          if (mounted) {
+            setDoRenderImage(() => workerRender);
+          }
         })
         .catch((err) => {
-          setError(err as Error);
+          if (mounted) {
+            console.error(err);
+            setError(err as Error);
+          }
         });
     }
 
     return () => {
+      mounted = false;
+      newCanvas.remove();
       if (renderInMainThread) {
         return;
       }
 
+      workerRef.current = undefined;
       webWorkerManager.unregisterWorkerListener(id);
     };
   }, [renderInMainThread, workerId]);
@@ -225,10 +228,10 @@ export function ImageCanvas(props: Props): JSX.Element {
   });
 
   useLayoutEffect(() => {
-    if (canvasRef.current) {
-      setContainer(canvasRef.current);
+    if (canvas) {
+      setContainer(canvas);
     }
-  }, [setContainer]);
+  }, [canvas, setContainer]);
 
   const renderOptions = useMemo(() => {
     return {
@@ -240,7 +243,7 @@ export function ImageCanvas(props: Props): JSX.Element {
 
   const devicePixelRatio = window.devicePixelRatio;
   const { error: renderError } = useAsync(async () => {
-    if (!canvasRef.current || !doRenderImage) {
+    if (!canvas || !doRenderImage) {
       return;
     }
 
@@ -263,7 +266,7 @@ export function ImageCanvas(props: Props): JSX.Element {
     const finishRender = onStartRenderImage();
     try {
       return await doRenderImage({
-        canvas: canvasRef.current,
+        canvas,
         geometry: {
           flipHorizontal: config.flipHorizontal ?? false,
           flipVertical: config.flipVertical ?? false,
@@ -280,6 +283,7 @@ export function ImageCanvas(props: Props): JSX.Element {
       finishRender();
     }
   }, [
+    canvas,
     config.flipHorizontal,
     config.flipVertical,
     config.rotation,
@@ -304,24 +308,28 @@ export function ImageCanvas(props: Props): JSX.Element {
     });
   }, [panX, panY, saveConfig, scaleValue]);
 
-  function onCanvasClick(event: MouseEvent<HTMLCanvasElement>) {
-    const boundingRect = event.currentTarget.getBoundingClientRect();
-    const x = event.clientX - boundingRect.x;
-    const y = event.clientY - boundingRect.y;
-    void workerRef.current
-      ?.send<PixelData | undefined>("mouseMove", {
-        id: workerId,
-        x: x * devicePixelRatio,
-        y: y * devicePixelRatio,
-      })
-      .then((r) => {
-        if (r?.marker) {
-          props.setActivePixelData(r);
-        } else {
-          props.setActivePixelData(undefined);
-        }
-      });
-  }
+  const onCanvasClick = useCallback(
+    (event: React.MouseEvent<HTMLElement>) => {
+      const setActivePixelData = props.setActivePixelData;
+      const boundingRect = event.currentTarget.getBoundingClientRect();
+      const x = event.clientX - boundingRect.x;
+      const y = event.clientY - boundingRect.y;
+      void workerRef.current
+        ?.send<PixelData | undefined>("mouseMove", {
+          id: workerId,
+          x: x * devicePixelRatio,
+          y: y * devicePixelRatio,
+        })
+        .then((r) => {
+          if (r?.marker) {
+            setActivePixelData(r);
+          } else {
+            setActivePixelData(undefined);
+          }
+        });
+    },
+    [devicePixelRatio, props.setActivePixelData, workerId],
+  );
 
   const resetPanZoom = useCallback(() => {
     setPan({ x: 0, y: 0 });
@@ -358,19 +366,19 @@ export function ImageCanvas(props: Props): JSX.Element {
       <KeyListener keyDownHandlers={keyDownHandlers} />
       {error && <div className={classes.errorMessage}>Error: {error.message}</div>}
       {renderError && <div className={classes.errorMessage}>Error: {renderError.message}</div>}
-      <canvas
-        {...panZoomHandlers}
-        className={cx(classes.canvas, {
-          [classes.canvasImageRenderingSmooth]: config.smooth === true,
-        })}
-        onClick={onCanvasClick}
-        ref={canvasRef}
-      />
       <ZoomMenu
         zoom={scaleValue}
         setZoom={setZoom}
         setZoomMode={setZoomMode}
         resetPanZoom={resetPanZoom}
+      />
+      <div
+        ref={canvasContainerRef}
+        onClick={onCanvasClick}
+        className={cx(classes.canvasContainer, {
+          [classes.canvasImageRenderingSmooth]: config.smooth === true,
+        })}
+        {...panZoomHandlers}
       />
     </div>
   );
