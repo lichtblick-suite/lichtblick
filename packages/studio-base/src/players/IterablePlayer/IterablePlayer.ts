@@ -338,7 +338,7 @@ export class IterablePlayer implements Player {
 
     // Support moving between idle (pause) and play and preserving the playback iterator
     if (newState !== "idle" && newState !== "play" && this._playbackIterator) {
-      log.info("Ending playback iterator because next state is not IDLE or PLAY");
+      log.debug("Ending playback iterator because next state is not IDLE or PLAY");
       const oldIterator = this._playbackIterator;
       this._playbackIterator = undefined;
       void oldIterator.return?.().catch((err) => {
