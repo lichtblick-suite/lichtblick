@@ -364,7 +364,8 @@ class CachingIterableSource implements IIterableSource {
         break;
       }
 
-      let readIdx = sortedIndexByTuple(cacheBlock.items, toNanoSec(args.time));
+      const targetTime = toNanoSec(args.time);
+      let readIdx = sortedIndexByTuple(cacheBlock.items, targetTime);
 
       // If readIdx is negative then we don't have an exact match, but readIdx does tell us what that is
       // See the findCacheItem documentation for how to interpret it.
@@ -374,6 +375,17 @@ class CachingIterableSource implements IIterableSource {
         // readIdx will point to the element after our time (or 1 past the end of the array)
         // We subtract 1 to start reading from before that element or end of array
         readIdx -= 1;
+      } else {
+        // When readIdx is an exact match we get a positive value. For an exact match we traverse
+        // forward linearly to find the last occurrence of the matching timestamp in our cache
+        // block. We can then read backwards in the block to find the last messages on all requested
+        // topics.
+        for (let i = readIdx + 1; i < cacheBlock.items.length; ++i) {
+          if (cacheBlock.items[i]?.[0] !== targetTime) {
+            break;
+          }
+          readIdx = i;
+        }
       }
 
       for (let i = readIdx; i >= 0; --i) {

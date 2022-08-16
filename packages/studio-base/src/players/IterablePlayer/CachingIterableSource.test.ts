@@ -822,4 +822,68 @@ describe("CachingIterableSource", () => {
       expect(bufferedSource.loadedRanges()).toEqual([{ start: 0, end: 1 }]);
     }
   });
+
+  it("should getBackfillMessages from cache where messages have same timestamp", async () => {
+    const source = new TestSource();
+    const bufferedSource = new CachingIterableSource(source);
+
+    await bufferedSource.initialize();
+
+    source.messageIterator = async function* messageIterator(
+      _args: MessageIteratorArgs,
+    ): AsyncIterableIterator<Readonly<IteratorResult>> {
+      for (let i = 0; i < 10; ++i) {
+        yield {
+          msgEvent: {
+            topic: "a",
+            receiveTime: { sec: Math.floor(i / 3), nsec: 0 },
+            message: { value: i },
+            sizeInBytes: 0,
+          },
+          problem: undefined,
+          connectionId: undefined,
+        };
+        yield {
+          msgEvent: {
+            topic: "b",
+            receiveTime: { sec: Math.floor(i / 3), nsec: 0 },
+            message: { value: i },
+            sizeInBytes: 0,
+          },
+          problem: undefined,
+          connectionId: undefined,
+        };
+      }
+    };
+
+    {
+      const messageIterator = bufferedSource.messageIterator({
+        topics: ["a", "b"],
+      });
+
+      // load all the messages into cache
+      for await (const _ of messageIterator) {
+        // no-op
+      }
+
+      expect(bufferedSource.loadedRanges()).toEqual([{ start: 0, end: 1 }]);
+    }
+
+    // because we have cached we shouldn't be calling source anymore
+    source.messageIterator = function messageIterator(
+      _args: MessageIteratorArgs,
+    ): AsyncIterableIterator<Readonly<IteratorResult>> {
+      throw new Error("should not be called");
+    };
+
+    const backfill = await bufferedSource.getBackfillMessages({
+      topics: ["a", "b"],
+      time: { sec: 2, nsec: 0 },
+    });
+
+    expect(backfill).toEqual([
+      { message: { value: 8 }, receiveTime: { sec: 2, nsec: 0 }, sizeInBytes: 0, topic: "b" },
+      { message: { value: 8 }, receiveTime: { sec: 2, nsec: 0 }, sizeInBytes: 0, topic: "a" },
+    ]);
+  });
 });
