@@ -20,6 +20,6 @@
     "prepack": "tsc -b"
   },
   "devDependencies": {
-    "typescript": "4.6.2"
+    "typescript": "4.7.4"
   }
 }

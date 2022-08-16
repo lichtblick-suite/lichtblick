@@ -399,6 +399,7 @@ export class LabelPool extends EventDispatcher<{ type: "scaleFactorChange" | "at
     }
 
     this.atlasTexture.image = {
+      colorSpace: "srgb",
       data,
       width: this.fontManager.atlasData.width,
       height: this.fontManager.atlasData.height,
