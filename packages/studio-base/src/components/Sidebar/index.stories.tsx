@@ -21,13 +21,14 @@ const E = () => <>E</>;
 
 const ITEMS = new Map<string, SidebarItem>([
   ["a", { title: "A", component: A, iconName: "Add" }],
-  ["b", { title: "B", component: B, iconName: "ErrorBadge" }],
   ["c", { title: "C", component: C, iconName: "Cancel" }],
   ["d", { title: "D", component: D, iconName: "Delete" }],
   ["e", { title: "E", component: E, badge: { count: 2 }, iconName: "Edit" }],
 ]);
 
-const BOTTOM_ITEMS = ["b"];
+const BOTTOM_ITEMS = new Map<string, SidebarItem>([
+  ["b", { title: "B", component: B, iconName: "ErrorBadge" }],
+]);
 
 function Story({
   clickKey,
@@ -43,16 +44,12 @@ function Story({
   useEffect(() => {
     if (clickKey != undefined) {
       void (async () => {
-        // Give the ResizeGroup some time to show the overflow button, to avoid flaky screenshot tests
-        for (let i = 0; i < 10; i++) {
-          await new Promise((resolve) => setTimeout(resolve, 10));
-          const button = document.querySelector<HTMLButtonElement>(
-            `button[data-sidebar-key=${clickKey}]`,
-          );
-          if (button) {
-            button.click();
-            return;
-          }
+        const button = document.querySelector<HTMLButtonElement>(
+          `button[data-sidebar-key=${clickKey}]`,
+        );
+        if (button) {
+          button.click();
+          return;
         }
         setSelectedKey(() => {
           throw new Error("Missing sidebar button");
@@ -89,13 +86,3 @@ ClickToDeselect.parameters = { colorScheme: "dark" };
 export const OverflowUnselected = (): JSX.Element => <Story height={200} />;
 export const OverflowCSelected = (): JSX.Element => <Story height={200} defaultSelectedKey="c" />;
 export const OverflowBSelected = (): JSX.Element => <Story height={200} defaultSelectedKey="b" />;
-
-export const OverflowMenuUnselected = (): JSX.Element => (
-  <Story height={200} clickKey="_overflow" />
-);
-OverflowMenuUnselected.parameters = { colorScheme: "dark" };
-
-export const OverflowMenuSelected = (): JSX.Element => (
-  <Story height={200} defaultSelectedKey="d" clickKey="_overflow" />
-);
-OverflowMenuSelected.parameters = { colorScheme: "dark" };

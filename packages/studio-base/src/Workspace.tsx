@@ -509,8 +509,8 @@ export default function Workspace(props: WorkspaceProps): JSX.Element {
     };
   }, []);
 
-  const sidebarItems = useMemo<Map<SidebarItemKey, SidebarItem>>(() => {
-    const SIDEBAR_ITEMS = new Map<SidebarItemKey, SidebarItem>([
+  const [sidebarItems, sidebarBottomItems] = useMemo(() => {
+    const topItems = new Map<SidebarItemKey, SidebarItem>([
       [
         "connection",
         {
@@ -530,29 +530,29 @@ export default function Workspace(props: WorkspaceProps): JSX.Element {
         { iconName: "PanelSettings", title: "Panel settings", component: PanelSettings },
       ],
       ["variables", { iconName: "Variable2", title: "Variables", component: VariablesSidebar }],
-      ["preferences", { iconName: "Settings", title: "Preferences", component: Preferences }],
       ["extensions", { iconName: "AddIn", title: "Extensions", component: ExtensionsSidebar }],
+    ]);
+
+    const bottomItems = new Map<SidebarItemKey, SidebarItem>([
       ["help", { iconName: "QuestionCircle", title: "Help", component: HelpSidebar }],
     ]);
 
-    return supportsAccountSettings
-      ? new Map([
-          ...SIDEBAR_ITEMS,
-          [
-            "account",
-            {
-              iconName: currentUser != undefined ? "BlockheadFilled" : "Blockhead",
-              title: currentUser != undefined ? `Signed in as ${currentUser.email}` : "Account",
-              component: AccountSettings,
-            },
-          ],
-        ])
-      : SIDEBAR_ITEMS;
-  }, [DataSourceSidebarItem, playerProblems, supportsAccountSettings, currentUser]);
+    if (supportsAccountSettings) {
+      bottomItems.set("account", {
+        iconName: currentUser != undefined ? "BlockheadFilled" : "Blockhead",
+        title: currentUser != undefined ? `Signed in as ${currentUser.email}` : "Account",
+        component: AccountSettings,
+      });
 
-  const sidebarBottomItems: readonly SidebarItemKey[] = useMemo(() => {
-    return supportsAccountSettings ? ["help", "account", "preferences"] : ["help", "preferences"];
-  }, [supportsAccountSettings]);
+      bottomItems.set("preferences", {
+        iconName: "Settings",
+        title: "Preferences",
+        component: Preferences,
+      });
+    }
+
+    return [topItems, bottomItems];
+  }, [DataSourceSidebarItem, playerProblems, supportsAccountSettings, currentUser]);
 
   const keyDownHandlers = useMemo(
     () => ({

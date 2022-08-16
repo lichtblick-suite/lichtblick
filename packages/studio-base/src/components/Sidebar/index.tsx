@@ -2,47 +2,72 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
+import { Badge, Paper, Tab, Tabs } from "@mui/material";
 import {
-  DirectionalHint,
-  IIconProps,
-  IOverflowSetItemProps,
-  OverflowSet,
-  ResizeGroup,
-  ResizeGroupDirection,
-} from "@fluentui/react";
-import { Theme, useTheme } from "@mui/material";
-import { makeStyles } from "@mui/styles";
-import { useCallback, useLayoutEffect, useRef, useState } from "react";
+  ComponentProps,
+  PropsWithChildren,
+  useCallback,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { MosaicNode, MosaicWithoutDragDropContext } from "react-mosaic-component";
+import { makeStyles } from "tss-react/mui";
 
-import { filterMap } from "@foxglove/den/collection";
 import { AppSetting } from "@foxglove/studio-base/AppSetting";
+import { BuiltinIcon } from "@foxglove/studio-base/components/BuiltinIcon";
 import ErrorBoundary from "@foxglove/studio-base/components/ErrorBoundary";
 import Stack from "@foxglove/studio-base/components/Stack";
 import { useAppConfigurationValue } from "@foxglove/studio-base/hooks";
 
 import { MemoryUseIndicator } from "./MemoryUseIndicator";
-import SidebarButton, { BUTTON_SIZE } from "./SidebarButton";
-import { Badge } from "./types";
+import { TabSpacer } from "./TabSpacer";
 
 function Noop(): ReactNull {
   return ReactNull;
 }
 
 export type SidebarItem = {
-  iconName: IIconProps["iconName"];
+  iconName: ComponentProps<typeof BuiltinIcon>["name"];
   title: string;
-  badge?: Badge;
+  badge?: { count: number };
   component?: React.ComponentType;
   url?: string;
 };
 
-const useStyles = makeStyles((theme: Theme) => ({
+const useStyles = makeStyles()((theme) => ({
   nav: {
-    width: BUTTON_SIZE,
     boxSizing: "content-box",
     borderRight: `1px solid ${theme.palette.divider}`,
     backgroundColor: theme.palette.background.paper,
+  },
+  tabs: {
+    flexGrow: 1,
+    ".MuiTabs-flexContainerVertical": {
+      height: "100%",
+    },
+  },
+  tab: {
+    padding: theme.spacing(1.625),
+    minWidth: 50,
+  },
+  badge: {
+    "> *:not(.MuiBadge-badge)": {
+      width: "1.5rem",
+      height: "1.5rem",
+      fontSize: "1.5rem",
+      display: "flex",
+
+      ".root-span": {
+        display: "contents",
+      },
+      svg: {
+        fontSize: "inherit",
+        width: "auto",
+        height: "auto",
+      },
+    },
   },
   mosaicWrapper: {
     flex: "1 1 100%",
@@ -54,10 +79,6 @@ const useStyles = makeStyles((theme: Theme) => ({
       display: "none !important",
     },
   },
-  resizeGroup: {
-    height: "100%",
-    minHeight: 0,
-  },
 }));
 
 // Determine initial sidebar width, with a cap for larger
@@ -68,27 +89,22 @@ function defaultInitialSidebarPercentage() {
   return (100 * width) / window.innerWidth;
 }
 
-export default function Sidebar<K extends string>({
-  children,
-  items,
-  bottomItems,
-  selectedKey,
-  onSelectKey,
-}: React.PropsWithChildren<{
+type SidebarProps<K> = PropsWithChildren<{
   items: Map<K, SidebarItem>;
-  bottomItems: readonly K[];
+  bottomItems: Map<K, SidebarItem>;
   selectedKey: K | undefined;
   onSelectKey: (key: K | undefined) => void;
-}>): JSX.Element {
+}>;
+
+export default function Sidebar<K extends string>(props: SidebarProps<K>): JSX.Element {
+  const { children, items, bottomItems, selectedKey, onSelectKey } = props;
   const [enableMemoryUseIndicator = false] = useAppConfigurationValue<boolean>(
     AppSetting.ENABLE_MEMORY_USE_INDICATOR,
   );
   const [mosaicValue, setMosaicValue] = useState<MosaicNode<"sidebar" | "children">>("children");
-
-  const theme = useTheme();
-  const classes = useStyles();
-
+  const { classes } = useStyles();
   const prevSelectedKey = useRef<string | undefined>(undefined);
+
   useLayoutEffect(() => {
     if (prevSelectedKey.current !== selectedKey) {
       if (selectedKey == undefined) {
@@ -105,123 +121,93 @@ export default function Sidebar<K extends string>({
     }
   }, [selectedKey]);
 
-  const onItemClick = useCallback(
+  const allItems = useMemo(() => {
+    return new Map([...items, ...bottomItems]);
+  }, [bottomItems, items]);
+
+  const SelectedComponent =
+    (selectedKey != undefined && allItems.get(selectedKey)?.component) || Noop;
+
+  const onClickTabAction = useCallback(
     (key: K) => {
+      // toggle tab selected/unselected on click
       if (selectedKey === key) {
         onSelectKey(undefined);
       } else {
         onSelectKey(key);
       }
     },
-    [onSelectKey, selectedKey],
+    [selectedKey, onSelectKey],
   );
 
-  const SelectedComponent = (selectedKey != undefined && items.get(selectedKey)?.component) || Noop;
+  const topTabs = useMemo(() => {
+    return [...items.entries()].map(([key, item]) => (
+      <Tab
+        data-sidebar-key={key}
+        className={classes.tab}
+        value={key}
+        key={key}
+        title={item.title}
+        onClick={() => onClickTabAction(key)}
+        icon={
+          <Badge
+            className={classes.badge}
+            badgeContent={item.badge?.count}
+            invisible={item.badge == undefined}
+            color="error"
+            anchorOrigin={{
+              vertical: "bottom",
+              horizontal: "right",
+            }}
+          >
+            <BuiltinIcon name={item.iconName} />
+          </Badge>
+        }
+      />
+    ));
+  }, [classes, items, onClickTabAction]);
 
-  type OverflowSetItem = IOverflowSetItemProps & { key: K };
-
-  // Callbacks for OverflowSet
-  const onRenderItem = useCallback(
-    ({ key }: OverflowSetItem) => {
-      const item = items.get(key);
-      if (!item) {
-        throw new Error(`Missing sidebar item ${key}`);
-      }
-      const { title, iconName } = item;
-      return (
-        <SidebarButton
-          dataSidebarKey={key}
-          key={key}
-          selected={selectedKey === key}
-          title={title}
-          iconProps={{ iconName }}
-          onClick={() => onItemClick(key)}
-          badge={item.badge}
-        />
-      );
-    },
-    [items, onItemClick, selectedKey],
-  );
-  const onRenderOverflowButton = useCallback(
-    (overflowItems?: OverflowSetItem[]) => {
-      if (!overflowItems) {
-        return ReactNull;
-      }
-      const overflowItemSelected = overflowItems.some(({ key }) => selectedKey === key);
-      return (
-        <SidebarButton
-          dataSidebarKey="_overflow"
-          selected={overflowItemSelected}
-          title="More"
-          iconProps={{ iconName: "MoreVertical" }}
-          menuProps={{
-            directionalHint: DirectionalHint.rightCenter,
-            items: overflowItems.map(({ key }) => {
-              const item = items.get(key as K);
-              if (!item) {
-                throw new Error(`Missing sidebar item ${key}`);
-              }
-              return {
-                key,
-                checked: selectedKey === key,
-                canCheck: overflowItemSelected,
-                text: item.title,
-                iconProps: { iconName: item.iconName },
-                onClick: () => onItemClick(key),
-              };
-            }),
-          }}
-        />
-      );
-    },
-    [items, selectedKey, onItemClick],
-  );
-
-  // Data and callbacks for ResizeGroup
-  type Data = { itemsToShow: number };
-  const onRenderData = useCallback(
-    ({ itemsToShow }: Data) => {
-      const shownItems = filterMap(items.keys(), (key) =>
-        bottomItems.includes(key) ? undefined : { key },
-      );
-      const overflowItems = shownItems.splice(itemsToShow);
-
-      return (
-        <OverflowSet
-          vertical
-          items={shownItems}
-          overflowItems={overflowItems}
-          onRenderItem={onRenderItem as (_: IOverflowSetItemProps) => unknown}
-          onRenderOverflowButton={onRenderOverflowButton}
-        />
-      );
-    },
-    [items, bottomItems, onRenderItem, onRenderOverflowButton],
-  );
-  const numNonBottomItems = items.size - bottomItems.length;
-  const onReduceData = useCallback(
-    ({ itemsToShow }: Data) => (itemsToShow === 0 ? undefined : { itemsToShow: itemsToShow - 1 }),
-    [],
-  );
-  const onGrowData = useCallback(
-    ({ itemsToShow }: Data) =>
-      itemsToShow >= numNonBottomItems ? undefined : { itemsToShow: itemsToShow + 1 },
-    [numNonBottomItems],
-  );
+  const bottomTabs = useMemo(() => {
+    return [...bottomItems.entries()].map(([key, item]) => (
+      <Tab
+        className={classes.tab}
+        value={key}
+        key={key}
+        title={item.title}
+        onClick={() => onClickTabAction(key)}
+        icon={
+          <Badge
+            className={classes.badge}
+            badgeContent={item.badge?.count}
+            invisible={item.badge == undefined}
+            color="error"
+            anchorOrigin={{
+              vertical: "bottom",
+              horizontal: "right",
+            }}
+          >
+            <BuiltinIcon name={item.iconName} />
+          </Badge>
+        }
+      />
+    ));
+  }, [bottomItems, classes, onClickTabAction]);
 
   return (
     <Stack direction="row" fullHeight overflow="hidden">
       <Stack className={classes.nav} flexShrink={0} justifyContent="space-between">
-        <ResizeGroup
-          className={classes.resizeGroup}
-          direction={ResizeGroupDirection.vertical}
-          data={{ itemsToShow: numNonBottomItems }}
-          onRenderData={onRenderData}
-          onReduceData={onReduceData}
-          onGrowData={onGrowData}
-        />
-        {bottomItems.map((key) => onRenderItem({ key }))}
-        {enableMemoryUseIndicator && <MemoryUseIndicator />}
+        <Tabs
+          className={classes.tabs}
+          orientation="vertical"
+          variant="scrollable"
+          value={selectedKey ?? false}
+          scrollButtons={false}
+        >
+          {topTabs}
+          <TabSpacer />
+          {bottomTabs}
+          {enableMemoryUseIndicator && <MemoryUseIndicator />}
+        </Tabs>
       </Stack>
       {
         // By always rendering the mosaic, even if we are only showing children, we can prevent the
@@ -237,13 +223,9 @@ export default function Sidebar<K extends string>({
               {id === "children" ? (
                 (children as JSX.Element)
               ) : (
-                <div
-                  style={{
-                    backgroundColor: theme.palette.background.paper,
-                  }}
-                >
+                <Paper square elevation={0}>
                   <SelectedComponent />
-                </div>
+                </Paper>
               )}
             </ErrorBoundary>
           )}

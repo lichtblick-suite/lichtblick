@@ -91,6 +91,15 @@ export default function muiComponents(theme: Theme): ThemeOptions["components"] 
         variant: "standard",
       },
     },
+    MuiBadge: {
+      styleOverrides: {
+        badge: {
+          height: 16,
+          minWidth: 16,
+          padding: theme.spacing(0, 0.25),
+        },
+      },
+    },
     MuiButton: {
       defaultProps: {
         disableElevation: true,
