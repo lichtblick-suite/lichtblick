@@ -106,7 +106,7 @@ const nestedTabLayoutFixture2: Fixture = {
   layout: {
     direction: "row",
     splitPercentage: 20,
-    first: "Plot!1",
+    first: "Sample1",
     second: {
       direction: "row",
       splitPercentage: 20,
