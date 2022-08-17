@@ -295,7 +295,7 @@ export class Renderer extends EventEmitter<RendererEvents> {
     this.gl.info.autoReset = false;
     this.gl.shadowMap.enabled = false;
     this.gl.shadowMap.type = THREE.VSMShadowMap;
-    this.gl.sortObjects = false;
+    this.gl.sortObjects = true;
     this.gl.setPixelRatio(window.devicePixelRatio);
 
     let width = canvas.width;
