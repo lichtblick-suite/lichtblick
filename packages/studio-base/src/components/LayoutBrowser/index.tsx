@@ -17,7 +17,7 @@ import {
 import { partition } from "lodash";
 import moment from "moment";
 import path from "path";
-import { MouseEvent, useCallback, useContext, useEffect, useLayoutEffect } from "react";
+import { MouseEvent, useCallback, useContext, useEffect, useLayoutEffect, useMemo } from "react";
 import { useToasts } from "react-toast-notifications";
 import { useMountedState } from "react-use";
 import useAsyncFn from "react-use/lib/useAsyncFn";
@@ -506,6 +506,12 @@ export default function LayoutBrowser({
 
   const pendingMultiAction = state.multiAction?.ids != undefined;
 
+  const anySelectedModifiedLayouts = useMemo(() => {
+    return [layouts.value?.personal ?? [], layouts.value?.shared ?? []]
+      .flat()
+      .some((layout) => layout.working != undefined && state.selectedIds.includes(layout.id));
+  }, [layouts, state.selectedIds]);
+
   return (
     <SidebarContent
       title="Layouts"
@@ -549,6 +555,7 @@ export default function LayoutBrowser({
           title={layoutManager.supportsSharing ? "Personal" : undefined}
           emptyText="Add a new layout to get started with Foxglove Studio!"
           items={layouts.value?.personal}
+          anySelectedModifiedLayouts={anySelectedModifiedLayouts}
           multiSelectedIds={state.selectedIds}
           selectedId={currentLayoutId}
           onSelect={onSelectLayout}
@@ -566,6 +573,7 @@ export default function LayoutBrowser({
             title="Team"
             emptyText="Your organization doesn’t have any shared layouts yet. Share a personal layout to collaborate with other team members."
             items={layouts.value?.shared}
+            anySelectedModifiedLayouts={anySelectedModifiedLayouts}
             multiSelectedIds={state.selectedIds}
             selectedId={currentLayoutId}
             onSelect={onSelectLayout}

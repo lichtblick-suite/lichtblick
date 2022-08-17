@@ -119,6 +119,7 @@ export type LayoutActionMenuItem =
 
 export default React.memo(function LayoutRow({
   layout,
+  anySelectedModifiedLayouts,
   multiSelectedIds,
   selected,
   onSelect,
@@ -132,6 +133,7 @@ export default React.memo(function LayoutRow({
   onMakePersonalCopy,
 }: {
   layout: Layout;
+  anySelectedModifiedLayouts: boolean;
   multiSelectedIds: readonly string[];
   selected: boolean;
   onSelect: (item: Layout, params?: { selectedViaClick?: boolean; event?: MouseEvent }) => void;
@@ -325,7 +327,7 @@ export default React.memo(function LayoutRow({
     },
   ];
 
-  if (hasModifications) {
+  if (hasModifications || anySelectedModifiedLayouts) {
     const sectionItems: LayoutActionMenuItem[] = [
       {
         type: "item",
@@ -352,13 +354,16 @@ export default React.memo(function LayoutRow({
         onClick: makePersonalCopyAction,
       });
     }
+
+    const unsavedChangesMessage = anySelectedModifiedLayouts
+      ? "These layouts have unsaved changes"
+      : "This layout has unsaved changes";
+
     menuItems.unshift(
       {
         key: "changes",
         type: "header",
-        text: deletedOnServer
-          ? "Someone else has deleted this layout"
-          : "This layout has unsaved changes",
+        text: deletedOnServer ? "Someone else has deleted this layout" : unsavedChangesMessage,
       },
       ...sectionItems,
       { key: "changes_divider", type: "divider" },

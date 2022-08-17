@@ -14,6 +14,7 @@ export default function LayoutSection({
   title,
   emptyText,
   items,
+  anySelectedModifiedLayouts,
   multiSelectedIds,
   selectedId,
   onSelect,
@@ -29,6 +30,7 @@ export default function LayoutSection({
   title: string | undefined;
   emptyText: string | undefined;
   items: readonly Layout[] | undefined;
+  anySelectedModifiedLayouts: boolean;
   multiSelectedIds: readonly string[];
   selectedId?: string;
   onSelect: (item: Layout, params?: { selectedViaClick?: boolean; event?: MouseEvent }) => void;
@@ -60,6 +62,7 @@ export default function LayoutSection({
         )}
         {items?.map((layout) => (
           <LayoutRow
+            anySelectedModifiedLayouts={anySelectedModifiedLayouts}
             multiSelectedIds={multiSelectedIds}
             selected={layout.id === selectedId}
             key={layout.id}
