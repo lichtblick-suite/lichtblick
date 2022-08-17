@@ -21,8 +21,7 @@ import { DeepPartial } from "ts-essentials";
 import { useDebouncedCallback } from "use-debounce";
 
 import Logger from "@foxglove/log";
-import { definitions as commonDefs } from "@foxglove/rosmsg-msgs-common";
-import { fromDate, toNanoSec } from "@foxglove/rostime";
+import { toNanoSec } from "@foxglove/rostime";
 import {
   LayoutActions,
   MessageEvent,
@@ -38,7 +37,6 @@ import PublishPoseEstimateIcon from "@foxglove/studio-base/components/PublishPos
 import useCleanup from "@foxglove/studio-base/hooks/useCleanup";
 import { DEFAULT_PUBLISH_SETTINGS } from "@foxglove/studio-base/panels/ThreeDeeRender/renderables/CoreSettings";
 import ThemeProvider from "@foxglove/studio-base/theme/ThemeProvider";
-import { Point, makeCovarianceArray } from "@foxglove/studio-base/util/geometry";
 
 import { DebugGui } from "./DebugGui";
 import { Interactions, InteractionContextMenu, SelectionObject, TabType } from "./Interactions";
@@ -48,9 +46,14 @@ import { RendererContext, useRenderer, useRendererEvent } from "./RendererContex
 import { Stats } from "./Stats";
 import { CameraState, DEFAULT_CAMERA_STATE, MouseEventObject } from "./camera";
 import { FRAME_TRANSFORM_DATATYPES } from "./foxglove";
+import {
+  PublishDatatypes,
+  makePointMessage,
+  makePoseEstimateMessage,
+  makePoseMessage,
+} from "./publish";
 import { PublishClickEvent, PublishClickType } from "./renderables/PublishClickTool";
 import { TF_DATATYPES, TRANSFORM_STAMPED_DATATYPES } from "./ros";
-import { Pose } from "./transforms/geometry";
 
 const log = Logger.getLogger(__filename);
 
@@ -68,54 +71,6 @@ const PublishClickIcons: Record<PublishClickType, React.ReactNode> = {
   point: <PublishPointIcon fontSize="inherit" />,
   pose_estimate: <PublishPoseEstimateIcon fontSize="inherit" />,
 };
-
-const PublishDatatypes = new Map(
-  (
-    [
-      "geometry_msgs/Point",
-      "geometry_msgs/PointStamped",
-      "geometry_msgs/Pose",
-      "geometry_msgs/PoseStamped",
-      "geometry_msgs/PoseWithCovariance",
-      "geometry_msgs/PoseWithCovarianceStamped",
-      "geometry_msgs/Quaternion",
-      "std_msgs/Header",
-    ] as Array<keyof typeof commonDefs>
-  ).map((type) => [type, commonDefs[type]]),
-);
-
-function makePointMessage(point: Point, frameId: string) {
-  const time = fromDate(new Date());
-  return {
-    header: { seq: 0, stamp: time, frame_id: frameId },
-    point: { x: point.x, y: point.y, z: 0 },
-  };
-}
-
-function makePoseMessage(pose: Pose, frameId: string) {
-  const time = fromDate(new Date());
-  return {
-    header: { seq: 0, stamp: time, frame_id: frameId },
-    pose,
-  };
-}
-
-function makePoseEstimateMessage(
-  pose: Pose,
-  frameId: string,
-  xDev: number,
-  yDev: number,
-  thetaDev: number,
-) {
-  const time = fromDate(new Date());
-  return {
-    header: { seq: 0, stamp: time, frame_id: frameId },
-    pose: {
-      covariance: makeCovarianceArray(xDev, yDev, thetaDev),
-      pose,
-    },
-  };
-}
 
 /**
  * Provides DOM overlay elements on top of the 3D scene (e.g. stats, debug GUI).
@@ -142,6 +97,9 @@ function RendererOverlay(props: {
   const [selectedRenderable, setSelectedRenderable] = useState<Renderable | undefined>(undefined);
   const [interactionsTabType, setInteractionsTabType] = useState<TabType | undefined>(undefined);
   const renderer = useRenderer();
+
+  // Publish control is only available if the canPublish prop is true and we have a fixed frame in the renderer
+  const showPublishControl: boolean = props.canPublish && renderer?.fixedFrameId != undefined;
 
   // Toggle object selection mode on/off in the renderer
   useEffect(() => {
@@ -265,7 +223,7 @@ function RendererOverlay(props: {
             <RulerIcon style={{ width: 16, height: 16 }} />
           </IconButton>
 
-          {props.canPublish && (
+          {showPublishControl && (
             <>
               <IconButton
                 {...longPressPublishEvent}
@@ -734,6 +692,11 @@ export function ThreeDeeRender({ context }: { context: PanelExtensionContext }):
         log.error("Data source does not support publishing");
         return;
       }
+      if (context.dataSourceProfile !== "ros1" && context.dataSourceProfile !== "ros2") {
+        log.warn("Publishing is only supported in ros1 and ros2");
+        return;
+      }
+
       try {
         switch (event.publishClickType) {
           case "point": {
@@ -806,6 +769,11 @@ export function ThreeDeeRender({ context }: { context: PanelExtensionContext }):
     [onTogglePerspective],
   );
 
+  // The 3d panel only supports publishing to ros1 and ros2 data sources
+  const isRosDataSource =
+    context.dataSourceProfile === "ros1" || context.dataSourceProfile === "ros2";
+  const canPublish = context.publish != undefined && isRosDataSource;
+
   return (
     <ThemeProvider isDark={colorScheme === "dark"}>
       <div style={PANEL_STYLE} onKeyDown={onKeyDown}>
@@ -827,7 +795,7 @@ export function ThreeDeeRender({ context }: { context: PanelExtensionContext }):
             onTogglePerspective={onTogglePerspective}
             measureActive={measureActive}
             onClickMeasure={onClickMeasure}
-            canPublish={context.publish != undefined}
+            canPublish={canPublish}
             publishActive={publishActive}
             onClickPublish={onClickPublish}
             publishClickType={renderer?.publishClickTool.publishClickType ?? "point"}

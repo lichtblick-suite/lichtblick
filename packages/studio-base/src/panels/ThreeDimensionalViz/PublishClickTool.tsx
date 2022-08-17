@@ -50,7 +50,7 @@ function makePointMessage(topic: string, point: Point, frameId: string) {
   return {
     topic,
     msg: {
-      header: { seq: 0, stamp: time, frame_id: frameId },
+      header: { stamp: time, frame_id: frameId },
       point: { x: point.x, y: point.y, z: 0 },
     },
   };
@@ -61,7 +61,7 @@ function makePoseMessage(topic: string, start: Point, end: Point, frameId: strin
   return {
     topic,
     msg: {
-      header: { seq: 0, stamp: time, frame_id: frameId },
+      header: { stamp: time, frame_id: frameId },
       pose: {
         position: { x: start.x, y: start.y, z: 0 },
         orientation: quaternionFromPoints(start, end),
@@ -83,7 +83,7 @@ function makePoseEstimateMessage(
   return {
     topic,
     msg: {
-      header: { seq: 0, stamp: time, frame_id: frameId },
+      header: { stamp: time, frame_id: frameId },
       pose: {
         covariance: makeCovarianceArray(x, y, theta),
         pose: {
