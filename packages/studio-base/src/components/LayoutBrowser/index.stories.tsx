@@ -97,7 +97,7 @@ async function deleteLayoutInteraction(index: number) {
 
 async function doMultiAction(action: string) {
   await selectAllAction();
-  await clickMenuButtonAction(0);
+  await clickMenuButtonAction(1);
   const button = await screen.findByText(action);
   fireEvent.click(button);
 }
