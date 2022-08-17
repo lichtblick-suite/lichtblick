@@ -79,6 +79,7 @@ export type Fixture = {
   frame?: Frame;
   topics?: Topic[];
   capabilities?: string[];
+  profile?: string;
   activeData?: Partial<PlayerStateActiveData>;
   progress?: Progress;
   datatypes?: RosDatatypes;
@@ -266,6 +267,7 @@ function UnconnectedPanelSetup(props: UnconnectedProps): JSX.Element | ReactNull
     topics = [],
     datatypes,
     capabilities,
+    profile,
     activeData,
     progress,
     publish,
@@ -302,6 +304,7 @@ function UnconnectedPanelSetup(props: UnconnectedProps): JSX.Element | ReactNull
         datatypes={dTypes}
         messages={allData}
         pauseFrame={props.pauseFrame}
+        profile={profile}
         activeData={activeData}
         progress={progress}
         publish={publish}
