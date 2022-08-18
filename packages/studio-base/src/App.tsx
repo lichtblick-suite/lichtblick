@@ -2,7 +2,7 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { useState, Suspense, Fragment } from "react";
+import { useState, Suspense, Fragment, useEffect } from "react";
 import { DndProvider } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
 
@@ -56,6 +56,16 @@ type AppProps = {
   enableLaunchPreferenceScreen?: boolean;
 };
 
+// Suppress context menu for the entire app except on inputs & textareas.
+function contextMenuHandler(event: MouseEvent) {
+  if (event.target instanceof HTMLInputElement || event.target instanceof HTMLTextAreaElement) {
+    return;
+  }
+
+  event.preventDefault();
+  return false;
+}
+
 export function App(props: AppProps): JSX.Element {
   const [assetLoaders] = useState(() => [new URDFAssetLoader()]);
 
@@ -108,6 +118,11 @@ export function App(props: AppProps): JSX.Element {
   }
 
   const MaybeLaunchPreference = enableLaunchPreferenceScreen === true ? LaunchPreference : Fragment;
+
+  useEffect(() => {
+    document.addEventListener("contextmenu", contextMenuHandler);
+    return () => document.removeEventListener("contextmenu", contextMenuHandler);
+  }, []);
 
   return (
     <AppConfigurationContext.Provider value={appConfiguration}>
