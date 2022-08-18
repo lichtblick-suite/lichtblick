@@ -30,8 +30,6 @@ export const DEFAULT_PUBLISH_SETTINGS: RendererConfig["publish"] = {
   poseEstimateThetaDeviation: round(Math.PI / 12, 8),
 };
 
-const ONE_DEGREE = Math.PI / 180;
-
 export class CoreSettings extends SceneExtension {
   constructor(renderer: Renderer) {
     super("foxglove.CoreSettings", renderer);
@@ -145,7 +143,7 @@ export class CoreSettings extends SceneExtension {
                 thetaOffset: {
                   label: "Theta",
                   input: "number",
-                  step: ONE_DEGREE,
+                  step: 1,
                   precision: PRECISION_DEGREES,
                   value: camera.thetaOffset,
                 },
@@ -153,14 +151,14 @@ export class CoreSettings extends SceneExtension {
                   phi: {
                     label: "Phi",
                     input: "number",
-                    step: ONE_DEGREE,
+                    step: 1,
                     precision: PRECISION_DEGREES,
                     value: camera.phi,
                   },
                   fovy: {
                     label: "Y-Axis FOV",
                     input: "number",
-                    step: ONE_DEGREE,
+                    step: 1,
                     precision: PRECISION_DEGREES,
                     value: camera.fovy,
                   },

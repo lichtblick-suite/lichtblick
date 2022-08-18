@@ -421,7 +421,8 @@ export function ThreeDeeRender({ context }: { context: PanelExtensionContext }):
     });
   }, [actionHandler, context, settingsTree]);
 
-  // Update the renderer's reference to `config` when it changes
+  // Update the renderer's reference to `config` when it changes. Note that this does *not*
+  // automatically update the settings tree.
   useEffect(() => {
     if (renderer) {
       renderer.config = config;
@@ -756,7 +757,9 @@ export function ThreeDeeRender({ context }: { context: PanelExtensionContext }):
       ...prevConfig,
       cameraState: { ...prevConfig.cameraState, perspective: !prevConfig.cameraState.perspective },
     }));
-  }, []);
+    // Wait for the setConfig to propagate to the renderer before updating the settings tree
+    setTimeout(() => renderer?.updateCoreSettings(), 0);
+  }, [renderer]);
 
   const onKeyDown = useCallback(
     (event: React.KeyboardEvent) => {

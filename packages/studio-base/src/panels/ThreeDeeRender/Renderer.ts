@@ -233,6 +233,7 @@ export class Renderer extends EventEmitter<RendererEvents> {
   input: Input;
   outlineMaterial = new THREE.LineBasicMaterial({ dithering: true });
 
+  coreSettings: CoreSettings;
   measurementTool: MeasurementTool;
   publishClickTool: PublishClickTool;
 
@@ -369,8 +370,9 @@ export class Renderer extends EventEmitter<RendererEvents> {
 
     this.measurementTool = new MeasurementTool(this);
     this.publishClickTool = new PublishClickTool(this);
+    this.coreSettings = new CoreSettings(this);
 
-    this.addSceneExtension(new CoreSettings(this));
+    this.addSceneExtension(this.coreSettings);
     this.addSceneExtension(new Cameras(this));
     this.addSceneExtension(new FrameAxes(this));
     this.addSceneExtension(new Grids(this));
@@ -451,6 +453,11 @@ export class Renderer extends EventEmitter<RendererEvents> {
   updateConfig(updateHandler: (draft: RendererConfig) => void): void {
     this.config = produce(this.config, updateHandler);
     this.emit("configChange", this);
+  }
+
+  /** Updates the settings tree for core settings to account for any changes in the config. */
+  updateCoreSettings(): void {
+    this.coreSettings.updateSettingsTree();
   }
 
   addDatatypeSubscriptions<T>(
