@@ -12,6 +12,6 @@ Check out the _templates_ within the editor for sample nodes.
 
 To debug your code, call `log(someValue, anotherValue)` to print values to the Logs section at the bottom of the editor panel.
 
-You can write more complex nodes that output custom datatypes or listen to multiple input topics. You can even reference [variables](https://foxglove.dev/docs/app-concepts/variables) or import the utility functions listed in the sidebar's "Utilities" tab.
+You can write more complex nodes that output custom datatypes or listen to multiple input topics. You can even reference [variables](https://foxglove.dev/docs/studio/app-concepts/variables) or import the utility functions listed in the sidebar's "Utilities" tab.
 
-[View docs](https://foxglove.dev/docs/panels/node-playground).
+[View docs](https://foxglove.dev/docs/studio/panels/user-scripts).

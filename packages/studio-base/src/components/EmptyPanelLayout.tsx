@@ -83,11 +83,7 @@ export const EmptyPanelLayout = ({ tabId }: Props): JSX.Element => {
         <Stack paddingBottom={2}>
           <Typography variant="body2" paddingX={2} paddingTop={2}>
             Select a panel below to add it to your layout.{" "}
-            <Link
-              color="primary"
-              target="_blank"
-              href="https://foxglove.dev/docs/app-concepts/layouts"
-            >
+            <Link color="primary" target="_blank" href="https://foxglove.dev/docs/studio/layouts">
               Learn more
             </Link>
           </Typography>

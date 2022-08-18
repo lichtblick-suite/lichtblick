@@ -34,4 +34,4 @@ Message path syntax is used throughout Studio to help you drill down to the exac
 - Multiple filters
   - `/some_topic.many_values[:]{some_str_field=="abc"}{some_num_field==5}{some_boolean_field==false}.x`
 
-[View docs](https://foxglove.dev/docs/app-concepts/message-path-syntax).
+[View docs](https://foxglove.dev/docs/studio/app-concepts/message-path-syntax).
