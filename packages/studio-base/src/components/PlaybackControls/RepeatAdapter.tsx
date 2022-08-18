@@ -2,54 +2,54 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { useEffect } from "react";
+import { useLayoutEffect } from "react";
 
-import { Time } from "@foxglove/rostime";
+import { compare, Time } from "@foxglove/rostime";
 import {
   MessagePipelineContext,
   useMessagePipeline,
 } from "@foxglove/studio-base/components/MessagePipeline";
-import { compare } from "@foxglove/studio-base/players/UserNodePlayer/nodeTransformerWorker/typescript/userUtils/time";
 
-type Props = {
-  isPlaying: boolean;
+type RepeatAdapterProps = {
   repeatEnabled: boolean;
   play: () => void;
-  pause: () => void;
   seek: (to: Time) => void;
 };
 
-const selectStartTime = (ctx: MessagePipelineContext) => ctx.playerState.activeData?.startTime;
-const selectCurrentTime = (ctx: MessagePipelineContext) => ctx.playerState.activeData?.currentTime;
-const selectEndTime = (ctx: MessagePipelineContext) => ctx.playerState.activeData?.endTime;
+function activeDataSelector(ctx: MessagePipelineContext) {
+  return ctx.playerState.activeData;
+}
 
-export default function RepeatAdapter(props: Props): JSX.Element {
-  const { play, pause, seek, repeatEnabled, isPlaying } = props;
+/**
+ * RepeatAdapter handled looping from the start of playback when playback reaches the end
+ *
+ * NOTE: Because repeat adapter receives every message pipeline frame, we isolate its logic inside
+ * a separate component so it does not cause virtual DOM diffing on any children.
+ */
+export function RepeatAdapter(props: RepeatAdapterProps): JSX.Element {
+  const { play, seek, repeatEnabled } = props;
 
-  const startTime = useMessagePipeline(selectStartTime);
-  const currentTime = useMessagePipeline(selectCurrentTime);
-  const endTime = useMessagePipeline(selectEndTime);
+  const activeData = useMessagePipeline(activeDataSelector);
 
-  // This effect runs on every render and checks if we need to seek back to start
-  useEffect(() => {
+  useLayoutEffect(() => {
+    if (!repeatEnabled) {
+      return;
+    }
+
+    const currentTime = activeData?.currentTime;
+    const endTime = activeData?.endTime;
+    const startTime = activeData?.startTime;
+
     // repeat logic could also live in messagePipeline but since it is only triggered
     // from playback controls we've implemented it here for now - if there is demand
     // to toggle repeat from elsewhere this logic can move
-    if (currentTime && endTime && compare(currentTime, endTime) >= 0) {
-      // repeat
-      if (startTime && repeatEnabled) {
-        seek(startTime);
-        // if the user turns on repeat and we are at the end, we assume they want to play from start
-        // even if paused
-        play();
-      } else if (isPlaying) {
-        // no-repeat
-        // pause playback to toggle pause button state
-        // if the user clicks play while we are at the end, we go back to begginning
-        pause();
-      }
+    if (startTime && currentTime && endTime && compare(currentTime, endTime) >= 0) {
+      seek(startTime);
+      // if the user turns on repeat and we are at the end, we assume they want to play from start
+      // even if paused
+      play();
     }
-  });
+  }, [activeData, play, repeatEnabled, seek]);
 
   return <></>;
 }

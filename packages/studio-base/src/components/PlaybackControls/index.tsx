@@ -25,7 +25,7 @@ import { Divider } from "@mui/material";
 import { useCallback, useMemo, useState } from "react";
 import { makeStyles } from "tss-react/mui";
 
-import { Time } from "@foxglove/rostime";
+import { compare, Time } from "@foxglove/rostime";
 import HoverableIconButton from "@foxglove/studio-base/components/HoverableIconButton";
 import KeyListener from "@foxglove/studio-base/components/KeyListener";
 import LoopIcon from "@foxglove/studio-base/components/LoopIcon";
@@ -38,7 +38,7 @@ import Stack from "@foxglove/studio-base/components/Stack";
 import { Player } from "@foxglove/studio-base/players/types";
 
 import PlaybackTimeDisplay from "./PlaybackTimeDisplay";
-import RepeatAdapter from "./RepeatAdapter";
+import { RepeatAdapter } from "./RepeatAdapter";
 import Scrubber from "./Scrubber";
 
 const useStyles = makeStyles()((theme) => ({
@@ -90,9 +90,14 @@ export default function PlaybackControls(props: {
     if (isPlaying) {
       pause();
     } else {
+      const { startTime: start, endTime: end, currentTime: current } = getTimeInfo();
+      // if we are at the end, we need to go back to start
+      if (current && end && start && compare(current, end) >= 0) {
+        seek(start);
+      }
       play();
     }
-  }, [pause, play, isPlaying]);
+  }, [isPlaying, pause, getTimeInfo, play, seek]);
 
   const seekForwardAction = useCallback(
     (ev?: KeyboardEvent) => {
@@ -147,13 +152,7 @@ export default function PlaybackControls(props: {
 
   return (
     <>
-      <RepeatAdapter
-        play={play}
-        pause={pause}
-        seek={seek}
-        repeatEnabled={repeat}
-        isPlaying={isPlaying}
-      />
+      <RepeatAdapter play={play} seek={seek} repeatEnabled={repeat} />
       <KeyListener global keyDownHandlers={keyDownHandlers} />
       <Stack className={classes.root} direction="row" alignItems="center" gap={1} padding={1}>
         <Stack direction="row" alignItems="center" gap={1}>

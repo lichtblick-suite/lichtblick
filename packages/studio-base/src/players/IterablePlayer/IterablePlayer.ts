@@ -873,6 +873,11 @@ export class IterablePlayer implements Player {
 
     try {
       while (this._isPlaying && !this._hasError && !this._nextState) {
+        if (compare(this._currentTime, this._end) >= 0) {
+          this._setState("idle");
+          return;
+        }
+
         const start = Date.now();
 
         await this._tick();
