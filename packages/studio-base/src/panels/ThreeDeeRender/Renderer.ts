@@ -504,7 +504,7 @@ export class Renderer extends EventEmitter<RendererEvents> {
     const topics: SettingsTreeEntry = {
       path: ["topics"],
       node: {
-        label: this._topicsNodeLabel(),
+        label: "Topics",
         defaultExpansionState: "expanded",
         actions: [
           { id: "show-all", type: "action", label: "Show All" },
@@ -604,9 +604,6 @@ export class Renderer extends EventEmitter<RendererEvents> {
       for (const extension of this.sceneExtensions.values()) {
         this.settings.setNodesForKey(extension.extensionId, extension.settingsNodes());
       }
-
-      // Update the "Topics" node label
-      this.settings.setLabel(["topics"], this._topicsNodeLabel());
     }
   }
 
@@ -622,13 +619,6 @@ export class Renderer extends EventEmitter<RendererEvents> {
     const layerCount = Object.keys(this.config.layers).length;
     const label = `Custom Layers${layerCount > 0 ? ` (${layerCount})` : ""}`;
     this.settings.setLabel(["layers"], label);
-  }
-
-  private _topicsNodeLabel(): string {
-    const topicCount = this.topics?.length ?? 0;
-    const topicsNode = this.settings.tree()["topics"];
-    const vizCount = Object.keys(topicsNode?.children ?? {}).length;
-    return topicCount === 0 && vizCount === 0 ? "Topics" : `Topics (${vizCount}/${topicCount})`;
   }
 
   /** Translate a CameraState to the three.js coordinate system */
