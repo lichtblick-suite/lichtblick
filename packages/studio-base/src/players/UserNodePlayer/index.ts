@@ -485,26 +485,34 @@ export default class UserNodePlayer implements Player {
           return;
         }
 
-        const diagnostics =
-          result.error != undefined
-            ? [
-                {
-                  source: Sources.Runtime,
-                  severity: DiagnosticSeverity.Error,
-                  message: result.error,
-                  code: ErrorCodes.RUNTIME,
-                },
-              ]
-            : [];
-        if (diagnostics.length > 0) {
-          this._setUserNodeDiagnostics(nodeId, diagnostics);
+        const allDiagnostics = result.userNodeDiagnostics;
+        if (result.error) {
+          allDiagnostics.push({
+            source: Sources.Runtime,
+            severity: DiagnosticSeverity.Error,
+            message: result.error,
+            code: ErrorCodes.RUNTIME,
+          });
         }
+
         this._addUserNodeLogs(nodeId, result.userNodeLogs);
+
+        if (allDiagnostics.length > 0) {
+          this._problemStore.set(problemKey, {
+            severity: "error",
+            message: `User Script ${nodeId} encountered an error.`,
+            tip: "Open the User Scripts panel and check the Problems tab for errors.",
+          });
+
+          this._setUserNodeDiagnostics(nodeId, allDiagnostics);
+          return;
+        }
 
         if (!result.message) {
           this._problemStore.set(problemKey, {
             severity: "warn",
-            message: `User Script ${nodeId} did not produce a message`,
+            message: `User Script ${nodeId} did not produce a message.`,
+            tip: "Check that all code paths in the user script return a message.",
           });
           return;
         }

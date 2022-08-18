@@ -25,7 +25,7 @@ export default {
   title: "components/NotificationModal",
 };
 
-export const ErrorModal = (): JSX.Element => {
+export const ErrorNoSubtextWithDetails = (): JSX.Element => {
   return (
     <NotificationModal
       onRequestClose={() => {}}
@@ -33,18 +33,17 @@ export const ErrorModal = (): JSX.Element => {
         id: "1",
         message: "Error 1",
         details: fakeError(),
-        read: false,
         created: new Date(),
         severity: "error",
       }}
     />
   );
 };
-ErrorModal.parameters = { colorScheme: "light" };
-export const ErrorModalDark = ErrorModal.bind(undefined);
-ErrorModalDark.parameters = { colorScheme: "dark" };
+ErrorNoSubtextWithDetails.parameters = { colorScheme: "light" };
+export const ErrorNoSubtextWithDetailsDark = ErrorNoSubtextWithDetails.bind(undefined);
+ErrorNoSubtextWithDetailsDark.parameters = { colorScheme: "dark" };
 
-export const ErrorModalWithSubtext = (): JSX.Element => {
+export const ErrorWithSubtextAndDetails = (): JSX.Element => {
   return (
     <NotificationModal
       onRequestClose={() => {}}
@@ -52,7 +51,6 @@ export const ErrorModalWithSubtext = (): JSX.Element => {
         id: "1",
         message: "Error 1",
         details: fakeError(),
-        read: false,
         created: new Date(),
         severity: "error",
         subText: "This error has a subtext.",
@@ -60,7 +58,24 @@ export const ErrorModalWithSubtext = (): JSX.Element => {
     />
   );
 };
-ErrorModalWithSubtext.parameters = { colorScheme: "light" };
+ErrorWithSubtextAndDetails.parameters = { colorScheme: "light" };
+
+export const ErrorWithSubtextNoDetails = (): JSX.Element => {
+  return (
+    <NotificationModal
+      onRequestClose={() => {}}
+      notification={{
+        id: "1",
+        message: "Error 1",
+        details: undefined,
+        created: new Date(),
+        severity: "error",
+        subText: "This error has a subtext.",
+      }}
+    />
+  );
+};
+ErrorWithSubtextNoDetails.parameters = { colorScheme: "light" };
 
 export const Warning = (): JSX.Element => {
   return (
@@ -70,7 +85,6 @@ export const Warning = (): JSX.Element => {
         id: "1",
         message: "Warning 1",
         details: "Some error details",
-        read: false,
         created: new Date(),
         severity: "warn",
       }}
@@ -79,7 +93,7 @@ export const Warning = (): JSX.Element => {
 };
 Warning.parameters = { colorScheme: "dark" };
 
-export const ErrorWithoutDetails = (): JSX.Element => {
+export const ErrorNoDetailsOrSubtext = (): JSX.Element => {
   return (
     <NotificationModal
       onRequestClose={() => {}}
@@ -87,14 +101,13 @@ export const ErrorWithoutDetails = (): JSX.Element => {
         id: "1",
         message: "Error 1",
         details: undefined,
-        read: false,
         created: new Date(),
         severity: "error",
       }}
     />
   );
 };
-ErrorWithoutDetails.parameters = { colorScheme: "dark" };
+ErrorNoDetailsOrSubtext.parameters = { colorScheme: "dark" };
 
 export const ErrorWithJsxElementDetails = (): JSX.Element => {
   return (
@@ -108,7 +121,6 @@ export const ErrorWithJsxElementDetails = (): JSX.Element => {
             This is <b style={{ color: "red" }}>customized</b> error detail.
           </p>
         ),
-        read: false,
         created: new Date(),
         severity: "error",
       }}
@@ -127,7 +139,6 @@ export const ErrorWithNewlineDetails = (): JSX.Element => {
         id: "1",
         message: "Error 1",
         details: "Some details.\n\nWith a newline.",
-        read: false,
         created: new Date(),
         severity: "error",
       }}

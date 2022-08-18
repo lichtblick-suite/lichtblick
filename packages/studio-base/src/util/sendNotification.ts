@@ -37,7 +37,6 @@ export type NotificationMessage = {
   readonly message: string;
   readonly details: DetailsType;
   readonly subText?: string;
-  readonly read?: boolean;
   readonly created?: Date;
   readonly severity: NotificationSeverity;
 };

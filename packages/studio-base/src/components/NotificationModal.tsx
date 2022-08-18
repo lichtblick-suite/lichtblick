@@ -4,6 +4,7 @@
 
 import CloseIcon from "@mui/icons-material/Close";
 import { Box, Dialog, DialogTitle, IconButton, Typography, useTheme } from "@mui/material";
+import { useMemo } from "react";
 import { makeStyles } from "tss-react/mui";
 
 import { NotificationMessage } from "@foxglove/studio-base/util/sendNotification";
@@ -45,22 +46,28 @@ export default function NotificationModal({
     info: theme.palette.info.main,
   };
 
+  const detailsElement = useMemo(() => {
+    if (details instanceof Error) {
+      return <Box className={classes.text}>{details.stack}</Box>;
+    } else if (details != undefined && details !== "") {
+      return (
+        <Typography style={{ whiteSpace: "pre-line" /* allow newlines in the details message */ }}>
+          {details}
+        </Typography>
+      );
+    } else if (subText) {
+      return undefined;
+    }
+
+    return "No details provided";
+  }, [classes, details, subText]);
+
   return (
     <Dialog classes={{ paper: classes.paper }} fullWidth open onClose={() => onRequestClose?.()}>
       <DialogTitle color={displayPropsBySeverity[severity]}>{message}</DialogTitle>
       <Box className={classes.container}>
         {subText && <Typography mb={3}>{subText}</Typography>}
-        {details instanceof Error ? (
-          <Box className={classes.text}>{details.stack}</Box>
-        ) : details != undefined && details !== "" ? (
-          <Typography
-            style={{ whiteSpace: "pre-line" /* allow newlines in the details message */ }}
-          >
-            {details}
-          </Typography>
-        ) : (
-          "No details provided"
-        )}
+        {detailsElement}
       </Box>
       <IconButton
         aria-label="close"

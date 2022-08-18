@@ -63,10 +63,12 @@ const DiagnosticsSection = ({ diagnostics }: Props): ReactElement => {
           (invert(DiagnosticSeverity) as Record<string, keyof typeof DiagnosticSeverity>)[
             severity
           ] ?? "Error";
+
         const errorLoc =
           startLineNumber != undefined && startColumn != undefined
             ? `[${startLineNumber + 1},${startColumn + 1}]`
-            : undefined;
+            : "";
+
         return (
           <StyledListItem key={`${message}_${i}`}>
             <ListItemIcon>{severityIcons[severityLabel]}</ListItemIcon>
