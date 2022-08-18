@@ -38,11 +38,46 @@ import {
 } from "react-table";
 
 import EmptyState from "@foxglove/studio-base/components/EmptyState";
-import { LegacyTable } from "@foxglove/studio-base/components/LegacyStyledComponents";
 import Stack from "@foxglove/studio-base/components/Stack";
 
 import TableCell from "./TableCell";
 import { sanitizeAccessorPath } from "./sanitizeAccessorPath";
+
+export const StyledTable = muiStyled("table")(({ theme }) => ({
+  border: "none",
+  width: "100%",
+  borderCollapse: "collapse",
+  borderSpacing: 0,
+
+  th: {
+    color: theme.palette.text.primary,
+
+    "tr:first-child &": {
+      paddingTop: theme.spacing(0.5),
+      paddingBottom: theme.spacing(0.5),
+    },
+  },
+  "th, td": {
+    verticalAlign: "top",
+    border: `1px solid ${theme.palette.divider}`,
+    padding: "0 0.3em",
+    lineHeight: "1.3em",
+  },
+  tr: {
+    svg: {
+      opacity: 0.6,
+    },
+  },
+  "tr:hover": {
+    td: {
+      backgroundColor: theme.palette.action.hover,
+      cursor: "pointer",
+    },
+    svg: {
+      opacity: 0.8,
+    },
+  },
+}));
 
 const SIconButton = muiStyled(IconButton)({
   "&:hover": {
@@ -216,7 +251,7 @@ export default function Table({
 
   return (
     <>
-      <LegacyTable {...getTableProps()}>
+      <StyledTable {...getTableProps()}>
         <thead>
           {headerGroups.map((headerGroup, i) => {
             return (
@@ -255,7 +290,7 @@ export default function Table({
             );
           })}
         </tbody>
-      </LegacyTable>
+      </StyledTable>
       {!isNested && (
         <Container maxWidth="xs" disableGutters>
           <Stack

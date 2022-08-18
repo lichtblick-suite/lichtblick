@@ -44,6 +44,7 @@ type ParseAndStringifyFn = {
   parse: (val: string) => unknown;
 };
 export type BaseProps = {
+  dataTestId?: string;
   dataValidator?: (data: unknown) => ValidationResult | undefined;
   onChange?: OnChange;
   onError?: (err: string) => void;
@@ -58,6 +59,7 @@ export type BaseProps = {
  * Only valid internal value change will call onChange. Any data processing and validation error will trigger onError.
  */
 function ValidatedInputBase({
+  dataTestId,
   dataValidator = () => undefined,
   onChange,
   onError,
@@ -170,7 +172,7 @@ function ValidatedInputBase({
       <CodeEditor
         className={cx(classes.editor, { [classes.error]: error.length > 0 })}
         readOnly={readOnly}
-        data-testid={`validated-input-${JSON.stringify(inputStr)}`}
+        data-testid={dataTestId ?? `validated-input-${JSON.stringify(inputStr)}`}
         ref={inputRef}
         value={inputStr}
         onChange={handleChange}
