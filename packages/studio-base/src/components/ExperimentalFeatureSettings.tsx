@@ -49,11 +49,6 @@ const features: Feature[] = [
     description: <>Enable the Legacy Plot panel.</>,
   },
   {
-    key: AppSetting.EXPERIMENTAL_LATCHING,
-    name: "Latching",
-    description: <>Enable message latching for bag, mcap, and data platform sources.</>,
-  },
-  {
     key: AppSetting.ENABLE_MEMORY_USE_INDICATOR,
     name: "Memory use indicator",
     description: <>Show the app memory use in the sidebar.</>,

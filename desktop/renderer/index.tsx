@@ -77,7 +77,6 @@ async function main() {
     {
       defaults: {
         [AppSetting.ENABLE_REACT_STRICT_MODE]: isDevelopment,
-        [AppSetting.EXPERIMENTAL_LATCHING]: true,
       },
     },
   );

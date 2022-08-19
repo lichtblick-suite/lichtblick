@@ -83,7 +83,6 @@ async function main() {
   const appConfiguration = new LocalStorageAppConfiguration({
     defaults: {
       [AppSetting.ENABLE_REACT_STRICT_MODE]: isDevelopment,
-      [AppSetting.EXPERIMENTAL_LATCHING]: true,
     },
   });
   const enableStrictMode = appConfiguration.get(AppSetting.ENABLE_REACT_STRICT_MODE) as boolean;
