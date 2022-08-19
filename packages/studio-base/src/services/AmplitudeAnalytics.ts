@@ -20,7 +20,7 @@ const log = Logger.getLogger("Analytics");
 export class AmplitudeAnalytics implements IAnalytics {
   private _amp?: AmplitudeClient;
 
-  constructor(options: { enableTelemetry: boolean; amplitudeApiKey?: string }) {
+  public constructor(options: { enableTelemetry: boolean; amplitudeApiKey?: string }) {
     const platform = getPlatformName();
     const appVersion = OsContextSingleton?.getAppVersion();
     const { glVendor, glRenderer } = getWebGLInfo() ?? {
@@ -58,7 +58,7 @@ export class AmplitudeAnalytics implements IAnalytics {
     }
   }
 
-  setUser(user?: User): void {
+  public setUser(user?: User): void {
     // Amplitude will continue to associate events with the last signed in user for this deviceId.
     // It is possible to call regenerateDeviceId() after sign out, but this means future events
     // will appear as a new unique user. We also don't want to call regenerateDeviceId() every time
@@ -70,7 +70,7 @@ export class AmplitudeAnalytics implements IAnalytics {
     setSentryUser({ id: user?.id, device_id: this._amp?.options.deviceId });
   }
 
-  async logEvent(event: AppEvent, data?: { [key: string]: unknown }): Promise<void> {
+  public async logEvent(event: AppEvent, data?: { [key: string]: unknown }): Promise<void> {
     addSentryBreadcrumb({
       type: getEventBreadcrumbType(event),
       category: `studio.${getEventCategory(event).toLowerCase()}`,

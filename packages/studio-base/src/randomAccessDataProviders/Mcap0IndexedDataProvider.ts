@@ -31,9 +31,9 @@ export default class Mcap0IndexedDataProvider implements RandomAccessDataProvide
   private reportedMissingChannelIds = new Set<number>();
   private reportedChannelsWithInvalidMessages = new Set<number>();
 
-  constructor(private reader: Mcap0IndexedReader) {}
+  public constructor(private reader: Mcap0IndexedReader) {}
 
-  async initialize(_extensionPoint: ExtensionPoint): Promise<InitializationResult> {
+  public async initialize(_extensionPoint: ExtensionPoint): Promise<InitializationResult> {
     let startTime: bigint | undefined;
     let endTime: bigint | undefined;
     for (const chunk of this.reader.chunkIndexes) {
@@ -115,7 +115,7 @@ export default class Mcap0IndexedDataProvider implements RandomAccessDataProvide
     };
   }
 
-  async getMessages(
+  public async getMessages(
     start: Time,
     end: Time,
     subscriptions: GetMessagesTopics,
@@ -163,5 +163,5 @@ export default class Mcap0IndexedDataProvider implements RandomAccessDataProvide
     return { parsedMessages, problems };
   }
 
-  async close(): Promise<void> {}
+  public async close(): Promise<void> {}
 }

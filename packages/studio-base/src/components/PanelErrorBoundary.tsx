@@ -22,16 +22,16 @@ type State = {
 };
 
 export default class PanelErrorBoundary extends Component<PropsWithChildren<Props>, State> {
-  override state: State = {
+  public override state: State = {
     currentError: undefined,
   };
 
-  override componentDidCatch(error: Error, errorInfo: ErrorInfo): void {
+  public override componentDidCatch(error: Error, errorInfo: ErrorInfo): void {
     captureException(new AppError(error, errorInfo));
     this.setState({ currentError: { error, errorInfo } });
   }
 
-  override render(): ReactNode {
+  public override render(): ReactNode {
     if (this.state.currentError) {
       return (
         <ErrorDisplay

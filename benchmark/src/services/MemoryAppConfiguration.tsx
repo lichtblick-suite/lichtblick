@@ -15,7 +15,7 @@ export class MemoryAppConfiguration implements IAppConfiguration {
 
   private changeListeners = new Map<string, Set<ChangeHandler>>();
 
-  constructor({ defaults }: { defaults?: { [key: string]: AppConfigurationValue } }) {
+  public constructor({ defaults }: { defaults?: { [key: string]: AppConfigurationValue } }) {
     if (defaults) {
       for (const [key, value] of Object.entries(defaults)) {
         this.values.set(key, value);
@@ -23,10 +23,10 @@ export class MemoryAppConfiguration implements IAppConfiguration {
     }
   }
 
-  get(key: string): AppConfigurationValue {
+  public get(key: string): AppConfigurationValue {
     return this.values.get(key);
   }
-  async set(key: string, value: AppConfigurationValue): Promise<void> {
+  public async set(key: string, value: AppConfigurationValue): Promise<void> {
     this.values.set(key, value);
     const listeners = this.changeListeners.get(key);
     if (listeners) {
@@ -35,7 +35,7 @@ export class MemoryAppConfiguration implements IAppConfiguration {
     }
   }
 
-  addChangeListener(key: string, cb: ChangeHandler): void {
+  public addChangeListener(key: string, cb: ChangeHandler): void {
     let listeners = this.changeListeners.get(key);
     if (!listeners) {
       listeners = new Set();
@@ -44,7 +44,7 @@ export class MemoryAppConfiguration implements IAppConfiguration {
     listeners.add(cb);
   }
 
-  removeChangeListener(key: string, cb: ChangeHandler): void {
+  public removeChangeListener(key: string, cb: ChangeHandler): void {
     const listeners = this.changeListeners.get(key);
     listeners?.delete(cb);
   }

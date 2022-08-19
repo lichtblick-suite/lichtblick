@@ -12,7 +12,7 @@ const log = Logger.getLogger(__filename);
  */
 export class NamespacedLayoutStorage {
   private migration: Promise<void>;
-  constructor(
+  public constructor(
     private storage: ILayoutStorage,
     private namespace: string,
     {
@@ -38,19 +38,19 @@ export class NamespacedLayoutStorage {
     })();
   }
 
-  async list(): Promise<readonly Layout[]> {
+  public async list(): Promise<readonly Layout[]> {
     await this.migration;
     return await this.storage.list(this.namespace);
   }
-  async get(id: LayoutID): Promise<Layout | undefined> {
+  public async get(id: LayoutID): Promise<Layout | undefined> {
     await this.migration;
     return await this.storage.get(this.namespace, id);
   }
-  async put(layout: Layout): Promise<Layout> {
+  public async put(layout: Layout): Promise<Layout> {
     await this.migration;
     return await this.storage.put(this.namespace, layout);
   }
-  async delete(id: LayoutID): Promise<void> {
+  public async delete(id: LayoutID): Promise<void> {
     await this.migration;
     await this.storage.delete(this.namespace, id);
   }

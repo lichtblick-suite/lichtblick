@@ -7,7 +7,7 @@ import { Link, Typography } from "@mui/material";
 import { IDataSourceFactory, Ros2SocketDataSourceFactory } from "@foxglove/studio-base";
 
 export default class Ros2UnavailableDataSourceFactory extends Ros2SocketDataSourceFactory {
-  disabledReason = (
+  public disabledReason = (
     <Typography>
       ROS 2 connections require UDP sockets, which are not available in a web browser.{" "}
       <Link href="https://foxglove.dev/download" target="_blank" rel="noreferrer">
@@ -17,7 +17,7 @@ export default class Ros2UnavailableDataSourceFactory extends Ros2SocketDataSour
     </Typography>
   );
 
-  override initialize(): ReturnType<IDataSourceFactory["initialize"]> {
+  public override initialize(): ReturnType<IDataSourceFactory["initialize"]> {
     return;
   }
 }

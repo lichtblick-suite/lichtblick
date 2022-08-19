@@ -43,15 +43,15 @@ declare module "@foxglove/regl-worldview" {
   type Pose = { position: Position; orientation: Orientation };
 
   class PolygonBuilder {
-    polygons: any;
-    onChange: any;
+    public polygons: any;
+    public onChange: any;
 
-    constructor(polygons?: Polygon[]);
+    public constructor(polygons?: Polygon[]);
 
-    onMouseMove: MouseHandler;
-    onMouseUp: MouseHandler;
-    onDoubleClick: MouseHandler;
-    onMouseDown: MouseHandler;
+    public onMouseMove: MouseHandler;
+    public onMouseUp: MouseHandler;
+    public onDoubleClick: MouseHandler;
+    public onMouseDown: MouseHandler;
   }
 
   interface CommonCommandProps {
@@ -59,12 +59,12 @@ declare module "@foxglove/regl-worldview" {
   }
 
   export class Ray {
-    origin: Vec3;
-    dir: Vec3;
-    point: Vec3;
-    distanceToPoint(point: Vec3): number;
+    public origin: Vec3;
+    public dir: Vec3;
+    public point: Vec3;
+    public distanceToPoint(point: Vec3): number;
     // eslint-disable-next-line no-restricted-syntax
-    planeIntersection(planeCoordinate: Vec3, planeNormal: Vec3): Vec3 | null;
+    public planeIntersection(planeCoordinate: Vec3, planeNormal: Vec3): Vec3 | null;
   }
 
   type ClickedObject = {
@@ -116,11 +116,11 @@ declare module "@foxglove/regl-worldview" {
   const DrawPolygons: any;
 
   class Polygon {
-    points: any;
-    constructor(name: string);
+    public points: any;
+    public constructor(name: string);
   }
   class PolygonPoint {
-    constructor(point: Vec3);
+    public constructor(point: Vec3);
   }
 
   type MouseEventObject = {
@@ -166,8 +166,11 @@ declare module "@foxglove/regl-worldview" {
 
   type CameraKeyMap = any;
   class CameraStore {
-    constructor(handler: (state: CameraState) => void, initialCameraState: Partial<CameraState>);
-    setCameraState(state: Partial<CameraState>): void;
+    public constructor(
+      handler: (state: CameraState) => void,
+      initialCameraState: Partial<CameraState>,
+    );
+    public setCameraState(state: Partial<CameraState>): void;
   }
 
   const CameraListener: React.ComponentClass<

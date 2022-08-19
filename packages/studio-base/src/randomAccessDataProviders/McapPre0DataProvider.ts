@@ -35,11 +35,11 @@ export default class McapPre0DataProvider implements RandomAccessDataProvider {
   private options: Options;
   private messagesByChannel?: Map<number, MessageEvent<unknown>[]>;
 
-  constructor(options: Options) {
+  public constructor(options: Options) {
     this.options = options;
   }
 
-  async initialize(_extensionPoint: ExtensionPoint): Promise<InitializationResult> {
+  public async initialize(_extensionPoint: ExtensionPoint): Promise<InitializationResult> {
     const decompressHandlers = await loadDecompressHandlers();
 
     const streamReader = this.options.stream.getReader();
@@ -176,7 +176,7 @@ export default class McapPre0DataProvider implements RandomAccessDataProvider {
     };
   }
 
-  async getMessages(
+  public async getMessages(
     start: Time,
     end: Time,
     subscriptions: GetMessagesTopics,
@@ -206,5 +206,5 @@ export default class McapPre0DataProvider implements RandomAccessDataProvider {
     return { parsedMessages };
   }
 
-  async close(): Promise<void> {}
+  public async close(): Promise<void> {}
 }

@@ -8,7 +8,7 @@ import CachedFilelike from "@foxglove/studio-base/util/CachedFilelike";
 export class RemoteFileReadable {
   private remoteReader: CachedFilelike;
 
-  constructor(url: string) {
+  public constructor(url: string) {
     const fileReader = new BrowserHttpReader(url);
     this.remoteReader = new CachedFilelike({
       fileReader,
@@ -16,14 +16,14 @@ export class RemoteFileReadable {
     });
   }
 
-  async open(): Promise<void> {
+  public async open(): Promise<void> {
     await this.remoteReader.open(); // Important that we call this first, because it might throw an error if the file can't be read.
   }
 
-  async size(): Promise<bigint> {
+  public async size(): Promise<bigint> {
     return BigInt(this.remoteReader.size());
   }
-  async read(offset: bigint, size: bigint): Promise<Uint8Array> {
+  public async read(offset: bigint, size: bigint): Promise<Uint8Array> {
     if (offset + size > Number.MAX_SAFE_INTEGER) {
       throw new Error(`Read too large: offset ${offset}, size ${size}`);
     }

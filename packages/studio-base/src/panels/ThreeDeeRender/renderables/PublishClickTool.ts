@@ -69,13 +69,13 @@ export class PublishClickTool extends SceneExtension<Renderable<BaseUserData>, P
   private sphere: RenderableSphere;
   private arrow: RenderableArrow;
 
-  publishClickType: PublishClickType = "point";
-  state: PublishClickState = "idle";
+  public publishClickType: PublishClickType = "point";
+  public state: PublishClickState = "idle";
 
-  point1?: THREE.Vector3;
-  point2?: THREE.Vector3;
+  private point1?: THREE.Vector3;
+  private point2?: THREE.Vector3;
 
-  constructor(renderer: Renderer) {
+  public constructor(renderer: Renderer) {
     super("foxglove.PublishClickTool", renderer);
 
     this.sphere = new RenderableSphere("", makeSphereMarker(), undefined, this.renderer);
@@ -95,7 +95,7 @@ export class PublishClickTool extends SceneExtension<Renderable<BaseUserData>, P
     this._setState("idle");
   }
 
-  override dispose(): void {
+  public override dispose(): void {
     super.dispose();
     this.arrow.dispose();
     this.sphere.dispose();
@@ -103,17 +103,17 @@ export class PublishClickTool extends SceneExtension<Renderable<BaseUserData>, P
     this.renderer.input.removeListener("mousemove", this._handleMouseMove);
   }
 
-  setPublishClickType(type: PublishClickType): void {
+  public setPublishClickType(type: PublishClickType): void {
     this.publishClickType = type;
     this.arrow.update(makeArrowMarker(this.publishClickType), undefined);
     this.dispatchEvent({ type: "foxglove.publish-type-change" });
   }
 
-  start(): void {
+  public start(): void {
     this._setState("place-first-point");
   }
 
-  stop(): void {
+  public stop(): void {
     this._setState("idle");
   }
 

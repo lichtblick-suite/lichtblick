@@ -49,7 +49,7 @@ export class Picker {
   private debug: boolean;
   private isDebugPass = false;
 
-  constructor(gl: THREE.WebGLRenderer, scene: THREE.Scene, options: PickerOptions = {}) {
+  public constructor(gl: THREE.WebGLRenderer, scene: THREE.Scene, options: PickerOptions = {}) {
     this.gl = gl;
     this.scene = scene;
     this.shouldPickObjectCB = AlwaysPickObject;
@@ -70,7 +70,7 @@ export class Picker {
     this.emptyScene.onAfterRender = this.handleAfterRender;
   }
 
-  dispose(): void {
+  public dispose(): void {
     for (const material of this.materialCache.values()) {
       material.dispose();
     }
@@ -78,7 +78,7 @@ export class Picker {
     this.pickingTarget.dispose();
   }
 
-  pick(
+  public pick(
     x: number,
     y: number,
     camera: THREE.OrthographicCamera | THREE.PerspectiveCamera,
@@ -120,7 +120,7 @@ export class Picker {
     return val;
   }
 
-  pickDebugRender(camera: THREE.OrthographicCamera | THREE.PerspectiveCamera): void {
+  public pickDebugRender(camera: THREE.OrthographicCamera | THREE.PerspectiveCamera): void {
     this.isDebugPass = true;
     const currAlpha = this.gl.getClearAlpha();
     this.gl.getClearColor(this.currClearColor);

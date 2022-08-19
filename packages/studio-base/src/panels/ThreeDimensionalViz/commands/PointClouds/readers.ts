@@ -20,97 +20,97 @@ export interface FieldReader {
 }
 
 export class Int8Reader implements FieldReader {
-  view: DataView;
+  private view: DataView;
 
-  constructor(data: Uint8Array, offset: number) {
+  public constructor(data: Uint8Array, offset: number) {
     this.view = new DataView(data.buffer, data.byteOffset + offset, data.byteLength - offset);
   }
 
-  read(byteOffset: number): number {
+  public read(byteOffset: number): number {
     return this.view.getInt8(byteOffset);
   }
 }
 
 export class Uint8Reader implements FieldReader {
-  view: DataView;
+  private view: DataView;
 
-  constructor(data: Uint8Array, offset: number) {
+  public constructor(data: Uint8Array, offset: number) {
     this.view = new DataView(data.buffer, data.byteOffset + offset, data.byteLength - offset);
   }
 
-  read(byteOffset: number): number {
+  public read(byteOffset: number): number {
     return this.view.getUint8(byteOffset);
   }
 }
 
 export class Int16Reader implements FieldReader {
-  view: DataView;
+  private view: DataView;
 
-  constructor(data: Uint8Array, offset: number) {
+  public constructor(data: Uint8Array, offset: number) {
     this.view = new DataView(data.buffer, data.byteOffset + offset, data.byteLength - offset);
   }
 
-  read(byteOffset: number): number {
+  public read(byteOffset: number): number {
     return this.view.getInt16(byteOffset, true);
   }
 }
 
 export class Uint16Reader implements FieldReader {
-  view: DataView;
+  private view: DataView;
 
-  constructor(data: Uint8Array, offset: number) {
+  public constructor(data: Uint8Array, offset: number) {
     this.view = new DataView(data.buffer, data.byteOffset + offset, data.byteLength - offset);
   }
 
-  read(byteOffset: number): number {
+  public read(byteOffset: number): number {
     return this.view.getUint16(byteOffset, true);
   }
 }
 
 export class Int32Reader implements FieldReader {
-  view: DataView;
+  private view: DataView;
 
-  constructor(data: Uint8Array, offset: number) {
+  public constructor(data: Uint8Array, offset: number) {
     this.view = new DataView(data.buffer, data.byteOffset + offset, data.byteLength - offset);
   }
 
-  read(byteOffset: number): number {
+  public read(byteOffset: number): number {
     return this.view.getInt32(byteOffset, true);
   }
 }
 
 export class Uint32Reader implements FieldReader {
-  view: DataView;
+  private view: DataView;
 
-  constructor(data: Uint8Array, offset: number) {
+  public constructor(data: Uint8Array, offset: number) {
     this.view = new DataView(data.buffer, data.byteOffset + offset, data.byteLength - offset);
   }
 
-  read(byteOffset: number): number {
+  public read(byteOffset: number): number {
     return this.view.getUint32(byteOffset, true);
   }
 }
 
 export class Float32Reader implements FieldReader {
-  view: DataView;
+  private view: DataView;
 
-  constructor(data: Uint8Array, offset: number) {
+  public constructor(data: Uint8Array, offset: number) {
     this.view = new DataView(data.buffer, data.byteOffset + offset, data.byteLength - offset);
   }
 
-  read(byteOffset: number): number {
+  public read(byteOffset: number): number {
     return this.view.getFloat32(byteOffset, true);
   }
 }
 
 export class Float64Reader implements FieldReader {
-  view: DataView;
+  private view: DataView;
 
-  constructor(data: Uint8Array, offset: number) {
+  public constructor(data: Uint8Array, offset: number) {
     this.view = new DataView(data.buffer, data.byteOffset + offset, data.byteLength - offset);
   }
 
-  read(byteOffset: number): number {
+  public read(byteOffset: number): number {
     return this.view.getFloat64(byteOffset, true);
   }
 }

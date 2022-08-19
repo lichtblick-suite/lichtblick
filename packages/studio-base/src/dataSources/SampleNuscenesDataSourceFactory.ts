@@ -12,14 +12,16 @@ import { BagIterableSource } from "@foxglove/studio-base/players/IterablePlayer/
 import SampleNuscenesLayout from "./SampleNuscenesLayout.json";
 
 class SampleNuscenesDataSourceFactory implements IDataSourceFactory {
-  id = "sample-nuscenes";
-  type: IDataSourceFactory["type"] = "sample";
-  displayName = "Sample: Nuscenes";
-  iconName: IDataSourceFactory["iconName"] = "FileASPX";
-  hidden = true;
-  sampleLayout = SampleNuscenesLayout as IDataSourceFactory["sampleLayout"];
+  public id = "sample-nuscenes";
+  public type: IDataSourceFactory["type"] = "sample";
+  public displayName = "Sample: Nuscenes";
+  public iconName: IDataSourceFactory["iconName"] = "FileASPX";
+  public hidden = true;
+  public sampleLayout = SampleNuscenesLayout as IDataSourceFactory["sampleLayout"];
 
-  initialize(args: DataSourceFactoryInitializeArgs): ReturnType<IDataSourceFactory["initialize"]> {
+  public initialize(
+    args: DataSourceFactoryInitializeArgs,
+  ): ReturnType<IDataSourceFactory["initialize"]> {
     const bagUrl = "https://assets.foxglove.dev/nuScenes-v1.0-mini-scene-0061.bag";
 
     const bagSource = new BagIterableSource({ type: "remote", url: bagUrl });

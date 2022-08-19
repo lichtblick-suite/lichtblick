@@ -71,17 +71,16 @@ export function Stats(): JSX.Element {
 // modified to use a maximum value of ~33ms instead of the default 200ms and
 // the FPS panel is removed
 class THREEStats {
-  mode = 0;
-  container: HTMLDivElement;
-  dom: HTMLDivElement;
-  beginTime: number;
-  prevTime: number;
-  frames = 0;
-  msPanel: Panel;
+  private mode = 0;
+  private container: HTMLDivElement;
+  public dom: HTMLDivElement;
+  private beginTime: number;
+  private prevTime: number;
+  private msPanel: Panel;
   // fpsPanel: Panel;
-  memPanel: Panel;
+  private memPanel: Panel;
 
-  constructor() {
+  public constructor() {
     this.container = document.createElement("div");
     this.container.style.cssText =
       "position:fixed;top:0;left:0;cursor:pointer;opacity:0.9;z-index:10000";
@@ -105,12 +104,12 @@ class THREEStats {
     this.showPanel(0);
   }
 
-  addPanel(panel: Panel) {
+  public addPanel(panel: Panel) {
     this.container.appendChild(panel.dom);
     return panel;
   }
 
-  showPanel(id: number) {
+  public showPanel(id: number) {
     for (let i = 0; i < this.container.children.length; i++) {
       const child = this.container.children[i] as HTMLElement;
       child.style.display = i === id ? "block" : "none";
@@ -119,13 +118,11 @@ class THREEStats {
     this.mode = id;
   }
 
-  begin = () => {
+  public begin = () => {
     this.beginTime = performance.now();
   };
 
-  end = () => {
-    this.frames++;
-
+  public end = () => {
     const time = performance.now();
 
     this.msPanel.update(time - this.beginTime, 1000 / 30);
@@ -134,7 +131,6 @@ class THREEStats {
       // this.fpsPanel.update((this.frames * 1000) / (time - this.prevTime), 100);
 
       this.prevTime = time;
-      this.frames = 0;
 
       const memory = (
         performance as unknown as { memory: { usedJSHeapSize: number; jsHeapSizeLimit: number } }
@@ -145,22 +141,22 @@ class THREEStats {
     return time;
   };
 
-  update = () => {
+  public update = () => {
     this.beginTime = this.end();
   };
 }
 
 // Adapted from <https://github.com/mrdoob/stats.js/>. License: MIT.
 class Panel {
-  dom: HTMLCanvasElement;
-  context: CanvasRenderingContext2D;
-  min = Infinity;
-  max = 0;
-  name: string;
-  fg: string;
-  bg: string;
+  public dom: HTMLCanvasElement;
+  private context: CanvasRenderingContext2D;
+  private min = Infinity;
+  private max = 0;
+  private name: string;
+  private fg: string;
+  private bg: string;
 
-  constructor(name: string, fg: string, bg: string) {
+  public constructor(name: string, fg: string, bg: string) {
     this.name = name;
     this.fg = fg;
     this.bg = bg;
@@ -199,7 +195,7 @@ class Panel {
     this.context = context;
   }
 
-  update(value: number, maxValue: number): void {
+  public update(value: number, maxValue: number): void {
     const PR = Math.round(window.devicePixelRatio);
     const WIDTH = 80 * PR,
       TEXT_X = 3 * PR,

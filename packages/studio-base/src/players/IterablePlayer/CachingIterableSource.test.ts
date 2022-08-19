@@ -14,7 +14,7 @@ import {
 } from "./IIterableSource";
 
 class TestSource implements IIterableSource {
-  async initialize(): Promise<Initalization> {
+  public async initialize(): Promise<Initalization> {
     return {
       start: { sec: 0, nsec: 0 },
       end: { sec: 10, nsec: 0 },
@@ -27,11 +27,13 @@ class TestSource implements IIterableSource {
     };
   }
 
-  async *messageIterator(
+  public async *messageIterator(
     _args: MessageIteratorArgs,
   ): AsyncIterableIterator<Readonly<IteratorResult>> {}
 
-  async getBackfillMessages(_args: GetBackfillMessagesArgs): Promise<MessageEvent<unknown>[]> {
+  public async getBackfillMessages(
+    _args: GetBackfillMessagesArgs,
+  ): Promise<MessageEvent<unknown>[]> {
     return [];
   }
 }

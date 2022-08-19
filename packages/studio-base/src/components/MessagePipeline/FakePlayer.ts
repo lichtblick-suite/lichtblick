@@ -24,18 +24,18 @@ import {
 
 // ts-prune-ignore-next
 export default class FakePlayer implements Player {
-  listener?: (arg0: PlayerState) => Promise<void>;
-  playerId: string = "test";
-  subscriptions: SubscribePayload[] = [];
-  publishers: AdvertiseOptions[] | undefined;
+  private listener?: (arg0: PlayerState) => Promise<void>;
+  public playerId: string = "test";
+  public subscriptions: SubscribePayload[] = [];
+  public publishers: AdvertiseOptions[] | undefined;
   private _capabilities: typeof PlayerCapabilities[keyof typeof PlayerCapabilities][] = [];
   private _profile: string | undefined;
 
-  setListener(listener: (arg0: PlayerState) => Promise<void>): void {
+  public setListener(listener: (arg0: PlayerState) => Promise<void>): void {
     this.listener = listener;
   }
 
-  async emit({
+  public async emit({
     activeData,
     presence,
     progress,
@@ -58,48 +58,48 @@ export default class FakePlayer implements Player {
     });
   }
 
-  close = (): void => {
+  public close = (): void => {
     // no-op
   };
-  setPlaybackSpeed = (): void => {
+  public setPlaybackSpeed = (): void => {
     // no-op
   };
-  pausePlayback = (): void => {
+  public pausePlayback = (): void => {
     // no-op
   };
-  publish = (): void => {
+  public publish = (): void => {
     // no-op
   };
-  callService = async (): Promise<void> => {
+  public callService = async (): Promise<void> => {
     // no-op
   };
-  setPublishers = (pubs: AdvertiseOptions[]): void => {
+  public setPublishers = (pubs: AdvertiseOptions[]): void => {
     this.publishers = pubs;
   };
-  setParameter(_key: string, _value: ParameterValue): void {
+  public setParameter(_key: string, _value: ParameterValue): void {
     // no-op
   }
-  setSubscriptions = (subs: SubscribePayload[]): void => {
+  public setSubscriptions = (subs: SubscribePayload[]): void => {
     this.subscriptions = subs;
   };
-  setCapabilities = (
+  public setCapabilities = (
     capabilities: typeof PlayerCapabilities[keyof typeof PlayerCapabilities][],
   ): void => {
     this._capabilities = capabilities;
   };
-  setProfile = (profile: string | undefined): void => {
+  public setProfile = (profile: string | undefined): void => {
     this._profile = profile;
   };
-  startPlayback = (): void => {
+  public startPlayback = (): void => {
     // no-op
   };
-  seekPlayback = (): void => {
+  public seekPlayback = (): void => {
     // no-op
   };
-  requestBackfill = (): void => {
+  public requestBackfill = (): void => {
     // no-op
   };
-  setGlobalVariables = (): void => {
+  public setGlobalVariables = (): void => {
     // no-op
   };
 }

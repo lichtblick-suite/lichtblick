@@ -28,22 +28,22 @@ export default class WebWorkerManager<W extends Channel> {
   private _workerStates: (WorkerListenerState<W> | undefined)[];
   private _allListeners: Set<string>;
 
-  constructor(createWorker: () => W, maxWorkerCount: number) {
+  public constructor(createWorker: () => W, maxWorkerCount: number) {
     this._createWorker = createWorker;
     this._maxWorkerCount = maxWorkerCount;
     this._workerStates = new Array(maxWorkerCount);
     this._allListeners = new Set();
   }
 
-  testing_workerCount(): number {
+  public testing_workerCount(): number {
     return this._workerStates.filter(Boolean).length;
   }
 
-  testing_getWorkerState(id: string): WorkerListenerState<W> | undefined {
+  public testing_getWorkerState(id: string): WorkerListenerState<W> | undefined {
     return this._workerStates.find((workerState) => workerState?.listenerIds.includes(id));
   }
 
-  registerWorkerListener(id: string): Rpc {
+  public registerWorkerListener(id: string): Rpc {
     if (this._allListeners.has(id)) {
       throw new Error("cannot register the same listener id twice");
     }
@@ -71,7 +71,7 @@ export default class WebWorkerManager<W extends Channel> {
     return workerState.rpc;
   }
 
-  unregisterWorkerListener(id: string): void {
+  public unregisterWorkerListener(id: string): void {
     if (!this._allListeners.has(id)) {
       throw new Error("Cannot find listener to unregister");
     }

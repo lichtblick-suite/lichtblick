@@ -44,7 +44,7 @@ class MessageOrderTracker {
 
   private incorrectMessages: MessageEvent<unknown>[] = [];
 
-  update(playerState: PlayerState): PlayerProblem[] {
+  public update(playerState: PlayerState): PlayerProblem[] {
     if (!playerState.activeData) {
       return [];
     }

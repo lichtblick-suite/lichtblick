@@ -92,12 +92,12 @@ function toTypedArray(data: readonly number[] | Int8Array): Uint8Array {
 }
 
 class TextureCacheEntry {
-  marker: OccupancyGridMessage;
-  texture: REGL.Texture2D;
+  public marker: OccupancyGridMessage;
+  public texture: REGL.Texture2D;
   // regl context
-  regl: REGL.Regl;
+  public regl: REGL.Regl;
 
-  constructor(regl: REGL.Regl, marker: OccupancyGridMessage) {
+  public constructor(regl: REGL.Regl, marker: OccupancyGridMessage) {
     this.marker = marker;
     this.regl = regl;
     const { info, data } = marker;
@@ -116,7 +116,7 @@ class TextureCacheEntry {
   // generate a new texture, otherwise keep the old one
   // uploading new texture data to the gpu is something
   // you only want to do when required - it takes several milliseconds
-  getTexture(marker: OccupancyGridMessage) {
+  public getTexture(marker: OccupancyGridMessage) {
     if (this.marker === marker) {
       return this.texture;
     }
@@ -134,18 +134,18 @@ class TextureCacheEntry {
 }
 
 export class TextureCache {
-  store: {
+  public store: {
     [key: string]: TextureCacheEntry;
   } = {};
   // regl context
-  regl: REGL.Regl;
+  public regl: REGL.Regl;
 
-  constructor(regl: REGL.Regl) {
+  public constructor(regl: REGL.Regl) {
     this.regl = regl;
   }
 
   // returns a regl texture for a given marker
-  get(marker: OccupancyGridMessage): REGL.Texture2D {
+  public get(marker: OccupancyGridMessage): REGL.Texture2D {
     const { name } = marker;
     const item = this.store[name];
     if (!item) {

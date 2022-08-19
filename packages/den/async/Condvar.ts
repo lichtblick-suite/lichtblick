@@ -23,7 +23,7 @@ class Condvar {
    * await condvar.wait();
    * ```
    */
-  async wait(): Promise<void> {
+  public async wait(): Promise<void> {
     await new Promise<void>((resolve) => {
       this.waitQueue.push(resolve);
     });
@@ -32,7 +32,7 @@ class Condvar {
   /**
    * Notify one wait.
    */
-  notifyOne(): void {
+  public notifyOne(): void {
     const item = this.waitQueue.shift();
     item?.();
   }
@@ -40,7 +40,7 @@ class Condvar {
   /**
    * Notify all waiting.
    */
-  notifyAll(): void {
+  public notifyAll(): void {
     for (const item of this.waitQueue) {
       item();
     }

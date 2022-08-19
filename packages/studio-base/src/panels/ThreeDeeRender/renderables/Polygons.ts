@@ -49,24 +49,24 @@ export type PolygonUserData = BaseUserData & {
 };
 
 export class PolygonRenderable extends Renderable<PolygonUserData> {
-  override dispose(): void {
+  public override dispose(): void {
     this.userData.lines?.dispose();
     super.dispose();
   }
 
-  override details(): Record<string, RosValue> {
+  public override details(): Record<string, RosValue> {
     return this.userData.polygonStamped;
   }
 }
 
 export class Polygons extends SceneExtension<PolygonRenderable> {
-  constructor(renderer: Renderer) {
+  public constructor(renderer: Renderer) {
     super("foxglove.Polygons", renderer);
 
     renderer.addDatatypeSubscriptions(POLYGON_STAMPED_DATATYPES, this.handlePolygon);
   }
 
-  override settingsNodes(): SettingsTreeEntry[] {
+  public override settingsNodes(): SettingsTreeEntry[] {
     const configTopics = this.renderer.config.topics;
     const handler = this.handleSettingsAction;
     const entries: SettingsTreeEntry[] = [];
@@ -95,7 +95,7 @@ export class Polygons extends SceneExtension<PolygonRenderable> {
     return entries;
   }
 
-  override handleSettingsAction = (action: SettingsTreeAction): void => {
+  public override handleSettingsAction = (action: SettingsTreeAction): void => {
     const path = action.payload.path;
     if (action.action !== "update" || path.length !== 3) {
       return;
@@ -119,7 +119,7 @@ export class Polygons extends SceneExtension<PolygonRenderable> {
     }
   };
 
-  handlePolygon = (messageEvent: PartialMessageEvent<PolygonStamped>): void => {
+  private handlePolygon = (messageEvent: PartialMessageEvent<PolygonStamped>): void => {
     const topic = messageEvent.topic;
     const polygonStamped = normalizePolygonStamped(messageEvent.message);
     const receiveTime = toNanoSec(messageEvent.receiveTime);
@@ -151,7 +151,7 @@ export class Polygons extends SceneExtension<PolygonRenderable> {
     this._updatePolygonRenderable(renderable, polygonStamped, receiveTime);
   };
 
-  _updatePolygonRenderable(
+  private _updatePolygonRenderable(
     renderable: PolygonRenderable,
     polygonStamped: PolygonStamped,
     receiveTime: bigint,

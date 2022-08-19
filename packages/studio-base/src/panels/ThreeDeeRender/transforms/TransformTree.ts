@@ -18,12 +18,20 @@ export class TransformTree {
   private _maxStorageTime: Duration;
   private _maxCapacityPerFrame: number;
 
-  constructor(maxStorageTime = MAX_DURATION, maxCapacityPerFrame = DEFAULT_MAX_CAPACITY_PER_FRAME) {
+  public constructor(
+    maxStorageTime = MAX_DURATION,
+    maxCapacityPerFrame = DEFAULT_MAX_CAPACITY_PER_FRAME,
+  ) {
     this._maxStorageTime = maxStorageTime;
     this._maxCapacityPerFrame = maxCapacityPerFrame;
   }
 
-  addTransform(frameId: string, parentFrameId: string, time: Time, transform: Transform): boolean {
+  public addTransform(
+    frameId: string,
+    parentFrameId: string,
+    time: Time,
+    transform: Transform,
+  ): boolean {
     let updated = !this.hasFrame(frameId);
     const frame = this.getOrCreateFrame(frameId);
     const curParentFrame = frame.parent();
@@ -38,19 +46,19 @@ export class TransformTree {
     return updated;
   }
 
-  clear(): void {
+  public clear(): void {
     this._frames.clear();
   }
 
-  hasFrame(id: string): boolean {
+  public hasFrame(id: string): boolean {
     return this._frames.has(id);
   }
 
-  frame(id: string): CoordinateFrame | undefined {
+  public frame(id: string): CoordinateFrame | undefined {
     return this._frames.get(id);
   }
 
-  getOrCreateFrame(id: string): CoordinateFrame {
+  public getOrCreateFrame(id: string): CoordinateFrame {
     let frame = this._frames.get(id);
     if (!frame) {
       frame = new CoordinateFrame(id, undefined, this._maxStorageTime, this._maxCapacityPerFrame);
@@ -59,11 +67,11 @@ export class TransformTree {
     return frame;
   }
 
-  frames(): ReadonlyMap<string, CoordinateFrame> {
+  public frames(): ReadonlyMap<string, CoordinateFrame> {
     return this._frames;
   }
 
-  apply(
+  public apply(
     output: Pose,
     input: Readonly<Pose>,
     frameId: string,
@@ -83,7 +91,7 @@ export class TransformTree {
     return frame.apply(output, input, rootFrame, srcFrame, dstTime, srcTime, maxDelta);
   }
 
-  frameList(): { label: string; value: string }[] {
+  public frameList(): { label: string; value: string }[] {
     type FrameEntry = { id: string; children: FrameEntry[] };
 
     const frames = Array.from(this._frames.values());
@@ -130,7 +138,7 @@ export class TransformTree {
     return output;
   }
 
-  static Clone(tree: TransformTree): TransformTree {
+  public static Clone(tree: TransformTree): TransformTree {
     // eslint-disable-next-line no-underscore-dangle
     const newTree = new TransformTree(tree._maxStorageTime, tree._maxCapacityPerFrame);
     // eslint-disable-next-line no-underscore-dangle

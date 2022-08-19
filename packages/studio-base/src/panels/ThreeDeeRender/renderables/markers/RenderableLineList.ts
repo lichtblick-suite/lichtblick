@@ -18,11 +18,11 @@ import {
 } from "./materials";
 
 export class RenderableLineList extends RenderableMarker {
-  geometry: LineSegmentsGeometry;
-  linePrepass: LineSegments2;
-  line: LineSegments2;
+  private geometry: LineSegmentsGeometry;
+  private linePrepass: LineSegments2;
+  private line: LineSegments2;
 
-  constructor(
+  public constructor(
     topic: string,
     marker: Marker,
     receiveTime: bigint | undefined,
@@ -60,7 +60,7 @@ export class RenderableLineList extends RenderableMarker {
     this.update(marker, receiveTime);
   }
 
-  override dispose(): void {
+  public override dispose(): void {
     this.linePrepass.material.dispose();
     this.line.material.dispose();
 
@@ -70,7 +70,7 @@ export class RenderableLineList extends RenderableMarker {
     this.geometry.dispose();
   }
 
-  override update(marker: Marker, receiveTime: bigint | undefined): void {
+  public override update(marker: Marker, receiveTime: bigint | undefined): void {
     let pointsLength = marker.points.length;
     if (pointsLength % 2 !== 0) {
       pointsLength--;

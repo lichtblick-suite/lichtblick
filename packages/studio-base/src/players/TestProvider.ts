@@ -60,10 +60,13 @@ export default class TestProvider implements RandomAccessDataProvider {
   private _end: Time;
   private _topics: Topic[];
   private _datatypes: RosDatatypes;
-  extensionPoint?: ExtensionPoint;
-  closed: boolean = false;
+  public extensionPoint?: ExtensionPoint;
+  public closed: boolean = false;
 
-  constructor({ getMessages, topics }: { getMessages?: GetMessages; topics?: Topic[] } = {}) {
+  public constructor({
+    getMessages,
+    topics,
+  }: { getMessages?: GetMessages; topics?: Topic[] } = {}) {
     this._start = defaultStart;
     this._end = defaultEnd;
     this._topics = topics ?? defaultTopics;
@@ -73,7 +76,7 @@ export default class TestProvider implements RandomAccessDataProvider {
     }
   }
 
-  async initialize(extensionPoint: ExtensionPoint): Promise<InitializationResult> {
+  public async initialize(extensionPoint: ExtensionPoint): Promise<InitializationResult> {
     this.extensionPoint = extensionPoint;
     return {
       start: this._start,
@@ -93,7 +96,7 @@ export default class TestProvider implements RandomAccessDataProvider {
     };
   }
 
-  getMessages: GetMessages = async (
+  public getMessages: GetMessages = async (
     _start: Time,
     _end: Time,
     _topics: GetMessagesTopics,
@@ -101,7 +104,7 @@ export default class TestProvider implements RandomAccessDataProvider {
     throw new Error("not implemented");
   };
 
-  async close(): Promise<void> {
+  public async close(): Promise<void> {
     this.closed = true;
   }
 }

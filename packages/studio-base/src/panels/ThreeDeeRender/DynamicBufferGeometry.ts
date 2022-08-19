@@ -24,19 +24,19 @@ export class DynamicBufferGeometry<
   T extends TypedArray,
   C extends TypedArrayConstructor<T>,
 > extends THREE.BufferGeometry {
-  override attributes: { [name: string]: THREE.BufferAttribute } = {};
+  public override attributes: { [name: string]: THREE.BufferAttribute } = {};
 
   private _dataConstructor: C;
   private _usage: THREE.Usage;
   private _itemCapacity = 0;
 
-  constructor(arrayConstructor: C, usage: THREE.Usage = THREE.DynamicDrawUsage) {
+  public constructor(arrayConstructor: C, usage: THREE.Usage = THREE.DynamicDrawUsage) {
     super();
     this._dataConstructor = arrayConstructor;
     this._usage = usage;
   }
 
-  createAttribute(
+  public createAttribute(
     name: THREE.BuiltinShaderAttributeName | string,
     itemSize: number,
   ): THREE.BufferGeometry {
@@ -46,7 +46,7 @@ export class DynamicBufferGeometry<
     return this.setAttribute(name, attribute);
   }
 
-  resize(itemCount: number): void {
+  public resize(itemCount: number): void {
     this.setDrawRange(0, itemCount);
 
     if (itemCount <= this._itemCapacity) {

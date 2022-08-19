@@ -40,10 +40,10 @@ declare global {
     }
 
     class ListFormat {
-      constructor(locales?: string | string[], options?: ListFormatOptions);
-      format(values: any[]): string;
-      formatToParts(values: any[]): ListFormatPart[];
-      supportedLocalesOf(locales: string | string[], options?: ListFormatOptions): string[];
+      public constructor(locales?: string | string[], options?: ListFormatOptions);
+      public format(values: any[]): string;
+      public formatToParts(values: any[]): ListFormatPart[];
+      public supportedLocalesOf(locales: string | string[], options?: ListFormatOptions): string[];
     }
   }
 }

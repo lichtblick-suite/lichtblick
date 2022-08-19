@@ -30,10 +30,10 @@ const panels: readonly PanelInfo[] = [
 ];
 
 class MockPanelCatalog implements PanelCatalog {
-  getPanels(): readonly PanelInfo[] {
+  public getPanels(): readonly PanelInfo[] {
     return panels;
   }
-  getPanelByType(type: string): PanelInfo | undefined {
+  public getPanelByType(type: string): PanelInfo | undefined {
     return panels.find((panel) => !panel.config && panel.type === type);
   }
 }

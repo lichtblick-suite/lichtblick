@@ -32,11 +32,11 @@ export default class Mcap0StreamedDataProvider implements RandomAccessDataProvid
   private options: Options;
   private messagesByChannel?: Map<number, MessageEvent<unknown>[]>;
 
-  constructor(options: Options) {
+  public constructor(options: Options) {
     this.options = options;
   }
 
-  async initialize(_extensionPoint: ExtensionPoint): Promise<InitializationResult> {
+  public async initialize(_extensionPoint: ExtensionPoint): Promise<InitializationResult> {
     if (this.options.size > 1024 * 1024 * 1024) {
       // This provider uses a simple approach of loading everything into memory up front, so we
       // can't handle large files
@@ -193,7 +193,7 @@ export default class Mcap0StreamedDataProvider implements RandomAccessDataProvid
     };
   }
 
-  async getMessages(
+  public async getMessages(
     start: Time,
     end: Time,
     subscriptions: GetMessagesTopics,
@@ -223,5 +223,5 @@ export default class Mcap0StreamedDataProvider implements RandomAccessDataProvid
     return { parsedMessages };
   }
 
-  async close(): Promise<void> {}
+  public async close(): Promise<void> {}
 }

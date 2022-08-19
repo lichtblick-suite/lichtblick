@@ -11,10 +11,15 @@ import { RenderableMarker } from "./RenderableMarker";
 import { markerHasTransparency, makePointsMaterial } from "./materials";
 
 export class RenderablePoints extends RenderableMarker {
-  geometry: DynamicFloatBufferGeometry;
-  points: THREE.Points<DynamicFloatBufferGeometry, THREE.PointsMaterial>;
+  private geometry: DynamicFloatBufferGeometry;
+  private points: THREE.Points<DynamicFloatBufferGeometry, THREE.PointsMaterial>;
 
-  constructor(topic: string, marker: Marker, receiveTime: bigint | undefined, renderer: Renderer) {
+  public constructor(
+    topic: string,
+    marker: Marker,
+    receiveTime: bigint | undefined,
+    renderer: Renderer,
+  ) {
     super(topic, marker, receiveTime, renderer);
 
     this.geometry = new DynamicBufferGeometry(Float32Array);
@@ -27,11 +32,11 @@ export class RenderablePoints extends RenderableMarker {
     this.update(marker, receiveTime);
   }
 
-  override dispose(): void {
+  public override dispose(): void {
     this.points.material.dispose();
   }
 
-  override update(marker: Marker, receiveTime: bigint | undefined): void {
+  public override update(marker: Marker, receiveTime: bigint | undefined): void {
     const prevMarker = this.userData.marker;
     super.update(marker, receiveTime);
 

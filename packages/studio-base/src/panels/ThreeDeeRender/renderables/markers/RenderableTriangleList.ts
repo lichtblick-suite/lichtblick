@@ -18,11 +18,16 @@ const EMPTY_FLOAT32 = new Float32Array();
 const tempColor = { r: 0, g: 0, b: 0, a: 0 };
 
 export class RenderableTriangleList extends RenderableMarker {
-  mesh: THREE.Mesh<THREE.BufferGeometry, THREE.MeshStandardMaterial>;
-  vertices: Float32Array;
-  colors: Float32Array;
+  private mesh: THREE.Mesh<THREE.BufferGeometry, THREE.MeshStandardMaterial>;
+  private vertices: Float32Array;
+  private colors: Float32Array;
 
-  constructor(topic: string, marker: Marker, receiveTime: bigint | undefined, renderer: Renderer) {
+  public constructor(
+    topic: string,
+    marker: Marker,
+    receiveTime: bigint | undefined,
+    renderer: Renderer,
+  ) {
     super(topic, marker, receiveTime, renderer);
 
     this.vertices = new Float32Array(marker.points.length * 3);
@@ -36,14 +41,14 @@ export class RenderableTriangleList extends RenderableMarker {
     this.update(marker, receiveTime);
   }
 
-  override dispose(): void {
+  public override dispose(): void {
     this.mesh.material.dispose();
     this.mesh.geometry.dispose();
     this.vertices = new Float32Array();
     this.colors = new Float32Array();
   }
 
-  override update(marker: Marker, receiveTime: bigint | undefined): void {
+  public override update(marker: Marker, receiveTime: bigint | undefined): void {
     const prevMarker = this.userData.marker;
     super.update(marker, receiveTime);
 

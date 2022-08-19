@@ -10,15 +10,15 @@ import RosbridgePlayer from "@foxglove/studio-base/players/RosbridgePlayer";
 import { Player } from "@foxglove/studio-base/players/types";
 
 class RosbridgeDataSourceFactory implements IDataSourceFactory {
-  id = "rosbridge-websocket";
-  type: IDataSourceFactory["type"] = "connection";
-  displayName = "Rosbridge (ROS 1 & 2)";
-  iconName: IDataSourceFactory["iconName"] = "Flow";
-  docsLink = "https://foxglove.dev/docs/studio/connection/rosbridge";
-  description =
+  public id = "rosbridge-websocket";
+  public type: IDataSourceFactory["type"] = "connection";
+  public displayName = "Rosbridge (ROS 1 & 2)";
+  public iconName: IDataSourceFactory["iconName"] = "Flow";
+  public docsLink = "https://foxglove.dev/docs/studio/connection/rosbridge";
+  public description =
     "Connect to a running ROS 1 or ROS 2 system over WebSockets using the rosbridge_suite package.";
 
-  formConfig = {
+  public formConfig = {
     fields: [
       {
         id: "url",
@@ -39,7 +39,7 @@ class RosbridgeDataSourceFactory implements IDataSourceFactory {
     ],
   };
 
-  initialize(args: DataSourceFactoryInitializeArgs): Player | undefined {
+  public initialize(args: DataSourceFactoryInitializeArgs): Player | undefined {
     const url = args.url;
     if (!url) {
       return;

@@ -10,15 +10,15 @@ import FoxgloveWebSocketPlayer from "@foxglove/studio-base/players/FoxgloveWebSo
 import { Player } from "@foxglove/studio-base/players/types";
 
 export default class FoxgloveWebSocketDataSourceFactory implements IDataSourceFactory {
-  id = "foxglove-websocket";
-  type: IDataSourceFactory["type"] = "connection";
-  displayName = "Foxglove WebSocket";
-  iconName: IDataSourceFactory["iconName"] = "Flow";
-  description =
+  public id = "foxglove-websocket";
+  public type: IDataSourceFactory["type"] = "connection";
+  public displayName = "Foxglove WebSocket";
+  public iconName: IDataSourceFactory["iconName"] = "Flow";
+  public description =
     "Connect live to your custom data via an encoding-agnostic WebSocket connection. Using this data source usualy requires writing a custom server.";
-  docsLink = "https://foxglove.dev/docs/studio/connection/foxglove-websocket";
+  public docsLink = "https://foxglove.dev/docs/studio/connection/foxglove-websocket";
 
-  formConfig = {
+  public formConfig = {
     fields: [
       {
         id: "url",
@@ -39,7 +39,7 @@ export default class FoxgloveWebSocketDataSourceFactory implements IDataSourceFa
     ],
   };
 
-  initialize(args: DataSourceFactoryInitializeArgs): Player | undefined {
+  public initialize(args: DataSourceFactoryInitializeArgs): Player | undefined {
     const url = args.url;
     if (!url) {
       return;

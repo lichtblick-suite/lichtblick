@@ -34,11 +34,11 @@ export default class Rosbag2DataProvider implements RandomAccessDataProvider {
   private options_: Options;
   private bag_?: Rosbag2;
 
-  constructor(options: Options) {
+  public constructor(options: Options) {
     this.options_ = options;
   }
 
-  async initialize(_extensionPoint: ExtensionPoint): Promise<InitializationResult> {
+  public async initialize(_extensionPoint: ExtensionPoint): Promise<InitializationResult> {
     const res = await fetch(
       new URL("@foxglove/sql.js/dist/sql-wasm.wasm", import.meta.url).toString(),
     );
@@ -125,7 +125,7 @@ export default class Rosbag2DataProvider implements RandomAccessDataProvider {
     };
   }
 
-  async getMessages(
+  public async getMessages(
     start: Time,
     end: Time,
     subscriptions: GetMessagesTopics,
@@ -159,7 +159,7 @@ export default class Rosbag2DataProvider implements RandomAccessDataProvider {
     return { parsedMessages };
   }
 
-  async close(): Promise<void> {
+  public async close(): Promise<void> {
     await this.bag_?.close();
   }
 }

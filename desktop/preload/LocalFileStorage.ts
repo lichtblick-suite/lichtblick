@@ -16,7 +16,7 @@ const log = Logger.getLogger(__filename);
 export default class LocalFileStorage implements Storage {
   private _userDataPath = ipcRenderer.invoke("getUserDataPath") as Promise<string>;
 
-  async list(datastore: string): Promise<string[]> {
+  public async list(datastore: string): Promise<string[]> {
     const datastoreDir = await this.ensureDatastorePath(datastore);
     const result = new Array<string>();
 
@@ -28,7 +28,7 @@ export default class LocalFileStorage implements Storage {
     return result;
   }
 
-  async all(datastore: string): Promise<Uint8Array[]> {
+  public async all(datastore: string): Promise<Uint8Array[]> {
     const datastoreDir = await this.ensureDatastorePath(datastore);
     const result = new Array<Uint8Array>();
 
@@ -47,17 +47,17 @@ export default class LocalFileStorage implements Storage {
     return result;
   }
 
-  async get(
+  public async get(
     datastore: string,
     key: string,
     options?: { encoding: undefined },
   ): Promise<Uint8Array | undefined>;
-  async get(
+  public async get(
     datastore: string,
     key: string,
     options: { encoding: "utf8" },
   ): Promise<string | undefined>;
-  async get(
+  public async get(
     datastore: string,
     key: string,
     options?: { encoding?: "utf8" },
@@ -71,13 +71,13 @@ export default class LocalFileStorage implements Storage {
     });
   }
 
-  async put(datastore: string, key: string, value: StorageContent): Promise<void> {
+  public async put(datastore: string, key: string, value: StorageContent): Promise<void> {
     const filePath = await this.makeFilePath(datastore, key);
     log.debug(`Writing ${key} to ${filePath}`);
     await fs.writeFile(filePath, value);
   }
 
-  async delete(datastore: string, key: string): Promise<void> {
+  public async delete(datastore: string, key: string): Promise<void> {
     const filePath = await this.makeFilePath(datastore, key);
     await fs.unlink(filePath);
   }

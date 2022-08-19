@@ -17,21 +17,21 @@ export default class PlayerProblemManager {
    * Returns the current set of problems. Subsequent calls will return the same object as long as
    * problems have not been added/removed.
    */
-  problems(): PlayerProblem[] {
+  public problems(): PlayerProblem[] {
     return (this._problems ??= Array.from(this._problemsById.values()));
   }
 
-  addProblem(id: string, problem: PlayerProblem): void {
+  public addProblem(id: string, problem: PlayerProblem): void {
     console[problem.severity].call(console, "Player problem", id, problem);
     this._problemsById.set(id, problem);
     this._problems = undefined;
   }
 
-  hasProblem(id: string): boolean {
+  public hasProblem(id: string): boolean {
     return this._problemsById.has(id);
   }
 
-  removeProblem(id: string): boolean {
+  public removeProblem(id: string): boolean {
     const changed = this._problemsById.delete(id);
     if (changed) {
       this._problems = undefined;
@@ -39,7 +39,7 @@ export default class PlayerProblemManager {
     return changed;
   }
 
-  removeProblems(predicate: (id: string, problem: PlayerProblem) => boolean): boolean {
+  public removeProblems(predicate: (id: string, problem: PlayerProblem) => boolean): boolean {
     let changed = false;
     for (const [id, problem] of this._problemsById) {
       if (predicate(id, problem)) {
@@ -54,7 +54,7 @@ export default class PlayerProblemManager {
     return changed;
   }
 
-  clear(): void {
+  public clear(): void {
     this._problemsById.clear();
     this._problems = undefined;
   }

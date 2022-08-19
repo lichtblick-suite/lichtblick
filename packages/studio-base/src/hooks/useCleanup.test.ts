@@ -18,11 +18,11 @@ import useCleanup from "./useCleanup";
 
 describe("useCleanup", () => {
   class Example {
-    destroyed: boolean;
-    constructor() {
+    public destroyed: boolean;
+    public constructor() {
       this.destroyed = false;
     }
-    destroy() {
+    public destroy() {
       this.destroyed = true;
     }
   }

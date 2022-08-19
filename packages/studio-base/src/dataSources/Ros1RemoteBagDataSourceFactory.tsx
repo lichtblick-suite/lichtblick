@@ -15,21 +15,21 @@ import WorkerBagDataProvider from "@foxglove/studio-base/randomAccessDataProvide
 import { getSeekToTime } from "@foxglove/studio-base/util/time";
 
 class Ros1RemoteBagDataSourceFactory implements IDataSourceFactory {
-  id = "ros1-remote-bagfile";
-  type: IDataSourceFactory["type"] = "remote-file";
-  displayName = "ROS 1 Bag";
-  iconName: IDataSourceFactory["iconName"] = "FileASPX";
-  supportedFileTypes = [".bag"];
-  description = "Fetch and load pre-recorded ROS 1 .bag files from a remote location.";
-  docsLink = "https://foxglove.dev/docs/studio/connection/ros1-bag";
+  public id = "ros1-remote-bagfile";
+  public type: IDataSourceFactory["type"] = "remote-file";
+  public displayName = "ROS 1 Bag";
+  public iconName: IDataSourceFactory["iconName"] = "FileASPX";
+  public supportedFileTypes = [".bag"];
+  public description = "Fetch and load pre-recorded ROS 1 .bag files from a remote location.";
+  public docsLink = "https://foxglove.dev/docs/studio/connection/ros1-bag";
 
   private enableIterablePlayer = false;
 
-  constructor(opt?: { useIterablePlayer: boolean }) {
+  private constructor(opt?: { useIterablePlayer: boolean }) {
     this.enableIterablePlayer = opt?.useIterablePlayer ?? false;
   }
 
-  initialize(args: DataSourceFactoryInitializeArgs): Player | undefined {
+  public initialize(args: DataSourceFactoryInitializeArgs): Player | undefined {
     const url = args.url;
     if (!url) {
       return;

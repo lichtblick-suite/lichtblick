@@ -11,11 +11,11 @@ export default class LazilyInitialized<T> {
   // when it is no longer needed.
   private state: { promise: Promise<T> } | { promise?: undefined; compute: () => Promise<T> };
 
-  constructor(compute: () => Promise<T>) {
+  public constructor(compute: () => Promise<T>) {
     this.state = { compute };
   }
 
-  async get(): Promise<T> {
+  public async get(): Promise<T> {
     if (this.state.promise) {
       return await this.state.promise;
     }

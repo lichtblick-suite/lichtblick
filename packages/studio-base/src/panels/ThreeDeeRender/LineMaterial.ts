@@ -472,9 +472,9 @@ export interface LineMaterialParameters extends MaterialParameters {
 }
 
 export class LineMaterial extends ShaderMaterial {
-  readonly isLineMaterial = true;
+  public readonly isLineMaterial = true;
 
-  constructor(parameters: LineMaterialParameters) {
+  public constructor(parameters: LineMaterialParameters) {
     // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
     super({
       type: "LineMaterial",
@@ -490,19 +490,19 @@ export class LineMaterial extends ShaderMaterial {
     this.setValues(parameters);
   }
 
-  get color() {
+  public get color() {
     return this.uniforms.diffuse!.value;
   }
 
-  set color(value) {
+  public set color(value) {
     this.uniforms.diffuse!.value = value;
   }
 
-  get worldUnits() {
+  public get worldUnits() {
     return "WORLD_UNITS" in this.defines;
   }
 
-  set worldUnits(value) {
+  public set worldUnits(value) {
     if (value) {
       this.defines.WORLD_UNITS = "";
     } else {
@@ -510,19 +510,19 @@ export class LineMaterial extends ShaderMaterial {
     }
   }
 
-  get lineWidth() {
+  public get lineWidth() {
     return this.uniforms.linewidth!.value;
   }
 
-  set lineWidth(value) {
+  public set lineWidth(value) {
     this.uniforms.linewidth!.value = value;
   }
 
-  get dashed() {
+  public get dashed() {
     return Boolean("USE_DASH" in this.defines);
   }
 
-  set dashed(value) {
+  public set dashed(value) {
     if (Boolean(value) !== Boolean("USE_DASH" in this.defines)) {
       this.needsUpdate = true;
     }
@@ -534,43 +534,43 @@ export class LineMaterial extends ShaderMaterial {
     }
   }
 
-  get dashScale() {
+  public get dashScale() {
     return this.uniforms.dashScale!.value;
   }
 
-  set dashScale(value) {
+  public set dashScale(value) {
     this.uniforms.dashScale!.value = value;
   }
 
-  get dashSize() {
+  public get dashSize() {
     return this.uniforms.dashSize!.value;
   }
 
-  set dashSize(value) {
+  public set dashSize(value) {
     this.uniforms.dashSize!.value = value;
   }
 
-  get dashOffset() {
+  public get dashOffset() {
     return this.uniforms.dashOffset!.value;
   }
 
-  set dashOffset(value) {
+  public set dashOffset(value) {
     this.uniforms.dashOffset!.value = value;
   }
 
-  get gapSize() {
+  public get gapSize() {
     return this.uniforms.gapSize!.value;
   }
 
-  set gapSize(value) {
+  public set gapSize(value) {
     this.uniforms.gapSize!.value = value;
   }
 
-  get resolution(): THREE.Vector2 {
+  public get resolution(): THREE.Vector2 {
     return this.uniforms.resolution!.value;
   }
 
-  set resolution(value: THREE.Vector2) {
+  public set resolution(value: THREE.Vector2) {
     this.uniforms.resolution!.value.copy(value);
   }
 }

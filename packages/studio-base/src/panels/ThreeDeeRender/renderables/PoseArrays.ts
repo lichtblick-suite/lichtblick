@@ -99,18 +99,18 @@ export type PoseArrayUserData = BaseUserData & {
 };
 
 export class PoseArrayRenderable extends Renderable<PoseArrayUserData> {
-  override dispose(): void {
+  public override dispose(): void {
     this.userData.axes.forEach((axis) => axis.dispose());
     this.userData.arrows.forEach((arrow) => arrow.dispose());
     this.userData.lineStrip?.dispose();
     super.dispose();
   }
 
-  override details(): Record<string, RosValue> {
+  public override details(): Record<string, RosValue> {
     return this.userData.poseArrayMessage;
   }
 
-  removeArrows(): void {
+  public removeArrows(): void {
     for (const arrow of this.userData.arrows) {
       this.remove(arrow);
       arrow.dispose();
@@ -118,7 +118,7 @@ export class PoseArrayRenderable extends Renderable<PoseArrayUserData> {
     this.userData.arrows.length = 0;
   }
 
-  removeAxes(): void {
+  public removeAxes(): void {
     for (const axis of this.userData.axes) {
       this.remove(axis);
       axis.dispose();
@@ -126,7 +126,7 @@ export class PoseArrayRenderable extends Renderable<PoseArrayUserData> {
     this.userData.axes.length = 0;
   }
 
-  removeLineStrip(): void {
+  public removeLineStrip(): void {
     if (this.userData.lineStrip) {
       this.remove(this.userData.lineStrip);
       this.userData.lineStrip.dispose();
@@ -136,14 +136,14 @@ export class PoseArrayRenderable extends Renderable<PoseArrayUserData> {
 }
 
 export class PoseArrays extends SceneExtension<PoseArrayRenderable> {
-  constructor(renderer: Renderer) {
+  public constructor(renderer: Renderer) {
     super("foxglove.PoseArrays", renderer);
 
     renderer.addDatatypeSubscriptions(POSE_ARRAY_DATATYPES, this.handlePoseArray);
     renderer.addDatatypeSubscriptions(NAV_PATH_DATATYPES, this.handleNavPath);
   }
 
-  override settingsNodes(): SettingsTreeEntry[] {
+  public override settingsNodes(): SettingsTreeEntry[] {
     const configTopics = this.renderer.config.topics;
     const handler = this.handleSettingsAction;
     const entries: SettingsTreeEntry[] = [];
@@ -190,7 +190,7 @@ export class PoseArrays extends SceneExtension<PoseArrayRenderable> {
     return entries;
   }
 
-  override handleSettingsAction = (action: SettingsTreeAction): void => {
+  public override handleSettingsAction = (action: SettingsTreeAction): void => {
     const path = action.payload.path;
     if (action.action !== "update" || path.length !== 3) {
       return;
@@ -214,13 +214,13 @@ export class PoseArrays extends SceneExtension<PoseArrayRenderable> {
     }
   };
 
-  handlePoseArray = (messageEvent: PartialMessageEvent<PoseArray>): void => {
+  private handlePoseArray = (messageEvent: PartialMessageEvent<PoseArray>): void => {
     const poseArrayMessage = normalizePoseArray(messageEvent.message);
     const receiveTime = toNanoSec(messageEvent.receiveTime);
     this.addPoseArray(messageEvent.topic, poseArrayMessage, receiveTime);
   };
 
-  handleNavPath = (messageEvent: PartialMessageEvent<NavPath>): void => {
+  private handleNavPath = (messageEvent: PartialMessageEvent<NavPath>): void => {
     if (!validateNavPath(messageEvent, this.renderer)) {
       return;
     }
@@ -230,7 +230,7 @@ export class PoseArrays extends SceneExtension<PoseArrayRenderable> {
     this.addPoseArray(messageEvent.topic, poseArrayMessage, receiveTime);
   };
 
-  addPoseArray(topic: string, poseArrayMessage: PoseArray, receiveTime: bigint): void {
+  private addPoseArray(topic: string, poseArrayMessage: PoseArray, receiveTime: bigint): void {
     let renderable = this.renderables.get(topic);
     if (!renderable) {
       // Set the initial settings from default values merged with any user settings
@@ -265,7 +265,7 @@ export class PoseArrays extends SceneExtension<PoseArrayRenderable> {
     );
   }
 
-  _createAxesToMatchPoses(
+  private _createAxesToMatchPoses(
     renderable: PoseArrayRenderable,
     poseArray: PoseArray,
     topic: string,
@@ -297,7 +297,7 @@ export class PoseArrays extends SceneExtension<PoseArrayRenderable> {
     }
   }
 
-  _createArrowsToMatchPoses(
+  private _createArrowsToMatchPoses(
     renderable: PoseArrayRenderable,
     poseArray: PoseArray,
     topic: string,
@@ -335,7 +335,7 @@ export class PoseArrays extends SceneExtension<PoseArrayRenderable> {
     }
   }
 
-  _updatePoseArrayRenderable(
+  private _updatePoseArrayRenderable(
     renderable: PoseArrayRenderable,
     poseArrayMessage: PoseArray,
     receiveTime: bigint,
@@ -425,16 +425,6 @@ export class PoseArrays extends SceneExtension<PoseArrayRenderable> {
       }
     }
   }
-
-  _destroyArrows(renderable: PoseArrayRenderable): void {
-    for (const arrow of renderable.userData.arrows) {
-      renderable.remove(arrow);
-      arrow.dispose();
-    }
-    renderable.userData.arrows.length = 0;
-  }
-
-  _destroyAxes(): void {}
 }
 
 function getDefaultType(topic: Topic | undefined): DisplayType {

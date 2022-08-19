@@ -79,20 +79,20 @@ export type PoseUserData = BaseUserData & {
 };
 
 export class PoseRenderable extends Renderable<PoseUserData> {
-  override dispose(): void {
+  public override dispose(): void {
     this.userData.axis?.dispose();
     this.userData.arrow?.dispose();
     this.userData.sphere?.dispose();
     super.dispose();
   }
 
-  override details(): Record<string, RosValue> {
+  public override details(): Record<string, RosValue> {
     return this.userData.poseMessage;
   }
 }
 
 export class Poses extends SceneExtension<PoseRenderable> {
-  constructor(renderer: Renderer) {
+  public constructor(renderer: Renderer) {
     super("foxglove.Poses", renderer);
 
     renderer.addDatatypeSubscriptions(POSE_STAMPED_DATATYPES, this.handlePoseStamped);
@@ -102,7 +102,7 @@ export class Poses extends SceneExtension<PoseRenderable> {
     );
   }
 
-  override settingsNodes(): SettingsTreeEntry[] {
+  public override settingsNodes(): SettingsTreeEntry[] {
     const configTopics = this.renderer.config.topics;
     const handler = this.handleSettingsAction;
     const entries: SettingsTreeEntry[] = [];
@@ -177,7 +177,7 @@ export class Poses extends SceneExtension<PoseRenderable> {
     return entries;
   }
 
-  override handleSettingsAction = (action: SettingsTreeAction): void => {
+  public override handleSettingsAction = (action: SettingsTreeAction): void => {
     const path = action.payload.path;
     if (action.action !== "update" || path.length !== 3) {
       return;
@@ -201,13 +201,13 @@ export class Poses extends SceneExtension<PoseRenderable> {
     }
   };
 
-  handlePoseStamped = (messageEvent: PartialMessageEvent<PoseStamped>): void => {
+  private handlePoseStamped = (messageEvent: PartialMessageEvent<PoseStamped>): void => {
     const poseMessage = normalizePoseStamped(messageEvent.message);
     const receiveTime = toNanoSec(messageEvent.receiveTime);
     this.addPose(messageEvent.topic, poseMessage, receiveTime);
   };
 
-  handlePoseWithCovariance = (
+  private handlePoseWithCovariance = (
     messageEvent: PartialMessageEvent<PoseWithCovarianceStamped>,
   ): void => {
     const poseMessage = normalizePoseWithCovarianceStamped(messageEvent.message);
@@ -215,7 +215,7 @@ export class Poses extends SceneExtension<PoseRenderable> {
     this.addPose(messageEvent.topic, poseMessage, receiveTime);
   };
 
-  addPose(
+  private addPose(
     topic: string,
     poseMessage: PoseStamped | PoseWithCovarianceStamped,
     receiveTime: bigint,
@@ -249,7 +249,7 @@ export class Poses extends SceneExtension<PoseRenderable> {
     this._updatePoseRenderable(renderable, poseMessage, receiveTime, renderable.userData.settings);
   }
 
-  _updatePoseRenderable(
+  private _updatePoseRenderable(
     renderable: PoseRenderable,
     poseMessage: PoseStamped | PoseWithCovarianceStamped,
     receiveTime: bigint,

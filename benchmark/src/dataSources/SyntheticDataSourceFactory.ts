@@ -11,12 +11,12 @@ import { Player } from "@foxglove/studio-base/players/types";
 import { SinewavePlayer } from "../players";
 
 class SyntheticDataSourceFactory implements IDataSourceFactory {
-  id = "synthetic";
-  type: IDataSourceFactory["type"] = "connection";
-  displayName = "Synthetic";
-  iconName: IDataSourceFactory["iconName"] = "FileASPX";
+  public id = "synthetic";
+  public type: IDataSourceFactory["type"] = "connection";
+  public displayName = "Synthetic";
+  public iconName: IDataSourceFactory["iconName"] = "FileASPX";
 
-  initialize(_args: DataSourceFactoryInitializeArgs): Player | undefined {
+  public initialize(_args: DataSourceFactoryInitializeArgs): Player | undefined {
     return new SinewavePlayer();
   }
 }

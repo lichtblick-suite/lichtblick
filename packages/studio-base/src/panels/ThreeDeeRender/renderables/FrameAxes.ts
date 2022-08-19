@@ -44,12 +44,12 @@ export type FrameAxisUserData = BaseUserData & {
 };
 
 class FrameAxisRenderable extends Renderable<FrameAxisUserData> {
-  override dispose(): void {
+  public override dispose(): void {
     this.renderer.labelPool.release(this.userData.label);
     super.dispose();
   }
 
-  override details(): Record<string, RosValue> {
+  public override details(): Record<string, RosValue> {
     const frame = this.renderer.transformTree.frame(this.userData.frameId);
     const parent = frame?.parent();
     const fixed = frame?.root();
@@ -72,13 +72,13 @@ const tempEuler = new THREE.Euler();
 export class FrameAxes extends SceneExtension<FrameAxisRenderable> {
   private static lineGeometry: LineGeometry | undefined;
 
-  lineMaterial: LineMaterial;
-  linePickingMaterial: THREE.ShaderMaterial;
+  private lineMaterial: LineMaterial;
+  private linePickingMaterial: THREE.ShaderMaterial;
 
   private labelForegroundColor = 1;
   private labelBackgroundColor = new THREE.Color();
 
-  constructor(renderer: Renderer) {
+  public constructor(renderer: Renderer) {
     super("foxglove.FrameAxes", renderer);
 
     const linewidth = this.renderer.config.scene.transforms?.lineWidth ?? DEFAULT_LINE_WIDTH_PX;
@@ -95,14 +95,14 @@ export class FrameAxes extends SceneExtension<FrameAxisRenderable> {
     renderer.on("transformTreeUpdated", this.handleTransformTreeUpdated);
   }
 
-  override dispose(): void {
+  public override dispose(): void {
     this.renderer.off("transformTreeUpdated", this.handleTransformTreeUpdated);
     this.lineMaterial.dispose();
     this.linePickingMaterial.dispose();
     super.dispose();
   }
 
-  override settingsNodes(): SettingsTreeEntry[] {
+  public override settingsNodes(): SettingsTreeEntry[] {
     const config = this.renderer.config;
     const configTransforms = config.transforms;
     const handler = this.handleSettingsAction;
@@ -185,7 +185,11 @@ export class FrameAxes extends SceneExtension<FrameAxisRenderable> {
     ];
   }
 
-  override startFrame(currentTime: bigint, renderFrameId: string, fixedFrameId: string): void {
+  public override startFrame(
+    currentTime: bigint,
+    renderFrameId: string,
+    fixedFrameId: string,
+  ): void {
     // Keep the material's `resolution` uniform in sync with the actual canvas size
     this.lineMaterial.resolution = this.renderer.input.canvasSize;
 
@@ -215,7 +219,7 @@ export class FrameAxes extends SceneExtension<FrameAxisRenderable> {
     }
   }
 
-  override setColorScheme(
+  public override setColorScheme(
     colorScheme: "dark" | "light",
     backgroundColor: THREE.Color | undefined,
   ): void {
@@ -243,33 +247,33 @@ export class FrameAxes extends SceneExtension<FrameAxisRenderable> {
   }
 
   // eslint-disable-next-line @foxglove/no-boolean-parameters
-  setLabelVisible(visible: boolean): void {
+  private setLabelVisible(visible: boolean): void {
     for (const renderable of this.renderables.values()) {
       renderable.userData.label.visible = visible;
     }
   }
 
-  setLabelSize(size: number): void {
+  private setLabelSize(size: number): void {
     for (const renderable of this.renderables.values()) {
       renderable.userData.label.setLineHeight(size);
     }
   }
 
-  setAxisScale(scale: number): void {
+  private setAxisScale(scale: number): void {
     for (const renderable of this.renderables.values()) {
       renderable.userData.axis.scale.set(scale, scale, scale);
     }
   }
 
-  setLineWidth(width: number): void {
+  private setLineWidth(width: number): void {
     this.lineMaterial.linewidth = width;
   }
 
-  setLineColor(color: string): void {
+  private setLineColor(color: string): void {
     stringToRgb(this.lineMaterial.color, color);
   }
 
-  override handleSettingsAction = (action: SettingsTreeAction): void => {
+  public override handleSettingsAction = (action: SettingsTreeAction): void => {
     const path = action.payload.path;
 
     // eslint-disable-next-line @foxglove/no-boolean-parameters
@@ -341,7 +345,7 @@ export class FrameAxes extends SceneExtension<FrameAxisRenderable> {
     }
   };
 
-  handleTransformTreeUpdated = (): void => {
+  private handleTransformTreeUpdated = (): void => {
     for (const frameId of this.renderer.transformTree.frames().keys()) {
       this._addFrameAxis(frameId);
     }
@@ -411,7 +415,7 @@ export class FrameAxes extends SceneExtension<FrameAxisRenderable> {
     this.renderables.set(frameId, renderable);
   }
 
-  static LineGeometry(): LineGeometry {
+  private static LineGeometry(): LineGeometry {
     if (!FrameAxes.lineGeometry) {
       FrameAxes.lineGeometry = new LineGeometry();
       FrameAxes.lineGeometry.setPositions([0, 0, 0, 1, 0, 0]);

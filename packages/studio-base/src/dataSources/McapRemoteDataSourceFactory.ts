@@ -15,21 +15,21 @@ import MemoryCacheDataProvider from "@foxglove/studio-base/randomAccessDataProvi
 import { getSeekToTime } from "@foxglove/studio-base/util/time";
 
 export default class McapRemoteDataSourceFactory implements IDataSourceFactory {
-  id = "mcap-remote-file";
-  type: IDataSourceFactory["type"] = "remote-file";
-  displayName = "MCAP";
-  iconName: IDataSourceFactory["iconName"] = "FileASPX";
-  supportedFileTypes = [".mcap"];
-  description = "Fetch and load pre-recorded MCAP files from a remote location.";
-  docsLink = "https://foxglove.dev/docs/studio/connection/mcap";
+  public id = "mcap-remote-file";
+  public type: IDataSourceFactory["type"] = "remote-file";
+  public displayName = "MCAP";
+  public iconName: IDataSourceFactory["iconName"] = "FileASPX";
+  public supportedFileTypes = [".mcap"];
+  public description = "Fetch and load pre-recorded MCAP files from a remote location.";
+  public docsLink = "https://foxglove.dev/docs/studio/connection/mcap";
 
   private enableIterablePlayer = false;
 
-  constructor(opt?: { useIterablePlayer: boolean }) {
+  public constructor(opt?: { useIterablePlayer: boolean }) {
     this.enableIterablePlayer = opt?.useIterablePlayer ?? false;
   }
 
-  initialize(args: DataSourceFactoryInitializeArgs): Player | undefined {
+  public initialize(args: DataSourceFactoryInitializeArgs): Player | undefined {
     const url = args.url;
     if (!url) {
       return;

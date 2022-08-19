@@ -66,7 +66,7 @@ export function createLinkedChannels(): { local: Channel; remote: Channel } {
 //   const rpc = new Rpc(global);
 // Check out the tests for more examples.
 export default class Rpc {
-  static transferables = "$$TRANSFERABLES";
+  public static transferables = "$$TRANSFERABLES";
   private _channel: Omit<Channel, "terminate">;
   private _messageId: number = 0;
   private _pendingCallbacks: {
@@ -76,7 +76,7 @@ export default class Rpc {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   private _receivers: Map<string, (arg0: any) => any> = new Map();
 
-  constructor(channel: Omit<Channel, "terminate">) {
+  public constructor(channel: Omit<Channel, "terminate">) {
     this._channel = channel;
     if (this._channel.onmessage) {
       throw new Error(
@@ -133,7 +133,7 @@ export default class Rpc {
   };
 
   /** Call this when the channel has been terminated to reject any outstanding send callbacks. */
-  terminate(): void {
+  public terminate(): void {
     for (const [id, callback] of Object.entries(this._pendingCallbacks)) {
       callback({
         topic: RESPONSE,
@@ -151,7 +151,7 @@ export default class Rpc {
   // send a message across the rpc boundary to a receiver on the other side
   // this returns a promise for the receiver's response.  If there is no registered
   // receiver for the given topic, this method throws
-  async send<TResult, TData = unknown>(
+  public async send<TResult, TData = unknown>(
     topic: string,
     data?: TData,
     transfer?: (Transferable | OffscreenCanvas)[],
@@ -179,7 +179,7 @@ export default class Rpc {
   // register a receiver for a given message on a topic
   // only one receiver can be registered per topic and currently
   // 'deregistering' a receiver is not supported since this is not common
-  receive<T, TOut>(topic: string, handler: (arg0: T) => TOut): void {
+  public receive<T, TOut>(topic: string, handler: (arg0: T) => TOut): void {
     if (this._receivers.has(topic)) {
       throw new Error(`Receiver already registered for topic: ${topic}`);
     }

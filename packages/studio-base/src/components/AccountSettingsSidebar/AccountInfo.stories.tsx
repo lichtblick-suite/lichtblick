@@ -8,7 +8,7 @@ import ConsoleApi from "@foxglove/studio-base/services/ConsoleApi";
 import AccountInfo from "./AccountInfo";
 
 class FakeConsoleApi extends ConsoleApi {
-  constructor() {
+  public constructor() {
     super("");
   }
 }

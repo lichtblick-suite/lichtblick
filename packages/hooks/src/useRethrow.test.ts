@@ -19,10 +19,10 @@ describe("useRethrow", () => {
       },
       {
         wrapper: class Wrapper extends React.Component<React.PropsWithChildren<unknown>> {
-          override componentDidCatch(err: Error) {
+          public override componentDidCatch(err: Error) {
             error = err;
           }
-          override render() {
+          public override render() {
             return this.props.children;
           }
         },

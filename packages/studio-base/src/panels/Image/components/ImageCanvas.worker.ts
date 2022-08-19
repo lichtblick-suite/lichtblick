@@ -28,7 +28,7 @@ type RenderState = {
 class ImageCanvasWorker {
   private readonly _renderStates: Record<string, RenderState> = {};
 
-  constructor(rpc: Rpc) {
+  public constructor(rpc: Rpc) {
     setupWorker(rpc);
 
     rpc.receive("initialize", async ({ id, canvas }: { id: string; canvas: OffscreenCanvas }) => {

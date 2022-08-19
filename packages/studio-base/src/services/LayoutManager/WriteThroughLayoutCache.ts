@@ -14,7 +14,7 @@ import { ILayoutStorage, Layout, LayoutID } from "@foxglove/studio-base/services
 export default class WriteThroughLayoutCache implements ILayoutStorage {
   private cacheByNamespace = new Map<string, LazilyInitialized<Map<string, Layout>>>();
 
-  constructor(private storage: ILayoutStorage) {}
+  public constructor(private storage: ILayoutStorage) {}
 
   private getOrCreateCache(namespace: string): LazilyInitialized<Map<string, Layout>> {
     let cache = this.cacheByNamespace.get(namespace);
@@ -30,29 +30,32 @@ export default class WriteThroughLayoutCache implements ILayoutStorage {
     return cache;
   }
 
-  async importLayouts(params: { fromNamespace: string; toNamespace: string }): Promise<void> {
+  public async importLayouts(params: {
+    fromNamespace: string;
+    toNamespace: string;
+  }): Promise<void> {
     return await this.storage.importLayouts(params);
   }
 
-  async migrateUnnamespacedLayouts(namespace: string): Promise<void> {
+  public async migrateUnnamespacedLayouts(namespace: string): Promise<void> {
     await this.storage.migrateUnnamespacedLayouts?.(namespace);
   }
 
-  async list(namespace: string): Promise<readonly Layout[]> {
+  public async list(namespace: string): Promise<readonly Layout[]> {
     return Array.from((await this.getOrCreateCache(namespace).get()).values());
   }
 
-  async get(namespace: string, id: LayoutID): Promise<Layout | undefined> {
+  public async get(namespace: string, id: LayoutID): Promise<Layout | undefined> {
     return (await this.getOrCreateCache(namespace).get()).get(id);
   }
 
-  async put(namespace: string, layout: Layout): Promise<Layout> {
+  public async put(namespace: string, layout: Layout): Promise<Layout> {
     const result = await this.storage.put(namespace, layout);
     (await this.getOrCreateCache(namespace).get()).set(result.id, result);
     return result;
   }
 
-  async delete(namespace: string, id: LayoutID): Promise<void> {
+  public async delete(namespace: string, id: LayoutID): Promise<void> {
     await this.storage.delete(namespace, id);
     (await this.getOrCreateCache(namespace).get()).delete(id);
   }

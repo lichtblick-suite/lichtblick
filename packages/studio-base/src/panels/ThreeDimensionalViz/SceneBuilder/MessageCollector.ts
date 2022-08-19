@@ -22,15 +22,19 @@ const ZERO_TIME = { sec: 0, nsec: 0 };
 type ObjectWithInteractionData = Interactive<unknown>;
 
 class MessageWithLifetime {
-  message: ObjectWithInteractionData;
-  receiveTime: Time;
+  public message: ObjectWithInteractionData;
+  public receiveTime: Time;
   // If lifetime is present and non-zero, the marker expires when the collector clock is greater
   // than receiveTime + lifetime.
   // If lifetime is zero, the marker remains until deleted by name.
   // If absent, the marker is removed from the collector using explicit "flush" actions.
-  lifetime?: Time;
+  public lifetime?: Time;
 
-  constructor(message: ObjectWithInteractionData, receiveTime: Time, lifetime: Time | undefined) {
+  public constructor(
+    message: ObjectWithInteractionData,
+    receiveTime: Time,
+    lifetime: Time | undefined,
+  ) {
     this.message = message;
     this.receiveTime = receiveTime;
     this.lifetime = lifetime;
@@ -39,7 +43,7 @@ class MessageWithLifetime {
   // support in place update w/ mutation to avoid allocating
   // a MarkerWithLifetime wrapper for every marker on every tick
   // only allocate on new markers
-  update(message: ObjectWithInteractionData, receiveTime: Time, lifetime?: Time) {
+  public update(message: ObjectWithInteractionData, receiveTime: Time, lifetime?: Time) {
     this.message = message;
     this.receiveTime = receiveTime;
     this.lifetime = lifetime;
@@ -49,10 +53,10 @@ class MessageWithLifetime {
 // used to collect marker and non-marker visualization messages
 // for a given topic and ensure the lifecycle is managed properly
 export default class MessageCollector {
-  markers: Map<string, MessageWithLifetime> = new Map();
-  clock: Time = { sec: 0, nsec: 0 };
+  public markers: Map<string, MessageWithLifetime> = new Map();
+  public clock: Time = { sec: 0, nsec: 0 };
 
-  setClock(clock: Time): void {
+  public setClock(clock: Time): void {
     const clockMovedBackwards = isGreaterThan(this.clock, clock);
 
     if (clockMovedBackwards) {
@@ -67,7 +71,7 @@ export default class MessageCollector {
     this.clock = clock;
   }
 
-  flush(): void {
+  public flush(): void {
     // clear out all undefined lifetime markers
     this.markers.forEach((marker, key) => {
       if (marker.lifetime == undefined) {
@@ -85,19 +89,19 @@ export default class MessageCollector {
     }
   }
 
-  addMarker(marker: Interactive<BaseMarker>, name: string): void {
+  public addMarker(marker: Interactive<BaseMarker>, name: string): void {
     this._addItem(name, marker, marker.lifetime);
   }
 
-  deleteMarker(name: string): void {
+  public deleteMarker(name: string): void {
     this.markers.delete(name);
   }
 
-  deleteAll(): void {
+  public deleteAll(): void {
     this.markers.clear();
   }
 
-  addNonMarker(topic: string, message: ObjectWithInteractionData, lifetime?: Time): void {
+  public addNonMarker(topic: string, message: ObjectWithInteractionData, lifetime?: Time): void {
     // Non-marker data is removed in two ways:
     //  - Messages with lifetimes expire only at the end of their lifetime. Multiple messages on the
     //    same topic are added and expired independently.
@@ -127,7 +131,7 @@ export default class MessageCollector {
     }
   }
 
-  getMessages(): ObjectWithInteractionData[] {
+  public getMessages(): ObjectWithInteractionData[] {
     const result: ObjectWithInteractionData[] = [];
     this.markers.forEach((marker, key) => {
       // Check if the marker has a lifetime and should be deleted
@@ -142,7 +146,7 @@ export default class MessageCollector {
     return result;
   }
 
-  static markerIsExpired(
+  public static markerIsExpired(
     lifetime: Time | undefined,
     messageStamp: Time,
     currentTime: Time,

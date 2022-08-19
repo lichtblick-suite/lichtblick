@@ -160,7 +160,7 @@ export function buildImageMarker(args?: Partial<ImageMarker>): ImageMarker {
  * @deprecated prefer `buildRosMarker({ ... })` instead
  */
 export class Marker implements IMarker {
-  header: Header = {
+  public header: Header = {
     frame_id: "",
     stamp: {
       sec: 0,
@@ -168,11 +168,11 @@ export class Marker implements IMarker {
     },
     seq: 0,
   };
-  ns = "";
-  id = 0;
-  type = 0;
-  action = 0;
-  pose: Pose = {
+  public ns = "";
+  public id = 0;
+  public type = 0;
+  public action = 0;
+  public pose: Pose = {
     position: {
       x: 0,
       y: 0,
@@ -185,21 +185,21 @@ export class Marker implements IMarker {
       w: 0,
     },
   };
-  scale: Point = {
+  public scale: Point = {
     x: 0,
     y: 0,
     z: 0,
   };
-  color: RGBA = { r: 0, g: 0, b: 0, a: 0 };
-  lifetime: Time = { sec: 0, nsec: 0 };
-  frame_locked = false;
-  points: Point[] = [];
-  colors: RGBA[] = [];
-  text = "";
-  mesh_resource = "";
-  mesh_use_embedded_materials = false;
+  public color: RGBA = { r: 0, g: 0, b: 0, a: 0 };
+  public lifetime: Time = { sec: 0, nsec: 0 };
+  public frame_locked = false;
+  public points: Point[] = [];
+  public colors: RGBA[] = [];
+  public text = "";
+  public mesh_resource = "";
+  public mesh_use_embedded_materials = false;
 
-  constructor({
+  public constructor({
     header,
     ns,
     id,

@@ -16,10 +16,15 @@ export class RenderableCylinder extends RenderableMarker {
   private static cylinderGeometry: THREE.CylinderGeometry | undefined;
   private static cylinderEdgesGeometry: THREE.EdgesGeometry | undefined;
 
-  mesh: THREE.Mesh<THREE.CylinderGeometry, THREE.MeshStandardMaterial>;
-  outline: THREE.LineSegments | undefined;
+  private mesh: THREE.Mesh<THREE.CylinderGeometry, THREE.MeshStandardMaterial>;
+  private outline: THREE.LineSegments | undefined;
 
-  constructor(topic: string, marker: Marker, receiveTime: bigint | undefined, renderer: Renderer) {
+  public constructor(
+    topic: string,
+    marker: Marker,
+    receiveTime: bigint | undefined,
+    renderer: Renderer,
+  ) {
     super(topic, marker, receiveTime, renderer);
 
     // Cylinder mesh
@@ -39,11 +44,11 @@ export class RenderableCylinder extends RenderableMarker {
     this.update(marker, receiveTime);
   }
 
-  override dispose(): void {
+  public override dispose(): void {
     this.mesh.material.dispose();
   }
 
-  override update(marker: Marker, receiveTime: bigint | undefined): void {
+  public override update(marker: Marker, receiveTime: bigint | undefined): void {
     super.update(marker, receiveTime);
 
     const transparent = marker.color.a < 1;
@@ -59,7 +64,7 @@ export class RenderableCylinder extends RenderableMarker {
     this.scale.set(marker.scale.x, marker.scale.y, marker.scale.z);
   }
 
-  static Geometry(lod: DetailLevel): THREE.CylinderGeometry {
+  private static Geometry(lod: DetailLevel): THREE.CylinderGeometry {
     if (!RenderableCylinder.cylinderGeometry || lod !== RenderableCylinder.lod) {
       const subdivisions = cylinderSubdivisions(lod);
       RenderableCylinder.cylinderGeometry = new THREE.CylinderGeometry(0.5, 0.5, 1, subdivisions);
@@ -70,7 +75,7 @@ export class RenderableCylinder extends RenderableMarker {
     return RenderableCylinder.cylinderGeometry;
   }
 
-  static EdgesGeometry(lod: DetailLevel): THREE.EdgesGeometry {
+  private static EdgesGeometry(lod: DetailLevel): THREE.EdgesGeometry {
     if (!RenderableCylinder.cylinderEdgesGeometry) {
       const geometry = RenderableCylinder.Geometry(lod);
       RenderableCylinder.cylinderEdgesGeometry = new THREE.EdgesGeometry(geometry, 40);

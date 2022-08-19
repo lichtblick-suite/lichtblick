@@ -30,7 +30,7 @@ storiesOf("components/Autocomplete", module)
   .addParameters({ colorScheme: "dark" })
   .add("filtering to 'o'", () => {
     class Example extends Component {
-      override render() {
+      public override render() {
         return (
           <div style={{ padding: 20 }} ref={focusInput}>
             <Autocomplete
@@ -50,7 +50,7 @@ storiesOf("components/Autocomplete", module)
     "filtering to 'o' light",
     () => {
       class Example extends Component {
-        override render() {
+        public override render() {
           return (
             <div style={{ padding: 20 }} ref={focusInput}>
               <Autocomplete
@@ -175,7 +175,7 @@ storiesOf("components/Autocomplete", module)
   })
   .add("at the right edge of the screen", () => {
     class Example extends Component {
-      override render() {
+      public override render() {
         return (
           <div style={{ position: "absolute", right: 0, padding: 20 }} ref={focusInput}>
             <Autocomplete items={["loooooooooooooong item"]} value="looo" onSelect={() => {}} />
@@ -187,7 +187,7 @@ storiesOf("components/Autocomplete", module)
   })
   .add("with a long truncated path (and autoSize)", () => {
     class Example extends Component {
-      override render() {
+      public override render() {
         return (
           <div style={{ maxWidth: 200 }} ref={focusInput}>
             <Autocomplete

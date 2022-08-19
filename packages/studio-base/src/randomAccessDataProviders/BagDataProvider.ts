@@ -86,14 +86,14 @@ const mergeStats = (a: TimedDataThroughput, b: TimedDataThroughput): TimedDataTh
 class LogMetricsReader {
   private _reader: FileReader;
   private _extensionPoint: ExtensionPoint;
-  constructor(reader: FileReader, extensionPoint: ExtensionPoint) {
+  public constructor(reader: FileReader, extensionPoint: ExtensionPoint) {
     this._reader = reader;
     this._extensionPoint = extensionPoint;
   }
-  async open() {
+  public async open() {
     return await this._reader.open();
   }
-  fetch(offset: number, length: number) {
+  public fetch(offset: number, length: number) {
     const stream = this._reader.fetch(offset, length);
     stream.on("data", getReportMetadataForChunk(this._extensionPoint));
     return stream;
@@ -110,11 +110,11 @@ export default class BagDataProvider implements RandomAccessDataProvider {
   private _extensionPoint?: ExtensionPoint;
   private bzip2?: Bzip2;
 
-  constructor(options: Options) {
+  public constructor(options: Options) {
     this._options = options;
   }
 
-  async initialize(extensionPoint: ExtensionPoint): Promise<InitializationResult> {
+  public async initialize(extensionPoint: ExtensionPoint): Promise<InitializationResult> {
     this._extensionPoint = extensionPoint;
     const { bagPath, cacheSizeInBytes } = this._options;
     await decompressLZ4.isLoaded;
@@ -264,7 +264,7 @@ export default class BagDataProvider implements RandomAccessDataProvider {
     this._debouncedLogStats();
   }
 
-  async getMessages(
+  public async getMessages(
     start: Time,
     end: Time,
     subscriptions: GetMessagesTopics,
@@ -338,7 +338,7 @@ export default class BagDataProvider implements RandomAccessDataProvider {
     return { encodedMessages: messages, parsedMessages: undefined };
   }
 
-  async close(): Promise<void> {
+  public async close(): Promise<void> {
     // no-op
   }
 }

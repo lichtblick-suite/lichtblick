@@ -19,22 +19,31 @@ type GltfMesh = THREE.Mesh<
 const MESH_FETCH_FAILED = "MESH_FETCH_FAILED";
 
 export class RenderableMeshResource extends RenderableMarker {
-  mesh: THREE.Group | THREE.Scene | undefined;
-  material: THREE.MeshStandardMaterial;
+  private mesh: THREE.Group | THREE.Scene | undefined;
+  private material: THREE.MeshStandardMaterial;
 
-  constructor(topic: string, marker: Marker, receiveTime: bigint | undefined, renderer: Renderer) {
+  public constructor(
+    topic: string,
+    marker: Marker,
+    receiveTime: bigint | undefined,
+    renderer: Renderer,
+  ) {
     super(topic, marker, receiveTime, renderer);
 
     this.material = makeStandardMaterial(marker.color);
     this.update(marker, receiveTime, true);
   }
 
-  override dispose(): void {
+  public override dispose(): void {
     this.material.dispose();
   }
 
-  // eslint-disable-next-line @foxglove/no-boolean-parameters
-  override update(marker: Marker, receiveTime: bigint | undefined, forceLoad?: boolean): void {
+  public override update(
+    marker: Marker,
+    receiveTime: bigint | undefined,
+    // eslint-disable-next-line @foxglove/no-boolean-parameters
+    forceLoad?: boolean,
+  ): void {
     const prevMarker = this.userData.marker;
     super.update(marker, receiveTime);
 

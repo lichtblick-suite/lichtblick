@@ -120,7 +120,7 @@ export default class RosbridgePlayer implements Player {
   private readonly _sourceId: string;
   private _rosVersion: 1 | 2 | undefined;
 
-  constructor({
+  public constructor({
     url,
     metricsCollector,
     sourceId,
@@ -416,12 +416,12 @@ export default class RosbridgePlayer implements Player {
     });
   });
 
-  setListener(listener: (arg0: PlayerState) => Promise<void>): void {
+  public setListener(listener: (arg0: PlayerState) => Promise<void>): void {
     this._listener = listener;
     this._emitState();
   }
 
-  close(): void {
+  public close(): void {
     this._closed = true;
     if (this._rosClient) {
       this._rosClient.close();
@@ -434,7 +434,7 @@ export default class RosbridgePlayer implements Player {
     this._hasReceivedMessage = false;
   }
 
-  setSubscriptions(subscriptions: SubscribePayload[]): void {
+  public setSubscriptions(subscriptions: SubscribePayload[]): void {
     this._requestedSubscriptions = subscriptions;
 
     if (!this._rosClient || this._closed) {
@@ -570,7 +570,7 @@ export default class RosbridgePlayer implements Player {
     }
   }
 
-  setPublishers(publishers: AdvertiseOptions[]): void {
+  public setPublishers(publishers: AdvertiseOptions[]): void {
     // Since `setPublishers` is rarely called, we can get away with just throwing away the old
     // Roslib.Topic objects and creating new ones.
     for (const publisher of this._topicPublishers.values()) {
@@ -581,11 +581,11 @@ export default class RosbridgePlayer implements Player {
     this._setupPublishers();
   }
 
-  setParameter(_key: string, _value: ParameterValue): void {
+  public setParameter(_key: string, _value: ParameterValue): void {
     throw new Error("Parameter editing is not supported by the Rosbridge connection");
   }
 
-  publish({ topic, msg }: PublishPayload): void {
+  public publish({ topic, msg }: PublishPayload): void {
     const publisher = this._topicPublishers.get(topic);
     if (!publisher) {
       throw new Error(
@@ -616,7 +616,7 @@ export default class RosbridgePlayer implements Player {
     return await serviceTypePromise;
   }
 
-  async callService(service: string, request: unknown): Promise<unknown> {
+  public async callService(service: string, request: unknown): Promise<unknown> {
     if (!this._rosClient) {
       throw new Error("Not connected");
     }
@@ -645,22 +645,22 @@ export default class RosbridgePlayer implements Player {
   }
 
   // Bunch of unsupported stuff. Just don't do anything for these.
-  startPlayback(): void {
+  public startPlayback(): void {
     // no-op
   }
-  pausePlayback(): void {
+  public pausePlayback(): void {
     // no-op
   }
-  seekPlayback(_time: Time): void {
+  public seekPlayback(_time: Time): void {
     // no-op
   }
-  setPlaybackSpeed(_speedFraction: number): void {
+  public setPlaybackSpeed(_speedFraction: number): void {
     // no-op
   }
-  requestBackfill(): void {
+  public requestBackfill(): void {
     // no-op
   }
-  setGlobalVariables(): void {
+  public setGlobalVariables(): void {
     // no-op
   }
 

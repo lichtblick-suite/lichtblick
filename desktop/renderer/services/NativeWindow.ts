@@ -9,11 +9,11 @@ import { Desktop } from "../../common/types";
 export class NativeWindow implements INativeWindow {
   private bridge?: Desktop;
 
-  constructor(bridge: Desktop) {
+  public constructor(bridge: Desktop) {
     this.bridge = bridge;
   }
 
-  async setRepresentedFilename(path: string | undefined): Promise<void> {
+  public async setRepresentedFilename(path: string | undefined): Promise<void> {
     await this.bridge?.setRepresentedFilename(path);
   }
 }

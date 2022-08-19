@@ -10,7 +10,7 @@ import { HTML5Backend } from "react-dnd-html5-backend";
 import PanelErrorBoundary from "./PanelErrorBoundary";
 
 class Broken extends React.Component {
-  override render() {
+  public override render() {
     throw Object.assign(new Error("Hello!"), {
       stack: `
   an error occurred

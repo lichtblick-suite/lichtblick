@@ -221,9 +221,9 @@ export const getArrowToParentMarker = (
 };
 
 export default class TransformsBuilder implements MarkerProvider {
-  selections: string[] = [];
+  private selections: string[] = [];
 
-  addMarkersForTransform(
+  public addMarkersForTransform(
     add: MarkerCollector,
     id: string,
     renderFrame: IImmutableCoordinateFrame,
@@ -256,11 +256,11 @@ export default class TransformsBuilder implements MarkerProvider {
     add.text(getAxisTextMarker(id, tempPose));
   }
 
-  setSelectedTransforms(selections: string[]): void {
+  public setSelectedTransforms(selections: string[]): void {
     this.selections = selections;
   }
 
-  renderMarkers = (args: RenderMarkerArgs): void => {
+  public renderMarkers = (args: RenderMarkerArgs): void => {
     const { add, renderFrame, fixedFrame, transforms, time } = args;
 
     for (const key of this.selections) {

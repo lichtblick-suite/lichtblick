@@ -276,12 +276,12 @@ export default class MemoryCacheDataProvider implements RandomAccessDataProvider
   private _readAheadBlocks: number = 0;
   private _memCacheBlockSizeNs: number = 0;
 
-  constructor(provider: RandomAccessDataProvider) {
+  public constructor(provider: RandomAccessDataProvider) {
     this._cacheSizeBytes = DEFAULT_CACHE_SIZE_BYTES;
     this._provider = provider;
   }
 
-  async initialize(extensionPoint: ExtensionPoint): Promise<InitializationResult> {
+  public async initialize(extensionPoint: ExtensionPoint): Promise<InitializationResult> {
     this._extensionPoint = extensionPoint;
     const result = await this._provider.initialize({
       ...extensionPoint,
@@ -312,7 +312,7 @@ export default class MemoryCacheDataProvider implements RandomAccessDataProvider
 
   // Potentially performance-sensitive; await can be expensive
   // eslint-disable-next-line @typescript-eslint/promise-function-async
-  getMessages(
+  public getMessages(
     startTime: Time,
     endTime: Time,
     subscriptions: GetMessagesTopics,
@@ -341,7 +341,7 @@ export default class MemoryCacheDataProvider implements RandomAccessDataProvider
     });
   }
 
-  async close(): Promise<void> {
+  public async close(): Promise<void> {
     delete this._currentConnection; // Make sure that the current "connection" loop stops executing.
 
     return await this._provider.close();
@@ -730,7 +730,7 @@ export default class MemoryCacheDataProvider implements RandomAccessDataProvider
     });
   }
 
-  setCacheSizeBytesInTests(cacheSizeBytes: number): void {
+  public setCacheSizeBytesInTests(cacheSizeBytes: number): void {
     this._cacheSizeBytes = cacheSizeBytes;
   }
 }

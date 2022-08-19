@@ -8,21 +8,21 @@ import { ILayoutStorage, Layout } from "@foxglove/studio-base/services/ILayoutSt
 export default class MockLayoutStorage implements ILayoutStorage {
   private layoutsByIdByNamespace: Map<string, Map<string, Layout>>;
 
-  constructor(namespace: string, layouts: Layout[] = []) {
+  public constructor(namespace: string, layouts: Layout[] = []) {
     this.layoutsByIdByNamespace = new Map([
       [namespace, new Map(layouts.map((layout) => [layout.id, layout]))],
     ]);
   }
 
-  async list(namespace: string): Promise<readonly Layout[]> {
+  public async list(namespace: string): Promise<readonly Layout[]> {
     return Array.from(this.layoutsByIdByNamespace.get(namespace)?.values() ?? []);
   }
 
-  async get(namespace: string, id: string): Promise<Layout | undefined> {
+  public async get(namespace: string, id: string): Promise<Layout | undefined> {
     return this.layoutsByIdByNamespace.get(namespace)?.get(id);
   }
 
-  async put(namespace: string, layout: Layout): Promise<Layout> {
+  public async put(namespace: string, layout: Layout): Promise<Layout> {
     let layoutsById = this.layoutsByIdByNamespace.get(namespace);
     if (!layoutsById) {
       layoutsById = new Map();
@@ -32,9 +32,9 @@ export default class MockLayoutStorage implements ILayoutStorage {
     return layout;
   }
 
-  async delete(namespace: string, id: string): Promise<void> {
+  public async delete(namespace: string, id: string): Promise<void> {
     this.layoutsByIdByNamespace.get(namespace)?.delete(id);
   }
 
-  async importLayouts(): Promise<void> {}
+  public async importLayouts(): Promise<void> {}
 }

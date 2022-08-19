@@ -11,18 +11,18 @@ import ConsoleApi, { DeviceCodeResponse } from "@foxglove/studio-base/services/C
 import DeviceCodeDialog from "./DeviceCodeDialog";
 
 class FakeConsoleApi extends ConsoleApi {
-  constructor(private _deviceCode: DeviceCodeResponse | Promise<DeviceCodeResponse>) {
+  public constructor(private _deviceCode: DeviceCodeResponse | Promise<DeviceCodeResponse>) {
     super("");
   }
 
-  override async token(): ReturnType<ConsoleApi["token"]> {
+  public override async token(): ReturnType<ConsoleApi["token"]> {
     return {
       accessToken: "foo",
       idToken: "bar",
     };
   }
 
-  override async deviceCode(): Promise<DeviceCodeResponse> {
+  public override async deviceCode(): Promise<DeviceCodeResponse> {
     return await this._deviceCode;
   }
 }

@@ -16,7 +16,7 @@ type MeasurementState = "idle" | "place-first-point" | "place-second-point";
  * perspective/zoom level.
  */
 class FixedSizeMeshMaterial extends THREE.ShaderMaterial {
-  constructor({ color }: { color: THREE.ColorRepresentation }) {
+  public constructor({ color }: { color: THREE.ColorRepresentation }) {
     super({
       vertexShader: /* glsl */ `
         #include <common>
@@ -68,12 +68,12 @@ export class MeasurementTool extends SceneExtension<Renderable<BaseUserData>, Me
   private point1NeedsUpdate = false;
   private point2NeedsUpdate = false;
 
-  point1?: THREE.Vector3;
-  point2?: THREE.Vector3;
+  private point1?: THREE.Vector3;
+  private point2?: THREE.Vector3;
 
-  state: MeasurementState = "idle";
+  public state: MeasurementState = "idle";
 
-  constructor(renderer: Renderer) {
+  public constructor(renderer: Renderer) {
     super("foxglove.MeasurementTool", renderer);
 
     this.line.userData.picking = false;
@@ -104,7 +104,7 @@ export class MeasurementTool extends SceneExtension<Renderable<BaseUserData>, Me
     this._setState("idle");
   }
 
-  override dispose(): void {
+  public override dispose(): void {
     super.dispose();
     this.renderer.labelPool.release(this.label);
     this.circleGeometry.dispose();
@@ -115,16 +115,20 @@ export class MeasurementTool extends SceneExtension<Renderable<BaseUserData>, Me
     this.renderer.input.removeListener("mousemove", this._handleMouseMove);
   }
 
-  startMeasuring(): void {
+  public startMeasuring(): void {
     this._setState("place-first-point");
   }
 
-  stopMeasuring(): void {
+  public stopMeasuring(): void {
     this.point1 = this.point2 = undefined;
     this._setState("idle");
   }
 
-  override startFrame(currentTime: bigint, renderFrameId: string, fixedFrameId: string): void {
+  public override startFrame(
+    currentTime: bigint,
+    renderFrameId: string,
+    fixedFrameId: string,
+  ): void {
     super.startFrame(currentTime, renderFrameId, fixedFrameId);
     this.circleMaterial.uniforms.canvasSize!.value[0] = this.renderer.input.canvasSize.x;
     this.circleMaterial.uniforms.canvasSize!.value[1] = this.renderer.input.canvasSize.y;

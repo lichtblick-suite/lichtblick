@@ -81,22 +81,22 @@ class CachingIterableSource implements IIterableSource {
   // Maximum size per block
   private maxBlockSizeBytes: number;
 
-  constructor(source: IIterableSource, opt?: Options) {
+  public constructor(source: IIterableSource, opt?: Options) {
     this.source = source;
     this.maxTotalSizeBytes = opt?.maxTotalSize ?? 1073741824; // 1GB
     this.maxBlockSizeBytes = opt?.maxBlockSize ?? 52428800; // 50MB
   }
 
-  async initialize(): Promise<Initalization> {
+  public async initialize(): Promise<Initalization> {
     this.initResult = await this.source.initialize();
     return this.initResult;
   }
 
-  loadedRanges(): Range[] {
+  public loadedRanges(): Range[] {
     return this.loadedRangesCache;
   }
 
-  async *messageIterator(
+  public async *messageIterator(
     args: MessageIteratorArgs,
   ): AsyncIterableIterator<Readonly<IteratorResult>> {
     if (!this.initResult) {
@@ -337,7 +337,9 @@ class CachingIterableSource implements IIterableSource {
     }
   }
 
-  async getBackfillMessages(args: GetBackfillMessagesArgs): Promise<MessageEvent<unknown>[]> {
+  public async getBackfillMessages(
+    args: GetBackfillMessagesArgs,
+  ): Promise<MessageEvent<unknown>[]> {
     if (!this.initResult) {
       throw new Error("Invariant: uninitialized");
     }

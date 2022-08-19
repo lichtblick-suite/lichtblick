@@ -34,11 +34,11 @@ export type MarkerTopicUserData = BaseUserData & {
 type PartialMarkerSettings = Partial<LayerSettingsMarker> | undefined;
 
 export class MarkersNamespace {
-  namespace: string;
-  markersById = new Map<number, RenderableMarker>();
-  settings: LayerSettingsMarkerNamespace;
+  public namespace: string;
+  public markersById = new Map<number, RenderableMarker>();
+  public settings: LayerSettingsMarkerNamespace;
 
-  constructor(topic: string, namespace: string, renderer: Renderer) {
+  public constructor(topic: string, namespace: string, renderer: Renderer) {
     this.namespace = namespace;
 
     // Set the initial settings from default values merged with any user settings
@@ -49,15 +49,15 @@ export class MarkersNamespace {
 }
 
 export class TopicMarkers extends Renderable<MarkerTopicUserData> {
-  override pickable = false;
-  namespaces = new Map<string, MarkersNamespace>();
+  public override pickable = false;
+  public namespaces = new Map<string, MarkersNamespace>();
 
   // eslint-disable-next-line no-restricted-syntax
-  get topic(): string {
+  public get topic(): string {
     return this.userData.topic;
   }
 
-  override dispose(): void {
+  public override dispose(): void {
     for (const ns of this.namespaces.values()) {
       for (const marker of ns.markersById.values()) {
         this.renderer.markerPool.release(marker);
@@ -67,7 +67,7 @@ export class TopicMarkers extends Renderable<MarkerTopicUserData> {
     this.namespaces.clear();
   }
 
-  addMarkerMessage(marker: Marker, receiveTime: bigint): void {
+  public addMarkerMessage(marker: Marker, receiveTime: bigint): void {
     switch (marker.action) {
       case MarkerAction.ADD:
       case MarkerAction.MODIFY:
@@ -90,7 +90,7 @@ export class TopicMarkers extends Renderable<MarkerTopicUserData> {
     }
   }
 
-  startFrame(currentTime: bigint, renderFrameId: string, fixedFrameId: string): void {
+  public startFrame(currentTime: bigint, renderFrameId: string, fixedFrameId: string): void {
     this.visible = this.userData.settings.visible;
     if (!this.visible) {
       this.renderer.settings.errors.clearTopic(this.topic);

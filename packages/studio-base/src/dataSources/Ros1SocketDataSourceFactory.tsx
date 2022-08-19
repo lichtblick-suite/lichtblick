@@ -12,15 +12,15 @@ import Ros1Player from "@foxglove/studio-base/players/Ros1Player";
 import { Player } from "@foxglove/studio-base/players/types";
 
 class Ros1SocketDataSourceFactory implements IDataSourceFactory {
-  id = "ros1-socket";
-  type: IDataSourceFactory["type"] = "connection";
-  displayName = "ROS 1";
-  iconName: IDataSourceFactory["iconName"] = "studio.ROS";
-  description =
+  public id = "ros1-socket";
+  public type: IDataSourceFactory["type"] = "connection";
+  public displayName = "ROS 1";
+  public iconName: IDataSourceFactory["iconName"] = "studio.ROS";
+  public description =
     "Connect to a running ROS 1 system via a native TCP connection that accesses your ROS master and nodes directly.";
-  docsLink = "https://foxglove.dev/docs/studio/connection/native";
+  public docsLink = "https://foxglove.dev/docs/studio/connection/native";
 
-  formConfig = {
+  public formConfig = {
     fields: [
       {
         id: "url",
@@ -43,7 +43,7 @@ class Ros1SocketDataSourceFactory implements IDataSourceFactory {
     ],
   };
 
-  initialize(args: DataSourceFactoryInitializeArgs): Player | undefined {
+  public initialize(args: DataSourceFactoryInitializeArgs): Player | undefined {
     const url = args.url;
     if (!url) {
       return;

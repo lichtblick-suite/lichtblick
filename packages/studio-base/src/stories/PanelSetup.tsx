@@ -167,10 +167,10 @@ export const MosaicWrapper = ({ children }: { children: React.ReactNode }): JSX.
 
 // empty catalog if one is not provided via props
 class MockPanelCatalog implements PanelCatalog {
-  getPanels(): readonly PanelInfo[] {
+  public getPanels(): readonly PanelInfo[] {
     return [];
   }
-  getPanelByType(_type: string): PanelInfo | undefined {
+  public getPanelByType(_type: string): PanelInfo | undefined {
     return undefined;
   }
 }

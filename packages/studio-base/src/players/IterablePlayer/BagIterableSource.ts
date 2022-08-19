@@ -36,11 +36,11 @@ export class BagIterableSource implements IIterableSource {
   private _bag: Bag | undefined;
   private _readersByConnectionId = new Map<number, LazyMessageReader>();
 
-  constructor(source: BagSource) {
+  public constructor(source: BagSource) {
     this._source = source;
   }
 
-  async initialize(): Promise<Initalization> {
+  public async initialize(): Promise<Initalization> {
     await decompressLZ4.isLoaded;
     const bzip2 = await Bzip2.init();
 
@@ -163,7 +163,7 @@ export class BagIterableSource implements IIterableSource {
     };
   }
 
-  async *messageIterator(
+  public async *messageIterator(
     opt: MessageIteratorArgs,
   ): AsyncIterableIterator<Readonly<IteratorResult>> {
     yield* this._messageIterator({ ...opt, reverse: false });
@@ -220,7 +220,7 @@ export class BagIterableSource implements IIterableSource {
     }
   }
 
-  async getBackfillMessages({
+  public async getBackfillMessages({
     topics,
     time,
   }: GetBackfillMessagesArgs): Promise<MessageEvent<unknown>[]> {

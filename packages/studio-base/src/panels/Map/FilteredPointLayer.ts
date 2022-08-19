@@ -22,7 +22,7 @@ type Args = {
 };
 
 class PointMarker extends CircleMarker {
-  messageEvent?: MessageEvent<NavSatFixMsg>;
+  public messageEvent?: MessageEvent<NavSatFixMsg>;
 }
 
 /**

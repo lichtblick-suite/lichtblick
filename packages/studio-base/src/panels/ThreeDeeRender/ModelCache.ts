@@ -38,11 +38,11 @@ export class ModelCache {
   private _models = new Map<string, Promise<LoadedModel | undefined>>();
   private _edgeMaterial: THREE.Material;
 
-  constructor(private loadModelOptions: LoadModelOptions) {
+  public constructor(private loadModelOptions: LoadModelOptions) {
     this._edgeMaterial = loadModelOptions.edgeMaterial;
   }
 
-  async load(url: string, reportError: ErrorCallback): Promise<LoadedModel | undefined> {
+  public async load(url: string, reportError: ErrorCallback): Promise<LoadedModel | undefined> {
     let promise = this._models.get(url);
     if (promise) {
       return await promise;

@@ -122,6 +122,8 @@ overrides:
         - error
         - ts-expect-error: allow-with-description
 
+      "@typescript-eslint/explicit-member-accessibility": error
+
       "@typescript-eslint/no-inferrable-types": off # It's sometimes useful to explicitly name to guard against future changes
       "@typescript-eslint/no-empty-function": off
       "@typescript-eslint/no-implied-eval": off # We need to use `new Function()`

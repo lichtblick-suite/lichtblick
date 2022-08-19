@@ -60,14 +60,14 @@ export type GridUserData = BaseUserData & {
 };
 
 export class GridRenderable extends Renderable<GridUserData> {
-  override dispose(): void {
+  public override dispose(): void {
     this.userData.lineList.dispose();
     super.dispose();
   }
 }
 
 export class Grids extends SceneExtension<GridRenderable> {
-  constructor(renderer: Renderer) {
+  public constructor(renderer: Renderer) {
     super("foxglove.Grids", renderer);
 
     renderer.addCustomLayerAction({
@@ -87,16 +87,16 @@ export class Grids extends SceneExtension<GridRenderable> {
     }
   }
 
-  override dispose(): void {
+  public override dispose(): void {
     this.renderer.off("transformTreeUpdated", this.handleTransformTreeUpdated);
     super.dispose();
   }
 
-  override removeAllRenderables(): void {
+  public override removeAllRenderables(): void {
     // no-op
   }
 
-  override settingsNodes(): SettingsTreeEntry[] {
+  public override settingsNodes(): SettingsTreeEntry[] {
     const handler = this.handleSettingsAction;
     const entries: SettingsTreeEntry[] = [];
     for (const [instanceId, layerConfig] of Object.entries(this.renderer.config.layers)) {
@@ -142,7 +142,11 @@ export class Grids extends SceneExtension<GridRenderable> {
     return entries;
   }
 
-  override startFrame(currentTime: bigint, renderFrameId: string, fixedFrameId: string): void {
+  public override startFrame(
+    currentTime: bigint,
+    renderFrameId: string,
+    fixedFrameId: string,
+  ): void {
     // Set the `frameId` to use for `updatePose()`
     for (const renderable of this.renderables.values()) {
       renderable.userData.frameId = renderable.userData.settings.frameId ?? renderFrameId;
@@ -150,7 +154,7 @@ export class Grids extends SceneExtension<GridRenderable> {
     super.startFrame(currentTime, renderFrameId, fixedFrameId);
   }
 
-  override handleSettingsAction = (action: SettingsTreeAction): void => {
+  public override handleSettingsAction = (action: SettingsTreeAction): void => {
     const path = action.payload.path;
 
     // Handle menu actions (delete)
@@ -186,7 +190,7 @@ export class Grids extends SceneExtension<GridRenderable> {
     this._updateGrid(instanceId, settings);
   };
 
-  handleAddGrid = (instanceId: string): void => {
+  private handleAddGrid = (instanceId: string): void => {
     log.info(`Creating ${LAYER_ID} layer ${instanceId}`);
 
     const config: LayerSettingsGrid = { ...DEFAULT_SETTINGS, instanceId };
@@ -205,7 +209,7 @@ export class Grids extends SceneExtension<GridRenderable> {
     this.updateSettingsTree();
   };
 
-  handleTransformTreeUpdated = (): void => {
+  private handleTransformTreeUpdated = (): void => {
     this.updateSettingsTree();
   };
 

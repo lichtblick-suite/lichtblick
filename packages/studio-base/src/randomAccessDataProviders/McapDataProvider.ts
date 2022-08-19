@@ -28,11 +28,11 @@ import McapPre0DataProvider from "./McapPre0DataProvider";
 type Options = { source: { type: "file"; file: File } | { type: "remote"; url: string } };
 
 class FileReadable {
-  constructor(private file: File) {}
-  async size(): Promise<bigint> {
+  public constructor(private file: File) {}
+  public async size(): Promise<bigint> {
     return BigInt(this.file.size);
   }
-  async read(offset: bigint, size: bigint): Promise<Uint8Array> {
+  public async read(offset: bigint, size: bigint): Promise<Uint8Array> {
     if (offset + size > this.file.size) {
       throw new Error(
         `Read of ${size} bytes at offset ${offset} exceeds file size ${this.file.size}`,
@@ -71,11 +71,11 @@ async function tryCreateIndexedReader(readable: Mcap0Types.IReadable) {
 export default class McapDataProvider implements RandomAccessDataProvider {
   private options: Options;
   private provider?: RandomAccessDataProvider;
-  constructor(options: Options) {
+  public constructor(options: Options) {
     this.options = options;
   }
 
-  async initialize(extensionPoint: ExtensionPoint): Promise<InitializationResult> {
+  public async initialize(extensionPoint: ExtensionPoint): Promise<InitializationResult> {
     const { source } = this.options;
     let makeReadable: () => Promise<Mcap0Types.IReadable>;
     let makeStream: () => Promise<{ size: number; stream: ReadableStream<Uint8Array> }>;
@@ -170,7 +170,7 @@ export default class McapDataProvider implements RandomAccessDataProvider {
     }
   }
 
-  async getMessages(
+  public async getMessages(
     start: Time,
     end: Time,
     subscriptions: GetMessagesTopics,
@@ -181,7 +181,7 @@ export default class McapDataProvider implements RandomAccessDataProvider {
     return await this.provider.getMessages(start, end, subscriptions);
   }
 
-  async close(): Promise<void> {
+  public async close(): Promise<void> {
     if (!this.provider) {
       throw new Error("Data provider has not been initialized");
     }

@@ -62,12 +62,12 @@ class BufferedIterableSource implements IIterableSource {
   // How far ahead of the read head we should try to keep buffering
   private readAheadDuration: Time;
 
-  constructor(source: IIterableSource, opt?: Options) {
+  public constructor(source: IIterableSource, opt?: Options) {
     this.readAheadDuration = opt?.readAheadDuration ?? DEFAULT_READ_AHEAD_DURATION;
     this.source = new CachingIterableSource(source);
   }
 
-  async initialize(): Promise<Initalization> {
+  public async initialize(): Promise<Initalization> {
     this.initResult = await this.source.initialize();
     return this.initResult;
   }
@@ -157,18 +157,20 @@ class BufferedIterableSource implements IIterableSource {
     log.debug("producer done");
   }
 
-  async stopProducer(): Promise<void> {
+  public async stopProducer(): Promise<void> {
     this.aborted = true;
     this.writeSignal.notifyAll();
     await this.producer;
     this.producer = undefined;
   }
 
-  loadedRanges(): Range[] {
+  public loadedRanges(): Range[] {
     return this.source.loadedRanges();
   }
 
-  messageIterator(args: MessageIteratorArgs): AsyncIterableIterator<Readonly<IteratorResult>> {
+  public messageIterator(
+    args: MessageIteratorArgs,
+  ): AsyncIterableIterator<Readonly<IteratorResult>> {
     if (!this.initResult) {
       throw new Error("Invariant: uninitialized");
     }
@@ -232,7 +234,9 @@ class BufferedIterableSource implements IIterableSource {
     })();
   }
 
-  async getBackfillMessages(args: GetBackfillMessagesArgs): Promise<MessageEvent<unknown>[]> {
+  public async getBackfillMessages(
+    args: GetBackfillMessagesArgs,
+  ): Promise<MessageEvent<unknown>[]> {
     return await this.source.getBackfillMessages(args);
   }
 }

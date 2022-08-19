@@ -14,10 +14,15 @@ export class RenderableCube extends RenderableMarker {
   private static cubeGeometry: THREE.BoxGeometry | undefined;
   private static cubeEdgesGeometry: THREE.EdgesGeometry | undefined;
 
-  mesh: THREE.Mesh<THREE.BoxGeometry, THREE.MeshStandardMaterial>;
-  outline: THREE.LineSegments | undefined;
+  private mesh: THREE.Mesh<THREE.BoxGeometry, THREE.MeshStandardMaterial>;
+  private outline: THREE.LineSegments | undefined;
 
-  constructor(topic: string, marker: Marker, receiveTime: bigint | undefined, renderer: Renderer) {
+  public constructor(
+    topic: string,
+    marker: Marker,
+    receiveTime: bigint | undefined,
+    renderer: Renderer,
+  ) {
     super(topic, marker, receiveTime, renderer);
 
     // Cube mesh
@@ -34,11 +39,11 @@ export class RenderableCube extends RenderableMarker {
     this.update(marker, receiveTime);
   }
 
-  override dispose(): void {
+  public override dispose(): void {
     this.mesh.material.dispose();
   }
 
-  override update(marker: Marker, receiveTime: bigint | undefined): void {
+  public override update(marker: Marker, receiveTime: bigint | undefined): void {
     super.update(marker, receiveTime);
 
     const transparent = marker.color.a < 1;
@@ -54,7 +59,7 @@ export class RenderableCube extends RenderableMarker {
     this.scale.set(marker.scale.x, marker.scale.y, marker.scale.z);
   }
 
-  static Geometry(): THREE.BoxGeometry {
+  public static Geometry(): THREE.BoxGeometry {
     if (!RenderableCube.cubeGeometry) {
       RenderableCube.cubeGeometry = new THREE.BoxGeometry(1, 1, 1);
       RenderableCube.cubeGeometry.computeBoundingSphere();
@@ -62,7 +67,7 @@ export class RenderableCube extends RenderableMarker {
     return RenderableCube.cubeGeometry;
   }
 
-  static EdgesGeometry(): THREE.EdgesGeometry {
+  private static EdgesGeometry(): THREE.EdgesGeometry {
     if (!RenderableCube.cubeEdgesGeometry) {
       RenderableCube.cubeEdgesGeometry = new THREE.EdgesGeometry(RenderableCube.Geometry(), 40);
       RenderableCube.cubeEdgesGeometry.computeBoundingSphere();

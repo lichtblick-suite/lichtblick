@@ -11,13 +11,13 @@ const log = Logger.getLogger(__filename);
 
 export class DesktopExtensionLoader implements ExtensionLoader {
   private bridge?: Desktop;
-  readonly namespace: ExtensionNamespace = "local";
+  public readonly namespace: ExtensionNamespace = "local";
 
-  constructor(bridge: Desktop) {
+  public constructor(bridge: Desktop) {
     this.bridge = bridge;
   }
 
-  async getExtensions(): Promise<ExtensionInfo[]> {
+  public async getExtensions(): Promise<ExtensionInfo[]> {
     const extensionList = (await this.bridge?.getExtensions()) ?? [];
     log.debug(`Loaded ${extensionList.length} extension(s)`);
 
@@ -42,11 +42,11 @@ export class DesktopExtensionLoader implements ExtensionLoader {
     return extensions;
   }
 
-  async loadExtension(id: string): Promise<string> {
+  public async loadExtension(id: string): Promise<string> {
     return (await this.bridge?.loadExtension(id)) ?? "";
   }
 
-  async installExtension(foxeFileData: Uint8Array): Promise<ExtensionInfo> {
+  public async installExtension(foxeFileData: Uint8Array): Promise<ExtensionInfo> {
     if (this.bridge == undefined) {
       throw new Error(`Cannot install extension without a desktopBridge`);
     }
@@ -70,7 +70,7 @@ export class DesktopExtensionLoader implements ExtensionLoader {
     };
   }
 
-  async uninstallExtension(id: string): Promise<void> {
+  public async uninstallExtension(id: string): Promise<void> {
     await this.bridge?.uninstallExtension(id);
   }
 }

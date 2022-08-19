@@ -42,7 +42,7 @@ const textMessage = ({ text }: { text: string }) => {
 
 let workerInstance: MockRosClient;
 class MockRosClient {
-  constructor() {
+  public constructor() {
     workerInstance = this;
   }
 
@@ -52,7 +52,7 @@ class MockRosClient {
   private _connectCallback?: () => void;
   private _messages: any[] = [];
 
-  setup({
+  public setup({
     topics = [],
     types = [],
     typedefs = [],
@@ -71,17 +71,17 @@ class MockRosClient {
     this._connectCallback?.();
   }
 
-  on(op: string, callback: () => void) {
+  public on(op: string, callback: () => void) {
     if (op === "connection") {
       this._connectCallback = callback;
     }
   }
 
-  close() {
+  public close() {
     // no-op
   }
 
-  getTopicsAndRawTypes(callback: (...args: unknown[]) => void) {
+  public getTopicsAndRawTypes(callback: (...args: unknown[]) => void) {
     callback({
       topics: this._topics,
       types: this._types,
@@ -89,15 +89,15 @@ class MockRosClient {
     });
   }
 
-  getMessagesByTopicName(topicName: string): { message: unknown }[] {
+  public getMessagesByTopicName(topicName: string): { message: unknown }[] {
     return this._messages.filter(({ topic }) => topic === topicName);
   }
 
-  getNodes(callback: (nodes: string[]) => void, _errCb: (error: Error) => void) {
+  public getNodes(callback: (nodes: string[]) => void, _errCb: (error: Error) => void) {
     callback([]);
   }
 
-  getNodeDetails(
+  public getNodeDetails(
     _node: string,
     callback: (subscriptions: string[], publications: string[], services: string[]) => void,
     _errCb: (error: Error) => void,
@@ -109,11 +109,11 @@ class MockRosClient {
 class MockRosTopic {
   private _name: string = "";
 
-  constructor({ name }: { name: string }) {
+  public constructor({ name }: { name: string }) {
     this._name = name;
   }
 
-  subscribe(callback: (arg: unknown) => void) {
+  public subscribe(callback: (arg: unknown) => void) {
     workerInstance.getMessagesByTopicName(this._name).forEach(({ message }) => callback(message));
   }
 }

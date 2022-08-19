@@ -26,11 +26,11 @@ export default class NativeStorageLayoutStorage implements ILayoutStorage {
 
   private _ctx: Storage;
 
-  constructor(storage: Storage) {
+  public constructor(storage: Storage) {
     this._ctx = storage;
   }
 
-  async list(namespace: string): Promise<readonly Layout[]> {
+  public async list(namespace: string): Promise<readonly Layout[]> {
     const items = await this._ctx.all(NativeStorageLayoutStorage.STORE_PREFIX + namespace);
 
     const layouts: Layout[] = [];
@@ -45,7 +45,7 @@ export default class NativeStorageLayoutStorage implements ILayoutStorage {
     return layouts;
   }
 
-  async get(namespace: string, id: LayoutID): Promise<Layout | undefined> {
+  public async get(namespace: string, id: LayoutID): Promise<Layout | undefined> {
     const item = await this._ctx.get(NativeStorageLayoutStorage.STORE_PREFIX + namespace, id);
     if (item == undefined) {
       return undefined;
@@ -53,17 +53,17 @@ export default class NativeStorageLayoutStorage implements ILayoutStorage {
     return parseAndMigrateLayout(item);
   }
 
-  async put(namespace: string, layout: Layout): Promise<Layout> {
+  public async put(namespace: string, layout: Layout): Promise<Layout> {
     const content = JSON.stringify(layout) ?? "";
     await this._ctx.put(NativeStorageLayoutStorage.STORE_PREFIX + namespace, layout.id, content);
     return layout;
   }
 
-  async delete(namespace: string, id: LayoutID): Promise<void> {
+  public async delete(namespace: string, id: LayoutID): Promise<void> {
     return await this._ctx.delete(NativeStorageLayoutStorage.STORE_PREFIX + namespace, id);
   }
 
-  async importLayouts({
+  public async importLayouts({
     fromNamespace,
     toNamespace,
   }: {
@@ -89,7 +89,7 @@ export default class NativeStorageLayoutStorage implements ILayoutStorage {
     }
   }
 
-  async migrateUnnamespacedLayouts(namespace: string): Promise<void> {
+  public async migrateUnnamespacedLayouts(namespace: string): Promise<void> {
     // Layouts were previously stored in a single un-namespaced store named "layouts".
     const items = await this._ctx.all(NativeStorageLayoutStorage.LEGACY_STORE_NAME);
     for (const item of items) {

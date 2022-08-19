@@ -11,16 +11,16 @@ export class ArrayMap<K, V> {
   private _list: [K, V][] = [];
 
   // eslint-disable-next-line no-restricted-syntax
-  get size(): number {
+  public get size(): number {
     return this._list.length;
   }
 
-  clear(): void {
+  public clear(): void {
     this._list.length = 0;
   }
 
   /** Retrieve the key/value tuple at the given index, if it exists. */
-  at(index: number): [K, V] | undefined {
+  public at(index: number): [K, V] | undefined {
     return this._list[index];
   }
 
@@ -28,7 +28,7 @@ export class ArrayMap<K, V> {
    * Store a key/value tuple in the sorted list. If the key already exists, the
    * previous entry is overwritten.
    */
-  set(key: K, value: V): void {
+  public set(key: K, value: V): void {
     const index = this.binarySearch(key);
     if (index >= 0) {
       this._list[index]![1] = value;
@@ -44,32 +44,32 @@ export class ArrayMap<K, V> {
   }
 
   /** Removes the first element and returns it, if available. */
-  shift(): [K, V] | undefined {
+  public shift(): [K, V] | undefined {
     return this._list.shift();
   }
 
   /** Removes the last element and returns it, if available. */
-  pop(): [K, V] | undefined {
+  public pop(): [K, V] | undefined {
     return this._list.pop();
   }
 
   /** Access the first key/value tuple in the list, without modifying the list. */
-  minEntry(): [K, V] | undefined {
+  public minEntry(): [K, V] | undefined {
     return this._list[0];
   }
 
   /** Access the last key/value tuple in the list, without modifying the list. */
-  maxEntry(): [K, V] | undefined {
+  public maxEntry(): [K, V] | undefined {
     return this._list[this._list.length - 1];
   }
 
   /** Access the first key in the list, without modifying the list. */
-  minKey(): K | undefined {
+  public minKey(): K | undefined {
     return this._list[0]?.[0];
   }
 
   /** Access the last key in the list, without modifying the list. */
-  maxKey(): K | undefined {
+  public maxKey(): K | undefined {
     return this._list[this._list.length - 1]?.[0];
   }
 
@@ -85,7 +85,7 @@ export class ArrayMap<K, V> {
    * number returned is the bitwise complement of the index of the last element
    * plus 1.
    */
-  binarySearch(key: K): number {
+  public binarySearch(key: K): number {
     const list = this._list;
     if (list.length === 0) {
       return -1;

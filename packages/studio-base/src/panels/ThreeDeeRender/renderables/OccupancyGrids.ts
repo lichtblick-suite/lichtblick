@@ -66,13 +66,13 @@ export type OccupancyGridUserData = BaseUserData & {
 };
 
 export class OccupancyGridRenderable extends Renderable<OccupancyGridUserData> {
-  override dispose(): void {
+  public override dispose(): void {
     this.userData.texture.dispose();
     this.userData.material.dispose();
     this.userData.pickingMaterial.dispose();
   }
 
-  override details(): Record<string, RosValue> {
+  public override details(): Record<string, RosValue> {
     return this.userData.occupancyGrid;
   }
 }
@@ -80,13 +80,13 @@ export class OccupancyGridRenderable extends Renderable<OccupancyGridUserData> {
 export class OccupancyGrids extends SceneExtension<OccupancyGridRenderable> {
   private static geometry: THREE.PlaneGeometry | undefined;
 
-  constructor(renderer: Renderer) {
+  public constructor(renderer: Renderer) {
     super("foxglove.OccupancyGrids", renderer);
 
     renderer.addDatatypeSubscriptions(OCCUPANCY_GRID_DATATYPES, this.handleOccupancyGrid);
   }
 
-  override settingsNodes(): SettingsTreeEntry[] {
+  public override settingsNodes(): SettingsTreeEntry[] {
     const configTopics = this.renderer.config.topics;
     const handler = this.handleSettingsAction;
     const entries: SettingsTreeEntry[] = [];
@@ -119,7 +119,7 @@ export class OccupancyGrids extends SceneExtension<OccupancyGridRenderable> {
     return entries;
   }
 
-  override handleSettingsAction = (action: SettingsTreeAction): void => {
+  public override handleSettingsAction = (action: SettingsTreeAction): void => {
     const path = action.payload.path;
     if (action.action !== "update" || path.length !== 3) {
       return;
@@ -143,7 +143,7 @@ export class OccupancyGrids extends SceneExtension<OccupancyGridRenderable> {
     }
   };
 
-  handleOccupancyGrid = (messageEvent: PartialMessageEvent<OccupancyGrid>): void => {
+  private handleOccupancyGrid = (messageEvent: PartialMessageEvent<OccupancyGrid>): void => {
     const topic = messageEvent.topic;
     const occupancyGrid = normalizeOccupancyGrid(messageEvent.message);
     const receiveTime = toNanoSec(messageEvent.receiveTime);
@@ -190,7 +190,7 @@ export class OccupancyGrids extends SceneExtension<OccupancyGridRenderable> {
     this._updateOccupancyGridRenderable(renderable, occupancyGrid, receiveTime);
   };
 
-  _updateOccupancyGridRenderable(
+  private _updateOccupancyGridRenderable(
     renderable: OccupancyGridRenderable,
     occupancyGrid: OccupancyGrid,
     receiveTime: bigint,
@@ -227,7 +227,7 @@ export class OccupancyGrids extends SceneExtension<OccupancyGridRenderable> {
     renderable.scale.set(resolution * width, resolution * height, 1);
   }
 
-  static Geometry(): THREE.PlaneGeometry {
+  private static Geometry(): THREE.PlaneGeometry {
     if (!OccupancyGrids.geometry) {
       OccupancyGrids.geometry = new THREE.PlaneGeometry(1, 1, 1, 1);
       OccupancyGrids.geometry.translate(0.5, 0.5, 0);

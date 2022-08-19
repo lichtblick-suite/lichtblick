@@ -18,11 +18,16 @@ import {
 } from "./materials";
 
 export class RenderableLineStrip extends RenderableMarker {
-  geometry: LineGeometry;
-  linePrepass: Line2;
-  line: Line2;
+  private geometry: LineGeometry;
+  private linePrepass: Line2;
+  private line: Line2;
 
-  constructor(topic: string, marker: Marker, receiveTime: bigint | undefined, renderer: Renderer) {
+  public constructor(
+    topic: string,
+    marker: Marker,
+    receiveTime: bigint | undefined,
+    renderer: Renderer,
+  ) {
     super(topic, marker, receiveTime, renderer);
 
     this.geometry = new LineGeometry();
@@ -53,7 +58,7 @@ export class RenderableLineStrip extends RenderableMarker {
     this.update(marker, receiveTime);
   }
 
-  override dispose(): void {
+  public override dispose(): void {
     this.linePrepass.material.dispose();
     this.line.material.dispose();
 
@@ -64,7 +69,7 @@ export class RenderableLineStrip extends RenderableMarker {
     super.dispose();
   }
 
-  override update(marker: Marker, receiveTime: bigint | undefined): void {
+  public override update(marker: Marker, receiveTime: bigint | undefined): void {
     const pointsLength = marker.points.length;
     if (pointsLength === 0) {
       // THREE.LineGeometry.setPositions crashes when given an empty array:

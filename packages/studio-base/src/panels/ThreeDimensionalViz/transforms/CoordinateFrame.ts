@@ -41,13 +41,13 @@ const tempMatrix = mat4Identity();
  * coordinate frame to another while interpolating over time.
  */
 export class CoordinateFrame {
-  readonly id: string;
-  maxStorageTime: Duration;
+  public readonly id: string;
+  public maxStorageTime: Duration;
 
   private _parent?: CoordinateFrame;
   private _transforms: AVLTree<Time, Transform>;
 
-  constructor(
+  public constructor(
     id: string,
     parent: CoordinateFrame | undefined,
     maxStorageTime: Duration = DEFAULT_MAX_STORAGE_TIME,
@@ -58,7 +58,7 @@ export class CoordinateFrame {
     this._transforms = new AVLTree<Time, Transform>(compare);
   }
 
-  parent(): CoordinateFrame | undefined {
+  public parent(): CoordinateFrame | undefined {
     return this._parent;
   }
 
@@ -66,7 +66,7 @@ export class CoordinateFrame {
    * Returns the top-most frame by walking up each parent frame. If the current
    * frame does not have a parent, the current frame is returned.
    */
-  root(): CoordinateFrame {
+  public root(): CoordinateFrame {
     // eslint-disable-next-line @typescript-eslint/no-this-alias
     let root: CoordinateFrame = this;
     while (root._parent) {
@@ -79,7 +79,7 @@ export class CoordinateFrame {
    * Set the parent frame for this frame. If the parent frame is already set to
    * a different frame, the transform history is cleared.
    */
-  setParent(parent: CoordinateFrame): void {
+  public setParent(parent: CoordinateFrame): void {
     if (this._parent && this._parent !== parent) {
       this._transforms.clear();
     }
@@ -92,7 +92,7 @@ export class CoordinateFrame {
    * @param id Frame ID to search for
    * @returns The ancestor frame, or undefined if not found
    */
-  findAncestor(id: string): CoordinateFrame | undefined {
+  public findAncestor(id: string): CoordinateFrame | undefined {
     let ancestor: CoordinateFrame | undefined = this._parent;
     while (ancestor) {
       if (ancestor.id === id) {
@@ -110,7 +110,7 @@ export class CoordinateFrame {
    *
    * If a transform with an identical timestamp already exists, it is replaced.
    */
-  addTransform(time: Time, transform: Transform): void {
+  public addTransform(time: Time, transform: Transform): void {
     this._transforms.set(time, transform);
 
     // Remove transforms that are too old
@@ -135,7 +135,7 @@ export class CoordinateFrame {
    *   transform
    * @returns True if the search was successful
    */
-  findClosestTransforms(
+  public findClosestTransforms(
     outLower: TimeAndTransform,
     outUpper: TimeAndTransform,
     time: Time,
@@ -216,7 +216,7 @@ export class CoordinateFrame {
    *   transform
    * @returns A reference to `out` on success, otherwise undefined
    */
-  applyLocal(
+  public applyLocal(
     out: MutablePose,
     input: Pose,
     srcFrame: CoordinateFrame,
@@ -279,7 +279,7 @@ export class CoordinateFrame {
    *   transform
    * @returns A reference to `out` on success, otherwise undefined
    */
-  apply(
+  public apply(
     out: MutablePose,
     input: Pose,
     rootFrame: CoordinateFrame,
@@ -307,7 +307,7 @@ export class CoordinateFrame {
    * @param time Interpolant in the range [lower[0], upper[0]]
    * @returns
    */
-  static Interpolate(
+  public static Interpolate(
     outTime: Time | undefined,
     outTf: Transform,
     lower: TimeAndTransform,
@@ -346,7 +346,7 @@ export class CoordinateFrame {
    *   transform
    * @returns True on success
    */
-  static GetTransformMatrix(
+  public static GetTransformMatrix(
     out: mat4,
     parentFrame: CoordinateFrame,
     childFrame: CoordinateFrame,
@@ -389,7 +389,7 @@ export class CoordinateFrame {
    *   transform
    * @returns True on success
    */
-  static Apply(
+  public static Apply(
     out: MutablePose,
     input: Pose,
     parent: CoordinateFrame,

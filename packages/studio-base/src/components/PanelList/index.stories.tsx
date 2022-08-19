@@ -60,10 +60,10 @@ const allPanels: PanelInfo[] = [
 ];
 
 class MockPanelCatalog implements PanelCatalog {
-  getPanels(): readonly PanelInfo[] {
+  public getPanels(): readonly PanelInfo[] {
     return allPanels;
   }
-  getPanelByType(type: string): PanelInfo | undefined {
+  public getPanelByType(type: string): PanelInfo | undefined {
     return allPanels.find((panel) => !panel.config && panel.type === type);
   }
 }

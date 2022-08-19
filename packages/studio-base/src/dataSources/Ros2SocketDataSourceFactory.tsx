@@ -10,17 +10,17 @@ import Ros2Player from "@foxglove/studio-base/players/Ros2Player";
 import { Player } from "@foxglove/studio-base/players/types";
 
 class Ros2SocketDataSourceFactory implements IDataSourceFactory {
-  id = "ros2-socket";
-  type: IDataSourceFactory["type"] = "connection";
-  displayName = "ROS 2";
-  iconName: IDataSourceFactory["iconName"] = "studio.ROS";
-  description =
+  public id = "ros2-socket";
+  public type: IDataSourceFactory["type"] = "connection";
+  public displayName = "ROS 2";
+  public iconName: IDataSourceFactory["iconName"] = "studio.ROS";
+  public description =
     "Connect to a running ROS 2 system via a native TCP connection that accesses your ROS nodes directly.";
-  docsLink = "https://foxglove.dev/docs/studio/connection/native";
-  warning =
+  public docsLink = "https://foxglove.dev/docs/studio/connection/native";
+  public warning =
     "Limitations of ROS 2 prevent Studio from having access to your custom messages. We recommend using the Rosbridge connection for a better experience.";
 
-  formConfig = {
+  public formConfig = {
     fields: [
       {
         id: "url",
@@ -32,7 +32,7 @@ class Ros2SocketDataSourceFactory implements IDataSourceFactory {
     ],
   };
 
-  initialize(args: DataSourceFactoryInitializeArgs): Player | undefined {
+  public initialize(args: DataSourceFactoryInitializeArgs): Player | undefined {
     const url = args.url;
     if (!url) {
       return;

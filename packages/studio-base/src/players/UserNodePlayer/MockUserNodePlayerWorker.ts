@@ -37,9 +37,9 @@ const validateWorkerArgs = (arg: unknown) => {
 // One test class that implements both typescript compilation and message transformation.
 // ts-prune-ignore-next
 export default class MockUserNodePlayerWorker {
-  port: Channel;
+  public port: Channel;
 
-  constructor() {
+  public constructor() {
     const { local, remote } = createLinkedChannels();
     this.port = local;
 
@@ -77,7 +77,7 @@ export default class MockUserNodePlayerWorker {
   }
 
   // So tests can spy on what gets called
-  messageSpy(_action: string): void {
+  public messageSpy(_action: string): void {
     // no-op
   }
 }

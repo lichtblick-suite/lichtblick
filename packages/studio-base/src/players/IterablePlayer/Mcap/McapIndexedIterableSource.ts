@@ -29,11 +29,11 @@ export class McapIndexedIterableSource implements IIterableSource {
   private start?: Time;
   private end?: Time;
 
-  constructor(reader: Mcap0IndexedReader) {
+  public constructor(reader: Mcap0IndexedReader) {
     this.reader = reader;
   }
 
-  async initialize(): Promise<Initalization> {
+  public async initialize(): Promise<Initalization> {
     let startTime: bigint | undefined;
     let endTime: bigint | undefined;
     for (const chunk of this.reader.chunkIndexes) {
@@ -111,7 +111,7 @@ export class McapIndexedIterableSource implements IIterableSource {
     };
   }
 
-  async *messageIterator(
+  public async *messageIterator(
     args: MessageIteratorArgs,
   ): AsyncIterableIterator<Readonly<IteratorResult>> {
     const topics = args.topics;
@@ -165,7 +165,9 @@ export class McapIndexedIterableSource implements IIterableSource {
     }
   }
 
-  async getBackfillMessages(args: GetBackfillMessagesArgs): Promise<MessageEvent<unknown>[]> {
+  public async getBackfillMessages(
+    args: GetBackfillMessagesArgs,
+  ): Promise<MessageEvent<unknown>[]> {
     const { topics, time } = args;
 
     const messages: MessageEvent<unknown>[] = [];

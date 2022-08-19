@@ -9,33 +9,33 @@ declare module "roslib" {
   };
 
   class Ros {
-    constructor(options: RosOptions);
+    public constructor(options: RosOptions);
 
-    on(eventName: "connection", cb: () => void): void;
-    on(eventName: "close", cb: () => void): void;
+    public on(eventName: "connection", cb: () => void): void;
+    public on(eventName: "close", cb: () => void): void;
     // eslint-disable-next-line no-restricted-syntax
-    on(eventName: "error", cb: (err: Error | null) => void): void;
+    public on(eventName: "error", cb: (err: Error | null) => void): void;
 
-    getNodes(cb: (nodes: string[]) => void, errorCallback: (error: Error) => void): void;
+    public getNodes(cb: (nodes: string[]) => void, errorCallback: (error: Error) => void): void;
 
-    getNodeDetails(
+    public getNodeDetails(
       node: string,
       cb: (subscriptions: string[], publications: string[], services: string[]) => void,
       errorCallback: (error: Error) => void,
     ): void;
 
-    getTopicsAndRawTypes(
+    public getTopicsAndRawTypes(
       cb: (result: { topics: string[]; types: string[]; typedefs_full_text: string[] }) => void,
       errorCallback: (error: Error) => void,
     ): void;
 
-    getServiceType(
+    public getServiceType(
       service: string,
       cb: (result: string) => void,
       errorCallback: (error: Error) => void,
     ): void;
 
-    close(): void;
+    public close(): void;
   }
 
   type Message = Record<string, unknown>;
@@ -49,11 +49,11 @@ declare module "roslib" {
   };
 
   class Topic {
-    constructor(options: TopicOptions);
-    publish(msg: Message): void;
-    subscribe(cb: (msg: Message) => void): void;
-    unsubscribe(): void;
-    unadvertise(): void;
+    public constructor(options: TopicOptions);
+    public publish(msg: Message): void;
+    public subscribe(cb: (msg: Message) => void): void;
+    public unsubscribe(): void;
+    public unadvertise(): void;
   }
 
   type ServiceOptions = {
@@ -63,8 +63,8 @@ declare module "roslib" {
   };
 
   class Service {
-    constructor(options: ServiceOptions);
-    callService(
+    public constructor(options: ServiceOptions);
+    public callService(
       request: Message,
       cb: (response: Message) => void,
       errorCallback: (error: Error) => void,

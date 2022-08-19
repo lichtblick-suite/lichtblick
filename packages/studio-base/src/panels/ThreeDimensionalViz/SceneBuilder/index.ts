@@ -218,28 +218,28 @@ function computeMarkerPose(
 }
 
 export default class SceneBuilder implements MarkerProvider {
-  topicsByName: {
+  public topicsByName: {
     [topicName: string]: Topic;
   } = {};
-  markers: Marker[] = [];
+  public markers: Marker[] = [];
   // A batch of messages organized by topic. This is the source material for
   // rendering. Not to be confused with the graphics rendering frame, or a
   // CoordinateFrame
-  frame?: Frame;
+  public frame?: Frame;
   // TODO(JP): Get rid of these two different variables `errors` and `errorsByTopic` which we
   // have to keep in sync.
-  errors: SceneErrors = {
+  public errors: SceneErrors = {
     renderFrameId: "",
     topicsMissingTransforms: new Map(),
     topicsWithError: new Map(),
   };
-  errorsByTopic: {
+  public errorsByTopic: {
     [topicName: string]: string[];
   } = {};
-  maps = [];
-  flattenedZHeightPose?: Pose;
-  scene = {};
-  collectors: {
+  public maps = [];
+  public flattenedZHeightPose?: Pose;
+  public scene = {};
+  public collectors: {
     [key: string]: MessageCollector;
   } = {};
   private _transforms?: IImmutableTransformTree;
@@ -260,25 +260,25 @@ export default class SceneBuilder implements MarkerProvider {
   // as point clouds
   private _velodyneCloudConverter = new VelodyneCloudConverter();
 
-  allNamespaces: Namespace[] = [];
+  public allNamespaces: Namespace[] = [];
   // TODO(Audrey): remove enabledNamespaces once we release topic groups
-  enabledNamespaces: Namespace[] = [];
-  selectedNamespacesByTopic?: { [topicName: string]: Set<string> };
-  flatten: boolean = false;
+  public enabledNamespaces: Namespace[] = [];
+  public selectedNamespacesByTopic?: { [topicName: string]: Set<string> };
+  public flatten: boolean = false;
 
   // list of topics that need to be rerendered because the frame has new values
   // or because a prop affecting its rendering was changed
-  topicsToRender: Set<string> = new Set();
+  public topicsToRender: Set<string> = new Set();
 
   // stored message arrays allowing us to re-render topics even when the latest
   // frame does not not contain that topic
-  lastSeenMessages: {
+  public lastSeenMessages: {
     [key: string]: MessageEvent<unknown>[];
   } = {};
 
-  constructor() {}
+  public constructor() {}
 
-  clear(): void {
+  public clear(): void {
     for (const topicName of Object.keys(this.topicsByName)) {
       const collector = this.collectors[topicName];
       if (collector) {
@@ -287,7 +287,7 @@ export default class SceneBuilder implements MarkerProvider {
     }
   }
 
-  setPlayerId(playerId: string): void {
+  public setPlayerId(playerId: string): void {
     if (this._playerId !== playerId) {
       this.errors = {
         renderFrameId: "",
@@ -299,12 +299,12 @@ export default class SceneBuilder implements MarkerProvider {
     this._playerId = playerId;
   }
 
-  setSettingsByKey(settings: TopicSettingsCollection): void {
+  public setSettingsByKey(settings: TopicSettingsCollection): void {
     this._settingsByKey = settings;
   }
 
   // set the topics the scene builder should consume from each frame
-  setTopics(topics: Topic[]): void {
+  public setTopics(topics: Topic[]): void {
     const topicsToFlush = Object.keys(this.topicsByName).filter(
       (topicName) => !topics.find((other) => other.name === topicName),
     );
@@ -323,7 +323,7 @@ export default class SceneBuilder implements MarkerProvider {
     });
   }
 
-  setFrame(frame: Frame): void {
+  public setFrame(frame: Frame): void {
     if (this.frame === frame) {
       return;
     }
@@ -339,15 +339,15 @@ export default class SceneBuilder implements MarkerProvider {
   }
 
   // eslint-disable-next-line @foxglove/no-boolean-parameters
-  setFlattenMarkers(_flatten: boolean): void {
+  public setFlattenMarkers(_flatten: boolean): void {
     this.flatten = _flatten;
   }
 
-  setEnabledNamespaces(namespaces: Namespace[]): void {
+  public setEnabledNamespaces(namespaces: Namespace[]): void {
     this.enabledNamespaces = namespaces;
   }
 
-  setSelectedNamespacesByTopic(selectedNamespacesByTopic: SelectedNamespacesByTopic): void {
+  public setSelectedNamespacesByTopic(selectedNamespacesByTopic: SelectedNamespacesByTopic): void {
     // We need to update topicsToRender here so changes to the selected namespaces will appear on the next render()
     Object.keys(selectedNamespacesByTopic).forEach((topicName) => {
       const newNamespaces = selectedNamespacesByTopic[topicName];
@@ -362,13 +362,13 @@ export default class SceneBuilder implements MarkerProvider {
     );
   }
 
-  setHighlightedMatchers(markerMatchers: Array<MarkerMatcher>): void {
+  public setHighlightedMatchers(markerMatchers: Array<MarkerMatcher>): void {
     const markerMatchersByTopic = groupBy<MarkerMatcher>(markerMatchers, ({ topic }) => topic);
     this._addTopicsToRenderForMarkerMatchers(this._highlightMarkerMatchersByTopic, markerMatchers);
     this._highlightMarkerMatchersByTopic = markerMatchersByTopic;
   }
 
-  setColorOverrideMatchers(markerMatchers: Array<MarkerMatcher>): void {
+  public setColorOverrideMatchers(markerMatchers: Array<MarkerMatcher>): void {
     const markerMatchersByTopic = groupBy<MarkerMatcher>(markerMatchers, ({ topic }) => topic);
     this._addTopicsToRenderForMarkerMatchers(
       this._colorOverrideMarkerMatchersByTopic,
@@ -396,11 +396,11 @@ export default class SceneBuilder implements MarkerProvider {
     }
   }
 
-  hasErrors(): boolean {
+  public hasErrors(): boolean {
     return this.errors.topicsMissingTransforms.size !== 0 || this.errors.topicsWithError.size !== 0;
   }
 
-  setOnForceUpdate(callback: () => void): void {
+  public setOnForceUpdate(callback: () => void): void {
     this._onForceUpdate = callback;
   }
 
@@ -443,7 +443,7 @@ export default class SceneBuilder implements MarkerProvider {
   }
 
   // Only public for tests
-  namespaceIsEnabled(topic: string, name: string): boolean {
+  public namespaceIsEnabled(topic: string, name: string): boolean {
     if (this.selectedNamespacesByTopic) {
       // enable all namespaces under a topic if it's not already set
       return this.selectedNamespacesByTopic[topic]?.has(name) ?? true;
@@ -795,7 +795,7 @@ export default class SceneBuilder implements MarkerProvider {
     this.collectors[topic]?.addNonMarker(topic, mappedMessage as Interactive<unknown>, lifetime);
   };
 
-  setCurrentTime = (currentTime: { sec: number; nsec: number }): void => {
+  public setCurrentTime = (currentTime: { sec: number; nsec: number }): void => {
     this._clock = currentTime;
     // set the new clock value in all existing collectors
     // including those for topics not included in this frame,
@@ -806,7 +806,7 @@ export default class SceneBuilder implements MarkerProvider {
   };
 
   // extracts renderable markers from the frame
-  render(): void {
+  public render(): void {
     for (const topic of this.topicsToRender) {
       try {
         this._consumeTopic(topic);
@@ -1009,7 +1009,7 @@ export default class SceneBuilder implements MarkerProvider {
     }
   };
 
-  renderMarkers({ add, transforms, renderFrame, fixedFrame, time }: RenderMarkerArgs): void {
+  public renderMarkers({ add, transforms, renderFrame, fixedFrame, time }: RenderMarkerArgs): void {
     this._transforms = transforms;
 
     this.errors.renderFrameId = renderFrame.id;

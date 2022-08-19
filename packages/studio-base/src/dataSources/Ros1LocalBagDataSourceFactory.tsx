@@ -15,19 +15,19 @@ import WorkerBagDataProvider from "@foxglove/studio-base/randomAccessDataProvide
 import { getSeekToTime } from "@foxglove/studio-base/util/time";
 
 class Ros1LocalBagDataSourceFactory implements IDataSourceFactory {
-  id = "ros1-local-bagfile";
-  type: IDataSourceFactory["type"] = "file";
-  displayName = "ROS 1 Bag";
-  iconName: IDataSourceFactory["iconName"] = "OpenFile";
-  supportedFileTypes = [".bag"];
+  public id = "ros1-local-bagfile";
+  public type: IDataSourceFactory["type"] = "file";
+  public displayName = "ROS 1 Bag";
+  public iconName: IDataSourceFactory["iconName"] = "OpenFile";
+  public supportedFileTypes = [".bag"];
 
   private enableIterablePlayer = false;
 
-  constructor(opt?: { useIterablePlayer: boolean }) {
+  private constructor(opt?: { useIterablePlayer: boolean }) {
     this.enableIterablePlayer = opt?.useIterablePlayer ?? false;
   }
 
-  initialize(args: DataSourceFactoryInitializeArgs): Player | undefined {
+  public initialize(args: DataSourceFactoryInitializeArgs): Player | undefined {
     const file = args.file;
     if (!file) {
       return;

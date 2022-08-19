@@ -16,7 +16,7 @@ import { Calibration, Model, PointCloud, RawPacket, Transformer } from "@foxglov
 export default class VelodyneCloudConverter {
   private _transformers = new Map<Model, Transformer>();
 
-  decode(scan: VelodyneScan): VelodyneScanDecoded | undefined {
+  public decode(scan: VelodyneScan): VelodyneScanDecoded | undefined {
     if (scan.packets.length === 0) {
       return undefined;
     }
@@ -57,7 +57,7 @@ export default class VelodyneCloudConverter {
     };
   }
 
-  getTransformer(model: Model): Transformer {
+  public getTransformer(model: Model): Transformer {
     let transformer = this._transformers.get(model);
     if (transformer != undefined) {
       return transformer;

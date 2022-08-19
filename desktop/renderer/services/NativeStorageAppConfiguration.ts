@@ -9,8 +9,8 @@ import { SETTINGS_DATASTORE_NAME, SETTINGS_JSON_DATASTORE_KEY } from "../../comm
 import { Storage } from "../../common/types";
 
 export default class NativeStorageAppConfiguration implements IAppConfiguration {
-  static STORE_NAME = SETTINGS_DATASTORE_NAME;
-  static STORE_KEY = SETTINGS_JSON_DATASTORE_KEY;
+  private static STORE_NAME = SETTINGS_DATASTORE_NAME;
+  private static STORE_KEY = SETTINGS_JSON_DATASTORE_KEY;
 
   private readonly _ctx: Storage;
   private _listeners = new Map<string, Set<ChangeHandler>>();
@@ -26,7 +26,7 @@ export default class NativeStorageAppConfiguration implements IAppConfiguration 
   }
 
   // create a new OsContextAppConfiguration
-  static async Initialize(
+  public static async Initialize(
     ctx: Storage,
     options: { defaults?: { [key: string]: AppConfigurationValue } } = {},
   ): Promise<NativeStorageAppConfiguration> {
@@ -42,11 +42,11 @@ export default class NativeStorageAppConfiguration implements IAppConfiguration 
     return config;
   }
 
-  get(key: string): AppConfigurationValue | undefined {
+  public get(key: string): AppConfigurationValue | undefined {
     return (this._currentValue as Record<string, AppConfigurationValue>)[key];
   }
 
-  async set(key: string, value: AppConfigurationValue): Promise<void> {
+  public async set(key: string, value: AppConfigurationValue): Promise<void> {
     await this._mutex.runExclusive(async () => {
       const currentConfig = await this._ctx.get(
         NativeStorageAppConfiguration.STORE_NAME,
@@ -70,7 +70,7 @@ export default class NativeStorageAppConfiguration implements IAppConfiguration 
     }
   }
 
-  addChangeListener(key: string, cb: ChangeHandler): void {
+  public addChangeListener(key: string, cb: ChangeHandler): void {
     let listeners = this._listeners.get(key);
     if (!listeners) {
       listeners = new Set();
@@ -79,7 +79,7 @@ export default class NativeStorageAppConfiguration implements IAppConfiguration 
     listeners.add(cb);
   }
 
-  removeChangeListener(key: string, cb: ChangeHandler): void {
+  public removeChangeListener(key: string, cb: ChangeHandler): void {
     const listeners = this._listeners.get(key);
     if (listeners) {
       listeners.delete(cb);

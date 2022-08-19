@@ -17,7 +17,7 @@ export class VecQueue<T> {
    * Add an item at the end of the queue. If the queue is full the underlying buffer is grown.
    * @param item the item to insert into the queue
    */
-  enqueue(item: T): void {
+  public enqueue(item: T): void {
     // When the write position is past the buffer end, we need to take one of two actions:
     // 1. If read position is at 0, we grow the array and write to the end
     // 2. Otherwise, we wrap write to the front and continue writing
@@ -45,7 +45,7 @@ export class VecQueue<T> {
    * Remove an item from the front of the queue and return it.
    * @returns the first item in the queue or undefined if the queue is empty
    */
-  dequeue(): T | undefined {
+  public dequeue(): T | undefined {
     if (this.readPos === this.writePos) {
       return undefined;
     }
@@ -65,7 +65,7 @@ export class VecQueue<T> {
   /**
    * @returns the number of items in the queue
    */
-  size(): number {
+  public size(): number {
     if (this.writePos >= this.readPos) {
       return this.writePos - this.readPos;
     }
@@ -76,14 +76,14 @@ export class VecQueue<T> {
   /**
    * @returns the capacity of the underlying circular buffer
    */
-  capacity(): number {
+  public capacity(): number {
     return this.buffer.length;
   }
 
   /**
    * Clear the queue.
    */
-  clear(): void {
+  public clear(): void {
     this.buffer.length = 0;
     this.writePos = 0;
     this.readPos = 0;

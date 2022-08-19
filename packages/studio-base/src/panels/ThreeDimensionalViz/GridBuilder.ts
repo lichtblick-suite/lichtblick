@@ -25,26 +25,26 @@ import { FOXGLOVE_GRID_TOPIC } from "@foxglove/studio-base/util/globalConstants"
 import { MarkerProvider, RenderMarkerArgs } from "./types";
 
 export default class GridBuilder implements MarkerProvider {
-  grid: GlLineListMarker;
+  private grid: GlLineListMarker;
   private _visible = true;
   private _settings: GridSettings = {};
 
-  constructor() {
+  public constructor() {
     this.grid = GridBuilder.BuildGrid(this._settings);
   }
 
-  renderMarkers = (args: RenderMarkerArgs): void => {
+  public renderMarkers = (args: RenderMarkerArgs): void => {
     if (this._visible) {
       args.add.glLineList(this.grid);
     }
   };
 
   // eslint-disable-next-line @foxglove/no-boolean-parameters
-  setVisible(isVisible: boolean): void {
+  public setVisible(isVisible: boolean): void {
     this._visible = isVisible;
   }
 
-  setSettingsByKey(settings: TopicSettingsCollection): void {
+  public setSettingsByKey(settings: TopicSettingsCollection): void {
     const newSettings = settings[`t:${FOXGLOVE_GRID_TOPIC}`] ?? {};
     if (!isEqual(newSettings, this._settings)) {
       this._settings = newSettings;
@@ -52,7 +52,7 @@ export default class GridBuilder implements MarkerProvider {
     }
   }
 
-  static BuildGrid(settings: GridSettings): GlLineListMarker {
+  public static BuildGrid(settings: GridSettings): GlLineListMarker {
     const width = settings.width ?? 10;
     const halfWidth = width / 2;
     const subdivisions = settings.subdivisions ?? 9;

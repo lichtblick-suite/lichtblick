@@ -30,9 +30,9 @@ interface ExtensionsDB extends IDB.DBSchema {
 
 export class IdbExtensionStorage implements IExtensionStorage {
   #db: Promise<IDB.IDBPDatabase<ExtensionsDB>>;
-  namespace: string;
+  public namespace: string;
 
-  constructor(namespace: string) {
+  public constructor(namespace: string) {
     this.namespace = namespace;
     this.#db = IDB.openDB<ExtensionsDB>([DATABASE_BASE_NAME, namespace].join("-"), 1, {
       upgrade: (db) => {
@@ -49,7 +49,7 @@ export class IdbExtensionStorage implements IExtensionStorage {
     });
   }
 
-  async list(): Promise<ExtensionInfo[]> {
+  public async list(): Promise<ExtensionInfo[]> {
     const records = await (await this.#db).getAll(METADATA_STORE_NAME);
 
     log.debug(`Found ${records.length} extensions`);
@@ -57,13 +57,13 @@ export class IdbExtensionStorage implements IExtensionStorage {
     return records;
   }
 
-  async get(id: string): Promise<undefined | StoredExtension> {
+  public async get(id: string): Promise<undefined | StoredExtension> {
     log.debug("Getting extension", id);
 
     return await (await this.#db).get(EXTENSION_STORE_NAME, id);
   }
 
-  async put(extension: StoredExtension): Promise<StoredExtension> {
+  public async put(extension: StoredExtension): Promise<StoredExtension> {
     log.debug("Storing extension", { extension });
 
     const transaction = (await this.#db).transaction(
@@ -79,7 +79,7 @@ export class IdbExtensionStorage implements IExtensionStorage {
     return extension;
   }
 
-  async delete(id: string): Promise<void> {
+  public async delete(id: string): Promise<void> {
     log.debug("Deleting extension", id);
 
     const transaction = (await this.#db).transaction(

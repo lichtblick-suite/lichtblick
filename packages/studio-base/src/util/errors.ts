@@ -14,11 +14,11 @@
 import { DetailsType } from "@foxglove/studio-base/util/sendNotification";
 
 export class AppError extends Error {
-  details: DetailsType;
-  extraInfo: unknown;
-  override message: string;
+  public details: DetailsType;
+  public extraInfo: unknown;
+  public override message: string;
 
-  constructor(details: DetailsType, extraInfo?: unknown) {
+  public constructor(details: DetailsType, extraInfo?: unknown) {
     super();
     this.details = details;
     this.extraInfo = extraInfo;
@@ -53,9 +53,9 @@ export class AppError extends Error {
 }
 
 export class UserError extends Error {
-  details: DetailsType;
+  public details: DetailsType;
 
-  constructor(details: DetailsType) {
+  public constructor(details: DetailsType) {
     super();
     this.details = details;
     this.name = "UserError";

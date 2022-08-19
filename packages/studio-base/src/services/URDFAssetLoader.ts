@@ -21,7 +21,7 @@ const URDF_ROOT = "$URDF_ROOT";
 // https://github.com/ros/urdf_tutorial
 
 export default class URDFAssetLoader implements AssetLoader {
-  async load(file: File): Promise<Asset | undefined> {
+  public async load(file: File): Promise<Asset | undefined> {
     if (!/\.(urdf|xacro|xml)$/.test(file.name)) {
       return undefined;
     }

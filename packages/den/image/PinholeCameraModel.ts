@@ -34,22 +34,22 @@ type Vec8 = [number, number, number, number, number, number, number, number];
 // http://docs.ros.org/diamondback/api/image_geometry/html/c++/pinhole__camera__model_8cpp_source.html
 export class PinholeCameraModel {
   // [k1, k2, p1, p2, k3, ?, ?, ?]
-  D: Readonly<Vec8>;
+  public D: Readonly<Vec8>;
   //     [fx  0 cx]
   // K = [ 0 fy cy]
   //     [ 0  0  1]
-  K: Readonly<Matrix3>;
+  public K: Readonly<Matrix3>;
   //     [fx'  0  cx' Tx]
   // P = [ 0  fy' cy' Ty]
   //     [ 0   0   1   0]
-  P: Readonly<Matrix3x4> | undefined;
-  R: Readonly<Matrix3>;
-  readonly width: number;
-  readonly height: number;
+  public P: Readonly<Matrix3x4> | undefined;
+  public R: Readonly<Matrix3>;
+  public readonly width: number;
+  public readonly height: number;
 
   // Mostly copied from `fromCameraInfo`
   // http://docs.ros.org/diamondback/api/image_geometry/html/c++/pinhole__camera__model_8cpp_source.html#l00062
-  constructor(info: CameraInfo) {
+  public constructor(info: CameraInfo) {
     const { binning_x, binning_y, roi, distortion_model: model, D, K, P, R, width, height } = info;
     const fx = P[0];
     const fy = P[5];
@@ -98,7 +98,7 @@ export class PinholeCameraModel {
     }
   }
 
-  projectPixelTo3dRay(out: Vector3, pixel: Readonly<Vector2>): boolean {
+  public projectPixelTo3dRay(out: Vector3, pixel: Readonly<Vector2>): boolean {
     const P = this.P;
     if (!P) {
       return false;
@@ -117,7 +117,7 @@ export class PinholeCameraModel {
     return true;
   }
 
-  rectifyPixel(out: Vector2, point: Readonly<Vector2>, iterations = 3): Vector2 {
+  public rectifyPixel(out: Vector2, point: Readonly<Vector2>, iterations = 3): Vector2 {
     if (!this.P) {
       out.x = point.x;
       out.y = point.y;
@@ -170,7 +170,7 @@ export class PinholeCameraModel {
     return out;
   }
 
-  unrectifyPixel(out: Vector2, point: Readonly<Vector2>): Vector2 {
+  public unrectifyPixel(out: Vector2, point: Readonly<Vector2>): Vector2 {
     if (!this.P) {
       out.x = point.x;
       out.y = point.y;

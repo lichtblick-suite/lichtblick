@@ -65,7 +65,7 @@ export default class FoxgloveWebSocketPlayer implements Player {
   private _recentlyCanceledSubscriptions = new Set<SubscriptionId>();
   private readonly _sourceId: string;
 
-  constructor({
+  public constructor({
     url,
     metricsCollector,
     sourceId,
@@ -367,12 +367,12 @@ export default class FoxgloveWebSocketPlayer implements Player {
     });
   });
 
-  setListener(listener: (arg0: PlayerState) => Promise<void>): void {
+  public setListener(listener: (arg0: PlayerState) => Promise<void>): void {
     this._listener = listener;
     this._emitState();
   }
 
-  close(): void {
+  public close(): void {
     this._closed = true;
     if (this._client) {
       this._client.close();
@@ -381,7 +381,7 @@ export default class FoxgloveWebSocketPlayer implements Player {
     this._hasReceivedMessage = false;
   }
 
-  setSubscriptions(subscriptions: SubscribePayload[]): void {
+  public setSubscriptions(subscriptions: SubscribePayload[]): void {
     if (!this._client || this._closed) {
       return;
     }
@@ -434,24 +434,24 @@ export default class FoxgloveWebSocketPlayer implements Player {
     }
   }
 
-  setPublishers(publishers: AdvertiseOptions[]): void {
+  public setPublishers(publishers: AdvertiseOptions[]): void {
     if (publishers.length > 0) {
       throw new Error("Publishing is not supported by the Foxglove WebSocket connection");
     }
   }
 
-  setParameter(): void {
+  public setParameter(): void {
     throw new Error("Parameter editing is not supported by the Foxglove WebSocket connection");
   }
 
-  publish(): void {
+  public publish(): void {
     throw new Error("Publishing is not supported by the Foxglove WebSocket connection");
   }
 
-  async callService(): Promise<unknown> {
+  public async callService(): Promise<unknown> {
     throw new Error("Service calls are not supported by the Foxglove WebSocket connection");
   }
 
-  requestBackfill(): void {}
-  setGlobalVariables(): void {}
+  public requestBackfill(): void {}
+  public setGlobalVariables(): void {}
 }

@@ -12,9 +12,9 @@ import { Mutex } from "async-mutex";
  */
 export default class MutexLocked<T> {
   private mutex = new Mutex();
-  constructor(private value: T) {}
+  public constructor(private value: T) {}
 
-  async runExclusive<Result>(body: (value: T) => Promise<Result>): Promise<Result> {
+  public async runExclusive<Result>(body: (value: T) => Promise<Result>): Promise<Result> {
     return await this.mutex.runExclusive(async () => await body(this.value));
   }
 }

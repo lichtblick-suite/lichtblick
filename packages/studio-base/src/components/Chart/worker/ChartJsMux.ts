@@ -117,7 +117,7 @@ export default class ChartJsMux {
   private _rpc: Rpc;
   private _managers = new Map<string, ChartJSManager>();
 
-  constructor(rpc: Rpc) {
+  public constructor(rpc: Rpc) {
     this._rpc = rpc;
 
     if (typeof WorkerGlobalScope !== "undefined" && self instanceof WorkerGlobalScope) {

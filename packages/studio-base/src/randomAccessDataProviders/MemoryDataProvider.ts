@@ -71,18 +71,18 @@ type MemoryDataProviderOptions = {
 // in-memory data provider for tests
 // ts-prune-ignore-next
 export default class MemoryDataProvider implements RandomAccessDataProvider {
-  messages: GetMessagesResult;
-  topics?: Topic[];
-  topicStats: Map<string, TopicStats>;
-  datatypes?: RosDatatypes;
-  messageDefinitionsByTopic: MessageDefinitionsByTopic;
-  parsedMessageDefinitionsByTopic?: ParsedMessageDefinitionsByTopic;
-  extensionPoint?: ExtensionPoint;
-  initiallyLoaded: boolean;
-  providesParsedMessages: boolean;
-  profile: string;
+  public messages: GetMessagesResult;
+  public topics?: Topic[];
+  public topicStats: Map<string, TopicStats>;
+  public datatypes?: RosDatatypes;
+  public messageDefinitionsByTopic: MessageDefinitionsByTopic;
+  public parsedMessageDefinitionsByTopic?: ParsedMessageDefinitionsByTopic;
+  public extensionPoint?: ExtensionPoint;
+  public initiallyLoaded: boolean;
+  public providesParsedMessages: boolean;
+  public profile: string;
 
-  constructor({
+  public constructor({
     messages,
     topics,
     topicStats,
@@ -104,7 +104,7 @@ export default class MemoryDataProvider implements RandomAccessDataProvider {
     this.profile = profile;
   }
 
-  async initialize(extensionPoint: ExtensionPoint): Promise<InitializationResult> {
+  public async initialize(extensionPoint: ExtensionPoint): Promise<InitializationResult> {
     this.extensionPoint = extensionPoint;
 
     if (!this.initiallyLoaded) {
@@ -152,11 +152,15 @@ export default class MemoryDataProvider implements RandomAccessDataProvider {
     };
   }
 
-  async close(): Promise<void> {
+  public async close(): Promise<void> {
     // no-op
   }
 
-  async getMessages(start: Time, end: Time, topics: GetMessagesTopics): Promise<GetMessagesResult> {
+  public async getMessages(
+    start: Time,
+    end: Time,
+    topics: GetMessagesTopics,
+  ): Promise<GetMessagesResult> {
     return {
       parsedMessages: filterMessages(
         start,

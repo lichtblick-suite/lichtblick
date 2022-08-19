@@ -11,13 +11,13 @@ import { UlogIterableSource } from "@foxglove/studio-base/players/IterablePlayer
 import { Player } from "@foxglove/studio-base/players/types";
 
 class UlogLocalDataSourceFactory implements IDataSourceFactory {
-  id = "ulog-local-file";
-  type: IDataSourceFactory["type"] = "file";
-  displayName = "PX4 ULog";
-  iconName: IDataSourceFactory["iconName"] = "OpenFile";
-  supportedFileTypes = [".ulg", ".ulog"];
+  public id = "ulog-local-file";
+  public type: IDataSourceFactory["type"] = "file";
+  public displayName = "PX4 ULog";
+  public iconName: IDataSourceFactory["iconName"] = "OpenFile";
+  public supportedFileTypes = [".ulg", ".ulog"];
 
-  initialize(args: DataSourceFactoryInitializeArgs): Player | undefined {
+  public initialize(args: DataSourceFactoryInitializeArgs): Player | undefined {
     const file = args.file;
     if (!file) {
       return;

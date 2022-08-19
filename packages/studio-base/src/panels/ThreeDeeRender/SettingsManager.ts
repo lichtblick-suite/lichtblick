@@ -20,12 +20,12 @@ export type SettingsManagerEvents = {
 };
 
 export class SettingsManager extends EventEmitter<SettingsManagerEvents> {
-  errors = new LayerErrors();
+  public errors = new LayerErrors();
 
   private _nodesByKey = new Map<string, SettingsTreeEntry[]>();
   private _root: SettingsTreeNodeWithActionHandler = { children: {} };
 
-  constructor(baseTree: SettingsTreeNodes) {
+  public constructor(baseTree: SettingsTreeNodes) {
     super();
 
     this._root = { children: baseTree };
@@ -34,7 +34,7 @@ export class SettingsManager extends EventEmitter<SettingsManagerEvents> {
     this.errors.on("clear", this.handleErrorUpdate);
   }
 
-  setNodesForKey(key: string, nodes: SettingsTreeEntry[]): void {
+  public setNodesForKey(key: string, nodes: SettingsTreeEntry[]): void {
     this._root = produce(this._root, (draft) => {
       // Delete all previous nodes for this key
       const prevNodes = this._nodesByKey.get(key);
@@ -59,7 +59,7 @@ export class SettingsManager extends EventEmitter<SettingsManagerEvents> {
     this.emit("update");
   }
 
-  setLabel(path: Path, label: string): void {
+  public setLabel(path: Path, label: string): void {
     this._root = produce(this._root, (draft) => {
       setLabelAtPath(draft, path, label);
     });
@@ -67,7 +67,7 @@ export class SettingsManager extends EventEmitter<SettingsManagerEvents> {
     this.emit("update");
   }
 
-  clearChildren(path: Path): void {
+  public clearChildren(path: Path): void {
     this._root = produce(this._root, (draft) => {
       clearChildren(draft, path);
     });
@@ -75,11 +75,11 @@ export class SettingsManager extends EventEmitter<SettingsManagerEvents> {
     this.emit("update");
   }
 
-  tree(): SettingsTreeNodes {
+  public tree(): SettingsTreeNodes {
     return this._root.children!;
   }
 
-  handleAction = (action: SettingsTreeAction): void => {
+  public handleAction = (action: SettingsTreeAction): void => {
     const path = action.payload.path;
 
     // Walk the settings tree down to the end of the path, firing any action
@@ -96,7 +96,7 @@ export class SettingsManager extends EventEmitter<SettingsManagerEvents> {
     }
   };
 
-  handleErrorUpdate = (path: Path): void => {
+  public handleErrorUpdate = (path: Path): void => {
     this._root = produce(this._root, (draft) => {
       if (path.length === 0) {
         return { ...draft };

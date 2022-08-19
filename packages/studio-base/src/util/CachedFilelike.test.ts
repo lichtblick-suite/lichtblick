@@ -18,15 +18,15 @@ import CachedFilelike, { FileReader, FileStream } from "./CachedFilelike";
 class InMemoryFileReader implements FileReader {
   private _buffer: Uint8Array;
 
-  constructor(bufferObj: Uint8Array) {
+  public constructor(bufferObj: Uint8Array) {
     this._buffer = bufferObj;
   }
 
-  async open() {
+  public async open() {
     return { size: this._buffer.byteLength };
   }
 
-  fetch(offset: number, length: number): FileStream {
+  public fetch(offset: number, length: number): FileStream {
     if (offset + length > this._buffer.byteLength) {
       throw new Error(
         `Read offset=${offset} length=${length} past buffer length ${this._buffer.byteLength}`,

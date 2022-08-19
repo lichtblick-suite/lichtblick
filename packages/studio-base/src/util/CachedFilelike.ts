@@ -101,7 +101,7 @@ export default class CachedFilelike implements Filelike {
   // The last time we've encountered an error;
   private _lastErrorTime?: number;
 
-  constructor(options: {
+  public constructor(options: {
     fileReader: FileReader;
     cacheSizeInBytes?: number;
     log?: ILogger;
@@ -115,7 +115,7 @@ export default class CachedFilelike implements Filelike {
     this._virtualBuffer = new VirtualLRUBuffer({ size: 0 });
   }
 
-  async open(): Promise<void> {
+  public async open(): Promise<void> {
     if (this._fileSize != undefined) {
       return;
     }
@@ -139,7 +139,7 @@ export default class CachedFilelike implements Filelike {
   }
 
   // Get the file size. Requires a call to `open()` or `read()` first.
-  size(): number {
+  public size(): number {
     if (this._fileSize == undefined) {
       throw new Error("CachedFilelike has not been opened");
     }
@@ -148,7 +148,7 @@ export default class CachedFilelike implements Filelike {
 
   // Potentially performance-sensitive; await can be expensive
   // eslint-disable-next-line @typescript-eslint/promise-function-async
-  read(offset: number, length: number): Promise<Uint8Array> {
+  public read(offset: number, length: number): Promise<Uint8Array> {
     if (length === 0) {
       return Promise.resolve(new Uint8Array());
     }

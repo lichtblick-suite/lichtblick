@@ -11,19 +11,19 @@ type Handler = () => void;
 export class NativeAppMenu implements INativeAppMenu {
   private bridge?: NativeMenuBridge;
 
-  constructor(bridge?: NativeMenuBridge) {
+  public constructor(bridge?: NativeMenuBridge) {
     this.bridge = bridge;
   }
-  addFileEntry(name: string, handler: Handler): void {
+  public addFileEntry(name: string, handler: Handler): void {
     void this.bridge?.menuAddInputSource(name, handler);
   }
-  removeFileEntry(name: string): void {
+  public removeFileEntry(name: string): void {
     void this.bridge?.menuRemoveInputSource(name);
   }
-  on(name: NativeAppMenuEvent, listener: Handler): void {
+  public on(name: NativeAppMenuEvent, listener: Handler): void {
     this.bridge?.addIpcEventListener(name, listener);
   }
-  off(name: NativeAppMenuEvent, listener: Handler): void {
+  public off(name: NativeAppMenuEvent, listener: Handler): void {
     this.bridge?.removeIpcEventListener(name, listener);
   }
 }

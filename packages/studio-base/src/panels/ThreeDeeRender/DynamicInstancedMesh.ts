@@ -22,14 +22,19 @@ export class DynamicInstancedMesh<
   // Total size of the buffer attributes, which can be larger than .count (instances in use)
   private _capacity: number;
 
-  constructor(geometry: TGeometry, material: TMaterial, initialCapacity = INITIAL_CAPACITY) {
+  public constructor(geometry: TGeometry, material: TMaterial, initialCapacity = INITIAL_CAPACITY) {
     super(geometry, material, 0);
 
     this._capacity = initialCapacity;
     this._resize();
   }
 
-  set(points: Vector3[], scale: Vector3, colors: ColorRGBA[], defaultColor: ColorRGBA): void {
+  public set(
+    points: Vector3[],
+    scale: Vector3,
+    colors: ColorRGBA[],
+    defaultColor: ColorRGBA,
+  ): void {
     const count = points.length;
     this._setCount(count);
 

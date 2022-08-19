@@ -72,12 +72,12 @@ export default class ChartJSManager {
   private _hasZoomed = false;
   private _hasPanned = false;
 
-  constructor(initOpts: InitOpts) {
+  public constructor(initOpts: InitOpts) {
     log.info(`new ChartJSManager(id=${initOpts.id})`);
     void this.init(initOpts);
   }
 
-  async init({
+  public async init({
     id,
     node,
     type,
@@ -131,56 +131,56 @@ export default class ChartJSManager {
     this._chartInstance = chartInstance;
   }
 
-  wheel(event: WheelEvent): RpcScales {
+  public wheel(event: WheelEvent): RpcScales {
     const target = event.target as Element & { boundingClientRect: DOMRect };
     target.getBoundingClientRect = () => target.boundingClientRect;
     this._fakeNodeEvents.emit("wheel", event);
     return this.getScales();
   }
 
-  mousedown(event: MouseEvent): RpcScales {
+  public mousedown(event: MouseEvent): RpcScales {
     const target = event.target as Element & { boundingClientRect: DOMRect };
     target.getBoundingClientRect = () => target.boundingClientRect;
     this._fakeNodeEvents.emit("mousedown", event);
     return this.getScales();
   }
 
-  mousemove(event: MouseEvent): RpcScales {
+  public mousemove(event: MouseEvent): RpcScales {
     const target = event.target as Element & { boundingClientRect: DOMRect };
     target.getBoundingClientRect = () => target.boundingClientRect;
     this._fakeNodeEvents.emit("mousemove", event);
     return this.getScales();
   }
 
-  mouseup(event: MouseEvent): RpcScales {
+  public mouseup(event: MouseEvent): RpcScales {
     const target = event.target as Element & { boundingClientRect: DOMRect };
     target.getBoundingClientRect = () => target.boundingClientRect;
     this._fakeDocumentEvents.emit("mouseup", event);
     return this.getScales();
   }
 
-  panstart(event: HammerInput): RpcScales {
+  public panstart(event: HammerInput): RpcScales {
     const target = event.target as HTMLElement & { boundingClientRect: DOMRect };
     target.getBoundingClientRect = () => target.boundingClientRect;
     maybeCast<ZoomableChart>(this._chartInstance)?.$zoom.panStartHandler(event);
     return this.getScales();
   }
 
-  panmove(event: HammerInput): RpcScales {
+  public panmove(event: HammerInput): RpcScales {
     const target = event.target as HTMLElement & { boundingClientRect: DOMRect };
     target.getBoundingClientRect = () => target.boundingClientRect;
     maybeCast<ZoomableChart>(this._chartInstance)?.$zoom.panHandler(event);
     return this.getScales();
   }
 
-  panend(event: HammerInput): RpcScales {
+  public panend(event: HammerInput): RpcScales {
     const target = event.target as HTMLElement & { boundingClientRect: DOMRect };
     target.getBoundingClientRect = () => target.boundingClientRect;
     maybeCast<ZoomableChart>(this._chartInstance)?.$zoom.panEndHandler(event);
     return this.getScales();
   }
 
-  update({
+  public update({
     options,
     width,
     height,
@@ -260,11 +260,11 @@ export default class ChartJSManager {
     return this.getScales();
   }
 
-  destroy(): void {
+  public destroy(): void {
     this._chartInstance?.destroy();
   }
 
-  getElementsAtEvent({ event }: { event: MouseEvent }): RpcElement[] {
+  public getElementsAtEvent({ event }: { event: MouseEvent }): RpcElement[] {
     const ev = {
       native: true,
       x: event.clientX,
@@ -314,7 +314,7 @@ export default class ChartJSManager {
     return out;
   }
 
-  getDatalabelAtEvent({ event }: { event: Event }): unknown {
+  public getDatalabelAtEvent({ event }: { event: Event }): unknown {
     this._chartInstance?.notifyPlugins("beforeEvent", { event });
 
     // clear the stored click context - we have consumed it
@@ -326,7 +326,7 @@ export default class ChartJSManager {
 
   // get the current chart scales in an rpc friendly format
   // all rpc methods return the current chart scale since that is the main thing that could change automatically
-  getScales(): RpcScales {
+  public getScales(): RpcScales {
     const scales: RpcScales = {};
 
     // fill our rpc scales - we only support x and y scales for now

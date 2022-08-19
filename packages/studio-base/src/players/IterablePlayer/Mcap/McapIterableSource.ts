@@ -38,11 +38,11 @@ export class McapIterableSource implements IIterableSource {
   private _source: McapSource;
   private _sourceImpl: IIterableSource | undefined;
 
-  constructor(source: McapSource) {
+  public constructor(source: McapSource) {
     this._source = source;
   }
 
-  async initialize(): Promise<Initalization> {
+  public async initialize(): Promise<Initalization> {
     const source = this._source;
 
     switch (source.type) {
@@ -64,7 +64,9 @@ export class McapIterableSource implements IIterableSource {
     return await this._sourceImpl.initialize();
   }
 
-  messageIterator(opt: MessageIteratorArgs): AsyncIterableIterator<Readonly<IteratorResult>> {
+  public messageIterator(
+    opt: MessageIteratorArgs,
+  ): AsyncIterableIterator<Readonly<IteratorResult>> {
     if (!this._sourceImpl) {
       throw new Error("Invariant: uninitialized");
     }
@@ -72,7 +74,9 @@ export class McapIterableSource implements IIterableSource {
     return this._sourceImpl.messageIterator(opt);
   }
 
-  async getBackfillMessages(args: GetBackfillMessagesArgs): Promise<MessageEvent<unknown>[]> {
+  public async getBackfillMessages(
+    args: GetBackfillMessagesArgs,
+  ): Promise<MessageEvent<unknown>[]> {
     if (!this._sourceImpl) {
       throw new Error("Invariant: uninitialized");
     }

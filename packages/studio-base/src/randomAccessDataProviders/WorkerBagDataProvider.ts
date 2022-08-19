@@ -35,11 +35,11 @@ export default class WorkerBagDataProvider implements RandomAccessDataProvider {
   private rpc?: Rpc;
   private options: Options;
 
-  constructor(options: Options) {
+  public constructor(options: Options) {
     this.options = options;
   }
 
-  async initialize(extensionPoint: ExtensionPoint): Promise<InitializationResult> {
+  public async initialize(extensionPoint: ExtensionPoint): Promise<InitializationResult> {
     // close any previous initialized workers
     await this.close();
 
@@ -76,7 +76,11 @@ export default class WorkerBagDataProvider implements RandomAccessDataProvider {
     return await this.rpc.send("initialize", this.options);
   }
 
-  async getMessages(start: Time, end: Time, topics: GetMessagesTopics): Promise<GetMessagesResult> {
+  public async getMessages(
+    start: Time,
+    end: Time,
+    topics: GetMessagesTopics,
+  ): Promise<GetMessagesResult> {
     if (!this.rpc) {
       throw new Error("WorkerDataProvieder not initialized");
     }
@@ -98,7 +102,7 @@ export default class WorkerBagDataProvider implements RandomAccessDataProvider {
     };
   }
 
-  async close(): Promise<void> {
+  public async close(): Promise<void> {
     try {
       await this.rpc?.send("close");
     } finally {

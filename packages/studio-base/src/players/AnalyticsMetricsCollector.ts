@@ -15,59 +15,59 @@ const log = Log.getLogger(__filename);
 type EventData = { [key: string]: string | number | boolean };
 
 export default class AnalyticsMetricsCollector implements PlayerMetricsCollectorInterface {
-  metadata: EventData = {};
+  private metadata: EventData = {};
   private _analytics: IAnalytics;
 
-  constructor(analytics: IAnalytics) {
+  public constructor(analytics: IAnalytics) {
     log.debug("New AnalyticsMetricsCollector");
     this._analytics = analytics;
   }
 
-  setProperty(key: string, value: string | number | boolean): void {
+  public setProperty(key: string, value: string | number | boolean): void {
     this.metadata[key] = value;
   }
 
-  logEvent(event: AppEvent, data?: EventData): void {
+  public logEvent(event: AppEvent, data?: EventData): void {
     void this._analytics.logEvent(event, { ...this.metadata, ...data });
   }
 
-  playerConstructed(): void {
+  public playerConstructed(): void {
     this.logEvent(AppEvent.PLAYER_CONSTRUCTED);
   }
 
-  initialized(args?: { isSampleDataSource: boolean }): void {
+  public initialized(args?: { isSampleDataSource: boolean }): void {
     this.logEvent(AppEvent.PLAYER_INITIALIZED, {
       isSampleDataSource: args?.isSampleDataSource === true,
     });
   }
 
-  play(speed: number): void {
+  public play(speed: number): void {
     this.logEvent(AppEvent.PLAYER_PLAY, { speed });
   }
 
-  seek(_time: Time): void {
+  public seek(_time: Time): void {
     // NOTE: This event fires in more cases than user interaction
   }
 
-  setSpeed(_speed: number): void {
+  public setSpeed(_speed: number): void {
     // NOTE: This event fires in more cases than user interaction
   }
 
-  pause(): void {
+  public pause(): void {
     this.logEvent(AppEvent.PLAYER_PAUSE);
   }
 
-  close(): void {
+  public close(): void {
     this.logEvent(AppEvent.PLAYER_CLOSE);
   }
 
-  setSubscriptions(_subscriptions: SubscribePayload[]): void {}
+  public setSubscriptions(_subscriptions: SubscribePayload[]): void {}
 
-  recordBytesReceived(_bytes: number): void {}
+  public recordBytesReceived(_bytes: number): void {}
 
-  recordPlaybackTime(_time: Time, _params: { stillLoadingData: boolean }): void {}
+  public recordPlaybackTime(_time: Time, _params: { stillLoadingData: boolean }): void {}
 
-  recordDataProviderPerformance(
+  public recordDataProviderPerformance(
     _metadata: Readonly<{
       type: "average_throughput";
       totalSizeOfMessages: number;
@@ -79,11 +79,11 @@ export default class AnalyticsMetricsCollector implements PlayerMetricsCollector
     }>,
   ): void {}
 
-  recordUncachedRangeRequest(): void {}
+  public recordUncachedRangeRequest(): void {}
 
-  recordTimeToFirstMsgs(): void {}
+  public recordTimeToFirstMsgs(): void {}
 
-  recordDataProviderInitializePerformance(
+  public recordDataProviderInitializePerformance(
     _metadata: Readonly<{
       type: "initializationPerformance";
       dataProviderType: string;
@@ -91,7 +91,7 @@ export default class AnalyticsMetricsCollector implements PlayerMetricsCollector
     }>,
   ): void {}
 
-  recordDataProviderStall(
+  public recordDataProviderStall(
     _metadata: Readonly<{
       type: "data_provider_stall";
       stallDuration: Time;

@@ -39,7 +39,7 @@ export class IdbLayoutStorage implements ILayoutStorage {
     },
   });
 
-  async list(namespace: string): Promise<readonly Layout[]> {
+  public async list(namespace: string): Promise<readonly Layout[]> {
     const results: Layout[] = [];
     const records = await (
       await this._db
@@ -54,21 +54,21 @@ export class IdbLayoutStorage implements ILayoutStorage {
     return results;
   }
 
-  async get(namespace: string, id: LayoutID): Promise<Layout | undefined> {
+  public async get(namespace: string, id: LayoutID): Promise<Layout | undefined> {
     const record = await (await this._db).get(OBJECT_STORE_NAME, [namespace, id]);
     return record == undefined ? undefined : migrateLayout(record.layout);
   }
 
-  async put(namespace: string, layout: Layout): Promise<Layout> {
+  public async put(namespace: string, layout: Layout): Promise<Layout> {
     await (await this._db).put(OBJECT_STORE_NAME, { namespace, layout });
     return layout;
   }
 
-  async delete(namespace: string, id: LayoutID): Promise<void> {
+  public async delete(namespace: string, id: LayoutID): Promise<void> {
     await (await this._db).delete(OBJECT_STORE_NAME, [namespace, id]);
   }
 
-  async importLayouts({
+  public async importLayouts({
     fromNamespace,
     toNamespace,
   }: {
@@ -89,7 +89,7 @@ export class IdbLayoutStorage implements ILayoutStorage {
     }
   }
 
-  async migrateUnnamespacedLayouts(namespace: string): Promise<void> {
+  public async migrateUnnamespacedLayouts(namespace: string): Promise<void> {
     await this._migrateFromLocalStorage();
 
     // At the time IdbLayoutStorage was created, all layouts were already namespaced, so there are

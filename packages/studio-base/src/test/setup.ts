@@ -45,20 +45,20 @@ global.React = require("react");
 class ResizeObserverMock {
   private _callback: ResizeObserverCallback;
 
-  constructor(callback: ResizeObserverCallback) {
+  public constructor(callback: ResizeObserverCallback) {
     this._callback = callback;
   }
 
-  disconnect() {}
+  public disconnect() {}
 
-  observe() {
+  public observe() {
     const entry = {
       contentRect: { width: 150, height: 150 },
     };
     this._callback([entry as ResizeObserverEntry], this);
   }
 
-  unobserve() {}
+  public unobserve() {}
 }
 
 global.ResizeObserver = ResizeObserverMock;

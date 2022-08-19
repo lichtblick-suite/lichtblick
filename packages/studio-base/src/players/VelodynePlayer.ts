@@ -89,7 +89,7 @@ export default class VelodynePlayer implements Player {
   private _problems: PlayerProblem[] = [];
   private _problemsById = new Map<string, PlayerProblem>();
 
-  constructor({ port, metricsCollector }: VelodynePlayerOpts) {
+  public constructor({ port, metricsCollector }: VelodynePlayerOpts) {
     this._port = port ?? DEFAULT_VELODYNE_PORT;
     log.info(`initializing VelodynePlayer on port ${this._port}`);
     this._metricsCollector = metricsCollector;
@@ -259,12 +259,12 @@ export default class VelodynePlayer implements Player {
     });
   });
 
-  setListener(listener: (arg0: PlayerState) => Promise<void>): void {
+  public setListener(listener: (arg0: PlayerState) => Promise<void>): void {
     this._listener = listener;
     this._emitState();
   }
 
-  close(): void {
+  public close(): void {
     this._closed = true;
     if (this._socket) {
       void this._socket.dispose();
@@ -281,30 +281,30 @@ export default class VelodynePlayer implements Player {
     this._parsedMessages = [];
   }
 
-  setSubscriptions(_subscriptions: SubscribePayload[]): void {}
+  public setSubscriptions(_subscriptions: SubscribePayload[]): void {}
 
-  setPublishers(_publishers: AdvertiseOptions[]): void {
+  public setPublishers(_publishers: AdvertiseOptions[]): void {
     // no-op
   }
 
   // Modify a remote parameter such as a rosparam.
-  setParameter(_key: string, _value: ParameterValue): void {
+  public setParameter(_key: string, _value: ParameterValue): void {
     throw new Error(`Parameter modification is not supported for VelodynePlayer`);
   }
 
-  publish(_request: PublishPayload): void {
+  public publish(_request: PublishPayload): void {
     throw new Error(`Publishing is not supported for VelodynePlayer`);
   }
 
-  async callService(): Promise<unknown> {
+  public async callService(): Promise<unknown> {
     throw new Error("Service calls are not supported for VelodynePlayer");
   }
 
-  requestBackfill(): void {
+  public requestBackfill(): void {
     // no-op
   }
 
-  setGlobalVariables(_globalVariables: GlobalVariables): void {
+  public setGlobalVariables(_globalVariables: GlobalVariables): void {
     // no-op
   }
 }

@@ -27,37 +27,37 @@ class BenchmarkPlayer implements Player {
   private listener?: (state: PlayerState) => Promise<void>;
   private subscriptions: SubscribePayload[] = [];
 
-  constructor(name: string, source: BenchmarkPlayer["source"]) {
+  public constructor(name: string, source: BenchmarkPlayer["source"]) {
     this.name = name;
     this.source = source;
   }
 
-  setListener(listener: (state: PlayerState) => Promise<void>): void {
+  public setListener(listener: (state: PlayerState) => Promise<void>): void {
     this.listener = listener;
     void this.run();
   }
-  close(): void {
+  public close(): void {
     //throw new Error("Method not implemented.");
   }
-  setSubscriptions(subscriptions: SubscribePayload[]): void {
+  public setSubscriptions(subscriptions: SubscribePayload[]): void {
     this.subscriptions = subscriptions;
   }
-  setPublishers(_publishers: AdvertiseOptions[]): void {
+  public setPublishers(_publishers: AdvertiseOptions[]): void {
     //throw new Error("Method not implemented.");
   }
-  setParameter(_key: string, _value: unknown): void {
+  public setParameter(_key: string, _value: unknown): void {
     throw new Error("Method not implemented.");
   }
-  publish(_request: PublishPayload): void {
+  public publish(_request: PublishPayload): void {
     throw new Error("Method not implemented.");
   }
-  async callService(_service: string, _request: unknown): Promise<unknown> {
+  public async callService(_service: string, _request: unknown): Promise<unknown> {
     throw new Error("Method not implemented.");
   }
-  requestBackfill(): void {
+  public requestBackfill(): void {
     // no-op
   }
-  setGlobalVariables(_globalVariables: GlobalVariables): void {
+  public setGlobalVariables(_globalVariables: GlobalVariables): void {
     throw new Error("Method not implemented.");
   }
 

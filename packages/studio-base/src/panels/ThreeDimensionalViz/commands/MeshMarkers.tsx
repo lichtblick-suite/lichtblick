@@ -79,9 +79,9 @@ async function loadModel(url: string, options: LoadModelOptions): Promise<GlbMod
 class ModelCache {
   private models = new Map<string, Promise<GlbModel | undefined>>();
 
-  constructor(private loadModelOptions: LoadModelOptions) {}
+  public constructor(private loadModelOptions: LoadModelOptions) {}
 
-  async load(url: string, reportError: (_: Error) => void): Promise<GlbModel | undefined> {
+  public async load(url: string, reportError: (_: Error) => void): Promise<GlbModel | undefined> {
     let promise = this.models.get(url);
     if (promise) {
       return await promise;

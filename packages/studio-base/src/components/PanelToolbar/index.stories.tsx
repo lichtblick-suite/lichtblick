@@ -30,7 +30,7 @@ class MosaicWrapper extends React.Component<{
   children: React.ReactNode;
   width?: number;
 }> {
-  override render() {
+  public override render() {
     const { width } = this.props;
     return (
       <Mosaic
@@ -67,7 +67,7 @@ class MosaicWrapper extends React.Component<{
 }
 
 class PanelToolbarWithOpenMenu extends React.PureComponent {
-  override render() {
+  public override render() {
     return (
       <div
         ref={(el) => {
@@ -161,7 +161,7 @@ storiesOf("components/PanelToolbar", module)
     "menu (only panel)",
     () => {
       class Story extends React.Component {
-        override render() {
+        public override render() {
           return (
             <MosaicWrapper width={268}>
               <PanelToolbarWithOpenMenu />
@@ -177,7 +177,7 @@ storiesOf("components/PanelToolbar", module)
     "menu light",
     () => {
       class Story extends React.Component {
-        override render() {
+        public override render() {
           return (
             <MosaicWrapper width={268}>
               <PanelToolbarWithOpenMenu />
@@ -193,7 +193,7 @@ storiesOf("components/PanelToolbar", module)
     "menu (with sibling panel)",
     () => {
       class Story extends React.Component {
-        override render() {
+        public override render() {
           return (
             <MosaicWrapper
               width={268}
@@ -212,7 +212,7 @@ storiesOf("components/PanelToolbar", module)
     "menu for Tab panel",
     () => {
       class Story extends React.Component {
-        override render() {
+        public override render() {
           return (
             <MosaicWrapper
               width={268}
@@ -231,7 +231,7 @@ storiesOf("components/PanelToolbar", module)
     "no toolbars",
     () => {
       class Story extends React.Component {
-        override render() {
+        public override render() {
           return (
             <MosaicWrapper
               width={268}

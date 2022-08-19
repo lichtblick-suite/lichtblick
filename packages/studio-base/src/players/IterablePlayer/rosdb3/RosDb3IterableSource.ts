@@ -26,16 +26,16 @@ export class RosDb3IterableSource implements IIterableSource {
   private files: File[];
   private wrapper?: Comlink.Remote<IIterableSource>;
 
-  constructor(files: File[]) {
+  public constructor(files: File[]) {
     this.files = files;
   }
 
-  async initialize(): Promise<Initalization> {
+  public async initialize(): Promise<Initalization> {
     const wrapper = (this.wrapper = await new ComlinkWrapper(this.files));
     return await wrapper.initialize();
   }
 
-  async *messageIterator(
+  public async *messageIterator(
     opt: MessageIteratorArgs,
   ): AsyncIterableIterator<Readonly<IteratorResult>> {
     if (this.wrapper == undefined) {
@@ -56,7 +56,9 @@ export class RosDb3IterableSource implements IIterableSource {
     }
   }
 
-  async getBackfillMessages(_args: GetBackfillMessagesArgs): Promise<MessageEvent<unknown>[]> {
+  public async getBackfillMessages(
+    _args: GetBackfillMessagesArgs,
+  ): Promise<MessageEvent<unknown>[]> {
     return [];
   }
 }

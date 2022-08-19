@@ -7,7 +7,7 @@ import { Link, Typography } from "@mui/material";
 import { IDataSourceFactory, VelodyneDataSourceFactory } from "@foxglove/studio-base";
 
 export default class VelodyneUnavailableDataSourceFactory extends VelodyneDataSourceFactory {
-  disabledReason = (
+  public disabledReason = (
     <Typography>
       Velodyne connections require UDP sockets, which are not available in a web browser.{" "}
       <Link href="https://foxglove.dev/download" target="_blank" rel="noreferrer">
@@ -17,7 +17,7 @@ export default class VelodyneUnavailableDataSourceFactory extends VelodyneDataSo
     </Typography>
   );
 
-  override initialize(): ReturnType<IDataSourceFactory["initialize"]> {
+  public override initialize(): ReturnType<IDataSourceFactory["initialize"]> {
     return;
   }
 }

@@ -5,18 +5,18 @@
 import { IAppConfiguration, ChangeHandler, AppConfigurationValue } from "@foxglove/studio-base";
 
 export default class LocalStorageAppConfiguration implements IAppConfiguration {
-  static KEY_PREFIX = "studio.app-configuration.";
+  private static KEY_PREFIX = "studio.app-configuration.";
 
   /** Default values for app configuration items which have never been set by a user */
-  defaults?: { [key: string]: AppConfigurationValue };
+  private defaults?: { [key: string]: AppConfigurationValue };
 
-  changeListeners = new Map<string, Set<ChangeHandler>>();
+  private changeListeners = new Map<string, Set<ChangeHandler>>();
 
-  constructor({ defaults }: { defaults?: { [key: string]: AppConfigurationValue } }) {
+  public constructor({ defaults }: { defaults?: { [key: string]: AppConfigurationValue } }) {
     this.defaults = defaults;
   }
 
-  get(key: string): AppConfigurationValue {
+  public get(key: string): AppConfigurationValue {
     const value = localStorage.getItem(LocalStorageAppConfiguration.KEY_PREFIX + key);
     try {
       return value == undefined ? this.defaults?.[key] : JSON.parse(value);
@@ -24,7 +24,7 @@ export default class LocalStorageAppConfiguration implements IAppConfiguration {
       return undefined;
     }
   }
-  async set(key: string, value: AppConfigurationValue): Promise<void> {
+  public async set(key: string, value: AppConfigurationValue): Promise<void> {
     if (value == undefined) {
       localStorage.removeItem(LocalStorageAppConfiguration.KEY_PREFIX + key);
     } else {
@@ -40,7 +40,7 @@ export default class LocalStorageAppConfiguration implements IAppConfiguration {
     }
   }
 
-  addChangeListener(key: string, cb: ChangeHandler): void {
+  public addChangeListener(key: string, cb: ChangeHandler): void {
     let listeners = this.changeListeners.get(key);
     if (!listeners) {
       listeners = new Set();
@@ -49,7 +49,7 @@ export default class LocalStorageAppConfiguration implements IAppConfiguration {
     listeners.add(cb);
   }
 
-  removeChangeListener(key: string, cb: ChangeHandler): void {
+  public removeChangeListener(key: string, cb: ChangeHandler): void {
     const listeners = this.changeListeners.get(key);
     if (listeners) {
       listeners.delete(cb);

@@ -9,7 +9,7 @@ const noop = () => {};
 
 class Logger {
   // default logger has an empty name
-  static default = new Logger("");
+  public static default = new Logger("");
 
   private _name: string;
   private _enabled = true;
@@ -23,31 +23,31 @@ class Logger {
   }
 
   // fully qualified name for the logger
-  name() {
+  public name() {
     return this._name;
   }
 
-  isEnabled() {
+  public isEnabled() {
     return this._enabled;
   }
 
-  enable() {
+  public enable() {
     this._enabled = true;
     this._updateHandlers();
   }
 
-  disable() {
+  public disable() {
     this._enabled = false;
     this._updateHandlers();
   }
 
-  debug(..._args: unknown[]) {}
-  info(..._args: unknown[]) {}
-  warn(..._args: unknown[]) {}
-  error(..._args: unknown[]) {}
+  public debug(..._args: unknown[]) {}
+  public info(..._args: unknown[]) {}
+  public warn(..._args: unknown[]) {}
+  public error(..._args: unknown[]) {}
 
   // create a new logger under this logger's namespace
-  getLogger(name: string): Logger {
+  public getLogger(name: string): Logger {
     const shortName = name.replace(/^.+\.(asar|webpack)[\\/\\]/, "").replace(/^(\.\.\/)+/, "");
     const channelName = this._name.length > 0 ? `${this._name}.${shortName}` : shortName;
     const existing = channels.get(channelName);
@@ -61,7 +61,7 @@ class Logger {
   }
 
   // get all logging channels
-  channels(): Logger[] {
+  public channels(): Logger[] {
     return Array.from(channels.values());
   }
 

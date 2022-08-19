@@ -16,10 +16,10 @@ declare module "text-metrics" {
   };
 
   export class TextMeasure {
-    width(text?: string, options?: Options, overrides?: Overrides): number;
-    height(text: string): number;
-    lines(text: string): string[];
-    maxFontSize(text: string): string;
+    public width(text?: string, options?: Options, overrides?: Overrides): number;
+    public height(text: string): number;
+    public lines(text: string): string[];
+    public maxFontSize(text: string): string;
   }
 
   function init(el?: Element | Overrides, overrides?: Overrides): TextMeasure;

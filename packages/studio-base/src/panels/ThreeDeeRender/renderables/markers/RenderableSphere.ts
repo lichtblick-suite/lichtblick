@@ -15,9 +15,14 @@ export class RenderableSphere extends RenderableMarker {
   private static lod: DetailLevel | undefined;
   private static sphereGeometry: THREE.SphereGeometry | undefined;
 
-  mesh: THREE.Mesh<THREE.SphereGeometry, THREE.MeshStandardMaterial>;
+  public mesh: THREE.Mesh<THREE.SphereGeometry, THREE.MeshStandardMaterial>;
 
-  constructor(topic: string, marker: Marker, receiveTime: bigint | undefined, renderer: Renderer) {
+  public constructor(
+    topic: string,
+    marker: Marker,
+    receiveTime: bigint | undefined,
+    renderer: Renderer,
+  ) {
     super(topic, marker, receiveTime, renderer);
 
     // Sphere mesh
@@ -30,11 +35,11 @@ export class RenderableSphere extends RenderableMarker {
     this.update(marker, receiveTime);
   }
 
-  override dispose(): void {
+  public override dispose(): void {
     this.mesh.material.dispose();
   }
 
-  override update(marker: Marker, receiveTime: bigint | undefined): void {
+  public override update(marker: Marker, receiveTime: bigint | undefined): void {
     super.update(marker, receiveTime);
 
     const transparent = marker.color.a < 1;
@@ -50,7 +55,7 @@ export class RenderableSphere extends RenderableMarker {
     this.scale.set(marker.scale.x, marker.scale.y, marker.scale.z);
   }
 
-  static Geometry(lod: DetailLevel): THREE.SphereGeometry {
+  public static Geometry(lod: DetailLevel): THREE.SphereGeometry {
     if (!RenderableSphere.sphereGeometry || lod !== RenderableSphere.lod) {
       const subdivisions = sphereSubdivisions(lod);
       RenderableSphere.sphereGeometry = new THREE.SphereGeometry(0.5, subdivisions, subdivisions);

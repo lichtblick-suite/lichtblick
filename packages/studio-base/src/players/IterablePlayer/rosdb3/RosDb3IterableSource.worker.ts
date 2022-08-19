@@ -32,11 +32,11 @@ export class RosDb3IterableSource implements IIterableSource {
   private start: Time = { sec: 0, nsec: 0 };
   private end: Time = { sec: 0, nsec: 0 };
 
-  constructor(files: File[]) {
+  public constructor(files: File[]) {
     this.files = files;
   }
 
-  async initialize(): Promise<Initalization> {
+  public async initialize(): Promise<Initalization> {
     const res = await fetch(
       new URL("@foxglove/sql.js/dist/sql-wasm.wasm", import.meta.url).toString(),
     );
@@ -109,7 +109,7 @@ export class RosDb3IterableSource implements IIterableSource {
     };
   }
 
-  async *messageIterator(
+  public async *messageIterator(
     opt: MessageIteratorArgs,
   ): AsyncIterableIterator<Readonly<IteratorResult>> {
     if (this.bag == undefined) {
@@ -146,7 +146,9 @@ export class RosDb3IterableSource implements IIterableSource {
     }
   }
 
-  async getBackfillMessages(_args: GetBackfillMessagesArgs): Promise<MessageEvent<unknown>[]> {
+  public async getBackfillMessages(
+    _args: GetBackfillMessagesArgs,
+  ): Promise<MessageEvent<unknown>[]> {
     return [];
   }
 }

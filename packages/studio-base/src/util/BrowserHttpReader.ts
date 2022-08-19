@@ -19,11 +19,11 @@ import isDesktopApp from "@foxglove/studio-base/util/isDesktopApp";
 export default class BrowserHttpReader implements FileReader {
   private _url: string;
 
-  constructor(url: string) {
+  public constructor(url: string) {
     this._url = url;
   }
 
-  async open(): Promise<{ size: number; identifier?: string }> {
+  public async open(): Promise<{ size: number; identifier?: string }> {
     let response: Response;
     try {
       // Make a GET request and then immediately cancel it. This is more robust than a HEAD request,
@@ -75,7 +75,7 @@ export default class BrowserHttpReader implements FileReader {
     };
   }
 
-  fetch(offset: number, length: number): FileStream {
+  public fetch(offset: number, length: number): FileStream {
     const headers = new Headers({ range: `bytes=${offset}-${offset + (length - 1)}` });
     const reader = new FetchReader(this._url, { headers });
     reader.read();

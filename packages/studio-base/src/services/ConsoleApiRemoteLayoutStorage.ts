@@ -22,9 +22,9 @@ function convertLayout({ id, name, permission, data, savedAt }: ConsoleApiLayout
 }
 
 export default class ConsoleApiRemoteLayoutStorage implements IRemoteLayoutStorage {
-  constructor(readonly namespace: string, private api: ConsoleApi) {}
+  public constructor(public readonly namespace: string, private api: ConsoleApi) {}
 
-  async getLayouts(): Promise<readonly RemoteLayout[]> {
+  public async getLayouts(): Promise<readonly RemoteLayout[]> {
     return filterMap(await this.api.getLayouts({ includeData: true }), (layout) => {
       try {
         return convertLayout(layout);
@@ -34,12 +34,12 @@ export default class ConsoleApiRemoteLayoutStorage implements IRemoteLayoutStora
       }
     });
   }
-  async getLayout(id: LayoutID): Promise<RemoteLayout | undefined> {
+  public async getLayout(id: LayoutID): Promise<RemoteLayout | undefined> {
     const layout = await this.api.getLayout(id, { includeData: true });
     return layout ? convertLayout(layout) : undefined;
   }
 
-  async saveNewLayout({
+  public async saveNewLayout({
     id,
     name,
     data,
@@ -56,7 +56,7 @@ export default class ConsoleApiRemoteLayoutStorage implements IRemoteLayoutStora
     return convertLayout(result);
   }
 
-  async updateLayout({
+  public async updateLayout({
     id,
     name,
     data,
@@ -78,7 +78,7 @@ export default class ConsoleApiRemoteLayoutStorage implements IRemoteLayoutStora
     }
   }
 
-  async deleteLayout(id: LayoutID): Promise<boolean> {
+  public async deleteLayout(id: LayoutID): Promise<boolean> {
     return await this.api.deleteLayout(id);
   }
 }

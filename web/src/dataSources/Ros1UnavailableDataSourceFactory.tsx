@@ -7,7 +7,7 @@ import { Link, Typography } from "@mui/material";
 import { IDataSourceFactory, Ros1SocketDataSourceFactory } from "@foxglove/studio-base";
 
 class Ros1UnavailableDataSourceFactory extends Ros1SocketDataSourceFactory {
-  disabledReason = (
+  public disabledReason = (
     <Typography>
       ROS 1 connections require TCP sockets, which are not available in a web browser.{" "}
       <Link href="https://foxglove.dev/download" target="_blank" rel="noreferrer">
@@ -17,7 +17,7 @@ class Ros1UnavailableDataSourceFactory extends Ros1SocketDataSourceFactory {
     </Typography>
   );
 
-  override initialize(): ReturnType<IDataSourceFactory["initialize"]> {
+  public override initialize(): ReturnType<IDataSourceFactory["initialize"]> {
     return;
   }
 }

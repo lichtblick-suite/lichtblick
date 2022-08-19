@@ -39,11 +39,11 @@ export class UlogIterableSource implements IIterableSource {
   private start?: Time;
   private end?: Time;
 
-  constructor(options: UlogOptions) {
+  public constructor(options: UlogOptions) {
     this.options = options;
   }
 
-  async initialize(): Promise<Initalization> {
+  public async initialize(): Promise<Initalization> {
     const file = this.options.file;
     const bytes = this.options.file.size;
     log.debug(`initialize(${bytes} bytes)`);
@@ -117,7 +117,7 @@ export class UlogIterableSource implements IIterableSource {
     };
   }
 
-  async *messageIterator(
+  public async *messageIterator(
     args: MessageIteratorArgs,
   ): AsyncIterableIterator<Readonly<IteratorResult>> {
     if (this.ulog == undefined) {
@@ -182,7 +182,9 @@ export class UlogIterableSource implements IIterableSource {
     }
   }
 
-  async getBackfillMessages(_args: GetBackfillMessagesArgs): Promise<MessageEvent<unknown>[]> {
+  public async getBackfillMessages(
+    _args: GetBackfillMessagesArgs,
+  ): Promise<MessageEvent<unknown>[]> {
     return [];
   }
 }

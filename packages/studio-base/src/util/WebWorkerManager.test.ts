@@ -17,18 +17,18 @@ import WebWorkerManager from "./WebWorkerManager";
 
 jest.mock("@foxglove/studio-base/util/Rpc", () => {
   return class FakeRpc {
-    terminate() {}
-    receive() {
+    public terminate() {}
+    public receive() {
       // no-op
     }
   };
 });
 class FakeWorker implements Channel {
-  terminated = false;
-  terminate() {
+  public terminated = false;
+  public terminate() {
     this.terminated = true;
   }
-  postMessage() {
+  public postMessage() {
     throw new Error("not supported");
   }
 }

@@ -11,15 +11,15 @@ export interface FieldReader {
 }
 
 export class Float32Reader implements FieldReader {
-  offset: number;
-  view: DataView;
-  constructor(offset: number) {
+  private offset: number;
+  private view: DataView;
+  public constructor(offset: number) {
     this.offset = offset;
     const buffer = new ArrayBuffer(4);
     this.view = new DataView(buffer);
   }
 
-  read(data: Uint8Array, index: number): number {
+  public read(data: Uint8Array, index: number): number {
     const base = index + this.offset;
     const size = 4;
     if (data.length < base + size) {
@@ -34,15 +34,15 @@ export class Float32Reader implements FieldReader {
 }
 
 export class Int32Reader implements FieldReader {
-  offset: number;
-  view: DataView;
-  constructor(offset: number) {
+  private offset: number;
+  private view: DataView;
+  public constructor(offset: number) {
     this.offset = offset;
     const buffer = new ArrayBuffer(4);
     this.view = new DataView(buffer);
   }
 
-  read(data: Uint8Array, index: number): number {
+  public read(data: Uint8Array, index: number): number {
     const base = index + this.offset;
     const size = 4;
     if (data.length < base + size) {
@@ -57,15 +57,15 @@ export class Int32Reader implements FieldReader {
 }
 
 export class Uint16Reader implements FieldReader {
-  offset: number;
-  view: DataView;
-  constructor(offset: number) {
+  private offset: number;
+  private view: DataView;
+  public constructor(offset: number) {
     this.offset = offset;
     const buffer = new ArrayBuffer(2);
     this.view = new DataView(buffer);
   }
 
-  read(data: Uint8Array, index: number): number {
+  public read(data: Uint8Array, index: number): number {
     const base = index + this.offset;
     const size = 2;
     if (data.length < base + size) {
@@ -78,12 +78,12 @@ export class Uint16Reader implements FieldReader {
 }
 
 export class Uint8Reader implements FieldReader {
-  offset: number;
-  constructor(offset: number) {
+  private offset: number;
+  public constructor(offset: number) {
     this.offset = offset;
   }
 
-  read(data: Uint8Array, index: number): number {
+  public read(data: Uint8Array, index: number): number {
     const base = index + this.offset;
     const size = 1;
     if (data.length < base + size) {
@@ -94,15 +94,15 @@ export class Uint8Reader implements FieldReader {
 }
 
 export class Int16Reader implements FieldReader {
-  offset: number;
-  view: DataView;
-  constructor(offset: number) {
+  private offset: number;
+  private view: DataView;
+  public constructor(offset: number) {
     this.offset = offset;
     const buffer = new ArrayBuffer(2);
     this.view = new DataView(buffer);
   }
 
-  read(data: Uint8Array, index: number): number {
+  public read(data: Uint8Array, index: number): number {
     const base = index + this.offset;
     const size = 2;
     if (data.length < base + size) {

@@ -29,7 +29,7 @@ class SinewavePlayer implements Player {
   private listener?: (state: PlayerState) => Promise<void>;
   private datatypes: RosDatatypes = new Map();
 
-  constructor() {
+  public constructor() {
     this.datatypes.set("Sinewave", {
       name: "Sinewave",
       definitions: [
@@ -41,30 +41,30 @@ class SinewavePlayer implements Player {
     });
   }
 
-  setListener(listener: (state: PlayerState) => Promise<void>): void {
+  public setListener(listener: (state: PlayerState) => Promise<void>): void {
     this.listener = listener;
     void this.run();
   }
-  close(): void {
+  public close(): void {
     // no-op
   }
-  setSubscriptions(_subscriptions: SubscribePayload[]): void {}
-  setPublishers(_publishers: AdvertiseOptions[]): void {
+  public setSubscriptions(_subscriptions: SubscribePayload[]): void {}
+  public setPublishers(_publishers: AdvertiseOptions[]): void {
     // no-op
   }
-  setParameter(_key: string, _value: unknown): void {
+  public setParameter(_key: string, _value: unknown): void {
     throw new Error("Method not implemented.");
   }
-  publish(_request: PublishPayload): void {
+  public publish(_request: PublishPayload): void {
     throw new Error("Method not implemented.");
   }
-  async callService(_service: string, _request: unknown): Promise<unknown> {
+  public async callService(_service: string, _request: unknown): Promise<unknown> {
     throw new Error("Method not implemented.");
   }
-  requestBackfill(): void {
+  public requestBackfill(): void {
     // no-op
   }
-  setGlobalVariables(_globalVariables: GlobalVariables): void {
+  public setGlobalVariables(_globalVariables: GlobalVariables): void {
     throw new Error("Method not implemented.");
   }
 

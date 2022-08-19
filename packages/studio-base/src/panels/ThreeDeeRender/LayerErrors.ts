@@ -11,15 +11,15 @@ export type Path = ReadonlyArray<string>;
 const TOPIC_PATH: [string, string] = ["topics", ""];
 
 export class NodeError {
-  path: Path;
-  errorsById?: Map<string, string>;
-  children?: Map<string, NodeError>;
+  public path: Path;
+  public errorsById?: Map<string, string>;
+  public children?: Map<string, NodeError>;
 
-  constructor(path: Path) {
+  public constructor(path: Path) {
     this.path = path;
   }
 
-  errorMessage(): string | undefined {
+  public errorMessage(): string | undefined {
     if (this.errorsById && this.errorsById.size > 0) {
       const errorMessages = Array.from(this.errorsById.values());
       return errorMessages.join("\n");
@@ -28,7 +28,7 @@ export class NodeError {
     }
   }
 
-  errorAtPath(path: Path): string | undefined {
+  public errorAtPath(path: Path): string | undefined {
     // eslint-disable-next-line @typescript-eslint/no-this-alias
     let node: NodeError | undefined = this;
     for (const segment of path) {
@@ -40,7 +40,7 @@ export class NodeError {
     return node.errorMessage();
   }
 
-  clone(): NodeError {
+  public clone(): NodeError {
     const clone = new NodeError(this.path);
     clone.errorsById = this.errorsById;
     clone.children = this.children;
@@ -57,9 +57,9 @@ export type LayerErrorEvents = {
 const log = Logger.getLogger(__filename);
 
 export class LayerErrors extends EventEmitter<LayerErrorEvents> {
-  errors = new NodeError([]);
+  public errors = new NodeError([]);
 
-  add(path: Path, errorId: string, errorMessage: string): void {
+  public add(path: Path, errorId: string, errorMessage: string): void {
     // Get or create the node for the given path
     let node = this.errors;
     for (const segment of path) {
@@ -88,17 +88,17 @@ export class LayerErrors extends EventEmitter<LayerErrorEvents> {
     }
   }
 
-  addToTopic(topicId: string, errorId: string, errorMessage: string): void {
+  public addToTopic(topicId: string, errorId: string, errorMessage: string): void {
     TOPIC_PATH[1] = topicId;
     this.add(TOPIC_PATH, errorId, errorMessage);
   }
 
-  hasError(path: Path, errorId: string): boolean {
+  public hasError(path: Path, errorId: string): boolean {
     const node = this._getNode(path);
     return node?.errorsById?.has(errorId) === true;
   }
 
-  remove(path: Path, errorId: string): void {
+  public remove(path: Path, errorId: string): void {
     const node = this._getNode(path);
     if (node?.errorsById?.has(errorId) === true) {
       node.errorsById.delete(errorId);
@@ -106,12 +106,12 @@ export class LayerErrors extends EventEmitter<LayerErrorEvents> {
     }
   }
 
-  removeFromTopic(topicId: string, errorId: string): void {
+  public removeFromTopic(topicId: string, errorId: string): void {
     TOPIC_PATH[1] = topicId;
     this.remove(TOPIC_PATH, errorId);
   }
 
-  clearPath(path: Path): void {
+  public clearPath(path: Path): void {
     const node = this._getNode(path);
     if (node) {
       node.children?.clear();
@@ -120,12 +120,12 @@ export class LayerErrors extends EventEmitter<LayerErrorEvents> {
     }
   }
 
-  clearTopic(topicId: string): void {
+  public clearTopic(topicId: string): void {
     TOPIC_PATH[1] = topicId;
     this.clearPath(TOPIC_PATH);
   }
 
-  clear(): void {
+  public clear(): void {
     this.clearPath([]);
   }
 

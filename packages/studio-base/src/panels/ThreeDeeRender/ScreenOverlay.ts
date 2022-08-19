@@ -9,9 +9,9 @@ type vec4 = [number, number, number, number];
 export class ScreenOverlay extends THREE.Object3D {
   private static geometry: THREE.PlaneGeometry | undefined;
 
-  material: THREE.ShaderMaterial;
+  private material: THREE.ShaderMaterial;
 
-  constructor() {
+  public constructor() {
     super();
 
     this.material = new THREE.ShaderMaterial({
@@ -34,7 +34,7 @@ export class ScreenOverlay extends THREE.Object3D {
     this.add(mesh);
   }
 
-  setColor(color: THREE.Color, opacity: number): void {
+  public setColor(color: THREE.Color, opacity: number): void {
     const colorUniform = this.material.uniforms.color!.value as vec4;
     colorUniform[0] = color.r;
     colorUniform[1] = color.g;
@@ -42,7 +42,7 @@ export class ScreenOverlay extends THREE.Object3D {
     colorUniform[3] = opacity;
   }
 
-  static Geometry(): THREE.PlaneGeometry {
+  private static Geometry(): THREE.PlaneGeometry {
     if (!ScreenOverlay.geometry) {
       ScreenOverlay.geometry = new THREE.PlaneGeometry(2, 2, 1, 1);
     }

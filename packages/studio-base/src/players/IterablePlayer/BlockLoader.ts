@@ -60,7 +60,7 @@ export class BlockLoader {
   private stopped: boolean = false;
   private activeChangeCondvar: Condvar = new Condvar();
 
-  constructor(args: BlockLoaderArgs) {
+  public constructor(args: BlockLoaderArgs) {
     this.source = args.source;
     this.start = args.start;
     this.end = args.end;
@@ -82,7 +82,7 @@ export class BlockLoader {
     this.blocks = Array.from({ length: blockCount });
   }
 
-  setActiveTime(time: Time): void {
+  public setActiveTime(time: Time): void {
     const startTime = subtractTimes(subtractTimes(time, this.start), { sec: 1, nsec: 0 });
     const startNs = Math.max(0, Number(toNanoSec(startTime)));
     const beginBlockId = Math.floor(startNs / this.blockDurationNanos);
@@ -95,7 +95,7 @@ export class BlockLoader {
     this.activeChangeCondvar.notifyAll();
   }
 
-  setTopics(topics: Set<string>): void {
+  public setTopics(topics: Set<string>): void {
     if (isEqual(topics, this.topics)) {
       return;
     }
@@ -116,13 +116,13 @@ export class BlockLoader {
     }
   }
 
-  async stopLoading(): Promise<void> {
+  public async stopLoading(): Promise<void> {
     log.debug("Stop loading blocks");
     this.stopped = true;
     this.activeChangeCondvar.notifyAll();
   }
 
-  async startLoading(args: LoadArgs): Promise<void> {
+  public async startLoading(args: LoadArgs): Promise<void> {
     log.debug("Start loading process");
     this.stopped = false;
 

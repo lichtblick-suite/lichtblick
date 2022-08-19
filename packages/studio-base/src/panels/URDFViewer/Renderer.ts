@@ -35,7 +35,7 @@ export class Renderer extends EventEmitter<EventTypes> {
   private opacity: number = 1;
   private jointValues: Record<string, number> = {};
 
-  constructor() {
+  public constructor() {
     super();
     this.scene.add(this.world);
     this.world.rotation.set(-Math.PI / 2, 0, 0);
@@ -51,20 +51,20 @@ export class Renderer extends EventEmitter<EventTypes> {
     this.scene.add(this.dirLight.target);
   }
 
-  setCanvas(canvas: HTMLCanvasElement): void {
+  public setCanvas(canvas: HTMLCanvasElement): void {
     this.renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
     this.renderer.setClearColor(0xffffff);
     this.renderer.setClearAlpha(0.5);
     this.renderer.outputEncoding = THREE.sRGBEncoding;
   }
 
-  setSize(width: number, height: number): void {
+  public setSize(width: number, height: number): void {
     this.camera.aspect = width / height;
     this.camera.updateProjectionMatrix();
     this.renderer?.setSize(width, height);
   }
 
-  setModel(model?: URDFRobot): void {
+  public setModel(model?: URDFRobot): void {
     if (this.model) {
       this.model.traverse((obj) => (obj as { dispose?(): void }).dispose?.());
       this.world.remove(this.model);
@@ -80,7 +80,7 @@ export class Renderer extends EventEmitter<EventTypes> {
     this.setJointValues(this.jointValues);
   }
 
-  setOpacity(opacity: number): void {
+  public setOpacity(opacity: number): void {
     this.opacity = opacity;
     this.model?.traverse((obj) => {
       if (obj instanceof THREE.Mesh) {
@@ -102,7 +102,7 @@ export class Renderer extends EventEmitter<EventTypes> {
   }
 
   /** Translate a Worldview CameraState to the three.js coordinate system */
-  setCameraState(cameraState: CameraState): void {
+  public setCameraState(cameraState: CameraState): void {
     this.camera.position
       .setFromSpherical(
         new THREE.Spherical(cameraState.distance, cameraState.phi, -cameraState.thetaOffset),
@@ -120,19 +120,19 @@ export class Renderer extends EventEmitter<EventTypes> {
     this.camera.updateProjectionMatrix();
   }
 
-  render(): void {
+  public render(): void {
     // The light should follow the viewer's position
     this.dirLight.position.copy(this.camera.position);
 
     this.renderer?.render(this.scene, this.camera);
   }
 
-  setJointValues(values: Record<string, number>): void {
+  public setJointValues(values: Record<string, number>): void {
     this.jointValues = values;
     this.model?.setJointValues(values);
   }
 
-  dispose(): void {
+  public dispose(): void {
     this.scene.traverse((obj) => obj !== this.scene && (obj as { dispose?(): void }).dispose?.());
   }
 }

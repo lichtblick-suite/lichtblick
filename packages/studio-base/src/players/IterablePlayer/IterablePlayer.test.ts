@@ -20,7 +20,7 @@ import {
 import { IterablePlayer } from "./IterablePlayer";
 
 class TestSource implements IIterableSource {
-  async initialize(): Promise<Initalization> {
+  public async initialize(): Promise<Initalization> {
     return {
       start: { sec: 0, nsec: 0 },
       end: { sec: 1, nsec: 0 },
@@ -33,11 +33,13 @@ class TestSource implements IIterableSource {
     };
   }
 
-  async *messageIterator(
+  public async *messageIterator(
     _args: MessageIteratorArgs,
   ): AsyncIterableIterator<Readonly<IteratorResult>> {}
 
-  async getBackfillMessages(_args: GetBackfillMessagesArgs): Promise<MessageEvent<unknown>[]> {
+  public async getBackfillMessages(
+    _args: GetBackfillMessagesArgs,
+  ): Promise<MessageEvent<unknown>[]> {
     return [];
   }
 }
@@ -45,7 +47,7 @@ class TestSource implements IIterableSource {
 type PlayerStateWithoutPlayerId = Omit<PlayerState, "playerId">;
 
 class PlayerStateStore {
-  done: Promise<PlayerStateWithoutPlayerId[]>;
+  public done: Promise<PlayerStateWithoutPlayerId[]>;
 
   private playerStates: PlayerStateWithoutPlayerId[] = [];
   private expected: number;
@@ -53,14 +55,14 @@ class PlayerStateStore {
     // no-op
   };
 
-  constructor(expected: number) {
+  public constructor(expected: number) {
     this.expected = expected;
     this.done = new Promise((resolve) => {
       this.resolve = resolve;
     });
   }
 
-  async add(state: PlayerState): Promise<void> {
+  public async add(state: PlayerState): Promise<void> {
     const { playerId: _playerId, ...rest } = state;
     this.playerStates.push(rest);
     if (this.playerStates.length === this.expected) {
@@ -75,7 +77,7 @@ class PlayerStateStore {
     }
   }
 
-  reset(expected: number): void {
+  public reset(expected: number): void {
     this.expected = expected;
     this.playerStates = [];
     this.done = new Promise((resolve) => {

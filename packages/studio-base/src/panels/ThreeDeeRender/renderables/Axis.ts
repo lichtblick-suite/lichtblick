@@ -32,11 +32,11 @@ export class Axis extends THREE.Object3D {
   private static shaftGeometry: THREE.CylinderGeometry | undefined;
   private static headGeometry: THREE.ConeGeometry | undefined;
 
-  readonly renderer: Renderer;
-  shaftMesh: THREE.InstancedMesh<THREE.BufferGeometry, THREE.MeshStandardMaterial>;
-  headMesh: THREE.InstancedMesh<THREE.BufferGeometry, THREE.MeshStandardMaterial>;
+  private readonly renderer: Renderer;
+  private shaftMesh: THREE.InstancedMesh<THREE.BufferGeometry, THREE.MeshStandardMaterial>;
+  private headMesh: THREE.InstancedMesh<THREE.BufferGeometry, THREE.MeshStandardMaterial>;
 
-  constructor(name: string, renderer: Renderer) {
+  public constructor(name: string, renderer: Renderer) {
     super();
     this.name = name;
     this.renderer = renderer;
@@ -59,14 +59,14 @@ export class Axis extends THREE.Object3D {
     this.add(this.headMesh);
   }
 
-  dispose(): void {
+  public dispose(): void {
     this.shaftMesh.material.dispose();
     this.shaftMesh.dispose();
     this.headMesh.material.dispose();
     this.headMesh.dispose();
   }
 
-  static UpdateInstances(
+  private static UpdateInstances(
     shaft: THREE.InstancedMesh,
     head: THREE.InstancedMesh,
     axisIndex: number,
@@ -101,7 +101,7 @@ export class Axis extends THREE.Object3D {
     head.setColorAt(indexZ, BLUE_COLOR);
   }
 
-  static ShaftGeometry(lod: DetailLevel): THREE.CylinderGeometry {
+  private static ShaftGeometry(lod: DetailLevel): THREE.CylinderGeometry {
     if (!Axis.shaftGeometry || lod !== Axis.shaftLod) {
       const subdivs = arrowShaftSubdivisions(lod);
       Axis.shaftGeometry = new THREE.CylinderGeometry(0.5, 0.5, 1, subdivs, 1, false);
@@ -113,7 +113,7 @@ export class Axis extends THREE.Object3D {
     return Axis.shaftGeometry;
   }
 
-  static HeadGeometry(lod: DetailLevel): THREE.ConeGeometry {
+  private static HeadGeometry(lod: DetailLevel): THREE.ConeGeometry {
     if (!Axis.headGeometry || lod !== Axis.headLod) {
       const subdivs = arrowHeadSubdivisions(lod);
       Axis.headGeometry = new THREE.ConeGeometry(0.5, 1, subdivs, 1, false);

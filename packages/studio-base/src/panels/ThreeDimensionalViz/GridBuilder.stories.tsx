@@ -55,29 +55,29 @@ const SExpectedResult = styled.div`
 `;
 
 class MockMarkerCollector implements MarkerCollector {
-  data = {
+  public data = {
     glLineList: [] as GlLineListMarker[],
   };
 
-  arrow(_arg0: ArrowMarker): void {}
-  color(_arg0: ColorMarker): void {}
-  cube(_arg0: CubeMarker): void {}
-  cubeList(_arg0: CubeListMarker): void {}
-  sphere(_arg0: SphereMarker): void {}
-  sphereList(_arg0: SphereListMarker): void {}
-  cylinder(_arg0: CylinderMarker): void {}
-  poseMarker(): void {}
-  lineStrip(_arg0: LineStripMarker): void {}
-  lineList(_arg0: LineListMarker): void {}
-  points(_arg0: PointsMarker): void {}
-  text(_arg0: TextMarker): void {}
-  mesh(_arg0: MeshMarker): void {}
-  triangleList(_arg0: TriangleListMarker): void {}
-  grid(_arg0: OccupancyGridMessage): void {}
-  pointcloud(_arg0: PointCloud): void {}
-  linedConvexHull(_arg0: LineListMarker | LineStripMarker): void {}
-  instancedLineList(_arg0: InstancedLineListMarker): void {}
-  glLineList(arg0: Readonly<{ color: Float32Array; points: Float32Array }>): void {
+  public arrow(_arg0: ArrowMarker): void {}
+  public color(_arg0: ColorMarker): void {}
+  public cube(_arg0: CubeMarker): void {}
+  public cubeList(_arg0: CubeListMarker): void {}
+  public sphere(_arg0: SphereMarker): void {}
+  public sphereList(_arg0: SphereListMarker): void {}
+  public cylinder(_arg0: CylinderMarker): void {}
+  public poseMarker(): void {}
+  public lineStrip(_arg0: LineStripMarker): void {}
+  public lineList(_arg0: LineListMarker): void {}
+  public points(_arg0: PointsMarker): void {}
+  public text(_arg0: TextMarker): void {}
+  public mesh(_arg0: MeshMarker): void {}
+  public triangleList(_arg0: TriangleListMarker): void {}
+  public grid(_arg0: OccupancyGridMessage): void {}
+  public pointcloud(_arg0: PointCloud): void {}
+  public linedConvexHull(_arg0: LineListMarker | LineStripMarker): void {}
+  public instancedLineList(_arg0: InstancedLineListMarker): void {}
+  public glLineList(arg0: Readonly<{ color: Float32Array; points: Float32Array }>): void {
     this.data.glLineList.push(arg0);
   }
 }

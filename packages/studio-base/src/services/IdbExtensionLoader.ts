@@ -52,20 +52,20 @@ function validatePackageInfo(info: Partial<ExtensionInfo>): ExtensionInfo {
 
 export class IdbExtensionLoader implements ExtensionLoader {
   readonly #storage: IExtensionStorage;
-  readonly namespace: ExtensionNamespace;
+  public readonly namespace: ExtensionNamespace;
 
-  constructor(namespace: ExtensionNamespace) {
+  public constructor(namespace: ExtensionNamespace) {
     this.namespace = namespace;
     this.#storage = new IdbExtensionStorage(namespace);
   }
 
-  async getExtensions(): Promise<ExtensionInfo[]> {
+  public async getExtensions(): Promise<ExtensionInfo[]> {
     log.debug("Listing extensions");
 
     return await this.#storage.list();
   }
 
-  async loadExtension(id: string): Promise<string> {
+  public async loadExtension(id: string): Promise<string> {
     log.debug("Loading extension", id);
 
     const extension = await this.#storage.get(id);
@@ -85,7 +85,7 @@ export class IdbExtensionLoader implements ExtensionLoader {
     return srcText;
   }
 
-  async installExtension(foxeFileData: Uint8Array): Promise<ExtensionInfo> {
+  public async installExtension(foxeFileData: Uint8Array): Promise<ExtensionInfo> {
     log.debug("Installing extension");
 
     const zip = new JSZip();
@@ -113,7 +113,7 @@ export class IdbExtensionLoader implements ExtensionLoader {
     return info;
   }
 
-  async uninstallExtension(id: string): Promise<void> {
+  public async uninstallExtension(id: string): Promise<void> {
     log.debug("Uninstalling extension", id);
 
     await this.#storage.delete(id);

@@ -16,7 +16,12 @@ import { quatFromValues, vec3FromValues } from "./geometry";
 export class TransformTree {
   private _frames = new Map<string, CoordinateFrame>();
 
-  addTransform(frameId: string, parentFrameId: string, time: Time, transform: Transform): void {
+  public addTransform(
+    frameId: string,
+    parentFrameId: string,
+    time: Time,
+    transform: Transform,
+  ): void {
     const frame = this.getOrCreateFrame(frameId);
     const curParentFrame = frame.parent();
     if (curParentFrame == undefined || curParentFrame.id !== parentFrameId) {
@@ -28,7 +33,7 @@ export class TransformTree {
     frame.addTransform(time, transform);
   }
 
-  addTransformMessage(tf: TF): void {
+  public addTransformMessage(tf: TF): void {
     const t = tf.transform.translation;
     const q = tf.transform.rotation;
     const transform = new Transform(
@@ -38,15 +43,15 @@ export class TransformTree {
     this.addTransform(tf.child_frame_id, tf.header.frame_id, tf.header.stamp, transform);
   }
 
-  hasFrame(id: string): boolean {
+  public hasFrame(id: string): boolean {
     return this._frames.has(id);
   }
 
-  frame(id: string): CoordinateFrame | undefined {
+  public frame(id: string): CoordinateFrame | undefined {
     return this._frames.get(id);
   }
 
-  getOrCreateFrame(id: string): CoordinateFrame {
+  public getOrCreateFrame(id: string): CoordinateFrame {
     let frame = this._frames.get(id);
     if (!frame) {
       frame = new CoordinateFrame(id, undefined);
@@ -55,11 +60,11 @@ export class TransformTree {
     return frame;
   }
 
-  frames(): ReadonlyMap<string, CoordinateFrame> {
+  public frames(): ReadonlyMap<string, CoordinateFrame> {
     return this._frames;
   }
 
-  apply(
+  public apply(
     output: MutablePose,
     input: Pose,
     frameId: string,
@@ -79,7 +84,7 @@ export class TransformTree {
     return frame.apply(output, input, rootFrame, srcFrame, dstTime, srcTime, maxDelta);
   }
 
-  static Clone(tree: TransformTree): TransformTree {
+  public static Clone(tree: TransformTree): TransformTree {
     const newTree = new TransformTree();
     // eslint-disable-next-line no-underscore-dangle
     newTree._frames = tree._frames;

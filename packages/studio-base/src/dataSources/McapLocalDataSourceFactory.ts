@@ -15,19 +15,19 @@ import MemoryCacheDataProvider from "@foxglove/studio-base/randomAccessDataProvi
 import { getSeekToTime } from "@foxglove/studio-base/util/time";
 
 class McapLocalDataSourceFactory implements IDataSourceFactory {
-  id = "mcap-local-file";
-  type: IDataSourceFactory["type"] = "file";
-  displayName = "MCAP";
-  iconName: IDataSourceFactory["iconName"] = "OpenFile";
-  supportedFileTypes = [".mcap"];
+  public id = "mcap-local-file";
+  public type: IDataSourceFactory["type"] = "file";
+  public displayName = "MCAP";
+  public iconName: IDataSourceFactory["iconName"] = "OpenFile";
+  public supportedFileTypes = [".mcap"];
 
   private enableIterablePlayer = false;
 
-  constructor(opt?: { useIterablePlayer: boolean }) {
+  public constructor(opt?: { useIterablePlayer: boolean }) {
     this.enableIterablePlayer = opt?.useIterablePlayer ?? false;
   }
 
-  initialize(args: DataSourceFactoryInitializeArgs): Player | undefined {
+  public initialize(args: DataSourceFactoryInitializeArgs): Player | undefined {
     const file = args.file;
     if (!file) {
       return;

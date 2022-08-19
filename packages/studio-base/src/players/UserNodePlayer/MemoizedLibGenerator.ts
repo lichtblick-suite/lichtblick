@@ -23,7 +23,7 @@ class MemoizedLibGenerator {
   private fn: LibGeneratorFn;
   private cached?: string;
 
-  constructor(fn: LibGeneratorFn) {
+  public constructor(fn: LibGeneratorFn) {
     this.fn = fn;
   }
 
@@ -33,7 +33,7 @@ class MemoizedLibGenerator {
    *
    * Return whether the cached value was updated and the cached value.
    */
-  async update(args: Args): Promise<{ didUpdate: boolean; lib: string }> {
+  public async update(args: Args): Promise<{ didUpdate: boolean; lib: string }> {
     if (
       args.topics === this.topics &&
       args.datatypes === this.datatypes &&

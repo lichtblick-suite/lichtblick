@@ -27,7 +27,7 @@ export default class FetchReader extends EventEmitter<EventTypes> {
   private _aborted: boolean = false;
   private _url: string;
 
-  constructor(url: string, options?: RequestInit) {
+  public constructor(url: string, options?: RequestInit) {
     super();
     this._url = url;
     this._controller = new AbortController();
@@ -77,7 +77,7 @@ export default class FetchReader extends EventEmitter<EventTypes> {
     return this._reader;
   }
 
-  read(): void {
+  public read(): void {
     this._getReader()
       .then((reader) => {
         // if no reader is returned then we've encountered an error
@@ -111,7 +111,7 @@ export default class FetchReader extends EventEmitter<EventTypes> {
       });
   }
 
-  destroy(): void {
+  public destroy(): void {
     this._aborted = true;
     this._controller.abort();
   }

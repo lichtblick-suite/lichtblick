@@ -129,7 +129,7 @@ export default class UserNodePlayer implements Player {
   private _resetCondvar = new Condvar();
 
   // exposed as a static to allow testing to mock/replace
-  static CreateNodeTransformWorker = (): SharedWorker => {
+  private static CreateNodeTransformWorker = (): SharedWorker => {
     return new SharedWorker(new URL("./nodeTransformerWorker/index", import.meta.url), {
       // Although we are using SharedWorkers, we do not actually want to share worker instances
       // between tabs. We achieve this by passing in a unique name.
@@ -138,7 +138,7 @@ export default class UserNodePlayer implements Player {
   };
 
   // exposed as a static to allow testing to mock/replace
-  static CreateNodeRuntimeWorker = (): SharedWorker => {
+  private static CreateNodeRuntimeWorker = (): SharedWorker => {
     return new SharedWorker(new URL("./nodeRuntimeWorker/index", import.meta.url), {
       // Although we are using SharedWorkers, we do not actually want to share worker instances
       // between tabs. We achieve this by passing in a unique name.
@@ -146,7 +146,7 @@ export default class UserNodePlayer implements Player {
     });
   };
 
-  constructor(player: Player, userNodeActions: UserNodeActions) {
+  public constructor(player: Player, userNodeActions: UserNodeActions) {
     this._player = player;
     this._userNodeActions = userNodeActions;
     const { setUserNodeDiagnostics, addUserNodeLogs } = userNodeActions;
@@ -329,12 +329,12 @@ export default class UserNodePlayer implements Player {
     return outputBlocks;
   }
 
-  setGlobalVariables(globalVariables: GlobalVariables): void {
+  public setGlobalVariables(globalVariables: GlobalVariables): void {
     this._globalVariables = globalVariables;
   }
 
   // Called when userNode state is updated.
-  async setUserNodes(userNodes: UserNodes): Promise<void> {
+  public async setUserNodes(userNodes: UserNodes): Promise<void> {
     this._userNodes = userNodes;
 
     // Prune the node registration cache so it doesn't grow forever.
@@ -869,7 +869,7 @@ export default class UserNodePlayer implements Player {
     }
   }
 
-  setListener(listener: NonNullable<UserNodePlayer["_listener"]>): void {
+  public setListener(listener: NonNullable<UserNodePlayer["_listener"]>): void {
     this._listener = listener;
 
     // Delay _player.setListener until our setListener is called because setListener in some cases
@@ -878,7 +878,7 @@ export default class UserNodePlayer implements Player {
     this._player.setListener(async (state) => await this._onPlayerState(state));
   }
 
-  setSubscriptions(subscriptions: SubscribePayload[]): void {
+  public setSubscriptions(subscriptions: SubscribePayload[]): void {
     this._subscriptions = subscriptions;
 
     const nodeSubscriptions: Record<string, SubscribePayload> = {};
@@ -913,7 +913,7 @@ export default class UserNodePlayer implements Player {
     this._player.setSubscriptions(realTopicSubscriptions);
   }
 
-  close = (): void => {
+  public close = (): void => {
     for (const nodeRegistration of this._nodeRegistrations) {
       nodeRegistration.terminate();
     }
@@ -923,31 +923,31 @@ export default class UserNodePlayer implements Player {
     }
   };
 
-  setPublishers(publishers: AdvertiseOptions[]): void {
+  public setPublishers(publishers: AdvertiseOptions[]): void {
     this._player.setPublishers(publishers);
   }
 
-  setParameter(key: string, value: ParameterValue): void {
+  public setParameter(key: string, value: ParameterValue): void {
     this._player.setParameter(key, value);
   }
 
-  publish(request: PublishPayload): void {
+  public publish(request: PublishPayload): void {
     this._player.publish(request);
   }
 
-  async callService(service: string, request: unknown): Promise<unknown> {
+  public async callService(service: string, request: unknown): Promise<unknown> {
     return await this._player.callService(service, request);
   }
 
-  startPlayback(): void {
+  public startPlayback(): void {
     this._player.startPlayback?.();
   }
 
-  pausePlayback(): void {
+  public pausePlayback(): void {
     this._player.pausePlayback?.();
   }
 
-  playUntil(time: Time): void {
+  public playUntil(time: Time): void {
     if (this._player.playUntil) {
       this._player.playUntil(time);
       return;
@@ -955,15 +955,15 @@ export default class UserNodePlayer implements Player {
     this._player.seekPlayback?.(time);
   }
 
-  setPlaybackSpeed(speed: number): void {
+  public setPlaybackSpeed(speed: number): void {
     this._player.setPlaybackSpeed?.(speed);
   }
 
-  seekPlayback(time: Time, backfillDuration?: Time): void {
+  public seekPlayback(time: Time, backfillDuration?: Time): void {
     this._player.seekPlayback?.(time, backfillDuration);
   }
 
-  requestBackfill(): void {
+  public requestBackfill(): void {
     this._player.requestBackfill();
   }
 }

@@ -39,7 +39,7 @@ class StudioAppUpdater {
   /**
    * Start the update process.
    */
-  start(): void {
+  public start(): void {
     if (this.started) {
       log.info(`StudioAppUpdater already running`);
       return;
@@ -78,7 +78,7 @@ class StudioAppUpdater {
   }
 
   private static instance: StudioAppUpdater;
-  static Instance(): StudioAppUpdater {
+  public static Instance(): StudioAppUpdater {
     return (StudioAppUpdater.instance ??= new StudioAppUpdater());
   }
 }

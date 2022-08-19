@@ -50,19 +50,19 @@ type PlayerStateWithoutPlayerId = Omit<PlayerState, "playerId">;
 
 class MessageStore {
   private _messages: PlayerStateWithoutPlayerId[] = [];
-  done: Promise<PlayerStateWithoutPlayerId[]>;
+  public done: Promise<PlayerStateWithoutPlayerId[]>;
   private _expected: number;
   private _resolve: (arg0: PlayerStateWithoutPlayerId[]) => void = () => {
     // no-op
   };
-  constructor(expected: number) {
+  public constructor(expected: number) {
     this._expected = expected;
     this.done = new Promise((resolve) => {
       this._resolve = resolve;
     });
   }
 
-  add = async (message: PlayerState): Promise<void> => {
+  public add = async (message: PlayerState): Promise<void> => {
     this._messages.push(omit(message, ["playerId"]));
     if (this._messages.length === this._expected) {
       this._resolve(this._messages);
@@ -76,7 +76,7 @@ class MessageStore {
     }
   };
 
-  reset = (expected: number): void => {
+  public reset = (expected: number): void => {
     this._expected = expected;
     this._messages = [];
     this.done = new Promise((resolve) => {
@@ -1197,7 +1197,7 @@ describe("RandomAccessPlayer", () => {
 
   it("doesn't try to close provider after initialization error", async () => {
     class FailTestProvider extends TestProvider {
-      override async initialize(): Promise<InitializationResult> {
+      public override async initialize(): Promise<InitializationResult> {
         throw new Error("fake initialization failure");
       }
     }
@@ -1373,49 +1373,49 @@ describe("RandomAccessPlayer", () => {
       private _seeked: number = 0;
       private _speed: number[] = [];
 
-      setProperty(_key: string, _value: string | number | boolean): void {
+      public setProperty(_key: string, _value: string | number | boolean): void {
         // no-op
       }
-      playerConstructed(): void {
+      public playerConstructed(): void {
         // no-op
       }
-      initialized(_args?: { isSampleDataSource: boolean }): void {
+      public initialized(_args?: { isSampleDataSource: boolean }): void {
         this._initialized++;
       }
-      play(_speed: number): void {
+      public play(_speed: number): void {
         this._played++;
       }
-      seek(_time: Time): void {
+      public seek(_time: Time): void {
         this._seeked++;
       }
-      setSpeed(speed: number): void {
+      public setSpeed(speed: number): void {
         this._speed.push(speed);
       }
-      pause(): void {
+      public pause(): void {
         this._paused++;
       }
-      setSubscriptions(): void {
+      public setSubscriptions(): void {
         // no-op
       }
-      close(): void {
+      public close(): void {
         // no-op
       }
-      recordDataProviderPerformance(): void {
+      public recordDataProviderPerformance(): void {
         // no-op
       }
-      recordDataProviderStall(): void {
+      public recordDataProviderStall(): void {
         // no-op
       }
-      recordPlaybackTime(_time: Time): void {
+      public recordPlaybackTime(_time: Time): void {
         // no-op
       }
-      recordBytesReceived(_bytes: number): void {
+      public recordBytesReceived(_bytes: number): void {
         // no-op
       }
-      recordUncachedRangeRequest(): void {
+      public recordUncachedRangeRequest(): void {
         // no-op
       }
-      stats() {
+      public stats() {
         return {
           initialized: this._initialized,
           played: this._played,
@@ -1424,10 +1424,10 @@ describe("RandomAccessPlayer", () => {
           speed: this._speed,
         };
       }
-      recordTimeToFirstMsgs(): void {
+      public recordTimeToFirstMsgs(): void {
         // no-op
       }
-      recordDataProviderInitializePerformance() {
+      public recordDataProviderInitializePerformance() {
         // no-op
       }
     }

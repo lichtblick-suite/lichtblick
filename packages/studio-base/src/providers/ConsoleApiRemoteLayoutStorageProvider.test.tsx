@@ -13,7 +13,7 @@ import ConsoleApi from "@foxglove/studio-base/services/ConsoleApi";
 import ConsoleApiRemoteLayoutStorageProvider from "./ConsoleApiRemoteLayoutStorageProvider";
 
 class FakeConsoleApi extends ConsoleApi {
-  constructor() {
+  public constructor() {
     super("");
   }
 }

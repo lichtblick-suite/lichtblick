@@ -26,32 +26,32 @@ export class Transform {
   private _rotation: quat;
   private _matrix: mat4;
 
-  constructor(position: vec3, rotation: quat) {
+  public constructor(position: vec3, rotation: quat) {
     this._position = position;
     this._rotation = rotation;
     quat.normalize(this._rotation, this._rotation);
     this._matrix = mat4.fromRotationTranslation(mat4Identity(), this._rotation, this._position);
   }
 
-  position(): ReadonlyVec3 {
+  public position(): ReadonlyVec3 {
     return this._position;
   }
 
-  rotation(): ReadonlyQuat {
+  public rotation(): ReadonlyQuat {
     return this._rotation;
   }
 
-  matrix(): ReadonlyMat4 {
+  public matrix(): ReadonlyMat4 {
     return this._matrix;
   }
 
-  setPosition(position: ReadonlyVec3): this {
+  public setPosition(position: ReadonlyVec3): this {
     vec3.copy(this._position, position);
     mat4.fromRotationTranslation(this._matrix, this._rotation, this._position);
     return this;
   }
 
-  setRotation(rotation: ReadonlyQuat): this {
+  public setRotation(rotation: ReadonlyQuat): this {
     quat.normalize(this._rotation, rotation);
     mat4.fromRotationTranslation(this._matrix, this._rotation, this._position);
     return this;
@@ -62,7 +62,7 @@ export class Transform {
    * calling setPosition and setRotation separately, since we only need to
    * update the matrix once
    */
-  setPositionRotation(position: ReadonlyVec3, rotation: ReadonlyQuat): this {
+  public setPositionRotation(position: ReadonlyVec3, rotation: ReadonlyQuat): this {
     vec3.copy(this._position, position);
     quat.normalize(this._rotation, rotation);
     mat4.fromRotationTranslation(this._matrix, this._rotation, this._position);
@@ -72,7 +72,7 @@ export class Transform {
   /**
    * Update position and rotation from a Pose object
    */
-  setPose(pose: Pose): this {
+  public setPose(pose: Pose): this {
     vec3.set(this._position, pose.position.x, pose.position.y, pose.position.z);
     quat.set(
       this._rotation,
@@ -89,7 +89,7 @@ export class Transform {
   /**
    * Update position and rotation from a matrix
    */
-  setMatrix(matrix: ReadonlyMat4): this {
+  public setMatrix(matrix: ReadonlyMat4): this {
     // Ensure the matrix has no scaling
     mat4.getScaling(tempScale, matrix);
     if (!approxEq(tempScale[0], 1) || !approxEq(tempScale[1], 1) || !approxEq(tempScale[2], 1)) {
@@ -109,7 +109,7 @@ export class Transform {
   /**
    * Copy the values in another transform into this one
    */
-  copy(other: Transform): this {
+  public copy(other: Transform): this {
     // eslint-disable-next-line no-underscore-dangle
     vec3.copy(this._position, other._position);
     // eslint-disable-next-line no-underscore-dangle
@@ -119,7 +119,7 @@ export class Transform {
     return this;
   }
 
-  toPose(out: MutablePose): void {
+  public toPose(out: MutablePose): void {
     out.position.x = this._position[0];
     out.position.y = this._position[1];
     out.position.z = this._position[2];
@@ -129,7 +129,7 @@ export class Transform {
     out.orientation.w = this._rotation[3];
   }
 
-  static Identity(): Transform {
+  public static Identity(): Transform {
     return new Transform(vec3Identity(), quatIdentity());
   }
 
@@ -144,7 +144,7 @@ export class Transform {
    * @param t Interpolant in the range [0, 1]
    * @returns A reference to `out`
    */
-  static Interpolate(out: Transform, a: Transform, b: Transform, t: number): Transform {
+  public static Interpolate(out: Transform, a: Transform, b: Transform, t: number): Transform {
     // eslint-disable-next-line no-underscore-dangle
     vec3.lerp(out._position, a.position(), b.position(), t);
     // eslint-disable-next-line no-underscore-dangle

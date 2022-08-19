@@ -30,14 +30,14 @@ const tempMatrix = mat4Identity();
  */
 // ts-prune-ignore-next
 export class CoordinateFrame {
-  readonly id: string;
-  maxStorageTime: Duration;
-  maxCapacity: number;
+  public readonly id: string;
+  public maxStorageTime: Duration;
+  public maxCapacity: number;
 
   private _parent?: CoordinateFrame;
   private _transforms: ArrayMap<Time, Transform>;
 
-  constructor(
+  public constructor(
     id: string,
     parent: CoordinateFrame | undefined,
     maxStorageTime: Duration,
@@ -50,7 +50,7 @@ export class CoordinateFrame {
     this._transforms = new ArrayMap<Time, Transform>();
   }
 
-  parent(): CoordinateFrame | undefined {
+  public parent(): CoordinateFrame | undefined {
     return this._parent;
   }
 
@@ -58,7 +58,7 @@ export class CoordinateFrame {
    * Returns the top-most frame by walking up each parent frame. If the current
    * frame does not have a parent, the current frame is returned.
    */
-  root(): CoordinateFrame {
+  public root(): CoordinateFrame {
     // eslint-disable-next-line @typescript-eslint/no-this-alias
     let root: CoordinateFrame = this;
     while (root._parent) {
@@ -70,7 +70,7 @@ export class CoordinateFrame {
   /**
    * Returns true if this frame has no parent frame.
    */
-  isRoot(): boolean {
+  public isRoot(): boolean {
     return this._parent == undefined;
   }
 
@@ -78,7 +78,7 @@ export class CoordinateFrame {
    * Set the parent frame for this frame. If the parent frame is already set to
    * a different frame, the transform history is cleared.
    */
-  setParent(parent: CoordinateFrame): void {
+  public setParent(parent: CoordinateFrame): void {
     if (this._parent && this._parent !== parent) {
       this._transforms.clear();
     }
@@ -91,7 +91,7 @@ export class CoordinateFrame {
    * @param id Frame ID to search for
    * @returns The ancestor frame, or undefined if not found
    */
-  findAncestor(id: string): CoordinateFrame | undefined {
+  public findAncestor(id: string): CoordinateFrame | undefined {
     let ancestor: CoordinateFrame | undefined = this._parent;
     while (ancestor) {
       if (ancestor.id === id) {
@@ -109,7 +109,7 @@ export class CoordinateFrame {
    *
    * If a transform with an identical timestamp already exists, it is replaced.
    */
-  addTransform(time: Time, transform: Transform): void {
+  public addTransform(time: Time, transform: Transform): void {
     this._transforms.set(time, transform);
 
     // Remove transforms that are too old
@@ -139,7 +139,7 @@ export class CoordinateFrame {
    *   transform
    * @returns True if the search was successful
    */
-  findClosestTransforms(
+  public findClosestTransforms(
     outLower: TimeAndTransform,
     outUpper: TimeAndTransform,
     time: Time,
@@ -225,7 +225,7 @@ export class CoordinateFrame {
    *   transform
    * @returns A reference to `out` on success, otherwise undefined
    */
-  applyLocal(
+  public applyLocal(
     out: Pose,
     input: Readonly<Pose>,
     srcFrame: CoordinateFrame,
@@ -288,7 +288,7 @@ export class CoordinateFrame {
    *   transform
    * @returns A reference to `out` on success, otherwise undefined
    */
-  apply(
+  public apply(
     out: Pose,
     input: Readonly<Pose>,
     rootFrame: CoordinateFrame,
@@ -311,7 +311,7 @@ export class CoordinateFrame {
    * Returns a display-friendly rendition of `id`, quoting the frame id if it is
    * an empty string or starts or ends with whitespace.
    */
-  displayName(): string {
+  public displayName(): string {
     return CoordinateFrame.DisplayName(this.id);
   }
 
@@ -322,7 +322,7 @@ export class CoordinateFrame {
    * @param upper End [time, transform]
    * @param time Interpolant in the range [lower[0], upper[0]]
    */
-  static Interpolate(
+  public static Interpolate(
     output: TimeAndTransform,
     lower: TimeAndTransform,
     upper: TimeAndTransform,
@@ -351,7 +351,7 @@ export class CoordinateFrame {
    * @param upper End [time, transform]
    * @param time Interpolant in the range [lower[0], upper[0]]
    */
-  static InterpolateTransform(
+  public static InterpolateTransform(
     output: Transform,
     lower: TimeAndTransform,
     upper: TimeAndTransform,
@@ -383,7 +383,7 @@ export class CoordinateFrame {
    *   transform
    * @returns True on success
    */
-  static GetTransformMatrix(
+  public static GetTransformMatrix(
     out: mat4,
     parentFrame: CoordinateFrame,
     childFrame: CoordinateFrame,
@@ -426,7 +426,7 @@ export class CoordinateFrame {
    *   transform
    * @returns True on success
    */
-  static Apply(
+  public static Apply(
     out: Pose,
     input: Readonly<Pose>,
     parent: CoordinateFrame,
@@ -452,7 +452,7 @@ export class CoordinateFrame {
    * Returns a display-friendly rendition of `frameId`, quoting the id if it is
    * an empty string or starts or ends with whitespace.
    */
-  static DisplayName(frameId: string): string {
+  public static DisplayName(frameId: string): string {
     return frameId === "" || frameId.startsWith(" ") || frameId.endsWith(" ")
       ? `"${frameId}"`
       : frameId;

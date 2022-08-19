@@ -69,7 +69,13 @@ export default class UrdfBuilder extends EventEmitter<EventTypes> implements Mar
   private _settings: UrdfSettings = {};
   private _urdfData?: string;
 
-  renderMarkers = ({ add, transforms, renderFrame, fixedFrame, time }: RenderMarkerArgs): void => {
+  public renderMarkers = ({
+    add,
+    transforms,
+    renderFrame,
+    fixedFrame,
+    time,
+  }: RenderMarkerArgs): void => {
     if (!this._visible) {
       return;
     }
@@ -97,11 +103,11 @@ export default class UrdfBuilder extends EventEmitter<EventTypes> implements Mar
   };
 
   // eslint-disable-next-line @foxglove/no-boolean-parameters
-  setVisible(isVisible: boolean): void {
+  public setVisible(isVisible: boolean): void {
     this._visible = isVisible;
   }
 
-  setUrdfData(urdfData: string | undefined): void {
+  public setUrdfData(urdfData: string | undefined): void {
     if (this._urdfData !== urdfData) {
       this._urdfData = urdfData;
 
@@ -118,7 +124,7 @@ export default class UrdfBuilder extends EventEmitter<EventTypes> implements Mar
     }
   }
 
-  setSettingsByKey(settings: TopicSettingsCollection): void {
+  public setSettingsByKey(settings: TopicSettingsCollection): void {
     const newSettings = settings[`t:${URDF_TOPIC}`] ?? {};
     if (!isEqual(newSettings, this._settings)) {
       this._settings = newSettings;
@@ -134,7 +140,7 @@ export default class UrdfBuilder extends EventEmitter<EventTypes> implements Mar
     }
   }
 
-  async fetchUrdf(url: string): Promise<void> {
+  private async fetchUrdf(url: string): Promise<void> {
     let text: string;
     try {
       const fetchUrl = url;
@@ -154,7 +160,7 @@ export default class UrdfBuilder extends EventEmitter<EventTypes> implements Mar
     await this.parseUrdf(text);
   }
 
-  async parseUrdf(text: string): Promise<void> {
+  private async parseUrdf(text: string): Promise<void> {
     const fileFetcher = getFileFetch();
 
     try {
@@ -185,7 +191,7 @@ export default class UrdfBuilder extends EventEmitter<EventTypes> implements Mar
     }
   }
 
-  createMarkers(): void {
+  private createMarkers(): void {
     this.clearMarkers();
 
     const urdf = this._urdf;
@@ -251,7 +257,7 @@ export default class UrdfBuilder extends EventEmitter<EventTypes> implements Mar
     }
   }
 
-  static BuildBox(
+  private static BuildBox(
     ns: string,
     id: string,
     visual: UrdfVisual,
@@ -274,7 +280,7 @@ export default class UrdfBuilder extends EventEmitter<EventTypes> implements Mar
     return marker;
   }
 
-  static BuildSphere(
+  private static BuildSphere(
     ns: string,
     id: string,
     visual: UrdfVisual,
@@ -297,7 +303,7 @@ export default class UrdfBuilder extends EventEmitter<EventTypes> implements Mar
     return marker;
   }
 
-  static BuildCylinder(
+  private static BuildCylinder(
     ns: string,
     id: string,
     visual: UrdfVisual,
@@ -320,7 +326,7 @@ export default class UrdfBuilder extends EventEmitter<EventTypes> implements Mar
     return marker;
   }
 
-  static BuildMesh(
+  private static BuildMesh(
     ns: string,
     id: string,
     visual: UrdfVisual,

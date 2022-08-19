@@ -5,11 +5,11 @@
 declare module "zstd-codec" {
   class Simple {
     // eslint-disable-next-line no-restricted-syntax
-    decompress(compressed_bytes: Uint8Array): Uint8Array | null;
+    public decompress(compressed_bytes: Uint8Array): Uint8Array | null;
   }
   class Streaming {
     // eslint-disable-next-line no-restricted-syntax
-    decompressChunks(chunks: Iterable<Uint8Array>, size_hint?: number): Uint8Array | null;
+    public decompressChunks(chunks: Iterable<Uint8Array>, size_hint?: number): Uint8Array | null;
   }
 
   export type { Simple as ZstdSimple };

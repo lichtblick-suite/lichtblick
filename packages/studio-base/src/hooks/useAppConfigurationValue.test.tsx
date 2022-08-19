@@ -13,14 +13,14 @@ import AppConfigurationContext, {
 import { useAppConfigurationValue } from "@foxglove/studio-base/hooks/useAppConfigurationValue";
 
 class FakeProvider implements IAppConfiguration {
-  get(key: string): AppConfigurationValue {
+  public get(key: string): AppConfigurationValue {
     return key;
   }
-  async set(_key: string, _value: unknown): Promise<void> {
+  public async set(_key: string, _value: unknown): Promise<void> {
     throw new Error("Method not implemented.");
   }
-  addChangeListener() {}
-  removeChangeListener() {}
+  public addChangeListener() {}
+  public removeChangeListener() {}
 }
 
 describe("useAppConfigurationValue", () => {

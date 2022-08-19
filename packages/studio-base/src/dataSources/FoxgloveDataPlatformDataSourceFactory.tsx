@@ -13,13 +13,13 @@ import { Player } from "@foxglove/studio-base/players/types";
 import { formatTimeRaw } from "@foxglove/studio-base/util/time";
 
 class FoxgloveDataPlatformDataSourceFactory implements IDataSourceFactory {
-  id = "foxglove-data-platform";
-  type: IDataSourceFactory["type"] = "connection";
-  displayName = "Foxglove Data Platform";
-  iconName: IDataSourceFactory["iconName"] = "FileASPX";
-  hidden = true;
+  public id = "foxglove-data-platform";
+  public type: IDataSourceFactory["type"] = "connection";
+  public displayName = "Foxglove Data Platform";
+  public iconName: IDataSourceFactory["iconName"] = "FileASPX";
+  public hidden = true;
 
-  initialize(args: DataSourceFactoryInitializeArgs): Player | undefined {
+  public initialize(args: DataSourceFactoryInitializeArgs): Player | undefined {
     if (!args.consoleApi) {
       return;
     }

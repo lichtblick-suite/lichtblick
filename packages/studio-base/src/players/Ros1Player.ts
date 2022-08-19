@@ -85,7 +85,7 @@ export default class Ros1Player implements Player {
   private _emitTimer?: ReturnType<typeof setTimeout>;
   private readonly _sourceId: string;
 
-  constructor({ url, hostname, metricsCollector, sourceId }: Ros1PlayerOpts) {
+  public constructor({ url, hostname, metricsCollector, sourceId }: Ros1PlayerOpts) {
     log.info(`initializing Ros1Player (url=${url}, hostname=${hostname})`);
     this._metricsCollector = metricsCollector;
     this._url = url;
@@ -342,12 +342,12 @@ export default class Ros1Player implements Player {
     });
   });
 
-  setListener(listener: (arg0: PlayerState) => Promise<void>): void {
+  public setListener(listener: (arg0: PlayerState) => Promise<void>): void {
     this._listener = listener;
     this._emitState();
   }
 
-  close(): void {
+  public close(): void {
     this._closed = true;
     if (this._rosNode) {
       this._rosNode.shutdown();
@@ -360,7 +360,7 @@ export default class Ros1Player implements Player {
     this._hasReceivedMessage = false;
   }
 
-  setSubscriptions(subscriptions: SubscribePayload[]): void {
+  public setSubscriptions(subscriptions: SubscribePayload[]): void {
     this._requestedSubscriptions = subscriptions;
 
     if (!this._rosNode || this._closed) {
@@ -460,7 +460,7 @@ export default class Ros1Player implements Player {
     this._emitState();
   };
 
-  setPublishers(publishers: AdvertiseOptions[]): void {
+  public setPublishers(publishers: AdvertiseOptions[]): void {
     this._requestedPublishers = publishers;
 
     if (!this._rosNode || this._closed) {
@@ -530,14 +530,14 @@ export default class Ros1Player implements Player {
     this._emitState();
   }
 
-  setParameter(key: string, value: ParameterValue): void {
+  public setParameter(key: string, value: ParameterValue): void {
     log.debug(`Ros1Player.setParameter(key=${key}, value=${value})`);
     // seems to be a TypeScript issue - the ParameterValue type is treated as `any`
     // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
     void this._rosNode?.setParameter(key, value);
   }
 
-  publish({ topic, msg }: PublishPayload): void {
+  public publish({ topic, msg }: PublishPayload): void {
     const problemId = `publish:${topic}`;
 
     if (this._rosNode != undefined) {
@@ -562,15 +562,15 @@ export default class Ros1Player implements Player {
     }
   }
 
-  async callService(): Promise<unknown> {
+  public async callService(): Promise<unknown> {
     throw new Error("Service calls are not supported by this data source");
   }
 
   // Bunch of unsupported stuff. Just don't do anything for these.
-  requestBackfill(): void {
+  public requestBackfill(): void {
     // no-op
   }
-  setGlobalVariables(): void {
+  public setGlobalVariables(): void {
     // no-op
   }
 

@@ -3,11 +3,11 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 export class FileReadable {
-  constructor(private file: File) {}
-  async size(): Promise<bigint> {
+  public constructor(private file: File) {}
+  public async size(): Promise<bigint> {
     return BigInt(this.file.size);
   }
-  async read(offset: bigint, size: bigint): Promise<Uint8Array> {
+  public async read(offset: bigint, size: bigint): Promise<Uint8Array> {
     if (offset + size > this.file.size) {
       throw new Error(
         `Read of ${size} bytes at offset ${offset} exceeds file size ${this.file.size}`,
