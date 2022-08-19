@@ -42,7 +42,7 @@ export function Root({ appConfiguration }: { appConfiguration: IAppConfiguration
       new UlogLocalDataSourceFactory(),
       new VelodyneUnavailableDataSourceFactory(),
       new FoxgloveDataPlatformDataSourceFactory(),
-      new SampleNuscenesDataSourceFactory({ useIterablePlayer: enableExperimentalLatching }),
+      new SampleNuscenesDataSourceFactory(),
       new McapLocalDataSourceFactory({ useIterablePlayer: enableExperimentalLatching }),
       new McapRemoteDataSourceFactory({ useIterablePlayer: enableExperimentalLatching }),
     ];

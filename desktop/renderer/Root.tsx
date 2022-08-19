@@ -55,7 +55,7 @@ export default function Root({
       new UlogLocalDataSourceFactory(),
       new VelodyneDataSourceFactory(),
       new FoxgloveDataPlatformDataSourceFactory(),
-      new SampleNuscenesDataSourceFactory({ useIterablePlayer: enableExperimentalLatching }),
+      new SampleNuscenesDataSourceFactory(),
       new McapLocalDataSourceFactory({ useIterablePlayer: enableExperimentalLatching }),
       new McapRemoteDataSourceFactory({ useIterablePlayer: enableExperimentalLatching }),
     ];
