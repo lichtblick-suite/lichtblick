@@ -5,7 +5,7 @@
 import { CSSProperties, PropsWithChildren, forwardRef } from "react";
 import { makeStyles } from "tss-react/mui";
 
-const useStyles = makeStyles<StackProps>()((theme, props) => ({
+const useStyles = makeStyles<StackProps>({ name: "FoxgloveStack" })((theme, props) => ({
   root: {
     display: props.inline === true ? "inline-flex" : "flex",
     flexDirection: props.direction,

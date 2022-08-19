@@ -9,8 +9,11 @@ import MonacoWebpackPlugin from "monaco-editor-webpack-plugin";
 import monacoPkg from "monaco-editor/package.json";
 import path from "path";
 import ReactRefreshTypescript from "react-refresh-typescript";
+import ts from "typescript";
 import createStyledComponentsTransformer from "typescript-plugin-styled-components";
 import webpack, { Configuration, WebpackPluginInstance } from "webpack";
+
+import { createTssReactNameTransformer } from "@foxglove/typescript-transformers";
 
 import { WebpackArgv } from "./WebpackArgv";
 import packageJson from "./package.json";
@@ -116,12 +119,13 @@ export function makeConfig(
                 onlyCompileBundledFiles: true,
                 projectReferences: true,
                 configFile: path.resolve(__dirname, isDev ? "tsconfig.dev.json" : "tsconfig.json"),
-                getCustomTransformers: () => ({
+                getCustomTransformers: (program: ts.Program) => ({
                   before: [
                     styledComponentsTransformer,
                     // only include refresh plugin when using webpack server
-                    ...(isServe ? [ReactRefreshTypescript()] : []),
-                  ],
+                    isServe && ReactRefreshTypescript(),
+                    isDev && createTssReactNameTransformer(program),
+                  ].filter(Boolean),
                 }),
               },
             },

@@ -2510,6 +2510,7 @@ __metadata:
     "@foxglove/schemas": 0.4.0
     "@foxglove/studio": "workspace:*"
     "@foxglove/three-text": 0.1.0
+    "@foxglove/typescript-transformers": "workspace:*"
     "@foxglove/ulog": 2.1.2
     "@foxglove/velodyne-cloud": 1.0.1
     "@foxglove/wasm-bz2": 0.1.0
@@ -2701,6 +2702,14 @@ __metadata:
   checksum: 18070d0f6a5bf540c04c5cab3c8ba223aee259d2ca628c78616d37c84e3d193069842901944019caf49fced1943b97cb6772aa7d9b6fe246842ce146386b85a6
   languageName: node
   linkType: hard
+
+"@foxglove/typescript-transformers@workspace:*, @foxglove/typescript-transformers@workspace:packages/typescript-transformers":
+  version: 0.0.0-use.local
+  resolution: "@foxglove/typescript-transformers@workspace:packages/typescript-transformers"
+  dependencies:
+    typescript: 4.7.4
+  languageName: unknown
+  linkType: soft
 
 "@foxglove/ulog@npm:2.1.2":
   version: 2.1.2
