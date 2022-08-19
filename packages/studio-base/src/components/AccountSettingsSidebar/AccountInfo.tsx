@@ -62,7 +62,7 @@ export default function AccountInfo(props: { currentUser?: User }): JSX.Element 
   return (
     <Stack fullHeight justifyContent="space-between">
       <Stack gap={2}>
-        <Stack direction="row" alignItems="center" gap={1}>
+        <Stack direction="row" alignItems="center" gap={1} flexWrap="wrap">
           <BlockheadFilledIcon className={classes.icon} />
           <Stack justifyContent="center">
             <Typography variant="subtitle1">{props.currentUser.email}</Typography>
