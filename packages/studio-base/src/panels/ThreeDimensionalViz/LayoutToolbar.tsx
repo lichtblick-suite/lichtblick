@@ -11,8 +11,7 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { Theme } from "@mui/material";
-import { makeStyles } from "@mui/styles";
+import { makeStyles } from "tss-react/mui";
 
 import { MouseEventObject } from "@foxglove/regl-worldview";
 import { Time } from "@foxglove/rostime";
@@ -59,7 +58,7 @@ type Props = LayoutToolbarSharedProps &
     showCrosshair?: boolean;
   };
 
-const useStyles = makeStyles((theme: Theme) => ({
+const useStyles = makeStyles()((theme) => ({
   controls: {
     position: "absolute",
     top: `calc(${PANEL_TOOLBAR_MIN_HEIGHT}px + ${theme.spacing(1.5)})`,
@@ -108,7 +107,7 @@ function LayoutToolbar({
   toggleSearchTextOpen,
   transforms,
 }: Props) {
-  const classes = useStyles();
+  const { classes } = useStyles();
   return (
     <>
       <div className={classes.controls}>

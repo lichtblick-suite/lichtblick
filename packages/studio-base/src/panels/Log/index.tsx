@@ -13,7 +13,6 @@
 
 import { IconButton, IList, List } from "@fluentui/react";
 import { Box } from "@mui/material";
-import { makeStyles } from "@mui/styles";
 import produce from "immer";
 import { set } from "lodash";
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
@@ -52,17 +51,7 @@ const SUPPORTED_DATATYPES = [
   "foxglove.Log",
 ];
 
-const useStyles = makeStyles({
-  scrollArea: {
-    height: "100%",
-    overflow: "auto",
-    display: "flex",
-    flexDirection: "column-reverse",
-  },
-});
-
 const LogPanel = React.memo(({ config, saveConfig }: Props) => {
-  const classes = useStyles();
   const { topics } = useDataSourceInfo();
   const { minLogLevel, searchTerms } = config;
   const { timeFormat, timeZone } = useAppTimeFormat();
@@ -194,7 +183,7 @@ const LogPanel = React.memo(({ config, saveConfig }: Props) => {
         />
       </PanelToolbar>
       <Stack flexGrow={1} overflow="hidden">
-        <div ref={divRef} className={classes.scrollArea}>
+        <Stack ref={divRef} fullHeight overflow="auto" direction="column-reverse">
           {/* items property wants a mutable array but filteredMessages is readonly */}
           <List
             componentRef={listRef}
@@ -219,7 +208,7 @@ const LogPanel = React.memo(({ config, saveConfig }: Props) => {
               );
             }}
           />
-        </div>
+        </Stack>
       </Stack>
       {hasUserScrolled && (
         <Box position="absolute" bottom={10} right={10}>

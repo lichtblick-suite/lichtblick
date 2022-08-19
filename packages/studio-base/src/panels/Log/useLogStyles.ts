@@ -5,6 +5,7 @@
 import { makeStyles } from "tss-react/mui";
 
 export default makeStyles()(({ palette }) => ({
+  /* eslint-disable tss-unused-classes/unused-classes */
   fatal: {
     color: palette.error.main,
     fontWeight: "bold",
@@ -21,4 +22,5 @@ export default makeStyles()(({ palette }) => ({
   debug: {
     color: palette.text.secondary,
   },
+  /* eslint-enable tss-unused-classes/unused-classes */
 }));

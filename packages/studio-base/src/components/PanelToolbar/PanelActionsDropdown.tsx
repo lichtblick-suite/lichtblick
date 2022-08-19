@@ -11,7 +11,7 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { ContextualMenu, IContextualMenuItem, useTheme } from "@fluentui/react";
+import { ContextualMenu, IContextualMenuItem } from "@fluentui/react";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
 import { useCallback, useContext, useMemo, useRef } from "react";
 import { MosaicContext, MosaicNode, MosaicWindowContext } from "react-mosaic-component";
@@ -95,8 +95,6 @@ export function PanelActionsDropdown({ isOpen, setIsOpen, isUnknownPanel }: Prop
     [mosaicActions, mosaicWindowActions, panelContext?.type, setIsOpen, swapPanel, tabId],
   );
 
-  const theme = useTheme();
-
   const menuItems: IContextualMenuItem[] = useMemo(() => {
     const items: IContextualMenuItem[] = [
       {
@@ -124,7 +122,6 @@ export function PanelActionsDropdown({ isOpen, setIsOpen, isUnknownPanel }: Prop
             <PanelList
               selectedPanelType={panelContext?.type}
               onPanelSelect={swap(panelContext?.id)}
-              backgroundColor={theme.semanticColors.menuBackground}
             />
           ),
         },
@@ -175,17 +172,7 @@ export function PanelActionsDropdown({ isOpen, setIsOpen, isUnknownPanel }: Prop
     });
 
     return items;
-  }, [
-    close,
-    isUnknownPanel,
-    panelContext?.enterFullscreen,
-    panelContext?.id,
-    panelContext?.isFullscreen,
-    panelContext?.type,
-    split,
-    swap,
-    theme.semanticColors.menuBackground,
-  ]);
+  }, [close, isUnknownPanel, panelContext, split, swap]);
 
   const buttonRef = useRef<HTMLDivElement>(ReactNull);
 

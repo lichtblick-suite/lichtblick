@@ -52,7 +52,7 @@ export const StyledTable = muiStyled("table")(({ theme }) => ({
   th: {
     color: theme.palette.text.primary,
 
-    "tr:first-child &": {
+    "tr:first-of-type &": {
       paddingTop: theme.spacing(0.5),
       paddingBottom: theme.spacing(0.5),
     },

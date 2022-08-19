@@ -112,6 +112,7 @@
     "eslint-plugin-prettier": "4.0.0",
     "eslint-plugin-react": "7.30.0",
     "eslint-plugin-react-hooks": "4.3.0",
+    "eslint-plugin-tss-unused-classes": "0.0.3",
     "html-webpack-plugin": "5.5.0",
     "jest": "27.5.1",
     "jest-canvas-mock": "2.3.1",

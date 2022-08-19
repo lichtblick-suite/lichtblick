@@ -3,9 +3,9 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 import { AccessTime as AccessTimeIcon, Check as CheckIcon } from "@mui/icons-material";
-import { IconButton, IconButtonProps, Menu, MenuItem, Theme } from "@mui/material";
-import { makeStyles } from "@mui/styles";
+import { IconButton, IconButtonProps, Menu, MenuItem } from "@mui/material";
 import { useCallback, useMemo } from "react";
+import { makeStyles } from "tss-react/mui";
 
 import * as PanelAPI from "@foxglove/studio-base/PanelAPI";
 import {
@@ -41,7 +41,7 @@ type Props = {
   onTimestampMethodChange?: (arg0: TimestampMethod, index?: number) => void;
 };
 
-const useStyles = makeStyles((theme: Theme) => ({
+const useStyles = makeStyles()((theme) => ({
   iconButton: {
     "&.MuiIconButton-root": {
       color: theme.palette.text.secondary,
@@ -56,7 +56,7 @@ const useStyles = makeStyles((theme: Theme) => ({
 }));
 
 export default function TimestampMethodDropdown(props: Props): JSX.Element {
-  const classes = useStyles();
+  const { classes } = useStyles();
   const [anchorEl, setAnchorEl] = React.useState<undefined | HTMLElement>(undefined);
   const open = Boolean(anchorEl);
 

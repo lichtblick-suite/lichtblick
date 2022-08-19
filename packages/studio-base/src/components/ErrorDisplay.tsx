@@ -2,13 +2,19 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { Theme, Typography, Link, Divider, styled as muiStyled } from "@mui/material";
-import { makeStyles } from "@mui/styles";
+import { Typography, Link, Divider } from "@mui/material";
 import { ErrorInfo, useMemo, useState } from "react";
+import { makeStyles } from "tss-react/mui";
 
 import Stack from "@foxglove/studio-base/components/Stack";
 
-const useStyles = makeStyles((theme: Theme) => ({
+const useStyles = makeStyles()((theme) => ({
+  grid: {
+    display: "grid",
+    gridTemplateRows: "auto 1fr auto",
+    height: "100%",
+    padding: theme.spacing(2),
+  },
   errorDetailStack: {
     fontSize: theme.typography.body2.fontSize,
     lineHeight: "1.3em",
@@ -25,14 +31,6 @@ const useStyles = makeStyles((theme: Theme) => ({
     textAlign: "right",
   },
 }));
-
-const Container = muiStyled("div")(({ theme }) => ({
-  display: "grid",
-  gridTemplateRows: "auto 1fr auto",
-  height: "100%",
-  padding: theme.spacing(2),
-}));
-
 /**
  * Remove source locations (which often include file hashes) so storybook screenshots can be
  * deterministic.
@@ -48,14 +46,14 @@ function ErrorStacktrace({
   stack: string;
   hideSourceLocations: boolean;
 }) {
-  const styles = useStyles();
+  const { classes } = useStyles();
   const lines = (hideSourceLocations ? sanitizeStack(stack) : stack)
     .trim()
     .replace(/^\s*at /gm, "")
     .split("\n")
     .map((line) => line.trim());
   return (
-    <pre className={styles.errorDetailStack}>
+    <pre className={classes.errorDetailStack}>
       {lines.map((line, i) => {
         const match = /^(.+)\s(\(.+$)/.exec(line);
         if (!match) {
@@ -84,7 +82,7 @@ type ErrorDisplayProps = {
 };
 
 function ErrorDisplay(props: ErrorDisplayProps): JSX.Element {
-  const styles = useStyles();
+  const { classes } = useStyles();
   const { error, errorInfo, hideErrorSourceLocations = false } = props;
 
   const [showErrorDetails, setShowErrorDetails] = useState(props.showErrorDetails ?? false);
@@ -121,7 +119,7 @@ function ErrorDisplay(props: ErrorDisplayProps): JSX.Element {
   }, [error, errorInfo, hideErrorSourceLocations, showErrorDetails]);
 
   return (
-    <Container>
+    <div className={classes.grid}>
       <Stack gap={2} paddingBottom={2}>
         <Stack>
           <Typography variant="h4" gutterBottom>
@@ -139,10 +137,10 @@ function ErrorDisplay(props: ErrorDisplayProps): JSX.Element {
           {showErrorDetails ? "Hide" : "Show"} details
         </Link>
       </Stack>
-      {errorDetails && <div className={styles.errorDetailContainer}>{errorDetails}</div>}
+      {errorDetails && <div className={classes.errorDetailContainer}>{errorDetails}</div>}
       {!errorDetails && <div />}
-      <div className={styles.actions}>{props.actions}</div>
-    </Container>
+      <div className={classes.actions}>{props.actions}</div>
+    </div>
   );
 }
 

@@ -16,12 +16,11 @@ import ArrowUpDownIcon from "@mdi/svg/svg/arrow-up-down.svg";
 import FitToPageIcon from "@mdi/svg/svg/fit-to-page-outline.svg";
 import ServiceIcon from "@mdi/svg/svg/rectangle-outline.svg";
 import TopicIcon from "@mdi/svg/svg/rhombus.svg";
-import { FormControlLabel, IconButton, Paper, Radio, RadioGroup, Theme } from "@mui/material";
-import { makeStyles } from "@mui/styles";
-import cx from "classnames";
+import { FormControlLabel, IconButton, Paper, Radio, RadioGroup } from "@mui/material";
 import Cytoscape from "cytoscape";
 import { useCallback, useMemo, useRef, useState } from "react";
 import textMetrics from "text-metrics";
+import { makeStyles } from "tss-react/mui";
 
 import EmptyState from "@foxglove/studio-base/components/EmptyState";
 import ExpandingToolbar, { ToolGroup } from "@foxglove/studio-base/components/ExpandingToolbar";
@@ -104,7 +103,7 @@ const STYLESHEET: Cytoscape.Stylesheet[] = [
   },
 ];
 
-const useStyles = makeStyles((theme: Theme) => ({
+const useStyles = makeStyles()((theme) => ({
   root: {
     display: "flex",
     flexDirection: "column",
@@ -119,7 +118,7 @@ const useStyles = makeStyles((theme: Theme) => ({
   },
   stack: {
     "& > .MuiIconButton-root": {
-      "&:not(:first-child)": {
+      "&:not(:first-of-type)": {
         borderTopRightRadius: 0,
         borderTopLeftRadius: 0,
       },
@@ -172,7 +171,7 @@ function unionInto<T>(dest: Set<T>, ...iterables: Set<T>[]): void {
 }
 
 function TopicGraph() {
-  const classes = useStyles();
+  const { classes, cx } = useStyles();
   const [selectedTab, setSelectedTab] = useState<"Topics" | undefined>(undefined);
 
   const publishedTopics = useMessagePipeline(

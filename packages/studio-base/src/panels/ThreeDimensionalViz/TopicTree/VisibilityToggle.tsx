@@ -3,19 +3,18 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 import BlockIcon from "@mui/icons-material/Block";
-import { IconButton, SvgIcon, Theme } from "@mui/material";
-import { makeStyles } from "@mui/styles";
-import cx from "classnames";
+import { IconButton, SvgIcon } from "@mui/material";
 import { MouseEvent, KeyboardEvent, useCallback } from "react";
+import { makeStyles } from "tss-react/mui";
 
 import { Color } from "@foxglove/regl-worldview";
 import { defaultedRGBStringFromColorObj } from "@foxglove/studio-base/util/colorUtils";
 
-const useStyles = makeStyles((theme: Theme) => ({
+const useStyles = makeStyles<StyleProps>()((theme, { checked, overrideRGB, visibleInScene }) => ({
   unavailable: {
     cursor: "not-allowed",
   },
-  button: ({ overrideRGB }: StyleProps) => ({
+  button: {
     fontSize: `10px !important`,
     color: `${theme.palette.text.secondary} !important`,
     position: "relative",
@@ -35,14 +34,14 @@ const useStyles = makeStyles((theme: Theme) => ({
         backgroundColor: theme.palette.action.focus,
       },
     },
-  }),
-  circle: ({ checked, overrideRGB, visibleInScene }: StyleProps) => ({
+  },
+  circle: {
     color: overrideRGB ?? "currentcolor",
     stroke: "currentcolor",
     strokeWidth: 2,
     fill: "currentcolor",
     fillOpacity: checked ? (visibleInScene ? 1 : theme.palette.action.disabledOpacity) : 0,
-  }),
+  },
 }));
 
 type VisibilityToggleProps = {
@@ -80,7 +79,7 @@ export default function VisibilityToggle(props: VisibilityToggleProps): JSX.Elem
   } = props;
   const overrideRGB = overrideColor ? defaultedRGBStringFromColorObj(overrideColor) : undefined;
 
-  const classes = useStyles({
+  const { classes, cx } = useStyles({
     checked,
     overrideRGB,
     visibleInScene,

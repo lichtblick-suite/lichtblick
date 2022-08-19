@@ -12,10 +12,10 @@
 //   You may not use this file except in compliance with the License.
 
 import { useTheme } from "@mui/material";
-import { makeStyles } from "@mui/styles";
 import { groupBy } from "lodash";
 import React, { useCallback, useEffect, useMemo, useReducer, useRef, useState } from "react";
 import { useResizeDetector } from "react-resize-detector";
+import { makeStyles } from "tss-react/mui";
 import { useDebouncedCallback } from "use-debounce";
 import { useImmerReducer } from "use-immer";
 
@@ -142,7 +142,7 @@ export type ColorOverride = {
 };
 export type ColorOverrideByVariable = Record<GlobalVariableName, ColorOverride>;
 
-const useStyles = makeStyles({
+const useStyles = makeStyles()({
   container: {
     display: "flex",
     flexDirection: "column",
@@ -264,7 +264,7 @@ export default function Layout({
     ignoreColladaUpAxis = false,
   },
 }: Props): React.ReactElement {
-  const classes = useStyles();
+  const { classes } = useStyles();
   const [filterText, setFilterText] = useState(""); // Topic tree text for filtering to see certain topics.
   const containerRef = useRef<HTMLDivElement>(ReactNull);
   const { linkedGlobalVariables } = useLinkedGlobalVariables();

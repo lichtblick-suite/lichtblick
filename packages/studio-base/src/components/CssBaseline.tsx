@@ -76,7 +76,7 @@ const useStyles = makeStyles()(({ palette, typography }) => ({
       ".mosaic-tile": {
         margin: 0,
       },
-      ".mosaic-tile:first-child": {
+      ".mosaic-tile:first-of-type": {
         // make room for splitters - unfortunately this means the background color will show
         // through even if the tile has its own background color set
         gap: 1,

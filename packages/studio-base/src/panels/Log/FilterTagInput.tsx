@@ -20,9 +20,6 @@ const useStyles = makeStyles()((theme) => ({
       margin: 0,
     },
   },
-  ".MuiAutocomplete-tag": {
-    margin: theme.spacing(0),
-  },
 }));
 
 export function FilterTagInput({

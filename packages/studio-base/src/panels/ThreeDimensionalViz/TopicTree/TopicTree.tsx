@@ -21,13 +21,13 @@ import {
   IButtonStyles,
   useTheme,
 } from "@fluentui/react";
-import { Theme, Typography } from "@mui/material";
-import { makeStyles } from "@mui/styles";
+import { Typography } from "@mui/material";
 import { clamp, groupBy } from "lodash";
 import Tree from "rc-tree";
 import React, { useCallback, useMemo, useRef } from "react";
 import { useResizeDetector } from "react-resize-detector";
 import { CSSTransition } from "react-transition-group";
+import { makeStyles } from "tss-react/mui";
 
 import { PANEL_TOOLBAR_MIN_HEIGHT } from "@foxglove/studio-base/components/PanelToolbar";
 import useChangeDetector from "@foxglove/studio-base/hooks/useChangeDetector";
@@ -67,7 +67,7 @@ const DEFAULT_XS_WIDTH = 240;
 const SEARCH_BAR_HEIGHT = 40;
 const MAX_CONTAINER_WIDTH_RATIO = 0.9;
 
-const useStyles = makeStyles((theme: Theme) => ({
+const useStyles = makeStyles<StyleProps>()((theme, { treeWidth }) => ({
   wrapper: {
     position: "absolute",
     top: CONTAINER_SPACING + PANEL_TOOLBAR_MIN_HEIGHT,
@@ -89,7 +89,7 @@ const useStyles = makeStyles((theme: Theme) => ({
   inner: {
     display: "flex",
     flexDirection: "column",
-    width: ({ treeWidth }: StyleProps) => treeWidth,
+    width: treeWidth,
 
     "& .rc-tree li ul": {
       padding: 0,
@@ -170,6 +170,28 @@ const useStyles = makeStyles((theme: Theme) => ({
     paddingTop: 4,
     paddingBottom: 2.5,
     spacing: 2,
+  },
+  // Transition classes
+  enter: {
+    opacity: 0,
+    transform: "translateX(-20px)",
+    pointerEvents: "none",
+  },
+  enterActive: {
+    opacity: 1,
+    transform: "none",
+    transition: "opacity 0.15s linear, transform 0.15s linear",
+  },
+  exit: {
+    opacity: 1,
+    transform: "none",
+    pointerEvents: "none",
+  },
+  exitActive: {
+    opacity: 0,
+    transform: "translateX(-20px)",
+    pointerEvents: "none",
+    transition: "opacity 0.15s linear, transform 0.15s linear",
   },
 }));
 
@@ -370,30 +392,6 @@ const useComponentStyles = (theme: ITheme) =>
     [theme],
   );
 
-const useTransitionStyles = makeStyles({
-  enter: {
-    opacity: 0,
-    transform: "translateX(-20px)",
-    pointerEvents: "none",
-  },
-  enterActive: {
-    opacity: 1,
-    transform: "none",
-    transition: "opacity 0.15s linear, transform 0.15s linear",
-  },
-  exit: {
-    opacity: 1,
-    transform: "none",
-    pointerEvents: "none",
-  },
-  exitActive: {
-    opacity: 0,
-    transform: "translateX(-20px)",
-    pointerEvents: "none",
-    transition: "opacity 0.15s linear, transform 0.15s linear",
-  },
-});
-
 type SharedProps = {
   allKeys: string[];
   availableNamespacesByTopic: NamespacesByTopic;
@@ -463,7 +461,7 @@ function TopicTree({
   visibleTopicsCountByKey,
 }: TopicTreeProps) {
   const theme = useTheme();
-  const classes = useStyles({ treeWidth });
+  const { classes } = useStyles({ treeWidth });
   const styles = useComponentStyles(theme);
   const scrollContainerRef = useRef<HTMLDivElement>(ReactNull);
   const checkedKeysSet = useMemo(() => new Set(checkedKeys), [checkedKeys]);
@@ -621,10 +619,15 @@ function TopicTreeWrapper({
   setShowTopicTree,
   ...rest
 }: WrapperProps) {
-  const transitionClasses = useTransitionStyles();
   const defaultTreeWidth = clamp(containerWidth, DEFAULT_XS_WIDTH, DEFAULT_WIDTH);
   const renderTopicTree = pinTopics || showTopicTree;
-  const classes = useStyles({ treeWidth: defaultTreeWidth });
+  const { classes } = useStyles({ treeWidth: defaultTreeWidth });
+  const transitionClasses = {
+    enter: classes.enter,
+    enterActive: classes.enterActive,
+    exit: classes.exit,
+    exitActive: classes.exitActive,
+  };
 
   // Use a debounce and 0 refresh rate to avoid triggering a resize observation while handling
   // an existing resize observation.

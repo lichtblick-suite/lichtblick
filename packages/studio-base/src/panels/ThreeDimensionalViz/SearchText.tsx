@@ -17,10 +17,10 @@ import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
 import KeyboardArrowUpIcon from "@mui/icons-material/KeyboardArrowUp";
 import SearchIcon from "@mui/icons-material/Search";
 import { Paper, IconButton, ToggleButton, ToggleButtonGroup } from "@mui/material";
-import { makeStyles } from "@mui/styles";
 import { vec3 } from "gl-matrix";
 import { range, throttle } from "lodash";
 import { useState, useRef, useEffect, useCallback, KeyboardEvent } from "react";
+import { makeStyles } from "tss-react/mui";
 
 import { CameraState, cameraStateSelectors } from "@foxglove/regl-worldview";
 import { Time } from "@foxglove/rostime";
@@ -224,7 +224,7 @@ export const useSearchMatches = ({
   ]);
 };
 
-const useStyles = makeStyles({
+const useStyles = makeStyles()({
   root: {
     pointerEvents: "auto",
     display: "flex",
@@ -253,7 +253,7 @@ const SearchText = React.memo<SearchTextComponentProps>(function SearchText({
   fixedFrameId,
   currentTime,
 }: SearchTextComponentProps) {
-  const classes = useStyles();
+  const { classes } = useStyles();
   const theme = useTheme();
   const currentMatch = searchTextMatches[selectedMatchIndex];
   const iterateCurrentIndex = useCallback(

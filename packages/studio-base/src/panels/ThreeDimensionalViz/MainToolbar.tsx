@@ -14,12 +14,11 @@ import {
   MenuItem,
   MenuItemProps,
   Paper,
-  Theme,
   Typography,
 } from "@mui/material";
-import { makeStyles } from "@mui/styles";
 import { ReactNode, useCallback, useContext, useRef, useState } from "react";
 import { useLongPress } from "react-use";
+import { makeStyles } from "tss-react/mui";
 
 import {
   MessagePipelineContext,
@@ -47,7 +46,7 @@ type Props = {
   perspective: boolean;
 };
 
-const useStyles = makeStyles((theme: Theme) => ({
+const useStyles = makeStyles()((theme) => ({
   root: {
     pointerEvents: "auto",
     display: "flex",
@@ -65,10 +64,10 @@ const useStyles = makeStyles((theme: Theme) => ({
       },
     },
   },
-  row: {
-    display: "flex",
-    position: "relative",
-  },
+  // row: {
+  //   display: "flex",
+  //   position: "relative",
+  // },
   expandIndicator: {
     content: "''",
     borderBottom: "6px solid currentColor",
@@ -125,7 +124,7 @@ type PopupMenuItemProps = {
 } & MenuItemProps;
 
 function PopupMenuItem({ icon, text, selected = false, ...rest }: PopupMenuItemProps): JSX.Element {
-  const classes = useStyles();
+  const { classes } = useStyles();
   return (
     <MenuItem className={classes.menuItem} selected={selected} {...rest}>
       <div className={classes.menuItemIcon}>{icon != undefined && icon}</div>
@@ -147,7 +146,7 @@ function MainToolbar({
   onToggleDebug,
   perspective = false,
 }: Props) {
-  const classes = useStyles();
+  const { classes } = useStyles();
   const canPublish = useMessagePipeline(canPublishSelector);
 
   const [clickMenuExpanded, setClickMenuExpanded] = useState(false);

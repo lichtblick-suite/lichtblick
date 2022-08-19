@@ -10,8 +10,7 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { Box, Link, Typography, useTheme } from "@mui/material";
-import { makeStyles } from "@mui/styles";
+import { Link, Typography } from "@mui/material";
 import { extname } from "path";
 import {
   useState,
@@ -23,6 +22,7 @@ import {
   useContext,
 } from "react";
 import { useToasts } from "react-toast-notifications";
+import { makeStyles } from "tss-react/mui";
 
 import Logger from "@foxglove/log";
 import { AppSetting } from "@foxglove/studio-base/AppSetting";
@@ -85,7 +85,7 @@ import { PanelSettingsEditorContextProvider } from "@foxglove/studio-base/provid
 
 const log = Logger.getLogger(__filename);
 
-const useStyles = makeStyles({
+const useStyles = makeStyles()({
   container: {
     width: "100%",
     height: "100%",
@@ -133,7 +133,6 @@ function keyboardEventHasModifier(event: KeyboardEvent) {
 function AddPanel() {
   const addPanel = useAddPanel();
   const { openLayoutBrowser } = useWorkspace();
-  const theme = useTheme();
   const selectedLayoutId = useCurrentLayoutSelector(selectedLayoutIdSelector);
 
   return (
@@ -147,7 +146,7 @@ function AddPanel() {
           <Link onClick={openLayoutBrowser}>Select a layout</Link> to get started!
         </Typography>
       ) : (
-        <PanelList onPanelSelect={addPanel} backgroundColor={theme.palette.background.default} />
+        <PanelList onPanelSelect={addPanel} />
       )}
     </SidebarContent>
   );
@@ -172,7 +171,7 @@ const selectPlayUntil = (ctx: MessagePipelineContext) => ctx.playUntil;
 const selectSetHelpInfo = (store: HelpInfoStore) => store.setHelpInfo;
 
 export default function Workspace(props: WorkspaceProps): JSX.Element {
-  const classes = useStyles();
+  const { classes } = useStyles();
   const containerRef = useRef<HTMLDivElement>(ReactNull);
   const { availableSources, selectSource } = usePlayerSelection();
   const playerPresence = useMessagePipeline(selectPlayerPresence);
@@ -621,7 +620,7 @@ export default function Workspace(props: WorkspaceProps): JSX.Element {
             <Stack>
               <PanelLayout />
               {play && pause && seek && (
-                <Box flexShrink={0}>
+                <div style={{ flexShrink: 0 }}>
                   <PlaybackControls
                     play={play}
                     pause={pause}
@@ -630,7 +629,7 @@ export default function Workspace(props: WorkspaceProps): JSX.Element {
                     isPlaying={isPlaying}
                     getTimeInfo={getTimeInfo}
                   />
-                </Box>
+                </div>
               )}
             </Stack>
           </RemountOnValueChange>

@@ -13,6 +13,7 @@ ignorePatterns:
 
 plugins:
   - file-progress
+  - tss-unused-classes
 
 extends:
   - plugin:@foxglove/base
@@ -24,6 +25,8 @@ settings:
 
 rules:
   "@foxglove/license-header": error
+
+  tss-unused-classes/unused-classes: error
 
   # show progress while linting
   file-progress/activate: warn
@@ -147,7 +150,14 @@ overrides:
       - "**/*.test.ts"
 
   - rules:
-      "no-restricted-imports": off
+      tss-unused-classes/unused-classes: off
+    files:
+      # Using @fluentui/makeStyles expecting deletion soon
+      - packages/studio-base/src/components/Menu/Item.tsx
+      - packages/studio-base/src/components/Menu/Menu.tsx
+
+  - rules:
+      no-restricted-imports: off
     files:
       # Ignore existing implementations of fluentui, styled-components, and @mui/styled
       - "web/src/VersionBanner.tsx"

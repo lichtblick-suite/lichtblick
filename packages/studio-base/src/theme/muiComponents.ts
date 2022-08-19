@@ -4,8 +4,8 @@
 
 import type {} from "@mui/x-data-grid/themeAugmentation";
 
-import { alpha, Theme, ThemeOptions } from "@mui/material/styles";
-import { CSSProperties } from "@mui/styles";
+import { alpha, Theme, ThemeOptions } from "@mui/material";
+import { CSSProperties } from "react";
 
 type MuiLabComponents = {
   MuiFocusVisible?: {

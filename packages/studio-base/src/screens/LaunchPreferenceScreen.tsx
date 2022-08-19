@@ -3,19 +3,16 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 import { CompoundButton, Checkbox, IButtonStyles } from "@fluentui/react";
-import { Card, Theme, Typography } from "@mui/material";
-import { makeStyles } from "@mui/styles";
+import { Card, Typography } from "@mui/material";
 import { ReactElement, useState } from "react";
+import { makeStyles } from "tss-react/mui";
 
 import { AppSetting } from "@foxglove/studio-base/AppSetting";
 import Stack from "@foxglove/studio-base/components/Stack";
 import { useAppConfigurationValue } from "@foxglove/studio-base/hooks";
 import { useSessionStorageValue } from "@foxglove/studio-base/hooks/useSessionStorageValue";
 
-const useStyles = makeStyles((theme: Theme) => ({
-  root: {
-    backgroundColor: theme.palette.background.default,
-  },
+const useStyles = makeStyles()((theme) => ({
   card: {
     display: "flex",
     flexDirection: "column",
@@ -32,7 +29,7 @@ const buttonStyles = {
 } as Partial<IButtonStyles>;
 
 export function LaunchPreferenceScreen(): ReactElement {
-  const classes = useStyles();
+  const { classes } = useStyles();
 
   const [globalPreference, setGlobalPreference] = useAppConfigurationValue<string | undefined>(
     AppSetting.LAUNCH_PREFERENCE,

@@ -44,7 +44,7 @@ export const LegacyTable = styled.table`
   th {
     color: ${({ theme }) => theme.semanticColors.bodyText};
 
-    tr:first-child & {
+    tr:first-of-type & {
       padding-top: 4px;
       padding-bottom: 4px;
     }

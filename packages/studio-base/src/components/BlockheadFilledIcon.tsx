@@ -2,10 +2,9 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { makeStyles } from "@mui/styles";
-import cx from "classnames";
+import { makeStyles } from "tss-react/mui";
 
-const useStyles = makeStyles({
+const useStyles = makeStyles()({
   // trying to match the wrapper provided by @fluentui here
   root: {
     display: "inline-block",
@@ -17,7 +16,7 @@ const useStyles = makeStyles({
 });
 
 export default function BlockheadFilledIcon({ className }: { className?: string }): JSX.Element {
-  const classes = useStyles();
+  const { classes, cx } = useStyles();
 
   return (
     <span className={cx(classes.root, className)}>

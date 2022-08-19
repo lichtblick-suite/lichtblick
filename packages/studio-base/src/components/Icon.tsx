@@ -11,9 +11,8 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { makeStyles } from "@mui/styles";
-import cx from "classnames";
 import { ComponentProps, CSSProperties, ReactNode, MouseEvent } from "react";
+import { makeStyles } from "tss-react/mui";
 
 import Tooltip, { useTooltip } from "@foxglove/studio-base/components/Tooltip";
 import { colors } from "@foxglove/studio-base/util/sharedStyleConstants";
@@ -36,7 +35,7 @@ function makeIconStyle(size: number) {
   };
 }
 
-const useStyles = makeStyles({
+const useStyles = makeStyles()({
   icon: {
     "& > svg": {
       fill: "currentColor",
@@ -97,7 +96,7 @@ type Props = {
 };
 
 const Icon = (props: Props): JSX.Element => {
-  const classes = useStyles();
+  const { classes, cx } = useStyles();
   const {
     children,
     size,
@@ -158,7 +157,7 @@ const Icon = (props: Props): JSX.Element => {
 Icon.displayName = "Icon";
 
 export const WrappedIcon = (props: Props): JSX.Element => {
-  const classes = useStyles();
+  const { classes, cx } = useStyles();
   return (
     <Icon
       {...props}

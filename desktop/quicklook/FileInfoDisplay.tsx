@@ -100,7 +100,7 @@ const useStyles = makeStyles()(() => ({
       "@media (prefers-color-scheme: dark)": {
         "--zebra-color": "rgba(255, 255, 255, 5%)",
       },
-      "& > :first-child": {
+      "& > :first-of-type": {
         background: "var(--zebra-color)",
 
         [`@media (min-width: ${NARROW_MIN_WIDTH}px)`]: {

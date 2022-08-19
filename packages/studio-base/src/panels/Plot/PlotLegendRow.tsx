@@ -8,9 +8,9 @@ import {
   Remove as RemoveIcon,
   MoreVert as MoreVertIcon,
 } from "@mui/icons-material";
-import { IconButton, Theme, Tooltip, Typography, useTheme } from "@mui/material";
-import { createStyles, makeStyles } from "@mui/styles";
+import { IconButton, Tooltip, Typography, useTheme } from "@mui/material";
 import { ComponentProps, useCallback, useMemo, useState } from "react";
+import { makeStyles } from "tss-react/mui";
 import { v4 as uuidv4 } from "uuid";
 
 import MessagePathInput from "@foxglove/studio-base/components/MessagePathSyntax/MessagePathInput";
@@ -34,72 +34,70 @@ type PlotLegendRowProps = {
   showPlotValuesInLegend: boolean;
 };
 
-const useStyles = makeStyles((theme: Theme) =>
-  createStyles({
-    root: {
-      display: "contents",
+const useStyles = makeStyles()((theme) => ({
+  root: {
+    display: "contents",
 
-      "&:hover, &:focus-within": {
-        "& .MuiIconButton-root": {
-          backgroundColor: theme.palette.action.hover,
-        },
-        "& > *:last-child": {
-          opacity: 1,
-        },
-        "& > *": {
-          backgroundColor: theme.palette.action.hover,
-        },
+    "&:hover, &:focus-within": {
+      "& .MuiIconButton-root": {
+        backgroundColor: theme.palette.action.hover,
       },
-    },
-    listIcon: {
-      padding: theme.spacing(0.25),
-      position: "sticky",
-      left: 0,
-      // creates an opaque background for the sticky element
-      backgroundImage: `linear-gradient(${theme.palette.background.paper}, ${theme.palette.background.paper})`,
-      backgroundBlendMode: "overlay",
-    },
-    legendIconButton: {
-      padding: `${theme.spacing(0.125)} !important`,
-      marginLeft: theme.spacing(0.25),
-    },
-    inputWrapper: {
-      display: "flex",
-      alignItems: "center",
-      padding: theme.spacing(0.25),
-    },
-    plotValue: {
-      display: "flex",
-      alignItems: "center",
-      padding: theme.spacing(0.25),
-    },
-    actionButton: {
-      padding: `${theme.spacing(0.25)} !important`,
-      color: theme.palette.text.secondary,
-
-      "&:hover": {
-        color: theme.palette.text.primary,
-      },
-    },
-    actions: {
-      display: "flex",
-      flexDirection: "row",
-      alignItems: "center",
-      padding: theme.spacing(0.25),
-      gap: theme.spacing(0.25),
-      position: "sticky",
-      right: 0,
-      opacity: 0,
-      // creates an opaque background for the sticky element
-      backgroundImage: `linear-gradient(${theme.palette.background.paper}, ${theme.palette.background.paper})`,
-      backgroundBlendMode: "overlay",
-
-      "&:hover": {
+      "& > *:last-child": {
         opacity: 1,
       },
+      "& > *": {
+        backgroundColor: theme.palette.action.hover,
+      },
     },
-  }),
-);
+  },
+  listIcon: {
+    padding: theme.spacing(0.25),
+    position: "sticky",
+    left: 0,
+    // creates an opaque background for the sticky element
+    backgroundImage: `linear-gradient(${theme.palette.background.paper}, ${theme.palette.background.paper})`,
+    backgroundBlendMode: "overlay",
+  },
+  legendIconButton: {
+    padding: `${theme.spacing(0.125)} !important`,
+    marginLeft: theme.spacing(0.25),
+  },
+  inputWrapper: {
+    display: "flex",
+    alignItems: "center",
+    padding: theme.spacing(0.25),
+  },
+  plotValue: {
+    display: "flex",
+    alignItems: "center",
+    padding: theme.spacing(0.25),
+  },
+  actionButton: {
+    padding: `${theme.spacing(0.25)} !important`,
+    color: theme.palette.text.secondary,
+
+    "&:hover": {
+      color: theme.palette.text.primary,
+    },
+  },
+  actions: {
+    display: "flex",
+    flexDirection: "row",
+    alignItems: "center",
+    padding: theme.spacing(0.25),
+    gap: theme.spacing(0.25),
+    position: "sticky",
+    right: 0,
+    opacity: 0,
+    // creates an opaque background for the sticky element
+    backgroundImage: `linear-gradient(${theme.palette.background.paper}, ${theme.palette.background.paper})`,
+    backgroundBlendMode: "overlay",
+
+    "&:hover": {
+      opacity: 1,
+    },
+  },
+}));
 
 export default function PlotLegendRow({
   index,
@@ -153,7 +151,7 @@ export default function PlotLegendRow({
     ? getLineColor(path.color, index)
     : theme.palette.text.secondary;
 
-  const classes = useStyles();
+  const { classes } = useStyles();
 
   const isReferenceLinePlotPath = isReferenceLinePlotPathType(path);
 

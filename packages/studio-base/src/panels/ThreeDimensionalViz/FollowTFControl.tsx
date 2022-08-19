@@ -14,11 +14,11 @@
 import { IButtonStyles, IconButton, useTheme } from "@fluentui/react";
 import MyLocationIcon from "@mui/icons-material/MyLocation";
 import NavigationIcon from "@mui/icons-material/Navigation";
-import { Paper, IconButton as MuiIconButton, Theme } from "@mui/material";
-import { makeStyles } from "@mui/styles";
+import { Paper, IconButton as MuiIconButton } from "@mui/material";
 import { sortBy } from "lodash";
 import { memo, useCallback, useMemo, useRef } from "react";
 import shallowequal from "shallowequal";
+import { makeStyles } from "tss-react/mui";
 
 import Autocomplete, { IAutocomplete } from "@foxglove/studio-base/components/Autocomplete";
 import { useTooltip } from "@foxglove/studio-base/components/Tooltip";
@@ -123,7 +123,7 @@ type StyleProps = {
   followTf?: Props["followTf"];
 };
 
-const useStyles = makeStyles((theme: Theme) => ({
+const useStyles = makeStyles<StyleProps>()((theme, { followTf }) => ({
   root: {
     pointerEvents: "auto",
   },
@@ -132,7 +132,7 @@ const useStyles = makeStyles((theme: Theme) => ({
     flexGrow: 1,
     alignItems: "center",
     // see also ExpandingToolbar styles
-    color: ({ followTf }: StyleProps) => (followTf ? undefined : theme.palette.text.disabled),
+    color: followTf ? undefined : theme.palette.text.disabled,
     position: "relative",
   },
   icon: {
@@ -143,7 +143,7 @@ const useStyles = makeStyles((theme: Theme) => ({
 const FollowTFControl = memo<Props>(function FollowTFControl(props: Props) {
   const { transforms, followTf, followMode, onFollowChange } = props;
   const theme = useTheme();
-  const classes = useStyles({ followTf });
+  const { classes } = useStyles({ followTf });
 
   const iconButtonStyles = useMemo(
     (): Partial<IButtonStyles> => ({

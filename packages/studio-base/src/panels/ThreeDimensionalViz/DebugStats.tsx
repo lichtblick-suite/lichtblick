@@ -11,9 +11,8 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { Theme } from "@mui/material";
-import { makeStyles } from "@mui/styles";
 import { useContext, useRef } from "react";
+import { makeStyles } from "tss-react/mui";
 
 import { WorldviewReactContext, WorldviewContextType } from "@foxglove/regl-worldview";
 import { fonts } from "@foxglove/studio-base/util/sharedStyleConstants";
@@ -28,7 +27,7 @@ type Stats = {
   getTotalBufferSize(): number;
 };
 
-const useStyles = makeStyles((theme: Theme) => ({
+const useStyles = makeStyles()((theme) => ({
   root: {
     position: "absolute",
     bottom: theme.spacing(2),
@@ -75,7 +74,7 @@ function validate(stats: Stats) {
 // Shows debug regl stats in the 3d panel.  Crashes the panel if regl stats drift outside of acceptable ranges.
 // TODO(bmc): move to regl-worldview at some point
 export default function DebugStats(): JSX.Element | ReactNull {
-  const classes = useStyles();
+  const { classes } = useStyles();
   // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
   const context = useContext<WorldviewContextType>(WorldviewReactContext);
   const renderCount = useRef(0);

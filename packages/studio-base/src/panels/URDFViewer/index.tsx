@@ -3,11 +3,11 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 import { IDropdownOption } from "@fluentui/react";
-import { makeStyles } from "@mui/styles";
 import produce from "immer";
 import { isEmpty, set } from "lodash";
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { useResizeDetector } from "react-resize-detector";
+import { makeStyles } from "tss-react/mui";
 
 import { filterMap } from "@foxglove/den/collection";
 import {
@@ -55,17 +55,12 @@ const DATA_TYPES = Object.freeze([
   "ros.sensor_msgs.JointState",
 ]);
 
-const useStyles = makeStyles({
+const useStyles = makeStyles()({
   root: {
     display: "flex",
     flexDirection: "column",
     flex: "auto",
     overflow: "hidden",
-  },
-  toolbar: {
-    display: "flex",
-    flexGrow: 1,
-    alignItems: "baseline",
   },
   content: {
     display: "flex",
@@ -88,7 +83,7 @@ const useStyles = makeStyles({
 });
 
 function URDFViewer({ config, saveConfig }: Props) {
-  const classes = useStyles();
+  const { classes } = useStyles();
   const { customJointValues, jointStatesTopic, opacity } = config;
   const [canvas, setCanvas] = useState<HTMLCanvasElement | ReactNull>(ReactNull);
 

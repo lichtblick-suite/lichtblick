@@ -2,14 +2,14 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { Button, Theme, Typography } from "@mui/material";
-import { makeStyles } from "@mui/styles";
+import { Button, Typography } from "@mui/material";
+import { makeStyles } from "tss-react/mui";
 
 import { useCurrentUser } from "@foxglove/studio-base/context/CurrentUserContext";
 
 import AccountSyncGraphic from "./AccountSyncGraphic";
 
-const useStyles = makeStyles((theme: Theme) => ({
+const useStyles = makeStyles()((theme) => ({
   root: {
     display: "flex",
     flexDirection: "column",
@@ -23,7 +23,7 @@ const useStyles = makeStyles((theme: Theme) => ({
 }));
 
 export default function SigninForm(): JSX.Element {
-  const classes = useStyles();
+  const { classes } = useStyles();
   const { signIn } = useCurrentUser();
 
   return (
