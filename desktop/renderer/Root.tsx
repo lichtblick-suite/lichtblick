@@ -54,9 +54,7 @@ export default function Root({
       new Ros2LocalBagDataSourceFactory({ useIterablePlayer: enableExperimentalLatching }),
       new UlogLocalDataSourceFactory(),
       new VelodyneDataSourceFactory(),
-      new FoxgloveDataPlatformDataSourceFactory({
-        useIterablePlayer: enableExperimentalLatching,
-      }),
+      new FoxgloveDataPlatformDataSourceFactory(),
       new SampleNuscenesDataSourceFactory({ useIterablePlayer: enableExperimentalLatching }),
       new McapLocalDataSourceFactory({ useIterablePlayer: enableExperimentalLatching }),
       new McapRemoteDataSourceFactory({ useIterablePlayer: enableExperimentalLatching }),

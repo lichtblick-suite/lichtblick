@@ -14,9 +14,6 @@ import {
   Time,
   toRFC3339String,
 } from "@foxglove/rostime";
-import streamMessages, {
-  ParsedChannelAndEncodings,
-} from "@foxglove/studio-base/players/FoxgloveDataPlatformPlayer/streamMessages";
 import {
   PlayerProblem,
   Topic,
@@ -33,7 +30,8 @@ import {
   MessageIteratorArgs,
   IteratorResult,
   GetBackfillMessagesArgs,
-} from "./IIterableSource";
+} from "../IIterableSource";
+import streamMessages, { ParsedChannelAndEncodings } from "./streamMessages";
 
 const log = Logger.getLogger(__filename);
 
