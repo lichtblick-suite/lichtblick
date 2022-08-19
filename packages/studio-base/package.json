@@ -49,7 +49,7 @@
     "@foxglove/rostime": "1.1.2",
     "@foxglove/schemas": "0.4.0",
     "@foxglove/studio": "workspace:*",
-    "@foxglove/three-text": "workspace:*",
+    "@foxglove/three-text": "0.1.0",
     "@foxglove/ulog": "2.1.2",
     "@foxglove/velodyne-cloud": "1.0.1",
     "@foxglove/wasm-bz2": "0.1.0",
