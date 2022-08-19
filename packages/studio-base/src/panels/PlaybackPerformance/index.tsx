@@ -100,12 +100,12 @@ export function UnconnectedPlaybackPerformance({
       lastPlaybackInfo.activeData.lastSeekTime === activeData.lastSeekTime &&
       lastPlaybackInfo.activeData.currentTime !== activeData.currentTime
     ) {
-      const bagTimeMs =
+      const elapsedPlayerTime =
         toSec(subtractTimes(activeData.currentTime, lastPlaybackInfo.activeData.currentTime)) *
         1000;
-      perfPoints.current.speed.push({ value: bagTimeMs / renderTimeMs, timestamp });
+      perfPoints.current.speed.push({ value: elapsedPlayerTime / renderTimeMs, timestamp });
       perfPoints.current.framerate.push({ value: 1000 / renderTimeMs, timestamp });
-      perfPoints.current.bagTimeMs.push({ value: bagTimeMs, timestamp });
+      perfPoints.current.bagTimeMs.push({ value: elapsedPlayerTime, timestamp });
     }
     const newBytesReceived =
       activeData.totalBytesReceived - lastPlaybackInfo.activeData.totalBytesReceived;

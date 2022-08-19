@@ -199,6 +199,78 @@ const LAYOUTS = new Map<string, Layout>([
       syncInfo: undefined,
     },
   ],
+  [
+    "benchmark-single-plot",
+    {
+      id: "benchmark-single-plot" as LayoutID,
+      name: "Benchmark - Single Plot",
+      permission: "CREATOR_WRITE",
+      baseline: {
+        data: {
+          configById: {
+            "Plot!a": {
+              title: "10 second window",
+              paths: [
+                {
+                  value: "sinewave_0.value",
+                  enabled: true,
+                  timestampMethod: "receiveTime",
+                },
+                {
+                  value: "sinewave_1.value",
+                  enabled: true,
+                  timestampMethod: "receiveTime",
+                },
+                {
+                  value: "sinewave_2.value",
+                  enabled: true,
+                  timestampMethod: "receiveTime",
+                },
+                {
+                  value: "sinewave_3.value",
+                  enabled: true,
+                  timestampMethod: "receiveTime",
+                },
+                {
+                  value: "sinewave_4.value",
+                  enabled: true,
+                  timestampMethod: "receiveTime",
+                },
+                {
+                  value: "sinewave_5.value",
+                  enabled: true,
+                  timestampMethod: "receiveTime",
+                },
+              ],
+              showXAxisLabels: true,
+              showYAxisLabels: true,
+              showLegend: true,
+              legendDisplay: "floating",
+              showPlotValuesInLegend: false,
+              isSynced: true,
+              xAxisVal: "timestamp",
+              sidebarDimension: 240,
+              followingViewWidth: 10,
+            },
+          },
+          globalVariables: {},
+          userNodes: {},
+          linkedGlobalVariables: [],
+          playbackConfig: {
+            speed: 1,
+          },
+          layout: {
+            first: "Plot!a",
+            second: "PlaybackPerformance!1fz1hnn",
+            direction: "column",
+          },
+        },
+        savedAt: new Date().toISOString() as ISO8601Timestamp,
+      },
+      working: undefined,
+      syncInfo: undefined,
+    },
+  ],
 ]);
 
 export { LAYOUTS };

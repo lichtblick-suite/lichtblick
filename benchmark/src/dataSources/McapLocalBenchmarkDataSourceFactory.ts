@@ -29,4 +29,4 @@ class McapLocalBenchmarkDataSourceFactory implements IDataSourceFactory {
   }
 }
 
-export default McapLocalBenchmarkDataSourceFactory;
+export { McapLocalBenchmarkDataSourceFactory };

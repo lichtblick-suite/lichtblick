@@ -24,6 +24,9 @@ class PredefinedLayoutStorage implements ILayoutStorage {
   }
 
   async put(_namespace: string, layout: Layout): Promise<Layout> {
+    if (!this.layouts.get(layout.id)) {
+      throw new Error("Benchmark app only allows updating existing layouts.");
+    }
     return layout;
   }
 

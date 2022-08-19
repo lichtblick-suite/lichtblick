@@ -6,11 +6,9 @@ import { useMemo, useState } from "react";
 
 import { App, IDataSourceFactory, ConsoleApi, AppSetting } from "@foxglove/studio-base";
 
-import McapLocalBenchmarkDataSourceFactory from "./dataSources/McapLocalBenchmarkDataSourceFactory";
+import { McapLocalBenchmarkDataSourceFactory, SyntheticDataSourceFactory } from "./dataSources";
 import { LAYOUTS } from "./layouts";
 import { PredefinedLayoutStorage, MemoryAppConfiguration } from "./services";
-
-const BENCHMARK_NAME = "benchmark-3d-panel"; // see layouts.ts
 
 export function Root(): JSX.Element {
   const [appConfiguration] = useState(
@@ -18,12 +16,13 @@ export function Root(): JSX.Element {
       new MemoryAppConfiguration({
         defaults: {
           [AppSetting.LAUNCH_PREFERENCE]: "web",
+          [AppSetting.MESSAGE_RATE]: 240,
         },
       }),
   );
 
   const dataSources: IDataSourceFactory[] = useMemo(() => {
-    const sources = [new McapLocalBenchmarkDataSourceFactory()];
+    const sources = [new McapLocalBenchmarkDataSourceFactory(), new SyntheticDataSourceFactory()];
 
     return sources;
   }, []);
@@ -33,7 +32,6 @@ export function Root(): JSX.Element {
   const consoleApi = useMemo(() => new ConsoleApi(process.env.FOXGLOVE_API_URL ?? ""), []);
 
   const url = new URL(window.location.href);
-  url.searchParams.set("layoutId", BENCHMARK_NAME);
 
   return (
     <App
