@@ -36,9 +36,9 @@ export type LayerSettingsOccupancyGrid = BaseSettings & {
 
 const INVALID_OCCUPANCY_GRID = "INVALID_OCCUPANCY_GRID";
 
-const DEFAULT_MIN_COLOR = { r: 1, g: 1, b: 1, a: 0.5 }; // white
-const DEFAULT_MAX_COLOR = { r: 0, g: 0, b: 0, a: 0.5 }; // black
-const DEFAULT_UNKNOWN_COLOR = { r: 0.5, g: 0.5, b: 0.5, a: 0.5 }; // gray
+const DEFAULT_MIN_COLOR = { r: 1, g: 1, b: 1, a: 1 }; // white
+const DEFAULT_MAX_COLOR = { r: 0, g: 0, b: 0, a: 1 }; // black
+const DEFAULT_UNKNOWN_COLOR = { r: 0.5, g: 0.5, b: 0.5, a: 1 }; // gray
 const DEFAULT_INVALID_COLOR = { r: 1, g: 0, b: 1, a: 1 }; // magenta
 
 const DEFAULT_MIN_COLOR_STR = rgbaToCssString(DEFAULT_MIN_COLOR);
@@ -61,7 +61,7 @@ export type OccupancyGridUserData = BaseUserData & {
   occupancyGrid: OccupancyGrid;
   mesh: THREE.Mesh;
   texture: THREE.DataTexture;
-  material: THREE.MeshStandardMaterial | THREE.MeshBasicMaterial;
+  material: THREE.MeshBasicMaterial;
   pickingMaterial: THREE.ShaderMaterial;
 };
 
@@ -131,10 +131,20 @@ export class OccupancyGrids extends SceneExtension<OccupancyGridRenderable> {
     const topicName = path[1]!;
     const renderable = this.renderables.get(topicName);
     if (renderable) {
+      const prevTransparent = occupancyGridHasTransparency(renderable.userData.settings);
       const settings = this.renderer.config.topics[topicName] as
         | Partial<LayerSettingsOccupancyGrid>
         | undefined;
       renderable.userData.settings = { ...renderable.userData.settings, ...settings };
+
+      // Check if the transparency changed and we need to create a new material
+      const newTransparent = occupancyGridHasTransparency(renderable.userData.settings);
+      if (prevTransparent !== newTransparent) {
+        renderable.userData.material.transparent = newTransparent;
+        renderable.userData.material.depthWrite = !newTransparent;
+        renderable.userData.material.needsUpdate = true;
+      }
+
       this._updateOccupancyGridRenderable(
         renderable,
         renderable.userData.occupancyGrid,
@@ -156,15 +166,10 @@ export class OccupancyGrids extends SceneExtension<OccupancyGridRenderable> {
         | undefined;
       const settings = { ...DEFAULT_SETTINGS, ...userSettings };
 
-      // Create the texture, material, and mesh
       const texture = createTexture(occupancyGrid);
-      const pickingMaterial = createPickingMaterial(texture);
-      const material = createMaterial(texture, topic, settings);
-      const mesh = new THREE.Mesh(OccupancyGrids.Geometry(), material);
-      mesh.castShadow = true;
-      mesh.receiveShadow = true;
-      // This overrides the picking material used for `mesh`. See Picker.ts
-      mesh.userData.pickingMaterial = pickingMaterial;
+      const mesh = createMesh(topic, texture, settings);
+      const material = mesh.material as THREE.MeshBasicMaterial;
+      const pickingMaterial = mesh.userData.pickingMaterial as THREE.ShaderMaterial;
 
       // Create the renderable
       renderable = new OccupancyGridRenderable(topic, this.renderer, {
@@ -227,7 +232,7 @@ export class OccupancyGrids extends SceneExtension<OccupancyGridRenderable> {
     renderable.scale.set(resolution * width, resolution * height, 1);
   }
 
-  private static Geometry(): THREE.PlaneGeometry {
+  public static Geometry(): THREE.PlaneGeometry {
     if (!OccupancyGrids.geometry) {
       OccupancyGrids.geometry = new THREE.PlaneGeometry(1, 1, 1, 1);
       OccupancyGrids.geometry.translate(0.5, 0.5, 0);
@@ -266,6 +271,22 @@ function createTexture(occupancyGrid: OccupancyGrid): THREE.DataTexture {
   );
   texture.generateMipmaps = false;
   return texture;
+}
+
+function createMesh(
+  topic: string,
+  texture: THREE.DataTexture,
+  settings: LayerSettingsOccupancyGrid,
+): THREE.Mesh {
+  // Create the texture, material, and mesh
+  const pickingMaterial = createPickingMaterial(texture);
+  const material = createMaterial(texture, topic, settings);
+  const mesh = new THREE.Mesh(OccupancyGrids.Geometry(), material);
+  mesh.castShadow = true;
+  mesh.receiveShadow = true;
+  // This overrides the picking material used for `mesh`. See Picker.ts
+  mesh.userData.pickingMaterial = pickingMaterial;
+  return mesh;
 }
 
 const tempUnknownColor = { r: 0, g: 0, b: 0, a: 0 };
@@ -330,16 +351,18 @@ function createMaterial(
   texture: THREE.DataTexture,
   topic: string,
   settings: LayerSettingsOccupancyGrid,
-): THREE.MeshStandardMaterial | THREE.MeshBasicMaterial {
+): THREE.MeshBasicMaterial {
   const transparent = occupancyGridHasTransparency(settings);
-  const material = new THREE.MeshBasicMaterial({
+  return new THREE.MeshBasicMaterial({
+    name: `${topic}:Material`,
+    // Enable alpha clipping. Fully transparent (alpha=0) pixels are skipped
+    // even when transparency is disabled
+    alphaTest: 1e-4,
+    depthWrite: !transparent,
     map: texture,
     side: THREE.DoubleSide,
+    transparent,
   });
-  material.name = `${topic}:Material`;
-  material.transparent = transparent;
-  material.depthWrite = !material.transparent;
-  return material;
 }
 
 function createPickingMaterial(texture: THREE.DataTexture): THREE.ShaderMaterial {
