@@ -31,6 +31,7 @@ import {
   SettingsTreeAction,
   SettingsTreeNodes,
   Topic,
+  VariableValue,
 } from "@foxglove/studio";
 import PublishGoalIcon from "@foxglove/studio-base/components/PublishGoalIcon";
 import PublishPointIcon from "@foxglove/studio-base/components/PublishPointIcon";
@@ -57,7 +58,7 @@ import { PublishClickEvent, PublishClickType } from "./renderables/PublishClickT
 const log = Logger.getLogger(__filename);
 
 const SHOW_DEBUG: true | false = false;
-
+const SELECTED_ID_VARIABLE = "selected_id";
 const PANEL_STYLE: React.CSSProperties = {
   width: "100%",
   height: "100%",
@@ -353,6 +354,7 @@ export function ThreeDeeRender({ context }: { context: PanelExtensionContext }):
   const [colorScheme, setColorScheme] = useState<"dark" | "light" | undefined>();
   const [topics, setTopics] = useState<ReadonlyArray<Topic> | undefined>();
   const [parameters, setParameters] = useState<ReadonlyMap<string, ParameterValue> | undefined>();
+  const [variables, setVariables] = useState<ReadonlyMap<string, VariableValue> | undefined>();
   const [messages, setMessages] = useState<ReadonlyArray<MessageEvent<unknown>> | undefined>();
   const [currentTime, setCurrentTime] = useState<bigint | undefined>();
   const [didSeek, setDidSeek] = useState<boolean>(false);
@@ -417,6 +419,16 @@ export function ThreeDeeRender({ context }: { context: PanelExtensionContext }):
   // Save the panel configuration when it changes
   const updateConfig = useCallback((curRenderer: Renderer) => setConfig(curRenderer.config), []);
   useRendererEvent("configChange", updateConfig, renderer);
+
+  // Write to a global variable when the current selection changes
+  const updateSelectedRenderable = useCallback(
+    (renderable: Renderable | undefined) => {
+      const id = (renderable?.details() as { id?: number | string } | undefined)?.id;
+      context.setVariable(SELECTED_ID_VARIABLE, id ?? ReactNull);
+    },
+    [context],
+  );
+  useRendererEvent("selectedRenderable", updateSelectedRenderable, renderer);
 
   // Rebuild the settings sidebar tree as needed
   useEffect(() => {
@@ -489,6 +501,9 @@ export function ThreeDeeRender({ context }: { context: PanelExtensionContext }):
         // Watch for any changes in the map of observed parameters
         setParameters(renderState.parameters);
 
+        // Watch for any changes in the map of global variables
+        setVariables(renderState.variables);
+
         // currentFrame has messages on subscribed topics since the last render call
         if (renderState.currentFrame) {
           // Fully parse lazy messages
@@ -508,6 +523,7 @@ export function ThreeDeeRender({ context }: { context: PanelExtensionContext }):
     context.watch("currentTime");
     context.watch("didSeek");
     context.watch("parameters");
+    context.watch("variables");
     context.watch("topics");
   }, [context]);
 
@@ -557,6 +573,13 @@ export function ThreeDeeRender({ context }: { context: PanelExtensionContext }):
       renderer.setParameters(parameters);
     }
   }, [parameters, renderer]);
+
+  // Keep the renderer variables up to date
+  useEffect(() => {
+    if (renderer && variables) {
+      renderer.setVariables(variables);
+    }
+  }, [variables, renderer, context]);
 
   // Keep the renderer currentTime up to date
   useEffect(() => {

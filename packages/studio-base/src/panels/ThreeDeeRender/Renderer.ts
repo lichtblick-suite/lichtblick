@@ -20,6 +20,7 @@ import {
   SettingsTreeNodeActionItem,
   SettingsTreeNodes,
   Topic,
+  VariableValue,
 } from "@foxglove/studio";
 import { fonts } from "@foxglove/studio-base/util/sharedStyleConstants";
 import { LabelMaterial, LabelPool } from "@foxglove/three-text";
@@ -80,8 +81,13 @@ export type RendererEvents = {
     cursorCoords: { x: number; y: number },
     renderer: Renderer,
   ) => void;
+  selectedRenderable: (renderable: Renderable | undefined, renderer: Renderer) => void;
   parametersChange: (
-    parameters: ReadonlyMap<string, unknown> | undefined,
+    parameters: ReadonlyMap<string, ParameterValue> | undefined,
+    renderer: Renderer,
+  ) => void;
+  variablesChange: (
+    variables: ReadonlyMap<string, VariableValue> | undefined,
     renderer: Renderer,
   ) => void;
   transformTreeUpdated: (renderer: Renderer) => void;
@@ -223,6 +229,8 @@ export class Renderer extends EventEmitter<RendererEvents> {
   public topicsByName: ReadonlyMap<string, Topic> | undefined;
   // parameterKey -> parameterValue
   public parameters: ReadonlyMap<string, ParameterValue> | undefined;
+  // variableName -> variableValue
+  public variables: ReadonlyMap<string, VariableValue> = new Map();
   // extensionId -> SceneExtension
   public sceneExtensions = new Map<string, SceneExtension>();
   // datatype -> handler[], only active when visibility is toggled on
@@ -638,11 +646,19 @@ export class Renderer extends EventEmitter<RendererEvents> {
     }
   }
 
-  public setParameters(parameters: ReadonlyMap<string, unknown> | undefined): void {
+  public setParameters(parameters: ReadonlyMap<string, ParameterValue> | undefined): void {
     const changed = this.parameters !== parameters;
     this.parameters = parameters;
     if (changed) {
       this.emit("parametersChange", parameters, this);
+    }
+  }
+
+  public setVariables(variables: ReadonlyMap<string, VariableValue>): void {
+    const changed = this.variables !== variables;
+    this.variables = variables;
+    if (changed) {
+      this.emit("variablesChange", variables, this);
     }
   }
 
@@ -740,6 +756,8 @@ export class Renderer extends EventEmitter<RendererEvents> {
       selectObject(selectedRenderable);
       log.debug(`Selected ${selectedRenderable.id} (${selectedRenderable.name})`);
     }
+
+    this.emit("selectedRenderable", selectedRenderable, this);
 
     this.animationFrame();
   }
