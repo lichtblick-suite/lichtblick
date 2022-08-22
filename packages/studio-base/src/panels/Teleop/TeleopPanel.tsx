@@ -73,7 +73,7 @@ function buildSettingsTree(config: Config, topics: readonly Topic[]): SettingsTr
           field: {
             label: "Field",
             input: "select",
-            value: config.upButton.field,
+            value: config.downButton.field,
             options: geometryMsgOptions,
           },
           value: { label: "Value", input: "number", value: config.downButton.value },
@@ -85,7 +85,7 @@ function buildSettingsTree(config: Config, topics: readonly Topic[]): SettingsTr
           field: {
             label: "Field",
             input: "select",
-            value: config.upButton.field,
+            value: config.leftButton.field,
             options: geometryMsgOptions,
           },
           value: { label: "Value", input: "number", value: config.leftButton.value },
@@ -97,7 +97,7 @@ function buildSettingsTree(config: Config, topics: readonly Topic[]): SettingsTr
           field: {
             label: "Field",
             input: "select",
-            value: config.upButton.field,
+            value: config.rightButton.field,
             options: geometryMsgOptions,
           },
           value: { label: "Value", input: "number", value: config.rightButton.value },
