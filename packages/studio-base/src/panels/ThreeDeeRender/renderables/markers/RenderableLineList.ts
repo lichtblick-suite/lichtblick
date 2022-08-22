@@ -70,14 +70,15 @@ export class RenderableLineList extends RenderableMarker {
     this.geometry.dispose();
   }
 
-  public override update(marker: Marker, receiveTime: bigint | undefined): void {
+  public override update(newMarker: Marker, receiveTime: bigint | undefined): void {
+    const prevMarker = this.userData.marker;
+    super.update(newMarker, receiveTime);
+    const marker = this.userData.marker;
+
     let pointsLength = marker.points.length;
     if (pointsLength % 2 !== 0) {
       pointsLength--;
     }
-
-    const prevMarker = this.userData.marker;
-    super.update(marker, receiveTime);
 
     const lineWidth = marker.scale.x;
     const transparent = markerHasTransparency(marker);

@@ -39,13 +39,14 @@ export class RenderableMeshResource extends RenderableMarker {
   }
 
   public override update(
-    marker: Marker,
+    newMarker: Marker,
     receiveTime: bigint | undefined,
     // eslint-disable-next-line @foxglove/no-boolean-parameters
     forceLoad?: boolean,
   ): void {
     const prevMarker = this.userData.marker;
-    super.update(marker, receiveTime);
+    super.update(newMarker, receiveTime);
+    const marker = this.userData.marker;
 
     const transparent = marker.color.a < 1;
     if (transparent !== this.material.transparent) {

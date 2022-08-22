@@ -36,9 +36,10 @@ export class RenderablePoints extends RenderableMarker {
     this.points.material.dispose();
   }
 
-  public override update(marker: Marker, receiveTime: bigint | undefined): void {
+  public override update(newMarker: Marker, receiveTime: bigint | undefined): void {
     const prevMarker = this.userData.marker;
-    super.update(marker, receiveTime);
+    super.update(newMarker, receiveTime);
+    const marker = this.userData.marker;
 
     const transparent = markerHasTransparency(marker);
     if (transparent !== markerHasTransparency(prevMarker)) {

@@ -13,10 +13,6 @@ import { Marker } from "../../ros";
 import { RenderableMarker } from "./RenderableMarker";
 import { makeStandardMaterial } from "./materials";
 
-// const SHAFT_LENGTH = 1;
-// const SHAFT_DIAMETER = 0.1;
-// const HEAD_LENGTH = 0.3;
-// const HEAD_DIAMETER = 0.2;
 const SHAFT_LENGTH = 0.77;
 const SHAFT_DIAMETER = 1.0;
 const HEAD_LENGTH = 0.23;
@@ -94,8 +90,9 @@ export class RenderableArrow extends RenderableMarker {
     super.dispose();
   }
 
-  public override update(marker: Marker, receiveTime: bigint | undefined): void {
-    super.update(marker, receiveTime);
+  public override update(newMarker: Marker, receiveTime: bigint | undefined): void {
+    super.update(newMarker, receiveTime);
+    const marker = this.userData.marker;
 
     const transparent = marker.color.a < 1;
     if (transparent !== this.shaftMesh.material.transparent) {

@@ -9,8 +9,9 @@ import { RosValue } from "@foxglove/studio-base/players/types";
 
 import { BaseUserData, Renderable } from "../../Renderable";
 import type { Renderer } from "../../Renderer";
-import { rgbToThreeColor } from "../../color";
+import { makeRgba, rgbToThreeColor, stringToRgba } from "../../color";
 import { Marker } from "../../ros";
+import { LayerSettingsMarker } from "../Markers";
 
 const tempColor = new THREE.Color();
 const tempColor2 = new THREE.Color();
@@ -18,7 +19,8 @@ const tempTuple4: THREE.Vector4Tuple = [0, 0, 0, 0];
 
 export type MarkerUserData = BaseUserData & {
   topic: string;
-  marker: Marker;
+  marker: Marker; // The marker used for rendering
+  originalMarker: Marker; // The original marker received from the topic, used for inspection
   expiresIn: bigint | undefined;
 };
 
@@ -45,12 +47,13 @@ export class RenderableMarker extends Renderable<MarkerUserData> {
       settings: { visible: true, frameLocked: marker.frame_locked },
       topic,
       marker,
+      originalMarker: marker,
       expiresIn: hasLifetime ? toNanoSec(marker.lifetime) : undefined,
     });
   }
 
   public override details(): Record<string, RosValue> {
-    return this.userData.marker;
+    return this.userData.originalMarker;
   }
 
   public update(marker: Marker, receiveTime: bigint | undefined): void {
@@ -62,7 +65,8 @@ export class RenderableMarker extends Renderable<MarkerUserData> {
     this.userData.messageTime = toNanoSec(marker.header.stamp);
     this.userData.frameId = this.renderer.normalizeFrameId(marker.header.frame_id);
     this.userData.pose = marker.pose;
-    this.userData.marker = marker;
+    this.userData.marker = this._renderMarker(marker);
+    this.userData.originalMarker = marker;
     this.userData.expiresIn = hasLifetime ? toNanoSec(marker.lifetime) : undefined;
   }
 
@@ -93,5 +97,22 @@ export class RenderableMarker extends Renderable<MarkerUserData> {
 
       callback(tempTuple4, i);
     }
+  }
+
+  private _renderMarker(marker: Marker): Marker {
+    const topicName = this.userData.topic;
+    const settings = this.renderer.config.topics[topicName] as
+      | Partial<LayerSettingsMarker>
+      | undefined;
+    const colorStr = settings?.color;
+
+    if (colorStr == undefined) {
+      return marker;
+    }
+
+    // Create a clone of the marker with the color overridden
+    const color = stringToRgba(makeRgba(), colorStr);
+    const newMarker = { ...marker, color, colors: [] };
+    return newMarker;
   }
 }

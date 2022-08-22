@@ -39,8 +39,9 @@ export class RenderableSphere extends RenderableMarker {
     this.mesh.material.dispose();
   }
 
-  public override update(marker: Marker, receiveTime: bigint | undefined): void {
-    super.update(marker, receiveTime);
+  public override update(newMarker: Marker, receiveTime: bigint | undefined): void {
+    super.update(newMarker, receiveTime);
+    const marker = this.userData.marker;
 
     const transparent = marker.color.a < 1;
     if (transparent !== this.mesh.material.transparent) {

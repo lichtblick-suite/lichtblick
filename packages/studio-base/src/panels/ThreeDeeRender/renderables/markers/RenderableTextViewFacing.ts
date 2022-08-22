@@ -31,8 +31,9 @@ export class RenderableTextViewFacing extends RenderableMarker {
     this.renderer.labelPool.release(this.label);
   }
 
-  public override update(marker: Marker, receiveTime: bigint | undefined): void {
-    super.update(marker, receiveTime);
+  public override update(newMarker: Marker, receiveTime: bigint | undefined): void {
+    super.update(newMarker, receiveTime);
+    const marker = this.userData.marker;
 
     this.label.setText(marker.text);
     this.label.setColor(

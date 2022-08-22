@@ -69,8 +69,15 @@ export class RenderableLineStrip extends RenderableMarker {
     super.dispose();
   }
 
-  public override update(marker: Marker, receiveTime: bigint | undefined): void {
+  public override update(newMarker: Marker, receiveTime: bigint | undefined): void {
+    const prevMarker = this.userData.marker;
+    super.update(newMarker, receiveTime);
+    const marker = this.userData.marker;
+
     const pointsLength = marker.points.length;
+    const lineWidth = marker.scale.x;
+    const transparent = markerHasTransparency(marker);
+
     if (pointsLength === 0) {
       // THREE.LineGeometry.setPositions crashes when given an empty array:
       // https://github.com/foxglove/studio/issues/3954
@@ -81,12 +88,6 @@ export class RenderableLineStrip extends RenderableMarker {
       this.linePrepass.visible = true;
       this.line.visible = true;
     }
-
-    const prevMarker = this.userData.marker;
-    super.update(marker, receiveTime);
-
-    const lineWidth = marker.scale.x;
-    const transparent = markerHasTransparency(marker);
 
     if (transparent !== markerHasTransparency(prevMarker)) {
       this.linePrepass.material.transparent = transparent;

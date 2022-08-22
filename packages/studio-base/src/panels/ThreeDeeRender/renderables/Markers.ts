@@ -25,11 +25,13 @@ import { makePose } from "../transforms";
 import { LayerSettingsMarkerNamespace, TopicMarkers } from "./TopicMarkers";
 
 export type LayerSettingsMarker = BaseSettings & {
+  color: string | undefined;
   namespaces: Record<string, LayerSettingsMarkerNamespace>;
 };
 
 const DEFAULT_SETTINGS: LayerSettingsMarker = {
   visible: false,
+  color: undefined,
   namespaces: {},
 };
 
@@ -52,20 +54,23 @@ export class Markers extends SceneExtension<TopicMarkers> {
           label: topic.name,
           icon: "Shapes",
           order: topic.name.toLocaleLowerCase(),
+          fields: {
+            color: { label: "Color", input: "rgba", value: config.color },
+          },
           visible: config.visible ?? DEFAULT_SETTINGS.visible,
           handler: this.handleSettingsAction,
         };
 
         // Create a list of all the namespaces for this topic
         const topicMarkers = this.renderables.get(topic.name);
-        const namespaces = Array.from(topicMarkers?.namespaces.values() ?? [])
-          .filter((ns) => ns.namespace !== "")
-          .sort((a, b) => a.namespace.localeCompare(b.namespace));
-        if (namespaces.length > 0) {
+        const namespaces = Array.from(topicMarkers?.namespaces.values() ?? []).sort((a, b) =>
+          a.namespace.localeCompare(b.namespace),
+        );
+        if (namespaces.length > 1 || (namespaces.length === 1 && namespaces[0]!.namespace !== "")) {
           node.children = {};
           for (const ns of namespaces) {
             const child: SettingsTreeNodeWithActionHandler = {
-              label: ns.namespace,
+              label: ns.namespace !== "" ? ns.namespace : `""`,
               icon: "Shapes",
               visible: ns.settings.visible,
               defaultExpansionState: namespaces.length > 1 ? "collapsed" : "expanded",
@@ -103,12 +108,13 @@ export class Markers extends SceneExtension<TopicMarkers> {
 
     // Update the TopicMarkers settings
     const topicName = path[1]!;
-    const renderable = this.renderables.get(topicName);
-    if (renderable) {
+    const topicMarkers = this.renderables.get(topicName);
+    if (topicMarkers) {
       const settings = this.renderer.config.topics[topicName] as
         | Partial<LayerSettingsMarker>
         | undefined;
-      renderable.userData.settings = { ...renderable.userData.settings, ...settings };
+      topicMarkers.userData.settings = { ...topicMarkers.userData.settings, ...settings };
+      topicMarkers.update();
     }
   };
 
