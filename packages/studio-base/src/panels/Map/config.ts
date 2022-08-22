@@ -9,12 +9,13 @@ import { SettingsTreeFields, SettingsTreeNodes } from "@foxglove/studio";
 
 // Persisted panel state
 export type Config = {
+  center?: { lat: number; lon: number };
   customTileUrl: string;
   disabledTopics: string[];
-  layer: string;
-  zoomLevel?: number;
   followTopic: string;
+  layer: string;
   topicColors: Record<string, string>;
+  zoomLevel?: number;
 };
 
 export function validateCustomUrl(url: string): Error | undefined {

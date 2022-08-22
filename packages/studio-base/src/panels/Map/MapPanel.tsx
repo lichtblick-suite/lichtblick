@@ -72,11 +72,13 @@ function MapPanel(props: MapPanelProps): JSX.Element {
   const [config, setConfig] = useState<Config>(() => {
     const initialConfig = props.context.initialState as Partial<Config>;
     return {
-      disabledTopics: initialConfig.disabledTopics ?? [],
-      layer: initialConfig.layer ?? "map",
+      center: initialConfig.center,
       customTileUrl: initialConfig.customTileUrl ?? "",
+      disabledTopics: initialConfig.disabledTopics ?? [],
       followTopic: initialConfig.followTopic ?? "",
+      layer: initialConfig.layer ?? "map",
       topicColors: initialConfig.topicColors ?? {},
+      zoomLevel: initialConfig.zoomLevel,
     };
   });
 
@@ -318,7 +320,10 @@ function MapPanel(props: MapPanelProps): JSX.Element {
     const map = new LeafMap(mapContainerRef.current);
 
     // the map must be initialized with some view before other features work
-    map.setView([0, 0], 10);
+    map.setView(
+      config.center ? [config.center.lat, config.center.lon] : [0, 0],
+      config.zoomLevel ?? 10,
+    );
 
     setCurrentMap(map);
 
@@ -354,7 +359,7 @@ function MapPanel(props: MapPanelProps): JSX.Element {
       map.remove();
       context.onRender = undefined;
     };
-  }, [context]);
+  }, [config.center, config.zoomLevel, context]);
 
   const onHover = useCallback(
     (messageEvent?: MessageEvent<unknown>) => {
@@ -374,7 +379,7 @@ function MapPanel(props: MapPanelProps): JSX.Element {
 
   /// --- the remaining code is unrelated to the extension api ----- ///
 
-  const [center, setCenter] = useState<Point | undefined>();
+  const [center, setCenter] = useState<Point | undefined>(config.center);
   const [filterBounds, setFilterBounds] = useState<LatLngBounds | undefined>();
 
   const addGeoFeatureEventHandlers = useCallback(
@@ -554,14 +559,20 @@ function MapPanel(props: MapPanelProps): JSX.Element {
       return;
     }
 
-    const zoomChange = () => {
+    const moveChange = () => {
       context.saveState({
-        zoomLevel: currentMap.getZoom(),
+        center: { lat: currentMap.getCenter().lat, lon: currentMap.getCenter().lng },
       });
     };
 
+    const zoomChange = () => {
+      context.saveState({ zoomLevel: currentMap.getZoom() });
+    };
+
+    currentMap.on("move", moveChange);
     currentMap.on("zoom", zoomChange);
     return () => {
+      currentMap.off("move", moveChange);
       currentMap.off("zoom", zoomChange);
     };
   }, [context, currentMap]);
