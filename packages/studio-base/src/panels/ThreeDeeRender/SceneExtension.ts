@@ -36,7 +36,8 @@ const SETTINGS_DEBOUNCE_MS = 100;
  * - Override `startFrame()` to execute code at the start of each frame. Call `super.startFrame()`
  *   to run `updatePose()` on each entry in `this.renderables`.
  * - Override `settingsNodes()` to add entries to the settings sidebar.
- * - Message subscriptions are added with `renderer.addDatatypeSubscriptions()`.
+ * - Message subscriptions are added with `renderer.addDatatypeSubscriptions()` or
+ *   `renderer.addTopicSubscription()`.
  * - Custom layer actions are added with `renderer.addCustomLayerAction()`.
  */
 export class SceneExtension<

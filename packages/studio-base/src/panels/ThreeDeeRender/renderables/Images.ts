@@ -26,7 +26,7 @@ import type { RosValue } from "@foxglove/studio-base/players/types";
 import { MutablePoint } from "@foxglove/studio-base/types/Messages";
 
 import { BaseUserData, Renderable } from "../Renderable";
-import { Renderer } from "../Renderer";
+import type { Renderer } from "../Renderer";
 import { PartialMessage, PartialMessageEvent, SceneExtension } from "../SceneExtension";
 import { SettingsTreeEntry } from "../SettingsManager";
 import { stringToRgba } from "../color";
@@ -39,7 +39,7 @@ import {
   COMPRESSED_IMAGE_DATATYPES,
   CAMERA_INFO_DATATYPES,
 } from "../ros";
-import { BaseSettings, PRECISION_DISTANCE, SelectEntry } from "../settings";
+import { BaseSettings, PRECISION_DISTANCE, SelectEntry, SubscriptionType } from "../settings";
 import { makePose } from "../transforms";
 import { CameraInfoUserData } from "./Cameras";
 
@@ -104,7 +104,14 @@ export class Images extends SceneExtension<ImageRenderable> {
 
     renderer.addDatatypeSubscriptions(IMAGE_DATATYPES, this.handleRawImage);
     renderer.addDatatypeSubscriptions(COMPRESSED_IMAGE_DATATYPES, this.handleCompressedImage);
-    renderer.addDatatypeSubscriptions(CAMERA_INFO_DATATYPES, this.handleCameraInfo);
+    // Unconditionally subscribe to CameraInfo messages so the `foxglove.Cameras` extension will
+    // always receive them and parse into camera models. This extension reuses the parsed camera
+    // models from `foxglove.Cameras`
+    renderer.addDatatypeSubscriptions(
+      CAMERA_INFO_DATATYPES,
+      this.handleCameraInfo,
+      SubscriptionType.Always,
+    );
   }
 
   public override settingsNodes(): SettingsTreeEntry[] {
