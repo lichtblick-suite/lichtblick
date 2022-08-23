@@ -3,7 +3,9 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 import { Skeleton, Typography } from "@mui/material";
+import { useDebounce } from "use-debounce";
 
+import { Time } from "@foxglove/rostime";
 import Duration from "@foxglove/studio-base/components/Duration";
 import {
   MessagePipelineContext,
@@ -21,13 +23,14 @@ const selectEndTime = (ctx: MessagePipelineContext) => ctx.playerState.activeDat
 const selectPlayerName = (ctx: MessagePipelineContext) => ctx.playerState.name;
 const selectPlayerPresence = ({ playerState }: MessagePipelineContext) => playerState.presence;
 
-function DataSourceInfo(): JSX.Element {
-  const startTime = useMessagePipeline(selectStartTime);
-  const endTime = useMessagePipeline(selectEndTime);
-  const playerName = useMessagePipeline(selectPlayerName);
-  const playerPresence = useMessagePipeline(selectPlayerPresence);
-
-  const duration = startTime && endTime ? subtractTimes(endTime, startTime) : undefined;
+function DataSourceInfoContent(props: {
+  duration?: Time;
+  endTime?: Time;
+  playerName?: string;
+  playerPresence: PlayerPresence;
+  startTime?: Time;
+}): JSX.Element {
+  const { duration, endTime, playerName, playerPresence, startTime } = props;
 
   return (
     <Stack gap={1.5} paddingX={2} paddingBottom={2}>
@@ -93,6 +96,31 @@ function DataSourceInfo(): JSX.Element {
         )}
       </Stack>
     </Stack>
+  );
+}
+
+const MemoDataSourceInfoContent = React.memo(DataSourceInfoContent);
+
+function DataSourceInfo(): JSX.Element {
+  const startTime = useMessagePipeline(selectStartTime);
+  const endTime = useMessagePipeline(selectEndTime);
+  const playerName = useMessagePipeline(selectPlayerName);
+  const playerPresence = useMessagePipeline(selectPlayerPresence);
+
+  const [debouncedTimes] = useDebounce(
+    { endTime, duration: startTime && endTime ? subtractTimes(endTime, startTime) : undefined },
+    100,
+    { leading: true, maxWait: 100 },
+  );
+
+  return (
+    <MemoDataSourceInfoContent
+      duration={debouncedTimes.duration}
+      endTime={debouncedTimes.endTime}
+      playerName={playerName}
+      playerPresence={playerPresence}
+      startTime={startTime}
+    />
   );
 }
 

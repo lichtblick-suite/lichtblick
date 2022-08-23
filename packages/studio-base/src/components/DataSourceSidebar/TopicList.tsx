@@ -18,7 +18,9 @@ import {
   TypographyProps,
 } from "@mui/material";
 import { Fzf, FzfResultItem } from "fzf";
+import { cloneDeep } from "lodash";
 import { useMemo, useState } from "react";
+import { useDebounce } from "use-debounce";
 
 import { areEqual, subtract as subtractTimes, Time, toSec } from "@foxglove/rostime";
 import {
@@ -151,6 +153,54 @@ const messageFrequency = (topic: TopicWithStats, duration: Time | undefined) => 
   return `${value.toFixed(digits)} Hz`;
 };
 
+function TopicListItem({
+  item,
+  messageCount,
+  messageHz,
+  positions,
+}: {
+  item: TopicWithStats;
+  messageCount?: number;
+  messageHz?: string;
+  positions: Set<number>;
+}): JSX.Element {
+  return (
+    <StyledListItem
+      divider
+      key={item.name}
+      secondaryAction={
+        (messageCount != undefined || messageHz != undefined) && (
+          <Stack style={{ textAlign: "right" }}>
+            <Typography variant="caption" color="text.secondary">
+              {messageCount ?? "–"}
+            </Typography>
+            <Typography variant="caption" color="text.secondary">
+              {messageHz ?? "–"}
+            </Typography>
+          </Stack>
+        )
+      }
+    >
+      <ListItemText
+        primary={<HighlightChars str={item.name} indices={positions} />}
+        primaryTypographyProps={{ noWrap: true, title: item.name }}
+        secondary={
+          <HighlightChars str={item.datatype} indices={positions} offset={item.name.length + 1} />
+        }
+        secondaryTypographyProps={{
+          variant: "caption",
+          fontFamily: fonts.MONOSPACE,
+          noWrap: true,
+          title: item.datatype,
+        }}
+        style={{ marginRight: "48px" }}
+      />
+    </StyledListItem>
+  );
+}
+
+const MemoTopicListItem = React.memo(TopicListItem);
+
 export function TopicList(): JSX.Element {
   const [filterText, setFilterText] = useState<string>("");
 
@@ -168,19 +218,30 @@ export function TopicList(): JSX.Element {
     [topics, topicStats],
   );
 
-  const duration =
-    endTime != undefined && startTime != undefined ? subtractTimes(endTime, startTime) : undefined;
+  // Clone deep is necessary here because players mutate the stats directly and
+  // break memoization.
+  const [debouncedData] = useDebounce(
+    {
+      items: cloneDeep(items),
+      duration:
+        endTime != undefined && startTime != undefined
+          ? subtractTimes(endTime, startTime)
+          : undefined,
+    },
+    1000,
+    { leading: true, maxWait: 1000 },
+  );
 
   const filteredTopics: FzfResultItem<TopicWithStats>[] = useMemo(
     () =>
       filterText
-        ? new Fzf(items, {
+        ? new Fzf(debouncedData.items, {
             fuzzy: filterText.length > 2 ? "v2" : false,
             sort: true,
             selector: (item) => `${item.name}|${item.datatype}`,
           }).find(filterText)
-        : items.map((item) => topicToFzfResult(item)),
-    [filterText, items],
+        : debouncedData.items.map((item) => topicToFzfResult(item)),
+    [filterText, debouncedData.items],
   );
 
   if (playerPresence === PlayerPresence.ERROR) {
@@ -254,44 +315,16 @@ export function TopicList(): JSX.Element {
         <List key="topics" dense disablePadding>
           {filteredTopics.map(({ item, positions }) => {
             const messageCount = item.numMessages;
-            const messageHz = messageFrequency(item, duration);
+            const messageHz = messageFrequency(item, debouncedData.duration);
 
             return (
-              <StyledListItem
-                divider
+              <MemoTopicListItem
                 key={item.name}
-                secondaryAction={
-                  (messageCount != undefined || messageHz != undefined) && (
-                    <Stack style={{ textAlign: "right" }}>
-                      <Typography variant="caption" color="text.secondary">
-                        {messageCount ?? "–"}
-                      </Typography>
-                      <Typography variant="caption" color="text.secondary">
-                        {messageHz ?? "–"}
-                      </Typography>
-                    </Stack>
-                  )
-                }
-              >
-                <ListItemText
-                  primary={<HighlightChars str={item.name} indices={positions} />}
-                  primaryTypographyProps={{ noWrap: true, title: item.name }}
-                  secondary={
-                    <HighlightChars
-                      str={item.datatype}
-                      indices={positions}
-                      offset={item.name.length + 1}
-                    />
-                  }
-                  secondaryTypographyProps={{
-                    variant: "caption",
-                    fontFamily: fonts.MONOSPACE,
-                    noWrap: true,
-                    title: item.datatype,
-                  }}
-                  style={{ marginRight: "48px" }}
-                />
-              </StyledListItem>
+                item={item}
+                messageCount={messageCount}
+                messageHz={messageHz}
+                positions={positions}
+              />
             );
           })}
         </List>
