@@ -425,8 +425,13 @@ export default function muiComponents(theme: Theme): ThemeOptions["components"] 
         root: {
           opacity: 0.8,
 
-          "&$selected": {
+          "&.Mui-selected": {
             opacity: 1,
+          },
+
+          "&:not(.Mui-selected):hover": {
+            opacity: 1,
+            color: theme.palette.action.active,
           },
         },
         selected: {},
