@@ -1,11 +1,47 @@
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
+
 import styled from "styled-components";
 
-import { LegacyTable } from "@foxglove/studio-base/components/LegacyStyledComponents";
+export default styled.table`
+  border: none;
+  width: 100%;
+  border-collapse: collapse;
+  border-spacing: 0;
 
-export default styled(LegacyTable)`
+  th {
+    color: ${({ theme }) => theme.semanticColors.bodyText};
+
+    tr:first-of-type & {
+      padding-top: 4px;
+      padding-bottom: 4px;
+    }
+  }
+  th,
+  td {
+    vertical-align: top;
+    border: 1px solid ${({ theme }) => theme.semanticColors.bodyDivider};
+    padding: 0 0.3em;
+    line-height: 1.3em;
+  }
+  tr {
+    svg {
+      opacity: 0.6;
+    }
+  }
+
+  tr:hover {
+    td {
+      background-color: ${({ theme }) => theme.semanticColors.menuItemBackgroundHovered};
+      cursor: pointer;
+    }
+
+    svg {
+      opacity: 0.8;
+    }
+  }
+
   th,
   td {
     border: none;

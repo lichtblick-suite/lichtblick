@@ -15,7 +15,6 @@ import LinkPlusIcon from "@mdi/svg/svg/link-plus.svg";
 import styled from "styled-components";
 
 import Icon from "@foxglove/studio-base/components/Icon";
-import { LegacyTable } from "@foxglove/studio-base/components/LegacyStyledComponents";
 
 import GlobalVariableLink from "./GlobalVariableLink/index";
 import GlobalVariableName from "./GlobalVariableName";
@@ -27,7 +26,44 @@ const SPath = styled.span`
   opacity: 0.8;
 `;
 
-const STable = styled(LegacyTable)`
+const STable = styled.table`
+  border: none;
+  width: 100%;
+  border-collapse: collapse;
+  border-spacing: 0;
+
+  th {
+    color: ${({ theme }) => theme.semanticColors.bodyText};
+
+    tr:first-of-type & {
+      padding-top: 4px;
+      padding-bottom: 4px;
+    }
+  }
+  th,
+  td {
+    vertical-align: top;
+    border: 1px solid ${({ theme }) => theme.semanticColors.bodyDivider};
+    padding: 0 0.3em;
+    line-height: 1.3em;
+  }
+  tr {
+    svg {
+      opacity: 0.6;
+    }
+  }
+
+  tr:hover {
+    td {
+      background-color: ${({ theme }) => theme.semanticColors.menuItemBackgroundHovered};
+      cursor: pointer;
+    }
+
+    svg {
+      opacity: 0.8;
+    }
+  }
+
   td {
     padding: 0.3em;
     border: none;

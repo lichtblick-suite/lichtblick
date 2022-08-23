@@ -15,11 +15,11 @@ import CameraControlIcon from "@mdi/svg/svg/camera-control.svg";
 import { Button, Tooltip, styled as muiStyled, useTheme } from "@mui/material";
 import { vec3 } from "gl-matrix";
 import { isEqual } from "lodash";
+import styled from "styled-components";
 
 import { CameraState, cameraStateSelectors, Vec3 } from "@foxglove/regl-worldview";
 import ExpandingToolbar, { ToolGroup } from "@foxglove/studio-base/components/ExpandingToolbar";
 import JsonInput from "@foxglove/studio-base/components/JsonInput";
-import { LegacyInput } from "@foxglove/studio-base/components/LegacyStyledComponents";
 import { usePanelContext } from "@foxglove/studio-base/components/PanelContext";
 import Stack from "@foxglove/studio-base/components/Stack";
 import {
@@ -32,6 +32,7 @@ import {
   ThreeDimensionalVizConfig,
 } from "@foxglove/studio-base/panels/ThreeDimensionalViz/types";
 import clipboard from "@foxglove/studio-base/util/clipboard";
+import { fonts } from "@foxglove/studio-base/util/sharedStyleConstants";
 
 import { point2DValidator, cameraStateValidator } from "./validate";
 
@@ -51,6 +52,29 @@ const StyledButton = muiStyled(Button)({
   lineHeight: 1.25,
   minWidth: 40,
 });
+
+const StyledInput = styled.input`
+  background-color: ${({ theme }) => theme.palette.neutralLighter};
+  border-radius: ${({ theme }) => theme.effects.roundedCorner2};
+  border: none;
+  color: ${({ theme }) => theme.semanticColors.inputText};
+  font: inherit;
+  font-family: ${fonts.SANS_SERIF};
+  font-feature-settings: ${fonts.SANS_SERIF_FEATURE_SETTINGS};
+  font-size: 100%;
+  margin: 0 0.2em;
+  padding: 8px 12px;
+  text-align: left;
+
+  &.disabled {
+    color: ${({ theme }) => theme.semanticColors.disabledText};
+    background-color: ${({ theme }) => theme.semanticColors.buttonBackgroundDisabled};
+  }
+  &:focus {
+    background-color: ${({ theme }) => theme.palette.neutralLighterAlt};
+    outline: none;
+  }
+`;
 
 export type CameraInfoPropsWithoutCameraState = {
   followMode: FollowMode;
@@ -206,7 +230,7 @@ export default function CameraInfo({
                       <SLabel>Auto sync:</SLabel>
                     </Tooltip>
                     <SValue>
-                      <LegacyInput
+                      <StyledInput
                         type="checkbox"
                         checked={autoSyncCameraState}
                         onChange={() =>
@@ -226,7 +250,7 @@ export default function CameraInfo({
                       Show crosshair:
                     </SLabel>
                     <SValue>
-                      <LegacyInput
+                      <StyledInput
                         type="checkbox"
                         disabled={cameraState.perspective}
                         checked={showCrosshair}
