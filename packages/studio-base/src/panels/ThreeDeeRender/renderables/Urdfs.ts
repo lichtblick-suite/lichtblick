@@ -82,6 +82,7 @@ type TransformData = {
 
 type ParsedUrdf = {
   robot: UrdfRobot;
+  frames: string[];
   transforms: TransformData[];
 };
 
@@ -417,8 +418,13 @@ export class Urdfs extends SceneExtension<UrdfRenderable> {
       });
   }
 
-  private _loadRobot(renderable: UrdfRenderable, { robot, transforms }: ParsedUrdf): void {
+  private _loadRobot(renderable: UrdfRenderable, { robot, frames, transforms }: ParsedUrdf): void {
     const renderer = this.renderer;
+
+    // Import all coordinate frames from the URDF into the scene
+    for (const frameId of frames) {
+      renderer.addCoordinateFrame(frameId);
+    }
 
     // Import all transforms from the URDF into the scene
     for (const { parent, child, translation, rotation } of transforms) {
@@ -454,13 +460,14 @@ export class Urdfs extends SceneExtension<UrdfRenderable> {
   }
 }
 
-async function parseUrdf(text: string): Promise<{ robot: UrdfRobot; transforms: TransformData[] }> {
+async function parseUrdf(text: string): Promise<ParsedUrdf> {
   const fileFetcher = getFileFetch();
 
   try {
     log.debug(`Parsing ${text.length} byte URDF`);
     const robot = await parseRobot(text, fileFetcher);
 
+    const frames = Array.from(robot.links.values(), (link) => link.name);
     const transforms = Array.from(robot.joints.values(), (joint) => {
       const translation = joint.origin.xyz;
       const rotation = eulerToQuaternion(joint.origin.rpy);
@@ -473,7 +480,7 @@ async function parseUrdf(text: string): Promise<{ robot: UrdfRobot; transforms: 
       return transform;
     });
 
-    return { robot, transforms };
+    return { robot, frames, transforms };
   } catch (err) {
     throw new Error(`Failed to parse ${text.length} byte URDF: ${err}`);
   }

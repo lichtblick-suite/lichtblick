@@ -808,7 +808,7 @@ export class Renderer extends EventEmitter<RendererEvents> {
     return frameId.slice(1);
   }
 
-  private addCoordinateFrame(frameId: string): void {
+  public addCoordinateFrame(frameId: string): void {
     const normalizedFrameId = this.normalizeFrameId(frameId);
     if (!this.transformTree.hasFrame(normalizedFrameId)) {
       this.transformTree.getOrCreateFrame(normalizedFrameId);
