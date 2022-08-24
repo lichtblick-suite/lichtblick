@@ -40,6 +40,9 @@ export class CoreSettings extends SceneExtension {
       "foxglove.publish-type-change",
       this.handlePublishToolChange,
     );
+
+    renderer.labelPool.scaleFactor =
+      renderer.config.scene.labelScaleFactor ?? DEFAULT_LABEL_SCALE_FACTOR;
   }
 
   public override dispose(): void {
