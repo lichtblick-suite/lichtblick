@@ -98,9 +98,12 @@ export class RenderableMeshResource extends RenderableMarker {
       return;
     }
 
-    const mesh = opts.useEmbeddedMaterials
-      ? cachedModel.clone(true)
-      : replaceMaterials(cachedModel.clone(true), this.material);
+    const mesh = cachedModel.clone(true);
+    removeLights(mesh);
+    if (!opts.useEmbeddedMaterials) {
+      replaceMaterials(mesh, this.material);
+    }
+
     this.mesh = mesh;
     this.add(mesh);
 
@@ -111,7 +114,22 @@ export class RenderableMeshResource extends RenderableMarker {
   }
 }
 
-function replaceMaterials(model: LoadedModel, material: THREE.MeshStandardMaterial): LoadedModel {
+function removeLights(model: LoadedModel): void {
+  // Remove lights from the model
+  const lights: THREE.Light[] = [];
+  model.traverse((child: THREE.Object3D) => {
+    const maybeLight = child as Partial<THREE.Light>;
+    if (maybeLight.isLight === true) {
+      lights.push(maybeLight as THREE.Light);
+    }
+  });
+  for (const light of lights) {
+    light.dispose();
+    light.removeFromParent();
+  }
+}
+
+function replaceMaterials(model: LoadedModel, material: THREE.MeshStandardMaterial): void {
   model.traverse((child: THREE.Object3D) => {
     if (!(child instanceof THREE.Mesh)) {
       return;
@@ -129,7 +147,6 @@ function replaceMaterials(model: LoadedModel, material: THREE.MeshStandardMateri
     }
     meshChild.material = material;
   });
-  return model;
 }
 
 /** Generic MeshStandardMaterial dispose function for materials loaded from an external source */
