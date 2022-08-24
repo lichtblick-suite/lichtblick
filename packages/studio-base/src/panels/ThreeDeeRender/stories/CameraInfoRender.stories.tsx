@@ -136,7 +136,7 @@ export function CameraInfoRender(): JSX.Element {
             perspective: true,
             phi: rad2deg(0),
             targetOffset: [0, 0, 0],
-            thetaOffset: rad2deg(0),
+            thetaOffset: rad2deg(Math.PI),
             fovy: rad2deg(0.75),
             near: 0.01,
             far: 5000,
