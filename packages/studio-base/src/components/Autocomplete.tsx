@@ -229,7 +229,7 @@ export default React.forwardRef(function Autocomplete<T = unknown>(
     selectedItem,
     // eslint-disable-next-line @typescript-eslint/strict-boolean-expressions
     value = stateValue ?? (selectedItem ? getItemText(selectedItem) : undefined),
-    filterText = value,
+    filterText = value ?? "",
     sortWhenFiltering = true,
     clearOnFocus = false,
     minWidth = 100,
@@ -243,19 +243,23 @@ export default React.forwardRef(function Autocomplete<T = unknown>(
     readOnly,
   }: AutocompleteProps<T> = props;
 
-  const autocompleteItems: FzfResultItem<T>[] = useMemo(
-    () =>
-      filterText
-        ? // @ts-expect-error Fzf selector TS type seems to be wrong?
-          new Fzf(items, {
-            fuzzy: filterText.length > 2 ? "v2" : false,
-            sort: sortWhenFiltering,
-            limit: MAX_ITEMS,
-            selector: getItemText,
-          }).find(filterText)
-        : items.map((item) => itemToFzfResult(item)),
-    [filterText, getItemText, items, sortWhenFiltering],
-  );
+  const fzfUnfiltered = useMemo(() => {
+    return items.map((item) => itemToFzfResult(item));
+  }, [items]);
+
+  const fzf = useMemo(() => {
+    // @ts-expect-error Fzf selector TS type seems to be wrong?
+    return new Fzf(items, {
+      fuzzy: "v2",
+      sort: sortWhenFiltering,
+      limit: MAX_ITEMS,
+      selector: getItemText,
+    });
+  }, [getItemText, items, sortWhenFiltering]);
+
+  const autocompleteItems: FzfResultItem<T>[] = useMemo(() => {
+    return filterText ? fzf.find(filterText) : fzfUnfiltered;
+  }, [filterText, fzf, fzfUnfiltered]);
 
   const hasError = Boolean(props.hasError ?? (autocompleteItems.length === 0 && value?.length));
 
