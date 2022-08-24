@@ -18,11 +18,9 @@ import {
   TypographyProps,
 } from "@mui/material";
 import { Fzf, FzfResultItem } from "fzf";
-import { cloneDeep } from "lodash";
 import { useMemo, useState } from "react";
-import { useDebounce } from "use-debounce";
 
-import { areEqual, subtract as subtractTimes, Time, toSec } from "@foxglove/rostime";
+import { DirectTopicStatsUpdater } from "@foxglove/studio-base/components/DirectTopicStatsUpdater";
 import {
   MessagePipelineContext,
   useMessagePipeline,
@@ -108,90 +106,57 @@ const StyledListItem = muiStyled(ListItem, { skipSx: true })(({ theme }) => ({
 }));
 
 const EMPTY_TOPICS: Topic[] = [];
-const EMPTY_TOPIC_STATS = new Map<string, TopicStats>();
 
 const selectPlayerPresence = ({ playerState }: MessagePipelineContext) => playerState.presence;
-const selectStartTime = ({ playerState }: MessagePipelineContext) =>
-  playerState.activeData?.startTime;
-const selectEndTime = ({ playerState }: MessagePipelineContext) => playerState.activeData?.endTime;
 
 const selectTopics = (ctx: MessagePipelineContext) =>
   ctx.playerState.activeData?.topics ?? EMPTY_TOPICS;
 
-const selectTopicStats = (ctx: MessagePipelineContext) =>
-  ctx.playerState.activeData?.topicStats ?? EMPTY_TOPIC_STATS;
-
-const messageFrequency = (topic: TopicWithStats, duration: Time | undefined) => {
-  const { numMessages, firstMessageTime, lastMessageTime } = topic;
-
-  if (numMessages == undefined || numMessages < 2) {
-    // Not enough messages to calculate a frequency
-    return undefined;
-  }
-  if (firstMessageTime == undefined || lastMessageTime == undefined) {
-    if (duration == undefined) {
-      return undefined;
-    }
-
-    // Message count but no timestamps, use the full connection duration
-    const durationSec = toSec(duration);
-    if (durationSec === 0) {
-      return undefined;
-    }
-    const value = numMessages / durationSec;
-    const digits = value >= 1000 ? 0 : value >= 100 ? 1 : 2;
-    return `${value.toFixed(digits)} Hz`;
-  }
-  if (areEqual(firstMessageTime, lastMessageTime)) {
-    // Not enough time span to calculate a frequency
-    return undefined;
-  }
-  const topicDurationSec = toSec(subtractTimes(lastMessageTime, firstMessageTime));
-
-  const value = (numMessages - 1) / topicDurationSec;
-  const digits = value >= 1000 ? 0 : value >= 100 ? 1 : 2;
-  return `${value.toFixed(digits)} Hz`;
-};
-
 function TopicListItem({
-  item,
-  messageCount,
-  messageHz,
+  topic,
   positions,
 }: {
-  item: TopicWithStats;
-  messageCount?: number;
-  messageHz?: string;
+  topic: Topic;
   positions: Set<number>;
 }): JSX.Element {
   return (
     <StyledListItem
       divider
-      key={item.name}
+      key={topic.name}
       secondaryAction={
-        (messageCount != undefined || messageHz != undefined) && (
-          <Stack style={{ textAlign: "right" }}>
-            <Typography variant="caption" color="text.secondary">
-              {messageCount ?? "–"}
-            </Typography>
-            <Typography variant="caption" color="text.secondary">
-              {messageHz ?? "–"}
-            </Typography>
-          </Stack>
-        )
+        <Stack style={{ textAlign: "right" }}>
+          <Typography
+            variant="caption"
+            component="div"
+            color="text.secondary"
+            data-topic={topic.name}
+            data-topic-stat="count"
+          >
+            &mdash;
+          </Typography>
+          <Typography
+            variant="caption"
+            component="div"
+            color="text.secondary"
+            data-topic={topic.name}
+            data-topic-stat="frequency"
+          >
+            &mdash;
+          </Typography>
+        </Stack>
       }
     >
       <ListItemText
-        primary={<HighlightChars str={item.name} indices={positions} />}
-        primaryTypographyProps={{ noWrap: true, title: item.name }}
+        primary={<HighlightChars str={topic.name} indices={positions} />}
+        primaryTypographyProps={{ noWrap: true, title: topic.name }}
         secondary={
-          <HighlightChars str={item.datatype} indices={positions} offset={item.name.length + 1} />
+          <HighlightChars str={topic.datatype} indices={positions} offset={topic.name.length + 1} />
         }
         secondaryTypographyProps={{
           variant: "caption",
           fontFamily: fonts.MONOSPACE,
           noWrap: true,
-          title: item.datatype,
+          title: topic.datatype,
         }}
         style={{ marginRight: "48px" }}
       />
@@ -205,43 +170,18 @@ export function TopicList(): JSX.Element {
   const [filterText, setFilterText] = useState<string>("");
 
   const playerPresence = useMessagePipeline(selectPlayerPresence);
-  const startTime = useMessagePipeline(selectStartTime);
-  const endTime = useMessagePipeline(selectEndTime);
   const topics = useMessagePipeline(selectTopics);
-  const topicStats = useMessagePipeline(selectTopicStats);
-  const items: TopicWithStats[] = useMemo(
-    () =>
-      topics.map((topic) => {
-        const stats = topicStats.get(topic.name);
-        return { ...topic, ...stats };
-      }),
-    [topics, topicStats],
-  );
 
-  // Clone deep is necessary here because players mutate the stats directly and
-  // break memoization.
-  const [debouncedData] = useDebounce(
-    {
-      items: cloneDeep(items),
-      duration:
-        endTime != undefined && startTime != undefined
-          ? subtractTimes(endTime, startTime)
-          : undefined,
-    },
-    1000,
-    { leading: true, maxWait: 1000 },
-  );
-
-  const filteredTopics: FzfResultItem<TopicWithStats>[] = useMemo(
+  const filteredTopics: FzfResultItem<Topic>[] = useMemo(
     () =>
       filterText
-        ? new Fzf(debouncedData.items, {
+        ? new Fzf(topics, {
             fuzzy: filterText.length > 2 ? "v2" : false,
             sort: true,
             selector: (item) => `${item.name}|${item.datatype}`,
           }).find(filterText)
-        : debouncedData.items.map((item) => topicToFzfResult(item)),
-    [filterText, debouncedData.items],
+        : topics.map((item) => topicToFzfResult(item)),
+    [filterText, topics],
   );
 
   if (playerPresence === PlayerPresence.ERROR) {
@@ -313,19 +253,8 @@ export function TopicList(): JSX.Element {
 
       {filteredTopics.length > 0 ? (
         <List key="topics" dense disablePadding>
-          {filteredTopics.map(({ item, positions }) => {
-            const messageCount = item.numMessages;
-            const messageHz = messageFrequency(item, debouncedData.duration);
-
-            return (
-              <MemoTopicListItem
-                key={item.name}
-                item={item}
-                messageCount={messageCount}
-                messageHz={messageHz}
-                positions={positions}
-              />
-            );
+          {filteredTopics.map(({ item: topic, positions }) => {
+            return <MemoTopicListItem key={topic.name} topic={topic} positions={positions} />;
           })}
         </List>
       ) : (
@@ -349,6 +278,7 @@ export function TopicList(): JSX.Element {
           )}
         </Stack>
       )}
+      <DirectTopicStatsUpdater interval={6} />
     </>
   );
 }

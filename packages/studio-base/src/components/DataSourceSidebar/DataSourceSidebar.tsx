@@ -22,7 +22,7 @@ import { SidebarContent } from "@foxglove/studio-base/components/SidebarContent"
 import Stack from "@foxglove/studio-base/components/Stack";
 import { PlayerPresence } from "@foxglove/studio-base/players/types";
 
-import { DataSourceInfo } from "./DataSourceInfo";
+import { DataSourceInfoView } from "../DataSourceInfoView";
 import { ProblemsList } from "./ProblemsList";
 import { TopicList } from "./TopicList";
 import helpContent from "./help.md";
@@ -128,7 +128,7 @@ export default function DataSourceSidebar(props: Props): JSX.Element {
       ].filter(Boolean)}
     >
       <Stack fullHeight>
-        <DataSourceInfo />
+        <DataSourceInfoView />
         {playerPresence !== PlayerPresence.NOT_PRESENT && (
           <>
             <Divider />
