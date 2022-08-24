@@ -7,7 +7,6 @@ import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import { IconButton, TextFieldProps, TextField, styled as muiStyled } from "@mui/material";
 import { clamp, isFinite } from "lodash";
 import { ReactNode, useCallback } from "react";
-import { useKeyPress } from "react-use";
 
 import { fonts } from "@foxglove/studio-base/util/sharedStyleConstants";
 
@@ -68,10 +67,6 @@ export function NumberInput(
 ): JSX.Element {
   const { value, iconDown, iconUp, step = 1, onChange, disabled, readOnly } = props;
 
-  const [shiftPressed] = useKeyPress("Shift");
-
-  const stepAmount = shiftPressed ? step * 10 : step;
-
   const placeHolderValue = isFinite(Number(props.placeholder))
     ? Number(props.placeholder)
     : undefined;
@@ -112,14 +107,16 @@ export function NumberInput(
         updateValue(event.target.value.length > 0 ? Number(event.target.value) : undefined)
       }
       type="number"
-      inputProps={{ max: props.max, min: props.min, step: stepAmount }}
+      inputProps={{ max: props.max, min: props.min, step }}
       InputProps={{
         readOnly,
         startAdornment: (
           <StyledIconButton
             size="small"
             edge="start"
-            onClick={() => updateValue((value ?? placeHolderValue ?? 0) - stepAmount)}
+            onClick={(event: React.MouseEvent) =>
+              updateValue((value ?? placeHolderValue ?? 0) - (event.shiftKey ? step * 10 : step))
+            }
           >
             {iconDown ?? <ChevronLeftIcon fontSize="small" />}
           </StyledIconButton>
@@ -128,7 +125,9 @@ export function NumberInput(
           <StyledIconButton
             size="small"
             edge="end"
-            onClick={() => updateValue((value ?? placeHolderValue ?? 0) + stepAmount)}
+            onClick={(event: React.MouseEvent) =>
+              updateValue((value ?? placeHolderValue ?? 0) + (event.shiftKey ? step * 10 : step))
+            }
           >
             {iconUp ?? <ChevronRightIcon fontSize="small" />}
           </StyledIconButton>
