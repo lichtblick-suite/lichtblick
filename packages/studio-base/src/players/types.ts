@@ -133,9 +133,6 @@ export type PlayerState = {
   // The player could set this value to represent the current connection, name, ports, etc.
   name?: string;
 
-  /** A path to a file on disk currently being accessed by the player */
-  filePath?: string;
-
   // Surface issues during playback or player initialization
   problems?: PlayerProblem[];
 

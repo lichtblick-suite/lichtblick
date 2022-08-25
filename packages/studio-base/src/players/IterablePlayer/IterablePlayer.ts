@@ -101,7 +101,6 @@ type IterablePlayerState =
 export class IterablePlayer implements Player {
   private _urlParams?: Record<string, string>;
   private _name?: string;
-  private _filePath?: string;
   private _nextState?: IterablePlayerState;
   private _state: IterablePlayerState = "preinit";
   private _runningState: boolean = false;
@@ -649,7 +648,6 @@ export class IterablePlayer implements Player {
     if (this._hasError) {
       return await this._listener({
         name: this._name,
-        filePath: this._filePath,
         presence: PlayerPresence.ERROR,
         progress: {},
         capabilities: this._capabilities,
@@ -674,7 +672,6 @@ export class IterablePlayer implements Player {
 
     const data: PlayerState = {
       name: this._name,
-      filePath: this._filePath,
       presence: this._presence,
       progress: this._progress,
       capabilities: this._capabilities,

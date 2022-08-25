@@ -33,6 +33,7 @@ import {
   useCurrentLayoutSelector,
 } from "@foxglove/studio-base/context/CurrentLayoutContext";
 import { useLayoutManager } from "@foxglove/studio-base/context/LayoutManagerContext";
+import { useNativeWindow } from "@foxglove/studio-base/context/NativeWindowContext";
 import PlayerSelectionContext, {
   DataSourceArgs,
   IDataSourceFactory,
@@ -74,6 +75,8 @@ export default function PlayerManager(props: PropsWithChildren<PlayerManagerProp
     setUserNodeRosLib,
     setUserNodeTypesLib,
   });
+
+  const nativeWindow = useNativeWindow();
 
   const isMounted = useMountedState();
 
@@ -118,6 +121,9 @@ export default function PlayerManager(props: PropsWithChildren<PlayerManagerProp
   const selectSource = useCallback(
     async (sourceId: string, args?: DataSourceArgs) => {
       log.debug(`Select Source: ${sourceId}`);
+
+      // Clear any previous represented filename
+      void nativeWindow?.setRepresentedFilename(undefined);
 
       const foundSource = playerSources.find((source) => source.id === sourceId);
       if (!foundSource) {
@@ -209,6 +215,12 @@ export default function PlayerManager(props: PropsWithChildren<PlayerManagerProp
                 metricsCollector,
               });
 
+              // If we are selecting a single file, the desktop environment might have features to
+              // show the user which file they've selected (i.e. macOS proxy icon)
+              if (file) {
+                void nativeWindow?.setRepresentedFilename((file as { path?: string }).path); // File.path is added by Electron
+              }
+
               setBasePlayer(newPlayer);
               return;
             } else if (handle) {
@@ -228,6 +240,10 @@ export default function PlayerManager(props: PropsWithChildren<PlayerManagerProp
               if (!isMounted()) {
                 return;
               }
+
+              // If we are selecting a single file, the desktop environment might have features to
+              // show the user which file they've selected (i.e. macOS proxy icon)
+              void nativeWindow?.setRepresentedFilename((file as { path?: string }).path); // File.path is added by Electron
 
               const newPlayer = foundSource.initialize({
                 file,
@@ -253,14 +269,15 @@ export default function PlayerManager(props: PropsWithChildren<PlayerManagerProp
       }
     },
     [
-      addRecent,
+      playerSources,
+      metricsCollector,
       enqueueSnackbar,
       consoleApi,
-      isMounted,
       layoutStorage,
-      metricsCollector,
-      playerSources,
+      isMounted,
       setSelectedLayoutId,
+      addRecent,
+      nativeWindow,
     ],
   );
 
