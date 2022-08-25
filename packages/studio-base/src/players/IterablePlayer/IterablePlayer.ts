@@ -241,11 +241,8 @@ export class IterablePlayer implements Player {
     this._speed = speed;
     this._metricsCollector.setSpeed(speed);
 
-    // If we are idling then we might not emit any new state so we use a state change to idle state
-    // to trigger an emit so listeners get updated with the new speed setting.
-    if (this._state === "idle") {
-      this._setState("idle");
-    }
+    // Queue event state update to update speed in player state to UI
+    this._queueEmitState();
   }
 
   public seekPlayback(time: Time): void {
@@ -778,7 +775,7 @@ export class IterablePlayer implements Player {
       // Read from the iterator through the end of the tick time
       for (;;) {
         if (!this._playbackIterator) {
-          break;
+          throw new Error("Invariant. this._playbackIterator is undefined.");
         }
 
         const result = await this._playbackIterator.next();
