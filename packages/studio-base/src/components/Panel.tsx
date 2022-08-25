@@ -47,7 +47,7 @@ import { useConfigById } from "@foxglove/studio-base/PanelAPI";
 import KeyListener from "@foxglove/studio-base/components/KeyListener";
 import PanelContext from "@foxglove/studio-base/components/PanelContext";
 import PanelErrorBoundary from "@foxglove/studio-base/components/PanelErrorBoundary";
-import { PanelRoot } from "@foxglove/studio-base/components/PanelRoot";
+import { PanelRoot, PANEL_ROOT_CLASS_NAME } from "@foxglove/studio-base/components/PanelRoot";
 import {
   useCurrentLayoutActions,
   useSelectedPanels,
@@ -83,7 +83,7 @@ const ActionsOverlay = muiStyled("div")(({ theme }) => ({
   visibility: "hidden",
   pointerEvents: "none",
 
-  [`${PanelRoot.toString()}:hover > &`]: {
+  [`.${PANEL_ROOT_CLASS_NAME}:hover > &`]: {
     visibility: "visible",
     pointerEvents: "auto",
   },
