@@ -79,7 +79,7 @@ export default function VariablesSidebar(): ReactElement {
         <Divider />
         {linked.map((name, idx) => (
           <Variable
-            key={`linked.${idx}`}
+            key={`linked.${name}`}
             name={name}
             selected={!skipAnimation.current && changedVariables.includes(name)}
             linked
@@ -88,7 +88,7 @@ export default function VariablesSidebar(): ReactElement {
         ))}
         {unlinked.map((name, idx) => (
           <Variable
-            key={`unlinked.${idx}`}
+            key={`unlinked.${name}`}
             name={name}
             selected={!skipAnimation.current && changedVariables.includes(name)}
             linkedIndex={linked.length + idx}
