@@ -162,7 +162,7 @@ export class IterablePlayer implements Player {
   private _blockLoader?: BlockLoader;
   private _blockLoadingProcess?: Promise<void>;
 
-  private _emitState: ReturnType<typeof debouncePromise>;
+  private _queueEmitState: ReturnType<typeof debouncePromise>;
 
   private readonly _sourceId: string;
 
@@ -182,7 +182,7 @@ export class IterablePlayer implements Player {
 
     // Wrap emitStateImpl in a debouncePromise for our states to call. Since we can emit from states
     // or from block loading updates we use debouncePromise to guard against concurrent emits.
-    this._emitState = debouncePromise(this._emitStateImpl.bind(this));
+    this._queueEmitState = debouncePromise(this._emitStateImpl.bind(this));
   }
 
   public setListener(listener: (playerState: PlayerState) => Promise<void>): void {
@@ -369,7 +369,7 @@ export class IterablePlayer implements Player {
 
         switch (state) {
           case "preinit":
-            this._emitState();
+            this._queueEmitState();
             break;
           case "initialize":
             await this._stateInitialize();
@@ -399,7 +399,7 @@ export class IterablePlayer implements Player {
     } catch (err) {
       log.error(err);
       this._setError((err as Error).message, err);
-      this._emitState();
+      this._queueEmitState();
     } finally {
       this._runningState = false;
     }
@@ -418,7 +418,7 @@ export class IterablePlayer implements Player {
   // Initialize the source and player members
   private async _stateInitialize(): Promise<void> {
     // emit state indicating start of initialization
-    this._emitState();
+    this._queueEmitState();
 
     try {
       const { start, end, topics, profile, topicStats, problems, publishersByTopic, datatypes } =
@@ -472,7 +472,7 @@ export class IterablePlayer implements Player {
     } catch (error) {
       this._setError(`Error initializing: ${error.message}`, error);
     }
-    this._emitState();
+    this._queueEmitState();
 
     if (!this._hasError) {
       // Wait a bit until panels have had the chance to subscribe to topics before we start
@@ -547,7 +547,7 @@ export class IterablePlayer implements Player {
     // indicates that the player is waiting to load more data.
     const tickTimeout = setTimeout(() => {
       this._presence = PlayerPresence.BUFFERING;
-      this._emitState();
+      this._queueEmitState();
     }, 100);
 
     try {
@@ -582,7 +582,7 @@ export class IterablePlayer implements Player {
     this._currentTime = stopTime;
     this._messages = messageEvents;
     this._presence = PlayerPresence.PRESENT;
-    this._emitState();
+    this._queueEmitState();
     this._setState("idle");
   }
 
@@ -604,7 +604,7 @@ export class IterablePlayer implements Player {
       this._messages = [];
       this._currentTime = targetTime;
       this._lastSeekEmitTime = Date.now();
-      this._emitState();
+      this._queueEmitState();
     }, 100);
 
     const topics = Array.from(this._allTopics);
@@ -616,7 +616,21 @@ export class IterablePlayer implements Player {
         time: targetTime,
         abortSignal: this._abort.signal,
       });
+
+      // We've successfully loaded the messages and will emit those, no longer need the ackTimeout
+      clearTimeout(seekAckTimeout);
+
+      if (this._nextState) {
+        return;
+      }
+
       this._messages = messages;
+      this._currentTime = targetTime;
+      this._lastSeekEmitTime = Date.now();
+      this._presence = PlayerPresence.PRESENT;
+      this._queueEmitState();
+      await this.resetPlaybackIterator();
+      this._setState(this._isPlaying ? "play" : "idle");
     } catch (err) {
       if (this._nextState && err instanceof DOMException && err.name === "AbortError") {
         log.debug("Aborted backfill");
@@ -624,22 +638,9 @@ export class IterablePlayer implements Player {
         throw err;
       }
     } finally {
+      clearTimeout(seekAckTimeout);
       this._abort = undefined;
     }
-
-    // We've successfully loaded the messages and will emit those, no longer need the ackTimeout
-    clearTimeout(seekAckTimeout);
-
-    if (this._nextState) {
-      return;
-    }
-
-    this._currentTime = targetTime;
-    this._lastSeekEmitTime = Date.now();
-    this._presence = PlayerPresence.PRESENT;
-    this._emitState();
-    await this.resetPlaybackIterator();
-    this._setState(this._isPlaying ? "play" : "idle");
   }
 
   /** Emit the player state to the registered listener */
@@ -749,11 +750,11 @@ export class IterablePlayer implements Player {
       // If the last message we saw is still ahead of the tick end time, we don't emit anything
       if (compare(this._lastMessage.receiveTime, end) > 0) {
         // Wait for the previous render frame to finish
-        await this._emitState.currentPromise;
+        await this._queueEmitState.currentPromise;
 
         this._currentTime = end;
         this._messages = msgEvents;
-        this._emitState();
+        this._queueEmitState();
 
         if (this._untilTime && compare(this._currentTime, this._untilTime) >= 0) {
           this.pausePlayback();
@@ -770,7 +771,7 @@ export class IterablePlayer implements Player {
     // clear this timeout.
     const tickTimeout = setTimeout(() => {
       this._presence = PlayerPresence.BUFFERING;
-      this._emitState();
+      this._queueEmitState();
     }, 500);
 
     try {
@@ -815,11 +816,11 @@ export class IterablePlayer implements Player {
     // Wait on any active emit state to finish as part of this tick
     // Without waiting on the emit state to finish we might drop messages since our emitState
     // might get debounced
-    await this._emitState.currentPromise;
+    await this._queueEmitState.currentPromise;
 
     this._currentTime = end;
     this._messages = msgEvents;
-    this._emitState();
+    this._queueEmitState();
 
     // This tick has reached the end of the untilTime so we go back to pause
     if (this._untilTime && compare(this._currentTime, this._untilTime) >= 0) {
@@ -830,7 +831,7 @@ export class IterablePlayer implements Player {
   private async _stateIdle() {
     this._isPlaying = false;
     this._presence = PlayerPresence.PRESENT;
-    this._emitState();
+    this._queueEmitState();
 
     if (this._abort) {
       throw new Error("Invariant: some other abort controller exists");
@@ -848,7 +849,7 @@ export class IterablePlayer implements Player {
         fullyLoadedFractionRanges: this._bufferedSource.loadedRanges(),
         messageCache: this._progress.messageCache,
       };
-      this._emitState();
+      this._queueEmitState();
 
       // When idling nothing is querying the source, but our buffered source might be
       // buffering behind the scenes. Every second we emit state with an update to show that
@@ -911,7 +912,7 @@ export class IterablePlayer implements Player {
       }
     } catch (err) {
       this._setError((err as Error).message, err);
-      this._emitState();
+      this._queueEmitState();
     }
   }
 
@@ -933,7 +934,7 @@ export class IterablePlayer implements Player {
           messageCache: progress.messageCache,
         };
 
-        this._emitState();
+        this._queueEmitState();
       },
     });
   }
