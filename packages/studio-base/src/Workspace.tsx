@@ -43,7 +43,6 @@ import {
 } from "@foxglove/studio-base/components/MessagePipeline";
 import MultiProvider from "@foxglove/studio-base/components/MultiProvider";
 import { OpenDialog, OpenDialogViews } from "@foxglove/studio-base/components/OpenDialog";
-import { OrgExtensionRegistrySyncAdapter } from "@foxglove/studio-base/components/OrgExtensionRegistrySyncAdapter";
 import PanelLayout from "@foxglove/studio-base/components/PanelLayout";
 import PanelList from "@foxglove/studio-base/components/PanelList";
 import panelsHelpContent from "@foxglove/studio-base/components/PanelList/index.help.md";
@@ -55,7 +54,7 @@ import Sidebar, { SidebarItem } from "@foxglove/studio-base/components/Sidebar";
 import { SidebarContent } from "@foxglove/studio-base/components/SidebarContent";
 import { SignInFormModal } from "@foxglove/studio-base/components/SignInFormModal";
 import Stack from "@foxglove/studio-base/components/Stack";
-import { URLStateSyncAdapter } from "@foxglove/studio-base/components/URLStateSyncAdapter";
+import { SyncAdapters } from "@foxglove/studio-base/components/SyncAdapters";
 import VariablesSidebar from "@foxglove/studio-base/components/VariablesSidebar";
 import { useAssets } from "@foxglove/studio-base/context/AssetsContext";
 import ConsoleApiContext from "@foxglove/studio-base/context/ConsoleApiContext";
@@ -595,8 +594,7 @@ export default function Workspace(props: WorkspaceProps): JSX.Element {
           <div className={classes.dropzone}>Drop a file here</div>
         </DropOverlay>
       </DocumentDropListener>
-      <OrgExtensionRegistrySyncAdapter />
-      <URLStateSyncAdapter />
+      <SyncAdapters />
       <KeyListener global keyDownHandlers={keyDownHandlers} />
       <div className={classes.container} ref={containerRef} tabIndex={0}>
         <Sidebar

@@ -11,12 +11,14 @@ import {
 } from "@foxglove/studio-base/components/MessagePipeline";
 import { useCurrentLayoutActions } from "@foxglove/studio-base/context/CurrentLayoutContext";
 import { useCurrentUser } from "@foxglove/studio-base/context/CurrentUserContext";
+import { EventsStore, useEvents } from "@foxglove/studio-base/context/EventsContext";
 import { usePlayerSelection } from "@foxglove/studio-base/context/PlayerSelectionContext";
 import { PlayerPresence } from "@foxglove/studio-base/players/types";
 import { parseAppURLState } from "@foxglove/studio-base/util/appURLState";
 
 const selectPlayerPresence = (ctx: MessagePipelineContext) => ctx.playerState.presence;
 const selectSeek = (ctx: MessagePipelineContext) => ctx.seekPlayback;
+const selectSelectEvent = (store: EventsStore) => store.selectEvent;
 
 const log = Log.getLogger(__filename);
 
@@ -32,6 +34,7 @@ export function useInitialDeepLinkState(deepLinks: readonly string[]): {
   const seekPlayback = useMessagePipeline(selectSeek);
   const playerPresence = useMessagePipeline(selectPlayerPresence);
   const { currentUser } = useCurrentUser();
+  const selectEvent = useEvents(selectSelectEvent);
 
   const targetUrlState = useMemo(
     () => (deepLinks[0] ? parseAppURLState(new URL(deepLinks[0])) : undefined),
@@ -65,9 +68,10 @@ export function useInitialDeepLinkState(deepLinks: readonly string[]): {
         type: "connection",
         params: unappliedUrlState.dsParams,
       });
+      selectEvent(unappliedUrlState.dsParams?.eventId);
       setUnappliedUrlState((oldState) => ({ ...oldState, ds: undefined, dsParams: undefined }));
     }
-  }, [currentUser, currentUserRequired, selectSource, unappliedUrlState]);
+  }, [currentUser, currentUserRequired, selectEvent, selectSource, unappliedUrlState]);
 
   // Select layout from URL.
   useEffect(() => {

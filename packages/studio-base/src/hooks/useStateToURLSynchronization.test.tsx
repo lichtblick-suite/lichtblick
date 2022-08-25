@@ -13,10 +13,12 @@
 //   You may not use this file except in compliance with the License.
 
 import { renderHook } from "@testing-library/react-hooks";
+import { ReactNode } from "react";
 
 import { useMessagePipeline } from "@foxglove/studio-base/components/MessagePipeline";
 import { useCurrentLayoutSelector } from "@foxglove/studio-base/context/CurrentLayoutContext";
 import { useStateToURLSynchronization } from "@foxglove/studio-base/hooks/useStateToURLSynchronization";
+import EventsProvider from "@foxglove/studio-base/providers/EventsProvider";
 
 jest.mock("@foxglove/studio-base/context/CurrentLayoutContext");
 jest.mock("@foxglove/studio-base/components/MessagePipeline");
@@ -41,7 +43,11 @@ describe("useStateToURLSynchronization", () => {
       }),
     );
 
-    const { rerender } = renderHook(useStateToURLSynchronization);
+    const wrapper = ({ children }: { children: ReactNode }) => (
+      <EventsProvider>{children}</EventsProvider>
+    );
+
+    const { rerender } = renderHook(useStateToURLSynchronization, { wrapper });
 
     expect(spy).toHaveBeenCalledWith(
       undefined,

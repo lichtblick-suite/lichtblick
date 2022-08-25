@@ -49,6 +49,18 @@ type ExtensionResponse = {
   sha256Sum?: string;
 };
 
+export type ConsoleEvent = {
+  id: string;
+  createdAt: string;
+  deviceId: string;
+  durationNanos: string;
+  metadata: Record<string, string>;
+  timestampNanos: string;
+  updatedAt: string;
+};
+
+type EventsResponse = ConsoleEvent[];
+
 type TokenArgs = {
   deviceCode: string;
   clientId: string;
@@ -151,6 +163,14 @@ class ConsoleApi {
 
   public async getExtension(id: string): Promise<ExtensionResponse> {
     return await this.get<ExtensionResponse>(`/v1/extensions/${id}`);
+  }
+
+  public async getEvents(params: {
+    deviceId: string;
+    start: string;
+    end: string;
+  }): Promise<EventsResponse> {
+    return await this.get<EventsResponse>(`/beta/device-events`, params);
   }
 
   public async getLayouts(options: { includeData: boolean }): Promise<readonly ConsoleApiLayout[]> {

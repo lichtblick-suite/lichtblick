@@ -14,12 +14,15 @@ import {
 } from "@mui/material";
 import { useState, PropsWithChildren, useEffect, useMemo } from "react";
 
+import { EventsList } from "@foxglove/studio-base/components/DataSourceSidebar/EventsList";
 import {
   MessagePipelineContext,
   useMessagePipeline,
 } from "@foxglove/studio-base/components/MessagePipeline";
 import { SidebarContent } from "@foxglove/studio-base/components/SidebarContent";
 import Stack from "@foxglove/studio-base/components/Stack";
+import { useCurrentUser } from "@foxglove/studio-base/context/CurrentUserContext";
+import { EventsStore, useEvents } from "@foxglove/studio-base/context/EventsContext";
 import { PlayerPresence } from "@foxglove/studio-base/players/types";
 
 import { DataSourceInfoView } from "../DataSourceInfoView";
@@ -83,12 +86,20 @@ const TabPanel = (
 
 const selectPlayerPresence = ({ playerState }: MessagePipelineContext) => playerState.presence;
 const selectPlayerProblems = ({ playerState }: MessagePipelineContext) => playerState.problems;
+const selectPlayerSourceId = ({ playerState }: MessagePipelineContext) =>
+  playerState.urlState?.sourceId;
+const selectSelectedEventId = (store: EventsStore) => store.selectedEventId;
 
 export default function DataSourceSidebar(props: Props): JSX.Element {
   const { onSelectDataSourceAction } = props;
   const playerPresence = useMessagePipeline(selectPlayerPresence);
   const playerProblems = useMessagePipeline(selectPlayerProblems) ?? [];
-  const [activeTab, setActiveTab] = useState<number>(0);
+  const { currentUser } = useCurrentUser();
+  const playerSourceId = useMessagePipeline(selectPlayerSourceId);
+  const selectedEventId = useEvents(selectSelectedEventId);
+  const [activeTab, setActiveTab] = useState(0);
+
+  const showEventsTab = currentUser != undefined && playerSourceId === "foxglove-data-platform";
 
   const isLoading = useMemo(
     () =>
@@ -99,11 +110,11 @@ export default function DataSourceSidebar(props: Props): JSX.Element {
 
   useEffect(() => {
     if (playerPresence === PlayerPresence.ERROR || playerPresence === PlayerPresence.RECONNECTING) {
+      setActiveTab(2);
+    } else if (showEventsTab && selectedEventId != undefined) {
       setActiveTab(1);
-    } else {
-      setActiveTab(0);
     }
-  }, [playerPresence]);
+  }, [playerPresence, showEventsTab, selectedEventId]);
 
   return (
     <SidebarContent
@@ -139,6 +150,7 @@ export default function DataSourceSidebar(props: Props): JSX.Element {
                 textColor="inherit"
               >
                 <StyledTab disableRipple label="Topics" value={0} />
+                {showEventsTab && <StyledTab disableRipple label="Events" value={1} />}
                 <StyledTab
                   disableRipple
                   label={
@@ -149,7 +161,7 @@ export default function DataSourceSidebar(props: Props): JSX.Element {
                       )}
                     </Stack>
                   }
-                  value={1}
+                  value={2}
                 />
               </StyledTabs>
               <Divider />
@@ -157,6 +169,9 @@ export default function DataSourceSidebar(props: Props): JSX.Element {
                 <TopicList />
               </TabPanel>
               <TabPanel value={activeTab} index={1}>
+                <EventsList />
+              </TabPanel>
+              <TabPanel value={activeTab} index={2}>
                 <ProblemsList problems={playerProblems} />
               </TabPanel>
             </Stack>

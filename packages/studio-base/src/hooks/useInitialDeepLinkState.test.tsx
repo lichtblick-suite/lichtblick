@@ -14,6 +14,7 @@ import PlayerSelectionContext, {
 } from "@foxglove/studio-base/context/PlayerSelectionContext";
 import { useInitialDeepLinkState } from "@foxglove/studio-base/hooks/useInitialDeepLinkState";
 import { useSessionStorageValue } from "@foxglove/studio-base/hooks/useSessionStorageValue";
+import EventsProvider from "@foxglove/studio-base/providers/EventsProvider";
 
 jest.mock("@foxglove/studio-base/hooks/useSessionStorageValue");
 jest.mock("@foxglove/studio-base/context/CurrentLayoutContext");
@@ -44,9 +45,11 @@ function makeWrapper(initialProps: WrapperProps) {
         startTime={{ sec: 0, nsec: 1 }}
       >
         <CurrentUserContext.Provider value={userContextValue}>
-          <PlayerSelectionContext.Provider value={wrapperProps.playerSelection}>
-            {children}
-          </PlayerSelectionContext.Provider>
+          <EventsProvider>
+            <PlayerSelectionContext.Provider value={wrapperProps.playerSelection}>
+              {children}
+            </PlayerSelectionContext.Provider>
+          </EventsProvider>
         </CurrentUserContext.Provider>
       </MockMessagePipelineProvider>
     );
