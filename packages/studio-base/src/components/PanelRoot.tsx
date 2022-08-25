@@ -2,95 +2,124 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
+import { alpha } from "@mui/material";
+import { forwardRef, HTMLAttributes, PropsWithChildren } from "react";
 import { TransitionStatus } from "react-transition-group";
-import styled, { css } from "styled-components";
+import { makeStyles } from "tss-react/mui";
 
-export const FULLSCREEN_TRANSITION_DURATION_MS = 200;
+export const PANEL_ROOT_CLASS_NAME = "FoxglovePanelRoot-root";
 
-// This is in a separate file to prevent circular import issues.
-export const PanelRoot = styled.div<{
+type PanelRootProps = {
   fullscreenState: TransitionStatus;
   selected: boolean;
   sourceRect: DOMRectReadOnly | undefined;
   hasFullscreenDescendant: boolean;
-}>`
-  display: flex;
-  flex-direction: column;
-  flex: 1 1 auto;
-  overflow: hidden;
-  background-color: ${({ theme }) => theme.semanticColors.bodyBackground};
-  border: 0px solid rgba(110, 81, 238, 0.3);
-  transition: border-width ${FULLSCREEN_TRANSITION_DURATION_MS}ms;
+} & HTMLAttributes<HTMLDivElement>;
 
-  ${({ fullscreenState, sourceRect, hasFullscreenDescendant }) => {
-    switch (fullscreenState) {
-      case "entering":
-        return css`
-          position: fixed;
-          top: ${sourceRect?.top ?? 0}px;
-          left: ${sourceRect?.left ?? 0}px;
-          right: ${sourceRect ? window.innerWidth - sourceRect.right : 0}px;
-          bottom: ${sourceRect ? window.innerHeight - sourceRect.bottom : 0}px;
-          z-index: 10000;
-        `;
-      case "entered":
-        return css`
-          transition: border-width ${FULLSCREEN_TRANSITION_DURATION_MS}ms,
-            top ${FULLSCREEN_TRANSITION_DURATION_MS}ms, left ${FULLSCREEN_TRANSITION_DURATION_MS}ms,
-            right ${FULLSCREEN_TRANSITION_DURATION_MS}ms,
-            bottom ${FULLSCREEN_TRANSITION_DURATION_MS}ms;
-          border-width: 4px;
-          position: fixed;
-          top: 0;
-          left: 0;
-          right: 0;
-          bottom: 50px;
-          z-index: 10000;
-        `;
-      case "exiting":
-        return css`
-          transition: border-width ${FULLSCREEN_TRANSITION_DURATION_MS}ms,
-            top ${FULLSCREEN_TRANSITION_DURATION_MS}ms, left ${FULLSCREEN_TRANSITION_DURATION_MS}ms,
-            right ${FULLSCREEN_TRANSITION_DURATION_MS}ms,
-            bottom ${FULLSCREEN_TRANSITION_DURATION_MS}ms;
-          position: fixed;
-          top: ${sourceRect?.top ?? 0}px;
-          left: ${sourceRect?.left ?? 0}px;
-          right: ${sourceRect ? window.innerWidth - sourceRect.right : 0}px;
-          bottom: ${sourceRect ? window.innerHeight - sourceRect.bottom : 0}px;
-          z-index: 10000;
-        `;
-      case "exited":
-        return css`
-          position: relative;
-          top: 0;
-          left: 0;
-          right: 0;
-          bottom: 0;
-          // "z-index: 1" makes panel drag & drop work more reliably (see
-          // https://github.com/foxglove/studio/pull/3355), but it also makes fullscreen panels get
-          // overlapped by other parts of the panel layout. So we turn it back to auto when a
-          // descendant is fullscreen.
-          z-index: ${hasFullscreenDescendant ? "auto" : 1};
-        `;
-      case "unmounted":
-        return css``;
-    }
-  }}
+export const usePanelRootStyles = makeStyles<
+  Omit<PanelRootProps, "fullscreenState" | "selected">
+>()((theme, props) => {
+  const { palette, transitions } = theme;
+  const { sourceRect, hasFullscreenDescendant } = props;
+  const duration = transitions.duration.shorter;
 
-  :after {
-    content: "";
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    inset: 1px;
-    opacity: ${({ selected }) => (selected ? 1 : 0)};
-    border: 1px solid ${({ theme }) => theme.palette.themePrimary};
-    position: absolute;
-    pointer-events: none;
-    transition: ${({ selected }) =>
-      selected ? "opacity 0.125s ease-out" : "opacity 0.05s ease-out"};
-    z-index: 100000;
-  }
-`;
+  return {
+    root: {
+      display: "flex",
+      flexDirection: "column",
+      flex: "1 1 auto",
+      overflow: "hidden",
+      backgroundColor: palette.background.default,
+      border: `0px solid ${alpha(palette.primary.main, 0.67)}`,
+      transition: transitions.create("border-width", {
+        duration, // match to timeout duration inside Panel component
+      }),
+
+      "::after": {
+        content: "''",
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        inset: 1,
+        opacity: 0,
+        border: `1px solid ${palette.primary.main}`,
+        position: "absolute",
+        pointerEvents: "none",
+        transition: "opacity 0.05s ease-out",
+        zIndex: 10000 + 1,
+      },
+    },
+    rootSelected: {
+      "::after": {
+        opacity: 1,
+        transition: "opacity 0.125s ease-out",
+      },
+    },
+    entering: {
+      position: "fixed",
+      top: sourceRect?.top ?? 0,
+      left: sourceRect?.left ?? 0,
+      right: sourceRect ? window.innerWidth - sourceRect.right : 0,
+      bottom: sourceRect ? window.innerHeight - sourceRect.bottom : 0,
+      zIndex: 10000,
+    },
+    entered: {
+      borderWidth: 4,
+      position: "fixed",
+      top: 0,
+      left: 0,
+      right: 0,
+      bottom: 50, // match PlaybackBar height
+      zIndex: 10000,
+      transition: transitions.create(["border-width", "top", "right", "bottom", "left"], {
+        duration, // match to timeout duration inside Panel component
+      }),
+    },
+    exiting: {
+      position: "fixed",
+      top: sourceRect?.top ?? 0,
+      left: sourceRect?.left ?? 0,
+      right: sourceRect ? window.innerWidth - sourceRect.right : 0,
+      bottom: sourceRect ? window.innerHeight - sourceRect.bottom : 0,
+      zIndex: 10000,
+      transition: transitions.create(["border-width", "top", "right", "bottom", "left"], {
+        duration, // match to timeout duration inside Panel component
+      }),
+    },
+    exited: {
+      position: "relative",
+      top: 0,
+      left: 0,
+      right: 0,
+      bottom: 0,
+      // "z-index: 1" makes panel drag & drop work more reliably (see
+      // https://github.com/foxglove/studio/pull/3355), but it also makes fullscreen panels get
+      // overlapped by other parts of the panel layout. So we turn it back to auto when a
+      // descendant is fullscreen.
+      zIndex: hasFullscreenDescendant ? "auto" : 1,
+    },
+  };
+});
+
+export const PanelRoot = forwardRef<HTMLDivElement, PropsWithChildren<PanelRootProps>>(
+  function PanelRoot(props, ref): JSX.Element {
+    const { fullscreenState, selected, sourceRect, hasFullscreenDescendant, className, ...rest } =
+      props;
+    const { classes, cx } = usePanelRootStyles({ sourceRect, hasFullscreenDescendant });
+
+    const classNames = cx(PANEL_ROOT_CLASS_NAME, className, classes.root, {
+      [classes.entering]: fullscreenState === "entering",
+      [classes.entered]: fullscreenState === "entered",
+      [classes.exiting]: fullscreenState === "exiting",
+      [classes.exited]: fullscreenState === "exited",
+      [classes.rootSelected]: selected,
+    });
+
+    return (
+      <div ref={ref} className={classNames} {...rest}>
+        {props.children}
+      </div>
+    );
+  },
+);

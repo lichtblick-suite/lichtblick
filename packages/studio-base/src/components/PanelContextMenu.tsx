@@ -13,7 +13,7 @@ import {
 import { DeepReadonly } from "ts-essentials";
 
 import { usePanelContext } from "@foxglove/studio-base/components/PanelContext";
-import { PanelRoot } from "@foxglove/studio-base/components/PanelRoot";
+import { PANEL_ROOT_CLASS_NAME } from "@foxglove/studio-base/components/PanelRoot";
 import { useCurrentLayoutActions } from "@foxglove/studio-base/context/CurrentLayoutContext";
 
 /**
@@ -98,7 +98,7 @@ export function PanelContextMenu(props: PanelContextMenuProps): JSX.Element {
       return;
     }
 
-    const parent: HTMLElement | ReactNull = element.closest(PanelRoot);
+    const parent: HTMLElement | ReactNull = element.closest(`.${PANEL_ROOT_CLASS_NAME}`);
     parent?.addEventListener("contextmenu", listener);
 
     return () => {

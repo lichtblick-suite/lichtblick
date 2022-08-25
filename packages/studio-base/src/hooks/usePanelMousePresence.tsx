@@ -4,7 +4,7 @@
 
 import { MutableRefObject, useCallback, useEffect, useState } from "react";
 
-import { PanelRoot } from "@foxglove/studio-base/components/PanelRoot";
+import { PANEL_ROOT_CLASS_NAME } from "@foxglove/studio-base/components/PanelRoot";
 
 /**
  * Tracks the presence of the mouse in the parent panel.
@@ -36,7 +36,7 @@ export function usePanelMousePresence(ref: MutableRefObject<HTMLElement | ReactN
       return;
     }
 
-    const parent: HTMLElement | ReactNull = element.closest(PanelRoot);
+    const parent: HTMLElement | ReactNull = element.closest(`.${PANEL_ROOT_CLASS_NAME}`);
     parent?.addEventListener("mouseenter", listener);
     parent?.addEventListener("mouseleave", listener);
 

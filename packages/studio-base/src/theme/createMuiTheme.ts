@@ -17,9 +17,6 @@ export default function createMuiTheme(
     palette: palette[themePreference],
     shape: { borderRadius: 2 },
     typography,
-    transitions: {
-      create: () => "none",
-    },
   });
 
   // add name for storybook
