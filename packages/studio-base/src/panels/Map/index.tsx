@@ -11,7 +11,7 @@ import ReactDOM from "react-dom";
 
 import { PanelExtensionContext } from "@foxglove/studio";
 import Panel from "@foxglove/studio-base/components/Panel";
-import PanelExtensionAdapter from "@foxglove/studio-base/components/PanelExtensionAdapter";
+import { PanelExtensionAdapter } from "@foxglove/studio-base/components/PanelExtensionAdapter";
 import { SaveConfig } from "@foxglove/studio-base/types/panels";
 
 import MapPanel from "./MapPanel";

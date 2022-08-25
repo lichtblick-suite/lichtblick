@@ -6,7 +6,7 @@ import { PropsWithChildren, useMemo } from "react";
 
 import { AppSetting } from "@foxglove/studio-base/AppSetting";
 import Panel from "@foxglove/studio-base/components/Panel";
-import PanelExtensionAdapter from "@foxglove/studio-base/components/PanelExtensionAdapter";
+import { PanelExtensionAdapter } from "@foxglove/studio-base/components/PanelExtensionAdapter";
 import { useExtensionCatalog } from "@foxglove/studio-base/context/ExtensionCatalogContext";
 import PanelCatalogContext, {
   PanelCatalog,

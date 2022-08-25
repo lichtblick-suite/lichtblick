@@ -7,9 +7,11 @@ import ReactDOM from "react-dom";
 
 import { toSec } from "@foxglove/rostime";
 import { PanelExtensionContext, ParameterValue, RenderState, Time } from "@foxglove/studio";
+import ErrorBoundary from "@foxglove/studio-base/components/ErrorBoundary";
 import MockPanelContextProvider from "@foxglove/studio-base/components/MockPanelContextProvider";
-import PanelExtensionAdapter from "@foxglove/studio-base/components/PanelExtensionAdapter";
 import PanelSetup from "@foxglove/studio-base/stories/PanelSetup";
+
+import PanelExtensionAdapter from "./PanelExtensionAdapter";
 
 export default {
   title: "PanelExtensionAdapter",
@@ -45,7 +47,9 @@ export const CatchRenderError = (): JSX.Element => {
       }}
     >
       <MockPanelContextProvider>
-        <PanelExtensionAdapter config={{}} saveConfig={() => {}} initPanel={initPanel} />
+        <ErrorBoundary>
+          <PanelExtensionAdapter config={{}} saveConfig={() => {}} initPanel={initPanel} />
+        </ErrorBoundary>
       </MockPanelContextProvider>
     </PanelSetup>
   );
