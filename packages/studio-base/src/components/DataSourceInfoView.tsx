@@ -4,6 +4,7 @@
 
 import { Skeleton, Typography } from "@mui/material";
 import { MutableRefObject, useEffect, useRef } from "react";
+import { makeStyles } from "tss-react/mui";
 
 import { Time } from "@foxglove/rostime";
 import {
@@ -16,8 +17,15 @@ import { useAppTimeFormat } from "@foxglove/studio-base/hooks";
 import { subtractTimes } from "@foxglove/studio-base/players/UserNodePlayer/nodeTransformerWorker/typescript/userUtils/time";
 import { PlayerPresence } from "@foxglove/studio-base/players/types";
 import { formatDate, formatDuration } from "@foxglove/studio-base/util/formatTime";
+import { fonts } from "@foxglove/studio-base/util/sharedStyleConstants";
 
 import { MultilineMiddleTruncate } from "./MultilineMiddleTruncate";
+
+const useStyles = makeStyles()({
+  numericValue: {
+    fontFamily: fonts.MONOSPACE,
+  },
+});
 
 const selectStartTime = (ctx: MessagePipelineContext) => ctx.playerState.activeData?.startTime;
 const selectEndTime = (ctx: MessagePipelineContext) => ctx.playerState.activeData?.endTime;
@@ -32,6 +40,7 @@ function DataSourceInfoContent(props: {
   startTime?: Time;
 }): JSX.Element {
   const { durationRef, endTimeRef, playerName, playerPresence, startTime } = props;
+  const { classes } = useStyles();
 
   return (
     <Stack gap={1.5} paddingX={2} paddingBottom={2}>
@@ -50,7 +59,9 @@ function DataSourceInfoContent(props: {
             <MultilineMiddleTruncate text={playerName} />
           </Typography>
         ) : (
-          <Typography>&mdash;</Typography>
+          <Typography className={classes.numericValue} variant="inherit">
+            &mdash;
+          </Typography>
         )}
       </Stack>
 
@@ -63,7 +74,9 @@ function DataSourceInfoContent(props: {
         ) : startTime ? (
           <Timestamp horizontal time={startTime} />
         ) : (
-          <Typography color="text.secondary">&mdash;</Typography>
+          <Typography className={classes.numericValue} variant="inherit" color="text.secondary">
+            &mdash;
+          </Typography>
         )}
       </Stack>
 
@@ -74,7 +87,7 @@ function DataSourceInfoContent(props: {
         {playerPresence === PlayerPresence.INITIALIZING ? (
           <Skeleton animation="wave" width="50%" />
         ) : (
-          <Typography variant="inherit" ref={endTimeRef}>
+          <Typography className={classes.numericValue} variant="inherit" ref={endTimeRef}>
             &mdash;
           </Typography>
         )}
@@ -87,7 +100,7 @@ function DataSourceInfoContent(props: {
         {playerPresence === PlayerPresence.INITIALIZING ? (
           <Skeleton animation="wave" width={100} />
         ) : (
-          <Typography variant="inherit" ref={durationRef}>
+          <Typography className={classes.numericValue} variant="inherit" ref={durationRef}>
             &mdash;
           </Typography>
         )}
@@ -125,10 +138,10 @@ export function DataSourceInfoView(): JSX.Element {
         const date = formatDate(endTime, undefined);
         endTimeRef.current.innerText = `${date} ${formatTime(endTime)}`;
       } else {
-        endTimeRef.current.innerText = EmDash;
+        endTimeRef.current.innerHTML = EmDash;
       }
     }
-  }, [endTime, formatTime, startTime]);
+  }, [endTime, formatTime, startTime, playerPresence]);
 
   return (
     <MemoDataSourceInfoContent
