@@ -477,18 +477,10 @@ export default function TimeBasedChart(props: Props): JSX.Element {
       max = datasetBounds.x.max;
     }
 
-    // if we are syncing and have global bounds there are two possibilities
-    // 1. the global bounds are from user interaction, we use that unconditionally
-    // 2. the global bounds are min/max with our dataset bounds
-    if (globalBounds) {
-      if (globalBounds.userInteraction) {
-        min = globalBounds.min;
-        max = globalBounds.max;
-      } else if (defaultView?.type !== "following") {
-        // if following and no user interaction - we leave our bounds as they are
-        min = Math.min(min ?? globalBounds.min, globalBounds.min);
-        max = Math.max(max ?? globalBounds.max, globalBounds.max);
-      }
+    // If the global bounds are from user interaction, we use that unconditionally.
+    if (globalBounds?.userInteraction === true) {
+      min = globalBounds.min;
+      max = globalBounds.max;
     }
 
     // if the min/max are the same, use undefined to fall-back to chart component auto-scales

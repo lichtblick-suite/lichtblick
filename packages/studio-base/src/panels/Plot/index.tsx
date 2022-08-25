@@ -13,8 +13,7 @@
 
 import DownloadIcon from "@mui/icons-material/Download";
 import { Typography, useTheme } from "@mui/material";
-import produce from "immer";
-import { compact, isEmpty, set, uniq } from "lodash";
+import { compact, isEmpty, isNumber, uniq } from "lodash";
 import memoizeWeak from "memoize-weak";
 import { useEffect, useCallback, useMemo, ComponentProps } from "react";
 
@@ -27,7 +26,7 @@ import {
   subtract as subtractTimes,
   toSec,
 } from "@foxglove/rostime";
-import { MessageEvent, SettingsTreeAction } from "@foxglove/studio";
+import { MessageEvent } from "@foxglove/studio";
 import { useBlocksByTopic, useMessageReducer } from "@foxglove/studio-base/PanelAPI";
 import { MessageBlock } from "@foxglove/studio-base/PanelAPI/useBlocksByTopic";
 import parseRosPath, {
@@ -53,7 +52,6 @@ import {
   ChartDefaultView,
   TimeBasedChartTooltipData,
 } from "@foxglove/studio-base/components/TimeBasedChart";
-import { usePanelSettingsTreeUpdate } from "@foxglove/studio-base/providers/PanelSettingsEditorContextProvider";
 import { OnClickArg as OnChartClickArgs } from "@foxglove/studio-base/src/components/Chart";
 import { OpenSiblingPanel, PanelConfig, SaveConfig } from "@foxglove/studio-base/types/panels";
 import { getTimestampForMessage } from "@foxglove/studio-base/util/time";
@@ -64,7 +62,7 @@ import { downloadCSV } from "./csv";
 import { getDatasets } from "./datasets";
 import helpContent from "./index.help.md";
 import { PlotDataByPath, PlotDataItem } from "./internalTypes";
-import { buildSettingsTree } from "./settings";
+import { usePlotPanelSettings } from "./settings";
 import { PlotConfig } from "./types";
 
 export { plotableRosTypes } from "./types";
@@ -177,6 +175,8 @@ function Plot(props: Props) {
     title,
     followingViewWidth,
     paths: yAxisPaths,
+    minXValue,
+    maxXValue,
     minYValue,
     maxYValue,
     showXAxisLabels,
@@ -224,11 +224,19 @@ function Plot(props: Props) {
 
   const endTimeSinceStart = timeSincePreloadedStart(endTime);
   const fixedView = useMemo<ChartDefaultView | undefined>(() => {
+    // Apply min/max x-value if either min or max or both is defined.
+    if ((isNumber(minXValue) && isNumber(endTimeSinceStart)) || isNumber(maxXValue)) {
+      return {
+        type: "fixed",
+        minXValue: isNumber(minXValue) ? minXValue : 0,
+        maxXValue: isNumber(maxXValue) ? maxXValue : endTimeSinceStart ?? 0,
+      };
+    }
     if (xAxisVal === "timestamp" && startTime && endTimeSinceStart != undefined) {
       return { type: "fixed", minXValue: 0, maxXValue: endTimeSinceStart };
     }
     return undefined;
-  }, [endTimeSinceStart, startTime, xAxisVal]);
+  }, [maxXValue, minXValue, endTimeSinceStart, startTime, xAxisVal]);
 
   // following view and fixed view are split to keep defaultView identity stable when possible
   const defaultView = useMemo<ChartDefaultView | undefined>(() => {
@@ -436,29 +444,7 @@ function Plot(props: Props) {
     [messagePipeline, xAxisVal],
   );
 
-  const updatePanelSettingsTree = usePanelSettingsTreeUpdate();
-
-  const actionHandler = useCallback(
-    (action: SettingsTreeAction) => {
-      if (action.action !== "update") {
-        return;
-      }
-
-      const { path, value } = action.payload;
-      saveConfig(
-        produce((draft) => {
-          set(draft, path.slice(1), value);
-        }),
-      );
-    },
-    [saveConfig],
-  );
-  useEffect(() => {
-    updatePanelSettingsTree({
-      actionHandler,
-      nodes: buildSettingsTree(config),
-    });
-  }, [actionHandler, config, updatePanelSettingsTree]);
+  usePlotPanelSettings(config, saveConfig);
 
   const stackDirection = useMemo(
     () => (legendDisplay === "top" ? "column" : "row"),

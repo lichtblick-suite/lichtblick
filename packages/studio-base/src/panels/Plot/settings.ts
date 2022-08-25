@@ -2,16 +2,25 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { isNumber } from "lodash";
+import produce from "immer";
+import { isNumber, set } from "lodash";
+import { useCallback, useEffect } from "react";
 
-import { SettingsTreeNodes } from "@foxglove/studio";
+import { SettingsTreeAction, SettingsTreeNodes } from "@foxglove/studio";
+import { usePanelSettingsTreeUpdate } from "@foxglove/studio-base/providers/PanelSettingsEditorContextProvider";
+import { SaveConfig } from "@foxglove/studio-base/types/panels";
 
 import { PlotConfig } from "./types";
 
-export function buildSettingsTree(config: PlotConfig): SettingsTreeNodes {
+function buildSettingsTree(config: PlotConfig): SettingsTreeNodes {
   const maxYError =
     isNumber(config.minYValue) && isNumber(config.maxYValue) && config.minYValue >= config.maxYValue
       ? "Y max must be greater than Y min."
+      : undefined;
+
+  const maxXError =
+    isNumber(config.minXValue) && isNumber(config.maxXValue) && config.minXValue >= config.maxXValue
+      ? "X max must be greater than X min."
       : undefined;
 
   return {
@@ -36,24 +45,24 @@ export function buildSettingsTree(config: PlotConfig): SettingsTreeNodes {
           input: "boolean",
           value: config.showPlotValuesInLegend,
         },
-        showXAxisLabels: {
-          label: "Show X axis labels",
-          input: "boolean",
-          value: config.showXAxisLabels,
-        },
+      },
+    },
+    yAxis: {
+      label: "Y Axis",
+      fields: {
         showYAxisLabels: {
-          label: "Show Y axis labels",
+          label: "Show labels",
           input: "boolean",
           value: config.showYAxisLabels,
         },
         minYValue: {
-          label: "Y min",
+          label: "Min",
           input: "number",
           value: config.minYValue != undefined ? Number(config.minYValue) : undefined,
           placeholder: "auto",
         },
         maxYValue: {
-          label: "Y max",
+          label: "Max",
           input: "number",
           error: maxYError,
           value: config.maxYValue != undefined ? Number(config.maxYValue) : undefined,
@@ -61,11 +70,29 @@ export function buildSettingsTree(config: PlotConfig): SettingsTreeNodes {
         },
       },
     },
-    timeSeriesOnly: {
-      label: "Time series only",
+    xAxis: {
+      label: "X Axis",
       fields: {
+        showXAxisLabels: {
+          label: "Show labels",
+          input: "boolean",
+          value: config.showXAxisLabels,
+        },
+        minXValue: {
+          label: "Min",
+          input: "number",
+          value: config.minXValue != undefined ? Number(config.minXValue) : undefined,
+          placeholder: "auto",
+        },
+        maxXValue: {
+          label: "Max",
+          input: "number",
+          error: maxXError,
+          value: config.maxXValue != undefined ? Number(config.maxXValue) : undefined,
+          placeholder: "auto",
+        },
         followingViewWidth: {
-          label: "X range (seconds)",
+          label: "Range (seconds)",
           input: "number",
           placeholder: "auto",
           value: config.followingViewWidth,
@@ -73,4 +100,39 @@ export function buildSettingsTree(config: PlotConfig): SettingsTreeNodes {
       },
     },
   };
+}
+
+export function usePlotPanelSettings(config: PlotConfig, saveConfig: SaveConfig<PlotConfig>): void {
+  const updatePanelSettingsTree = usePanelSettingsTreeUpdate();
+
+  const actionHandler = useCallback(
+    (action: SettingsTreeAction) => {
+      if (action.action !== "update") {
+        return;
+      }
+
+      const { path, value } = action.payload;
+      saveConfig(
+        produce((draft) => {
+          set(draft, path.slice(1), value);
+
+          // X min/max and following width are mutually exclusive.
+          if (path[1] === "followingViewWidth") {
+            draft.minXValue = undefined;
+            draft.maxXValue = undefined;
+          } else if (path[1] === "minXValue" || path[1] === "maxXValue") {
+            draft.followingViewWidth = undefined;
+          }
+        }),
+      );
+    },
+    [saveConfig],
+  );
+
+  useEffect(() => {
+    updatePanelSettingsTree({
+      actionHandler,
+      nodes: buildSettingsTree(config),
+    });
+  }, [actionHandler, config, updatePanelSettingsTree]);
 }
