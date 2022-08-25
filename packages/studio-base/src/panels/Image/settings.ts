@@ -56,11 +56,16 @@ export function buildSettingsTree({
         },
         transformMarkers: {
           input: "boolean",
-          label: "Synchronize Markers",
+          label: "Transform Markers",
           value: config.transformMarkers,
           help: config.transformMarkers
             ? "Markers are being transformed by Foxglove Studio based on the camera model. Click to turn it off."
             : `Markers can be transformed by Foxglove Studio based on the camera model. Click to turn it on.`,
+        },
+        synchronize: {
+          input: "boolean",
+          label: "Synchronize Timestamps",
+          value: config.synchronize,
         },
         smooth: {
           input: "boolean",

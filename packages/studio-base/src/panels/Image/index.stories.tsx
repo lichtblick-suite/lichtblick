@@ -36,6 +36,17 @@ export function NoTopic(): React.ReactElement {
   );
 }
 
+export function WithSettings(): JSX.Element {
+  return (
+    <PanelSetup includeSettings>
+      <ImageView />
+    </PanelSetup>
+  );
+}
+WithSettings.parameters = {
+  colorScheme: "light",
+};
+
 export function TopicButNoDataSource(): React.ReactElement {
   return (
     <PanelSetup>
