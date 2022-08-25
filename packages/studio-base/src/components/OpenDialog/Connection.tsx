@@ -2,10 +2,11 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { Icon } from "@fluentui/react";
-import { Alert, Link, Tab, Tabs, Typography, styled as muiStyled } from "@mui/material";
+import { Alert, Link, Tab, Tabs, Typography } from "@mui/material";
 import { useState, useMemo, useCallback, useLayoutEffect } from "react";
+import { makeStyles } from "tss-react/mui";
 
+import { BuiltinIcon } from "@foxglove/studio-base/components/BuiltinIcon";
 import Stack from "@foxglove/studio-base/components/Stack";
 import {
   IDataSourceFactory,
@@ -22,14 +23,14 @@ type ConnectionProps = {
   activeSource?: IDataSourceFactory;
 };
 
-const StyledTabs = muiStyled(Tabs)(({ theme }) => ({
-  ".MuiTabs-indicator": {
+const useStyles = makeStyles()((theme) => ({
+  indicator: {
     right: 0,
     width: "100%",
     backgroundColor: theme.palette.action.hover,
     borderRadius: theme.shape.borderRadius,
   },
-  ".MuiTab-root": {
+  tab: {
     textAlign: "right",
     flexDirection: "row",
     justifyContent: "flex-start",
@@ -38,24 +39,22 @@ const StyledTabs = muiStyled(Tabs)(({ theme }) => ({
     paddingTop: theme.spacing(1.5),
     paddingBottom: theme.spacing(1.5),
 
-    ".MuiTab-iconWrapper": {
-      marginBottom: 0,
-      marginRight: theme.spacing(1.5),
-      fontSize: theme.typography.pxToRem(24),
+    "> span": {
+      display: "flex",
       color: theme.palette.primary.main,
-
-      "> span": {
-        display: "flex",
-      },
-      svg: {
-        fontSize: "inherit",
-      },
+      marginRight: theme.spacing(1.5),
+      height: "auto",
+      width: "auto",
+    },
+    svg: {
+      fontSize: "inherit",
     },
   },
 }));
 
 export default function Connection(props: ConnectionProps): JSX.Element {
   const { availableSources, activeSource, onCancel, onBack } = props;
+  const { classes } = useStyles();
 
   const { selectSource } = usePlayerSelection();
   const [selectedConnectionIdx, setSelectedConnectionIdx] = useState<number>(() => {
@@ -109,7 +108,8 @@ export default function Connection(props: ConnectionProps): JSX.Element {
     <View onBack={onBack} onCancel={onCancel} onOpen={disableOpen ? undefined : onOpen}>
       <Stack direction="row" flexGrow={1} flexWrap="wrap" fullHeight gap={4}>
         <Stack flexBasis={240}>
-          <StyledTabs
+          <Tabs
+            classes={{ indicator: classes.indicator }}
             textColor="inherit"
             orientation="vertical"
             onChange={(_event, newValue: number) => setSelectedConnectionIdx(newValue)}
@@ -118,10 +118,16 @@ export default function Connection(props: ConnectionProps): JSX.Element {
             {enabledSourcesFirst.map((source, idx) => {
               const { id, iconName, displayName } = source;
               return (
-                <Tab value={idx} key={id} icon={<Icon iconName={iconName} />} label={displayName} />
+                <Tab
+                  value={idx}
+                  key={id}
+                  icon={<BuiltinIcon name={iconName ?? "Flow"} />}
+                  label={displayName}
+                  className={classes.tab}
+                />
               );
             })}
-          </StyledTabs>
+          </Tabs>
         </Stack>
         <Stack key={selectedSource?.id} flex="1 0" gap={2}>
           {selectedSource?.warning && <Alert severity="warning">{selectedSource.warning}</Alert>}
