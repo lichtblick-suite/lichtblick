@@ -2,71 +2,69 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { MessageBar, MessageBarType } from "@fluentui/react";
-import { PropsWithChildren, useCallback, useEffect, useRef, useState } from "react";
-import { ToastProps, ToastProvider } from "react-toast-notifications";
+import ErrorIcon from "@mui/icons-material/CancelOutlined";
+import SuccessIcon from "@mui/icons-material/CheckCircleOutline";
+import CloseIcon from "@mui/icons-material/Close";
+import InfoIcon from "@mui/icons-material/InfoOutlined";
+import WarningIcon from "@mui/icons-material/WarningAmberOutlined";
+import { Grow, IconButton } from "@mui/material";
+import { SnackbarProvider, SnackbarKey, useSnackbar } from "notistack";
+import { PropsWithChildren } from "react";
+import { makeStyles } from "tss-react/mui";
 
-const StudioToast = ({
-  appearance,
-  onDismiss,
-  children,
-  transitionDuration,
-  transitionState,
-}: ToastProps) => {
-  const barType = (() => {
-    switch (appearance) {
-      case "info":
-        return MessageBarType.info;
-      case "success":
-        return MessageBarType.success;
-      case "warning":
-        return MessageBarType.warning;
-      case "error":
-        return MessageBarType.error;
-      default:
-        return MessageBarType.info;
-    }
-  })();
-  const onDismissBar = useCallback(() => onDismiss(), [onDismiss]);
+const useStyles = makeStyles()((theme) => ({
+  /* eslint-disable tss-unused-classes/unused-classes */
+  root: {
+    ".SnackbarContent-root": { padding: theme.spacing(0.5, 1.5) },
+  },
+  variantDefault: {
+    "&.SnackbarContent-root": {
+      backgroundColor: theme.palette.background.paper,
+      color: theme.palette.text.primary,
+    },
+  },
+  variantSuccess: {
+    "&.SnackbarContent-root": { backgroundColor: theme.palette.success.main },
+  },
+  variantError: {
+    "&.SnackbarContent-root": { backgroundColor: theme.palette.error.main },
+  },
+  variantInfo: {
+    "&.SnackbarContent-root": { backgroundColor: theme.palette.info.main },
+  },
+  variantWarning: {
+    "&.SnackbarContent-root": { backgroundColor: theme.palette.warning.main },
+  },
+  /* eslint-enable tss-unused-classes/unused-classes */
+}));
 
-  // Adapted from react-toast-notifications ToastElement
-  const [height, setHeight] = useState<string | number>("auto");
-  const elementRef = useRef<HTMLDivElement>(ReactNull);
-  useEffect(() => {
-    if (transitionState === "entered") {
-      setHeight(elementRef.current?.offsetHeight ?? "auto");
-    }
-    if (transitionState === "exiting") {
-      setHeight(0);
-    }
-  }, [transitionState]);
-
+const CloseSnackbarAction = ({ id }: { id: SnackbarKey }) => {
+  const { closeSnackbar } = useSnackbar();
   return (
-    <div ref={elementRef} style={{ height, transition: `height ${transitionDuration}ms` }}>
-      <MessageBar
-        messageBarType={barType}
-        isMultiline={false}
-        onDismiss={onDismissBar}
-        dismissButtonAriaLabel="Close"
-        styles={{
-          text: { alignItems: "center" },
-          root: {
-            transition: `transform ${transitionDuration}ms, opacity ${transitionDuration}ms`,
-            transform: transitionState === "entered" ? "" : "scale(0.66)",
-            opacity: transitionState === "entered" ? 1 : 0,
-          },
-        }}
-      >
-        {children}
-      </MessageBar>
-    </div>
+    <IconButton size="small" color="inherit" onClick={() => closeSnackbar(id)}>
+      <CloseIcon fontSize="inherit" />
+    </IconButton>
   );
 };
 
 export default function StudioToastProvider(props: PropsWithChildren<unknown>): JSX.Element {
+  const { classes } = useStyles();
   return (
-    <ToastProvider placement="top-center" components={{ Toast: StudioToast }}>
+    <SnackbarProvider
+      action={(id) => <CloseSnackbarAction id={id} />}
+      iconVariant={{
+        default: <InfoIcon color="primary" style={{ marginInlineEnd: 8 }} />,
+        info: <InfoIcon style={{ marginInlineEnd: 8, opacity: 0.6 }} />,
+        error: <ErrorIcon style={{ marginInlineEnd: 8, opacity: 0.6 }} />,
+        warning: <WarningIcon style={{ marginInlineEnd: 8, opacity: 0.6 }} />,
+        success: <SuccessIcon style={{ marginInlineEnd: 8, opacity: 0.6 }} />,
+      }}
+      anchorOrigin={{ vertical: "top", horizontal: "center" }}
+      maxSnack={5}
+      TransitionComponent={Grow}
+      classes={classes}
+    >
       {props.children}
-    </ToastProvider>
+    </SnackbarProvider>
   );
 }

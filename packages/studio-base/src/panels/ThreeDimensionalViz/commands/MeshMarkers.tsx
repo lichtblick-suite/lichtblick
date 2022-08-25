@@ -10,8 +10,8 @@
 //   This source code is licensed under the Apache License, Version 2.0,
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
+import { useSnackbar } from "notistack";
 import { ReactElement, useMemo, useCallback } from "react";
-import { useToasts } from "react-toast-notifications";
 
 import { CommonCommandProps, GLTFScene, parseGLB } from "@foxglove/regl-worldview";
 import RemountOnValueChange from "@foxglove/studio-base/components/RemountOnValueChange";
@@ -99,12 +99,12 @@ function MeshMarkers({ markers, loadModelOptions, layerIndex }: MeshMarkerProps)
   const models: React.ReactNode[] = [];
 
   const modelCache = useMemo(() => new ModelCache(loadModelOptions), [loadModelOptions]);
-  const { addToast } = useToasts();
+  const { enqueueSnackbar } = useSnackbar();
   const reportError = useCallback(
     (error: Error) => {
-      addToast(error.toString(), { appearance: "error", autoDismiss: true });
+      enqueueSnackbar(error.toString(), { variant: "error" });
     },
-    [addToast],
+    [enqueueSnackbar],
   );
 
   for (let i = 0; i < markers.length; i++) {

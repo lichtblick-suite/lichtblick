@@ -11,6 +11,7 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
+import { useSnackbar } from "notistack";
 import {
   PropsWithChildren,
   useCallback,
@@ -19,7 +20,6 @@ import {
   useMemo,
   useState,
 } from "react";
-import { useToasts } from "react-toast-notifications";
 import { useLatest, useMountedState } from "react-use";
 
 import { useShallowMemo } from "@foxglove/hooks";
@@ -113,7 +113,7 @@ export default function PlayerManager(props: PropsWithChildren<PlayerManagerProp
 
   useLayoutEffect(() => void player?.setUserNodes(userNodes), [player, userNodes]);
 
-  const { addToast } = useToasts();
+  const { enqueueSnackbar } = useSnackbar();
 
   const selectSource = useCallback(
     async (sourceId: string, args?: DataSourceArgs) => {
@@ -121,9 +121,7 @@ export default function PlayerManager(props: PropsWithChildren<PlayerManagerProp
 
       const foundSource = playerSources.find((source) => source.id === sourceId);
       if (!foundSource) {
-        addToast(`Unknown data source: ${sourceId}`, {
-          appearance: "warning",
-        });
+        enqueueSnackbar(`Unknown data source: ${sourceId}`, { variant: "warning" });
         return;
       }
 
@@ -154,7 +152,7 @@ export default function PlayerManager(props: PropsWithChildren<PlayerManagerProp
               setSelectedLayoutId(sourceLayout.id);
             }
           } catch (err) {
-            addToast((err as Error).message, { appearance: "error" });
+            enqueueSnackbar((err as Error).message, { variant: "error" });
           }
         }
 
@@ -162,7 +160,7 @@ export default function PlayerManager(props: PropsWithChildren<PlayerManagerProp
       }
 
       if (!args) {
-        addToast("Unable to initialize player: no args", { appearance: "error" });
+        enqueueSnackbar("Unable to initialize player: no args", { variant: "error" });
         return;
       }
 
@@ -249,14 +247,14 @@ export default function PlayerManager(props: PropsWithChildren<PlayerManagerProp
           }
         }
 
-        addToast("Unable to initialize player", { appearance: "error" });
+        enqueueSnackbar("Unable to initialize player", { variant: "error" });
       } catch (error) {
-        addToast((error as Error).message, { appearance: "error" });
+        enqueueSnackbar((error as Error).message, { variant: "error" });
       }
     },
     [
       addRecent,
-      addToast,
+      enqueueSnackbar,
       consoleApi,
       isMounted,
       layoutStorage,
@@ -272,9 +270,7 @@ export default function PlayerManager(props: PropsWithChildren<PlayerManagerProp
       // find the recent from the list and initialize
       const foundRecent = recents.find((value) => value.id === recentId);
       if (!foundRecent) {
-        addToast(`Failed to restore recent: ${recentId}`, {
-          appearance: "error",
-        });
+        enqueueSnackbar(`Failed to restore recent: ${recentId}`, { variant: "error" });
         return;
       }
 
@@ -294,7 +290,7 @@ export default function PlayerManager(props: PropsWithChildren<PlayerManagerProp
         }
       }
     },
-    [recents, addToast, selectSource],
+    [recents, enqueueSnackbar, selectSource],
   );
 
   // Make a RecentSources array for the PlayerSelectionContext

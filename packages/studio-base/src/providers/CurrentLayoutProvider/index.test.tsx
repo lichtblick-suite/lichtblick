@@ -3,8 +3,8 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 import { act, renderHook } from "@testing-library/react-hooks";
+import { SnackbarProvider } from "notistack";
 import { useEffect } from "react";
-import { ToastProvider } from "react-toast-notifications";
 
 import { Condvar } from "@foxglove/den/async";
 import {
@@ -96,13 +96,13 @@ function renderTest({
       wrapper: function Wrapper({ children }) {
         useEffect(() => childMounted.notifyAll(), []);
         return (
-          <ToastProvider>
+          <SnackbarProvider>
             <LayoutManagerContext.Provider value={mockLayoutManager}>
               <UserProfileStorageContext.Provider value={mockUserProfile}>
                 <CurrentLayoutProvider>{children}</CurrentLayoutProvider>
               </UserProfileStorageContext.Provider>
             </LayoutManagerContext.Provider>
-          </ToastProvider>
+          </SnackbarProvider>
         );
       },
     },

@@ -13,8 +13,8 @@ import {
   Divider,
   styled as muiStyled,
 } from "@mui/material";
+import { useSnackbar } from "notistack";
 import { useCallback, useState } from "react";
-import { useToasts } from "react-toast-notifications";
 import { useAsync, useMountedState } from "react-use";
 import { DeepReadonly } from "ts-essentials";
 
@@ -46,7 +46,7 @@ export function ExtensionDetails({ extension, onClose, installed }: Props): Reac
   const installExtension = useExtensionCatalog((state) => state.installExtension);
   const uninstallExtension = useExtensionCatalog((state) => state.uninstallExtension);
   const marketplace = useExtensionMarketplace();
-  const { addToast } = useToasts();
+  const { enqueueSnackbar } = useSnackbar();
   const readmeUrl = extension.readme;
   const changelogUrl = extension.changelog;
   const canInstall = extension.foxe != undefined;
@@ -65,7 +65,9 @@ export function ExtensionDetails({ extension, onClose, installed }: Props): Reac
 
   const install = useCallback(async () => {
     if (!isDesktopApp()) {
-      addToast("Download the desktop app to use marketplace extensions.", { appearance: "error" });
+      enqueueSnackbar("Download the desktop app to use marketplace extensions.", {
+        variant: "error",
+      });
       return;
     }
 
@@ -81,14 +83,14 @@ export function ExtensionDetails({ extension, onClose, installed }: Props): Reac
         void analytics.logEvent(AppEvent.EXTENSION_INSTALL, { type: extension.id });
       }
     } catch (err) {
-      addToast(`Failed to download extension ${extension.id}. ${err.message}`, {
-        appearance: "error",
+      enqueueSnackbar(`Failed to download extension ${extension.id}. ${err.message}`, {
+        variant: "error",
       });
     }
   }, [
-    addToast,
     analytics,
     downloadExtension,
+    enqueueSnackbar,
     extension.foxe,
     extension.id,
     installExtension,

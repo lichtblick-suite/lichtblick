@@ -2,8 +2,8 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
+import { useSnackbar } from "notistack";
 import { useCallback } from "react";
-import { useToasts } from "react-toast-notifications";
 
 import Logger from "@foxglove/log";
 
@@ -16,17 +16,17 @@ export default function useCallbackWithToast<Args extends unknown[]>(
   callback: (...args: Args) => Promise<void> | void,
   deps: unknown[],
 ): (...args: Args) => Promise<void> {
-  const { addToast } = useToasts();
+  const { enqueueSnackbar } = useSnackbar();
   return useCallback(
     async (...args: Args) => {
       try {
         return await callback(...args);
       } catch (error) {
         log.error(error);
-        addToast((error as Error).toString(), { appearance: "error" });
+        enqueueSnackbar((error as Error).toString(), { variant: "error" });
       }
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [addToast, ...deps],
+    [enqueueSnackbar, ...deps],
   );
 }

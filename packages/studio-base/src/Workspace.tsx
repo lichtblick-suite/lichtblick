@@ -11,6 +11,7 @@
 //   You may not use this file except in compliance with the License.
 
 import { Link, Typography } from "@mui/material";
+import { useSnackbar } from "notistack";
 import { extname } from "path";
 import {
   useState,
@@ -21,7 +22,6 @@ import {
   useLayoutEffect,
   useContext,
 } from "react";
-import { useToasts } from "react-toast-notifications";
 import { makeStyles } from "tss-react/mui";
 
 import Logger from "@foxglove/log";
@@ -351,7 +351,7 @@ export default function Workspace(props: WorkspaceProps): JSX.Element {
     };
   }, [connectionSources, nativeAppMenu, selectSource]);
 
-  const { addToast } = useToasts();
+  const { enqueueSnackbar } = useSnackbar();
 
   const { loadFromFile } = useAssets();
 
@@ -370,14 +370,11 @@ export default function Workspace(props: WorkspaceProps): JSX.Element {
           const arrayBuffer = await file.arrayBuffer();
           const data = new Uint8Array(arrayBuffer);
           const extension = await installExtension("local", data);
-          addToast(`Installed extension ${extension.id}`, {
-            appearance: "success",
-            autoDismiss: true,
-          });
+          enqueueSnackbar(`Installed extension ${extension.id}`, { variant: "success" });
         } catch (err) {
           log.error(err);
-          addToast(`Failed to install extension ${file.name}: ${err.message}`, {
-            appearance: "error",
+          enqueueSnackbar(`Failed to install extension ${file.name}: ${err.message}`, {
+            variant: "error",
           });
         }
       } else {
@@ -387,9 +384,7 @@ export default function Workspace(props: WorkspaceProps): JSX.Element {
           }
         } catch (err) {
           log.error(err);
-          addToast(`Failed to load ${file.name}: ${err.message}`, {
-            appearance: "error",
-          });
+          enqueueSnackbar(`Failed to load ${file.name}: ${err.message}`, { variant: "error" });
         }
       }
 
@@ -402,7 +397,7 @@ export default function Workspace(props: WorkspaceProps): JSX.Element {
         selectSource(matchedSource.id, { type: "file", handle });
       }
     },
-    [addToast, availableSources, installExtension, loadFromFile, selectSource],
+    [availableSources, enqueueSnackbar, installExtension, loadFromFile, selectSource],
   );
 
   const openFiles = useCallback(
@@ -420,14 +415,11 @@ export default function Workspace(props: WorkspaceProps): JSX.Element {
             const arrayBuffer = await file.arrayBuffer();
             const data = new Uint8Array(arrayBuffer);
             const extension = await installExtension("local", data);
-            addToast(`Installed extension ${extension.id}`, {
-              appearance: "success",
-              autoDismiss: true,
-            });
+            enqueueSnackbar(`Installed extension ${extension.id}`, { variant: "success" });
           } catch (err) {
             log.error(err);
-            addToast(`Failed to install extension ${file.name}: ${err.message}`, {
-              appearance: "error",
+            enqueueSnackbar(`Failed to install extension ${file.name}: ${err.message}`, {
+              variant: "error",
             });
           }
         } else {
@@ -437,9 +429,7 @@ export default function Workspace(props: WorkspaceProps): JSX.Element {
             }
           } catch (err) {
             log.error(err);
-            addToast(`Failed to load ${file.name}: ${err.message}`, {
-              appearance: "error",
-            });
+            enqueueSnackbar(`Failed to load ${file.name}: ${err.message}`, { variant: "error" });
           }
         }
       }
@@ -460,7 +450,7 @@ export default function Workspace(props: WorkspaceProps): JSX.Element {
         }
       }
     },
-    [addToast, availableSources, installExtension, loadFromFile, selectSource],
+    [availableSources, enqueueSnackbar, installExtension, loadFromFile, selectSource],
   );
 
   // files the main thread told us to open

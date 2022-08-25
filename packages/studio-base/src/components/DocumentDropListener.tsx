@@ -12,9 +12,9 @@
 //   You may not use this file except in compliance with the License.
 
 import { Layer } from "@fluentui/react";
+import { useSnackbar } from "notistack";
 import { extname } from "path";
 import { useCallback, useLayoutEffect, useState } from "react";
-import { useToasts } from "react-toast-notifications";
 
 type Props = {
   children: React.ReactNode; // Shown when dragging in a file.
@@ -27,7 +27,7 @@ export default function DocumentDropListener(props: Props): JSX.Element {
 
   const { onDrop: onDropProp, allowedExtensions } = props;
 
-  const { addToast } = useToasts();
+  const { enqueueSnackbar } = useSnackbar();
 
   const onDrop = useCallback(
     async (ev: DragEvent) => {
@@ -112,9 +112,7 @@ export default function DocumentDropListener(props: Props): JSX.Element {
 
       // Check for no supported files
       if (filteredFiles.length === 0 && filteredHandles?.length === 0) {
-        addToast("The file format is unsupported.", {
-          appearance: "error",
-        });
+        enqueueSnackbar("The file format is unsupported.", { variant: "error" });
         return;
       }
 
@@ -123,7 +121,7 @@ export default function DocumentDropListener(props: Props): JSX.Element {
 
       onDropProp?.({ files: filteredFiles, handles: filteredHandles });
     },
-    [addToast, onDropProp, allowedExtensions],
+    [enqueueSnackbar, onDropProp, allowedExtensions],
   );
 
   const onDragOver = useCallback(

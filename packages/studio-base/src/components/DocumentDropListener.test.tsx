@@ -12,9 +12,9 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
+import { SnackbarProvider } from "notistack";
 import ReactDOM from "react-dom";
 import { act } from "react-dom/test-utils";
-import { ToastProvider } from "react-toast-notifications";
 
 import DocumentDropListener from "@foxglove/studio-base/components/DocumentDropListener";
 import ThemeProvider from "@foxglove/studio-base/theme/ThemeProvider";
@@ -32,13 +32,13 @@ describe("<DocumentDropListener>", () => {
 
     ReactDOM.render(
       <div>
-        <ToastProvider>
+        <SnackbarProvider>
           <ThemeProvider isDark={false}>
             <DocumentDropListener allowedExtensions={[]}>
               <div />
             </DocumentDropListener>
           </ThemeProvider>
-        </ToastProvider>
+        </SnackbarProvider>
       </div>,
       wrapper,
     );

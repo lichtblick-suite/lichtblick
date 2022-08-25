@@ -16,9 +16,9 @@ import {
 } from "@mui/material";
 import { partition } from "lodash";
 import moment from "moment";
+import { useSnackbar } from "notistack";
 import path from "path";
 import { MouseEvent, useCallback, useContext, useEffect, useLayoutEffect, useMemo } from "react";
-import { useToasts } from "react-toast-notifications";
 import { useMountedState } from "react-use";
 import useAsyncFn from "react-use/lib/useAsyncFn";
 
@@ -64,7 +64,7 @@ export default function LayoutBrowser({
 }>): JSX.Element {
   const theme = useTheme();
   const isMounted = useMountedState();
-  const { addToast } = useToasts();
+  const { enqueueSnackbar } = useSnackbar();
   const layoutManager = useLayoutManager();
   const prompt = usePrompt();
   const analytics = useAnalytics();
@@ -150,14 +150,14 @@ export default function LayoutBrowser({
               break;
           }
         } catch (err) {
-          addToast(`Error processing layouts: ${err.message}`, { appearance: "error" });
+          enqueueSnackbar(`Error processing layouts: ${err.message}`, { variant: "error" });
           dispatch({ type: "clear-multi-action" });
         }
       }
     };
 
     processAction().catch((err) => log.error(err));
-  }, [addToast, dispatch, layoutManager, state.multiAction]);
+  }, [dispatch, enqueueSnackbar, layoutManager, state.multiAction]);
 
   useEffect(() => {
     const listener = () => void reloadLayouts();
@@ -466,12 +466,14 @@ export default function LayoutBrowser({
         try {
           parsedState = JSON.parse(content);
         } catch (err) {
-          addToast(`${file.name} is not a valid layout: ${err.message}`, { appearance: "error" });
+          enqueueSnackbar(`${file.name} is not a valid layout: ${err.message}`, {
+            variant: "error",
+          });
           return;
         }
 
         if (typeof parsedState !== "object" || !parsedState) {
-          addToast(`${file.name} is not a valid layout`, { appearance: "error" });
+          enqueueSnackbar(`${file.name} is not a valid layout`, { variant: "error" });
           return;
         }
 
@@ -493,7 +495,14 @@ export default function LayoutBrowser({
       void onSelectLayout(newLayout);
     }
     void analytics.logEvent(AppEvent.LAYOUT_IMPORT, { numLayouts: fileHandles.length });
-  }, [promptForUnsavedChanges, isMounted, layoutManager, onSelectLayout, analytics, addToast]);
+  }, [
+    analytics,
+    enqueueSnackbar,
+    isMounted,
+    layoutManager,
+    onSelectLayout,
+    promptForUnsavedChanges,
+  ]);
 
   const layoutDebug = useContext(LayoutStorageDebuggingContext);
   const supportsSignIn = useContext(ConsoleApiContext) != undefined;
