@@ -431,7 +431,7 @@ export default function muiComponents(theme: Theme): ThemeOptions["components"] 
 
           "&:not(.Mui-selected):hover": {
             opacity: 1,
-            color: theme.palette.action.active,
+            color: theme.palette.text.primary,
           },
         },
         selected: {},
