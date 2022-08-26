@@ -61,9 +61,6 @@ class SinewavePlayer implements Player {
   public async callService(_service: string, _request: unknown): Promise<unknown> {
     throw new Error("Method not implemented.");
   }
-  public requestBackfill(): void {
-    // no-op
-  }
   public setGlobalVariables(_globalVariables: GlobalVariables): void {
     throw new Error("Method not implemented.");
   }

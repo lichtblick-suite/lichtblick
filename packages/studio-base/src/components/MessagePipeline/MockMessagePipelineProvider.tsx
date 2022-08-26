@@ -67,7 +67,6 @@ export default function MockMessagePipelineProvider(props: {
   isPlaying?: boolean;
   pauseFrame?: (arg0: string) => () => void;
   playerId?: string;
-  requestBackfill?: () => void;
   progress?: Progress;
   urlState?: PlayerURLState;
 }): React.ReactElement {
@@ -104,11 +103,6 @@ export default function MockMessagePipelineProvider(props: {
       }
     },
     [setAllSubscriptions, props.setSubscriptions],
-  );
-
-  const requestBackfill = useMemo(
-    () => props.requestBackfill ?? (() => {}),
-    [props.requestBackfill],
   );
 
   const capabilities = useShallowMemo(props.capabilities ?? []);
@@ -199,7 +193,6 @@ export default function MockMessagePipelineProvider(props: {
         setPlaybackSpeed: noop,
         seekPlayback: props.seekPlayback ?? noop,
         pauseFrame: props.pauseFrame ?? (() => noop),
-        requestBackfill,
       }}
     >
       {props.children}

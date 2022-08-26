@@ -46,10 +46,6 @@ type Params<T> = {
   addMessages?: MessagesReducer<T>;
 };
 
-function selectRequestBackfill(ctx: MessagePipelineContext) {
-  return ctx.requestBackfill;
-}
-
 function selectSetSubscriptions(ctx: MessagePipelineContext) {
   return ctx.setSubscriptions;
 }
@@ -96,11 +92,6 @@ export function useMessageReducer<T>(props: Params<T>): T {
   const setSubscriptions = useMessagePipeline(selectSetSubscriptions);
   useEffect(() => setSubscriptions(id, subscriptions), [id, setSubscriptions, subscriptions]);
   useCleanup(() => setSubscriptions(id, []));
-
-  const requestBackfill = useMessagePipeline(selectRequestBackfill);
-
-  // Whenever `subscriptions` change, request a backfill, since we'd like to show fresh data.
-  useEffect(() => requestBackfill(), [requestBackfill, subscriptions]);
 
   const state = useRef<
     | Readonly<{

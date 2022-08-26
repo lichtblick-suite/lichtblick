@@ -300,10 +300,6 @@ export default class VelodynePlayer implements Player {
     throw new Error("Service calls are not supported for VelodynePlayer");
   }
 
-  public requestBackfill(): void {
-    // no-op
-  }
-
   public setGlobalVariables(_globalVariables: GlobalVariables): void {
     // no-op
   }

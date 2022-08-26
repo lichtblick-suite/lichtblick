@@ -106,7 +106,6 @@ describe("MessagePipelineProvider/useMessagePipeline", () => {
         seekPlayback: undefined,
         setParameter: expect.any(Function),
         pauseFrame: expect.any(Function),
-        requestBackfill: expect.any(Function),
       },
     ]);
   });

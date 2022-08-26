@@ -650,9 +650,7 @@ export default class RandomAccessPlayer implements Player {
   public setSubscriptions(newSubscriptions: SubscribePayload[]): void {
     this._parsedSubscribedTopics = new Set(newSubscriptions.map(({ topic }) => topic));
     this._metricsCollector.setSubscriptions(newSubscriptions);
-  }
 
-  public requestBackfill(): void {
     if (this._isPlaying || this._initializing || !this._currentTime) {
       return;
     }

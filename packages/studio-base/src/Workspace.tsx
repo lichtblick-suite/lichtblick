@@ -158,7 +158,7 @@ type WorkspaceProps = {
 const DEFAULT_DEEPLINKS = Object.freeze([]);
 
 const selectPlayerPresence = ({ playerState }: MessagePipelineContext) => playerState.presence;
-const selectRequestBackfill = ({ requestBackfill }: MessagePipelineContext) => requestBackfill;
+const selectSetSubscriptions = ({ setSubscriptions }: MessagePipelineContext) => setSubscriptions;
 const selectPlayerProblems = ({ playerState }: MessagePipelineContext) => playerState.problems;
 const selectIsPlaying = (ctx: MessagePipelineContext) =>
   ctx.playerState.activeData?.isPlaying === true;
@@ -189,9 +189,9 @@ export default function Workspace(props: WorkspaceProps): JSX.Element {
 
   const supportsAccountSettings = useContext(ConsoleApiContext) != undefined;
 
-  // we use requestBackfill to signal when a player changes for RemountOnValueChange below
+  // we use setSubscriptions to detect when a player changes for RemountOnValueChange below
   // see comment below above the RemountOnValueChange component
-  const requestBackfill = useMessagePipeline(selectRequestBackfill);
+  const setSubscriptions = useMessagePipeline(selectSetSubscriptions);
 
   const isPlayerPresent = playerPresence !== PlayerPresence.NOT_PRESENT;
 
@@ -604,7 +604,7 @@ export default function Workspace(props: WorkspaceProps): JSX.Element {
           onSelectKey={selectSidebarItem}
         >
           {/* To ensure no stale player state remains, we unmount all panels when players change */}
-          <RemountOnValueChange value={requestBackfill}>
+          <RemountOnValueChange value={setSubscriptions}>
             <Stack>
               <PanelLayout />
               {play && pause && seek && (

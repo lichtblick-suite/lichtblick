@@ -774,7 +774,6 @@ export default class UserNodePlayer implements Player {
         this._lastPlayerStateActiveData = activeData;
         await this._resetWorkers();
         this.setSubscriptions(this._subscriptions);
-        this.requestBackfill();
       } else {
         // Reset node state after seeking
         let shouldReset = activeData.lastSeekTime !== this._lastPlayerStateActiveData.lastSeekTime;
@@ -961,9 +960,5 @@ export default class UserNodePlayer implements Player {
 
   public seekPlayback(time: Time, backfillDuration?: Time): void {
     this._player.seekPlayback?.(time, backfillDuration);
-  }
-
-  public requestBackfill(): void {
-    this._player.requestBackfill();
   }
 }

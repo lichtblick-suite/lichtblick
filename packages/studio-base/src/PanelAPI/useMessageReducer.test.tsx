@@ -535,51 +535,6 @@ describe("useMessageReducer", () => {
     expect(result.current).toEqual(1);
   });
 
-  it("calls requestBackfill when topics change", async () => {
-    const requestBackfill = jest.fn();
-    const initialRestore = jest.fn().mockReturnValue(1);
-    const initialAddMessage = jest.fn().mockImplementation((_, msg) => msg.message.value);
-
-    const { rerender } = renderHook(
-      ({ topics, addMessage, restore }) =>
-        PanelAPI.useMessageReducer({ topics, restore, addMessage }),
-      {
-        initialProps: { topics: ["/foo"], addMessage: initialAddMessage, restore: initialRestore },
-        wrapper: ({ children }) => (
-          <MockMessagePipelineProvider requestBackfill={requestBackfill}>
-            {children}
-          </MockMessagePipelineProvider>
-        ),
-      },
-    );
-
-    // Calls `requestBackfill` initially.
-    expect(requestBackfill.mock.calls.length).toEqual(1);
-    requestBackfill.mockClear();
-
-    // Rendering again with the same topics should NOT result in any calls.
-    rerender({ topics: ["/foo"], restore: initialRestore, addMessage: initialAddMessage });
-    expect(requestBackfill.mock.calls.length).toEqual(0);
-    requestBackfill.mockClear();
-
-    // However, changing the topics results in another `requestBackfill` call.
-    rerender({ topics: ["/foo", "/bar"], restore: initialRestore, addMessage: initialAddMessage });
-    expect(requestBackfill.mock.calls.length).toEqual(1);
-    requestBackfill.mockClear();
-
-    // Passing in a different `addMessage` function should NOT result in any calls.
-    const newAddMessage = jest.fn();
-    rerender({ topics: ["/foo", "/bar"], restore: initialRestore, addMessage: newAddMessage });
-    expect(requestBackfill.mock.calls.length).toEqual(0);
-    requestBackfill.mockClear();
-
-    // Passing in a different `restore` function should NOT result in any calls.
-    const newRestore = jest.fn();
-    rerender({ topics: ["/foo", "/bar"], restore: newRestore, addMessage: newAddMessage });
-    expect(requestBackfill.mock.calls.length).toEqual(0);
-    requestBackfill.mockClear();
-  });
-
   it("restore called when addMessages changes", async () => {
     const message1 = {
       topic: "/foo",

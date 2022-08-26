@@ -635,9 +635,6 @@ export default class Ros2Player implements Player {
   }
 
   // Bunch of unsupported stuff. Just don't do anything for these.
-  public requestBackfill(): void {
-    // no-op
-  }
   public setGlobalVariables(): void {
     // no-op
   }

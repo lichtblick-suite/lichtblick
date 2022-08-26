@@ -452,6 +452,5 @@ export default class FoxgloveWebSocketPlayer implements Player {
     throw new Error("Service calls are not supported by the Foxglove WebSocket connection");
   }
 
-  public requestBackfill(): void {}
   public setGlobalVariables(): void {}
 }

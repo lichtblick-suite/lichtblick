@@ -274,6 +274,7 @@ export class IterablePlayer implements Player {
       ),
     );
 
+    // If there are no changes to topics there's no reason to perform a "seek" to trigger loading
     if (isEqual(allTopics, this._allTopics) && isEqual(partialTopics, this._partialTopics)) {
       return;
     }
@@ -281,17 +282,7 @@ export class IterablePlayer implements Player {
     this._allTopics = allTopics;
     this._partialTopics = partialTopics;
     this._blockLoader?.setTopics(this._partialTopics);
-  }
 
-  public requestBackfill(): void {
-    // The message pipeline invokes requestBackfill after setting subscriptions. It does this so any
-    // new panels that subscribe receive their messages even if the topic was already subscribed.
-    //
-    // Note(Roman): This behavior was designed around RandomAccessPlayer (I think) which does not do
-    // anything in setSubscriptions other than update internal members. While we still have
-    // RandomAccessPlayer we mimick that behavior in this player. Eventually we can update
-    // MessagePipeline to remove requestBackfill.
-    //
     // We only seek playback if the player is not playing. If the player is playing, the
     // playing state will detect any subscription changes and emit new messages.
     if (this._state === "idle" || this._state === "seek-backfill" || this._state === "play") {

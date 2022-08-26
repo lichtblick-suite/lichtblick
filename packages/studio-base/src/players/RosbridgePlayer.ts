@@ -657,9 +657,6 @@ export default class RosbridgePlayer implements Player {
   public setPlaybackSpeed(_speedFraction: number): void {
     // no-op
   }
-  public requestBackfill(): void {
-    // no-op
-  }
   public setGlobalVariables(): void {
     // no-op
   }
