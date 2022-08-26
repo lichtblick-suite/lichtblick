@@ -107,6 +107,9 @@ export class UrdfRenderable extends Renderable<UrdfUserData> {
 }
 
 export class Urdfs extends SceneExtension<UrdfRenderable> {
+  private frames: string[] = [];
+  private transforms: TransformData[] = [];
+
   public constructor(renderer: Renderer) {
     super("foxglove.Urdfs", renderer);
 
@@ -125,6 +128,11 @@ export class Urdfs extends SceneExtension<UrdfRenderable> {
         this._loadUrdf(instanceId, undefined);
       }
     }
+  }
+
+  public override dispose(): void {
+    this.frames = [];
+    this.transforms = [];
   }
 
   public override settingsNodes(): SettingsTreeEntry[] {
@@ -185,7 +193,8 @@ export class Urdfs extends SceneExtension<UrdfRenderable> {
   }
 
   public override removeAllRenderables(): void {
-    // no-op
+    // Re-add coordinate frames and transforms since the scene has been cleared
+    this._loadTransforms(this.frames, this.transforms);
   }
 
   public override startFrame(
@@ -421,15 +430,7 @@ export class Urdfs extends SceneExtension<UrdfRenderable> {
   private _loadRobot(renderable: UrdfRenderable, { robot, frames, transforms }: ParsedUrdf): void {
     const renderer = this.renderer;
 
-    // Import all coordinate frames from the URDF into the scene
-    for (const frameId of frames) {
-      renderer.addCoordinateFrame(frameId);
-    }
-
-    // Import all transforms from the URDF into the scene
-    for (const { parent, child, translation, rotation } of transforms) {
-      renderer.addTransform(parent, child, 0n, translation, rotation);
-    }
+    this._loadTransforms(frames, transforms);
 
     // Dispose any existing renderables
     renderable.removeChildren();
@@ -456,6 +457,21 @@ export class Urdfs extends SceneExtension<UrdfRenderable> {
           createChild(frameId, i, link.colliders[i]!);
         }
       }
+    }
+  }
+
+  private _loadTransforms(frames: string[], transforms: TransformData[]): void {
+    this.frames = frames;
+    this.transforms = transforms;
+
+    // Import all coordinate frames from the URDF into the scene
+    for (const frameId of frames) {
+      this.renderer.addCoordinateFrame(frameId);
+    }
+
+    // Import all transforms from the URDF into the scene
+    for (const { parent, child, translation, rotation } of transforms) {
+      this.renderer.addTransform(parent, child, 0n, translation, rotation);
     }
   }
 }
