@@ -14,6 +14,7 @@ export type Initalization = {
   topicStats: Map<string, TopicStats>;
   datatypes: RosDatatypes;
   profile: string | undefined;
+  name?: string;
 
   /** Publisher names by topic **/
   publishersByTopic: Map<string, Set<string>>;

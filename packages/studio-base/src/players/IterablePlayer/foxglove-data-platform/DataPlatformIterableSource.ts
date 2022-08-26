@@ -99,6 +99,8 @@ export class DataPlatformIterableSource implements IIterableSource {
       );
     }
 
+    const device = await this._consoleApi.getDevice(this._deviceId);
+
     if (isLessThan(this._start, coverageStartTime)) {
       log.debug("Increased start time from", this._start, "to", coverageStartTime);
       this._start = coverageStartTime;
@@ -158,6 +160,7 @@ export class DataPlatformIterableSource implements IIterableSource {
       profile: undefined,
       problems,
       publishersByTopic: new Map(),
+      name: `${device.name} (${device.id})`,
     };
   }
 

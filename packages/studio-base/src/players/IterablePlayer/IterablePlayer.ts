@@ -408,14 +408,24 @@ export class IterablePlayer implements Player {
     this._queueEmitState();
 
     try {
-      const { start, end, topics, profile, topicStats, problems, publishersByTopic, datatypes } =
-        await this._bufferedSource.initialize();
+      const {
+        start,
+        end,
+        topics,
+        profile,
+        topicStats,
+        problems,
+        publishersByTopic,
+        datatypes,
+        name,
+      } = await this._bufferedSource.initialize();
 
       this._profile = profile;
       this._start = this._currentTime = start;
       this._end = end;
       this._publishedTopics = publishersByTopic;
       this._providerDatatypes = datatypes;
+      this._name = name ?? this._name;
 
       // Studio does not like duplicate topics or topics with different datatypes
       // Check for duplicates or for mismatched datatypes
