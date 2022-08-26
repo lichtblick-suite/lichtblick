@@ -48,3 +48,14 @@ export function NarrowLayout(): JSX.Element {
     </PanelSetup>
   );
 }
+
+export function WithSettings(): JSX.Element {
+  return (
+    <PanelSetup fixture={fixture} includeSettings>
+      <VariableSliderPanel />
+    </PanelSetup>
+  );
+}
+WithSettings.parameters = {
+  colorScheme: "light",
+};
