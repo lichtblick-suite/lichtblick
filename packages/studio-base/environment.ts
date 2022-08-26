@@ -39,5 +39,6 @@ export function buildEnvironmentDefaults(
     SENTRY_PROJECT: process.env.SENTRY_PROJECT ?? null, // eslint-disable-line no-restricted-syntax
     SIGNUP_API_URL: "https://foxglove.dev/api/signup",
     SLACK_INVITE_URL: "https://foxglove.dev/join-slack",
+    FOXGLOVE_ENABLE_DIALOG_AUTH: process.env.FOXGLOVE_ENABLE_DIALOG_AUTH ?? null, // eslint-disable-line no-restricted-syntax
   };
 }
