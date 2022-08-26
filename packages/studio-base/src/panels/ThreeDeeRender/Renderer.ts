@@ -549,6 +549,7 @@ export class Renderer extends EventEmitter<RendererEvents> {
           { id: "show-all", type: "action", label: "Show All" },
           { id: "hide-all", type: "action", label: "Hide All" },
         ],
+        children: this.settings.tree()["topics"]?.children,
         handler: this.handleTopicsAction,
       },
     };
