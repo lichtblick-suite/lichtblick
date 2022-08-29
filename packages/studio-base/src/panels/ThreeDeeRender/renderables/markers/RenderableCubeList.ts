@@ -30,15 +30,6 @@ export class RenderableCubeList extends RenderableMarker {
     this.mesh.receiveShadow = true;
     this.add(this.mesh);
 
-    // TODO(jhurliman): Instanced cube outlines
-    // Cube outlines
-    // this.outline = new THREE.LineSegments(
-    //   RenderableCubeList.edgesGeometry(),
-    //   materialCache.outlineMaterial,
-    // );
-    // this.outline.userData.picking = false;
-    // this.add(this.outline);
-
     this.update(marker, receiveTime);
   }
 

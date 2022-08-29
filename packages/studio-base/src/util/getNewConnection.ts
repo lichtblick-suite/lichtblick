@@ -91,8 +91,6 @@ function getNewConnectionWithExistingReadRequest({
     // If we're downloading to the end of our range, do some reading ahead while we're at it.
     // Note that we might have already downloaded parts of this range, but we don't know when
     // they get evicted, so for now we just the entire range again.
-    // TODO(JP): In the future it might be good to mark the already downloaded bits as "recently
-    // accessed" so they don't get evicted, and then not download them again.
     return {
       ...notDownloadedRanges[0],
       end: Math.min(readRequestRange.start + maxRequestSize, fileSize),

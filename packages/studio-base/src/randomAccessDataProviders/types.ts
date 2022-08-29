@@ -83,8 +83,6 @@ export interface RandomAccessDataProvider {
   // callbacks that only some implementations care about. May only be called once. If there's an
   // error during initialization, it must be reported using `sendNotification` (even in Web Workers).
   // If the error is unrecoverable, just never resolve the promise.
-  // TODO(JP): It would be better to reject the promise explicitly in case of unrecoverable errors,
-  // so we can update the UI appropriately.
   initialize(extensionPoint: ExtensionPoint): Promise<InitializationResult>;
   // Get messages for a time range inclusive of start and end matching any of the provided topics.
   // May only be called after `initialize` has finished. Returned messages must be ordered by
@@ -121,8 +119,6 @@ export type ExtensionPoint = {
   progressCallback: (progress: Progress) => void;
 
   // Report some sort of metadata to the `Player`, see below for different kinds of metadata.
-  // TODO(JP): this is a bit of an odd one out. Maybe we should unify this with the
-  // `progressCallback` and have one type of "status" object?
   reportMetadataCallback: (metadata: RandomAccessDataProviderMetadata) => void;
 };
 

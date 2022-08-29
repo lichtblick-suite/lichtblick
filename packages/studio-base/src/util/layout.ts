@@ -122,7 +122,6 @@ function getLayoutWithNewPanelIds(
       newLayout[key] = layout[key];
     }
   }
-  // TODO: Refactor above to allow for better typing here.
   return newLayout as unknown as MosaicNode<string>;
 }
 

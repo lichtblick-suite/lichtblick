@@ -74,8 +74,6 @@ export function setRayDistance(pt: Point, distance: number): Point {
 export function convertToRangeView(points: Point[], range: number, makeColors: boolean): RGBA[] {
   const colors: RGBA[] = makeColors ? new Array(points.length) : [];
   // First pass to get min and max ranges
-  // TODO: Could be more efficient and extract this during
-  // transforms for free
   let maxRange = Number.MIN_VALUE;
   if (makeColors) {
     for (const point of points) {

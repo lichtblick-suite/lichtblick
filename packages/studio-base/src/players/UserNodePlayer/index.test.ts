@@ -703,7 +703,6 @@ describe("UserNodePlayer", () => {
         };
       `;
 
-      // TODO: test here to make sure the user node does not produce messages if not subscribed to.
       userNodePlayer.setSubscriptions([{ topic: `${DEFAULT_STUDIO_NODE_PREFIX}1` }]);
       await userNodePlayer.setUserNodes({
         [nodeId]: { name: `${DEFAULT_STUDIO_NODE_PREFIX}1`, sourceCode: unionTypeReturn },

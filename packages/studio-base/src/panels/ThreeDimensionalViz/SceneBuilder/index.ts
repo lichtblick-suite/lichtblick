@@ -226,8 +226,6 @@ export default class SceneBuilder implements MarkerProvider {
   // rendering. Not to be confused with the graphics rendering frame, or a
   // CoordinateFrame
   public frame?: Frame;
-  // TODO(JP): Get rid of these two different variables `errors` and `errorsByTopic` which we
-  // have to keep in sync.
   public errors: SceneErrors = {
     renderFrameId: "",
     topicsMissingTransforms: new Map(),
@@ -261,7 +259,6 @@ export default class SceneBuilder implements MarkerProvider {
   private _velodyneCloudConverter = new VelodyneCloudConverter();
 
   public allNamespaces: Namespace[] = [];
-  // TODO(Audrey): remove enabledNamespaces once we release topic groups
   public enabledNamespaces: Namespace[] = [];
   public selectedNamespacesByTopic?: { [topicName: string]: Set<string> };
   public flatten: boolean = false;

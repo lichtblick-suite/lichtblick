@@ -340,8 +340,6 @@ const makePointCloudCommand = () => {
           // If we're using "flat" color mode, we pass the actual color in a uniform (see uniforms below)
           // But we still need to provide some color buffer, even if it's not going to be used.
           // Instead of creating a dummy buffer, we just send the one we have for position.
-          // TODO (Hernan): I tried using the constant option provided by Regl, but it leads to
-          // visual artifacts. I need to check if this is a bug in Regl.
           const colorBuffer =
             colorMode == undefined || colorMode.mode === "flat"
               ? props.positionBuffer

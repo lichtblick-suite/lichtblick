@@ -118,7 +118,7 @@ export type NodeDataTransformer = (nodeData: NodeData, topics: Topic[]) => NodeD
 
 export type UserNodeLog = {
   source: "registerNode" | "processMessage";
-  value: unknown; // TODO: This should ideally share the type def of `log()` in `lib.js`
+  value: unknown;
 };
 
 export type RegistrationOutput = {

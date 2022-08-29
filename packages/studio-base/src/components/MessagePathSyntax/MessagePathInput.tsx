@@ -341,7 +341,6 @@ export default React.memo<MessagePathInputBaseProps>(function MessagePathInput(
 
         // Provide filter suggestions for primitive values, since they're the only kinds of values
         // that can be filtered on.
-        // TODO: add support for nested paths to primitives, such as "/some_topic{foo.bar==3}".
         for (const name of Object.keys(structureTraversalResult.structureItem.nextByName)) {
           const item = structureTraversalResult.structureItem.nextByName[name];
           if (item?.structureType === "primitive") {

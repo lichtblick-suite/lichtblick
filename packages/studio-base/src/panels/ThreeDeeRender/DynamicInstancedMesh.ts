@@ -48,9 +48,6 @@ export class DynamicInstancedMesh<
 
       tempColor.setRGB(color.r, color.g, color.b);
       this.setColorAt(i, tempColor);
-
-      // TODO: Need to adapt InstancedMesh to use an opacity instance buffer attribute
-      // this.setOpacityAt(i, color.a);
     }
   }
 

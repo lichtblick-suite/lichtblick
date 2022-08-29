@@ -32,7 +32,6 @@ if (!inSharedWorker()) {
   // their associated page, ignoring any policy in the headers of their source file. SharedWorkers
   // use the headers from their source files, though, and we use a CSP to prohibit user scripts
   // workers from making web requests (using enforceFetchIsBlocked, below.)
-  // TODO(steel): Change this back to a web worker if/when Chrome changes its behavior:
   // https://bugs.chromium.org/p/chromium/issues/detail?id=1012640
   throw new Error("Not in a SharedWorker.");
 }

@@ -53,7 +53,6 @@ export const transformDiagnosticToMarkerData = (diagnostic: ts.Diagnostic): Diag
     startColumn,
     endLineNumber,
     endColumn,
-    // TODO: Maybe map these 'codes' to meaningful strings?
     code: diagnostic.code,
   };
 };

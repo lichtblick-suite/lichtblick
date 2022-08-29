@@ -30,10 +30,6 @@ export type LayerSettingsOccupancyGrid = BaseSettings & {
   invalidColor: string;
 };
 
-// TODO(jhurliman): Upload the OccupancyGrid data directly as a R8I texture and
-// use a custom ShaderMaterial with an isampler2D uniform to reimplement the
-// updateTexture() logic in a shader
-
 const INVALID_OCCUPANCY_GRID = "INVALID_OCCUPANCY_GRID";
 
 const DEFAULT_MIN_COLOR = { r: 1, g: 1, b: 1, a: 1 }; // white

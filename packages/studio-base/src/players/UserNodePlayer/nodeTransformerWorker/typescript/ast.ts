@@ -344,9 +344,6 @@ export const constructDatatypes = (
             secField.isArray !== true &&
             nsecField.isArray !== true
           ) {
-            // TODO(JP): Might want to do some extra checks for types here. But then again,
-            // "time" is just pretty awkward of a field in general; maybe we should instead
-            // just get rid of it throughout our application and treat it as a regular nested object?
             return {
               name,
               type: "time",

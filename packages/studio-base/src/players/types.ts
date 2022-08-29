@@ -101,8 +101,6 @@ export type PlayerState = {
   presence: PlayerPresence;
 
   // Show some sort of progress indication in the playback bar; see `type Progress` for more details.
-  // TODO(JP): Maybe we should unify some progress and the other initialization fields above into
-  // one "status" object?
   progress: Progress;
 
   // Capabilities of this particular `Player`, which are not shared across all players.
@@ -171,9 +169,6 @@ export type PlayerStateActiveData = {
 
   // The last time a seek / discontinuity in messages happened. This will clear out data within
   // `PanelAPI` so we're not looking at stale data.
-  // TODO(JP): This currently is a time per `Date.now()`, but we don't need that anywhere, so we
-  // should change this to a `resetMessagesId` where you just have to set it to a unique id (better
-  // to have an id than a boolean, in case the listener skips parsing a state for some reason).
   lastSeekTime: number;
 
   // A list of topics that panels can subscribe to. This list may change across states,

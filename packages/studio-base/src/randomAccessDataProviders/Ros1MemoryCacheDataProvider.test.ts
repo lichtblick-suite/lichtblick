@@ -344,10 +344,6 @@ describe("MemoryCacheDataProvider", () => {
     sendNotification.expectCalledDuringTest();
   });
 
-  // TODO(JP): We test getBlocksToKeep separately, but never as part of MemoryCacheDataProvider.
-  // This is a bit more work to set up properly, so I haven't done that for now since I feel like
-  // the units themselves are sufficiently tested, but in the future it would be good to add some
-  // more coverage, especially as this code matures.
   describe("getBlocksToKeep", () => {
     it("keeps all blocks if we haven't reached the maximum cache size yet", () => {
       expect(

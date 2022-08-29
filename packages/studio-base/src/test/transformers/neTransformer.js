@@ -13,8 +13,7 @@ module.exports = {
     // Parse the grammar source into an AST
     const grammarParser = new nearley.Parser(nearleyGrammar);
     grammarParser.feed(sourceText);
-    const grammarAst = grammarParser.results[0]; // TODO check for errors
-
+    const grammarAst = grammarParser.results[0];
     // Compile the AST into a set of rules
     const grammarInfoObject = compile(grammarAst, {});
     // Generate JavaScript code from the rules

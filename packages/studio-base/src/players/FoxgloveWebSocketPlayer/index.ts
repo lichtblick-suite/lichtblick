@@ -210,7 +210,7 @@ export default class FoxgloveWebSocketPlayer implements Player {
           if (channel.id === id) {
             this._resolvedSubscriptionsById.delete(subId);
             this._resolvedSubscriptionsByTopic.delete(channel.topic);
-            client.unsubscribe(subId); // TODO: batch
+            client.unsubscribe(subId);
             this._unresolvedSubscriptions.add(channel.topic);
           }
         }
@@ -395,7 +395,7 @@ export default class FoxgloveWebSocketPlayer implements Player {
 
     for (const [topic, subId] of this._resolvedSubscriptionsByTopic) {
       if (!newTopics.has(topic)) {
-        this._client.unsubscribe(subId); // TODO: batch?
+        this._client.unsubscribe(subId);
         this._resolvedSubscriptionsByTopic.delete(topic);
         this._resolvedSubscriptionsById.delete(subId);
         this._recentlyCanceledSubscriptions.add(subId);
@@ -426,7 +426,7 @@ export default class FoxgloveWebSocketPlayer implements Player {
     for (const topic of this._unresolvedSubscriptions) {
       const chanInfo = this._channelsByTopic.get(topic);
       if (chanInfo) {
-        const subId = this._client.subscribe(chanInfo.channel.id); //TODO: batch?
+        const subId = this._client.subscribe(chanInfo.channel.id);
         this._unresolvedSubscriptions.delete(topic);
         this._resolvedSubscriptionsByTopic.set(topic, subId);
         this._resolvedSubscriptionsById.set(subId, chanInfo);

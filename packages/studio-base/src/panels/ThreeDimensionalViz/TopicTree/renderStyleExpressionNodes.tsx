@@ -36,7 +36,6 @@ import { SLeft, SRightActions, SToggles, STreeNodeRow } from "./TreeNodeRow";
 import VisibilityToggle from "./VisibilityToggle";
 import { TREE_SPACING, ROW_HEIGHT } from "./constants";
 
-// TODO: Dedupe from renderNamespaceNodes
 const OUTER_LEFT_MARGIN = 12;
 
 export const SDisplayName = styled.div`

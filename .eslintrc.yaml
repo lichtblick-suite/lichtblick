@@ -59,7 +59,7 @@ rules:
 
   no-warning-comments:
     - error
-    - terms: ["fixme", "xxx"]
+    - terms: ["fixme", "xxx", "todo"]
       location: anywhere
 
   no-restricted-imports:

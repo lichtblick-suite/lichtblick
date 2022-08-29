@@ -81,7 +81,6 @@ export default class VirtualLRUBuffer {
 
     // Walk through the blocks and copy the data over. If the input buffer is too large we will
     // currently just evict the earliest copied in data.
-    // TODO(JP): We could throw an error in that case if this is causing a lot of trouble.
     let position = range.start;
     while (position < range.end) {
       const { blockIndex, positionInBlock, remainingBytesInBlock } =
@@ -147,9 +146,6 @@ export default class VirtualLRUBuffer {
       // If we have too many blocks, remove the least recently used one.
       // Note that we don't reuse blocks, since other code might still hold a reference to it
       // via the `VirtualLRUBuffer#slice` method.
-      // TODO(JP): It might be worth measuring if under typical use it's faster to reuse blocks and always
-      // copy to a new buffer in `VirtualLRUBuffer#slice` (less garbage collection), or if the current method
-      // is better (faster slicing).
       const deleteIndex = this._lastAccessedBlockIndices.shift();
       if (deleteIndex != undefined) {
         delete this._blocks[deleteIndex];

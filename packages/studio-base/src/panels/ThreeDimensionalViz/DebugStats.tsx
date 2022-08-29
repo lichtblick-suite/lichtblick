@@ -72,7 +72,6 @@ function validate(stats: Stats) {
 }
 
 // Shows debug regl stats in the 3d panel.  Crashes the panel if regl stats drift outside of acceptable ranges.
-// TODO(bmc): move to regl-worldview at some point
 export default function DebugStats(): JSX.Element | ReactNull {
   const { classes } = useStyles();
   // eslint-disable-next-line @typescript-eslint/no-unsafe-argument

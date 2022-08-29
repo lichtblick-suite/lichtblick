@@ -8,9 +8,6 @@ import { useCallback, useEffect, useState } from "react";
  * This provides a convenience wrapper around sessionStorage and triggers
  * a react state change when values change.
  *
- * TODO: We should probably refactor LocalStorageAppConfigurationProvider to
- * handle localStorage & sessionStorage and replace this.
- *
  * @param key sessionStorage key to manage.
  * @returns [value, setValue] tuple for that key.
  */

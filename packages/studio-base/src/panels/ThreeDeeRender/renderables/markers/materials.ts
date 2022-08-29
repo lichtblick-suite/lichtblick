@@ -145,7 +145,7 @@ export function makePointsMaterial(marker: Marker): THREE.PointsMaterial {
   const transparent = markerHasTransparency(marker);
   return new THREE.PointsMaterial({
     vertexColors: true,
-    size: marker.scale.x, // TODO: Support scale.y
+    size: marker.scale.x,
     sizeAttenuation: true,
     transparent,
     depthWrite: !transparent,

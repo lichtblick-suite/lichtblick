@@ -120,7 +120,7 @@ type Colors = readonly Color[];
 export type BaseMarker = Readonly<
   StampedMessage & {
     ns: string;
-    id: string | number; // TODO: Actually just a number
+    id: string | number;
     action: 0 | 1 | 2 | 3;
     pose: MutablePose;
     scale: Scale;
@@ -130,7 +130,7 @@ export type BaseMarker = Readonly<
     frame_locked: boolean;
     points?: Point[];
     text?: string;
-    mesh_resource?: string; // TODO: required
+    mesh_resource?: string;
     mesh_use_embedded_materials?: boolean;
     primitive?: string;
     metadata?: Readonly<Record<string, unknown>>;

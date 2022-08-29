@@ -38,7 +38,7 @@ import {
   dashOffset: { value: 0 },
   dashScale: { value: 1 },
   dashSize: { value: 1 },
-  gapSize: { value: 1 }, // todo FIX - maybe change to totalSize
+  gapSize: { value: 1 },
 };
 
 ShaderLib["foxglove.line"] = {
