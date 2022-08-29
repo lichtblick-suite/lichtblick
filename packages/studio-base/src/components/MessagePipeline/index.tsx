@@ -11,7 +11,7 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { flatten } from "lodash";
+import { debounce, flatten } from "lodash";
 
 import { Condvar } from "@foxglove/den/async";
 import { useShallowMemo } from "@foxglove/hooks";
@@ -125,7 +125,28 @@ export function MessagePipelineProvider({
     () => flatten(Object.values(publishersById)),
     [publishersById],
   );
-  useEffect(() => player?.setSubscriptions(subscriptions), [player, subscriptions]);
+
+  // Debounce the subscription updates for players. This batches multiple subscribe calls
+  // into one update for the player which avoids fetching data that will be immediately discarded.
+  //
+  // The delay of 0ms is intentional as we only want to give one timeout cycle to batch updates
+  const debouncedPlayerSetSubscriptions = useMemo(() => {
+    return debounce((subs: SubscribePayload[]) => {
+      player?.setSubscriptions(subs);
+    });
+  }, [player]);
+
+  // when unmounting or changing the debounce function cancel any pending debounce
+  useEffect(() => {
+    return () => {
+      debouncedPlayerSetSubscriptions.cancel();
+    };
+  }, [debouncedPlayerSetSubscriptions]);
+
+  useEffect(
+    () => debouncedPlayerSetSubscriptions(subscriptions),
+    [debouncedPlayerSetSubscriptions, subscriptions],
+  );
   useEffect(() => player?.setPublishers(publishers), [player, publishers]);
 
   // Slow down the message pipeline framerate to the given FPS if it is set to less than 60

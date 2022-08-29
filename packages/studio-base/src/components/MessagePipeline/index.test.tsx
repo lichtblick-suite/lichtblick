@@ -427,6 +427,7 @@ describe("MessagePipelineProvider/useMessagePipeline", () => {
     const player2 = new FakePlayer();
     setPlayer(player2);
     rerender();
+    await act(async () => await delay(1));
     expect(player2.subscriptions).toEqual([{ topic: "/studio/test" }, { topic: "/studio/test2" }]);
     expect(player2.publishers).toEqual([{ topic: "/studio/test", datatype: "test" }]);
   });
