@@ -11,8 +11,7 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { Layer } from "@fluentui/react";
-import { alpha, Paper, useTheme } from "@mui/material";
+import { alpha, Paper, useTheme, Modal } from "@mui/material";
 import { Fzf, FzfResultItem } from "fzf";
 import { maxBy } from "lodash";
 import React, {
@@ -520,7 +519,11 @@ export default React.forwardRef(function Autocomplete<T = unknown>(
         );
       }}
       // @ts-expect-error renderMenuWrapper added in the fork but we don't have typings for it
-      renderMenuWrapper={(menu: React.ReactNode) => <Layer>{menu}</Layer>}
+      renderMenuWrapper={(menu) => (
+        <Modal disableAutoFocus open={open} hideBackdrop>
+          {menu}
+        </Modal>
+      )}
       ref={autocomplete}
       wrapperStyle={{
         display: "flex",

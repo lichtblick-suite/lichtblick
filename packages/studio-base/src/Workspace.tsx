@@ -29,7 +29,6 @@ import { AppSetting } from "@foxglove/studio-base/AppSetting";
 import AccountSettings from "@foxglove/studio-base/components/AccountSettingsSidebar/AccountSettings";
 import { DataSourceSidebar } from "@foxglove/studio-base/components/DataSourceSidebar";
 import DocumentDropListener from "@foxglove/studio-base/components/DocumentDropListener";
-import DropOverlay from "@foxglove/studio-base/components/DropOverlay";
 import ExtensionsSidebar from "@foxglove/studio-base/components/ExtensionsSidebar";
 import HelpSidebar, {
   MESSAGE_PATH_SYNTAX_HELP_INFO,
@@ -94,10 +93,6 @@ const useStyles = makeStyles()({
     flex: "1 1 100%",
     outline: "none",
     overflow: "hidden",
-  },
-  dropzone: {
-    fontSize: "4em",
-    marginBottom: "1em",
   },
 });
 
@@ -589,11 +584,7 @@ export default function Workspace(props: WorkspaceProps): JSX.Element {
           onDismiss={() => setShowOpenDialog(undefined)}
         />
       )}
-      <DocumentDropListener onDrop={dropHandler} allowedExtensions={allowedDropExtensions}>
-        <DropOverlay>
-          <div className={classes.dropzone}>Drop a file here</div>
-        </DropOverlay>
-      </DocumentDropListener>
+      <DocumentDropListener onDrop={dropHandler} allowedExtensions={allowedDropExtensions} />
       <SyncAdapters />
       <KeyListener global keyDownHandlers={keyDownHandlers} />
       <div className={classes.container} ref={containerRef} tabIndex={0}>

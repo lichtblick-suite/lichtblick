@@ -34,9 +34,7 @@ describe("<DocumentDropListener>", () => {
       <div>
         <SnackbarProvider>
           <ThemeProvider isDark={false}>
-            <DocumentDropListener allowedExtensions={[]}>
-              <div />
-            </DocumentDropListener>
+            <DocumentDropListener allowedExtensions={[]} />
           </ThemeProvider>
         </SnackbarProvider>
       </div>,
