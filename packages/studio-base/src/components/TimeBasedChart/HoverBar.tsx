@@ -15,7 +15,7 @@ import { CSSProperties, useMemo } from "react";
 import { withStyles } from "tss-react/mui";
 
 import { RpcScales } from "@foxglove/studio-base/components/Chart/types";
-import { useHoverValue } from "@foxglove/studio-base/context/HoverValueContext";
+import { useHoverValue } from "@foxglove/studio-base/context/TimelineInteractionStateContext";
 
 const Wrapper = withStyles("div", () => ({
   root: {

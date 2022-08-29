@@ -18,7 +18,7 @@ import { useTooltip } from "@foxglove/studio-base/components/Tooltip";
 import {
   useClearHoverValue,
   useSetHoverValue,
-} from "@foxglove/studio-base/context/HoverValueContext";
+} from "@foxglove/studio-base/context/TimelineInteractionStateContext";
 import { useAppTimeFormat } from "@foxglove/studio-base/hooks";
 import { PlayerPresence } from "@foxglove/studio-base/players/types";
 import { fonts } from "@foxglove/studio-base/util/sharedStyleConstants";

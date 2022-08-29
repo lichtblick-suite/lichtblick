@@ -15,7 +15,7 @@ import { v4 as uuidv4 } from "uuid";
 
 import MessagePathInput from "@foxglove/studio-base/components/MessagePathSyntax/MessagePathInput";
 import TimeBasedChart from "@foxglove/studio-base/components/TimeBasedChart";
-import { useHoverValue } from "@foxglove/studio-base/context/HoverValueContext";
+import { useHoverValue } from "@foxglove/studio-base/context/TimelineInteractionStateContext";
 import { getLineColor } from "@foxglove/studio-base/util/plotColors";
 
 import PathSettingsModal from "./PathSettingsModal";

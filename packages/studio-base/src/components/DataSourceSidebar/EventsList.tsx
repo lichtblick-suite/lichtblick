@@ -19,7 +19,7 @@ import { EventsStore, useEvents } from "@foxglove/studio-base/context/EventsCont
 import {
   useClearHoverValue,
   useSetHoverValue,
-} from "@foxglove/studio-base/context/HoverValueContext";
+} from "@foxglove/studio-base/context/TimelineInteractionStateContext";
 import { useAppTimeFormat } from "@foxglove/studio-base/hooks";
 import { ConsoleEvent } from "@foxglove/studio-base/services/ConsoleApi";
 
