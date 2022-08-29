@@ -11,10 +11,7 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import CheckIcon from "@mui/icons-material/Check";
-import CopyAllIcon from "@mui/icons-material/CopyAll";
 import {
-  IconButton,
   Table,
   TableBody,
   TableCell,
@@ -29,6 +26,7 @@ import { makeStyles } from "tss-react/mui";
 import { useDebouncedCallback } from "use-debounce";
 
 import { ParameterValue } from "@foxglove/studio";
+import CopyButton from "@foxglove/studio-base/components/CopyButton";
 import EmptyState from "@foxglove/studio-base/components/EmptyState";
 import JsonInput from "@foxglove/studio-base/components/JsonInput";
 import {
@@ -39,7 +37,6 @@ import Panel from "@foxglove/studio-base/components/Panel";
 import PanelToolbar from "@foxglove/studio-base/components/PanelToolbar";
 import Stack from "@foxglove/studio-base/components/Stack";
 import { PlayerCapabilities } from "@foxglove/studio-base/players/types";
-import clipboard from "@foxglove/studio-base/util/clipboard";
 
 // The minimum amount of time to wait between showing the parameter update animation again
 export const ANIMATION_RESET_DELAY_MS = 3000;
@@ -97,7 +94,6 @@ function Parameters(): ReactElement {
     200,
   );
 
-  const [copied, setCopied] = useState(false);
   const [changedParameters, setChangedParameters] = useState<string[]>([]);
 
   const canGetParams = capabilities.includes(PlayerCapabilities.getParameters);
@@ -132,16 +128,6 @@ function Parameters(): ReactElement {
     const timerId = setTimeout(() => setChangedParameters([]), ANIMATION_RESET_DELAY_MS);
     return () => clearTimeout(timerId);
   }, [parameters, skipAnimation]);
-
-  const handleCopy = useCallback((value: string) => {
-    clipboard
-      .copy(value)
-      .then(() => {
-        setCopied(true);
-        setTimeout(() => setCopied(false), 1500);
-      })
-      .catch((err) => console.warn(err));
-  }, []);
 
   if (!canGetParams) {
     return (
@@ -200,17 +186,13 @@ function Parameters(): ReactElement {
                   )}
 
                   <TableCell padding="none" align="center">
-                    <IconButton
+                    <CopyButton
                       className={classes.copyIcon}
                       edge="end"
                       size="small"
-                      onClick={() => handleCopy(`${name}: ${value}`)}
-                      title={copied ? "Copied" : "Copy to Clipboard"}
-                      aria-label={copied ? "Copied" : "Copy to Clipboard"}
-                      color={copied ? "success" : "primary"}
-                    >
-                      {copied ? <CheckIcon fontSize="small" /> : <CopyAllIcon fontSize="small" />}
-                    </IconButton>
+                      iconSize="small"
+                      value={`${name}: ${value}`}
+                    />
                   </TableCell>
                 </TableRow>
               );

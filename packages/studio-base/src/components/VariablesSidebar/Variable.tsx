@@ -16,7 +16,6 @@ import {
   ListItemButtonProps,
   ListItemText,
   Typography,
-  Button,
   Tooltip,
   InputBase,
 } from "@mui/material";
@@ -24,13 +23,13 @@ import { pick } from "lodash";
 import { useMemo, useCallback, useState, useRef } from "react";
 import { makeStyles } from "tss-react/mui";
 
+import CopyButton from "@foxglove/studio-base/components/CopyButton";
 import JsonInput from "@foxglove/studio-base/components/JsonInput";
 import Stack from "@foxglove/studio-base/components/Stack";
 import useGlobalVariables, {
   GlobalVariables,
 } from "@foxglove/studio-base/hooks/useGlobalVariables";
 import useLinkedGlobalVariables from "@foxglove/studio-base/panels/ThreeDimensionalViz/Interactions/useLinkedGlobalVariables";
-import clipboard from "@foxglove/studio-base/util/clipboard";
 
 const useStyles = makeStyles<void, "copyButton">()((theme, _params, classes) => ({
   root: {
@@ -159,16 +158,6 @@ export default function Variable(props: {
   }, [linkedGlobalVariables, name, setGlobalVariables, setLinkedGlobalVariables]);
 
   const value = useMemo(() => globalVariables[name], [globalVariables, name]);
-
-  const handleCopy = useCallback(() => {
-    clipboard
-      .copy(JSON.stringify(value, undefined, 2) ?? "")
-      .then(() => {
-        setCopied(true);
-        setTimeout(() => setCopied(false), 1500);
-      })
-      .catch((e) => console.warn(e));
-  }, [value]);
 
   const onChangeValue = useCallback(
     (newVal: unknown) => {
@@ -323,14 +312,14 @@ export default function Variable(props: {
       {expanded && (
         <div className={classes.editorWrapper}>
           <Divider />
-          <Button
+          <CopyButton
             className={classes.copyButton}
             size="small"
-            onClick={handleCopy}
             color={copied ? "primary" : "inherit"}
+            value={JSON.stringify(value, undefined, 2) ?? ""}
           >
             {copied ? "Copied" : "Copy"}
-          </Button>
+          </CopyButton>
           <JsonInput value={value} readOnly={linked} onChange={onChangeValue} />
         </div>
       )}

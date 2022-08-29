@@ -5,6 +5,7 @@
 import { Box, Divider } from "@mui/material";
 import { makeStyles } from "tss-react/mui";
 
+import CopyButton from "@foxglove/studio-base/components/CopyButton";
 import { DataSourceInfoView } from "@foxglove/studio-base/components/DataSourceInfoView";
 import { DirectTopicStatsUpdater } from "@foxglove/studio-base/components/DirectTopicStatsUpdater";
 import EmptyState from "@foxglove/studio-base/components/EmptyState";
@@ -20,7 +21,14 @@ import helpContent from "./index.help.md";
 
 const EMPTY_TOPICS: Topic[] = [];
 
-const useStyles = makeStyles()((theme) => ({
+const useStyles = makeStyles<void, "copyIcon">()((theme, _params, classes) => ({
+  copyIcon: {
+    visibility: "hidden",
+
+    "&:hover": {
+      backgroundColor: "transparent",
+    },
+  },
   table: {
     borderCollapse: "collapse",
     display: "block",
@@ -48,18 +56,42 @@ const useStyles = makeStyles()((theme) => ({
     },
 
     td: {
-      paddingBlock: theme.spacing(1),
+      paddingBlock: theme.spacing(0.25),
       paddingInline: theme.spacing(1.5),
       whiteSpace: "nowrap",
+
+      [`&:hover .${classes.copyIcon}`]: {
+        visibility: "visible",
+      },
     },
   },
 }));
 
 function TopicRow({ topic }: { topic: Topic }): JSX.Element {
+  const { classes } = useStyles();
+
   return (
     <tr>
-      <td>{topic.name}</td>
-      <td>{topic.datatype}</td>
+      <td>
+        {topic.name}
+        <CopyButton
+          className={classes.copyIcon}
+          edge="end"
+          size="small"
+          iconSize="small"
+          value={topic.name}
+        />
+      </td>
+      <td>
+        {topic.datatype}
+        <CopyButton
+          className={classes.copyIcon}
+          edge="end"
+          size="small"
+          iconSize="small"
+          value={topic.datatype}
+        />
+      </td>
       <td data-topic={topic.name} data-topic-stat="count">
         &mdash;
       </td>

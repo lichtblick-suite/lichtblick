@@ -11,20 +11,32 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { Link, styled as muiStyled } from "@mui/material";
+import { Link, Typography } from "@mui/material";
+import { makeStyles } from "tss-react/mui";
 
+import CopyButton from "@foxglove/studio-base/components/CopyButton";
+import Stack from "@foxglove/studio-base/components/Stack";
 import { MessageEvent } from "@foxglove/studio-base/players/types";
 import { formatTimeRaw } from "@foxglove/studio-base/util/time";
 
-import CopyMessageButton from "./CopyMessageButton";
+import { copyMessageReplacer } from "./copyMessageReplacer";
 import { getMessageDocumentationLink } from "./utils";
 
-const SMetadata = muiStyled("div")`
-  color: ${({ theme }) => theme.palette.text.secondary};
-  margin-top: ${({ theme }) => theme.spacing(0.5)};
-  font-size: 11px;
-  line-height: 1.3;
-`;
+const useStyles = makeStyles()((theme) => ({
+  button: {
+    padding: theme.spacing(0.125),
+
+    ".MuiSvgIcon-root": {
+      fontSize: theme.typography.pxToRem(16),
+    },
+    ".MuiButton-startIcon": {
+      marginRight: theme.spacing(0.5),
+    },
+    "&:hover": {
+      backgroundColor: "transparent",
+    },
+  },
+}));
 
 type Props = {
   data: unknown;
@@ -43,30 +55,60 @@ export default function Metadata({
   message,
   diffMessage,
 }: Props): JSX.Element {
+  const { classes } = useStyles();
   return (
-    <SMetadata>
-      {!diffMessage && datatype && (
-        <Link
-          target="_blank"
-          color="inherit"
-          underline="hover"
-          rel="noopener noreferrer"
-          href={getMessageDocumentationLink(datatype)}
-        >
-          {datatype}
-        </Link>
-      )}
-      {diffMessage ? " base" : ""} @ {formatTimeRaw(message.receiveTime)} sec{" "}
-      <CopyMessageButton data={data} text="Copy msg" />
+    <Stack alignItems="flex-start" padding={0.25}>
+      <Stack direction="row" alignItems="center" gap={0.5}>
+        <Typography variant="caption" lineHeight={1.2} color="text.secondary">
+          {diffMessage
+            ? "base"
+            : datatype && (
+                <Link
+                  target="_blank"
+                  color="inherit"
+                  variant="caption"
+                  underline="hover"
+                  rel="noopener noreferrer"
+                  href={getMessageDocumentationLink(datatype)}
+                >
+                  {datatype}
+                </Link>
+              )}
+          {` @ ${formatTimeRaw(message.receiveTime)} sec`}
+        </Typography>
+        <CopyButton
+          size="small"
+          iconSize="inherit"
+          className={classes.button}
+          value={JSON.stringify(data, copyMessageReplacer, 2) ?? ""}
+        />
+      </Stack>
+
       {diffMessage?.receiveTime && (
         <>
-          <div>
-            {`diff @ ${formatTimeRaw(diffMessage.receiveTime)} sec `}
-            <CopyMessageButton data={diffData} text="Copy msg" />
-          </div>
-          <CopyMessageButton data={diff} text="Copy diff of msgs" />
+          <Stack direction="row" alignItems="center" gap={0.5}>
+            <Typography
+              variant="caption"
+              lineHeight={1.2}
+              color="text.secondary"
+            >{`diff @ ${formatTimeRaw(diffMessage.receiveTime)} sec `}</Typography>
+            <CopyButton
+              size="small"
+              iconSize="inherit"
+              className={classes.button}
+              value={JSON.stringify(diffData, copyMessageReplacer, 2) ?? ""}
+            />
+          </Stack>
+          <CopyButton
+            size="small"
+            iconSize="inherit"
+            className={classes.button}
+            value={JSON.stringify(diff, copyMessageReplacer, 2) ?? ""}
+          >
+            Copy diff of msgs
+          </CopyButton>
         </>
       )}
-    </SMetadata>
+    </Stack>
   );
 }
