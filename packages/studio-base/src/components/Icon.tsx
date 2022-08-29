@@ -15,7 +15,6 @@ import { ComponentProps, CSSProperties, ReactNode, MouseEvent } from "react";
 import { makeStyles } from "tss-react/mui";
 
 import Tooltip, { useTooltip } from "@foxglove/studio-base/components/Tooltip";
-import { colors } from "@foxglove/studio-base/util/sharedStyleConstants";
 
 export type IconSize = "xlarge" | "large" | "medium" | "small" | "xsmall" | "xxsmall";
 
@@ -35,7 +34,7 @@ function makeIconStyle(size: number) {
   };
 }
 
-const useStyles = makeStyles()({
+const useStyles = makeStyles()((theme) => ({
   icon: {
     "& > svg": {
       fill: "currentColor",
@@ -67,10 +66,10 @@ const useStyles = makeStyles()({
   },
   wrappedIcon: {
     "&:hover": {
-      backgroundColor: colors.DARK3,
+      backgroundColor: theme.palette.action.hover,
     },
     "&.active": {
-      backgroundColor: colors.DARK4,
+      backgroundColor: theme.palette.action.active,
     },
   },
   xlarge: makeIconStyle(32),
@@ -79,7 +78,7 @@ const useStyles = makeStyles()({
   small: makeIconStyle(18),
   xsmall: makeIconStyle(16),
   xxsmall: makeIconStyle(11),
-});
+}));
 
 type Props = {
   children: ReactNode;

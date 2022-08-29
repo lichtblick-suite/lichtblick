@@ -13,25 +13,27 @@
 import { every, uniq, keyBy, isEmpty } from "lodash";
 
 import { isTypicalFilterName } from "@foxglove/studio-base/components/MessagePathSyntax/isTypicalFilterName";
-import { colors } from "@foxglove/studio-base/util/sharedStyleConstants";
 
 export const diffArrow = "->";
 export const diffLabels = {
   ADDED: {
     labelText: "STUDIO_DIFF___ADDED",
-    color: colors.DARK6,
+    color: "#404047",
     backgroundColor: "#daffe7",
     invertedBackgroundColor: "#182924",
     indicator: "+",
   },
   DELETED: {
     labelText: "STUDIO_DIFF___DELETED",
-    color: colors.DARK6,
+    color: "#404047",
     backgroundColor: "#ffdee3",
     invertedBackgroundColor: "#3d2327",
     indicator: "-",
   },
-  CHANGED: { labelText: "STUDIO_DIFF___CHANGED", color: colors.YELLOW1 },
+  CHANGED: {
+    labelText: "STUDIO_DIFF___CHANGED",
+    color: "#eba800",
+  },
   ID: { labelText: "STUDIO_DIFF___ID" },
 } as const;
 

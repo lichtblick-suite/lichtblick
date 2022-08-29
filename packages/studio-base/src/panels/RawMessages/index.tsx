@@ -64,6 +64,7 @@ import { enumValuesByDatatypeAndField } from "@foxglove/studio-base/util/selecto
 import { fonts } from "@foxglove/studio-base/util/sharedStyleConstants";
 
 import DiffSpan from "./DiffSpan";
+import DiffStats from "./DiffStats";
 import MaybeCollapsedValue from "./MaybeCollapsedValue";
 import Metadata from "./Metadata";
 import Value from "./Value";
@@ -74,7 +75,7 @@ import {
 } from "./getValueActionForValue";
 import helpContent from "./index.help.md";
 import { RawMessagesPanelConfig } from "./types";
-import { DATA_ARRAY_PREVIEW_LIMIT, generateDeepKeyPaths, getItemStringForDiff } from "./utils";
+import { DATA_ARRAY_PREVIEW_LIMIT, generateDeepKeyPaths } from "./utils";
 
 export const CUSTOM_METHOD = "custom";
 export const PREV_MSG_METHOD = "previous message";
@@ -140,15 +141,11 @@ function RawMessages(props: Props) {
   const getItemString = useMemo(
     () =>
       diffEnabled
-        ? (type: string, data: DiffObject, itemType: React.ReactNode) =>
-            getItemStringForDiff({
-              type,
-              data,
-              itemType,
-              isInverted: themePreference === "dark",
-            })
+        ? (_type: string, data: DiffObject, itemType: React.ReactNode) => (
+            <DiffStats data={data} itemType={itemType} />
+          )
         : defaultGetItemString,
-    [defaultGetItemString, diffEnabled, themePreference],
+    [defaultGetItemString, diffEnabled],
   );
 
   const topicRosPath: RosPath | undefined = useMemo(() => parseRosPath(topicPath), [topicPath]);
@@ -194,7 +191,6 @@ function RawMessages(props: Props) {
     if (expansion === "all") {
       return false;
     }
-
     if (typeof expansion === "object" && Object.values(expansion).some((v) => v === "c")) {
       return true;
     } else {

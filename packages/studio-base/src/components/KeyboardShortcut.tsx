@@ -13,7 +13,7 @@
 
 import { styled as muiStyled } from "@mui/material";
 
-import { colors, fonts } from "@foxglove/studio-base/util/sharedStyleConstants";
+import { fonts } from "@foxglove/studio-base/util/sharedStyleConstants";
 
 const SKeyboardShortcut = muiStyled("div")(({ theme }) => ({
   padding: theme.spacing(0.5, 0),
@@ -46,7 +46,7 @@ const SKey = muiStyled("kbd")(({ theme }) => ({
   fontFamily: fonts.SANS_SERIF,
 
   "&:not(:last-child)": {
-    borderRight: `1px solid ${colors.DARK9}`,
+    borderRight: `1px solid ${theme.palette.text.secondary}`,
   },
 }));
 

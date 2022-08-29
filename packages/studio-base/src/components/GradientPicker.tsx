@@ -18,7 +18,6 @@ import { Color } from "@foxglove/regl-worldview";
 import AutoSizingCanvas from "@foxglove/studio-base/components/AutoSizingCanvas";
 import ColorPicker from "@foxglove/studio-base/components/ColorPicker";
 import { defaultedRGBStringFromColorObj } from "@foxglove/studio-base/util/colorUtils";
-import { colors } from "@foxglove/studio-base/util/sharedStyleConstants";
 
 const GRADIENT_LINE_HEIGHT = 6;
 const GRADIENT_LINE_WIDTH = 1;
@@ -44,7 +43,7 @@ const SLine = muiStyled("div")`
   flex: 0 0 auto;
   width: ${GRADIENT_LINE_WIDTH}px;
   height: ${GRADIENT_BAR_HEIGHT + GRADIENT_LINE_HEIGHT}px;
-  background-color: ${colors.LIGHT2};
+  background-color: ${({ theme }) => theme.palette.text.primary};
 `;
 const SBar = muiStyled("div")`
   flex: 1 1 auto;

@@ -12,10 +12,8 @@
 //   You may not use this file except in compliance with the License.
 
 import { first, last } from "lodash";
-import { ReactNode } from "react";
 
 import { diffLabels, DiffObject } from "@foxglove/studio-base/panels/RawMessages/getDiff";
-import { colors } from "@foxglove/studio-base/util/sharedStyleConstants";
 
 export const DATA_ARRAY_PREVIEW_LIMIT = 20;
 export const ROS_COMMON_MSGS: Set<string> = new Set([
@@ -78,12 +76,14 @@ export function generateDeepKeyPaths(obj: unknown, maxArrayLength: number): Set<
   return keys;
 }
 
-function getChangeCounts(
+export function getChangeCounts(
   data: DiffObject,
   startingCounts: {
     -readonly [K in typeof diffLabels["ADDED" | "CHANGED" | "DELETED"]["labelText"]]: number;
   },
-) {
+): {
+  [key: string]: number;
+} {
   for (const key in data) {
     if (
       key === diffLabels.ADDED.labelText ||
@@ -97,75 +97,6 @@ function getChangeCounts(
   }
   return startingCounts;
 }
-
-export const getItemStringForDiff = ({
-  data,
-  itemType,
-  isInverted,
-}: {
-  type: string;
-  data: DiffObject;
-  itemType: ReactNode;
-  isInverted: boolean;
-}): ReactNode => {
-  const { ADDED, DELETED, CHANGED, ID } = diffLabels;
-  const id = data[ID.labelText] as DiffObject | undefined;
-  const idLabel = id
-    ? Object.keys(id)
-        .map((key) => `${key}: ${id[key]}`)
-        .join(", ")
-    : undefined;
-  const startingCounts = { [ADDED.labelText]: 0, [CHANGED.labelText]: 0, [DELETED.labelText]: 0 };
-  const counts = getChangeCounts(data, startingCounts);
-  return (
-    <>
-      {id ? (
-        <span>
-          {itemType} {idLabel}
-        </span>
-      ) : undefined}
-      <span style={{ float: "right", color: CHANGED.color }}>
-        {counts[ADDED.labelText] !== 0 || counts[DELETED.labelText] !== 0 ? (
-          <span
-            style={{
-              display: "inline-block",
-              fontSize: "0.8em",
-              padding: 2,
-              borderRadius: 3,
-              backgroundColor: isInverted ? colors.DARK6 : colors.LIGHT1,
-              marginRight: 5,
-            }}
-          >
-            <span style={{ color: colors.GREEN }}>
-              {counts[ADDED.labelText] !== 0
-                ? `${diffLabels.ADDED.indicator}${counts[ADDED.labelText]} `
-                : undefined}
-            </span>
-            <span style={{ color: colors.RED }}>
-              {counts[DELETED.labelText] !== 0
-                ? `${diffLabels.DELETED.indicator}${counts[DELETED.labelText]}`
-                : undefined}
-            </span>
-          </span>
-        ) : undefined}
-        {counts[CHANGED.labelText] !== 0 ? (
-          <span
-            style={{
-              display: "inline-block",
-              width: 3,
-              height: 3,
-              borderRadius: 3,
-              backgroundColor: CHANGED.color,
-              marginRight: 5,
-            }}
-          >
-            {counts[CHANGED.labelText] !== 0 ? " " : undefined}
-          </span>
-        ) : undefined}
-      </span>
-    </>
-  );
-};
 
 export function getMessageDocumentationLink(datatype: string): string {
   const parts = datatype.split("/");
