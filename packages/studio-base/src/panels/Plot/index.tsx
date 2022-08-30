@@ -120,18 +120,42 @@ const getMessagePathItemsForBlock = memoizeWeak(
 
 const ZERO_TIME = { sec: 0, nsec: 0 };
 
+const performance = window.performance;
+
 function getBlockItemsByPath(
   decodeMessagePathsForMessagesByTopic: (_: MessageBlock) => MessageDataItemsByPath,
   blocks: readonly MessageBlock[],
 ) {
   const ret: Record<string, PlotDataItem[][]> = {};
   const lastBlockIndexForPath: Record<string, number> = {};
-  blocks.forEach((block, i: number) => {
+  let count = 0;
+  let i = 0;
+  for (const block of blocks) {
     const messagePathItemsForBlock: PlotDataByPath = getMessagePathItemsForBlock(
       decodeMessagePathsForMessagesByTopic,
       block,
     );
-    Object.entries(messagePathItemsForBlock).forEach(([path, messagePathItems]) => {
+
+    // After 1 million data points we check if there is more memory to continue loading more
+    // data points. This helps prevent runaway memory use if the user tried to plot a binary topic.
+    //
+    // An example would be to try plotting `/map.data[:]` where map is an occupancy grid
+    // this can easily result in many millions of points.
+    if (count >= 1_000_000) {
+      // if we have memory stats we can let the user have more points as long as memory is not under pressure
+      if (performance.memory) {
+        const pct = performance.memory.usedJSHeapSize / performance.memory.jsHeapSizeLimit;
+        if (isNaN(pct) || pct > 0.6) {
+          return ret;
+        }
+      } else {
+        return ret;
+      }
+    }
+
+    for (const [path, messagePathItems] of Object.entries(messagePathItemsForBlock)) {
+      count += messagePathItems[0]?.[0]?.queriedData.length ?? 0;
+
       const existingItems = ret[path] ?? [];
       // getMessagePathItemsForBlock returns an array of exactly one range of items.
       const [pathItems] = messagePathItems;
@@ -152,8 +176,10 @@ function getBlockItemsByPath(
       }
       ret[path] = existingItems;
       lastBlockIndexForPath[path] = i;
-    });
-  });
+    }
+
+    i += 1;
+  }
   return ret;
 }
 

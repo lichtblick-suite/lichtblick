@@ -7,3 +7,18 @@ interface WindowOrWorkerGlobalScope {
 }
 
 declare function structuredClone<T>(value: T, options?: StructuredSerializeOptions): T;
+
+type MemoryInfo = {
+  /// Maximum heap size in bytes
+  jsHeapSizeLimit: number;
+  /// current size in bytes of the JS heap including free space not occupied by any JS objects
+  totalJSHeapSize: number;
+  /// total amount of memory in bytes being used by JS objects including V8 internal objects
+  usedJSHeapSize: number;
+};
+
+// Our DOM types don't have types for performance.memory since this is a chrome feature
+// We make our own version of Performance which optionally has MemoryInfo
+interface Performance {
+  memory?: MemoryInfo;
+}

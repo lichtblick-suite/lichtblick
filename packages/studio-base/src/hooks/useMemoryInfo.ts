@@ -8,26 +8,11 @@ import Logger from "@foxglove/log";
 
 const log = Logger.getLogger(__filename);
 
-type MemoryInfo = {
-  /// Maximum heap size in bytes
-  jsHeapSizeLimit: number;
-  /// current size in bytes of the JS heap including free space not occupied by any JS objects
-  totalJSHeapSize: number;
-  /// total amount of memory in bytes being used by JS objects including V8 internal objects
-  usedJSHeapSize: number;
-};
-
-// Our DOM types don't have types for performance.memory since this is a chrome feature
-// We make our own version of Performance which optionally has MemoryInfo
-interface Performance {
-  memory?: MemoryInfo;
-}
-
 type UseMemoryInfoOptions = {
   refreshIntervalMs: number;
 };
 
-const performance = window.performance as Performance;
+const performance = window.performance;
 
 export function useMemoryInfo(opt: UseMemoryInfoOptions): MemoryInfo | undefined {
   const { refreshIntervalMs } = opt;
