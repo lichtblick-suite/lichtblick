@@ -335,7 +335,7 @@ function NodePlayground(props: Props) {
     <Stack fullHeight>
       <PanelToolbar helpContent={helpContent} />
       <Divider />
-      <Stack direction="row" fullHeight>
+      <Stack direction="row" fullHeight overflow="hidden">
         <Sidebar
           explorer={explorer}
           updateExplorer={updateExplorer}
