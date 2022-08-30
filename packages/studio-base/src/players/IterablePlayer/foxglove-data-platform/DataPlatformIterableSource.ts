@@ -136,17 +136,25 @@ export class DataPlatformIterableSource implements IIterableSource {
         }
       }
 
-      const parsedChannel = parseChannel({
-        messageEncoding,
-        schema: { name: schemaName, data: schema, encoding: schemaEncoding },
-      });
+      try {
+        const parsedChannel = parseChannel({
+          messageEncoding,
+          schema: { name: schemaName, data: schema, encoding: schemaEncoding },
+        });
 
-      topics.push({ name: topic, datatype: parsedChannel.fullSchemaName });
-      parsedChannels.push({ messageEncoding, schemaEncoding, schema, parsedChannel });
+        topics.push({ name: topic, datatype: parsedChannel.fullSchemaName });
+        parsedChannels.push({ messageEncoding, schemaEncoding, schema, parsedChannel });
 
-      // Final datatypes is an unholy union of schemas across all channels
-      for (const [name, datatype] of parsedChannel.datatypes) {
-        datatypes.set(name, datatype);
+        // Final datatypes is an unholy union of schemas across all channels
+        for (const [name, datatype] of parsedChannel.datatypes) {
+          datatypes.set(name, datatype);
+        }
+      } catch (err) {
+        problems.push({
+          message: `Failed to parse schema for topic ${topic}`,
+          severity: "error",
+          error: err,
+        });
       }
     }
 
