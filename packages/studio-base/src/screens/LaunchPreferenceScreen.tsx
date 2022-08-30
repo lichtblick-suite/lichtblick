@@ -2,8 +2,15 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { CompoundButton, Checkbox, IButtonStyles } from "@fluentui/react";
-import { Card, Typography } from "@mui/material";
+import {
+  Button,
+  Checkbox,
+  Dialog,
+  DialogContent,
+  FormControlLabel,
+  Grid,
+  Typography,
+} from "@mui/material";
 import { ReactElement, useState } from "react";
 import { makeStyles } from "tss-react/mui";
 
@@ -13,24 +20,21 @@ import { useAppConfigurationValue } from "@foxglove/studio-base/hooks";
 import { useSessionStorageValue } from "@foxglove/studio-base/hooks/useSessionStorageValue";
 
 const useStyles = makeStyles()((theme) => ({
-  card: {
-    display: "flex",
-    flexDirection: "column",
-    gap: theme.spacing(2.5),
-    padding: theme.spacing(2.5),
-    marginBottom: theme.spacing(4),
+  button: {
+    textAlign: "left",
+    justifyContent: "flex-start",
+    padding: theme.spacing(2),
+    gap: theme.spacing(1.5),
+    borderColor: theme.palette.divider,
+    height: "100%",
+  },
+  paper: {
     maxWidth: 480,
   },
 }));
 
-const buttonStyles = {
-  root: { flex: "0 1 100%" },
-  flexContainer: { alignItems: "center" },
-} as Partial<IButtonStyles>;
-
 export function LaunchPreferenceScreen(): ReactElement {
   const { classes } = useStyles();
-
   const [globalPreference, setGlobalPreference] = useAppConfigurationValue<string | undefined>(
     AppSetting.LAUNCH_PREFERENCE,
   );
@@ -60,38 +64,68 @@ export function LaunchPreferenceScreen(): ReactElement {
     if (rememberPreference) {
       await setGlobalPreference(undefined);
     }
-
     setRememberPreference(!rememberPreference);
   }
 
+  const actions = [
+    {
+      key: "web",
+      primary: "Web",
+      secondary: "Requires Chrome v76+",
+      onClick: () => void launchInWeb(),
+    },
+    {
+      key: "desktop",
+      primary: "Desktop App",
+      secondary: "For Linux, Windows, and macOS",
+      onClick: () => void launchInDesktop(),
+    },
+  ];
+
   return (
-    <Stack alignItems="center" justifyContent="center" fullHeight>
-      <Card variant="outlined" className={classes.card}>
-        <Typography variant="h2" fontWeight={600} align="center" gutterBottom>
+    <Dialog open classes={{ paper: classes.paper }}>
+      <Stack paddingX={2} paddingTop={3}>
+        <Typography align="center" variant="h2" fontWeight={600}>
           Launch Foxglove Studio
         </Typography>
-        <Stack direction="row" gap={2}>
-          <CompoundButton
-            styles={buttonStyles}
-            onClick={() => void launchInWeb()}
-            secondaryText="Requires Chrome v76+"
-          >
-            Web
-          </CompoundButton>
-          <CompoundButton
-            styles={buttonStyles}
-            onClick={() => void launchInDesktop()}
-            secondaryText="For Linux, Windows, and macOS"
-          >
-            Desktop App
-          </CompoundButton>
-        </Stack>
-        <Checkbox
-          label="Remember my preference"
-          checked={rememberPreference}
-          onChange={toggleRememberPreference}
-        />
-      </Card>
-    </Stack>
+      </Stack>
+      <DialogContent>
+        <Grid container spacing={1}>
+          {actions.map((action) => (
+            <Grid key={action.key} item xs={12} sm={6}>
+              <Button
+                className={classes.button}
+                fullWidth
+                color="inherit"
+                variant="outlined"
+                size="large"
+                onClick={action.onClick}
+              >
+                <Stack flex="auto" zeroMinWidth>
+                  <Typography component="div" variant="subtitle1" color="text.primary">
+                    {action.primary}
+                  </Typography>
+                  <Typography component="div" variant="body2" color="text.secondary">
+                    {action.secondary}
+                  </Typography>
+                </Stack>
+              </Button>
+            </Grid>
+          ))}
+          <Grid item xs={12}>
+            <FormControlLabel
+              label="Remember my preference"
+              control={
+                <Checkbox
+                  color="primary"
+                  checked={rememberPreference}
+                  onChange={toggleRememberPreference}
+                />
+              }
+            />
+          </Grid>
+        </Grid>
+      </DialogContent>
+    </Dialog>
   );
 }
