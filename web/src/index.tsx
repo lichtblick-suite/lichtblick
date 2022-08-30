@@ -8,7 +8,6 @@ import { StrictMode } from "react";
 import ReactDOM from "react-dom";
 
 import Logger from "@foxglove/log";
-import { AppSetting } from "@foxglove/studio-base";
 
 import VersionBanner from "./VersionBanner";
 import LocalStorageAppConfiguration from "./services/LocalStorageAppConfiguration";
@@ -45,8 +44,6 @@ if (!rootEl) {
   throw new Error("missing #root element");
 }
 
-const isDevelopment = process.env.NODE_ENV === "development";
-
 async function main() {
   const chromeMatch = navigator.userAgent.match(/Chrome\/(\d+)\./);
   const chromeVersion = chromeMatch ? parseInt(chromeMatch[1] ?? "", 10) : 0;
@@ -81,20 +78,14 @@ async function main() {
   const { Root } = await import("./Root");
 
   const appConfiguration = new LocalStorageAppConfiguration({
-    defaults: {
-      [AppSetting.ENABLE_REACT_STRICT_MODE]: isDevelopment,
-    },
+    defaults: {},
   });
-  const enableStrictMode = appConfiguration.get(AppSetting.ENABLE_REACT_STRICT_MODE) as boolean;
 
-  const root = (
-    <>
+  ReactDOM.render(
+    <StrictMode>
       {banner}
       <Root appConfiguration={appConfiguration} />
-    </>
-  );
-  ReactDOM.render(
-    enableStrictMode ? <StrictMode>{root}</StrictMode> : root,
+    </StrictMode>,
     rootEl,
     renderCallback,
   );

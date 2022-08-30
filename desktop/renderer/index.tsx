@@ -12,12 +12,7 @@ import ReactDOM from "react-dom";
 
 import { Sockets } from "@foxglove/electron-socket/renderer";
 import Logger from "@foxglove/log";
-import {
-  AppSetting,
-  installDevtoolsFormatters,
-  overwriteFetch,
-  waitForFonts,
-} from "@foxglove/studio-base";
+import { installDevtoolsFormatters, overwriteFetch, waitForFonts } from "@foxglove/studio-base";
 
 import pkgInfo from "../../package.json";
 import { Storage } from "../common/types";
@@ -61,8 +56,6 @@ if (!rootEl) {
   throw new Error("missing #root element");
 }
 
-const isDevelopment = process.env.NODE_ENV === "development";
-
 async function main() {
   // Initialize the RPC channel for electron-socket. This method is called first
   // since the window.onmessage handler needs to be installed before
@@ -75,18 +68,20 @@ async function main() {
   const appConfiguration = await NativeStorageAppConfiguration.Initialize(
     (global as { storageBridge?: Storage }).storageBridge!,
     {
-      defaults: {
-        [AppSetting.ENABLE_REACT_STRICT_MODE]: isDevelopment,
-      },
+      defaults: {},
     },
   );
 
-  const enableStrictMode = appConfiguration.get(AppSetting.ENABLE_REACT_STRICT_MODE) as boolean;
-  const root = <Root appConfiguration={appConfiguration} />;
-  ReactDOM.render(enableStrictMode ? <StrictMode>{root}</StrictMode> : root, rootEl, () => {
-    // Integration tests look for this console log to indicate the app has rendered once
-    log.debug("App rendered");
-  });
+  ReactDOM.render(
+    <StrictMode>
+      <Root appConfiguration={appConfiguration} />
+    </StrictMode>,
+    rootEl,
+    () => {
+      // Integration tests look for this console log to indicate the app has rendered once
+      log.debug("App rendered");
+    },
+  );
 }
 
 void main();
