@@ -11,7 +11,7 @@ import { v4 as uuidv4 } from "uuid";
 
 import Logger from "@foxglove/log";
 import { toNanoSec } from "@foxglove/rostime";
-import type { FrameTransform } from "@foxglove/schemas/schemas/typescript";
+import type { FrameTransform, SceneUpdate } from "@foxglove/schemas/schemas/typescript";
 import {
   MessageEvent,
   ParameterValue,
@@ -55,6 +55,7 @@ import { Polygons } from "./renderables/Polygons";
 import { PoseArrays } from "./renderables/PoseArrays";
 import { Poses } from "./renderables/Poses";
 import { PublishClickTool, PublishClickType } from "./renderables/PublishClickTool";
+import { FoxgloveSceneEntities } from "./renderables/SceneEntities";
 import { Urdfs } from "./renderables/Urdfs";
 import { MarkerPool } from "./renderables/markers/MarkerPool";
 import {
@@ -93,6 +94,8 @@ export type RendererEvents = {
   transformTreeUpdated: (renderer: Renderer) => void;
   settingsTreeChange: (renderer: Renderer) => void;
   configChange: (renderer: Renderer) => void;
+  datatypeHandlersChanged: (renderer: Renderer) => void;
+  topicHandlersChanged: (renderer: Renderer) => void;
 };
 
 export type RendererConfig = {
@@ -213,6 +216,14 @@ Object.defineProperty(LabelMaterial.prototype, "fragmentShaderKey", {
   configurable: true,
 });
 
+class InstancedLineMaterial extends THREE.LineBasicMaterial {
+  public constructor(...args: ConstructorParameters<typeof THREE.LineBasicMaterial>) {
+    super(...args);
+    this.defines ??= {};
+    this.defines.USE_INSTANCING = true;
+  }
+}
+
 /**
  * An extensible 3D renderer attached to a `HTMLCanvasElement`,
  * `WebGLRenderingContext`, and `SettingsTree`.
@@ -248,6 +259,7 @@ export class Renderer extends EventEmitter<RendererEvents> {
   private hemiLight: THREE.HemisphereLight;
   public input: Input;
   public readonly outlineMaterial = new THREE.LineBasicMaterial({ dithering: true });
+  public readonly instancedOutlineMaterial = new InstancedLineMaterial({ dithering: true });
 
   private coreSettings: CoreSettings;
   public measurementTool: MeasurementTool;
@@ -401,6 +413,7 @@ export class Renderer extends EventEmitter<RendererEvents> {
     this.addSceneExtension(new Grids(this));
     this.addSceneExtension(new Images(this));
     this.addSceneExtension(new Markers(this));
+    this.addSceneExtension(new FoxgloveSceneEntities(this));
     this.addSceneExtension(new OccupancyGrids(this));
     this.addSceneExtension(new PointCloudsAndLaserScans(this));
     this.addSceneExtension(new Polygons(this));
@@ -504,6 +517,7 @@ export class Renderer extends EventEmitter<RendererEvents> {
         handlers.push(genericHandler);
       }
     }
+    this.emit("datatypeHandlersChanged", this);
   }
 
   public addTopicSubscription<T>(
@@ -522,6 +536,7 @@ export class Renderer extends EventEmitter<RendererEvents> {
     if (!handlers.includes(genericHandler)) {
       handlers.push(genericHandler);
     }
+    this.emit("topicHandlersChanged", this);
   }
 
   public addCustomLayerAction(options: {
@@ -625,11 +640,15 @@ export class Renderer extends EventEmitter<RendererEvents> {
       this.gl.setClearColor(bgColor ?? DARK_BACKDROP);
       this.outlineMaterial.color.set(DARK_OUTLINE);
       this.outlineMaterial.needsUpdate = true;
+      this.instancedOutlineMaterial.color.set(DARK_OUTLINE);
+      this.instancedOutlineMaterial.needsUpdate = true;
       this.selectionBackdrop.setColor(DARK_BACKDROP, 0.8);
     } else {
       this.gl.setClearColor(bgColor ?? LIGHT_BACKDROP);
       this.outlineMaterial.color.set(LIGHT_OUTLINE);
       this.outlineMaterial.needsUpdate = true;
+      this.instancedOutlineMaterial.color.set(LIGHT_OUTLINE);
+      this.instancedOutlineMaterial.needsUpdate = true;
       this.selectionBackdrop.setColor(LIGHT_BACKDROP, 0.8);
     }
   }
@@ -775,6 +794,7 @@ export class Renderer extends EventEmitter<RendererEvents> {
 
     const maybeHasHeader = message as DeepPartial<{ header: Header }>;
     const maybeHasMarkers = message as DeepPartial<MarkerArray>;
+    const maybeHasEntities = message as DeepPartial<SceneUpdate>;
     const maybeHasFrameId = message as DeepPartial<Header>;
 
     // Extract coordinate frame IDs from all incoming messages
@@ -786,6 +806,12 @@ export class Renderer extends EventEmitter<RendererEvents> {
       // If this message has an array called markers, scrape frame_id from all markers
       for (const marker of maybeHasMarkers.markers) {
         const frameId = marker.header?.frame_id ?? "";
+        this.addCoordinateFrame(frameId);
+      }
+    } else if (Array.isArray(maybeHasEntities.entities)) {
+      // If this message has an array called entities, scrape frame_id from all entities
+      for (const entity of maybeHasEntities.entities) {
+        const frameId = entity.frame_id ?? "";
         this.addCoordinateFrame(frameId);
       }
     } else if (typeof maybeHasFrameId.frame_id === "string") {

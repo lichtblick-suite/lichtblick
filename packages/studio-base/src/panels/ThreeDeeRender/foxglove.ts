@@ -8,6 +8,9 @@ addFoxgloveSchema(FRAME_TRANSFORM_DATATYPES, "foxglove.FrameTransform");
 export const POINTCLOUD_DATATYPES = new Set<string>();
 addFoxgloveSchema(POINTCLOUD_DATATYPES, "foxglove.PointCloud");
 
+export const SCENE_UPDATE_DATATYPES = new Set<string>();
+addFoxgloveSchema(SCENE_UPDATE_DATATYPES, "foxglove.SceneUpdate");
+
 // Expand a single Foxglove dataType into variations for ROS1 and ROS2 then add
 // them to the given output set
 function addFoxgloveSchema(output: Set<string>, dataType: string): Set<string> {

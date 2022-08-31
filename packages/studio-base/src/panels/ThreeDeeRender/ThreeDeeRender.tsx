@@ -43,7 +43,7 @@ import ThemeProvider from "@foxglove/studio-base/theme/ThemeProvider";
 import { DebugGui } from "./DebugGui";
 import { Interactions, InteractionContextMenu, SelectionObject, TabType } from "./Interactions";
 import type { Renderable } from "./Renderable";
-import { MessageHandler, Renderer, RendererConfig } from "./Renderer";
+import { Renderer, RendererConfig, RendererEvents } from "./Renderer";
 import { RendererContext, useRenderer, useRendererEvent } from "./RendererContext";
 import { Stats } from "./Stats";
 import { CameraState, DEFAULT_CAMERA_STATE, MouseEventObject } from "./camera";
@@ -313,6 +313,28 @@ function RendererOverlay(props: {
   );
 }
 
+function useRendererProperty<K extends keyof Renderer>(
+  renderer: Renderer | undefined,
+  key: K,
+  event: keyof RendererEvents,
+  fallback: () => Renderer[K],
+): Renderer[K] {
+  const [value, setValue] = useState(() => renderer?.[key] ?? fallback());
+  useEffect(() => {
+    if (!renderer) {
+      return;
+    }
+    const onChange = () => setValue(renderer[key]);
+    onChange();
+
+    renderer.addListener(event, onChange);
+    return () => {
+      renderer.removeListener(event, onChange);
+    };
+  }, [renderer, event, key]);
+  return value;
+}
+
 /**
  * A panel that renders a 3D scene. This is a thin wrapper around a `Renderer` instance.
  */
@@ -345,9 +367,9 @@ export function ThreeDeeRender({ context }: { context: PanelExtensionContext }):
   const backgroundColor = config.scene.backgroundColor;
 
   const [canvas, setCanvas] = useState<HTMLCanvasElement | ReactNull>(ReactNull);
-  const [renderer, setRenderer] = useState<Renderer | ReactNull>(ReactNull);
+  const [renderer, setRenderer] = useState<Renderer | undefined>(undefined);
   useEffect(
-    () => setRenderer(canvas ? new Renderer(canvas, configRef.current) : ReactNull),
+    () => setRenderer(canvas ? new Renderer(canvas, configRef.current) : undefined),
     [canvas],
   );
 
@@ -362,21 +384,29 @@ export function ThreeDeeRender({ context }: { context: PanelExtensionContext }):
   const renderRef = useRef({ needsRender: false });
   const [renderDone, setRenderDone] = useState<(() => void) | undefined>();
 
-  const datatypeHandlers = useMemo(
-    () => renderer?.datatypeHandlers ?? new Map<string, MessageHandler[]>(),
-    [renderer],
+  const datatypeHandlers = useRendererProperty(
+    renderer,
+    "datatypeHandlers",
+    "datatypeHandlersChanged",
+    () => new Map(),
   );
-  const forcedDatatypeHandlers = useMemo(
-    () => renderer?.forcedDatatypeHandlers ?? new Map<string, MessageHandler[]>(),
-    [renderer],
+  const forcedDatatypeHandlers = useRendererProperty(
+    renderer,
+    "forcedDatatypeHandlers",
+    "datatypeHandlersChanged",
+    () => new Map(),
   );
-  const topicHandlers = useMemo(
-    () => renderer?.topicHandlers ?? new Map<string, MessageHandler[]>(),
-    [renderer],
+  const topicHandlers = useRendererProperty(
+    renderer,
+    "topicHandlers",
+    "topicHandlersChanged",
+    () => new Map(),
   );
-  const forcedTopicHandlers = useMemo(
-    () => renderer?.forcedTopicHandlers ?? new Map<string, MessageHandler[]>(),
-    [renderer],
+  const forcedTopicHandlers = useRendererProperty(
+    renderer,
+    "forcedTopicHandlers",
+    "topicHandlersChanged",
+    () => new Map(),
   );
 
   // Config cameraState

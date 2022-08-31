@@ -16,9 +16,13 @@ import Logger from "@foxglove/log";
 
 const log = Logger.getLogger(__filename);
 
-export type LoadModelOptions = {
+export type ModelCacheOptions = {
   edgeMaterial: THREE.Material;
   ignoreColladaUpAxis: boolean;
+};
+
+type LoadModelOptions = {
+  overrideMediaType?: string;
 };
 
 export type LoadedModel = THREE.Group | THREE.Scene;
@@ -38,17 +42,21 @@ export class ModelCache {
   private _models = new Map<string, Promise<LoadedModel | undefined>>();
   private _edgeMaterial: THREE.Material;
 
-  public constructor(private loadModelOptions: LoadModelOptions) {
-    this._edgeMaterial = loadModelOptions.edgeMaterial;
+  public constructor(private options: ModelCacheOptions) {
+    this._edgeMaterial = options.edgeMaterial;
   }
 
-  public async load(url: string, reportError: ErrorCallback): Promise<LoadedModel | undefined> {
+  public async load(
+    url: string,
+    opts: LoadModelOptions,
+    reportError: ErrorCallback,
+  ): Promise<LoadedModel | undefined> {
     let promise = this._models.get(url);
     if (promise) {
       return await promise;
     }
 
-    promise = this._loadModel(url, this.loadModelOptions, reportError)
+    promise = this._loadModel(url, opts, reportError)
       .then((model) => addEdges(model, this._edgeMaterial))
       .catch(async (err) => {
         reportError(err as Error);
@@ -77,7 +85,7 @@ export class ModelCache {
       throw new Error(`${buffer.byteLength} bytes received`);
     }
     const view = new DataView(buffer);
-    const contentType = response.headers.get("content-type") ?? "";
+    const contentType = options.overrideMediaType ?? response.headers.get("content-type") ?? "";
 
     // Check if this is a glTF .glb or .gltf file
     if (
@@ -97,7 +105,7 @@ export class ModelCache {
     // Check if this is a COLLADA file based on content-type or file extension
     if (DAE_MIME_TYPES.includes(contentType) || /\.dae$/i.test(url)) {
       let text = this._textDecoder.decode(buffer);
-      if (options.ignoreColladaUpAxis) {
+      if (this.options.ignoreColladaUpAxis) {
         const xml = new DOMParser().parseFromString(text, "application/xml");
         xml.querySelectorAll("up_axis").forEach((node) => node.remove());
         text = xml.documentElement.outerHTML;

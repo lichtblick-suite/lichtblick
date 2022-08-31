@@ -4,14 +4,14 @@
 
 import * as THREE from "three";
 
-import { LoadedModel } from "../../ModelCache";
 import type { Renderer } from "../../Renderer";
 import { rgbToThreeColor } from "../../color";
 import { Marker } from "../../ros";
+import { removeLights, replaceMaterials } from "../models";
 import { RenderableMarker } from "./RenderableMarker";
 import { makeStandardMaterial } from "./materials";
 
-type GltfMesh = THREE.Mesh<
+export type GltfMesh = THREE.Mesh<
   THREE.BufferGeometry,
   THREE.MeshStandardMaterial | THREE.MeshStandardMaterial[]
 >;
@@ -79,7 +79,7 @@ export class RenderableMeshResource extends RenderableMarker {
       this.mesh = undefined;
     }
 
-    const cachedModel = await this.renderer.modelCache.load(url, (err) => {
+    const cachedModel = await this.renderer.modelCache.load(url, {}, (err) => {
       this.renderer.settings.errors.add(
         this.userData.settingsPath,
         MESH_FETCH_FAILED,
@@ -112,55 +112,4 @@ export class RenderableMeshResource extends RenderableMarker {
     // Render a new frame now that the model is loaded
     this.renderer.queueAnimationFrame();
   }
-}
-
-function removeLights(model: LoadedModel): void {
-  // Remove lights from the model
-  const lights: THREE.Light[] = [];
-  model.traverse((child: THREE.Object3D) => {
-    const maybeLight = child as Partial<THREE.Light>;
-    if (maybeLight.isLight === true) {
-      lights.push(maybeLight as THREE.Light);
-    }
-  });
-  for (const light of lights) {
-    light.dispose();
-    light.removeFromParent();
-  }
-}
-
-function replaceMaterials(model: LoadedModel, material: THREE.MeshStandardMaterial): void {
-  model.traverse((child: THREE.Object3D) => {
-    if (!(child instanceof THREE.Mesh)) {
-      return;
-    }
-
-    // Dispose of any allocated textures and the material and swap it with
-    // our own material
-    const meshChild = child as GltfMesh;
-    if (Array.isArray(meshChild.material)) {
-      for (const embeddedMaterial of meshChild.material) {
-        disposeStandardMaterial(embeddedMaterial);
-      }
-    } else {
-      disposeStandardMaterial(meshChild.material);
-    }
-    meshChild.material = material;
-  });
-}
-
-/** Generic MeshStandardMaterial dispose function for materials loaded from an external source */
-function disposeStandardMaterial(material: THREE.MeshStandardMaterial): void {
-  material.map?.dispose();
-  material.lightMap?.dispose();
-  material.aoMap?.dispose();
-  material.emissiveMap?.dispose();
-  material.bumpMap?.dispose();
-  material.normalMap?.dispose();
-  material.displacementMap?.dispose();
-  material.roughnessMap?.dispose();
-  material.metalnessMap?.dispose();
-  material.alphaMap?.dispose();
-  material.envMap?.dispose();
-  material.dispose();
 }

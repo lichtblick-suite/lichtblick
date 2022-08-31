@@ -7,7 +7,7 @@ import { createContext, useContext, useEffect } from "react";
 
 import { Renderer, RendererEvents } from "./Renderer";
 
-export const RendererContext = createContext<Renderer | ReactNull>(ReactNull);
+export const RendererContext = createContext<Renderer | undefined>(undefined);
 
 /**
  * React hook to retrieve the Renderer instance registered with the
