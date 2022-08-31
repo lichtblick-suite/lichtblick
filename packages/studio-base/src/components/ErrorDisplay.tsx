@@ -14,6 +14,7 @@ const useStyles = makeStyles()((theme) => ({
     gridTemplateRows: "auto 1fr auto",
     height: "100%",
     padding: theme.spacing(2),
+    overflowY: "auto",
   },
   errorDetailStack: {
     fontSize: theme.typography.body2.fontSize,
@@ -24,6 +25,7 @@ const useStyles = makeStyles()((theme) => ({
     overflowY: "auto",
     background: theme.palette.background.paper,
     padding: theme.spacing(1),
+    minHeight: theme.spacing(10),
   },
   actions: {
     flex: "auto",
