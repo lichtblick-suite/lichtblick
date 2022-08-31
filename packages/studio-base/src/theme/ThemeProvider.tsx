@@ -51,6 +51,15 @@ export default function ThemeProvider({
   const muiTheme = useMemo(() => createMuiTheme(isDark ? "dark" : "light"), [isDark]);
   const fluentTheme = useMemo(() => createFluentTheme({ isInverted: isDark }), [isDark]);
 
+  useLayoutEffect(() => {
+    // Set the theme color to match the sidebar and playback bar
+    const meta = document.createElement("meta");
+    meta.name = "theme-color";
+    meta.content = muiTheme.palette.background.paper;
+    document.head.appendChild(meta);
+    return () => meta.remove();
+  }, [muiTheme]);
+
   if (!iconsRegistered) {
     return ReactNull;
   }
