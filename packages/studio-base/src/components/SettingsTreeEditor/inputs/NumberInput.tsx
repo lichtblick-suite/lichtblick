@@ -4,53 +4,58 @@
 
 import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
-import { IconButton, TextFieldProps, TextField, styled as muiStyled } from "@mui/material";
+import { IconButton, TextFieldProps, TextField } from "@mui/material";
 import { clamp, isFinite } from "lodash";
-import { ReactNode, useCallback } from "react";
+import { ReactNode, useCallback, useRef } from "react";
+import { useLatest } from "react-use";
+import { makeStyles } from "tss-react/mui";
 
 import { fonts } from "@foxglove/studio-base/util/sharedStyleConstants";
 
-const StyledTextField = muiStyled(TextField)({
-  ".MuiInputBase-formControl.MuiInputBase-root": {
-    paddingTop: 0,
-    paddingBottom: 0,
+const useStyles = makeStyles()((theme) => ({
+  iconButton: {
+    "&.MuiIconButton-edgeStart": {
+      marginLeft: theme.spacing(-0.75),
+      borderTopRightRadius: 0,
+      borderBottomRightRadius: 0,
+    },
+    "&.MuiIconButton-edgeEnd": {
+      marginRight: theme.spacing(-0.75),
+      borderTopLeftRadius: 0,
+      borderBottomLeftRadius: 0,
+    },
   },
-  ".MuiInputBase-input": {
-    textAlign: "center",
-    fontFamily: fonts.MONOSPACE,
 
-    "&::-webkit-outer-spin-button, &::-webkit-inner-spin-button": {
-      appearance: "none",
-      margin: 0,
+  textField: {
+    ".MuiInputBase-formControl.MuiInputBase-root": {
+      paddingTop: 0,
+      paddingBottom: 0,
     },
-  },
-  "@media (pointer: fine)": {
-    ".MuiIconButton-root": {
-      visibility: "hidden",
-    },
-    "&:hover .MuiIconButton-root": {
-      visibility: "visible",
-    },
-  },
-});
+    ".MuiInputBase-input": {
+      textAlign: "center",
+      fontFamily: fonts.MONOSPACE,
+      cursor: "ew-resize",
 
-const StyledIconButton = muiStyled(IconButton)(({ theme }) => ({
-  "&.MuiIconButton-edgeStart": {
-    marginLeft: theme.spacing(-0.75),
-    borderTopRightRadius: 0,
-    borderBottomRightRadius: 0,
+      "&::-webkit-outer-spin-button, &::-webkit-inner-spin-button": {
+        appearance: "none",
+        margin: 0,
+      },
+    },
+    "@media (pointer: fine)": {
+      ".MuiIconButton-root": {
+        visibility: "hidden",
+      },
+      "&:hover .MuiIconButton-root": {
+        visibility: "visible",
+      },
+    },
   },
-  "&.MuiIconButton-edgeEnd": {
-    marginRight: theme.spacing(-0.75),
-    borderTopLeftRadius: 0,
-    borderBottomLeftRadius: 0,
+  textFieldReadonly: {
+    ".MuiInputBase-input": {
+      cursor: "auto",
+    },
   },
 }));
-
-function limitPrecision(x: number, digits: number): number {
-  const factor = Math.pow(10, digits);
-  return Math.round(x * factor) / factor;
-}
 
 export function NumberInput(
   props: {
@@ -65,7 +70,26 @@ export function NumberInput(
     onChange: (value: undefined | number) => void;
   } & Omit<TextFieldProps, "onChange">,
 ): JSX.Element {
-  const { value, iconDown, iconUp, step = 1, onChange, disabled, readOnly } = props;
+  const { classes, cx } = useStyles();
+  const {
+    value,
+    iconDown,
+    iconUp,
+    step = 1,
+    min,
+    max,
+    onChange,
+    disabled,
+    readOnly,
+    precision = 2,
+  } = props;
+
+  const inputRef = useRef<HTMLInputElement>(ReactNull);
+
+  // Maintain our own internal scrub value during the scrub to prevent jitter.
+  const scrubValue = useRef(0);
+
+  const latestValue = useLatest(value);
 
   const placeHolderValue = isFinite(Number(props.placeholder))
     ? Number(props.placeholder)
@@ -80,38 +104,68 @@ export function NumberInput(
       const clampedValue =
         newValue == undefined
           ? undefined
-          : clamp(
-              newValue,
-              props.min ?? Number.NEGATIVE_INFINITY,
-              props.max ?? Number.POSITIVE_INFINITY,
-            );
-      const newLimitedValue =
-        props.precision != undefined && clampedValue != undefined
-          ? limitPrecision(clampedValue, props.precision)
-          : clampedValue;
-      onChange(newLimitedValue);
+          : clamp(newValue, min ?? Number.NEGATIVE_INFINITY, max ?? Number.POSITIVE_INFINITY);
+      onChange(clampedValue);
     },
-    [disabled, readOnly, props.min, props.max, props.precision, onChange],
+    [disabled, readOnly, min, max, onChange],
   );
 
-  const limitedValue =
-    props.precision != undefined && value != undefined
-      ? limitPrecision(value, props.precision)
-      : value;
+  const onPointerDown = useCallback(
+    (event: React.PointerEvent) => {
+      event.currentTarget.setPointerCapture(event.pointerId);
+      const scrubStart = latestValue.current ?? placeHolderValue ?? 0;
+      scrubValue.current = isFinite(scrubStart) ? scrubStart : 0;
+    },
+    [latestValue, placeHolderValue],
+  );
+
+  const onPointerUp = useCallback((event: React.PointerEvent) => {
+    event.currentTarget.releasePointerCapture(event.pointerId);
+  }, []);
+
+  const onPointerMove = useCallback(
+    (event: React.PointerEvent<HTMLInputElement>) => {
+      if (event.buttons === 1) {
+        event.preventDefault();
+        event.currentTarget.blur();
+        const scale = event.shiftKey ? 10 : 1;
+        const delta =
+          Math.sign(event.movementX) *
+          Math.pow(Math.abs(event.movementX), 1.5) *
+          0.1 *
+          step *
+          scale;
+        scrubValue.current += delta;
+        updateValue(scrubValue.current);
+      }
+    },
+    [step, updateValue],
+  );
+
+  const displayValue =
+    inputRef.current === document.activeElement ? value : value?.toFixed(precision);
 
   return (
-    <StyledTextField
+    <TextField
       {...props}
-      value={limitedValue ?? ""}
+      value={displayValue ?? ""}
       onChange={(event) =>
         updateValue(event.target.value.length > 0 ? Number(event.target.value) : undefined)
       }
       type="number"
-      inputProps={{ max: props.max, min: props.min, step }}
+      className={cx(classes.textField, { [classes.textFieldReadonly]: readOnly })}
+      inputProps={{
+        ref: inputRef,
+        step,
+        onPointerDown,
+        onPointerUp,
+        onPointerMove,
+      }}
       InputProps={{
         readOnly,
         startAdornment: (
-          <StyledIconButton
+          <IconButton
+            className={classes.iconButton}
             size="small"
             edge="start"
             onClick={(event: React.MouseEvent) =>
@@ -119,10 +173,11 @@ export function NumberInput(
             }
           >
             {iconDown ?? <ChevronLeftIcon fontSize="small" />}
-          </StyledIconButton>
+          </IconButton>
         ),
         endAdornment: (
-          <StyledIconButton
+          <IconButton
+            className={classes.iconButton}
             size="small"
             edge="end"
             onClick={(event: React.MouseEvent) =>
@@ -130,7 +185,7 @@ export function NumberInput(
             }
           >
             {iconUp ?? <ChevronRightIcon fontSize="small" />}
-          </StyledIconButton>
+          </IconButton>
         ),
       }}
     />
