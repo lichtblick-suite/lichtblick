@@ -2546,7 +2546,7 @@ __metadata:
     meshoptimizer: 0.18.0
     moment: 2.29.4
     moment-duration-format: 2.3.2
-    moment-timezone: 0.5.34
+    moment-timezone: 0.5.35
     monaco-editor: 0.30.1
     monaco-editor-webpack-plugin: 6.0.0
     natsort: 2.0.3
@@ -17640,12 +17640,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"moment-timezone@npm:0.5.34":
-  version: 0.5.34
-  resolution: "moment-timezone@npm:0.5.34"
+"moment-timezone@npm:0.5.35":
+  version: 0.5.35
+  resolution: "moment-timezone@npm:0.5.35"
   dependencies:
     moment: ">= 2.9.0"
-  checksum: 12a1d3d52e4ba509cf1fa36bbda59d898a08fa80ab35f6c358747e93aec1f07e617cec647eaf2e8acf5f9132e581d4704d34a9edffa9a80c5cd04bf23b277595
+  checksum: 0f3907282dc9ae3d405fefaccf486dc4222945ff479127fd269e6c4ddc25e526e7ca9e849d6bf941c871bd17e875b256bdb276137a55db9fce4177c792a003df
   languageName: node
   linkType: hard
 
