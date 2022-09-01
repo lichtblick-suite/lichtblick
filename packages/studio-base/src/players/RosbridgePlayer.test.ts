@@ -43,6 +43,7 @@ const textMessage = ({ text }: { text: string }) => {
 let workerInstance: MockRosClient;
 class MockRosClient {
   public constructor() {
+    // eslint-disable-next-line @typescript-eslint/no-this-alias
     workerInstance = this;
   }
 

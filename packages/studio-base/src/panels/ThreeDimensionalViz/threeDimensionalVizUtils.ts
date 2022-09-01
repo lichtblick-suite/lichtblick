@@ -131,7 +131,7 @@ export const getObject = (selectedObject?: MouseEventObject): unknown => {
 export const getInteractionData = (
   selectedObject?: MouseEventObject,
 ): InteractionData | undefined =>
-  (selectedObject?.object as { interactionData?: InteractionData }).interactionData ??
+  (selectedObject?.object as { interactionData?: InteractionData } | undefined)?.interactionData ??
   (getObject(selectedObject) as { interactionData?: InteractionData } | undefined)?.interactionData;
 
 export function getUpdatedGlobalVariablesBySelectedObject(

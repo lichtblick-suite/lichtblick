@@ -789,7 +789,11 @@ export default class SceneBuilder implements MarkerProvider {
     const lifetime =
       decayTimeInSec != undefined && decayTimeInSec !== 0 ? fromSec(decayTimeInSec) : undefined;
 
-    this.collectors[topic]?.addNonMarker(topic, mappedMessage as Interactive<unknown>, lifetime);
+    this.collectors[topic]?.addNonMarker(
+      topic,
+      mappedMessage as unknown as Interactive<unknown>,
+      lifetime,
+    );
   };
 
   public setCurrentTime = (currentTime: { sec: number; nsec: number }): void => {

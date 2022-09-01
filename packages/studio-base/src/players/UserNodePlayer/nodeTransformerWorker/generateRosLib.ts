@@ -172,6 +172,7 @@ const generateRosLib = ({
     /* name */
     [
       ts.factory.createTypeParameterDeclaration(
+        [],
         "T",
         ts.factory.createTypeOperatorNode(
           ts.SyntaxKind.KeyOfKeyword,

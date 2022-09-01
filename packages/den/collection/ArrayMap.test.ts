@@ -51,7 +51,7 @@ describe("ArrayMap", () => {
   });
 
   it("works with BigInt keys", () => {
-    const list = new ArrayMap<BigInt, string>();
+    const list = new ArrayMap<bigint, string>();
     expect(list.size).toBe(0);
     expect(list.at(0)).toBeUndefined();
     expect(list.minEntry()).toBeUndefined();
