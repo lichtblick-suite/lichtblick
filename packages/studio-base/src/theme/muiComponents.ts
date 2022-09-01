@@ -39,6 +39,10 @@ const iconHack = {
   },
 };
 
+const disableBackgroundColorTransition = {
+  transition: "none",
+};
+
 export default function muiComponents(theme: Theme): ThemeOptions["components"] & MuiLabComponents {
   const prefersDarkMode = theme.palette.mode === "dark";
 
@@ -196,6 +200,7 @@ export default function muiComponents(theme: Theme): ThemeOptions["components"] 
           ".MuiAutocomplete-root &": {
             paddingTop: 0,
           },
+          ...disableBackgroundColorTransition,
         },
       },
     },
@@ -262,6 +267,7 @@ export default function muiComponents(theme: Theme): ThemeOptions["components"] 
           "&:hover": {
             backgroundColor: theme.palette.action.hover,
           },
+          ...disableBackgroundColorTransition,
         },
       },
     },
@@ -353,6 +359,11 @@ export default function muiComponents(theme: Theme): ThemeOptions["components"] 
     },
     MuiListItemButton: {
       defaultProps: { disableRipple: true },
+      styleOverrides: {
+        root: {
+          ...disableBackgroundColorTransition,
+        },
+      },
     },
     MuiMenu: {
       styleOverrides: {
