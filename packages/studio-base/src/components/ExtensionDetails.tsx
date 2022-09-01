@@ -109,8 +109,7 @@ export function ExtensionDetails({ extension, onClose, installed }: Props): Reac
     <SidebarContent
       title={extension.name}
       leadingItems={[
-        // eslint-disable-next-line react/jsx-key
-        <IconButton onClick={onClose} color="primary" edge="start">
+        <IconButton key="back-arrow" onClick={onClose} size="small" edge="start">
           <ChevronLeftIcon />
         </IconButton>,
       ]}

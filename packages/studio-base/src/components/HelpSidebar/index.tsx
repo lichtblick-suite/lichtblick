@@ -2,12 +2,11 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import ChevronLeftIcon from "@mdi/svg/svg/chevron-left.svg";
-import { Link, Typography } from "@mui/material";
+import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
+import { IconButton, Link, Typography } from "@mui/material";
 import { useMemo } from "react";
 import { useUnmount } from "react-use";
 
-import Icon from "@foxglove/studio-base/components/Icon";
 import KeyboardShortcutHelp from "@foxglove/studio-base/components/KeyboardShortcut.help.md";
 import MesssagePathSyntaxHelp from "@foxglove/studio-base/components/MessagePathSyntax/index.help.md";
 import { SidebarContent } from "@foxglove/studio-base/components/SidebarContent";
@@ -129,21 +128,21 @@ export default function HelpSidebar({
 
   return (
     <SidebarContent
+      title={isHomeView ? "Help" : helpInfo.title}
       leadingItems={
-        helpInfo.content == undefined
-          ? undefined
-          : [
-              <Icon
+        helpInfo.content != undefined
+          ? [
+              <IconButton
                 key="back-arrow"
                 size="small"
-                style={{ marginRight: "5px" }}
+                edge="start"
                 onClick={() => setHelpInfo(DEFAULT_HELP_INFO)}
               >
                 <ChevronLeftIcon />
-              </Icon>,
+              </IconButton>,
             ]
+          : undefined
       }
-      title={isHomeView ? "Help" : helpInfo.title}
     >
       <Stack>
         {isHomeView ? (

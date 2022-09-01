@@ -73,9 +73,11 @@ type Props = {
   dataTest?: string;
 };
 
+/** @deprecated */
 // a component which takes 2 child components: toggle trigger and content
 // when the toggle trigger component is clicked the onToggle callback will fire
 // setting isOpen to true will show the content component, floating below the trigger component
+
 export default function ChildToggle(props: Props): ReactElement {
   const {
     isOpen: controlledIsOpen,

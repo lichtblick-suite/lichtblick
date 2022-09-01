@@ -4,30 +4,28 @@
 
 import HelpIcon from "@mui/icons-material/Help";
 import HelpOutlineIcon from "@mui/icons-material/HelpOutline";
-import { IconButton, styled as muiStyled, Typography } from "@mui/material";
-import { useState, useMemo, CSSProperties } from "react";
+import { IconButton, Typography } from "@mui/material";
+import { useState, useMemo, CSSProperties, Fragment } from "react";
+import { makeStyles } from "tss-react/mui";
 
 import Stack from "@foxglove/studio-base/components/Stack";
 import TextContent from "@foxglove/studio-base/components/TextContent";
 
-export const TOOLBAR_HEIGHT = 56;
-
-const Toolbar = muiStyled(Stack)({
-  minHeight: TOOLBAR_HEIGHT,
-});
-
-const ContentWrapper = muiStyled("div", {
-  shouldForwardProp: (prop) => prop !== "disablePadding",
-})<{ disablePadding: boolean }>(({ theme, disablePadding }) => ({
-  flexGrow: 1,
-
-  ...(!disablePadding && {
-    padding: theme.spacing(0, 2, 2),
-  }),
-}));
-
-const HelpContent = muiStyled("div")(({ theme }) => ({
-  padding: theme.spacing(0, 2, 2),
+const useStyles = makeStyles()((theme) => ({
+  leadingItems: {
+    display: "flex",
+    alignItems: "center",
+    marginLeft: theme.spacing(-1),
+    gap: theme.spacing(0.5),
+  },
+  toolbar: {
+    minHeight: 56,
+    flexShrink: 0,
+    display: "flex",
+    alignItems: "center",
+    padding: theme.spacing(2),
+    gap: theme.spacing(0.5),
+  },
 }));
 
 export function SidebarContent({
@@ -39,6 +37,7 @@ export function SidebarContent({
   overflow = "auto",
   trailingItems,
 }: React.PropsWithChildren<SidebarContentProps>): JSX.Element {
+  const { classes } = useStyles();
   const [showHelp, setShowHelp] = useState<boolean>(false);
 
   const trailingItemsWithHelp = useMemo(() => {
@@ -60,13 +59,13 @@ export function SidebarContent({
 
   return (
     <Stack overflow={overflow} fullHeight flex="auto" gap={1}>
-      <Toolbar flexShrink={0} direction="row" alignItems="center" padding={2}>
-        {leadingItems && (
-          <Stack direction="row" alignItems="center">
+      <div className={classes.toolbar}>
+        {leadingItems != undefined && (
+          <div className={classes.leadingItems}>
             {leadingItems.map((item, i) => (
-              <div key={i}>{item}</div>
+              <Fragment key={i}>{item}</Fragment>
             ))}
-          </Stack>
+          </div>
         )}
         <Typography component="h2" variant="h4" fontWeight={800} flex="auto">
           {title}
@@ -78,13 +77,15 @@ export function SidebarContent({
             ))}
           </Stack>
         )}
-      </Toolbar>
+      </div>
       {showHelp && (
-        <HelpContent>
+        <Stack paddingX={2} paddingBottom={2}>
           <TextContent allowMarkdownHtml={true}>{helpContent}</TextContent>
-        </HelpContent>
+        </Stack>
       )}
-      <ContentWrapper disablePadding={disablePadding}>{children}</ContentWrapper>
+      <Stack flex="auto" {...(!disablePadding && { paddingX: 2, paddingBottom: 2 })}>
+        {children}
+      </Stack>
     </Stack>
   );
 }
