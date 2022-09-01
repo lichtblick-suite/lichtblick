@@ -21,6 +21,7 @@ storiesOf("components/Menu", module).add("default", () => {
       <Menu>
         <Item>howdy</Item>
         <Item>Some other item</Item>
+        <Item tooltip="Item with tooltip">Item with tooltip</Item>
       </Menu>
     </div>
   );

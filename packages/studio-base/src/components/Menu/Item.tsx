@@ -16,11 +16,11 @@ import CheckCircleIcon from "@mdi/svg/svg/check-circle.svg";
 import CheckIcon from "@mdi/svg/svg/check.svg";
 import ChevronLeftIcon from "@mdi/svg/svg/chevron-left.svg";
 import ChevronRightIcon from "@mdi/svg/svg/chevron-right.svg";
+import { Tooltip } from "@mui/material";
 import cx from "classnames";
 import { noop } from "lodash";
 
 import Icon, { IconSize } from "@foxglove/studio-base/components/Icon";
-import Tooltip from "@foxglove/studio-base/components/Tooltip";
 
 const useStyles = makeStyles((theme) => ({
   contentWrapper: {
@@ -173,7 +173,11 @@ const Item = (props: ItemProps): JSX.Element => {
   );
 
   if (tooltip != undefined && tooltip !== "") {
-    return <Tooltip contents={tooltip}>{item}</Tooltip>;
+    return (
+      <Tooltip arrow title={tooltip}>
+        {item}
+      </Tooltip>
+    );
   }
   return item;
 };

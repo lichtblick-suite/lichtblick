@@ -494,5 +494,16 @@ export default function muiComponents(theme: Theme): ThemeOptions["components"] 
         },
       },
     },
+    MuiTooltip: {
+      defaultProps: {
+        arrow: true,
+      },
+      styleOverrides: {
+        tooltip: {
+          fontWeight: "normal",
+          fontSize: "0.75rem",
+        },
+      },
+    },
   };
 }
