@@ -169,19 +169,29 @@ function FieldInput({
       return (
         <StyledToggleButtonGroup
           fullWidth
-          value={field.value}
+          value={field.value ?? UNDEFINED_SENTINEL_VALUE}
           exclusive
           disabled={field.disabled}
           size="small"
           onChange={(_event, value) => {
             if (field.readonly !== true) {
-              actionHandler({ action: "update", payload: { path, input: "toggle", value } });
+              actionHandler({
+                action: "update",
+                payload: {
+                  path,
+                  input: "toggle",
+                  value: value === UNDEFINED_SENTINEL_VALUE ? undefined : value,
+                },
+              });
             }
           }}
         >
           {field.options.map((opt) => (
-            <ToggleButton key={opt} value={opt}>
-              {opt}
+            <ToggleButton
+              key={(typeof opt === "string" ? opt : opt.value) ?? UNDEFINED_SENTINEL_VALUE}
+              value={(typeof opt === "string" ? opt : opt.value) ?? UNDEFINED_SENTINEL_VALUE}
+            >
+              {typeof opt === "string" ? opt : opt.label}
             </ToggleButton>
           ))}
         </StyledToggleButtonGroup>

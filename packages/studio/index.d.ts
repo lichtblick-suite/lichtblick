@@ -446,7 +446,11 @@ declare module "@foxglove/studio" {
          */
         placeholder?: string;
       }
-    | { input: "toggle"; value?: string; options: string[] }
+    | {
+        input: "toggle";
+        value?: string;
+        options: string[] | Array<{ label: string; value: undefined | string }>;
+      }
     | {
         input: "vec3";
         value?: [undefined | number, undefined | number, undefined | number];

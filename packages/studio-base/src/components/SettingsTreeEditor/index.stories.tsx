@@ -210,8 +210,11 @@ const DisabledSettings: SettingsTreeNodes = {
       toggle: {
         input: "toggle",
         label: "Toggle",
-        value: "One",
-        options: ["One", "Two"],
+        value: "one",
+        options: [
+          { label: "One", value: "one" },
+          { label: "Two", value: "two" },
+        ],
         disabled: true,
       },
       vec2: {
@@ -296,8 +299,11 @@ const ReadonlySettings: SettingsTreeNodes = {
       toggle: {
         input: "toggle",
         label: "Toggle",
-        value: "One",
-        options: ["One", "Two"],
+        value: "one",
+        options: [
+          { label: "One", value: "one" },
+          { label: "Two", value: "two" },
+        ],
         readonly: true,
       },
       vec2: {
@@ -352,9 +358,12 @@ const PanelExamplesSettings: SettingsTreeNodes = {
       },
       color_by: {
         label: "Color by",
-        value: "Flat",
+        value: "flat",
         input: "toggle",
-        options: ["Flat", "Point data"],
+        options: [
+          { label: "Flat", value: "flat" },
+          { label: "Point data", value: "data" },
+        ],
       },
       marker_color: {
         label: "Marker color",
@@ -539,8 +548,11 @@ const TopicSettings: SettingsTreeNodes = {
           point_shape: {
             label: "Point Shape",
             input: "toggle",
-            value: "Circle",
-            options: ["Circle", "Square"],
+            value: "circle",
+            options: [
+              { label: "Circle", value: "circle" },
+              { label: "Square", value: "square" },
+            ],
           },
           decay_time: {
             label: "Decay Time (seconds)",
