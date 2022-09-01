@@ -2,21 +2,19 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { IDropdownOption } from "@fluentui/react";
-import produce from "immer";
-import { isEmpty, set } from "lodash";
-import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
+import { Button } from "@mui/material";
+import { differenceBy, first, isEmpty } from "lodash";
+import { useEffect, useLayoutEffect, useMemo, useState } from "react";
 import { useResizeDetector } from "react-resize-detector";
+import { usePrevious } from "react-use";
 import { makeStyles } from "tss-react/mui";
 
-import { filterMap } from "@foxglove/den/collection";
 import {
   CameraStore,
   CameraListener,
   CameraState,
   DEFAULT_CAMERA_STATE,
 } from "@foxglove/regl-worldview";
-import { SettingsTreeAction } from "@foxglove/studio";
 import * as PanelAPI from "@foxglove/studio-base/PanelAPI";
 import EmptyState from "@foxglove/studio-base/components/EmptyState";
 import Panel from "@foxglove/studio-base/components/Panel";
@@ -24,16 +22,13 @@ import PanelToolbar from "@foxglove/studio-base/components/PanelToolbar";
 import { useAssets } from "@foxglove/studio-base/context/AssetsContext";
 import useCleanup from "@foxglove/studio-base/hooks/useCleanup";
 import { MessageEvent } from "@foxglove/studio-base/players/types";
-import { usePanelSettingsTreeUpdate } from "@foxglove/studio-base/providers/PanelSettingsEditorContextProvider";
 import { JointState } from "@foxglove/studio-base/types/Messages";
 import { SaveConfig } from "@foxglove/studio-base/types/panels";
-import { ROBOT_DESCRIPTION_PARAM } from "@foxglove/studio-base/util/globalConstants";
 
-import { JointValueSliders } from "./JointValueSliders";
-import OverlayControls from "./OverlayControls";
 import { Renderer } from "./Renderer";
+import { defaultConfig } from "./defaultConfig";
 import helpContent from "./index.help.md";
-import { buildSettingsTree } from "./settings";
+import { useURDFViewerSettings } from "./settings";
 import { Config } from "./types";
 import useRobotDescriptionAsset from "./useRobotDescriptionAsset";
 
@@ -44,18 +39,7 @@ type Props = {
   saveConfig: SaveConfig<Config>;
 };
 
-const defaultConfig: Config = {
-  jointStatesTopic: "/joint_states",
-  opacity: 0.75,
-};
-
-const DATA_TYPES = Object.freeze([
-  "sensor_msgs/JointState",
-  "sensor_msgs/msg/JointState",
-  "ros.sensor_msgs.JointState",
-]);
-
-const useStyles = makeStyles()({
+const useStyles = makeStyles()((theme) => ({
   root: {
     display: "flex",
     flexDirection: "column",
@@ -80,11 +64,16 @@ const useStyles = makeStyles()({
     position: "absolute",
     inset: 0,
   },
-});
+  recenterButton: {
+    bottom: theme.spacing(1),
+    right: theme.spacing(1),
+    position: "absolute",
+  },
+}));
 
 function URDFViewer({ config, saveConfig }: Props) {
   const { classes } = useStyles();
-  const { customJointValues, jointStatesTopic, opacity } = config;
+  const { customJointValues, jointStatesTopic, opacity, selectedAssetId } = config;
   const [canvas, setCanvas] = useState<HTMLCanvasElement | ReactNull>(ReactNull);
 
   // Use a debounce and 0 refresh rate to avoid triggering a resize observation while handling
@@ -99,29 +88,26 @@ function URDFViewer({ config, saveConfig }: Props) {
     refreshMode: "debounce",
   });
   const { assets } = useAssets();
-  const [selectedAssetId, setSelectedAssetId] = useState<string | undefined>();
 
-  const updatePanelSettingsTree = usePanelSettingsTreeUpdate();
+  // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+  const urdfAssets = useMemo(() => assets.filter((asset) => asset.type === "urdf"), [assets]);
 
   const model = useMemo(() => {
-    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-    const asset = assets.find(({ type, uuid }) => uuid === selectedAssetId && type === "urdf");
-    return asset?.model;
-  }, [assets, selectedAssetId]);
+    if (selectedAssetId) {
+      return urdfAssets.find((asset) => asset.uuid === selectedAssetId)?.model;
+    } else {
+      return urdfAssets[0]?.model;
+    }
+  }, [urdfAssets, selectedAssetId]);
 
   // Automatically select newly added URDF assets
-  const prevAssets = useRef<typeof assets | undefined>();
+  const prevAssets = usePrevious(urdfAssets);
   useEffect(() => {
-    const prevAssetIds = new Set(prevAssets.current?.map(({ uuid }) => uuid));
-    prevAssets.current = assets;
-    for (const asset of assets) {
-      // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-      if (!prevAssetIds.has(asset.uuid) && asset.type === "urdf") {
-        setSelectedAssetId(asset.uuid);
-        return;
-      }
+    const newAsset = first(differenceBy(urdfAssets, prevAssets ?? [], (asset) => asset.uuid));
+    if (newAsset) {
+      saveConfig({ selectedAssetId: newAsset.uuid });
     }
-  }, [assets]);
+  }, [urdfAssets, saveConfig, prevAssets]);
 
   const [renderer] = useState(() => new Renderer());
 
@@ -198,59 +184,9 @@ function URDFViewer({ config, saveConfig }: Props) {
     renderer.render();
   });
 
-  const setCustomJointValues = useCallback(
-    (values: typeof customJointValues) => {
-      saveConfig({ customJointValues: values });
-    },
-    [saveConfig],
-  );
+  const { messageBar } = useRobotDescriptionAsset();
 
-  const { topics } = PanelAPI.useDataSourceInfo();
-
-  const { robotDescriptionAsset, messageBar } = useRobotDescriptionAsset();
-
-  const assetOptions: IDropdownOption[] = useMemo(() => {
-    const options = filterMap(assets, (asset) =>
-      // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-      asset.type === "urdf" ? { key: asset.uuid, text: asset.name } : undefined,
-    );
-    if (robotDescriptionAsset != undefined) {
-      options.unshift({ key: ROBOT_DESCRIPTION_PARAM, text: ROBOT_DESCRIPTION_PARAM });
-    }
-    return options;
-  }, [assets, robotDescriptionAsset]);
-
-  const actionHandler = useCallback(
-    (action: SettingsTreeAction) => {
-      if (action.action !== "update") {
-        return;
-      }
-
-      const { input, path, value } = action.payload;
-
-      if (input === "boolean" && path[1] === "manualControl") {
-        saveConfig({
-          jointStatesTopic: value === true ? undefined : defaultConfig.jointStatesTopic,
-        });
-        return;
-      }
-
-      saveConfig(produce((draft) => set(draft, path.slice(1), value)));
-    },
-    [saveConfig],
-  );
-
-  const availableTopics = useMemo(
-    () => topics.filter((topic) => DATA_TYPES.includes(topic.datatype)),
-    [topics],
-  );
-
-  useEffect(() => {
-    updatePanelSettingsTree({
-      actionHandler,
-      nodes: buildSettingsTree(config, availableTopics),
-    });
-  }, [actionHandler, availableTopics, config, updatePanelSettingsTree]);
+  useURDFViewerSettings(config, saveConfig, model);
 
   return (
     <div className={classes.root}>
@@ -267,33 +203,24 @@ function URDFViewer({ config, saveConfig }: Props) {
                   <canvas ref={(el) => setCanvas(el)} width={width} height={height} />
                 </CameraListener>
               </div>
-              <OverlayControls
-                assetOptions={assetOptions}
-                selectedAssetId={selectedAssetId}
-                onSelectAsset={(_event, option) =>
-                  option != undefined && setSelectedAssetId(option.key as string)
-                }
-                opacity={opacity}
-                onChangeOpacity={(value) => saveConfig({ opacity: value })}
-                cameraCentered={cameraCentered}
-                onCenterCamera={() => {
-                  const newState: CameraState = {
-                    ...cameraState,
-                    targetOffset: [0, 0, 0],
-                    distance: DEFAULT_DISTANCE,
-                  };
-                  cameraStore.setCameraState(newState);
-                  setCameraState(newState);
-                }}
-              />
+              {!cameraCentered && (
+                <Button
+                  className={classes.recenterButton}
+                  onClick={() => {
+                    const newState: CameraState = {
+                      ...cameraState,
+                      targetOffset: [0, 0, 0],
+                      distance: DEFAULT_DISTANCE,
+                    };
+                    cameraStore.setCameraState(newState);
+                    setCameraState(newState);
+                  }}
+                  variant="contained"
+                >
+                  Re-center
+                </Button>
+              )}
             </div>
-            {manualJointControl && (
-              <JointValueSliders
-                model={model}
-                customJointValues={customJointValues}
-                onChange={setCustomJointValues}
-              />
-            )}
           </div>
         )}
       </div>

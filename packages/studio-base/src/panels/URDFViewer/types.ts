@@ -10,4 +10,11 @@ export type Config = {
   jointStatesTopic?: string;
   customJointValues?: Record<string, number>;
   opacity?: number;
+  selectedAssetId?: string;
 };
+
+export const DATA_TYPES = Object.freeze([
+  "sensor_msgs/JointState",
+  "sensor_msgs/msg/JointState",
+  "ros.sensor_msgs.JointState",
+]);
