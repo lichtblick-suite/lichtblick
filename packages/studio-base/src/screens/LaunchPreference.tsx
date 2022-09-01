@@ -4,6 +4,8 @@
 
 import { PropsWithChildren } from "react";
 
+import { LaunchPreferenceValue } from "@foxglove/studio-base/types/LaunchPreferenceValue";
+
 import { AppSetting } from "../AppSetting";
 import { useAppConfigurationValue } from "../hooks";
 import { useSessionStorageValue } from "../hooks/useSessionStorageValue";
@@ -11,20 +13,29 @@ import { LaunchPreferenceScreen } from "./LaunchPreferenceScreen";
 import { LaunchingInDesktopScreen } from "./LaunchingInDesktopScreen";
 
 export function LaunchPreference(props: PropsWithChildren<unknown>): JSX.Element {
-  const [globalLaunchPreference = "unknown"] = useAppConfigurationValue<string>(
-    AppSetting.LAUNCH_PREFERENCE,
-  );
+  const [globalLaunchPreference] = useAppConfigurationValue<string>(AppSetting.LAUNCH_PREFERENCE);
   const [sessionLaunchPreference] = useSessionStorageValue(AppSetting.LAUNCH_PREFERENCE);
 
-  // Session preferences take priority over global preferences.
-  const activePreference = sessionLaunchPreference ?? globalLaunchPreference;
-
   const url = new URL(window.location.href);
+
+  // Session preferences take priority over URL and global preferences. This allows the button in
+  // LaunchPreferenceScreen to override the url when clicked.
+  let activePreference =
+    sessionLaunchPreference ?? url.searchParams.get("openIn") ?? globalLaunchPreference;
+  switch (activePreference) {
+    case LaunchPreferenceValue.WEB:
+    case LaunchPreferenceValue.DESKTOP:
+    case LaunchPreferenceValue.ASK:
+      break;
+    default:
+      activePreference = LaunchPreferenceValue.WEB;
+  }
+
   const hasParams = Array.from(url.searchParams.entries()).length > 0;
   // Ask the user in which environment they want to open this session.
-  if (activePreference === "unknown" && hasParams) {
+  if (activePreference === LaunchPreferenceValue.ASK && hasParams) {
     return <LaunchPreferenceScreen />;
-  } else if (activePreference === "desktop" && hasParams) {
+  } else if (activePreference === LaunchPreferenceValue.DESKTOP && hasParams) {
     return <LaunchingInDesktopScreen />;
   } else {
     return <>{props.children}</>;

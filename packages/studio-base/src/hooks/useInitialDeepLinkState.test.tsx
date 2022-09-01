@@ -15,6 +15,7 @@ import PlayerSelectionContext, {
 import { useInitialDeepLinkState } from "@foxglove/studio-base/hooks/useInitialDeepLinkState";
 import { useSessionStorageValue } from "@foxglove/studio-base/hooks/useSessionStorageValue";
 import EventsProvider from "@foxglove/studio-base/providers/EventsProvider";
+import { LaunchPreferenceValue } from "@foxglove/studio-base/types/LaunchPreferenceValue";
 
 jest.mock("@foxglove/studio-base/hooks/useSessionStorageValue");
 jest.mock("@foxglove/studio-base/context/CurrentLayoutContext");
@@ -69,7 +70,7 @@ describe("Initial deep link state", () => {
   };
 
   beforeEach(() => {
-    (useSessionStorageValue as jest.Mock).mockReturnValue(["web", jest.fn()]);
+    (useSessionStorageValue as jest.Mock).mockReturnValue([LaunchPreferenceValue.WEB, jest.fn()]);
     (useCurrentLayoutActions as jest.Mock).mockReturnValue({ setSelectedLayoutId });
     selectSource.mockClear();
     setSelectedLayoutId.mockClear();

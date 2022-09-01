@@ -4,7 +4,13 @@
 
 import { useMemo, useState } from "react";
 
-import { App, IDataSourceFactory, ConsoleApi, AppSetting } from "@foxglove/studio-base";
+import {
+  App,
+  IDataSourceFactory,
+  ConsoleApi,
+  AppSetting,
+  LaunchPreferenceValue,
+} from "@foxglove/studio-base";
 
 import { McapLocalBenchmarkDataSourceFactory, SyntheticDataSourceFactory } from "./dataSources";
 import { LAYOUTS } from "./layouts";
@@ -15,7 +21,7 @@ export function Root(): JSX.Element {
     () =>
       new MemoryAppConfiguration({
         defaults: {
-          [AppSetting.LAUNCH_PREFERENCE]: "web",
+          [AppSetting.LAUNCH_PREFERENCE]: LaunchPreferenceValue.WEB,
           [AppSetting.MESSAGE_RATE]: 240,
         },
       }),

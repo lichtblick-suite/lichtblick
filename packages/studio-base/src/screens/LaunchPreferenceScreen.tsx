@@ -18,6 +18,7 @@ import { AppSetting } from "@foxglove/studio-base/AppSetting";
 import Stack from "@foxglove/studio-base/components/Stack";
 import { useAppConfigurationValue } from "@foxglove/studio-base/hooks";
 import { useSessionStorageValue } from "@foxglove/studio-base/hooks/useSessionStorageValue";
+import { LaunchPreferenceValue } from "@foxglove/studio-base/types/LaunchPreferenceValue";
 
 const useStyles = makeStyles()((theme) => ({
   button: {
@@ -41,22 +42,17 @@ export function LaunchPreferenceScreen(): ReactElement {
   const [_, setSessionPreference] = useSessionStorageValue(AppSetting.LAUNCH_PREFERENCE);
   const [rememberPreference, setRememberPreference] = useState(globalPreference != undefined);
 
-  const cleanWebURL = new URL(window.location.href);
-  cleanWebURL.searchParams.delete("launch");
-
   async function launchInWeb() {
+    setSessionPreference(LaunchPreferenceValue.WEB); // always set session preference to allow overriding the URL param
     if (rememberPreference) {
-      await setGlobalPreference("web");
-    } else {
-      setSessionPreference("web");
+      await setGlobalPreference(LaunchPreferenceValue.WEB);
     }
   }
 
   async function launchInDesktop() {
+    setSessionPreference(LaunchPreferenceValue.DESKTOP); // always set session preference to allow overriding the URL param
     if (rememberPreference) {
-      await setGlobalPreference("desktop");
-    } else {
-      setSessionPreference("desktop");
+      await setGlobalPreference(LaunchPreferenceValue.DESKTOP);
     }
   }
 
@@ -69,13 +65,13 @@ export function LaunchPreferenceScreen(): ReactElement {
 
   const actions = [
     {
-      key: "web",
+      key: LaunchPreferenceValue.WEB,
       primary: "Web",
       secondary: "Requires Chrome v76+",
       onClick: () => void launchInWeb(),
     },
     {
-      key: "desktop",
+      key: LaunchPreferenceValue.DESKTOP,
       primary: "Desktop App",
       secondary: "For Linux, Windows, and macOS",
       onClick: () => void launchInDesktop(),

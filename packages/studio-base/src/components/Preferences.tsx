@@ -33,6 +33,7 @@ import { SidebarContent } from "@foxglove/studio-base/components/SidebarContent"
 import Stack from "@foxglove/studio-base/components/Stack";
 import { useAppTimeFormat } from "@foxglove/studio-base/hooks";
 import { useAppConfigurationValue } from "@foxglove/studio-base/hooks/useAppConfigurationValue";
+import { LaunchPreferenceValue } from "@foxglove/studio-base/types/LaunchPreferenceValue";
 import { TimeDisplayMethod } from "@foxglove/studio-base/types/panels";
 import { formatTime } from "@foxglove/studio-base/util/formatTime";
 import isDesktopApp from "@foxglove/studio-base/util/isDesktopApp";
@@ -223,9 +224,19 @@ function TimeFormat(): React.ReactElement {
 
 function LaunchDefault(): React.ReactElement {
   const { classes } = useStyles();
-  const [preference = "unknown", setPreference] = useAppConfigurationValue<string | undefined>(
+  const [preference, setPreference] = useAppConfigurationValue<string | undefined>(
     AppSetting.LAUNCH_PREFERENCE,
   );
+  let sanitizedPreference: LaunchPreferenceValue;
+  switch (preference) {
+    case LaunchPreferenceValue.WEB:
+    case LaunchPreferenceValue.DESKTOP:
+    case LaunchPreferenceValue.ASK:
+      sanitizedPreference = preference;
+      break;
+    default:
+      sanitizedPreference = LaunchPreferenceValue.WEB;
+  }
 
   return (
     <Stack>
@@ -235,16 +246,16 @@ function LaunchDefault(): React.ReactElement {
         size="small"
         fullWidth
         exclusive
-        value={preference}
+        value={sanitizedPreference}
         onChange={(_, value?: string) => value != undefined && void setPreference(value)}
       >
-        <ToggleButton value="web" className={classes.toggleButton}>
+        <ToggleButton value={LaunchPreferenceValue.WEB} className={classes.toggleButton}>
           <WebIcon /> Web app
         </ToggleButton>
-        <ToggleButton value="desktop" className={classes.toggleButton}>
+        <ToggleButton value={LaunchPreferenceValue.DESKTOP} className={classes.toggleButton}>
           <ComputerIcon /> Desktop app
         </ToggleButton>
-        <ToggleButton value="unknown" className={classes.toggleButton}>
+        <ToggleButton value={LaunchPreferenceValue.ASK} className={classes.toggleButton}>
           <QuestionAnswerOutlinedIcon /> Ask each time
         </ToggleButton>
       </ToggleButtonGroup>
