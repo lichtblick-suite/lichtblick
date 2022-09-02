@@ -34,7 +34,7 @@ import { SceneExtension } from "./SceneExtension";
 import { ScreenOverlay } from "./ScreenOverlay";
 import { SettingsManager, SettingsTreeEntry } from "./SettingsManager";
 import { CameraState } from "./camera";
-import { stringToRgb } from "./color";
+import { DARK_OUTLINE, LIGHT_OUTLINE, stringToRgb } from "./color";
 import { FRAME_TRANSFORM_DATATYPES } from "./foxglove";
 import { DetailLevel, msaaSamples } from "./lod";
 import {
@@ -168,9 +168,6 @@ const MAX_SELECTIONS = 10;
 // affected by gamma correction
 const LIGHT_BACKDROP = new THREE.Color(0xececec);
 const DARK_BACKDROP = new THREE.Color(0x121217);
-
-const LIGHT_OUTLINE = new THREE.Color(0x000000).convertSRGBToLinear();
-const DARK_OUTLINE = new THREE.Color(0xffffff).convertSRGBToLinear();
 
 // Define rendering layers for multipass rendering used for the selection effect
 const LAYER_DEFAULT = 0;

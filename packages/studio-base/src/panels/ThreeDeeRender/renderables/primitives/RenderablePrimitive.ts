@@ -29,6 +29,10 @@ export class RenderablePrimitive extends Renderable<EntityRenderableUserData> {
     return this.userData.entity ?? {};
   }
 
+  public setColorScheme(colorScheme: "dark" | "light"): void {
+    void colorScheme;
+  }
+
   public prepareForReuse(): void {
     this.userData.entity = undefined;
     this.userData.pose = emptyPose();

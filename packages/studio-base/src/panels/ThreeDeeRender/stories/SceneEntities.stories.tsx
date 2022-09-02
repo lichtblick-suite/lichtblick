@@ -70,7 +70,22 @@ function makeStoryScene({
 
           spheres: [],
 
-          cylinders: [],
+          cylinders: [
+            {
+              pose: xyzrpyToPose([0, 5, 0], [0, 0, 0]),
+              size: { x: 0.8, y: 0.5, z: 1 },
+              color: makeColor("#f4b136", 0.5),
+              top_scale: 1,
+              bottom_scale: 0,
+            },
+            {
+              pose: xyzrpyToPose([1, 5, 0], [0, 0, 30]),
+              size: { x: 0.4, y: 0.2, z: 1 },
+              color: makeColor("#afe663", 0.9),
+              top_scale: 0.25,
+              bottom_scale: 0.75,
+            },
+          ],
 
           lines: [
             0 as LineType.LINE_STRIP,
@@ -257,10 +272,10 @@ export function BasicEntities(): JSX.Element {
             grid: { layerId: "foxglove.Grid" },
           },
           cameraState: {
-            distance: 10,
+            distance: 12,
             perspective: true,
             phi: 30,
-            targetOffset: [0, -4, 0],
+            targetOffset: [0, -2, 0],
             thetaOffset: rad2deg(-0.25),
             fovy: 45,
             near: 0.01,

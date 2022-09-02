@@ -8,6 +8,9 @@ import tinycolor from "tinycolor2";
 import { lerp } from "./math";
 import { ColorRGB, ColorRGBA } from "./ros";
 
+export const LIGHT_OUTLINE = new THREE.Color(0x000000).convertSRGBToLinear();
+export const DARK_OUTLINE = new THREE.Color(0xffffff).convertSRGBToLinear();
+
 // From https://github.com/mrdoob/three.js/blob/dev/src/math/ColorManagement.js
 // which is not exported
 export function SRGBToLinear(c: number): number {

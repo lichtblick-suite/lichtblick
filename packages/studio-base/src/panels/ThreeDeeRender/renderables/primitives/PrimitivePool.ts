@@ -4,6 +4,7 @@
 
 import type { Renderer } from "../../Renderer";
 import { RenderableCubes } from "./RenderableCubes";
+import { RenderableCylinders } from "./RenderableCylinders";
 import { RenderableLines } from "./RenderableLines";
 import { RenderableModels } from "./RenderableModels";
 import { RenderablePrimitive } from "./RenderablePrimitive";
@@ -13,6 +14,7 @@ const CONSTRUCTORS = {
   [PrimitiveType.CUBES]: RenderableCubes,
   [PrimitiveType.MODELS]: RenderableModels,
   [PrimitiveType.LINES]: RenderableLines,
+  [PrimitiveType.CYLINDERS]: RenderableCylinders,
 };
 
 /**
@@ -61,5 +63,13 @@ export class PrimitivePool {
     }
     this.primitivesByType.clear();
     this.disposed = true;
+  }
+
+  public setColorScheme(colorScheme: "dark" | "light"): void {
+    for (const primitives of this.primitivesByType.values()) {
+      for (const primitive of primitives) {
+        primitive.setColorScheme(colorScheme);
+      }
+    }
   }
 }

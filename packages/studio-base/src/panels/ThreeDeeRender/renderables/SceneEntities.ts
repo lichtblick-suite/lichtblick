@@ -91,6 +91,15 @@ export class FoxgloveSceneEntities extends SceneExtension<TopicEntities> {
     }
   }
 
+  public override setColorScheme(
+    colorScheme: "dark" | "light",
+    _backgroundColor: THREE.Color | undefined,
+  ): void {
+    for (const renderable of this.renderables.values()) {
+      renderable.setColorScheme(colorScheme);
+    }
+  }
+
   public override handleSettingsAction = (action: SettingsTreeAction): void => {
     const path = action.payload.path;
     if (action.action !== "update" || path.length !== 3) {
