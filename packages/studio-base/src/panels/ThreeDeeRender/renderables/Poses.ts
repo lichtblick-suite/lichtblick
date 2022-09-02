@@ -196,7 +196,7 @@ export class Poses extends SceneExtension<PoseRenderable> {
         renderable,
         renderable.userData.poseMessage,
         renderable.userData.receiveTime,
-        { ...renderable.userData.settings, ...settings },
+        { ...DEFAULT_SETTINGS, ...settings },
       );
     }
   };

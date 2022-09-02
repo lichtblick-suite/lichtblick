@@ -113,7 +113,7 @@ export class Markers extends SceneExtension<TopicMarkers> {
       const settings = this.renderer.config.topics[topicName] as
         | Partial<LayerSettingsMarker>
         | undefined;
-      topicMarkers.userData.settings = { ...topicMarkers.userData.settings, ...settings };
+      topicMarkers.userData.settings = { ...DEFAULT_SETTINGS, ...settings };
       topicMarkers.update();
     }
   };

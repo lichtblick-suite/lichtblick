@@ -131,7 +131,7 @@ export class OccupancyGrids extends SceneExtension<OccupancyGridRenderable> {
       const settings = this.renderer.config.topics[topicName] as
         | Partial<LayerSettingsOccupancyGrid>
         | undefined;
-      renderable.userData.settings = { ...renderable.userData.settings, ...settings };
+      renderable.userData.settings = { ...DEFAULT_SETTINGS, ...settings };
 
       // Check if the transparency changed and we need to create a new material
       const newTransparent = occupancyGridHasTransparency(renderable.userData.settings);

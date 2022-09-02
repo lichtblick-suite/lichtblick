@@ -110,7 +110,7 @@ export class Polygons extends SceneExtension<PolygonRenderable> {
       const settings = this.renderer.config.topics[topicName] as
         | Partial<LayerSettingsPolygon>
         | undefined;
-      renderable.userData.settings = { ...renderable.userData.settings, ...settings };
+      renderable.userData.settings = { ...DEFAULT_SETTINGS, ...settings };
       this._updatePolygonRenderable(
         renderable,
         renderable.userData.polygonStamped,

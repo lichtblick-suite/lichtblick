@@ -209,7 +209,7 @@ export class PoseArrays extends SceneExtension<PoseArrayRenderable> {
         renderable,
         renderable.userData.poseArrayMessage,
         renderable.userData.receiveTime,
-        { ...renderable.userData.settings, ...settings },
+        { ...DEFAULT_SETTINGS, ...settings },
       );
     }
   };
