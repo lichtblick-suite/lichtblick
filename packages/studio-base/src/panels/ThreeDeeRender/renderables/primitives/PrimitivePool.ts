@@ -3,6 +3,7 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 import type { Renderer } from "../../Renderer";
+import { RenderableArrows } from "./RenderableArrows";
 import { RenderableCubes } from "./RenderableCubes";
 import { RenderableCylinders } from "./RenderableCylinders";
 import { RenderableLines } from "./RenderableLines";
@@ -15,6 +16,7 @@ const CONSTRUCTORS = {
   [PrimitiveType.MODELS]: RenderableModels,
   [PrimitiveType.LINES]: RenderableLines,
   [PrimitiveType.CYLINDERS]: RenderableCylinders,
+  [PrimitiveType.ARROWS]: RenderableArrows,
 };
 
 /**

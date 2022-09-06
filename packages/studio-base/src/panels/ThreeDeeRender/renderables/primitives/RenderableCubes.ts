@@ -84,7 +84,7 @@ export class RenderableCubes extends RenderablePrimitive {
 
       this.mesh.removeFromParent();
       this.mesh.dispose();
-      this.mesh = new THREE.InstancedMesh(this.mesh.geometry, this.material, this.maxInstances);
+      this.mesh = new THREE.InstancedMesh(this.geometry, this.material, this.maxInstances);
       this.instanceOpacity = new THREE.InstancedBufferAttribute(
         new Float32Array(this.maxInstances),
         1,
@@ -152,7 +152,7 @@ export class RenderableCubes extends RenderablePrimitive {
     this.mesh.instanceMatrix.needsUpdate = true;
     this.instanceOpacity.needsUpdate = true;
 
-    // may be null if we were initialized with count 0 and still have 0 cubes
+    // may be null if we were initialized with count 0 and still have 0 primitives
     if (this.mesh.instanceColor) {
       this.mesh.instanceColor.needsUpdate = true;
     }

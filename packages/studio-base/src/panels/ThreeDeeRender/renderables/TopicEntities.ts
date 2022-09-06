@@ -14,6 +14,7 @@ import { Renderer } from "../Renderer";
 import { updatePose } from "../updatePose";
 import { LayerSettingsEntity } from "./SceneEntities";
 import { PrimitivePool } from "./primitives/PrimitivePool";
+import { RenderableArrows } from "./primitives/RenderableArrows";
 import { RenderableCubes } from "./primitives/RenderableCubes";
 import { RenderableCylinders } from "./primitives/RenderableCylinders";
 import { RenderableLines } from "./primitives/RenderableLines";
@@ -33,6 +34,7 @@ type EntityRenderables = {
   [PrimitiveType.MODELS]?: RenderableModels;
   [PrimitiveType.LINES]?: RenderableLines;
   [PrimitiveType.CYLINDERS]?: RenderableCylinders;
+  [PrimitiveType.ARROWS]?: RenderableArrows;
 };
 
 const PRIMITIVE_KEYS = {
@@ -40,6 +42,7 @@ const PRIMITIVE_KEYS = {
   [PrimitiveType.MODELS]: "models",
   [PrimitiveType.LINES]: "lines",
   [PrimitiveType.CYLINDERS]: "cylinders",
+  [PrimitiveType.ARROWS]: "arrows",
 } as const;
 
 export class TopicEntities extends Renderable<EntityTopicUserData> {

@@ -53,7 +53,24 @@ function makeStoryScene({
           frame_locked: true,
           metadata: [],
 
-          arrows: [],
+          arrows: [
+            {
+              pose: xyzrpyToPose([0, 4, 0], [0, 0, 0]),
+              shaft_diameter: 0.5,
+              shaft_length: 0.5,
+              head_diameter: 1,
+              head_length: 0.3,
+              color: makeColor("#f4b136", 0.5),
+            },
+            {
+              pose: xyzrpyToPose([1, 4, 0], [0, 0, 30]),
+              shaft_diameter: 0.5,
+              shaft_length: 0.5,
+              head_diameter: 1,
+              head_length: 0.3,
+              color: makeColor("#afe663", 0.9),
+            },
+          ],
 
           cubes: [
             {
