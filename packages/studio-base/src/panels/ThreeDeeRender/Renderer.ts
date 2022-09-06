@@ -69,7 +69,7 @@ import {
   Vector3,
 } from "./ros";
 import { BaseSettings, CustomLayerSettings, SelectEntry, SubscriptionType } from "./settings";
-import { Transform, TransformTree } from "./transforms";
+import { makePose, Pose, Transform, TransformTree } from "./transforms";
 
 const log = Logger.getLogger(__filename);
 
@@ -98,11 +98,15 @@ export type RendererEvents = {
   topicHandlersChanged: (renderer: Renderer) => void;
 };
 
+export type FollowMode = "follow-pose" | "follow-position" | "follow-none";
+
 export type RendererConfig = {
   /** Camera settings for the currently rendering scene */
   cameraState: CameraState;
   /** Coordinate frameId of the rendering frame */
   followTf: string | undefined;
+  /** Camera follow mode */
+  followMode: FollowMode;
   scene: {
     /** Show rendering metrics in a DOM overlay */
     enableStats?: boolean;
@@ -194,6 +198,9 @@ const tempVec2 = new THREE.Vector2();
 const tempSpherical = new THREE.Spherical();
 const tempEuler = new THREE.Euler();
 
+// used for holding unfollowPoseSnapshot in render frame every new frame
+const snapshotInRenderFrame = makePose();
+
 // We use a patched version of THREE.js where the internal WebGLShaderCache class has been
 // modified to allow caching based on `vertexShaderKey` and/or `fragmentShaderKey` instead of
 // using the full shader source as a Map key
@@ -264,8 +271,15 @@ export class Renderer extends EventEmitter<RendererEvents> {
 
   private perspectiveCamera: THREE.PerspectiveCamera;
   private orthographicCamera: THREE.OrthographicCamera;
+  // This group is used to transform the cameras based on the Frame follow mode
+  // quaternion is affected in stationary and position-only follow modes
+  // both position and quaternion of the group are affected in stationary mode
+  private cameraGroup: THREE.Group;
   private aspect: number;
   private controls: OrbitControls;
+  public followMode: FollowMode;
+  // The pose of the render frame in the fixed frame when following was disabled
+  private unfollowPoseSnapshot: Pose | undefined;
 
   // Are we connected to a ROS data source? Normalize coordinate frames if so by
   // stripping any leading "/" prefix. See `normalizeFrameId()` for details.
@@ -359,6 +373,11 @@ export class Renderer extends EventEmitter<RendererEvents> {
 
     this.perspectiveCamera = new THREE.PerspectiveCamera();
     this.orthographicCamera = new THREE.OrthographicCamera();
+    this.cameraGroup = new THREE.Group();
+
+    this.cameraGroup.add(this.perspectiveCamera);
+    this.cameraGroup.add(this.orthographicCamera);
+    this.scene.add(this.cameraGroup);
 
     this.controls = new OrbitControls(this.perspectiveCamera, this.canvas);
     this.controls.screenSpacePanning = false; // only allow panning in the XY plane
@@ -388,6 +407,7 @@ export class Renderer extends EventEmitter<RendererEvents> {
     this.scene.add(this.selectionBackdrop);
 
     this.followFrameId = config.followTf;
+    this.followMode = config.followMode;
 
     const samples = msaaSamples(this.gl.capabilities);
     const renderSize = this.gl.getDrawingBufferSize(tempVec2);
@@ -739,7 +759,11 @@ export class Renderer extends EventEmitter<RendererEvents> {
   public setCameraState(cameraState: CameraState): void {
     this._isUpdatingCameraState = true;
     this._updateCameras(cameraState);
-    this.controls.update();
+    // only active for follow pose mode because it introduces strange behavior into the other modes
+    // due to the fact that they are manipulating the camera after update with the `cameraGroup`
+    if (this.followMode === "follow-pose") {
+      this.controls.update();
+    }
     this._isUpdatingCameraState = false;
   }
 
@@ -900,7 +924,7 @@ export class Renderer extends EventEmitter<RendererEvents> {
 
   private frameHandler = (currentTime: bigint): void => {
     this.currentTime = currentTime;
-    this._updateFrames();
+    this._updateFrames(currentTime);
     this._updateResolution();
 
     this.gl.clear();
@@ -914,6 +938,48 @@ export class Renderer extends EventEmitter<RendererEvents> {
     const fixedFrameId = this.fixedFrameId;
     if (renderFrameId == undefined || fixedFrameId == undefined) {
       return;
+    }
+
+    const renderFrame = this.transformTree.frame(renderFrameId);
+    const fixedFrame = this.transformTree.frame(fixedFrameId);
+
+    // If in stationary or follow-position modes
+    if (
+      this.followMode !== "follow-pose" &&
+      this.unfollowPoseSnapshot &&
+      renderFrame &&
+      fixedFrame
+    ) {
+      renderFrame.applyLocal(
+        snapshotInRenderFrame,
+        this.unfollowPoseSnapshot,
+        fixedFrame,
+        currentTime,
+      );
+      /**
+       * the application of the unfollowPoseSnapshot position and orientation
+       * components makes the camera position and rotation static relative to the fixed frame.
+       * So when the display frame changes the angle of the camera relative
+       * to the scene will not change because only the snapshotPose orientation is applied
+       */
+      if (this.followMode === "follow-position") {
+        // only make orientation static/stationary in this mode
+        // the position still follows the frame
+        this.cameraGroup.position.set(0, 0, 0);
+      } else {
+        this.cameraGroup.position.set(
+          snapshotInRenderFrame.position.x,
+          snapshotInRenderFrame.position.y,
+          snapshotInRenderFrame.position.z,
+        );
+      }
+      // this negates the rotation of the changes in renderFrame
+      this.cameraGroup.quaternion.set(
+        snapshotInRenderFrame.orientation.x,
+        snapshotInRenderFrame.orientation.y,
+        snapshotInRenderFrame.orientation.z,
+        snapshotInRenderFrame.orientation.w,
+      );
     }
 
     for (const sceneExtension of this.sceneExtensions.values()) {
@@ -1101,7 +1167,7 @@ export class Renderer extends EventEmitter<RendererEvents> {
   /** Tracks the number of frames so we can recompute the defaultFrameId when frames are added. */
   private _lastTransformFrameCount = 0;
 
-  private _updateFrames(): void {
+  private _updateFrames(currentTime: bigint): void {
     if (
       this.followFrameId != undefined &&
       this.renderFrameId !== this.followFrameId &&
@@ -1162,7 +1228,53 @@ export class Renderer extends EventEmitter<RendererEvents> {
       this.fixedFrameId = fixedFrameId;
     }
 
+    // Should only occur on reload when the saved followMode is not follow
+    if (this.followMode !== "follow-pose" && !this.unfollowPoseSnapshot) {
+      // Snapshot the current pose of the render frame in the fixed frame
+      this.unfollowPoseSnapshot = makePose();
+      fixedFrame.applyLocal(
+        this.unfollowPoseSnapshot,
+        this.unfollowPoseSnapshot,
+        frame,
+        currentTime,
+      );
+    }
     this.settings.errors.clearPath(FOLLOW_TF_PATH);
+  }
+
+  // This should not be called on initialization only on settings changes
+  public updateFollowMode(newFollowMode: FollowMode): void {
+    if (this.followMode === newFollowMode) {
+      return;
+    }
+
+    if (!this.renderFrameId || !this.fixedFrameId) {
+      this.followMode = newFollowMode;
+      return;
+    }
+
+    const renderFrame = this.transformTree.frame(this.renderFrameId);
+    const fixedFrame = this.transformTree.frame(this.fixedFrameId);
+
+    if (!renderFrame || !fixedFrame) {
+      // if this happens it will be set on initialization in _updateFrames
+      this.followMode = newFollowMode;
+      return;
+    }
+
+    // always create a new snapshot when changing frames to minimize old snapshots causing camera jumps
+    this.unfollowPoseSnapshot = makePose();
+    fixedFrame.applyLocal(
+      this.unfollowPoseSnapshot,
+      this.unfollowPoseSnapshot,
+      renderFrame,
+      this.currentTime,
+    );
+
+    // reset any applied cameraGroup settings so that they aren't applied in follow mode
+    this.cameraGroup.position.set(0, 0, 0);
+    this.cameraGroup.quaternion.set(0, 0, 0, 1);
+    this.followMode = newFollowMode;
   }
 
   private _updateResolution(): void {

@@ -6,7 +6,7 @@ import { cloneDeep, round, set } from "lodash";
 
 import { SettingsTreeAction } from "@foxglove/studio";
 
-import { Renderer, RendererConfig } from "../Renderer";
+import { FollowMode, Renderer, RendererConfig } from "../Renderer";
 import { SceneExtension } from "../SceneExtension";
 import { SettingsTreeEntry } from "../SettingsManager";
 import { DEFAULT_CAMERA_STATE } from "../camera";
@@ -77,6 +77,13 @@ export class CoreSettings extends SceneExtension {
     );
     const followTfError = this.renderer.settings.errors.errors.errorAtPath(["general", "followTf"]);
 
+    const followModeOptions = [
+      { label: "Pose", value: "follow-pose" },
+      { label: "Position", value: "follow-position" },
+      { label: "None", value: "follow-none" },
+    ];
+    const followModeValue = this.renderer.followMode;
+
     return [
       {
         path: ["general"],
@@ -84,12 +91,19 @@ export class CoreSettings extends SceneExtension {
           label: "Frame",
           fields: {
             followTf: {
-              label: "Display Frame",
+              label: "Display frame",
               help: "The coordinate frame to place the camera in. The camera position and orientation will be relative to the origin of this frame.",
               input: "select",
               options: followTfOptions,
               value: followTfValue,
               error: followTfError,
+            },
+            followMode: {
+              label: "Follow mode",
+              help: "Change the camera behavior during playback to follow the display frame or not.",
+              input: "select",
+              options: followModeOptions,
+              value: followModeValue,
             },
           },
           defaultExpansionState: "expanded",
@@ -281,6 +295,23 @@ export class CoreSettings extends SceneExtension {
 
         this.renderer.followFrameId = followTf;
         this.renderer.settings.errors.clearPath(["general", "followTf"]);
+      } else if (path[1] === "followMode") {
+        const followMode = value as FollowMode;
+        // Update the configuration. This is done manually since followMode is at the top level of
+        // config, not under `general`
+        this.renderer.updateConfig((draft) => {
+          // any follow -> stationary no clear
+          // stationary -> any follow clear offset (center on frame)
+          if (draft.followMode === "follow-none") {
+            draft.cameraState.targetOffset = [...DEFAULT_CAMERA_STATE.targetOffset];
+            draft.cameraState.thetaOffset = DEFAULT_CAMERA_STATE.thetaOffset;
+          } else if (followMode === "follow-pose") {
+            draft.cameraState.thetaOffset = DEFAULT_CAMERA_STATE.thetaOffset;
+          }
+          draft.followMode = followMode;
+        });
+
+        this.renderer.updateFollowMode(followMode);
       }
     } else if (category === "scene") {
       if (path[1] === "cameraState") {
