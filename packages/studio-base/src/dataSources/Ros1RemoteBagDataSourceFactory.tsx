@@ -8,11 +8,7 @@ import {
 } from "@foxglove/studio-base/context/PlayerSelectionContext";
 import { IterablePlayer } from "@foxglove/studio-base/players/IterablePlayer";
 import { BagIterableSource } from "@foxglove/studio-base/players/IterablePlayer/BagIterableSource";
-import RandomAccessPlayer from "@foxglove/studio-base/players/RandomAccessPlayer";
 import { Player } from "@foxglove/studio-base/players/types";
-import Ros1MemoryCacheDataProvider from "@foxglove/studio-base/randomAccessDataProviders/Ros1MemoryCacheDataProvider";
-import WorkerBagDataProvider from "@foxglove/studio-base/randomAccessDataProviders/WorkerBagDataProvider";
-import { getSeekToTime } from "@foxglove/studio-base/util/time";
 
 class Ros1RemoteBagDataSourceFactory implements IDataSourceFactory {
   public id = "ros1-remote-bagfile";
@@ -23,48 +19,24 @@ class Ros1RemoteBagDataSourceFactory implements IDataSourceFactory {
   public description = "Fetch and load pre-recorded ROS 1 .bag files from a remote location.";
   public docsLink = "https://foxglove.dev/docs/studio/connection/ros1-bag";
 
-  private enableIterablePlayer = false;
-
-  private constructor(opt?: { useIterablePlayer: boolean }) {
-    this.enableIterablePlayer = opt?.useIterablePlayer ?? false;
-  }
-
   public initialize(args: DataSourceFactoryInitializeArgs): Player | undefined {
     const url = args.url;
     if (!url) {
       return;
     }
 
-    if (this.enableIterablePlayer) {
-      const bagSource = new BagIterableSource({ type: "remote", url });
-      return new IterablePlayer({
-        source: bagSource,
-        isSampleDataSource: true,
-        name: url,
-        metricsCollector: args.metricsCollector,
-        // Use blank url params so the data source is set in the url
-        urlParams: {
-          url,
-        },
-        sourceId: this.id,
-      });
-    } else {
-      const bagWorkerDataProvider = new WorkerBagDataProvider({ type: "remote", url });
-      const messageCacheProvider = new Ros1MemoryCacheDataProvider(bagWorkerDataProvider);
-
-      return new RandomAccessPlayer(messageCacheProvider, {
-        metricsCollector: args.metricsCollector,
-        seekToTime: getSeekToTime(),
-        // Overridden to 500ms to limit the number of blocks that need to be
-        // fetched per seek from the potentially slow remote data source
-        seekBackNs: BigInt(0.5e9),
-        name: url,
-        urlParams: {
-          url,
-        },
-        sourceId: this.id,
-      });
-    }
+    const bagSource = new BagIterableSource({ type: "remote", url });
+    return new IterablePlayer({
+      source: bagSource,
+      isSampleDataSource: true,
+      name: url,
+      metricsCollector: args.metricsCollector,
+      // Use blank url params so the data source is set in the url
+      urlParams: {
+        url,
+      },
+      sourceId: this.id,
+    });
   }
 }
 

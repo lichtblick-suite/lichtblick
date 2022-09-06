@@ -13,7 +13,7 @@
 
 // No time functions that require `moment` should live in this file.
 import log from "@foxglove/log";
-import { Time, add, isLessThan, fromNanoSec, clampTime, interpolate } from "@foxglove/rostime";
+import { Time } from "@foxglove/rostime";
 import { MessageEvent } from "@foxglove/studio-base/players/types";
 import { MarkerArray, StampedMessage } from "@foxglove/studio-base/types/Messages";
 
@@ -38,40 +38,11 @@ export function formatFrame({ sec, nsec }: Time): string {
   return `${sec}.${String.prototype.padStart.call(nsec, 9, "0")}`;
 }
 
-// Functions and types for specifying and applying player initial seek time intentions.
-// When loading from a copied URL, the exact unix time is used.
-type AbsoluteSeekToTime = Readonly<{ type: "absolute"; time: Time }>;
-// If no seek time is specified, we default to 299ms from the start of the bag. Finer control is
-// exposed for use-cases where it's needed.
-type RelativeSeekToTime = Readonly<{ type: "relative"; startOffset: Time }>;
-// Currently unused: We may expose interactive seek controls before the bag duration is known, and
-// store the seek state as a fraction of the eventual bag length.
-type SeekFraction = Readonly<{ type: "fraction"; fraction: number }>;
-export type SeekToTimeSpec = AbsoluteSeekToTime | RelativeSeekToTime | SeekFraction;
-
 // Amount to seek into the bag from the start when loading the player, to show
 // something useful on the screen. Ideally this is less than BLOCK_SIZE_NS from
 // MemoryCacheDataProvider so we still stay within the first block when fetching
 // initial data.
 export const SEEK_ON_START_NS = BigInt(99 * 1e6); /* ms */
-
-export function getSeekToTime(): SeekToTimeSpec {
-  const defaultResult: SeekToTimeSpec = {
-    type: "relative",
-    startOffset: fromNanoSec(SEEK_ON_START_NS),
-  };
-  return defaultResult;
-}
-
-export function getSeekTimeFromSpec(spec: SeekToTimeSpec, start: Time, end: Time): Time {
-  const rawSpecTime =
-    spec.type === "absolute"
-      ? spec.time
-      : spec.type === "relative"
-      ? add(isLessThan(spec.startOffset, { sec: 0, nsec: 0 }) ? end : start, spec.startOffset)
-      : interpolate(start, end, spec.fraction);
-  return clampTime(rawSpecTime, start, end);
-}
 
 export function getTimestampForMessageEvent(
   messageEvent: MessageEvent<unknown>,

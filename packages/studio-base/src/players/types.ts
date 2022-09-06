@@ -17,11 +17,6 @@ import { RosMsgDefinition } from "@foxglove/rosmsg";
 import { Time } from "@foxglove/rostime";
 import type { MessageEvent, ParameterValue } from "@foxglove/studio";
 import { GlobalVariables } from "@foxglove/studio-base/hooks/useGlobalVariables";
-import {
-  AverageThroughput,
-  RandomAccessDataProviderStall,
-  InitializationPerformanceMetadata,
-} from "@foxglove/studio-base/randomAccessDataProviders/types";
 import { RosDatatypes } from "@foxglove/studio-base/types/RosDatatypes";
 import { Range } from "@foxglove/studio-base/util/ranges";
 import { NotificationSeverity } from "@foxglove/studio-base/util/sendNotification";
@@ -329,9 +324,6 @@ export interface PlayerMetricsCollectorInterface {
   setSubscriptions(subscriptions: SubscribePayload[]): void;
   recordBytesReceived(bytes: number): void;
   recordPlaybackTime(time: Time, params: { stillLoadingData: boolean }): void;
-  recordDataProviderPerformance(metadata: AverageThroughput): void;
   recordUncachedRangeRequest(): void;
   recordTimeToFirstMsgs(): void;
-  recordDataProviderInitializePerformance(metadata: InitializationPerformanceMetadata): void;
-  recordDataProviderStall(metadata: RandomAccessDataProviderStall): void;
 }

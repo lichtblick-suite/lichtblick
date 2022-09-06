@@ -11,12 +11,7 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import {
-  isRangeCoveredByRanges,
-  missingRanges,
-  mergeNewRangeIntoUnsortedNonOverlappingList,
-  Range,
-} from "./ranges";
+import { isRangeCoveredByRanges, missingRanges, Range } from "./ranges";
 
 describe("ranges", () => {
   describe("isRangeCoveredByRanges", () => {
@@ -69,70 +64,6 @@ describe("ranges", () => {
         { start: 7, end: 20 },
       ];
       expect(missingRanges(bounds, ranges)).toEqual([{ start: 2, end: 7 }]);
-    });
-  });
-
-  describe("mergeNewRangeIntoUnsortedNonOverlappingList", () => {
-    it("returns `newRange` when `ranges` is empty", () => {
-      const newRange = { start: 20, end: 30 };
-      const unsortedNonOverlappingRanges: Range[] = [];
-      expect(
-        mergeNewRangeIntoUnsortedNonOverlappingList(newRange, unsortedNonOverlappingRanges),
-      ).toEqual([newRange]);
-    });
-
-    it("keeps the returned list unsorted", () => {
-      const newRange = { start: 20, end: 30 };
-      const unsortedNonOverlappingRanges = [{ start: 0, end: 10 }];
-      expect(
-        mergeNewRangeIntoUnsortedNonOverlappingList(newRange, unsortedNonOverlappingRanges),
-      ).toEqual([
-        { start: 20, end: 30 },
-        { start: 0, end: 10 },
-      ]);
-    });
-
-    it("merges with an overlapping range", () => {
-      const newRange = { start: 20, end: 30 };
-      const unsortedNonOverlappingRanges = [
-        { start: 25, end: 35 },
-        { start: 0, end: 10 },
-      ];
-      expect(
-        mergeNewRangeIntoUnsortedNonOverlappingList(newRange, unsortedNonOverlappingRanges),
-      ).toEqual([
-        { start: 20, end: 35 },
-        { start: 0, end: 10 },
-      ]);
-    });
-
-    it("merges with a touching range", () => {
-      const newRange = { start: 20, end: 30 };
-      const unsortedNonOverlappingRanges = [
-        { start: 30, end: 40 },
-        { start: 0, end: 10 },
-      ];
-      expect(
-        mergeNewRangeIntoUnsortedNonOverlappingList(newRange, unsortedNonOverlappingRanges),
-      ).toEqual([
-        { start: 20, end: 40 },
-        { start: 0, end: 10 },
-      ]);
-    });
-
-    it("merges with multiple ranges at once", () => {
-      const newRange = { start: 20, end: 30 };
-      const unsortedNonOverlappingRanges = [
-        { start: 30, end: 40 },
-        { start: 0, end: 10 },
-        { start: 15, end: 25 },
-      ];
-      expect(
-        mergeNewRangeIntoUnsortedNonOverlappingList(newRange, unsortedNonOverlappingRanges),
-      ).toEqual([
-        { start: 15, end: 40 },
-        { start: 0, end: 10 },
-      ]);
     });
   });
 });

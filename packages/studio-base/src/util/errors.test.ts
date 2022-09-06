@@ -11,7 +11,7 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { AppError, UserError } from "@foxglove/studio-base/util/errors";
+import { AppError } from "@foxglove/studio-base/util/errors";
 
 describe("errors", () => {
   describe("AppError", () => {
@@ -53,14 +53,6 @@ describe("errors", () => {
     it("catches BigInt values in extraInfo", () => {
       const { message } = new AppError("internal error", { val: BigInt(10) });
       expect(message.includes("[ Either cyclic object or object with BigInt(s) ]")).toBeTruthy();
-    });
-  });
-
-  describe("UserError", () => {
-    it("is an instanceof itself", () => {
-      const err = new UserError("example");
-      expect(err.name).toBe("UserError");
-      expect(err).toBeInstanceOf(UserError);
     });
   });
 });

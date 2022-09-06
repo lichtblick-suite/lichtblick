@@ -51,21 +51,3 @@ export class AppError extends Error {
     }
   }
 }
-
-export class UserError extends Error {
-  public details: DetailsType;
-
-  public constructor(details: DetailsType) {
-    super();
-    this.details = details;
-    this.name = "UserError";
-
-    if (details instanceof Error) {
-      this.message = details.stack ?? details.message;
-    } else if (typeof details === "string") {
-      this.message = details;
-    } else {
-      this.message = "Unknown Error";
-    }
-  }
-}

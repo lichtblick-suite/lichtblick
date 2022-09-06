@@ -28,13 +28,11 @@ import VelodyneUnavailableDataSourceFactory from "./dataSources/VelodyneUnavaila
 import { IdbLayoutStorage } from "./services/IdbLayoutStorage";
 
 export function Root({ appConfiguration }: { appConfiguration: IAppConfiguration }): JSX.Element {
-  const enableExperimentalLatching = true;
-
   const dataSources: IDataSourceFactory[] = useMemo(() => {
     const sources = [
       new Ros1UnavailableDataSourceFactory(),
-      new Ros1LocalBagDataSourceFactory({ useIterablePlayer: enableExperimentalLatching }),
-      new Ros1RemoteBagDataSourceFactory({ useIterablePlayer: enableExperimentalLatching }),
+      new Ros1LocalBagDataSourceFactory(),
+      new Ros1RemoteBagDataSourceFactory(),
       new Ros2UnavailableDataSourceFactory(),
       new Ros2LocalBagDataSourceFactory(),
       new RosbridgeDataSourceFactory(),
@@ -48,7 +46,7 @@ export function Root({ appConfiguration }: { appConfiguration: IAppConfiguration
     ];
 
     return sources;
-  }, [enableExperimentalLatching]);
+  }, []);
 
   const layoutStorage = useMemo(() => new IdbLayoutStorage(), []);
   const [extensionLoaders] = useState(() => [

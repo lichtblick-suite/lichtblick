@@ -11,21 +11,11 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { intersection, keyBy } from "lodash";
-import memoizeWeak from "memoize-weak";
+import { keyBy } from "lodash";
 import { createSelector } from "reselect";
 
 import { Topic } from "@foxglove/studio-base/players/types";
 import { RosDatatypes } from "@foxglove/studio-base/types/RosDatatypes";
-
-export const getSanitizedTopics = memoizeWeak(
-  (subscribedTopics: Set<string>, providerTopics: Topic[]): string[] => {
-    return intersection(
-      Array.from(subscribedTopics),
-      providerTopics.map(({ name }) => name),
-    );
-  },
-);
 
 export const getTopicsByTopicName = createSelector(
   (topics: readonly Topic[]) => topics,

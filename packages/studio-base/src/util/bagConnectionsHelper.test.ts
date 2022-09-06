@@ -11,7 +11,7 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { bagConnectionsToDatatypes, bagConnectionsToTopics } from "./bagConnectionsHelper";
+import { bagConnectionsToDatatypes } from "./bagConnectionsHelper";
 
 describe("bagConnectionsToDatatypes", () => {
   it("extracts one big list from multiple connections", () => {
@@ -63,44 +63,5 @@ describe("bagConnectionsToDatatypes", () => {
         }),
       ),
     );
-  });
-});
-
-describe("bagConnectionsToTopics", () => {
-  it("extracts one big list from multiple connections (even with duplicate topics)", () => {
-    expect(
-      bagConnectionsToTopics([
-        {
-          topic: "/some/topic/with/points",
-          type: "something/points",
-          messageDefinition: "",
-          md5sum: "",
-          callerid: "",
-        },
-        {
-          topic: "/some/topic/with/points",
-          type: "something/points",
-          messageDefinition: "",
-          md5sum: "",
-          callerid: "",
-        },
-        {
-          topic: "/some/topic/with/two_points",
-          type: "something/two_points",
-          messageDefinition: "",
-          md5sum: "",
-          callerid: "",
-        },
-      ]),
-    ).toEqual([
-      {
-        name: "/some/topic/with/points",
-        datatype: "something/points",
-      },
-      {
-        name: "/some/topic/with/two_points",
-        datatype: "something/two_points",
-      },
-    ]);
   });
 });
