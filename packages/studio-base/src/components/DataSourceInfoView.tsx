@@ -18,6 +18,7 @@ import { subtractTimes } from "@foxglove/studio-base/players/UserNodePlayer/node
 import { PlayerPresence } from "@foxglove/studio-base/players/types";
 import { formatDate, formatDuration } from "@foxglove/studio-base/util/formatTime";
 import { fonts } from "@foxglove/studio-base/util/sharedStyleConstants";
+import { formatTimeRaw, isAbsoluteTime } from "@foxglove/studio-base/util/time";
 
 import { MultilineMiddleTruncate } from "./MultilineMiddleTruncate";
 
@@ -136,7 +137,9 @@ export function DataSourceInfoView(): JSX.Element {
     if (endTimeRef.current) {
       if (endTime) {
         const date = formatDate(endTime, undefined);
-        endTimeRef.current.innerText = `${date} ${formatTime(endTime)}`;
+        endTimeRef.current.innerText = !isAbsoluteTime(endTime)
+          ? `${formatTimeRaw(endTime)}`
+          : `${date} ${formatTime(endTime)}`;
       } else {
         endTimeRef.current.innerHTML = EmDash;
       }

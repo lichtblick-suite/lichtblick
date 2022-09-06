@@ -27,6 +27,13 @@ export function formatTimeRaw(stamp: Time): string {
   return `${stamp.sec}.${stamp.nsec.toFixed().padStart(9, "0")}`;
 }
 
+const DURATION_20_YEARS_SEC = 20 * 365 * 24 * 60 * 60;
+
+// Values "too small" to be absolute epoch-based times are probably relative durations.
+export function isAbsoluteTime(time: Time): boolean {
+  return time.sec > DURATION_20_YEARS_SEC;
+}
+
 export function formatFrame({ sec, nsec }: Time): string {
   return `${sec}.${String.prototype.padStart.call(nsec, 9, "0")}`;
 }
