@@ -36,6 +36,7 @@ import PanelCatalogContext, {
   PanelCatalog,
   PanelInfo,
 } from "@foxglove/studio-base/context/PanelCatalogContext";
+import { usePanelSettingsEditorStore } from "@foxglove/studio-base/context/PanelSettingsEditorContext";
 import {
   UserNodeStateProvider,
   useUserNodeState,
@@ -53,10 +54,7 @@ import {
 import MockCurrentLayoutProvider from "@foxglove/studio-base/providers/CurrentLayoutProvider/MockCurrentLayoutProvider";
 import ExtensionCatalogProvider from "@foxglove/studio-base/providers/ExtensionCatalogProvider";
 import HelpInfoProvider from "@foxglove/studio-base/providers/HelpInfoProvider";
-import {
-  PanelSettingsEditorContextProvider,
-  usePanelSettingsEditorStore,
-} from "@foxglove/studio-base/providers/PanelSettingsEditorContextProvider";
+import { PanelSettingsEditorContextProvider } from "@foxglove/studio-base/providers/PanelSettingsEditorContextProvider";
 import TimelineInteractionStateProvider from "@foxglove/studio-base/providers/TimelineInteractionStateProvider";
 import ThemeProvider from "@foxglove/studio-base/theme/ThemeProvider";
 import { RosDatatypes } from "@foxglove/studio-base/types/RosDatatypes";

@@ -19,8 +19,8 @@ import {
   useSelectedPanels,
 } from "@foxglove/studio-base/context/CurrentLayoutContext";
 import { usePanelCatalog } from "@foxglove/studio-base/context/PanelCatalogContext";
+import { usePanelSettingsEditorStore } from "@foxglove/studio-base/context/PanelSettingsEditorContext";
 import { useWorkspace } from "@foxglove/studio-base/context/WorkspaceContext";
-import { usePanelSettingsEditorStore } from "@foxglove/studio-base/providers/PanelSettingsEditorContextProvider";
 import { PanelConfig } from "@foxglove/studio-base/types/panels";
 import { TAB_PANEL_TYPE } from "@foxglove/studio-base/util/globalConstants";
 import { getPanelTypeFromId } from "@foxglove/studio-base/util/layout";

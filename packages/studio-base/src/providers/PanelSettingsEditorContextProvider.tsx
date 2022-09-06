@@ -2,25 +2,19 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { ReactNode, useCallback } from "react";
-import { DeepReadonly } from "ts-essentials";
-import create, { StoreApi } from "zustand";
-import createContext from "zustand/context";
+import { ReactNode, useCallback, useState } from "react";
+import { createStore, StoreApi } from "zustand";
 
-import { SettingsTree } from "@foxglove/studio";
 import { usePanelContext } from "@foxglove/studio-base/components/PanelContext";
+import {
+  ImmutableSettingsTree,
+  PanelSettingsEditorContext,
+  PanelSettingsEditorStore,
+  usePanelSettingsEditorStore,
+} from "@foxglove/studio-base/context/PanelSettingsEditorContext";
 
-type ImmutableSettingsTree = DeepReadonly<SettingsTree>;
-
-export type PanelSettingsEditorStore = {
-  settingsTrees: Record<string, ImmutableSettingsTree>;
-  updateSettingsTree: (panelId: string, settingsTree: ImmutableSettingsTree) => void;
-};
-
-const { Provider, useStore } = createContext<StoreApi<PanelSettingsEditorStore>>();
-
-export function createSettingsEditorStore(): StoreApi<PanelSettingsEditorStore> {
-  return create((set) => {
+function createSettingsEditorStore(): StoreApi<PanelSettingsEditorStore> {
+  return createStore((set) => {
     return {
       settingsTrees: {},
       updateSettingsTree: (panelId, settingsTree) => {
@@ -35,8 +29,6 @@ export function createSettingsEditorStore(): StoreApi<PanelSettingsEditorStore> 
   });
 }
 
-export const usePanelSettingsEditorStore = useStore;
-
 const updateSettingsTreeSelector = (store: PanelSettingsEditorStore) => store.updateSettingsTree;
 
 /**
@@ -44,7 +36,7 @@ const updateSettingsTreeSelector = (store: PanelSettingsEditorStore) => store.up
  */
 export function usePanelSettingsTreeUpdate(): (newTree: ImmutableSettingsTree) => void {
   const { id } = usePanelContext();
-  const updateStoreTree = useStore(updateSettingsTreeSelector);
+  const updateStoreTree = usePanelSettingsEditorStore(updateSettingsTreeSelector);
 
   const updateSettingsTree = useCallback(
     (newTree: ImmutableSettingsTree) => {
@@ -61,5 +53,11 @@ export function PanelSettingsEditorContextProvider({
 }: {
   children?: ReactNode;
 }): JSX.Element {
-  return <Provider createStore={createSettingsEditorStore}>{children}</Provider>;
+  const [store] = useState(createSettingsEditorStore());
+
+  return (
+    <PanelSettingsEditorContext.Provider value={store}>
+      {children}
+    </PanelSettingsEditorContext.Provider>
+  );
 }
