@@ -43,6 +43,9 @@ const useStyles = makeStyles()(({ palette, typography }) => ({
     "b, strong": {
       fontWeight: 700,
     },
+    canvas: {
+      outline: "none",
+    },
 
     // container styling
     height: "100%",
