@@ -28,7 +28,7 @@ import { LabelMaterial, LabelPool } from "@foxglove/three-text";
 import { Input } from "./Input";
 import { LineMaterial } from "./LineMaterial";
 import { ModelCache } from "./ModelCache";
-import { Picker } from "./Picker";
+import { PickedRenderable, Picker } from "./Picker";
 import type { Renderable } from "./Renderable";
 import { SceneExtension } from "./SceneExtension";
 import { ScreenOverlay } from "./ScreenOverlay";
@@ -78,11 +78,11 @@ export type RendererEvents = {
   endFrame: (currentTime: bigint, renderer: Renderer) => void;
   cameraMove: (renderer: Renderer) => void;
   renderablesClicked: (
-    renderables: Renderable[],
+    selections: PickedRenderable[],
     cursorCoords: { x: number; y: number },
     renderer: Renderer,
   ) => void;
-  selectedRenderable: (renderable: Renderable | undefined, renderer: Renderer) => void;
+  selectedRenderable: (selection: PickedRenderable | undefined, renderer: Renderer) => void;
   parametersChange: (
     parameters: ReadonlyMap<string, ParameterValue> | undefined,
     renderer: Renderer,
@@ -287,7 +287,7 @@ export class Renderer extends EventEmitter<RendererEvents> {
 
   private picker: Picker;
   private selectionBackdrop: ScreenOverlay;
-  private selectedRenderable: Renderable | undefined;
+  private selectedRenderable: PickedRenderable | undefined;
   public colorScheme: "dark" | "light" = "light";
   public modelCache: ModelCache;
   public transformTree = new TransformTree();
@@ -782,28 +782,33 @@ export class Renderer extends EventEmitter<RendererEvents> {
     };
   }
 
-  public setSelectedRenderable(selectedRenderable: Renderable | undefined): void {
-    if (this.selectedRenderable === selectedRenderable) {
+  public setSelectedRenderable(selection: PickedRenderable | undefined): void {
+    if (this.selectedRenderable === selection) {
       return;
     }
 
-    if (this.selectedRenderable) {
+    const prevSelected = this.selectedRenderable;
+    if (prevSelected) {
       // Deselect the previously selected renderable
-      deselectObject(this.selectedRenderable);
-      log.debug(`Deselected ${this.selectedRenderable.id} (${this.selectedRenderable.name})`);
+      deselectObject(prevSelected.renderable);
+      log.debug(`Deselected ${prevSelected.renderable.id} (${prevSelected.renderable.name})`);
     }
 
-    this.selectedRenderable = selectedRenderable;
+    this.selectedRenderable = selection;
 
-    if (selectedRenderable) {
+    if (selection) {
       // Select the newly selected renderable
-      selectObject(selectedRenderable);
-      log.debug(`Selected ${selectedRenderable.id} (${selectedRenderable.name})`);
+      selectObject(selection.renderable);
+      log.debug(
+        `Selected ${selection.renderable.id} (${selection.renderable.name}) (instance=${selection.instanceIndex})`,
+      );
     }
 
-    this.emit("selectedRenderable", selectedRenderable, this);
+    this.emit("selectedRenderable", selection, this);
 
-    this.animationFrame();
+    if (!DEBUG_PICKING) {
+      this.animationFrame();
+    }
   }
 
   private activeCamera(): THREE.PerspectiveCamera | THREE.OrthographicCamera {
@@ -1030,20 +1035,20 @@ export class Renderer extends EventEmitter<RendererEvents> {
     // Pick a single renderable, hide it, re-render, and run picking again until
     // the backdrop is hit or we exceed MAX_SELECTIONS
     const camera = this.activeCamera();
-    const selections: Renderable[] = [];
-    let curSelection: Renderable | undefined;
+    const selections: PickedRenderable[] = [];
+    let curSelection: PickedRenderable | undefined;
     while (
       (curSelection = this._pickSingleObject(cursorCoords)) &&
       selections.length < MAX_SELECTIONS
     ) {
       selections.push(curSelection);
-      curSelection.visible = false;
+      curSelection.renderable.visible = false;
       this.gl.render(this.scene, camera);
     }
 
     // Put everything back to normal and render one last frame
     for (const selection of selections) {
-      selection.visible = true;
+      selection.renderable.visible = true;
     }
     if (!DEBUG_PICKING) {
       this.animationFrame();
@@ -1134,7 +1139,7 @@ export class Renderer extends EventEmitter<RendererEvents> {
     this.updateCustomLayersCount();
   };
 
-  private _pickSingleObject(cursorCoords: THREE.Vector2): Renderable | undefined {
+  private _pickSingleObject(cursorCoords: THREE.Vector2): PickedRenderable | undefined {
     // Render a single pixel using a fragment shader that writes object IDs as
     // colors, then read the value of that single pixel back
     const objectId = this.picker.pick(cursorCoords.x, cursorCoords.y, this.activeCamera());
@@ -1146,22 +1151,34 @@ export class Renderer extends EventEmitter<RendererEvents> {
     const pickedObject = this.scene.getObjectById(objectId);
 
     // Find the highest ancestor of the picked object that is a Renderable
-    let selectedRenderable: Renderable | undefined;
+    let renderable: Renderable | undefined;
     let maybeRenderable = pickedObject as Partial<Renderable> | undefined;
     while (maybeRenderable) {
       if (maybeRenderable.pickable === true) {
-        selectedRenderable = maybeRenderable as Renderable;
+        renderable = maybeRenderable as Renderable;
       }
       maybeRenderable = (maybeRenderable.parent ?? undefined) as Partial<Renderable> | undefined;
     }
 
-    if (!selectedRenderable) {
+    if (!renderable) {
       log.warn(
         `No Renderable found for objectId ${objectId} (name="${pickedObject?.name}" uuid=${pickedObject?.uuid})`,
       );
+      return undefined;
     }
 
-    return selectedRenderable;
+    let instanceIndex: number | undefined;
+    if (renderable.pickableInstances) {
+      instanceIndex = this.picker.pickInstance(
+        cursorCoords.x,
+        cursorCoords.y,
+        this.activeCamera(),
+        renderable,
+      );
+      instanceIndex = instanceIndex === -1 ? undefined : instanceIndex;
+    }
+
+    return { renderable, instanceIndex };
   }
 
   /** Tracks the number of frames so we can recompute the defaultFrameId when frames are added. */

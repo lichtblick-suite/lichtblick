@@ -42,6 +42,7 @@ import ThemeProvider from "@foxglove/studio-base/theme/ThemeProvider";
 
 import { DebugGui } from "./DebugGui";
 import { Interactions, InteractionContextMenu, SelectionObject, TabType } from "./Interactions";
+import type { PickedRenderable } from "./Picker";
 import type { Renderable } from "./Renderable";
 import { Renderer, RendererConfig, RendererEvents } from "./Renderer";
 import { RendererContext, useRenderer, useRendererEvent } from "./RendererContext";
@@ -93,8 +94,10 @@ function RendererOverlay(props: {
     clientX: 0,
     clientY: 0,
   });
-  const [selectedRenderables, setSelectedRenderables] = useState<Renderable[]>([]);
-  const [selectedRenderable, setSelectedRenderable] = useState<Renderable | undefined>(undefined);
+  const [selectedRenderables, setSelectedRenderables] = useState<PickedRenderable[]>([]);
+  const [selectedRenderable, setSelectedRenderable] = useState<PickedRenderable | undefined>(
+    undefined,
+  );
   const [interactionsTabType, setInteractionsTabType] = useState<TabType | undefined>(undefined);
   const renderer = useRenderer();
 
@@ -108,11 +111,11 @@ function RendererOverlay(props: {
     }
   }, [interactionsTabType, renderer]);
 
-  useRendererEvent("renderablesClicked", (renderables, cursorCoords) => {
+  useRendererEvent("renderablesClicked", (selections, cursorCoords) => {
     const rect = props.canvas!.getBoundingClientRect();
     setClickedPosition({ clientX: rect.left + cursorCoords.x, clientY: rect.top + cursorCoords.y });
-    setSelectedRenderables(renderables);
-    setSelectedRenderable(renderables.length === 1 ? renderables[0] : undefined);
+    setSelectedRenderables(selections);
+    setSelectedRenderable(selections.length === 1 ? selections[0] : undefined);
   });
 
   const stats = props.enableStats ? (
@@ -132,18 +135,18 @@ function RendererOverlay(props: {
   // of candidate objects to select
   const clickedObjects = useMemo<MouseEventObject[]>(
     () =>
-      selectedRenderables.map((renderable) => ({
+      selectedRenderables.map((selection) => ({
         object: {
-          pose: renderable.userData.pose,
-          scale: renderable.scale,
+          pose: selection.renderable.userData.pose,
+          scale: selection.renderable.scale,
           color: undefined,
           interactionData: {
-            topic: renderable.name,
+            topic: selection.renderable.name,
             highlighted: undefined,
-            renderable,
+            renderable: selection.renderable,
           },
         },
-        instanceIndex: undefined,
+        instanceIndex: selection.instanceIndex,
       })),
     [selectedRenderables],
   );
@@ -155,14 +158,20 @@ function RendererOverlay(props: {
       selectedRenderable
         ? {
             object: {
-              pose: selectedRenderable.userData.pose,
+              pose: selectedRenderable.renderable.userData.pose,
               interactionData: {
-                topic: (selectedRenderable.userData as { topic?: string }).topic,
+                topic: (selectedRenderable.renderable.userData as { topic?: string }).topic,
                 highlighted: true,
-                originalMessage: selectedRenderable.details(),
+                originalMessage: selectedRenderable.renderable.details(),
+                instanceDetails:
+                  selectedRenderable.instanceIndex != undefined
+                    ? selectedRenderable.renderable.instanceDetails(
+                        selectedRenderable.instanceIndex,
+                      )
+                    : undefined,
               },
             },
-            instanceIndex: undefined,
+            instanceIndex: selectedRenderable.instanceIndex,
           }
         : undefined,
     [selectedRenderable],
@@ -301,8 +310,9 @@ function RendererOverlay(props: {
               const renderable = (
                 selection.object as unknown as { interactionData: { renderable: Renderable } }
               ).interactionData.renderable;
+              const instanceIndex = selection.instanceIndex;
               setSelectedRenderables([]);
-              setSelectedRenderable(renderable);
+              setSelectedRenderable({ renderable, instanceIndex });
             }
           }}
         />
@@ -462,8 +472,8 @@ export function ThreeDeeRender({ context }: { context: PanelExtensionContext }):
 
   // Write to a global variable when the current selection changes
   const updateSelectedRenderable = useCallback(
-    (renderable: Renderable | undefined) => {
-      const id = (renderable?.details() as { id?: number | string } | undefined)?.id;
+    (selection: PickedRenderable | undefined) => {
+      const id = (selection?.renderable.details() as { id?: number | string } | undefined)?.id;
       context.setVariable(SELECTED_ID_VARIABLE, id ?? ReactNull);
     },
     [context],

@@ -54,6 +54,7 @@ const InteractionsBaseComponent = React.memo<Props>(function InteractionsBaseCom
 }: Props) {
   const selectedInteractionData = selectedObject?.object.interactionData;
   const originalMessage = selectedInteractionData?.originalMessage;
+  const instanceDetails = selectedInteractionData?.instanceDetails;
 
   return (
     <ExpandingToolbar
@@ -69,6 +70,7 @@ const InteractionsBaseComponent = React.memo<Props>(function InteractionsBaseCom
               {selectedInteractionData.topic && (
                 <TopicLink addPanel={addPanel} topic={selectedInteractionData.topic} />
               )}
+              {instanceDetails ? <ObjectDetails selectedObject={instanceDetails} /> : <></>}
               <ObjectDetails
                 selectedObject={originalMessage}
                 interactionData={selectedInteractionData}
