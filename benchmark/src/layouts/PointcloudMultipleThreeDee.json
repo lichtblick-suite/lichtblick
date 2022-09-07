@@ -1,0 +1,242 @@
+{
+  "configById": {
+    "3D!2cny167": {
+      "cameraState": {
+        "perspective": true,
+        "distance": 42.66000692073286,
+        "phi": 51.275522132169115,
+        "thetaOffset": 41.991115960099805,
+        "targetOffset": [0, 0, 0],
+        "target": [0, 0, 0],
+        "targetOrientation": [0, 0, 0, 1],
+        "fovy": 45,
+        "near": 0.01,
+        "far": 5000
+      },
+      "scene": {},
+      "transforms": {},
+      "topics": {
+        "pointcloud_0": {
+          "visible": true,
+          "colorField": "rgba",
+          "colorMode": "rgba",
+          "colorMap": "turbo"
+        }
+      },
+      "layers": {},
+      "publish": {
+        "type": "point",
+        "poseTopic": "/move_base_simple/goal",
+        "pointTopic": "/clicked_point",
+        "poseEstimateTopic": "/initialpose",
+        "poseEstimateXDeviation": 0.5,
+        "poseEstimateYDeviation": 0.5,
+        "poseEstimateThetaDeviation": 0.26179939
+      },
+      "followTf": "sensor"
+    },
+    "3D!114oj8x": {
+      "cameraState": {
+        "perspective": true,
+        "distance": 42.66000692073286,
+        "phi": 51.275522132169115,
+        "thetaOffset": 41.991115960099805,
+        "targetOffset": [0, 0, 0],
+        "target": [0, 0, 0],
+        "targetOrientation": [0, 0, 0, 1],
+        "fovy": 45,
+        "near": 0.01,
+        "far": 5000
+      },
+      "scene": {},
+      "transforms": {},
+      "topics": {
+        "pointcloud_0": {
+          "visible": true,
+          "colorField": "rgba",
+          "colorMode": "rgba",
+          "colorMap": "turbo"
+        }
+      },
+      "layers": {},
+      "publish": {
+        "type": "point",
+        "poseTopic": "/move_base_simple/goal",
+        "pointTopic": "/clicked_point",
+        "poseEstimateTopic": "/initialpose",
+        "poseEstimateXDeviation": 0.5,
+        "poseEstimateYDeviation": 0.5,
+        "poseEstimateThetaDeviation": 0.26179939
+      },
+      "followTf": "sensor"
+    },
+    "3D!3nryvvh": {
+      "cameraState": {
+        "perspective": true,
+        "distance": 42.66000692073286,
+        "phi": 51.275522132169115,
+        "thetaOffset": 41.991115960099805,
+        "targetOffset": [0, 0, 0],
+        "target": [0, 0, 0],
+        "targetOrientation": [0, 0, 0, 1],
+        "fovy": 45,
+        "near": 0.01,
+        "far": 5000
+      },
+      "scene": {},
+      "transforms": {},
+      "topics": {
+        "pointcloud_0": {
+          "visible": true,
+          "colorField": "rgba",
+          "colorMode": "rgba",
+          "colorMap": "turbo"
+        }
+      },
+      "layers": {},
+      "publish": {
+        "type": "point",
+        "poseTopic": "/move_base_simple/goal",
+        "pointTopic": "/clicked_point",
+        "poseEstimateTopic": "/initialpose",
+        "poseEstimateXDeviation": 0.5,
+        "poseEstimateYDeviation": 0.5,
+        "poseEstimateThetaDeviation": 0.26179939
+      },
+      "followTf": "sensor"
+    },
+    "3D!j791b8": {
+      "cameraState": {
+        "perspective": true,
+        "distance": 42.66000692073286,
+        "phi": 51.275522132169115,
+        "thetaOffset": 41.991115960099805,
+        "targetOffset": [0, 0, 0],
+        "target": [0, 0, 0],
+        "targetOrientation": [0, 0, 0, 1],
+        "fovy": 45,
+        "near": 0.01,
+        "far": 5000
+      },
+      "scene": {},
+      "transforms": {},
+      "topics": {
+        "pointcloud_0": {
+          "visible": true,
+          "colorField": "rgba",
+          "colorMode": "rgba",
+          "colorMap": "turbo"
+        }
+      },
+      "layers": {},
+      "publish": {
+        "type": "point",
+        "poseTopic": "/move_base_simple/goal",
+        "pointTopic": "/clicked_point",
+        "poseEstimateTopic": "/initialpose",
+        "poseEstimateXDeviation": 0.5,
+        "poseEstimateYDeviation": 0.5,
+        "poseEstimateThetaDeviation": 0.26179939
+      },
+      "followTf": "sensor"
+    },
+    "3D!1no7ks7": {
+      "cameraState": {
+        "perspective": true,
+        "distance": 42.66000692073286,
+        "phi": 51.275522132169115,
+        "thetaOffset": 41.991115960099805,
+        "targetOffset": [0, 0, 0],
+        "target": [0, 0, 0],
+        "targetOrientation": [0, 0, 0, 1],
+        "fovy": 45,
+        "near": 0.01,
+        "far": 5000
+      },
+      "scene": {},
+      "transforms": {},
+      "topics": {
+        "pointcloud_0": {
+          "visible": true,
+          "colorField": "rgba",
+          "colorMode": "rgba",
+          "colorMap": "turbo"
+        }
+      },
+      "layers": {},
+      "publish": {
+        "type": "point",
+        "poseTopic": "/move_base_simple/goal",
+        "pointTopic": "/clicked_point",
+        "poseEstimateTopic": "/initialpose",
+        "poseEstimateXDeviation": 0.5,
+        "poseEstimateYDeviation": 0.5,
+        "poseEstimateThetaDeviation": 0.26179939
+      },
+      "followTf": "sensor"
+    },
+    "3D!lwiy6x": {
+      "cameraState": {
+        "perspective": true,
+        "distance": 42.66000692073286,
+        "phi": 51.275522132169115,
+        "thetaOffset": 41.991115960099805,
+        "targetOffset": [0, 0, 0],
+        "target": [0, 0, 0],
+        "targetOrientation": [0, 0, 0, 1],
+        "fovy": 45,
+        "near": 0.01,
+        "far": 5000
+      },
+      "scene": {},
+      "transforms": {},
+      "topics": {
+        "pointcloud_0": {
+          "visible": true,
+          "colorField": "rgba",
+          "colorMode": "rgba",
+          "colorMap": "turbo"
+        }
+      },
+      "layers": {},
+      "publish": {
+        "type": "point",
+        "poseTopic": "/move_base_simple/goal",
+        "pointTopic": "/clicked_point",
+        "poseEstimateTopic": "/initialpose",
+        "poseEstimateXDeviation": 0.5,
+        "poseEstimateYDeviation": 0.5,
+        "poseEstimateThetaDeviation": 0.26179939
+      },
+      "followTf": "sensor"
+    }
+  },
+  "globalVariables": {},
+  "userNodes": {},
+  "linkedGlobalVariables": [],
+  "playbackConfig": {
+    "speed": 1
+  },
+  "layout": {
+    "first": {
+      "first": "3D!2cny167",
+      "second": "3D!lwiy6x",
+      "direction": "column"
+    },
+    "second": {
+      "first": {
+        "first": "3D!114oj8x",
+        "second": "3D!3nryvvh",
+        "direction": "column"
+      },
+      "second": {
+        "first": "3D!j791b8",
+        "second": "3D!1no7ks7",
+        "direction": "column"
+      },
+      "direction": "row"
+    },
+    "direction": "row",
+    "splitPercentage": 30.914460197542898
+  }
+}

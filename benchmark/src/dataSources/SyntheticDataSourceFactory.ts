@@ -8,16 +8,25 @@ import {
 } from "@foxglove/studio-base/context/PlayerSelectionContext";
 import { Player } from "@foxglove/studio-base/players/types";
 
-import { SinewavePlayer } from "../players";
+interface PlayerConstructor {
+  new (): Player;
+}
 
 class SyntheticDataSourceFactory implements IDataSourceFactory {
-  public id = "synthetic";
-  public type: IDataSourceFactory["type"] = "connection";
+  public id;
+  public type: IDataSourceFactory["type"] = "sample";
   public displayName = "Synthetic";
   public iconName: IDataSourceFactory["iconName"] = "FileASPX";
 
+  private newFn: PlayerConstructor;
+
+  public constructor(id: string, newFn: PlayerConstructor) {
+    this.id = id;
+    this.newFn = newFn;
+  }
+
   public initialize(_args: DataSourceFactoryInitializeArgs): Player | undefined {
-    return new SinewavePlayer();
+    return new this.newFn();
   }
 }
 

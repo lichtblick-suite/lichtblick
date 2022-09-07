@@ -4,273 +4,51 @@
 
 import { Layout, LayoutID, ISO8601Timestamp } from "@foxglove/studio-base";
 
-const LAYOUTS = new Map<string, Layout>([
-  [
-    "benchmark-raw-messages",
-    {
-      id: "benchmark-raw-messages" as LayoutID,
-      name: "Benchmark - RawMessages",
-      permission: "CREATOR_WRITE",
-      baseline: {
-        data: {
-          configById: {
-            "RawMessages!a": {
-              topicPath: "/imu",
-            },
-          },
-          globalVariables: {},
-          userNodes: {},
-          linkedGlobalVariables: [],
-          playbackConfig: { speed: 1.0 },
-          layout: "RawMessages!a",
-        },
-        savedAt: new Date().toISOString() as ISO8601Timestamp,
-      },
-      working: undefined,
-      syncInfo: undefined,
+import Empty from "./layouts/Empty.json";
+import PointcloudMultiple3dLegacy from "./layouts/PointcloudMultiple3dLegacy.json";
+import PointcloudMultipleThreeDee from "./layouts/PointcloudMultipleThreeDee.json";
+import PointcloudRawMessageAnd3d from "./layouts/PointcloudRawMessageAnd3d.json";
+import SinewaveSinglePlot from "./layouts/SinewaveSinglePlot.json";
+
+// Make a new Layout with the provided panel state
+// The panel state is the .json file from an "export" on a layout
+function panelStateJsonToLayout(id: string, name: string, state: unknown): Layout {
+  return {
+    id: id as LayoutID,
+    name,
+    permission: "CREATOR_WRITE",
+    baseline: {
+      data: state as NonNullable<Layout["baseline"]["data"]>,
+      savedAt: new Date().toISOString() as ISO8601Timestamp,
     },
-  ],
-  [
-    "benchmark-3d-panel",
-    {
-      id: "benchmark-3d-panel" as LayoutID,
-      name: "Benchmark - ThreeDeeRender",
-      permission: "CREATOR_WRITE",
-      baseline: {
-        data: {
-          configById: {
-            "3D!a": {
-              transforms: {
-                base_link: {
-                  visible: true,
-                },
-                map: {
-                  visible: true,
-                },
-                RADAR_FRONT: {
-                  visible: true,
-                },
-                RADAR_FRONT_LEFT: {
-                  visible: true,
-                },
-                RADAR_FRONT_RIGHT: {
-                  visible: true,
-                },
-                RADAR_BACK_LEFT: {
-                  visible: true,
-                },
-                RADAR_BACK_RIGHT: {
-                  visible: true,
-                },
-                LIDAR_TOP: {
-                  visible: true,
-                },
-                CAM_FRONT: {
-                  visible: true,
-                },
-                CAM_FRONT_RIGHT: {
-                  visible: true,
-                },
-                CAM_BACK_RIGHT: {
-                  visible: true,
-                },
-                CAM_BACK: {
-                  visible: true,
-                },
-                CAM_BACK_LEFT: {
-                  visible: true,
-                },
-                CAM_FRONT_LEFT: {
-                  visible: true,
-                },
-              },
-              topics: {
-                "/semantic_map": {
-                  visible: true,
-                },
-                "/markers/annotations": {
-                  visible: true,
-                },
-                "/map": {
-                  visible: true,
-                },
-                "/drivable_area": {
-                  visible: true,
-                },
-                "/RADAR_FRONT": {
-                  visible: true,
-                },
-                "/RADAR_FRONT_LEFT": {
-                  visible: true,
-                },
-                "/RADAR_FRONT_RIGHT": {
-                  visible: true,
-                },
-                "/RADAR_BACK_LEFT": {
-                  visible: true,
-                },
-                "/RADAR_BACK_RIGHT": {
-                  visible: true,
-                },
-                "/LIDAR_TOP": {
-                  visible: true,
-                },
-                "/pose": {
-                  visible: true,
-                },
-              },
-              layers: {
-                "4a051a91-cd3d-4b38-aebb-cd69aba50fe8": {
-                  visible: true,
-                  label: "Grid",
-                  instanceId: "4a051a91-cd3d-4b38-aebb-cd69aba50fe8",
-                  layerId: "foxglove.Grid",
-                  order: 1,
-                },
-              },
-            },
-          },
-          globalVariables: {},
-          userNodes: {},
-          linkedGlobalVariables: [],
-          playbackConfig: { speed: 1.0 },
-          layout: "3D!a",
-        },
-        savedAt: new Date().toISOString() as ISO8601Timestamp,
-      },
-      working: undefined,
-      syncInfo: undefined,
-    },
-  ],
-  [
-    "benchmark-legacy-3d-panel",
-    {
-      id: "benchmark-legacy-3d-panel" as LayoutID,
-      name: "Benchmark - ThreeDimensionalViz",
-      permission: "CREATOR_WRITE",
-      baseline: {
-        data: {
-          configById: {
-            "3D Panel!a": {
-              autoSyncCameraState: false,
-              autoTextBackgroundColor: true,
-              cameraState: {},
-              checkedKeys: [
-                "name:Topics",
-                "t:/markers/annotations",
-                "t:/pose",
-                "t:/LIDAR_TOP",
-                "t:/RADAR_BACK_RIGHT",
-                "t:/RADAR_BACK_LEFT",
-                "t:/RADAR_FRONT_RIGHT",
-                "t:/RADAR_FRONT_LEFT",
-                "t:/RADAR_FRONT",
-                "t:/drivable_area",
-                "t:/semantic_map",
-                "t:/map",
-                "t:/tf",
-                "t:/foxglove/grid",
-              ],
-              clickToPublishPoseTopic: "/move_base_simple/goal",
-              clickToPublishPointTopic: "/clicked_point",
-              clickToPublishPoseEstimateTopic: "/initialpose",
-              clickToPublishPoseEstimateXDeviation: 0.5,
-              clickToPublishPoseEstimateYDeviation: 0.5,
-              clickToPublishPoseEstimateThetaDeviation: 0.26179939,
-              customBackgroundColor: "#000000",
-              diffModeEnabled: true,
-              expandedKeys: ["name:Topics"],
-              followMode: "follow",
-              modifiedNamespaceTopics: [],
-              pinTopics: false,
-              settingsByKey: {},
-              useThemeBackgroundColor: true,
-            },
-          },
-          globalVariables: {},
-          userNodes: {},
-          linkedGlobalVariables: [],
-          playbackConfig: { speed: 1.0 },
-          layout: "3D Panel!a",
-        },
-        savedAt: new Date().toISOString() as ISO8601Timestamp,
-      },
-      working: undefined,
-      syncInfo: undefined,
-    },
-  ],
-  [
-    "benchmark-single-plot",
-    {
-      id: "benchmark-single-plot" as LayoutID,
-      name: "Benchmark - Single Plot",
-      permission: "CREATOR_WRITE",
-      baseline: {
-        data: {
-          configById: {
-            "Plot!a": {
-              title: "10 second window",
-              paths: [
-                {
-                  value: "sinewave_0.value",
-                  enabled: true,
-                  timestampMethod: "receiveTime",
-                },
-                {
-                  value: "sinewave_1.value",
-                  enabled: true,
-                  timestampMethod: "receiveTime",
-                },
-                {
-                  value: "sinewave_2.value",
-                  enabled: true,
-                  timestampMethod: "receiveTime",
-                },
-                {
-                  value: "sinewave_3.value",
-                  enabled: true,
-                  timestampMethod: "receiveTime",
-                },
-                {
-                  value: "sinewave_4.value",
-                  enabled: true,
-                  timestampMethod: "receiveTime",
-                },
-                {
-                  value: "sinewave_5.value",
-                  enabled: true,
-                  timestampMethod: "receiveTime",
-                },
-              ],
-              showXAxisLabels: true,
-              showYAxisLabels: true,
-              showLegend: true,
-              legendDisplay: "floating",
-              showPlotValuesInLegend: false,
-              isSynced: true,
-              xAxisVal: "timestamp",
-              sidebarDimension: 240,
-              followingViewWidth: 10,
-            },
-          },
-          globalVariables: {},
-          userNodes: {},
-          linkedGlobalVariables: [],
-          playbackConfig: {
-            speed: 1,
-          },
-          layout: {
-            first: "Plot!a",
-            second: "PlaybackPerformance!1fz1hnn",
-            direction: "column",
-          },
-        },
-        savedAt: new Date().toISOString() as ISO8601Timestamp,
-      },
-      working: undefined,
-      syncInfo: undefined,
-    },
-  ],
-]);
+    working: undefined,
+    syncInfo: undefined,
+  };
+}
+
+const layouts = [
+  panelStateJsonToLayout("Empty", "Empty", Empty),
+  panelStateJsonToLayout("SinewaveSinglePlot", "Sinewave - Single Plot", SinewaveSinglePlot),
+  panelStateJsonToLayout(
+    "PointcloudRawMessageAnd3d",
+    "Pointcloud - Raw Message and 3d",
+    PointcloudRawMessageAnd3d,
+  ),
+  panelStateJsonToLayout(
+    "PointcloudMultipleThreeDee",
+    "Pointcloud - Multiple 3d",
+    PointcloudMultipleThreeDee,
+  ),
+  panelStateJsonToLayout(
+    "PointcloudMultiple3dLegacy",
+    "Pointcloud - Multiple 3d Legacy",
+    PointcloudMultiple3dLegacy,
+  ),
+];
+
+const LAYOUTS = new Map<string, Layout>();
+for (const layout of layouts) {
+  LAYOUTS.set(layout.id, layout);
+}
 
 export { LAYOUTS };

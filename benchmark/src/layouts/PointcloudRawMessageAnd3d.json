@@ -1,0 +1,57 @@
+{
+  "configById": {
+    "RawMessages!41teyny": {
+      "diffEnabled": false,
+      "diffMethod": "custom",
+      "diffTopicPath": "",
+      "showFullMessageForDiff": false,
+      "topicPath": "pointcloud_0"
+    },
+    "3D!2cny167": {
+      "cameraState": {
+        "perspective": true,
+        "distance": 42.66000692073286,
+        "phi": 51.275522132169115,
+        "thetaOffset": 41.991115960099805,
+        "targetOffset": [0, 0, 0],
+        "target": [0, 0, 0],
+        "targetOrientation": [0, 0, 0, 1],
+        "fovy": 45,
+        "near": 0.01,
+        "far": 5000
+      },
+      "scene": {},
+      "transforms": {},
+      "topics": {
+        "pointcloud_0": {
+          "visible": true,
+          "colorField": "rgba",
+          "colorMode": "rgba",
+          "colorMap": "turbo"
+        }
+      },
+      "layers": {},
+      "publish": {
+        "type": "point",
+        "poseTopic": "/move_base_simple/goal",
+        "pointTopic": "/clicked_point",
+        "poseEstimateTopic": "/initialpose",
+        "poseEstimateXDeviation": 0.5,
+        "poseEstimateYDeviation": 0.5,
+        "poseEstimateThetaDeviation": 0.26179939
+      },
+      "followTf": "sensor"
+    }
+  },
+  "globalVariables": {},
+  "userNodes": {},
+  "linkedGlobalVariables": [],
+  "playbackConfig": {
+    "speed": 1
+  },
+  "layout": {
+    "first": "RawMessages!41teyny",
+    "second": "3D!2cny167",
+    "direction": "row"
+  }
+}

@@ -1,0 +1,55 @@
+{
+  "configById": {
+    "Plot!a": {
+      "title": "10 second window",
+      "paths": [
+        {
+          "value": "sinewave_0.value",
+          "enabled": true,
+          "timestampMethod": "receiveTime"
+        },
+        {
+          "value": "sinewave_1.value",
+          "enabled": true,
+          "timestampMethod": "receiveTime"
+        },
+        {
+          "value": "sinewave_2.value",
+          "enabled": true,
+          "timestampMethod": "receiveTime"
+        },
+        {
+          "value": "sinewave_3.value",
+          "enabled": true,
+          "timestampMethod": "receiveTime"
+        },
+        {
+          "value": "sinewave_4.value",
+          "enabled": true,
+          "timestampMethod": "receiveTime"
+        },
+        {
+          "value": "sinewave_5.value",
+          "enabled": true,
+          "timestampMethod": "receiveTime"
+        }
+      ],
+      "showXAxisLabels": true,
+      "showYAxisLabels": true,
+      "showLegend": true,
+      "legendDisplay": "floating",
+      "showPlotValuesInLegend": false,
+      "isSynced": true,
+      "xAxisVal": "timestamp",
+      "sidebarDimension": 240,
+      "followingViewWidth": 10
+    }
+  },
+  "globalVariables": {},
+  "userNodes": {},
+  "linkedGlobalVariables": [],
+  "playbackConfig": {
+    "speed": 1
+  },
+  "layout": "Plot!a"
+}

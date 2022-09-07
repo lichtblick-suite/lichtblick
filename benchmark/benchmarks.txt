@@ -1,0 +1,4 @@
+http://localhost:8080/?ds=sinewave&layoutId=SinewaveSinglePlot
+http://localhost:8080/?ds=pointcloud&layoutId=PointcloudMultipleThreeDee
+http://localhost:8080/?ds=pointcloud&layoutId=PointcloudRawMessageAnd3d
+http://localhost:8080/?ds=pointcloud&layoutId=PointcloudMultiple3dLegacy
