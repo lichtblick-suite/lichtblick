@@ -2324,6 +2324,21 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@foxglove/roslibjs@npm:0.0.1":
+  version: 0.0.1
+  resolution: "@foxglove/roslibjs@npm:0.0.1"
+  dependencies:
+    cbor-js: ^0.1.0
+    eventemitter2: ^6.4.0
+    object-assign: ^4.0.1
+    socket.io: ^4.0.0
+    webworkify: ^1.5.0
+    ws: ^7.2.1
+    xmldom: ^0.6.0
+  checksum: 2c55a46cc8c224b9d33734bba4416b6148067e9d22d92cdb1d523d1d5aad23f6f1c60d20bdfecf781e9eb09db35680be446529c4cf9b8a7763e893cd0d856ea9
+  languageName: node
+  linkType: hard
+
 "@foxglove/rosmsg-msgs-common@npm:1.1.0, @foxglove/rosmsg-msgs-common@npm:^1.0.4, @foxglove/rosmsg-msgs-common@npm:^1.1.0":
   version: 1.1.0
   resolution: "@foxglove/rosmsg-msgs-common@npm:1.1.0"
@@ -2429,6 +2444,7 @@ __metadata:
     "@foxglove/ros2": 3.3.0
     "@foxglove/rosbag": 0.2.2
     "@foxglove/rosbag2-web": 4.0.4
+    "@foxglove/roslibjs": 0.0.1
     "@foxglove/rosmsg": 3.0.0
     "@foxglove/rosmsg-msgs-common": 1.1.0
     "@foxglove/rosmsg-serialization": 1.5.0
@@ -2464,6 +2480,7 @@ __metadata:
     "@types/enzyme": ^3.10.11
     "@types/enzyme-adapter-react-16": 1.0.6
     "@types/escape-html": ^1.0.1
+    "@types/foxglove__roslibjs": "workspace:*"
     "@types/gl-matrix": 3.2.0
     "@types/hammerjs": 2.0.41
     "@types/leaflet": 1.7.9
@@ -2484,7 +2501,6 @@ __metadata:
     "@types/react-table": 7.7.9
     "@types/react-transition-group": ^4.4.4
     "@types/react-virtualized": 9.21.20
-    "@types/roslib": "workspace:*"
     "@types/sanitize-html": 2.6.2
     "@types/seedrandom": 3.0.2
     "@types/shallowequal": 1.1.1
@@ -2573,7 +2589,6 @@ __metadata:
     readable-stream: 3.6.0
     rehype-raw: 6.1.1
     reselect: 4.1.5
-    roslib: "github:foxglove/roslibjs#df3d7f87064c93b705e6e7e3354b2c6f63b682a6"
     sanitize-html: 2.7.0
     seedrandom: 3.0.5
     shallowequal: 1.1.0
@@ -5584,6 +5599,12 @@ __metadata:
   languageName: unknown
   linkType: soft
 
+"@types/foxglove__roslibjs@workspace:*, @types/foxglove__roslibjs@workspace:packages/@types/foxglove__roslibjs":
+  version: 0.0.0-use.local
+  resolution: "@types/foxglove__roslibjs@workspace:packages/@types/foxglove__roslibjs"
+  languageName: unknown
+  linkType: soft
+
 "@types/fs-extra@npm:^9.0.11":
   version: 9.0.13
   resolution: "@types/fs-extra@npm:9.0.13"
@@ -6105,12 +6126,6 @@ __metadata:
   checksum: 5f46b2556053655f78262bb33040dc58417c900457cc63ff37d6c35349814471453ef511af0cec76a540c601296cd2b22f64bab1ab649c0dacc0223765ba876c
   languageName: node
   linkType: hard
-
-"@types/roslib@workspace:*, @types/roslib@workspace:packages/@types/roslib":
-  version: 0.0.0-use.local
-  resolution: "@types/roslib@workspace:packages/@types/roslib"
-  languageName: unknown
-  linkType: soft
 
 "@types/sanitize-html@npm:2.6.2":
   version: 2.6.2
@@ -21213,21 +21228,6 @@ __metadata:
     semver-compare: ^1.0.0
     sprintf-js: ^1.1.2
   checksum: 682e28d5491e3ae99728a35ba188f4f0ccb6347dbd492f95dc9f4bfdfe8ee63d8203ad234766ee2db88c8d7a300714304976eb095ce5c9366fe586c03a21586c
-  languageName: node
-  linkType: hard
-
-"roslib@github:foxglove/roslibjs#df3d7f87064c93b705e6e7e3354b2c6f63b682a6":
-  version: 1.1.1
-  resolution: "roslib@https://github.com/foxglove/roslibjs.git#commit=df3d7f87064c93b705e6e7e3354b2c6f63b682a6"
-  dependencies:
-    cbor-js: ^0.1.0
-    eventemitter2: ^6.4.0
-    object-assign: ^4.0.1
-    socket.io: ^4.0.0
-    webworkify: ^1.5.0
-    ws: ^7.2.1
-    xmldom: ^0.6.0
-  checksum: 2efef6e6ecaed7b92ced4e9b92ec09fd7ee056482fb30f9f533b94607b48a184e207c19f2e8de94c333026a24da43882d1aa88b748c5ceb560126155b7b21fed
   languageName: node
   linkType: hard
 

@@ -12,12 +12,12 @@
 //   You may not use this file except in compliance with the License.
 
 import { isEqual, sortBy, transform } from "lodash";
-import roslib from "roslib";
 import { v4 as uuidv4 } from "uuid";
 
 import { debouncePromise } from "@foxglove/den/async";
 import { filterMap } from "@foxglove/den/collection";
 import Log from "@foxglove/log";
+import roslib from "@foxglove/roslibjs";
 import { parse as parseMessageDefinition } from "@foxglove/rosmsg";
 import { LazyMessageReader } from "@foxglove/rosmsg-serialization";
 import { MessageReader as ROS2MessageReader } from "@foxglove/rosmsg2-serialization";
