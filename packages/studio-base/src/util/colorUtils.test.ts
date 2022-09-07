@@ -12,8 +12,6 @@
 //   You may not use this file except in compliance with the License.
 import {
   colorObjToRGBA,
-  colorObjToHex,
-  getColorFromIRGB,
   defaultedRGBStringFromColorObj,
 } from "@foxglove/studio-base/util/colorUtils";
 
@@ -33,24 +31,10 @@ describe("colorUtils", () => {
       a: 0,
     });
   });
-  it("colorObjToHex", () => {
-    expect(colorObjToHex({ r: 1, g: 1, b: 0.5, a: 0 })).toEqual("#ffff80");
-    expect(colorObjToHex({ r: 1, g: 1, b: 0.5, a: 1 })).toEqual("#ffff80");
-    expect(colorObjToHex({ r: 0.7, g: 0.5, b: 0.5, a: 0 })).toEqual("#b38080");
-  });
   it("defaultedRGBStringFromColorObj", () => {
     expect(defaultedRGBStringFromColorObj(undefined)).toEqual("rgba(255, 255, 255, 1)");
     expect(defaultedRGBStringFromColorObj({ r: 0.5, b: 0.5, g: 0.5, a: 0.7 })).toEqual(
       "rgba(128, 128, 128, 0.7)",
     );
-  });
-  it("getColorFromIRGB", () => {
-    expect(getColorFromIRGB({ r: 255, g: 255, b: 255, a: 100 })).toEqual({
-      r: 1,
-      g: 1,
-      b: 1,
-      a: 1,
-    });
-    expect(getColorFromIRGB({ r: 255, g: 255, b: 255 })).toEqual({ r: 1, g: 1, b: 1, a: 1 });
   });
 });

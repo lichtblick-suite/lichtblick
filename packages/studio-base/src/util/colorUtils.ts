@@ -12,7 +12,6 @@
 //   You may not use this file except in compliance with the License.
 
 import * as THREE from "three";
-import tinycolor, { ColorFormats } from "tinycolor2";
 
 import { Color } from "@foxglove/studio-base/types/Messages";
 
@@ -44,28 +43,11 @@ export const colorObjToRGBA = (color: Color): Color => {
   };
 };
 
-// Convert a color object to a hex color. Disregards the alpha value.
-export const colorObjToHex = (color?: Color): string => {
-  return tinycolor.fromRatio(color ?? DEFAULT_RGBA).toHexString();
-};
-
 // Returns an RGB string for a regl-worldview color. The scale of the formatted
 // tuple is (255, 255, 255, 1).
 export function defaultedRGBStringFromColorObj(color?: Color): string {
   const rgba = colorObjToRGBA(color ?? DEFAULT_RGBA);
   return `rgba(${rgba.r}, ${rgba.g}, ${rgba.b}, ${rgba.a / 100})`;
-}
-
-// Translate a fluentui IRGB to our internal Color interface, defaulting the
-// alpha value to 1 if it is not present.
-export function getColorFromIRGB(rgba: ColorFormats.RGB & { a?: number }): Color {
-  const alpha = rgba.a ?? 100;
-  return {
-    r: rgba.r / 255,
-    g: rgba.g / 255,
-    b: rgba.b / 255,
-    a: alpha / 100,
-  };
 }
 
 // prettier-ignore

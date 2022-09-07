@@ -12,8 +12,8 @@ export default {
   decorators: [(StoryComponent: Story): JSX.Element => <StoryComponent />],
 };
 
-const RGBA_WHITE = { r: 0, g: 0, b: 0, a: 1 };
-const RGBA_BLACK = { r: 1, g: 1, b: 1, a: 1 };
+const RGBA_BLACK = { r: 0, g: 0, b: 0, a: 1 };
+const RGBA_WHITE = { r: 255, g: 255, b: 255, a: 1 };
 const POSITION = { x: 1, y: 1, z: 1 };
 
 const PointCloudSettingsStory = ({ settings }: { settings: PointCloudSettings }) => {
@@ -70,8 +70,8 @@ export const ColorModeGradient = (): JSX.Element => {
         colorMode: {
           mode: "gradient",
           colorField: "b",
-          minColor: RGBA_WHITE,
-          maxColor: RGBA_BLACK,
+          minColor: RGBA_BLACK,
+          maxColor: RGBA_WHITE,
         },
       }}
     />

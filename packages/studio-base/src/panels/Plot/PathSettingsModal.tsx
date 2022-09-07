@@ -2,7 +2,6 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { getColorFromString } from "@fluentui/react";
 import CloseIcon from "@mui/icons-material/Close";
 import {
   Button,
@@ -18,10 +17,10 @@ import {
   styled as muiStyled,
 } from "@mui/material";
 import { useCallback } from "react";
+import tinycolor from "tinycolor2";
 
 import ColorPicker from "@foxglove/studio-base/components/ColorPicker";
 import Stack from "@foxglove/studio-base/components/Stack";
-import { colorObjToHex, getColorFromIRGB } from "@foxglove/studio-base/util/colorUtils";
 import { getLineColor } from "@foxglove/studio-base/util/plotColors";
 import { TimestampMethod } from "@foxglove/studio-base/util/time";
 
@@ -67,9 +66,7 @@ export default function PathSettingsModal({
     savePathConfig({ color: undefined });
   }, [savePathConfig]);
 
-  const currentColor = getColorFromIRGB(
-    getColorFromString(getLineColor(path.color, index)) ?? { r: 255, g: 255, b: 255, a: 100 },
-  );
+  const currentColor = tinycolor(getLineColor(path.color, index)).toRgb();
 
   const isTimestampBased = xAxisVal === "timestamp";
   const isReferenceLine = isReferenceLinePlotPathType(path);
@@ -89,7 +86,7 @@ export default function PathSettingsModal({
             <FormLabel>Color</FormLabel>
             <ColorPicker
               color={currentColor}
-              onChange={(newColor) => savePathConfig({ color: colorObjToHex(newColor) })}
+              onChange={(newColor) => savePathConfig({ color: tinycolor(newColor).toHexString() })}
             />
           </FormControl>
 

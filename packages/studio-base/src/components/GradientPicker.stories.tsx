@@ -11,56 +11,26 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { storiesOf } from "@storybook/react";
-import { useRef, useLayoutEffect, useState } from "react";
-import TestUtils from "react-dom/test-utils";
+import { screen } from "@testing-library/dom";
+import userEvent from "@testing-library/user-event";
+import { useState } from "react";
 
 import { Color } from "@foxglove/regl-worldview";
 
 import GradientPicker from "./GradientPicker";
 
 function Story({
-  changeMinColorAfterMount = false,
-  changeMaxColorAfterMount = false,
   initialMinColor,
   initialMaxColor,
 }: {
-  changeMinColorAfterMount?: boolean;
-  changeMaxColorAfterMount?: boolean;
   initialMinColor?: Color;
   initialMaxColor?: Color;
 }) {
-  const containerRef = useRef<HTMLDivElement>(ReactNull);
   const [minColor, setMinColor] = useState(initialMinColor ?? { r: 0, g: 0, b: 0, a: 0 });
   const [maxColor, setMaxColor] = useState(initialMaxColor ?? { r: 0, g: 0, b: 0, a: 0 });
 
-  useLayoutEffect(() => {
-    if (!(changeMinColorAfterMount || changeMaxColorAfterMount)) {
-      return;
-    }
-    const [minTriggerEl, maxTriggerEl] = document.querySelectorAll("button[class^=ms-Button]");
-
-    if (changeMinColorAfterMount) {
-      (minTriggerEl as any).click();
-      setImmediate(() => {
-        const hexInput = document.querySelector("input[aria-label=Hex]") as HTMLInputElement;
-        hexInput.value = "d2ff03";
-        TestUtils.Simulate.change(hexInput);
-        TestUtils.Simulate.blur(hexInput);
-      });
-    } else {
-      (maxTriggerEl as any).click();
-      setImmediate(() => {
-        const hexInput = document.querySelector("input[aria-label=Hex]") as HTMLInputElement;
-        hexInput.value = "c501ff";
-        TestUtils.Simulate.change(hexInput);
-        TestUtils.Simulate.blur(hexInput);
-      });
-    }
-  }, [changeMaxColorAfterMount, changeMinColorAfterMount]);
-
   return (
-    <div ref={containerRef} style={{ width: "400px", padding: "100px" }}>
+    <div style={{ width: "400px", padding: "100px" }}>
       <GradientPicker
         minColor={minColor}
         maxColor={maxColor}
@@ -73,52 +43,54 @@ function Story({
   );
 }
 
-storiesOf("components/GradientPicker", module)
-  .addParameters({
-    chromatic: {
-      viewport: { width: 585, height: 500 },
-    },
-  })
-  .add(
-    "basic",
-    () => (
-      <Story
-        initialMinColor={{ r: 1, g: 0, b: 0, a: 1 }}
-        initialMaxColor={{ r: 0, g: 0, b: 1, a: 1 }}
-      />
-    ),
-    { colorScheme: "both-column" },
-  )
-  .add(
-    "change min color",
-    () => (
-      <Story
-        initialMinColor={{ r: 1, g: 0, b: 0, a: 1 }}
-        initialMaxColor={{ r: 0, g: 0, b: 1, a: 1 }}
-        changeMinColorAfterMount
-      />
-    ),
-    { colorScheme: "dark" },
-  )
-  .add(
-    "change min color light",
-    () => (
-      <Story
-        initialMinColor={{ r: 1, g: 0, b: 0, a: 1 }}
-        initialMaxColor={{ r: 0, g: 0, b: 1, a: 1 }}
-        changeMinColorAfterMount
-      />
-    ),
-    { colorScheme: "light" },
-  )
-  .add(
-    "change max color",
-    () => (
-      <Story
-        initialMinColor={{ r: 1, g: 0, b: 0, a: 1 }}
-        initialMaxColor={{ r: 0, g: 0, b: 1, a: 1 }}
-        changeMaxColorAfterMount
-      />
-    ),
-    { colorScheme: "dark" },
+export default {
+  title: "components/GradientPicker",
+  component: GradientPicker,
+};
+
+export function Basic(): JSX.Element {
+  return (
+    <Story
+      initialMinColor={{ r: 255, g: 0, b: 0, a: 1 }}
+      initialMaxColor={{ r: 0, g: 0, b: 255, a: 1 }}
+    />
   );
+}
+
+export function ChangeMinColor(): JSX.Element {
+  return (
+    <Story
+      initialMinColor={{ r: 255, g: 0, b: 0, a: 1 }}
+      initialMaxColor={{ r: 0, g: 0, b: 255, a: 1 }}
+    />
+  );
+}
+ChangeMinColor.parameters = {
+  colorScheme: "light",
+};
+ChangeMinColor.play = async () => {
+  const user = userEvent.setup();
+  const triggers = await screen.findAllByTestId("color-picker-button");
+  await user.click(triggers[0]!);
+  const input = await screen.findByRole("input");
+  await user.type(input, "00bbaa");
+};
+
+export function ChangeMaxColor(): JSX.Element {
+  return (
+    <Story
+      initialMinColor={{ r: 255, g: 0, b: 0, a: 1 }}
+      initialMaxColor={{ r: 0, g: 0, b: 255, a: 1 }}
+    />
+  );
+}
+ChangeMaxColor.parameters = {
+  colorScheme: "light",
+};
+ChangeMaxColor.play = async () => {
+  const user = userEvent.setup();
+  const triggers = await screen.findAllByTestId("color-picker-button");
+  await user.click(triggers[1]!);
+  const input = await screen.findByRole("input");
+  await user.type(input, "aabb00");
+};

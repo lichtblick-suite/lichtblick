@@ -2,100 +2,112 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import {
-  Callout,
-  DefaultButton,
-  DirectionalHint,
-  IconButton,
-  ColorPicker as Picker,
-} from "@fluentui/react";
-import { useRef, useState } from "react";
+import { Button, ButtonBase, Popover, SvgIcon } from "@mui/material";
+import { MouseEvent, useCallback, useMemo, useState } from "react";
+import tinycolor, { ColorFormats } from "tinycolor2";
+import { makeStyles } from "tss-react/mui";
 
-import { Color } from "@foxglove/regl-worldview";
-import { colorObjToHex, getColorFromIRGB } from "@foxglove/studio-base/util/colorUtils";
-import { fonts } from "@foxglove/studio-base/util/sharedStyleConstants";
+import { ColorPickerControl } from "@foxglove/studio-base/components/SettingsTreeEditor/inputs/ColorPickerControl";
 
 type Props = {
-  color?: Color;
-  onChange: (newColor: Color) => void;
+  color?: ColorFormats.RGBA;
+  onChange: (newColor: ColorFormats.RGBA) => void;
   buttonShape?: "circle" | "default";
   circleSize?: number;
   alphaType?: "alpha" | "none";
 };
 
-// Returns a button that pops out an ColorPicker in a fluent callout.
+const useStyles = makeStyles()((theme) => ({
+  circleButton: {
+    borderRadius: "50%",
+    border: `1px solid ${theme.palette.text.primary}`,
+  },
+}));
+
+// Returns a button that pops out an ColorPicker in MUI Popover
 export default function ColorPicker({
   color,
   circleSize = 25,
   onChange,
   buttonShape,
-  alphaType,
+  alphaType = "none",
 }: Props): JSX.Element {
-  const hexColor = colorObjToHex(color);
-  const colorButtonRef = useRef<HTMLElement>(ReactNull);
-  const [colorPickerShown, setColorPickerShown] = useState(false);
+  const { classes } = useStyles();
+  const hexColor = tinycolor(color).toHexString();
+  const [anchorEl, setAnchorEl] = useState<undefined | HTMLElement>(undefined);
+  const open = Boolean(anchorEl);
 
-  let button;
-  switch (buttonShape) {
-    case "circle":
-      button = (
-        <IconButton
-          elementRef={colorButtonRef}
-          styles={{
-            root: {
-              backgroundColor: hexColor,
-              width: `${circleSize}px`,
-              height: `${circleSize}px`,
-              borderRadius: "50%",
-            },
-            rootHovered: { backgroundColor: hexColor, opacity: 0.8 },
-            rootPressed: { backgroundColor: hexColor, opacity: 0.6 },
+  const handleClick = useCallback((event: MouseEvent<HTMLElement>) => {
+    setAnchorEl(event.currentTarget);
+  }, []);
+
+  const handleClose = useCallback(() => {
+    setAnchorEl(undefined);
+  }, []);
+
+  const button = useMemo(
+    () =>
+      buttonShape === "circle" ? (
+        <ButtonBase
+          className={classes.circleButton}
+          data-testid="color-picker-button"
+          aria-controls={open ? "color-picker-menu" : undefined}
+          aria-haspopup="true"
+          aria-expanded={open ? "true" : undefined}
+          onClick={handleClick}
+          style={{
+            fontSize: circleSize - 2,
+            height: circleSize,
+            width: circleSize,
           }}
-          onClick={() => setColorPickerShown(!colorPickerShown)}
-        />
-      );
-      break;
-    default:
-      button = (
-        <DefaultButton
-          elementRef={colorButtonRef}
-          styles={{
-            root: { backgroundColor: hexColor },
-            rootHovered: { backgroundColor: hexColor, opacity: 0.8 },
-            rootPressed: { backgroundColor: hexColor, opacity: 0.6 },
-          }}
-          onClick={() => setColorPickerShown(!colorPickerShown)}
-        />
-      );
-      break;
-  }
+        >
+          <SvgIcon fontSize="inherit">
+            <circle fill={hexColor} cx={12} cy={12} r={12} />
+          </SvgIcon>
+        </ButtonBase>
+      ) : (
+        <Button
+          variant="outlined"
+          color="secondary"
+          data-testid="color-picker-button"
+          aria-controls={open ? "color-picker-menu" : undefined}
+          aria-haspopup="true"
+          aria-expanded={open ? "true" : undefined}
+          onClick={handleClick}
+          style={{ backgroundColor: hexColor }}
+        >
+          &nbsp;
+        </Button>
+      ),
+    [buttonShape, circleSize, classes, handleClick, hexColor, open],
+  );
+
+  const onChangeCallback = useCallback(
+    (newColor: string) => {
+      const parsed = tinycolor(newColor).toRgb();
+      onChange(parsed);
+    },
+    [onChange],
+  );
 
   return (
     <div>
       {button}
-      {colorPickerShown && (
-        <Callout
-          directionalHint={DirectionalHint.topCenter}
-          target={colorButtonRef.current}
-          onDismiss={() => {
-            setColorPickerShown(false);
-          }}
-        >
-          <Picker
-            color={hexColor}
-            alphaType={alphaType ?? "none"}
-            styles={{
-              tableHexCell: { width: "35%" },
-              input: {
-                input: {
-                  fontFeatureSettings: `${fonts.SANS_SERIF_FEATURE_SETTINGS}, 'zero' !important`,
-                },
-              },
-            }}
-            onChange={(_event, newValue) => onChange(getColorFromIRGB(newValue))}
-          />
-        </Callout>
-      )}
+      <Popover
+        open={open}
+        anchorEl={anchorEl}
+        onClose={handleClose}
+        anchorOrigin={{
+          vertical: "bottom",
+          horizontal: "left",
+        }}
+        transformOrigin={{
+          vertical: "top",
+          horizontal: "center",
+        }}
+      >
+        <ColorPickerControl alphaType={alphaType} value={hexColor} onChange={onChangeCallback} />
+      </Popover>
     </div>
   );
 }

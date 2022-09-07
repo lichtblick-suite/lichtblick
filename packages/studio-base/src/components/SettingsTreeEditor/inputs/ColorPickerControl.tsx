@@ -99,6 +99,8 @@ export function ColorPickerControl(props: ColorPickerInputProps): JSX.Element {
         size="small"
         error={editedValueIsInvalid}
         InputProps={{
+          onFocus: (event) => event.target.select(),
+          role: "input",
           startAdornment: <TagIcon fontSize="small" />,
           style: { fontFamily: fonts.MONOSPACE },
         }}
