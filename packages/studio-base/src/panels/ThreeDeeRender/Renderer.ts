@@ -383,8 +383,8 @@ export class Renderer extends EventEmitter<RendererEvents> {
     this.controls.screenSpacePanning = false; // only allow panning in the XY plane
     this.controls.mouseButtons.LEFT = THREE.MOUSE.PAN;
     this.controls.mouseButtons.RIGHT = THREE.MOUSE.ROTATE;
-    this.controls.touches.ONE = THREE.TOUCH.DOLLY_PAN;
-    this.controls.touches.TWO = THREE.TOUCH.ROTATE;
+    this.controls.touches.ONE = THREE.TOUCH.PAN;
+    this.controls.touches.TWO = THREE.TOUCH.DOLLY_ROTATE;
     this.controls.addEventListener("change", () => {
       if (!this._isUpdatingCameraState) {
         this.emit("cameraMove", this);
