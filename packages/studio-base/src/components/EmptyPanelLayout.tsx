@@ -40,6 +40,7 @@ const DropTarget = muiStyled("div", {
 }>(({ isOver, theme }) => ({
   width: "100%",
   height: "100%",
+  minHeight: 0,
 
   ...(isOver && {
     "&:after": {
