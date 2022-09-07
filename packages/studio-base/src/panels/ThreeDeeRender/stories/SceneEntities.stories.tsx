@@ -85,7 +85,18 @@ function makeStoryScene({
             },
           ],
 
-          spheres: [],
+          spheres: [
+            {
+              pose: xyzrpyToPose([0, 6, 0], [0, 0, 0]),
+              size: { x: 0.8, y: 0.5, z: 1 },
+              color: makeColor("#ff6136", 0.5),
+            },
+            {
+              pose: xyzrpyToPose([1, 6, 0], [0, 0, 30]),
+              size: { x: 0.4, y: 0.2, z: 1 },
+              color: makeColor("#afe6c3", 0.9),
+            },
+          ],
 
           cylinders: [
             {
