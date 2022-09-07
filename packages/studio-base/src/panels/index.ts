@@ -36,6 +36,7 @@ import tableThumbnail from "./Table/thumbnail.png";
 import TeleopHelp from "./Teleop/index.help.md";
 import teleopThumbnail from "./Teleop/thumbnail.png";
 import ThreeDeeRenderHelp from "./ThreeDeeRender/index.help.md";
+import threeDeeRenderThumbnail from "./ThreeDeeRender/thumbnail.png";
 import ThreeDimensionalVizHelp from "./ThreeDimensionalViz/index.help.md";
 import threeDimensionalVizThumbnail from "./ThreeDimensionalViz/thumbnail.png";
 import TopicGraphHelp from "./TopicGraph/index.help.md";
@@ -61,10 +62,11 @@ const builtin: PanelInfo[] = [
   {
     title: "3D (Beta)",
     type: "3D",
-    description: "Test our next-generation 3D panel, using a new rendering engine.",
+    description: "Display markers, camera images, meshes, URDFs, and more in a 3D scene.",
     help: ThreeDeeRenderHelp,
-    thumbnail: threeDimensionalVizThumbnail,
+    thumbnail: threeDeeRenderThumbnail,
     module: async () => await import("./ThreeDeeRender"),
+    settingsOnboardingTooltip: "Open settings to configure topics and layers.",
   },
   {
     title: `Diagnostics – Detail (ROS)`,

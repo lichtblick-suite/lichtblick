@@ -9,11 +9,16 @@ import { LayoutID } from "@foxglove/studio-base/services/ILayoutStorage";
 export type UserProfile = {
   /** The id of the layout the user is currently working with. */
   currentLayoutId?: LayoutID;
+  /** Onboarding flow status */
+  onboarding?: {
+    /** List of panel types for which the settings tooltip has been shown */
+    settingsTooltipShownForPanelTypes?: string[];
+  };
 };
 
 export type UserProfileStorage = {
   getUserProfile: () => Promise<UserProfile>;
-  setUserProfile: (data: UserProfile) => Promise<void>;
+  setUserProfile: (data: UserProfile | ((profile: UserProfile) => UserProfile)) => Promise<void>;
 };
 
 export const UserProfileStorageContext = createContext<UserProfileStorage | undefined>(undefined);

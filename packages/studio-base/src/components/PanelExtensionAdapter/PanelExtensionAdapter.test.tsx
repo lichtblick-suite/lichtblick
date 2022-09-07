@@ -9,7 +9,7 @@
 import { render } from "@testing-library/react";
 import { act } from "react-dom/test-utils";
 
-import { Condvar } from "@foxglove/den/async";
+import { Condvar, signal } from "@foxglove/den/async";
 import { Time } from "@foxglove/rostime";
 import { PanelExtensionContext, RenderState } from "@foxglove/studio";
 import MockPanelContextProvider from "@foxglove/studio-base/components/MockPanelContextProvider";
@@ -20,12 +20,13 @@ import ThemeProvider from "@foxglove/studio-base/theme/ThemeProvider";
 import PanelExtensionAdapter from "./PanelExtensionAdapter";
 
 describe("PanelExtensionAdapter", () => {
-  it("should call initPanel", (done) => {
+  it("should call initPanel", async () => {
     expect.assertions(1);
 
+    const sig = signal();
     const initPanel = (context: PanelExtensionContext) => {
       expect(context).toBeDefined();
-      done();
+      sig.resolve();
     };
 
     const config = {};
@@ -48,9 +49,11 @@ describe("PanelExtensionAdapter", () => {
     };
 
     const handle = render(<Wrapper />);
+    await act(async () => undefined);
 
     // force a re-render to make sure we do not call init panel again
     handle.rerender(<Wrapper />);
+    await sig;
   });
 
   it("sets didSeek=true when seeking", async () => {
@@ -116,11 +119,12 @@ describe("PanelExtensionAdapter", () => {
     mockRAF.mockRestore();
   });
 
-  it("should support advertising on a topic", (done) => {
+  it("should support advertising on a topic", async () => {
     const initPanel = (context: PanelExtensionContext) => {
       context.advertise?.("/some/topic", "some_datatype");
     };
 
+    const sig = signal();
     let passed = false;
     render(
       <ThemeProvider isDark>
@@ -147,7 +151,7 @@ describe("PanelExtensionAdapter", () => {
                   ]),
                 );
                 passed = true;
-                done();
+                sig.resolve();
               },
             }}
           >
@@ -156,15 +160,18 @@ describe("PanelExtensionAdapter", () => {
         </MockPanelContextProvider>
       </ThemeProvider>,
     );
+    await act(async () => undefined);
+    await sig;
   });
 
-  it("should support advertising on multiple topics", (done) => {
+  it("should support advertising on multiple topics", async () => {
     let count = 0;
 
     const initPanel = (context: PanelExtensionContext) => {
       context.advertise?.("/some/topic", "some_datatype");
       context.advertise?.("/another/topic", "another_datatype");
     };
+    const sig = signal();
 
     render(
       <ThemeProvider isDark>
@@ -207,7 +214,7 @@ describe("PanelExtensionAdapter", () => {
                       },
                     ]),
                   );
-                  done();
+                  sig.resolve();
                 }
               },
             }}
@@ -217,9 +224,12 @@ describe("PanelExtensionAdapter", () => {
         </MockPanelContextProvider>
       </ThemeProvider>,
     );
+
+    await act(async () => undefined);
+    await sig;
   });
 
-  it("should support publishing on a topic", (done) => {
+  it("should support publishing on a topic", async () => {
     expect.assertions(3);
 
     const initPanel = (context: PanelExtensionContext) => {
@@ -229,6 +239,7 @@ describe("PanelExtensionAdapter", () => {
       });
     };
 
+    const sig = signal();
     let passed = false;
     render(
       <ThemeProvider isDark>
@@ -261,7 +272,7 @@ describe("PanelExtensionAdapter", () => {
                 }
                 expect(request).toEqual({ topic: "/some/topic", msg: { foo: "bar" } });
                 passed = true;
-                done();
+                sig.resolve();
               },
             }}
           >
@@ -270,9 +281,12 @@ describe("PanelExtensionAdapter", () => {
         </MockPanelContextProvider>
       </ThemeProvider>,
     );
+
+    await act(async () => undefined);
+    await sig;
   });
 
-  it("should support unadvertising", (done) => {
+  it("should support unadvertising", async () => {
     let count = 0;
 
     const initPanel = (context: PanelExtensionContext) => {
@@ -280,6 +294,8 @@ describe("PanelExtensionAdapter", () => {
       context.advertise?.("/another/topic", "another_datatype");
       context.unadvertise?.("/some/topic");
     };
+
+    const sig = signal();
 
     render(
       <ThemeProvider isDark>
@@ -334,7 +350,7 @@ describe("PanelExtensionAdapter", () => {
                     ]),
                   );
 
-                  done();
+                  sig.resolve();
                 }
               },
             }}
@@ -344,6 +360,9 @@ describe("PanelExtensionAdapter", () => {
         </MockPanelContextProvider>
       </ThemeProvider>,
     );
+
+    await act(async () => undefined);
+    await sig;
   });
 
   it("should unadvertise when unmounting", (done) => {
@@ -409,12 +428,14 @@ describe("PanelExtensionAdapter", () => {
     handle.rerender(<Wrapper mounted={false} />);
   });
 
-  it("supports adding new panels to the layout", (done) => {
+  it("supports adding new panels to the layout", async () => {
     expect.assertions(3);
 
     const openSiblingPanel = jest.fn();
     const config = {};
     const saveConfig = () => {};
+
+    const sig = signal();
 
     const initPanel = (context: PanelExtensionContext) => {
       expect(context).toBeDefined();
@@ -437,7 +458,7 @@ describe("PanelExtensionAdapter", () => {
       expect(openSiblingPanel.mock.calls).toEqual([
         [{ panelType: "X", updateIfExists: true, siblingConfigCreator: expect.any(Function) }],
       ]);
-      done();
+      sig.resolve();
     };
 
     const Wrapper = () => {
@@ -458,14 +479,19 @@ describe("PanelExtensionAdapter", () => {
 
     const handle = render(<Wrapper />);
 
+    await act(async () => undefined);
+
     // force a re-render to make sure we call init panel once
     handle.rerender(<Wrapper />);
+    await sig;
   });
 
-  it("should unsubscribe from all topics when subscribing to empty topics array", (done) => {
+  it("should unsubscribe from all topics when subscribing to empty topics array", async () => {
     const initPanel = (context: PanelExtensionContext) => {
       context.subscribe([]);
     };
+
+    const sig = signal();
 
     render(
       <ThemeProvider isDark>
@@ -479,7 +505,7 @@ describe("PanelExtensionAdapter", () => {
               layout: "UnknownPanel!4co6n9d",
               setSubscriptions: (_, payload) => {
                 expect(payload).toEqual([]);
-                done();
+                sig.resolve();
               },
             }}
           >
@@ -488,6 +514,9 @@ describe("PanelExtensionAdapter", () => {
         </MockPanelContextProvider>
       </ThemeProvider>,
     );
+
+    await act(async () => undefined);
+    await sig;
   });
 
   it("should get and set variables", async () => {

@@ -3,6 +3,7 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 import { IconButton, IconButtonProps, styled as muiStyled } from "@mui/material";
+import { ForwardedRef, forwardRef } from "react";
 
 const StyledIconButton = muiStyled(IconButton, {
   shouldForwardProp: (prop) => prop !== "subMenuActive",
@@ -20,17 +21,19 @@ const StyledIconButton = muiStyled(IconButton, {
   },
 }));
 
-export default function ToolbarIconButton(
+export default forwardRef(function ToolbarIconButton(
   props: {
     subMenuActive?: boolean;
-    title: string; // require title for accessibility
+    title?: string;
   } & Partial<IconButtonProps>,
+  ref: ForwardedRef<HTMLButtonElement>,
 ): React.ReactElement {
   return (
     <StyledIconButton
+      ref={ref}
       subMenuActive={props.subMenuActive === true}
       aria-label={props.title}
       {...props}
     />
   );
-}
+});

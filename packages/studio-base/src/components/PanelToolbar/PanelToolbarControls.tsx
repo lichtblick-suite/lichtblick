@@ -11,17 +11,24 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
+import CloseIcon from "@mui/icons-material/Close";
 import SettingsIcon from "@mui/icons-material/Settings";
-import { forwardRef, useCallback, useContext } from "react";
+import { IconButton, Tooltip } from "@mui/material";
+import produce from "immer";
+import { forwardRef, useCallback, useContext, useEffect } from "react";
+import { useAsyncFn } from "react-use";
+import { makeStyles } from "tss-react/mui";
 
 import PanelContext from "@foxglove/studio-base/components/PanelContext";
 import ToolbarIconButton from "@foxglove/studio-base/components/PanelToolbar/ToolbarIconButton";
 import Stack from "@foxglove/studio-base/components/Stack";
 import { useSelectedPanels } from "@foxglove/studio-base/context/CurrentLayoutContext";
+import PanelCatalogContext from "@foxglove/studio-base/context/PanelCatalogContext";
 import {
   PanelSettingsEditorStore,
   usePanelSettingsEditorStore,
 } from "@foxglove/studio-base/context/PanelSettingsEditorContext";
+import { UserProfileStorageContext } from "@foxglove/studio-base/context/UserProfileStorageContext";
 import { useWorkspace } from "@foxglove/studio-base/context/WorkspaceContext";
 
 import { PanelActionsDropdown } from "./PanelActionsDropdown";
@@ -34,12 +41,27 @@ type PanelToolbarControlsProps = {
   setMenuOpen: (_: boolean) => void;
 };
 
+const useStyles = makeStyles()((theme) => ({
+  popper: {
+    zIndex: theme.zIndex.modal - 1,
+  },
+  tooltip: {
+    padding: theme.spacing(1, 1.5),
+    boxShadow: theme.shadows[8],
+    fontSize: theme.typography.body2.fontSize,
+    lineHeight: theme.typography.body2.lineHeight,
+    marginTop: `${theme.spacing(1)} !important`,
+  },
+}));
+
 const PanelToolbarControlsComponent = forwardRef<HTMLDivElement, PanelToolbarControlsProps>(
   (props, ref) => {
     const { additionalIcons, isUnknownPanel, menuOpen, setMenuOpen } = props;
-    const panelId = useContext(PanelContext)?.id;
+    const { id: panelId, type: panelType } = useContext(PanelContext) ?? {};
+    const panelCatalog = useContext(PanelCatalogContext);
     const { setSelectedPanelIds } = useSelectedPanels();
     const { openPanelSettings } = useWorkspace();
+    const { classes } = useStyles();
 
     const hasSettingsSelector = useCallback(
       (store: PanelSettingsEditorStore) =>
@@ -49,21 +71,96 @@ const PanelToolbarControlsComponent = forwardRef<HTMLDivElement, PanelToolbarCon
 
     const hasSettings = usePanelSettingsEditorStore(hasSettingsSelector);
 
-    const openSettings = useCallback(() => {
+    const userProfileStorage = useContext(UserProfileStorageContext);
+    const [{ value: settingsOnboardingTooltip }, loadOnboardingState] =
+      useAsyncFn(async (): Promise<string | undefined> => {
+        if (panelType == undefined || userProfileStorage == undefined || !hasSettings) {
+          return undefined;
+        }
+        const tooltip = panelCatalog?.getPanelByType(panelType)?.settingsOnboardingTooltip;
+        if (tooltip == undefined) {
+          return undefined;
+        }
+        const { onboarding } = await userProfileStorage.getUserProfile();
+        const { settingsTooltipShownForPanelTypes = [] } = onboarding ?? {};
+        if (settingsTooltipShownForPanelTypes.includes(panelType)) {
+          return undefined;
+        }
+        return tooltip;
+      }, [hasSettings, panelCatalog, panelType, userProfileStorage]);
+    useEffect(() => {
+      void loadOnboardingState();
+    }, [loadOnboardingState]);
+
+    const onDismissTooltip = useCallback(async () => {
+      if (panelType && userProfileStorage) {
+        await userProfileStorage.setUserProfile((profile) =>
+          produce(profile, (draft) => {
+            draft.onboarding ??= { settingsTooltipShownForPanelTypes: [] };
+            if (draft.onboarding.settingsTooltipShownForPanelTypes?.includes(panelType) !== true) {
+              draft.onboarding.settingsTooltipShownForPanelTypes?.push(panelType);
+            }
+          }),
+        );
+        await loadOnboardingState();
+      }
+    }, [loadOnboardingState, panelType, userProfileStorage]);
+
+    const openSettings = useCallback(async () => {
       if (panelId) {
         setSelectedPanelIds([panelId]);
         openPanelSettings();
       }
-    }, [setSelectedPanelIds, openPanelSettings, panelId]);
+      await onDismissTooltip();
+    }, [panelId, onDismissTooltip, setSelectedPanelIds, openPanelSettings]);
+
+    let settingsButton = (
+      <ToolbarIconButton onClick={openSettings}>
+        <SettingsIcon />
+      </ToolbarIconButton>
+    );
+    if (settingsOnboardingTooltip) {
+      settingsButton = (
+        <Tooltip
+          open
+          classes={{ popper: classes.popper, tooltip: classes.tooltip }}
+          title={
+            <Stack direction="row" alignItems="center" style={{ maxWidth: 190 }}>
+              <span>{settingsOnboardingTooltip}</span>
+              <IconButton
+                aria-label="Dismiss"
+                role="button"
+                size="small"
+                color="inherit"
+                onClick={(event) => {
+                  event.stopPropagation();
+                  void onDismissTooltip();
+                }}
+              >
+                <CloseIcon fontSize="small" />
+              </IconButton>
+            </Stack>
+          }
+          arrow
+          TransitionProps={{ in: true }}
+          PopperProps={{
+            modifiers: [
+              {
+                name: "preventOverflow",
+                options: { altAxis: true, padding: 4 },
+              },
+            ],
+          }}
+        >
+          {settingsButton}
+        </Tooltip>
+      );
+    }
 
     return (
       <Stack direction="row" alignItems="center" paddingLeft={1} ref={ref}>
         {additionalIcons}
-        {hasSettings && (
-          <ToolbarIconButton title="Settings" onClick={openSettings}>
-            <SettingsIcon />
-          </ToolbarIconButton>
-        )}
+        {hasSettings && settingsButton}
         <PanelActionsDropdown
           isOpen={menuOpen}
           setIsOpen={setMenuOpen}
