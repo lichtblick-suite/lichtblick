@@ -2,6 +2,7 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
+import { captureException } from "@sentry/core";
 import { isEqual, maxBy, minBy } from "lodash";
 
 import Logger from "@foxglove/log";
@@ -150,6 +151,7 @@ export class DataPlatformIterableSource implements IIterableSource {
           datatypes.set(name, datatype);
         }
       } catch (err) {
+        captureException(err, { extra: { rawTopic } });
         problems.push({
           message: `Failed to parse schema for topic ${topic}`,
           severity: "error",
