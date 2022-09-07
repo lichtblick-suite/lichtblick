@@ -53,6 +53,11 @@ const features: Feature[] = [
     name: "Memory use indicator",
     description: <>Show the app memory use in the sidebar.</>,
   },
+  {
+    key: AppSetting.ENABLE_PLOT_PANEL_SERIES_SETTINGS,
+    name: "Plot panel series in settings",
+    description: <>Allow editing plot panel data series in the sidebar.</>,
+  },
 ];
 if (process.env.NODE_ENV === "development") {
   features.push({

@@ -27,6 +27,7 @@ import {
   toSec,
 } from "@foxglove/rostime";
 import { MessageEvent } from "@foxglove/studio";
+import { AppSetting } from "@foxglove/studio-base/AppSetting";
 import { useBlocksByTopic, useMessageReducer } from "@foxglove/studio-base/PanelAPI";
 import { MessageBlock } from "@foxglove/studio-base/PanelAPI/useBlocksByTopic";
 import parseRosPath, {
@@ -52,6 +53,7 @@ import {
   ChartDefaultView,
   TimeBasedChartTooltipData,
 } from "@foxglove/studio-base/components/TimeBasedChart";
+import { useAppConfigurationValue } from "@foxglove/studio-base/hooks";
 import { OnClickArg as OnChartClickArgs } from "@foxglove/studio-base/src/components/Chart";
 import { OpenSiblingPanel, PanelConfig, SaveConfig } from "@foxglove/studio-base/types/panels";
 import { getTimestampForMessage } from "@foxglove/studio-base/util/time";
@@ -472,6 +474,10 @@ function Plot(props: Props) {
 
   usePlotPanelSettings(config, saveConfig);
 
+  const [seriesSettings = false] = useAppConfigurationValue(
+    AppSetting.ENABLE_PLOT_PANEL_SERIES_SETTINGS,
+  );
+
   const stackDirection = useMemo(
     () => (legendDisplay === "top" ? "column" : "row"),
     [legendDisplay],
@@ -506,19 +512,21 @@ function Plot(props: Props) {
         fullWidth
         style={{ height: `calc(100% - ${PANEL_TOOLBAR_MIN_HEIGHT}px)` }}
       >
-        <PlotLegend
-          paths={yAxisPaths}
-          datasets={datasets}
-          currentTime={currentTimeSinceStart}
-          saveConfig={saveConfig}
-          showLegend={showLegend}
-          xAxisVal={xAxisVal}
-          xAxisPath={xAxisPath}
-          pathsWithMismatchedDataLengths={pathsWithMismatchedDataLengths}
-          legendDisplay={legendDisplay}
-          showPlotValuesInLegend={showPlotValuesInLegend}
-          sidebarDimension={sidebarDimension}
-        />
+        {seriesSettings === false && (
+          <PlotLegend
+            paths={yAxisPaths}
+            datasets={datasets}
+            currentTime={currentTimeSinceStart}
+            saveConfig={saveConfig}
+            showLegend={showLegend}
+            xAxisVal={xAxisVal}
+            xAxisPath={xAxisPath}
+            pathsWithMismatchedDataLengths={pathsWithMismatchedDataLengths}
+            legendDisplay={legendDisplay}
+            showPlotValuesInLegend={showPlotValuesInLegend}
+            sidebarDimension={sidebarDimension}
+          />
+        )}
         <Stack flex="auto" alignItems="center" justifyContent="center" overflow="hidden">
           <PlotChart
             isSynced={xAxisVal === "timestamp" && isSynced}

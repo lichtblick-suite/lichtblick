@@ -233,8 +233,8 @@ function FieldInput({
             }
           }}
         >
-          <ToggleButton value={true}>On</ToggleButton>
           <ToggleButton value={false}>Off</ToggleButton>
+          <ToggleButton value={true}>On</ToggleButton>
         </StyledToggleButtonGroup>
       );
     case "rgb":
