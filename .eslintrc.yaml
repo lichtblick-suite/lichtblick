@@ -107,7 +107,6 @@ rules:
         `// eslint-disable-next-line no-restricted-syntax`. For rationale, see:
         https://github.com/sindresorhus/meta/discussions/7"
 
-  jest/no-done-callback: off # Can be a useful alternative to promises
   jest/expect-expect:
     [error, { assertFunctionNames: [expect*, sendNotification.expectCalledDuringTest] }]
 

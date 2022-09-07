@@ -15,6 +15,8 @@
 import CircleIcon from "@mdi/svg/svg/circle.svg";
 import { render } from "@testing-library/react";
 
+import { signal } from "@foxglove/den/async";
+
 import Icon from "./Icon";
 
 describe("<Icon />", () => {
@@ -27,11 +29,12 @@ describe("<Icon />", () => {
     expect(result.container.querySelector("svg")).not.toBeNullOrUndefined();
   });
 
-  it("stops click event with custom handler", (done) => {
+  it("stops click event with custom handler", async () => {
     expect.assertions(0);
+    const sig = signal();
     const Container = () => (
-      <div onClick={() => done("should not bubble")}>
-        <Icon onClick={() => done()}>
+      <div onClick={() => sig.reject(new Error("should not bubble"))}>
+        <Icon onClick={() => setTimeout(() => sig.resolve(), 0)}>
           <CircleIcon />
         </Icon>
       </div>
@@ -40,12 +43,14 @@ describe("<Icon />", () => {
     result.container
       .querySelector(".icon")
       ?.dispatchEvent(new MouseEvent("click", { bubbles: true }));
+    await sig;
   });
 
-  it("does not prevent click by default", (done) => {
+  it("does not prevent click by default", async () => {
     expect.assertions(0);
+    const sig = signal();
     const Container = () => (
-      <div onClick={() => done()}>
+      <div onClick={() => sig.resolve()}>
         <Icon>
           <CircleIcon />
         </Icon>
@@ -55,5 +60,6 @@ describe("<Icon />", () => {
     result.container
       .querySelector(".icon")
       ?.dispatchEvent(new MouseEvent("click", { bubbles: true }));
+    await sig;
   });
 });
