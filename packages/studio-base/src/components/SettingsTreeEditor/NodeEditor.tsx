@@ -272,9 +272,6 @@ function NodeEditorComponent(props: NodeEditorProps): JSX.Element {
               disabled={!allowVisibilityToggle}
             />
           )}
-          {settings.actions && (
-            <NodeActionsMenu actions={settings.actions} onSelectAction={handleNodeAction} />
-          )}
           {props.settings?.error && (
             <Tooltip
               arrow
@@ -284,6 +281,9 @@ function NodeEditorComponent(props: NodeEditorProps): JSX.Element {
                 <ErrorIcon fontSize="small" />
               </IconButton>
             </Tooltip>
+          )}
+          {settings.actions && (
+            <NodeActionsMenu actions={settings.actions} onSelectAction={handleNodeAction} />
           )}
         </Stack>
       </NodeHeader>
