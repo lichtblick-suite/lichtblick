@@ -13,12 +13,13 @@
 
 import { action } from "@storybook/addon-actions";
 import { Story } from "@storybook/react";
-import { useLayoutEffect } from "react";
+import { useEffect, useLayoutEffect } from "react";
 
 import MockMessagePipelineProvider from "@foxglove/studio-base/components/MessagePipeline/MockMessagePipelineProvider";
 import AppConfigurationContext, {
   IAppConfiguration,
 } from "@foxglove/studio-base/context/AppConfigurationContext";
+import { useEvents } from "@foxglove/studio-base/context/EventsContext";
 import { useSetHoverValue } from "@foxglove/studio-base/context/TimelineInteractionStateContext";
 import {
   PlayerCapabilities,
@@ -27,6 +28,8 @@ import {
   PlayerStateActiveData,
 } from "@foxglove/studio-base/players/types";
 import MockCurrentLayoutProvider from "@foxglove/studio-base/providers/CurrentLayoutProvider/MockCurrentLayoutProvider";
+import EventsProvider from "@foxglove/studio-base/providers/EventsProvider";
+import { makeMockEvents } from "@foxglove/studio-base/test/mocks/makeMockEvents";
 
 import PlaybackControls from "./index";
 
@@ -81,26 +84,33 @@ function Wrapper({
   progress?: PlayerState["progress"];
 }) {
   return (
-    <AppConfigurationContext.Provider value={mockAppConfiguration}>
-      <MockCurrentLayoutProvider>
-        <MockMessagePipelineProvider
-          isPlaying={isPlaying}
-          capabilities={["setSpeed", "playbackControl"]}
-          activeData={activeData}
-          pausePlayback={action("pause")}
-          seekPlayback={action("seek")}
-          startPlayback={action("play")}
-          progress={progress}
-        >
-          <div style={{ padding: 20, margin: 20 }}>{children}</div>
-        </MockMessagePipelineProvider>
-      </MockCurrentLayoutProvider>
-    </AppConfigurationContext.Provider>
+    <MockMessagePipelineProvider
+      isPlaying={isPlaying}
+      capabilities={["setSpeed", "playbackControl"]}
+      activeData={activeData}
+      pausePlayback={action("pause")}
+      seekPlayback={action("seek")}
+      startPlayback={action("play")}
+      progress={progress}
+    >
+      <div style={{ padding: 20, margin: 20 }}>{children}</div>
+    </MockMessagePipelineProvider>
   );
 }
 
 export default {
   title: "components/PlaybackControls",
+  decorators: [
+    (StoryFn: Story): JSX.Element => (
+      <AppConfigurationContext.Provider value={mockAppConfiguration}>
+        <MockCurrentLayoutProvider>
+          <EventsProvider>
+            <StoryFn />
+          </EventsProvider>
+        </MockCurrentLayoutProvider>
+      </AppConfigurationContext.Provider>
+    ),
+  ],
 };
 
 export const Playing: Story = () => {
@@ -181,3 +191,25 @@ export const HoverTicks: Story = () => {
   );
 };
 HoverTicks.parameters = { colorScheme: "both-column" };
+
+export const WithEvents: Story = () => {
+  const player = getPlayerState();
+  const setEvents = useEvents((store) => store.setEvents);
+
+  useEffect(() => {
+    setEvents({ loading: false, value: makeMockEvents(4, START_TIME + 1, 4) });
+  });
+
+  return (
+    <Wrapper activeData={player.activeData}>
+      <PlaybackControls
+        isPlaying
+        getTimeInfo={() => ({})}
+        play={action("play")}
+        pause={action("pause")}
+        seek={action("seek")}
+      />
+    </Wrapper>
+  );
+};
+WithEvents.parameters = { colorScheme: "both-column" };

@@ -2,7 +2,8 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { Typography } from "@mui/material";
+import { Divider, Typography } from "@mui/material";
+import { isEmpty } from "lodash";
 import { Fragment, useCallback, useEffect, useRef, useState } from "react";
 import { useLatest } from "react-use";
 import { makeStyles } from "tss-react/mui";
@@ -16,18 +17,25 @@ import {
 import Stack from "@foxglove/studio-base/components/Stack";
 import { useTooltip } from "@foxglove/studio-base/components/Tooltip";
 import {
+  TimelineInteractionStateStore,
   useClearHoverValue,
   useSetHoverValue,
+  useTimelineInteractionState,
 } from "@foxglove/studio-base/context/TimelineInteractionStateContext";
 import { useAppTimeFormat } from "@foxglove/studio-base/hooks";
 import { PlayerPresence } from "@foxglove/studio-base/players/types";
 import { fonts } from "@foxglove/studio-base/util/sharedStyleConstants";
 
+import { EventsOverlay } from "./EventsOverlay";
 import PlaybackBarHoverTicks from "./PlaybackBarHoverTicks";
 import { ProgressPlot } from "./ProgressPlot";
 import Slider from "./Slider";
 
 const useStyles = makeStyles()((theme) => ({
+  tooltipDivider: {
+    gridColumn: "span 2",
+    marginBlock: theme.spacing(0.5),
+  },
   tooltipWrapper: {
     fontFeatureSettings: `${fonts.SANS_SERIF_FEATURE_SETTINGS}, "zero"`,
     fontFamily: fonts.SANS_SERIF,
@@ -49,7 +57,7 @@ const useStyles = makeStyles()((theme) => ({
     position: "absolute",
     left: 0,
     right: 0,
-    height: 4,
+    height: 6,
     backgroundColor: theme.palette.action.focus,
   },
   trackDisabled: {
@@ -57,6 +65,7 @@ const useStyles = makeStyles()((theme) => ({
   },
 }));
 
+const selectHoveredEvents = (store: TimelineInteractionStateStore) => store.eventsAtHoverValue;
 const selectStartTime = (ctx: MessagePipelineContext) => ctx.playerState.activeData?.startTime;
 const selectCurrentTime = (ctx: MessagePipelineContext) => ctx.playerState.activeData?.currentTime;
 const selectEndTime = (ctx: MessagePipelineContext) => ctx.playerState.activeData?.endTime;
@@ -67,6 +76,8 @@ const selectPresence = (ctx: MessagePipelineContext) => ctx.playerState.presence
 type Props = {
   onSeek: (seekTo: Time) => void;
 };
+
+type TooltipItem = { type: "divider" } | { type: "item"; title: string; value: string };
 
 export default function Scrubber(props: Props): JSX.Element {
   const { onSeek } = props;
@@ -82,6 +93,7 @@ export default function Scrubber(props: Props): JSX.Element {
   const endTime = useMessagePipeline(selectEndTime);
   const presence = useMessagePipeline(selectPresence);
   const ranges = useMessagePipeline(selectRanges);
+  const hoveredEvents = useTimelineInteractionState(selectHoveredEvents);
 
   const setHoverValue = useSetHoverValue();
 
@@ -100,31 +112,61 @@ export default function Scrubber(props: Props): JSX.Element {
       const stamp = fromSec(value);
       const timeFromStart = subtractTimes(stamp, latestStartTime.current);
 
-      const tooltipItems = [];
+      const tooltipItems: TooltipItem[] = [];
+
+      if (!isEmpty(hoveredEvents)) {
+        Object.values(hoveredEvents).forEach(({ event }) => {
+          tooltipItems.push({
+            type: "item",
+            title: "Start",
+            value: formatTime(event.startTime),
+          });
+          tooltipItems.push({
+            type: "item",
+            title: "End",
+            value: formatTime(event.endTime),
+          });
+          if (!isEmpty(event.metadata)) {
+            Object.entries(event.metadata).forEach(([metaKey, metaValue]) => {
+              tooltipItems.push({ type: "item", title: metaKey, value: metaValue });
+            });
+          }
+          tooltipItems.push({ type: "divider" });
+        });
+      }
 
       switch (timeFormat) {
         case "TOD":
-          tooltipItems.push({ title: "Time", value: formatTime(stamp) });
+          tooltipItems.push({ type: "item", title: "Time", value: formatTime(stamp) });
           break;
         case "SEC":
-          tooltipItems.push({ title: "SEC", value: formatTime(stamp) });
+          tooltipItems.push({ type: "item", title: "SEC", value: formatTime(stamp) });
           break;
       }
 
-      tooltipItems.push({ title: "Elapsed", value: `${toSec(timeFromStart).toFixed(9)} sec` });
+      tooltipItems.push({
+        type: "item",
+        title: "Elapsed",
+        value: `${toSec(timeFromStart).toFixed(9)} sec`,
+      });
 
       const tip = (
         <div className={classes.tooltipWrapper}>
-          {tooltipItems.map((item) => (
-            <Fragment key={item.title}>
-              <Typography align="right" variant="body2">
-                {item.title}:
-              </Typography>
-              <Typography variant="body2" color="text.secondary">
-                {item.value}
-              </Typography>
-            </Fragment>
-          ))}
+          {tooltipItems.map((item, idx) => {
+            if (item.type === "divider") {
+              return <Divider key={`divider_${idx}`} className={classes.tooltipDivider} />;
+            }
+            return (
+              <Fragment key={`${item.title}_${idx}`}>
+                <Typography align="right" variant="body2">
+                  {item.title}:
+                </Typography>
+                <Typography variant="body2" color="text.secondary">
+                  {item.value}
+                </Typography>
+              </Fragment>
+            );
+          })}
         </div>
       );
       setTooltipState({ x, y, tip });
@@ -135,12 +177,14 @@ export default function Scrubber(props: Props): JSX.Element {
       });
     },
     [
-      latestStartTime,
-      timeFormat,
+      classes.tooltipDivider,
       classes.tooltipWrapper,
-      setHoverValue,
-      hoverComponentId,
       formatTime,
+      hoverComponentId,
+      hoveredEvents,
+      latestStartTime,
+      setHoverValue,
+      timeFormat,
     ],
   );
 
@@ -194,7 +238,7 @@ export default function Scrubber(props: Props): JSX.Element {
     >
       {tooltip}
       <div className={cx(classes.track, { [classes.trackDisabled]: !startTime })} />
-      <Stack position="absolute" flex="auto" fullWidth style={{ height: 4 }}>
+      <Stack position="absolute" flex="auto" fullWidth style={{ height: 6 }}>
         <ProgressPlot loading={loading} availableRanges={ranges} />
       </Stack>
       <Stack ref={el} fullHeight fullWidth position="absolute" flex={1}>
@@ -210,6 +254,7 @@ export default function Scrubber(props: Props): JSX.Element {
           renderSlider={renderSlider}
         />
       </Stack>
+      <EventsOverlay />
       <PlaybackBarHoverTicks componentId={hoverComponentId} />
     </Stack>
   );

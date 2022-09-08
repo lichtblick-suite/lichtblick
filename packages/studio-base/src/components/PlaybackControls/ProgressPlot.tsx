@@ -43,7 +43,7 @@ const useStyles = makeStyles()((theme) => ({
   range: {
     label: "ProgressPlot-range",
     position: "absolute",
-    backgroundColor: theme.palette.text.secondary,
+    backgroundColor: theme.palette.divider,
     height: "100%",
   },
 }));

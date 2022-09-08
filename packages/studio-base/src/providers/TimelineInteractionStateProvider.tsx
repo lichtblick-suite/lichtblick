@@ -2,10 +2,11 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { isEqual } from "lodash";
+import { isEqual, keyBy } from "lodash";
 import { ReactNode, useState } from "react";
 import { createStore, StoreApi } from "zustand";
 
+import { TimelinePositionedEvent } from "@foxglove/studio-base/context/EventsContext";
 import {
   TimelineInteractionStateContext,
   TimelineInteractionStateStore,
@@ -14,23 +15,21 @@ import {
 import { HoverValue } from "@foxglove/studio-base/types/hoverValue";
 
 function createTimelineInteractionStateStore(): StoreApi<TimelineInteractionStateStore> {
-  return createStore((set, get) => {
+  return createStore((set) => {
     return {
-      /** Shared time bounds for synced plots, if any. */
+      eventsAtHoverValue: {},
       globalBounds: undefined,
-
-      /** The point in time hovered over by the user. */
+      hoveredEvent: undefined,
       hoverValue: undefined,
 
-      /** Clears the current hover value. */
       clearHoverValue: (componentId: string) =>
         set((store) => ({
           hoverValue: store.hoverValue?.componentId === componentId ? undefined : store.hoverValue,
         })),
 
-      /**
-       * Sets new global bounds.
-       */
+      setEventsAtHoverValue: (eventsAtHoverValue: TimelinePositionedEvent[]) =>
+        set({ eventsAtHoverValue: keyBy(eventsAtHoverValue, (event) => event.event.id) }),
+
       setGlobalBounds: (
         newBounds:
           | undefined
@@ -38,15 +37,27 @@ function createTimelineInteractionStateStore(): StoreApi<TimelineInteractionStat
           | ((oldValue: undefined | SyncBounds) => undefined | SyncBounds),
       ) => {
         if (typeof newBounds === "function") {
-          set({ globalBounds: newBounds(get().globalBounds) });
+          set((store) => ({ globalBounds: newBounds(store.globalBounds) }));
         } else {
           set({ globalBounds: newBounds });
         }
       },
 
-      /**
-       * Sets the new hover value.
-       */
+      setHoveredEvent: (hoveredEvent: undefined | TimelinePositionedEvent) => {
+        if (hoveredEvent) {
+          set({
+            hoveredEvent,
+            hoverValue: {
+              componentId: `event_${hoveredEvent.event.id}`,
+              type: "PLAYBACK_SECONDS",
+              value: hoveredEvent.secondsSinceStart,
+            },
+          });
+        } else {
+          set({ hoveredEvent: undefined, hoverValue: undefined });
+        }
+      },
+
       setHoverValue: (newValue: HoverValue) =>
         set((store) => ({
           hoverValue: isEqual(newValue, store.hoverValue) ? store.hoverValue : newValue,

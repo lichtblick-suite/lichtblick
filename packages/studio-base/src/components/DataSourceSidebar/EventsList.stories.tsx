@@ -5,13 +5,12 @@
 import { Story, StoryContext } from "@storybook/react";
 import { screen } from "@testing-library/dom";
 import userEvent from "@testing-library/user-event";
-import { range } from "lodash";
 import { useEffect } from "react";
 
-import { toNanoSec } from "@foxglove/rostime";
 import MockMessagePipelineProvider from "@foxglove/studio-base/components/MessagePipeline/MockMessagePipelineProvider";
 import { useEvents } from "@foxglove/studio-base/context/EventsContext";
 import EventsProvider from "@foxglove/studio-base/providers/EventsProvider";
+import { makeMockEvents } from "@foxglove/studio-base/test/mocks/makeMockEvents";
 
 import { EventsList } from "./EventsList";
 
@@ -36,25 +35,10 @@ export default {
   decorators: [Wrapper],
 };
 
-function makeEvents(count: number) {
-  return range(0, count).map((idx) => ({
-    id: `event_${idx + 1}`,
-    timestampNanos: toNanoSec({ sec: idx + 100, nsec: 123456789 }).toString(),
-    metadata: {
-      type: ["type A", "type B", "type C"][idx % 3]!,
-      state: ["🤖", "🚎", "🚜"][idx % 3]!,
-    },
-    createdAt: new Date(2020, 1, 1).toISOString(),
-    updatedAt: new Date(2020, 1, 1).toISOString(),
-    deviceId: `device_${idx + 1}`,
-    durationNanos: "100",
-  }));
-}
-
 export function Default(): JSX.Element {
   const setEvents = useEvents((store) => store.setEvents);
   useEffect(() => {
-    setEvents({ loading: false, value: makeEvents(20) });
+    setEvents({ loading: false, value: makeMockEvents(20) });
   }, [setEvents]);
 
   return <EventsList />;
@@ -63,7 +47,7 @@ export function Default(): JSX.Element {
 export function Filtered(): JSX.Element {
   const setEvents = useEvents((store) => store.setEvents);
   useEffect(() => {
-    setEvents({ loading: false, value: makeEvents(20) });
+    setEvents({ loading: false, value: makeMockEvents(20) });
   }, [setEvents]);
 
   return <EventsList />;
@@ -83,7 +67,7 @@ export function Selected(): JSX.Element {
   const selectEvent = useEvents((store) => store.selectEvent);
 
   useEffect(() => {
-    const events = makeEvents(20);
+    const events = makeMockEvents(20);
 
     setEvents({ loading: false, value: events });
   }, [selectEvent, setEvents]);

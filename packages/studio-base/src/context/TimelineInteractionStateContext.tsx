@@ -15,26 +15,56 @@ import { createContext, useCallback } from "react";
 import { DeepReadonly } from "ts-essentials";
 import { StoreApi, useStore } from "zustand";
 
+import { TimelinePositionedEvent } from "@foxglove/studio-base/context/EventsContext";
 import useGuaranteedContext from "@foxglove/studio-base/hooks/useGuaranteedContext";
 import type { HoverValue } from "@foxglove/studio-base/types/hoverValue";
 
-export type SyncBounds = { min: number; max: number; sourceId: string; userInteraction: boolean };
+/**
+ * Represents the global bounds to which synced plots conform, including the id of the
+ * component that set those bounds.
+ */
+export type SyncBounds = {
+  min: number;
+  max: number;
+  sourceId: string;
+  userInteraction: boolean;
+};
 
 /**
  * The TimelineInteractionStateStore manages state related to dynamic user interactions with data in the app.
  * Things like the hovered time value and global bounds for plots are managed here.
  */
 export type TimelineInteractionStateStore = DeepReadonly<{
+  /** The events overlapping the current hover time, if any. */
+  eventsAtHoverValue: Record<string, TimelinePositionedEvent>;
+
+  /** Shared time bounds for synced plots, if any. */
   globalBounds: undefined | SyncBounds;
+
+  /** The event directly hovered over by the user, if any. */
+  hoveredEvent: undefined | TimelinePositionedEvent;
+
+  /** The point in time hovered over by the user. */
   hoverValue: undefined | HoverValue;
 
+  /** Clears the current hover value. */
   clearHoverValue: (componentId: string) => void;
+
+  /** Sets the events overlapping the current hover time. */
+  setEventsAtHoverValue: (events: TimelinePositionedEvent[]) => void;
+
+  /** Sets new global bounds. */
   setGlobalBounds: (
     newBounds:
       | undefined
       | SyncBounds
       | ((oldValue: undefined | SyncBounds) => undefined | SyncBounds),
   ) => void;
+
+  /** Sets or clears the directly hovered event. */
+  setHoveredEvent: (hoveredEvent: undefined | TimelinePositionedEvent) => void;
+
+  /** Sets the new hover value. */
   setHoverValue: (value: HoverValue) => void;
 }>;
 
@@ -55,6 +85,10 @@ export function useSetHoverValue(): TimelineInteractionStateStore["setHoverValue
   return useTimelineInteractionState(selectSetHoverValue);
 }
 
+/**
+ * Encapsulates logic for selecting the current hover value depending
+ * on which component registered the hover value.
+ */
 export function useHoverValue(args?: {
   componentId: string;
   isTimestampScale: boolean;

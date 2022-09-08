@@ -4,17 +4,48 @@
 
 import { createContext } from "react";
 import { AsyncState } from "react-use/lib/useAsyncFn";
+import { DeepReadonly } from "ts-essentials";
 import { StoreApi, useStore } from "zustand";
 
 import useGuaranteedContext from "@foxglove/studio-base/hooks/useGuaranteedContext";
 import { ConsoleEvent } from "@foxglove/studio-base/services/ConsoleApi";
 
-export type EventsStore = {
-  events: AsyncState<ConsoleEvent[]>;
-  selectedEventId: undefined | string;
-  selectEvent: (id: undefined | string) => void;
-  setEvents: (events: AsyncState<ConsoleEvent[]>) => void;
+/**
+ * Represents an event including its fractional position on the timeline.
+ */
+export type TimelinePositionedEvent = {
+  /** The event. */
+  event: ConsoleEvent;
+
+  /** The end position of the event, as a value 0-1 relative to the timeline. */
+  endPosition: number;
+
+  /** The start position of the event, as a value 0-1 relative to the timeline. */
+  startPosition: number;
+
+  /** The time, in seconds, relative to the start of the timeline. */
+  secondsSinceStart: number;
 };
+
+export type EventsStore = DeepReadonly<{
+  /** Fetched events for this session. */
+  events: AsyncState<TimelinePositionedEvent[]>;
+
+  /** The current event filter expression. */
+  filter: string;
+
+  /** The currently selected event, if any. */
+  selectedEventId: undefined | string;
+
+  /** Select an event by id or clear the selection. */
+  selectEvent: (id: undefined | string) => void;
+
+  /** Set the fetched events. */
+  setEvents: (events: AsyncState<TimelinePositionedEvent[]>) => void;
+
+  /** Update the current filter expression. */
+  setFilter: (filter: string) => void;
+}>;
 
 export const EventsContext = createContext<undefined | StoreApi<EventsStore>>(undefined);
 
