@@ -45,7 +45,7 @@ function isFileToOpen(arg: string) {
 }
 
 function updateNativeColorScheme() {
-  const colorScheme = getAppSetting<string>(AppSetting.COLOR_SCHEME) ?? "dark";
+  const colorScheme = getAppSetting<string>(AppSetting.COLOR_SCHEME) ?? "system";
   nativeTheme.themeSource =
     colorScheme === "dark" ? "dark" : colorScheme === "light" ? "light" : "system";
 }
