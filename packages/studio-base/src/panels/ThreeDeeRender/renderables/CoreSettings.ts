@@ -80,7 +80,7 @@ export class CoreSettings extends SceneExtension {
     const followModeOptions = [
       { label: "Pose", value: "follow-pose" },
       { label: "Position", value: "follow-position" },
-      { label: "None", value: "follow-none" },
+      { label: "Fixed", value: "follow-none" },
     ];
     const followModeValue = this.renderer.followMode;
 
