@@ -52,7 +52,7 @@ import diagnosticSummaryThumbnail from "./diagnostics/thumbnails/diagnostic-summ
 
 const builtin: PanelInfo[] = [
   {
-    title: "3D",
+    title: "3D (Legacy)",
     type: "3D Panel",
     description: "Display visualization markers and models in a 3D scene.",
     help: ThreeDimensionalVizHelp,
@@ -60,7 +60,7 @@ const builtin: PanelInfo[] = [
     module: async () => await import("./ThreeDimensionalViz"),
   },
   {
-    title: "3D (Beta)",
+    title: "3D",
     type: "3D",
     description: "Display markers, camera images, meshes, URDFs, and more in a 3D scene.",
     help: ThreeDeeRenderHelp,

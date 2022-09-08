@@ -11,8 +11,23 @@ import { defaultPlaybackConfig } from "@foxglove/studio-base/providers/CurrentLa
  */
 export const defaultLayout: PanelsState = {
   configById: {
-    "3D Panel!18i6zy7": {
-      pinTopics: true,
+    "3D!18i6zy7": {
+      layers: {
+        "845139cb-26bc-40b3-8161-8ab60af4baf5": {
+          visible: true,
+          frameLocked: true,
+          label: "Grid",
+          instanceId: "845139cb-26bc-40b3-8161-8ab60af4baf5",
+          layerId: "foxglove.Grid",
+          size: 10,
+          divisions: 10,
+          lineWidth: 1,
+          color: "#248eff",
+          position: [0, 0, 0],
+          rotation: [0, 0, 0],
+          order: 1,
+        },
+      },
     },
     "RawMessages!os6rgs": {},
     "ImageViewPanel!3mnp456": {},
@@ -22,7 +37,7 @@ export const defaultLayout: PanelsState = {
   linkedGlobalVariables: [],
   playbackConfig: { ...defaultPlaybackConfig },
   layout: {
-    first: "3D Panel!18i6zy7",
+    first: "3D!18i6zy7",
     second: {
       first: "ImageViewPanel!3mnp456",
       second: "RawMessages!os6rgs",
