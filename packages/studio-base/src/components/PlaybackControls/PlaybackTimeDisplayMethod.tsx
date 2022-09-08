@@ -40,7 +40,20 @@ type PlaybackTimeDisplayMethodProps = {
 
 const StyledTextField = muiStyled(TextField)<{ error?: boolean }>(({ error, theme }) => ({
   borderRadius: theme.shape.borderRadius,
+  ":hover": {
+    backgroundColor: theme.palette.action.hover,
 
+    ".MuiIconButton-root": {
+      visibility: "visible",
+    },
+  },
+  ".MuiFilledInput-root": {
+    backgroundColor: "transparent",
+
+    ":hover": {
+      backgroundColor: "transparent",
+    },
+  },
   ".MuiInputBase-input": {
     fontFeatureSettings: `${fonts.SANS_SERIF_FEATURE_SETTINGS}, 'zero' !important`,
     minWidth: "20ch",
@@ -49,6 +62,8 @@ const StyledTextField = muiStyled(TextField)<{ error?: boolean }>(({ error, them
     borderTopLeftRadius: 0,
     borderBottomLeftRadius: 0,
     borderLeft: `1px solid ${theme.palette.background.paper}`,
+    visibility: "hidden",
+    marginRight: theme.spacing(-1),
   },
   ...(error === true && {
     outline: `1px solid ${theme.palette.error.main}`,
@@ -80,7 +95,6 @@ function PlaybackTimeMethodMenu({
   return (
     <>
       <IconButton
-        edge="end"
         id="playback-time-display-toggle-button"
         aria-controls={open ? "playback-time-display-toggle-menu" : undefined}
         aria-haspopup="true"
@@ -214,6 +228,7 @@ export default function PlaybackTimeDisplayMethod({
             value={isEditing ? inputText : currentTimeString}
             error={hasError}
             variant="filled"
+            size="small"
             InputProps={{
               startAdornment: hasError ? <WarningIcon color="error" /> : undefined,
               endAdornment: (

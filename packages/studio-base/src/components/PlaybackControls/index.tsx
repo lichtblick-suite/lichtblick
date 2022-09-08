@@ -21,7 +21,6 @@ import {
   Previous20Filled,
   Previous20Regular,
 } from "@fluentui/react-icons";
-import { Divider } from "@mui/material";
 import { useCallback, useMemo, useState } from "react";
 import { makeStyles } from "tss-react/mui";
 
@@ -29,10 +28,6 @@ import { compare, Time } from "@foxglove/rostime";
 import HoverableIconButton from "@foxglove/studio-base/components/HoverableIconButton";
 import KeyListener from "@foxglove/studio-base/components/KeyListener";
 import LoopIcon from "@foxglove/studio-base/components/LoopIcon";
-import {
-  jumpSeek,
-  DIRECTION,
-} from "@foxglove/studio-base/components/PlaybackControls/sharedHelpers";
 import PlaybackSpeedControls from "@foxglove/studio-base/components/PlaybackSpeedControls";
 import Stack from "@foxglove/studio-base/components/Stack";
 import { Player } from "@foxglove/studio-base/players/types";
@@ -40,32 +35,17 @@ import { Player } from "@foxglove/studio-base/players/types";
 import PlaybackTimeDisplay from "./PlaybackTimeDisplay";
 import { RepeatAdapter } from "./RepeatAdapter";
 import Scrubber from "./Scrubber";
+import { jumpSeek, DIRECTION } from "./sharedHelpers";
 
 const useStyles = makeStyles()((theme) => ({
   root: {
-    label: "PlaybackControls-root",
+    display: "flex",
+    flexDirection: "column",
+    padding: theme.spacing(0.5, 1, 1, 1),
+    position: "relative",
     backgroundColor: theme.palette.background.paper,
     borderTop: `1px solid ${theme.palette.divider}`,
-  },
-  buttonGroup: {
-    label: "PlaybackControls-buttonGroup",
-    backgroundColor: theme.palette.action.focus,
-    borderRadius: theme.shape.borderRadius,
-
-    ".MuiIconButton-root": {
-      "&:not(:first-of-type)": {
-        borderTopLeftRadius: 0,
-        borderBottomLeftRadius: 0,
-      },
-      "&:not(:last-of-type)": {
-        borderTopRightRadius: 0,
-        borderBottomRightRadius: 0,
-      },
-    },
-    ".MuiDivider-root": {
-      borderColor: theme.palette.background.paper,
-      borderRightWidth: 2,
-    },
+    zIndex: 100000,
   },
 }));
 
@@ -154,45 +134,48 @@ export default function PlaybackControls(props: {
     <>
       <RepeatAdapter play={play} seek={seek} repeatEnabled={repeat} />
       <KeyListener global keyDownHandlers={keyDownHandlers} />
-      <Stack className={classes.root} direction="row" alignItems="center" gap={1} padding={1}>
-        <Stack direction="row" alignItems="center" gap={1}>
-          <PlaybackSpeedControls />
-        </Stack>
-        <Stack direction="row" alignItems="center" flex={1} gap={1}>
+      <div className={classes.root}>
+        <Scrubber onSeek={seek} />
+        <Stack direction="row" alignItems="center" justifyContent="space-evenly" flex={1} gap={1}>
+          <Stack direction="row" flex={1}>
+            <PlaybackTimeDisplay onSeek={seek} onPause={pause} />
+          </Stack>
           <Stack direction="row" alignItems="center" gap={1}>
             <HoverableIconButton
+              size="small"
+              title="Seek backward"
+              icon={<Previous20Regular />}
+              activeIcon={<Previous20Filled />}
+              onClick={() => seekBackwardAction()}
+            />
+            <HoverableIconButton
+              size="small"
+              title={isPlaying ? "Pause" : "Play"}
+              onClick={togglePlayPause}
+              icon={isPlaying ? <Pause20Regular /> : <Play20Regular />}
+              activeIcon={isPlaying ? <Pause20Filled /> : <Play20Filled />}
+            />
+            <HoverableIconButton
+              size="small"
+              title="Seek forward"
+              icon={<Next20Regular />}
+              activeIcon={<Next20Filled />}
+              onClick={() => seekForwardAction()}
+            />
+          </Stack>
+          <Stack direction="row" flex={1} alignItems="center" justifyContent="flex-end" gap={0.5}>
+            <HoverableIconButton
+              size="small"
               title="Loop playback"
               color={repeat ? "primary" : "inherit"}
               onClick={toggleRepeat}
               icon={repeat ? <LoopIcon strokeWidth={1.9375} /> : <LoopIcon strokeWidth={1.375} />}
               activeIcon={<LoopIcon strokeWidth={1.875} />}
             />
-            <HoverableIconButton
-              title={isPlaying ? "Pause" : "Play"}
-              onClick={togglePlayPause}
-              icon={isPlaying ? <Pause20Regular /> : <Play20Regular />}
-              activeIcon={isPlaying ? <Pause20Filled /> : <Play20Filled />}
-            />
+            <PlaybackSpeedControls />
           </Stack>
-          <Scrubber onSeek={seek} />
-          <PlaybackTimeDisplay onSeek={seek} onPause={pause} />
         </Stack>
-        <Stack direction="row" className={classes.buttonGroup}>
-          <HoverableIconButton
-            title="Seek backward"
-            icon={<Previous20Regular />}
-            activeIcon={<Previous20Filled />}
-            onClick={() => seekBackwardAction()}
-          />
-          <Divider flexItem orientation="vertical" />
-          <HoverableIconButton
-            title="Seek forward"
-            icon={<Next20Regular />}
-            activeIcon={<Next20Filled />}
-            onClick={() => seekForwardAction()}
-          />
-        </Stack>
-      </Stack>
+      </div>
     </>
   );
 }

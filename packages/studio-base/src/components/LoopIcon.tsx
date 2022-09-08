@@ -2,10 +2,13 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-export default function LoopIcon({ strokeWidth = 1 }: { strokeWidth: number }): JSX.Element {
+import { SvgIcon, SvgIconProps } from "@mui/material";
+
+export default function LoopIcon(props: { strokeWidth: number } & SvgIconProps): JSX.Element {
+  const { strokeWidth = 1, ...rest } = props;
   return (
-    <svg height="100%" viewBox="0 0 24 24">
-      <g>
+    <SvgIcon {...rest}>
+      <g fill="currentColor">
         <path
           fill="none"
           stroke="currentColor"
@@ -37,6 +40,6 @@ export default function LoopIcon({ strokeWidth = 1 }: { strokeWidth: number }): 
           d="M13.308,20.121l-2.121,-2.121l2.121,-2.121"
         />
       </g>
-    </svg>
+    </SvgIcon>
   );
 }

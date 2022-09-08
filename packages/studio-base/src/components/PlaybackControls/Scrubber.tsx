@@ -29,7 +29,6 @@ import Slider from "./Slider";
 
 const useStyles = makeStyles()((theme) => ({
   tooltipWrapper: {
-    label: "Scrubber-tooltipWrapper",
     fontFeatureSettings: `${fonts.SANS_SERIF_FEATURE_SETTINGS}, "zero"`,
     fontFamily: fonts.SANS_SERIF,
     whiteSpace: "nowrap",
@@ -39,16 +38,14 @@ const useStyles = makeStyles()((theme) => ({
     flexDirection: "column",
   },
   marker: {
-    label: "Scrubber-marker",
     backgroundColor: theme.palette.text.primary,
     position: "absolute",
-    height: 8,
+    height: 16,
     borderRadius: 1,
     width: 2,
     transform: "translate(-50%, 0)",
   },
   track: {
-    label: "Scrubber-track",
     position: "absolute",
     left: 0,
     right: 0,
@@ -56,7 +53,6 @@ const useStyles = makeStyles()((theme) => ({
     backgroundColor: theme.palette.action.focus,
   },
   trackDisabled: {
-    label: "Scrubber-trackDisabled",
     opacity: theme.palette.action.disabledOpacity,
   },
 }));
@@ -194,14 +190,13 @@ export default function Scrubber(props: Props): JSX.Element {
       flexGrow={1}
       alignItems="center"
       position="relative"
-      style={{ height: 28 }}
+      style={{ height: 32 }}
     >
       {tooltip}
       <div className={cx(classes.track, { [classes.trackDisabled]: !startTime })} />
       <Stack position="absolute" flex="auto" fullWidth style={{ height: 4 }}>
         <ProgressPlot loading={loading} availableRanges={ranges} />
       </Stack>
-      <PlaybackBarHoverTicks componentId={hoverComponentId} />
       <Stack ref={el} fullHeight fullWidth position="absolute" flex={1}>
         <Slider
           min={min ?? 0}
@@ -215,6 +210,7 @@ export default function Scrubber(props: Props): JSX.Element {
           renderSlider={renderSlider}
         />
       </Stack>
+      <PlaybackBarHoverTicks componentId={hoverComponentId} />
     </Stack>
   );
 }
