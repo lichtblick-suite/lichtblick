@@ -296,6 +296,14 @@ function FieldInput({
           readOnly={field.readonly}
           variant="filled"
           value={field.value ?? UNDEFINED_SENTINEL_VALUE}
+          renderValue={(value) => {
+            for (const option of field.options) {
+              if (option.value === value) {
+                return option.label.trim();
+              }
+            }
+            return undefined;
+          }}
           onChange={(event) =>
             actionHandler({
               action: "update",
