@@ -7,7 +7,7 @@ import * as path from "path";
 
 // Adjust this byte size as needed if the app is growing for a valid reason.
 // This check is here to catch unexpected ballooning of the build size
-const MAX_BUILD_SIZE = 150_000_000;
+const MAX_BUILD_SIZE = 160_000_000;
 
 async function getAllFiles(dirPath: string, arrayOfFiles: string[] = []): Promise<string[]> {
   const files = await readdir(dirPath, { withFileTypes: true });

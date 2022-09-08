@@ -57,7 +57,6 @@
   },
   "resolutions": {
     "@types/node": "15.3.0",
-    "esbuild-loader/esbuild": "0.14.7",
     "react-dnd": "14.0.2"
   },
   "devDependencies": {
@@ -132,9 +131,9 @@
     "typescript-plugin-css-modules": "3.4.0",
     "utif": "3.1.0",
     "webpack": "5.74.0",
-    "webpack-cli": "4.9.2",
-    "webpack-dev-server": "4.7.4",
-    "webpack-hot-middleware": "2.25.1"
+    "webpack-cli": "4.10.0",
+    "webpack-dev-server": "4.11.0",
+    "webpack-hot-middleware": "2.25.2"
   },
   "packageManager": "yarn@3.1.0"
 }

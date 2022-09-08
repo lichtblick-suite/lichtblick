@@ -119,6 +119,9 @@ export function makeConfig(
                 onlyCompileBundledFiles: true,
                 projectReferences: true,
                 configFile: path.resolve(__dirname, isDev ? "tsconfig.dev.json" : "tsconfig.json"),
+                compilerOptions: {
+                  sourceMap: true,
+                },
                 getCustomTransformers: (program: ts.Program) => ({
                   before: [
                     styledComponentsTransformer,
