@@ -30,6 +30,7 @@ import {
   RenderState,
   SettingsTreeAction,
   SettingsTreeNodes,
+  Subscription,
   Topic,
   VariableValue,
 } from "@foxglove/studio";
@@ -44,7 +45,7 @@ import { DebugGui } from "./DebugGui";
 import { Interactions, InteractionContextMenu, SelectionObject, TabType } from "./Interactions";
 import type { PickedRenderable } from "./Picker";
 import type { Renderable } from "./Renderable";
-import { Renderer, RendererConfig, RendererEvents } from "./Renderer";
+import { Renderer, RendererConfig, RendererEvents, RendererSubscription } from "./Renderer";
 import { RendererContext, useRenderer, useRendererEvent } from "./RendererContext";
 import { Stats } from "./Stats";
 import { CameraState, DEFAULT_CAMERA_STATE, MouseEventObject } from "./camera";
@@ -65,6 +66,11 @@ const PANEL_STYLE: React.CSSProperties = {
   height: "100%",
   display: "flex",
   position: "relative",
+};
+
+type SubscriptionWithOptions = Subscription & {
+  preload: boolean;
+  forced: boolean;
 };
 
 const PublishClickIcons: Record<PublishClickType, React.ReactNode> = {
@@ -389,6 +395,9 @@ export function ThreeDeeRender({ context }: { context: PanelExtensionContext }):
   const [parameters, setParameters] = useState<ReadonlyMap<string, ParameterValue> | undefined>();
   const [variables, setVariables] = useState<ReadonlyMap<string, VariableValue> | undefined>();
   const [messages, setMessages] = useState<ReadonlyArray<MessageEvent<unknown>> | undefined>();
+  const [preloadedMessages, setPreloadedMessages] = useState<
+    ReadonlyArray<MessageEvent<unknown>> | undefined
+  >();
   const [currentTime, setCurrentTime] = useState<bigint | undefined>();
   const [didSeek, setDidSeek] = useState<boolean>(false);
 
@@ -401,21 +410,9 @@ export function ThreeDeeRender({ context }: { context: PanelExtensionContext }):
     "datatypeHandlersChanged",
     () => new Map(),
   );
-  const forcedDatatypeHandlers = useRendererProperty(
-    renderer,
-    "forcedDatatypeHandlers",
-    "datatypeHandlersChanged",
-    () => new Map(),
-  );
   const topicHandlers = useRendererProperty(
     renderer,
     "topicHandlers",
-    "topicHandlersChanged",
-    () => new Map(),
-  );
-  const forcedTopicHandlers = useRendererProperty(
-    renderer,
-    "forcedTopicHandlers",
     "topicHandlersChanged",
     () => new Map(),
   );
@@ -555,19 +552,16 @@ export function ThreeDeeRender({ context }: { context: PanelExtensionContext }):
         setVariables(renderState.variables);
 
         // currentFrame has messages on subscribed topics since the last render call
-        if (renderState.currentFrame) {
-          // Fully parse lazy messages
-          for (const messageEvent of renderState.currentFrame) {
-            const maybeLazy = messageEvent.message as { toJSON?: () => unknown };
-            if ("toJSON" in maybeLazy) {
-              (messageEvent as { message: unknown }).message = maybeLazy.toJSON!();
-            }
-          }
-        }
+        deepParseMessageEvents(renderState.currentFrame);
         setMessages(renderState.currentFrame);
+
+        // allFrames has messages on preloaded topics across all frames (as they are loaded)
+        deepParseMessageEvents(renderState.allFrames);
+        setPreloadedMessages(renderState.allFrames);
       });
     };
 
+    context.watch("allFrames");
     context.watch("colorScheme");
     context.watch("currentFrame");
     context.watch("currentTime");
@@ -578,43 +572,54 @@ export function ThreeDeeRender({ context }: { context: PanelExtensionContext }):
   }, [context]);
 
   // Build a list of topics to subscribe to
-  const [topicsToSubscribe, setTopicsToSubscribe] = useState<string[] | undefined>(undefined);
+  const [topicsToSubscribe, setTopicsToSubscribe] = useState<SubscriptionWithOptions[] | undefined>(
+    undefined,
+  );
   useEffect(() => {
-    const subscriptions = new Set<string>();
+    const subscriptions = new Map<string, SubscriptionWithOptions>();
     if (!topics) {
       setTopicsToSubscribe(undefined);
       return;
     }
 
+    const updateSubscriptions = (topic: string, rendererSubscription: RendererSubscription) => {
+      let topicSubscription = subscriptions.get(topic);
+      if (!topicSubscription) {
+        topicSubscription = {
+          topic,
+          forced: rendererSubscription.forced ?? false,
+          preload: rendererSubscription.preload ?? false,
+        };
+        subscriptions.set(topic, topicSubscription);
+      }
+      topicSubscription.preload ||= rendererSubscription.preload ?? false;
+      topicSubscription.forced ||= rendererSubscription.forced ?? false;
+    };
+
     for (const topic of topics) {
-      if (forcedTopicHandlers.has(topic.name) || forcedDatatypeHandlers.has(topic.datatype)) {
-        subscriptions.add(topic.name);
-      } else if (topicHandlers.has(topic.name) || datatypeHandlers.has(topic.datatype)) {
-        // Only subscribe if the topic visibility has been toggled on
-        if (config.topics[topic.name]?.visible === true) {
-          subscriptions.add(topic.name);
-        }
+      for (const rendererSubscription of topicHandlers.get(topic.name) ?? []) {
+        updateSubscriptions(topic.name, rendererSubscription);
+      }
+      for (const rendererSubscription of datatypeHandlers.get(topic.datatype) ?? []) {
+        updateSubscriptions(topic.name, rendererSubscription);
       }
     }
 
-    const newTopics = Array.from(subscriptions.keys()).sort();
-    setTopicsToSubscribe((prevTopics) => (isEqual(prevTopics, newTopics) ? prevTopics : newTopics));
-  }, [
-    topics,
-    config.topics,
-    datatypeHandlers,
-    topicHandlers,
-    forcedTopicHandlers,
-    forcedDatatypeHandlers,
-  ]);
+    const newTopics = [...subscriptions.values()]
+      // Only subscribe if the subscription is forced or topic visibility has been toggled on
+      .filter((a) => a.forced || config.topics[a.topic]?.visible === true)
+      // Sort the list to make comparisons stable
+      .sort((a, b) => a.topic.localeCompare(b.topic));
+    setTopicsToSubscribe((prev) => (areSubscriptionsEqual(prev, newTopics) ? prev : newTopics));
+  }, [topics, config.topics, datatypeHandlers, topicHandlers]);
 
   // Notify the extension context when our subscription list changes
   useEffect(() => {
     if (!topicsToSubscribe) {
       return;
     }
-    log.debug(`Subscribing to [${topicsToSubscribe.join(", ")}]`);
-    context.subscribe(topicsToSubscribe.map((topic) => ({ topic, preload: false })));
+    log.debug(`Subscribing to [${topicsToSubscribe.map((t) => JSON.stringify(t)).join(", ")}]`);
+    context.subscribe(topicsToSubscribe);
   }, [context, topicsToSubscribe]);
 
   // Keep the renderer parameters up to date
@@ -672,6 +677,24 @@ export function ThreeDeeRender({ context }: { context: PanelExtensionContext }):
 
     renderRef.current.needsRender = true;
   }, [messages, renderer, topicsToDatatypes]);
+
+  // Handle preloaded messages and render a frame if new messages are available
+  useEffect(() => {
+    if (!renderer || !preloadedMessages) {
+      return;
+    }
+
+    for (const message of preloadedMessages) {
+      const datatype = topicsToDatatypes.get(message.topic);
+      if (!datatype) {
+        continue;
+      }
+
+      renderer.addMessageEvent(message, datatype);
+    }
+
+    renderRef.current.needsRender = true;
+  }, [preloadedMessages, renderer, topicsToDatatypes]);
 
   // Update the renderer when the camera moves
   useEffect(() => {
@@ -889,4 +912,35 @@ export function ThreeDeeRender({ context }: { context: PanelExtensionContext }):
       </div>
     </ThemeProvider>
   );
+}
+
+function deepParseMessageEvents(
+  messageEvents: ReadonlyArray<MessageEvent<unknown>> | undefined,
+): void {
+  if (!messageEvents) {
+    return;
+  }
+  for (const messageEvent of messageEvents) {
+    const maybeLazy = messageEvent.message as { toJSON?: () => unknown };
+    if ("toJSON" in maybeLazy) {
+      (messageEvent as { message: unknown }).message = maybeLazy.toJSON!();
+    }
+  }
+}
+
+function areSubscriptionsEqual(
+  a: SubscriptionWithOptions[] | undefined,
+  b: SubscriptionWithOptions[],
+): boolean {
+  if (a == undefined || a.length !== b.length) {
+    return false;
+  }
+  for (let i = 0; i < a.length; i++) {
+    const aI = a[i]!;
+    const bI = b[i]!;
+    if (aI.topic !== bI.topic || aI.preload !== bI.preload || aI.forced !== bI.forced) {
+      return false;
+    }
+  }
+  return true;
 }

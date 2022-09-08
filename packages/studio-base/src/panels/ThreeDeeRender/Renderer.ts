@@ -68,7 +68,7 @@ import {
   TRANSFORM_STAMPED_DATATYPES,
   Vector3,
 } from "./ros";
-import { BaseSettings, CustomLayerSettings, SelectEntry, SubscriptionType } from "./settings";
+import { BaseSettings, CustomLayerSettings, SelectEntry } from "./settings";
 import { makePose, Pose, Transform, TransformTree } from "./transforms";
 
 const log = Logger.getLogger(__filename);
@@ -154,7 +154,20 @@ export type RendererConfig = {
 };
 
 /** Callback for handling a message received on a topic */
-export type MessageHandler = (messageEvent: MessageEvent<unknown>) => void;
+export type MessageHandler<T = unknown> = (messageEvent: MessageEvent<T>) => void;
+
+export type RendererSubscription<T = unknown> = {
+  /** Preload the full history of topic messages as a best effort */
+  preload?: boolean;
+  /**
+   * By default, topic subscriptions are only created when the topic visibility
+   * has been toggled on by the user in the settings sidebar. Enabling forced
+   * will unconditionally create the topic subscription(s)
+   */
+  forced?: boolean;
+  /** Callback that will be fired for each matching incoming message */
+  handler: MessageHandler<T>;
+};
 
 /** Menu item entry and callback for the "Custom Layers" menu */
 export type CustomLayerAction = {
@@ -248,14 +261,10 @@ export class Renderer extends EventEmitter<RendererEvents> {
   public variables: ReadonlyMap<string, VariableValue> = new Map();
   // extensionId -> SceneExtension
   public sceneExtensions = new Map<string, SceneExtension>();
-  // datatype -> handler[], only active when visibility is toggled on
-  public datatypeHandlers = new Map<string, MessageHandler[]>();
-  // datatype -> handler[], always active
-  public forcedDatatypeHandlers = new Map<string, MessageHandler[]>();
-  // topicName -> handler[], only active when visibility is toggled on
-  public topicHandlers = new Map<string, MessageHandler[]>();
-  // topicName -> handler[], always active
-  public forcedTopicHandlers = new Map<string, MessageHandler[]>();
+  // datatype -> RendererSubscription[]
+  public datatypeHandlers = new Map<string, RendererSubscription[]>();
+  // topicName -> RendererSubscription[]
+  public topicHandlers = new Map<string, RendererSubscription[]>();
   // layerId -> { action, handler }
   private customLayerActions = new Map<string, CustomLayerAction>();
   private scene: THREE.Scene;
@@ -419,10 +428,21 @@ export class Renderer extends EventEmitter<RendererEvents> {
     this.coreSettings = new CoreSettings(this);
 
     // Internal handlers for TF messages to update the transform tree
-    const always = SubscriptionType.Always;
-    this.addDatatypeSubscriptions(FRAME_TRANSFORM_DATATYPES, this.handleFrameTransform, always);
-    this.addDatatypeSubscriptions(TF_DATATYPES, this.handleTFMessage, always);
-    this.addDatatypeSubscriptions(TRANSFORM_STAMPED_DATATYPES, this.handleTransformStamped, always);
+    this.addDatatypeSubscriptions(FRAME_TRANSFORM_DATATYPES, {
+      handler: this.handleFrameTransform,
+      forced: true,
+      preload: true,
+    });
+    this.addDatatypeSubscriptions(TF_DATATYPES, {
+      handler: this.handleTFMessage,
+      forced: true,
+      preload: true,
+    });
+    this.addDatatypeSubscriptions(TRANSFORM_STAMPED_DATATYPES, {
+      handler: this.handleTransformStamped,
+      forced: true,
+      preload: true,
+    });
 
     this.addSceneExtension(this.coreSettings);
     this.addSceneExtension(new Cameras(this));
@@ -488,10 +508,9 @@ export class Renderer extends EventEmitter<RendererEvents> {
    * This is useful when seeking to a new playback position or when a new data source is loaded.
    */
   public clear(): void {
-    // These must be cleared before calling `SceneExtension#removeAllRenderables()` to allow
-    // extensions to add errors or transforms back afterward
+    // This must be cleared before calling `SceneExtension#removeAllRenderables()` to allow
+    // extensions to add errors back afterward
     this.settings.errors.clear();
-    this.transformTree.clear();
 
     for (const extension of this.sceneExtensions.values()) {
       extension.removeAllRenderables();
@@ -518,20 +537,20 @@ export class Renderer extends EventEmitter<RendererEvents> {
 
   public addDatatypeSubscriptions<T>(
     datatypes: Iterable<string>,
-    handler: (messageEvent: MessageEvent<T>) => void,
-    type = SubscriptionType.WhenVisible,
+    subscription: RendererSubscription<T> | MessageHandler<T>,
   ): void {
-    const genericHandler = handler as (messageEvent: MessageEvent<unknown>) => void;
-    const handlersMap =
-      type === SubscriptionType.Always ? this.forcedDatatypeHandlers : this.datatypeHandlers;
+    const genericSubscription =
+      subscription instanceof Function
+        ? { handler: subscription as MessageHandler<unknown> }
+        : (subscription as RendererSubscription);
     for (const datatype of datatypes) {
-      let handlers = handlersMap.get(datatype);
+      let handlers = this.datatypeHandlers.get(datatype);
       if (!handlers) {
         handlers = [];
-        handlersMap.set(datatype, handlers);
+        this.datatypeHandlers.set(datatype, handlers);
       }
-      if (!handlers.includes(genericHandler)) {
-        handlers.push(genericHandler);
+      if (!handlers.includes(genericSubscription)) {
+        handlers.push(genericSubscription);
       }
     }
     this.emit("datatypeHandlersChanged", this);
@@ -539,19 +558,19 @@ export class Renderer extends EventEmitter<RendererEvents> {
 
   public addTopicSubscription<T>(
     topic: string,
-    handler: (messageEvent: MessageEvent<T>) => void,
-    type = SubscriptionType.WhenVisible,
+    subscription: RendererSubscription<T> | MessageHandler<T>,
   ): void {
-    const genericHandler = handler as (messageEvent: MessageEvent<unknown>) => void;
-    const handlersMap =
-      type === SubscriptionType.Always ? this.forcedTopicHandlers : this.topicHandlers;
-    let handlers = handlersMap.get(topic);
+    const genericSubscription =
+      subscription instanceof Function
+        ? { handler: subscription as MessageHandler<unknown> }
+        : (subscription as RendererSubscription);
+    let handlers = this.topicHandlers.get(topic);
     if (!handlers) {
       handlers = [];
-      handlersMap.set(topic, handlers);
+      this.topicHandlers.set(topic, handlers);
     }
-    if (!handlers.includes(genericHandler)) {
-      handlers.push(genericHandler);
+    if (!handlers.includes(genericSubscription)) {
+      handlers.push(genericSubscription);
     }
     this.emit("topicHandlersChanged", this);
   }
@@ -845,9 +864,7 @@ export class Renderer extends EventEmitter<RendererEvents> {
       this.addCoordinateFrame(maybeHasFrameId.frame_id);
     }
 
-    handleMessage(messageEvent, this.forcedTopicHandlers.get(messageEvent.topic));
     handleMessage(messageEvent, this.topicHandlers.get(messageEvent.topic));
-    handleMessage(messageEvent, this.forcedDatatypeHandlers.get(datatype));
     handleMessage(messageEvent, this.datatypeHandlers.get(datatype));
   }
 
@@ -1320,11 +1337,11 @@ export class Renderer extends EventEmitter<RendererEvents> {
 
 function handleMessage(
   messageEvent: Readonly<MessageEvent<unknown>>,
-  handlers: MessageHandler[] | undefined,
+  subscriptions: RendererSubscription[] | undefined,
 ): void {
-  if (handlers) {
-    for (const handler of handlers) {
-      handler(messageEvent);
+  if (subscriptions) {
+    for (const subscription of subscriptions) {
+      subscription.handler(messageEvent);
     }
   }
 }

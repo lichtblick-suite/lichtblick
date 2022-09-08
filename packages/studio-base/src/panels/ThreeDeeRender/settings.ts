@@ -34,16 +34,6 @@ export type CustomLayerSettings = BaseSettings & {
   order?: number;
 };
 
-/**
- * Defines the condition for creating a topic subscription.
- */
-export enum SubscriptionType {
-  /** Only create a topic subscription when the user has toggled topic visibility on */
-  WhenVisible,
-  /** Unconditionally subscribe to matching topics */
-  Always,
-}
-
 export const PRECISION_DISTANCE = 3; // [1mm]
 export const PRECISION_DEGREES = 1;
 

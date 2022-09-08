@@ -103,6 +103,11 @@ export class FrameAxes extends SceneExtension<FrameAxisRenderable> {
     super.dispose();
   }
 
+  public override removeAllRenderables(): void {
+    // Don't destroy frame axis renderables on clear() since `renderer.transformTree`
+    // is left untouched
+  }
+
   public override settingsNodes(): SettingsTreeEntry[] {
     const config = this.renderer.config;
     const configTransforms = config.transforms;

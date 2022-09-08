@@ -39,7 +39,7 @@ import {
   COMPRESSED_IMAGE_DATATYPES,
   CAMERA_INFO_DATATYPES,
 } from "../ros";
-import { BaseSettings, PRECISION_DISTANCE, SelectEntry, SubscriptionType } from "../settings";
+import { BaseSettings, PRECISION_DISTANCE, SelectEntry } from "../settings";
 import { makePose } from "../transforms";
 import { CameraInfoUserData } from "./Cameras";
 
@@ -107,11 +107,10 @@ export class Images extends SceneExtension<ImageRenderable> {
     // Unconditionally subscribe to CameraInfo messages so the `foxglove.Cameras` extension will
     // always receive them and parse into camera models. This extension reuses the parsed camera
     // models from `foxglove.Cameras`
-    renderer.addDatatypeSubscriptions(
-      CAMERA_INFO_DATATYPES,
-      this.handleCameraInfo,
-      SubscriptionType.Always,
-    );
+    renderer.addDatatypeSubscriptions(CAMERA_INFO_DATATYPES, {
+      handler: this.handleCameraInfo,
+      forced: true,
+    });
   }
 
   public override settingsNodes(): SettingsTreeEntry[] {
