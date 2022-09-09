@@ -254,6 +254,16 @@ export class IterablePlayer implements Player {
     // Limit seek to within the valid range
     const targetTime = clampTime(time, this._start, this._end);
 
+    // We are already seeking to this time, no need to reset seeking
+    if (this._seekTarget && compare(this._seekTarget, targetTime) === 0) {
+      return;
+    }
+
+    // We are already at this time, no need to reset seeking
+    if (this._currentTime && compare(this._currentTime, targetTime) === 0) {
+      return;
+    }
+
     this._metricsCollector.seek(targetTime);
     this._seekTarget = targetTime;
     this._untilTime = undefined;
@@ -592,7 +602,6 @@ export class IterablePlayer implements Player {
     }
 
     this._lastMessage = undefined;
-    this._seekTarget = undefined;
 
     // If the backfill does not complete within 100 milliseconds, we emit a seek event with no messages.
     // This provides feedback to the user that we've acknowledged their seek request but haven't loaded the data.
@@ -635,6 +644,10 @@ export class IterablePlayer implements Player {
         throw err;
       }
     } finally {
+      // Unless the next state is a seek backfill, we clear the seek target since we have finished seeking
+      if (this._nextState !== "seek-backfill") {
+        this._seekTarget = undefined;
+      }
       clearTimeout(seekAckTimeout);
       this._abort = undefined;
     }
