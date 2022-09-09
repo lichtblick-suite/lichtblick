@@ -28,6 +28,8 @@ export const DisjointRanges: Story = () => {
   );
 };
 
+DisjointRanges.parameters = { colorScheme: "both-column" };
+
 export const Loading: Story = () => {
   return (
     <Box bgcolor="background.paper" width="100%" height="100%" padding={2}>
@@ -43,3 +45,5 @@ export const Loading: Story = () => {
     </Box>
   );
 };
+
+Loading.parameters = { colorScheme: "both-column" };

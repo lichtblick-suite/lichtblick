@@ -5,6 +5,7 @@
 import { keyframes } from "@emotion/react";
 import { simplify } from "intervals-fn";
 import { useMemo } from "react";
+import tinycolor from "tinycolor2";
 import { makeStyles } from "tss-react/mui";
 
 import { filterMap } from "@foxglove/den/collection";
@@ -43,7 +44,10 @@ const useStyles = makeStyles()((theme) => ({
   range: {
     label: "ProgressPlot-range",
     position: "absolute",
-    backgroundColor: theme.palette.divider,
+    backgroundColor:
+      theme.palette.mode === "dark"
+        ? tinycolor(theme.palette.text.secondary).darken(25).toHexString()
+        : tinycolor(theme.palette.text.secondary).lighten(25).toHexString(),
     height: "100%",
   },
 }));

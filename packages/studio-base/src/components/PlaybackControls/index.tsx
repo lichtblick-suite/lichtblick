@@ -28,9 +28,13 @@ import { compare, Time } from "@foxglove/rostime";
 import HoverableIconButton from "@foxglove/studio-base/components/HoverableIconButton";
 import KeyListener from "@foxglove/studio-base/components/KeyListener";
 import LoopIcon from "@foxglove/studio-base/components/LoopIcon";
+import {
+  MessagePipelineContext,
+  useMessagePipeline,
+} from "@foxglove/studio-base/components/MessagePipeline";
 import PlaybackSpeedControls from "@foxglove/studio-base/components/PlaybackSpeedControls";
 import Stack from "@foxglove/studio-base/components/Stack";
-import { Player } from "@foxglove/studio-base/players/types";
+import { Player, PlayerPresence } from "@foxglove/studio-base/players/types";
 
 import PlaybackTimeDisplay from "./PlaybackTimeDisplay";
 import { RepeatAdapter } from "./RepeatAdapter";
@@ -49,6 +53,8 @@ const useStyles = makeStyles()((theme) => ({
   },
 }));
 
+const selectPresence = (ctx: MessagePipelineContext) => ctx.playerState.presence;
+
 export default function PlaybackControls(props: {
   play: NonNullable<Player["startPlayback"]>;
   pause: NonNullable<Player["pausePlayback"]>;
@@ -58,6 +64,7 @@ export default function PlaybackControls(props: {
   getTimeInfo: () => { startTime?: Time; endTime?: Time; currentTime?: Time };
 }): JSX.Element {
   const { play, pause, seek, isPlaying, getTimeInfo, playUntil } = props;
+  const presence = useMessagePipeline(selectPresence);
 
   const { classes } = useStyles();
   const [repeat, setRepeat] = useState(false);
@@ -130,6 +137,8 @@ export default function PlaybackControls(props: {
     [seekBackwardAction, seekForwardAction, togglePlayPause],
   );
 
+  const disableControls = presence === PlayerPresence.ERROR;
+
   return (
     <>
       <RepeatAdapter play={play} seek={seek} repeatEnabled={repeat} />
@@ -142,6 +151,7 @@ export default function PlaybackControls(props: {
           </Stack>
           <Stack direction="row" alignItems="center" gap={1}>
             <HoverableIconButton
+              disabled={disableControls}
               size="small"
               title="Seek backward"
               icon={<Previous20Regular />}
@@ -149,6 +159,7 @@ export default function PlaybackControls(props: {
               onClick={() => seekBackwardAction()}
             />
             <HoverableIconButton
+              disabled={disableControls}
               size="small"
               title={isPlaying ? "Pause" : "Play"}
               onClick={togglePlayPause}
@@ -156,6 +167,7 @@ export default function PlaybackControls(props: {
               activeIcon={isPlaying ? <Pause20Filled /> : <Play20Filled />}
             />
             <HoverableIconButton
+              disabled={disableControls}
               size="small"
               title="Seek forward"
               icon={<Next20Regular />}

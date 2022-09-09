@@ -40,7 +40,13 @@ type PlaybackTimeDisplayMethodProps = {
 
 const StyledTextField = muiStyled(TextField)<{ error?: boolean }>(({ error, theme }) => ({
   borderRadius: theme.shape.borderRadius,
-  ":hover": {
+
+  "&.Mui-disabled": {
+    ".MuiFilledInput-root": {
+      backgroundColor: "transparent",
+    },
+  },
+  "&:not(.Mui-disabled):hover": {
     backgroundColor: theme.palette.action.hover,
 
     ".MuiIconButton-root": {
@@ -261,8 +267,11 @@ export default function PlaybackTimeDisplayMethod({
         </form>
       ) : (
         <StyledTextField
+          className="Mui-disabled"
           disabled
-          defaultValue="–"
+          variant="filled"
+          size="small"
+          defaultValue={timeFormat.timeFormat === "SEC" ? "0000000000.000000000" : "00:00:00.000"}
           InputProps={{
             endAdornment: (
               <IconButton edge="end" disabled>
