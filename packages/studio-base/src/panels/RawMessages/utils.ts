@@ -11,24 +11,15 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { first, last } from "lodash";
+import { first, kebabCase, last } from "lodash";
 
+import { definitions as commonDefs } from "@foxglove/rosmsg-msgs-common";
+import { foxgloveMessageSchemas } from "@foxglove/schemas";
 import { diffLabels, DiffObject } from "@foxglove/studio-base/panels/RawMessages/getDiff";
 
 export const DATA_ARRAY_PREVIEW_LIMIT = 20;
-export const ROS_COMMON_MSGS: Set<string> = new Set([
-  "actionlib_msgs",
-  "diagnostic_msgs",
-  "geometry_msgs",
-  "nav_msgs",
-  "sensor_msgs",
-  "shape_msgs",
-  "std_msgs",
-  "stereo_msgs",
-  "trajectory_msgs",
-  "visualization_msgs",
-  "turtlesim",
-]);
+const ROS_COMMON_MSG_PACKAGES = new Set(Object.keys(commonDefs).map((key) => key.split("/")[0]!));
+ROS_COMMON_MSG_PACKAGES.add("turtlesim");
 
 function isTypedArray(obj: unknown) {
   return Boolean(
@@ -98,11 +89,27 @@ export function getChangeCounts(
   return startingCounts;
 }
 
-export function getMessageDocumentationLink(datatype: string): string {
-  const parts = datatype.split("/");
+const foxgloveDocsLinksByDatatype = new Map<string, string>();
+for (const schema of Object.values(foxgloveMessageSchemas)) {
+  const url = `https://foxglove.dev/docs/studio/messages/${kebabCase(schema.name)}`;
+  foxgloveDocsLinksByDatatype.set(`foxglove_msgs/${schema.name}`, url);
+  foxgloveDocsLinksByDatatype.set(`foxglove_msgs/msg/${schema.name}`, url);
+  foxgloveDocsLinksByDatatype.set(`foxglove.${schema.name}`, url);
+}
+
+export function getMessageDocumentationLink(datatype: string): string | undefined {
+  const parts = datatype.split(/[/.]/);
   const pkg = first(parts);
   const filename = last(parts);
-  return pkg != undefined && ROS_COMMON_MSGS.has(pkg)
-    ? `http://docs.ros.org/api/${pkg}/html/msg/${filename}.html`
-    : `https://www.google.com/search?q=${pkg}/${filename}`;
+
+  if (pkg != undefined && ROS_COMMON_MSG_PACKAGES.has(pkg)) {
+    return `https://docs.ros.org/api/${pkg}/html/msg/${filename}.html`;
+  }
+
+  const foxgloveDocsLink = foxgloveDocsLinksByDatatype.get(datatype);
+  if (foxgloveDocsLink != undefined) {
+    return foxgloveDocsLink;
+  }
+
+  return undefined;
 }

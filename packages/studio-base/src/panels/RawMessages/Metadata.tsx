@@ -56,24 +56,27 @@ export default function Metadata({
   diffMessage,
 }: Props): JSX.Element {
   const { classes } = useStyles();
+  const docsLink = datatype ? getMessageDocumentationLink(datatype) : undefined;
   return (
     <Stack alignItems="flex-start" padding={0.25}>
       <Stack direction="row" alignItems="center" gap={0.5}>
         <Typography variant="caption" lineHeight={1.2} color="text.secondary">
-          {diffMessage
-            ? "base"
-            : datatype && (
-                <Link
-                  target="_blank"
-                  color="inherit"
-                  variant="caption"
-                  underline="hover"
-                  rel="noopener noreferrer"
-                  href={getMessageDocumentationLink(datatype)}
-                >
-                  {datatype}
-                </Link>
-              )}
+          {diffMessage ? (
+            "base"
+          ) : docsLink ? (
+            <Link
+              target="_blank"
+              color="inherit"
+              variant="caption"
+              underline="hover"
+              rel="noopener noreferrer"
+              href={docsLink}
+            >
+              {datatype}
+            </Link>
+          ) : (
+            datatype
+          )}
           {` @ ${formatTimeRaw(message.receiveTime)} sec`}
         </Typography>
         <CopyButton
