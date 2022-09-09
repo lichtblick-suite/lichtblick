@@ -197,12 +197,9 @@ export function MessagePipelineProvider({
     },
     [updateState],
   );
-  const setPublishers = useCallback(
-    (id: string, publishersForId: AdvertiseOptions[]) => {
-      setAllPublishers((p) => ({ ...p, [id]: publishersForId }));
-    },
-    [setAllPublishers],
-  );
+  const setPublishers = useCallback((id: string, publishersForId: AdvertiseOptions[]) => {
+    setAllPublishers((p) => ({ ...p, [id]: publishersForId }));
+  }, []);
   const setParameter = useCallback(
     (key: string, value: ParameterValue) => (player ? player.setParameter(key, value) : undefined),
     [player],

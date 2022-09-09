@@ -80,8 +80,13 @@ type RenderFn = NonNullable<PanelExtensionContext["onRender"]>;
 function PanelExtensionAdapter(props: PanelExtensionAdapterProps): JSX.Element {
   const { initPanel, config, saveConfig } = props;
 
-  // Buffer initial state so initPanel is not called on every config update.
-  const [initialState, setInitialState] = useState(config);
+  // Unlike the react data flow, the config is only provided to the panel once on setup.
+  // The panel is meant to manage the config and call saveConfig on its own.
+  //
+  // We store the config in a ref to avoid re-initializing the panel when the react config
+  // changes. The initialState is updated in an effect below so that if the panel does re-initialize
+  // it does so with the latest config.
+  const initialState = useRef(config);
 
   const messagePipelineContext = useMessagePipeline(selectContext);
 
@@ -91,7 +96,7 @@ function PanelExtensionAdapter(props: PanelExtensionAdapterProps): JSX.Element {
 
   const { openSiblingPanel } = usePanelContext();
 
-  const [panelId] = useState(() => uuid());
+  const [panelId, setPanelId] = useState(() => uuid());
 
   const [error, setError] = useState<Error | undefined>();
   const [watchedFields, setWatchedFields] = useState(new Set<keyof RenderState>());
@@ -138,10 +143,12 @@ function PanelExtensionAdapter(props: PanelExtensionAdapterProps): JSX.Element {
   // Spiritually its like a reducer
   const [buildRenderState, setBuildRenderState] = useState(() => initRenderStateBuilder());
 
-  // Reset panel when config is cleared.
+  // Keep the initialState updated and reset the panel if the config is cleared
+  // This happens when a panel crashes and the user wants to "reset" it
   useUpdateEffect(() => {
+    initialState.current = config;
     if (isEqual(config, {})) {
-      setInitialState(config);
+      setPanelId(() => uuid());
     }
   }, [config]);
 
@@ -274,7 +281,7 @@ function PanelExtensionAdapter(props: PanelExtensionAdapterProps): JSX.Element {
     };
 
     return {
-      initialState,
+      initialState: initialState.current,
 
       saveState: saveConfig,
 
@@ -396,7 +403,6 @@ function PanelExtensionAdapter(props: PanelExtensionAdapterProps): JSX.Element {
     capabilities,
     clearHoverValue,
     dataSourceProfile,
-    initialState,
     getMessagePipelineContext,
     openSiblingPanel,
     panelId,

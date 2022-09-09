@@ -153,7 +153,6 @@ type WorkspaceProps = {
 const DEFAULT_DEEPLINKS = Object.freeze([]);
 
 const selectPlayerPresence = ({ playerState }: MessagePipelineContext) => playerState.presence;
-const selectSetSubscriptions = ({ setSubscriptions }: MessagePipelineContext) => setSubscriptions;
 const selectPlayerProblems = ({ playerState }: MessagePipelineContext) => playerState.problems;
 const selectIsPlaying = (ctx: MessagePipelineContext) =>
   ctx.playerState.activeData?.isPlaying === true;
@@ -161,6 +160,7 @@ const selectPause = (ctx: MessagePipelineContext) => ctx.pausePlayback;
 const selectPlay = (ctx: MessagePipelineContext) => ctx.startPlayback;
 const selectSeek = (ctx: MessagePipelineContext) => ctx.seekPlayback;
 const selectPlayUntil = (ctx: MessagePipelineContext) => ctx.playUntil;
+const selectPlayerId = (ctx: MessagePipelineContext) => ctx.playerState.playerId;
 
 const selectSetHelpInfo = (store: HelpInfoStore) => store.setHelpInfo;
 
@@ -184,9 +184,9 @@ export default function Workspace(props: WorkspaceProps): JSX.Element {
 
   const supportsAccountSettings = useContext(ConsoleApiContext) != undefined;
 
-  // we use setSubscriptions to detect when a player changes for RemountOnValueChange below
+  // We use playerId to detect when a player changes for RemountOnValueChange below
   // see comment below above the RemountOnValueChange component
-  const setSubscriptions = useMessagePipeline(selectSetSubscriptions);
+  const playerId = useMessagePipeline(selectPlayerId);
 
   const isPlayerPresent = playerPresence !== PlayerPresence.NOT_PRESENT;
 
@@ -595,7 +595,7 @@ export default function Workspace(props: WorkspaceProps): JSX.Element {
           onSelectKey={selectSidebarItem}
         >
           {/* To ensure no stale player state remains, we unmount all panels when players change */}
-          <RemountOnValueChange value={setSubscriptions}>
+          <RemountOnValueChange value={playerId}>
             <Stack>
               <PanelLayout />
               {play && pause && seek && (
