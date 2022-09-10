@@ -293,11 +293,16 @@ export class IterablePlayer implements Player {
     this._partialTopics = partialTopics;
     this._blockLoader?.setTopics(this._partialTopics);
 
-    // We only seek playback if the player is not playing. If the player is playing, the
-    // playing state will detect any subscription changes and emit new messages.
+    // If the player is playing, the playing state will detect any subscription changes and adjust
+    // iterators accordignly. However if we are idle or already seeking then we need to manually
+    // trigger the backfill.
     if (this._state === "idle" || this._state === "seek-backfill" || this._state === "play") {
       if (!this._isPlaying && this._currentTime) {
-        this.seekPlayback(this._currentTime);
+        this._seekTarget = this._currentTime;
+        this._untilTime = undefined;
+
+        // Trigger a seek backfill to load any missing messages and reset the forward iterator
+        this._setState("seek-backfill");
       }
     }
   }

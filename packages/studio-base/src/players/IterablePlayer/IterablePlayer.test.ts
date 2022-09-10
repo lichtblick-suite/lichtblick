@@ -357,4 +357,35 @@ describe("IterablePlayer", () => {
 
     player.close();
   });
+
+  it("should make a new message iterator when topic subscriptions change", async () => {
+    const source = new TestSource();
+    const player = new IterablePlayer({
+      source,
+      enablePreload: false,
+      sourceId: "test",
+    });
+
+    const messageIteratorSpy = jest.spyOn(source, "messageIterator");
+
+    const store = new PlayerStateStore(4);
+    player.setSubscriptions([{ topic: "foo" }]);
+    player.setListener(async (state) => await store.add(state));
+
+    // Wait for initial setup
+    await store.done;
+
+    // Call set subscriptions and add a new topic
+    store.reset(3);
+    player.setSubscriptions([{ topic: "foo" }, { topic: "bar" }]);
+
+    await store.done;
+
+    expect(messageIteratorSpy.mock.calls).toEqual([
+      [{ start: { sec: 0, nsec: 0 }, end: { sec: 1, nsec: 0 }, topics: ["foo"] }],
+      [{ start: { sec: 0, nsec: 99000001 }, end: { sec: 1, nsec: 0 }, topics: ["bar", "foo"] }],
+    ]);
+
+    player.close();
+  });
 });
