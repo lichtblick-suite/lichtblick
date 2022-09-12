@@ -398,14 +398,14 @@ function MapPanel(props: MapPanelProps): JSX.Element {
   );
 
   const addGeoJsonMessage = useCallback(
-    (message: GeoJsonMessage, topicLayer: TopicGroups) => {
+    (message: GeoJsonMessage, group: FeatureGroup) => {
       const parsed = JSON.parse(message.message.geojson) as Parameters<typeof geoJSON>[0];
       geoJSON(parsed, {
         onEachFeature: (_feature, layer) => addGeoFeatureEventHandlers(message, layer),
         style: config.topicColors[message.topic]
           ? { color: config.topicColors[message.topic] }
           : {},
-      }).addTo(topicLayer.allFrames);
+      }).addTo(group);
     },
     [addGeoFeatureEventHandlers, config.topicColors],
   );
@@ -462,7 +462,7 @@ function MapPanel(props: MapPanelProps): JSX.Element {
 
       allGeoMessages
         .filter((message) => message.topic === topic)
-        .forEach((message) => addGeoJsonMessage(message, topicLayer));
+        .forEach((message) => addGeoJsonMessage(message, topicLayer.allFrames));
     }
   }, [
     addGeoJsonMessage,
@@ -511,7 +511,7 @@ function MapPanel(props: MapPanelProps): JSX.Element {
 
       currentGeoMessages
         .filter((message) => message.topic === topic)
-        .forEach((message) => addGeoJsonMessage(message, topicLayer));
+        .forEach((message) => addGeoJsonMessage(message, topicLayer.currentFrame));
     }
   }, [
     addGeoJsonMessage,
