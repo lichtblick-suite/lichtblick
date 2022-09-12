@@ -5,8 +5,7 @@
 import { Menu, MenuItem, MenuProps } from "@mui/material";
 import { useCallback } from "react";
 
-import { getObject } from "@foxglove/studio-base/panels/ThreeDimensionalViz/threeDimensionalVizUtils";
-import { BaseMarker } from "@foxglove/studio-base/types/Messages";
+import { BaseMarker, InstancedLineListMarker } from "@foxglove/studio-base/types/Messages";
 
 import { MouseEventObject } from "../camera";
 import { Interactive, SelectedObject } from "./types";
@@ -18,6 +17,22 @@ type Props = {
   clickedObjects: MouseEventObject[];
   onClose: MenuProps["onClose"];
   selectObject: (arg0?: MouseEventObject) => void;
+};
+
+const getInstanceObj = (marker: unknown, idx: number): unknown => {
+  if (marker == undefined) {
+    return;
+  }
+  return (marker as InstancedLineListMarker).metadataByIndex?.[idx];
+};
+
+const getObject = (selectedObject?: MouseEventObject): unknown => {
+  const object =
+    (selectedObject?.instanceIndex != undefined &&
+      (selectedObject.object as InstancedLineListMarker).metadataByIndex != undefined &&
+      getInstanceObj(selectedObject.object, selectedObject.instanceIndex)) ||
+    selectedObject?.object;
+  return object;
 };
 
 function InteractionContextMenuItem({

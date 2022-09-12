@@ -13,10 +13,10 @@
 
 import styled from "styled-components";
 
+import TextMiddleTruncate from "@foxglove/studio-base/components/TextMiddleTruncate";
 import Tooltip from "@foxglove/studio-base/components/Tooltip";
 
 import TextHighlight from "./TextHighlight";
-import TextMiddleTruncate from "./TextMiddleTruncate";
 
 // Extra text length to make sure text such as `1000 visible topics` don't get truncated.
 const DEFAULT_END_TEXT_LENGTH = 22;

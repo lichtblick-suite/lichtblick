@@ -11,36 +11,35 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import styled from "styled-components";
+import { makeStyles } from "tss-react/mui";
 
 import Tooltip from "@foxglove/studio-base/components/Tooltip";
 
 export const DEFAULT_END_TEXT_LENGTH = 16;
 
-export const STextMiddleTruncate = styled.div`
-  display: flex;
-  flex-direction: row;
-  flex-wrap: nowrap;
-  justify-content: flex-start;
-`;
-
-const SStart = styled.div`
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  flex-shrink: 1;
-`;
-
-const SEnd = styled.div`
-  white-space: nowrap;
-  flex-basis: content;
-  flex-grow: 0;
-  flex-shrink: 0;
-  max-width: 100%;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-`;
+const useStyles = makeStyles()(() => ({
+  STextMiddleTruncate: {
+    display: "flex",
+    flexDirection: "row",
+    flexWrap: "nowrap",
+    justifyContent: "flex-start",
+  },
+  SStart: {
+    overflow: "hidden",
+    textOverflow: "ellipsis",
+    whiteSpace: "nowrap",
+    flexShrink: 1,
+  },
+  SEnd: {
+    whiteSpace: "nowrap",
+    flexBasis: "content",
+    flexGrow: 0,
+    flexShrink: 0,
+    maxWidth: "100%",
+    overflow: "hidden",
+    textOverflow: "ellipsis",
+  },
+}));
 
 type Props = {
   tooltips?: React.ReactNode[];
@@ -59,19 +58,20 @@ export default function TextMiddleTruncate({
   style,
   testShowTooltip,
 }: Props): React.ReactElement {
+  const { classes } = useStyles();
   const startTextLen = Math.max(
     0,
     text.length -
       (endTextLength == undefined || endTextLength === 0 ? DEFAULT_END_TEXT_LENGTH : endTextLength),
   );
-  const startText = text.substr(0, startTextLen);
-  const endText = text.substr(startTextLen);
+  const startText = text.substring(0, startTextLen);
+  const endText = text.substring(startTextLen);
 
   const elem = (
-    <STextMiddleTruncate style={style}>
-      <SStart>{startText}</SStart>
-      <SEnd>{endText}</SEnd>
-    </STextMiddleTruncate>
+    <div className={classes.STextMiddleTruncate} style={style}>
+      <div className={classes.SStart}>{startText}</div>
+      <div className={classes.SEnd}>{endText}</div>
+    </div>
   );
   return (
     <Tooltip contents={tooltips} placement="top" shown={testShowTooltip}>

@@ -14,9 +14,9 @@ import { useMemo } from "react";
 
 import { AppSetting } from "@foxglove/studio-base/AppSetting";
 import Stack from "@foxglove/studio-base/components/Stack";
+import TextMiddleTruncate from "@foxglove/studio-base/components/TextMiddleTruncate";
 import { usePlayerSelection } from "@foxglove/studio-base/context/PlayerSelectionContext";
 import { useAppConfigurationValue } from "@foxglove/studio-base/hooks";
-import TextMiddleTruncate from "@foxglove/studio-base/panels/ThreeDimensionalViz/TopicTree/TextMiddleTruncate";
 
 import ActionList, { ActionListItem } from "./ActionList";
 import { OpenDialogViews } from "./types";

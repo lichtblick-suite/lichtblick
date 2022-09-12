@@ -16,7 +16,7 @@ import TextMiddleTruncate from "./TextMiddleTruncate";
 
 const LONG_TOPIC_NAME =
   "/some_really_long_topic_name/some/long/text/lorem/ipsum/dolor/sit/amet/consectetur/adipisicing/voluptate/laborum/amet/velit/eius/cum/modi//sapiente/natus/unde/end_topic_name";
-storiesOf("panels/ThreeDimensionalViz/TopicTree/TextMiddleTruncate", module).add("default", () => {
+storiesOf("components/TextMiddleTruncate", module).add("default", () => {
   return (
     <div style={{ width: 240, border: "1px solid gray", margin: 16 }}>
       <div>
