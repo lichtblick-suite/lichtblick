@@ -200,7 +200,40 @@ function makeStoryScene({
 
           triangles: [],
 
-          texts: [],
+          texts: [
+            {
+              pose: xyzrpyToPose([0, 7, 0], [0, 0, 0]),
+              color: makeColor("#f6f136", 0.5),
+              font_size: 0.2,
+              text: "3d size",
+              scale_invariant: false,
+              billboard: true,
+            },
+            {
+              pose: xyzrpyToPose([1, 7, 0], [0, 0, 30]),
+              color: makeColor("#ae6fc3", 0.9),
+              font_size: 10,
+              text: "pixel size",
+              scale_invariant: true,
+              billboard: true,
+            },
+            {
+              pose: xyzrpyToPose([0, 8, 0], [0, 0, 0]),
+              color: makeColor("#f6f136", 0.5),
+              font_size: 0.2,
+              text: "scale invariant false",
+              scale_invariant: false,
+              billboard: false,
+            },
+            {
+              pose: xyzrpyToPose([1, 8, 0], [0, 0, 30]),
+              color: makeColor("#ae6fc3", 0.9),
+              font_size: 0.2,
+              text: "scale invariant true",
+              scale_invariant: true,
+              billboard: false,
+            },
+          ],
 
           models: [
             {

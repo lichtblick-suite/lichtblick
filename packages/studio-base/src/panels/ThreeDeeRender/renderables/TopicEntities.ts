@@ -20,6 +20,7 @@ import { RenderableCylinders } from "./primitives/RenderableCylinders";
 import { RenderableLines } from "./primitives/RenderableLines";
 import { RenderableModels } from "./primitives/RenderableModels";
 import { RenderableSpheres } from "./primitives/RenderableSpheres";
+import { RenderableTexts } from "./primitives/RenderableTexts";
 import { ALL_PRIMITIVE_TYPES, PrimitiveType } from "./primitives/types";
 import { missingTransformMessage, MISSING_TRANSFORM } from "./transforms";
 
@@ -37,6 +38,7 @@ type EntityRenderables = {
   [PrimitiveType.CYLINDERS]?: RenderableCylinders;
   [PrimitiveType.ARROWS]?: RenderableArrows;
   [PrimitiveType.SPHERES]?: RenderableSpheres;
+  [PrimitiveType.TEXTS]?: RenderableTexts;
 };
 
 const PRIMITIVE_KEYS = {
@@ -46,6 +48,7 @@ const PRIMITIVE_KEYS = {
   [PrimitiveType.CYLINDERS]: "cylinders",
   [PrimitiveType.ARROWS]: "arrows",
   [PrimitiveType.SPHERES]: "spheres",
+  [PrimitiveType.TEXTS]: "texts",
 } as const;
 
 export class TopicEntities extends Renderable<EntityTopicUserData> {
