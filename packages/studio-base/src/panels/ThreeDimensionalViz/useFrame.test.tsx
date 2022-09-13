@@ -184,6 +184,19 @@ describe("useFrame", () => {
         },
       },
       {
+        reset: false,
+        frame: {
+          "/some/topic": [
+            {
+              topic: "/some/topic",
+              receiveTime: { sec: 100, nsec: 0 },
+              message: { index: 0 },
+              sizeInBytes: 0,
+            },
+          ],
+        },
+      },
+      {
         // next render indicates reset is false since the stream remains the same
         reset: false,
         frame: {

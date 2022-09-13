@@ -1,72 +1,40 @@
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
-//
-// This file incorporates work covered by the following copyright and
-// permission notice:
-//
-//   Copyright 2018-2021 Cruise LLC
-//
-//   This source code is licensed under the Apache License, Version 2.0,
-//   found at http://www.apache.org/licenses/LICENSE-2.0
-//   You may not use this file except in compliance with the License.
 
-import { debounce, flatten } from "lodash";
+import { debounce } from "lodash";
+import { createContext } from "react";
+import { StoreApi, useStore } from "zustand";
 
-import { Condvar } from "@foxglove/den/async";
-import { useShallowMemo } from "@foxglove/hooks";
-import { Time } from "@foxglove/rostime";
-import { MessageEvent, ParameterValue } from "@foxglove/studio";
 import { AppSetting } from "@foxglove/studio-base/AppSetting";
 import { useAppConfigurationValue } from "@foxglove/studio-base/hooks/useAppConfigurationValue";
-import useContextSelector from "@foxglove/studio-base/hooks/useContextSelector";
 import { GlobalVariables } from "@foxglove/studio-base/hooks/useGlobalVariables";
-import useSelectableContextGetter from "@foxglove/studio-base/hooks/useSelectableContextGetter";
+import useGuaranteedContext from "@foxglove/studio-base/hooks/useGuaranteedContext";
 import {
-  AdvertiseOptions,
   Player,
-  PlayerCapabilities,
-  PlayerPresence,
   PlayerProblem,
   PlayerState,
-  PublishPayload,
   SubscribePayload,
-  Topic,
 } from "@foxglove/studio-base/players/types";
-import { RosDatatypes } from "@foxglove/studio-base/types/RosDatatypes";
-import createSelectableContext from "@foxglove/studio-base/util/createSelectableContext";
 
 import MessageOrderTracker from "./MessageOrderTracker";
 import { pauseFrameForPromises, FramePromise } from "./pauseFrameForPromise";
-import { MessagePipelineStateAction, usePlayerState } from "./usePlayerState";
+import {
+  MessagePipelineInternalState,
+  createMessagePipelineStore,
+  MessagePipelineStateAction,
+  defaultPlayerState,
+} from "./store";
+import { MessagePipelineContext } from "./types";
+
+export type { MessagePipelineContext };
 
 const { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } = React;
 
-type ResumeFrame = () => void;
-export type MessagePipelineContext = {
-  playerState: PlayerState;
-  sortedTopics: Topic[];
-  datatypes: RosDatatypes;
-  subscriptions: SubscribePayload[];
-  publishers: AdvertiseOptions[];
-  messageEventsBySubscriberId: Map<string, MessageEvent<unknown>[]>;
-  setSubscriptions: (id: string, subscriptionsForId: SubscribePayload[]) => void;
-  setPublishers: (id: string, publishersForId: AdvertiseOptions[]) => void;
-  setParameter: (key: string, value: ParameterValue) => void;
-  publish: (request: PublishPayload) => void;
-  callService: (service: string, request: unknown) => Promise<unknown>;
-  startPlayback?: () => void;
-  pausePlayback?: () => void;
-  playUntil?: (time: Time) => void;
-  setPlaybackSpeed?: (speed: number) => void;
-  seekPlayback?: (time: Time) => void;
-  // Don't render the next frame until the returned function has been called.
-  pauseFrame: (name: string) => ResumeFrame;
-};
-
 // exported only for MockMessagePipelineProvider
-export const ContextInternal = createSelectableContext<MessagePipelineContext>();
-ContextInternal.displayName = "MessagePipelineContext";
+export const ContextInternal = createContext<StoreApi<MessagePipelineInternalState> | undefined>(
+  undefined,
+);
 
 /**
  * useMessagePipelineGetter returns a function to access the current message pipeline context.
@@ -76,22 +44,16 @@ ContextInternal.displayName = "MessagePipelineContext";
  * @returns a function to return the current MessagePipelineContext
  */
 export function useMessagePipelineGetter(): () => MessagePipelineContext {
-  return useSelectableContextGetter(ContextInternal);
+  const store = useGuaranteedContext(ContextInternal);
+  return useCallback(() => store.getState().public, [store]);
 }
 
 export function useMessagePipeline<T>(selector: (arg0: MessagePipelineContext) => T): T {
-  return useContextSelector(ContextInternal, selector);
-}
-
-function defaultPlayerState(): PlayerState {
-  return {
-    presence: PlayerPresence.NOT_PRESENT,
-    progress: {},
-    capabilities: [],
-    profile: undefined,
-    playerId: "",
-    activeData: undefined,
-  };
+  const store = useGuaranteedContext(ContextInternal);
+  return useStore(
+    store,
+    useCallback((state) => selector(state.public), [selector]),
+  );
 }
 
 type ProviderProps = {
@@ -106,25 +68,25 @@ type ProviderProps = {
   globalVariables: GlobalVariables;
 };
 
+const selectRenderDone = (state: MessagePipelineInternalState) => state.renderDone;
+const selectPublishers = (state: MessagePipelineInternalState) => state.public.publishers;
+const selectSubscriptions = (state: MessagePipelineInternalState) => state.public.subscriptions;
+
 export function MessagePipelineProvider({
   children,
   player,
   globalVariables,
 }: ProviderProps): React.ReactElement {
-  const [publishersById, setAllPublishers] = useState({});
-
   const promisesToWaitForRef = useRef<FramePromise[]>([]);
-
-  const [state, updateState] = usePlayerState();
-
-  const subscriptions: SubscribePayload[] = useMemo(
-    () => flatten(Array.from(state.subscriptionsById.values())),
-    [state.subscriptionsById],
+  const [store] = useState(() =>
+    createMessagePipelineStore({ promisesToWaitForRef, initialPlayer: player }),
   );
-  const publishers: AdvertiseOptions[] = useMemo(
-    () => flatten(Object.values(publishersById)),
-    [publishersById],
-  );
+  useEffect(() => {
+    store.getState().dispatch({ type: "set-player", player });
+  }, [player, store]);
+
+  const publishers = useStore(store, selectPublishers);
+  const subscriptions = useStore(store, selectSubscriptions);
 
   // Debounce the subscription updates for players. This batches multiple subscribe calls
   // into one update for the player which avoids fetching data that will be immediately discarded.
@@ -153,14 +115,15 @@ export function MessagePipelineProvider({
   const [messageRate] = useAppConfigurationValue<number>(AppSetting.MESSAGE_RATE);
 
   // Tell listener the layout has completed
-  const signalRenderDone = state.renderDone;
+  const renderDone = useStore(store, selectRenderDone);
   useLayoutEffect(() => {
-    signalRenderDone?.();
-  }, [signalRenderDone]);
+    renderDone?.();
+  }, [renderDone]);
 
   const msPerFrameRef = useRef<number>(16);
   msPerFrameRef.current = 1000 / (messageRate ?? 60);
 
+  const dispatch = store.getState().dispatch;
   useEffect(() => {
     if (!player) {
       return;
@@ -169,119 +132,25 @@ export function MessagePipelineProvider({
     const { listener, cleanupListener } = createPlayerListener({
       msPerFrameRef,
       promisesToWaitForRef,
-      updateState,
+      dispatch,
     });
     player.setListener(listener);
     return () => {
       cleanupListener();
       player.close();
-      updateState({
+      dispatch({
         type: "update-player-state",
         playerState: defaultPlayerState(),
         renderDone: undefined,
       });
     };
-  }, [player, updateState]);
-
-  const topics: Topic[] | undefined = useShallowMemo(state.playerState.activeData?.topics);
-  const sortedTopics = useMemo(() => (topics ?? []).sort(), [topics]);
-  const datatypes: RosDatatypes = useMemo(
-    () => state.playerState.activeData?.datatypes ?? new Map(),
-    [state.playerState.activeData?.datatypes],
-  );
-
-  const capabilities = useShallowMemo(state.playerState.capabilities);
-  const setSubscriptions = useCallback(
-    (id: string, payloads: SubscribePayload[]) => {
-      updateState({ type: "update-subscriber", id, payloads });
-    },
-    [updateState],
-  );
-  const setPublishers = useCallback((id: string, publishersForId: AdvertiseOptions[]) => {
-    setAllPublishers((p) => ({ ...p, [id]: publishersForId }));
-  }, []);
-  const setParameter = useCallback(
-    (key: string, value: ParameterValue) => (player ? player.setParameter(key, value) : undefined),
-    [player],
-  );
-  const publish = useCallback(
-    (request: PublishPayload) => (player ? player.publish(request) : undefined),
-    [player],
-  );
-  const callService = useCallback(
-    async (service: string, request: unknown) =>
-      await (player ? player.callService(service, request) : Promise.reject()),
-    [player],
-  );
-  const startPlayback = useMemo(
-    () =>
-      capabilities.includes(PlayerCapabilities.playbackControl)
-        ? player?.startPlayback?.bind(player)
-        : undefined,
-    [player, capabilities],
-  );
-  const playUntil = useMemo(
-    () => (player?.playUntil ? player.playUntil.bind(player) : undefined),
-    [player],
-  );
-  const pausePlayback = useMemo(
-    () =>
-      capabilities.includes(PlayerCapabilities.playbackControl)
-        ? player?.pausePlayback?.bind(player)
-        : undefined,
-    [player, capabilities],
-  );
-  const seekPlayback = useMemo(
-    () =>
-      capabilities.includes(PlayerCapabilities.playbackControl)
-        ? player?.seekPlayback?.bind(player)
-        : undefined,
-    [player, capabilities],
-  );
-  const setPlaybackSpeed = useMemo(
-    () =>
-      capabilities.includes(PlayerCapabilities.setSpeed)
-        ? player?.setPlaybackSpeed?.bind(player)
-        : undefined,
-    [player, capabilities],
-  );
-  const pauseFrame = useCallback((name: string) => {
-    const condvar = new Condvar();
-    promisesToWaitForRef.current.push({ name, promise: condvar.wait() });
-    return () => {
-      condvar.notifyAll();
-    };
-  }, []);
+  }, [player, dispatch]);
 
   useEffect(() => {
     player?.setGlobalVariables(globalVariables);
   }, [player, globalVariables]);
 
-  return (
-    <ContextInternal.Provider
-      value={useShallowMemo({
-        playerState: state.playerState,
-        messageEventsBySubscriberId: state.messagesBySubscriberId,
-        subscriptions,
-        publishers,
-        sortedTopics,
-        datatypes,
-        setSubscriptions,
-        setPublishers,
-        setParameter,
-        publish,
-        callService,
-        startPlayback,
-        playUntil,
-        pausePlayback,
-        setPlaybackSpeed,
-        seekPlayback,
-        pauseFrame,
-      })}
-    >
-      {children}
-    </ContextInternal.Provider>
-  );
+  return <ContextInternal.Provider value={store}>{children}</ContextInternal.Provider>;
 }
 
 // Given a PlayerState and a PlayerProblem array, add the problems to any existing player problems
@@ -322,12 +191,12 @@ function concatProblems(origState: PlayerState, problems: PlayerProblem[]): Play
 function createPlayerListener(args: {
   msPerFrameRef: React.MutableRefObject<number>;
   promisesToWaitForRef: React.MutableRefObject<FramePromise[]>;
-  updateState: (action: MessagePipelineStateAction) => void;
+  dispatch: (action: MessagePipelineStateAction) => void;
 }): {
   listener: (state: PlayerState) => Promise<void>;
   cleanupListener: () => void;
 } {
-  const { msPerFrameRef, promisesToWaitForRef, updateState } = args;
+  const { msPerFrameRef, promisesToWaitForRef, dispatch: updateState } = args;
   const messageOrderTracker = new MessageOrderTracker();
   let closed = false;
   let resolveFn: undefined | (() => void);

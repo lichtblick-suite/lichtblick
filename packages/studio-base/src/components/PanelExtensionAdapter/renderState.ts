@@ -19,8 +19,6 @@ import { HoverValue } from "@foxglove/studio-base/types/hoverValue";
 
 const EmptyParameters = new Map<string, ParameterValue>();
 
-const EmptyTopics: readonly Topic[] = [];
-
 type BuilderRenderStateInput = {
   watchedFields: Set<string>;
   playerState: PlayerState | undefined;
@@ -29,6 +27,7 @@ type BuilderRenderStateInput = {
   colorScheme: RenderState["colorScheme"] | undefined;
   globalVariables: GlobalVariables;
   hoverValue: HoverValue | undefined;
+  sortedTopics: readonly Topic[];
   subscribedTopics: string[];
 };
 
@@ -62,6 +61,7 @@ function initRenderStateBuilder(): BuildRenderStateFn {
       globalVariables,
       hoverValue,
       subscribedTopics,
+      sortedTopics,
     } = input;
 
     // If the player has loaded all the blocks, the blocks reference won't change so our message
@@ -118,10 +118,9 @@ function initRenderStateBuilder(): BuildRenderStateFn {
     }
 
     if (watchedFields.has("topics")) {
-      const newTopics = activeData?.topics ?? EmptyTopics;
-      if (newTopics !== prevRenderState.topics) {
+      if (sortedTopics !== prevRenderState.topics) {
         shouldRender = true;
-        renderState.topics = newTopics;
+        renderState.topics = sortedTopics;
       }
     }
 

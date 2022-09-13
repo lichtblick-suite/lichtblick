@@ -90,7 +90,8 @@ function PanelExtensionAdapter(props: PanelExtensionAdapterProps): JSX.Element {
 
   const messagePipelineContext = useMessagePipeline(selectContext);
 
-  const { playerState, pauseFrame, setSubscriptions, seekPlayback } = messagePipelineContext;
+  const { playerState, pauseFrame, setSubscriptions, seekPlayback, sortedTopics } =
+    messagePipelineContext;
 
   const { capabilities, profile: dataSourceProfile } = playerState;
 
@@ -207,6 +208,7 @@ function PanelExtensionAdapter(props: PanelExtensionAdapterProps): JSX.Element {
       appSettings,
       subscribedTopics,
       currentFrame: messageEvents,
+      sortedTopics,
     });
 
     if (!renderState) {
@@ -252,6 +254,7 @@ function PanelExtensionAdapter(props: PanelExtensionAdapterProps): JSX.Element {
     colorScheme,
     buildRenderState,
     globalVariables,
+    sortedTopics,
   ]);
 
   const updatePanelSettingsTree = usePanelSettingsTreeUpdate();

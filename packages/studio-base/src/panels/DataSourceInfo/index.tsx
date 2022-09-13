@@ -19,8 +19,6 @@ import { Topic } from "@foxglove/studio-base/src/players/types";
 
 import helpContent from "./index.help.md";
 
-const EMPTY_TOPICS: Topic[] = [];
-
 const useStyles = makeStyles<void, "copyIcon">()((theme, _params, classes) => ({
   copyIcon: {
     visibility: "hidden",
@@ -102,8 +100,7 @@ function TopicRow({ topic }: { topic: Topic }): JSX.Element {
   );
 }
 
-const selectTopics = (ctx: MessagePipelineContext) =>
-  ctx.playerState.activeData?.topics ?? EMPTY_TOPICS;
+const selectSortedTopics = (ctx: MessagePipelineContext) => ctx.sortedTopics;
 const selectStartTime = (ctx: MessagePipelineContext) => ctx.playerState.activeData?.startTime;
 const selectEndTime = (ctx: MessagePipelineContext) => ctx.playerState.activeData?.endTime;
 
@@ -112,7 +109,7 @@ const MemoTopicRow = React.memo(TopicRow);
 function SourceInfo(): JSX.Element {
   const { classes } = useStyles();
 
-  const topics = useMessagePipeline(selectTopics);
+  const topics = useMessagePipeline(selectSortedTopics);
   const startTime = useMessagePipeline(selectStartTime);
   const endTime = useMessagePipeline(selectEndTime);
 
