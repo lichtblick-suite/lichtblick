@@ -499,7 +499,11 @@ export default function muiComponents(theme: Theme): ThemeOptions["components"] 
         arrow: true,
       },
       styleOverrides: {
+        arrow: {
+          color: theme.palette.grey[700],
+        },
         tooltip: {
+          backgroundColor: theme.palette.grey[700],
           fontWeight: "normal",
           fontSize: "0.75rem",
         },
