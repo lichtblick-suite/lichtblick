@@ -10,7 +10,7 @@ import { Sockets } from "@foxglove/electron-socket/renderer";
 import Logger from "@foxglove/log";
 import { RosNode } from "@foxglove/ros2";
 import { RosMsgDefinition } from "@foxglove/rosmsg";
-import { definitions as commonDefs } from "@foxglove/rosmsg-msgs-common";
+import { ros2galactic } from "@foxglove/rosmsg-msgs-common";
 import { Time, fromMillis, toSec, isGreaterThan } from "@foxglove/rostime";
 import { Durability, Reliability } from "@foxglove/rtps";
 import { foxgloveMessageSchemas, generateRosMsgDefinition } from "@foxglove/schemas";
@@ -85,19 +85,20 @@ export default class Ros2Player implements Player {
     this._metricsCollector.playerConstructed();
     this._sourceId = sourceId;
 
-    // The ros1ToRos2Type() hack can be removed when @foxglove/rosmsg-msgs-* packages are updated to
-    // natively support ROS 2
-    this._fixRos2MsgDefs();
+    this._importRos2MsgDefs();
 
     void this._open();
   }
 
-  private _fixRos2MsgDefs(): void {
-    for (const dataType in commonDefs) {
-      const msgDef = (commonDefs as Record<string, RosMsgDefinition>)[dataType]!;
+  private _importRos2MsgDefs(): void {
+    // Add common message definitions from ROS2 (rcl_interfaces, common_interfaces, etc)
+    for (const dataType in ros2galactic) {
+      const msgDef = (ros2galactic as Record<string, RosMsgDefinition>)[dataType]!;
       this._providerDatatypes.set(dataType, msgDef);
-      this._providerDatatypes.set(ros1ToRos2Type(dataType), msgDef);
+      this._providerDatatypes.set(dataTypeToFullName(dataType), msgDef);
     }
+
+    // Add message definitions from foxglove schemas
     for (const schema of Object.values(foxgloveMessageSchemas)) {
       const { fields, rosMsgInterfaceName, rosFullInterfaceName } = generateRosMsgDefinition(
         schema,
@@ -107,6 +108,8 @@ export default class Ros2Player implements Player {
       this._providerDatatypes.set(rosMsgInterfaceName, msgDef);
       this._providerDatatypes.set(rosFullInterfaceName, msgDef);
     }
+
+    // Add the legacy foxglove_msgs/ImageMarkerArray message definition
     this._providerDatatypes.set("foxglove_msgs/ImageMarkerArray", {
       definitions: [
         { name: "markers", type: "visualization_msgs/ImageMarker", isComplex: true, isArray: true },
@@ -115,35 +118,6 @@ export default class Ros2Player implements Player {
     this._providerDatatypes.set("foxglove_msgs/msg/ImageMarkerArray", {
       definitions: [
         { name: "markers", type: "visualization_msgs/ImageMarker", isComplex: true, isArray: true },
-      ],
-    });
-
-    // Fix std_msgs/Header, which changed in ROS 2
-    const definitions = [
-      // "seq" was removed
-      { name: "stamp", type: "time" },
-      { name: "frame_id", type: "string" },
-    ];
-    this._providerDatatypes.set("std_msgs/Header", { name: "std_msgs/Header", definitions });
-    this._providerDatatypes.set("std_msgs/msg/Header", {
-      name: "std_msgs/msg/Header",
-      definitions,
-    });
-
-    // Add Time and Duration builtin interfaces
-    this._providerDatatypes.set("builtin_interfaces/Time", {
-      name: "builtin_interfaces/Time",
-      definitions: [
-        { name: "sec", type: "int32" },
-        { name: "nanosec", type: "uint32" },
-      ],
-    });
-
-    this._providerDatatypes.set("builtin_interfaces/Duration", {
-      name: "builtin_interfaces/Duration",
-      definitions: [
-        { name: "sec", type: "int32" },
-        { name: "nanosec", type: "uint32" },
       ],
     });
   }
@@ -702,7 +676,7 @@ export default class Ros2Player implements Player {
   }
 }
 
-function ros1ToRos2Type(dataType: string): string {
+function dataTypeToFullName(dataType: string): string {
   const parts = dataType.split("/");
   if (parts.length === 2) {
     return `${parts[0]}/msg/${parts[1]}`;

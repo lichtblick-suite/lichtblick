@@ -2,7 +2,7 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { definitions as commonDefs } from "@foxglove/rosmsg-msgs-common";
+import { ros1, ros2galactic } from "@foxglove/rosmsg-msgs-common";
 import { foxgloveMessageSchemas, generateRosMsgDefinition } from "@foxglove/schemas";
 import { RosDatatypes } from "@foxglove/studio-base/types/RosDatatypes";
 
@@ -15,16 +15,19 @@ import { RosDatatypes } from "@foxglove/studio-base/types/RosDatatypes";
  */
 export const basicDatatypes: RosDatatypes = new Map();
 
-for (const [name, def] of Object.entries(commonDefs)) {
+// Add ROS2 message schemas
+for (const [name, def] of Object.entries(ros2galactic)) {
   basicDatatypes.set(name, def);
 }
+
+// Add ROS1 message schemas
+for (const [name, def] of Object.entries(ros1)) {
+  basicDatatypes.set(name, def);
+}
+
+// Add foxglove message schemas
 for (const schema of Object.values(foxgloveMessageSchemas)) {
   const definition = generateRosMsgDefinition(schema, { rosVersion: 1 });
-  basicDatatypes.set("foxglove_msgs/ImageMarkerArray", {
-    definitions: [
-      { name: "markers", type: "visualization_msgs/ImageMarker", isComplex: true, isArray: true },
-    ],
-  });
   basicDatatypes.set(definition.rosMsgInterfaceName, {
     name: definition.rosMsgInterfaceName,
     definitions: definition.fields,
@@ -34,3 +37,10 @@ for (const schema of Object.values(foxgloveMessageSchemas)) {
     definitions: definition.fields,
   });
 }
+
+// Add the legacy foxglove_msgs/ImageMarkerArray message definition
+basicDatatypes.set("foxglove_msgs/ImageMarkerArray", {
+  definitions: [
+    { name: "markers", type: "visualization_msgs/ImageMarker", isComplex: true, isArray: true },
+  ],
+});

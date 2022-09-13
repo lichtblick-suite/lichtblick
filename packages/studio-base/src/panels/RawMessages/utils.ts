@@ -13,13 +13,13 @@
 
 import { first, kebabCase, last } from "lodash";
 
-import { definitions as commonDefs } from "@foxglove/rosmsg-msgs-common";
+import { ros1 } from "@foxglove/rosmsg-msgs-common";
 import { foxgloveMessageSchemas } from "@foxglove/schemas";
 import { diffLabels, DiffObject } from "@foxglove/studio-base/panels/RawMessages/getDiff";
 
 export const DATA_ARRAY_PREVIEW_LIMIT = 20;
-const ROS_COMMON_MSG_PACKAGES = new Set(Object.keys(commonDefs).map((key) => key.split("/")[0]!));
-ROS_COMMON_MSG_PACKAGES.add("turtlesim");
+const ROS1_COMMON_MSG_PACKAGES = new Set(Object.keys(ros1).map((key) => key.split("/")[0]!));
+ROS1_COMMON_MSG_PACKAGES.add("turtlesim");
 
 function isTypedArray(obj: unknown) {
   return Boolean(
@@ -102,7 +102,7 @@ export function getMessageDocumentationLink(datatype: string): string | undefine
   const pkg = first(parts);
   const filename = last(parts);
 
-  if (pkg != undefined && ROS_COMMON_MSG_PACKAGES.has(pkg)) {
+  if (pkg != undefined && ROS1_COMMON_MSG_PACKAGES.has(pkg)) {
     return `https://docs.ros.org/api/${pkg}/html/msg/${filename}.html`;
   }
 

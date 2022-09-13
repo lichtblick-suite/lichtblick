@@ -50,7 +50,8 @@ import { RendererContext, useRenderer, useRendererEvent } from "./RendererContex
 import { Stats } from "./Stats";
 import { CameraState, DEFAULT_CAMERA_STATE, MouseEventObject } from "./camera";
 import {
-  PublishDatatypes,
+  PublishRos1Datatypes,
+  PublishRos2Datatypes,
   makePointMessage,
   makePoseEstimateMessage,
   makePoseMessage,
@@ -763,14 +764,12 @@ export function ThreeDeeRender({ context }: { context: PanelExtensionContext }):
   }, [config.publish.poseTopic, config.publish.pointTopic, config.publish.poseEstimateTopic]);
 
   useEffect(() => {
-    context.advertise?.(publishTopics.goal, "geometry_msgs/PoseStamped", {
-      datatypes: PublishDatatypes,
-    });
-    context.advertise?.(publishTopics.point, "geometry_msgs/PointStamped", {
-      datatypes: PublishDatatypes,
-    });
+    const datatypes =
+      context.dataSourceProfile === "ros2" ? PublishRos2Datatypes : PublishRos1Datatypes;
+    context.advertise?.(publishTopics.goal, "geometry_msgs/PoseStamped", { datatypes });
+    context.advertise?.(publishTopics.point, "geometry_msgs/PointStamped", { datatypes });
     context.advertise?.(publishTopics.pose, "geometry_msgs/PoseWithCovarianceStamped", {
-      datatypes: PublishDatatypes,
+      datatypes,
     });
 
     return () => {
@@ -778,7 +777,7 @@ export function ThreeDeeRender({ context }: { context: PanelExtensionContext }):
       context.unadvertise?.(publishTopics.point);
       context.unadvertise?.(publishTopics.pose);
     };
-  }, [publishTopics, context]);
+  }, [publishTopics, context, context.dataSourceProfile]);
 
   const latestPublishConfig = useLatest(config.publish);
 

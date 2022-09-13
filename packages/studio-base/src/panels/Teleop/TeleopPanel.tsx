@@ -6,7 +6,7 @@ import { set } from "lodash";
 import { useCallback, useEffect, useLayoutEffect, useState } from "react";
 import { DeepPartial } from "ts-essentials";
 
-import { definitions as commonDefs } from "@foxglove/rosmsg-msgs-common";
+import { ros1 } from "@foxglove/rosmsg-msgs-common";
 import {
   PanelExtensionContext,
   SettingsTreeAction,
@@ -185,8 +185,8 @@ function TeleopPanel(props: TeleopPanelProps): JSX.Element {
 
     context.advertise?.(currentTopic, "geometry_msgs/Twist", {
       datatypes: new Map([
-        ["geometry_msgs/Vector3", commonDefs["geometry_msgs/Vector3"]],
-        ["geometry_msgs/Twist", commonDefs["geometry_msgs/Twist"]],
+        ["geometry_msgs/Vector3", ros1["geometry_msgs/Vector3"]],
+        ["geometry_msgs/Twist", ros1["geometry_msgs/Twist"]],
       ]),
     });
 
