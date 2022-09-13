@@ -41,15 +41,14 @@ function updateSubscriberAction(
   const previousSubscriptionsById = prevSubscriberState.subscriptionsById;
   const newTopicsBySubscriberId = new Map(prevSubscriberState.newTopicsBySubscriberId);
 
-  const previousSubscription = previousSubscriptionsById.get(action.id);
-
   // Record any _new_ topics for this subscriber into newTopicsBySubscriberId
   const newTopics = newTopicsBySubscriberId.get(action.id);
   if (!newTopics) {
     const actionTopics = action.payloads.map((sub) => sub.topic);
     newTopicsBySubscriberId.set(action.id, new Set(actionTopics));
-  } else if (previousSubscription) {
-    const prevTopics = new Set(previousSubscription.map((sub) => sub.topic));
+  } else {
+    const previousSubscription = previousSubscriptionsById.get(action.id);
+    const prevTopics = new Set(previousSubscription?.map((sub) => sub.topic) ?? []);
     for (const { topic: newTopic } of action.payloads) {
       if (!prevTopics.has(newTopic)) {
         newTopics.add(newTopic);

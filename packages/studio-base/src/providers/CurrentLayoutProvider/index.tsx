@@ -6,6 +6,7 @@ import { useSnackbar } from "notistack";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { getNodeAtPath } from "react-mosaic-component";
 import { useAsync, useAsyncFn, useMountedState } from "react-use";
+import shallowequal from "shallowequal";
 import { v4 as uuidv4 } from "uuid";
 
 import { useShallowMemo } from "@foxglove/hooks";
@@ -97,10 +98,12 @@ export default function CurrentLayoutProvider({
   const getSelectedPanelIds = useCallback(() => selectedPanelIds.current, []);
   const setSelectedPanelIds = useCallback(
     (value: readonly string[] | ((prevState: readonly string[]) => readonly string[])): void => {
-      selectedPanelIds.current =
-        typeof value === "function" ? value(selectedPanelIds.current) : value;
-      for (const listener of [...selectedPanelIdsListeners.current]) {
-        listener(selectedPanelIds.current);
+      const newValue = typeof value === "function" ? value(selectedPanelIds.current) : value;
+      if (!shallowequal(newValue, selectedPanelIds.current)) {
+        selectedPanelIds.current = newValue;
+        for (const listener of [...selectedPanelIdsListeners.current]) {
+          listener(selectedPanelIds.current);
+        }
       }
     },
     [],
