@@ -109,6 +109,9 @@ export default function muiComponents(theme: Theme): ThemeOptions["components"] 
         disableElevation: true,
       },
       styleOverrides: {
+        root: {
+          ...disableBackgroundColorTransition,
+        },
         containedInherit: {
           backgroundColor: theme.palette.action.focus,
         },
