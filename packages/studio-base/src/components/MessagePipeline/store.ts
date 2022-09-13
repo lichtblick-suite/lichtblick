@@ -267,16 +267,13 @@ function updatePlayerStateAction(
   };
 
   const topics = action.playerState.activeData?.topics;
-  if (!shallowequal(topics, prevState.public.playerState.activeData?.topics)) {
+  if (topics !== prevState.public.playerState.activeData?.topics) {
     newPublicState.sortedTopics = topics
       ? [...topics].sort((a, b) => a.name.localeCompare(b.name))
       : [];
   }
   if (
-    !shallowequal(
-      action.playerState.activeData?.datatypes,
-      prevState.public.playerState.activeData?.datatypes,
-    )
+    action.playerState.activeData?.datatypes !== prevState.public.playerState.activeData?.datatypes
   ) {
     newPublicState.datatypes = action.playerState.activeData?.datatypes ?? new Map();
   }
