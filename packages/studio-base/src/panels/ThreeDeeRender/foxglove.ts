@@ -8,6 +8,15 @@ addFoxgloveSchema(FRAME_TRANSFORM_DATATYPES, "foxglove.FrameTransform");
 export const POINTCLOUD_DATATYPES = new Set<string>();
 addFoxgloveSchema(POINTCLOUD_DATATYPES, "foxglove.PointCloud");
 
+export const RAW_IMAGE_DATATYPES = new Set<string>();
+addFoxgloveSchema(RAW_IMAGE_DATATYPES, "foxglove.RawImage");
+
+export const COMPRESSED_IMAGE_DATATYPES = new Set<string>();
+addFoxgloveSchema(COMPRESSED_IMAGE_DATATYPES, "foxglove.CompressedImage");
+
+export const CAMERA_CALIBRATION_DATATYPES = new Set<string>();
+addFoxgloveSchema(CAMERA_CALIBRATION_DATATYPES, "foxglove.CameraCalibration");
+
 export const SCENE_UPDATE_DATATYPES = new Set<string>();
 addFoxgloveSchema(SCENE_UPDATE_DATATYPES, "foxglove.SceneUpdate");
 
