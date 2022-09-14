@@ -4,11 +4,11 @@
 
 import { quat } from "gl-matrix";
 
+import { FrameTransform, PosesInFrame } from "@foxglove/schemas/schemas/typescript";
 import { MessageEvent, Topic } from "@foxglove/studio";
 import PanelSetup from "@foxglove/studio-base/stories/PanelSetup";
 
 import ThreeDeeRender from "../index";
-import { PoseArray, TransformStamped } from "../ros";
 import { QUAT_IDENTITY, rad2deg } from "./common";
 import useDelayedFixture from "./useDelayedFixture";
 
@@ -20,52 +20,47 @@ export default {
 type Vec4 = [number, number, number, number];
 const vec4ToOrientation = ([x, y, z, w]: Vec4) => ({ x, y, z, w });
 
-GeometryMsgs_PoseArray.parameters = { colorScheme: "dark" };
-export function GeometryMsgs_PoseArray(): JSX.Element {
+Foxglove_PosesInFrame.parameters = { colorScheme: "dark" };
+export function Foxglove_PosesInFrame(): JSX.Element {
   const topics: Topic[] = [
-    { name: "/baselink_path", datatype: "geometry_msgs/PoseArray" },
-    { name: "/sensor_path", datatype: "geometry_msgs/PoseArray" },
-    { name: "/sensor_path2", datatype: "geometry_msgs/PoseArray" },
-    { name: "/tf", datatype: "geometry_msgs/TransformStamped" },
+    { name: "/baselink_path", datatype: "foxglove.PosesInFrame" },
+    { name: "/sensor_path", datatype: "foxglove.PosesInFrame" },
+    { name: "/sensor_path2", datatype: "foxglove.PosesInFrame" },
+    { name: "/tf", datatype: "foxglove.FrameTransform" },
   ];
-  const tf1: MessageEvent<TransformStamped> = {
+  const tf1: MessageEvent<FrameTransform> = {
     topic: "/tf",
     receiveTime: { sec: 10, nsec: 0 },
     message: {
-      header: { seq: 0, stamp: { sec: 0, nsec: 0 }, frame_id: "map" },
+      timestamp: { sec: 0, nsec: 0 },
+      parent_frame_id: "map",
       child_frame_id: "base_link",
-      transform: {
-        translation: { x: 1e7, y: 0, z: 0 },
-        rotation: QUAT_IDENTITY,
-      },
+      translation: { x: 1e7, y: 0, z: 0 },
+      rotation: QUAT_IDENTITY,
     },
     sizeInBytes: 0,
   };
-  const tf2: MessageEvent<TransformStamped> = {
+  const tf2: MessageEvent<FrameTransform> = {
     topic: "/tf",
     receiveTime: { sec: 10, nsec: 0 },
     message: {
-      header: { seq: 0, stamp: { sec: 0, nsec: 0 }, frame_id: "base_link" },
+      timestamp: { sec: 0, nsec: 0 },
+      parent_frame_id: "base_link",
       child_frame_id: "sensor",
-      transform: {
-        translation: { x: 0, y: 0, z: 1 },
-        rotation: vec4ToOrientation(
-          quat.rotateZ(quat.create(), quat.create(), Math.PI / 2) as Vec4,
-        ),
-      },
+      translation: { x: 0, y: 0, z: 1 },
+      rotation: vec4ToOrientation(quat.rotateZ(quat.create(), quat.create(), Math.PI / 2) as Vec4),
     },
     sizeInBytes: 0,
   };
-  const tf3: MessageEvent<TransformStamped> = {
+  const tf3: MessageEvent<FrameTransform> = {
     topic: "/tf",
     receiveTime: { sec: 10, nsec: 0 },
     message: {
-      header: { seq: 0, stamp: { sec: 10, nsec: 0 }, frame_id: "base_link" },
+      timestamp: { sec: 10, nsec: 0 },
+      parent_frame_id: "base_link",
       child_frame_id: "sensor",
-      transform: {
-        translation: { x: 0, y: 5, z: 1 },
-        rotation: QUAT_IDENTITY,
-      },
+      translation: { x: 0, y: 5, z: 1 },
+      rotation: QUAT_IDENTITY,
     },
     sizeInBytes: 0,
   };
@@ -77,11 +72,12 @@ export function GeometryMsgs_PoseArray(): JSX.Element {
     return { x: o[0], y: o[1], z: o[2], w: o[3] };
   };
 
-  const baseLinkPath: MessageEvent<PoseArray> = {
+  const baseLinkPath: MessageEvent<PosesInFrame> = {
     topic: "/baselink_path",
     receiveTime: { sec: 3, nsec: 0 },
     message: {
-      header: { seq: 0, stamp: { sec: 0, nsec: 0 }, frame_id: "base_link" },
+      timestamp: { sec: 0, nsec: 0 },
+      frame_id: "base_link",
       poses: [...Array(10)].map((_, i) => ({
         position: { x: 3, y: i / 4, z: 1 },
         orientation: makeOrientation(i),
@@ -90,11 +86,12 @@ export function GeometryMsgs_PoseArray(): JSX.Element {
     sizeInBytes: 0,
   };
 
-  const sensorPath: MessageEvent<PoseArray> = {
+  const sensorPath: MessageEvent<PosesInFrame> = {
     topic: "/sensor_path",
     receiveTime: { sec: 3, nsec: 0 },
     message: {
-      header: { seq: 0, stamp: { sec: 0, nsec: 0 }, frame_id: "sensor" },
+      timestamp: { sec: 0, nsec: 0 },
+      frame_id: "sensor",
       poses: [...Array(10)].map((_, i) => ({
         position: { x: 2, y: i / 4, z: 0 },
         orientation: makeOrientation(i),
@@ -103,11 +100,12 @@ export function GeometryMsgs_PoseArray(): JSX.Element {
     sizeInBytes: 0,
   };
 
-  const sensorPath2: MessageEvent<PoseArray> = {
+  const sensorPath2: MessageEvent<PosesInFrame> = {
     topic: "/sensor_path2",
     receiveTime: { sec: 3, nsec: 0 },
     message: {
-      header: { seq: 0, stamp: { sec: 0, nsec: 0 }, frame_id: "sensor" },
+      timestamp: { sec: 0, nsec: 0 },
+      frame_id: "sensor",
       poses: [...Array(10)].map((_, i) => ({
         position: { x: -i / 4, y: 2, z: 0 },
         orientation: makeOrientation(i),

@@ -5,6 +5,7 @@
 import * as THREE from "three";
 
 import { toNanoSec } from "@foxglove/rostime";
+import { PosesInFrame } from "@foxglove/schemas/schemas/typescript";
 import { SettingsTreeAction, SettingsTreeFields, Topic } from "@foxglove/studio";
 import type { RosValue } from "@foxglove/studio-base/players/types";
 
@@ -13,8 +14,9 @@ import { Renderer } from "../Renderer";
 import { PartialMessage, PartialMessageEvent, SceneExtension } from "../SceneExtension";
 import { SettingsTreeEntry } from "../SettingsManager";
 import { makeRgba, rgbaGradient, rgbaToCssString, stringToRgba } from "../color";
+import { POSES_IN_FRAME_DATATYPES } from "../foxglove";
 import { vecEqual } from "../math";
-import { normalizeHeader, normalizePose } from "../normalizeMessages";
+import { normalizeHeader, normalizePose, normalizeTime } from "../normalizeMessages";
 import {
   PoseArray,
   POSE_ARRAY_DATATYPES,
@@ -93,6 +95,7 @@ export type PoseArrayUserData = BaseUserData & {
   settings: LayerSettingsPoseArray;
   topic: string;
   poseArrayMessage: PoseArray;
+  originalMessage: Record<string, RosValue>;
   axes: Axis[];
   arrows: RenderableArrow[];
   lineStrip?: RenderableLineStrip;
@@ -107,7 +110,7 @@ export class PoseArrayRenderable extends Renderable<PoseArrayUserData> {
   }
 
   public override details(): Record<string, RosValue> {
-    return this.userData.poseArrayMessage;
+    return this.userData.originalMessage;
   }
 
   public removeArrows(): void {
@@ -140,6 +143,7 @@ export class PoseArrays extends SceneExtension<PoseArrayRenderable> {
     super("foxglove.PoseArrays", renderer);
 
     renderer.addDatatypeSubscriptions(POSE_ARRAY_DATATYPES, this.handlePoseArray);
+    renderer.addDatatypeSubscriptions(POSES_IN_FRAME_DATATYPES, this.handlePosesInFrame);
     renderer.addDatatypeSubscriptions(NAV_PATH_DATATYPES, this.handleNavPath);
   }
 
@@ -148,7 +152,11 @@ export class PoseArrays extends SceneExtension<PoseArrayRenderable> {
     const handler = this.handleSettingsAction;
     const entries: SettingsTreeEntry[] = [];
     for (const topic of this.renderer.topics ?? []) {
-      if (POSE_ARRAY_DATATYPES.has(topic.datatype) || NAV_PATH_DATATYPES.has(topic.datatype)) {
+      if (
+        POSE_ARRAY_DATATYPES.has(topic.datatype) ||
+        NAV_PATH_DATATYPES.has(topic.datatype) ||
+        POSES_IN_FRAME_DATATYPES.has(topic.datatype)
+      ) {
         const config = (configTopics[topic.name] ?? {}) as Partial<LayerSettingsPoseArray>;
         const displayType = config.type ?? getDefaultType(topic);
         const { axisScale, lineWidth } = config;
@@ -208,6 +216,7 @@ export class PoseArrays extends SceneExtension<PoseArrayRenderable> {
       this._updatePoseArrayRenderable(
         renderable,
         renderable.userData.poseArrayMessage,
+        renderable.userData.originalMessage,
         renderable.userData.receiveTime,
         { ...DEFAULT_SETTINGS, ...settings },
       );
@@ -217,7 +226,7 @@ export class PoseArrays extends SceneExtension<PoseArrayRenderable> {
   private handlePoseArray = (messageEvent: PartialMessageEvent<PoseArray>): void => {
     const poseArrayMessage = normalizePoseArray(messageEvent.message);
     const receiveTime = toNanoSec(messageEvent.receiveTime);
-    this.addPoseArray(messageEvent.topic, poseArrayMessage, receiveTime);
+    this.addPoseArray(messageEvent.topic, poseArrayMessage, messageEvent.message, receiveTime);
   };
 
   private handleNavPath = (messageEvent: PartialMessageEvent<NavPath>): void => {
@@ -227,10 +236,21 @@ export class PoseArrays extends SceneExtension<PoseArrayRenderable> {
 
     const poseArrayMessage = normalizeNavPathToPoseArray(messageEvent.message);
     const receiveTime = toNanoSec(messageEvent.receiveTime);
-    this.addPoseArray(messageEvent.topic, poseArrayMessage, receiveTime);
+    this.addPoseArray(messageEvent.topic, poseArrayMessage, messageEvent.message, receiveTime);
   };
 
-  private addPoseArray(topic: string, poseArrayMessage: PoseArray, receiveTime: bigint): void {
+  private handlePosesInFrame = (messageEvent: PartialMessageEvent<PosesInFrame>): void => {
+    const poseArrayMessage = normalizePosesInFrameToPoseArray(messageEvent.message);
+    const receiveTime = toNanoSec(messageEvent.receiveTime);
+    this.addPoseArray(messageEvent.topic, poseArrayMessage, messageEvent.message, receiveTime);
+  };
+
+  private addPoseArray(
+    topic: string,
+    poseArrayMessage: PoseArray,
+    originalMessage: Record<string, RosValue>,
+    receiveTime: bigint,
+  ): void {
     let renderable = this.renderables.get(topic);
     if (!renderable) {
       // Set the initial settings from default values merged with any user settings
@@ -249,6 +269,7 @@ export class PoseArrays extends SceneExtension<PoseArrayRenderable> {
         settings,
         topic,
         poseArrayMessage,
+        originalMessage,
         axes: [],
         arrows: [],
       });
@@ -260,6 +281,7 @@ export class PoseArrays extends SceneExtension<PoseArrayRenderable> {
     this._updatePoseArrayRenderable(
       renderable,
       poseArrayMessage,
+      originalMessage,
       receiveTime,
       renderable.userData.settings,
     );
@@ -338,6 +360,7 @@ export class PoseArrays extends SceneExtension<PoseArrayRenderable> {
   private _updatePoseArrayRenderable(
     renderable: PoseArrayRenderable,
     poseArrayMessage: PoseArray,
+    originalMessage: Record<string, RosValue>,
     receiveTime: bigint,
     settings: LayerSettingsPoseArray,
   ): void {
@@ -345,6 +368,7 @@ export class PoseArrays extends SceneExtension<PoseArrayRenderable> {
     renderable.userData.messageTime = toNanoSec(poseArrayMessage.header.stamp);
     renderable.userData.frameId = this.renderer.normalizeFrameId(poseArrayMessage.header.frame_id);
     renderable.userData.poseArrayMessage = poseArrayMessage;
+    renderable.userData.originalMessage = originalMessage;
 
     const { topic, settings: prevSettings } = renderable.userData;
     const axisOrArrowSettingsChanged =
@@ -482,6 +506,13 @@ function normalizeNavPathToPoseArray(navPath: PartialMessage<NavPath>): PoseArra
   return {
     header: normalizeHeader(navPath.header),
     poses: navPath.poses?.map((p) => normalizePose(p.pose)) ?? [],
+  };
+}
+
+function normalizePosesInFrameToPoseArray(poseArray: PartialMessage<PosesInFrame>): PoseArray {
+  return {
+    header: { stamp: normalizeTime(poseArray.timestamp), frame_id: poseArray.frame_id ?? "" },
+    poses: poseArray.poses?.map(normalizePose) ?? [],
   };
 }
 

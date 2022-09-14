@@ -226,12 +226,11 @@ type RosTypedArray =
   | Float32Array
   | Float64Array;
 
-type RosSingularField = number | string | boolean | RosObject; // No time -- consider it a message.
+type RosSingularField = number | string | boolean | RosObject | undefined; // No time -- consider it a message.
 export type RosValue =
   | RosSingularField
   | readonly RosSingularField[]
   | RosTypedArray
-  | undefined
   // eslint-disable-next-line no-restricted-syntax
   | null;
 
