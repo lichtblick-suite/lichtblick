@@ -8,6 +8,9 @@ addFoxgloveSchema(FRAME_TRANSFORM_DATATYPES, "foxglove.FrameTransform");
 export const POINTCLOUD_DATATYPES = new Set<string>();
 addFoxgloveSchema(POINTCLOUD_DATATYPES, "foxglove.PointCloud");
 
+export const LASERSCAN_DATATYPES = new Set<string>();
+addFoxgloveSchema(LASERSCAN_DATATYPES, "foxglove.LaserScan");
+
 export const RAW_IMAGE_DATATYPES = new Set<string>();
 addFoxgloveSchema(RAW_IMAGE_DATATYPES, "foxglove.RawImage");
 

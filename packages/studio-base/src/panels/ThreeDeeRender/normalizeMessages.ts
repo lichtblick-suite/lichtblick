@@ -84,7 +84,11 @@ export function normalizeFloat32Array(array: unknown): Float32Array {
     return new Float32Array(0);
   } else if (array instanceof Float32Array) {
     return array;
-  } else if (Array.isArray(array) || array instanceof ArrayBuffer) {
+  } else if (
+    Array.isArray(array) ||
+    array instanceof ArrayBuffer ||
+    array instanceof Float64Array
+  ) {
     return new Float32Array(array);
   } else {
     return new Float32Array(0);

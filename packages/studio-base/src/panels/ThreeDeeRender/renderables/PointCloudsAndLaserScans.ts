@@ -5,9 +5,14 @@
 import * as THREE from "three";
 
 import { Time, toNanoSec } from "@foxglove/rostime";
-import type { PackedElementField, PointCloud } from "@foxglove/schemas/schemas/typescript";
+import type {
+  LaserScan as FoxgloveLaserScan,
+  PackedElementField,
+  PointCloud,
+} from "@foxglove/schemas/schemas/typescript";
 import { SettingsTreeAction, SettingsTreeFields, SettingsTreeNode, Topic } from "@foxglove/studio";
-import type { RosValue } from "@foxglove/studio-base/players/types";
+import type { RosObject, RosValue } from "@foxglove/studio-base/players/types";
+import { emptyPose } from "@foxglove/studio-base/util/Pose";
 
 import { DynamicBufferGeometry, DynamicFloatBufferGeometry } from "../DynamicBufferGeometry";
 import { BaseUserData, Renderable } from "../Renderable";
@@ -15,7 +20,10 @@ import { Renderer } from "../Renderer";
 import { PartialMessage, PartialMessageEvent, SceneExtension } from "../SceneExtension";
 import { SettingsTreeEntry, SettingsTreeNodeWithActionHandler } from "../SettingsManager";
 import { rgbaToCssString, stringToRgba } from "../color";
-import { POINTCLOUD_DATATYPES as FOXGLOVE_POINTCLOUD_DATATYPES } from "../foxglove";
+import {
+  LASERSCAN_DATATYPES as FOXGLOVE_LASERSCAN_DATATYPES,
+  POINTCLOUD_DATATYPES as FOXGLOVE_POINTCLOUD_DATATYPES,
+} from "../foxglove";
 import {
   normalizeByteArray,
   normalizeHeader,
@@ -25,8 +33,8 @@ import {
   numericTypeToPointFieldType,
 } from "../normalizeMessages";
 import {
-  LASERSCAN_DATATYPES,
-  LaserScan,
+  LASERSCAN_DATATYPES as ROS_LASERSCAN_DATATYPES,
+  LaserScan as RosLaserScan,
   PointCloud2,
   POINTCLOUD_DATATYPES as ROS_POINTCLOUD_DATATYPES,
   PointField,
@@ -65,11 +73,24 @@ type PointCloudFieldReaders = {
   colorReader: FieldReader;
 };
 
+type NormalizedLaserScan = {
+  timestamp: Time;
+  frame_id: string;
+  pose: Pose;
+  start_angle: number;
+  end_angle: number;
+  range_min: number;
+  range_max: number;
+  ranges: Float32Array;
+  intensities: Float32Array;
+};
+
 type PointCloudAndLaserScanUserData = BaseUserData & {
   settings: LayerSettingsPointCloudAndLaserScan;
   topic: string;
   pointCloud?: PointCloud | PointCloud2;
-  laserScan?: LaserScan;
+  laserScan?: NormalizedLaserScan;
+  originalMessage: Record<string, RosValue> | undefined;
   pointsHistory: PointsAtTime[];
   material: Material;
   pickingMaterial: THREE.ShaderMaterial | LaserScanMaterial;
@@ -102,9 +123,13 @@ const DEFAULT_SETTINGS: LayerSettingsPointCloudAndLaserScan = {
   maxValue: undefined,
 };
 
-const POINTCLOUD_DATATYPES = new Set<string>([
+const ALL_POINTCLOUD_DATATYPES = new Set<string>([
   ...FOXGLOVE_POINTCLOUD_DATATYPES,
   ...ROS_POINTCLOUD_DATATYPES,
+]);
+const ALL_LASERSCAN_DATATYPES = new Set<string>([
+  ...FOXGLOVE_LASERSCAN_DATATYPES,
+  ...ROS_LASERSCAN_DATATYPES,
 ]);
 const POINT_SHAPE_OPTIONS = [
   { label: "Circle", value: "circle" },
@@ -163,6 +188,7 @@ export class PointCloudAndLaserScanRenderable extends Renderable<PointCloudAndLa
   public override dispose(): void {
     this.userData.pointCloud = undefined;
     this.userData.laserScan = undefined;
+    this.userData.originalMessage = undefined;
     for (const entry of this.userData.pointsHistory) {
       entry.points.geometry.dispose();
     }
@@ -174,7 +200,7 @@ export class PointCloudAndLaserScanRenderable extends Renderable<PointCloudAndLa
   }
 
   public override details(): Record<string, RosValue> {
-    return this.userData.pointCloud ?? this.userData.laserScan ?? {};
+    return this.userData.originalMessage ?? {};
   }
 
   public override instanceDetails(instanceId: number): Record<string, RosValue> | undefined {
@@ -217,7 +243,8 @@ export class PointCloudsAndLaserScans extends SceneExtension<PointCloudAndLaserS
 
     renderer.addDatatypeSubscriptions(ROS_POINTCLOUD_DATATYPES, this.handleRosPointCloud);
     renderer.addDatatypeSubscriptions(FOXGLOVE_POINTCLOUD_DATATYPES, this.handleFoxglovePointCloud);
-    renderer.addDatatypeSubscriptions(LASERSCAN_DATATYPES, this.handleLaserScan);
+    renderer.addDatatypeSubscriptions(ROS_LASERSCAN_DATATYPES, this.handleLaserScan);
+    renderer.addDatatypeSubscriptions(FOXGLOVE_LASERSCAN_DATATYPES, this.handleLaserScan);
   }
 
   public override settingsNodes(): SettingsTreeEntry[] {
@@ -225,8 +252,8 @@ export class PointCloudsAndLaserScans extends SceneExtension<PointCloudAndLaserS
     const handler = this.handleSettingsAction;
     const entries: SettingsTreeEntry[] = [];
     for (const topic of this.renderer.topics ?? []) {
-      const isPointCloud = POINTCLOUD_DATATYPES.has(topic.datatype);
-      const isLaserScan = !isPointCloud && LASERSCAN_DATATYPES.has(topic.datatype);
+      const isPointCloud = ALL_POINTCLOUD_DATATYPES.has(topic.datatype);
+      const isLaserScan = !isPointCloud && ALL_LASERSCAN_DATATYPES.has(topic.datatype);
       if (isPointCloud || isLaserScan) {
         const config = (configTopics[topic.name] ??
           {}) as Partial<LayerSettingsPointCloudAndLaserScan>;
@@ -332,6 +359,7 @@ export class PointCloudsAndLaserScans extends SceneExtension<PointCloudAndLaserS
         this._updatePointCloudRenderable(
           renderable,
           renderable.userData.pointCloud,
+          renderable.userData.originalMessage,
           settings,
           renderable.userData.receiveTime,
         );
@@ -339,6 +367,7 @@ export class PointCloudsAndLaserScans extends SceneExtension<PointCloudAndLaserS
         this._updateLaserScanRenderable(
           renderable,
           renderable.userData.laserScan,
+          renderable.userData.originalMessage,
           settings,
           renderable.userData.receiveTime,
         );
@@ -399,6 +428,7 @@ export class PointCloudsAndLaserScans extends SceneExtension<PointCloudAndLaserS
         settings,
         topic,
         pointCloud,
+        originalMessage: messageEvent.message as RosObject,
         pointsHistory: [{ receiveTime, messageTime, points }],
         material,
         pickingMaterial,
@@ -421,6 +451,7 @@ export class PointCloudsAndLaserScans extends SceneExtension<PointCloudAndLaserS
     this._updatePointCloudRenderable(
       renderable,
       pointCloud,
+      messageEvent.message as RosObject,
       renderable.userData.settings,
       receiveTime,
     );
@@ -479,6 +510,7 @@ export class PointCloudsAndLaserScans extends SceneExtension<PointCloudAndLaserS
         settings,
         topic,
         pointCloud,
+        originalMessage: messageEvent.message as RosObject,
         pointsHistory: [{ receiveTime, messageTime, points }],
         material,
         pickingMaterial,
@@ -501,6 +533,7 @@ export class PointCloudsAndLaserScans extends SceneExtension<PointCloudAndLaserS
     this._updatePointCloudRenderable(
       renderable,
       pointCloud,
+      messageEvent.message as RosObject,
       renderable.userData.settings,
       receiveTime,
     );
@@ -517,6 +550,7 @@ export class PointCloudsAndLaserScans extends SceneExtension<PointCloudAndLaserS
   private _updatePointCloudRenderable(
     renderable: PointCloudAndLaserScanRenderable,
     pointCloud: PointCloud | PointCloud2,
+    originalMessage: RosObject | undefined,
     settings: LayerSettingsPointCloudAndLaserScan,
     receiveTime: bigint,
   ): void {
@@ -526,6 +560,7 @@ export class PointCloudsAndLaserScans extends SceneExtension<PointCloudAndLaserS
     renderable.userData.frameId = this.renderer.normalizeFrameId(getFrameId(pointCloud));
     renderable.userData.pointCloud = pointCloud;
     renderable.userData.laserScan = undefined;
+    renderable.userData.originalMessage = originalMessage;
 
     const prevSettings = renderable.userData.settings;
     renderable.userData.settings = settings;
@@ -849,9 +884,14 @@ export class PointCloudsAndLaserScans extends SceneExtension<PointCloudAndLaserS
     colorAttribute.needsUpdate = true;
   }
 
-  private handleLaserScan = (messageEvent: PartialMessageEvent<LaserScan>): void => {
+  private handleLaserScan = (
+    messageEvent: PartialMessageEvent<RosLaserScan | FoxgloveLaserScan>,
+  ): void => {
     const topic = messageEvent.topic;
-    const laserScan = normalizeLaserScan(messageEvent.message);
+    const laserScan =
+      "header" in messageEvent.message
+        ? normalizeRosLaserScan(messageEvent.message)
+        : normalizeFoxgloveLaserScan(messageEvent.message as PartialMessage<FoxgloveLaserScan>);
     const receiveTime = toNanoSec(messageEvent.receiveTime);
 
     let renderable = this.renderables.get(topic);
@@ -887,7 +927,7 @@ export class PointCloudsAndLaserScans extends SceneExtension<PointCloudAndLaserS
       const instancePickingMaterial = new LaserScanInstancePickingMaterial();
       const points = createPoints(
         topic,
-        makePose(),
+        laserScan.pose,
         geometry,
         material,
         pickingMaterial,
@@ -897,16 +937,17 @@ export class PointCloudsAndLaserScans extends SceneExtension<PointCloudAndLaserS
       material.update(settings, laserScan);
       pickingMaterial.update(settings, laserScan);
 
-      const messageTime = toNanoSec(laserScan.header.stamp);
+      const messageTime = toNanoSec(laserScan.timestamp);
       renderable = new PointCloudAndLaserScanRenderable(topic, this.renderer, {
         receiveTime,
         messageTime,
-        frameId: this.renderer.normalizeFrameId(laserScan.header.frame_id),
-        pose: makePose(),
+        frameId: this.renderer.normalizeFrameId(laserScan.frame_id),
+        pose: laserScan.pose,
         settingsPath: ["topics", topic],
         settings,
         topic,
         laserScan,
+        originalMessage: messageEvent.message as RosObject,
         pointsHistory: [{ receiveTime, messageTime, points }],
         material,
         pickingMaterial,
@@ -921,6 +962,7 @@ export class PointCloudsAndLaserScans extends SceneExtension<PointCloudAndLaserS
     this._updateLaserScanRenderable(
       renderable,
       laserScan,
+      messageEvent.message as RosObject,
       renderable.userData.settings,
       receiveTime,
     );
@@ -928,16 +970,18 @@ export class PointCloudsAndLaserScans extends SceneExtension<PointCloudAndLaserS
 
   private _updateLaserScanRenderable(
     renderable: PointCloudAndLaserScanRenderable,
-    laserScan: LaserScan,
+    laserScan: NormalizedLaserScan,
+    originalMessage: RosObject | undefined,
     settings: LayerSettingsPointCloudAndLaserScan,
     receiveTime: bigint,
   ): void {
-    const messageTime = toNanoSec(laserScan.header.stamp);
+    const messageTime = toNanoSec(laserScan.timestamp);
     renderable.userData.receiveTime = receiveTime;
     renderable.userData.messageTime = messageTime;
-    renderable.userData.frameId = this.renderer.normalizeFrameId(laserScan.header.frame_id);
+    renderable.userData.frameId = this.renderer.normalizeFrameId(laserScan.frame_id);
     renderable.userData.pointCloud = undefined;
     renderable.userData.laserScan = laserScan;
+    renderable.userData.originalMessage = originalMessage;
 
     renderable.userData.settings = settings;
     const { colorField } = settings;
@@ -966,7 +1010,7 @@ export class PointCloudsAndLaserScans extends SceneExtension<PointCloudAndLaserS
       const geometry = this._createGeometry(topic, THREE.StaticDrawUsage);
       const points = createPoints(
         topic,
-        makePose(),
+        laserScan.pose,
         geometry,
         laserScanMaterial,
         pickingMaterial,
@@ -980,6 +1024,9 @@ export class PointCloudsAndLaserScans extends SceneExtension<PointCloudAndLaserS
     if (!latestEntry) {
       throw new Error(`pointsHistory is empty for ${topic}`);
     }
+
+    latestEntry.receiveTime = receiveTime;
+    latestEntry.messageTime = messageTime;
 
     const geometry = latestEntry.points.geometry;
     geometry.resize(ranges.length);
@@ -999,12 +1046,14 @@ export class PointCloudsAndLaserScans extends SceneExtension<PointCloudAndLaserS
 
       for (let i = 0; i < ranges.length; i++) {
         const range = ranges[i]!;
-        maxRange = Math.max(maxRange, range);
+        if (Number.isFinite(range)) {
+          maxRange = Math.max(maxRange, range);
+        }
 
         const colorValue = colorField === "range" ? range : intensities[i];
-        if (colorValue != undefined) {
-          minColorValue = Math.min(minColorValue, colorValue);
-          maxColorValue = Math.max(maxColorValue, colorValue);
+        if (Number.isFinite(colorValue)) {
+          minColorValue = Math.min(minColorValue, colorValue!);
+          maxColorValue = Math.max(maxColorValue, colorValue!);
         }
       }
       minColorValue = settings.minValue ?? minColorValue;
@@ -1144,11 +1193,15 @@ class LaserScanMaterial extends THREE.RawShaderMaterial {
     }
   }
 
-  public update(settings: LayerSettingsPointCloudAndLaserScan, laserScan: LaserScan): void {
+  public update(
+    settings: LayerSettingsPointCloudAndLaserScan,
+    laserScan: NormalizedLaserScan,
+  ): void {
     this.uniforms.isCircle!.value = settings.pointShape === "circle";
     this.uniforms.pointSize!.value = settings.pointSize;
-    this.uniforms.angleMin!.value = laserScan.angle_min;
-    this.uniforms.angleIncrement!.value = laserScan.angle_increment;
+    this.uniforms.angleMin!.value = laserScan.start_angle;
+    this.uniforms.angleIncrement!.value =
+      (laserScan.end_angle - laserScan.start_angle) / (laserScan.ranges.length - 1);
     this.uniforms.rangeMin!.value = laserScan.range_min;
     this.uniforms.rangeMax!.value = laserScan.range_max;
     this.uniformsNeedUpdate = true;
@@ -1227,7 +1280,7 @@ class LaserScanInstancePickingMaterial extends THREE.RawShaderMaterial {
     };
   }
 
-  public update(settings: LayerSettingsPointCloudAndLaserScan, laserScan: LaserScan): void {
+  public update(settings: LayerSettingsPointCloudAndLaserScan, laserScan: RosLaserScan): void {
     this.uniforms.isCircle!.value = settings.pointShape === "circle";
     this.uniforms.pointSize!.value = settings.pointSize;
     this.uniforms.angleMin!.value = laserScan.angle_min;
@@ -1664,14 +1717,29 @@ function normalizePointCloud2(message: PartialMessage<PointCloud2>): PointCloud2
   };
 }
 
-function normalizeLaserScan(message: PartialMessage<LaserScan>): LaserScan {
+function normalizeFoxgloveLaserScan(
+  message: PartialMessage<FoxgloveLaserScan>,
+): NormalizedLaserScan {
   return {
-    header: normalizeHeader(message.header),
-    angle_min: message.angle_min ?? 0,
-    angle_max: message.angle_max ?? 0,
-    angle_increment: message.angle_increment ?? 0,
-    time_increment: message.time_increment ?? 0,
-    scan_time: message.scan_time ?? 0,
+    timestamp: normalizeTime(message.timestamp),
+    frame_id: message.frame_id ?? "",
+    pose: normalizePose(message.pose),
+    start_angle: message.start_angle ?? 0,
+    end_angle: message.end_angle ?? 0,
+    range_min: -Infinity,
+    range_max: Infinity,
+    ranges: normalizeFloat32Array(message.ranges),
+    intensities: normalizeFloat32Array(message.intensities),
+  };
+}
+
+function normalizeRosLaserScan(message: PartialMessage<RosLaserScan>): NormalizedLaserScan {
+  return {
+    timestamp: normalizeTime(message.header?.stamp),
+    frame_id: message.header?.frame_id ?? "",
+    pose: emptyPose(),
+    start_angle: message.angle_min ?? 0,
+    end_angle: message.angle_max ?? 0,
     range_min: message.range_min ?? -Infinity,
     range_max: message.range_max ?? Infinity,
     ranges: normalizeFloat32Array(message.ranges),
