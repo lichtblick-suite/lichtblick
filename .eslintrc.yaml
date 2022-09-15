@@ -221,7 +221,6 @@ overrides:
       - "packages/studio-base/src/panels/Image/components/TopicDropdown.tsx"
       - "packages/studio-base/src/panels/Image/components/ZoomMenu.tsx"
       - "packages/studio-base/src/panels/Image/index.tsx"
-      - "packages/studio-base/src/panels/InternalLogs/index.tsx"
       - "packages/studio-base/src/panels/LegacyPlot/index.tsx"
       - "packages/studio-base/src/panels/Log/FilterBar.tsx"
       - "packages/studio-base/src/panels/Log/index.tsx"

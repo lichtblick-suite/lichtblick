@@ -12,7 +12,12 @@ import ReactDOM from "react-dom";
 
 import { Sockets } from "@foxglove/electron-socket/renderer";
 import Logger from "@foxglove/log";
-import { installDevtoolsFormatters, overwriteFetch, waitForFonts } from "@foxglove/studio-base";
+import {
+  AppSetting,
+  installDevtoolsFormatters,
+  overwriteFetch,
+  waitForFonts,
+} from "@foxglove/studio-base";
 
 import pkgInfo from "../../package.json";
 import { Storage } from "../common/types";
@@ -56,6 +61,8 @@ if (!rootEl) {
   throw new Error("missing #root element");
 }
 
+const isDevelopment = process.env.NODE_ENV === "development";
+
 async function main() {
   // Initialize the RPC channel for electron-socket. This method is called first
   // since the window.onmessage handler needs to be installed before
@@ -68,7 +75,9 @@ async function main() {
   const appConfiguration = await NativeStorageAppConfiguration.Initialize(
     (global as { storageBridge?: Storage }).storageBridge!,
     {
-      defaults: {},
+      defaults: {
+        [AppSetting.SHOW_DEBUG_PANELS]: isDevelopment,
+      },
     },
   );
 

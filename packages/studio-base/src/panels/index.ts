@@ -12,7 +12,6 @@ import ImageViewHelp from "./Image/index.help.md";
 import imageViewThumbnail from "./Image/thumbnail.png";
 import IndicatorHelp from "./Indicator/index.help.md";
 import indicatorThumbnail from "./Indicator/thumbnail.png";
-import InternalLogsHelp from "./InternalLogs/index.help.md";
 import LogHelp from "./Log/index.help.md";
 import logThumbnail from "./Log/thumbnail.png";
 import MapHelp from "./Map/index.help.md";
@@ -237,13 +236,6 @@ const debug: PanelInfo[] = [
     description: "Display playback and data-streaming performance statistics.",
     help: PlaybackPerformanceHelp,
     module: async () => await import("./PlaybackPerformance"),
-  },
-  {
-    title: "Studio - Logs",
-    type: "InternalLogs",
-    description: "Specify the channels of internal logs to display for debugging.",
-    help: InternalLogsHelp,
-    module: async () => await import("./InternalLogs"),
   },
 ];
 

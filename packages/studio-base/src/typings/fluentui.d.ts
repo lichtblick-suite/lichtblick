@@ -16,6 +16,7 @@ declare global {
     | CustomIconNames
     | "Add"
     | "AddIn"
+    | "BacklogList"
     | "Blockhead"
     | "BlockheadFilled"
     | "BookStar"

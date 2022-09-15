@@ -23,28 +23,28 @@ class Logger {
   }
 
   // fully qualified name for the logger
-  public name() {
+  public name(): string {
     return this._name;
   }
 
-  public isEnabled() {
+  public isEnabled(): boolean {
     return this._enabled;
   }
 
-  public enable() {
+  public enable(): void {
     this._enabled = true;
     this._updateHandlers();
   }
 
-  public disable() {
+  public disable(): void {
     this._enabled = false;
     this._updateHandlers();
   }
 
-  public debug(..._args: unknown[]) {}
-  public info(..._args: unknown[]) {}
-  public warn(..._args: unknown[]) {}
-  public error(..._args: unknown[]) {}
+  public debug(..._args: unknown[]): void {}
+  public info(..._args: unknown[]): void {}
+  public warn(..._args: unknown[]): void {}
+  public error(..._args: unknown[]): void {}
 
   // create a new logger under this logger's namespace
   public getLogger(name: string): Logger {
@@ -67,11 +67,10 @@ class Logger {
 
   private _updateHandlers() {
     if (this._enabled) {
-      const prefix = this._name.length > 0 ? `[${this._name}]` : "";
-      this.debug = console.debug.bind(global.console, `${prefix}`);
-      this.info = console.info.bind(global.console, `${prefix}`);
-      this.warn = console.warn.bind(global.console, `${prefix}`);
-      this.error = console.error.bind(global.console, `${prefix}`);
+      this.debug = console.debug.bind(global.console);
+      this.info = console.info.bind(global.console);
+      this.warn = console.warn.bind(global.console);
+      this.error = console.error.bind(global.console);
     } else {
       this.debug = noop;
       this.info = noop;
@@ -82,3 +81,4 @@ class Logger {
 }
 
 export default Logger.default;
+export { Logger };

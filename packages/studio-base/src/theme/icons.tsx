@@ -18,6 +18,7 @@ import {
 import {
   AddIcon,
   AddInIcon,
+  BacklogListIcon,
   CancelIcon,
   CaretSolidDownIcon,
   CheckMarkIcon,
@@ -61,6 +62,7 @@ const icons: {
 } = {
   Add: <AddIcon />,
   AddIn: <AddInIcon />,
+  BacklogList: <BacklogListIcon />,
   Blockhead: <BlockheadIcon />,
   BlockheadFilled: <BlockheadFilledIcon />,
   BookStar: <BookStar24Regular />,

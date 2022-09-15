@@ -8,6 +8,7 @@ import { StrictMode } from "react";
 import ReactDOM from "react-dom";
 
 import Logger from "@foxglove/log";
+import { AppSetting } from "@foxglove/studio-base";
 
 import VersionBanner from "./VersionBanner";
 import LocalStorageAppConfiguration from "./services/LocalStorageAppConfiguration";
@@ -44,6 +45,8 @@ if (!rootEl) {
   throw new Error("missing #root element");
 }
 
+const isDevelopment = process.env.NODE_ENV === "development";
+
 async function main() {
   const chromeMatch = navigator.userAgent.match(/Chrome\/(\d+)\./);
   const chromeVersion = chromeMatch ? parseInt(chromeMatch[1] ?? "", 10) : 0;
@@ -78,7 +81,9 @@ async function main() {
   const { Root } = await import("./Root");
 
   const appConfiguration = new LocalStorageAppConfiguration({
-    defaults: {},
+    defaults: {
+      [AppSetting.SHOW_DEBUG_PANELS]: isDevelopment,
+    },
   });
 
   ReactDOM.render(
