@@ -4,10 +4,11 @@
 
 import ClearIcon from "@mui/icons-material/Clear";
 import SearchIcon from "@mui/icons-material/Search";
-import { AppBar, IconButton, TextField, styled as muiStyled } from "@mui/material";
+import { AppBar, IconButton, TextField } from "@mui/material";
 import memoizeWeak from "memoize-weak";
 import { useMemo, useState } from "react";
 import { DeepReadonly } from "ts-essentials";
+import { makeStyles } from "tss-react/mui";
 
 import { SettingsTree } from "@foxglove/studio";
 import Stack from "@foxglove/studio-base/components/Stack";
@@ -15,17 +16,18 @@ import Stack from "@foxglove/studio-base/components/Stack";
 import { NodeEditor } from "./NodeEditor";
 import { filterTreeNodes, prepareSettingsNodes } from "./utils";
 
-const StyledAppBar = muiStyled(AppBar, { skipSx: true })(({ theme }) => ({
-  top: -1,
-  zIndex: theme.zIndex.appBar - 1,
-  borderBottom: `1px solid ${theme.palette.divider}`,
-  padding: theme.spacing(1),
-}));
-
-const FieldGrid = muiStyled("div", { skipSx: true })(({ theme }) => ({
-  display: "grid",
-  gridTemplateColumns: "minmax(4rem, 1fr) minmax(4rem, 12rem)",
-  columnGap: theme.spacing(1),
+const useStyles = makeStyles()((theme) => ({
+  appBar: {
+    top: -1,
+    zIndex: theme.zIndex.appBar - 1,
+    borderBottom: `1px solid ${theme.palette.divider}`,
+    padding: theme.spacing(1),
+  },
+  fieldGrid: {
+    display: "grid",
+    gridTemplateColumns: "minmax(20%, 20ch) auto",
+    columnGap: theme.spacing(1),
+  },
 }));
 
 const makeStablePath = memoizeWeak((key: string) => [key]);
@@ -35,6 +37,7 @@ export default function SettingsTreeEditor({
 }: {
   settings: DeepReadonly<SettingsTree>;
 }): JSX.Element {
+  const { classes } = useStyles();
   const { actionHandler } = settings;
   const [filterText, setFilterText] = useState<string>("");
 
@@ -51,7 +54,7 @@ export default function SettingsTreeEditor({
   return (
     <Stack fullHeight>
       {settings.enableFilter === true && (
-        <StyledAppBar position="sticky" color="default" elevation={0}>
+        <AppBar className={classes.appBar} position="sticky" color="default" elevation={0}>
           <TextField
             data-testid="settings-filter-field"
             onChange={(event) => setFilterText(event.target.value)}
@@ -73,9 +76,9 @@ export default function SettingsTreeEditor({
               ),
             }}
           />
-        </StyledAppBar>
+        </AppBar>
       )}
-      <FieldGrid>
+      <div className={classes.fieldGrid}>
         {definedNodes.map(([key, root]) => (
           <NodeEditor
             key={key}
@@ -86,7 +89,7 @@ export default function SettingsTreeEditor({
             settings={root}
           />
         ))}
-      </FieldGrid>
+      </div>
     </Stack>
   );
 }

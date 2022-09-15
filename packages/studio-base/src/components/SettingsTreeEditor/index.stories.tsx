@@ -43,6 +43,10 @@ const BasicSettings: SettingsTreeNodes = {
     ],
     fields: {
       emptyField: undefined,
+      longField: {
+        input: "string",
+        label: "A field with a very long label that might wrap or truncate",
+      },
       numberWithPrecision: {
         input: "number",
         label: "Number with precision",

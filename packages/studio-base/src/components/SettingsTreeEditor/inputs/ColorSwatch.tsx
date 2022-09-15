@@ -9,8 +9,9 @@ export const ColorSwatch = muiStyled("div", {
 })<{ color: string }>(({ theme, color }) => ({
   backgroundColor: color,
   aspectRatio: "1/1",
-  width: theme.spacing(3),
+  width: theme.spacing(2.5),
   margin: theme.spacing(0.625),
   borderRadius: 1,
   border: `1px solid ${theme.palette.getContrastText(color)}`,
+  flexShrink: 0,
 }));
