@@ -11,6 +11,7 @@ import { RenderableModels } from "./RenderableModels";
 import { RenderablePrimitive } from "./RenderablePrimitive";
 import { RenderableSpheres } from "./RenderableSpheres";
 import { RenderableTexts } from "./RenderableTexts";
+import { RenderableTriangles } from "./RenderableTriangles";
 import { PrimitiveType } from "./types";
 
 const CONSTRUCTORS = {
@@ -21,6 +22,7 @@ const CONSTRUCTORS = {
   [PrimitiveType.ARROWS]: RenderableArrows,
   [PrimitiveType.SPHERES]: RenderableSpheres,
   [PrimitiveType.TEXTS]: RenderableTexts,
+  [PrimitiveType.TRIANGLES]: RenderableTriangles,
 };
 
 /**

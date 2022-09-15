@@ -21,6 +21,7 @@ import { RenderableLines } from "./primitives/RenderableLines";
 import { RenderableModels } from "./primitives/RenderableModels";
 import { RenderableSpheres } from "./primitives/RenderableSpheres";
 import { RenderableTexts } from "./primitives/RenderableTexts";
+import { RenderableTriangles } from "./primitives/RenderableTriangles";
 import { ALL_PRIMITIVE_TYPES, PrimitiveType } from "./primitives/types";
 import { missingTransformMessage, MISSING_TRANSFORM } from "./transforms";
 
@@ -39,6 +40,7 @@ type EntityRenderables = {
   [PrimitiveType.ARROWS]?: RenderableArrows;
   [PrimitiveType.SPHERES]?: RenderableSpheres;
   [PrimitiveType.TEXTS]?: RenderableTexts;
+  [PrimitiveType.TRIANGLES]?: RenderableTriangles;
 };
 
 const PRIMITIVE_KEYS = {
@@ -49,6 +51,7 @@ const PRIMITIVE_KEYS = {
   [PrimitiveType.ARROWS]: "arrows",
   [PrimitiveType.SPHERES]: "spheres",
   [PrimitiveType.TEXTS]: "texts",
+  [PrimitiveType.TRIANGLES]: "triangles",
 } as const;
 
 export class TopicEntities extends Renderable<EntityTopicUserData> {

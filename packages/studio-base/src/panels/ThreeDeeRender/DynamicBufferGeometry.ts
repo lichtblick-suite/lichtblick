@@ -61,7 +61,7 @@ export class DynamicBufferGeometry<
       const data = new this._dataConstructor(itemCount * attribute.itemSize);
       const newAttrib = new THREE.BufferAttribute(data, attribute.itemSize, attribute.normalized);
       newAttrib.setUsage(this._usage);
-      this.attributes[attributeName] = newAttrib;
+      this.setAttribute(attributeName, newAttrib);
     }
 
     this._itemCapacity = itemCount;
