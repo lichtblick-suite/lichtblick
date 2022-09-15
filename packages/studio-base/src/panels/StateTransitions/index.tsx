@@ -53,7 +53,8 @@ import { TimestampMethod } from "@foxglove/studio-base/util/time";
 
 import helpContent from "./index.help.md";
 import messagesToDatasets from "./messagesToDatasets";
-import { StateTransitionPath } from "./types";
+import { useStateTransitionsPanelSettings } from "./settings";
+import { StateTransitionConfig } from "./types";
 
 export const transitionableRosTypes = [
   "bool",
@@ -144,8 +145,6 @@ const plugins: ChartOptions["plugins"] = {
     },
   },
 };
-
-export type StateTransitionConfig = { paths: StateTransitionPath[] };
 
 export function openSiblingStateTransitionsPanel(
   openSiblingPanel: OpenSiblingPanel,
@@ -344,6 +343,8 @@ const StateTransitions = React.memo(function StateTransitions(props: Props) {
   const rootRef = useRef<HTMLDivElement>(ReactNull);
   const mousePresent = usePanelMousePresence(rootRef);
 
+  useStateTransitionsPanelSettings(config, saveConfig);
+
   return (
     <Stack ref={rootRef} flexGrow={1} overflow="hidden" style={{ zIndex: 0 }}>
       <PanelToolbar helpContent={helpContent} />
@@ -369,7 +370,7 @@ const StateTransitions = React.memo(function StateTransitions(props: Props) {
         <div className={classes.chartWrapper} style={{ height }} ref={sizeRef}>
           <TimeBasedChart
             zoom
-            isSynced
+            isSynced={config.isSynced}
             showXAxisLabels
             width={width ?? 0}
             height={height}
@@ -408,7 +409,7 @@ const StateTransitions = React.memo(function StateTransitions(props: Props) {
               <TimestampMethodDropdown
                 path={path}
                 index={index}
-                iconButtonProps={{ disabled: !path }}
+                iconButtonProps={{ disabled: path !== "" }}
                 timestampMethod={timestampMethod}
                 onTimestampMethodChange={onInputTimestampMethodChange}
               />
@@ -420,7 +421,7 @@ const StateTransitions = React.memo(function StateTransitions(props: Props) {
   );
 });
 
-const defaultConfig: PanelConfig = { paths: [] };
+const defaultConfig: StateTransitionConfig = { paths: [], isSynced: true };
 export default Panel(
   Object.assign(StateTransitions, {
     panelType: "StateTransitions",

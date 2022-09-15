@@ -5,3 +5,8 @@
 import { TimestampMethod } from "@foxglove/studio-base/util/time";
 
 export type StateTransitionPath = { value: string; timestampMethod: TimestampMethod };
+
+export type StateTransitionConfig = {
+  paths: StateTransitionPath[];
+  isSynced: boolean;
+};
