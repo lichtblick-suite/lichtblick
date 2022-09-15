@@ -28,6 +28,9 @@ export type TimelinePositionedEvent = {
 };
 
 export type EventsStore = DeepReadonly<{
+  /** Used to signal event refreshes. */
+  eventFetchCount: number;
+
   /** Fetched events for this session. */
   events: AsyncState<TimelinePositionedEvent[]>;
 
@@ -36,6 +39,9 @@ export type EventsStore = DeepReadonly<{
 
   /** The currently selected event, if any. */
   selectedEventId: undefined | string;
+
+  /** Refreshes events from api. */
+  refreshEvents: () => void;
 
   /** Select an event by id or clear the selection. */
   selectEvent: (id: undefined | string) => void;

@@ -25,6 +25,9 @@ import { useCallback, useMemo, useState } from "react";
 import { makeStyles } from "tss-react/mui";
 
 import { compare, Time } from "@foxglove/rostime";
+import { CreateEventDialog } from "@foxglove/studio-base/components/CreateEventDialog";
+import EventIcon from "@foxglove/studio-base/components/EventIcon";
+import EventOutlinedIcon from "@foxglove/studio-base/components/EventOutlinedIcon";
 import HoverableIconButton from "@foxglove/studio-base/components/HoverableIconButton";
 import KeyListener from "@foxglove/studio-base/components/KeyListener";
 import LoopIcon from "@foxglove/studio-base/components/LoopIcon";
@@ -34,6 +37,7 @@ import {
 } from "@foxglove/studio-base/components/MessagePipeline";
 import PlaybackSpeedControls from "@foxglove/studio-base/components/PlaybackSpeedControls";
 import Stack from "@foxglove/studio-base/components/Stack";
+import { useCurrentUser } from "@foxglove/studio-base/context/CurrentUserContext";
 import { Player, PlayerPresence } from "@foxglove/studio-base/players/types";
 
 import PlaybackTimeDisplay from "./PlaybackTimeDisplay";
@@ -53,6 +57,14 @@ const useStyles = makeStyles()((theme) => ({
   },
 }));
 
+const selectDeviceId = (ctx: MessagePipelineContext) => {
+  if (ctx.playerState.urlState?.sourceId === "foxglove-data-platform") {
+    return ctx.playerState.urlState.parameters?.deviceId;
+  } else {
+    return undefined;
+  }
+};
+
 const selectPresence = (ctx: MessagePipelineContext) => ctx.playerState.presence;
 
 export default function PlaybackControls(props: {
@@ -68,6 +80,9 @@ export default function PlaybackControls(props: {
 
   const { classes } = useStyles();
   const [repeat, setRepeat] = useState(false);
+  const [createEventDialogOpen, setCreateEventDialogOpen] = useState(false);
+  const { currentUser } = useCurrentUser();
+  const deviceId = useMessagePipeline(selectDeviceId);
 
   const toggleRepeat = useCallback(() => {
     setRepeat((old) => !old);
@@ -137,6 +152,10 @@ export default function PlaybackControls(props: {
     [seekBackwardAction, seekForwardAction, togglePlayPause],
   );
 
+  const toggleCreateEventDialog = useCallback(() => {
+    setCreateEventDialogOpen((open) => !open);
+  }, []);
+
   const disableControls = presence === PlayerPresence.ERROR;
 
   return (
@@ -146,7 +165,16 @@ export default function PlaybackControls(props: {
       <div className={classes.root}>
         <Scrubber onSeek={seek} />
         <Stack direction="row" alignItems="center" justifyContent="space-evenly" flex={1} gap={1}>
-          <Stack direction="row" flex={1}>
+          <Stack direction="row" flex={1} gap={0.5}>
+            {currentUser && deviceId && (
+              <HoverableIconButton
+                size="small"
+                title="Create event"
+                icon={<EventOutlinedIcon />}
+                activeIcon={<EventIcon />}
+                onClick={toggleCreateEventDialog}
+              />
+            )}
             <PlaybackTimeDisplay onSeek={seek} onPause={pause} />
           </Stack>
           <Stack direction="row" alignItems="center" gap={1}>
@@ -187,6 +215,9 @@ export default function PlaybackControls(props: {
             <PlaybackSpeedControls />
           </Stack>
         </Stack>
+        {createEventDialogOpen && deviceId && (
+          <CreateEventDialog deviceId={deviceId} onClose={toggleCreateEventDialog} />
+        )}
       </div>
     </>
   );

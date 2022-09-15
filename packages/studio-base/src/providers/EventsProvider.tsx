@@ -17,9 +17,12 @@ const NO_EVENTS: TimelinePositionedEvent[] = [];
 
 function createEventsStore() {
   return createStore<EventsStore>((set) => ({
-    filter: "",
+    eventFetchCount: 0,
     events: { loading: false, value: NO_EVENTS },
+    filter: "",
     selectedEventId: undefined,
+
+    refreshEvents: () => set((old) => ({ eventFetchCount: old.eventFetchCount + 1 })),
     selectEvent: (id: undefined | string) => set({ selectedEventId: id }),
     setEvents: (events: AsyncState<TimelinePositionedEvent[]>) =>
       set({ events, filter: "", selectedEventId: undefined }),

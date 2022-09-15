@@ -3,7 +3,7 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 import { useEffect, useMemo } from "react";
-import { useAsync } from "react-use";
+import { useAsyncFn } from "react-use";
 
 import { scaleValue as scale } from "@foxglove/den/math";
 import Logger from "@foxglove/log";
@@ -52,6 +52,7 @@ function positionEvents(
   });
 }
 
+const selectEventFetchCount = (store: EventsStore) => store.eventFetchCount;
 const selectUrlState = (ctx: MessagePipelineContext) => ctx.playerState.urlState;
 const selectSetEvents = (store: EventsStore) => store.setEvents;
 const selectSetEventsAtHoverValue = (store: TimelineInteractionStateStore) =>
@@ -72,6 +73,7 @@ export function EventsSyncAdapter(): ReactNull {
   const startTime = useMessagePipeline(selectStartTime);
   const endTime = useMessagePipeline(selectEndTime);
   const events = useEvents(EventsSelectors.selectFilteredEvents);
+  const eventFetchCount = useEvents(selectEventFetchCount);
 
   const timeRange = useMemo(() => {
     if (!startTime || !endTime) {
@@ -82,7 +84,7 @@ export function EventsSyncAdapter(): ReactNull {
   }, [endTime, startTime]);
 
   // Sync events with console API.
-  useAsync(async () => {
+  const [_events, syncEvents] = useAsyncFn(async () => {
     if (
       currentUser &&
       startTime &&
@@ -112,6 +114,10 @@ export function EventsSyncAdapter(): ReactNull {
     urlState?.parameters,
     urlState?.sourceId,
   ]);
+
+  useEffect(() => {
+    syncEvents().catch((error) => log.error(error));
+  }, [syncEvents, eventFetchCount]);
 
   // Sync hovered value and hovered events.
   useEffect(() => {
