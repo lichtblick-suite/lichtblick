@@ -2,7 +2,7 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { MessageBar, MessageBarType } from "@fluentui/react";
+import { Alert, Snackbar } from "@mui/material";
 import { useLayoutEffect, useState } from "react";
 import { useAsync } from "react-use";
 
@@ -28,12 +28,11 @@ export default function useRobotDescriptionAsset(): {
   }, [robotDescriptionParam]);
 
   const messageBar = robotDescriptionAssetError && !assetErrorDismissed && (
-    <MessageBar
-      messageBarType={MessageBarType.warning}
-      onDismiss={() => setAssetErrorDismissed(true)}
-    >
-      {robotDescriptionAssetError.toString()}
-    </MessageBar>
+    <Snackbar open anchorOrigin={{ vertical: "top", horizontal: "center" }}>
+      <Alert variant="filled" severity="warning" onClose={() => setAssetErrorDismissed(true)}>
+        {robotDescriptionAssetError.toString()}
+      </Alert>
+    </Snackbar>
   );
 
   // When the error changes, show the message bar again if the user previously dismissed it.

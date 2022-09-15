@@ -105,6 +105,16 @@ export function ManualJointPosition(): JSX.Element {
   );
 }
 
+export function WithError(): JSX.Element {
+  return (
+    <PanelSetup
+      fixture={{ activeData: { parameters: new Map([["/robot_description", "hello"]]) } }}
+    >
+      <URDFViewer />
+    </PanelSetup>
+  );
+}
+
 const exampleURDF = `
 <?xml version="1.0"?>
 <robot>
