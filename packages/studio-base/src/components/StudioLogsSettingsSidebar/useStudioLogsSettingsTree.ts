@@ -5,7 +5,7 @@
 import { extname } from "path";
 import { useMemo } from "react";
 
-import Log from "@foxglove/log";
+import Log, { toLogLevel } from "@foxglove/log";
 import { SettingsTree, SettingsTreeNode, SettingsTreeNodes } from "@foxglove/studio";
 import { useStudioLogsSettings } from "@foxglove/studio-base/context/StudioLogsSettingsContext";
 
@@ -27,7 +27,25 @@ function useStudioLogsSettingsTree(): SettingsTree {
     const itemDetailByPath = new Map<string, ItemDetail>();
 
     // Root node of all other settings nodes
-    const settingsRoot: SettingsTreeNodes = {};
+    const settingsRoot: SettingsTreeNodes = {
+      Settings: {
+        label: "Settings",
+        icon: "Settings",
+        fields: {
+          level: {
+            label: "level",
+            input: "select",
+            value: logsConfig.globalLevel,
+            options: [
+              { label: "error", value: "error" },
+              { label: "warn", value: "warn" },
+              { label: "info", value: "info" },
+              { label: "debug", value: "debug" },
+            ],
+          },
+        },
+      },
+    };
 
     // Channels are split into two buckets - "packages" and "misc". This is the root for "misc"
     // channels.
@@ -137,6 +155,14 @@ function useStudioLogsSettingsTree(): SettingsTree {
       enableFilter: true,
       actionHandler: (action) => {
         log.debug("action", action);
+
+        if (action.action === "update" && action.payload.path.join(".") === "Settings.level") {
+          if (typeof action.payload.value !== "string") {
+            return;
+          }
+          logsConfig.setGlobalLevel(toLogLevel(action.payload.value));
+          return;
+        }
 
         // visibility toggle sends and update as if it was a boolean input
         if (action.action !== "update" || action.payload.input !== "boolean") {

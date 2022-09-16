@@ -5,11 +5,14 @@
 import { createContext } from "react";
 import { StoreApi, useStore } from "zustand";
 
+import { LogLevel } from "@foxglove/log";
 import useGuaranteedContext from "@foxglove/studio-base/hooks/useGuaranteedContext";
 
 type StudioLogConfigChannel = { name: string; enabled: boolean };
 
 interface IStudioLogsSettings {
+  readonly globalLevel: LogLevel;
+
   readonly channels: ReadonlyArray<{ name: string; enabled: boolean }>;
 
   // Enable/disable a channel. Name is the full name of the channel.
@@ -19,6 +22,10 @@ interface IStudioLogsSettings {
   // Enable/disable an entire prefix. Any channels with a name starting with the prefix will be toggled
   enablePrefix(prefix: string): void;
   disablePrefix(prefix: string): void;
+
+  // Set the global log level for all channels
+  // This does not affect whether a channel is enabled or disabled
+  setGlobalLevel(level: LogLevel): void;
 }
 
 const StudioLogsSettingsContext = createContext<undefined | StoreApi<IStudioLogsSettings>>(
