@@ -646,4 +646,48 @@ describe("PanelExtensionAdapter", () => {
 
     mockRAF.mockRestore();
   });
+
+  it("ignores subscriptions after panel unmount", async () => {
+    const sig = signal();
+    const initPanel = jest.fn((context: PanelExtensionContext) => {
+      context.watch("currentFrame");
+      context.subscribe(["x"]);
+      setTimeout(() => {
+        context.subscribe(["y"]);
+        sig.resolve();
+      }, 10);
+    });
+
+    const config = {};
+    const saveConfig = () => {};
+
+    const mockSetSubscriptions = jest.fn();
+
+    const { unmount } = render(
+      <ThemeProvider isDark>
+        <MockPanelContextProvider>
+          <PanelSetup fixture={{ setSubscriptions: mockSetSubscriptions }}>
+            <PanelExtensionAdapter config={config} saveConfig={saveConfig} initPanel={initPanel} />
+          </PanelSetup>
+        </MockPanelContextProvider>
+      </ThemeProvider>,
+    );
+
+    expect(initPanel).toHaveBeenCalled();
+
+    expect(mockSetSubscriptions.mock.calls).toEqual([
+      [expect.any(String), [{ preloadType: "full", topic: "x" }]],
+    ]);
+    unmount();
+    expect(mockSetSubscriptions.mock.calls).toEqual([
+      [expect.any(String), [{ preloadType: "full", topic: "x" }]],
+      [expect.any(String), []],
+    ]);
+    await act(async () => await sig);
+    unmount();
+    expect(mockSetSubscriptions.mock.calls).toEqual([
+      [expect.any(String), [{ preloadType: "full", topic: "x" }]],
+      [expect.any(String), []],
+    ]);
+  });
 });
