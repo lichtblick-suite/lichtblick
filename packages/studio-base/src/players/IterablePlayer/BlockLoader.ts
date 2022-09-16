@@ -229,6 +229,7 @@ export class BlockLoader {
         topics: Array.from(topicsToFetch),
         start: iteratorStartTime,
         end: iteratorEndTime,
+        consumptionType: "full",
       });
 
       let messagesByTopic: Record<string, MessageEvent<unknown>[]> = {};

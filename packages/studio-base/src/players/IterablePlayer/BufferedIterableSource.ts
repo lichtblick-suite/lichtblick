@@ -20,7 +20,7 @@ import {
 
 const log = Log.getLogger(__filename);
 
-const DEFAULT_READ_AHEAD_DURATION = { sec: 5, nsec: 0 };
+const DEFAULT_READ_AHEAD_DURATION = { sec: 10, nsec: 0 };
 
 type Options = {
   // How far ahead to buffer
@@ -88,65 +88,46 @@ class BufferedIterableSource implements IIterableSource {
     // the start of the array.
     this.cache.clear();
 
-    // Streaming starts where the read head is and adjust as data is buffered and read
-    let streamStart = this.readHead;
-
     try {
-      for (;;) {
+      const sourceIterator = this.source.messageIterator({
+        topics: args.topics,
+        start: this.readHead,
+        consumptionType: "partial",
+      });
+
+      // Messages are read from the source until reaching the readUntil time. Then we wait for the read head
+      // to move forward until it is within 1 headAheadDuration of the readUntil time until trying to read more.
+      // We set the readUntil time to 2x readAheadDuration so that every move of the read head does not require
+      // also reading the underlying source. This creates the effect of buffering some
+      let readUntil = clampTime(
+        addTime(this.readHead, this.readAheadDuration),
+        this.initResult.start,
+        this.initResult.end,
+      );
+
+      for await (const result of sourceIterator) {
         if (this.aborted) {
-          break;
-        }
-
-        const readUntil = addTime(
-          streamStart,
-          addTime(this.readAheadDuration, this.readAheadDuration),
-        );
-        const streamEnd = clampTime(readUntil, this.initResult.start, this.initResult.end);
-
-        const sourceIterator = this.source.messageIterator({
-          topics: args.topics,
-          start: streamStart,
-          end: streamEnd,
-        });
-
-        for await (const result of sourceIterator) {
-          // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-          if (this.aborted) {
-            break;
-          }
-
-          if (result.msgEvent && compare(result.msgEvent.receiveTime, streamEnd) > 0) {
-            throw new Error("Invariant: out of bounds result");
-          }
-
-          this.cache.enqueue(result);
-
-          // Indicate to the consumer that it can try reading again
-          this.readSignal.notifyAll();
-        }
-
-        // We've streamed through the end of our data source
-        if (compare(streamEnd, this.initResult.end) >= 0) {
           return;
         }
 
-        // Wait until we've consumed enough data that we should read more
-        for (;;) {
-          // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-          if (this.aborted) {
-            break;
-          }
+        this.cache.enqueue(result);
 
-          // If this.readHead + readAheadTime > streamEnd, we start another stream for buffering
-          // otherwise we wait
-          const targetUntil = addTime(this.readHead, this.readAheadDuration);
-          if (compare(targetUntil, streamEnd) > 0 || this.cache.size() === 0) {
-            streamStart = addTime(streamEnd, { sec: 0, nsec: 1 });
-            break;
-          }
+        // Indicate to the consumer that it can try reading again
+        this.readSignal.notifyAll();
 
-          await this.writeSignal.wait();
+        // Keep reading while the messages we receive are <= the readUntil time
+        if (result.msgEvent && compare(result.msgEvent.receiveTime, readUntil) <= 0) {
+          continue;
         }
+
+        // If we didn't load anything into the cache keep reading
+        if (this.cache.size() === 0) {
+          continue;
+        }
+
+        // Wait for messages to be read and then update the new readUntil
+        await this.writeSignal.wait();
+        readUntil = addTime(this.readHead, this.readAheadDuration);
       }
     } finally {
       // Indicate to the consumer that it can try reading again

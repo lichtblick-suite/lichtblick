@@ -41,6 +41,17 @@ export type MessageIteratorArgs = {
    * The last message receiveTime will be <= end.
    * */
   end?: Time;
+
+  /**
+   * Indicate the expected way the iterator is consumed.
+   *
+   * Data sources may choose to change internal mechanics depending on whether the messages are
+   * consumed immediate in full from the iterator or if it might be read partially.
+   *
+   * `full` indicates that the caller plans to read the entire iterator
+   * `partial` indicates that the caller plans to read the iterator but may not read all the messages
+   */
+  consumptionType?: "full" | "partial";
 };
 
 export type IteratorResult =

@@ -516,21 +516,25 @@ describe("BlockLoader", () => {
 
     expect(messageIteratorCallArgs).toEqual([
       {
+        consumptionType: "full",
         topics: ["a"],
         start: { sec: 0, nsec: 0 },
         end: { sec: 9, nsec: 0 },
       },
       {
+        consumptionType: "full",
         topics: ["a"],
         start: { sec: 4, nsec: 500000003 },
         end: { sec: 9, nsec: 0 },
       },
       {
+        consumptionType: "full",
         topics: ["a"],
         start: { sec: 1, nsec: 500000001 },
         end: { sec: 4, nsec: 500000002 },
       },
       {
+        consumptionType: "full",
         topics: ["a"],
         start: { sec: 7, nsec: 500000005 },
         end: { sec: 9, nsec: 0 },

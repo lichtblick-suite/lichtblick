@@ -382,8 +382,22 @@ describe("IterablePlayer", () => {
     await store.done;
 
     expect(messageIteratorSpy.mock.calls).toEqual([
-      [{ start: { sec: 0, nsec: 0 }, end: { sec: 1, nsec: 0 }, topics: ["foo"] }],
-      [{ start: { sec: 0, nsec: 99000001 }, end: { sec: 1, nsec: 0 }, topics: ["bar", "foo"] }],
+      [
+        {
+          start: { sec: 0, nsec: 0 },
+          end: { sec: 1, nsec: 0 },
+          topics: ["foo"],
+          consumptionType: "partial",
+        },
+      ],
+      [
+        {
+          start: { sec: 0, nsec: 99000001 },
+          end: { sec: 1, nsec: 0 },
+          topics: ["bar", "foo"],
+          consumptionType: "partial",
+        },
+      ],
     ]);
 
     player.close();

@@ -207,6 +207,7 @@ class CachingIterableSource implements IIterableSource {
         topics: this.cachedTopics,
         start: sourceReadStart,
         end: sourceReadEnd,
+        consumptionType: args.consumptionType,
       });
 
       // The cache is indexed on time, but iterator results that are problems might not have a time.

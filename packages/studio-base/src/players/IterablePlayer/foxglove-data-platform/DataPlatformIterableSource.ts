@@ -14,6 +14,8 @@ import {
   isLessThan,
   Time,
   toRFC3339String,
+  add as addTime,
+  compare,
 } from "@foxglove/rostime";
 import {
   PlayerProblem,
@@ -21,7 +23,7 @@ import {
   MessageEvent,
   TopicStats,
 } from "@foxglove/studio-base/players/types";
-import ConsoleApi from "@foxglove/studio-base/services/ConsoleApi";
+import ConsoleApi, { CoverageResponse } from "@foxglove/studio-base/services/ConsoleApi";
 import { RosDatatypes } from "@foxglove/studio-base/types/RosDatatypes";
 import { formatTimeRaw } from "@foxglove/studio-base/util/time";
 
@@ -58,6 +60,8 @@ export class DataPlatformIterableSource implements IIterableSource {
    */
   private _parsedChannelsByTopic = new Map<string, ParsedChannelAndEncodings[]>();
 
+  private _coverage: CoverageResponse[] = [];
+
   public constructor(options: DataPlatformIterableSourceOptions) {
     this._consoleApi = options.api;
     this._start = options.start;
@@ -86,6 +90,8 @@ export class DataPlatformIterableSource implements IIterableSource {
         )} and ${formatTimeRaw(this._end)}.`,
       );
     }
+
+    this._coverage = coverage;
 
     // Truncate start/end time to coverage range
     const coverageStart = minBy(coverage, (c) => c.start);
@@ -199,16 +205,63 @@ export class DataPlatformIterableSource implements IIterableSource {
     const streamStart = args.start ?? this._start;
     const streamEnd = clampTime(args.end ?? this._end, this._start, this._end);
 
-    const stream = streamMessages({
-      api,
-      parsedChannelsByTopic,
-      params: { deviceId, start: streamStart, end: streamEnd, topics: args.topics },
-    });
+    if (args.consumptionType === "full") {
+      const stream = streamMessages({
+        api,
+        parsedChannelsByTopic,
+        params: { deviceId, start: streamStart, end: streamEnd, topics: args.topics },
+      });
 
-    for await (const messages of stream) {
-      for (const message of messages) {
-        yield { connectionId: undefined, msgEvent: message, problem: undefined };
+      for await (const messages of stream) {
+        for (const message of messages) {
+          yield { connectionId: undefined, msgEvent: message, problem: undefined };
+        }
       }
+
+      return;
+    }
+
+    let localStart = streamStart;
+    let localEnd = clampTime(addTime(localStart, { sec: 5, nsec: 0 }), streamStart, streamEnd);
+
+    for (;;) {
+      const stream = streamMessages({
+        api,
+        parsedChannelsByTopic,
+        params: { deviceId, start: localStart, end: localEnd, topics: args.topics },
+      });
+
+      for await (const messages of stream) {
+        for (const message of messages) {
+          yield { connectionId: undefined, msgEvent: message, problem: undefined };
+        }
+      }
+
+      if (compare(localEnd, streamEnd) >= 0) {
+        return;
+      }
+
+      localStart = addTime(localEnd, { sec: 0, nsec: 1 });
+
+      // find the coverage item where localStart < end
+      // if that item's start > localStart, use that item's start as the localStart
+      for (const coverage of this._coverage) {
+        // if local start is less than the coverate end, then the start is either in the coverage region
+        // or in a gap.
+        const end = fromRFC3339String(coverage.end);
+        const start = fromRFC3339String(coverage.start);
+        if (!start || !end) {
+          continue;
+        }
+
+        if (compare(localStart, end) <= 0 && compare(localStart, start) < 0) {
+          localStart = start;
+          break;
+        }
+      }
+
+      localStart = clampTime(localStart, streamStart, streamEnd);
+      localEnd = clampTime(addTime(localStart, { sec: 5, nsec: 0 }), streamStart, streamEnd);
     }
   }
 
