@@ -114,6 +114,8 @@ export type RendererConfig = {
     backgroundColor?: string;
     /* Scale factor to apply to all labels */
     labelScaleFactor?: number;
+    /** Ignore the <up_axis> tag in COLLADA files (matching rviz behavior) */
+    ignoreColladaUpAxis?: boolean;
     transforms?: {
       /** Toggles visibility of frame axis labels */
       showLabel?: boolean;
@@ -357,7 +359,7 @@ export class Renderer extends EventEmitter<RendererEvents> {
     }
 
     this.modelCache = new ModelCache({
-      ignoreColladaUpAxis: true,
+      ignoreColladaUpAxis: config.scene.ignoreColladaUpAxis ?? false,
       edgeMaterial: this.outlineMaterial,
     });
 

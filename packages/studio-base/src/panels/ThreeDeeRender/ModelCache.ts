@@ -42,7 +42,7 @@ export class ModelCache {
   private _models = new Map<string, Promise<LoadedModel | undefined>>();
   private _edgeMaterial: THREE.Material;
 
-  public constructor(private options: ModelCacheOptions) {
+  public constructor(public readonly options: ModelCacheOptions) {
     this._edgeMaterial = options.edgeMaterial;
   }
 

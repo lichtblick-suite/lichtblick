@@ -136,6 +136,17 @@ export class CoreSettings extends SceneExtension {
               value: config.scene.labelScaleFactor,
               placeholder: String(DEFAULT_LABEL_SCALE_FACTOR),
             },
+            ignoreColladaUpAxis: {
+              label: "Ignore COLLADA <up_axis>",
+              help: "Match the behavior of rviz by ignoring the <up_axis> tag in COLLADA files",
+              input: "boolean",
+              value: config.scene.ignoreColladaUpAxis,
+              error:
+                (config.scene.ignoreColladaUpAxis ?? false) !==
+                this.renderer.modelCache.options.ignoreColladaUpAxis
+                  ? "This setting requires a restart to take effect"
+                  : undefined,
+            },
           },
           children: {
             cameraState: {
