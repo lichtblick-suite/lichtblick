@@ -132,6 +132,11 @@ export default function muiComponents(theme: Theme): ThemeOptions["components"] 
       defaultProps: {
         disableRipple: true,
       },
+      styleOverrides: {
+        focusHighlight: {
+          ...disableBackgroundColorTransition,
+        },
+      },
     },
     MuiCardContent: {
       styleOverrides: {
