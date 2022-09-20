@@ -411,7 +411,6 @@ export default class SceneBuilder implements MarkerProvider {
   }
 
   private _setTopicError = (topic: string, message: string): void => {
-    log.warn(`[TOPIC ERROR][${topic}] ${message}`);
     this.errors.topicsWithError.set(topic, message);
     this._updateErrorsByTopic();
   };
