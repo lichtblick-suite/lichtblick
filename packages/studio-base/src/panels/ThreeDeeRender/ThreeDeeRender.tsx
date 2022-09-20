@@ -38,7 +38,6 @@ import PublishGoalIcon from "@foxglove/studio-base/components/PublishGoalIcon";
 import PublishPointIcon from "@foxglove/studio-base/components/PublishPointIcon";
 import PublishPoseEstimateIcon from "@foxglove/studio-base/components/PublishPoseEstimateIcon";
 import useCleanup from "@foxglove/studio-base/hooks/useCleanup";
-import { DEFAULT_PUBLISH_SETTINGS } from "@foxglove/studio-base/panels/ThreeDeeRender/renderables/CoreSettings";
 import ThemeProvider from "@foxglove/studio-base/theme/ThemeProvider";
 
 import { DebugGui } from "./DebugGui";
@@ -56,6 +55,8 @@ import {
   makePoseEstimateMessage,
   makePoseMessage,
 } from "./publish";
+import { DEFAULT_PUBLISH_SETTINGS } from "./renderables/CoreSettings";
+import type { LayerSettingsTransform } from "./renderables/FrameAxes";
 import { PublishClickEvent, PublishClickType } from "./renderables/PublishClickTool";
 
 const log = Logger.getLogger(__filename);
@@ -369,12 +370,17 @@ export function ThreeDeeRender({ context }: { context: PanelExtensionContext }):
     );
     const publish = merge(cloneDeep(DEFAULT_PUBLISH_SETTINGS), partialConfig?.publish);
 
+    const transforms = (partialConfig?.transforms ?? {}) as Record<
+      string,
+      Partial<LayerSettingsTransform>
+    >;
+
     return {
       cameraState,
       followMode: partialConfig?.followMode ?? "follow-pose",
       followTf: partialConfig?.followTf,
       scene: partialConfig?.scene ?? {},
-      transforms: partialConfig?.transforms ?? {},
+      transforms,
       topics: partialConfig?.topics ?? {},
       layers: partialConfig?.layers ?? {},
       publish,

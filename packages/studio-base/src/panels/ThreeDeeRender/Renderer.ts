@@ -117,6 +117,8 @@ export type RendererConfig = {
     /** Ignore the <up_axis> tag in COLLADA files (matching rviz behavior) */
     ignoreColladaUpAxis?: boolean;
     transforms?: {
+      /** Toggles translation and rotation offset controls for frames */
+      editable?: boolean;
       /** Toggles visibility of frame axis labels */
       showLabel?: boolean;
       /** Size of frame axis labels */
