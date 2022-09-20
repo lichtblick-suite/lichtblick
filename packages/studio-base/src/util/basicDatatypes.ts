@@ -3,7 +3,7 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 import { ros1, ros2galactic } from "@foxglove/rosmsg-msgs-common";
-import { foxgloveMessageSchemas, generateRosMsgDefinition } from "@foxglove/schemas";
+import { foxgloveMessageSchemas, generateRosMsgDefinition } from "@foxglove/schemas/internal";
 import { RosDatatypes } from "@foxglove/studio-base/types/RosDatatypes";
 
 /**

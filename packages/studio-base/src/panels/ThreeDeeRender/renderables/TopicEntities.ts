@@ -3,11 +3,7 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 import { toNanoSec } from "@foxglove/rostime";
-import {
-  SceneEntity,
-  SceneEntityDeletion,
-  SceneEntityDeletionType,
-} from "@foxglove/schemas/schemas/typescript";
+import { SceneEntity, SceneEntityDeletion, SceneEntityDeletionType } from "@foxglove/schemas";
 
 import { BaseUserData, Renderable } from "../Renderable";
 import { Renderer } from "../Renderer";
@@ -168,10 +164,10 @@ export class TopicEntities extends Renderable<EntityTopicUserData> {
 
   public deleteEntities(deletion: SceneEntityDeletion): void {
     switch (deletion.type) {
-      case 0 as SceneEntityDeletionType.MATCHING_ID:
+      case SceneEntityDeletionType.MATCHING_ID:
         this._deleteEntity(deletion.id);
         break;
-      case 1 as SceneEntityDeletionType.ALL:
+      case SceneEntityDeletionType.ALL:
         this._deleteAllEntities();
         break;
       default:

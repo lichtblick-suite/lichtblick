@@ -5,7 +5,7 @@
 import * as THREE from "three";
 
 import { fromSec } from "@foxglove/rostime";
-import { FrameTransform, LaserScan, PointCloud } from "@foxglove/schemas/schemas/typescript";
+import { FrameTransform, LaserScan, PointCloud } from "@foxglove/schemas";
 import { MessageEvent, Topic } from "@foxglove/studio";
 import { xyzrpyToPose } from "@foxglove/studio-base/panels/ThreeDeeRender/transforms";
 import PanelSetup from "@foxglove/studio-base/stories/PanelSetup";

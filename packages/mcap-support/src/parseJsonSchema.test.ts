@@ -4,7 +4,7 @@
 
 import * as protobufjs from "protobufjs";
 
-import { foxgloveMessageSchemas, generateJsonSchema } from "@foxglove/schemas";
+import { foxgloveMessageSchemas, generateJsonSchema } from "@foxglove/schemas/internal";
 
 import { parseJsonSchema } from "./parseJsonSchema";
 

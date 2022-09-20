@@ -2224,7 +2224,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@foxglove/mcap-support@workspace:packages/mcap-support"
   dependencies:
-    "@foxglove/schemas": 0.6.1
+    "@foxglove/schemas": 0.7.0
     "@foxglove/wasm-bz2": 0.1.0
     "@protobufjs/base64": 1.1.2
     "@types/zstd-codec": "workspace:*"
@@ -2307,15 +2307,15 @@ __metadata:
   linkType: hard
 
 "@foxglove/rosbag2@npm:^4.3.1":
-  version: 4.3.1
-  resolution: "@foxglove/rosbag2@npm:4.3.1"
+  version: 4.3.2
+  resolution: "@foxglove/rosbag2@npm:4.3.2"
   dependencies:
     "@foxglove/rosmsg-msgs-common": ^2.0.0
     "@foxglove/rosmsg2-serialization": ^1.0.7
     "@foxglove/rostime": ^1.1.2
-    "@foxglove/schemas": ^0.6.1
+    "@foxglove/schemas": ^0.7.0
     js-yaml: ^4.1.0
-  checksum: 46b57ced2f9c73b3264f9948bea7d7aab81952e853752dbdd3d83eeb23b9351921473b4b9299df2dcc962b0632057727ca9002f34428f2851457dc10996e7cca
+  checksum: 0d5b767d93d1a35fa62d478a165c83d6376c7a78a1a8e6b0bcad61a1391a567e9a4aa28d94db42d2c5bcef733538aef5686bd89ad80ab4d8350bcee0e96a15c4
   languageName: node
   linkType: hard
 
@@ -2403,13 +2403,13 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@foxglove/schemas@npm:0.6.1, @foxglove/schemas@npm:^0.6.1":
-  version: 0.6.1
-  resolution: "@foxglove/schemas@npm:0.6.1"
+"@foxglove/schemas@npm:0.7.0, @foxglove/schemas@npm:^0.7.0":
+  version: 0.7.0
+  resolution: "@foxglove/schemas@npm:0.7.0"
   dependencies:
     "@foxglove/rosmsg-msgs-common": ^2.0.0
     tslib: ^2
-  checksum: 65dafb10ff801b5ac6d8a47262e917f386cdb6b449963303e8344dcf2f7d33cf6dc74382c02e980da16c12ea83d60f065d68d4dfb1072f33cd3d8f51582fff8d
+  checksum: 853357e5ff93ac7ef450c9e38a99b2f423a68e5ae96ee26e5830149de9f6524426eb1d95e78636ccacaacdcc8da5cb63f27dffae066f75c3f16976b5eaab0fab
   languageName: node
   linkType: hard
 
@@ -2447,7 +2447,7 @@ __metadata:
     "@foxglove/rosmsg-serialization": 1.5.2
     "@foxglove/rosmsg2-serialization": 1.0.7
     "@foxglove/rostime": 1.1.2
-    "@foxglove/schemas": 0.6.1
+    "@foxglove/schemas": 0.7.0
     "@foxglove/studio": "workspace:*"
     "@foxglove/three-text": 0.1.0
     "@foxglove/typescript-transformers": "workspace:*"

@@ -3,7 +3,7 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 import { toNanoSec } from "@foxglove/rostime";
-import { SceneEntity, TextPrimitive } from "@foxglove/schemas/schemas/typescript";
+import { SceneEntity, TextPrimitive } from "@foxglove/schemas";
 import { emptyPose } from "@foxglove/studio-base/util/Pose";
 import { Label, LabelPool } from "@foxglove/three-text";
 

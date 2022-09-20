@@ -2,7 +2,7 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { CompressedImage, FrameTransform, RawImage } from "@foxglove/schemas/schemas/typescript";
+import { CompressedImage, FrameTransform, RawImage } from "@foxglove/schemas";
 import { MessageEvent, Topic } from "@foxglove/studio";
 import PanelSetup from "@foxglove/studio-base/stories/PanelSetup";
 

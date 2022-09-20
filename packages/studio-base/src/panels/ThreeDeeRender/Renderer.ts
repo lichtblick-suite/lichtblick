@@ -11,7 +11,7 @@ import { v4 as uuidv4 } from "uuid";
 
 import Logger from "@foxglove/log";
 import { toNanoSec } from "@foxglove/rostime";
-import type { FrameTransform, SceneUpdate } from "@foxglove/schemas/schemas/typescript";
+import type { FrameTransform, SceneUpdate } from "@foxglove/schemas";
 import {
   MessageEvent,
   ParameterValue,

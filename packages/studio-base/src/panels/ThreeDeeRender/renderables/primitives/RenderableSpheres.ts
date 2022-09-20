@@ -5,7 +5,7 @@
 import * as THREE from "three";
 
 import { toNanoSec } from "@foxglove/rostime";
-import { SpherePrimitive, SceneEntity } from "@foxglove/schemas/schemas/typescript";
+import { SpherePrimitive, SceneEntity } from "@foxglove/schemas";
 import { emptyPose } from "@foxglove/studio-base/util/Pose";
 
 import type { Renderer } from "../../Renderer";

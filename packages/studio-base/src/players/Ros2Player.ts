@@ -13,7 +13,7 @@ import { RosMsgDefinition } from "@foxglove/rosmsg";
 import { ros2galactic } from "@foxglove/rosmsg-msgs-common";
 import { Time, fromMillis, toSec, isGreaterThan } from "@foxglove/rostime";
 import { Durability, Reliability } from "@foxglove/rtps";
-import { foxgloveMessageSchemas, generateRosMsgDefinition } from "@foxglove/schemas";
+import { foxgloveMessageSchemas, generateRosMsgDefinition } from "@foxglove/schemas/internal";
 import { ParameterValue } from "@foxglove/studio";
 import OsContextSingleton from "@foxglove/studio-base/OsContextSingleton";
 import PlayerProblemManager from "@foxglove/studio-base/players/PlayerProblemManager";

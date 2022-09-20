@@ -14,7 +14,7 @@
 import { first, kebabCase, last } from "lodash";
 
 import { ros1 } from "@foxglove/rosmsg-msgs-common";
-import { foxgloveMessageSchemas } from "@foxglove/schemas";
+import { foxgloveMessageSchemas } from "@foxglove/schemas/internal";
 import { diffLabels, DiffObject } from "@foxglove/studio-base/panels/RawMessages/getDiff";
 
 export const DATA_ARRAY_PREVIEW_LIMIT = 20;

@@ -4,7 +4,7 @@
 
 import { filterMap } from "@foxglove/den/collection";
 import { fromNanoSec } from "@foxglove/rostime";
-import { ImageAnnotations, type PointsAnnotationType } from "@foxglove/schemas/schemas/typescript";
+import { ImageAnnotations, PointsAnnotationType } from "@foxglove/schemas";
 import {
   ImageMarker,
   ImageMarkerArray,
@@ -18,15 +18,14 @@ function foxglovePointTypeToStyle(
   type: PointsAnnotationType,
 ): PointsAnnotation["style"] | undefined {
   switch (type) {
-    // casting required for now because enum imports don't work: https://github.com/foxglove/schemas/issues/41
-    case 0 as PointsAnnotationType.UNKNOWN:
-    case 1 as PointsAnnotationType.POINTS:
+    case PointsAnnotationType.UNKNOWN:
+    case PointsAnnotationType.POINTS:
       return "points";
-    case 2 as PointsAnnotationType.LINE_LOOP:
+    case PointsAnnotationType.LINE_LOOP:
       return "polygon";
-    case 3 as PointsAnnotationType.LINE_STRIP:
+    case PointsAnnotationType.LINE_STRIP:
       return "line_strip";
-    case 4 as PointsAnnotationType.LINE_LIST:
+    case PointsAnnotationType.LINE_LIST:
       return "line_list";
   }
   return undefined;

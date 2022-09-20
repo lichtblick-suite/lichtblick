@@ -5,7 +5,7 @@
 import * as THREE from "three";
 
 import { toNanoSec } from "@foxglove/rostime";
-import { ModelPrimitive, SceneEntity } from "@foxglove/schemas/schemas/typescript";
+import { ModelPrimitive, SceneEntity } from "@foxglove/schemas";
 import { emptyPose } from "@foxglove/studio-base/util/Pose";
 
 import { LoadedModel } from "../../ModelCache";

@@ -7,7 +7,7 @@ import { STLExporter } from "three/examples/jsm/exporters/STLExporter";
 import { TeapotGeometry } from "three/examples/jsm/geometries/TeapotGeometry";
 import tinycolor from "tinycolor2";
 
-import { FrameTransform, LineType, SceneUpdate } from "@foxglove/schemas/schemas/typescript";
+import { FrameTransform, LineType, SceneUpdate } from "@foxglove/schemas";
 import { MessageEvent, Topic } from "@foxglove/studio";
 import { ColorRGBA } from "@foxglove/studio-base/panels/ThreeDeeRender/ros";
 import { xyzrpyToPose } from "@foxglove/studio-base/panels/ThreeDeeRender/transforms";
@@ -137,88 +137,86 @@ function makeStoryScene({
             },
           ],
 
-          lines: [
-            0 as LineType.LINE_STRIP,
-            1 as LineType.LINE_LOOP,
-            2 as LineType.LINE_LIST,
-          ].flatMap((type, typeIndex) => [
-            {
-              // non-indexed, single color
-              type,
-              pose: xyzrpyToPose([0, 0.8 + typeIndex * 0.2, 0], [0, 0, 0]),
-              thickness: 0.05,
-              scale_invariant: false,
-              points: new Array(10).fill(0).map((_, i, { length }) => ({
-                x: (0.8 * i) / (length - 1),
-                y: 0.25 * Math.sin((2 * Math.PI * i) / (length - 1)),
-                z: 0,
-              })),
-              color: makeColor("#7995fb", 0.8),
-              colors: [],
-              indices: [],
-            },
-            {
-              // indexed, single color
-              type,
-              pose: xyzrpyToPose([0, 1.8 + typeIndex * 0.2, 0], [0, 0, 0]),
-              thickness: 0.05,
-              scale_invariant: false,
-              points: rearrange(
-                new Array(10).fill(0).map((_, i, { length }) => ({
+          lines: [LineType.LINE_STRIP, LineType.LINE_LOOP, LineType.LINE_LIST].flatMap(
+            (type, typeIndex) => [
+              {
+                // non-indexed, single color
+                type,
+                pose: xyzrpyToPose([0, 0.8 + typeIndex * 0.2, 0], [0, 0, 0]),
+                thickness: 0.05,
+                scale_invariant: false,
+                points: new Array(10).fill(0).map((_, i, { length }) => ({
                   x: (0.8 * i) / (length - 1),
                   y: 0.25 * Math.sin((2 * Math.PI * i) / (length - 1)),
                   z: 0,
                 })),
-              ),
-              color: makeColor("#7995fb", 0.8),
-              colors: [],
-              indices: rearrange(new Array(10).fill(0).map((_, i) => i)),
-            },
-            {
-              // non-indexed, vertex colors
-              type,
-              pose: xyzrpyToPose([1, 0.8 + typeIndex * 0.2, 0], [0, 0, 0]),
-              thickness: 5,
-              scale_invariant: true,
-              points: new Array(10).fill(0).map((_, i, { length }) => ({
-                x: (0.8 * i) / (length - 1),
-                y: 0.25 * Math.sin((2 * Math.PI * i) / (length - 1)),
-                z: 0,
-              })),
-              color: makeColor("#7995fb", 0.8),
-              colors: new Array(10).fill(0).map((_, i, { length }) => {
-                const { r, g, b, a } = tinycolor
-                  .fromRatio({ h: i / (length - 1), s: 1, v: 1 })
-                  .toRgb();
-                return { r: r / 255, g: g / 255, b: b / 255, a };
-              }),
-              indices: [],
-            },
-            {
-              // indexed, vertex colors
-              type,
-              pose: xyzrpyToPose([1, 1.8 + typeIndex * 0.2, 0], [0, 0, 0]),
-              thickness: 5,
-              scale_invariant: true,
-              points: rearrange(
-                new Array(10).fill(0).map((_, i, { length }) => ({
+                color: makeColor("#7995fb", 0.8),
+                colors: [],
+                indices: [],
+              },
+              {
+                // indexed, single color
+                type,
+                pose: xyzrpyToPose([0, 1.8 + typeIndex * 0.2, 0], [0, 0, 0]),
+                thickness: 0.05,
+                scale_invariant: false,
+                points: rearrange(
+                  new Array(10).fill(0).map((_, i, { length }) => ({
+                    x: (0.8 * i) / (length - 1),
+                    y: 0.25 * Math.sin((2 * Math.PI * i) / (length - 1)),
+                    z: 0,
+                  })),
+                ),
+                color: makeColor("#7995fb", 0.8),
+                colors: [],
+                indices: rearrange(new Array(10).fill(0).map((_, i) => i)),
+              },
+              {
+                // non-indexed, vertex colors
+                type,
+                pose: xyzrpyToPose([1, 0.8 + typeIndex * 0.2, 0], [0, 0, 0]),
+                thickness: 5,
+                scale_invariant: true,
+                points: new Array(10).fill(0).map((_, i, { length }) => ({
                   x: (0.8 * i) / (length - 1),
                   y: 0.25 * Math.sin((2 * Math.PI * i) / (length - 1)),
                   z: 0,
                 })),
-              ),
-              color: makeColor("#7995fb", 0.8),
-              colors: rearrange(
-                new Array(10).fill(0).map((_, i, { length }) => {
+                color: makeColor("#7995fb", 0.8),
+                colors: new Array(10).fill(0).map((_, i, { length }) => {
                   const { r, g, b, a } = tinycolor
                     .fromRatio({ h: i / (length - 1), s: 1, v: 1 })
                     .toRgb();
                   return { r: r / 255, g: g / 255, b: b / 255, a };
                 }),
-              ),
-              indices: rearrange(new Array(10).fill(0).map((_, i) => i)),
-            },
-          ]),
+                indices: [],
+              },
+              {
+                // indexed, vertex colors
+                type,
+                pose: xyzrpyToPose([1, 1.8 + typeIndex * 0.2, 0], [0, 0, 0]),
+                thickness: 5,
+                scale_invariant: true,
+                points: rearrange(
+                  new Array(10).fill(0).map((_, i, { length }) => ({
+                    x: (0.8 * i) / (length - 1),
+                    y: 0.25 * Math.sin((2 * Math.PI * i) / (length - 1)),
+                    z: 0,
+                  })),
+                ),
+                color: makeColor("#7995fb", 0.8),
+                colors: rearrange(
+                  new Array(10).fill(0).map((_, i, { length }) => {
+                    const { r, g, b, a } = tinycolor
+                      .fromRatio({ h: i / (length - 1), s: 1, v: 1 })
+                      .toRgb();
+                    return { r: r / 255, g: g / 255, b: b / 255, a };
+                  }),
+                ),
+                indices: rearrange(new Array(10).fill(0).map((_, i) => i)),
+              },
+            ],
+          ),
 
           triangles: [
             {

@@ -9,7 +9,7 @@ import { LineSegments2 } from "three/examples/jsm/lines/LineSegments2";
 import { LineSegmentsGeometry } from "three/examples/jsm/lines/LineSegmentsGeometry";
 
 import { toNanoSec } from "@foxglove/rostime";
-import { LinePrimitive, LineType, SceneEntity } from "@foxglove/schemas/schemas/typescript";
+import { LinePrimitive, LineType, SceneEntity } from "@foxglove/schemas";
 import { LineMaterial } from "@foxglove/studio-base/panels/ThreeDeeRender/LineMaterial";
 import { emptyPose } from "@foxglove/studio-base/util/Pose";
 
@@ -59,8 +59,8 @@ export class RenderableLines extends RenderablePrimitive {
 
   private _makeLine(primitive: LinePrimitive) {
     let geometry: LineSegmentsGeometry;
-    const isSegments = primitive.type === (2 as LineType.LINE_LIST);
-    const isLoop = primitive.type === (1 as LineType.LINE_LOOP);
+    const isSegments = primitive.type === LineType.LINE_LIST;
+    const isLoop = primitive.type === LineType.LINE_LOOP;
 
     const transparent = true;
     const material = new LineMaterial({
@@ -96,14 +96,14 @@ export class RenderableLines extends RenderablePrimitive {
     let line: LineSegments2;
 
     switch (primitive.type) {
-      case 0 as LineType.LINE_STRIP:
-      case 1 as LineType.LINE_LOOP: {
+      case LineType.LINE_STRIP:
+      case LineType.LINE_LOOP: {
         const lineGeometry = new LineGeometry(); // separate variable to work around typescript refinement
         geometry = lineGeometry;
         line = new Line2(lineGeometry, material);
         break;
       }
-      case 2 as LineType.LINE_LIST: {
+      case LineType.LINE_LIST: {
         geometry = new LineSegmentsGeometry();
         line = new LineSegments2(geometry, material);
         break;
@@ -190,7 +190,7 @@ export class RenderableLines extends RenderablePrimitive {
  * vertices for LineGeometry or LineSegmentsGeometry.
  */
 function getPositions(primitive: LinePrimitive): Float32Array {
-  const isLoop = primitive.type === (1 as LineType.LINE_LOOP);
+  const isLoop = primitive.type === LineType.LINE_LOOP;
   let positions: Float32Array;
   const indices = primitive.indices;
   if (indices.length > 0) {
@@ -226,7 +226,7 @@ function getPositions(primitive: LinePrimitive): Float32Array {
  * vertices for LineGeometry or LineSegmentsGeometry.
  */
 function getColors(primitive: LinePrimitive): Float32Array {
-  const isLoop = primitive.type === (1 as LineType.LINE_LOOP);
+  const isLoop = primitive.type === LineType.LINE_LOOP;
   let colors: Float32Array;
   const indices = primitive.indices;
   if (indices.length > 0) {

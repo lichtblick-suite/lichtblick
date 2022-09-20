@@ -9,7 +9,7 @@ import type {
   LaserScan as FoxgloveLaserScan,
   PackedElementField,
   PointCloud,
-} from "@foxglove/schemas/schemas/typescript";
+} from "@foxglove/schemas";
 import { SettingsTreeAction, SettingsTreeFields, SettingsTreeNode, Topic } from "@foxglove/studio";
 import type { RosObject, RosValue } from "@foxglove/studio-base/players/types";
 import { emptyPose } from "@foxglove/studio-base/util/Pose";

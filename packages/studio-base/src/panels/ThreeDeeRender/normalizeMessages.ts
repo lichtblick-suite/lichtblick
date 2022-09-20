@@ -3,7 +3,7 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 import type { Time } from "@foxglove/rostime";
-import type { FrameTransform } from "@foxglove/schemas/schemas/typescript";
+import { FrameTransform, NumericType } from "@foxglove/schemas";
 
 import type { PartialMessage } from "./SceneExtension";
 import {
@@ -18,21 +18,6 @@ import {
   Vector3,
 } from "./ros";
 import type { Pose } from "./transforms";
-
-// This should be importable from @foxglove/schemas, but importing enums from
-// that package is currently not working. See <https://github.com/foxglove/schemas/issues/41>
-// for more details
-enum NumericType {
-  UNKNOWN = 0,
-  UINT8 = 1,
-  INT8 = 2,
-  UINT16 = 3,
-  INT16 = 4,
-  UINT32 = 5,
-  INT32 = 6,
-  FLOAT32 = 7,
-  FLOAT64 = 8,
-}
 
 // Legacy foxglove.Transform type -- see https://github.com/foxglove/schemas/pull/46
 type LegacyTransform = {

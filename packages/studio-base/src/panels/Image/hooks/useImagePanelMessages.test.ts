@@ -4,7 +4,7 @@
 
 import { AVLTree } from "@foxglove/avl";
 import { Time, compare as compareTime, toNanoSec } from "@foxglove/rostime";
-import { ImageAnnotations } from "@foxglove/schemas/schemas/typescript";
+import { ImageAnnotations } from "@foxglove/schemas";
 import { FoxgloveMessages } from "@foxglove/studio-base/types/FoxgloveMessages";
 
 import { synchronizedAddMessage, SynchronizationItem } from "./useImagePanelMessages";

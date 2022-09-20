@@ -4,7 +4,7 @@
 
 import { range } from "lodash";
 
-import { ImageAnnotations } from "@foxglove/schemas/schemas/typescript";
+import { ImageAnnotations } from "@foxglove/schemas";
 import { normalizeAnnotations } from "@foxglove/studio-base/panels/Image/lib/normalizeAnnotations";
 import { ImageMarker, ImageMarkerType } from "@foxglove/studio-base/types/Messages";
 

@@ -4,7 +4,7 @@
 
 import { quat } from "gl-matrix";
 
-import { FrameTransform, PoseInFrame } from "@foxglove/schemas/schemas/typescript";
+import { FrameTransform, PoseInFrame } from "@foxglove/schemas";
 import { MessageEvent, Topic } from "@foxglove/studio";
 import PanelSetup from "@foxglove/studio-base/stories/PanelSetup";
 

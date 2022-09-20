@@ -17,7 +17,7 @@ import {
   SpherePrimitive,
   TextPrimitive,
   TriangleListPrimitive,
-} from "@foxglove/schemas/schemas/typescript";
+} from "@foxglove/schemas";
 import { SettingsTreeAction } from "@foxglove/studio";
 
 import { Renderer } from "../Renderer";
@@ -188,7 +188,7 @@ function normalizeSceneEntityDeletion(
 ): SceneEntityDeletion {
   return {
     timestamp: normalizeTime(entity.timestamp),
-    type: entity.type ?? (0 as SceneEntityDeletionType.MATCHING_ID),
+    type: entity.type ?? SceneEntityDeletionType.MATCHING_ID,
     id: entity.id ?? "",
   };
 }
@@ -234,7 +234,7 @@ function normalizeCylinderPrimitive(
 
 function normalizeLinePrimitive(line: PartialMessage<LinePrimitive>): LinePrimitive {
   return {
-    type: line.type ?? (0 as LineType.LINE_STRIP),
+    type: line.type ?? LineType.LINE_STRIP,
     pose: normalizePose(line.pose),
     thickness: line.thickness ?? 0.05,
     scale_invariant: line.scale_invariant ?? false,

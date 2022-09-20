@@ -5,7 +5,7 @@
 import * as THREE from "three";
 
 import { toNanoSec } from "@foxglove/rostime";
-import { SceneEntity, TriangleListPrimitive } from "@foxglove/schemas/schemas/typescript";
+import { SceneEntity, TriangleListPrimitive } from "@foxglove/schemas";
 import {
   DynamicBufferGeometry,
   DynamicFloatBufferGeometry,

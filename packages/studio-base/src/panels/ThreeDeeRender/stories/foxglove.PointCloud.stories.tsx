@@ -4,7 +4,7 @@
 
 import { vec3 } from "gl-matrix";
 
-import type { PointCloud } from "@foxglove/schemas/schemas/typescript";
+import type { PointCloud } from "@foxglove/schemas";
 import { MessageEvent, Topic } from "@foxglove/studio";
 import PanelSetup from "@foxglove/studio-base/stories/PanelSetup";
 
