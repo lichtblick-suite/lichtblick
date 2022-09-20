@@ -243,17 +243,22 @@ export class DataPlatformIterableSource implements IIterableSource {
 
       localStart = addTime(localEnd, { sec: 0, nsec: 1 });
 
-      // find the coverage item where localStart < end
-      // if that item's start > localStart, use that item's start as the localStart
+      // Assumes coverage regions are sorted by start time
       for (const coverage of this._coverage) {
-        // if local start is less than the coverate end, then the start is either in the coverage region
-        // or in a gap.
         const end = fromRFC3339String(coverage.end);
         const start = fromRFC3339String(coverage.start);
         if (!start || !end) {
           continue;
         }
 
+        // if localStart is in a coverage region, then allow this localStart to be used
+        if (compare(localStart, start) >= 0 && compare(localStart, end) <= 0) {
+          break;
+        }
+
+        // if localStart is completely before a coverage region then we reset the localStart to the
+        // start of the coverage region. Since coverage regions are sorted by start time, if we get
+        // here we know that localStart did not fall into a previous coverage region
         if (compare(localStart, end) <= 0 && compare(localStart, start) < 0) {
           localStart = start;
           break;
