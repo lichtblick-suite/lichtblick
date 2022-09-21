@@ -164,7 +164,7 @@ export default function PlaybackControls(props: {
       <KeyListener global keyDownHandlers={keyDownHandlers} />
       <div className={classes.root}>
         <Scrubber onSeek={seek} />
-        <Stack direction="row" alignItems="center" justifyContent="space-evenly" flex={1} gap={1}>
+        <Stack direction="row" alignItems="center" flex={1} gap={1} overflowX="auto">
           <Stack direction="row" flex={1} gap={0.5}>
             {currentUser && deviceId && (
               <HoverableIconButton
