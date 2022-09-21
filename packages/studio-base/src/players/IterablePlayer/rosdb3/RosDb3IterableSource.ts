@@ -18,10 +18,6 @@ import type { RosDb3IterableSource as RosDb3Source } from "./RosDb3IterableSourc
 
 Comlink.transferHandlers.set("iterable", iterableTransferHandler);
 
-const ComlinkWrapper = Comlink.wrap<new (files: File[]) => RosDb3Source>(
-  new Worker(new URL("./RosDb3IterableSource.worker", import.meta.url)),
-);
-
 export class RosDb3IterableSource implements IIterableSource {
   private files: File[];
   private wrapper?: Comlink.Remote<IIterableSource>;
@@ -31,6 +27,12 @@ export class RosDb3IterableSource implements IIterableSource {
   }
 
   public async initialize(): Promise<Initalization> {
+    // Generate a wrapper around the launched worker. Note this launches the worker and should
+    // happen on-demand rather than at the file level.
+    const ComlinkWrapper = Comlink.wrap<new (files: File[]) => RosDb3Source>(
+      new Worker(new URL("./RosDb3IterableSource.worker", import.meta.url)),
+    );
+
     const wrapper = (this.wrapper = await new ComlinkWrapper(this.files));
     return await wrapper.initialize();
   }
