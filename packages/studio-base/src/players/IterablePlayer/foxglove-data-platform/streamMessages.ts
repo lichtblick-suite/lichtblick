@@ -25,13 +25,21 @@ export type ParsedChannelAndEncodings = {
   parsedChannel: ParsedChannel;
 };
 
-export default async function* streamMessages({
+/**
+ * The console api methods used by streamMessages. This scopes the required interface to a small
+ * subset of ConsoleApi to make it easier to mock/stub for tests.
+ */
+interface StreamMessageApi {
+  stream: ConsoleApi["stream"];
+}
+
+export async function* streamMessages({
   api,
   signal,
   parsedChannelsByTopic,
   params,
 }: {
-  api: ConsoleApi;
+  api: StreamMessageApi;
 
   /**
    * An AbortSignal allowing the stream request to be canceled. When the signal is aborted, the
