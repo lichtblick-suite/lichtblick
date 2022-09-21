@@ -13,14 +13,11 @@
 
 import { isPlainObject } from "lodash";
 
-import type { GlobalVariables } from "@foxglove/studio-base/hooks/useGlobalVariables";
-import {
-  processMessage,
-  registerNode,
-} from "@foxglove/studio-base/players/UserNodePlayer/nodeRuntimeWorker/registry";
-import generateRosLib from "@foxglove/studio-base/players/UserNodePlayer/nodeTransformerWorker/generateRosLib";
-import transform from "@foxglove/studio-base/players/UserNodePlayer/nodeTransformerWorker/transform";
 import Rpc, { Channel, createLinkedChannels } from "@foxglove/studio-base/util/Rpc";
+
+import { processMessage, registerNode } from "./nodeRuntimeWorker/registry";
+import generateRosLib from "./nodeTransformerWorker/generateRosLib";
+import transform from "./nodeTransformerWorker/transform";
 
 const validateWorkerArgs = (arg: unknown) => {
   expect(arg).not.toBeInstanceOf(Function);
@@ -62,18 +59,7 @@ export default class MockUserNodePlayerWorker {
     receiveAndLog("generateRosLib", generateRosLib);
     receiveAndLog("transform", transform);
     receiveAndLog("registerNode", registerNode);
-    receiveAndLog(
-      "processMessage",
-      async ({
-        message,
-        globalVariables,
-      }: {
-        message: unknown;
-        globalVariables: GlobalVariables;
-      }) => {
-        return processMessage({ message, globalVariables });
-      },
-    );
+    receiveAndLog("processMessage", processMessage);
   }
 
   // So tests can spy on what gets called

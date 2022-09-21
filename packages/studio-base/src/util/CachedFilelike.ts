@@ -219,13 +219,13 @@ export default class CachedFilelike implements Filelike {
 
   // Replace the current connection with a new one, spanning a certain range.
   private _setConnection(range: Range): void {
-    this._log.info(`Setting new connection @ ${rangeToString(range)}`);
+    this._log.debug(`Setting new connection @ ${rangeToString(range)}`);
 
     if (this._currentConnection) {
       // Destroy the current connection if there is one.
       const currentConnection = this._currentConnection;
       currentConnection.stream.destroy();
-      this._log.info(
+      this._log.debug(
         `Destroyed current connection @ ${rangeToString(currentConnection.remainingRange)}`,
       );
     }
