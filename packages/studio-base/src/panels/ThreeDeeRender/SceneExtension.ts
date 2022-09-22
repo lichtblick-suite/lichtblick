@@ -56,7 +56,10 @@ export class SceneExtension<
   public readonly renderables = new Map<string, TRenderable>();
 
   private _settingsUpdateDebounced = debounce(
-    () => this.renderer.settings.setNodesForKey(this.extensionId, this.settingsNodes()),
+    () => {
+      this.renderer.settings.setNodesForKey(this.extensionId, this.settingsNodes());
+      this.renderer.syncSettingsTree();
+    },
     SETTINGS_DEBOUNCE_MS,
     { leading: true, trailing: true, maxWait: SETTINGS_DEBOUNCE_MS },
   );
