@@ -67,10 +67,11 @@ export async function* streamMessages({
   parsedChannelsByTopic: Map<string, ParsedChannelAndEncodings[]>;
 }): AsyncGenerator<MessageEvent<unknown>[]> {
   const controller = new AbortController();
-  signal?.addEventListener("abort", () => {
+  const abortHandler = () => {
     log.debug("Manual abort of streamMessages", params);
     controller.abort();
-  });
+  };
+  signal?.addEventListener("abort", abortHandler);
   const decompressHandlers = await loadDecompressHandlers();
 
   log.debug("streamMessages", params);
@@ -227,6 +228,7 @@ export async function* streamMessages({
       // If the caller called generator.return() in between body chunks, automatically cancel the request.
       log.debug("Automatic abort of streamMessages", params);
     }
+    signal?.removeEventListener("abort", abortHandler);
     controller.abort();
   }
 

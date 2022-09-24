@@ -162,6 +162,8 @@ export class BlockLoader {
       [0, this.activeBlockId],
     ];
 
+    log.debug("loading segments", segments);
+
     for (const segment of segments) {
       const [beginBlockId, lastBlockId] = segment;
 
@@ -183,6 +185,7 @@ export class BlockLoader {
     progress: LoadArgs["progress"],
   ): Promise<void> {
     const topics = this.topics;
+    log.debug("load block range", { topics, beginBlockId, lastBlockId });
 
     let totalBlockSizeBytes = this.cacheSize();
 
@@ -275,6 +278,7 @@ export class BlockLoader {
             };
 
             // setup a new block cache for the next block
+            sizeInBytes = 0;
             messagesByTopic = {};
             // Set all topic arrays to empty to indicate we've read this topic
             for (const topic of topicsToFetch) {
@@ -320,6 +324,11 @@ export class BlockLoader {
           });
           // If we could not evict any blocks to bring our size down, then we stop loading more data
           if (evictedSize === 0) {
+            log.debug("could not evict more blocks", {
+              totalBlockSizeBytes,
+              messageSizeInBytes,
+              maxCache: this.maxCacheSize,
+            });
             return;
           }
 
@@ -367,6 +376,7 @@ export class BlockLoader {
           sizeInBytes: sizeInBytes + (existingBlock?.sizeInBytes ?? 0),
         };
 
+        sizeInBytes = 0;
         messagesByTopic = {};
         // Set all topic arrays to empty to indicate we've read this topic
         for (const topic of topicsToFetch) {
@@ -392,6 +402,7 @@ export class BlockLoader {
           continue;
         }
 
+        log.debug(`evict block ${i}, size: ${blockToEvict.sizeInBytes}`);
         this.blocks[i] = undefined;
         return blockToEvict.sizeInBytes;
       }
@@ -404,6 +415,7 @@ export class BlockLoader {
           continue;
         }
 
+        log.debug(`evict block ${i}, size: ${blockToEvict.sizeInBytes}`);
         this.blocks[i] = undefined;
         return blockToEvict.sizeInBytes;
       }
@@ -414,6 +426,7 @@ export class BlockLoader {
           continue;
         }
 
+        log.debug(`evict block ${i}, size: ${blockToEvict.sizeInBytes}`);
         this.blocks[i] = undefined;
         return blockToEvict.sizeInBytes;
       }
