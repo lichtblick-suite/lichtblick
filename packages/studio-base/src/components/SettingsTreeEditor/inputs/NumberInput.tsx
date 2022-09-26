@@ -168,6 +168,7 @@ export function NumberInput(
             className={classes.iconButton}
             size="small"
             edge="start"
+            tabIndex={-1} // Disable tabbing to the step buttons.
             onClick={(event: React.MouseEvent) =>
               updateValue((value ?? placeHolderValue ?? 0) - (event.shiftKey ? step * 10 : step))
             }
@@ -180,6 +181,7 @@ export function NumberInput(
             className={classes.iconButton}
             size="small"
             edge="end"
+            tabIndex={-1} // Disable tabbing to the step buttons.
             onClick={(event: React.MouseEvent) =>
               updateValue((value ?? placeHolderValue ?? 0) + (event.shiftKey ? step * 10 : step))
             }
