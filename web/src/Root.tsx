@@ -60,8 +60,11 @@ export function Root({ appConfiguration }: { appConfiguration: IAppConfiguration
   const enableDialogAuth =
     process.env.NODE_ENV === "development" || process.env.FOXGLOVE_ENABLE_DIALOG_AUTH != undefined;
 
+  const disableSignin = process.env.FOXGLOVE_DISABLE_SIGN_IN != undefined;
+
   return (
     <App
+      disableSignin={disableSignin}
       enableDialogAuth={enableDialogAuth}
       enableLaunchPreferenceScreen
       deepLinks={[window.location.href]}

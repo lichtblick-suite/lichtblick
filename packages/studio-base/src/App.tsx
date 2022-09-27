@@ -55,6 +55,7 @@ type AppProps = {
   extensionLoaders: readonly ExtensionLoader[];
   nativeAppMenu?: INativeAppMenu;
   nativeWindow?: INativeWindow;
+  disableSignin?: boolean;
   enableDialogAuth?: boolean;
   enableLaunchPreferenceScreen?: boolean;
 };
@@ -77,6 +78,7 @@ export function App(props: AppProps): JSX.Element {
     dataSources,
     layoutStorage,
     consoleApi,
+    disableSignin,
     extensionLoaders,
     nativeAppMenu,
     nativeWindow,
@@ -142,7 +144,7 @@ export function App(props: AppProps): JSX.Element {
                 <DndProvider backend={HTML5Backend}>
                   <Suspense fallback={<></>}>
                     <PanelCatalogProvider>
-                      <Workspace deepLinks={deepLinks} />
+                      <Workspace deepLinks={deepLinks} disableSignin={disableSignin} />
                     </PanelCatalogProvider>
                   </Suspense>
                 </DndProvider>
