@@ -542,13 +542,13 @@ export default function Workspace(props: WorkspaceProps): JSX.Element {
         title: currentUser != undefined ? `Signed in as ${currentUser.email}` : "Account",
         component: AccountSettings,
       });
-
-      bottomItems.set("preferences", {
-        iconName: "Settings",
-        title: "Preferences",
-        component: Preferences,
-      });
     }
+
+    bottomItems.set("preferences", {
+      iconName: "Settings",
+      title: "Preferences",
+      component: Preferences,
+    });
 
     return [topItems, bottomItems];
   }, [
