@@ -61,7 +61,7 @@ jobs:
           token: ${{ secrets.FOXGLOVEBOT_GITHUB_TOKEN }}
           lfs: true
 
-      - uses: actions/setup-node@v3.4.1
+      - uses: actions/setup-node@v3.5.0
         with:
           node-version: 16.17
           cache: yarn
@@ -119,7 +119,7 @@ jobs:
           ref: ${{ github.event.release.tag_name || github.event.inputs.tag_name }}
           lfs: true
 
-      - uses: actions/setup-node@v3.4.1
+      - uses: actions/setup-node@v3.5.0
         with:
           node-version: 16.17
           registry-url: https://registry.npmjs.org
@@ -194,7 +194,7 @@ jobs:
           token: ${{ secrets.FOXGLOVEBOT_GITHUB_TOKEN }}
           lfs: true
 
-      - uses: actions/setup-node@v3.4.1
+      - uses: actions/setup-node@v3.5.0
         with:
           node-version: 16.17
           cache: yarn
