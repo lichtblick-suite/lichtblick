@@ -62,6 +62,8 @@ import { SavedProps, UserNodes } from "@foxglove/studio-base/types/panels";
 
 const log = Logger.getLogger(__filename);
 
+function noop() {}
+
 type Frame = {
   [topic: string]: MessageEvent<unknown>[];
 };
@@ -306,6 +308,9 @@ function UnconnectedPanelSetup(props: UnconnectedProps): JSX.Element | ReactNull
         activeData={activeData}
         progress={progress}
         publish={publish}
+        startPlayback={noop}
+        pausePlayback={noop}
+        seekPlayback={noop}
         setPublishers={setPublishers}
         setSubscriptions={setSubscriptions}
       >

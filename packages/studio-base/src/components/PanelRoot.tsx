@@ -70,7 +70,7 @@ export const usePanelRootStyles = makeStyles<
       top: 0,
       left: 0,
       right: 0,
-      bottom: 50, // match PlaybackBar height
+      bottom: 77, // match PlaybackBar height
       zIndex: 10000,
       transition: transitions.create(["border-width", "top", "right", "bottom", "left"], {
         duration, // match to timeout duration inside Panel component

@@ -26,7 +26,6 @@ import React, {
   Profiler,
   MouseEventHandler,
   useLayoutEffect,
-  useEffect,
   CSSProperties,
   useContext,
 } from "react";
@@ -478,16 +477,6 @@ export default function Panel<
       }),
       [exitFullscreen],
     );
-
-    /* Ensure user exits full-screen mode when leaving window, even if key is still pressed down */
-    useEffect(() => {
-      const listener = () => {
-        exitFullscreen();
-        setQuickActionsKeyPressed(false);
-      };
-      window.addEventListener("blur", listener);
-      return () => window.removeEventListener("blur", listener);
-    }, [exitFullscreen]);
 
     const otherPanelProps = useShallowMemo(otherProps);
     const childProps = useMemo(
