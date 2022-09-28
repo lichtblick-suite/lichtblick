@@ -50,8 +50,6 @@ function makeStoryScene({
   frameId: string;
 }): MessageEvent<SceneUpdate> {
   const teapotMesh = new THREE.Mesh(new TeapotGeometry(1));
-  teapotMesh.rotateX(Math.PI / 2);
-  teapotMesh.updateMatrixWorld();
   const teapotSTL = new STLExporter().parse(teapotMesh);
 
   /** Reorder points for testing `indices` */

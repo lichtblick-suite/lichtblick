@@ -104,13 +104,8 @@ export class ModelCache {
 
     // Check if this is a COLLADA file based on content-type or file extension
     if (DAE_MIME_TYPES.includes(contentType) || /\.dae$/i.test(url)) {
-      let text = this._textDecoder.decode(buffer);
-      if (this.options.ignoreColladaUpAxis) {
-        const xml = new DOMParser().parseFromString(text, "application/xml");
-        xml.querySelectorAll("up_axis").forEach((node) => node.remove());
-        text = xml.documentElement.outerHTML;
-      }
-      return await loadCollada(url, text, reportError);
+      const text = this._textDecoder.decode(buffer);
+      return await loadCollada(url, text, this.options.ignoreColladaUpAxis, reportError);
     }
 
     // Check if this is an OBJ file based on content-type or file extension
@@ -142,7 +137,6 @@ async function loadGltf(url: string, reportError: ErrorCallback): Promise<Loaded
 
   // THREE.js uses Y-up, while Studio follows the ROS
   // [REP-0103](https://www.ros.org/reps/rep-0103.html) convention of Z-up
-  gltf.scene.rotateZ(Math.PI / 2);
   gltf.scene.rotateX(Math.PI / 2);
 
   return gltf.scene;
@@ -163,12 +157,19 @@ function loadSTL(url: string, buffer: ArrayBuffer): LoadedModel {
   const mesh = new THREE.Mesh(bufferGeometry, material);
   const group = new THREE.Group();
   group.add(mesh);
+
+  // THREE.js uses Y-up, while Studio follows the ROS
+  // [REP-0103](https://www.ros.org/reps/rep-0103.html) convention of Z-up
+  group.rotateX(Math.PI / 2);
+
   return group;
 }
 
 async function loadCollada(
   url: string,
   text: string,
+  // eslint-disable-next-line @foxglove/no-boolean-parameters
+  ignoreUpAxis: boolean,
   reportError: ErrorCallback,
 ): Promise<LoadedModel> {
   const onError = (assetUrl: string) => {
@@ -177,13 +178,29 @@ async function loadCollada(
     reportError(new Error(`Failed to load COLLADA asset "${originalUrl}"`));
   };
 
+  // The three.js ColladaLoader handles <up_axis> by detecting Z_UP and simply
+  // applying a scene rotation. Since Studio is already Z_UP, we do our own
+  // <up_axis> handling and skip rotation entirely for the Z_UP case
+  const xml = new DOMParser().parseFromString(text, "application/xml");
+  const upAxis = ignoreUpAxis
+    ? "Z_UP"
+    : (xml.querySelector("up_axis")?.textContent ?? "Y_UP").trim().toUpperCase();
+  xml.querySelectorAll("up_axis").forEach((node) => node.remove());
+  const xmlText = xml.documentElement.outerHTML;
+
   const manager = new THREE.LoadingManager(undefined, undefined, onError);
   manager.setURLModifier(rewriteUrl);
   const daeLoader = new ColladaLoader(manager);
 
   manager.itemStart(url);
-  const dae = daeLoader.parse(text, baseUrl(url));
+  const dae = daeLoader.parse(xmlText, baseUrl(url));
   manager.itemEnd(url);
+
+  // If the <up_axis> is Y_UP, rotate to the Studio convention of Z-up following
+  // ROS [REP-0103](https://www.ros.org/reps/rep-0103.html)
+  if (upAxis === "Y_UP") {
+    dae.scene.rotateX(Math.PI / 2);
+  }
 
   return fixDaeMaterials(dae.scene);
 }
@@ -206,6 +223,10 @@ async function loadOBJ(
   manager.itemStart(url);
   const group = objLoader.parse(text);
   manager.itemEnd(url);
+
+  // THREE.js uses Y-up, while Studio follows the ROS
+  // [REP-0103](https://www.ros.org/reps/rep-0103.html) convention of Z-up
+  group.rotateX(Math.PI / 2);
 
   return fixObjMaterials(group);
 }
