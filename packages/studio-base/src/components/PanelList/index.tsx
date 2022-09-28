@@ -19,13 +19,15 @@ import {
   CardContent,
   CardMedia,
   Container,
+  Fade,
+  IconButton,
   List,
   ListItem,
   ListItemButton,
   ListItemText,
-  Typography,
   TextField,
-  IconButton,
+  Tooltip,
+  Typography,
 } from "@mui/material";
 import fuzzySort from "fuzzysort";
 import { countBy, isEmpty } from "lodash";
@@ -36,7 +38,6 @@ import { makeStyles } from "tss-react/mui";
 
 import Stack from "@foxglove/studio-base/components/Stack";
 import TextHighlight from "@foxglove/studio-base/components/TextHighlight";
-import { useTooltip } from "@foxglove/studio-base/components/Tooltip";
 import {
   useCurrentLayoutActions,
   usePanelMosaicId,
@@ -173,33 +174,12 @@ function DraggablePanelItem({
     }
   }, [highlighted]);
 
-  const { ref: tooltipRef, tooltip } = useTooltip({
-    contents:
-      mode === "grid" ? (
-        panel.description
-      ) : (
-        <Stack style={{ width: 200 }}>
-          {panel.thumbnail != undefined && <img src={panel.thumbnail} alt={panel.title} />}
-          <Stack padding={1} gap={0.5}>
-            <Typography variant="body2" style={{ fontWeight: "bold" }}>
-              {panel.title}
-            </Typography>
-            <Typography variant="body2" color="text.secondary">
-              {panel.description}
-            </Typography>
-          </Stack>
-        </Stack>
-      ),
-    placement: mode === "grid" ? undefined : "right",
-    delay: 200,
-  });
   const mergedRef = useCallback(
     (el: HTMLElement | ReactNull) => {
       connectDragSource(el);
-      tooltipRef(el);
       scrollRef.current = el;
     },
-    [connectDragSource, tooltipRef, scrollRef],
+    [connectDragSource, scrollRef],
   );
 
   const targetString = panel.extensionNamespace
@@ -234,24 +214,42 @@ function DraggablePanelItem({
 
     case "list":
       return (
-        <ListItem disableGutters disablePadding selected={highlighted}>
-          {tooltip}
-          <ListItemButton
-            className={classes.grab}
-            disabled={checked}
-            ref={mergedRef}
-            onClick={onClick}
-          >
-            <ListItemText
-              primary={
-                <span data-testid={`panel-menu-item ${panel.title}`}>
-                  <TextHighlight targetStr={targetString} searchText={searchQuery} />
-                </span>
-              }
-              primaryTypographyProps={{ fontWeight: checked ? "bold" : undefined }}
-            />
-          </ListItemButton>
-        </ListItem>
+        <Tooltip
+          placement="right"
+          enterDelay={200}
+          TransitionComponent={Fade}
+          title={
+            <Stack paddingTop={0.25} style={{ width: 200 }}>
+              {panel.thumbnail != undefined && <img src={panel.thumbnail} alt={panel.title} />}
+              <Stack padding={1} gap={0.5}>
+                <Typography variant="body2" fontWeight="bold">
+                  {panel.title}
+                </Typography>
+                <Typography variant="body2" style={{ opacity: 0.6 }}>
+                  {panel.description}
+                </Typography>
+              </Stack>
+            </Stack>
+          }
+        >
+          <ListItem disableGutters disablePadding selected={highlighted}>
+            <ListItemButton
+              className={classes.grab}
+              disabled={checked}
+              ref={mergedRef}
+              onClick={onClick}
+            >
+              <ListItemText
+                primary={
+                  <span data-testid={`panel-menu-item ${panel.title}`}>
+                    <TextHighlight targetStr={targetString} searchText={searchQuery} />
+                  </span>
+                }
+                primaryTypographyProps={{ fontWeight: checked ? "bold" : undefined }}
+              />
+            </ListItemButton>
+          </ListItem>
+        </Tooltip>
       );
   }
 }
