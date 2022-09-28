@@ -13,7 +13,7 @@
 
 import FullscreenExitIcon from "@mui/icons-material/FullscreenExit";
 import { styled as muiStyled, Typography } from "@mui/material";
-import { useContext, useState, useMemo, CSSProperties } from "react";
+import { useContext, useMemo, CSSProperties } from "react";
 
 import PanelContext from "@foxglove/studio-base/components/PanelContext";
 import ToolbarIconButton from "@foxglove/studio-base/components/PanelToolbar/ToolbarIconButton";
@@ -62,7 +62,6 @@ export default React.memo<Props>(function PanelToolbar({
   isUnknownPanel = false,
 }: Props) {
   const { isFullscreen, exitFullscreen } = useContext(PanelContext) ?? {};
-  const [menuOpen, setMenuOpen] = useState(false);
 
   const panelContext = useContext(PanelContext);
 
@@ -109,9 +108,7 @@ export default React.memo<Props>(function PanelToolbar({
       <PanelToolbarControls
         additionalIcons={additionalIconsWithHelp}
         isUnknownPanel={!!isUnknownPanel}
-        menuOpen={menuOpen}
         ref={controlsDragRef}
-        setMenuOpen={setMenuOpen}
       />
     </PanelToolbarRoot>
   );

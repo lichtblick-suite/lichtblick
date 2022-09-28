@@ -11,25 +11,62 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { ContextualMenu, IContextualMenuItem } from "@fluentui/react";
+import {
+  Delete20Regular,
+  FullScreenMaximize20Regular,
+  ShapeSubtract20Regular,
+  SplitHorizontal20Regular,
+  SplitVertical20Regular,
+} from "@fluentui/react-icons";
+import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
-import { useCallback, useContext, useMemo, useRef } from "react";
+import { Divider, Menu, MenuItem } from "@mui/material";
+import { MouseEvent, useCallback, useContext, useMemo, useRef, useState } from "react";
 import { MosaicContext, MosaicNode, MosaicWindowContext } from "react-mosaic-component";
+import { makeStyles } from "tss-react/mui";
 
 import PanelContext from "@foxglove/studio-base/components/PanelContext";
-import PanelList, { PanelSelection } from "@foxglove/studio-base/components/PanelList";
+import ChangePanelMenu from "@foxglove/studio-base/components/PanelToolbar/ChangePanelMenu";
 import ToolbarIconButton from "@foxglove/studio-base/components/PanelToolbar/ToolbarIconButton";
 import { getPanelTypeFromMosaic } from "@foxglove/studio-base/components/PanelToolbar/utils";
 import { useCurrentLayoutActions } from "@foxglove/studio-base/context/CurrentLayoutContext";
 
 type Props = {
-  isOpen: boolean;
-  // eslint-disable-next-line @foxglove/no-boolean-parameters
-  setIsOpen: (_: boolean) => void;
   isUnknownPanel: boolean;
 };
 
-export function PanelActionsDropdown({ isOpen, setIsOpen, isUnknownPanel }: Props): JSX.Element {
+const useStyles = makeStyles()((theme) => ({
+  error: { color: theme.palette.error.main },
+  icon: {
+    marginRight: theme.spacing(-1),
+  },
+  menuItem: {
+    display: "flex",
+    gap: theme.spacing(1),
+    alignItems: "center",
+
+    ".root-span": {
+      display: "flex",
+      marginLeft: theme.spacing(-0.25),
+    },
+    "&.Mui-selected": {
+      backgroundColor: theme.palette.action.hover,
+
+      "&:hover": {
+        backgroundColor: theme.palette.action.hover,
+      },
+    },
+  },
+}));
+
+export function PanelActionsDropdown({ isUnknownPanel }: Props): JSX.Element {
+  const { classes, cx } = useStyles();
+  const [menuAnchorEl, setMenuAnchorEl] = useState<undefined | HTMLElement>(undefined);
+  const [subMenuAnchorEl, setSubmenuAnchorEl] = useState<undefined | HTMLElement>(undefined);
+
+  const menuOpen = Boolean(menuAnchorEl);
+  const submenuOpen = Boolean(subMenuAnchorEl);
+
   const panelContext = useContext(PanelContext);
   const tabId = panelContext?.tabId;
   const { mosaicActions } = useContext(MosaicContext);
@@ -38,12 +75,36 @@ export function PanelActionsDropdown({ isOpen, setIsOpen, isUnknownPanel }: Prop
     getCurrentLayoutState: getCurrentLayout,
     closePanel,
     splitPanel,
-    swapPanel,
   } = useCurrentLayoutActions();
   const getPanelType = useCallback(
     () => getPanelTypeFromMosaic(mosaicWindowActions, mosaicActions),
     [mosaicActions, mosaicWindowActions],
   );
+
+  const handleMenuClick = (event: React.MouseEvent<HTMLButtonElement>) => {
+    setSubmenuAnchorEl(undefined);
+    setMenuAnchorEl(event.currentTarget);
+  };
+
+  const handleMenuClose = () => {
+    setSubmenuAnchorEl(undefined);
+    setMenuAnchorEl(undefined);
+  };
+
+  const handleSubmenuClick = (event: MouseEvent<HTMLElement>) => {
+    if (subMenuAnchorEl !== event.currentTarget) {
+      setSubmenuAnchorEl(event.currentTarget);
+    }
+    setMenuAnchorEl(undefined);
+  };
+
+  const handleSubmenuClose = useCallback(() => {
+    setSubmenuAnchorEl(undefined);
+  }, []);
+
+  const handleSubmenuMouseEnter = (event: MouseEvent<HTMLElement>) => {
+    setSubmenuAnchorEl(event.currentTarget);
+  };
 
   const close = useCallback(() => {
     closePanel({
@@ -51,6 +112,7 @@ export function PanelActionsDropdown({ isOpen, setIsOpen, isUnknownPanel }: Prop
       root: mosaicActions.getRoot() as MosaicNode<string>,
       path: mosaicWindowActions.getPath(),
     });
+    handleMenuClose();
   }, [closePanel, mosaicActions, mosaicWindowActions, tabId]);
 
   const split = useCallback(
@@ -69,83 +131,32 @@ export function PanelActionsDropdown({ isOpen, setIsOpen, isUnknownPanel }: Prop
         path: mosaicWindowActions.getPath(),
         config,
       });
+      handleMenuClose();
     },
     [getCurrentLayout, getPanelType, mosaicActions, mosaicWindowActions, splitPanel, tabId],
   );
 
-  const swap = useCallback(
-    (id?: string) =>
-      ({ type, config, relatedConfigs }: PanelSelection) => {
-        // Reselecting current panel type is a no-op.
-        if (type === panelContext?.type) {
-          setIsOpen(false);
-          return;
-        }
+  const enterFullscreen = useCallback(() => {
+    panelContext?.enterFullscreen();
+    handleMenuClose();
+  }, [panelContext]);
 
-        swapPanel({
-          tabId,
-          originalId: id ?? "",
-          type,
-          root: mosaicActions.getRoot() as MosaicNode<string>,
-          path: mosaicWindowActions.getPath(),
-          config: config ?? {},
-          relatedConfigs,
-        });
-      },
-    [mosaicActions, mosaicWindowActions, panelContext?.type, setIsOpen, swapPanel, tabId],
-  );
+  const menuItems = useMemo(() => {
+    const items = [];
 
-  const menuItems: IContextualMenuItem[] = useMemo(() => {
-    const items: IContextualMenuItem[] = [
-      {
-        key: "change-panel",
-        text: "Change panel",
-        onClick: () => undefined,
-        iconProps: {
-          iconName: "ShapeSubtract",
-          styles: { root: { height: 24, marginLeft: 2, marginRight: 6 } },
-        },
-        subMenuProps: {
-          items: [{ key: "dummy" }],
-          calloutProps: {
-            // https://github.com/foxglove/studio/issues/2205
-            // https://github.com/microsoft/fluentui/issues/18839
-            // Lie to the callout and tell it the height of the content so that it keeps the top
-            // edge anchored as the user searches panels and the PanelList changes height.
-            calloutMaxHeight: 310,
-            finalHeight: 310,
-            styles: {
-              calloutMain: { overflowY: "auto !important" },
-            },
-          },
-          onRenderMenuList: () => (
-            <PanelList
-              selectedPanelType={panelContext?.type}
-              onPanelSelect={swap(panelContext?.id)}
-            />
-          ),
-        },
-      },
-    ];
     if (!isUnknownPanel) {
       items.push(
         {
           key: "hsplit",
           text: "Split horizontal",
+          icon: <SplitHorizontal20Regular />,
           onClick: () => split(panelContext?.id, "column"),
-          iconProps: {
-            iconName: "SplitHorizontal",
-            styles: { root: { height: 24, marginLeft: 2, marginRight: 6 } },
-          },
         },
         {
           key: "vsplit",
           text: "Split vertical",
+          icon: <SplitVertical20Regular />,
           onClick: () => split(panelContext?.id, "row"),
-          iconProps: {
-            iconName: "SplitVertical",
-            styles: { root: { height: 24, marginLeft: 2, marginRight: 6 } },
-          },
         },
       );
     }
@@ -154,44 +165,98 @@ export function PanelActionsDropdown({ isOpen, setIsOpen, isUnknownPanel }: Prop
       items.push({
         key: "enter-fullscreen",
         text: "Fullscreen",
-        onClick: panelContext?.enterFullscreen,
-        iconProps: {
-          iconName: "FullScreenMaximize",
-          styles: { root: { height: 24, marginLeft: 2, marginRight: 6 } },
-        },
+        icon: <FullScreenMaximize20Regular />,
+        onClick: enterFullscreen,
         "data-testid": "panel-menu-fullscreen",
       });
     }
 
+    items.push({ key: "divider", type: "divider" });
+
     items.push({
       key: "remove",
       text: "Remove panel",
+      icon: <Delete20Regular />,
       onClick: close,
-      iconProps: { iconName: "Delete" },
       "data-testid": "panel-menu-remove",
+      className: classes.error,
     });
 
     return items;
-  }, [close, isUnknownPanel, panelContext, split, swap]);
+  }, [
+    classes.error,
+    close,
+    enterFullscreen,
+    isUnknownPanel,
+    panelContext?.id,
+    panelContext?.isFullscreen,
+    split,
+  ]);
 
   const buttonRef = useRef<HTMLDivElement>(ReactNull);
-
   const type = getPanelType();
+
   if (type == undefined) {
     return <></>;
   }
 
   return (
     <div ref={buttonRef}>
-      <ContextualMenu
-        hidden={!isOpen}
-        items={menuItems}
-        target={buttonRef}
-        onDismiss={() => setIsOpen(false)}
-      />
-      <ToolbarIconButton title="More" data-testid="panel-menu" onClick={() => setIsOpen(!isOpen)}>
+      <ToolbarIconButton
+        id="panel-menu-button"
+        aria-controls={menuOpen ? "panel-menu" : undefined}
+        aria-haspopup="true"
+        aria-expanded={menuOpen ? "true" : undefined}
+        onClick={handleMenuClick}
+        data-testid="panel-menu"
+        title="More"
+      >
         <MoreVertIcon />
       </ToolbarIconButton>
+      <Menu
+        id="panel-menu"
+        anchorEl={menuAnchorEl}
+        open={menuOpen}
+        onClose={handleMenuClose}
+        anchorOrigin={{ vertical: "bottom", horizontal: "left" }}
+        MenuListProps={{
+          "aria-labelledby": "panel-menu-button",
+          dense: true,
+        }}
+      >
+        <MenuItem
+          className={classes.menuItem}
+          selected={submenuOpen}
+          id="change-panel-button"
+          aria-controls={submenuOpen ? "change-panel-menu" : undefined}
+          aria-haspopup="true"
+          aria-expanded={submenuOpen ? "true" : undefined}
+          onClick={handleSubmenuClick}
+          onMouseEnter={handleSubmenuMouseEnter}
+        >
+          <ShapeSubtract20Regular />
+          Change Panel
+          <ChevronRightIcon className={classes.icon} fontSize="small" />
+        </MenuItem>
+        <ChangePanelMenu anchorEl={subMenuAnchorEl} onClose={handleSubmenuClose} tabId={tabId} />
+        <Divider variant="middle" />
+        {menuItems.map((item, idx) =>
+          item.type === "divider" ? (
+            <Divider key={`divider-${idx}`} variant="middle" />
+          ) : (
+            <MenuItem
+              key={item.key}
+              onClick={item.onClick}
+              onMouseEnter={() => setSubmenuAnchorEl(undefined)}
+              className={cx(classes.menuItem, item.className)}
+              data-testid={item["data-testid"]}
+            >
+              {item.icon}
+              {item.text}
+            </MenuItem>
+          ),
+        )}
+      </Menu>
     </div>
   );
 }

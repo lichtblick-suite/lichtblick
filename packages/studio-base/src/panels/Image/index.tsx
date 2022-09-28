@@ -56,7 +56,7 @@ const Timestamp = muiStyled(Typography, {
   margin: theme.spacing(0.5),
   right: 0,
   bottom: 0,
-  zIndex: theme.zIndex.tooltip,
+  zIndex: theme.zIndex.appBar - 1,
   transition: "opacity 0.1s ease-in-out",
   opacity: 0,
   padding: theme.spacing(0.25, 0.5),
