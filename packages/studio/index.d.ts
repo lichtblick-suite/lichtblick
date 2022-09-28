@@ -402,6 +402,11 @@ declare module "@foxglove/studio" {
          * Optional placeholder text displayed in the field input when value is undefined
          */
         placeholder?: string;
+
+        /**
+         * Optional field that's true if the clear button should be hidden.
+         */
+        hideClearButton?: boolean;
       }
     | {
         input: "rgba";
@@ -411,6 +416,11 @@ declare module "@foxglove/studio" {
          * Optional placeholder text displayed in the field input when value is undefined
          */
         placeholder?: string;
+
+        /**
+         * Optional field that's true if the clear button should be hidden.
+         */
+        hideClearButton?: boolean;
       }
     | { input: "gradient"; value?: [string, string] }
     | { input: "messagepath"; value?: string; validTypes?: string[] }
