@@ -324,9 +324,9 @@ export class FrameAxes extends SceneExtension<FrameAxisRenderable> {
 
       this.renderer.updateConfig((draft) => {
         for (const frameId of this.renderables.keys()) {
-          const frameIdSanitized = frameId === "settings" ? "$settings" : frameId;
-          draft.transforms[frameIdSanitized] ??= {};
-          draft.transforms[frameIdSanitized]!.visible = value;
+          const frameKeySanitized = frameId === "settings" ? "$settings" : `frame:${frameId}`;
+          draft.transforms[frameKeySanitized] ??= {};
+          draft.transforms[frameKeySanitized]!.visible = value;
         }
       });
 
