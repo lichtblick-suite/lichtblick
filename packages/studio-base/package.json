@@ -167,7 +167,7 @@
     "quickhull3d": "2.0.5",
     "rc-tree": "5.4.3",
     "react": "17.0.2",
-    "react-autocomplete": "janpaul123/react-autocomplete#bc8737070b5744069719c8fcd4e0a197192b0d48",
+    "react-autocomplete": "https://github.com/foxglove/react-autocomplete/raw/9717d597d7c78c316fb7ad3c2c57060c243530c2/react-autocomplete-9.9.9.tgz",
     "react-colorful": "5.6.0",
     "react-dom": "patch:react-dom@npm:17.0.2#../../patches/react-dom.patch",
     "react-highlight-words": "0.17.0",
