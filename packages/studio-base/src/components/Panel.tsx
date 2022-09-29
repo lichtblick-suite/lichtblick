@@ -192,6 +192,7 @@ export default function Panel<
       updatePanelConfigs,
       createTabPanel,
       closePanel,
+      swapPanel,
       getCurrentLayoutState,
     } = useCurrentLayoutActions();
 
@@ -329,6 +330,23 @@ export default function Panel<
         panelCatalog,
         savePanelConfigs,
       ],
+    );
+
+    const replacePanel = useCallback(
+      (newPanelType: string, config: Record<string, unknown>) => {
+        if (childId == undefined) {
+          return;
+        }
+        swapPanel({
+          tabId,
+          originalId: childId,
+          type: newPanelType,
+          root: mosaicActions.getRoot() as MosaicNode<string>,
+          path: mosaicWindowActions.getPath(),
+          config,
+        });
+      },
+      [childId, mosaicActions, mosaicWindowActions, swapPanel, tabId],
     );
 
     const { panelSettingsOpen } = useWorkspace();
@@ -534,6 +552,7 @@ export default function Panel<
             saveConfig: saveConfig as SaveConfig<PanelConfig>,
             updatePanelConfigs,
             openSiblingPanel,
+            replacePanel,
             enterFullscreen,
             exitFullscreen,
             setHasFullscreenDescendant,

@@ -26,6 +26,7 @@ export enum AppSetting {
   HIDE_SIGN_IN_PROMPT = "hideSignInPrompt",
   LAUNCH_PREFERENCE = "launchPreference",
   SHOW_OPEN_DIALOG_ON_STARTUP = "ui.open-dialog-startup",
+  CLOSED_OLD3D_DEPRECATION_BANNER = "closedOld3dDeprecationBanner",
 
   // Dev only
   ENABLE_LAYOUT_DEBUGGING = "enableLayoutDebugging",

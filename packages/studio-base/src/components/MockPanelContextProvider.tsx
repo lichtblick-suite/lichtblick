@@ -24,6 +24,7 @@ const DEFAULT_MOCK_PANEL_CONTEXT: PanelContextType<PanelConfig> = {
   saveConfig: () => {},
   updatePanelConfigs: () => {},
   openSiblingPanel: () => {},
+  replacePanel: () => {},
   enterFullscreen: () => {},
   exitFullscreen: () => {},
   setHasFullscreenDescendant: () => {},

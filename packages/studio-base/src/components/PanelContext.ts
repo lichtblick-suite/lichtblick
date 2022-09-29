@@ -24,6 +24,7 @@ export type PanelContextType<T> = {
 
   updatePanelConfigs: (panelType: string, updateConfig: (config: T) => T) => void;
   openSiblingPanel: OpenSiblingPanel;
+  replacePanel: (panelType: string, config: Record<string, unknown>) => void;
 
   enterFullscreen: () => void;
   exitFullscreen: () => void;

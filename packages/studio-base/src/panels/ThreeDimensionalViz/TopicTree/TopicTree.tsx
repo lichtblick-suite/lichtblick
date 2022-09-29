@@ -29,7 +29,6 @@ import { useResizeDetector } from "react-resize-detector";
 import { CSSTransition } from "react-transition-group";
 import { makeStyles } from "tss-react/mui";
 
-import { PANEL_TOOLBAR_MIN_HEIGHT } from "@foxglove/studio-base/components/PanelToolbar";
 import useChangeDetector from "@foxglove/studio-base/hooks/useChangeDetector";
 import { Save3DConfig } from "@foxglove/studio-base/panels/ThreeDimensionalViz";
 import useLinkedGlobalVariables from "@foxglove/studio-base/panels/ThreeDimensionalViz/Interactions/useLinkedGlobalVariables";
@@ -70,7 +69,7 @@ const MAX_CONTAINER_WIDTH_RATIO = 0.9;
 const useStyles = makeStyles<StyleProps>()((theme, { treeWidth }) => ({
   wrapper: {
     position: "absolute",
-    top: CONTAINER_SPACING + PANEL_TOOLBAR_MIN_HEIGHT,
+    top: CONTAINER_SPACING,
     left: CONTAINER_SPACING,
     zIndex: 102,
     maxWidth: `${MAX_CONTAINER_WIDTH_RATIO * 100}%`,
