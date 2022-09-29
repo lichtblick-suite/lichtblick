@@ -58,7 +58,7 @@ Note: All contributors must agree to our [Contributor License Agreement](https:/
 **Getting started:**
 
 1. Clone repo
-1. Run `yarn install`
+1. Run `corepack enable` and `yarn install`
 1. Launch the development environment:
 
 ```sh
