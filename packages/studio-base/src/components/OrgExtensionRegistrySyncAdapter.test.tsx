@@ -58,6 +58,7 @@ describe("Private registry sync adapter", () => {
     getExtensions.mockReturnValue([
       { name: "id1" },
       { name: "id2" },
+      { name: "mixedCaseName", activeVersion: "1" },
       { name: "private-installed-1", activeVersion: "2" },
       { name: "private-installed-2", activeVersion: "1" },
     ]);
@@ -70,6 +71,7 @@ describe("Private registry sync adapter", () => {
       getExtensions: jest
         .fn()
         .mockResolvedValue([
+          fakeExtension({ namespace: "org", name: "mixedcasename", version: "1" }),
           fakeExtension({ namespace: "org", name: "private-installed-1", version: "1" }),
           fakeExtension({ namespace: "org", name: "private-installed-2", version: "1" }),
           fakeExtension({ namespace: "org", name: "private-to-delete", version: "1" }),

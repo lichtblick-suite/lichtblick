@@ -68,13 +68,13 @@ export function OrgExtensionRegistrySyncAdapter(): ReactNull {
       const toInstall = differenceWith(
         remoteExtensions,
         installedPrivateExtensions,
-        (a, b) => a.name === b.name && a.activeVersion === b.version,
+        (a, b) => a.name.toLowerCase() === b.name.toLowerCase() && a.activeVersion === b.version,
       );
 
       const toRemove = differenceWith(
         installedPrivateExtensions,
         remoteExtensions,
-        (a, b) => a.name === b.name,
+        (a, b) => a.name.toLowerCase() === b.name.toLowerCase(),
       );
 
       for (const extension of toInstall) {
