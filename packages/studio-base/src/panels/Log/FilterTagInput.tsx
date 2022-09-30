@@ -2,7 +2,7 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { Chip, TextField } from "@mui/material";
+import { TextField } from "@mui/material";
 import Autocomplete from "@mui/material/Autocomplete";
 import { makeStyles } from "tss-react/mui";
 
@@ -15,8 +15,11 @@ const useStyles = makeStyles()((theme) => ({
       },
     ".MuiInputBase-root.MuiInputBase-sizeSmall": {
       padding: theme.spacing(0.125),
+      gap: theme.spacing(0.25),
     },
-    ".MuiAutocomplete-tag": {
+  },
+  chip: {
+    "&.MuiAutocomplete-tag": {
       margin: 0,
     },
   },
@@ -42,12 +45,11 @@ export function FilterTagInput({
       options={suggestions}
       freeSolo
       fullWidth
-      renderTags={(value: readonly string[], getTagProps) =>
-        value.map((option: string, index: number) => (
-          // eslint-disable-next-line react/jsx-key
-          <Chip variant="outlined" size="small" label={option} {...getTagProps({ index })} />
-        ))
-      }
+      ChipProps={{
+        className: classes.chip,
+        variant: "filled",
+        size: "small",
+      }}
       renderInput={(params) => (
         <TextField {...params} size="small" className={classes.input} placeholder="Search filter" />
       )}

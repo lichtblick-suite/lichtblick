@@ -13,6 +13,7 @@
 
 import { screen } from "@testing-library/dom";
 import userEvent from "@testing-library/user-event";
+import { range } from "lodash";
 import TestUtils from "react-dom/test-utils";
 
 import Log from "@foxglove/studio-base/panels/Log";
@@ -98,6 +99,30 @@ const fixture = {
   },
 };
 
+function makeLongFixture() {
+  const levels = [1, 2, 4, 8, 16];
+
+  return {
+    topics: [{ name: "/rosout", datatype: "rosgraph_msgs/Log" }],
+    frame: {
+      "/rosout": range(200).map((idx) => ({
+        topic: "/rosout",
+        receiveTime: { sec: 10 * idx, nsec: 0 },
+        message: {
+          file: "some_topic_utils/src/foo.cpp",
+          function: "vector<int> some_topic::findInt",
+          header: { stamp: { sec: 123, nsec: 0 } },
+          level: levels[idx % levels.length],
+          line: 242,
+          msg: `Couldn't find int ${idx + 1}.`,
+          name: "/some_topic",
+        },
+        sizeInBytes: 0,
+      })),
+    },
+  };
+}
+
 export default {
   title: "panels/Log",
   component: Log,
@@ -106,6 +131,14 @@ export default {
 export const Simple = (): JSX.Element => {
   return (
     <PanelSetup fixture={fixture}>
+      <Log />
+    </PanelSetup>
+  );
+};
+
+export const Scrolled = (): JSX.Element => {
+  return (
+    <PanelSetup fixture={makeLongFixture()}>
       <Log />
     </PanelSetup>
   );
