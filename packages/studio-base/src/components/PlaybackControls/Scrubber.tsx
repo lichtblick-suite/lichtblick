@@ -9,7 +9,13 @@ import { useLatest } from "react-use";
 import { makeStyles } from "tss-react/mui";
 import { v4 as uuidv4 } from "uuid";
 
-import { subtract as subtractTimes, toSec, fromSec, Time } from "@foxglove/rostime";
+import {
+  subtract as subtractTimes,
+  add as addTimes,
+  toSec,
+  fromSec,
+  Time,
+} from "@foxglove/rostime";
 import {
   MessagePipelineContext,
   useMessagePipeline,
@@ -74,26 +80,41 @@ export default function Scrubber(props: Props): JSX.Element {
 
   const setHoverValue = useSetHoverValue();
 
-  const [hoverX, setHoverX] = useState<undefined | number>();
-
-  const onChange = useCallback((value: number) => onSeek(fromSec(value)), [onSeek]);
+  const [hoverStamp, setHoverStamp] = useState<Time | undefined>();
 
   const latestStartTime = useLatest(startTime);
-  const onHoverOver = useCallback(
-    (_x: number, value: number) => {
-      if (!latestStartTime.current || hoverElRef.current == undefined) {
+  const latestEndTime = useLatest(endTime);
+
+  const onChange = useCallback(
+    (fraction: number) => {
+      if (!latestStartTime.current || !latestEndTime.current) {
         return;
       }
-      const stamp = fromSec(value);
-      const timeFromStart = subtractTimes(stamp, latestStartTime.current);
-      setHoverX(value);
+      onSeek(
+        addTimes(
+          latestStartTime.current,
+          fromSec(fraction * toSec(subtractTimes(latestEndTime.current, latestStartTime.current))),
+        ),
+      );
+    },
+    [onSeek, latestEndTime, latestStartTime],
+  );
+
+  const onHoverOver = useCallback(
+    (fraction: number) => {
+      if (!latestStartTime.current || !latestEndTime.current || hoverElRef.current == undefined) {
+        return;
+      }
+      const duration = toSec(subtractTimes(latestEndTime.current, latestStartTime.current));
+      const timeFromStart = fromSec(fraction * duration);
+      setHoverStamp(addTimes(latestStartTime.current, timeFromStart));
       setHoverValue({
         componentId: hoverComponentId,
         type: "PLAYBACK_SECONDS",
         value: toSec(timeFromStart),
       });
     },
-    [hoverComponentId, latestStartTime, setHoverValue],
+    [hoverComponentId, latestEndTime, latestStartTime, setHoverValue],
   );
 
   const clearHoverValue = useClearHoverValue();
@@ -117,8 +138,10 @@ export default function Scrubber(props: Props): JSX.Element {
 
   const min = startTime && toSec(startTime);
   const max = endTime && toSec(endTime);
-  const value = currentTime == undefined ? undefined : toSec(currentTime);
-  const step = ((max ?? 100) - (min ?? 0)) / 500;
+  const fraction =
+    currentTime && startTime && endTime
+      ? toSec(subtractTimes(currentTime, startTime)) / toSec(subtractTimes(endTime, startTime))
+      : undefined;
 
   const loading = presence === PlayerPresence.INITIALIZING || presence === PlayerPresence.BUFFERING;
 
@@ -136,7 +159,7 @@ export default function Scrubber(props: Props): JSX.Element {
 
   return (
     <Tooltip
-      title={hoverX != undefined ? <PlaybackControlsTooltipContent hoverXPosition={hoverX} /> : ""}
+      title={hoverStamp != undefined ? <PlaybackControlsTooltipContent stamp={hoverStamp} /> : ""}
       placement="top"
       disableInteractive
       TransitionComponent={Fade}
@@ -185,11 +208,8 @@ export default function Scrubber(props: Props): JSX.Element {
         </Stack>
         <Stack fullHeight fullWidth position="absolute" flex={1}>
           <Slider
-            min={min ?? 0}
-            max={max ?? 100}
             disabled={min == undefined || max == undefined}
-            step={step}
-            value={value}
+            fraction={fraction}
             onHoverOver={onHoverOver}
             onHoverOut={onHoverOut}
             onChange={onChange}

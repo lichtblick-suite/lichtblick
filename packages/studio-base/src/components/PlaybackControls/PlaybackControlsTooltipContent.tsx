@@ -7,7 +7,7 @@ import { isEmpty } from "lodash";
 import { Fragment } from "react";
 import { makeStyles } from "tss-react/mui";
 
-import { subtract as subtractTimes, toSec, fromSec } from "@foxglove/rostime";
+import { subtract as subtractTimes, toSec, Time } from "@foxglove/rostime";
 import {
   MessagePipelineContext,
   useMessagePipeline,
@@ -50,10 +50,8 @@ const useStyles = makeStyles()((theme) => ({
 const selectHoveredEvents = (store: TimelineInteractionStateStore) => store.eventsAtHoverValue;
 const selectStartTime = (ctx: MessagePipelineContext) => ctx.playerState.activeData?.startTime;
 
-export function PlaybackControlsTooltipContent(params: {
-  hoverXPosition: number;
-}): ReactNull | JSX.Element {
-  const { hoverXPosition } = params;
+export function PlaybackControlsTooltipContent(params: { stamp: Time }): ReactNull | JSX.Element {
+  const { stamp } = params;
   const { formatTime, timeFormat } = useAppTimeFormat();
   const hoveredEvents = useTimelineInteractionState(selectHoveredEvents);
   const startTime = useMessagePipeline(selectStartTime);
@@ -63,7 +61,6 @@ export function PlaybackControlsTooltipContent(params: {
     return ReactNull;
   }
 
-  const stamp = fromSec(hoverXPosition);
   const timeFromStart = subtractTimes(stamp, startTime);
 
   const tooltipItems: PlaybackControlsTooltipItem[] = [];
