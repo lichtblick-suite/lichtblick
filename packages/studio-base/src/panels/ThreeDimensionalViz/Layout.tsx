@@ -858,7 +858,13 @@ export default function Layout({
                     : latestConfig.current.followMode === "follow"
                     ? "follow-position"
                     : "follow-none",
-                cameraState: latestConfig.current.cameraState,
+                cameraState: {
+                  ...latestConfig.current.cameraState,
+                  phi: ((latestConfig.current.cameraState.phi ?? Math.PI / 3) * 180) / Math.PI,
+                  thetaOffset:
+                    ((latestConfig.current.cameraState.thetaOffset ?? 0) * 180) / Math.PI,
+                  fovy: ((latestConfig.current.cameraState.fovy ?? Math.PI / 4) * 180) / Math.PI,
+                },
                 publish: {
                   poseTopic: latestConfig.current.clickToPublishPoseTopic,
                   pointTopic: latestConfig.current.clickToPublishPointTopic,
@@ -887,7 +893,6 @@ export default function Layout({
                   ),
                 ]),
               });
-              void setClosedBanner(true);
               setShowUpgradeConfirmDialog(false);
             }}
           >
@@ -896,7 +901,7 @@ export default function Layout({
         </DialogActions>
       </Dialog>
     ),
-    [latestConfig, latestTransforms, panelContext, setClosedBanner, showUpgradeConfirmDialog],
+    [latestConfig, latestTransforms, panelContext, showUpgradeConfirmDialog],
   );
 
   return (
