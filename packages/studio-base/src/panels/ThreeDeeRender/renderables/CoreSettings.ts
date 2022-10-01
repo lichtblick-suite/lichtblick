@@ -30,6 +30,8 @@ export const DEFAULT_PUBLISH_SETTINGS: RendererConfig["publish"] = {
   poseEstimateThetaDeviation: round(Math.PI / 12, 8),
 };
 
+const FOLLOW_TF_PATH = ["general", "followTf"];
+
 export class CoreSettings extends SceneExtension {
   public constructor(renderer: Renderer) {
     super("foxglove.CoreSettings", renderer);
@@ -75,7 +77,7 @@ export class CoreSettings extends SceneExtension {
       [this.renderer.followFrameId, config.followTf, this.renderer.renderFrameId],
       followTfOptions,
     );
-    const followTfError = this.renderer.settings.errors.errors.errorAtPath(["general", "followTf"]);
+    const followTfError = this.renderer.settings.errors.errors.errorAtPath(FOLLOW_TF_PATH);
 
     const followModeOptions = [
       { label: "Pose", value: "follow-pose" },

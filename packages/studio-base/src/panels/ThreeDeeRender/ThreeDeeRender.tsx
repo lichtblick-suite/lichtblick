@@ -21,7 +21,7 @@ import { DeepPartial } from "ts-essentials";
 import { useDebouncedCallback } from "use-debounce";
 
 import Logger from "@foxglove/log";
-import { toNanoSec } from "@foxglove/rostime";
+import { isLessThan, Time, toNanoSec } from "@foxglove/rostime";
 import {
   LayoutActions,
   MessageEvent,
@@ -69,6 +69,7 @@ const PANEL_STYLE: React.CSSProperties = {
   display: "flex",
   position: "relative",
 };
+const TIME_ZERO = { sec: 0, nsec: 0 };
 
 type SubscriptionWithOptions = Subscription & {
   preload: boolean;
@@ -405,6 +406,7 @@ export function ThreeDeeRender({ context }: { context: PanelExtensionContext }):
   const [preloadedMessages, setPreloadedMessages] = useState<
     ReadonlyArray<MessageEvent<unknown>> | undefined
   >();
+  const lastPreloadedMessageTimeRef = useRef<Time>(TIME_ZERO);
   const [currentTime, setCurrentTime] = useState<bigint | undefined>();
   const [didSeek, setDidSeek] = useState<boolean>(false);
 
@@ -536,9 +538,10 @@ export function ThreeDeeRender({ context }: { context: PanelExtensionContext }):
           setCurrentTime(toNanoSec(renderState.currentTime));
         }
 
-        // Increment the seek count if didSeek is set to true, to trigger a
-        // state flush in Renderer
+        // Check if didSeek is set to true to reset the preloadedMessageTime and
+        // trigger a state flush in Renderer
         if (renderState.didSeek === true) {
+          lastPreloadedMessageTimeRef.current = TIME_ZERO;
           setDidSeek(true);
         }
 
@@ -667,6 +670,34 @@ export function ThreeDeeRender({ context }: { context: PanelExtensionContext }):
     }
   }, [backgroundColor, colorScheme, renderer]);
 
+  // Handle preloaded messages and render a frame if new messages are available
+  useEffect(() => {
+    if (!renderer || !preloadedMessages) {
+      return;
+    }
+
+    for (const message of preloadedMessages) {
+      // Skip preloaded messages before the last receiveTime we've previously processed
+      if (isLessThan(message.receiveTime, lastPreloadedMessageTimeRef.current)) {
+        continue;
+      }
+
+      const datatype = topicsToDatatypes.get(message.topic);
+      if (!datatype) {
+        continue;
+      }
+
+      renderer.addMessageEvent(message, datatype);
+    }
+
+    const lastMessage = preloadedMessages[preloadedMessages.length - 1];
+    if (lastMessage) {
+      lastPreloadedMessageTimeRef.current = lastMessage.receiveTime;
+    }
+
+    renderRef.current.needsRender = true;
+  }, [preloadedMessages, renderer, topicsToDatatypes]);
+
   // Handle messages and render a frame if new messages are available
   useEffect(() => {
     if (!renderer || !messages) {
@@ -684,24 +715,6 @@ export function ThreeDeeRender({ context }: { context: PanelExtensionContext }):
 
     renderRef.current.needsRender = true;
   }, [messages, renderer, topicsToDatatypes]);
-
-  // Handle preloaded messages and render a frame if new messages are available
-  useEffect(() => {
-    if (!renderer || !preloadedMessages) {
-      return;
-    }
-
-    for (const message of preloadedMessages) {
-      const datatype = topicsToDatatypes.get(message.topic);
-      if (!datatype) {
-        continue;
-      }
-
-      renderer.addMessageEvent(message, datatype);
-    }
-
-    renderRef.current.needsRender = true;
-  }, [preloadedMessages, renderer, topicsToDatatypes]);
 
   // Update the renderer when the camera moves
   useEffect(() => {

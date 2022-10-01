@@ -83,6 +83,13 @@ export class CoordinateFrame {
   }
 
   /**
+   * Returns the number of transforms stored in the transform history.
+   */
+  public transformsSize(): number {
+    return this._transforms.size;
+  }
+
+  /**
    * Set the parent frame for this frame. If the parent frame is already set to
    * a different frame, the transform history is cleared.
    */
@@ -128,7 +135,7 @@ export class CoordinateFrame {
     }
 
     // Trim down to the maximum history size
-    if (this._transforms.size > this.maxCapacity) {
+    while (this._transforms.size > this.maxCapacity) {
       this._transforms.shift();
     }
   }

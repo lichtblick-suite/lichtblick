@@ -7,7 +7,7 @@ import { Transform } from "./Transform";
 import { Pose } from "./geometry";
 import { Duration, Time } from "./time";
 
-const DEFAULT_MAX_CAPACITY_PER_FRAME = 10_000;
+const DEFAULT_MAX_CAPACITY_PER_FRAME = 50_000;
 
 /**
  * TransformTree is a collection of coordinate frames with convenience methods
