@@ -12,6 +12,7 @@
 //   You may not use this file except in compliance with the License.
 
 import { Link, Typography } from "@mui/material";
+import { useCallback } from "react";
 import { makeStyles } from "tss-react/mui";
 
 import CopyButton from "@foxglove/studio-base/components/CopyButton";
@@ -57,6 +58,12 @@ export default function Metadata({
 }: Props): JSX.Element {
   const { classes } = useStyles();
   const docsLink = datatype ? getMessageDocumentationLink(datatype) : undefined;
+  const copyData = useCallback(() => JSON.stringify(data, copyMessageReplacer, 2) ?? "", [data]);
+  const copyDiffData = useCallback(
+    () => JSON.stringify(diffData, copyMessageReplacer, 2) ?? "",
+    [diffData],
+  );
+  const copyDiff = useCallback(() => JSON.stringify(diff, copyMessageReplacer, 2) ?? "", [diff]);
   return (
     <Stack alignItems="flex-start" padding={0.25}>
       <Stack direction="row" alignItems="center" gap={0.5}>
@@ -79,12 +86,7 @@ export default function Metadata({
           )}
           {` @ ${formatTimeRaw(message.receiveTime)} sec`}
         </Typography>
-        <CopyButton
-          size="small"
-          iconSize="inherit"
-          className={classes.button}
-          value={JSON.stringify(data, copyMessageReplacer, 2) ?? ""}
-        />
+        <CopyButton size="small" iconSize="inherit" className={classes.button} getText={copyData} />
       </Stack>
 
       {diffMessage?.receiveTime && (
@@ -99,15 +101,10 @@ export default function Metadata({
               size="small"
               iconSize="inherit"
               className={classes.button}
-              value={JSON.stringify(diffData, copyMessageReplacer, 2) ?? ""}
+              getText={copyDiffData}
             />
           </Stack>
-          <CopyButton
-            size="small"
-            iconSize="inherit"
-            className={classes.button}
-            value={JSON.stringify(diff, copyMessageReplacer, 2) ?? ""}
-          >
+          <CopyButton size="small" iconSize="inherit" className={classes.button} getText={copyDiff}>
             Copy diff of msgs
           </CopyButton>
         </>

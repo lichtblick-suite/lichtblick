@@ -186,6 +186,8 @@ export default function Variable(props: {
   const isDuplicate =
     editedName != undefined && editedName !== name && globalVariables[editedName] != undefined;
 
+  const getText = useCallback(() => JSON.stringify(value, undefined, 2) ?? "", [value]);
+
   return (
     <Stack className={classes.root} ref={rootRef}>
       <ListItem
@@ -316,7 +318,7 @@ export default function Variable(props: {
             className={classes.copyButton}
             size="small"
             color={copied ? "primary" : "inherit"}
-            value={JSON.stringify(value, undefined, 2) ?? ""}
+            getText={getText}
           >
             {copied ? "Copied" : "Copy"}
           </CopyButton>

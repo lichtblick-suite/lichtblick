@@ -191,7 +191,7 @@ function Parameters(): ReactElement {
                       edge="end"
                       size="small"
                       iconSize="small"
-                      value={`${name}: ${value}`}
+                      getText={() => `${name}: ${value}`}
                     />
                   </TableCell>
                 </TableRow>
