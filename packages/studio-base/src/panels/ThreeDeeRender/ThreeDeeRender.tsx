@@ -386,7 +386,7 @@ export function ThreeDeeRender({ context }: { context: PanelExtensionContext }):
       publish,
     };
   });
-  const configRef = useRef(config);
+  const configRef = useLatest(config);
   const { cameraState } = config;
   const backgroundColor = config.scene.backgroundColor;
 
@@ -394,7 +394,7 @@ export function ThreeDeeRender({ context }: { context: PanelExtensionContext }):
   const [renderer, setRenderer] = useState<Renderer | undefined>(undefined);
   useEffect(
     () => setRenderer(canvas ? new Renderer(canvas, configRef.current) : undefined),
-    [canvas],
+    [canvas, configRef, config.scene.transforms?.enablePreloading],
   );
 
   const [colorScheme, setColorScheme] = useState<"dark" | "light" | undefined>();

@@ -168,6 +168,11 @@ export class FrameAxes extends SceneExtension<FrameAxisRenderable> {
             input: "rgb",
             value: config.scene.transforms?.lineColor ?? DEFAULT_LINE_COLOR_STR,
           },
+          enablePreloading: {
+            label: "Enable preloading",
+            input: "boolean",
+            value: config.scene.transforms?.enablePreloading ?? true,
+          },
         },
       },
     };

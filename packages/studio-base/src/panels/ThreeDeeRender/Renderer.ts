@@ -129,6 +129,8 @@ export type RendererConfig = {
       lineWidth?: number;
       /** Color of the connecting line between child and parent frames */
       lineColor?: string;
+      /** Enable transform preloading */
+      enablePreloading?: boolean;
     };
     /** Toggles visibility of all topics */
     topicsVisible?: boolean;
@@ -435,17 +437,17 @@ export class Renderer extends EventEmitter<RendererEvents> {
     this.addDatatypeSubscriptions(FRAME_TRANSFORM_DATATYPES, {
       handler: this.handleFrameTransform,
       forced: true,
-      preload: true,
+      preload: config.scene.transforms?.enablePreloading ?? true,
     });
     this.addDatatypeSubscriptions(TF_DATATYPES, {
       handler: this.handleTFMessage,
       forced: true,
-      preload: true,
+      preload: config.scene.transforms?.enablePreloading ?? true,
     });
     this.addDatatypeSubscriptions(TRANSFORM_STAMPED_DATATYPES, {
       handler: this.handleTransformStamped,
       forced: true,
-      preload: true,
+      preload: config.scene.transforms?.enablePreloading ?? true,
     });
 
     this.addSceneExtension(this.coreSettings);
