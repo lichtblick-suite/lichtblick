@@ -257,17 +257,19 @@ class ConsoleApi {
   }
 
   public async coverage(params: {
-    deviceId: string;
-    start: string;
-    end: string;
+    deviceId?: string;
+    importId?: string;
+    start?: string;
+    end?: string;
   }): Promise<CoverageResponse[]> {
     return await this.get<CoverageResponse[]>("/v1/data/coverage", params);
   }
 
   public async topics(params: {
-    deviceId: string;
-    start: string;
-    end: string;
+    deviceId?: string;
+    importId?: string;
+    start?: string;
+    end?: string;
     includeSchemas?: boolean;
   }): Promise<readonly TopicResponse[]> {
     return (
@@ -286,9 +288,10 @@ class ConsoleApi {
   }
 
   public async stream(params: {
-    deviceId: string;
-    start: string;
-    end: string;
+    deviceId?: string;
+    importId?: string;
+    start?: string;
+    end?: string;
     topics: readonly string[];
     outputFormat?: "bag1" | "mcap0";
     replayPolicy?: "lastPerChannel" | "";

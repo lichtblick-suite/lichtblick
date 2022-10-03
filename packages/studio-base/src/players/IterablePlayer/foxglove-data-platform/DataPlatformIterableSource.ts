@@ -51,17 +51,19 @@ export type DataPlatformInterableSourceConsoleApi = Pick<
 
 type DataPlatformIterableSourceOptions = {
   api: DataPlatformInterableSourceConsoleApi;
-  deviceId: string;
-  start: Time;
-  end: Time;
+  deviceId?: string;
+  importId?: string;
+  start?: Time;
+  end?: Time;
 };
 
 export class DataPlatformIterableSource implements IIterableSource {
   private readonly _consoleApi: DataPlatformInterableSourceConsoleApi;
 
-  private _start: Time;
-  private _end: Time;
-  private _deviceId: string;
+  private _start: Time | undefined;
+  private _end: Time | undefined;
+  private readonly _deviceId: string | undefined;
+  private readonly _importId: string | undefined;
   private _knownTopicNames: string[] = [];
 
   /**
@@ -78,27 +80,32 @@ export class DataPlatformIterableSource implements IIterableSource {
     this._start = options.start;
     this._end = options.end;
     this._deviceId = options.deviceId;
+    this._importId = options.importId;
   }
 
   public async initialize(): Promise<Initalization> {
     const [coverage, rawTopics] = await Promise.all([
       this._consoleApi.coverage({
-        deviceId: this._deviceId,
-        start: toRFC3339String(this._start),
-        end: toRFC3339String(this._end),
+        ...(this._importId && { importId: this._importId }),
+        ...(this._deviceId && { deviceId: this._deviceId }),
+        ...(this._start && { start: toRFC3339String(this._start) }),
+        ...(this._end && { end: toRFC3339String(this._end) }),
       }),
       this._consoleApi.topics({
-        deviceId: this._deviceId,
-        start: toRFC3339String(this._start),
-        end: toRFC3339String(this._end),
+        ...(this._importId && { importId: this._importId }),
+        ...(this._deviceId && { deviceId: this._deviceId }),
+        ...(this._start && { start: toRFC3339String(this._start) }),
+        ...(this._end && { end: toRFC3339String(this._end) }),
         includeSchemas: true,
       }),
     ]);
     if (rawTopics.length === 0 || coverage.length === 0) {
       throw new Error(
-        `No data available for ${this._deviceId} between ${formatTimeRaw(
-          this._start,
-        )} and ${formatTimeRaw(this._end)}.`,
+        this._deviceId && this._start && this._end
+          ? `No data available for ${this._deviceId} between ${formatTimeRaw(
+              this._start,
+            )} and ${formatTimeRaw(this._end)}.`
+          : `No data available for ${this._importId}`,
       );
     }
 
@@ -117,13 +124,15 @@ export class DataPlatformIterableSource implements IIterableSource {
       );
     }
 
-    const device = await this._consoleApi.getDevice(this._deviceId);
+    const device = await this._consoleApi.getDevice(
+      this._deviceId ?? coverageStart?.deviceId ?? "",
+    );
 
-    if (isLessThan(this._start, coverageStartTime)) {
+    if (!this._start || isLessThan(this._start, coverageStartTime)) {
       log.debug("Increased start time from", this._start, "to", coverageStartTime);
       this._start = coverageStartTime;
     }
-    if (isGreaterThan(this._end, coverageEndTime)) {
+    if (!this._end || isGreaterThan(this._end, coverageEndTime)) {
       log.debug("Reduced end time from", this._end, "to", coverageEndTime);
       this._end = coverageEndTime;
     }
@@ -198,6 +207,7 @@ export class DataPlatformIterableSource implements IIterableSource {
 
     const api = this._consoleApi;
     const deviceId = this._deviceId;
+    const importId = this._importId;
     const parsedChannelsByTopic = this._parsedChannelsByTopic;
 
     // Data platform treats topic array length 0 as "all topics". Until that is changed, we filter out
@@ -216,6 +226,11 @@ export class DataPlatformIterableSource implements IIterableSource {
       return;
     }
 
+    if (!this._start || !this._end || (!deviceId && !importId)) {
+      log.debug("source needs to be initialized");
+      return;
+    }
+
     const streamStart = args.start ?? this._start;
     const streamEnd = clampTime(args.end ?? this._end, this._start, this._end);
 
@@ -223,7 +238,12 @@ export class DataPlatformIterableSource implements IIterableSource {
       const stream = streamMessages({
         api,
         parsedChannelsByTopic,
-        params: { deviceId, start: streamStart, end: streamEnd, topics: args.topics },
+        params: {
+          ...(deviceId ? { deviceId } : { importId: importId! }),
+          start: streamStart,
+          end: streamEnd,
+          topics: args.topics,
+        },
       });
 
       for await (const messages of stream) {
@@ -237,12 +257,16 @@ export class DataPlatformIterableSource implements IIterableSource {
 
     let localStart = streamStart;
     let localEnd = clampTime(addTime(localStart, { sec: 5, nsec: 0 }), streamStart, streamEnd);
-
     for (;;) {
       const stream = streamMessages({
         api,
         parsedChannelsByTopic,
-        params: { deviceId, start: localStart, end: localEnd, topics: args.topics },
+        params: {
+          ...(deviceId ? { deviceId } : { importId: importId! }),
+          start: localStart,
+          end: localEnd,
+          topics: args.topics,
+        },
       });
 
       for await (const messages of stream) {
@@ -296,13 +320,18 @@ export class DataPlatformIterableSource implements IIterableSource {
       return [];
     }
 
+    if (!this._deviceId && !this._importId) {
+      log.debug("source needs to be initialized");
+      return [];
+    }
+
     const messages: MessageEvent<unknown>[] = [];
     for await (const block of streamMessages({
       api: this._consoleApi,
       parsedChannelsByTopic: this._parsedChannelsByTopic,
       signal: abortSignal,
       params: {
-        deviceId: this._deviceId,
+        ...(this._deviceId ? { deviceId: this._deviceId } : { importId: this._importId! }),
         start: time,
         end: time,
         topics,

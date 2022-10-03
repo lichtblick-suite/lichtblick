@@ -2,7 +2,7 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { fromRFC3339String, toRFC3339String } from "@foxglove/rostime";
+import { fromRFC3339String } from "@foxglove/rostime";
 import {
   IDataSourceFactory,
   DataSourceFactoryInitializeArgs,
@@ -28,31 +28,36 @@ class FoxgloveDataPlatformDataSourceFactory implements IDataSourceFactory {
     const start = args.start as string | undefined;
     const end = args.end as string | undefined;
     const deviceId = args.deviceId as string | undefined;
-    if (!start || !end || !deviceId) {
+    const importId = args.importId as string | undefined;
+
+    if (!deviceId && !importId) {
       return;
     }
 
-    const startTime = fromRFC3339String(start);
-    const endTime = fromRFC3339String(end);
-    if (!startTime || !endTime) {
-      return;
-    }
+    const startTime = start ? fromRFC3339String(start) : undefined;
+    const endTime = end ? fromRFC3339String(end) : undefined;
+
     const source = new DataPlatformIterableSource({
       api: args.consoleApi,
+      deviceId,
+      importId,
       start: startTime,
       end: endTime,
-      deviceId,
     });
     return new IterablePlayer({
       metricsCollector: args.metricsCollector,
       source,
       sourceId: this.id,
       urlParams: {
-        deviceId,
-        start: toRFC3339String(startTime),
-        end: toRFC3339String(endTime),
+        ...(importId && { importId }),
+        ...(deviceId && { deviceId }),
+        ...(startTime && { start }),
+        ...(endTime && { end }),
       },
-      name: `${deviceId}, ${formatTimeRaw(startTime)} to ${formatTimeRaw(endTime)}`,
+      name:
+        startTime && endTime && deviceId
+          ? `${deviceId}, ${formatTimeRaw(startTime)} to ${formatTimeRaw(endTime)}`
+          : `${importId}`,
     });
   }
 }

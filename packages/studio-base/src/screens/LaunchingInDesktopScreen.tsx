@@ -36,6 +36,9 @@ export function LaunchingInDesktopScreen(): ReactElement {
           case "ds.deviceId":
             desktopURL.searchParams.set("deviceId", v);
             break;
+          case "ds.importId":
+            desktopURL.searchParams.set("importId", v);
+            break;
           case "ds.end":
             desktopURL.searchParams.set("end", v);
             break;

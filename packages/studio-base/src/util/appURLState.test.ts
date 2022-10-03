@@ -59,6 +59,7 @@ describe("app state url parser", () => {
       url.searchParams.append("layoutId", "1234");
       url.searchParams.append("time", time);
       url.searchParams.append("ds.deviceId", "dummy");
+      url.searchParams.append("ds.importId", "dummyImportId");
       url.searchParams.append("ds.start", start);
       url.searchParams.append("ds.end", end);
       url.searchParams.append("ds.eventId", "dummyEventId");
@@ -70,6 +71,7 @@ describe("app state url parser", () => {
         time: { sec: now.sec + 500, nsec: 0 },
         dsParams: {
           deviceId: "dummy",
+          importId: "dummyImportId",
           start,
           end,
           eventId: "dummyEventId",
