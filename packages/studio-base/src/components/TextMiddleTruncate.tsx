@@ -11,26 +11,24 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
+import { CSSProperties } from "react";
 import { makeStyles } from "tss-react/mui";
 
-import Tooltip from "@foxglove/studio-base/components/Tooltip";
-
-export const DEFAULT_END_TEXT_LENGTH = 16;
+const DEFAULT_END_TEXT_LENGTH = 16;
 
 const useStyles = makeStyles()(() => ({
-  STextMiddleTruncate: {
+  root: {
+    alignSelf: "start",
     display: "flex",
-    flexDirection: "row",
-    flexWrap: "nowrap",
     justifyContent: "flex-start",
   },
-  SStart: {
+  start: {
     overflow: "hidden",
     textOverflow: "ellipsis",
     whiteSpace: "nowrap",
     flexShrink: 1,
   },
-  SEnd: {
+  end: {
     whiteSpace: "nowrap",
     flexBasis: "content",
     flexGrow: 0,
@@ -42,23 +40,19 @@ const useStyles = makeStyles()(() => ({
 }));
 
 type Props = {
-  tooltips?: React.ReactNode[];
   text: string;
   endTextLength?: number;
-  style?: {
-    [attr: string]: string | number;
-  };
-  testShowTooltip?: boolean;
+  className?: string;
+  style?: CSSProperties;
 };
 
 export default function TextMiddleTruncate({
-  tooltips,
   text,
   endTextLength,
+  className,
   style,
-  testShowTooltip,
-}: Props): React.ReactElement {
-  const { classes } = useStyles();
+}: Props): JSX.Element {
+  const { classes, cx } = useStyles();
   const startTextLen = Math.max(
     0,
     text.length -
@@ -67,15 +61,23 @@ export default function TextMiddleTruncate({
   const startText = text.substring(0, startTextLen);
   const endText = text.substring(startTextLen);
 
-  const elem = (
-    <div className={classes.STextMiddleTruncate} style={style}>
-      <div className={classes.SStart}>{startText}</div>
-      <div className={classes.SEnd}>{endText}</div>
-    </div>
-  );
+  if (!startText) {
+    return (
+      <div className={cx(classes.end, className)} style={style}>
+        {endText}
+      </div>
+    );
+  }
+
   return (
-    <Tooltip contents={tooltips} placement="top" shown={testShowTooltip}>
-      {elem}
-    </Tooltip>
+    <div
+      data-testid="text-middle-truncate"
+      className={cx(className, classes.root)}
+      title={text}
+      style={style}
+    >
+      <div className={classes.start}>{startText}</div>
+      <div className={classes.end}>{endText}</div>
+    </div>
   );
 }

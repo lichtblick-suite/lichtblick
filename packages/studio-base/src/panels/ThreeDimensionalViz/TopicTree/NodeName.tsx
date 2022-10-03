@@ -94,7 +94,6 @@ export default function NodeName({
       endTextLength={
         topicName.length > 0 ? topicName.split("/").pop()!.length + 1 : DEFAULT_END_TEXT_LENGTH
       }
-      tooltips={tooltips}
     />
   );
   return (
