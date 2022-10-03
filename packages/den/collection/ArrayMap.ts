@@ -94,6 +94,13 @@ export class ArrayMap<K, V> {
     let left = 0;
     let right = list.length - 1;
 
+    // Quick checks to see if key is outside the bounds of the list
+    if (key < list[left]![0]) {
+      return ~left;
+    } else if (key > list[right]![0]) {
+      return ~(right + 1);
+    }
+
     while (left <= right) {
       const mid = (left + right) >> 1;
       const midKey = list[mid]![0];

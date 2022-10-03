@@ -4,6 +4,6 @@ The benchmark runner is a customized build of Studio that runs a pre-configured 
 
 ## Instructions
 
-`yarn benchmark:serve` to start the benchmark app
+`yarn benchmark:serve` to start the benchmark app in development mode. For production builds, use `yarn benchmark:build:prod` followed by `npx serve -p 8080 benchmark/.webpack`.
 
-See benchmarks.txt for a list of available benchmarks
+See benchmarks.txt for a list of available benchmarks.

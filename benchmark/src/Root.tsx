@@ -14,7 +14,7 @@ import {
 
 import { McapLocalBenchmarkDataSourceFactory, SyntheticDataSourceFactory } from "./dataSources";
 import { LAYOUTS } from "./layouts";
-import { PointcloudPlayer, SinewavePlayer } from "./players";
+import { PointcloudPlayer, SinewavePlayer, TransformPlayer } from "./players";
 import { PredefinedLayoutStorage, MemoryAppConfiguration } from "./services";
 
 export function Root(): JSX.Element {
@@ -33,6 +33,7 @@ export function Root(): JSX.Element {
       new McapLocalBenchmarkDataSourceFactory(),
       new SyntheticDataSourceFactory("pointcloud", PointcloudPlayer),
       new SyntheticDataSourceFactory("sinewave", SinewavePlayer),
+      new SyntheticDataSourceFactory("transform", TransformPlayer),
     ];
 
     return sources;

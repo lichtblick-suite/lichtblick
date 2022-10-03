@@ -1,0 +1,128 @@
+{
+  "configById": {
+    "3D!a": {
+      "layers": {
+        "grid": {
+          "layerId": "foxglove.Grid",
+          "color": "#845EC2"
+        }
+      },
+      "followTf": "map",
+      "cameraState": {
+        "perspective": true,
+        "distance": 6,
+        "phi": 60,
+        "thetaOffset": 14,
+        "targetOffset": [1, 0.15, 0],
+        "fovy": 45
+      }
+    },
+    "3D!b": {
+      "layers": {
+        "grid": {
+          "layerId": "foxglove.Grid",
+          "color": "#D65DB1"
+        }
+      },
+      "followTf": "map",
+      "cameraState": {
+        "perspective": true,
+        "distance": 6,
+        "phi": 60,
+        "thetaOffset": 14,
+        "targetOffset": [1, 0.15, 0],
+        "fovy": 45
+      }
+    },
+    "3D!c": {
+      "layers": {
+        "grid": {
+          "layerId": "foxglove.Grid",
+          "color": "#FF6F91"
+        }
+      },
+      "followTf": "map",
+      "cameraState": {
+        "perspective": true,
+        "distance": 6,
+        "phi": 60,
+        "thetaOffset": 14,
+        "targetOffset": [1, 0.15, 0],
+        "fovy": 45
+      }
+    },
+    "3D!d": {
+      "layers": {
+        "grid": {
+          "layerId": "foxglove.Grid",
+          "color": "#FF9671"
+        }
+      },
+      "followTf": "map",
+      "cameraState": {
+        "perspective": true,
+        "distance": 6,
+        "phi": 60,
+        "thetaOffset": 14,
+        "targetOffset": [1, 0.15, 0],
+        "fovy": 45
+      }
+    },
+    "3D!e": {
+      "layers": {
+        "grid": {
+          "layerId": "foxglove.Grid",
+          "color": "#FFC75F"
+        }
+      },
+      "followTf": "map",
+      "cameraState": {
+        "perspective": true,
+        "distance": 6,
+        "phi": 60,
+        "thetaOffset": 14,
+        "targetOffset": [1, 0.15, 0],
+        "fovy": 45
+      }
+    },
+    "3D!f": {
+      "layers": {
+        "grid": {
+          "layerId": "foxglove.Grid",
+          "color": "#F9F871"
+        }
+      },
+      "followTf": "map",
+      "cameraState": {
+        "perspective": true,
+        "distance": 6,
+        "phi": 60,
+        "thetaOffset": 14,
+        "targetOffset": [1, 0.15, 0],
+        "fovy": 45
+      }
+    }
+  },
+  "layout": {
+    "first": {
+      "first": "3D!a",
+      "second": "3D!f",
+      "direction": "column"
+    },
+    "second": {
+      "first": {
+        "first": "3D!b",
+        "second": "3D!c",
+        "direction": "column"
+      },
+      "second": {
+        "first": "3D!d",
+        "second": "3D!e",
+        "direction": "column"
+      },
+      "direction": "row"
+    },
+    "direction": "row",
+    "splitPercentage": 33.33
+  }
+}
