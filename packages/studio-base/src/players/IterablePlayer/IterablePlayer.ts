@@ -36,7 +36,6 @@ import {
 } from "@foxglove/studio-base/players/types";
 import { RosDatatypes } from "@foxglove/studio-base/types/RosDatatypes";
 import delay from "@foxglove/studio-base/util/delay";
-import { SEEK_ON_START_NS } from "@foxglove/studio-base/util/time";
 
 import { BlockLoader } from "./BlockLoader";
 import { BufferedIterableSource } from "./BufferedIterableSource";
@@ -61,6 +60,10 @@ const MIN_MEM_CACHE_BLOCK_SIZE_NS = 0.1e9;
 // Adaptive block sizing is simpler than using a tree structure for immutable updates but
 // less flexible, so we may want to move away from a single-level block structure in the future.
 const MAX_BLOCKS = 400;
+
+// Amount to seek into the data source from the start when loading the player. The purpose of this
+// is to provide some initial data to subscribers.
+const SEEK_ON_START_NS = BigInt(99 * 1e6);
 
 type IterablePlayerOptions = {
   metricsCollector?: PlayerMetricsCollectorInterface;

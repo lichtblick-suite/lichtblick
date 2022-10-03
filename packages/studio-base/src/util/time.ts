@@ -38,12 +38,6 @@ export function formatFrame({ sec, nsec }: Time): string {
   return `${sec}.${String.prototype.padStart.call(nsec, 9, "0")}`;
 }
 
-// Amount to seek into the bag from the start when loading the player, to show
-// something useful on the screen. Ideally this is less than BLOCK_SIZE_NS from
-// MemoryCacheDataProvider so we still stay within the first block when fetching
-// initial data.
-export const SEEK_ON_START_NS = BigInt(99 * 1e6); /* ms */
-
 export function getTimestampForMessageEvent(
   messageEvent: MessageEvent<unknown>,
   timestampMethod?: TimestampMethod,
