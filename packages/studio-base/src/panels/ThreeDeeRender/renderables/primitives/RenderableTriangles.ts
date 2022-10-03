@@ -6,10 +6,7 @@ import * as THREE from "three";
 
 import { toNanoSec } from "@foxglove/rostime";
 import { SceneEntity, TriangleListPrimitive } from "@foxglove/schemas";
-import {
-  DynamicBufferGeometry,
-  DynamicFloatBufferGeometry,
-} from "@foxglove/studio-base/panels/ThreeDeeRender/DynamicBufferGeometry";
+import { DynamicBufferGeometry } from "@foxglove/studio-base/panels/ThreeDeeRender/DynamicBufferGeometry";
 import { emptyPose } from "@foxglove/studio-base/util/Pose";
 
 import type { Renderer } from "../../Renderer";
@@ -20,7 +17,7 @@ import { RenderablePrimitive } from "./RenderablePrimitive";
 const tempRgba = makeRgba();
 const tempColor = new THREE.Color();
 
-type TriangleMesh = THREE.Mesh<DynamicFloatBufferGeometry, THREE.MeshStandardMaterial>;
+type TriangleMesh = THREE.Mesh<DynamicBufferGeometry, THREE.MeshStandardMaterial>;
 export class RenderableTriangles extends RenderablePrimitive {
   private _triangleMeshes: TriangleMesh[] = [];
   public constructor(renderer: Renderer) {
@@ -63,7 +60,7 @@ export class RenderableTriangles extends RenderablePrimitive {
       geometry.resize(primitive.points.length);
 
       if (!geometry.attributes.position) {
-        geometry.createAttribute("position", 3);
+        geometry.createAttribute("position", Float32Array, 3);
       }
       const vertices = geometry.attributes.position!;
 
@@ -74,7 +71,7 @@ export class RenderableTriangles extends RenderablePrimitive {
         : undefined;
 
       if (!singleColor && !geometry.attributes.color) {
-        geometry.createAttribute("color", 4);
+        geometry.createAttribute("color", Uint8Array, 4, true);
       }
       const colors = geometry.attributes.color;
 
@@ -89,10 +86,10 @@ export class RenderableTriangles extends RenderablePrimitive {
 
         if (!singleColor && colors && primitive.colors.length > 0) {
           const color = primitive.colors[i]!;
-          const r = SRGBToLinear(color.r);
-          const g = SRGBToLinear(color.g);
-          const b = SRGBToLinear(color.b);
-          const a = SRGBToLinear(color.a);
+          const r = (SRGBToLinear(color.r) * 255) | 0;
+          const g = (SRGBToLinear(color.g) * 255) | 0;
+          const b = (SRGBToLinear(color.b) * 255) | 0;
+          const a = (color.a * 255) | 0;
           colorChanged =
             colorChanged ||
             colors.getX(i) !== r ||
@@ -218,7 +215,7 @@ export class RenderableTriangles extends RenderablePrimitive {
 
 function makeTriangleMesh(): TriangleMesh {
   return new THREE.Mesh(
-    new DynamicBufferGeometry(Float32Array),
+    new DynamicBufferGeometry(),
     new THREE.MeshStandardMaterial({
       metalness: 0,
       roughness: 1,

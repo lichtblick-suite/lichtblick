@@ -4,15 +4,15 @@
 
 import * as THREE from "three";
 
-import { DynamicBufferGeometry, DynamicFloatBufferGeometry } from "../../DynamicBufferGeometry";
+import { DynamicBufferGeometry } from "../../DynamicBufferGeometry";
 import type { Renderer } from "../../Renderer";
 import { Marker } from "../../ros";
 import { RenderableMarker } from "./RenderableMarker";
 import { markerHasTransparency, makePointsMaterial } from "./materials";
 
 export class RenderablePoints extends RenderableMarker {
-  private geometry: DynamicFloatBufferGeometry;
-  private points: THREE.Points<DynamicFloatBufferGeometry, THREE.PointsMaterial>;
+  private geometry: DynamicBufferGeometry;
+  private points: THREE.Points<DynamicBufferGeometry, THREE.PointsMaterial>;
 
   public constructor(
     topic: string,
@@ -22,9 +22,9 @@ export class RenderablePoints extends RenderableMarker {
   ) {
     super(topic, marker, receiveTime, renderer);
 
-    this.geometry = new DynamicBufferGeometry(Float32Array);
-    this.geometry.createAttribute("position", 3);
-    this.geometry.createAttribute("color", 4);
+    this.geometry = new DynamicBufferGeometry();
+    this.geometry.createAttribute("position", Float32Array, 3);
+    this.geometry.createAttribute("color", Uint8Array, 4, true);
 
     this.points = new THREE.Points(this.geometry, makePointsMaterial(marker));
     this.add(this.points);
@@ -71,12 +71,12 @@ export class RenderablePoints extends RenderableMarker {
   private _setColors(marker: Marker, pointsLength: number): void {
     // Converts color-per-point to a flattened typed array
     const attribute = this.geometry.getAttribute("color") as THREE.BufferAttribute;
-    const rgbaData = attribute.array as Float32Array;
+    const rgbaData = attribute.array as Uint8Array;
     this._markerColorsToLinear(marker, pointsLength, (color, i) => {
-      rgbaData[4 * i + 0] = color[0];
-      rgbaData[4 * i + 1] = color[1];
-      rgbaData[4 * i + 2] = color[2];
-      rgbaData[4 * i + 3] = color[3];
+      rgbaData[4 * i + 0] = (color[0] * 255) | 0;
+      rgbaData[4 * i + 1] = (color[1] * 255) | 0;
+      rgbaData[4 * i + 2] = (color[2] * 255) | 0;
+      rgbaData[4 * i + 3] = (color[3] * 255) | 0;
     });
     attribute.needsUpdate = true;
   }

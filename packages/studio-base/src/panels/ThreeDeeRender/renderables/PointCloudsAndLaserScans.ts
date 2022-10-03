@@ -14,7 +14,7 @@ import { SettingsTreeAction, SettingsTreeFields, SettingsTreeNode, Topic } from 
 import type { RosObject, RosValue } from "@foxglove/studio-base/players/types";
 import { emptyPose } from "@foxglove/studio-base/util/Pose";
 
-import { DynamicBufferGeometry, DynamicFloatBufferGeometry } from "../DynamicBufferGeometry";
+import { DynamicBufferGeometry } from "../DynamicBufferGeometry";
 import { BaseUserData, Renderable } from "../Renderable";
 import { Renderer } from "../Renderer";
 import { PartialMessage, PartialMessageEvent, SceneExtension } from "../SceneExtension";
@@ -63,7 +63,7 @@ export type LayerSettingsPointCloudAndLaserScan = BaseSettings & {
 };
 
 type Material = THREE.PointsMaterial | LaserScanMaterial;
-type Points = THREE.Points<DynamicFloatBufferGeometry, Material>;
+type Points = THREE.Points<DynamicBufferGeometry, Material>;
 type PointsAtTime = { receiveTime: bigint; messageTime: bigint; points: Points };
 
 type PointCloudFieldReaders = {
@@ -104,7 +104,7 @@ const DEFAULT_FLAT_COLOR = { r: 1, g: 1, b: 1, a: 1 };
 const DEFAULT_MIN_COLOR = { r: 100, g: 47, b: 105, a: 1 };
 const DEFAULT_MAX_COLOR = { r: 227, g: 177, b: 135, a: 1 };
 const DEFAULT_RGB_BYTE_ORDER = "rgba";
-const SKIP_MIN_MAX = ["flat", "rgb", "rgba"];
+const NEEDS_MIN_MAX = ["gradient", "colormap"];
 
 const DEFAULT_SETTINGS: LayerSettingsPointCloudAndLaserScan = {
   visible: false,
@@ -539,11 +539,11 @@ export class PointCloudsAndLaserScans extends SceneExtension<PointCloudAndLaserS
     );
   };
 
-  private _createGeometry(topic: string, usage: THREE.Usage): DynamicFloatBufferGeometry {
-    const geometry = new DynamicBufferGeometry(Float32Array, usage);
+  private _createGeometry(topic: string, usage: THREE.Usage): DynamicBufferGeometry {
+    const geometry = new DynamicBufferGeometry(usage);
     geometry.name = `${topic}:PointCloud:geometry`;
-    geometry.createAttribute("position", 3);
-    geometry.createAttribute("color", 4);
+    geometry.createAttribute("position", Float32Array, 3);
+    geometry.createAttribute("color", Uint8Array, 4, true);
     return geometry;
   }
 
@@ -824,13 +824,12 @@ export class PointCloudsAndLaserScans extends SceneExtension<PointCloudAndLaserS
     pointStep: number,
     settings: LayerSettingsPointCloudAndLaserScan,
   ): void {
-    if (SKIP_MIN_MAX.includes(settings.colorMode)) {
-      return;
-    }
-
     let minColorValue = settings.minValue ?? Number.POSITIVE_INFINITY;
     let maxColorValue = settings.maxValue ?? Number.NEGATIVE_INFINITY;
-    if (settings.minValue == undefined || settings.maxValue == undefined) {
+    if (
+      NEEDS_MIN_MAX.includes(settings.colorMode) &&
+      (settings.minValue == undefined || settings.maxValue == undefined)
+    ) {
       for (let i = 0; i < pointCount; i++) {
         const pointOffset = i * pointStep;
         const colorValue = colorReader(view, pointOffset);
@@ -877,7 +876,13 @@ export class PointCloudsAndLaserScans extends SceneExtension<PointCloudAndLaserS
       // Update color attribute
       const colorValue = colorReader(view, pointOffset);
       colorConverter(tempColor, colorValue);
-      colorAttribute.setXYZW(i, tempColor.r, tempColor.g, tempColor.b, tempColor.a);
+      colorAttribute.setXYZW(
+        i,
+        (tempColor.r * 255) | 0,
+        (tempColor.g * 255) | 0,
+        (tempColor.b * 255) | 0,
+        (tempColor.a * 255) | 0,
+      );
     }
 
     positionAttribute.needsUpdate = true;
@@ -916,11 +921,11 @@ export class PointCloudsAndLaserScans extends SceneExtension<PointCloudAndLaserS
         });
       }
 
-      const geometry = new DynamicBufferGeometry(Float32Array);
+      const geometry = new DynamicBufferGeometry();
       geometry.name = `${topic}:LaserScan:geometry`;
       // Three.JS doesn't render anything if there is no attribute named position, so we use the name position for the "range" parameter.
-      geometry.createAttribute("position", 1);
-      geometry.createAttribute("color", 4);
+      geometry.createAttribute("position", Float32Array, 1);
+      geometry.createAttribute("color", Uint8Array, 4, true);
 
       const material = new LaserScanMaterial();
       const pickingMaterial = new LaserScanMaterial({ picking: true });
@@ -1075,7 +1080,13 @@ export class PointCloudsAndLaserScans extends SceneExtension<PointCloudAndLaserS
     for (let i = 0; i < ranges.length; i++) {
       const colorValue = colorField === "range" ? ranges[i]! : intensities[i] ?? 0;
       colorConverter(tempColor, colorValue);
-      colorAttribute.setXYZW(i, tempColor.r, tempColor.g, tempColor.b, tempColor.a);
+      colorAttribute.setXYZW(
+        i,
+        (tempColor.r * 255) | 0,
+        (tempColor.g * 255) | 0,
+        (tempColor.b * 255) | 0,
+        (tempColor.a * 255) | 0,
+      );
     }
 
     rangeAttribute.needsUpdate = true;
@@ -1653,12 +1664,12 @@ function zeroReader(): number {
 function createPoints(
   topic: string,
   pose: Pose,
-  geometry: DynamicFloatBufferGeometry,
+  geometry: DynamicBufferGeometry,
   material: Material,
   pickingMaterial: THREE.Material,
   instancePickingMaterial: THREE.Material | undefined,
 ): Points {
-  const points = new THREE.Points<DynamicFloatBufferGeometry, Material>(geometry, material);
+  const points = new THREE.Points<DynamicBufferGeometry, Material>(geometry, material);
   // We don't calculate the bounding sphere for points, so frustum culling is disabled
   points.frustumCulled = false;
   points.name = `${topic}:PointCloud:points`;
