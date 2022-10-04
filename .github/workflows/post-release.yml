@@ -64,7 +64,6 @@ jobs:
       - uses: actions/setup-node@v3.5.0
         with:
           node-version: 16.17
-          cache: yarn
       - run: corepack enable yarn
 
       - run: yarn install --immutable
@@ -124,7 +123,6 @@ jobs:
         with:
           node-version: 16.17
           registry-url: https://registry.npmjs.org
-          cache: yarn
       - run: corepack enable yarn
 
       - run: yarn install --immutable
@@ -199,7 +197,6 @@ jobs:
       - uses: actions/setup-node@v3.5.0
         with:
           node-version: 16.17
-          cache: yarn
       - run: corepack enable yarn
 
       - run: yarn install --immutable
