@@ -194,6 +194,7 @@ class ConsoleApi {
     deviceId: string;
     start: string;
     end: string;
+    query?: string;
   }): Promise<EventsResponse> {
     const rawEvents = await this.get<EventsResponse>(`/beta/device-events`, params);
     return rawEvents.map((event) => {

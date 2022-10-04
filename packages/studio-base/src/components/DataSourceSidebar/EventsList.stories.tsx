@@ -44,24 +44,6 @@ export function Default(): JSX.Element {
   return <EventsList />;
 }
 
-export function Filtered(): JSX.Element {
-  const setEvents = useEvents((store) => store.setEvents);
-  useEffect(() => {
-    setEvents({ loading: false, value: makeMockEvents(20) });
-  }, [setEvents]);
-
-  return <EventsList />;
-}
-Filtered.play = async () => {
-  const user = userEvent.setup();
-  const filter = await screen.findByPlaceholderText("Filter event metadata");
-  await user.click(filter);
-  await user.keyboard("type a");
-};
-Filtered.parameters = {
-  colorScheme: "light",
-};
-
 export function Selected(): JSX.Element {
   const setEvents = useEvents((store) => store.setEvents);
   const selectEvent = useEvents((store) => store.selectEvent);

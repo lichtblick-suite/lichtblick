@@ -15,7 +15,6 @@ import {
   TimelineInteractionStateStore,
   useTimelineInteractionState,
 } from "@foxglove/studio-base/context/TimelineInteractionStateContext";
-import { EventsSelectors } from "@foxglove/studio-base/providers/EventsProvider";
 
 const useStyles = makeStyles()(({ transitions, palette }) => ({
   root: {
@@ -47,6 +46,7 @@ const useStyles = makeStyles()(({ transitions, palette }) => ({
   },
 }));
 
+const selectEvents = (store: EventsStore) => store.events;
 const selectHoveredEvent = (store: TimelineInteractionStateStore) => store.hoveredEvent;
 const selectEventsAtHoverValue = (store: TimelineInteractionStateStore) => store.eventsAtHoverValue;
 const selectSelectedEventId = (store: EventsStore) => store.selectedEventId;
@@ -76,12 +76,12 @@ function EventTick({ event }: { event: TimelinePositionedEvent }): JSX.Element {
 const MemoEventTick = React.memo(EventTick);
 
 export function EventsOverlay(): JSX.Element {
-  const events = useEvents(EventsSelectors.selectFilteredEvents);
+  const events = useEvents(selectEvents);
   const { classes } = useStyles();
 
   return (
     <div className={classes.root}>
-      {events.map((event) => (
+      {(events.value ?? []).map((event) => (
         <MemoEventTick key={event.event.id} event={event} />
       ))}
     </div>

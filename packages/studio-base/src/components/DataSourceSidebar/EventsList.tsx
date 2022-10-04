@@ -23,7 +23,6 @@ import {
   useTimelineInteractionState,
 } from "@foxglove/studio-base/context/TimelineInteractionStateContext";
 import { useAppTimeFormat } from "@foxglove/studio-base/hooks";
-import { EventsSelectors } from "@foxglove/studio-base/providers/EventsProvider";
 
 import { EventView } from "./EventView";
 
@@ -40,7 +39,7 @@ const useStyles = makeStyles()((theme) => ({
   },
   grid: {
     display: "grid",
-    flex: 1,
+    flexShrink: 1,
     gridTemplateColumns: "auto 1fr",
     overflowY: "auto",
     padding: theme.spacing(1),
@@ -72,14 +71,13 @@ export function EventsList(): JSX.Element {
   const setHoveredEvent = useTimelineInteractionState(selectSetHoveredEvent);
   const filter = useEvents(selectEventFilter);
   const setFilter = useEvents(selectSetEventFilter);
-  const filteredEvents = useEvents(EventsSelectors.selectFilteredEvents);
 
   const timestampedEvents = useMemo(
     () =>
-      filteredEvents.map((event) => {
+      (events.value ?? []).map((event) => {
         return { ...event, formattedTime: formatTime(event.event.startTime) };
       }),
-    [filteredEvents, formatTime],
+    [events, formatTime],
   );
 
   const clearFilter = useCallback(() => {
@@ -114,43 +112,15 @@ export function EventsList(): JSX.Element {
 
   const { classes } = useStyles();
 
-  if (events.loading) {
-    return (
-      <Stack flex="auto" padding={2} fullHeight alignItems="center" justifyContent="center">
-        <CircularProgress />
-      </Stack>
-    );
-  }
-
-  if (events.error) {
-    return (
-      <Stack flex="auto" padding={2} fullHeight alignItems="center" justifyContent="center">
-        <Typography align="center" color="error">
-          Error loading events.
-        </Typography>
-      </Stack>
-    );
-  }
-
-  if ((events.value ?? []).length === 0) {
-    return (
-      <Stack flex="auto" padding={2} fullHeight alignItems="center" justifyContent="center">
-        <Typography align="center" color="text.secondary">
-          No Events
-        </Typography>
-      </Stack>
-    );
-  }
-
   return (
-    <Stack className={classes.root}>
+    <Stack className={classes.root} fullHeight>
       <AppBar className={classes.appBar} position="sticky" color="inherit" elevation={0}>
         <TextField
           variant="filled"
           fullWidth
           value={filter}
           onChange={(event) => setFilter(event.currentTarget.value)}
-          placeholder="Filter event metadata"
+          placeholder="Search by key, value, or key:value"
           InputProps={{
             startAdornment: <SearchIcon fontSize="small" />,
             endAdornment: filter !== "" && (
@@ -161,6 +131,25 @@ export function EventsList(): JSX.Element {
           }}
         />
       </AppBar>
+      {events.loading && (
+        <Stack flex="auto" padding={2} fullHeight alignItems="center" justifyContent="center">
+          <CircularProgress />
+        </Stack>
+      )}
+      {events.error && (
+        <Stack flex="auto" padding={2} fullHeight alignItems="center" justifyContent="center">
+          <Typography align="center" color="error">
+            Error loading events.
+          </Typography>
+        </Stack>
+      )}
+      {events.value && events.value.length === 0 && (
+        <Stack flex="auto" padding={2} fullHeight alignItems="center" justifyContent="center">
+          <Typography align="center" color="text.secondary">
+            No Events
+          </Typography>
+        </Stack>
+      )}
       <div className={classes.grid}>
         {timestampedEvents.map((event) => {
           return (
