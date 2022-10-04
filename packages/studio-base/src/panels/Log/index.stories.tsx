@@ -35,6 +35,7 @@ const fixture = {
           msg: "Couldn't find int 83757.",
           name: "/some_topic",
         },
+        datatype: "rosgraph_msgs/Log",
         sizeInBytes: 0,
       },
       {
@@ -49,6 +50,7 @@ const fixture = {
           msg: "Couldn't find int 2121.",
           name: "/other_node",
         },
+        datatype: "rosgraph_msgs/Log",
         sizeInBytes: 0,
       },
       {
@@ -63,6 +65,7 @@ const fixture = {
           msg: "Lorem ipsum blah blah. This message should\nshow up as multiple lines",
           name: "/other_node",
         },
+        datatype: "rosgraph_msgs/Log",
         sizeInBytes: 0,
       },
       {
@@ -78,6 +81,7 @@ const fixture = {
           line: 491,
           topics: [],
         },
+        datatype: "rosgraph_msgs/Log",
         sizeInBytes: 0,
       },
       {
@@ -93,6 +97,7 @@ const fixture = {
           line: 491,
           topics: [],
         },
+        datatype: "rosgraph_msgs/Log",
         sizeInBytes: 0,
       },
     ],
@@ -117,6 +122,7 @@ function makeLongFixture() {
           msg: `Couldn't find int ${idx + 1}.`,
           name: "/some_topic",
         },
+        datatype: "rosgraph_msgs/Log",
         sizeInBytes: 0,
       })),
     },
@@ -255,6 +261,7 @@ export const FoxgloveLog = (): JSX.Element => {
             line: 242,
             message: "Couldn't find int 83757.",
           },
+          datatype: "foxglove.Log",
           sizeInBytes: 0,
         },
         {
@@ -268,6 +275,7 @@ export const FoxgloveLog = (): JSX.Element => {
             line: 242,
             message: "Couldn't find int 2121.",
           },
+          datatype: "foxglove.Log",
           sizeInBytes: 0,
         },
         {
@@ -281,6 +289,7 @@ export const FoxgloveLog = (): JSX.Element => {
             line: 242,
             message: "Lorem ipsum blah blah. This message should\nshow up as multiple lines",
           },
+          datatype: "foxglove.Log",
           sizeInBytes: 0,
         },
         {
@@ -294,6 +303,7 @@ export const FoxgloveLog = (): JSX.Element => {
             file: "somefile.cpp",
             line: 491,
           },
+          datatype: "foxglove.Log",
           sizeInBytes: 0,
         },
         {
@@ -306,6 +316,7 @@ export const FoxgloveLog = (): JSX.Element => {
             file: "somefile.cpp",
             line: 491,
           },
+          datatype: "foxglove.Log",
           sizeInBytes: 0,
         },
       ],

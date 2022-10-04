@@ -36,6 +36,7 @@ export function Markers(): JSX.Element {
         rotation: QUAT_IDENTITY,
       },
     },
+    datatype: "geometry_msgs/TransformStamped",
     sizeInBytes: 0,
   };
   const tf2: MessageEvent<TransformStamped> = {
@@ -49,6 +50,7 @@ export function Markers(): JSX.Element {
         rotation: QUAT_IDENTITY,
       },
     },
+    datatype: "geometry_msgs/TransformStamped",
     sizeInBytes: 0,
   };
 
@@ -70,6 +72,7 @@ export function Markers(): JSX.Element {
       color: makeColor("#f44336", 0.5),
       lifetime: { sec: 0, nsec: 0 },
     },
+    datatype: "visualization_msgs/Marker",
     sizeInBytes: 0,
   };
 
@@ -91,6 +94,7 @@ export function Markers(): JSX.Element {
       color: makeColor("#e81e63", 0.5),
       lifetime: { sec: 0, nsec: 0 },
     },
+    datatype: "visualization_msgs/Marker",
     sizeInBytes: 0,
   };
 
@@ -112,6 +116,7 @@ export function Markers(): JSX.Element {
       color: makeColor("#9c27b0", 0.5),
       lifetime: { sec: 0, nsec: 0 },
     },
+    datatype: "visualization_msgs/Marker",
     sizeInBytes: 0,
   };
 
@@ -133,6 +138,7 @@ export function Markers(): JSX.Element {
       color: makeColor("#673ab7", 0.5),
       lifetime: { sec: 0, nsec: 0 },
     },
+    datatype: "visualization_msgs/Marker",
     sizeInBytes: 0,
   };
 
@@ -166,6 +172,7 @@ export function Markers(): JSX.Element {
       ],
       lifetime: { sec: 0, nsec: 0 },
     },
+    datatype: "visualization_msgs/Marker",
     sizeInBytes: 0,
   };
 
@@ -203,6 +210,7 @@ export function Markers(): JSX.Element {
       ],
       lifetime: { sec: 0, nsec: 0 },
     },
+    datatype: "visualization_msgs/Marker",
     sizeInBytes: 0,
   };
 
@@ -230,6 +238,7 @@ export function Markers(): JSX.Element {
       colors: [makeColor("#f44336", 0.5), makeColor("#4caf50", 0.5), makeColor("#2196f3", 0.5)],
       lifetime: { sec: 0, nsec: 0 },
     },
+    datatype: "visualization_msgs/Marker",
     sizeInBytes: 0,
   };
 
@@ -257,6 +266,7 @@ export function Markers(): JSX.Element {
       colors: [makeColor("#f44336", 0.5), makeColor("#4caf50", 0.5), makeColor("#2196f3", 0.5)],
       lifetime: { sec: 0, nsec: 0 },
     },
+    datatype: "visualization_msgs/Marker",
     sizeInBytes: 0,
   };
 
@@ -285,6 +295,7 @@ export function Markers(): JSX.Element {
       colors: [makeColor("#f44336", 0.5), makeColor("#4caf50", 0.5), makeColor("#2196f3", 0.5)],
       lifetime: { sec: 0, nsec: 0 },
     },
+    datatype: "visualization_msgs/Marker",
     sizeInBytes: 0,
   };
 
@@ -307,6 +318,7 @@ export function Markers(): JSX.Element {
       text: "Lorem Ipsum\nDolor Sit Amet",
       lifetime: { sec: 0, nsec: 0 },
     },
+    datatype: "visualization_msgs/Marker",
     sizeInBytes: 0,
   };
 
@@ -330,6 +342,7 @@ export function Markers(): JSX.Element {
       mesh_use_embedded_materials: true,
       lifetime: { sec: 0, nsec: 0 },
     },
+    datatype: "visualization_msgs/Marker",
     sizeInBytes: 0,
   };
 
@@ -396,6 +409,7 @@ export function Markers(): JSX.Element {
       colors: [],
       lifetime: { sec: 0, nsec: 0 },
     },
+    datatype: "visualization_msgs/Marker",
     sizeInBytes: 0,
   };
 
@@ -476,6 +490,7 @@ export function Markers(): JSX.Element {
       colors: triangleList2Colors,
       lifetime: { sec: 0, nsec: 0 },
     },
+    datatype: "visualization_msgs/Marker",
     sizeInBytes: 0,
   };
 
@@ -562,6 +577,7 @@ export function EmptyLineStrip(): JSX.Element {
         rotation: QUAT_IDENTITY,
       },
     },
+    datatype: "geometry_msgs/TransformStamped",
     sizeInBytes: 0,
   };
 
@@ -595,6 +611,7 @@ export function EmptyLineStrip(): JSX.Element {
       ],
       lifetime: { sec: 0, nsec: 0 },
     },
+    datatype: "visualization_msgs/Marker",
     sizeInBytes: 0,
   };
 
@@ -625,6 +642,7 @@ export function EmptyLineStrip(): JSX.Element {
                 points: [],
                 colors: [],
               },
+              datatype: "visualization_msgs/Marker",
             },
           ],
         },

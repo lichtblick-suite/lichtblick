@@ -35,6 +35,7 @@ export function FoxgloveFrameTransform(): JSX.Element {
       translation: VEC3_ZERO,
       rotation: QUAT_IDENTITY,
     },
+    datatype: "foxglove.FrameTransform",
     sizeInBytes: 0,
   };
   // backwards compatibility with legacy message format
@@ -51,6 +52,7 @@ export function FoxgloveFrameTransform(): JSX.Element {
         rotation: QUAT_IDENTITY,
       },
     },
+    datatype: "foxglove.FrameTransform",
     sizeInBytes: 0,
   };
   const pass1 = makePass({

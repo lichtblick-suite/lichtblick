@@ -24,7 +24,7 @@ export class McapIndexedIterableSource implements IIterableSource {
   private reader: Mcap0IndexedReader;
   private channelInfoById = new Map<
     number,
-    { channel: Mcap0Types.Channel; parsedChannel: ParsedChannel }
+    { channel: Mcap0Types.Channel; parsedChannel: ParsedChannel; schemaName: string }
   >();
   private start?: Time;
   private end?: Time;
@@ -78,7 +78,7 @@ export class McapIndexedIterableSource implements IIterableSource {
         });
         continue;
       }
-      this.channelInfoById.set(channel.id, { channel, parsedChannel });
+      this.channelInfoById.set(channel.id, { channel, parsedChannel, schemaName: schema.name });
 
       let topic = topicsByName.get(channel.topic);
       if (!topic) {
@@ -149,6 +149,7 @@ export class McapIndexedIterableSource implements IIterableSource {
             publishTime: fromNanoSec(message.publishTime),
             message: channelInfo.parsedChannel.deserializer(message.data),
             sizeInBytes: message.data.byteLength,
+            datatype: channelInfo.schemaName,
           },
         };
       } catch (error) {
@@ -193,6 +194,7 @@ export class McapIndexedIterableSource implements IIterableSource {
             publishTime: fromNanoSec(message.publishTime),
             message: channelInfo.parsedChannel.deserializer(message.data),
             sizeInBytes: message.data.byteLength,
+            datatype: channelInfo.schemaName,
           });
         } catch (err) {
           log.error(err);

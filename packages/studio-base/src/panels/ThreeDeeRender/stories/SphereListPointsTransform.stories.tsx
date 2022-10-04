@@ -43,6 +43,7 @@ export function SphereListPointsTransform(): JSX.Element {
         color: makeColor(color, 1),
         lifetime: { sec: 0, nsec: 0 },
       },
+      datatype: "visualization_msgs/Marker",
       sizeInBytes: 0,
     };
   }
@@ -68,6 +69,7 @@ export function SphereListPointsTransform(): JSX.Element {
         },
       },
     },
+    datatype: "geometry_msgs/TransformStamped",
     sizeInBytes: 0,
   };
 

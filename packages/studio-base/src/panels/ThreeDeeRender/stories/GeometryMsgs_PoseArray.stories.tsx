@@ -39,6 +39,7 @@ export function GeometryMsgs_PoseArray(): JSX.Element {
         rotation: QUAT_IDENTITY,
       },
     },
+    datatype: "geometry_msgs/TransformStamped",
     sizeInBytes: 0,
   };
   const tf2: MessageEvent<TransformStamped> = {
@@ -54,6 +55,7 @@ export function GeometryMsgs_PoseArray(): JSX.Element {
         ),
       },
     },
+    datatype: "geometry_msgs/TransformStamped",
     sizeInBytes: 0,
   };
   const tf3: MessageEvent<TransformStamped> = {
@@ -67,6 +69,7 @@ export function GeometryMsgs_PoseArray(): JSX.Element {
         rotation: QUAT_IDENTITY,
       },
     },
+    datatype: "geometry_msgs/TransformStamped",
     sizeInBytes: 0,
   };
 
@@ -87,6 +90,7 @@ export function GeometryMsgs_PoseArray(): JSX.Element {
         orientation: makeOrientation(i),
       })),
     },
+    datatype: "geometry_msgs/PoseArray",
     sizeInBytes: 0,
   };
 
@@ -100,6 +104,7 @@ export function GeometryMsgs_PoseArray(): JSX.Element {
         orientation: makeOrientation(i),
       })),
     },
+    datatype: "geometry_msgs/PoseArray",
     sizeInBytes: 0,
   };
 
@@ -113,6 +118,7 @@ export function GeometryMsgs_PoseArray(): JSX.Element {
         orientation: makeOrientation(i),
       })),
     },
+    datatype: "geometry_msgs/PoseArray",
     sizeInBytes: 0,
   };
 

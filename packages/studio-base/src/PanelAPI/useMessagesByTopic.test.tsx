@@ -38,6 +38,7 @@ describe("useMessagesByTopic", () => {
       topic: "/foo",
       receiveTime: { sec: 0, nsec: 0 },
       message: { value: 1 },
+      datatype: "foo",
       sizeInBytes: 0,
     };
 
@@ -45,6 +46,7 @@ describe("useMessagesByTopic", () => {
       topic: "/foo",
       receiveTime: { sec: 0, nsec: 0 },
       message: { value: 2 },
+      datatype: "foo",
       sizeInBytes: 0,
     };
 
@@ -69,6 +71,7 @@ describe("useMessagesByTopic", () => {
       topic: "/foo",
       receiveTime: { sec: 0, nsec: 0 },
       message: { value: 1 },
+      datatype: "foo",
       sizeInBytes: 0,
     };
 
@@ -76,6 +79,7 @@ describe("useMessagesByTopic", () => {
       topic: "/foo",
       receiveTime: { sec: 0, nsec: 0 },
       message: { value: 2 },
+      datatype: "foo",
       sizeInBytes: 0,
     };
 

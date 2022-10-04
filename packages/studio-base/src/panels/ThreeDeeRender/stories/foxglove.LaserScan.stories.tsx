@@ -46,6 +46,7 @@ function Foxglove_LaserScan({
       translation: { x: 1e7, y: 0, z: 0 },
       rotation: QUAT_IDENTITY,
     },
+    datatype: "foxglove.FrameTransform",
     sizeInBytes: 0,
   };
   const tf2: MessageEvent<FrameTransform> = {
@@ -58,6 +59,7 @@ function Foxglove_LaserScan({
       translation: { x: 0, y: 0, z: 1 },
       rotation: new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 0, 1), Math.PI / 2),
     },
+    datatype: "foxglove.FrameTransform",
     sizeInBytes: 0,
   };
   const tf3: MessageEvent<FrameTransform> = {
@@ -70,6 +72,7 @@ function Foxglove_LaserScan({
       translation: { x: 0, y: 5, z: 1 },
       rotation: QUAT_IDENTITY,
     },
+    datatype: "foxglove.FrameTransform",
     sizeInBytes: 0,
   };
 
@@ -98,6 +101,7 @@ function Foxglove_LaserScan({
       ranges: ranges as unknown as number[],
       intensities: intensities as unknown as number[],
     },
+    datatype: "foxglove.LaserScan",
     sizeInBytes: 0,
   };
 
@@ -225,6 +229,7 @@ export function ComparisonWithPointCloudColors(): JSX.Element {
       translation: { x: 1e7, y: 0, z: 0 },
       rotation: QUAT_IDENTITY,
     },
+    datatype: "foxglove.FrameTransform",
     sizeInBytes: 0,
   };
 
@@ -258,6 +263,7 @@ export function ComparisonWithPointCloudColors(): JSX.Element {
       ranges: ranges as unknown as number[],
       intensities: intensities as unknown as number[],
     },
+    datatype: "foxglove.LaserScan",
     sizeInBytes: 0,
   };
 
@@ -281,6 +287,7 @@ export function ComparisonWithPointCloudColors(): JSX.Element {
         pointCloudData.byteLength,
       ),
     },
+    datatype: "foxglove.PointCloud",
     sizeInBytes: 0,
   };
 

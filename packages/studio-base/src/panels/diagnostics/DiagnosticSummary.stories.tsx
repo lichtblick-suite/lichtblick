@@ -31,6 +31,7 @@ export function makeDiagnosticMessage(
       header: { frame_id: "", stamp: { sec: 1, nsec: 500_000_000 }, seq: 0 },
       status: messages.map((message) => ({ level, name, hardware_id, message, values })),
     },
+    datatype: "diagnostic_msgs/DiagnosticArray",
     sizeInBytes: 0,
   };
 }

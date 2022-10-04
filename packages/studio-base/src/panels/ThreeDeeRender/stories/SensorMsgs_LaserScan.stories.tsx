@@ -45,6 +45,7 @@ function SensorMsgs_LaserScan({
         rotation: QUAT_IDENTITY,
       },
     },
+    datatype: "geometry_msgs/TransformStamped",
     sizeInBytes: 0,
   };
   const tf2: MessageEvent<TransformStamped> = {
@@ -58,6 +59,7 @@ function SensorMsgs_LaserScan({
         rotation: new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 0, 1), Math.PI / 2),
       },
     },
+    datatype: "geometry_msgs/TransformStamped",
     sizeInBytes: 0,
   };
   const tf3: MessageEvent<TransformStamped> = {
@@ -71,6 +73,7 @@ function SensorMsgs_LaserScan({
         rotation: QUAT_IDENTITY,
       },
     },
+    datatype: "geometry_msgs/TransformStamped",
     sizeInBytes: 0,
   };
 
@@ -99,6 +102,7 @@ function SensorMsgs_LaserScan({
       ranges,
       intensities,
     },
+    datatype: "sensor_msgs/LaserScan",
     sizeInBytes: 0,
   };
 
@@ -227,6 +231,7 @@ export function ComparisonWithPointCloudColors(): JSX.Element {
         rotation: QUAT_IDENTITY,
       },
     },
+    datatype: "geometry_msgs/TransformStamped",
     sizeInBytes: 0,
   };
 
@@ -263,6 +268,7 @@ export function ComparisonWithPointCloudColors(): JSX.Element {
       ranges,
       intensities,
     },
+    datatype: "sensor_msgs/LaserScan",
     sizeInBytes: 0,
   };
 
@@ -289,6 +295,7 @@ export function ComparisonWithPointCloudColors(): JSX.Element {
       ),
       is_dense: true,
     },
+    datatype: "sensor_msgs/PointCloud2",
     sizeInBytes: 0,
   };
 

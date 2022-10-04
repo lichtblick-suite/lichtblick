@@ -35,6 +35,7 @@ export class BagIterableSource implements IIterableSource {
   private _source: BagSource;
   private _bag: Bag | undefined;
   private _readersByConnectionId = new Map<number, LazyMessageReader>();
+  private _datatypesByConnectionId = new Map<number, string>();
 
   public constructor(source: BagSource) {
     this._source = source;
@@ -139,6 +140,7 @@ export class BagIterableSource implements IIterableSource {
       const parsedDefinition = parseMessageDefinition(connection.messageDefinition);
       const reader = new LazyMessageReader(parsedDefinition);
       this._readersByConnectionId.set(id, reader);
+      this._datatypesByConnectionId.set(id, datatype);
 
       for (const definition of parsedDefinition) {
         // In parsed definitions, the first definition (root) does not have a name as is meant to
@@ -193,6 +195,20 @@ export class BagIterableSource implements IIterableSource {
         return;
       }
 
+      const datatype = this._datatypesByConnectionId.get(connectionId);
+      if (!datatype) {
+        yield {
+          connectionId,
+          msgEvent: undefined,
+          problem: {
+            severity: "error",
+            message: `Cannot missing datatype for connection id ${connectionId}`,
+            tip: `Check that your bag file is well-formed. It should have a connection record for every connection id referenced from a message record.`,
+          },
+        };
+        return;
+      }
+
       if (reader) {
         // bagMsgEvent.data is a view on top of the entire chunk. To avoid keeping references for
         // chunks (which will fill up memory space when we cache messages) when make a copy of the
@@ -208,6 +224,7 @@ export class BagIterableSource implements IIterableSource {
             receiveTime: bagMsgEvent.timestamp,
             sizeInBytes: bagMsgEvent.data.byteLength,
             message: parsedMessage,
+            datatype,
           },
         };
       } else {

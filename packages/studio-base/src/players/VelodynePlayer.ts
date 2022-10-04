@@ -169,7 +169,13 @@ export default class VelodynePlayer implements Player {
       };
 
       const sizeInBytes = this._packets.reduce((acc, packet) => acc + packet.data.byteLength, 0);
-      const msg: MessageEvent<unknown> = { topic: TOPIC_NAME, receiveTime, message, sizeInBytes };
+      const msg: MessageEvent<unknown> = {
+        topic: TOPIC_NAME,
+        receiveTime,
+        message,
+        sizeInBytes,
+        datatype: TOPIC.datatype,
+      };
       this._parsedMessages.push(msg);
       this._packets = [];
 

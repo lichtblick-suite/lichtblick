@@ -40,6 +40,7 @@ export function AutoSelectFrame(): JSX.Element {
         rotation: QUAT_IDENTITY,
       },
     },
+    datatype: "geometry_msgs/TransformStamped",
     sizeInBytes: 0,
   };
   const tf2: MessageEvent<TransformStamped> = {
@@ -53,6 +54,7 @@ export function AutoSelectFrame(): JSX.Element {
         rotation: { x: 0.383, y: 0, z: 0, w: 0.924 },
       },
     },
+    datatype: "geometry_msgs/TransformStamped",
     sizeInBytes: 0,
   };
 
@@ -74,6 +76,7 @@ export function AutoSelectFrame(): JSX.Element {
       color: makeColor("#4caf50", 0.5),
       lifetime: { sec: 0, nsec: 0 },
     },
+    datatype: "visualization_msgs/Marker",
     sizeInBytes: 0,
   };
 

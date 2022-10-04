@@ -13,6 +13,7 @@ describe("simpleGetMessagePathDataItems", () => {
       topic: "/foo",
       receiveTime: { sec: 0, nsec: 0 },
       sizeInBytes: 0,
+      datatype: "datatype",
       message: { foo: 42 },
     };
     expect(simpleGetMessagePathDataItems(message, parseRosPath("/foo")!)).toEqual([{ foo: 42 }]);
@@ -24,6 +25,7 @@ describe("simpleGetMessagePathDataItems", () => {
       topic: "/foo",
       receiveTime: { sec: 0, nsec: 0 },
       sizeInBytes: 0,
+      datatype: "datatype",
       message: {
         foo: {
           bars: [
@@ -57,6 +59,7 @@ describe("simpleGetMessagePathDataItems", () => {
       topic: "/foo",
       receiveTime: { sec: 0, nsec: 0 },
       sizeInBytes: 0,
+      datatype: "datatype",
       message: { foo: 1 },
     };
     expect(simpleGetMessagePathDataItems(message, parseRosPath("/foo.foo.baz.hello")!)).toEqual([]);
@@ -67,6 +70,7 @@ describe("simpleGetMessagePathDataItems", () => {
       topic: "/foo",
       receiveTime: { sec: 0, nsec: 0 },
       sizeInBytes: 0,
+      datatype: "datatype",
       message: {
         foo: {
           bars: [

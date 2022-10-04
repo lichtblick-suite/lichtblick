@@ -32,6 +32,7 @@ const buildMessageAtLevel = (level: number): MessageEvent<DiagnosticStatusArrayM
   },
   topic: "/foo",
   receiveTime: { sec: 1547062466, nsec: 1674890 },
+  datatype: "diagnostic_msgs/Diagnostic",
   sizeInBytes: 0,
 });
 

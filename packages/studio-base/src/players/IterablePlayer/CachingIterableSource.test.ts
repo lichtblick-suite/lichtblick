@@ -63,6 +63,7 @@ describe("CachingIterableSource", () => {
             receiveTime: { sec: 0, nsec: i * 1e8 },
             message: undefined,
             sizeInBytes: 0,
+            datatype: "foo",
           },
           problem: undefined,
           connectionId: undefined,
@@ -88,6 +89,7 @@ describe("CachingIterableSource", () => {
               message: undefined,
               sizeInBytes: 0,
               topic: "a",
+              datatype: "foo",
             },
           },
         });
@@ -127,6 +129,7 @@ describe("CachingIterableSource", () => {
               message: undefined,
               sizeInBytes: 0,
               topic: "a",
+              datatype: "foo",
             },
           },
         });
@@ -157,6 +160,7 @@ describe("CachingIterableSource", () => {
           receiveTime: { sec: 0, nsec: 1 },
           message: undefined,
           sizeInBytes: 0,
+          datatype: "foo",
         },
         problem: undefined,
         connectionId: undefined,
@@ -201,6 +205,7 @@ describe("CachingIterableSource", () => {
             receiveTime: { sec: 5, nsec: 0 },
             message: undefined,
             sizeInBytes: 0,
+            datatype: "foo",
           },
           problem: undefined,
           connectionId: undefined,
@@ -225,6 +230,7 @@ describe("CachingIterableSource", () => {
               message: undefined,
               sizeInBytes: 0,
               topic: "a",
+              datatype: "foo",
             },
           },
         });
@@ -251,6 +257,7 @@ describe("CachingIterableSource", () => {
             receiveTime: { sec: 0, nsec: 0 },
             message: undefined,
             sizeInBytes: 0,
+            datatype: "foo",
           },
           problem: undefined,
           connectionId: undefined,
@@ -275,6 +282,7 @@ describe("CachingIterableSource", () => {
               message: undefined,
               sizeInBytes: 0,
               topic: "a",
+              datatype: "foo",
             },
           },
         });
@@ -292,6 +300,7 @@ describe("CachingIterableSource", () => {
               message: undefined,
               sizeInBytes: 0,
               topic: "a",
+              datatype: "foo",
             },
           },
         });
@@ -326,6 +335,7 @@ describe("CachingIterableSource", () => {
           receiveTime: { sec: 0, nsec: 0 },
           message: undefined,
           sizeInBytes: 101,
+          datatype: "foo",
         },
         problem: undefined,
         connectionId: undefined,
@@ -337,6 +347,7 @@ describe("CachingIterableSource", () => {
           receiveTime: { sec: 5, nsec: 1 },
           message: undefined,
           sizeInBytes: 101,
+          datatype: "foo",
         },
         problem: undefined,
         connectionId: undefined,
@@ -348,6 +359,7 @@ describe("CachingIterableSource", () => {
           receiveTime: { sec: 10, nsec: 0 },
           message: undefined,
           sizeInBytes: 101,
+          datatype: "foo",
         },
         problem: undefined,
         connectionId: undefined,
@@ -412,6 +424,7 @@ describe("CachingIterableSource", () => {
           receiveTime: { sec: 3, nsec: 0 },
           message: undefined,
           sizeInBytes: 0,
+          datatype: "foo",
         },
         problem: undefined,
         connectionId: undefined,
@@ -427,6 +440,7 @@ describe("CachingIterableSource", () => {
           receiveTime: { sec: 6, nsec: 0 },
           message: undefined,
           sizeInBytes: 0,
+          datatype: "foo",
         },
         problem: undefined,
         connectionId: undefined,
@@ -446,6 +460,7 @@ describe("CachingIterableSource", () => {
           receiveTime: { sec: 3, nsec: 0 },
           message: undefined,
           sizeInBytes: 0,
+          datatype: "foo",
         },
         problem: undefined,
         connectionId: undefined,
@@ -473,6 +488,7 @@ describe("CachingIterableSource", () => {
           receiveTime: { sec: 3, nsec: 0 },
           message: undefined,
           sizeInBytes: 0,
+          datatype: "foo",
         },
         problem: undefined,
         connectionId: undefined,
@@ -484,6 +500,7 @@ describe("CachingIterableSource", () => {
           receiveTime: { sec: 6, nsec: 0 },
           message: undefined,
           sizeInBytes: 0,
+          datatype: "foo",
         },
         problem: undefined,
         connectionId: undefined,
@@ -513,6 +530,7 @@ describe("CachingIterableSource", () => {
           receiveTime: { sec: 3, nsec: 0 },
           message: undefined,
           sizeInBytes: 0,
+          datatype: "foo",
         },
         problem: undefined,
         connectionId: undefined,
@@ -541,6 +559,7 @@ describe("CachingIterableSource", () => {
             receiveTime: { sec: 0, nsec: i * 1e8 },
             message: undefined,
             sizeInBytes: 0,
+            datatype: "foo",
           },
           problem: undefined,
           connectionId: undefined,
@@ -573,7 +592,13 @@ describe("CachingIterableSource", () => {
       time: { sec: 2, nsec: 0 },
     });
     expect(backfill).toEqual([
-      { message: undefined, receiveTime: { sec: 0, nsec: 700000000 }, sizeInBytes: 0, topic: "a" },
+      {
+        message: undefined,
+        receiveTime: { sec: 0, nsec: 700000000 },
+        sizeInBytes: 0,
+        topic: "a",
+        datatype: "foo",
+      },
     ]);
   });
 
@@ -592,6 +617,7 @@ describe("CachingIterableSource", () => {
           receiveTime: { sec: 1, nsec: 0 },
           message: undefined,
           sizeInBytes: 101,
+          datatype: "foo",
         },
         problem: undefined,
         connectionId: undefined,
@@ -602,6 +628,7 @@ describe("CachingIterableSource", () => {
           receiveTime: { sec: 2, nsec: 0 },
           message: undefined,
           sizeInBytes: 101,
+          datatype: "foo",
         },
         problem: undefined,
         connectionId: undefined,
@@ -633,8 +660,20 @@ describe("CachingIterableSource", () => {
       time: { sec: 2, nsec: 500 },
     });
     expect(backfill).toEqual([
-      { message: undefined, receiveTime: { sec: 2, nsec: 0 }, sizeInBytes: 101, topic: "b" },
-      { message: undefined, receiveTime: { sec: 1, nsec: 0 }, sizeInBytes: 101, topic: "a" },
+      {
+        message: undefined,
+        receiveTime: { sec: 2, nsec: 0 },
+        sizeInBytes: 101,
+        topic: "b",
+        datatype: "foo",
+      },
+      {
+        message: undefined,
+        receiveTime: { sec: 1, nsec: 0 },
+        sizeInBytes: 101,
+        topic: "a",
+        datatype: "foo",
+      },
     ]);
   });
 
@@ -657,6 +696,7 @@ describe("CachingIterableSource", () => {
             receiveTime: { sec: i, nsec: 0 },
             message: undefined,
             sizeInBytes: 101,
+            datatype: "foo",
           },
           problem: undefined,
           connectionId: undefined,
@@ -697,6 +737,7 @@ describe("CachingIterableSource", () => {
             receiveTime: { sec: i, nsec: 0 },
             message: undefined,
             sizeInBytes: 100,
+            datatype: "foo",
           },
           problem: undefined,
           connectionId: undefined,
@@ -746,6 +787,7 @@ describe("CachingIterableSource", () => {
             receiveTime: { sec: Math.floor(i / 3), nsec: 0 },
             message: { value: i },
             sizeInBytes: 50,
+            datatype: "foo",
           },
           problem: undefined,
           connectionId: undefined,
@@ -771,6 +813,7 @@ describe("CachingIterableSource", () => {
               message: { value: i },
               sizeInBytes: 50,
               topic: "a",
+              datatype: "foo",
             },
           },
         });
@@ -810,6 +853,7 @@ describe("CachingIterableSource", () => {
               message: { value: i },
               sizeInBytes: 50,
               topic: "a",
+              datatype: "foo",
             },
           },
         });
@@ -841,6 +885,7 @@ describe("CachingIterableSource", () => {
             receiveTime: { sec: Math.floor(i / 3), nsec: 0 },
             message: { value: i },
             sizeInBytes: 0,
+            datatype: "foo",
           },
           problem: undefined,
           connectionId: undefined,
@@ -851,6 +896,7 @@ describe("CachingIterableSource", () => {
             receiveTime: { sec: Math.floor(i / 3), nsec: 0 },
             message: { value: i },
             sizeInBytes: 0,
+            datatype: "foo",
           },
           problem: undefined,
           connectionId: undefined,
@@ -884,8 +930,20 @@ describe("CachingIterableSource", () => {
     });
 
     expect(backfill).toEqual([
-      { message: { value: 8 }, receiveTime: { sec: 2, nsec: 0 }, sizeInBytes: 0, topic: "b" },
-      { message: { value: 8 }, receiveTime: { sec: 2, nsec: 0 }, sizeInBytes: 0, topic: "a" },
+      {
+        message: { value: 8 },
+        receiveTime: { sec: 2, nsec: 0 },
+        sizeInBytes: 0,
+        topic: "b",
+        datatype: "foo",
+      },
+      {
+        message: { value: 8 },
+        receiveTime: { sec: 2, nsec: 0 },
+        sizeInBytes: 0,
+        topic: "a",
+        datatype: "foo",
+      },
     ]);
   });
 });

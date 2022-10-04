@@ -35,6 +35,7 @@ export function TransformInterpolation(): JSX.Element {
         rotation: QUAT_IDENTITY,
       },
     },
+    datatype: "geometry_msgs/TransformStamped",
     sizeInBytes: 0,
   };
   const tf_t3: MessageEvent<TransformStamped> = {
@@ -48,6 +49,7 @@ export function TransformInterpolation(): JSX.Element {
         rotation: QUAT_IDENTITY,
       },
     },
+    datatype: "geometry_msgs/TransformStamped",
     sizeInBytes: 0,
   };
   const pass1 = makePass({
@@ -132,6 +134,7 @@ export function TransformOffsets(): JSX.Element {
         rotation: QUAT_IDENTITY,
       },
     },
+    datatype: "geometry_msgs/TransformStamped",
     sizeInBytes: 0,
   };
   const tf_bc: MessageEvent<TransformStamped> = {
@@ -145,6 +148,7 @@ export function TransformOffsets(): JSX.Element {
         rotation: QUAT_IDENTITY,
       },
     },
+    datatype: "geometry_msgs/TransformStamped",
     sizeInBytes: 0,
   };
   const tf_cd: MessageEvent<TransformStamped> = {
@@ -158,6 +162,7 @@ export function TransformOffsets(): JSX.Element {
         rotation: QUAT_IDENTITY,
       },
     },
+    datatype: "geometry_msgs/TransformStamped",
     sizeInBytes: 0,
   };
 

@@ -88,6 +88,7 @@ describe("BlockLoader", () => {
         receiveTime: { sec: i, nsec: 0 },
         message: undefined,
         sizeInBytes: 1,
+        datatype: "foo",
       });
     }
 
@@ -187,6 +188,7 @@ describe("BlockLoader", () => {
         receiveTime: { sec: i, nsec: 0 },
         message: undefined,
         sizeInBytes: 0,
+        datatype: "foo",
       });
     }
 
@@ -295,6 +297,7 @@ describe("BlockLoader", () => {
         receiveTime: { sec: i, nsec: 0 },
         message: undefined,
         sizeInBytes: 0,
+        datatype: "foo",
       });
     }
 
@@ -564,6 +567,7 @@ describe("BlockLoader", () => {
         receiveTime: { sec: i, nsec: 0 },
         message: undefined,
         sizeInBytes: 0,
+        datatype: "foo",
       });
     }
 

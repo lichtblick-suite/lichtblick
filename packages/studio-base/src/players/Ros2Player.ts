@@ -442,7 +442,7 @@ export default class Ros2Player implements Player {
       });
 
       subscription.on("message", (timestamp, message, data, _pub) => {
-        this._handleMessage(topicName, timestamp, message, data.byteLength, true);
+        this._handleMessage(topicName, timestamp, message, dataType, data.byteLength, true);
         // Clear any existing subscription problems for this topic if we're receiving messages again.
         this._problems.removeProblem(`subscription:${topicName}`);
       });
@@ -472,6 +472,7 @@ export default class Ros2Player implements Player {
     topic: string,
     timestamp: Time,
     message: unknown,
+    datatype: string,
     sizeInBytes: number,
     // This is a hot path so we avoid extra object allocation from a parameters struct
     // eslint-disable-next-line @foxglove/no-boolean-parameters
@@ -490,7 +491,14 @@ export default class Ros2Player implements Player {
     }
 
     if (message != undefined) {
-      const msg: MessageEvent<unknown> = { topic, receiveTime, publishTime, message, sizeInBytes };
+      const msg: MessageEvent<unknown> = {
+        topic,
+        receiveTime,
+        publishTime,
+        message,
+        sizeInBytes,
+        datatype,
+      };
       this._parsedMessages.push(msg);
       this._handleInternalMessage(msg);
     }
@@ -519,89 +527,17 @@ export default class Ros2Player implements Player {
       return;
     }
 
-    // const validPublishers = publishers.filter(({ topic }) => topic.length > 0 && topic !== "/");
-    // const topics = new Set<string>(validPublishers.map(({ topic }) => topic));
-
     // Clear all problems related to publishing
     this._clearPublishProblems({ skipEmit: false });
-
-    // Unadvertise any topics that were previously published and no longer appear in the list
-    // for (const topic of this._rosNode.publications.keys()) {
-    //   if (!topics.has(topic)) {
-    //     this._rosNode.unadvertise(topic);
-    //   }
-    // }
-
-    // // Unadvertise any topics where the dataType changed
-    // for (const { topic, datatype } of validPublishers) {
-    //   const existingPub = this._rosNode.publications.get(topic);
-    //   if (existingPub != undefined && existingPub.dataType !== datatype) {
-    //     this._rosNode.unadvertise(topic);
-    //   }
-    // }
-
-    // // Advertise new topics
-    // for (const { topic, datatype: dataType, datatypes } of validPublishers) {
-    //   if (this._rosNode.publications.has(topic)) {
-    //     continue;
-    //   }
-
-    //   const msgdefProblemId = `msgdef:${topic}`;
-    //   const advertiseProblemId = `advertise:${topic}`;
-
-    //   // Try to retrieve the ROS message definition for this topic
-    //   let msgdef: RosMsgDefinition[];
-    //   try {
-    //     msgdef = rosDatatypesToMessageDefinition(datatypes, dataType);
-    //   } catch (error) {
-    //     this._addProblem(msgdefProblemId, {
-    //       severity: "warn",
-    //       message: `Unknown message definition for "${topic}"`,
-    //       tip: `Try subscribing to the topic "${topic} before publishing to it`,
-    //     });
-    //     continue;
-    //   }
-
-    //   // Advertise this topic to ROS as being published by us
-    //   this._rosNode.advertise({ topic, dataType, messageDefinition: msgdef }).catch((error) =>
-    //     this._addProblem(advertiseProblemId, {
-    //       severity: "error",
-    //       message: `Failed to advertise "${topic}"`,
-    //       error,
-    //     }),
-    //   );
-    // }
-
     this._emitState();
   }
 
   public setParameter(_key: string, _value: ParameterValue): void {
-    // log.debug(`Ros1Player.setParameter(key=${key}, value=${value})`);
-    // this._rosNode?.setParameter(key, value);
+    throw new Error("Parameter editing is not supported by this data source");
   }
 
   public publish(_payload: PublishPayload): void {
-    // const problemId = `publish:${topic}`;
-    // if (this._rosNode != undefined) {
-    //   if (this._rosNode.isAdvertising(topic)) {
-    //     this._rosNode
-    //       .publish(topic, msg)
-    //       .then(() => this._clearProblem(problemId))
-    //       .catch((error) =>
-    //         this._addProblem(problemId, {
-    //           severity: "error",
-    //           message: `Publishing to ${topic} failed`,
-    //           error,
-    //         }),
-    //       );
-    //   } else {
-    //     this._addProblem(problemId, {
-    //       severity: "warn",
-    //       message: `Unable to publish to "${topic}"`,
-    //       tip: `ROS1 may be disconnected. Please try again in a moment`,
-    //     });
-    //   }
-    // }
+    throw new Error("Publishing is not supported");
   }
 
   public async callService(): Promise<unknown> {

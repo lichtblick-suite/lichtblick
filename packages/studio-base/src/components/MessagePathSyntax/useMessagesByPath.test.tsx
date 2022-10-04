@@ -363,6 +363,7 @@ describe("useMessagesByPath", () => {
           { index: 2, baz: 12 },
         ],
       },
+      datatype: "dtype/Foo",
       sizeInBytes: 0,
     };
     it("updates queriedData when a global variable changes", () => {

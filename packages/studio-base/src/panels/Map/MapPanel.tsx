@@ -38,11 +38,12 @@ type MapPanelProps = {
   context: PanelExtensionContext;
 };
 
-function isGeoJSONMessage(message: MessageEvent<unknown>): message is GeoJsonMessage {
+function isGeoJSONMessage(msgEvent: MessageEvent<unknown>): msgEvent is GeoJsonMessage {
+  const datatype = msgEvent.datatype;
   return (
-    typeof message.message === "object" &&
-    message.message != undefined &&
-    "geojson" in message.message
+    datatype === "foxglove_msgs/GeoJSON" ||
+    datatype === "foxglove_msgs/msg/GeoJSON" ||
+    datatype === "foxglove.GeoJSON"
   );
 }
 

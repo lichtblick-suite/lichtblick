@@ -101,6 +101,7 @@ const fixture = {
         message: {
           versions: [example0, example1],
         },
+        datatype: "our_plot_type",
         sizeInBytes: 0,
       },
     ],

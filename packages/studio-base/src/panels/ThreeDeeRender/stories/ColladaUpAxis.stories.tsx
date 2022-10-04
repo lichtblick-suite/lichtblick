@@ -39,6 +39,7 @@ const baseMeshMarker: MessageEvent<Marker> = {
     mesh_use_embedded_materials: true,
     lifetime: { sec: 0, nsec: 0 },
   },
+  datatype: "visualization_msgs/Marker",
   sizeInBytes: 0,
 };
 
@@ -65,6 +66,7 @@ const baseLabel: MessageEvent<Marker> = {
     mesh_use_embedded_materials: false,
     lifetime: { sec: 0, nsec: 0 },
   },
+  datatype: "visualization_msgs/Marker",
   sizeInBytes: 0,
 };
 

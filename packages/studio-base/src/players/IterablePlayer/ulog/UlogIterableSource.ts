@@ -143,7 +143,8 @@ export class UlogIterableSource implements IIterableSource {
       if (msg.type === MessageType.Data) {
         const timestamp = (msg.value as { timestamp: bigint }).timestamp;
         const receiveTime = fromMicros(Number(timestamp));
-        const topic = messageIdToTopic(msg.msgId, this.ulog);
+        const sub = this.ulog.subscriptions.get(msg.msgId);
+        const topic = sub?.name;
         if (topic && topics.includes(topic) && isTimeInRangeInclusive(receiveTime, start, end)) {
           yield {
             msgEvent: {
@@ -151,6 +152,7 @@ export class UlogIterableSource implements IIterableSource {
               receiveTime,
               message: msg.value,
               sizeInBytes: msg.data.byteLength,
+              datatype: sub.name,
             },
             connectionId: undefined,
             problem: undefined,
@@ -172,6 +174,7 @@ export class UlogIterableSource implements IIterableSource {
                 msg: msg.message,
                 name: "",
               },
+              datatype: "rosgraph_msgs/Log",
               sizeInBytes: msg.size,
             },
             connectionId: undefined,

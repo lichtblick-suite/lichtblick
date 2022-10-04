@@ -109,6 +109,7 @@ const upstreamFirst = {
   message: {
     payload: "bar",
   },
+  datatype: "foo",
   sizeInBytes: 0,
 };
 
@@ -118,6 +119,7 @@ const upstreamSecond = {
   message: {
     payload: "baz",
   },
+  datatype: "foo",
   sizeInBytes: 0,
 };
 
@@ -538,6 +540,7 @@ describe("UserNodePlayer", () => {
           topic: `${DEFAULT_STUDIO_NODE_PREFIX}1`,
           receiveTime: upstreamFirst.receiveTime,
           message: { custom_np_field: "abc", value: "bar" },
+          datatype: "/studio_script/1",
           sizeInBytes: 0,
         },
       ]);
@@ -596,6 +599,7 @@ describe("UserNodePlayer", () => {
                       custom_np_field: "abc",
                       value: "bar",
                     },
+                    datatype: "/studio_script/1",
                     sizeInBytes: 0,
                   },
                 ],
@@ -735,6 +739,7 @@ describe("UserNodePlayer", () => {
           topic: `${DEFAULT_STUDIO_NODE_PREFIX}1`,
           receiveTime: upstreamFirst.receiveTime,
           message: { a: 1, b: 0.7483314773547883, g: 0.7483314773547883, r: 1 },
+          datatype: "/studio_script/1",
           sizeInBytes: 0,
         },
       ]);
@@ -793,6 +798,7 @@ describe("UserNodePlayer", () => {
           topic: `${DEFAULT_STUDIO_NODE_PREFIX}1`,
           receiveTime: upstreamSecond.receiveTime,
           message: { custom_np_field: "abc", value: "baz" },
+          datatype: "/studio_script/1",
           sizeInBytes: 0,
         },
       ]);
@@ -948,12 +954,14 @@ describe("UserNodePlayer", () => {
           topic: `${DEFAULT_STUDIO_NODE_PREFIX}1`,
           receiveTime: upstreamFirst.receiveTime,
           message: { custom_np_field: "abc", value: "bar" },
+          datatype: "/studio_script/1",
           sizeInBytes: 0,
         },
         {
           topic: `${DEFAULT_STUDIO_NODE_PREFIX}2`,
           receiveTime: upstreamFirst.receiveTime,
           message: { custom_np_field: "abc", value: "bar" },
+          datatype: "/studio_script/2",
           sizeInBytes: 0,
         },
       ]);
@@ -1452,6 +1460,7 @@ describe("UserNodePlayer", () => {
             topic: `${DEFAULT_STUDIO_NODE_PREFIX}1`,
             receiveTime: upstreamFirst.receiveTime,
             message: { custom_np_field: "aaa", value: "aaa" },
+            datatype: "/studio_script/1",
             sizeInBytes: 0,
           },
         ]);
@@ -1466,6 +1475,7 @@ describe("UserNodePlayer", () => {
             topic: `${DEFAULT_STUDIO_NODE_PREFIX}1`,
             receiveTime: upstreamFirst.receiveTime,
             message: { custom_np_field: "bbb", value: "bbb" },
+            datatype: "/studio_script/1",
             sizeInBytes: 0,
           },
         ]);
@@ -1511,6 +1521,7 @@ describe("UserNodePlayer", () => {
             topic: `${DEFAULT_STUDIO_NODE_PREFIX}0`,
             receiveTime: upstreamFirst.receiveTime,
             message: { key: sourceIndex },
+            datatype: "/studio_script/0",
             sizeInBytes: 0,
           },
         ]);

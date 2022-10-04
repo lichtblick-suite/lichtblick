@@ -90,6 +90,8 @@ const fixture = {
       topic: "/some/topic/with/state",
       receiveTime: message.header.stamp,
       message: { ...message, data: { value: idx } },
+      datatype: "msgs/SystemState",
+
       sizeInBytes: 0,
     })),
     "/some/topic/with/string_state": systemStateMessages.map((message, idx) => {
@@ -98,6 +100,7 @@ const fixture = {
         topic: "/some/topic/with/string_state",
         receiveTime: message.header.stamp,
         message: { ...message, data: { value: values[idx % values.length] } },
+        datatype: "msgs/SystemState",
         sizeInBytes: 0,
       };
     }),
@@ -263,6 +266,8 @@ const messageCache: BlockCache = {
           topic: "/blocks",
           receiveTime: message.header.stamp,
           message: { ...message, data: { value: idx } },
+          datatype: "msgs/SystemState",
+
           sizeInBytes: 0,
         })),
       },
@@ -274,6 +279,8 @@ const messageCache: BlockCache = {
           topic: "/blocks",
           receiveTime: message.header.stamp,
           message: { ...message, data: { value: idx } },
+          datatype: "msgs/SystemState",
+
           sizeInBytes: 0,
         })),
       },
@@ -289,6 +296,7 @@ const messageCache: BlockCache = {
           topic: "/blocks",
           receiveTime: message.header.stamp,
           message: { ...message, data: { value: idx } },
+          datatype: "msgs/SystemState",
           sizeInBytes: 0,
         })),
       },

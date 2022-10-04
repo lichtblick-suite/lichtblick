@@ -196,6 +196,7 @@ export function makePass({
       mesh_resource: "",
       mesh_use_embedded_materials: false,
     },
+    datatype: "visualization_msgs/Marker",
     sizeInBytes: 0,
   };
 }
@@ -234,6 +235,7 @@ export function makeFail({
       mesh_resource: "",
       mesh_use_embedded_materials: false,
     },
+    datatype: "visualization_msgs/Marker",
     sizeInBytes: 0,
   };
 }

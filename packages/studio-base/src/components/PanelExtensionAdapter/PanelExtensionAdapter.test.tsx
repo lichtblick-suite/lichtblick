@@ -76,7 +76,13 @@ describe("PanelExtensionAdapter", () => {
     const config = {};
     const saveConfig = () => {};
 
-    const message = { topic: "x", receiveTime: { sec: 0, nsec: 1 }, sizeInBytes: 0, message: 42 };
+    const message = {
+      topic: "x",
+      receiveTime: { sec: 0, nsec: 1 },
+      sizeInBytes: 0,
+      message: 42,
+      datatype: "foo",
+    };
 
     const Wrapper = ({ lastSeekTime }: { lastSeekTime?: number }) => {
       return (

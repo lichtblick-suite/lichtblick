@@ -59,7 +59,7 @@ export class McapStreamingIterableSource implements IIterableSource {
     const schemasById = new Map<number, Mcap0Types.TypedMcapRecords["Schema"]>();
     const channelInfoById = new Map<
       number,
-      { channel: Mcap0Types.Channel; parsedChannel: ParsedChannel }
+      { channel: Mcap0Types.Channel; parsedChannel: ParsedChannel; schemaName: string }
     >();
 
     let startTime: Time | undefined;
@@ -111,7 +111,11 @@ export class McapStreamingIterableSource implements IIterableSource {
 
           try {
             const parsedChannel = parseChannel({ messageEncoding: record.messageEncoding, schema });
-            channelInfoById.set(record.id, { channel: record, parsedChannel });
+            channelInfoById.set(record.id, {
+              channel: record,
+              parsedChannel,
+              schemaName: schema.name,
+            });
             messagesByChannel.set(record.id, []);
           } catch (error) {
             channelIdsWithErrors.add(record.id);
@@ -148,6 +152,7 @@ export class McapStreamingIterableSource implements IIterableSource {
             publishTime: fromNanoSec(record.publishTime),
             message: channelInfo.parsedChannel.deserializer(record.data),
             sizeInBytes: record.data.byteLength,
+            datatype: channelInfo.schemaName,
           });
           break;
         }

@@ -42,6 +42,7 @@ export function PoseMarkers(): JSX.Element {
         rotation: QUAT_IDENTITY,
       },
     },
+    datatype: "geometry_msgs/TransformStamped",
     sizeInBytes: 0,
   };
   const tf2: MessageEvent<TransformStamped> = {
@@ -55,6 +56,7 @@ export function PoseMarkers(): JSX.Element {
         rotation: { x: 0.383, y: 0, z: 0, w: 0.924 },
       },
     },
+    datatype: "geometry_msgs/TransformStamped",
     sizeInBytes: 0,
   };
 
@@ -68,6 +70,7 @@ export function PoseMarkers(): JSX.Element {
         orientation: { x: 0, y: -Math.SQRT1_2, z: 0, w: Math.SQRT1_2 },
       },
     },
+    datatype: "geometry_msgs/PoseStamped",
     sizeInBytes: 0,
   };
 
@@ -92,6 +95,7 @@ export function PoseMarkers(): JSX.Element {
         ],
       },
     },
+    datatype: "geometry_msgs/PoseWithCovarianceStamped",
     sizeInBytes: 0,
   };
 
@@ -116,6 +120,7 @@ export function PoseMarkers(): JSX.Element {
         ],
       },
     },
+    datatype: "geometry_msgs/PoseWithCovarianceStamped",
     sizeInBytes: 0,
   };
 
@@ -140,6 +145,7 @@ export function PoseMarkers(): JSX.Element {
         ],
       },
     },
+    datatype: "geometry_msgs/PoseWithCovarianceStamped",
     sizeInBytes: 0,
   };
 

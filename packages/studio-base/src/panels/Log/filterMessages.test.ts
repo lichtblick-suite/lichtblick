@@ -21,6 +21,7 @@ describe("filter", () => {
     {
       topic: "/some_topic",
       receiveTime: { sec: 123, nsec: 456 },
+      datatype: "rosgraph_msgs/Log",
       message: {
         msg: "Couldn't find int 83757.",
         level: 2,
@@ -33,6 +34,7 @@ describe("filter", () => {
     {
       topic: "/some_topic",
       receiveTime: { sec: 123, nsec: 456 },
+      datatype: "rcl_interfaces/msg/Log",
       message: {
         msg: "Couldn't find int 83757.",
         level: 30,
@@ -46,7 +48,6 @@ describe("filter", () => {
       filterMessages(ros1msgs, {
         minLogLevel: 3,
         searchTerms: [],
-        topicDatatype: "rosgraph_msgs/Log",
       }),
     ).toEqual([]);
   });
@@ -56,7 +57,6 @@ describe("filter", () => {
       filterMessages(ros1msgs, {
         minLogLevel: 2,
         searchTerms: [],
-        topicDatatype: "rosgraph_msgs/Log",
       }),
     ).toEqual(ros1msgs);
   });
@@ -66,7 +66,6 @@ describe("filter", () => {
       filterMessages(ros2msgs, {
         minLogLevel: LogLevel.INFO,
         searchTerms: [],
-        topicDatatype: "rcl_interfaces/msg/Log",
       }),
     ).toEqual(ros2msgs);
 
@@ -74,7 +73,6 @@ describe("filter", () => {
       filterMessages(ros2msgs, {
         minLogLevel: LogLevel.ERROR,
         searchTerms: [],
-        topicDatatype: "rcl_interfaces/msg/Log",
       }),
     ).toEqual([]);
   });
@@ -87,7 +85,6 @@ describe("filter", () => {
         filterMessages(ros1msgs, {
           minLogLevel,
           searchTerms: ["/some_topic"],
-          topicDatatype: "rosgraph_msgs/Log",
         }),
       ).toEqual(ros1msgs);
     });
@@ -97,7 +94,6 @@ describe("filter", () => {
         filterMessages(ros1msgs, {
           minLogLevel,
           searchTerms: ["some"],
-          topicDatatype: "rosgraph_msgs/Log",
         }),
       ).toEqual(ros1msgs);
     });
@@ -107,7 +103,6 @@ describe("filter", () => {
         filterMessages(ros1msgs, {
           minLogLevel,
           searchTerms: ["int"],
-          topicDatatype: "rosgraph_msgs/Log",
         }),
       ).toEqual(ros1msgs);
     });
@@ -117,7 +112,6 @@ describe("filter", () => {
         filterMessages(ros1msgs, {
           minLogLevel,
           searchTerms: ["random"],
-          topicDatatype: "rosgraph_msgs/Log",
         }),
       ).toEqual([]);
     });
@@ -127,7 +121,6 @@ describe("filter", () => {
         filterMessages(ros1msgs, {
           minLogLevel: 2,
           searchTerms: ["int", "random"],
-          topicDatatype: "rosgraph_msgs/Log",
         }),
       ).toEqual(ros1msgs);
     });

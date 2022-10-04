@@ -285,6 +285,7 @@ GeoJSON.parameters = {
           {
             topic: "/gps",
             receiveTime: { sec: 123, nsec: 456 },
+            datatype: "sensor_msgs/NavSatFix",
             message: {
               latitude: 1.801374964252865,
               longitude: 2.42477416992186,
@@ -302,6 +303,7 @@ GeoJSON.parameters = {
           {
             topic: "/geo",
             receiveTime: { sec: 123, nsec: 456 },
+            datatype: "foxglove.GeoJSON",
             message: {
               geojson: GeoJsonContent,
             },

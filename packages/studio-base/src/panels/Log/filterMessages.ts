@@ -16,9 +16,9 @@ import { LogMessageEvent } from "./types";
 
 export default function filterMessages(
   events: readonly LogMessageEvent[],
-  filter: { minLogLevel: number; searchTerms: string[]; topicDatatype: string },
+  filter: { minLogLevel: number; searchTerms: string[] },
 ): readonly LogMessageEvent[] {
-  const { minLogLevel, searchTerms, topicDatatype } = filter;
+  const { minLogLevel, searchTerms } = filter;
   const hasActiveFilters = minLogLevel > 1 || searchTerms.length > 0;
   // return all messages if we wouldn't filter anything
   if (!hasActiveFilters) {
@@ -29,7 +29,7 @@ export default function filterMessages(
 
   return events.filter((event) => {
     const logMessage = event.message;
-    const effectiveLogLevel = getNormalizedLevel(topicDatatype, logMessage);
+    const effectiveLogLevel = getNormalizedLevel(event.datatype, logMessage);
     if (effectiveLogLevel < minLogLevel) {
       return false;
     }

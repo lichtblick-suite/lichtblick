@@ -82,15 +82,6 @@ const LogPanel = React.memo(({ config, saveConfig }: Props) => {
     [topics],
   );
 
-  const datatypeByTopic = useMemo(() => {
-    const out = new Map<string, string>();
-
-    for (const topic of topics) {
-      out.set(topic.name, topic.datatype);
-    }
-    return out;
-  }, [topics]);
-
   // Pick the first available topic, if there are not available topics, then we inform the user
   // nothing is publishing log messages
   const defaultTopicToRender = useMemo(() => availableTopics[0]?.name, [availableTopics]);
@@ -138,15 +129,9 @@ const LogPanel = React.memo(({ config, saveConfig }: Props) => {
 
   const searchTermsSet = useMemo(() => new Set(searchTerms), [searchTerms]);
 
-  const topicDatatype = useMemo(
-    () => availableTopics.find((topic) => topic.name === topicToRender)?.datatype,
-    [availableTopics, topicToRender],
-  );
-
   const filteredMessages = useMemo(
-    () =>
-      topicDatatype ? filterMessages(msgEvents, { minLogLevel, searchTerms, topicDatatype }) : [],
-    [msgEvents, minLogLevel, searchTerms, topicDatatype],
+    () => filterMessages(msgEvents, { minLogLevel, searchTerms }),
+    [msgEvents, minLogLevel, searchTerms],
   );
 
   const listRef = useRef<IList>(ReactNull);
@@ -209,12 +194,7 @@ const LogPanel = React.memo(({ config, saveConfig }: Props) => {
                 return;
               }
 
-              const datatype = datatypeByTopic.get(item.topic);
-              if (!datatype) {
-                return;
-              }
-
-              const normalizedLog = normalizedLogMessage(datatype, item["message"]);
+              const normalizedLog = normalizedLogMessage(item.datatype, item["message"]);
               return (
                 <LogMessage
                   value={normalizedLog}

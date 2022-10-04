@@ -52,6 +52,7 @@ function SensorMsgs_PointCloud2({ rgbaFieldName }: { rgbaFieldName: string }): J
         rotation: QUAT_IDENTITY,
       },
     },
+    datatype: "geometry_msgs/TransformStamped",
     sizeInBytes: 0,
   };
   const tf2: MessageEvent<TransformStamped> = {
@@ -65,6 +66,7 @@ function SensorMsgs_PointCloud2({ rgbaFieldName }: { rgbaFieldName: string }): J
         rotation: QUAT_IDENTITY,
       },
     },
+    datatype: "geometry_msgs/TransformStamped",
     sizeInBytes: 0,
   };
 
@@ -113,6 +115,7 @@ function SensorMsgs_PointCloud2({ rgbaFieldName }: { rgbaFieldName: string }): J
       data,
       is_dense: true,
     },
+    datatype: "sensor_msgs/PointCloud2",
     sizeInBytes: 0,
   };
 
@@ -180,6 +183,7 @@ export function SensorMsgs_PointCloud2_Intensity(): JSX.Element {
         rotation: QUAT_IDENTITY,
       },
     },
+    datatype: "geometry_msgs/TransformStamped",
     sizeInBytes: 0,
   };
   const tf2: MessageEvent<TransformStamped> = {
@@ -193,6 +197,7 @@ export function SensorMsgs_PointCloud2_Intensity(): JSX.Element {
         rotation: QUAT_IDENTITY,
       },
     },
+    datatype: "geometry_msgs/TransformStamped",
     sizeInBytes: 0,
   };
 
@@ -287,6 +292,7 @@ export function SensorMsgs_PointCloud2_Intensity(): JSX.Element {
       data,
       is_dense: false,
     },
+    datatype: "sensor_msgs/PointCloud2",
     sizeInBytes: 0,
   };
 
@@ -373,6 +379,7 @@ export function SensorMsgs_PointCloud2_TwoDimensions(): JSX.Element {
       data,
       is_dense: true,
     },
+    datatype: "sensor_msgs/PointCloud2",
     sizeInBytes: 0,
   };
 

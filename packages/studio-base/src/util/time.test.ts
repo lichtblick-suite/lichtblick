@@ -40,6 +40,7 @@ describe("time.getTimestampForMessageEvent", () => {
       topic: "/foo",
       receiveTime: { sec: 1000, nsec: 0 },
       sizeInBytes: 0,
+      datatype: "stamped",
     };
 
     expect(
@@ -55,7 +56,9 @@ describe("time.getTimestampForMessageEvent", () => {
       time.getTimestampForMessageEvent(
         {
           ...messageBase,
-          message: { header: { stamp: { sec: 0, nsec: 0 }, seq: 0, frame_id: "" } },
+          message: {
+            header: { stamp: { sec: 0, nsec: 0 }, seq: 0, frame_id: "" },
+          },
         },
         "headerStamp",
       ),

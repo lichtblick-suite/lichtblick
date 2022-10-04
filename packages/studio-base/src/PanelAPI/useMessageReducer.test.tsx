@@ -70,6 +70,7 @@ describe("useMessageReducer", () => {
       topic: "/foo",
       receiveTime: { sec: 0, nsec: 0 },
       message: { value: 2 },
+      datatype: "foo",
       sizeInBytes: 0,
     };
 
@@ -99,6 +100,7 @@ describe("useMessageReducer", () => {
       topic: "/foo",
       receiveTime: { sec: 0, nsec: 0 },
       message: { value: 2 },
+      datatype: "foo",
       sizeInBytes: 0,
     };
 
@@ -130,12 +132,14 @@ describe("useMessageReducer", () => {
       topic: "/foo",
       receiveTime: { sec: 0, nsec: 0 },
       message: { value: 2 },
+      datatype: "foo",
       sizeInBytes: 0,
     };
     const message2 = {
       topic: "/bar",
       receiveTime: { sec: 0, nsec: 0 },
       message: { value: 3 },
+      datatype: "bar",
       sizeInBytes: 0,
     };
 
@@ -188,18 +192,21 @@ describe("useMessageReducer", () => {
       topic: "/foo",
       receiveTime: { sec: 0, nsec: 0 },
       message: { value: 2 },
+      datatype: "foo",
       sizeInBytes: 0,
     };
     const message2 = {
       topic: "/bar",
       receiveTime: { sec: 0, nsec: 0 },
       message: { value: 3 },
+      datatype: "bar",
       sizeInBytes: 0,
     };
     const message3 = {
       topic: "/bar",
       receiveTime: { sec: 0, nsec: 0 },
       message: { value: 4 },
+      datatype: "bar",
       sizeInBytes: 0,
     };
 
@@ -298,6 +305,7 @@ describe("useMessageReducer", () => {
       topic: "/foo",
       receiveTime: { sec: 0, nsec: 0 },
       message: { value: 2 },
+      datatype: "foo",
       sizeInBytes: 0,
     };
 
@@ -358,12 +366,14 @@ describe("useMessageReducer", () => {
       topic: "/foo",
       receiveTime: { sec: 0, nsec: 0 },
       message: { value: 1 },
+      datatype: "foo",
       sizeInBytes: 0,
     };
     const message2 = {
       topic: "/bar",
       receiveTime: { sec: 0, nsec: 0 },
       message: { value: 2 },
+      datatype: "bar",
       sizeInBytes: 0,
     };
 
@@ -469,6 +479,7 @@ describe("useMessageReducer", () => {
       topic: "/foo",
       receiveTime: { sec: 0, nsec: 0 },
       message: { value: 2 },
+      datatype: "foo",
       sizeInBytes: 0,
     };
 
@@ -540,6 +551,7 @@ describe("useMessageReducer", () => {
       topic: "/foo",
       receiveTime: { sec: 0, nsec: 0 },
       message: { value: 2 },
+      datatype: "foo",
       sizeInBytes: 0,
     };
 
