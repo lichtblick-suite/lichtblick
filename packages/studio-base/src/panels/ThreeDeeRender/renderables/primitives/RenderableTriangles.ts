@@ -62,6 +62,9 @@ export class RenderableTriangles extends RenderablePrimitive {
       if (!geometry.attributes.position) {
         geometry.createAttribute("position", Float32Array, 3);
       }
+      if (!geometry.attributes.normal) {
+        geometry.createAttribute("normal", Float32Array, 3);
+      }
       const vertices = geometry.attributes.position!;
 
       const singleColor = this.userData.settings.color
