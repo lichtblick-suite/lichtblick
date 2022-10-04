@@ -148,7 +148,10 @@ describe("IterablePlayer", () => {
       // before initialize
       { ...baseState, activeData: { ...baseState.activeData, endTime: { sec: 0, nsec: 0 } } },
       // start delay
-      baseState,
+      {
+        ...baseState,
+        presence: PlayerPresence.PRESENT,
+      },
       // startPlay
       {
         ...baseState,
