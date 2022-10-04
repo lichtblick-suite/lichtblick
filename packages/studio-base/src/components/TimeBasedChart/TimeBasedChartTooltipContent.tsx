@@ -15,7 +15,6 @@ import { take } from "lodash";
 import { PropsWithChildren, useMemo } from "react";
 import { makeStyles } from "tss-react/mui";
 
-import Stack from "@foxglove/studio-base/components/Stack";
 import { fonts } from "@foxglove/studio-base/util/sharedStyleConstants";
 
 import { TimeBasedChartTooltipData } from "./index";
@@ -28,17 +27,19 @@ type Props = {
 
 const useStyles = makeStyles()((theme) => ({
   root: {
+    display: "flex",
+    flexDirection: "column",
     fontFamily: fonts.MONOSPACE,
-    fontSize: 11,
-    lineHeight: "1.4",
+    fontSize: theme.typography.caption.fontSize,
+    lineHeight: theme.typography.caption.lineHeight,
     overflowWrap: "break-word",
   },
   overflow: {
-    color: theme.palette.text.disabled,
+    opacity: theme.palette.action.disabledOpacity,
     fontStyle: "italic",
   },
   path: {
-    color: theme.palette.text.secondary,
+    opacity: 0.6,
     whiteSpace: "nowrap",
   },
 }));
@@ -81,7 +82,7 @@ export default function TimeBasedChartTooltipContent(
   // not include all datasets
   if (!multiDataset) {
     return (
-      <Stack gap={0.5} className={classes.root} data-testid="TimeBasedChartTooltipContent">
+      <div className={classes.root} data-testid="TimeBasedChartTooltipContent">
         {take(content, 1).map((item, idx) => {
           const value =
             typeof item.value === "string"
@@ -97,7 +98,7 @@ export default function TimeBasedChartTooltipContent(
           );
         })}
         {content.length > 1 && <OverflowMessage />}
-      </Stack>
+      </div>
     );
   }
 

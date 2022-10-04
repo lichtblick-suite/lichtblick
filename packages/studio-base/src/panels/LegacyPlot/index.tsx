@@ -11,11 +11,12 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { Button, styled as muiStyled, useTheme } from "@mui/material";
+import { Button, Fade, Tooltip, useTheme } from "@mui/material";
 import { ChartOptions, ScaleOptions } from "chart.js";
 import { flatten, pick, uniq } from "lodash";
 import { ComponentProps, useCallback, useMemo, useState } from "react";
 import { useResizeDetector } from "react-resize-detector";
+import { makeStyles } from "tss-react/mui";
 
 import type { ZoomOptions } from "@foxglove/chartjs-plugin-zoom/types/options";
 import { filterMap } from "@foxglove/den/collection";
@@ -27,19 +28,20 @@ import { useMessageDataItem } from "@foxglove/studio-base/components/MessagePath
 import Panel from "@foxglove/studio-base/components/Panel";
 import PanelToolbar from "@foxglove/studio-base/components/PanelToolbar";
 import Stack from "@foxglove/studio-base/components/Stack";
-import { useTooltip } from "@foxglove/studio-base/components/Tooltip";
 import useDeepChangeDetector from "@foxglove/studio-base/hooks/useDeepChangeDetector";
 import { SaveConfig } from "@foxglove/studio-base/types/panels";
 
 import { TwoDimensionalTooltip } from "./Tooltip";
 import { safeParseFloat } from "./helpers";
 
-const StyledButton = muiStyled(Button)(({ theme }) => ({
-  position: "absolute",
-  marginRight: theme.spacing(2.5),
-  marginBottom: theme.spacing(7),
-  bottom: 0,
-  right: 0,
+const useStyles = makeStyles()((theme) => ({
+  resetButton: {
+    position: "absolute",
+    marginRight: theme.spacing(2.5),
+    marginBottom: theme.spacing(7),
+    bottom: 0,
+    right: 0,
+  },
 }));
 
 const VALID_TYPES = ["message"];
@@ -114,9 +116,11 @@ export type PlotMessage = {
 };
 
 function TwoDimensionalPlot(props: Props) {
-  const theme = useTheme();
   const { config, saveConfig, onFinishRender } = props;
   const { path, minXVal, maxXVal, minYVal, maxYVal, pointRadiusOverride } = config;
+
+  const theme = useTheme();
+  const { classes } = useStyles();
   const [hasUserPannedOrZoomed, setHasUserPannedOrZoomed] = React.useState<boolean>(false);
   const [hasVerticalExclusiveZoom, setHasVerticalExclusiveZoom] = React.useState<boolean>(false);
   const [hasBothAxesZoom, setHasBothAxesZoom] = React.useState<boolean>(false);
@@ -311,13 +315,6 @@ function TwoDimensionalPlot(props: Props) {
     return <TwoDimensionalTooltip datapoints={activeTooltip?.data ?? []} />;
   }, [activeTooltip?.data]);
 
-  const { tooltip } = useTooltip({
-    shown: activeTooltip != undefined,
-    noPointerEvents: true,
-    targetPosition: { x: activeTooltip?.x ?? 0, y: activeTooltip?.y ?? 0 },
-    contents: tooltipElement,
-  });
-
   // Use a debounce and 0 refresh rate to avoid triggering a resize observation while handling
   // an existing resize observation.
   // https://github.com/maslianok/react-resize-detector/issues/45
@@ -431,7 +428,23 @@ function TwoDimensionalPlot(props: Props) {
           emptyStateElement
         ) : (
           <>
-            {tooltip}
+            <Tooltip
+              open={activeTooltip != undefined}
+              placement="right"
+              title={tooltipElement}
+              disableInteractive
+              TransitionComponent={Fade}
+              TransitionProps={{ timeout: 0 }}
+              PopperProps={{
+                anchorEl: {
+                  getBoundingClientRect: () => {
+                    return new DOMRect(activeTooltip?.x ?? 0, activeTooltip?.y ?? 0, 0, 0);
+                  },
+                },
+              }}
+            >
+              <div />
+            </Tooltip>
             <ChartComponent
               type="scatter"
               width={width}
@@ -443,7 +456,8 @@ function TwoDimensionalPlot(props: Props) {
               onFinishRender={onFinishRender}
             />
             {hasUserPannedOrZoomed && (
-              <StyledButton
+              <Button
+                className={classes.resetButton}
                 data-testid="reset-zoom"
                 variant="contained"
                 color="inherit"
@@ -451,7 +465,7 @@ function TwoDimensionalPlot(props: Props) {
                 onClick={onResetZoom}
               >
                 Reset view
-              </StyledButton>
+              </Button>
             )}
             <KeyListener global keyDownHandlers={keyDownHandlers} keyUpHandlers={keyUphandlers} />
           </>

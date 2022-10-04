@@ -11,7 +11,7 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { Button, useTheme, styled as muiStyled } from "@mui/material";
+import { Tooltip, Button, useTheme, Fade } from "@mui/material";
 import { ChartOptions, ScaleOptions } from "chart.js";
 import { AnnotationOptions } from "chartjs-plugin-annotation";
 import React, {
@@ -24,6 +24,7 @@ import React, {
   MouseEvent,
 } from "react";
 import { useMountedState, useThrottle } from "react-use";
+import { makeStyles } from "tss-react/mui";
 import { useDebouncedCallback } from "use-debounce";
 import { v4 as uuidv4 } from "uuid";
 
@@ -34,8 +35,8 @@ import ChartComponent from "@foxglove/studio-base/components/Chart/index";
 import { RpcElement, RpcScales } from "@foxglove/studio-base/components/Chart/types";
 import KeyListener from "@foxglove/studio-base/components/KeyListener";
 import { useMessagePipeline } from "@foxglove/studio-base/components/MessagePipeline";
+import Stack from "@foxglove/studio-base/components/Stack";
 import TimeBasedChartLegend from "@foxglove/studio-base/components/TimeBasedChart/TimeBasedChartLegend";
-import Tooltip from "@foxglove/studio-base/components/Tooltip";
 import {
   TimelineInteractionStateStore,
   useClearHoverValue,
@@ -58,39 +59,38 @@ export type TimeBasedChartTooltipData = {
   constantName?: string;
 };
 
-const SRoot = muiStyled("div")({
-  position: "relative",
-});
-
-const SResetZoom = muiStyled("div")(({ theme }) => ({
-  position: "absolute",
-  bottom: theme.spacing(4),
-  right: theme.spacing(1),
-}));
-
-const SLegend = muiStyled("div")(({ theme }) => ({
-  display: "flex",
-  width: "10%",
-  minWidth: 90,
-  overflowY: "auto",
-  flexDirection: "column",
-  alignItems: "flex-start",
-  justifyContent: "start",
-  padding: theme.spacing(4, 0, 1, 0),
-}));
-
-const SBar = muiStyled("div", {
-  shouldForwardProp: (prop) => prop !== "xAxisIsPlaybackTime",
-})<{
-  xAxisIsPlaybackTime: boolean;
-}>(({ xAxisIsPlaybackTime, theme }) => ({
-  position: "absolute",
-  top: 0,
-  bottom: 0,
-  width: 1,
-  marginLeft: -1,
-  display: "block",
-  backgroundColor: xAxisIsPlaybackTime ? theme.palette.warning.main : theme.palette.info.main,
+const useStyles = makeStyles()((theme) => ({
+  root: {
+    position: "relative",
+  },
+  resetZoomButton: {
+    position: "absolute",
+    bottom: 0,
+    right: 0,
+    marginBottom: theme.spacing(4),
+    marginRight: theme.spacing(1),
+  },
+  legend: {
+    display: "flex",
+    width: "10%",
+    minWidth: 90,
+    overflowY: "auto",
+    flexDirection: "column",
+    alignItems: "flex-start",
+    justifyContent: "start",
+    padding: theme.spacing(4, 0, 1, 0),
+  },
+  tooltip: {
+    maxWidth: "none",
+  },
+  bar: {
+    position: "absolute",
+    top: 0,
+    bottom: 0,
+    width: 1,
+    marginLeft: -1,
+    display: "block",
+  },
 }));
 
 type ChartComponentProps = ComponentProps<typeof ChartComponent>;
@@ -161,6 +161,7 @@ export default function TimeBasedChart(props: Props): JSX.Element {
   const { labels, datasets } = data;
 
   const theme = useTheme();
+  const { classes } = useStyles();
   const componentId = useMemo(() => uuidv4(), []);
   const isMounted = useMountedState();
   const canvasContainer = useRef<HTMLDivElement>(ReactNull);
@@ -828,31 +829,43 @@ export default function TimeBasedChart(props: Props): JSX.Element {
   }
 
   return (
-    <div style={{ display: "flex", width: "100%" }}>
+    <Stack direction="row" fullWidth>
       <Tooltip
-        shown
-        noPointerEvents={true}
+        arrow={false}
+        classes={{ tooltip: classes.tooltip }}
+        open={activeTooltip != undefined}
         placement="right"
-        targetPosition={{ x: activeTooltip?.x ?? 0, y: activeTooltip?.y ?? 0 }}
-        contents={tooltipContent}
-      />
-      <div style={{ display: "flex", width }}>
-        <SRoot onDoubleClick={onResetZoom}>
-          <HoverBar
-            componentId={componentId}
-            isTimestampScale={xAxisIsPlaybackTime}
-            scales={currentScalesRef.current}
-          >
-            <SBar xAxisIsPlaybackTime={xAxisIsPlaybackTime} ref={hoverBar} />
-          </HoverBar>
+        title={tooltipContent ?? <></>}
+        disableInteractive
+        followCursor
+        TransitionComponent={Fade}
+        TransitionProps={{ timeout: 0 }}
+      >
+        <Stack direction="row" style={{ width }}>
+          <div className={classes.root} onDoubleClick={onResetZoom}>
+            <HoverBar
+              componentId={componentId}
+              isTimestampScale={xAxisIsPlaybackTime}
+              scales={currentScalesRef.current}
+            >
+              <div
+                className={classes.bar}
+                ref={hoverBar}
+                style={{
+                  backgroundColor: xAxisIsPlaybackTime
+                    ? theme.palette.warning.main
+                    : theme.palette.info.main,
+                }}
+              />
+            </HoverBar>
 
-          <div ref={canvasContainer} onMouseMove={onMouseMove} onMouseOut={onMouseOut}>
-            <ChartComponent {...chartProps} />
-          </div>
+            <div ref={canvasContainer} onMouseMove={onMouseMove} onMouseOut={onMouseOut}>
+              <ChartComponent {...chartProps} />
+            </div>
 
-          <SResetZoom>
             {showReset && (
               <Button
+                className={classes.resetZoomButton}
                 variant="contained"
                 color="inherit"
                 title="(shortcut: double-click)"
@@ -861,12 +874,12 @@ export default function TimeBasedChart(props: Props): JSX.Element {
                 Reset view
               </Button>
             )}
-          </SResetZoom>
-          <KeyListener global keyDownHandlers={keyDownHandlers} keyUpHandlers={keyUphandlers} />
-        </SRoot>
-      </div>
+            <KeyListener global keyDownHandlers={keyDownHandlers} keyUpHandlers={keyUphandlers} />
+          </div>
+        </Stack>
+      </Tooltip>
       {drawLegend === true && (
-        <SLegend>
+        <div className={classes.legend}>
           <TimeBasedChartLegend
             datasetId={datasetId}
             canToggleLines={canToggleLines}
@@ -874,8 +887,8 @@ export default function TimeBasedChart(props: Props): JSX.Element {
             linesToHide={linesToHide}
             toggleLine={toggleLine}
           />
-        </SLegend>
+        </div>
       )}
-    </div>
+    </Stack>
   );
 }
