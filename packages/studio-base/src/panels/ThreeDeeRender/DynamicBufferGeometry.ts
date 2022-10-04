@@ -55,9 +55,13 @@ export class DynamicBufferGeometry extends THREE.BufferGeometry {
       return;
     }
 
-    for (const attributeName of Object.keys(this.attributes)) {
-      const attribute = this.attributes[attributeName]!;
-      const dataConstructor = this._attributeConstructors.get(attributeName)!;
+    for (const [attributeName, attribute] of Object.entries(this.attributes)) {
+      const dataConstructor = this._attributeConstructors.get(attributeName);
+      if (!dataConstructor) {
+        throw new Error(
+          `DynamicBufferGeometry resize(${itemCount}) failed, missing data constructor for attribute "${attributeName}". Attributes must be created using createAttribute().`,
+        );
+      }
       const data = new dataConstructor(itemCount * attribute.itemSize);
       const newAttrib = new THREE.BufferAttribute(data, attribute.itemSize, attribute.normalized);
       newAttrib.setUsage(this._usage);
