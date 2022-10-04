@@ -604,6 +604,7 @@ export class Renderer extends EventEmitter<RendererEvents> {
     const topics: SettingsTreeEntry = {
       path: ["topics"],
       node: {
+        enableVisibilityFilter: true,
         label: "Topics",
         defaultExpansionState: "expanded",
         actions: [

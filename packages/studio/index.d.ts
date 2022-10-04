@@ -597,6 +597,11 @@ declare module "@foxglove/studio" {
      * to the action handler.
      **/
     visible?: boolean;
+
+    /**
+     * Filter Children by visibility status
+     */
+    enableVisibilityFilter?: boolean;
   };
 
   /**
