@@ -3,6 +3,9 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 import { Story, StoryContext } from "@storybook/react";
+import { cloneDeep, tap } from "lodash";
+import { useState } from "react";
+import { useTimeoutFn } from "react-use";
 
 import {
   NavSatFixMsg,
@@ -10,7 +13,7 @@ import {
   NavSatFixService,
   NavSatFixStatus,
 } from "@foxglove/studio-base/panels/Map/types";
-import PanelSetup from "@foxglove/studio-base/stories/PanelSetup";
+import PanelSetup, { Fixture } from "@foxglove/studio-base/stories/PanelSetup";
 
 import MapPanel from "./index";
 
@@ -22,81 +25,82 @@ const EMPTY_MESSAGE: NavSatFixMsg = {
   position_covariance: [1, 0, 0, 0, 1, 0, 0, 0, 1],
   position_covariance_type: NavSatFixPositionCovarianceType.COVARIANCE_TYPE_UNKNOWN,
 };
-const OFFSET_MESSAGE = JSON.parse(JSON.stringify(EMPTY_MESSAGE) ?? "") as NavSatFixMsg;
-OFFSET_MESSAGE.latitude += 0.1;
-OFFSET_MESSAGE.longitude += 0.1;
-
-const GeoJsonContent = JSON.stringify({
-  type: "FeatureCollection",
-  features: [
-    {
-      type: "Feature",
-      properties: {},
-      geometry: {
-        type: "LineString",
-        coordinates: [
-          [2.42477416992186, 1.801374964252865],
-          [2.42082595825194, 1.7846897817763],
-          [2.4422836303711, 1.78292608704408],
-        ],
-      },
-    },
-    {
-      type: "Feature",
-      properties: {},
-      geometry: {
-        type: "Polygon",
-        coordinates: [
-          [
-            [2.44314193725585, 1.77342854582093],
-            [2.43953704833984, 1.76596533600783],
-            [2.4264907836914, 1.7694934927041],
-            [2.42700576782227, 1.77817746896081],
-            [2.44314193725585, 1.77342854582093],
-          ],
-        ],
-      },
-    },
-    {
-      type: "Feature",
-      properties: {
-        "marker-color": "#7e7e7e",
-        "marker-size": "medium",
-        "marker-symbol": "1",
-      },
-      geometry: {
-        type: "Point",
-        coordinates: [2.43284225463867, 1.78943798147498],
-      },
-    },
-  ],
+const OFFSET_MESSAGE = tap(cloneDeep(EMPTY_MESSAGE), (message) => {
+  message.latitude += 0.1;
+  message.longitude += 0.1;
 });
+
+function makeGeoJsonMessage(center: { lat: number; lon: number }) {
+  return {
+    type: "FeatureCollection",
+    features: [
+      {
+        type: "Feature",
+        properties: {},
+        geometry: {
+          type: "LineString",
+          coordinates: [
+            [center.lon, center.lat],
+            [0.1 + center.lon, center.lat],
+            [0.1 + center.lon, 0.1 + center.lat],
+          ],
+        },
+      },
+      {
+        type: "Feature",
+        properties: {},
+        geometry: {
+          type: "Polygon",
+          coordinates: [
+            [
+              [center.lon - 0.1, center.lat - 0.1],
+              [center.lon + 0.2, center.lat - 0.1],
+              [center.lon + 0.2, center.lat],
+            ],
+          ],
+        },
+      },
+      {
+        type: "Feature",
+        properties: {
+          "marker-color": "#7f7e7e",
+          "marker-size": "medium",
+          "marker-symbol": "1",
+        },
+        geometry: {
+          type: "Point",
+          coordinates: [center.lon - 0.1, center.lat + 0.1],
+        },
+      },
+    ],
+  };
+}
+
+const Wrapper = (StoryComponent: Story, { parameters }: StoryContext): JSX.Element => {
+  return (
+    <PanelSetup
+      fixture={parameters.panelSetup?.fixture}
+      includeSettings={parameters.includeSettings}
+    >
+      <StoryComponent />
+    </PanelSetup>
+  );
+};
 
 export default {
   title: "panels/Map",
   component: MapPanel,
-  decorators: [
-    (StoryComponent: Story, { parameters }: StoryContext): JSX.Element => {
-      return (
-        <PanelSetup
-          fixture={parameters.panelSetup?.fixture}
-          includeSettings={parameters.includeSettings}
-        >
-          <StoryComponent />
-        </PanelSetup>
-      );
-    },
-  ],
 };
 
 export const EmptyState = (): JSX.Element => {
   return <MapPanel />;
 };
+EmptyState.decorators = [Wrapper];
 
 export const SinglePoint = (): JSX.Element => {
   return <MapPanel />;
 };
-
+SinglePoint.decorators = [Wrapper];
 SinglePoint.parameters = {
   chromatic: {
     delay: 1000,
@@ -120,6 +124,7 @@ SinglePoint.parameters = {
 export const SinglePointWithSettings = (): JSX.Element => {
   return <MapPanel overrideConfig={{ layer: "custom" }} />;
 };
+SinglePointWithSettings.decorators = [Wrapper];
 SinglePointWithSettings.parameters = {
   ...SinglePoint.parameters,
   includeSettings: true,
@@ -128,6 +133,7 @@ SinglePointWithSettings.parameters = {
 export const SinglePointWithSettingsOverride = (): JSX.Element => {
   return <MapPanel overrideConfig={{ layer: "custom", topicColors: { "/gps": "#ffc0cb" } }} />;
 };
+SinglePointWithSettingsOverride.decorators = [Wrapper];
 SinglePointWithSettingsOverride.parameters = {
   ...SinglePoint.parameters,
   includeSettings: true,
@@ -136,11 +142,12 @@ SinglePointWithSettingsOverride.parameters = {
 export const MultipleTopics = (): JSX.Element => {
   return <MapPanel />;
 };
-
+MultipleTopics.decorators = [Wrapper];
 MultipleTopics.parameters = {
   chromatic: {
     delay: 1000,
   },
+  decorators: [Wrapper],
   panelSetup: {
     fixture: {
       topics: [
@@ -170,11 +177,12 @@ MultipleTopics.parameters = {
 export const SinglePointNoFix = (): JSX.Element => {
   return <MapPanel />;
 };
-
+SinglePointNoFix.decorators = [Wrapper];
 SinglePointNoFix.parameters = {
   chromatic: {
     delay: 1000,
   },
+  decorators: [Wrapper],
   panelSetup: {
     fixture: {
       topics: [{ name: "/gps", datatype: "sensor_msgs/NavSatFix" }],
@@ -204,11 +212,12 @@ SinglePointNoFix.parameters = {
 export const SinglePointDiagonalCovariance = (): JSX.Element => {
   return <MapPanel />;
 };
-
+SinglePointDiagonalCovariance.decorators = [Wrapper];
 SinglePointDiagonalCovariance.parameters = {
   chromatic: {
     delay: 1000,
   },
+  decorators: [Wrapper],
   panelSetup: {
     fixture: {
       topics: [{ name: "/gps", datatype: "sensor_msgs/NavSatFix" }],
@@ -236,11 +245,12 @@ SinglePointDiagonalCovariance.parameters = {
 export const SinglePointFullCovariance = (): JSX.Element => {
   return <MapPanel />;
 };
-
+SinglePointFullCovariance.decorators = [Wrapper];
 SinglePointFullCovariance.parameters = {
   chromatic: {
     delay: 1000,
   },
+  decorators: [Wrapper],
   panelSetup: {
     fixture: {
       topics: [{ name: "/gps", datatype: "sensor_msgs/NavSatFix" }],
@@ -267,49 +277,93 @@ SinglePointFullCovariance.parameters = {
   },
 };
 
+const GeoCenter = { lat: 34.9949, lon: 135.785 };
+
 export const GeoJSON = (): JSX.Element => {
-  return <MapPanel overrideConfig={{ topicColors: { "/geo": "#00ffaa", "/gps": "#ffc0cb" } }} />;
-};
-GeoJSON.parameters = {
-  chromatic: {
-    delay: 1000,
-  },
-  panelSetup: {
-    fixture: {
-      topics: [
-        { name: "/gps", datatype: "sensor_msgs/NavSatFix" },
-        { name: "/geo", datatype: "foxglove.GeoJSON" },
+  const topics = [
+    { name: "/geo", datatype: "foxglove.GeoJSON" },
+    { name: "/geo2", datatype: "foxglove.GeoJSON" },
+    { name: "/gps", datatype: "sensor_msgs/NavSatFix" },
+  ];
+
+  const [fixture, setFixture] = useState<Fixture>({
+    topics,
+    frame: {
+      "/gps": [
+        {
+          topic: "/gps",
+          receiveTime: { sec: 123, nsec: 456 },
+          datatype: "sensor_msgs/NavSatFix",
+          message: EMPTY_MESSAGE,
+          sizeInBytes: 10,
+        },
       ],
-      frame: {
-        "/gps": [
-          {
-            topic: "/gps",
-            receiveTime: { sec: 123, nsec: 456 },
-            datatype: "sensor_msgs/NavSatFix",
-            message: {
-              latitude: 1.801374964252865,
-              longitude: 2.42477416992186,
-              altitude: 0,
-              status: {
-                status: NavSatFixStatus.STATUS_GBAS_FIX,
-                service: NavSatFixService.SERVICE_GPS,
-              },
-              position_covariance: [1, 2, 3, 2, 5000000, 6, 3, 6, 1000000000],
-              position_covariance_type: NavSatFixPositionCovarianceType.COVARIANCE_TYPE_KNOWN,
-            },
+      "/geo": [
+        {
+          topic: "/geo",
+          receiveTime: { sec: 123, nsec: 0 },
+          datatype: "foxglove.GeoJSON",
+          message: {
+            geojson: JSON.stringify(
+              makeGeoJsonMessage({ lat: GeoCenter.lat - 0.2, lon: GeoCenter.lon - 0.2 }),
+            ),
           },
-        ],
+          sizeInBytes: 10,
+        },
+      ],
+      "/geo2": [
+        {
+          topic: "/geo2",
+          receiveTime: { sec: 123, nsec: 0 },
+          datatype: "foxglove.GeoJSON",
+          message: {
+            geojson: JSON.stringify(
+              makeGeoJsonMessage({ lat: GeoCenter.lat - 0.1, lon: GeoCenter.lon - 0.1 }),
+            ),
+          },
+          sizeInBytes: 10,
+        },
+      ],
+    },
+  });
+
+  // Send a second messaqge on /geo topic. This should replace the previous message but not
+  // the /geo2 message.
+  useTimeoutFn(() => {
+    setFixture({
+      topics,
+      frame: {
         "/geo": [
           {
             topic: "/geo",
-            receiveTime: { sec: 123, nsec: 456 },
+            receiveTime: { sec: 130, nsec: 0 },
             datatype: "foxglove.GeoJSON",
             message: {
-              geojson: GeoJsonContent,
+              geojson: JSON.stringify(
+                makeGeoJsonMessage({ lat: GeoCenter.lat + 0.2, lon: GeoCenter.lon + 0.1 }),
+              ),
             },
+            sizeInBytes: 10,
           },
         ],
       },
-    },
+    });
+  }, 1000);
+
+  return (
+    <PanelSetup fixture={fixture}>
+      <MapPanel
+        overrideConfig={{
+          topicColors: { "/geo": "#00ffaa", "/geo2": "#aa00ff" },
+          center: GeoCenter,
+        }}
+      />
+    </PanelSetup>
+  );
+};
+GeoJSON.parameters = {
+  chromatic: {
+    delay: 2000,
   },
+  colorScheme: "light",
 };

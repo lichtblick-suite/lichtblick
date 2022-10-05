@@ -13,7 +13,7 @@ import {
   geoJSON,
   Layer,
 } from "leaflet";
-import { difference, minBy, partition, union } from "lodash";
+import { difference, groupBy, isEqual, minBy, partition, union } from "lodash";
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { useResizeDetector } from "react-resize-detector";
 import { useDebouncedCallback } from "use-debounce";
@@ -343,7 +343,11 @@ function MapPanel(props: MapPanelProps): JSX.Element {
       setPreviewTime(renderState.previewTime);
 
       if (renderState.topics) {
-        setTopics(renderState.topics);
+        // Changing the topic list clears all map layers so we try to preserve reference identity
+        // if the contents of the topic list haven't changed.
+        setTopics((oldTopics) => {
+          return isEqual(oldTopics, renderState.topics) ? oldTopics : renderState.topics ?? [];
+        });
       }
 
       if (renderState.allFrames) {
@@ -483,11 +487,15 @@ function MapPanel(props: MapPanelProps): JSX.Element {
       return;
     }
 
-    for (const [topic, topicLayer] of topicLayers) {
-      topicLayer.currentFrame.clearLayers();
+    const navByTopic = groupBy(currentNavMessages, (msg) => msg.topic);
+    for (const [topic, messages] of Object.entries(navByTopic)) {
+      const topicLayer = topicLayers.get(topic);
+      if (!topicLayer) {
+        continue;
+      }
 
-      const navMessages = currentNavMessages.filter((message) => message.topic === topic);
-      const [fixEvents, noFixEvents] = partition(navMessages, hasFix);
+      topicLayer.currentFrame.clearLayers();
+      const [fixEvents, noFixEvents] = partition(messages, hasFix);
 
       const pointLayerNoFix = FilteredPointLayer({
         map: currentMap,
@@ -509,10 +517,17 @@ function MapPanel(props: MapPanelProps): JSX.Element {
 
       topicLayer.currentFrame.addLayer(pointLayerNoFix);
       topicLayer.currentFrame.addLayer(pointLayerFix);
+    }
 
-      currentGeoMessages
-        .filter((message) => message.topic === topic)
-        .forEach((message) => addGeoJsonMessage(message, topicLayer.currentFrame));
+    const geoByTopic = groupBy(currentGeoMessages, (msg) => msg.topic);
+    for (const [topic, messages] of Object.entries(geoByTopic)) {
+      const topicLayer = topicLayers.get(topic);
+      if (topicLayer) {
+        topicLayer.currentFrame.clearLayers();
+        for (const message of messages) {
+          addGeoJsonMessage(message, topicLayer.currentFrame);
+        }
+      }
     }
   }, [
     addGeoJsonMessage,
