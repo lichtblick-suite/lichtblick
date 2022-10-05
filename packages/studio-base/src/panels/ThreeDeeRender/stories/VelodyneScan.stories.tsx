@@ -1298,6 +1298,7 @@ export function VelodyneScan_Intensity(): JSX.Element {
       "/velodyne_packets": [
         {
           topic: "/velodyne_packets",
+          datatype: "velodyne_msgs/VelodyneScan",
           message: velodyneScan,
           receiveTime: { sec: 0, nsec: 0 },
           sizeInBytes: 0,
