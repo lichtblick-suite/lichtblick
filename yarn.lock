@@ -2355,12 +2355,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@foxglove/rosmsg-serialization@npm:1.5.2, @foxglove/rosmsg-serialization@npm:^1.5.2":
-  version: 1.5.2
-  resolution: "@foxglove/rosmsg-serialization@npm:1.5.2"
+"@foxglove/rosmsg-serialization@npm:1.5.3, @foxglove/rosmsg-serialization@npm:^1.5.2":
+  version: 1.5.3
+  resolution: "@foxglove/rosmsg-serialization@npm:1.5.3"
   dependencies:
     "@foxglove/rosmsg": ^3.1.0
-  checksum: e3b67af4d542fc8f0f06689958de3d5d1e227f812f1531860e56f99e72a5c3aff7b9c6e085ce3ea588f2690729fd1044559bc34bc37e59cce82854e1d5bc4a09
+  checksum: fdb665763b84f9af30d5161368aaf8ad662615cbb65ee648a7398c940f679baaeaca2eb569f573d2cedbdb171a0a1dabbdad14d0f2b70eff5c1afc337e58752b
   languageName: node
   linkType: hard
 
@@ -2444,7 +2444,7 @@ __metadata:
     "@foxglove/roslibjs": 0.0.1
     "@foxglove/rosmsg": 3.1.0
     "@foxglove/rosmsg-msgs-common": 2.1.0
-    "@foxglove/rosmsg-serialization": 1.5.2
+    "@foxglove/rosmsg-serialization": 1.5.3
     "@foxglove/rosmsg2-serialization": 1.0.7
     "@foxglove/rostime": 1.1.2
     "@foxglove/schemas": 0.7.0
