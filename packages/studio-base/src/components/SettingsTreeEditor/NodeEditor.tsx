@@ -191,7 +191,8 @@ function NodeEditorComponent(props: NodeEditorProps): JSX.Element {
   };
 
   const { fields, children } = settings;
-  const hasProperties = fields != undefined || children != undefined;
+  const hasChildren = children != undefined && Object.keys(children).length > 0;
+  const hasProperties = fields != undefined || hasChildren;
 
   const fieldEditors = filterMap(Object.entries(fields ?? {}), ([key, field]) => {
     return field ? (
@@ -369,7 +370,7 @@ function NodeEditorComponent(props: NodeEditorProps): JSX.Element {
           <div className={classes.fieldPadding} />
         </>
       )}
-      {state.open && selectVisibilityFilterEnabled && (
+      {state.open && selectVisibilityFilterEnabled && hasChildren && (
         <FieldEditor
           key="visibilityFilter"
           field={{ ...SelectVisibilityFilterField, value: state.visibilityFilter }}
