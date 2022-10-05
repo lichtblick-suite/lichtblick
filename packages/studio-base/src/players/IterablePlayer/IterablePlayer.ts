@@ -454,7 +454,8 @@ export class IterablePlayer implements Player {
         if (existingTopic) {
           problems.push({
             severity: "warn",
-            message: `Duplicate topic: ${topic.name}`,
+            message: `Inconsistent datatype for topic: ${topic.name}`,
+            tip: `Topic ${topic.name} has messages with multiple datatypes: ${existingTopic.datatype}, ${topic.datatype}. This may result in errors during visualization.`,
           });
           continue;
         }
