@@ -4,18 +4,33 @@
 
 import * as THREE from "three";
 
+import { PackedElementField } from "@foxglove/schemas";
+import { SettingsTreeFields, SettingsTreeNode, Topic } from "@foxglove/studio";
+import { BaseSettings } from "@foxglove/studio-base/panels/ThreeDeeRender/settings";
+
 import { rgbaGradient, rgbaToLinear, SRGBToLinear, stringToRgba } from "../../color";
 import { clamp } from "../../math";
 import type { ColorRGBA } from "../../ros";
-import type { LayerSettingsPointCloudAndLaserScan } from "../PointCloudsAndLaserScans";
 
 export type ColorConverter = (output: ColorRGBA, colorValue: number) => void;
 
 const tempColor1 = { r: 0, g: 0, b: 0, a: 0 };
 const tempColor2 = { r: 0, g: 0, b: 0, a: 0 };
 
-export function getColorConverter(
-  settings: LayerSettingsPointCloudAndLaserScan,
+export interface ColorModeSettings {
+  colorMode: "flat" | "gradient" | "colormap" | "rgb" | "rgba";
+  flatColor: string;
+  colorField?: string;
+  gradient: [string, string];
+  colorMap: "turbo" | "rainbow";
+  explicitAlpha: number;
+  rgbByteOrder: "rgba" | "bgra" | "abgr";
+  minValue?: number;
+  maxValue?: number;
+}
+
+export function getColorConverter<Settings extends ColorModeSettings>(
+  settings: Settings,
   minValue: number,
   maxValue: number,
 ): ColorConverter {
@@ -226,4 +241,212 @@ function turboCached(output: ColorRGBA, pct: number): void {
   output.g = TurboLookup[offset + 1]!;
   output.b = TurboLookup[offset + 2]!;
   output.a = 1;
+}
+export const COLOR_FIELDS = new Set<string>(["rgb", "rgba", "bgr", "bgra", "abgr", "color"]);
+export const INTENSITY_FIELDS = new Set<string>(["intensity", "i"]);
+
+export function autoSelectColorField<Settings extends ColorModeSettings>(
+  output: Settings,
+  fields: PackedElementField[],
+): void {
+  // Prefer color fields first
+  for (const field of fields) {
+    const fieldNameLower = field.name.toLowerCase();
+    if (COLOR_FIELDS.has(fieldNameLower)) {
+      output.colorField = field.name;
+      switch (fieldNameLower) {
+        case "rgb":
+          output.colorMode = "rgb";
+          output.rgbByteOrder = "abgr";
+          break;
+        default:
+        case "rgba":
+          output.colorMode = "rgba";
+          output.rgbByteOrder = "abgr";
+          break;
+        case "bgr":
+          output.colorMode = "rgb";
+          output.rgbByteOrder = "bgra";
+          break;
+        case "bgra":
+          output.colorMode = "rgba";
+          output.rgbByteOrder = "bgra";
+          break;
+        case "abgr":
+          output.colorMode = "rgba";
+          output.rgbByteOrder = "abgr";
+          break;
+      }
+      return;
+    }
+  }
+
+  // Fall back to using the first field
+  if (fields.length > 0) {
+    const firstField = fields[0]!;
+    output.colorField = firstField.name;
+    output.colorMode = "colormap";
+    output.colorMap = "turbo";
+    return;
+  }
+}
+
+export function bestColorByField(fields: string[]): string {
+  for (const field of fields) {
+    if (COLOR_FIELDS.has(field)) {
+      return field;
+    }
+  }
+  for (const field of fields) {
+    if (INTENSITY_FIELDS.has(field)) {
+      return field;
+    }
+  }
+  return fields.find((field) => field === "x") || fields[0] ? fields[0]! : "";
+}
+
+export function baseColorModeSettingsNode<Settings extends ColorModeSettings & BaseSettings>(
+  fieldsByTopic: Map<string, string[]>,
+  config: Partial<Settings>,
+  topic: Topic,
+  defaults: Settings,
+): SettingsTreeNode {
+  const msgFields = fieldsByTopic.get(topic.name) ?? [];
+  const colorMode = config.colorMode ?? "flat";
+  const flatColor = config.flatColor ?? "#ffffff";
+  const colorField = config.colorField ?? bestColorByField(msgFields);
+  const colorFieldOptions = msgFields.map((field) => ({ label: field, value: field }));
+  const gradient = config.gradient;
+  const colorMap = config.colorMap ?? "turbo";
+  const explicitAlpha = config.explicitAlpha ?? 1;
+  const rgbByteOrder = config.rgbByteOrder ?? "rgba";
+  const minValue = config.minValue;
+  const maxValue = config.maxValue;
+
+  const fields: SettingsTreeFields = {};
+
+  fields.colorMode = {
+    label: "Color mode",
+    input: "select",
+    options: [
+      { label: "Flat", value: "flat" },
+      { label: "Color map", value: "colormap" },
+      { label: "Gradient", value: "gradient" },
+      { label: "RGB", value: "rgb" },
+      { label: "RGBA", value: "rgba" },
+    ],
+    value: colorMode,
+  };
+  if (colorMode === "flat") {
+    fields.flatColor = { label: "Flat color", input: "rgba", value: flatColor };
+  } else {
+    fields.colorField = {
+      label: "Color by",
+      input: "select",
+      options: colorFieldOptions,
+      value: colorField,
+    };
+
+    switch (colorMode) {
+      case "gradient":
+        fields.gradient = {
+          label: "Gradient",
+          input: "gradient",
+          value: gradient ?? defaults.gradient,
+        };
+        break;
+      case "colormap":
+        fields.colorMap = {
+          label: "Color map",
+          input: "select",
+          options: [
+            { label: "Turbo", value: "turbo" },
+            { label: "Rainbow", value: "rainbow" },
+          ],
+          value: colorMap,
+        };
+        break;
+      case "rgb":
+        fields.rgbByteOrder = {
+          label: "RGB byte order",
+          input: "select",
+          options: [
+            { label: "RGB", value: "rgba" },
+            { label: "BGR", value: "bgra" },
+            { label: "XBGR", value: "abgr" },
+          ],
+          value: rgbByteOrder,
+        };
+        break;
+      case "rgba":
+        fields.rgbByteOrder = {
+          label: "RGBA byte order",
+          input: "select",
+          options: [
+            { label: "RGBA", value: "rgba" },
+            { label: "BGRA", value: "bgra" },
+            { label: "ABGR", value: "abgr" },
+          ],
+          value: rgbByteOrder,
+        };
+        break;
+      default:
+        break;
+    }
+
+    if (colorMode === "colormap" || colorMode === "rgb") {
+      fields.explicitAlpha = {
+        label: "Opacity",
+        input: "number",
+        step: 0.1,
+        placeholder: "1",
+        precision: 3,
+        min: 0,
+        max: 1,
+        value: explicitAlpha,
+      };
+    }
+
+    fields.minValue = {
+      label: "Value min",
+      input: "number",
+      placeholder: "auto",
+      precision: 4,
+      value: minValue,
+    };
+    fields.maxValue = {
+      label: "Value max",
+      input: "number",
+      placeholder: "auto",
+      precision: 4,
+      value: maxValue,
+    };
+  }
+
+  return {
+    fields,
+    order: topic.name.toLocaleLowerCase(),
+    visible: config.visible ?? defaults.visible,
+  };
+}
+
+const tempColor = { r: 0, g: 0, b: 0, a: 0 };
+export function colorHasTransparency<Settings extends ColorModeSettings>(
+  settings: Settings,
+): boolean {
+  switch (settings.colorMode) {
+    case "flat":
+      return stringToRgba(tempColor, settings.flatColor).a < 1.0;
+    case "gradient":
+      return (
+        stringToRgba(tempColor, settings.gradient[0]).a < 1.0 ||
+        stringToRgba(tempColor, settings.gradient[1]).a < 1.0
+      );
+    case "colormap":
+    case "rgb":
+      return settings.explicitAlpha < 1.0;
+    case "rgba":
+      // It's too expensive to check the alpha value of each color. Just assume it's transparent
+      return true;
+  }
 }

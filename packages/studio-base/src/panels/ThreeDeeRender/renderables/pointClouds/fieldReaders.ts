@@ -2,9 +2,8 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import type { PackedElementField } from "@foxglove/schemas";
+import { NumericType, PackedElementField } from "@foxglove/schemas";
 
-import { numericTypeToPointFieldType } from "../../normalizeMessages";
 import { PointField, PointFieldType } from "../../ros";
 
 export type FieldReader = (view: DataView, pointOffset: number) => number;
@@ -43,33 +42,53 @@ export function float64Reader(fieldOffset: number): FieldReader {
 
 export function getReader(
   field: PackedElementField | PointField,
-  pointStep: number,
-  forceType?: PointFieldType,
+  stride: number,
+  forceType?: PointFieldType | NumericType,
 ): FieldReader | undefined {
   const numericType = (field as Partial<PackedElementField>).type;
-  const type =
-    forceType ??
-    (numericType != undefined
-      ? numericTypeToPointFieldType(numericType)
-      : (field as PointField).datatype);
-  switch (type) {
-    case PointFieldType.INT8:
-      return field.offset + 1 <= pointStep ? int8Reader(field.offset) : undefined;
-    case PointFieldType.UINT8:
-      return field.offset + 1 <= pointStep ? uint8Reader(field.offset) : undefined;
-    case PointFieldType.INT16:
-      return field.offset + 2 <= pointStep ? int16Reader(field.offset) : undefined;
-    case PointFieldType.UINT16:
-      return field.offset + 2 <= pointStep ? uint16Reader(field.offset) : undefined;
-    case PointFieldType.INT32:
-      return field.offset + 4 <= pointStep ? int32Reader(field.offset) : undefined;
-    case PointFieldType.UINT32:
-      return field.offset + 4 <= pointStep ? uint32Reader(field.offset) : undefined;
-    case PointFieldType.FLOAT32:
-      return field.offset + 4 <= pointStep ? float32Reader(field.offset) : undefined;
-    case PointFieldType.FLOAT64:
-      return field.offset + 8 <= pointStep ? float64Reader(field.offset) : undefined;
-    default:
-      return undefined;
+  if (numericType == undefined) {
+    const type = forceType ?? (field as PointField).datatype;
+    switch (type) {
+      case PointFieldType.INT8:
+        return field.offset + 1 <= stride ? int8Reader(field.offset) : undefined;
+      case PointFieldType.UINT8:
+        return field.offset + 1 <= stride ? uint8Reader(field.offset) : undefined;
+      case PointFieldType.INT16:
+        return field.offset + 2 <= stride ? int16Reader(field.offset) : undefined;
+      case PointFieldType.UINT16:
+        return field.offset + 2 <= stride ? uint16Reader(field.offset) : undefined;
+      case PointFieldType.INT32:
+        return field.offset + 4 <= stride ? int32Reader(field.offset) : undefined;
+      case PointFieldType.UINT32:
+        return field.offset + 4 <= stride ? uint32Reader(field.offset) : undefined;
+      case PointFieldType.FLOAT32:
+        return field.offset + 4 <= stride ? float32Reader(field.offset) : undefined;
+      case PointFieldType.FLOAT64:
+        return field.offset + 8 <= stride ? float64Reader(field.offset) : undefined;
+      default:
+        return undefined;
+    }
+  } else {
+    const type = (forceType ?? numericType) as NumericType;
+    switch (type) {
+      case NumericType.INT8:
+        return field.offset + 1 <= stride ? int8Reader(field.offset) : undefined;
+      case NumericType.UINT8:
+        return field.offset + 1 <= stride ? uint8Reader(field.offset) : undefined;
+      case NumericType.INT16:
+        return field.offset + 2 <= stride ? int16Reader(field.offset) : undefined;
+      case NumericType.UINT16:
+        return field.offset + 2 <= stride ? uint16Reader(field.offset) : undefined;
+      case NumericType.INT32:
+        return field.offset + 4 <= stride ? int32Reader(field.offset) : undefined;
+      case NumericType.UINT32:
+        return field.offset + 4 <= stride ? uint32Reader(field.offset) : undefined;
+      case NumericType.FLOAT32:
+        return field.offset + 4 <= stride ? float32Reader(field.offset) : undefined;
+      case NumericType.FLOAT64:
+        return field.offset + 8 <= stride ? float64Reader(field.offset) : undefined;
+      default:
+        return undefined;
+    }
   }
 }

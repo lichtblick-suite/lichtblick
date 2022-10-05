@@ -22,6 +22,7 @@ import {
   Topic,
   VariableValue,
 } from "@foxglove/studio";
+import { FoxgloveGrid } from "@foxglove/studio-base/panels/ThreeDeeRender/renderables/FoxgloveGrid";
 import { fonts } from "@foxglove/studio-base/util/sharedStyleConstants";
 import { LabelMaterial, LabelPool } from "@foxglove/three-text";
 
@@ -459,6 +460,7 @@ export class Renderer extends EventEmitter<RendererEvents> {
     this.addSceneExtension(new Images(this));
     this.addSceneExtension(new Markers(this));
     this.addSceneExtension(new FoxgloveSceneEntities(this));
+    this.addSceneExtension(new FoxgloveGrid(this));
     this.addSceneExtension(new OccupancyGrids(this));
     this.addSceneExtension(new PointCloudsAndLaserScans(this));
     this.addSceneExtension(new VelodyneScans(this));

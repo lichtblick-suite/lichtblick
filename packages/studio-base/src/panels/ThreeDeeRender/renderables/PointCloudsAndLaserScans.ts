@@ -5,8 +5,9 @@
 import * as THREE from "three";
 
 import { Time, toNanoSec } from "@foxglove/rostime";
-import type {
+import {
   LaserScan as FoxgloveLaserScan,
+  NumericType,
   PackedElementField,
   PointCloud,
 } from "@foxglove/schemas";
@@ -43,24 +44,22 @@ import {
 import { BaseSettings } from "../settings";
 import { makePose, MAX_DURATION, Pose } from "../transforms";
 import { updatePose } from "../updatePose";
-import { getColorConverter } from "./pointClouds/colors";
+import {
+  bestColorByField,
+  ColorModeSettings,
+  COLOR_FIELDS,
+  getColorConverter,
+  INTENSITY_FIELDS,
+} from "./pointClouds/colors";
 import { FieldReader, getReader } from "./pointClouds/fieldReaders";
 import { missingTransformMessage, MISSING_TRANSFORM } from "./transforms";
 
-export type LayerSettingsPointCloudAndLaserScan = BaseSettings & {
-  pointSize: number;
-  pointShape: "circle" | "square";
-  decayTime: number;
-  colorMode: "flat" | "gradient" | "colormap" | "rgb" | "rgba";
-  flatColor: string;
-  colorField: string | undefined;
-  gradient: [string, string];
-  colorMap: "turbo" | "rainbow";
-  explicitAlpha: number;
-  rgbByteOrder: "rgba" | "bgra" | "abgr";
-  minValue: number | undefined;
-  maxValue: number | undefined;
-};
+export type LayerSettingsPointCloudAndLaserScan = BaseSettings &
+  ColorModeSettings & {
+    pointSize: number;
+    pointShape: "circle" | "square";
+    decayTime: number;
+  };
 
 type Material = THREE.PointsMaterial | LaserScanMaterial;
 type Points = THREE.Points<DynamicBufferGeometry, Material>;
@@ -137,9 +136,6 @@ const POINT_SHAPE_OPTIONS = [
 ];
 const POINTCLOUD_REQUIRED_FIELDS = ["x", "y", "z"];
 const LASERSCAN_FIELDS = ["range", "intensity"];
-
-const COLOR_FIELDS = new Set<string>(["rgb", "rgba", "bgr", "bgra", "abgr", "color"]);
-const INTENSITY_FIELDS = new Set<string>(["intensity", "i"]);
 
 const INVALID_POINTCLOUD_OR_LASERSCAN = "INVALID_POINTCLOUD_OR_LASERSCAN";
 
@@ -479,7 +475,9 @@ export class PointCloudAndLaserScanRenderable extends Renderable<PointCloudAndLa
         // other than uint32
         const forceType =
           (settings.colorMode === "rgb" || settings.colorMode === "rgba") && byteWidth >= 4
-            ? PointFieldType.UINT32
+            ? numericType != undefined
+              ? NumericType.UINT32
+              : PointFieldType.UINT32
             : undefined;
         colorReader = getReader(field, stride, forceType);
         if (!colorReader) {
@@ -1446,20 +1444,6 @@ export function autoSelectColorField(
     output.colorMap = "turbo";
     return;
   }
-}
-
-function bestColorByField(fields: string[]): string {
-  for (const field of fields) {
-    if (COLOR_FIELDS.has(field)) {
-      return field;
-    }
-  }
-  for (const field of fields) {
-    if (INTENSITY_FIELDS.has(field)) {
-      return field;
-    }
-  }
-  return "x";
 }
 
 export function pointCloudSettingsNode(

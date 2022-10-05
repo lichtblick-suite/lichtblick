@@ -29,6 +29,9 @@ addFoxgloveSchema(POSE_IN_FRAME_DATATYPES, "foxglove.PoseInFrame");
 export const POSES_IN_FRAME_DATATYPES = new Set<string>();
 addFoxgloveSchema(POSES_IN_FRAME_DATATYPES, "foxglove.PosesInFrame");
 
+export const GRID_DATATYPES = new Set<string>();
+addFoxgloveSchema(GRID_DATATYPES, "foxglove.Grid");
+
 // Expand a single Foxglove dataType into variations for ROS1 and ROS2 then add
 // them to the given output set
 function addFoxgloveSchema(output: Set<string>, dataType: string): Set<string> {
