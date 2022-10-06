@@ -10,6 +10,7 @@ import {
 import { IterablePlayer } from "@foxglove/studio-base/players/IterablePlayer";
 import { DataPlatformIterableSource } from "@foxglove/studio-base/players/IterablePlayer/foxglove-data-platform";
 import { Player } from "@foxglove/studio-base/players/types";
+import { DataPlatformSourceParameters } from "@foxglove/studio-base/services/ConsoleApi";
 import { formatTimeRaw } from "@foxglove/studio-base/util/time";
 
 class FoxgloveDataPlatformDataSourceFactory implements IDataSourceFactory {
@@ -30,27 +31,28 @@ class FoxgloveDataPlatformDataSourceFactory implements IDataSourceFactory {
     const deviceId = args.deviceId as string | undefined;
     const importId = args.importId as string | undefined;
 
-    if (!deviceId && !importId) {
-      return;
-    }
-
     const startTime = start ? fromRFC3339String(start) : undefined;
     const endTime = end ? fromRFC3339String(end) : undefined;
 
+    if (!(importId || (deviceId && startTime && endTime))) {
+      return;
+    }
+    const dpSourceParams: DataPlatformSourceParameters = importId
+      ? { type: "by-import", importId, start: startTime, end: endTime }
+      : { type: "by-device", deviceId: deviceId!, start: startTime!, end: endTime! };
+
     const source = new DataPlatformIterableSource({
       api: args.consoleApi,
-      deviceId,
-      importId,
-      start: startTime,
-      end: endTime,
+      params: dpSourceParams,
     });
+
     return new IterablePlayer({
       metricsCollector: args.metricsCollector,
       source,
       sourceId: this.id,
       urlParams: {
         ...(importId && { importId }),
-        ...(deviceId && { deviceId }),
+        ...(!importId && deviceId && { deviceId }),
         ...(startTime && { start }),
         ...(endTime && { end }),
       },
