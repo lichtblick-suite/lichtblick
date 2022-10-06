@@ -174,7 +174,7 @@ export default class VelodynePlayer implements Player {
         receiveTime,
         message,
         sizeInBytes,
-        datatype: TOPIC.datatype,
+        schemaName: TOPIC.datatype,
       };
       this._parsedMessages.push(msg);
       this._packets = [];

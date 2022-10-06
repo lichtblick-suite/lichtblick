@@ -77,7 +77,7 @@ export function JointPositionFromTopic(): JSX.Element {
       velocity: [0],
       effort: [0],
     },
-    datatype: "sensor_msgs/JointState",
+    schemaName: "sensor_msgs/JointState",
     sizeInBytes: 0,
   };
   return (

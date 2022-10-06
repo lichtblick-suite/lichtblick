@@ -15,25 +15,26 @@
 import { renderHook } from "@testing-library/react-hooks";
 
 import MockMessagePipelineProvider from "@foxglove/studio-base/components/MessagePipeline/MockMessagePipelineProvider";
+import { MessageEvent } from "@foxglove/studio-base/players/types";
 import { RosDatatypes } from "@foxglove/studio-base/types/RosDatatypes";
 
 import * as PanelAPI from ".";
 
 describe("useDataSourceInfo", () => {
   const topics = [{ name: "/foo", datatype: "Foo" }];
-  const messages = [
+  const messages: MessageEvent<unknown>[] = [
     {
       topic: "/foo",
       receiveTime: { sec: 1, nsec: 2 },
       message: {},
-      datatype: "foo",
+      schemaName: "foo",
       sizeInBytes: 0,
     },
     {
       topic: "/foo",
       receiveTime: { sec: 5, nsec: 6 },
       message: {},
-      datatype: "foo",
+      schemaName: "foo",
       sizeInBytes: 0,
     },
   ];

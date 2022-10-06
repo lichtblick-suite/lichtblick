@@ -11,9 +11,9 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
+import { MessageEvent } from "@foxglove/studio-base/players/types";
 import { Fixture } from "@foxglove/studio-base/stories/PanelSetup";
 import { RosDatatypes } from "@foxglove/studio-base/types/RosDatatypes";
-
 // ts-prune-ignore-next
 export const datatypes: RosDatatypes = new Map(
   Object.entries({
@@ -22,29 +22,29 @@ export const datatypes: RosDatatypes = new Map(
 );
 
 // ts-prune-ignore-next
-export const messages = Object.freeze([
+export const messages = Object.freeze<MessageEvent<unknown>>([
   {
     topic: "/some/topic",
     receiveTime: { sec: 100, nsec: 0 },
     message: { index: 0 },
-    datatype: "msgs/PoseDebug",
+    schemaName: "msgs/PoseDebug",
     sizeInBytes: 0,
   },
   {
     topic: "/some/topic",
     receiveTime: { sec: 101, nsec: 0 },
     message: { index: 1 },
-    datatype: "msgs/PoseDebug",
+    schemaName: "msgs/PoseDebug",
     sizeInBytes: 0,
   },
   {
     topic: "/some/topic",
     receiveTime: { sec: 102, nsec: 0 },
     message: { index: 2 },
-    datatype: "msgs/PoseDebug",
+    schemaName: "msgs/PoseDebug",
     sizeInBytes: 0,
   },
-] as const);
+]);
 
 // ts-prune-ignore-next
 export const MessagePathInputStoryFixture: Fixture = {

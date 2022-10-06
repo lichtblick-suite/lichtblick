@@ -497,7 +497,7 @@ export default class Ros2Player implements Player {
         publishTime,
         message,
         sizeInBytes,
-        datatype,
+        schemaName: datatype,
       };
       this._parsedMessages.push(msg);
       this._handleInternalMessage(msg);

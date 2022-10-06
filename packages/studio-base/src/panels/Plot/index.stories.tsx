@@ -14,22 +14,12 @@
 import { shuffle } from "lodash";
 import { useCallback, useRef } from "react";
 
-import { parse as parseMessageDefinition } from "@foxglove/rosmsg";
 import { fromSec } from "@foxglove/rostime";
 import Plot, { PlotConfig } from "@foxglove/studio-base/panels/Plot";
-import { BlockCache } from "@foxglove/studio-base/players/types";
+import { BlockCache, MessageEvent } from "@foxglove/studio-base/players/types";
 import PanelSetup, { Fixture, triggerWheel } from "@foxglove/studio-base/stories/PanelSetup";
 import { useReadySignal } from "@foxglove/studio-base/stories/ReadySignalContext";
 import { RosDatatypes } from "@foxglove/studio-base/types/RosDatatypes";
-
-const float64StampedDefinition = `std_msgs/Header header
-float64 data
-
-================================================================================
-MSG: std_msgs/Header
-uint32 seq
-time stamp
-string frame_id`;
 
 const locationMessages = [
   {
@@ -249,7 +239,7 @@ const messageCache: BlockCache = {
   startTime: fromSec(0.6),
 };
 
-const fixture = {
+const fixture: Fixture = {
   datatypes,
   topics: [
     { name: "/some_topic/location", datatype: "msgs/PoseDebug" },
@@ -264,41 +254,44 @@ const fixture = {
     endTime: { sec: 24, nsec: 999997069 },
     currentTime: { sec: 0, nsec: 750000000 },
     isPlaying: false,
-    parsedMessageDefinitionsByTopic: {
-      "/preloaded_topic": parseMessageDefinition(float64StampedDefinition),
-    },
     speed: 0.2,
   },
   frame: {
-    "/some_topic/location": locationMessages.map((message) => ({
-      topic: "/some_topic/location",
-      receiveTime: message.header.stamp,
-      message,
-      datatype: "msgs/PoseDebug",
-      sizeInBytes: 0,
-    })),
-    "/some_topic/location_subset": locationMessages
-      .slice(locationMessages.length / 3, (locationMessages.length * 2) / 3)
-      .map((message) => ({
-        topic: "/some_topic/location_subset",
+    "/some_topic/location": locationMessages.map(
+      (message): MessageEvent<unknown> => ({
+        topic: "/some_topic/location",
         receiveTime: message.header.stamp,
         message,
-        datatype: "msgs/PoseDebug",
+        schemaName: "msgs/PoseDebug",
         sizeInBytes: 0,
-      })),
-    "/some_topic/state": otherStateMessages.map((message) => ({
-      topic: "/some_topic/state",
-      receiveTime: message.header.stamp,
-      message,
-      datatype: "msgs/State",
-      sizeInBytes: 0,
-    })),
+      }),
+    ),
+    "/some_topic/location_subset": locationMessages
+      .slice(locationMessages.length / 3, (locationMessages.length * 2) / 3)
+      .map(
+        (message): MessageEvent<unknown> => ({
+          topic: "/some_topic/location_subset",
+          receiveTime: message.header.stamp,
+          message,
+          schemaName: "msgs/PoseDebug",
+          sizeInBytes: 0,
+        }),
+      ),
+    "/some_topic/state": otherStateMessages.map(
+      (message): MessageEvent<unknown> => ({
+        topic: "/some_topic/state",
+        receiveTime: message.header.stamp,
+        message,
+        schemaName: "msgs/State",
+        sizeInBytes: 0,
+      }),
+    ),
     "/boolean_topic": [
       {
         topic: "/boolean_topic",
         receiveTime: { sec: 1, nsec: 0 },
         message: { data: true },
-        datatype: "std_msgs/Bool",
+        schemaName: "std_msgs/Bool",
         sizeInBytes: 0,
       },
     ],
@@ -306,13 +299,15 @@ const fixture = {
     // This is used in the headerStamp series test to check that the dataset is sorted
     // prior to rendering. If the dataset is not sorted properly, the plot is jumbled.
     "/some_topic/location_shuffled": shuffle(
-      locationMessages.map((message) => ({
-        topic: "/some_topic/location_shuffled",
-        receiveTime: message.header.stamp,
-        message,
-        datatype: "msgs/PoseDebug",
-        sizeInBytes: 0,
-      })),
+      locationMessages.map(
+        (message): MessageEvent<unknown> => ({
+          topic: "/some_topic/location_shuffled",
+          receiveTime: message.header.stamp,
+          message,
+          schemaName: "msgs/PoseDebug",
+          sizeInBytes: 0,
+        }),
+      ),
     ),
   },
   progress: { messageCache },
@@ -1037,14 +1032,14 @@ export function SuperCloseValues(): JSX.Element {
               topic: "/some_number",
               receiveTime: { sec: 0, nsec: 0 },
               message: { data: 1.8548483304974972 },
-              datatype: "std_msgs/Float32",
+              schemaName: "std_msgs/Float32",
               sizeInBytes: 0,
             },
             {
               topic: "/some_number",
               receiveTime: { sec: 1, nsec: 0 },
               message: { data: 1.8548483304974974 },
-              datatype: "std_msgs/Float32",
+              schemaName: "std_msgs/Float32",
               sizeInBytes: 0,
             },
           ],

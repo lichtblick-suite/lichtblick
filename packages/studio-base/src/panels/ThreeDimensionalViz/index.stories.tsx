@@ -3,6 +3,7 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 import { quat, vec3 } from "gl-matrix";
+import { DeepWritable } from "ts-essentials";
 
 import { DEFAULT_CAMERA_STATE, Vec4, vec4ToOrientation } from "@foxglove/regl-worldview";
 import { RosMsgDefinition } from "@foxglove/rosmsg";
@@ -112,7 +113,7 @@ function makePass({
       color: makeColor(colorHex, 0.25),
       lifetime,
     },
-    datatype: "visualization_msgs/Marker",
+    schemaName: "visualization_msgs/Marker",
     sizeInBytes: 0,
   };
 }
@@ -145,7 +146,7 @@ function makeFail({
       color: makeColor(colorHex, 0.75),
       lifetime,
     },
-    datatype: "visualization_msgs/Marker",
+    schemaName: "visualization_msgs/Marker",
     sizeInBytes: 0,
   };
 }
@@ -319,7 +320,7 @@ export function Markers(): JSX.Element {
         rotation: QUAT_IDENTITY,
       },
     },
-    datatype: "geometry_msgs/TransformStamped",
+    schemaName: "geometry_msgs/TransformStamped",
     sizeInBytes: 0,
   };
   const tf2: MessageEvent<TF> = {
@@ -333,7 +334,7 @@ export function Markers(): JSX.Element {
         rotation: QUAT_IDENTITY,
       },
     },
-    datatype: "geometry_msgs/TransformStamped",
+    schemaName: "geometry_msgs/TransformStamped",
     sizeInBytes: 0,
   };
 
@@ -355,7 +356,7 @@ export function Markers(): JSX.Element {
       color: makeColor("#f44336", 0.5),
       lifetime: { sec: 0, nsec: 0 },
     },
-    datatype: "visualization_msgs/Marker",
+    schemaName: "visualization_msgs/Marker",
     sizeInBytes: 0,
   };
 
@@ -377,7 +378,7 @@ export function Markers(): JSX.Element {
       color: makeColor("#e81e63", 0.5),
       lifetime: { sec: 0, nsec: 0 },
     },
-    datatype: "visualization_msgs/Marker",
+    schemaName: "visualization_msgs/Marker",
     sizeInBytes: 0,
   };
 
@@ -399,7 +400,7 @@ export function Markers(): JSX.Element {
       color: makeColor("#9c27b0", 0.5),
       lifetime: { sec: 0, nsec: 0 },
     },
-    datatype: "visualization_msgs/Marker",
+    schemaName: "visualization_msgs/Marker",
     sizeInBytes: 0,
   };
 
@@ -421,7 +422,7 @@ export function Markers(): JSX.Element {
       color: makeColor("#673ab7", 0.5),
       lifetime: { sec: 0, nsec: 0 },
     },
-    datatype: "visualization_msgs/Marker",
+    schemaName: "visualization_msgs/Marker",
     sizeInBytes: 0,
   };
 
@@ -455,7 +456,7 @@ export function Markers(): JSX.Element {
       ],
       lifetime: { sec: 0, nsec: 0 },
     },
-    datatype: "visualization_msgs/Marker",
+    schemaName: "visualization_msgs/Marker",
     sizeInBytes: 0,
   };
 
@@ -493,7 +494,7 @@ export function Markers(): JSX.Element {
       ],
       lifetime: { sec: 0, nsec: 0 },
     },
-    datatype: "visualization_msgs/Marker",
+    schemaName: "visualization_msgs/Marker",
     sizeInBytes: 0,
   };
 
@@ -521,7 +522,7 @@ export function Markers(): JSX.Element {
       colors: [makeColor("#f44336", 0.5), makeColor("#4caf50", 0.5), makeColor("#2196f3", 0.5)],
       lifetime: { sec: 0, nsec: 0 },
     },
-    datatype: "visualization_msgs/Marker",
+    schemaName: "visualization_msgs/Marker",
     sizeInBytes: 0,
   };
 
@@ -549,7 +550,7 @@ export function Markers(): JSX.Element {
       colors: [makeColor("#f44336", 0.5), makeColor("#4caf50", 0.5), makeColor("#2196f3", 0.5)],
       lifetime: { sec: 0, nsec: 0 },
     },
-    datatype: "visualization_msgs/Marker",
+    schemaName: "visualization_msgs/Marker",
     sizeInBytes: 0,
   };
 
@@ -578,7 +579,7 @@ export function Markers(): JSX.Element {
       colors: [makeColor("#f44336", 0.5), makeColor("#4caf50", 0.5), makeColor("#2196f3", 0.5)],
       lifetime: { sec: 0, nsec: 0 },
     },
-    datatype: "visualization_msgs/Marker",
+    schemaName: "visualization_msgs/Marker",
     sizeInBytes: 0,
   };
 
@@ -601,7 +602,7 @@ export function Markers(): JSX.Element {
       text: "Lorem Ipsum\nDolor Sit Amet",
       lifetime: { sec: 0, nsec: 0 },
     },
-    datatype: "visualization_msgs/Marker",
+    schemaName: "visualization_msgs/Marker",
     sizeInBytes: 0,
   };
 
@@ -625,7 +626,7 @@ export function Markers(): JSX.Element {
       mesh_use_embedded_materials: true,
       lifetime: { sec: 0, nsec: 0 },
     },
-    datatype: "visualization_msgs/Marker",
+    schemaName: "visualization_msgs/Marker",
     sizeInBytes: 0,
   };
 
@@ -657,7 +658,7 @@ export function Markers(): JSX.Element {
       colors: [makeColor("#f44336", 0.5), makeColor("#4caf50", 0.5), makeColor("#2196f3", 0.5)],
       lifetime: { sec: 0, nsec: 0 },
     },
-    datatype: "visualization_msgs/Marker",
+    schemaName: "visualization_msgs/Marker",
     sizeInBytes: 0,
   };
 
@@ -738,7 +739,7 @@ export function FramelessMarkers(): JSX.Element {
       color: makeColor("#e81e63", 0.5),
       lifetime: { sec: 0, nsec: 0 },
     },
-    datatype: "visualization_msgs/Marker",
+    schemaName: "visualization_msgs/Marker",
     sizeInBytes: 0,
   };
 
@@ -797,7 +798,7 @@ export function ArrowMarkers(): JSX.Element {
         rotation: QUAT_IDENTITY,
       },
     },
-    datatype: "geometry_msgs/TransformStamped",
+    schemaName: "geometry_msgs/TransformStamped",
     sizeInBytes: 0,
   };
   const tf2: MessageEvent<TF> = {
@@ -811,7 +812,7 @@ export function ArrowMarkers(): JSX.Element {
         rotation: { x: 0.383, y: 0, z: 0, w: 0.924 },
       },
     },
-    datatype: "geometry_msgs/TransformStamped",
+    schemaName: "geometry_msgs/TransformStamped",
     sizeInBytes: 0,
   };
 
@@ -833,7 +834,7 @@ export function ArrowMarkers(): JSX.Element {
       color: makeColor("#f44336", 0.5),
       lifetime: { sec: 0, nsec: 0 },
     },
-    datatype: "visualization_msgs/Marker",
+    schemaName: "visualization_msgs/Marker",
     sizeInBytes: 0,
   };
 
@@ -855,7 +856,7 @@ export function ArrowMarkers(): JSX.Element {
       color: makeColor("#4caf50", 0.5),
       lifetime: { sec: 0, nsec: 0 },
     },
-    datatype: "visualization_msgs/Marker",
+    schemaName: "visualization_msgs/Marker",
     sizeInBytes: 0,
   };
 
@@ -881,7 +882,7 @@ export function ArrowMarkers(): JSX.Element {
       color: makeColor("#2196f3", 0.5),
       lifetime: { sec: 0, nsec: 0 },
     },
-    datatype: "visualization_msgs/Marker",
+    schemaName: "visualization_msgs/Marker",
     sizeInBytes: 0,
   };
 
@@ -926,7 +927,11 @@ export function ArrowMarkers(): JSX.Element {
 
 SphereListPointsTransform.parameters = { colorScheme: "dark" };
 export function SphereListPointsTransform(): JSX.Element {
-  function makeSphere(id: string, color: string, scale: number) {
+  function makeSphere(
+    id: string,
+    color: string,
+    scale: number,
+  ): MessageEvent<DeepWritable<SphereListMarker>> {
     return {
       topic: "/sphere",
       receiveTime: { sec: 10, nsec: 0 },
@@ -952,7 +957,7 @@ export function SphereListPointsTransform(): JSX.Element {
         color: makeColor(color, 1),
         lifetime: { sec: 0, nsec: 0 },
       },
-      datatype: "visualization_msgs/Marker",
+      schemaName: "visualization_msgs/Marker",
       sizeInBytes: 0,
     };
   }
@@ -978,7 +983,7 @@ export function SphereListPointsTransform(): JSX.Element {
         },
       },
     },
-    datatype: "geometry_msgs/TransformStamped",
+    schemaName: "geometry_msgs/TransformStamped",
     sizeInBytes: 0,
   };
 
@@ -1056,7 +1061,7 @@ export function TransformInterpolation(): JSX.Element {
         rotation: QUAT_IDENTITY,
       },
     },
-    datatype: "geometry_msgs/TransformStamped",
+    schemaName: "geometry_msgs/TransformStamped",
     sizeInBytes: 0,
   };
   const tf_t3: MessageEvent<TF> = {
@@ -1070,7 +1075,7 @@ export function TransformInterpolation(): JSX.Element {
         rotation: QUAT_IDENTITY,
       },
     },
-    datatype: "geometry_msgs/TransformStamped",
+    schemaName: "geometry_msgs/TransformStamped",
     sizeInBytes: 0,
   };
   const pass1 = makePass({
@@ -1151,7 +1156,7 @@ export function MarkerLifetimes(): JSX.Element {
         rotation: QUAT_IDENTITY,
       },
     },
-    datatype: "geometry_msgs/TransformStamped",
+    schemaName: "geometry_msgs/TransformStamped",
     sizeInBytes: 0,
   };
   const tf2: MessageEvent<TF> = {
@@ -1165,7 +1170,7 @@ export function MarkerLifetimes(): JSX.Element {
         rotation: QUAT_IDENTITY,
       },
     },
-    datatype: "geometry_msgs/TransformStamped",
+    schemaName: "geometry_msgs/TransformStamped",
     sizeInBytes: 0,
   };
   const pass1 = makePass({
@@ -1283,7 +1288,7 @@ export function Marker_PointCloud2_Alignment(): JSX.Element {
         rotation: QUAT_IDENTITY,
       },
     },
-    datatype: "geometry_msgs/TransformStamped",
+    schemaName: "geometry_msgs/TransformStamped",
     sizeInBytes: 0,
   };
   const tf2: MessageEvent<TF> = {
@@ -1297,7 +1302,7 @@ export function Marker_PointCloud2_Alignment(): JSX.Element {
         rotation: { x: 0.010471, y: 0.008726, z: -0.000091, w: 0.999907 },
       },
     },
-    datatype: "geometry_msgs/TransformStamped",
+    schemaName: "geometry_msgs/TransformStamped",
     sizeInBytes: 0,
   };
 
@@ -1326,7 +1331,7 @@ export function Marker_PointCloud2_Alignment(): JSX.Element {
       colors: [makeColor("#f44336"), makeColor("#4caf50"), makeColor("#2196f3")],
       lifetime: { sec: 0, nsec: 0 },
     },
-    datatype: "visualization_msgs/Marker",
+    schemaName: "visualization_msgs/Marker",
     sizeInBytes: 0,
   };
 
@@ -1372,7 +1377,7 @@ export function Marker_PointCloud2_Alignment(): JSX.Element {
       data,
       is_dense: 1,
     },
-    datatype: "sensor_msgs/PointCloud2",
+    schemaName: "sensor_msgs/PointCloud2",
     sizeInBytes: 0,
   };
 
@@ -1441,7 +1446,7 @@ export function Foxglove_Color(): JSX.Element {
     topic: "/color",
     receiveTime: { sec: 0, nsec: 0 },
     message: { r: 1, g: 0.5, b: 0, a: 0.5 },
-    datatype: "foxglove.Color",
+    schemaName: "foxglove.Color",
     sizeInBytes: 0,
   };
 
@@ -1489,7 +1494,7 @@ export function Foxglove_Grid(): JSX.Element {
     topic: "/grid",
     receiveTime: { sec: 0, nsec: 0 },
     sizeInBytes: 0,
-    datatype: "foxglove.Grid",
+    schemaName: "foxglove.Grid",
     message: {
       frame_id: "",
       timestamp: { sec: 1, nsec: 0 },
@@ -1549,7 +1554,7 @@ export function Foxglove_PointCloud(): JSX.Element {
     topic: "/pointcloud",
     receiveTime: { sec: 0, nsec: 0 },
     sizeInBytes: 0,
-    datatype: "foxglove.PointCloud",
+    schemaName: "foxglove.PointCloud",
     message: {
       frame_id: "",
       timestamp: { sec: 1, nsec: 0 },
@@ -1602,7 +1607,7 @@ export function Foxglove_LaserScan(): JSX.Element {
     topic: "/laserscan",
     receiveTime: { sec: 0, nsec: 0 },
     sizeInBytes: 0,
-    datatype: "foxglove.LaserScan",
+    schemaName: "foxglove.LaserScan",
     message: {
       frame_id: "",
       timestamp: { sec: 1, nsec: 0 },
@@ -1658,7 +1663,7 @@ export function GeometryMsgs_Polygon(): JSX.Element {
         rotation: QUAT_IDENTITY,
       },
     },
-    datatype: "geometry_msgs/TransformStamped",
+    schemaName: "geometry_msgs/TransformStamped",
     sizeInBytes: 0,
   };
   const tf2: MessageEvent<TF> = {
@@ -1672,7 +1677,7 @@ export function GeometryMsgs_Polygon(): JSX.Element {
         rotation: QUAT_IDENTITY,
       },
     },
-    datatype: "geometry_msgs/TransformStamped",
+    schemaName: "geometry_msgs/TransformStamped",
     sizeInBytes: 0,
   };
 
@@ -1689,7 +1694,7 @@ export function GeometryMsgs_Polygon(): JSX.Element {
         ],
       },
     },
-    datatype: "geometry_msgs/PolygonStamped",
+    schemaName: "geometry_msgs/PolygonStamped",
     sizeInBytes: 0,
   };
 
@@ -1756,7 +1761,7 @@ function GeometryMsgs_PoseArray_Base({ displayType }: { displayType?: string }):
         rotation: QUAT_IDENTITY,
       },
     },
-    datatype: "geometry_msgs/TransformStamped",
+    schemaName: "geometry_msgs/TransformStamped",
     sizeInBytes: 0,
   };
   const tf2: MessageEvent<TF> = {
@@ -1772,7 +1777,7 @@ function GeometryMsgs_PoseArray_Base({ displayType }: { displayType?: string }):
         ),
       },
     },
-    datatype: "geometry_msgs/TransformStamped",
+    schemaName: "geometry_msgs/TransformStamped",
     sizeInBytes: 0,
   };
   const tf3: MessageEvent<TF> = {
@@ -1786,7 +1791,7 @@ function GeometryMsgs_PoseArray_Base({ displayType }: { displayType?: string }):
         rotation: QUAT_IDENTITY,
       },
     },
-    datatype: "geometry_msgs/TransformStamped",
+    schemaName: "geometry_msgs/TransformStamped",
     sizeInBytes: 0,
   };
 
@@ -1807,7 +1812,7 @@ function GeometryMsgs_PoseArray_Base({ displayType }: { displayType?: string }):
         orientation: makeOrientation(i),
       })),
     },
-    datatype: "geometry_msgs/PoseArray",
+    schemaName: "geometry_msgs/PoseArray",
     sizeInBytes: 0,
   };
 
@@ -1821,7 +1826,7 @@ function GeometryMsgs_PoseArray_Base({ displayType }: { displayType?: string }):
         orientation: makeOrientation(i),
       })),
     },
-    datatype: "geometry_msgs/PoseArray",
+    schemaName: "geometry_msgs/PoseArray",
     sizeInBytes: 0,
   };
 
@@ -1907,7 +1912,7 @@ export function GeometryMsgs_PoseStamped(): JSX.Element {
         rotation: QUAT_IDENTITY,
       },
     },
-    datatype: "geometry_msgs/TransformStamped",
+    schemaName: "geometry_msgs/TransformStamped",
     sizeInBytes: 0,
   };
   const tf2: MessageEvent<TF> = {
@@ -1921,7 +1926,7 @@ export function GeometryMsgs_PoseStamped(): JSX.Element {
         rotation: QUAT_IDENTITY,
       },
     },
-    datatype: "geometry_msgs/TransformStamped",
+    schemaName: "geometry_msgs/TransformStamped",
     sizeInBytes: 0,
   };
 
@@ -1935,7 +1940,7 @@ export function GeometryMsgs_PoseStamped(): JSX.Element {
         orientation: QUAT_IDENTITY,
       },
     },
-    datatype: "geometry_msgs/PoseStamped",
+    schemaName: "geometry_msgs/PoseStamped",
     sizeInBytes: 0,
   };
 
@@ -1951,7 +1956,7 @@ export function GeometryMsgs_PoseStamped(): JSX.Element {
         ),
       },
     },
-    datatype: "geometry_msgs/PoseStamped",
+    schemaName: "geometry_msgs/PoseStamped",
     sizeInBytes: 0,
   };
 
@@ -2024,7 +2029,7 @@ export function NavMsgs_Path(): JSX.Element {
         rotation: QUAT_IDENTITY,
       },
     },
-    datatype: "geometry_msgs/TransformStamped",
+    schemaName: "geometry_msgs/TransformStamped",
     sizeInBytes: 0,
   };
   const tf2: MessageEvent<TF> = {
@@ -2038,7 +2043,7 @@ export function NavMsgs_Path(): JSX.Element {
         rotation: QUAT_IDENTITY,
       },
     },
-    datatype: "geometry_msgs/TransformStamped",
+    schemaName: "geometry_msgs/TransformStamped",
     sizeInBytes: 0,
   };
   const tf3: MessageEvent<TF> = {
@@ -2052,7 +2057,7 @@ export function NavMsgs_Path(): JSX.Element {
         rotation: QUAT_IDENTITY,
       },
     },
-    datatype: "geometry_msgs/TransformStamped",
+    schemaName: "geometry_msgs/TransformStamped",
     sizeInBytes: 0,
   };
 
@@ -2077,7 +2082,7 @@ export function NavMsgs_Path(): JSX.Element {
         pose: { position: { x: i - 5, y: 0, z: 0 }, orientation: makeOrientation(i) },
       })),
     },
-    datatype: "nav_msgs/Path",
+    schemaName: "nav_msgs/Path",
     sizeInBytes: 0,
   };
 
@@ -2091,7 +2096,7 @@ export function NavMsgs_Path(): JSX.Element {
         pose: { position: { x: i - 5, y: 0, z: i % 2 }, orientation: makeOrientation(i) },
       })),
     },
-    datatype: "nav_msgs/Path",
+    schemaName: "nav_msgs/Path",
     sizeInBytes: 0,
   };
 
@@ -2165,7 +2170,7 @@ export function SensorMsgs_LaserScan(): JSX.Element {
         rotation: QUAT_IDENTITY,
       },
     },
-    datatype: "geometry_msgs/TransformStamped",
+    schemaName: "geometry_msgs/TransformStamped",
     sizeInBytes: 0,
   };
   const tf2: MessageEvent<TF> = {
@@ -2179,7 +2184,7 @@ export function SensorMsgs_LaserScan(): JSX.Element {
         rotation: QUAT_IDENTITY,
       },
     },
-    datatype: "geometry_msgs/TransformStamped",
+    schemaName: "geometry_msgs/TransformStamped",
     sizeInBytes: 0,
   };
 
@@ -2198,7 +2203,7 @@ export function SensorMsgs_LaserScan(): JSX.Element {
       ranges: [...Array(360)].map((_, i) => 4 + (1 + Math.sin(i / 2)) / 2),
       intensities: [...Array(360)].map((_, i) => (1 + Math.sin(i / 2)) / 2),
     },
-    datatype: "sensor_msgs/LaserScan",
+    schemaName: "sensor_msgs/LaserScan",
     sizeInBytes: 0,
   };
 
@@ -2217,7 +2222,7 @@ export function SensorMsgs_LaserScan(): JSX.Element {
       ranges: [...Array(360)].map((_, i) => 1 + (1 + Math.sin(i / 2)) / 2),
       intensities: [],
     },
-    datatype: "sensor_msgs/LaserScan",
+    schemaName: "sensor_msgs/LaserScan",
     sizeInBytes: 0,
   };
 
@@ -2299,7 +2304,7 @@ function SensorMsgs_PointCloud2({ rgbaFieldName }: { rgbaFieldName: string }): J
         rotation: QUAT_IDENTITY,
       },
     },
-    datatype: "geometry_msgs/TransformStamped",
+    schemaName: "geometry_msgs/TransformStamped",
     sizeInBytes: 0,
   };
   const tf2: MessageEvent<TF> = {
@@ -2313,7 +2318,7 @@ function SensorMsgs_PointCloud2({ rgbaFieldName }: { rgbaFieldName: string }): J
         rotation: QUAT_IDENTITY,
       },
     },
-    datatype: "geometry_msgs/TransformStamped",
+    schemaName: "geometry_msgs/TransformStamped",
     sizeInBytes: 0,
   };
 
@@ -2363,7 +2368,7 @@ function SensorMsgs_PointCloud2({ rgbaFieldName }: { rgbaFieldName: string }): J
       data,
       is_dense: 1,
     },
-    datatype: "sensor_msgs/PointCloud2",
+    schemaName: "sensor_msgs/PointCloud2",
     sizeInBytes: 0,
   };
 
@@ -2429,7 +2434,7 @@ export function SensorMsgs_PointCloud2_Intensity(): JSX.Element {
         rotation: QUAT_IDENTITY,
       },
     },
-    datatype: "geometry_msgs/TransformStamped",
+    schemaName: "geometry_msgs/TransformStamped",
     sizeInBytes: 0,
   };
   const tf2: MessageEvent<TF> = {
@@ -2443,7 +2448,7 @@ export function SensorMsgs_PointCloud2_Intensity(): JSX.Element {
         rotation: QUAT_IDENTITY,
       },
     },
-    datatype: "geometry_msgs/TransformStamped",
+    schemaName: "geometry_msgs/TransformStamped",
     sizeInBytes: 0,
   };
 
@@ -2539,7 +2544,7 @@ export function SensorMsgs_PointCloud2_Intensity(): JSX.Element {
       data,
       is_dense: 0,
     },
-    datatype: "sensor_msgs/PointCloud2",
+    schemaName: "sensor_msgs/PointCloud2",
     sizeInBytes: 0,
   };
 
@@ -2628,7 +2633,7 @@ export function SensorMsgs_PointCloud2_InsufficientFields(): JSX.Element {
       data,
       is_dense: 1,
     },
-    datatype: "sensor_msgs/PointCloud2",
+    schemaName: "sensor_msgs/PointCloud2",
     sizeInBytes: 0,
   };
 
@@ -2688,7 +2693,7 @@ export function LargeTransform(): JSX.Element {
         rotation: QUAT_IDENTITY,
       },
     },
-    datatype: "geometry_msgs/TransformStamped",
+    schemaName: "geometry_msgs/TransformStamped",
     sizeInBytes: 0,
   };
   const tf2: MessageEvent<TF> = {
@@ -2702,7 +2707,7 @@ export function LargeTransform(): JSX.Element {
         rotation: QUAT_IDENTITY,
       },
     },
-    datatype: "geometry_msgs/TransformStamped",
+    schemaName: "geometry_msgs/TransformStamped",
     sizeInBytes: 0,
   };
 
@@ -2806,7 +2811,7 @@ endsolid AssimpScene`),
       mesh_use_embedded_materials: true,
       lifetime: { sec: 0, nsec: 0 },
     },
-    datatype: "visualization_msgs/Marker",
+    schemaName: "visualization_msgs/Marker",
     sizeInBytes: 0,
   };
 

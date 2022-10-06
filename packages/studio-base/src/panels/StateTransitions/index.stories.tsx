@@ -15,7 +15,7 @@ import { useCallback } from "react";
 import TestUtils from "react-dom/test-utils";
 
 import { BlockCache } from "@foxglove/studio-base/players/types";
-import PanelSetup from "@foxglove/studio-base/stories/PanelSetup";
+import PanelSetup, { Fixture } from "@foxglove/studio-base/stories/PanelSetup";
 import { useReadySignal } from "@foxglove/studio-base/stories/ReadySignalContext";
 import { expandedLineColors } from "@foxglove/studio-base/util/plotColors";
 
@@ -47,7 +47,7 @@ const systemStateMessages = [
   { header: { stamp: { sec: 1526191541, nsec: 789110904 } }, state: -1 },
 ];
 
-const fixture = {
+const fixture: Fixture = {
   datatypes: new Map(
     Object.entries({
       "msgs/SystemState": {
@@ -90,7 +90,7 @@ const fixture = {
       topic: "/some/topic/with/state",
       receiveTime: message.header.stamp,
       message: { ...message, data: { value: idx } },
-      datatype: "msgs/SystemState",
+      schemaName: "msgs/SystemState",
 
       sizeInBytes: 0,
     })),
@@ -100,7 +100,7 @@ const fixture = {
         topic: "/some/topic/with/string_state",
         receiveTime: message.header.stamp,
         message: { ...message, data: { value: values[idx % values.length] } },
-        datatype: "msgs/SystemState",
+        schemaName: "msgs/SystemState",
         sizeInBytes: 0,
       };
     }),
@@ -266,7 +266,7 @@ const messageCache: BlockCache = {
           topic: "/blocks",
           receiveTime: message.header.stamp,
           message: { ...message, data: { value: idx } },
-          datatype: "msgs/SystemState",
+          schemaName: "msgs/SystemState",
 
           sizeInBytes: 0,
         })),
@@ -279,7 +279,7 @@ const messageCache: BlockCache = {
           topic: "/blocks",
           receiveTime: message.header.stamp,
           message: { ...message, data: { value: idx } },
-          datatype: "msgs/SystemState",
+          schemaName: "msgs/SystemState",
 
           sizeInBytes: 0,
         })),
@@ -296,7 +296,7 @@ const messageCache: BlockCache = {
           topic: "/blocks",
           receiveTime: message.header.stamp,
           message: { ...message, data: { value: idx } },
-          datatype: "msgs/SystemState",
+          schemaName: "msgs/SystemState",
           sizeInBytes: 0,
         })),
       },

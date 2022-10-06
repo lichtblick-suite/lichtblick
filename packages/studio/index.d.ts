@@ -72,9 +72,9 @@ declare module "@foxglove/studio" {
     /** The topic name this message was received on, i.e. "/some/topic" */
     topic: string;
     /**
-     * The datatype is an identifier for the type of message within the message event.
+     * The schema name is an identifier for the schema of the message within the message event.
      */
-    datatype: string;
+    schemaName: string;
     /**
      * The time in nanoseconds this message was received. This may be set by the
      * local system clock or the data source, depending on the data source used

@@ -32,7 +32,7 @@ export function GeometryMsgs_Polygon(): JSX.Element {
         rotation: QUAT_IDENTITY,
       },
     },
-    datatype: "geometry_msgs/TransformStamped",
+    schemaName: "geometry_msgs/TransformStamped",
     sizeInBytes: 0,
   };
   const tf2: MessageEvent<TransformStamped> = {
@@ -46,7 +46,7 @@ export function GeometryMsgs_Polygon(): JSX.Element {
         rotation: QUAT_IDENTITY,
       },
     },
-    datatype: "geometry_msgs/TransformStamped",
+    schemaName: "geometry_msgs/TransformStamped",
     sizeInBytes: 0,
   };
 
@@ -63,7 +63,7 @@ export function GeometryMsgs_Polygon(): JSX.Element {
         ],
       },
     },
-    datatype: "geometry_msgs/PolygonStamped",
+    schemaName: "geometry_msgs/PolygonStamped",
     sizeInBytes: 0,
   };
 

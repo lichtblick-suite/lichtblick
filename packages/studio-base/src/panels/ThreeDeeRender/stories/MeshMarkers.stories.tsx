@@ -43,7 +43,7 @@ export function MeshMarkers(): JSX.Element {
       mesh_use_embedded_materials: true,
       lifetime: { sec: 0, nsec: 0 },
     },
-    datatype: "visualization_msgs/Marker",
+    schemaName: "visualization_msgs/Marker",
     sizeInBytes: 0,
   };
 
@@ -80,7 +80,7 @@ export function MeshMarkers(): JSX.Element {
       mesh_use_embedded_materials: true,
       lifetime: { sec: 0, nsec: 0 },
     },
-    datatype: "visualization_msgs/Marker",
+    schemaName: "visualization_msgs/Marker",
     sizeInBytes: 0,
   };
 

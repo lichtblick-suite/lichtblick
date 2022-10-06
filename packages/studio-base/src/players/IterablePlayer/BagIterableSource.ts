@@ -224,7 +224,7 @@ export class BagIterableSource implements IIterableSource {
             receiveTime: bagMsgEvent.timestamp,
             sizeInBytes: bagMsgEvent.data.byteLength,
             message: parsedMessage,
-            datatype,
+            schemaName: datatype,
           },
         };
       } else {

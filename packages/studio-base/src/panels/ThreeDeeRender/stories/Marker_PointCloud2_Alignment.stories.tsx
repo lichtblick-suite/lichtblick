@@ -33,7 +33,7 @@ export function Marker_PointCloud2_Alignment(): JSX.Element {
         rotation: QUAT_IDENTITY,
       },
     },
-    datatype: "geometry_msgs/TransformStamped",
+    schemaName: "geometry_msgs/TransformStamped",
     sizeInBytes: 0,
   };
   const tf2: MessageEvent<TransformStamped> = {
@@ -47,7 +47,7 @@ export function Marker_PointCloud2_Alignment(): JSX.Element {
         rotation: { x: 0.010471, y: 0.008726, z: -0.000091, w: 0.999907 },
       },
     },
-    datatype: "geometry_msgs/TransformStamped",
+    schemaName: "geometry_msgs/TransformStamped",
     sizeInBytes: 0,
   };
 
@@ -79,7 +79,7 @@ export function Marker_PointCloud2_Alignment(): JSX.Element {
       mesh_resource: "",
       mesh_use_embedded_materials: false,
     },
-    datatype: "visualization_msgs/Marker",
+    schemaName: "visualization_msgs/Marker",
     sizeInBytes: 0,
   };
 
@@ -124,7 +124,7 @@ export function Marker_PointCloud2_Alignment(): JSX.Element {
       data,
       is_dense: true,
     },
-    datatype: "sensor_msgs/PointCloud2",
+    schemaName: "sensor_msgs/PointCloud2",
     sizeInBytes: 0,
   };
 

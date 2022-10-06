@@ -149,7 +149,7 @@ export class McapIndexedIterableSource implements IIterableSource {
             publishTime: fromNanoSec(message.publishTime),
             message: channelInfo.parsedChannel.deserializer(message.data),
             sizeInBytes: message.data.byteLength,
-            datatype: channelInfo.schemaName,
+            schemaName: channelInfo.schemaName,
           },
         };
       } catch (error) {
@@ -194,7 +194,7 @@ export class McapIndexedIterableSource implements IIterableSource {
             publishTime: fromNanoSec(message.publishTime),
             message: channelInfo.parsedChannel.deserializer(message.data),
             sizeInBytes: message.data.byteLength,
-            datatype: channelInfo.schemaName,
+            schemaName: channelInfo.schemaName,
           });
         } catch (err) {
           log.error(err);

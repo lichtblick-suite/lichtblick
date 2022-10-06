@@ -261,7 +261,7 @@ export default class FoxgloveWebSocketPlayer implements Player {
           receiveTime,
           message: chanInfo.parsedChannel.deserializer(data),
           sizeInBytes: data.byteLength,
-          datatype: chanInfo.channel.schemaName,
+          schemaName: chanInfo.channel.schemaName,
         });
 
         // Update the message count for this topic

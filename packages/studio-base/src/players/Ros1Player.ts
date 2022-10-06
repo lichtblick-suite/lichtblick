@@ -447,7 +447,13 @@ export default class Ros1Player implements Player {
       this._metricsCollector.recordTimeToFirstMsgs();
     }
 
-    const msg: MessageEvent<unknown> = { topic, receiveTime, message, sizeInBytes, datatype };
+    const msg: MessageEvent<unknown> = {
+      topic,
+      receiveTime,
+      message,
+      sizeInBytes,
+      schemaName: datatype,
+    };
     this._parsedMessages.push(msg);
     this._handleInternalMessage(msg);
 

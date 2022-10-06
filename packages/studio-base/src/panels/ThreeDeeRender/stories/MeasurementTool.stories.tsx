@@ -47,7 +47,7 @@ export function MeasurementTool(): JSX.Element {
         rotation: QUAT_IDENTITY,
       },
     },
-    datatype: "geometry_msgs/TransformStamped",
+    schemaName: "geometry_msgs/TransformStamped",
     sizeInBytes: 0,
   };
 

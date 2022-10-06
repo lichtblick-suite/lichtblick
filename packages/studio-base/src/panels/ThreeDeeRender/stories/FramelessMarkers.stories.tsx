@@ -45,7 +45,7 @@ export function FramelessMarkers(): JSX.Element {
       mesh_resource: "",
       mesh_use_embedded_materials: false,
     },
-    datatype: "visualization_msgs/Marker",
+    schemaName: "visualization_msgs/Marker",
     sizeInBytes: 0,
   };
 

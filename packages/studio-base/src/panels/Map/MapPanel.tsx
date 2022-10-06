@@ -39,7 +39,7 @@ type MapPanelProps = {
 };
 
 function isGeoJSONMessage(msgEvent: MessageEvent<unknown>): msgEvent is GeoJsonMessage {
-  const datatype = msgEvent.datatype;
+  const datatype = msgEvent.schemaName;
   return (
     datatype === "foxglove_msgs/GeoJSON" ||
     datatype === "foxglove_msgs/msg/GeoJSON" ||

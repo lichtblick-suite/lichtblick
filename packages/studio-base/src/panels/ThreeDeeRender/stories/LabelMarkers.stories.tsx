@@ -32,7 +32,7 @@ export function LabelMarkers(): JSX.Element {
         rotation: QUAT_IDENTITY,
       },
     },
-    datatype: "geometry_msgs/TransformStamped",
+    schemaName: "geometry_msgs/TransformStamped",
     sizeInBytes: 0,
   };
   const tf2: MessageEvent<TransformStamped> = {
@@ -46,7 +46,7 @@ export function LabelMarkers(): JSX.Element {
         rotation: QUAT_IDENTITY,
       },
     },
-    datatype: "geometry_msgs/TransformStamped",
+    schemaName: "geometry_msgs/TransformStamped",
     sizeInBytes: 0,
   };
 
@@ -72,7 +72,7 @@ export function LabelMarkers(): JSX.Element {
         pose: { position, orientation: QUAT_IDENTITY },
         scale: { x: 0, y: 0, z: 0.1 },
       },
-      datatype: "visualization_msgs/Marker",
+      schemaName: "visualization_msgs/Marker",
       sizeInBytes: 0,
     };
   };

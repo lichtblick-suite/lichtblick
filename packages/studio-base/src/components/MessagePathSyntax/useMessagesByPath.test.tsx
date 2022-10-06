@@ -30,8 +30,8 @@ const singleTopic = [{ name: "/some/topic", datatype: "some/datatype" }];
 
 function queriedMessage(index: 0 | 1 | 2) {
   return {
-    messageEvent: fixture.messages[index],
-    queriedData: [{ value: fixture.messages[index].message, path: "/some/topic" }],
+    messageEvent: fixture.messages[index]!,
+    queriedData: [{ value: fixture.messages[index]!.message, path: "/some/topic" }],
   };
 }
 
@@ -175,8 +175,8 @@ describe("useMessagesByPath", () => {
     rerender({ ...initialProps, historySize: 2 });
     expect(result.current.messagesByPath).toEqual({
       "/some/topic": [
-        { messageEvent: fixture.messages[1], queriedData: [] },
-        { messageEvent: fixture.messages[2], queriedData: [] },
+        { messageEvent: fixture.messages[1]!, queriedData: [] },
+        { messageEvent: fixture.messages[2]!, queriedData: [] },
       ],
     });
     unmount();
@@ -187,7 +187,7 @@ describe("useMessagesByPath", () => {
     const { wrapper, setWrapperProps } = makeMessagePipelineWrapper({
       topics: singleTopic,
       datatypes: fixture.datatypes,
-      messages: [fixture.messages[0], fixture.messages[1]],
+      messages: [fixture.messages[0]!, fixture.messages[1]!],
     });
     const initialProps = {
       paths: ["/some/topic"],
@@ -203,7 +203,7 @@ describe("useMessagesByPath", () => {
 
     // Then let's send in the last message too, and it should discard the older message
     // (since bufferSize=2).
-    setWrapperProps({ messages: [fixture.messages[2]] });
+    setWrapperProps({ messages: [fixture.messages[2]!] });
     rerender(initialProps);
     expect(result.current.messagesByPath).toEqual({
       "/some/topic": [queriedMessage(1), queriedMessage(2)],
@@ -214,7 +214,7 @@ describe("useMessagesByPath", () => {
     const { wrapper, setWrapperProps } = makeMessagePipelineWrapper({
       topics: singleTopic,
       datatypes: fixture.datatypes,
-      messages: [fixture.messages[0]],
+      messages: [fixture.messages[0]!],
     });
     const initialProps = {
       paths: ["/some/topic"],
@@ -236,7 +236,7 @@ describe("useMessagesByPath", () => {
     const { wrapper } = makeMessagePipelineWrapper({
       topics: singleTopic,
       datatypes: fixture.datatypes,
-      messages: [fixture.messages[0], fixture.messages[1]],
+      messages: [fixture.messages[0]!, fixture.messages[1]!],
     });
     const { result: result1 } = renderHook(Hooks, {
       wrapper,
@@ -255,7 +255,7 @@ describe("useMessagesByPath", () => {
     const { wrapper } = makeMessagePipelineWrapper({
       topics: singleTopic,
       datatypes: fixture.datatypes,
-      messages: [fixture.messages[0], fixture.messages[1]],
+      messages: [fixture.messages[0]!, fixture.messages[1]!],
     });
     const initialProps = {
       paths: ["/some/topic.index"],
@@ -267,11 +267,11 @@ describe("useMessagesByPath", () => {
     expect(result.current.messagesByPath).toEqual({
       "/some/topic.index": [
         {
-          messageEvent: fixture.messages[0],
+          messageEvent: fixture.messages[0]!,
           queriedData: [{ path: "/some/topic.index", value: 0 }],
         },
         {
-          messageEvent: fixture.messages[1],
+          messageEvent: fixture.messages[1]!,
           queriedData: [{ path: "/some/topic.index", value: 1 }],
         },
       ],
@@ -285,7 +285,7 @@ describe("useMessagesByPath", () => {
         { name: "/some/other/topic", datatype: "dummy" },
       ],
       datatypes: fixture.datatypes,
-      messages: [fixture.messages[0]],
+      messages: [fixture.messages[0]!],
     });
     const initialProps = {
       paths: ["/some/topic"],
@@ -313,7 +313,7 @@ describe("useMessagesByPath", () => {
         { name: "/some/other/topic", datatype: "dummy" },
       ],
       datatypes: fixture.datatypes,
-      messages: [fixture.messages[0]],
+      messages: [fixture.messages[0]!],
     });
     const initialProps = {
       paths: ["/some/topic"],
@@ -331,7 +331,7 @@ describe("useMessagesByPath", () => {
     expect(result.current.messagesByPath).toEqual({
       "/some/topic.index": [
         {
-          messageEvent: fixture.messages[0],
+          messageEvent: fixture.messages[0]!,
           queriedData: [{ path: "/some/topic.index", value: 0 }],
         },
       ],
@@ -353,7 +353,7 @@ describe("useMessagesByPath", () => {
       }),
     );
 
-    const message = {
+    const message: MessageEvent<unknown> = {
       topic: "/some/topic",
       receiveTime: { sec: 100, nsec: 0 },
       message: {
@@ -363,7 +363,7 @@ describe("useMessagesByPath", () => {
           { index: 2, baz: 12 },
         ],
       },
-      datatype: "dtype/Foo",
+      schemaName: "dtype/Foo",
       sizeInBytes: 0,
     };
     it("updates queriedData when a global variable changes", () => {
@@ -412,7 +412,7 @@ describe("useMessagesByPath", () => {
     const { wrapper, setWrapperProps } = makeMessagePipelineWrapper({
       topics: singleTopic,
       datatypes: fixture.datatypes,
-      messages: [fixture.messages[0]],
+      messages: [fixture.messages[0]!],
     });
     const { result, rerender } = renderHook(Hooks, {
       wrapper,
@@ -431,7 +431,7 @@ describe("useMessagesByPath", () => {
     const { wrapper } = makeMessagePipelineWrapper({
       topics: singleTopic,
       datatypes: fixture.datatypes,
-      messages: [fixture.messages[0]],
+      messages: [fixture.messages[0]!],
     });
     const { result, rerender } = renderHook(Hooks, {
       wrapper,

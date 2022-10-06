@@ -110,7 +110,7 @@ describe("useCachedGetMessagePathDataItems", () => {
       topic: "/topic",
       receiveTime: { sec: 0, nsec: 0 },
       message: { an_array: [5, 10, 15, 20] },
-      datatype: "datatype",
+      schemaName: "datatype",
       sizeInBytes: 0,
     };
 
@@ -200,7 +200,7 @@ describe("useCachedGetMessagePathDataItems", () => {
       topic: "/topic",
       receiveTime: { sec: 0, nsec: 0 },
       message: { an_array: [5, 10, 15, 20] },
-      datatype: "datatype",
+      schemaName: "datatype",
       sizeInBytes: 0,
     };
     const { result } = setup(["/topic.an_array[$foo]"], { foo: 0 });
@@ -254,7 +254,7 @@ describe("useCachedGetMessagePathDataItems", () => {
       topic: "/topic",
       receiveTime: { sec: 0, nsec: 0 },
       message: { field: 0, self: { field: 1 } },
-      datatype: "datatype",
+      schemaName: "datatype",
       sizeInBytes: 0,
     };
 
@@ -274,7 +274,7 @@ describe("useCachedGetMessagePathDataItems", () => {
           topic: "/some/topic",
           receiveTime: { sec: 0, nsec: 0 },
           message: { some_array: [{ some_id: 10, some_message: { x: 10, y: 20 } }] },
-          datatype: "datatype",
+          schemaName: "datatype",
           sizeInBytes: 0,
         },
         {
@@ -286,7 +286,7 @@ describe("useCachedGetMessagePathDataItems", () => {
               { some_id: 50, some_message: { x: 50, y: 60 } },
             ],
           },
-          datatype: "datatype",
+          schemaName: "datatype",
           sizeInBytes: 0,
         },
       ];
@@ -347,14 +347,14 @@ describe("useCachedGetMessagePathDataItems", () => {
             topic: "/some/topic",
             receiveTime: { sec: 0, nsec: 0 },
             message: { someJson: { someId: 10 } },
-            datatype: "datatype",
+            schemaName: "datatype",
             sizeInBytes: 0,
           },
           {
             topic: "/some/topic",
             receiveTime: { sec: 0, nsec: 0 },
             message: { someJson: { someId: 11, anotherId: 12 } },
-            datatype: "datatype",
+            schemaName: "datatype",
             sizeInBytes: 0,
           },
         ];
@@ -391,7 +391,7 @@ describe("useCachedGetMessagePathDataItems", () => {
             topic: "/some/topic",
             receiveTime: { sec: 0, nsec: 0 },
             message: { jsonArr: [{ foo: { bar: 42 } }] },
-            datatype: "datatype",
+            schemaName: "datatype",
             sizeInBytes: 0,
           },
         ];
@@ -415,7 +415,7 @@ describe("useCachedGetMessagePathDataItems", () => {
             topic: "/some/topic",
             receiveTime: { sec: 0, nsec: 0 },
             message: { jsonArr: [{ id: 1, val: 42 }, { id: 2 }] },
-            datatype: "datatype",
+            schemaName: "datatype",
             sizeInBytes: 0,
           },
         ];
@@ -437,7 +437,7 @@ describe("useCachedGetMessagePathDataItems", () => {
             topic: "/some/topic",
             receiveTime: { sec: 0, nsec: 0 },
             message: { jsonArr: [{ foo: 42 }] },
-            datatype: "datatype",
+            schemaName: "datatype",
             sizeInBytes: 0,
           },
         ];
@@ -459,7 +459,7 @@ describe("useCachedGetMessagePathDataItems", () => {
             topic: "/some/topic",
             receiveTime: { sec: 0, nsec: 0 },
             message: { someJson: { someId: 11, anotherId: 12 } },
-            datatype: "datatype",
+            schemaName: "datatype",
             sizeInBytes: 0,
           },
         ];
@@ -498,7 +498,7 @@ describe("useCachedGetMessagePathDataItems", () => {
           topic: "/some/topic",
           receiveTime: { sec: 0, nsec: 0 },
           message: { some_array: [1, 2, 3, 4, 5] },
-          datatype: "datatype",
+          schemaName: "datatype",
           sizeInBytes: 0,
         },
       ];
@@ -525,7 +525,7 @@ describe("useCachedGetMessagePathDataItems", () => {
           topic: "/some/topic",
           receiveTime: { sec: 0, nsec: 0 },
           message: { value: 1 },
-          datatype: "datatype",
+          schemaName: "datatype",
           sizeInBytes: 0,
         },
       ];
@@ -547,7 +547,7 @@ describe("useCachedGetMessagePathDataItems", () => {
           topic: "/some/topic",
           receiveTime: { sec: 0, nsec: 0 },
           message: { stamp: { sec: 1, nsec: 2 } },
-          datatype: "datatype",
+          schemaName: "datatype",
           sizeInBytes: 0,
         },
       ];
@@ -573,7 +573,7 @@ describe("useCachedGetMessagePathDataItems", () => {
               },
             ],
           },
-          datatype: "datatype",
+          schemaName: "datatype",
           sizeInBytes: 0,
         },
       ];
@@ -631,7 +631,7 @@ describe("useCachedGetMessagePathDataItems", () => {
             str_field: "A",
             num_field: 1,
           },
-          datatype: "datatype",
+          schemaName: "datatype",
           sizeInBytes: 0,
         },
         {
@@ -641,7 +641,7 @@ describe("useCachedGetMessagePathDataItems", () => {
             str_field: "A",
             num_field: 2,
           },
-          datatype: "datatype",
+          schemaName: "datatype",
           sizeInBytes: 0,
         },
         {
@@ -651,7 +651,7 @@ describe("useCachedGetMessagePathDataItems", () => {
             str_field: "B",
             num_field: 2,
           },
-          datatype: "datatype",
+          schemaName: "datatype",
           sizeInBytes: 0,
         },
       ];
@@ -739,7 +739,7 @@ describe("useCachedGetMessagePathDataItems", () => {
           message: {
             state: 0,
           },
-          datatype: "datatype",
+          schemaName: "datatype",
           sizeInBytes: 0,
         },
         {
@@ -748,7 +748,7 @@ describe("useCachedGetMessagePathDataItems", () => {
           message: {
             state: 1,
           },
-          datatype: "datatype",
+          schemaName: "datatype",
           sizeInBytes: 0,
         },
       ];
@@ -802,14 +802,14 @@ describe("useCachedGetMessagePathDataItems", () => {
           topic: "/some/topic",
           receiveTime: { sec: 0, nsec: 0 },
           message: { str_field: "A", num_field: 18446744073709551616n },
-          datatype: "datatype",
+          schemaName: "datatype",
           sizeInBytes: 0,
         },
         {
           topic: "/some/topic",
           receiveTime: { sec: 0, nsec: 0 },
           message: { str_field: "B", num_field: 18446744073709552020n },
-          datatype: "datatype",
+          schemaName: "datatype",
           sizeInBytes: 0,
         },
       ];
@@ -974,11 +974,11 @@ describe("useDecodeMessagePathsForMessagesByTopic", () => {
       },
     });
 
-    const message = {
+    const message: MessageEvent<unknown> = {
       topic: "/topic1",
       receiveTime: { sec: 0, nsec: 0 },
       message: { value: 1 },
-      datatype: "datatype",
+      schemaName: "datatype",
       sizeInBytes: 0,
     };
     const messagesByTopic = {

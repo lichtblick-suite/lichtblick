@@ -2,8 +2,11 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
+import { DeepWritable } from "ts-essentials";
+
 import { MessageEvent, Topic } from "@foxglove/studio";
 import PanelSetup from "@foxglove/studio-base/stories/PanelSetup";
+import { SphereListMarker } from "@foxglove/studio-base/types/Messages";
 
 import ThreeDeeRender from "../index";
 import { TransformStamped } from "../ros";
@@ -17,7 +20,11 @@ export default {
 
 SphereListPointsTransform.parameters = { colorScheme: "dark" };
 export function SphereListPointsTransform(): JSX.Element {
-  function makeSphere(id: string, color: string, scale: number) {
+  function makeSphere(
+    id: string,
+    color: string,
+    scale: number,
+  ): MessageEvent<DeepWritable<SphereListMarker>> {
     return {
       topic: "/sphere",
       receiveTime: { sec: 10, nsec: 0 },
@@ -43,7 +50,7 @@ export function SphereListPointsTransform(): JSX.Element {
         color: makeColor(color, 1),
         lifetime: { sec: 0, nsec: 0 },
       },
-      datatype: "visualization_msgs/Marker",
+      schemaName: "visualization_msgs/Marker",
       sizeInBytes: 0,
     };
   }
@@ -69,7 +76,7 @@ export function SphereListPointsTransform(): JSX.Element {
         },
       },
     },
-    datatype: "geometry_msgs/TransformStamped",
+    schemaName: "geometry_msgs/TransformStamped",
     sizeInBytes: 0,
   };
 

@@ -201,7 +201,7 @@ export async function* streamMessages({
           receiveTime,
           message: info.parsedChannel.deserializer(record.data),
           sizeInBytes: record.data.byteLength,
-          datatype: info.schemaName,
+          schemaName: info.schemaName,
         });
         return;
       }

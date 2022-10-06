@@ -194,7 +194,7 @@ const LogPanel = React.memo(({ config, saveConfig }: Props) => {
                 return;
               }
 
-              const normalizedLog = normalizedLogMessage(item.datatype, item["message"]);
+              const normalizedLog = normalizedLogMessage(item.schemaName, item["message"]);
               return (
                 <LogMessage
                   value={normalizedLog}

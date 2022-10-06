@@ -41,7 +41,7 @@ export function CameraInfoRender(): JSX.Element {
         rotation: QUAT_IDENTITY,
       },
     },
-    datatype: "geometry_msgs/TransformStamped",
+    schemaName: "geometry_msgs/TransformStamped",
     sizeInBytes: 0,
   };
   const tf2: MessageEvent<TransformStamped> = {
@@ -55,7 +55,7 @@ export function CameraInfoRender(): JSX.Element {
         rotation: { x: 0.383, y: 0, z: 0, w: 0.924 },
       },
     },
-    datatype: "geometry_msgs/TransformStamped",
+    schemaName: "geometry_msgs/TransformStamped",
     sizeInBytes: 0,
   };
 
@@ -78,7 +78,7 @@ export function CameraInfoRender(): JSX.Element {
         233.90321350097656, -0.00011014656047336757, 0, 0, 1, 0.000024338871298823506,
       ],
     },
-    datatype: "sensor_msgs/CameraInfo",
+    schemaName: "sensor_msgs/CameraInfo",
     sizeInBytes: 0,
   };
 
@@ -100,7 +100,7 @@ export function CameraInfoRender(): JSX.Element {
         0, 1, 0,
       ],
     },
-    datatype: "sensor_msgs/CameraInfo",
+    schemaName: "sensor_msgs/CameraInfo",
     sizeInBytes: 0,
   };
 
@@ -112,7 +112,7 @@ export function CameraInfoRender(): JSX.Element {
       height: 1080,
       width: 1920,
     },
-    datatype: "sensor_msgs/CameraInfo",
+    schemaName: "sensor_msgs/CameraInfo",
     sizeInBytes: 0,
   };
 

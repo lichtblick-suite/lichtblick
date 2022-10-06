@@ -44,7 +44,7 @@ export function ImageRender(): JSX.Element {
         rotation: QUAT_IDENTITY,
       },
     },
-    datatype: "geometry_msgs/TransformStamped",
+    schemaName: "geometry_msgs/TransformStamped",
     sizeInBytes: 0,
   };
   const tf2: MessageEvent<TransformStamped> = {
@@ -58,7 +58,7 @@ export function ImageRender(): JSX.Element {
         rotation: { x: 0.383, y: 0, z: 0, w: 0.924 },
       },
     },
-    datatype: "geometry_msgs/TransformStamped",
+    schemaName: "geometry_msgs/TransformStamped",
     sizeInBytes: 0,
   };
 
@@ -81,7 +81,7 @@ export function ImageRender(): JSX.Element {
         233.90321350097656, -0.00011014656047336757, 0, 0, 1, 0.000024338871298823506,
       ],
     },
-    datatype: "sensor_msgs/CameraInfo",
+    schemaName: "sensor_msgs/CameraInfo",
     sizeInBytes: 0,
   };
 
@@ -103,7 +103,7 @@ export function ImageRender(): JSX.Element {
         0, 1, 0,
       ],
     },
-    datatype: "sensor_msgs/CameraInfo",
+    schemaName: "sensor_msgs/CameraInfo",
     sizeInBytes: 0,
   };
 
@@ -115,7 +115,7 @@ export function ImageRender(): JSX.Element {
       format: "png",
       data: PNG_TEST_IMAGE,
     },
-    datatype: "sensor_msgs/CameraInfo",
+    schemaName: "sensor_msgs/CameraInfo",
     sizeInBytes: 0,
   };
 
@@ -144,7 +144,7 @@ export function ImageRender(): JSX.Element {
       step: SIZE * 4,
       data: rgba8,
     },
-    datatype: "sensor_msgs/Image",
+    schemaName: "sensor_msgs/Image",
     sizeInBytes: 0,
   };
 
@@ -232,7 +232,7 @@ export function FoxgloveImageRender(): JSX.Element {
       translation: { x: 1e7, y: 0, z: 0 },
       rotation: QUAT_IDENTITY,
     },
-    datatype: "foxglove.FrameTransform",
+    schemaName: "foxglove.FrameTransform",
     sizeInBytes: 0,
   };
   const tf2: MessageEvent<FrameTransform> = {
@@ -245,7 +245,7 @@ export function FoxgloveImageRender(): JSX.Element {
       translation: { x: 0, y: 0, z: 1 },
       rotation: { x: 0.383, y: 0, z: 0, w: 0.924 },
     },
-    datatype: "foxglove.FrameTransform",
+    schemaName: "foxglove.FrameTransform",
     sizeInBytes: 0,
   };
 
@@ -268,7 +268,7 @@ export function FoxgloveImageRender(): JSX.Element {
         233.90321350097656, -0.00011014656047336757, 0, 0, 1, 0.000024338871298823506,
       ],
     },
-    datatype: "foxglove.CameraCalibration",
+    schemaName: "foxglove.CameraCalibration",
     sizeInBytes: 0,
   };
 
@@ -290,7 +290,7 @@ export function FoxgloveImageRender(): JSX.Element {
         0, 1, 0,
       ],
     },
-    datatype: "foxglove.CameraCalibration",
+    schemaName: "foxglove.CameraCalibration",
     sizeInBytes: 0,
   };
 
@@ -303,7 +303,7 @@ export function FoxgloveImageRender(): JSX.Element {
       format: "png",
       data: PNG_TEST_IMAGE,
     },
-    datatype: "foxglove.CompressedImage",
+    schemaName: "foxglove.CompressedImage",
     sizeInBytes: 0,
   };
 
@@ -332,7 +332,7 @@ export function FoxgloveImageRender(): JSX.Element {
       step: SIZE * 4,
       data: rgba8,
     },
-    datatype: "sensor_msgs/Image",
+    schemaName: "sensor_msgs/Image",
     sizeInBytes: 0,
   };
 

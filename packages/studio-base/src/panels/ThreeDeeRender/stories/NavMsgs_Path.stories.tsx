@@ -35,7 +35,7 @@ export function NavMsgs_Path(): JSX.Element {
         rotation: QUAT_IDENTITY,
       },
     },
-    datatype: "geometry_msgs/TransformStamped",
+    schemaName: "geometry_msgs/TransformStamped",
     sizeInBytes: 0,
   };
   const tf2: MessageEvent<TransformStamped> = {
@@ -49,7 +49,7 @@ export function NavMsgs_Path(): JSX.Element {
         rotation: QUAT_IDENTITY,
       },
     },
-    datatype: "geometry_msgs/TransformStamped",
+    schemaName: "geometry_msgs/TransformStamped",
     sizeInBytes: 0,
   };
   const tf3: MessageEvent<TransformStamped> = {
@@ -63,7 +63,7 @@ export function NavMsgs_Path(): JSX.Element {
         rotation: QUAT_IDENTITY,
       },
     },
-    datatype: "geometry_msgs/TransformStamped",
+    schemaName: "geometry_msgs/TransformStamped",
     sizeInBytes: 0,
   };
 
@@ -88,7 +88,7 @@ export function NavMsgs_Path(): JSX.Element {
         pose: { position: { x: i - 5, y: 0, z: 0 }, orientation: makeOrientation(i) },
       })),
     },
-    datatype: "nav_msgs/Path",
+    schemaName: "nav_msgs/Path",
     sizeInBytes: 0,
   };
 
@@ -102,7 +102,7 @@ export function NavMsgs_Path(): JSX.Element {
         pose: { position: { x: i - 5, y: 0, z: i % 2 }, orientation: makeOrientation(i) },
       })),
     },
-    datatype: "nav_msgs/Path",
+    schemaName: "nav_msgs/Path",
     sizeInBytes: 0,
   };
 

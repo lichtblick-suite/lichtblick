@@ -139,7 +139,7 @@ export class RosDb3IterableSource implements IIterableSource {
           receiveTime: msg.timestamp,
           message: msg.value,
           sizeInBytes: msg.data.byteLength,
-          datatype: msg.topic.type,
+          schemaName: msg.topic.type,
         },
         connectionId: undefined,
         problem: undefined,

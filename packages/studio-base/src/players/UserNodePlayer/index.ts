@@ -483,7 +483,7 @@ export default class UserNodePlayer implements Player {
               topic: msgEvent.topic,
               receiveTime: msgEvent.receiveTime,
               message: maybePlainObject(msgEvent.message),
-              datatype: msgEvent.datatype,
+              datatype: msgEvent.schemaName,
             },
             globalVariables,
           }),
@@ -539,7 +539,7 @@ export default class UserNodePlayer implements Player {
           receiveTime: msgEvent.receiveTime,
           message: result.message,
           sizeInBytes: msgEvent.sizeInBytes,
-          datatype: outputDatatype,
+          schemaName: outputDatatype,
         };
       };
     };

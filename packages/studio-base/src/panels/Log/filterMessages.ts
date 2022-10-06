@@ -29,7 +29,7 @@ export default function filterMessages(
 
   return events.filter((event) => {
     const logMessage = event.message;
-    const effectiveLogLevel = getNormalizedLevel(event.datatype, logMessage);
+    const effectiveLogLevel = getNormalizedLevel(event.schemaName, logMessage);
     if (effectiveLogLevel < minLogLevel) {
       return false;
     }

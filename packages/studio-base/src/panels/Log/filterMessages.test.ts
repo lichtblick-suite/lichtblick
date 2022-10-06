@@ -21,7 +21,7 @@ describe("filter", () => {
     {
       topic: "/some_topic",
       receiveTime: { sec: 123, nsec: 456 },
-      datatype: "rosgraph_msgs/Log",
+      schemaName: "rosgraph_msgs/Log",
       message: {
         msg: "Couldn't find int 83757.",
         level: 2,
@@ -34,7 +34,7 @@ describe("filter", () => {
     {
       topic: "/some_topic",
       receiveTime: { sec: 123, nsec: 456 },
-      datatype: "rcl_interfaces/msg/Log",
+      schemaName: "rcl_interfaces/msg/Log",
       message: {
         msg: "Couldn't find int 83757.",
         level: 30,

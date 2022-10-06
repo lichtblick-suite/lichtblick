@@ -38,7 +38,7 @@ export function Foxglove_PosesInFrame(): JSX.Element {
       translation: { x: 1e7, y: 0, z: 0 },
       rotation: QUAT_IDENTITY,
     },
-    datatype: "foxglove.FrameTransform",
+    schemaName: "foxglove.FrameTransform",
     sizeInBytes: 0,
   };
   const tf2: MessageEvent<FrameTransform> = {
@@ -51,7 +51,7 @@ export function Foxglove_PosesInFrame(): JSX.Element {
       translation: { x: 0, y: 0, z: 1 },
       rotation: vec4ToOrientation(quat.rotateZ(quat.create(), quat.create(), Math.PI / 2) as Vec4),
     },
-    datatype: "foxglove.FrameTransform",
+    schemaName: "foxglove.FrameTransform",
     sizeInBytes: 0,
   };
   const tf3: MessageEvent<FrameTransform> = {
@@ -64,7 +64,7 @@ export function Foxglove_PosesInFrame(): JSX.Element {
       translation: { x: 0, y: 5, z: 1 },
       rotation: QUAT_IDENTITY,
     },
-    datatype: "foxglove.FrameTransform",
+    schemaName: "foxglove.FrameTransform",
     sizeInBytes: 0,
   };
 
@@ -86,7 +86,7 @@ export function Foxglove_PosesInFrame(): JSX.Element {
         orientation: makeOrientation(i),
       })),
     },
-    datatype: "foxglove.PosesInFrame",
+    schemaName: "foxglove.PosesInFrame",
     sizeInBytes: 0,
   };
 
@@ -101,7 +101,7 @@ export function Foxglove_PosesInFrame(): JSX.Element {
         orientation: makeOrientation(i),
       })),
     },
-    datatype: "foxglove.PosesInFrame",
+    schemaName: "foxglove.PosesInFrame",
     sizeInBytes: 0,
   };
 
@@ -116,7 +116,7 @@ export function Foxglove_PosesInFrame(): JSX.Element {
         orientation: makeOrientation(i),
       })),
     },
-    datatype: "foxglove.PosesInFrame",
+    schemaName: "foxglove.PosesInFrame",
     sizeInBytes: 0,
   };
 

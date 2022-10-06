@@ -302,7 +302,7 @@ function makeStoryScene({
         },
       ],
     },
-    datatype: "foxglove.SceneUpdate",
+    schemaName: "foxglove.SceneUpdate",
     sizeInBytes: 0,
   };
 }
@@ -328,7 +328,7 @@ export function BasicEntities(): JSX.Element {
       translation: { x: 1e7, y: 0, z: 0 },
       rotation: QUAT_IDENTITY,
     },
-    datatype: "foxglove.FrameTransform",
+    schemaName: "foxglove.FrameTransform",
     sizeInBytes: 0,
   };
   const tf2: MessageEvent<FrameTransform> = {
@@ -341,7 +341,7 @@ export function BasicEntities(): JSX.Element {
       translation: { x: -4, y: -4, z: 0 },
       rotation: QUAT_IDENTITY,
     },
-    datatype: "foxglove.FrameTransform",
+    schemaName: "foxglove.FrameTransform",
     sizeInBytes: 0,
   };
   const tf3: MessageEvent<FrameTransform> = {
@@ -354,7 +354,7 @@ export function BasicEntities(): JSX.Element {
       translation: { x: 0, y: -4, z: 0 },
       rotation: QUAT_IDENTITY,
     },
-    datatype: "foxglove.FrameTransform",
+    schemaName: "foxglove.FrameTransform",
     sizeInBytes: 0,
   };
 

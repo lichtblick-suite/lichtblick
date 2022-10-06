@@ -40,7 +40,7 @@ export function Foxglove_PoseInFrame(): JSX.Element {
       translation: { x: 1e7, y: 0, z: 0 },
       rotation: QUAT_IDENTITY,
     },
-    datatype: "foxglove.FrameTransform",
+    schemaName: "foxglove.FrameTransform",
     sizeInBytes: 0,
   };
   const tf2: MessageEvent<FrameTransform> = {
@@ -53,7 +53,7 @@ export function Foxglove_PoseInFrame(): JSX.Element {
       translation: { x: 0, y: -5, z: 0 },
       rotation: QUAT_IDENTITY,
     },
-    datatype: "foxglove.FrameTransform",
+    schemaName: "foxglove.FrameTransform",
     sizeInBytes: 0,
   };
 
@@ -68,7 +68,7 @@ export function Foxglove_PoseInFrame(): JSX.Element {
         orientation: QUAT_IDENTITY,
       },
     },
-    datatype: "foxglove.PoseInFrame",
+    schemaName: "foxglove.PoseInFrame",
     sizeInBytes: 0,
   };
 
@@ -85,7 +85,7 @@ export function Foxglove_PoseInFrame(): JSX.Element {
         ),
       },
     },
-    datatype: "foxglove.PoseInFrame",
+    schemaName: "foxglove.PoseInFrame",
     sizeInBytes: 0,
   };
 
@@ -102,7 +102,7 @@ export function Foxglove_PoseInFrame(): JSX.Element {
         ),
       },
     },
-    datatype: "foxglove.PoseInFrame",
+    schemaName: "foxglove.PoseInFrame",
     sizeInBytes: 0,
   };
 

@@ -19,7 +19,12 @@ import { MessagePipelineProvider } from "@foxglove/studio-base/components/Messag
 import FakePlayer from "@foxglove/studio-base/components/MessagePipeline/FakePlayer";
 import MockMessagePipelineProvider from "@foxglove/studio-base/components/MessagePipeline/MockMessagePipelineProvider";
 import AppConfigurationContext from "@foxglove/studio-base/context/AppConfigurationContext";
-import { Player, PlayerStateActiveData, Topic } from "@foxglove/studio-base/players/types";
+import {
+  Player,
+  PlayerStateActiveData,
+  Topic,
+  MessageEvent,
+} from "@foxglove/studio-base/players/types";
 import { makeMockAppConfiguration } from "@foxglove/studio-base/util/makeMockAppConfiguration";
 
 import * as PanelAPI from ".";
@@ -66,11 +71,11 @@ describe("useMessageReducer", () => {
   });
 
   it("calls restore to initialize and addMessage for initial messages", async () => {
-    const message = {
+    const message: MessageEvent<unknown> = {
       topic: "/foo",
       receiveTime: { sec: 0, nsec: 0 },
       message: { value: 2 },
-      datatype: "foo",
+      schemaName: "foo",
       sizeInBytes: 0,
     };
 
@@ -96,11 +101,11 @@ describe("useMessageReducer", () => {
   });
 
   it("calls restore to initialize and addMessages for initial messages", async () => {
-    const message = {
+    const message: MessageEvent<unknown> = {
       topic: "/foo",
       receiveTime: { sec: 0, nsec: 0 },
       message: { value: 2 },
-      datatype: "foo",
+      schemaName: "foo",
       sizeInBytes: 0,
     };
 
@@ -128,18 +133,18 @@ describe("useMessageReducer", () => {
   });
 
   it("calls addMessage for messages added later", async () => {
-    const message1 = {
+    const message1: MessageEvent<unknown> = {
       topic: "/foo",
       receiveTime: { sec: 0, nsec: 0 },
       message: { value: 2 },
-      datatype: "foo",
+      schemaName: "foo",
       sizeInBytes: 0,
     };
-    const message2 = {
+    const message2: MessageEvent<unknown> = {
       topic: "/bar",
       receiveTime: { sec: 0, nsec: 0 },
       message: { value: 3 },
-      datatype: "bar",
+      schemaName: "bar",
       sizeInBytes: 0,
     };
 
@@ -188,25 +193,25 @@ describe("useMessageReducer", () => {
   });
 
   it("calls addMessages for messages added later", async () => {
-    const message1 = {
+    const message1: MessageEvent<unknown> = {
       topic: "/foo",
       receiveTime: { sec: 0, nsec: 0 },
       message: { value: 2 },
-      datatype: "foo",
+      schemaName: "foo",
       sizeInBytes: 0,
     };
-    const message2 = {
+    const message2: MessageEvent<unknown> = {
       topic: "/bar",
       receiveTime: { sec: 0, nsec: 0 },
       message: { value: 3 },
-      datatype: "bar",
+      schemaName: "bar",
       sizeInBytes: 0,
     };
-    const message3 = {
+    const message3: MessageEvent<unknown> = {
       topic: "/bar",
       receiveTime: { sec: 0, nsec: 0 },
       message: { value: 4 },
-      datatype: "bar",
+      schemaName: "bar",
       sizeInBytes: 0,
     };
 
@@ -301,11 +306,11 @@ describe("useMessageReducer", () => {
   });
 
   it("clears everything on seek", () => {
-    const message1 = {
+    const message1: MessageEvent<unknown> = {
       topic: "/foo",
       receiveTime: { sec: 0, nsec: 0 },
       message: { value: 2 },
-      datatype: "foo",
+      schemaName: "foo",
       sizeInBytes: 0,
     };
 
@@ -362,18 +367,18 @@ describe("useMessageReducer", () => {
     restore.mockReturnValue(0);
     addMessage.mockImplementation((_, msg) => msg.message.value);
 
-    const message1 = {
+    const message1: MessageEvent<unknown> = {
       topic: "/foo",
       receiveTime: { sec: 0, nsec: 0 },
       message: { value: 1 },
-      datatype: "foo",
+      schemaName: "foo",
       sizeInBytes: 0,
     };
-    const message2 = {
+    const message2: MessageEvent<unknown> = {
       topic: "/bar",
       receiveTime: { sec: 0, nsec: 0 },
       message: { value: 2 },
-      datatype: "bar",
+      schemaName: "bar",
       sizeInBytes: 0,
     };
 
@@ -475,11 +480,11 @@ describe("useMessageReducer", () => {
   });
 
   it("doesn't re-render when player topics or other playerState changes", async () => {
-    const message = {
+    const message: MessageEvent<unknown> = {
       topic: "/foo",
       receiveTime: { sec: 0, nsec: 0 },
       message: { value: 2 },
-      datatype: "foo",
+      schemaName: "foo",
       sizeInBytes: 0,
     };
 
@@ -547,11 +552,11 @@ describe("useMessageReducer", () => {
   });
 
   it("restore called when addMessages changes", async () => {
-    const message1 = {
+    const message1: MessageEvent<unknown> = {
       topic: "/foo",
       receiveTime: { sec: 0, nsec: 0 },
       message: { value: 2 },
-      datatype: "foo",
+      schemaName: "foo",
       sizeInBytes: 0,
     };
 
