@@ -15,7 +15,9 @@ function calculateBorderColor(theme: Theme, color: string): string {
 export const ColorSwatch = muiStyled("div", {
   shouldForwardProp: (prop) => prop !== "color",
 })<{ color: string }>(({ theme, color }) => ({
-  backgroundColor: color,
+  // Color on top of white/black diagonal gradient. Color must be specified as a gradient because a
+  // background color can't be stacked on top of a background image.
+  background: `linear-gradient(${color}, ${color}), linear-gradient(to bottom right, white 50%, black 50%)`,
   aspectRatio: "1/1",
   width: theme.spacing(2.5),
   margin: theme.spacing(0.625),
