@@ -4,7 +4,8 @@
 
 import { useEffect, useState } from "react";
 
-import { MessageEvent, Topic } from "@foxglove/studio";
+import { MessageEvent } from "@foxglove/studio";
+import { Topic } from "@foxglove/studio-base/players/types";
 import PanelSetup, { Fixture } from "@foxglove/studio-base/stories/PanelSetup";
 import { useReadySignal } from "@foxglove/studio-base/stories/ReadySignalContext";
 
@@ -21,8 +22,8 @@ export default {
 Markers.parameters = { colorScheme: "dark", chromatic: { delay: 100 } };
 export function Markers(): JSX.Element {
   const topics: Topic[] = [
-    { name: "/tf", datatype: "geometry_msgs/TransformStamped" },
-    { name: "/markers", datatype: "visualization_msgs/Marker" },
+    { name: "/tf", schemaName: "geometry_msgs/TransformStamped" },
+    { name: "/markers", schemaName: "visualization_msgs/Marker" },
   ];
 
   const tf1: MessageEvent<TransformStamped> = {
@@ -562,8 +563,8 @@ EmptyLineStrip.parameters = {
 export function EmptyLineStrip(): JSX.Element {
   const readySignal = useReadySignal();
   const topics: Topic[] = [
-    { name: "/tf", datatype: "geometry_msgs/TransformStamped" },
-    { name: "/markers", datatype: "visualization_msgs/Marker" },
+    { name: "/tf", schemaName: "geometry_msgs/TransformStamped" },
+    { name: "/markers", schemaName: "visualization_msgs/Marker" },
   ];
 
   const tf1: MessageEvent<TransformStamped> = {

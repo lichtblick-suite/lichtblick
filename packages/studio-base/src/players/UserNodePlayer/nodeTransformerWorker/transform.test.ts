@@ -53,7 +53,7 @@ const baseNodeData: NodeData = {
   sourceFile: undefined,
   typeChecker: undefined,
   rosLib: generateRosLib({
-    topics: [{ name: "/some_topic", datatype: "std_msgs/ColorRGBA" }],
+    topics: [{ name: "/some_topic", schemaName: "std_msgs/ColorRGBA" }],
     datatypes: exampleDatatypes,
   }),
   typesLib: generateEmptyTypesLib(),
@@ -169,7 +169,7 @@ describe("pipeline", () => {
     ])("returns a  error when an input topic is not yet available", (inputTopics, topics) => {
       const { diagnostics } = validateInputTopics(
         { ...baseNodeData, inputTopics },
-        topics.map((name) => ({ name, datatype: "" })),
+        topics.map((name) => ({ name, schemaName: "" })),
       );
       expect(diagnostics.length).toEqual(1);
       expect(diagnostics[0]?.severity).toEqual(DiagnosticSeverity.Error);
@@ -303,7 +303,7 @@ describe("pipeline", () => {
         `;
 
         const rosLib = generateRosLib({
-          topics: [{ name: "/tick_information", datatype: "std_msgs/TickInfo" }],
+          topics: [{ name: "/tick_information", schemaName: "std_msgs/TickInfo" }],
           datatypes: new Map(
             Object.entries({
               "std_msgs/TickInfo": tickInfoDatatype,

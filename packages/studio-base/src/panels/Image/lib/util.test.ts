@@ -44,11 +44,11 @@ describe("ImageView", () => {
 
   describe("getMarkerOptions", () => {
     const allMarkerTopics: Topic[] = [
-      { name: "/some_camera_topic/marker1", datatype: "visualization_msgs/ImageMarker" },
-      { name: "/some_camera_topic/marker2", datatype: "vision_msgs/ImageMarker" },
-      { name: "/old/some_camera_topic/marker3", datatype: "vision_msgs/ImageMarker" },
-      { name: "/camera_rear_medium/marker4", datatype: "vision_msgs/ImageMarker" }, // not included because it's for a different camera
-      { name: "/unknown_camera/marker5", datatype: "vision_msgs/ImageMarker" },
+      { name: "/some_camera_topic/marker1", schemaName: "visualization_msgs/ImageMarker" },
+      { name: "/some_camera_topic/marker2", schemaName: "vision_msgs/ImageMarker" },
+      { name: "/old/some_camera_topic/marker3", schemaName: "vision_msgs/ImageMarker" },
+      { name: "/camera_rear_medium/marker4", schemaName: "vision_msgs/ImageMarker" }, // not included because it's for a different camera
+      { name: "/unknown_camera/marker5", schemaName: "vision_msgs/ImageMarker" },
     ];
     it("filters and sorts topics relevant to this camera", () => {
       expect(

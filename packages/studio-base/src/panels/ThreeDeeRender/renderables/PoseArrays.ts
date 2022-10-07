@@ -153,9 +153,9 @@ export class PoseArrays extends SceneExtension<PoseArrayRenderable> {
     const entries: SettingsTreeEntry[] = [];
     for (const topic of this.renderer.topics ?? []) {
       if (
-        POSE_ARRAY_DATATYPES.has(topic.datatype) ||
-        NAV_PATH_DATATYPES.has(topic.datatype) ||
-        POSES_IN_FRAME_DATATYPES.has(topic.datatype)
+        POSE_ARRAY_DATATYPES.has(topic.schemaName) ||
+        NAV_PATH_DATATYPES.has(topic.schemaName) ||
+        POSES_IN_FRAME_DATATYPES.has(topic.schemaName)
       ) {
         const config = (configTopics[topic.name] ?? {}) as Partial<LayerSettingsPoseArray>;
         const displayType = config.type ?? getDefaultType(topic);
@@ -187,7 +187,7 @@ export class PoseArrays extends SceneExtension<PoseArrayRenderable> {
           path: ["topics", topic.name],
           node: {
             label: topic.name,
-            icon: NAV_PATH_DATATYPES.has(topic.datatype) ? "Timeline" : "Flag",
+            icon: NAV_PATH_DATATYPES.has(topic.schemaName) ? "Timeline" : "Flag",
             fields,
             visible: config.visible ?? DEFAULT_SETTINGS.visible,
             handler,
@@ -452,7 +452,7 @@ export class PoseArrays extends SceneExtension<PoseArrayRenderable> {
 }
 
 function getDefaultType(topic: Topic | undefined): DisplayType {
-  return topic != undefined && NAV_PATH_DATATYPES.has(topic.datatype) ? "line" : DEFAULT_TYPE;
+  return topic != undefined && NAV_PATH_DATATYPES.has(topic.schemaName) ? "line" : DEFAULT_TYPE;
 }
 
 function setObjectPose(object: THREE.Object3D, pose: Pose): void {

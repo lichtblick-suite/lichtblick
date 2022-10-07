@@ -182,8 +182,8 @@ describe("IterablePlayer", () => {
           start: { sec: 0, nsec: 0 },
           end: { sec: 1, nsec: 0 },
           topics: [
-            { name: "A", datatype: "B" },
-            { name: "A", datatype: "C" },
+            { name: "A", schemaName: "B" },
+            { name: "A", schemaName: "C" },
           ],
           topicStats: new Map(),
           profile: undefined,

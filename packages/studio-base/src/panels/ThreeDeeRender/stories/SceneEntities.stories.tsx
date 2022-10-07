@@ -8,9 +8,10 @@ import { TeapotGeometry } from "three/examples/jsm/geometries/TeapotGeometry";
 import tinycolor from "tinycolor2";
 
 import { FrameTransform, LineType, SceneUpdate } from "@foxglove/schemas";
-import { MessageEvent, Topic } from "@foxglove/studio";
+import { MessageEvent } from "@foxglove/studio";
 import { ColorRGBA } from "@foxglove/studio-base/panels/ThreeDeeRender/ros";
 import { xyzrpyToPose } from "@foxglove/studio-base/panels/ThreeDeeRender/transforms";
+import { Topic } from "@foxglove/studio-base/players/types";
 import PanelSetup from "@foxglove/studio-base/stories/PanelSetup";
 
 import ThreeDeeRender from "../index";
@@ -310,9 +311,9 @@ function makeStoryScene({
 BasicEntities.parameters = { colorScheme: "light", chromatic: { delay: 100 } };
 export function BasicEntities(): JSX.Element {
   const topics: Topic[] = [
-    { name: "transforms", datatype: "foxglove.FrameTransform" },
-    { name: "scene1", datatype: "foxglove.SceneUpdate" },
-    { name: "scene2", datatype: "foxglove.SceneUpdate" },
+    { name: "transforms", schemaName: "foxglove.FrameTransform" },
+    { name: "scene1", schemaName: "foxglove.SceneUpdate" },
+    { name: "scene2", schemaName: "foxglove.SceneUpdate" },
   ];
 
   const scene1 = makeStoryScene({ topic: "scene1", frameId: "frame1" });

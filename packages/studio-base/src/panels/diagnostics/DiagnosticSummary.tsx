@@ -199,7 +199,7 @@ function DiagnosticSummary(props: Props): JSX.Element {
   // Filter down all topics to those that conform to our supported datatypes
   const availableTopics = useMemo(() => {
     const filtered = topics
-      .filter((topic) => ALLOWED_DATATYPES.includes(topic.datatype))
+      .filter((topic) => ALLOWED_DATATYPES.includes(topic.schemaName))
       .map((topic) => topic.name);
 
     // Keeps only the first occurrence of each topic.

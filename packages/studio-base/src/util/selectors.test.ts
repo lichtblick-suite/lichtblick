@@ -22,12 +22,12 @@ describe("selectors", () => {
     it("indexes the topics by topic name", () => {
       expect(
         getTopicsByTopicName([
-          { name: "/some/topic", datatype: "dummy" },
-          { name: "/another/topic", datatype: "dummy" },
+          { name: "/some/topic", schemaName: "dummy" },
+          { name: "/another/topic", schemaName: "dummy" },
         ]),
-      ).toEqual({
-        "/some/topic": { name: "/some/topic", datatype: "dummy" },
-        "/another/topic": { name: "/another/topic", datatype: "dummy" },
+      ).toEqual<ReturnType<typeof getTopicsByTopicName>>({
+        "/some/topic": { name: "/some/topic", schemaName: "dummy" },
+        "/another/topic": { name: "/another/topic", schemaName: "dummy" },
       });
     });
   });

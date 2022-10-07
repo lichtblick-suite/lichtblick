@@ -6,8 +6,8 @@ import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown";
 import { Button, styled as muiStyled, Menu, MenuItem } from "@mui/material";
 import { MouseEvent, useState, useCallback } from "react";
 
-import { Topic } from "@foxglove/studio";
 import TextMiddleTruncate from "@foxglove/studio-base/components/TextMiddleTruncate";
+import { Topic } from "@foxglove/studio-base/players/types";
 
 type TopicDropdownProps = {
   topics: Topic[];

@@ -78,7 +78,7 @@ const LogPanel = React.memo(({ config, saveConfig }: Props) => {
   // Get the topics that have our supported datatypes
   // Users can select any of these topics for display in the panel
   const availableTopics = useMemo(
-    () => topics.filter((topic) => SUPPORTED_DATATYPES.includes(topic.datatype)),
+    () => topics.filter((topic) => SUPPORTED_DATATYPES.includes(topic.schemaName)),
     [topics],
   );
 

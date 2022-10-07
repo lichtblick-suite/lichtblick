@@ -95,7 +95,7 @@ type Props = {
 
 function TopicSettingsModal({
   currentEditingTopic,
-  currentEditingTopic: { datatype, name: topicName },
+  currentEditingTopic: { schemaName: datatype, name: topicName },
   saveConfig,
   sceneBuilderMessage,
   setCurrentEditingTopic,
@@ -150,7 +150,7 @@ function TopicSettingsModal({
             {currentEditingTopic.name}
           </Typography>
           <Typography variant="body1" color="text.secondary">
-            {currentEditingTopic.datatype}
+            {currentEditingTopic.schemaName}
           </Typography>
         </Stack>
 

@@ -17,7 +17,7 @@ import SceneBuilder, {
 describe("SceneBuilder", () => {
   it("on setFrame, modified topics rendered", () => {
     const builder = new SceneBuilder();
-    builder.setTopics([{ name: "a", datatype: "A" }]);
+    builder.setTopics([{ name: "a", schemaName: "A" }]);
 
     builder.setFrame({ a: [] });
 
@@ -26,7 +26,7 @@ describe("SceneBuilder", () => {
 
   it("on setFrame, only specified topics rendered", () => {
     const builder = new SceneBuilder();
-    builder.setTopics([{ name: "a", datatype: "A" }]);
+    builder.setTopics([{ name: "a", schemaName: "A" }]);
 
     builder.setFrame({ b: [] });
 
@@ -35,7 +35,7 @@ describe("SceneBuilder", () => {
 
   it("on setFrame, same instance, nothing rendered", () => {
     const builder = new SceneBuilder();
-    builder.setTopics([{ name: "a", datatype: "A" }]);
+    builder.setTopics([{ name: "a", schemaName: "A" }]);
     const frame = { a: [] };
     builder.setFrame(frame);
     // check that we're set up properly with one topic rendered
@@ -49,7 +49,7 @@ describe("SceneBuilder", () => {
 
   it("on setFrame, same value different instance, topics rendered", () => {
     const builder = new SceneBuilder();
-    builder.setTopics([{ name: "a", datatype: "A" }]);
+    builder.setTopics([{ name: "a", schemaName: "A" }]);
     const frame1 = { a: [] };
     const frame2 = { a: [] };
     builder.setFrame(frame1);
@@ -62,7 +62,7 @@ describe("SceneBuilder", () => {
 
   it("on setFrame, latest value saved", () => {
     const builder = new SceneBuilder();
-    builder.setTopics([{ name: "a", datatype: "A" }]);
+    builder.setTopics([{ name: "a", schemaName: "A" }]);
     const messages1: any = [];
     const messages2: any = [];
     builder.setFrame({ a: messages1 });
@@ -75,7 +75,7 @@ describe("SceneBuilder", () => {
   it("on setFrame, messages are saved", () => {
     const builder = new SceneBuilder();
     const messagesValue: any = [];
-    builder.setTopics([{ name: "a", datatype: "A" }]);
+    builder.setTopics([{ name: "a", schemaName: "A" }]);
 
     builder.setFrame({ a: messagesValue });
 
@@ -86,8 +86,8 @@ describe("SceneBuilder", () => {
     const builder = new SceneBuilder();
     const messagesValue: any = [];
     builder.setTopics([
-      { name: "a", datatype: "A" },
-      { name: "b", datatype: "B" },
+      { name: "a", schemaName: "A" },
+      { name: "b", schemaName: "B" },
     ]);
     builder.setFrame({ a: messagesValue });
 
@@ -100,7 +100,7 @@ describe("SceneBuilder", () => {
   it("on setFrame, unrendered messages saved", () => {
     const builder = new SceneBuilder();
     const messagesValue: any = [];
-    builder.setTopics([{ name: "a", datatype: "A" }]);
+    builder.setTopics([{ name: "a", schemaName: "A" }]);
 
     builder.setFrame({ b: messagesValue });
 
@@ -109,7 +109,7 @@ describe("SceneBuilder", () => {
 
   it("on render, topics to render cleared", () => {
     const builder = new SceneBuilder();
-    builder.setTopics([{ name: "a", datatype: "A" }]);
+    builder.setTopics([{ name: "a", schemaName: "A" }]);
     builder.setFrame({ a: [] });
     // to make sure we're set up right, check that one topic should be rendered
     expect(builder.topicsToRender.size).toBe(1);

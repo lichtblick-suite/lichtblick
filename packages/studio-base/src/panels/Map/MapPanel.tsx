@@ -48,7 +48,7 @@ function isGeoJSONMessage(msgEvent: MessageEvent<unknown>): msgEvent is GeoJsonM
 }
 
 function topicMessageType(topic: Topic) {
-  switch (topic.datatype) {
+  switch (topic.schemaName) {
     case "sensor_msgs/NavSatFix":
     case "sensor_msgs/msg/NavSatFix":
     case "ros.sensor_msgs.NavSatFix":

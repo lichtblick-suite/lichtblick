@@ -8,10 +8,11 @@ import { useCallback, useEffect, useMemo } from "react";
 import { URDFRobot } from "urdf-loader";
 
 import { filterMap } from "@foxglove/den/collection";
-import { SettingsTreeAction, SettingsTreeFields, SettingsTreeNodes, Topic } from "@foxglove/studio";
+import { SettingsTreeAction, SettingsTreeFields, SettingsTreeNodes } from "@foxglove/studio";
 import * as PanelAPI from "@foxglove/studio-base/PanelAPI";
 import { useAssets } from "@foxglove/studio-base/context/AssetsContext";
 import useRobotDescriptionAsset from "@foxglove/studio-base/panels/URDFViewer/useRobotDescriptionAsset";
+import { Topic } from "@foxglove/studio-base/players/types";
 import { usePanelSettingsTreeUpdate } from "@foxglove/studio-base/providers/PanelSettingsEditorContextProvider";
 import { SaveConfig } from "@foxglove/studio-base/types/panels";
 import { ROBOT_DESCRIPTION_PARAM } from "@foxglove/studio-base/util/globalConstants";
@@ -125,7 +126,7 @@ export function useURDFViewerSettings(
   const { robotDescriptionAsset } = useRobotDescriptionAsset();
 
   const availableTopics = useMemo(
-    () => topics.filter((topic) => DATA_TYPES.includes(topic.datatype)),
+    () => topics.filter((topic) => DATA_TYPES.includes(topic.schemaName)),
     [topics],
   );
 

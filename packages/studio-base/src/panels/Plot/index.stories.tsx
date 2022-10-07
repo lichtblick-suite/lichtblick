@@ -242,12 +242,12 @@ const messageCache: BlockCache = {
 const fixture: Fixture = {
   datatypes,
   topics: [
-    { name: "/some_topic/location", datatype: "msgs/PoseDebug" },
-    { name: "/some_topic/location_subset", datatype: "msgs/PoseDebug" },
-    { name: "/some_topic/location_shuffled", datatype: "msgs/PoseDebug" },
-    { name: "/some_topic/state", datatype: "msgs/State" },
-    { name: "/boolean_topic", datatype: "std_msgs/Bool" },
-    { name: "/preloaded_topic", datatype: "nonstd_msgs/Float64Stamped" },
+    { name: "/some_topic/location", schemaName: "msgs/PoseDebug" },
+    { name: "/some_topic/location_subset", schemaName: "msgs/PoseDebug" },
+    { name: "/some_topic/location_shuffled", schemaName: "msgs/PoseDebug" },
+    { name: "/some_topic/state", schemaName: "msgs/State" },
+    { name: "/boolean_topic", schemaName: "std_msgs/Bool" },
+    { name: "/preloaded_topic", schemaName: "nonstd_msgs/Float64Stamped" },
   ],
   activeData: {
     startTime: { sec: 0, nsec: 202050 },
@@ -1019,7 +1019,7 @@ export function SuperCloseValues(): JSX.Element {
             },
           }),
         ),
-        topics: [{ name: "/some_number", datatype: "std_msgs/Float32" }],
+        topics: [{ name: "/some_number", schemaName: "std_msgs/Float32" }],
         activeData: {
           startTime: { sec: 0, nsec: 0 },
           endTime: { sec: 10, nsec: 0 },

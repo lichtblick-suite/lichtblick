@@ -239,7 +239,7 @@ const SUPPORTED_MARKER_DATATYPES_SET = new Set([
 ]);
 
 function isTopicRenderable(topic: Topic): boolean {
-  const datatype = topic.datatype;
+  const datatype = topic.schemaName;
   return (
     SUPPORTED_MARKER_DATATYPES_SET.has(datatype) ||
     datatype.endsWith("/Color") ||
@@ -433,8 +433,8 @@ export default function Layout({
     // Subscribe to all TF topics
     for (const topic of memoizedTopics) {
       if (
-        TF_DATATYPES.includes(topic.datatype) ||
-        TRANSFORM_STAMPED_DATATYPES.includes(topic.datatype)
+        TF_DATATYPES.includes(topic.schemaName) ||
+        TRANSFORM_STAMPED_DATATYPES.includes(topic.schemaName)
       ) {
         allTopics.add(topic.name);
       }

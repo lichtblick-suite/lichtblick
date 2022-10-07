@@ -2,7 +2,8 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { MessageEvent, Topic } from "@foxglove/studio";
+import { MessageEvent } from "@foxglove/studio";
+import { Topic } from "@foxglove/studio-base/players/types";
 import PanelSetup from "@foxglove/studio-base/stories/PanelSetup";
 import delay from "@foxglove/studio-base/util/delay";
 
@@ -35,7 +36,7 @@ MeasurementTool.play = async () => {
   await delay(100);
 };
 export function MeasurementTool(): JSX.Element {
-  const topics: Topic[] = [{ name: "/tf", datatype: "geometry_msgs/TransformStamped" }];
+  const topics: Topic[] = [{ name: "/tf", schemaName: "geometry_msgs/TransformStamped" }];
   const tf1: MessageEvent<TransformStamped> = {
     topic: "/tf",
     receiveTime: { sec: 10, nsec: 0 },

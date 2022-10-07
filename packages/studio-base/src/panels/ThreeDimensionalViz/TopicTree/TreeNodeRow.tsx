@@ -234,7 +234,7 @@ export default function TreeNodeRow({
             style={{ padding: "0 4px", color: colors.HIGHLIGHT, lineHeight: 1 }}
             fade
             tooltip="Topic settings edited"
-            onClick={() => setCurrentEditingTopic({ name: topicName, datatype })}
+            onClick={() => setCurrentEditingTopic({ name: topicName, schemaName: datatype })}
           >
             <LeadPencilIcon />
           </Icon>

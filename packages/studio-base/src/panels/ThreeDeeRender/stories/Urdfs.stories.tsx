@@ -2,7 +2,8 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { MessageEvent, Topic } from "@foxglove/studio";
+import { MessageEvent } from "@foxglove/studio";
+import { Topic } from "@foxglove/studio-base/players/types";
 import PanelSetup from "@foxglove/studio-base/stories/PanelSetup";
 
 import ThreeDeeRender from "../index";
@@ -101,7 +102,7 @@ export default {
 
 Urdfs.parameters = { colorScheme: "dark" };
 export function Urdfs(): JSX.Element {
-  const topics: Topic[] = [{ name: "/robot_description", datatype: "std_msgs/String" }];
+  const topics: Topic[] = [{ name: "/robot_description", schemaName: "std_msgs/String" }];
   const robot_description: MessageEvent<{ data: string }> = {
     topic: "/robot_description",
     receiveTime: { sec: 10, nsec: 0 },

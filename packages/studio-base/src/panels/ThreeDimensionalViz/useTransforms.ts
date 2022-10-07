@@ -100,7 +100,7 @@ function useTransforms(args: Args): IImmutableTransformTree {
   const { topics, frame, reset, urdfTransforms } = args;
 
   const topicsToDatatypes = useMemo(() => {
-    return new Map<string, string>(topics.map((topic) => [topic.name, topic.datatype]));
+    return new Map<string, string>(topics.map((topic) => [topic.name, topic.schemaName]));
   }, [topics]);
 
   const transformsRef = useRef(new TransformTree());

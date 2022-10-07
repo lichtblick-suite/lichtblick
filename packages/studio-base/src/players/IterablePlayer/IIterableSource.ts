@@ -3,8 +3,8 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 import { Time } from "@foxglove/rostime";
-import { Topic, MessageEvent } from "@foxglove/studio";
-import { PlayerProblem, TopicStats } from "@foxglove/studio-base/players/types";
+import { MessageEvent } from "@foxglove/studio";
+import { PlayerProblem, Topic, TopicStats } from "@foxglove/studio-base/players/types";
 import { RosDatatypes } from "@foxglove/studio-base/types/RosDatatypes";
 
 export type Initalization = {

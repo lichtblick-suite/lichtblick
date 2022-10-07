@@ -210,7 +210,7 @@ export default class Ros2Player implements Player {
           });
         }
 
-        topics.push({ name: topic, datatype: dataType });
+        topics.push({ name: topic, schemaName: dataType });
       }
 
       // Sort them for easy comparison
@@ -386,7 +386,7 @@ export default class Ros2Player implements Player {
       if (!availableTopic || this._rosNode.subscriptions.has(topicName)) {
         continue;
       }
-      const dataType = availableTopic.datatype;
+      const dataType = availableTopic.schemaName;
 
       // Find the first publisher for this topic to mimic its QoS history settings
       const rosEndpoint = publishedTopics.get(topicName)?.[0];

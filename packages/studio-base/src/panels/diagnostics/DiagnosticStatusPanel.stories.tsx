@@ -4,14 +4,14 @@
 import DiagnosticStatusPanel from "@foxglove/studio-base/panels/diagnostics/DiagnosticStatusPanel";
 import { makeDiagnosticMessage } from "@foxglove/studio-base/panels/diagnostics/DiagnosticSummary.stories";
 import { LEVELS } from "@foxglove/studio-base/panels/diagnostics/util";
-import PanelSetup from "@foxglove/studio-base/stories/PanelSetup";
+import PanelSetup, { Fixture } from "@foxglove/studio-base/stories/PanelSetup";
 
 export default {
   title: "panels/diagnostics/DiagnosticStatusPanel",
 };
 
-const fixture = {
-  topics: [{ name: "/diagnostics", datatype: "diagnostic_msgs/DiagnosticArray" }],
+const fixture: Fixture = {
+  topics: [{ name: "/diagnostics", schemaName: "diagnostic_msgs/DiagnosticArray" }],
   frame: {
     "/diagnostics": [
       makeDiagnosticMessage(LEVELS.OK, "name1", "hardware_id1", ["message 1", "message 2"]),

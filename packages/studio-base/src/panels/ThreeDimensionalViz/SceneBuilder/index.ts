@@ -993,7 +993,7 @@ export default class SceneBuilder implements MarkerProvider {
     this.collectors[topic]?.setClock(this._clock ?? { sec: 0, nsec: 0 });
     this.collectors[topic]?.flush();
 
-    const datatype = this.topicsByName[topic]?.datatype;
+    const datatype = this.topicsByName[topic]?.schemaName;
     if (datatype == undefined) {
       return;
     }

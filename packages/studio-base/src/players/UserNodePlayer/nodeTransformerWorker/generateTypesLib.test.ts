@@ -93,7 +93,7 @@ describe("generateTypesLib", () => {
       topics: [
         {
           name: "/my_topic",
-          datatype: "std_msgs/ColorRGBA",
+          schemaName: "std_msgs/ColorRGBA",
         },
       ],
       datatypes: new Map(
@@ -120,11 +120,11 @@ describe("generateTypesLib", () => {
       topics: [
         {
           name: "/my_topic",
-          datatype: "std_msgs/ColorRGBA",
+          schemaName: "std_msgs/ColorRGBA",
         },
         {
           name: "/another_topic",
-          datatype: "unknown_datatype",
+          schemaName: "unknown_datatype",
         },
       ],
       datatypes: new Map(

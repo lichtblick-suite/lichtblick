@@ -2,7 +2,8 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { MessageEvent, Topic } from "@foxglove/studio";
+import { MessageEvent } from "@foxglove/studio";
+import { Topic } from "@foxglove/studio-base/players/types";
 import PanelSetup from "@foxglove/studio-base/stories/PanelSetup";
 
 import ThreeDeeRender from "../index";
@@ -17,8 +18,8 @@ export default {
 
 export function LabelMarkers(): JSX.Element {
   const topics: Topic[] = [
-    { name: "/tf", datatype: "geometry_msgs/TransformStamped" },
-    { name: "/labels", datatype: "visualization_msgs/Marker" },
+    { name: "/tf", schemaName: "geometry_msgs/TransformStamped" },
+    { name: "/labels", schemaName: "visualization_msgs/Marker" },
   ];
 
   const tf1: MessageEvent<TransformStamped> = {

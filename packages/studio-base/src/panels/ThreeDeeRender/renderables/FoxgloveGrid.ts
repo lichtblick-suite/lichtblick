@@ -97,7 +97,7 @@ export class FoxgloveGrid extends SceneExtension<FoxgloveGridRenderable> {
     const handler = this.handleSettingsAction;
     const entries: SettingsTreeEntry[] = [];
     for (const topic of this.renderer.topics ?? []) {
-      if (GRID_DATATYPES.has(topic.datatype)) {
+      if (GRID_DATATYPES.has(topic.schemaName)) {
         const config = (configTopics[topic.name] ?? {}) as Partial<LayerSettingsFoxgloveGrid>;
 
         const node = baseColorModeSettingsNode(this.fieldsByTopic, config, topic, DEFAULT_SETTINGS);

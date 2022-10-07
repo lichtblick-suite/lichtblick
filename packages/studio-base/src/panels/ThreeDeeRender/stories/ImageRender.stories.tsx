@@ -3,7 +3,8 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 import { CompressedImage, FrameTransform, RawImage } from "@foxglove/schemas";
-import { MessageEvent, Topic } from "@foxglove/studio";
+import { MessageEvent } from "@foxglove/studio";
+import { Topic } from "@foxglove/studio-base/players/types";
 import PanelSetup from "@foxglove/studio-base/stories/PanelSetup";
 
 import ThreeDeeRender from "../index";
@@ -26,11 +27,11 @@ export default {
 ImageRender.parameters = { colorScheme: "light" };
 export function ImageRender(): JSX.Element {
   const topics: Topic[] = [
-    { name: "/tf", datatype: "geometry_msgs/TransformStamped" },
-    { name: "/cam1/info", datatype: "sensor_msgs/CameraInfo" },
-    { name: "/cam2/info", datatype: "sensor_msgs/CameraInfo" },
-    { name: "/cam1/png", datatype: "sensor_msgs/CompressedImage" },
-    { name: "/cam2/raw", datatype: "sensor_msgs/Image" },
+    { name: "/tf", schemaName: "geometry_msgs/TransformStamped" },
+    { name: "/cam1/info", schemaName: "sensor_msgs/CameraInfo" },
+    { name: "/cam2/info", schemaName: "sensor_msgs/CameraInfo" },
+    { name: "/cam1/png", schemaName: "sensor_msgs/CompressedImage" },
+    { name: "/cam2/raw", schemaName: "sensor_msgs/Image" },
   ];
 
   const tf1: MessageEvent<TransformStamped> = {
@@ -215,11 +216,11 @@ export function ImageRender(): JSX.Element {
 FoxgloveImageRender.parameters = { colorScheme: "light" };
 export function FoxgloveImageRender(): JSX.Element {
   const topics: Topic[] = [
-    { name: "/tf", datatype: "foxglove.FrameTransform" },
-    { name: "/cam1/info", datatype: "foxglove.CameraCalibration" },
-    { name: "/cam2/info", datatype: "foxglove.CameraCalibration" },
-    { name: "/cam1/png", datatype: "foxglove.CompressedImage" },
-    { name: "/cam2/raw", datatype: "foxglove.RawImage" },
+    { name: "/tf", schemaName: "foxglove.FrameTransform" },
+    { name: "/cam1/info", schemaName: "foxglove.CameraCalibration" },
+    { name: "/cam2/info", schemaName: "foxglove.CameraCalibration" },
+    { name: "/cam1/png", schemaName: "foxglove.CompressedImage" },
+    { name: "/cam2/raw", schemaName: "foxglove.RawImage" },
   ];
 
   const tf1: MessageEvent<FrameTransform> = {

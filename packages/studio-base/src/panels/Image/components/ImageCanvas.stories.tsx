@@ -14,6 +14,7 @@
 import { Story } from "@storybook/react";
 import { noop } from "lodash";
 
+import { Topic } from "@foxglove/studio-base/players/types";
 import { useReadySignal } from "@foxglove/studio-base/stories/ReadySignalContext";
 import { CameraInfo } from "@foxglove/studio-base/types/Messages";
 
@@ -48,9 +49,9 @@ const noMarkersMarkerData = {
   transformMarkers: false,
 };
 
-const topics = [
-  { name: "/storybook_image", datatype: "sensor_msgs/Image" },
-  { name: "/storybook_compressed_image", datatype: "sensor_msgs/CompressedImage" },
+const topics: Topic[] = [
+  { name: "/storybook_image", schemaName: "sensor_msgs/Image" },
+  { name: "/storybook_compressed_image", schemaName: "sensor_msgs/CompressedImage" },
 ];
 const config: Config = { ...ImageView.defaultConfig, mode: "fit" };
 

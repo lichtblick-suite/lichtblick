@@ -4,7 +4,8 @@
 
 import { vec3 } from "gl-matrix";
 
-import { MessageEvent, Topic } from "@foxglove/studio";
+import { MessageEvent } from "@foxglove/studio";
+import { Topic } from "@foxglove/studio-base/players/types";
 import PanelSetup from "@foxglove/studio-base/stories/PanelSetup";
 
 import ThreeDeeRender from "../index";
@@ -38,8 +39,8 @@ SensorMsgs_PointCloud2_RGB.parameters = { colorScheme: "dark" };
 
 function SensorMsgs_PointCloud2({ rgbaFieldName }: { rgbaFieldName: string }): JSX.Element {
   const topics: Topic[] = [
-    { name: "/pointcloud", datatype: "sensor_msgs/PointCloud2" },
-    { name: "/tf", datatype: "geometry_msgs/TransformStamped" },
+    { name: "/pointcloud", schemaName: "sensor_msgs/PointCloud2" },
+    { name: "/tf", schemaName: "geometry_msgs/TransformStamped" },
   ];
   const tf1: MessageEvent<TransformStamped> = {
     topic: "/tf",
@@ -169,8 +170,8 @@ function SensorMsgs_PointCloud2({ rgbaFieldName }: { rgbaFieldName: string }): J
 SensorMsgs_PointCloud2_Intensity.parameters = { colorScheme: "dark" };
 export function SensorMsgs_PointCloud2_Intensity(): JSX.Element {
   const topics: Topic[] = [
-    { name: "/pointcloud", datatype: "sensor_msgs/PointCloud2" },
-    { name: "/tf", datatype: "geometry_msgs/TransformStamped" },
+    { name: "/pointcloud", schemaName: "sensor_msgs/PointCloud2" },
+    { name: "/tf", schemaName: "geometry_msgs/TransformStamped" },
   ];
   const tf1: MessageEvent<TransformStamped> = {
     topic: "/tf",
@@ -343,7 +344,7 @@ export function SensorMsgs_PointCloud2_Intensity(): JSX.Element {
 // Render a flat plane if we only have two dimensions
 SensorMsgs_PointCloud2_TwoDimensions.parameters = { colorScheme: "dark" };
 export function SensorMsgs_PointCloud2_TwoDimensions(): JSX.Element {
-  const topics: Topic[] = [{ name: "/pointcloud", datatype: "sensor_msgs/PointCloud2" }];
+  const topics: Topic[] = [{ name: "/pointcloud", schemaName: "sensor_msgs/PointCloud2" }];
 
   const SCALE = 10 / 128;
 

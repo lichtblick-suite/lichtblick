@@ -3,8 +3,9 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 import { Grid, NumericType } from "@foxglove/schemas";
-import { MessageEvent, Topic } from "@foxglove/studio";
+import { MessageEvent } from "@foxglove/studio";
 import { LayerSettingsFoxgloveGrid } from "@foxglove/studio-base/panels/ThreeDeeRender/renderables/FoxgloveGrid";
+import { Topic } from "@foxglove/studio-base/players/types";
 import PanelSetup from "@foxglove/studio-base/stories/PanelSetup";
 
 import ThreeDeeRender from "../index";
@@ -58,8 +59,8 @@ function copyGridAtPosition(
 
 function Foxglove_Grid_Uint8(): JSX.Element {
   const topics: Topic[] = [
-    { name: "/grid", datatype: "foxglove.Grid" },
-    { name: "/tf", datatype: "geometry_msgs/TransformStamped" },
+    { name: "/grid", schemaName: "foxglove.Grid" },
+    { name: "/tf", schemaName: "geometry_msgs/TransformStamped" },
   ];
   const tf1: MessageEvent<TransformStamped> = {
     topic: "/tf",
@@ -167,7 +168,7 @@ function Foxglove_Grid_Uint8(): JSX.Element {
     },
     "/grid2",
   );
-  topics.push({ name: "/grid2", datatype: "foxglove.Grid" });
+  topics.push({ name: "/grid2", schemaName: "foxglove.Grid" });
   const grid3 = copyGridAtPosition(
     grid,
     {
@@ -177,7 +178,7 @@ function Foxglove_Grid_Uint8(): JSX.Element {
     },
     "/grid3",
   );
-  topics.push({ name: "/grid3", datatype: "foxglove.Grid" });
+  topics.push({ name: "/grid3", schemaName: "foxglove.Grid" });
   const grid4 = copyGridAtPosition(
     grid,
     {
@@ -187,7 +188,7 @@ function Foxglove_Grid_Uint8(): JSX.Element {
     },
     "/grid4",
   );
-  topics.push({ name: "/grid4", datatype: "foxglove.Grid" });
+  topics.push({ name: "/grid4", schemaName: "foxglove.Grid" });
 
   const fixture = useDelayedFixture({
     topics,
@@ -276,8 +277,8 @@ function jet(x: number, a: number): number {
 }
 function Foxglove_Grid_RGBA(): JSX.Element {
   const topics: Topic[] = [
-    { name: "/grid", datatype: "foxglove.Grid" },
-    { name: "/tf", datatype: "geometry_msgs/TransformStamped" },
+    { name: "/grid", schemaName: "foxglove.Grid" },
+    { name: "/tf", schemaName: "geometry_msgs/TransformStamped" },
   ];
   const tf1: MessageEvent<TransformStamped> = {
     topic: "/tf",
@@ -397,8 +398,8 @@ function Foxglove_Grid_RGBA(): JSX.Element {
 
 function Foxglove_Grid_Float(): JSX.Element {
   const topics: Topic[] = [
-    { name: "/grid", datatype: "foxglove.Grid" },
-    { name: "/tf", datatype: "geometry_msgs/TransformStamped" },
+    { name: "/grid", schemaName: "foxglove.Grid" },
+    { name: "/tf", schemaName: "geometry_msgs/TransformStamped" },
   ];
   const tf1: MessageEvent<TransformStamped> = {
     topic: "/tf",

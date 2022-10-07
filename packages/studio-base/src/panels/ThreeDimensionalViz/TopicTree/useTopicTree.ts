@@ -199,7 +199,7 @@ export default function useTopicTree({
 
     // Precompute uncategorized topics to add to the transformedTreeConfig before generating the TreeNodes.
     const uncategorizedTopicNames = difference([...availableTopicsNamesSet], topicTreeTopics);
-    const datatypesByTopic = mapValues(keyBy(providerTopics, "name"), (item) => item.datatype);
+    const datatypesByTopic = mapValues(keyBy(providerTopics, "name"), (item) => item.schemaName);
 
     const newChildren = [...(topicTreeConfig.children ?? [])];
     if (uncategorizedTopicNames.length > 0) {

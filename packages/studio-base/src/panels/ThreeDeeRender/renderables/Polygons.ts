@@ -71,7 +71,7 @@ export class Polygons extends SceneExtension<PolygonRenderable> {
     const handler = this.handleSettingsAction;
     const entries: SettingsTreeEntry[] = [];
     for (const topic of this.renderer.topics ?? []) {
-      if (POLYGON_STAMPED_DATATYPES.has(topic.datatype)) {
+      if (POLYGON_STAMPED_DATATYPES.has(topic.schemaName)) {
         const config = (configTopics[topic.name] ?? {}) as Partial<LayerSettingsPolygon>;
 
         // prettier-ignore

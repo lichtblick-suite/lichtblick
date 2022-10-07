@@ -47,7 +47,7 @@ export class Markers extends SceneExtension<TopicMarkers> {
     const configTopics = this.renderer.config.topics;
     const entries: SettingsTreeEntry[] = [];
     for (const topic of this.renderer.topics ?? []) {
-      if (MARKER_ARRAY_DATATYPES.has(topic.datatype) || MARKER_DATATYPES.has(topic.datatype)) {
+      if (MARKER_ARRAY_DATATYPES.has(topic.schemaName) || MARKER_DATATYPES.has(topic.schemaName)) {
         const config = (configTopics[topic.name] ?? {}) as Partial<LayerSettingsMarker>;
 
         const node: SettingsTreeNodeWithActionHandler = {

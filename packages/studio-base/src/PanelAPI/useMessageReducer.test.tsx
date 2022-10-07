@@ -417,8 +417,8 @@ describe("useMessageReducer", () => {
             speed: 0.2,
             lastSeekTime: 1234,
             topics: [
-              { name: "/foo", datatype: "foo" },
-              { name: "/bar", datatype: "foo" },
+              { name: "/foo", schemaName: "foo" },
+              { name: "/bar", schemaName: "foo" },
             ],
             topicStats: new Map(),
             datatypes: new Map(
@@ -456,8 +456,8 @@ describe("useMessageReducer", () => {
             speed: 0.2,
             lastSeekTime: 1234,
             topics: [
-              { name: "/foo", datatype: "foo" },
-              { name: "/bar", datatype: "foo" },
+              { name: "/foo", schemaName: "foo" },
+              { name: "/bar", schemaName: "foo" },
             ],
             topicStats: new Map(),
             datatypes: new Map(
@@ -513,7 +513,7 @@ describe("useMessageReducer", () => {
     expect(addMessage.mock.calls).toEqual([[1, message]]);
     expect(result.current).toEqual(2);
 
-    topics = [{ name: "/bar", datatype: "Bar" }];
+    topics = [{ name: "/bar", schemaName: "Bar" }];
     rerender();
     capabilities = ["some_capability"];
     rerender();

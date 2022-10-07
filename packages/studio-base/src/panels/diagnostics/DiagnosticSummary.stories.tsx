@@ -10,7 +10,7 @@ import {
   LEVELS,
 } from "@foxglove/studio-base/panels/diagnostics/util";
 import { MessageEvent } from "@foxglove/studio-base/players/types";
-import PanelSetup from "@foxglove/studio-base/stories/PanelSetup";
+import PanelSetup, { Fixture } from "@foxglove/studio-base/stories/PanelSetup";
 
 export default {
   title: "panels/diagnostics/DiagnosticSummary",
@@ -36,8 +36,8 @@ export function makeDiagnosticMessage(
   };
 }
 
-const fixture = {
-  topics: [{ name: "/diagnostics", datatype: "diagnostic_msgs/DiagnosticArray" }],
+const fixture: Fixture = {
+  topics: [{ name: "/diagnostics", schemaName: "diagnostic_msgs/DiagnosticArray" }],
   frame: {
     "/diagnostics": [
       makeDiagnosticMessage(LEVELS.OK, "name1", "hardware_id1", ["ok"]),

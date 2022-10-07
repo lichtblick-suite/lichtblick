@@ -119,16 +119,16 @@ export class BagIterableSource implements IIterableSource {
       publishers.add(connection.callerid ?? String(connection.conn));
 
       const existingTopic = topics.get(connection.topic);
-      if (existingTopic && existingTopic.datatype !== datatype) {
+      if (existingTopic && existingTopic.schemaName !== datatype) {
         problems.push({
           severity: "warn",
-          message: `Conflicting datatypes on topic (${connection.topic}): ${datatype}, ${existingTopic.datatype}`,
+          message: `Conflicting datatypes on topic (${connection.topic}): ${datatype}, ${existingTopic.schemaName}`,
           tip: `Studio requires all connections on a topic to have the same datatype. Make sure all your nodes are publishing the same message on ${connection.topic}.`,
         });
       }
 
       if (!existingTopic) {
-        topics.set(connection.topic, { name: connection.topic, datatype });
+        topics.set(connection.topic, { name: connection.topic, schemaName: datatype });
       }
 
       // Update the message count for this topic

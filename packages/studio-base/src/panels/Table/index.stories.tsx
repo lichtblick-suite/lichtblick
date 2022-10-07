@@ -44,7 +44,7 @@ const fixture: Fixture = {
       },
     }),
   ),
-  topics: [{ name: "/my_arr", datatype: "my_arr" }],
+  topics: [{ name: "/my_arr", schemaName: "my_arr" }],
   frame: {
     "/my_arr": [
       {

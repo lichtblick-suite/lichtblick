@@ -87,7 +87,7 @@ export class OccupancyGrids extends SceneExtension<OccupancyGridRenderable> {
     const handler = this.handleSettingsAction;
     const entries: SettingsTreeEntry[] = [];
     for (const topic of this.renderer.topics ?? []) {
-      if (OCCUPANCY_GRID_DATATYPES.has(topic.datatype)) {
+      if (OCCUPANCY_GRID_DATATYPES.has(topic.schemaName)) {
         const config = (configTopics[topic.name] ?? {}) as Partial<LayerSettingsOccupancyGrid>;
 
         // prettier-ignore

@@ -195,7 +195,7 @@ const generateRosLib = ({
 
   let datatypeInterfaces = generateTypeDefs(datatypes);
 
-  topics.forEach(({ name, datatype }) => {
+  topics.forEach(({ name, schemaName: datatype }) => {
     if (!datatypeInterfaces[datatype]) {
       datatypeInterfaces = {
         ...datatypeInterfaces,

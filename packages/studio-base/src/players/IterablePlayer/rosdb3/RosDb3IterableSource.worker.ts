@@ -72,7 +72,7 @@ export class RosDb3IterableSource implements IIterableSource {
     for (const topicDef of topicDefs) {
       const numMessages = messageCounts.get(topicDef.name);
 
-      topics.push({ name: topicDef.name, datatype: topicDef.type });
+      topics.push({ name: topicDef.name, schemaName: topicDef.type });
       if (numMessages != undefined) {
         topicStats.set(topicDef.name, { numMessages });
       }

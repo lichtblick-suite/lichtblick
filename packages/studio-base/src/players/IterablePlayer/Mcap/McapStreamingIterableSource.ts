@@ -17,7 +17,7 @@ import {
   toRFC3339String,
   compare,
 } from "@foxglove/rostime";
-import { Topic, MessageEvent } from "@foxglove/studio";
+import { MessageEvent } from "@foxglove/studio";
 import {
   GetBackfillMessagesArgs,
   IIterableSource,
@@ -25,7 +25,7 @@ import {
   IteratorResult,
   MessageIteratorArgs,
 } from "@foxglove/studio-base/players/IterablePlayer/IIterableSource";
-import { PlayerProblem, TopicStats } from "@foxglove/studio-base/players/types";
+import { PlayerProblem, Topic, TopicStats } from "@foxglove/studio-base/players/types";
 import { RosDatatypes } from "@foxglove/studio-base/types/RosDatatypes";
 
 const DURATION_YEAR_SEC = 365 * 24 * 60 * 60;
@@ -174,7 +174,7 @@ export class McapStreamingIterableSource implements IIterableSource {
     const datatypes: RosDatatypes = new Map();
 
     for (const { channel, parsedChannel } of channelInfoById.values()) {
-      topics.push({ name: channel.topic, datatype: parsedChannel.fullSchemaName });
+      topics.push({ name: channel.topic, schemaName: parsedChannel.fullSchemaName });
       const numMessages = messagesByChannel.get(channel.id)?.length;
       if (numMessages != undefined) {
         topicStats.set(channel.topic, { numMessages });

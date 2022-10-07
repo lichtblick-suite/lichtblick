@@ -114,7 +114,7 @@ function generateTypesByTopicInterface(topics: Topic[]): string {
     export type MessageTypeByTopic = {`;
 
   for (const topic of topics) {
-    src += `${safeString(topic.name)}: MessageTypeBySchemaName[${safeString(topic.datatype)}]\n`;
+    src += `${safeString(topic.name)}: MessageTypeBySchemaName[${safeString(topic.schemaName)}]\n`;
   }
 
   src += "\n};";
@@ -131,9 +131,9 @@ function generateTypesLib(args: Args): string {
   // We want the types library to still generate and compile so we use empty placeholders for such datatypes.
   const allDatatypes = new Map(args.datatypes);
   for (const topic of args.topics) {
-    if (!allDatatypes.has(topic.datatype)) {
-      allDatatypes.set(topic.datatype, {
-        name: topic.datatype,
+    if (!allDatatypes.has(topic.schemaName)) {
+      allDatatypes.set(topic.schemaName, {
+        name: topic.schemaName,
         definitions: [],
       });
     }

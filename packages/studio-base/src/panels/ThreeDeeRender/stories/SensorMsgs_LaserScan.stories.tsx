@@ -5,7 +5,8 @@
 import * as THREE from "three";
 
 import { fromSec } from "@foxglove/rostime";
-import { MessageEvent, Topic } from "@foxglove/studio";
+import { MessageEvent } from "@foxglove/studio";
+import { Topic } from "@foxglove/studio-base/players/types";
 import PanelSetup from "@foxglove/studio-base/stories/PanelSetup";
 
 import ThreeDeeRender from "../index";
@@ -31,8 +32,8 @@ function SensorMsgs_LaserScan({
   settings: Record<string, unknown>;
 }): JSX.Element {
   const topics: Topic[] = [
-    { name: "/scan", datatype: "sensor_msgs/LaserScan" },
-    { name: "/tf", datatype: "geometry_msgs/TransformStamped" },
+    { name: "/scan", schemaName: "sensor_msgs/LaserScan" },
+    { name: "/tf", schemaName: "geometry_msgs/TransformStamped" },
   ];
   const tf1: MessageEvent<TransformStamped> = {
     topic: "/tf",
@@ -216,9 +217,9 @@ export const Time10 = Object.assign(SensorMsgs_LaserScan.bind({}), {
 
 export function ComparisonWithPointCloudColors(): JSX.Element {
   const topics: Topic[] = [
-    { name: "/scan", datatype: "sensor_msgs/LaserScan" },
-    { name: "/cloud", datatype: "sensor_msgs/PointCloud2" },
-    { name: "/tf", datatype: "geometry_msgs/TransformStamped" },
+    { name: "/scan", schemaName: "sensor_msgs/LaserScan" },
+    { name: "/cloud", schemaName: "sensor_msgs/PointCloud2" },
+    { name: "/tf", schemaName: "geometry_msgs/TransformStamped" },
   ];
   const tf1: MessageEvent<TransformStamped> = {
     topic: "/tf",

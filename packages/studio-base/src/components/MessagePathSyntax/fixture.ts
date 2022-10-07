@@ -103,13 +103,13 @@ export const MessagePathInputStoryFixture: Fixture = {
     }),
   ),
   topics: [
-    { name: "/some_topic/location", datatype: "msgs/PoseDebug" },
-    { name: "/some_topic/state", datatype: "msgs/State" },
+    { name: "/some_topic/location", schemaName: "msgs/PoseDebug" },
+    { name: "/some_topic/state", schemaName: "msgs/State" },
     {
       name: "/very_very_very_very_very_very_very_very_very_very_very_very_very_very_very_very_very_very_very_very_very_very_very_very_very_very_very_very_very_very_very_very_very_very_very_very_very_very_very_very_very_very_very_very_very_very_very_long_topic_name/state",
-      datatype: "msgs/State",
+      schemaName: "msgs/State",
     },
-    { name: "/some_logs_topic", datatype: "msgs/Log" },
+    { name: "/some_logs_topic", schemaName: "msgs/Log" },
   ],
   frame: {},
   globalVariables: { global_var_1: 42, global_var_2: 10 },

@@ -168,7 +168,9 @@ describe("RosbridgePlayer", () => {
         return;
       }
 
-      expect(topics).toStrictEqual([{ name: "/topic/A", datatype: "/std_msgs/Header" }]);
+      expect(topics).toStrictEqual<typeof topics>([
+        { name: "/topic/A", schemaName: "/std_msgs/Header" },
+      ]);
       sig.resolve();
     });
 

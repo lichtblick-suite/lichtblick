@@ -16,14 +16,14 @@ import { Fixture } from "@foxglove/studio-base/stories/PanelSetup";
 // ts-prune-ignore-next
 export const fixture: Fixture = {
   topics: [
-    { name: "/msgs/big_topic", datatype: "msgs/big_topic" },
-    { name: "/foo", datatype: "std_msgs/String" },
-    { name: "/baz/num", datatype: "baz/num" },
-    { name: "/baz/bigint", datatype: "baz/bigint" },
-    { name: "/baz/text", datatype: "baz/text" },
-    { name: "/baz/array", datatype: "baz/array" },
-    { name: "/baz/array/obj", datatype: "baz/array/obj" },
-    { name: "/geometry/types", datatype: "geometry/types" },
+    { name: "/msgs/big_topic", schemaName: "msgs/big_topic" },
+    { name: "/foo", schemaName: "std_msgs/String" },
+    { name: "/baz/num", schemaName: "baz/num" },
+    { name: "/baz/bigint", schemaName: "baz/bigint" },
+    { name: "/baz/text", schemaName: "baz/text" },
+    { name: "/baz/array", schemaName: "baz/array" },
+    { name: "/baz/array/obj", schemaName: "baz/array/obj" },
+    { name: "/geometry/types", schemaName: "geometry/types" },
   ],
   frame: {
     "/msgs/big_topic": [
@@ -251,7 +251,7 @@ export const enumFixture: Fixture = {
       },
     }),
   ),
-  topics: [{ name: "/baz/enum", datatype: "baz/enum" }],
+  topics: [{ name: "/baz/enum", schemaName: "baz/enum" }],
   frame: {
     "/baz/enum": [
       {
@@ -305,7 +305,7 @@ export const enumAdvancedFixture: Fixture = {
       },
     }),
   ),
-  topics: [{ name: "/baz/enum_advanced", datatype: "baz/enum_advanced" }],
+  topics: [{ name: "/baz/enum_advanced", schemaName: "baz/enum_advanced" }],
   frame: {
     "/baz/enum_advanced": [
       {
@@ -328,7 +328,7 @@ export const withMissingData: Fixture = {
       },
     }),
   ),
-  topics: [{ name: "/baz/missing_data", datatype: "baz/missing_data" }],
+  topics: [{ name: "/baz/missing_data", schemaName: "baz/missing_data" }],
   frame: {
     "/baz/missing_data": [
       {
@@ -348,8 +348,8 @@ export const withMissingData: Fixture = {
 export const topicsToDiffFixture: Fixture = {
   datatypes: enumAdvancedFixture.datatypes,
   topics: [
-    { name: "/baz/enum_advanced", datatype: "baz/enum_advanced" },
-    { name: "/another/baz/enum_advanced", datatype: "baz/enum_advanced" },
+    { name: "/baz/enum_advanced", schemaName: "baz/enum_advanced" },
+    { name: "/another/baz/enum_advanced", schemaName: "baz/enum_advanced" },
   ],
   frame: {
     "/baz/enum_advanced": [
@@ -386,8 +386,8 @@ export const topicsToDiffFixture: Fixture = {
 export const topicsWithIdsToDiffFixture: Fixture = {
   datatypes: enumAdvancedFixture.datatypes,
   topics: [
-    { name: "/baz/enum_advanced_array", datatype: "baz/enum_advanced_array" },
-    { name: "/another/baz/enum_advanced_array", datatype: "baz/enum_advanced_array" },
+    { name: "/baz/enum_advanced_array", schemaName: "baz/enum_advanced_array" },
+    { name: "/another/baz/enum_advanced_array", schemaName: "baz/enum_advanced_array" },
   ],
   frame: {
     "/baz/enum_advanced_array": [
@@ -435,7 +435,7 @@ export const multipleNumberMessagesFixture: Fixture = {
       },
     }),
   ),
-  topics: [{ name: "/multiple_number_messages", datatype: "multiple_number_messages" }],
+  topics: [{ name: "/multiple_number_messages", schemaName: "multiple_number_messages" }],
   frame: {
     "/baz/enum": [
       {
@@ -475,7 +475,7 @@ export const multipleMessagesFilter: Fixture = {
       },
     }),
   ),
-  topics: [{ name: "/foo", datatype: "custom_message" }],
+  topics: [{ name: "/foo", schemaName: "custom_message" }],
   frame: {
     "/foo": [
       {

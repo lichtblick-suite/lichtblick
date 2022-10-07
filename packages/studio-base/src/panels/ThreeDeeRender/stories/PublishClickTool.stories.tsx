@@ -4,8 +4,8 @@
 
 import { screen } from "@testing-library/react";
 
-import { MessageEvent, Topic } from "@foxglove/studio";
-import { PlayerCapabilities } from "@foxglove/studio-base/players/types";
+import { MessageEvent } from "@foxglove/studio";
+import { PlayerCapabilities, Topic } from "@foxglove/studio-base/players/types";
 import PanelSetup from "@foxglove/studio-base/stories/PanelSetup";
 import delay from "@foxglove/studio-base/util/delay";
 
@@ -113,7 +113,7 @@ export const PoseEstimateComplete = Object.assign(PublishClickToolTemplate.bind(
 });
 
 function PublishClickToolTemplate({ type }: { type: PublishClickType }): JSX.Element {
-  const topics: Topic[] = [{ name: "/tf", datatype: "geometry_msgs/TransformStamped" }];
+  const topics: Topic[] = [{ name: "/tf", schemaName: "geometry_msgs/TransformStamped" }];
   const tf1: MessageEvent<TransformStamped> = {
     topic: "/tf",
     receiveTime: { sec: 10, nsec: 0 },

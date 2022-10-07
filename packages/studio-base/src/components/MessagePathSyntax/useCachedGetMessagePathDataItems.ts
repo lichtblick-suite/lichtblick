@@ -114,7 +114,7 @@ export function useCachedGetMessagePathDataItems(
         }
       }
     }
-    for (const { datatype } of relevantTopics.values()) {
+    for (const { schemaName: datatype } of relevantTopics.values()) {
       addRelevantDatatype(datatype, []);
     }
     return relevantDatatypes;
@@ -353,7 +353,7 @@ export function getMessagePathDataItems(
       );
     }
   }
-  const structure = structures[topic.datatype];
+  const structure = structures[topic.schemaName];
   if (structure) {
     traverse(message.message, 0, quoteTopicNameIfNeeded(filledInPath.topicName), structure);
   }

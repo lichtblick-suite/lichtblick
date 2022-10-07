@@ -213,7 +213,7 @@ export default class Ros1Player implements Player {
 
     try {
       const topicArrays = await rosNode.getPublishedTopics();
-      const topics: Topic[] = topicArrays.map(([name, datatype]) => ({ name, datatype }));
+      const topics: Topic[] = topicArrays.map(([name, schemaName]) => ({ name, schemaName }));
       // Sort them for easy comparison
       const sortedTopics = sortBy(topics, "name");
 
@@ -392,7 +392,7 @@ export default class Ros1Player implements Player {
         continue;
       }
 
-      const { datatype } = availTopic;
+      const { schemaName: datatype } = availTopic;
       const subscription = this._rosNode.subscribe({ topic: topicName, dataType: datatype });
 
       subscription.on("header", (_header, msgdef, _reader) => {

@@ -27,7 +27,7 @@ let manyTopics: Topic[] = [];
 for (let i = 0; i < 10; i++) {
   manyTopics = manyTopics.concat(
     Array.from(basicDatatypes.keys()).map(
-      (datatype): Topic => ({ name: `/${datatype.toLowerCase()}/${i}`, datatype }),
+      (datatype): Topic => ({ name: `/${datatype.toLowerCase()}/${i}`, schemaName: datatype }),
     ),
   );
 }

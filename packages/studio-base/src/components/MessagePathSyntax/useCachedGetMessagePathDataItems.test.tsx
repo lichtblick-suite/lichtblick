@@ -49,7 +49,7 @@ function addValuesWithPathsToItems(
 }
 
 describe("useCachedGetMessagePathDataItems", () => {
-  const initialTopics = [{ name: "/topic", datatype: "datatype" }];
+  const initialTopics: Topic[] = [{ name: "/topic", schemaName: "datatype" }];
   const initialDatatypes: RosDatatypes = new Map(
     Object.entries({
       datatype: {
@@ -151,8 +151,8 @@ describe("useCachedGetMessagePathDataItems", () => {
     rerender({
       ...initialProps,
       topics: [
-        { name: "/topic", datatype: "datatype" },
-        { name: "/topic2", datatype: "datatype2" },
+        { name: "/topic", schemaName: "datatype" },
+        { name: "/topic2", schemaName: "datatype2" },
       ],
       datatypes: new Map([
         [
@@ -170,7 +170,7 @@ describe("useCachedGetMessagePathDataItems", () => {
     );
 
     // Invalidate cache with topics.
-    rerender({ ...initialProps, topics: [{ name: "/topic", datatype: "datatype2" }] });
+    rerender({ ...initialProps, topics: [{ name: "/topic", schemaName: "datatype2" }] });
     expect(result.current.getItems("/topic.an_array[0]", message)).not.toBe(
       data0BeforeProviderTopicsChange,
     );
@@ -223,7 +223,7 @@ describe("useCachedGetMessagePathDataItems", () => {
   });
 
   it("supports types with reference cycles (i.e. reference themselves within their children)", () => {
-    const topics = [{ name: "/topic", datatype: "datatype" }];
+    const topics: Topic[] = [{ name: "/topic", schemaName: "datatype" }];
     const datatypes: RosDatatypes = new Map(
       Object.entries({
         datatype: {
@@ -290,7 +290,7 @@ describe("useCachedGetMessagePathDataItems", () => {
           sizeInBytes: 0,
         },
       ];
-      const topics: Topic[] = [{ name: "/some/topic", datatype: "some_datatype" }];
+      const topics: Topic[] = [{ name: "/some/topic", schemaName: "some_datatype" }];
       const datatypes: RosDatatypes = new Map(
         Object.entries({
           some_datatype: {
@@ -358,7 +358,7 @@ describe("useCachedGetMessagePathDataItems", () => {
             sizeInBytes: 0,
           },
         ];
-        const topics: Topic[] = [{ name: "/some/topic", datatype: "some_datatype" }];
+        const topics: Topic[] = [{ name: "/some/topic", schemaName: "some_datatype" }];
         const datatypes: RosDatatypes = new Map(
           Object.entries({
             some_datatype: { definitions: [{ name: "someJson", type: "json", isArray: false }] },
@@ -395,7 +395,7 @@ describe("useCachedGetMessagePathDataItems", () => {
             sizeInBytes: 0,
           },
         ];
-        const topics: Topic[] = [{ name: "/some/topic", datatype: "some_datatype" }];
+        const topics: Topic[] = [{ name: "/some/topic", schemaName: "some_datatype" }];
         const datatypes: RosDatatypes = new Map(
           Object.entries({
             some_datatype: { definitions: [{ name: "jsonArr", type: "json", isArray: false }] },
@@ -419,7 +419,7 @@ describe("useCachedGetMessagePathDataItems", () => {
             sizeInBytes: 0,
           },
         ];
-        const topics: Topic[] = [{ name: "/some/topic", datatype: "some_datatype" }];
+        const topics: Topic[] = [{ name: "/some/topic", schemaName: "some_datatype" }];
         const datatypes: RosDatatypes = new Map(
           Object.entries({
             some_datatype: { definitions: [{ name: "jsonArr", type: "json", isArray: false }] },
@@ -441,7 +441,7 @@ describe("useCachedGetMessagePathDataItems", () => {
             sizeInBytes: 0,
           },
         ];
-        const topics: Topic[] = [{ name: "/some/topic", datatype: "some_datatype" }];
+        const topics: Topic[] = [{ name: "/some/topic", schemaName: "some_datatype" }];
         const datatypes: RosDatatypes = new Map(
           Object.entries({
             some_datatype: { definitions: [{ name: "jsonArr", type: "json", isArray: true }] },
@@ -463,7 +463,7 @@ describe("useCachedGetMessagePathDataItems", () => {
             sizeInBytes: 0,
           },
         ];
-        const topics: Topic[] = [{ name: "/some/topic", datatype: "some_datatype" }];
+        const topics: Topic[] = [{ name: "/some/topic", schemaName: "some_datatype" }];
         const datatypes: RosDatatypes = new Map(
           Object.entries({
             some_datatype: { definitions: [{ name: "someJson", type: "json", isArray: false }] },
@@ -502,7 +502,7 @@ describe("useCachedGetMessagePathDataItems", () => {
           sizeInBytes: 0,
         },
       ];
-      const topics: Topic[] = [{ name: "/some/topic", datatype: "some_datatype" }];
+      const topics: Topic[] = [{ name: "/some/topic", schemaName: "some_datatype" }];
       const datatypes: RosDatatypes = new Map(
         Object.entries({
           some_datatype: { definitions: [{ name: "some_array", type: "int32", isArray: true }] },
@@ -536,7 +536,7 @@ describe("useCachedGetMessagePathDataItems", () => {
     });
 
     it("handles fields inside times", () => {
-      const topics: Topic[] = [{ name: "/some/topic", datatype: "std_msgs/Header" }];
+      const topics: Topic[] = [{ name: "/some/topic", schemaName: "std_msgs/Header" }];
       const datatypes: RosDatatypes = new Map(
         Object.entries({
           "std_msgs/Header": { definitions: [{ name: "stamp", type: "time", isArray: false }] },
@@ -577,7 +577,7 @@ describe("useCachedGetMessagePathDataItems", () => {
           sizeInBytes: 0,
         },
       ];
-      const topics: Topic[] = [{ name: "/some/topic", datatype: "some_datatype" }];
+      const topics: Topic[] = [{ name: "/some/topic", schemaName: "some_datatype" }];
       const datatypes: RosDatatypes = new Map(
         Object.entries({
           some_datatype: {
@@ -655,7 +655,7 @@ describe("useCachedGetMessagePathDataItems", () => {
           sizeInBytes: 0,
         },
       ];
-      const topics: Topic[] = [{ name: "/some/topic", datatype: "some_datatype" }];
+      const topics: Topic[] = [{ name: "/some/topic", schemaName: "some_datatype" }];
       const datatypes: RosDatatypes = new Map(
         Object.entries({
           some_datatype: {
@@ -752,7 +752,7 @@ describe("useCachedGetMessagePathDataItems", () => {
           sizeInBytes: 0,
         },
       ];
-      const topics: Topic[] = [{ name: "/some/topic", datatype: "some_datatype" }];
+      const topics: Topic[] = [{ name: "/some/topic", schemaName: "some_datatype" }];
       const datatypes: RosDatatypes = new Map(
         Object.entries({
           some_datatype: {
@@ -813,7 +813,7 @@ describe("useCachedGetMessagePathDataItems", () => {
           sizeInBytes: 0,
         },
       ];
-      const topics: Topic[] = [{ name: "/some/topic", datatype: "some_datatype" }];
+      const topics: Topic[] = [{ name: "/some/topic", schemaName: "some_datatype" }];
       const datatypes: RosDatatypes = new Map(
         Object.entries({
           some_datatype: {
@@ -947,10 +947,10 @@ describe("fillInGlobalVariablesInPath", () => {
 
 describe("useDecodeMessagePathsForMessagesByTopic", () => {
   it("results in missing entries when no array is provided for a topic", () => {
-    const topics = [
-      { name: "/topic1", datatype: "datatype" },
-      { name: "/topic2", datatype: "datatype" },
-      { name: "/topic3", datatype: "datatype" },
+    const topics: Topic[] = [
+      { name: "/topic1", schemaName: "datatype" },
+      { name: "/topic2", schemaName: "datatype" },
+      { name: "/topic3", schemaName: "datatype" },
     ];
     const datatypes: RosDatatypes = new Map(
       Object.entries({

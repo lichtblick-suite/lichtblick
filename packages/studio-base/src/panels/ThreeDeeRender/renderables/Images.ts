@@ -137,10 +137,10 @@ export class Images extends SceneExtension<ImageRenderable> {
     const entries: SettingsTreeEntry[] = [];
     for (const topic of this.renderer.topics ?? []) {
       if (
-        ROS_IMAGE_DATATYPES.has(topic.datatype) ||
-        ROS_COMPRESSED_IMAGE_DATATYPES.has(topic.datatype) ||
-        RAW_IMAGE_DATATYPES.has(topic.datatype) ||
-        COMPRESSED_IMAGE_DATATYPES.has(topic.datatype)
+        ROS_IMAGE_DATATYPES.has(topic.schemaName) ||
+        ROS_COMPRESSED_IMAGE_DATATYPES.has(topic.schemaName) ||
+        RAW_IMAGE_DATATYPES.has(topic.schemaName) ||
+        COMPRESSED_IMAGE_DATATYPES.has(topic.schemaName)
       ) {
         const config = (configTopics[topic.name] ?? {}) as Partial<LayerSettingsImage>;
 

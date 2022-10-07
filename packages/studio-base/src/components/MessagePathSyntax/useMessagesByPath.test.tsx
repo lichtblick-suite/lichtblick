@@ -26,7 +26,7 @@ import { RosDatatypes } from "@foxglove/studio-base/types/RosDatatypes";
 
 import * as fixture from "./fixture";
 
-const singleTopic = [{ name: "/some/topic", datatype: "some/datatype" }];
+const singleTopic: [Topic] = [{ name: "/some/topic", schemaName: "some/datatype" }];
 
 function queriedMessage(index: 0 | 1 | 2) {
   return {
@@ -102,8 +102,8 @@ describe("useMessagesByPath", () => {
       initialProps: {
         paths: ["/some/topic", "/some/other/topic"],
         topics: [
-          { name: "/some/topic", datatype: "dummy" },
-          { name: "/some/other/topic", datatype: "dummy" },
+          { name: "/some/topic", schemaName: "dummy" },
+          { name: "/some/other/topic", schemaName: "dummy" },
         ],
       },
     });
@@ -281,8 +281,8 @@ describe("useMessagesByPath", () => {
   it("remembers data when changing topics", () => {
     const { wrapper } = makeMessagePipelineWrapper({
       topics: [
-        { name: "/some/topic", datatype: "some/datatype" },
-        { name: "/some/other/topic", datatype: "dummy" },
+        { name: "/some/topic", schemaName: "some/datatype" },
+        { name: "/some/other/topic", schemaName: "dummy" },
       ],
       datatypes: fixture.datatypes,
       messages: [fixture.messages[0]!],
@@ -309,8 +309,8 @@ describe("useMessagesByPath", () => {
   it("remembers data when changing paths on an existing topic", () => {
     const { wrapper } = makeMessagePipelineWrapper({
       topics: [
-        { name: "/some/topic", datatype: "some/datatype" },
-        { name: "/some/other/topic", datatype: "dummy" },
+        { name: "/some/topic", schemaName: "some/datatype" },
+        { name: "/some/other/topic", schemaName: "dummy" },
       ],
       datatypes: fixture.datatypes,
       messages: [fixture.messages[0]!],
@@ -369,7 +369,7 @@ describe("useMessagesByPath", () => {
     it("updates queriedData when a global variable changes", () => {
       const { wrapper } = makeMessagePipelineWrapper({
         globalVariables: { foo: 0 },
-        topics: [{ name: "/some/topic", datatype: "dtype/Foo" }],
+        topics: [{ name: "/some/topic", schemaName: "dtype/Foo" }],
         datatypes: exampleDatatypes,
         messages: [message],
       });

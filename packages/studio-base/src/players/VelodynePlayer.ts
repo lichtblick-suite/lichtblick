@@ -33,7 +33,7 @@ export const DEFAULT_VELODYNE_PORT = 2369;
 const RPM = 600;
 const PROBLEM_SOCKET_ERROR = "SOCKET_ERROR";
 const TOPIC_NAME = "/velodyne_points";
-const TOPIC: Topic = { name: TOPIC_NAME, datatype: "velodyne_msgs/VelodyneScan" };
+const TOPIC: Topic = { name: TOPIC_NAME, schemaName: "velodyne_msgs/VelodyneScan" };
 const DATATYPES: RosDatatypes = new Map(
   Object.entries({
     "velodyne_msgs/VelodyneScan": {
@@ -174,7 +174,7 @@ export default class VelodynePlayer implements Player {
         receiveTime,
         message,
         sizeInBytes,
-        schemaName: TOPIC.datatype,
+        schemaName: TOPIC.schemaName,
       };
       this._parsedMessages.push(msg);
       this._packets = [];

@@ -8,8 +8,9 @@ import { DeepWritable } from "ts-essentials";
 import { DEFAULT_CAMERA_STATE, Vec4, vec4ToOrientation } from "@foxglove/regl-worldview";
 import { RosMsgDefinition } from "@foxglove/rosmsg";
 import { fromSec, Time } from "@foxglove/rostime";
-import { MessageEvent, Topic } from "@foxglove/studio";
+import { MessageEvent } from "@foxglove/studio";
 import useDelayedFixture from "@foxglove/studio-base/panels/ThreeDimensionalViz/stories/useDelayedFixture";
+import { Topic } from "@foxglove/studio-base/players/types";
 import PanelSetup from "@foxglove/studio-base/stories/PanelSetup";
 import { FoxgloveMessages } from "@foxglove/studio-base/types/FoxgloveMessages";
 import {
@@ -305,8 +306,8 @@ export function CustomBackgroundColor(): JSX.Element {
 Markers.parameters = { colorScheme: "dark", chromatic: { delay: 100 } };
 export function Markers(): JSX.Element {
   const topics: Topic[] = [
-    { name: "/tf", datatype: "geometry_msgs/TransformStamped" },
-    { name: "/markers", datatype: "visualization_msgs/Marker" },
+    { name: "/tf", schemaName: "geometry_msgs/TransformStamped" },
+    { name: "/markers", schemaName: "visualization_msgs/Marker" },
   ];
 
   const tf1: MessageEvent<TF> = {
@@ -716,7 +717,7 @@ export function Markers(): JSX.Element {
 
 FramelessMarkers.parameters = { colorScheme: "dark", chromatic: { delay: 100 } };
 export function FramelessMarkers(): JSX.Element {
-  const topics: Topic[] = [{ name: "/markers", datatype: "visualization_msgs/Marker" }];
+  const topics: Topic[] = [{ name: "/markers", schemaName: "visualization_msgs/Marker" }];
 
   type FramelessHeader = Omit<Header, "frame_id">;
   type FramelessCubeMaker = Omit<CubeMarker, "header"> & { header: FramelessHeader };
@@ -783,8 +784,8 @@ export function FramelessMarkers(): JSX.Element {
 ArrowMarkers.parameters = { colorScheme: "dark" };
 export function ArrowMarkers(): JSX.Element {
   const topics: Topic[] = [
-    { name: "/tf", datatype: "geometry_msgs/TransformStamped" },
-    { name: "/arrows", datatype: "visualization_msgs/Marker" },
+    { name: "/tf", schemaName: "geometry_msgs/TransformStamped" },
+    { name: "/arrows", schemaName: "visualization_msgs/Marker" },
   ];
 
   const tf1: MessageEvent<TF> = {
@@ -963,8 +964,8 @@ export function SphereListPointsTransform(): JSX.Element {
   }
 
   const topics: Topic[] = [
-    { name: "/tf", datatype: "geometry_msgs/TransformStamped" },
-    { name: "/sphere", datatype: "visualization_msgs/Marker" },
+    { name: "/tf", schemaName: "geometry_msgs/TransformStamped" },
+    { name: "/sphere", schemaName: "visualization_msgs/Marker" },
   ];
 
   const tf1: MessageEvent<TF> = {
@@ -1047,8 +1048,8 @@ export function SphereListPointsTransform(): JSX.Element {
 TransformInterpolation.parameters = { colorScheme: "dark" };
 export function TransformInterpolation(): JSX.Element {
   const topics: Topic[] = [
-    { name: "/markers", datatype: "visualization_msgs/Marker" },
-    { name: "/tf", datatype: "geometry_msgs/TransformStamped" },
+    { name: "/markers", schemaName: "visualization_msgs/Marker" },
+    { name: "/tf", schemaName: "geometry_msgs/TransformStamped" },
   ];
   const tf_t1: MessageEvent<TF> = {
     topic: "/tf",
@@ -1142,8 +1143,8 @@ export function TransformInterpolation(): JSX.Element {
 MarkerLifetimes.parameters = { colorScheme: "dark" };
 export function MarkerLifetimes(): JSX.Element {
   const topics: Topic[] = [
-    { name: "/markers", datatype: "visualization_msgs/Marker" },
-    { name: "/tf", datatype: "geometry_msgs/TransformStamped" },
+    { name: "/markers", schemaName: "visualization_msgs/Marker" },
+    { name: "/tf", schemaName: "geometry_msgs/TransformStamped" },
   ];
   const tf1: MessageEvent<TF> = {
     topic: "/tf",
@@ -1273,9 +1274,9 @@ export function MarkerLifetimes(): JSX.Element {
 Marker_PointCloud2_Alignment.parameters = { colorScheme: "dark" };
 export function Marker_PointCloud2_Alignment(): JSX.Element {
   const topics: Topic[] = [
-    { name: "/markers", datatype: "visualization_msgs/Marker" },
-    { name: "/pointcloud", datatype: "sensor_msgs/PointCloud2" },
-    { name: "/tf", datatype: "geometry_msgs/TransformStamped" },
+    { name: "/markers", schemaName: "visualization_msgs/Marker" },
+    { name: "/pointcloud", schemaName: "sensor_msgs/PointCloud2" },
+    { name: "/tf", schemaName: "geometry_msgs/TransformStamped" },
   ];
   const tf1: MessageEvent<TF> = {
     topic: "/tf",
@@ -1441,7 +1442,7 @@ export function Marker_PointCloud2_Alignment(): JSX.Element {
 
 Foxglove_Color.parameters = { colorScheme: "dark" };
 export function Foxglove_Color(): JSX.Element {
-  const topics: Topic[] = [{ name: "/color", datatype: "foxglove.Color" }];
+  const topics: Topic[] = [{ name: "/color", schemaName: "foxglove.Color" }];
   const color: MessageEvent<FoxgloveMessages["foxglove.Color"]> = {
     topic: "/color",
     receiveTime: { sec: 0, nsec: 0 },
@@ -1476,7 +1477,7 @@ export function Foxglove_Color(): JSX.Element {
 
 Foxglove_Grid.parameters = { colorScheme: "dark" };
 export function Foxglove_Grid(): JSX.Element {
-  const topics: Topic[] = [{ name: "/grid", datatype: "foxglove.Grid" }];
+  const topics: Topic[] = [{ name: "/grid", schemaName: "foxglove.Grid" }];
   const width = 5;
   const height = 3;
   const offset = 2;
@@ -1534,7 +1535,7 @@ export function Foxglove_Grid(): JSX.Element {
 
 Foxglove_PointCloud.parameters = { colorScheme: "dark" };
 export function Foxglove_PointCloud(): JSX.Element {
-  const topics: Topic[] = [{ name: "/pointcloud", datatype: "foxglove.PointCloud" }];
+  const topics: Topic[] = [{ name: "/pointcloud", schemaName: "foxglove.PointCloud" }];
   const count = 5;
   const point_stride = 8 + 8 + 8 + 4;
   const data = new Uint8Array(point_stride * count);
@@ -1599,7 +1600,7 @@ export function Foxglove_PointCloud(): JSX.Element {
 
 Foxglove_LaserScan.parameters = { colorScheme: "dark" };
 export function Foxglove_LaserScan(): JSX.Element {
-  const topics: Topic[] = [{ name: "/laserscan", datatype: "foxglove.LaserScan" }];
+  const topics: Topic[] = [{ name: "/laserscan", schemaName: "foxglove.LaserScan" }];
   const count = 10;
   const ranges = new Array(count).fill(3);
   const intensities = ranges.map((_, i) => i);
@@ -1649,8 +1650,8 @@ export function Foxglove_LaserScan(): JSX.Element {
 GeometryMsgs_Polygon.parameters = { colorScheme: "dark" };
 export function GeometryMsgs_Polygon(): JSX.Element {
   const topics: Topic[] = [
-    { name: "/polygon", datatype: "geometry_msgs/PolygonStamped" },
-    { name: "/tf", datatype: "geometry_msgs/TransformStamped" },
+    { name: "/polygon", schemaName: "geometry_msgs/PolygonStamped" },
+    { name: "/tf", schemaName: "geometry_msgs/TransformStamped" },
   ];
   const tf1: MessageEvent<TF> = {
     topic: "/tf",
@@ -1746,9 +1747,9 @@ GeometryMsgs_PoseArray_Line.parameters = { colorScheme: "dark" };
 
 function GeometryMsgs_PoseArray_Base({ displayType }: { displayType?: string }): JSX.Element {
   const topics: Topic[] = [
-    { name: "/baselink_path", datatype: "geometry_msgs/PoseArray" },
-    { name: "/sensor_path", datatype: "geometry_msgs/PoseArray" },
-    { name: "/tf", datatype: "geometry_msgs/TransformStamped" },
+    { name: "/baselink_path", schemaName: "geometry_msgs/PoseArray" },
+    { name: "/sensor_path", schemaName: "geometry_msgs/PoseArray" },
+    { name: "/tf", schemaName: "geometry_msgs/TransformStamped" },
   ];
   const tf1: MessageEvent<TF> = {
     topic: "/tf",
@@ -1896,9 +1897,9 @@ function GeometryMsgs_PoseArray_Base({ displayType }: { displayType?: string }):
 GeometryMsgs_PoseStamped.parameters = { colorScheme: "dark" };
 export function GeometryMsgs_PoseStamped(): JSX.Element {
   const topics: Topic[] = [
-    { name: "/tf", datatype: "geometry_msgs/TransformStamped" },
-    { name: "/pose1", datatype: "geometry_msgs/PoseStamped" },
-    { name: "/pose2", datatype: "geometry_msgs/PoseStamped" },
+    { name: "/tf", schemaName: "geometry_msgs/TransformStamped" },
+    { name: "/pose1", schemaName: "geometry_msgs/PoseStamped" },
+    { name: "/pose2", schemaName: "geometry_msgs/PoseStamped" },
   ];
 
   const tf1: MessageEvent<TF> = {
@@ -2014,9 +2015,9 @@ export function GeometryMsgs_PoseStamped(): JSX.Element {
 NavMsgs_Path.parameters = { colorScheme: "dark" };
 export function NavMsgs_Path(): JSX.Element {
   const topics: Topic[] = [
-    { name: "/baselink_path", datatype: "nav_msgs/Path" },
-    { name: "/sensor_path", datatype: "nav_msgs/Path" },
-    { name: "/tf", datatype: "geometry_msgs/TransformStamped" },
+    { name: "/baselink_path", schemaName: "nav_msgs/Path" },
+    { name: "/sensor_path", schemaName: "nav_msgs/Path" },
+    { name: "/tf", schemaName: "geometry_msgs/TransformStamped" },
   ];
   const tf1: MessageEvent<TF> = {
     topic: "/tf",
@@ -2155,9 +2156,9 @@ export function NavMsgs_Path(): JSX.Element {
 SensorMsgs_LaserScan.parameters = { colorScheme: "dark" };
 export function SensorMsgs_LaserScan(): JSX.Element {
   const topics: Topic[] = [
-    { name: "/laserscan", datatype: "sensor_msgs/LaserScan" },
-    { name: "/laserscan/nointensity", datatype: "sensor_msgs/LaserScan" },
-    { name: "/tf", datatype: "geometry_msgs/TransformStamped" },
+    { name: "/laserscan", schemaName: "sensor_msgs/LaserScan" },
+    { name: "/laserscan/nointensity", schemaName: "sensor_msgs/LaserScan" },
+    { name: "/tf", schemaName: "geometry_msgs/TransformStamped" },
   ];
   const tf1: MessageEvent<TF> = {
     topic: "/tf",
@@ -2290,8 +2291,8 @@ SensorMsgs_PointCloud2_RGB.parameters = { colorScheme: "dark" };
 
 function SensorMsgs_PointCloud2({ rgbaFieldName }: { rgbaFieldName: string }): JSX.Element {
   const topics: Topic[] = [
-    { name: "/pointcloud", datatype: "sensor_msgs/PointCloud2" },
-    { name: "/tf", datatype: "geometry_msgs/TransformStamped" },
+    { name: "/pointcloud", schemaName: "sensor_msgs/PointCloud2" },
+    { name: "/tf", schemaName: "geometry_msgs/TransformStamped" },
   ];
   const tf1: MessageEvent<TF> = {
     topic: "/tf",
@@ -2420,8 +2421,8 @@ function SensorMsgs_PointCloud2({ rgbaFieldName }: { rgbaFieldName: string }): J
 SensorMsgs_PointCloud2_Intensity.parameters = { colorScheme: "dark" };
 export function SensorMsgs_PointCloud2_Intensity(): JSX.Element {
   const topics: Topic[] = [
-    { name: "/pointcloud", datatype: "sensor_msgs/PointCloud2" },
-    { name: "/tf", datatype: "geometry_msgs/TransformStamped" },
+    { name: "/pointcloud", schemaName: "sensor_msgs/PointCloud2" },
+    { name: "/tf", schemaName: "geometry_msgs/TransformStamped" },
   ];
   const tf1: MessageEvent<TF> = {
     topic: "/tf",
@@ -2596,7 +2597,7 @@ export function SensorMsgs_PointCloud2_Intensity(): JSX.Element {
 // field descriptions.
 SensorMsgs_PointCloud2_InsufficientFields.parameters = { colorScheme: "dark" };
 export function SensorMsgs_PointCloud2_InsufficientFields(): JSX.Element {
-  const topics: Topic[] = [{ name: "/pointcloud", datatype: "sensor_msgs/PointCloud2" }];
+  const topics: Topic[] = [{ name: "/pointcloud", schemaName: "sensor_msgs/PointCloud2" }];
 
   const SCALE = 10 / 128;
 
@@ -2679,8 +2680,8 @@ export function SensorMsgs_PointCloud2_InsufficientFields(): JSX.Element {
 LargeTransform.parameters = { colorScheme: "dark" };
 export function LargeTransform(): JSX.Element {
   const topics: Topic[] = [
-    { name: "/markers", datatype: "visualization_msgs/Marker" },
-    { name: "/tf", datatype: "geometry_msgs/TransformStamped" },
+    { name: "/markers", schemaName: "visualization_msgs/Marker" },
+    { name: "/tf", schemaName: "geometry_msgs/TransformStamped" },
   ];
   const tf1: MessageEvent<TF> = {
     topic: "/tf",
@@ -2776,7 +2777,7 @@ export function LargeTransform(): JSX.Element {
 
 STLMeshMarkers.parameters = { colorScheme: "dark" };
 export function STLMeshMarkers(): JSX.Element {
-  const topics: Topic[] = [{ name: "/markers", datatype: "visualization_msgs/Marker" }];
+  const topics: Topic[] = [{ name: "/markers", schemaName: "visualization_msgs/Marker" }];
 
   const mesh: MessageEvent<MeshMarker> = {
     topic: "/markers",

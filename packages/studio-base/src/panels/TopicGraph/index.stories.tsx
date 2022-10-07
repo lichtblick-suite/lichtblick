@@ -30,7 +30,7 @@ function TopicsStory({
 }) {
   const [fixture] = useState<Fixture>({
     frame: {},
-    topics: [{ name: "/topic", datatype: "std_msgs/Header" }],
+    topics: [{ name: "/topic", schemaName: "std_msgs/Header" }],
     activeData: {
       publishedTopics: new Map([
         ["/topic", new Set(["pub-1", "pub-2"])],
@@ -71,7 +71,7 @@ export const TopicsHidden = (): JSX.Element => <TopicsStory topicVisibility="non
 export const ReLayout = (): JSX.Element => {
   const [fixture, setFixture] = useState<Fixture>({
     frame: {},
-    topics: [{ name: "/topic", datatype: "std_msgs/Header" }],
+    topics: [{ name: "/topic", schemaName: "std_msgs/Header" }],
     activeData: {
       publishedTopics: new Map([["/topic", new Set(["pub-1", "pub-2"])]]),
       subscribedTopics: new Map([["/topic", new Set(["sub-1"])]]),
@@ -82,7 +82,7 @@ export const ReLayout = (): JSX.Element => {
     setTimeout(() => {
       setFixture({
         frame: {},
-        topics: [{ name: "/topic", datatype: "std_msgs/Header" }],
+        topics: [{ name: "/topic", schemaName: "std_msgs/Header" }],
         activeData: {
           publishedTopics: new Map([["/topic", new Set(["pub-1", "pub-2"])]]),
           subscribedTopics: new Map([["/topic", new Set(["sub-1", "sub-2"])]]),

@@ -75,9 +75,9 @@ const fixture: Fixture = {
     }),
   ),
   topics: [
-    { name: "/some/topic/with/state", datatype: "msgs/SystemState" },
-    { name: "/some/topic/with/string_state", datatype: "msgs/SystemState" },
-    { name: "/blocks", datatype: "msgs/SystemState" },
+    { name: "/some/topic/with/state", schemaName: "msgs/SystemState" },
+    { name: "/some/topic/with/string_state", schemaName: "msgs/SystemState" },
+    { name: "/blocks", schemaName: "msgs/SystemState" },
   ],
   activeData: {
     startTime: { sec: 1526191527, nsec: 202050 },

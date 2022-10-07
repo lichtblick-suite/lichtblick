@@ -2,7 +2,8 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { MessageEvent, Topic } from "@foxglove/studio";
+import { MessageEvent } from "@foxglove/studio";
+import { Topic } from "@foxglove/studio-base/players/types";
 import PanelSetup from "@foxglove/studio-base/stories/PanelSetup";
 
 import ThreeDeeRender from "../index";
@@ -18,9 +19,9 @@ export default {
 Marker_PointCloud2_Alignment.parameters = { colorScheme: "dark" };
 export function Marker_PointCloud2_Alignment(): JSX.Element {
   const topics: Topic[] = [
-    { name: "/markers", datatype: "visualization_msgs/Marker" },
-    { name: "/pointcloud", datatype: "sensor_msgs/PointCloud2" },
-    { name: "/tf", datatype: "geometry_msgs/TransformStamped" },
+    { name: "/markers", schemaName: "visualization_msgs/Marker" },
+    { name: "/pointcloud", schemaName: "sensor_msgs/PointCloud2" },
+    { name: "/tf", schemaName: "geometry_msgs/TransformStamped" },
   ];
   const tf1: MessageEvent<TransformStamped> = {
     topic: "/tf",

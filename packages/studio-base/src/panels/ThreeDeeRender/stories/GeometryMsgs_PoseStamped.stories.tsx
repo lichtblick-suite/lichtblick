@@ -4,7 +4,8 @@
 
 import { quat } from "gl-matrix";
 
-import { MessageEvent, Topic } from "@foxglove/studio";
+import { MessageEvent } from "@foxglove/studio";
+import { Topic } from "@foxglove/studio-base/players/types";
 import PanelSetup from "@foxglove/studio-base/stories/PanelSetup";
 
 import ThreeDeeRender from "../index";
@@ -24,10 +25,10 @@ const vec4ToOrientation = ([x, y, z, w]: Vec4) => ({ x, y, z, w });
 GeometryMsgs_PoseStamped.parameters = { colorScheme: "dark" };
 export function GeometryMsgs_PoseStamped(): JSX.Element {
   const topics: Topic[] = [
-    { name: "/tf", datatype: "geometry_msgs/TransformStamped" },
-    { name: "/pose1", datatype: "geometry_msgs/PoseStamped" },
-    { name: "/pose2", datatype: "geometry_msgs/PoseStamped" },
-    { name: "/pose3", datatype: "geometry_msgs/PoseStamped" },
+    { name: "/tf", schemaName: "geometry_msgs/TransformStamped" },
+    { name: "/pose1", schemaName: "geometry_msgs/PoseStamped" },
+    { name: "/pose2", schemaName: "geometry_msgs/PoseStamped" },
+    { name: "/pose3", schemaName: "geometry_msgs/PoseStamped" },
   ];
 
   const tf1: MessageEvent<TransformStamped> = {

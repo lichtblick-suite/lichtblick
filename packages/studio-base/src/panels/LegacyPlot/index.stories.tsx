@@ -84,7 +84,7 @@ const example1 = {
 };
 
 const fixture: Fixture = {
-  topics: [{ name: "/plot_a", datatype: "our_plot_type" }],
+  topics: [{ name: "/plot_a", schemaName: "our_plot_type" }],
   datatypes: new Map(
     Object.entries({
       our_plot_type: {

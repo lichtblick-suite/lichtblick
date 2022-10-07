@@ -82,7 +82,7 @@ function ImageView(props: Props) {
   const updatePanelSettingsTree = usePanelSettingsTreeUpdate();
 
   const imageTopics = useMemo(() => {
-    return topics.filter(({ datatype }) => NORMALIZABLE_IMAGE_DATATYPES.includes(datatype));
+    return topics.filter(({ schemaName }) => NORMALIZABLE_IMAGE_DATATYPES.includes(schemaName));
   }, [topics]);
 
   // If no cameraTopic is selected, automatically select the first available image topic
@@ -152,7 +152,7 @@ function ImageView(props: Props) {
 
   const markerTopics = useMemo(() => {
     return topics
-      .filter((topic) => (ANNOTATION_DATATYPES as readonly string[]).includes(topic.datatype))
+      .filter((topic) => (ANNOTATION_DATATYPES as readonly string[]).includes(topic.schemaName))
       .map((topic) => topic.name);
   }, [topics]);
 

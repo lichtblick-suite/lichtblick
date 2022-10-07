@@ -20,7 +20,7 @@ import Log from "@foxglove/studio-base/panels/Log";
 import PanelSetup, { Fixture } from "@foxglove/studio-base/stories/PanelSetup";
 
 const fixture: Fixture = {
-  topics: [{ name: "/rosout", datatype: "rosgraph_msgs/Log" }],
+  topics: [{ name: "/rosout", schemaName: "rosgraph_msgs/Log" }],
   frame: {
     "/rosout": [
       {
@@ -108,7 +108,7 @@ function makeLongFixture(): Fixture {
   const levels = [1, 2, 4, 8, 16];
 
   return {
-    topics: [{ name: "/rosout", datatype: "rosgraph_msgs/Log" }],
+    topics: [{ name: "/rosout", schemaName: "rosgraph_msgs/Log" }],
     frame: {
       "/rosout": range(200).map((idx) => ({
         topic: "/rosout",
@@ -170,9 +170,9 @@ export const TopicToRender = (): JSX.Element => {
     <PanelSetup
       fixture={{
         topics: [
-          { name: "/rosout", datatype: "rosgraph_msgs/Log" },
-          { name: "/foo/rosout", datatype: "rosgraph_msgs/Log" },
-          { name: "/studio_source_2/rosout", datatype: "rosgraph_msgs/Log" },
+          { name: "/rosout", schemaName: "rosgraph_msgs/Log" },
+          { name: "/foo/rosout", schemaName: "rosgraph_msgs/Log" },
+          { name: "/studio_source_2/rosout", schemaName: "rosgraph_msgs/Log" },
         ],
         frame: {
           "/rosout": makeMessages("/rosout"),
@@ -248,7 +248,7 @@ AutoCompleteItems.play = async () => {
 
 export const FoxgloveLog = (): JSX.Element => {
   const foxgloveLogFixture: Fixture = {
-    topics: [{ name: "/log", datatype: "foxglove.Log" }],
+    topics: [{ name: "/log", schemaName: "foxglove.Log" }],
     frame: {
       "/log": [
         {

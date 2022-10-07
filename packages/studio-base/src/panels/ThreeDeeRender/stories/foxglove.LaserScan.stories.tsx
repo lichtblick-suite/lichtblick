@@ -6,8 +6,9 @@ import * as THREE from "three";
 
 import { fromSec } from "@foxglove/rostime";
 import { FrameTransform, LaserScan, PointCloud } from "@foxglove/schemas";
-import { MessageEvent, Topic } from "@foxglove/studio";
+import { MessageEvent } from "@foxglove/studio";
 import { xyzrpyToPose } from "@foxglove/studio-base/panels/ThreeDeeRender/transforms";
+import { Topic } from "@foxglove/studio-base/players/types";
 import PanelSetup from "@foxglove/studio-base/stories/PanelSetup";
 import { emptyPose } from "@foxglove/studio-base/util/Pose";
 
@@ -33,8 +34,8 @@ function Foxglove_LaserScan({
   settings: Record<string, unknown>;
 }): JSX.Element {
   const topics: Topic[] = [
-    { name: "/scan", datatype: "foxglove.LaserScan" },
-    { name: "/tf", datatype: "foxglove.FrameTransform" },
+    { name: "/scan", schemaName: "foxglove.LaserScan" },
+    { name: "/tf", schemaName: "foxglove.FrameTransform" },
   ];
   const tf1: MessageEvent<FrameTransform> = {
     topic: "/tf",
@@ -215,9 +216,9 @@ export const Time10 = Object.assign(Foxglove_LaserScan.bind({}), {
 
 export function ComparisonWithPointCloudColors(): JSX.Element {
   const topics: Topic[] = [
-    { name: "/scan", datatype: "foxglove.LaserScan" },
-    { name: "/cloud", datatype: "foxglove.PointCloud" },
-    { name: "/tf", datatype: "foxglove.FrameTransform" },
+    { name: "/scan", schemaName: "foxglove.LaserScan" },
+    { name: "/cloud", schemaName: "foxglove.PointCloud" },
+    { name: "/tf", schemaName: "foxglove.FrameTransform" },
   ];
   const tf1: MessageEvent<FrameTransform> = {
     topic: "/tf",

@@ -2,7 +2,8 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { MessageEvent, Topic } from "@foxglove/studio";
+import { MessageEvent } from "@foxglove/studio";
+import { Topic } from "@foxglove/studio-base/players/types";
 import PanelSetup from "@foxglove/studio-base/stories/PanelSetup";
 
 import ThreeDeeRender from "../index";
@@ -24,11 +25,11 @@ export default {
 PoseMarkers.parameters = { colorScheme: "dark" };
 export function PoseMarkers(): JSX.Element {
   const topics: Topic[] = [
-    { name: "/tf", datatype: "geometry_msgs/TransformStamped" },
-    { name: "/pose", datatype: "geometry_msgs/PoseStamped" },
-    { name: "/pose_with_covariance", datatype: "geometry_msgs/PoseWithCovarianceStamped" },
-    { name: "/pose_with_hidden_covariance", datatype: "geometry_msgs/PoseWithCovarianceStamped" },
-    { name: "/pose_axis_with_covariance", datatype: "geometry_msgs/PoseWithCovarianceStamped" },
+    { name: "/tf", schemaName: "geometry_msgs/TransformStamped" },
+    { name: "/pose", schemaName: "geometry_msgs/PoseStamped" },
+    { name: "/pose_with_covariance", schemaName: "geometry_msgs/PoseWithCovarianceStamped" },
+    { name: "/pose_with_hidden_covariance", schemaName: "geometry_msgs/PoseWithCovarianceStamped" },
+    { name: "/pose_axis_with_covariance", schemaName: "geometry_msgs/PoseWithCovarianceStamped" },
   ];
 
   const tf1: MessageEvent<TransformStamped> = {

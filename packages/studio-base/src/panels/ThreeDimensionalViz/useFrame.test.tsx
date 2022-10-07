@@ -16,6 +16,7 @@ import { renderHook } from "@testing-library/react-hooks";
 
 import { MessageEvent } from "@foxglove/studio";
 import MockMessagePipelineProvider from "@foxglove/studio-base/components/MessagePipeline/MockMessagePipelineProvider";
+import { Topic } from "@foxglove/studio-base/players/types";
 import { RosDatatypes } from "@foxglove/studio-base/types/RosDatatypes";
 
 import useFrame from "./useFrame";
@@ -52,9 +53,9 @@ const messageEventFixtures: MessageEvent<unknown>[] = [
 
 describe("useFrame", () => {
   it("should pass in a frame of messages", () => {
-    const topics = [
-      { name: "/some/topic", datatype: "some/topic" },
-      { name: "/foo", datatype: "foo_msgs/Foo" },
+    const topics: Topic[] = [
+      { name: "/some/topic", schemaName: "some/topic" },
+      { name: "/foo", schemaName: "foo_msgs/Foo" },
     ];
 
     const all: ReturnType<typeof useFrame>[] = [];
@@ -131,9 +132,9 @@ describe("useFrame", () => {
   });
 
   it("should pass in another frame of messages", () => {
-    const topics = [
-      { name: "/some/topic", datatype: "some/topic" },
-      { name: "/foo", datatype: "foo_msgs/Foo" },
+    const topics: Topic[] = [
+      { name: "/some/topic", schemaName: "some/topic" },
+      { name: "/foo", schemaName: "foo_msgs/Foo" },
     ];
 
     const all: ReturnType<typeof useFrame>[] = [];

@@ -13,6 +13,7 @@ import {
   NavSatFixService,
   NavSatFixStatus,
 } from "@foxglove/studio-base/panels/Map/types";
+import { Topic } from "@foxglove/studio-base/players/types";
 import PanelSetup, { Fixture } from "@foxglove/studio-base/stories/PanelSetup";
 
 import MapPanel from "./index";
@@ -107,17 +108,19 @@ SinglePoint.parameters = {
   },
   panelSetup: {
     fixture: {
-      topics: [{ name: "/gps", datatype: "sensor_msgs/NavSatFix" }],
+      topics: [{ name: "/gps", schemaName: "sensor_msgs/NavSatFix" }],
       frame: {
         "/gps": [
           {
             topic: "/gps",
+            schemaName: "sensor_msgs/NavSatFix",
+            sizeInBytes: 0,
             receiveTime: { sec: 123, nsec: 456 },
             message: EMPTY_MESSAGE,
           },
         ],
       },
-    },
+    } as Fixture,
   },
 };
 
@@ -151,13 +154,15 @@ MultipleTopics.parameters = {
   panelSetup: {
     fixture: {
       topics: [
-        { name: "/gps", datatype: "sensor_msgs/NavSatFix" },
-        { name: "/another-gps-topic", datatype: "sensor_msgs/NavSatFix" },
+        { name: "/gps", schemaName: "sensor_msgs/NavSatFix" },
+        { name: "/another-gps-topic", schemaName: "sensor_msgs/NavSatFix" },
       ],
       frame: {
         "/gps": [
           {
             topic: "/gps",
+            schemaName: "sensor_msgs/NavSatFix",
+            sizeInBytes: 0,
             receiveTime: { sec: 123, nsec: 456 },
             message: EMPTY_MESSAGE,
           },
@@ -165,12 +170,14 @@ MultipleTopics.parameters = {
         "/another-gps-topic": [
           {
             topic: "/another-gps-topic",
+            schemaName: "sensor_msgs/NavSatFix",
+            sizeInBytes: 0,
             receiveTime: { sec: 123, nsec: 456 },
             message: OFFSET_MESSAGE,
           },
         ],
       },
-    },
+    } as Fixture,
   },
 };
 
@@ -185,11 +192,13 @@ SinglePointNoFix.parameters = {
   decorators: [Wrapper],
   panelSetup: {
     fixture: {
-      topics: [{ name: "/gps", datatype: "sensor_msgs/NavSatFix" }],
+      topics: [{ name: "/gps", schemaName: "sensor_msgs/NavSatFix" }],
       frame: {
         "/gps": [
           {
             topic: "/gps",
+            schemaName: "sensor_msgs/NavSatFix",
+            sizeInBytes: 0,
             receiveTime: { sec: 123, nsec: 456 },
             message: {
               latitude: 0,
@@ -205,7 +214,7 @@ SinglePointNoFix.parameters = {
           },
         ],
       },
-    },
+    } as Fixture,
   },
 };
 
@@ -220,11 +229,13 @@ SinglePointDiagonalCovariance.parameters = {
   decorators: [Wrapper],
   panelSetup: {
     fixture: {
-      topics: [{ name: "/gps", datatype: "sensor_msgs/NavSatFix" }],
+      topics: [{ name: "/gps", schemaName: "sensor_msgs/NavSatFix" }],
       frame: {
         "/gps": [
           {
             topic: "/gps",
+            schemaName: "sensor_msgs/NavSatFix",
+            sizeInBytes: 0,
             receiveTime: { sec: 123, nsec: 456 },
             message: {
               latitude: 1,
@@ -238,7 +249,7 @@ SinglePointDiagonalCovariance.parameters = {
           },
         ],
       },
-    },
+    } as Fixture,
   },
 };
 
@@ -253,12 +264,14 @@ SinglePointFullCovariance.parameters = {
   decorators: [Wrapper],
   panelSetup: {
     fixture: {
-      topics: [{ name: "/gps", datatype: "sensor_msgs/NavSatFix" }],
+      topics: [{ name: "/gps", schemaName: "sensor_msgs/NavSatFix" }],
       frame: {
         "/gps": [
           {
             topic: "/gps",
             receiveTime: { sec: 123, nsec: 456 },
+            sizeInBytes: 0,
+            schemaName: "sensor_msgs/NavSatFix",
             message: {
               latitude: 1,
               longitude: 2,
@@ -273,17 +286,17 @@ SinglePointFullCovariance.parameters = {
           },
         ],
       },
-    },
+    } as Fixture,
   },
 };
 
 const GeoCenter = { lat: 34.9949, lon: 135.785 };
 
 export const GeoJSON = (): JSX.Element => {
-  const topics = [
-    { name: "/geo", datatype: "foxglove.GeoJSON" },
-    { name: "/geo2", datatype: "foxglove.GeoJSON" },
-    { name: "/gps", datatype: "sensor_msgs/NavSatFix" },
+  const topics: Topic[] = [
+    { name: "/geo", schemaName: "foxglove.GeoJSON" },
+    { name: "/geo2", schemaName: "foxglove.GeoJSON" },
+    { name: "/gps", schemaName: "sensor_msgs/NavSatFix" },
   ];
 
   const [fixture, setFixture] = useState<Fixture>({
