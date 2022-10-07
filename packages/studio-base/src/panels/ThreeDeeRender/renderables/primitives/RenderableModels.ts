@@ -11,6 +11,7 @@ import { emptyPose } from "@foxglove/studio-base/util/Pose";
 import { LoadedModel } from "../../ModelCache";
 import type { Renderer } from "../../Renderer";
 import { makeRgba, rgbToThreeColor, stringToRgba } from "../../color";
+import { disposeMeshesRecursive } from "../../dispose";
 import { LayerSettingsEntity } from "../SceneEntities";
 import { removeLights, replaceMaterials } from "../models";
 import { RenderablePrimitive } from "./RenderablePrimitive";
@@ -229,8 +230,8 @@ export class RenderableModels extends RenderablePrimitive {
 
   private _disposeModel(renderable: RenderableModel) {
     renderable.material?.dispose();
-    disposeModel(renderable.model);
-    disposeModel(renderable.cachedModel);
+    disposeMeshesRecursive(renderable.model);
+    disposeMeshesRecursive(renderable.cachedModel);
   }
 }
 
@@ -238,26 +239,4 @@ function cloneAndPrepareModel(cachedModel: LoadedModel) {
   const model = cachedModel.clone(true);
   removeLights(model);
   return new THREE.Group().add(model);
-}
-
-function disposeModel(object: THREE.Object3D) {
-  object.traverse((child) => {
-    if (child instanceof THREE.Mesh) {
-      child.geometry.dispose();
-      if (child.material instanceof THREE.MeshStandardMaterial) {
-        child.material.map?.dispose();
-        child.material.lightMap?.dispose();
-        child.material.aoMap?.dispose();
-        child.material.emissiveMap?.dispose();
-        child.material.bumpMap?.dispose();
-        child.material.normalMap?.dispose();
-        child.material.displacementMap?.dispose();
-        child.material.roughnessMap?.dispose();
-        child.material.metalnessMap?.dispose();
-        child.material.alphaMap?.dispose();
-        child.material.envMap?.dispose();
-      }
-      child.material.dispose();
-    }
-  });
 }

@@ -6,6 +6,7 @@ import * as THREE from "three";
 
 import type { Renderer } from "../../Renderer";
 import { rgbToThreeColor } from "../../color";
+import { disposeMeshesRecursive } from "../../dispose";
 import { Marker } from "../../ros";
 import { removeLights, replaceMaterials } from "../models";
 import { RenderableMarker } from "./RenderableMarker";
@@ -22,6 +23,9 @@ export class RenderableMeshResource extends RenderableMarker {
   private mesh: THREE.Group | THREE.Scene | undefined;
   private material: THREE.MeshStandardMaterial;
 
+  /** Track updates to avoid race conditions when asynchronously loading models */
+  private updateId = 0;
+
   public constructor(
     topic: string,
     marker: Marker,
@@ -35,6 +39,9 @@ export class RenderableMeshResource extends RenderableMarker {
   }
 
   public override dispose(): void {
+    if (this.mesh) {
+      disposeMeshesRecursive(this.mesh);
+    }
     this.material.dispose();
   }
 
@@ -59,26 +66,49 @@ export class RenderableMeshResource extends RenderableMarker {
     this.material.opacity = marker.color.a;
 
     if (forceLoad === true || marker.mesh_resource !== prevMarker.mesh_resource) {
+      const curUpdateId = ++this.updateId;
+
       const opts = { useEmbeddedMaterials: marker.mesh_use_embedded_materials };
       const errors = this.renderer.settings.errors;
-      this._loadModel(marker.mesh_resource, opts).catch((err) => {
-        errors.add(
-          this.userData.settingsPath,
-          MESH_FETCH_FAILED,
-          `Unhandled error loading mesh from "${marker.mesh_resource}": ${err.message}`,
-        );
-      });
+      if (this.mesh) {
+        this.remove(this.mesh);
+        disposeMeshesRecursive(this.mesh);
+        this.mesh = undefined;
+      }
+      this._loadModel(marker.mesh_resource, opts)
+        .then((mesh) => {
+          if (!mesh) {
+            return;
+          }
+          if (this.updateId !== curUpdateId) {
+            // another update has started
+            disposeMeshesRecursive(mesh);
+            return;
+          }
+          this.mesh = mesh;
+          this.add(mesh);
+
+          // Remove any mesh fetch error message since loading was successful
+          this.renderer.settings.errors.remove(this.userData.settingsPath, MESH_FETCH_FAILED);
+          // Render a new frame now that the model is loaded
+          this.renderer.queueAnimationFrame();
+        })
+        .catch((err) => {
+          errors.add(
+            this.userData.settingsPath,
+            MESH_FETCH_FAILED,
+            `Unhandled error loading mesh from "${marker.mesh_resource}": ${err.message}`,
+          );
+        });
     }
 
     this.scale.set(marker.scale.x, marker.scale.y, marker.scale.z);
   }
 
-  private async _loadModel(url: string, opts: { useEmbeddedMaterials: boolean }): Promise<void> {
-    if (this.mesh) {
-      this.remove(this.mesh);
-      this.mesh = undefined;
-    }
-
+  private async _loadModel(
+    url: string,
+    opts: { useEmbeddedMaterials: boolean },
+  ): Promise<THREE.Group | THREE.Scene | undefined> {
     const cachedModel = await this.renderer.modelCache.load(url, {}, (err) => {
       this.renderer.settings.errors.add(
         this.userData.settingsPath,
@@ -95,7 +125,7 @@ export class RenderableMeshResource extends RenderableMarker {
           `Failed to load mesh from "${url}"`,
         );
       }
-      return;
+      return undefined;
     }
 
     const mesh = cachedModel.clone(true);
@@ -104,12 +134,6 @@ export class RenderableMeshResource extends RenderableMarker {
       replaceMaterials(mesh, this.material);
     }
 
-    this.mesh = mesh;
-    this.add(mesh);
-
-    // Remove any mesh fetch error message since loading was successful
-    this.renderer.settings.errors.remove(this.userData.settingsPath, MESH_FETCH_FAILED);
-    // Render a new frame now that the model is loaded
-    this.renderer.queueAnimationFrame();
+    return mesh;
   }
 }
