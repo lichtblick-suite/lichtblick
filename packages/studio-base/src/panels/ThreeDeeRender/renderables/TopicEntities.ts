@@ -148,6 +148,7 @@ export class TopicEntities extends Renderable<EntityTopicUserData> {
         if (!renderable) {
           renderable = this.primitivePool.acquire(primitiveType);
           renderable.name = `${entity.id}:${primitiveType} on ${this.topic}`;
+          renderable.userData.settingsPath = this.userData.settingsPath;
           renderable.setColorScheme(this.renderer.colorScheme);
           // @ts-expect-error TS doesn't know that renderable matches primitiveType
           renderables[primitiveType] = renderable;

@@ -16,6 +16,9 @@ import { RenderablePrimitive } from "./RenderablePrimitive";
 
 const tempRgba = makeRgba();
 const tempColor = new THREE.Color();
+const missingColor = { r: 0, g: 1.0, b: 0, a: 1.0 };
+
+const COLOR_LENGTH_ERROR_ID = "INVALID_COLOR_LENGTH";
 
 type TriangleMesh = THREE.Mesh<DynamicBufferGeometry, THREE.MeshStandardMaterial>;
 export class RenderableTriangles extends RenderablePrimitive {
@@ -88,7 +91,15 @@ export class RenderableTriangles extends RenderablePrimitive {
         vertices.setXYZ(i, point.x, point.y, point.z);
 
         if (!singleColor && colors && primitive.colors.length > 0) {
-          const color = primitive.colors[i]!;
+          const color = primitive.colors[i] ?? missingColor;
+          // only trigger on last point index
+          if (i === primitive.points.length - 1 && color === missingColor) {
+            // will only show 1st triMeshIdx of issue -- addError prevents the adding of errors with duplicate errorIds
+            this.addError(
+              `${this.name}-${COLOR_LENGTH_ERROR_ID}`,
+              `Entity: ${this.userData.entity?.id}.triangles[${triMeshIdx}](1st index) - Colors array should be same size as points array, showing #00ff00 instead`,
+            );
+          }
           const r = (SRGBToLinear(color.r) * 255) | 0;
           const g = (SRGBToLinear(color.g) * 255) | 0;
           const b = (SRGBToLinear(color.b) * 255) | 0;
@@ -194,6 +205,7 @@ export class RenderableTriangles extends RenderablePrimitive {
     }
     this.clear();
     this._triangleMeshes.length = 0;
+    this.clearErrors();
   }
 
   public override update(

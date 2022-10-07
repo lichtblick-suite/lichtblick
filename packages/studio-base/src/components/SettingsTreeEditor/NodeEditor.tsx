@@ -119,6 +119,11 @@ const useStyles = makeStyles()((theme) => ({
   nodeHeaderToggleVisible: {
     opacity: 1,
   },
+  errorTooltip: {
+    whiteSpace: "pre-line",
+    maxHeight: "15vh",
+    overflowY: "auto",
+  },
 }));
 
 function ExpansionArrow({ expanded }: { expanded: boolean }): JSX.Element {
@@ -351,7 +356,11 @@ function NodeEditorComponent(props: NodeEditorProps): JSX.Element {
           {props.settings?.error && (
             <Tooltip
               arrow
-              title={<Typography variant="subtitle2">{props.settings.error}</Typography>}
+              title={
+                <Typography variant="subtitle2" className={classes.errorTooltip}>
+                  {props.settings.error}
+                </Typography>
+              }
             >
               <IconButton size="small" color="error">
                 <ErrorIcon fontSize="small" />

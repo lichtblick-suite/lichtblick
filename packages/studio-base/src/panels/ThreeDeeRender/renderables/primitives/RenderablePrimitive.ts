@@ -37,4 +37,16 @@ export class RenderablePrimitive extends Renderable<EntityRenderableUserData> {
     this.userData.entity = undefined;
     this.userData.pose = emptyPose();
   }
+
+  public addError(errorId: string, message: string): void {
+    this.renderer.settings.errors.add(this.userData.settingsPath, errorId, message);
+  }
+
+  public clearErrors(): void {
+    // presumably a renderable has not been assigned a settings path if it is 0
+    // running clearPath([]) will clear all errors from the settings tree
+    if (this.userData.settingsPath.length > 0) {
+      this.renderer.settings.errors.clearPath(this.userData.settingsPath);
+    }
+  }
 }
