@@ -10,7 +10,6 @@ import { SettingsTreeAction } from "@foxglove/studio";
 import { GRID_DATATYPES } from "@foxglove/studio-base/panels/ThreeDeeRender/foxglove";
 import {
   baseColorModeSettingsNode,
-  colorHasTransparency,
   ColorModeSettings,
   getColorConverter,
   autoSelectColorField,
@@ -130,19 +129,10 @@ export class FoxgloveGrid extends SceneExtension<FoxgloveGridRenderable> {
     const topicName = path[1]!;
     const renderable = this.renderables.get(topicName);
     if (renderable) {
-      const prevTransparent = colorHasTransparency(renderable.userData.settings);
       const settings = this.renderer.config.topics[topicName] as
         | Partial<LayerSettingsFoxgloveGrid>
         | undefined;
       renderable.userData.settings = { ...DEFAULT_SETTINGS, ...settings };
-
-      // Check if the transparency changed and we need to create a new material
-      const newTransparent = colorHasTransparency(renderable.userData.settings);
-      if (prevTransparent !== newTransparent) {
-        renderable.userData.material.transparent = newTransparent;
-        renderable.userData.material.depthWrite = !newTransparent;
-        renderable.userData.material.needsUpdate = true;
-      }
 
       this._updateFoxgloveGridRenderable(
         renderable,
@@ -178,7 +168,7 @@ export class FoxgloveGrid extends SceneExtension<FoxgloveGridRenderable> {
       }
 
       const texture = createTexture(foxgloveGrid);
-      const mesh = createMesh(topic, texture, settings);
+      const mesh = createMesh(topic, texture);
       const material = mesh.material as THREE.MeshBasicMaterial;
       const pickingMaterial = mesh.userData.pickingMaterial as THREE.ShaderMaterial;
 
@@ -322,6 +312,7 @@ export class FoxgloveGrid extends SceneExtension<FoxgloveGridRenderable> {
     }
 
     const rgba = texture.image.data;
+    let hasTransparency = false;
 
     const [minColorValue, maxColorValue] = tempMinMaxColor;
     const { fieldReader } = tempFieldReader;
@@ -335,9 +326,21 @@ export class FoxgloveGrid extends SceneExtension<FoxgloveGridRenderable> {
       rgba[rgbaOffset + 1] = Math.floor(tempColor.g * 255);
       rgba[rgbaOffset + 2] = Math.floor(tempColor.b * 255);
       rgba[rgbaOffset + 3] = Math.floor(tempColor.a * 255);
+
+      // We cheat a little with transparency: alpha 0 will be handled by the alphaTest setting, so
+      // we don't need to set material.transparent = true.
+      if (tempColor.a !== 0 && tempColor.a !== 1) {
+        hasTransparency = true;
+      }
     }
 
     texture.needsUpdate = true;
+
+    if (renderable.userData.material.transparent !== hasTransparency) {
+      renderable.userData.material.transparent = hasTransparency;
+      renderable.userData.material.depthWrite = !hasTransparency;
+      renderable.userData.material.needsUpdate = true;
+    }
 
     renderable.scale.set(foxgloveGrid.cell_size.x * cols, foxgloveGrid.cell_size.y * rows, 1);
   }
@@ -388,14 +391,10 @@ function createTexture(foxgloveGrid: Grid): THREE.DataTexture {
   return texture;
 }
 
-function createMesh(
-  topic: string,
-  texture: THREE.DataTexture,
-  settings: LayerSettingsFoxgloveGrid,
-): THREE.Mesh {
+function createMesh(topic: string, texture: THREE.DataTexture): THREE.Mesh {
   // Create the texture, material, and mesh
   const pickingMaterial = createPickingMaterial(texture);
-  const material = createMaterial(texture, topic, settings);
+  const material = createMaterial(texture, topic);
   const mesh = new THREE.Mesh(FoxgloveGrid.Geometry(), material);
   mesh.castShadow = true;
   mesh.receiveShadow = true;
@@ -423,21 +422,14 @@ function numericTypeWidth(type: NumericType): number {
   }
 }
 
-function createMaterial(
-  texture: THREE.DataTexture,
-  topic: string,
-  settings: LayerSettingsFoxgloveGrid,
-): THREE.MeshBasicMaterial {
-  const transparent = colorHasTransparency(settings);
+function createMaterial(texture: THREE.DataTexture, topic: string): THREE.MeshBasicMaterial {
   return new THREE.MeshBasicMaterial({
     name: `${topic}:Material`,
     // Enable alpha clipping. Fully transparent (alpha=0) pixels are skipped
     // even when transparency is disabled
     alphaTest: 1e-4,
-    depthWrite: !transparent,
     map: texture,
     side: THREE.DoubleSide,
-    transparent,
   });
 }
 
