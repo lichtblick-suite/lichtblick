@@ -290,7 +290,7 @@ SinglePointFullCovariance.parameters = {
   },
 };
 
-const GeoCenter = { lat: 34.9949, lon: 135.785 };
+const GeoCenter = { lat: 0.25, lon: 0.25 };
 
 export const GeoJSON = (): JSX.Element => {
   const topics: Topic[] = [
