@@ -4,6 +4,8 @@
 
 import { BrowserWindow } from "electron";
 
+import delay from "@foxglove/studio-base/src/util/delay";
+
 // <input> elements can only be opened on user interaction
 // This fakes a uesr interaction which allows us to invoke input.click() in renderer threads
 export async function simulateUserClick(win: BrowserWindow): Promise<void> {
@@ -17,5 +19,5 @@ export async function simulateUserClick(win: BrowserWindow): Promise<void> {
     x: -1,
     y: -1,
   });
-  await new Promise((resolve) => setTimeout(resolve, 10));
+  await delay(10);
 }

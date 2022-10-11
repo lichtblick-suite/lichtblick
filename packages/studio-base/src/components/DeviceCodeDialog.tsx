@@ -19,6 +19,7 @@ import Logger from "@foxglove/log";
 import Stack from "@foxglove/studio-base/components/Stack";
 import { useConsoleApi } from "@foxglove/studio-base/context/ConsoleApiContext";
 import { Session } from "@foxglove/studio-base/services/ConsoleApi";
+import delay from "@foxglove/studio-base/util/delay";
 import { fonts } from "@foxglove/studio-base/util/sharedStyleConstants";
 
 const log = Logger.getLogger(__filename);
@@ -62,7 +63,7 @@ export default function DeviceCodeDialog(props: DeviceCodePanelProps): JSX.Eleme
 
     // continue polling for the token until we receive the token or we timeout
     while (Date.now() < endTimeMs) {
-      await new Promise((resolve) => setTimeout(resolve, deviceCode.interval * 1000));
+      await delay(deviceCode.interval * 1000);
       // no need to query if no longer mounted
       if (!isMounted()) {
         return;
