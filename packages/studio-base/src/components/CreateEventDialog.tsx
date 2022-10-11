@@ -231,7 +231,7 @@ export function CreateEventDialog(props: { deviceId: string; onClose: () => void
             }}
           />
           <ButtonGroup style={{ visibility: "hidden" }}>
-            <IconButton tabIndex={-1}>
+            <IconButton tabIndex={-1} data-testid="add">
               <AddIcon />
             </IconButton>
             <IconButton tabIndex={-1}>
@@ -251,7 +251,7 @@ export function CreateEventDialog(props: { deviceId: string; onClose: () => void
                   fullWidth
                   value={key}
                   autoFocus={index === 0}
-                  placeholder="key"
+                  placeholder="Key (string)"
                   error={hasDuplicate}
                   onKeyDown={onMetaDataKeyDown}
                   onChange={(ev) => updateMetadata(index, "key", ev.currentTarget.value)}
@@ -259,7 +259,8 @@ export function CreateEventDialog(props: { deviceId: string; onClose: () => void
                 <TextField
                   fullWidth
                   value={value}
-                  placeholder="value"
+                  placeholder="Value (string)"
+                  error={hasDuplicate}
                   onKeyDown={onMetaDataKeyDown}
                   onChange={(ev) => updateMetadata(index, "value", ev.currentTarget.value)}
                 />
