@@ -99,7 +99,7 @@ class TransformPlayer implements Player {
     });
 
     const topics: Topic[] = [];
-    topics.push({ name: "tf", datatype: "foxglove.FrameTransform" });
+    topics.push({ name: "tf", schemaName: "foxglove.FrameTransform" });
 
     let numMessages = 0;
     let startTime: Time | undefined;
@@ -115,6 +115,7 @@ class TransformPlayer implements Player {
       messages.push({
         receiveTime: timestamp,
         topic: "tf",
+        schemaName: "foxglove.FrameTransform",
         message: {
           timestamp,
           parent_frame_id: "odom",
@@ -130,6 +131,7 @@ class TransformPlayer implements Player {
         messages.push({
           receiveTime: timestamp,
           topic: "tf",
+          schemaName: "foxglove.FrameTransform",
           message: {
             timestamp: curTimestamp,
             parent_frame_id: "map",

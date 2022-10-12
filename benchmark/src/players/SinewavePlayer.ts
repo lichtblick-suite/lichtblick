@@ -95,7 +95,7 @@ class SinewavePlayer implements Player {
 
     for (let i = 0; i < sinewaveCount; ++i) {
       const topicName = `sinewave_${i}`;
-      topics.push({ name: topicName, datatype: "Sinewave" });
+      topics.push({ name: topicName, schemaName: "Sinewave" });
     }
 
     let messageCount = 0;
@@ -114,6 +114,7 @@ class SinewavePlayer implements Player {
         messages.push({
           receiveTime: now,
           topic: topicName,
+          schemaName: "Sinewave",
           message: { value: value + i * 0.1 },
           sizeInBytes: 0,
         });

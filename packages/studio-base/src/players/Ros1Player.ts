@@ -392,17 +392,17 @@ export default class Ros1Player implements Player {
         continue;
       }
 
-      const { schemaName: datatype } = availTopic;
-      const subscription = this._rosNode.subscribe({ topic: topicName, dataType: datatype });
+      const { schemaName } = availTopic;
+      const subscription = this._rosNode.subscribe({ topic: topicName, dataType: schemaName });
 
       subscription.on("header", (_header, msgdef, _reader) => {
         // We have to create a new object instead of just updating _providerDatatypes to support
         // shallow memo downstream.
-        const newDatatypes = this._getRosDatatypes(datatype, msgdef);
+        const newDatatypes = this._getRosDatatypes(schemaName, msgdef);
         this._providerDatatypes = new Map([...this._providerDatatypes, ...newDatatypes]);
       });
       subscription.on("message", (message, data, _pub) => {
-        this._handleMessage(topicName, message, data.byteLength, datatype, true);
+        this._handleMessage(topicName, message, data.byteLength, schemaName, true);
         // Clear any existing subscription problems for this topic if we're receiving messages again.
         this._clearProblem(`subscribe:${topicName}`, { skipEmit: true });
       });
@@ -431,7 +431,7 @@ export default class Ros1Player implements Player {
     topic: string,
     message: unknown,
     sizeInBytes: number,
-    datatype: string,
+    schemaName: string,
     // This is a hot path so we avoid extra object allocation from a parameters struct
     // eslint-disable-next-line @foxglove/no-boolean-parameters
     external: boolean,
@@ -452,7 +452,7 @@ export default class Ros1Player implements Player {
       receiveTime,
       message,
       sizeInBytes,
-      schemaName: datatype,
+      schemaName,
     };
     this._parsedMessages.push(msg);
     this._handleInternalMessage(msg);
@@ -497,7 +497,7 @@ export default class Ros1Player implements Player {
     }
 
     // Unadvertise any topics where the dataType changed
-    for (const { topic, datatype } of validPublishers) {
+    for (const { topic, schemaName: datatype } of validPublishers) {
       const existingPub = this._rosNode.publications.get(topic);
       if (existingPub != undefined && existingPub.dataType !== datatype) {
         this._rosNode.unadvertise(topic);
@@ -506,7 +506,7 @@ export default class Ros1Player implements Player {
 
     // Advertise new topics
     for (const advertiseOptions of validPublishers) {
-      const { topic, datatype: dataType, options } = advertiseOptions;
+      const { topic, schemaName: dataType, options } = advertiseOptions;
 
       if (this._rosNode.publications.has(topic)) {
         continue;

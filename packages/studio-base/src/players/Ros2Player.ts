@@ -472,7 +472,7 @@ export default class Ros2Player implements Player {
     topic: string,
     timestamp: Time,
     message: unknown,
-    datatype: string,
+    schemaName: string,
     sizeInBytes: number,
     // This is a hot path so we avoid extra object allocation from a parameters struct
     // eslint-disable-next-line @foxglove/no-boolean-parameters
@@ -497,7 +497,7 @@ export default class Ros2Player implements Player {
         publishTime,
         message,
         sizeInBytes,
-        schemaName: datatype,
+        schemaName,
       };
       this._parsedMessages.push(msg);
       this._handleInternalMessage(msg);

@@ -362,7 +362,7 @@ function PanelExtensionAdapter(props: PanelExtensionAdapterProps): JSX.Element {
             }
             const payload: AdvertiseOptions = {
               topic,
-              datatype,
+              schemaName: datatype,
               options,
             };
             advertisementsRef.current.set(topic, payload);

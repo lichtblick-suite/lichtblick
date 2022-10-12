@@ -201,7 +201,7 @@ class PointcloudPlayer implements Player {
 
     for (let i = 0; i < pointcloudCount; ++i) {
       const topicName = `pointcloud_${i}`;
-      topics.push({ name: topicName, datatype: "foxglove.PointCloud" });
+      topics.push({ name: topicName, schemaName: "foxglove.PointCloud" });
     }
 
     let messageCount = 0;
@@ -221,6 +221,7 @@ class PointcloudPlayer implements Player {
           receiveTime: now,
           topic: topicName,
           message: pointcloudMsg,
+          schemaName: "foxglove.PointCloud",
           sizeInBytes: 0,
         });
 

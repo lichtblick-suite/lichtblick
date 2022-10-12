@@ -43,7 +43,7 @@ type Props = {
 export const DOT_MENU_WIDTH = 18; // The width of the small icon.
 
 export default function TreeNodeMenu({
-  datatype,
+  datatype: schemaName,
   nodeKey,
   providerAvailable,
   setCurrentEditingTopic,
@@ -119,11 +119,11 @@ export default function TreeNodeMenu({
             Copy topic name
           </Item>
         )}
-        {datatype && (
+        {schemaName && (
           <Item
             dataTest={`topic-row-menu-edit-settings-${topicName}`}
             onClick={() => {
-              setCurrentEditingTopic({ name: topicName, schemaName: datatype });
+              setCurrentEditingTopic({ name: topicName, schemaName });
               setIsOpen(false);
             }}
           >

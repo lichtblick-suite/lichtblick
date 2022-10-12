@@ -20,7 +20,7 @@ import { RosDatatypes } from "@foxglove/studio-base/types/RosDatatypes";
 
 type Props = {
   topic: string;
-  datatype: string;
+  schemaName: string;
   datatypes: RosDatatypes;
   name: string;
 };
@@ -29,7 +29,7 @@ type Props = {
 // no-op functions if the player does not have the `advertise` capability
 export default function usePublisher({
   topic,
-  datatype,
+  schemaName,
   datatypes,
   name,
 }: Props): (msg: Record<string, unknown>) => void {
@@ -41,12 +41,12 @@ export default function usePublisher({
   const setPublishers = useMessagePipeline((context) => context.setPublishers);
   useEffect(() => {
     if (canPublish) {
-      setPublishers(id, [{ topic, datatype, options: { datatypes } }]);
+      setPublishers(id, [{ topic, schemaName, options: { datatypes } }]);
       return () => setPublishers(id, []);
     } else {
       return undefined;
     }
-  }, [id, topic, datatype, datatypes, name, setPublishers, canPublish]);
+  }, [id, topic, schemaName, datatypes, name, setPublishers, canPublish]);
 
   return useCallback(
     (msg) => {

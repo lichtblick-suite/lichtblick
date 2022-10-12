@@ -108,8 +108,8 @@ export class BagIterableSource implements IIterableSource {
     const topicStats = new Map<string, TopicStats>();
     const publishersByTopic: Initalization["publishersByTopic"] = new Map();
     for (const [id, connection] of this._bag.connections) {
-      const datatype = connection.type;
-      if (!datatype) {
+      const schemaName = connection.type;
+      if (!schemaName) {
         continue;
       }
 
@@ -121,16 +121,16 @@ export class BagIterableSource implements IIterableSource {
       publishers.add(connection.callerid ?? String(connection.conn));
 
       const existingTopic = topics.get(connection.topic);
-      if (existingTopic && existingTopic.schemaName !== datatype) {
+      if (existingTopic && existingTopic.schemaName !== schemaName) {
         problems.push({
           severity: "warn",
-          message: `Conflicting datatypes on topic (${connection.topic}): ${datatype}, ${existingTopic.schemaName}`,
+          message: `Conflicting datatypes on topic (${connection.topic}): ${schemaName}, ${existingTopic.schemaName}`,
           tip: `Studio requires all connections on a topic to have the same datatype. Make sure all your nodes are publishing the same message on ${connection.topic}.`,
         });
       }
 
       if (!existingTopic) {
-        topics.set(connection.topic, { name: connection.topic, schemaName: datatype });
+        topics.set(connection.topic, { name: connection.topic, schemaName });
       }
 
       // Update the message count for this topic
@@ -142,13 +142,13 @@ export class BagIterableSource implements IIterableSource {
       const parsedDefinition = parseMessageDefinition(connection.messageDefinition);
       const reader = new MessageReader(parsedDefinition);
       this._readersByConnectionId.set(id, reader);
-      this._datatypesByConnectionId.set(id, datatype);
+      this._datatypesByConnectionId.set(id, schemaName);
 
       for (const definition of parsedDefinition) {
         // In parsed definitions, the first definition (root) does not have a name as is meant to
         // be the datatype of the topic.
         if (!definition.name) {
-          datatypes.set(datatype, definition);
+          datatypes.set(schemaName, definition);
         } else {
           datatypes.set(definition.name, definition);
         }
@@ -197,8 +197,8 @@ export class BagIterableSource implements IIterableSource {
         return;
       }
 
-      const datatype = this._datatypesByConnectionId.get(connectionId);
-      if (!datatype) {
+      const schemaName = this._datatypesByConnectionId.get(connectionId);
+      if (!schemaName) {
         yield {
           connectionId,
           msgEvent: undefined,
@@ -226,7 +226,7 @@ export class BagIterableSource implements IIterableSource {
             receiveTime: bagMsgEvent.timestamp,
             sizeInBytes: bagMsgEvent.data.byteLength,
             message: parsedMessage,
-            schemaName: datatype,
+            schemaName,
           },
         };
       } else {

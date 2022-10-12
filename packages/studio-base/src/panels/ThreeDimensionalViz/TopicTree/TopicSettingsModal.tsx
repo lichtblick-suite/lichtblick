@@ -95,7 +95,7 @@ type Props = {
 
 function TopicSettingsModal({
   currentEditingTopic,
-  currentEditingTopic: { schemaName: datatype, name: topicName },
+  currentEditingTopic: { schemaName, name: topicName },
   saveConfig,
   sceneBuilderMessage,
   setCurrentEditingTopic,
@@ -160,7 +160,7 @@ function TopicSettingsModal({
       </Stack>
       <MainEditor
         collectorMessage={sceneBuilderMessage}
-        datatype={datatype}
+        datatype={schemaName}
         onFieldChange={onFieldChange}
         onSettingsChange={onSettingsChange}
         settings={settingsByKey[topicSettingsKey] ?? {}}

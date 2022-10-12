@@ -139,7 +139,12 @@ function Publish(props: Props) {
     saveConfig,
   } = props;
 
-  const publish = usePublisher({ name: "Publish", topic: topicName, datatype, datatypes });
+  const publish = usePublisher({
+    name: "Publish",
+    topic: topicName,
+    schemaName: datatype,
+    datatypes,
+  });
 
   const datatypeNames = useMemo(() => Array.from(datatypes.keys()).sort(), [datatypes]);
   const { error, parsedObject } = useMemo(() => parseInput(value), [value]);

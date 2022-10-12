@@ -275,13 +275,13 @@ export type SubscribePayload = {
 
 // Represents a single topic publisher, for use in `setPublishers`.
 export type AdvertiseOptions = {
-  // The topic name
+  /** The topic name */
   topic: string;
 
-  // The datatype name
-  datatype: string;
+  /** The schema name */
+  schemaName: string;
 
-  // Additional advertise options
+  /** Additional player-specific advertise options */
   options?: Record<string, unknown>;
 };
 

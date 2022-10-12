@@ -143,11 +143,11 @@ export default function TreeNodeRow({
 }: Props): JSX.Element {
   const theme = useTheme();
   const topicName = node.type === "topic" ? node.topicName : "";
-  const datatype = node.type === "topic" ? node.datatype : undefined;
+  const schemaName = node.type === "topic" ? node.datatype : undefined;
 
   const isDefaultSettings =
     !derivedCustomSettings || (derivedCustomSettings.isDefaultSettings ?? false);
-  const showTopicSettings = topicName.length > 0 && !!datatype && canEditDatatype(datatype);
+  const showTopicSettings = topicName.length > 0 && !!schemaName && canEditDatatype(schemaName);
   const showTopicSettingsChanged = showTopicSettings && !isDefaultSettings;
 
   const showTopicError =
@@ -229,12 +229,12 @@ export default function TreeNodeRow({
               }
             : undefined)}
         />
-        {showTopicSettingsChanged && datatype && (
+        {showTopicSettingsChanged && schemaName && (
           <Icon
             style={{ padding: "0 4px", color: colors.HIGHLIGHT, lineHeight: 1 }}
             fade
             tooltip="Topic settings edited"
-            onClick={() => setCurrentEditingTopic({ name: topicName, schemaName: datatype })}
+            onClick={() => setCurrentEditingTopic({ name: topicName, schemaName })}
           >
             <LeadPencilIcon />
           </Icon>
@@ -299,7 +299,7 @@ export default function TreeNodeRow({
           </SToggles>
         )}
         <TreeNodeMenu
-          datatype={showTopicSettings ? datatype : undefined}
+          datatype={showTopicSettings ? schemaName : undefined}
           nodeKey={key}
           providerAvailable={providerAvailable}
           setCurrentEditingTopic={setCurrentEditingTopic}

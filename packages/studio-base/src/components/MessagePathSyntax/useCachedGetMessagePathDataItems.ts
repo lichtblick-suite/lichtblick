@@ -114,8 +114,8 @@ export function useCachedGetMessagePathDataItems(
         }
       }
     }
-    for (const { schemaName: datatype } of relevantTopics.values()) {
-      addRelevantDatatype(datatype, []);
+    for (const { schemaName } of relevantTopics.values()) {
+      addRelevantDatatype(schemaName, []);
     }
     return relevantDatatypes;
   }, [datatypes, relevantTopics]);

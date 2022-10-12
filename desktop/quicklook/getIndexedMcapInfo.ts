@@ -45,8 +45,8 @@ export default async function getIndexedMcapInfo(
     const schema = reader.schemasById.get(channel.schemaId);
     const numMessages = reader.statistics?.channelMessageCounts.get(channel.id);
     if (info != undefined) {
-      if (schema != undefined && info.datatype !== schema.name) {
-        info.datatype = "(multiple)";
+      if (schema != undefined && info.schemaName !== schema.name) {
+        info.schemaName = "(multiple)";
       }
       if (numMessages != undefined) {
         info.numMessages = (info.numMessages ?? 0n) + numMessages;
@@ -55,7 +55,7 @@ export default async function getIndexedMcapInfo(
     } else {
       topicInfosByTopic.set(channel.topic, {
         topic: channel.topic,
-        datatype: schema?.name ?? "(unknown)",
+        schemaName: schema?.name ?? "(unknown)",
         numMessages,
         numConnections: 1,
       });

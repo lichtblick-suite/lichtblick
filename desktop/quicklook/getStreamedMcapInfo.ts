@@ -31,8 +31,8 @@ export function processMcapPre0Record(info: McapInfo, record: McapPre0Types.Mcap
       info.topicNamesByChannelId.set(record.id, record.topic);
       const chanInfo = info.topicInfosByTopic.get(record.topic);
       if (chanInfo != undefined) {
-        if (chanInfo.datatype !== record.schemaName) {
-          chanInfo.datatype = "(multiple)";
+        if (chanInfo.schemaName !== record.schemaName) {
+          chanInfo.schemaName = "(multiple)";
         }
         if (!chanInfo.connectionIds.has(record.id)) {
           chanInfo.connectionIds.add(record.id);
@@ -41,7 +41,7 @@ export function processMcapPre0Record(info: McapInfo, record: McapPre0Types.Mcap
       } else {
         info.topicInfosByTopic.set(record.topic, {
           topic: record.topic,
-          datatype: record.schemaName,
+          schemaName: record.schemaName,
           numMessages: 0n,
           numConnections: 1,
           connectionIds: new Set([record.id]),
@@ -93,8 +93,8 @@ export function processMcap0Record(info: McapInfo, record: Mcap0Types.TypedMcapR
       const chanInfo = info.topicInfosByTopic.get(record.topic);
       const schemaName = info.schemaNamesById.get(record.schemaId);
       if (chanInfo != undefined) {
-        if (schemaName != undefined && chanInfo.datatype !== schemaName) {
-          chanInfo.datatype = "(multiple)";
+        if (schemaName != undefined && chanInfo.schemaName !== schemaName) {
+          chanInfo.schemaName = "(multiple)";
         }
         if (!chanInfo.connectionIds.has(record.id)) {
           chanInfo.connectionIds.add(record.id);
@@ -103,7 +103,7 @@ export function processMcap0Record(info: McapInfo, record: Mcap0Types.TypedMcapR
       } else {
         info.topicInfosByTopic.set(record.topic, {
           topic: record.topic,
-          datatype: schemaName ?? "(unknown)",
+          schemaName: schemaName ?? "(unknown)",
           numMessages: 0n,
           numConnections: 1,
           connectionIds: new Set([record.id]),

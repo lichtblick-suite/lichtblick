@@ -169,17 +169,17 @@ export function PublishClickTool(props: Props): ReactElement {
     setPublishers("panel-click", [
       {
         topic: topics.goal,
-        datatype: "geometry_msgs/PoseStamped",
+        schemaName: "geometry_msgs/PoseStamped",
         options: { datatypes },
       },
       {
         topic: topics.point,
-        datatype: "geometry_msgs/PointStamped",
+        schemaName: "geometry_msgs/PointStamped",
         options: { datatypes },
       },
       {
         topic: topics.pose,
-        datatype: "geometry_msgs/PoseWithCovarianceStamped",
+        schemaName: "geometry_msgs/PoseWithCovarianceStamped",
         options: { datatypes },
       },
     ]);

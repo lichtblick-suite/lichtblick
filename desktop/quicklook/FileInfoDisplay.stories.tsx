@@ -53,9 +53,9 @@ export function Details(): JSX.Element {
         startTime: { sec: 0, nsec: 1 },
         endTime: { sec: 1, nsec: 2 },
         topics: [
-          { topic: "foo", datatype: "Foo", numMessages: 100n, numConnections: 1 },
-          { topic: "bar", datatype: "Bar", numMessages: 1_000_000n, numConnections: 2 },
-          { topic: "baz", datatype: "Baz", numMessages: undefined, numConnections: 0 },
+          { topic: "foo", schemaName: "Foo", numMessages: 100n, numConnections: 1 },
+          { topic: "bar", schemaName: "Bar", numMessages: 1_000_000n, numConnections: 2 },
+          { topic: "baz", schemaName: "Baz", numMessages: undefined, numConnections: 0 },
         ],
         compressionTypes: new Set(["zstd"]),
       }}

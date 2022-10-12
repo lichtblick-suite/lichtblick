@@ -467,8 +467,8 @@ export default class RosbridgePlayer implements Player {
         continue;
       }
 
-      const { schemaName: datatype } = availTopic;
-      const messageReader = this._messageReadersByDatatype[datatype];
+      const { schemaName } = availTopic;
+      const messageReader = this._messageReadersByDatatype[schemaName];
       if (!messageReader) {
         continue;
       }
@@ -524,7 +524,7 @@ export default class RosbridgePlayer implements Player {
               topic: topicName,
               receiveTime,
               message: innerMessage,
-              schemaName: datatype,
+              schemaName,
               sizeInBytes: bytes.byteLength,
             };
             this._parsedMessages.push(msg);
@@ -672,7 +672,7 @@ export default class RosbridgePlayer implements Player {
       return;
     }
 
-    for (const { topic, datatype } of this._advertisements) {
+    for (const { topic, schemaName: datatype } of this._advertisements) {
       this._topicPublishers.set(
         topic,
         new roslib.Topic({

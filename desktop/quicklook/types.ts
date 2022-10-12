@@ -6,7 +6,7 @@ import { Time } from "@foxglove/rostime";
 
 export type TopicInfo = {
   topic: string;
-  datatype: string;
+  schemaName: string;
   numMessages: bigint | undefined;
   numConnections: number;
 };

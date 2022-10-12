@@ -373,13 +373,19 @@ describe("MessagePipelineProvider/useMessagePipeline", () => {
       wrapper: Wrapper,
     });
 
-    act(() => result.current.setPublishers("test", [{ topic: "/studio/test", datatype: "test" }]));
-    expect(result.current.publishers).toEqual([{ topic: "/studio/test", datatype: "test" }]);
+    act(() =>
+      result.current.setPublishers("test", [{ topic: "/studio/test", schemaName: "test" }]),
+    );
+    expect(result.current.publishers).toEqual<typeof result.current.publishers>([
+      { topic: "/studio/test", schemaName: "test" },
+    ]);
 
-    act(() => result.current.setPublishers("bar", [{ topic: "/studio/test2", datatype: "test2" }]));
-    expect(result.current.publishers).toEqual([
-      { topic: "/studio/test", datatype: "test" },
-      { topic: "/studio/test2", datatype: "test2" },
+    act(() =>
+      result.current.setPublishers("bar", [{ topic: "/studio/test2", schemaName: "test2" }]),
+    );
+    expect(result.current.publishers).toEqual<typeof result.current.publishers>([
+      { topic: "/studio/test", schemaName: "test" },
+      { topic: "/studio/test2", schemaName: "test2" },
     ]);
 
     const lastPublishers = result.current.publishers;
@@ -552,14 +558,18 @@ describe("MessagePipelineProvider/useMessagePipeline", () => {
     });
     act(() => result.current.setSubscriptions("test", [{ topic: "/studio/test" }]));
     act(() => result.current.setSubscriptions("bar", [{ topic: "/studio/test2" }]));
-    act(() => result.current.setPublishers("test", [{ topic: "/studio/test", datatype: "test" }]));
+    act(() =>
+      result.current.setPublishers("test", [{ topic: "/studio/test", schemaName: "test" }]),
+    );
 
     const player2 = new FakePlayer();
     setPlayer(player2);
     rerender();
     await act(async () => await delay(1));
     expect(player2.subscriptions).toEqual([{ topic: "/studio/test" }, { topic: "/studio/test2" }]);
-    expect(player2.publishers).toEqual([{ topic: "/studio/test", datatype: "test" }]);
+    expect(player2.publishers).toEqual<typeof player2.publishers>([
+      { topic: "/studio/test", schemaName: "test" },
+    ]);
   });
 
   describe("pauseFrame", () => {

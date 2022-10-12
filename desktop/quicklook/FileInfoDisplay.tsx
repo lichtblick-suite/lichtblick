@@ -125,7 +125,7 @@ const useStyles = makeStyles()(() => ({
     color: "#888",
     verticalAlign: "baseline",
   },
-  topicNameAndDatatype: {
+  topicNameAndSchemaName: {
     width: "100%",
     padding: "2px 0",
     display: "flex",
@@ -137,7 +137,7 @@ const useStyles = makeStyles()(() => ({
   topicName: {
     marginRight: 10,
   },
-  datatype: {
+  schemaName: {
     fontSize: "12px",
     opacity: 0.5,
   },
@@ -162,17 +162,17 @@ function formatCount(count: number | bigint | undefined, noun: string): string |
 
 function TopicRow(props: { info: TopicInfo }) {
   const {
-    info: { topic, datatype, numMessages, numConnections },
+    info: { topic, schemaName, numMessages, numConnections },
   } = props;
   const { classes } = useStyles();
 
   return (
     <tr className={classes.topicRowWrapper}>
       <td className={classes.messageCount}>{numMessages?.toLocaleString()}</td>
-      <td className={classes.topicNameAndDatatype}>
+      <td className={classes.topicNameAndSchemaName}>
         <code className={classes.topicName}>{topic}</code>
-        <div className={classes.datatype}>
-          {datatype}
+        <div className={classes.schemaName}>
+          {schemaName}
           {numConnections > 1 && ` (${numConnections})`}
         </div>
       </td>

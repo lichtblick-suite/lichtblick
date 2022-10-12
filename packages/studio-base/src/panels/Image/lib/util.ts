@@ -74,11 +74,11 @@ export function getMarkerOptions(
 ): string[] {
   const results = [];
   const cameraNamespace = getCameraNamespace(imageTopic);
-  for (const { name, schemaName: datatype } of topics) {
+  for (const { name, schemaName } of topics) {
     if (
       cameraNamespace &&
       name.startsWith(cameraNamespace + "/") &&
-      imageMarkerDatatypes.includes(datatype)
+      imageMarkerDatatypes.includes(schemaName)
     ) {
       results.push(name);
     }

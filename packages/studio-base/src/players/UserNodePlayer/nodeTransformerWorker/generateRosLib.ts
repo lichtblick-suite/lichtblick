@@ -195,11 +195,11 @@ const generateRosLib = ({
 
   let datatypeInterfaces = generateTypeDefs(datatypes);
 
-  topics.forEach(({ name, schemaName: datatype }) => {
-    if (!datatypeInterfaces[datatype]) {
+  topics.forEach(({ name, schemaName }) => {
+    if (!datatypeInterfaces[schemaName]) {
       datatypeInterfaces = {
         ...datatypeInterfaces,
-        ...generateTypeDefs(new Map(Object.entries({ [datatype]: { definitions: [] } }))),
+        ...generateTypeDefs(new Map(Object.entries({ [schemaName]: { definitions: [] } }))),
       };
     }
 
@@ -220,7 +220,7 @@ const generateRosLib = ({
         createProperty(
           ts.factory.createStringLiteral(name),
           ts.factory.createTypeReferenceNode(
-            `${DATATYPES_IDENTIFIER}.${formatInterfaceName(datatype)}`,
+            `${DATATYPES_IDENTIFIER}.${formatInterfaceName(schemaName)}`,
           ),
         ),
       ],

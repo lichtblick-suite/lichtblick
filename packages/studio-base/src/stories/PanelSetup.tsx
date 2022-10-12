@@ -277,8 +277,8 @@ function UnconnectedPanelSetup(props: UnconnectedProps): JSX.Element | ReactNull
   let dTypes = datatypes;
   if (!dTypes) {
     const dummyDatatypes: RosDatatypes = new Map();
-    for (const { schemaName: datatype } of topics) {
-      dummyDatatypes.set(datatype, { definitions: [] });
+    for (const { schemaName } of topics) {
+      dummyDatatypes.set(schemaName, { definitions: [] });
     }
     dTypes = dummyDatatypes;
   }

@@ -15,6 +15,7 @@
 import { signal } from "@foxglove/den/async";
 import FakePlayer from "@foxglove/studio-base/components/MessagePipeline/FakePlayer";
 import {
+  AdvertiseOptions,
   MessageEvent,
   PlayerState,
   PlayerStateActiveData,
@@ -231,7 +232,7 @@ describe("UserNodePlayer", () => {
       const userNodePlayer = new UserNodePlayer(fakePlayer, defaultUserNodeActions);
       expect(fakePlayer.setPublishers).not.toHaveBeenCalled();
       expect(fakePlayer.publish).not.toHaveBeenCalled();
-      const publishers = [{ topic: "/foo", datatype: "foo", datatypes: new Map() }];
+      const publishers: AdvertiseOptions[] = [{ topic: "/foo", schemaName: "foo" }];
       userNodePlayer.setPublishers(publishers);
       expect(fakePlayer.setPublishers).toHaveBeenLastCalledWith(publishers);
       expect(fakePlayer.publish).not.toHaveBeenCalled();

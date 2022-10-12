@@ -20,12 +20,12 @@ export async function getBagInfo(file: File): Promise<FileInfo> {
   }
 
   const topicInfosByTopic = new Map<string, TopicInfo>();
-  for (const { topic, type: datatype, conn } of bag.connections.values()) {
+  for (const { topic, type: schemaName, conn } of bag.connections.values()) {
     const info = topicInfosByTopic.get(topic);
     const numMessages = numMessagesByConnectionIndex[conn];
     if (info != undefined) {
-      if (info.datatype !== datatype) {
-        info.datatype = "(multiple)";
+      if (info.schemaName !== schemaName) {
+        info.schemaName = "(multiple)";
       }
       if (numMessages != undefined) {
         info.numMessages = (info.numMessages ?? 0n) + numMessages;
@@ -34,7 +34,7 @@ export async function getBagInfo(file: File): Promise<FileInfo> {
     } else {
       topicInfosByTopic.set(topic, {
         topic,
-        datatype: datatype ?? "(unknown)",
+        schemaName: schemaName ?? "(unknown)",
         numMessages,
         numConnections: 1,
       });
