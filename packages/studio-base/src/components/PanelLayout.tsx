@@ -13,21 +13,21 @@
 
 import { CircularProgress, Link, styled as muiStyled } from "@mui/material";
 import React, {
-  useCallback,
-  useMemo,
+  LazyExoticComponent,
   PropsWithChildren,
   Suspense,
-  useRef,
-  LazyExoticComponent,
+  useCallback,
   useEffect,
+  useMemo,
+  useRef,
 } from "react";
 import { useDrop } from "react-dnd";
 import {
-  MosaicWithoutDragDropContext,
-  MosaicWindow,
   MosaicDragType,
   MosaicNode,
   MosaicPath,
+  MosaicWindow,
+  MosaicWithoutDragDropContext,
 } from "react-mosaic-component";
 import "react-mosaic-component/react-mosaic-component.css";
 
@@ -49,6 +49,7 @@ import { getPanelIdForType, getPanelTypeFromId } from "@foxglove/studio-base/uti
 
 import ErrorBoundary from "./ErrorBoundary";
 import { MosaicPathContext } from "./MosaicPathContext";
+import { PanelRemounter } from "./PanelRemounter";
 
 type Props = {
   layout?: MosaicNode<string>;
@@ -166,7 +167,9 @@ export function UnconnectedPanelLayout(props: Props): React.ReactElement {
             }
           >
             <MosaicPathContext.Provider value={path}>
-              <Panel childId={id} tabId={tabId} key={`${id}${tabId}`} />
+              <PanelRemounter id={id} tabId={tabId}>
+                <Panel childId={id} tabId={tabId} />
+              </PanelRemounter>
             </MosaicPathContext.Provider>
           </Suspense>
         </MosaicWindow>

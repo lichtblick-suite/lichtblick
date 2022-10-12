@@ -16,7 +16,20 @@ import {
 function createSettingsEditorStore(): StoreApi<PanelSettingsEditorStore> {
   return createStore((set) => {
     return {
+      sequenceNumbers: {},
       settingsTrees: {},
+
+      incrementSequenceNumber: (panelId: string) => {
+        set((state) => {
+          return {
+            sequenceNumbers: {
+              ...state.sequenceNumbers,
+              [panelId]: (state.sequenceNumbers[panelId] ?? 0) + 1,
+            },
+          };
+        });
+      },
+
       updateSettingsTree: (panelId, settingsTree) => {
         set((state) => ({
           settingsTrees: {
