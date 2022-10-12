@@ -106,7 +106,7 @@ export class Grids extends SceneExtension<GridRenderable> {
 
       const config = layerConfig as Partial<LayerSettingsGrid>;
       const frameIdOptions = [
-        { label: "<Render Frame>", value: undefined },
+        { label: "<Display frame>", value: undefined },
         ...this.renderer.coordinateFrameList,
       ];
 
