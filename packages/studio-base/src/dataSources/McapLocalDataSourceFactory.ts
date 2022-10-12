@@ -6,8 +6,7 @@ import {
   IDataSourceFactory,
   DataSourceFactoryInitializeArgs,
 } from "@foxglove/studio-base/context/PlayerSelectionContext";
-import { IterablePlayer } from "@foxglove/studio-base/players/IterablePlayer";
-import { McapIterableSource } from "@foxglove/studio-base/players/IterablePlayer/Mcap/McapIterableSource";
+import { IterablePlayer, WorkerIterableSource } from "@foxglove/studio-base/players/IterablePlayer";
 import { Player } from "@foxglove/studio-base/players/types";
 
 class McapLocalDataSourceFactory implements IDataSourceFactory {
@@ -23,7 +22,11 @@ class McapLocalDataSourceFactory implements IDataSourceFactory {
       return;
     }
 
-    const source = new McapIterableSource({ type: "file", file });
+    const source = new WorkerIterableSource({
+      sourceType: "mcap",
+      initArgs: { file },
+    });
+
     return new IterablePlayer({
       metricsCollector: args.metricsCollector,
       source,

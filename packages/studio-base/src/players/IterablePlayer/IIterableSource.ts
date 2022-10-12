@@ -105,4 +105,22 @@ export interface IIterableSource {
    * available.
    */
   getBackfillMessages(args: GetBackfillMessagesArgs): Promise<MessageEvent<unknown>[]>;
+
+  /**
+   * Optional method a data source can implement to cleanup resources. The player will call this
+   * method when the source will no longer be used.
+   */
+  terminate?: () => Promise<void>;
 }
+
+export type IterableSourceInitializeArgs = {
+  file?: File;
+  url?: string;
+  files?: File[];
+  params?: Record<string, string | undefined>;
+
+  api?: {
+    baseUrl: string;
+    auth?: string;
+  };
+};

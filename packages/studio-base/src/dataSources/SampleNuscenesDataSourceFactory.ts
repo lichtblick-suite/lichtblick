@@ -6,8 +6,7 @@ import {
   IDataSourceFactory,
   DataSourceFactoryInitializeArgs,
 } from "@foxglove/studio-base/context/PlayerSelectionContext";
-import { IterablePlayer } from "@foxglove/studio-base/players/IterablePlayer";
-import { BagIterableSource } from "@foxglove/studio-base/players/IterablePlayer/BagIterableSource";
+import { IterablePlayer, WorkerIterableSource } from "@foxglove/studio-base/players/IterablePlayer";
 
 import SampleNuscenesLayout from "./SampleNuscenesLayout.json";
 
@@ -24,9 +23,13 @@ class SampleNuscenesDataSourceFactory implements IDataSourceFactory {
   ): ReturnType<IDataSourceFactory["initialize"]> {
     const bagUrl = "https://assets.foxglove.dev/nuScenes-v1.0-mini-scene-0061.bag";
 
-    const bagSource = new BagIterableSource({ type: "remote", url: bagUrl });
+    const source = new WorkerIterableSource({
+      sourceType: "rosbag",
+      initArgs: { url: bagUrl },
+    });
+
     return new IterablePlayer({
-      source: bagSource,
+      source,
       isSampleDataSource: true,
       name: "Adapted from nuScenes dataset.\nCopyright © 2020 nuScenes.\nhttps://www.nuscenes.org/terms-of-use",
       metricsCollector: args.metricsCollector,

@@ -61,10 +61,8 @@ describe("parseChannel", () => {
     });
     expect(channel.fullSchemaName).toEqual("foo_msgs/Bar");
 
-    const obj = channel.deserializer(new Uint8Array([4, 0, 0, 0, 65, 66, 67, 68])) as {
-      toJSON: () => unknown;
-    };
-    expect(obj.toJSON()).toEqual({ data: "ABCD" });
+    const obj = channel.deserializer(new Uint8Array([4, 0, 0, 0, 65, 66, 67, 68]));
+    expect(obj).toEqual({ data: "ABCD" });
   });
 
   it("works with ros2", () => {

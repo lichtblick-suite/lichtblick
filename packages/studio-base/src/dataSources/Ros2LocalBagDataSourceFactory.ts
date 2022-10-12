@@ -6,8 +6,7 @@ import {
   IDataSourceFactory,
   DataSourceFactoryInitializeArgs,
 } from "@foxglove/studio-base/context/PlayerSelectionContext";
-import { IterablePlayer } from "@foxglove/studio-base/players/IterablePlayer";
-import { RosDb3IterableSource } from "@foxglove/studio-base/players/IterablePlayer/rosdb3";
+import { IterablePlayer, WorkerIterableSource } from "@foxglove/studio-base/players/IterablePlayer";
 import { Player } from "@foxglove/studio-base/players/types";
 
 class Ros2LocalBagDataSourceFactory implements IDataSourceFactory {
@@ -23,13 +22,17 @@ class Ros2LocalBagDataSourceFactory implements IDataSourceFactory {
     const name = args.file ? args.file.name : args.files?.map((file) => file.name).join(", ");
 
     if (!files) {
-      return undefined;
+      return;
     }
 
-    const bagSource = new RosDb3IterableSource(files);
+    const source = new WorkerIterableSource({
+      sourceType: "rosdb3",
+      initArgs: { files },
+    });
+
     return new IterablePlayer({
       metricsCollector: args.metricsCollector,
-      source: bagSource,
+      source,
       name,
       sourceId: this.id,
     });

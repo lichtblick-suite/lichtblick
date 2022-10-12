@@ -6,8 +6,7 @@ import {
   IDataSourceFactory,
   DataSourceFactoryInitializeArgs,
 } from "@foxglove/studio-base/context/PlayerSelectionContext";
-import { IterablePlayer } from "@foxglove/studio-base/players/IterablePlayer";
-import { UlogIterableSource } from "@foxglove/studio-base/players/IterablePlayer/ulog/UlogIterableSource";
+import { IterablePlayer, WorkerIterableSource } from "@foxglove/studio-base/players/IterablePlayer";
 import { Player } from "@foxglove/studio-base/players/types";
 
 class UlogLocalDataSourceFactory implements IDataSourceFactory {
@@ -23,7 +22,11 @@ class UlogLocalDataSourceFactory implements IDataSourceFactory {
       return;
     }
 
-    const source = new UlogIterableSource({ type: "file", file });
+    const source = new WorkerIterableSource({
+      sourceType: "ulog",
+      initArgs: { file },
+    });
+
     return new IterablePlayer({
       metricsCollector: args.metricsCollector,
       source,

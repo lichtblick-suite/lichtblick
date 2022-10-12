@@ -19,15 +19,16 @@ class VelodyneDataSourceFactory implements IDataSourceFactory {
   public docsLink = "https://foxglove.dev/docs/studio/connection/velodyne";
 
   public formConfig = {
-    fields: [{ id: "url", label: "UDP Port", defaultValue: "2369" }],
+    fields: [{ id: "port", label: "UDP Port", defaultValue: "2369" }],
   };
 
   public initialize(args: DataSourceFactoryInitializeArgs): Player | undefined {
-    // velodyne uses the url arg as the port
-    const port = args.url as number | undefined;
-    if (port == undefined) {
+    const portStr = args.params?.portStr;
+    if (portStr == undefined) {
       return;
     }
+
+    const port = parseInt(portStr);
 
     return new VelodynePlayer({ port, metricsCollector: args.metricsCollector });
   }

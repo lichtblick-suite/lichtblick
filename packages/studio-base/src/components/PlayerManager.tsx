@@ -174,9 +174,9 @@ export default function PlayerManager(props: PropsWithChildren<PlayerManagerProp
         switch (args.type) {
           case "connection": {
             const newPlayer = foundSource.initialize({
-              ...args.params,
               consoleApi,
               metricsCollector,
+              params: args.params,
             });
             setBasePlayer(newPlayer);
 

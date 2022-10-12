@@ -6,7 +6,7 @@ import protobufjs from "protobufjs";
 import { FileDescriptorSet, IFileDescriptorSet } from "protobufjs/ext/descriptor";
 
 import { parse as parseMessageDefinition, RosMsgDefinition } from "@foxglove/rosmsg";
-import { LazyMessageReader } from "@foxglove/rosmsg-serialization";
+import { MessageReader } from "@foxglove/rosmsg-serialization";
 import { MessageReader as ROS2MessageReader } from "@foxglove/rosmsg2-serialization";
 
 import { parseFlatbufferSchema } from "./parseFlatbufferSchema";
@@ -158,19 +158,11 @@ export function parseChannel(channel: Channel): ParsedChannel {
     }
     const schema = new TextDecoder().decode(channel.schema.data);
     const parsedDefinitions = parseMessageDefinition(schema);
-    const reader = new LazyMessageReader(parsedDefinitions);
+    const reader = new MessageReader(parsedDefinitions);
     return {
       fullSchemaName: channel.schema.name,
       datatypes: parsedDefinitionsToDatatypes(parsedDefinitions, channel.schema.name),
-      deserializer: (data) => {
-        const size = reader.size(data);
-        if (size > data.byteLength) {
-          throw new Error(
-            `Buffer not large enough: expected ${size} bytes, got ${data.byteLength}`,
-          );
-        }
-        return reader.readMessage(data);
-      },
+      deserializer: (data) => reader.readMessage(data),
     };
   }
 

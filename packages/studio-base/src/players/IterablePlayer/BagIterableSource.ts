@@ -7,7 +7,7 @@ import decompressLZ4 from "wasm-lz4";
 import { Bag, Filelike } from "@foxglove/rosbag";
 import { BlobReader } from "@foxglove/rosbag/web";
 import { parse as parseMessageDefinition } from "@foxglove/rosmsg";
-import { LazyMessageReader } from "@foxglove/rosmsg-serialization";
+import { MessageReader } from "@foxglove/rosmsg-serialization";
 import { compare } from "@foxglove/rostime";
 import {
   PlayerProblem,
@@ -27,14 +27,16 @@ import {
   Initalization,
   MessageIteratorArgs,
   GetBackfillMessagesArgs,
+  IterableSourceInitializeArgs,
 } from "./IIterableSource";
 
 type BagSource = { type: "file"; file: File } | { type: "remote"; url: string };
 
 export class BagIterableSource implements IIterableSource {
-  private _source: BagSource;
+  private readonly _source: BagSource;
+
   private _bag: Bag | undefined;
-  private _readersByConnectionId = new Map<number, LazyMessageReader>();
+  private _readersByConnectionId = new Map<number, MessageReader>();
   private _datatypesByConnectionId = new Map<number, string>();
 
   public constructor(source: BagSource) {
@@ -138,7 +140,7 @@ export class BagIterableSource implements IIterableSource {
       topicStats.set(connection.topic, { numMessages });
 
       const parsedDefinition = parseMessageDefinition(connection.messageDefinition);
-      const reader = new LazyMessageReader(parsedDefinition);
+      const reader = new MessageReader(parsedDefinition);
       this._readersByConnectionId.set(id, reader);
       this._datatypesByConnectionId.set(id, datatype);
 
@@ -264,4 +266,14 @@ export class BagIterableSource implements IIterableSource {
     messages.sort((a, b) => compare(a.receiveTime, b.receiveTime));
     return messages;
   }
+}
+
+export function initialize(args: IterableSourceInitializeArgs): BagIterableSource {
+  if (args.file) {
+    return new BagIterableSource({ type: "file", file: args.file });
+  } else if (args.url) {
+    return new BagIterableSource({ type: "remote", url: args.url });
+  }
+
+  throw new Error("file or url required");
 }

@@ -8,11 +8,9 @@ import { isEqual } from "lodash";
 
 import Logger from "@foxglove/log";
 import { loadDecompressHandlers, parseChannel, ParsedChannel } from "@foxglove/mcap-support";
-import { fromNanoSec, toRFC3339String } from "@foxglove/rostime";
+import { fromNanoSec } from "@foxglove/rostime";
 import { MessageEvent } from "@foxglove/studio-base/players/types";
-import ConsoleApi, {
-  DataPlatformSourceParameters,
-} from "@foxglove/studio-base/services/ConsoleApi";
+import ConsoleApi, { DataPlatformRequestArgs } from "@foxglove/studio-base/services/ConsoleApi";
 
 const log = Logger.getLogger(__filename);
 
@@ -25,6 +23,15 @@ export type ParsedChannelAndEncodings = {
   schemaEncoding: string;
   schema: Uint8Array;
   parsedChannel: ParsedChannel;
+};
+
+/**
+ * Parameters for stream requests
+ */
+export type StreamParams = DataPlatformRequestArgs & {
+  topics: readonly string[];
+  replayPolicy?: "lastPerChannel" | "";
+  replayLookbackSeconds?: number;
 };
 
 /**
@@ -50,12 +57,7 @@ export async function* streamMessages({
    */
   signal?: AbortSignal;
 
-  /** Parameters indicating the time range to stream. */
-  params: DataPlatformSourceParameters & {
-    topics: readonly string[];
-    replayPolicy?: "lastPerChannel" | "";
-    replayLookbackSeconds?: number;
-  };
+  params: StreamParams;
 
   /**
    * Message readers are initialized out of band so we can parse message definitions only once.
@@ -76,51 +78,16 @@ export async function* streamMessages({
   log.debug("streamMessages", params);
   const startTimer = performance.now();
 
-  const apiParams =
-    params.type === "by-device"
-      ? {
-          deviceId: params.deviceId,
-          start: toRFC3339String(params.start),
-          end: toRFC3339String(params.end),
-        }
-      : {
-          importId: params.importId,
-          start: params.start ? toRFC3339String(params.start) : undefined,
-          end: params.end ? toRFC3339String(params.end) : undefined,
-        };
-
   const { link: mcapUrl } = await api.stream({
-    ...apiParams,
-    topics: params.topics,
+    ...params,
     outputFormat: "mcap0",
-    replayPolicy: params.replayPolicy,
-    replayLookbackSeconds: params.replayLookbackSeconds,
   });
   if (controller.signal.aborted) {
     return;
   }
 
-  // Since every request is signed with a new token, there's no benefit to caching.
-  const response = await fetch(mcapUrl, {
-    signal: controller.signal,
-    cache: "no-cache",
-    headers: {
-      // Include the version of studio in the request Useful when scraping logs to determine what
-      // versions of the app are making requests.
-      "fg-user-agent": FOXGLOVE_USER_AGENT,
-    },
-  });
-  if (response.status === 404) {
-    return;
-  } else if (response.status !== 200) {
-    log.error(`${response.status} response for`, mcapUrl, response);
-    throw new Error(`Unexpected response status ${response.status}`);
-  }
-  if (!response.body) {
-    throw new Error("Unable to stream response body");
-  }
-  const streamReader = response.body.getReader();
-
+  let totalMessages = 0;
+  let messages: MessageEvent<unknown>[] = [];
   const schemasById = new Map<number, Mcap0Types.TypedMcapRecords["Schema"]>();
   const channelInfoById = new Map<
     number,
@@ -130,9 +97,6 @@ export async function* streamMessages({
       schemaName: string;
     }
   >();
-
-  let totalMessages = 0;
-  let messages: MessageEvent<unknown>[] = [];
 
   function processRecord(record: Mcap0Types.TypedMcapRecord) {
     switch (record.type) {
@@ -190,7 +154,11 @@ export async function* streamMessages({
 
         parsedChannelsByTopic.set(record.topic, parsedChannels);
 
-        channelInfoById.set(record.id, { channel: record, parsedChannel, schemaName: schema.name });
+        channelInfoById.set(record.id, {
+          channel: record,
+          parsedChannel,
+          schemaName: schema.name,
+        });
 
         const err = new Error(
           `No pre-initialized reader for ${record.topic} (message encoding ${record.messageEncoding}, schema encoding ${schema.encoding}, schema name ${schema.name})`,
@@ -218,38 +186,67 @@ export async function* streamMessages({
     }
   }
 
-  let normalReturn = false;
-  parseLoop: try {
-    const reader = new Mcap0StreamReader({ decompressHandlers });
-    for (let result; (result = await streamReader.read()), !result.done; ) {
-      reader.append(result.value);
-      for (let record; (record = reader.nextRecord()); ) {
-        if (record.type === "DataEnd") {
-          normalReturn = true;
-          break;
-        }
-        processRecord(record);
-      }
-      if (messages.length > 0) {
-        yield messages;
-        messages = [];
-      }
+  try {
+    // Since every request is signed with a new token, there's no benefit to caching.
+    const response = await fetch(mcapUrl, {
+      signal: controller.signal,
+      cache: "no-cache",
+      headers: {
+        // Include the version of studio in the request Useful when scraping logs to determine what
+        // versions of the app are making requests.
+        "fg-user-agent": FOXGLOVE_USER_AGENT,
+      },
+    });
+    if (response.status === 404) {
+      return;
+    } else if (response.status !== 200) {
+      log.error(`${response.status} response for`, mcapUrl, response);
+      throw new Error(`Unexpected response status ${response.status}`);
+    }
+    if (!response.body) {
+      throw new Error("Unable to stream response body");
+    }
+    const streamReader = response.body.getReader();
 
-      if (normalReturn) {
-        break parseLoop;
+    let normalReturn = false;
+    parseLoop: try {
+      const reader = new Mcap0StreamReader({ decompressHandlers });
+      for (let result; (result = await streamReader.read()), !result.done; ) {
+        reader.append(result.value);
+        for (let record; (record = reader.nextRecord()); ) {
+          if (record.type === "DataEnd") {
+            normalReturn = true;
+            break;
+          }
+          processRecord(record);
+        }
+        if (messages.length > 0) {
+          yield messages;
+          messages = [];
+        }
+
+        if (normalReturn) {
+          break parseLoop;
+        }
       }
+      if (!reader.done()) {
+        throw new Error("Incomplete mcap file");
+      }
+      normalReturn = true;
+    } finally {
+      if (!normalReturn) {
+        // If the caller called generator.return() in between body chunks, automatically cancel the request.
+        log.debug("Automatic abort of streamMessages", params);
+      }
+      signal?.removeEventListener("abort", abortHandler);
+      controller.abort();
     }
-    if (!reader.done()) {
-      throw new Error("Incomplete mcap file");
+  } catch (err) {
+    // Capture errors from manually aborting the request via the abort controller.
+    if (err instanceof DOMException && err.message === "The user aborted a request.") {
+      return;
     }
-    normalReturn = true;
-  } finally {
-    if (!normalReturn) {
-      // If the caller called generator.return() in between body chunks, automatically cancel the request.
-      log.debug("Automatic abort of streamMessages", params);
-    }
-    signal?.removeEventListener("abort", abortHandler);
-    controller.abort();
+    throw err;
   }
 
   log.debug(

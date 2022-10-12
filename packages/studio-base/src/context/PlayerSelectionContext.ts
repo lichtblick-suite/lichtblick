@@ -10,12 +10,11 @@ import ConsoleApi from "@foxglove/studio-base/services/ConsoleApi";
 
 export type DataSourceFactoryInitializeArgs = {
   metricsCollector: PlayerMetricsCollectorInterface;
-  folder?: FileSystemDirectoryHandle;
   file?: File;
   files?: File[];
-  url?: string;
+  params?: Record<string, string | undefined>;
   consoleApi?: ConsoleApi;
-} & Record<string, unknown>;
+};
 
 export type DataSourceFactoryType = "file" | "remote-file" | "connection" | "sample";
 

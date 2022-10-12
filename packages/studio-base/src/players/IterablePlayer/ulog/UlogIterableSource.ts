@@ -23,6 +23,7 @@ import {
   Initalization,
   MessageIteratorArgs,
   GetBackfillMessagesArgs,
+  IterableSourceInitializeArgs,
 } from "../IIterableSource";
 import { messageIdToTopic, messageDefinitionToRos, logLevelToRosout } from "./support";
 
@@ -190,4 +191,12 @@ export class UlogIterableSource implements IIterableSource {
   ): Promise<MessageEvent<unknown>[]> {
     return [];
   }
+}
+
+export function initialize(args: IterableSourceInitializeArgs): UlogIterableSource {
+  if (args.file) {
+    return new UlogIterableSource({ type: "file", file: args.file });
+  }
+
+  throw new Error("file required");
 }

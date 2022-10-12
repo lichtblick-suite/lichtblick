@@ -6,8 +6,7 @@ import {
   IDataSourceFactory,
   DataSourceFactoryInitializeArgs,
 } from "@foxglove/studio-base/context/PlayerSelectionContext";
-import { IterablePlayer } from "@foxglove/studio-base/players/IterablePlayer";
-import { BagIterableSource } from "@foxglove/studio-base/players/IterablePlayer/BagIterableSource";
+import { IterablePlayer, WorkerIterableSource } from "@foxglove/studio-base/players/IterablePlayer";
 import { Player } from "@foxglove/studio-base/players/types";
 
 class Ros1RemoteBagDataSourceFactory implements IDataSourceFactory {
@@ -20,14 +19,18 @@ class Ros1RemoteBagDataSourceFactory implements IDataSourceFactory {
   public docsLink = "https://foxglove.dev/docs/studio/connection/ros1-bag";
 
   public initialize(args: DataSourceFactoryInitializeArgs): Player | undefined {
-    const url = args.url;
+    const url = args.params?.url;
     if (!url) {
       return;
     }
 
-    const bagSource = new BagIterableSource({ type: "remote", url });
+    const source = new WorkerIterableSource({
+      sourceType: "rosbag",
+      initArgs: { url },
+    });
+
     return new IterablePlayer({
-      source: bagSource,
+      source,
       isSampleDataSource: true,
       name: url,
       metricsCollector: args.metricsCollector,
