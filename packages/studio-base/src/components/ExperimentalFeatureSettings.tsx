@@ -49,6 +49,11 @@ const features: Feature[] = [
     description: <>Enable the Legacy Plot panel.</>,
   },
   {
+    key: AppSetting.ENABLE_LEGACY_3D_PANEL,
+    name: "Legacy 3D panel",
+    description: <>Enable the Legacy 3D panel.</>,
+  },
+  {
     key: AppSetting.ENABLE_MEMORY_USE_INDICATOR,
     name: "Memory use indicator",
     description: <>Show the app memory use in the sidebar.</>,

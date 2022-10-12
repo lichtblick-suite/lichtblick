@@ -20,6 +20,7 @@ export enum AppSetting {
   // Experimental features
   SHOW_DEBUG_PANELS = "showDebugPanels",
   ENABLE_LEGACY_PLOT_PANEL = "enableLegacyPlotPanel",
+  ENABLE_LEGACY_3D_PANEL = "enableLegacy3DPanel",
   ENABLE_PLOT_PANEL_SERIES_SETTINGS = "enablePlotPathSeriesSettings",
 
   // Miscellaneous

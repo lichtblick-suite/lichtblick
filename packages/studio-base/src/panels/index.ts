@@ -51,14 +51,6 @@ import diagnosticSummaryThumbnail from "./diagnostics/thumbnails/diagnostic-summ
 
 const builtin: PanelInfo[] = [
   {
-    title: "3D (Legacy)",
-    type: "3D Panel",
-    description: "Display visualization markers and models in a 3D scene.",
-    help: ThreeDimensionalVizHelp,
-    thumbnail: threeDimensionalVizThumbnail,
-    module: async () => await import("./ThreeDimensionalViz"),
-  },
-  {
     title: "3D",
     type: "3D",
     description: "Display markers, camera images, meshes, URDFs, and more in a 3D scene.",
@@ -247,4 +239,15 @@ const legacyPlot: PanelInfo[] = [
   },
 ];
 
-export default { builtin, debug, legacyPlot };
+const legacy3D: PanelInfo[] = [
+  {
+    title: "3D (Legacy)",
+    type: "3D Panel",
+    description: "Display visualization markers and models in a 3D scene.",
+    help: ThreeDimensionalVizHelp,
+    thumbnail: threeDimensionalVizThumbnail,
+    module: async () => await import("./ThreeDimensionalViz"),
+  },
+];
+
+export default { builtin, debug, legacyPlot, legacy3D };
