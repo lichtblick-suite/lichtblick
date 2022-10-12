@@ -254,6 +254,7 @@ function main() {
       "font-src": "'self' data:",
       // Include http in the CSP to allow loading images (i.e. map tiles) from http endpoints like localhost
       "img-src": "'self' data: https: package: x-foxglove-converted-tiff: http:",
+      "media-src": "'self' data: https: http: blob: file:",
     };
     const cspHeader = Object.entries(contentSecurityPolicy)
       .map(([key, val]) => `${key} ${val}`)
