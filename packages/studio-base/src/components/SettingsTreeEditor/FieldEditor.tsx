@@ -44,6 +44,7 @@ const useStyles = makeStyles<void, "error">()((theme, _params, classes) => {
       whiteSpace: "nowrap",
     },
     fieldWrapper: {
+      minWidth: theme.spacing(14),
       marginRight: theme.spacing(1.25),
       [`&.${classes.error}`]: {
         ".MuiInputBase-root": {
