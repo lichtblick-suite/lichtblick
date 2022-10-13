@@ -2,10 +2,7 @@
   "configById": {
     "ImageViewPanel!1r5tdvh": {
       "cameraTopic": "/CAM_FRONT_LEFT/image_rect_compressed",
-      "enabledMarkerTopics": [
-        "/CAM_FRONT_LEFT/image_markers_annotations",
-        "/CAM_FRONT_LEFT/image_markers_lidar"
-      ],
+      "enabledMarkerTopics": ["/CAM_FRONT_LEFT/annotations", "/CAM_FRONT_LEFT/lidar"],
       "customMarkerTopicOptions": [],
       "transformMarkers": false,
       "synchronize": false,
@@ -19,10 +16,7 @@
     },
     "ImageViewPanel!15kmj7r": {
       "cameraTopic": "/CAM_FRONT/image_rect_compressed",
-      "enabledMarkerTopics": [
-        "/CAM_FRONT/image_markers_annotations",
-        "/CAM_FRONT/image_markers_lidar"
-      ],
+      "enabledMarkerTopics": ["/CAM_FRONT/lidar", "/CAM_FRONT/annotations"],
       "customMarkerTopicOptions": [],
       "transformMarkers": false,
       "synchronize": false,
@@ -36,10 +30,7 @@
     },
     "ImageViewPanel!1jn49st": {
       "cameraTopic": "/CAM_FRONT_RIGHT/image_rect_compressed",
-      "enabledMarkerTopics": [
-        "/CAM_FRONT_RIGHT/image_markers_annotations",
-        "/CAM_FRONT_RIGHT/image_markers_lidar"
-      ],
+      "enabledMarkerTopics": ["/CAM_FRONT_RIGHT/annotations", "/CAM_FRONT_RIGHT/lidar"],
       "customMarkerTopicOptions": [],
       "transformMarkers": false,
       "synchronize": false,
@@ -74,7 +65,21 @@
           "visible": true
         },
         "/map": {
-          "visible": true
+          "visible": true,
+          "colorField": "color",
+          "colorMode": "rgba",
+          "colorMap": "turbo",
+          "gradient": ["#ffffff", "#000000"]
+        },
+        "/drivable_area": {
+          "visible": false,
+          "minColor": "#ffffff",
+          "colorField": "drivable_area",
+          "colorMode": "gradient",
+          "colorMap": "turbo",
+          "gradient": ["#ffffff", "#ffffff00"],
+          "maxValue": 1,
+          "minValue": 0
         },
         "/RADAR_FRONT": {
           "visible": true,
@@ -112,10 +117,8 @@
           "colorMode": "colormap",
           "colorMap": "turbo"
         },
-        "/pose": {
-          "visible": true,
-          "type": "arrow",
-          "arrowScale": [2, 1, 1]
+        "/markers/car": {
+          "visible": true
         }
       },
       "layers": {},
@@ -127,7 +130,8 @@
         "poseEstimateXDeviation": 0.5,
         "poseEstimateYDeviation": 0.5,
         "poseEstimateThetaDeviation": 0.26179939
-      }
+      },
+      "followMode": "follow-pose"
     },
     "map!2vkib4e": {
       "disabledTopics": [],
@@ -165,16 +169,23 @@
         },
         "/map": {
           "visible": true,
-          "minColor": "#ffffff"
+          "colorField": "value",
+          "colorMode": "gradient",
+          "colorMap": "turbo",
+          "gradient": ["#ffffff", "#000000"]
         },
         "/drivable_area": {
           "visible": true,
-          "minColor": "#ffffff"
+          "minColor": "#ffffff",
+          "colorField": "drivable_area",
+          "colorMode": "gradient",
+          "colorMap": "turbo",
+          "gradient": ["#ffffff", "#ffffff00"],
+          "maxValue": 1,
+          "minValue": 0
         },
-        "/pose": {
-          "visible": true,
-          "type": "arrow",
-          "arrowScale": [2, 1, 1]
+        "/markers/car": {
+          "visible": true
         }
       },
       "layers": {},
@@ -186,12 +197,13 @@
         "poseEstimateXDeviation": 0.5,
         "poseEstimateYDeviation": 0.5,
         "poseEstimateThetaDeviation": 0.26179939
-      }
+      },
+      "followMode": "follow-pose"
     },
     "Plot!2pb7zl7": {
       "paths": [
         {
-          "value": "/imu.linear_acceleration.x",
+          "value": "/imu.linear_accel.x",
           "enabled": true,
           "timestampMethod": "headerStamp"
         },
@@ -254,7 +266,8 @@
           "value": "/diagnostics.status[:].values[:]{key==\"brake_switch\"}.value",
           "timestampMethod": "headerStamp"
         }
-      ]
+      ],
+      "isSynced": true
     },
     "DiagnosticSummary!3equ26v": {
       "minLevel": 0,
@@ -271,7 +284,7 @@
     },
     "SourceInfo!7dc2bd": {},
     "RawMessages!21ab95j": {
-      "topicPath": "/markers/annotations.markers[:]{id==28114}",
+      "topicPath": "/markers/annotations.entities[:]{id==\"6dd2\"}",
       "diffTopicPath": "",
       "diffMethod": "custom",
       "diffEnabled": false,
