@@ -28,7 +28,7 @@ import { LabelMaterial, LabelPool } from "@foxglove/three-text";
 
 import { Input } from "./Input";
 import { LineMaterial } from "./LineMaterial";
-import { ModelCache } from "./ModelCache";
+import { ModelCache, MeshUpAxis, DEFAULT_MESH_UP_AXIS } from "./ModelCache";
 import { PickedRenderable, Picker } from "./Picker";
 import type { Renderable } from "./Renderable";
 import { SceneExtension } from "./SceneExtension";
@@ -118,6 +118,7 @@ export type RendererConfig = {
     labelScaleFactor?: number;
     /** Ignore the <up_axis> tag in COLLADA files (matching rviz behavior) */
     ignoreColladaUpAxis?: boolean;
+    meshUpAxis?: MeshUpAxis;
     transforms?: {
       /** Toggles translation and rotation offset controls for frames */
       editable?: boolean;
@@ -367,6 +368,7 @@ export class Renderer extends EventEmitter<RendererEvents> {
 
     this.modelCache = new ModelCache({
       ignoreColladaUpAxis: config.scene.ignoreColladaUpAxis ?? false,
+      meshUpAxis: config.scene.meshUpAxis ?? DEFAULT_MESH_UP_AXIS,
       edgeMaterial: this.outlineMaterial,
     });
 

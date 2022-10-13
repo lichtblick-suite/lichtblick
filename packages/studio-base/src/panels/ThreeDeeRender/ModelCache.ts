@@ -16,9 +16,13 @@ import Logger from "@foxglove/log";
 
 const log = Logger.getLogger(__filename);
 
+export type MeshUpAxis = "y_up" | "z_up";
+export const DEFAULT_MESH_UP_AXIS: MeshUpAxis = "y_up";
+
 export type ModelCacheOptions = {
   edgeMaterial: THREE.Material;
   ignoreColladaUpAxis: boolean;
+  meshUpAxis: MeshUpAxis;
 };
 
 type LoadModelOptions = {
@@ -99,7 +103,7 @@ export class ModelCache {
 
     // Check if this is a STL file based on content-type or file extension
     if (STL_MIME_TYPES.includes(contentType) || /\.stl$/i.test(url)) {
-      return loadSTL(url, buffer);
+      return loadSTL(url, buffer, this.options.meshUpAxis);
     }
 
     // Check if this is a COLLADA file based on content-type or file extension
@@ -111,7 +115,7 @@ export class ModelCache {
     // Check if this is an OBJ file based on content-type or file extension
     if (OBJ_MIME_TYPES.includes(contentType) || /\.obj$/i.test(url)) {
       const text = this._textDecoder.decode(buffer);
-      return await loadOBJ(url, text, reportError);
+      return await loadOBJ(url, text, this.options.meshUpAxis, reportError);
     }
 
     throw new Error(`Unknown ${buffer.byteLength} byte mesh (content-type: "${contentType}")`);
@@ -142,7 +146,7 @@ async function loadGltf(url: string, reportError: ErrorCallback): Promise<Loaded
   return gltf.scene;
 }
 
-function loadSTL(url: string, buffer: ArrayBuffer): LoadedModel {
+function loadSTL(url: string, buffer: ArrayBuffer, meshUpAxis: MeshUpAxis): LoadedModel {
   // STL files do not reference any external assets, no LoadingManager needed
   const stlLoader = new STLLoader();
   const bufferGeometry = stlLoader.parse(buffer);
@@ -160,7 +164,9 @@ function loadSTL(url: string, buffer: ArrayBuffer): LoadedModel {
 
   // THREE.js uses Y-up, while Studio follows the ROS
   // [REP-0103](https://www.ros.org/reps/rep-0103.html) convention of Z-up
-  group.rotateX(Math.PI / 2);
+  if (meshUpAxis === "y_up") {
+    group.rotateX(Math.PI / 2);
+  }
 
   return group;
 }
@@ -208,6 +214,7 @@ async function loadCollada(
 async function loadOBJ(
   url: string,
   text: string,
+  meshUpAxis: MeshUpAxis,
   reportError: ErrorCallback,
 ): Promise<LoadedModel> {
   const onError = (assetUrl: string) => {
@@ -226,7 +233,9 @@ async function loadOBJ(
 
   // THREE.js uses Y-up, while Studio follows the ROS
   // [REP-0103](https://www.ros.org/reps/rep-0103.html) convention of Z-up
-  group.rotateX(Math.PI / 2);
+  if (meshUpAxis === "y_up") {
+    group.rotateX(Math.PI / 2);
+  }
 
   return fixObjMaterials(group);
 }
