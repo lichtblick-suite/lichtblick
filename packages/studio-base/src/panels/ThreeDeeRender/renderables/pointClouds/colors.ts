@@ -16,6 +16,7 @@ export type ColorConverter = (output: ColorRGBA, colorValue: number) => void;
 
 const tempColor1 = { r: 0, g: 0, b: 0, a: 0 };
 const tempColor2 = { r: 0, g: 0, b: 0, a: 0 };
+export const NEEDS_MIN_MAX = ["gradient", "colormap"];
 
 export interface ColorModeSettings {
   colorMode: "flat" | "gradient" | "colormap" | "rgb" | "rgba";
@@ -306,12 +307,12 @@ export function bestColorByField(fields: string[]): string {
 }
 
 export function baseColorModeSettingsNode<Settings extends ColorModeSettings & BaseSettings>(
-  fieldsByTopic: Map<string, string[]>,
+  msgFields: string[],
   config: Partial<Settings>,
   topic: Topic,
   defaults: Settings,
-): SettingsTreeNode {
-  const msgFields = fieldsByTopic.get(topic.name) ?? [];
+  { supportsRgbModes }: { supportsRgbModes: boolean },
+): SettingsTreeNode & { fields: NonNullable<SettingsTreeNode["fields"]> } {
   const colorMode = config.colorMode ?? "flat";
   const flatColor = config.flatColor ?? "#ffffff";
   const colorField = config.colorField ?? bestColorByField(msgFields);
@@ -332,9 +333,14 @@ export function baseColorModeSettingsNode<Settings extends ColorModeSettings & B
       { label: "Flat", value: "flat" },
       { label: "Color map", value: "colormap" },
       { label: "Gradient", value: "gradient" },
-      { label: "RGB", value: "rgb" },
-      { label: "RGBA", value: "rgba" },
-    ],
+    ].concat(
+      supportsRgbModes
+        ? [
+            { label: "RGB", value: "rgb" },
+            { label: "RGBA", value: "rgba" },
+          ]
+        : [],
+    ),
     value: colorMode,
   };
   if (colorMode === "flat") {
@@ -407,20 +413,22 @@ export function baseColorModeSettingsNode<Settings extends ColorModeSettings & B
       };
     }
 
-    fields.minValue = {
-      label: "Value min",
-      input: "number",
-      placeholder: "auto",
-      precision: 4,
-      value: minValue,
-    };
-    fields.maxValue = {
-      label: "Value max",
-      input: "number",
-      placeholder: "auto",
-      precision: 4,
-      value: maxValue,
-    };
+    if (NEEDS_MIN_MAX.includes(colorMode)) {
+      fields.minValue = {
+        label: "Value min",
+        input: "number",
+        placeholder: "auto",
+        precision: 4,
+        value: minValue,
+      };
+      fields.maxValue = {
+        label: "Value max",
+        input: "number",
+        placeholder: "auto",
+        precision: 4,
+        value: maxValue,
+      };
+    }
   }
 
   return {

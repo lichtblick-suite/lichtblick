@@ -11,7 +11,7 @@ import {
   PackedElementField,
   PointCloud,
 } from "@foxglove/schemas";
-import { SettingsTreeAction, SettingsTreeFields, SettingsTreeNode, Topic } from "@foxglove/studio";
+import { SettingsTreeAction, SettingsTreeNode, Topic } from "@foxglove/studio";
 import type { RosObject, RosValue } from "@foxglove/studio-base/players/types";
 import { emptyPose } from "@foxglove/studio-base/util/Pose";
 
@@ -45,7 +45,7 @@ import { BaseSettings } from "../settings";
 import { makePose, MAX_DURATION, Pose } from "../transforms";
 import { updatePose } from "../updatePose";
 import {
-  bestColorByField,
+  baseColorModeSettingsNode,
   colorHasTransparency,
   ColorModeSettings,
   COLOR_FIELDS,
@@ -101,8 +101,8 @@ const DEFAULT_POINT_SIZE = 1.5;
 const DEFAULT_POINT_SHAPE = "circle";
 const DEFAULT_COLOR_MAP = "turbo";
 const DEFAULT_FLAT_COLOR = { r: 1, g: 1, b: 1, a: 1 };
-const DEFAULT_MIN_COLOR = { r: 100, g: 47, b: 105, a: 1 };
-const DEFAULT_MAX_COLOR = { r: 227, g: 177, b: 135, a: 1 };
+const DEFAULT_MIN_COLOR = { r: 100 / 255, g: 47 / 255, b: 105 / 255, a: 1 };
+const DEFAULT_MAX_COLOR = { r: 227 / 255, g: 177 / 255, b: 135 / 255, a: 1 };
 const DEFAULT_RGB_BYTE_ORDER = "rgba";
 const NEEDS_MIN_MAX = ["gradient", "colormap"];
 
@@ -1433,7 +1433,7 @@ export function pointCloudSettingsNode(
   pclFieldsByTopic: Map<string, string[]>,
   config: Partial<LayerSettingsPointCloudAndLaserScan>,
   topic: Topic,
-  kind: "pointcloud" | "laserscan",
+  kind: "pointcloud" | "laserscan" | "velodynescan",
 ): SettingsTreeNode {
   const msgFields =
     kind === "laserscan"
@@ -1442,148 +1442,39 @@ export function pointCloudSettingsNode(
   const pointSize = config.pointSize;
   const pointShape = config.pointShape ?? "circle";
   const decayTime = config.decayTime;
-  const colorMode = config.colorMode ?? "flat";
-  const flatColor = config.flatColor ?? "#ffffff";
-  const colorField = config.colorField ?? bestColorByField(msgFields);
-  const colorFieldOptions = msgFields.map((field) => ({ label: field, value: field }));
-  const gradient = config.gradient;
-  const colorMap = config.colorMap ?? "turbo";
-  const explicitAlpha = config.explicitAlpha ?? 1;
-  const rgbByteOrder = config.rgbByteOrder ?? "rgba";
-  const minValue = config.minValue;
-  const maxValue = config.maxValue;
 
-  const fields: SettingsTreeFields = {};
-  fields.pointSize = {
-    label: "Point size",
-    input: "number",
-    step: 1,
-    placeholder: "2",
-    precision: 2,
-    value: pointSize,
-  };
-  fields.pointShape = {
-    label: "Point shape",
-    input: "select",
-    options: POINT_SHAPE_OPTIONS,
-    value: pointShape,
-  };
-  fields.decayTime = {
-    label: "Decay time",
-    input: "number",
-    step: 0.5,
-    placeholder: "0 seconds",
-    min: 0,
-    precision: 3,
-    value: decayTime,
-  };
-  fields.colorMode = {
-    label: "Color mode",
-    input: "select",
-    options: [
-      { label: "Flat", value: "flat" },
-      { label: "Color map", value: "colormap" },
-      { label: "Gradient", value: "gradient" },
-    ].concat(
-      kind === "pointcloud"
-        ? [
-            { label: "RGB", value: "rgb" },
-            { label: "RGBA", value: "rgba" },
-          ]
-        : [],
-    ),
-    value: colorMode,
-  };
-  if (colorMode === "flat") {
-    fields.flatColor = { label: "Flat color", input: "rgba", value: flatColor };
-  } else {
-    fields.colorField = {
-      label: "Color by",
+  const node = baseColorModeSettingsNode(msgFields, config, topic, DEFAULT_SETTINGS, {
+    supportsRgbModes: kind === "pointcloud",
+  });
+  node.fields = {
+    pointSize: {
+      label: "Point size",
+      input: "number",
+      step: 1,
+      placeholder: "2",
+      precision: 2,
+      value: pointSize,
+    },
+    pointShape: {
+      label: "Point shape",
       input: "select",
-      options: colorFieldOptions,
-      value: colorField,
-    };
-
-    switch (colorMode) {
-      case "gradient":
-        fields.gradient = {
-          label: "Gradient",
-          input: "gradient",
-          value: gradient ?? DEFAULT_SETTINGS.gradient,
-        };
-        break;
-      case "colormap":
-        fields.colorMap = {
-          label: "Color map",
-          input: "select",
-          options: [
-            { label: "Turbo", value: "turbo" },
-            { label: "Rainbow", value: "rainbow" },
-          ],
-          value: colorMap,
-        };
-        break;
-      case "rgb":
-        fields.rgbByteOrder = {
-          label: "RGB byte order",
-          input: "select",
-          options: [
-            { label: "RGB", value: "rgba" },
-            { label: "BGR", value: "bgra" },
-            { label: "XBGR", value: "abgr" },
-          ],
-          value: rgbByteOrder,
-        };
-        break;
-      case "rgba":
-        fields.rgbByteOrder = {
-          label: "RGBA byte order",
-          input: "select",
-          options: [
-            { label: "RGBA", value: "rgba" },
-            { label: "BGRA", value: "bgra" },
-            { label: "ABGR", value: "abgr" },
-          ],
-          value: rgbByteOrder,
-        };
-        break;
-    }
-
-    if (colorMode === "colormap" || colorMode === "rgb") {
-      fields.explicitAlpha = {
-        label: "Opacity",
-        input: "number",
-        step: 0.1,
-        placeholder: "1",
-        precision: 3,
-        min: 0,
-        max: 1,
-        value: explicitAlpha,
-      };
-    }
-
-    fields.minValue = {
-      label: "Value min",
+      options: POINT_SHAPE_OPTIONS,
+      value: pointShape,
+    },
+    decayTime: {
+      label: "Decay time",
       input: "number",
-      placeholder: "auto",
-      precision: 4,
-      value: minValue,
-    };
-    fields.maxValue = {
-      label: "Value max",
-      input: "number",
-      placeholder: "auto",
-      precision: 4,
-      value: maxValue,
-    };
-  }
-
-  return {
-    icon: kind === "pointcloud" ? "Points" : "Radar",
-    fields,
-    order: topic.name.toLocaleLowerCase(),
-    visible: config.visible ?? DEFAULT_SETTINGS.visible,
+      step: 0.5,
+      placeholder: "0 seconds",
+      min: 0,
+      precision: 3,
+      value: decayTime,
+    },
+    ...node.fields,
   };
+
+  node.icon = kind === "laserscan" ? "Radar" : "Points";
+  return node;
 }
 
 function pointFieldTypeName(type: PointFieldType): string {

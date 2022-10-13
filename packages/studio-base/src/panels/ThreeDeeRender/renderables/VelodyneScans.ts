@@ -139,7 +139,7 @@ export class VelodyneScans extends SceneExtension<PointCloudAndLaserScanRenderab
           this._pointCloudFieldsByTopic,
           config,
           topic,
-          "pointcloud",
+          "velodynescan",
         );
         node.handler = handler;
         entries.push({ path: ["topics", topic.name], node });

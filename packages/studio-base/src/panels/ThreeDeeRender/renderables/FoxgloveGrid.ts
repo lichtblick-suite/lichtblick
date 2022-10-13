@@ -13,6 +13,7 @@ import {
   ColorModeSettings,
   getColorConverter,
   autoSelectColorField,
+  NEEDS_MIN_MAX,
 } from "@foxglove/studio-base/panels/ThreeDeeRender/renderables/pointClouds/colors";
 import type { RosValue } from "@foxglove/studio-base/players/types";
 
@@ -37,9 +38,8 @@ const INVALID_FOXGLOVE_GRID = "INVALID_FOXGLOVE_GRID";
 
 const DEFAULT_COLOR_MAP = "turbo";
 const DEFAULT_FLAT_COLOR = { r: 1, g: 1, b: 1, a: 1 };
-const DEFAULT_MIN_COLOR = { r: 100, g: 47, b: 105, a: 1 };
-const DEFAULT_MAX_COLOR = { r: 227, g: 177, b: 135, a: 1 };
-const SKIP_MIN_MAX = ["flat", "rgb", "rgba"];
+const DEFAULT_MIN_COLOR = { r: 100 / 255, g: 47 / 255, b: 105 / 255, a: 1 };
+const DEFAULT_MAX_COLOR = { r: 227 / 255, g: 177 / 255, b: 135 / 255, a: 1 };
 const DEFAULT_RGB_BYTE_ORDER = "rgba";
 
 const DEFAULT_SETTINGS: LayerSettingsFoxgloveGrid = {
@@ -100,9 +100,15 @@ export class FoxgloveGrid extends SceneExtension<FoxgloveGridRenderable> {
       if (GRID_DATATYPES.has(topic.schemaName)) {
         const config = (configTopics[topic.name] ?? {}) as Partial<LayerSettingsFoxgloveGrid>;
 
-        const node = baseColorModeSettingsNode(this.fieldsByTopic, config, topic, DEFAULT_SETTINGS);
+        const node = baseColorModeSettingsNode(
+          this.fieldsByTopic.get(topic.name) ?? [],
+          config,
+          topic,
+          DEFAULT_SETTINGS,
+          { supportsRgbModes: true },
+        );
         node.icon = "Cells";
-        node.fields!.frameLocked = {
+        node.fields.frameLocked = {
           label: "Frame lock",
           input: "boolean",
           value: config.frameLocked ?? DEFAULT_SETTINGS.frameLocked,
@@ -491,7 +497,7 @@ function minMaxColorValues(
   settings: LayerSettingsFoxgloveGrid,
   numericType: NumericType,
 ): void {
-  if (SKIP_MIN_MAX.includes(settings.colorMode)) {
+  if (!NEEDS_MIN_MAX.includes(settings.colorMode)) {
     return;
   }
 
