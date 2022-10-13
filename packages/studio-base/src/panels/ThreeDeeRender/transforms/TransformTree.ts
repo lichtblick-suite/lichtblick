@@ -36,6 +36,8 @@ export class TransformTree {
     const frame = this.getOrCreateFrame(frameId);
     const curParentFrame = frame.parent();
     if (curParentFrame == undefined || curParentFrame.id !== parentFrameId) {
+      // will throw error if cycle is created
+      this._checkParentForCycle(frameId, parentFrameId);
       // This frame was previously unparented but now we know its parent, or we
       // are reparenting this frame
       frame.setParent(this.getOrCreateFrame(parentFrameId));
@@ -136,6 +138,18 @@ export class TransformTree {
     }
 
     return output;
+  }
+  private _checkParentForCycle(frameId: string, parentFrameId: string) {
+    // walk up tree from parent Frame to check if it eventually crosses the frame
+    let frame = this.frame(parentFrameId);
+    while (frame?.parent()) {
+      if (frame.parent()?.id === frameId) {
+        throw Error(
+          `Transform tree cycle detected: Cannot add parent frame "${parentFrameId}" to frame"${frameId}. Aborted adding of transform.`,
+        );
+      }
+      frame = frame.parent();
+    }
   }
 
   public static Clone(tree: TransformTree): TransformTree {
