@@ -96,9 +96,7 @@ class BufferedIterableSource implements IIterableSource {
       });
 
       // Messages are read from the source until reaching the readUntil time. Then we wait for the read head
-      // to move forward until it is within 1 headAheadDuration of the readUntil time until trying to read more.
-      // We set the readUntil time to 2x readAheadDuration so that every move of the read head does not require
-      // also reading the underlying source. This creates the effect of buffering some
+      // to move forward and adjust readUntil
       let readUntil = clampTime(
         addTime(this.readHead, this.readAheadDuration),
         this.initResult.start,
@@ -115,6 +113,11 @@ class BufferedIterableSource implements IIterableSource {
         // Indicate to the consumer that it can try reading again
         this.readSignal.notifyAll();
 
+        // Update the target readUntil to be ahead of the latest readHead
+        // Do this before checking whether whether we continue loading more data to keep the
+        // readUntil constantly updated relative to the readHead
+        readUntil = addTime(this.readHead, this.readAheadDuration);
+
         // Keep reading while the messages we receive are <= the readUntil time
         if (result.msgEvent && compare(result.msgEvent.receiveTime, readUntil) <= 0) {
           continue;
@@ -125,9 +128,8 @@ class BufferedIterableSource implements IIterableSource {
           continue;
         }
 
-        // Wait for messages to be read and then update the new readUntil
+        // Wait for consumer thread to read something before trying to load more data
         await this.writeSignal.wait();
-        readUntil = addTime(this.readHead, this.readAheadDuration);
       }
     } finally {
       // Indicate to the consumer that it can try reading again
