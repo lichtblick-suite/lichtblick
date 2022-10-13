@@ -15,7 +15,10 @@ import { useSnackbar } from "notistack";
 import { extname } from "path";
 import { useCallback, useLayoutEffect, useState } from "react";
 
+import Logger from "@foxglove/log";
 import DropOverlay from "@foxglove/studio-base/components/DropOverlay";
+
+const log = Logger.getLogger(__filename);
 
 type Props = {
   allowedExtensions?: string[];
@@ -43,15 +46,28 @@ export default function DocumentDropListener(props: Props): JSX.Element {
       const directories: FileSystemDirectoryEntry[] = [];
       const dataItems = ev.dataTransfer.items;
       for (const item of Array.from(dataItems)) {
-        const entry = item.webkitGetAsEntry();
-
         // Attempt to grab the filesystem handle if the feature is available.
         // A file system handle is more versatile than File instances.
         // Note: awaiting on the fileSystemHandle function triggered a (bug?) where all other
         // dataTransfer items were ignored
-        if ("getAsFileSystemHandle" in item) {
+        //
+        // getAsFileSystemHandle is only available in a secure context. If called outside a secure
+        // context the observed behavior is a browser (tab) crash. To avoid the crash we check that
+        // we are in a secure context and only call the api if available.
+        //
+        // Handles power features like recents which require saving handles in indexeddb. This check
+        // allows us to gracefully degrade away from this feature if the user deploys Studio in an
+        // unsecure context.
+        if (window.isSecureContext && "getAsFileSystemHandle" in item) {
           handlePromises.push(item.getAsFileSystemHandle());
+        } else {
+          log.info(
+            "getAsFileSystemHandle not available on a dropped item. Features requiring handles will not be available for the item",
+            item,
+          );
         }
+
+        const entry = item.webkitGetAsEntry();
 
         // Keep track of all File and Directory instaces
         if (entry?.isFile === true) {
