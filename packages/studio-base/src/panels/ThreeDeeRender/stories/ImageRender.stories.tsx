@@ -116,7 +116,7 @@ export function ImageRender(): JSX.Element {
       format: "png",
       data: PNG_TEST_IMAGE,
     },
-    schemaName: "sensor_msgs/CameraInfo",
+    schemaName: "sensor_msgs/CompressedImage",
     sizeInBytes: 0,
   };
 
@@ -333,7 +333,7 @@ export function FoxgloveImageRender(): JSX.Element {
       step: SIZE * 4,
       data: rgba8,
     },
-    schemaName: "sensor_msgs/Image",
+    schemaName: "foxglove.RawImage",
     sizeInBytes: 0,
   };
 

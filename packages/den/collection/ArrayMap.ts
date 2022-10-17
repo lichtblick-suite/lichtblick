@@ -53,6 +53,13 @@ export class ArrayMap<K, V> {
     return this._list.pop();
   }
 
+  /** Removes all elements with keys greater than the given key. */
+  public removeAfter(key: K): void {
+    const index = this.binarySearch(key);
+    const greaterThanIndex = index >= 0 ? index + 1 : ~index;
+    this._list.length = greaterThanIndex;
+  }
+
   /** Access the first key/value tuple in the list, without modifying the list. */
   public minEntry(): [K, V] | undefined {
     return this._list[0];
