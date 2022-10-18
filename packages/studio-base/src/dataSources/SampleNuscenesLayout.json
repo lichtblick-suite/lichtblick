@@ -52,7 +52,7 @@
         "targetOrientation": [0, 0, 0, 1],
         "thetaOffset": 45,
         "fovy": 45,
-        "near": 0.01,
+        "near": 1.0,
         "far": 5000
       },
       "scene": {},

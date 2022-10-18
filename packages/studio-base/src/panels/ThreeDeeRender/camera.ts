@@ -38,6 +38,6 @@ export const DEFAULT_CAMERA_STATE: CameraState = {
   targetOrientation: [0, 0, 0, 1],
   thetaOffset: 45,
   fovy: 45,
-  near: 0.01,
+  near: 0.5,
   far: 5000,
 };
