@@ -1,44 +1,72 @@
-# <img src="resources/icon/icon.png" width="40" height="40" align="top"> Foxglove Studio
+<picture>
+  <source media="(max-width: 640px)" srcset="https://user-images.githubusercontent.com/14011012/195951058-ac1e9c02-c0ee-42b7-82b9-378d43a38598.png">
+  <source media="(min-width: 576px)" srcset="https://user-images.githubusercontent.com/14011012/195918769-5aaeedf3-5de2-48fb-951e-7399f2b9e190.png">
+  <img alt="Foxglove repo header" src="https://user-images.githubusercontent.com/14011012/195918769-5aaeedf3-5de2-48fb-951e-7399f2b9e190.png">
+</picture>
 
-[Foxglove Studio](https://foxglove.dev) is an integrated visualization and diagnosis tool for robotics, available [in your browser](https://studio.foxglove.dev/) or for [download](https://foxglove.dev/download) as a desktop app on Linux, Windows, and macOS.
+<br/>
 
-<p align="center">
-  <a href="https://foxglove.dev"><img alt="Foxglove Studio screenshot" src="/resources/screenshot.png"></a>
-</p>
+<div align="center">
+    <h1>Foxglove Studio</h1>
+    <a href="https://github.com/foxglove/studio#contributing"><img src="https://img.shields.io/badge/PRs-welcome-brightgreen.svg" /></a>
+    <a href="https://github.com/foxglove/studio/blob/main/LICENSE"><img src="https://img.shields.io/aur/license/foxglove-studio" /></a>
+    <a href="https://foxglove.dev/join-slack"><img src="https://img.shields.io/badge/chat-on%20slack-purple.svg" /></a>
+    <br />
+    <br />
+    <a href="https://foxglove.dev/download">Download</a>
+    <span>&nbsp;&nbsp;•&nbsp;&nbsp;</span>
+    <a href="https://foxglove.dev/docs/studio">Docs</a>
+    <span>&nbsp;&nbsp;•&nbsp;&nbsp;</span>
+    <a href="https://foxglove.dev/blog">Blog</a>
+    <span>&nbsp;&nbsp;•&nbsp;&nbsp;</span>
+    <a href="https://foxglove.dev/demo">Demo</a>
+    <span>&nbsp;&nbsp;•&nbsp;&nbsp;</span>
+    <a href="https://foxglove.dev/contact">Contact Us</a>
+    <span>&nbsp;&nbsp;•&nbsp;&nbsp;</span>
+    <a href="https://foxglove.dev/slack">Slack</a>
+    <span>&nbsp;&nbsp;•&nbsp;&nbsp;</span>
+    <a href="https://twitter.com/foxglovedev">Twitter</a>
+  <br />
+  <br />
+
+[Foxglove Studio](https://foxglove.dev) is an integrated visualization and diagnosis tool for robotics, available [in your browser](https://studio.foxglove.dev/) or [as a desktop app](https://foxglove.dev/download) on Linux, Windows, and macOS.
+
+  <p align="center">
+    <a href="https://foxglove.dev"><img alt="Foxglove Studio screenshot" src="/resources/screenshot.png"></a>
+  </p>
+</div>
+
+<hr />
 
 To learn more, visit the following resources:
 
-- [About](https://foxglove.dev/about)
-- [Documentation](https://foxglove.dev/docs)
-- [Release notes](https://github.com/foxglove/studio/releases)
-- [ROS Wiki page](http://wiki.ros.org/FoxgloveStudio)
-- [Blog](https://foxglove.dev/blog)
+[About](https://foxglove.dev/about)
+&nbsp;•&nbsp;
+[Documentation](https://foxglove.dev/docs)
+&nbsp;•&nbsp;
+[Release notes](https://github.com/foxglove/studio/releases)
+&nbsp;•&nbsp;
+[ROS Wiki page](http://wiki.ros.org/FoxgloveStudio)
+&nbsp;•&nbsp;
+[Blog](https://foxglove.dev/blog)
 
 You can also join us on the following platforms to ask questions, share feedback, and stay up to date on what our team is working on:
 
-- [GitHub Discussions](https://github.com/foxglove/studio/discussions)
-- [Slack](https://foxglove.dev/join-slack)
-- [Newsletter](https://www.getrevue.co/profile/foxglove)
-- [Twitter](https://twitter.com/foxglovedev)
-- [LinkedIn](https://www.linkedin.com/company/foxglovedev)
+[GitHub Discussions](https://github.com/foxglove/studio/discussions)
+&nbsp;•&nbsp;
+[Slack](https://foxglove.dev/join-slack)
+&nbsp;•&nbsp;
+[Newsletter](https://www.getrevue.co/profile/foxglove)
+&nbsp;•&nbsp;
+[Twitter](https://twitter.com/foxglovedev)
+&nbsp;•&nbsp;
+[LinkedIn](https://www.linkedin.com/company/foxglovedev)
+
+<br />
 
 ## Installation
 
 Visit [foxglove.dev/download](https://foxglove.dev/download) or [GitHub Releases](https://github.com/foxglove/studio/releases) to download the latest version.
-
-## Self-hosting
-
-Foxglove Studio can be run as a standalone [desktop application](https://foxglove.dev/download), accessed in your browser at [studio.foxglove.dev](https://studio.foxglove.dev/), or self-hosted on your own domain.
-
-A Docker image is provided to make self-hosting easy. You can run it like so:
-
-```sh
-docker run --rm -p "8080:8080" ghcr.io/foxglove/studio:latest
-```
-
-Foxglove Studio will then be accessible in your browser at [localhost:8080](http://localhost:8080/).
-
-For all list of available image versions, see the [package details](https://github.com/foxglove/studio/pkgs/container/studio).
 
 ## Contributing
 
@@ -96,6 +124,20 @@ $ yarn test         # run all tests
 $ yarn test:watch   # run tests on changed files
 ```
 
-### Credits
+## Self-hosting
+
+Foxglove Studio can be run as a standalone [desktop application](https://foxglove.dev/download), accessed in your browser at [studio.foxglove.dev](https://studio.foxglove.dev/), or self-hosted on your own domain.
+
+A Docker image is provided to make self-hosting easy. You can run it like so:
+
+```sh
+docker run --rm -p "8080:8080" ghcr.io/foxglove/studio:latest
+```
+
+Foxglove Studio will then be accessible in your browser at [localhost:8080](http://localhost:8080/).
+
+For all list of available image versions, see the [package details](https://github.com/foxglove/studio/pkgs/container/studio).
+
+## Credits
 
 Foxglove Studio originally began as a fork of [Webviz](https://github.com/cruise-automation/webviz), an open source project developed by [Cruise](https://getcruise.com/). The codebase has since changed significantly, with a port to TypeScript, more [panels](https://foxglove.dev/docs/panels/introduction), additional [data sources](https://foxglove.dev/docs/connection/data-sources), improved [layout management](https://foxglove.dev/docs/layouts), new [team features](https://foxglove.dev/blog/announcing-foxglove-for-teams), and an [Extension API](https://foxglove.dev/docs/extensions/getting-started).
