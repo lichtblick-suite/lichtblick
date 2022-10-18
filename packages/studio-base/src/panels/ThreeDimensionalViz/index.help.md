@@ -1,5 +1,7 @@
 Display visualization markers with any of the following datatypes in a 2D or 3D scene. Click any given marker in the scene to display its relevant details in a dialog box.
 
+**Note**: This panel is deprecated in favor of the [3D Panel](https://foxglove.dev/docs/panels/3d).
+
 ## Shortcuts
 
 #### To move the camera:
@@ -83,4 +85,4 @@ Display visualization markers with any of the following datatypes in a 2D or 3D 
 - [`std_msgs/msg/ColorRGBA`](https://github.com/ros2/common_interfaces/blob/master/std_msgs/msg/ColorRGBA.msg)
 - or any datatype suffixed with `/Color` or `/ColorRGBA` and containing `r`, `g`, `b` fields
 
-[View docs](https://foxglove.dev/docs/panels/3d).
+[View docs](https://foxglove.dev/docs/panels/3d-legacy).
