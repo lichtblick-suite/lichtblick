@@ -163,7 +163,6 @@
     "path-browserify": "1.0.1",
     "prettier": "2.5.1",
     "promise-queue": "2.2.5",
-    "protobufjs": "6.11.3",
     "quickhull3d": "2.0.5",
     "rc-tree": "5.4.3",
     "react": "17.0.2",
