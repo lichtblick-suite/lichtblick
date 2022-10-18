@@ -39,6 +39,9 @@ export class RenderableLines extends RenderablePrimitive {
     this._lines.length = 0;
 
     for (const primitive of lines) {
+      if (primitive.points.length === 0) {
+        continue;
+      }
       const line = this._makeLine(primitive);
       const group = new THREE.Group().add(line);
       group.position.set(
@@ -111,6 +114,8 @@ export class RenderableLines extends RenderablePrimitive {
     }
 
     const positions = getPositions(primitive);
+    // setPosition requires the position array to be >= 6 length or else it will error
+    // we skip primitives with empty points before calling this function
     geometry.setPositions(positions);
 
     const singleColor = this.userData.settings.color
@@ -151,7 +156,7 @@ export class RenderableLines extends RenderablePrimitive {
       ? primitive.points.length >>> 1
       : isLoop
       ? primitive.points.length
-      : primitive.points.length - 1;
+      : Math.max(primitive.points.length - 1, 0);
 
     line.userData.pickingMaterial = pickingMaterial;
     return line;

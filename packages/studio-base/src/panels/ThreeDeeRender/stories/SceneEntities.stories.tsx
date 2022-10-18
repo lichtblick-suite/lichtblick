@@ -214,6 +214,17 @@ function makeStoryScene({
                 ),
                 indices: rearrange(new Array(10).fill(0).map((_, i) => i)),
               },
+              {
+                // empty points
+                type,
+                pose: xyzrpyToPose([1, 1.8 + typeIndex * 0.2, 0], [0, 0, 0]),
+                thickness: 5,
+                scale_invariant: true,
+                points: [],
+                color: makeColor("#7995fb", 0.8),
+                colors: [],
+                indices: [],
+              },
             ],
           ),
 
