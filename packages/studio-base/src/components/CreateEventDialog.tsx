@@ -19,12 +19,12 @@ import {
   IconButton,
   ButtonGroup,
 } from "@mui/material";
-import produce from "immer";
 import { countBy } from "lodash";
-import { KeyboardEvent, useCallback, useState } from "react";
+import { KeyboardEvent, useCallback } from "react";
 import { useAsyncFn } from "react-use";
 import { keyframes } from "tss-react";
 import { makeStyles } from "tss-react/mui";
+import { useImmer } from "use-immer";
 
 import Log from "@foxglove/log";
 import { toDate, toNanoSec } from "@foxglove/rostime";
@@ -90,41 +90,42 @@ export function CreateEventDialog(props: { deviceId: string; onClose: () => void
 
   const refreshEvents = useEvents(selectRefreshEvents);
   const currentTime = useMessagePipeline(selectCurrentTime);
-  const [event, setEvent] = useState<{
+  const [event, setEvent] = useImmer<{
     startTime: undefined | Date;
     duration: undefined | number;
     durationUnit: "sec" | "nsec";
-    metadata: KeyValue[];
+    metadataEntries: KeyValue[];
   }>({
     startTime: currentTime ? toDate(currentTime) : undefined,
     duration: 0,
     durationUnit: "sec",
-    metadata: [{ key: "", value: "" }],
+    metadataEntries: [{ key: "", value: "" }],
   });
 
-  const updateMetadata = useCallback((index: number, position: keyof KeyValue, value: string) => {
-    setEvent(
-      produce((draft) => {
-        const keyval = draft.metadata[index];
+  const updateMetadata = useCallback(
+    (index: number, updateType: keyof KeyValue, value: string) => {
+      setEvent((draft) => {
+        const keyval = draft.metadataEntries[index];
         if (keyval) {
-          keyval[position] = value;
+          keyval[updateType] = value;
 
           // Automatically add new row if we're at the end and have both key and value.
           if (
-            index === draft.metadata.length - 1 &&
+            index === draft.metadataEntries.length - 1 &&
             keyval.key.length > 0 &&
             keyval.value.length > 0
           ) {
-            draft.metadata.push({ key: "", value: "" });
+            draft.metadataEntries.push({ key: "", value: "" });
           }
         }
-      }),
-    );
-  }, []);
+      });
+    },
+    [setEvent],
+  );
 
   const { formatTime } = useAppTimeFormat();
 
-  const countedMetadata = countBy(event.metadata, (kv) => kv.key);
+  const countedMetadata = countBy(event.metadataEntries, (kv) => kv.key);
   const duplicateKey = Object.entries(countedMetadata).find(
     ([key, count]) => key.length > 0 && count > 1,
   );
@@ -135,11 +136,11 @@ export function CreateEventDialog(props: { deviceId: string; onClose: () => void
       return;
     }
 
-    const filteredMeta = event.metadata.filter(
-      (meta) => meta.key.length > 0 && meta.value.length > 0,
+    const filteredMeta = event.metadataEntries.filter(
+      (entry) => entry.key.length > 0 && entry.value.length > 0,
     );
     const keyedMetadata = Object.fromEntries(
-      filteredMeta.map((meta) => [meta.key.trim(), meta.value.trim()]),
+      filteredMeta.map((entry) => [entry.key.trim(), entry.value.trim()]),
     );
     await consoleApi.createEvent({
       deviceId,
@@ -164,23 +165,25 @@ export function CreateEventDialog(props: { deviceId: string; onClose: () => void
     [createEvent],
   );
 
-  const addRow = useCallback((index: number) => {
-    setEvent(
-      produce((draft) => {
-        draft.metadata.splice(index, 0, { key: "", value: "" });
-      }),
-    );
-  }, []);
+  const addRow = useCallback(
+    (index: number) => {
+      setEvent((draft) => {
+        draft.metadataEntries.splice(index + 1, 0, { key: "", value: "" });
+      });
+    },
+    [setEvent],
+  );
 
-  const removeRow = useCallback((index: number) => {
-    setEvent(
-      produce((draft) => {
-        if (draft.metadata.length > 1) {
-          draft.metadata.splice(index, 1);
+  const removeRow = useCallback(
+    (index: number) => {
+      setEvent((draft) => {
+        if (draft.metadataEntries.length > 1) {
+          draft.metadataEntries.splice(index, 1);
         }
-      }),
-    );
-  }, []);
+      });
+    },
+    [setEvent],
+  );
 
   const formattedStartTime = currentTime ? formatTime(currentTime) : "-";
 
@@ -243,7 +246,7 @@ export function CreateEventDialog(props: { deviceId: string; onClose: () => void
       <Stack paddingX={3} paddingTop={2}>
         <FormLabel>Metadata</FormLabel>
         <div className={classes.grid}>
-          {event.metadata.map(({ key, value }, index) => {
+          {event.metadataEntries.map(({ key, value }, index) => {
             const hasDuplicate = ((key.length > 0 && countedMetadata[key]) ?? 0) > 1;
             return (
               <div className={classes.row} key={index}>
@@ -254,7 +257,7 @@ export function CreateEventDialog(props: { deviceId: string; onClose: () => void
                   placeholder="Key (string)"
                   error={hasDuplicate}
                   onKeyDown={onMetaDataKeyDown}
-                  onChange={(ev) => updateMetadata(index, "key", ev.currentTarget.value)}
+                  onChange={(evt) => updateMetadata(index, "key", evt.currentTarget.value)}
                 />
                 <TextField
                   fullWidth
@@ -262,7 +265,7 @@ export function CreateEventDialog(props: { deviceId: string; onClose: () => void
                   placeholder="Value (string)"
                   error={hasDuplicate}
                   onKeyDown={onMetaDataKeyDown}
-                  onChange={(ev) => updateMetadata(index, "value", ev.currentTarget.value)}
+                  onChange={(evt) => updateMetadata(index, "value", evt.currentTarget.value)}
                 />
                 <ButtonGroup>
                   <IconButton tabIndex={-1} onClick={() => addRow(index)}>
@@ -271,7 +274,7 @@ export function CreateEventDialog(props: { deviceId: string; onClose: () => void
                   <IconButton
                     tabIndex={-1}
                     onClick={() => removeRow(index)}
-                    style={{ visibility: event.metadata.length > 1 ? "visible" : "hidden" }}
+                    style={{ visibility: event.metadataEntries.length > 1 ? "visible" : "hidden" }}
                   >
                     <RemoveIcon />
                   </IconButton>
