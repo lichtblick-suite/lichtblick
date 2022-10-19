@@ -54,7 +54,7 @@ type State = {
 };
 
 type Action =
-  | { type: "message"; message: MessageEvent<unknown> }
+  | { type: "frame"; messages: readonly MessageEvent<unknown>[] }
   | { type: "path"; path: string }
   | { type: "seek" };
 
@@ -68,19 +68,27 @@ function getSingleDataItem(results: unknown[]) {
 function reducer(state: State, action: Action): State {
   try {
     switch (action.type) {
-      case "message": {
+      case "frame": {
         if (state.pathParseError != undefined) {
-          return { ...state, latestMessage: action.message, error: undefined };
+          return { ...state, latestMessage: last(action.messages), error: undefined };
         }
-        const data = state.parsedPath
-          ? getSingleDataItem(simpleGetMessagePathDataItems(action.message, state.parsedPath))
-          : undefined;
-        return {
-          ...state,
-          latestMessage: action.message,
-          latestMatchingQueriedData: data ?? state.latestMatchingQueriedData,
-          error: undefined,
-        };
+        let latestMatchingQueriedData = state.latestMatchingQueriedData;
+        let latestMessage = state.latestMessage;
+        if (state.parsedPath) {
+          for (const message of action.messages) {
+            if (message.topic !== state.parsedPath.topicName) {
+              continue;
+            }
+            const data = getSingleDataItem(
+              simpleGetMessagePathDataItems(message, state.parsedPath),
+            );
+            if (data != undefined) {
+              latestMatchingQueriedData = data;
+              latestMessage = message;
+            }
+          }
+        }
+        return { ...state, latestMessage, latestMatchingQueriedData, error: undefined };
       }
       case "path": {
         const newPath = parseRosPath(action.path);
@@ -169,9 +177,8 @@ export function Indicator({ context }: Props): JSX.Element {
         dispatch({ type: "seek" });
       }
 
-      const message = last(renderState.currentFrame);
-      if (message != undefined && message.topic === state.parsedPath?.topicName) {
-        dispatch({ type: "message", message });
+      if (renderState.currentFrame) {
+        dispatch({ type: "frame", messages: renderState.currentFrame });
       }
     };
     context.watch("currentFrame");
@@ -180,7 +187,7 @@ export function Indicator({ context }: Props): JSX.Element {
     return () => {
       context.onRender = undefined;
     };
-  }, [context, state.parsedPath?.topicName]);
+  }, [context]);
 
   const settingsActionHandler = useCallback(
     (action: SettingsTreeAction) =>

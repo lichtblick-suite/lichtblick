@@ -149,3 +149,33 @@ export const CustomRange = (): JSX.Element => {
   return <GaugePanel overrideConfig={{ path: "/data.value", minValue: 5, maxValue: 7 }} />;
 };
 CustomRange.parameters = { panelSetup: { fixture: makeFixture(6.5) } };
+
+export const MessagePathWithFilter = (): JSX.Element => {
+  return <GaugePanel overrideConfig={{ path: `/data{id=="b"}.value`, minValue: 0, maxValue: 4 }} />;
+};
+MessagePathWithFilter.parameters = {
+  panelSetup: {
+    fixture: {
+      topics: [{ name: "/data", datatype: "foo_msgs/Bar" }],
+      frame: {
+        "/data": [
+          {
+            topic: "/data",
+            receiveTime: { sec: 123, nsec: 456 },
+            message: { id: "a", value: 1 },
+          },
+          {
+            topic: "/data",
+            receiveTime: { sec: 123, nsec: 456 },
+            message: { id: "b", value: 2 },
+          },
+          {
+            topic: "/data",
+            receiveTime: { sec: 123, nsec: 456 },
+            message: { id: "c", value: 3 },
+          },
+        ],
+      },
+    },
+  },
+};

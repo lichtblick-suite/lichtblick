@@ -134,3 +134,46 @@ export const NumberZero = (): JSX.Element => <NumberStory />;
 NumberZero.parameters = { panelSetup: { fixture: makeFixture(0) } };
 export const NumberPositive = (): JSX.Element => <NumberStory />;
 NumberPositive.parameters = { panelSetup: { fixture: makeFixture(1) } };
+
+export const MessagePathWithFilter = (): JSX.Element => {
+  return (
+    <Indicator
+      overrideConfig={{
+        path: `/data{id=="b"}.value`,
+        style: "bulb",
+        rules: [
+          { operator: "=", rawValue: "true", color: "#00dd00", label: "True" },
+          { operator: "=", rawValue: "false", color: "#dd00dd", label: "False" },
+        ],
+        fallbackColor: "#dddd00",
+        fallbackLabel: "Fallback",
+      }}
+    />
+  );
+};
+MessagePathWithFilter.parameters = {
+  panelSetup: {
+    fixture: {
+      topics: [{ name: "/data", datatype: "foo_msgs/Bar" }],
+      frame: {
+        "/data": [
+          {
+            topic: "/data",
+            receiveTime: { sec: 123, nsec: 456 },
+            message: { id: "a", value: false },
+          },
+          {
+            topic: "/data",
+            receiveTime: { sec: 123, nsec: 456 },
+            message: { id: "b", value: true },
+          },
+          {
+            topic: "/data",
+            receiveTime: { sec: 123, nsec: 456 },
+            message: { id: "c", value: false },
+          },
+        ],
+      },
+    },
+  },
+};
