@@ -2168,15 +2168,15 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@foxglove/electron-socket@npm:2.0.0":
-  version: 2.0.0
-  resolution: "@foxglove/electron-socket@npm:2.0.0"
+"@foxglove/electron-socket@npm:2.1.0":
+  version: 2.1.0
+  resolution: "@foxglove/electron-socket@npm:2.1.0"
   dependencies:
     dns-packet: ^5.2.4
     eventemitter3: ^4.0.7
   peerDependencies:
     electron: ">=12"
-  checksum: aaf47e91847830d5d75cf4e06bf5b1e208a5d122638403ee3a3ad1da3c5347775b200021b63d94f8b34d0b16fb1888422f67cd8f21a2f894699303ded3c6cc2b
+  checksum: 71cfb3160127e4499df876234b7134fb4740e7bdf141f55e8398762c316a4a64bc520a7aa927699be1a4cf76548ce78028764f3f4a895e341f1c83d7e7a9d128
   languageName: node
   linkType: hard
 
@@ -2271,17 +2271,18 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@foxglove/ros1@npm:1.5.1":
-  version: 1.5.1
-  resolution: "@foxglove/ros1@npm:1.5.1"
+"@foxglove/ros1@npm:1.6.0":
+  version: 1.6.0
+  resolution: "@foxglove/ros1@npm:1.6.0"
   dependencies:
     "@foxglove/rosmsg": ^3.1.0
     "@foxglove/rosmsg-serialization": ^1.5.2
-    "@foxglove/xmlrpc": ^1.2.1
+    "@foxglove/xmlrpc": ^1.3.0
     eventemitter3: ^4.0.7
+    ipaddr.js: ^2.0.1
   bin:
     roscore: dist/nodejs/roscore.js
-  checksum: 1a3957bc99f39ddad7c3ad26f64f05e440bb0aadaf41322e82ee177408e3347fae8e27c58077220105f673f26b2b316fc17be547ef3abd48aacb1eab93804ab5
+  checksum: c4a479c1a48778988fb5a153be871d45f14be144a207ded57a1ddf3f4fa56243debf65f0d65f72e1bbf10c3aeac9488e426a08c66071c318475591c8e4522800
   languageName: node
   linkType: hard
 
@@ -2434,11 +2435,11 @@ __metadata:
     "@foxglove/chartjs-plugin-zoom": 2.0.4
     "@foxglove/comlink-transfer-handlers": "workspace:*"
     "@foxglove/den": "workspace:*"
-    "@foxglove/electron-socket": 2.0.0
+    "@foxglove/electron-socket": 2.1.0
     "@foxglove/hooks": "workspace:*"
     "@foxglove/mcap-support": "workspace:*"
     "@foxglove/regl-worldview": 2.4.0
-    "@foxglove/ros1": 1.5.1
+    "@foxglove/ros1": 1.6.0
     "@foxglove/ros2": 3.4.0
     "@foxglove/rosbag": 0.2.3
     "@foxglove/rosbag2-web": 4.0.5
@@ -2682,15 +2683,15 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@foxglove/xmlrpc@npm:^1.2.1":
-  version: 1.2.1
-  resolution: "@foxglove/xmlrpc@npm:1.2.1"
+"@foxglove/xmlrpc@npm:^1.3.0":
+  version: 1.3.0
+  resolution: "@foxglove/xmlrpc@npm:1.3.0"
   dependencies:
     "@foxglove/just-fetch": ^1.2.4
     byte-base64: ^1.1.0
     sax: ^1.2.4
     xmlbuilder2: ^3.0.2
-  checksum: f7fb2f0217af2802a699465a581a453ffb36c4150dda50de4948bdd6ec98af8647ef6b2c69e93966e4ea6c2d574ccd75e00416e38ffc56274cb5adc6aa14bdc2
+  checksum: 9f772e147581081426d1353512b59b80e3335973920a305a6086dde2189627a74d227f6d54f9e85bccdc2843797f7a0eeeaedc5762e695c2da04bf7bfdff7246
   languageName: node
   linkType: hard
 
@@ -10386,7 +10387,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "desktop@workspace:desktop"
   dependencies:
-    "@foxglove/electron-socket": 2.0.0
+    "@foxglove/electron-socket": 2.1.0
     "@foxglove/studio-base": "workspace:*"
     "@types/plist": ^3.0.2
     plist: 3.0.5
