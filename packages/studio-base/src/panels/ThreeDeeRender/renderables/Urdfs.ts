@@ -585,8 +585,10 @@ export class Urdfs extends SceneExtension<UrdfRenderable> {
     this.transformsByInstanceId.set(instanceId, transforms);
 
     // Import all transforms from the URDF into the scene
+    const isTopic = instanceId === TOPIC_NAME;
+    const settingsPath = isTopic ? ["topics", TOPIC_NAME] : ["layers", instanceId];
     for (const { parent, child, translation, rotation } of transforms) {
-      this.renderer.addTransform(parent, child, 0n, translation, rotation);
+      this.renderer.addTransform(parent, child, 0n, translation, rotation, settingsPath);
     }
   }
 }
