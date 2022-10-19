@@ -265,8 +265,8 @@ function rgba(r: number, g: number, b: number, a: number) {
   );
 }
 
-function f(x: number, y: number) {
-  return (x / 128 - 0.5) ** 2 + (y / 128 - 0.5) ** 2;
+function f(x: number, y: number, size = 128) {
+  return (x / size - 0.5) ** 2 + (y / size - 0.5) ** 2;
 }
 function jet(x: number, a: number): number {
   const i = Math.trunc(x * 255);
@@ -519,6 +519,131 @@ function Foxglove_Grid_Float(): JSX.Element {
     </PanelSetup>
   );
 }
+
+function Row_Stride_Grid(): JSX.Element {
+  const topics: Topic[] = [
+    { name: "/grid", schemaName: "foxglove.Grid" },
+    { name: "/tf", schemaName: "geometry_msgs/TransformStamped" },
+  ];
+  const tf1: MessageEvent<TransformStamped> = {
+    topic: "/tf",
+    schemaName: "geometry_msgs/TransformStamped",
+    receiveTime: { sec: 10, nsec: 0 },
+    message: {
+      header: { seq: 0, stamp: { sec: 0, nsec: 0 }, frame_id: "map" },
+      child_frame_id: "base_link",
+      transform: {
+        translation: { x: 1e7, y: 0, z: 0 },
+        rotation: QUAT_IDENTITY,
+      },
+    },
+    sizeInBytes: 0,
+  };
+  const tf2: MessageEvent<TransformStamped> = {
+    topic: "/tf",
+    schemaName: "geometry_msgs/TransformStamped",
+    receiveTime: { sec: 10, nsec: 0 },
+    message: {
+      header: { seq: 0, stamp: { sec: 0, nsec: 0 }, frame_id: "base_link" },
+      child_frame_id: "sensor",
+      transform: {
+        translation: { x: 0, y: 0, z: 1 },
+        rotation: QUAT_IDENTITY,
+      },
+    },
+    sizeInBytes: 0,
+  };
+
+  const column_count = 100;
+  const rowCount = 100;
+  const cell_stride = 8;
+  const row_stride = 128 * 8;
+
+  const data = new Uint8Array(rowCount * row_stride);
+  const view = new DataView(data.buffer, data.byteOffset, data.byteLength);
+  for (let i = 0; i < rowCount; i++) {
+    for (let j = 0; j < column_count; j++) {
+      const offset = i * row_stride + j * cell_stride;
+      view.setFloat32(offset, f(i, j, 100), true);
+    }
+  }
+  const cell_size = {
+    x: 0.07,
+    y: 0.07,
+  };
+  const grid: MessageEvent<Grid> = {
+    topic: "/grid",
+    schemaName: "foxglove.Grid",
+    receiveTime: { sec: 10, nsec: 0 },
+    message: {
+      timestamp: { sec: 0, nsec: 0 },
+      frame_id: "sensor",
+      pose: {
+        position: {
+          x: -0.5 * cell_size.x * rowCount,
+          y: -0.5 * cell_size.y * column_count,
+          z: 0,
+        },
+        orientation: QUAT_IDENTITY,
+      },
+      cell_size,
+      column_count,
+      cell_stride,
+      row_stride,
+      fields: [{ name: "height", offset: 0, type: NumericType.FLOAT32 }],
+      data,
+    },
+    sizeInBytes: 0,
+  };
+
+  const fixture = useDelayedFixture({
+    topics,
+    frame: {
+      "/grid": [grid],
+      "/tf": [tf1, tf2],
+    },
+    capabilities: [],
+    activeData: {
+      currentTime: { sec: 0, nsec: 0 },
+    },
+  });
+
+  return (
+    <PanelSetup fixture={fixture}>
+      <ThreeDeeRender
+        overrideConfig={{
+          followTf: "base_link",
+          topics: {
+            "/grid": {
+              visible: true,
+              colorField: "height",
+              colorMode: "gradient",
+              gradient: ["#ffffffFF", "#ff00bb80"],
+              minValue: -0.25,
+              maxValue: 0.25,
+            } as LayerSettingsFoxgloveGrid,
+          },
+          layers: {
+            grid: { layerId: "foxglove.Grid" },
+          },
+          cameraState: {
+            distance: 13.5,
+            perspective: true,
+            phi: 0.1,
+            targetOffset: [0.25, -0.5, 0],
+            thetaOffset: 0,
+            fovy: rad2deg(0.75),
+            near: 0.01,
+            far: 5000,
+            target: [0, 0, 0],
+            targetOrientation: [0, 0, 0, 1],
+          },
+        }}
+      />
+    </PanelSetup>
+  );
+}
 export const Foxglove_Grid_Uint8_Values = (): JSX.Element => <Foxglove_Grid_Uint8 />;
 export const Foxglove_Grid_RGBA_Values = (): JSX.Element => <Foxglove_Grid_RGBA />;
 export const Foxglove_Grid_Float_Values = (): JSX.Element => <Foxglove_Grid_Float />;
+export const Foxglove_Grid_Padded_Row = (): JSX.Element => <Row_Stride_Grid />;
