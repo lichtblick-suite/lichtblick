@@ -250,7 +250,10 @@ export function Gauge({ context }: Props): JSX.Element {
   }, [renderDone]);
 
   const rawValue =
-    typeof state.latestMatchingQueriedData === "number" ? state.latestMatchingQueriedData : NaN;
+    typeof state.latestMatchingQueriedData === "number" ||
+    typeof state.latestMatchingQueriedData === "string"
+      ? Number(state.latestMatchingQueriedData)
+      : NaN;
 
   const { minValue, maxValue } = config;
   const scaledValue =

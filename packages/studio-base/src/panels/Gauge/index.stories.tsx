@@ -179,3 +179,23 @@ MessagePathWithFilter.parameters = {
     },
   },
 };
+
+export const StringValue = (): JSX.Element => {
+  return <GaugePanel overrideConfig={{ path: `/data.value`, minValue: 0, maxValue: 1 }} />;
+};
+StringValue.parameters = {
+  panelSetup: {
+    fixture: {
+      topics: [{ name: "/data", datatype: "foo_msgs/Bar" }],
+      frame: {
+        "/data": [
+          {
+            topic: "/data",
+            receiveTime: { sec: 123, nsec: 456 },
+            message: { value: "0.2" },
+          },
+        ],
+      },
+    },
+  },
+};

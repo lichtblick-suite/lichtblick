@@ -38,6 +38,7 @@ const supportedDataTypes = [
   "uint32",
   "float32",
   "float64",
+  "string",
 ];
 
 export function useSettingsTree(
