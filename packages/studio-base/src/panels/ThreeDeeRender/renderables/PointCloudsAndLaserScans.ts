@@ -866,6 +866,7 @@ export class PointCloudsAndLaserScans extends SceneExtension<PointCloudAndLaserS
           updatedUserSettings.colorField = settings.colorField;
           updatedUserSettings.colorMode = settings.colorMode;
           updatedUserSettings.colorMap = settings.colorMap;
+          updatedUserSettings.rgbByteOrder = settings.rgbByteOrder;
           draft.topics[topic] = updatedUserSettings;
         });
       }
@@ -947,6 +948,7 @@ export class PointCloudsAndLaserScans extends SceneExtension<PointCloudAndLaserS
           updatedUserSettings.colorField = settings.colorField;
           updatedUserSettings.colorMode = settings.colorMode;
           updatedUserSettings.colorMap = settings.colorMap;
+          updatedUserSettings.rgbByteOrder = settings.rgbByteOrder;
           draft.topics[topic] = updatedUserSettings;
         });
       }
@@ -1035,6 +1037,7 @@ export class PointCloudsAndLaserScans extends SceneExtension<PointCloudAndLaserS
           updatedUserSettings.colorField = settings.colorField;
           updatedUserSettings.colorMode = settings.colorMode;
           updatedUserSettings.colorMap = settings.colorMap;
+          updatedUserSettings.rgbByteOrder = settings.rgbByteOrder;
           draft.topics[topic] = updatedUserSettings;
         });
       }
