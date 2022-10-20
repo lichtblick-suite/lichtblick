@@ -2,50 +2,43 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { transferHandlers, proxy, TransferHandler } from "comlink";
+import { TransferHandler } from "comlink";
 
 const isAbortSignal = (val: unknown): val is AbortSignal => val instanceof AbortSignal;
-
-const proxyTransferHandler = transferHandlers.get("proxy") as
-  | undefined
-  | TransferHandler<object, MessagePort>;
-if (!proxyTransferHandler) {
-  throw new Error("Invariant: comlink should have a proxy transfer handler");
-}
 
 /**
  * abortSignalTransferHandler implements a Comlink TransferHandler for AbortSignal instances
  *
- * Serialize creates a proxyAbort object to proxy an onabort handler and calls this handler
- * when the actual abort signal fires.
+ * Serialize creates an array with a boolean for whether the signal is already aborted and a message
+ * port to send an abort signal.
  *
- * Deserialize creates a new abort controller and aborts it when the proxy onabort fires.
+ * Deserialize creates a new abort controller and aborts it when the abort message is sent over the
+ * message port.
  *
  * Reference: https://developer.mozilla.org/en-US/docs/Web/API/AbortSignal
  */
-const abortSignalTransferHandler: TransferHandler<AbortSignal, MessagePort> = {
+const abortSignalTransferHandler: TransferHandler<AbortSignal, [boolean, MessagePort]> = {
   canHandle: isAbortSignal,
-  deserialize: (msgPort) => {
+  deserialize: ([aborted, msgPort]) => {
     const controller = new AbortController();
-    const abortSignal = controller.signal;
 
-    const abortSignalProxy = proxyTransferHandler.deserialize(msgPort) as { onabort?: () => void };
-    abortSignalProxy.onabort = proxy(() => {
+    if (aborted) {
       controller.abort();
-    });
+    } else {
+      msgPort.onmessage = () => {
+        controller.abort();
+      };
+    }
 
-    return abortSignal;
+    return controller.signal;
   },
   serialize: (abortSignal) => {
-    const proxyAbort: { onabort?: () => void } = {
-      onabort: undefined,
-    };
-
+    const { port1, port2 } = new MessageChannel();
     abortSignal.addEventListener("abort", () => {
-      proxyAbort.onabort?.();
+      port1.postMessage("aborted");
     });
 
-    return proxyTransferHandler.serialize(proxy(proxyAbort));
+    return [[abortSignal.aborted, port2], [port2]];
   },
 };
 

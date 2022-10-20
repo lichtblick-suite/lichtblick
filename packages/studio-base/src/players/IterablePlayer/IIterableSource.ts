@@ -73,6 +73,41 @@ export type GetBackfillMessagesArgs = {
   abortSignal?: AbortSignal;
 };
 
+// IMessageCursor describes an interface for message cursors. Message cursors are a similar concept
+// to javascript generators but provide a method for reading a batch of messages rather than one
+// message.
+//
+// Motivation: When using webworkers, read calls are invoked via an RPC interface. For large
+// datasets (many hundred thousand) messages, preloading the data (i.e. to plot a signal) would
+// result in several hundred thousand RPC calls. The overhead of making these calls add up and
+// negatively impact the preloading experience.
+//
+// Providing an interface which allows callers to read a batch of messages significantly (4x speedup
+// on an 700k message dataset on M1 Pro) reduces the RPC call overhead.
+export interface IMessageCursor {
+  /**
+   * Read the next message from the cursor. Return a result or undefined if the cursor is done
+   */
+  next(): Promise<IteratorResult | undefined>;
+
+  /**
+   * Read a batch of messages through end time (inclusive) or end of cursor
+   *
+   * return undefined when no more message remain in the cursor
+   */
+  readUntil(end: Time): Promise<IteratorResult[] | undefined>;
+
+  /**
+   * End the cursor
+   *
+   * Release any held resources by the cursor.
+   *
+   * Calls to next() and readUntil() should return `undefined` after a cursor is ended as if the
+   * cursor reached the end of its messages.
+   */
+  end(): Promise<void>;
+}
+
 /**
  * IIterableSource specifies an interface for initializing and accessing messages using iterators.
  *
@@ -105,6 +140,15 @@ export interface IIterableSource {
    * available.
    */
   getBackfillMessages(args: GetBackfillMessagesArgs): Promise<MessageEvent<unknown>[]>;
+
+  /**
+   * A source can optionally implement a cursor interface in addition to a messageIterator interface.
+   *
+   * A cursor interface provides methods to read messages in batches rather than one at a time.
+   * This improves performance for some workflows (i.e. message reading over webworkers) by avoiding
+   * individual "next" calls per message.
+   */
+  getMessageCursor?: (args: MessageIteratorArgs & { abort?: AbortSignal }) => IMessageCursor;
 
   /**
    * Optional method a data source can implement to cleanup resources. The player will call this

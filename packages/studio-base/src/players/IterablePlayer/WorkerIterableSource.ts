@@ -4,15 +4,13 @@
 
 import * as Comlink from "comlink";
 
-import {
-  abortSignalTransferHandler,
-  iterableTransferHandler,
-} from "@foxglove/comlink-transfer-handlers";
-import { MessageEvent } from "@foxglove/studio";
+import { abortSignalTransferHandler } from "@foxglove/comlink-transfer-handlers";
+import { MessageEvent, Time } from "@foxglove/studio";
 
 import type {
   GetBackfillMessagesArgs,
   IIterableSource,
+  IMessageCursor,
   Initalization,
   IteratorResult,
   MessageIteratorArgs,
@@ -22,7 +20,6 @@ import type {
   WorkerIterableSourceWorkerArgs,
 } from "./WorkerIterableSourceWorker.worker";
 
-Comlink.transferHandlers.set("iterable", iterableTransferHandler);
 Comlink.transferHandlers.set("abortsignal", abortSignalTransferHandler);
 
 export class WorkerIterableSource implements IIterableSource {
@@ -55,6 +52,8 @@ export class WorkerIterableSource implements IIterableSource {
     }
 
     const iter = await this._worker.messageIterator(args);
+    const ret = iter.return;
+
     try {
       for (;;) {
         const iterResult = await iter.next();
@@ -64,7 +63,12 @@ export class WorkerIterableSource implements IIterableSource {
         yield iterResult.value;
       }
     } finally {
-      await iter.return?.();
+      // Note: typescript types for iter.return don't narrow this to a function so we have this
+      // check in place to appease the types. This is not on a hot-path.
+      if (typeof ret === "function") {
+        await ret();
+      }
+      iter[Comlink.releaseProxy]();
     }
   }
 
@@ -80,6 +84,41 @@ export class WorkerIterableSource implements IIterableSource {
     // making the abort signal available within the worker.
     const { abortSignal, ...rest } = args;
     return await this._worker.getBackfillMessages(rest, abortSignal);
+  }
+
+  public getMessageCursor(args: MessageIteratorArgs & { abort?: AbortSignal }): IMessageCursor {
+    if (this._worker == undefined) {
+      throw new Error(`WorkerIterableSource is not initialized`);
+    }
+
+    // An AbortSignal is not clonable, so we remove it from the args and send it as a separate argumet
+    // to our worker getBackfillMessages call. Our installed Comlink handler for AbortSignal handles
+    // making the abort signal available within the worker.
+    const { abort, ...rest } = args;
+    const messageCursorPromise = this._worker.getMessageCursor(rest, abort);
+
+    const cursor: IMessageCursor = {
+      async next() {
+        const messageCursor = await messageCursorPromise;
+        return await messageCursor.next();
+      },
+
+      async readUntil(end: Time) {
+        const messageCursor = await messageCursorPromise;
+        return await messageCursor.readUntil(end);
+      },
+
+      async end() {
+        const messageCursor = await messageCursorPromise;
+        try {
+          await messageCursor.end();
+        } finally {
+          messageCursor[Comlink.releaseProxy]();
+        }
+      },
+    };
+
+    return cursor;
   }
 
   public async terminate(): Promise<void> {
