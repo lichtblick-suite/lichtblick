@@ -2,6 +2,7 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
+import { ScatterDataPoint } from "chart.js";
 import stringHash from "string-hash";
 
 import { Time, toSec, subtract as subtractTimes } from "@foxglove/rostime";
@@ -20,6 +21,9 @@ type DatasetInfo = {
   tooltips: TimeBasedChartTooltipData[];
 };
 
+type Dataset = ChartData["datasets"][number];
+type DatasetData = ChartData["datasets"][number]["data"];
+
 const baseColors = [grey, ...expandedLineColors];
 
 type Args = {
@@ -31,21 +35,23 @@ type Args = {
 };
 
 export default function messagesToDatasets(args: Args): DatasetInfo {
-  const { path, startTime, y, pathIndex, blocks } = args;
+  const { path, pathIndex, startTime, y, blocks } = args;
 
   const info: DatasetInfo = {
     datasets: [],
     tooltips: [],
   };
 
-  let prevQueryValue: string | number | bigint | boolean | undefined;
   let previousTimestamp: Time | undefined;
-  let currentData: ChartData["datasets"][0]["data"] = [];
+  let currentData: DatasetData = [];
+
+  const datasetIndexMap = new Map<unknown, number>();
+  let lastDatasetIndex: undefined | number = undefined;
 
   for (const messages of blocks) {
     if (!messages) {
-      currentData = [];
-      prevQueryValue = undefined;
+      currentData.push({ x: NaN, y: NaN });
+      lastDatasetIndex = undefined;
       previousTimestamp = undefined;
       continue;
     }
@@ -63,11 +69,13 @@ export default function messagesToDatasets(args: Args): DatasetInfo {
 
       const { constantName, value } = queriedData;
 
+      const datasetIndex = datasetIndexMap.get(value);
+
       // Skip duplicates.
       if (
         previousTimestamp &&
         toSec(subtractTimes(previousTimestamp, timestamp)) === 0 &&
-        prevQueryValue === value
+        datasetIndex === lastDatasetIndex
       ) {
         continue;
       }
@@ -94,8 +102,6 @@ export default function messagesToDatasets(args: Args): DatasetInfo {
 
       const x = toSec(subtractTimes(timestamp, startTime));
 
-      const element = { x, y };
-
       const tooltip: TimeBasedChartTooltipData = {
         x,
         y,
@@ -105,24 +111,27 @@ export default function messagesToDatasets(args: Args): DatasetInfo {
       };
       info.tooltips.unshift(tooltip);
 
-      // the current point is added even if different from previous value to avoid _gaps_ in the data
-      // this is a byproduct of using separate datasets to render each color
-      currentData.push({ x, y });
-
-      // if the value is different from previous value, make a new dataset
-      if (value !== prevQueryValue) {
-        const label =
-          constantName != undefined ? `${constantName} (${String(value)})` : String(value);
-
+      // If the value maps to a different dataset than the last value, close the previous segment
+      // and insert a gap.
+      const newSegment = datasetIndex !== lastDatasetIndex;
+      if (newSegment) {
+        currentData.push({ x, y });
+        currentData.push({ x: NaN, y: NaN });
+      }
+      const label =
+        constantName != undefined ? `${constantName} (${String(value)})` : String(value);
+      if (datasetIndex == undefined) {
+        datasetIndexMap.set(value, info.datasets.length);
         const elementWithLabel = {
-          ...element,
+          x,
+          y,
           label,
           labelColor: color,
         };
 
         // new data starts with our current point, the current point
         currentData = [elementWithLabel];
-        const dataset: ChartData["datasets"][0] = {
+        const dataset: Dataset = {
           borderWidth: 10,
           borderColor: color,
           data: currentData,
@@ -138,10 +147,17 @@ export default function messagesToDatasets(args: Args): DatasetInfo {
           },
         };
 
+        lastDatasetIndex = info.datasets.length;
         info.datasets.push(dataset);
+      } else {
+        currentData = info.datasets[datasetIndex]?.data ?? [];
+        if (newSegment) {
+          currentData.push({ x, y, label, labelColor: color } as ScatterDataPoint);
+        } else {
+          currentData.push({ x, y });
+        }
+        lastDatasetIndex = datasetIndex;
       }
-
-      prevQueryValue = value;
     }
   }
 
