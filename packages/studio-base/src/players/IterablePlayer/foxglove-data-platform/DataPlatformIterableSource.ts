@@ -186,6 +186,17 @@ export class DataPlatformIterableSource implements IIterableSource {
       }
     }
 
+    let profile: string | undefined;
+
+    // Workaround for https://github.com/foxglove/studio/issues/4690.
+    // If all topics use ros1 schemas and message encodings, assume we are working with the ros1 profile data.
+    if (
+      rawTopics.length > 0 &&
+      rawTopics.every((topic) => topic.encoding === "ros1" && topic.schemaEncoding === "ros1msg")
+    ) {
+      profile = "ros1";
+    }
+
     this._knownTopicNames = topics.map((topic) => topic.name);
     return {
       topics,
@@ -193,7 +204,7 @@ export class DataPlatformIterableSource implements IIterableSource {
       datatypes,
       start: params.start,
       end: params.end,
-      profile: undefined,
+      profile,
       problems,
       publishersByTopic: new Map(),
       name: `${device.name} (${device.id})`,
