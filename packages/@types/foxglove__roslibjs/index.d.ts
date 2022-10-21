@@ -50,6 +50,7 @@ declare module "@foxglove/roslibjs" {
 
   class Topic {
     public constructor(options: TopicOptions);
+    public advertise(): void;
     public publish(msg: Message): void;
     public subscribe(cb: (msg: Message) => void): void;
     public unsubscribe(): void;

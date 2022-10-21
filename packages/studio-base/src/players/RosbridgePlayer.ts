@@ -673,15 +673,14 @@ export default class RosbridgePlayer implements Player {
     }
 
     for (const { topic, schemaName: datatype } of this._advertisements) {
-      this._topicPublishers.set(
-        topic,
-        new roslib.Topic({
-          ros: this._rosClient,
-          name: topic,
-          messageType: datatype,
-          queue_size: 0,
-        }),
-      );
+      const roslibTopic = new roslib.Topic({
+        ros: this._rosClient,
+        name: topic,
+        messageType: datatype,
+        queue_size: 0,
+      });
+      this._topicPublishers.set(topic, roslibTopic);
+      roslibTopic.advertise();
     }
   }
 
