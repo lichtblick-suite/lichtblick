@@ -69,8 +69,6 @@ export default class ChartJSManager {
   private _fakeNodeEvents = new EventEmitter();
   private _fakeDocumentEvents = new EventEmitter();
   private _lastDatalabelClickContext?: DatalabelContext;
-  private _hasZoomed = false;
-  private _hasPanned = false;
 
   public constructor(initOpts: InitOpts) {
     log.info(`new ChartJSManager(id=${initOpts.id})`);
@@ -184,11 +182,13 @@ export default class ChartJSManager {
     options,
     width,
     height,
+    isBoundsReset,
     data,
   }: {
     options?: ChartOptions;
     width?: number;
     height?: number;
+    isBoundsReset: boolean;
     data?: ChartData;
   }): RpcScales {
     const instance = this._chartInstance;
@@ -199,22 +199,20 @@ export default class ChartJSManager {
     if (options != undefined) {
       instance.options.plugins = this.addFunctionsToConfig(options).plugins;
 
-      // If the options specify specific values for min/max then we go back into a state where scales are updated
-      // We need scales to update with undefined values if we haven't zoomed so new data is shown on the chart.
-      // If we do not update the scales to undefined, the initial zoom range stays and new data is not visible.
+      // Let the chart manage its own scales unless we've been told to reset or if an explicit
+      // min and max have been specified.
       const scales = options.scales ?? {};
-      if (scales.x?.min != undefined && scales.x.max != undefined) {
-        this._hasPanned = false;
-        this._hasZoomed = false;
+      if (
+        (isBoundsReset || (scales.x?.min != undefined && scales.x.max != undefined)) &&
+        instance.options.scales
+      ) {
+        instance.options.scales.x = scales.x;
       }
-      if (scales.y?.min != undefined && scales.y.max != undefined) {
-        this._hasPanned = false;
-        this._hasZoomed = false;
-      }
-
-      // If the user manually zoomed or panned this chart we avoid updating the scales since they have updated.
-      if (!this._hasZoomed && !this._hasPanned) {
-        instance.options.scales = options.scales;
+      if (
+        (isBoundsReset || (scales.y?.min != undefined && scales.y.max != undefined)) &&
+        instance.options.scales
+      ) {
+        instance.options.scales.y = scales.y;
       }
     }
 
@@ -299,7 +297,7 @@ export default class ChartJSManager {
       });
     }
 
-    // sort elemtents by proximity to the cursor
+    // sort elements by proximity to the cursor
     out.sort((itemA, itemB) => {
       const dxA = event.clientX - itemA.view.x;
       const dyA = event.clientY - itemA.view.y;
@@ -372,18 +370,6 @@ export default class ChartJSManager {
         // eslint-disable-next-line no-restricted-syntax
         return value.label ?? null;
       };
-
-      if (config.plugins.zoom?.zoom) {
-        config.plugins.zoom.zoom.onZoom = () => {
-          this._hasZoomed = true;
-        };
-      }
-
-      if (config.plugins.zoom?.pan) {
-        config.plugins.zoom.pan.onPan = () => {
-          this._hasPanned = true;
-        };
-      }
 
       // Override color so that it can be set per-dataset.
       const staticColor = config.plugins.datalabels.color ?? "white";

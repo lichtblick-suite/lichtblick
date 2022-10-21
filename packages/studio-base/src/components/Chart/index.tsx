@@ -8,7 +8,7 @@
 /// <reference types="chartjs-plugin-datalabels" />
 /// <reference types="@foxglove/chartjs-plugin-zoom" />
 
-import { ChartOptions, ChartData as ChartJsChartData, ScatterDataPoint } from "chart.js";
+import { ChartData as ChartJsChartData, ChartOptions, ScatterDataPoint } from "chart.js";
 import Hammer from "hammerjs";
 import { useCallback, useLayoutEffect, useRef, useState } from "react";
 import { useAsync, useMountedState } from "react-use";
@@ -16,7 +16,9 @@ import { v4 as uuidv4 } from "uuid";
 
 import Logger from "@foxglove/log";
 import { RpcElement, RpcScales } from "@foxglove/studio-base/components/Chart/types";
-import ChartJsMux from "@foxglove/studio-base/components/Chart/worker/ChartJsMux";
+import ChartJsMux, {
+  ChartUpdateMessage,
+} from "@foxglove/studio-base/components/Chart/worker/ChartJsMux";
 import Rpc, { createLinkedChannels } from "@foxglove/studio-base/util/Rpc";
 import WebWorkerManager from "@foxglove/studio-base/util/WebWorkerManager";
 import { mightActuallyBePartial } from "@foxglove/studio-base/util/mightActuallyBePartial";
@@ -43,6 +45,7 @@ export type ChartData = ChartJsChartData<"scatter", (ScatterDataPoint | typeof C
 type Props = {
   data: ChartData;
   options: ChartOptions;
+  isBoundsReset: boolean;
   type: string;
   height: number;
   width: number;
@@ -106,7 +109,8 @@ function Chart(props: Props): JSX.Element {
   const zoomEnabled = props.options.plugins?.zoom?.zoom?.enabled ?? false;
   const panEnabled = props.options.plugins?.zoom?.pan?.enabled ?? false;
 
-  const { type, data, options, width, height, onStartRender, onFinishRender } = props;
+  const { type, data, isBoundsReset, options, width, height, onStartRender, onFinishRender } =
+    props;
 
   const sendWrapperRef = useRef<RpcSend | undefined>();
   const rpcSendRef = useRef<RpcSend | undefined>();
@@ -183,8 +187,7 @@ function Chart(props: Props): JSX.Element {
   // if they are unchanged from a previous initialization or update.
   const getNewUpdateMessage = useCallback(() => {
     const prev = previousUpdateMessage.current;
-    const out: Partial<{ width: number; height: number; data: ChartData; options: ChartOptions }> =
-      {};
+    const out: Partial<ChartUpdateMessage> = {};
 
     // NOTE(Roman): I don't know why this happens but when I initialize a chart using some data
     // and width/height of 0. Even when I later send an update for correct width/height the chart
@@ -209,13 +212,15 @@ function Chart(props: Props): JSX.Element {
       prev.width = out.width = width;
     }
 
+    out.isBoundsReset = isBoundsReset;
+
     // nothing to update
     if (Object.keys(out).length === 0) {
       return;
     }
 
     return out;
-  }, [data, height, options, width]);
+  }, [data, height, options, isBoundsReset, width]);
 
   const { error: updateError } = useAsync(async () => {
     if (!sendWrapperRef.current) {

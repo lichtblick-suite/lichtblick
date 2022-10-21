@@ -99,6 +99,7 @@ type ChartComponentProps = ComponentProps<typeof ChartComponent>;
 // eslint-disable-next-line no-restricted-syntax
 const ChartNull = null;
 
+const selectGlobalBounds = (store: TimelineInteractionStateStore) => store.globalBounds;
 const selectSetGlobalBounds = (store: TimelineInteractionStateStore) => store.setGlobalBounds;
 
 // Calculation mode for the "reset view" view.
@@ -206,15 +207,14 @@ export default function TimeBasedChart(props: Props): JSX.Element {
 
   const hoverBar = useRef<HTMLDivElement>(ReactNull);
 
-  // Ignore global bounds if we're not synced.
-  const globalBoundsSelector = useCallback(
-    (store: TimelineInteractionStateStore) => {
-      return isSynced ? store.globalBounds : undefined;
-    },
-    [isSynced],
-  );
-  const globalBounds = useTimelineInteractionState(globalBoundsSelector);
+  const globalBounds = useTimelineInteractionState(selectGlobalBounds);
   const setGlobalBounds = useTimelineInteractionState(selectSetGlobalBounds);
+
+  // Ignore global bounds if we're not synced.
+  const syncedGlobalBounds = useMemo(
+    () => (isSynced ? globalBounds : undefined),
+    [globalBounds, isSynced],
+  );
 
   const linesToHide = useMemo(() => props.linesToHide ?? {}, [props.linesToHide]);
 
@@ -460,13 +460,13 @@ export default function TimeBasedChart(props: Props): JSX.Element {
   // we memo the min/max X values so only when the values change is the scales object re-made
   const { min: minX, max: maxX } = useMemo(() => {
     // when unlocking sync keep the last manually panned/zoomed chart state
-    if (!globalBounds && hasUserPannedOrZoomed) {
+    if (!syncedGlobalBounds && hasUserPannedOrZoomed) {
       return { min: undefined, max: undefined };
     }
 
     // If we're the source of global bounds then use our current values
     // to avoid scale feedback jitter.
-    if (globalBounds?.sourceId === componentId && globalBounds.userInteraction) {
+    if (syncedGlobalBounds?.sourceId === componentId && syncedGlobalBounds.userInteraction) {
       return { min: undefined, max: undefined };
     }
 
@@ -486,9 +486,9 @@ export default function TimeBasedChart(props: Props): JSX.Element {
     }
 
     // If the global bounds are from user interaction, we use that unconditionally.
-    if (globalBounds?.userInteraction === true) {
-      min = globalBounds.min;
-      max = globalBounds.max;
+    if (syncedGlobalBounds?.userInteraction === true) {
+      min = syncedGlobalBounds.min;
+      max = syncedGlobalBounds.max;
     }
 
     // if the min/max are the same, use undefined to fall-back to chart component auto-scales
@@ -504,7 +504,7 @@ export default function TimeBasedChart(props: Props): JSX.Element {
     datasetBounds.x.max,
     datasetBounds.x.min,
     defaultView,
-    globalBounds,
+    syncedGlobalBounds,
     hasUserPannedOrZoomed,
   ]);
 
@@ -804,8 +804,8 @@ export default function TimeBasedChart(props: Props): JSX.Element {
   // The reason we check for pan lock is to remove reset display from all sync'd plots once
   // the range has been reset.
   const showReset = useMemo(() => {
-    return isSynced ? globalBounds?.userInteraction === true : hasUserPannedOrZoomed;
-  }, [globalBounds?.userInteraction, hasUserPannedOrZoomed, isSynced]);
+    return isSynced ? syncedGlobalBounds?.userInteraction === true : hasUserPannedOrZoomed;
+  }, [syncedGlobalBounds?.userInteraction, hasUserPannedOrZoomed, isSynced]);
 
   // We don't memo this since each option itself is memo'd and this is just convenience to pass to
   // the component.
@@ -813,6 +813,7 @@ export default function TimeBasedChart(props: Props): JSX.Element {
     type,
     width,
     height,
+    isBoundsReset: globalBounds == undefined,
     options,
     data: downsampledData,
     onClick: props.onClick,

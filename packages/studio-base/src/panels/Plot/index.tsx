@@ -384,7 +384,7 @@ function Plot(props: Props) {
             accumulated[path] = [[plotDataItem]];
           } else {
             const plotDataPath = (accumulated[path] ??= [[]]);
-            // PlotDataPaths have 2d arrays of items to accomodate blocks which may have gaps so
+            // PlotDataPaths have 2d arrays of items to accommodate blocks which may have gaps so
             // each continuous set of blocks forms one continuous line. For streaming messages we
             // treat this as one continuous set of items and always add to the first "range"
             const plotDataItems = plotDataPath[0]!;

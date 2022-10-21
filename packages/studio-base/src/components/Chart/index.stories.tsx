@@ -29,6 +29,7 @@ const dataPoint = {
 const props: ComponentProps<typeof ChartComponent> = {
   width: 500,
   height: 700,
+  isBoundsReset: false,
   data: {
     datasets: [
       {

@@ -12,22 +12,22 @@
 //   You may not use this file except in compliance with the License.
 
 import {
-  Chart,
-  Ticks,
-  LineElement,
-  PointElement,
-  LineController,
-  ScatterController,
   CategoryScale,
-  LinearScale,
-  TimeScale,
-  TimeSeriesScale,
+  Chart,
+  ChartData,
+  ChartOptions,
   Filler,
   Legend,
+  LinearScale,
+  LineController,
+  LineElement,
+  PointElement,
+  ScatterController,
+  Ticks,
+  TimeScale,
+  TimeSeriesScale,
   Title,
   Tooltip,
-  ChartOptions,
-  ChartData,
 } from "chart.js";
 import AnnotationPlugin from "chartjs-plugin-annotation";
 
@@ -39,13 +39,17 @@ import ChartJSManager, { InitOpts } from "./ChartJSManager";
 
 type RpcEvent<EventType> = { id: string; event: EventType };
 
+export type ChartUpdateMessage = {
+  data?: ChartData;
+  height?: number;
+  options?: ChartOptions;
+  isBoundsReset: boolean;
+  width?: number;
+};
+
 type RpcUpdateEvent = {
   id: string;
-  options?: ChartOptions;
-  width?: number;
-  height?: number;
-  data?: ChartData;
-};
+} & ChartUpdateMessage;
 
 // Explicitly load the "Plex Mono" font, since custom fonts from the main renderer are not inherited
 // by web workers. This is required to draw "Plex Mono" on an OffscreenCanvas, and it also appears
@@ -114,8 +118,8 @@ function fixTicks(args: RpcUpdateEvent): RpcUpdateEvent {
 // Since we use a capped number of web-workers, a single web-worker may be running multiple chartjs instances
 // The ChartJsWorkerMux forwards an rpc request for a specific chartjs instance id to the appropriate instance
 export default class ChartJsMux {
-  private _rpc: Rpc;
-  private _managers = new Map<string, ChartJSManager>();
+  private readonly _rpc: Rpc;
+  private readonly _managers = new Map<string, ChartJSManager>();
 
   public constructor(rpc: Rpc) {
     this._rpc = rpc;

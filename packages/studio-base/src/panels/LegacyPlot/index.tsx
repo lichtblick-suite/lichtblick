@@ -450,6 +450,7 @@ function TwoDimensionalPlot(props: Props) {
               width={width}
               height={height}
               options={options}
+              isBoundsReset={false}
               onScalesUpdate={onScaleBoundsUpdate}
               onHover={onHover}
               data={data}

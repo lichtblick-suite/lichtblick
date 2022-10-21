@@ -11,6 +11,8 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
+import { screen } from "@testing-library/dom";
+import userEvent from "@testing-library/user-event";
 import { shuffle } from "lodash";
 import { useCallback, useRef } from "react";
 
@@ -429,7 +431,7 @@ export function LineGraphWithSettings(): JSX.Element {
   return (
     <PlotWrapper
       pauseFrame={pauseFrame}
-      config={{ ...exampleConfig, minYValue: 1, maxYValue: -1, minXValue: 0, maxXValue: 3 }}
+      config={{ ...exampleConfig, minYValue: -1, maxYValue: 1, minXValue: 0, maxXValue: 3 }}
       includeSettings
     />
   );
@@ -437,6 +439,11 @@ export function LineGraphWithSettings(): JSX.Element {
 LineGraphWithSettings.parameters = {
   colorScheme: "light",
   useReadySignal: true,
+};
+LineGraphWithSettings.play = async () => {
+  const user = userEvent.setup();
+  const label = await screen.findByText("Y Axis");
+  await user.click(label);
 };
 
 LineGraphWithLegendsHidden.storyName = "line graph with legends hidden";
@@ -644,6 +651,7 @@ export function WithMinAndMaxYValues(): JSX.Element {
 
   return (
     <PlotWrapper
+      includeSettings
       pauseFrame={pauseFrame}
       config={{
         ...exampleConfig,
@@ -661,7 +669,13 @@ export function WithMinAndMaxYValues(): JSX.Element {
   );
 }
 WithMinAndMaxYValues.parameters = {
+  colorScheme: "light",
   useReadySignal: true,
+};
+WithMinAndMaxYValues.play = async () => {
+  const user = userEvent.setup();
+  const label = await screen.findByText("Y Axis");
+  await user.click(label);
 };
 
 WithJustMinYValueLessThanMinimumValue.storyName = "with just min Y value less than minimum value";
