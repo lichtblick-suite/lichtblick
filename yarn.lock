@@ -2500,6 +2500,7 @@ __metadata:
     "@types/react-table": 7.7.9
     "@types/react-transition-group": ^4.4.4
     "@types/react-virtualized": 9.21.20
+    "@types/react-window": ^1
     "@types/sanitize-html": 2.6.2
     "@types/seedrandom": 3.0.2
     "@types/shallowequal": 1.1.1
@@ -2584,6 +2585,7 @@ __metadata:
     react-transition-group: 4.4.2
     react-use: "patch:react-use@17.3.1#../../patches/react-use.patch"
     react-virtualized: 9.22.3
+    react-window: 1.8.7
     readable-stream: 3.6.0
     rehype-raw: 6.1.1
     reselect: 4.1.5
@@ -6081,6 +6083,15 @@ __metadata:
     "@types/prop-types": "*"
     "@types/react": "*"
   checksum: 70fd77d9a0fc498b4eb29a195f218fd10f6ca935025813d53d3937e1464580bfbfd3a0c84806530f21cf810c1f6cf1789656052a9714b23de46702b1ac1b73c5
+  languageName: node
+  linkType: hard
+
+"@types/react-window@npm:^1":
+  version: 1.8.5
+  resolution: "@types/react-window@npm:1.8.5"
+  dependencies:
+    "@types/react": "*"
+  checksum: 5f519e1402300d11b6e6595223feb6499f3227e38da166cbc565773cd7f71862abcf855b7835d391b5119fcfacdfba79d73a965b45f60a293fc1ff25986319ed
   languageName: node
   linkType: hard
 
@@ -16941,17 +16952,17 @@ __metadata:
   languageName: node
   linkType: hard
 
+"memoize-one@npm:>=3.1.1 <6, memoize-one@npm:^5.1.1":
+  version: 5.2.1
+  resolution: "memoize-one@npm:5.2.1"
+  checksum: a3cba7b824ebcf24cdfcd234aa7f86f3ad6394b8d9be4c96ff756dafb8b51c7f71320785fbc2304f1af48a0467cbbd2a409efc9333025700ed523f254cb52e3d
+  languageName: node
+  linkType: hard
+
 "memoize-one@npm:^4.0.0":
   version: 4.0.3
   resolution: "memoize-one@npm:4.0.3"
   checksum: addd18c046542f57440ba70bf8ebd48663d17626cade681f777522ef70900a87ec72c5041bed8ece4f6d40a2cb58803bae388b50a4b740d64f36bcda20c147b7
-  languageName: node
-  linkType: hard
-
-"memoize-one@npm:^5.1.1":
-  version: 5.2.1
-  resolution: "memoize-one@npm:5.2.1"
-  checksum: a3cba7b824ebcf24cdfcd234aa7f86f3ad6394b8d9be4c96ff756dafb8b51c7f71320785fbc2304f1af48a0467cbbd2a409efc9333025700ed523f254cb52e3d
   languageName: node
   linkType: hard
 
@@ -20370,6 +20381,19 @@ __metadata:
     react: ^15.3.0 || ^16.0.0-alpha
     react-dom: ^15.3.0 || ^16.0.0-alpha
   checksum: 5e3b566592293bc0057bc6be4f6ee29c58c8931421d2882a3ef45ca9b24c6f3ea78bbc5a182c2916af6520845e5a90f569b3a63c9b5e89428720913e6d6239cc
+  languageName: node
+  linkType: hard
+
+"react-window@npm:1.8.7":
+  version: 1.8.7
+  resolution: "react-window@npm:1.8.7"
+  dependencies:
+    "@babel/runtime": ^7.0.0
+    memoize-one: ">=3.1.1 <6"
+  peerDependencies:
+    react: ^15.0.0 || ^16.0.0 || ^17.0.0 || ^18.0.0
+    react-dom: ^15.0.0 || ^16.0.0 || ^17.0.0 || ^18.0.0
+  checksum: 1e122c29224781e70359978287a2e850ccdf509cd71ba16b16ea258725687a62f5c16ab69f52f732b4ed20df583196dbe2a04804f3e4a176bb3e62f3fc910452
   languageName: node
   linkType: hard
 
