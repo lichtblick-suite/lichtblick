@@ -235,8 +235,8 @@ const StateTransitions = React.memo(function StateTransitions(props: Props) {
   const { datasets, tooltips, minY } = useMemo(() => {
     let outMinY: number | undefined;
 
-    const outTooltips: TimeBasedChartTooltipData[] = [];
-    const outDatasets: ChartData["datasets"] = [];
+    let outTooltips: TimeBasedChartTooltipData[] = [];
+    let outDatasets: ChartData["datasets"] = [];
 
     // ignore all data when we don't have a start time
     if (!startTime) {
@@ -264,8 +264,8 @@ const StateTransitions = React.memo(function StateTransitions(props: Props) {
           blocks: blocksForPath,
         });
 
-        outDatasets.push(...newDataSets);
-        outTooltips.push(...newTooltips);
+        outDatasets = outDatasets.concat(newDataSets);
+        outTooltips = outTooltips.concat(newTooltips);
       }
 
       // If we have have messages in blocks for this path, we ignore streamed messages and only
@@ -284,8 +284,8 @@ const StateTransitions = React.memo(function StateTransitions(props: Props) {
           pathIndex,
           blocks: [items],
         });
-        outDatasets.push(...newDataSets);
-        outTooltips.push(...newTooltips);
+        outDatasets = outDatasets.concat(newDataSets);
+        outTooltips = outTooltips.concat(newTooltips);
       }
     });
 
