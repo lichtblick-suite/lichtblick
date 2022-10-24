@@ -35,8 +35,10 @@ const getFixture = ({
             ["number", -42],
             ["string", "Hello, world!"],
             ["date", new Date(1618876820517)],
-            ["Uint8Array", new Uint8Array([0, 1, 2, 3, 4, 5])],
-            ["struct", { a: 1, b: [2, 3, 4], c: "String value" }],
+            ["Uint8Array", new Uint8Array([0, 1])],
+            ["array", [1, 2]],
+            ["string array", ["one", "two", "three"]],
+            ["struct", { a: 1, b: [2, 3], c: "String value" }],
           ])
         : undefined,
     },
@@ -59,6 +61,14 @@ export function Default(): JSX.Element {
 export function WithParameters(): JSX.Element {
   return (
     <PanelSetup fixture={getFixture({ getParameters: true, setParameters: false })}>
+      <Parameters />
+    </PanelSetup>
+  );
+}
+
+export function WithEditableParameters(): JSX.Element {
+  return (
+    <PanelSetup fixture={getFixture({ getParameters: true, setParameters: true })}>
       <Parameters />
     </PanelSetup>
   );
