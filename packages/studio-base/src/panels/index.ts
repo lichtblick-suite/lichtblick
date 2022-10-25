@@ -19,6 +19,7 @@ import mapThumbnail from "./Map/thumbnail.png";
 import NodePlaygroundHelp from "./NodePlayground/index.help.md";
 import nodePlaygroundThumbnail from "./NodePlayground/thumbnail.png";
 import ParametersHelp from "./Parameters/index.help.md";
+import parametersThumbnail from "./Parameters/thumbnail.png";
 import PlaybackPerformanceHelp from "./PlaybackPerformance/index.help.md";
 import PlotHelp from "./Plot/index.help.md";
 import plotThumbnail from "./Plot/thumbnail.png";
@@ -120,6 +121,7 @@ const builtin: PanelInfo[] = [
     type: "Parameters",
     description: "Read and set parameters for a data source.",
     help: ParametersHelp,
+    thumbnail: parametersThumbnail,
     module: async () => await import("./Parameters"),
   },
   {
