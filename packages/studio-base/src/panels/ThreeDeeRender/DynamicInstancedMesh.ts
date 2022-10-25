@@ -49,6 +49,10 @@ export class DynamicInstancedMesh<
       tempColor.setRGB(color.r, color.g, color.b);
       this.setColorAt(i, tempColor);
     }
+    this.instanceMatrix.needsUpdate = true;
+    if (this.instanceColor) {
+      this.instanceColor.needsUpdate = true;
+    }
   }
 
   private _setCount(count: number) {
