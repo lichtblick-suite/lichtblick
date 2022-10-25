@@ -335,10 +335,12 @@ export function reducer(
         ...prevState,
         player: action.player,
         lastCapabilities: [],
+        lastMessageEventByTopic: new Map(),
         public: {
           ...prevState.public,
           sortedTopics: [],
           datatypes: new Map(),
+          messageEventsBySubscriberId: new Map(),
           startPlayback: undefined,
           pausePlayback: undefined,
           playUntil: undefined,
