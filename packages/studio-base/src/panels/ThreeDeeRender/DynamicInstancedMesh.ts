@@ -9,7 +9,6 @@ import { ColorRGBA, Vector3 } from "./ros";
 const INITIAL_CAPACITY = 4;
 
 const tempMat4 = new THREE.Matrix4();
-const tempColor = new THREE.Color();
 
 /**
  * Extends InstancedMesh with a set() method that takes a list of points and
@@ -38,6 +37,7 @@ export class DynamicInstancedMesh<
     const count = points.length;
     this._setCount(count);
 
+    const colorArray = this.instanceColor!.array as Uint8ClampedArray;
     for (let i = 0; i < count; i++) {
       const point = points[i]!;
       const color = colors[i] ?? defaultColor;
@@ -46,8 +46,9 @@ export class DynamicInstancedMesh<
       tempMat4.scale(scale as THREE.Vector3);
       this.setMatrixAt(i, tempMat4);
 
-      tempColor.setRGB(color.r, color.g, color.b);
-      this.setColorAt(i, tempColor);
+      colorArray[i * 3 + 0] = (color.r * 255) | 0;
+      colorArray[i * 3 + 1] = (color.g * 255) | 0;
+      colorArray[i * 3 + 2] = (color.b * 255) | 0;
     }
     this.instanceMatrix.needsUpdate = true;
     if (this.instanceColor) {
@@ -71,10 +72,10 @@ export class DynamicInstancedMesh<
 
   private _resize() {
     const oldMatrixArray = this.instanceMatrix.array as Float32Array;
-    const oldColorArray = this.instanceColor?.array as Float32Array | undefined;
+    const oldColorArray = this.instanceColor?.array as Uint8ClampedArray | undefined;
 
     const newMatrixArray = new Float32Array(this._capacity * 16);
-    const newColorArray = new Float32Array(this._capacity * 3);
+    const newColorArray = new Uint8ClampedArray(this._capacity * 3);
 
     if (oldMatrixArray.length > 0) {
       newMatrixArray.set(oldMatrixArray);
@@ -84,7 +85,7 @@ export class DynamicInstancedMesh<
     }
 
     this.instanceMatrix = new THREE.InstancedBufferAttribute(newMatrixArray, 16);
-    this.instanceColor = new THREE.InstancedBufferAttribute(newColorArray, 3);
+    this.instanceColor = new THREE.InstancedBufferAttribute(newColorArray, 3, true);
 
     this.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
     this.instanceColor.setUsage(THREE.DynamicDrawUsage);
