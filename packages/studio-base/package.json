@@ -1,6 +1,6 @@
 {
   "name": "@foxglove/studio-base",
-  "version": "1.29.1-dev",
+  "version": "1.30.0",
   "description": "Core components of Foxglove Studio",
   "license": "MPL-2.0",
   "repository": {
