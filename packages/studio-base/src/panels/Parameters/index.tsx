@@ -79,6 +79,10 @@ const useStyles = makeStyles<void, "copyIcon">()((_theme, _params, classes) => (
   },
 }));
 
+/**
+ * Converts a parameter value into a value that can be edited in the JsonInput. Wraps
+ * any value JsonInput can't handle in JSON.stringify.
+ */
 function editableValue(value: unknown): string | number | boolean | unknown[] | object {
   if (
     typeof value === "string" ||
@@ -88,6 +92,25 @@ function editableValue(value: unknown): string | number | boolean | unknown[] | 
     isObject(value)
   ) {
     return value;
+  } else {
+    return JSON.stringify(value) ?? "";
+  }
+}
+
+/**
+ * Converts a parameter value into a string we can display value or use as a title.
+ */
+function displayableValue(value: unknown): string {
+  if (value == undefined) {
+    return "";
+  }
+
+  if (value instanceof Date) {
+    return value.toISOString();
+  }
+
+  if (typeof value === "string" || typeof value === "number" || typeof value === "boolean") {
+    return String(value);
   } else {
     return JSON.stringify(value) ?? "";
   }
@@ -166,7 +189,7 @@ function Parameters(): ReactElement {
           </TableHead>
           <TableBody>
             {parameterNames.map((name) => {
-              const displayValue = JSON.stringify(parameters.get(name)) ?? "";
+              const displayValue = displayableValue(parameters.get(name));
               const editValue = editableValue(parameters.get(name));
 
               return (
