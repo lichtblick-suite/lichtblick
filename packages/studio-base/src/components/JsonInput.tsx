@@ -177,6 +177,7 @@ function ValidatedInputBase({
         value={inputStr}
         onChange={handleChange}
         language="json"
+        onBlur={() => setIsEditing(false)}
         padding={12}
         style={{ maxHeight: maxHeight ?? 300 }}
       />
