@@ -102,7 +102,8 @@ export default class VelodynePlayer implements Player {
     if (this._closed) {
       return;
     }
-    this._presence = PlayerPresence.INITIALIZING;
+    this._presence = PlayerPresence.PRESENT;
+    this._emitState();
 
     if (this._socket == undefined) {
       const net = await Sockets.Create();
