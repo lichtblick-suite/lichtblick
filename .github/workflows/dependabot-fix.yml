@@ -1,0 +1,68 @@
+# Automatically run `yarn dedupe` for dependabot PRs.
+# This is necessary because dependabot doesn't run it automatically:
+# https://github.com/dependabot/dependabot-core/issues/5830
+#
+# Note: We use the `pull_request_target` event due to GitHub security measures.
+#       It is important to ensure we don't execute any untrusted PR code in this context.
+# See: https://github.blog/changelog/2021-02-19-github-actions-workflows-triggered-by-dependabot-prs-will-run-with-read-only-permissions/
+#      https://securitylab.github.com/research/github-actions-preventing-pwn-requests
+
+name: Dependabot
+
+on:
+  - pull_request_target
+
+jobs:
+  build:
+    name: fix
+    runs-on: ubuntu-latest
+    if: |
+      github.actor == 'dependabot[bot]' &&
+      contains(github.event.pull_request.head.ref, 'dependabot/npm_and_yarn/')
+    # IMPORTANT: setting YARN_ENABLE_SCRIPTS=false is critical to ensure that untrusted
+    # PRs can't add an npm package and then use that to execute untrusted code in
+    # a trusted context. See links at the top of this workflow for further details.
+    # See also: https://github.com/yarnpkg/berry/issues/1679#issuecomment-669937860
+    env:
+      YARN_ENABLE_SCRIPTS: false
+
+    steps:
+      - uses: actions/checkout@v2.3.4
+        with:
+          # Using a Personal Access Token here is required to trigger workflows on our new commit.
+          # The default GitHub token doesn't trigger any workflows.
+          # See: https://github.community/t/push-from-action-does-not-trigger-subsequent-action/16854/2
+          token: ${{ secrets.DEPENDABOT_FIX_GITHUB_TOKEN }}
+          ref: ${{ github.event.pull_request.head.ref }}
+
+      - run: git lfs pull --include .yarn/
+
+      - name: Configure Node.js
+        uses: actions/setup-node@v2.2.0
+        with:
+          node-version: 16.17
+
+      - name: Restore cache
+        uses: actions/cache@v2.1.6
+        with:
+          path: |
+            .yarn/cache
+            **/node_modules
+          key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
+          restore-keys: ${{ runner.os }}-yarn-
+
+      - run: yarn install --skip-builds
+        env:
+          # yarn runs in immutable mode "by default" in CI -- turning this off requires an
+          # undocumented env var
+          YARN_ENABLE_IMMUTABLE_INSTALLS: false
+
+      - run: yarn dedupe
+
+      - name: Commit yarn.lock
+        run: |
+          git config user.name "dependabot[bot]"
+          git config user.email "49699333+dependabot[bot]@users.noreply.github.com"
+          git add yarn.lock
+          git commit -m '[dependabot skip] Fix yarn.lock'
+          git push
