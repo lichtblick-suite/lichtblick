@@ -165,7 +165,7 @@
     "prettier": "2.5.1",
     "promise-queue": "2.2.5",
     "quickhull3d": "2.0.5",
-    "rc-tree": "5.4.3",
+    "rc-tree": "5.7.0",
     "react": "17.0.2",
     "react-autocomplete": "https://github.com/foxglove/react-autocomplete/raw/9717d597d7c78c316fb7ad3c2c57060c243530c2/react-autocomplete-9.9.9.tgz",
     "react-colorful": "5.6.0",
