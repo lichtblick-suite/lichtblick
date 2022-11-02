@@ -161,6 +161,9 @@ export default class FoxgloveWebSocketPlayer implements Player {
           } else if (channel.encoding === "ros1") {
             schemaEncoding = "ros1msg";
             schemaData = new TextEncoder().encode(channel.schema);
+          } else if (channel.encoding === "cdr") {
+            schemaEncoding = "ros2msg";
+            schemaData = new TextEncoder().encode(channel.schema);
           } else {
             throw new Error(`Unsupported encoding ${channel.encoding}`);
           }
