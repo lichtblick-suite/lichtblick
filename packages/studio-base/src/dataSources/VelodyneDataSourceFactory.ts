@@ -12,10 +12,10 @@ import { Player } from "@foxglove/studio-base/players/types";
 class VelodyneDataSourceFactory implements IDataSourceFactory {
   public id = "velodyne-device";
   public type: IDataSourceFactory["type"] = "connection";
-  public displayName = "Velodyne LIDAR";
+  public displayName = "Velodyne Lidar";
   public iconName: IDataSourceFactory["iconName"] = "GenericScan";
   public description =
-    "Connect directly to Velodyne LIDAR hardware to inspect incoming sensor data.";
+    "Connect directly to Velodyne Lidar hardware to inspect incoming sensor data.";
   public docsLink = "https://foxglove.dev/docs/studio/connection/velodyne";
 
   public formConfig = {
