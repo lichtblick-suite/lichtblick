@@ -3,8 +3,10 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 import { exec } from "@actions/exec";
+import { downloadTool, extractZip } from "@actions/tool-cache";
 import type MacPackager from "app-builder-lib/out/macPackager";
 import { log, Arch } from "builder-util";
+import crypto from "crypto";
 import { AfterPackContext } from "electron-builder";
 import fs from "fs/promises";
 import path from "path";
@@ -21,6 +23,69 @@ async function getKeychainFile(context: AfterPackContext): Promise<string | unde
 
 export default async function afterPack(context: AfterPackContext): Promise<void> {
   await configureQuickLookExtension(context);
+  await copySpotlightImporter(context);
+}
+
+/**
+ * When building a universal app, electron-builder uses lipo to merge binaries at the same path.
+ * Since our bundled Quick Look and Spotlight extensions already provide universal binaries, we need
+ * to strip out other architectures so that lipo doesn't fail when it gets two copies of each slice.
+ */
+async function extractTargetArchitecture(executablePath: string, context: AfterPackContext) {
+  const arch = new Map([
+    [Arch.arm64, "arm64"],
+    [Arch.x64, "x86_64"],
+    [Arch.universal, "universal"],
+  ]).get(context.arch);
+  if (arch == undefined) {
+    throw new Error(`Unsupported arch ${context.arch}`);
+  }
+  if (arch !== "universal") {
+    await exec("lipo", ["-extract", arch, executablePath, "-output", executablePath]);
+    log.info({ executablePath }, `Extracted ${arch} from universal executable`);
+  }
+}
+
+/**
+ * Download the Spotlight importer for MCAP files and include it in the app bundle.
+ */
+async function copySpotlightImporter(context: AfterPackContext) {
+  const { electronPlatformName, outDir, appOutDir } = context;
+  if (electronPlatformName !== "darwin") {
+    return;
+  }
+
+  const appName = context.packager.appInfo.productFilename;
+  const appPath = path.join(appOutDir, `${appName}.app`);
+  const spotlightDirPath = path.join(appPath, "Contents", "Library", "Spotlight");
+  const zipPath = path.join(outDir, "MCAPSpotlightImporter.mdimporter.zip");
+  await fs.unlink(zipPath).catch(() => {});
+
+  const zipURL =
+    "https://github.com/foxglove/MCAPSpotlightImporter/releases/download/v1.0.2/MCAPSpotlightImporter.mdimporter.zip";
+  const zipSHA = "26cafa3e3069fcbd294864ceeee1bc9899e94456e0d28079f966787b6f05c7a2";
+  await downloadTool(zipURL, zipPath);
+  const actualSHA = crypto
+    .createHash("sha256")
+    .update(await fs.readFile(zipPath))
+    .digest("hex");
+  if (actualSHA !== zipSHA) {
+    throw new Error(`SHA mismatch for ${zipURL}: expected ${zipSHA}, got ${actualSHA}`);
+  }
+  try {
+    await extractZip(zipPath, spotlightDirPath);
+    const executablePath = path.join(
+      spotlightDirPath,
+      "MCAPSpotlightImporter.mdimporter",
+      "Contents",
+      "MacOS",
+      "MCAPSpotlightImporter",
+    );
+    await extractTargetArchitecture(executablePath, context);
+  } finally {
+    await fs.unlink(zipPath).catch((err: Error) => log.error(err.toString()));
+  }
+  log.info({ path: spotlightDirPath }, "Copied mdimporter");
 }
 
 /**
@@ -58,7 +123,7 @@ async function configureQuickLookExtension(context: AfterPackContext) {
     NSExtension: {
       ...(originalInfo.NSExtension as PlistObject),
       NSExtensionAttributes: {
-        QLSupportedContentTypes: ["org.ros.bag", "dev.foxglove.mcap"],
+        QLSupportedContentTypes: ["org.ros.bag", "dev.mcap.mcap"],
         QLSupportsSearchableItems: false,
       },
     },
@@ -79,21 +144,7 @@ async function configureQuickLookExtension(context: AfterPackContext) {
   }
   log.info("Copied .webpack/quicklook into appex resources");
 
-  // When building a universal app, electron-builder uses lipo to merge binaries at the same path.
-  // Since quicklookjs already provides a universal binary, we need to strip out other architectures
-  // so that lipo doesn't fail when it gets two copies of each slice.
-  const arch = new Map([
-    [Arch.arm64, "arm64"],
-    [Arch.x64, "x86_64"],
-    [Arch.universal, "universal"],
-  ]).get(context.arch);
-  if (arch == undefined) {
-    throw new Error(`Unsupported arch ${context.arch}`);
-  }
-  if (arch !== "universal") {
-    await exec("lipo", ["-extract", arch, appexExecutablePath, "-output", appexExecutablePath]);
-    log.info(`Extracted ${arch} from appex executable`);
-  }
+  await extractTargetArchitecture(appexExecutablePath, context);
 
   // The notarization step requires a valid signature from our "Developer ID Application"
   // certificate. However this certificate is only available in CI, so for packaging to succeed in a

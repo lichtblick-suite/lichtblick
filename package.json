@@ -62,6 +62,7 @@
   "devDependencies": {
     "@actions/core": "1.6.0",
     "@actions/exec": "1.1.0",
+    "@actions/tool-cache": "2.0.1",
     "@babel/core": "7.17.2",
     "@babel/preset-env": "7.16.11",
     "@babel/preset-typescript": "7.16.7",

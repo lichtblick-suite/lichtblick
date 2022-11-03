@@ -21,12 +21,31 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@actions/core@npm:^1.2.6":
+  version: 1.10.0
+  resolution: "@actions/core@npm:1.10.0"
+  dependencies:
+    "@actions/http-client": ^2.0.1
+    uuid: ^8.3.2
+  checksum: 0a75621e007ab20d887434cdd165f0b9036f14c22252a2faed33543d8b9d04ec95d823e69ca636a25245574e4585d73e1e9e47a845339553c664f9f2c9614669
+  languageName: node
+  linkType: hard
+
 "@actions/exec@npm:1.1.0":
   version: 1.1.0
   resolution: "@actions/exec@npm:1.1.0"
   dependencies:
     "@actions/io": ^1.0.1
   checksum: 1fad630ec2ca02438e0c05a9596f375edb3b04de50bf8cd712d6b79aec9f3cc3a175836d3ea610667e32431e7749cb93d8f4dec4947a48e29a720cfc3220216c
+  languageName: node
+  linkType: hard
+
+"@actions/exec@npm:^1.0.0":
+  version: 1.1.1
+  resolution: "@actions/exec@npm:1.1.1"
+  dependencies:
+    "@actions/io": ^1.0.1
+  checksum: d976e66dd51ab03d76a143da8e1406daa1bcdee06046168e6e0bec681c87a12999eefaad7a81cb81f28e4190610f55a58b8458ae4b82cbaaba13200490f4e8c2
   languageName: node
   linkType: hard
 
@@ -39,10 +58,33 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@actions/io@npm:^1.0.1":
-  version: 1.1.1
-  resolution: "@actions/io@npm:1.1.1"
-  checksum: d291869b19ac5eea87697100fe51849ea5bacedd556f12789629a5e4ba722fc0daadb37374892301b1c446d1d3b9798ec0fea6ad39e08bccb4ec39bbffb3263e
+"@actions/http-client@npm:^2.0.1":
+  version: 2.0.1
+  resolution: "@actions/http-client@npm:2.0.1"
+  dependencies:
+    tunnel: ^0.0.6
+  checksum: 799ec3df91e28a9da91ce6592e94f8b8923ccf6cc21a2f72c7429be5af5273f1625335411adc2a1bb222d56c852d5767214dfa6fa32a6da7e81dba8290e08f17
+  languageName: node
+  linkType: hard
+
+"@actions/io@npm:^1.0.1, @actions/io@npm:^1.1.1":
+  version: 1.1.2
+  resolution: "@actions/io@npm:1.1.2"
+  checksum: 3c6583c4557abf6c95e9cfc9b6377045e65ba2c5dd4863f4feedd6be9daf4f6b60e588ab0151d5626b5f8320a37f05b8d44ab5c329b8c19f65be31b0616e1464
+  languageName: node
+  linkType: hard
+
+"@actions/tool-cache@npm:2.0.1":
+  version: 2.0.1
+  resolution: "@actions/tool-cache@npm:2.0.1"
+  dependencies:
+    "@actions/core": ^1.2.6
+    "@actions/exec": ^1.0.0
+    "@actions/http-client": ^2.0.1
+    "@actions/io": ^1.1.1
+    semver: ^6.1.0
+    uuid: ^3.3.2
+  checksum: 33f6393b9b163e4af2b9759e8d37cda4f018f10ddda3643355bb8a9f92d732e5bdff089cf8036b46d181e1ef2b3210b895b2f746fdf54487afe88f1d340aa9e1
   languageName: node
   linkType: hard
 
@@ -12725,6 +12767,7 @@ __metadata:
   dependencies:
     "@actions/core": 1.6.0
     "@actions/exec": 1.1.0
+    "@actions/tool-cache": 2.0.1
     "@babel/core": 7.17.2
     "@babel/preset-env": 7.16.11
     "@babel/preset-typescript": 7.16.7
@@ -21481,7 +21524,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"semver@npm:^6.0.0, semver@npm:^6.1.1, semver@npm:^6.1.2, semver@npm:^6.2.0, semver@npm:^6.3.0":
+"semver@npm:^6.0.0, semver@npm:^6.1.0, semver@npm:^6.1.1, semver@npm:^6.1.2, semver@npm:^6.2.0, semver@npm:^6.3.0":
   version: 6.3.0
   resolution: "semver@npm:6.3.0"
   bin:

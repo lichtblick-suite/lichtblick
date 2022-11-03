@@ -107,6 +107,7 @@
     ],
     "extraResources": [
       { "from": "resources/icon/BagIcon.png", "to": "BagIcon.png" },
+      { "from": "resources/icon/McapIcon.png", "to": "McapIcon.png" },
       { "from": "resources/icon/FoxeIcon.png", "to": "FoxeIcon.png" },
       { "from": "resources/icon/URDFIcon.png", "to": "URDFIcon.png" },
       { "from": "resources/icon/XacroIcon.png", "to": "XacroIcon.png" }
@@ -129,14 +130,14 @@
           "CFBundleTypeRole": "Viewer",
           "LSHandlerRank": "Owner",
           "CFBundleTypeIconSystemGenerated": 1,
-          "LSItemContentTypes": ["dev.foxglove.mcap"]
+          "LSItemContentTypes": ["dev.mcap.mcap"]
         },
         {
           "CFBundleTypeExtensions": ["foxe"],
           "CFBundleTypeIconFile": "FoxeIcon",
           "CFBundleTypeName": "Foxglove Studio Extension File",
           "CFBundleTypeRole": "Viewer",
-          "LSHandlerRank": "Default",
+          "LSHandlerRank": "Owner",
           "CFBundleTypeIconSystemGenerated": 1,
           "LSItemContentTypes": ["dev.foxglove.extension"]
         },
@@ -165,41 +166,48 @@
           "CFBundleTypeRole": "Viewer"
         }
       ],
-      "UTImportedTypeDeclarations": [
+      "UTExportedTypeDeclarations": [
         {
-          "UTTypeConformsTo": ["public.data"],
-          "UTTypeDescription": "ROS Bag File",
-          "UTTypeIcons": { "UTTypeIconText": "bag" },
-          "UTTypeIdentifier": "org.ros.bag",
-          "UTTypeTagSpecification": { "public.filename-extension": "bag" }
-        },
-        {
-          "UTTypeConformsTo": ["public.data"],
+          "UTTypeConformsTo": ["public.data", "public.log", "public.composite-content"],
           "UTTypeDescription": "MCAP File",
           "UTTypeIcons": { "UTTypeIconText": "mcap" },
-          "UTTypeIdentifier": "dev.foxglove.mcap",
-          "UTTypeTagSpecification": { "public.filename-extension": "mcap" }
+          "UTTypeIdentifier": "dev.mcap.mcap",
+          "UTTypeTagSpecification": { "public.filename-extension": "mcap" },
+          "UTTypeReferenceURL": "https://mcap.dev/"
         },
         {
           "UTTypeConformsTo": ["public.data", "public.archive", "public.zip-archive"],
           "UTTypeDescription": "Foxglove Studio Extension File",
           "UTTypeIcons": { "UTTypeIconText": "foxe" },
           "UTTypeIdentifier": "dev.foxglove.extension",
-          "UTTypeTagSpecification": { "public.filename-extension": "foxe" }
+          "UTTypeTagSpecification": { "public.filename-extension": "foxe" },
+          "UTTypeReferenceURL": "https://foxglove.dev/docs/studio/extensions/getting-started"
+        }
+      ],
+      "UTImportedTypeDeclarations": [
+        {
+          "UTTypeConformsTo": ["public.data", "public.log", "public.composite-content"],
+          "UTTypeDescription": "ROS 1 Bag File",
+          "UTTypeIcons": { "UTTypeIconText": "bag" },
+          "UTTypeIdentifier": "org.ros.bag",
+          "UTTypeTagSpecification": { "public.filename-extension": "bag" },
+          "UTTypeReferenceURL": "http://wiki.ros.org/Bags"
         },
         {
           "UTTypeConformsTo": ["public.xml"],
           "UTTypeDescription": "Unified Robot Description Format File",
           "UTTypeIcons": { "UTTypeIconText": "urdf" },
           "UTTypeIdentifier": "org.ros.urdf",
-          "UTTypeTagSpecification": { "public.filename-extension": "urdf" }
+          "UTTypeTagSpecification": { "public.filename-extension": "urdf" },
+          "UTTypeReferenceURL": "http://wiki.ros.org/urdf"
         },
         {
           "UTTypeConformsTo": ["public.xml"],
           "UTTypeDescription": "Xacro File",
           "UTTypeIcons": { "UTTypeIconText": "xacro" },
           "UTTypeIdentifier": "org.ros.xacro",
-          "UTTypeTagSpecification": { "public.filename-extension": "xacro" }
+          "UTTypeTagSpecification": { "public.filename-extension": "xacro" },
+          "UTTypeReferenceURL": "https://github.com/ros/xacro/wiki"
         }
       ]
     }
