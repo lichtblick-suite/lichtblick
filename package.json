@@ -89,7 +89,7 @@
     "@types/webpack-dev-server": "4.7.2",
     "@typescript-eslint/eslint-plugin": "5.36.1",
     "@typescript-eslint/parser": "5.36.1",
-    "@xmldom/xmldom": "0.8.1",
+    "@xmldom/xmldom": "0.8.3",
     "babel-jest": "27.5.1",
     "babel-plugin-transform-import-meta": "2.1.1",
     "clean-webpack-plugin": "4.0.0",
