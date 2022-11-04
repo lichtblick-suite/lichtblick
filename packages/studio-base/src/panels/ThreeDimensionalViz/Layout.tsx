@@ -42,13 +42,11 @@ import { filterMap } from "@foxglove/den/collection";
 import { useShallowMemo } from "@foxglove/hooks";
 import { Worldview, CameraState, ReglClickInfo, MouseEventObject } from "@foxglove/regl-worldview";
 import { Time } from "@foxglove/rostime";
-import { AppSetting } from "@foxglove/studio-base/AppSetting";
 import * as PanelAPI from "@foxglove/studio-base/PanelAPI";
 import { useDataSourceInfo } from "@foxglove/studio-base/PanelAPI";
 import KeyListener from "@foxglove/studio-base/components/KeyListener";
 import PanelContext from "@foxglove/studio-base/components/PanelContext";
 import PanelToolbar from "@foxglove/studio-base/components/PanelToolbar";
-import { useAppConfigurationValue } from "@foxglove/studio-base/hooks";
 import useGlobalVariables from "@foxglove/studio-base/hooks/useGlobalVariables";
 import { Save3DConfig } from "@foxglove/studio-base/panels/ThreeDimensionalViz";
 import DebugStats from "@foxglove/studio-base/panels/ThreeDimensionalViz/DebugStats";
@@ -815,21 +813,17 @@ export default function Layout({
 
   const loadModelOptions = useMemo(() => ({ ignoreColladaUpAxis }), [ignoreColladaUpAxis]);
 
-  const [closedBanner, setClosedBanner] = useAppConfigurationValue<boolean>(
-    AppSetting.CLOSED_OLD3D_DEPRECATION_BANNER,
-  );
   const [showUpgradeConfirmDialog, setShowUpgradeConfirmDialog] = useState(false);
 
-  const deprecationBanner =
-    closedBanner === true ? undefined : (
-      <Alert severity="info" color="warning" onClose={() => void setClosedBanner(true)}>
-        The 3D (Legacy) panel is now deprecated.{" "}
-        <Link color="inherit" onClick={() => setShowUpgradeConfirmDialog(true)}>
-          Upgrade to the new 3D panel
-        </Link>
-        .
-      </Alert>
-    );
+  const deprecationBanner = (
+    <Alert severity="info" color="warning">
+      The 3D (Legacy) panel is now deprecated.{" "}
+      <Link color="inherit" onClick={() => setShowUpgradeConfirmDialog(true)}>
+        Upgrade to the new 3D panel
+      </Link>
+      .
+    </Alert>
+  );
 
   const panelContext = useContext(PanelContext);
   const latestConfig = useLatest(config);
