@@ -40,11 +40,23 @@ export function float64Reader(fieldOffset: number): FieldReader {
   return (view: DataView, pointOffset: number) => view.getFloat64(pointOffset + fieldOffset, true);
 }
 
+export function isSupportedField(field: PackedElementField | PointField): boolean {
+  // Only PointFields with count === 1 are supported (doesn't apply to PackedElementFields)
+  if ("count" in field && field.count !== 1) {
+    return false;
+  }
+  return true;
+}
+
 export function getReader(
   field: PackedElementField | PointField,
   stride: number,
   forceType?: PointFieldType | NumericType,
 ): FieldReader | undefined {
+  if (!isSupportedField(field)) {
+    return undefined;
+  }
+
   const numericType = (field as Partial<PackedElementField>).type;
   if (numericType == undefined) {
     const type = forceType ?? (field as PointField).datatype;
