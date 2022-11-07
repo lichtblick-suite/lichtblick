@@ -123,7 +123,7 @@
     "chartjs-plugin-datalabels": "2.0.0",
     "chromatic": "6.7.4",
     "circular-dependency-plugin": "5.2.2",
-    "classnames": "2.3.1",
+    "classnames": "2.3.2",
     "comlink": "4.3.1",
     "cross-env": "7.0.3",
     "crypto-browserify": "3.12.0",
