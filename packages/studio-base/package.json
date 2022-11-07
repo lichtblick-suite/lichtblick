@@ -113,7 +113,7 @@
     "@types/wicg-file-system-access": "2020.9.5",
     "@types/ws": "8.5.2",
     "@uiw/react-textarea-code-editor": "2.0.3",
-    "@wojtekmaj/enzyme-adapter-react-17": "0.6.7",
+    "@wojtekmaj/enzyme-adapter-react-17": "0.7.0",
     "amplitude-js": "8.16.1",
     "argparse": "2.0.1",
     "async-mutex": "0.3.2",
