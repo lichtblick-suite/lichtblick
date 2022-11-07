@@ -45,7 +45,7 @@ export function Default(): JSX.Element {
 }
 
 export function DefaultWithTimezone(): JSX.Element {
-  return <Wrapper entries={[["timezone", "America/Los_Angeles"]]} />;
+  return <Wrapper entries={[["timezone", "UTC"]]} />;
 }
 
 ChangingTimezone.parameters = { colorScheme: "light" };
@@ -57,8 +57,8 @@ ChangingTimezone.play = async () => {
   const input = await screen.findByDisplayValue("Detect from system", { exact: false });
   await user.click(input);
 
-  await userEvent.keyboard("New_York");
-  const item = await screen.findByText("New_York", { exact: false });
+  await userEvent.keyboard("UTC (+00:00)");
+  const item = await screen.findByText("UTC", { exact: false });
   await user.click(item);
 };
 
