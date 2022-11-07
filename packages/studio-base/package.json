@@ -209,7 +209,7 @@
     "typescript-transform-paths": "3.3.1",
     "urdf-loader": "0.10.4",
     "url-search-params": "1.1.0",
-    "use-debounce": "7.0.1",
+    "use-debounce": "8.0.4",
     "use-immer": "0.7.0",
     "use-pan-and-zoom": "0.6.5",
     "uuid": "8.3.2",
