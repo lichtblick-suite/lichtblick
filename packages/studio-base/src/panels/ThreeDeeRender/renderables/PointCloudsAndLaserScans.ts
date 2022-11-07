@@ -49,9 +49,10 @@ import {
   baseColorModeSettingsNode,
   colorHasTransparency,
   ColorModeSettings,
-  COLOR_FIELDS,
+  RGBA_PACKED_FIELDS,
   getColorConverter,
   INTENSITY_FIELDS,
+  FS_SRGB_TO_LINEAR,
 } from "./pointClouds/colors";
 import { FieldReader, getReader, isSupportedField } from "./pointClouds/fieldReaders";
 import { missingTransformMessage, MISSING_TRANSFORM } from "./transforms";
@@ -71,7 +72,11 @@ type PointCloudFieldReaders = {
   xReader: FieldReader;
   yReader: FieldReader;
   zReader: FieldReader;
-  colorReader: FieldReader;
+  packedColorReader: FieldReader;
+  redReader: FieldReader;
+  greenReader: FieldReader;
+  blueReader: FieldReader;
+  alphaReader: FieldReader;
 };
 
 type NormalizedLaserScan = {
@@ -104,7 +109,6 @@ const DEFAULT_COLOR_MAP = "turbo";
 const DEFAULT_FLAT_COLOR = { r: 1, g: 1, b: 1, a: 1 };
 const DEFAULT_MIN_COLOR = { r: 100 / 255, g: 47 / 255, b: 105 / 255, a: 1 };
 const DEFAULT_MAX_COLOR = { r: 227 / 255, g: 177 / 255, b: 135 / 255, a: 1 };
-const DEFAULT_RGB_BYTE_ORDER = "rgba";
 const NEEDS_MIN_MAX = ["gradient", "colormap"];
 
 export const DEFAULT_SETTINGS: LayerSettingsPointCloudAndLaserScan = {
@@ -119,7 +123,6 @@ export const DEFAULT_SETTINGS: LayerSettingsPointCloudAndLaserScan = {
   gradient: [rgbaToCssString(DEFAULT_MIN_COLOR), rgbaToCssString(DEFAULT_MAX_COLOR)],
   colorMap: DEFAULT_COLOR_MAP,
   explicitAlpha: 1,
-  rgbByteOrder: DEFAULT_RGB_BYTE_ORDER,
   minValue: undefined,
   maxValue: undefined,
 };
@@ -143,23 +146,6 @@ const INVALID_POINTCLOUD_OR_LASERSCAN = "INVALID_POINTCLOUD_OR_LASERSCAN";
 
 const VEC3_ZERO = new THREE.Vector3();
 
-// Fragment shader chunk to convert sRGB to linear RGB. This is used by some
-// PointCloud materials to avoid expensive per-point colorspace conversion on
-// the CPU. Source: <https://github.com/mrdoob/three.js/blob/13b67d96/src/renderers/shaders/ShaderChunk/encodings_pars_fragment.glsl.js#L16-L18>
-const FS_SRGB_TO_LINEAR = /* glsl */ `
-vec3 sRGBToLinear(in vec3 value) {
-	return vec3(mix(
-    pow(value.rgb * 0.9478672986 + vec3(0.0521327014), vec3(2.4)),
-    value.rgb * 0.0773993808,
-    vec3(lessThanEqual(value.rgb, vec3(0.04045)))
-  ));
-}
-
-vec4 sRGBToLinear(in vec4 value) {
-  return vec4(sRGBToLinear(value.rgb), value.a);
-}
-`;
-
 // Fragment shader chunk to convert sRGB to linear RGB
 const FS_POINTCLOUD_SRGB_TO_LINEAR = /* glsl */ `
 outgoingLight = sRGBToLinear(outgoingLight);
@@ -177,7 +163,11 @@ const tempFieldReaders: PointCloudFieldReaders = {
   xReader: zeroReader,
   yReader: zeroReader,
   zReader: zeroReader,
-  colorReader: zeroReader,
+  packedColorReader: zeroReader,
+  redReader: zeroReader,
+  greenReader: zeroReader,
+  blueReader: zeroReader,
+  alphaReader: zeroReader,
 };
 
 export function createGeometry(topic: string, usage: THREE.Usage): DynamicBufferGeometry {
@@ -416,7 +406,11 @@ export class PointCloudAndLaserScanRenderable extends Renderable<PointCloudAndLa
     let xReader: FieldReader | undefined;
     let yReader: FieldReader | undefined;
     let zReader: FieldReader | undefined;
-    let colorReader: FieldReader | undefined;
+    let packedColorReader: FieldReader | undefined;
+    let redReader: FieldReader | undefined;
+    let greenReader: FieldReader | undefined;
+    let blueReader: FieldReader | undefined;
+    let alphaReader: FieldReader | undefined;
 
     const stride = getStride(pointCloud);
 
@@ -466,6 +460,14 @@ export class PointCloudAndLaserScanRenderable extends Renderable<PointCloudAndLa
           invalidPointCloudOrLaserScanError(this.renderer, renderable, message);
           return false;
         }
+      } else if (field.name === "red") {
+        redReader = getReader(field, stride, /*normalize*/ true);
+      } else if (field.name === "green") {
+        greenReader = getReader(field, stride, /*normalize*/ true);
+      } else if (field.name === "blue") {
+        blueReader = getReader(field, stride, /*normalize*/ true);
+      } else if (field.name === "alpha") {
+        alphaReader = getReader(field, stride, /*normalize*/ true);
       }
 
       const byteWidth = pointFieldWidth(type);
@@ -482,8 +484,8 @@ export class PointCloudAndLaserScanRenderable extends Renderable<PointCloudAndLa
               ? NumericType.UINT32
               : PointFieldType.UINT32
             : undefined;
-        colorReader = getReader(field, stride, forceType);
-        if (!colorReader) {
+        packedColorReader = getReader(field, stride, /*normalize*/ false, forceType);
+        if (!packedColorReader) {
           const typeName = pointFieldTypeName(type);
           const message = `PointCloud field "${field.name}" is invalid. type=${typeName}, offset=${field.offset}, stride=${stride}`;
           invalidPointCloudOrLaserScanError(this.renderer, renderable, message);
@@ -508,7 +510,11 @@ export class PointCloudAndLaserScanRenderable extends Renderable<PointCloudAndLa
     output.xReader = xReader ?? zeroReader;
     output.yReader = yReader ?? zeroReader;
     output.zReader = zReader ?? zeroReader;
-    output.colorReader = colorReader ?? xReader ?? yReader ?? zReader ?? zeroReader;
+    output.packedColorReader = packedColorReader ?? xReader ?? yReader ?? zReader ?? zeroReader;
+    output.redReader = redReader ?? zeroReader;
+    output.greenReader = greenReader ?? zeroReader;
+    output.blueReader = blueReader ?? zeroReader;
+    output.alphaReader = alphaReader ?? zeroReader;
     return true;
   }
 
@@ -551,34 +557,69 @@ export class PointCloudAndLaserScanRenderable extends Renderable<PointCloudAndLa
     const data = pointCloud.data;
     const view = new DataView(data.buffer, data.byteOffset, data.byteLength);
     const pointStep = getStride(pointCloud);
-    const { xReader, yReader, zReader, colorReader } = readers;
+    const {
+      xReader,
+      yReader,
+      zReader,
+      packedColorReader,
+      redReader,
+      greenReader,
+      blueReader,
+      alphaReader,
+    } = readers;
 
-    // Iterate the point cloud data to determine min/max color values (if needed)
-    this._minMaxColorValues(tempMinMaxColor, colorReader, view, pointCount, pointStep, settings);
-    const [minColorValue, maxColorValue] = tempMinMaxColor;
-
-    // Build a method to convert raw color field values to RGBA
-    const colorConverter = getColorConverter(settings, minColorValue, maxColorValue);
-
+    // Update position attribute
     for (let i = 0; i < pointCount; i++) {
       const pointOffset = i * pointStep;
-
-      // Update position attribute
       const x = xReader(view, pointOffset);
       const y = yReader(view, pointOffset);
       const z = zReader(view, pointOffset);
       positionAttribute.setXYZ(i, x, y, z);
+    }
 
-      // Update color attribute
-      const colorValue = colorReader(view, pointOffset);
-      colorConverter(tempColor, colorValue);
-      colorAttribute.setXYZW(
-        i,
-        (tempColor.r * 255) | 0,
-        (tempColor.g * 255) | 0,
-        (tempColor.b * 255) | 0,
-        (tempColor.a * 255) | 0,
+    // Update color attribute
+    if (settings.colorMode === "rgba-fields") {
+      for (let i = 0; i < pointCount; i++) {
+        const pointOffset = i * pointStep;
+        colorAttribute.setXYZW(
+          i,
+          (redReader(view, pointOffset) * 255) | 0,
+          (greenReader(view, pointOffset) * 255) | 0,
+          (blueReader(view, pointOffset) * 255) | 0,
+          (alphaReader(view, pointOffset) * 255) | 0,
+        );
+      }
+    } else {
+      // Iterate the point cloud data to determine min/max color values (if needed)
+      this._minMaxColorValues(
+        tempMinMaxColor,
+        packedColorReader,
+        view,
+        pointCount,
+        pointStep,
+        settings,
       );
+      const [minColorValue, maxColorValue] = tempMinMaxColor;
+
+      // Build a method to convert raw color field values to RGBA
+      const colorConverter = getColorConverter(
+        settings as typeof settings & { colorMode: typeof settings.colorMode },
+        minColorValue,
+        maxColorValue,
+      );
+
+      for (let i = 0; i < pointCount; i++) {
+        const pointOffset = i * pointStep;
+        const colorValue = packedColorReader(view, pointOffset);
+        colorConverter(tempColor, colorValue);
+        colorAttribute.setXYZW(
+          i,
+          (tempColor.r * 255) | 0,
+          (tempColor.g * 255) | 0,
+          (tempColor.b * 255) | 0,
+          (tempColor.a * 255) | 0,
+        );
+      }
     }
 
     positionAttribute.needsUpdate = true;
@@ -685,7 +726,14 @@ export class PointCloudAndLaserScanRenderable extends Renderable<PointCloudAndLa
     }
 
     // Build a method to convert raw color field values to RGBA
-    const colorConverter = getColorConverter(settings, minColorValue, maxColorValue);
+    const colorConverter =
+      settings.colorMode === "rgba-fields"
+        ? () => NaN // should never happen: rgba-fields is not supported for LaserScans
+        : getColorConverter(
+            settings as typeof settings & { colorMode: typeof settings.colorMode },
+            minColorValue,
+            maxColorValue,
+          );
 
     // Iterate the point cloud data to update color attribute
     for (let i = 0; i < ranges.length; i++) {
@@ -860,7 +908,7 @@ export class PointCloudsAndLaserScans extends SceneExtension<PointCloudAndLaserS
         | undefined;
       const settings = { ...DEFAULT_SETTINGS, ...userSettings };
       if (settings.colorField == undefined) {
-        autoSelectColorField(settings, pointCloud);
+        autoSelectColorField(settings, pointCloud, { supportsPackedRgbModes: false });
 
         // Update user settings with the newly selected color field
         this.renderer.updateConfig((draft) => {
@@ -868,7 +916,6 @@ export class PointCloudsAndLaserScans extends SceneExtension<PointCloudAndLaserS
           updatedUserSettings.colorField = settings.colorField;
           updatedUserSettings.colorMode = settings.colorMode;
           updatedUserSettings.colorMap = settings.colorMap;
-          updatedUserSettings.rgbByteOrder = settings.rgbByteOrder;
           draft.topics[topic] = updatedUserSettings;
         });
       }
@@ -942,7 +989,7 @@ export class PointCloudsAndLaserScans extends SceneExtension<PointCloudAndLaserS
         | undefined;
       const settings = { ...DEFAULT_SETTINGS, ...userSettings };
       if (settings.colorField == undefined) {
-        autoSelectColorField(settings, pointCloud);
+        autoSelectColorField(settings, pointCloud, { supportsPackedRgbModes: true });
 
         // Update user settings with the newly selected color field
         this.renderer.updateConfig((draft) => {
@@ -950,7 +997,6 @@ export class PointCloudsAndLaserScans extends SceneExtension<PointCloudAndLaserS
           updatedUserSettings.colorField = settings.colorField;
           updatedUserSettings.colorMode = settings.colorMode;
           updatedUserSettings.colorMap = settings.colorMap;
-          updatedUserSettings.rgbByteOrder = settings.rgbByteOrder;
           draft.topics[topic] = updatedUserSettings;
         });
       }
@@ -1046,7 +1092,6 @@ export class PointCloudsAndLaserScans extends SceneExtension<PointCloudAndLaserS
           updatedUserSettings.colorField = settings.colorField;
           updatedUserSettings.colorMode = settings.colorMode;
           updatedUserSettings.colorMap = settings.colorMap;
-          updatedUserSettings.rgbByteOrder = settings.rgbByteOrder;
           draft.topics[topic] = updatedUserSettings;
         });
       }
@@ -1376,9 +1421,11 @@ function pointCloudColorEncoding(settings: LayerSettingsPointCloudAndLaserScan):
     case "flat":
     case "colormap":
     case "gradient":
+      // converted to linear by getColorConverter
       return "linear";
     case "rgb":
     case "rgba":
+    case "rgba-fields":
       return "srgb";
   }
 }
@@ -1386,39 +1433,28 @@ function pointCloudColorEncoding(settings: LayerSettingsPointCloudAndLaserScan):
 export function autoSelectColorField(
   output: LayerSettingsPointCloudAndLaserScan,
   pointCloud: PointCloud | PointCloud2,
+  { supportsPackedRgbModes }: { supportsPackedRgbModes: boolean },
 ): void {
   // Prefer color fields first
-  for (const field of pointCloud.fields) {
-    if (!isSupportedField(field)) {
-      continue;
-    }
-    const fieldNameLower = field.name.toLowerCase();
-    if (COLOR_FIELDS.has(fieldNameLower)) {
-      output.colorField = field.name;
-      switch (fieldNameLower) {
-        case "rgb":
-          output.colorMode = "rgb";
-          output.rgbByteOrder = "abgr";
-          break;
-        default:
-        case "rgba":
-          output.colorMode = "rgba";
-          output.rgbByteOrder = "abgr";
-          break;
-        case "bgr":
-          output.colorMode = "rgb";
-          output.rgbByteOrder = "bgra";
-          break;
-        case "bgra":
-          output.colorMode = "rgba";
-          output.rgbByteOrder = "bgra";
-          break;
-        case "abgr":
-          output.colorMode = "rgba";
-          output.rgbByteOrder = "abgr";
-          break;
+  if (supportsPackedRgbModes) {
+    for (const field of pointCloud.fields) {
+      if (!isSupportedField(field)) {
+        continue;
       }
-      return;
+      const fieldNameLower = field.name.toLowerCase();
+      if (RGBA_PACKED_FIELDS.has(fieldNameLower)) {
+        output.colorField = field.name;
+        switch (fieldNameLower) {
+          case "rgb":
+            output.colorMode = "rgb";
+            break;
+          default:
+          case "rgba":
+            output.colorMode = "rgba";
+            break;
+        }
+        return;
+      }
     }
   }
 
@@ -1462,7 +1498,8 @@ export function pointCloudSettingsNode(
   const decayTime = config.decayTime;
 
   const node = baseColorModeSettingsNode(msgFields, config, topic, DEFAULT_SETTINGS, {
-    supportsRgbModes: kind === "pointcloud",
+    supportsPackedRgbModes: ROS_POINTCLOUD_DATATYPES.has(topic.schemaName),
+    supportsRgbaFieldsMode: FOXGLOVE_POINTCLOUD_DATATYPES.has(topic.schemaName),
   });
   node.fields = {
     pointSize: {

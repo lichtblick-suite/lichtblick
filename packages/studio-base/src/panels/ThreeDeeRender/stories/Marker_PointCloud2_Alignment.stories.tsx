@@ -8,7 +8,7 @@ import PanelSetup from "@foxglove/studio-base/stories/PanelSetup";
 
 import ThreeDeeRender from "../index";
 import { Marker, MarkerType, PointCloud2, TransformStamped } from "../ros";
-import { makeColor, QUAT_IDENTITY, rad2deg, rgba, VEC3_ZERO } from "./common";
+import { makeColor, QUAT_IDENTITY, rad2deg, packRvizRgba, VEC3_ZERO } from "./common";
 import useDelayedFixture from "./useDelayedFixture";
 
 export default {
@@ -97,7 +97,7 @@ export function Marker_PointCloud2_Alignment(): JSX.Element {
     view.setFloat32(offset + 0, x, true);
     view.setFloat32(offset + 4, y, true);
     view.setFloat32(offset + 8, z, true);
-    view.setUint32(offset + 12, rgba(c.r, c.g, c.b, c.a), true);
+    view.setUint32(offset + 12, packRvizRgba(c.r, c.g, c.b, c.a), true);
   }
 
   const data = new Uint8Array(3 * 16);
@@ -154,7 +154,6 @@ export function Marker_PointCloud2_Alignment(): JSX.Element {
               pointSize: 30,
               colorMode: "rgba",
               colorField: "rgba",
-              rgbByteOrder: "rgba",
             },
           },
           followTf: "base_link",

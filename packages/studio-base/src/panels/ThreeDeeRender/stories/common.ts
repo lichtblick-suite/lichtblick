@@ -152,13 +152,17 @@ export function makeColor(hex: string, alpha?: number): ColorRGBA {
   return color;
 }
 
+/**
+ * Pack RGBA values into a uint32 in the order expected by RViz:
+ * https://github.com/ros-visualization/rviz/blob/a60b334fd10785a6b74893189fcebbd419d468e4/src/rviz/default_plugin/point_cloud_transformers.cpp#L400-L404
+ */
 // ts-prune-ignore-next
-export function rgba(r: number, g: number, b: number, a: number): number {
+export function packRvizRgba(r: number, g: number, b: number, a: number): number {
   return (
-    (Math.trunc(r * 255) << 24) |
-    (Math.trunc(g * 255) << 16) |
-    (Math.trunc(b * 255) << 8) |
-    Math.trunc(a * 255)
+    (Math.trunc(a * 255) << 24) |
+    (Math.trunc(r * 255) << 16) |
+    (Math.trunc(g * 255) << 8) |
+    Math.trunc(b * 255)
   );
 }
 

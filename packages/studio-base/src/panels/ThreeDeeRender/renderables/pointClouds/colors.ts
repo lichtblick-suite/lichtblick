@@ -19,22 +19,21 @@ const tempColor2 = { r: 0, g: 0, b: 0, a: 0 };
 export const NEEDS_MIN_MAX = ["gradient", "colormap"];
 
 export interface ColorModeSettings {
-  colorMode: "flat" | "gradient" | "colormap" | "rgb" | "rgba";
+  colorMode: "flat" | "gradient" | "colormap" | "rgb" | "rgba" | "rgba-fields";
   flatColor: string;
   colorField?: string;
   gradient: [string, string];
   colorMap: "turbo" | "rainbow";
   explicitAlpha: number;
-  rgbByteOrder: "rgba" | "bgra" | "abgr";
   minValue?: number;
   maxValue?: number;
 }
 
-export function getColorConverter<Settings extends ColorModeSettings>(
-  settings: Settings,
-  minValue: number,
-  maxValue: number,
-): ColorConverter {
+export function getColorConverter<
+  Settings extends ColorModeSettings & {
+    readonly colorMode: Exclude<ColorModeSettings["colorMode"], "rgba-fields">;
+  },
+>(settings: Settings, minValue: number, maxValue: number): ColorConverter {
   switch (settings.colorMode) {
     case "flat": {
       const flatColor = stringToRgba(tempColor1, settings.flatColor);
@@ -63,107 +62,42 @@ export function getColorConverter<Settings extends ColorModeSettings>(
         case "turbo":
           return (output: ColorRGBA, colorValue: number) => {
             const t = (colorValue - minValue) / valueDelta;
-            turboCached(output, t);
+            turboLinearCached(output, t);
             output.a = settings.explicitAlpha;
           };
         case "rainbow":
           return (output: ColorRGBA, colorValue: number) => {
             const t = (colorValue - minValue) / valueDelta;
-            rainbow(output, t);
+            rainbowLinear(output, t);
             output.a = settings.explicitAlpha;
           };
       }
       throw new Error(`Unrecognized color map: ${settings.colorMap}`);
     }
     case "rgb":
-      switch (settings.rgbByteOrder) {
-        default:
-        case "rgba":
-          return (output: ColorRGBA, colorValue: number) => {
-            getColorRgb(output, colorValue);
-            output.a = settings.explicitAlpha;
-          };
-        case "bgra":
-          return (output: ColorRGBA, colorValue: number) => {
-            getColorBgr(output, colorValue);
-            output.a = settings.explicitAlpha;
-          };
-        case "abgr":
-          return (output: ColorRGBA, colorValue: number) => {
-            getColor0bgr(output, colorValue);
-            output.a = settings.explicitAlpha;
-          };
-      }
+      return (output: ColorRGBA, colorValue: number) => {
+        getColorBgra(output, colorValue);
+        output.a = settings.explicitAlpha;
+      };
     case "rgba":
-      switch (settings.rgbByteOrder) {
-        default:
-        case "rgba":
-          return getColorRgba;
-        case "bgra":
-          return getColorBgra;
-        case "abgr":
-          return getColorAbgr;
-      }
+      return getColorBgra;
   }
 }
 
-// 0xrrggbb00
-function getColorRgb(output: ColorRGBA, colorValue: number): void {
-  const num = colorValue >>> 0;
-  output.r = ((num & 0xff000000) >>> 24) / 255;
-  output.g = ((num & 0x00ff0000) >>> 16) / 255;
-  output.b = ((num & 0x0000ff00) >>> 8) / 255;
-  output.a = 1;
-}
-
-// 0xrrggbbaa
-function getColorRgba(output: ColorRGBA, colorValue: number): void {
-  const num = colorValue >>> 0;
-  output.r = ((num & 0xff000000) >>> 24) / 255;
-  output.g = ((num & 0x00ff0000) >>> 16) / 255;
-  output.b = ((num & 0x0000ff00) >>> 8) / 255;
-  output.a = ((num & 0x000000ff) >>> 0) / 255;
-}
-
-// 0xbbggrr00
-function getColorBgr(output: ColorRGBA, colorValue: number): void {
-  const num = colorValue >>> 0;
-  output.r = ((num & 0x0000ff00) >>> 8) / 255;
-  output.g = ((num & 0x00ff0000) >>> 16) / 255;
-  output.b = ((num & 0xff000000) >>> 24) / 255;
-  output.a = 1;
-}
-
-// 0xbbggrraa
+// 0xaarrggbb
+// Matches rviz behavior:
+// https://github.com/ros-visualization/rviz/blob/a60b334fd10785a6b74893189fcebbd419d468e4/src/rviz/default_plugin/point_cloud_transformers.cpp#L383-L406
 function getColorBgra(output: ColorRGBA, colorValue: number): void {
   const num = colorValue >>> 0;
-  output.r = ((num & 0x0000ff00) >>> 8) / 255;
-  output.g = ((num & 0x00ff0000) >>> 16) / 255;
-  output.b = ((num & 0xff000000) >>> 24) / 255;
-  output.a = ((num & 0x000000ff) >>> 0) / 255;
-}
-
-// 0x00bbggrr
-function getColor0bgr(output: ColorRGBA, colorValue: number): void {
-  const num = colorValue >>> 0;
-  output.r = ((num & 0x000000ff) >>> 0) / 255;
-  output.g = ((num & 0x0000ff00) >>> 8) / 255;
-  output.b = ((num & 0x00ff0000) >>> 16) / 255;
-  output.a = 1;
-}
-
-// 0xaabbggrr
-function getColorAbgr(output: ColorRGBA, colorValue: number): void {
-  const num = colorValue >>> 0;
-  output.r = ((num & 0x000000ff) >>> 0) / 255;
-  output.g = ((num & 0x0000ff00) >>> 8) / 255;
-  output.b = ((num & 0x00ff0000) >>> 16) / 255;
   output.a = ((num & 0xff000000) >>> 24) / 255;
+  output.r = ((num & 0x00ff0000) >>> 16) / 255;
+  output.g = ((num & 0x0000ff00) >>> 8) / 255;
+  output.b = ((num & 0x000000ff) >>> 0) / 255;
 }
 
 // taken from http://docs.ros.org/jade/api/rviz/html/c++/point__cloud__transformers_8cpp_source.html
 // line 47
-function rainbow(output: ColorRGBA, pct: number): void {
+function rainbowLinear(output: ColorRGBA, pct: number): void {
   const h = (1.0 - clamp(pct, 0, 1)) * 5.0 + 1.0;
   const i = Math.floor(h);
   let f = h % 1;
@@ -206,7 +140,7 @@ const v4 = new THREE.Vector4();
 const v2 = new THREE.Vector2();
 
 // adapted from https://gist.github.com/mikhailov-work/0d177465a8151eb6ede1768d51d476c7
-function turbo(output: ColorRGBA, pct: number): void {
+function turboLinear(output: ColorRGBA, pct: number): void {
   // Clamp the input between [0.0, 1.0], then scale to the range [0.01, 1.0]
   const x = clamp(pct, 0.0, 1.0) * 0.99 + 0.01;
   v4.set(1, x, x * x, x * x * x);
@@ -224,12 +158,12 @@ const TURBO_LOOKUP_SIZE = 65535;
 
 // Builds a one-time lookup table for the turbo() function then uses it to
 // convert `pct` to a color
-function turboCached(output: ColorRGBA, pct: number): void {
+function turboLinearCached(output: ColorRGBA, pct: number): void {
   if (!TurboLookup) {
     TurboLookup = new Float32Array(TURBO_LOOKUP_SIZE * 3);
     const tempColor = { r: 0, g: 0, b: 0, a: 0 };
     for (let i = 0; i < TURBO_LOOKUP_SIZE; i++) {
-      turbo(tempColor, i / (TURBO_LOOKUP_SIZE - 1));
+      turboLinear(tempColor, i / (TURBO_LOOKUP_SIZE - 1));
       const offset = i * 3;
       TurboLookup[offset + 0] = tempColor.r;
       TurboLookup[offset + 1] = tempColor.g;
@@ -243,42 +177,31 @@ function turboCached(output: ColorRGBA, pct: number): void {
   output.b = TurboLookup[offset + 2]!;
   output.a = 1;
 }
-export const COLOR_FIELDS = new Set<string>(["rgb", "rgba", "bgr", "bgra", "abgr", "color"]);
+export const RGBA_PACKED_FIELDS = new Set<string>(["rgb", "rgba"]);
 export const INTENSITY_FIELDS = new Set<string>(["intensity", "i"]);
 
 export function autoSelectColorField<Settings extends ColorModeSettings>(
   output: Settings,
   fields: PackedElementField[],
+  { supportsPackedRgbModes }: { supportsPackedRgbModes: boolean },
 ): void {
   // Prefer color fields first
-  for (const field of fields) {
-    const fieldNameLower = field.name.toLowerCase();
-    if (COLOR_FIELDS.has(fieldNameLower)) {
-      output.colorField = field.name;
-      switch (fieldNameLower) {
-        case "rgb":
-          output.colorMode = "rgb";
-          output.rgbByteOrder = "abgr";
-          break;
-        default:
-        case "rgba":
-          output.colorMode = "rgba";
-          output.rgbByteOrder = "abgr";
-          break;
-        case "bgr":
-          output.colorMode = "rgb";
-          output.rgbByteOrder = "bgra";
-          break;
-        case "bgra":
-          output.colorMode = "rgba";
-          output.rgbByteOrder = "bgra";
-          break;
-        case "abgr":
-          output.colorMode = "rgba";
-          output.rgbByteOrder = "abgr";
-          break;
+  if (supportsPackedRgbModes) {
+    for (const field of fields) {
+      const fieldNameLower = field.name.toLowerCase();
+      if (RGBA_PACKED_FIELDS.has(fieldNameLower)) {
+        output.colorField = field.name;
+        switch (fieldNameLower) {
+          case "rgb":
+            output.colorMode = "rgb";
+            break;
+          default:
+          case "rgba":
+            output.colorMode = "rgba";
+            break;
+        }
+        return;
       }
-      return;
     }
   }
 
@@ -292,10 +215,15 @@ export function autoSelectColorField<Settings extends ColorModeSettings>(
   }
 }
 
-export function bestColorByField(fields: string[]): string {
-  for (const field of fields) {
-    if (COLOR_FIELDS.has(field)) {
-      return field;
+function bestColorByField(
+  fields: string[],
+  { supportsPackedRgbModes }: { supportsPackedRgbModes: boolean },
+): string {
+  if (supportsPackedRgbModes) {
+    for (const field of fields) {
+      if (RGBA_PACKED_FIELDS.has(field)) {
+        return field;
+      }
     }
   }
   for (const field of fields) {
@@ -306,21 +234,47 @@ export function bestColorByField(fields: string[]): string {
   return fields.find((field) => field === "x") || fields[0] ? fields[0]! : "";
 }
 
+function hasSeparateRgbaFields(fields: string[]) {
+  let r = false;
+  let g = false;
+  let b = false;
+  let a = false;
+  for (const field of fields) {
+    switch (field) {
+      case "red":
+        r = true;
+        break;
+      case "green":
+        g = true;
+        break;
+      case "blue":
+        b = true;
+        break;
+      case "alpha":
+        a = true;
+        break;
+    }
+  }
+  return r && g && b && a;
+}
+
 export function baseColorModeSettingsNode<Settings extends ColorModeSettings & BaseSettings>(
   msgFields: string[],
   config: Partial<Settings>,
   topic: Topic,
   defaults: Settings,
-  { supportsRgbModes }: { supportsRgbModes: boolean },
+  {
+    supportsPackedRgbModes,
+    supportsRgbaFieldsMode,
+  }: { supportsPackedRgbModes: boolean; supportsRgbaFieldsMode: boolean },
 ): SettingsTreeNode & { fields: NonNullable<SettingsTreeNode["fields"]> } {
   const colorMode = config.colorMode ?? "flat";
   const flatColor = config.flatColor ?? "#ffffff";
-  const colorField = config.colorField ?? bestColorByField(msgFields);
+  const colorField = config.colorField ?? bestColorByField(msgFields, { supportsPackedRgbModes });
   const colorFieldOptions = msgFields.map((field) => ({ label: field, value: field }));
   const gradient = config.gradient;
   const colorMap = config.colorMap ?? "turbo";
   const explicitAlpha = config.explicitAlpha ?? 1;
-  const rgbByteOrder = config.rgbByteOrder ?? "rgba";
   const minValue = config.minValue;
   const maxValue = config.maxValue;
 
@@ -333,19 +287,25 @@ export function baseColorModeSettingsNode<Settings extends ColorModeSettings & B
       { label: "Flat", value: "flat" },
       { label: "Color map", value: "colormap" },
       { label: "Gradient", value: "gradient" },
-    ].concat(
-      supportsRgbModes
-        ? [
-            { label: "RGB", value: "rgb" },
-            { label: "RGBA", value: "rgba" },
-          ]
-        : [],
-    ),
+    ]
+      .concat(
+        supportsPackedRgbModes
+          ? [
+              { label: "BGR (packed)", value: "rgb" },
+              { label: "BGRA (packed)", value: "rgba" },
+            ]
+          : [],
+      )
+      .concat(
+        supportsRgbaFieldsMode && hasSeparateRgbaFields(msgFields)
+          ? [{ label: "RGBA (separate fields)", value: "rgba-fields" }]
+          : [],
+      ),
     value: colorMode,
   };
   if (colorMode === "flat") {
     fields.flatColor = { label: "Flat color", input: "rgba", value: flatColor };
-  } else {
+  } else if (colorMode !== "rgba-fields") {
     fields.colorField = {
       label: "Color by",
       input: "select",
@@ -370,30 +330,6 @@ export function baseColorModeSettingsNode<Settings extends ColorModeSettings & B
             { label: "Rainbow", value: "rainbow" },
           ],
           value: colorMap,
-        };
-        break;
-      case "rgb":
-        fields.rgbByteOrder = {
-          label: "RGB byte order",
-          input: "select",
-          options: [
-            { label: "RGB", value: "rgba" },
-            { label: "BGR", value: "bgra" },
-            { label: "XBGR", value: "abgr" },
-          ],
-          value: rgbByteOrder,
-        };
-        break;
-      case "rgba":
-        fields.rgbByteOrder = {
-          label: "RGBA byte order",
-          input: "select",
-          options: [
-            { label: "RGBA", value: "rgba" },
-            { label: "BGRA", value: "bgra" },
-            { label: "ABGR", value: "abgr" },
-          ],
-          value: rgbByteOrder,
         };
         break;
       default:
@@ -454,7 +390,25 @@ export function colorHasTransparency<Settings extends ColorModeSettings>(
     case "rgb":
       return settings.explicitAlpha < 1.0;
     case "rgba":
+    case "rgba-fields":
       // It's too expensive to check the alpha value of each color. Just assume it's transparent
       return true;
   }
 }
+
+// Fragment shader chunk to convert sRGB to linear RGB. This is used by some
+// PointCloud materials to avoid expensive per-point colorspace conversion on
+// the CPU. Source: <https://github.com/mrdoob/three.js/blob/13b67d96/src/renderers/shaders/ShaderChunk/encodings_pars_fragment.glsl.js#L16-L18>
+export const FS_SRGB_TO_LINEAR = /* glsl */ `
+vec3 sRGBToLinear(in vec3 value) {
+	return vec3(mix(
+    pow(value.rgb * 0.9478672986 + vec3(0.0521327014), vec3(2.4)),
+    value.rgb * 0.0773993808,
+    vec3(lessThanEqual(value.rgb, vec3(0.04045)))
+  ));
+}
+
+vec4 sRGBToLinear(in vec4 value) {
+  return vec4(sRGBToLinear(value.rgb), value.a);
+}
+`;

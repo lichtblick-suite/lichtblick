@@ -206,7 +206,7 @@ export class VelodyneScans extends SceneExtension<PointCloudAndLaserScanRenderab
         | undefined;
       const settings = { ...DEFAULT_SETTINGS, ...userSettings };
       if (settings.colorField == undefined) {
-        autoSelectColorField(settings, pointCloud);
+        autoSelectColorField(settings, pointCloud, { supportsPackedRgbModes: false });
 
         // Update user settings with the newly selected color field
         this.renderer.updateConfig((draft) => {

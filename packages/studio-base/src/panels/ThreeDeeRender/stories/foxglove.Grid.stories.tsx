@@ -256,24 +256,16 @@ function Foxglove_Grid_Uint8(): JSX.Element {
     </PanelSetup>
   );
 }
-function rgba(r: number, g: number, b: number, a: number) {
-  return (
-    (Math.trunc(r * 255) << 24) |
-    (Math.trunc(g * 255) << 16) |
-    (Math.trunc(b * 255) << 8) |
-    Math.trunc(a * 255)
-  );
-}
 
 function f(x: number, y: number, size = 128) {
   return (x / size - 0.5) ** 2 + (y / size - 0.5) ** 2;
 }
-function jet(x: number, a: number): number {
+function jet(x: number, a: number) {
   const i = Math.trunc(x * 255);
   const r = Math.max(0, Math.min(255, 4 * (i - 96), 255 - 4 * (i - 224)));
   const g = Math.max(0, Math.min(255, 4 * (i - 32), 255 - 4 * (i - 160)));
   const b = Math.max(0, Math.min(255, 4 * i + 127, 255 - 4 * (i - 96)));
-  return rgba(r / 255, g / 255, b / 255, a);
+  return { r, g, b, a: (a * 255) | 0 };
 }
 function Foxglove_Grid_RGBA(): JSX.Element {
   const topics: Topic[] = [
@@ -319,7 +311,11 @@ function Foxglove_Grid_RGBA(): JSX.Element {
   for (let i = 0; i < rowCount; i++) {
     for (let j = 0; j < column_count; j++) {
       const offset = i * column_count + j;
-      view.setUint32(offset * 4, jet(f(i, j) * 2, i / rowCount), true);
+      const { r, g, b, a } = jet(f(i, j) * 2, i / rowCount);
+      view.setUint8(offset * 4 + 0, r);
+      view.setUint8(offset * 4 + 1, g);
+      view.setUint8(offset * 4 + 2, b);
+      view.setUint8(offset * 4 + 3, a);
     }
   }
   const cell_size = {
@@ -345,7 +341,12 @@ function Foxglove_Grid_RGBA(): JSX.Element {
       column_count,
       cell_stride,
       row_stride,
-      fields: [{ name: "color", offset: 0, type: NumericType.UINT32 }],
+      fields: [
+        { name: "red", offset: 0, type: NumericType.UINT8 },
+        { name: "green", offset: 1, type: NumericType.UINT8 },
+        { name: "blue", offset: 2, type: NumericType.UINT8 },
+        { name: "alpha", offset: 3, type: NumericType.UINT8 },
+      ],
       data,
     },
     sizeInBytes: 0,
@@ -371,8 +372,8 @@ function Foxglove_Grid_RGBA(): JSX.Element {
           topics: {
             "/grid": {
               visible: true,
-              colorField: "color",
-              colorMode: "rgba",
+              colorField: "red",
+              colorMode: "rgba-fields",
             } as LayerSettingsFoxgloveGrid,
           },
           layers: {

@@ -10,22 +10,13 @@ import PanelSetup from "@foxglove/studio-base/stories/PanelSetup";
 
 import ThreeDeeRender from "../index";
 import { PointCloud2, TransformStamped } from "../ros";
-import { QUAT_IDENTITY, rad2deg } from "./common";
+import { packRvizRgba, QUAT_IDENTITY, rad2deg } from "./common";
 import useDelayedFixture from "./useDelayedFixture";
 
 export default {
   title: "panels/ThreeDeeRender",
   component: ThreeDeeRender,
 };
-
-function rgba(r: number, g: number, b: number, a: number) {
-  return (
-    (Math.trunc(r * 255) << 24) |
-    (Math.trunc(g * 255) << 16) |
-    (Math.trunc(b * 255) << 8) |
-    Math.trunc(a * 255)
-  );
-}
 
 export const SensorMsgs_PointCloud2_RGBA = (): JSX.Element => (
   <SensorMsgs_PointCloud2 rgbaFieldName="rgba" />
@@ -82,7 +73,7 @@ function SensorMsgs_PointCloud2({ rgbaFieldName }: { rgbaFieldName: string }): J
     const r = Math.max(0, Math.min(255, 4 * (i - 96), 255 - 4 * (i - 224)));
     const g = Math.max(0, Math.min(255, 4 * (i - 32), 255 - 4 * (i - 160)));
     const b = Math.max(0, Math.min(255, 4 * i + 127, 255 - 4 * (i - 96)));
-    return rgba(r / 255, g / 255, b / 255, a);
+    return packRvizRgba(r / 255, g / 255, b / 255, a);
   }
 
   const data = new Uint8Array(128 * 128 * 16);
@@ -143,7 +134,6 @@ function SensorMsgs_PointCloud2({ rgbaFieldName }: { rgbaFieldName: string }): J
               pointSize: 10,
               colorMode: rgbaFieldName,
               colorField: rgbaFieldName,
-              rgbByteOrder: "rgba",
             },
           },
           layers: {

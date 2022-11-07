@@ -22,32 +22,15 @@ export default {
   },
 };
 
-function rgba(r: number, g: number, b: number, a: number) {
-  return (
-    (Math.trunc(r * 255) << 24) |
-    (Math.trunc(g * 255) << 16) |
-    (Math.trunc(b * 255) << 8) |
-    Math.trunc(a * 255)
-  );
-}
+export const Foxglove_PointCloud_RGBA = (): JSX.Element => <Foxglove_PointCloud />;
 
-export const Foxglove_PointCloud_RGBA = (): JSX.Element => (
-  <Foxglove_PointCloud rgbaFieldName="rgba" />
-);
-
-export const Foxglove_PointCloud_RGB = (): JSX.Element => (
-  <Foxglove_PointCloud rgbaFieldName="rgb" />
-);
-
-export const Foxglove_PointCloud_RGB_Square = (): JSX.Element => (
-  <Foxglove_PointCloud rgbaFieldName="rgb" pointShape="square" />
+export const Foxglove_PointCloud_RGBA_Square = (): JSX.Element => (
+  <Foxglove_PointCloud pointShape="square" />
 );
 
 function Foxglove_PointCloud({
-  rgbaFieldName,
   pointShape = "circle",
 }: {
-  rgbaFieldName: string;
   pointShape?: "circle" | "square";
 }): JSX.Element {
   const topics: Topic[] = [
@@ -89,12 +72,12 @@ function Foxglove_PointCloud({
     return (x / 128 - 0.5) ** 2 + (y / 128 - 0.5) ** 2;
   }
 
-  function jet(x: number, a: number): number {
+  function jet(x: number, a: number) {
     const i = Math.trunc(x * 255);
     const r = Math.max(0, Math.min(255, 4 * (i - 96), 255 - 4 * (i - 224)));
     const g = Math.max(0, Math.min(255, 4 * (i - 32), 255 - 4 * (i - 160)));
     const b = Math.max(0, Math.min(255, 4 * i + 127, 255 - 4 * (i - 96)));
-    return rgba(r / 255, g / 255, b / 255, a);
+    return { r, g, b, a };
   }
 
   const data = new Uint8Array(128 * 128 * 16);
@@ -105,7 +88,11 @@ function Foxglove_PointCloud({
       view.setFloat32(i + 0, x * SCALE - 5, true);
       view.setFloat32(i + 4, y * SCALE - 5, true);
       view.setFloat32(i + 8, f(x, y) * 5, true);
-      view.setUint32(i + 12, jet(f(x, y) * 2, x / 128), true);
+      const { r, g, b, a } = jet(f(x, y) * 2, x / 128);
+      view.setUint8(i + 12, r);
+      view.setUint8(i + 13, g);
+      view.setUint8(i + 14, b);
+      view.setUint8(i + 15, (a * 255) | 0);
     }
   }
 
@@ -121,7 +108,10 @@ function Foxglove_PointCloud({
         { name: "x", offset: 0, type: 7 },
         { name: "y", offset: 4, type: 7 },
         { name: "z", offset: 8, type: 7 },
-        { name: rgbaFieldName, offset: 12, type: 6 },
+        { name: "red", offset: 12, type: 1 },
+        { name: "green", offset: 13, type: 1 },
+        { name: "blue", offset: 14, type: 1 },
+        { name: "alpha", offset: 15, type: 1 },
       ],
       data,
     },
@@ -151,9 +141,8 @@ function Foxglove_PointCloud({
               visible: true,
               pointSize: 10,
               pointShape,
-              colorMode: rgbaFieldName,
-              colorField: rgbaFieldName,
-              rgbByteOrder: "rgba",
+              colorMode: "rgba-fields",
+              colorField: "x",
             },
           },
           layers: {
