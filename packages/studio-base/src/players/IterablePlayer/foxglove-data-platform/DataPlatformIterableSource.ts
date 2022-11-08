@@ -189,12 +189,21 @@ export class DataPlatformIterableSource implements IIterableSource {
     let profile: string | undefined;
 
     // Workaround for https://github.com/foxglove/studio/issues/4690.
-    // If all topics use ros1 schemas and message encodings, assume we are working with the ros1 profile data.
+    // If all topics use ros1/2 schemas and message encodings, assume we are working with the ros1/2 profile data.
     if (
       rawTopics.length > 0 &&
       rawTopics.every((topic) => topic.encoding === "ros1" && topic.schemaEncoding === "ros1msg")
     ) {
       profile = "ros1";
+    } else if (
+      rawTopics.length > 0 &&
+      rawTopics.every(
+        (topic) =>
+          topic.encoding === "cdr" &&
+          (topic.schemaEncoding === "ros2msg" || topic.schemaEncoding === "ros2idl"),
+      )
+    ) {
+      profile = "ros2";
     }
 
     this._knownTopicNames = topics.map((topic) => topic.name);
