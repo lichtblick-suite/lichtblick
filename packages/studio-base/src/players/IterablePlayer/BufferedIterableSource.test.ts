@@ -82,6 +82,7 @@ describe("BufferedIterableSource", () => {
     ): AsyncIterableIterator<Readonly<IteratorResult>> {
       for (let i = 0; i < 8; ++i) {
         yield {
+          type: "message-event",
           msgEvent: {
             topic: "a",
             receiveTime: { sec: i, nsec: 0 },
@@ -89,8 +90,6 @@ describe("BufferedIterableSource", () => {
             sizeInBytes: 0,
             schemaName: "foo",
           },
-          problem: undefined,
-          connectionId: undefined,
         };
       }
     };
@@ -105,8 +104,7 @@ describe("BufferedIterableSource", () => {
       await expect(iterResult).resolves.toEqual({
         done: false,
         value: {
-          problem: undefined,
-          connectionId: undefined,
+          type: "message-event",
           msgEvent: {
             receiveTime: { sec: i, nsec: 0 },
             message: undefined,
@@ -143,6 +141,7 @@ describe("BufferedIterableSource", () => {
 
       for (let i = 0; i < 8; ++i) {
         yield {
+          type: "message-event",
           msgEvent: {
             topic: "a",
             receiveTime: { sec: i, nsec: 0 },
@@ -150,8 +149,6 @@ describe("BufferedIterableSource", () => {
             sizeInBytes: 0,
             schemaName: "foo",
           },
-          problem: undefined,
-          connectionId: undefined,
         };
       }
       signal.notify();
@@ -168,8 +165,7 @@ describe("BufferedIterableSource", () => {
         await expect(iterResult).resolves.toEqual({
           done: false,
           value: {
-            problem: undefined,
-            connectionId: undefined,
+            type: "message-event",
             msgEvent: {
               receiveTime: { sec: i, nsec: 0 },
               message: undefined,
@@ -204,6 +200,7 @@ describe("BufferedIterableSource", () => {
     ): AsyncIterableIterator<Readonly<IteratorResult>> {
       for (let i = 0; i < 8; ++i) {
         yield {
+          type: "message-event",
           msgEvent: {
             topic: "a",
             receiveTime: { sec: i, nsec: 0 },
@@ -211,8 +208,6 @@ describe("BufferedIterableSource", () => {
             sizeInBytes: 0,
             schemaName: "foo",
           },
-          problem: undefined,
-          connectionId: undefined,
         };
       }
       signal.notify();
@@ -232,8 +227,7 @@ describe("BufferedIterableSource", () => {
       await expect(iterResult).resolves.toEqual({
         done: false,
         value: {
-          problem: undefined,
-          connectionId: undefined,
+          type: "message-event",
           msgEvent: {
             receiveTime: { sec: i, nsec: 0 },
             message: undefined,
@@ -266,6 +260,7 @@ describe("BufferedIterableSource", () => {
     ): AsyncIterableIterator<Readonly<IteratorResult>> {
       for (let i = 0; i < 8; ++i) {
         yield {
+          type: "message-event",
           msgEvent: {
             topic: "a",
             receiveTime: { sec: i, nsec: 0 },
@@ -273,8 +268,6 @@ describe("BufferedIterableSource", () => {
             sizeInBytes: 0,
             schemaName: "foo",
           },
-          problem: undefined,
-          connectionId: undefined,
         };
         partialBuffer.notify();
       }
@@ -307,6 +300,7 @@ describe("BufferedIterableSource", () => {
         _args: MessageIteratorArgs,
       ): AsyncIterableIterator<Readonly<IteratorResult>> {
         yield {
+          type: "message-event",
           msgEvent: {
             topic: "a",
             receiveTime: { sec: 5, nsec: 0 },
@@ -314,8 +308,6 @@ describe("BufferedIterableSource", () => {
             sizeInBytes: 0,
             schemaName: "foo",
           },
-          problem: undefined,
-          connectionId: undefined,
         };
         doneYield.notify();
       };
@@ -339,6 +331,7 @@ describe("BufferedIterableSource", () => {
         _args: MessageIteratorArgs,
       ): AsyncIterableIterator<Readonly<IteratorResult>> {
         yield {
+          type: "message-event",
           msgEvent: {
             topic: "a",
             receiveTime: { sec: 1, nsec: 0 },
@@ -346,8 +339,6 @@ describe("BufferedIterableSource", () => {
             sizeInBytes: 0,
             schemaName: "foo",
           },
-          problem: undefined,
-          connectionId: undefined,
         };
         doneYield.notify();
       };
@@ -367,8 +358,7 @@ describe("BufferedIterableSource", () => {
           await expect(iterResult).resolves.toEqual({
             done: false,
             value: {
-              problem: undefined,
-              connectionId: undefined,
+              type: "message-event",
               msgEvent: {
                 receiveTime: { sec: 1, nsec: 0 },
                 message: undefined,
@@ -385,8 +375,7 @@ describe("BufferedIterableSource", () => {
           await expect(iterResult).resolves.toEqual({
             done: false,
             value: {
-              problem: undefined,
-              connectionId: undefined,
+              type: "message-event",
               msgEvent: {
                 receiveTime: { sec: 5, nsec: 0 },
                 message: undefined,
@@ -437,6 +426,7 @@ describe("BufferedIterableSource", () => {
       for (let i = 0; i < 8; ++i) {
         debounceNotify();
         yield {
+          type: "message-event",
           msgEvent: {
             topic: "a",
             receiveTime: { sec: i, nsec: 0 },
@@ -444,8 +434,6 @@ describe("BufferedIterableSource", () => {
             sizeInBytes: 0,
             schemaName: "foo",
           },
-          problem: undefined,
-          connectionId: undefined,
         };
       }
     };
@@ -493,6 +481,7 @@ describe("BufferedIterableSource", () => {
         }
 
         yield {
+          type: "message-event",
           msgEvent: {
             topic: "a",
             receiveTime: { sec: i, nsec: 0 },
@@ -500,8 +489,6 @@ describe("BufferedIterableSource", () => {
             sizeInBytes: 0,
             schemaName: "foo",
           },
-          problem: undefined,
-          connectionId: undefined,
         };
       }
     };
@@ -524,5 +511,62 @@ describe("BufferedIterableSource", () => {
 
     await signal.wait();
     expect(count).toEqual(4);
+  });
+
+  it("should support stamp iterator results and wait to buffer more messages until reading moves forward", async () => {
+    const source = new TestSource();
+    const bufferedSource = new BufferedIterableSource(source, {
+      readAheadDuration: { sec: 1, nsec: 0 },
+    });
+
+    await bufferedSource.initialize();
+
+    let signal = waiter(1);
+
+    const debounceNotify = debounce(() => {
+      signal.notify();
+    }, 500);
+
+    let messageIteratorCount = 0;
+    source.messageIterator = async function* messageIterator(
+      args: MessageIteratorArgs,
+    ): AsyncIterableIterator<Readonly<IteratorResult>> {
+      expect(args).toEqual({
+        topics: ["a"],
+        start: { sec: 0, nsec: 0 },
+        end: { sec: 10, nsec: 0 },
+        consumptionType: "partial",
+      });
+      messageIteratorCount += 1;
+
+      for (let i = 0; i < 8; ++i) {
+        debounceNotify();
+        yield {
+          type: "stamp",
+          stamp: { sec: i, nsec: 0 },
+        };
+      }
+    };
+
+    const messageIterator = bufferedSource.messageIterator({
+      topics: ["a"],
+    });
+
+    // Reading the first message buffers some data
+    await messageIterator.next();
+
+    // Wait for the buffered iterable source to stop reading messages
+    await signal.wait();
+
+    expect(bufferedSource.loadedRanges()).toEqual([{ start: 0, end: 0.0999999999 }]);
+
+    // Reading the second message buffers more data
+    signal = waiter(1);
+    await messageIterator.next();
+    await signal.wait();
+    expect(bufferedSource.loadedRanges()).toEqual([{ start: 0, end: 0.1999999999 }]);
+
+    // We should have called the messageIterator method only once
+    expect(messageIteratorCount).toEqual(1);
   });
 });

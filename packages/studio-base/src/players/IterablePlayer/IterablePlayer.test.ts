@@ -154,11 +154,14 @@ describe("IterablePlayer", () => {
         ...baseState,
         presence: PlayerPresence.PRESENT,
       },
-      // startPlay
+      // initial play
       {
         ...baseState,
         presence: PlayerPresence.PRESENT,
-        activeData: { ...baseState.activeData, currentTime: { sec: 0, nsec: 99000000 } },
+        activeData: {
+          ...baseState.activeData,
+          currentTime: { sec: 0, nsec: 99000000 },
+        },
       },
       // idle
       {
@@ -345,6 +348,7 @@ describe("IterablePlayer", () => {
       source.messageIterator = origMsgIterator;
 
       yield {
+        type: "message-event",
         msgEvent: {
           topic: "foo",
           receiveTime: { sec: 0, nsec: 99000001 },
@@ -352,7 +356,6 @@ describe("IterablePlayer", () => {
           sizeInBytes: 0,
           schemaName: "foo",
         },
-        problem: undefined,
         connectionId: undefined,
       };
     };
@@ -391,6 +394,7 @@ describe("IterablePlayer", () => {
       source.messageIterator = origMsgIterator;
 
       yield {
+        type: "message-event",
         msgEvent: {
           topic: "foo",
           receiveTime: { sec: 0, nsec: 99000001 },
@@ -398,7 +402,6 @@ describe("IterablePlayer", () => {
           sizeInBytes: 0,
           schemaName: "foo",
         },
-        problem: undefined,
         connectionId: undefined,
       };
     };

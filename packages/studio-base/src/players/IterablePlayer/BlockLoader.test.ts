@@ -98,9 +98,8 @@ describe("BlockLoader", () => {
       for (let i = 0; i < msgEvents.length; ++i) {
         const msgEvent = msgEvents[i]!;
         yield {
+          type: "message-event",
           msgEvent,
-          problem: undefined,
-          connectionId: undefined,
         };
       }
     };
@@ -205,9 +204,8 @@ describe("BlockLoader", () => {
         }
 
         yield {
+          type: "message-event",
           msgEvent,
-          problem: undefined,
-          connectionId: undefined,
         };
       }
     };
@@ -316,9 +314,8 @@ describe("BlockLoader", () => {
         }
 
         yield {
+          type: "message-event",
           msgEvent,
-          problem: undefined,
-          connectionId: undefined,
         };
       }
     };
@@ -577,9 +574,8 @@ describe("BlockLoader", () => {
       for (let i = 0; i < msgEvents.length; ++i) {
         const msgEvent = msgEvents[i]!;
         yield {
+          type: "message-event",
           msgEvent,
-          problem: undefined,
-          connectionId: undefined,
         };
       }
     };

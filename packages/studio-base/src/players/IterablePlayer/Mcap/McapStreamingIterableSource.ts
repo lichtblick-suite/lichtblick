@@ -242,8 +242,8 @@ export class McapStreamingIterableSource implements IIterableSource {
           topicsSet.has(msgEvent.topic)
         ) {
           yield {
+            type: "message-event",
             connectionId: channelId,
-            problem: undefined,
             msgEvent,
           };
         }

@@ -130,19 +130,17 @@ export class McapIndexedIterableSource implements IIterableSource {
       const channelInfo = this.channelInfoById.get(message.channelId);
       if (!channelInfo) {
         yield {
-          connectionId: undefined,
+          type: "problem",
           problem: {
             message: `Received message on channel ${message.channelId} without prior channel info`,
             severity: "error",
           },
-          msgEvent: undefined,
         };
         continue;
       }
       try {
         yield {
-          connectionId: undefined,
-          problem: undefined,
+          type: "message-event",
           msgEvent: {
             topic: channelInfo.channel.topic,
             receiveTime: fromNanoSec(message.logTime),
@@ -154,13 +152,12 @@ export class McapIndexedIterableSource implements IIterableSource {
         };
       } catch (error) {
         yield {
-          connectionId: undefined,
+          type: "problem",
           problem: {
             message: `Error decoding message on ${channelInfo.channel.topic}`,
             error,
             severity: "error",
           },
-          msgEvent: undefined,
         };
       }
     }

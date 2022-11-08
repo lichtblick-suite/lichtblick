@@ -108,18 +108,36 @@ class BufferedIterableSource implements IIterableSource {
           return;
         }
 
+        // Update the target readUntil to be ahead of the latest readHead
+        //
+        // Since reading a result from the iterator is async, we update the readUntil after we have
+        // the result so we can have the latest readHead
+        readUntil = addTime(this.readHead, this.readAheadDuration);
+
+        // When receiving a stamp result we enqueue the result into the cache and notify a reader.
+        if (result.type === "stamp" && compare(result.stamp, readUntil) >= 0) {
+          while (compare(result.stamp, readUntil) >= 0) {
+            // enqueue the stamp and wakeup the reader
+            // but the reader might not be reading - cause it is not being read from
+            this.cache.enqueue(result);
+            this.readSignal.notifyAll();
+
+            await this.writeSignal.wait();
+            readUntil = addTime(this.readHead, this.readAheadDuration);
+          }
+          continue;
+        }
+
         this.cache.enqueue(result);
 
         // Indicate to the consumer that it can try reading again
         this.readSignal.notifyAll();
 
-        // Update the target readUntil to be ahead of the latest readHead
-        // Do this before checking whether whether we continue loading more data to keep the
-        // readUntil constantly updated relative to the readHead
-        readUntil = addTime(this.readHead, this.readAheadDuration);
-
-        // Keep reading while the messages we receive are <= the readUntil time
-        if (result.msgEvent && compare(result.msgEvent.receiveTime, readUntil) <= 0) {
+        // Keep reading while the messages we receive are <= the readUntil time.
+        if (
+          result.type === "message-event" &&
+          compare(result.msgEvent.receiveTime, readUntil) <= 0
+        ) {
           continue;
         }
 
@@ -200,12 +218,18 @@ class BufferedIterableSource implements IIterableSource {
             continue;
           }
 
+          if (item.type === "stamp") {
+            self.readHead = item.stamp;
+          }
+
           // When there is a new message update the readHead for the producer to know where we are
           // currently reading
-          if (item.msgEvent) {
+          if (item.type === "message-event") {
             self.readHead = item.msgEvent.receiveTime;
           }
 
+          // Notify the producer thread that it can load more data. Since our producer and consumer are on the same _thread_
+          // this notification is picked up on the next tick.
           self.writeSignal.notifyAll();
 
           yield item;

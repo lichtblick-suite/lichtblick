@@ -200,8 +200,8 @@ export class BagIterableSource implements IIterableSource {
       const schemaName = this._datatypesByConnectionId.get(connectionId);
       if (!schemaName) {
         yield {
+          type: "problem",
           connectionId,
-          msgEvent: undefined,
           problem: {
             severity: "error",
             message: `Cannot missing datatype for connection id ${connectionId}`,
@@ -219,8 +219,8 @@ export class BagIterableSource implements IIterableSource {
         const parsedMessage = reader.readMessage(dataCopy);
 
         yield {
+          type: "message-event",
           connectionId,
-          problem: undefined,
           msgEvent: {
             topic: bagMsgEvent.topic,
             receiveTime: bagMsgEvent.timestamp,
@@ -231,8 +231,8 @@ export class BagIterableSource implements IIterableSource {
         };
       } else {
         yield {
+          type: "problem",
           connectionId,
-          msgEvent: undefined,
           problem: {
             severity: "error",
             message: `Cannot deserialize message for missing connection id ${connectionId}`,
@@ -257,7 +257,7 @@ export class BagIterableSource implements IIterableSource {
         start: time,
         reverse: true,
       })) {
-        if (result.msgEvent) {
+        if (result.type === "message-event") {
           messages.push(result.msgEvent);
         }
         break;

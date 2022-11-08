@@ -126,10 +126,12 @@ class BenchmarkPlayer implements Player {
     // Load all messages into memory
     for await (const item of iterator) {
       // any problem bails
-      if (item.problem) {
+      if (item.type === "problem") {
         throw new Error(item.problem.message);
       }
-      msgEvents.push(item.msgEvent);
+      if (item.type === "message-event") {
+        msgEvents.push(item.msgEvent);
+      }
       frameMs.push(0);
     }
 

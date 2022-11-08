@@ -275,8 +275,12 @@ export class BlockLoader {
 
         let sizeInBytes = 0;
         for (const iterResult of results) {
-          if (iterResult.problem) {
+          if (iterResult.type === "problem") {
             this.problemManager.addProblem(`connid-${iterResult.connectionId}`, iterResult.problem);
+            continue;
+          }
+
+          if (iterResult.type !== "message-event") {
             continue;
           }
 

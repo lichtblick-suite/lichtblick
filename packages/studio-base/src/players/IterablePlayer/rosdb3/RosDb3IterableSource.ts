@@ -132,6 +132,7 @@ export class RosDb3IterableSource implements IIterableSource {
     });
     for await (const msg of msgIterator) {
       yield {
+        type: "message-event",
         msgEvent: {
           topic: msg.topic.name,
           receiveTime: msg.timestamp,
@@ -139,8 +140,6 @@ export class RosDb3IterableSource implements IIterableSource {
           sizeInBytes: msg.data.byteLength,
           schemaName: msg.topic.type,
         },
-        connectionId: undefined,
-        problem: undefined,
       };
     }
   }

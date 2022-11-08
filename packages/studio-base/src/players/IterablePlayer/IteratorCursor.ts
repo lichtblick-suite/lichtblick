@@ -46,7 +46,14 @@ class IteratorCursor implements IMessageCursor {
 
     // if the last result is still past end time, return empty results
     if (
-      this._lastIteratorResult?.msgEvent?.receiveTime &&
+      this._lastIteratorResult?.type === "stamp" &&
+      compare(this._lastIteratorResult.stamp, end) >= 0
+    ) {
+      return results;
+    }
+
+    if (
+      this._lastIteratorResult?.type === "message-event" &&
       compare(this._lastIteratorResult.msgEvent.receiveTime, end) > 0
     ) {
       return results;
@@ -68,7 +75,11 @@ class IteratorCursor implements IMessageCursor {
       }
 
       const value = result.value;
-      if (value.msgEvent?.receiveTime && compare(value.msgEvent.receiveTime, end) > 0) {
+      if (value.type === "stamp" && compare(value.stamp, end) >= 0) {
+        this._lastIteratorResult = value;
+        break;
+      }
+      if (value.type === "message-event" && compare(value.msgEvent.receiveTime, end) > 0) {
         this._lastIteratorResult = value;
         break;
       }

@@ -148,6 +148,7 @@ export class UlogIterableSource implements IIterableSource {
         const topic = sub?.name;
         if (topic && topics.includes(topic) && isTimeInRangeInclusive(receiveTime, start, end)) {
           yield {
+            type: "message-event",
             msgEvent: {
               topic,
               receiveTime,
@@ -155,14 +156,13 @@ export class UlogIterableSource implements IIterableSource {
               sizeInBytes: msg.data.byteLength,
               schemaName: sub.name,
             },
-            connectionId: undefined,
-            problem: undefined,
           };
         }
       } else if (msg.type === MessageType.Log || msg.type === MessageType.LogTagged) {
         const receiveTime = fromMicros(Number(msg.timestamp));
         if (topics.includes(LOG_TOPIC) && isTimeInRangeInclusive(receiveTime, start, end)) {
           yield {
+            type: "message-event",
             msgEvent: {
               topic: LOG_TOPIC,
               receiveTime,
@@ -178,8 +178,6 @@ export class UlogIterableSource implements IIterableSource {
               schemaName: "rosgraph_msgs/Log",
               sizeInBytes: msg.size,
             },
-            connectionId: undefined,
-            problem: undefined,
           };
         }
       }
