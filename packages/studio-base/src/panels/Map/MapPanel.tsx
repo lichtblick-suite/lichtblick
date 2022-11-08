@@ -4,14 +4,14 @@
 
 import produce from "immer";
 import {
-  Map as LeafMap,
-  TileLayer,
-  LatLngBounds,
   CircleMarker,
   FeatureGroup,
-  LayerGroup,
   geoJSON,
+  LatLngBounds,
   Layer,
+  LayerGroup,
+  Map as LeafMap,
+  TileLayer,
 } from "leaflet";
 import { difference, groupBy, isEqual, minBy, partition, union } from "lodash";
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
@@ -19,7 +19,7 @@ import { useResizeDetector } from "react-resize-detector";
 import { useDebouncedCallback } from "use-debounce";
 
 import { toSec } from "@foxglove/rostime";
-import { PanelExtensionContext, MessageEvent, SettingsTreeAction } from "@foxglove/studio";
+import { MessageEvent, PanelExtensionContext, SettingsTreeAction } from "@foxglove/studio";
 import Stack from "@foxglove/studio-base/components/Stack";
 import FilteredPointLayer, {
   POINT_MARKER_RADIUS,
@@ -28,9 +28,9 @@ import { Topic } from "@foxglove/studio-base/players/types";
 import { FoxgloveMessages } from "@foxglove/studio-base/types/FoxgloveMessages";
 import { darkColor, lightColor, lineColors } from "@foxglove/studio-base/util/plotColors";
 
-import { Config, validateCustomUrl, buildSettingsTree } from "./config";
+import { buildSettingsTree, Config, validateCustomUrl } from "./config";
 import { hasFix } from "./support";
-import { MapPanelMessage, Point } from "./types";
+import { MapPanelMessage, NavSatFixMsg, NavSatFixStatus, Point } from "./types";
 
 type GeoJsonMessage = MessageEvent<FoxgloveMessages["foxglove.GeoJSON"]>;
 
@@ -44,6 +44,25 @@ function isGeoJSONMessage(msgEvent: MessageEvent<unknown>): msgEvent is GeoJsonM
     datatype === "foxglove_msgs/GeoJSON" ||
     datatype === "foxglove_msgs/msg/GeoJSON" ||
     datatype === "foxglove.GeoJSON"
+  );
+}
+
+/**
+ * Verify that the message is either a GeoJSON message or a NavSatFix message with a
+ * position fix and finite latitude and longitude so we can actually display it.
+ */
+function isValidMapMessage(msgEvent: MessageEvent<unknown>): msgEvent is MapPanelMessage {
+  if (isGeoJSONMessage(msgEvent)) {
+    return true;
+  }
+
+  const message = msgEvent.message as Partial<NavSatFixMsg>;
+  return (
+    message.latitude != undefined &&
+    isFinite(message.latitude) &&
+    message.longitude != undefined &&
+    isFinite(message.longitude) &&
+    message.status?.status !== NavSatFixStatus.STATUS_NO_FIX
   );
 }
 
@@ -351,12 +370,12 @@ function MapPanel(props: MapPanelProps): JSX.Element {
       }
 
       if (renderState.allFrames) {
-        setAllMapMessages(renderState.allFrames as MapPanelMessage[]);
+        setAllMapMessages(renderState.allFrames.filter(isValidMapMessage));
       }
 
       // Only update the current frame if we have new messages.
       if (renderState.currentFrame && renderState.currentFrame.length > 0) {
-        setCurrentMapMessages(renderState.currentFrame as MapPanelMessage[]);
+        setCurrentMapMessages(renderState.currentFrame.filter(isValidMapMessage));
       }
     };
 

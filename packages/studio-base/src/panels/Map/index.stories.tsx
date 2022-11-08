@@ -124,6 +124,68 @@ SinglePoint.parameters = {
   },
 };
 
+export const SinglePointWithMissingValues = (): JSX.Element => {
+  return <MapPanel />;
+};
+SinglePointWithMissingValues.decorators = [Wrapper];
+SinglePointWithMissingValues.parameters = {
+  chromatic: {
+    delay: 1000,
+  },
+  panelSetup: {
+    fixture: {
+      topics: [{ name: "/gps", schemaName: "sensor_msgs/NavSatFix" }],
+      frame: {
+        "/gps": [
+          {
+            topic: "/gps",
+            schemaName: "sensor_msgs/NavSatFix",
+            sizeInBytes: 0,
+            receiveTime: { sec: 123, nsec: 456 },
+            message: {
+              ...EMPTY_MESSAGE,
+              latitude: undefined,
+              longitude: undefined,
+            },
+          },
+        ],
+      },
+    } as Fixture,
+  },
+};
+
+export const SinglePointWithNoFix = (): JSX.Element => {
+  return <MapPanel />;
+};
+SinglePointWithNoFix.decorators = [Wrapper];
+SinglePointWithNoFix.parameters = {
+  chromatic: {
+    delay: 1000,
+  },
+  panelSetup: {
+    fixture: {
+      topics: [{ name: "/gps", schemaName: "sensor_msgs/NavSatFix" }],
+      frame: {
+        "/gps": [
+          {
+            topic: "/gps",
+            schemaName: "sensor_msgs/NavSatFix",
+            sizeInBytes: 0,
+            receiveTime: { sec: 123, nsec: 456 },
+            message: {
+              ...EMPTY_MESSAGE,
+              status: {
+                status: NavSatFixStatus.STATUS_NO_FIX,
+                service: NavSatFixService.SERVICE_GPS,
+              },
+            },
+          },
+        ],
+      },
+    } as Fixture,
+  },
+};
+
 export const SinglePointWithSettings = (): JSX.Element => {
   return <MapPanel overrideConfig={{ layer: "custom" }} />;
 };
