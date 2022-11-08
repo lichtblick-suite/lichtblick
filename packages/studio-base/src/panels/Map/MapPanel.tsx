@@ -339,6 +339,9 @@ function MapPanel(props: MapPanelProps): JSX.Element {
 
     const map = new LeafMap(mapContainerRef.current);
 
+    // Remove default prefix from the attribution control
+    map.attributionControl.setPrefix(false);
+
     // the map must be initialized with some view before other features work
     map.setView(
       config.center ? [config.center.lat, config.center.lon] : [0, 0],

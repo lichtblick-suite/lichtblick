@@ -2524,7 +2524,7 @@ __metadata:
     "@types/foxglove__roslibjs": "workspace:*"
     "@types/gl-matrix": 3.2.0
     "@types/hammerjs": 2.0.41
-    "@types/leaflet": 1.7.9
+    "@types/leaflet": 1.9.0
     "@types/memoize-weak": "workspace:*"
     "@types/moment-duration-format": 2.2.3
     "@types/nearley": 2.11.2
@@ -2590,7 +2590,7 @@ __metadata:
     immer: 9.0.12
     intervals-fn: 3.0.3
     jszip: 3.10.0
-    leaflet: 1.7.1
+    leaflet: 1.9.2
     lodash: 4.17.21
     mathjs: 10.1.1
     memoize-weak: 1.0.2
@@ -5812,12 +5812,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/leaflet@npm:1.7.9":
-  version: 1.7.9
-  resolution: "@types/leaflet@npm:1.7.9"
+"@types/leaflet@npm:1.9.0":
+  version: 1.9.0
+  resolution: "@types/leaflet@npm:1.9.0"
   dependencies:
     "@types/geojson": "*"
-  checksum: 1a8c18b50d1b7726e99d86f9087733216b830c545a97ea95a83ff45e51e555bbef8f4eab654de603f539b9a297d352f8c443895f75cc5c52a7b488eaed664c04
+  checksum: f3ee2e2fc8bd3480d77667471c8f774a3726ff7694a7d08d2423c05b40e28f00379c7d469b4cbd3b53a1bc96c75970c92f9da7908fc477cbac0eda2a9d17b6ad
   languageName: node
   linkType: hard
 
@@ -16275,10 +16275,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"leaflet@npm:1.7.1":
-  version: 1.7.1
-  resolution: "leaflet@npm:1.7.1"
-  checksum: f69149ab482eeb6cdabd837939c4782c97a7a18bc0b2a9330d4a828ca0dc6e035981f2ecdb71c6646aa173bc369cd3b4fd6bbe5d81df4c59c45254f9e9361d03
+"leaflet@npm:1.9.2":
+  version: 1.9.2
+  resolution: "leaflet@npm:1.9.2"
+  checksum: ab6edb278c6bbd05db9a9395694fc517557433bedbcb233941ea42327ee90650f2d61dd3f9caf861040c8b25abfd8e1f79018f6ae899181e280287c7481ba4bf
   languageName: node
   linkType: hard
 
