@@ -2613,7 +2613,7 @@ __metadata:
     react-autocomplete: "https://github.com/foxglove/react-autocomplete/raw/9717d597d7c78c316fb7ad3c2c57060c243530c2/react-autocomplete-9.9.9.tgz"
     react-colorful: 5.6.0
     react-dom: "patch:react-dom@npm:17.0.2#../../patches/react-dom.patch"
-    react-highlight-words: 0.17.0
+    react-highlight-words: 0.18.0
     react-hover-observer: 2.1.1
     react-input-autosize: 3.0.0
     react-is: 17.0.2
@@ -20090,16 +20090,16 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-highlight-words@npm:0.17.0":
-  version: 0.17.0
-  resolution: "react-highlight-words@npm:0.17.0"
+"react-highlight-words@npm:0.18.0":
+  version: 0.18.0
+  resolution: "react-highlight-words@npm:0.18.0"
   dependencies:
     highlight-words-core: ^1.2.0
     memoize-one: ^4.0.0
     prop-types: ^15.5.8
   peerDependencies:
-    react: ^0.14.0 || ^15.0.0 || ^16.0.0-0 || ^17.0.0-0
-  checksum: 41b3d0e4516cbc12fd4e0b620b72d309eaa3e207f1089a377d76040f99edb717b99a34e0bef5f83d7d28d408542f3138ca3a5c06e08359e4f13f241432327485
+    react: ^0.14.0 || ^15.0.0 || ^16.0.0-0 || ^17.0.0-0 || ^18.0.0-0
+  checksum: ff9759e7ebeb140067854d8cad3021123ba0e3b78bda14d35d9b21dd7890986c858955885ddbcb537e9f88472aebe4a23a1841b7af190989efb0a8ecf7dc2a57
   languageName: node
   linkType: hard
 

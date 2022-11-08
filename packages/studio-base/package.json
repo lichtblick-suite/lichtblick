@@ -170,7 +170,7 @@
     "react-autocomplete": "https://github.com/foxglove/react-autocomplete/raw/9717d597d7c78c316fb7ad3c2c57060c243530c2/react-autocomplete-9.9.9.tgz",
     "react-colorful": "5.6.0",
     "react-dom": "patch:react-dom@npm:17.0.2#../../patches/react-dom.patch",
-    "react-highlight-words": "0.17.0",
+    "react-highlight-words": "0.18.0",
     "react-hover-observer": "2.1.1",
     "react-input-autosize": "3.0.0",
     "react-is": "17.0.2",
