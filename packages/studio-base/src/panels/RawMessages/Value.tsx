@@ -4,13 +4,14 @@
 
 import CheckIcon from "@mui/icons-material/Check";
 import CopyAllIcon from "@mui/icons-material/CopyAll";
+import ErrorIcon from "@mui/icons-material/Error";
 import FilterIcon from "@mui/icons-material/FilterAlt";
 import StateTransitionsIcon from "@mui/icons-material/PowerInput";
 import ScatterPlotIcon from "@mui/icons-material/ScatterPlot";
 import LineChartIcon from "@mui/icons-material/ShowChart";
 import { IconButtonProps, Tooltip, TooltipProps } from "@mui/material";
 import { useCallback, useMemo, useState } from "react";
-import { withStyles } from "tss-react/mui";
+import { withStyles, makeStyles } from "tss-react/mui";
 
 import HoverableIconButton from "@foxglove/studio-base/components/HoverableIconButton";
 import Stack from "@foxglove/studio-base/components/Stack";
@@ -38,6 +39,16 @@ const StyledIconButton = withStyles(HoverableIconButton, (theme) => ({
   },
 }));
 
+const useStyles = makeStyles()({
+  // always hidden, just used to keep space and prevent resizing on hover
+  placeholderActionContainer: {
+    alignItems: "inherit",
+    display: "inherit",
+    gap: "inherit",
+    visibility: "hidden",
+  },
+});
+
 type ValueProps = {
   arrLabel: string;
   basePath: string;
@@ -56,6 +67,14 @@ type ValueActionItem = {
   activeColor?: IconButtonProps["color"];
   color?: IconButtonProps["color"];
 };
+
+const emptyAction: ValueActionItem = {
+  key: "",
+  tooltip: "",
+  icon: <ErrorIcon fontSize="inherit" />,
+};
+
+const MAX_ACTION_ITEMS = 4;
 
 export default function Value(props: ValueProps): JSX.Element {
   const {
@@ -98,7 +117,6 @@ export default function Value(props: ValueProps): JSX.Element {
 
   const availableActions = useMemo(() => {
     const actions: ValueActionItem[] = [];
-
     if (arrLabel.length > 0) {
       actions.push({
         key: "Copy",
@@ -146,9 +164,10 @@ export default function Value(props: ValueProps): JSX.Element {
         });
       }
     }
+
     return actions;
   }, [
-    arrLabel,
+    arrLabel.length,
     copied,
     handleCopy,
     itemValue,
@@ -157,6 +176,16 @@ export default function Value(props: ValueProps): JSX.Element {
     openStateTransitionsPanel,
     valueAction,
   ]);
+
+  // need to keep space to prevent resizing and wrapping on hover
+  const placeholderActionsForSpacing = useMemo(() => {
+    const actions: ValueActionItem[] = [];
+    for (let i = availableActions.length; i < MAX_ACTION_ITEMS; i++) {
+      actions.push({ ...emptyAction, key: `empty-${i}` });
+    }
+    return actions;
+  }, [availableActions.length]);
+  const { classes, cx } = useStyles();
 
   return (
     <Stack inline flexWrap="wrap" direction="row" alignItems="center" gap={0.25}>
@@ -173,6 +202,13 @@ export default function Value(props: ValueProps): JSX.Element {
           />
         </Tooltip>
       ))}
+      <span className={cx(classes.placeholderActionContainer)}>
+        {placeholderActionsForSpacing.map((action) => (
+          <Tooltip key={action.key} arrow title={action.tooltip} placement="top">
+            <StyledIconButton size="small" color="inherit" icon={action.icon} />
+          </Tooltip>
+        ))}
+      </span>
     </Stack>
   );
 }
