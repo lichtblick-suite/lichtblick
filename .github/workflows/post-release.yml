@@ -21,7 +21,7 @@ jobs:
 
     steps:
       - name: Checkout ${{ github.event.release.target_commitish || github.event.inputs.target_commitish }}
-        uses: actions/checkout@v3
+        uses: actions/checkout@v3.1.0
         with:
           ref: ${{ github.event.release.target_commitish || github.event.inputs.target_commitish }}
           lfs: true
@@ -55,7 +55,7 @@ jobs:
 
     steps:
       - name: Checkout ${{ github.event.release.target_commitish || github.event.inputs.target_commitish }}
-        uses: actions/checkout@v3
+        uses: actions/checkout@v3.1.0
         with:
           ref: ${{ github.event.release.target_commitish || github.event.inputs.target_commitish }}
           token: ${{ secrets.FOXGLOVEBOT_GITHUB_TOKEN }}
@@ -114,7 +114,7 @@ jobs:
 
     steps:
       - name: Checkout ${{ github.event.release.tag_name || github.event.inputs.tag_name }}
-        uses: actions/checkout@v3
+        uses: actions/checkout@v3.1.0
         with:
           ref: ${{ github.event.release.tag_name || github.event.inputs.tag_name }}
           lfs: true
@@ -145,7 +145,7 @@ jobs:
 
     steps:
       - name: Checkout ${{ github.event.release.tag_name || github.event.inputs.tag_name }}
-        uses: actions/checkout@v3
+        uses: actions/checkout@v3.1.0
         with:
           ref: ${{ github.event.release.tag_name || github.event.inputs.tag_name }}
           lfs: true
@@ -188,7 +188,7 @@ jobs:
 
     steps:
       - name: Checkout ${{ github.event.release.tag_name || github.event.inputs.tag_name }}
-        uses: actions/checkout@v3
+        uses: actions/checkout@v3.1.0
         with:
           ref: ${{ github.event.release.tag_name || github.event.inputs.tag_name }}
           token: ${{ secrets.FOXGLOVEBOT_GITHUB_TOKEN }}
