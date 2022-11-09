@@ -44,7 +44,13 @@ import { missingTransformMessage, MISSING_TRANSFORM } from "./transforms";
 const log = Logger.getLogger(__filename);
 
 const LAYER_ID = "foxglove.Urdf";
-const TOPIC_NAME = "/robot_description"; // Also doubles as the ROS parameter name
+const TOPIC_NAME = "/robot_description";
+
+/** ID of fake "topic" used to represent the /robot_description parameter */
+const PARAM_KEY = "param:/robot_description";
+/** Standard parameter name used for URDF data in ROS */
+const PARAM_NAME = "/robot_description";
+const PARAM_DISPLAY_NAME = "/robot_description (parameter)";
 
 const VALID_URL_ERR = "ValidUrl";
 const FETCH_URDF_ERR = "FetchUrdf";
@@ -169,29 +175,45 @@ export class Urdfs extends SceneExtension<UrdfRenderable> {
   }
 
   public override settingsNodes(): SettingsTreeEntry[] {
-    const configTopics = this.renderer.config.topics;
-    const topicHandler = this.handleTopicSettingsAction;
-    const layerHandler = this.handleLayerSettingsAction;
     const entries: SettingsTreeEntry[] = [];
 
-    // Topic entry (also used for `/robot_description` parameter)
+    // /robot_description topic entry
     const topic = this.renderer.topicsByName?.get(TOPIC_NAME);
-    const parameter = this.renderer.parameters?.get(TOPIC_NAME);
-    if (topic != undefined || parameter != undefined) {
-      const config = (configTopics[TOPIC_NAME] ?? {}) as Partial<LayerSettingsUrdf>;
-
-      const fields: SettingsTreeFields = {};
-
+    if (topic != undefined) {
+      const config = (this.renderer.config.topics[TOPIC_NAME] ?? {}) as Partial<LayerSettingsUrdf>;
       entries.push({
         path: ["topics", TOPIC_NAME],
         node: {
           label: TOPIC_NAME,
           icon: "PrecisionManufacturing",
-          fields,
           visible: config.visible ?? DEFAULT_SETTINGS.visible,
-          handler: topicHandler,
+          handler: this.handleTopicSettingsAction,
           children: urdfChildren(
             this.transformsByInstanceId.get(TOPIC_NAME),
+            this.renderer.transformTree,
+            this.jointStates,
+          ),
+        },
+      });
+    }
+
+    // /robot_description parameter entry
+    const parameter = this.renderer.parameters?.get(PARAM_NAME);
+    if (parameter != undefined) {
+      const config = (this.renderer.config.topics[PARAM_KEY] ?? {}) as Partial<LayerSettingsUrdf>;
+
+      const fields: SettingsTreeFields = {};
+
+      entries.push({
+        path: ["topics", PARAM_KEY],
+        node: {
+          label: PARAM_DISPLAY_NAME,
+          icon: "PrecisionManufacturing",
+          fields,
+          visible: config.visible ?? DEFAULT_SETTINGS.visible,
+          handler: this.handleTopicSettingsAction,
+          children: urdfChildren(
+            this.transformsByInstanceId.get(PARAM_KEY),
             this.renderer.transformTree,
             this.jointStates,
           ),
@@ -221,7 +243,7 @@ export class Urdfs extends SceneExtension<UrdfRenderable> {
             visible: config.visible ?? DEFAULT_CUSTOM_SETTINGS.visible,
             actions: [{ type: "action", id: "delete", label: "Delete" }],
             order: layerConfig.order,
-            handler: layerHandler,
+            handler: this.handleLayerSettingsAction,
             children: urdfChildren(
               this.transformsByInstanceId.get(instanceId),
               this.renderer.transformTree,
@@ -364,7 +386,11 @@ export class Urdfs extends SceneExtension<UrdfRenderable> {
       // ["layers", instanceId, field]
       this.saveSetting(path, action.payload.value);
       const instanceId = path[1]!;
-      this._loadUrdf(instanceId, undefined);
+      if (path[1] === PARAM_KEY) {
+        this._loadUrdf(instanceId, this.renderer.parameters?.get(PARAM_NAME) as string | undefined);
+      } else {
+        this._loadUrdf(instanceId, undefined);
+      }
     }
   };
 
@@ -394,11 +420,11 @@ export class Urdfs extends SceneExtension<UrdfRenderable> {
   };
 
   private handleParametersChange = (parameters: ReadonlyMap<string, unknown> | undefined): void => {
-    const robotDescription = parameters?.get(TOPIC_NAME);
+    const robotDescription = parameters?.get(PARAM_NAME);
     if (typeof robotDescription !== "string") {
       return;
     }
-    this._loadUrdf(TOPIC_NAME, robotDescription);
+    this._loadUrdf(PARAM_KEY, robotDescription);
   };
 
   private handleAddUrdf = (instanceId: string): void => {
@@ -467,9 +493,21 @@ export class Urdfs extends SceneExtension<UrdfRenderable> {
       });
   }
 
+  private _getCurrentSettings(instanceId: string) {
+    const isTopicOrParam = instanceId === TOPIC_NAME || instanceId === PARAM_KEY;
+    const baseSettings = isTopicOrParam ? DEFAULT_SETTINGS : DEFAULT_CUSTOM_SETTINGS;
+    const userSettings = isTopicOrParam
+      ? this.renderer.config.topics[instanceId]
+      : this.renderer.config.layers[instanceId];
+    const settings = { ...baseSettings, ...userSettings, instanceId };
+    return settings;
+  }
+
   private _loadUrdf(instanceId: string, urdf: string | undefined): void {
     let renderable = this.renderables.get(instanceId);
     if (renderable && urdf != undefined && renderable.userData.urdf === urdf) {
+      const settings = this._getCurrentSettings(instanceId);
+      renderable.userData.settings = settings;
       return;
     }
 
@@ -478,14 +516,10 @@ export class Urdfs extends SceneExtension<UrdfRenderable> {
     this.framesByInstanceId.delete(instanceId);
     this.updateSettingsTree();
 
-    const isTopic = instanceId === TOPIC_NAME;
+    const isTopicOrParam = instanceId === TOPIC_NAME || instanceId === PARAM_KEY;
     const frameId = this.renderer.fixedFrameId ?? ""; // Unused
-    const settingsPath = isTopic ? ["topics", TOPIC_NAME] : ["layers", instanceId];
-    const baseSettings = isTopic ? DEFAULT_SETTINGS : DEFAULT_CUSTOM_SETTINGS;
-    const userSettings = isTopic
-      ? this.renderer.config.topics[instanceId]
-      : this.renderer.config.layers[instanceId];
-    const settings = { ...baseSettings, ...userSettings, instanceId };
+    const settingsPath = isTopicOrParam ? ["topics", instanceId] : ["layers", instanceId];
+    const settings = this._getCurrentSettings(instanceId);
     const url = (settings as Partial<LayerSettingsCustomUrdf>).url;
 
     // Create a UrdfRenderable if it does not already exist
@@ -585,8 +619,8 @@ export class Urdfs extends SceneExtension<UrdfRenderable> {
     this.transformsByInstanceId.set(instanceId, transforms);
 
     // Import all transforms from the URDF into the scene
-    const isTopic = instanceId === TOPIC_NAME;
-    const settingsPath = isTopic ? ["topics", TOPIC_NAME] : ["layers", instanceId];
+    const isTopicOrParam = instanceId === TOPIC_NAME || instanceId === PARAM_KEY;
+    const settingsPath = isTopicOrParam ? ["topics", instanceId] : ["layers", instanceId];
     for (const { parent, child, translation, rotation } of transforms) {
       this.renderer.addTransform(parent, child, 0n, translation, rotation, settingsPath);
     }
