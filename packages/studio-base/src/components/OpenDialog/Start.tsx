@@ -15,8 +15,10 @@ import { useMemo } from "react";
 import { AppSetting } from "@foxglove/studio-base/AppSetting";
 import Stack from "@foxglove/studio-base/components/Stack";
 import TextMiddleTruncate from "@foxglove/studio-base/components/TextMiddleTruncate";
+import { useAnalytics } from "@foxglove/studio-base/context/AnalyticsContext";
 import { usePlayerSelection } from "@foxglove/studio-base/context/PlayerSelectionContext";
 import { useAppConfigurationValue } from "@foxglove/studio-base/hooks";
+import { AppEvent } from "@foxglove/studio-base/services/IAnalytics";
 
 import ActionList, { ActionListItem } from "./ActionList";
 import { OpenDialogViews } from "./types";
@@ -95,6 +97,7 @@ export default function Start(props: IStartProps): JSX.Element {
     onSelectView,
   } = props;
   const { recentSources, selectRecent } = usePlayerSelection();
+  const analytics = useAnalytics();
 
   const [showOnStartup = true, setShowOnStartup] = useAppConfigurationValue<boolean>(
     AppSetting.SHOW_OPEN_DIALOG_ON_STARTUP,
@@ -118,7 +121,10 @@ export default function Start(props: IStartProps): JSX.Element {
             <path d="M1955 1533l-163-162v677h-128v-677l-163 162-90-90 317-317 317 317-90 90zM256 1920h1280v128H128V0h1115l549 549v475h-128V640h-512V128H256v1792zM1280 512h293l-293-293v293z" />
           </SvgIcon>
         ),
-        onClick: () => onSelectView("file"),
+        onClick: () => {
+          onSelectView("file");
+          void analytics.logEvent(AppEvent.DIALOG_SELECT_VIEW, { type: "local" });
+        },
       },
       {
         key: "open-url",
@@ -130,7 +136,10 @@ export default function Start(props: IStartProps): JSX.Element {
           </SvgIcon>
         ),
         iconProps: { iconName: "FileASPX" },
-        onClick: () => onSelectView("remote"),
+        onClick: () => {
+          onSelectView("remote");
+          void analytics.logEvent(AppEvent.DIALOG_SELECT_VIEW, { type: "remote" });
+        },
       },
       {
         key: "open-connection",
@@ -141,7 +150,10 @@ export default function Start(props: IStartProps): JSX.Element {
             <path d="M1408 256h640v640h-640V640h-120l-449 896H640v256H0v-640h640v256h120l449-896h199V256zM512 1664v-384H128v384h384zm1408-896V384h-384v384h384z" />
           </SvgIcon>
         ),
-        onClick: () => onSelectView("connection"),
+        onClick: () => {
+          onSelectView("connection");
+          void analytics.logEvent(AppEvent.DIALOG_SELECT_VIEW, { type: "live" });
+        },
       },
       {
         key: "sample-data",
@@ -153,10 +165,13 @@ export default function Start(props: IStartProps): JSX.Element {
             <path d="M6.5 2A2.5 2.5 0 004 4.5v15A2.5 2.5 0 006.5 22h13.25a.75.75 0 000-1.5H6.5a1 1 0 01-1-1h14.25c.41 0 .75-.34.75-.75V4.5A2.5 2.5 0 0018 2H6.5zM19 18H5.5V4.5a1 1 0 011-1H18a1 1 0 011 1V18z" />
           </SvgIcon>
         ),
-        onClick: () => onSelectView("demo"),
+        onClick: () => {
+          onSelectView("demo");
+          void analytics.logEvent(AppEvent.DIALOG_SELECT_VIEW, { type: "demo" });
+        },
       },
     ];
-  }, [onSelectView, supportedLocalFileExtensions, supportedRemoteFileExtensions]);
+  }, [analytics, onSelectView, supportedLocalFileExtensions, supportedRemoteFileExtensions]);
 
   const recentItems: ActionListItem[] = useMemo(() => {
     return recentSources.map((recent) => {

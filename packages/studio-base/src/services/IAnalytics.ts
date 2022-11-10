@@ -4,6 +4,7 @@
 
 enum AppEventCategory {
   LIFECYCLE = "LIFECYCLE",
+  DIALOG = "DIALOG",
   PLAYERS = "PLAYERS",
   LAYOUTS = "LAYOUTS",
   PANELS = "PANELS",
@@ -12,6 +13,9 @@ enum AppEventCategory {
 
 enum AppEvent {
   APP_INIT = "APP_INIT",
+
+  // Dialog events
+  DIALOG_SELECT_VIEW = "DIALOG_SELECT_VIEW",
 
   // Player events
   PLAYER_CONSTRUCTED = "PLAYER_CONSTRUCTED",
@@ -64,6 +68,9 @@ export function getEventCategory(event: AppEvent): AppEventCategory {
     case AppEvent.APP_INIT:
       return AppEventCategory.LIFECYCLE;
 
+    case AppEvent.DIALOG_SELECT_VIEW:
+      return AppEventCategory.DIALOG;
+
     case AppEvent.PLAYER_CONSTRUCTED:
     case AppEvent.PLAYER_INITIALIZED:
     case AppEvent.PLAYER_PLAY:
@@ -101,6 +108,9 @@ export function getEventBreadcrumbType(event: AppEvent): SentryBreadcrumbType {
   switch (event) {
     case AppEvent.APP_INIT:
       return SentryBreadcrumbType.DEFAULT;
+
+    case AppEvent.DIALOG_SELECT_VIEW:
+      return SentryBreadcrumbType.TRANSACTION;
 
     case AppEvent.PLAYER_CONSTRUCTED:
     case AppEvent.PLAYER_INITIALIZED:

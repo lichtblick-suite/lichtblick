@@ -8,10 +8,12 @@ import { makeStyles } from "tss-react/mui";
 
 import { BuiltinIcon } from "@foxglove/studio-base/components/BuiltinIcon";
 import Stack from "@foxglove/studio-base/components/Stack";
+import { useAnalytics } from "@foxglove/studio-base/context/AnalyticsContext";
 import {
   IDataSourceFactory,
   usePlayerSelection,
 } from "@foxglove/studio-base/context/PlayerSelectionContext";
+import { AppEvent } from "@foxglove/studio-base/services/IAnalytics";
 
 import { FormField } from "./FormField";
 import View from "./View";
@@ -57,10 +59,7 @@ export default function Connection(props: ConnectionProps): JSX.Element {
   const { classes } = useStyles();
 
   const { selectSource } = usePlayerSelection();
-  const [selectedConnectionIdx, setSelectedConnectionIdx] = useState<number>(() => {
-    const foundIdx = availableSources.findIndex((source) => source === activeSource);
-    return foundIdx < 0 ? 0 : foundIdx;
-  });
+  const analytics = useAnalytics();
 
   // List enabled sources before disabled sources so the default selected item is an available source
   const enabledSourcesFirst = useMemo(() => {
@@ -68,6 +67,16 @@ export default function Connection(props: ConnectionProps): JSX.Element {
     const disabledSources = availableSources.filter((source) => source.disabledReason);
     return [...enabledSources, ...disabledSources];
   }, [availableSources]);
+
+  const [selectedConnectionIdx, setSelectedConnectionIdx] = useState<number>(() => {
+    const foundIdx = availableSources.findIndex((source) => source === activeSource);
+    const selectedIdx = foundIdx < 0 ? 0 : foundIdx;
+    void analytics.logEvent(AppEvent.DIALOG_SELECT_VIEW, {
+      type: "live",
+      data: enabledSourcesFirst[selectedIdx]?.id,
+    });
+    return selectedIdx;
+  });
 
   const selectedSource = useMemo(
     () => enabledSourcesFirst[selectedConnectionIdx],
@@ -112,7 +121,13 @@ export default function Connection(props: ConnectionProps): JSX.Element {
             classes={{ indicator: classes.indicator }}
             textColor="inherit"
             orientation="vertical"
-            onChange={(_event, newValue: number) => setSelectedConnectionIdx(newValue)}
+            onChange={(_event, newValue: number) => {
+              setSelectedConnectionIdx(newValue);
+              void analytics.logEvent(AppEvent.DIALOG_SELECT_VIEW, {
+                type: "live",
+                data: enabledSourcesFirst[newValue]?.id,
+              });
+            }}
             value={selectedConnectionIdx}
           >
             {enabledSourcesFirst.map((source, idx) => {
