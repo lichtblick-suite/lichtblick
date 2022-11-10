@@ -8,6 +8,7 @@ enum AppEventCategory {
   PLAYERS = "PLAYERS",
   LAYOUTS = "LAYOUTS",
   PANELS = "PANELS",
+  VARIABLES = "VARIABLES",
   EXTENSIONS = "EXTENSIONS",
 }
 
@@ -43,6 +44,10 @@ enum AppEvent {
   // Panel events
   PANEL_ADD = "PANEL_ADD",
   PANEL_DELETE = "PANEL_DELETE",
+
+  // Variable events
+  VARIABLE_ADD = "VARIABLE_ADD",
+  VARIABLE_DELETE = "VARIABLE_DELETE",
 
   // Extension events
   EXTENSION_INSTALL = "EXTENSION_INSTALL",
@@ -98,6 +103,10 @@ export function getEventCategory(event: AppEvent): AppEventCategory {
     case AppEvent.PANEL_DELETE:
       return AppEventCategory.PANELS;
 
+    case AppEvent.VARIABLE_ADD:
+    case AppEvent.VARIABLE_DELETE:
+      return AppEventCategory.VARIABLES;
+
     case AppEvent.EXTENSION_INSTALL:
     case AppEvent.EXTENSION_UNINSTALL:
       return AppEventCategory.EXTENSIONS;
@@ -139,6 +148,10 @@ export function getEventBreadcrumbType(event: AppEvent): SentryBreadcrumbType {
     case AppEvent.LAYOUT_MAKE_PERSONAL_COPY:
     case AppEvent.PANEL_ADD:
     case AppEvent.PANEL_DELETE:
+      return SentryBreadcrumbType.USER;
+
+    case AppEvent.VARIABLE_ADD:
+    case AppEvent.VARIABLE_DELETE:
       return SentryBreadcrumbType.USER;
 
     case AppEvent.EXTENSION_INSTALL:

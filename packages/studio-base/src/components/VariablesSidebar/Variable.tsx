@@ -26,10 +26,12 @@ import { makeStyles } from "tss-react/mui";
 import CopyButton from "@foxglove/studio-base/components/CopyButton";
 import JsonInput from "@foxglove/studio-base/components/JsonInput";
 import Stack from "@foxglove/studio-base/components/Stack";
+import { useAnalytics } from "@foxglove/studio-base/context/AnalyticsContext";
 import useGlobalVariables, {
   GlobalVariables,
 } from "@foxglove/studio-base/hooks/useGlobalVariables";
 import useLinkedGlobalVariables from "@foxglove/studio-base/panels/ThreeDimensionalViz/Interactions/useLinkedGlobalVariables";
+import { AppEvent } from "@foxglove/studio-base/services/IAnalytics";
 
 const useStyles = makeStyles<void, "copyButton">()((theme, _params, classes) => ({
   root: {
@@ -148,14 +150,17 @@ export default function Variable(props: {
     [linkedGlobalVariables, name, setLinkedGlobalVariables],
   );
 
+  const analytics = useAnalytics();
+
   const unlinkAndDelete = useCallback(() => {
     const newLinkedGlobalVariables = linkedGlobalVariables.filter(
       ({ name: varName }) => varName !== name,
     );
     setLinkedGlobalVariables(newLinkedGlobalVariables);
     setGlobalVariables({ [name]: undefined });
+    void analytics.logEvent(AppEvent.VARIABLE_DELETE);
     handleClose();
-  }, [linkedGlobalVariables, name, setGlobalVariables, setLinkedGlobalVariables]);
+  }, [analytics, linkedGlobalVariables, name, setGlobalVariables, setLinkedGlobalVariables]);
 
   const value = useMemo(() => globalVariables[name], [globalVariables, name]);
 

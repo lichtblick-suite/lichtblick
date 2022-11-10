@@ -9,10 +9,12 @@ import { useMemo, useRef, useState, ReactElement, useEffect } from "react";
 
 import { SidebarContent } from "@foxglove/studio-base/components/SidebarContent";
 import Stack from "@foxglove/studio-base/components/Stack";
+import { useAnalytics } from "@foxglove/studio-base/context/AnalyticsContext";
 import useGlobalVariables, {
   GlobalVariables,
 } from "@foxglove/studio-base/hooks/useGlobalVariables";
 import useLinkedGlobalVariables from "@foxglove/studio-base/panels/ThreeDimensionalViz/Interactions/useLinkedGlobalVariables";
+import { AppEvent } from "@foxglove/studio-base/services/IAnalytics";
 
 import Variable from "./Variable";
 import helpContent from "./index.help.md";
@@ -30,6 +32,8 @@ export default function VariablesSidebar(): ReactElement {
 
   // Don't run the animation when the sidebar first renders
   const skipAnimation = useRef<boolean>(true);
+
+  const analytics = useAnalytics();
 
   useEffect(() => {
     const timeoutId = setTimeout(() => (skipAnimation.current = false), ANIMATION_RESET_DELAY_MS);
@@ -69,7 +73,10 @@ export default function VariablesSidebar(): ReactElement {
           key="add-global-variable"
           color="primary"
           disabled={globalVariables[""] != undefined}
-          onClick={() => setGlobalVariables({ "": '""' })}
+          onClick={() => {
+            setGlobalVariables({ "": '""' });
+            void analytics.logEvent(AppEvent.VARIABLE_ADD);
+          }}
         >
           <AddIcon />
         </IconButton>,
