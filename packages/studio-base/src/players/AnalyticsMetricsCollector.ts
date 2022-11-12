@@ -35,12 +35,6 @@ export default class AnalyticsMetricsCollector implements PlayerMetricsCollector
     this.logEvent(AppEvent.PLAYER_CONSTRUCTED);
   }
 
-  public initialized(args?: { isSampleDataSource: boolean }): void {
-    this.logEvent(AppEvent.PLAYER_INITIALIZED, {
-      isSampleDataSource: args?.isSampleDataSource === true,
-    });
-  }
-
   public play(speed: number): void {
     this.logEvent(AppEvent.PLAYER_PLAY, { speed });
   }

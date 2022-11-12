@@ -216,10 +216,6 @@ export default class Ros2Player implements Player {
       // Sort them for easy comparison
       const sortedTopics: Topic[] = sortBy(topics, "name");
 
-      if (this._providerTopics == undefined) {
-        this._metricsCollector.initialized();
-      }
-
       if (this._topicsChanged(sortedTopics)) {
         // Remove stats entries for removed topics
         const topicsSet = new Set<string>(topics.map((topic) => topic.name));

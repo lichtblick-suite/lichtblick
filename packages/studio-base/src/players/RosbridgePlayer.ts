@@ -302,10 +302,6 @@ export default class RosbridgePlayer implements Player {
         });
       }
 
-      if (this._providerTopics == undefined) {
-        this._metricsCollector.initialized();
-      }
-
       // Remove stats entries for removed topics
       const topicsSet = new Set<string>(topics.map((topic) => topic.name));
       for (const topic of this._providerTopicsStats.keys()) {

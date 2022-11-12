@@ -23,9 +23,6 @@ export default class NoopMetricsCollector implements PlayerMetricsCollectorInter
   public playerConstructed(): void {
     // no-op
   }
-  public initialized(_args?: { isSampleDataSource: boolean }): void {
-    // no-op
-  }
   public play(_speed: number): void {
     // no-op
   }
