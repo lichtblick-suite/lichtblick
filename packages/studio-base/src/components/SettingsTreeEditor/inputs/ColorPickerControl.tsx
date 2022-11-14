@@ -41,6 +41,7 @@ type ColorPickerInputProps = {
   alphaType: "none" | "alpha";
   value: undefined | string;
   onChange: (value: string) => void;
+  onEnterKey?: () => void;
 };
 
 function isValidHexColor(color: string, alphaType: "none" | "alpha") {
@@ -48,7 +49,7 @@ function isValidHexColor(color: string, alphaType: "none" | "alpha") {
 }
 
 export function ColorPickerControl(props: ColorPickerInputProps): JSX.Element {
-  const { alphaType, onChange, value } = props;
+  const { alphaType, onChange, value, onEnterKey } = props;
 
   const { classes } = useStyles();
 
@@ -70,7 +71,7 @@ export function ColorPickerControl(props: ColorPickerInputProps): JSX.Element {
       setEditedValue(newValue);
 
       if (isValidHexColor(newValue, alphaType)) {
-        onChange(newValue);
+        onChange(`#${newValue}`);
       }
     },
     [alphaType, onChange],
@@ -106,6 +107,7 @@ export function ColorPickerControl(props: ColorPickerInputProps): JSX.Element {
         }}
         placeholder={alphaType === "alpha" ? "RRGGBBAA" : "RRGGBB"}
         value={editedValue}
+        onKeyDown={(event) => event.key === "Enter" && onEnterKey?.()}
         onChange={(event) => updateEditedValue(event.target.value)}
       />
     </Stack>

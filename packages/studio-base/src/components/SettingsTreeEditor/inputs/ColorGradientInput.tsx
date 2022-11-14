@@ -97,6 +97,7 @@ export function ColorGradientInput({
           value={leftColor}
           alphaType="alpha"
           onChange={(newValue) => onChange([newValue, rightColor])}
+          onEnterKey={handleClose}
         />
       </Popover>
       <Popover
@@ -116,6 +117,7 @@ export function ColorGradientInput({
           value={rightColor}
           alphaType="alpha"
           onChange={(newValue) => onChange([leftColor, newValue])}
+          onEnterKey={handleClose}
         />
       </Popover>
     </Stack>

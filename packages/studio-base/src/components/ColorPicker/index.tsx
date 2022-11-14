@@ -106,7 +106,12 @@ export default function ColorPicker({
           horizontal: "center",
         }}
       >
-        <ColorPickerControl alphaType={alphaType} value={hexColor} onChange={onChangeCallback} />
+        <ColorPickerControl
+          alphaType={alphaType}
+          value={hexColor}
+          onChange={onChangeCallback}
+          onEnterKey={handleClose}
+        />
       </Popover>
     </div>
   );

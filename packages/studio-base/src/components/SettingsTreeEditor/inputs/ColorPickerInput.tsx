@@ -109,7 +109,12 @@ export function ColorPickerInput(props: ColorPickerInputProps): JSX.Element {
           horizontal: "center",
         }}
       >
-        <ColorPickerControl alphaType={alphaType} value={value} onChange={onChange} />
+        <ColorPickerControl
+          alphaType={alphaType}
+          value={value}
+          onChange={onChange}
+          onEnterKey={handleClose}
+        />
       </Popover>
     </Stack>
   );
