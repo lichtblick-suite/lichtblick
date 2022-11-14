@@ -118,7 +118,7 @@
     "jest": "27.5.1",
     "jest-canvas-mock": "2.3.1",
     "license-checker": "25.0.1",
-    "playwright": "1.25.1",
+    "playwright": "1.27.1",
     "pngjs": "6.0.0",
     "prettier": "2.5.1",
     "react-refresh": "0.11.0",
