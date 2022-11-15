@@ -22,7 +22,10 @@ const log = Logger.getLogger(__filename);
 
 type Props = {
   allowedExtensions?: string[];
-  onDrop?: (event: { files?: File[]; handles?: FileSystemFileHandle[] }) => void;
+  onDrop?: (event: {
+    files?: File[];
+    handles?: FileSystemFileHandle[]; // foxglove-depcheck-used: @types/wicg-file-system-access
+  }) => void;
 };
 
 export default function DocumentDropListener(props: Props): JSX.Element {

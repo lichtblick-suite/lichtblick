@@ -22,10 +22,15 @@
   },
   "devDependencies": {
     "@foxglove/schemas": "0.7.0",
+    "@mcap/core": "0.2.2",
+    "@types/protobufjs": "workspace:*",
     "@types/zstd-codec": "workspace:*",
     "typescript": "4.8.2"
   },
   "dependencies": {
+    "@foxglove/rosmsg": "3.1.0",
+    "@foxglove/rosmsg-serialization": "1.5.3",
+    "@foxglove/rosmsg2-serialization": "1.0.7",
     "@foxglove/wasm-bz2": "0.1.0",
     "@protobufjs/base64": "1.1.2",
     "flatbuffers": "2.0.6",

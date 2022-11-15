@@ -143,7 +143,6 @@ declare module "@foxglove/regl-worldview" {
   };
   type CameraStateSelectors = any;
   type Scale = any;
-  type Pose = any;
   type Regl = REGL.Regl;
   type AssignNextColorsFn = (object: unknown, count: number) => Vec4[];
 

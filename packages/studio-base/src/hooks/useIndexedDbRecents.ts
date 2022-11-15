@@ -37,7 +37,7 @@ type RecentConnectionRecord = RecentRecordCommon & {
 
 type RecentFileRecord = RecentRecordCommon & {
   type: "file";
-  handle: FileSystemFileHandle;
+  handle: FileSystemFileHandle; // foxglove-depcheck-used: @types/wicg-file-system-access
 };
 
 type UnsavedRecentRecord = Omit<RecentConnectionRecord, "id"> | Omit<RecentFileRecord, "id">;

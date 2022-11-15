@@ -3,7 +3,7 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 import { Fade, Tooltip } from "@mui/material";
-import { Instance } from "@popperjs/core";
+import type { Instance } from "@popperjs/core";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useLatest } from "react-use";
 import { makeStyles } from "tss-react/mui";

@@ -78,7 +78,7 @@ export type RecentSource = {
 type FileDataSourceArgs = {
   type: "file";
   files?: File[];
-  handle?: FileSystemFileHandle;
+  handle?: FileSystemFileHandle; // foxglove-depcheck-used: @types/wicg-file-system-access
 };
 
 type ConnectionDataSourceArgs = {

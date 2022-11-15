@@ -360,7 +360,9 @@ export default function Workspace(props: WorkspaceProps): JSX.Element {
   const installExtension = useExtensionCatalog((state) => state.installExtension);
 
   const openHandle = useCallback(
-    async (handle: FileSystemFileHandle) => {
+    async (
+      handle: FileSystemFileHandle /* foxglove-depcheck-used: @types/wicg-file-system-access */,
+    ) => {
       log.debug("open handle", handle);
       const file = await handle.getFile();
       // electron extends File with a `path` field which is not available in browsers

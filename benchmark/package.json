@@ -5,8 +5,19 @@
     "@foxglove/studio-base": "workspace:*"
   },
   "devDependencies": {
-    "@types/copy-webpack-plugin": "10.1.0",
-    "copy-webpack-plugin": "10.2.4",
-    "webpack": "5.74.0"
+    "@foxglove/log": "workspace:*",
+    "@foxglove/rostime": "1.1.2",
+    "@foxglove/schemas": "0.7.0",
+    "@foxglove/studio": "workspace:*",
+    "@pmmmwh/react-refresh-webpack-plugin": "0.5.4",
+    "@types/react": "17.0.39",
+    "@types/react-dom": "17.0.13",
+    "clean-webpack-plugin": "4.0.0",
+    "html-webpack-plugin": "5.5.0",
+    "mathjs": "10.1.1",
+    "react": "17.0.2",
+    "react-dom": "17.0.2",
+    "webpack": "5.74.0",
+    "webpack-dev-server": "4.11.0"
   }
 }

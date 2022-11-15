@@ -111,7 +111,7 @@ export function makeConfig(
           resourceQuery: { not: [/raw/] },
           use: [
             {
-              loader: "ts-loader",
+              loader: "ts-loader", // foxglove-depcheck-used: ts-loader
               options: {
                 transpileOnly: true,
                 // https://github.com/TypeStrong/ts-loader#onlycompilebundledfiles
@@ -143,14 +143,14 @@ export function makeConfig(
         { test: /\.(md|template)$/, type: "asset/source" },
         {
           test: /\.svg$/,
-          loader: "react-svg-loader",
+          loader: "react-svg-loader", // foxglove-depcheck-used: react-svg-loader
           options: {
             svgo: {
               plugins: [{ removeViewBox: false }, { removeDimensions: false }],
             },
           },
         },
-        { test: /\.ne$/, loader: "nearley-loader" },
+        { test: /\.ne$/, loader: "nearley-loader" }, // foxglove-depcheck-used: nearley-loader
         {
           test: /\.(png|jpg|gif)$/i,
           type: "asset",
@@ -162,17 +162,17 @@ export function makeConfig(
         },
         {
           test: /\.css$/,
-          loader: "style-loader",
+          loader: "style-loader", // foxglove-depcheck-used: style-loader
           sideEffects: true,
         },
         {
           test: /\.css$/,
-          loader: "css-loader",
+          loader: "css-loader", // foxglove-depcheck-used: css-loader
           options: { sourceMap: true },
         },
         {
           test: /\.css$/,
-          loader: "esbuild-loader",
+          loader: "esbuild-loader", // foxglove-depcheck-used: esbuild-loader
           options: { loader: "css", minify: !isDev },
         },
         { test: /\.woff2?$/, type: "asset/inline" },
@@ -183,7 +183,7 @@ export function makeConfig(
           // https://github.com/microsoft/TypeScript/issues/39436
           // Prettier's TS parser also bundles the same code: https://github.com/prettier/prettier/issues/11076
           test: /[\\/]node_modules[\\/]typescript[\\/]lib[\\/]typescript\.js$|[\\/]node_modules[\\/]prettier[\\/]parser-typescript\.js$/,
-          loader: "string-replace-loader",
+          loader: "string-replace-loader", // foxglove-depcheck-used: string-replace-loader
           options: {
             multiple: [
               {
@@ -220,7 +220,7 @@ export function makeConfig(
           // Since we don't need these fonts present, we remove the default font registration.
           // https://github.com/microsoft/fluentui/issues/10363
           test: /[\\/]fonts[\\/]DefaultFontStyles.js$/,
-          loader: "string-replace-loader",
+          loader: "string-replace-loader", // foxglove-depcheck-used: string-replace-loader
           options: {
             search: "registerDefaultFontFaces(_getFontBaseUrl());",
             replace: "",

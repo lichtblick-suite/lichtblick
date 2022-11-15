@@ -22,8 +22,7 @@ export default async function installChromeExtensions(): Promise<void> {
       setTimeout(() => {
         if (!finished) {
           console.warn(
-            "Warning: extension installation may be stuck; try relaunching electron or deleting its extensions directory. Continuing for now."
-              .yellow,
+            "Warning: extension installation may be stuck; try relaunching electron or deleting its extensions directory. Continuing for now.",
           );
         }
         resolve();
