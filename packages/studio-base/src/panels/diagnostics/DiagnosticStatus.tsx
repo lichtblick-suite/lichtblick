@@ -33,7 +33,7 @@ import { openSiblingPlotPanel } from "@foxglove/studio-base/panels/Plot";
 import { openSiblingStateTransitionsPanel } from "@foxglove/studio-base/panels/StateTransitions";
 import { OpenSiblingPanel } from "@foxglove/studio-base/types/panels";
 
-import { DiagnosticInfo, KeyValue, DiagnosticStatusMessage } from "./util";
+import { DiagnosticInfo, KeyValue, DiagnosticStatusMessage, LEVELS } from "./util";
 
 const MIN_SPLIT_FRACTION = 0.1;
 
@@ -279,11 +279,11 @@ export default function DiagnosticStatus(props: Props): JSX.Element {
     });
   }, [info.status, openSiblingPanel, renderKeyValueCell, topicToRender]);
 
-  const STATUS_COLORS: { [key: number]: string } = {
-    0: "success.main",
-    1: "error.main",
-    2: "warning.main",
-    3: "info.main",
+  const STATUS_COLORS: Record<number, string> = {
+    [LEVELS.OK]: "success.main",
+    [LEVELS.ERROR]: "error.main",
+    [LEVELS.WARN]: "warning.main",
+    [LEVELS.STALE]: "info.main",
   };
 
   return (

@@ -25,6 +25,10 @@ const fixture: Fixture = {
           { key: "key <b>with html</b>", value: "value <tt>with html</tt>" },
         ],
       ),
+      makeDiagnosticMessage(LEVELS.ERROR, "name1", "levels_id", ["error message"]),
+      makeDiagnosticMessage(LEVELS.OK, "name2", "levels_id", ["ok message"]),
+      makeDiagnosticMessage(LEVELS.STALE, "name3", "levels_id", ["stale message"]),
+      makeDiagnosticMessage(LEVELS.WARN, "name4", "levels_id", ["warn message"]),
     ],
   },
 };
@@ -33,6 +37,19 @@ export function Empty(): JSX.Element {
   return (
     <PanelSetup fixture={fixture}>
       <DiagnosticStatusPanel />
+    </PanelSetup>
+  );
+}
+
+export function Default(): JSX.Element {
+  return (
+    <PanelSetup fixture={fixture}>
+      <DiagnosticStatusPanel
+        overrideConfig={{
+          topicToRender: "/diagnostics",
+          selectedHardwareId: "levels_id",
+        }}
+      />
     </PanelSetup>
   );
 }
@@ -50,6 +67,9 @@ export function WithSettings(): JSX.Element {
     </PanelSetup>
   );
 }
+WithSettings.parameters = {
+  colorScheme: "light",
+};
 
 export function SelectedHardwareIDOnly(): JSX.Element {
   return (
