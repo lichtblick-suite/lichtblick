@@ -46,7 +46,6 @@ export default class FoxgloveWebSocketPlayer implements Player {
   private _topics?: Topic[]; // Topics as published by the WebSocket.
   private _topicsStats = new Map<string, TopicStats>(); // Topic names to topic statistics.
   private _datatypes?: RosDatatypes; // Datatypes as published by the WebSocket.
-  private _start?: Time; // The time at which we started playing.
   private _parsedMessages: MessageEvent<unknown>[] = []; // Queue of messages that we'll send in next _emitState() call.
   private _receivedBytes: number = 0;
   private _metricsCollector: PlayerMetricsCollectorInterface;
@@ -54,7 +53,13 @@ export default class FoxgloveWebSocketPlayer implements Player {
   private _presence: PlayerPresence = PlayerPresence.NOT_PRESENT;
   private _problems = new PlayerProblemManager();
   private _lastSeekTime = 0;
+
+  /** Earliest time seen */
+  private _startTime?: Time;
+  /** Most recently-seen time */
   private _currentTime?: Time;
+  /** Latest time seen */
+  private _endTime?: Time;
 
   private _unresolvedSubscriptions = new Set<string>();
   private _resolvedSubscriptionsByTopic = new Map<string, SubscriptionId>();
@@ -114,6 +119,9 @@ export default class FoxgloveWebSocketPlayer implements Player {
     client.on("close", (event) => {
       log.info("Connection closed:", event);
       this._presence = PlayerPresence.RECONNECTING;
+      this._startTime = undefined;
+      this._currentTime = undefined;
+      this._endTime = undefined;
 
       for (const topic of this._resolvedSubscriptionsByTopic.keys()) {
         this._unresolvedSubscriptions.add(topic);
@@ -258,8 +266,11 @@ export default class FoxgloveWebSocketPlayer implements Player {
           this._parsedMessages = [];
         }
         this._currentTime = receiveTime;
-        if (!this._start) {
-          this._start = receiveTime;
+        if (!this._startTime || isLessThan(receiveTime, this._startTime)) {
+          this._startTime = receiveTime;
+        }
+        if (!this._endTime || isGreaterThan(receiveTime, this._endTime)) {
+          this._endTime = receiveTime;
         }
         this._parsedMessages.push({
           topic,
@@ -359,8 +370,8 @@ export default class FoxgloveWebSocketPlayer implements Player {
       activeData: {
         messages,
         totalBytesReceived: this._receivedBytes,
-        startTime: this._start ?? ZERO_TIME,
-        endTime: this._currentTime ?? ZERO_TIME,
+        startTime: this._startTime ?? ZERO_TIME,
+        endTime: this._endTime ?? ZERO_TIME,
         currentTime: this._currentTime ?? ZERO_TIME,
         isPlaying: true,
         speed: 1,
