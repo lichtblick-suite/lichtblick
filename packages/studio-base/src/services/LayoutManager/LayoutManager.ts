@@ -29,6 +29,7 @@ import {
   RemoteLayout,
 } from "@foxglove/studio-base/services/IRemoteLayoutStorage";
 
+import { migratePanelsState } from "../migrateLayout";
 import { NamespacedLayoutStorage } from "./NamespacedLayoutStorage";
 import WriteThroughLayoutCache from "./WriteThroughLayoutCache";
 import computeLayoutSyncOperations, { SyncOperation } from "./computeLayoutSyncOperations";
@@ -216,13 +217,14 @@ export default class LayoutManager implements ILayoutManager {
   @LayoutManager.withBusyStatus
   public async saveNewLayout({
     name,
-    data,
+    data: unmigratedData,
     permission,
   }: {
     name: string;
     data: PanelsState;
     permission: LayoutPermission;
   }): Promise<Layout> {
+    const data = migratePanelsState(unmigratedData);
     if (layoutPermissionIsShared(permission)) {
       if (!this.remote) {
         throw new Error("Shared layouts are not supported without remote layout storage");
