@@ -399,10 +399,14 @@ export default class FoxgloveWebSocketPlayer implements Player {
   }
 
   public setSubscriptions(subscriptions: SubscribePayload[]): void {
+    const newTopics = new Set(subscriptions.map(({ topic }) => topic));
+
     if (!this._client || this._closed) {
+      // Remember requested subscriptions so we can retry subscribing when
+      // the client is available.
+      this._unresolvedSubscriptions = newTopics;
       return;
     }
-    const newTopics = new Set(subscriptions.map(({ topic }) => topic));
 
     for (const topic of newTopics) {
       if (!this._resolvedSubscriptionsByTopic.has(topic)) {
