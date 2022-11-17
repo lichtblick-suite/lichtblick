@@ -8,10 +8,12 @@ import { useCallback, useLayoutEffect, useMemo, useState } from "react";
 import { useMountedState } from "react-use";
 
 import Stack from "@foxglove/studio-base/components/Stack";
+import { useAnalytics } from "@foxglove/studio-base/context/AnalyticsContext";
 import {
   IDataSourceFactory,
   usePlayerSelection,
 } from "@foxglove/studio-base/context/PlayerSelectionContext";
+import { AppEvent } from "@foxglove/studio-base/services/IAnalytics";
 
 import Connection from "./Connection";
 import Remote from "./Remote";
@@ -52,6 +54,15 @@ export default function OpenDialog(props: OpenDialogProps): JSX.Element {
   const onSelectView = useCallback((view: OpenDialogViews) => {
     setActiveView(view);
   }, []);
+
+  const analytics = useAnalytics();
+
+  const onModalClose = useCallback(() => {
+    if (onDismiss) {
+      onDismiss();
+      void analytics.logEvent(AppEvent.DIALOG_CLOSE, { activeView });
+    }
+  }, [analytics, activeView, onDismiss]);
 
   useLayoutEffect(() => {
     if (activeView === "file") {
@@ -105,7 +116,7 @@ export default function OpenDialog(props: OpenDialogProps): JSX.Element {
           component: (
             <Connection
               onBack={() => onSelectView("start")}
-              onCancel={onDismiss}
+              onCancel={onModalClose}
               availableSources={connectionSources}
               activeSource={activeDataSource}
             />
@@ -117,7 +128,7 @@ export default function OpenDialog(props: OpenDialogProps): JSX.Element {
           component: (
             <Remote
               onBack={() => onSelectView("start")}
-              onCancel={onDismiss}
+              onCancel={onModalClose}
               availableSources={remoteFileSources}
             />
           ),
@@ -139,15 +150,15 @@ export default function OpenDialog(props: OpenDialogProps): JSX.Element {
     activeView,
     connectionSources,
     localFileSources,
-    onDismiss,
     onSelectView,
     remoteFileSources,
+    onModalClose,
   ]);
 
   return (
     <Dialog
       open
-      onClose={onDismiss}
+      onClose={onModalClose}
       fullWidth
       maxWidth="md"
       PaperProps={{
@@ -157,7 +168,7 @@ export default function OpenDialog(props: OpenDialogProps): JSX.Element {
     >
       <StyledDialogTitle>
         {view.title}
-        <IconButton onClick={onDismiss} edge="end">
+        <IconButton onClick={onModalClose} edge="end">
           <CloseIcon />
         </IconButton>
       </StyledDialogTitle>

@@ -17,6 +17,7 @@ enum AppEvent {
 
   // Dialog events
   DIALOG_SELECT_VIEW = "DIALOG_SELECT_VIEW",
+  DIALOG_CLOSE = "DIALOG_CLOSE",
 
   // Player events
   PLAYER_CONSTRUCTED = "PLAYER_CONSTRUCTED",
@@ -73,6 +74,7 @@ export function getEventCategory(event: AppEvent): AppEventCategory {
       return AppEventCategory.LIFECYCLE;
 
     case AppEvent.DIALOG_SELECT_VIEW:
+    case AppEvent.DIALOG_CLOSE:
       return AppEventCategory.DIALOG;
 
     case AppEvent.PLAYER_CONSTRUCTED:
@@ -118,6 +120,9 @@ export function getEventBreadcrumbType(event: AppEvent): SentryBreadcrumbType {
 
     case AppEvent.DIALOG_SELECT_VIEW:
       return SentryBreadcrumbType.TRANSACTION;
+
+    case AppEvent.DIALOG_CLOSE:
+      return SentryBreadcrumbType.USER;
 
     case AppEvent.PLAYER_CONSTRUCTED:
       return SentryBreadcrumbType.TRANSACTION;
