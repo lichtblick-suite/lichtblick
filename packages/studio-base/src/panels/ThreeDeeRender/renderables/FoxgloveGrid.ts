@@ -816,10 +816,10 @@ function createMaterial(texture: THREE.DataTexture, topic: string): GridShaderMa
             }
           }
         }
+        if(gl_FragColor.a < 0.00001) {
+          discard;
+        }
         if(PICKING == 1) {
-          if(gl_FragColor.a < 0.00001) {
-            discard;
-          }
           gl_FragColor = objectId;
         } else {
           #include <encodings_fragment>
