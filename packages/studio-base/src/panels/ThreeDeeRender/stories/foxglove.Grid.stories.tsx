@@ -57,7 +57,13 @@ function copyGridAtPosition(
   };
 }
 
-function Foxglove_Grid_Uint8(): JSX.Element {
+function Foxglove_Grid_Uint8({
+  minValue,
+  maxValue,
+}: {
+  minValue?: number;
+  maxValue?: number;
+}): JSX.Element {
   const topics: Topic[] = [
     { name: "/grid", schemaName: "foxglove.Grid" },
     { name: "/tf", schemaName: "geometry_msgs/TransformStamped" },
@@ -216,24 +222,32 @@ function Foxglove_Grid_Uint8(): JSX.Element {
               colorField: "checkerboard",
               colorMode: "gradient",
               gradient: ["#ff0000ff", "#00ff0001"],
+              minValue,
+              maxValue,
             } as LayerSettingsFoxgloveGrid,
             "/grid2": {
               visible: true,
               colorField: "gradient",
               colorMode: "colormap",
               colorMap: "rainbow",
+              minValue,
+              maxValue,
             } as LayerSettingsFoxgloveGrid,
             "/grid3": {
               visible: true,
               colorField: "gradient",
               colorMode: "colormap",
               colorMap: "turbo",
+              minValue,
+              maxValue,
             } as LayerSettingsFoxgloveGrid,
             "/grid4": {
               visible: true,
               colorField: "colStripes",
               colorMode: "colormap",
               colorMap: "turbo",
+              minValue,
+              maxValue,
             } as LayerSettingsFoxgloveGrid,
           },
           layers: {
@@ -397,7 +411,13 @@ function Foxglove_Grid_RGBA(): JSX.Element {
   );
 }
 
-function Foxglove_Grid_Float(): JSX.Element {
+function Foxglove_Grid_Float({
+  minValue,
+  maxValue,
+}: {
+  minValue?: number;
+  maxValue?: number;
+}): JSX.Element {
   const topics: Topic[] = [
     { name: "/grid", schemaName: "foxglove.Grid" },
     { name: "/tf", schemaName: "geometry_msgs/TransformStamped" },
@@ -496,8 +516,8 @@ function Foxglove_Grid_Float(): JSX.Element {
               colorField: "height",
               colorMode: "gradient",
               gradient: ["#ffffffFF", "#ff00bb80"],
-              minValue: -0.25,
-              maxValue: 0.25,
+              minValue: minValue ?? -0.25,
+              maxValue: maxValue ?? 0.25,
             } as LayerSettingsFoxgloveGrid,
           },
           layers: {
@@ -645,6 +665,12 @@ function Row_Stride_Grid(): JSX.Element {
   );
 }
 export const Foxglove_Grid_Uint8_Values = (): JSX.Element => <Foxglove_Grid_Uint8 />;
+export const Foxglove_Grid_Uint8_Values_Clamped = (): JSX.Element => (
+  <Foxglove_Grid_Uint8 minValue={30} maxValue={80} />
+);
 export const Foxglove_Grid_RGBA_Values = (): JSX.Element => <Foxglove_Grid_RGBA />;
 export const Foxglove_Grid_Float_Values = (): JSX.Element => <Foxglove_Grid_Float />;
+export const Foxglove_Grid_Float_Values_Clamped = (): JSX.Element => (
+  <Foxglove_Grid_Float minValue={0.05} maxValue={0.1} />
+);
 export const Foxglove_Grid_Padded_Row = (): JSX.Element => <Row_Stride_Grid />;

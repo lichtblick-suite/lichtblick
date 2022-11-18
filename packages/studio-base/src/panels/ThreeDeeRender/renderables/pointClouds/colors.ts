@@ -52,7 +52,7 @@ export function getColorConverter<
       rgbaToLinear(minColor, minColor);
       rgbaToLinear(maxColor, maxColor);
       return (output: ColorRGBA, colorValue: number) => {
-        const t = (colorValue - minValue) / valueDelta;
+        const t = Math.max(0, Math.min((colorValue - minValue) / valueDelta, 1));
         rgbaGradient(output, minColor, maxColor, t);
       };
     }
@@ -61,13 +61,13 @@ export function getColorConverter<
       switch (settings.colorMap) {
         case "turbo":
           return (output: ColorRGBA, colorValue: number) => {
-            const t = (colorValue - minValue) / valueDelta;
+            const t = Math.max(0, Math.min((colorValue - minValue) / valueDelta, 1));
             turboLinearCached(output, t);
             output.a = settings.explicitAlpha;
           };
         case "rainbow":
           return (output: ColorRGBA, colorValue: number) => {
-            const t = (colorValue - minValue) / valueDelta;
+            const t = Math.max(0, Math.min((colorValue - minValue) / valueDelta, 1));
             rainbowLinear(output, t);
             output.a = settings.explicitAlpha;
           };

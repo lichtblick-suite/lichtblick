@@ -27,11 +27,23 @@ export const Foxglove_PointCloud_RGBA = (): JSX.Element => <Foxglove_PointCloud 
 export const Foxglove_PointCloud_RGBA_Square = (): JSX.Element => (
   <Foxglove_PointCloud pointShape="square" />
 );
+export const Foxglove_PointCloud_Gradient = (): JSX.Element => (
+  <Foxglove_PointCloud colorMode="gradient" />
+);
+export const Foxglove_PointCloud_Gradient_Clamped = (): JSX.Element => (
+  <Foxglove_PointCloud colorMode="gradient" minValue={-2} maxValue={2} />
+);
 
 function Foxglove_PointCloud({
   pointShape = "circle",
+  colorMode = "rgba-fields",
+  minValue,
+  maxValue,
 }: {
   pointShape?: "circle" | "square";
+  colorMode?: "gradient" | "rgba-fields";
+  minValue?: number;
+  maxValue?: number;
 }): JSX.Element {
   const topics: Topic[] = [
     { name: "/pointcloud", schemaName: "foxglove.PointCloud" },
@@ -141,8 +153,11 @@ function Foxglove_PointCloud({
               visible: true,
               pointSize: 10,
               pointShape,
-              colorMode: "rgba-fields",
+              colorMode,
               colorField: "x",
+              gradient: ["#17b3f6", "#09e609d5"],
+              minValue,
+              maxValue,
             },
           },
           layers: {
@@ -166,7 +181,13 @@ function Foxglove_PointCloud({
   );
 }
 
-export function Foxglove_PointCloud_Intensity(): JSX.Element {
+function Foxglove_PointCloud_Intensity_Base({
+  minValue,
+  maxValue,
+}: {
+  minValue?: number;
+  maxValue?: number;
+}): JSX.Element {
   const topics: Topic[] = [
     { name: "/pointcloud", schemaName: "foxglove.PointCloud" },
     { name: "/tf", schemaName: "geometry_msgs/TransformStamped" },
@@ -313,6 +334,8 @@ export function Foxglove_PointCloud_Intensity(): JSX.Element {
             "/pointcloud": {
               visible: true,
               pointSize: 5,
+              minValue,
+              maxValue,
             },
           },
           layers: {
@@ -335,6 +358,16 @@ export function Foxglove_PointCloud_Intensity(): JSX.Element {
     </PanelSetup>
   );
 }
+
+export const Foxglove_PointCloud_Intensity = Foxglove_PointCloud_Intensity_Base.bind(undefined, {});
+
+export const Foxglove_PointCloud_Intensity_Clamped = Foxglove_PointCloud_Intensity_Base.bind(
+  undefined,
+  {
+    minValue: 80,
+    maxValue: 130,
+  },
+);
 
 // Render a flat plane if we only have two dimensions
 export function Foxglove_PointCloud_TwoDimensions(): JSX.Element {
