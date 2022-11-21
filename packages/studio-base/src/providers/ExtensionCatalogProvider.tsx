@@ -12,7 +12,6 @@ import {
   ExtensionCatalog,
   ExtensionCatalogContext,
   RegisteredPanel,
-  useExtensionCatalog,
 } from "@foxglove/studio-base/context/ExtensionCatalogContext";
 import { ExtensionLoader } from "@foxglove/studio-base/services/ExtensionLoader";
 import { ExtensionInfo, ExtensionNamespace } from "@foxglove/studio-base/types/Extensions";
@@ -141,25 +140,19 @@ export function createExtensionRegistryStore(
   }));
 }
 
-function InitialRefreshAdapter(): ReactNull {
-  const refreshExtensions = useExtensionCatalog((state) => state.refreshExtensions);
-  useEffect(() => {
-    refreshExtensions().catch((err) => log.error(err));
-  }, [refreshExtensions]);
-
-  return ReactNull;
-}
-
 export default function ExtensionCatalogProvider({
   children,
   loaders,
 }: PropsWithChildren<{ loaders: readonly ExtensionLoader[] }>): JSX.Element {
   const [store] = useState(createExtensionRegistryStore(loaders));
 
+  // Request an initial refresh on first mount
+  const refreshExtensions = store.getState().refreshExtensions;
+  useEffect(() => {
+    refreshExtensions().catch((err) => log.error(err));
+  }, [refreshExtensions]);
+
   return (
-    <ExtensionCatalogContext.Provider value={store}>
-      <InitialRefreshAdapter />
-      {children}
-    </ExtensionCatalogContext.Provider>
+    <ExtensionCatalogContext.Provider value={store}>{children}</ExtensionCatalogContext.Provider>
   );
 }
