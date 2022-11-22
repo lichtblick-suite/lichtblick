@@ -56,15 +56,18 @@ describe("Private registry sync adapter", () => {
     });
 
     getExtensions.mockReturnValue([
-      { name: "id1" },
-      { name: "id2" },
-      { name: "mixedCaseName", activeVersion: "1" },
-      { name: "private-installed-1", activeVersion: "2" },
-      { name: "private-installed-2", activeVersion: "1" },
+      { id: "id1", name: "id1" },
+      { id: "id2", name: "id2" },
+      { id: "mixedCaseName", name: "mixedCaseName", activeVersion: "1" },
+      { id: "private-installed-1", name: "private-installed-1", activeVersion: "2" },
+      { id: "private-installed-2", name: "private-installed-2", activeVersion: "1" },
     ]);
-    getExtension.mockReturnValue({ foxe: "url" });
 
-    fetchMock.get("url", new Uint8Array());
+    // Send back a fake url for the foxe file
+    getExtension.mockReturnValue({ foxe: "http://example.com/extension.foxe" });
+
+    // Fake response to extension download path
+    fetchMock.get("http://example.com/extension.foxe", new Uint8Array());
 
     const mockPrivateLoader = {
       namespace: "org",
@@ -88,6 +91,13 @@ describe("Private registry sync adapter", () => {
     );
 
     await waitFor(() => expect(mockPrivateLoader.installExtension).toHaveBeenCalledTimes(3));
+    // These extensions were not installed locally or at the correct version so we need to install them
+    expect(getExtension.mock.calls).toEqual([["id1"], ["id2"], ["private-installed-1"]]);
+    expect(mockPrivateLoader.installExtension.mock.calls).toEqual([
+      [new Uint8Array([123, 125])],
+      [new Uint8Array([123, 125])],
+      [new Uint8Array([123, 125])],
+    ]);
     expect(mockPrivateLoader.uninstallExtension).toHaveBeenCalledTimes(1);
   });
 });

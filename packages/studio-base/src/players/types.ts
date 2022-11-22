@@ -268,7 +268,7 @@ export type SubscriptionPreloadType =
 
 // Represents a subscription to a single topic, for use in `setSubscriptions`.
 export type SubscribePayload = {
-  // The topic name to subscribe to.
+  // The topic name to subscribe to
   topic: string;
   preloadType?: SubscriptionPreloadType;
 };

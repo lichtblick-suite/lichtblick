@@ -55,10 +55,25 @@ declare module "@foxglove/studio" {
      * i.e. `package.Message` in protobuf-like serialization or `pkg/Msg` in ROS systems.
      */
     schemaName: string;
+
+    /**
+     * Lists any additional schema names available for subscribers on the topic. When subscribing to
+     * a topic, the panel can request messages be automatically converted from schemaName into one
+     * of the convertibleTo schemas using the convertTo option.
+     */
+    convertibleTo?: readonly string[];
   };
 
   export type Subscription = {
     topic: string;
+
+    /**
+     * If a topic as additional schema names, specifying a schema name will convert messages on that
+     * topic to the convertTo schema using a registered message converter. MessageEvents for the
+     * subscription will contain the converted message and an originalMessageEvent field with the
+     * original message event.
+     */
+    convertTo?: string;
 
     /**
      * Setting preload to _true_ hints to the data source that it should attempt to load all available
@@ -102,6 +117,13 @@ declare module "@foxglove/studio" {
      * useful for statistics tracking and cache eviction.
      */
     sizeInBytes: number;
+
+    /**
+     * When subscribing to a topic using the `convertTo` option, the message event `message`
+     * contains the converted message and the originalMessageEvent field contains the original
+     * un-converted message event.
+     */
+    originalMessageEvent?: MessageEvent<unknown>;
   }>;
 
   export interface LayoutActions {
@@ -342,11 +364,19 @@ declare module "@foxglove/studio" {
     initPanel: (context: PanelExtensionContext) => void;
   };
 
+  export type RegisterMessageConverterArgs<Src> = {
+    fromSchemaName: string;
+    toSchemaName: string;
+    converter: (msg: Src) => unknown;
+  };
+
   export interface ExtensionContext {
     /** The current _mode_ of the application. */
     readonly mode: "production" | "development" | "test";
 
     registerPanel(params: ExtensionPanelRegistration): void;
+
+    registerMessageConverter<Src>(args: RegisterMessageConverterArgs<Src>): void;
   }
 
   export interface ExtensionActivate {

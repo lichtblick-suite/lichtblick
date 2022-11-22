@@ -29,6 +29,10 @@ import { usePanelContext } from "@foxglove/studio-base/components/PanelContext";
 import PanelToolbar from "@foxglove/studio-base/components/PanelToolbar";
 import { useAppConfiguration } from "@foxglove/studio-base/context/AppConfigurationContext";
 import {
+  ExtensionCatalog,
+  useExtensionCatalog,
+} from "@foxglove/studio-base/context/ExtensionCatalogContext";
+import {
   useClearHoverValue,
   useHoverValue,
   useSetHoverValue,
@@ -63,6 +67,10 @@ function selectContext(ctx: MessagePipelineContext) {
   return ctx;
 }
 
+function selectInstalledMessageConverters(state: ExtensionCatalog) {
+  return state.installedMessageConverters;
+}
+
 type RenderFn = NonNullable<PanelExtensionContext["onRender"]>;
 /**
  * PanelExtensionAdapter renders a panel extension via initPanel
@@ -92,11 +100,9 @@ function PanelExtensionAdapter(props: PanelExtensionAdapterProps): JSX.Element {
   const isMounted = useSynchronousMountedState();
   const [error, setError] = useState<Error | undefined>();
   const [watchedFields, setWatchedFields] = useState(new Set<keyof RenderState>());
+  const messageConverters = useExtensionCatalog(selectInstalledMessageConverters);
 
-  // When subscribing to preloaded topics we use this array to filter the raw blocks to include only
-  // the topics we subscribed to in the allFrames render state. Otherwise the panel would receive
-  // messages in allFrames for topics the panel did not subscribe to.
-  const [subscribedTopics, setSubscribedTopics] = useState<string[]>([]);
+  const [localSubscriptions, setLocalSubscriptions] = useState<Subscription[]>([]);
 
   const [appSettings, setAppSettings] = useState(new Map<string, AppSettingValue>());
   const [subscribedAppSettings, setSubscribedAppSettings] = useState<string[]>([]);
@@ -188,9 +194,10 @@ function PanelExtensionAdapter(props: PanelExtensionAdapterProps): JSX.Element {
       playerState,
       colorScheme,
       appSettings,
-      subscribedTopics,
+      subscriptions: localSubscriptions,
       currentFrame: messageEvents,
       sortedTopics,
+      messageConverters,
     });
 
     if (!renderState) {
@@ -226,12 +233,13 @@ function PanelExtensionAdapter(props: PanelExtensionAdapterProps): JSX.Element {
   }, [
     panelId,
     pauseFrame,
-    subscribedTopics,
+    localSubscriptions,
     watchedFields,
     appSettings,
     hoverValue,
     playerState,
     messageEvents,
+    messageConverters,
     renderFn,
     colorScheme,
     buildRenderState,
@@ -335,23 +343,21 @@ function PanelExtensionAdapter(props: PanelExtensionAdapterProps): JSX.Element {
         if (!isMounted()) {
           return;
         }
-        const newSubscribedTopics: string[] = [];
         const subscribePayloads = topics.map<SubscribePayload>((item) => {
           if (typeof item === "string") {
-            newSubscribedTopics.push(item);
             // For backwards compatability with the topic-string-array api `subscribe(["/topic"])`
             // results in a topic subscription with full preloading
             return { topic: item, preloadType: "full" };
           }
 
-          newSubscribedTopics.push(item.topic);
           return {
             topic: item.topic,
+            convertTo: item.convertTo,
             preloadType: item.preload === true ? "full" : "partial",
           };
         });
 
-        setSubscribedTopics(newSubscribedTopics);
+        setLocalSubscriptions(subscribePayloads);
         setSubscriptions(panelId, subscribePayloads);
       },
 
@@ -412,7 +418,7 @@ function PanelExtensionAdapter(props: PanelExtensionAdapterProps): JSX.Element {
         if (!isMounted()) {
           return;
         }
-        setSubscribedTopics([]);
+        setLocalSubscriptions([]);
         setSubscriptions(panelId, []);
       },
 
