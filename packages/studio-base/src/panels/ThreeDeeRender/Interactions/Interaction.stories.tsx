@@ -18,7 +18,7 @@ import MockPanelContextProvider from "@foxglove/studio-base/components/MockPanel
 import PanelSetup from "@foxglove/studio-base/stories/PanelSetup";
 import { PointCloud2 } from "@foxglove/studio-base/types/Messages";
 
-import Interactions, { OBJECT_TAB_TYPE, LINKED_VARIABLES_TAB_TYPE } from "./Interactions";
+import Interactions, { OBJECT_TAB_TYPE } from "./Interactions";
 
 const markerObject = {
   id: "12345",
@@ -288,38 +288,6 @@ function PanelSetupWithData({
         topics: [],
         datatypes: new Map(),
         frame: {},
-        linkedGlobalVariables: [
-          {
-            topic: "/foo/bar",
-            markerKeyPath: ["frame_id", "header"],
-            name: "some_val",
-          },
-          {
-            topic: "/foo/bar",
-            markerKeyPath: ["type"],
-            name: "type",
-          },
-          {
-            topic: "/foo/bar",
-            markerKeyPath: ["action"],
-            name: "some_val",
-          },
-          {
-            topic: "/some_topic",
-            markerKeyPath: ["scale"],
-            name: "scale",
-          },
-          {
-            topic: "/other_topic",
-            markerKeyPath: ["scale"],
-            name: "scale",
-          },
-          {
-            topic: "/foo/bar",
-            markerKeyPath: ["y", "some_very_very_long_path"],
-            name: "scaleY",
-          },
-        ],
         globalVariables: {
           id: 100,
           scaleY: 2.4,
@@ -349,13 +317,6 @@ function PanelSetupWithData({
 function DefaultStory() {
   return (
     <Stack direction="row" flexWrap="wrap" height="100%" bgcolor="background.paper">
-      <PanelSetupWithData title="Link Tab">
-        <Interactions
-          {...(sharedProps as any)}
-          selectedObject={undefined}
-          interactionsTabType={LINKED_VARIABLES_TAB_TYPE}
-        />
-      </PanelSetupWithData>
       <PanelSetupWithData title="Default without clicked object">
         <Interactions
           {...(sharedProps as any)}
@@ -365,34 +326,6 @@ function DefaultStory() {
       </PanelSetupWithData>
       <PanelSetupWithData title="With interactionData">
         <Interactions {...(sharedProps as any)} />
-      </PanelSetupWithData>
-      <PanelSetupWithData
-        title="Clicked link button"
-        onMount={(el) => {
-          const btn = el.querySelector("[data-testid='link-id']");
-          if (btn) {
-            (btn as any).click();
-          }
-        }}
-      >
-        <Interactions
-          {...(sharedProps as any)}
-          selectedObject={{ ...selectedObject, interactionData: { topic: "/foo/bar" } }}
-        />
-      </PanelSetupWithData>
-      <PanelSetupWithData
-        title="Add link to existing linked global variable"
-        onMount={(el) => {
-          const btn = el.querySelector("[data-testid='link-scale']");
-          if (btn) {
-            (btn as any).click();
-          }
-        }}
-      >
-        <Interactions
-          {...(sharedProps as any)}
-          selectedObject={{ ...selectedObject, interactionData: { topic: "/foo/bar" } }}
-        />
       </PanelSetupWithData>
     </Stack>
   );

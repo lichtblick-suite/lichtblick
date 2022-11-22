@@ -34,7 +34,6 @@ export const defaultLayout: PanelsState = {
   },
   globalVariables: {},
   userNodes: {},
-  linkedGlobalVariables: [],
   playbackConfig: { ...defaultPlaybackConfig },
   layout: {
     first: "3D!18i6zy7",

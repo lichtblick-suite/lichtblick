@@ -37,8 +37,6 @@ import TeleopHelp from "./Teleop/index.help.md";
 import teleopThumbnail from "./Teleop/thumbnail.png";
 import ThreeDeeRenderHelp from "./ThreeDeeRender/index.help.md";
 import threeDeeRenderThumbnail from "./ThreeDeeRender/thumbnail.png";
-import ThreeDimensionalVizHelp from "./ThreeDimensionalViz/index.help.md";
-import threeDimensionalVizThumbnail from "./ThreeDimensionalViz/thumbnail.png";
 import TopicGraphHelp from "./TopicGraph/index.help.md";
 import topicGraphThumbnail from "./TopicGraph/thumbnail.png";
 import URDFViewerHelp from "./URDFViewer/index.help.md";
@@ -241,15 +239,4 @@ const legacyPlot: PanelInfo[] = [
   },
 ];
 
-const legacy3D: PanelInfo[] = [
-  {
-    title: "3D (Legacy)",
-    type: "3D Panel",
-    description: "Display visualization markers and models in a 3D scene.",
-    help: ThreeDimensionalVizHelp,
-    thumbnail: threeDimensionalVizThumbnail,
-    module: async () => await import("./ThreeDimensionalViz"),
-  },
-];
-
-export default { builtin, debug, legacyPlot, legacy3D };
+export default { builtin, debug, legacyPlot };

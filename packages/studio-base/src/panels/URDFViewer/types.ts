@@ -2,8 +2,10 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
+import * as THREE from "three";
+
 export type EventTypes = {
-  cameraMove: () => void;
+  cameraMove: (center: THREE.Vector3) => void;
 };
 
 export type Config = {

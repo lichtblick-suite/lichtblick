@@ -34,7 +34,6 @@ import {
 } from "@foxglove/studio-base/context/CurrentLayoutContext/actions";
 import { useLayoutManager } from "@foxglove/studio-base/context/LayoutManagerContext";
 import { useUserProfileStorage } from "@foxglove/studio-base/context/UserProfileStorageContext";
-import { LinkedGlobalVariables } from "@foxglove/studio-base/panels/ThreeDimensionalViz/Interactions/useLinkedGlobalVariables";
 import { defaultLayout } from "@foxglove/studio-base/providers/CurrentLayoutProvider/defaultLayout";
 import panelsReducer from "@foxglove/studio-base/providers/CurrentLayoutProvider/reducers";
 import { LayoutID } from "@foxglove/studio-base/services/ConsoleApi";
@@ -296,8 +295,6 @@ export default function CurrentLayoutProvider({
         performAction({ type: "SET_GLOBAL_DATA", payload }),
       setUserNodes: (payload: Partial<UserNodes>) =>
         performAction({ type: "SET_USER_NODES", payload }),
-      setLinkedGlobalVariables: (payload: LinkedGlobalVariables) =>
-        performAction({ type: "SET_LINKED_GLOBAL_VARIABLES", payload }),
       setPlaybackConfig: (payload: Partial<PlaybackConfig>) =>
         performAction({ type: "SET_PLAYBACK_CONFIG", payload }),
       closePanel: (payload: ClosePanelPayload) => {

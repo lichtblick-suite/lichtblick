@@ -8,7 +8,6 @@
     "dbaeumer.vscode-eslint",
     "esbenp.prettier-vscode",
     "orta.vscode-jest",
-    "styled-components.vscode-styled-components",
     "bierner.comment-tagged-templates"
   ],
   // List of extensions recommended by VS Code that should not be recommended for users of this workspace.

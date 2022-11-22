@@ -18,15 +18,7 @@ export default {
 const initialState = {
   globalVariables: {
     selected_id: 1234,
-    linked_variable: { seq: 0, stamp: { sec: 1535385092, nsec: 150099000 }, frame_id: "map" },
   },
-  linkedGlobalVariables: [
-    {
-      topic: "linked_variable",
-      markerKeyPath: ["", ""],
-      name: "linked_variable",
-    },
-  ],
 };
 
 export function Default(): JSX.Element {

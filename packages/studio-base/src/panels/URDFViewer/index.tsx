@@ -7,14 +7,9 @@ import { differenceBy, first, isEmpty } from "lodash";
 import { useEffect, useLayoutEffect, useMemo, useState } from "react";
 import { useResizeDetector } from "react-resize-detector";
 import { usePrevious } from "react-use";
+import * as THREE from "three";
 import { makeStyles } from "tss-react/mui";
 
-import {
-  CameraStore,
-  CameraListener,
-  CameraState,
-  DEFAULT_CAMERA_STATE,
-} from "@foxglove/regl-worldview";
 import * as PanelAPI from "@foxglove/studio-base/PanelAPI";
 import EmptyState from "@foxglove/studio-base/components/EmptyState";
 import Panel from "@foxglove/studio-base/components/Panel";
@@ -31,8 +26,6 @@ import helpContent from "./index.help.md";
 import { useURDFViewerSettings } from "./settings";
 import { Config } from "./types";
 import useRobotDescriptionAsset from "./useRobotDescriptionAsset";
-
-const DEFAULT_DISTANCE = 5;
 
 type Props = {
   config: Config;
@@ -169,18 +162,19 @@ function URDFViewer({ config, saveConfig }: Props) {
     }
   }, [renderer, opacity]);
 
-  const [cameraState, setCameraState] = useState(() => ({
-    ...DEFAULT_CAMERA_STATE,
-    distance: DEFAULT_DISTANCE,
-  }));
-  const [cameraStore] = useState(() => new CameraStore(setCameraState, cameraState));
-  const cameraCentered =
-    cameraState.targetOffset[0] === 0 &&
-    cameraState.targetOffset[1] === 0 &&
-    cameraState.targetOffset[2] === 0;
+  const [cameraCenter, setCameraCenter] = useState(() => new THREE.Vector3(0, 0, 0));
+  const cameraCentered = cameraCenter.x === 0 && cameraCenter.y === 0 && cameraCenter.z === 0;
+  useEffect(() => {
+    const listener = (center: THREE.Vector3) => {
+      setCameraCenter(center.clone());
+    };
+    renderer.addListener("cameraMove", listener);
+    return () => {
+      renderer.removeListener("cameraMove", listener);
+    };
+  });
 
   useLayoutEffect(() => {
-    renderer.setCameraState(cameraState);
     renderer.render();
   });
 
@@ -199,21 +193,13 @@ function URDFViewer({ config, saveConfig }: Props) {
           <div className={classes.viewer}>
             <div className={classes.inner} ref={resizeRef}>
               <div className={classes.canvasWrapper}>
-                <CameraListener cameraStore={cameraStore} shiftKeys={true}>
-                  <canvas ref={(el) => setCanvas(el)} width={width} height={height} />
-                </CameraListener>
+                <canvas ref={(el) => setCanvas(el)} width={width} height={height} />
               </div>
               {!cameraCentered && (
                 <Button
                   className={classes.recenterButton}
                   onClick={() => {
-                    const newState: CameraState = {
-                      ...cameraState,
-                      targetOffset: [0, 0, 0],
-                      distance: DEFAULT_DISTANCE,
-                    };
-                    cameraStore.setCameraState(newState);
-                    setCameraState(newState);
+                    renderer.centerCamera();
                   }}
                   variant="contained"
                 >

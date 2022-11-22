@@ -3,6 +3,7 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 import ICONS from "@foxglove/studio-base/theme/icons";
+import { RegisteredIconNames } from "@foxglove/studio-base/types/Icons";
 
 type BuiltinIconProps = {
   name?: RegisteredIconNames;

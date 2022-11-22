@@ -28,7 +28,6 @@ const emptyLayout: PanelsState = {
   configById: {},
   globalVariables: {},
   userNodes: {},
-  linkedGlobalVariables: [],
   playbackConfig: defaultPlaybackConfig,
 };
 

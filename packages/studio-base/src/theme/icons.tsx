@@ -52,6 +52,7 @@ import UnfoldMoreIcon from "@mdi/svg/svg/unfold-more-horizontal.svg";
 import BlockheadFilledIcon from "@foxglove/studio-base/components/BlockheadFilledIcon";
 import BlockheadIcon from "@foxglove/studio-base/components/BlockheadIcon";
 import RosIcon from "@foxglove/studio-base/components/RosIcon";
+import { RegisteredIconNames } from "@foxglove/studio-base/types/Icons";
 
 import DatabaseSettings from "../assets/database-settings.svg";
 import PanelSettings from "../assets/panel-settings.svg";
@@ -106,7 +107,7 @@ const icons: {
   Variable2: <Variable2Icon />,
   WeatherMoon: <WeatherMoon20Filled />,
   WeatherSunny: <WeatherSunny20Regular />,
-  "studio.ROS": <RosIcon />,
+  ROS: <RosIcon />,
 };
 
 export default icons;

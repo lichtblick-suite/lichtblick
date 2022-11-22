@@ -88,6 +88,7 @@ async function main() {
     rootEl,
     () => {
       // Integration tests look for this console log to indicate the app has rendered once
+      log.setLevel("debug");
       log.debug("App rendered");
     },
   );

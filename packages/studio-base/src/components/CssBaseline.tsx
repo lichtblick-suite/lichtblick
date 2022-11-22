@@ -149,10 +149,10 @@ const useStyles = makeStyles()(({ palette, typography }) => ({
         zIndex: 99,
 
         ".mosaic-split-line": {
-          boxShadow: `0 0 0 1px ${palette.grey[palette.mode === "dark" ? "A200" : "A100"]}`,
+          boxShadow: `0 0 0 1px ${palette.grey.A100}`,
         },
         "&:hover .mosaic-split-line": {
-          boxShadow: `0 0 0 1px ${palette.grey[palette.mode === "dark" ? "A200" : "A100"]}`,
+          boxShadow: `0 0 0 1px ${palette.grey.A100}`,
         },
         "&.-row": {
           marginTop: 2,

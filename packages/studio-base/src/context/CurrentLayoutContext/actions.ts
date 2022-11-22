@@ -14,7 +14,6 @@ import { MosaicNode, MosaicPath } from "react-mosaic-component";
 
 import { VariableValue } from "@foxglove/studio";
 import { GlobalVariables } from "@foxglove/studio-base/hooks/useGlobalVariables";
-import { LinkedGlobalVariables } from "@foxglove/studio-base/panels/ThreeDimensionalViz/Interactions/useLinkedGlobalVariables";
 import { TabLocation } from "@foxglove/studio-base/types/layouts";
 import {
   UserNodes,
@@ -32,7 +31,6 @@ export type PanelsState = {
   savedProps?: SavedProps;
   globalVariables: GlobalVariables;
   userNodes: UserNodes;
-  linkedGlobalVariables: LinkedGlobalVariables;
   playbackConfig: PlaybackConfig;
 };
 
@@ -86,11 +84,6 @@ export type SET_GLOBAL_DATA = {
 };
 
 export type SET_STUDIO_NODES = { type: "SET_USER_NODES"; payload: Partial<UserNodes> };
-
-export type SET_LINKED_GLOBAL_VARIABLES = {
-  type: "SET_LINKED_GLOBAL_VARIABLES";
-  payload: LinkedGlobalVariables;
-};
 
 export type SET_PLAYBACK_CONFIG = { type: "SET_PLAYBACK_CONFIG"; payload: Partial<PlaybackConfig> };
 
@@ -172,7 +165,6 @@ export type PanelsActions =
   | OVERWRITE_GLOBAL_DATA
   | SET_GLOBAL_DATA
   | SET_STUDIO_NODES
-  | SET_LINKED_GLOBAL_VARIABLES
   | SET_PLAYBACK_CONFIG
   | CLOSE_PANEL
   | SPLIT_PANEL

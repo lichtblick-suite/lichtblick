@@ -39,7 +39,7 @@ const playerSelection: PlayerSelection = {
       type: "connection",
       displayName: "My Data Source",
       description: "Data source description",
-      iconName: "studio.ROS",
+      iconName: "ROS",
       warning: "This is a warning",
 
       formConfig: {

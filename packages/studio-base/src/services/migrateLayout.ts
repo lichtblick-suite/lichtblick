@@ -13,12 +13,10 @@ import { migrateLegacyToNew3DPanels } from "./migrateLegacyToNew3DPanels";
  * Perform any necessary migrations on old layout data.
  */
 export function migratePanelsState(data: MarkOptional<PanelsState, "configById">): PanelsState {
-  const result: PanelsState = { ...data, configById: data.configById ?? data.savedProps ?? {} };
+  let result: PanelsState = { ...data, configById: data.configById ?? data.savedProps ?? {} };
   delete result.savedProps;
 
-  // To be enabled when https://github.com/foxglove/studio/pull/4450 is merged.
-  // result = migrateLegacyToNew3DPanels(result);
-  void migrateLegacyToNew3DPanels(result);
+  result = migrateLegacyToNew3DPanels(result);
 
   return result;
 }

@@ -17,21 +17,3 @@ import { MutablePose } from "@foxglove/studio-base/types/Messages";
 export function emptyPose(): MutablePose {
   return { position: { x: 0, y: 0, z: 0 }, orientation: { x: 0, y: 0, z: 0, w: 1 } };
 }
-
-// Perform a deep copy of a pose object
-export function clonePose(pose: MutablePose): MutablePose {
-  const p = pose.position;
-  const o = pose.orientation;
-  return { position: { x: p.x, y: p.y, z: p.z }, orientation: { x: o.x, y: o.y, z: o.z, w: o.w } };
-}
-
-// Reset a pose object to the identity pose
-export function setIdentityPose(pose: MutablePose): void {
-  pose.position.x = 0;
-  pose.position.y = 0;
-  pose.position.z = 0;
-  pose.orientation.x = 0;
-  pose.orientation.y = 0;
-  pose.orientation.z = 0;
-  pose.orientation.w = 1;
-}

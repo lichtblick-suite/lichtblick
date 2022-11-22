@@ -334,7 +334,6 @@ export default function LayoutBrowser({
       configById: {},
       globalVariables: {},
       userNodes: {},
-      linkedGlobalVariables: [],
       playbackConfig: defaultPlaybackConfig,
     };
     const newLayout = await layoutManager.saveNewLayout({

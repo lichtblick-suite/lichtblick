@@ -814,11 +814,6 @@ export default function (panelsState: Readonly<PanelsState>, action: PanelsActio
       };
     }
 
-    case "SET_LINKED_GLOBAL_VARIABLES":
-      return {
-        ...panelsState,
-        linkedGlobalVariables: action.payload,
-      };
     case "SET_PLAYBACK_CONFIG":
       return {
         ...panelsState,

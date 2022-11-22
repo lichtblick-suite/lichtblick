@@ -8,9 +8,9 @@ import muiComponents from "./muiComponents";
 import typography from "./muiTypography";
 import * as palette from "./palette";
 
-export type ThemePreference = "dark" | "light";
+type ThemePreference = "dark" | "light";
 
-export default function createMuiTheme(
+export function createMuiTheme(
   themePreference: ThemePreference,
 ): Theme & { name: ThemePreference } {
   const theme = createTheme({

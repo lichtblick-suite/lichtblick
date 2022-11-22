@@ -25,7 +25,6 @@ const DEFAULT_LAYOUT_FOR_TESTS: PanelsState = {
   configById: {},
   globalVariables: {},
   userNodes: {},
-  linkedGlobalVariables: [],
   playbackConfig: defaultPlaybackConfig,
 };
 

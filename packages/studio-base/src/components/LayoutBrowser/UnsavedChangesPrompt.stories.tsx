@@ -24,7 +24,6 @@ const dummyLayout: Layout = {
       configById: {},
       globalVariables: {},
       userNodes: {},
-      linkedGlobalVariables: [],
       playbackConfig: defaultPlaybackConfig,
     },
   },
