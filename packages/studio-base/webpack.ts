@@ -205,20 +205,6 @@ export function makeConfig(
             ],
           },
         },
-        {
-          // By default the @fluentui/theme package registers a bunch of font faces to the document.
-          // When we load all fonts with `waitForFonts` some of these URLs fail to load causing errors.
-          // Since we don't need these fonts present, we remove the default font registration.
-          // https://github.com/microsoft/fluentui/issues/10363
-          test: /[\\/]fonts[\\/]DefaultFontStyles.js$/,
-          loader: "string-replace-loader", // foxglove-depcheck-used: string-replace-loader
-          options: {
-            search: "registerDefaultFontFaces(_getFontBaseUrl());",
-            replace: "",
-            // https://github.com/Va1/string-replace-loader#strict-mode-replacement
-            strict: true,
-          },
-        },
       ],
     },
     optimization: {

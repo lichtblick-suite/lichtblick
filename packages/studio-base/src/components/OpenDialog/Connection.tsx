@@ -41,12 +41,12 @@ const useStyles = makeStyles()((theme) => ({
     paddingTop: theme.spacing(1.5),
     paddingBottom: theme.spacing(1.5),
 
-    "> span": {
+    "> span, > .MuiSvgIcon-root": {
       display: "flex",
       color: theme.palette.primary.main,
       marginRight: theme.spacing(1.5),
-      height: "auto",
-      width: "auto",
+      height: theme.typography.pxToRem(21),
+      width: theme.typography.pxToRem(21),
     },
     svg: {
       fontSize: "inherit",

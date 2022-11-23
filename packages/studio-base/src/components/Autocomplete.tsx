@@ -29,7 +29,7 @@ import { makeStyles } from "tss-react/mui";
 import { fonts } from "@foxglove/studio-base/util/sharedStyleConstants";
 
 // react-autocomplete tries to auto-scroll as soon as the menu is rendered, which is not compatible
-// with fluentui's Layer because the Layer takes a couple of react render cycles before elements are
+// with mui's Modal because the Modal takes a couple of react render cycles before elements are
 // actually mounted.
 Object.assign(ReactAutocomplete.prototype, { maybeScrollItemIntoView: () => {} });
 

@@ -6,7 +6,6 @@
 
 import "./extensions";
 import "./react";
-import "./fluentui";
 import "./overrides";
 import "./web";
 import "./webpack-defines";
