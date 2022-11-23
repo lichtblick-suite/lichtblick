@@ -22,6 +22,7 @@ import {
   TIME_ZERO,
 } from "../ros";
 import { BaseSettings } from "../settings";
+import { topicIsConvertibleToSchema } from "../topicIsConvertibleToSchema";
 import { makePose } from "../transforms";
 import { RenderableLineStrip } from "./markers/RenderableLineStrip";
 
@@ -63,7 +64,7 @@ export class Polygons extends SceneExtension<PolygonRenderable> {
   public constructor(renderer: Renderer) {
     super("foxglove.Polygons", renderer);
 
-    renderer.addDatatypeSubscriptions(POLYGON_STAMPED_DATATYPES, this.handlePolygon);
+    renderer.addSchemaSubscriptions(POLYGON_STAMPED_DATATYPES, this.handlePolygon);
   }
 
   public override settingsNodes(): SettingsTreeEntry[] {
@@ -71,26 +72,27 @@ export class Polygons extends SceneExtension<PolygonRenderable> {
     const handler = this.handleSettingsAction;
     const entries: SettingsTreeEntry[] = [];
     for (const topic of this.renderer.topics ?? []) {
-      if (POLYGON_STAMPED_DATATYPES.has(topic.schemaName)) {
-        const config = (configTopics[topic.name] ?? {}) as Partial<LayerSettingsPolygon>;
-
-        // prettier-ignore
-        const fields: SettingsTreeFields = {
-          lineWidth: { label: "Line Width", input: "number", min: 0, placeholder: String(DEFAULT_LINE_WIDTH), step: 0.005, precision: 3, value: config.lineWidth },
-          color: { label: "Color", input: "rgba", value: config.color ?? DEFAULT_COLOR_STR },
-        };
-
-        entries.push({
-          path: ["topics", topic.name],
-          node: {
-            label: topic.name,
-            icon: "Star",
-            fields,
-            visible: config.visible ?? DEFAULT_SETTINGS.visible,
-            handler,
-          },
-        });
+      if (!topicIsConvertibleToSchema(topic, POLYGON_STAMPED_DATATYPES)) {
+        continue;
       }
+      const config = (configTopics[topic.name] ?? {}) as Partial<LayerSettingsPolygon>;
+
+      // prettier-ignore
+      const fields: SettingsTreeFields = {
+        lineWidth: { label: "Line Width", input: "number", min: 0, placeholder: String(DEFAULT_LINE_WIDTH), step: 0.005, precision: 3, value: config.lineWidth },
+        color: { label: "Color", input: "rgba", value: config.color ?? DEFAULT_COLOR_STR },
+      };
+
+      entries.push({
+        path: ["topics", topic.name],
+        node: {
+          label: topic.name,
+          icon: "Star",
+          fields,
+          visible: config.visible ?? DEFAULT_SETTINGS.visible,
+          handler,
+        },
+      });
     }
     return entries;
   }

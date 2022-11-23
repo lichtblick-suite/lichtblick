@@ -97,7 +97,7 @@ export type RendererEvents = {
   transformTreeUpdated: (renderer: Renderer) => void;
   settingsTreeChange: (renderer: Renderer) => void;
   configChange: (renderer: Renderer) => void;
-  datatypeHandlersChanged: (renderer: Renderer) => void;
+  schemaHandlersChanged: (renderer: Renderer) => void;
   topicHandlersChanged: (renderer: Renderer) => void;
 };
 
@@ -274,7 +274,7 @@ export class Renderer extends EventEmitter<RendererEvents> {
   // extensionId -> SceneExtension
   public sceneExtensions = new Map<string, SceneExtension>();
   // datatype -> RendererSubscription[]
-  public datatypeHandlers = new Map<string, RendererSubscription[]>();
+  public schemaHandlers = new Map<string, RendererSubscription[]>();
   // topicName -> RendererSubscription[]
   public topicHandlers = new Map<string, RendererSubscription[]>();
   // layerId -> { action, handler }
@@ -441,20 +441,20 @@ export class Renderer extends EventEmitter<RendererEvents> {
     this.coreSettings = new CoreSettings(this);
 
     // Internal handlers for TF messages to update the transform tree
-    this.addDatatypeSubscriptions(FRAME_TRANSFORM_DATATYPES, {
+    this.addSchemaSubscriptions(FRAME_TRANSFORM_DATATYPES, {
       handler: this.handleFrameTransform,
       forced: true,
       // Disabled until we can efficiently preload transforms. See
       // <https://github.com/foxglove/studio/issues/4657> for more details.
       // preload: config.scene.transforms?.enablePreloading ?? true,
     });
-    this.addDatatypeSubscriptions(TF_DATATYPES, {
+    this.addSchemaSubscriptions(TF_DATATYPES, {
       handler: this.handleTFMessage,
       forced: true,
       // Disabled until we can efficiently preload transforms
       // preload: config.scene.transforms?.enablePreloading ?? true,
     });
-    this.addDatatypeSubscriptions(TRANSFORM_STAMPED_DATATYPES, {
+    this.addSchemaSubscriptions(TRANSFORM_STAMPED_DATATYPES, {
       handler: this.handleTransformStamped,
       forced: true,
       // Disabled until we can efficiently preload transforms
@@ -555,25 +555,25 @@ export class Renderer extends EventEmitter<RendererEvents> {
     this.coreSettings.updateSettingsTree();
   }
 
-  public addDatatypeSubscriptions<T>(
-    datatypes: Iterable<string>,
+  public addSchemaSubscriptions<T>(
+    schemaNames: Iterable<string>,
     subscription: RendererSubscription<T> | MessageHandler<T>,
   ): void {
     const genericSubscription =
       subscription instanceof Function
         ? { handler: subscription as MessageHandler<unknown> }
         : (subscription as RendererSubscription);
-    for (const datatype of datatypes) {
-      let handlers = this.datatypeHandlers.get(datatype);
+    for (const schemaName of schemaNames) {
+      let handlers = this.schemaHandlers.get(schemaName);
       if (!handlers) {
         handlers = [];
-        this.datatypeHandlers.set(datatype, handlers);
+        this.schemaHandlers.set(schemaName, handlers);
       }
       if (!handlers.includes(genericSubscription)) {
         handlers.push(genericSubscription);
       }
     }
-    this.emit("datatypeHandlersChanged", this);
+    this.emit("schemaHandlersChanged", this);
   }
 
   public addTopicSubscription<T>(
@@ -886,7 +886,7 @@ export class Renderer extends EventEmitter<RendererEvents> {
     }
 
     handleMessage(messageEvent, this.topicHandlers.get(messageEvent.topic));
-    handleMessage(messageEvent, this.datatypeHandlers.get(messageEvent.schemaName));
+    handleMessage(messageEvent, this.schemaHandlers.get(messageEvent.schemaName));
   }
 
   /** Match the behavior of `tf::Transformer` by stripping leading slashes from

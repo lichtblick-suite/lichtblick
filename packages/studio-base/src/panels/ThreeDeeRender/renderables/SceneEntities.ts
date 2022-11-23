@@ -33,6 +33,7 @@ import {
   normalizeByteArray,
 } from "../normalizeMessages";
 import { BaseSettings } from "../settings";
+import { topicIsConvertibleToSchema } from "../topicIsConvertibleToSchema";
 import { makePose } from "../transforms";
 import { TopicEntities } from "./TopicEntities";
 import { PrimitivePool } from "./primitives/PrimitivePool";
@@ -52,29 +53,30 @@ export class FoxgloveSceneEntities extends SceneExtension<TopicEntities> {
   public constructor(renderer: Renderer) {
     super("foxglove.SceneEntities", renderer);
 
-    renderer.addDatatypeSubscriptions(SCENE_UPDATE_DATATYPES, this.handleSceneUpdate);
+    renderer.addSchemaSubscriptions(SCENE_UPDATE_DATATYPES, this.handleSceneUpdate);
   }
 
   public override settingsNodes(): SettingsTreeEntry[] {
     const configTopics = this.renderer.config.topics;
     const entries: SettingsTreeEntry[] = [];
     for (const topic of this.renderer.topics ?? []) {
-      if (SCENE_UPDATE_DATATYPES.has(topic.schemaName)) {
-        const config = (configTopics[topic.name] ?? {}) as Partial<LayerSettingsEntity>;
-
-        const node: SettingsTreeNodeWithActionHandler = {
-          label: topic.name,
-          icon: "Shapes",
-          order: topic.name.toLocaleLowerCase(),
-          fields: {
-            color: { label: "Color", input: "rgba", value: config.color },
-          },
-          visible: config.visible ?? DEFAULT_SETTINGS.visible,
-          handler: this.handleSettingsAction,
-        };
-
-        entries.push({ path: ["topics", topic.name], node });
+      if (!topicIsConvertibleToSchema(topic, SCENE_UPDATE_DATATYPES)) {
+        continue;
       }
+      const config = (configTopics[topic.name] ?? {}) as Partial<LayerSettingsEntity>;
+
+      const node: SettingsTreeNodeWithActionHandler = {
+        label: topic.name,
+        icon: "Shapes",
+        order: topic.name.toLocaleLowerCase(),
+        fields: {
+          color: { label: "Color", input: "rgba", value: config.color },
+        },
+        visible: config.visible ?? DEFAULT_SETTINGS.visible,
+        handler: this.handleSettingsAction,
+      };
+
+      entries.push({ path: ["topics", topic.name], node });
     }
     return entries;
   }

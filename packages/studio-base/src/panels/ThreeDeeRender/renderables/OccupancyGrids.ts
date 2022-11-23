@@ -21,6 +21,7 @@ import {
 } from "../normalizeMessages";
 import { ColorRGBA, OccupancyGrid, OCCUPANCY_GRID_DATATYPES } from "../ros";
 import { BaseSettings } from "../settings";
+import { topicIsConvertibleToSchema } from "../topicIsConvertibleToSchema";
 
 export type LayerSettingsOccupancyGrid = BaseSettings & {
   frameLocked: boolean;
@@ -79,7 +80,7 @@ export class OccupancyGrids extends SceneExtension<OccupancyGridRenderable> {
   public constructor(renderer: Renderer) {
     super("foxglove.OccupancyGrids", renderer);
 
-    renderer.addDatatypeSubscriptions(OCCUPANCY_GRID_DATATYPES, this.handleOccupancyGrid);
+    renderer.addSchemaSubscriptions(OCCUPANCY_GRID_DATATYPES, this.handleOccupancyGrid);
   }
 
   public override settingsNodes(): SettingsTreeEntry[] {
@@ -87,30 +88,31 @@ export class OccupancyGrids extends SceneExtension<OccupancyGridRenderable> {
     const handler = this.handleSettingsAction;
     const entries: SettingsTreeEntry[] = [];
     for (const topic of this.renderer.topics ?? []) {
-      if (OCCUPANCY_GRID_DATATYPES.has(topic.schemaName)) {
-        const config = (configTopics[topic.name] ?? {}) as Partial<LayerSettingsOccupancyGrid>;
-
-        // prettier-ignore
-        const fields: SettingsTreeFields = {
-          minColor: { label: "Min Color", input: "rgba", value: config.minColor ?? DEFAULT_MIN_COLOR_STR },
-          maxColor: { label: "Max Color", input: "rgba", value: config.maxColor ?? DEFAULT_MAX_COLOR_STR },
-          unknownColor: { label: "Unknown Color", input: "rgba", value: config.unknownColor ?? DEFAULT_UNKNOWN_COLOR_STR },
-          invalidColor: { label: "Invalid Color", input: "rgba", value: config.invalidColor ?? DEFAULT_INVALID_COLOR_STR },
-          frameLocked: { label: "Frame lock", input: "boolean", value: config.frameLocked ?? false },
-        };
-
-        entries.push({
-          path: ["topics", topic.name],
-          node: {
-            label: topic.name,
-            icon: "Cells",
-            fields,
-            visible: config.visible ?? DEFAULT_SETTINGS.visible,
-            order: topic.name.toLocaleLowerCase(),
-            handler,
-          },
-        });
+      if (!topicIsConvertibleToSchema(topic, OCCUPANCY_GRID_DATATYPES)) {
+        continue;
       }
+      const config = (configTopics[topic.name] ?? {}) as Partial<LayerSettingsOccupancyGrid>;
+
+      // prettier-ignore
+      const fields: SettingsTreeFields = {
+        minColor: { label: "Min Color", input: "rgba", value: config.minColor ?? DEFAULT_MIN_COLOR_STR },
+        maxColor: { label: "Max Color", input: "rgba", value: config.maxColor ?? DEFAULT_MAX_COLOR_STR },
+        unknownColor: { label: "Unknown Color", input: "rgba", value: config.unknownColor ?? DEFAULT_UNKNOWN_COLOR_STR },
+        invalidColor: { label: "Invalid Color", input: "rgba", value: config.invalidColor ?? DEFAULT_INVALID_COLOR_STR },
+        frameLocked: { label: "Frame lock", input: "boolean", value: config.frameLocked ?? false },
+      };
+
+      entries.push({
+        path: ["topics", topic.name],
+        node: {
+          label: topic.name,
+          icon: "Cells",
+          fields,
+          visible: config.visible ?? DEFAULT_SETTINGS.visible,
+          order: topic.name.toLocaleLowerCase(),
+          handler,
+        },
+      });
     }
     return entries;
   }

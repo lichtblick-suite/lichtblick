@@ -35,6 +35,7 @@ import {
   fieldSize,
   PRECISION_DISTANCE,
 } from "../settings";
+import { topicIsConvertibleToSchema } from "../topicIsConvertibleToSchema";
 import { makePose, Pose } from "../transforms";
 import { Axis, AXIS_LENGTH } from "./Axis";
 import { createArrowMarker } from "./Poses";
@@ -142,9 +143,9 @@ export class PoseArrays extends SceneExtension<PoseArrayRenderable> {
   public constructor(renderer: Renderer) {
     super("foxglove.PoseArrays", renderer);
 
-    renderer.addDatatypeSubscriptions(POSE_ARRAY_DATATYPES, this.handlePoseArray);
-    renderer.addDatatypeSubscriptions(POSES_IN_FRAME_DATATYPES, this.handlePosesInFrame);
-    renderer.addDatatypeSubscriptions(NAV_PATH_DATATYPES, this.handleNavPath);
+    renderer.addSchemaSubscriptions(POSE_ARRAY_DATATYPES, this.handlePoseArray);
+    renderer.addSchemaSubscriptions(POSES_IN_FRAME_DATATYPES, this.handlePosesInFrame);
+    renderer.addSchemaSubscriptions(NAV_PATH_DATATYPES, this.handleNavPath);
   }
 
   public override settingsNodes(): SettingsTreeEntry[] {
@@ -153,47 +154,50 @@ export class PoseArrays extends SceneExtension<PoseArrayRenderable> {
     const entries: SettingsTreeEntry[] = [];
     for (const topic of this.renderer.topics ?? []) {
       if (
-        POSE_ARRAY_DATATYPES.has(topic.schemaName) ||
-        NAV_PATH_DATATYPES.has(topic.schemaName) ||
-        POSES_IN_FRAME_DATATYPES.has(topic.schemaName)
+        !(
+          topicIsConvertibleToSchema(topic, POSE_ARRAY_DATATYPES) ||
+          topicIsConvertibleToSchema(topic, NAV_PATH_DATATYPES) ||
+          topicIsConvertibleToSchema(topic, POSES_IN_FRAME_DATATYPES)
+        )
       ) {
-        const config = (configTopics[topic.name] ?? {}) as Partial<LayerSettingsPoseArray>;
-        const displayType = config.type ?? getDefaultType(topic);
-        const { axisScale, lineWidth } = config;
-        const arrowScale = config.arrowScale ?? DEFAULT_ARROW_SCALE;
-        const gradient = config.gradient ?? DEFAULT_GRADIENT_STR;
-
-        const fields: SettingsTreeFields = {
-          type: { label: "Type", input: "select", options: TYPE_OPTIONS, value: displayType },
-        };
-        switch (displayType) {
-          case "axis":
-            fields["axisScale"] = fieldSize("Scale", axisScale, PRECISION_DISTANCE);
-            break;
-          case "arrow":
-            fields["arrowScale"] = fieldScaleVec3("Scale", arrowScale);
-            break;
-          case "line":
-            fields["lineWidth"] = fieldLineWidth("Line Width", lineWidth, DEFAULT_LINE_WIDTH);
-            break;
-        }
-
-        // Axis does not currently support gradients. This could possibly be done with tinting
-        if (displayType !== "axis") {
-          fields["gradient"] = fieldGradient("Gradient", gradient);
-        }
-
-        entries.push({
-          path: ["topics", topic.name],
-          node: {
-            label: topic.name,
-            icon: NAV_PATH_DATATYPES.has(topic.schemaName) ? "Timeline" : "Flag",
-            fields,
-            visible: config.visible ?? DEFAULT_SETTINGS.visible,
-            handler,
-          },
-        });
+        continue;
       }
+      const config = (configTopics[topic.name] ?? {}) as Partial<LayerSettingsPoseArray>;
+      const displayType = config.type ?? getDefaultType(topic);
+      const { axisScale, lineWidth } = config;
+      const arrowScale = config.arrowScale ?? DEFAULT_ARROW_SCALE;
+      const gradient = config.gradient ?? DEFAULT_GRADIENT_STR;
+
+      const fields: SettingsTreeFields = {
+        type: { label: "Type", input: "select", options: TYPE_OPTIONS, value: displayType },
+      };
+      switch (displayType) {
+        case "axis":
+          fields["axisScale"] = fieldSize("Scale", axisScale, PRECISION_DISTANCE);
+          break;
+        case "arrow":
+          fields["arrowScale"] = fieldScaleVec3("Scale", arrowScale);
+          break;
+        case "line":
+          fields["lineWidth"] = fieldLineWidth("Line Width", lineWidth, DEFAULT_LINE_WIDTH);
+          break;
+      }
+
+      // Axis does not currently support gradients. This could possibly be done with tinting
+      if (displayType !== "axis") {
+        fields["gradient"] = fieldGradient("Gradient", gradient);
+      }
+
+      entries.push({
+        path: ["topics", topic.name],
+        node: {
+          label: topic.name,
+          icon: topicIsConvertibleToSchema(topic, NAV_PATH_DATATYPES) ? "Timeline" : "Flag",
+          fields,
+          visible: config.visible ?? DEFAULT_SETTINGS.visible,
+          handler,
+        },
+      });
     }
     return entries;
   }

@@ -70,11 +70,6 @@ const PANEL_STYLE: React.CSSProperties = {
   position: "relative",
 };
 
-type SubscriptionWithOptions = Subscription & {
-  preload: boolean;
-  forced: boolean;
-};
-
 const PublishClickIcons: Record<PublishClickType, React.ReactNode> = {
   pose: <PublishGoalIcon fontSize="inherit" />,
   point: <PublishPointIcon fontSize="inherit" />,
@@ -414,10 +409,10 @@ export function ThreeDeeRender({ context }: { context: PanelExtensionContext }):
   const renderRef = useRef({ needsRender: false });
   const [renderDone, setRenderDone] = useState<(() => void) | undefined>();
 
-  const datatypeHandlers = useRendererProperty(
+  const schemaHandlers = useRendererProperty(
     renderer,
-    "datatypeHandlers",
-    "datatypeHandlersChanged",
+    "schemaHandlers",
+    "schemaHandlersChanged",
     () => new Map(),
   );
   const topicHandlers = useRendererProperty(
@@ -566,46 +561,47 @@ export function ThreeDeeRender({ context }: { context: PanelExtensionContext }):
   }, [context]);
 
   // Build a list of topics to subscribe to
-  const [topicsToSubscribe, setTopicsToSubscribe] = useState<SubscriptionWithOptions[] | undefined>(
-    undefined,
-  );
+  const [topicsToSubscribe, setTopicsToSubscribe] = useState<Subscription[] | undefined>(undefined);
   useEffect(() => {
-    const subscriptions = new Map<string, SubscriptionWithOptions>();
     if (!topics) {
       setTopicsToSubscribe(undefined);
       return;
     }
 
-    const updateSubscriptions = (topic: string, rendererSubscription: RendererSubscription) => {
-      let topicSubscription = subscriptions.get(topic);
-      if (!topicSubscription) {
-        topicSubscription = {
+    const newSubscriptions: Subscription[] = [];
+
+    const addSubscription = (
+      topic: string,
+      rendererSubscription: RendererSubscription,
+      convertTo?: string,
+    ) => {
+      if (rendererSubscription.forced === true || config.topics[topic]?.visible === true) {
+        newSubscriptions.push({
           topic,
-          forced: rendererSubscription.forced ?? false,
-          preload: rendererSubscription.preload ?? false,
-        };
-        subscriptions.set(topic, topicSubscription);
+          preload: rendererSubscription.preload,
+          convertTo,
+        });
       }
-      topicSubscription.preload ||= rendererSubscription.preload ?? false;
-      topicSubscription.forced ||= rendererSubscription.forced ?? false;
     };
 
     for (const topic of topics) {
       for (const rendererSubscription of topicHandlers.get(topic.name) ?? []) {
-        updateSubscriptions(topic.name, rendererSubscription);
+        addSubscription(topic.name, rendererSubscription);
       }
-      for (const rendererSubscription of datatypeHandlers.get(topic.schemaName) ?? []) {
-        updateSubscriptions(topic.name, rendererSubscription);
+      for (const rendererSubscription of schemaHandlers.get(topic.schemaName) ?? []) {
+        addSubscription(topic.name, rendererSubscription);
+      }
+      for (const schemaName of topic.convertibleTo ?? []) {
+        for (const rendererSubscription of schemaHandlers.get(schemaName) ?? []) {
+          addSubscription(topic.name, rendererSubscription, schemaName);
+        }
       }
     }
 
-    const newTopics = [...subscriptions.values()]
-      // Only subscribe if the subscription is forced or topic visibility has been toggled on
-      .filter((a) => a.forced || config.topics[a.topic]?.visible === true)
-      // Sort the list to make comparisons stable
-      .sort((a, b) => a.topic.localeCompare(b.topic));
-    setTopicsToSubscribe((prev) => (areSubscriptionsEqual(prev, newTopics) ? prev : newTopics));
-  }, [topics, config.topics, datatypeHandlers, topicHandlers]);
+    // Sort the list to make comparisons stable
+    newSubscriptions.sort((a, b) => a.topic.localeCompare(b.topic));
+    setTopicsToSubscribe((prev) => (isEqual(prev, newSubscriptions) ? prev : newSubscriptions));
+  }, [topics, config.topics, schemaHandlers, topicHandlers]);
 
   // Notify the extension context when our subscription list changes
   useEffect(() => {
@@ -895,21 +891,4 @@ function deepParseMessageEvents(
       (messageEvent as { message: unknown }).message = maybeLazy.toJSON!();
     }
   }
-}
-
-function areSubscriptionsEqual(
-  a: SubscriptionWithOptions[] | undefined,
-  b: SubscriptionWithOptions[],
-): boolean {
-  if (a == undefined || a.length !== b.length) {
-    return false;
-  }
-  for (let i = 0; i < a.length; i++) {
-    const aI = a[i]!;
-    const bI = b[i]!;
-    if (aI.topic !== bI.topic || aI.preload !== bI.preload || aI.forced !== bI.forced) {
-      return false;
-    }
-  }
-  return true;
 }
