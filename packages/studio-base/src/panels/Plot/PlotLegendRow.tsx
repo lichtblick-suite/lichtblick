@@ -176,20 +176,8 @@ export default function PlotLegendRow({
     return { textDecoration: !path.enabled ? "line-through" : undefined };
   }, [path.enabled]);
 
-  return (
-    <div className={classes.root}>
-      <div style={{ position: "absolute" }}>
-        {settingsModalOpen && (
-          <PathSettingsModal
-            xAxisVal={xAxisVal}
-            path={path}
-            paths={paths}
-            index={index}
-            savePaths={savePaths}
-            onDismiss={() => setSettingsModalOpen(false)}
-          />
-        )}
-      </div>
+  const legendIcon = useMemo(
+    () => (
       <div className={classes.listIcon}>
         <IconButton
           className={classes.legendIconButton}
@@ -208,6 +196,12 @@ export default function PlotLegendRow({
           <RemoveIcon style={{ color: legendIconColor }} color="inherit" />
         </IconButton>
       </div>
+    ),
+    [classes, index, legendIconColor, paths, savePaths],
+  );
+
+  const input = useMemo(
+    () => (
       <div className={classes.inputWrapper}>
         <MessagePathInput
           supportsMathModifiers
@@ -229,13 +223,28 @@ export default function PlotLegendRow({
           </Tooltip>
         )}
       </div>
-      {showPlotValuesInLegend && (
-        <div className={classes.plotValue} style={{ color: currentDisplay.color }}>
-          <Typography component="div" variant="body2" align="right" color="inherit">
-            {currentDisplay.value ?? ""}
-          </Typography>
-        </div>
-      )}
+    ),
+    [
+      classes.inputWrapper,
+      hasMismatchedDataLength,
+      index,
+      isReferenceLinePlotPath,
+      messagePathInputStyle,
+      onInputChange,
+      path.value,
+    ],
+  );
+
+  const plotValue = showPlotValuesInLegend && (
+    <div className={classes.plotValue} style={{ color: currentDisplay.color }}>
+      <Typography component="div" variant="body2" align="right" color="inherit">
+        {currentDisplay.value ?? ""}
+      </Typography>
+    </div>
+  );
+
+  const actions = useMemo(
+    () => (
       <div className={classes.actions}>
         <IconButton
           className={classes.actionButton}
@@ -258,6 +267,28 @@ export default function PlotLegendRow({
           <CloseIcon fontSize="small" />
         </IconButton>
       </div>
+    ),
+    [classes.actionButton, classes.actions, index, path.value, paths, savePaths],
+  );
+
+  return (
+    <div className={classes.root}>
+      <div style={{ position: "absolute" }}>
+        {settingsModalOpen && (
+          <PathSettingsModal
+            xAxisVal={xAxisVal}
+            path={path}
+            paths={paths}
+            index={index}
+            savePaths={savePaths}
+            onDismiss={() => setSettingsModalOpen(false)}
+          />
+        )}
+      </div>
+      {legendIcon}
+      {input}
+      {plotValue}
+      {actions}
     </div>
   );
 }

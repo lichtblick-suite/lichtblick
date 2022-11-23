@@ -401,32 +401,66 @@ export default function PlotLegend(props: PlotLegendProps): JSX.Element {
 
   const contentRef = useRef<HTMLDivElement>(ReactNull);
 
+  const legendHeader = useMemo(
+    () => (
+      <header className={classes.header}>
+        <AxisDropdown
+          xAxisVal={xAxisVal}
+          onChange={(value: PlotXAxisVal) => saveConfig({ xAxisVal: value })}
+        />
+        {(xAxisVal === "custom" || xAxisVal === "currentCustom") && (
+          <MessagePathInput
+            path={xAxisPath?.value ?? ""}
+            onChange={(newXAxisPath) =>
+              saveConfig({
+                xAxisPath: {
+                  value: newXAxisPath,
+                  enabled: xAxisPath ? xAxisPath.enabled : true,
+                },
+              })
+            }
+            validTypes={plotableRosTypes}
+            placeholder="Enter a topic name or a number"
+            disableAutocomplete={xAxisPath && isReferenceLinePlotPathType(xAxisPath)}
+            autoSize
+          />
+        )}
+      </header>
+    ),
+    [classes.header, saveConfig, xAxisPath, xAxisVal],
+  );
+
+  const legendFooter = useMemo(
+    () => (
+      <footer className={classes.footer}>
+        <Button
+          className={classes.addButton}
+          size="small"
+          fullWidth
+          startIcon={<AddIcon />}
+          onClick={() =>
+            savePaths([
+              ...localPaths,
+              {
+                value: "",
+                enabled: true,
+                // For convenience, default to the `timestampMethod` of the last path.
+                timestampMethod: lastPath ? lastPath.timestampMethod : "receiveTime",
+              },
+            ])
+          }
+        >
+          Add line
+        </Button>
+      </footer>
+    ),
+    [classes.addButton, classes.footer, lastPath, localPaths, savePaths],
+  );
+
   const legendContent = useMemo(
     () => (
       <div ref={contentRef} className={classes.legendContent}>
-        <header className={classes.header}>
-          <AxisDropdown
-            xAxisVal={xAxisVal}
-            onChange={(value: PlotXAxisVal) => saveConfig({ xAxisVal: value })}
-          />
-          {(xAxisVal === "custom" || xAxisVal === "currentCustom") && (
-            <MessagePathInput
-              path={xAxisPath?.value ?? ""}
-              onChange={(newXAxisPath) =>
-                saveConfig({
-                  xAxisPath: {
-                    value: newXAxisPath,
-                    enabled: xAxisPath ? xAxisPath.enabled : true,
-                  },
-                })
-              }
-              validTypes={plotableRosTypes}
-              placeholder="Enter a topic name or a number"
-              disableAutocomplete={xAxisPath && isReferenceLinePlotPathType(xAxisPath)}
-              autoSize
-            />
-          )}
-        </header>
+        {legendHeader}
         <div className={classes.grid}>
           {localPaths.map((path: PlotPath, index: number) => (
             <PlotLegendRow
@@ -443,44 +477,20 @@ export default function PlotLegend(props: PlotLegendProps): JSX.Element {
             />
           ))}
         </div>
-        <footer className={classes.footer}>
-          <Button
-            className={classes.addButton}
-            size="small"
-            fullWidth
-            startIcon={<AddIcon />}
-            onClick={() =>
-              savePaths([
-                ...localPaths,
-                {
-                  value: "",
-                  enabled: true,
-                  // For convenience, default to the `timestampMethod` of the last path.
-                  timestampMethod: lastPath ? lastPath.timestampMethod : "receiveTime",
-                },
-              ])
-            }
-          >
-            Add line
-          </Button>
-        </footer>
+        {legendFooter}
       </div>
     ),
     [
-      classes.addButton,
-      classes.footer,
       classes.grid,
-      classes.header,
       classes.legendContent,
       currentTime,
       datasets,
-      lastPath,
+      legendFooter,
+      legendHeader,
       localPaths,
       pathsWithMismatchedDataLengths,
-      saveConfig,
       savePaths,
       showPlotValuesInLegend,
-      xAxisPath,
       xAxisVal,
     ],
   );

@@ -11,65 +11,28 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { CSSProperties, useMemo } from "react";
-import { withStyles } from "tss-react/mui";
-
 import { RpcScales } from "@foxglove/studio-base/components/Chart/types";
 import { useHoverValue } from "@foxglove/studio-base/context/TimelineInteractionStateContext";
 
-const Wrapper = withStyles("div", () => ({
-  root: {
-    top: 0,
-    bottom: 0,
-    position: "absolute",
-    pointerEvents: "none",
-    willChange: "transform",
-    visibility: "hidden",
-  },
-}));
+import { VerticalBarWrapper } from "./VerticalBarWrapper";
 
 type Props = {
-  children?: React.ReactNode;
-  componentId: string;
   scales?: RpcScales;
+  componentId: string;
   isTimestampScale: boolean;
 };
 
-export default React.memo<Props>(function HoverBar({
+export default React.memo<React.PropsWithChildren<Props>>(function HoverBar({
   children,
   componentId,
   isTimestampScale,
   scales,
-}: Props) {
+}) {
   const hoverValue = useHoverValue({ componentId, isTimestampScale });
 
-  const positionX = useMemo(() => {
-    const xScale = scales?.x;
-    if (!xScale || !hoverValue) {
-      return;
-    }
-
-    const pixels = xScale.pixelMax - xScale.pixelMin;
-    const range = xScale.max - xScale.min;
-
-    if (pixels === 0 || range === 0) {
-      return;
-    }
-
-    const pos = (hoverValue.value - xScale.min) / (range / pixels) + xScale.pixelMin;
-    // don't show hoverbar if it falls outsize our boundary
-    if (pos < xScale.pixelMin || pos > xScale.pixelMax) {
-      return;
-    }
-    return pos;
-  }, [scales?.x, hoverValue]);
-
-  const { visibility, transform } = useMemo((): CSSProperties => {
-    if (positionX == undefined || isNaN(positionX)) {
-      return { visibility: "hidden", transform: undefined };
-    }
-    return { visibility: "visible", transform: `translateX(${positionX}px)` };
-  }, [positionX]);
-
-  return <Wrapper style={{ visibility, transform }}>{children}</Wrapper>;
+  return (
+    <VerticalBarWrapper scales={scales} xValue={hoverValue?.value}>
+      {children}
+    </VerticalBarWrapper>
+  );
 });

@@ -47,6 +47,7 @@ import { fonts } from "@foxglove/studio-base/util/sharedStyleConstants";
 
 import HoverBar from "./HoverBar";
 import TimeBasedChartTooltipContent from "./TimeBasedChartTooltipContent";
+import { VerticalBarWrapper } from "./VerticalBarWrapper";
 import { downsampleTimeseries, downsampleScatter } from "./downsample";
 
 const log = Logger.getLogger(__filename);
@@ -90,6 +91,9 @@ const useStyles = makeStyles()((theme) => ({
     width: 1,
     marginLeft: -1,
     display: "block",
+  },
+  playbackBar: {
+    backgroundColor: "#aaa",
   },
 }));
 
@@ -162,7 +166,7 @@ export default function TimeBasedChart(props: Props): JSX.Element {
   const { labels, datasets } = data;
 
   const theme = useTheme();
-  const { classes } = useStyles();
+  const { classes, cx } = useStyles();
   const componentId = useMemo(() => uuidv4(), []);
   const isMounted = useMountedState();
   const canvasContainer = useRef<HTMLDivElement>(ReactNull);
@@ -204,8 +208,6 @@ export default function TimeBasedChart(props: Props): JSX.Element {
       onFinishRender();
     };
   }, [pauseFrame, onFinishRender]);
-
-  const hoverBar = useRef<HTMLDivElement>(ReactNull);
 
   const globalBounds = useTimelineInteractionState(selectGlobalBounds);
   const setGlobalBounds = useTimelineInteractionState(selectSetGlobalBounds);
@@ -410,19 +412,6 @@ export default function TimeBasedChart(props: Props): JSX.Element {
   );
 
   const plugins = useMemo<ChartOptions["plugins"]>(() => {
-    const annotations: AnnotationOptions[] = [...(props.annotations ?? [])];
-
-    if (currentTime != undefined) {
-      annotations.push({
-        type: "line",
-        drawTime: "beforeDatasetsDraw",
-        scaleID: "x",
-        borderColor: "#aaa",
-        borderWidth: 1,
-        value: currentTime,
-      });
-    }
-
     return {
       decimation: {
         enabled: true,
@@ -452,9 +441,9 @@ export default function TimeBasedChart(props: Props): JSX.Element {
         },
       },
       ...props.plugins,
-      annotation: { annotations },
+      annotation: { annotations: props.annotations },
     } as ChartOptions["plugins"];
-  }, [currentTime, props.annotations, props.plugins, props.zoom, zoomMode]);
+  }, [props.annotations, props.plugins, props.zoom, zoomMode]);
 
   // To avoid making a new xScale identity on all updates that might change the min/max
   // we memo the min/max X values so only when the values change is the scales object re-made
@@ -851,7 +840,6 @@ export default function TimeBasedChart(props: Props): JSX.Element {
             >
               <div
                 className={classes.bar}
-                ref={hoverBar}
                 style={{
                   backgroundColor: xAxisIsPlaybackTime
                     ? theme.palette.warning.main
@@ -859,6 +847,11 @@ export default function TimeBasedChart(props: Props): JSX.Element {
                 }}
               />
             </HoverBar>
+            {xAxisIsPlaybackTime && (
+              <VerticalBarWrapper scales={currentScalesRef.current} xValue={currentTime}>
+                <div className={cx(classes.bar, classes.playbackBar)} />
+              </VerticalBarWrapper>
+            )}
 
             <div ref={canvasContainer} onMouseMove={onMouseMove} onMouseOut={onMouseOut}>
               <ChartComponent {...chartProps} />
