@@ -4,7 +4,7 @@
 
 import { EventNames, EventListener } from "eventemitter3";
 
-import { PanelsState } from "@foxglove/studio-base/context/CurrentLayoutContext/actions";
+import { LayoutData } from "@foxglove/studio-base/context/CurrentLayoutContext/actions";
 import { Layout, LayoutID, LayoutPermission } from "@foxglove/studio-base/services/ILayoutStorage";
 
 export type LayoutManagerChangeEvent =
@@ -71,7 +71,7 @@ export interface ILayoutManager {
 
   saveNewLayout(params: {
     name: string;
-    data: PanelsState;
+    data: LayoutData;
     permission: LayoutPermission;
   }): Promise<Layout>;
 
@@ -81,7 +81,7 @@ export interface ILayoutManager {
    * @note If the layout has not been edited before, the returned layout's id may be different from
    * the input id.
    */
-  updateLayout(params: { id: LayoutID; name?: string; data?: PanelsState }): Promise<Layout>;
+  updateLayout(params: { id: LayoutID; name?: string; data?: LayoutData }): Promise<Layout>;
 
   deleteLayout(params: { id: LayoutID }): Promise<void>;
 

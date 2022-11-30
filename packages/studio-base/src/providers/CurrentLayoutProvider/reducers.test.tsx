@@ -15,7 +15,7 @@ import { getLeaves, MosaicNode, MosaicParent } from "react-mosaic-component";
 
 import {
   CreateTabPanelPayload,
-  PanelsState,
+  LayoutData,
 } from "@foxglove/studio-base/context/CurrentLayoutContext/actions";
 import { TabPanelConfig } from "@foxglove/studio-base/types/layouts";
 import { MosaicDropTargetPosition } from "@foxglove/studio-base/types/panels";
@@ -24,7 +24,7 @@ import { getPanelTypeFromId } from "@foxglove/studio-base/util/layout";
 
 import panelsReducer, { defaultPlaybackConfig } from "./reducers";
 
-const emptyLayout: PanelsState = {
+const emptyLayout: LayoutData = {
   configById: {},
   globalVariables: {},
   userNodes: {},
@@ -34,7 +34,7 @@ const emptyLayout: PanelsState = {
 describe("layout reducers", () => {
   describe("adds panel to a layout", () => {
     it("adds panel to main app layout", () => {
-      let panels: PanelsState = {
+      let panels: LayoutData = {
         ...emptyLayout,
         layout: "Tab!a",
         configById: {
@@ -62,7 +62,7 @@ describe("layout reducers", () => {
       expect(panels.configById[secondStr]).toEqual(originalLayout.configById["Tab!a"]);
     });
     it("adds panel to empty Tab layout", () => {
-      let panels: PanelsState = {
+      let panels: LayoutData = {
         ...emptyLayout,
         layout: "Tab!a",
         configById: {
@@ -95,7 +95,7 @@ describe("layout reducers", () => {
     });
 
     it("adds panel to uninitialized Tab layout", () => {
-      let panels: PanelsState = {
+      let panels: LayoutData = {
         ...emptyLayout,
         layout: "Tab!a",
         configById: {
@@ -119,7 +119,7 @@ describe("layout reducers", () => {
 
   describe("drops panel into a layout", () => {
     it("drops panel into app layout", () => {
-      let panels: PanelsState = {
+      let panels: LayoutData = {
         ...emptyLayout,
         layout: "Tab!a",
         configById: {
@@ -143,7 +143,7 @@ describe("layout reducers", () => {
       expect(getPanelTypeFromId(layout.second as string)).toEqual("Audio");
     });
     it("drops Tab panel into app layout", () => {
-      let panels: PanelsState = {
+      let panels: LayoutData = {
         ...emptyLayout,
         layout: "Audio!a",
         configById: { "Audio!a": { foo: "bar" } },
@@ -175,7 +175,7 @@ describe("layout reducers", () => {
       expect(configById[newAudioId]).toEqual({ foo: "baz" });
     });
     it("drops panel into empty Tab layout", () => {
-      let panels: PanelsState = {
+      let panels: LayoutData = {
         ...emptyLayout,
         layout: "Tab!a",
         configById: {
@@ -201,7 +201,7 @@ describe("layout reducers", () => {
       expect(tabs.length).toEqual(3);
     });
     it("drops panel into nested Tab layout", () => {
-      let panels: PanelsState = {
+      let panels: LayoutData = {
         ...emptyLayout,
         layout: "Tab!a",
         configById: {
@@ -235,7 +235,7 @@ describe("layout reducers", () => {
       });
     });
     it("drops nested Tab panel into main layout", () => {
-      let panels: PanelsState = { ...emptyLayout, layout: "Audio!a" };
+      let panels: LayoutData = { ...emptyLayout, layout: "Audio!a" };
       panels = panelsReducer(panels, {
         type: "DROP_PANEL",
         payload: {
@@ -269,7 +269,7 @@ describe("layout reducers", () => {
 
   describe("moves tabs", () => {
     it("reorders tabs within a Tab panel", () => {
-      let panels: PanelsState = {
+      let panels: LayoutData = {
         ...emptyLayout,
         layout: "Tab!a",
         configById: {
@@ -291,7 +291,7 @@ describe("layout reducers", () => {
 
     it("moves tabs between Tab panels", () => {
       const layout: MosaicParent<string> = { first: "Tab!a", second: "Tab!b", direction: "row" };
-      let panels: PanelsState = {
+      let panels: LayoutData = {
         ...emptyLayout,
         layout,
         configById: {
@@ -325,7 +325,7 @@ describe("layout reducers", () => {
   });
 
   it("closes a panel in single-panel layout", () => {
-    let panels: PanelsState = {
+    let panels: LayoutData = {
       ...emptyLayout,
       layout: "Audio!a",
       configById: { "Audio!a": { foo: "bar" } },
@@ -341,7 +341,7 @@ describe("layout reducers", () => {
 
   it("closes a panel in multi-panel layout", () => {
     const layout: MosaicParent<string> = { first: "Audio!a", second: "Audio!b", direction: "row" };
-    let panels: PanelsState = {
+    let panels: LayoutData = {
       ...emptyLayout,
       layout,
       configById: { "Audio!a": { foo: "bar" }, "Audio!b": { foo: "baz" } },
@@ -355,7 +355,7 @@ describe("layout reducers", () => {
   });
 
   it("closes a panel nested inside a Tab panel", () => {
-    let panels: PanelsState = {
+    let panels: LayoutData = {
       ...emptyLayout,
       layout: "Tab!a",
       configById: {
@@ -374,7 +374,7 @@ describe("layout reducers", () => {
   });
 
   describe("creates Tab panels from existing panels correctly", () => {
-    const regularLayoutPayload: Partial<PanelsState> & { layout: MosaicNode<string> } = {
+    const regularLayoutPayload: Partial<LayoutData> & { layout: MosaicNode<string> } = {
       layout: {
         first: "Audio!a",
         second: { first: "RawMessages!a", second: "Audio!c", direction: "column" },
@@ -388,7 +388,7 @@ describe("layout reducers", () => {
       idsToRemove: ["Audio!a", "RawMessages!a"],
       singleTab: false,
     };
-    const nestedLayoutPayload: Partial<PanelsState> & { layout: MosaicNode<string> } = {
+    const nestedLayoutPayload: Partial<LayoutData> & { layout: MosaicNode<string> } = {
       layout: {
         first: "Audio!a",
         second: "Tab!z",
@@ -419,7 +419,7 @@ describe("layout reducers", () => {
     };
 
     it("will group selected panels into a Tab panel", () => {
-      let panels: PanelsState = { ...emptyLayout, ...regularLayoutPayload };
+      let panels: LayoutData = { ...emptyLayout, ...regularLayoutPayload };
       panels = panelsReducer(panels, {
         type: "CREATE_TAB_PANEL",
         payload: { ...createTabPanelPayload, singleTab: true },
@@ -443,7 +443,7 @@ describe("layout reducers", () => {
     });
 
     it("will group selected panels into a Tab panel, even when a selected panel is nested", () => {
-      let panels: PanelsState = { ...emptyLayout, ...nestedLayoutPayload };
+      let panels: LayoutData = { ...emptyLayout, ...nestedLayoutPayload };
       panels = panelsReducer(panels, {
         type: "CREATE_TAB_PANEL",
         payload: { ...nestedCreateTabPanelPayload, singleTab: true },
@@ -468,7 +468,7 @@ describe("layout reducers", () => {
     });
 
     it("will create individual tabs for selected panels in a new Tab panel", () => {
-      let panels: PanelsState = { ...emptyLayout, ...regularLayoutPayload };
+      let panels: LayoutData = { ...emptyLayout, ...regularLayoutPayload };
       panels = panelsReducer(panels, {
         type: "CREATE_TAB_PANEL",
         payload: { ...createTabPanelPayload, singleTab: false },
@@ -490,7 +490,7 @@ describe("layout reducers", () => {
     });
 
     it("will create individual tabs for selected panels in a new Tab panel, even when a selected panel is nested", () => {
-      let panels: PanelsState = { ...emptyLayout, ...nestedLayoutPayload };
+      let panels: LayoutData = { ...emptyLayout, ...nestedLayoutPayload };
       panels = panelsReducer(panels, {
         type: "CREATE_TAB_PANEL",
         payload: { ...nestedCreateTabPanelPayload, singleTab: false },
@@ -514,7 +514,7 @@ describe("layout reducers", () => {
   });
 
   it("saves and overwrites user nodes", () => {
-    let panels: PanelsState = { ...emptyLayout };
+    let panels: LayoutData = { ...emptyLayout };
     const firstPayload = { foo: { name: "foo", sourceCode: "bar" } };
     const secondPayload = { bar: { name: "bar", sourceCode: "baz" } };
 
@@ -534,7 +534,7 @@ describe("layout reducers", () => {
   describe("panel toolbar actions", () => {
     it("can split panel", () => {
       const audioConfig = { foo: "bar" };
-      let panels: PanelsState = {
+      let panels: LayoutData = {
         ...emptyLayout,
         layout: "Audio!a",
         configById: { "Audio!a": audioConfig },
@@ -561,7 +561,7 @@ describe("layout reducers", () => {
     it("can split Tab panel", () => {
       const audioConfig = { foo: "bar" };
       const tabConfig = { activeTabIdx: 0, tabs: [{ title: "A", layout: "Audio!a" }] };
-      let panels: PanelsState = {
+      let panels: LayoutData = {
         ...emptyLayout,
         layout: "Tab!a",
         configById: { "Tab!a": tabConfig, "Audio!a": audioConfig },
@@ -594,7 +594,7 @@ describe("layout reducers", () => {
     it("can split panel inside Tab panel", () => {
       const audioConfig = { foo: "bar" };
       const tabConfig = { activeTabIdx: 0, tabs: [{ title: "A", layout: "Audio!a" }] };
-      let panels: PanelsState = {
+      let panels: LayoutData = {
         ...emptyLayout,
         layout: "Tab!a",
         configById: { "Tab!a": tabConfig, "Audio!a": audioConfig },
@@ -624,7 +624,7 @@ describe("layout reducers", () => {
     it("can swap panels", () => {
       const audioConfig = { foo: "bar" };
       const rawMessagesConfig = { foo: "baz" };
-      let panels: PanelsState = {
+      let panels: LayoutData = {
         ...emptyLayout,
         layout: "Audio!a",
         configById: { "Audio!a": audioConfig },
@@ -650,7 +650,7 @@ describe("layout reducers", () => {
       const audioConfig = { foo: "bar" };
       const tabConfig = { activeTabIdx: 0, tabs: [{ title: "A", layout: "RawMessages!a" }] };
       const rawMessagesConfig = { path: "foo" };
-      let panels: PanelsState = {
+      let panels: LayoutData = {
         ...emptyLayout,
         layout: "Audio!a",
         configById: { "Audio!a": audioConfig },
@@ -678,7 +678,7 @@ describe("layout reducers", () => {
     it("can swap panel inside a Tab", () => {
       const rawMessagesConfig = { foo: "baz" };
       const tabConfig = { activeTabIdx: 0, tabs: [{ title: "A", layout: "Audio!a" }] };
-      let panels: PanelsState = {
+      let panels: LayoutData = {
         ...emptyLayout,
         layout: "Tab!a",
         configById: { "Tab!a": tabConfig },
@@ -714,7 +714,7 @@ describe("layout reducers", () => {
         },
       },
       configById: {},
-    } as PanelsState;
+    } as LayoutData;
     const tabPanelState = {
       layout: {
         direction: "row",
@@ -726,10 +726,10 @@ describe("layout reducers", () => {
         },
       },
       configById: {},
-    } as PanelsState;
+    } as LayoutData;
 
     it("keeps panel state identity stable when config is unchanged", () => {
-      const orig: PanelsState = {
+      const orig: LayoutData = {
         ...emptyLayout,
         layout: panelState.layout,
       };
@@ -763,7 +763,7 @@ describe("layout reducers", () => {
     });
 
     it("removes a panel's configById when it is removed from the layout", () => {
-      let panels: PanelsState = {
+      let panels: LayoutData = {
         ...emptyLayout,
         layout: panelState.layout,
       };
@@ -830,7 +830,7 @@ describe("layout reducers", () => {
     });
 
     it("removes a panel's configById when it is removed from Tab panel", () => {
-      let panels: PanelsState = {
+      let panels: LayoutData = {
         ...emptyLayout,
         layout: tabPanelState.layout,
       };
@@ -876,7 +876,7 @@ describe("layout reducers", () => {
     });
 
     it("does not remove old configById when trimConfigById = false", () => {
-      let panels: PanelsState = {
+      let panels: LayoutData = {
         ...emptyLayout,
         layout: "foo!bar",
       };
@@ -913,7 +913,7 @@ describe("layout reducers", () => {
 
   describe("handles dragging panels", () => {
     it("disallows dragging from single-panel layout", () => {
-      const panels: PanelsState = {
+      const panels: LayoutData = {
         ...emptyLayout,
         layout: "Audio!a",
       };
@@ -926,7 +926,7 @@ describe("layout reducers", () => {
     });
 
     it("hides panel from multi-panel layout when starting drag", () => {
-      let panels: PanelsState = {
+      let panels: LayoutData = {
         ...emptyLayout,
         layout: { first: "Audio!a", second: "RawMessages!a", direction: "column" },
       } as const;
@@ -942,7 +942,7 @@ describe("layout reducers", () => {
       });
     });
     it("removes non-Tab panel from single-panel tab layout when starting drag", () => {
-      let panels: PanelsState = {
+      let panels: LayoutData = {
         ...emptyLayout,
         layout: { first: "Tab!a", second: "RawMessages!a", direction: "column" },
         configById: {
@@ -961,7 +961,7 @@ describe("layout reducers", () => {
       });
     });
     it("hides panel from multi-panel Tab layout when starting drag", () => {
-      let panels: PanelsState = {
+      let panels: LayoutData = {
         ...emptyLayout,
         layout: { first: "Tab!a", second: "RawMessages!a", direction: "column" },
         configById: {
@@ -1002,7 +1002,7 @@ describe("layout reducers", () => {
           tabs: [{ title: "A", layout: { first: "Audio!a", second: "Plot!a", direction: "row" } }],
         },
       };
-      let panels: PanelsState = {
+      let panels: LayoutData = {
         ...emptyLayout,
         layout: "Tab!a",
         configById: originalSavedProps,
@@ -1043,7 +1043,7 @@ describe("layout reducers", () => {
           tabs: [{ title: "A", layout: { first: "Audio!a", second: "Plot!a", direction: "row" } }],
         },
       };
-      let panels: PanelsState = {
+      let panels: LayoutData = {
         ...emptyLayout,
         layout: originalLayout,
         configById: originalSavedProps,
@@ -1088,7 +1088,7 @@ describe("layout reducers", () => {
           tabs: [{ title: "A", layout: { first: "Audio!a", second: "Plot!a", direction: "row" } }],
         },
       };
-      let panels: PanelsState = {
+      let panels: LayoutData = {
         ...emptyLayout,
         layout: originalLayout,
         configById: originalSavedProps,
@@ -1148,7 +1148,7 @@ describe("layout reducers", () => {
           ],
         },
       };
-      let panels: PanelsState = {
+      let panels: LayoutData = {
         ...emptyLayout,
         layout: originalLayout,
         configById: originalSavedProps,
@@ -1202,7 +1202,7 @@ describe("layout reducers", () => {
           tabs: [{ title: "B", layout: "RawMessages!a" }],
         },
       };
-      let panels: PanelsState = {
+      let panels: LayoutData = {
         ...emptyLayout,
         layout: originalLayout,
         configById: originalSavedProps,
@@ -1258,7 +1258,7 @@ describe("layout reducers", () => {
         "Tab!b": { activeTabIdx: 0, tabs: [{ title: "B" }] },
         "Tab!c": tabCConfig,
       };
-      let panels: PanelsState = {
+      let panels: LayoutData = {
         ...emptyLayout,
         layout: originalLayout,
         configById: originalSavedProps,
@@ -1298,7 +1298,7 @@ describe("layout reducers", () => {
         second: "Plot!a",
         direction: "row",
       } as MosaicParent<string>;
-      let panels: PanelsState = {
+      let panels: LayoutData = {
         ...emptyLayout,
         layout: originalLayout,
       };
@@ -1331,7 +1331,7 @@ describe("layout reducers", () => {
         second: "Plot!a",
         direction: "row",
       } as MosaicParent<string>;
-      let panels: PanelsState = { ...emptyLayout, layout: originalLayout };
+      let panels: LayoutData = { ...emptyLayout, layout: originalLayout };
       panels = panelsReducer(panels, {
         type: "START_DRAG",
         payload: { sourceTabId: undefined, path: ["first"] },

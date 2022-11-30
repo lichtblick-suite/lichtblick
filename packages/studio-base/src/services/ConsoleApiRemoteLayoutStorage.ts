@@ -4,7 +4,7 @@
 
 import { filterMap } from "@foxglove/den/collection";
 import Logger from "@foxglove/log";
-import { PanelsState } from "@foxglove/studio-base/context/CurrentLayoutContext/actions";
+import { LayoutData } from "@foxglove/studio-base/context/CurrentLayoutContext/actions";
 import ConsoleApi, { ConsoleApiLayout } from "@foxglove/studio-base/services/ConsoleApi";
 import { LayoutID, ISO8601Timestamp } from "@foxglove/studio-base/services/ILayoutStorage";
 import {
@@ -18,7 +18,7 @@ function convertLayout({ id, name, permission, data, savedAt }: ConsoleApiLayout
   if (data == undefined) {
     throw new Error(`Missing data for server layout ${name} (${id})`);
   }
-  return { id, name, permission, data: data as PanelsState, savedAt };
+  return { id, name, permission, data: data as LayoutData, savedAt };
 }
 
 export default class ConsoleApiRemoteLayoutStorage implements IRemoteLayoutStorage {
@@ -48,7 +48,7 @@ export default class ConsoleApiRemoteLayoutStorage implements IRemoteLayoutStora
   }: {
     id: LayoutID | undefined;
     name: string;
-    data: PanelsState;
+    data: LayoutData;
     permission: "CREATOR_WRITE" | "ORG_READ" | "ORG_WRITE";
     savedAt: ISO8601Timestamp;
   }): Promise<RemoteLayout> {
@@ -65,7 +65,7 @@ export default class ConsoleApiRemoteLayoutStorage implements IRemoteLayoutStora
   }: {
     id: LayoutID;
     name?: string;
-    data?: PanelsState;
+    data?: LayoutData;
     permission?: "CREATOR_WRITE" | "ORG_READ" | "ORG_WRITE";
     savedAt: ISO8601Timestamp;
   }): Promise<{ status: "success"; newLayout: RemoteLayout } | { status: "conflict" }> {

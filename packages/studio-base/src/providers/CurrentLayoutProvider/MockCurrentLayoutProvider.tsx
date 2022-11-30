@@ -11,7 +11,7 @@ import CurrentLayoutContext, {
 } from "@foxglove/studio-base/context/CurrentLayoutContext";
 import {
   PanelsActions,
-  PanelsState,
+  LayoutData,
 } from "@foxglove/studio-base/context/CurrentLayoutContext/actions";
 import { defaultPlaybackConfig } from "@foxglove/studio-base/providers/CurrentLayoutProvider/reducers";
 import { LayoutID } from "@foxglove/studio-base/services/ConsoleApi";
@@ -28,7 +28,7 @@ export default function MockCurrentLayoutProvider({
   initialState,
   onAction,
 }: React.PropsWithChildren<{
-  initialState?: Partial<PanelsState>;
+  initialState?: Partial<LayoutData>;
   onAction?: (action: PanelsActions) => void;
 }>): JSX.Element {
   const layoutStateListeners = useRef(new Set<(_: LayoutState) => void>());

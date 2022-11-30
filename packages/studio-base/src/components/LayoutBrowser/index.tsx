@@ -35,7 +35,7 @@ import {
   useCurrentLayoutActions,
   useCurrentLayoutSelector,
 } from "@foxglove/studio-base/context/CurrentLayoutContext";
-import { PanelsState } from "@foxglove/studio-base/context/CurrentLayoutContext/actions";
+import { LayoutData } from "@foxglove/studio-base/context/CurrentLayoutContext/actions";
 import { useLayoutManager } from "@foxglove/studio-base/context/LayoutManagerContext";
 import LayoutStorageDebuggingContext from "@foxglove/studio-base/context/LayoutStorageDebuggingContext";
 import { useAppConfigurationValue } from "@foxglove/studio-base/hooks/useAppConfigurationValue";
@@ -330,7 +330,7 @@ export default function LayoutBrowser({
     const name = `Unnamed layout ${moment(currentDateForStorybook).format("l")} at ${moment(
       currentDateForStorybook,
     ).format("LT")}`;
-    const panelState: Omit<PanelsState, "name" | "id"> = {
+    const layoutData: Omit<LayoutData, "name" | "id"> = {
       configById: {},
       globalVariables: {},
       userNodes: {},
@@ -338,7 +338,7 @@ export default function LayoutBrowser({
     };
     const newLayout = await layoutManager.saveNewLayout({
       name,
-      data: panelState as PanelsState,
+      data: layoutData as LayoutData,
       permission: "CREATOR_WRITE",
     });
     void onSelectLayout(newLayout);
@@ -476,7 +476,7 @@ export default function LayoutBrowser({
           return;
         }
 
-        const data = parsedState as PanelsState;
+        const data = parsedState as LayoutData;
         const newLayout = await layoutManager.saveNewLayout({
           name: layoutName,
           data,

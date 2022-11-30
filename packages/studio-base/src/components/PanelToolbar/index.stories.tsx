@@ -20,7 +20,7 @@ import MockPanelContextProvider from "@foxglove/studio-base/components/MockPanel
 import ToolbarIconButton from "@foxglove/studio-base/components/PanelToolbar/ToolbarIconButton";
 import MockCurrentLayoutProvider from "@foxglove/studio-base/providers/CurrentLayoutProvider/MockCurrentLayoutProvider";
 import HelpInfoProvider from "@foxglove/studio-base/providers/HelpInfoProvider";
-import { PanelSettingsEditorContextProvider } from "@foxglove/studio-base/providers/PanelSettingsEditorContextProvider";
+import { PanelStateContextProvider } from "@foxglove/studio-base/providers/PanelStateContextProvider";
 
 import PanelToolbar from "./index";
 
@@ -41,7 +41,7 @@ class MosaicWrapper extends React.Component<{
             toolbarControls={<div />}
             renderPreview={() => undefined as any}
           >
-            <PanelSettingsEditorContextProvider>
+            <PanelStateContextProvider>
               <HelpInfoProvider>
                 <Box
                   width="100%"
@@ -55,7 +55,7 @@ class MosaicWrapper extends React.Component<{
                   </Box>
                 </Box>
               </HelpInfoProvider>
-            </PanelSettingsEditorContextProvider>
+            </PanelStateContextProvider>
           </MosaicWindow>
         )}
         value={this.props.layout ?? "dummy"}

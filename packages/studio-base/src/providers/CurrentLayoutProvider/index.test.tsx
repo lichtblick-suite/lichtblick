@@ -14,7 +14,7 @@ import {
   useCurrentLayoutActions,
   useCurrentLayoutSelector,
 } from "@foxglove/studio-base/context/CurrentLayoutContext";
-import { PanelsState } from "@foxglove/studio-base/context/CurrentLayoutContext/actions";
+import { LayoutData } from "@foxglove/studio-base/context/CurrentLayoutContext/actions";
 import LayoutManagerContext from "@foxglove/studio-base/context/LayoutManagerContext";
 import {
   UserProfileStorage,
@@ -24,7 +24,7 @@ import CurrentLayoutProvider from "@foxglove/studio-base/providers/CurrentLayout
 import { ILayoutManager } from "@foxglove/studio-base/services/ILayoutManager";
 import { LayoutID } from "@foxglove/studio-base/services/ILayoutStorage";
 
-const TEST_LAYOUT: PanelsState = {
+const TEST_LAYOUT: LayoutData = {
   layout: "ExamplePanel!1",
   configById: {},
   globalVariables: {},
@@ -112,7 +112,7 @@ function renderTest({
 
 describe("CurrentLayoutProvider", () => {
   it("uses currentLayoutId from UserProfile to load from LayoutStorage", async () => {
-    const expectedState: PanelsState = {
+    const expectedState: LayoutData = {
       layout: "Foo!bar",
       configById: { "Foo!bar": { setting: 1 } },
       globalVariables: { var: "hello" },
@@ -148,7 +148,7 @@ describe("CurrentLayoutProvider", () => {
 
   it("saves new layout selection into UserProfile", async () => {
     const mockLayoutManager = makeMockLayoutManager();
-    const newLayout: Partial<PanelsState> = {
+    const newLayout: Partial<LayoutData> = {
       ...TEST_LAYOUT,
       layout: "ExamplePanel!2",
     };

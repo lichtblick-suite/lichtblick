@@ -34,7 +34,7 @@ import PanelCatalogContext, {
   PanelCatalog,
   PanelInfo,
 } from "@foxglove/studio-base/context/PanelCatalogContext";
-import { usePanelSettingsEditorStore } from "@foxglove/studio-base/context/PanelSettingsEditorContext";
+import { usePanelStateStore } from "@foxglove/studio-base/context/PanelStateContext";
 import {
   UserNodeStateProvider,
   useUserNodeState,
@@ -51,7 +51,7 @@ import {
 import MockCurrentLayoutProvider from "@foxglove/studio-base/providers/CurrentLayoutProvider/MockCurrentLayoutProvider";
 import ExtensionCatalogProvider from "@foxglove/studio-base/providers/ExtensionCatalogProvider";
 import HelpInfoProvider from "@foxglove/studio-base/providers/HelpInfoProvider";
-import { PanelSettingsEditorContextProvider } from "@foxglove/studio-base/providers/PanelSettingsEditorContextProvider";
+import { PanelStateContextProvider } from "@foxglove/studio-base/providers/PanelStateContextProvider";
 import TimelineInteractionStateProvider from "@foxglove/studio-base/providers/TimelineInteractionStateProvider";
 import ThemeProvider from "@foxglove/studio-base/theme/ThemeProvider";
 import { RosDatatypes } from "@foxglove/studio-base/types/RosDatatypes";
@@ -171,7 +171,7 @@ function PanelWrapper({
   children?: ReactNode;
   includeSettings?: boolean;
 }): JSX.Element {
-  const settings = usePanelSettingsEditorStore((store) => Object.values(store.settingsTrees)[0]);
+  const settings = usePanelStateStore((store) => Object.values(store.settingsTrees)[0]);
 
   return (
     <>
@@ -329,7 +329,7 @@ export default function PanelSetup(props: Props): JSX.Element {
     <UserNodeStateProvider>
       <TimelineInteractionStateProvider>
         <MockCurrentLayoutProvider onAction={props.onLayoutAction}>
-          <PanelSettingsEditorContextProvider>
+          <PanelStateContextProvider>
             <ExtensionCatalogProvider loaders={[]}>
               <HelpInfoProvider>
                 <ThemeProvider isDark={theme.palette.mode === "dark"}>
@@ -337,7 +337,7 @@ export default function PanelSetup(props: Props): JSX.Element {
                 </ThemeProvider>
               </HelpInfoProvider>
             </ExtensionCatalogProvider>
-          </PanelSettingsEditorContextProvider>
+          </PanelStateContextProvider>
         </MockCurrentLayoutProvider>
       </TimelineInteractionStateProvider>
     </UserNodeStateProvider>

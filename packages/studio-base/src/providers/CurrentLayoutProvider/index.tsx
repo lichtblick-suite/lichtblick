@@ -26,7 +26,7 @@ import {
   EndDragPayload,
   MoveTabPayload,
   PanelsActions,
-  PanelsState,
+  LayoutData,
   SaveConfigsPayload,
   SplitPanelPayload,
   StartDragPayload,
@@ -153,7 +153,7 @@ export default function CurrentLayoutProvider({
     [enqueueSnackbar, isMounted, layoutManager, setLayoutState, setUserProfile],
   );
 
-  type UpdateLayoutParams = { id: LayoutID; data: PanelsState };
+  type UpdateLayoutParams = { id: LayoutID; data: LayoutData };
   const unsavedLayoutsRef = useRef(new Map<LayoutID, UpdateLayoutParams>());
 
   // When the user performs an action, we immediately setLayoutState to update the UI. Saving back

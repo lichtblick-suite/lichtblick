@@ -23,7 +23,7 @@ import {
   MosaicDropTargetPosition,
 } from "@foxglove/studio-base/types/panels";
 
-export type PanelsState = {
+export type LayoutData = {
   layout?: MosaicNode<string>;
   // We store config for each panel in an object keyed by the panel id.
   configById: SavedProps;

@@ -25,9 +25,9 @@ import Stack from "@foxglove/studio-base/components/Stack";
 import { useSelectedPanels } from "@foxglove/studio-base/context/CurrentLayoutContext";
 import PanelCatalogContext from "@foxglove/studio-base/context/PanelCatalogContext";
 import {
-  PanelSettingsEditorStore,
-  usePanelSettingsEditorStore,
-} from "@foxglove/studio-base/context/PanelSettingsEditorContext";
+  PanelStateStore,
+  usePanelStateStore,
+} from "@foxglove/studio-base/context/PanelStateContext";
 import { UserProfileStorageContext } from "@foxglove/studio-base/context/UserProfileStorageContext";
 import { useWorkspace } from "@foxglove/studio-base/context/WorkspaceContext";
 
@@ -68,12 +68,11 @@ const PanelToolbarControlsComponent = forwardRef<HTMLDivElement, PanelToolbarCon
     const { classes } = useStyles();
 
     const hasSettingsSelector = useCallback(
-      (store: PanelSettingsEditorStore) =>
-        panelId ? store.settingsTrees[panelId] != undefined : false,
+      (store: PanelStateStore) => (panelId ? store.settingsTrees[panelId] != undefined : false),
       [panelId],
     );
 
-    const hasSettings = usePanelSettingsEditorStore(hasSettingsSelector);
+    const hasSettings = usePanelStateStore(hasSettingsSelector);
 
     const userProfileStorage = useContext(UserProfileStorageContext);
     const [{ value: settingsOnboardingTooltip }, loadOnboardingState] =

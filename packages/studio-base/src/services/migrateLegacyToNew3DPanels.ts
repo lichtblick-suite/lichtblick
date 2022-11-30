@@ -6,7 +6,7 @@ import { round } from "lodash";
 import { MosaicNode } from "react-mosaic-component";
 
 import { filterMap } from "@foxglove/den/collection";
-import { PanelsState } from "@foxglove/studio-base/context/CurrentLayoutContext/actions";
+import { LayoutData } from "@foxglove/studio-base/context/CurrentLayoutContext/actions";
 import type { RendererConfig } from "@foxglove/studio-base/panels/ThreeDeeRender/Renderer";
 import { DEFAULT_CAMERA_STATE } from "@foxglove/studio-base/panels/ThreeDeeRender/camera";
 import {
@@ -111,11 +111,11 @@ function replacePanelInLayout(
 }
 
 function replacePanel(
-  panelsState: PanelsState,
+  panelsState: LayoutData,
   oldId: string,
   newId: string,
   newConfig: Record<string, unknown>,
-): PanelsState {
+): LayoutData {
   const newPanelsState = {
     ...panelsState,
     configById: { ...panelsState.configById, [newId]: newConfig },
@@ -141,17 +141,17 @@ function replacePanel(
   return newPanelsState;
 }
 
-export function migrateLegacyToNew3DPanels(panelsState: PanelsState): PanelsState {
-  if (panelsState.layout == undefined) {
-    return panelsState;
+export function migrateLegacyToNew3DPanels(layoutData: LayoutData): LayoutData {
+  if (layoutData.layout == undefined) {
+    return layoutData;
   }
 
-  const legacy3DPanels = getAllPanelIds(panelsState.layout, panelsState.configById).filter(
+  const legacy3DPanels = getAllPanelIds(layoutData.layout, layoutData.configById).filter(
     (id) => getPanelTypeFromId(id) === "3D Panel",
   );
-  let newState = panelsState;
+  let newState = layoutData;
   for (const id of legacy3DPanels) {
-    const legacyConfig = panelsState.configById[id] as Legacy3DConfig | undefined;
+    const legacyConfig = layoutData.configById[id] as Legacy3DConfig | undefined;
     if (legacyConfig != undefined) {
       newState = replacePanel(
         newState,

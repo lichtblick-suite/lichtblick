@@ -16,7 +16,7 @@ import { LayoutID } from "@foxglove/studio-base/services/ILayoutStorage";
 import { PanelConfig, PlaybackConfig, UserNodes } from "@foxglove/studio-base/types/panels";
 
 import {
-  PanelsState,
+  LayoutData,
   AddPanelPayload,
   ChangePanelLayoutPayload,
   ClosePanelPayload,
@@ -35,7 +35,7 @@ export type LayoutState = Readonly<{
     | {
         id: LayoutID;
         loading?: boolean;
-        data: PanelsState | undefined;
+        data: LayoutData | undefined;
       }
     | undefined;
 }>;

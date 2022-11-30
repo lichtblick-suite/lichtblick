@@ -5,9 +5,9 @@
 import { Fragment, ReactNode, useCallback } from "react";
 
 import {
-  PanelSettingsEditorStore,
-  usePanelSettingsEditorStore,
-} from "@foxglove/studio-base/context/PanelSettingsEditorContext";
+  PanelStateStore,
+  usePanelStateStore,
+} from "@foxglove/studio-base/context/PanelStateContext";
 
 /**
  * Wrapper component used to force-remount the panel when key properties like the tabId
@@ -22,11 +22,8 @@ export function PanelRemounter({
   id: string;
   tabId: undefined | string;
 }): JSX.Element {
-  const selector = useCallback(
-    (store: PanelSettingsEditorStore) => store.sequenceNumbers[id] ?? 0,
-    [id],
-  );
-  const sequenceNumber = usePanelSettingsEditorStore(selector);
+  const selector = useCallback((store: PanelStateStore) => store.sequenceNumbers[id] ?? 0, [id]);
+  const sequenceNumber = usePanelStateStore(selector);
 
   return <Fragment key={`${id}${tabId ?? ""}${sequenceNumber}`}>{children}</Fragment>;
 }

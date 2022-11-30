@@ -8,7 +8,7 @@ import userEvent from "@testing-library/user-event";
 import { useMemo } from "react";
 
 import AnalyticsProvider from "@foxglove/studio-base/context/AnalyticsProvider";
-import { PanelsState } from "@foxglove/studio-base/context/CurrentLayoutContext/actions";
+import { LayoutData } from "@foxglove/studio-base/context/CurrentLayoutContext/actions";
 import LayoutStorageContext from "@foxglove/studio-base/context/LayoutStorageContext";
 import ModalHost from "@foxglove/studio-base/context/ModalHost";
 import { UserProfileStorageContext } from "@foxglove/studio-base/context/UserProfileStorageContext";
@@ -21,7 +21,7 @@ import MockLayoutStorage from "@foxglove/studio-base/services/MockLayoutStorage"
 
 import LayoutBrowser from "./index";
 
-const DEFAULT_LAYOUT_FOR_TESTS: PanelsState = {
+const DEFAULT_LAYOUT_FOR_TESTS: LayoutData = {
   configById: {},
   globalVariables: {},
   userNodes: {},

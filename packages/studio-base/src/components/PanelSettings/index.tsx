@@ -20,9 +20,9 @@ import {
 } from "@foxglove/studio-base/context/CurrentLayoutContext";
 import { usePanelCatalog } from "@foxglove/studio-base/context/PanelCatalogContext";
 import {
-  PanelSettingsEditorStore,
-  usePanelSettingsEditorStore,
-} from "@foxglove/studio-base/context/PanelSettingsEditorContext";
+  PanelStateStore,
+  usePanelStateStore,
+} from "@foxglove/studio-base/context/PanelStateContext";
 import { useWorkspace } from "@foxglove/studio-base/context/WorkspaceContext";
 import { PanelConfig } from "@foxglove/studio-base/types/panels";
 import { TAB_PANEL_TYPE } from "@foxglove/studio-base/util/globalConstants";
@@ -35,8 +35,7 @@ const singlePanelIdSelector = (state: LayoutState) =>
     ? state.selectedLayout.data.layout
     : undefined;
 
-const selectIncrementSequenceNumber = (store: PanelSettingsEditorStore) =>
-  store.incrementSequenceNumber;
+const selectIncrementSequenceNumber = (store: PanelStateStore) => store.incrementSequenceNumber;
 
 export default function PanelSettings({
   selectedPanelIdsForTests,
@@ -83,7 +82,7 @@ export default function PanelSettings({
     [panelCatalog, panelType],
   );
 
-  const incrementSequenceNumber = usePanelSettingsEditorStore(selectIncrementSequenceNumber);
+  const incrementSequenceNumber = usePanelStateStore(selectIncrementSequenceNumber);
 
   const [showShareModal, setShowShareModal] = useState(false);
   const shareModal = useMemo(() => {
@@ -115,7 +114,7 @@ export default function PanelSettings({
 
   const [config] = useConfigById(selectedPanelId);
 
-  const settingsTree = usePanelSettingsEditorStore((state) =>
+  const settingsTree = usePanelStateStore((state) =>
     selectedPanelId ? state.settingsTrees[selectedPanelId] : undefined,
   );
 

@@ -4,7 +4,7 @@
 
 import { MarkOptional } from "ts-essentials";
 
-import { PanelsState } from "@foxglove/studio-base/context/CurrentLayoutContext/actions";
+import { LayoutData } from "@foxglove/studio-base/context/CurrentLayoutContext/actions";
 
 import { Layout, ISO8601Timestamp } from "./ILayoutStorage";
 import { migrateLegacyToNew3DPanels } from "./migrateLegacyToNew3DPanels";
@@ -12,8 +12,8 @@ import { migrateLegacyToNew3DPanels } from "./migrateLegacyToNew3DPanels";
 /**
  * Perform any necessary migrations on old layout data.
  */
-export function migratePanelsState(data: MarkOptional<PanelsState, "configById">): PanelsState {
-  let result: PanelsState = { ...data, configById: data.configById ?? data.savedProps ?? {} };
+export function migratePanelsState(data: MarkOptional<LayoutData, "configById">): LayoutData {
+  let result: LayoutData = { ...data, configById: data.configById ?? data.savedProps ?? {} };
   delete result.savedProps;
 
   result = migrateLegacyToNew3DPanels(result);

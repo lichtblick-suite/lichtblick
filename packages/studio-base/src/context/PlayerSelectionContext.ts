@@ -4,7 +4,7 @@
 
 import { createContext, useContext } from "react";
 
-import { PanelsState } from "@foxglove/studio-base/context/CurrentLayoutContext/actions";
+import { LayoutData } from "@foxglove/studio-base/context/CurrentLayoutContext/actions";
 import { Player, PlayerMetricsCollectorInterface } from "@foxglove/studio-base/players/types";
 import ConsoleApi from "@foxglove/studio-base/services/ConsoleApi";
 import { RegisteredIconNames } from "@foxglove/studio-base/types/Icons";
@@ -47,7 +47,7 @@ export interface IDataSourceFactory {
   hidden?: boolean;
   warning?: string;
 
-  sampleLayout?: PanelsState;
+  sampleLayout?: LayoutData;
 
   formConfig?: {
     // Initialization args are populated with keys of the _id_ field

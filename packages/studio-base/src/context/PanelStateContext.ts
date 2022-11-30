@@ -11,7 +11,7 @@ import useGuaranteedContext from "@foxglove/studio-base/hooks/useGuaranteedConte
 
 export type ImmutableSettingsTree = DeepReadonly<SettingsTree>;
 
-export type PanelSettingsEditorStore = {
+export type PanelStateStore = {
   /**
    * Used for forcing remounts on panels to make panels reload their saved configs. This is necessary
    * because panels are free to ignore updates to their config in the layout and maintain their own
@@ -35,14 +35,12 @@ export type PanelSettingsEditorStore = {
   updateSettingsTree: (panelId: string, settingsTree: ImmutableSettingsTree) => void;
 };
 
-export const PanelSettingsEditorContext = createContext<
-  undefined | StoreApi<PanelSettingsEditorStore>
->(undefined);
+export const PanelStateContext = createContext<undefined | StoreApi<PanelStateStore>>(undefined);
 
-export function usePanelSettingsEditorStore<T>(
-  selector: (store: PanelSettingsEditorStore) => T,
+export function usePanelStateStore<T>(
+  selector: (store: PanelStateStore) => T,
   equalityFn?: (a: T, b: T) => boolean,
 ): T {
-  const context = useGuaranteedContext(PanelSettingsEditorContext);
+  const context = useGuaranteedContext(PanelStateContext);
   return useStore(context, selector, equalityFn);
 }

@@ -8,12 +8,12 @@ import { createStore, StoreApi } from "zustand";
 import { usePanelContext } from "@foxglove/studio-base/components/PanelContext";
 import {
   ImmutableSettingsTree,
-  PanelSettingsEditorContext,
-  PanelSettingsEditorStore,
-  usePanelSettingsEditorStore,
-} from "@foxglove/studio-base/context/PanelSettingsEditorContext";
+  PanelStateContext,
+  PanelStateStore,
+  usePanelStateStore,
+} from "@foxglove/studio-base/context/PanelStateContext";
 
-function createSettingsEditorStore(): StoreApi<PanelSettingsEditorStore> {
+function createPanelStateStore(): StoreApi<PanelStateStore> {
   return createStore((set) => {
     return {
       sequenceNumbers: {},
@@ -42,14 +42,14 @@ function createSettingsEditorStore(): StoreApi<PanelSettingsEditorStore> {
   });
 }
 
-const updateSettingsTreeSelector = (store: PanelSettingsEditorStore) => store.updateSettingsTree;
+const updateSettingsTreeSelector = (store: PanelStateStore) => store.updateSettingsTree;
 
 /**
  * Returns updater function for the current panels settings tree.
  */
 export function usePanelSettingsTreeUpdate(): (newTree: ImmutableSettingsTree) => void {
   const { id } = usePanelContext();
-  const updateStoreTree = usePanelSettingsEditorStore(updateSettingsTreeSelector);
+  const updateStoreTree = usePanelStateStore(updateSettingsTreeSelector);
 
   const updateSettingsTree = useCallback(
     (newTree: ImmutableSettingsTree) => {
@@ -61,16 +61,8 @@ export function usePanelSettingsTreeUpdate(): (newTree: ImmutableSettingsTree) =
   return updateSettingsTree;
 }
 
-export function PanelSettingsEditorContextProvider({
-  children,
-}: {
-  children?: ReactNode;
-}): JSX.Element {
-  const [store] = useState(createSettingsEditorStore());
+export function PanelStateContextProvider({ children }: { children?: ReactNode }): JSX.Element {
+  const [store] = useState(createPanelStateStore());
 
-  return (
-    <PanelSettingsEditorContext.Provider value={store}>
-      {children}
-    </PanelSettingsEditorContext.Provider>
-  );
+  return <PanelStateContext.Provider value={store}>{children}</PanelStateContext.Provider>;
 }

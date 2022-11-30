@@ -13,7 +13,7 @@ import * as PanelAPI from "@foxglove/studio-base/PanelAPI";
 import { useAssets } from "@foxglove/studio-base/context/AssetsContext";
 import useRobotDescriptionAsset from "@foxglove/studio-base/panels/URDFViewer/useRobotDescriptionAsset";
 import { Topic } from "@foxglove/studio-base/players/types";
-import { usePanelSettingsTreeUpdate } from "@foxglove/studio-base/providers/PanelSettingsEditorContextProvider";
+import { usePanelSettingsTreeUpdate } from "@foxglove/studio-base/providers/PanelStateContextProvider";
 import { SaveConfig } from "@foxglove/studio-base/types/panels";
 import { ROBOT_DESCRIPTION_PARAM } from "@foxglove/studio-base/util/globalConstants";
 

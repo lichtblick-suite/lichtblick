@@ -2,7 +2,7 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { PanelsState } from "@foxglove/studio-base/context/CurrentLayoutContext/actions";
+import { LayoutData } from "@foxglove/studio-base/context/CurrentLayoutContext/actions";
 
 // We use "brand" tags to prevent confusion between string types with distinct meanings
 // https://github.com/microsoft/TypeScript/issues/4895
@@ -23,13 +23,13 @@ export type Layout = {
   permission: LayoutPermission;
 
   /** @deprecated old field name, migrated to working/baseline */
-  data?: PanelsState;
+  data?: LayoutData;
   /** @deprecated old field name, migrated to working/baseline */
-  state?: PanelsState;
+  state?: LayoutData;
 
   /** The last explicitly saved version of this layout. */
   baseline: {
-    data: PanelsState;
+    data: LayoutData;
     savedAt: ISO8601Timestamp | undefined;
   };
 
@@ -38,7 +38,7 @@ export type Layout = {
    */
   working:
     | {
-        data: PanelsState;
+        data: LayoutData;
         savedAt: ISO8601Timestamp | undefined;
       }
     | undefined;

@@ -7,7 +7,7 @@ import { set } from "lodash";
 import { useCallback, useEffect } from "react";
 
 import { SettingsTreeAction, SettingsTreeNodes } from "@foxglove/studio";
-import { usePanelSettingsTreeUpdate } from "@foxglove/studio-base/providers/PanelSettingsEditorContextProvider";
+import { usePanelSettingsTreeUpdate } from "@foxglove/studio-base/providers/PanelStateContextProvider";
 import { SaveConfig } from "@foxglove/studio-base/types/panels";
 
 import { VariableSliderConfig } from "./types";
