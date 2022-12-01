@@ -351,7 +351,7 @@ function Plot(props: Props) {
 
       // If we don't change any accumulated data, avoid returning a new "accumulated" object so
       // react hooks remain stable.
-      let changed = false;
+      let newAccumulated: PlotDataByPath | undefined;
 
       for (const msgEvent of msgEvents) {
         const paths = topicToPaths.get(msgEvent.topic);
@@ -378,37 +378,40 @@ function Plot(props: Props) {
             headerStamp,
           };
 
-          changed = true;
+          if (!newAccumulated) {
+            newAccumulated = { ...accumulated };
+          }
 
           if (showSingleCurrentMessage) {
-            accumulated[path] = [[plotDataItem]];
+            newAccumulated[path] = [[plotDataItem]];
           } else {
-            const plotDataPath = (accumulated[path] ??= [[]]);
+            const plotDataPath = newAccumulated[path]?.slice() ?? [[]];
             // PlotDataPaths have 2d arrays of items to accommodate blocks which may have gaps so
             // each continuous set of blocks forms one continuous line. For streaming messages we
             // treat this as one continuous set of items and always add to the first "range"
             const plotDataItems = plotDataPath[0]!;
-            plotDataItems.push(plotDataItem);
 
             // If we are using the _following_ view mode, truncate away any items older than the view window.
             if (lastEventTime && isFollowing) {
               const minStamp = toSec(lastEventTime) - followingView.width;
-              plotDataPath[0] = filterMap(plotDataItems, (item) => {
+              const newItems = filterMap(plotDataItems, (item) => {
                 if (toSec(item.receiveTime) < minStamp) {
                   return undefined;
                 }
                 return item;
               });
+              newItems.push(plotDataItem);
+              plotDataPath[0] = newItems;
+            } else {
+              plotDataPath[0] = plotDataItems.concat(plotDataItem);
             }
+
+            newAccumulated[path] = plotDataPath;
           }
         }
       }
 
-      if (!changed) {
-        return accumulated;
-      }
-
-      return { ...accumulated };
+      return newAccumulated ?? accumulated;
     },
     [
       blockPathsMemo,
@@ -419,12 +422,17 @@ function Plot(props: Props) {
     ],
   );
 
-  const plotDataByPath = useMessageReducer<PlotDataByPath>({
-    topics: subscribeTopics,
-    preloadType: "full",
-    restore,
-    addMessages,
-  });
+  // The extra useShallowMemo is useful when seeking. Without it, the reduced value will be reset,
+  // and trigger the plot to re-render even if the old value and new value were both empty ({})
+  // which happens for fully pre-loaded data coming from blocks.
+  const plotDataByPath = useShallowMemo(
+    useMessageReducer<PlotDataByPath>({
+      topics: subscribeTopics,
+      preloadType: "full",
+      restore,
+      addMessages,
+    }),
+  );
 
   // Keep disabled paths when passing into getDatasets, because we still want
   // easy access to the history when turning the disabled paths back on.
