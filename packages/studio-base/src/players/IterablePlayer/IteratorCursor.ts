@@ -2,10 +2,12 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { compare } from "@foxglove/rostime";
+import { compare, add as addTime } from "@foxglove/rostime";
 import { Time } from "@foxglove/studio";
 
 import type { IMessageCursor, IteratorResult } from "./IIterableSource";
+
+const TIME_ZERO = Object.freeze({ sec: 0, nsec: 0 });
 
 /// IteratorCursor implements a IMessageCursor interface on top of an AsyncIterable
 class IteratorCursor implements IMessageCursor {
@@ -32,6 +34,49 @@ class IteratorCursor implements IMessageCursor {
 
     const result = await this._iter.next();
     return result.value;
+  }
+
+  public async nextBatch(durationMs: number): Promise<IteratorResult[] | undefined> {
+    const firstResult = await this.next();
+    if (!firstResult) {
+      return undefined;
+    }
+
+    if (firstResult.type === "problem") {
+      return [firstResult];
+    }
+
+    const results: IteratorResult[] = [firstResult];
+
+    let cutoffTime: Time = TIME_ZERO;
+    switch (firstResult.type) {
+      case "stamp":
+        cutoffTime = addTime(firstResult.stamp, { sec: 0, nsec: durationMs * 1e6 });
+        break;
+      case "message-event":
+        cutoffTime = addTime(firstResult.msgEvent.receiveTime, { sec: 0, nsec: durationMs * 1e6 });
+        break;
+    }
+
+    for (;;) {
+      const result = await this.next();
+      if (!result) {
+        return results;
+      }
+
+      results.push(result);
+
+      if (result.type === "problem") {
+        break;
+      }
+      if (result.type === "stamp" && compare(result.stamp, cutoffTime) > 0) {
+        break;
+      }
+      if (result.type === "message-event" && compare(result.msgEvent.receiveTime, cutoffTime) > 0) {
+        break;
+      }
+    }
+    return results;
   }
 
   public async readUntil(end: Time): ReturnType<IMessageCursor["readUntil"]> {

@@ -51,24 +51,21 @@ export class WorkerIterableSource implements IIterableSource {
       throw new Error(`WorkerIterableSource is not initialized`);
     }
 
-    const iter = await this._worker.messageIterator(args);
-    const ret = iter.return;
-
+    const cursor = this.getMessageCursor(args);
     try {
       for (;;) {
-        const iterResult = await iter.next();
-        if (iterResult.done === true) {
-          return iterResult.value;
+        // The fastest framerate that studio renders at is 60fps. So to render a frame studio needs
+        // at minimum ~16 milliseconds of messages before it will render a frame. Here we fetch
+        // batches of 17 milliseconds so that one batch fetch could result in one frame render.
+        // Fetching too much in a batch means we cannot render until the batch is returned.
+        const results = await cursor.nextBatch(17 /* milliseconds */);
+        if (!results || results.length === 0) {
+          break;
         }
-        yield iterResult.value;
+        yield* results;
       }
     } finally {
-      // Note: typescript types for iter.return don't narrow this to a function so we have this
-      // check in place to appease the types. This is not on a hot-path.
-      if (typeof ret === "function") {
-        await ret();
-      }
-      iter[Comlink.releaseProxy]();
+      await cursor.end();
     }
   }
 
@@ -101,6 +98,11 @@ export class WorkerIterableSource implements IIterableSource {
       async next() {
         const messageCursor = await messageCursorPromise;
         return await messageCursor.next();
+      },
+
+      async nextBatch(durationMs: number) {
+        const messageCursor = await messageCursorPromise;
+        return await messageCursor.nextBatch(durationMs);
       },
 
       async readUntil(end: Time) {

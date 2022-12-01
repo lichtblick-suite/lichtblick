@@ -107,6 +107,15 @@ export interface IMessageCursor {
   next(): Promise<IteratorResult | undefined>;
 
   /**
+   * Read the next batch of messages from the cursor. Return an array of results or undefined if the cursor is done.
+   *
+   * @param durationMs indicate the duration (in milliseconds) for the batch to stop waiting for
+   * more messages and return. This duration tracks the receive time from the first message in the
+   * batch.
+   */
+  nextBatch(durationMs: number): Promise<IteratorResult[] | undefined>;
+
+  /**
    * Read a batch of messages through end time (inclusive) or end of cursor
    *
    * return undefined when no more message remain in the cursor
