@@ -30,7 +30,10 @@ export function validateCustomUrl(url: string): Error | undefined {
   return undefined;
 }
 
-export function buildSettingsTree(config: Config, eligibleTopics: Topic[]): SettingsTreeNodes {
+export function buildSettingsTree(
+  config: Config,
+  eligibleTopics: Omit<Topic, "datatype">[],
+): SettingsTreeNodes {
   const topics: SettingsTreeNodes = transform(
     eligibleTopics,
     (result, topic) => {

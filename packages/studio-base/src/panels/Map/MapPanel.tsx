@@ -192,7 +192,7 @@ function MapPanel(props: MapPanelProps): JSX.Element {
       if (topic.convertibleTo) {
         for (const schemaName of topic.convertibleTo) {
           if (isSupportedSchema(schemaName)) {
-            return { name: topic.name, schemaName, datatype: schemaName };
+            return { name: topic.name, schemaName };
           }
         }
       }
