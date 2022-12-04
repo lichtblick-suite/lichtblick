@@ -13,8 +13,8 @@ import {
   Paper,
   useTheme,
 } from "@mui/material";
-import { isEqual, cloneDeep, merge } from "lodash";
-import React, { useCallback, useLayoutEffect, useEffect, useState, useMemo, useRef } from "react";
+import { cloneDeep, isEqual, merge } from "lodash";
+import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import ReactDOM from "react-dom";
 import { useLatest, useLongPress } from "react-use";
 import { DeepPartial } from "ts-essentials";
@@ -41,25 +41,37 @@ import useCleanup from "@foxglove/studio-base/hooks/useCleanup";
 import ThemeProvider from "@foxglove/studio-base/theme/ThemeProvider";
 
 import { DebugGui } from "./DebugGui";
-import { Interactions, InteractionContextMenu, SelectionObject, TabType } from "./Interactions";
+import { InteractionContextMenu, Interactions, SelectionObject, TabType } from "./Interactions";
 import type { PickedRenderable } from "./Picker";
 import type { Renderable } from "./Renderable";
-import { Renderer, RendererConfig, RendererEvents, RendererSubscription } from "./Renderer";
+import {
+  FollowMode,
+  Renderer,
+  RendererConfig,
+  RendererEvents,
+  RendererSubscription,
+} from "./Renderer";
 import { RendererContext, useRenderer, useRendererEvent } from "./RendererContext";
 import { Stats } from "./Stats";
 import { CameraState, DEFAULT_CAMERA_STATE, MouseEventObject } from "./camera";
 import {
-  PublishRos1Datatypes,
-  PublishRos2Datatypes,
   makePointMessage,
   makePoseEstimateMessage,
   makePoseMessage,
+  PublishRos1Datatypes,
+  PublishRos2Datatypes,
 } from "./publish";
 import { DEFAULT_PUBLISH_SETTINGS } from "./renderables/CoreSettings";
 import type { LayerSettingsTransform } from "./renderables/FrameAxes";
 import { PublishClickEvent, PublishClickType } from "./renderables/PublishClickTool";
 
 const log = Logger.getLogger(__filename);
+
+type Shared3DPanelState = {
+  cameraState: CameraState;
+  followMode: FollowMode;
+  followTf: undefined | string;
+};
 
 const SHOW_DEBUG: true | false = false;
 const SELECTED_ID_VARIABLE = "selected_id";
@@ -405,6 +417,7 @@ export function ThreeDeeRender({ context }: { context: PanelExtensionContext }):
   const [messages, setMessages] = useState<ReadonlyArray<MessageEvent<unknown>> | undefined>();
   const [currentTime, setCurrentTime] = useState<Time | undefined>();
   const [didSeek, setDidSeek] = useState<boolean>(false);
+  const [sharedPanelState, setSharedPanelState] = useState<undefined | Shared3DPanelState>();
 
   const renderRef = useRef({ needsRender: false });
   const [renderDone, setRenderDone] = useState<(() => void) | undefined>();
@@ -422,6 +435,9 @@ export function ThreeDeeRender({ context }: { context: PanelExtensionContext }):
     () => new Map(),
   );
 
+  // The frame we care about for syncing purposes can be either of these.
+  const effectiveRendererFrameId = renderer?.followFrameId ?? renderer?.renderFrameId;
+
   // Config cameraState
   useEffect(() => {
     const listener = () => {
@@ -431,11 +447,19 @@ export function ThreeDeeRender({ context }: { context: PanelExtensionContext }):
         // non-follow mode playback
         renderer.setCameraState(newCameraState);
         setConfig((prevConfig) => ({ ...prevConfig, cameraState: newCameraState }));
+
+        if (config.scene.syncCamera === true) {
+          context.setSharedPanelState({
+            cameraState: newCameraState,
+            followMode: renderer.followMode,
+            followTf: effectiveRendererFrameId,
+          });
+        }
       }
     };
     renderer?.addListener("cameraMove", listener);
     return () => void renderer?.removeListener("cameraMove", listener);
-  }, [renderer]);
+  }, [config.scene.syncCamera, context, effectiveRendererFrameId, renderer]);
 
   // Handle user changes in the settings sidebar
   const actionHandler = useCallback(
@@ -444,8 +468,22 @@ export function ThreeDeeRender({ context }: { context: PanelExtensionContext }):
       // function has finished executing. This allows scene extensions that call
       // renderer.updateConfig to read out the new config value and configure their renderables
       // before the render occurs.
-      ReactDOM.unstable_batchedUpdates(() => renderer?.settings.handleAction(action)),
-    [renderer],
+      ReactDOM.unstable_batchedUpdates(() => {
+        if (renderer) {
+          const initialCameraState = renderer.getCameraState();
+          renderer.settings.handleAction(action);
+          const updatedCameraState = renderer.getCameraState();
+          // Communicate camera changes from settings to the global state if syncing.
+          if (updatedCameraState !== initialCameraState && config.scene.syncCamera === true) {
+            context.setSharedPanelState({
+              cameraState: updatedCameraState,
+              followMode: renderer.followMode,
+              followTf: renderer.followFrameId,
+            });
+          }
+        }
+      }),
+    [config.scene.syncCamera, context, renderer],
   );
 
   // Maintain the settings tree
@@ -538,6 +576,8 @@ export function ThreeDeeRender({ context }: { context: PanelExtensionContext }):
         // the current frame, topics may not have changed
         setTopics(renderState.topics);
 
+        setSharedPanelState(renderState.sharedPanelState as Shared3DPanelState);
+
         // Watch for any changes in the map of observed parameters
         setParameters(renderState.parameters);
 
@@ -556,9 +596,10 @@ export function ThreeDeeRender({ context }: { context: PanelExtensionContext }):
     context.watch("currentTime");
     context.watch("didSeek");
     context.watch("parameters");
+    context.watch("sharedPanelState");
     context.watch("variables");
     context.watch("topics");
-  }, [context]);
+  }, [context, renderer]);
 
   // Build a list of topics to subscribe to
   const [topicsToSubscribe, setTopicsToSubscribe] = useState<Subscription[] | undefined>(undefined);
@@ -624,7 +665,7 @@ export function ThreeDeeRender({ context }: { context: PanelExtensionContext }):
     if (renderer && variables) {
       renderer.setVariables(variables);
     }
-  }, [variables, renderer, context]);
+  }, [variables, renderer]);
 
   // Keep the renderer currentTime up to date
   useEffect(() => {
@@ -670,6 +711,32 @@ export function ThreeDeeRender({ context }: { context: PanelExtensionContext }):
       renderRef.current.needsRender = true;
     }
   }, [cameraState, renderer]);
+
+  // Sync camera with shared state, if enabled.
+  useEffect(() => {
+    if (!renderer || sharedPanelState == undefined || config.scene.syncCamera !== true) {
+      return;
+    }
+
+    if (sharedPanelState.followMode !== renderer.followMode) {
+      renderer.setCameraSyncError(
+        `Follow mode must be ${sharedPanelState.followMode} to sync camera.`,
+      );
+    } else if (sharedPanelState.followTf !== effectiveRendererFrameId) {
+      renderer.setCameraSyncError(
+        `Display frame must be ${sharedPanelState.followTf} to sync camera.`,
+      );
+    } else {
+      const newCameraState = sharedPanelState.cameraState;
+      renderer.setCameraState(newCameraState);
+      renderRef.current.needsRender = true;
+      setConfig((prevConfig) => ({
+        ...prevConfig,
+        cameraState: newCameraState,
+      }));
+      renderer.setCameraSyncError(undefined);
+    }
+  }, [config.scene.syncCamera, effectiveRendererFrameId, renderer, sharedPanelState]);
 
   // Render a new frame if requested
   useEffect(() => {
@@ -819,13 +886,16 @@ export function ThreeDeeRender({ context }: { context: PanelExtensionContext }):
   }, [publishActive, renderer]);
 
   const onTogglePerspective = useCallback(() => {
-    setConfig((prevConfig) => ({
-      ...prevConfig,
-      cameraState: { ...prevConfig.cameraState, perspective: !prevConfig.cameraState.perspective },
-    }));
-    // Wait for the setConfig to propagate to the renderer before updating the settings tree
-    setTimeout(() => renderer?.updateCoreSettings(), 0);
-  }, [renderer]);
+    const currentState = renderer?.getCameraState().perspective ?? false;
+    actionHandler({
+      action: "update",
+      payload: {
+        input: "boolean",
+        path: ["scene", "cameraState", "perspective"],
+        value: !currentState,
+      },
+    });
+  }, [actionHandler, renderer]);
 
   const onKeyDown = useCallback(
     (event: React.KeyboardEvent) => {

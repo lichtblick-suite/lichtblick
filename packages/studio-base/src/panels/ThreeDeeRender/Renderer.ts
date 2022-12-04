@@ -136,6 +136,8 @@ export type RendererConfig = {
       /** Enable transform preloading */
       enablePreloading?: boolean;
     };
+    /** Sync camera with other 3d panels */
+    syncCamera?: boolean;
     /** Toggles visibility of all topics */
     topicsVisible?: boolean;
   };
@@ -325,6 +327,7 @@ export class Renderer extends EventEmitter<RendererEvents> {
   private _pickingEnabled = false;
   private _isUpdatingCameraState = false;
   private _animationFrame?: number;
+  private _cameraSyncError: undefined | string;
 
   public constructor(canvas: HTMLCanvasElement, config: RendererConfig) {
     super();
@@ -516,6 +519,15 @@ export class Renderer extends EventEmitter<RendererEvents> {
     this.picker.dispose();
     this.input.dispose();
     this.gl.dispose();
+  }
+
+  public cameraSyncError(): undefined | string {
+    return this._cameraSyncError;
+  }
+
+  public setCameraSyncError(error: undefined | string): void {
+    this._cameraSyncError = error;
+    this.updateCoreSettings();
   }
 
   public getPixelRatio(): number {

@@ -15,6 +15,7 @@ describe("renderState", () => {
       colorScheme: undefined,
       globalVariables: {},
       hoverValue: undefined,
+      sharedPanelState: {},
       sortedTopics: [{ name: "test", schemaName: "schema" }],
       subscriptions: [],
       messageConverters: [
@@ -49,6 +50,7 @@ describe("renderState", () => {
       colorScheme: undefined,
       globalVariables: {},
       hoverValue: undefined,
+      sharedPanelState: {},
       sortedTopics: [{ name: "test", schemaName: "schema" }],
       subscriptions: [{ topic: "test", convertTo: "schema" }],
       messageConverters: [],
@@ -93,6 +95,7 @@ describe("renderState", () => {
       colorScheme: undefined,
       globalVariables: {},
       hoverValue: undefined,
+      sharedPanelState: {},
       sortedTopics: [
         { name: "another", schemaName: "schema" },
         { name: "test", schemaName: "schema" },
@@ -136,6 +139,7 @@ describe("renderState", () => {
       colorScheme: undefined,
       globalVariables: {},
       hoverValue: undefined,
+      sharedPanelState: {},
       sortedTopics: [{ name: "test", schemaName: "schema" }],
       subscriptions: [{ topic: "test" }, { topic: "test", convertTo: "otherSchema" }],
       messageConverters: [
@@ -199,6 +203,7 @@ describe("renderState", () => {
       colorScheme: undefined,
       globalVariables: {},
       hoverValue: undefined,
+      sharedPanelState: {},
       sortedTopics: [
         { name: "another", schemaName: "srcschema" },
         { name: "test", schemaName: "srcschemade" },

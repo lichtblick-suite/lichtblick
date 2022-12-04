@@ -184,6 +184,12 @@ declare module "@foxglove/studio" {
     parameters?: ReadonlyMap<string, ParameterValue>;
 
     /**
+     * Transient panel state shared between panels of the same type. This can be any data a
+     * panel author wishes to share between panels.
+     */
+    sharedPanelState?: Readonly<Record<string, unknown>>;
+
+    /**
      * Map of current Studio variables. Variables are key/value pairs that are globally accessible
      * to panels and scripts in the current layout. See
      * <https://foxglove.dev/docs/studio/app-concepts/variables> for more information.
@@ -260,6 +266,12 @@ declare module "@foxglove/studio" {
      * @param value The new value of the parameter.
      */
     setParameter: (name: string, value: ParameterValue) => void;
+
+    /**
+     * Set the transient state shared by panels of the same type as the caller of this function.
+     * This will not be persisted in the layout.
+     */
+    setSharedPanelState: (state: undefined | Readonly<string, unknown>) => void;
 
     /**
      * Set the value of variable name to value.

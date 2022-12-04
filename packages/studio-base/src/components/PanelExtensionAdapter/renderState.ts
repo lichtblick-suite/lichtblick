@@ -25,16 +25,17 @@ const log = Log.getLogger(__filename);
 const EmptyParameters = new Map<string, ParameterValue>();
 
 type BuilderRenderStateInput = {
-  watchedFields: Set<string>;
-  playerState: PlayerState | undefined;
   appSettings: Map<string, AppSettingValue> | undefined;
-  currentFrame: MessageEvent<unknown>[] | undefined;
   colorScheme: RenderState["colorScheme"] | undefined;
+  currentFrame: MessageEvent<unknown>[] | undefined;
   globalVariables: GlobalVariables;
   hoverValue: HoverValue | undefined;
+  messageConverters?: RegisterMessageConverterArgs<unknown>[];
+  playerState: PlayerState | undefined;
+  sharedPanelState: Record<string, unknown> | undefined;
   sortedTopics: readonly PlayerTopic[];
   subscriptions: Subscription[];
-  messageConverters?: RegisterMessageConverterArgs<unknown>[];
+  watchedFields: Set<string>;
 };
 
 type BuildRenderStateFn = (input: BuilderRenderStateInput) => Readonly<RenderState> | undefined;
@@ -64,6 +65,7 @@ function initRenderStateBuilder(): BuildRenderStateFn {
   let prevSubscriptions: BuilderRenderStateInput["subscriptions"];
   let prevSortedTopics: BuilderRenderStateInput["sortedTopics"] | undefined;
   let prevMessageConverters: BuilderRenderStateInput["messageConverters"] | undefined;
+  let prevSharedPanelState: BuilderRenderStateInput["sharedPanelState"];
 
   // Topics which we are subscribed without a conversion, these are topics we want to receive the original message
   const topicNoConversions: Set<string> = new Set();
@@ -78,16 +80,17 @@ function initRenderStateBuilder(): BuildRenderStateFn {
 
   return function buildRenderState(input: BuilderRenderStateInput) {
     const {
-      playerState,
-      watchedFields,
       appSettings,
-      currentFrame,
       colorScheme,
+      currentFrame,
       globalVariables,
       hoverValue,
-      sortedTopics,
       messageConverters,
+      playerState,
+      sharedPanelState,
+      sortedTopics,
       subscriptions,
+      watchedFields,
     } = input;
 
     // If the player has loaded all the blocks, the blocks reference won't change so our message
@@ -141,6 +144,14 @@ function initRenderStateBuilder(): BuildRenderStateFn {
       if (parameters !== renderState.parameters) {
         shouldRender = true;
         renderState.parameters = parameters;
+      }
+    }
+
+    if (watchedFields.has("sharedPanelState")) {
+      if (sharedPanelState !== prevSharedPanelState) {
+        shouldRender = true;
+        prevSharedPanelState = sharedPanelState;
+        renderState.sharedPanelState = sharedPanelState;
       }
     }
 

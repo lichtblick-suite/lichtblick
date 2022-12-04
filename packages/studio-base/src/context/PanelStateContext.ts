@@ -6,10 +6,14 @@ import { createContext } from "react";
 import { DeepReadonly } from "ts-essentials";
 import { useStore, StoreApi } from "zustand";
 
-import { SettingsTree } from "@foxglove/studio";
+import { RenderState, SettingsTree } from "@foxglove/studio";
 import useGuaranteedContext from "@foxglove/studio-base/hooks/useGuaranteedContext";
 
 export type ImmutableSettingsTree = DeepReadonly<SettingsTree>;
+
+export type SharedPanelState = RenderState["sharedPanelState"];
+
+type PanelType = string;
 
 export type PanelStateStore = {
   /**
@@ -25,6 +29,11 @@ export type PanelStateStore = {
   settingsTrees: Record<string, ImmutableSettingsTree>;
 
   /**
+   * Transient state shared between panels, keyed by panel type.
+   */
+  sharedPanelState: Record<PanelType, SharedPanelState>;
+
+  /**
    * Increments the sequence number for the panel, forcing a remount.
    */
   incrementSequenceNumber: (panelId: string) => void;
@@ -33,6 +42,11 @@ export type PanelStateStore = {
    * Updates the settings UI for the given panel.
    */
   updateSettingsTree: (panelId: string, settingsTree: ImmutableSettingsTree) => void;
+
+  /**
+   * Update the transient state associated with a particular panel type.
+   */
+  updateSharedPanelState: (type: PanelType, data: SharedPanelState) => void;
 };
 
 export const PanelStateContext = createContext<undefined | StoreApi<PanelStateStore>>(undefined);
