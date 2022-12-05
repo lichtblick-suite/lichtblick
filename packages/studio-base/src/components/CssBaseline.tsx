@@ -13,6 +13,32 @@ import { fonts } from "@foxglove/studio-base/util/sharedStyleConstants";
 
 const useStyles = makeStyles()(({ palette, typography }) => ({
   root: {
+    // container styling
+    height: "100%",
+    width: "100%",
+    display: "flex",
+    flexDirection: "column",
+    position: "relative",
+    flex: "1 1 100%",
+    overflow: "hidden",
+    background: palette.background.default,
+    color: palette.text.primary,
+    font: "inherit",
+    fontSize: typography.body2.fontSize,
+    fontFeatureSettings: fonts.SANS_SERIF_FEATURE_SETTINGS,
+    fontFamily: typography.body2.fontFamily,
+    fontWeight: typography.body2.fontWeight,
+    zIndex: 0,
+
+    // Prevent scroll "bouncing" since the app workspace is not scrollable. Allows individual
+    // scrollable elements to be scrolled without the whole page moving (even if they don't
+    // preventDefault on scroll events).
+    overscrollBehavior: "none",
+
+    // https://github.com/necolas/normalize.css/blob/master/normalize.css#L12
+    lineHeight: 1.15,
+
+    /// --- child and element styling follows ---
     "code, pre, tt": {
       fontFamily: fonts.MONOSPACE,
       overflowWrap: "break-word",
@@ -46,20 +72,6 @@ const useStyles = makeStyles()(({ palette, typography }) => ({
     canvas: {
       outline: "none",
     },
-
-    // container styling
-    height: "100%",
-    width: "100%",
-    display: "flex",
-    flexDirection: "column",
-    position: "relative",
-    flex: "1 1 100%",
-    overflow: "hidden",
-    background: palette.background.default,
-    color: palette.text.primary,
-    font: "inherit",
-    fontSize: typography.body2.fontSize,
-    fontFeatureSettings: fonts.SANS_SERIF_FEATURE_SETTINGS,
 
     // mosaic styling
     ".mosaic": {

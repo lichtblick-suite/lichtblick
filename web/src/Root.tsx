@@ -20,6 +20,7 @@ import {
   McapRemoteDataSourceFactory,
   App,
   ConsoleApi,
+  GlobalCss,
 } from "@foxglove/studio-base";
 
 import Ros1UnavailableDataSourceFactory from "./dataSources/Ros1UnavailableDataSourceFactory";
@@ -63,16 +64,19 @@ export function Root({ appConfiguration }: { appConfiguration: IAppConfiguration
   const disableSignin = process.env.FOXGLOVE_DISABLE_SIGN_IN != undefined;
 
   return (
-    <App
-      disableSignin={disableSignin}
-      enableDialogAuth={enableDialogAuth}
-      enableLaunchPreferenceScreen
-      deepLinks={[window.location.href]}
-      dataSources={dataSources}
-      appConfiguration={appConfiguration}
-      layoutStorage={layoutStorage}
-      consoleApi={consoleApi}
-      extensionLoaders={extensionLoaders}
-    />
+    <>
+      <GlobalCss />
+      <App
+        disableSignin={disableSignin}
+        enableDialogAuth={enableDialogAuth}
+        enableLaunchPreferenceScreen
+        deepLinks={[window.location.href]}
+        dataSources={dataSources}
+        appConfiguration={appConfiguration}
+        layoutStorage={layoutStorage}
+        consoleApi={consoleApi}
+        extensionLoaders={extensionLoaders}
+      />
+    </>
   );
 }

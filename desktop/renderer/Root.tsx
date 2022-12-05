@@ -5,25 +5,26 @@
 import { useMemo, useEffect, useState } from "react";
 
 import {
-  IDataSourceFactory,
-  Ros1LocalBagDataSourceFactory,
-  Ros2LocalBagDataSourceFactory,
-  RosbridgeDataSourceFactory,
-  VelodyneDataSourceFactory,
-  Ros1RemoteBagDataSourceFactory,
-  Ros1SocketDataSourceFactory,
-  Ros2SocketDataSourceFactory,
+  App,
+  AppSetting,
+  ConsoleApi,
   FoxgloveDataPlatformDataSourceFactory,
   FoxgloveWebSocketDataSourceFactory,
-  UlogLocalDataSourceFactory,
-  McapLocalDataSourceFactory,
-  SampleNuscenesDataSourceFactory,
-  McapRemoteDataSourceFactory,
+  GlobalCss,
   IAppConfiguration,
-  AppSetting,
-  App,
-  ConsoleApi,
+  IDataSourceFactory,
   IdbExtensionLoader,
+  McapLocalDataSourceFactory,
+  McapRemoteDataSourceFactory,
+  Ros1LocalBagDataSourceFactory,
+  Ros1RemoteBagDataSourceFactory,
+  Ros1SocketDataSourceFactory,
+  Ros2LocalBagDataSourceFactory,
+  Ros2SocketDataSourceFactory,
+  RosbridgeDataSourceFactory,
+  SampleNuscenesDataSourceFactory,
+  UlogLocalDataSourceFactory,
+  VelodyneDataSourceFactory,
 } from "@foxglove/studio-base";
 
 import { Desktop, NativeMenuBridge, Storage } from "../common/types";
@@ -97,16 +98,19 @@ export default function Root({
   });
 
   return (
-    <App
-      enableDialogAuth
-      deepLinks={deepLinks}
-      dataSources={dataSources}
-      appConfiguration={appConfiguration}
-      consoleApi={consoleApi}
-      layoutStorage={layoutStorage}
-      extensionLoaders={extensionLoaders}
-      nativeAppMenu={nativeAppMenu}
-      nativeWindow={nativeWindow}
-    />
+    <>
+      <GlobalCss />
+      <App
+        enableDialogAuth
+        deepLinks={deepLinks}
+        dataSources={dataSources}
+        appConfiguration={appConfiguration}
+        consoleApi={consoleApi}
+        layoutStorage={layoutStorage}
+        extensionLoaders={extensionLoaders}
+        nativeAppMenu={nativeAppMenu}
+        nativeWindow={nativeWindow}
+      />
+    </>
   );
 }

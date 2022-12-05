@@ -15,7 +15,6 @@ import { ColorSchemeThemeProvider } from "./components/ColorSchemeThemeProvider"
 import CssBaseline from "./components/CssBaseline";
 import DocumentTitleAdapter from "./components/DocumentTitleAdapter";
 import ErrorBoundary from "./components/ErrorBoundary";
-import GlobalCss from "./components/GlobalCss";
 import MultiProvider from "./components/MultiProvider";
 import PlayerManager from "./components/PlayerManager";
 import SendNotificationToastAdapter from "./components/SendNotificationToastAdapter";
@@ -134,7 +133,6 @@ export function App(props: AppProps): JSX.Element {
   return (
     <AppConfigurationContext.Provider value={appConfiguration}>
       <ColorSchemeThemeProvider>
-        <GlobalCss />
         <CssBaseline>
           <ErrorBoundary>
             <MaybeLaunchPreference>

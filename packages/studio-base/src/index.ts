@@ -33,6 +33,7 @@ export { IdbExtensionLoader } from "./services/IdbExtensionLoader";
 export type { ExtensionLoader } from "./services/ExtensionLoader";
 export type { ExtensionInfo, ExtensionNamespace } from "./types/Extensions";
 export { AppSetting } from "./AppSetting";
+export { default as GlobalCss } from "./components/GlobalCss";
 export { default as FoxgloveDataPlatformDataSourceFactory } from "./dataSources/FoxgloveDataPlatformDataSourceFactory";
 export { default as FoxgloveWebSocketDataSourceFactory } from "./dataSources/FoxgloveWebSocketDataSourceFactory";
 export { default as Ros1LocalBagDataSourceFactory } from "./dataSources/Ros1LocalBagDataSourceFactory";
