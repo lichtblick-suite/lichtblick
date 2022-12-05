@@ -184,11 +184,15 @@ export default function Connection(props: ConnectionProps): JSX.Element {
               </Stack>
             </Stack>
           )}
-          {selectedSource?.docsLink && (
-            <Link color="primary" href={selectedSource.docsLink}>
-              View docs.
-            </Link>
-          )}
+          <ul style={{ margin: 0, padding: 0, listStyle: "none" }}>
+            {(selectedSource?.docsLinks ?? []).map((item) => (
+              <li key={item.url}>
+                <Link color="primary" href={item.url}>
+                  {item.label ? `View docs for ${item.label}` : "View docs"}.
+                </Link>
+              </li>
+            ))}
+          </ul>
         </Stack>
       </Stack>
     </View>

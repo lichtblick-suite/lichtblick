@@ -16,7 +16,7 @@ class Ros2SocketDataSourceFactory implements IDataSourceFactory {
   public iconName: IDataSourceFactory["iconName"] = "ROS";
   public description =
     "Connect to a running ROS 2 system via a native TCP connection that accesses your ROS nodes directly.";
-  public docsLink = "https://foxglove.dev/docs/studio/connection/native";
+  public docsLinks = [{ url: "https://foxglove.dev/docs/studio/connection/native" }];
   public warning =
     "Limitations of ROS 2 prevent Studio from having access to your custom messages. We recommend using the Rosbridge connection for a better experience.";
 
