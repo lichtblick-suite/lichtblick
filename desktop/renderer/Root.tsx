@@ -10,7 +10,7 @@ import {
   Ros2LocalBagDataSourceFactory,
   RosbridgeDataSourceFactory,
   VelodyneDataSourceFactory,
-  RemoteDataSourceFactory,
+  Ros1RemoteBagDataSourceFactory,
   Ros1SocketDataSourceFactory,
   Ros2SocketDataSourceFactory,
   FoxgloveDataPlatformDataSourceFactory,
@@ -18,6 +18,7 @@ import {
   UlogLocalDataSourceFactory,
   McapLocalDataSourceFactory,
   SampleNuscenesDataSourceFactory,
+  McapRemoteDataSourceFactory,
   IAppConfiguration,
   AppSetting,
   App,
@@ -46,14 +47,15 @@ export default function Root({
       new FoxgloveWebSocketDataSourceFactory(),
       new Ros1SocketDataSourceFactory(),
       new Ros1LocalBagDataSourceFactory(),
+      new Ros1RemoteBagDataSourceFactory(),
       new Ros2SocketDataSourceFactory(),
       new Ros2LocalBagDataSourceFactory(),
       new UlogLocalDataSourceFactory(),
-      new RemoteDataSourceFactory(),
       new VelodyneDataSourceFactory(),
       new FoxgloveDataPlatformDataSourceFactory(),
       new SampleNuscenesDataSourceFactory(),
       new McapLocalDataSourceFactory(),
+      new McapRemoteDataSourceFactory(),
     ];
 
     return sources;

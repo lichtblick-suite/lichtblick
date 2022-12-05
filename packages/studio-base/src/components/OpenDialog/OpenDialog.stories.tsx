@@ -77,6 +77,22 @@ StartDark.parameters = {
   title: "components/OpenDialog/Start/Dark",
 };
 
+// Remote
+
+export const RemoteLight = (): JSX.Element => <OpenDialog activeView="remote" />;
+
+RemoteLight.parameters = {
+  colorScheme: "light",
+  title: "components/OpenDialog/Remote/Light",
+};
+
+export const RemoteDark = (): JSX.Element => <OpenDialog activeView="remote" />;
+
+RemoteDark.parameters = {
+  colorScheme: "dark",
+  title: "components/OpenDialog/Remote/Dark",
+};
+
 export const ConnectionLight = (): JSX.Element => (
   <PlayerSelectionContext.Provider value={playerSelection}>
     <OpenDialog activeView="connection" />

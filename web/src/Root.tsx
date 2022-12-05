@@ -9,7 +9,7 @@ import {
   Ros1LocalBagDataSourceFactory,
   Ros2LocalBagDataSourceFactory,
   RosbridgeDataSourceFactory,
-  RemoteDataSourceFactory,
+  Ros1RemoteBagDataSourceFactory,
   FoxgloveDataPlatformDataSourceFactory,
   FoxgloveWebSocketDataSourceFactory,
   UlogLocalDataSourceFactory,
@@ -17,6 +17,7 @@ import {
   SampleNuscenesDataSourceFactory,
   IAppConfiguration,
   IdbExtensionLoader,
+  McapRemoteDataSourceFactory,
   App,
   ConsoleApi,
 } from "@foxglove/studio-base";
@@ -31,16 +32,17 @@ export function Root({ appConfiguration }: { appConfiguration: IAppConfiguration
     const sources = [
       new Ros1UnavailableDataSourceFactory(),
       new Ros1LocalBagDataSourceFactory(),
+      new Ros1RemoteBagDataSourceFactory(),
       new Ros2UnavailableDataSourceFactory(),
       new Ros2LocalBagDataSourceFactory(),
       new RosbridgeDataSourceFactory(),
       new FoxgloveWebSocketDataSourceFactory(),
       new UlogLocalDataSourceFactory(),
-      new RemoteDataSourceFactory(),
       new VelodyneUnavailableDataSourceFactory(),
       new FoxgloveDataPlatformDataSourceFactory(),
       new SampleNuscenesDataSourceFactory(),
       new McapLocalDataSourceFactory(),
+      new McapRemoteDataSourceFactory(),
     ];
 
     return sources;

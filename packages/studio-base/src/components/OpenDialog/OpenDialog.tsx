@@ -16,6 +16,7 @@ import {
 import { AppEvent } from "@foxglove/studio-base/services/IAnalytics";
 
 import Connection from "./Connection";
+import Remote from "./Remote";
 import Start from "./Start";
 import { OpenDialogViews } from "./types";
 import { useOpenFile } from "./useOpenFile";
@@ -91,8 +92,15 @@ export default function OpenDialog(props: OpenDialogProps): JSX.Element {
     return availableSources.filter((source) => source.type === "file");
   }, [availableSources]);
 
+  const remoteFileSources = useMemo(() => {
+    return availableSources.filter((source) => source.type === "remote-file");
+  }, [availableSources]);
+
   const view = useMemo(() => {
     const supportedLocalFileTypes = localFileSources.flatMap(
+      (source) => source.supportedFileTypes ?? [],
+    );
+    const supportedRemoteFileTypes = remoteFileSources.flatMap(
       (source) => source.supportedFileTypes ?? [],
     );
     switch (activeView) {
@@ -114,6 +122,17 @@ export default function OpenDialog(props: OpenDialogProps): JSX.Element {
             />
           ),
         };
+      case "remote":
+        return {
+          title: "Open a file from a remote location",
+          component: (
+            <Remote
+              onBack={() => onSelectView("start")}
+              onCancel={onModalClose}
+              availableSources={remoteFileSources}
+            />
+          ),
+        };
       default:
         return {
           title: "Get started",
@@ -121,6 +140,7 @@ export default function OpenDialog(props: OpenDialogProps): JSX.Element {
             <Start
               onSelectView={onSelectView}
               supportedLocalFileExtensions={supportedLocalFileTypes}
+              supportedRemoteFileExtensions={supportedRemoteFileTypes}
             />
           ),
         };
@@ -131,6 +151,7 @@ export default function OpenDialog(props: OpenDialogProps): JSX.Element {
     connectionSources,
     localFileSources,
     onSelectView,
+    remoteFileSources,
     onModalClose,
   ]);
 
