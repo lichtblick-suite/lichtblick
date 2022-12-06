@@ -372,8 +372,11 @@ declare module "@foxglove/studio" {
     // your panel.
     name: string;
 
-    // This function is invoked when your panel is initialized
-    initPanel: (context: PanelExtensionContext) => void;
+    /**
+     * This function is invoked when your panel is initialized
+     * @return: (optional) A function which is called when the panel is removed or replaced. Typically intended for cleanup logic to gracefully teardown your panel.
+     */
+    initPanel: (context: PanelExtensionContext) => void | (() => void);
   };
 
   export type RegisterMessageConverterArgs<Src> = {

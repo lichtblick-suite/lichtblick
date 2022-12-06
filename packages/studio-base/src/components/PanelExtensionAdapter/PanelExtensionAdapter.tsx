@@ -111,6 +111,7 @@ function PanelExtensionAdapter(props: PanelExtensionAdapterProps): JSX.Element {
   const [subscribedAppSettings, setSubscribedAppSettings] = useState<string[]>([]);
 
   const [renderFn, setRenderFn] = useState<RenderFn | undefined>();
+  const isPanelInitializedRef = useRef(false);
 
   const [slowRender, setSlowRender] = useState(false);
 
@@ -188,7 +189,14 @@ function PanelExtensionAdapter(props: PanelExtensionAdapterProps): JSX.Element {
   // updates.
   const renderingRef = useRef<boolean>(false);
   useLayoutEffect(() => {
-    if (!renderFn) {
+    /**
+     * We need to check that the panel has been initialized because the renderFn function is being
+     * called between the initPanel's useLayoutEffect cleanup and initPanel being called
+     * again even if setRenderFn(undefined) is called in the cleanup function. This causes
+     * the old renderFn to be called in this effect and pauseFrame to happen, but it is never
+     * resumed, thus causing a 5 second delay in all panels in the layout to be loaded.
+     */
+    if (!renderFn || !isPanelInitializedRef.current) {
       return;
     }
 
@@ -480,6 +488,9 @@ function PanelExtensionAdapter(props: PanelExtensionAdapterProps): JSX.Element {
 
     // Reset local state when the panel element is mounted or changes
     setRenderFn(undefined);
+    renderingRef.current = false;
+    setSlowRender(false);
+
     setBuildRenderState(() => initRenderStateBuilder());
 
     const panelElement = document.createElement("div");
@@ -489,7 +500,7 @@ function PanelExtensionAdapter(props: PanelExtensionAdapterProps): JSX.Element {
     panelContainerRef.current.appendChild(panelElement);
 
     log.info(`Init panel ${panelId}`);
-    initPanel({
+    const onUnmount = initPanel({
       panelElement,
       ...partialExtensionContext,
 
@@ -498,8 +509,13 @@ function PanelExtensionAdapter(props: PanelExtensionAdapterProps): JSX.Element {
         setRenderFn(() => renderFunction);
       },
     });
+    isPanelInitializedRef.current = true;
 
     return () => {
+      if (onUnmount) {
+        onUnmount();
+      }
+      isPanelInitializedRef.current = false;
       panelElement.remove();
       getMessagePipelineContext().setSubscriptions(panelId, []);
       getMessagePipelineContext().setPublishers(panelId, []);

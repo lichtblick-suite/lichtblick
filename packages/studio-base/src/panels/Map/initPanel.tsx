@@ -28,11 +28,14 @@ L.Marker.prototype.options.icon = L.icon({
   shadowSize: [41, 41],
 });
 
-export function initPanel(context: PanelExtensionContext): void {
+export function initPanel(context: PanelExtensionContext): () => void {
   ReactDOM.render(
     <StrictMode>
       <MapPanel context={context} />
     </StrictMode>,
     context.panelElement,
   );
+  return () => {
+    ReactDOM.unmountComponentAtNode(context.panelElement);
+  };
 }
