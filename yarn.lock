@@ -2168,7 +2168,7 @@ __metadata:
     "@protobufjs/base64": 1.1.2
     "@types/protobufjs": "workspace:*"
     "@types/zstd-codec": "workspace:*"
-    flatbuffers: 2.0.6
+    flatbuffers: 22.10.26
     flatbuffers_reflection: 0.0.2
     protobufjs: 7.1.2
     typescript: 4.8.2
@@ -12396,10 +12396,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"flatbuffers@npm:2.0.6":
-  version: 2.0.6
-  resolution: "flatbuffers@npm:2.0.6"
-  checksum: 88d907d3c9404c2e10c3e45e23a39ed5517b77c036738f88973933f50454a44f49336cbfbc5f3758b3eeb8e644902d84fdedd94c3fd0a54dfda724d4adb1155f
+"flatbuffers@npm:22.10.26":
+  version: 22.10.26
+  resolution: "flatbuffers@npm:22.10.26"
+  checksum: 3a1e2aaaac50c476fd01ef5d9eac0bb6b869ef7887e93f920496cee5c4bc4d40f959ebd8837eaea310a0bd05c7dd02e55be0c6f3dbf40e143ee9ef6104a7b6d0
   languageName: node
   linkType: hard
 
