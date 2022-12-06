@@ -246,7 +246,10 @@ export function PanelActionsDropdown({ isUnknownPanel }: Props): JSX.Element {
           ) : (
             <MenuItem
               key={item.key}
-              onClick={item.onClick}
+              onClick={(event) => {
+                event.stopPropagation();
+                item.onClick?.();
+              }}
               onMouseEnter={() => setSubmenuAnchorEl(undefined)}
               className={cx(classes.menuItem, item.className)}
               data-testid={item["data-testid"]}

@@ -629,7 +629,10 @@ export default function Panel<
                         size="large"
                         variant="contained"
                         startIcon={<DeleteForeverOutlinedIcon fontSize="large" />}
-                        onClick={removePanel}
+                        onClick={(event) => {
+                          event.stopPropagation();
+                          removePanel();
+                        }}
                       >
                         Remove
                       </StyledButton>
