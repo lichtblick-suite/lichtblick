@@ -9,7 +9,7 @@ import {
   Ros1LocalBagDataSourceFactory,
   Ros2LocalBagDataSourceFactory,
   RosbridgeDataSourceFactory,
-  Ros1RemoteBagDataSourceFactory,
+  RemoteDataSourceFactory,
   FoxgloveDataPlatformDataSourceFactory,
   FoxgloveWebSocketDataSourceFactory,
   UlogLocalDataSourceFactory,
@@ -17,7 +17,6 @@ import {
   SampleNuscenesDataSourceFactory,
   IAppConfiguration,
   IdbExtensionLoader,
-  McapRemoteDataSourceFactory,
   App,
   ConsoleApi,
   GlobalCss,
@@ -33,7 +32,6 @@ export function Root({ appConfiguration }: { appConfiguration: IAppConfiguration
     const sources = [
       new Ros1UnavailableDataSourceFactory(),
       new Ros1LocalBagDataSourceFactory(),
-      new Ros1RemoteBagDataSourceFactory(),
       new Ros2UnavailableDataSourceFactory(),
       new Ros2LocalBagDataSourceFactory(),
       new RosbridgeDataSourceFactory(),
@@ -43,7 +41,7 @@ export function Root({ appConfiguration }: { appConfiguration: IAppConfiguration
       new FoxgloveDataPlatformDataSourceFactory(),
       new SampleNuscenesDataSourceFactory(),
       new McapLocalDataSourceFactory(),
-      new McapRemoteDataSourceFactory(),
+      new RemoteDataSourceFactory(),
     ];
 
     return sources;

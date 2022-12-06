@@ -4,6 +4,7 @@
 
 import { FormHelperText, TextField } from "@mui/material";
 import { ChangeEvent, useState } from "react";
+import { makeStyles } from "tss-react/mui";
 
 import { Field } from "@foxglove/studio-base/context/PlayerSelectionContext";
 
@@ -14,9 +15,18 @@ type Props = {
   onError: (message: string) => void;
 };
 
+const useStyles = makeStyles()({
+  field: {
+    "& legend": {
+      display: "none",
+    },
+  },
+});
+
 export function FormField(props: Props): JSX.Element {
   const [error, setError] = useState<string | undefined>();
   const field = props.field;
+  const { classes } = useStyles();
 
   const onChange = (event: ChangeEvent<HTMLInputElement>) => {
     setError(undefined);
@@ -36,6 +46,7 @@ export function FormField(props: Props): JSX.Element {
     <div>
       <TextField
         fullWidth
+        className={classes.field}
         disabled={props.disabled}
         key={field.label}
         label={field.label}
@@ -47,6 +58,7 @@ export function FormField(props: Props): JSX.Element {
         placeholder={field.placeholder}
         defaultValue={field.defaultValue}
         onChange={onChange}
+        InputLabelProps={{ shrink: true }}
       />
       <FormHelperText>{field.description}</FormHelperText>
     </div>

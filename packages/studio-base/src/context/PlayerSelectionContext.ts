@@ -17,7 +17,7 @@ export type DataSourceFactoryInitializeArgs = {
   consoleApi?: ConsoleApi;
 };
 
-export type DataSourceFactoryType = "file" | "remote-file" | "connection" | "sample";
+export type DataSourceFactoryType = "file" | "connection" | "sample";
 
 export type Field = {
   id: string;
@@ -41,7 +41,7 @@ export interface IDataSourceFactory {
   displayName: string;
   iconName?: RegisteredIconNames;
   description?: string;
-  docsLink?: string;
+  docsLinks?: { label?: string; url: string }[];
   disabledReason?: string | JSX.Element;
   badgeText?: string;
   hidden?: boolean;

@@ -15,13 +15,12 @@ import {
   IDataSourceFactory,
   IdbExtensionLoader,
   McapLocalDataSourceFactory,
-  McapRemoteDataSourceFactory,
   Ros1LocalBagDataSourceFactory,
-  Ros1RemoteBagDataSourceFactory,
-  Ros1SocketDataSourceFactory,
   Ros2LocalBagDataSourceFactory,
-  Ros2SocketDataSourceFactory,
   RosbridgeDataSourceFactory,
+  RemoteDataSourceFactory,
+  Ros1SocketDataSourceFactory,
+  Ros2SocketDataSourceFactory,
   SampleNuscenesDataSourceFactory,
   UlogLocalDataSourceFactory,
   VelodyneDataSourceFactory,
@@ -48,7 +47,6 @@ export default function Root({
       new FoxgloveWebSocketDataSourceFactory(),
       new Ros1SocketDataSourceFactory(),
       new Ros1LocalBagDataSourceFactory(),
-      new Ros1RemoteBagDataSourceFactory(),
       new Ros2SocketDataSourceFactory(),
       new Ros2LocalBagDataSourceFactory(),
       new UlogLocalDataSourceFactory(),
@@ -56,7 +54,7 @@ export default function Root({
       new FoxgloveDataPlatformDataSourceFactory(),
       new SampleNuscenesDataSourceFactory(),
       new McapLocalDataSourceFactory(),
-      new McapRemoteDataSourceFactory(),
+      new RemoteDataSourceFactory(),
     ];
 
     return sources;

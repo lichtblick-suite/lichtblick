@@ -20,7 +20,7 @@ class Ros1SocketDataSourceFactory implements IDataSourceFactory {
   public iconName: IDataSourceFactory["iconName"] = "ROS";
   public description =
     "Connect to a running ROS 1 system via a native TCP connection that accesses your ROS master and nodes directly.";
-  public docsLink = "https://foxglove.dev/docs/studio/connection/native";
+  public docsLinks = [{ url: "https://foxglove.dev/docs/studio/connection/native" }];
 
   public formConfig = {
     fields: [
