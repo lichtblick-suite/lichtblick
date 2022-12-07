@@ -13,6 +13,13 @@ import { Player } from "@foxglove/studio-base/players/types";
 
 class RemoteDataSourceFactory implements IDataSourceFactory {
   public id = "remote-file";
+
+  // The remote file feature use to be handled by two separate factories with these IDs.
+  // We consolidated this into one factory that appears in the "connection" list and has a `url` field.
+  //
+  // To keep backwards compatability with deep-link urls that used these ids we provide them as legacy aliases
+  public legacyIds = ["mcap-remote-file", "ros1-remote-bagfile"];
+
   public type: IDataSourceFactory["type"] = "connection";
   public displayName = "Remote file";
   public iconName: IDataSourceFactory["iconName"] = "FileASPX";
@@ -31,25 +38,7 @@ class RemoteDataSourceFactory implements IDataSourceFactory {
         label: "Remote file URL",
         placeholder: "https://example.com/file.bag",
         validate: (newValue: string): Error | undefined => {
-          try {
-            const url = new URL(newValue);
-            const extension = path.extname(url.pathname);
-
-            if (extension.length === 0) {
-              return new Error("URL must end with a filename and extension");
-            }
-
-            if (!this.supportedFileTypes.includes(extension)) {
-              const supportedExtensions = new Intl.ListFormat("en-US", { style: "long" }).format(
-                this.supportedFileTypes,
-              );
-              return new Error(`Only ${supportedExtensions} files are supported.`);
-            }
-
-            return undefined;
-          } catch (err) {
-            return new Error("Enter a valid url");
-          }
+          return this.validateUrl(newValue);
         },
       },
     ],
@@ -58,7 +47,7 @@ class RemoteDataSourceFactory implements IDataSourceFactory {
   public initialize(args: DataSourceFactoryInitializeArgs): Player | undefined {
     const url = args.params?.url;
     if (!url) {
-      return;
+      throw new Error("Missing url argument");
     }
 
     const extension = path.extname(new URL(url).pathname);
@@ -73,6 +62,28 @@ class RemoteDataSourceFactory implements IDataSourceFactory {
       urlParams: { url },
       sourceId: this.id,
     });
+  }
+
+  private validateUrl(newValue: string): Error | undefined {
+    try {
+      const url = new URL(newValue);
+      const extension = path.extname(url.pathname);
+
+      if (extension.length === 0) {
+        return new Error("URL must end with a filename and extension");
+      }
+
+      if (!this.supportedFileTypes.includes(extension)) {
+        const supportedExtensions = new Intl.ListFormat("en-US", { style: "long" }).format(
+          this.supportedFileTypes,
+        );
+        return new Error(`Only ${supportedExtensions} files are supported.`);
+      }
+
+      return undefined;
+    } catch (err) {
+      return new Error("Enter a valid url");
+    }
   }
 }
 

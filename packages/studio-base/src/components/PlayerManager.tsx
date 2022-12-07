@@ -125,7 +125,9 @@ export default function PlayerManager(props: PropsWithChildren<PlayerManagerProp
       // Clear any previous represented filename
       void nativeWindow?.setRepresentedFilename(undefined);
 
-      const foundSource = playerSources.find((source) => source.id === sourceId);
+      const foundSource = playerSources.find(
+        (source) => source.id === sourceId || source.legacyIds?.includes(sourceId),
+      );
       if (!foundSource) {
         enqueueSnackbar(`Unknown data source: ${sourceId}`, { variant: "warning" });
         return;

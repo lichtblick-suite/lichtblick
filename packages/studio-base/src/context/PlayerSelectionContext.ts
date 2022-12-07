@@ -37,6 +37,11 @@ export type Field = {
 
 export interface IDataSourceFactory {
   id: string;
+
+  // A list of alternate ids used to identify this factory
+  // https://github.com/foxglove/studio/issues/4937
+  legacyIds?: string[];
+
   type: DataSourceFactoryType;
   displayName: string;
   iconName?: RegisteredIconNames;
