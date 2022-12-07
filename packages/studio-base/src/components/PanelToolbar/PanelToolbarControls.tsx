@@ -118,7 +118,10 @@ const PanelToolbarControlsComponent = forwardRef<HTMLDivElement, PanelToolbarCon
     }, [panelId, onDismissTooltip, setSelectedPanelIds, openPanelSettings]);
 
     let settingsButton = (
-      <ToolbarIconButton title="Settings" onClick={openSettings}>
+      <ToolbarIconButton
+        title={settingsOnboardingTooltip ? undefined : "Settings"}
+        onClick={openSettings}
+      >
         <SettingsIcon />
       </ToolbarIconButton>
     );
