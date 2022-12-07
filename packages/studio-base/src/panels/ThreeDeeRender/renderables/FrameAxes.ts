@@ -80,13 +80,12 @@ const tempEuler = new THREE.Euler();
 const tempTfPath: [string, string] = ["transforms", ""];
 
 export class FrameAxes extends SceneExtension<FrameAxisRenderable> {
-  private static lineGeometry: LineGeometry | undefined;
-
   private lineMaterial: LineMaterial;
   private linePickingMaterial: THREE.ShaderMaterial;
 
   private labelForegroundColor = 1;
   private labelBackgroundColor = new THREE.Color();
+  private lineGeometry: LineGeometry;
 
   public constructor(renderer: Renderer) {
     super("foxglove.FrameAxes", renderer);
@@ -100,6 +99,12 @@ export class FrameAxes extends SceneExtension<FrameAxisRenderable> {
     this.lineMaterial.color = color;
 
     const options = { resolution: renderer.input.canvasSize, worldUnits: false };
+
+    this.lineGeometry = this.renderer.sharedGeometry.getGeometry(
+      this.constructor.name,
+      createLineGeometry,
+    );
+
     this.linePickingMaterial = makeLinePickingMaterial(PICKING_LINE_SIZE, options);
 
     renderer.on("transformTreeUpdated", this.handleTransformTreeUpdated);
@@ -437,7 +442,7 @@ export class FrameAxes extends SceneExtension<FrameAxisRenderable> {
     const settings = { ...DEFAULT_SETTINGS, ...userSettings };
 
     // Parent line
-    const parentLine = new Line2(FrameAxes.LineGeometry(), this.lineMaterial);
+    const parentLine = new Line2(this.lineGeometry, this.lineMaterial);
     parentLine.castShadow = true;
     parentLine.receiveShadow = false;
     parentLine.userData.pickingMaterial = this.linePickingMaterial;
@@ -492,14 +497,11 @@ export class FrameAxes extends SceneExtension<FrameAxisRenderable> {
     frame.offsetPosition = getOffset(this.renderer.config.transforms[frameKey]?.xyzOffset);
     frame.offsetEulerDegrees = getOffset(this.renderer.config.transforms[frameKey]?.rpyOffset);
   }
-
-  private static LineGeometry(): LineGeometry {
-    if (!FrameAxes.lineGeometry) {
-      FrameAxes.lineGeometry = new LineGeometry();
-      FrameAxes.lineGeometry.setPositions([0, 0, 0, 1, 0, 0]);
-    }
-    return FrameAxes.lineGeometry;
-  }
+}
+function createLineGeometry(): LineGeometry {
+  const lineGeometry = new LineGeometry();
+  lineGeometry.setPositions([0, 0, 0, 1, 0, 0]);
+  return lineGeometry;
 }
 
 function buildSettingsFields(

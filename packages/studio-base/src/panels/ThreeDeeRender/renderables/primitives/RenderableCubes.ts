@@ -22,11 +22,7 @@ const tempQuat = new THREE.Quaternion();
 const tempRgba = makeRgba();
 
 export class RenderableCubes extends RenderablePrimitive {
-  private static cubeGeometry: THREE.BoxGeometry | undefined;
-  private static cubeEdgesGeometry: THREE.EdgesGeometry | undefined;
-
   // Each RenderableCubes needs its own geometry because we attach additional custom attributes to it.
-  private geometry = new THREE.BoxGeometry(1, 1, 1);
   private mesh: THREE.InstancedMesh<THREE.BoxGeometry, MeshStandardMaterialWithInstanceOpacity>;
   private instanceOpacity: THREE.InstancedBufferAttribute;
   private material = new MeshStandardMaterialWithInstanceOpacity({
@@ -43,6 +39,10 @@ export class RenderableCubes extends RenderablePrimitive {
 
   private outlineGeometry: THREE.InstancedBufferGeometry;
   private outline: THREE.LineSegments;
+  private geometry: THREE.BoxGeometry;
+  // actual shared geometry across instances, only copy -- do not modify
+  // stored for ease of use
+  private sharedEdgesGeometry: THREE.EdgesGeometry<THREE.BufferGeometry>;
 
   public constructor(renderer: Renderer) {
     super("", renderer, {
@@ -56,6 +56,10 @@ export class RenderableCubes extends RenderablePrimitive {
     });
 
     // Cube mesh
+    this.geometry = renderer.sharedGeometry
+      .getGeometry(`${this.constructor.name}-cube`, createCubeGeometry)
+      .clone() as THREE.BoxGeometry;
+
     this.maxInstances = 16;
     this.mesh = new THREE.InstancedMesh(this.geometry, this.material, this.maxInstances);
     this.instanceOpacity = new THREE.InstancedBufferAttribute(
@@ -67,9 +71,11 @@ export class RenderableCubes extends RenderablePrimitive {
     this.add(this.mesh);
 
     // Cube outline
-    this.outlineGeometry = new THREE.InstancedBufferGeometry().copy(
-      RenderableCubes.EdgesGeometry(),
+    this.sharedEdgesGeometry = renderer.sharedGeometry.getGeometry(
+      `${this.constructor.name}-edges`,
+      () => createEdgesGeometry(this.geometry),
     );
+    this.outlineGeometry = new THREE.InstancedBufferGeometry().copy(this.sharedEdgesGeometry);
     this.outlineGeometry.setAttribute("instanceMatrix", this.mesh.instanceMatrix);
     this.outline = new THREE.LineSegments(this.outlineGeometry, renderer.instancedOutlineMaterial);
     this.outline.frustumCulled = false;
@@ -95,9 +101,7 @@ export class RenderableCubes extends RenderablePrimitive {
       // THREE.js doesn't correctly recompute the new max instance count when dynamically
       // reassigning the attribute of InstancedBufferGeometry, so we just create a new geometry
       this.outlineGeometry.dispose();
-      this.outlineGeometry = new THREE.InstancedBufferGeometry().copy(
-        RenderableCubes.EdgesGeometry(),
-      );
+      this.outlineGeometry = new THREE.InstancedBufferGeometry().copy(this.sharedEdgesGeometry);
       this.outlineGeometry.instanceCount = newCapacity;
       this.outlineGeometry.setAttribute("instanceMatrix", this.mesh.instanceMatrix);
       this.outline.geometry = this.outlineGeometry;
@@ -183,20 +187,16 @@ export class RenderableCubes extends RenderablePrimitive {
   public updateSettings(settings: LayerSettingsEntity): void {
     this.update(this.userData.entity, settings, this.userData.receiveTime);
   }
+}
 
-  private static Geometry(): THREE.BoxGeometry {
-    if (!RenderableCubes.cubeGeometry) {
-      RenderableCubes.cubeGeometry = new THREE.BoxGeometry(1, 1, 1);
-      RenderableCubes.cubeGeometry.computeBoundingSphere();
-    }
-    return RenderableCubes.cubeGeometry;
-  }
+function createCubeGeometry(): THREE.BoxGeometry {
+  const cubeGeometry = new THREE.BoxGeometry(1, 1, 1);
+  cubeGeometry.computeBoundingSphere();
+  return cubeGeometry;
+}
 
-  private static EdgesGeometry(): THREE.EdgesGeometry {
-    if (!RenderableCubes.cubeEdgesGeometry) {
-      RenderableCubes.cubeEdgesGeometry = new THREE.EdgesGeometry(RenderableCubes.Geometry(), 40);
-      RenderableCubes.cubeEdgesGeometry.computeBoundingSphere();
-    }
-    return RenderableCubes.cubeEdgesGeometry;
-  }
+function createEdgesGeometry(cubeGeometry: THREE.BoxGeometry): THREE.EdgesGeometry {
+  const cubeEdgesGeometry = new THREE.EdgesGeometry(cubeGeometry, 40);
+  cubeEdgesGeometry.computeBoundingSphere();
+  return cubeEdgesGeometry;
 }

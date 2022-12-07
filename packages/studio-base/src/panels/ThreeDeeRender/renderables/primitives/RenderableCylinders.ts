@@ -22,15 +22,15 @@ const tempQuat = new THREE.Quaternion();
 const tempRgba = makeRgba();
 
 export class RenderableCylinders extends RenderablePrimitive {
-  private static cylinderGeometry: THREE.CylinderGeometry | undefined;
-  private static cylinderEdgesGeometry: THREE.EdgesGeometry | undefined;
-
   // Each RenderableCylinders needs its own geometry because we attach additional custom attributes to it.
-  private geometry = RenderableCylinders.Geometry().clone() as THREE.CylinderGeometry;
   private mesh: THREE.InstancedMesh<
     THREE.CylinderGeometry,
     MeshStandardMaterialWithInstanceOpacity
   >;
+  private geometry: THREE.CylinderGeometry;
+  // actual shared geometry across instances, only copy -- do not modify
+  // stored for ease of use
+  private sharedEdgesGeometry: THREE.EdgesGeometry<THREE.BufferGeometry>;
   private instanceOpacity: THREE.InstancedBufferAttribute;
   private instanceTopScale: THREE.InstancedBufferAttribute;
   private instanceBottomScale: THREE.InstancedBufferAttribute;
@@ -58,6 +58,9 @@ export class RenderableCylinders extends RenderablePrimitive {
       entity: undefined,
     });
 
+    this.geometry = renderer.sharedGeometry
+      .getGeometry(`${this.constructor.name}-cylinder`, createGeometry)
+      .clone() as THREE.CylinderGeometry;
     this.maxInstances = 16;
     this.mesh = new THREE.InstancedMesh(this.geometry, this.material, this.maxInstances);
     this.mesh.userData.pickingMaterial = this.pickingMaterial;
@@ -79,9 +82,11 @@ export class RenderableCylinders extends RenderablePrimitive {
     this.mesh.count = 0;
     this.add(this.mesh);
 
-    this.outlineGeometry = new THREE.InstancedBufferGeometry().copy(
-      RenderableCylinders.EdgesGeometry(),
+    this.sharedEdgesGeometry = renderer.sharedGeometry.getGeometry(
+      `${this.constructor.name}-edges`,
+      () => createEdgesGeometry(this.geometry),
     );
+    this.outlineGeometry = new THREE.InstancedBufferGeometry().copy(this.sharedEdgesGeometry);
     this.outlineGeometry.setAttribute("instanceMatrix", this.mesh.instanceMatrix);
     this.outlineGeometry.setAttribute("instanceBottomScale", this.instanceBottomScale);
     this.outlineGeometry.setAttribute("instanceTopScale", this.instanceTopScale);
@@ -126,9 +131,7 @@ export class RenderableCylinders extends RenderablePrimitive {
       // THREE.js doesn't correctly recompute the new max instance count when dynamically
       // reassigning the attribute of InstancedBufferGeometry, so we just create a new geometry
       this.outlineGeometry.dispose();
-      this.outlineGeometry = new THREE.InstancedBufferGeometry().copy(
-        RenderableCylinders.EdgesGeometry(),
-      );
+      this.outlineGeometry = new THREE.InstancedBufferGeometry().copy(this.sharedEdgesGeometry);
       this.outlineGeometry.instanceCount = newCapacity;
       this.outlineGeometry.setAttribute("instanceMatrix", this.mesh.instanceMatrix);
       this.outlineGeometry.setAttribute("instanceBottomScale", this.instanceBottomScale);
@@ -226,26 +229,18 @@ export class RenderableCylinders extends RenderablePrimitive {
   public updateSettings(settings: LayerSettingsEntity): void {
     this.update(this.userData.entity, settings, this.userData.receiveTime);
   }
+}
+function createGeometry() {
+  const cylinderGeometry = new THREE.CylinderGeometry(0.5, 0.5, 1, 16);
+  cylinderGeometry.rotateX(Math.PI / 2);
+  cylinderGeometry.computeBoundingSphere();
+  return cylinderGeometry;
+}
 
-  private static Geometry() {
-    if (!RenderableCylinders.cylinderGeometry) {
-      RenderableCylinders.cylinderGeometry = new THREE.CylinderGeometry(0.5, 0.5, 1, 16);
-      RenderableCylinders.cylinderGeometry.rotateX(Math.PI / 2);
-      RenderableCylinders.cylinderGeometry.computeBoundingSphere();
-    }
-    return RenderableCylinders.cylinderGeometry;
-  }
-
-  private static EdgesGeometry() {
-    if (!RenderableCylinders.cylinderEdgesGeometry) {
-      RenderableCylinders.cylinderEdgesGeometry = new THREE.EdgesGeometry(
-        RenderableCylinders.Geometry(),
-        40,
-      );
-      RenderableCylinders.cylinderEdgesGeometry.computeBoundingSphere();
-    }
-    return RenderableCylinders.cylinderEdgesGeometry;
-  }
+function createEdgesGeometry(geometry: THREE.CylinderGeometry) {
+  const cylinderEdgesGeometry = new THREE.EdgesGeometry(geometry, 40);
+  cylinderEdgesGeometry.computeBoundingSphere();
+  return cylinderEdgesGeometry;
 }
 
 /** Modify the given vertex shader so it transforms positions to support bottom_scale and top_scale. */

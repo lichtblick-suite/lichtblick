@@ -384,7 +384,6 @@ export class FoxgloveGridRenderable extends Renderable<FoxgloveGridUserData> {
 }
 
 export class FoxgloveGrid extends SceneExtension<FoxgloveGridRenderable> {
-  private static geometry: THREE.PlaneGeometry | undefined;
   private fieldsByTopic = new Map<string, string[]>();
 
   public constructor(renderer: Renderer) {
@@ -493,7 +492,11 @@ export class FoxgloveGrid extends SceneExtension<FoxgloveGridRenderable> {
 
       // Check color
       const texture = createTexture(foxgloveGrid, settings);
-      const mesh = createMesh(topic, texture);
+      const geometry = this.renderer.sharedGeometry.getGeometry(
+        this.constructor.name,
+        createGridGeometry,
+      );
+      const mesh = createMesh(topic, texture, geometry);
       const material = mesh.material as GridShaderMaterial;
       const pickingMaterial = mesh.userData.pickingMaterial as THREE.ShaderMaterial;
 
@@ -608,15 +611,12 @@ export class FoxgloveGrid extends SceneExtension<FoxgloveGridRenderable> {
 
     renderable.syncPickingMaterial();
   }
-
-  public static Geometry(): THREE.PlaneGeometry {
-    if (!FoxgloveGrid.geometry) {
-      FoxgloveGrid.geometry = new THREE.PlaneGeometry(1, 1, 1, 1);
-      FoxgloveGrid.geometry.translate(0.5, 0.5, 0);
-      FoxgloveGrid.geometry.computeBoundingSphere();
-    }
-    return FoxgloveGrid.geometry;
-  }
+}
+function createGridGeometry(): THREE.PlaneGeometry {
+  const geometry = new THREE.PlaneGeometry(1, 1, 1, 1);
+  geometry.translate(0.5, 0.5, 0);
+  geometry.computeBoundingSphere();
+  return geometry;
 }
 
 function invalidFoxgloveGridError(renderer: Renderer, topic: string, message: string): void {
@@ -649,11 +649,15 @@ function createTexture(foxgloveGrid: Grid, settings: GridColorModeSettings): THR
   return texture;
 }
 
-function createMesh(topic: string, texture: THREE.DataTexture): THREE.Mesh {
+function createMesh(
+  topic: string,
+  texture: THREE.DataTexture,
+  geometry: THREE.PlaneGeometry,
+): THREE.Mesh {
   // Create the texture, material, and mesh
   const material = createMaterial(texture, topic);
   const pickingMaterial = createPickingMaterial(material);
-  const mesh = new THREE.Mesh(FoxgloveGrid.Geometry(), material);
+  const mesh = new THREE.Mesh(geometry, material);
   mesh.castShadow = true;
   mesh.receiveShadow = true;
   // This overrides the picking material used for `mesh`. See Picker.ts

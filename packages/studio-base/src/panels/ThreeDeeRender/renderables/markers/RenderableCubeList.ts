@@ -7,7 +7,7 @@ import * as THREE from "three";
 import { DynamicInstancedMesh } from "../../DynamicInstancedMesh";
 import type { Renderer } from "../../Renderer";
 import { Marker } from "../../ros";
-import { RenderableCube } from "./RenderableCube";
+import { createGeometry as createCubeGeometry } from "./RenderableCube";
 import { RenderableMarker } from "./RenderableMarker";
 import { markerHasTransparency, makeStandardInstancedMaterial } from "./materials";
 
@@ -25,7 +25,8 @@ export class RenderableCubeList extends RenderableMarker {
 
     // Cube instanced mesh
     const material = makeStandardInstancedMaterial(marker);
-    this.mesh = new DynamicInstancedMesh(RenderableCube.Geometry(), material, marker.points.length);
+    const geometry = renderer.sharedGeometry.getGeometry("RenderableCube", createCubeGeometry);
+    this.mesh = new DynamicInstancedMesh(geometry, material, marker.points.length);
     this.mesh.castShadow = true;
     this.mesh.receiveShadow = true;
     this.add(this.mesh);

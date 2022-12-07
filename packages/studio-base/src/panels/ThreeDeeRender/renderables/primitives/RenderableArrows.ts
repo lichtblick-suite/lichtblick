@@ -22,18 +22,17 @@ const tempQuat = new THREE.Quaternion();
 const tempRgba = makeRgba();
 
 export class RenderableArrows extends RenderablePrimitive {
-  private static shaftGeometry: THREE.CylinderGeometry | undefined;
-  private static shaftEdgesGeometry: THREE.EdgesGeometry | undefined;
-  private static headGeometry: THREE.CylinderGeometry | undefined;
-  private static headEdgesGeometry: THREE.EdgesGeometry | undefined;
+  // Each needs its own geometries because we attach additional custom attributes to them.
+  // so we will need to clone or copy when assigning from shared geometry
+  private shaftGeometry: THREE.CylinderGeometry;
+  private headGeometry: THREE.ConeGeometry;
+  private shaftOutlineGeometry: THREE.InstancedBufferGeometry;
+  private headOutlineGeometry: THREE.InstancedBufferGeometry;
 
-  // Each RenderableArrows needs its own geometry because we attach additional custom attributes to it.
-  private shaftGeometry = RenderableArrows.ShaftGeometry().clone() as THREE.CylinderGeometry;
   private shaftMesh: THREE.InstancedMesh<
     THREE.CylinderGeometry,
     MeshStandardMaterialWithInstanceOpacity
   >;
-  private headGeometry = RenderableArrows.HeadGeometry().clone() as THREE.ConeGeometry;
   private headMesh: THREE.InstancedMesh<
     THREE.ConeGeometry,
     MeshStandardMaterialWithInstanceOpacity
@@ -51,9 +50,7 @@ export class RenderableArrows extends RenderablePrimitive {
    */
   private maxInstances: number;
 
-  private shaftOutlineGeometry: THREE.InstancedBufferGeometry;
   private shaftOutline: THREE.LineSegments;
-  private headOutlineGeometry: THREE.InstancedBufferGeometry;
   private headOutline: THREE.LineSegments;
 
   public constructor(renderer: Renderer) {
@@ -72,20 +69,28 @@ export class RenderableArrows extends RenderablePrimitive {
       new Float32Array(this.maxInstances),
       1,
     );
-    this.shaftGeometry.setAttribute("instanceOpacity", this.instanceOpacity);
-    this.headGeometry.setAttribute("instanceOpacity", this.instanceOpacity);
 
+    this.shaftGeometry = renderer.sharedGeometry
+      .getGeometry(`${this.constructor.name}-shaft`, createShaftGeometry)
+      .clone() as THREE.CylinderGeometry;
+    this.shaftGeometry.setAttribute("instanceOpacity", this.instanceOpacity);
     this.shaftMesh = new THREE.InstancedMesh(this.shaftGeometry, this.material, this.maxInstances);
     this.shaftMesh.count = 0;
     this.add(this.shaftMesh);
 
+    this.headGeometry = renderer.sharedGeometry
+      .getGeometry(`${this.constructor.name}-head`, createHeadGeometry)
+      .clone() as THREE.ConeGeometry;
+    this.headGeometry.setAttribute("instanceOpacity", this.instanceOpacity);
     this.headMesh = new THREE.InstancedMesh(this.headGeometry, this.material, this.maxInstances);
     this.headMesh.count = 0;
     this.add(this.headMesh);
 
-    this.shaftOutlineGeometry = new THREE.InstancedBufferGeometry().copy(
-      RenderableArrows.ShaftEdgesGeometry(),
+    const shaftEdgesGeometry = renderer.sharedGeometry.getGeometry(
+      `${this.constructor.name}-shaftedges`,
+      () => createShaftEdgesGeometry(this.shaftGeometry),
     );
+    this.shaftOutlineGeometry = new THREE.InstancedBufferGeometry().copy(shaftEdgesGeometry);
     this.shaftOutlineGeometry.setAttribute("instanceMatrix", this.shaftMesh.instanceMatrix);
     this.shaftOutline = new THREE.LineSegments(
       this.shaftOutlineGeometry,
@@ -95,9 +100,11 @@ export class RenderableArrows extends RenderablePrimitive {
     this.shaftOutline.userData.picking = false;
     this.add(this.shaftOutline);
 
-    this.headOutlineGeometry = new THREE.InstancedBufferGeometry().copy(
-      RenderableArrows.HeadEdgesGeometry(),
+    const headEdgesGeometry = renderer.sharedGeometry.getGeometry(
+      `${this.constructor.name}-headedges`,
+      () => createHeadEdgesGeometry(this.headGeometry),
     );
+    this.headOutlineGeometry = new THREE.InstancedBufferGeometry().copy(headEdgesGeometry);
     this.headOutlineGeometry.setAttribute("instanceMatrix", this.headMesh.instanceMatrix);
     this.headOutline = new THREE.LineSegments(
       this.headOutlineGeometry,
@@ -138,17 +145,21 @@ export class RenderableArrows extends RenderablePrimitive {
       // reassigning the attribute of InstancedBufferGeometry, so we just create a new geometry
 
       this.shaftOutlineGeometry.dispose();
-      this.shaftOutlineGeometry = new THREE.InstancedBufferGeometry().copy(
-        RenderableArrows.ShaftEdgesGeometry(),
+      const shaftEdgesGeometry = this.renderer.sharedGeometry.getGeometry(
+        `${this.constructor.name}-shaftedges`,
+        () => createShaftEdgesGeometry(this.shaftGeometry),
       );
+      this.shaftOutlineGeometry = new THREE.InstancedBufferGeometry().copy(shaftEdgesGeometry);
       this.shaftOutlineGeometry.instanceCount = newCapacity;
       this.shaftOutlineGeometry.setAttribute("instanceMatrix", this.shaftMesh.instanceMatrix);
       this.shaftOutline.geometry = this.shaftOutlineGeometry;
 
       this.headOutlineGeometry.dispose();
-      this.headOutlineGeometry = new THREE.InstancedBufferGeometry().copy(
-        RenderableArrows.HeadEdgesGeometry(),
+      const headEdgesGeometry = this.renderer.sharedGeometry.getGeometry(
+        `${this.constructor.name}-headedges`,
+        () => createHeadEdgesGeometry(this.headGeometry),
       );
+      this.headOutlineGeometry = new THREE.InstancedBufferGeometry().copy(headEdgesGeometry);
       this.headOutlineGeometry.instanceCount = newCapacity;
       this.headOutlineGeometry.setAttribute("instanceMatrix", this.headMesh.instanceMatrix);
       this.headOutline.geometry = this.headOutlineGeometry;
@@ -257,46 +268,32 @@ export class RenderableArrows extends RenderablePrimitive {
   public updateSettings(settings: LayerSettingsEntity): void {
     this.update(this.userData.entity, settings, this.userData.receiveTime);
   }
+}
 
-  private static ShaftGeometry() {
-    if (!RenderableArrows.shaftGeometry) {
-      RenderableArrows.shaftGeometry = new THREE.CylinderGeometry(0.5, 0.5, 1, 16);
-      // Adjust cylinder so ends are centered on (0,0,0) and (1,0,0)
-      RenderableArrows.shaftGeometry.rotateZ(-Math.PI / 2).translate(0.5, 0, 0);
-      RenderableArrows.shaftGeometry.computeBoundingSphere();
-    }
-    return RenderableArrows.shaftGeometry;
-  }
+function createShaftGeometry() {
+  const shaftGeometry = new THREE.CylinderGeometry(0.5, 0.5, 1, 16);
+  // Adjust cylinder so ends are centered on (0,0,0) and (1,0,0)
+  shaftGeometry.rotateZ(-Math.PI / 2).translate(0.5, 0, 0);
+  shaftGeometry.computeBoundingSphere();
+  return shaftGeometry;
+}
 
-  private static ShaftEdgesGeometry() {
-    if (!RenderableArrows.shaftEdgesGeometry) {
-      RenderableArrows.shaftEdgesGeometry = new THREE.EdgesGeometry(
-        RenderableArrows.ShaftGeometry(),
-        40,
-      );
-      RenderableArrows.shaftEdgesGeometry.computeBoundingSphere();
-    }
-    return RenderableArrows.shaftEdgesGeometry;
-  }
+function createShaftEdgesGeometry(geometry: THREE.CylinderGeometry) {
+  const shaftEdgesGeometry = new THREE.EdgesGeometry(geometry, 40);
+  shaftEdgesGeometry.computeBoundingSphere();
+  return shaftEdgesGeometry;
+}
 
-  private static HeadGeometry() {
-    if (!RenderableArrows.headGeometry) {
-      RenderableArrows.headGeometry = new THREE.ConeGeometry(0.5, 1, 16);
-      // Adjust cone so base is centered on (0,0,0) and tip is at (1,0,0)
-      RenderableArrows.headGeometry.rotateZ(-Math.PI / 2).translate(0.5, 0, 0);
-      RenderableArrows.headGeometry.computeBoundingSphere();
-    }
-    return RenderableArrows.headGeometry;
-  }
+function createHeadGeometry() {
+  const headGeometry = new THREE.ConeGeometry(0.5, 1, 16);
+  // Adjust cone so base is centered on (0,0,0) and tip is at (1,0,0)
+  headGeometry.rotateZ(-Math.PI / 2).translate(0.5, 0, 0);
+  headGeometry.computeBoundingSphere();
+  return headGeometry;
+}
 
-  private static HeadEdgesGeometry() {
-    if (!RenderableArrows.headEdgesGeometry) {
-      RenderableArrows.headEdgesGeometry = new THREE.EdgesGeometry(
-        RenderableArrows.HeadGeometry(),
-        40,
-      );
-      RenderableArrows.headEdgesGeometry.computeBoundingSphere();
-    }
-    return RenderableArrows.headEdgesGeometry;
-  }
+function createHeadEdgesGeometry(geometry: THREE.ConeGeometry) {
+  const headEdgesGeometry = new THREE.EdgesGeometry(geometry, 40);
+  headEdgesGeometry.computeBoundingSphere();
+  return headEdgesGeometry;
 }

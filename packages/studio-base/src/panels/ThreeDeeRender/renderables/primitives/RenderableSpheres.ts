@@ -22,9 +22,7 @@ const tempQuat = new THREE.Quaternion();
 const tempRgba = makeRgba();
 
 export class RenderableSpheres extends RenderablePrimitive {
-  private static sphereGeometry: THREE.SphereGeometry | undefined;
-
-  private geometry = new THREE.SphereGeometry(0.5, 16, 16);
+  private geometry: THREE.SphereGeometry;
   private mesh: THREE.InstancedMesh<THREE.SphereGeometry, MeshStandardMaterialWithInstanceOpacity>;
   private instanceOpacity: THREE.InstancedBufferAttribute;
   private material = new MeshStandardMaterialWithInstanceOpacity({
@@ -51,13 +49,15 @@ export class RenderableSpheres extends RenderablePrimitive {
     });
 
     // Sphere mesh
+    this.geometry = renderer.sharedGeometry
+      .getGeometry(this.constructor.name, createGeometry)
+      .clone() as THREE.SphereGeometry;
     this.maxInstances = 16;
     this.mesh = new THREE.InstancedMesh(this.geometry, this.material, this.maxInstances);
     this.instanceOpacity = new THREE.InstancedBufferAttribute(
       new Float32Array(this.maxInstances),
       1,
     );
-    this.geometry.copy(RenderableSpheres.Geometry());
     this.geometry.setAttribute("instanceOpacity", this.instanceOpacity);
     this.mesh.count = 0;
     this.add(this.mesh);
@@ -157,12 +157,10 @@ export class RenderableSpheres extends RenderablePrimitive {
   public updateSettings(settings: LayerSettingsEntity): void {
     this.update(this.userData.entity, settings, this.userData.receiveTime);
   }
+}
 
-  private static Geometry(): THREE.SphereGeometry {
-    if (!RenderableSpheres.sphereGeometry) {
-      RenderableSpheres.sphereGeometry = new THREE.SphereGeometry(0.5, 16, 16);
-      RenderableSpheres.sphereGeometry.computeBoundingSphere();
-    }
-    return RenderableSpheres.sphereGeometry;
-  }
+function createGeometry(): THREE.SphereGeometry {
+  const sphereGeometry = new THREE.SphereGeometry(0.5, 16, 16);
+  sphereGeometry.computeBoundingSphere();
+  return sphereGeometry;
 }

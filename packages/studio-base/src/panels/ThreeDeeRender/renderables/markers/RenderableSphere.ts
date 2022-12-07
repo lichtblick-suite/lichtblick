@@ -12,9 +12,6 @@ import { RenderableMarker } from "./RenderableMarker";
 import { makeStandardMaterial } from "./materials";
 
 export class RenderableSphere extends RenderableMarker {
-  private static lod: DetailLevel | undefined;
-  private static sphereGeometry: THREE.SphereGeometry | undefined;
-
   public mesh: THREE.Mesh<THREE.SphereGeometry, THREE.MeshStandardMaterial>;
 
   public constructor(
@@ -26,7 +23,10 @@ export class RenderableSphere extends RenderableMarker {
     super(topic, marker, receiveTime, renderer);
 
     // Sphere mesh
-    const geometry = RenderableSphere.Geometry(renderer.maxLod);
+    const geometry = renderer.sharedGeometry.getGeometry(
+      `${this.constructor.name}-${renderer.maxLod}`,
+      () => createGeometry(renderer.maxLod),
+    );
     this.mesh = new THREE.Mesh(geometry, makeStandardMaterial(marker.color));
     this.mesh.castShadow = true;
     this.mesh.receiveShadow = true;
@@ -55,14 +55,11 @@ export class RenderableSphere extends RenderableMarker {
 
     this.scale.set(marker.scale.x, marker.scale.y, marker.scale.z);
   }
+}
 
-  public static Geometry(lod: DetailLevel): THREE.SphereGeometry {
-    if (!RenderableSphere.sphereGeometry || lod !== RenderableSphere.lod) {
-      const subdivisions = sphereSubdivisions(lod);
-      RenderableSphere.sphereGeometry = new THREE.SphereGeometry(0.5, subdivisions, subdivisions);
-      RenderableSphere.sphereGeometry.computeBoundingSphere();
-      RenderableSphere.lod = lod;
-    }
-    return RenderableSphere.sphereGeometry;
-  }
+export function createGeometry(lod: DetailLevel): THREE.SphereGeometry {
+  const subdivisions = sphereSubdivisions(lod);
+  const sphereGeometry = new THREE.SphereGeometry(0.5, subdivisions, subdivisions);
+  sphereGeometry.computeBoundingSphere();
+  return sphereGeometry;
 }

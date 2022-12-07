@@ -37,7 +37,6 @@ import {
 import PublishGoalIcon from "@foxglove/studio-base/components/PublishGoalIcon";
 import PublishPointIcon from "@foxglove/studio-base/components/PublishPointIcon";
 import PublishPoseEstimateIcon from "@foxglove/studio-base/components/PublishPoseEstimateIcon";
-import useCleanup from "@foxglove/studio-base/hooks/useCleanup";
 import ThemeProvider from "@foxglove/studio-base/theme/ThemeProvider";
 
 import { DebugGui } from "./DebugGui";
@@ -548,9 +547,6 @@ export function ThreeDeeRender({ context }: { context: PanelExtensionContext }):
     { leading: false, trailing: true, maxWait: 1000 },
   );
   useEffect(() => throttledSave(config), [config, throttledSave]);
-
-  // Dispose of the renderer (and associated GPU resources) on teardown
-  useCleanup(() => renderer?.dispose());
 
   // Establish a connection to the message pipeline with context.watch and context.onRender
   useLayoutEffect(() => {

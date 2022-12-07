@@ -11,9 +11,6 @@ import { RenderableMarker } from "./RenderableMarker";
 import { makeStandardMaterial } from "./materials";
 
 export class RenderableCube extends RenderableMarker {
-  private static cubeGeometry: THREE.BoxGeometry | undefined;
-  private static cubeEdgesGeometry: THREE.EdgesGeometry | undefined;
-
   private mesh: THREE.Mesh<THREE.BoxGeometry, THREE.MeshStandardMaterial>;
   private outline: THREE.LineSegments | undefined;
 
@@ -26,13 +23,21 @@ export class RenderableCube extends RenderableMarker {
     super(topic, marker, receiveTime, renderer);
 
     // Cube mesh
-    this.mesh = new THREE.Mesh(RenderableCube.Geometry(), makeStandardMaterial(marker.color));
+    const cubeGeometry = this.renderer.sharedGeometry.getGeometry(
+      `${this.constructor.name}-cube`,
+      createGeometry,
+    );
+    const cubeEdgesGeometry = this.renderer.sharedGeometry.getGeometry(
+      `${this.constructor.name}-cube-edges`,
+      () => createEdgesGeometry(cubeGeometry),
+    );
+    this.mesh = new THREE.Mesh(cubeGeometry, makeStandardMaterial(marker.color));
     this.mesh.castShadow = true;
     this.mesh.receiveShadow = true;
     this.add(this.mesh);
 
     // Cube outline
-    this.outline = new THREE.LineSegments(RenderableCube.EdgesGeometry(), renderer.outlineMaterial);
+    this.outline = new THREE.LineSegments(cubeEdgesGeometry, renderer.outlineMaterial);
     this.outline.userData.picking = false;
     this.mesh.add(this.outline);
 
@@ -59,20 +64,15 @@ export class RenderableCube extends RenderableMarker {
 
     this.scale.set(marker.scale.x, marker.scale.y, marker.scale.z);
   }
+}
 
-  public static Geometry(): THREE.BoxGeometry {
-    if (!RenderableCube.cubeGeometry) {
-      RenderableCube.cubeGeometry = new THREE.BoxGeometry(1, 1, 1);
-      RenderableCube.cubeGeometry.computeBoundingSphere();
-    }
-    return RenderableCube.cubeGeometry;
-  }
-
-  private static EdgesGeometry(): THREE.EdgesGeometry {
-    if (!RenderableCube.cubeEdgesGeometry) {
-      RenderableCube.cubeEdgesGeometry = new THREE.EdgesGeometry(RenderableCube.Geometry(), 40);
-      RenderableCube.cubeEdgesGeometry.computeBoundingSphere();
-    }
-    return RenderableCube.cubeEdgesGeometry;
-  }
+export function createGeometry(): THREE.BoxGeometry {
+  const cubeGeometry = new THREE.BoxGeometry(1, 1, 1);
+  cubeGeometry.computeBoundingSphere();
+  return cubeGeometry;
+}
+function createEdgesGeometry(cubeGeometry: THREE.BoxGeometry): THREE.EdgesGeometry {
+  const cubeEdgesGeometry = new THREE.EdgesGeometry(cubeGeometry, 40);
+  cubeEdgesGeometry.computeBoundingSphere();
+  return cubeEdgesGeometry;
 }

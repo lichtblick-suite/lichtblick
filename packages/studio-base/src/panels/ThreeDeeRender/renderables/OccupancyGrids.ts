@@ -75,8 +75,6 @@ export class OccupancyGridRenderable extends Renderable<OccupancyGridUserData> {
 }
 
 export class OccupancyGrids extends SceneExtension<OccupancyGridRenderable> {
-  private static geometry: THREE.PlaneGeometry | undefined;
-
   public constructor(renderer: Renderer) {
     super("foxglove.OccupancyGrids", renderer);
 
@@ -165,7 +163,11 @@ export class OccupancyGrids extends SceneExtension<OccupancyGridRenderable> {
       const settings = { ...DEFAULT_SETTINGS, ...userSettings };
 
       const texture = createTexture(occupancyGrid);
-      const mesh = createMesh(topic, texture, settings);
+      const geometry = this.renderer.sharedGeometry.getGeometry(
+        this.constructor.name,
+        createGeometry,
+      );
+      const mesh = createMesh(topic, geometry, texture, settings);
       const material = mesh.material as THREE.MeshBasicMaterial;
       const pickingMaterial = mesh.userData.pickingMaterial as THREE.ShaderMaterial;
 
@@ -229,17 +231,13 @@ export class OccupancyGrids extends SceneExtension<OccupancyGridRenderable> {
 
     renderable.scale.set(resolution * width, resolution * height, 1);
   }
-
-  public static Geometry(): THREE.PlaneGeometry {
-    if (!OccupancyGrids.geometry) {
-      OccupancyGrids.geometry = new THREE.PlaneGeometry(1, 1, 1, 1);
-      OccupancyGrids.geometry.translate(0.5, 0.5, 0);
-      OccupancyGrids.geometry.computeBoundingSphere();
-    }
-    return OccupancyGrids.geometry;
-  }
 }
-
+function createGeometry(): THREE.PlaneGeometry {
+  const geometry = new THREE.PlaneGeometry(1, 1, 1, 1);
+  geometry.translate(0.5, 0.5, 0);
+  geometry.computeBoundingSphere();
+  return geometry;
+}
 function invalidOccupancyGridError(
   renderer: Renderer,
   renderable: OccupancyGridRenderable,
@@ -273,13 +271,14 @@ function createTexture(occupancyGrid: OccupancyGrid): THREE.DataTexture {
 
 function createMesh(
   topic: string,
+  geometry: THREE.PlaneGeometry,
   texture: THREE.DataTexture,
   settings: LayerSettingsOccupancyGrid,
 ): THREE.Mesh {
   // Create the texture, material, and mesh
   const pickingMaterial = createPickingMaterial(texture);
   const material = createMaterial(texture, topic, settings);
-  const mesh = new THREE.Mesh(OccupancyGrids.Geometry(), material);
+  const mesh = new THREE.Mesh(geometry, material);
   mesh.castShadow = true;
   mesh.receiveShadow = true;
   // This overrides the picking material used for `mesh`. See Picker.ts
