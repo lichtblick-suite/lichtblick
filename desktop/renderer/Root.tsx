@@ -10,7 +10,6 @@ import {
   ConsoleApi,
   FoxgloveDataPlatformDataSourceFactory,
   FoxgloveWebSocketDataSourceFactory,
-  GlobalCss,
   IAppConfiguration,
   IDataSourceFactory,
   IdbExtensionLoader,
@@ -97,7 +96,6 @@ export default function Root({
 
   return (
     <>
-      <GlobalCss />
       <App
         enableDialogAuth
         deepLinks={deepLinks}
@@ -108,6 +106,7 @@ export default function Root({
         extensionLoaders={extensionLoaders}
         nativeAppMenu={nativeAppMenu}
         nativeWindow={nativeWindow}
+        enableGlobalCss
       />
     </>
   );

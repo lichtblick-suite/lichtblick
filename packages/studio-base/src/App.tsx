@@ -6,6 +6,7 @@ import { useState, Suspense, Fragment, useEffect } from "react";
 import { DndProvider } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
 
+import GlobalCss from "@foxglove/studio-base/components/GlobalCss";
 import EventsProvider from "@foxglove/studio-base/providers/EventsProvider";
 import { StudioLogsSettingsProvider } from "@foxglove/studio-base/providers/StudioLogsSettingsProvider";
 import TimelineInteractionStateProvider from "@foxglove/studio-base/providers/TimelineInteractionStateProvider";
@@ -57,6 +58,7 @@ type AppProps = {
   disableSignin?: boolean;
   enableDialogAuth?: boolean;
   enableLaunchPreferenceScreen?: boolean;
+  enableGlobalCss?: boolean;
 };
 
 // Suppress context menu for the entire app except on inputs & textareas.
@@ -84,6 +86,7 @@ export function App(props: AppProps): JSX.Element {
     enableDialogAuth,
     deepLinks,
     enableLaunchPreferenceScreen,
+    enableGlobalCss = false,
   } = props;
 
   const CurrentUserProviderComponent =
@@ -133,6 +136,7 @@ export function App(props: AppProps): JSX.Element {
   return (
     <AppConfigurationContext.Provider value={appConfiguration}>
       <ColorSchemeThemeProvider>
+        {enableGlobalCss && <GlobalCss />}
         <CssBaseline>
           <ErrorBoundary>
             <MaybeLaunchPreference>

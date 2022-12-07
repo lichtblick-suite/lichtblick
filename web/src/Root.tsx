@@ -19,7 +19,6 @@ import {
   IdbExtensionLoader,
   App,
   ConsoleApi,
-  GlobalCss,
 } from "@foxglove/studio-base";
 
 import Ros1UnavailableDataSourceFactory from "./dataSources/Ros1UnavailableDataSourceFactory";
@@ -63,7 +62,6 @@ export function Root({ appConfiguration }: { appConfiguration: IAppConfiguration
 
   return (
     <>
-      <GlobalCss />
       <App
         disableSignin={disableSignin}
         enableDialogAuth={enableDialogAuth}
@@ -74,6 +72,7 @@ export function Root({ appConfiguration }: { appConfiguration: IAppConfiguration
         layoutStorage={layoutStorage}
         consoleApi={consoleApi}
         extensionLoaders={extensionLoaders}
+        enableGlobalCss
       />
     </>
   );
