@@ -2,7 +2,7 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import EventEmitter, { EventNames, EventListener } from "eventemitter3";
+import EventEmitter from "eventemitter3";
 import { isEqual, partition } from "lodash";
 import { v4 as uuidv4 } from "uuid";
 
@@ -144,15 +144,15 @@ export default class LayoutManager implements ILayoutManager {
     this.supportsSharing = remote != undefined;
   }
 
-  public on<E extends EventNames<LayoutManagerEventTypes>>(
+  public on<E extends EventEmitter.EventNames<LayoutManagerEventTypes>>(
     name: E,
-    listener: EventListener<LayoutManagerEventTypes, E>,
+    listener: EventEmitter.EventListener<LayoutManagerEventTypes, E>,
   ): void {
     this.emitter.on(name, listener);
   }
-  public off<E extends EventNames<LayoutManagerEventTypes>>(
+  public off<E extends EventEmitter.EventNames<LayoutManagerEventTypes>>(
     name: E,
-    listener: EventListener<LayoutManagerEventTypes, E>,
+    listener: EventEmitter.EventListener<LayoutManagerEventTypes, E>,
   ): void {
     this.emitter.off(name, listener);
   }

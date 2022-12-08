@@ -2,7 +2,7 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { ArgumentMap } from "eventemitter3";
+import EventEmitter from "eventemitter3";
 import { createContext, useContext, useEffect } from "react";
 
 import { Renderer, RendererEvents } from "./Renderer";
@@ -30,7 +30,9 @@ export function useRenderer(): Renderer | undefined {
  */
 export function useRendererEvent<K extends keyof RendererEvents>(
   eventName: K,
-  listener: (...args: ArgumentMap<RendererEvents>[Extract<K, keyof RendererEvents>]) => void,
+  listener: (
+    ...args: EventEmitter.ArgumentMap<RendererEvents>[Extract<K, keyof RendererEvents>]
+  ) => void,
   rendererInstance?: Renderer | ReactNull,
 ): void {
   const usedRenderer = useRenderer();
