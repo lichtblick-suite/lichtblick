@@ -158,6 +158,11 @@ class BufferedIterableSource implements IIterableSource {
     log.debug("producer done");
   }
 
+  public async terminate(): Promise<void> {
+    this.cache.clear();
+    await this.source.terminate();
+  }
+
   public async stopProducer(): Promise<void> {
     this.aborted = true;
     this.writeSignal.notifyAll();

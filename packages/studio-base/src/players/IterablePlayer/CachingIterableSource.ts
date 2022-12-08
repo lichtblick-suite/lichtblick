@@ -92,6 +92,11 @@ class CachingIterableSource implements IIterableSource {
     return this.initResult;
   }
 
+  public async terminate(): Promise<void> {
+    this.cache.length = 0;
+    this.cachedTopics.length = 0;
+  }
+
   public loadedRanges(): Range[] {
     return this.loadedRangesCache;
   }
