@@ -52,6 +52,17 @@ export class RenderableMarker extends Renderable<MarkerUserData> {
     });
   }
 
+  public override idFromMessage(): number | string | undefined {
+    return this.userData.marker.id;
+  }
+
+  public override selectedIdVariable(): string | undefined {
+    const settings = this.renderer.config.topics[this.userData.topic] as
+      | LayerSettingsMarker
+      | undefined;
+    return settings?.selectedIdVariable;
+  }
+
   public override details(): Record<string, RosValue> {
     return this.userData.originalMarker;
   }

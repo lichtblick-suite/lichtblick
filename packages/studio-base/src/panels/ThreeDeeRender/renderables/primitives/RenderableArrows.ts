@@ -59,7 +59,7 @@ export class RenderableArrows extends RenderablePrimitive {
       messageTime: -1n,
       frameId: "",
       pose: emptyPose(),
-      settings: { visible: true, color: undefined },
+      settings: { visible: true, color: undefined, selectedIdVariable: undefined },
       settingsPath: [],
       entity: undefined,
     });
@@ -251,13 +251,12 @@ export class RenderableArrows extends RenderablePrimitive {
   }
 
   public override update(
+    topic: string | undefined,
     entity: SceneEntity | undefined,
     settings: LayerSettingsEntity,
     receiveTime: bigint,
   ): void {
-    this.userData.entity = entity;
-    this.userData.settings = settings;
-    this.userData.receiveTime = receiveTime;
+    super.update(topic, entity, settings, receiveTime);
     if (entity) {
       const lifetimeNs = toNanoSec(entity.lifetime);
       this.userData.expiresAt = lifetimeNs === 0n ? undefined : receiveTime + lifetimeNs;
@@ -266,7 +265,7 @@ export class RenderableArrows extends RenderablePrimitive {
   }
 
   public updateSettings(settings: LayerSettingsEntity): void {
-    this.update(this.userData.entity, settings, this.userData.receiveTime);
+    this.update(this.userData.topic, this.userData.entity, settings, this.userData.receiveTime);
   }
 }
 

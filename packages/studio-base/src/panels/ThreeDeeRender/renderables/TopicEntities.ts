@@ -154,7 +154,7 @@ export class TopicEntities extends Renderable<EntityTopicUserData> {
           renderables[primitiveType] = renderable;
           this.add(renderable);
         }
-        renderable.update(entity, this.userData.settings, receiveTime);
+        renderable.update(this.userData.topic, entity, this.userData.settings, receiveTime);
       } else if (renderable) {
         this.remove(renderable);
         delete renderables[primitiveType];

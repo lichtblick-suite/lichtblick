@@ -42,7 +42,7 @@ import ThemeProvider from "@foxglove/studio-base/theme/ThemeProvider";
 import { DebugGui } from "./DebugGui";
 import { InteractionContextMenu, Interactions, SelectionObject, TabType } from "./Interactions";
 import type { PickedRenderable } from "./Picker";
-import type { Renderable } from "./Renderable";
+import { Renderable, SELECTED_ID_VARIABLE } from "./Renderable";
 import {
   FollowMode,
   Renderer,
@@ -73,7 +73,7 @@ type Shared3DPanelState = {
 };
 
 const SHOW_DEBUG: true | false = false;
-const SELECTED_ID_VARIABLE = "selected_id";
+
 const PANEL_STYLE: React.CSSProperties = {
   width: "100%",
   height: "100%",
@@ -500,7 +500,11 @@ export function ThreeDeeRender({ context }: { context: PanelExtensionContext }):
   // Write to a global variable when the current selection changes
   const updateSelectedRenderable = useCallback(
     (selection: PickedRenderable | undefined) => {
-      const id = (selection?.renderable.details() as { id?: number | string } | undefined)?.id;
+      const id = selection?.renderable.idFromMessage();
+      const customVariable = selection?.renderable.selectedIdVariable();
+      if (customVariable) {
+        context.setVariable(customVariable, id ?? ReactNull);
+      }
       context.setVariable(SELECTED_ID_VARIABLE, id ?? ReactNull);
     },
     [context],

@@ -9,6 +9,7 @@ import { RosValue } from "@foxglove/studio-base/players/types";
 import { emptyPose } from "@foxglove/studio-base/util/Pose";
 
 export type EntityRenderableUserData = BaseUserData & {
+  topic?: string;
   entity?: SceneEntity;
   expiresAt?: bigint;
   settings?: LayerSettingsEntity;
@@ -16,13 +17,29 @@ export type EntityRenderableUserData = BaseUserData & {
 
 export class RenderablePrimitive extends Renderable<EntityRenderableUserData> {
   public update(
+    topic: string | undefined,
     entity: SceneEntity | undefined,
     settings: LayerSettingsEntity,
     receiveTime: bigint,
   ): void {
-    void entity;
-    void settings;
-    void receiveTime;
+    this.userData.topic = topic;
+    this.userData.entity = entity;
+    this.userData.settings = settings;
+    this.userData.receiveTime = receiveTime;
+  }
+
+  public override idFromMessage(): number | string | undefined {
+    return this.userData.entity?.id;
+  }
+
+  public override selectedIdVariable(): string | undefined {
+    if (this.userData.topic == undefined) {
+      return undefined;
+    }
+    const settings = this.renderer.config.topics[this.userData.topic] as
+      | LayerSettingsEntity
+      | undefined;
+    return settings?.selectedIdVariable;
   }
 
   public override details(): Record<string, RosValue> {

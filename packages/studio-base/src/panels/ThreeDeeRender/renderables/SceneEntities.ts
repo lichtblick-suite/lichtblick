@@ -20,6 +20,7 @@ import {
 } from "@foxglove/schemas";
 import { SettingsTreeAction } from "@foxglove/studio";
 
+import { SELECTED_ID_VARIABLE } from "../Renderable";
 import { Renderer } from "../Renderer";
 import { PartialMessage, PartialMessageEvent, SceneExtension } from "../SceneExtension";
 import { SettingsTreeEntry, SettingsTreeNodeWithActionHandler } from "../SettingsManager";
@@ -40,11 +41,13 @@ import { PrimitivePool } from "./primitives/PrimitivePool";
 
 export type LayerSettingsEntity = BaseSettings & {
   color: string | undefined;
+  selectedIdVariable: string | undefined;
 };
 
 const DEFAULT_SETTINGS: LayerSettingsEntity = {
   visible: false,
   color: undefined,
+  selectedIdVariable: undefined,
 };
 
 export class FoxgloveSceneEntities extends SceneExtension<TopicEntities> {
@@ -71,6 +74,13 @@ export class FoxgloveSceneEntities extends SceneExtension<TopicEntities> {
         order: topic.name.toLocaleLowerCase(),
         fields: {
           color: { label: "Color", input: "rgba", value: config.color },
+          selectedIdVariable: {
+            label: "Selection Variable",
+            input: "string",
+            help: "When selecting a SceneEntity, this global variable will be set to the entity ID",
+            value: config.selectedIdVariable,
+            placeholder: SELECTED_ID_VARIABLE,
+          },
         },
         visible: config.visible ?? DEFAULT_SETTINGS.visible,
         handler: this.handleSettingsAction,
