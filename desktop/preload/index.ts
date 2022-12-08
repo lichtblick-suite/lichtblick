@@ -13,6 +13,7 @@ import Logger from "@foxglove/log";
 import { NetworkInterface, OsContext } from "@foxglove/studio-base/src/OsContext";
 
 import pkgInfo from "../../package.json";
+import { decodeRendererArg } from "../common/rendererArgs";
 import { Desktop, ForwardedMenuEvent, NativeMenuBridge, Storage } from "../common/types";
 import LocalFileStorage from "./LocalFileStorage";
 import { getExtensions, loadExtension, installExtension, uninstallExtension } from "./extensions";
@@ -104,7 +105,7 @@ const desktopBridge: Desktop = {
     await ipcRenderer.invoke("updateNativeColorScheme");
   },
   getDeepLinks(): string[] {
-    return window.process.argv.filter((arg) => arg.startsWith("foxglove://"));
+    return decodeRendererArg("deepLinks", window.process.argv) ?? [];
   },
   async getExtensions() {
     const homePath = (await ipcRenderer.invoke("getHomePath")) as string;
