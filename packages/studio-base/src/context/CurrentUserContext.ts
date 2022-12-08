@@ -4,14 +4,9 @@
 
 import { createContext, useContext } from "react";
 
-export interface User {
-  id: string;
-  email: string;
-  orgId: string;
-  orgDisplayName: string | null; // eslint-disable-line no-restricted-syntax
-  orgSlug: string;
-  orgPaid: boolean | null; // eslint-disable-line no-restricted-syntax
-}
+import { User as ConsoleUser } from "@foxglove/studio-base/services/ConsoleApi";
+
+export type User = ConsoleUser;
 
 export interface CurrentUser {
   currentUser: User | undefined;

@@ -132,14 +132,24 @@ describe("Initial deep link state", () => {
 
     expect(selectSource).not.toHaveBeenCalled();
 
+    const org: User["org"] = {
+      id: "fake-orgid",
+      slug: "fake-org",
+      displayName: "Fake Org",
+      isEnterprise: false,
+      allowsUploads: false,
+      supportsEdgeSites: false,
+    };
+
     setWrapperProps({
       currentUser: {
         id: "id",
         email: "email",
-        orgId: "org",
-        orgDisplayName: "org name",
-        orgSlug: "org",
+        orgId: org.id,
+        orgDisplayName: org.displayName,
+        orgSlug: org.slug,
         orgPaid: true,
+        org,
       },
       playerSelection: emptyPlayerSelection,
     });

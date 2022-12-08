@@ -21,6 +21,7 @@ const useStyles = makeStyles()(() => ({
     alignSelf: "start",
     display: "flex",
     justifyContent: "flex-start",
+    overflow: "hidden",
   },
   start: {
     overflow: "hidden",

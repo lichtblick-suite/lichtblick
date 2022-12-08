@@ -6,13 +6,21 @@ import * as base64 from "@protobufjs/base64";
 
 import { add, fromNanoSec, Time, toRFC3339String, toSec } from "@foxglove/rostime";
 
-type User = {
+export type User = {
   id: string;
   email: string;
   orgId: string;
   orgDisplayName: string | null; // eslint-disable-line no-restricted-syntax
   orgSlug: string;
   orgPaid: boolean | null; // eslint-disable-line no-restricted-syntax
+  org: {
+    id: string;
+    slug: string;
+    displayName: string;
+    isEnterprise: boolean;
+    allowsUploads: boolean;
+    supportsEdgeSites: boolean;
+  };
 };
 
 type SigninArgs = {

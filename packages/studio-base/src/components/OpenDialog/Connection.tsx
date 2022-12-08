@@ -32,6 +32,9 @@ const useStyles = makeStyles()((theme) => ({
     backgroundColor: theme.palette.action.hover,
     borderRadius: theme.shape.borderRadius,
   },
+  tabs: {
+    marginLeft: theme.spacing(-2),
+  },
   tab: {
     textAlign: "right",
     flexDirection: "row",
@@ -115,10 +118,23 @@ export default function Connection(props: ConnectionProps): JSX.Element {
 
   return (
     <View onBack={onBack} onCancel={onCancel} onOpen={disableOpen ? undefined : onOpen}>
-      <Stack direction="row" flexGrow={1} flexWrap="wrap" fullHeight gap={4}>
+      <Stack paddingX={6} paddingTop={6} paddingBottom={2}>
+        <Typography variant="h3" fontWeight={600} gutterBottom>
+          Open a new connection
+        </Typography>
+      </Stack>
+      <Stack
+        direction="row"
+        flexGrow={1}
+        flexWrap="wrap"
+        fullHeight
+        gap={4}
+        paddingX={6}
+        style={{ minHeight: 452 }}
+      >
         <Stack flexBasis={240}>
           <Tabs
-            classes={{ indicator: classes.indicator }}
+            classes={{ root: classes.tabs, indicator: classes.indicator }}
             textColor="inherit"
             orientation="vertical"
             onChange={(_event, newValue: number) => {
@@ -184,15 +200,13 @@ export default function Connection(props: ConnectionProps): JSX.Element {
               </Stack>
             </Stack>
           )}
-          <ul style={{ margin: 0, padding: 0, listStyle: "none" }}>
+          <Stack direction="row" gap={1}>
             {(selectedSource?.docsLinks ?? []).map((item) => (
-              <li key={item.url}>
-                <Link color="primary" href={item.url}>
-                  {item.label ? `View docs for ${item.label}` : "View docs"}.
-                </Link>
-              </li>
+              <Link key={item.url} color="primary" href={item.url}>
+                {item.label ? `View docs for ${item.label}` : "View docs"}.
+              </Link>
             ))}
-          </ul>
+          </Stack>
         </Stack>
       </Stack>
     </View>

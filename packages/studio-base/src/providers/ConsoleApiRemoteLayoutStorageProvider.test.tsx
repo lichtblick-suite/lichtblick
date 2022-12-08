@@ -21,13 +21,22 @@ class FakeConsoleApi extends ConsoleApi {
 describe("ConsoleApiRemoteLayoutStorageProvider", () => {
   it("produces the same layout storage instance when currentUser changes, as long as currentUser.id remains the same", () => {
     const fakeApi = new FakeConsoleApi();
+    const org: User["org"] = {
+      id: "fake-orgid",
+      slug: "fake-org",
+      displayName: "Fake Org",
+      isEnterprise: false,
+      allowsUploads: false,
+      supportsEdgeSites: false,
+    };
     const initialUser: User = {
       id: "id",
       email: "foo@example.com",
-      orgId: "org_abc",
-      orgDisplayName: "BigCo",
-      orgSlug: "bigco",
+      orgId: org.id,
+      orgDisplayName: org.displayName,
+      orgSlug: org.slug,
       orgPaid: true,
+      org,
     };
     let user = initialUser;
     const { result, rerender } = renderHook(() => useRemoteLayoutStorage(), {
