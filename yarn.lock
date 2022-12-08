@@ -88,27 +88,36 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@amplitude/types@npm:^1.9.1":
-  version: 1.9.1
-  resolution: "@amplitude/types@npm:1.9.1"
-  checksum: d8dc2236e9cf88277e4c85f5c451279b09bf281e0d0f119cb5b414e9d0592e82c6c1a5ef63d300f078fac04e89859c0d7d2e241e05f82a845741fbcbdaa67a4b
-  languageName: node
-  linkType: hard
-
-"@amplitude/ua-parser-js@npm:0.7.26":
-  version: 0.7.26
-  resolution: "@amplitude/ua-parser-js@npm:0.7.26"
-  checksum: 38f6f297980b12f6991ea2550273ce85fc96d8d0180ae2e025a3a9439cb45d98623b8bed25915c3acfc047fa2a920c1d353e9aefad77b8cdb210d77622db7242
-  languageName: node
-  linkType: hard
-
-"@amplitude/utils@npm:^1.0.5":
-  version: 1.9.1
-  resolution: "@amplitude/utils@npm:1.9.1"
+"@amplitude/analytics-connector@npm:^1.4.5":
+  version: 1.4.6
+  resolution: "@amplitude/analytics-connector@npm:1.4.6"
   dependencies:
-    "@amplitude/types": ^1.9.1
-    tslib: ^1.9.3
-  checksum: ff2d11ba223c176710df5dddfb4e1a2928425f61be923f13e99e6880ce80483295585884b0caf655835e879b0c636667f6b55451324aadc7fd8f1b1b40ac8829
+    "@amplitude/ua-parser-js": 0.7.31
+  checksum: 0a2acfa54e02b405e1b66ec522aa5802f938f525ad0e81a864f9370b53a3a18f166962d891a5372c12938ec7c3fbbb3453304261845bd57e5617963c8285c2dc
+  languageName: node
+  linkType: hard
+
+"@amplitude/types@npm:^1.10.2":
+  version: 1.10.2
+  resolution: "@amplitude/types@npm:1.10.2"
+  checksum: 206ef520979c76a69baa145679a60c96249c165ff8354c0b58d183b917ae3abb35569cb0e9587ecf6c7b8636b2cc69d05ea9ecbd1cc9cade503256860bd80afe
+  languageName: node
+  linkType: hard
+
+"@amplitude/ua-parser-js@npm:0.7.31":
+  version: 0.7.31
+  resolution: "@amplitude/ua-parser-js@npm:0.7.31"
+  checksum: c72e7c8656dd77a6c2ece9e3817929022aeadf731470e53fecddce03232d87977fd5b09d76c570a2a5bed97f5dd463fe6379aac7a6c4b2d2393f14486d385eec
+  languageName: node
+  linkType: hard
+
+"@amplitude/utils@npm:^1.10.1":
+  version: 1.10.2
+  resolution: "@amplitude/utils@npm:1.10.2"
+  dependencies:
+    "@amplitude/types": ^1.10.2
+    tslib: ^2.0.0
+  checksum: 9b5d3652725e30add1e42a1f221a3954c844d9aeb9d73b197c5ea2a0b91a86ccdedd4878e829cdae0eca287e68d37016347b97860069fa233d8d9ec78821d1c9
   languageName: node
   linkType: hard
 
@@ -2389,7 +2398,7 @@ __metadata:
     "@testing-library/react": 12.1.2
     "@testing-library/react-hooks": 7.0.2
     "@testing-library/user-event": 14.3.0
-    "@types/amplitude-js": 8.16.0
+    "@types/amplitude-js": 8.16.2
     "@types/base16": ^1
     "@types/circular-dependency-plugin": 5.0.5
     "@types/cytoscape": ^3.19.4
@@ -2422,7 +2431,7 @@ __metadata:
     "@types/uuid": 8.3.4
     "@types/wicg-file-system-access": 2020.9.5
     "@uiw/react-textarea-code-editor": 2.0.3
-    amplitude-js: 8.16.1
+    amplitude-js: 8.21.2
     babel-jest: 27.5.1
     browserify-zlib: 0.2.0
     chart.js: 3.7.0
@@ -5193,10 +5202,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/amplitude-js@npm:8.16.0":
-  version: 8.16.0
-  resolution: "@types/amplitude-js@npm:8.16.0"
-  checksum: dea381963314d912e47394d8ce13a299d78a902a65efc5b3734acdf76158334663fa39286b685f4381f8fc42fde258705c8855c7d477c772eccf04572ece419a
+"@types/amplitude-js@npm:8.16.2":
+  version: 8.16.2
+  resolution: "@types/amplitude-js@npm:8.16.2"
+  checksum: 4b6763098af5f0a5b06030cd094bd834ba11eeed7625f2ac040ecaf8f1a951b1420ece0f1ed7a086ebbcd29f1ae959715c3b70e21b42e5dda4ef38a4f07d7391
   languageName: node
   linkType: hard
 
@@ -6995,16 +7004,17 @@ __metadata:
   languageName: node
   linkType: hard
 
-"amplitude-js@npm:8.16.1":
-  version: 8.16.1
-  resolution: "amplitude-js@npm:8.16.1"
+"amplitude-js@npm:8.21.2":
+  version: 8.21.2
+  resolution: "amplitude-js@npm:8.21.2"
   dependencies:
-    "@amplitude/ua-parser-js": 0.7.26
-    "@amplitude/utils": ^1.0.5
+    "@amplitude/analytics-connector": ^1.4.5
+    "@amplitude/ua-parser-js": 0.7.31
+    "@amplitude/utils": ^1.10.1
     "@babel/runtime": ^7.3.4
     blueimp-md5: ^2.10.0
     query-string: 5
-  checksum: 414b9429b5f1462c8690da49f30a7229e4f978219cde131bf3022eca05f6c0d2fd22f8158ebf221a8e2a333fdef904685e3082bc5c2bb16cb71c69fce121e80f
+  checksum: 5f93418092446eeb9124ce26f00a1af055c2788589d0ace2f93457a7b52a5288bfd83eebcaaf611f1ad42e8c7a710233a4a4ebf170c7f6b6ff577c07e0d199e0
   languageName: node
   linkType: hard
 
