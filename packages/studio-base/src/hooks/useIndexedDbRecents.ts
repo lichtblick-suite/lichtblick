@@ -42,7 +42,7 @@ type RecentFileRecord = RecentRecordCommon & {
 
 type UnsavedRecentRecord = Omit<RecentConnectionRecord, "id"> | Omit<RecentFileRecord, "id">;
 
-type RecentRecord = RecentConnectionRecord | RecentFileRecord;
+export type RecentRecord = RecentConnectionRecord | RecentFileRecord;
 
 interface IRecentsStore {
   // Recent records
