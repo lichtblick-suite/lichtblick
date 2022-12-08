@@ -817,9 +817,9 @@ export function ThreeDeeRender({ context }: { context: PanelExtensionContext }):
   useEffect(() => {
     const onStart = () => setPublishActive(true);
     const onSubmit = (event: PublishClickEvent & { type: "foxglove.publish-submit" }) => {
-      const frameId = renderer?.fixedFrameId;
+      const frameId = renderer?.renderFrameId;
       if (frameId == undefined) {
-        log.warn("Unable to publish, fixedFrameId is not set");
+        log.warn("Unable to publish, renderFrameId is not set");
         return;
       }
       if (!context.publish) {
@@ -872,7 +872,7 @@ export function ThreeDeeRender({ context }: { context: PanelExtensionContext }):
     context,
     latestPublishConfig,
     publishTopics,
-    renderer?.fixedFrameId,
+    renderer?.renderFrameId,
     renderer?.publishClickTool,
   ]);
 
