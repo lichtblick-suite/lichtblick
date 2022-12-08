@@ -26,7 +26,7 @@ export type PanelStateStore = {
   /**
    * Per-panel settings UI trees.
    */
-  settingsTrees: Record<string, ImmutableSettingsTree>;
+  settingsTrees: Record<string, ImmutableSettingsTree | undefined>;
 
   /**
    * Transient state shared between panels, keyed by panel type.
@@ -41,7 +41,7 @@ export type PanelStateStore = {
   /**
    * Updates the settings UI for the given panel.
    */
-  updateSettingsTree: (panelId: string, settingsTree: ImmutableSettingsTree) => void;
+  updateSettingsTree: (panelId: string, settingsTree: ImmutableSettingsTree | undefined) => void;
 
   /**
    * Update the transient state associated with a particular panel type.

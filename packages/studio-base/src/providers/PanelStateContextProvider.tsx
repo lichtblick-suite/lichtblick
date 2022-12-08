@@ -72,6 +72,18 @@ export function usePanelSettingsTreeUpdate(): (newTree: ImmutableSettingsTree) =
     [id, updateStoreTree],
   );
 
+  /** Cleanup unmounted panels
+   * `actionHandler` can capture panel variables in closure context and keep them in memory
+   * even after unmounting. To prevent this we set the panelSettingsTree entry to undefined,
+   * allowing the actionHandler and its captured closure context from the unmounted panel to
+   * be garbage collected.
+   */
+  useEffect(() => {
+    return () => {
+      updateStoreTree(id, undefined);
+    };
+  }, [id, updateStoreTree]);
+
   return updateSettingsTree;
 }
 
