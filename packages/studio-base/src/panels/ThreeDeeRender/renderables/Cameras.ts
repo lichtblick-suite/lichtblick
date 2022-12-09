@@ -8,7 +8,6 @@ import { toNanoSec } from "@foxglove/rostime";
 import { CameraCalibration } from "@foxglove/schemas";
 import { SettingsTreeAction, SettingsTreeFields } from "@foxglove/studio";
 import type { RosValue } from "@foxglove/studio-base/players/types";
-import { MutablePoint } from "@foxglove/studio-base/types/Messages";
 
 import { BaseUserData, Renderable } from "../Renderable";
 import { Renderer } from "../Renderer";
@@ -28,22 +27,26 @@ import {
   Matrix3x4,
   RegionOfInterest,
   TIME_ZERO,
+  Vector3,
 } from "../ros";
-import { BaseSettings, fieldLineWidth, fieldSize } from "../settings";
+import { BaseSettings, fieldLineWidth, PRECISION_DISTANCE } from "../settings";
 import { topicIsConvertibleToSchema } from "../topicIsConvertibleToSchema";
 import { makePose } from "../transforms";
 import { RenderableLineList } from "./markers/RenderableLineList";
+import { projectPixel } from "./projections";
 
 const log = Logger.getLogger(__filename);
 void log;
 
 export type LayerSettingsCameraInfo = BaseSettings & {
   distance: number;
+  planarProjectionFactor: number;
   width: number;
   color: string;
 };
 
 const DEFAULT_DISTANCE = 1;
+const DEFAULT_PLANAR_PROJECTION_FACTOR = 0;
 const DEFAULT_WIDTH = 0.01;
 
 const DEFAULT_COLOR = { r: 124 / 255, g: 107 / 255, b: 1, a: 1 };
@@ -56,6 +59,7 @@ const DEFAULT_SETTINGS: LayerSettingsCameraInfo = {
   visible: false,
   frameLocked: true,
   distance: DEFAULT_DISTANCE,
+  planarProjectionFactor: DEFAULT_PLANAR_PROJECTION_FACTOR,
   width: DEFAULT_WIDTH,
   color: DEFAULT_COLOR_STR,
 };
@@ -105,7 +109,8 @@ export class Cameras extends SceneExtension<CameraInfoRenderable> {
 
       // prettier-ignore
       const fields: SettingsTreeFields = {
-        distance: fieldSize("Distance", config.distance, DEFAULT_DISTANCE),
+        distance: { label: "Distance", input: "number", placeholder: String(DEFAULT_DISTANCE), step: 0.1, precision: PRECISION_DISTANCE, value: config.distance },
+        planarProjectionFactor: { label: "Planar Projection Factor", input: "number", placeholder: String(DEFAULT_PLANAR_PROJECTION_FACTOR), min: 0, max: 1, step: 0.1, precision: 2, value: config.planarProjectionFactor },
         width: fieldLineWidth("Line Width", config.width, DEFAULT_WIDTH),
         color: { label: "Color", input: "rgba", value: config.color ?? DEFAULT_COLOR_STR },
       };
@@ -209,6 +214,7 @@ export class Cameras extends SceneExtension<CameraInfoRenderable> {
     const settingsEqual =
       newSettings.color === prevSettings.color &&
       newSettings.distance === prevSettings.distance &&
+      newSettings.planarProjectionFactor === prevSettings.planarProjectionFactor &&
       newSettings.width === prevSettings.width;
     const topic = renderable.userData.topic;
 
@@ -269,7 +275,7 @@ export class Cameras extends SceneExtension<CameraInfoRenderable> {
   }
 }
 
-function vec3(): MutablePoint {
+function vec3(): Vector3 {
   return { x: 0, y: 0, z: 0 };
 }
 
@@ -279,53 +285,43 @@ function createLineListMarker(
   settings: LayerSettingsCameraInfo,
   steps = 10,
 ): Marker {
-  const { distance: depth, width } = settings;
-
   // Create the four lines from the camera origin to the four corners of the image
   const uv = { x: 0, y: 0 };
-  const tl = vec3();
-  cameraModel.projectPixelTo3dRay(tl, cameraModel.rectifyPixel(uv, uv));
-  multiplyScalar(tl, depth);
+  const tl = projectPixel(vec3(), uv, cameraModel, settings);
 
   uv.x = cameraInfo.width;
   uv.y = 0;
-  const tr = vec3();
-  cameraModel.projectPixelTo3dRay(tr, cameraModel.rectifyPixel(uv, uv));
-  multiplyScalar(tr, depth);
+  const tr = projectPixel(vec3(), uv, cameraModel, settings);
 
   uv.x = 0;
   uv.y = cameraInfo.height;
-  const bl = vec3();
-  cameraModel.projectPixelTo3dRay(bl, cameraModel.rectifyPixel(uv, uv));
-  multiplyScalar(bl, depth);
+  const bl = projectPixel(vec3(), uv, cameraModel, settings);
 
   uv.x = cameraInfo.width;
   uv.y = cameraInfo.height;
-  const br = vec3();
-  cameraModel.projectPixelTo3dRay(br, cameraModel.rectifyPixel(uv, uv));
-  multiplyScalar(br, depth);
+  const br = projectPixel(vec3(), uv, cameraModel, settings);
 
-  const origin = vec3();
+  const origin = { x: 0, y: 0, z: 0 };
   const points = [origin, tl, origin, tr, origin, br, origin, bl];
 
   // Top-left -> top-right
   points.push(tl);
-  horizontalLine(points, 0, cameraInfo, cameraModel, steps, depth);
+  horizontalLine(points, 0, cameraInfo, cameraModel, steps, settings);
   points.push(tr);
 
   // Bottom-left -> bottom-right
   points.push(bl);
-  horizontalLine(points, cameraInfo.height, cameraInfo, cameraModel, steps, depth);
+  horizontalLine(points, cameraInfo.height, cameraInfo, cameraModel, steps, settings);
   points.push(br);
 
   // Top-left -> bottom-left
   points.push(tl);
-  verticalLine(points, 0, cameraInfo, cameraModel, steps, depth);
+  verticalLine(points, 0, cameraInfo, cameraModel, steps, settings);
   points.push(bl);
 
   // Top-right -> bottom-right
   points.push(tr);
-  verticalLine(points, cameraInfo.width, cameraInfo, cameraModel, steps, depth);
+  verticalLine(points, cameraInfo.width, cameraInfo, cameraModel, steps, settings);
   points.push(br);
 
   return {
@@ -335,7 +331,7 @@ function createLineListMarker(
     type: MarkerType.LINE_LIST,
     action: MarkerAction.ADD,
     pose: makePose(),
-    scale: { x: width, y: width, z: width },
+    scale: { x: settings.width, y: settings.width, z: settings.width },
     color: stringToRgba(makeRgba(), settings.color),
     lifetime: TIME_ZERO,
     frame_locked: true,
@@ -348,39 +344,35 @@ function createLineListMarker(
 }
 
 function horizontalLine(
-  output: MutablePoint[],
+  output: Vector3[],
   y: number,
   cameraInfo: CameraInfo,
   cameraModel: PinholeCameraModel,
   steps: number,
-  depth: number,
+  settings: LayerSettingsCameraInfo,
 ): void {
   const uv = { x: 0, y: 0 };
   for (let i = 1; i < steps; i++) {
     uv.x = (i / steps) * cameraInfo.width;
     uv.y = y;
-    const p = vec3();
-    cameraModel.projectPixelTo3dRay(p, cameraModel.rectifyPixel(uv, uv));
-    multiplyScalar(p, depth);
+    const p = projectPixel(vec3(), uv, cameraModel, settings);
     output.push(p, p);
   }
 }
 
 function verticalLine(
-  output: MutablePoint[],
+  output: Vector3[],
   x: number,
   cameraInfo: CameraInfo,
   cameraModel: PinholeCameraModel,
   steps: number,
-  depth: number,
+  settings: LayerSettingsCameraInfo,
 ): void {
   const uv = { x: 0, y: 0 };
   for (let i = 1; i < steps; i++) {
     uv.x = x;
     uv.y = (i / steps) * cameraInfo.height;
-    const p = vec3();
-    cameraModel.projectPixelTo3dRay(p, cameraModel.rectifyPixel(uv, uv));
-    multiplyScalar(p, depth);
+    const p = projectPixel(vec3(), uv, cameraModel, settings);
     output.push(p, p);
   }
 }
@@ -431,12 +423,6 @@ function cameraInfosEqual(a: CameraInfo | undefined, b: CameraInfo | undefined):
     }
   }
   return true;
-}
-
-function multiplyScalar(vec: MutablePoint, scalar: number): void {
-  vec.x *= scalar;
-  vec.y *= scalar;
-  vec.z *= scalar;
 }
 
 function normalizeRegionOfInterest(

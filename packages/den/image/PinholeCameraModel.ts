@@ -1,15 +1,6 @@
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
-//
-// This file incorporates work covered by the following copyright and
-// permission notice:
-//
-//   Copyright 2018-2021 Cruise LLC
-//
-//   This source code is licensed under the Apache License, Version 2.0,
-//   found at http://www.apache.org/licenses/LICENSE-2.0
-//   You may not use this file except in compliance with the License.
 
 import type { CameraInfo } from "./CameraInfo";
 
@@ -28,27 +19,68 @@ type Matrix3x4 = [
 
 type Vec8 = [number, number, number, number, number, number, number, number];
 
-// Essentially a copy of ROSPinholeCameraModel
-// but only the relevant methods, i.e.
-// fromCameraInfo() and unrectifyPixel()
-// http://docs.ros.org/diamondback/api/image_geometry/html/c++/pinhole__camera__model_8cpp_source.html
+/**
+ * A pinhole camera model that can be used to rectify, unrectify, and project pixel coordinates.
+ * Based on `ROSPinholeCameraModel` from the ROS `image_geometry` package. See
+ * <http://docs.ros.org/diamondback/api/image_geometry/html/c++/pinhole__camera__model_8cpp_source.html>
+ */
 export class PinholeCameraModel {
-  // [k1, k2, p1, p2, k3, ?, ?, ?]
+  /**
+   * Distortion parameters `[k1, k2, p1, p2, k3, k4, k5, k6]`. For `rational_polynomial`, all eight
+   * parameters are set. For `plumb_bob`, the last three parameters are set to zero. For no
+   * distortion model, all eight parameters are set to zero.
+   */
   public D: Readonly<Vec8>;
-  //     [fx  0 cx]
-  // K = [ 0 fy cy]
-  //     [ 0  0  1]
+  /**
+   * Intrinsic camera matrix for the raw (distorted) images. 3x3 row-major matrix.
+   * ```
+   *     [fx  0 cx]
+   * K = [ 0 fy cy]
+   *     [ 0  0  1]
+   * ```
+   * Projects 3D points in the camera coordinate frame to 2D pixel coordinates using the focal
+   * lengths `(fx, fy)` and principal point `(cx, cy)`.
+   */
   public K: Readonly<Matrix3>;
-  //     [fx'  0  cx' Tx]
-  // P = [ 0  fy' cy' Ty]
-  //     [ 0   0   1   0]
+  /**
+   * Projection/camera matrix. 3x4 row-major matrix.
+   * This matrix specifies the intrinsic (camera) matrix of the processed (rectified) image. That
+   * is, the left 3x3 portion is the normal camera intrinsic matrix for the rectified image.
+   *
+   * It projects 3D points in the camera coordinate frame to 2D pixel coordinates using the focal
+   * lengths `(fx', fy')` and principal point `(cx', cy')` - these may differ from the values in K.
+   * For monocular cameras, `Tx = Ty = 0`. Normally, monocular cameras will also have R = the
+   * identity and `P[1:3,1:3] = K`.
+   *
+   * For a stereo pair, the fourth column `[Tx Ty 0]'` is related to the position of the optical
+   * center of the second camera in the first camera's frame. We assume `Tz = 0` so both cameras are
+   * in the same stereo image plane. The first camera always has `Tx = Ty = 0`. For the right
+   * (second) camera of a horizontal stereo pair, `Ty = 0 and Tx = -fx' * B`, where `B` is the
+   * baseline between the cameras.
+   *
+   * Given a 3D point `[X Y Z]'`, the projection `(x, y)` of the point onto the rectified image is
+   * given by:
+   * ```
+   * [u v w]' = P * [X Y Z 1]'
+   *        x = u / w
+   *        y = v / w
+   * ```
+   * This holds for both images of a stereo pair.
+   */
   public P: Readonly<Matrix3x4> | undefined;
+  /**
+   * Rectification matrix (stereo cameras only). 3x3 row-major matrix.
+   * A rotation matrix aligning the camera coordinate system to the ideal stereo image plane so
+   * that epipolar lines in both stereo images are parallel.
+   */
   public R: Readonly<Matrix3>;
+  /** The full camera image width in pixels. */
   public readonly width: number;
+  /** The full camera image height in pixels. */
   public readonly height: number;
 
   // Mostly copied from `fromCameraInfo`
-  // http://docs.ros.org/diamondback/api/image_geometry/html/c++/pinhole__camera__model_8cpp_source.html#l00062
+  // <http://docs.ros.org/diamondback/api/image_geometry/html/c++/pinhole__camera__model_8cpp_source.html#l00064>
   public constructor(info: CameraInfo) {
     const { binning_x, binning_y, roi, distortion_model: model, D, K, P, R, width, height } = info;
     const fx = P[0];
@@ -98,7 +130,17 @@ export class PinholeCameraModel {
     }
   }
 
-  public projectPixelTo3dRay(out: Vector3, pixel: Readonly<Vector2>): boolean {
+  /**
+   * Projects a 2D image pixel to a point on a plane in 3D world coordinates a
+   * unit distance along the Z axis. This is equivalent to `projectPixelTo3dRay`
+   * before normalizing.
+   *
+   * @param out - The output vector to receive the 3D point.
+   * @param pixel - The 2D image pixel coordinate.
+   * @returns `true` if the projection was successful, or `false` if the camera
+   *   projection matrix `P` is not set.
+   */
+  public projectPixelTo3dPlane(out: Vector3, pixel: Readonly<Vector2>): boolean {
     const P = this.P;
     if (!P) {
       return false;
@@ -114,10 +156,43 @@ export class PinholeCameraModel {
     out.x = (pixel.x - cx - tx) / fx;
     out.y = (pixel.y - cy - ty) / fy;
     out.z = 1.0;
+
     return true;
   }
 
-  public rectifyPixel(out: Vector2, point: Readonly<Vector2>, iterations = 3): Vector2 {
+  /**
+   * Projects a 2D image pixel into a 3D ray in world coordinates. This is
+   * equivalent to normalizing the result of `projectPixelTo3dPlane` to get a
+   * direction vector.
+   *
+   * @param out - The output vector to receive the 3D ray direction.
+   * @param pixel - The 2D image pixel coordinate.
+   * @returns `true` if the projection was successful, or `false` if the camera
+   *   projection matrix `P` is not set.
+   */
+  public projectPixelTo3dRay(out: Vector3, pixel: Readonly<Vector2>): boolean {
+    if (!this.projectPixelTo3dPlane(out, pixel)) {
+      return false;
+    }
+
+    // Normalize the ray direction
+    const invNorm = 1.0 / Math.sqrt(out.x * out.x + out.y * out.y + out.z * out.z);
+    out.x *= invNorm;
+    out.y *= invNorm;
+    out.z *= invNorm;
+
+    return true;
+  }
+
+  /**
+   * Rectifies the given pixel 2D coordinate.
+   *
+   * @param out - The output rectified 2D pixel coordinate.
+   * @param point - The input unrectified 2D pixel to rectify.
+   * @param iterations - The number of iterations to use in the iterative optimization.
+   * @returns The rectified pixel, a reference to `out`.
+   */
+  public rectifyPixel(out: Vector2, point: Readonly<Vector2>, iterations = 5): Vector2 {
     if (!this.P) {
       out.x = point.x;
       out.y = point.y;
@@ -133,9 +208,15 @@ export class PinholeCameraModel {
     const cy = P[6];
 
     // This method does three things:
-    //   1. Undo the camera matrix
-    //   2. Iterative optimization to undo distortion
-    //   3. Reapply the camera matrix
+    //   1. Convert the input 2D point from pixel coordinates to normalized
+    //      coordinates by subtracting the principal point (cx, cy) and dividing
+    //      by the focal lengths (fx, fy).
+    //   2. Apply the distortion model to the normalized point using an
+    //      iterative optimization algorithm. This undoes the distortion that
+    //      was applied to the original image and yields an approximation of the
+    //      rectified point.
+    //   3. Convert the rectified point back to pixel coordinates by multiplying
+    //      by the focal lengths and adding the principal point.
     // The distortion model is non-linear, so we use fixed-point iteration to
     // incrementally iterate to an approximation of the solution. This approach
     // is described at <http://peterabeles.com/blog/?p=73>. The Jacobi method is
@@ -156,20 +237,28 @@ export class PinholeCameraModel {
 
     const x0 = x;
     const y0 = y;
-    for (let i = 0; i < iterations; i++) {
-      const r2 = x ** 2 + y ** 2; // squared distance in the image projected by the pinhole model
-      const k_inv = 1 / (1 + k1 * r2 + k2 * r2 ** 2 + k3 * r2 ** 3);
-      const delta_x = 2 * p1 * x * y + p2 * (r2 + 2 * x ** 2);
-      const delta_y = p1 * (r2 + 2 * y ** 2) + 2 * p2 * x * y;
+    const count = k1 !== 0 || k2 !== 0 || p1 !== 0 || p2 !== 0 || k3 !== 0 ? iterations : 1;
+    for (let i = 0; i < count; i++) {
+      const r2 = x * x + y * y; // squared distance in the image projected by the pinhole model
+      const k_inv = 1 / (1 + k1 * r2 + k2 * r2 * r2 + k3 * r2 * r2 * r2);
+      const delta_x = 2 * p1 * x * y + p2 * (r2 + 2 * x * x);
+      const delta_y = p1 * (r2 + 2 * y * y) + 2 * p2 * x * y;
       x = (x0 - delta_x) * k_inv;
       y = (y0 - delta_y) * k_inv;
     }
 
-    out.x = x * this.width + cx;
-    out.y = y * this.height + cy;
+    out.x = x * fx + cx;
+    out.y = y * fy + cy;
     return out;
   }
 
+  /**
+   * Unrectifies the given 2D pixel coordinate.
+   *
+   * @param out - The output unrectified 2D pixel coordinate
+   * @param point - The input rectified 2D pixel coordinate
+   * @returns The unrectified pixel, a reference to `out`
+   */
   public unrectifyPixel(out: Vector2, point: Readonly<Vector2>): Vector2 {
     if (!this.P) {
       out.x = point.x;
@@ -186,7 +275,7 @@ export class PinholeCameraModel {
     const ty = P[7];
 
     // Formulae from docs for cv::initUndistortRectifyMap,
-    // http://opencv.willowgarage.com/documentation/cpp/camera_calibration_and_3d_reconstruction.html
+    // <https://docs.opencv.org/2.4/modules/calib3d/doc/camera_calibration_and_3d_reconstruction.html>
 
     // x <- (u - c'x) / f'x
     // y <- (v - c'y) / f'y

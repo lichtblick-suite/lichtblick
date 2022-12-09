@@ -137,6 +137,9 @@ export function CameraInfoRender(): JSX.Element {
         overrideConfig={{
           ...ThreeDeeRender.defaultConfig,
           followTf: SENSOR_FRAME_ID,
+          scene: {
+            labelScaleFactor: 0.1,
+          },
           cameraState: {
             distance: 1.85,
             perspective: true,
@@ -159,6 +162,7 @@ export function CameraInfoRender(): JSX.Element {
               visible: true,
               color: "rgba(0, 255, 255, 1)",
               distance: 0.5,
+              planarProjectionFactor: 1,
             },
             "/empty": {
               visible: true,

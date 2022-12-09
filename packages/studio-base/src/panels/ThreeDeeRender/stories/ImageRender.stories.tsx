@@ -190,6 +190,7 @@ export function ImageRender(): JSX.Element {
               visible: true,
               color: "rgba(0, 255, 0, 1)",
               distance: 0.5,
+              planarProjectionFactor: 1,
             },
             "/cam2/info": {
               visible: true,
@@ -378,6 +379,7 @@ export function FoxgloveImageRender(): JSX.Element {
               visible: true,
               color: "rgba(0, 255, 0, 1)",
               distance: 0.5,
+              planarProjectionFactor: 1,
             },
             "/cam2/info": {
               visible: true,

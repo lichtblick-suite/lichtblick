@@ -553,7 +553,7 @@ function buildSettingsFields(
       value: ageValue,
     },
     historySize: {
-      label: "History size",
+      label: "History Size",
       input: "string",
       readonly: true,
       value: historySizeValue,

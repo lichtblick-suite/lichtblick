@@ -97,7 +97,7 @@ export class OccupancyGrids extends SceneExtension<OccupancyGridRenderable> {
         maxColor: { label: "Max Color", input: "rgba", value: config.maxColor ?? DEFAULT_MAX_COLOR_STR },
         unknownColor: { label: "Unknown Color", input: "rgba", value: config.unknownColor ?? DEFAULT_UNKNOWN_COLOR_STR },
         invalidColor: { label: "Invalid Color", input: "rgba", value: config.invalidColor ?? DEFAULT_INVALID_COLOR_STR },
-        frameLocked: { label: "Frame lock", input: "boolean", value: config.frameLocked ?? false },
+        frameLocked: { label: "Frame Lock", input: "boolean", value: config.frameLocked ?? false },
       };
 
       entries.push({
