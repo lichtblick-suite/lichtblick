@@ -153,10 +153,9 @@ function typeForField(schema: SchemaT, field: FieldT): RosMsgField[] {
 // Note: Currently this does not support "lazy" message reading in the style of the ros1 message
 // reader, and so will relatively inefficiently deserialize the entire flatbuffer message.
 export function parseFlatbufferSchema(
-  fullSchemaName: string,
+  schemaName: string,
   schemaArray: Uint8Array,
 ): {
-  fullSchemaName: string;
   datatypes: RosDatatypes;
   deserializer: (buffer: ArrayBufferView) => unknown;
 } {
@@ -168,7 +167,7 @@ export function parseFlatbufferSchema(
   let typeIndex = -1;
   for (let schemaIndex = 0; schemaIndex < schema.objects.length; ++schemaIndex) {
     const object = schema.objects[schemaIndex];
-    if (object?.name === fullSchemaName) {
+    if (object?.name === schemaName) {
       typeIndex = schemaIndex;
     }
     let fields: RosMsgField[] = [];
@@ -181,9 +180,9 @@ export function parseFlatbufferSchema(
     datatypes.set(flatbufferString(object.name), { definitions: fields });
   }
   if (typeIndex === -1) {
-    if (schema.rootTable?.name !== fullSchemaName) {
+    if (schema.rootTable?.name !== schemaName) {
       throw new Error(
-        `Type "${fullSchemaName}" is not available in the schema for "${schema.rootTable?.name}".`,
+        `Type "${schemaName}" is not available in the schema for "${schema.rootTable?.name}".`,
       );
     }
   }
@@ -200,5 +199,5 @@ export function parseFlatbufferSchema(
     const obj = parser.toObject(table);
     return obj;
   };
-  return { fullSchemaName, datatypes, deserializer };
+  return { datatypes, deserializer };
 }

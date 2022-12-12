@@ -82,7 +82,7 @@ export class McapIndexedIterableSource implements IIterableSource {
 
       let topic = topicsByName.get(channel.topic);
       if (!topic) {
-        topic = { name: channel.topic, schemaName: parsedChannel.fullSchemaName };
+        topic = { name: channel.topic, schemaName: schema.name };
         topicsByName.set(channel.topic, topic);
 
         const numMessages = this.reader.statistics?.channelMessageCounts.get(channel.id);

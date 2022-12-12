@@ -316,11 +316,10 @@ describe("parseFlatbufferSchema", () => {
     // $ flatc -b --schema reflection/reflection.fbs
     // In https://github.com/google/flatbuffers
     const reflectionSchemaBuffer: Buffer = fs.readFileSync(`${__dirname}/fixtures/reflection.bfbs`);
-    const { fullSchemaName, datatypes, deserializer } = parseFlatbufferSchema(
+    const { datatypes, deserializer } = parseFlatbufferSchema(
       "reflection.Schema",
       reflectionSchemaBuffer,
     );
-    expect(fullSchemaName).toEqual("reflection.Schema");
     const deserialized: any = deserializer(reflectionSchemaBuffer);
     const reflectionSchemaByteBuffer: ByteBuffer = new ByteBuffer(reflectionSchemaBuffer);
     const schema = Schema.getRootAsSchema(reflectionSchemaByteBuffer);
@@ -338,11 +337,10 @@ describe("parseFlatbufferSchema", () => {
   });
   it("parses non-root table schema", () => {
     const reflectionSchemaBuffer: Buffer = fs.readFileSync(`${__dirname}/fixtures/reflection.bfbs`);
-    const { fullSchemaName, datatypes, deserializer } = parseFlatbufferSchema(
+    const { datatypes, deserializer } = parseFlatbufferSchema(
       "reflection.Type",
       reflectionSchemaBuffer,
     );
-    expect(fullSchemaName).toEqual("reflection.Type");
     expect(datatypes.keys()).toContain("reflection.Type");
     expect(datatypes.get("reflection.Type")).toEqual(typeSchema);
 
@@ -380,11 +378,7 @@ describe("parseFlatbufferSchema", () => {
     const byteVectorBin = Uint8Array.from(builder.asUint8Array());
 
     const byteVectorSchemaArray = fs.readFileSync(`${__dirname}/fixtures/ByteVector.bfbs`);
-    const { fullSchemaName, deserializer } = parseFlatbufferSchema(
-      "ByteVector",
-      byteVectorSchemaArray,
-    );
-    expect(fullSchemaName).toEqual("ByteVector");
+    const { deserializer } = parseFlatbufferSchema("ByteVector", byteVectorSchemaArray);
     expect(deserializer(byteVectorBin)).toEqual({ data: new Uint8Array([1, 2, 3]) });
   });
 });

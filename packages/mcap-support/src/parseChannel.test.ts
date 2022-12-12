@@ -19,7 +19,6 @@ describe("parseChannel", () => {
         ),
       },
     });
-    expect(channel.fullSchemaName).toEqual("X");
     expect(channel.deserializer(new TextEncoder().encode(JSON.stringify({ value: "hi" })))).toEqual(
       { value: "hi" },
     );
@@ -31,7 +30,6 @@ describe("parseChannel", () => {
       messageEncoding: "flatbuffer",
       schema: { name: "reflection.Schema", encoding: "flatbuffer", data: reflectionSchema },
     });
-    expect(channel.fullSchemaName).toEqual("reflection.Schema");
     const deserialized = channel.deserializer(reflectionSchema) as {
       objects: Record<string, unknown>[];
     };
@@ -45,7 +43,6 @@ describe("parseChannel", () => {
       messageEncoding: "protobuf",
       schema: { name: "google.protobuf.FileDescriptorSet", encoding: "protobuf", data: fds },
     });
-    expect(channel.fullSchemaName).toEqual("google.protobuf.FileDescriptorSet");
     const deserialized = channel.deserializer(fds) as IFileDescriptorSet;
     expect(deserialized.file[0]!.name).toEqual("google_protobuf.proto");
   });
@@ -77,7 +74,6 @@ describe("parseChannel", () => {
         ),
       },
     });
-    expect(channel.fullSchemaName).toEqual("ExampleMessage");
     expect(channel.deserializer(Buffer.from("0A0101", "hex"))).toEqual({ data: [1] });
   });
 
@@ -90,7 +86,6 @@ describe("parseChannel", () => {
         data: new TextEncoder().encode("string data"),
       },
     });
-    expect(channel.fullSchemaName).toEqual("foo_msgs/Bar");
 
     const obj = channel.deserializer(new Uint8Array([4, 0, 0, 0, 65, 66, 67, 68]));
     expect(obj).toEqual({ data: "ABCD" });
@@ -105,7 +100,6 @@ describe("parseChannel", () => {
         data: new TextEncoder().encode("string data"),
       },
     });
-    expect(channel.fullSchemaName).toEqual("foo_msgs/Bar");
 
     const obj = channel.deserializer(new Uint8Array([0, 1, 0, 0, 5, 0, 0, 0, 65, 66, 67, 68, 0]));
     expect(obj).toEqual({ data: "ABCD" });

@@ -309,7 +309,7 @@ export default class FoxgloveWebSocketPlayer implements Player {
     // Build a new topics array from this._channelsById
     const topics: Topic[] = Array.from(this._channelsById.values(), (chanInfo) => ({
       name: chanInfo.channel.topic,
-      schemaName: chanInfo.parsedChannel.fullSchemaName,
+      schemaName: chanInfo.channel.schemaName,
     }));
 
     // Remove stats entries for removed topics

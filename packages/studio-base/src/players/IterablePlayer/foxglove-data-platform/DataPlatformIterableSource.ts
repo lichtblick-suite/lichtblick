@@ -169,7 +169,7 @@ export class DataPlatformIterableSource implements IIterableSource {
           schema: { name: schemaName, data: schema, encoding: schemaEncoding },
         });
 
-        topics.push({ name: topic, schemaName: parsedChannel.fullSchemaName });
+        topics.push({ name: topic, schemaName });
         parsedChannels.push({ messageEncoding, schemaEncoding, schema, parsedChannel });
 
         // Final datatypes is an unholy union of schemas across all channels

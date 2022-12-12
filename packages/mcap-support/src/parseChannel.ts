@@ -11,7 +11,7 @@ import { MessageReader as ROS2MessageReader } from "@foxglove/rosmsg2-serializat
 
 import { parseFlatbufferSchema } from "./parseFlatbufferSchema";
 import { parseJsonSchema } from "./parseJsonSchema";
-import { protobufDefinitionsToDatatypes, stripLeadingDot } from "./protobufDefinitionsToDatatypes";
+import { protobufDefinitionsToDatatypes } from "./protobufDefinitionsToDatatypes";
 import { RosDatatypes } from "./types";
 
 type Channel = {
@@ -20,7 +20,6 @@ type Channel = {
 };
 
 export type ParsedChannel = {
-  fullSchemaName: string;
   deserializer: (data: ArrayBufferView) => unknown;
   datatypes: RosDatatypes;
 };
@@ -78,7 +77,7 @@ export function parseChannel(channel: Channel): ParsedChannel {
       deserializer = (data) =>
         postprocessValue(JSON.parse(textDecoder.decode(data)) as Record<string, unknown>);
     }
-    return { fullSchemaName: channel.schema.name, deserializer, datatypes };
+    return { deserializer, datatypes };
   }
 
   if (channel.messageEncoding === "flatbuffer") {
@@ -138,12 +137,7 @@ export function parseChannel(channel: Channel): ParsedChannel {
     const datatypes: RosDatatypes = new Map();
     protobufDefinitionsToDatatypes(datatypes, type);
 
-    return {
-      // fullName is a fully qualified name but includes a leading dot. Remove the leading dot.
-      fullSchemaName: stripLeadingDot(type.fullName),
-      deserializer,
-      datatypes,
-    };
+    return { deserializer, datatypes };
   }
 
   if (channel.messageEncoding === "ros1") {
@@ -160,7 +154,6 @@ export function parseChannel(channel: Channel): ParsedChannel {
     const parsedDefinitions = parseMessageDefinition(schema);
     const reader = new MessageReader(parsedDefinitions);
     return {
-      fullSchemaName: channel.schema.name,
       datatypes: parsedDefinitionsToDatatypes(parsedDefinitions, channel.schema.name),
       deserializer: (data) => reader.readMessage(data),
     };
@@ -180,7 +173,6 @@ export function parseChannel(channel: Channel): ParsedChannel {
     const parsedDefinitions = parseMessageDefinition(schema, { ros2: true });
     const reader = new ROS2MessageReader(parsedDefinitions);
     return {
-      fullSchemaName: channel.schema.name,
       datatypes: parsedDefinitionsToDatatypes(parsedDefinitions, channel.schema.name),
       deserializer: (data) => reader.readMessage(data),
     };

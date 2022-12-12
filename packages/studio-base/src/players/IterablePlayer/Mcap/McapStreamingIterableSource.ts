@@ -173,8 +173,8 @@ export class McapStreamingIterableSource implements IIterableSource {
     const topicStats = new Map<string, TopicStats>();
     const datatypes: RosDatatypes = new Map();
 
-    for (const { channel, parsedChannel } of channelInfoById.values()) {
-      topics.push({ name: channel.topic, schemaName: parsedChannel.fullSchemaName });
+    for (const { channel, parsedChannel, schemaName } of channelInfoById.values()) {
+      topics.push({ name: channel.topic, schemaName });
       const numMessages = messagesByChannel.get(channel.id)?.length;
       if (numMessages != undefined) {
         topicStats.set(channel.topic, { numMessages });
