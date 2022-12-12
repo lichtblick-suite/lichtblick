@@ -49,6 +49,7 @@ export type DiagnosticStatusConfig = {
   selectedName?: string;
   splitFraction?: number;
   topicToRender: string;
+  numericPrecision?: number;
 };
 
 export type DiagnosticSummaryConfig = {
