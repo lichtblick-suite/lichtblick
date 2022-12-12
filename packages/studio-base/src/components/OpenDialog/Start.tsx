@@ -22,7 +22,7 @@ export type IStartProps = {
   onSelectView: (newValue: OpenDialogViews) => void;
 };
 
-const useStyles = makeStyles<void, "recentSourcePrimary">()((theme, _params, classes) => ({
+const useStyles = makeStyles()((theme) => ({
   logo: {
     width: 212,
     height: "auto",
@@ -87,21 +87,12 @@ const useStyles = makeStyles<void, "recentSourcePrimary">()((theme, _params, cla
   },
   recentListItemButton: {
     overflow: "hidden",
-    color: theme.palette.text.secondary,
+    color: theme.palette.primary.main,
 
     "&:hover": {
       backgroundColor: "transparent",
-      color: theme.palette.text.primary,
-
-      [`.${classes.recentSourcePrimary}`]: {
-        color: theme.palette.primary[theme.palette.mode === "dark" ? "light" : "dark"],
-      },
+      color: theme.palette.primary[theme.palette.mode === "dark" ? "light" : "dark"],
     },
-  },
-  recentSourcePrimary: {
-    fontWeight: 600,
-    whiteSpace: "nowrap",
-    color: theme.palette.primary.main,
   },
   recentSourceSecondary: {
     color: "inherit",
@@ -499,16 +490,10 @@ export default function Start(props: IStartProps): JSX.Element {
                       onClick={() => selectRecent(recent.id)}
                       className={classes.recentListItemButton}
                     >
-                      <Stack direction="row" alignItems="center" gap={1} overflow="hidden">
-                        <div className={classes.recentSourcePrimary}>
-                          {recent.label ?? "Local file"}
-                        </div>
-                        {" – "}
-                        <TextMiddleTruncate
-                          className={classes.recentSourceSecondary}
-                          text={recent.title}
-                        />
-                      </Stack>
+                      <TextMiddleTruncate
+                        className={classes.recentSourceSecondary}
+                        text={recent.title}
+                      />
                     </ListItemButton>
                   </ListItem>
                 ))}
