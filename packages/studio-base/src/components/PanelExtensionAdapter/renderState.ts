@@ -295,7 +295,7 @@ function initRenderStateBuilder(): BuildRenderStateFn {
               // Lookup any subscriptions for this topic which want a conversion
               const subConvertTo = topicConversions.get(messageEvent.topic);
               if (subConvertTo) {
-                const convertKey = messageEvent.schemaName + subConvertTo;
+                const convertKey = converterKey(messageEvent.schemaName, subConvertTo);
                 const converter = convertersByKey.get(convertKey);
                 if (converter) {
                   const convertedMessage = converter.converter(messageEvent.message);

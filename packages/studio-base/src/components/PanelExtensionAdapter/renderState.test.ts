@@ -2,6 +2,8 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
+import { PlayerPresence } from "@foxglove/studio-base/players/types";
+
 import { initRenderStateBuilder } from "./renderState";
 
 describe("renderState", () => {
@@ -124,8 +126,34 @@ describe("renderState", () => {
   it("should support subscribing to original and converted schemas", () => {
     const buildRenderState = initRenderStateBuilder();
     const state = buildRenderState({
-      watchedFields: new Set(["topics", "currentFrame"]),
-      playerState: undefined,
+      watchedFields: new Set(["topics", "currentFrame", "allFrames"]),
+      playerState: {
+        presence: PlayerPresence.INITIALIZING,
+        capabilities: [],
+        profile: undefined,
+        playerId: "test",
+        progress: {
+          messageCache: {
+            startTime: { sec: 0, nsec: 0 },
+            blocks: [
+              {
+                sizeInBytes: 0,
+                messagesByTopic: {
+                  test: [
+                    {
+                      topic: "test",
+                      schemaName: "schema",
+                      receiveTime: { sec: 1, nsec: 0 },
+                      sizeInBytes: 1,
+                      message: { from: "allFrames" },
+                    },
+                  ],
+                },
+              },
+            ],
+          },
+        },
+      },
       appSettings: undefined,
       currentFrame: [
         {
@@ -133,7 +161,7 @@ describe("renderState", () => {
           schemaName: "schema",
           receiveTime: { sec: 0, nsec: 0 },
           sizeInBytes: 1,
-          message: {},
+          message: { from: "currentFrame" },
         },
       ],
       colorScheme: undefined,
@@ -161,7 +189,7 @@ describe("renderState", () => {
         {
           topic: "test",
           schemaName: "schema",
-          message: {},
+          message: { from: "currentFrame" },
           receiveTime: { sec: 0, nsec: 0 },
           sizeInBytes: 1,
         },
@@ -174,10 +202,33 @@ describe("renderState", () => {
           originalMessageEvent: {
             topic: "test",
             schemaName: "schema",
-            message: {},
+            message: { from: "currentFrame" },
             receiveTime: { sec: 0, nsec: 0 },
             sizeInBytes: 1,
           },
+        },
+      ],
+      allFrames: [
+        {
+          message: { from: "allFrames" },
+          receiveTime: { nsec: 0, sec: 1 },
+          schemaName: "schema",
+          sizeInBytes: 1,
+          topic: "test",
+        },
+        {
+          message: 1,
+          originalMessageEvent: {
+            message: { from: "allFrames" },
+            receiveTime: { nsec: 0, sec: 1 },
+            schemaName: "schema",
+            sizeInBytes: 1,
+            topic: "test",
+          },
+          receiveTime: { nsec: 0, sec: 1 },
+          schemaName: "otherSchema",
+          sizeInBytes: 1,
+          topic: "test",
         },
       ],
     });
