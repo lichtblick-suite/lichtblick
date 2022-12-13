@@ -11,7 +11,7 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { useRef, useLayoutEffect } from "react";
+import { useRef, useLayoutEffect, useState } from "react";
 import { useResizeDetector } from "react-resize-detector";
 
 type Draw = (context: CanvasRenderingContext2D, width: number, height: number) => void;
@@ -36,7 +36,17 @@ const AutoSizingCanvas = ({
     targetRef: canvasRef,
   });
 
-  const ratio = overrideDevicePixelRatioForTest ?? 1;
+  const [pixelRatio, setPixelRatio] = useState(window.devicePixelRatio);
+  useLayoutEffect(() => {
+    const listener = () => setPixelRatio(window.devicePixelRatio);
+    const query = window.matchMedia(`(resolution: ${pixelRatio}dppx)`);
+    query.addEventListener("change", listener, { once: true });
+    return () => {
+      query.removeEventListener("change", listener);
+    };
+  }, [pixelRatio]);
+
+  const ratio = overrideDevicePixelRatioForTest ?? pixelRatio;
 
   const actualWidth = ratio * (width ?? 0);
   const actualHeight = ratio * (height ?? 0);
