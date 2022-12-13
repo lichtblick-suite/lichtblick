@@ -213,7 +213,7 @@ function SidebarItems(props: { onSelectView: (newValue: OpenDialogViews) => void
             Explore sample data
           </Button>
           <Button
-            href="https://foxglove.dev/docs/studio"
+            href="https://foxglove.dev/docs/studio/connection/data-sources"
             target="_blank"
             className={classes.button}
             onClick={() => {
