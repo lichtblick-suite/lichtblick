@@ -97,6 +97,8 @@ const useStyles = makeStyles()((theme) => ({
   recentSourceSecondary: {
     color: "inherit",
   },
+  accountList: { padding: "0px" },
+  accountListItem: { margin: "0px 0px 5px 10px" },
 }));
 
 type DataSourceOptionProps = {
@@ -299,9 +301,22 @@ function SidebarItems(props: { onSelectView: (newValue: OpenDialogViews) => void
         return [
           ...freeUser,
           {
-            id: "store-and-collaborate",
-            title: "Store and collaborate",
-            text: "Securely store petabytes of indexed data for easy discovery and analysis in Foxglove Data Platform.",
+            id: "collaborate",
+            title: "Accelerate development with Foxglove Data Platform",
+            text: (
+              <ul className={classes.accountList}>
+                <li className={classes.accountListItem}>
+                  Securely store petabytes of ROS or custom data
+                </li>
+                <li className={classes.accountListItem}>
+                  Use a convenient web interface to tag, search, and retrieve data at lightning
+                  speed
+                </li>
+                <li className={classes.accountListItem}>
+                  Share data files, visualization layouts, and custom extensions with teammates
+                </li>
+              </ul>
+            ),
             actions: (
               <>
                 <Button
@@ -374,7 +389,15 @@ function SidebarItems(props: { onSelectView: (newValue: OpenDialogViews) => void
       case "authenticated-enterprise":
         return teamOrEnterpriseUser;
     }
-  }, [analytics, classes.button, currentUserType, freeUser, teamOrEnterpriseUser]);
+  }, [
+    analytics,
+    classes.accountList,
+    classes.accountListItem,
+    classes.button,
+    currentUserType,
+    freeUser,
+    teamOrEnterpriseUser,
+  ]);
 
   return (
     <>
