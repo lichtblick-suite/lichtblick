@@ -2,7 +2,7 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { Alert, Link, Tab, Tabs, Typography } from "@mui/material";
+import { Alert, Link, Tab, Tabs, Typography, useMediaQuery, useTheme } from "@mui/material";
 import { useState, useMemo, useCallback, useLayoutEffect } from "react";
 import { makeStyles } from "tss-react/mui";
 
@@ -26,24 +26,44 @@ type ConnectionProps = {
 };
 
 const useStyles = makeStyles()((theme) => ({
-  indicator: {
-    right: 0,
-    width: "100%",
-    backgroundColor: theme.palette.action.hover,
-    borderRadius: theme.shape.borderRadius,
-  },
-  tabs: {
-    marginLeft: theme.spacing(-2),
-  },
-  tab: {
-    textAlign: "right",
-    flexDirection: "row",
-    justifyContent: "flex-start",
-    alignItems: "center",
-    minHeight: "auto",
-    paddingTop: theme.spacing(1.5),
-    paddingBottom: theme.spacing(1.5),
+  grid: {
+    padding: theme.spacing(4, 4, 0),
+    columnGap: theme.spacing(4),
+    rowGap: theme.spacing(2),
 
+    [theme.breakpoints.up("md")]: {
+      overflow: "hidden",
+      display: "grid",
+      padding: theme.spacing(4, 4, 0, 4),
+      gridTemplateAreas: `
+        "header header"
+        "sidebar form"
+      `,
+      gridTemplateColumns: "240px 1fr",
+      gridTemplateRows: "auto auto",
+    },
+  },
+  header: {
+    gridArea: "header",
+  },
+  form: {
+    gridArea: "form",
+    overflowY: "auto",
+  },
+  formInner: {
+    [theme.breakpoints.up("md")]: {
+      height: theme.spacing(43), // this is aproximately the height of the tallest form
+    },
+  },
+  sidebar: {
+    gridArea: "sidebar",
+    overflowY: "auto",
+  },
+  tabs: {},
+  tab: {
+    svg: {
+      fontSize: "inherit",
+    },
     "> span, > .MuiSvgIcon-root": {
       display: "flex",
       color: theme.palette.primary.main,
@@ -51,8 +71,22 @@ const useStyles = makeStyles()((theme) => ({
       height: theme.typography.pxToRem(21),
       width: theme.typography.pxToRem(21),
     },
-    svg: {
-      fontSize: "inherit",
+    [theme.breakpoints.up("md")]: {
+      textAlign: "right",
+      flexDirection: "row",
+      justifyContent: "flex-start",
+      alignItems: "center",
+      minHeight: "auto",
+      paddingTop: theme.spacing(1.5),
+      paddingBottom: theme.spacing(1.5),
+    },
+  },
+  indicator: {
+    [theme.breakpoints.up("md")]: {
+      right: 0,
+      width: "100%",
+      backgroundColor: theme.palette.action.hover,
+      borderRadius: theme.shape.borderRadius,
     },
   },
 }));
@@ -60,6 +94,9 @@ const useStyles = makeStyles()((theme) => ({
 export default function Connection(props: ConnectionProps): JSX.Element {
   const { availableSources, activeSource, onCancel, onBack } = props;
   const { classes } = useStyles();
+
+  const theme = useTheme();
+  const mdUp = useMediaQuery(theme.breakpoints.up("md"));
 
   const { selectSource } = usePlayerSelection();
   const analytics = useAnalytics();
@@ -118,25 +155,21 @@ export default function Connection(props: ConnectionProps): JSX.Element {
 
   return (
     <View onBack={onBack} onCancel={onCancel} onOpen={disableOpen ? undefined : onOpen}>
-      <Stack paddingX={6} paddingTop={6} paddingBottom={2}>
-        <Typography variant="h3" fontWeight={600} gutterBottom>
-          Open a new connection
-        </Typography>
-      </Stack>
-      <Stack
-        direction="row"
-        flexGrow={1}
-        flexWrap="wrap"
-        fullHeight
-        gap={4}
-        paddingX={6}
-        style={{ minHeight: 452 }}
-      >
-        <Stack flexBasis={240}>
+      <Stack className={classes.grid}>
+        <header className={classes.header}>
+          <Typography variant="h3" fontWeight={600} gutterBottom>
+            Open a new connection
+          </Typography>
+        </header>
+        <div className={classes.sidebar}>
           <Tabs
-            classes={{ root: classes.tabs, indicator: classes.indicator }}
+            classes={{
+              root: classes.tabs,
+              indicator: classes.indicator,
+            }}
+            variant="scrollable"
             textColor="inherit"
-            orientation="vertical"
+            orientation={mdUp ? "vertical" : "horizontal"}
             onChange={(_event, newValue: number) => {
               setSelectedConnectionIdx(newValue);
               void analytics.logEvent(AppEvent.DIALOG_SELECT_VIEW, {
@@ -152,60 +185,63 @@ export default function Connection(props: ConnectionProps): JSX.Element {
                 <Tab
                   value={idx}
                   key={id}
-                  icon={<BuiltinIcon name={iconName ?? "Flow"} />}
+                  icon={mdUp ? <BuiltinIcon name={iconName ?? "Flow"} /> : undefined}
                   label={displayName}
                   className={classes.tab}
                 />
               );
             })}
           </Tabs>
-        </Stack>
-        <Stack key={selectedSource?.id} flex="1 0" gap={2}>
-          {selectedSource?.disabledReason == undefined && selectedSource?.warning && (
-            <Alert severity="warning">{selectedSource.warning}</Alert>
-          )}
-          {selectedSource?.disabledReason != undefined && (
-            <Alert severity="warning">{selectedSource.disabledReason}</Alert>
-          )}
+        </div>
 
-          {selectedSource?.description && <Typography>{selectedSource.description}</Typography>}
-          {selectedSource?.formConfig != undefined && (
-            <Stack flexGrow={1} justifyContent="space-between">
-              <Stack gap={2}>
-                {selectedSource.formConfig.fields.map((field) => (
-                  <FormField
-                    key={field.id}
-                    field={field}
-                    disabled={selectedSource.disabledReason != undefined}
-                    onError={(err) => {
-                      setFieldErrors((existing) => {
-                        existing.set(field.id, err);
-                        return new Map(existing);
-                      });
-                    }}
-                    onChange={(newValue) => {
-                      setFieldErrors((existing) => {
-                        existing.delete(field.id);
-                        return new Map(existing);
-                      });
-                      setFieldValues((existing) => {
-                        return {
-                          ...existing,
-                          [field.id]: newValue,
-                        };
-                      });
-                    }}
-                  />
-                ))}
+        <Stack className={classes.form} key={selectedSource?.id} flex="1 0">
+          <Stack className={classes.formInner} gap={2}>
+            {selectedSource?.disabledReason == undefined && selectedSource?.warning && (
+              <Alert severity="warning">{selectedSource.warning}</Alert>
+            )}
+            {selectedSource?.disabledReason != undefined && (
+              <Alert severity="warning">{selectedSource.disabledReason}</Alert>
+            )}
+
+            {selectedSource?.description && <Typography>{selectedSource.description}</Typography>}
+            {selectedSource?.formConfig != undefined && (
+              <Stack flexGrow={1} justifyContent="space-between">
+                <Stack gap={2}>
+                  {selectedSource.formConfig.fields.map((field) => (
+                    <FormField
+                      key={field.id}
+                      field={field}
+                      disabled={selectedSource.disabledReason != undefined}
+                      onError={(err) => {
+                        setFieldErrors((existing) => {
+                          existing.set(field.id, err);
+                          return new Map(existing);
+                        });
+                      }}
+                      onChange={(newValue) => {
+                        setFieldErrors((existing) => {
+                          existing.delete(field.id);
+                          return new Map(existing);
+                        });
+                        setFieldValues((existing) => {
+                          return {
+                            ...existing,
+                            [field.id]: newValue,
+                          };
+                        });
+                      }}
+                    />
+                  ))}
+                </Stack>
               </Stack>
+            )}
+            <Stack direction="row" gap={1}>
+              {(selectedSource?.docsLinks ?? []).map((item) => (
+                <Link key={item.url} color="primary" href={item.url}>
+                  {item.label ? `View docs for ${item.label}` : "View docs"}.
+                </Link>
+              ))}
             </Stack>
-          )}
-          <Stack direction="row" gap={1}>
-            {(selectedSource?.docsLinks ?? []).map((item) => (
-              <Link key={item.url} color="primary" href={item.url}>
-                {item.label ? `View docs for ${item.label}` : "View docs"}.
-              </Link>
-            ))}
           </Stack>
         </Stack>
       </Stack>

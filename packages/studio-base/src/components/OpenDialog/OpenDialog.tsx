@@ -156,7 +156,12 @@ export default function OpenDialog(props: OpenDialogProps): JSX.Element {
       <IconButton className={classes.closeButton} onClick={onModalClose} edge="end">
         <CloseIcon />
       </IconButton>
-      <Stack flexGrow={1} fullHeight justifyContent="space-between">
+      <Stack
+        flexGrow={1}
+        fullHeight
+        justifyContent="space-between"
+        overflow={activeView === "connection" ? "hidden" : undefined}
+      >
         {view.component}
       </Stack>
     </Dialog>

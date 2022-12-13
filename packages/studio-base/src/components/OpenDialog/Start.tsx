@@ -32,9 +32,9 @@ const useStyles = makeStyles()((theme) => ({
     [theme.breakpoints.up("md")]: {
       display: "grid",
       gridTemplateAreas: `
-      "header spacer"
-      "content sidebar"
-    `,
+        "header spacer"
+        "content sidebar"
+      `,
       gridTemplateRows: `content auto`,
       gridTemplateColumns: `1fr 375px`,
     },
@@ -46,6 +46,9 @@ const useStyles = makeStyles()((theme) => ({
     [theme.breakpoints.down("md")]: {
       padding: theme.spacing(4),
     },
+    [`@media (max-height: ${theme.breakpoints.values.sm})`]: {
+      display: "none",
+    },
   },
   content: {
     padding: theme.spacing(0, 6, 6),
@@ -55,10 +58,17 @@ const useStyles = makeStyles()((theme) => ({
     [theme.breakpoints.down("md")]: {
       padding: theme.spacing(0, 4, 4),
     },
+    [`@media (max-height: ${theme.breakpoints.values.sm})`]: {
+      paddingTop: theme.spacing(6),
+    },
   },
   spacer: {
     gridArea: "spacer",
     backgroundColor: tinycolor(theme.palette.text.primary).setAlpha(0.04).toRgbString(),
+
+    [`@media (max-height: ${theme.breakpoints.values.sm})`]: {
+      display: "none",
+    },
   },
   sidebar: {
     gridArea: "sidebar",
@@ -67,6 +77,9 @@ const useStyles = makeStyles()((theme) => ({
 
     [theme.breakpoints.down("md")]: {
       padding: theme.spacing(4),
+    },
+    [`@media (max-height: ${theme.breakpoints.values.sm})`]: {
+      paddingTop: theme.spacing(6),
     },
   },
   button: {
