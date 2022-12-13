@@ -1,8 +1,14 @@
 blank_issues_enabled: false
 contact_links:
-  - name: Question or Idea
-    url: https://github.com/foxglove/studio/discussions
-    about: Ask in our GitHub Discussions forum
-  - name: Slack
+  - name: Feature request
+    url: https://github.com/orgs/foxglove/discussions/new?category=studio&body=%3C!---%20Remember%20to%20include%20code%2C%20screenshots%2C%20and%20example%20data%20(e.g.%20bag%20or%20mcap%20file)%20if%20relevant%20--%3E%0A
+    about: Share a new feature request or idea
+  - name: Bug report
+    url: https://github.com/foxglove/studio/issues/new?labels=bug&body=**Description**%0A%0A%0A-%20Version%3A%0A-%20OS%3A%0A-%20Data%20source%20(e.g.%20bag%20or%20mcap%20file%2C%20rosbridge%2C%20websocket)%3A%0A-%20ROS%20distro%20(if%20applicable)%3A%0A%0A**Steps%20To%20Reproduce**%0A%3C!---%20Remember%20to%20include%20code%2C%20screenshots%2C%20and%20example%20data%20(e.g.%20bag%20or%20mcap%20file)%20if%20relevant%20--%3E%0A%0A%0A**Expected%20Behavior**%0A%0A%0A**Actual%20Behavior**%0A
+    about: Report broken functionality or incorrect documentation
+  - name: Stack Exchange
+    url: https://robotics.stackexchange.com/questions/ask?tags=foxglove-studio
+    about: Get help from the robotics community
+  - name: Live chat
     url: https://foxglove.dev/slack
-    about: Get live help from the Foxglove Community
+    about: Join the discussion in our Slack channel
