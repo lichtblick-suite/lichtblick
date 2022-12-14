@@ -7,6 +7,7 @@ import * as THREE from "three";
 import { toNanoSec, toSec } from "@foxglove/rostime";
 import { NumericType, PointCloud as FoxglovePointCloud } from "@foxglove/schemas";
 import { MessageEvent, SettingsTreeAction } from "@foxglove/studio";
+import { PointCloudRenderable } from "@foxglove/studio-base/panels/ThreeDeeRender/renderables/PointClouds";
 import type { RosObject } from "@foxglove/studio-base/players/types";
 import { VelodynePacket, VelodyneScan } from "@foxglove/studio-base/types/Messages";
 import {
@@ -30,12 +31,15 @@ import {
   createInstancePickingMaterial,
   createPickingMaterial,
   createPoints,
-  DEFAULT_SETTINGS,
-  LayerSettingsPointCloudAndLaserScan,
-  PointCloudAndLaserScanRenderable,
+  DEFAULT_POINT_SETTINGS,
+  LayerSettingsPointExtension,
+  pointSettingsNode,
   pointCloudMaterial,
-  pointCloudSettingsNode,
-} from "./PointCloudsAndLaserScans";
+  POINT_CLOUD_REQUIRED_FIELDS,
+} from "./pointExtensionUtils";
+
+type LayerSettingsVelodyneScans = LayerSettingsPointExtension;
+const DEFAULT_SETTINGS = DEFAULT_POINT_SETTINGS;
 
 export function pointFieldDataTypeToNumericType(type: PointFieldDataType): NumericType {
   switch (type) {
@@ -118,7 +122,7 @@ class VelodyneCloudConverter {
   }
 }
 
-export class VelodyneScans extends SceneExtension<PointCloudAndLaserScanRenderable> {
+export class VelodyneScans extends SceneExtension<PointCloudRenderable> {
   private _pointCloudFieldsByTopic = new Map<string, string[]>();
   private _velodyneCloudConverter = new VelodyneCloudConverter();
 
@@ -136,15 +140,16 @@ export class VelodyneScans extends SceneExtension<PointCloudAndLaserScanRenderab
       if (!topicIsConvertibleToSchema(topic, VELODYNE_SCAN_DATATYPES)) {
         continue;
       }
-      const config = (configTopics[topic.name] ??
-        {}) as Partial<LayerSettingsPointCloudAndLaserScan>;
-      const node: SettingsTreeNodeWithActionHandler = pointCloudSettingsNode(
-        this._pointCloudFieldsByTopic,
-        config,
+      const config = (configTopics[topic.name] ?? {}) as Partial<LayerSettingsVelodyneScans>;
+      const messageFields =
+        this._pointCloudFieldsByTopic.get(topic.name) ?? POINT_CLOUD_REQUIRED_FIELDS;
+      const node: SettingsTreeNodeWithActionHandler = pointSettingsNode(
         topic,
-        "velodynescan",
+        messageFields,
+        config,
       );
       node.handler = handler;
+      node.icon = "Points";
       entries.push({ path: ["topics", topic.name], node });
     }
     return entries;
@@ -163,17 +168,15 @@ export class VelodyneScans extends SceneExtension<PointCloudAndLaserScanRenderab
     const renderable = this.renderables.get(topicName);
     if (renderable) {
       const prevSettings = this.renderer.config.topics[topicName] as
-        | Partial<LayerSettingsPointCloudAndLaserScan>
+        | Partial<LayerSettingsVelodyneScans>
         | undefined;
       const settings = { ...DEFAULT_SETTINGS, ...prevSettings };
-      if (renderable.userData.pointCloud) {
-        renderable.updatePointCloud(
-          renderable.userData.pointCloud,
-          renderable.userData.originalMessage,
-          settings,
-          renderable.userData.receiveTime,
-        );
-      }
+      renderable.updatePointCloud(
+        renderable.userData.pointCloud,
+        renderable.userData.originalMessage,
+        settings,
+        renderable.userData.receiveTime,
+      );
     }
   };
 
@@ -204,7 +207,7 @@ export class VelodyneScans extends SceneExtension<PointCloudAndLaserScanRenderab
     if (!renderable) {
       // Set the initial settings from default values merged with any user settings
       const userSettings = this.renderer.config.topics[topic] as
-        | Partial<LayerSettingsPointCloudAndLaserScan>
+        | Partial<LayerSettingsVelodyneScans>
         | undefined;
       const settings = { ...DEFAULT_SETTINGS, ...userSettings };
       if (settings.colorField == undefined) {
@@ -239,7 +242,7 @@ export class VelodyneScans extends SceneExtension<PointCloudAndLaserScanRenderab
       );
 
       const messageTime = toNanoSec(pointCloud.timestamp);
-      renderable = new PointCloudAndLaserScanRenderable(topic, this.renderer, {
+      renderable = new PointCloudRenderable(topic, this.renderer, {
         receiveTime,
         messageTime,
         frameId: this.renderer.normalizeFrameId(pointCloud.frame_id),
