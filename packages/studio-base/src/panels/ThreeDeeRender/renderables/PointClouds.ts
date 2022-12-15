@@ -198,6 +198,7 @@ export class PointCloudRenderable extends PointsHistoryRenderable<PointCloudUser
 
     latestEntry.receiveTime = receiveTime;
     latestEntry.messageTime = messageTime;
+    latestEntry.points.userData.pose = getPose(pointCloud);
 
     const pointCount = Math.trunc(pointCloud.data.length / getStride(pointCloud));
     latestEntry.points.geometry.resize(pointCount);

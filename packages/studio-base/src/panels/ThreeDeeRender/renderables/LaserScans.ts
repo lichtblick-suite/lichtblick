@@ -22,7 +22,6 @@ import { topicIsConvertibleToSchema } from "../topicIsConvertibleToSchema";
 import { Pose } from "../transforms";
 import { colorHasTransparency, getColorConverter } from "./pointClouds/colors";
 import {
-  createGeometry,
   createPoints,
   DEFAULT_POINT_SETTINGS,
   LayerSettingsPointExtension,
@@ -69,6 +68,15 @@ const INVALID_LASERSCAN = "INVALID_LASERSCAN";
 const VEC3_ZERO = new THREE.Vector3();
 
 const tempColor = { r: 0, g: 0, b: 0, a: 0 };
+
+function createLaserScanGeometry(topic: string, usage: THREE.Usage): DynamicBufferGeometry {
+  const geometry = new DynamicBufferGeometry(usage);
+  geometry.name = `${topic}:LaserScan:geometry`;
+  // Three.JS doesn't render anything if there is no attribute named position, so we use the name position for the "range" parameter.
+  geometry.createAttribute("position", Float32Array, 1);
+  geometry.createAttribute("color", Uint8Array, 4, true);
+  return geometry;
+}
 
 class LaserScanRenderable extends PointsHistoryRenderable<LaserScanUserData> {
   public override pickableInstances = true;
@@ -134,7 +142,7 @@ class LaserScanRenderable extends PointsHistoryRenderable<LaserScanUserData> {
     const isDecay = settings.decayTime > 0;
     if (isDecay) {
       // Push a new (empty) entry to the history of points
-      const geometry = createGeometry(topic, THREE.StaticDrawUsage);
+      const geometry = createLaserScanGeometry(topic, THREE.StaticDrawUsage);
       const points = createPoints(
         topic,
         laserScan.pose,
@@ -154,6 +162,7 @@ class LaserScanRenderable extends PointsHistoryRenderable<LaserScanUserData> {
 
     latestEntry.receiveTime = receiveTime;
     latestEntry.messageTime = messageTime;
+    latestEntry.points.userData.pose = laserScan.pose;
 
     const geometry = latestEntry.points.geometry;
     geometry.resize(ranges.length);
@@ -336,11 +345,11 @@ export class LaserScans extends SceneExtension<LaserScanRenderable> {
         });
       }
 
-      const geometry = new DynamicBufferGeometry();
-      geometry.name = `${topic}:LaserScan:geometry`;
-      // Three.JS doesn't render anything if there is no attribute named position, so we use the name position for the "range" parameter.
-      geometry.createAttribute("position", Float32Array, 1);
-      geometry.createAttribute("color", Uint8Array, 4, true);
+      const isDecay = settings.decayTime > 0;
+      const geometry = createLaserScanGeometry(
+        topic,
+        isDecay ? THREE.StaticDrawUsage : THREE.DynamicDrawUsage,
+      );
 
       const material = new LaserScanMaterial();
       const pickingMaterial = new LaserScanMaterial({ picking: true });

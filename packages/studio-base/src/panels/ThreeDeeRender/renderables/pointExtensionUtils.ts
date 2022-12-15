@@ -395,7 +395,7 @@ export class PointsHistoryRenderable<
     // Update the pose on each THREE.Points entry
     let hadTfError = false;
     for (const entry of pointsHistory) {
-      const srcTime = entry.messageTime;
+      const srcTime = entry.messageTime; // frameLocked is false, so use TFs from the original message timestamp
       const frameId = this.userData.frameId;
       const updated = updatePose(
         entry.points,
