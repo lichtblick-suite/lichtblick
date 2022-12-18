@@ -122,7 +122,7 @@ const plugins: ChartOptions["plugins"] = {
     display: "auto",
     anchor: "center",
     align: -45,
-    offset: 6,
+    offset: 0,
     clip: true,
     font: {
       family: fontFamily,

@@ -2436,7 +2436,7 @@ __metadata:
     browserify-zlib: 0.2.0
     chart.js: 3.7.0
     chartjs-plugin-annotation: 1.2.1
-    chartjs-plugin-datalabels: 2.0.0
+    chartjs-plugin-datalabels: 2.2.0
     chromatic: 6.7.4
     circular-dependency-plugin: 5.2.2
     clean-webpack-plugin: 4.0.0
@@ -8666,12 +8666,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"chartjs-plugin-datalabels@npm:2.0.0":
-  version: 2.0.0
-  resolution: "chartjs-plugin-datalabels@npm:2.0.0"
+"chartjs-plugin-datalabels@npm:2.2.0":
+  version: 2.2.0
+  resolution: "chartjs-plugin-datalabels@npm:2.2.0"
   peerDependencies:
-    chart.js: ^3.0.0
-  checksum: aa59cabc57feca686281033f6160c4f7e84f973e5ad27e794daa7a6bc8dbf7a14055fee4c05df6a9d8c7be66ec0a59203244e8f528fce3dfd13847bf92d7aa7c
+    chart.js: ">=3.0.0"
+  checksum: 26086a908a8e88507959b7aaf798b2d9794ea95f7a5889b8bb9f6b9f3437a7e2fdf18952d3ba403b2ff78e5b70452439fb323bd0dfe76e9d7d1dae1328dacb99
   languageName: node
   linkType: hard
 
