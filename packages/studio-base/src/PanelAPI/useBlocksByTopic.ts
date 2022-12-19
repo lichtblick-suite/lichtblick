@@ -20,7 +20,6 @@ import {
   useMessagePipeline,
   MessagePipelineContext,
 } from "@foxglove/studio-base/components/MessagePipeline";
-import useCleanup from "@foxglove/studio-base/hooks/useCleanup";
 import {
   SubscribePayload,
   MessageEvent,
@@ -70,7 +69,12 @@ const useSubscribeToTopicsForBlocks = (topics: readonly string[]) => {
     return topics.map((topic) => ({ topic, preloadType: "full" }));
   }, [topics]);
   useEffect(() => setSubscriptions(id, subscriptions), [id, setSubscriptions, subscriptions]);
-  useCleanup(() => setSubscriptions(id, []));
+
+  useEffect(() => {
+    return () => {
+      setSubscriptions(id, []);
+    };
+  }, [id, setSubscriptions]);
 };
 
 // A note: for the moment,

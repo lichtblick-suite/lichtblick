@@ -20,7 +20,6 @@ import {
   useMessagePipeline,
   MessagePipelineContext,
 } from "@foxglove/studio-base/components/MessagePipeline";
-import useCleanup from "@foxglove/studio-base/hooks/useCleanup";
 import useShouldNotChangeOften from "@foxglove/studio-base/hooks/useShouldNotChangeOften";
 import {
   MessageEvent,
@@ -91,7 +90,11 @@ export function useMessageReducer<T>(props: Params<T>): T {
 
   const setSubscriptions = useMessagePipeline(selectSetSubscriptions);
   useEffect(() => setSubscriptions(id, subscriptions), [id, setSubscriptions, subscriptions]);
-  useCleanup(() => setSubscriptions(id, []));
+  useEffect(() => {
+    return () => {
+      setSubscriptions(id, []);
+    };
+  }, [id, setSubscriptions]);
 
   const state = useRef<
     | Readonly<{
