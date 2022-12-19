@@ -52,11 +52,6 @@ export class TopicMarkers extends Renderable<MarkerTopicUserData> {
   public override pickable = false;
   public namespaces = new Map<string, MarkersNamespace>();
 
-  // eslint-disable-next-line no-restricted-syntax
-  public get topic(): string {
-    return this.userData.topic;
-  }
-
   public override dispose(): void {
     for (const ns of this.namespaces.values()) {
       for (const marker of ns.markersById.values()) {

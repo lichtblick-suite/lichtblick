@@ -63,11 +63,6 @@ export class TopicEntities extends Renderable<EntityTopicUserData> {
     super(name, renderer, userData);
   }
 
-  // eslint-disable-next-line no-restricted-syntax
-  public get topic(): string {
-    return this.userData.topic;
-  }
-
   public override dispose(): void {
     this.children.length = 0;
     this._deleteAllEntities();

@@ -25,6 +25,8 @@ export type BaseUserData = {
   settingsPath: ReadonlyArray<string>;
   /** User-customizable settings for this Renderable */
   settings: BaseSettings;
+  /** Topic that the Renderable belongs to, if applicable*/
+  topic?: string;
 };
 
 /**
@@ -83,6 +85,21 @@ export class Renderable<TUserData extends BaseUserData = BaseUserData> extends T
     return {};
   }
 
+  /**
+   * Return topic if one exists on the userData.
+   */
+  // eslint-disable-next-line no-restricted-syntax
+  public get topic(): TUserData["topic"] {
+    return this.userData.topic;
+  }
+
+  /**
+   * Return pose as defined in userData
+   */
+  // eslint-disable-next-line no-restricted-syntax
+  public get pose(): Pose {
+    return this.userData.pose;
+  }
   /**
    * Return a Plain Old JavaScript Object (POJO) representation of a specific
    * visual instance rendered by this Renderable.

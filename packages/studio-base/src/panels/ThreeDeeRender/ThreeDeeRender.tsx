@@ -151,7 +151,7 @@ function RendererOverlay(props: {
     () =>
       selectedRenderables.map((selection) => ({
         object: {
-          pose: selection.renderable.userData.pose,
+          pose: selection.renderable.pose,
           scale: selection.renderable.scale,
           color: undefined,
           interactionData: {
@@ -172,9 +172,9 @@ function RendererOverlay(props: {
       selectedRenderable
         ? {
             object: {
-              pose: selectedRenderable.renderable.userData.pose,
+              pose: selectedRenderable.renderable.pose,
               interactionData: {
-                topic: (selectedRenderable.renderable.userData as { topic?: string }).topic,
+                topic: selectedRenderable.renderable.topic,
                 highlighted: true,
                 originalMessage: selectedRenderable.renderable.details(),
                 instanceDetails:
