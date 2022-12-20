@@ -117,7 +117,7 @@
     "comlink": "4.3.1",
     "cross-env": "7.0.3",
     "crypto-browserify": "3.12.0",
-    "css-loader": "6.7.1",
+    "css-loader": "6.7.3",
     "cytoscape": "3.21.0",
     "cytoscape-dagre": "2.4.0",
     "dat.gui": "0.7.9",
