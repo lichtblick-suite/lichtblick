@@ -12,12 +12,13 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@actions/core@npm:1.6.0":
-  version: 1.6.0
-  resolution: "@actions/core@npm:1.6.0"
+"@actions/core@npm:1.9.1":
+  version: 1.9.1
+  resolution: "@actions/core@npm:1.9.1"
   dependencies:
-    "@actions/http-client": ^1.0.11
-  checksum: ac4689b6095110546d771f15388173c5e4ff3f808a9cadca2089df5e92b8c81e8ee32c47a38b7ab9dc9e690bac4be71561a73fec631547dfa57ee9b7ff7dc6d7
+    "@actions/http-client": ^2.0.1
+    uuid: ^8.3.2
+  checksum: 8f9823bed2e172fcabb65a63e136f98bbd0614bf37b5012caff4d3216471de19956e6bc0ed2767c52bccc3d02a7450a3b902a83f56bfa255477858c6341d1e2e
   languageName: node
   linkType: hard
 
@@ -46,15 +47,6 @@ __metadata:
   dependencies:
     "@actions/io": ^1.0.1
   checksum: d976e66dd51ab03d76a143da8e1406daa1bcdee06046168e6e0bec681c87a12999eefaad7a81cb81f28e4190610f55a58b8458ae4b82cbaaba13200490f4e8c2
-  languageName: node
-  linkType: hard
-
-"@actions/http-client@npm:^1.0.11":
-  version: 1.0.11
-  resolution: "@actions/http-client@npm:1.0.11"
-  dependencies:
-    tunnel: 0.0.6
-  checksum: 2c72834ec36a121ae95d2cb61fd28234eae2ab265a2aefe857a9eeb788ea77b284ad727ecd3c67fefd1920d5f2800b6c1ba6916b39d44f81f293b4b0020d367c
   languageName: node
   linkType: hard
 
@@ -12881,7 +12873,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "foxglove-studio@workspace:."
   dependencies:
-    "@actions/core": 1.6.0
+    "@actions/core": 1.9.1
     "@actions/exec": 1.1.0
     "@actions/tool-cache": 2.0.1
     "@babel/core": 7.20.2
@@ -23738,7 +23730,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"tunnel@npm:0.0.6, tunnel@npm:^0.0.6":
+"tunnel@npm:^0.0.6":
   version: 0.0.6
   resolution: "tunnel@npm:0.0.6"
   checksum: c362948df9ad34b649b5585e54ce2838fa583aa3037091aaed66793c65b423a264e5229f0d7e9a95513a795ac2bd4cb72cda7e89a74313f182c1e9ae0b0994fa
