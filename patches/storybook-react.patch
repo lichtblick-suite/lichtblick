@@ -1,28 +1,36 @@
 diff --git a/dist/esm/client/preview/render.js b/dist/esm/client/preview/render.js
-index 5bf30e1d97021f22c529384316e215df1537f302..43567af6f9b47d550f59898caa21e75a9b4121bc 100644
+index c2f6c314c82f96d1b5be90cd957e0f1926e8bd28..0ff99c0918251a9fd58b80bfbfe5e225bfd807ff 100644
 --- a/dist/esm/client/preview/render.js
 +++ b/dist/esm/client/preview/render.js
-@@ -57,7 +57,7 @@ export var render = function render(args, context) {
+@@ -70,7 +70,7 @@ var WithCallback = function WithCallback(_ref) {
  };
 
  var renderElement = /*#__PURE__*/function () {
--  var _ref = _asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee(node, el) {
-+  var _ref = _asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee(node, el, storyContext) {
+-  var _ref2 = _asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee(node, el) {
++  var _ref2 = _asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee(node, el, storyContext) {
      var root;
      return regeneratorRuntime.wrap(function _callee$(_context) {
        while (1) {
-@@ -76,7 +76,9 @@ var renderElement = /*#__PURE__*/function () {
-                 }, 0);
+@@ -85,12 +85,16 @@ var renderElement = /*#__PURE__*/function () {
+               if (root) {
+                 root.render( /*#__PURE__*/React.createElement(WithCallback, {
+                   callback: function callback() {
+-                    return resolve(null);
++                    // access the parameters in the render callback to allow decorators to set storyReady
++                    var maybeSignal = storyContext.parameters?.storyReady;
++                    maybeSignal ? maybeSignal.then(() => resolve(null)) : resolve(null);
+                   }
+                 }, node));
                } else {
                  ReactDOM.render(node, el, function () {
 -                  return resolve(null);
-+		  // access the parameters in the render callback to allow decorators to set storyReady
++                  // access the parameters in the render callback to allow decorators to set storyReady
 +                  var maybeSignal = storyContext.parameters?.storyReady;
 +                  maybeSignal ? maybeSignal.then(() => resolve(null)) : resolve(null);
                  });
                }
              }));
-@@ -242,7 +244,7 @@ function _renderToDOM() {
+@@ -256,7 +260,7 @@ function _renderToDOM() {
              }
 
              _context3.next = 7;
