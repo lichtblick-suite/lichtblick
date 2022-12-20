@@ -186,11 +186,23 @@ function DraggablePanelItem({
     ? `${panel.title} [${panel.extensionNamespace}]`
     : panel.title;
 
+  const onClickWithStopPropagation = useCallback(
+    (event: React.MouseEvent) => {
+      event.stopPropagation();
+      onClick();
+    },
+    [onClick],
+  );
+
   switch (mode) {
     case "grid":
       return (
         <Card className={classes.fullHeight}>
-          <CardActionArea ref={mergedRef} onClick={onClick} className={classes.fullHeight}>
+          <CardActionArea
+            ref={mergedRef}
+            onClick={onClickWithStopPropagation}
+            className={classes.fullHeight}
+          >
             <Stack fullHeight>
               {panel.thumbnail != undefined ? (
                 <CardMedia component="img" image={panel.thumbnail} alt={panel.title} />
@@ -237,7 +249,7 @@ function DraggablePanelItem({
               className={classes.grab}
               disabled={checked}
               ref={mergedRef}
-              onClick={onClick}
+              onClick={onClickWithStopPropagation}
             >
               <ListItemText
                 primary={
