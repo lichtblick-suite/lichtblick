@@ -7,7 +7,7 @@
 
 import * as Sentry from "@sentry/electron/renderer";
 import { BrowserTracing } from "@sentry/tracing";
-import { StrictMode } from "react";
+import { StrictMode, useEffect } from "react";
 import ReactDOM from "react-dom";
 
 import { Sockets } from "@foxglove/electron-socket/renderer";
@@ -63,6 +63,15 @@ if (!rootEl) {
 
 const isDevelopment = process.env.NODE_ENV === "development";
 
+function LogAfterRender(props: React.PropsWithChildren<unknown>): JSX.Element {
+  useEffect(() => {
+    // Integration tests look for this console log to indicate the app has rendered once
+    log.setLevel("debug");
+    log.debug("App rendered");
+  }, []);
+  return <>{props.children}</>;
+}
+
 async function main() {
   // Initialize the RPC channel for electron-socket. This method is called first
   // since the window.onmessage handler needs to be installed before
@@ -83,14 +92,11 @@ async function main() {
 
   ReactDOM.render(
     <StrictMode>
-      <Root appConfiguration={appConfiguration} />
+      <LogAfterRender>
+        <Root appConfiguration={appConfiguration} />
+      </LogAfterRender>
     </StrictMode>,
     rootEl,
-    () => {
-      // Integration tests look for this console log to indicate the app has rendered once
-      log.setLevel("debug");
-      log.debug("App rendered");
-    },
   );
 }
 
