@@ -110,7 +110,7 @@
     "license-checker": "25.0.1",
     "prettier": "2.5.1",
     "rimraf": "3.0.2",
-    "semver": "7.3.5",
+    "semver": "7.3.8",
     "ts-node": "10.9.1",
     "ts-prune": "0.10.3",
     "tslib": "2.4.0",
