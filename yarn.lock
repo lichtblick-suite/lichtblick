@@ -2458,7 +2458,7 @@ __metadata:
     hammerjs: 2.0.8
     idb: 7.0.1
     idb-keyval: 6.1.0
-    immer: 9.0.12
+    immer: 9.0.16
     intervals-fn: 3.0.3
     jest-diff: 29.3.1
     jszip: 3.10.1
@@ -14360,10 +14360,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"immer@npm:9.0.12":
-  version: 9.0.12
-  resolution: "immer@npm:9.0.12"
-  checksum: bcbec6d76dac65e49068eb67ece4d407116e62b8cde3126aa89c801e408f5047763ba0aeb62f1938c1aa704bb6612f1d8302bb2a86fa1fc60fcc12d8b25dc895
+"immer@npm:9.0.16":
+  version: 9.0.16
+  resolution: "immer@npm:9.0.16"
+  checksum: e9a5ca65c929b329da7a3b7beccf7984271cda7bdd47b2cab619eac3277dcd56598c211b55cc340786b6eff0c06652ac018808d9fd744443f06882364dece6bc
   languageName: node
   linkType: hard
 
