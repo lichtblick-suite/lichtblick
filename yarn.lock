@@ -11706,14 +11706,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"eslint-config-prettier@npm:8.3.0":
-  version: 8.3.0
-  resolution: "eslint-config-prettier@npm:8.3.0"
+"eslint-config-prettier@npm:8.5.0":
+  version: 8.5.0
+  resolution: "eslint-config-prettier@npm:8.5.0"
   peerDependencies:
     eslint: ">=7.0.0"
   bin:
     eslint-config-prettier: bin/cli.js
-  checksum: df4cea3032671995bb5ab07e016169072f7fa59f44a53251664d9ca60951b66cdc872683b5c6a3729c91497c11490ca44a79654b395dd6756beb0c3903a37196
+  checksum: 0d0f5c32e7a0ad91249467ce71ca92394ccd343178277d318baf32063b79ea90216f4c81d1065d60f96366fdc60f151d4d68ae7811a58bd37228b84c2083f893
   languageName: node
   linkType: hard
 
@@ -12871,7 +12871,7 @@ __metadata:
     electron-builder: 23.1.0
     electron-notarize: 1.2.1
     eslint: 8.8.0
-    eslint-config-prettier: 8.3.0
+    eslint-config-prettier: 8.5.0
     eslint-import-resolver-webpack: 0.13.2
     eslint-plugin-es: 4.1.0
     eslint-plugin-file-progress: 1.2.0
