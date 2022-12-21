@@ -2416,7 +2416,7 @@ __metadata:
     "@types/react-autocomplete": 1.8.6
     "@types/react-dom": 18.0.9
     "@types/react-hover-observer": "workspace:*"
-    "@types/react-table": 7.7.9
+    "@types/react-table": 7.7.12
     "@types/react-transition-group": ^4.4.4
     "@types/react-virtualized": 9.21.20
     "@types/react-window": ^1
@@ -2492,7 +2492,7 @@ __metadata:
     react-refresh-typescript: 2.0.3
     react-resize-detector: 7.1.2
     react-svg-loader: 3.0.3
-    react-table: 7.7.0
+    react-table: 7.8.0
     react-transition-group: 4.4.2
     react-use: 17.4.0
     react-virtualized: 9.22.3
@@ -5924,12 +5924,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/react-table@npm:7.7.9":
-  version: 7.7.9
-  resolution: "@types/react-table@npm:7.7.9"
+"@types/react-table@npm:7.7.12":
+  version: 7.7.12
+  resolution: "@types/react-table@npm:7.7.12"
   dependencies:
     "@types/react": "*"
-  checksum: 3f6c847c8e904479875bb249af02b70e271c5480d0f8b94f7da96eb3980a83cf011d7e558e885259851e3af8defb6493deb147227242766ebca37c9cb630c306
+  checksum: 287ea68e75b56c2e70e6d6491cd172348c7302b032789047eb2dca1b25b240684e48a60f58140575828b790f95724b9f3ec4d3adce82fc1c05d994def1449009
   languageName: node
   linkType: hard
 
@@ -20537,12 +20537,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-table@npm:7.7.0":
-  version: 7.7.0
-  resolution: "react-table@npm:7.7.0"
+"react-table@npm:7.8.0":
+  version: 7.8.0
+  resolution: "react-table@npm:7.8.0"
   peerDependencies:
-    react: ^16.8.3 || ^17.0.0-0
-  checksum: a679edecc76d3e51311b095528395b38ac85a1ffa371716bea01559a5fdc75af9a6abb9bb907c63190c8e77da22b11f7b05065b3a45d190d8f43cb83e4366206
+    react: ^16.8.3 || ^17.0.0-0 || ^18.0.0
+  checksum: 44ca0fb848c6869cd793cede8dc33072b38ebb8f8d2833565afe7cf3eac5d1fa455ac5fb9d06838b16fab0523d5d03e3e82f7645032f71245096e67b892313b9
   languageName: node
   linkType: hard
 
