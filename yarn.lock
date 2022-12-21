@@ -2495,7 +2495,7 @@ __metadata:
     react-svg-loader: 3.0.3
     react-table: 7.7.0
     react-transition-group: 4.4.2
-    react-use: 17.3.1
+    react-use: 17.4.0
     react-virtualized: 9.22.3
     react-window: 1.8.8
     readable-stream: 3.6.0
@@ -10546,7 +10546,7 @@ __metadata:
     react: 17.0.2
     react-dom: 17.0.2
     react-refresh-typescript: 2.0.3
-    react-use: 17.3.1
+    react-use: 17.4.0
     tinycolor2: 1.4.2
     tss-react: 3.7.1
     utif: 3.1.0
@@ -20618,9 +20618,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-use@npm:17.3.1":
-  version: 17.3.1
-  resolution: "react-use@npm:17.3.1"
+"react-use@npm:17.4.0":
+  version: 17.4.0
+  resolution: "react-use@npm:17.4.0"
   dependencies:
     "@types/js-cookie": ^2.2.6
     "@xobotyi/scrollbar-width": ^1.9.5
@@ -20637,15 +20637,15 @@ __metadata:
     ts-easing: ^0.2.0
     tslib: ^2.1.0
   peerDependencies:
-    react: ^16.8.0  || ^17.0.0
-    react-dom: ^16.8.0  || ^17.0.0
-  checksum: 0489a2603dc1a5e2666ae7643b42ec82d747a70476087b0965ee67048940a8dee912cd982d568ff97af703365914c8d8208216301b8489082be61d86561fb858
+    react: ^16.8.0  || ^17.0.0 || ^18.0.0
+    react-dom: ^16.8.0  || ^17.0.0 || ^18.0.0
+  checksum: 0889da919b49a186de375ec15d2778b954ae981c523acd17dd496e4a4da7b6190efe7993491e1b85fdd6de3e745d08a4eaba4caa35408d570b5f1de550f35d11
   languageName: node
   linkType: hard
 
-"react-use@patch:react-use@17.3.1#./patches/react-use.patch::locator=foxglove-studio%40workspace%3A.":
-  version: 17.3.1
-  resolution: "react-use@patch:react-use@npm%3A17.3.1#./patches/react-use.patch::version=17.3.1&hash=37189e&locator=foxglove-studio%40workspace%3A."
+"react-use@patch:react-use@17.4.0#./patches/react-use.patch::locator=foxglove-studio%40workspace%3A.":
+  version: 17.4.0
+  resolution: "react-use@patch:react-use@npm%3A17.4.0#./patches/react-use.patch::version=17.4.0&hash=95d442&locator=foxglove-studio%40workspace%3A."
   dependencies:
     "@types/js-cookie": ^2.2.6
     "@xobotyi/scrollbar-width": ^1.9.5
@@ -20662,9 +20662,9 @@ __metadata:
     ts-easing: ^0.2.0
     tslib: ^2.1.0
   peerDependencies:
-    react: ^16.8.0  || ^17.0.0
-    react-dom: ^16.8.0  || ^17.0.0
-  checksum: 719d6a7f888e95c3c5f90527e09bb10b25fa5c9f08b36f756ebf21d360b9ad52be54a65a1027929bbce0acafe49e12a5f9eabbf19c04fe2a63b8c26b077d2b4a
+    react: ^16.8.0  || ^17.0.0 || ^18.0.0
+    react-dom: ^16.8.0  || ^17.0.0 || ^18.0.0
+  checksum: 1f7268aa7948f9099935d458533bf8e5e059c8592ec98acb4a68c162455e54b04572287aa05ba7e248e39e9ef952264a4a5fb14dcbf2fd764b210ad02c59a037
   languageName: node
   linkType: hard
 

@@ -14,6 +14,22 @@ index bb20b9649ddaef1015e027ef14ce9a557eabc1b3..9f9173a7d7308d9c573947305976d88c
 -declare const useThrottle: <T>(value: T, ms?: number) => T;
 +declare const useThrottle: <T>(value: T | (() => T), ms?: number) => T;
  export default useThrottle;
+diff --git a/esm/useThrottle.js b/esm/useThrottle.js
+index 86e5dbd6620c73836be70d25c5078dbc2c2e20cc..07e796aa20cf7ccc81119373aed96feea378e2a6 100644
+--- a/esm/useThrottle.js
++++ b/esm/useThrottle.js
+@@ -27,7 +27,10 @@ var useThrottle = function (value, ms) {
+         }
+     }, [value]);
+     useUnmount(function () {
+-        timeout.current && clearTimeout(timeout.current);
++        if (timeout.current) {
++            clearTimeout(timeout.current);
++            timeout.current = undefined;
++        }
+     });
+     return state;
+ };
 diff --git a/esm/useLocalStorage.js b/esm/useLocalStorage.js
 index e9e192611c0c8407a0f8147304dcc366c0d074d9..434c1d5ddc5284d033a92ff487cabf2279bb2063 100644
 --- a/esm/useLocalStorage.js
