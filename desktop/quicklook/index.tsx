@@ -5,7 +5,7 @@
 /// <reference types="quicklookjs" />
 
 import { useState, useEffect, useRef } from "react";
-import ReactDOM from "react-dom";
+import { createRoot } from "react-dom/client";
 import { useAsync } from "react-use";
 
 import Logger from "@foxglove/log";
@@ -118,10 +118,9 @@ function Root(): JSX.Element {
   );
 }
 
-ReactDOM.render(
+createRoot(rootEl).render(
   <>
     <GlobalStyle />
     <Root />
   </>,
-  rootEl,
 );

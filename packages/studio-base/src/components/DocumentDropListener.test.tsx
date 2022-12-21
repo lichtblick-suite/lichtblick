@@ -13,7 +13,7 @@
 //   You may not use this file except in compliance with the License.
 
 import { SnackbarProvider } from "notistack";
-import ReactDOM from "react-dom";
+import { createRoot } from "react-dom/client";
 import { act } from "react-dom/test-utils";
 
 import DocumentDropListener from "@foxglove/studio-base/components/DocumentDropListener";
@@ -30,7 +30,7 @@ describe("<DocumentDropListener>", () => {
     wrapper = document.createElement("div");
     document.body.appendChild(wrapper);
 
-    ReactDOM.render(
+    createRoot(wrapper).render(
       <div>
         <SnackbarProvider>
           <ThemeProvider isDark={false}>
@@ -38,13 +38,12 @@ describe("<DocumentDropListener>", () => {
           </ThemeProvider>
         </SnackbarProvider>
       </div>,
-      wrapper,
     );
   });
 
   it("allows the event to bubble if the dataTransfer has no files", async () => {
     // The event should bubble up from the document to the window
-    act(() => {
+    await act(() => {
       document.dispatchEvent(new CustomEvent("dragover", { bubbles: true, cancelable: true }));
     });
     expect(windowDragoverHandler).toHaveBeenCalled();
@@ -59,9 +58,7 @@ describe("<DocumentDropListener>", () => {
     (event as any).dataTransfer = {
       types: ["Files"],
     };
-    act(() => {
-      document.dispatchEvent(event); // The event should NOT bubble up from the document to the window
-    });
+    document.dispatchEvent(event); // The event should NOT bubble up from the document to the window
     expect(windowDragoverHandler).not.toHaveBeenCalled();
   });
 

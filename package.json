@@ -62,7 +62,6 @@
     "@types/node": "15.3.0",
     "react-dnd": "14.0.2",
     "@storybook/react": "patch:@storybook/react@6.5.15#./patches/storybook-react.patch",
-    "react-dom": "patch:react-dom@npm:17.0.2#./patches/react-dom.patch",
     "react-use": "patch:react-use@17.4.0#./patches/react-use.patch"
   },
   "devDependencies": {

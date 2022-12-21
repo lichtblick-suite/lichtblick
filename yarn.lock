@@ -2140,11 +2140,11 @@ __metadata:
   resolution: "@foxglove/hooks@workspace:packages/hooks"
   dependencies:
     "@foxglove/log": "workspace:*"
-    "@testing-library/react-hooks": 7.0.2
+    "@testing-library/react": 13.4.0
     shallowequal: 1.1.0
     typescript: 4.8.2
   peerDependencies:
-    react: ^17.0.2
+    react: ^18.2.0
   languageName: unknown
   linkType: soft
 
@@ -2395,10 +2395,9 @@ __metadata:
     "@sentry/types": 7.10.0
     "@storybook/addon-actions": 6.5.15
     "@storybook/react": 6.5.15
-    "@testing-library/dom": 8.11.3
-    "@testing-library/react": 12.1.2
-    "@testing-library/react-hooks": 7.0.2
-    "@testing-library/user-event": 14.3.0
+    "@testing-library/dom": 8.19.0
+    "@testing-library/react": 13.4.0
+    "@testing-library/user-event": 14.4.3
     "@types/amplitude-js": 8.16.2
     "@types/base16": ^1
     "@types/circular-dependency-plugin": 5.0.5
@@ -2413,9 +2412,9 @@ __metadata:
     "@types/nearley": 2.11.2
     "@types/offscreencanvas": 2019.6.4
     "@types/prettier": 2.4.4
-    "@types/react": 17.0.39
+    "@types/react": 18.0.26
     "@types/react-autocomplete": 1.8.6
-    "@types/react-dom": 17.0.13
+    "@types/react-dom": 18.0.9
     "@types/react-hover-observer": "workspace:*"
     "@types/react-table": 7.7.9
     "@types/react-transition-group": ^4.4.4
@@ -2479,17 +2478,17 @@ __metadata:
     notistack: 2.0.5
     path-browserify: 1.0.1
     prettier: 2.5.1
-    react: 17.0.2
+    react: 18.2.0
     react-autocomplete: "https://github.com/foxglove/react-autocomplete/raw/9717d597d7c78c316fb7ad3c2c57060c243530c2/react-autocomplete-9.9.9.tgz"
     react-colorful: 5.6.0
     react-dnd: 14.0.2
     react-dnd-html5-backend: 14.0.2
-    react-dom: 17.0.2
+    react-dom: 18.2.0
     react-hover-observer: 2.1.1
     react-json-tree: "patch:react-json-tree@npm:0.15.1#../../patches/react-json-tree.patch"
     react-markdown: 8.0.0
     react-monaco-editor: 0.46.0
-    react-mosaic-component: 5.0.0
+    react-mosaic-component: 5.3.0
     react-refresh-typescript: 2.0.3
     react-resize-detector: 7.1.2
     react-svg-loader: 3.0.3
@@ -5155,9 +5154,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@testing-library/dom@npm:8.11.3, @testing-library/dom@npm:^8.0.0":
-  version: 8.11.3
-  resolution: "@testing-library/dom@npm:8.11.3"
+"@testing-library/dom@npm:8.19.0, @testing-library/dom@npm:^8.5.0":
+  version: 8.19.0
+  resolution: "@testing-library/dom@npm:8.19.0"
   dependencies:
     "@babel/code-frame": ^7.10.4
     "@babel/runtime": ^7.12.5
@@ -5167,51 +5166,30 @@ __metadata:
     dom-accessibility-api: ^0.5.9
     lz-string: ^1.4.4
     pretty-format: ^27.0.2
-  checksum: 2245d254b6058590e25de86fb7b3c75e4a31096901a191f80d3efb9fa7e1e273043416f370c8770feb9f3ccc73a1550a877a3b003b593f1728ae828fcb52cd62
+  checksum: 6bb93fef96703b6c47cf1b7cc8f71d402a9576084a94ba4e9926f51bd7bb1287fbb4f6942d82bd03fc6f3d998ae97e60f6aea4618f3a1ce6139597d2a4ecb7b9
   languageName: node
   linkType: hard
 
-"@testing-library/react-hooks@npm:7.0.2":
-  version: 7.0.2
-  resolution: "@testing-library/react-hooks@npm:7.0.2"
+"@testing-library/react@npm:13.4.0":
+  version: 13.4.0
+  resolution: "@testing-library/react@npm:13.4.0"
   dependencies:
     "@babel/runtime": ^7.12.5
-    "@types/react": ">=16.9.0"
-    "@types/react-dom": ">=16.9.0"
-    "@types/react-test-renderer": ">=16.9.0"
-    react-error-boundary: ^3.1.0
+    "@testing-library/dom": ^8.5.0
+    "@types/react-dom": ^18.0.0
   peerDependencies:
-    react: ">=16.9.0"
-    react-dom: ">=16.9.0"
-    react-test-renderer: ">=16.9.0"
-  peerDependenciesMeta:
-    react-dom:
-      optional: true
-    react-test-renderer:
-      optional: true
-  checksum: 27c6169b5c9832bd02dcea232e6a0a3cd8d4504e13ecb49d57eb5ab6bea5e2f1bff65f3102068b7e57eec3cbd671326dc0b277335014b0edfbdedf11a1fe6db5
+    react: ^18.0.0
+    react-dom: ^18.0.0
+  checksum: 51ec548c1fdb1271089a5c63e0908f0166f2c7fcd9cacd3108ebbe0ce64cb4351812d885892020dc37608418cfb15698514856502b3cab0e5cc58d6cc1bd4a3e
   languageName: node
   linkType: hard
 
-"@testing-library/react@npm:12.1.2":
-  version: 12.1.2
-  resolution: "@testing-library/react@npm:12.1.2"
-  dependencies:
-    "@babel/runtime": ^7.12.5
-    "@testing-library/dom": ^8.0.0
-  peerDependencies:
-    react: "*"
-    react-dom: "*"
-  checksum: 70b0f7f27c83fe1a33e7df01b1e64850fbab4050c403848d611d852cadaa25ccde58518773002ae569a1350b2282c2ccbcbe5eb6af8b29ab377ab2a8ab573b3b
-  languageName: node
-  linkType: hard
-
-"@testing-library/user-event@npm:14.3.0":
-  version: 14.3.0
-  resolution: "@testing-library/user-event@npm:14.3.0"
+"@testing-library/user-event@npm:14.4.3":
+  version: 14.4.3
+  resolution: "@testing-library/user-event@npm:14.4.3"
   peerDependencies:
     "@testing-library/dom": ">=7.21.4"
-  checksum: cbd5954460496519cb2ff3fa506ca598d7e4c2e3d2f2e129b21909758f5ec87573aad7d6c79aebffd4bd0ea843315b3064a2a76e545f196bd4c82489cb3afc1d
+  checksum: 852c48ea6db1c9471b18276617c84fec4320771e466cd58339a732ca3fd73ad35e5a43ae14f51af51a8d0a150dcf60fcaab049ef367871207bea8f92c4b8195e
   languageName: node
   linkType: hard
 
@@ -5922,12 +5900,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/react-dom@npm:17.0.13, @types/react-dom@npm:>=16.9.0":
-  version: 17.0.13
-  resolution: "@types/react-dom@npm:17.0.13"
+"@types/react-dom@npm:18.0.9, @types/react-dom@npm:^18.0.0":
+  version: 18.0.9
+  resolution: "@types/react-dom@npm:18.0.9"
   dependencies:
     "@types/react": "*"
-  checksum: 62c42a54ac8961c23a0e74b9cdd8b0a78563757e462b1ab665b2aa365bfd8b86a73d3f6eafc09a4a80fb08659321db168f012aa597c41c0df36f645a94e9266b
+  checksum: e744e3feba25fc43733289d4df4d9c0e59fcca7f34e8c89d75f81a339accb2bd70236d69382d47d2c0ad06a1529b2e56aa6171fe175854d60e07156ddceedfcb
   languageName: node
   linkType: hard
 
@@ -5952,15 +5930,6 @@ __metadata:
   dependencies:
     "@types/react": "*"
   checksum: 3f6c847c8e904479875bb249af02b70e271c5480d0f8b94f7da96eb3980a83cf011d7e558e885259851e3af8defb6493deb147227242766ebca37c9cb630c306
-  languageName: node
-  linkType: hard
-
-"@types/react-test-renderer@npm:>=16.9.0":
-  version: 17.0.1
-  resolution: "@types/react-test-renderer@npm:17.0.1"
-  dependencies:
-    "@types/react": "*"
-  checksum: ecaae8df36cd8cfeb89080d52534856acc3789bad9a6e369ff5119426377c827b4e5b5daa638507f2c1c2fd6c994bf45de288a698143178cd4049c2cd8b77b35
   languageName: node
   linkType: hard
 
@@ -5992,14 +5961,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/react@npm:*, @types/react@npm:17.0.39, @types/react@npm:>=16.9.0":
-  version: 17.0.39
-  resolution: "@types/react@npm:17.0.39"
+"@types/react@npm:*, @types/react@npm:18.0.26":
+  version: 18.0.26
+  resolution: "@types/react@npm:18.0.26"
   dependencies:
     "@types/prop-types": "*"
     "@types/scheduler": "*"
     csstype: ^3.0.2
-  checksum: bf04d3c2894559012710d595553e12b422d3b91cd8f4f7e122d8cb044ba9c2ba17f6e8a4e09581359cc5509ddc59cd8c8fabd6774f3505a40a45393f074d6e6e
+  checksum: b62f0ea3cdfa68e106391728325057ad36f1bde7ba2dfae029472c47e01e482bc77c6ba4f1dad59f3f04ee81cb597618ff7c30a33c157c0a20462b6dd6aa2d4d
   languageName: node
   linkType: hard
 
@@ -8095,13 +8064,13 @@ __metadata:
     "@foxglove/studio": "workspace:*"
     "@foxglove/studio-base": "workspace:*"
     "@pmmmwh/react-refresh-webpack-plugin": 0.5.4
-    "@types/react": 17.0.39
-    "@types/react-dom": 17.0.13
+    "@types/react": 18.0.26
+    "@types/react-dom": 18.0.9
     clean-webpack-plugin: 4.0.0
     html-webpack-plugin: 5.5.0
     mathjs: 10.1.1
-    react: 17.0.2
-    react-dom: 17.0.2
+    react: 18.2.0
+    react-dom: 18.2.0
     webpack: 5.74.0
     webpack-dev-server: 4.11.0
   languageName: unknown
@@ -10543,8 +10512,8 @@ __metadata:
     plist: 3.0.5
     pngjs: 6.0.0
     quicklookjs: 0.0.3
-    react: 17.0.2
-    react-dom: 17.0.2
+    react: 18.2.0
+    react-dom: 18.2.0
     react-refresh-typescript: 2.0.3
     react-use: 17.4.0
     tinycolor2: 1.4.2
@@ -20239,12 +20208,21 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-dnd-html5-backend@npm:14.0.2, react-dnd-html5-backend@npm:^14.0.0":
+"react-dnd-html5-backend@npm:14.0.2":
   version: 14.0.2
   resolution: "react-dnd-html5-backend@npm:14.0.2"
   dependencies:
     dnd-core: 14.0.1
   checksum: c11dca3dcb9218d696d3d8b9a334e9b96952c399ceda159a164a61f44303be0603284e133729ff9a77901023500e92e5539f9b626100907c868ad858ea7c2d23
+  languageName: node
+  linkType: hard
+
+"react-dnd-html5-backend@npm:^14.1.0":
+  version: 14.1.0
+  resolution: "react-dnd-html5-backend@npm:14.1.0"
+  dependencies:
+    dnd-core: 14.0.1
+  checksum: 6aa8d62c6b2288893b3f216d476d2f84495b40d33578ba9e3a5051dc093a71dc59700e6927ed7ac596ff8d7aa3b3f29404f7d173f844bd6144ed633403dd8e96
   languageName: node
   linkType: hard
 
@@ -20276,7 +20254,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-dnd-touch-backend@npm:^14.0.0":
+"react-dnd-touch-backend@npm:^14.1.1":
   version: 14.1.1
   resolution: "react-dnd-touch-backend@npm:14.1.1"
   dependencies:
@@ -20340,29 +20318,15 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-dom@npm:17.0.2":
-  version: 17.0.2
-  resolution: "react-dom@npm:17.0.2"
+"react-dom@npm:18.2.0":
+  version: 18.2.0
+  resolution: "react-dom@npm:18.2.0"
   dependencies:
     loose-envify: ^1.1.0
-    object-assign: ^4.1.1
-    scheduler: ^0.20.2
+    scheduler: ^0.23.0
   peerDependencies:
-    react: 17.0.2
-  checksum: 1c1eaa3bca7c7228d24b70932e3d7c99e70d1d04e13bb0843bbf321582bc25d7961d6b8a6978a58a598af2af496d1cedcfb1bf65f6b0960a0a8161cb8dab743c
-  languageName: node
-  linkType: hard
-
-"react-dom@patch:react-dom@npm:17.0.2#./patches/react-dom.patch::locator=foxglove-studio%40workspace%3A.":
-  version: 17.0.2
-  resolution: "react-dom@patch:react-dom@npm%3A17.0.2#./patches/react-dom.patch::version=17.0.2&hash=e5f27c&locator=foxglove-studio%40workspace%3A."
-  dependencies:
-    loose-envify: ^1.1.0
-    object-assign: ^4.1.1
-    scheduler: ^0.20.2
-  peerDependencies:
-    react: 17.0.2
-  checksum: 6e1db6fd74ea7ed5583ea103472190d096c5976e61c847c20fa0680bcc95c3b863135680e93aa2f7ed6164f57de415b908709febe0e88f79c329f430504f9600
+    react: ^18.2.0
+  checksum: 7d323310bea3a91be2965f9468d552f201b1c27891e45ddc2d6b8f717680c95a75ae0bc1e3f5cf41472446a2589a75aed4483aee8169287909fcd59ad149e8cc
   languageName: node
   linkType: hard
 
@@ -20377,17 +20341,6 @@ __metadata:
     react: ^0.14.8 || ^15.0.1 || ^16.0.0 || ^17.0.1
     react-dom: ^0.14.8 || ^15.0.1 || ^16.0.0 || ^17.0.1
   checksum: 42bcd4423f12e9ee21b2d3f0c2a28805ff4953bd82b6be4c1f5b5f9a371115aafa36a6f3d82726d43b4912179b79e99550c2b9a772c7fe6a5cd8f7e93ff34ceb
-  languageName: node
-  linkType: hard
-
-"react-error-boundary@npm:^3.1.0":
-  version: 3.1.4
-  resolution: "react-error-boundary@npm:3.1.4"
-  dependencies:
-    "@babel/runtime": ^7.12.5
-  peerDependencies:
-    react: ">=16.13.1"
-  checksum: f36270a5d775a25c8920f854c0d91649ceea417b15b5bc51e270a959b0476647bb79abb4da3be7dd9a4597b029214e8fe43ea914a7f16fa7543c91f784977f1b
   languageName: node
   linkType: hard
 
@@ -20511,22 +20464,22 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-mosaic-component@npm:5.0.0":
-  version: 5.0.0
-  resolution: "react-mosaic-component@npm:5.0.0"
+"react-mosaic-component@npm:5.3.0":
+  version: 5.3.0
+  resolution: "react-mosaic-component@npm:5.3.0"
   dependencies:
     classnames: ^2.3.1
     immutability-helper: ^3.1.1
     lodash: ^4.17.21
-    prop-types: ^15.7.2
-    react-dnd: ^14.0.2
-    react-dnd-html5-backend: ^14.0.0
+    prop-types: ^15.8.1
+    react-dnd: ^14.0.5
+    react-dnd-html5-backend: ^14.1.0
     react-dnd-multi-backend: ^6.0.2
-    react-dnd-touch-backend: ^14.0.0
+    react-dnd-touch-backend: ^14.1.1
     uuid: ^3.4.0
   peerDependencies:
     react: 16 - 18
-  checksum: 25352bba0a0995dafde21b6887e67a6a50178b1821ed51238326626545dea527cfb1c9ae8cd2ef82eec0e9bed133e60debd036971b1f6dc5460d98ac0214daca
+  checksum: 92db779aa4ce34860a318f19d375fe9a9b2803903c24417e5f1b5979aa9cab89b4b28d4a536c84b680c198f203d48f5146165323523de12eba264a8467b5df63
   languageName: node
   linkType: hard
 
@@ -20698,13 +20651,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react@npm:17.0.2":
-  version: 17.0.2
-  resolution: "react@npm:17.0.2"
+"react@npm:18.2.0":
+  version: 18.2.0
+  resolution: "react@npm:18.2.0"
   dependencies:
     loose-envify: ^1.1.0
-    object-assign: ^4.1.1
-  checksum: b254cc17ce3011788330f7bbf383ab653c6848902d7936a87b09d835d091e3f295f7e9dd1597c6daac5dc80f90e778c8230218ba8ad599f74adcc11e33b9d61b
+  checksum: 88e38092da8839b830cda6feef2e8505dec8ace60579e46aa5490fc3dc9bba0bd50336507dc166f43e3afc1c42939c09fe33b25fae889d6f402721dcd78fca1b
   languageName: node
   linkType: hard
 
@@ -21649,13 +21601,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"scheduler@npm:^0.20.2":
-  version: 0.20.2
-  resolution: "scheduler@npm:0.20.2"
+"scheduler@npm:^0.23.0":
+  version: 0.23.0
+  resolution: "scheduler@npm:0.23.0"
   dependencies:
     loose-envify: ^1.1.0
-    object-assign: ^4.1.1
-  checksum: c4b35cf967c8f0d3e65753252d0f260271f81a81e427241295c5a7b783abf4ea9e905f22f815ab66676f5313be0a25f47be582254db8f9241b259213e999b8fc
+  checksum: d79192eeaa12abef860c195ea45d37cbf2bbf5f66e3c4dcd16f54a7da53b17788a70d109ee3d3dde1a0fd50e6a8fc171f4300356c5aee4fc0171de526bf35f8a
   languageName: node
   linkType: hard
 
@@ -24803,8 +24754,8 @@ __metadata:
     copy-webpack-plugin: 11.0.0
     html-webpack-plugin: 5.5.0
     idb: 7.0.1
-    react: 17.0.2
-    react-dom: 17.0.2
+    react: 18.2.0
+    react-dom: 18.2.0
     webpack: 5.74.0
     webpack-dev-server: 4.11.0
   languageName: unknown

@@ -12,7 +12,7 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { renderHook, act } from "@testing-library/react-hooks";
+import { renderHook, act } from "@testing-library/react";
 import { PropsWithChildren, useState } from "react";
 
 import { MessagePipelineProvider } from "@foxglove/studio-base/components/MessagePipeline";
@@ -56,18 +56,15 @@ describe("useMessageReducer", () => {
     const restore = jest.fn().mockReturnValue(1);
     const addMessage = jest.fn();
     const addMessages = jest.fn();
-    const { result: result1 } = renderHook(() =>
-      PanelAPI.useMessageReducer({ topics: ["/foo"], restore }),
-    );
-    expect(result1.error).toEqual(
-      new Error("useMessageReducer must be provided with exactly one of addMessage or addMessages"),
-    );
-    const { result: result2 } = renderHook(() =>
-      PanelAPI.useMessageReducer({ topics: ["/foo"], restore, addMessage, addMessages }),
-    );
-    expect(result2.error).toEqual(
-      new Error("useMessageReducer must be provided with exactly one of addMessage or addMessages"),
-    );
+    expect(() =>
+      renderHook(() => PanelAPI.useMessageReducer({ topics: ["/foo"], restore })),
+    ).toThrow("useMessageReducer must be provided with exactly one of addMessage or addMessages");
+    expect(() =>
+      renderHook(() =>
+        PanelAPI.useMessageReducer({ topics: ["/foo"], restore, addMessage, addMessages }),
+      ),
+    ).toThrow("useMessageReducer must be provided with exactly one of addMessage or addMessages");
+    (console.error as any).mockClear();
   });
 
   it("calls restore to initialize and addMessage for initial messages", async () => {
@@ -261,7 +258,7 @@ describe("useMessageReducer", () => {
     expect(result.current).toEqual(4);
   });
 
-  it("does not filter out non-existing topics", () => {
+  it("does not filter out non-existing topics", async () => {
     // Initial mount. Note that we haven't received any topics yet.
     const setSubscriptions = jest.fn();
 
@@ -289,7 +286,7 @@ describe("useMessageReducer", () => {
     rerender({ topics: ["/foo", "/bar"] });
 
     // And unsubscribes properly, too.
-    act(() => {
+    await act(() => {
       unmount();
     });
     expect(setSubscriptions.mock.calls).toEqual([
@@ -405,7 +402,7 @@ describe("useMessageReducer", () => {
     expect(result.current).toEqual(0);
 
     let promise: Promise<void>;
-    act(
+    await act(
       () =>
         void (promise = player.emit({
           activeData: {
@@ -444,7 +441,7 @@ describe("useMessageReducer", () => {
     expect(result.current).toEqual(2);
 
     let promise2: Promise<void>;
-    act(
+    await act(
       () =>
         void (promise2 = player.emit({
           activeData: {

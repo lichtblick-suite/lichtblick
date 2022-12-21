@@ -18,6 +18,7 @@ import rawUserUtils from "@foxglove/studio-base/players/UserNodePlayer/nodeTrans
 import { UserNodeLog } from "@foxglove/studio-base/players/UserNodePlayer/types";
 import PanelSetup from "@foxglove/studio-base/stories/PanelSetup";
 import { SExpectedResult } from "@foxglove/studio-base/stories/storyHelpers";
+import delay from "@foxglove/studio-base/util/delay";
 import { DEFAULT_STUDIO_NODE_PREFIX } from "@foxglove/studio-base/util/globalConstants";
 
 const userNodes = {
@@ -514,10 +515,11 @@ storiesOf("panels/NodePlayground", module)
         userNodeLogs: { nodeId1: logs },
       }}
       onFirstMount={(el) => {
-        setTimeout(() => {
+        setTimeout(async () => {
           const logsLabel = el.querySelector<HTMLElement>("[data-testid=np-logs]");
           if (logsLabel) {
             logsLabel.click();
+            await delay(10);
             const clearBtn = el.querySelector<HTMLElement>("button[data-testid=np-logs-clear]");
             if (clearBtn) {
               clearBtn.click();

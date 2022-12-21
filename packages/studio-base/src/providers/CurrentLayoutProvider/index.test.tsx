@@ -3,7 +3,7 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { act, renderHook } from "@testing-library/react-hooks";
+import { act, renderHook } from "@testing-library/react";
 import { SnackbarProvider } from "notistack";
 import { useEffect } from "react";
 
@@ -140,7 +140,6 @@ describe("CurrentLayoutProvider", () => {
     expect(mockLayoutManager.getLayout.mock.calls).toEqual([["example"], ["example"]]);
     expect(all.map((item) => (item instanceof Error ? undefined : item.layoutState))).toEqual([
       { selectedLayout: undefined },
-      { selectedLayout: { loading: true, id: "example", data: undefined } },
       { selectedLayout: { loading: false, id: "example", data: expectedState } },
     ]);
     (console.warn as jest.Mock).mockClear();
@@ -186,9 +185,7 @@ describe("CurrentLayoutProvider", () => {
     expect(mockUserProfile.setUserProfile.mock.calls).toEqual([[{ currentLayoutId: "example2" }]]);
     expect(all.map((item) => (item instanceof Error ? undefined : item.layoutState))).toEqual([
       { selectedLayout: undefined },
-      { selectedLayout: { loading: true, id: "example", data: undefined } },
       { selectedLayout: { loading: false, id: "example", data: TEST_LAYOUT } },
-      { selectedLayout: { loading: true, id: "example2", data: undefined } },
       { selectedLayout: { loading: false, id: "example2", data: newLayout } },
     ]);
     (console.warn as jest.Mock).mockClear();
@@ -216,7 +213,7 @@ describe("CurrentLayoutProvider", () => {
     });
 
     await act(async () => await result.current.childMounted);
-    act(() => result.current.actions.setPlaybackConfig({ speed: 10 }));
+    await act(() => result.current.actions.setPlaybackConfig({ speed: 10 }));
     await act(async () => await layoutStoragePutCalled);
 
     const newState = {
@@ -232,7 +229,6 @@ describe("CurrentLayoutProvider", () => {
     ]);
     expect(all.map((item) => (item instanceof Error ? undefined : item.layoutState))).toEqual([
       { selectedLayout: undefined },
-      { selectedLayout: { loading: true, id: "example", data: undefined } },
       { selectedLayout: { loading: false, id: "example", data: TEST_LAYOUT } },
       { selectedLayout: { loading: false, id: "example", data: newState } },
     ]);
@@ -268,7 +264,7 @@ describe("CurrentLayoutProvider", () => {
     await act(async () => await result.current.childMounted);
     const actions = result.current.actions;
     expect(result.current.actions).toBe(actions);
-    act(() =>
+    await act(() =>
       result.current.actions.savePanelConfigs({
         configs: [{ id: "ExamplePanel!1", config: { foo: "bar" } }],
       }),

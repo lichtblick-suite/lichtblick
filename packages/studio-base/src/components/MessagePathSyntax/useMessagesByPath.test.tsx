@@ -12,7 +12,7 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { act, renderHook } from "@testing-library/react-hooks";
+import { act, renderHook } from "@testing-library/react";
 import React, { PropsWithChildren } from "react";
 
 import useMessagesByPath from "@foxglove/studio-base/components/MessagePathSyntax/useMessagesByPath";
@@ -366,7 +366,7 @@ describe("useMessagesByPath", () => {
       schemaName: "dtype/Foo",
       sizeInBytes: 0,
     };
-    it("updates queriedData when a global variable changes", () => {
+    it("updates queriedData when a global variable changes", async () => {
       const { wrapper } = makeMessagePipelineWrapper({
         globalVariables: { foo: 0 },
         topics: [{ name: "/some/topic", schemaName: "dtype/Foo" }],
@@ -391,7 +391,7 @@ describe("useMessagesByPath", () => {
       });
 
       // when $foo changes to 1, queriedData.value should change to 11
-      act(() => {
+      await act(() => {
         result.current.setGlobalVariables({ foo: 1 });
       });
 

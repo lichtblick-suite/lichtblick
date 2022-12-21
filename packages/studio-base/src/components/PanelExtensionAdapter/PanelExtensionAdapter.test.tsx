@@ -118,6 +118,7 @@ describe("PanelExtensionAdapter", () => {
     await act(async () => await Promise.resolve());
     expect(renderStates).toEqual([
       { currentFrame: [message], didSeek: false },
+      { currentFrame: [message], didSeek: false },
       { currentFrame: [message], didSeek: true },
       { currentFrame: [message], didSeek: false },
       { currentFrame: [message], didSeek: true },
@@ -648,6 +649,7 @@ describe("PanelExtensionAdapter", () => {
       {
         currentTime: { sec: 1, nsec: 0 },
       },
+      {},
     ]);
 
     mockRAF.mockRestore();

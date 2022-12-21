@@ -5,7 +5,7 @@
 import * as Sentry from "@sentry/browser";
 import { BrowserTracing } from "@sentry/tracing";
 import { StrictMode, useEffect } from "react";
-import ReactDOM from "react-dom";
+import { createRoot } from "react-dom/client";
 
 import Logger from "@foxglove/log";
 import { AppSetting } from "@foxglove/studio-base";
@@ -70,11 +70,10 @@ async function main() {
   );
 
   if (!canRenderApp) {
-    ReactDOM.render(
+    createRoot(rootEl!).render(
       <StrictMode>
         <LogAfterRender>{banner}</LogAfterRender>
       </StrictMode>,
-      rootEl,
     );
     return;
   }
@@ -95,14 +94,13 @@ async function main() {
     },
   });
 
-  ReactDOM.render(
+  createRoot(rootEl!).render(
     <StrictMode>
       <LogAfterRender>
         {banner}
         <Root appConfiguration={appConfiguration} />
       </LogAfterRender>
     </StrictMode>,
-    rootEl,
   );
 }
 

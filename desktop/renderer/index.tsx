@@ -8,7 +8,7 @@
 import * as Sentry from "@sentry/electron/renderer";
 import { BrowserTracing } from "@sentry/tracing";
 import { StrictMode, useEffect } from "react";
-import ReactDOM from "react-dom";
+import { createRoot } from "react-dom/client";
 
 import { Sockets } from "@foxglove/electron-socket/renderer";
 import Logger from "@foxglove/log";
@@ -90,13 +90,12 @@ async function main() {
     },
   );
 
-  ReactDOM.render(
+  createRoot(rootEl!).render(
     <StrictMode>
       <LogAfterRender>
         <Root appConfiguration={appConfiguration} />
       </LogAfterRender>
     </StrictMode>,
-    rootEl,
   );
 }
 

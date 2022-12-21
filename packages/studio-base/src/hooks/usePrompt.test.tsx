@@ -23,7 +23,7 @@ describe("usePrompt", () => {
     );
     const start = document.body.childNodes.length;
     let promise: Promise<string | undefined> | undefined;
-    act(() => {
+    await act(() => {
       promise = prompt!({ title: "Hello" });
     });
     expect(promise).toBeDefined();
@@ -45,7 +45,7 @@ describe("usePrompt", () => {
       </ModalHost>,
     );
 
-    act(() => {
+    await act(() => {
       void prompt!({
         title: "test-title",
         placeholder: "test-placeholder",
@@ -70,7 +70,7 @@ describe("usePrompt", () => {
       </ModalHost>,
     );
     let valPromise: Promise<string | undefined> | undefined;
-    act(() => {
+    await act(() => {
       valPromise = prompt!({
         title: "test-title",
         placeholder: "test-placeholder",
@@ -82,7 +82,7 @@ describe("usePrompt", () => {
     fireEvent.change(input, { target: { value: "something" } });
 
     const submitButton = screen.getByText("OK");
-    act(() => submitButton.click());
+    await act(() => submitButton.click());
 
     await expect(valPromise).resolves.toEqual("something");
     root.unmount();
@@ -100,7 +100,7 @@ describe("usePrompt", () => {
       </ModalHost>,
     );
     let valPromise: Promise<string | undefined> | undefined;
-    act(() => {
+    await act(() => {
       valPromise = prompt!({
         title: "test-title",
         initialValue: "initial-value",
@@ -113,7 +113,7 @@ describe("usePrompt", () => {
     expect(input.value).toEqual("initial-value");
 
     const submitButton = screen.getByText("OK");
-    act(() => submitButton.click());
+    await act(() => submitButton.click());
 
     await expect(valPromise).resolves.toEqual("initial-value");
     root.unmount();
