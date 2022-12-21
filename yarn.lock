@@ -11771,15 +11771,15 @@ __metadata:
   languageName: node
   linkType: hard
 
-"eslint-plugin-file-progress@npm:1.2.0":
-  version: 1.2.0
-  resolution: "eslint-plugin-file-progress@npm:1.2.0"
+"eslint-plugin-file-progress@npm:1.3.0":
+  version: 1.3.0
+  resolution: "eslint-plugin-file-progress@npm:1.3.0"
   dependencies:
     chalk: ^4.1.2
     ora: ^5.4.1
   peerDependencies:
     eslint: ^7.0.0 || ^8.0.0
-  checksum: fcff4a5e8b9b7a8ba0280a4e900224f0dc1ac0183080711e6755f48ee6d605dc33c1ec5d66b3fc33ab350f2a7dbc26564c6579331fd02cd9e94784963fe8a608
+  checksum: 7253a36888eb91de721b53740a8e1e4f75786ec6312da192d47e93f7b304f1f5bc6b33d1f2df58a2fbd589558191ac66aa7b644b5fe91b8b4d303400ed716409
   languageName: node
   linkType: hard
 
@@ -12874,7 +12874,7 @@ __metadata:
     eslint-config-prettier: 8.5.0
     eslint-import-resolver-webpack: 0.13.2
     eslint-plugin-es: 4.1.0
-    eslint-plugin-file-progress: 1.2.0
+    eslint-plugin-file-progress: 1.3.0
     eslint-plugin-filenames: 1.3.2
     eslint-plugin-import: 2.25.4
     eslint-plugin-jest: 27.1.7
