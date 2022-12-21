@@ -2443,7 +2443,7 @@ __metadata:
     fake-indexeddb: 4.0.1
     fetch-mock: 9.11.0
     fork-ts-checker-webpack-plugin: 7.2.13
-    fuzzysort: 1.1.4
+    fuzzysort: 2.0.4
     fzf: 0.5.1
     gl-matrix: 3.4.3
     hammerjs: 2.0.8
@@ -13072,10 +13072,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"fuzzysort@npm:1.1.4":
-  version: 1.1.4
-  resolution: "fuzzysort@npm:1.1.4"
-  checksum: 27f0d44fb820b782c1f12564de32e6cc560a6035e801e28221fca746ceaf541698d466b68144315f38dcd221c1f0d40146c76ab71ec907e513f39dc2804da800
+"fuzzysort@npm:2.0.4":
+  version: 2.0.4
+  resolution: "fuzzysort@npm:2.0.4"
+  checksum: 5c498ec452ffc75c4368c52a7c4a490fc4d4129d94eab5f892d7e69d91ee3057259d9ab6924f14cca21f5731e7d91912e6c01669b40ef9b2165924e4b8e65fb5
   languageName: node
   linkType: hard
 
