@@ -180,8 +180,10 @@ export class Markers extends SceneExtension<TopicMarkers> {
     const receiveTime = toNanoSec(messageEvent.receiveTime);
 
     for (const markerMsg of markerArray.markers ?? []) {
-      const marker = normalizeMarker(markerMsg);
-      this.addMarker(topic, marker, receiveTime);
+      if (markerMsg) {
+        const marker = normalizeMarker(markerMsg);
+        this.addMarker(topic, marker, receiveTime);
+      }
     }
   };
 

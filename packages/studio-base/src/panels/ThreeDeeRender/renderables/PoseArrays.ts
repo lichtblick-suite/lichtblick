@@ -509,7 +509,7 @@ function normalizePoseArray(poseArray: PartialMessage<PoseArray>): PoseArray {
 function normalizeNavPathToPoseArray(navPath: PartialMessage<NavPath>): PoseArray {
   return {
     header: normalizeHeader(navPath.header),
-    poses: navPath.poses?.map((p) => normalizePose(p.pose)) ?? [],
+    poses: navPath.poses?.map((p) => normalizePose(p?.pose)) ?? [],
   };
 }
 
@@ -525,7 +525,7 @@ function validateNavPath(messageEvent: PartialMessageEvent<NavPath>, renderer: R
   if (navPath.poses) {
     const baseFrameId = renderer.normalizeFrameId(navPath.header?.frame_id ?? "");
     for (const pose of navPath.poses) {
-      const curFrameId = renderer.normalizeFrameId(pose.header?.frame_id ?? "");
+      const curFrameId = renderer.normalizeFrameId(pose?.header?.frame_id ?? "");
       if (baseFrameId !== curFrameId) {
         renderer.settings.errors.addToTopic(
           topic,

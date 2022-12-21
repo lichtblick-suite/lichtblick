@@ -87,7 +87,9 @@ export function normalizeVector3(vector: Partial<Vector3> | undefined): Vector3 
   return { x: vector.x ?? 0, y: vector.y ?? 0, z: vector.z ?? 0 };
 }
 
-export function normalizeVector3s(vectors: Partial<Vector3>[] | undefined): Vector3[] {
+export function normalizeVector3s(
+  vectors: (Partial<Vector3> | undefined)[] | undefined,
+): Vector3[] {
   if (!vectors) {
     return [];
   }
@@ -124,7 +126,9 @@ export function normalizeColorRGBA(color: Partial<ColorRGBA> | undefined): Color
   return { r: color.r ?? 0, g: color.g ?? 0, b: color.b ?? 0, a: color.a ?? 1 };
 }
 
-export function normalizeColorRGBAs(colors: Partial<ColorRGBA>[] | undefined): ColorRGBA[] {
+export function normalizeColorRGBAs(
+  colors: (Partial<ColorRGBA> | undefined)[] | undefined,
+): ColorRGBA[] {
   if (!colors) {
     return [];
   }

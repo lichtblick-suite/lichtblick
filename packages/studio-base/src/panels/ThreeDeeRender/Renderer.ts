@@ -892,14 +892,18 @@ export class Renderer extends EventEmitter<RendererEvents> {
     } else if (Array.isArray(maybeHasMarkers.markers)) {
       // If this message has an array called markers, scrape frame_id from all markers
       for (const marker of maybeHasMarkers.markers) {
-        const frameId = marker.header?.frame_id ?? "";
-        this.addCoordinateFrame(frameId);
+        if (marker) {
+          const frameId = marker.header?.frame_id ?? "";
+          this.addCoordinateFrame(frameId);
+        }
       }
     } else if (Array.isArray(maybeHasEntities.entities)) {
       // If this message has an array called entities, scrape frame_id from all entities
       for (const entity of maybeHasEntities.entities) {
-        const frameId = entity.frame_id ?? "";
-        this.addCoordinateFrame(frameId);
+        if (entity) {
+          const frameId = entity.frame_id ?? "";
+          this.addCoordinateFrame(frameId);
+        }
       }
     } else if (typeof maybeHasFrameId.frame_id === "string") {
       // If this message has a top-level frame_id, scrape it
