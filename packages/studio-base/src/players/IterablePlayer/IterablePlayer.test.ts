@@ -410,7 +410,7 @@ describe("IterablePlayer", () => {
 
     {
       // if the playback iterator is undefined it will throw an invariant error
-      expect(() => player.startPlayback()).not.toThrowError();
+      expect(() => player.startPlayback()).not.toThrow();
       await store.done;
     }
 
