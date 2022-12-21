@@ -32,16 +32,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@actions/exec@npm:1.1.0":
-  version: 1.1.0
-  resolution: "@actions/exec@npm:1.1.0"
-  dependencies:
-    "@actions/io": ^1.0.1
-  checksum: 1fad630ec2ca02438e0c05a9596f375edb3b04de50bf8cd712d6b79aec9f3cc3a175836d3ea610667e32431e7749cb93d8f4dec4947a48e29a720cfc3220216c
-  languageName: node
-  linkType: hard
-
-"@actions/exec@npm:^1.0.0":
+"@actions/exec@npm:1.1.1, @actions/exec@npm:^1.0.0":
   version: 1.1.1
   resolution: "@actions/exec@npm:1.1.1"
   dependencies:
@@ -10467,7 +10458,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "desktop@workspace:desktop"
   dependencies:
-    "@actions/exec": 1.1.0
+    "@actions/exec": 1.1.1
     "@actions/tool-cache": 2.0.1
     "@foxglove/electron-socket": 2.1.0
     "@foxglove/log": "workspace:*"
@@ -12829,7 +12820,7 @@ __metadata:
   resolution: "foxglove-studio@workspace:."
   dependencies:
     "@actions/core": 1.9.1
-    "@actions/exec": 1.1.0
+    "@actions/exec": 1.1.1
     "@actions/tool-cache": 2.0.1
     "@babel/core": 7.20.5
     "@babel/preset-env": 7.16.11
