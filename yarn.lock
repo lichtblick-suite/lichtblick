@@ -2449,7 +2449,7 @@ __metadata:
     dat.gui: 0.7.9
     esbuild-loader: 2.20.0
     eventemitter3: 5.0.0
-    fake-indexeddb: 3.1.7
+    fake-indexeddb: 4.0.1
     fetch-mock: 9.11.0
     fork-ts-checker-webpack-plugin: 7.2.13
     fuzzysort: 1.1.4
@@ -9645,13 +9645,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"core-js@npm:^2.5.3":
-  version: 2.6.12
-  resolution: "core-js@npm:2.6.12"
-  checksum: 44fa9934a85f8c78d61e0c8b7b22436330471ffe59ec5076fe7f324d6e8cf7f824b14b1c81ca73608b13bdb0fef035bd820989bf059767ad6fa13123bb8bd016
-  languageName: node
-  linkType: hard
-
 "core-js@npm:^3.0.0, core-js@npm:^3.0.4, core-js@npm:^3.6.5, core-js@npm:^3.8.2":
   version: 3.19.2
   resolution: "core-js@npm:3.19.2"
@@ -12325,12 +12318,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"fake-indexeddb@npm:3.1.7":
-  version: 3.1.7
-  resolution: "fake-indexeddb@npm:3.1.7"
+"fake-indexeddb@npm:4.0.1":
+  version: 4.0.1
+  resolution: "fake-indexeddb@npm:4.0.1"
   dependencies:
-    realistic-structured-clone: ^2.0.1
-  checksum: bd1663c9e27858de3ce6217721eeb0e802a3910bf521a509caaff509ca8c490efda6842d19de86488c43cf5cf5f55a7fdadcefc5e7d591a0976e606ead5000fd
+    realistic-structured-clone: ^3.0.0
+  checksum: dd1c82111e3b97c262a647a29dc012209f8c3bed0fbe7ae9630927772842fe8d3276794ff196d0021a5e60563a25a4323eca622a6a7bc6575b62e074328a0c90
   languageName: node
   linkType: hard
 
@@ -20805,15 +20798,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"realistic-structured-clone@npm:^2.0.1":
-  version: 2.0.3
-  resolution: "realistic-structured-clone@npm:2.0.3"
+"realistic-structured-clone@npm:^3.0.0":
+  version: 3.0.0
+  resolution: "realistic-structured-clone@npm:3.0.0"
   dependencies:
-    core-js: ^2.5.3
     domexception: ^1.0.1
     typeson: ^6.1.0
     typeson-registry: ^1.0.0-alpha.20
-  checksum: aca8c7c2712519a8c05278456972dd4dd93f73da57be000f4693669d02479eebe995bc277019dc64adf508696b5dca3cbd425a06c0372557a0d3178da0adab06
+  checksum: b4521b299c8dc320a5e3ef44678f80a92b0f1837901a5fbd1c7be06808110fb0b591b417114306ec55b44ef47fd17968aacca079afc9665afbe1c528026295ec
   languageName: node
   linkType: hard
 
