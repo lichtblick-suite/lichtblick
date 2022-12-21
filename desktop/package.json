@@ -36,7 +36,7 @@
     "esbuild-loader": "2.20.0",
     "fork-ts-checker-webpack-plugin": "7.2.13",
     "html-webpack-plugin": "5.5.0",
-    "jszip": "3.10.0",
+    "jszip": "3.10.1",
     "path-browserify": "1.0.1",
     "playwright": "1.27.1",
     "plist": "3.0.5",
