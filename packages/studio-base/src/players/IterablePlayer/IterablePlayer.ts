@@ -33,6 +33,7 @@ import {
   PlayerPresence,
   PlayerCapabilities,
   TopicStats,
+  PlayerStateActiveData,
 } from "@foxglove/studio-base/players/types";
 import { RosDatatypes } from "@foxglove/studio-base/types/RosDatatypes";
 import delay from "@foxglove/studio-base/util/delay";
@@ -112,8 +113,8 @@ export class IterablePlayer implements Player {
   private _isPlaying: boolean = false;
   private _listener?: (playerState: PlayerState) => Promise<void>;
   private _speed: number = 1.0;
-  private _start: Time = { sec: 0, nsec: 0 };
-  private _end: Time = { sec: 0, nsec: 0 };
+  private _start?: Time;
+  private _end?: Time;
   private _enablePreload = true;
 
   // next read start time indicates where to start reading for the next tick
@@ -206,7 +207,7 @@ export class IterablePlayer implements Player {
   }
 
   private startPlayImpl(opt?: { untilTime: Time }): void {
-    if (this._isPlaying || this._untilTime) {
+    if (this._isPlaying || this._untilTime || !this._start || !this._end) {
       return;
     }
 
@@ -250,9 +251,10 @@ export class IterablePlayer implements Player {
   }
 
   public seekPlayback(time: Time): void {
-    // Seeking before initialization is complete is a no-op since we do not
-    // yet know the time range of the source
-    if (this._state === "preinit" || this._state === "initialize") {
+    // Wait to perform seek until initialization is complete
+    if (this._state === "preinit" || this._state === "initialize" || !this._start || !this._end) {
+      log.debug(`Ignoring seek, state=${this._state}`);
+      this._seekTarget = time;
       return;
     }
 
@@ -261,11 +263,13 @@ export class IterablePlayer implements Player {
 
     // We are already seeking to this time, no need to reset seeking
     if (this._seekTarget && compare(this._seekTarget, targetTime) === 0) {
+      log.debug(`Ignoring seek, already seeking to this time`);
       return;
     }
 
     // We are already at this time, no need to reset seeking
     if (this._currentTime && compare(this._currentTime, targetTime) === 0) {
+      log.debug(`Ignoring seek, already at this time`);
       return;
     }
 
@@ -303,7 +307,7 @@ export class IterablePlayer implements Player {
     // trigger the backfill.
     if (this._state === "idle" || this._state === "seek-backfill" || this._state === "play") {
       if (!this._isPlaying && this._currentTime) {
-        this._seekTarget = this._currentTime;
+        this._seekTarget ??= this._currentTime;
         this._untilTime = undefined;
 
         // Trigger a seek backfill to load any missing messages and reset the forward iterator
@@ -441,7 +445,8 @@ export class IterablePlayer implements Player {
       } = await this._bufferedSource.initialize();
 
       this._profile = profile;
-      this._start = this._currentTime = start;
+      this._start = start;
+      this._currentTime = this._seekTarget ?? start;
       this._end = end;
       this._publishedTopics = publishersByTopic;
       this._providerDatatypes = datatypes;
@@ -506,7 +511,7 @@ export class IterablePlayer implements Player {
     }
     this._queueEmitState();
 
-    if (!this._hasError) {
+    if (!this._hasError && this._start) {
       // Wait a bit until panels have had the chance to subscribe to topics before we start
       // playback.
       await delay(START_DELAY_MS);
@@ -553,6 +558,16 @@ export class IterablePlayer implements Player {
   // Without an initial read, the user would be looking at a blank layout since no messages have yet
   // been delivered.
   private async _stateStartPlay() {
+    if (!this._start || !this._end) {
+      throw new Error("Invariant: start and end must be set");
+    }
+
+    // If we have a target seek time, the seekPlayback function will take care of backfilling messages.
+    if (this._seekTarget) {
+      this._setState("seek-backfill");
+      return;
+    }
+
     const stopTime = clampTime(
       add(this._start, fromNanoSec(SEEK_ON_START_NS)),
       this._start,
@@ -714,23 +729,15 @@ export class IterablePlayer implements Player {
     const messages = this._messages;
     this._messages = [];
 
-    const currentTime = this._currentTime ?? this._start;
+    let activeData: PlayerStateActiveData | undefined;
+    if (this._start && this._end && this._currentTime) {
+      // Notify the block loader about the current time so it tries to keep current time loaded
+      this._blockLoader?.setActiveTime(this._currentTime);
 
-    // Notify the block loader about the current time so it tries to keep current time loaded
-    this._blockLoader?.setActiveTime(currentTime);
-
-    const data: PlayerState = {
-      name: this._name,
-      presence: this._presence,
-      progress: this._progress,
-      capabilities: this._capabilities,
-      profile: this._profile,
-      playerId: this._id,
-      problems: this._problemManager.problems(),
-      activeData: {
+      activeData = {
         messages,
         totalBytesReceived: this._receivedBytes,
-        currentTime,
+        currentTime: this._currentTime,
         startTime: this._start,
         endTime: this._end,
         isPlaying: this._isPlaying,
@@ -740,7 +747,18 @@ export class IterablePlayer implements Player {
         topicStats: this._providerTopicStats,
         datatypes: this._providerDatatypes,
         publishedTopics: this._publishedTopics,
-      },
+      };
+    }
+
+    const data: PlayerState = {
+      name: this._name,
+      presence: this._presence,
+      progress: this._progress,
+      capabilities: this._capabilities,
+      profile: this._profile,
+      playerId: this._id,
+      problems: this._problemManager.problems(),
+      activeData,
       urlState: {
         sourceId: this._sourceId,
         parameters: this._urlParams,
@@ -756,6 +774,9 @@ export class IterablePlayer implements Player {
   private async _tick(): Promise<void> {
     if (!this._isPlaying) {
       return;
+    }
+    if (!this._start || !this._end) {
+      throw new Error("Invariant: start & end should be set before tick()");
     }
 
     // compute how long of a time range we want to read by taking into account
@@ -939,6 +960,9 @@ export class IterablePlayer implements Player {
 
     if (!this._currentTime) {
       throw new Error("Invariant: currentTime not set before statePlay");
+    }
+    if (!this._start || !this._end) {
+      throw new Error("Invariant: start & end should be set before statePlay");
     }
 
     // Track the identity of allTopics, if this changes we need to reset our iterator to

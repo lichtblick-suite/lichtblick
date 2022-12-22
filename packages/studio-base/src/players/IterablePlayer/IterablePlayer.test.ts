@@ -5,6 +5,7 @@
 
 import { last } from "lodash";
 
+import { fromSec } from "@foxglove/rostime";
 import {
   MessageEvent,
   PlayerCapabilities,
@@ -148,7 +149,7 @@ describe("IterablePlayer", () => {
 
     expect(playerStates).toEqual([
       // before initialize
-      { ...baseState, activeData: { ...baseState.activeData, endTime: { sec: 0, nsec: 0 } } },
+      { ...baseState, activeData: undefined },
       // start delay
       {
         ...baseState,
@@ -322,6 +323,67 @@ describe("IterablePlayer", () => {
     // 1. a state update completing the second seek
     // 1. a state update for moving to idle
     expect(playerStates).toEqual([withMessages, baseState, baseState]);
+
+    player.close();
+  });
+
+  it("supports seek request during initialization", async () => {
+    const source = new TestSource();
+    const player = new IterablePlayer({
+      source,
+      enablePreload: false,
+      sourceId: "test",
+    });
+    const store = new PlayerStateStore(5);
+    player.setSubscriptions([{ topic: "foo" }]);
+    player.setListener(async (state) => await store.add(state));
+
+    // starts a seek backfill
+    player.seekPlayback(fromSec(0.5));
+
+    const baseState: PlayerStateWithoutPlayerId = {
+      activeData: {
+        currentTime: fromSec(0.5),
+        startTime: { sec: 0, nsec: 0 },
+        endTime: { sec: 1, nsec: 0 },
+        datatypes: new Map(),
+        isPlaying: false,
+        lastSeekTime: 0,
+        messages: [],
+        totalBytesReceived: 0,
+        speed: 1.0,
+        topics: [],
+        topicStats: new Map(),
+        publishedTopics: new Map<string, Set<string>>(),
+      },
+      problems: [],
+      capabilities: [PlayerCapabilities.setSpeed, PlayerCapabilities.playbackControl],
+      profile: undefined,
+      presence: PlayerPresence.PRESENT,
+      progress: {
+        fullyLoadedFractionRanges: [{ start: 0.500_000_001, end: 1 }],
+        messageCache: undefined,
+      },
+      urlState: {
+        sourceId: "test",
+        parameters: undefined,
+      },
+      name: undefined,
+    };
+
+    const playerStates = await store.done;
+    expect(playerStates).toEqual([
+      {
+        ...baseState,
+        activeData: undefined,
+        presence: PlayerPresence.INITIALIZING,
+        progress: {},
+      },
+      { ...baseState, progress: {} },
+      { ...baseState, progress: {} },
+      { ...baseState, progress: {} },
+      baseState,
+    ]);
 
     player.close();
   });

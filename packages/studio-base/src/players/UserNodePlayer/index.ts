@@ -356,10 +356,6 @@ export default class UserNodePlayer implements Player {
       // This code causes us to reset workers twice because the seeking resets the workers too
       await this._resetWorkersUnlocked(state);
       this._setSubscriptionsUnlocked(this._subscriptions, state);
-      const { currentTime, isPlaying = false } = state.lastPlayerStateActiveData ?? {};
-      if (currentTime && !isPlaying) {
-        this._player.seekPlayback?.(currentTime);
-      }
     });
   }
 
