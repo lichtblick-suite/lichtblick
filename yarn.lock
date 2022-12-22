@@ -2466,7 +2466,7 @@ __metadata:
     natsort: 2.0.3
     nearley: 2.20.1
     nearley-loader: 2.0.0
-    notistack: 2.0.5
+    notistack: 2.0.8
     path-browserify: 1.0.1
     prettier: 2.5.1
     react: 18.2.0
@@ -18328,9 +18328,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"notistack@npm:2.0.5":
-  version: 2.0.5
-  resolution: "notistack@npm:2.0.5"
+"notistack@npm:2.0.8":
+  version: 2.0.8
+  resolution: "notistack@npm:2.0.8"
   dependencies:
     clsx: ^1.1.0
     hoist-non-react-statics: ^3.3.0
@@ -18345,7 +18345,7 @@ __metadata:
       optional: true
     "@emotion/styled":
       optional: true
-  checksum: afbf8bf8878c610b3ca58b70164784d2f5683f345bc4b670b5c4114a9155104f087a501422d7883ec8fd90299d6c66029f8bd6b11396baba157fad70c27e167a
+  checksum: f95952ea7209840f6f05a65e74f0fb4e7a1bb321753b2955ae6052f2205d47a6a3c50a42b72db11eac2fc491c4105b4687bed89e79287399530973fa133a5380
   languageName: node
   linkType: hard
 
