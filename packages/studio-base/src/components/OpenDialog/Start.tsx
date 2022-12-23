@@ -389,7 +389,7 @@ function SidebarItems(props: { onSelectView: (newValue: OpenDialogViews) => void
                   target="_blank"
                   className={classes.button}
                 >
-                  Share team layouts
+                  Share layouts
                 </Button>
               </>
             ),

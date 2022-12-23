@@ -37,7 +37,7 @@ export default function SignInPrompt(props: SignInPromptProps): JSX.Element {
           <Link color="inherit" onClick={openAccountSettings} underline="always">
             Sign in
           </Link>{" "}
-          to sync layouts across multiple devices, and share them with team members.
+          to sync layouts across multiple devices, and share them with your organization.
         </>
       }
       titleTypographyProps={{

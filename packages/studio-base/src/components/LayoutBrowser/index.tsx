@@ -358,8 +358,8 @@ export default function LayoutBrowser({
   const onShareLayout = useCallbackWithToast(
     async (item: Layout) => {
       const name = await prompt({
-        title: "Share a copy with your team",
-        subText: "Team layouts can be used and changed by other members of your team.",
+        title: "Share a copy with your organization",
+        subText: "Shared layouts can be used and changed by other members of your organization.",
         initialValue: item.name,
         label: "Layout name",
       });
@@ -390,7 +390,7 @@ export default function LayoutBrowser({
         const response = await confirm({
           title: `Update “${item.name}”?`,
           prompt:
-            "Your changes will overwrite this layout for all team members. This cannot be undone.",
+            "Your changes will overwrite this layout for all organization members. This cannot be undone.",
           ok: "Save",
         });
         if (response !== "ok") {
@@ -578,8 +578,8 @@ export default function LayoutBrowser({
         />
         {layoutManager.supportsSharing && (
           <LayoutSection
-            title="Team"
-            emptyText="Your organization doesn’t have any shared layouts yet. Share a personal layout to collaborate with other team members."
+            title="Organization"
+            emptyText="Your organization doesn’t have any shared layouts yet. Share a layout to collaborate with others."
             items={layouts.value?.shared}
             anySelectedModifiedLayouts={anySelectedModifiedLayouts}
             multiSelectedIds={state.selectedIds}

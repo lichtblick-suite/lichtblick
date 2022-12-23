@@ -96,7 +96,7 @@ export function UnsavedChangesPrompt({
               <FormControlLabel
                 value="overwrite"
                 label={[
-                  `Update team layout “${layout.name}”`,
+                  `Update shared layout “${layout.name}”`,
                   !isOnline && "(unavailable while offline)",
                 ]
                   .filter(Boolean)
