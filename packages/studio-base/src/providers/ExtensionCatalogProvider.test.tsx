@@ -3,9 +3,8 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { renderHook, act } from "@testing-library/react";
+import { renderHook } from "@testing-library/react-hooks";
 
-import { signal } from "@foxglove/den/async";
 import { useExtensionCatalog } from "@foxglove/studio-base/context/ExtensionCatalogContext";
 import { ExtensionLoader } from "@foxglove/studio-base/services/ExtensionLoader";
 import { ExtensionInfo } from "@foxglove/studio-base/types/Extensions";
@@ -35,11 +34,7 @@ describe("ExtensionCatalogProvider", () => {
         module.exports = { activate: function() { return 1; } }
     `;
 
-    const loadExtensionCalled = signal();
-    const loadExtension = jest.fn().mockImplementation(async () => {
-      loadExtensionCalled.resolve();
-      return source;
-    });
+    const loadExtension = jest.fn().mockResolvedValue(source);
     const mockPrivateLoader: ExtensionLoader = {
       namespace: "org",
       getExtensions: jest
@@ -50,7 +45,7 @@ describe("ExtensionCatalogProvider", () => {
       uninstallExtension: jest.fn(),
     };
 
-    const { result } = renderHook(() => useExtensionCatalog((state) => state), {
+    const { result, waitFor } = renderHook(() => useExtensionCatalog((state) => state), {
       initialProps: {},
       wrapper: ({ children }) => (
         <ExtensionCatalogProvider loaders={[mockPrivateLoader]}>
@@ -59,7 +54,7 @@ describe("ExtensionCatalogProvider", () => {
       ),
     });
 
-    await act(async () => await loadExtensionCalled);
+    await waitFor(() => expect(loadExtension).toHaveBeenCalledTimes(1));
     expect(result.current.installedExtensions).toEqual([
       {
         description: "description",
@@ -90,11 +85,7 @@ describe("ExtensionCatalogProvider", () => {
         }
     `;
 
-    const loadExtensionCalled = signal();
-    const loadExtension = jest.fn().mockImplementation(async () => {
-      loadExtensionCalled.resolve();
-      return source;
-    });
+    const loadExtension = jest.fn().mockResolvedValue(source);
     const mockPrivateLoader: ExtensionLoader = {
       namespace: "org",
       getExtensions: jest
@@ -105,7 +96,7 @@ describe("ExtensionCatalogProvider", () => {
       uninstallExtension: jest.fn(),
     };
 
-    const { result } = renderHook(() => useExtensionCatalog((state) => state), {
+    const { result, waitFor } = renderHook(() => useExtensionCatalog((state) => state), {
       initialProps: {},
       wrapper: ({ children }) => (
         <ExtensionCatalogProvider loaders={[mockPrivateLoader]}>
@@ -114,8 +105,7 @@ describe("ExtensionCatalogProvider", () => {
       ),
     });
 
-    await act(async () => await loadExtensionCalled);
-    await Promise.resolve();
+    await waitFor(() => expect(loadExtension).toHaveBeenCalledTimes(1));
     expect(result.current.installedMessageConverters).toEqual([
       {
         fromSchemaName: "from.Schema",

@@ -3,7 +3,7 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 import { StrictMode } from "react";
-import { createRoot } from "react-dom/client";
+import ReactDOM from "react-dom";
 
 import { PanelExtensionContext } from "@foxglove/studio";
 import Panel from "@foxglove/studio-base/components/Panel";
@@ -14,14 +14,14 @@ import TeleopPanel from "./TeleopPanel";
 import helpContent from "./index.help.md";
 
 function initPanel(context: PanelExtensionContext) {
-  const root = createRoot(context.panelElement);
-  root.render(
+  ReactDOM.render(
     <StrictMode>
       <TeleopPanel context={context} />
     </StrictMode>,
+    context.panelElement,
   );
   return () => {
-    root.unmount();
+    ReactDOM.unmountComponentAtNode(context.panelElement);
   };
 }
 

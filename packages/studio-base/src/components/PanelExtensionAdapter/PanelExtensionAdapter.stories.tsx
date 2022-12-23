@@ -3,7 +3,7 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 import { ReactElement, useLayoutEffect, useState } from "react";
-import { createRoot } from "react-dom/client";
+import ReactDOM from "react-dom";
 
 import { toSec } from "@foxglove/rostime";
 import { PanelExtensionContext, ParameterValue, RenderState, Time } from "@foxglove/studio";
@@ -16,7 +16,6 @@ import PanelExtensionAdapter from "./PanelExtensionAdapter";
 export default {
   title: "PanelExtensionAdapter",
   component: PanelExtensionAdapter,
-  parameters: { colorScheme: "light" },
 };
 
 export const CatchRenderError = (): JSX.Element => {
@@ -64,9 +63,7 @@ function SimplePanel({ context }: { context: PanelExtensionContext }) {
     context.watch("currentTime");
     context.watch("parameters");
     context.onRender = (renderState: RenderState, done) => {
-      if (renderState.currentTime != undefined) {
-        setCurrentTime(renderState.currentTime);
-      }
+      setCurrentTime(renderState.currentTime);
       if (renderState.parameters != undefined) {
         setParameters(renderState.parameters);
       }
@@ -87,9 +84,7 @@ function SimplePanel({ context }: { context: PanelExtensionContext }) {
 
 export const SimplePanelRender = (): ReactElement => {
   function initPanel(context: PanelExtensionContext) {
-    const root = createRoot(context.panelElement);
-    root.render(<SimplePanel context={context} />);
-    return () => root.unmount();
+    ReactDOM.render(<SimplePanel context={context} />, context.panelElement);
   }
 
   return (

@@ -3,7 +3,7 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 import { useEffect } from "react";
-import { createRoot } from "react-dom/client";
+import ReactDOM from "react-dom";
 
 import Logger from "@foxglove/log";
 
@@ -35,10 +35,11 @@ async function main() {
 
   const { Root } = await import("./Root");
 
-  createRoot(rootEl!).render(
+  ReactDOM.render(
     <LogAfterRender>
       <Root />
     </LogAfterRender>,
+    rootEl,
   );
 }
 

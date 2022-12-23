@@ -61,7 +61,7 @@ export function TabbedToolbar(props: Props): JSX.Element {
 
   const [{ isOver, item }, dropRef] = useDrop({
     accept: TAB_DRAG_TYPE,
-    collect: (monitor): { isOver: boolean; item?: DraggingTabItem } => ({
+    collect: (monitor) => ({
       item: monitor.getItem(),
       isOver: monitor.isOver(),
     }),

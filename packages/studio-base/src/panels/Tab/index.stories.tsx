@@ -474,7 +474,6 @@ export const DraggingAndDroppingANestedTabPanelDoesNotRemoveAnyTabs: Story = () 
             document.querySelectorAll('[data-testid~="Tab!Left"] [data-testid="add-tab"]')[0] as any
           ).click();
 
-          await Promise.resolve();
           const dragHandle = document.querySelector(
             '[data-testid~="Tab!RightInner"] [data-testid="panel-menu"]',
           );
@@ -482,13 +481,7 @@ export const DraggingAndDroppingANestedTabPanelDoesNotRemoveAnyTabs: Story = () 
           const target = document.querySelector(
             '[data-testid~="Tab!Left"] [data-testid="empty-drop-target"]',
           );
-          if (!dragHandle) {
-            throw new Error("No drag handle");
-          }
-          if (!target) {
-            throw new Error("No drop target");
-          }
-          dragAndDrop(dragHandle, target);
+          dragAndDrop(dragHandle!, target!);
         }, DEFAULT_TIMEOUT);
       }}
     >

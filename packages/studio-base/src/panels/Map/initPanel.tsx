@@ -7,7 +7,7 @@ import LeafletRetinaIconUrl from "leaflet/dist/images/marker-icon-2x.png";
 import LeafletIconUrl from "leaflet/dist/images/marker-icon.png";
 import LeafletShadowIconUrl from "leaflet/dist/images/marker-shadow.png";
 import { StrictMode } from "react";
-import { createRoot } from "react-dom/client";
+import ReactDOM from "react-dom";
 
 import { PanelExtensionContext } from "@foxglove/studio";
 
@@ -29,13 +29,13 @@ L.Marker.prototype.options.icon = L.icon({
 });
 
 export function initPanel(context: PanelExtensionContext): () => void {
-  const root = createRoot(context.panelElement);
-  root.render(
+  ReactDOM.render(
     <StrictMode>
       <MapPanel context={context} />
     </StrictMode>,
+    context.panelElement,
   );
   return () => {
-    root.unmount();
+    ReactDOM.unmountComponentAtNode(context.panelElement);
   };
 }

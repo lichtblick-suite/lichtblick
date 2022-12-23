@@ -176,11 +176,10 @@ storiesOf("panels/Table", module)
         <PanelSetup
           fixture={fixture}
           onMount={() => {
-            setImmediate(async () => {
+            setImmediate(() => {
               (
                 document.querySelectorAll("[data-testid=expand-row-0]")[0] as HTMLTableCellElement
               ).click();
-              await Promise.resolve();
               (
                 document.querySelectorAll("[data-testid=expand-row-1]")[0] as HTMLTableCellElement
               ).click();

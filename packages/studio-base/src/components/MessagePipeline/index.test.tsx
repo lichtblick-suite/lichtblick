@@ -14,7 +14,7 @@
 
 /* eslint-disable jest/no-conditional-expect */
 
-import { renderHook, act } from "@testing-library/react";
+import { renderHook, act } from "@testing-library/react-hooks";
 import { PropsWithChildren, useCallback, useState } from "react";
 import { DeepPartial } from "ts-essentials";
 
@@ -38,11 +38,10 @@ import { MAX_PROMISE_TIMEOUT_TIME_MS } from "./pauseFrameForPromise";
 
 jest.setTimeout(MAX_PROMISE_TIMEOUT_TIME_MS * 3);
 
-// We require two act() calls for each player emit() to take effect because of some quirks with
-// React 18 / @testing-library/react. The root cause for why this requires two act() calls is unknown.
+// We require two state updates for each player emit() to take effect, because we  React 18 / @testing-library/react,
 async function doubleAct(fn: () => Promise<void>) {
   let promise: Promise<void> | undefined;
-  await act(() => void (promise = fn()));
+  act(() => void (promise = fn()));
   await act(async () => await promise);
 }
 
@@ -273,7 +272,7 @@ describe("MessagePipelineProvider/useMessagePipeline", () => {
     renderHook(Hook, {
       wrapper: Wrapper,
     });
-    await act(() => {
+    act(() => {
       void player.emit();
     });
     await expect(async () => await player.emit()).rejects.toThrow(
@@ -288,12 +287,12 @@ describe("MessagePipelineProvider/useMessagePipeline", () => {
       wrapper: Wrapper,
     });
 
-    await act(() => {
+    act(() => {
       result.current.setSubscriptions("test", [{ topic: "/studio/test" }]);
     });
     expect(result.current.subscriptions).toEqual([{ topic: "/studio/test" }]);
 
-    await act(() => {
+    act(() => {
       result.current.setSubscriptions("bar", [{ topic: "/studio/test2" }]);
     });
     expect(result.current.subscriptions).toEqual([
@@ -343,7 +342,7 @@ describe("MessagePipelineProvider/useMessagePipeline", () => {
         }),
     );
 
-    await act(() => {
+    act(() => {
       result.current.setSubscriptions("custom-id", [{ topic: "/input/foo" }]);
     });
     expect(result.current.subscriptions).toEqual([{ topic: "/input/foo" }]);
@@ -399,7 +398,7 @@ describe("MessagePipelineProvider/useMessagePipeline", () => {
         }),
     );
 
-    await act(() => {
+    act(() => {
       result.current.setSubscriptions("custom-id", [{ topic: "/input/foo" }]);
     });
     expect(result.current.subscriptions).toEqual([{ topic: "/input/foo" }]);
@@ -427,14 +426,15 @@ describe("MessagePipelineProvider/useMessagePipeline", () => {
     rerender();
 
     // Unsubscribe and re-subscribe to trigger injection of old messages
-    await act(() => {
+    act(() => {
       result.current.setSubscriptions("custom-id", []);
     });
-    await act(() => {
+    act(() => {
       result.current.setSubscriptions("custom-id", [{ topic: "/input/foo" }]);
     });
     expect(result.current.subscriptions).toEqual([{ topic: "/input/foo" }]);
-    await doubleAct(
+
+    await act(
       async () =>
         await player2.emit({
           activeData: {
@@ -464,14 +464,14 @@ describe("MessagePipelineProvider/useMessagePipeline", () => {
       wrapper: Wrapper,
     });
 
-    await act(() =>
+    act(() =>
       result.current.setPublishers("test", [{ topic: "/studio/test", schemaName: "test" }]),
     );
     expect(result.current.publishers).toEqual<typeof result.current.publishers>([
       { topic: "/studio/test", schemaName: "test" },
     ]);
 
-    await act(() =>
+    act(() =>
       result.current.setPublishers("bar", [{ topic: "/studio/test2", schemaName: "test2" }]),
     );
     expect(result.current.publishers).toEqual<typeof result.current.publishers>([
@@ -647,9 +647,9 @@ describe("MessagePipelineProvider/useMessagePipeline", () => {
     const { result, rerender } = renderHook(Hook, {
       wrapper: Wrapper,
     });
-    await act(() => result.current.setSubscriptions("test", [{ topic: "/studio/test" }]));
-    await act(() => result.current.setSubscriptions("bar", [{ topic: "/studio/test2" }]));
-    await act(() =>
+    act(() => result.current.setSubscriptions("test", [{ topic: "/studio/test" }]));
+    act(() => result.current.setSubscriptions("bar", [{ topic: "/studio/test2" }]));
+    act(() =>
       result.current.setPublishers("test", [{ topic: "/studio/test", schemaName: "test" }]),
     );
 
@@ -822,7 +822,7 @@ describe("MessagePipelineProvider/useMessagePipeline", () => {
       const firstPlayerResumeFn = result.current.pauseFrame("");
 
       // Then trigger the next emit.
-      await act(() => void player.emit());
+      act(() => void player.emit());
       await delay(20);
 
       // Replace the player.

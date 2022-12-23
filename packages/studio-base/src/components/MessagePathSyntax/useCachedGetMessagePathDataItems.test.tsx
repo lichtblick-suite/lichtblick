@@ -11,7 +11,7 @@
 //   This source code is licensed under the Apache License, Version 2.0,
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
-import { act, renderHook } from "@testing-library/react";
+import { act, renderHook } from "@testing-library/react-hooks";
 
 import parseRosPath from "@foxglove/studio-base/components/MessagePathSyntax/parseRosPath";
 import MockMessagePipelineProvider from "@foxglove/studio-base/components/MessagePipeline/MockMessagePipelineProvider";
@@ -212,11 +212,11 @@ describe("useCachedGetMessagePathDataItems", () => {
     expect(result.current.getItems("/topic.an_array[$foo]", message)).toBe(data0);
 
     // Changing an unrelated global variable should not invalidate the cache.
-    await act(() => result.current.setGlobalVariables({ bar: 0 }));
+    act(() => result.current.setGlobalVariables({ bar: 0 }));
     expect(result.current.getItems("/topic.an_array[$foo]", message)).toBe(data0);
 
     // Changing a relevant global variable.
-    await act(() => result.current.setGlobalVariables({ foo: 1 }));
+    act(() => result.current.setGlobalVariables({ foo: 1 }));
     expect(result.current.getItems("/topic.an_array[$foo]", message)).toEqual([
       { path: "/topic.an_array[1]", value: 10 },
     ]);

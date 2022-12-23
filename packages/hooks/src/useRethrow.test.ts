@@ -3,13 +3,13 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { act, renderHook } from "@testing-library/react";
+import { act, renderHook } from "@testing-library/react-hooks";
 import * as React from "react";
 
 import useRethrow from "./useRethrow";
 
 describe("useRethrow", () => {
-  it("should catch errors thrown", async () => {
+  it("should catch errors thrown", () => {
     let error: Error | undefined;
     const { result } = renderHook(
       () => {
@@ -29,7 +29,7 @@ describe("useRethrow", () => {
       },
     );
 
-    await act(() => {
+    act(() => {
       result.current();
     });
     expect(error?.message).toEqual("foobar");

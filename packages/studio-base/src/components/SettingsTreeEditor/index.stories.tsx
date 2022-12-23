@@ -4,7 +4,6 @@
 
 import { Box } from "@mui/material";
 import { fireEvent } from "@testing-library/dom";
-import userEvent from "@testing-library/user-event";
 import produce from "immer";
 import { last } from "lodash";
 import { useCallback, useMemo, useState, useEffect } from "react";
@@ -803,10 +802,14 @@ export function PanelExamples(): JSX.Element {
   return <Wrapper nodes={PanelExamplesSettings} />;
 }
 
-PanelExamples.play = async () => {
-  const node = document.querySelector("[data-node-function=edit-label]");
-  await userEvent.click(node!);
-  await userEvent.keyboard("Renamed Node{Enter}");
+PanelExamples.play = () => {
+  Array.from(document.querySelectorAll("[data-node-function=edit-label]"))
+    .slice(0, 1)
+    .forEach((node) => {
+      fireEvent.click(node);
+      fireEvent.change(document.activeElement!, { target: { value: "Renamed Node" } });
+      fireEvent.keyDown(document.activeElement!, { key: "Enter" });
+    });
 };
 
 export function IconExamples(): JSX.Element {
