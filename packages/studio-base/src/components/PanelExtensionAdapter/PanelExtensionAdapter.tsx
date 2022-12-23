@@ -351,8 +351,15 @@ function PanelExtensionAdapter(props: PanelExtensionAdapterProps): JSX.Element {
           return;
         }
         setWatchedFields((old) => {
-          old.add(field);
-          return new Set(old);
+          if (old.has(field)) {
+            // In React 18 we noticed that this setter function would be called in an infinite loop
+            // even though watch() was not called repeatedly. Adding this early return of the old
+            // value fixed the issue.
+            return old;
+          }
+          const newWatchedFields = new Set(old);
+          newWatchedFields.add(field);
+          return newWatchedFields;
         });
       },
 
