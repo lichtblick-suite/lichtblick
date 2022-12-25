@@ -12,7 +12,7 @@ import PlayerSelectionContext, {
   PlayerSelection,
 } from "@foxglove/studio-base/context/PlayerSelectionContext";
 
-import OpenDialog from "./OpenDialog";
+import OpenDialog, { OpenDialogProps } from "./OpenDialog";
 
 export default {
   title: "components/OpenDialog/Start",
@@ -102,18 +102,20 @@ function CurrentUserWrapper(props: { children: ReactNode; user?: User }): JSX.El
   return <CurrentUserContext.Provider value={value}>{props.children}</CurrentUserContext.Provider>;
 }
 
-export const DefaultLight = (): JSX.Element => <OpenDialog />;
+const defaultProps: OpenDialogProps = { backdropAnimation: false };
+
+export const DefaultLight = (): JSX.Element => <OpenDialog {...defaultProps} />;
 DefaultLight.storyName = "Default (light)";
 DefaultLight.parameters = { colorScheme: "light" };
 
-export const DefaultDark = (): JSX.Element => <OpenDialog />;
+export const DefaultDark = (): JSX.Element => <OpenDialog {...defaultProps} />;
 DefaultDark.storyName = "Default (dark)";
 DefaultDark.parameters = { colorScheme: "dark" };
 
 export function UserNoAuth(): JSX.Element {
   return (
     <PlayerSelectionContext.Provider value={playerSelection}>
-      <OpenDialog />
+      <OpenDialog {...defaultProps} />
     </PlayerSelectionContext.Provider>
   );
 }
@@ -126,7 +128,7 @@ export function UserAuthedFree(): JSX.Element {
   return (
     <CurrentUserWrapper user={freeUser}>
       <PlayerSelectionContext.Provider value={playerSelection}>
-        <OpenDialog />
+        <OpenDialog {...defaultProps} />
       </PlayerSelectionContext.Provider>
     </CurrentUserWrapper>
   );
@@ -140,7 +142,7 @@ export function UserAuthedPaid(): JSX.Element {
   return (
     <CurrentUserWrapper user={freeUser}>
       <PlayerSelectionContext.Provider value={playerSelection}>
-        <OpenDialog />
+        <OpenDialog {...defaultProps} />
       </PlayerSelectionContext.Provider>
     </CurrentUserWrapper>
   );

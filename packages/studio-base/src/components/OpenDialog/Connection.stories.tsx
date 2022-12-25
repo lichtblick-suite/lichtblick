@@ -6,7 +6,7 @@ import PlayerSelectionContext, {
   PlayerSelection,
 } from "@foxglove/studio-base/context/PlayerSelectionContext";
 
-import OpenDialog from "./OpenDialog";
+import OpenDialog, { OpenDialogProps } from "./OpenDialog";
 
 export default {
   title: "components/OpenDialog/Connection",
@@ -38,9 +38,11 @@ const playerSelection: PlayerSelection = {
   ],
 };
 
+const defaultProps: OpenDialogProps = { activeView: "connection", backdropAnimation: false };
+
 export const Light = (): JSX.Element => (
   <PlayerSelectionContext.Provider value={playerSelection}>
-    <OpenDialog activeView="connection" />
+    <OpenDialog {...defaultProps} />
   </PlayerSelectionContext.Provider>
 );
 Light.storyName = "Default (light)";
@@ -48,7 +50,7 @@ Light.parameters = { colorScheme: "light" };
 
 export const Dark = (): JSX.Element => (
   <PlayerSelectionContext.Provider value={playerSelection}>
-    <OpenDialog activeView="connection" />
+    <OpenDialog {...defaultProps} />
   </PlayerSelectionContext.Provider>
 );
 Dark.storyName = "Default (dark)";
