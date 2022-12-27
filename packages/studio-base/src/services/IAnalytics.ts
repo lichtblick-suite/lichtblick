@@ -14,49 +14,49 @@ enum AppEventCategory {
 }
 
 enum AppEvent {
-  APP_INIT = "APP_INIT",
+  APP_INIT = "Studio: App initiated",
 
   // Dialog events
-  DIALOG_SELECT_VIEW = "DIALOG_SELECT_VIEW",
-  DIALOG_CLOSE = "DIALOG_CLOSE",
-  DIALOG_CLICK_CTA = "DIALOG_CLICK_CTA",
+  DIALOG_SELECT_VIEW = "Studio: Dialog view selected",
+  DIALOG_CLOSE = "Studio: Dialog closed",
+  DIALOG_CLICK_CTA = "Studio: Dialog CTA clicked",
 
   // Player events
-  PLAYER_CONSTRUCTED = "PLAYER_CONSTRUCTED",
-  PLAYER_PLAY = "PLAYER_PLAY",
-  PLAYER_SEEK = "PLAYER_SEEK",
-  PLAYER_SET_SPEED = "PLAYER_SET_SPEED",
-  PLAYER_PAUSE = "PLAYER_PAUSE",
-  PLAYER_CLOSE = "PLAYER_CLOSE",
+  PLAYER_CONSTRUCTED = "Studio: Player constructed",
+  PLAYER_PLAY = "Studio: Player played",
+  PLAYER_SEEK = "Studio: Player seeked",
+  PLAYER_SET_SPEED = "Studio: Player speed set",
+  PLAYER_PAUSE = "Studio: Player paused",
+  PLAYER_CLOSE = "Studio: Player closed",
 
   // Layout events
-  LAYOUT_UPDATE = "LAYOUT_UPDATE",
-  LAYOUT_CREATE = "LAYOUT_CREATE",
-  LAYOUT_DUPLICATE = "LAYOUT_DUPLICATE",
-  LAYOUT_RENAME = "LAYOUT_RENAME",
-  LAYOUT_DELETE = "LAYOUT_DELETE",
-  LAYOUT_SELECT = "LAYOUT_SELECT",
-  LAYOUT_IMPORT = "LAYOUT_IMPORT",
-  LAYOUT_EXPORT = "LAYOUT_EXPORT",
-  LAYOUT_SHARE = "LAYOUT_SHARE",
-  LAYOUT_OVERWRITE = "LAYOUT_OVERWRITE",
-  LAYOUT_REVERT = "LAYOUT_REVERT",
-  LAYOUT_MAKE_PERSONAL_COPY = "LAYOUT_MAKE_PERSONAL_COPY",
+  LAYOUT_UPDATE = "Studio: Layout updated",
+  LAYOUT_CREATE = "Studio: Layout created",
+  LAYOUT_DUPLICATE = "Studio: Layout duplicated",
+  LAYOUT_RENAME = "Studio: Layout renamed",
+  LAYOUT_DELETE = "Studio: Layout deleted",
+  LAYOUT_SELECT = "Studio: Layout selected",
+  LAYOUT_IMPORT = "Studio: Layout imported",
+  LAYOUT_EXPORT = "Studio: Layout exported",
+  LAYOUT_SHARE = "Studio: Layout shared",
+  LAYOUT_OVERWRITE = "Studio: Layout overwritten",
+  LAYOUT_REVERT = "Studio: Layout reverted",
+  LAYOUT_MAKE_PERSONAL_COPY = "Studio: Layout personal copy made",
 
   // Panel events
-  PANEL_ADD = "PANEL_ADD",
-  PANEL_DELETE = "PANEL_DELETE",
+  PANEL_ADD = "Studio: Panel added",
+  PANEL_DELETE = "Studio: Panel deleted",
 
   // Variable events
-  VARIABLE_ADD = "VARIABLE_ADD",
-  VARIABLE_DELETE = "VARIABLE_DELETE",
+  VARIABLE_ADD = "Studio: Variable added",
+  VARIABLE_DELETE = "Studio: Variable deleted",
 
   // Extension events
-  EXTENSION_INSTALL = "EXTENSION_INSTALL",
-  EXTENSION_UNINSTALL = "EXTENSION_UNINSTALL",
+  EXTENSION_INSTALL = "Studio: Extension installed",
+  EXTENSION_UNINSTALL = "Studio: Extension uninstalled",
 
   // Experimental features
-  EXPERIMENTAL_FEATURE_TOGGLE = "EXPERIMENTAL_FEATURE_TOGGLE",
+  EXPERIMENTAL_FEATURE_TOGGLE = "Studio: Experimental feature toggled",
 }
 
 /** https://develop.sentry.dev/sdk/event-payloads/breadcrumbs/#breadcrumb-types */
