@@ -5,13 +5,14 @@
 import { Story } from "@storybook/react";
 
 import MockMessagePipelineProvider from "@foxglove/studio-base/components/MessagePipeline/MockMessagePipelineProvider";
-import { TopicStats } from "@foxglove/studio-base/players/types";
+import { PlayerCapabilities, TopicStats } from "@foxglove/studio-base/players/types";
 
 import { TopicList } from "./TopicList";
 
 function Wrapper(StoryFn: Story): JSX.Element {
   return (
     <MockMessagePipelineProvider
+      capabilities={[PlayerCapabilities.playbackControl]}
       topics={[
         {
           name: "/topic_1",
