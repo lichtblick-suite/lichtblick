@@ -50,7 +50,10 @@ const isDevelopment = process.env.NODE_ENV === "development";
 function LogAfterRender(props: React.PropsWithChildren<unknown>): JSX.Element {
   useEffect(() => {
     // Integration tests look for this console log to indicate the app has rendered once
+    const level = log.getLevel();
+    log.setLevel("debug");
     log.debug("App rendered");
+    log.setLevel(level);
   }, []);
   return <>{props.children}</>;
 }

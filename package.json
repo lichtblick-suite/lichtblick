@@ -39,6 +39,8 @@
     "test:debug": "cross-env NODE_OPTIONS='--inspect-brk' jest",
     "test:watch": "jest --watch",
     "test:integration": "jest --forceExit --projects desktop/integration-test",
+    "test:web-integration": "jest --forceExit --projects  web/integration-test",
+    "test:web-integration:local": "BASE_URL=\"http://localhost:8080/\" jest --forceExit --projects  web/integration-test",
     "package:win": "yarn package --win",
     "package:darwin": "yarn package --mac",
     "package:linux": "yarn package --linux",

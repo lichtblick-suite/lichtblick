@@ -45,6 +45,22 @@ class Logger {
   }
 
   /**
+   *
+   * @returns the current log level
+   */
+  public getLevel(): LogLevel {
+    if (this.debug !== noop) {
+      return "debug";
+    } else if (this.info !== noop) {
+      return "info";
+    } else if (this.warn !== noop) {
+      return "warn";
+    } else {
+      return "error";
+    }
+  }
+
+  /**
    * Set the allowed log level. Any log calls with severity "below" this one will be ignored.
    *
    * i.e. setting a level of "warn" will ignore any "info" or "debug" logs

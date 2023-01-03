@@ -1,0 +1,35 @@
+name: Web Integration Tests
+
+on:
+  # runs on a preview deployment (vercel or otherwise)
+  deployment_status:
+
+jobs:
+  test:
+    # run only on a successful deployment
+    if: github.event_name == 'deployment_status' && github.event.deployment_status.state == 'success'
+    runs-on: ubuntu-20.04
+    steps:
+      - uses: actions/checkout@v3.2.0
+        with:
+          lfs: true
+
+      - uses: actions/setup-node@v3.5.1
+        with:
+          node-version: 16.17
+      - run: corepack enable yarn
+
+      - name: Restore cache
+        uses: actions/cache@v3.0.11
+        with:
+          path: |
+            .yarn/cache
+            **/node_modules
+          key: v5-${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
+          restore-keys: v5-${{ runner.os }}-yarn-
+
+      - run: yarn install --immutable
+      - name: Run tests
+        run: yarn test:web-integration
+        env:
+          BASE_URL: ${{ github.event.deployment_status.target_url }}
