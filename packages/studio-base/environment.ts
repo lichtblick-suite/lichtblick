@@ -12,8 +12,8 @@ function serverURLsForBackend(backend: string): { api: string; console: string }
 
   if (backend === "development") {
     return {
-      api: "https://api-dev.foxglove.dev",
-      console: "https://console-dev.foxglove.dev",
+      api: "https://api-dev.foxglove.party",
+      console: "https://console-dev.foxglove.party",
     };
   }
 
