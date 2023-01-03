@@ -9,7 +9,7 @@ import { v4 as uuidv4 } from "uuid";
 import { debouncePromise } from "@foxglove/den/async";
 import Log from "@foxglove/log";
 import { parseChannel, ParsedChannel } from "@foxglove/mcap-support";
-import { fromNanoSec, isGreaterThan, isLessThan, Time } from "@foxglove/rostime";
+import { fromMillis, fromNanoSec, isGreaterThan, isLessThan, Time } from "@foxglove/rostime";
 import PlayerProblemManager from "@foxglove/studio-base/players/PlayerProblemManager";
 import {
   AdvertiseOptions,
@@ -59,12 +59,10 @@ export default class FoxgloveWebSocketPlayer implements Player {
   private _hasReceivedMessage = false;
   private _presence: PlayerPresence = PlayerPresence.NOT_PRESENT;
   private _problems = new PlayerProblemManager();
-  private _lastSeekTime = 0;
+  private _numTimeSeeks = 0;
 
   /** Earliest time seen */
   private _startTime?: Time;
-  /** Most recently-seen time */
-  private _currentTime?: Time;
   /** Latest time seen */
   private _endTime?: Time;
   /* The most recent published time, if available */
@@ -131,7 +129,6 @@ export default class FoxgloveWebSocketPlayer implements Player {
       log.info("Connection closed:", event);
       this._presence = PlayerPresence.RECONNECTING;
       this._startTime = undefined;
-      this._currentTime = undefined;
       this._endTime = undefined;
       this._clockTime = undefined;
       this._serverPublishesTime = false;
@@ -249,7 +246,7 @@ export default class FoxgloveWebSocketPlayer implements Player {
       this._emitState();
     });
 
-    client.on("message", ({ subscriptionId, timestamp, data }) => {
+    client.on("message", ({ subscriptionId, data }) => {
       if (!this._hasReceivedMessage) {
         this._hasReceivedMessage = true;
         this._metricsCollector.recordTimeToFirstMsgs();
@@ -268,20 +265,8 @@ export default class FoxgloveWebSocketPlayer implements Player {
       }
 
       try {
-        const receiveTime = this._serverPublishesTime
-          ? this._clockTime ?? ZERO_TIME
-          : fromNanoSec(timestamp);
+        const receiveTime = this._getCurrentTime();
         const topic = chanInfo.channel.topic;
-        // If time goes backwards, increment lastSeekTime and discard unemitted messages from before
-        // the discontinuity. This prevents us from queueing an unbounded number of messages when
-        // servers loop over the same recorded data multiple times. However, for now the queue can
-        // still grow unboundedly in a live system if the listener is not processing messages (such
-        // as when the app is hidden/backgrounded).
-        if (this._currentTime && isLessThan(receiveTime, this._currentTime)) {
-          ++this._lastSeekTime;
-          this._parsedMessages = [];
-        }
-        this._currentTime = receiveTime;
         this._parsedMessages.push({
           topic,
           receiveTime,
@@ -320,11 +305,11 @@ export default class FoxgloveWebSocketPlayer implements Player {
 
       const time = fromNanoSec(timestamp);
       if (this._clockTime != undefined && isLessThan(time, this._clockTime)) {
-        ++this._lastSeekTime;
+        this._numTimeSeeks++;
         this._parsedMessages = [];
       }
 
-      this._clockTime = this._currentTime = time;
+      this._clockTime = time;
       this._emitState();
     });
   };
@@ -377,11 +362,11 @@ export default class FoxgloveWebSocketPlayer implements Player {
       });
     }
 
-    const currentTime = this._currentTime;
-    if (currentTime && (!this._startTime || isLessThan(currentTime, this._startTime))) {
+    const currentTime = this._getCurrentTime();
+    if (!this._startTime || isLessThan(currentTime, this._startTime)) {
       this._startTime = currentTime;
     }
-    if (currentTime && (!this._endTime || isGreaterThan(currentTime, this._endTime))) {
+    if (!this._endTime || isGreaterThan(currentTime, this._endTime)) {
       this._endTime = currentTime;
     }
 
@@ -403,12 +388,12 @@ export default class FoxgloveWebSocketPlayer implements Player {
       activeData: {
         messages,
         totalBytesReceived: this._receivedBytes,
-        startTime: this._startTime ?? ZERO_TIME,
-        endTime: this._endTime ?? ZERO_TIME,
-        currentTime: currentTime ?? ZERO_TIME,
+        startTime: this._startTime,
+        endTime: this._endTime,
+        currentTime,
         isPlaying: true,
         speed: 1,
-        lastSeekTime: this._lastSeekTime,
+        lastSeekTime: this._numTimeSeeks,
         topics: _topics,
         // Always copy topic stats since message counts and timestamps are being updated
         topicStats: new Map(this._topicsStats),
@@ -507,4 +492,8 @@ export default class FoxgloveWebSocketPlayer implements Player {
   }
 
   public setGlobalVariables(): void {}
+
+  private _getCurrentTime(): Time {
+    return this._serverPublishesTime ? this._clockTime ?? ZERO_TIME : fromMillis(Date.now());
+  }
 }
