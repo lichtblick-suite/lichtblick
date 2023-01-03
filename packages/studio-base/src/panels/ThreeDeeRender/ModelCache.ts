@@ -46,6 +46,8 @@ export class ModelCache {
   private _models = new Map<string, Promise<LoadedModel | undefined>>();
   private _edgeMaterial: THREE.Material;
 
+  private _dracoLoader?: DRACOLoader;
+
   public constructor(public readonly options: ModelCacheOptions) {
     this._edgeMaterial = options.edgeMaterial;
   }
@@ -98,146 +100,178 @@ export class ModelCache {
       /\.glb$/i.test(url) ||
       /\.gltf$/i.test(url)
     ) {
-      return await loadGltf(url, reportError);
+      return await this.loadGltf(url, reportError);
     }
 
     // Check if this is a STL file based on content-type or file extension
     if (STL_MIME_TYPES.includes(contentType) || /\.stl$/i.test(url)) {
-      return loadSTL(url, buffer, this.options.meshUpAxis);
+      return this.loadSTL(url, buffer, this.options.meshUpAxis);
     }
 
     // Check if this is a COLLADA file based on content-type or file extension
     if (DAE_MIME_TYPES.includes(contentType) || /\.dae$/i.test(url)) {
       const text = this._textDecoder.decode(buffer);
-      return await loadCollada(url, text, this.options.ignoreColladaUpAxis, reportError);
+      return await this.loadCollada(url, text, this.options.ignoreColladaUpAxis, reportError);
     }
 
     // Check if this is an OBJ file based on content-type or file extension
     if (OBJ_MIME_TYPES.includes(contentType) || /\.obj$/i.test(url)) {
       const text = this._textDecoder.decode(buffer);
-      return await loadOBJ(url, text, this.options.meshUpAxis, reportError);
+      return await this.loadOBJ(url, text, this.options.meshUpAxis, reportError);
     }
 
     throw new Error(`Unknown ${buffer.byteLength} byte mesh (content-type: "${contentType}")`);
   }
-}
 
-async function loadGltf(url: string, reportError: ErrorCallback): Promise<LoadedModel> {
-  const onError = (assetUrl: string) => {
-    const originalUrl = unrewriteUrl(assetUrl);
-    log.error(`Failed to load GLTF asset "${originalUrl}" for "${url}"`);
-    reportError(new Error(`Failed to load GLTF asset "${originalUrl}"`));
-  };
+  private async loadGltf(url: string, reportError: ErrorCallback): Promise<LoadedModel> {
+    const onError = (assetUrl: string) => {
+      const originalUrl = unrewriteUrl(assetUrl);
+      log.error(`Failed to load GLTF asset "${originalUrl}" for "${url}"`);
+      reportError(new Error(`Failed to load GLTF asset "${originalUrl}"`));
+    };
 
-  const manager = new THREE.LoadingManager(undefined, undefined, onError);
-  manager.setURLModifier(rewriteUrl);
-  const gltfLoader = new GLTFLoader(manager);
-  gltfLoader.setMeshoptDecoder(MeshoptDecoder);
-  gltfLoader.setDRACOLoader(createDracoLoader(manager));
+    const manager = new THREE.LoadingManager(undefined, undefined, onError);
+    manager.setURLModifier(rewriteUrl);
+    const gltfLoader = new GLTFLoader(manager);
+    gltfLoader.setMeshoptDecoder(MeshoptDecoder);
+    gltfLoader.setDRACOLoader(this.getDracoLoader(manager));
 
-  manager.itemStart(url);
-  const gltf = await gltfLoader.loadAsync(url);
-  manager.itemEnd(url);
+    manager.itemStart(url);
+    const gltf = await gltfLoader.loadAsync(url);
+    manager.itemEnd(url);
 
-  // THREE.js uses Y-up, while Studio follows the ROS
-  // [REP-0103](https://www.ros.org/reps/rep-0103.html) convention of Z-up
-  gltf.scene.rotateX(Math.PI / 2);
+    // THREE.js uses Y-up, while Studio follows the ROS
+    // [REP-0103](https://www.ros.org/reps/rep-0103.html) convention of Z-up
+    gltf.scene.rotateX(Math.PI / 2);
 
-  return gltf.scene;
-}
-
-function loadSTL(url: string, buffer: ArrayBuffer, meshUpAxis: MeshUpAxis): LoadedModel {
-  // STL files do not reference any external assets, no LoadingManager needed
-  const stlLoader = new STLLoader();
-  const bufferGeometry = stlLoader.parse(buffer);
-  log.debug(`Finished loading STL from ${url}`);
-  const material = new THREE.MeshStandardMaterial({
-    name: url.slice(-32), // truncate to 32 characters
-    color: DEFAULT_COLOR,
-    metalness: 0,
-    roughness: 1,
-    dithering: true,
-  });
-  const mesh = new THREE.Mesh(bufferGeometry, material);
-  const group = new THREE.Group();
-  group.add(mesh);
-
-  // THREE.js uses Y-up, while Studio follows the ROS
-  // [REP-0103](https://www.ros.org/reps/rep-0103.html) convention of Z-up
-  if (meshUpAxis === "y_up") {
-    group.rotateX(Math.PI / 2);
+    return gltf.scene;
   }
 
-  return group;
-}
+  private loadSTL(url: string, buffer: ArrayBuffer, meshUpAxis: MeshUpAxis): LoadedModel {
+    // STL files do not reference any external assets, no LoadingManager needed
+    const stlLoader = new STLLoader();
+    const bufferGeometry = stlLoader.parse(buffer);
+    log.debug(`Finished loading STL from ${url}`);
+    const material = new THREE.MeshStandardMaterial({
+      name: url.slice(-32), // truncate to 32 characters
+      color: DEFAULT_COLOR,
+      metalness: 0,
+      roughness: 1,
+      dithering: true,
+    });
+    const mesh = new THREE.Mesh(bufferGeometry, material);
+    const group = new THREE.Group();
+    group.add(mesh);
 
-async function loadCollada(
-  url: string,
-  text: string,
-  // eslint-disable-next-line @foxglove/no-boolean-parameters
-  ignoreUpAxis: boolean,
-  reportError: ErrorCallback,
-): Promise<LoadedModel> {
-  const onError = (assetUrl: string) => {
-    const originalUrl = unrewriteUrl(assetUrl);
-    log.error(`Failed to load COLLADA asset "${originalUrl}" for "${url}"`);
-    reportError(new Error(`Failed to load COLLADA asset "${originalUrl}"`));
-  };
+    // THREE.js uses Y-up, while Studio follows the ROS
+    // [REP-0103](https://www.ros.org/reps/rep-0103.html) convention of Z-up
+    if (meshUpAxis === "y_up") {
+      group.rotateX(Math.PI / 2);
+    }
 
-  // The three.js ColladaLoader handles <up_axis> by detecting Z_UP and simply
-  // applying a scene rotation. Since Studio is already Z_UP, we do our own
-  // <up_axis> handling and skip rotation entirely for the Z_UP case
-  const xml = new DOMParser().parseFromString(text, "application/xml");
-  const upAxis = ignoreUpAxis
-    ? "Z_UP"
-    : (xml.querySelector("up_axis")?.textContent ?? "Y_UP").trim().toUpperCase();
-  xml.querySelectorAll("up_axis").forEach((node) => node.remove());
-  const xmlText = xml.documentElement.outerHTML;
-
-  const manager = new THREE.LoadingManager(undefined, undefined, onError);
-  manager.setURLModifier(rewriteUrl);
-  const daeLoader = new ColladaLoader(manager);
-
-  manager.itemStart(url);
-  const dae = daeLoader.parse(xmlText, baseUrl(url));
-  manager.itemEnd(url);
-
-  // If the <up_axis> is Y_UP, rotate to the Studio convention of Z-up following
-  // ROS [REP-0103](https://www.ros.org/reps/rep-0103.html)
-  if (upAxis === "Y_UP") {
-    dae.scene.rotateX(Math.PI / 2);
+    return group;
   }
 
-  return fixDaeMaterials(dae.scene);
-}
+  private async loadCollada(
+    url: string,
+    text: string,
+    // eslint-disable-next-line @foxglove/no-boolean-parameters
+    ignoreUpAxis: boolean,
+    reportError: ErrorCallback,
+  ): Promise<LoadedModel> {
+    const onError = (assetUrl: string) => {
+      const originalUrl = unrewriteUrl(assetUrl);
+      log.error(`Failed to load COLLADA asset "${originalUrl}" for "${url}"`);
+      reportError(new Error(`Failed to load COLLADA asset "${originalUrl}"`));
+    };
 
-async function loadOBJ(
-  url: string,
-  text: string,
-  meshUpAxis: MeshUpAxis,
-  reportError: ErrorCallback,
-): Promise<LoadedModel> {
-  const onError = (assetUrl: string) => {
-    const originalUrl = unrewriteUrl(assetUrl);
-    log.error(`Failed to load OBJ asset "${originalUrl}" for "${url}"`);
-    reportError(new Error(`Failed to load OBJ asset "${originalUrl}"`));
-  };
+    // The three.js ColladaLoader handles <up_axis> by detecting Z_UP and simply
+    // applying a scene rotation. Since Studio is already Z_UP, we do our own
+    // <up_axis> handling and skip rotation entirely for the Z_UP case
+    const xml = new DOMParser().parseFromString(text, "application/xml");
+    const upAxis = ignoreUpAxis
+      ? "Z_UP"
+      : (xml.querySelector("up_axis")?.textContent ?? "Y_UP").trim().toUpperCase();
+    xml.querySelectorAll("up_axis").forEach((node) => node.remove());
+    const xmlText = xml.documentElement.outerHTML;
 
-  const manager = new THREE.LoadingManager(undefined, undefined, onError);
-  manager.setURLModifier(rewriteUrl);
-  const objLoader = new OBJLoader(manager);
+    const manager = new THREE.LoadingManager(undefined, undefined, onError);
+    manager.setURLModifier(rewriteUrl);
+    const daeLoader = new ColladaLoader(manager);
 
-  manager.itemStart(url);
-  const group = objLoader.parse(text);
-  manager.itemEnd(url);
+    manager.itemStart(url);
+    const dae = daeLoader.parse(xmlText, baseUrl(url));
+    manager.itemEnd(url);
 
-  // THREE.js uses Y-up, while Studio follows the ROS
-  // [REP-0103](https://www.ros.org/reps/rep-0103.html) convention of Z-up
-  if (meshUpAxis === "y_up") {
-    group.rotateX(Math.PI / 2);
+    // If the <up_axis> is Y_UP, rotate to the Studio convention of Z-up following
+    // ROS [REP-0103](https://www.ros.org/reps/rep-0103.html)
+    if (upAxis === "Y_UP") {
+      dae.scene.rotateX(Math.PI / 2);
+    }
+
+    return fixDaeMaterials(dae.scene);
   }
 
-  return fixObjMaterials(group);
+  private async loadOBJ(
+    url: string,
+    text: string,
+    meshUpAxis: MeshUpAxis,
+    reportError: ErrorCallback,
+  ): Promise<LoadedModel> {
+    const onError = (assetUrl: string) => {
+      const originalUrl = unrewriteUrl(assetUrl);
+      log.error(`Failed to load OBJ asset "${originalUrl}" for "${url}"`);
+      reportError(new Error(`Failed to load OBJ asset "${originalUrl}"`));
+    };
+
+    const manager = new THREE.LoadingManager(undefined, undefined, onError);
+    manager.setURLModifier(rewriteUrl);
+    const objLoader = new OBJLoader(manager);
+
+    manager.itemStart(url);
+    const group = objLoader.parse(text);
+    manager.itemEnd(url);
+
+    // THREE.js uses Y-up, while Studio follows the ROS
+    // [REP-0103](https://www.ros.org/reps/rep-0103.html) convention of Z-up
+    if (meshUpAxis === "y_up") {
+      group.rotateX(Math.PI / 2);
+    }
+
+    return fixObjMaterials(group);
+  }
+
+  // singleton dracoloader
+  private getDracoLoader(manager: THREE.LoadingManager): DRACOLoader {
+    let dracoLoader = this._dracoLoader;
+    if (!dracoLoader) {
+      dracoLoader = new DRACOLoader(manager);
+      // Hack in a replacement function to load assets from the webpack bundle
+      (dracoLoader as { _loadLibrary?: (url: string, responseType: string) => unknown })[
+        "_loadLibrary"
+      ] = async function (url: string, responseType: string) {
+        if (url === "draco_wasm_wrapper.js" && responseType === "text") {
+          return dracoWasmWrapperJs;
+        } else if (url === "draco_decoder.wasm" && responseType === "arraybuffer") {
+          return await (await fetch(dracoDecoderWasmUrl)).arrayBuffer();
+        } else {
+          throw new Error(
+            `DRACOLoader attempt to load non-bundled asset: ${url} as ${responseType}`,
+          );
+        }
+      };
+      this._dracoLoader = dracoLoader;
+    }
+
+    dracoLoader.manager = manager;
+    return dracoLoader;
+  }
+
+  public dispose(): void {
+    // DRACOLoader is only loader that needs to be disposed because it uses a webworker
+    this._dracoLoader?.dispose();
+    this._dracoLoader = undefined;
+  }
 }
 
 function addEdges(model: LoadedModel, edgeMaterial: THREE.Material): LoadedModel {
@@ -318,25 +352,6 @@ function toStandard(
   standard.roughness = 1 - shininess / 100;
   standard.dithering = true;
   return standard;
-}
-
-function createDracoLoader(manager: THREE.LoadingManager): DRACOLoader {
-  const dracoLoader = new DRACOLoader(manager);
-
-  // Hack in a replacement function to load assets from the webpack bundle
-  (dracoLoader as { _loadLibrary?: (url: string, responseType: string) => unknown })[
-    "_loadLibrary"
-  ] = async function (url: string, responseType: string) {
-    if (url === "draco_wasm_wrapper.js" && responseType === "text") {
-      return dracoWasmWrapperJs;
-    } else if (url === "draco_decoder.wasm" && responseType === "arraybuffer") {
-      return await (await fetch(dracoDecoderWasmUrl)).arrayBuffer();
-    } else {
-      throw new Error(`DRACOLoader attempt to load non-bundled asset: ${url} as ${responseType}`);
-    }
-  };
-
-  return dracoLoader;
 }
 
 // The THREE.TextureLoader does not support loading .tiff files into textures. To work around

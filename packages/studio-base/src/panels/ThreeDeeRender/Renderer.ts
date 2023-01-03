@@ -522,6 +522,7 @@ export class Renderer extends EventEmitter<RendererEvents> {
     }
     this.sceneExtensions.clear();
     this.sharedGeometry.dispose();
+    this.modelCache.dispose();
 
     this.labelPool.dispose();
     this.markerPool.dispose();
