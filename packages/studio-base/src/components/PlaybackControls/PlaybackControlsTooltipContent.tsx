@@ -36,7 +36,8 @@ const useStyles = makeStyles()((theme) => ({
     columnGap: theme.spacing(0.5),
     display: "grid",
     alignItems: "center",
-    gridTemplateColumns: "auto 1fr",
+    gridTemplateColumns: "auto auto",
+    width: "100%",
     flexDirection: "column",
   },
   itemKey: {
@@ -109,8 +110,12 @@ export function PlaybackControlsTooltipContent(params: { stamp: Time }): ReactNu
         }
         return (
           <Fragment key={`${item.title}_${idx}`}>
-            <Typography className={classes.itemKey}>{item.title}</Typography>
-            <Typography variant="subtitle2">{item.value}</Typography>
+            <Typography className={classes.itemKey} noWrap>
+              {item.title}
+            </Typography>
+            <Typography variant="subtitle2" noWrap>
+              {item.value}
+            </Typography>
           </Fragment>
         );
       })}
