@@ -12,10 +12,8 @@
 //   You may not use this file except in compliance with the License.
 
 import { Dialog, DialogContent, DialogTitle, DialogActions, Button } from "@mui/material";
-import { useCallback, useContext, useEffect, useRef } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useKeyPressEvent } from "react-use";
-
-import ModalContext from "@foxglove/studio-base/context/ModalContext";
 
 type ConfirmVariant = "danger" | "primary";
 type ConfirmAction = "ok" | "cancel";
@@ -104,25 +102,25 @@ function ConfirmModal(props: ConfirmModalProps) {
 
 // Returns a function that can be used similarly to the DOM confirm(), but
 // backed by a React element rather than a native modal, and asynchronous.
-export function useConfirm(): (options: ConfirmOptions) => Promise<ConfirmAction> {
-  const modalHost = useContext(ModalContext);
+export function useConfirm(): [
+  confirm: (options: ConfirmOptions) => Promise<ConfirmAction>,
+  confirmModal: JSX.Element | undefined,
+] {
+  const [modal, setModal] = useState<JSX.Element | undefined>();
 
-  const openConfirm = useCallback(
-    async (options: ConfirmOptions) => {
-      return await new Promise<ConfirmAction>((resolve) => {
-        const remove = modalHost.addModalElement(
-          <ConfirmModal
-            {...options}
-            onComplete={(value) => {
-              resolve(value);
-              remove();
-            }}
-          />,
-        );
-      });
-    },
-    [modalHost],
-  );
+  const openConfirm = useCallback(async (options: ConfirmOptions) => {
+    return await new Promise<ConfirmAction>((resolve) => {
+      setModal(
+        <ConfirmModal
+          {...options}
+          onComplete={(value) => {
+            resolve(value);
+            setModal(undefined);
+          }}
+        />,
+      );
+    });
+  }, []);
 
-  return openConfirm;
+  return [openConfirm, modal];
 }

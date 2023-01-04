@@ -5,22 +5,17 @@
 
 import { render, screen, fireEvent, act } from "@testing-library/react";
 
-import ModalHost from "@foxglove/studio-base/context/ModalHost";
-
 import { usePrompt } from "./usePrompt";
 
 describe("usePrompt", () => {
   it("cleans up extra nodes added", async () => {
-    let prompt: ReturnType<typeof usePrompt> | undefined;
+    let prompt: ReturnType<typeof usePrompt>[0] | undefined;
     const Test = () => {
-      prompt = usePrompt();
-      return ReactNull;
+      let promptModal;
+      [prompt, promptModal] = usePrompt();
+      return <>{promptModal}</>;
     };
-    const root = render(
-      <ModalHost>
-        <Test />
-      </ModalHost>,
-    );
+    const root = render(<Test />);
     const start = document.body.childNodes.length;
     let promise: Promise<string | undefined> | undefined;
     act(() => {
@@ -34,16 +29,13 @@ describe("usePrompt", () => {
   });
 
   it("should support a title and placeholder", async () => {
-    let prompt: ReturnType<typeof usePrompt> | undefined;
+    let prompt: ReturnType<typeof usePrompt>[0] | undefined;
     const Test = () => {
-      prompt = usePrompt();
-      return ReactNull;
+      let promptModal;
+      [prompt, promptModal] = usePrompt();
+      return <>{promptModal}</>;
     };
-    const root = render(
-      <ModalHost>
-        <Test />
-      </ModalHost>,
-    );
+    const root = render(<Test />);
 
     act(() => {
       void prompt!({
@@ -59,16 +51,13 @@ describe("usePrompt", () => {
   });
 
   it("should return entered value", async () => {
-    let prompt: ReturnType<typeof usePrompt> | undefined;
+    let prompt: ReturnType<typeof usePrompt>[0] | undefined;
     const Test = () => {
-      prompt = usePrompt();
-      return ReactNull;
+      let promptModal;
+      [prompt, promptModal] = usePrompt();
+      return <>{promptModal}</>;
     };
-    const root = render(
-      <ModalHost>
-        <Test />
-      </ModalHost>,
-    );
+    const root = render(<Test />);
     let valPromise: Promise<string | undefined> | undefined;
     act(() => {
       valPromise = prompt!({
@@ -89,16 +78,13 @@ describe("usePrompt", () => {
   });
 
   it("should use an initial value", async () => {
-    let prompt: ReturnType<typeof usePrompt> | undefined;
+    let prompt: ReturnType<typeof usePrompt>[0] | undefined;
     const Test = () => {
-      prompt = usePrompt();
-      return ReactNull;
+      let promptModal;
+      [prompt, promptModal] = usePrompt();
+      return <>{promptModal}</>;
     };
-    const root = render(
-      <ModalHost>
-        <Test />
-      </ModalHost>,
-    );
+    const root = render(<Test />);
     let valPromise: Promise<string | undefined> | undefined;
     act(() => {
       valPromise = prompt!({

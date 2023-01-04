@@ -25,7 +25,6 @@ import AppConfigurationContext, { IAppConfiguration } from "./context/AppConfigu
 import { AssetsProvider } from "./context/AssetsContext";
 import ConsoleApiContext from "./context/ConsoleApiContext";
 import LayoutStorageContext from "./context/LayoutStorageContext";
-import ModalHost from "./context/ModalHost";
 import NativeAppMenuContext, { INativeAppMenu } from "./context/NativeAppMenuContext";
 import NativeWindowContext, { INativeWindow } from "./context/NativeWindowContext";
 import { IDataSourceFactory } from "./context/PlayerSelectionContext";
@@ -105,7 +104,6 @@ export function App(props: AppProps): JSX.Element {
     <UserProfileLocalStorageProvider />,
     <AnalyticsProvider amplitudeApiKey={process.env.AMPLITUDE_API_KEY} />,
     <LayoutManagerProvider />,
-    <ModalHost />, // render modal elements inside the ThemeProvider
     <AssetsProvider loaders={assetLoaders} />,
     <HelpInfoProvider />,
     <TimelineInteractionStateProvider />,

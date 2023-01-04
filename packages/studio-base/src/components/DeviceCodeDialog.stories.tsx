@@ -5,7 +5,6 @@
 import { Story, StoryContext } from "@storybook/react";
 
 import ConsoleApiContext from "@foxglove/studio-base/context/ConsoleApiContext";
-import ModalHost from "@foxglove/studio-base/context/ModalHost";
 import ConsoleApi, { DeviceCodeResponse } from "@foxglove/studio-base/services/ConsoleApi";
 
 import DeviceCodeDialog from "./DeviceCodeDialog";
@@ -38,11 +37,9 @@ export default {
         new FakeConsoleApi(ctx.parameters.deviceCode as DeviceCodeResponse);
 
       return (
-        <ModalHost>
-          <ConsoleApiContext.Provider value={fakeConsoleApi}>
-            <SingleStory />
-          </ConsoleApiContext.Provider>
-        </ModalHost>
+        <ConsoleApiContext.Provider value={fakeConsoleApi}>
+          <SingleStory />
+        </ConsoleApiContext.Provider>
       );
     },
   ],

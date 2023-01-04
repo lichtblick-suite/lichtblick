@@ -28,7 +28,7 @@ const useStyles = makeStyles()((theme) => ({
 export default function AccountInfo(props: { currentUser?: User }): JSX.Element {
   const { signOut } = useCurrentUser();
   const { enqueueSnackbar } = useSnackbar();
-  const confirm = useConfirm();
+  const [confirm, confirmModal] = useConfirm();
   const { classes } = useStyles();
 
   const [{ loading }, beginSignOut] = useAsyncFn(async () => {
@@ -61,6 +61,7 @@ export default function AccountInfo(props: { currentUser?: User }): JSX.Element 
 
   return (
     <Stack fullHeight justifyContent="space-between">
+      {confirmModal}
       <Stack gap={2}>
         <Stack direction="row" alignItems="center" gap={1} flexWrap="wrap">
           <BlockheadFilledIcon className={classes.icon} />

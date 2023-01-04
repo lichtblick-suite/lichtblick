@@ -147,7 +147,7 @@ export default React.memo(function LayoutRow({
   onMakePersonalCopy: (item: Layout) => void;
 }): JSX.Element {
   const isMounted = useMountedState();
-  const confirm = useConfirm();
+  const [confirm, confirmModal] = useConfirm();
   const layoutDebug = useContext(LayoutStorageDebuggingContext);
   const layoutManager = useLayoutManager();
 
@@ -271,8 +271,9 @@ export default React.memo(function LayoutRow({
 
   const handleMenuButtonClick = useCallback((event: React.MouseEvent) => {
     event.preventDefault();
+    const { currentTarget } = event;
     setContextMenuTarget((target) =>
-      target == undefined ? { type: "element", element: event.currentTarget } : undefined,
+      target == undefined ? { type: "element", element: currentTarget } : undefined,
     );
   }, []);
 
@@ -462,6 +463,7 @@ export default React.memo(function LayoutRow({
         </IconButton>
       }
     >
+      {confirmModal}
       <ListItemButton
         data-testid="layout-list-item"
         selected={selected || multiSelectedIds.includes(layout.id)}

@@ -8,7 +8,6 @@ import { Story } from "@storybook/react";
 import { fromDate } from "@foxglove/rostime";
 import MockMessagePipelineProvider from "@foxglove/studio-base/components/MessagePipeline/MockMessagePipelineProvider";
 import CurrentUserContext, { User } from "@foxglove/studio-base/context/CurrentUserContext";
-import ModalHost from "@foxglove/studio-base/context/ModalHost";
 import { PlayerPresence, Topic } from "@foxglove/studio-base/players/types";
 import EventsProvider from "@foxglove/studio-base/providers/EventsProvider";
 
@@ -17,9 +16,7 @@ import DataSourceSidebar from "./DataSourceSidebar";
 function Wrapper(StoryFn: Story): JSX.Element {
   return (
     <EventsProvider>
-      <ModalHost>
-        <StoryFn />
-      </ModalHost>
+      <StoryFn />
     </EventsProvider>
   );
 }

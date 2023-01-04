@@ -10,7 +10,6 @@ import { useMemo } from "react";
 import AnalyticsProvider from "@foxglove/studio-base/context/AnalyticsProvider";
 import { LayoutData } from "@foxglove/studio-base/context/CurrentLayoutContext/actions";
 import LayoutStorageContext from "@foxglove/studio-base/context/LayoutStorageContext";
-import ModalHost from "@foxglove/studio-base/context/ModalHost";
 import { UserProfileStorageContext } from "@foxglove/studio-base/context/UserProfileStorageContext";
 import CurrentLayoutProvider from "@foxglove/studio-base/providers/CurrentLayoutProvider";
 import { defaultPlaybackConfig } from "@foxglove/studio-base/providers/CurrentLayoutProvider/reducers";
@@ -128,19 +127,17 @@ function WithSetup(Child: Story, ctx: StoryContext): JSX.Element {
   );
   return (
     <div style={{ display: "flex", height: "100%", width: 320 }}>
-      <ModalHost>
-        <AnalyticsProvider>
-          <UserProfileStorageContext.Provider value={userProfile}>
-            <LayoutStorageContext.Provider value={storage}>
-              <LayoutManagerProvider>
-                <CurrentLayoutProvider>
-                  <Child />
-                </CurrentLayoutProvider>
-              </LayoutManagerProvider>
-            </LayoutStorageContext.Provider>
-          </UserProfileStorageContext.Provider>
-        </AnalyticsProvider>
-      </ModalHost>
+      <AnalyticsProvider>
+        <UserProfileStorageContext.Provider value={userProfile}>
+          <LayoutStorageContext.Provider value={storage}>
+            <LayoutManagerProvider>
+              <CurrentLayoutProvider>
+                <Child />
+              </CurrentLayoutProvider>
+            </LayoutManagerProvider>
+          </LayoutStorageContext.Provider>
+        </UserProfileStorageContext.Provider>
+      </AnalyticsProvider>
     </div>
   );
 }

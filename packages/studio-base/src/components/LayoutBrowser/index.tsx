@@ -66,9 +66,9 @@ export default function LayoutBrowser({
   const isMounted = useMountedState();
   const { enqueueSnackbar } = useSnackbar();
   const layoutManager = useLayoutManager();
-  const prompt = usePrompt();
+  const [prompt, promptModal] = usePrompt();
   const analytics = useAnalytics();
-  const confirm = useConfirm();
+  const [confirm, confirmModal] = useConfirm();
   const { unsavedChangesPrompt, openUnsavedChangesPrompt } = useUnsavedChangesPrompt();
 
   const currentLayoutId = useCurrentLayoutSelector(selectedLayoutIdSelector);
@@ -557,6 +557,8 @@ export default function LayoutBrowser({
         </IconButton>,
       ].filter(Boolean)}
     >
+      {promptModal}
+      {confirmModal}
       {unsavedChangesPrompt}
       <Stack fullHeight gap={2} style={{ pointerEvents: pendingMultiAction ? "none" : "auto" }}>
         <LayoutSection

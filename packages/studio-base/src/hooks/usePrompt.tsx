@@ -3,11 +3,10 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 import { Button, Dialog, DialogActions, DialogContent, TextField, Typography } from "@mui/material";
-import { FormEvent, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
+import { FormEvent, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useKeyPressEvent } from "react-use";
 
 import Stack from "@foxglove/studio-base/components/Stack";
-import ModalContext from "@foxglove/studio-base/context/ModalContext";
 
 type PromptOptions = {
   title: string;
@@ -134,27 +133,27 @@ function ModalPrompt({
 
 // Returns a function that can be used similarly to the DOM prompt(), but
 // backed by a React element rather than a native modal, and asynchronous.
-export function usePrompt(): (options: PromptOptions) => Promise<string | undefined> {
-  const modalHost = useContext(ModalContext);
+export function usePrompt(): [
+  prompt: (options: PromptOptions) => Promise<string | undefined>,
+  promptModal: JSX.Element | undefined,
+] {
+  const [modal, setModal] = useState<JSX.Element | undefined>();
 
-  const runPrompt = useCallback(
-    async (options: PromptOptions) => {
-      return await new Promise<string | undefined>((resolve) => {
-        const remove = modalHost.addModalElement(
-          <ModalPrompt
-            {...options}
-            onComplete={(value) => {
-              resolve(value);
-              remove();
-            }}
-          />,
-        );
-      });
-    },
-    [modalHost],
-  );
+  const runPrompt = useCallback(async (options: PromptOptions) => {
+    return await new Promise<string | undefined>((resolve) => {
+      setModal(
+        <ModalPrompt
+          {...options}
+          onComplete={(value) => {
+            resolve(value);
+            setModal(undefined);
+          }}
+        />,
+      );
+    });
+  }, []);
 
-  return runPrompt;
+  return [runPrompt, modal];
 }
 
 export type { PromptOptions };
