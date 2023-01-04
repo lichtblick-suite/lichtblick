@@ -23,72 +23,68 @@ type ContributionPoints = {
   messageConverters: RegisterMessageConverterArgs<unknown>[];
 };
 
-async function activateExtensions(
-  extensions: ExtensionInfo[],
-  loadExtension: ExtensionLoader["loadExtension"],
-): Promise<ContributionPoints> {
+function activateExtension(
+  extension: ExtensionInfo,
+  unwrappedExtensionSource: string,
+): ContributionPoints {
   // registered panels stored by their fully qualified id
   // the fully qualified id is the extension name + panel name
   const panels: Record<string, RegisteredPanel> = {};
 
   const messageConverters: RegisterMessageConverterArgs<unknown>[] = [];
 
-  for (const extension of extensions) {
-    log.debug(`Activating extension ${extension.qualifiedName}`);
+  log.debug(`Activating extension ${extension.qualifiedName}`);
 
-    const module = { exports: {} };
-    const require = (name: string) => {
-      return { react: React, "react-dom": ReactDOM }[name];
-    };
+  const module = { exports: {} };
+  const require = (name: string) => {
+    return { react: React, "react-dom": ReactDOM }[name];
+  };
 
-    const extensionMode =
-      process.env.NODE_ENV === "production"
-        ? "production"
-        : process.env.NODE_ENV === "test"
-        ? "test"
-        : "development";
+  const extensionMode =
+    process.env.NODE_ENV === "production"
+      ? "production"
+      : process.env.NODE_ENV === "test"
+      ? "test"
+      : "development";
 
-    const ctx: ExtensionContext = {
-      mode: extensionMode,
+  const ctx: ExtensionContext = {
+    mode: extensionMode,
 
-      registerPanel(params) {
-        log.debug(`Extension ${extension.qualifiedName} registering panel: ${params.name}`);
+    registerPanel(params) {
+      log.debug(`Extension ${extension.qualifiedName} registering panel: ${params.name}`);
 
-        const fullId = `${extension.qualifiedName}.${params.name}`;
-        if (panels[fullId]) {
-          log.warn(`Panel ${fullId} is already registered`);
-          return;
-        }
+      const fullId = `${extension.qualifiedName}.${params.name}`;
+      if (panels[fullId]) {
+        log.warn(`Panel ${fullId} is already registered`);
+        return;
+      }
 
-        panels[fullId] = {
-          extensionName: extension.qualifiedName,
-          extensionNamespace: extension.namespace,
-          registration: params,
-        };
-      },
+      panels[fullId] = {
+        extensionName: extension.qualifiedName,
+        extensionNamespace: extension.namespace,
+        registration: params,
+      };
+    },
 
-      registerMessageConverter<Src>(args: RegisterMessageConverterArgs<Src>) {
-        log.debug(
-          `Extension ${extension.qualifiedName} registering message converter from: ${args.fromSchemaName} to: ${args.toSchemaName}`,
-        );
-        messageConverters.push(args as RegisterMessageConverterArgs<unknown>);
-      },
-    };
+    registerMessageConverter<Src>(args: RegisterMessageConverterArgs<Src>) {
+      log.debug(
+        `Extension ${extension.qualifiedName} registering message converter from: ${args.fromSchemaName} to: ${args.toSchemaName}`,
+      );
+      messageConverters.push(args as RegisterMessageConverterArgs<unknown>);
+    },
+  };
 
-    try {
-      const unwrappedExtensionSource = await loadExtension(extension.id);
+  try {
+    // eslint-disable-next-line no-new-func
+    const fn = new Function("module", "require", unwrappedExtensionSource);
 
-      // eslint-disable-next-line no-new-func
-      const fn = new Function("module", "require", unwrappedExtensionSource);
+    // load the extension module exports
+    fn(module, require, {});
+    const wrappedExtensionModule = module.exports as ExtensionModule;
 
-      // load the extension module exports
-      fn(module, require, {});
-      const wrappedExtensionModule = module.exports as ExtensionModule;
-
-      wrappedExtensionModule.activate(ctx);
-    } catch (err) {
-      log.error(err);
-    }
+    wrappedExtensionModule.activate(ctx);
+  } catch (err) {
+    log.error(err);
   }
 
   return {
@@ -116,37 +112,35 @@ export function createExtensionRegistryStore(
       return info;
     },
 
-    loadExtension: async (id: string) => {
-      for (const loader of loaders) {
-        try {
-          return await loader.loadExtension(id);
-        } catch (error) {
-          log.debug(error);
-        }
-      }
-
-      throw new Error(`Extension ${id} not found`);
-    },
-
     refreshExtensions: async () => {
       if (loaders.length === 0) {
         return;
       }
 
-      const extensionList = (
-        await Promise.all(loaders.map(async (loader) => await loader.getExtensions()))
-      )
-        .flat()
-        .sort();
+      const extensionList: ExtensionInfo[] = [];
+      const allContributionPoints: ContributionPoints = { panels: {}, messageConverters: [] };
+      for (const loader of loaders) {
+        try {
+          for (const extension of await loader.getExtensions()) {
+            try {
+              extensionList.push(extension);
+              const unwrappedExtensionSource = await loader.loadExtension(extension.id);
+              const contributionPoints = activateExtension(extension, unwrappedExtensionSource);
+              Object.assign(allContributionPoints.panels, contributionPoints.panels);
+              allContributionPoints.messageConverters.push(...contributionPoints.messageConverters);
+            } catch (err) {
+              log.error("Error loading extension", err);
+            }
+          }
+        } catch (err) {
+          log.error("Error loading extension list", err);
+        }
+      }
       log.debug(`Found ${extensionList.length} extension(s)`);
-      const contributionPoints = await activateExtensions(
-        extensionList,
-        async (id: string) => await get().loadExtension(id),
-      );
       set({
         installedExtensions: extensionList,
-        installedPanels: contributionPoints.panels,
-        installedMessageConverters: contributionPoints.messageConverters,
+        installedPanels: allContributionPoints.panels,
+        installedMessageConverters: allContributionPoints.messageConverters,
       });
     },
 

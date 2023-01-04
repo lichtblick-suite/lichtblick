@@ -21,7 +21,6 @@ export type ExtensionCatalog = {
     namespace: ExtensionNamespace,
     foxeFileData: Uint8Array,
   ) => Promise<ExtensionInfo>;
-  loadExtension(id: string): Promise<string>;
   refreshExtensions: () => Promise<void>;
   uninstallExtension: (namespace: ExtensionNamespace, id: string) => Promise<void>;
 
