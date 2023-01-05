@@ -265,6 +265,7 @@ export default class FoxgloveWebSocketPlayer implements Player {
       }
 
       try {
+        this._receivedBytes += data.byteLength;
         const receiveTime = this._getCurrentTime();
         const topic = chanInfo.channel.topic;
         this._parsedMessages.push({
