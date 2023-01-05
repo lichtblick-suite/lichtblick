@@ -42,8 +42,8 @@ export default function Root({
 }): JSX.Element {
   const dataSources: IDataSourceFactory[] = useMemo(() => {
     const sources = [
-      new RosbridgeDataSourceFactory(),
       new FoxgloveWebSocketDataSourceFactory(),
+      new RosbridgeDataSourceFactory(),
       new Ros1SocketDataSourceFactory(),
       new Ros1LocalBagDataSourceFactory(),
       new Ros2SocketDataSourceFactory(),

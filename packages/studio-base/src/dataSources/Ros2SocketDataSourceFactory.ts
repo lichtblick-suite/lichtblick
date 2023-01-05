@@ -15,10 +15,10 @@ class Ros2SocketDataSourceFactory implements IDataSourceFactory {
   public displayName = "ROS 2";
   public iconName: IDataSourceFactory["iconName"] = "ROS";
   public description =
-    "Connect to a running ROS 2 system via a native TCP connection that accesses your ROS nodes directly.";
-  public docsLinks = [{ url: "https://foxglove.dev/docs/studio/connection/native" }];
+    "Connect to a running ROS 2 system via a native UDP connection that accesses your ROS nodes directly.";
+  public docsLinks = [{ url: "https://foxglove.dev/docs/studio/connection/ros2" }];
   public warning =
-    "Limitations of ROS 2 prevent Studio from having access to your custom messages. We recommend using the Rosbridge connection for a better experience.";
+    "Native ROS 2 connections do not support custom messages, and are deprecated. We recommend using the Foxglove WebSocket connection instead.";
 
   public formConfig = {
     fields: [

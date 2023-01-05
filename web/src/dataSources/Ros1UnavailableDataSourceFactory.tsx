@@ -9,11 +9,16 @@ import { IDataSourceFactory, Ros1SocketDataSourceFactory } from "@foxglove/studi
 class Ros1UnavailableDataSourceFactory extends Ros1SocketDataSourceFactory {
   public disabledReason = (
     <>
-      ROS 1 connections require TCP sockets, which are not available in a web browser.{" "}
-      <Link href="https://foxglove.dev/download" target="_blank" rel="noreferrer">
-        Download our desktop app
+      Native ROS 1 connections require TCP sockets, which are not available in a web browser. We
+      recommend using the{" "}
+      <Link
+        href="https://foxglove.dev/docs/studio/connection/ros1#live-connection"
+        target="_blank"
+        rel="noreferrer"
+      >
+        Foxglove WebSocket
       </Link>{" "}
-      to connect to a ROS 1 system.
+      connection instead.
     </>
   );
 

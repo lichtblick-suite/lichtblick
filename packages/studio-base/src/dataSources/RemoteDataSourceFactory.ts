@@ -24,8 +24,7 @@ class RemoteDataSourceFactory implements IDataSourceFactory {
   public displayName = "Remote file";
   public iconName: IDataSourceFactory["iconName"] = "FileASPX";
   public supportedFileTypes = [".bag", ".mcap"];
-  public description =
-    "Fetch and load pre-recorded ROS 1 (.bag) or MCAP (.mcap) files from a remote location.";
+  public description = "Open pre-recorded .bag or .mcap files from a remote location.";
   public docsLinks = [
     { label: "ROS 1", url: "https://foxglove.dev/docs/studio/connection/ros1#cloud-data" },
     { label: "MCAP", url: "https://foxglove.dev/docs/studio/connection/mcap#cloud-data" },

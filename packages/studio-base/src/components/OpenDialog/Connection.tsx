@@ -237,8 +237,14 @@ export default function Connection(props: ConnectionProps): JSX.Element {
             )}
             <Stack direction="row" gap={1}>
               {(selectedSource?.docsLinks ?? []).map((item) => (
-                <Link key={item.url} color="primary" href={item.url}>
-                  {item.label ? `View docs for ${item.label}` : "View docs"}.
+                <Link
+                  key={item.url}
+                  color="primary"
+                  href={item.url}
+                  target="_blank"
+                  rel="noreferrer"
+                >
+                  {item.label ? `View docs for ${item.label}` : "View docs"}
                 </Link>
               ))}
             </Stack>
