@@ -13,7 +13,7 @@
   },
   "homepage": "https://foxglove.dev/",
   "dependencies": {
-    "async-mutex": "0.3.2",
+    "async-mutex": "0.4.0",
     "xacro-parser": "0.3.8"
   }
 }

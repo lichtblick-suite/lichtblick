@@ -25,7 +25,7 @@
     "@types/utif": "^3.0.1",
     "@xmldom/xmldom": "0.8.3",
     "app-builder-lib": "23.1.0",
-    "async-mutex": "0.3.2",
+    "async-mutex": "0.4.0",
     "builder-util": "23.0.9",
     "clean-webpack-plugin": "4.0.0",
     "electron": "19.1.8",
