@@ -8675,6 +8675,16 @@ __metadata:
   languageName: node
   linkType: hard
 
+"builder-util-runtime@npm:9.1.1":
+  version: 9.1.1
+  resolution: "builder-util-runtime@npm:9.1.1"
+  dependencies:
+    debug: ^4.3.4
+    sax: ^1.2.4
+  checksum: 3458f9c8accad6e934c841cffa93f5d4b342c22b10b9c1a2eb3fd44ca96ea2c662b1048f9a075da9b8a4fada17206887b7e92ebdca331b1071520916e013e245
+  languageName: node
+  linkType: hard
+
 "builder-util@npm:23.0.9":
   version: 23.0.9
   resolution: "builder-util@npm:23.0.9"
@@ -8697,6 +8707,31 @@ __metadata:
     stat-mode: ^1.0.0
     temp-file: ^3.4.0
   checksum: 14cee9beb7d32cc158bcd8d7107d5a6c527d6f01fe5d94091ddaef8604b6bf32ad63197fa6ef26802784c2a5773c655680ec6acaaf9c66f52129913156be8281
+  languageName: node
+  linkType: hard
+
+"builder-util@npm:23.6.0":
+  version: 23.6.0
+  resolution: "builder-util@npm:23.6.0"
+  dependencies:
+    7zip-bin: ~5.1.1
+    "@types/debug": ^4.1.6
+    "@types/fs-extra": ^9.0.11
+    app-builder-bin: 4.0.0
+    bluebird-lst: ^1.0.9
+    builder-util-runtime: 9.1.1
+    chalk: ^4.1.1
+    cross-spawn: ^7.0.3
+    debug: ^4.3.4
+    fs-extra: ^10.0.0
+    http-proxy-agent: ^5.0.0
+    https-proxy-agent: ^5.0.0
+    is-ci: ^3.0.0
+    js-yaml: ^4.1.0
+    source-map-support: ^0.5.19
+    stat-mode: ^1.0.0
+    temp-file: ^3.4.0
+  checksum: 138fb9abed01ea2e5ac895e6a6ed75310ca6c89e0050483c81801b052f61b42ae5a042f457088b6e205ec8b4403b1ff3a325955f110255afb4da2310e3cf14ad
   languageName: node
   linkType: hard
 
@@ -10678,7 +10713,7 @@ __metadata:
     "@xmldom/xmldom": 0.8.6
     app-builder-lib: 23.1.0
     async-mutex: 0.4.0
-    builder-util: 23.0.9
+    builder-util: 23.6.0
     clean-webpack-plugin: 4.0.0
     electron: 19.1.8
     electron-builder: 23.1.0

@@ -26,7 +26,7 @@
     "@xmldom/xmldom": "0.8.6",
     "app-builder-lib": "23.1.0",
     "async-mutex": "0.4.0",
-    "builder-util": "23.0.9",
+    "builder-util": "23.6.0",
     "clean-webpack-plugin": "4.0.0",
     "electron": "19.1.8",
     "electron-builder": "23.1.0",
