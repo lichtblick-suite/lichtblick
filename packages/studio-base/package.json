@@ -125,7 +125,7 @@
     "eventemitter3": "5.0.0",
     "fake-indexeddb": "4.0.1",
     "fetch-mock": "9.11.0",
-    "fork-ts-checker-webpack-plugin": "7.2.13",
+    "fork-ts-checker-webpack-plugin": "7.2.14",
     "fuzzysort": "2.0.4",
     "fzf": "0.5.1",
     "gl-matrix": "3.4.3",
