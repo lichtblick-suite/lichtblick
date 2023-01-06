@@ -2524,7 +2524,7 @@ __metadata:
     three: "patch:three@0.140.2#../../patches/three.patch"
     tinycolor2: 1.4.2
     ts-essentials: 9.3.0
-    ts-key-enum: 2.0.11
+    ts-key-enum: 2.0.12
     ts-loader: 9.4.2
     tss-react: 3.7.1
     ttypescript: 1.5.13
@@ -23705,10 +23705,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"ts-key-enum@npm:2.0.11":
-  version: 2.0.11
-  resolution: "ts-key-enum@npm:2.0.11"
-  checksum: e2c84dd3d3451b8ef1de87f594b84efc588e765554bc596ef9f220e987e350fe104d0002f87da5a4727399175fb4d41ef028cf32a7ccfa37313ac97e26561401
+"ts-key-enum@npm:2.0.12":
+  version: 2.0.12
+  resolution: "ts-key-enum@npm:2.0.12"
+  checksum: faf84f36f7b116aee5502bd86feb50b592c15af49c1795b9710861c27b464eaa1c6ce701e7a2843cc69c09e224be4ae7ea74e284a00f41478a690462d7ab963d
   languageName: node
   linkType: hard
 
