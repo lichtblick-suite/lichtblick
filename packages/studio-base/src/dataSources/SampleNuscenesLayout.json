@@ -131,7 +131,8 @@
         "poseEstimateYDeviation": 0.5,
         "poseEstimateThetaDeviation": 0.26179939
       },
-      "followMode": "follow-pose"
+      "followMode": "follow-pose",
+      "followTf": "base_link"
     },
     "map!2vkib4e": {
       "disabledTopics": [],
@@ -198,7 +199,8 @@
         "poseEstimateYDeviation": 0.5,
         "poseEstimateThetaDeviation": 0.26179939
       },
-      "followMode": "follow-pose"
+      "followMode": "follow-pose",
+      "followTf": "base_link"
     },
     "Plot!2pb7zl7": {
       "paths": [
