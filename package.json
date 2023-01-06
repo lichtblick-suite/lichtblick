@@ -68,7 +68,7 @@
     "react-use": "patch:react-use@17.4.0#./patches/react-use.patch"
   },
   "devDependencies": {
-    "@actions/core": "1.9.1",
+    "@actions/core": "1.10.0",
     "@actions/exec": "1.1.1",
     "@actions/tool-cache": "2.0.1",
     "@babel/core": "7.20.12",
