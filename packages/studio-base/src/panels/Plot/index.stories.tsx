@@ -242,7 +242,7 @@ const messageCache: BlockCache = {
   startTime: fromSec(0.6),
 };
 
-const fixture: Fixture = {
+export const fixture: Fixture = {
   datatypes,
   topics: [
     { name: "/some_topic/location", schemaName: "msgs/PoseDebug" },
@@ -316,7 +316,7 @@ const fixture: Fixture = {
   progress: { messageCache },
 };
 
-const paths: PlotConfig["paths"] = [
+export const paths: PlotConfig["paths"] = [
   { value: "/some_topic/location.pose.velocity", enabled: true, timestampMethod: "receiveTime" },
   {
     value: "/some_topic/location.pose.acceleration",
@@ -370,6 +370,7 @@ export default {
   parameters: {
     chromatic: { delay: 50 },
   },
+  excludeStories: ["paths", "fixture"],
 };
 
 LineGraph.storyName = "line graph";

@@ -3,7 +3,7 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 import produce from "immer";
-import { isNumber, set } from "lodash";
+import { isEqual, isNumber, set } from "lodash";
 import memoizeWeak from "memoize-weak";
 import { useCallback, useEffect } from "react";
 
@@ -78,25 +78,26 @@ function buildSettingsTree(config: PlotConfig, enableSeries: boolean): SettingsT
       fields: {
         title: { label: "Title", input: "string", value: config.title, placeholder: "Plot" },
         isSynced: { label: "Sync with other plots", input: "boolean", value: config.isSynced },
-        legendDisplay: enableSeries
-          ? undefined
-          : {
-              label: "Legend position",
-              input: "select",
-              value: config.legendDisplay,
-              options: [
-                { value: "floating", label: "Floating" },
-                { value: "left", label: "Left" },
-                { value: "top", label: "Top" },
-              ],
-            },
-        showPlotValuesInLegend: enableSeries
-          ? undefined
-          : {
-              label: "Show plot values in legend",
-              input: "boolean",
-              value: config.showPlotValuesInLegend,
-            },
+      },
+    },
+    legend: {
+      label: "Legend",
+      fields: {
+        legendDisplay: {
+          label: "Position",
+          input: "select",
+          value: config.legendDisplay,
+          options: [
+            { value: "floating", label: "Floating" },
+            { value: "left", label: "Left" },
+            { value: "top", label: "Top" },
+          ],
+        },
+        showPlotValuesInLegend: {
+          label: "Show plot values",
+          input: "boolean",
+          value: config.showPlotValuesInLegend,
+        },
       },
     },
     yAxis: {
@@ -127,6 +128,26 @@ function buildSettingsTree(config: PlotConfig, enableSeries: boolean): SettingsT
       label: "X Axis",
       defaultExpansionState: "collapsed",
       fields: {
+        xAxisVal: {
+          label: "Value",
+          input: "select",
+          value: config.xAxisVal,
+          options: [
+            { label: "Timestamp", value: "timestamp" },
+            { label: "Index", value: "index" },
+            { label: "Path (current)", value: "currentCustom" },
+            { label: "Path (accumulated)", value: "custom" },
+          ],
+        },
+        xAxisPath:
+          config.xAxisVal === "currentCustom" || config.xAxisVal === "custom"
+            ? {
+                input: "messagepath",
+                label: "Path",
+                value: config.xAxisPath?.value ?? "",
+                validTypes: plotableRosTypes,
+              }
+            : undefined,
         showXAxisLabels: {
           label: "Show labels",
           input: "boolean",
@@ -170,7 +191,13 @@ export function usePlotPanelSettings(config: PlotConfig, saveConfig: SaveConfig<
         saveConfig(
           produce((draft) => {
             if (path[0] === "paths") {
-              set(draft, path, value);
+              if (path[2] === "visible") {
+                set(draft, [...path.slice(0, 2), "enabled"], value);
+              } else {
+                set(draft, path, value);
+              }
+            } else if (isEqual(path, ["xAxis", "xAxisPath"])) {
+              set(draft, ["xAxisPath", "value"], value);
             } else {
               set(draft, path.slice(1), value);
 
@@ -191,6 +218,7 @@ export function usePlotPanelSettings(config: PlotConfig, saveConfig: SaveConfig<
               draft.paths.push({
                 timestampMethod: "receiveTime",
                 value: "",
+                label: `Series ${draft.paths.length + 1}`,
                 enabled: true,
               });
             }),
