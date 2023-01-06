@@ -2532,7 +2532,7 @@ __metadata:
     typescript-transform-paths: 3.3.1
     urdf-loader: 0.10.4
     url-search-params: 1.1.0
-    use-debounce: 8.0.4
+    use-debounce: 9.0.2
     use-immer: 0.8.1
     use-pan-and-zoom: 0.6.5
     uuid: 8.3.2
@@ -24612,12 +24612,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"use-debounce@npm:8.0.4":
-  version: 8.0.4
-  resolution: "use-debounce@npm:8.0.4"
+"use-debounce@npm:9.0.2":
+  version: 9.0.2
+  resolution: "use-debounce@npm:9.0.2"
   peerDependencies:
     react: ">=16.8.0"
-  checksum: 0f8b9e571f68a4694033ec00690bf73d781ac890140ae9ed4b330f71f7adb3f7d7df5cdaa32923c4d03fdc9de8a11be0f84301175ae4f66208af52ad03c55504
+  checksum: fb7d9a263e6d5e9d246118b90f11298156b7973aaff315d70bfeb154de5fb8c8bcdde3058da2f57d40a014eec6545c3e3a00cb4dbb2d9323adf2a169f8a492bb
   languageName: node
   linkType: hard
 
