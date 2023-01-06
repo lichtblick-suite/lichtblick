@@ -131,6 +131,10 @@ export default class UserNodePlayer implements Player {
   // a node may set its own problem or clear its problem
   private _problemStore = new Map<string, PlayerProblem>();
 
+  // keep track of last message on all topics to recompute output topic messages when user nodes change
+  private _lastMessageByInputTopic = new Map<string, MessageEvent<unknown>>();
+  private _userNodeIdsNeedUpdate = new Set<string>();
+
   private _protectedState = new MutexLocked<ProtectedState>({
     userNodes: {},
     nodeRegistrations: [],
@@ -223,8 +227,8 @@ export default class UserNodePlayer implements Player {
     parsedMessages: [],
   };
 
-  // When updating nodes while paused, we seek to the current time
-  // (i.e. invoke _getMessages with an empty array) to refresh messages
+  // Processes input messages through nodes to create messages on output topics
+  // Memoized to prevent reprocessing on same input
   private async _getMessages(
     parsedMessages: readonly MessageEvent<unknown>[],
     globalVariables: GlobalVariables,
@@ -232,6 +236,10 @@ export default class UserNodePlayer implements Player {
   ): Promise<{
     parsedMessages: readonly MessageEvent<unknown>[];
   }> {
+    // prevents from memoizing results for empty requests
+    if (parsedMessages.length === 0) {
+      return { parsedMessages };
+    }
     if (
       shallowequal(this._lastGetMessagesInput, {
         parsedMessages,
@@ -347,6 +355,14 @@ export default class UserNodePlayer implements Player {
   // Called when userNode state is updated.
   public async setUserNodes(userNodes: UserNodes): Promise<void> {
     await this._protectedState.runExclusive(async (state) => {
+      for (const nodeId of Object.keys(userNodes)) {
+        const prevNode = state.userNodes[nodeId];
+        const newNode = userNodes[nodeId];
+        if (prevNode && newNode && prevNode.sourceCode !== newNode.sourceCode) {
+          // if source code of a userNode changed then we need to mark it for re-processing input messages
+          this._userNodeIdsNeedUpdate.add(nodeId);
+        }
+      }
       state.userNodes = userNodes;
 
       // Prune the node registration cache so it doesn't grow forever.
@@ -796,8 +812,53 @@ export default class UserNodePlayer implements Player {
 
         const allDatatypes = this._getDatatypes(datatypes, this._memoizedNodeDatatypes);
 
+        /**
+         * if nodes have been updated we need to add their previous input messages
+         * to our list of messages to be parsed so that subscribers can refresh with
+         * the new output topic messages
+         */
+        const inputTopicsForRecompute = new Set<string>();
+
+        for (const userNodeId of this._userNodeIdsNeedUpdate) {
+          const nodeRegistration = state.nodeRegistrations.find(
+            ({ nodeId }) => nodeId === userNodeId,
+          );
+          if (!nodeRegistration) {
+            continue;
+          }
+          const inputTopics = nodeRegistration.inputs;
+
+          for (const topic of inputTopics) {
+            inputTopicsForRecompute.add(topic);
+          }
+        }
+
+        // remove topics that already have messages in state, because we won't need to take their last message to process
+        // this also removes possible duplicate messages to be parsed
+        for (const message of messages) {
+          if (inputTopicsForRecompute.has(message.topic)) {
+            inputTopicsForRecompute.delete(message.topic);
+          }
+        }
+
+        const messagesForRecompute: MessageEvent<unknown>[] = [];
+        for (const topic of inputTopicsForRecompute) {
+          const messageForRecompute = this._lastMessageByInputTopic.get(topic);
+          if (messageForRecompute) {
+            messagesForRecompute.push(messageForRecompute);
+          }
+        }
+
+        this._userNodeIdsNeedUpdate.clear();
+
+        for (const message of messages) {
+          this._lastMessageByInputTopic.set(message.topic, message);
+        }
+
+        const messagesToBeParsed =
+          messagesForRecompute.length > 0 ? messages.concat(messagesForRecompute) : messages;
         const { parsedMessages } = await this._getMessages(
-          messages,
+          messagesToBeParsed,
           globalVariables,
           state.nodeRegistrations,
         );

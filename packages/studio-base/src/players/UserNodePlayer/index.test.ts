@@ -437,6 +437,85 @@ describe("UserNodePlayer", () => {
       expect(messages).toBe(newMessages);
     });
 
+    it("outputs updated messages on next when user script is changed with no new messages as part of active state", async () => {
+      const fakePlayer = new FakePlayer();
+      const mockAddUserNodeLogs = jest.fn();
+      const userNodePlayer = new UserNodePlayer(fakePlayer, {
+        ...defaultUserNodeActions,
+        setUserNodeDiagnostics: jest.fn(),
+        addUserNodeLogs: mockAddUserNodeLogs,
+      });
+
+      userNodePlayer.setSubscriptions([{ topic: `${DEFAULT_STUDIO_NODE_PREFIX}1` }]);
+      const nodeUserCodeBefore = `
+        export const inputs = ["/np_input"];
+        export const output = "${DEFAULT_STUDIO_NODE_PREFIX}1";
+        let lastStamp, lastReceiveTime;
+        export default (message: { message: { payload: string } }): { custom_np_field: string, value: string } => {
+          return { custom_np_field: "abc", value: message.message.payload };
+        };
+      `;
+      await userNodePlayer.setUserNodes({
+        nodeId: {
+          name: `${DEFAULT_STUDIO_NODE_PREFIX}1`,
+          sourceCode: nodeUserCodeBefore,
+        },
+      });
+
+      const messagesArray = [upstreamFirst];
+
+      const [done, nextDone] = setListenerHelper(userNodePlayer, 2);
+
+      const topics: Topic[] = [{ name: "/np_input", schemaName: `${DEFAULT_STUDIO_NODE_PREFIX}1` }];
+      const datatypes = new Map(Object.entries({ foo: { definitions: [] } }));
+
+      await fakePlayer.emit({
+        activeData: {
+          ...basicPlayerState,
+          messages: messagesArray,
+          currentTime: { sec: 0, nsec: 0 },
+          topics,
+          datatypes,
+        },
+      });
+
+      (await done)!;
+
+      const nodeUserCodeAfter = `
+        export const inputs = ["/np_input"];
+        export const output = "${DEFAULT_STUDIO_NODE_PREFIX}1";
+        let lastStamp, lastReceiveTime;
+        export default (message: { message: { payload: string } }): { custom_np_field: string, value: string } => {
+          return { custom_np_field: "COMPLETELY_DIFFERENT", value: message.message.payload };
+        };
+      `;
+      await userNodePlayer.setUserNodes({
+        nodeId: {
+          name: `${DEFAULT_STUDIO_NODE_PREFIX}1`,
+          sourceCode: nodeUserCodeAfter,
+        },
+      });
+      await fakePlayer.emit({
+        activeData: {
+          ...basicPlayerState,
+          messages: [],
+          currentTime: { sec: 0, nsec: 0 },
+          topics,
+          datatypes,
+        },
+      });
+
+      const { messages: newMessages }: any = await nextDone;
+
+      expect(
+        newMessages.find(
+          (message: MessageEvent<unknown>) =>
+            (message.message as { custom_np_field?: string }).custom_np_field ===
+            "COMPLETELY_DIFFERENT",
+        ),
+      ).toBeTruthy();
+    });
+
     it("subscribes to underlying topics when nodeInfo is added", async () => {
       const fakePlayer = new FakePlayer();
       const userNodePlayer = new UserNodePlayer(fakePlayer, defaultUserNodeActions);
