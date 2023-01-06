@@ -27,7 +27,7 @@ export const MESSAGE_PATH_SYNTAX_HELP_INFO = {
 };
 
 type SectionKey = "app" | "panels" | "resources" | "products" | "contact" | "legal";
-const helpMenuItems: Map<SectionKey, { subheader: string; links: HelpInfo[] }> = new Map([
+export const helpMenuItems: Map<SectionKey, { subheader: string; links: HelpInfo[] }> = new Map([
   [
     "resources",
     {

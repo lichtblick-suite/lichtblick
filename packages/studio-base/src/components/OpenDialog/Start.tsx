@@ -11,7 +11,7 @@ import FoxgloveLogoText from "@foxglove/studio-base/components/FoxgloveLogoText"
 import Stack from "@foxglove/studio-base/components/Stack";
 import TextMiddleTruncate from "@foxglove/studio-base/components/TextMiddleTruncate";
 import { useAnalytics } from "@foxglove/studio-base/context/AnalyticsContext";
-import { useCurrentUser } from "@foxglove/studio-base/context/CurrentUserContext";
+import { useCurrentUserType } from "@foxglove/studio-base/context/CurrentUserContext";
 import { usePlayerSelection } from "@foxglove/studio-base/context/PlayerSelectionContext";
 import { AppEvent } from "@foxglove/studio-base/services/IAnalytics";
 
@@ -153,29 +153,6 @@ function DataSourceOption(props: DataSourceOptionProps): JSX.Element {
   ) : (
     button
   );
-}
-
-type UserType =
-  | "unauthenticated"
-  | "authenticated-free"
-  | "authenticated-team"
-  | "authenticated-enterprise";
-
-function useCurrentUserType(): UserType {
-  const user = useCurrentUser();
-  if (user.currentUser == undefined) {
-    return "unauthenticated";
-  }
-
-  if (user.currentUser.org.isEnterprise) {
-    return "authenticated-enterprise";
-  }
-
-  if (user.currentUser.orgPaid === true) {
-    return "authenticated-team";
-  }
-
-  return "authenticated-free";
 }
 
 type SidebarItem = {

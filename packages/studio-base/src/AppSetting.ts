@@ -21,6 +21,7 @@ export enum AppSetting {
   SHOW_DEBUG_PANELS = "showDebugPanels",
   ENABLE_LEGACY_PLOT_PANEL = "enableLegacyPlotPanel",
   ENABLE_PLOT_PANEL_SERIES_SETTINGS = "enablePlotPathSeriesSettings",
+  ENABLE_NEW_UI = "enableNewUI",
 
   // Miscellaneous
   HIDE_SIGN_IN_PROMPT = "hideSignInPrompt",

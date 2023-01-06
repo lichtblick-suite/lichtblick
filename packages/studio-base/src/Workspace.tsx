@@ -27,6 +27,7 @@ import { makeStyles } from "tss-react/mui";
 import Logger from "@foxglove/log";
 import { AppSetting } from "@foxglove/studio-base/AppSetting";
 import AccountSettings from "@foxglove/studio-base/components/AccountSettingsSidebar/AccountSettings";
+import { AppBar } from "@foxglove/studio-base/components/AppBar";
 import { DataSourceSidebar } from "@foxglove/studio-base/components/DataSourceSidebar";
 import DocumentDropListener from "@foxglove/studio-base/components/DocumentDropListener";
 import ExtensionsSidebar from "@foxglove/studio-base/components/ExtensionsSidebar";
@@ -194,7 +195,7 @@ export default function Workspace(props: WorkspaceProps): JSX.Element {
 
   const isPlayerPresent = playerPresence !== PlayerPresence.NOT_PRESENT;
 
-  const { currentUser } = useCurrentUser();
+  const { currentUser, signIn } = useCurrentUser();
 
   const { currentUserRequired } = useInitialDeepLinkState(props.deepLinks ?? DEFAULT_DEEPLINKS);
 
@@ -207,6 +208,8 @@ export default function Workspace(props: WorkspaceProps): JSX.Element {
   const [enableStudioLogsSidebar = false] = useAppConfigurationValue<boolean>(
     AppSetting.SHOW_DEBUG_PANELS,
   );
+
+  const [enableNewUI = false] = useAppConfigurationValue<boolean>(AppSetting.ENABLE_NEW_UI);
 
   const showSignInForm = currentUserRequired && currentUser == undefined;
 
@@ -304,8 +307,10 @@ export default function Workspace(props: WorkspaceProps): JSX.Element {
   useNativeAppMenuEvent(
     "open-preferences",
     useCallback(() => {
-      setSelectedSidebarItem("preferences");
-    }, []),
+      if (!enableNewUI) {
+        setSelectedSidebarItem("preferences");
+      }
+    }, [enableNewUI]),
   );
 
   useNativeAppMenuEvent(
@@ -538,25 +543,28 @@ export default function Workspace(props: WorkspaceProps): JSX.Element {
       ["help", { iconName: "QuestionCircle", title: "Help", component: HelpSidebar }],
     ]);
 
-    if (supportsAccountSettings) {
-      bottomItems.set("account", {
-        iconName: currentUser != undefined ? "BlockheadFilled" : "Blockhead",
-        title: currentUser != undefined ? `Signed in as ${currentUser.email}` : "Account",
-        component: AccountSettings,
+    if (!enableNewUI) {
+      if (supportsAccountSettings) {
+        bottomItems.set("account", {
+          iconName: currentUser != undefined ? "BlockheadFilled" : "Blockhead",
+          title: currentUser != undefined ? `Signed in as ${currentUser.email}` : "Account",
+          component: AccountSettings,
+        });
+      }
+
+      bottomItems.set("preferences", {
+        iconName: "Settings",
+        title: "Preferences",
+        component: Preferences,
       });
     }
-
-    bottomItems.set("preferences", {
-      iconName: "Settings",
-      title: "Preferences",
-      component: Preferences,
-    });
 
     return [topItems, bottomItems];
   }, [
     DataSourceSidebarItem,
     playerProblems,
     enableStudioLogsSidebar,
+    enableNewUI,
     supportsAccountSettings,
     currentUser,
   ]);
@@ -612,6 +620,9 @@ export default function Workspace(props: WorkspaceProps): JSX.Element {
       <SyncAdapters />
       <KeyListener global keyDownHandlers={keyDownHandlers} />
       <div className={classes.container} ref={containerRef} tabIndex={0}>
+        {enableNewUI && (
+          <AppBar currentUser={currentUser} disableSignin={props.disableSignin} signIn={signIn} />
+        )}
         <Sidebar
           items={sidebarItems}
           bottomItems={sidebarBottomItems}

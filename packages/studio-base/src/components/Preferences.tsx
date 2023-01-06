@@ -20,6 +20,7 @@ import {
   Typography,
   ToggleButtonGroup,
   ToggleButton,
+  ToggleButtonGroupProps,
 } from "@mui/material";
 import moment from "moment-timezone";
 import { MouseEvent, useCallback, useMemo } from "react";
@@ -77,7 +78,7 @@ function formatTimezone(name: string) {
   return `${name} (${zoneAbbr}, ${offsetStr})`;
 }
 
-function ColorSchemeSettings(): JSX.Element {
+export function ColorSchemeSettings(): JSX.Element {
   const { classes } = useStyles();
   const [colorScheme = "system", setColorScheme] = useAppConfigurationValue<string>(
     AppSetting.COLOR_SCHEME,
@@ -117,7 +118,7 @@ function ColorSchemeSettings(): JSX.Element {
   );
 }
 
-function TimezoneSettings(): React.ReactElement {
+export function TimezoneSettings(): React.ReactElement {
   type Option = { key: string; label: string; data?: string; divider?: boolean };
 
   const { classes } = useStyles();
@@ -192,7 +193,11 @@ function TimezoneSettings(): React.ReactElement {
   );
 }
 
-function TimeFormat(): React.ReactElement {
+export function TimeFormat({
+  orientation = "vertical",
+}: {
+  orientation?: ToggleButtonGroupProps["orientation"];
+}): React.ReactElement {
   const { timeFormat, setTimeFormat } = useAppTimeFormat();
 
   const [timezone] = useAppConfigurationValue<string>(AppSetting.TIMEZONE);
@@ -205,7 +210,7 @@ function TimeFormat(): React.ReactElement {
       <ToggleButtonGroup
         color="primary"
         size="small"
-        orientation="vertical"
+        orientation={orientation}
         fullWidth
         exclusive
         value={timeFormat}
@@ -222,7 +227,7 @@ function TimeFormat(): React.ReactElement {
   );
 }
 
-function LaunchDefault(): React.ReactElement {
+export function LaunchDefault(): React.ReactElement {
   const { classes } = useStyles();
   const [preference, setPreference] = useAppConfigurationValue<string | undefined>(
     AppSetting.LAUNCH_PREFERENCE,
@@ -263,7 +268,7 @@ function LaunchDefault(): React.ReactElement {
   );
 }
 
-function MessageFramerate(): React.ReactElement {
+export function MessageFramerate(): React.ReactElement {
   const [messageRate, setMessageRate] = useAppConfigurationValue<number>(AppSetting.MESSAGE_RATE);
   const options = useMemo(
     () => MESSAGE_RATES.map((rate) => ({ key: rate, text: `${rate}`, data: rate })),
@@ -288,7 +293,7 @@ function MessageFramerate(): React.ReactElement {
   );
 }
 
-function AutoUpdate(): React.ReactElement {
+export function AutoUpdate(): React.ReactElement {
   const [updatesEnabled = true, setUpdatedEnabled] = useAppConfigurationValue<boolean>(
     AppSetting.UPDATES_ENABLED,
   );
@@ -315,7 +320,7 @@ function AutoUpdate(): React.ReactElement {
   );
 }
 
-function RosPackagePath(): React.ReactElement {
+export function RosPackagePath(): React.ReactElement {
   const [rosPackagePath, setRosPackagePath] = useAppConfigurationValue<string>(
     AppSetting.ROS_PACKAGE_PATH,
   );

@@ -105,25 +105,36 @@ export default function Sidebar<K extends string>(props: SidebarProps<K>): JSX.E
   const { classes } = useStyles();
   const prevSelectedKey = useRef<string | undefined>(undefined);
 
-  useLayoutEffect(() => {
-    if (prevSelectedKey.current !== selectedKey) {
-      if (selectedKey == undefined) {
-        setMosaicValue("children");
-      } else if (prevSelectedKey.current == undefined) {
-        setMosaicValue({
-          direction: "row",
-          first: "sidebar",
-          second: "children",
-          splitPercentage: defaultInitialSidebarPercentage(),
-        });
-      }
-      prevSelectedKey.current = selectedKey;
-    }
-  }, [selectedKey]);
-
   const allItems = useMemo(() => {
     return new Map([...items, ...bottomItems]);
   }, [bottomItems, items]);
+
+  useLayoutEffect(() => {
+    const keyDoesNotExist = selectedKey != undefined && !allItems.has(selectedKey);
+    const keyChanged = prevSelectedKey.current !== selectedKey;
+
+    if (keyDoesNotExist) {
+      // if the selected key has been removed from allItems, hide the sidebar content
+      setMosaicValue("children");
+    } else if (keyChanged) {
+      if (selectedKey == undefined) {
+        // hide sidebar content when deselecting an item
+        setMosaicValue("children");
+      } else {
+        // show sidebar content when selecting an item
+        setMosaicValue((oldValue) => ({
+          direction: "row",
+          first: "sidebar",
+          second: "children",
+          splitPercentage:
+            // keep previous splitPercentage when changing from one tab to another
+            (typeof oldValue === "object" ? oldValue.splitPercentage : undefined) ??
+            defaultInitialSidebarPercentage(),
+        }));
+      }
+    }
+    prevSelectedKey.current = selectedKey;
+  }, [allItems, selectedKey]);
 
   const SelectedComponent =
     (selectedKey != undefined && allItems.get(selectedKey)?.component) || Noop;
