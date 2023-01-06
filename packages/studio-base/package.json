@@ -95,7 +95,7 @@
     "@types/react-virtualized": "9.21.20",
     "@types/react-window": "^1",
     "@types/sanitize-html": "2.6.2",
-    "@types/seedrandom": "3.0.2",
+    "@types/seedrandom": "3.0.4",
     "@types/shallowequal": "1.1.1",
     "@types/string-hash": "1.1.1",
     "@types/text-metrics": "workspace:*",
