@@ -91,7 +91,7 @@ const useStyles = makeStyles<void, "error">()((theme, _params, classes) => {
         borderRadius: theme.shape.borderRadius,
         paddingTop: 0,
         paddingBottom: 0,
-        borderColor: "transparent",
+        borderColor: "transparent !important",
         lineHeight: 1.75,
 
         "&.Mui-selected": {

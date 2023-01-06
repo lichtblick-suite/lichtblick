@@ -31,7 +31,7 @@ const useStyles = makeStyles()((theme) => ({
   },
   tooltip: {
     '&[data-popper-placement*="top"] .MuiTooltip-tooltip': {
-      marginBottom: theme.spacing(1),
+      marginBottom: `${theme.spacing(1)} !important`,
     },
   },
 }));

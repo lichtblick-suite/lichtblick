@@ -28,7 +28,7 @@ const useStyles = makeStyles()((theme) => ({
     padding: theme.spacing(0.125),
 
     ".MuiSvgIcon-root": {
-      fontSize: theme.typography.pxToRem(16),
+      fontSize: `${theme.typography.pxToRem(16)} !important`,
     },
     ".MuiButton-startIcon": {
       marginRight: theme.spacing(0.5),

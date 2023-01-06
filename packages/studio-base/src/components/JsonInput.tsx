@@ -25,9 +25,9 @@ const { useState, useCallback, useRef, useLayoutEffect, useEffect } = React;
 
 const useStyles = makeStyles()((theme) => ({
   editor: {
-    backgroundColor: "transparent",
-    font: "inherit",
-    fontFamily: fonts.MONOSPACE,
+    backgroundColor: "transparent !important",
+    font: "inherit !important",
+    fontFamily: `${fonts.MONOSPACE} !important`,
     overflow: "auto",
   },
   error: {

@@ -40,8 +40,8 @@ const useStyles = makeStyles()((theme) => ({
   },
   levelSelect: {
     ".MuiSelect-select.MuiInputBase-inputSizeSmall": {
-      paddingBottom: theme.spacing(0.375),
-      paddingTop: theme.spacing(0.375),
+      paddingBottom: `${theme.spacing(0.375)} !important`,
+      paddingTop: `${theme.spacing(0.375)} !important`,
     },
   },
 }));
