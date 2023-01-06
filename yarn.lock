@@ -12069,12 +12069,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"eslint-plugin-tss-unused-classes@npm:0.0.3":
-  version: 0.0.3
-  resolution: "eslint-plugin-tss-unused-classes@npm:0.0.3"
+"eslint-plugin-tss-unused-classes@npm:0.0.4":
+  version: 0.0.4
+  resolution: "eslint-plugin-tss-unused-classes@npm:0.0.4"
   peerDependencies:
-    eslint: ^7.14.0
-  checksum: 6ff956c2a97b640e30aa96ae40499dc1b6dfdf59037d68fcf5a3d30a07cc116ef1ed017af31c2f78989e6fda34e5c1f9abb7ec55078c78f4bc4fc43c617444ae
+    eslint: ^7.14.0 || ^8.0.0
+  checksum: a2b6f5ddd721643eb850d304b288c7a38cbc2f69d6c0e4a9b690fff6fab5a6864e494f782bcefdae95fdffdf3e7932f167d1d945931a7efb46b06c37d9af0639
   languageName: node
   linkType: hard
 
@@ -13060,7 +13060,7 @@ __metadata:
     eslint-plugin-prettier: 4.2.1
     eslint-plugin-react: 7.30.0
     eslint-plugin-react-hooks: 4.6.0
-    eslint-plugin-tss-unused-classes: 0.0.3
+    eslint-plugin-tss-unused-classes: 0.0.4
     jest: 27.5.1
     jest-canvas-mock: 2.3.1
     license-checker: 25.0.1
