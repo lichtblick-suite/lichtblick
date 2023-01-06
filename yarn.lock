@@ -2470,7 +2470,7 @@ __metadata:
     lodash: 4.17.21
     mathjs: 10.1.1
     memoize-weak: 1.0.2
-    meshoptimizer: 0.18.0
+    meshoptimizer: 0.18.1
     moment: 2.29.4
     moment-duration-format: 2.3.2
     moment-timezone: 0.5.35
@@ -17641,10 +17641,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"meshoptimizer@npm:0.18.0":
-  version: 0.18.0
-  resolution: "meshoptimizer@npm:0.18.0"
-  checksum: d9f07b4659315b18f677edea0c7eb25aa0ca8c8ec5d67c7ee3f0d90237144d6bcdc4098dfb5d1de166f5bcd57a735455851b9841fa3f9c52f3aa5cbc2178ecec
+"meshoptimizer@npm:0.18.1":
+  version: 0.18.1
+  resolution: "meshoptimizer@npm:0.18.1"
+  checksum: 101dbed8abd4cf167cdb7a0bc13db90dd0743332c689e43b18cc5254d238f0766750752432401fa63dc7e9e32399ef68daacf48f0d89db1484042c1761c7362d
   languageName: node
   linkType: hard
 
