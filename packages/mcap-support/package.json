@@ -21,7 +21,7 @@
     "prepack": "tsc -b"
   },
   "devDependencies": {
-    "@foxglove/schemas": "0.7.0",
+    "@foxglove/schemas": "0.7.3",
     "@mcap/core": "0.3.0",
     "@types/protobufjs": "workspace:*",
     "@types/zstd-codec": "workspace:*",
