@@ -2459,7 +2459,7 @@ __metadata:
     crypto-browserify: 3.12.0
     css-loader: 6.7.3
     cytoscape: 3.21.0
-    cytoscape-dagre: 2.4.0
+    cytoscape-dagre: 2.5.0
     dat.gui: 0.7.9
     esbuild-loader: 2.20.0
     eventemitter3: 5.0.0
@@ -10309,14 +10309,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"cytoscape-dagre@npm:2.4.0":
-  version: 2.4.0
-  resolution: "cytoscape-dagre@npm:2.4.0"
+"cytoscape-dagre@npm:2.5.0":
+  version: 2.5.0
+  resolution: "cytoscape-dagre@npm:2.5.0"
   dependencies:
     dagre: ^0.8.5
   peerDependencies:
     cytoscape: ^3.2.22
-  checksum: 3d878879e9ba062b0ae8f124c76007bec06508fa5435aca7ef8fa14c2f5e5f6e8310d1e1691641ef67eaa9113fed3ecee5e99340a0d04357344e23155425758c
+  checksum: 0a115b41c2b2123f14110281105547bb0718c2d1f3988f266096e5b6cbd693ae765d4c570de30844c5b0d0cc18ffe81d5fe74115928eb86a41378834b9b3edce
   languageName: node
   linkType: hard
 
