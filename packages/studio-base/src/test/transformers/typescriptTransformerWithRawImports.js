@@ -18,10 +18,19 @@ function rewriteSource(source, sourcePath) {
 }
 
 module.exports = {
-  process(sourceText, sourcePath, opt) {
-    return babelJest.process(rewriteSource(sourceText, sourcePath), sourcePath, opt);
-  },
-  getCacheKey(sourceText, sourcePath, opt) {
-    return babelJest.getCacheKey(rewriteSource(sourceText, sourcePath), sourcePath, opt);
+  createTransformer() {
+    const babelJestTransformer = babelJest.createTransformer({ rootMode: "upward" });
+    return {
+      process(sourceText, sourcePath, opt) {
+        return babelJestTransformer.process(rewriteSource(sourceText, sourcePath), sourcePath, opt);
+      },
+      getCacheKey(sourceText, sourcePath, opt) {
+        return babelJestTransformer.getCacheKey(
+          rewriteSource(sourceText, sourcePath),
+          sourcePath,
+          opt,
+        );
+      },
+    };
   },
 };
