@@ -2,7 +2,7 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { Mcap0IndexedReader, Mcap0Types } from "@mcap/core";
+import { McapIndexedReader, McapTypes } from "@mcap/core";
 
 import { fromNanoSec } from "@foxglove/rostime";
 
@@ -10,9 +10,9 @@ import { FileInfo, TopicInfo } from "./types";
 
 export default async function getIndexedMcapInfo(
   file: File,
-  decompressHandlers: Mcap0Types.DecompressHandlers,
+  decompressHandlers: McapTypes.DecompressHandlers,
 ): Promise<FileInfo> {
-  const reader = await Mcap0IndexedReader.Initialize({
+  const reader = await McapIndexedReader.Initialize({
     readable: {
       size: async () => BigInt(file.size),
       read: async (offset, length) => {

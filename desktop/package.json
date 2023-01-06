@@ -12,7 +12,7 @@
     "@foxglove/mcap-support": "workspace:*",
     "@foxglove/rosbag": "0.2.3",
     "@foxglove/rostime": "1.1.2",
-    "@mcap/core": "0.2.2",
+    "@mcap/core": "0.3.0",
     "@pmmmwh/react-refresh-webpack-plugin": "0.5.4",
     "@sentry/electron": "4.0.0",
     "@sentry/tracing": "7.10.0",

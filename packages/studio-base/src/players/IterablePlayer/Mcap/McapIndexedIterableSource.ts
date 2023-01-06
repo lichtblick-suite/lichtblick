@@ -2,7 +2,7 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { Mcap0IndexedReader, Mcap0Types } from "@mcap/core";
+import { McapIndexedReader, McapTypes } from "@mcap/core";
 
 import Logger from "@foxglove/log";
 import { ParsedChannel, parseChannel } from "@foxglove/mcap-support";
@@ -21,15 +21,15 @@ import { RosDatatypes } from "@foxglove/studio-base/types/RosDatatypes";
 const log = Logger.getLogger(__filename);
 
 export class McapIndexedIterableSource implements IIterableSource {
-  private reader: Mcap0IndexedReader;
+  private reader: McapIndexedReader;
   private channelInfoById = new Map<
     number,
-    { channel: Mcap0Types.Channel; parsedChannel: ParsedChannel; schemaName: string }
+    { channel: McapTypes.Channel; parsedChannel: ParsedChannel; schemaName: string }
   >();
   private start?: Time;
   private end?: Time;
 
-  public constructor(reader: Mcap0IndexedReader) {
+  public constructor(reader: McapIndexedReader) {
     this.reader = reader;
   }
 

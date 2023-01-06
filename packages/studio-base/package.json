@@ -58,7 +58,7 @@
     "@foxglove/wasm-bz2": "0.1.0",
     "@foxglove/ws-protocol": "0.2.0",
     "@foxglove/xmlrpc": "1.3.0",
-    "@mcap/core": "0.2.2",
+    "@mcap/core": "0.3.0",
     "@mdi/svg": "7.1.96",
     "@mui/icons-material": "5.11.0",
     "@mui/material": "5.4.1",

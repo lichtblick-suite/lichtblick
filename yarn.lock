@@ -2187,7 +2187,7 @@ __metadata:
     "@foxglove/rosmsg2-serialization": 1.0.7
     "@foxglove/schemas": 0.7.0
     "@foxglove/wasm-bz2": 0.1.0
-    "@mcap/core": 0.2.2
+    "@mcap/core": 0.3.0
     "@protobufjs/base64": 1.1.2
     "@types/protobufjs": "workspace:*"
     "@types/zstd-codec": "workspace:*"
@@ -2398,7 +2398,7 @@ __metadata:
     "@foxglove/wasm-bz2": 0.1.0
     "@foxglove/ws-protocol": 0.2.0
     "@foxglove/xmlrpc": 1.3.0
-    "@mcap/core": 0.2.2
+    "@mcap/core": 0.3.0
     "@mdi/svg": 7.1.96
     "@mui/icons-material": 5.11.0
     "@mui/material": 5.4.1
@@ -3051,14 +3051,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@mcap/core@npm:0.2.2":
-  version: 0.2.2
-  resolution: "@mcap/core@npm:0.2.2"
+"@mcap/core@npm:0.3.0":
+  version: 0.3.0
+  resolution: "@mcap/core@npm:0.3.0"
   dependencies:
     "@foxglove/crc": ^0.0.3
     heap-js: ^2.1.6
     tslib: ^2
-  checksum: b7b5f6fd8c33b064abf0d4d71a026c804caf5f4e6bc50a0c60aad9a0c85f7a0acc92511a1385b47ae8ca1faef5ef820af2822c5861a4f2cb84e91aeaee1003d4
+  checksum: de2bc1e9f9eee35485216085d18efcc5a6abe01671aab3d42a42e8f7a0d7caf6bc899076623788c758910a9c1f20cd65a9c0efac2fb088cb78c367f5381c26e3
   languageName: node
   linkType: hard
 
@@ -10699,7 +10699,7 @@ __metadata:
     "@foxglove/rosbag": 0.2.3
     "@foxglove/rostime": 1.1.2
     "@foxglove/studio-base": "workspace:*"
-    "@mcap/core": 0.2.2
+    "@mcap/core": 0.3.0
     "@pmmmwh/react-refresh-webpack-plugin": 0.5.4
     "@sentry/electron": 4.0.0
     "@sentry/tracing": 7.10.0

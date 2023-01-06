@@ -2,16 +2,16 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { Mcap0Types } from "@mcap/core";
+import { McapTypes } from "@mcap/core";
 import type { ZstdModule, ZstdStreaming } from "zstd-codec";
 
-let handlersPromise: Promise<Mcap0Types.DecompressHandlers> | undefined;
-export async function loadDecompressHandlers(): Promise<Mcap0Types.DecompressHandlers> {
+let handlersPromise: Promise<McapTypes.DecompressHandlers> | undefined;
+export async function loadDecompressHandlers(): Promise<McapTypes.DecompressHandlers> {
   return await (handlersPromise ??= _loadDecompressHandlers());
 }
 
 // eslint-disable-next-line no-underscore-dangle
-async function _loadDecompressHandlers(): Promise<Mcap0Types.DecompressHandlers> {
+async function _loadDecompressHandlers(): Promise<McapTypes.DecompressHandlers> {
   const [zstd, decompressLZ4, bzip2] = await Promise.all([
     import("zstd-codec").then(async ({ ZstdCodec }) => {
       return await new Promise<ZstdModule>((resolve) => ZstdCodec.run(resolve));

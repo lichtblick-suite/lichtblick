@@ -2,7 +2,7 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { Mcap0Types, McapPre0Types } from "@mcap/core";
+import { McapTypes } from "@mcap/core";
 
 import { Time, fromNanoSec, isLessThan, isGreaterThan } from "@foxglove/rostime";
 
@@ -20,60 +20,7 @@ type McapInfo = {
   schemaNamesById: Map<number, string>;
 };
 
-export function processMcapPre0Record(info: McapInfo, record: McapPre0Types.McapRecord): void {
-  switch (record.type) {
-    case "Chunk":
-      info.numChunks++;
-      info.compressionTypes.add(record.compression);
-      return;
-
-    case "ChannelInfo": {
-      info.topicNamesByChannelId.set(record.id, record.topic);
-      const chanInfo = info.topicInfosByTopic.get(record.topic);
-      if (chanInfo != undefined) {
-        if (chanInfo.schemaName !== record.schemaName) {
-          chanInfo.schemaName = "(multiple)";
-        }
-        if (!chanInfo.connectionIds.has(record.id)) {
-          chanInfo.connectionIds.add(record.id);
-          chanInfo.numConnections++;
-        }
-      } else {
-        info.topicInfosByTopic.set(record.topic, {
-          topic: record.topic,
-          schemaName: record.schemaName,
-          numMessages: 0n,
-          numConnections: 1,
-          connectionIds: new Set([record.id]),
-        });
-      }
-      return;
-    }
-
-    case "Message": {
-      const topic = record.channelInfo.topic;
-      const topicInfo = info.topicInfosByTopic.get(topic);
-      if (topicInfo != undefined) {
-        topicInfo.numMessages = (topicInfo.numMessages ?? 0n) + 1n;
-      }
-
-      info.totalMessages++;
-      const timestamp = fromNanoSec(record.timestamp);
-      if (!info.startTime || isLessThan(timestamp, info.startTime)) {
-        info.startTime = timestamp;
-      }
-      if (!info.endTime || isGreaterThan(timestamp, info.endTime)) {
-        info.endTime = timestamp;
-      }
-      return;
-    }
-
-    case "Footer":
-      break;
-  }
-}
-
-export function processMcap0Record(info: McapInfo, record: Mcap0Types.TypedMcapRecord): void {
+export function processMcapRecord(info: McapInfo, record: McapTypes.TypedMcapRecord): void {
   switch (record.type) {
     case "Chunk":
       info.numChunks++;

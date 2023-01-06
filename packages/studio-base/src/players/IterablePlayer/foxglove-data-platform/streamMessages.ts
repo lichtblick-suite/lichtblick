@@ -2,7 +2,7 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { Mcap0StreamReader, Mcap0Types } from "@mcap/core";
+import { McapStreamReader, McapTypes } from "@mcap/core";
 import { captureException } from "@sentry/core";
 import { isEqual } from "lodash";
 
@@ -88,17 +88,17 @@ export async function* streamMessages({
 
   let totalMessages = 0;
   let messages: MessageEvent<unknown>[] = [];
-  const schemasById = new Map<number, Mcap0Types.TypedMcapRecords["Schema"]>();
+  const schemasById = new Map<number, McapTypes.TypedMcapRecords["Schema"]>();
   const channelInfoById = new Map<
     number,
     {
-      channel: Mcap0Types.TypedMcapRecords["Channel"];
+      channel: McapTypes.TypedMcapRecords["Channel"];
       parsedChannel: ParsedChannel;
       schemaName: string;
     }
   >();
 
-  function processRecord(record: Mcap0Types.TypedMcapRecord) {
+  function processRecord(record: McapTypes.TypedMcapRecord) {
     switch (record.type) {
       default:
         return;
@@ -210,7 +210,7 @@ export async function* streamMessages({
 
     let normalReturn = false;
     parseLoop: try {
-      const reader = new Mcap0StreamReader({ decompressHandlers });
+      const reader = new McapStreamReader({ decompressHandlers });
       for (let result; (result = await streamReader.read()), !result.done; ) {
         reader.append(result.value);
         for (let record; (record = reader.nextRecord()); ) {
