@@ -71,7 +71,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@amplitude/analytics-connector@npm:^1.4.5":
+"@amplitude/analytics-connector@npm:^1.4.6":
   version: 1.4.6
   resolution: "@amplitude/analytics-connector@npm:1.4.6"
   dependencies:
@@ -2445,7 +2445,7 @@ __metadata:
     "@types/uuid": 8.3.4
     "@types/wicg-file-system-access": 2020.9.5
     "@uiw/react-textarea-code-editor": 2.0.3
-    amplitude-js: 8.21.2
+    amplitude-js: 8.21.3
     babel-jest: 29.3.1
     browserify-zlib: 0.2.0
     chart.js: 3.7.0
@@ -7332,17 +7332,17 @@ __metadata:
   languageName: node
   linkType: hard
 
-"amplitude-js@npm:8.21.2":
-  version: 8.21.2
-  resolution: "amplitude-js@npm:8.21.2"
+"amplitude-js@npm:8.21.3":
+  version: 8.21.3
+  resolution: "amplitude-js@npm:8.21.3"
   dependencies:
-    "@amplitude/analytics-connector": ^1.4.5
+    "@amplitude/analytics-connector": ^1.4.6
     "@amplitude/ua-parser-js": 0.7.31
     "@amplitude/utils": ^1.10.1
     "@babel/runtime": ^7.3.4
     blueimp-md5: ^2.10.0
     query-string: 5
-  checksum: 5f93418092446eeb9124ce26f00a1af055c2788589d0ace2f93457a7b52a5288bfd83eebcaaf611f1ad42e8c7a710233a4a4ebf170c7f6b6ff577c07e0d199e0
+  checksum: 66564a9c6c272ddc90b4f2344536486ba856ee429670bd5c8dd992aaab6e5e561dda0afb91507584c08be5ce0d992b3e8ae720d9579b3eb9df5a61479644b7cd
   languageName: node
   linkType: hard
 
