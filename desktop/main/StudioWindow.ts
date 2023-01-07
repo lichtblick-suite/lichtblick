@@ -102,6 +102,7 @@ function newStudioWindow(deepLinks: string[] = []): BrowserWindow {
     title: pkgInfo.productName,
     webPreferences: {
       contextIsolation: true,
+      sandbox: false, // Allow preload script to access Node builtins
       preload: preloadPath,
       nodeIntegration: false,
       additionalArguments: [
@@ -141,11 +142,9 @@ function newStudioWindow(deepLinks: string[] = []): BrowserWindow {
   });
 
   // Open all new windows in an external browser
-  // Note: this API is supposed to be superseded by webContents.setWindowOpenHandler,
-  // but using that causes the app to freeze when a new window is opened.
-  browserWindow.webContents.on("new-window", (event, url) => {
-    event.preventDefault();
+  browserWindow.webContents.setWindowOpenHandler(({ url }) => {
     void shell.openExternal(url);
+    return { action: "deny" };
   });
 
   browserWindow.webContents.on("will-navigate", (event, reqUrl) => {
