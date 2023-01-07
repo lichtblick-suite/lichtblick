@@ -2492,7 +2492,7 @@ __metadata:
     react-json-tree: "patch:react-json-tree@npm:0.15.1#../../patches/react-json-tree.patch"
     react-markdown: 8.0.0
     react-monaco-editor: 0.46.0
-    react-mosaic-component: 5.0.0
+    react-mosaic-component: 5.3.0
     react-refresh-typescript: 2.0.3
     react-resize-detector: 7.1.2
     react-svg-loader: 3.0.3
@@ -20489,12 +20489,21 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-dnd-html5-backend@npm:14.0.2, react-dnd-html5-backend@npm:^14.0.0":
+"react-dnd-html5-backend@npm:14.0.2":
   version: 14.0.2
   resolution: "react-dnd-html5-backend@npm:14.0.2"
   dependencies:
     dnd-core: 14.0.1
   checksum: c11dca3dcb9218d696d3d8b9a334e9b96952c399ceda159a164a61f44303be0603284e133729ff9a77901023500e92e5539f9b626100907c868ad858ea7c2d23
+  languageName: node
+  linkType: hard
+
+"react-dnd-html5-backend@npm:^14.1.0":
+  version: 14.1.0
+  resolution: "react-dnd-html5-backend@npm:14.1.0"
+  dependencies:
+    dnd-core: 14.0.1
+  checksum: 6aa8d62c6b2288893b3f216d476d2f84495b40d33578ba9e3a5051dc093a71dc59700e6927ed7ac596ff8d7aa3b3f29404f7d173f844bd6144ed633403dd8e96
   languageName: node
   linkType: hard
 
@@ -20526,7 +20535,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-dnd-touch-backend@npm:^14.0.0":
+"react-dnd-touch-backend@npm:^14.1.1":
   version: 14.1.1
   resolution: "react-dnd-touch-backend@npm:14.1.1"
   dependencies:
@@ -20761,22 +20770,22 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-mosaic-component@npm:5.0.0":
-  version: 5.0.0
-  resolution: "react-mosaic-component@npm:5.0.0"
+"react-mosaic-component@npm:5.3.0":
+  version: 5.3.0
+  resolution: "react-mosaic-component@npm:5.3.0"
   dependencies:
     classnames: ^2.3.1
     immutability-helper: ^3.1.1
     lodash: ^4.17.21
-    prop-types: ^15.7.2
-    react-dnd: ^14.0.2
-    react-dnd-html5-backend: ^14.0.0
+    prop-types: ^15.8.1
+    react-dnd: ^14.0.5
+    react-dnd-html5-backend: ^14.1.0
     react-dnd-multi-backend: ^6.0.2
-    react-dnd-touch-backend: ^14.0.0
+    react-dnd-touch-backend: ^14.1.1
     uuid: ^3.4.0
   peerDependencies:
     react: 16 - 18
-  checksum: 25352bba0a0995dafde21b6887e67a6a50178b1821ed51238326626545dea527cfb1c9ae8cd2ef82eec0e9bed133e60debd036971b1f6dc5460d98ac0214daca
+  checksum: 92db779aa4ce34860a318f19d375fe9a9b2803903c24417e5f1b5979aa9cab89b4b28d4a536c84b680c198f203d48f5146165323523de12eba264a8467b5df63
   languageName: node
   linkType: hard
 
