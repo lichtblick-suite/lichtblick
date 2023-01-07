@@ -12,15 +12,13 @@
 //   You may not use this file except in compliance with the License.
 
 import { Link } from "@mui/material";
-import { PropsWithChildren, CSSProperties, useCallback, useContext, Suspense } from "react";
-import { useAsync } from "react-use";
+import { PropsWithChildren, CSSProperties, useCallback, useContext } from "react";
+import Markdown from "react-markdown";
+import rehypeRaw from "rehype-raw";
 import { withStyles } from "tss-react/mui";
 
 import LinkHandlerContext from "@foxglove/studio-base/context/LinkHandlerContext";
 import { fonts } from "@foxglove/studio-base/util/sharedStyleConstants";
-
-// workaround for ESM in jest: https://github.com/foxglove/studio/issues/1854
-const Markdown = React.lazy(async () => await import("react-markdown"));
 
 const TextContentRoot = withStyles("div", (theme) => {
   const { palette, shape, spacing, typography, shadows } = theme;
@@ -187,23 +185,15 @@ export default function TextContent(
     [handleLink],
   );
 
-  // workaround for ESM in jest: https://github.com/foxglove/studio/issues/1854
-  const { value: rehypeRaw } = useAsync(async () => await import("rehype-raw"));
-  if (!rehypeRaw) {
-    return ReactNull;
-  }
-
   return (
     <TextContentRoot style={style}>
       {typeof children === "string" ? (
-        <Suspense fallback={ReactNull}>
-          <Markdown
-            rehypePlugins={allowMarkdownHtml === true ? [rehypeRaw.default] : []}
-            components={{ a: linkRenderer }}
-          >
-            {children}
-          </Markdown>
-        </Suspense>
+        <Markdown
+          rehypePlugins={allowMarkdownHtml === true ? [rehypeRaw] : []}
+          components={{ a: linkRenderer }}
+        >
+          {children}
+        </Markdown>
       ) : (
         children
       )}
