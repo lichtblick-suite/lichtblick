@@ -58,6 +58,7 @@ type AppProps = {
   enableDialogAuth?: boolean;
   enableLaunchPreferenceScreen?: boolean;
   enableGlobalCss?: boolean;
+  appBarLeftInset?: number;
 };
 
 // Suppress context menu for the entire app except on inputs & textareas.
@@ -144,7 +145,11 @@ export function App(props: AppProps): JSX.Element {
                 <DndProvider backend={HTML5Backend}>
                   <Suspense fallback={<></>}>
                     <PanelCatalogProvider>
-                      <Workspace deepLinks={deepLinks} disableSignin={disableSignin} />
+                      <Workspace
+                        deepLinks={deepLinks}
+                        disableSignin={disableSignin}
+                        appBarLeftInset={props.appBarLeftInset}
+                      />
                     </PanelCatalogProvider>
                   </Suspense>
                 </DndProvider>

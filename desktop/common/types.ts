@@ -16,6 +16,8 @@ export type ForwardedMenuEvent =
   | "open-help"
   | "open-account";
 
+export type ForwardedWindowEvent = "enter-full-screen" | "leave-full-screen";
+
 interface NativeMenuBridge {
   // Events from the native window are available in the main process but not the renderer, so we forward them through the bridge.
   addIpcEventListener(eventName: ForwardedMenuEvent, handler: () => void): void;
@@ -57,6 +59,10 @@ type DesktopExtension = {
 interface Desktop {
   /** https://www.electronjs.org/docs/tutorial/represented-file */
   setRepresentedFilename(path: string | undefined): Promise<void>;
+
+  // Events from the native window are available in the main process but not the renderer, so we forward them through the bridge.
+  addIpcEventListener(eventName: ForwardedWindowEvent, handler: () => void): void;
+  removeIpcEventListener(eventName: ForwardedWindowEvent, handler: () => void): void;
 
   /**
    * Notify the app that the color scheme setting has changed and the native theme may need to be

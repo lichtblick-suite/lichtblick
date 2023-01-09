@@ -28,14 +28,18 @@ import ThemeProvider from "@foxglove/studio-base/theme/ThemeProvider";
 
 import { HelpIconButton, HelpMenu } from "./Help";
 import { UserIconButton, UserMenu } from "./User";
+import { APP_BAR_HEIGHT } from "./constants";
 
-const useStyles = makeStyles()((theme) => ({
+const useStyles = makeStyles<{ leftInset?: number }>()((theme, { leftInset }) => ({
   appBar: {
     gridArea: "appbar",
     boxShadow: "none",
     backgroundColor: "#27272b",
     borderBottom: `${theme.palette.divider} 1px solid`,
     color: theme.palette.common.white,
+    height: APP_BAR_HEIGHT,
+    paddingLeft: leftInset,
+    "-webkit-app-region": "drag", // make custom window title bar draggable for desktop app
   },
   toolbar: {
     display: "grid",
@@ -89,11 +93,12 @@ type AppBarProps = {
   currentUser?: User;
   disableSignin?: boolean;
   signIn?: CurrentUser["signIn"];
+  leftInset?: number;
 };
 
 export function AppBar(props: AppBarProps): JSX.Element {
   const { currentUser, disableSignin, signIn } = props;
-  const { classes } = useStyles();
+  const { classes } = useStyles({ leftInset: props.leftInset });
   const playerName = useMessagePipeline(selectPlayerName);
   const currentUserType = useCurrentUserType();
   const analytics = useAnalytics();

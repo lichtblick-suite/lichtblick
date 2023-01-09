@@ -23,6 +23,7 @@ import {
   SampleNuscenesDataSourceFactory,
   UlogLocalDataSourceFactory,
   VelodyneDataSourceFactory,
+  OsContext,
 } from "@foxglove/studio-base";
 
 import { Desktop, NativeMenuBridge, Storage } from "../common/types";
@@ -34,6 +35,7 @@ import { NativeWindow } from "./services/NativeWindow";
 const desktopBridge = (global as unknown as { desktopBridge: Desktop }).desktopBridge;
 const storageBridge = (global as unknown as { storageBridge?: Storage }).storageBridge;
 const menuBridge = (global as { menuBridge?: NativeMenuBridge }).menuBridge;
+const ctxbridge = (global as { ctxbridge?: OsContext }).ctxbridge;
 
 export default function Root({
   appConfiguration,
@@ -94,6 +96,19 @@ export default function Root({
     return hasActiveURLState ? [window.location.href] : desktopBridge.getDeepLinks();
   });
 
+  const [isFullScreen, setFullScreen] = useState(false);
+
+  useEffect(() => {
+    const onEnter = () => setFullScreen(true);
+    const onLeave = () => setFullScreen(false);
+    desktopBridge.addIpcEventListener("enter-full-screen", onEnter);
+    desktopBridge.addIpcEventListener("leave-full-screen", onLeave);
+    return () => {
+      desktopBridge.removeIpcEventListener("enter-full-screen", onEnter);
+      desktopBridge.removeIpcEventListener("leave-full-screen", onLeave);
+    };
+  }, []);
+
   return (
     <>
       <App
@@ -107,6 +122,7 @@ export default function Root({
         nativeAppMenu={nativeAppMenu}
         nativeWindow={nativeWindow}
         enableGlobalCss
+        appBarLeftInset={ctxbridge?.platform === "darwin" && !isFullScreen ? 72 : undefined}
       />
     </>
   );

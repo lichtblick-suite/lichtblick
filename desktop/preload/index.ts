@@ -14,7 +14,13 @@ import { NetworkInterface, OsContext } from "@foxglove/studio-base/src/OsContext
 
 import pkgInfo from "../../package.json";
 import { decodeRendererArg } from "../common/rendererArgs";
-import { Desktop, ForwardedMenuEvent, NativeMenuBridge, Storage } from "../common/types";
+import {
+  Desktop,
+  ForwardedMenuEvent,
+  ForwardedWindowEvent,
+  NativeMenuBridge,
+  Storage,
+} from "../common/types";
 import LocalFileStorage from "./LocalFileStorage";
 import { getExtensions, loadExtension, installExtension, uninstallExtension } from "./extensions";
 
@@ -98,6 +104,12 @@ const ctx: OsContext = {
 };
 
 const desktopBridge: Desktop = {
+  addIpcEventListener(eventName: ForwardedWindowEvent, handler: () => void) {
+    ipcRenderer.on(eventName, () => handler());
+  },
+  removeIpcEventListener(eventName: ForwardedWindowEvent, handler: () => void) {
+    ipcRenderer.off(eventName, () => handler());
+  },
   async setRepresentedFilename(path: string | undefined) {
     await ipcRenderer.invoke("setRepresentedFilename", path);
   },

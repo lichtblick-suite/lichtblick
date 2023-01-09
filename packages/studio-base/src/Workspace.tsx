@@ -152,6 +152,7 @@ function AddPanel() {
 type WorkspaceProps = {
   deepLinks?: string[];
   disableSignin?: boolean;
+  appBarLeftInset?: number;
 };
 
 const DEFAULT_DEEPLINKS = Object.freeze([]);
@@ -621,7 +622,12 @@ export default function Workspace(props: WorkspaceProps): JSX.Element {
       <KeyListener global keyDownHandlers={keyDownHandlers} />
       <div className={classes.container} ref={containerRef} tabIndex={0}>
         {enableNewUI && (
-          <AppBar currentUser={currentUser} disableSignin={props.disableSignin} signIn={signIn} />
+          <AppBar
+            currentUser={currentUser}
+            disableSignin={props.disableSignin}
+            signIn={signIn}
+            leftInset={props.appBarLeftInset}
+          />
         )}
         <Sidebar
           items={sidebarItems}
