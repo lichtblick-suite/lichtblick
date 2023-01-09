@@ -2173,7 +2173,7 @@ __metadata:
     "@foxglove/rosmsg-serialization": 1.5.3
     "@foxglove/rosmsg2-serialization": 1.0.7
     "@foxglove/schemas": 0.7.3
-    "@foxglove/wasm-bz2": 0.1.0
+    "@foxglove/wasm-bz2": 0.1.1
     "@mcap/core": 0.3.0
     "@protobufjs/base64": 1.1.2
     "@types/protobufjs": "workspace:*"
@@ -2382,7 +2382,7 @@ __metadata:
     "@foxglove/typescript-transformers": "workspace:*"
     "@foxglove/ulog": 2.1.2
     "@foxglove/velodyne-cloud": 1.0.1
-    "@foxglove/wasm-bz2": 0.1.0
+    "@foxglove/wasm-bz2": 0.1.1
     "@foxglove/ws-protocol": 0.2.0
     "@foxglove/xmlrpc": 1.3.0
     "@mcap/core": 0.3.0
@@ -2576,10 +2576,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@foxglove/wasm-bz2@npm:0.1.0":
-  version: 0.1.0
-  resolution: "@foxglove/wasm-bz2@npm:0.1.0"
-  checksum: 879c28d6d81133e2affc05c6e03069db0d3a3fd5712624f4bd61292205dd724ceb2997efb8182965d94c7d92b389008b1fe49d1b232ce0e9b368a3d8d9a73a08
+"@foxglove/wasm-bz2@npm:0.1.1":
+  version: 0.1.1
+  resolution: "@foxglove/wasm-bz2@npm:0.1.1"
+  dependencies:
+    tslib: ^2
+  checksum: 525206e231e765dfec3f787bcd4da664eff7bc72ccddfebee22782c5822c2e6d776c4aa4fc67fd58710eadb87a09dc16a207de08f4583500481bddef6a99bb71
   languageName: node
   linkType: hard
 

@@ -31,7 +31,7 @@
     "@foxglove/rosmsg": "3.1.0",
     "@foxglove/rosmsg-serialization": "1.5.3",
     "@foxglove/rosmsg2-serialization": "1.0.7",
-    "@foxglove/wasm-bz2": "0.1.0",
+    "@foxglove/wasm-bz2": "0.1.1",
     "@protobufjs/base64": "1.1.2",
     "flatbuffers": "22.12.6",
     "flatbuffers_reflection": "0.0.2",
