@@ -3,11 +3,13 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 import { captureException } from "@sentry/electron/main";
-import { autoUpdater } from "electron-updater";
+import { dialog } from "electron";
+import { autoUpdater, UpdateInfo } from "electron-updater";
 
 import Logger from "@foxglove/log";
 import { AppSetting } from "@foxglove/studio-base/src/AppSetting";
 
+import pkgInfo from "../../package.json";
 import { getAppSetting } from "./settings";
 
 const log = Logger.getLogger(__filename);
@@ -36,6 +38,11 @@ class StudioAppUpdater {
   // Seconds to wait after an update check completes before starting a new check
   private updateCheckIntervalSec = 60 * 60;
 
+  public canCheckForUpdates(): boolean {
+    // Updates are disabled by default in dev mode
+    return autoUpdater.isUpdaterActive();
+  }
+
   /**
    * Start the update process.
    */
@@ -50,6 +57,37 @@ class StudioAppUpdater {
     setTimeout(() => {
       void this.maybeCheckForUpdates();
     }, this.initialUpdateDelaySec * 1000);
+  }
+
+  public async checkNow(): Promise<void> {
+    const onDisabled = () => {
+      void dialog.showMessageBox({ message: `Updates are not enabled.` });
+    };
+    const onNotAvailable = (info: UpdateInfo) => {
+      void dialog.showMessageBox({
+        message: `${pkgInfo.productName} is up to date (version ${info.version}).`,
+      });
+    };
+    const onError = (error: Error) => {
+      log.error(error);
+      dialog.showErrorBox("An error occurred while checking for updates.", error.message);
+    };
+
+    if (!autoUpdater.isUpdaterActive()) {
+      onDisabled();
+      return;
+    }
+    try {
+      autoUpdater.on("update-not-available", onNotAvailable);
+      const result = await autoUpdater.checkForUpdatesAndNotify();
+      if (!result) {
+        onDisabled();
+      }
+    } catch (error) {
+      onError(error as Error);
+    } finally {
+      autoUpdater.off("update-not-available", onNotAvailable);
+    }
   }
 
   // Check for updates and download.

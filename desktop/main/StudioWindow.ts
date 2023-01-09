@@ -20,6 +20,7 @@ import { APP_BAR_HEIGHT } from "@foxglove/studio-base/src/components/AppBar/cons
 
 import pkgInfo from "../../package.json";
 import { encodeRendererArg } from "../common/rendererArgs";
+import StudioAppUpdater from "./StudioAppUpdater";
 import getDevModeIcon from "./getDevModeIcon";
 import { getAppSetting } from "./settings";
 import { simulateUserClick } from "./simulateUserClick";
@@ -175,12 +176,19 @@ function newStudioWindow(deepLinks: string[] = []): BrowserWindow {
 function buildMenu(browserWindow: BrowserWindow): Menu {
   const menuTemplate: MenuItemConstructorOptions[] = [];
 
+  const checkForUpdatesItem: MenuItemConstructorOptions = {
+    label: "Check for Updates…",
+    click: () => void StudioAppUpdater.Instance().checkNow(),
+    enabled: StudioAppUpdater.Instance().canCheckForUpdates(),
+  };
+
   if (isMac) {
     menuTemplate.push({
       role: "appMenu",
       label: app.name,
       submenu: [
         { role: "about" },
+        checkForUpdatesItem,
         { type: "separator" },
 
         {
@@ -358,6 +366,7 @@ function buildMenu(browserWindow: BrowserWindow): Menu {
                 showAboutDialog();
               },
             },
+            checkForUpdatesItem,
           ]),
     ],
   });
