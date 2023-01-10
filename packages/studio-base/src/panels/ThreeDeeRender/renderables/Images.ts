@@ -4,6 +4,7 @@
 
 import * as THREE from "three";
 
+import { MultiMap } from "@foxglove/den/collection";
 import {
   PinholeCameraModel,
   decodeYUV,
@@ -47,8 +48,7 @@ import {
 import { BaseSettings, PRECISION_DISTANCE, SelectEntry } from "../settings";
 import { topicIsConvertibleToSchema } from "../topicIsConvertibleToSchema";
 import { makePose } from "../transforms";
-import { CameraInfoUserData } from "./Cameras";
-import { projectPixel } from "./projections";
+import { cameraInfosEqual, normalizeCameraInfo, projectPixel } from "./projections";
 
 const log = Logger.getLogger(__filename);
 void log;
@@ -81,7 +81,9 @@ const DEFAULT_SETTINGS: LayerSettingsImage = {
 export type ImageUserData = BaseUserData & {
   topic: string;
   settings: LayerSettingsImage;
-  image: AnyImage;
+  cameraInfo: CameraInfo | undefined;
+  cameraModel: PinholeCameraModel | undefined;
+  image: AnyImage | undefined;
   texture: THREE.Texture | undefined;
   material: THREE.MeshBasicMaterial | undefined;
   geometry: THREE.PlaneGeometry | undefined;
@@ -97,38 +99,35 @@ export class ImageRenderable extends Renderable<ImageUserData> {
   }
 
   public override details(): Record<string, RosValue> {
-    const cameraInfoTopic = this.userData.settings.cameraInfoTopic;
-    const cameraInfoRenderable = cameraInfoTopic
-      ? camerasExtension(this.renderer)?.renderables.get(cameraInfoTopic)
-      : undefined;
-    return {
-      image: this.userData.image,
-      camera_info: cameraInfoRenderable?.userData.cameraInfo,
-    };
+    return { image: this.userData.image, camera_info: this.userData.cameraInfo };
   }
 }
 
 export class Images extends SceneExtension<ImageRenderable> {
+  /* All of the CameraInfo topics we have received at least one message on. */
   private cameraInfoTopics = new Set<string>();
+  /**
+   * A bi-directional mapping between cameraInfo topics and image topics. This
+   * is used for retrieving an image renderable, which is indexed by image
+   * topic, when receiving a camera info message.
+   */
+  private cameraInfoToImageTopics = new MultiMap<string, string>();
 
   public constructor(renderer: Renderer) {
     super("foxglove.Images", renderer);
 
     renderer.addSchemaSubscriptions(ROS_IMAGE_DATATYPES, this.handleRosRawImage);
     renderer.addSchemaSubscriptions(ROS_COMPRESSED_IMAGE_DATATYPES, this.handleRosCompressedImage);
-    // Unconditionally subscribe to CameraInfo messages so the `foxglove.Cameras` extension will
-    // always receive them and parse into camera models. This extension reuses the parsed camera
-    // models from `foxglove.Cameras`
     renderer.addSchemaSubscriptions(CAMERA_INFO_DATATYPES, {
-      handler: this.handleRosCameraInfo,
-      forced: true,
+      handler: this.handleCameraInfo,
+      shouldSubscribe: this.cameraInfoShouldSubscribe,
     });
 
     renderer.addSchemaSubscriptions(RAW_IMAGE_DATATYPES, this.handleRawImage);
     renderer.addSchemaSubscriptions(COMPRESSED_IMAGE_DATATYPES, this.handleCompressedImage);
     renderer.addSchemaSubscriptions(CAMERA_CALIBRATION_DATATYPES, {
-      handler: this.handleCameraCalibration,
-      forced: true,
+      handler: this.handleCameraInfo,
+      shouldSubscribe: this.cameraInfoShouldSubscribe,
     });
   }
 
@@ -147,13 +146,14 @@ export class Images extends SceneExtension<ImageRenderable> {
       ) {
         continue;
       }
-      const config = (configTopics[topic.name] ?? {}) as Partial<LayerSettingsImage>;
+      const imageTopic = topic.name;
+      const config = (configTopics[imageTopic] ?? {}) as Partial<LayerSettingsImage>;
 
       // Build a list of all matching CameraInfo topics
       const bestCameraInfoOptions: SelectEntry[] = [];
       const otherCameraInfoOptions: SelectEntry[] = [];
       for (const cameraInfoTopic of this.cameraInfoTopics) {
-        if (cameraInfoTopicMatches(topic.name, cameraInfoTopic)) {
+        if (cameraInfoTopicMatches(imageTopic, cameraInfoTopic)) {
           bestCameraInfoOptions.push({ label: cameraInfoTopic, value: cameraInfoTopic });
         } else {
           otherCameraInfoOptions.push({ label: cameraInfoTopic, value: cameraInfoTopic });
@@ -170,12 +170,12 @@ export class Images extends SceneExtension<ImageRenderable> {
       };
 
       entries.push({
-        path: ["topics", topic.name],
+        path: ["topics", imageTopic],
         node: {
           icon: "ImageProjection",
           fields,
           visible: config.visible ?? DEFAULT_SETTINGS.visible,
-          order: topic.name.toLocaleLowerCase(),
+          order: imageTopic.toLocaleLowerCase(),
           handler,
         },
       });
@@ -189,18 +189,50 @@ export class Images extends SceneExtension<ImageRenderable> {
       return;
     }
 
+    const imageTopic = path[1]!;
+    const prevSettings = this.renderer.config.topics[imageTopic] as
+      | Partial<LayerSettingsImage>
+      | undefined;
+    const prevCameraInfoTopic = prevSettings?.cameraInfoTopic;
+
     this.saveSetting(path, action.payload.value);
 
-    // Update the renderable
-    const topicName = path[1]!;
-    const renderable = this.renderables.get(topicName);
-    if (renderable) {
-      const { image, receiveTime } = renderable.userData;
-      const settings = this.renderer.config.topics[topicName] as
-        | Partial<LayerSettingsImage>
-        | undefined;
-      this._updateImageRenderable(renderable, image, receiveTime, settings);
+    const settings = this.renderer.config.topics[imageTopic] as
+      | Partial<LayerSettingsImage>
+      | undefined;
+    const cameraInfoTopic = settings?.cameraInfoTopic;
+
+    if (prevCameraInfoTopic != undefined && cameraInfoTopic !== prevCameraInfoTopic) {
+      // Remove the previous camera_info_topic -> image_topic mapping
+      this.cameraInfoToImageTopics.delete(prevCameraInfoTopic, imageTopic);
     }
+
+    // Add this camera_info_topic -> image_topic mapping
+    if (cameraInfoTopic != undefined) {
+      this.cameraInfoToImageTopics.set(cameraInfoTopic, imageTopic);
+    }
+
+    // Update the renderable
+    const renderable = this.renderables.get(imageTopic);
+    const image = renderable?.userData.image;
+    const cameraModel = renderable?.userData.cameraModel;
+    if (image && cameraModel) {
+      const receiveTime = renderable.userData.receiveTime;
+
+      this._updateImageRenderable(renderable, image, cameraModel, receiveTime, settings);
+    }
+  };
+
+  private cameraInfoShouldSubscribe = (cameraInfoTopic: string): boolean => {
+    // Iterate over each configured topic and check if it has a `cameraInfoTopic` setting
+    // that matches the given CameraInfo topic name
+    for (const topicConfig of Object.values(this.renderer.config.topics)) {
+      const maybeImageConfig = topicConfig as Partial<LayerSettingsImage>;
+      if (maybeImageConfig.cameraInfoTopic === cameraInfoTopic) {
+        return maybeImageConfig.visible ?? false;
+      }
+    }
+    return false;
   };
 
   private handleRosRawImage = (messageEvent: PartialMessageEvent<RosImage>): void => {
@@ -222,92 +254,93 @@ export class Images extends SceneExtension<ImageRenderable> {
   };
 
   private handleImage = (messageEvent: PartialMessageEvent<AnyImage>, image: AnyImage): void => {
-    const topic = messageEvent.topic;
+    const imageTopic = messageEvent.topic;
     const receiveTime = toNanoSec(messageEvent.receiveTime);
-
-    const userSettings = this.renderer.config.topics[topic] as
+    const frameId = "header" in image ? image.header.frame_id : image.frame_id;
+    const userSettings = this.renderer.config.topics[imageTopic] as
       | Partial<LayerSettingsImage>
       | undefined;
 
     // Create an ImageRenderable for this topic if it doesn't already exist
-    let renderable = this.renderables.get(topic);
-    if (!renderable) {
-      renderable = new ImageRenderable(topic, this.renderer, {
-        receiveTime,
-        messageTime: toNanoSec("header" in image ? image.header.stamp : image.timestamp),
-        frameId: this.renderer.normalizeFrameId(
-          "header" in image ? image.header.frame_id : image.frame_id,
-        ),
-        pose: makePose(),
-        settingsPath: ["topics", topic],
-        topic,
-        settings: { ...DEFAULT_SETTINGS, ...userSettings },
-        image,
-        texture: undefined,
-        material: undefined,
-        geometry: undefined,
-        mesh: undefined,
-      });
-
-      this.add(renderable);
-      this.renderables.set(topic, renderable);
-    }
+    const renderable = this._getImageRenderable(
+      imageTopic,
+      receiveTime,
+      image,
+      frameId,
+      userSettings,
+    );
 
     // Auto-select settings.cameraInfoTopic if it's not already set
     const settings = renderable.userData.settings;
     if (settings.cameraInfoTopic == undefined) {
-      autoSelectCameraInfoTopic(settings, topic, this.cameraInfoTopics);
-      // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-      if (settings.cameraInfoTopic != undefined) {
+      autoSelectCameraInfoTopic(settings, imageTopic, this.cameraInfoTopics);
+      const newCameraInfoTopic = settings.cameraInfoTopic as string | undefined;
+      if (newCameraInfoTopic != undefined) {
+        this.cameraInfoToImageTopics.set(newCameraInfoTopic, imageTopic);
         // Update user settings with the newly selected CameraInfo topic
         this.renderer.updateConfig((draft) => {
           const updatedUserSettings = { ...userSettings };
-          updatedUserSettings.cameraInfoTopic = settings.cameraInfoTopic;
-          draft.topics[topic] = updatedUserSettings;
+          updatedUserSettings.cameraInfoTopic = newCameraInfoTopic;
+          draft.topics[imageTopic] = updatedUserSettings;
         });
         this.updateSettingsTree();
       } else {
         this.renderer.settings.errors.addToTopic(
-          topic,
+          imageTopic,
           NO_CAMERA_INFO_ERR,
           "No CameraInfo topic found",
         );
       }
     }
 
-    this._updateImageRenderable(renderable, image, receiveTime, renderable.userData.settings);
-  };
-
-  private handleRosCameraInfo = (messageEvent: PartialMessageEvent<CameraInfo>): void => {
-    const topic = messageEvent.topic;
-    const updated = !this.cameraInfoTopics.has(topic);
-    this.cameraInfoTopics.add(topic);
-
-    const renderable = this.renderables.get(topic);
-    if (renderable) {
-      const { image, settings } = renderable.userData;
-      this._updateImageRenderable(renderable, image, renderable.userData.receiveTime, settings);
-    }
-
-    if (updated) {
-      this.updateSettingsTree();
+    const cameraModel = renderable.userData.cameraModel;
+    if (cameraModel) {
+      this._updateImageRenderable(renderable, image, cameraModel, receiveTime, settings);
     }
   };
 
-  private handleCameraCalibration = (
-    messageEvent: PartialMessageEvent<CameraCalibration>,
+  private handleCameraInfo = (
+    messageEvent: PartialMessageEvent<CameraInfo> & PartialMessageEvent<CameraCalibration>,
   ): void => {
-    const topic = messageEvent.topic;
-    const updated = !this.cameraInfoTopics.has(topic);
-    this.cameraInfoTopics.add(topic);
+    const cameraInfoTopic = messageEvent.topic;
+    const receiveTime = toNanoSec(messageEvent.receiveTime);
 
-    const renderable = this.renderables.get(topic);
-    if (renderable) {
-      const { image, settings } = renderable.userData;
-      this._updateImageRenderable(renderable, image, renderable.userData.receiveTime, settings);
+    const topicsUpdated = !this.cameraInfoTopics.has(cameraInfoTopic);
+    if (topicsUpdated) {
+      this.cameraInfoTopics.add(cameraInfoTopic);
+    }
+    const cameraInfo = normalizeCameraInfo(messageEvent.message);
+    const frameId = cameraInfo.header.frame_id;
+    const userSettings = this.renderer.config.topics[cameraInfoTopic] as
+      | Partial<LayerSettingsImage>
+      | undefined;
+
+    // Check if we have a mapping from this CameraInfo topic to an Image topic
+    const imageTopics = this.cameraInfoToImageTopics.get(cameraInfoTopic);
+    if (imageTopics && imageTopics.length > 0) {
+      for (const imageTopic of imageTopics) {
+        // Get the ImageRenderable for the image topic
+        const renderable = this._getImageRenderable(
+          imageTopic,
+          receiveTime,
+          undefined,
+          frameId,
+          userSettings,
+        );
+
+        const dataEqual = cameraInfosEqual(renderable.userData.cameraInfo, cameraInfo);
+        if (!dataEqual) {
+          const cameraModel = new PinholeCameraModel(cameraInfo);
+          renderable.userData.cameraModel = cameraModel;
+          if (renderable.userData.image) {
+            const { image, settings } = renderable.userData;
+            this._updateImageRenderable(renderable, image, cameraModel, receiveTime, settings);
+          }
+        }
+      }
     }
 
-    if (updated) {
+    if (topicsUpdated) {
       this.updateSettingsTree();
     }
   };
@@ -315,6 +348,7 @@ export class Images extends SceneExtension<ImageRenderable> {
   private _updateImageRenderable(
     renderable: ImageRenderable,
     image: AnyImage,
+    cameraModel: PinholeCameraModel,
     receiveTime: bigint,
     settings: Partial<LayerSettingsImage> | undefined,
   ): void {
@@ -328,6 +362,7 @@ export class Images extends SceneExtension<ImageRenderable> {
     const topic = renderable.userData.topic;
 
     renderable.userData.image = image;
+    renderable.userData.cameraModel = cameraModel;
     renderable.userData.frameId = this.renderer.normalizeFrameId(
       "header" in image ? image.header.frame_id : image.frame_id,
     );
@@ -354,20 +389,11 @@ export class Images extends SceneExtension<ImageRenderable> {
 
     // Create the plane geometry if needed
     if (hasCameraInfo && renderable.userData.geometry == undefined) {
-      const cameraRenderable = camerasExtension(this.renderer)?.renderables.get(
-        settings.cameraInfoTopic!,
-      );
-      const cameraModel = cameraRenderable?.userData.cameraModel;
-      if (cameraModel) {
-        // log.debug(
-        //   `Constructing geometry for ${cameraModel.width}x${cameraModel.height} camera image on "${topic}"`,
-        // );
-        const geometry = createGeometry(cameraModel, renderable.userData.settings);
-        renderable.userData.geometry = geometry;
-        if (renderable.userData.mesh) {
-          renderable.remove(renderable.userData.mesh);
-          renderable.userData.mesh = undefined;
-        }
+      const geometry = createGeometry(cameraModel, renderable.userData.settings);
+      renderable.userData.geometry = geometry;
+      if (renderable.userData.mesh) {
+        renderable.remove(renderable.userData.mesh);
+        renderable.userData.mesh = undefined;
       }
     }
 
@@ -378,9 +404,6 @@ export class Images extends SceneExtension<ImageRenderable> {
         .createImageBitmap(bitmapData, { resizeWidth: DEFAULT_IMAGE_WIDTH })
         .then((bitmap) => {
           if (renderable.userData.texture == undefined) {
-            // log.debug(
-            //   `Creating texture for ${bitmap.width}x${bitmap.height} "${compressed.format}" camera image on "${topic}"`,
-            // );
             renderable.userData.texture = createCanvasTexture(bitmap);
             rebuildMaterial(renderable);
             tryCreateMesh(renderable, this.renderer);
@@ -408,9 +431,6 @@ export class Images extends SceneExtension<ImageRenderable> {
         prevTexture.image.height !== height
       ) {
         prevTexture?.dispose();
-        // log.debug(
-        //   `Creating data texture for ${width}x${height} "${raw.encoding}" camera image on "${topic}"`,
-        // );
         renderable.userData.texture = createDataTexture(width, height);
         rebuildMaterial(renderable);
         tryCreateMesh(renderable, this.renderer);
@@ -429,6 +449,40 @@ export class Images extends SceneExtension<ImageRenderable> {
     // Create/recreate the mesh if needed
     tryCreateMesh(renderable, this.renderer);
   }
+
+  private _getImageRenderable(
+    imageTopic: string,
+    receiveTime: bigint,
+    image: AnyImage | undefined,
+    frameId: string,
+    userSettings: Partial<LayerSettingsImage> | undefined,
+  ): ImageRenderable {
+    let renderable = this.renderables.get(imageTopic);
+    if (renderable) {
+      return renderable;
+    }
+
+    renderable = new ImageRenderable(imageTopic, this.renderer, {
+      receiveTime,
+      messageTime: image ? toNanoSec("header" in image ? image.header.stamp : image.timestamp) : 0n,
+      frameId: this.renderer.normalizeFrameId(frameId),
+      pose: makePose(),
+      settingsPath: ["topics", imageTopic],
+      topic: imageTopic,
+      settings: { ...DEFAULT_SETTINGS, ...userSettings },
+      cameraInfo: undefined,
+      cameraModel: undefined,
+      image,
+      texture: undefined,
+      material: undefined,
+      geometry: undefined,
+      mesh: undefined,
+    });
+
+    this.add(renderable);
+    this.renderables.set(imageTopic, renderable);
+    return renderable;
+  }
 }
 
 type RawImageOptions = {
@@ -441,7 +495,6 @@ const tempColor = { r: 0, g: 0, b: 0, a: 0 };
 function tryCreateMesh(renderable: ImageRenderable, renderer: Renderer): void {
   const { mesh, geometry, material } = renderable.userData;
   if (!mesh && geometry && material) {
-    // log.debug(`Building mesh for camera image on "${renderable.userData.topic}"`);
     renderable.userData.mesh = new THREE.Mesh(geometry, renderable.userData.material);
     renderable.add(renderable.userData.mesh);
     renderer.queueAnimationFrame();
@@ -569,8 +622,8 @@ function createGeometry(
   return geometry;
 }
 
-export function cameraInfoTopicMatches(topic: string, cameraInfoTopic: string): boolean {
-  const imageParts = topic.split("/");
+export function cameraInfoTopicMatches(imageTopic: string, cameraInfoTopic: string): boolean {
+  const imageParts = imageTopic.split("/");
   const infoParts = cameraInfoTopic.split("/");
 
   for (let i = 0; i < imageParts.length - 1 && i < infoParts.length - 1; i++) {
@@ -580,12 +633,6 @@ export function cameraInfoTopicMatches(topic: string, cameraInfoTopic: string): 
   }
 
   return true;
-}
-
-function camerasExtension(renderer: Renderer) {
-  return renderer.sceneExtensions.get("foxglove.Cameras") as
-    | SceneExtension<Renderable<CameraInfoUserData>>
-    | undefined;
 }
 
 function autoSelectCameraInfoTopic(

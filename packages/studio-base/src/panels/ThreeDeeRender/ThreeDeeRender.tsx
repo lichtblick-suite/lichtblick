@@ -616,7 +616,9 @@ export function ThreeDeeRender({ context }: { context: PanelExtensionContext }):
       rendererSubscription: RendererSubscription,
       convertTo?: string,
     ) => {
-      if (rendererSubscription.forced === true || config.topics[topic]?.visible === true) {
+      const shouldSubscribe =
+        rendererSubscription.shouldSubscribe ?? ((t) => config.topics[t]?.visible === true);
+      if (shouldSubscribe(topic)) {
         newSubscriptions.push({
           topic,
           preload: rendererSubscription.preload,
