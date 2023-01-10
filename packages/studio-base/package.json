@@ -160,7 +160,7 @@
     "react-dom": "17.0.2",
     "react-hover-observer": "2.1.1",
     "react-json-tree": "patch:react-json-tree@npm:0.15.1#../../patches/react-json-tree.patch",
-    "react-markdown": "8.0.0",
+    "react-markdown": "8.0.4",
     "react-monaco-editor": "0.46.0",
     "react-mosaic-component": "5.3.0",
     "react-refresh-typescript": "2.0.3",
