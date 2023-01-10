@@ -32,6 +32,8 @@ jobs:
             command: yarn run build:packages
           - name: web
             command: yarn run web:build:prod
+          - name: build benchmark
+            command: yarn run benchmark:build:prod
           - name: test
             command: yarn run test --maxWorkers=100%
           - name: pack studio-base

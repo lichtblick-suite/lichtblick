@@ -22,7 +22,7 @@ export function encodeRendererArg<K extends keyof RendererArgTypes>(
   argName: K,
   value: RendererArgTypes[K],
 ): string {
-  return `--${argName}=${btoa(JSON.stringify(value))}`;
+  return `--${argName}=${btoa(JSON.stringify(value)!)}`;
 }
 
 export function decodeRendererArg<K extends keyof RendererArgTypes>(

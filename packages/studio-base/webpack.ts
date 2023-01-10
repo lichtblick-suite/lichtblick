@@ -110,9 +110,13 @@ export function makeConfig(
                 // avoid looking at files which are not part of the bundle
                 onlyCompileBundledFiles: true,
                 projectReferences: true,
-                configFile: path.resolve(__dirname, isDev ? "tsconfig.dev.json" : "tsconfig.json"),
+                // Note: configFile should not be overridden, it needs to differ between web,
+                // desktop, etc. so that files specific to each build (not just shared files) are
+                // also type-checked. The default behavior is to find it from the webpack `context`
+                // directory.
                 compilerOptions: {
                   sourceMap: true,
+                  jsx: isDev ? "react-jsxdev" : "react-jsx",
                 },
                 getCustomTransformers: (program: ts.Program) => ({
                   before: [
@@ -254,14 +258,14 @@ export function makeConfig(
       }),
       new ForkTsCheckerWebpackPlugin({
         typescript: {
-          configFile: path.resolve(__dirname, isDev ? "tsconfig.dev.json" : "tsconfig.json"),
+          // Note: configFile should not be overridden, it needs to differ between web, desktop,
+          // etc. so that files specific to each build (not just shared files) are also
+          // type-checked. The default behavior is to find it from the webpack `context` directory.
           configOverwrite: {
             compilerOptions: {
               noUnusedLocals: !allowUnusedVariables,
               noUnusedParameters: !allowUnusedVariables,
-              paths: {
-                "@foxglove/studio-base/*": [path.join(__dirname, "src/*")],
-              },
+              jsx: isDev ? "react-jsxdev" : "react-jsx",
             },
           },
         },

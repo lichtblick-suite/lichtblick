@@ -1,6 +1,7 @@
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
+import path from "path";
 import { Configuration } from "webpack";
 
 import { makeConfig } from "@foxglove/studio-base/webpack";
@@ -27,6 +28,8 @@ module.exports = {
 
     return {
       ...config,
+      // context is required for ForkTsCheckerWebpackPlugin to find .storybook/tsconfig.json
+      context: path.resolve(__dirname),
       optimization: {
         ...config.optimization,
         minimize: false, // disabling minification improves build performance

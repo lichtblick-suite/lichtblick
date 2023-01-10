@@ -2391,8 +2391,8 @@ __metadata:
     "@mui/material": 5.4.1
     "@popperjs/core": 2.11.0
     "@protobufjs/base64": 1.1.2
-    "@sentry/core": 7.29.0
-    "@sentry/types": 7.29.0
+    "@sentry/core": 7.16.0
+    "@sentry/types": 7.16.0
     "@storybook/addon-actions": 6.5.15
     "@storybook/react": 6.5.15
     "@testing-library/dom": 8.11.3
@@ -3655,19 +3655,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@sentry/browser@npm:7.29.0":
-  version: 7.29.0
-  resolution: "@sentry/browser@npm:7.29.0"
-  dependencies:
-    "@sentry/core": 7.29.0
-    "@sentry/replay": 7.29.0
-    "@sentry/types": 7.29.0
-    "@sentry/utils": 7.29.0
-    tslib: ^1.9.3
-  checksum: 136b9d03a9ff38e72f4d8fd335f23469341d0095d1f075a36d85ef2cd6bd0763635a7e1cbc7abe14508291e88cffe549eda6016c858564b55c1d4e81ef67882f
-  languageName: node
-  linkType: hard
-
 "@sentry/cli@npm:^1.74.6":
   version: 1.74.6
   resolution: "@sentry/cli@npm:1.74.6"
@@ -3693,17 +3680,6 @@ __metadata:
     "@sentry/utils": 7.16.0
     tslib: ^1.9.3
   checksum: 033c775f9e4411dc4506617cea3d780b0696367ded01052d398e4a2e4752bb29de3ad15731cde07115995ed8c3ded2fea1b65231502eba87703cdfb35699d8b0
-  languageName: node
-  linkType: hard
-
-"@sentry/core@npm:7.29.0":
-  version: 7.29.0
-  resolution: "@sentry/core@npm:7.29.0"
-  dependencies:
-    "@sentry/types": 7.29.0
-    "@sentry/utils": 7.29.0
-    tslib: ^1.9.3
-  checksum: d9330ed3528f2328b524cb237e400368dcb6c36b8afb791d28141e98ab5c0b56dc306a65cfc7164108cb5616346dabe793a39a140257f723906dc25a03b7ebcd
   languageName: node
   linkType: hard
 
@@ -3737,28 +3713,15 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@sentry/replay@npm:7.29.0":
-  version: 7.29.0
-  resolution: "@sentry/replay@npm:7.29.0"
+"@sentry/tracing@npm:7.16.0":
+  version: 7.16.0
+  resolution: "@sentry/tracing@npm:7.16.0"
   dependencies:
-    "@sentry/core": 7.29.0
-    "@sentry/types": 7.29.0
-    "@sentry/utils": 7.29.0
-  peerDependencies:
-    "@sentry/browser": ">=7.24.0"
-  checksum: 539e18c128bb7966c9d4ea91ebd9cde6d42f42f96fa648d7ead5bff699e643f3792f57a344376586fab26f659f5e1431176faf0e12e6ea53508fd48ba928dd12
-  languageName: node
-  linkType: hard
-
-"@sentry/tracing@npm:7.29.0":
-  version: 7.29.0
-  resolution: "@sentry/tracing@npm:7.29.0"
-  dependencies:
-    "@sentry/core": 7.29.0
-    "@sentry/types": 7.29.0
-    "@sentry/utils": 7.29.0
+    "@sentry/core": 7.16.0
+    "@sentry/types": 7.16.0
+    "@sentry/utils": 7.16.0
     tslib: ^1.9.3
-  checksum: 7ad9040664a8c65693aba2bdd9cecc8334ce25a296c01727d38649c7141106b78c92142626ce8e44983b4272e0f411010a3df99843a1af6d4f89e4f67ce6f57e
+  checksum: 59acb23540e8760129e9b59d553f57dc3f4ff6e6348145fb001fa41da9a0d452c5894a4a50eef910b92fc037f4eef703f000778879fec3f73cef6f61e9c00dc1
   languageName: node
   linkType: hard
 
@@ -3769,13 +3732,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@sentry/types@npm:7.29.0":
-  version: 7.29.0
-  resolution: "@sentry/types@npm:7.29.0"
-  checksum: 53815b66662a193cfd7024b9fb2477afb8178a771aa59f3bef10578cc940a9d7207722f9f04e2ca65a8e118cef012ac42f4936aa921aacdfc00a914bec88b009
-  languageName: node
-  linkType: hard
-
 "@sentry/utils@npm:7.16.0":
   version: 7.16.0
   resolution: "@sentry/utils@npm:7.16.0"
@@ -3783,16 +3739,6 @@ __metadata:
     "@sentry/types": 7.16.0
     tslib: ^1.9.3
   checksum: decff9f82e7b6b431b1d226f6567762bd2189357ceacb304be20413fcb07be62fad17433979f750e717a07e92625b250bf7493591550f6e146d8adc8d06d6721
-  languageName: node
-  linkType: hard
-
-"@sentry/utils@npm:7.29.0":
-  version: 7.29.0
-  resolution: "@sentry/utils@npm:7.29.0"
-  dependencies:
-    "@sentry/types": 7.29.0
-    tslib: ^1.9.3
-  checksum: 9914a2129692a5713453437d75b957a18ad5a4ef8085776e5499208ad329dea8da27ee2e2b74fdc089a3831b4e2929f8e6c0f3bc75528f41023d85de5077f462
   languageName: node
   linkType: hard
 
@@ -10553,7 +10499,7 @@ __metadata:
     "@mcap/core": 0.3.0
     "@pmmmwh/react-refresh-webpack-plugin": 0.5.10
     "@sentry/electron": 4.1.2
-    "@sentry/tracing": 7.29.0
+    "@sentry/tracing": 7.16.0
     "@sentry/webpack-plugin": 1.20.0
     "@storybook/react": 6.5.15
     "@types/electron-devtools-installer": 2.2.2
@@ -24570,8 +24516,8 @@ __metadata:
     "@mui/icons-material": 5.11.0
     "@mui/material": 5.4.1
     "@pmmmwh/react-refresh-webpack-plugin": 0.5.10
-    "@sentry/browser": 7.29.0
-    "@sentry/tracing": 7.29.0
+    "@sentry/browser": 7.16.0
+    "@sentry/tracing": 7.16.0
     "@sentry/webpack-plugin": 1.20.0
     "@types/copy-webpack-plugin": 10.1.0
     clean-webpack-plugin: 4.0.0

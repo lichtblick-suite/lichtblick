@@ -7,6 +7,9 @@
     "jsx": "react-jsx",
     "experimentalDecorators": true,
     "useUnknownInCatchVariables": false,
-    "lib": ["dom", "dom.iterable", "es2020", "webworker"]
+    "lib": ["dom", "dom.iterable", "es2020", "webworker"],
+    "paths": {
+      "@foxglove/studio-base/*": ["../../packages/studio-base/src/*"]
+    }
   }
 }
