@@ -3503,24 +3503,24 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@pmmmwh/react-refresh-webpack-plugin@npm:0.5.4":
-  version: 0.5.4
-  resolution: "@pmmmwh/react-refresh-webpack-plugin@npm:0.5.4"
+"@pmmmwh/react-refresh-webpack-plugin@npm:0.5.10, @pmmmwh/react-refresh-webpack-plugin@npm:^0.5.3":
+  version: 0.5.10
+  resolution: "@pmmmwh/react-refresh-webpack-plugin@npm:0.5.10"
   dependencies:
     ansi-html-community: ^0.0.8
     common-path-prefix: ^3.0.0
-    core-js-pure: ^3.8.1
+    core-js-pure: ^3.23.3
     error-stack-parser: ^2.0.6
     find-up: ^5.0.0
     html-entities: ^2.1.0
-    loader-utils: ^2.0.0
+    loader-utils: ^2.0.4
     schema-utils: ^3.0.0
     source-map: ^0.7.3
   peerDependencies:
     "@types/webpack": 4.x || 5.x
     react-refresh: ">=0.10.0 <1.0.0"
     sockjs-client: ^1.4.0
-    type-fest: ">=0.17.0 <3.0.0"
+    type-fest: ">=0.17.0 <4.0.0"
     webpack: ">=4.43.0 <6.0.0"
     webpack-dev-server: 3.x || 4.x
     webpack-hot-middleware: 2.x
@@ -3538,46 +3538,7 @@ __metadata:
       optional: true
     webpack-plugin-serve:
       optional: true
-  checksum: 66deb75fe06c0d93f9f6f87c57349013cdc82d4cc536b3aff919fd417df1c6603d14a96448d4088f1a680ec22a75f994b30c374a0042c524dfecd96a942ff674
-  languageName: node
-  linkType: hard
-
-"@pmmmwh/react-refresh-webpack-plugin@npm:^0.5.3":
-  version: 0.5.7
-  resolution: "@pmmmwh/react-refresh-webpack-plugin@npm:0.5.7"
-  dependencies:
-    ansi-html-community: ^0.0.8
-    common-path-prefix: ^3.0.0
-    core-js-pure: ^3.8.1
-    error-stack-parser: ^2.0.6
-    find-up: ^5.0.0
-    html-entities: ^2.1.0
-    loader-utils: ^2.0.0
-    schema-utils: ^3.0.0
-    source-map: ^0.7.3
-  peerDependencies:
-    "@types/webpack": 4.x || 5.x
-    react-refresh: ">=0.10.0 <1.0.0"
-    sockjs-client: ^1.4.0
-    type-fest: ">=0.17.0 <3.0.0"
-    webpack: ">=4.43.0 <6.0.0"
-    webpack-dev-server: 3.x || 4.x
-    webpack-hot-middleware: 2.x
-    webpack-plugin-serve: 0.x || 1.x
-  peerDependenciesMeta:
-    "@types/webpack":
-      optional: true
-    sockjs-client:
-      optional: true
-    type-fest:
-      optional: true
-    webpack-dev-server:
-      optional: true
-    webpack-hot-middleware:
-      optional: true
-    webpack-plugin-serve:
-      optional: true
-  checksum: 3490649181878cc8808fb91f3870ef095e5a1fb9647b3ac83740df07379c9d1cf540f24bf2b09d5f26a3a8c805b2c6b9c5be7192bdb9317d0ffffa67426e9f66
+  checksum: c45beded9c56fbbdc7213a2c36131ace5db360ed704d462cc39d6678f980173a91c9a3f691e6bd3a026f25486644cd0027e8a12a0a4eced8e8b886a0472e7d34
   languageName: node
   linkType: hard
 
@@ -8229,7 +8190,7 @@ __metadata:
     "@foxglove/schemas": 0.7.3
     "@foxglove/studio": "workspace:*"
     "@foxglove/studio-base": "workspace:*"
-    "@pmmmwh/react-refresh-webpack-plugin": 0.5.4
+    "@pmmmwh/react-refresh-webpack-plugin": 0.5.10
     "@types/react": 17.0.39
     "@types/react-dom": 17.0.13
     clean-webpack-plugin: 4.0.0
@@ -9782,10 +9743,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"core-js-pure@npm:^3.8.1":
-  version: 3.19.2
-  resolution: "core-js-pure@npm:3.19.2"
-  checksum: cc747d76628820a5662f5d9c7042b3fd417bbe44cd7df19931591e6b850ad5126db4a4f1544b6fb7ee90f253d0e433f3ec24f2e6f9653aa04ff7742867454eee
+"core-js-pure@npm:^3.23.3":
+  version: 3.27.1
+  resolution: "core-js-pure@npm:3.27.1"
+  checksum: 571ff8ffc00cba7c1937e70b502a382317d450ef3a38835b0dc4a6a9645ce9853c10a90f71a2027901fb52690a7ba702396f29e125d1b9d6ae3e277db1bcdf57
   languageName: node
   linkType: hard
 
@@ -10590,7 +10551,7 @@ __metadata:
     "@foxglove/rostime": 1.1.2
     "@foxglove/studio-base": "workspace:*"
     "@mcap/core": 0.3.0
-    "@pmmmwh/react-refresh-webpack-plugin": 0.5.4
+    "@pmmmwh/react-refresh-webpack-plugin": 0.5.10
     "@sentry/electron": 4.1.2
     "@sentry/tracing": 7.29.0
     "@sentry/webpack-plugin": 1.20.0
@@ -24607,7 +24568,7 @@ __metadata:
     "@foxglove/studio-base": "workspace:*"
     "@mui/icons-material": 5.11.0
     "@mui/material": 5.4.1
-    "@pmmmwh/react-refresh-webpack-plugin": 0.5.4
+    "@pmmmwh/react-refresh-webpack-plugin": 0.5.10
     "@sentry/browser": 7.29.0
     "@sentry/tracing": 7.29.0
     "@sentry/webpack-plugin": 1.20.0

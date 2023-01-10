@@ -8,7 +8,7 @@
     "@foxglove/log": "workspace:*",
     "@mui/icons-material": "5.11.0",
     "@mui/material": "5.4.1",
-    "@pmmmwh/react-refresh-webpack-plugin": "0.5.4",
+    "@pmmmwh/react-refresh-webpack-plugin": "0.5.10",
     "@sentry/browser": "7.29.0",
     "@sentry/tracing": "7.29.0",
     "@sentry/webpack-plugin": "1.20.0",
