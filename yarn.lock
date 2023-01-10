@@ -2417,7 +2417,7 @@ __metadata:
     "@types/react-autocomplete": 1.8.6
     "@types/react-dom": 17.0.13
     "@types/react-hover-observer": "workspace:*"
-    "@types/react-table": 7.7.12
+    "@types/react-table": 7.7.14
     "@types/react-transition-group": ^4.4.4
     "@types/react-virtualized": 9.21.20
     "@types/react-window": ^1
@@ -5938,12 +5938,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/react-table@npm:7.7.12":
-  version: 7.7.12
-  resolution: "@types/react-table@npm:7.7.12"
+"@types/react-table@npm:7.7.14":
+  version: 7.7.14
+  resolution: "@types/react-table@npm:7.7.14"
   dependencies:
     "@types/react": "*"
-  checksum: 287ea68e75b56c2e70e6d6491cd172348c7302b032789047eb2dca1b25b240684e48a60f58140575828b790f95724b9f3ec4d3adce82fc1c05d994def1449009
+  checksum: 238047beca9abecc4b3e1e377b823b492b1a00d011b8456012bbcbd2682d5a7e0c0b1cca6384ccc41e724156e991d35e5725a5a3c4b01ff7bbaf095643569da9
   languageName: node
   linkType: hard
 
