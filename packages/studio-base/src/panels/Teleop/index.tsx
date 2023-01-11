@@ -11,7 +11,6 @@ import { PanelExtensionAdapter } from "@foxglove/studio-base/components/PanelExt
 import { SaveConfig } from "@foxglove/studio-base/types/panels";
 
 import TeleopPanel from "./TeleopPanel";
-import helpContent from "./index.help.md";
 
 function initPanel(context: PanelExtensionContext) {
   ReactDOM.render(
@@ -35,7 +34,6 @@ function TeleopPanelAdapter(props: Props) {
     <PanelExtensionAdapter
       config={props.config}
       saveConfig={props.saveConfig}
-      help={helpContent}
       initPanel={initPanel}
     />
   );

@@ -25,7 +25,6 @@ import { SaveConfig } from "@foxglove/studio-base/types/panels";
 import { fonts } from "@foxglove/studio-base/util/sharedStyleConstants";
 
 import Table from "./Table";
-import helpContent from "./index.help.md";
 
 type Config = { topicPath: string };
 type Props = { config: Config; saveConfig: SaveConfig<Config> };
@@ -52,7 +51,7 @@ function TablePanel({ config, saveConfig }: Props) {
 
   return (
     <Stack flex="auto" overflow="hidden" position="relative">
-      <PanelToolbar helpContent={helpContent}>
+      <PanelToolbar>
         <Box width="100%" lineHeight="20px">
           <MessagePathInput
             index={0}

@@ -27,7 +27,6 @@ import { usePanelSettingsTreeUpdate } from "@foxglove/studio-base/providers/Pane
 import { SaveConfig } from "@foxglove/studio-base/types/panels";
 
 import DiagnosticStatus from "./DiagnosticStatus";
-import helpContent from "./DiagnosticStatusPanel.help.md";
 import { buildStatusPanelSettingsTree } from "./settings";
 import useAvailableDiagnostics from "./useAvailableDiagnostics";
 import useDiagnostics from "./useDiagnostics";
@@ -147,7 +146,7 @@ function DiagnosticStatusPanel(props: Props) {
 
   return (
     <Stack flex="auto" overflow="hidden">
-      <PanelToolbar helpContent={helpContent}>
+      <PanelToolbar>
         <Autocomplete
           disablePortal
           blurOnSelect={true}

@@ -17,8 +17,6 @@ import Panel from "@foxglove/studio-base/components/Panel";
 import PanelToolbar from "@foxglove/studio-base/components/PanelToolbar";
 import { Topic } from "@foxglove/studio-base/src/players/types";
 
-import helpContent from "./index.help.md";
-
 const useStyles = makeStyles<void, "copyIcon">()((theme, _params, classes) => ({
   copyIcon: {
     visibility: "hidden",
@@ -116,7 +114,7 @@ function SourceInfo(): JSX.Element {
   if (!startTime || !endTime) {
     return (
       <>
-        <PanelToolbar helpContent={helpContent} />
+        <PanelToolbar />
         <EmptyState>Waiting for data...</EmptyState>
       </>
     );
@@ -124,7 +122,7 @@ function SourceInfo(): JSX.Element {
 
   return (
     <>
-      <PanelToolbar helpContent={helpContent} />
+      <PanelToolbar />
       <Divider />
       <Box paddingTop={1}>
         <DataSourceInfoView />

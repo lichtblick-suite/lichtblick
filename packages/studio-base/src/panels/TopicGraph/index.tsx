@@ -32,7 +32,6 @@ import PanelToolbar, {
 import Stack from "@foxglove/studio-base/components/Stack";
 
 import Graph, { GraphMutation } from "./Graph";
-import helpContent from "./index.help.md";
 
 const LABEL_MAX_WIDTH = 200;
 const STYLESHEET: Cytoscape.Stylesheet[] = [
@@ -369,7 +368,7 @@ function TopicGraph() {
   if (publishedTopics == undefined) {
     return (
       <>
-        <PanelToolbar helpContent={helpContent} />
+        <PanelToolbar />
         <EmptyState>Waiting for data...</EmptyState>
       </>
     );
@@ -377,7 +376,7 @@ function TopicGraph() {
 
   return (
     <>
-      <PanelToolbar helpContent={helpContent} />
+      <PanelToolbar />
       <div className={classes.root}>
         <Paper square={false} elevation={4} className={classes.pointerEventsAuto}>
           <Stack flex="0 0" className={cx(classes.stack, classes.pointerEventsAuto)}>

@@ -49,7 +49,6 @@ import { downloadTextFile } from "@foxglove/studio-base/util/download";
 import showOpenFilePicker from "@foxglove/studio-base/util/showOpenFilePicker";
 
 import LayoutSection from "./LayoutSection";
-import helpContent from "./index.help.md";
 import { useLayoutBrowserReducer } from "./reducer";
 import { debugBorder } from "./styles";
 
@@ -523,7 +522,6 @@ export default function LayoutBrowser({
   return (
     <SidebarContent
       title="Layouts"
-      helpContent={helpContent}
       disablePadding
       trailingItems={[
         (layouts.loading || state.busy || pendingMultiAction) && (

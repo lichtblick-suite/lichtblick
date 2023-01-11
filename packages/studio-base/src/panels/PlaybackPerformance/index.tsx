@@ -23,8 +23,6 @@ import { Sparkline, SparklinePoint } from "@foxglove/studio-base/components/Spar
 import Stack from "@foxglove/studio-base/components/Stack";
 import { PlayerStateActiveData } from "@foxglove/studio-base/players/types";
 
-import helpContent from "./index.help.md";
-
 const TIME_RANGE = 5000;
 
 type PlaybackPerformanceItemProps = {
@@ -121,7 +119,7 @@ export function UnconnectedPlaybackPerformance({
 
   return (
     <Stack flex="auto">
-      <PanelToolbar helpContent={helpContent} />
+      <PanelToolbar />
       <Stack flex="auto" justifyContent="center" gap={2} padding={1}>
         <PlaybackPerformanceItem
           points={perfPoints.current.speed}

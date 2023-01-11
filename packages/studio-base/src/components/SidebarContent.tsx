@@ -2,14 +2,11 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import HelpIcon from "@mui/icons-material/Help";
-import HelpOutlineIcon from "@mui/icons-material/HelpOutline";
-import { IconButton, Typography } from "@mui/material";
-import { useState, useMemo, CSSProperties, Fragment } from "react";
+import { Typography } from "@mui/material";
+import { CSSProperties, Fragment } from "react";
 import { makeStyles } from "tss-react/mui";
 
 import Stack from "@foxglove/studio-base/components/Stack";
-import TextContent from "@foxglove/studio-base/components/TextContent";
 
 const useStyles = makeStyles()((theme) => ({
   leadingItems: {
@@ -32,30 +29,11 @@ export function SidebarContent({
   disablePadding = false,
   title,
   children,
-  helpContent,
   leadingItems,
   overflow = "auto",
   trailingItems,
 }: React.PropsWithChildren<SidebarContentProps>): JSX.Element {
   const { classes } = useStyles();
-  const [showHelp, setShowHelp] = useState<boolean>(false);
-
-  const trailingItemsWithHelp = useMemo(() => {
-    if (helpContent != undefined) {
-      return [
-        ...(trailingItems ?? []),
-        <IconButton
-          color={showHelp ? "inherit" : "primary"}
-          title={showHelp ? "Hide help" : "Show help"}
-          key="help-icon"
-          onClick={() => setShowHelp(!showHelp)}
-        >
-          {showHelp ? <HelpIcon /> : <HelpOutlineIcon />}
-        </IconButton>,
-      ];
-    }
-    return trailingItems ?? [];
-  }, [helpContent, trailingItems, showHelp]);
 
   return (
     <Stack overflow={overflow} fullHeight flex="auto" gap={1}>
@@ -70,19 +48,14 @@ export function SidebarContent({
         <Typography component="h2" variant="h4" fontWeight={800} flex="auto">
           {title}
         </Typography>
-        {trailingItemsWithHelp.length > 0 && (
+        {trailingItems != undefined && (
           <Stack direction="row" alignItems="center">
-            {trailingItemsWithHelp.map((item, i) => (
+            {trailingItems.map((item, i) => (
               <div key={i}>{item}</div>
             ))}
           </Stack>
         )}
       </div>
-      {showHelp && (
-        <Stack paddingX={2} paddingBottom={2}>
-          <TextContent allowMarkdownHtml={true}>{helpContent}</TextContent>
-        </Stack>
-      )}
       <Stack flex="auto" {...(!disablePadding && { paddingX: 2, paddingBottom: 2 })}>
         {children}
       </Stack>
@@ -92,7 +65,6 @@ export function SidebarContent({
 
 type SidebarContentProps = {
   title: string;
-  helpContent?: React.ReactNode;
   disablePadding?: boolean;
 
   /** Buttons/items to display on the leading (left) side of the header */

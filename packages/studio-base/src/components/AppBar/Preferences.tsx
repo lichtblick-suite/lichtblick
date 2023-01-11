@@ -32,7 +32,6 @@ import OsContextSingleton from "@foxglove/studio-base/OsContextSingleton";
 import CopyButton from "@foxglove/studio-base/components/CopyButton";
 import { ExperimentalFeatureSettings } from "@foxglove/studio-base/components/ExperimentalFeatureSettings";
 import FoxgloveLogoText from "@foxglove/studio-base/components/FoxgloveLogoText";
-import { helpMenuItems } from "@foxglove/studio-base/components/HelpSidebar";
 import {
   AutoUpdate,
   ColorSchemeSettings,
@@ -111,6 +110,58 @@ const useStyles = makeStyles()((theme) => ({
     },
   },
 }));
+
+type SectionKey = "resources" | "products" | "contact" | "legal";
+
+export const aboutItems: Map<
+  SectionKey,
+  {
+    subheader: string;
+    links: { title: string; url?: string }[];
+  }
+> = new Map([
+  [
+    "resources",
+    {
+      subheader: "External resources",
+      links: [
+        ...(isDesktopApp() ? [] : [{ title: "Desktop app", url: "https://foxglove.dev/download" }]),
+        { title: "Browse docs", url: "https://foxglove.dev/docs" },
+        { title: "Join our community", url: "https://foxglove.dev/community" },
+      ],
+    },
+  ],
+  [
+    "products",
+    {
+      subheader: "Products",
+      links: [
+        { title: "Foxglove Studio", url: "https://foxglove.dev/studio" },
+        { title: "Foxglove Data Platform", url: "https://foxglove.dev/data-platform" },
+      ],
+    },
+  ],
+  [
+    "contact",
+    {
+      subheader: "Contact",
+      links: [
+        { title: "Give feedback", url: "https://foxglove.dev/contact" },
+        { title: "Schedule a demo", url: "https://foxglove.dev/demo" },
+      ],
+    },
+  ],
+  [
+    "legal",
+    {
+      subheader: "Legal",
+      links: [
+        { title: "License terms", url: "https://foxglove.dev/legal/studio-license" },
+        { title: "Privacy policy", url: "https://foxglove.dev/legal/privacy" },
+      ],
+    },
+  ],
+]);
 
 export function PreferencesIconButton(props: IconButtonProps): JSX.Element {
   const { classes } = useStyles();
@@ -273,10 +324,10 @@ export function PreferencesDialog(props: DialogProps & { activeTab?: TabOption }
                   />
                 </Stack>
                 {[
-                  helpMenuItems.get("resources"),
-                  helpMenuItems.get("products"),
-                  helpMenuItems.get("contact"),
-                  helpMenuItems.get("legal"),
+                  aboutItems.get("resources"),
+                  aboutItems.get("products"),
+                  aboutItems.get("contact"),
+                  aboutItems.get("legal"),
                 ].map((item) => {
                   return (
                     <Stack key={item?.subheader} gap={1}>

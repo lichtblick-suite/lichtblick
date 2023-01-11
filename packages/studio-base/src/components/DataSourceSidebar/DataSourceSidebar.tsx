@@ -28,7 +28,6 @@ import { PlayerPresence } from "@foxglove/studio-base/players/types";
 import { DataSourceInfoView } from "../DataSourceInfoView";
 import { ProblemsList } from "./ProblemsList";
 import { TopicList } from "./TopicList";
-import helpContent from "./help.md";
 
 type Props = {
   onSelectDataSourceAction: () => void;
@@ -120,7 +119,6 @@ export default function DataSourceSidebar(props: Props): JSX.Element {
     <SidebarContent
       overflow="auto"
       title="Data source"
-      helpContent={helpContent}
       disablePadding
       trailingItems={[
         isLoading && (

@@ -19,7 +19,6 @@ import { Mosaic, MosaicWindow } from "react-mosaic-component";
 import MockPanelContextProvider from "@foxglove/studio-base/components/MockPanelContextProvider";
 import ToolbarIconButton from "@foxglove/studio-base/components/PanelToolbar/ToolbarIconButton";
 import MockCurrentLayoutProvider from "@foxglove/studio-base/providers/CurrentLayoutProvider/MockCurrentLayoutProvider";
-import HelpInfoProvider from "@foxglove/studio-base/providers/HelpInfoProvider";
 import { PanelStateContextProvider } from "@foxglove/studio-base/providers/PanelStateContextProvider";
 
 import PanelToolbar from "./index";
@@ -42,19 +41,15 @@ class MosaicWrapper extends React.Component<{
             renderPreview={() => undefined as any}
           >
             <PanelStateContextProvider>
-              <HelpInfoProvider>
-                <Box
-                  width="100%"
-                  height="100%"
-                  padding={3}
-                  position="relative"
-                  bgcolor="background.default"
-                >
-                  <Box width={width}>
-                    {id === "Sibling" ? "Sibling Panel" : this.props.children}
-                  </Box>
-                </Box>
-              </HelpInfoProvider>
+              <Box
+                width="100%"
+                height="100%"
+                padding={3}
+                position="relative"
+                bgcolor="background.default"
+              >
+                <Box width={width}>{id === "Sibling" ? "Sibling Panel" : this.props.children}</Box>
+              </Box>
             </PanelStateContextProvider>
           </MosaicWindow>
         )}
@@ -79,7 +74,7 @@ class PanelToolbarWithOpenMenu extends React.PureComponent {
           }
         }}
       >
-        <PanelToolbar helpContent={<div />}>
+        <PanelToolbar>
           <div style={{ width: "100%", lineHeight: "22px", paddingLeft: 5 }}>
             Some controls here
           </div>
@@ -101,7 +96,7 @@ storiesOf("components/PanelToolbar", module)
   .add("non-floating (narrow)", () => {
     return (
       <MosaicWrapper width={268}>
-        <PanelToolbar helpContent={<div />}>
+        <PanelToolbar>
           <div style={{ width: "100%", lineHeight: "22px", paddingLeft: 5 }}>
             Some controls here
           </div>
@@ -112,7 +107,7 @@ storiesOf("components/PanelToolbar", module)
   .add("non-floating (wide with panel name)", () => {
     return (
       <MosaicWrapper width={468}>
-        <PanelToolbar helpContent={<div />}>
+        <PanelToolbar>
           <div style={{ width: "100%", lineHeight: "22px", paddingLeft: 5 }}>
             Some controls here
           </div>
@@ -128,7 +123,7 @@ storiesOf("components/PanelToolbar", module)
     );
     return (
       <MosaicWrapper width={468}>
-        <PanelToolbar helpContent={<div />} additionalIcons={additionalIcons}>
+        <PanelToolbar additionalIcons={additionalIcons}>
           <div style={{ width: "100%", lineHeight: "22px", paddingLeft: 5 }}>
             Some controls here
           </div>

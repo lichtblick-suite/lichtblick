@@ -21,7 +21,6 @@ import { SaveConfig } from "@foxglove/studio-base/types/panels";
 
 import { Renderer } from "./Renderer";
 import { defaultConfig } from "./defaultConfig";
-import helpContent from "./index.help.md";
 import { useURDFViewerSettings } from "./settings";
 import { Config } from "./types";
 import useRobotDescriptionAsset from "./useRobotDescriptionAsset";
@@ -185,7 +184,7 @@ function URDFViewer({ config, saveConfig }: Props) {
 
   return (
     <div className={classes.root}>
-      <PanelToolbar helpContent={helpContent} />
+      <PanelToolbar />
       <div className={classes.content}>
         {messageBar}
         {model == undefined ? (

@@ -6,7 +6,6 @@ import Panel from "@foxglove/studio-base/components/Panel";
 import { PanelExtensionAdapter } from "@foxglove/studio-base/components/PanelExtensionAdapter";
 import { SaveConfig } from "@foxglove/studio-base/types/panels";
 
-import helpContent from "./index.help.md";
 import { initPanel } from "./initPanel";
 
 type Props = {
@@ -19,7 +18,6 @@ function MapPanelAdapter(props: Props) {
     <PanelExtensionAdapter
       config={props.config}
       saveConfig={props.saveConfig}
-      help={helpContent}
       initPanel={initPanel}
     />
   );

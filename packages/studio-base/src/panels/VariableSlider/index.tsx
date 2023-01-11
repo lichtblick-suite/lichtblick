@@ -20,7 +20,6 @@ import Stack from "@foxglove/studio-base/components/Stack";
 import useGlobalVariables from "@foxglove/studio-base/hooks/useGlobalVariables";
 import { SaveConfig } from "@foxglove/studio-base/types/panels";
 
-import helpContent from "./index.help.md";
 import { useVariableSliderSettings } from "./settings";
 import { VariableSliderConfig } from "./types";
 
@@ -55,7 +54,7 @@ function VariableSliderPanel(props: Props): JSX.Element {
 
   return (
     <Stack fullHeight>
-      <PanelToolbar helpContent={helpContent} />
+      <PanelToolbar />
       <Stack
         flex="auto"
         alignItems="center"

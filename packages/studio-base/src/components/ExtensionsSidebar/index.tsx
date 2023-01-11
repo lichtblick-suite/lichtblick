@@ -26,8 +26,6 @@ import {
   useExtensionMarketplace,
 } from "@foxglove/studio-base/context/ExtensionMarketplaceContext";
 
-import helpContent from "./index.help.md";
-
 const log = Log.getLogger(__filename);
 
 const StyledListItemButton = muiStyled(ListItemButton)(({ theme }) => ({
@@ -178,7 +176,7 @@ export default function ExtensionsSidebar(): React.ReactElement {
   }
 
   return (
-    <SidebarContent title="Extensions" helpContent={helpContent} disablePadding>
+    <SidebarContent title="Extensions" disablePadding>
       <Stack gap={1}>
         {!isEmpty(namespacedEntries) ? (
           Object.entries(namespacedEntries).map(([namespace, entries]) => (

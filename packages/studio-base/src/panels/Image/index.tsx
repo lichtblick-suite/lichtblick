@@ -37,7 +37,6 @@ import { formatTimeRaw } from "@foxglove/studio-base/util/time";
 
 import { ImageCanvas, ImageEmptyState, Toolbar, TopicDropdown } from "./components";
 import { useCameraInfo, ANNOTATION_DATATYPES, useImagePanelMessages } from "./hooks";
-import helpContent from "./index.help.md";
 import { downloadImage } from "./lib/downloadImage";
 import { NORMALIZABLE_IMAGE_DATATYPES } from "./lib/normalizeMessage";
 import { getRelatedMarkerTopics, getMarkerOptions } from "./lib/util";
@@ -263,7 +262,7 @@ function ImageView(props: Props) {
 
   return (
     <Stack flex="auto" overflow="hidden" position="relative">
-      <PanelToolbar helpContent={helpContent}>
+      <PanelToolbar>
         <Stack direction="row" flex="auto" alignItems="center" overflow="hidden">
           <TopicDropdown
             topics={imageTopics}

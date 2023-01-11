@@ -63,7 +63,6 @@ import PlotChart from "./PlotChart";
 import PlotLegend from "./PlotLegend";
 import { downloadCSV } from "./csv";
 import { getDatasets } from "./datasets";
-import helpContent from "./index.help.md";
 import { PlotDataByPath, PlotDataItem } from "./internalTypes";
 import { usePlotPanelSettings } from "./settings";
 import { PlotConfig } from "./types";
@@ -501,7 +500,6 @@ function Plot(props: Props) {
       position="relative"
     >
       <PanelToolbar
-        helpContent={helpContent}
         additionalIcons={
           <ToolbarIconButton
             onClick={() => downloadCSV(datasets, xAxisVal)}

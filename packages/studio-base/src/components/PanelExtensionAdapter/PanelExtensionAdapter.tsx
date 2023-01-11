@@ -61,9 +61,6 @@ type PanelExtensionAdapterProps = {
 
   config: unknown;
   saveConfig: SaveConfig<unknown>;
-
-  /** Help document for the panel */
-  help?: string;
 };
 
 function selectContext(ctx: MessagePipelineContext) {
@@ -553,7 +550,7 @@ function PanelExtensionAdapter(props: PanelExtensionAdapterProps): JSX.Element {
         ...style,
       }}
     >
-      <PanelToolbar helpContent={props.help} />
+      <PanelToolbar />
       <div style={{ flex: 1, overflow: "hidden" }} ref={panelContainerRef} />
     </div>
   );

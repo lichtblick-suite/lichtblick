@@ -51,7 +51,6 @@ import { OpenSiblingPanel, PanelConfig, SaveConfig } from "@foxglove/studio-base
 import { fonts } from "@foxglove/studio-base/util/sharedStyleConstants";
 import { TimestampMethod } from "@foxglove/studio-base/util/time";
 
-import helpContent from "./index.help.md";
 import messagesToDatasets from "./messagesToDatasets";
 import { useStateTransitionsPanelSettings } from "./settings";
 import { StateTransitionConfig } from "./types";
@@ -347,7 +346,7 @@ const StateTransitions = React.memo(function StateTransitions(props: Props) {
 
   return (
     <Stack ref={rootRef} flexGrow={1} overflow="hidden" style={{ zIndex: 0 }}>
-      <PanelToolbar helpContent={helpContent} />
+      <PanelToolbar />
       <div
         className={cx(classes.addButton, {
           [classes.visibilityHidden]: !mousePresent,

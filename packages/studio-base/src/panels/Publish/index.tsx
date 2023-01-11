@@ -30,7 +30,6 @@ import { SaveConfig } from "@foxglove/studio-base/types/panels";
 import { fonts } from "@foxglove/studio-base/util/sharedStyleConstants";
 
 import buildSampleMessage from "./buildSampleMessage";
-import helpContent from "./index.help.md";
 
 type Config = Partial<{
   topicName: string;
@@ -230,7 +229,7 @@ function Publish(props: Props) {
 
   return (
     <Stack fullHeight>
-      <PanelToolbar helpContent={helpContent} />
+      <PanelToolbar />
       {advancedView && (
         <Stack flex="auto" padding={2} gap={1} paddingBottom={0}>
           <div>

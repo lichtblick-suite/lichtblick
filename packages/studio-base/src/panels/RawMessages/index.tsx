@@ -73,7 +73,6 @@ import {
   getValueActionForValue,
   getStructureItemForPath,
 } from "./getValueActionForValue";
-import helpContent from "./index.help.md";
 import { RawMessagesPanelConfig } from "./types";
 import { DATA_ARRAY_PREVIEW_LIMIT, generateDeepKeyPaths } from "./utils";
 
@@ -651,7 +650,7 @@ function RawMessages(props: Props) {
 
   return (
     <Stack flex="auto" overflow="hidden" position="relative">
-      <PanelToolbar helpContent={helpContent}>
+      <PanelToolbar>
         <IconButton
           className={classes.iconButton}
           title="Toggle diff"

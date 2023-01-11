@@ -31,9 +31,6 @@ import { AppBar } from "@foxglove/studio-base/components/AppBar";
 import { DataSourceSidebar } from "@foxglove/studio-base/components/DataSourceSidebar";
 import DocumentDropListener from "@foxglove/studio-base/components/DocumentDropListener";
 import ExtensionsSidebar from "@foxglove/studio-base/components/ExtensionsSidebar";
-import HelpSidebar, {
-  MESSAGE_PATH_SYNTAX_HELP_INFO,
-} from "@foxglove/studio-base/components/HelpSidebar";
 import KeyListener from "@foxglove/studio-base/components/KeyListener";
 import LayoutBrowser from "@foxglove/studio-base/components/LayoutBrowser";
 import {
@@ -45,7 +42,6 @@ import MultiProvider from "@foxglove/studio-base/components/MultiProvider";
 import { OpenDialog, OpenDialogViews } from "@foxglove/studio-base/components/OpenDialog";
 import PanelLayout from "@foxglove/studio-base/components/PanelLayout";
 import PanelList from "@foxglove/studio-base/components/PanelList";
-import panelsHelpContent from "@foxglove/studio-base/components/PanelList/index.help.md";
 import PanelSettings from "@foxglove/studio-base/components/PanelSettings";
 import PlaybackControls from "@foxglove/studio-base/components/PlaybackControls";
 import Preferences from "@foxglove/studio-base/components/Preferences";
@@ -65,7 +61,6 @@ import {
 } from "@foxglove/studio-base/context/CurrentLayoutContext";
 import { useCurrentUser } from "@foxglove/studio-base/context/CurrentUserContext";
 import { useExtensionCatalog } from "@foxglove/studio-base/context/ExtensionCatalogContext";
-import LinkHandlerContext from "@foxglove/studio-base/context/LinkHandlerContext";
 import { useNativeAppMenu } from "@foxglove/studio-base/context/NativeAppMenuContext";
 import {
   IDataSourceFactory,
@@ -80,7 +75,6 @@ import useElectronFilesToOpen from "@foxglove/studio-base/hooks/useElectronFiles
 import { useInitialDeepLinkState } from "@foxglove/studio-base/hooks/useInitialDeepLinkState";
 import useNativeAppMenuEvent from "@foxglove/studio-base/hooks/useNativeAppMenuEvent";
 import { PlayerPresence } from "@foxglove/studio-base/players/types";
-import { HelpInfoStore, useHelpInfo } from "@foxglove/studio-base/providers/HelpInfoProvider";
 import { PanelStateContextProvider } from "@foxglove/studio-base/providers/PanelStateContextProvider";
 
 const log = Logger.getLogger(__filename);
@@ -133,11 +127,7 @@ function AddPanel() {
   const selectedLayoutId = useCurrentLayoutSelector(selectedLayoutIdSelector);
 
   return (
-    <SidebarContent
-      disablePadding={selectedLayoutId != undefined}
-      title="Add panel"
-      helpContent={panelsHelpContent}
-    >
+    <SidebarContent disablePadding={selectedLayoutId != undefined} title="Add panel">
       {selectedLayoutId == undefined ? (
         <Typography color="text.secondary">
           <Link onClick={openLayoutBrowser}>Select a layout</Link> to get started!
@@ -166,8 +156,6 @@ const selectPlay = (ctx: MessagePipelineContext) => ctx.startPlayback;
 const selectSeek = (ctx: MessagePipelineContext) => ctx.seekPlayback;
 const selectPlayUntil = (ctx: MessagePipelineContext) => ctx.playUntil;
 const selectPlayerId = (ctx: MessagePipelineContext) => ctx.playerState.playerId;
-
-const selectSetHelpInfo = (store: HelpInfoStore) => store.setHelpInfo;
 
 export default function Workspace(props: WorkspaceProps): JSX.Element {
   const { classes } = useStyles();
@@ -240,19 +228,6 @@ export default function Workspace(props: WorkspaceProps): JSX.Element {
       setShowOpenDialog(undefined);
     }
   }, [playerPresence]);
-
-  const setHelpInfo = useHelpInfo(selectSetHelpInfo);
-
-  const handleInternalLink = useCallback(
-    (event: React.MouseEvent, href: string) => {
-      if (href === "#help:message-path-syntax") {
-        event.preventDefault();
-        setSelectedSidebarItem("help");
-        setHelpInfo(MESSAGE_PATH_SYNTAX_HELP_INFO);
-      }
-    },
-    [setHelpInfo],
-  );
 
   useEffect(() => {
     // Focus on page load to enable keyboard interaction.
@@ -540,9 +515,7 @@ export default function Workspace(props: WorkspaceProps): JSX.Element {
       });
     }
 
-    const bottomItems = new Map<SidebarItemKey, SidebarItem>([
-      ["help", { iconName: "QuestionCircle", title: "Help", component: HelpSidebar }],
-    ]);
+    const bottomItems = new Map<SidebarItemKey, SidebarItem>([]);
 
     if (!enableNewUI) {
       if (supportsAccountSettings) {
@@ -603,7 +576,6 @@ export default function Workspace(props: WorkspaceProps): JSX.Element {
     <MultiProvider
       providers={[
         /* eslint-disable react/jsx-key */
-        <LinkHandlerContext.Provider value={handleInternalLink} />,
         <WorkspaceContext.Provider value={workspaceActions} />,
         <PanelStateContextProvider />,
         /* eslint-enable react/jsx-key */

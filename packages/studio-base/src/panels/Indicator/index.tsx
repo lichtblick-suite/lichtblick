@@ -12,7 +12,6 @@ import ThemeProvider from "@foxglove/studio-base/theme/ThemeProvider";
 import { SaveConfig } from "@foxglove/studio-base/types/panels";
 
 import { Indicator } from "./Indicator";
-import helpContent from "./index.help.md";
 import { Config } from "./types";
 
 function initPanel(context: PanelExtensionContext) {
@@ -39,7 +38,6 @@ function IndicatorLightPanelAdapter(props: Props) {
     <PanelExtensionAdapter
       config={props.config}
       saveConfig={props.saveConfig}
-      help={helpContent}
       initPanel={initPanel}
     />
   );

@@ -39,15 +39,12 @@ import {
   useCurrentLayoutSelector,
 } from "@foxglove/studio-base/context/CurrentLayoutContext";
 import { useUserNodeState } from "@foxglove/studio-base/context/UserNodeStateContext";
-import { useWorkspace } from "@foxglove/studio-base/context/WorkspaceContext";
 import BottomBar from "@foxglove/studio-base/panels/NodePlayground/BottomBar";
 import Sidebar from "@foxglove/studio-base/panels/NodePlayground/Sidebar";
-import { HelpInfoStore, useHelpInfo } from "@foxglove/studio-base/providers/HelpInfoProvider";
 import { usePanelSettingsTreeUpdate } from "@foxglove/studio-base/providers/PanelStateContextProvider";
 import { SaveConfig, UserNodes } from "@foxglove/studio-base/types/panels";
 
 import Config from "./Config";
-import helpContent from "./index.help.md";
 import { Script } from "./script";
 
 const Editor = React.lazy(
@@ -131,11 +128,7 @@ function buildSettingsTree(config: Config): SettingsTreeNodes {
   };
 }
 
-const selectSetHelpInfo = (store: HelpInfoStore) => store.setHelpInfo;
-
 const WelcomeScreen = ({ addNewNode }: { addNewNode: (code?: string) => void }) => {
-  const setHelpInfo = useHelpInfo(selectSetHelpInfo);
-  const { openHelp } = useWorkspace();
   return (
     <EmptyState>
       <Container maxWidth="xs">
@@ -147,11 +140,8 @@ const WelcomeScreen = ({ addNewNode }: { addNewNode: (code?: string) => void }) 
             <Link
               color="primary"
               underline="hover"
-              onClick={(e) => {
-                e.preventDefault();
-                setHelpInfo({ title: "NodePlayground", content: helpContent });
-                openHelp();
-              }}
+              href="https://foxglove.dev/docs/studio/panels/user-scripts"
+              target="_blank"
             >
               docs
             </Link>
@@ -333,7 +323,7 @@ function NodePlayground(props: Props) {
 
   return (
     <Stack fullHeight>
-      <PanelToolbar helpContent={helpContent} />
+      <PanelToolbar />
       <Divider />
       <Stack direction="row" fullHeight overflow="hidden">
         <Sidebar
