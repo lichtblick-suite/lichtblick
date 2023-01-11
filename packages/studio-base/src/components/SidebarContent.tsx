@@ -3,7 +3,7 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 import { Typography } from "@mui/material";
-import { CSSProperties, Fragment } from "react";
+import { CSSProperties, Fragment, PropsWithChildren } from "react";
 import { makeStyles } from "tss-react/mui";
 
 import Stack from "@foxglove/studio-base/components/Stack";
@@ -32,7 +32,7 @@ export function SidebarContent({
   leadingItems,
   overflow = "auto",
   trailingItems,
-}: React.PropsWithChildren<SidebarContentProps>): JSX.Element {
+}: PropsWithChildren<SidebarContentProps>): JSX.Element {
   const { classes } = useStyles();
 
   return (

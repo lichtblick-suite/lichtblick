@@ -228,7 +228,19 @@ export function AppBar(props: AppBarProps): JSX.Element {
           </Toolbar>
         </MuiAppBar>
       </ThemeProvider>
-      <HelpMenu anchorEl={helpAnchorEl} open={helpMenuOpen} handleClose={handleHelpClose} />
+      <HelpMenu
+        anchorEl={helpAnchorEl}
+        open={helpMenuOpen}
+        handleClose={handleHelpClose}
+        anchorOrigin={{
+          horizontal: "right",
+          vertical: "bottom",
+        }}
+        transformOrigin={{
+          vertical: "top",
+          horizontal: "right",
+        }}
+      />
       <UserMenu anchorEl={userAnchorEl} open={userMenuOpen} handleClose={handleUserClose} />
       <PreferencesDialog
         id="preferences-dialog"

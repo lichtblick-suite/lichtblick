@@ -2,9 +2,11 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
+import HelpOutlineIcon from "@mui/icons-material/HelpOutline";
 import { Badge, Paper, Tab, Tabs } from "@mui/material";
 import {
   ComponentProps,
+  MouseEvent,
   PropsWithChildren,
   useCallback,
   useLayoutEffect,
@@ -16,6 +18,7 @@ import { MosaicNode, MosaicWithoutDragDropContext } from "react-mosaic-component
 import { makeStyles } from "tss-react/mui";
 
 import { AppSetting } from "@foxglove/studio-base/AppSetting";
+import { HelpMenu } from "@foxglove/studio-base/components/AppBar/Help";
 import { BuiltinIcon } from "@foxglove/studio-base/components/BuiltinIcon";
 import ErrorBoundary from "@foxglove/studio-base/components/ErrorBoundary";
 import Stack from "@foxglove/studio-base/components/Stack";
@@ -108,6 +111,17 @@ export default function Sidebar<K extends string>(props: SidebarProps<K>): JSX.E
   const allItems = useMemo(() => {
     return new Map([...items, ...bottomItems]);
   }, [bottomItems, items]);
+
+  const [helpAnchorEl, setHelpAnchorEl] = useState<undefined | HTMLElement>(undefined);
+
+  const helpMenuOpen = Boolean(helpAnchorEl);
+
+  const handleHelpClick = (event: MouseEvent<HTMLElement>) => {
+    setHelpAnchorEl(event.currentTarget);
+  };
+  const handleHelpClose = () => {
+    setHelpAnchorEl(undefined);
+  };
 
   useLayoutEffect(() => {
     const keyDoesNotExist = selectedKey != undefined && !allItems.has(selectedKey);
@@ -216,9 +230,33 @@ export default function Sidebar<K extends string>(props: SidebarProps<K>): JSX.E
         >
           {topTabs}
           <TabSpacer />
+          <Tab
+            className={classes.tab}
+            color="inherit"
+            id="help-button"
+            aria-label="Help menu button"
+            aria-controls={helpMenuOpen ? "help-menu" : undefined}
+            aria-haspopup="true"
+            aria-expanded={helpMenuOpen ? "true" : undefined}
+            onClick={(event) => handleHelpClick(event)}
+            icon={<HelpOutlineIcon color={helpMenuOpen ? "primary" : "inherit"} />}
+          />
           {bottomTabs}
           {enableMemoryUseIndicator && <MemoryUseIndicator />}
         </Tabs>
+        <HelpMenu
+          anchorEl={helpAnchorEl}
+          open={helpMenuOpen}
+          handleClose={handleHelpClose}
+          anchorOrigin={{
+            horizontal: "right",
+            vertical: "bottom",
+          }}
+          transformOrigin={{
+            vertical: "bottom",
+            horizontal: "left",
+          }}
+        />
       </Stack>
       {
         // By always rendering the mosaic, even if we are only showing children, we can prevent the

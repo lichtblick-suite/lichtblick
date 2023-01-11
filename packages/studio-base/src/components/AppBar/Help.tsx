@@ -14,6 +14,7 @@ import {
   MenuItem,
   IconButton,
   IconButtonProps,
+  MenuProps,
 } from "@mui/material";
 import { makeStyles } from "tss-react/mui";
 
@@ -50,32 +51,22 @@ export function HelpIconButton(props: IconButtonProps): JSX.Element {
   );
 }
 
-export function HelpMenu({
-  anchorEl,
-  handleClose,
-  open,
-}: {
-  handleClose: () => void;
-  anchorEl?: HTMLElement;
-  open: boolean;
-}): JSX.Element {
+export function HelpMenu(
+  props: {
+    handleClose: () => void;
+  } & MenuProps,
+): JSX.Element {
+  const { anchorEl, handleClose, open } = props;
   const { classes } = useStyles();
   const currentUserType = useCurrentUserType();
   const analytics = useAnalytics();
 
   return (
     <Menu
+      {...props}
       classes={{ paper: classes.paper }}
       id="help-menu"
       anchorEl={anchorEl}
-      anchorOrigin={{
-        horizontal: "right",
-        vertical: "bottom",
-      }}
-      transformOrigin={{
-        vertical: "top",
-        horizontal: "right",
-      }}
       open={open}
       onClose={handleClose}
       MenuListProps={{
