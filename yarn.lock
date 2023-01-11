@@ -10522,7 +10522,7 @@ __metadata:
     html-webpack-plugin: 5.5.0
     jszip: 3.10.1
     path-browserify: 1.0.1
-    playwright: 1.27.1
+    playwright: 1.29.2
     plist: 3.0.5
     pngjs: 6.0.0
     quicklookjs: 0.0.3
@@ -19192,23 +19192,23 @@ __metadata:
   languageName: node
   linkType: hard
 
-"playwright-core@npm:1.27.1":
-  version: 1.27.1
-  resolution: "playwright-core@npm:1.27.1"
+"playwright-core@npm:1.29.2":
+  version: 1.29.2
+  resolution: "playwright-core@npm:1.29.2"
   bin:
     playwright: cli.js
-  checksum: fd65d3eb29978e0e7a755158625e8922a66ca9d599b7c24ddf920822b261d81c51a5964ef8e0e5ed9b2b12dc64541c5949b6a898d965e107f43261964e8c29a0
+  checksum: 19e00e162a24eb99878408518930346c1d2c8ce83bb02993e3dd890c99df4530240cfebe4ec4e5aca01656462695b6328fb8f913cf2e229c2c73941623ac524e
   languageName: node
   linkType: hard
 
-"playwright@npm:1.27.1":
-  version: 1.27.1
-  resolution: "playwright@npm:1.27.1"
+"playwright@npm:1.29.2":
+  version: 1.29.2
+  resolution: "playwright@npm:1.29.2"
   dependencies:
-    playwright-core: 1.27.1
+    playwright-core: 1.29.2
   bin:
     playwright: cli.js
-  checksum: 7bb31998e1783f96443bd1a38f0d7838d1b6fd0cf410ac83ef480c0f0e3e930b809b7e42ccda35b9e272c84aaa8f15e0ee8bdddc19a60b224eecc57d285bf92f
+  checksum: 6909483b440ad936cf413efeb30f4541e801f93f9a87797dda263264e29170a38e0741d65274bc26ffcbbfaa12f044938d65ccdfc04ca960c16b9383ed4cbb0e
   languageName: node
   linkType: hard
 
@@ -24533,7 +24533,7 @@ __metadata:
     copy-webpack-plugin: 11.0.0
     html-webpack-plugin: 5.5.0
     idb: 7.0.1
-    playwright: 1.27.1
+    playwright: 1.29.2
     react: 17.0.2
     react-dom: 17.0.2
     webpack: 5.74.0
