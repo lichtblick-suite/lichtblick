@@ -49,7 +49,7 @@ To learn more, visit the following resources:
 
 You can also join us on the following platforms to ask questions, share feedback, and stay up to date on what our team is working on:
 
-[GitHub Discussions](https://github.com/foxglove/studio/discussions)
+[GitHub Discussions](https://github.com/orgs/foxglove/discussions)
 &nbsp;•&nbsp;
 [Slack](https://foxglove.dev/join-slack)
 &nbsp;•&nbsp;
