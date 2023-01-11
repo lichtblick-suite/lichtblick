@@ -500,7 +500,7 @@ function MapPanel(props: MapPanelProps): JSX.Element {
         }
       }
 
-      return;
+      return old;
     });
   }, [allNavMessages, currentNavMessages, config]);
 
