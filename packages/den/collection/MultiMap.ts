@@ -14,12 +14,10 @@ export class MultiMap<TKey, TValue> {
 
   public set(key: TKey, value: TValue): void {
     const values = this.#map.get(key);
-    if (values != undefined) {
-      if (!values.includes(value)) {
-        values.push(value);
-      }
-    } else {
+    if (values == undefined) {
       this.#map.set(key, [value]);
+    } else if (!values.includes(value)) {
+      values.push(value);
     }
   }
 
