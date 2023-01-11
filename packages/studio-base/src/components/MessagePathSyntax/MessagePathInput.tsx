@@ -306,7 +306,7 @@ export default React.memo<MessagePathInputBaseProps>(function MessagePathInput(
     } else if (!topic) {
       return "topicName";
     } else if (
-      !structureTraversalResult ||
+      structureTraversalResult == undefined ||
       !structureTraversalResult.valid ||
       !validTerminatingStructureItem(structureTraversalResult.structureItem, validTypes)
     ) {

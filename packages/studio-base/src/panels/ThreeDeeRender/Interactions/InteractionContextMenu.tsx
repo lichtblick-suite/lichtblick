@@ -30,7 +30,7 @@ const getObject = (selectedObject?: MouseEventObject): unknown => {
   const object =
     (selectedObject?.instanceIndex != undefined &&
       (selectedObject.object as InstancedLineListMarker).metadataByIndex != undefined &&
-      getInstanceObj(selectedObject.object, selectedObject.instanceIndex)) ||
+      getInstanceObj(selectedObject.object, selectedObject.instanceIndex) != undefined) ||
     selectedObject?.object;
   return object;
 };
