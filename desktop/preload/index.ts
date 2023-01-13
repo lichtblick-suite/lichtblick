@@ -140,6 +140,9 @@ const desktopBridge: Desktop = {
     const userExtensionRoot = pathJoin(homePath, ".foxglove-studio", "extensions");
     return await uninstallExtension(id, userExtensionRoot);
   },
+  handleTitleBarDoubleClick() {
+    ipcRenderer.send("titleBarDoubleClicked");
+  },
 };
 
 const storageBridge: Storage = {

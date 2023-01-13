@@ -58,6 +58,7 @@ type AppProps = {
   enableLaunchPreferenceScreen?: boolean;
   enableGlobalCss?: boolean;
   appBarLeftInset?: number;
+  onAppBarDoubleClick?: () => void;
 };
 
 // Suppress context menu for the entire app except on inputs & textareas.
@@ -147,6 +148,7 @@ export function App(props: AppProps): JSX.Element {
                         deepLinks={deepLinks}
                         disableSignin={disableSignin}
                         appBarLeftInset={props.appBarLeftInset}
+                        onAppBarDoubleClick={props.onAppBarDoubleClick}
                       />
                     </PanelCatalogProvider>
                   </Suspense>

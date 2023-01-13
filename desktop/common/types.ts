@@ -85,6 +85,9 @@ interface Desktop {
   // Uninstall an extension. Returns true if the extension was found and uninstalled, or false if it
   // was not found (i.e. already uninstalled)
   uninstallExtension: (id: string) => Promise<boolean>;
+
+  /** Handle a double-click on the custom title bar */
+  handleTitleBarDoubleClick(): void;
 }
 
 export type { NativeMenuBridge, Storage, StorageContent, Desktop, DesktopExtension };

@@ -143,6 +143,7 @@ type WorkspaceProps = {
   deepLinks?: string[];
   disableSignin?: boolean;
   appBarLeftInset?: number;
+  onAppBarDoubleClick?: () => void;
 };
 
 const DEFAULT_DEEPLINKS = Object.freeze([]);
@@ -599,6 +600,7 @@ export default function Workspace(props: WorkspaceProps): JSX.Element {
             disableSignin={props.disableSignin}
             signIn={signIn}
             leftInset={props.appBarLeftInset}
+            onDoubleClick={props.onAppBarDoubleClick}
           />
         )}
         <Sidebar
