@@ -22,6 +22,7 @@ const useStyles = makeStyles()((theme) => ({
     pointerEvents: "none",
     padding: theme.spacing(5),
     boxShadow: "none",
+    maxHeight: "none", // override inset for titlebar area on Windows desktop app
   },
   inner: {
     borderRadius: 16,

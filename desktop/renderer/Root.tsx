@@ -2,7 +2,7 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { useMemo, useEffect, useState } from "react";
+import { useMemo, useEffect, useState, useCallback } from "react";
 
 import {
   App,
@@ -97,15 +97,27 @@ export default function Root({
   });
 
   const [isFullScreen, setFullScreen] = useState(false);
+  const [isMaximized, setMaximized] = useState(nativeWindow.isMaximized());
+
+  const onMinimizeWindow = useCallback(() => nativeWindow.minimize(), [nativeWindow]);
+  const onMaximizeWindow = useCallback(() => nativeWindow.maximize(), [nativeWindow]);
+  const onUnmaximizeWindow = useCallback(() => nativeWindow.unmaximize(), [nativeWindow]);
+  const onCloseWindow = useCallback(() => nativeWindow.close(), [nativeWindow]);
 
   useEffect(() => {
-    const onEnter = () => setFullScreen(true);
-    const onLeave = () => setFullScreen(false);
-    desktopBridge.addIpcEventListener("enter-full-screen", onEnter);
-    desktopBridge.addIpcEventListener("leave-full-screen", onLeave);
+    const onEnterFullScreen = () => setFullScreen(true);
+    const onLeaveFullScreen = () => setFullScreen(false);
+    const onMaximize = () => setMaximized(true);
+    const onUnmaximize = () => setMaximized(false);
+    desktopBridge.addIpcEventListener("enter-full-screen", onEnterFullScreen);
+    desktopBridge.addIpcEventListener("leave-full-screen", onLeaveFullScreen);
+    desktopBridge.addIpcEventListener("maximize", onMaximize);
+    desktopBridge.addIpcEventListener("unmaximize", onUnmaximize);
     return () => {
-      desktopBridge.removeIpcEventListener("enter-full-screen", onEnter);
-      desktopBridge.removeIpcEventListener("leave-full-screen", onLeave);
+      desktopBridge.removeIpcEventListener("enter-full-screen", onEnterFullScreen);
+      desktopBridge.removeIpcEventListener("leave-full-screen", onLeaveFullScreen);
+      desktopBridge.removeIpcEventListener("maximize", onMaximize);
+      desktopBridge.removeIpcEventListener("unmaximize", onUnmaximize);
     };
   }, []);
 
@@ -124,6 +136,12 @@ export default function Root({
         enableGlobalCss
         appBarLeftInset={ctxbridge?.platform === "darwin" && !isFullScreen ? 72 : undefined}
         onAppBarDoubleClick={() => nativeWindow.handleTitleBarDoubleClick()}
+        showCustomWindowControls={ctxbridge?.platform === "linux"}
+        isMaximized={isMaximized}
+        onMinimizeWindow={onMinimizeWindow}
+        onMaximizeWindow={onMaximizeWindow}
+        onUnmaximizeWindow={onUnmaximizeWindow}
+        onCloseWindow={onCloseWindow}
       />
     </>
   );

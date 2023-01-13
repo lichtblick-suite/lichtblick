@@ -13,6 +13,9 @@ export default {
   title: "components/AppBar",
   component: AppBar,
   decorators: [Wrapper],
+  parameters: {
+    colorScheme: "both-column",
+  },
 };
 
 class FakeConsoleApi extends ConsoleApi {
@@ -36,12 +39,18 @@ function Wrapper(StoryFn: Story): JSX.Element {
 export function Default(): JSX.Element {
   return <AppBar />;
 }
-Default.parameters = { colorScheme: "both-column" };
+
+export function CustomWindowControls(): JSX.Element {
+  return <AppBar showCustomWindowControls />;
+}
+
+export function CustomWindowControlsDragRegion(): JSX.Element {
+  return <AppBar showCustomWindowControls debugDragRegion />;
+}
 
 export function SignInDisabled(): JSX.Element {
   return <AppBar disableSignin />;
 }
-SignInDisabled.parameters = { colorScheme: "both-column" };
 
 export function UserPresent(): JSX.Element {
   const org: User["org"] = {
@@ -72,4 +81,3 @@ export function UserPresent(): JSX.Element {
     />
   );
 }
-UserPresent.parameters = { colorScheme: "both-column" };

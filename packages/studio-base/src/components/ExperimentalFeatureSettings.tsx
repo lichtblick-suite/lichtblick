@@ -19,6 +19,7 @@ import Stack from "@foxglove/studio-base/components/Stack";
 import { useAnalytics } from "@foxglove/studio-base/context/AnalyticsContext";
 import { useAppConfigurationValue } from "@foxglove/studio-base/hooks/useAppConfigurationValue";
 import { AppEvent } from "@foxglove/studio-base/services/IAnalytics";
+import isDesktopApp from "@foxglove/studio-base/util/isDesktopApp";
 
 const useStyles = makeStyles()({
   checkbox: {
@@ -63,7 +64,12 @@ const features: Feature[] = [
   {
     key: AppSetting.ENABLE_NEW_UI,
     name: "Enable new user interface",
-    description: <>Try our redesigned navigation and layout.</>,
+    description: (
+      <>
+        Try our redesigned navigation and layout.
+        {isDesktopApp() && " Close and reopen the app for changes to take effect."}
+      </>
+    ),
   },
 ];
 if (process.env.NODE_ENV === "development") {

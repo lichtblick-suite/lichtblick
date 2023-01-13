@@ -27,7 +27,7 @@ import { makeStyles } from "tss-react/mui";
 import Logger from "@foxglove/log";
 import { AppSetting } from "@foxglove/studio-base/AppSetting";
 import AccountSettings from "@foxglove/studio-base/components/AccountSettingsSidebar/AccountSettings";
-import { AppBar } from "@foxglove/studio-base/components/AppBar";
+import { AppBar, CustomWindowControlsProps } from "@foxglove/studio-base/components/AppBar";
 import { DataSourceSidebar } from "@foxglove/studio-base/components/DataSourceSidebar";
 import DocumentDropListener from "@foxglove/studio-base/components/DocumentDropListener";
 import ExtensionsSidebar from "@foxglove/studio-base/components/ExtensionsSidebar";
@@ -76,6 +76,7 @@ import { useInitialDeepLinkState } from "@foxglove/studio-base/hooks/useInitialD
 import useNativeAppMenuEvent from "@foxglove/studio-base/hooks/useNativeAppMenuEvent";
 import { PlayerPresence } from "@foxglove/studio-base/players/types";
 import { PanelStateContextProvider } from "@foxglove/studio-base/providers/PanelStateContextProvider";
+import isDesktopApp from "@foxglove/studio-base/util/isDesktopApp";
 
 const log = Logger.getLogger(__filename);
 
@@ -139,7 +140,7 @@ function AddPanel() {
   );
 }
 
-type WorkspaceProps = {
+type WorkspaceProps = CustomWindowControlsProps & {
   deepLinks?: string[];
   disableSignin?: boolean;
   appBarLeftInset?: number;
@@ -199,7 +200,11 @@ export default function Workspace(props: WorkspaceProps): JSX.Element {
     AppSetting.SHOW_DEBUG_PANELS,
   );
 
-  const [enableNewUI = false] = useAppConfigurationValue<boolean>(AppSetting.ENABLE_NEW_UI);
+  // Since we can't toggle the title bar on an electron window, keep the setting at its initial
+  // value until the app is reloaded/relaunched.
+  const [currentEnableNewUI = false] = useAppConfigurationValue<boolean>(AppSetting.ENABLE_NEW_UI);
+  const [initialEnableNewUI] = useState(currentEnableNewUI);
+  const enableNewUI = isDesktopApp() ? initialEnableNewUI : currentEnableNewUI;
 
   const showSignInForm = currentUserRequired && currentUser == undefined;
 
@@ -601,6 +606,12 @@ export default function Workspace(props: WorkspaceProps): JSX.Element {
             signIn={signIn}
             leftInset={props.appBarLeftInset}
             onDoubleClick={props.onAppBarDoubleClick}
+            showCustomWindowControls={props.showCustomWindowControls}
+            isMaximized={props.isMaximized}
+            onMinimizeWindow={props.onMinimizeWindow}
+            onMaximizeWindow={props.onMaximizeWindow}
+            onUnmaximizeWindow={props.onUnmaximizeWindow}
+            onCloseWindow={props.onCloseWindow}
           />
         )}
         <Sidebar

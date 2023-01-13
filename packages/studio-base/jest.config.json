@@ -10,7 +10,9 @@
   "//": "Enable transpilation of node_modules to support ESM-only packages",
   "transformIgnorePatterns": [],
   "globals": {
-    "ReactNull": null
+    "ReactNull": null,
+    "FOXGLOVE_STUDIO_VERSION": "TEST",
+    "FOXGLOVE_USER_AGENT": "TEST"
   },
   "setupFiles": ["<rootDir>/src/test/setup.ts", "jest-canvas-mock", "fake-indexeddb/auto"],
   "setupFilesAfterEnv": ["<rootDir>/src/test/setupTestFramework.ts"],

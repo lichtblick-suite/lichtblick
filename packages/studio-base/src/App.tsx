@@ -12,6 +12,7 @@ import { StudioLogsSettingsProvider } from "@foxglove/studio-base/providers/Stud
 import TimelineInteractionStateProvider from "@foxglove/studio-base/providers/TimelineInteractionStateProvider";
 
 import Workspace from "./Workspace";
+import { CustomWindowControlsProps } from "./components/AppBar";
 import { ColorSchemeThemeProvider } from "./components/ColorSchemeThemeProvider";
 import CssBaseline from "./components/CssBaseline";
 import DocumentTitleAdapter from "./components/DocumentTitleAdapter";
@@ -44,7 +45,7 @@ import { ExtensionLoader } from "./services/ExtensionLoader";
 import { ILayoutStorage } from "./services/ILayoutStorage";
 import URDFAssetLoader from "./services/URDFAssetLoader";
 
-type AppProps = {
+type AppProps = CustomWindowControlsProps & {
   deepLinks: string[];
   appConfiguration: IAppConfiguration;
   dataSources: IDataSourceFactory[];
@@ -149,6 +150,12 @@ export function App(props: AppProps): JSX.Element {
                         disableSignin={disableSignin}
                         appBarLeftInset={props.appBarLeftInset}
                         onAppBarDoubleClick={props.onAppBarDoubleClick}
+                        showCustomWindowControls={props.showCustomWindowControls}
+                        isMaximized={props.isMaximized}
+                        onMinimizeWindow={props.onMinimizeWindow}
+                        onMaximizeWindow={props.onMaximizeWindow}
+                        onUnmaximizeWindow={props.onUnmaximizeWindow}
+                        onCloseWindow={props.onCloseWindow}
                       />
                     </PanelCatalogProvider>
                   </Suspense>

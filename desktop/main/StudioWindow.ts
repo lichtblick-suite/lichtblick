@@ -17,7 +17,11 @@ import path from "path";
 
 import Logger from "@foxglove/log";
 import { AppSetting } from "@foxglove/studio-base/src/AppSetting";
-import { APP_BAR_HEIGHT } from "@foxglove/studio-base/src/components/AppBar/constants";
+import {
+  APP_BAR_BACKGROUND_COLOR,
+  APP_BAR_HEIGHT,
+  APP_BAR_FOREGROUND_COLOR,
+} from "@foxglove/studio-base/src/components/AppBar/constants";
 
 import pkgInfo from "../../package.json";
 import { encodeRendererArg } from "../common/rendererArgs";
@@ -30,6 +34,8 @@ import { getTelemetrySettings } from "./telemetry";
 declare const MAIN_WINDOW_WEBPACK_ENTRY: string;
 
 const isMac = process.platform === "darwin";
+const isLinux = process.platform === "linux";
+const isWindows = process.platform === "win32";
 const isProduction = process.env.NODE_ENV === "production";
 const rendererPath = MAIN_WINDOW_WEBPACK_ENTRY;
 
@@ -109,9 +115,17 @@ function newStudioWindow(deepLinks: string[] = []): BrowserWindow {
     minHeight: 250,
     autoHideMenuBar: true,
     title: pkgInfo.productName,
-    titleBarStyle: isMac && enableNewUI ? "hidden" : "default",
+    frame: enableNewUI && isLinux ? false : true,
+    titleBarStyle: enableNewUI ? "hidden" : "default",
     trafficLightPosition:
       isMac && enableNewUI ? { x: macTrafficLightInset, y: macTrafficLightInset } : undefined,
+    titleBarOverlay: isWindows
+      ? {
+          height: APP_BAR_HEIGHT,
+          color: APP_BAR_BACKGROUND_COLOR,
+          symbolColor: APP_BAR_FOREGROUND_COLOR,
+        }
+      : undefined,
     webPreferences: {
       contextIsolation: true,
       sandbox: false, // Allow preload script to access Node builtins
@@ -142,15 +156,18 @@ function newStudioWindow(deepLinks: string[] = []): BrowserWindow {
   browserWindow.addListener("enter-full-screen", () =>
     browserWindow.webContents.send("enter-full-screen"),
   );
-
   browserWindow.addListener("leave-full-screen", () =>
     browserWindow.webContents.send("leave-full-screen"),
   );
+  browserWindow.addListener("maximize", () => browserWindow.webContents.send("maximize"));
+
+  browserWindow.addListener("unmaximize", () => browserWindow.webContents.send("unmaximize"));
 
   browserWindow.webContents.once("dom-ready", () => {
     if (!isProduction) {
       browserWindow.webContents.openDevTools();
     }
+    browserWindow.webContents.send(browserWindow.isMaximized() ? "maximize" : "unmaximize");
   });
 
   // Open all new windows in an external browser
@@ -171,21 +188,38 @@ function newStudioWindow(deepLinks: string[] = []): BrowserWindow {
     }
   });
 
-  browserWindow.webContents.on("ipc-message", (_event: Event, channel: string) => {
-    if (channel === "titleBarDoubleClicked") {
-      const action: string =
-        systemPreferences.getUserDefault("AppleActionOnDoubleClick", "string") || "Maximize";
-      if (action === "Minimize") {
-        browserWindow.minimize();
-      } else if (action === "Maximize") {
-        if (browserWindow.isMaximized()) {
-          browserWindow.unmaximize();
+  browserWindow.webContents.on("ipc-message", (_event, channel) => {
+    switch (channel) {
+      case "titleBarDoubleClicked": {
+        const action: string =
+          systemPreferences.getUserDefault("AppleActionOnDoubleClick", "string") || "Maximize";
+        if (action === "Minimize") {
+          browserWindow.minimize();
+        } else if (action === "Maximize") {
+          if (browserWindow.isMaximized()) {
+            browserWindow.unmaximize();
+          } else {
+            browserWindow.maximize();
+          }
         } else {
-          browserWindow.maximize();
+          // "None"
         }
-      } else {
-        // "None"
+        break;
       }
+      case "minimizeWindow":
+        browserWindow.minimize();
+        break;
+      case "maximizeWindow":
+        browserWindow.maximize();
+        break;
+      case "unmaximizeWindow":
+        browserWindow.unmaximize();
+        break;
+      case "closeWindow":
+        browserWindow.close();
+        break;
+      default:
+        break;
     }
   });
 

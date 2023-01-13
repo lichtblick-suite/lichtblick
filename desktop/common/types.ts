@@ -16,7 +16,11 @@ export type ForwardedMenuEvent =
   | "open-help"
   | "open-account";
 
-export type ForwardedWindowEvent = "enter-full-screen" | "leave-full-screen";
+export type ForwardedWindowEvent =
+  | "enter-full-screen"
+  | "leave-full-screen"
+  | "maximize"
+  | "unmaximize";
 
 interface NativeMenuBridge {
   // Events from the native window are available in the main process but not the renderer, so we forward them through the bridge.
@@ -88,6 +92,12 @@ interface Desktop {
 
   /** Handle a double-click on the custom title bar */
   handleTitleBarDoubleClick(): void;
+
+  isMaximized(): boolean;
+  minimizeWindow(): void;
+  maximizeWindow(): void;
+  unmaximizeWindow(): void;
+  closeWindow(): void;
 }
 
 export type { NativeMenuBridge, Storage, StorageContent, Desktop, DesktopExtension };

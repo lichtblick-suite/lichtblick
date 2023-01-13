@@ -28,4 +28,20 @@ export class NativeWindow implements INativeWindow {
   public handleTitleBarDoubleClick(): void {
     this.bridge?.handleTitleBarDoubleClick();
   }
+
+  public isMaximized(): boolean {
+    return this.bridge?.isMaximized() ?? false;
+  }
+  public minimize(): void {
+    this.bridge?.minimizeWindow();
+  }
+  public maximize(): void {
+    this.bridge?.maximizeWindow();
+  }
+  public unmaximize(): void {
+    this.bridge?.unmaximizeWindow();
+  }
+  public close(): void {
+    this.bridge?.closeWindow();
+  }
 }
