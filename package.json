@@ -96,7 +96,7 @@
     "electron": "22.0.0",
     "electron-builder": "23.6.0",
     "electron-notarize": "1.2.2",
-    "eslint": "8.30.0",
+    "eslint": "8.31.0",
     "eslint-config-prettier": "8.6.0",
     "eslint-import-resolver-webpack": "0.13.2",
     "eslint-plugin-es": "4.1.0",
