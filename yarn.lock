@@ -2389,7 +2389,7 @@ __metadata:
     "@mdi/svg": 7.1.96
     "@mui/icons-material": 5.11.0
     "@mui/material": 5.4.1
-    "@popperjs/core": 2.11.0
+    "@popperjs/core": 2.11.6
     "@protobufjs/base64": 1.1.2
     "@sentry/core": 7.16.0
     "@sentry/types": 7.16.0
@@ -3542,10 +3542,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@popperjs/core@npm:2.11.0, @popperjs/core@npm:^2.4.4":
-  version: 2.11.0
-  resolution: "@popperjs/core@npm:2.11.0"
-  checksum: 84d6f197d3ddfd8a5b05c7276c3692d8404c96128a946ab0a800b25567d8fc231928319c1f97a67e0817e76ce2a1b735589ef0f38f8e8835692408660a2395a1
+"@popperjs/core@npm:2.11.6, @popperjs/core@npm:^2.4.4":
+  version: 2.11.6
+  resolution: "@popperjs/core@npm:2.11.6"
+  checksum: 47fb328cec1924559d759b48235c78574f2d71a8a6c4c03edb6de5d7074078371633b91e39bbf3f901b32aa8af9b9d8f82834856d2f5737a23475036b16817f0
   languageName: node
   linkType: hard
 
