@@ -119,8 +119,9 @@ export const MultipleItemsSingleDatasetLight = Object.assign(
   { parameters: { colorScheme: "light" } },
 );
 
-export function MultipleItemsMultieDataset(): JSX.Element {
+export function MultipleItemsMultipleDataset(): JSX.Element {
   const data: TimeBasedChartTooltipData = {
+    datasetIndex: 0,
     x: 0,
     y: 0,
     path: "/some/topic.path",
@@ -130,7 +131,13 @@ export function MultipleItemsMultieDataset(): JSX.Element {
   return (
     <Tooltip
       open
-      title={<TimeBasedChartTooltipContent multiDataset={true} content={[data, data]} />}
+      title={
+        <TimeBasedChartTooltipContent
+          multiDataset={true}
+          content={[data, data]}
+          colorsByDatasetIndex={{ "0": "chartreuse" }}
+        />
+      }
       placement="top"
       arrow
       PopperProps={{
@@ -145,9 +152,9 @@ export function MultipleItemsMultieDataset(): JSX.Element {
     </Tooltip>
   );
 }
-MultipleItemsMultieDataset.parameters = { colorScheme: "dark" };
+MultipleItemsMultipleDataset.parameters = { colorScheme: "dark" };
 
 export const MultipleItemsMultiDatasetLight = Object.assign(
-  MultipleItemsMultieDataset.bind(undefined),
+  MultipleItemsMultipleDataset.bind(undefined),
   { parameters: { colorScheme: "light" } },
 );

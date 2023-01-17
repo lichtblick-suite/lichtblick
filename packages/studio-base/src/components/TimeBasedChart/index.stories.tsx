@@ -25,12 +25,17 @@ import type { Props } from "./index";
 
 const dataX = 0.000057603000000000004;
 const dataY = 5.544444561004639;
-const tooltipData: TimeBasedChartTooltipData = {
-  x: dataX,
-  y: dataY,
-  path: "/turtle1/pose.x",
-  value: 5.544444561004639,
-};
+const tooltipData = new Map<string, TimeBasedChartTooltipData>([
+  [
+    `${dataX}:${dataY}:0`,
+    {
+      x: dataX,
+      y: dataY,
+      path: "/turtle1/pose.x",
+      value: 5.544444561004639,
+    },
+  ],
+]);
 
 const commonProps: Props = {
   isSynced: true,
@@ -69,7 +74,7 @@ const commonProps: Props = {
       },
     ],
   },
-  tooltips: [tooltipData],
+  tooltips: tooltipData,
   annotations: [],
   type: "scatter",
   xAxes: {

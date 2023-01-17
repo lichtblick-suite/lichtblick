@@ -63,7 +63,7 @@ import PlotChart from "./PlotChart";
 import PlotLegend from "./PlotLegend";
 import { downloadCSV } from "./csv";
 import { getDatasets } from "./datasets";
-import { PlotDataByPath, PlotDataItem } from "./internalTypes";
+import { DataSet, PlotDataByPath, PlotDataItem } from "./internalTypes";
 import { usePlotPanelSettings } from "./settings";
 import { PlotConfig } from "./types";
 
@@ -123,6 +123,20 @@ const getMessagePathItemsForBlock = memoizeWeak(
 const ZERO_TIME = { sec: 0, nsec: 0 };
 
 const performance = window.performance;
+
+/**
+ * Builds a lookup map of a compound x:y:index key to a datum, used to map hovered positions
+ * on screen to a data point for tooltip display.
+ */
+function buildTooltipLookupMap(datasets: DataSet[]): Map<string, TimeBasedChartTooltipData> {
+  const lookup = new Map<string, TimeBasedChartTooltipData>();
+  for (const [index, dataset] of datasets.entries()) {
+    for (const datum of dataset.data) {
+      lookup.set(`${datum.x}:${datum.y}:${index}`, datum);
+    }
+  }
+  return lookup;
+}
 
 function getBlockItemsByPath(
   decodeMessagePathsForMessagesByTopic: (_: MessageBlock) => MessageDataItemsByPath,
@@ -451,15 +465,9 @@ function Plot(props: Props) {
 
   const tooltips = useMemo(() => {
     if (showLegend && showPlotValuesInLegend) {
-      return [];
+      return new Map();
     }
-    const allTooltips: TimeBasedChartTooltipData[] = [];
-    for (const dataset of datasets) {
-      for (const datum of dataset.data) {
-        allTooltips.push(datum);
-      }
-    }
-    return allTooltips;
+    return buildTooltipLookupMap(datasets);
   }, [datasets, showLegend, showPlotValuesInLegend]);
 
   const messagePipeline = useMessagePipelineGetter();

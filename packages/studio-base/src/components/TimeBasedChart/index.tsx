@@ -53,6 +53,7 @@ import { downsampleTimeseries, downsampleScatter } from "./downsample";
 const log = Logger.getLogger(__filename);
 
 export type TimeBasedChartTooltipData = {
+  datasetIndex?: number;
   x: number | bigint;
   y: number | bigint;
   path: string;
@@ -117,7 +118,7 @@ export type Props = {
   height: number;
   zoom: boolean;
   data: ChartComponentProps["data"];
-  tooltips?: TimeBasedChartTooltipData[];
+  tooltips?: Map<string, TimeBasedChartTooltipData>;
   xAxes?: ScaleOptions<"linear">;
   yAxes: ScaleOptions<"linear">;
   annotations?: AnnotationOptions[];
@@ -299,20 +300,6 @@ export default function TimeBasedChart(props: Props): JSX.Element {
 
   const mouseYRef = useRef<number | undefined>(undefined);
 
-  // Tooltip lookup via x/y string key to find tooltips on hover without iterating entire array
-  const tooltipLookup = useMemo(() => {
-    const tooltipMap = new Map<string, TimeBasedChartTooltipData>();
-    if (!tooltips) {
-      return tooltipMap;
-    }
-
-    for (const tooltip of tooltips) {
-      const key = `${tooltip.x}:${tooltip.y}`;
-      tooltipMap.set(key, tooltip);
-    }
-    return tooltipMap;
-  }, [tooltips]);
-
   // We use a custom tooltip so we can style it more nicely, and so that it can break
   // out of the bounds of the canvas, in case the panel is small.
   const [activeTooltip, setActiveTooltip] = useState<{
@@ -332,14 +319,14 @@ export default function TimeBasedChart(props: Props): JSX.Element {
         if (!element.data) {
           continue;
         }
-        const key = `${element.data.x}:${element.data.y}`;
-        const foundTooltip = tooltipLookup.get(key);
+        const key = `${element.data.x}:${element.data.y}:${element.datasetIndex}`;
+        const foundTooltip = tooltips?.get(key);
         if (!foundTooltip) {
           continue;
         }
 
         tooltipItems.push({
-          item: foundTooltip,
+          item: { ...foundTooltip, datasetIndex: element.datasetIndex },
           element,
         });
       }
@@ -359,7 +346,7 @@ export default function TimeBasedChart(props: Props): JSX.Element {
         });
       }
     },
-    [tooltipLookup],
+    [tooltips],
   );
 
   const setHoverValue = useSetHoverValue();
@@ -777,15 +764,22 @@ export default function TimeBasedChart(props: Props): JSX.Element {
 
   useEffect(() => log.debug(`<TimeBasedChart> (datasetId=${datasetId})`), [datasetId]);
 
+  const colorsByDatasetIndex = useMemo(() => {
+    return Object.fromEntries(
+      data.datasets.map((dataset, index) => [index, dataset.borderColor?.toString()]),
+    );
+  }, [data.datasets]);
+
   const datasetsLength = datasets.length;
   const tooltipContent = useMemo(() => {
     return activeTooltip ? (
       <TimeBasedChartTooltipContent
-        multiDataset={datasetsLength > 1}
         content={activeTooltip.data}
+        multiDataset={datasetsLength > 1}
+        colorsByDatasetIndex={colorsByDatasetIndex}
       />
     ) : undefined;
-  }, [activeTooltip, datasetsLength]);
+  }, [activeTooltip, colorsByDatasetIndex, datasetsLength]);
 
   // reset is shown if we have sync lock and there has been user interaction, or if we don't
   // have sync lock and the user has manually interacted with the plot

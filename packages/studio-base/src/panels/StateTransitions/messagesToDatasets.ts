@@ -103,6 +103,7 @@ export default function messagesToDatasets(args: Args): DatasetInfo {
       const x = toSec(subtractTimes(timestamp, startTime));
 
       const tooltip: TimeBasedChartTooltipData = {
+        datasetIndex,
         x,
         y,
         path: path.value,

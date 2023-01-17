@@ -344,6 +344,14 @@ const StateTransitions = React.memo(function StateTransitions(props: Props) {
 
   useStateTransitionsPanelSettings(config, saveConfig);
 
+  const pointToDatumTooltipMap = useMemo(() => {
+    const lookup = new Map<string, TimeBasedChartTooltipData>();
+    for (const tip of tooltips) {
+      lookup.set(`${tip.x}:${tip.y}:${tip.datasetIndex}`, tip);
+    }
+    return lookup;
+  }, [tooltips]);
+
   return (
     <Stack ref={rootRef} flexGrow={1} overflow="hidden" style={{ zIndex: 0 }}>
       <PanelToolbar />
@@ -379,7 +387,7 @@ const StateTransitions = React.memo(function StateTransitions(props: Props) {
             xAxisIsPlaybackTime
             yAxes={yScale}
             plugins={plugins}
-            tooltips={tooltips}
+            tooltips={pointToDatumTooltipMap}
             onClick={onClick}
             currentTime={currentTimeSinceStart}
           />

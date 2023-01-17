@@ -289,11 +289,12 @@ export default class ChartJSManager {
 
       // turn into an object we can send over the rpc
       out.push({
+        data,
+        datasetIndex: element.datasetIndex,
         view: {
           x: element.element.x,
           y: element.element.y,
         },
-        data,
       });
     }
 

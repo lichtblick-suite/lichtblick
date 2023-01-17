@@ -63,7 +63,7 @@ type PlotChartProps = {
   showXAxisLabels: boolean;
   showYAxisLabels: boolean;
   datasets: ComponentProps<typeof TimeBasedChart>["data"]["datasets"];
-  tooltips: TimeBasedChartTooltipData[];
+  tooltips: Map<string, TimeBasedChartTooltipData>;
   xAxisVal: PlotXAxisVal;
   currentTime?: number;
   defaultView?: ChartDefaultView;

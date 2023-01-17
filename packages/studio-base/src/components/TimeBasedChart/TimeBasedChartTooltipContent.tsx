@@ -11,7 +11,7 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { take } from "lodash";
+import { sortBy, take } from "lodash";
 import { PropsWithChildren, useMemo } from "react";
 import { makeStyles } from "tss-react/mui";
 
@@ -20,6 +20,7 @@ import { fonts } from "@foxglove/studio-base/util/sharedStyleConstants";
 import { TimeBasedChartTooltipData } from "./index";
 
 type Props = {
+  colorsByDatasetIndex?: Record<string, undefined | string>;
   content: TimeBasedChartTooltipData[];
   // Flag indicating the containing chart has multiple datasets
   multiDataset: boolean;
@@ -39,7 +40,7 @@ const useStyles = makeStyles()((theme) => ({
     fontStyle: "italic",
   },
   path: {
-    opacity: 0.6,
+    opacity: 0.9,
     whiteSpace: "nowrap",
   },
 }));
@@ -53,7 +54,7 @@ function OverflowMessage() {
 export default function TimeBasedChartTooltipContent(
   props: PropsWithChildren<Props>,
 ): React.ReactElement {
-  const { content, multiDataset } = props;
+  const { colorsByDatasetIndex, content, multiDataset } = props;
   const { classes } = useStyles();
 
   const itemsByPath = useMemo(() => {
@@ -102,12 +103,25 @@ export default function TimeBasedChartTooltipContent(
     );
   }
 
+  // Sort items by their dataset index to maintain the same ordering as the series in the legend.
+  const sortedItems = sortBy(
+    [...itemsByPath.out.entries()],
+    ([_, items]) => items[0]?.datasetIndex ?? 0,
+  );
+
   return (
     <div className={classes.root} data-testid="TimeBasedChartTooltipContent">
-      {Array.from(itemsByPath.out.entries(), ([path, items], idx) => {
+      {sortedItems.map(([path, items], idx) => {
+        const firstItem = items[0];
+        const color =
+          firstItem?.datasetIndex != undefined
+            ? colorsByDatasetIndex?.[firstItem.datasetIndex]
+            : "auto";
         return (
           <div key={idx}>
-            <div className={classes.path}>{path}</div>
+            <div className={classes.path} style={{ color: color ?? "auto" }}>
+              {path}
+            </div>
             {take(items, 1).map((item, itemIdx) => {
               const value =
                 typeof item.value === "string"

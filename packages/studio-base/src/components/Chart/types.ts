@@ -22,6 +22,7 @@ export type RpcScales = {
 
 export type RpcElement = {
   data?: ScatterDataPoint;
+  datasetIndex: number;
   view: {
     x: number;
     y: number;
