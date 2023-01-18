@@ -2,13 +2,12 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import AddIcon from "@mui/icons-material/Add";
 import ArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
 import ArrowLeftIcon from "@mui/icons-material/KeyboardArrowLeft";
 import ArrowRightIcon from "@mui/icons-material/KeyboardArrowRight";
 import ArrowUpIcon from "@mui/icons-material/KeyboardArrowUp";
 import ListIcon from "@mui/icons-material/List";
-import { Button, SvgIconProps, ToggleButton } from "@mui/material";
+import { SvgIconProps, ToggleButton } from "@mui/material";
 import { clamp } from "lodash";
 import { ComponentProps, useCallback, useMemo, useRef } from "react";
 import tinycolor from "tinycolor2";
@@ -119,14 +118,6 @@ const useStyles = makeStyles<StyleProps, "container" | "toggleButton">()(
         borderColor: palette.action.selected,
       },
     },
-    footer: {
-      gridColumn: "1/-1",
-      padding: spacing(0.5),
-    },
-    addButton: {
-      minWidth: 100,
-      backgroundColor: `${palette.action.hover} !important`,
-    },
     toggleButton: {
       fontSize: typography.pxToRem(20),
       padding: spacing(0.5),
@@ -153,21 +144,6 @@ export function NewPlotLegend(props: Props): JSX.Element {
     () => saveConfig({ showLegend: !showLegend }),
     [showLegend, saveConfig],
   );
-
-  const addSeries = useCallback(() => {
-    saveConfig((old) => ({
-      ...old,
-      paths: [
-        ...old.paths,
-        {
-          timestampMethod: "receiveTime",
-          value: "",
-          label: `Series ${old.paths.length + 1}`,
-          enabled: true,
-        },
-      ],
-    }));
-  }, [saveConfig]);
 
   const toggleIcon = useMemo(() => {
     const iconProps = {
@@ -224,20 +200,6 @@ export function NewPlotLegend(props: Props): JSX.Element {
     [saveConfig],
   );
 
-  const addSeriesFooter = (
-    <footer className={classes.footer}>
-      <Button
-        className={classes.addButton}
-        size="small"
-        startIcon={<AddIcon />}
-        fullWidth
-        onClick={() => addSeries()}
-      >
-        Add series
-      </Button>
-    </footer>
-  );
-
   return (
     <div
       className={cx(classes.root, {
@@ -292,9 +254,7 @@ export function NewPlotLegend(props: Props): JSX.Element {
                     showPlotValuesInLegend={showPlotValuesInLegend}
                   />
                 ))}
-                {legendDisplay === "floating" && addSeriesFooter}
               </div>
-              {legendDisplay !== "floating" && addSeriesFooter}
             </Stack>
           </Stack>
         )}
