@@ -31,6 +31,7 @@ import { AppSetting } from "@foxglove/studio-base/AppSetting";
 import OsContextSingleton from "@foxglove/studio-base/OsContextSingleton";
 import CopyButton from "@foxglove/studio-base/components/CopyButton";
 import { ExperimentalFeatureSettings } from "@foxglove/studio-base/components/ExperimentalFeatureSettings";
+import ExtensionsSettings from "@foxglove/studio-base/components/ExtensionsSettings";
 import FoxgloveLogoText from "@foxglove/studio-base/components/FoxgloveLogoText";
 import {
   AutoUpdate,
@@ -173,7 +174,7 @@ export function PreferencesIconButton(props: IconButtonProps): JSX.Element {
   );
 }
 
-type TabOption = "general" | "privacy" | "lab" | "about";
+type TabOption = "general" | "privacy" | "extensions" | "experimental-features" | "about";
 
 export function PreferencesDialog(props: DialogProps & { activeTab?: TabOption }): JSX.Element {
   const { activeTab: _activeTab } = props;
@@ -231,7 +232,12 @@ export function PreferencesDialog(props: DialogProps & { activeTab?: TabOption }
           >
             <Tab className={classes.tab} label="General" value="general" />
             <Tab className={classes.tab} label="Privacy" value="privacy" />
-            <Tab className={classes.tab} label="Experimental features" value="lab" />
+            <Tab className={classes.tab} label="Extensions" value="extensions" />
+            <Tab
+              className={classes.tab}
+              label="Experimental features"
+              value="experimental-features"
+            />
             <Tab className={classes.tab} label="About" value="about" />
           </Tabs>
         </Grid>
@@ -290,7 +296,19 @@ export function PreferencesDialog(props: DialogProps & { activeTab?: TabOption }
             </section>
 
             <section
-              className={cx(classes.tabPanel, { [classes.tabPanelActive]: activeTab === "lab" })}
+              className={cx(classes.tabPanel, {
+                [classes.tabPanelActive]: activeTab === "extensions",
+              })}
+            >
+              <Stack gap={2}>
+                <ExtensionsSettings />
+              </Stack>
+            </section>
+
+            <section
+              className={cx(classes.tabPanel, {
+                [classes.tabPanelActive]: activeTab === "experimental-features",
+              })}
             >
               <Stack gap={2}>
                 <Alert color="warning" icon={<WarningAmberIcon />}>

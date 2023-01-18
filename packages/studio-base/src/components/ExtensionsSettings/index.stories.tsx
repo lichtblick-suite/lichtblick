@@ -14,7 +14,7 @@
 import { useState } from "react";
 
 import { ExtensionInfo, ExtensionLoader } from "@foxglove/studio-base";
-import ExtensionsSidebar from "@foxglove/studio-base/components/ExtensionsSidebar";
+import ExtensionsSettings from "@foxglove/studio-base/components/ExtensionsSettings";
 import AppConfigurationContext from "@foxglove/studio-base/context/AppConfigurationContext";
 import ExtensionMarketplaceContext, {
   ExtensionMarketplace,
@@ -23,8 +23,8 @@ import ExtensionCatalogProvider from "@foxglove/studio-base/providers/ExtensionC
 import { makeMockAppConfiguration } from "@foxglove/studio-base/util/makeMockAppConfiguration";
 
 export default {
-  title: "components/ExtensionsSidebar",
-  component: ExtensionsSidebar,
+  title: "components/ExtensionsSettings",
+  component: ExtensionsSettings,
 };
 
 const installedExtensions: ExtensionInfo[] = [
@@ -94,7 +94,7 @@ export function Sidebar(): JSX.Element {
     <AppConfigurationContext.Provider value={config}>
       <ExtensionCatalogProvider loaders={[MockExtensionLoader]}>
         <ExtensionMarketplaceContext.Provider value={MockExtensionMarketplace}>
-          <ExtensionsSidebar />
+          <ExtensionsSettings />
         </ExtensionMarketplaceContext.Provider>
       </ExtensionCatalogProvider>
     </AppConfigurationContext.Provider>

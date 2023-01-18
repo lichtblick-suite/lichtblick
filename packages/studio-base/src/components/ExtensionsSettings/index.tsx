@@ -18,7 +18,6 @@ import { DeepReadonly } from "ts-essentials";
 
 import Log from "@foxglove/log";
 import { ExtensionDetails } from "@foxglove/studio-base/components/ExtensionDetails";
-import { SidebarContent } from "@foxglove/studio-base/components/SidebarContent";
 import Stack from "@foxglove/studio-base/components/Stack";
 import { useExtensionCatalog } from "@foxglove/studio-base/context/ExtensionCatalogContext";
 import {
@@ -82,7 +81,7 @@ function ExtensionListEntry(props: {
   );
 }
 
-export default function ExtensionsSidebar(): React.ReactElement {
+export default function ExtensionsSettings(): React.ReactElement {
   const [focusedExtension, setFocusedExtension] = useState<
     | {
         installed: boolean;
@@ -161,62 +160,58 @@ export default function ExtensionsSidebar(): React.ReactElement {
 
   if (marketplaceEntries.error) {
     return (
-      <SidebarContent title="Extensions">
-        <Stack gap={1} alignItems="center" justifyContent="center" fullHeight>
-          <Typography align="center" variant="body2" color="text.secondary">
-            Failed to fetch the list of available extensions. Check your Internet connection and try
-            again.
-          </Typography>
-          <Button onClick={async () => await refreshMarketplaceEntries()}>
-            Retry Fetching Extensions
-          </Button>
-        </Stack>
-      </SidebarContent>
+      <Stack gap={1} alignItems="center" justifyContent="center" fullHeight>
+        <Typography align="center" variant="body2" color="text.secondary">
+          Failed to fetch the list of available extensions. Check your Internet connection and try
+          again.
+        </Typography>
+        <Button onClick={async () => await refreshMarketplaceEntries()}>
+          Retry Fetching Extensions
+        </Button>
+      </Stack>
     );
   }
 
   return (
-    <SidebarContent title="Extensions" disablePadding>
-      <Stack gap={1}>
-        {!isEmpty(namespacedEntries) ? (
-          Object.entries(namespacedEntries).map(([namespace, entries]) => (
-            <List key={namespace}>
-              <Stack paddingY={0.25} paddingX={2}>
-                <Typography component="li" variant="overline" color="text.secondary">
-                  {displayNameForNamespace(namespace)}
-                </Typography>
-              </Stack>
-              {entries.map((entry) => (
-                <ExtensionListEntry
-                  key={`${entry.id}`}
-                  entry={entry}
-                  onClick={() => setFocusedExtension({ installed: true, entry })}
-                />
-              ))}
-            </List>
-          ))
-        ) : (
-          <List>
-            <ListItem>
-              <ListItemText primary="No installed extensions" />
-            </ListItem>
+    <Stack gap={1}>
+      {!isEmpty(namespacedEntries) ? (
+        Object.entries(namespacedEntries).map(([namespace, entries]) => (
+          <List key={namespace}>
+            <Stack paddingY={0.25} paddingX={2}>
+              <Typography component="li" variant="overline" color="text.secondary">
+                {displayNameForNamespace(namespace)}
+              </Typography>
+            </Stack>
+            {entries.map((entry) => (
+              <ExtensionListEntry
+                key={`${entry.id}`}
+                entry={entry}
+                onClick={() => setFocusedExtension({ installed: true, entry })}
+              />
+            ))}
           </List>
-        )}
+        ))
+      ) : (
         <List>
-          <Stack paddingY={0.25} paddingX={2}>
-            <Typography component="li" variant="overline" color="text.secondary">
-              Available
-            </Typography>
-          </Stack>
-          {filteredMarketplaceEntries.map((entry) => (
-            <ExtensionListEntry
-              key={`${entry.id}_${entry.namespace}`}
-              entry={entry}
-              onClick={() => setFocusedExtension({ installed: false, entry })}
-            />
-          ))}
+          <ListItem>
+            <ListItemText primary="No installed extensions" />
+          </ListItem>
         </List>
-      </Stack>
-    </SidebarContent>
+      )}
+      <List>
+        <Stack paddingY={0.25} paddingX={2}>
+          <Typography component="li" variant="overline" color="text.secondary">
+            Available
+          </Typography>
+        </Stack>
+        {filteredMarketplaceEntries.map((entry) => (
+          <ExtensionListEntry
+            key={`${entry.id}_${entry.namespace}`}
+            entry={entry}
+            onClick={() => setFocusedExtension({ installed: false, entry })}
+          />
+        ))}
+      </List>
+    </Stack>
   );
 }
