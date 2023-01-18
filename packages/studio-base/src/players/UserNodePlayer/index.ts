@@ -320,6 +320,12 @@ export default class UserNodePlayer implements Player {
         .sort((a, b) => compare(a.receiveTime, b.receiveTime));
       for (const nodeRegistration of fullRegistrations) {
         const outTopic = nodeRegistration.output.name;
+        // Clear out any previously processed messages that were previously in the output topic.
+        // otherwise it will contain duplicates.
+        if (messagesByTopic[outTopic] != undefined) {
+          messagesByTopic[outTopic] = [];
+        }
+
         for (const message of blockMessages) {
           if (nodeRegistration.inputs.includes(message.topic)) {
             const outputMessage = await nodeRegistration.processMessage(message, globalVariables);
