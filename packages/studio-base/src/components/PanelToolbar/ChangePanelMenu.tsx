@@ -59,8 +59,12 @@ export default function ChangePanelMenu({
     [onClose, mosaicActions, mosaicWindowActions, panelContext?.type, swapPanel, tabId],
   );
 
+  // https://github.com/mui/material-ui/issues/35287#issuecomment-1332327752
+  const fixMui35287 = {} as { onResize: undefined; onResizeCapture: undefined };
+
   return (
     <Popper
+      {...fixMui35287}
       id="change-panel-menu"
       open={open}
       role={undefined}

@@ -2,7 +2,7 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { alpha, Theme, ThemeOptions } from "@mui/material";
+import { alpha, Theme } from "@mui/material";
 import { CSSProperties } from "react";
 
 type MuiLabComponents = {
@@ -41,7 +41,7 @@ const disableBackgroundColorTransition = {
   transition: "none",
 };
 
-export default function muiComponents(theme: Theme): ThemeOptions["components"] & MuiLabComponents {
+export default function muiComponents(theme: Theme): Theme["components"] & MuiLabComponents {
   const prefersDarkMode = theme.palette.mode === "dark";
 
   return {
@@ -73,6 +73,7 @@ export default function muiComponents(theme: Theme): ThemeOptions["components"] 
             padding: theme.spacing(1, 1.25),
           },
           ".MuiInputBase-root.MuiInputBase-sizeSmall": {
+            paddingTop: 0,
             paddingBottom: 0,
 
             ".MuiAutocomplete-input.MuiInputBase-inputSizeSmall": {

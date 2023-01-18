@@ -10,7 +10,7 @@
     "@foxglove/schemas": "0.7.3",
     "@foxglove/studio": "workspace:*",
     "@pmmmwh/react-refresh-webpack-plugin": "0.5.10",
-    "@types/react": "17.0.39",
+    "@types/react": "17.0.53",
     "@types/react-dom": "17.0.13",
     "clean-webpack-plugin": "4.0.0",
     "html-webpack-plugin": "5.5.0",
