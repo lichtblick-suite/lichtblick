@@ -1,10 +1,10 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`rosDatatypesToMessageDefinition Includes all of the definitions for "visualization_msgs/StudioMarkerArray" 1`] = `
-Array [
-  Object {
-    "definitions": Array [
-      Object {
+[
+  {
+    "definitions": [
+      {
         "isArray": true,
         "isComplex": true,
         "name": "markers",
@@ -12,205 +12,205 @@ Array [
       },
     ],
   },
-  Object {
-    "definitions": Array [
-      Object {
+  {
+    "definitions": [
+      {
         "isConstant": true,
         "name": "ARROW",
         "type": "uint8",
         "value": 0,
         "valueText": "0",
       },
-      Object {
+      {
         "isConstant": true,
         "name": "CUBE",
         "type": "uint8",
         "value": 1,
         "valueText": "1",
       },
-      Object {
+      {
         "isConstant": true,
         "name": "SPHERE",
         "type": "uint8",
         "value": 2,
         "valueText": "2",
       },
-      Object {
+      {
         "isConstant": true,
         "name": "CYLINDER",
         "type": "uint8",
         "value": 3,
         "valueText": "3",
       },
-      Object {
+      {
         "isConstant": true,
         "name": "LINE_STRIP",
         "type": "uint8",
         "value": 4,
         "valueText": "4",
       },
-      Object {
+      {
         "isConstant": true,
         "name": "LINE_LIST",
         "type": "uint8",
         "value": 5,
         "valueText": "5",
       },
-      Object {
+      {
         "isConstant": true,
         "name": "CUBE_LIST",
         "type": "uint8",
         "value": 6,
         "valueText": "6",
       },
-      Object {
+      {
         "isConstant": true,
         "name": "SPHERE_LIST",
         "type": "uint8",
         "value": 7,
         "valueText": "7",
       },
-      Object {
+      {
         "isConstant": true,
         "name": "POINTS",
         "type": "uint8",
         "value": 8,
         "valueText": "8",
       },
-      Object {
+      {
         "isConstant": true,
         "name": "TEXT_VIEW_FACING",
         "type": "uint8",
         "value": 9,
         "valueText": "9",
       },
-      Object {
+      {
         "isConstant": true,
         "name": "MESH_RESOURCE",
         "type": "uint8",
         "value": 10,
         "valueText": "10",
       },
-      Object {
+      {
         "isConstant": true,
         "name": "TRIANGLE_LIST",
         "type": "uint8",
         "value": 11,
         "valueText": "11",
       },
-      Object {
+      {
         "isConstant": true,
         "name": "ADD",
         "type": "uint8",
         "value": 0,
         "valueText": "0",
       },
-      Object {
+      {
         "isConstant": true,
         "name": "MODIFY",
         "type": "uint8",
         "value": 0,
         "valueText": "0",
       },
-      Object {
+      {
         "isConstant": true,
         "name": "DELETE",
         "type": "uint8",
         "value": 2,
         "valueText": "2",
       },
-      Object {
+      {
         "isConstant": true,
         "name": "DELETEALL",
         "type": "uint8",
         "value": 3,
         "valueText": "3",
       },
-      Object {
+      {
         "isArray": false,
         "isComplex": true,
         "name": "header",
         "type": "std_msgs/Header",
       },
-      Object {
+      {
         "isArray": false,
         "isComplex": false,
         "name": "ns",
         "type": "string",
       },
-      Object {
+      {
         "isArray": false,
         "isComplex": false,
         "name": "id",
         "type": "int32",
       },
-      Object {
+      {
         "isArray": false,
         "isComplex": false,
         "name": "type",
         "type": "int32",
       },
-      Object {
+      {
         "isArray": false,
         "isComplex": false,
         "name": "action",
         "type": "int32",
       },
-      Object {
+      {
         "isArray": false,
         "isComplex": true,
         "name": "pose",
         "type": "geometry_msgs/Pose",
       },
-      Object {
+      {
         "isArray": false,
         "isComplex": true,
         "name": "scale",
         "type": "geometry_msgs/Vector3",
       },
-      Object {
+      {
         "isArray": false,
         "isComplex": true,
         "name": "color",
         "type": "std_msgs/ColorRGBA",
       },
-      Object {
+      {
         "isArray": false,
         "isComplex": false,
         "name": "lifetime",
         "type": "duration",
       },
-      Object {
+      {
         "isArray": false,
         "isComplex": false,
         "name": "frame_locked",
         "type": "bool",
       },
-      Object {
+      {
         "isArray": true,
         "isComplex": true,
         "name": "points",
         "type": "geometry_msgs/Point",
       },
-      Object {
+      {
         "isArray": true,
         "isComplex": true,
         "name": "colors",
         "type": "std_msgs/ColorRGBA",
       },
-      Object {
+      {
         "isArray": false,
         "isComplex": false,
         "name": "text",
         "type": "string",
       },
-      Object {
+      {
         "isArray": false,
         "isComplex": false,
         "name": "mesh_resource",
         "type": "string",
       },
-      Object {
+      {
         "isArray": false,
         "isComplex": false,
         "name": "mesh_use_embedded_materials",
@@ -219,21 +219,21 @@ Array [
     ],
     "name": "visualization_msgs/Marker",
   },
-  Object {
-    "definitions": Array [
-      Object {
+  {
+    "definitions": [
+      {
         "isArray": false,
         "isComplex": false,
         "name": "x",
         "type": "float64",
       },
-      Object {
+      {
         "isArray": false,
         "isComplex": false,
         "name": "y",
         "type": "float64",
       },
-      Object {
+      {
         "isArray": false,
         "isComplex": false,
         "name": "z",
@@ -242,27 +242,27 @@ Array [
     ],
     "name": "geometry_msgs/Point",
   },
-  Object {
-    "definitions": Array [
-      Object {
+  {
+    "definitions": [
+      {
         "isArray": false,
         "isComplex": false,
         "name": "r",
         "type": "float32",
       },
-      Object {
+      {
         "isArray": false,
         "isComplex": false,
         "name": "g",
         "type": "float32",
       },
-      Object {
+      {
         "isArray": false,
         "isComplex": false,
         "name": "b",
         "type": "float32",
       },
-      Object {
+      {
         "isArray": false,
         "isComplex": false,
         "name": "a",
@@ -271,21 +271,21 @@ Array [
     ],
     "name": "std_msgs/ColorRGBA",
   },
-  Object {
-    "definitions": Array [
-      Object {
+  {
+    "definitions": [
+      {
         "isArray": false,
         "isComplex": false,
         "name": "x",
         "type": "float64",
       },
-      Object {
+      {
         "isArray": false,
         "isComplex": false,
         "name": "y",
         "type": "float64",
       },
-      Object {
+      {
         "isArray": false,
         "isComplex": false,
         "name": "z",
@@ -294,15 +294,15 @@ Array [
     ],
     "name": "geometry_msgs/Vector3",
   },
-  Object {
-    "definitions": Array [
-      Object {
+  {
+    "definitions": [
+      {
         "isArray": false,
         "isComplex": true,
         "name": "position",
         "type": "geometry_msgs/Point",
       },
-      Object {
+      {
         "isArray": false,
         "isComplex": true,
         "name": "orientation",
@@ -311,27 +311,27 @@ Array [
     ],
     "name": "geometry_msgs/Pose",
   },
-  Object {
-    "definitions": Array [
-      Object {
+  {
+    "definitions": [
+      {
         "isArray": false,
         "isComplex": false,
         "name": "x",
         "type": "float64",
       },
-      Object {
+      {
         "isArray": false,
         "isComplex": false,
         "name": "y",
         "type": "float64",
       },
-      Object {
+      {
         "isArray": false,
         "isComplex": false,
         "name": "z",
         "type": "float64",
       },
-      Object {
+      {
         "isArray": false,
         "isComplex": false,
         "name": "w",
@@ -340,21 +340,21 @@ Array [
     ],
     "name": "geometry_msgs/Quaternion",
   },
-  Object {
-    "definitions": Array [
-      Object {
+  {
+    "definitions": [
+      {
         "isArray": false,
         "isComplex": false,
         "name": "seq",
         "type": "uint32",
       },
-      Object {
+      {
         "isArray": false,
         "isComplex": false,
         "name": "stamp",
         "type": "time",
       },
-      Object {
+      {
         "isArray": false,
         "isComplex": false,
         "name": "frame_id",

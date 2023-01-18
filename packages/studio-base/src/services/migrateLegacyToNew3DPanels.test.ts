@@ -26,27 +26,27 @@ describe("migrateLegacyToNew3DPanels", () => {
         playbackConfig: { speed: 1 },
       }),
     ).toMatchInlineSnapshot(`
-      Object {
-        "configById": Object {
-          "3D!1": Object {
-            "cameraState": Object {
+      {
+        "configById": {
+          "3D!1": {
+            "cameraState": {
               "distance": 20,
               "far": 5000,
               "fovy": 45,
               "near": 0.5,
               "perspective": true,
               "phi": 59.99999999999999,
-              "target": Array [
+              "target": [
                 0,
                 0,
                 0,
               ],
-              "targetOffset": Array [
+              "targetOffset": [
                 0,
                 0,
                 0,
               ],
-              "targetOrientation": Array [
+              "targetOrientation": [
                 0,
                 0,
                 0,
@@ -56,8 +56,8 @@ describe("migrateLegacyToNew3DPanels", () => {
             },
             "followMode": "follow-none",
             "followTf": undefined,
-            "layers": Object {},
-            "publish": Object {
+            "layers": {},
+            "publish": {
               "pointTopic": "/clicked_point",
               "poseEstimateThetaDeviation": 0.26179939,
               "poseEstimateTopic": "/initialpose",
@@ -66,17 +66,17 @@ describe("migrateLegacyToNew3DPanels", () => {
               "poseTopic": "/move_base_simple/goal",
               "type": "point",
             },
-            "scene": Object {},
-            "topics": Object {},
-            "transforms": Object {},
+            "scene": {},
+            "topics": {},
+            "transforms": {},
           },
         },
-        "globalVariables": Object {},
+        "globalVariables": {},
         "layout": "3D!1",
-        "playbackConfig": Object {
+        "playbackConfig": {
           "speed": 1,
         },
-        "userNodes": Object {},
+        "userNodes": {},
       }
     `);
   });
@@ -95,27 +95,27 @@ describe("migrateLegacyToNew3DPanels", () => {
         playbackConfig: { speed: 1 },
       }),
     ).toMatchInlineSnapshot(`
-      Object {
-        "configById": Object {
-          "3D!1": Object {
-            "cameraState": Object {
+      {
+        "configById": {
+          "3D!1": {
+            "cameraState": {
               "distance": 20,
               "far": 5000,
               "fovy": 45,
               "near": 0.5,
               "perspective": true,
               "phi": 59.99999999999999,
-              "target": Array [
+              "target": [
                 0,
                 0,
                 0,
               ],
-              "targetOffset": Array [
+              "targetOffset": [
                 0,
                 0,
                 0,
               ],
-              "targetOrientation": Array [
+              "targetOrientation": [
                 0,
                 0,
                 0,
@@ -125,8 +125,8 @@ describe("migrateLegacyToNew3DPanels", () => {
             },
             "followMode": "follow-none",
             "followTf": undefined,
-            "layers": Object {},
-            "publish": Object {
+            "layers": {},
+            "publish": {
               "pointTopic": "/clicked_point",
               "poseEstimateThetaDeviation": 0.26179939,
               "poseEstimateTopic": "/initialpose",
@@ -135,31 +135,31 @@ describe("migrateLegacyToNew3DPanels", () => {
               "poseTopic": "/move_base_simple/goal",
               "type": "point",
             },
-            "scene": Object {},
-            "topics": Object {},
-            "transforms": Object {},
+            "scene": {},
+            "topics": {},
+            "transforms": {},
           },
-          "XXX!a": Object {
+          "XXX!a": {
             "foo": "bar",
           },
-          "XXX!b": Object {
+          "XXX!b": {
             "foo": "baz",
           },
         },
-        "globalVariables": Object {},
-        "layout": Object {
+        "globalVariables": {},
+        "layout": {
           "direction": "row",
-          "first": Object {
+          "first": {
             "direction": "row",
             "first": "XXX!a",
             "second": "3D!1",
           },
           "second": "XXX!b",
         },
-        "playbackConfig": Object {
+        "playbackConfig": {
           "speed": 1,
         },
-        "userNodes": Object {},
+        "userNodes": {},
       }
     `);
   });
@@ -200,27 +200,27 @@ describe("migrateLegacyToNew3DPanels", () => {
         playbackConfig: { speed: 1 },
       }),
     ).toMatchInlineSnapshot(`
-      Object {
-        "configById": Object {
-          "3D!1": Object {
-            "cameraState": Object {
+      {
+        "configById": {
+          "3D!1": {
+            "cameraState": {
               "distance": 20,
               "far": 5000,
               "fovy": 45,
               "near": 0.5,
               "perspective": true,
               "phi": 59.99999999999999,
-              "target": Array [
+              "target": [
                 0,
                 0,
                 0,
               ],
-              "targetOffset": Array [
+              "targetOffset": [
                 0,
                 0,
                 0,
               ],
-              "targetOrientation": Array [
+              "targetOrientation": [
                 0,
                 0,
                 0,
@@ -230,8 +230,8 @@ describe("migrateLegacyToNew3DPanels", () => {
             },
             "followMode": "follow-none",
             "followTf": undefined,
-            "layers": Object {},
-            "publish": Object {
+            "layers": {},
+            "publish": {
               "pointTopic": "/clicked_point",
               "poseEstimateThetaDeviation": 0.26179939,
               "poseEstimateTopic": "/initialpose",
@@ -240,32 +240,32 @@ describe("migrateLegacyToNew3DPanels", () => {
               "poseTopic": "/move_base_simple/goal",
               "type": "point",
             },
-            "scene": Object {},
-            "topics": Object {},
-            "transforms": Object {},
+            "scene": {},
+            "topics": {},
+            "transforms": {},
           },
-          "Tab!a": Object {
+          "Tab!a": {
             "activeTabIdx": 0,
-            "tabs": Array [
-              Object {
+            "tabs": [
+              {
                 "layout": "XXX!c",
                 "title": "One",
               },
-              Object {
+              {
                 "layout": "Tab!b",
                 "title": "Two",
               },
-              Object {
+              {
                 "layout": "XXX!d",
                 "title": "Three",
               },
             ],
           },
-          "Tab!b": Object {
+          "Tab!b": {
             "activeTabIdx": 0,
-            "tabs": Array [
-              Object {
-                "layout": Object {
+            "tabs": [
+              {
+                "layout": {
                   "direction": "row",
                   "first": "XXX!a",
                   "second": "3D!1",
@@ -274,29 +274,29 @@ describe("migrateLegacyToNew3DPanels", () => {
               },
             ],
           },
-          "XXX!a": Object {
+          "XXX!a": {
             "foo": "foo",
           },
-          "XXX!b": Object {
+          "XXX!b": {
             "foo": "bar",
           },
-          "XXX!c": Object {
+          "XXX!c": {
             "foo": "baz",
           },
-          "XXX!d": Object {
+          "XXX!d": {
             "foo": "quux",
           },
         },
-        "globalVariables": Object {},
-        "layout": Object {
+        "globalVariables": {},
+        "layout": {
           "direction": "row",
           "first": "Tab!a",
           "second": "XXX!b",
         },
-        "playbackConfig": Object {
+        "playbackConfig": {
           "speed": 1,
         },
-        "userNodes": Object {},
+        "userNodes": {},
       }
     `);
   });

@@ -8,7 +8,7 @@ exports[`generateTypesLib generateDatatypesInterface should generate basic Datat
  * You probably want to use Message<...> instead.
  */
 export type MessageTypeBySchemaName = {
-  \\"std_msgs.ColorRGBA\\": {
+  "std_msgs.ColorRGBA": {
     r: number;
     g: number;
     b: number;
@@ -26,10 +26,10 @@ exports[`generateTypesLib generateDatatypesInterface should generate multiple da
  * You probably want to use Message<...> instead.
  */
 export type MessageTypeBySchemaName = {
-  \\"pkg.foo.Bar\\": {
-    car: MessageTypeBySchemaName[\\"pkg.baz.Car\\"];
+  "pkg.foo.Bar": {
+    car: MessageTypeBySchemaName["pkg.baz.Car"];
   };
-  \\"pkg.baz.Car\\": {
+  "pkg.baz.Car": {
     points: Float32Array;
   };
 };
@@ -44,7 +44,7 @@ exports[`generateTypesLib generateDatatypesInterface should generate type with b
  * You probably want to use Message<...> instead.
  */
 export type MessageTypeBySchemaName = {
-  \\"std_msgs\\\\\\\\ColorRGBA\\": {
+  "std_msgs\\\\ColorRGBA": {
     r: number;
   };
 };
@@ -72,7 +72,7 @@ type Duration = Time;
  * You probably want to use Message<...> instead.
  */
 export type MessageTypeBySchemaName = {
-  \\"std_msgs/ColorRGBA\\": {
+  "std_msgs/ColorRGBA": {
     r: number;
   };
 };
@@ -81,10 +81,10 @@ export type MessageTypeBySchemaName = {
  * MessageTypeByTopic enumerates the Messages types for all the topics in
  * the current data source.
  *
- * You probably want to use Input<\\"/my-topic\\"> instead of MessageTypeByTopic.
+ * You probably want to use Input<"/my-topic"> instead of MessageTypeByTopic.
  */
 export type MessageTypeByTopic = {
-  \\"/my_topic\\": MessageTypeBySchemaName[\\"std_msgs/ColorRGBA\\"];
+  "/my_topic": MessageTypeBySchemaName["std_msgs/ColorRGBA"];
 };
 "
 `;
@@ -110,7 +110,7 @@ type Duration = Time;
  * You probably want to use Message<...> instead.
  */
 export type MessageTypeBySchemaName = {
-  \\"std_msgs/ColorRGBA\\": {
+  "std_msgs/ColorRGBA": {
     r: number;
   };
   unknown_datatype: {};
@@ -120,11 +120,11 @@ export type MessageTypeBySchemaName = {
  * MessageTypeByTopic enumerates the Messages types for all the topics in
  * the current data source.
  *
- * You probably want to use Input<\\"/my-topic\\"> instead of MessageTypeByTopic.
+ * You probably want to use Input<"/my-topic"> instead of MessageTypeByTopic.
  */
 export type MessageTypeByTopic = {
-  \\"/my_topic\\": MessageTypeBySchemaName[\\"std_msgs/ColorRGBA\\"];
-  \\"/another_topic\\": MessageTypeBySchemaName[\\"unknown_datatype\\"];
+  "/my_topic": MessageTypeBySchemaName["std_msgs/ColorRGBA"];
+  "/another_topic": MessageTypeBySchemaName["unknown_datatype"];
 };
 "
 `;

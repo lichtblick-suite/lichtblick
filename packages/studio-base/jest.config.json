@@ -2,7 +2,7 @@
   "//": "Note: we use babel-jest rather than ts-jest for performance reasons.",
   "testMatch": ["<rootDir>/src/**/*.test.ts(x)?"],
   "transform": {
-    "\\.jsx?$": "babel-jest",
+    "\\.jsx?$": ["babel-jest", { "rootMode": "upward" }],
     "\\.tsx?$": "<rootDir>/src/test/transformers/typescriptTransformerWithRawImports.js",
     "\\.ne$": "<rootDir>/src/test/transformers/neTransformer.js",
     "\\.(bin|template|wasm)$": "<rootDir>/src/test/transformers/rawTransformer.js"
