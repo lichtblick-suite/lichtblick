@@ -100,7 +100,7 @@ export type PlayerState = {
 
   // Capabilities of this particular `Player`, which are not shared across all players.
   // See `const PlayerCapabilities` for more details.
-  capabilities: typeof PlayerCapabilities[keyof typeof PlayerCapabilities][];
+  capabilities: (typeof PlayerCapabilities)[keyof typeof PlayerCapabilities][];
 
   /**
    * Identifies the semantics of the data being played back, such as which topics or parameters are

@@ -155,7 +155,7 @@ describe("useMessageReducer", () => {
     const restore = jest.fn().mockReturnValue(1);
     const addMessage = jest.fn().mockImplementation((_, msg) => msg.message.value);
 
-    let messages: typeof message1[] = [];
+    let messages: (typeof message1)[] = [];
     const { result, rerender } = renderHook(
       ({ topics }) =>
         PanelAPI.useMessageReducer({
@@ -224,7 +224,7 @@ describe("useMessageReducer", () => {
       .fn()
       .mockImplementation((_, msgs) => msgs[msgs.length - 1].message.value);
 
-    let messages: typeof message1[] = [];
+    let messages: (typeof message1)[] = [];
     const { result, rerender } = renderHook(
       ({ topics }) =>
         PanelAPI.useMessageReducer({
@@ -321,7 +321,7 @@ describe("useMessageReducer", () => {
     const restore = jest.fn().mockReturnValue(1);
     const addMessage = jest.fn().mockImplementation((_, msg) => msg.message.value);
 
-    let messages: typeof message1[] = [];
+    let messages: (typeof message1)[] = [];
     let activeData: Partial<PlayerStateActiveData> = {};
     const { result, rerender } = renderHook(
       () => PanelAPI.useMessageReducer({ topics: ["/foo"], restore, addMessage }),

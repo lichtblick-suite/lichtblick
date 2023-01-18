@@ -70,7 +70,7 @@ export function generateDeepKeyPaths(obj: unknown, maxArrayLength: number): Set<
 export function getChangeCounts(
   data: DiffObject,
   startingCounts: {
-    -readonly [K in typeof diffLabels["ADDED" | "CHANGED" | "DELETED"]["labelText"]]: number;
+    -readonly [K in (typeof diffLabels)["ADDED" | "CHANGED" | "DELETED"]["labelText"]]: number;
   },
 ): {
   [key: string]: number;

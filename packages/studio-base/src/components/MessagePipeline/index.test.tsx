@@ -245,7 +245,7 @@ describe("MessagePipelineProvider/useMessagePipeline", () => {
         }),
     );
     expect(all).toEqual([
-      expect.objectContaining<DeepPartial<typeof all[0]>>({
+      expect.objectContaining<DeepPartial<(typeof all)[0]>>({
         playerState: {
           activeData: undefined,
           capabilities: [],
@@ -254,10 +254,10 @@ describe("MessagePipelineProvider/useMessagePipeline", () => {
           progress: {},
         },
       }),
-      expect.objectContaining<DeepPartial<typeof all[0]>>({
+      expect.objectContaining<DeepPartial<(typeof all)[0]>>({
         sortedTopics: [{ name: "foo", schemaName: "Foo" }],
       }),
-      expect.objectContaining<DeepPartial<typeof all[0]>>({
+      expect.objectContaining<DeepPartial<(typeof all)[0]>>({
         sortedTopics: [
           { name: "bar", schemaName: "Bar" },
           { name: "foo", schemaName: "Foo" },

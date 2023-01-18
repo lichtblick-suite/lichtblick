@@ -64,7 +64,7 @@ export function downsampleTimeseries(dataset: DataSet, bounds: DownsampleBounds)
   const minX = bounds.x.min - xRange * 0.5;
   const maxX = bounds.x.max + xRange * 0.5;
 
-  let firstPastBounds: typeof dataset.data[0] | undefined = undefined;
+  let firstPastBounds: (typeof dataset.data)[0] | undefined = undefined;
 
   for (const datum of dataset.data) {
     if (!datum) {

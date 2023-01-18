@@ -399,7 +399,7 @@ describe("pipeline", () => {
       sourceCode: string;
       description: string;
       datatypes?: RosDatatypes;
-      error?: typeof ErrorCodes.DatatypeExtraction[keyof typeof ErrorCodes.DatatypeExtraction];
+      error?: (typeof ErrorCodes.DatatypeExtraction)[keyof typeof ErrorCodes.DatatypeExtraction];
       outputDatatype?: string;
       only?: boolean;
       /* Debugging helper */

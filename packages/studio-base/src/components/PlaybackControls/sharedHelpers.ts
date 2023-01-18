@@ -22,7 +22,7 @@ export const DIRECTION = {
 };
 
 export const jumpSeek = (
-  directionSign: typeof DIRECTION[keyof typeof DIRECTION],
+  directionSign: (typeof DIRECTION)[keyof typeof DIRECTION],
   currentTime: Time,
   modifierKeys?: { altKey: boolean; shiftKey: boolean },
 ): Time => {

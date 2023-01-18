@@ -70,9 +70,9 @@ export const ErrorCodes = {
 };
 
 export type Diagnostic = {
-  severity: typeof DiagnosticSeverity[keyof typeof DiagnosticSeverity];
+  severity: (typeof DiagnosticSeverity)[keyof typeof DiagnosticSeverity];
   message: string;
-  source: typeof Sources[keyof typeof Sources];
+  source: (typeof Sources)[keyof typeof Sources];
   startLineNumber?: number;
   startColumn?: number;
   endLineNumber?: number;

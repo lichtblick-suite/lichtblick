@@ -17,7 +17,7 @@ import { DiagnosticSeverity, Diagnostic } from "@foxglove/studio-base/players/Us
 
 const mapCategoryToDiagnosticSeverity = (
   category: ts.DiagnosticCategory,
-): typeof DiagnosticSeverity[keyof typeof DiagnosticSeverity] => {
+): (typeof DiagnosticSeverity)[keyof typeof DiagnosticSeverity] => {
   switch (category) {
     case ts.DiagnosticCategory.Error:
       return DiagnosticSeverity.Error;

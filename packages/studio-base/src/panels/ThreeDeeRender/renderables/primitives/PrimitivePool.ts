@@ -34,22 +34,22 @@ export class PrimitivePool {
 
   public constructor(private renderer: Renderer) {}
 
-  public acquire<T extends PrimitiveType>(type: T): InstanceType<typeof CONSTRUCTORS[T]> {
+  public acquire<T extends PrimitiveType>(type: T): InstanceType<(typeof CONSTRUCTORS)[T]> {
     if (this.disposed) {
       throw new Error(`Attempt to acquire PrimitiveType.${type} after PrimitivePool was disposed`);
     }
     const primitive = this.primitivesByType.get(type)?.pop();
     if (primitive) {
       primitive.prepareForReuse();
-      return primitive as InstanceType<typeof CONSTRUCTORS[T]>;
+      return primitive as InstanceType<(typeof CONSTRUCTORS)[T]>;
     }
     // https://github.com/microsoft/TypeScript/issues/44049
-    return new CONSTRUCTORS[type](this.renderer) as InstanceType<typeof CONSTRUCTORS[T]>;
+    return new CONSTRUCTORS[type](this.renderer) as InstanceType<(typeof CONSTRUCTORS)[T]>;
   }
 
   public release<T extends PrimitiveType>(
     type: T,
-    primitive: InstanceType<typeof CONSTRUCTORS[T]>,
+    primitive: InstanceType<(typeof CONSTRUCTORS)[T]>,
   ): void {
     if (this.disposed) {
       primitive.dispose();
