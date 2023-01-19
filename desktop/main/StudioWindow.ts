@@ -101,7 +101,7 @@ type ClearableMenu = Menu & { clear: () => void };
 
 function newStudioWindow(deepLinks: string[] = []): BrowserWindow {
   const { crashReportingEnabled, telemetryEnabled } = getTelemetrySettings();
-  const enableNewUI = getAppSetting<boolean>(AppSetting.ENABLE_NEW_TOPNAV) ?? false;
+  const enableNewTopNav = getAppSetting<boolean>(AppSetting.ENABLE_NEW_TOPNAV) ?? false;
 
   const preloadPath = path.join(app.getAppPath(), "main", "preload.js");
 
@@ -115,10 +115,10 @@ function newStudioWindow(deepLinks: string[] = []): BrowserWindow {
     minHeight: 250,
     autoHideMenuBar: true,
     title: pkgInfo.productName,
-    frame: enableNewUI && isLinux ? false : true,
-    titleBarStyle: enableNewUI ? "hidden" : "default",
+    frame: enableNewTopNav && isLinux ? false : true,
+    titleBarStyle: enableNewTopNav ? "hidden" : "default",
     trafficLightPosition:
-      isMac && enableNewUI ? { x: macTrafficLightInset, y: macTrafficLightInset } : undefined,
+      isMac && enableNewTopNav ? { x: macTrafficLightInset, y: macTrafficLightInset } : undefined,
     titleBarOverlay: isWindows
       ? {
           height: APP_BAR_HEIGHT,

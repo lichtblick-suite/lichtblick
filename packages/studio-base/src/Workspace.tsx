@@ -210,11 +210,11 @@ export default function Workspace(props: WorkspaceProps): JSX.Element {
 
   // Since we can't toggle the title bar on an electron window, keep the setting at its initial
   // value until the app is reloaded/relaunched.
-  const [currentEnableNewUI = false] = useAppConfigurationValue<boolean>(
+  const [currentEnableNewTopNav = false] = useAppConfigurationValue<boolean>(
     AppSetting.ENABLE_NEW_TOPNAV,
   );
-  const [initialEnableNewUI] = useState(currentEnableNewUI);
-  const enableNewUI = isDesktopApp() ? initialEnableNewUI : currentEnableNewUI;
+  const [initialEnableNewTopNav] = useState(currentEnableNewTopNav);
+  const enableNewTopNav = isDesktopApp() ? initialEnableNewTopNav : currentEnableNewTopNav;
 
   const showSignInForm = currentUserRequired && currentUser == undefined;
 
@@ -299,10 +299,10 @@ export default function Workspace(props: WorkspaceProps): JSX.Element {
   useNativeAppMenuEvent(
     "open-preferences",
     useCallback(() => {
-      if (!enableNewUI) {
+      if (!enableNewTopNav) {
         setSelectedSidebarItem("preferences");
       }
-    }, [enableNewUI]),
+    }, [enableNewTopNav]),
   );
 
   useNativeAppMenuEvent(
@@ -532,7 +532,7 @@ export default function Workspace(props: WorkspaceProps): JSX.Element {
 
     const bottomItems = new Map<SidebarItemKey, SidebarItem>([]);
 
-    if (!enableNewUI) {
+    if (!enableNewTopNav) {
       topItems.set("extensions", {
         iconName: "AddIn",
         title: "Extensions",
@@ -559,7 +559,7 @@ export default function Workspace(props: WorkspaceProps): JSX.Element {
     DataSourceSidebarItem,
     playerProblems,
     enableStudioLogsSidebar,
-    enableNewUI,
+    enableNewTopNav,
     supportsAccountSettings,
     currentUser,
   ]);
@@ -614,7 +614,7 @@ export default function Workspace(props: WorkspaceProps): JSX.Element {
       <SyncAdapters />
       <KeyListener global keyDownHandlers={keyDownHandlers} />
       <div className={classes.container} ref={containerRef} tabIndex={0}>
-        {enableNewUI && (
+        {enableNewTopNav && (
           <AppBar
             currentUser={currentUser}
             disableSignin={props.disableSignin}
