@@ -9,6 +9,10 @@ import { v4 as uuidv4 } from "uuid";
 import { debouncePromise } from "@foxglove/den/async";
 import Log from "@foxglove/log";
 import { parseChannel, ParsedChannel } from "@foxglove/mcap-support";
+import { RosMsgDefinition } from "@foxglove/rosmsg";
+import CommonRosTypes from "@foxglove/rosmsg-msgs-common";
+import { MessageWriter as Ros1MessageWriter } from "@foxglove/rosmsg-serialization";
+import { MessageWriter as Ros2MessageWriter } from "@foxglove/rosmsg2-serialization";
 import { fromMillis, fromNanoSec, isGreaterThan, isLessThan, Time } from "@foxglove/rostime";
 import { ParameterValue } from "@foxglove/studio";
 import PlayerProblemManager from "@foxglove/studio-base/players/PlayerProblemManager";
@@ -20,14 +24,17 @@ import {
   PlayerMetricsCollectorInterface,
   PlayerPresence,
   PlayerState,
+  PublishPayload,
   SubscribePayload,
   Topic,
   TopicStats,
 } from "@foxglove/studio-base/players/types";
 import { RosDatatypes } from "@foxglove/studio-base/types/RosDatatypes";
+import rosDatatypesToMessageDefinition from "@foxglove/studio-base/util/rosDatatypesToMessageDefinition";
 import {
   Channel,
   ChannelId,
+  ClientChannel,
   FoxgloveClient,
   ServerCapability,
   SubscriptionId,
@@ -41,8 +48,12 @@ const SUBSCRIPTION_WARNING_SUPPRESSION_MS = 2000;
 const ZERO_TIME = Object.freeze({ sec: 0, nsec: 0 });
 const GET_ALL_PARAMS_REQUEST_ID = "get-all-params";
 const GET_ALL_PARAMS_PERIOD_MS = 15000;
+const ROS_ENCODINGS = ["ros1", "cdr"];
+const SUPPORTED_PUBLICATION_ENCODINGS = ["json", ...ROS_ENCODINGS];
+const FALLBACK_PUBLICATION_ENCODING = "json";
 
 type ResolvedChannel = { channel: Channel; parsedChannel: ParsedChannel };
+type Publication = ClientChannel & { messageWriter?: Ros1MessageWriter | Ros2MessageWriter };
 
 export default class FoxgloveWebSocketPlayer implements Player {
   private _url: string; // WebSocket URL.
@@ -51,6 +62,7 @@ export default class FoxgloveWebSocketPlayer implements Player {
   private _id: string = uuidv4(); // Unique ID for this player.
   private _serverCapabilities: string[] = [];
   private _playerCapabilities: (typeof PlayerCapabilities)[keyof typeof PlayerCapabilities][] = [];
+  private _supportedEncodings?: string[];
   private _listener?: (arg0: PlayerState) => Promise<void>; // Listener for _emitState().
   private _closed: boolean = false; // Whether the player has been completely closed using close().
   private _topics?: Topic[]; // Topics as published by the WebSocket.
@@ -83,6 +95,8 @@ export default class FoxgloveWebSocketPlayer implements Player {
   private _parameters = new Map<string, ParameterValue>();
   private readonly _sourceId: string;
   private _getParameterInterval?: ReturnType<typeof setInterval>;
+  private _unresolvedPublications: AdvertiseOptions[] = [];
+  private _publicationsByTopic = new Map<string, Publication>();
 
   public constructor({
     url,
@@ -124,6 +138,7 @@ export default class FoxgloveWebSocketPlayer implements Player {
       this._channelsById.clear();
       this._channelsByTopic.clear();
       this._client = client;
+      this._setupPublishers();
     });
 
     client.on("error", (err) => {
@@ -139,6 +154,8 @@ export default class FoxgloveWebSocketPlayer implements Player {
       this._serverPublishesTime = false;
       this._serverCapabilities = [];
       this._playerCapabilities = [];
+      this._supportedEncodings = undefined;
+      this._datatypes = undefined;
 
       for (const topic of this._resolvedSubscriptionsByTopic.keys()) {
         this._unresolvedSubscriptions.add(topic);
@@ -167,6 +184,28 @@ export default class FoxgloveWebSocketPlayer implements Player {
       this._name = `${this._url}\n${event.name}`;
       this._serverCapabilities = event.capabilities;
       this._serverPublishesTime = event.capabilities.includes(ServerCapability.time);
+      this._supportedEncodings = event.supportedEncodings;
+      this._datatypes = new Map();
+
+      if (event.metadata != undefined && "ROS_DISTRO" in event.metadata) {
+        // Add common ROS message definitions
+        const rosDistro = event.metadata["ROS_DISTRO"] as string;
+        const rosDataTypes = ["melodic", "noetic"].includes(rosDistro)
+          ? CommonRosTypes.ros1
+          : ["foxy", "galactic"].includes(rosDistro)
+          ? CommonRosTypes.ros2galactic
+          : CommonRosTypes.ros2humble;
+
+        for (const dataType in rosDataTypes) {
+          const msgDef = (rosDataTypes as Record<string, RosMsgDefinition>)[dataType]!;
+          this._datatypes.set(dataType, msgDef);
+          this._datatypes.set(dataTypeToFullName(dataType), msgDef);
+        }
+      }
+
+      if (event.capabilities.includes(ServerCapability.clientPublish)) {
+        this._playerCapabilities.push(PlayerCapabilities.advertise);
+      }
 
       if (event.capabilities.includes(ServerCapability.parameters)) {
         this._playerCapabilities.push(
@@ -381,11 +420,12 @@ export default class FoxgloveWebSocketPlayer implements Player {
 
     this._topics = topics;
 
-    // Rebuild the _datatypes map
-    this._datatypes = new Map();
-    for (const { parsedChannel } of this._channelsById.values()) {
-      for (const [name, types] of parsedChannel.datatypes) {
-        this._datatypes.set(name, types);
+    if (this._datatypes) {
+      // Update the _datatypes map;
+      for (const { parsedChannel } of this._channelsById.values()) {
+        for (const [name, types] of parsedChannel.datatypes) {
+          this._datatypes.set(name, types);
+        }
       }
     }
     this._emitState();
@@ -525,9 +565,14 @@ export default class FoxgloveWebSocketPlayer implements Player {
   }
 
   public setPublishers(publishers: AdvertiseOptions[]): void {
-    if (publishers.length > 0) {
-      throw new Error("Publishing is not supported by the Foxglove WebSocket connection");
+    // Since `setPublishers` is rarely called, we can get away with just unadvertising existing
+    // channels und re-advertising them again
+    for (const channel of this._publicationsByTopic.values()) {
+      this._client?.unadvertise(channel.id);
     }
+    this._publicationsByTopic.clear();
+    this._unresolvedPublications = publishers;
+    this._setupPublishers();
   }
 
   public setParameter(key: string, value: ParameterValue): void {
@@ -543,8 +588,26 @@ export default class FoxgloveWebSocketPlayer implements Player {
     this._emitState();
   }
 
-  public publish(): void {
-    throw new Error("Publishing is not supported by the Foxglove WebSocket connection");
+  public publish({ topic, msg }: PublishPayload): void {
+    if (!this._client) {
+      throw new Error(`Attempted to publish without a valid Foxglove WebSocket connection`);
+    }
+
+    const clientChannel = this._publicationsByTopic.get(topic);
+    if (!clientChannel) {
+      throw new Error(`Tried to publish on topic '${topic}' that has not been advertised before.`);
+    }
+
+    if (clientChannel.encoding === "json") {
+      const message = Buffer.from(JSON.stringify(msg) ?? "");
+      this._client.sendMessage(clientChannel.id, message);
+    } else if (
+      ROS_ENCODINGS.includes(clientChannel.encoding) &&
+      clientChannel.messageWriter != undefined
+    ) {
+      const message = clientChannel.messageWriter.writeMessage(msg);
+      this._client.sendMessage(clientChannel.id, message);
+    }
   }
 
   public async callService(): Promise<unknown> {
@@ -556,4 +619,78 @@ export default class FoxgloveWebSocketPlayer implements Player {
   private _getCurrentTime(): Time {
     return this._serverPublishesTime ? this._clockTime ?? ZERO_TIME : fromMillis(Date.now());
   }
+
+  private _setupPublishers(): void {
+    // This function will be called again once a connection is established
+    if (!this._client || this._closed) {
+      return;
+    }
+
+    if (this._unresolvedPublications.length === 0) {
+      return;
+    }
+
+    this._problems.removeProblems((id) => id.startsWith("pub:"));
+
+    const encoding = this._supportedEncodings
+      ? this._supportedEncodings.find((e) => SUPPORTED_PUBLICATION_ENCODINGS.includes(e))
+      : FALLBACK_PUBLICATION_ENCODING;
+
+    for (const { topic, schemaName, options } of this._unresolvedPublications) {
+      const encodingProblemId = `pub:encoding:${topic}`;
+      const msgdefProblemId = `pub:msgdef:${topic}`;
+
+      if (!encoding) {
+        this._problems.addProblem(encodingProblemId, {
+          severity: "warn",
+          message: `Cannot advertise topic '${topic}': Server does not support one of the following encodings for client-side publishing: ${SUPPORTED_PUBLICATION_ENCODINGS}`,
+        });
+        continue;
+      }
+
+      let messageWriter: Publication["messageWriter"] = undefined;
+      if (ROS_ENCODINGS.includes(encoding)) {
+        // Try to retrieve the ROS message definition for this topic
+        let msgdef: RosMsgDefinition[];
+        try {
+          const datatypes = options?.["datatypes"] as RosDatatypes | undefined;
+          if (!datatypes || !(datatypes instanceof Map)) {
+            throw new Error("The datatypes option is required for publishing");
+          }
+          msgdef = rosDatatypesToMessageDefinition(datatypes, schemaName);
+        } catch (error) {
+          log.debug(error);
+          this._problems.addProblem(msgdefProblemId, {
+            severity: "warn",
+            message: `Unknown message definition for "${topic}"`,
+            tip: `Try subscribing to the topic "${topic}" before publishing to it`,
+          });
+          continue;
+        }
+
+        messageWriter =
+          encoding === "ros1" ? new Ros1MessageWriter(msgdef) : new Ros2MessageWriter(msgdef);
+      }
+
+      const channelId = this._client.advertise(topic, encoding, schemaName);
+      this._publicationsByTopic.set(topic, {
+        id: channelId,
+        topic,
+        encoding,
+        schemaName,
+        messageWriter,
+      });
+    }
+
+    this._unresolvedPublications = [];
+    this._emitState();
+  }
+}
+
+function dataTypeToFullName(dataType: string): string {
+  const parts = dataType.split("/");
+  if (parts.length === 2) {
+    return `${parts[0]}/msg/${parts[1]}`;
+  }
+  return dataType;
 }
