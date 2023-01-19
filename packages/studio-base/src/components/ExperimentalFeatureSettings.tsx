@@ -62,12 +62,12 @@ const features: Feature[] = [
     description: <>Allow editing plot panel data series in the sidebar.</>,
   },
   {
-    key: AppSetting.ENABLE_NEW_UI,
-    name: "Enable new user interface",
+    key: AppSetting.ENABLE_NEW_TOPNAV,
+    name: "New navigation",
     description: (
       <>
-        Try our redesigned navigation and layout.
-        {isDesktopApp() && " Close and reopen the app for changes to take effect."}
+        New top navigation bar.
+        {isDesktopApp() && " Restart the app for changes to take effect."}
       </>
     ),
   },

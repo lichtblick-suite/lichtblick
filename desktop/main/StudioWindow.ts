@@ -101,7 +101,7 @@ type ClearableMenu = Menu & { clear: () => void };
 
 function newStudioWindow(deepLinks: string[] = []): BrowserWindow {
   const { crashReportingEnabled, telemetryEnabled } = getTelemetrySettings();
-  const enableNewUI = getAppSetting<boolean>(AppSetting.ENABLE_NEW_UI) ?? false;
+  const enableNewUI = getAppSetting<boolean>(AppSetting.ENABLE_NEW_TOPNAV) ?? false;
 
   const preloadPath = path.join(app.getAppPath(), "main", "preload.js");
 

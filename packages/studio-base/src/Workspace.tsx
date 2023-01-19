@@ -210,7 +210,9 @@ export default function Workspace(props: WorkspaceProps): JSX.Element {
 
   // Since we can't toggle the title bar on an electron window, keep the setting at its initial
   // value until the app is reloaded/relaunched.
-  const [currentEnableNewUI = false] = useAppConfigurationValue<boolean>(AppSetting.ENABLE_NEW_UI);
+  const [currentEnableNewUI = false] = useAppConfigurationValue<boolean>(
+    AppSetting.ENABLE_NEW_TOPNAV,
+  );
   const [initialEnableNewUI] = useState(currentEnableNewUI);
   const enableNewUI = isDesktopApp() ? initialEnableNewUI : currentEnableNewUI;
 
