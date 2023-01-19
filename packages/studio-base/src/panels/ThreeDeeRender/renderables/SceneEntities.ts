@@ -136,6 +136,13 @@ export class FoxgloveSceneEntities extends SceneExtension<TopicEntities> {
     const topic = messageEvent.topic;
     const sceneUpdates = messageEvent.message;
 
+    for (const deletionMsg of sceneUpdates.deletions ?? []) {
+      if (deletionMsg) {
+        const deletion = normalizeSceneEntityDeletion(deletionMsg);
+        this._getTopicEntities(topic).deleteEntities(deletion);
+      }
+    }
+
     for (const entityMsg of sceneUpdates.entities ?? []) {
       if (entityMsg) {
         const entity = normalizeSceneEntity(entityMsg);
@@ -143,13 +150,6 @@ export class FoxgloveSceneEntities extends SceneExtension<TopicEntities> {
           entity,
           toNanoSec(messageEvent.receiveTime),
         );
-      }
-    }
-
-    for (const deletionMsg of sceneUpdates.deletions ?? []) {
-      if (deletionMsg) {
-        const deletion = normalizeSceneEntityDeletion(deletionMsg);
-        this._getTopicEntities(topic).deleteEntities(deletion);
       }
     }
   };
