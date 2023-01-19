@@ -82,7 +82,7 @@ export class AmplitudeAnalytics implements IAnalytics {
 
     await new Promise<void>((resolve) => {
       if (this._amp) {
-        this._amp.logEvent(event, data, () => resolve());
+        this._amp.logEvent(event, { ...data, app: "studio" }, () => resolve());
       } else {
         resolve();
       }
