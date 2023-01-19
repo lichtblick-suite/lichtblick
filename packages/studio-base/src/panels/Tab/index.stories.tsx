@@ -18,11 +18,15 @@ import MockPanelContextProvider from "@foxglove/studio-base/components/MockPanel
 import Panel from "@foxglove/studio-base/components/Panel";
 import PanelLayout from "@foxglove/studio-base/components/PanelLayout";
 import PanelToolbar from "@foxglove/studio-base/components/PanelToolbar";
+import LayoutStorageContext from "@foxglove/studio-base/context/LayoutStorageContext";
 import { PanelCatalog, PanelInfo } from "@foxglove/studio-base/context/PanelCatalogContext";
 import {
   nestedTabLayoutFixture,
   nestedTabLayoutFixture2,
 } from "@foxglove/studio-base/panels/Tab/nestedTabLayoutFixture";
+import LayoutManagerProvider from "@foxglove/studio-base/providers/LayoutManagerProvider";
+import LayoutManager from "@foxglove/studio-base/services/LayoutManager/LayoutManager";
+import MockLayoutStorage from "@foxglove/studio-base/services/MockLayoutStorage";
 import PanelSetup from "@foxglove/studio-base/stories/PanelSetup";
 import { SExpectedResult } from "@foxglove/studio-base/stories/storyHelpers";
 import tick from "@foxglove/studio-base/util/tick";
@@ -90,6 +94,20 @@ export default {
 
     colorScheme: "dark",
   },
+
+  decorators: [
+    (StoryFn: Story): JSX.Element => {
+      const storage = new MockLayoutStorage(LayoutManager.LOCAL_STORAGE_NAMESPACE, []);
+
+      return (
+        <LayoutStorageContext.Provider value={storage}>
+          <LayoutManagerProvider>
+            <StoryFn />
+          </LayoutManagerProvider>
+        </LayoutStorageContext.Provider>
+      );
+    },
+  ],
 };
 
 export const Default: Story = () => (
