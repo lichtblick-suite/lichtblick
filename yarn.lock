@@ -10459,7 +10459,7 @@ __metadata:
     async-mutex: 0.4.0
     builder-util: 23.6.0
     clean-webpack-plugin: 4.0.0
-    electron: 22.0.0
+    electron: 22.0.3
     electron-builder: 23.6.0
     electron-devtools-installer: 3.2.0
     electron-squirrel-startup: 1.0.0
@@ -11025,16 +11025,16 @@ __metadata:
   languageName: node
   linkType: hard
 
-"electron@npm:22.0.0":
-  version: 22.0.0
-  resolution: "electron@npm:22.0.0"
+"electron@npm:22.0.3":
+  version: 22.0.3
+  resolution: "electron@npm:22.0.3"
   dependencies:
     "@electron/get": ^2.0.0
     "@types/node": ^16.11.26
     extract-zip: ^2.0.1
   bin:
     electron: cli.js
-  checksum: bbd3aef19e91568e9def792349152bdab59aa6d79dee17a8e662a9fb0b29626297f4e767df998937af7def803f34688dd94b4b37891aaf6b5bf86d2759629d9c
+  checksum: 0777a212d57ef3d7c7f1a00ca173f85d7c0a1524dba9aea9f3dd72cc5de7ff11d4ff68308e43a1810f51e8ee5d5f43fe36dbc3571fafd6725200b605935df951
   languageName: node
   linkType: hard
 
@@ -12837,7 +12837,7 @@ __metadata:
     babel-plugin-transform-import-meta: 2.2.0
     cross-env: 7.0.3
     depcheck: 1.4.3
-    electron: 22.0.0
+    electron: 22.0.3
     electron-builder: 23.6.0
     electron-notarize: 1.2.2
     eslint: 8.31.0
