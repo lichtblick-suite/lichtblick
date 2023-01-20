@@ -243,6 +243,12 @@ export default class FoxgloveWebSocketPlayer implements Player {
             if (base64.decode(channel.schema, schemaData, 0) !== schemaData.byteLength) {
               throw new Error(`Failed to decode base64 schema on channel ${channel.id}`);
             }
+          } else if (channel.encoding === "flatbuffer") {
+            schemaEncoding = "flatbuffer";
+            schemaData = new Uint8Array(base64.length(channel.schema));
+            if (base64.decode(channel.schema, schemaData, 0) !== schemaData.byteLength) {
+              throw new Error(`Failed to decode base64 schema on channel ${channel.id}`);
+            }
           } else if (channel.encoding === "ros1") {
             schemaEncoding = "ros1msg";
             schemaData = new TextEncoder().encode(channel.schema);
