@@ -11,7 +11,7 @@ import { MessageReader as ROS2MessageReader } from "@foxglove/rosmsg2-serializat
 
 import { parseFlatbufferSchema } from "./parseFlatbufferSchema";
 import { parseJsonSchema } from "./parseJsonSchema";
-import { protobufDefinitionsToDatatypes } from "./protobufDefinitionsToDatatypes";
+import { protobufDefinitionsToDatatypes, stripLeadingDot } from "./protobufDefinitionsToDatatypes";
 import { RosDatatypes } from "./types";
 
 type Channel = {
@@ -136,6 +136,14 @@ export function parseChannel(channel: Channel): ParsedChannel {
 
     const datatypes: RosDatatypes = new Map();
     protobufDefinitionsToDatatypes(datatypes, type);
+
+    if (!datatypes.has(channel.schema.name)) {
+      throw new Error(
+        `Protobuf schema does not contain an entry for '${
+          channel.schema.name
+        }'. The schema name should be fully-qualified, e.g. '${stripLeadingDot(type.fullName)}'.`,
+      );
+    }
 
     return { deserializer, datatypes };
   }
