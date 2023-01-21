@@ -2521,7 +2521,7 @@ __metadata:
     ts-key-enum: 2.0.12
     ts-loader: 9.4.2
     tss-react: 4.5.2
-    ttypescript: 1.5.13
+    ttypescript: 1.5.15
     typescript: 4.8.2
     typescript-transform-paths: 3.3.1
     urdf-loader: 0.10.4
@@ -23418,9 +23418,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"ttypescript@npm:1.5.13":
-  version: 1.5.13
-  resolution: "ttypescript@npm:1.5.13"
+"ttypescript@npm:1.5.15":
+  version: 1.5.15
+  resolution: "ttypescript@npm:1.5.15"
   dependencies:
     resolve: ">=1.9.0"
   peerDependencies:
@@ -23429,7 +23429,7 @@ __metadata:
   bin:
     ttsc: bin/tsc
     ttsserver: bin/tsserver
-  checksum: bd97f058520ebd6183446b2100bfc714c400455e2195c3711d00c3407521d99098a4a204f16200c14a115cd78a5005d4a790bf7fb73a1b21a513573291a9c1d0
+  checksum: 0328578050f08f9d12e6732a9fe71e93cc693ed5e825aefb7f4ba142d4d3d6912caa59a723f775de89cd066c8e609665fd5a7ccfa3b69fb3456c7f24d695db90
   languageName: node
   linkType: hard
 
