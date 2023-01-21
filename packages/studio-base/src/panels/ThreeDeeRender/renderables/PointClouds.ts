@@ -769,7 +769,7 @@ export class PointClouds extends SceneExtension<PointCloudRenderable> {
 }
 
 function pointFieldTypeName(type: PointFieldType): string {
-  return PointFieldType[type] ?? `${type}`;
+  return PointFieldType[type as number] ?? `${type}`;
 }
 
 function pointFieldWidth(type: PointFieldType): number {

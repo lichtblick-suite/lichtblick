@@ -8,8 +8,6 @@
 /// <reference types="chartjs-plugin-datalabels" />
 /// <reference types="@foxglove/chartjs-plugin-zoom" />
 
-/// <reference types="@types/offscreencanvas" />
-
 import { ChartData as ChartJsChartData, ChartOptions, ScatterDataPoint } from "chart.js";
 import Hammer from "hammerjs";
 import { useCallback, useLayoutEffect, useRef, useState } from "react";
@@ -255,7 +253,9 @@ function Chart(props: Props): JSX.Element {
 
       onStartRender?.();
       const offscreenCanvas =
-        "transferControlToOffscreen" in canvas ? canvas.transferControlToOffscreen() : canvas;
+        typeof canvas.transferControlToOffscreen === "function"
+          ? canvas.transferControlToOffscreen()
+          : canvas;
       const scales = await sendWrapperRef.current<RpcScales>(
         "initialize",
         {

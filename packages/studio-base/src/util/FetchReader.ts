@@ -22,7 +22,7 @@ type EventTypes = {
 // https://developer.mozilla.org/en-US/docs/Web/API/Streams_API
 export default class FetchReader extends EventEmitter<EventTypes> {
   private _response: Promise<Response>;
-  private _reader?: ReadableStreamReader<Uint8Array>;
+  private _reader?: ReadableStreamDefaultReader<Uint8Array>;
   private _controller: AbortController;
   private _aborted: boolean = false;
   private _url: string;
@@ -36,7 +36,7 @@ export default class FetchReader extends EventEmitter<EventTypes> {
 
   // you can only call getReader once on a response body
   // so keep a local copy of the reader and return it after the first call to get a reader
-  private async _getReader(): Promise<ReadableStreamReader<Uint8Array> | undefined> {
+  private async _getReader(): Promise<ReadableStreamDefaultReader<Uint8Array> | undefined> {
     if (this._reader) {
       return this._reader;
     }

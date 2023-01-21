@@ -47,8 +47,13 @@ class ImageCanvasWorker {
 
       const matrix = (state.dimensions?.transform ?? new DOMMatrix()).inverse();
       const point = new DOMPoint(x, y).matrixTransform(matrix);
-      const pixel = state.canvas.getContext("2d")?.getImageData(x, y, 1, 1);
-      const hit = state.hitmap.getContext("2d")?.getImageData(x, y, 1, 1);
+      // https://github.com/microsoft/TypeScript-DOM-lib-generator/issues/1480
+      const pixel = (
+        state.canvas.getContext("2d") as OffscreenCanvasRenderingContext2D | undefined
+      )?.getImageData(x, y, 1, 1);
+      const hit = (
+        state.hitmap.getContext("2d") as OffscreenCanvasRenderingContext2D | undefined
+      )?.getImageData(x, y, 1, 1);
       const markerIndex = hit ? idColorToIndex(hit.data) : undefined;
 
       if (pixel) {

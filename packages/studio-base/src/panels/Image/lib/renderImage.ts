@@ -184,7 +184,13 @@ function decodeMessageToBitmap(
 
 function clearCanvas(canvas?: RenderableCanvas) {
   if (canvas) {
-    canvas.getContext("2d")?.clearRect(0, 0, canvas.width, canvas.height);
+    // https://github.com/microsoft/TypeScript-DOM-lib-generator/issues/1480
+    (
+      canvas.getContext("2d") as
+        | CanvasRenderingContext2D
+        | OffscreenCanvasRenderingContext2D
+        | undefined
+    )?.clearRect(0, 0, canvas.width, canvas.height);
   }
 }
 
@@ -208,7 +214,10 @@ function render({
       ? { width: bitmap.width, height: bitmap.height }
       : { width: bitmap.height, height: bitmap.width };
 
-  const canvasCtx = canvas.getContext("2d");
+  const canvasCtx = canvas.getContext("2d") as  // https://github.com/microsoft/TypeScript-DOM-lib-generator/issues/1480
+    | CanvasRenderingContext2D
+    | OffscreenCanvasRenderingContext2D
+    | undefined;
   if (!canvasCtx) {
     return;
   }

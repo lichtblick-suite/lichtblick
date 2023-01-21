@@ -2091,7 +2091,7 @@ __metadata:
   resolution: "@foxglove/comlink-transfer-handlers@workspace:packages/comlink-transfer-handlers"
   dependencies:
     comlink: 4.3.1
-    typescript: 4.8.2
+    typescript: 4.9.4
   languageName: unknown
   linkType: soft
 
@@ -2149,7 +2149,7 @@ __metadata:
     "@foxglove/log": "workspace:*"
     "@testing-library/react-hooks": 7.0.2
     shallowequal: 1.1.0
-    typescript: 4.8.2
+    typescript: 4.9.4
   peerDependencies:
     react: ^17.0.2
   languageName: unknown
@@ -2168,7 +2168,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@foxglove/log@workspace:packages/log"
   dependencies:
-    typescript: 4.8.2
+    typescript: 4.9.4
   languageName: unknown
   linkType: soft
 
@@ -2188,7 +2188,7 @@ __metadata:
     flatbuffers: 22.12.6
     flatbuffers_reflection: 0.0.2
     protobufjs: 7.1.2
-    typescript: 4.8.2
+    typescript: 4.9.4
     wasm-lz4: 2.0.0
     zstd-codec: "patch:zstd-codec@0.1.4#../../patches/zstd-codec.patch"
   languageName: unknown
@@ -2418,7 +2418,6 @@ __metadata:
     "@types/memoize-weak": "workspace:*"
     "@types/moment-duration-format": 2.2.3
     "@types/nearley": 2.11.2
-    "@types/offscreencanvas": 2019.6.4
     "@types/prettier": 2.7.2
     "@types/react": 17.0.53
     "@types/react-autocomplete": 1.8.6
@@ -2522,7 +2521,7 @@ __metadata:
     ts-loader: 9.4.2
     tss-react: 4.5.2
     ttypescript: 1.5.15
-    typescript: 4.8.2
+    typescript: 4.9.4
     typescript-transform-paths: 3.3.1
     urdf-loader: 0.10.4
     url-search-params: 1.1.0
@@ -2565,7 +2564,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@foxglove/typescript-transformers@workspace:packages/typescript-transformers"
   dependencies:
-    typescript: 4.8.2
+    typescript: 4.9.4
   languageName: unknown
   linkType: soft
 
@@ -5770,13 +5769,6 @@ __metadata:
   version: 4.1.3
   resolution: "@types/npmlog@npm:4.1.3"
   checksum: bf04854965ecea594a69f134eaec845f5bd044eee686e79f24865891dee7d8b376bf48dbdeb89632175bc368a8e9925800dd37e54546954e991b3c1b8df2bd2e
-  languageName: node
-  linkType: hard
-
-"@types/offscreencanvas@npm:2019.6.4":
-  version: 2019.6.4
-  resolution: "@types/offscreencanvas@npm:2019.6.4"
-  checksum: ea05348b49cb0dc082fadf7ccc283e53c03ecf9b94c5ee096fce447edfcb563f6c060714609b72cee7848ea24589aa56297144a2b3a89a833e6ea24eaaa96da9
   languageName: node
   linkType: hard
 
@@ -12862,7 +12854,7 @@ __metadata:
     ts-node: 10.9.1
     ts-prune: 0.10.3
     tslib: 2.4.1
-    typescript: 4.8.2
+    typescript: 4.9.4
     typescript-plugin-css-modules: 4.1.1
     webpack: 5.74.0
     webpack-cli: 4.10.0
@@ -23591,17 +23583,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"typescript@npm:4.8.2":
-  version: 4.8.2
-  resolution: "typescript@npm:4.8.2"
-  bin:
-    tsc: bin/tsc
-    tsserver: bin/tsserver
-  checksum: 7f5b81d0d558c9067f952c7af52ab7f19c2e70a916817929e4a5b256c93990bf3178eccb1ac8a850bc75df35f6781b6f4cb3370ce20d8b1ded92ed462348f628
-  languageName: node
-  linkType: hard
-
-"typescript@npm:^4":
+"typescript@npm:4.9.4, typescript@npm:^4":
   version: 4.9.4
   resolution: "typescript@npm:4.9.4"
   bin:
@@ -23611,17 +23593,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"typescript@patch:typescript@4.8.2#~builtin<compat/typescript>":
-  version: 4.8.2
-  resolution: "typescript@patch:typescript@npm%3A4.8.2#~builtin<compat/typescript>::version=4.8.2&hash=ddd1e8"
-  bin:
-    tsc: bin/tsc
-    tsserver: bin/tsserver
-  checksum: 6f49363af8af2fe480da1d5fa68712644438785208b06690a3cbe5e7365fd652c3a0f1e587bc8684d78fb69de3dde4de185c0bad7bb4f3664ddfc813ce8caad6
-  languageName: node
-  linkType: hard
-
-"typescript@patch:typescript@^4#~builtin<compat/typescript>":
+"typescript@patch:typescript@4.9.4#~builtin<compat/typescript>, typescript@patch:typescript@^4#~builtin<compat/typescript>":
   version: 4.9.4
   resolution: "typescript@patch:typescript@npm%3A4.9.4#~builtin<compat/typescript>::version=4.9.4&hash=ddd1e8"
   bin:

@@ -22,7 +22,7 @@ export const datatypes: RosDatatypes = new Map(
 );
 
 // ts-prune-ignore-next
-export const messages = Object.freeze<MessageEvent<unknown>>([
+export const messages = Object.freeze<MessageEvent<unknown>[]>([
   {
     topic: "/some/topic",
     receiveTime: { sec: 100, nsec: 0 },

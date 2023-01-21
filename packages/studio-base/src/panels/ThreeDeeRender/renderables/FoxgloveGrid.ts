@@ -125,7 +125,7 @@ const tempRgbaFieldReaders: RgbaFieldReaders = {
 };
 
 function numericTypeName(type: NumericType): string {
-  return NumericType[type] ?? `${type}`;
+  return NumericType[type as number] ?? `${type}`;
 }
 
 function getTextureEncoding(settings: GridColorModeSettings) {
