@@ -31,4 +31,8 @@ describe("TransformTree", () => {
     // c <- a <- b <- c  ERROR - cycle created
     expect(tfTree.addTransform("a", "c", bigint, tf)).toEqual(AddTransformResult.CYCLE_DETECTED);
   });
+  it("detects a cycle when adding a transform with a parent as itself", () => {
+    const tfTree = new TransformTree();
+    expect(tfTree.addTransform("a", "a", bigint, tf)).toEqual(AddTransformResult.CYCLE_DETECTED);
+  });
 });

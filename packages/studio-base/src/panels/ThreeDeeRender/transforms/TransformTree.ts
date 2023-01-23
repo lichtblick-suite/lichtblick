@@ -160,6 +160,9 @@ export class TransformTree {
     return output;
   }
   private _checkParentForCycle(frameId: string, parentFrameId: string): boolean {
+    if (frameId === parentFrameId) {
+      return true;
+    }
     // walk up tree from parent Frame to check if it eventually crosses the frame
     let frame = this.frame(parentFrameId);
     while (frame?.parent()) {
