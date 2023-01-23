@@ -161,7 +161,7 @@ export class Urdfs extends SceneExtension<UrdfRenderable> {
     renderer.on("parametersChange", this.handleParametersChange);
     renderer.addCustomLayerAction({
       layerId: LAYER_ID,
-      label: "Add Unified Robot Description Format (URDF)",
+      label: "Add URDF",
       icon: "PrecisionManufacturing",
       handler: this.handleAddUrdf,
     });
