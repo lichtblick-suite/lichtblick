@@ -108,10 +108,10 @@ export class RenderableTriangles extends RenderablePrimitive {
               `Entity: ${this.userData.entity?.id}.triangles[${triMeshIdx}](1st index) - Colors array should be same size as points array, showing #00ff00 instead`,
             );
           }
-          const r = (SRGBToLinear(color.r) * 255) | 0;
-          const g = (SRGBToLinear(color.g) * 255) | 0;
-          const b = (SRGBToLinear(color.b) * 255) | 0;
-          const a = (color.a * 255) | 0;
+          const r = SRGBToLinear(color.r);
+          const g = SRGBToLinear(color.g);
+          const b = SRGBToLinear(color.b);
+          const a = color.a;
           colorChanged =
             colorChanged ||
             colors.getX(i) !== r ||
@@ -242,7 +242,7 @@ function makeTriangleMesh(): TriangleMesh {
       metalness: 0,
       roughness: 1,
       flatShading: true,
-      side: THREE.DoubleSide,
+      side: THREE.TwoPassDoubleSide,
     }),
   );
 }

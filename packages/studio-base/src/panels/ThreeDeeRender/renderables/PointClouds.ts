@@ -480,10 +480,10 @@ export class PointCloudRenderable extends PointsHistoryRenderable<PointCloudUser
         const pointOffset = i * pointStep;
         colorAttribute.setXYZW(
           i,
-          (redReader(view, pointOffset) * 255) | 0,
-          (greenReader(view, pointOffset) * 255) | 0,
-          (blueReader(view, pointOffset) * 255) | 0,
-          (alphaReader(view, pointOffset) * 255) | 0,
+          redReader(view, pointOffset),
+          greenReader(view, pointOffset),
+          blueReader(view, pointOffset),
+          alphaReader(view, pointOffset),
         );
       }
     } else {
@@ -509,13 +509,7 @@ export class PointCloudRenderable extends PointsHistoryRenderable<PointCloudUser
         const pointOffset = i * pointStep;
         const colorValue = packedColorReader(view, pointOffset);
         colorConverter(tempColor, colorValue);
-        colorAttribute.setXYZW(
-          i,
-          (tempColor.r * 255) | 0,
-          (tempColor.g * 255) | 0,
-          (tempColor.b * 255) | 0,
-          (tempColor.a * 255) | 0,
-        );
+        colorAttribute.setXYZW(i, tempColor.r, tempColor.g, tempColor.b, tempColor.a);
       }
     }
 
