@@ -2432,7 +2432,7 @@ __metadata:
     "@types/shallowequal": 1.1.1
     "@types/string-hash": 1.1.1
     "@types/text-metrics": "workspace:*"
-    "@types/three": ^0.148.0
+    "@types/three": ^0.148.1
     "@types/tinycolor2": 1.4.3
     "@types/url-search-params": 1.1.0
     "@types/uuid": 9.0.0
@@ -6072,12 +6072,12 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@types/three@npm:^0.148.0":
-  version: 0.148.0
-  resolution: "@types/three@npm:0.148.0"
+"@types/three@npm:^0.148.1":
+  version: 0.148.1
+  resolution: "@types/three@npm:0.148.1"
   dependencies:
     "@types/webxr": "*"
-  checksum: c5747a8cc353c8560196052f1a035c7d641e4a953ac63c1c8d9d91c5489da2dbe8b9c4b70670eef891f8597e9ae882c450e6270abe49e807920644abdea08ddb
+  checksum: 166eb03b80ece4d400641c17cc74a9ad28331dc1f255964dee3d9bead9a4d46e2c287beb1f65a44254b224163a8102f4fe1d50685c896c7fb84fd01c11c43e2d
   languageName: node
   linkType: hard
 
