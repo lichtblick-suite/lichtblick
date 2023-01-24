@@ -2,7 +2,7 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { Button } from "@mui/material";
+import { Alert, Button, Link } from "@mui/material";
 import { differenceBy, first, isEmpty } from "lodash";
 import { useEffect, useLayoutEffect, useMemo, useState } from "react";
 import { useResizeDetector } from "react-resize-detector";
@@ -185,6 +185,16 @@ function URDFViewer({ config, saveConfig }: Props) {
   return (
     <div className={classes.root}>
       <PanelToolbar />
+      <Alert severity="warning">
+        The URDF Viewer panel is deprecated. See the{" "}
+        <Link
+          href="https://foxglove.dev/docs/studio/panels/3d#add-unified-robot-description-format-urdf"
+          target="_blank"
+        >
+          3D panel docs
+        </Link>{" "}
+        to visualize URDFs.
+      </Alert>
       <div className={classes.content}>
         {messageBar}
         {model == undefined ? (
