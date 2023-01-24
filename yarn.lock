@@ -2,7 +2,7 @@
 # Manual changes might be lost - proceed with caution!
 
 __metadata:
-  version: 5
+  version: 6
   cacheKey: 8
 
 "7zip-bin@npm:~5.1.1":
@@ -4898,7 +4898,7 @@ __metadata:
 
 "@storybook/react@patch:@storybook/react@6.5.15#./patches/storybook-react.patch::locator=foxglove-studio%40workspace%3A.":
   version: 6.5.15
-  resolution: "@storybook/react@patch:@storybook/react@npm%3A6.5.15#./patches/storybook-react.patch::version=6.5.15&hash=42abdd&locator=foxglove-studio%40workspace%3A."
+  resolution: "@storybook/react@patch:@storybook/react@npm%3A6.5.15#./patches/storybook-react.patch::version=6.5.15&hash=4f2e43&locator=foxglove-studio%40workspace%3A."
   dependencies:
     "@babel/preset-flow": ^7.12.1
     "@babel/preset-react": ^7.12.10
@@ -7091,12 +7091,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"acorn@npm:^8.1.0, acorn@npm:^8.4.1, acorn@npm:^8.7.1, acorn@npm:^8.8.0, acorn@npm:^8.8.1":
-  version: 8.8.1
-  resolution: "acorn@npm:8.8.1"
+"acorn@npm:^8.1.0, acorn@npm:^8.4.1, acorn@npm:^8.5.0, acorn@npm:^8.7.1, acorn@npm:^8.8.0, acorn@npm:^8.8.1":
+  version: 8.8.2
+  resolution: "acorn@npm:8.8.2"
   bin:
     acorn: bin/acorn
-  checksum: 4079b67283b94935157698831967642f24a075c52ce3feaaaafe095776dfbe15d86a1b33b1e53860fc0d062ed6c83f4284a5c87c85b9ad51853a01173da6097f
+  checksum: f790b99a1bf63ef160c967e23c46feea7787e531292bb827126334612c234ed489a0dc2c7ba33156416f0ffa8d25bf2b0fdb7f35c2ba60eb3e960572bece4001
   languageName: node
   linkType: hard
 
@@ -13048,7 +13048,7 @@ __metadata:
 
 "fsevents@patch:fsevents@^1.2.7#~builtin<compat/fsevents>":
   version: 1.2.13
-  resolution: "fsevents@patch:fsevents@npm%3A1.2.13#~builtin<compat/fsevents>::version=1.2.13&hash=18f3a7"
+  resolution: "fsevents@patch:fsevents@npm%3A1.2.13#~builtin<compat/fsevents>::version=1.2.13&hash=d11327"
   dependencies:
     bindings: ^1.5.0
     nan: ^2.12.1
@@ -13058,7 +13058,7 @@ __metadata:
 
 "fsevents@patch:fsevents@^2.1.2#~builtin<compat/fsevents>, fsevents@patch:fsevents@^2.3.2#~builtin<compat/fsevents>, fsevents@patch:fsevents@~2.3.2#~builtin<compat/fsevents>":
   version: 2.3.2
-  resolution: "fsevents@patch:fsevents@npm%3A2.3.2#~builtin<compat/fsevents>::version=2.3.2&hash=18f3a7"
+  resolution: "fsevents@patch:fsevents@npm%3A2.3.2#~builtin<compat/fsevents>::version=2.3.2&hash=df0bf1"
   dependencies:
     node-gyp: latest
   conditions: os=darwin
@@ -20128,7 +20128,7 @@ __metadata:
 
 "react-dom@patch:react-dom@npm:17.0.2#./patches/react-dom.patch::locator=foxglove-studio%40workspace%3A.":
   version: 17.0.2
-  resolution: "react-dom@patch:react-dom@npm%3A17.0.2#./patches/react-dom.patch::version=17.0.2&hash=e5f27c&locator=foxglove-studio%40workspace%3A."
+  resolution: "react-dom@patch:react-dom@npm%3A17.0.2#./patches/react-dom.patch::version=17.0.2&hash=34e376&locator=foxglove-studio%40workspace%3A."
   dependencies:
     loose-envify: ^1.1.0
     object-assign: ^4.1.1
@@ -20227,7 +20227,7 @@ __metadata:
 
 "react-json-tree@patch:react-json-tree@npm:0.15.1#../../patches/react-json-tree.patch::locator=%40foxglove%2Fstudio-base%40workspace%3Apackages%2Fstudio-base":
   version: 0.15.1
-  resolution: "react-json-tree@patch:react-json-tree@npm%3A0.15.1#../../patches/react-json-tree.patch::version=0.15.1&hash=9ebe07&locator=%40foxglove%2Fstudio-base%40workspace%3Apackages%2Fstudio-base"
+  resolution: "react-json-tree@patch:react-json-tree@npm%3A0.15.1#../../patches/react-json-tree.patch::version=0.15.1&hash=5e2bac&locator=%40foxglove%2Fstudio-base%40workspace%3Apackages%2Fstudio-base"
   dependencies:
     "@types/prop-types": ^15.7.4
     prop-types: ^15.7.2
@@ -20434,7 +20434,7 @@ __metadata:
 
 "react-use@patch:react-use@17.4.0#./patches/react-use.patch::locator=foxglove-studio%40workspace%3A.":
   version: 17.4.0
-  resolution: "react-use@patch:react-use@npm%3A17.4.0#./patches/react-use.patch::version=17.4.0&hash=95d442&locator=foxglove-studio%40workspace%3A."
+  resolution: "react-use@patch:react-use@npm%3A17.4.0#./patches/react-use.patch::version=17.4.0&hash=16b4d0&locator=foxglove-studio%40workspace%3A."
   dependencies:
     "@types/js-cookie": ^2.2.6
     "@xobotyi/scrollbar-width": ^1.9.5
@@ -21132,7 +21132,7 @@ __metadata:
 
 "resolve@patch:resolve@>=1.9.0#~builtin<compat/resolve>, resolve@patch:resolve@^1.10.0#~builtin<compat/resolve>, resolve@patch:resolve@^1.12.0#~builtin<compat/resolve>, resolve@patch:resolve@^1.14.2#~builtin<compat/resolve>, resolve@patch:resolve@^1.18.1#~builtin<compat/resolve>, resolve@patch:resolve@^1.19.0#~builtin<compat/resolve>, resolve@patch:resolve@^1.20.0#~builtin<compat/resolve>, resolve@patch:resolve@^1.22.0#~builtin<compat/resolve>, resolve@patch:resolve@^1.3.2#~builtin<compat/resolve>":
   version: 1.22.1
-  resolution: "resolve@patch:resolve@npm%3A1.22.1#~builtin<compat/resolve>::version=1.22.1&hash=07638b"
+  resolution: "resolve@patch:resolve@npm%3A1.22.1#~builtin<compat/resolve>::version=1.22.1&hash=c3c19d"
   dependencies:
     is-core-module: ^2.9.0
     path-parse: ^1.0.7
@@ -21145,7 +21145,7 @@ __metadata:
 
 "resolve@patch:resolve@^2.0.0-next.4#~builtin<compat/resolve>":
   version: 2.0.0-next.4
-  resolution: "resolve@patch:resolve@npm%3A2.0.0-next.4#~builtin<compat/resolve>::version=2.0.0-next.4&hash=07638b"
+  resolution: "resolve@patch:resolve@npm%3A2.0.0-next.4#~builtin<compat/resolve>::version=2.0.0-next.4&hash=c3c19d"
   dependencies:
     is-core-module: ^2.9.0
     path-parse: ^1.0.7
@@ -23014,7 +23014,7 @@ __metadata:
 
 "three@patch:three@0.148.0#../../patches/three.patch::locator=%40foxglove%2Fstudio-base%40workspace%3Apackages%2Fstudio-base":
   version: 0.148.0
-  resolution: "three@patch:three@npm%3A0.148.0#../../patches/three.patch::version=0.148.0&hash=1ca5de&locator=%40foxglove%2Fstudio-base%40workspace%3Apackages%2Fstudio-base"
+  resolution: "three@patch:three@npm%3A0.148.0#../../patches/three.patch::version=0.148.0&hash=34f677&locator=%40foxglove%2Fstudio-base%40workspace%3Apackages%2Fstudio-base"
   checksum: e28bed988c499e690a79f9a8245daa474390a2fc081ea0387f7059bfbdacb375c96b1e892ddfeb1832e4c73dc41771cb545e26176759696b29a75d3f60be08bf
   languageName: node
   linkType: hard
@@ -23654,11 +23654,11 @@ __metadata:
 
 "typescript@patch:typescript@4.9.4#~builtin<compat/typescript>, typescript@patch:typescript@^4#~builtin<compat/typescript>":
   version: 4.9.4
-  resolution: "typescript@patch:typescript@npm%3A4.9.4#~builtin<compat/typescript>::version=4.9.4&hash=ddd1e8"
+  resolution: "typescript@patch:typescript@npm%3A4.9.4#~builtin<compat/typescript>::version=4.9.4&hash=ad5954"
   bin:
     tsc: bin/tsc
     tsserver: bin/tsserver
-  checksum: 37f6e2c3c5e2aa5934b85b0fddbf32eeac8b1bacf3a5b51d01946936d03f5377fe86255d4e5a4ae628fd0cd553386355ad362c57f13b4635064400f3e8e05b9d
+  checksum: 1caaea6cb7f813e64345190fddc4e6c924d0b698ab81189b503763c4a18f7f5501c69362979d36e19c042d89d936443e768a78b0675690b35eb663d19e0eae71
   languageName: node
   linkType: hard
 
@@ -25339,7 +25339,7 @@ __metadata:
 
 "zstd-codec@patch:zstd-codec@0.1.4#../../patches/zstd-codec.patch::locator=%40foxglove%2Fmcap-support%40workspace%3Apackages%2Fmcap-support":
   version: 0.1.4
-  resolution: "zstd-codec@patch:zstd-codec@npm%3A0.1.4#../../patches/zstd-codec.patch::version=0.1.4&hash=a862de&locator=%40foxglove%2Fmcap-support%40workspace%3Apackages%2Fmcap-support"
+  resolution: "zstd-codec@patch:zstd-codec@npm%3A0.1.4#../../patches/zstd-codec.patch::version=0.1.4&hash=201ecd&locator=%40foxglove%2Fmcap-support%40workspace%3Apackages%2Fmcap-support"
   checksum: 08a5e329950cb926581ea3a0a46131676e05fcbcdc59faebe2d7c66036562694c9a266140183848facb08fa06e5f6db7e55e23dac27f219e7dbb69f124b62554
   languageName: node
   linkType: hard
