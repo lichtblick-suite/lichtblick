@@ -2532,7 +2532,7 @@ __metadata:
     wasm-lz4: 2.0.0
     webpack: 5.75.0
     xacro-parser: 0.3.9
-    zustand: 4.2.0
+    zustand: 4.3.2
   languageName: unknown
   linkType: soft
 
@@ -25293,9 +25293,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"zustand@npm:4.2.0":
-  version: 4.2.0
-  resolution: "zustand@npm:4.2.0"
+"zustand@npm:4.3.2":
+  version: 4.3.2
+  resolution: "zustand@npm:4.3.2"
   dependencies:
     use-sync-external-store: 1.2.0
   peerDependencies:
@@ -25306,7 +25306,7 @@ __metadata:
       optional: true
     react:
       optional: true
-  checksum: 70f9c9272c7ee6534d16e23e1f273822fdf4cb17a9865db588946ed250a51e169f8b0dcaf0a8d15e866239182263c015bca644756a69314ea1da4fe61ba1b67f
+  checksum: fc443abf5bc9deac0d4e375847e7914e44c7ffc9f7f09b60e466cb9bbbcf5a46706bf2f9c8b9e6e6c9a1c5aea0bd6123cbf9fbcd39788ae27d8494d505969ae8
   languageName: node
   linkType: hard
 
