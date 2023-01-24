@@ -2530,7 +2530,7 @@ __metadata:
     use-pan-and-zoom: 0.6.5
     uuid: 9.0.0
     wasm-lz4: 2.0.0
-    webpack: 5.74.0
+    webpack: 5.75.0
     xacro-parser: 0.3.9
     zustand: 4.2.0
   languageName: unknown
@@ -8129,7 +8129,7 @@ __metadata:
     mathjs: 11.5.0
     react: 17.0.2
     react-dom: 17.0.2
-    webpack: 5.74.0
+    webpack: 5.75.0
     webpack-dev-server: 4.11.1
   languageName: unknown
   linkType: soft
@@ -10481,7 +10481,7 @@ __metadata:
     tinycolor2: 1.4.2
     tss-react: 4.5.2
     utif: 3.1.0
-    webpack: 5.74.0
+    webpack: 5.75.0
     webpack-dev-server: 4.11.1
   languageName: unknown
   linkType: soft
@@ -12896,7 +12896,7 @@ __metadata:
     tslib: 2.4.1
     typescript: 4.9.4
     typescript-plugin-css-modules: 4.1.1
-    webpack: 5.74.0
+    webpack: 5.75.0
     webpack-cli: 5.0.1
     webpack-dev-server: 4.11.1
     webpack-hot-middleware: 2.25.3
@@ -24553,7 +24553,7 @@ __metadata:
     playwright: 1.29.2
     react: 17.0.2
     react-dom: 17.0.2
-    webpack: 5.74.0
+    webpack: 5.75.0
     webpack-dev-server: 4.11.1
   languageName: unknown
   linkType: soft
@@ -24829,9 +24829,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"webpack@npm:5.74.0, webpack@npm:>=4.43.0 <6.0.0, webpack@npm:^5.1.0, webpack@npm:^5.9.0":
-  version: 5.74.0
-  resolution: "webpack@npm:5.74.0"
+"webpack@npm:5.75.0, webpack@npm:>=4.43.0 <6.0.0, webpack@npm:^5.1.0, webpack@npm:^5.9.0":
+  version: 5.75.0
+  resolution: "webpack@npm:5.75.0"
   dependencies:
     "@types/eslint-scope": ^3.7.3
     "@types/estree": ^0.0.51
@@ -24862,7 +24862,7 @@ __metadata:
       optional: true
   bin:
     webpack: bin/webpack.js
-  checksum: 320c41369a75051b19e18c63f408b3dcc481852e992f83d311771c5ec0f05f2946385e8ebef62030cf3587f0a3d2f12779ffdb191569a966847289ba7313f946
+  checksum: 2bcc5f3c195f375944e8af2f00bf2feea39cb9fda5f763b0d1b00077f1c51783db25c94d3fae96a07dead9fa085e6ae7474417e5ab31719c9776ea5969ceb83a
   languageName: node
   linkType: hard
 
