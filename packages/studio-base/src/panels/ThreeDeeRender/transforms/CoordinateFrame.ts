@@ -39,6 +39,9 @@ export class CoordinateFrame {
   public readonly id: string;
   public maxStorageTime: Duration;
   public maxCapacity: number;
+  // The percentage of maxCapacity that can be exceeded before overfilled frames in history are cleared
+  // allows for better perf by amortizing trimming of frames every few thousand transforms rather than every new transform
+  public capacityOverfillPercentage: number;
   public offsetPosition: vec3 | undefined;
   public offsetEulerDegrees: vec3 | undefined;
 
@@ -50,10 +53,12 @@ export class CoordinateFrame {
     parent: CoordinateFrame | undefined,
     maxStorageTime: Duration,
     maxCapacity: number,
+    capacityOverfillPercentage = 0.1,
   ) {
     this.id = id;
     this.maxStorageTime = maxStorageTime;
     this.maxCapacity = maxCapacity;
+    this.capacityOverfillPercentage = capacityOverfillPercentage;
     this._parent = parent;
     this._transforms = new ArrayMap<Time, Transform>();
   }
@@ -118,9 +123,10 @@ export class CoordinateFrame {
   }
 
   /**
-   * Add a transform to the transform history maintained by this frame. The
-   * difference between the newest and oldest timestamps cannot be more than
-   * `this.maxStorageTime`, so this addition may purge older transforms.
+   * Add a transform to the transform history maintained by this frame. When the overfill
+   * limit has been reached, the history is trimmed by removing the larger portion of either
+   * frames that are outside of the `maxStorageTime` or the oldest frames over `maxCapacity`.
+   * This is to amortize the cost of trimming the history ever time a new transform is added.
    *
    * If a transform with an identical timestamp already exists, it is replaced.
    */
@@ -128,15 +134,23 @@ export class CoordinateFrame {
     this._transforms.set(time, transform);
 
     // Remove transforms that are too old
-    const endTime = this._transforms.maxKey()!;
-    const startTime = endTime - this.maxStorageTime;
-    while (this._transforms.size > 1 && this._transforms.minKey()! < startTime) {
-      this._transforms.shift();
-    }
+    // percent over the maxCapacity
+    const overfillPercent =
+      Math.max(0, this._transforms.size - this.maxCapacity) / this.maxCapacity;
 
-    // Trim down to the maximum history size
-    while (this._transforms.size > this.maxCapacity) {
-      this._transforms.shift();
+    // Trim down to the maximum history size if we've exceeded the overfill
+    if (overfillPercent > this.capacityOverfillPercentage) {
+      const overfillIndex = this._transforms.size - this.maxCapacity;
+      // guaranteed to be more than minKey
+      let removeBeforeTime = this._transforms.at(overfillIndex)![0];
+      const endTime = this._transforms.maxKey()!;
+      // not guaranteed to be more than minKey
+      const startTime = endTime - this.maxStorageTime;
+      // at the very least we remove the overfill, but if the maxStorageTime enforces a  larger trim we take that
+      // we can't afford to check maxStorageTime every time we add a transform, so we only check it when overfill is full
+      removeBeforeTime = startTime > removeBeforeTime ? startTime : removeBeforeTime;
+
+      this._transforms.removeBefore(removeBeforeTime);
     }
   }
 
