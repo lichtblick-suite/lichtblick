@@ -40,7 +40,7 @@ import ChartJSManager, { InitOpts } from "./ChartJSManager";
 type RpcEvent<EventType> = { id: string; event: EventType };
 
 export type ChartUpdateMessage = {
-  data?: ChartData;
+  data?: ChartData<"scatter">;
   height?: number;
   options?: ChartOptions;
   isBoundsReset: boolean;

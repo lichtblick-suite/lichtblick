@@ -2441,7 +2441,7 @@ __metadata:
     amplitude-js: 8.21.3
     babel-jest: 29.3.1
     browserify-zlib: 0.2.0
-    chart.js: 3.7.0
+    chart.js: 4.2.0
     chartjs-plugin-annotation: 2.1.2
     chartjs-plugin-datalabels: 2.2.0
     chromatic: 6.14.0
@@ -2991,6 +2991,13 @@ __metadata:
     "@jridgewell/resolve-uri": 3.1.0
     "@jridgewell/sourcemap-codec": 1.4.14
   checksum: 9d703b859cff5cd83b7308fd457a431387db5db96bd781a63bf48e183418dd9d3d44e76b9e4ae13237f6abeeb25d739ec9215c1d5bfdd08f66f750a50074a339
+  languageName: node
+  linkType: hard
+
+"@kurkle/color@npm:^0.3.0":
+  version: 0.3.2
+  resolution: "@kurkle/color@npm:0.3.2"
+  checksum: 79e97b31f8f6efb28c69d373f94b0c7480226fe8ec95221f518ac998e156444a496727ce47de6d728eb5c3369288e794cba82cae34253deb0d472d3bfe080e49
   languageName: node
   linkType: hard
 
@@ -8864,10 +8871,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"chart.js@npm:3.7.0":
-  version: 3.7.0
-  resolution: "chart.js@npm:3.7.0"
-  checksum: 050d675d15742e873ec10aa3c77fecd43d16062a5f188615795a08158b8aed591f98f2f067adf5d3f6b710093ea3a754977b2418fb30ff0babdeabbcf6898e5e
+"chart.js@npm:4.2.0":
+  version: 4.2.0
+  resolution: "chart.js@npm:4.2.0"
+  dependencies:
+    "@kurkle/color": ^0.3.0
+  checksum: 281b023c013de8700a5208a45d35248b02119fadb574d0c104c7e0720605e085195ce546fd3aa27625e9db1188fdd5f7491a411463b9c30b7654a5f4b13d8d80
   languageName: node
   linkType: hard
 

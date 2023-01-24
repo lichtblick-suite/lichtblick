@@ -14,6 +14,7 @@
 import { Chart, ChartData, ChartOptions, ChartType } from "chart.js";
 import type { Context as DatalabelContext } from "chartjs-plugin-datalabels";
 import DatalabelPlugin from "chartjs-plugin-datalabels";
+import { type Options as DatalabelsPluginOptions } from "chartjs-plugin-datalabels/types/options";
 import EventEmitter from "eventemitter3";
 
 import { Zoom as ZoomPlugin } from "@foxglove/chartjs-plugin-zoom";
@@ -28,7 +29,7 @@ export type InitOpts = {
   id: string;
   node: { canvas: HTMLCanvasElement };
   type: ChartType;
-  data: ChartData;
+  data: ChartData<"scatter">;
   options: ChartOptions;
   devicePixelRatio: number;
   fontLoaded: Promise<FontFace>;
@@ -189,7 +190,7 @@ export default class ChartJSManager {
     width?: number;
     height?: number;
     isBoundsReset: boolean;
-    data?: ChartData;
+    data?: ChartData<"scatter">;
   }): RpcScales {
     const instance = this._chartInstance;
     if (instance == undefined) {
@@ -282,7 +283,9 @@ export default class ChartJSManager {
     const out = new Array<RpcElement>();
 
     for (const element of elements) {
-      const data = this._chartInstance?.data.datasets[element.datasetIndex]?.data[element.index];
+      const data = (this._chartInstance?.data as ChartData<"scatter"> | undefined)?.datasets[
+        element.datasetIndex
+      ]?.data[element.index];
       if (data == undefined || typeof data === "number") {
         continue;
       }
@@ -354,18 +357,19 @@ export default class ChartJSManager {
 
   // We cannot serialize functions over rpc, we add options that require functions here
   private addFunctionsToConfig(config: ChartOptions): typeof config {
-    if (config.plugins?.datalabels) {
+    const datalabelsOptions = config.plugins?.datalabels as DatalabelsPluginOptions | undefined;
+    if (datalabelsOptions) {
       // process _click_ events to get the label we clicked on
       // this is because datalabels does not export any public methods to lookup the clicked label
       // maybe we contribute a patch upstream with the explanation for web-worker use
-      config.plugins.datalabels.listeners = {
+      datalabelsOptions.listeners = {
         click: (context: DatalabelContext) => {
           this._lastDatalabelClickContext = context;
         },
       };
 
       // Only display labels for datapoints that include a "label" property
-      config.plugins.datalabels.formatter = (value: { label?: string }, _context: unknown) => {
+      datalabelsOptions.formatter = (value: { label?: string }, _context: unknown) => {
         // Return "null" if we don't want this label to be displayed.
         // Returning "undefined" falls back to the default formatting and will display
         // eslint-disable-next-line no-restricted-syntax
@@ -373,8 +377,8 @@ export default class ChartJSManager {
       };
 
       // Override color so that it can be set per-dataset.
-      const staticColor = config.plugins.datalabels.color ?? "white";
-      config.plugins.datalabels.color = (context: DatalabelContext) => {
+      const staticColor = datalabelsOptions.color ?? "white";
+      datalabelsOptions.color = (context: DatalabelContext) => {
         const value = context.dataset.data[context.dataIndex];
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         return (value as any)?.labelColor ?? staticColor;

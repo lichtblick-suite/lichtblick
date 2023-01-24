@@ -100,10 +100,6 @@ const useStyles = makeStyles()((theme) => ({
 
 type ChartComponentProps = ComponentProps<typeof ChartComponent>;
 
-// Chartjs typings use _null_ to indicate _gaps_ in the dataset
-// eslint-disable-next-line no-restricted-syntax
-const ChartNull = null;
-
 const selectGlobalBounds = (store: TimelineInteractionStateStore) => store.globalBounds;
 const selectSetGlobalBounds = (store: TimelineInteractionStateStore) => store.setGlobalBounds;
 
@@ -429,7 +425,7 @@ export default function TimeBasedChart(props: Props): JSX.Element {
       },
       ...props.plugins,
       annotation: { annotations: props.annotations },
-    } as ChartOptions["plugins"];
+    };
   }, [props.annotations, props.plugins, props.zoom, zoomMode]);
 
   // To avoid making a new xScale identity on all updates that might change the min/max
@@ -611,17 +607,15 @@ export default function TimeBasedChart(props: Props): JSX.Element {
           dataset.showLine !== true
             ? downsampleScatter(dataset, bounds)
             : downsampleTimeseries(dataset, bounds);
-        // NaN item values are now allowed, instead we convert these to undefined entries
-        // which will create _gaps_ in the line
-        const nanToNulldata = downsampled.data.map((item) => {
+        // NaN item values create gaps in the line
+        const undefinedToNanData = downsampled.data.map((item) => {
           if (item == undefined || isNaN(item.x) || isNaN(item.y)) {
-            // Chartjs typings use _null_ to indicate a gap
-            return ChartNull;
+            return { x: NaN, y: NaN };
           }
           return item;
         });
 
-        return { ...downsampled, data: nanToNulldata };
+        return { ...downsampled, data: undefinedToNanData };
       });
     },
     [height, width],
