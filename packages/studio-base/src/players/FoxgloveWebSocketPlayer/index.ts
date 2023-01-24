@@ -360,12 +360,6 @@ export default class FoxgloveWebSocketPlayer implements Player {
           this._topicsStats.set(topic, stats);
         }
         stats.numMessages++;
-        stats.firstMessageTime ??= receiveTime;
-        if (stats.lastMessageTime == undefined) {
-          stats.lastMessageTime = receiveTime;
-        } else if (isGreaterThan(receiveTime, stats.lastMessageTime)) {
-          stats.lastMessageTime = receiveTime;
-        }
       } catch (error) {
         this._problems.addProblem(`message:${chanInfo.channel.topic}`, {
           severity: "error",

@@ -210,9 +210,11 @@ export type Topic = {
 export type TopicStats = {
   // The number of messages observed on the topic.
   numMessages: number;
-  // Timestamp of the first observed message on this topic.
+  // Timestamp of the first observed message on this topic. Only set for static data sources such as
+  // local files or servers that provide a fixed set of data.
   firstMessageTime?: Time;
-  // Timestamp of the last observed message on this topic.
+  // Timestamp of the last observed message on this topic. Only set for static data sources such as
+  // local files or servers that provide a fixed set of data.
   lastMessageTime?: Time;
 };
 

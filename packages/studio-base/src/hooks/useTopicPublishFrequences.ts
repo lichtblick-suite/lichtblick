@@ -5,7 +5,7 @@
 import { useMemo, useRef } from "react";
 import { DeepReadonly } from "ts-essentials";
 
-import { areEqual, Time, toSec } from "@foxglove/rostime";
+import { areEqual, fromMillis, Time, toSec } from "@foxglove/rostime";
 import {
   MessagePipelineContext,
   useMessagePipeline,
@@ -83,7 +83,7 @@ const EMPTY_FREQUENCIES: FrequenciesByTopic = {};
  * @property interval - the interval, in frames, between updates.
  */
 export function useTopicPublishFrequencies(): DeepReadonly<FrequenciesByTopic> {
-  const currentTime = useMessagePipeline(selectCurrentTime);
+  const playerCurrentTime = useMessagePipeline(selectCurrentTime);
   const startTime = useMessagePipeline(selectStartTime);
   const endTime = useMessagePipeline(selectEndTime);
   const topicStats = useMessagePipeline(selectTopicStats);
@@ -101,9 +101,10 @@ export function useTopicPublishFrequencies(): DeepReadonly<FrequenciesByTopic> {
   );
 
   const frequencies = useMemo(() => {
-    if (!currentTime) {
+    if (!playerCurrentTime) {
       return EMPTY_FREQUENCIES;
     }
+    const currentTime = fromMillis(Date.now());
 
     const result: FrequenciesByTopic = {};
     for (const [topic, stat] of topicStats) {
@@ -143,7 +144,7 @@ export function useTopicPublishFrequencies(): DeepReadonly<FrequenciesByTopic> {
     }
 
     return result;
-  }, [currentTime, duration, playerIsStaticSource, topicStats]);
+  }, [playerCurrentTime, duration, playerIsStaticSource, topicStats]);
 
   return frequencies;
 }

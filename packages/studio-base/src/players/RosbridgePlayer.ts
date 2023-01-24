@@ -21,7 +21,7 @@ import roslib from "@foxglove/roslibjs";
 import { parse as parseMessageDefinition } from "@foxglove/rosmsg";
 import { LazyMessageReader } from "@foxglove/rosmsg-serialization";
 import { MessageReader as ROS2MessageReader } from "@foxglove/rosmsg2-serialization";
-import { Time, fromMillis, toSec, isGreaterThan } from "@foxglove/rostime";
+import { Time, fromMillis, toSec } from "@foxglove/rostime";
 import { ParameterValue } from "@foxglove/studio";
 import PlayerProblemManager from "@foxglove/studio-base/players/PlayerProblemManager";
 import {
@@ -535,12 +535,6 @@ export default class RosbridgePlayer implements Player {
               this._providerTopicsStats.set(topicName, stats);
             }
             stats.numMessages++;
-            stats.firstMessageTime ??= receiveTime;
-            if (stats.lastMessageTime == undefined) {
-              stats.lastMessageTime = receiveTime;
-            } else if (isGreaterThan(receiveTime, stats.lastMessageTime)) {
-              stats.lastMessageTime = receiveTime;
-            }
           }
         } catch (error) {
           this._problems.addProblem(problemId, {
