@@ -2500,7 +2500,7 @@ __metadata:
     react-resize-detector: 7.1.2
     react-svg-loader: 3.0.3
     react-table: 7.8.0
-    react-transition-group: 4.4.2
+    react-transition-group: 4.4.5
     react-use: 17.4.0
     react-virtualized: 9.22.3
     react-window: 1.8.8
@@ -20322,22 +20322,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-transition-group@npm:4.4.2":
-  version: 4.4.2
-  resolution: "react-transition-group@npm:4.4.2"
-  dependencies:
-    "@babel/runtime": ^7.5.5
-    dom-helpers: ^5.0.1
-    loose-envify: ^1.4.0
-    prop-types: ^15.6.2
-  peerDependencies:
-    react: ">=16.6.0"
-    react-dom: ">=16.6.0"
-  checksum: b67bf5b3e86dbab72d658b9a52a3589e5960583ab28c7c66272427d8fe30d4c7de422d5046ae96bd2683cdf80cc3264b2516f5ce80cae1dbe6cf3ca6dda392c5
-  languageName: node
-  linkType: hard
-
-"react-transition-group@npm:^4.4.5":
+"react-transition-group@npm:4.4.5, react-transition-group@npm:^4.4.5":
   version: 4.4.5
   resolution: "react-transition-group@npm:4.4.5"
   dependencies:
