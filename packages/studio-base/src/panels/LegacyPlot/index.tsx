@@ -398,7 +398,7 @@ function TwoDimensionalPlot(props: Props) {
     if (!message) {
       return <EmptyState>Waiting for next message</EmptyState>;
     } else if (emptyMessage) {
-      <EmptyState>No 2D Plot data (lines, points, polygons) to visualize</EmptyState>;
+      return <EmptyState>No 2D Plot data (lines, points, polygons) to visualize</EmptyState>;
     }
 
     return undefined;
