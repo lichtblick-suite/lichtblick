@@ -11,7 +11,7 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { useRef, useLayoutEffect, useState } from "react";
+import { useLayoutEffect, useState } from "react";
 import { useResizeDetector } from "react-resize-detector";
 
 type Draw = (context: CanvasRenderingContext2D, width: number, height: number) => void;
@@ -25,15 +25,16 @@ const AutoSizingCanvas = ({
   draw,
   overrideDevicePixelRatioForTest,
 }: AutoSizingCanvasProps): JSX.Element => {
-  const canvasRef = useRef<HTMLCanvasElement>(ReactNull);
-
   // Use a debounce and 0 refresh rate to avoid triggering a resize observation while handling
   // an existing resize observation.
   // https://github.com/maslianok/react-resize-detector/issues/45
-  const { width, height } = useResizeDetector({
+  const {
+    width,
+    height,
+    ref: canvasRef,
+  } = useResizeDetector<HTMLCanvasElement>({
     refreshRate: 0,
     refreshMode: "debounce",
-    targetRef: canvasRef,
   });
 
   const [pixelRatio, setPixelRatio] = useState(window.devicePixelRatio);
