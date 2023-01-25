@@ -2463,7 +2463,7 @@ __metadata:
     fzf: 0.5.1
     gl-matrix: 3.4.3
     hammerjs: 2.0.8
-    idb: 7.0.1
+    idb: 7.1.1
     idb-keyval: 6.2.0
     immer: 9.0.16
     intervals-fn: 3.0.3
@@ -14276,10 +14276,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"idb@npm:7.0.1":
-  version: 7.0.1
-  resolution: "idb@npm:7.0.1"
-  checksum: 61526789562cc3518a1a030c7a06cc98edfcd62795700ff28c701d6f84c178aee4e98bedfc79e6c394ba26084aa4667d6594b1728e5868f305f9b34148662679
+"idb@npm:7.1.1":
+  version: 7.1.1
+  resolution: "idb@npm:7.1.1"
+  checksum: 1973c28d53c784b177bdef9f527ec89ec239ec7cf5fcbd987dae75a16c03f5b7dfcc8c6d3285716fd0309dd57739805390bd9f98ce23b1b7d8849a3b52de8d56
   languageName: node
   linkType: hard
 
@@ -24536,7 +24536,7 @@ __metadata:
     clean-webpack-plugin: 4.0.0
     copy-webpack-plugin: 11.0.0
     html-webpack-plugin: 5.5.0
-    idb: 7.0.1
+    idb: 7.1.1
     playwright: 1.29.2
     react: 17.0.2
     react-dom: 17.0.2
