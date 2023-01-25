@@ -169,7 +169,10 @@ describe("renderState", () => {
       hoverValue: undefined,
       sharedPanelState: {},
       sortedTopics: [{ name: "test", schemaName: "schema" }],
-      subscriptions: [{ topic: "test" }, { topic: "test", convertTo: "otherSchema" }],
+      subscriptions: [
+        { topic: "test" },
+        { topic: "test", convertTo: "otherSchema", preload: true },
+      ],
       messageConverters: [
         {
           fromSchemaName: "schema",

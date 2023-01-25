@@ -378,7 +378,16 @@ function PanelExtensionAdapter(props: PanelExtensionAdapterProps): JSX.Element {
           };
         });
 
-        setLocalSubscriptions(subscribePayloads);
+        // ExtensionPanel-Facing subscription type
+        const localSubs = topics.map<Subscription>((item) => {
+          if (typeof item === "string") {
+            return { topic: item, preload: true };
+          }
+
+          return item;
+        });
+
+        setLocalSubscriptions(localSubs);
         setSubscriptions(panelId, subscribePayloads);
       },
 
