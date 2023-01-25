@@ -170,7 +170,7 @@
     "react-use": "17.4.0",
     "react-virtualized": "9.22.3",
     "react-window": "1.8.8",
-    "readable-stream": "3.6.0",
+    "readable-stream": "4.3.0",
     "rehype-raw": "6.1.1",
     "reselect": "4.1.7",
     "sanitize-html": "2.8.1",
