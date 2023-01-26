@@ -11,6 +11,21 @@ export type PlotXAxisVal =
   | "custom" // Message path data. Preloaded.
   | "currentCustom"; // Message path data. One "current" message at playback time.
 
+/**
+ * Coalesces null, undefined and empty string to undefined.
+ */
+function presence<T>(value: undefined | T): undefined | T {
+  if (value === "") {
+    return undefined;
+  }
+
+  return value == undefined ? undefined : value;
+}
+
+export function plotPathDisplayName(path: Readonly<PlotPath>, index: number): string {
+  return presence(path.label) ?? presence(path.value) ?? `Series ${index + 1}`;
+}
+
 type DeprecatedPlotConfig = {
   showSidebar?: boolean;
   sidebarWidth?: number;

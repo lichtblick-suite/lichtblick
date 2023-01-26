@@ -23,8 +23,16 @@ export default {
   decorators: [Wrapper],
 };
 
+const labeledPaths = paths.map((path, index) => {
+  if (index % 2 === 0) {
+    return path;
+  } else {
+    return { ...path, label: `Label ${index}` };
+  }
+});
+
 const exampleConfig: PlotConfig = {
-  paths,
+  paths: labeledPaths,
   xAxisVal: "timestamp",
   showLegend: true,
   isSynced: true,

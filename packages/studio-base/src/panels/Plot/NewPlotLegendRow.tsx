@@ -5,7 +5,6 @@
 import CircleIcon from "@mui/icons-material/Circle";
 import CircleOutlinedIcon from "@mui/icons-material/CircleOutlined";
 import CircleTwoToneIcon from "@mui/icons-material/CircleTwoTone";
-import CloseIcon from "@mui/icons-material/Close";
 import ErrorIcon from "@mui/icons-material/Error";
 import { IconButton, Tooltip, Typography } from "@mui/material";
 import { ComponentProps, useMemo, useState } from "react";
@@ -17,6 +16,7 @@ import TimeBasedChart from "@foxglove/studio-base/components/TimeBasedChart";
 import { useSelectedPanels } from "@foxglove/studio-base/context/CurrentLayoutContext";
 import { useHoverValue } from "@foxglove/studio-base/context/TimelineInteractionStateContext";
 import { useWorkspace } from "@foxglove/studio-base/context/WorkspaceContext";
+import { plotPathDisplayName } from "@foxglove/studio-base/panels/Plot/types";
 import { getLineColor } from "@foxglove/studio-base/util/plotColors";
 
 import { PlotPath } from "./internalTypes";
@@ -37,6 +37,7 @@ const ROW_HEIGHT = 28;
 const useStyles = makeStyles<void, "plotName">()((theme, _params, classes) => ({
   root: {
     display: "contents",
+    cursor: "pointer",
 
     "&:hover, &:focus-within": {
       "& > *:last-child": {
@@ -70,6 +71,9 @@ const useStyles = makeStyles<void, "plotName">()((theme, _params, classes) => ({
     marginLeft: theme.spacing(0.125),
     fontSize: theme.typography.pxToRem(14),
   },
+  disabledPathLabel: {
+    opacity: 0.5,
+  },
   plotName: {
     display: "flex",
     alignItems: "center",
@@ -82,29 +86,6 @@ const useStyles = makeStyles<void, "plotName">()((theme, _params, classes) => ({
     alignItems: "center",
     height: ROW_HEIGHT,
     padding: theme.spacing(0.25),
-  },
-  actionButton: {
-    padding: `${theme.spacing(0.25)} !important`,
-    color: theme.palette.text.secondary,
-
-    "&:hover": {
-      color: theme.palette.text.primary,
-    },
-  },
-  actions: {
-    height: ROW_HEIGHT,
-    display: "flex",
-    flexDirection: "row",
-    alignItems: "center",
-    gap: theme.spacing(0.25),
-    padding: theme.spacing(0.25),
-    position: "sticky",
-    right: 0,
-    opacity: 0,
-
-    "&:hover": {
-      opacity: 1,
-    },
   },
 }));
 
@@ -198,8 +179,13 @@ export function NewPlotLegendRow({
         className={classes.plotName}
         style={{ gridColumn: !showPlotValuesInLegend ? "span 2" : undefined }}
       >
-        <Typography noWrap={true} flex="auto" variant="subtitle2">
-          {path.label ?? `Series ${index + 1}`}
+        <Typography
+          noWrap={true}
+          flex="auto"
+          variant="subtitle2"
+          className={cx({ [classes.disabledPathLabel]: !path.enabled })}
+        >
+          {plotPathDisplayName(path, index)}
         </Typography>
         {hasMismatchedDataLength && (
           <Tooltip
@@ -222,20 +208,6 @@ export function NewPlotLegendRow({
           </Typography>
         </div>
       )}
-      <div className={classes.actions}>
-        <IconButton
-          className={classes.actionButton}
-          size="small"
-          title={`Remove ${path.value}`}
-          onClick={() => {
-            const newPaths = paths.slice();
-            newPaths.splice(index, 1);
-            savePaths(newPaths);
-          }}
-        >
-          <CloseIcon fontSize="small" />
-        </IconButton>
-      </div>
     </div>
   );
 }
