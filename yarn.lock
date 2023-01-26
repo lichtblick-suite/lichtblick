@@ -2435,7 +2435,7 @@ __metadata:
     "@types/wicg-file-system-access": 2020.9.5
     "@uiw/react-textarea-code-editor": 2.0.6
     amplitude-js: 8.21.3
-    babel-jest: 29.3.1
+    babel-jest: 29.4.0
     browserify-zlib: 0.2.0
     chart.js: 4.2.0
     chartjs-plugin-annotation: 2.1.2
@@ -2878,7 +2878,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@jest/transform@npm:^29.3.1, @jest/transform@npm:^29.4.0":
+"@jest/transform@npm:^29.4.0":
   version: 29.4.0
   resolution: "@jest/transform@npm:29.4.0"
   dependencies:
@@ -5236,16 +5236,16 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/babel__core@npm:^7.1.14, @types/babel__core@npm:^7.1.20":
-  version: 7.1.20
-  resolution: "@types/babel__core@npm:7.1.20"
+"@types/babel__core@npm:^7.1.14, @types/babel__core@npm:^7.20.0":
+  version: 7.20.0
+  resolution: "@types/babel__core@npm:7.20.0"
   dependencies:
-    "@babel/parser": ^7.1.0
-    "@babel/types": ^7.0.0
+    "@babel/parser": ^7.20.7
+    "@babel/types": ^7.20.7
     "@types/babel__generator": "*"
     "@types/babel__template": "*"
     "@types/babel__traverse": "*"
-  checksum: a09c4f0456552547a5b8a5a009a3daec4d362f622168f8e08bda0ded2da0a65ab0b1642e23c433b3616721f5701dc34a996c5bde5baeaea53eda98f438043f2c
+  checksum: 49b601a0a7637f1f387442c8156bd086cfd10ff4b82b0e1994e73a6396643b5435366fb33d6b604eade8467cca594ef97adcbc412aede90bb112ebe88d0ad6df
   languageName: node
   linkType: hard
 
@@ -7766,24 +7766,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"babel-jest@npm:29.3.1":
-  version: 29.3.1
-  resolution: "babel-jest@npm:29.3.1"
-  dependencies:
-    "@jest/transform": ^29.3.1
-    "@types/babel__core": ^7.1.14
-    babel-plugin-istanbul: ^6.1.1
-    babel-preset-jest: ^29.2.0
-    chalk: ^4.0.0
-    graceful-fs: ^4.2.9
-    slash: ^3.0.0
-  peerDependencies:
-    "@babel/core": ^7.8.0
-  checksum: 793848238a771a931ddeb5930b9ec8ab800522ac8d64933665698f4a39603d157e572e20b57d79610277e1df88d3ee82b180d59a21f3570388f602beeb38a595
-  languageName: node
-  linkType: hard
-
-"babel-jest@npm:^29.4.0":
+"babel-jest@npm:29.4.0, babel-jest@npm:^29.4.0":
   version: 29.4.0
   resolution: "babel-jest@npm:29.4.0"
   dependencies:
@@ -7988,7 +7971,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"babel-preset-jest@npm:^29.2.0, babel-preset-jest@npm:^29.4.0":
+"babel-preset-jest@npm:^29.4.0":
   version: 29.4.0
   resolution: "babel-preset-jest@npm:29.4.0"
   dependencies:
@@ -12850,7 +12833,7 @@ __metadata:
     "@storybook/builder-webpack5": 6.5.15
     "@storybook/manager-webpack5": 6.5.15
     "@storybook/react": 6.5.15
-    "@types/babel__core": ^7.1.20
+    "@types/babel__core": ^7.20.0
     "@types/babel__preset-env": ^7.9.2
     "@types/case-sensitive-paths-webpack-plugin": 2.1.6
     "@types/jest": 29.4.0
