@@ -6,6 +6,7 @@ import { toNanoSec } from "@foxglove/rostime";
 import { SettingsTreeAction, SettingsTreeFields } from "@foxglove/studio";
 import type { RosValue } from "@foxglove/studio-base/players/types";
 
+import { RenderableLineStrip } from "./markers/RenderableLineStrip";
 import { BaseUserData, Renderable } from "../Renderable";
 import { Renderer } from "../Renderer";
 import { PartialMessage, PartialMessageEvent, SceneExtension } from "../SceneExtension";
@@ -24,7 +25,6 @@ import {
 import { BaseSettings } from "../settings";
 import { topicIsConvertibleToSchema } from "../topicIsConvertibleToSchema";
 import { makePose } from "../transforms";
-import { RenderableLineStrip } from "./markers/RenderableLineStrip";
 
 export type LayerSettingsPolygon = BaseSettings & {
   lineWidth: number;

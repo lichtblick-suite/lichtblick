@@ -4,12 +4,12 @@
 
 import * as THREE from "three";
 
+import { RenderableMarker } from "./RenderableMarker";
+import { makeStandardMaterial } from "./materials";
 import type { Renderer } from "../../Renderer";
 import { rgbToThreeColor } from "../../color";
 import { DetailLevel, sphereSubdivisions } from "../../lod";
 import { Marker } from "../../ros";
-import { RenderableMarker } from "./RenderableMarker";
-import { makeStandardMaterial } from "./materials";
 
 export class RenderableSphere extends RenderableMarker {
   public mesh: THREE.Mesh<THREE.SphereGeometry, THREE.MeshStandardMaterial>;

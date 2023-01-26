@@ -25,6 +25,8 @@ import {
 } from "@foxglove/studio-base/panels/ThreeDeeRender/renderables/pointExtensionUtils";
 import type { RosObject, RosValue } from "@foxglove/studio-base/players/types";
 
+import { colorHasTransparency, getColorConverter } from "./pointClouds/colors";
+import { FieldReader, getReader, isSupportedField } from "./pointClouds/fieldReaders";
 import { BaseUserData } from "../Renderable";
 import { Renderer } from "../Renderer";
 import { PartialMessage, PartialMessageEvent, SceneExtension } from "../SceneExtension";
@@ -45,8 +47,6 @@ import {
 } from "../ros";
 import { topicIsConvertibleToSchema } from "../topicIsConvertibleToSchema";
 import { makePose, Pose } from "../transforms";
-import { colorHasTransparency, getColorConverter } from "./pointClouds/colors";
-import { FieldReader, getReader, isSupportedField } from "./pointClouds/fieldReaders";
 
 type PointCloudFieldReaders = {
   xReader: FieldReader;

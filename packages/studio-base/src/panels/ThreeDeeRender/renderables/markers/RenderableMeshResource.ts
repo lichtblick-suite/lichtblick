@@ -4,13 +4,13 @@
 
 import * as THREE from "three";
 
+import { RenderableMarker } from "./RenderableMarker";
+import { makeStandardMaterial } from "./materials";
 import type { Renderer } from "../../Renderer";
 import { rgbToThreeColor } from "../../color";
 import { disposeMeshesRecursive } from "../../dispose";
 import { Marker } from "../../ros";
 import { removeLights, replaceMaterials } from "../models";
-import { RenderableMarker } from "./RenderableMarker";
-import { makeStandardMaterial } from "./materials";
 
 export type GltfMesh = THREE.Mesh<
   THREE.BufferGeometry,

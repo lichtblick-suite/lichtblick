@@ -9,7 +9,6 @@ import fs from "fs";
 import Logger from "@foxglove/log";
 import { AppSetting } from "@foxglove/studio-base/src/AppSetting";
 
-import pkgInfo from "../../package.json";
 import StudioAppUpdater from "./StudioAppUpdater";
 import StudioWindow from "./StudioWindow";
 import getDevModeIcon from "./getDevModeIcon";
@@ -22,6 +21,7 @@ import {
 } from "./rosPackageResources";
 import { getAppSetting } from "./settings";
 import { getTelemetrySettings } from "./telemetry";
+import pkgInfo from "../../package.json";
 
 const log = Logger.getLogger(__filename);
 

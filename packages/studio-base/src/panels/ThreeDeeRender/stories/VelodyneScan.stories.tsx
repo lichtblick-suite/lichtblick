@@ -6,9 +6,9 @@ import { Topic } from "@foxglove/studio-base/players/types";
 import PanelSetup from "@foxglove/studio-base/stories/PanelSetup";
 import { VelodyneScan } from "@foxglove/studio-base/types/Messages";
 
-import ThreeDeeRender from "../index";
 import { rad2deg } from "./common";
 import useDelayedFixture from "./useDelayedFixture";
+import ThreeDeeRender from "../index";
 
 export default {
   title: "panels/ThreeDeeRender",

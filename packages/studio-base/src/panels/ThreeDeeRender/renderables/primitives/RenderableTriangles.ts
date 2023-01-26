@@ -9,10 +9,10 @@ import { Point3, SceneEntity, TriangleListPrimitive } from "@foxglove/schemas";
 import { DynamicBufferGeometry } from "@foxglove/studio-base/panels/ThreeDeeRender/DynamicBufferGeometry";
 import { emptyPose } from "@foxglove/studio-base/util/Pose";
 
+import { RenderablePrimitive } from "./RenderablePrimitive";
 import type { Renderer } from "../../Renderer";
 import { makeRgba, rgbToThreeColor, SRGBToLinear, stringToRgba } from "../../color";
 import { LayerSettingsEntity } from "../SceneEntities";
-import { RenderablePrimitive } from "./RenderablePrimitive";
 
 const tempRgba = makeRgba();
 const tempColor = new THREE.Color();

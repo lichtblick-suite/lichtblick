@@ -8,6 +8,10 @@ import Log from "@foxglove/log";
 import { loadDecompressHandlers } from "@foxglove/mcap-support";
 import { MessageEvent } from "@foxglove/studio-base/players/types";
 
+import { FileReadable } from "./FileReadable";
+import { McapIndexedIterableSource } from "./McapIndexedIterableSource";
+import { McapStreamingIterableSource } from "./McapStreamingIterableSource";
+import { RemoteFileReadable } from "./RemoteFileReadable";
 import {
   IIterableSource,
   IteratorResult,
@@ -16,10 +20,6 @@ import {
   GetBackfillMessagesArgs,
   IterableSourceInitializeArgs,
 } from "../IIterableSource";
-import { FileReadable } from "./FileReadable";
-import { McapIndexedIterableSource } from "./McapIndexedIterableSource";
-import { McapStreamingIterableSource } from "./McapStreamingIterableSource";
-import { RemoteFileReadable } from "./RemoteFileReadable";
 
 const log = Log.getLogger(__filename);
 

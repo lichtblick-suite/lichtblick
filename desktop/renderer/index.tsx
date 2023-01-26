@@ -19,10 +19,10 @@ import {
   waitForFonts,
 } from "@foxglove/studio-base";
 
-import pkgInfo from "../../package.json";
-import { Storage } from "../common/types";
 import Root from "./Root";
 import NativeStorageAppConfiguration from "./services/NativeStorageAppConfiguration";
+import pkgInfo from "../../package.json";
+import { Storage } from "../common/types";
 
 const log = Logger.getLogger(__filename);
 

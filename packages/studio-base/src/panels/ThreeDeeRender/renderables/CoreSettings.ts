@@ -6,6 +6,7 @@ import { cloneDeep, round, set } from "lodash";
 
 import { SettingsTreeAction } from "@foxglove/studio";
 
+import { PublishClickType } from "./PublishClickTool";
 import { DEFAULT_MESH_UP_AXIS } from "../ModelCache";
 import { FollowMode, Renderer, RendererConfig } from "../Renderer";
 import { SceneExtension } from "../SceneExtension";
@@ -13,7 +14,6 @@ import { SettingsTreeEntry } from "../SettingsManager";
 import { DEFAULT_CAMERA_STATE } from "../camera";
 import { PRECISION_DEGREES, PRECISION_DISTANCE, SelectEntry } from "../settings";
 import { CoordinateFrame } from "../transforms";
-import { PublishClickType } from "./PublishClickTool";
 
 export const DEFAULT_LABEL_SCALE_FACTOR = 1;
 export const DEFAULT_AXIS_SCALE = 1;

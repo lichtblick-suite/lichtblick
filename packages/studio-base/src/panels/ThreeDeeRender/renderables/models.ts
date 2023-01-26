@@ -4,8 +4,8 @@
 
 import * as THREE from "three";
 
-import { LoadedModel } from "../ModelCache";
 import { GltfMesh } from "./markers/RenderableMeshResource";
+import { LoadedModel } from "../ModelCache";
 
 export function removeLights(model: LoadedModel): void {
   // Remove lights from the model

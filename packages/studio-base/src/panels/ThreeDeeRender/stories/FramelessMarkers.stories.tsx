@@ -6,10 +6,10 @@ import { MessageEvent } from "@foxglove/studio";
 import { Topic } from "@foxglove/studio-base/players/types";
 import PanelSetup from "@foxglove/studio-base/stories/PanelSetup";
 
-import ThreeDeeRender from "../index";
-import { Header, Marker } from "../ros";
 import { makeColor, rad2deg, TEST_COLORS } from "./common";
 import useDelayedFixture from "./useDelayedFixture";
+import ThreeDeeRender from "../index";
+import { Header, Marker } from "../ros";
 
 export default {
   title: "panels/ThreeDeeRender",

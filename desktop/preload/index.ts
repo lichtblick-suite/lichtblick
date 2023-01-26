@@ -12,6 +12,8 @@ import { PreloaderSockets } from "@foxglove/electron-socket/preloader";
 import Logger from "@foxglove/log";
 import { NetworkInterface, OsContext } from "@foxglove/studio-base/src/OsContext";
 
+import LocalFileStorage from "./LocalFileStorage";
+import { getExtensions, loadExtension, installExtension, uninstallExtension } from "./extensions";
 import pkgInfo from "../../package.json";
 import { decodeRendererArg } from "../common/rendererArgs";
 import {
@@ -21,8 +23,6 @@ import {
   NativeMenuBridge,
   Storage,
 } from "../common/types";
-import LocalFileStorage from "./LocalFileStorage";
-import { getExtensions, loadExtension, installExtension, uninstallExtension } from "./extensions";
 
 const log = Logger.getLogger(__filename);
 

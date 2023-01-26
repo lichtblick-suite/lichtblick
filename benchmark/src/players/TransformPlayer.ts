@@ -21,8 +21,8 @@ import {
 import { RosDatatypes } from "@foxglove/studio-base/types/RosDatatypes";
 import { Quaternion } from "@foxglove/studio-base/util/geometry";
 
-import { BenchmarkStats } from "../BenchmarkStats";
 import { now } from "./time";
+import { BenchmarkStats } from "../BenchmarkStats";
 
 const log = Log.getLogger(__filename);
 

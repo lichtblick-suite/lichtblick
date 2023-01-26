@@ -2,7 +2,6 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import type { Renderer } from "../../Renderer";
 import { RenderableArrows } from "./RenderableArrows";
 import { RenderableCubes } from "./RenderableCubes";
 import { RenderableCylinders } from "./RenderableCylinders";
@@ -13,6 +12,7 @@ import { RenderableSpheres } from "./RenderableSpheres";
 import { RenderableTexts } from "./RenderableTexts";
 import { RenderableTriangles } from "./RenderableTriangles";
 import { PrimitiveType } from "./types";
+import type { Renderer } from "../../Renderer";
 
 const CONSTRUCTORS = {
   [PrimitiveType.CUBES]: RenderableCubes,

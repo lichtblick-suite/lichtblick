@@ -6,9 +6,6 @@ import * as THREE from "three";
 import { LineSegments2 } from "three/examples/jsm/lines/LineSegments2";
 import { LineSegmentsGeometry } from "three/examples/jsm/lines/LineSegmentsGeometry";
 
-import { LineMaterial } from "../../LineMaterial";
-import type { Renderer } from "../../Renderer";
-import { Marker } from "../../ros";
 import { RenderableMarker } from "./RenderableMarker";
 import {
   makeLineMaterial,
@@ -16,6 +13,9 @@ import {
   makeLinePickingMaterial,
   markerHasTransparency,
 } from "./materials";
+import { LineMaterial } from "../../LineMaterial";
+import type { Renderer } from "../../Renderer";
+import { Marker } from "../../ros";
 
 export class RenderableLineList extends RenderableMarker {
   private geometry: LineSegmentsGeometry;

@@ -29,6 +29,8 @@ import {
 import { Color, Point2D } from "@foxglove/studio-base/types/Messages";
 import sendNotification from "@foxglove/studio-base/util/sendNotification";
 
+import { HitmapRenderContext } from "./HitmapRenderContext";
+import { buildMarkerData, calculateZoomScale } from "./util";
 import type {
   MarkerData,
   PanZoom,
@@ -43,8 +45,6 @@ import type {
   TextAnnotation,
   NormalizedImageMessage,
 } from "../types";
-import { HitmapRenderContext } from "./HitmapRenderContext";
-import { buildMarkerData, calculateZoomScale } from "./util";
 
 // Just globally keep track of if we've shown an error in rendering, since typically when you get
 // one error, you'd then get a whole bunch more, which is spammy.

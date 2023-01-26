@@ -9,8 +9,8 @@ import { autoUpdater, UpdateInfo } from "electron-updater";
 import Logger from "@foxglove/log";
 import { AppSetting } from "@foxglove/studio-base/src/AppSetting";
 
-import pkgInfo from "../../package.json";
 import { getAppSetting } from "./settings";
+import pkgInfo from "../../package.json";
 
 const log = Logger.getLogger(__filename);
 

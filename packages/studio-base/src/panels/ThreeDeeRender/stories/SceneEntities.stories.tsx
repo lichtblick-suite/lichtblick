@@ -14,8 +14,8 @@ import { xyzrpyToPose } from "@foxglove/studio-base/panels/ThreeDeeRender/transf
 import { Topic } from "@foxglove/studio-base/players/types";
 import PanelSetup from "@foxglove/studio-base/stories/PanelSetup";
 
-import ThreeDeeRender from "../index";
 import { makeColor, QUAT_IDENTITY, rad2deg } from "./common";
+import ThreeDeeRender from "../index";
 
 export default {
   title: "panels/ThreeDeeRender/SceneEntities",

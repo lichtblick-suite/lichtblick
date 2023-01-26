@@ -18,8 +18,6 @@ import { BaseSettings } from "@foxglove/studio-base/panels/ThreeDeeRender/settin
 import { MAX_DURATION, Pose } from "@foxglove/studio-base/panels/ThreeDeeRender/transforms";
 import { updatePose } from "@foxglove/studio-base/panels/ThreeDeeRender/updatePose";
 
-import { POINTCLOUD_DATATYPES as FOXGLOVE_POINTCLOUD_DATATYPES } from "../foxglove";
-import { PointCloud2, POINTCLOUD_DATATYPES as ROS_POINTCLOUD_DATATYPES, PointField } from "../ros";
 import { LaserScanMaterial } from "./LaserScans";
 import {
   baseColorModeSettingsNode,
@@ -29,6 +27,8 @@ import {
   INTENSITY_FIELDS,
   RGBA_PACKED_FIELDS,
 } from "./pointClouds/colors";
+import { POINTCLOUD_DATATYPES as FOXGLOVE_POINTCLOUD_DATATYPES } from "../foxglove";
+import { PointCloud2, POINTCLOUD_DATATYPES as ROS_POINTCLOUD_DATATYPES, PointField } from "../ros";
 
 export type LayerSettingsPointExtension = BaseSettings &
   ColorModeSettings & {

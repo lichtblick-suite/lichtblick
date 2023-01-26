@@ -2,8 +2,8 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { Storage } from "../../common/types";
 import NativeStorageAppConfiguration from "./NativeStorageAppConfiguration";
+import { Storage } from "../../common/types";
 
 type MockStorage = {
   [K in keyof Storage]: jest.Mock<ReturnType<Storage[K]>, Parameters<Storage[K]>>;

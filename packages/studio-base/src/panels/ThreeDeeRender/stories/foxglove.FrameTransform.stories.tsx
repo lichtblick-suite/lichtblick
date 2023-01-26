@@ -8,10 +8,10 @@ import { MessageEvent } from "@foxglove/studio";
 import { Topic } from "@foxglove/studio-base/players/types";
 import PanelSetup from "@foxglove/studio-base/stories/PanelSetup";
 
-import ThreeDeeRender from "../index";
-import { LegacyFrameTransform } from "../normalizeMessages";
 import { makePass, QUAT_IDENTITY, rad2deg, TEST_COLORS } from "./common";
 import useDelayedFixture from "./useDelayedFixture";
+import ThreeDeeRender from "../index";
+import { LegacyFrameTransform } from "../normalizeMessages";
 
 const VEC3_ZERO = { x: 0, y: 0, z: 0 };
 

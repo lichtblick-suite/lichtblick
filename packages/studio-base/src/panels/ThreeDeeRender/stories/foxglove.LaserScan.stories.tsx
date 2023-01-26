@@ -12,9 +12,9 @@ import { Topic } from "@foxglove/studio-base/players/types";
 import PanelSetup from "@foxglove/studio-base/stories/PanelSetup";
 import { emptyPose } from "@foxglove/studio-base/util/Pose";
 
-import ThreeDeeRender from "../index";
 import { QUAT_IDENTITY, rad2deg } from "./common";
 import useDelayedFixture from "./useDelayedFixture";
+import ThreeDeeRender from "../index";
 
 export default {
   title: "panels/ThreeDeeRender/foxglove.LaserScan",

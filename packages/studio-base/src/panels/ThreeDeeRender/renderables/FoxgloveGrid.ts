@@ -10,14 +10,6 @@ import { SettingsTreeAction } from "@foxglove/studio";
 import { GRID_DATATYPES } from "@foxglove/studio-base/panels/ThreeDeeRender/foxglove";
 import type { RosValue } from "@foxglove/studio-base/players/types";
 
-import { BaseUserData, Renderable } from "../Renderable";
-import { Renderer } from "../Renderer";
-import { PartialMessage, PartialMessageEvent, SceneExtension } from "../SceneExtension";
-import { SettingsTreeEntry, SettingsTreeNodeWithActionHandler } from "../SettingsManager";
-import { rgbaToCssString, rgbaToLinear, stringToRgba } from "../color";
-import { normalizePose, normalizeTime, normalizeByteArray } from "../normalizeMessages";
-import { BaseSettings } from "../settings";
-import { topicIsConvertibleToSchema } from "../topicIsConvertibleToSchema";
 import {
   baseColorModeSettingsNode,
   ColorModeSettings,
@@ -27,6 +19,14 @@ import {
   FS_SRGB_TO_LINEAR,
 } from "./pointClouds/colors";
 import { FieldReader, getReader } from "./pointClouds/fieldReaders";
+import { BaseUserData, Renderable } from "../Renderable";
+import { Renderer } from "../Renderer";
+import { PartialMessage, PartialMessageEvent, SceneExtension } from "../SceneExtension";
+import { SettingsTreeEntry, SettingsTreeNodeWithActionHandler } from "../SettingsManager";
+import { rgbaToCssString, rgbaToLinear, stringToRgba } from "../color";
+import { normalizePose, normalizeTime, normalizeByteArray } from "../normalizeMessages";
+import { BaseSettings } from "../settings";
+import { topicIsConvertibleToSchema } from "../topicIsConvertibleToSchema";
 
 type GridColorModeSettings = ColorModeSettings & {
   // rgba packed modes are only supported for sensor_msgs/PointCloud2

@@ -6,8 +6,6 @@ import { MessageEvent } from "@foxglove/studio";
 import { Topic } from "@foxglove/studio-base/players/types";
 import PanelSetup from "@foxglove/studio-base/stories/PanelSetup";
 
-import ThreeDeeRender from "../index";
-import { Marker, TransformStamped } from "../ros";
 import {
   BASE_LINK_FRAME_ID,
   FIXED_FRAME_ID,
@@ -17,6 +15,8 @@ import {
   SENSOR_FRAME_ID,
 } from "./common";
 import useDelayedFixture from "./useDelayedFixture";
+import ThreeDeeRender from "../index";
+import { Marker, TransformStamped } from "../ros";
 
 export default {
   title: "panels/ThreeDeeRender",

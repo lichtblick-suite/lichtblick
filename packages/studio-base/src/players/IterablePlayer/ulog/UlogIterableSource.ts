@@ -17,6 +17,7 @@ import { RosDatatypes } from "@foxglove/studio-base/types/RosDatatypes";
 import { MessageType, ULog } from "@foxglove/ulog";
 import { BlobReader } from "@foxglove/ulog/web";
 
+import { messageIdToTopic, messageDefinitionToRos, logLevelToRosout } from "./support";
 import {
   IIterableSource,
   IteratorResult,
@@ -25,7 +26,6 @@ import {
   GetBackfillMessagesArgs,
   IterableSourceInitializeArgs,
 } from "../IIterableSource";
-import { messageIdToTopic, messageDefinitionToRos, logLevelToRosout } from "./support";
 
 type UlogOptions = { type: "file"; file: File };
 

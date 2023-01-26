@@ -8,11 +8,11 @@ import path from "path";
 import type { Configuration } from "webpack";
 import "webpack-dev-server";
 
-import packageJson from "../package.json";
 import main from "./webpack.main.config";
 import preload from "./webpack.preload.config";
 import quicklook from "./webpack.quicklook.config";
 import renderer from "./webpack.renderer.config";
+import packageJson from "../package.json";
 
 const isRelease = process.env.RELEASE != undefined;
 

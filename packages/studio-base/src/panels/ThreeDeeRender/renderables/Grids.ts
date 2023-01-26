@@ -7,6 +7,7 @@ import { maxBy } from "lodash";
 import Logger from "@foxglove/log";
 import { SettingsTreeAction, SettingsTreeFields } from "@foxglove/studio";
 
+import { RenderableLineList } from "./markers/RenderableLineList";
 import { BaseUserData, Renderable } from "../Renderable";
 import { Renderer } from "../Renderer";
 import { SceneExtension } from "../SceneExtension";
@@ -16,7 +17,6 @@ import { vec3TupleApproxEquals } from "../math";
 import { Marker, MarkerAction, MarkerType, TIME_ZERO, Vector3 } from "../ros";
 import { CustomLayerSettings, PRECISION_DEGREES, PRECISION_DISTANCE } from "../settings";
 import { makePose, xyzrpyToPose } from "../transforms";
-import { RenderableLineList } from "./markers/RenderableLineList";
 
 const log = Logger.getLogger(__filename);
 

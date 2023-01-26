@@ -5,13 +5,13 @@
 import * as THREE from "three";
 import { clamp } from "three/src/math/MathUtils";
 
+import { RenderableMarker } from "./RenderableMarker";
+import { makeStandardMaterial } from "./materials";
 import type { Renderer } from "../../Renderer";
 import { rgbToThreeColor } from "../../color";
 import { arrowHeadSubdivisions, arrowShaftSubdivisions, DetailLevel } from "../../lod";
 import { getRotationTo } from "../../math";
 import { Marker } from "../../ros";
-import { RenderableMarker } from "./RenderableMarker";
-import { makeStandardMaterial } from "./materials";
 
 const SHAFT_LENGTH = 0.77;
 const SHAFT_DIAMETER = 1.0;

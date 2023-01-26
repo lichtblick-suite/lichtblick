@@ -4,11 +4,11 @@
 
 import * as THREE from "three";
 
+import { RenderableMarker } from "./RenderableMarker";
+import { markerHasTransparency, makeStandardVertexColorMaterial } from "./materials";
 import type { Renderer } from "../../Renderer";
 import { rgbaToLinear } from "../../color";
 import { Marker, Vector3 } from "../../ros";
-import { RenderableMarker } from "./RenderableMarker";
-import { markerHasTransparency, makeStandardVertexColorMaterial } from "./materials";
 
 const NOT_DIVISIBLE_ERR = "NOT_DIVISIBLE";
 const EMPTY_ERR = "EMPTY";

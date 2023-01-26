@@ -20,10 +20,10 @@ import ExpandingToolbar, {
   ToolGroupFixedSizePane,
 } from "@foxglove/studio-base/components/ExpandingToolbar";
 
-import { Pose } from "../transforms";
 import ObjectDetails from "./ObjectDetails";
 import TopicLink from "./TopicLink";
 import { InteractionData } from "./types";
+import { Pose } from "../transforms";
 
 // ts-prune-ignore-next
 export const OBJECT_TAB_TYPE = "Selected object";

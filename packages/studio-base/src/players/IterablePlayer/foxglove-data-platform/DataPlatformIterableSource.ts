@@ -26,6 +26,7 @@ import ConsoleApi, { CoverageResponse } from "@foxglove/studio-base/services/Con
 import { RosDatatypes } from "@foxglove/studio-base/types/RosDatatypes";
 import { formatTimeRaw } from "@foxglove/studio-base/util/time";
 
+import { streamMessages, ParsedChannelAndEncodings, StreamParams } from "./streamMessages";
 import {
   IIterableSource,
   Initalization,
@@ -34,7 +35,6 @@ import {
   GetBackfillMessagesArgs,
   IterableSourceInitializeArgs,
 } from "../IIterableSource";
-import { streamMessages, ParsedChannelAndEncodings, StreamParams } from "./streamMessages";
 
 const log = Logger.getLogger(__filename);
 

@@ -23,13 +23,13 @@ import {
   APP_BAR_FOREGROUND_COLOR,
 } from "@foxglove/studio-base/src/components/AppBar/constants";
 
-import pkgInfo from "../../package.json";
-import { encodeRendererArg } from "../common/rendererArgs";
 import StudioAppUpdater from "./StudioAppUpdater";
 import getDevModeIcon from "./getDevModeIcon";
 import { getAppSetting } from "./settings";
 import { simulateUserClick } from "./simulateUserClick";
 import { getTelemetrySettings } from "./telemetry";
+import pkgInfo from "../../package.json";
+import { encodeRendererArg } from "../common/rendererArgs";
 
 declare const MAIN_WINDOW_WEBPACK_ENTRY: string;
 

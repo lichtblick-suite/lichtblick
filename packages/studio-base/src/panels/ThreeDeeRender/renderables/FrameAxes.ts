@@ -12,13 +12,6 @@ import { SettingsTreeAction, SettingsTreeChildren, SettingsTreeFields } from "@f
 import type { RosValue } from "@foxglove/studio-base/players/types";
 import { Label } from "@foxglove/three-text";
 
-import { BaseUserData, Renderable } from "../Renderable";
-import { Renderer, RendererConfig } from "../Renderer";
-import { SceneExtension } from "../SceneExtension";
-import { SettingsTreeEntry } from "../SettingsManager";
-import { getLuminance, stringToRgb } from "../color";
-import { BaseSettings, fieldSize, PRECISION_DEGREES, PRECISION_DISTANCE } from "../settings";
-import { Duration, Transform, makePose, CoordinateFrame, MAX_DURATION } from "../transforms";
 import { Axis, AXIS_LENGTH } from "./Axis";
 import {
   DEFAULT_AXIS_SCALE,
@@ -28,6 +21,13 @@ import {
   DEFAULT_TF_LABEL_SIZE,
 } from "./CoreSettings";
 import { makeLinePickingMaterial } from "./markers/materials";
+import { BaseUserData, Renderable } from "../Renderable";
+import { Renderer, RendererConfig } from "../Renderer";
+import { SceneExtension } from "../SceneExtension";
+import { SettingsTreeEntry } from "../SettingsManager";
+import { getLuminance, stringToRgb } from "../color";
+import { BaseSettings, fieldSize, PRECISION_DEGREES, PRECISION_DISTANCE } from "../settings";
+import { Duration, Transform, makePose, CoordinateFrame, MAX_DURATION } from "../transforms";
 
 export type LayerSettingsTransform = BaseSettings & {
   xyzOffset: Readonly<[number | undefined, number | undefined, number | undefined]>;

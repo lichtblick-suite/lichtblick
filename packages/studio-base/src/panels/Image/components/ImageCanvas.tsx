@@ -23,6 +23,7 @@ import { Topic } from "@foxglove/studio-base/players/types";
 import Rpc from "@foxglove/studio-base/util/Rpc";
 import WebWorkerManager from "@foxglove/studio-base/util/WebWorkerManager";
 
+import ZoomMenu from "./ZoomMenu";
 import { renderImage } from "../lib/renderImage";
 import { Config, SaveImagePanelConfig } from "../types";
 import type {
@@ -33,7 +34,6 @@ import type {
   RenderArgs,
   NormalizedImageMessage,
 } from "../types";
-import ZoomMenu from "./ZoomMenu";
 
 type OnFinishRenderImage = () => void;
 

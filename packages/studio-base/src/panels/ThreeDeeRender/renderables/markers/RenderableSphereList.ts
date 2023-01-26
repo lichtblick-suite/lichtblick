@@ -4,12 +4,12 @@
 
 import * as THREE from "three";
 
-import { DynamicInstancedMesh } from "../../DynamicInstancedMesh";
-import type { Renderer } from "../../Renderer";
-import { Marker } from "../../ros";
 import { RenderableMarker } from "./RenderableMarker";
 import { createGeometry as createSphereGeometry } from "./RenderableSphere";
 import { markerHasTransparency, makeStandardInstancedMaterial } from "./materials";
+import { DynamicInstancedMesh } from "../../DynamicInstancedMesh";
+import type { Renderer } from "../../Renderer";
+import { Marker } from "../../ros";
 
 export class RenderableSphereList extends RenderableMarker {
   private mesh: DynamicInstancedMesh<THREE.SphereGeometry, THREE.MeshStandardMaterial>;

@@ -18,10 +18,10 @@ import { Topic } from "@foxglove/studio-base/players/types";
 import { useReadySignal } from "@foxglove/studio-base/stories/ReadySignalContext";
 import { CameraInfo } from "@foxglove/studio-base/types/Messages";
 
+import { ImageCanvas } from "./ImageCanvas";
 import ImageView from "../index";
 import { useCompressedImage, annotations } from "../storySupport";
 import { Config } from "../types";
-import { ImageCanvas } from "./ImageCanvas";
 
 const cameraInfo: CameraInfo = {
   width: 400,

@@ -8,13 +8,13 @@ import { toNanoSec } from "@foxglove/rostime";
 import { ModelPrimitive, SceneEntity } from "@foxglove/schemas";
 import { emptyPose } from "@foxglove/studio-base/util/Pose";
 
+import { RenderablePrimitive } from "./RenderablePrimitive";
 import { LoadedModel } from "../../ModelCache";
 import type { Renderer } from "../../Renderer";
 import { makeRgba, rgbToThreeColor, stringToRgba } from "../../color";
 import { disposeMeshesRecursive } from "../../dispose";
 import { LayerSettingsEntity } from "../SceneEntities";
 import { removeLights, replaceMaterials } from "../models";
-import { RenderablePrimitive } from "./RenderablePrimitive";
 
 const tempRgba = makeRgba();
 

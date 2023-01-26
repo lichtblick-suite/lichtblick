@@ -2,8 +2,6 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import type { Renderer } from "../../Renderer";
-import { MarkerType, Marker } from "../../ros";
 import { RenderableArrow } from "./RenderableArrow";
 import { RenderableCube } from "./RenderableCube";
 import { RenderableCubeList } from "./RenderableCubeList";
@@ -17,6 +15,8 @@ import { RenderableSphere } from "./RenderableSphere";
 import { RenderableSphereList } from "./RenderableSphereList";
 import { RenderableTextViewFacing } from "./RenderableTextViewFacing";
 import { RenderableTriangleList } from "./RenderableTriangleList";
+import type { Renderer } from "../../Renderer";
+import { MarkerType, Marker } from "../../ros";
 
 const CONSTRUCTORS = {
   [MarkerType.ARROW]: RenderableArrow,

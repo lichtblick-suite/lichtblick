@@ -6,11 +6,11 @@ import { MessageEvent } from "@foxglove/studio";
 import { Topic } from "@foxglove/studio-base/players/types";
 import PanelSetup from "@foxglove/studio-base/stories/PanelSetup";
 
+import { makeColor, OBJ_CUBE_MESH_RESOURCE, STL_CUBE_MESH_RESOURCE } from "./common";
+import useDelayedFixture from "./useDelayedFixture";
 import { DEFAULT_CAMERA_STATE } from "../camera";
 import ThreeDeeRender from "../index";
 import { Marker } from "../ros";
-import { makeColor, OBJ_CUBE_MESH_RESOURCE, STL_CUBE_MESH_RESOURCE } from "./common";
-import useDelayedFixture from "./useDelayedFixture";
 
 export default {
   title: "panels/ThreeDeeRender",

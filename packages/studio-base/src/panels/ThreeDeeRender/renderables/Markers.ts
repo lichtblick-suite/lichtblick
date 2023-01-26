@@ -7,6 +7,7 @@ import { set } from "lodash";
 import { toNanoSec } from "@foxglove/rostime";
 import { SettingsTreeAction } from "@foxglove/studio";
 
+import { LayerSettingsMarkerNamespace, TopicMarkers } from "./TopicMarkers";
 import { SELECTED_ID_VARIABLE } from "../Renderable";
 import { Renderer } from "../Renderer";
 import { PartialMessage, PartialMessageEvent, SceneExtension } from "../SceneExtension";
@@ -24,7 +25,6 @@ import { Marker, MarkerArray, MARKER_ARRAY_DATATYPES, MARKER_DATATYPES } from ".
 import { BaseSettings } from "../settings";
 import { topicIsConvertibleToSchema } from "../topicIsConvertibleToSchema";
 import { makePose } from "../transforms";
-import { LayerSettingsMarkerNamespace, TopicMarkers } from "./TopicMarkers";
 
 export type LayerSettingsMarker = BaseSettings & {
   color: string | undefined;

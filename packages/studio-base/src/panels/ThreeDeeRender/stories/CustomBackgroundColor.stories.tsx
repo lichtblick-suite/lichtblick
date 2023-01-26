@@ -4,8 +4,8 @@
 
 import PanelSetup from "@foxglove/studio-base/stories/PanelSetup";
 
-import ThreeDeeRender from "../index";
 import useDelayedFixture from "./useDelayedFixture";
+import ThreeDeeRender from "../index";
 
 export default {
   title: "panels/ThreeDeeRender",

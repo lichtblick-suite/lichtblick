@@ -10,6 +10,15 @@ import { SettingsTreeAction } from "@foxglove/studio";
 import type { RosObject, RosValue } from "@foxglove/studio-base/players/types";
 import { emptyPose } from "@foxglove/studio-base/util/Pose";
 
+import { colorHasTransparency, getColorConverter } from "./pointClouds/colors";
+import {
+  createPoints,
+  DEFAULT_POINT_SETTINGS,
+  LayerSettingsPointExtension,
+  pointSettingsNode,
+  PointsAtTime,
+  PointsHistoryRenderable,
+} from "./pointExtensionUtils";
 import { DynamicBufferGeometry } from "../DynamicBufferGeometry";
 import { BaseUserData } from "../Renderable";
 import { Renderer } from "../Renderer";
@@ -20,15 +29,6 @@ import { normalizeFloat32Array, normalizeTime, normalizePose } from "../normaliz
 import { LASERSCAN_DATATYPES as ROS_LASERSCAN_DATATYPES, LaserScan as RosLaserScan } from "../ros";
 import { topicIsConvertibleToSchema } from "../topicIsConvertibleToSchema";
 import { Pose } from "../transforms";
-import { colorHasTransparency, getColorConverter } from "./pointClouds/colors";
-import {
-  createPoints,
-  DEFAULT_POINT_SETTINGS,
-  LayerSettingsPointExtension,
-  pointSettingsNode,
-  PointsAtTime,
-  PointsHistoryRenderable,
-} from "./pointExtensionUtils";
 
 type LayerSettingsLaserScan = LayerSettingsPointExtension;
 const DEFAULT_SETTINGS = DEFAULT_POINT_SETTINGS;

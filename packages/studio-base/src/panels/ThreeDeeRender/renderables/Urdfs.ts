@@ -13,6 +13,11 @@ import { SettingsTreeAction, SettingsTreeChildren, SettingsTreeFields } from "@f
 import { eulerToQuaternion } from "@foxglove/studio-base/util/geometry";
 import isDesktopApp from "@foxglove/studio-base/util/isDesktopApp";
 
+import { RenderableCube } from "./markers/RenderableCube";
+import { RenderableCylinder } from "./markers/RenderableCylinder";
+import { RenderableMeshResource } from "./markers/RenderableMeshResource";
+import { RenderableSphere } from "./markers/RenderableSphere";
+import { missingTransformMessage, MISSING_TRANSFORM } from "./transforms";
 import { BaseUserData, Renderable } from "../Renderable";
 import { Renderer } from "../Renderer";
 import { PartialMessageEvent, SceneExtension } from "../SceneExtension";
@@ -35,11 +40,6 @@ import {
 } from "../settings";
 import { Pose, makePose, TransformTree } from "../transforms";
 import { updatePose } from "../updatePose";
-import { RenderableCube } from "./markers/RenderableCube";
-import { RenderableCylinder } from "./markers/RenderableCylinder";
-import { RenderableMeshResource } from "./markers/RenderableMeshResource";
-import { RenderableSphere } from "./markers/RenderableSphere";
-import { missingTransformMessage, MISSING_TRANSFORM } from "./transforms";
 
 const log = Logger.getLogger(__filename);
 

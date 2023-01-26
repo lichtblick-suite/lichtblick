@@ -26,6 +26,7 @@ import { CameraCalibration, CompressedImage, RawImage } from "@foxglove/schemas"
 import { SettingsTreeAction, SettingsTreeFields } from "@foxglove/studio";
 import type { RosValue } from "@foxglove/studio-base/players/types";
 
+import { cameraInfosEqual, normalizeCameraInfo, projectPixel } from "./projections";
 import { BaseUserData, Renderable } from "../Renderable";
 import type { Renderer } from "../Renderer";
 import { PartialMessage, PartialMessageEvent, SceneExtension } from "../SceneExtension";
@@ -48,7 +49,6 @@ import {
 import { BaseSettings, PRECISION_DISTANCE, SelectEntry } from "../settings";
 import { topicIsConvertibleToSchema } from "../topicIsConvertibleToSchema";
 import { makePose } from "../transforms";
-import { cameraInfosEqual, normalizeCameraInfo, projectPixel } from "./projections";
 
 const log = Logger.getLogger(__filename);
 void log;

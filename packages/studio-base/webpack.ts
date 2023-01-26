@@ -5,8 +5,8 @@
 import CircularDependencyPlugin from "circular-dependency-plugin";
 import { ESBuildMinifyPlugin } from "esbuild-loader";
 import ForkTsCheckerWebpackPlugin from "fork-ts-checker-webpack-plugin";
-import MonacoWebpackPlugin from "monaco-editor-webpack-plugin";
 import monacoPkg from "monaco-editor/package.json";
+import MonacoWebpackPlugin from "monaco-editor-webpack-plugin";
 import path from "path";
 import ReactRefreshTypescript from "react-refresh-typescript";
 import ts from "typescript";

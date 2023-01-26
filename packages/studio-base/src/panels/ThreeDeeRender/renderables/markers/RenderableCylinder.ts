@@ -4,12 +4,12 @@
 
 import * as THREE from "three";
 
+import { RenderableMarker } from "./RenderableMarker";
+import { makeStandardMaterial } from "./materials";
 import type { Renderer } from "../../Renderer";
 import { rgbToThreeColor } from "../../color";
 import { cylinderSubdivisions, DetailLevel } from "../../lod";
 import { Marker } from "../../ros";
-import { RenderableMarker } from "./RenderableMarker";
-import { makeStandardMaterial } from "./materials";
 
 export class RenderableCylinder extends RenderableMarker {
   private mesh: THREE.Mesh<THREE.CylinderGeometry, THREE.MeshStandardMaterial>;

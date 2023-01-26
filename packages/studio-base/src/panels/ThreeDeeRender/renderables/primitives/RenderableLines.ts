@@ -13,10 +13,10 @@ import { LinePrimitive, LineType, SceneEntity } from "@foxglove/schemas";
 import { LineMaterial } from "@foxglove/studio-base/panels/ThreeDeeRender/LineMaterial";
 import { emptyPose } from "@foxglove/studio-base/util/Pose";
 
+import { RenderablePrimitive } from "./RenderablePrimitive";
 import type { Renderer } from "../../Renderer";
 import { makeRgba, rgbToThreeColor, SRGBToLinear, stringToRgba } from "../../color";
 import { LayerSettingsEntity } from "../SceneEntities";
-import { RenderablePrimitive } from "./RenderablePrimitive";
 
 const tempRgba = makeRgba();
 

@@ -5,8 +5,8 @@
 import { Topic } from "@foxglove/studio-base/players/types";
 import { downloadFiles } from "@foxglove/studio-base/util/download";
 
-import { Config, NormalizedImageMessage } from "../types";
 import { renderImage } from "./renderImage";
+import { Config, NormalizedImageMessage } from "../types";
 
 export async function downloadImage(
   normalizedImageMessage: NormalizedImageMessage,

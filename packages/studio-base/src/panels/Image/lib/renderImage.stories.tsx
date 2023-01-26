@@ -5,9 +5,9 @@
 import { Story } from "@storybook/react";
 import { useEffect, useMemo, useRef } from "react";
 
-import { useCompressedImage, cameraInfo, annotations, foxgloveAnnotations } from "../storySupport";
 import { normalizeAnnotations } from "./normalizeAnnotations";
 import { renderImage } from "./renderImage";
+import { useCompressedImage, cameraInfo, annotations, foxgloveAnnotations } from "../storySupport";
 
 export default {
   title: "panels/Image/renderImage",
