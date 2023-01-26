@@ -70,7 +70,6 @@ export function buildSettingsTree(
 
   const settings: SettingsTreeNodes = {
     general: {
-      icon: "Settings",
       fields: {
         assetId: {
           label: "Asset",

@@ -18,7 +18,6 @@ export function buildSettingsTree(
 
   return {
     general: {
-      icon: "Settings",
       fields: {
         topicToRender: {
           input: "select",

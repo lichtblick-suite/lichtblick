@@ -112,7 +112,6 @@ export function buildSettingsTree(
   const settings: SettingsTreeNodes = {
     general: {
       label: "General",
-      icon: "Settings",
       fields: generalSettings,
     },
     topics: {

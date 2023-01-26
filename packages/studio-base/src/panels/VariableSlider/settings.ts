@@ -16,7 +16,6 @@ function buildSettingsTree(config: VariableSliderConfig): SettingsTreeNodes {
   return {
     general: {
       label: "General",
-      icon: "Settings",
       fields: {
         min: {
           label: "Min",

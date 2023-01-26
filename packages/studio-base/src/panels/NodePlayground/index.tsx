@@ -116,7 +116,6 @@ export type Explorer = undefined | "nodes" | "utils" | "templates";
 function buildSettingsTree(config: Config): SettingsTreeNodes {
   return {
     general: {
-      icon: "Settings",
       fields: {
         autoFormatOnSave: {
           input: "boolean",
