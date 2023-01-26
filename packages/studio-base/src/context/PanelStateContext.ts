@@ -28,6 +28,9 @@ export type PanelStateStore = {
    */
   settingsTrees: Record<string, ImmutableSettingsTree | undefined>;
 
+  /** Per-panel default titles. */
+  defaultTitles: Record<string, string | undefined>;
+
   /**
    * Transient state shared between panels, keyed by panel type.
    */
@@ -42,6 +45,9 @@ export type PanelStateStore = {
    * Updates the settings UI for the given panel.
    */
   updateSettingsTree: (panelId: string, settingsTree: ImmutableSettingsTree | undefined) => void;
+
+  /** Updates the default title for the given panel. */
+  updateDefaultTitle: (panelId: string, title: string | undefined) => void;
 
   /**
    * Update the transient state associated with a particular panel type.

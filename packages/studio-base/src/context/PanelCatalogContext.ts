@@ -18,6 +18,9 @@ export type PanelInfo = {
   thumbnail?: string;
   help?: React.ReactNode;
 
+  /** Set this to true if a panel has custom toolbar items and so cannot be renamed. */
+  hasCustomToolbar?: boolean;
+
   /**
    * Tooltip to show on the settings button to help new users find the panel settings. Shown on
    * panels of this type across the whole app until the settings button is clicked.

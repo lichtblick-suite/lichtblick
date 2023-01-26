@@ -201,6 +201,7 @@ export function Gauge({ context }: Props): JSX.Element {
 
   useEffect(() => {
     context.saveState(config);
+    context.setDefaultPanelTitle(config.path === "" ? undefined : config.path);
   }, [config, context]);
 
   useEffect(() => {

@@ -12,8 +12,8 @@
 //   You may not use this file except in compliance with the License.
 
 import DownloadIcon from "@mui/icons-material/Download";
-import { Typography, useTheme } from "@mui/material";
-import { compact, isEmpty, isNumber, uniq } from "lodash";
+import { useTheme } from "@mui/material";
+import { compact, isNumber, uniq } from "lodash";
 import memoizeWeak from "memoize-weak";
 import { useEffect, useCallback, useMemo, ComponentProps } from "react";
 
@@ -57,6 +57,7 @@ import { useAppConfigurationValue } from "@foxglove/studio-base/hooks";
 import { NewPlotLegend } from "@foxglove/studio-base/panels/Plot/NewPlotLegend";
 import { OnClickArg as OnChartClickArgs } from "@foxglove/studio-base/src/components/Chart";
 import { OpenSiblingPanel, PanelConfig, SaveConfig } from "@foxglove/studio-base/types/panels";
+import { PANEL_TITLE_CONFIG_KEY } from "@foxglove/studio-base/util/layout";
 import { getTimestampForMessage } from "@foxglove/studio-base/util/time";
 
 import PlotChart from "./PlotChart";
@@ -214,7 +215,7 @@ function selectEndTime(ctx: MessagePipelineContext) {
 function Plot(props: Props) {
   const { saveConfig, config } = props;
   const {
-    title,
+    title: legacyTitle,
     followingViewWidth,
     paths: yAxisPaths,
     minXValue,
@@ -231,6 +232,18 @@ function Plot(props: Props) {
     xAxisPath,
     sidebarDimension = config.sidebarWidth ?? defaultSidebarDimension,
   } = config;
+
+  useEffect(() => {
+    if (legacyTitle) {
+      // Migrate legacy Plot-specific title setting to new global title setting
+      // https://github.com/foxglove/studio/pull/5225
+      saveConfig({
+        title: undefined,
+        [PANEL_TITLE_CONFIG_KEY]: legacyTitle,
+      } as Partial<PlotConfig>);
+    }
+  }, [legacyTitle, saveConfig]);
+
   const theme = useTheme();
 
   useEffect(() => {
@@ -516,11 +529,7 @@ function Plot(props: Props) {
             <DownloadIcon fontSize="small" />
           </ToolbarIconButton>
         }
-      >
-        <Typography noWrap variant="body2" color="text.secondary" flex="auto">
-          {isEmpty(title) ? "Plot" : title}
-        </Typography>
-      </PanelToolbar>
+      />
       <Stack
         direction={stackDirection}
         flex="auto"

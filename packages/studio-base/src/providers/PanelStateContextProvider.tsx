@@ -28,6 +28,7 @@ function createPanelStateStore(): StoreApi<PanelStateStore> {
       sequenceNumbers: {},
       settingsTrees: {},
       sharedPanelState: {},
+      defaultTitles: {},
 
       incrementSequenceNumber: (panelId: string) => {
         set((state) => {
@@ -47,6 +48,10 @@ function createPanelStateStore(): StoreApi<PanelStateStore> {
             [panelId]: settingsTree,
           },
         }));
+      },
+
+      updateDefaultTitle: (panelId, defaultTitle) => {
+        set((state) => ({ defaultTitles: { ...state.defaultTitles, [panelId]: defaultTitle } }));
       },
 
       updateSharedPanelState: (type: string, data: SharedPanelState) => {
@@ -88,6 +93,7 @@ export function usePanelSettingsTreeUpdate(): (newTree: ImmutableSettingsTree) =
 }
 
 const updateSharedDataSelector = (store: PanelStateStore) => store.updateSharedPanelState;
+const updateDefaultTitleSelector = (store: PanelStateStore) => store.updateDefaultTitle;
 
 /**
  * Returns a [state, setState] pair that can be used to read and update shared transient
@@ -117,6 +123,29 @@ export function useSharedPanelState(): [
   );
 
   return [sharedData, update];
+}
+
+/**
+ * Returns a [state, setState] pair that can be used to read and update a panel's default title.
+ */
+export function useDefaultPanelTitle(): [
+  string | undefined,
+  (defaultTitle: string | undefined) => void,
+] {
+  const panelId = usePanelContext().id;
+
+  const selector = useCallback((store: PanelStateStore) => store.defaultTitles[panelId], [panelId]);
+
+  const updateDefaultTitle = usePanelStateStore(updateDefaultTitleSelector);
+  const defaultTitle = usePanelStateStore(selector);
+  const update = useCallback(
+    (newValue: string | undefined) => {
+      updateDefaultTitle(panelId, newValue);
+    },
+    [panelId, updateDefaultTitle],
+  );
+
+  return [defaultTitle, update];
 }
 
 /**

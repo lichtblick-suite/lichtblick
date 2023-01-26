@@ -41,6 +41,7 @@ const builtin: PanelInfo[] = [
     description: "Display ROS DiagnosticArray messages for a specific hardware_id.",
     thumbnail: diagnosticStatusThumbnail,
     module: async () => await import("./diagnostics/DiagnosticStatusPanel"),
+    hasCustomToolbar: true,
   },
   {
     title: `Diagnostics – Summary (ROS)`,
@@ -48,6 +49,7 @@ const builtin: PanelInfo[] = [
     description: "Display a summary of all ROS DiagnosticArray messages.",
     thumbnail: diagnosticSummaryThumbnail,
     module: async () => await import("./diagnostics/DiagnosticSummary"),
+    hasCustomToolbar: true,
   },
   {
     title: "Image",
@@ -55,6 +57,7 @@ const builtin: PanelInfo[] = [
     description: "Display annotated images.",
     thumbnail: imageViewThumbnail,
     module: async () => await import("./Image"),
+    hasCustomToolbar: true,
   },
   {
     title: "Indicator",
@@ -111,6 +114,7 @@ const builtin: PanelInfo[] = [
     description: "Inspect topic messages.",
     thumbnail: rawMessagesThumbnail,
     module: async () => await import("./RawMessages"),
+    hasCustomToolbar: true,
   },
   {
     title: "Log",
@@ -118,6 +122,7 @@ const builtin: PanelInfo[] = [
     description: "Display logs by node and severity level.",
     thumbnail: logThumbnail,
     module: async () => await import("./Log"),
+    hasCustomToolbar: true,
   },
   {
     title: "State Transitions",
@@ -132,6 +137,7 @@ const builtin: PanelInfo[] = [
     description: "Display topic messages in a tabular format.",
     thumbnail: tableThumbnail,
     module: async () => await import("./Table"),
+    hasCustomToolbar: true,
   },
   {
     title: "URDF Viewer",

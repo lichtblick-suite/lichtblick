@@ -6,12 +6,18 @@ import ClearIcon from "@mui/icons-material/Clear";
 import SearchIcon from "@mui/icons-material/Search";
 import { AppBar, IconButton, TextField } from "@mui/material";
 import memoizeWeak from "memoize-weak";
-import { useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { DeepReadonly } from "ts-essentials";
 import { makeStyles } from "tss-react/mui";
 
-import { SettingsTree } from "@foxglove/studio";
+import { SettingsTree, SettingsTreeAction, SettingsTreeField } from "@foxglove/studio";
+import { useConfigById } from "@foxglove/studio-base/PanelAPI";
+import { FieldEditor } from "@foxglove/studio-base/components/SettingsTreeEditor/FieldEditor";
 import Stack from "@foxglove/studio-base/components/Stack";
+import { useSelectedPanels } from "@foxglove/studio-base/context/CurrentLayoutContext";
+import { usePanelCatalog } from "@foxglove/studio-base/context/PanelCatalogContext";
+import { usePanelStateStore } from "@foxglove/studio-base/context/PanelStateContext";
+import { getPanelTypeFromId, PANEL_TITLE_CONFIG_KEY } from "@foxglove/studio-base/util/layout";
 
 import { NodeEditor } from "./NodeEditor";
 import { filterTreeNodes, prepareSettingsNodes } from "./utils";
@@ -51,6 +57,48 @@ export default function SettingsTreeEditor({
 
   const definedNodes = useMemo(() => prepareSettingsNodes(filteredNodes), [filteredNodes]);
 
+  const { selectedPanelIds } = useSelectedPanels();
+  const selectedPanelId = useMemo(
+    () => (selectedPanelIds.length === 1 ? selectedPanelIds[0] : undefined),
+    [selectedPanelIds],
+  );
+  const panelCatalog = usePanelCatalog();
+  const panelType = useMemo(
+    () => (selectedPanelId != undefined ? getPanelTypeFromId(selectedPanelId) : undefined),
+    [selectedPanelId],
+  );
+  const panelInfo = useMemo(
+    () => (panelType != undefined ? panelCatalog.getPanelByType(panelType) : undefined),
+    [panelCatalog, panelType],
+  );
+  const [config, saveConfig] = useConfigById(selectedPanelId);
+  const defaultPanelTitle = usePanelStateStore((state) =>
+    selectedPanelId ? state.defaultTitles[selectedPanelId] : undefined,
+  );
+  const customPanelTitle =
+    typeof config?.[PANEL_TITLE_CONFIG_KEY] === "string"
+      ? config[PANEL_TITLE_CONFIG_KEY]
+      : undefined;
+  const panelTitleField = useMemo<SettingsTreeField>(
+    () => ({
+      input: "string",
+      label: "Title",
+      placeholder: defaultPanelTitle ?? panelInfo?.title,
+      value: customPanelTitle,
+    }),
+    [customPanelTitle, defaultPanelTitle, panelInfo?.title],
+  );
+  const handleTitleChange = useCallback(
+    (action: SettingsTreeAction) => {
+      if (action.action === "update" && action.payload.path[0] === PANEL_TITLE_CONFIG_KEY) {
+        saveConfig({ [PANEL_TITLE_CONFIG_KEY]: action.payload.value });
+      }
+    },
+    [saveConfig],
+  );
+
+  const showTitleField = filterText.length === 0 && panelInfo?.hasCustomToolbar !== true;
+
   return (
     <Stack fullHeight>
       {settings.enableFilter === true && (
@@ -79,6 +127,16 @@ export default function SettingsTreeEditor({
         </AppBar>
       )}
       <div className={classes.fieldGrid}>
+        {showTitleField && (
+          <>
+            <Stack paddingBottom={0.5} style={{ gridColumn: "span 2" }} />
+            <FieldEditor
+              field={panelTitleField}
+              path={[PANEL_TITLE_CONFIG_KEY]}
+              actionHandler={handleTitleChange}
+            />
+          </>
+        )}
         {definedNodes.map(([key, root]) => (
           <NodeEditor
             key={key}

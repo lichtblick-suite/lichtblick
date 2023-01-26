@@ -362,6 +362,12 @@ declare module "@foxglove/studio" {
      * the representation of the panel settings in the editor.
      */
     updatePanelSettingsEditor(settings: Readonly<SettingsTree>): void;
+
+    /**
+     * Updates the panel's default title. Users can always override the default title by editing it
+     * manually. A value of `undefined` will display the panel's name in the title bar.
+     */
+    setDefaultPanelTitle(defaultTitle: string | undefined): void;
   };
 
   export type ExtensionPanelRegistration = {
