@@ -2433,7 +2433,7 @@ __metadata:
     "@types/url-search-params": 1.1.0
     "@types/uuid": 9.0.0
     "@types/wicg-file-system-access": 2020.9.5
-    "@uiw/react-textarea-code-editor": 2.0.3
+    "@uiw/react-textarea-code-editor": 2.0.6
     amplitude-js: 8.21.3
     babel-jest: 29.3.1
     browserify-zlib: 0.2.0
@@ -6372,18 +6372,18 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@uiw/react-textarea-code-editor@npm:2.0.3":
-  version: 2.0.3
-  resolution: "@uiw/react-textarea-code-editor@npm:2.0.3"
+"@uiw/react-textarea-code-editor@npm:2.0.6":
+  version: 2.0.6
+  resolution: "@uiw/react-textarea-code-editor@npm:2.0.6"
   dependencies:
     "@babel/runtime": ^7.18.6
     rehype: ~12.0.1
-    rehype-prism-plus: 1.4.1
+    rehype-prism-plus: 1.5.0
   peerDependencies:
     "@babel/runtime": ">=7.10.0"
     react: ">=16.9.0"
     react-dom: ">=16.9.0"
-  checksum: 4187307c45b9ec0ca851fce51836438b0cb97b8c199ea5bb9306aba03af9422d1a51eaf3208ba9e6d86a3880c0d29c048198f4899c1b66b6c3f00cd9285be384
+  checksum: 65e5414c4ef91bfe80bebeab9b69076588ba496a0f7fe77dd013af2f908432dba4cdda1ed07df8572591092a6db5b8ecd2dd7cc0cc960d4b879db1c8c8ba655d
   languageName: node
   linkType: hard
 
@@ -20799,9 +20799,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"rehype-prism-plus@npm:1.4.1":
-  version: 1.4.1
-  resolution: "rehype-prism-plus@npm:1.4.1"
+"rehype-prism-plus@npm:1.5.0":
+  version: 1.5.0
+  resolution: "rehype-prism-plus@npm:1.5.0"
   dependencies:
     hast-util-to-string: ^2.0.0
     parse-numeric-range: ^1.3.0
@@ -20809,7 +20809,7 @@ __metadata:
     rehype-parse: ^8.0.2
     unist-util-filter: ^4.0.0
     unist-util-visit: ^4.0.0
-  checksum: 8397261c776c6668648052a3de78fc6b8cae5246d26f040306a0af96205ae9e24ce58e7c7f208059cd103aeaf9515d43131460d4eb96d8186609789bcf386a36
+  checksum: b1b0af56c1cc2ae6091fda4989f2b8554fb58aff576a3a7566a39e40d5a2e735f13a0dceef0c7942b27b06b3a0061658908d705ae5174fc09d94a3bfe1a2964e
   languageName: node
   linkType: hard
 
