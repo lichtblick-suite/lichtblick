@@ -51,7 +51,7 @@ export function useSettingsTree(
       error,
       fields: {
         path: {
-          label: "Data",
+          label: "Message path",
           input: "messagepath",
           value: config.path,
           error: pathParseError,

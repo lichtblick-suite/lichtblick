@@ -29,8 +29,8 @@ const makeSeriesNode = memoizeWeak((path: PlotPath, index: number): SettingsTree
         value: path.label,
       },
       value: {
+        label: "Message path",
         input: "messagepath",
-        label: "Path",
         value: path.value,
         validTypes: plotableRosTypes,
       },
@@ -149,8 +149,8 @@ function buildSettingsTree(config: PlotConfig, enableSeries: boolean): SettingsT
         xAxisPath:
           config.xAxisVal === "currentCustom" || config.xAxisVal === "custom"
             ? {
+                label: "Message path",
                 input: "messagepath",
-                label: "Path",
                 value: config.xAxisPath?.value ?? "",
                 validTypes: plotableRosTypes,
               }
