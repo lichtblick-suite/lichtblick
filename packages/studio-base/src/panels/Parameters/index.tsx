@@ -11,16 +11,20 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
+import CheckIcon from "@mui/icons-material/Check";
+import ClearIcon from "@mui/icons-material/Clear";
 import {
+  IconButton,
   Table,
   TableBody,
   TableCell,
   TableContainer,
   TableHead,
   TableRow,
+  Tooltip,
   Typography,
 } from "@mui/material";
-import { isObject, union } from "lodash";
+import { isEqual, isObject, union } from "lodash";
 import { ReactElement, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { makeStyles } from "tss-react/mui";
 import { useDebouncedCallback } from "use-debounce";
@@ -116,6 +120,36 @@ function displayableValue(value: unknown): string {
   }
 }
 
+function SubmittableJsonInput(props: {
+  value: unknown;
+  onSubmit: (newVal: unknown) => void;
+}): ReactElement {
+  const [value, setValue] = useState<unknown>(editableValue(props.value));
+
+  return (
+    <Stack direction="row">
+      <JsonInput
+        value={value}
+        onChange={(newVal) => {
+          setValue(newVal);
+        }}
+      />
+      {!isEqual(value, props.value) && [
+        <Tooltip key="submit" title="Submit change">
+          <IconButton onClick={() => props.onSubmit(value)}>
+            <CheckIcon />
+          </IconButton>
+        </Tooltip>,
+        <Tooltip key="reset" title="Reset">
+          <IconButton key="reset" onClick={() => setValue(editableValue(props.value))}>
+            <ClearIcon />
+          </IconButton>
+        </Tooltip>,
+      ]}
+    </Stack>
+  );
+}
+
 function Parameters(): ReactElement {
   const { classes } = useStyles();
 
@@ -128,7 +162,7 @@ function Parameters(): ReactElement {
       (name: string, value: ParameterValue) => setParameterUnbounced(name, value),
       [setParameterUnbounced],
     ),
-    200,
+    500,
   );
 
   const [changedParameters, setChangedParameters] = useState<string[]>([]);
@@ -157,7 +191,7 @@ function Parameters(): ReactElement {
       Array.from(previousParametersRef.current?.keys() ?? []),
     ).filter((name) => {
       const previousValue = previousParametersRef.current?.get(name);
-      return previousValue !== parameters.get(name);
+      return !isEqual(previousValue, parameters.get(name));
     });
 
     setChangedParameters(newChangedParameters);
@@ -190,13 +224,12 @@ function Parameters(): ReactElement {
           <TableBody>
             {parameterNames.map((name) => {
               const displayValue = displayableValue(parameters.get(name));
-              const editValue = editableValue(parameters.get(name));
 
               return (
                 <TableRow
                   hover
                   className={classes.tableRow}
-                  key={`parameter-${name}`}
+                  key={`parameter-${name}-${displayValue}`}
                   selected={!skipAnimation.current && changedParameters.includes(name)}
                 >
                   <TableCell variant="head">
@@ -207,10 +240,9 @@ function Parameters(): ReactElement {
 
                   {canSetParams ? (
                     <TableCell padding="none">
-                      <JsonInput
-                        dataTestId={`parameter-value-input-${displayValue}`}
-                        value={editValue}
-                        onChange={(newVal) => {
+                      <SubmittableJsonInput
+                        value={parameters.get(name)}
+                        onSubmit={(newVal) => {
                           setParameter(name, newVal as ParameterValue);
                         }}
                       />
