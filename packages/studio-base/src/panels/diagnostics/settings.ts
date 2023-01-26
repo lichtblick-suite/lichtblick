@@ -29,7 +29,7 @@ export function buildSummarySettingsTree(
           error: topicError,
           options: topicOptions,
         },
-        sortByLevel: { label: "Sort By Level", input: "boolean", value: config.sortByLevel },
+        sortByLevel: { label: "Sort by level", input: "boolean", value: config.sortByLevel },
       },
     },
   };

@@ -57,7 +57,7 @@ export function buildSettingsTree({
         },
         transformMarkers: {
           input: "boolean",
-          label: "Transform Markers",
+          label: "Transform markers",
           value: config.transformMarkers,
           help: config.transformMarkers
             ? "Markers are being transformed by Foxglove Studio based on the camera model. Click to turn it off."
@@ -65,22 +65,22 @@ export function buildSettingsTree({
         },
         synchronize: {
           input: "boolean",
-          label: "Synchronize Timestamps",
+          label: "Synchronize timestamps",
           value: config.synchronize,
         },
         smooth: {
           input: "boolean",
-          label: "Bilinear Smoothing",
+          label: "Bilinear smoothing",
           value: config.smooth ?? false,
         },
         flipHorizontal: {
           input: "boolean",
-          label: "Flip Horizontal",
+          label: "Flip horizontal",
           value: config.flipHorizontal ?? false,
         },
         flipVertical: {
           input: "boolean",
-          label: "Flip Vertical",
+          label: "Flip vertical",
           value: config.flipVertical ?? false,
         },
         rotation: {
@@ -96,13 +96,13 @@ export function buildSettingsTree({
         },
         minValue: {
           input: "number",
-          label: "Minimum Value (depth images)",
+          label: "Min (depth images)",
           placeholder: "0",
           value: config.minValue,
         },
         maxValue: {
           input: "number",
-          label: "Maximum Value (depth images)",
+          label: "Max (depth images)",
           placeholder: "10000",
           value: config.maxValue,
         },

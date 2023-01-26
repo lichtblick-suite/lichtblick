@@ -235,7 +235,7 @@ export function PanelActionsDropdown({ isUnknownPanel }: Props): JSX.Element {
           onMouseEnter={handleSubmenuMouseEnter}
         >
           <ShapeSubtract20Regular />
-          Change Panel
+          Change panel
           <ChevronRightIcon className={classes.icon} fontSize="small" />
         </MenuItem>
         <ChangePanelMenu anchorEl={subMenuAnchorEl} onClose={handleSubmenuClose} tabId={tabId} />

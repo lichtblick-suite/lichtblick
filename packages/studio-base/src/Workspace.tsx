@@ -525,7 +525,7 @@ export default function Workspace(props: WorkspaceProps): JSX.Element {
     if (enableStudioLogsSidebar) {
       topItems.set("studio-logs-settings", {
         iconName: "BacklogList",
-        title: "Studio Logs Settings",
+        title: "Studio logs settings",
         component: StudioLogsSettingsSidebar,
       });
     }

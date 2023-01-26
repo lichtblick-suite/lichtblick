@@ -76,7 +76,7 @@ export function buildSettingsTree(
   const followTopicOptions = [{ label: "Off", value: "" }, ...eligibleFollowTopicOptions];
   const generalSettings: SettingsTreeFields = {
     layer: {
-      label: "Tile Layer",
+      label: "Tile layer",
       input: "select",
       value: config.layer,
       options: [

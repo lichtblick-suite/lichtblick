@@ -46,7 +46,7 @@ function buildSettingsTree(config: Config, topics: readonly Topic[]): SettingsTr
   const general: SettingsTreeNode = {
     label: "General",
     fields: {
-      publishRate: { label: "Publish Rate", input: "number", value: config.publishRate },
+      publishRate: { label: "Publish rate", input: "number", value: config.publishRate },
       topic: {
         label: "Topic",
         input: "autocomplete",

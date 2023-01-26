@@ -50,10 +50,10 @@ function buildSettingsTree(config: Config): SettingsTreeNodes {
   return {
     general: {
       fields: {
-        advancedView: { label: "Editing Mode", input: "boolean", value: config.advancedView },
-        buttonText: { label: "Button Title", input: "string", value: config.buttonText },
-        buttonTooltip: { label: "Button Tooltip", input: "string", value: config.buttonTooltip },
-        buttonColor: { label: "Button Color", input: "rgb", value: config.buttonColor },
+        advancedView: { label: "Editing mode", input: "boolean", value: config.advancedView },
+        buttonText: { label: "Button title", input: "string", value: config.buttonText },
+        buttonTooltip: { label: "Button tooltip", input: "string", value: config.buttonTooltip },
+        buttonColor: { label: "Button color", input: "rgb", value: config.buttonColor },
       },
     },
   };

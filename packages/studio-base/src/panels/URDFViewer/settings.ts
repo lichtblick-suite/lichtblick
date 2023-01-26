@@ -87,7 +87,7 @@ export function buildSettingsTree(
           value: config.opacity,
         },
         manualControl: {
-          label: "Manual Control",
+          label: "Manual control",
           input: "boolean",
           value: manualControl,
         },

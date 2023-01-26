@@ -58,12 +58,12 @@ export function useSettingsTree(
           validTypes: supportedDataTypes,
         },
         minValue: {
-          label: "Minimum",
+          label: "Min",
           input: "number",
           value: config.minValue,
         },
         maxValue: {
-          label: "Maximum",
+          label: "Max",
           input: "number",
           value: config.maxValue,
         },
