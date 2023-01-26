@@ -130,7 +130,6 @@ export class FrameAxes extends SceneExtension<FrameAxisRenderable> {
     const children: SettingsTreeChildren = {
       settings: {
         label: "Settings",
-        icon: "Settings",
         defaultExpansionState: "collapsed",
         order: 0,
         fields: {
