@@ -2518,7 +2518,7 @@ __metadata:
     tss-react: 4.5.2
     ttypescript: 1.5.15
     typescript: 4.9.4
-    typescript-transform-paths: 3.3.1
+    typescript-transform-paths: 3.4.6
     urdf-loader: 0.10.4
     url-search-params: 1.1.0
     use-debounce: 9.0.3
@@ -23635,14 +23635,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"typescript-transform-paths@npm:3.3.1":
-  version: 3.3.1
-  resolution: "typescript-transform-paths@npm:3.3.1"
+"typescript-transform-paths@npm:3.4.6":
+  version: 3.4.6
+  resolution: "typescript-transform-paths@npm:3.4.6"
   dependencies:
     minimatch: ^3.0.4
   peerDependencies:
     typescript: ">=3.6.5"
-  checksum: aa4d36c2767ae3c8801b03ecfc8cb2a1ca164f82b4abb34f14b20d5184fc62310d02ed34298d68934ba976e281cd7e6ba26ff7e89467e1dca2f561b3e88b306d
+  checksum: 963d57f17b1be6717d8fbccf7740674b7c2919c39f1796886a4a425265b8679093b6dfc6662a64a3260ce57b6718563420deb290ab65df681641039ba6d89ab3
   languageName: node
   linkType: hard
 

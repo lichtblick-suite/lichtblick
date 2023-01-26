@@ -188,7 +188,7 @@
     "tss-react": "4.5.2",
     "ttypescript": "1.5.15",
     "typescript": "4.9.4",
-    "typescript-transform-paths": "3.3.1",
+    "typescript-transform-paths": "3.4.6",
     "urdf-loader": "0.10.4",
     "url-search-params": "1.1.0",
     "use-debounce": "9.0.3",
