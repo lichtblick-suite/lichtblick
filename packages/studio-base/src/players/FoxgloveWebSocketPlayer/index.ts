@@ -186,9 +186,15 @@ export default class FoxgloveWebSocketPlayer implements Player {
     });
 
     this._client.on("serverInfo", (event) => {
+      if (!Array.isArray(event.capabilities)) {
+        this._problems.addProblem("ws:invalid-capabilities", {
+          severity: "warn",
+          message: `Server sent an invalid or missing capabilities field: '${event.capabilities}'`,
+        });
+      }
       this._name = `${this._url}\n${event.name}`;
-      this._serverCapabilities = event.capabilities;
-      this._serverPublishesTime = event.capabilities.includes(ServerCapability.time);
+      this._serverCapabilities = Array.isArray(event.capabilities) ? event.capabilities : [];
+      this._serverPublishesTime = this._serverCapabilities.includes(ServerCapability.time);
       this._supportedEncodings = event.supportedEncodings;
       this._datatypes = new Map();
 
