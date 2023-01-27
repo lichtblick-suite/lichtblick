@@ -57,7 +57,6 @@ const builtin: PanelInfo[] = [
     description: "Display annotated images.",
     thumbnail: imageViewThumbnail,
     module: async () => await import("./Image"),
-    hasCustomToolbar: true,
   },
   {
     title: "Indicator",

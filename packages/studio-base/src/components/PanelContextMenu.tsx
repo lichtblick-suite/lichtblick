@@ -3,18 +3,10 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 import { Divider, ListItemText, Menu, MenuItem } from "@mui/material";
-import { useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
-import {
-  MosaicContext,
-  MosaicNode,
-  MosaicWindowActions,
-  MosaicWindowContext,
-} from "react-mosaic-component";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { DeepReadonly } from "ts-essentials";
 
-import { usePanelContext } from "@foxglove/studio-base/components/PanelContext";
 import { PANEL_ROOT_CLASS_NAME } from "@foxglove/studio-base/components/PanelRoot";
-import { useCurrentLayoutActions } from "@foxglove/studio-base/context/CurrentLayoutContext";
 
 /**
  * Types of items that can be included in a context menu. Either a clickable item
@@ -63,8 +55,6 @@ export function PanelContextMenu(props: PanelContextMenuProps): JSX.Element {
 
   const handleClose = useCallback(() => setPosition(undefined), []);
 
-  const { tabId } = usePanelContext();
-
   const [items, setItems] = useState<undefined | DeepReadonly<PanelContextMenuItem[]>>();
 
   const listener = useCallback(
@@ -76,21 +66,6 @@ export function PanelContextMenu(props: PanelContextMenuProps): JSX.Element {
     },
     [itemsForClickPosition],
   );
-
-  const { closePanel } = useCurrentLayoutActions();
-
-  const { mosaicActions } = useContext(MosaicContext);
-
-  const { mosaicWindowActions }: { mosaicWindowActions: MosaicWindowActions } =
-    useContext(MosaicWindowContext);
-
-  const removePanel = useCallback(() => {
-    closePanel({
-      path: mosaicWindowActions.getPath(),
-      root: mosaicActions.getRoot() as MosaicNode<string>,
-      tabId,
-    });
-  }, [closePanel, mosaicActions, mosaicWindowActions, tabId]);
 
   useEffect(() => {
     const element = rootRef.current;
@@ -106,18 +81,6 @@ export function PanelContextMenu(props: PanelContextMenuProps): JSX.Element {
     };
   }, [listener]);
 
-  const completeItems: DeepReadonly<PanelContextMenuItem[]> = useMemo(() => {
-    return [
-      ...(items ?? []),
-      { type: "divider" },
-      {
-        type: "item",
-        label: "Remove panel",
-        onclick: removePanel,
-      },
-    ];
-  }, [items, removePanel]);
-
   return (
     <div ref={rootRef} onContextMenu={(event) => event.preventDefault()}>
       <Menu
@@ -129,7 +92,7 @@ export function PanelContextMenu(props: PanelContextMenuProps): JSX.Element {
           dense: true,
         }}
       >
-        {completeItems.map((item, index) => {
+        {(items ?? []).map((item, index) => {
           if (item.type === "divider") {
             return <Divider variant="middle" key={`divider_${index}`} />;
           }

@@ -3,7 +3,6 @@
     "ImageViewPanel!1r5tdvh": {
       "cameraTopic": "/CAM_FRONT_LEFT/image_rect_compressed",
       "enabledMarkerTopics": ["/CAM_FRONT_LEFT/annotations", "/CAM_FRONT_LEFT/lidar"],
-      "customMarkerTopicOptions": [],
       "transformMarkers": false,
       "synchronize": false,
       "mode": "fit",
@@ -17,7 +16,6 @@
     "ImageViewPanel!15kmj7r": {
       "cameraTopic": "/CAM_FRONT/image_rect_compressed",
       "enabledMarkerTopics": ["/CAM_FRONT/lidar", "/CAM_FRONT/annotations"],
-      "customMarkerTopicOptions": [],
       "transformMarkers": false,
       "synchronize": false,
       "mode": "fit",
@@ -31,7 +29,6 @@
     "ImageViewPanel!1jn49st": {
       "cameraTopic": "/CAM_FRONT_RIGHT/image_rect_compressed",
       "enabledMarkerTopics": ["/CAM_FRONT_RIGHT/annotations", "/CAM_FRONT_RIGHT/lidar"],
-      "customMarkerTopicOptions": [],
       "transformMarkers": false,
       "synchronize": false,
       "mode": "fit",

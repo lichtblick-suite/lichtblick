@@ -280,7 +280,7 @@ function render({
 
 function paintMarkers(
   ctx: HitmapRenderContext,
-  annotations: Annotation[],
+  annotations: readonly Annotation[],
   cameraModel: PinholeCameraModel | undefined,
   panZoom: PanZoom,
 ) {

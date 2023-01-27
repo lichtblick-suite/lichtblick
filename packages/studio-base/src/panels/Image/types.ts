@@ -5,14 +5,11 @@
 import type { PinholeCameraModel } from "@foxglove/den/image";
 import type { Time } from "@foxglove/studio";
 import type { CameraInfo, Color, ImageMarker, Point2D } from "@foxglove/studio-base/types/Messages";
-import type { SaveConfig } from "@foxglove/studio-base/types/panels";
 
 export type DefaultConfig = {
   cameraTopic: string;
   enabledMarkerTopics: string[];
   synchronize: boolean;
-  /** @deprecated */
-  customMarkerTopicOptions?: string[];
 };
 
 export type Config = DefaultConfig & {
@@ -30,8 +27,6 @@ export type Config = DefaultConfig & {
   zoomPercentage?: number;
 };
 
-export type SaveImagePanelConfig = SaveConfig<Config>;
-
 export type PanZoom = { x: number; y: number; scale: number };
 
 export type ZoomMode = "fit" | "fill" | "other";
@@ -39,7 +34,7 @@ export type ZoomMode = "fit" | "fill" | "other";
 export type Dimensions = { width: number; height: number };
 
 export type RawMarkerData = {
-  markers: Annotation[];
+  markers: readonly Annotation[];
   transformMarkers: boolean;
   cameraInfo?: CameraInfo;
 };
@@ -83,7 +78,7 @@ export type RenderableCanvas = HTMLCanvasElement | OffscreenCanvas;
 export type RenderDimensions = Dimensions & { transform: DOMMatrix };
 
 export type MarkerData = {
-  markers: Annotation[];
+  markers: readonly Annotation[];
   originalWidth?: number; // undefined means no scaling is needed (use the image's size)
   originalHeight?: number; // undefined means no scaling is needed (use the image's size)
   cameraModel?: PinholeCameraModel; // undefined means no transformation is needed

@@ -22,7 +22,7 @@ type RenderState = {
   canvas: OffscreenCanvas;
   dimensions?: RenderDimensions;
   hitmap: OffscreenCanvas;
-  markers: Annotation[];
+  markers: readonly Annotation[];
 };
 
 class ImageCanvasWorker {
