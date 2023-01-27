@@ -558,7 +558,12 @@ export class Urdfs extends SceneExtension<UrdfRenderable> {
     // Parse the URDF
     const loadedRenderable = renderable;
     parseUrdf(urdf)
-      .then((parsed) => this._loadRobot(loadedRenderable, parsed))
+      .then((parsed) => {
+        this._loadRobot(loadedRenderable, parsed);
+        // the frame from the settings update is called before the robot is loaded
+        // need to queue another animation frame after robot has been loaded
+        this.renderer.queueAnimationFrame();
+      })
       .catch((unknown) => {
         const err = unknown as Error;
         log.error(`Failed to parse URDF: ${err.message}`);
