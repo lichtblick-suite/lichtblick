@@ -18,7 +18,6 @@ import { AppEvent } from "@foxglove/studio-base/services/IAnalytics";
 import { OpenDialogViews } from "./types";
 
 export type IStartProps = {
-  supportedLocalFileExtensions?: string[];
   onSelectView: (newValue: OpenDialogViews) => void;
 };
 
@@ -410,21 +409,17 @@ function SidebarItems(props: { onSelectView: (newValue: OpenDialogViews) => void
 }
 
 export default function Start(props: IStartProps): JSX.Element {
-  const { supportedLocalFileExtensions = [], onSelectView } = props;
+  const { onSelectView } = props;
   const { recentSources, selectRecent } = usePlayerSelection();
   const { classes } = useStyles();
   const analytics = useAnalytics();
 
   const startItems = useMemo(() => {
-    const formatter = new Intl.ListFormat("en-US", { style: "long" });
-    const supportedLocalFiles = formatter.format(
-      Array.from(new Set(supportedLocalFileExtensions)).sort(),
-    );
     return [
       {
         key: "open-local-file",
         text: "Open local file",
-        secondaryText: `Supports ${supportedLocalFiles} files.`,
+        secondaryText: "Visualize data directly from your local filesystem.",
         icon: (
           <SvgIcon fontSize="large" color="primary" viewBox="0 0 2048 2048">
             <path d="M1955 1533l-163-162v677h-128v-677l-163 162-90-90 317-317 317 317-90 90zM256 1920h1280v128H128V0h1115l549 549v475h-128V640h-512V128H256v1792zM1280 512h293l-293-293v293z" />
@@ -465,7 +460,7 @@ export default function Start(props: IStartProps): JSX.Element {
         },
       },
     ];
-  }, [analytics, onSelectView, supportedLocalFileExtensions]);
+  }, [analytics, onSelectView]);
 
   return (
     <Stack className={classes.grid}>
