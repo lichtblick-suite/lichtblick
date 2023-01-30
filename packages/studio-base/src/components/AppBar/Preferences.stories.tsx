@@ -3,6 +3,7 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 import { Story } from "@storybook/react";
+import { range } from "lodash";
 
 import { ExtensionInfo, ExtensionLoader } from "@foxglove/studio-base";
 import { PreferencesDialog } from "@foxglove/studio-base/components/AppBar/Preferences";
@@ -11,34 +12,19 @@ import ExtensionMarketplaceContext, {
 } from "@foxglove/studio-base/context/ExtensionMarketplaceContext";
 import ExtensionCatalogProvider from "@foxglove/studio-base/providers/ExtensionCatalogProvider";
 
-const installedExtensions: ExtensionInfo[] = [
-  {
-    id: "publisher.storyextension",
-    name: "privatestoryextension",
-    qualifiedName: "storyextension",
-    displayName: "Private Extension Name",
-    description: "Private extension sample description",
-    publisher: "Private Publisher",
-    homepage: "https://foxglove.dev/",
-    license: "MIT",
-    version: "1.2.10",
-    keywords: ["storybook", "testing"],
-    namespace: "org",
-  },
-  {
-    id: "publisher.storyextension",
-    name: "storyextension",
-    qualifiedName: "storyextension",
-    displayName: "Extension Name",
-    description: "Extension sample description",
-    publisher: "Publisher",
-    homepage: "https://foxglove.dev/",
-    license: "MIT",
-    version: "1.2.10",
-    keywords: ["storybook", "testing"],
-    namespace: "local",
-  },
-];
+const installedExtensions: ExtensionInfo[] = range(1, 10).map((index) => ({
+  id: "publisher.storyextension",
+  name: "privatestoryextension",
+  qualifiedName: "storyextension",
+  displayName: `Private Extension Name ${index + 1}`,
+  description: "Private extension sample description",
+  publisher: "Private Publisher",
+  homepage: "https://foxglove.dev/",
+  license: "MIT",
+  version: `1.${index}`,
+  keywords: ["storybook", "testing"],
+  namespace: index % 2 === 0 ? "local" : "org",
+}));
 
 const marketplaceExtensions: ExtensionInfo[] = [
   {

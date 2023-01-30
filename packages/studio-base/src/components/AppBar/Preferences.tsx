@@ -7,22 +7,21 @@ import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 import SettingsOutlinedIcon from "@mui/icons-material/SettingsOutlined";
 import WarningAmberIcon from "@mui/icons-material/WarningAmber";
 import {
+  Alert,
+  Button,
+  Checkbox,
+  Dialog,
+  DialogActions,
+  DialogProps,
+  FormControlLabel,
   IconButton,
   IconButtonProps,
-  Dialog,
-  DialogProps,
-  Tabs,
-  Tab,
-  FormControlLabel,
-  Checkbox,
-  Grid,
-  Alert,
-  useTheme,
-  useMediaQuery,
-  DialogActions,
-  Button,
-  Typography,
   Link,
+  Tab,
+  Tabs,
+  Typography,
+  useMediaQuery,
+  useTheme,
 } from "@mui/material";
 import { MouseEvent, SyntheticEvent, useState } from "react";
 import { makeStyles } from "tss-react/mui";
@@ -47,19 +46,29 @@ import { useAppConfigurationValue } from "@foxglove/studio-base/hooks";
 import isDesktopApp from "@foxglove/studio-base/util/isDesktopApp";
 
 const useStyles = makeStyles()((theme) => ({
+  layoutGrid: {
+    display: "grid",
+    gap: theme.spacing(2),
+    height: "70vh",
+    paddingLeft: theme.spacing(1),
+    overflowY: "hidden",
+    [theme.breakpoints.up("sm")]: {
+      gridTemplateColumns: "auto minmax(0, 1fr)",
+    },
+  },
   logo: {
     width: 212,
     height: "auto",
     marginLeft: theme.spacing(-1),
   },
   tabPanel: {
-    visibility: "hidden",
+    display: "none",
     marginRight: "-100%",
     width: "100%",
     padding: theme.spacing(0, 4, 4),
   },
   tabPanelActive: {
-    visibility: "visible",
+    display: "block",
   },
   iconButton: {
     padding: theme.spacing(0.75),
@@ -92,7 +101,7 @@ const useStyles = makeStyles()((theme) => ({
       height: theme.typography.pxToRem(21),
       width: theme.typography.pxToRem(21),
     },
-    [theme.breakpoints.up("md")]: {
+    [theme.breakpoints.up("sm")]: {
       textAlign: "right",
       flexDirection: "row",
       justifyContent: "flex-start",
@@ -103,7 +112,7 @@ const useStyles = makeStyles()((theme) => ({
     },
   },
   indicator: {
-    [theme.breakpoints.up("md")]: {
+    [theme.breakpoints.up("sm")]: {
       right: 0,
       width: "100%",
       backgroundColor: theme.palette.action.hover,
@@ -187,7 +196,7 @@ export function PreferencesDialog(props: DialogProps & { activeTab?: TabOption }
   );
   const { classes, cx } = useStyles();
   const theme = useTheme();
-  const mdUp = useMediaQuery(theme.breakpoints.up("md"));
+  const smUp = useMediaQuery(theme.breakpoints.up("sm"));
 
   // automatic updates are a desktop-only setting
   //
@@ -207,7 +216,7 @@ export function PreferencesDialog(props: DialogProps & { activeTab?: TabOption }
   };
 
   return (
-    <Dialog {...props} maxWidth="md">
+    <Dialog {...props} fullWidth maxWidth="md">
       <Stack
         direction="row"
         justifyContent="space-between"
@@ -222,154 +231,150 @@ export function PreferencesDialog(props: DialogProps & { activeTab?: TabOption }
           <CloseIcon />
         </IconButton>
       </Stack>
-      <Grid container>
-        <Grid item xs={12} md={3} paddingLeft={{ md: 1 }}>
-          <Tabs
-            classes={{ indicator: classes.indicator }}
-            value={activeTab}
-            orientation={mdUp ? "vertical" : "horizontal"}
-            onChange={handleTabChange}
+      <div className={classes.layoutGrid}>
+        <Tabs
+          classes={{ indicator: classes.indicator }}
+          value={activeTab}
+          orientation={smUp ? "vertical" : "horizontal"}
+          onChange={handleTabChange}
+        >
+          <Tab className={classes.tab} label="General" value="general" />
+          <Tab className={classes.tab} label="Privacy" value="privacy" />
+          <Tab className={classes.tab} label="Extensions" value="extensions" />
+          <Tab
+            className={classes.tab}
+            label="Experimental features"
+            value="experimental-features"
+          />
+          <Tab className={classes.tab} label="About" value="about" />
+        </Tabs>
+        <Stack direction="row" fullHeight overflowY="auto">
+          <section
+            className={cx(classes.tabPanel, {
+              [classes.tabPanelActive]: activeTab === "general",
+            })}
           >
-            <Tab className={classes.tab} label="General" value="general" />
-            <Tab className={classes.tab} label="Privacy" value="privacy" />
-            <Tab className={classes.tab} label="Extensions" value="extensions" />
-            <Tab
-              className={classes.tab}
-              label="Experimental features"
-              value="experimental-features"
-            />
-            <Tab className={classes.tab} label="About" value="about" />
-          </Tabs>
-        </Grid>
-        <Grid item xs={12} md={9} paddingTop={{ xs: 4, md: 0 }}>
-          <Stack direction="row">
-            <section
-              className={cx(classes.tabPanel, {
-                [classes.tabPanelActive]: activeTab === "general",
-              })}
-            >
-              <Stack gap={2}>
-                <ColorSchemeSettings />
-                <TimezoneSettings />
-                <TimeFormat orientation={mdUp ? "horizontal" : "vertical"} />
-                <MessageFramerate />
-                {supportsAppUpdates && <AutoUpdate />}
-                {!isDesktopApp() && <LaunchDefault />}
-                <RosPackagePath />
-              </Stack>
-            </section>
+            <Stack gap={2}>
+              <ColorSchemeSettings />
+              <TimezoneSettings />
+              <TimeFormat orientation={smUp ? "horizontal" : "vertical"} />
+              <MessageFramerate />
+              {supportsAppUpdates && <AutoUpdate />}
+              {!isDesktopApp() && <LaunchDefault />}
+              <RosPackagePath />
+            </Stack>
+          </section>
 
-            <section
-              className={cx(classes.tabPanel, {
-                [classes.tabPanelActive]: activeTab === "privacy",
-              })}
-            >
-              <Stack gap={2}>
-                <Alert color="info" icon={<InfoOutlinedIcon />}>
-                  Changes will take effect the next time Foxglove Studio is launched.
-                </Alert>
-                <Stack gap={0.5} paddingLeft={2}>
-                  <FormControlLabel
-                    className={classes.formControlLabel}
-                    control={
-                      <Checkbox
-                        className={classes.checkbox}
-                        checked={telemetryEnabled ?? true}
-                        onChange={(_event, checked) => void setTelemetryEnabled(checked)}
-                      />
+          <section
+            className={cx(classes.tabPanel, {
+              [classes.tabPanelActive]: activeTab === "privacy",
+            })}
+          >
+            <Stack gap={2}>
+              <Alert color="info" icon={<InfoOutlinedIcon />}>
+                Changes will take effect the next time Foxglove Studio is launched.
+              </Alert>
+              <Stack gap={0.5} paddingLeft={2}>
+                <FormControlLabel
+                  className={classes.formControlLabel}
+                  control={
+                    <Checkbox
+                      className={classes.checkbox}
+                      checked={telemetryEnabled ?? true}
+                      onChange={(_event, checked) => void setTelemetryEnabled(checked)}
+                    />
+                  }
+                  label="Send anonymized usage data to help us improve Foxglove Studio"
+                />
+                <FormControlLabel
+                  className={classes.formControlLabel}
+                  control={
+                    <Checkbox
+                      className={classes.checkbox}
+                      checked={crashReportingEnabled ?? true}
+                      onChange={(_event, checked) => void setCrashReportingEnabled(checked)}
+                    />
+                  }
+                  label="Send anonymized crash reports"
+                />
+              </Stack>
+            </Stack>
+          </section>
+
+          <section
+            className={cx(classes.tabPanel, {
+              [classes.tabPanelActive]: activeTab === "extensions",
+            })}
+          >
+            <Stack gap={2}>
+              <ExtensionsSettings />
+            </Stack>
+          </section>
+
+          <section
+            className={cx(classes.tabPanel, {
+              [classes.tabPanelActive]: activeTab === "experimental-features",
+            })}
+          >
+            <Stack gap={2}>
+              <Alert color="warning" icon={<WarningAmberIcon />}>
+                These features are unstable and not recommended for daily use.
+              </Alert>
+              <Stack paddingLeft={2}>
+                <ExperimentalFeatureSettings />
+              </Stack>
+            </Stack>
+          </section>
+
+          <section
+            className={cx(classes.tabPanel, { [classes.tabPanelActive]: activeTab === "about" })}
+          >
+            <Stack gap={2} alignItems="flex-start">
+              <header>
+                <FoxgloveLogoText color="primary" className={classes.logo} />
+              </header>
+              <Stack direction="row" alignItems="center" gap={1}>
+                <Typography variant="body2">
+                  Foxglove Studio version {FOXGLOVE_STUDIO_VERSION}
+                </Typography>
+                <CopyButton
+                  size="small"
+                  getText={() => {
+                    if (FOXGLOVE_STUDIO_VERSION != undefined) {
+                      return FOXGLOVE_STUDIO_VERSION.toString();
                     }
-                    label="Send anonymized usage data to help us improve Foxglove Studio"
-                  />
-                  <FormControlLabel
-                    className={classes.formControlLabel}
-                    control={
-                      <Checkbox
-                        className={classes.checkbox}
-                        checked={crashReportingEnabled ?? true}
-                        onChange={(_event, checked) => void setCrashReportingEnabled(checked)}
-                      />
-                    }
-                    label="Send anonymized crash reports"
-                  />
-                </Stack>
+                    return "";
+                  }}
+                />
               </Stack>
-            </section>
-
-            <section
-              className={cx(classes.tabPanel, {
-                [classes.tabPanelActive]: activeTab === "extensions",
+              {[
+                aboutItems.get("resources"),
+                aboutItems.get("products"),
+                aboutItems.get("contact"),
+                aboutItems.get("legal"),
+              ].map((item) => {
+                return (
+                  <Stack key={item?.subheader} gap={1}>
+                    {item?.subheader && <Typography>{item.subheader}</Typography>}
+                    {item?.links.map((link) => (
+                      <Link
+                        variant="body2"
+                        underline="hover"
+                        key={link.title}
+                        data-testid={link.title}
+                        href={link.url}
+                        target="_blank"
+                      >
+                        {link.title}
+                      </Link>
+                    ))}
+                  </Stack>
+                );
               })}
-            >
-              <Stack gap={2}>
-                <ExtensionsSettings />
-              </Stack>
-            </section>
-
-            <section
-              className={cx(classes.tabPanel, {
-                [classes.tabPanelActive]: activeTab === "experimental-features",
-              })}
-            >
-              <Stack gap={2}>
-                <Alert color="warning" icon={<WarningAmberIcon />}>
-                  These features are unstable and not recommended for daily use.
-                </Alert>
-                <Stack paddingLeft={2}>
-                  <ExperimentalFeatureSettings />
-                </Stack>
-              </Stack>
-            </section>
-
-            <section
-              className={cx(classes.tabPanel, { [classes.tabPanelActive]: activeTab === "about" })}
-            >
-              <Stack gap={2} alignItems="flex-start">
-                <header>
-                  <FoxgloveLogoText color="primary" className={classes.logo} />
-                </header>
-                <Stack direction="row" alignItems="center" gap={1}>
-                  <Typography variant="body2">
-                    Foxglove Studio version {FOXGLOVE_STUDIO_VERSION}
-                  </Typography>
-                  <CopyButton
-                    size="small"
-                    getText={() => {
-                      if (FOXGLOVE_STUDIO_VERSION != undefined) {
-                        return FOXGLOVE_STUDIO_VERSION.toString();
-                      }
-                      return "";
-                    }}
-                  />
-                </Stack>
-                {[
-                  aboutItems.get("resources"),
-                  aboutItems.get("products"),
-                  aboutItems.get("contact"),
-                  aboutItems.get("legal"),
-                ].map((item) => {
-                  return (
-                    <Stack key={item?.subheader} gap={1}>
-                      {item?.subheader && <Typography>{item.subheader}</Typography>}
-                      {item?.links.map((link) => (
-                        <Link
-                          variant="body2"
-                          underline="hover"
-                          key={link.title}
-                          data-testid={link.title}
-                          href={link.url}
-                          target="_blank"
-                        >
-                          {link.title}
-                        </Link>
-                      ))}
-                    </Stack>
-                  );
-                })}
-              </Stack>
-            </section>
-          </Stack>
-        </Grid>
-      </Grid>
+            </Stack>
+          </section>
+        </Stack>
+      </div>
       <DialogActions className={classes.dialogActions}>
         <Button onClick={handleClose}>Done</Button>
       </DialogActions>
