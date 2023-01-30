@@ -4,9 +4,11 @@
 
 import Clock from "@mui/icons-material/AccessTime";
 import Add from "@mui/icons-material/Add";
+import Addchart from "@mui/icons-material/Addchart";
 import Points from "@mui/icons-material/BlurOn";
 import Check from "@mui/icons-material/Check";
 import Circle from "@mui/icons-material/Circle";
+import Clear from "@mui/icons-material/Clear";
 import Delete from "@mui/icons-material/Delete";
 import Walk from "@mui/icons-material/DirectionsWalk";
 import Flag from "@mui/icons-material/Flag";
@@ -43,11 +45,13 @@ import { SettingsIcon } from "@foxglove/studio";
 
 const icons: Record<SettingsIcon, typeof Add> = {
   Add,
+  Addchart,
   Background,
   Camera,
   Cells,
   Check,
   Circle,
+  Clear,
   Clock,
   Collapse,
   Cube,

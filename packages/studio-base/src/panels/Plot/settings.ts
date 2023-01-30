@@ -19,7 +19,15 @@ import { plotableRosTypes, PlotConfig, plotPathDisplayName } from "./types";
 
 const makeSeriesNode = memoizeWeak((path: PlotPath, index: number): SettingsTreeNode => {
   return {
-    actions: [{ type: "action", id: "delete-series", label: "Delete" }],
+    actions: [
+      {
+        type: "action",
+        id: "delete-series",
+        label: "Delete series",
+        display: "inline",
+        icon: "Clear",
+      },
+    ],
     label: plotPathDisplayName(path, index),
     visible: path.enabled,
     fields: {
@@ -59,7 +67,15 @@ const makeRootSeriesNode = memoizeWeak((paths: PlotPath[]): SettingsTreeNode => 
   return {
     label: "Series",
     children,
-    actions: [{ type: "action", id: "add-series", label: "Add series" }],
+    actions: [
+      {
+        type: "action",
+        id: "add-series",
+        label: "Add series",
+        display: "inline",
+        icon: "Addchart",
+      },
+    ],
   };
 });
 

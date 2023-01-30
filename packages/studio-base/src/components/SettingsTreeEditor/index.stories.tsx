@@ -449,6 +449,14 @@ const IconExamplesSettings: SettingsTreeNodes = {
   grid: {
     label: "Grid",
     icon: "Grid",
+    error: "Also an error!",
+    visible: true,
+    actions: [
+      { type: "action", id: "action1", label: "Action 1", display: "inline", icon: "Camera" },
+      { type: "action", id: "action2", label: "Action 2", display: "inline", icon: "Clock" },
+      { type: "action", id: "action3", label: "Action 3", display: "inline" },
+      { type: "action", id: "action4", label: "Action 4", display: "menu" },
+    ],
     fields: {
       color: {
         label: "Color",

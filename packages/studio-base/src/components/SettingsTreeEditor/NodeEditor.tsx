@@ -7,15 +7,24 @@ import ArrowRightIcon from "@mui/icons-material/ArrowRight";
 import CheckIcon from "@mui/icons-material/Check";
 import EditIcon from "@mui/icons-material/Edit";
 import ErrorIcon from "@mui/icons-material/Error";
-import { Divider, IconButton, TextField, Tooltip, Typography, useTheme } from "@mui/material";
+import {
+  Button,
+  Divider,
+  IconButton,
+  TextField,
+  Tooltip,
+  Typography,
+  useTheme,
+} from "@mui/material";
+import { partition } from "lodash";
 import memoizeWeak from "memoize-weak";
-import { ChangeEvent, useCallback } from "react";
+import { ChangeEvent, useCallback, useMemo } from "react";
 import { DeepReadonly } from "ts-essentials";
 import { makeStyles } from "tss-react/mui";
 import { useImmer } from "use-immer";
 
 import { filterMap } from "@foxglove/den/collection";
-import { SettingsTreeAction, SettingsTreeNode } from "@foxglove/studio";
+import { SettingsTreeAction, SettingsTreeNode, SettingsTreeNodeActionItem } from "@foxglove/studio";
 import { HighlightedText } from "@foxglove/studio-base/components/HighlightedText";
 import Stack from "@foxglove/studio-base/components/Stack";
 
@@ -36,7 +45,7 @@ export type NodeEditorProps = {
 export const NODE_HEADER_MIN_HEIGHT = 35;
 
 const useStyles = makeStyles()((theme) => ({
-  editButton: {
+  actionButton: {
     padding: theme.spacing(0.5),
   },
   editNameField: {
@@ -266,6 +275,16 @@ function NodeEditorComponent(props: NodeEditorProps): JSX.Element {
     [toggleEditing],
   );
 
+  const [inlineActions, menuActions] = useMemo(
+    () =>
+      partition(
+        settings.actions,
+        (action): action is SettingsTreeNodeActionItem =>
+          action.type === "action" && action.display === "inline",
+      ),
+    [settings.actions],
+  );
+
   return (
     <>
       <div className={cx(classes.nodeHeader, { [classes.nodeHeaderVisible]: visible })}>
@@ -303,7 +322,7 @@ function NodeEditorComponent(props: NodeEditorProps): JSX.Element {
               InputProps={{
                 endAdornment: (
                   <IconButton
-                    className={classes.editButton}
+                    className={classes.actionButton}
                     title="Rename"
                     data-node-function="edit-label"
                     color="primary"
@@ -332,7 +351,7 @@ function NodeEditorComponent(props: NodeEditorProps): JSX.Element {
         <Stack alignItems="center" direction="row">
           {settings.renamable === true && !state.editing && (
             <IconButton
-              className={classes.editButton}
+              className={classes.actionButton}
               title="Rename"
               data-node-function="edit-label"
               color="primary"
@@ -353,6 +372,34 @@ function NodeEditorComponent(props: NodeEditorProps): JSX.Element {
               disabled={!allowVisibilityToggle}
             />
           )}
+          {inlineActions.map((action) => {
+            const Icon = action.icon ? icons[action.icon] : undefined;
+            const handler = () =>
+              actionHandler({
+                action: "perform-node-action",
+                payload: { id: action.id, path: props.path },
+              });
+            return Icon ? (
+              <IconButton
+                key={action.id}
+                onClick={handler}
+                title={action.label}
+                className={classes.actionButton}
+              >
+                <Icon fontSize="small" />
+              </IconButton>
+            ) : (
+              <Button
+                key={action.id}
+                onClick={handler}
+                size="small"
+                color="inherit"
+                className={classes.actionButton}
+              >
+                {action.label}
+              </Button>
+            );
+          })}
           {props.settings?.error && (
             <Tooltip
               arrow
@@ -367,8 +414,9 @@ function NodeEditorComponent(props: NodeEditorProps): JSX.Element {
               </IconButton>
             </Tooltip>
           )}
-          {settings.actions && (
-            <NodeActionsMenu actions={settings.actions} onSelectAction={handleNodeAction} />
+
+          {menuActions.length > 0 && (
+            <NodeActionsMenu actions={menuActions} onSelectAction={handleNodeAction} />
           )}
         </Stack>
       </div>
