@@ -98,7 +98,7 @@ export function ImageView({ context }: Props): JSX.Element {
     if (cameraInfoTopic != undefined) {
       subs.push(cameraInfoTopic);
     }
-    return subs;
+    return subs.map((topic) => ({ topic, preload: false }));
   }, [cameraTopic, cameraInfoTopic, enabledMarkerTopics]);
 
   const [colorScheme, setColorScheme] = useState<"dark" | "light">("light");
