@@ -2,7 +2,6 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { compare } from "@foxglove/rostime";
 import { MessageEvent } from "@foxglove/studio";
 import PlayerProblemManager from "@foxglove/studio-base/players/PlayerProblemManager";
 
@@ -39,7 +38,7 @@ class TestSource implements IIterableSource {
     return [];
   }
 }
-
+const consoleErrorMock = console.error as ReturnType<typeof jest.fn>;
 describe("BlockLoader", () => {
   it("should make an empty block loader", async () => {
     const loader = new BlockLoader({
@@ -167,12 +166,12 @@ describe("BlockLoader", () => {
     expect.assertions(1);
   });
 
-  it("should load the source into blocks when starting partially through the source", async () => {
+  it("should not load messages past max cache size", async () => {
     const source = new TestSource();
 
     const loader = new BlockLoader({
-      maxBlocks: 5,
-      cacheSizeBytes: 1,
+      maxBlocks: 2,
+      cacheSizeBytes: 3,
       minBlockDurationNs: 1,
       source,
       start: { sec: 0, nsec: 0 },
@@ -181,28 +180,21 @@ describe("BlockLoader", () => {
     });
 
     const msgEvents: MessageEvent<unknown>[] = [];
-    for (let i = 0; i < 5; ++i) {
+    for (let i = 0; i < 10; i += 3) {
       msgEvents.push({
         topic: "a",
         receiveTime: { sec: i, nsec: 0 },
         message: undefined,
-        sizeInBytes: 0,
+        sizeInBytes: 1,
         schemaName: "foo",
       });
     }
 
     source.messageIterator = async function* messageIterator(
-      args: MessageIteratorArgs,
+      _args: MessageIteratorArgs,
     ): AsyncIterableIterator<Readonly<IteratorResult>> {
       for (let i = 0; i < msgEvents.length; ++i) {
         const msgEvent = msgEvents[i]!;
-        if (args.start && compare(msgEvent.receiveTime, args.start) < 0) {
-          continue;
-        }
-        if (args.end && compare(msgEvent.receiveTime, args.end) > 0) {
-          continue;
-        }
-
         yield {
           type: "message-event",
           msgEvent,
@@ -211,19 +203,13 @@ describe("BlockLoader", () => {
     };
 
     loader.setTopics(new Set("a"));
-    loader.setActiveTime({ sec: 3, nsec: 10 });
-    let count = 0;
     await loader.startLoading({
       progress: async (progress) => {
-        if (++count < 3) {
-          return;
-        }
-
         expect(progress).toEqual({
           fullyLoadedFractionRanges: [
             {
               start: 0,
-              end: 1,
+              end: 0.5,
             },
           ],
           messageCache: {
@@ -232,36 +218,8 @@ describe("BlockLoader", () => {
                 messagesByTopic: {
                   a: [msgEvents[0], msgEvents[1]],
                 },
-                sizeInBytes: 0,
                 needTopics: new Set(),
-              },
-              {
-                messagesByTopic: {
-                  a: [msgEvents[2], msgEvents[3]],
-                },
-                sizeInBytes: 0,
-                needTopics: new Set(),
-              },
-              {
-                messagesByTopic: {
-                  a: [msgEvents[4]],
-                },
-                sizeInBytes: 0,
-                needTopics: new Set(),
-              },
-              {
-                messagesByTopic: {
-                  a: [],
-                },
-                sizeInBytes: 0,
-                needTopics: new Set(),
-              },
-              {
-                messagesByTopic: {
-                  a: [],
-                },
-                sizeInBytes: 0,
-                needTopics: new Set(),
+                sizeInBytes: 2,
               },
             ],
             startTime: { sec: 0, nsec: 0 },
@@ -271,188 +229,63 @@ describe("BlockLoader", () => {
         await loader.stopLoading();
       },
     });
-
-    expect.assertions(1);
+    expect(consoleErrorMock.mock.calls[0] ?? []).toContain("cache-full");
+    consoleErrorMock.mockClear();
+    expect.assertions(2);
   });
 
-  it("should reset loading when active time moves to an unloaded region", async () => {
+  it("should remove unused topics on blocks if cache is full", async () => {
     const source = new TestSource();
 
     const loader = new BlockLoader({
-      maxBlocks: 6,
-      cacheSizeBytes: 1,
+      maxBlocks: 2,
+      cacheSizeBytes: 6,
       minBlockDurationNs: 1,
       source,
       start: { sec: 0, nsec: 0 },
-      end: { sec: 9, nsec: 0 },
+      end: { sec: 5, nsec: 0 },
       problemManager: new PlayerProblemManager(),
     });
 
     const msgEvents: MessageEvent<unknown>[] = [];
-    for (let i = 0; i < 10; ++i) {
+    for (let i = 0; i < 4; ++i) {
       msgEvents.push({
         topic: "a",
         receiveTime: { sec: i, nsec: 0 },
         message: undefined,
-        sizeInBytes: 0,
+        sizeInBytes: 1,
+        schemaName: "foo",
+      });
+      msgEvents.push({
+        topic: "b",
+        receiveTime: { sec: i, nsec: 0 },
+        message: undefined,
+        sizeInBytes: 1,
         schemaName: "foo",
       });
     }
 
-    const messageIteratorCallArgs: MessageIteratorArgs[] = [];
     source.messageIterator = async function* messageIterator(
-      args: MessageIteratorArgs,
+      _args: MessageIteratorArgs,
     ): AsyncIterableIterator<Readonly<IteratorResult>> {
-      messageIteratorCallArgs.push(args);
       for (let i = 0; i < msgEvents.length; ++i) {
         const msgEvent = msgEvents[i]!;
-        if (args.start && compare(msgEvent.receiveTime, args.start) < 0) {
-          continue;
+        // need to filter iterator by requested topics since there's messages from more than 1 topic in here
+        if (_args.topics.includes(msgEvent.topic)) {
+          yield {
+            type: "message-event",
+            msgEvent,
+          };
         }
-        if (args.end && compare(msgEvent.receiveTime, args.end) > 0) {
-          continue;
-        }
-
-        yield {
-          type: "message-event",
-          msgEvent,
-        };
       }
     };
 
     loader.setTopics(new Set("a"));
-
     let count = 0;
     await loader.startLoading({
       progress: async (progress) => {
-        count += 1;
-
-        if (count === 1) {
-          loader.setActiveTime({ sec: 6, nsec: 0 });
-          // eslint-disable-next-line jest/no-conditional-expect
-          expect(progress).toEqual({
-            fullyLoadedFractionRanges: [
-              {
-                start: 0,
-                end: 0.16666666666666666,
-              },
-            ],
-            messageCache: {
-              blocks: [
-                {
-                  messagesByTopic: {
-                    a: [msgEvents[0], msgEvents[1]],
-                  },
-                  needTopics: new Set(),
-                  sizeInBytes: 0,
-                },
-                undefined,
-                undefined,
-                undefined,
-                undefined,
-                undefined,
-              ],
-              startTime: { sec: 0, nsec: 0 },
-            },
-          });
-        } else if (count === 3) {
-          loader.setActiveTime({ sec: 1, nsec: 0 });
-
-          // eslint-disable-next-line jest/no-conditional-expect
-          expect(progress).toEqual({
-            fullyLoadedFractionRanges: [
-              {
-                start: 0,
-                end: 0.16666666666666666,
-              },
-              {
-                start: 0.5,
-                end: 0.8333333333333334,
-              },
-            ],
-            messageCache: {
-              blocks: [
-                {
-                  messagesByTopic: {
-                    a: [msgEvents[0], msgEvents[1]],
-                  },
-                  needTopics: new Set(),
-                  sizeInBytes: 0,
-                },
-                undefined,
-                undefined,
-                {
-                  messagesByTopic: {
-                    a: [msgEvents[5], msgEvents[6]],
-                  },
-                  needTopics: new Set(),
-                  sizeInBytes: 0,
-                },
-                {
-                  messagesByTopic: {
-                    a: [msgEvents[7]],
-                  },
-                  needTopics: new Set(),
-                  sizeInBytes: 0,
-                },
-                undefined,
-              ],
-              startTime: { sec: 0, nsec: 0 },
-            },
-          });
-        } else if (count === 4) {
-          // eslint-disable-next-line jest/no-conditional-expect
-          expect(progress).toEqual({
-            fullyLoadedFractionRanges: [
-              {
-                start: 0,
-                end: 0.3333333333333333,
-              },
-              {
-                start: 0.5,
-                end: 0.8333333333333334,
-              },
-            ],
-            messageCache: {
-              blocks: [
-                {
-                  messagesByTopic: {
-                    a: [msgEvents[0], msgEvents[1]],
-                  },
-                  needTopics: new Set(),
-                  sizeInBytes: 0,
-                },
-                {
-                  messagesByTopic: {
-                    a: [msgEvents[2], msgEvents[3]],
-                  },
-                  needTopics: new Set(),
-                  sizeInBytes: 0,
-                },
-                undefined,
-                {
-                  messagesByTopic: {
-                    a: [msgEvents[5], msgEvents[6]],
-                  },
-                  needTopics: new Set(),
-                  sizeInBytes: 0,
-                },
-                {
-                  messagesByTopic: {
-                    a: [msgEvents[7]],
-                  },
-                  needTopics: new Set(),
-                  sizeInBytes: 0,
-                },
-                undefined,
-              ],
-              startTime: { sec: 0, nsec: 0 },
-            },
-          });
-        }
-
-        // when progress matches what we want we've finished loading
-        if (progress.messageCache?.blocks.every((item) => item != undefined) === true) {
+        count++;
+        if (count === 2) {
           // eslint-disable-next-line jest/no-conditional-expect
           expect(progress).toEqual({
             fullyLoadedFractionRanges: [
@@ -465,44 +298,16 @@ describe("BlockLoader", () => {
               blocks: [
                 {
                   messagesByTopic: {
-                    a: [msgEvents[0], msgEvents[1]],
+                    a: [msgEvents[0], msgEvents[2], msgEvents[4]],
                   },
-                  sizeInBytes: 0,
+                  sizeInBytes: 3,
                   needTopics: new Set(),
                 },
                 {
                   messagesByTopic: {
-                    a: [msgEvents[2], msgEvents[3]],
+                    a: [msgEvents[6]],
                   },
-                  sizeInBytes: 0,
-                  needTopics: new Set(),
-                },
-                {
-                  messagesByTopic: {
-                    a: [msgEvents[4]],
-                  },
-                  sizeInBytes: 0,
-                  needTopics: new Set(),
-                },
-                {
-                  messagesByTopic: {
-                    a: [msgEvents[5], msgEvents[6]],
-                  },
-                  sizeInBytes: 0,
-                  needTopics: new Set(),
-                },
-                {
-                  messagesByTopic: {
-                    a: [msgEvents[7]],
-                  },
-                  sizeInBytes: 0,
-                  needTopics: new Set(),
-                },
-                {
-                  messagesByTopic: {
-                    a: [msgEvents[8], msgEvents[9]],
-                  },
-                  sizeInBytes: 0,
+                  sizeInBytes: 1,
                   needTopics: new Set(),
                 },
               ],
@@ -514,34 +319,47 @@ describe("BlockLoader", () => {
       },
     });
 
-    expect(messageIteratorCallArgs).toEqual([
-      {
-        consumptionType: "full",
-        topics: ["a"],
-        start: { sec: 0, nsec: 0 },
-        end: { sec: 9, nsec: 0 },
-      },
-      {
-        consumptionType: "full",
-        topics: ["a"],
-        start: { sec: 4, nsec: 500000003 },
-        end: { sec: 9, nsec: 0 },
-      },
-      {
-        consumptionType: "full",
-        topics: ["a"],
-        start: { sec: 1, nsec: 500000001 },
-        end: { sec: 4, nsec: 500000002 },
-      },
-      {
-        consumptionType: "full",
-        topics: ["a"],
-        start: { sec: 7, nsec: 500000005 },
-        end: { sec: 9, nsec: 0 },
-      },
-    ]);
+    loader.setTopics(new Set("b"));
 
-    expect.assertions(5);
+    count = 0;
+    // at the end of loading "b" topic it should have removed the "a" topic as its no longer used.
+    await loader.startLoading({
+      progress: async (progress) => {
+        count += 1;
+        if (count === 2) {
+          // eslint-disable-next-line jest/no-conditional-expect
+          expect(progress).toEqual({
+            fullyLoadedFractionRanges: [
+              {
+                start: 0,
+                end: 1,
+              },
+            ],
+            messageCache: {
+              blocks: [
+                {
+                  messagesByTopic: {
+                    b: [msgEvents[1], msgEvents[3], msgEvents[5]],
+                  },
+                  sizeInBytes: 3,
+                  needTopics: new Set(),
+                },
+                {
+                  messagesByTopic: {
+                    b: [msgEvents[7]],
+                  },
+                  sizeInBytes: 1,
+                  needTopics: new Set(),
+                },
+              ],
+              startTime: { sec: 0, nsec: 0 },
+            },
+          });
+          await loader.stopLoading();
+        }
+      },
+    });
+    expect.assertions(2);
   });
 
   it("should avoid emitting progress when nothing changed", async () => {
@@ -625,12 +443,6 @@ describe("BlockLoader", () => {
           ): AsyncIterableIterator<Readonly<IteratorResult>> {
             throw new Error("Should not call iterator");
           };
-
-          // Everything has loaded so now we seek to a new time
-          // We should not get any more progress updates
-          setTimeout(() => {
-            loader.setActiveTime({ sec: 4, nsec: 0 });
-          }, 0);
 
           setTimeout(async () => {
             await loader.stopLoading();

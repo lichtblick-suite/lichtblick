@@ -56,7 +56,6 @@ export class BlockLoader {
   private blockDurationNanos: number;
   private topics: Set<string> = new Set();
   private maxCacheSize: number = 0;
-  private activeBlockId: number = 0;
   private problemManager: PlayerProblemManager;
   private stopped: boolean = false;
   private activeChangeCondvar: Condvar = new Condvar();
@@ -85,20 +84,6 @@ export class BlockLoader {
     this.blocks = Array.from({ length: blockCount });
   }
 
-  public setActiveTime(time: Time): void {
-    const startTime = subtractTimes(subtractTimes(time, this.start), { sec: 1, nsec: 0 });
-    const startNs = Math.max(0, Number(toNanoSec(startTime)));
-    const beginBlockId = Math.floor(startNs / this.blockDurationNanos);
-
-    if (beginBlockId === this.activeBlockId) {
-      return;
-    }
-
-    this.abortController.abort();
-    this.activeBlockId = beginBlockId;
-    this.activeChangeCondvar.notifyAll();
-  }
-
   public setTopics(topics: Set<string>): void {
     if (isEqual(topics, this.topics)) {
       return;
@@ -121,6 +106,42 @@ export class BlockLoader {
     }
   }
 
+  /**
+   * Remove topics that are no longer requested to be preloaded from blocks to free up space
+   */
+  private _removeUnusedBlockTopics(): number {
+    const topics = this.topics;
+    let totalBytesRemoved = 0;
+    for (let i = 0; i < this.blocks.length; i++) {
+      const block = this.blocks[i];
+      if (block) {
+        let blockBytesRemoved = 0;
+        const newMessagesByTopic: Record<string, MessageEvent<unknown>[]> = {
+          ...block.messagesByTopic,
+        };
+        const blockTopics = Object.keys(newMessagesByTopic);
+        for (const topic of blockTopics) {
+          // remove topics that are no longer requested to be preloaded.
+          if (!topics.has(topic) && newMessagesByTopic[topic]) {
+            for (const msg of newMessagesByTopic[topic]!) {
+              blockBytesRemoved += msg.sizeInBytes;
+            }
+            delete newMessagesByTopic[topic];
+          }
+        }
+        if (blockBytesRemoved > 0) {
+          this.blocks[i] = {
+            ...block,
+            messagesByTopic: newMessagesByTopic,
+            sizeInBytes: block.sizeInBytes - blockBytesRemoved,
+          };
+          totalBytesRemoved += blockBytesRemoved;
+        }
+      }
+    }
+    return totalBytesRemoved;
+  }
+
   public async stopLoading(): Promise<void> {
     log.debug("Stop loading blocks");
     this.stopped = true;
@@ -135,10 +156,8 @@ export class BlockLoader {
     while (!this.stopped) {
       this.abortController = new AbortController();
 
-      const activeBlockId = this.activeBlockId;
       const topics = this.topics;
 
-      // Load around the active block id, if the active block id changes then bail
       await this.load({ progress: args.progress });
 
       // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
@@ -146,9 +165,8 @@ export class BlockLoader {
         break;
       }
 
-      // The active block id is the same as when we started.
-      // Wait for it to possibly change.
-      if (this.activeBlockId === activeBlockId && this.topics === topics) {
+      // Wait for topics to possibly change.
+      if (this.topics === topics) {
         await this.activeChangeCondvar.wait();
       }
     }
@@ -167,25 +185,11 @@ export class BlockLoader {
       return;
     }
 
-    // Load the active block to end first, then go back and load first block to active block
-    await this.loadBlockRange(this.activeBlockId, this.blocks.length, args.progress);
+    log.debug("loading blocks", { topics });
+    const beginBlockId = 0;
+    const lastBlockId = this.blocks.length;
 
-    if (this.activeBlockId > 0) {
-      await this.loadBlockRange(0, this.activeBlockId, args.progress);
-    }
-  }
-
-  /// ---- private
-
-  // Load the blocks from [beginBlockId, lastBlockId)
-  private async loadBlockRange(
-    beginBlockId: number,
-    lastBlockId: number,
-    progress: LoadArgs["progress"],
-  ): Promise<void> {
-    const topics = this.topics;
-    log.debug("load block range", { topics, beginBlockId, lastBlockId });
-
+    const { progress } = args;
     let totalBlockSizeBytes = this.cacheSize();
 
     for (let blockId = beginBlockId; blockId < lastBlockId; ++blockId) {
@@ -293,7 +297,7 @@ export class BlockLoader {
           if (!arr) {
             this.problemManager.addProblem(problemKey, {
               severity: "error",
-              message: `Received a messaged on an unexpected topic: ${msgTopic}.`,
+              message: `Received a message on an unexpected topic: ${msgTopic}.`,
             });
 
             continue;
@@ -306,23 +310,22 @@ export class BlockLoader {
 
           sizeInBytes += messageSizeInBytes;
 
-          // Evict blocks until we have space for our new message
-          while (totalBlockSizeBytes > this.maxCacheSize) {
-            const evictedSize = this.evictBlock({
-              startId: this.activeBlockId,
-              endId: currentBlockId,
+          if (totalBlockSizeBytes < this.maxCacheSize) {
+            this.problemManager.removeProblem("cache-full");
+            continue;
+          }
+          // cache over capacity, try removing unused topics
+          const removedSize = this._removeUnusedBlockTopics();
+          totalBlockSizeBytes -= removedSize;
+          if (totalBlockSizeBytes > this.maxCacheSize) {
+            this.problemManager.addProblem("cache-full", {
+              severity: "error",
+              message: `Cache is full. Preloading for topics [${Array.from(topicsToFetch).join(
+                ", ",
+              )}] has stopped on block ${currentBlockId + 1}/${this.blocks.length}.`,
+              tip: "Try reducing the number of topics that require preloading at a given time (e.g. in plots), or try to reduce the time range of the file.",
             });
-            // If we could not evict any blocks to bring our size down, then we stop loading more data
-            if (evictedSize === 0) {
-              log.debug("could not evict more blocks", {
-                totalBlockSizeBytes,
-                messageSizeInBytes,
-                maxCache: this.maxCacheSize,
-              });
-              return;
-            }
-
-            totalBlockSizeBytes -= evictedSize;
+            return;
           }
         }
 
@@ -343,48 +346,6 @@ export class BlockLoader {
       await cursor.end();
       blockId = endBlockId + 1;
     }
-  }
-
-  // Evict a block while preserving blocks in the block id range (inclusive)
-  private evictBlock(range: { startId: number; endId: number }): number {
-    if (range.endId < range.startId) {
-      for (let i = range.startId - 1; i > range.endId; --i) {
-        const blockToEvict = this.blocks[i];
-        if (!blockToEvict || blockToEvict.sizeInBytes === 0) {
-          continue;
-        }
-
-        log.debug(`evict block ${i}, size: ${blockToEvict.sizeInBytes}`);
-        this.blocks[i] = undefined;
-        return blockToEvict.sizeInBytes;
-      }
-    }
-
-    if (range.endId > range.startId) {
-      for (let i = range.startId - 1; i > 0; --i) {
-        const blockToEvict = this.blocks[i];
-        if (!blockToEvict || blockToEvict.sizeInBytes === 0) {
-          continue;
-        }
-
-        log.debug(`evict block ${i}, size: ${blockToEvict.sizeInBytes}`);
-        this.blocks[i] = undefined;
-        return blockToEvict.sizeInBytes;
-      }
-
-      for (let i = range.endId + 1; i < this.blocks.length; ++i) {
-        const blockToEvict = this.blocks[i];
-        if (!blockToEvict || blockToEvict.sizeInBytes === 0) {
-          continue;
-        }
-
-        log.debug(`evict block ${i}, size: ${blockToEvict.sizeInBytes}`);
-        this.blocks[i] = undefined;
-        return blockToEvict.sizeInBytes;
-      }
-    }
-
-    return 0;
   }
 
   private calculateProgress(topics: Set<string>): Progress {

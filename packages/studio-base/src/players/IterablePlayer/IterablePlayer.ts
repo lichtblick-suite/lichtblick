@@ -135,7 +135,7 @@ export class IterablePlayer implements Player {
   private _metricsCollector: PlayerMetricsCollectorInterface;
   private _subscriptions: SubscribePayload[] = [];
   private _allTopics: Set<string> = new Set();
-  private _partialTopics: Set<string> = new Set();
+  private _preloadTopics: Set<string> = new Set();
 
   private _progress: Progress = {};
   private _id: string = uuidv4();
@@ -277,7 +277,6 @@ export class IterablePlayer implements Player {
     this._seekTarget = targetTime;
     this._untilTime = undefined;
 
-    this._blockLoader?.setActiveTime(targetTime);
     this._setState("seek-backfill");
   }
 
@@ -287,20 +286,20 @@ export class IterablePlayer implements Player {
     this._metricsCollector.setSubscriptions(newSubscriptions);
 
     const allTopics = new Set(this._subscriptions.map((subscription) => subscription.topic));
-    const partialTopics = new Set(
+    const preloadTopics = new Set(
       filterMap(this._subscriptions, (sub) =>
         sub.preloadType !== "partial" ? sub.topic : undefined,
       ),
     );
 
     // If there are no changes to topics there's no reason to perform a "seek" to trigger loading
-    if (isEqual(allTopics, this._allTopics) && isEqual(partialTopics, this._partialTopics)) {
+    if (isEqual(allTopics, this._allTopics) && isEqual(preloadTopics, this._preloadTopics)) {
       return;
     }
 
     this._allTopics = allTopics;
-    this._partialTopics = partialTopics;
-    this._blockLoader?.setTopics(this._partialTopics);
+    this._preloadTopics = preloadTopics;
+    this._blockLoader?.setTopics(this._preloadTopics);
 
     // If the player is playing, the playing state will detect any subscription changes and adjust
     // iterators accordignly. However if we are idle or already seeking then we need to manually
@@ -516,8 +515,7 @@ export class IterablePlayer implements Player {
       // playback.
       await delay(START_DELAY_MS);
 
-      this._blockLoader?.setActiveTime(this._start);
-      this._blockLoader?.setTopics(this._partialTopics);
+      this._blockLoader?.setTopics(this._preloadTopics);
 
       // Block loadings is constantly running and tries to keep the preloaded messages in memory
       this._blockLoadingProcess = this.startBlockLoading();
@@ -731,9 +729,6 @@ export class IterablePlayer implements Player {
 
     let activeData: PlayerStateActiveData | undefined;
     if (this._start && this._end && this._currentTime) {
-      // Notify the block loader about the current time so it tries to keep current time loaded
-      this._blockLoader?.setActiveTime(this._currentTime);
-
       activeData = {
         messages,
         totalBytesReceived: this._receivedBytes,
