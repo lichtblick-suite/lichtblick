@@ -2325,6 +2325,7 @@ __metadata:
     "@foxglove/rosmsg2-serialization": 1.1.1
     "@foxglove/schemas": 0.7.3
     "@foxglove/wasm-bz2": 0.1.1
+    "@foxglove/wasm-lz4": 1.0.2
     "@mcap/core": 0.3.0
     "@protobufjs/base64": 1.1.2
     "@types/protobufjs": "workspace:*"
@@ -2333,7 +2334,6 @@ __metadata:
     flatbuffers_reflection: 0.0.2
     protobufjs: 7.2.0
     typescript: 4.9.4
-    wasm-lz4: 2.0.0
     zstd-codec: "patch:zstd-codec@0.1.4#../../patches/zstd-codec.patch"
   languageName: unknown
   linkType: soft
@@ -2534,6 +2534,7 @@ __metadata:
     "@foxglove/ulog": 2.1.2
     "@foxglove/velodyne-cloud": 1.0.1
     "@foxglove/wasm-bz2": 0.1.1
+    "@foxglove/wasm-lz4": 1.0.2
     "@foxglove/ws-protocol": 0.3.3
     "@foxglove/xmlrpc": 1.3.0
     "@mcap/core": 0.3.0
@@ -2673,7 +2674,6 @@ __metadata:
     use-immer: 0.8.1
     use-pan-and-zoom: 0.6.5
     uuid: 9.0.0
-    wasm-lz4: 2.0.0
     webpack: 5.75.0
     xacro-parser: 0.3.9
     zustand: 4.3.2
@@ -2732,6 +2732,13 @@ __metadata:
   dependencies:
     tslib: ^2
   checksum: 525206e231e765dfec3f787bcd4da664eff7bc72ccddfebee22782c5822c2e6d776c4aa4fc67fd58710eadb87a09dc16a207de08f4583500481bddef6a99bb71
+  languageName: node
+  linkType: hard
+
+"@foxglove/wasm-lz4@npm:1.0.2":
+  version: 1.0.2
+  resolution: "@foxglove/wasm-lz4@npm:1.0.2"
+  checksum: 1148ae84be22830382995ef19912dd033f009c0f16690dd942acce2efee02035b035f5910690c7e37c9435e7636b94006ef33220f86e98bc281129e50445bb19
   languageName: node
   linkType: hard
 
@@ -6314,12 +6321,6 @@ __metadata:
   checksum: f9f7073d86f7ef67a4ad930e02aa4579648e635ab5749fc365e248431bd3a4b01d76c483b2600a11e700bc738f10f1b38c1ef70f17ed2c7984fc4abde2bfa348
   languageName: node
   linkType: hard
-
-"@types/wasm-lz4@workspace:packages/@types/wasm-lz4":
-  version: 0.0.0-use.local
-  resolution: "@types/wasm-lz4@workspace:packages/@types/wasm-lz4"
-  languageName: unknown
-  linkType: soft
 
 "@types/webpack-env@npm:^1.16.0, @types/webpack-env@npm:^1.17.0":
   version: 1.17.0
@@ -24453,13 +24454,6 @@ __metadata:
   dependencies:
     makeerror: 1.0.12
   checksum: ad7a257ea1e662e57ef2e018f97b3c02a7240ad5093c392186ce0bcf1f1a60bbadd520d073b9beb921ed99f64f065efb63dfc8eec689a80e569f93c1c5d5e16c
-  languageName: node
-  linkType: hard
-
-"wasm-lz4@npm:2.0.0":
-  version: 2.0.0
-  resolution: "wasm-lz4@npm:2.0.0"
-  checksum: d224f106b00fc72a86eaaaa2f18a2b1f1786d9da1af9405fab82e001e56e820cce723f9573fc745c8c62b6f294fc709f8941411ba0e2cd38ccf75a1051996583
   languageName: node
   linkType: hard
 

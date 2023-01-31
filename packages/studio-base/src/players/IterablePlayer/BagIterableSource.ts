@@ -2,8 +2,6 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import decompressLZ4 from "wasm-lz4";
-
 import { Bag, Filelike } from "@foxglove/rosbag";
 import { BlobReader } from "@foxglove/rosbag/web";
 import { parse as parseMessageDefinition } from "@foxglove/rosmsg";
@@ -20,6 +18,7 @@ import BrowserHttpReader from "@foxglove/studio-base/util/BrowserHttpReader";
 import CachedFilelike from "@foxglove/studio-base/util/CachedFilelike";
 import { getBagChunksOverlapCount } from "@foxglove/studio-base/util/bags";
 import Bzip2 from "@foxglove/wasm-bz2";
+import decompressLZ4 from "@foxglove/wasm-lz4";
 
 import {
   IIterableSource,

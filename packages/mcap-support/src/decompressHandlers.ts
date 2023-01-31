@@ -16,7 +16,7 @@ async function _loadDecompressHandlers(): Promise<McapTypes.DecompressHandlers> 
     import("zstd-codec").then(async ({ ZstdCodec }) => {
       return await new Promise<ZstdModule>((resolve) => ZstdCodec.run(resolve));
     }),
-    import("wasm-lz4").then(async (mod) => {
+    import("@foxglove/wasm-lz4").then(async (mod) => {
       await mod.default.isLoaded;
       return mod.default;
     }),

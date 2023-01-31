@@ -32,11 +32,11 @@
     "@foxglove/rosmsg-serialization": "1.5.3",
     "@foxglove/rosmsg2-serialization": "1.1.1",
     "@foxglove/wasm-bz2": "0.1.1",
+    "@foxglove/wasm-lz4": "1.0.2",
     "@protobufjs/base64": "1.1.2",
     "flatbuffers": "23.1.21",
     "flatbuffers_reflection": "0.0.2",
     "protobufjs": "7.2.0",
-    "wasm-lz4": "2.0.0",
     "zstd-codec": "patch:zstd-codec@0.1.4#../../patches/zstd-codec.patch"
   }
 }
