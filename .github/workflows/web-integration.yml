@@ -19,16 +19,8 @@ jobs:
           node-version: 16.17
       - run: corepack enable yarn
 
-      - name: Restore cache
-        uses: actions/cache@v3.2.4
-        with:
-          path: |
-            .yarn/cache
-            **/node_modules
-          key: v5-${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
-          restore-keys: v5-${{ runner.os }}-yarn-
-
       - run: yarn install --immutable
+
       - name: Run tests
         run: yarn test:web-integration
         env:
