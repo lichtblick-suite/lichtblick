@@ -72,9 +72,6 @@ export function HelpMenu(
       MenuListProps={{
         "aria-labelledby": "help-button",
       }}
-      PaperProps={{
-        onMouseLeave: handleClose,
-      }}
     >
       <ListSubheader className={classes.subheader} tabIndex={-1}>
         Documentation
