@@ -4,7 +4,7 @@
 
 import { filterMap } from "@foxglove/den/collection";
 import Log from "@foxglove/log";
-import { toSec } from "@foxglove/rostime";
+import { compare, toSec } from "@foxglove/rostime";
 import {
   AppSettingValue,
   MessageEvent,
@@ -280,22 +280,23 @@ function initRenderStateBuilder(): BuildRenderStateFn {
         shouldRender = true;
         const frames: MessageEvent<unknown>[] = (renderState.allFrames = []);
         // only populate allFrames with topics that the panel wants to preload
-        const topicsToPreloadForPanel = new Set<string>(
-          Array.from(
+        const topicsToPreloadForPanel = Array.from(
+          new Set<string>(
             filterMap(subscriptions, (sub) => (sub.preload === true ? sub.topic : undefined)),
           ),
         );
+
         for (const block of newBlocks) {
           if (!block) {
             continue;
           }
 
-          for (const topic of topicsToPreloadForPanel) {
-            const messageEvents = block.messagesByTopic[topic];
-            if (!messageEvents) {
-              continue;
-            }
-            for (const messageEvent of messageEvents) {
+          // Given that messagesByTopic should be in order by receiveTime
+          // We need to combine all of the messages into a single array and sorted by receive time
+          forEachSortedArrays(
+            topicsToPreloadForPanel.map((topic) => block.messagesByTopic[topic] ?? []),
+            (a, b) => compare(a.receiveTime, b.receiveTime),
+            (messageEvent) => {
               // Message blocks may contain topics that we are not subscribed to so we need to filter those out.
               // We use the topicNoConversions and topicConversions to determine if we should include the message event
 
@@ -320,8 +321,8 @@ function initRenderStateBuilder(): BuildRenderStateFn {
                   });
                 }
               }
-            }
-          }
+            },
+          );
         }
       }
       prevBlocks = newBlocks;
@@ -381,3 +382,52 @@ function initRenderStateBuilder(): BuildRenderStateFn {
 }
 
 export { initRenderStateBuilder };
+
+/**
+ * Function to iterate and call function over multiple sorted arrays in sorted order across all items in all arrays.
+ * Time complexity is O(t*n) where t is the number of arrays and n is the total number of items in all arrays.
+ * Space complexity is O(t) where t is the number of arrays.
+ * @param arrays - sorted arrays to iterate over
+ * @param compareFn - function called to compare items in arrays. Returns a positive value if left is larger than right,
+ *  a negative value if right is larger than left, or zero if both are equal
+ * @param forEach - callback to be executed on all items in the arrays to iterate over in sorted order across all arrays
+ */
+export function forEachSortedArrays<Item>(
+  arrays: Item[][],
+  compareFn: (a: Item, b: Item) => number,
+  forEach: (item: Item) => void,
+): void {
+  const cursors: number[] = Array(arrays.length).fill(0);
+  if (arrays.length === 0) {
+    return;
+  }
+  for (;;) {
+    let minCursorIndex = undefined;
+    for (let i = 0; i < cursors.length; i++) {
+      const cursor = cursors[i]!;
+      const array = arrays[i]!;
+      if (cursor >= array.length) {
+        continue;
+      }
+      const item = array[cursor]!;
+      if (minCursorIndex == undefined) {
+        minCursorIndex = i;
+      } else {
+        const minItem = arrays[minCursorIndex]![cursors[minCursorIndex]!]!;
+        if (compareFn(item, minItem) < 0) {
+          minCursorIndex = i;
+        }
+      }
+    }
+    if (minCursorIndex == undefined) {
+      break;
+    }
+    const minItem = arrays[minCursorIndex]![cursors[minCursorIndex]!];
+    if (minItem != undefined) {
+      forEach(minItem);
+      cursors[minCursorIndex]++;
+    } else {
+      break;
+    }
+  }
+}
