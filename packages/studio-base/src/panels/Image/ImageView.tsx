@@ -11,13 +11,14 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { Typography, styled as muiStyled } from "@mui/material";
+import { Typography } from "@mui/material";
 import produce from "immer";
 import { difference, set, union } from "lodash";
 import { useEffect, useState, useMemo, useCallback, useRef } from "react";
 import ReactDOM from "react-dom";
 import { useUpdateEffect } from "react-use";
 import { DeepPartial } from "ts-essentials";
+import { makeStyles } from "tss-react/mui";
 
 import { PanelExtensionContext, SettingsTreeAction, Topic } from "@foxglove/studio";
 import {
@@ -45,28 +46,39 @@ type Props = {
   context: PanelExtensionContext;
 };
 
-const Timestamp = muiStyled(Typography, {
-  shouldForwardProp: (prop) => prop !== "screenshotTest",
-})<{ screenshotTest: boolean }>(({ screenshotTest, theme }) => ({
-  position: "absolute",
-  margin: theme.spacing(0.5),
-  right: 0,
-  bottom: 0,
-  zIndex: theme.zIndex.appBar - 1,
-  transition: "opacity 0.1s ease-in-out",
-  opacity: 0,
-  padding: theme.spacing(0.25, 0.5),
-  userSelect: "all",
+const useStyles = makeStyles<void, "timestamp">()((theme, _params, classes) => ({
+  timestamp: {
+    position: "absolute",
+    margin: theme.spacing(0.5),
+    right: 0,
+    bottom: 0,
+    fontFamily: fonts.MONOSPACE,
+    color: theme.palette.common.white,
+    zIndex: theme.zIndex.appBar - 1,
+    transition: "opacity 0.1s ease-in-out",
+    padding: theme.spacing(0.25, 0.5),
+    userSelect: "all",
+    textShadow: `0 1px 4px ${theme.palette.common.black}`,
 
-  ".mosaic-window:hover &": {
-    opacity: "1",
+    "@media (hover: hover)": {
+      // only hide if the current device supports hover
+      opacity: 0,
+    },
   },
-  ...(screenshotTest && {
-    opacity: 1,
-  }),
+  root: {
+    [`&:hover .${classes.timestamp}`]: {
+      opacity: 1,
+    },
+  },
+  screenshotTest: {
+    [`.${classes.timestamp}`]: {
+      opacity: 1,
+    },
+  },
 }));
 
 export function ImageView({ context }: Props): JSX.Element {
+  const { classes, cx } = useStyles();
   const [renderDone, setRenderDone] = useState(() => () => {});
   const [topics, setTopics] = useState<readonly Topic[]>([]);
   const [config, setConfig] = useState<Config>(() => {
@@ -334,7 +346,16 @@ export function ImageView({ context }: Props): JSX.Element {
 
   return (
     <ThemeProvider isDark={colorScheme === "dark"}>
-      <Stack flex="auto" overflow="hidden" fullWidth fullHeight position="relative">
+      <Stack
+        flex="auto"
+        overflow="hidden"
+        fullWidth
+        fullHeight
+        position="relative"
+        className={cx(classes.root, {
+          [classes.screenshotTest]: inScreenshotTests(),
+        })}
+      >
         <PanelContextMenu itemsForClickPosition={contextMenuItemsForClickPosition} />
         <Stack fullWidth fullHeight>
           {/* Always render the ImageCanvas because it's expensive to unmount and start up. */}
@@ -356,14 +377,14 @@ export function ImageView({ context }: Props): JSX.Element {
             />
           )}
           {image && (
-            <Timestamp
+            <Typography
+              className={classes.timestamp}
               fontFamily={fonts.MONOSPACE}
               variant="caption"
               align="right"
-              screenshotTest={inScreenshotTests()}
             >
               {formatTimeRaw(image.stamp)}
-            </Timestamp>
+            </Typography>
           )}
         </Stack>
         <Toolbar pixelData={activePixelData} />
