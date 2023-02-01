@@ -32,8 +32,6 @@ import {
 
 import { EmptyPanelLayout } from "@foxglove/studio-base/components/EmptyPanelLayout";
 import EmptyState from "@foxglove/studio-base/components/EmptyState";
-import PanelToolbar from "@foxglove/studio-base/components/PanelToolbar";
-import Stack from "@foxglove/studio-base/components/Stack";
 import {
   LayoutState,
   useCurrentLayoutActions,
@@ -54,6 +52,7 @@ import "react-mosaic-component/react-mosaic-component.css";
 import ErrorBoundary from "./ErrorBoundary";
 import { MosaicPathContext } from "./MosaicPathContext";
 import { PanelRemounter } from "./PanelRemounter";
+import { UnknownPanel } from "./UnknownPanel";
 
 type Props = {
   layout?: MosaicNode<string>;
@@ -143,12 +142,7 @@ export function UnconnectedPanelLayout(props: Props): React.ReactElement {
         // If we haven't found a panel of the given type, render the panel selector
         Panel = panelInfo
           ? React.lazy(panelInfo.module)
-          : () => (
-              <Stack flex="auto" alignItems="center" justifyContent="center" data-testid={id}>
-                <PanelToolbar isUnknownPanel />
-                <EmptyState>Unknown panel type: {type}.</EmptyState>
-              </Stack>
-            );
+          : () => <UnknownPanel overrideConfig={{ type, id }} />;
 
         if (panelInfo) {
           panelComponentCache.current.set(type, Panel);
