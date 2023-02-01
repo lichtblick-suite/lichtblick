@@ -104,6 +104,7 @@ export default function Sidebar<K extends string>(props: SidebarProps<K>): JSX.E
   const [enableMemoryUseIndicator = false] = useAppConfigurationValue<boolean>(
     AppSetting.ENABLE_MEMORY_USE_INDICATOR,
   );
+  const [enableNewTopNav = false] = useAppConfigurationValue<boolean>(AppSetting.ENABLE_NEW_TOPNAV);
   const [mosaicValue, setMosaicValue] = useState<MosaicNode<"sidebar" | "children">>("children");
   const { classes } = useStyles();
   const prevSelectedKey = useRef<string | undefined>(undefined);
@@ -244,19 +245,21 @@ export default function Sidebar<K extends string>(props: SidebarProps<K>): JSX.E
           {bottomTabs}
           {enableMemoryUseIndicator && <MemoryUseIndicator />}
         </Tabs>
-        <HelpMenu
-          anchorEl={helpAnchorEl}
-          open={helpMenuOpen}
-          handleClose={handleHelpClose}
-          anchorOrigin={{
-            horizontal: "right",
-            vertical: "bottom",
-          }}
-          transformOrigin={{
-            vertical: "bottom",
-            horizontal: "left",
-          }}
-        />
+        {enableNewTopNav && (
+          <HelpMenu
+            anchorEl={helpAnchorEl}
+            open={helpMenuOpen}
+            handleClose={handleHelpClose}
+            anchorOrigin={{
+              horizontal: "right",
+              vertical: "bottom",
+            }}
+            transformOrigin={{
+              vertical: "bottom",
+              horizontal: "left",
+            }}
+          />
+        )}
       </Stack>
       {
         // By always rendering the mosaic, even if we are only showing children, we can prevent the
