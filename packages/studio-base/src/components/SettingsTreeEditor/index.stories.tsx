@@ -16,7 +16,6 @@ import {
   SettingsTreeAction,
 } from "@foxglove/studio";
 import { MessagePathInputStoryFixture } from "@foxglove/studio-base/components/MessagePathSyntax/fixture";
-import MockPanelContextProvider from "@foxglove/studio-base/components/MockPanelContextProvider";
 import SettingsTreeEditor from "@foxglove/studio-base/components/SettingsTreeEditor";
 import PanelSetup from "@foxglove/studio-base/stories/PanelSetup";
 
@@ -772,19 +771,17 @@ function Wrapper({ nodes }: { nodes: SettingsTreeNodes }): JSX.Element {
   }, [dynamicNodes]);
 
   return (
-    <MockPanelContextProvider>
-      <PanelSetup fixture={MessagePathInputStoryFixture}>
-        <Box
-          display="flex"
-          flexDirection="column"
-          width="100%"
-          bgcolor="background.paper"
-          overflow="auto"
-        >
-          <SettingsTreeEditor settings={settingsTree} />
-        </Box>
-      </PanelSetup>
-    </MockPanelContextProvider>
+    <PanelSetup fixture={MessagePathInputStoryFixture}>
+      <Box
+        display="flex"
+        flexDirection="column"
+        width="100%"
+        bgcolor="background.paper"
+        overflow="auto"
+      >
+        <SettingsTreeEditor settings={settingsTree} />
+      </Box>
+    </PanelSetup>
   );
 }
 

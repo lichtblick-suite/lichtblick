@@ -14,7 +14,6 @@
 import { Story } from "@storybook/react";
 import { fireEvent } from "@testing-library/dom";
 
-import MockPanelContextProvider from "@foxglove/studio-base/components/MockPanelContextProvider";
 import Panel from "@foxglove/studio-base/components/Panel";
 import PanelLayout from "@foxglove/studio-base/components/PanelLayout";
 import PanelToolbar from "@foxglove/studio-base/components/PanelToolbar";
@@ -523,17 +522,16 @@ export const SupportsDraggingBetweenTabsAnywhereInTheLayout: Story = () => {
           const dragHandle = document.querySelector(
             '[data-testid~="Sample1"] [data-testid="mosaic-drag-handle"]',
           );
+
           const target = document
-            .querySelector('[data-testid~="unknown!inner4"]')
-            ?.parentElement?.parentElement?.querySelector(".drop-target.left");
+            .querySelector('[data-testid="unknown!inner4"]')
+            ?.parentElement?.parentElement?.parentElement?.querySelector(".drop-target.left");
 
           dragAndDrop(dragHandle!, target!);
         }, DEFAULT_TIMEOUT);
       }}
     >
-      <MockPanelContextProvider>
-        <PanelLayout />
-      </MockPanelContextProvider>
+      <PanelLayout />
     </PanelSetup>
   );
 };

@@ -15,7 +15,6 @@ import { Stack } from "@mui/material";
 import { screen, waitFor } from "@testing-library/dom";
 import userEvent from "@testing-library/user-event";
 
-import MockPanelContextProvider from "@foxglove/studio-base/components/MockPanelContextProvider";
 import { Topic } from "@foxglove/studio-base/players/types";
 import PanelSetup, { Fixture } from "@foxglove/studio-base/stories/PanelSetup";
 import { basicDatatypes } from "@foxglove/studio-base/util/basicDatatypes";
@@ -54,19 +53,17 @@ function MessagePathInputStory(props: {
   const [path, setPath] = React.useState(props.path);
 
   return (
-    <MockPanelContextProvider>
-      <PanelSetup fixture={MessagePathInputStoryFixture} onMount={clickInput}>
-        <Stack direction="row" flex="auto" margin={1.25}>
-          <MessagePathInput
-            autoSize={false}
-            path={path}
-            validTypes={props.validTypes}
-            prioritizedDatatype={props.prioritizedDatatype}
-            onChange={(newPath) => setPath(newPath)}
-          />
-        </Stack>
-      </PanelSetup>
-    </MockPanelContextProvider>
+    <PanelSetup fixture={MessagePathInputStoryFixture} onMount={clickInput}>
+      <Stack direction="row" flex="auto" margin={1.25}>
+        <MessagePathInput
+          autoSize={false}
+          path={path}
+          validTypes={props.validTypes}
+          prioritizedDatatype={props.prioritizedDatatype}
+          onChange={(newPath) => setPath(newPath)}
+        />
+      </Stack>
+    </PanelSetup>
   );
 }
 
@@ -74,18 +71,16 @@ function MessagePathPerformanceStory(props: { path: string; prioritizedDatatype?
   const [path, setPath] = React.useState(props.path);
 
   return (
-    <MockPanelContextProvider>
-      <PanelSetup fixture={heavyFixture} onMount={clickInput}>
-        <Stack direction="row" flex="auto" margin={1.25}>
-          <MessagePathInput
-            autoSize={false}
-            path={path}
-            prioritizedDatatype={props.prioritizedDatatype}
-            onChange={(newPath) => setPath(newPath)}
-          />
-        </Stack>
-      </PanelSetup>
-    </MockPanelContextProvider>
+    <PanelSetup fixture={heavyFixture} onMount={clickInput}>
+      <Stack direction="row" flex="auto" margin={1.25}>
+        <MessagePathInput
+          autoSize={false}
+          path={path}
+          prioritizedDatatype={props.prioritizedDatatype}
+          onChange={(newPath) => setPath(newPath)}
+        />
+      </Stack>
+    </PanelSetup>
   );
 }
 
