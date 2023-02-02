@@ -8,7 +8,7 @@ import { RenderableCubeList } from "./RenderableCubeList";
 import { RenderableCylinder } from "./RenderableCylinder";
 import { RenderableLineList } from "./RenderableLineList";
 import { RenderableLineStrip } from "./RenderableLineStrip";
-import { RenderableMarker } from "./RenderableMarker";
+import { RenderableMarker, getMarkerId } from "./RenderableMarker";
 import { RenderableMeshResource } from "./RenderableMeshResource";
 import { RenderablePoints } from "./RenderablePoints";
 import { RenderableSphere } from "./RenderableSphere";
@@ -54,6 +54,7 @@ export class MarkerPool {
         renderable.userData.settingsPath = ["topics", topic];
         renderable.userData.settings = { visible: true, frameLocked: marker.frame_locked };
         renderable.userData.topic = topic;
+        renderable.name = getMarkerId(topic, marker.ns, marker.id);
         renderable.update(marker, receiveTime);
         return renderable;
       }
