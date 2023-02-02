@@ -5,6 +5,7 @@
 import * as base64 from "@protobufjs/base64";
 
 import { add, fromNanoSec, Time, toRFC3339String, toSec } from "@foxglove/rostime";
+import { LayoutID, ISO8601Timestamp } from "@foxglove/studio-base/services/ILayoutStorage";
 
 export type User = {
   id: string;
@@ -105,9 +106,6 @@ type DeviceResponse = {
   id: string;
   name: string;
 };
-
-export type LayoutID = string & { __brand: "LayoutID" };
-export type ISO8601Timestamp = string & { __brand: "ISO8601Timestamp" };
 
 export type ConsoleApiLayout = {
   id: LayoutID;

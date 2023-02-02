@@ -9,7 +9,6 @@ import { v4 as uuidv4 } from "uuid";
 import { MutexLocked } from "@foxglove/den/async";
 import Logger from "@foxglove/log";
 import { LayoutData } from "@foxglove/studio-base/context/CurrentLayoutContext/actions";
-import { ISO8601Timestamp } from "@foxglove/studio-base/services/ConsoleApi";
 import {
   ILayoutManager,
   LayoutManagerChangeEvent,
@@ -23,6 +22,7 @@ import {
   layoutIsShared,
   LayoutPermission,
   layoutPermissionIsShared,
+  ISO8601Timestamp,
 } from "@foxglove/studio-base/services/ILayoutStorage";
 import {
   IRemoteLayoutStorage,

@@ -14,7 +14,7 @@ import {
   LayoutData,
 } from "@foxglove/studio-base/context/CurrentLayoutContext/actions";
 import { defaultPlaybackConfig } from "@foxglove/studio-base/providers/CurrentLayoutProvider/reducers";
-import { LayoutID } from "@foxglove/studio-base/services/ConsoleApi";
+import { LayoutID } from "@foxglove/studio-base/services/ILayoutStorage";
 
 import panelsReducer from "./reducers";
 
