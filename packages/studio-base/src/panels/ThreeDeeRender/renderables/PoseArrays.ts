@@ -217,12 +217,13 @@ export class PoseArrays extends SceneExtension<PoseArrayRenderable> {
       const settings = this.renderer.config.topics[topicName] as
         | Partial<LayerSettingsPoseArray>
         | undefined;
+      const defaultType = { type: getDefaultType(this.renderer.topicsByName?.get(topicName)) };
       this._updatePoseArrayRenderable(
         renderable,
         renderable.userData.poseArrayMessage,
         renderable.userData.originalMessage,
         renderable.userData.receiveTime,
-        { ...DEFAULT_SETTINGS, ...settings },
+        { ...DEFAULT_SETTINGS, ...defaultType, ...settings },
       );
     }
   };
