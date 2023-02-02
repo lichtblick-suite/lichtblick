@@ -6,7 +6,6 @@ import { createContext, useContext } from "react";
 
 import { LayoutData } from "@foxglove/studio-base/context/CurrentLayoutContext/actions";
 import { Player, PlayerMetricsCollectorInterface } from "@foxglove/studio-base/players/types";
-import ConsoleApi from "@foxglove/studio-base/services/ConsoleApi";
 import { RegisteredIconNames } from "@foxglove/studio-base/types/Icons";
 
 export type DataSourceFactoryInitializeArgs = {
@@ -14,7 +13,6 @@ export type DataSourceFactoryInitializeArgs = {
   file?: File;
   files?: File[];
   params?: Record<string, string | undefined>;
-  consoleApi?: ConsoleApi;
 };
 
 export type DataSourceFactoryType = "file" | "connection" | "sample";

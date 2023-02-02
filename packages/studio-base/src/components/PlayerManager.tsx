@@ -12,21 +12,13 @@
 //   You may not use this file except in compliance with the License.
 
 import { useSnackbar } from "notistack";
-import {
-  PropsWithChildren,
-  useCallback,
-  useContext,
-  useLayoutEffect,
-  useMemo,
-  useState,
-} from "react";
+import { PropsWithChildren, useCallback, useLayoutEffect, useMemo, useState } from "react";
 import { useLatest, useMountedState } from "react-use";
 
 import { useShallowMemo } from "@foxglove/hooks";
 import Logger from "@foxglove/log";
 import { MessagePipelineProvider } from "@foxglove/studio-base/components/MessagePipeline";
 import { useAnalytics } from "@foxglove/studio-base/context/AnalyticsContext";
-import ConsoleApiContext from "@foxglove/studio-base/context/ConsoleApiContext";
 import {
   LayoutState,
   useCurrentLayoutActions,
@@ -83,9 +75,6 @@ export default function PlayerManager(props: PropsWithChildren<PlayerManagerProp
   const analytics = useAnalytics();
   const metricsCollector = useMemo(() => new AnalyticsMetricsCollector(analytics), [analytics]);
 
-  // When we implement per-data-connector UI settings we will move this into the foxglove data platform source.
-  const consoleApi = useContext(ConsoleApiContext);
-
   const layoutStorage = useLayoutManager();
   const { setSelectedLayoutId } = useCurrentLayoutActions();
 
@@ -138,7 +127,6 @@ export default function PlayerManager(props: PropsWithChildren<PlayerManagerProp
       // Sample sources don't need args or prompts to initialize
       if (foundSource.type === "sample") {
         const newPlayer = foundSource.initialize({
-          consoleApi,
           metricsCollector,
         });
 
@@ -176,7 +164,6 @@ export default function PlayerManager(props: PropsWithChildren<PlayerManagerProp
         switch (args.type) {
           case "connection": {
             const newPlayer = foundSource.initialize({
-              consoleApi,
               metricsCollector,
               params: args.params,
             });
@@ -274,7 +261,6 @@ export default function PlayerManager(props: PropsWithChildren<PlayerManagerProp
       playerSources,
       metricsCollector,
       enqueueSnackbar,
-      consoleApi,
       layoutStorage,
       isMounted,
       setSelectedLayoutId,

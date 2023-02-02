@@ -27,6 +27,13 @@ import VelodyneUnavailableDataSourceFactory from "./dataSources/VelodyneUnavaila
 import { IdbLayoutStorage } from "./services/IdbLayoutStorage";
 
 export function Root({ appConfiguration }: { appConfiguration: IAppConfiguration }): JSX.Element {
+  const layoutStorage = useMemo(() => new IdbLayoutStorage(), []);
+  const [extensionLoaders] = useState(() => [
+    new IdbExtensionLoader("org"),
+    new IdbExtensionLoader("local"),
+  ]);
+  const consoleApi = useMemo(() => new ConsoleApi(process.env.FOXGLOVE_API_URL ?? ""), []);
+
   const dataSources: IDataSourceFactory[] = useMemo(() => {
     const sources = [
       new Ros1UnavailableDataSourceFactory(),
@@ -37,21 +44,14 @@ export function Root({ appConfiguration }: { appConfiguration: IAppConfiguration
       new RosbridgeDataSourceFactory(),
       new UlogLocalDataSourceFactory(),
       new VelodyneUnavailableDataSourceFactory(),
-      new FoxgloveDataPlatformDataSourceFactory(),
+      new FoxgloveDataPlatformDataSourceFactory(consoleApi),
       new SampleNuscenesDataSourceFactory(),
       new McapLocalDataSourceFactory(),
       new RemoteDataSourceFactory(),
     ];
 
     return sources;
-  }, []);
-
-  const layoutStorage = useMemo(() => new IdbLayoutStorage(), []);
-  const [extensionLoaders] = useState(() => [
-    new IdbExtensionLoader("org"),
-    new IdbExtensionLoader("local"),
-  ]);
-  const consoleApi = useMemo(() => new ConsoleApi(process.env.FOXGLOVE_API_URL ?? ""), []);
+  }, [consoleApi]);
 
   // Enable dialog auth in development since using cookie auth does not work between
   // localhost and the hosted dev deployment due to browser cookie/host security.

@@ -8,6 +8,7 @@ import {
 } from "@foxglove/studio-base/context/PlayerSelectionContext";
 import { IterablePlayer, WorkerIterableSource } from "@foxglove/studio-base/players/IterablePlayer";
 import { Player } from "@foxglove/studio-base/players/types";
+import ConsoleApi from "@foxglove/studio-base/services/ConsoleApi";
 
 class FoxgloveDataPlatformDataSourceFactory implements IDataSourceFactory {
   public id = "foxglove-data-platform";
@@ -16,18 +17,19 @@ class FoxgloveDataPlatformDataSourceFactory implements IDataSourceFactory {
   public iconName: IDataSourceFactory["iconName"] = "FileASPX";
   public hidden = true;
 
-  public initialize(args: DataSourceFactoryInitializeArgs): Player | undefined {
-    const consoleApi = args.consoleApi;
-    if (!consoleApi) {
-      return;
-    }
+  #consoleApi: ConsoleApi;
 
+  public constructor(consoleApi: ConsoleApi) {
+    this.#consoleApi = consoleApi;
+  }
+
+  public initialize(args: DataSourceFactoryInitializeArgs): Player | undefined {
     const source = new WorkerIterableSource({
       sourceType: "foxgloveDataPlatform",
       initArgs: {
         api: {
-          baseUrl: consoleApi.getBaseUrl(),
-          auth: consoleApi.getAuthHeader(),
+          baseUrl: this.#consoleApi.getBaseUrl(),
+          auth: this.#consoleApi.getAuthHeader(),
         },
         params: args.params,
       },
