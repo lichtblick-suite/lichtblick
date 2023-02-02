@@ -3,6 +3,7 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 import type { BasePlotPath, PlotPath } from "@foxglove/studio-base/panels/Plot/internalTypes";
+import { PANEL_TITLE_CONFIG_KEY } from "@foxglove/studio-base/util/layout";
 
 // X-axis values:
 export type PlotXAxisVal =
@@ -48,6 +49,7 @@ export type PlotConfig = DeprecatedPlotConfig & {
   xAxisPath?: BasePlotPath;
   followingViewWidth?: number;
   sidebarDimension: number;
+  [PANEL_TITLE_CONFIG_KEY]?: string;
 };
 
 export const plotableRosTypes = [

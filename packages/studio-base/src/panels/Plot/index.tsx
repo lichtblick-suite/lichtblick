@@ -231,10 +231,11 @@ function Plot(props: Props) {
     xAxisVal,
     xAxisPath,
     sidebarDimension = config.sidebarWidth ?? defaultSidebarDimension,
+    [PANEL_TITLE_CONFIG_KEY]: customTitle,
   } = config;
 
   useEffect(() => {
-    if (legacyTitle) {
+    if (legacyTitle && (customTitle == undefined || customTitle === "")) {
       // Migrate legacy Plot-specific title setting to new global title setting
       // https://github.com/foxglove/studio/pull/5225
       saveConfig({
@@ -242,7 +243,7 @@ function Plot(props: Props) {
         [PANEL_TITLE_CONFIG_KEY]: legacyTitle,
       } as Partial<PlotConfig>);
     }
-  }, [legacyTitle, saveConfig]);
+  }, [customTitle, legacyTitle, saveConfig]);
 
   const theme = useTheme();
 
