@@ -452,21 +452,17 @@ export class Renderer extends EventEmitter<RendererEvents> {
     this.addSchemaSubscriptions(FRAME_TRANSFORM_DATATYPES, {
       handler: this.handleFrameTransform,
       shouldSubscribe: () => true,
-      // Disabled until we can efficiently preload transforms. See
-      // <https://github.com/foxglove/studio/issues/4657> for more details.
-      // preload: config.scene.transforms?.enablePreloading ?? true,
+      preload: config.scene.transforms?.enablePreloading ?? false,
     });
     this.addSchemaSubscriptions(TF_DATATYPES, {
       handler: this.handleTFMessage,
       shouldSubscribe: () => true,
-      // Disabled until we can efficiently preload transforms
-      // preload: config.scene.transforms?.enablePreloading ?? true,
+      preload: config.scene.transforms?.enablePreloading ?? false,
     });
     this.addSchemaSubscriptions(TRANSFORM_STAMPED_DATATYPES, {
       handler: this.handleTransformStamped,
       shouldSubscribe: () => true,
-      // Disabled until we can efficiently preload transforms
-      // preload: config.scene.transforms?.enablePreloading ?? true,
+      preload: config.scene.transforms?.enablePreloading ?? false,
     });
 
     this.addSceneExtension(this.coreSettings);
@@ -1002,7 +998,7 @@ export class Renderer extends EventEmitter<RendererEvents> {
       this.settings.errors.add(
         ["transforms", `frame:${childFrameId}`],
         TF_OVERFLOW,
-        `Transform history is at capacity (${frame.maxCapacity}), TFs will be dropped`,
+        `[Warning] Transform history is at capacity (${frame.maxCapacity}), old TFs will be dropped`,
       );
     }
   }
