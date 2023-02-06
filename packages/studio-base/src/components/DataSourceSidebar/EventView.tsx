@@ -8,8 +8,10 @@ import { Fragment } from "react";
 import { makeStyles } from "tss-react/mui";
 
 import { HighlightedText } from "@foxglove/studio-base/components/HighlightedText";
-import { TimelinePositionedEvent } from "@foxglove/studio-base/context/EventsContext";
-import { ConsoleEvent } from "@foxglove/studio-base/services/ConsoleApi";
+import {
+  TimelinePositionedEvent,
+  DataSourceEvent,
+} from "@foxglove/studio-base/context/EventsContext";
 
 const useStyles = makeStyles<void, "eventMetadata" | "eventSelected">()(
   (theme, _params, classes) => ({
@@ -68,7 +70,7 @@ const useStyles = makeStyles<void, "eventMetadata" | "eventSelected">()(
   }),
 );
 
-function formatEventDuration(event: ConsoleEvent) {
+function formatEventDuration(event: DataSourceEvent) {
   if (event.durationNanos === "0") {
     // instant
     return "-";

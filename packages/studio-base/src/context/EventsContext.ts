@@ -7,15 +7,32 @@ import { AsyncState } from "react-use/lib/useAsyncFn";
 import { DeepReadonly } from "ts-essentials";
 import { StoreApi, useStore } from "zustand";
 
+import { Time } from "@foxglove/rostime";
 import useGuaranteedContext from "@foxglove/studio-base/hooks/useGuaranteedContext";
-import { ConsoleEvent } from "@foxglove/studio-base/services/ConsoleApi";
+
+/**
+ * DataSourceEvent representings a single event within a data source.
+ */
+export type DataSourceEvent = {
+  id: string;
+  createdAt: string;
+  deviceId: string;
+  durationNanos: string;
+  endTime: Time;
+  endTimeInSeconds: number;
+  metadata: Record<string, string>;
+  startTime: Time;
+  startTimeInSeconds: number;
+  timestampNanos: string;
+  updatedAt: string;
+};
 
 /**
  * Represents an event including its fractional position on the timeline.
  */
 export type TimelinePositionedEvent = {
   /** The event. */
-  event: ConsoleEvent;
+  event: DataSourceEvent;
 
   /** The end position of the event, as a value 0-1 relative to the timeline. */
   endPosition: number;
