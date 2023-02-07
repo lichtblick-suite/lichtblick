@@ -499,6 +499,11 @@ export default function Workspace(props: WorkspaceProps): JSX.Element {
     };
   }, []);
 
+  const ConnectedLayoutBrowser = useCallback(
+    () => <LayoutBrowser supportsSignIn={supportsAccountSettings} />,
+    [supportsAccountSettings],
+  );
+
   const [sidebarItems, sidebarBottomItems] = useMemo(() => {
     const topItems = new Map<SidebarItemKey, SidebarItem>([
       [
@@ -513,7 +518,10 @@ export default function Workspace(props: WorkspaceProps): JSX.Element {
               : undefined,
         },
       ],
-      ["layouts", { iconName: "FiveTileGrid", title: "Layouts", component: LayoutBrowser }],
+      [
+        "layouts",
+        { iconName: "FiveTileGrid", title: "Layouts", component: ConnectedLayoutBrowser },
+      ],
       ["add-panel", { iconName: "RectangularClipping", title: "Add panel", component: AddPanel }],
       [
         "panel-settings",
@@ -558,6 +566,7 @@ export default function Workspace(props: WorkspaceProps): JSX.Element {
   }, [
     DataSourceSidebarItem,
     playerProblems,
+    ConnectedLayoutBrowser,
     enableStudioLogsSidebar,
     enableNewTopNav,
     supportsAccountSettings,
