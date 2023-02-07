@@ -702,6 +702,35 @@ declare module "@foxglove/studio" {
   /**
    * A settings tree is a tree of panel settings that can be displayed and edited in
    * the panel settings sidebar.
+   *
+   * Nodes and fields in the tree can be referred to by a string path, which collects
+   * the keys of each node on the path from the root to the child node or field.
+   *
+   * For example, for the following tree:
+   *
+   *  root: {
+   *    children: {
+   *      a: {
+   *        children: {
+   *          b: {
+   *            fields: {
+   *              toggleMe: {
+   *                label: "Toggle me",
+   *                input: "boolean",
+   *                value: false,
+   *              },
+   *            },
+   *          },
+   *        },
+   *      },
+   *    },
+   *  },
+   *
+   * the path to the node at b would be ["a", "b"] and the path to the toggleMe
+   * field would be ["a", "b", "toggleMe"]. These paths are used in the
+   * actionHandler, which responds to updates to values in the tree, and also in
+   * the focusedPath, which is used to focus the editor UI at a particular node
+   * in the tree.
    */
   export type SettingsTree = {
     /**
@@ -715,8 +744,15 @@ declare module "@foxglove/studio" {
     enableFilter?: boolean;
 
     /**
-     * The settings tree root nodes. Updates to these will automatically be reflected in the
-     * editor UI.
+     * Setting this will have a one-time effect of scrolling the editor to the
+     * node at the path and highlighting it. This is a transient effect so it is
+     * not necessary to subsequently unset this.
+     */
+    focusedPath?: readonly string[];
+
+    /**
+     * The settings tree root nodes. Updates to these will automatically be
+     * reflected in the editor UI.
      */
     nodes: SettingsTreeNodes;
   };

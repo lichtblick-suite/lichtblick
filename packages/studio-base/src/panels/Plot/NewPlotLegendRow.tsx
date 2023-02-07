@@ -23,6 +23,7 @@ import { PlotPath } from "./internalTypes";
 
 type PlotLegendRowProps = {
   index: number;
+  onClickPath: () => void;
   path: PlotPath;
   paths: PlotPath[];
   hasMismatchedDataLength: boolean;
@@ -91,6 +92,7 @@ const useStyles = makeStyles<void, "plotName">()((theme, _params, classes) => ({
 
 export function NewPlotLegendRow({
   index,
+  onClickPath,
   path,
   paths,
   hasMismatchedDataLength,
@@ -143,6 +145,7 @@ export function NewPlotLegendRow({
       onClick={() => {
         setSelectedPanelIds([panelId]);
         openPanelSettings();
+        onClickPath();
       }}
     >
       <div className={classes.listIcon}>

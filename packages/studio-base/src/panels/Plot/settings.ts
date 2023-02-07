@@ -201,7 +201,11 @@ function buildSettingsTree(config: PlotConfig, enableSeries: boolean): SettingsT
   };
 }
 
-export function usePlotPanelSettings(config: PlotConfig, saveConfig: SaveConfig<PlotConfig>): void {
+export function usePlotPanelSettings(
+  config: PlotConfig,
+  saveConfig: SaveConfig<PlotConfig>,
+  focusedPath?: readonly string[],
+): void {
   const updatePanelSettingsTree = usePanelSettingsTreeUpdate();
   const [enableSeries = false] = useAppConfigurationValue<boolean>(
     AppSetting.ENABLE_PLOT_PANEL_SERIES_SETTINGS,
@@ -262,7 +266,8 @@ export function usePlotPanelSettings(config: PlotConfig, saveConfig: SaveConfig<
   useEffect(() => {
     updatePanelSettingsTree({
       actionHandler,
+      focusedPath,
       nodes: buildSettingsTree(config, enableSeries),
     });
-  }, [actionHandler, config, enableSeries, updatePanelSettingsTree]);
+  }, [actionHandler, config, enableSeries, focusedPath, updatePanelSettingsTree]);
 }

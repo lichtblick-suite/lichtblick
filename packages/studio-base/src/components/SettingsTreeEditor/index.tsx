@@ -44,7 +44,7 @@ export default function SettingsTreeEditor({
   settings: DeepReadonly<SettingsTree>;
 }): JSX.Element {
   const { classes } = useStyles();
-  const { actionHandler } = settings;
+  const { actionHandler, focusedPath } = settings;
   const [filterText, setFilterText] = useState<string>("");
 
   const filteredNodes = useMemo(() => {
@@ -143,6 +143,7 @@ export default function SettingsTreeEditor({
             actionHandler={actionHandler}
             defaultOpen={root.defaultExpansionState === "collapsed" ? false : true}
             filter={filterText}
+            focusedPath={focusedPath}
             path={makeStablePath(key)}
             settings={root}
           />

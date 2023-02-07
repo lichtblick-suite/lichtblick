@@ -16,10 +16,12 @@ import {
   Typography,
   useTheme,
 } from "@mui/material";
-import { partition } from "lodash";
+import { isEqual, partition } from "lodash";
 import memoizeWeak from "memoize-weak";
-import { ChangeEvent, useCallback, useMemo } from "react";
+import { ChangeEvent, useCallback, useEffect, useMemo, useRef } from "react";
+import tinycolor from "tinycolor2";
 import { DeepReadonly } from "ts-essentials";
+import { keyframes } from "tss-react";
 import { makeStyles } from "tss-react/mui";
 import { useImmer } from "use-immer";
 
@@ -38,6 +40,7 @@ export type NodeEditorProps = {
   actionHandler: (action: SettingsTreeAction) => void;
   defaultOpen?: boolean;
   filter?: string;
+  focusedPath?: readonly string[];
   path: readonly string[];
   settings?: DeepReadonly<SettingsTreeNode>;
 };
@@ -57,6 +60,17 @@ const useStyles = makeStyles()((theme) => ({
       fontSize: "0.75rem",
       padding: theme.spacing(0.75, 1),
     },
+  },
+  focusedNode: {
+    animation: `${keyframes`
+      from {
+        background-color: ${tinycolor(theme.palette.primary.main).setAlpha(0.3).toRgbString()};
+      }
+      to {
+        background-color: transparent;
+      }`}
+      0.5s ease-in-out
+    `,
   },
   fieldPadding: {
     gridColumn: "span 2",
@@ -169,11 +183,19 @@ const SelectVisibilityFilterField = {
   options: SelectVisibilityFilterOptions,
 } as const;
 
+type State = {
+  editing: boolean;
+  focusedPath: undefined | readonly string[];
+  open: boolean;
+  visibilityFilter: SelectVisibilityFilterValue;
+};
+
 function NodeEditorComponent(props: NodeEditorProps): JSX.Element {
-  const { actionHandler, defaultOpen = true, filter, settings = {} } = props;
-  const [state, setState] = useImmer({
-    open: defaultOpen,
+  const { actionHandler, defaultOpen = true, filter, focusedPath, settings = {} } = props;
+  const [state, setState] = useImmer<State>({
     editing: false,
+    focusedPath: undefined,
+    open: defaultOpen,
     visibilityFilter: "all",
   });
 
@@ -204,9 +226,28 @@ function NodeEditorComponent(props: NodeEditorProps): JSX.Element {
     actionHandler({ action: "perform-node-action", payload: { id: actionId, path: props.path } });
   };
 
+  const isFocused = isEqual(focusedPath, props.path);
+
+  useEffect(() => {
+    const isOnFocusedPath =
+      focusedPath != undefined && isEqual(props.path, focusedPath.slice(0, props.path.length));
+
+    if (isOnFocusedPath) {
+      setState((draft) => {
+        draft.open = true;
+      });
+    }
+
+    if (isFocused) {
+      rootRef.current?.scrollIntoView();
+    }
+  }, [focusedPath, isFocused, props.path, setState]);
+
   const { fields, children } = settings;
   const hasChildren = children != undefined && Object.keys(children).length > 0;
   const hasProperties = fields != undefined || hasChildren;
+
+  const rootRef = useRef<HTMLDivElement>(ReactNull);
 
   const fieldEditors = filterMap(Object.entries(fields ?? {}), ([key, field]) => {
     return field ? (
@@ -231,6 +272,7 @@ function NodeEditorComponent(props: NodeEditorProps): JSX.Element {
         actionHandler={actionHandler}
         defaultOpen={child.defaultExpansionState === "collapsed" ? false : true}
         filter={filter}
+        focusedPath={focusedPath}
         key={key}
         settings={child}
         path={makeStablePath(props.path, key)}
@@ -287,7 +329,13 @@ function NodeEditorComponent(props: NodeEditorProps): JSX.Element {
 
   return (
     <>
-      <div className={cx(classes.nodeHeader, { [classes.nodeHeaderVisible]: visible })}>
+      <div
+        className={cx(classes.nodeHeader, {
+          [classes.focusedNode]: isFocused,
+          [classes.nodeHeaderVisible]: visible,
+        })}
+        ref={rootRef}
+      >
         <div
           className={cx(classes.nodeHeaderToggle, {
             [classes.nodeHeaderToggleHasProperties]: hasProperties,

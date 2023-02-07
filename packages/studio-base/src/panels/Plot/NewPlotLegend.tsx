@@ -22,6 +22,7 @@ type Props = {
   paths: PlotPath[];
   datasets: ComponentProps<typeof TimeBasedChart>["data"]["datasets"];
   currentTime?: number;
+  onClickPath: (index: number) => void;
   saveConfig: SaveConfig<PlotConfig>;
   showLegend: boolean;
   pathsWithMismatchedDataLengths: string[];
@@ -122,6 +123,7 @@ const useStyles = makeStyles<StyleProps, "container" | "toggleButton">()(
 
 export function NewPlotLegend(props: Props): JSX.Element {
   const {
+    onClickPath,
     paths,
     saveConfig,
     datasets,
@@ -204,6 +206,7 @@ export function NewPlotLegend(props: Props): JSX.Element {
                 <NewPlotLegendRow
                   key={index}
                   index={index}
+                  onClickPath={() => onClickPath(index)}
                   path={path}
                   paths={paths}
                   hasMismatchedDataLength={pathsWithMismatchedDataLengths.includes(path.value)}

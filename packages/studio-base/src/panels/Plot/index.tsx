@@ -15,7 +15,7 @@ import DownloadIcon from "@mui/icons-material/Download";
 import { useTheme } from "@mui/material";
 import { compact, isNumber, uniq } from "lodash";
 import memoizeWeak from "memoize-weak";
-import { useEffect, useCallback, useMemo, ComponentProps } from "react";
+import { useEffect, useCallback, useMemo, ComponentProps, useState } from "react";
 
 import { filterMap } from "@foxglove/den/collection";
 import { useShallowMemo } from "@foxglove/hooks";
@@ -502,7 +502,9 @@ function Plot(props: Props) {
     [messagePipeline, xAxisVal],
   );
 
-  usePlotPanelSettings(config, saveConfig);
+  const [focusedPath, setFocusedPath] = useState<undefined | string[]>(undefined);
+
+  usePlotPanelSettings(config, saveConfig, focusedPath);
 
   const [seriesSettings = false] = useAppConfigurationValue(
     AppSetting.ENABLE_PLOT_PANEL_SERIES_SETTINGS,
@@ -554,6 +556,7 @@ function Plot(props: Props) {
         )}
         {seriesSettings === true && (
           <NewPlotLegend
+            onClickPath={(index: number) => setFocusedPath(["paths", String(index)])}
             paths={yAxisPaths}
             datasets={datasets}
             currentTime={currentTimeSinceStart}
