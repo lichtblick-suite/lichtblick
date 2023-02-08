@@ -16,5 +16,11 @@
       "source": "/((?:\\w+\\.)?[0-9a-f]{20}\\.(?:js|js\\.map|wasm))",
       "headers": [{ "key": "Cache-Control", "value": "public, max-age=86400, must-revalidate" }]
     }
+  ],
+  "rewrites": [
+    {
+      "source": "/studio",
+      "destination": "/"
+    }
   ]
 }
