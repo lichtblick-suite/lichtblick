@@ -19,6 +19,7 @@ import * as path from "path";
 import { ReactElement, useCallback, useRef } from "react";
 import MonacoEditor, { EditorDidMount, EditorWillMount } from "react-monaco-editor";
 import { useResizeDetector } from "react-resize-detector";
+import { useLatest } from "react-use";
 
 import getPrettifiedCode from "@foxglove/studio-base/panels/NodePlayground/getPrettifiedCode";
 import { Script } from "@foxglove/studio-base/panels/NodePlayground/script";
@@ -285,7 +286,13 @@ const Editor = ({
     });
   }, []);
 
-  const onChange = React.useCallback((srcCode: string) => setScriptCode(srcCode), [setScriptCode]);
+  // Refer to setScriptCode by reference so that the onChange callback isn't invalidated
+  // on every edit.
+  const latestSetScriptCode = useLatest(setScriptCode);
+  const onChange = useCallback(
+    (srcCode: string) => latestSetScriptCode.current(srcCode),
+    [latestSetScriptCode],
+  );
 
   const onResize = useCallback((width?: number, height?: number) => {
     if (width != undefined && height != undefined) {
