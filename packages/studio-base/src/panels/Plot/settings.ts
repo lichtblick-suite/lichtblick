@@ -8,8 +8,6 @@ import memoizeWeak from "memoize-weak";
 import { useCallback, useEffect } from "react";
 
 import { SettingsTreeAction, SettingsTreeNode, SettingsTreeNodes } from "@foxglove/studio";
-import { AppSetting } from "@foxglove/studio-base/AppSetting";
-import { useAppConfigurationValue } from "@foxglove/studio-base/hooks";
 import { PlotPath } from "@foxglove/studio-base/panels/Plot/internalTypes";
 import { usePanelSettingsTreeUpdate } from "@foxglove/studio-base/providers/PanelStateContextProvider";
 import { SaveConfig } from "@foxglove/studio-base/types/panels";
@@ -79,8 +77,7 @@ const makeRootSeriesNode = memoizeWeak((paths: PlotPath[]): SettingsTreeNode => 
   };
 });
 
-// eslint-disable-next-line @foxglove/no-boolean-parameters
-function buildSettingsTree(config: PlotConfig, enableSeries: boolean): SettingsTreeNodes {
+function buildSettingsTree(config: PlotConfig): SettingsTreeNodes {
   const maxYError =
     isNumber(config.minYValue) && isNumber(config.maxYValue) && config.minYValue >= config.maxYValue
       ? "Y max must be greater than Y min."
@@ -104,17 +101,13 @@ function buildSettingsTree(config: PlotConfig, enableSeries: boolean): SettingsT
         legendDisplay: {
           label: "Position",
           input: "select",
-          value: config.legendDisplay,
+          value: config.showLegend ? config.legendDisplay : "none",
           options: [
             { value: "floating", label: "Floating" },
             { value: "left", label: "Left" },
             { value: "top", label: "Top" },
+            { value: "none", label: "None" },
           ],
-        },
-        showLegend: {
-          label: "Show legend",
-          input: "boolean",
-          value: config.showLegend,
         },
         showPlotValuesInLegend: {
           label: "Show values",
@@ -197,7 +190,7 @@ function buildSettingsTree(config: PlotConfig, enableSeries: boolean): SettingsT
         },
       },
     },
-    paths: enableSeries ? makeRootSeriesNode(config.paths) : undefined,
+    paths: makeRootSeriesNode(config.paths),
   };
 }
 
@@ -207,9 +200,6 @@ export function usePlotPanelSettings(
   focusedPath?: readonly string[],
 ): void {
   const updatePanelSettingsTree = usePanelSettingsTreeUpdate();
-  const [enableSeries = false] = useAppConfigurationValue<boolean>(
-    AppSetting.ENABLE_PLOT_PANEL_SERIES_SETTINGS,
-  );
 
   const actionHandler = useCallback(
     (action: SettingsTreeAction) => {
@@ -222,6 +212,13 @@ export function usePlotPanelSettings(
                 set(draft, [...path.slice(0, 2), "enabled"], value);
               } else {
                 set(draft, path, value);
+              }
+            } else if (isEqual(path, ["legend", "legendDisplay"])) {
+              if (value === "none") {
+                draft.showLegend = false;
+              } else {
+                draft.legendDisplay = value;
+                draft.showLegend = true;
               }
             } else if (isEqual(path, ["xAxis", "xAxisPath"])) {
               set(draft, ["xAxisPath", "value"], value);
@@ -267,7 +264,7 @@ export function usePlotPanelSettings(
     updatePanelSettingsTree({
       actionHandler,
       focusedPath,
-      nodes: buildSettingsTree(config, enableSeries),
+      nodes: buildSettingsTree(config),
     });
-  }, [actionHandler, config, enableSeries, focusedPath, updatePanelSettingsTree]);
+  }, [actionHandler, config, focusedPath, updatePanelSettingsTree]);
 }

@@ -57,11 +57,6 @@ const features: Feature[] = [
     description: <>Show the app memory use in the sidebar.</>,
   },
   {
-    key: AppSetting.ENABLE_PLOT_PANEL_SERIES_SETTINGS,
-    name: "Plot panel series in settings",
-    description: <>Allow editing plot panel data series in the sidebar.</>,
-  },
-  {
     key: AppSetting.ENABLE_NEW_TOPNAV,
     name: "New navigation",
     description: (
