@@ -48,6 +48,7 @@ const devServerConfig: WebpackConfiguration = {
 const mainConfig = (env: unknown, argv: WebpackArgv): Configuration => {
   const isDev = argv.mode === "development";
   const isServe = argv.env?.WEBPACK_SERVE ?? false;
+  const publicPath = process.env.FOXGLOVE_PUBLIC_PATH ?? "";
 
   const allowUnusedVariables = isDev;
 
@@ -91,7 +92,7 @@ const mainConfig = (env: unknown, argv: WebpackArgv): Configuration => {
     devtool: isDev ? "eval-cheap-module-source-map" : "source-map",
 
     output: {
-      publicPath: "auto",
+      publicPath: publicPath === "" ? "auto" : publicPath,
 
       // Output filenames should include content hashes in order to cache bust when new versions are available
       filename: isDev ? "[name].js" : "[name].[contenthash].js",
@@ -117,12 +118,12 @@ const mainConfig = (env: unknown, argv: WebpackArgv): Configuration => {
       <meta property="og:description" content="Open source visualization and debugging tool for robotics"/>
       <meta property="og:type" content="website"/>
       <meta property="og:image" content="https://foxglove.dev/images/og-image.jpeg"/>
-      <meta property="og:url" content="https://studio.foxglove.dev/"/>
+      <meta property="og:url" content="${publicPath}"/>
       <meta name="twitter:card" content="summary_large_image"/>
       <meta name="twitter:site" content="@foxglovedev"/>
-      <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png" />
-      <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png" />
-      <link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png" />
+      <link rel="apple-touch-icon" sizes="180x180" href="${publicPath}apple-touch-icon.png" />
+      <link rel="icon" type="image/png" sizes="32x32" href="${publicPath}favicon-32x32.png" />
+      <link rel="icon" type="image/png" sizes="16x16" href="${publicPath}favicon-16x16.png" />
       <title>Foxglove Studio</title>
     </head>
     <script>
