@@ -19,8 +19,9 @@
   ],
   "rewrites": [
     {
-      "source": "/studio",
-      "destination": "/"
+      "source": "/studio/:path*",
+      "destination": "/:path*"
     }
-  ]
+  ],
+  "trailingSlash": false
 }
