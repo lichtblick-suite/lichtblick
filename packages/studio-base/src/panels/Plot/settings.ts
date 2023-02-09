@@ -242,7 +242,6 @@ export function usePlotPanelSettings(
               draft.paths.push({
                 timestampMethod: "receiveTime",
                 value: "",
-                label: `Series ${draft.paths.length + 1}`,
                 enabled: true,
               });
             }),
