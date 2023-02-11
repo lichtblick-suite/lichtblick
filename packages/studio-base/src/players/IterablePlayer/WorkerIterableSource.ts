@@ -14,33 +14,36 @@ import type {
   Initalization,
   IteratorResult,
   MessageIteratorArgs,
+  IterableSourceInitializeArgs,
 } from "./IIterableSource";
-import type {
-  WorkerIterableSourceWorker,
-  WorkerIterableSourceWorkerArgs,
-} from "./WorkerIterableSourceWorker.worker";
+import type { WorkerIterableSourceWorker } from "./WorkerIterableSourceWorker";
 
 Comlink.transferHandlers.set("abortsignal", abortSignalTransferHandler);
 
+type ConstructorArgs = {
+  initWorker: () => Worker;
+  initArgs: IterableSourceInitializeArgs;
+};
+
 export class WorkerIterableSource implements IIterableSource {
-  private readonly _args: WorkerIterableSourceWorkerArgs;
+  private readonly _args: ConstructorArgs;
 
   private _thread?: Worker;
   private _worker?: Comlink.Remote<WorkerIterableSourceWorker>;
 
-  public constructor(args: WorkerIterableSourceWorkerArgs) {
+  public constructor(args: ConstructorArgs) {
     this._args = args;
   }
 
   public async initialize(): Promise<Initalization> {
     // Note: this launches the worker.
-    this._thread = new Worker(new URL("./WorkerIterableSourceWorker.worker", import.meta.url));
+    this._thread = this._args.initWorker();
 
-    const Wrapped = Comlink.wrap<
-      new (args: WorkerIterableSourceWorkerArgs) => WorkerIterableSourceWorker
+    const initialize = Comlink.wrap<
+      (args: IterableSourceInitializeArgs) => Comlink.Remote<WorkerIterableSourceWorker>
     >(this._thread);
 
-    const worker = (this._worker = await new Wrapped(this._args));
+    const worker = (this._worker = await initialize(this._args.initArgs));
     return await worker.initialize();
   }
 

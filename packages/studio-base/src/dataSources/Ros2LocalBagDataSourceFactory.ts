@@ -26,7 +26,14 @@ class Ros2LocalBagDataSourceFactory implements IDataSourceFactory {
     }
 
     const source = new WorkerIterableSource({
-      sourceType: "rosdb3",
+      initWorker: () => {
+        return new Worker(
+          new URL(
+            "@foxglove/studio-base/players/IterablePlayer/rosdb3/RosDb3IterableSourceWorker.worker",
+            import.meta.url,
+          ),
+        );
+      },
       initArgs: { files },
     });
 

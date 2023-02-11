@@ -24,7 +24,14 @@ class SampleNuscenesDataSourceFactory implements IDataSourceFactory {
     const bagUrl = "https://assets.foxglove.dev/NuScenes-v1.0-mini-scene-0061-8c50124.mcap";
 
     const source = new WorkerIterableSource({
-      sourceType: "mcap",
+      initWorker: () => {
+        return new Worker(
+          new URL(
+            "@foxglove/studio-base/players/IterablePlayer/Mcap/McapIterableSourceWorker.worker",
+            import.meta.url,
+          ),
+        );
+      },
       initArgs: { url: bagUrl },
     });
 

@@ -21,7 +21,6 @@ import {
   Initalization,
   MessageIteratorArgs,
   GetBackfillMessagesArgs,
-  IterableSourceInitializeArgs,
 } from "../IIterableSource";
 
 export class RosDb3IterableSource implements IIterableSource {
@@ -149,13 +148,4 @@ export class RosDb3IterableSource implements IIterableSource {
   ): Promise<MessageEvent<unknown>[]> {
     return [];
   }
-}
-
-export function initialize(args: IterableSourceInitializeArgs): RosDb3IterableSource {
-  const files = args.file ? [args.file] : args.files;
-  if (files) {
-    return new RosDb3IterableSource(files);
-  }
-
-  throw new Error("files required");
 }

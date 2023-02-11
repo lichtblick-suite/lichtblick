@@ -23,7 +23,14 @@ class Ros1LocalBagDataSourceFactory implements IDataSourceFactory {
     }
 
     const source = new WorkerIterableSource({
-      sourceType: "rosbag",
+      initWorker: () => {
+        return new Worker(
+          new URL(
+            "@foxglove/studio-base/players/IterablePlayer/BagIterableSourceWorker.worker",
+            import.meta.url,
+          ),
+        );
+      },
       initArgs: { file },
     });
 

@@ -25,7 +25,14 @@ class FoxgloveDataPlatformDataSourceFactory implements IDataSourceFactory {
 
   public initialize(args: DataSourceFactoryInitializeArgs): Player | undefined {
     const source = new WorkerIterableSource({
-      sourceType: "foxgloveDataPlatform",
+      initWorker: () => {
+        return new Worker(
+          new URL(
+            "@foxglove/studio-base/players/IterablePlayer/foxglove-data-platform/DataPlatformIterableSourceWorker.worker",
+            import.meta.url,
+          ),
+        );
+      },
       initArgs: {
         api: {
           baseUrl: this.#consoleApi.getBaseUrl(),

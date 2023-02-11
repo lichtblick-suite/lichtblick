@@ -26,7 +26,6 @@ import {
   Initalization,
   MessageIteratorArgs,
   GetBackfillMessagesArgs,
-  IterableSourceInitializeArgs,
 } from "./IIterableSource";
 
 type BagSource = { type: "file"; file: File } | { type: "remote"; url: string };
@@ -265,14 +264,4 @@ export class BagIterableSource implements IIterableSource {
     messages.sort((a, b) => compare(a.receiveTime, b.receiveTime));
     return messages;
   }
-}
-
-export function initialize(args: IterableSourceInitializeArgs): BagIterableSource {
-  if (args.file) {
-    return new BagIterableSource({ type: "file", file: args.file });
-  } else if (args.url) {
-    return new BagIterableSource({ type: "remote", url: args.url });
-  }
-
-  throw new Error("file or url required");
 }
