@@ -7,7 +7,7 @@ import CloseIcon from "@mui/icons-material/Close";
 import FilterNoneIcon from "@mui/icons-material/FilterNone";
 import MinimizeIcon from "@mui/icons-material/Minimize";
 import { AppBar as MuiAppBar, Button, IconButton, Toolbar, Typography } from "@mui/material";
-import { MouseEvent, useCallback, useContext, useState } from "react";
+import { MouseEvent, useCallback, useState } from "react";
 import { makeStyles } from "tss-react/mui";
 
 import { FoxgloveLogo } from "@foxglove/studio-base/components/FoxgloveLogo";
@@ -16,7 +16,6 @@ import {
   useMessagePipeline,
 } from "@foxglove/studio-base/components/MessagePipeline";
 import { useAnalytics } from "@foxglove/studio-base/context/AnalyticsContext";
-import ConsoleApiContext from "@foxglove/studio-base/context/ConsoleApiContext";
 import {
   CurrentUser,
   useCurrentUserType,
@@ -161,8 +160,7 @@ export function AppBar(props: AppBarProps): JSX.Element {
   const currentUserType = useCurrentUserType();
   const analytics = useAnalytics();
 
-  const supportsAccountSettings =
-    useContext(ConsoleApiContext) != undefined && disableSignin !== true;
+  const supportsAccountSettings = signIn != undefined && disableSignin !== true;
 
   const [helpAnchorEl, setHelpAnchorEl] = useState<undefined | HTMLElement>(undefined);
   const [userAnchorEl, setUserAnchorEl] = useState<undefined | HTMLElement>(undefined);
@@ -286,13 +284,11 @@ export function AppBar(props: AppBarProps): JSX.Element {
                       variant="contained"
                       color="primary"
                       onClick={() => {
-                        if (signIn) {
-                          signIn();
-                          void analytics.logEvent(AppEvent.APP_BAR_CLICK_CTA, {
-                            user: "unauthenticated",
-                            cta: "sign-in",
-                          });
-                        }
+                        signIn();
+                        void analytics.logEvent(AppEvent.APP_BAR_CLICK_CTA, {
+                          user: "unauthenticated",
+                          cta: "sign-in",
+                        });
                       }}
                     >
                       Sign in
