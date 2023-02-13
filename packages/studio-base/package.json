@@ -65,7 +65,7 @@
     "@mui/material": "5.11.6",
     "@popperjs/core": "2.11.6",
     "@protobufjs/base64": "1.1.2",
-    "@sentry/core": "7.37.0",
+    "@sentry/core": "7.37.2",
     "@sentry/types": "7.30.0",
     "@storybook/addon-actions": "6.5.16",
     "@storybook/react": "6.5.15",
