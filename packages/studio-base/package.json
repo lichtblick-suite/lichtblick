@@ -134,7 +134,7 @@
     "idb-keyval": "6.2.0",
     "immer": "9.0.18",
     "intervals-fn": "3.0.3",
-    "jest-diff": "29.4.0",
+    "jest-diff": "29.4.2",
     "jszip": "3.10.1",
     "leaflet": "1.9.3",
     "lodash": "4.17.21",
