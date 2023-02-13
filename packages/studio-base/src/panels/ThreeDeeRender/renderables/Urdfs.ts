@@ -587,7 +587,8 @@ export class Urdfs extends SceneExtension<UrdfRenderable> {
     renderable.removeChildren();
 
     const createChild = (frameId: string, i: number, visual: UrdfVisual): void => {
-      const childRenderable = createRenderable(visual, robot, i, frameId, renderer);
+      const baseUrl = renderable.userData.url;
+      const childRenderable = createRenderable(visual, robot, i, frameId, renderer, baseUrl);
       // Set the childRenderable settingsPath so errors route to the correct place
       childRenderable.userData.settingsPath = renderable.userData.settingsPath;
       renderable.userData.renderables.set(childRenderable.name, childRenderable);
@@ -677,6 +678,7 @@ function createRenderable(
   id: number,
   frameId: string,
   renderer: Renderer,
+  baseUrl: string | undefined,
 ): Renderable {
   const name = `${frameId}-${id}-${visual.geometry.geometryType}`;
   const orientation = eulerToQuaternion(visual.origin.rpy);
@@ -704,7 +706,7 @@ function createRenderable(
     case "mesh": {
       // Use embedded materials only when no override material is defined in the URDF
       const embedded = !visual.material ? EmbeddedMaterialUsage.Use : EmbeddedMaterialUsage.Ignore;
-      const marker = createMeshMarker(frameId, pose, embedded, visual.geometry, color);
+      const marker = createMeshMarker(frameId, pose, embedded, visual.geometry, baseUrl, color);
       return new RenderableMeshResource(name, marker, undefined, renderer);
     }
     default:
@@ -756,6 +758,7 @@ function createMeshMarker(
   pose: Pose,
   embeddedMaterialUsage: EmbeddedMaterialUsage,
   mesh: UrdfGeometryMesh,
+  baseUrl: string | undefined,
   color: ColorRGBA,
 ): Marker {
   const scale = mesh.scale ?? VEC3_ONE;
@@ -773,7 +776,7 @@ function createMeshMarker(
     points: [],
     colors: [],
     text: "",
-    mesh_resource: mesh.filename,
+    mesh_resource: new URL(mesh.filename, baseUrl).toString(),
     mesh_use_embedded_materials: embeddedMaterialUsage === EmbeddedMaterialUsage.Use,
   };
 }
