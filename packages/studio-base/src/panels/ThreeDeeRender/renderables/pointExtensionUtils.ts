@@ -8,6 +8,7 @@ import { PackedElementField, PointCloud } from "@foxglove/schemas";
 import { SettingsTreeNode, Topic } from "@foxglove/studio";
 import { DynamicBufferGeometry } from "@foxglove/studio-base/panels/ThreeDeeRender/DynamicBufferGeometry";
 import { BaseUserData, Renderable } from "@foxglove/studio-base/panels/ThreeDeeRender/Renderable";
+import { Renderer } from "@foxglove/studio-base/panels/ThreeDeeRender/Renderer";
 import { rgbaToCssString } from "@foxglove/studio-base/panels/ThreeDeeRender/color";
 import { isSupportedField } from "@foxglove/studio-base/panels/ThreeDeeRender/renderables/pointClouds/fieldReaders";
 import {
@@ -194,7 +195,6 @@ export function createGeometry(topic: string, usage: THREE.Usage): DynamicBuffer
 
 type Material = THREE.PointsMaterial | LaserScanMaterial;
 type Points = THREE.Points<DynamicBufferGeometry, Material>;
-export type PointsAtTime = { receiveTime: bigint; messageTime: bigint; points: Points };
 
 export function pointCloudColorEncoding<T extends LayerSettingsPointExtension>(
   settings: T,
@@ -340,65 +340,72 @@ export function createInstancePickingMaterial<T extends LayerSettingsPointExtens
   });
 }
 
-type PointHistoryUserData = BaseUserData & {
+/**
+ * Class that handles lifecycle of 3d object history over the decay time
+ * This class encapsulates the functionality of showing the history of an object within a specified decay time.
+ * Meant to be extensible for all kinds of renderables that need to show old points over decay time.
+ * See LaserScansRenderable and PointCloudsRenderable for examples.
+ */
+
+type RenderObjectHistoryUserData = BaseUserData & {
   topic: string;
   settings: LayerSettingsPointExtension;
-  pointsHistory: PointsAtTime[];
   material: THREE.Material;
   pickingMaterial: THREE.Material;
 };
 
-/**
- * Parent class renderable that handles lifecycle of points history over the decay time
- * This class only handles updating, and end of life of the points history and its geometry.
- * Creation of new points in the history is handled by the child Renderable classes.
- * See LaserScansRenderable and PointCloudsRenderable for examples.
- */
-export class PointsHistoryRenderable<
-  UserData extends PointHistoryUserData,
-> extends Renderable<UserData> {
-  public override dispose(): void {
-    for (const entry of this.userData.pointsHistory) {
-      entry.points.geometry.dispose();
-    }
-    this.userData.pointsHistory.length = 0;
+type ThreeObject = THREE.Points<DynamicBufferGeometry> | THREE.LineSegments<DynamicBufferGeometry>;
+type HistoryEntry = { receiveTime: bigint; messageTime: bigint; object3d: ThreeObject };
+export class RenderObjectHistory<ParentRenderable extends Renderable<RenderObjectHistoryUserData>> {
+  public history: HistoryEntry[];
+  private renderable: ParentRenderable;
+  private renderer: Renderer;
 
-    super.dispose();
+  public constructor({
+    initial,
+    renderer,
+    parentRenderable,
+  }: {
+    initial: HistoryEntry;
+    renderer: Renderer;
+    parentRenderable: ParentRenderable;
+  }) {
+    this.history = [initial];
+    this.renderer = renderer;
+    this.renderable = parentRenderable;
   }
 
-  public startFrame(currentTime: bigint, renderFrameId: string, fixedFrameId: string): void {
-    const path = this.userData.settingsPath;
+  public addHistoryEntry(entry: HistoryEntry): void {
+    this.history.push(entry);
+  }
 
-    this.visible = this.userData.settings.visible;
-    if (!this.visible) {
-      this.renderer.settings.errors.clearPath(path);
-      const pointsHistory = this.userData.pointsHistory;
-      // removes all but the last element of the array, which would be the current point
-      for (const entry of pointsHistory.splice(0, pointsHistory.length - 1)) {
-        entry.points.geometry.dispose();
-        this.remove(entry.points);
-      }
-      return;
+  public updateMaterial(material: THREE.Material): void {
+    for (const entry of this.history) {
+      entry.object3d.material = material;
     }
+  }
 
+  public updateHistoryFromCurrentTime(currentTime: bigint): void {
     // Remove expired entries from the history of points when decayTime is enabled
-    const pointsHistory = this.userData.pointsHistory;
-    const decayTime = this.userData.settings.decayTime;
+    const pointsHistory = this.history;
+    const decayTime = this.renderable.userData.settings.decayTime;
     const expireTime =
       decayTime > 0 ? currentTime - BigInt(Math.round(decayTime * 1e9)) : MAX_DURATION;
     while (pointsHistory.length > 1 && pointsHistory[0]!.receiveTime < expireTime) {
-      const entry = this.userData.pointsHistory.shift()!;
-      this.remove(entry.points);
-      entry.points.geometry.dispose();
+      const entry = this.history.shift()!;
+      this.renderable.remove(entry.object3d);
+      entry.object3d.geometry.dispose();
     }
+  }
 
-    // Update the pose on each THREE.Points entry
+  public updatePoses(currentTime: bigint, renderFrameId: string, fixedFrameId: string): void {
+    // Update the pose on each entry
     let hadTfError = false;
-    for (const entry of pointsHistory) {
-      const srcTime = entry.messageTime; // frameLocked is false, so use TFs from the original message timestamp
-      const frameId = this.userData.frameId;
+    for (const entry of this.history) {
+      const srcTime = entry.messageTime;
+      const frameId = this.renderable.userData.frameId;
       const updated = updatePose(
-        entry.points,
+        entry.object3d,
         this.renderer.transformTree,
         renderFrameId,
         fixedFrameId,
@@ -408,13 +415,32 @@ export class PointsHistoryRenderable<
       );
       if (!updated && !hadTfError) {
         const message = missingTransformMessage(renderFrameId, fixedFrameId, frameId);
-        this.renderer.settings.errors.add(path, MISSING_TRANSFORM, message);
+        this.renderer.settings.errors.add(
+          this.renderable.userData.settingsPath,
+          MISSING_TRANSFORM,
+          message,
+        );
         hadTfError = true;
       }
     }
+  }
 
-    if (!hadTfError) {
-      this.renderer.settings.errors.remove(path, MISSING_TRANSFORM);
+  public latest(): { receiveTime: bigint; messageTime: bigint; object3d: ThreeObject } | undefined {
+    return this.history[this.history.length - 1];
+  }
+
+  public clearHistory(): void {
+    // removes all but the last element of the array, which would be the current object used in rendering
+    for (const entry of this.history.splice(0, this.history.length - 1)) {
+      entry.object3d.geometry.dispose();
+      this.renderable.remove(entry.object3d);
     }
+  }
+
+  public dispose(): void {
+    for (const entry of this.history) {
+      entry.object3d.geometry.dispose();
+    }
+    this.history.length = 0;
   }
 }

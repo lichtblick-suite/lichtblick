@@ -2,12 +2,13 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import * as THREE from "three";
-
 import { toNanoSec, toSec } from "@foxglove/rostime";
 import { NumericType, PointCloud as FoxglovePointCloud } from "@foxglove/schemas";
 import { MessageEvent, SettingsTreeAction } from "@foxglove/studio";
-import { PointCloudRenderable } from "@foxglove/studio-base/panels/ThreeDeeRender/renderables/PointClouds";
+import {
+  createStixelMaterial,
+  PointCloudRenderable,
+} from "@foxglove/studio-base/panels/ThreeDeeRender/renderables/PointClouds";
 import type { RosObject } from "@foxglove/studio-base/players/types";
 import { VelodynePacket, VelodyneScan } from "@foxglove/studio-base/types/Messages";
 import {
@@ -21,10 +22,8 @@ import {
 
 import {
   autoSelectColorField,
-  createGeometry,
   createInstancePickingMaterial,
   createPickingMaterial,
-  createPoints,
   DEFAULT_POINT_SETTINGS,
   LayerSettingsPointExtension,
   pointSettingsNode,
@@ -38,8 +37,10 @@ import { VELODYNE_SCAN_DATATYPES } from "../ros";
 import { topicIsConvertibleToSchema } from "../topicIsConvertibleToSchema";
 import { makePose } from "../transforms";
 
-type LayerSettingsVelodyneScans = LayerSettingsPointExtension;
-const DEFAULT_SETTINGS = DEFAULT_POINT_SETTINGS;
+type LayerSettingsVelodyneScans = LayerSettingsPointExtension & {
+  stixelsEnabled: boolean;
+};
+const DEFAULT_SETTINGS = { ...DEFAULT_POINT_SETTINGS, stixelsEnabled: false };
 
 export function pointFieldDataTypeToNumericType(type: PointFieldDataType): NumericType {
   switch (type) {
@@ -148,6 +149,11 @@ export class VelodyneScans extends SceneExtension<PointCloudRenderable> {
         messageFields,
         config,
       );
+      node.fields!.stixelsEnabled = {
+        label: "Stixel view",
+        input: "boolean",
+        value: config.stixelsEnabled ?? DEFAULT_SETTINGS.stixelsEnabled,
+      };
       node.handler = handler;
       node.icon = "Points";
       entries.push({ path: ["topics", topic.name], node });
@@ -223,23 +229,10 @@ export class VelodyneScans extends SceneExtension<PointCloudRenderable> {
         });
       }
 
-      const isDecay = settings.decayTime > 0;
-      const geometry = createGeometry(
-        topic,
-        isDecay ? THREE.StaticDrawUsage : THREE.DynamicDrawUsage,
-      );
-
       const material = pointCloudMaterial(settings);
       const pickingMaterial = createPickingMaterial(settings);
       const instancePickingMaterial = createInstancePickingMaterial(settings);
-      const points = createPoints(
-        topic,
-        pointCloud.pose,
-        geometry,
-        material,
-        pickingMaterial,
-        instancePickingMaterial,
-      );
+      const stixelMaterial = createStixelMaterial(settings);
 
       const messageTime = toNanoSec(pointCloud.timestamp);
       renderable = new PointCloudRenderable(topic, this.renderer, {
@@ -252,12 +245,11 @@ export class VelodyneScans extends SceneExtension<PointCloudRenderable> {
         topic,
         pointCloud,
         originalMessage: messageEvent.message as RosObject,
-        pointsHistory: [{ receiveTime, messageTime, points }],
         material,
         pickingMaterial,
         instancePickingMaterial,
+        stixelMaterial,
       });
-      renderable.add(points);
 
       this.add(renderable);
       this.renderables.set(topic, renderable);
