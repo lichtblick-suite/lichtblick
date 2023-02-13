@@ -525,6 +525,9 @@ function MapPanel(props: MapPanelProps): JSX.Element {
 
       topicLayer.allFrames.addLayer(pointLayer);
 
+      // Push this layer to the back so it renders under the current messages.
+      pointLayer.bringToBack();
+
       allGeoMessages
         .filter((message) => message.topic === topic)
         .forEach((message) => addGeoJsonMessage(message, topicLayer.allFrames));
