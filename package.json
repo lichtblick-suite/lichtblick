@@ -89,7 +89,7 @@
     "@types/license-checker": "^25.0.3",
     "@types/semver": "^7.3.13",
     "@typescript-eslint/eslint-plugin": "5.49.0",
-    "@typescript-eslint/parser": "5.49.0",
+    "@typescript-eslint/parser": "5.51.0",
     "babel-plugin-transform-import-meta": "2.2.0",
     "cross-env": "7.0.3",
     "depcheck": "1.4.3",
