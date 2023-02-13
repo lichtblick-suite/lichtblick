@@ -29,6 +29,7 @@ export class RenderableTextViewFacing extends RenderableMarker {
 
   public override dispose(): void {
     this.renderer.labelPool.release(this.label);
+    super.dispose();
   }
 
   public override update(newMarker: Marker, receiveTime: bigint | undefined): void {

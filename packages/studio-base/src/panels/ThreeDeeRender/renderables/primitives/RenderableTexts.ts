@@ -96,6 +96,7 @@ export class RenderableTexts extends RenderablePrimitive {
     for (const label of this.labels) {
       this.labelPool.release(label);
     }
+    super.dispose();
   }
 
   public override update(

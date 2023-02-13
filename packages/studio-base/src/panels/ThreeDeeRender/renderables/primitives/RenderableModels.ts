@@ -132,6 +132,7 @@ export class RenderableModels extends RenderablePrimitive {
       }
     }
     this.renderablesByUrl.clear();
+    super.dispose();
   }
 
   public override update(

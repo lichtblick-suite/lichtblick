@@ -177,8 +177,8 @@ export class FoxgloveSceneEntities extends SceneExtension<TopicEntities> {
   }
 
   public override dispose(): void {
-    super.dispose();
     this.primitivePool.dispose();
+    super.dispose();
   }
 }
 

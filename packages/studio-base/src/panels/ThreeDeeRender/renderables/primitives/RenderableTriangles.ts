@@ -214,6 +214,7 @@ export class RenderableTriangles extends RenderablePrimitive {
     this.clear();
     this._triangleMeshes.length = 0;
     this.clearErrors();
+    super.dispose();
   }
 
   public override update(

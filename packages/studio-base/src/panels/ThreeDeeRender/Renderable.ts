@@ -7,6 +7,7 @@ import * as THREE from "three";
 import type { RosValue } from "@foxglove/studio-base/players/types";
 
 import type { Renderer } from "./Renderer";
+import { disposeMeshesRecursive } from "./dispose";
 import type { BaseSettings } from "./settings";
 import type { Pose } from "./transforms";
 
@@ -61,6 +62,7 @@ export class Renderable<TUserData extends BaseUserData = BaseUserData> extends T
    * such as GPU buffers.
    */
   public dispose(): void {
+    disposeMeshesRecursive(this);
     this.children.length = 0;
   }
 

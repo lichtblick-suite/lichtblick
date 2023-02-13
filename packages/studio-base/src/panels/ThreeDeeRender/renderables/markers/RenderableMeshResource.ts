@@ -41,8 +41,10 @@ export class RenderableMeshResource extends RenderableMarker {
   public override dispose(): void {
     if (this.mesh) {
       disposeMeshesRecursive(this.mesh);
+      this.mesh = undefined;
     }
     this.material.dispose();
+    super.dispose();
   }
 
   public override update(

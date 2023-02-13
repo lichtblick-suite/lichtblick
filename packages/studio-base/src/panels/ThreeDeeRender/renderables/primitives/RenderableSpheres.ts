@@ -137,6 +137,7 @@ export class RenderableSpheres extends RenderablePrimitive {
     this.mesh.dispose();
     this.geometry.dispose();
     this.material.dispose();
+    super.dispose();
   }
 
   public override update(

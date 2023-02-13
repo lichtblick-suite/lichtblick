@@ -11,6 +11,7 @@ import { emptyPose } from "@foxglove/studio-base/util/Pose";
 import { RenderablePrimitive } from "./RenderablePrimitive";
 import type { Renderer } from "../../Renderer";
 import { makeRgba, rgbToThreeColor, stringToRgba } from "../../color";
+import { disposeMeshesRecursive } from "../../dispose";
 import { LayerSettingsEntity } from "../SceneEntities";
 import { MeshStandardMaterialWithInstanceOpacity } from "../materials/MeshStandardMaterialWithInstanceOpacity";
 
@@ -163,10 +164,11 @@ export class RenderableCubes extends RenderablePrimitive {
   }
 
   public override dispose(): void {
-    this.mesh.dispose();
+    disposeMeshesRecursive(this.mesh);
     this.geometry.dispose();
     this.material.dispose();
     this.outlineGeometry.dispose();
+    super.dispose();
   }
 
   public override update(
