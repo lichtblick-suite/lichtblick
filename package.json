@@ -16,7 +16,7 @@
   },
   "homepage": "https://foxglove.dev/",
   "scripts": {
-    "clean": "tsc --build --clean packages/*/tsconfig.json && rimraf .webpack dist storybook-screenshots storybook-static",
+    "clean": "tsc --build --clean packages/*/tsconfig.json && rimraf .webpack */.webpack dist storybook-screenshots storybook-static",
     "build:packages": "tsc --build --verbose packages/**/tsconfig.json",
     "build:dev": "webpack --mode development --progress --config desktop/webpack.config.ts",
     "build:prod": "webpack --mode production --progress --config desktop/webpack.config.ts",
