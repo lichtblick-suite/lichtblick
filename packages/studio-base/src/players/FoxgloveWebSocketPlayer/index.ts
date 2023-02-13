@@ -38,11 +38,16 @@ import {
   FoxgloveClient,
   ServerCapability,
   SubscriptionId,
+  Service,
+  ServiceCallPayload,
+  ServiceCallRequest,
+  ServiceCallResponse,
 } from "@foxglove/ws-protocol";
 
 import WorkerSocketAdapter from "./WorkerSocketAdapter";
 
 const log = Log.getLogger(__dirname);
+const textEncoder = new TextEncoder();
 
 /** Suppress warnings about messages on unknown subscriptions if the susbscription was recently canceled. */
 const SUBSCRIPTION_WARNING_SUPPRESSION_MS = 2000;
@@ -53,9 +58,18 @@ const GET_ALL_PARAMS_PERIOD_MS = 15000;
 const ROS_ENCODINGS = ["ros1", "cdr"];
 const SUPPORTED_PUBLICATION_ENCODINGS = ["json", ...ROS_ENCODINGS];
 const FALLBACK_PUBLICATION_ENCODING = "json";
+const SUPPORTED_SERVICE_ENCODINGS = ["json", ...ROS_ENCODINGS];
 
+interface MessageWriter {
+  writeMessage(message: unknown): Uint8Array;
+}
 type ResolvedChannel = { channel: Channel; parsedChannel: ParsedChannel };
 type Publication = ClientChannel & { messageWriter?: Ros1MessageWriter | Ros2MessageWriter };
+type ResolvedService = {
+  service: Service;
+  parsedResponse: ParsedChannel;
+  requestMessageWriter: MessageWriter;
+};
 
 export default class FoxgloveWebSocketPlayer implements Player {
   private _url: string; // WebSocket URL.
@@ -100,6 +114,14 @@ export default class FoxgloveWebSocketPlayer implements Player {
   private _getParameterInterval?: ReturnType<typeof setInterval>;
   private _unresolvedPublications: AdvertiseOptions[] = [];
   private _publicationsByTopic = new Map<string, Publication>();
+  private _serviceCallEncoding?: string;
+  private _services = new Map<string, Set<string>>();
+  private _servicesByName = new Map<string, ResolvedService>();
+  private _serviceResponseCbs = new Map<
+    ServiceCallRequest["callId"],
+    (response: ServiceCallResponse) => void
+  >();
+  private _nextServiceCallId = 0;
 
   public constructor({
     url,
@@ -144,6 +166,9 @@ export default class FoxgloveWebSocketPlayer implements Player {
       this._channelsById.clear();
       this._channelsByTopic.clear();
       this._setupPublishers();
+      this._services.clear();
+      this._servicesByName.clear();
+      this._serviceResponseCbs.clear();
       this._profile = undefined;
     });
 
@@ -223,6 +248,24 @@ export default class FoxgloveWebSocketPlayer implements Player {
       if (event.capabilities.includes(ServerCapability.clientPublish)) {
         this._playerCapabilities.push(PlayerCapabilities.advertise);
       }
+      if (event.capabilities.includes(ServerCapability.services)) {
+        this._serviceCallEncoding = event.supportedEncodings?.find((e) =>
+          SUPPORTED_SERVICE_ENCODINGS.includes(e),
+        );
+
+        const problemId = "callService:unsupportedEncoding";
+        if (this._serviceCallEncoding) {
+          this._playerCapabilities.push(PlayerCapabilities.callServices);
+          this._problems.removeProblem(problemId);
+        } else {
+          this._problems.addProblem(problemId, {
+            severity: "warn",
+            message: `Calling services is disabled as no compatible encoding could be found. \
+            The server supports [${event.supportedEncodings?.join(", ")}], \
+            but Studio only supports [${SUPPORTED_SERVICE_ENCODINGS.join(", ")}]`,
+          });
+        }
+      }
 
       if (event.capabilities.includes(ServerCapability.parameters)) {
         this._playerCapabilities.push(
@@ -253,7 +296,7 @@ export default class FoxgloveWebSocketPlayer implements Player {
           let schemaData;
           if (channel.encoding === "json") {
             schemaEncoding = "jsonschema";
-            schemaData = new TextEncoder().encode(channel.schema);
+            schemaData = textEncoder.encode(channel.schema);
           } else if (channel.encoding === "protobuf") {
             schemaEncoding = "protobuf";
             schemaData = new Uint8Array(base64.length(channel.schema));
@@ -268,10 +311,10 @@ export default class FoxgloveWebSocketPlayer implements Player {
             }
           } else if (channel.encoding === "ros1") {
             schemaEncoding = "ros1msg";
-            schemaData = new TextEncoder().encode(channel.schema);
+            schemaData = textEncoder.encode(channel.schema);
           } else if (channel.encoding === "cdr") {
             schemaEncoding = "ros2msg";
-            schemaData = new TextEncoder().encode(channel.schema);
+            schemaData = textEncoder.encode(channel.schema);
           } else {
             throw new Error(`Unsupported encoding ${channel.encoding}`);
           }
@@ -418,6 +461,89 @@ export default class FoxgloveWebSocketPlayer implements Player {
         this._client?.subscribeParameterUpdates(newParameters.map((p) => p.name));
       }
     });
+
+    this._client.on("advertiseServices", (services) => {
+      if (!this._serviceCallEncoding) {
+        return;
+      }
+
+      let schemaEncoding: string;
+      if (this._serviceCallEncoding === "json") {
+        schemaEncoding = "jsonschema";
+      } else if (this._serviceCallEncoding === "ros1") {
+        schemaEncoding = "ros1msg";
+      } else if (this._serviceCallEncoding === "cdr") {
+        schemaEncoding = "ros2msg";
+      } else {
+        throw new Error(`Unsupported encoding "${this._serviceCallEncoding}"`);
+      }
+
+      for (const service of services) {
+        const requestType = `${service.type}_Request`;
+        const responseType = `${service.type}_Response`;
+        const parsedRequest = parseChannel({
+          messageEncoding: this._serviceCallEncoding,
+          schema: {
+            name: requestType,
+            encoding: schemaEncoding,
+            data: textEncoder.encode(service.requestSchema),
+          },
+        });
+        const parsedResponse = parseChannel({
+          messageEncoding: this._serviceCallEncoding,
+          schema: {
+            name: responseType,
+            encoding: schemaEncoding,
+            data: textEncoder.encode(service.responseSchema),
+          },
+        });
+        const requestMsgDef = rosDatatypesToMessageDefinition(parsedRequest.datatypes, requestType);
+        const requestMessageWriter = ROS_ENCODINGS.includes(this._serviceCallEncoding)
+          ? this._serviceCallEncoding === "ros1"
+            ? new Ros1MessageWriter(requestMsgDef)
+            : new Ros2MessageWriter(requestMsgDef)
+          : new JsonMessageWriter();
+
+        // Add type definitions for service response and request
+        for (const [name, types] of [...parsedRequest.datatypes, ...parsedResponse.datatypes]) {
+          this._datatypes?.set(name, types);
+        }
+
+        const resolvedService: ResolvedService = {
+          service,
+          parsedResponse,
+          requestMessageWriter,
+        };
+        this._servicesByName.set(service.name, resolvedService);
+        this._services.set(service.name, new Set([service.name]));
+      }
+      this._emitState();
+    });
+
+    this._client.on("unadvertiseServices", (serviceIds) => {
+      for (const serviceId of serviceIds) {
+        const service: ResolvedService | undefined = Object.values(this._servicesByName).find(
+          (srv) => srv.service.id === serviceId,
+        );
+        if (service) {
+          this._servicesByName.delete(service.service.name);
+          this._services.delete(service.service.name);
+        }
+      }
+    });
+
+    this._client.on("serviceCallResponse", (response) => {
+      const responseCallback = this._serviceResponseCbs.get(response.callId);
+      if (!responseCallback) {
+        this._problems.addProblem(`callService:${response.callId}`, {
+          severity: "error",
+          message: `Received a response for a service for which no callback was registered`,
+        });
+        return;
+      }
+      responseCallback(response);
+      this._serviceResponseCbs.delete(response.callId);
+    });
   };
 
   private _updateTopicsAndDatatypes() {
@@ -506,6 +632,7 @@ export default class FoxgloveWebSocketPlayer implements Player {
         topicStats: new Map(this._topicsStats),
         datatypes: _datatypes,
         parameters: new Map(this._parameters),
+        services: new Map(this._services),
       },
     });
   });
@@ -627,8 +754,47 @@ export default class FoxgloveWebSocketPlayer implements Player {
     }
   }
 
-  public async callService(): Promise<unknown> {
-    throw new Error("Service calls are not supported by the Foxglove WebSocket connection");
+  public async callService(serviceName: string, request: unknown): Promise<unknown> {
+    if (!this._client) {
+      throw new Error(
+        `Attempted to call service ${serviceName} without a valid Foxglove WebSocket connection.`,
+      );
+    }
+
+    if (request == undefined || typeof request !== "object") {
+      throw new Error("FoxgloveWebSocketPlayer#callService request must be an object.");
+    }
+
+    const resolvedService = this._servicesByName.get(serviceName);
+    if (!resolvedService) {
+      throw new Error(
+        `Tried to call service '${serviceName}' that has not been advertised before.`,
+      );
+    }
+
+    const { service, parsedResponse, requestMessageWriter } = resolvedService;
+
+    const serviceCallRequest: ServiceCallPayload = {
+      serviceId: service.id,
+      callId: ++this._nextServiceCallId,
+      encoding: this._serviceCallEncoding!,
+      data: new DataView(new Uint8Array().buffer),
+    };
+
+    const message = requestMessageWriter.writeMessage(request);
+    serviceCallRequest.data = new DataView(message.buffer);
+    this._client.sendServiceCallRequest(serviceCallRequest);
+
+    return await new Promise<Record<string, unknown>>((resolve, reject) => {
+      this._serviceResponseCbs.set(serviceCallRequest.callId, (response: ServiceCallResponse) => {
+        try {
+          const data = parsedResponse.deserializer(response.data);
+          resolve(data as Record<string, unknown>);
+        } catch (error) {
+          reject(error);
+        }
+      });
+    });
   }
 
   public setGlobalVariables(): void {}
@@ -710,4 +876,10 @@ function dataTypeToFullName(dataType: string): string {
     return `${parts[0]}/msg/${parts[1]}`;
   }
   return dataType;
+}
+
+class JsonMessageWriter implements MessageWriter {
+  public writeMessage(message: unknown): Uint8Array {
+    return new Uint8Array(Buffer.from(JSON.stringify(message) ?? ""));
+  }
 }
