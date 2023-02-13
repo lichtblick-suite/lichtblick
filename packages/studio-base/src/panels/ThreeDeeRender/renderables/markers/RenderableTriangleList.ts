@@ -8,7 +8,6 @@ import { RenderableMarker } from "./RenderableMarker";
 import { markerHasTransparency, makeStandardVertexColorMaterial } from "./materials";
 import type { Renderer } from "../../Renderer";
 import { rgbaToLinear } from "../../color";
-import { disposeMeshesRecursive } from "../../dispose";
 import { Marker, Vector3 } from "../../ros";
 
 const NOT_DIVISIBLE_ERR = "NOT_DIVISIBLE";
@@ -44,10 +43,10 @@ export class RenderableTriangleList extends RenderableMarker {
   }
 
   public override dispose(): void {
-    disposeMeshesRecursive(this.mesh);
+    this.mesh.material.dispose();
+    this.mesh.geometry.dispose();
     this.vertices = new Float32Array();
     this.colors = new Float32Array();
-    super.dispose();
   }
 
   public override update(newMarker: Marker, receiveTime: bigint | undefined): void {

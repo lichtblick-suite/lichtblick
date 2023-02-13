@@ -96,11 +96,11 @@ export class PublishClickTool extends SceneExtension<Renderable<BaseUserData>, P
   }
 
   public override dispose(): void {
+    super.dispose();
     this.arrow.dispose();
     this.sphere.dispose();
     this.renderer.input.removeListener("click", this._handleClick);
     this.renderer.input.removeListener("mousemove", this._handleMouseMove);
-    super.dispose();
   }
 
   public setPublishClickType(type: PublishClickType): void {

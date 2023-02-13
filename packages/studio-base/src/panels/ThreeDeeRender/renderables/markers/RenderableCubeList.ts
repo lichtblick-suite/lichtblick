@@ -9,7 +9,6 @@ import { RenderableMarker } from "./RenderableMarker";
 import { markerHasTransparency, makeStandardInstancedMaterial } from "./materials";
 import { DynamicInstancedMesh } from "../../DynamicInstancedMesh";
 import type { Renderer } from "../../Renderer";
-import { disposeMeshesRecursive } from "../../dispose";
 import { Marker } from "../../ros";
 
 export class RenderableCubeList extends RenderableMarker {
@@ -36,8 +35,7 @@ export class RenderableCubeList extends RenderableMarker {
   }
 
   public override dispose(): void {
-    disposeMeshesRecursive(this.mesh);
-    super.dispose();
+    this.mesh.material.dispose();
   }
 
   public override update(newMarker: Marker, receiveTime: bigint | undefined): void {

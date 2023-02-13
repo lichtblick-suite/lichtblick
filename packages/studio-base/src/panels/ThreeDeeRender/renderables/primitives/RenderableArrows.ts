@@ -248,7 +248,6 @@ export class RenderableArrows extends RenderablePrimitive {
     this.headGeometry.dispose();
     this.shaftOutlineGeometry.dispose();
     this.headOutlineGeometry.dispose();
-    super.dispose();
   }
 
   public override update(

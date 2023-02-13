@@ -34,8 +34,6 @@ export class RenderablePoints extends RenderableMarker {
 
   public override dispose(): void {
     this.points.material.dispose();
-    this.geometry.dispose();
-    super.dispose();
   }
 
   public override update(newMarker: Marker, receiveTime: bigint | undefined): void {

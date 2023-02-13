@@ -168,7 +168,6 @@ export class RenderableLines extends RenderablePrimitive {
       line.material.dispose();
       line.userData.pickingMaterial.dispose();
     }
-    super.dispose();
   }
 
   public override update(

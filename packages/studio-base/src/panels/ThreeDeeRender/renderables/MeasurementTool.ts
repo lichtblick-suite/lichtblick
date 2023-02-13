@@ -138,6 +138,7 @@ export class MeasurementTool extends SceneExtension<Renderable<BaseUserData>, Me
   }
 
   public override dispose(): void {
+    super.dispose();
     this.renderer.labelPool.release(this.label);
     this.circleGeometry.dispose();
     this.circleMaterial.dispose();
@@ -147,7 +148,6 @@ export class MeasurementTool extends SceneExtension<Renderable<BaseUserData>, Me
     this.lineOccluded.material.dispose();
     this.renderer.input.removeListener("click", this._handleClick);
     this.renderer.input.removeListener("mousemove", this._handleMouseMove);
-    super.dispose();
   }
 
   public startMeasuring(): void {

@@ -8,7 +8,6 @@ import { RenderableMarker } from "./RenderableMarker";
 import { makeStandardMaterial } from "./materials";
 import type { Renderer } from "../../Renderer";
 import { rgbToThreeColor } from "../../color";
-import { disposeMeshesRecursive } from "../../dispose";
 import { cylinderSubdivisions, DetailLevel } from "../../lod";
 import { Marker } from "../../ros";
 
@@ -48,8 +47,7 @@ export class RenderableCylinder extends RenderableMarker {
   }
 
   public override dispose(): void {
-    disposeMeshesRecursive(this.mesh);
-    super.dispose();
+    this.mesh.material.dispose();
   }
 
   public override update(newMarker: Marker, receiveTime: bigint | undefined): void {

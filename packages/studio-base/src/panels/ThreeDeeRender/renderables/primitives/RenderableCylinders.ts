@@ -209,7 +209,6 @@ export class RenderableCylinders extends RenderablePrimitive {
     this.pickingMaterial.dispose();
     this.outlineMaterial.dispose();
     this.outlineGeometry.dispose();
-    super.dispose();
   }
 
   public override update(

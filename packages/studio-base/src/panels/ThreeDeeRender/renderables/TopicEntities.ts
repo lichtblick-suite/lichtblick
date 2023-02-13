@@ -66,7 +66,6 @@ export class TopicEntities extends Renderable<EntityTopicUserData> {
   public override dispose(): void {
     this.children.length = 0;
     this._deleteAllEntities();
-    super.dispose();
   }
 
   public updateSettings(): void {

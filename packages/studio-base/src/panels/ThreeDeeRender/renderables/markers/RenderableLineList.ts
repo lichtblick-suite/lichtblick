@@ -68,8 +68,6 @@ export class RenderableLineList extends RenderableMarker {
     pickingMaterial.dispose();
 
     this.geometry.dispose();
-
-    super.dispose();
   }
 
   public override update(newMarker: Marker, receiveTime: bigint | undefined): void {

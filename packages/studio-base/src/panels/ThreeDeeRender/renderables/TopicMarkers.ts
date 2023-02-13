@@ -60,7 +60,6 @@ export class TopicMarkers extends Renderable<MarkerTopicUserData> {
     }
     this.children.length = 0;
     this.namespaces.clear();
-    super.dispose();
   }
 
   public addMarkerMessage(marker: Marker, receiveTime: bigint): void {
