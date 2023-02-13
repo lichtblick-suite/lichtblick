@@ -104,6 +104,7 @@ export default function Sidebar<K extends string>(props: SidebarProps<K>): JSX.E
   const [enableMemoryUseIndicator = false] = useAppConfigurationValue<boolean>(
     AppSetting.ENABLE_MEMORY_USE_INDICATOR,
   );
+  const [enableNewTopNav = false] = useAppConfigurationValue<boolean>(AppSetting.ENABLE_NEW_TOPNAV);
   const [mosaicValue, setMosaicValue] = useState<MosaicNode<"sidebar" | "children">>("children");
   const { classes } = useStyles();
   const prevSelectedKey = useRef<string | undefined>(undefined);
@@ -230,17 +231,19 @@ export default function Sidebar<K extends string>(props: SidebarProps<K>): JSX.E
         >
           {topTabs}
           <TabSpacer />
-          <Tab
-            className={classes.tab}
-            color="inherit"
-            id="help-button"
-            aria-label="Help menu button"
-            aria-controls={helpMenuOpen ? "help-menu" : undefined}
-            aria-haspopup="true"
-            aria-expanded={helpMenuOpen ? "true" : undefined}
-            onClick={(event) => handleHelpClick(event)}
-            icon={<HelpOutlineIcon color={helpMenuOpen ? "primary" : "inherit"} />}
-          />
+          {!enableNewTopNav && (
+            <Tab
+              className={classes.tab}
+              color="inherit"
+              id="help-button"
+              aria-label="Help menu button"
+              aria-controls={helpMenuOpen ? "help-menu" : undefined}
+              aria-haspopup="true"
+              aria-expanded={helpMenuOpen ? "true" : undefined}
+              onClick={(event) => handleHelpClick(event)}
+              icon={<HelpOutlineIcon color={helpMenuOpen ? "primary" : "inherit"} />}
+            />
+          )}
           {bottomTabs}
           {enableMemoryUseIndicator && <MemoryUseIndicator />}
         </Tabs>

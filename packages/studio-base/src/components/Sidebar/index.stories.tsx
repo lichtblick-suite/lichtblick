@@ -2,11 +2,12 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { screen } from "@testing-library/dom";
-import userEvent from "@testing-library/user-event";
 import { useEffect, useState } from "react";
 import { DndProvider } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
+
+import { AppSetting } from "@foxglove/studio-base/AppSetting";
+import { useAppConfigurationValue } from "@foxglove/studio-base/hooks";
 
 import Sidebar, { SidebarItem } from ".";
 
@@ -35,13 +36,22 @@ const BOTTOM_ITEMS = new Map<string, SidebarItem>([
 function Story({
   clickKey,
   defaultSelectedKey,
+  enableAppBar,
   height = 300,
 }: {
   clickKey?: string;
   defaultSelectedKey?: string | undefined;
+  enableAppBar?: boolean;
   height?: number;
 }) {
   const [selectedKey, setSelectedKey] = useState<string | undefined>(defaultSelectedKey);
+  const [_, setAppBarEnabled] = useAppConfigurationValue<boolean>(AppSetting.ENABLE_NEW_TOPNAV);
+
+  useEffect(() => {
+    if (enableAppBar === true) {
+      void setAppBarEnabled(true);
+    }
+  }, [enableAppBar, setAppBarEnabled]);
 
   useEffect(() => {
     if (clickKey != undefined) {
@@ -89,12 +99,4 @@ export const OverflowUnselected = (): JSX.Element => <Story height={200} />;
 export const OverflowCSelected = (): JSX.Element => <Story height={200} defaultSelectedKey="c" />;
 export const OverflowBSelected = (): JSX.Element => <Story height={200} defaultSelectedKey="b" />;
 
-export const HelpMenuOpen = (): JSX.Element => <Story />;
-HelpMenuOpen.play = async () => {
-  const user = userEvent.setup();
-  const helpButton = await screen.findByRole("tab", { name: /Help menu button/ });
-  await user.click(helpButton);
-};
-HelpMenuOpen.parameters = {
-  colorScheme: "light",
-};
+export const WithAppBarEnabled = (): JSX.Element => <Story enableAppBar />;
