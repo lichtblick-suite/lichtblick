@@ -8,7 +8,6 @@ import { useMemo } from "react";
 import { Time } from "@foxglove/rostime";
 import Stack from "@foxglove/studio-base/components/Stack";
 import { useAppTimeFormat } from "@foxglove/studio-base/hooks";
-import { formatDate } from "@foxglove/studio-base/util/formatTime";
 import { fonts } from "@foxglove/studio-base/util/sharedStyleConstants";
 import { isAbsoluteTime, formatTimeRaw } from "@foxglove/studio-base/util/time";
 
@@ -16,15 +15,14 @@ type Props = {
   disableDate?: boolean;
   horizontal?: boolean;
   time: Time;
-  timezone?: string;
 };
 
 export default function Timestamp(props: Props): JSX.Element {
-  const { disableDate = false, horizontal = false, time, timezone } = props;
-  const { formatTime } = useAppTimeFormat();
+  const { disableDate = false, horizontal = false, time } = props;
+  const { formatDate, formatTime } = useAppTimeFormat();
   const currentTimeStr = useMemo(() => formatTime(time), [time, formatTime]);
   const rawTimeStr = useMemo(() => formatTimeRaw(time), [time]);
-  const date = useMemo(() => formatDate(time, timezone), [time, timezone]);
+  const date = useMemo(() => formatDate(time), [formatDate, time]);
 
   if (!isAbsoluteTime(time)) {
     return (

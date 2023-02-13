@@ -16,7 +16,7 @@ import Timestamp from "@foxglove/studio-base/components/Timestamp";
 import { useAppTimeFormat } from "@foxglove/studio-base/hooks";
 import { subtractTimes } from "@foxglove/studio-base/players/UserNodePlayer/nodeTransformerWorker/typescript/userUtils/time";
 import { PlayerPresence } from "@foxglove/studio-base/players/types";
-import { formatDate, formatDuration } from "@foxglove/studio-base/util/formatTime";
+import { formatDuration } from "@foxglove/studio-base/util/formatTime";
 import { fonts } from "@foxglove/studio-base/util/sharedStyleConstants";
 import { formatTimeRaw, isAbsoluteTime } from "@foxglove/studio-base/util/time";
 
@@ -121,7 +121,7 @@ export function DataSourceInfoView(): JSX.Element {
   const playerPresence = useMessagePipeline(selectPlayerPresence);
   const durationRef = useRef<HTMLDivElement>(ReactNull);
   const endTimeRef = useRef<HTMLDivElement>(ReactNull);
-  const { formatTime } = useAppTimeFormat();
+  const { formatDate, formatTime } = useAppTimeFormat();
 
   // We bypass react and update the DOM elements directly for better performance here.
   useEffect(() => {
@@ -136,7 +136,7 @@ export function DataSourceInfoView(): JSX.Element {
     }
     if (endTimeRef.current) {
       if (endTime) {
-        const date = formatDate(endTime, undefined);
+        const date = formatDate(endTime);
         endTimeRef.current.innerText = !isAbsoluteTime(endTime)
           ? `${formatTimeRaw(endTime)}`
           : `${date} ${formatTime(endTime)}`;
@@ -144,7 +144,7 @@ export function DataSourceInfoView(): JSX.Element {
         endTimeRef.current.innerHTML = EmDash;
       }
     }
-  }, [endTime, formatTime, startTime, playerPresence]);
+  }, [endTime, formatTime, startTime, playerPresence, formatDate]);
 
   return (
     <MemoDataSourceInfoContent

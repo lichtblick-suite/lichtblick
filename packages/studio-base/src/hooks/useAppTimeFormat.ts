@@ -8,12 +8,13 @@ import { useCallback, useMemo } from "react";
 import { Time } from "@foxglove/studio";
 import { AppSetting } from "@foxglove/studio-base/AppSetting";
 import { TimeDisplayMethod } from "@foxglove/studio-base/types/panels";
-import { formatTime } from "@foxglove/studio-base/util/formatTime";
+import { formatDate, formatTime } from "@foxglove/studio-base/util/formatTime";
 import { formatTimeRaw } from "@foxglove/studio-base/util/time";
 
 import { useAppConfigurationValue } from "./useAppConfigurationValue";
 
 export interface IAppTimeFormat {
+  formatDate: (date: Time) => string;
   formatTime: (stamp: Time) => string;
   formatDuration: (duration: Time) => string;
   timeFormat: TimeDisplayMethod;
@@ -28,6 +29,13 @@ export function useAppTimeFormat(): IAppTimeFormat {
   const effectiveFormat: TimeDisplayMethod = useMemo(
     () => (timeFormat === "SEC" ? "SEC" : "TOD"),
     [timeFormat],
+  );
+
+  const formatDateCallback = useCallback(
+    (date: Time) => {
+      return formatDate(date, timeZone);
+    },
+    [timeZone],
   );
 
   const formatTimeCallback = useCallback(
@@ -56,6 +64,7 @@ export function useAppTimeFormat(): IAppTimeFormat {
   );
 
   return {
+    formatDate: formatDateCallback,
     formatTime: formatTimeCallback,
     formatDuration: formatDurationCallback,
     setTimeFormat,
