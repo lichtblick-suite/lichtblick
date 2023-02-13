@@ -20,7 +20,7 @@
     "prepack": "tsc -b"
   },
   "devDependencies": {
-    "@testing-library/react-hooks": "7.0.2",
+    "@testing-library/react-hooks": "8.0.1",
     "typescript": "4.9.4"
   },
   "dependencies": {
