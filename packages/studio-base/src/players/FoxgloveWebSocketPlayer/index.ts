@@ -77,6 +77,7 @@ export default class FoxgloveWebSocketPlayer implements Player {
   private _presence: PlayerPresence = PlayerPresence.NOT_PRESENT;
   private _problems = new PlayerProblemManager();
   private _numTimeSeeks = 0;
+  private _profile?: string;
 
   /** Earliest time seen */
   private _startTime?: Time;
@@ -143,6 +144,7 @@ export default class FoxgloveWebSocketPlayer implements Player {
       this._channelsById.clear();
       this._channelsByTopic.clear();
       this._setupPublishers();
+      this._profile = undefined;
     });
 
     this._client.on("error", (err) => {
@@ -198,10 +200,14 @@ export default class FoxgloveWebSocketPlayer implements Player {
       this._supportedEncodings = event.supportedEncodings;
       this._datatypes = new Map();
 
-      if (event.metadata != undefined && "ROS_DISTRO" in event.metadata) {
+      const maybeRosDistro = event.metadata?.["ROS_DISTRO"];
+      if (maybeRosDistro) {
+        const rosDistro = maybeRosDistro;
+        const isRos1 = ["melodic", "noetic"].includes(rosDistro);
+        this._profile = isRos1 ? "ros1" : "ros2";
+
         // Add common ROS message definitions
-        const rosDistro = event.metadata["ROS_DISTRO"] as string;
-        const rosDataTypes = ["melodic", "noetic"].includes(rosDistro)
+        const rosDataTypes = isRos1
           ? CommonRosTypes.ros1
           : ["foxy", "galactic"].includes(rosDistro)
           ? CommonRosTypes.ros2galactic
@@ -478,7 +484,7 @@ export default class FoxgloveWebSocketPlayer implements Player {
       presence: this._presence,
       progress: {},
       capabilities: this._playerCapabilities,
-      profile: undefined,
+      profile: this._profile,
       playerId: this._id,
       problems: this._problems.problems(),
       urlState: {
