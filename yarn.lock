@@ -2966,7 +2966,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@jest/schemas@npm:^29.4.0, @jest/schemas@npm:^29.4.2":
+"@jest/schemas@npm:^29.4.2":
   version: 29.4.2
   resolution: "@jest/schemas@npm:29.4.2"
   dependencies:
