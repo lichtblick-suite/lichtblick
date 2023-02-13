@@ -12,7 +12,7 @@ import { Player } from "@foxglove/studio-base/players/types";
 class RosbridgeDataSourceFactory implements IDataSourceFactory {
   public id = "rosbridge-websocket";
   public type: IDataSourceFactory["type"] = "connection";
-  public displayName = "Rosbridge (ROS 1 & 2)";
+  public displayName = "Rosbridge";
   public iconName: IDataSourceFactory["iconName"] = "Flow";
   public docsLinks = [{ url: "https://foxglove.dev/docs/studio/connection/rosbridge" }];
   public description = "Connect to a ROS 1 or ROS 2 system using the Rosbridge WebSocket protocol.";
