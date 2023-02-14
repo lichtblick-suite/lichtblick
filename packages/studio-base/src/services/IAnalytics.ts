@@ -13,6 +13,7 @@ enum AppEventCategory {
   VARIABLES = "VARIABLES",
   EXTENSIONS = "EXTENSIONS",
   EXPERIMENTAL_FEATURES = "EXPERIMENTAL_FEATURES",
+  URDF = "URDF",
 }
 
 enum AppEvent {
@@ -65,6 +66,10 @@ enum AppEvent {
 
   // Experimental features
   EXPERIMENTAL_FEATURE_TOGGLE = "Studio: Experimental Feature Toggled",
+
+  // URDF functionality
+  URDF_LOAD_LOCAL_FILE = "Studio: Local URDF File Loaded",
+  URDF_LOAD_PARAM = "Studio: URDF Loaded from robot_description Paramter",
 }
 
 /** https://develop.sentry.dev/sdk/event-payloads/breadcrumbs/#breadcrumb-types */
@@ -133,6 +138,10 @@ export function getEventCategory(event: AppEvent): AppEventCategory {
 
     case AppEvent.EXPERIMENTAL_FEATURE_TOGGLE:
       return AppEventCategory.EXPERIMENTAL_FEATURES;
+
+    case AppEvent.URDF_LOAD_LOCAL_FILE:
+    case AppEvent.URDF_LOAD_PARAM:
+      return AppEventCategory.URDF;
   }
 }
 
@@ -189,6 +198,10 @@ export function getEventBreadcrumbType(event: AppEvent): SentryBreadcrumbType {
       return SentryBreadcrumbType.USER;
 
     case AppEvent.EXPERIMENTAL_FEATURE_TOGGLE:
+      return SentryBreadcrumbType.USER;
+
+    case AppEvent.URDF_LOAD_LOCAL_FILE:
+    case AppEvent.URDF_LOAD_PARAM:
       return SentryBreadcrumbType.USER;
   }
 }

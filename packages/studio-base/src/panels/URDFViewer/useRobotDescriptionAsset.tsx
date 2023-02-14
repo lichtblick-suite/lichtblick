@@ -7,6 +7,7 @@ import { useLayoutEffect, useState } from "react";
 import { useAsync } from "react-use";
 
 import * as PanelAPI from "@foxglove/studio-base/PanelAPI";
+import { useAnalytics } from "@foxglove/studio-base/context/AnalyticsContext";
 import { Asset } from "@foxglove/studio-base/context/AssetsContext";
 import URDFAssetLoader from "@foxglove/studio-base/services/URDFAssetLoader";
 import { ROBOT_DESCRIPTION_PARAM } from "@foxglove/studio-base/util/globalConstants";
@@ -17,6 +18,7 @@ export default function useRobotDescriptionAsset(): {
 } {
   const [robotDescriptionParam] = PanelAPI.useParameter<string>(ROBOT_DESCRIPTION_PARAM);
   const [assetErrorDismissed, setAssetErrorDismissed] = useState(false);
+  const analytics = useAnalytics();
 
   const { value: robotDescriptionAsset, error: robotDescriptionAssetError } = useAsync(async () => {
     if (robotDescriptionParam == undefined) {
@@ -24,8 +26,9 @@ export default function useRobotDescriptionAsset(): {
     }
     return await new URDFAssetLoader().load(
       new File([robotDescriptionParam], "robot_description.urdf"),
+      { basePath: undefined, analytics, source: "param" },
     );
-  }, [robotDescriptionParam]);
+  }, [analytics, robotDescriptionParam]);
 
   const messageBar = robotDescriptionAssetError && !assetErrorDismissed && (
     <Snackbar open anchorOrigin={{ vertical: "top", horizontal: "center" }}>

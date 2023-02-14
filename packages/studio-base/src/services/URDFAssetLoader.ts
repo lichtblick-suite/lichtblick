@@ -12,6 +12,7 @@ import { XacroParser } from "xacro-parser";
 
 import Logger from "@foxglove/log";
 import { AssetLoader, Asset, parsePackageUrl } from "@foxglove/studio-base/context/AssetsContext";
+import IAnalytics, { AppEvent } from "@foxglove/studio-base/services/IAnalytics";
 import isDesktopApp from "@foxglove/studio-base/util/isDesktopApp";
 
 const log = Logger.getLogger(__filename);
@@ -21,10 +22,35 @@ const URDF_ROOT = "$URDF_ROOT";
 // https://github.com/ros/urdf_tutorial
 
 export default class URDFAssetLoader implements AssetLoader {
-  public async load(file: File): Promise<Asset | undefined> {
+  public async load(
+    file: File,
+    options: {
+      basePath: string | undefined;
+      analytics: IAnalytics;
+      source: "param" | "local_file";
+    },
+  ): Promise<Asset | undefined> {
     if (!/\.(urdf|xacro|xml)$/.test(file.name)) {
       return undefined;
     }
+    try {
+      const result = await this._load(file);
+
+      void options.analytics.logEvent(
+        options.source === "param" ? AppEvent.URDF_LOAD_PARAM : AppEvent.URDF_LOAD_LOCAL_FILE,
+        { success: true },
+      );
+      return result;
+    } catch (error) {
+      void options.analytics.logEvent(
+        options.source === "param" ? AppEvent.URDF_LOAD_PARAM : AppEvent.URDF_LOAD_LOCAL_FILE,
+        { success: false },
+      );
+      throw error;
+    }
+  }
+
+  private async _load(file: File): Promise<Asset | undefined> {
     const text = await file.text();
     if (text.trim().length === 0) {
       throw new Error(`${file.name} is empty`);

@@ -53,6 +53,7 @@ import Stack from "@foxglove/studio-base/components/Stack";
 import { StudioLogsSettingsSidebar } from "@foxglove/studio-base/components/StudioLogsSettingsSidebar";
 import { SyncAdapters } from "@foxglove/studio-base/components/SyncAdapters";
 import VariablesSidebar from "@foxglove/studio-base/components/VariablesSidebar";
+import { useAnalytics } from "@foxglove/studio-base/context/AnalyticsContext";
 import { useAssets } from "@foxglove/studio-base/context/AssetsContext";
 import ConsoleApiContext from "@foxglove/studio-base/context/ConsoleApiContext";
 import {
@@ -353,6 +354,7 @@ export default function Workspace(props: WorkspaceProps): JSX.Element {
   const { enqueueSnackbar } = useSnackbar();
 
   const { loadFromFile } = useAssets();
+  const analytics = useAnalytics();
 
   const installExtension = useExtensionCatalog((state) => state.installExtension);
 
@@ -380,7 +382,7 @@ export default function Workspace(props: WorkspaceProps): JSX.Element {
         }
       } else {
         try {
-          if (await loadFromFile(file, { basePath })) {
+          if (await loadFromFile(file, { basePath, analytics, source: "local_file" })) {
             return;
           }
         } catch (err) {
@@ -398,7 +400,7 @@ export default function Workspace(props: WorkspaceProps): JSX.Element {
         selectSource(matchedSource.id, { type: "file", handle });
       }
     },
-    [availableSources, enqueueSnackbar, installExtension, loadFromFile, selectSource],
+    [analytics, availableSources, enqueueSnackbar, installExtension, loadFromFile, selectSource],
   );
 
   const openFiles = useCallback(
@@ -425,7 +427,7 @@ export default function Workspace(props: WorkspaceProps): JSX.Element {
           }
         } else {
           try {
-            if (!(await loadFromFile(file, { basePath }))) {
+            if (!(await loadFromFile(file, { basePath, analytics, source: "local_file" }))) {
               otherFiles.push(file);
             }
           } catch (err) {
@@ -451,7 +453,7 @@ export default function Workspace(props: WorkspaceProps): JSX.Element {
         }
       }
     },
-    [availableSources, enqueueSnackbar, installExtension, loadFromFile, selectSource],
+    [analytics, availableSources, enqueueSnackbar, installExtension, loadFromFile, selectSource],
   );
 
   // files the main thread told us to open

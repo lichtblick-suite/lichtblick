@@ -7,13 +7,21 @@ import { URDFRobot } from "urdf-loader";
 import { v4 as uuidv4 } from "uuid";
 
 import { useShallowMemo } from "@foxglove/hooks";
+import IAnalytics from "@foxglove/studio-base/services/IAnalytics";
 
 export type Asset = { name: string } & { type: "urdf"; model: URDFRobot };
 type AssetWithUUID = Asset & { uuid: string };
 
 type Assets = {
   /** Returns true if the file was successfully loaded as an asset. */
-  loadFromFile: (file: File, options: { basePath: string | undefined }) => Promise<boolean>;
+  loadFromFile: (
+    file: File,
+    options: {
+      basePath: string | undefined;
+      analytics: IAnalytics;
+      source: "param" | "local_file";
+    },
+  ) => Promise<boolean>;
   assets: readonly AssetWithUUID[];
 };
 
@@ -29,7 +37,14 @@ export interface AssetLoader {
   /**
    * @returns A successfully loaded asset, or undefined if this loader should not be used to load this asset.
    */
-  load(file: File, options: { basePath: string | undefined }): Promise<Asset | undefined>;
+  load(
+    file: File,
+    options: {
+      basePath: string | undefined;
+      analytics: IAnalytics;
+      source: "param" | "local_file";
+    },
+  ): Promise<Asset | undefined>;
 }
 
 /**
