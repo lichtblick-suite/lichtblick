@@ -79,7 +79,7 @@ export const ReLayout = (): JSX.Element => {
   });
 
   useEffect(() => {
-    setTimeout(() => {
+    const timeOutID = setTimeout(() => {
       setFixture({
         frame: {},
         topics: [{ name: "/topic", schemaName: "std_msgs/Header" }],
@@ -89,6 +89,10 @@ export const ReLayout = (): JSX.Element => {
         },
       });
     }, 100);
+
+    return () => {
+      clearTimeout(timeOutID);
+    };
   }, []);
 
   return (

@@ -625,7 +625,9 @@ export const EmptyLineStrip: Story = () => {
   });
 
   useEffect(() => {
-    setTimeout(() => {
+    let timeOutID2: NodeJS.Timeout;
+
+    const timeOutID = setTimeout(() => {
       setFixture((oldFixture) => ({
         ...oldFixture,
         frame: {
@@ -644,8 +646,13 @@ export const EmptyLineStrip: Story = () => {
           ],
         },
       }));
-      setTimeout(() => readySignal(), 100);
+      timeOutID2 = setTimeout(() => readySignal(), 100);
     }, 500);
+
+    return () => {
+      clearTimeout(timeOutID);
+      clearTimeout(timeOutID2);
+    };
   }, [readySignal]);
 
   return (

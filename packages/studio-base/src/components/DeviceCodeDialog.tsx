@@ -50,9 +50,13 @@ export default function DeviceCodeDialog(props: DeviceCodePanelProps): JSX.Eleme
     url.searchParams.append("user_code", deviceCode.userCode);
     const href = url.toString();
 
-    setTimeout(() => {
+    const timeOutID = setTimeout(() => {
       window.open(href, "_blank");
     }, 700);
+
+    return () => {
+      clearTimeout(timeOutID);
+    };
   }, [deviceCode]);
 
   const { value: deviceResponse, error: deviceResponseError } = useAsync(async () => {

@@ -28,7 +28,7 @@ function Example({
   const [width, setWidth] = useState(300);
   const [pixelRatio, setPixelRatio] = useState(devicePixelRatio);
   useEffect(() => {
-    setTimeout(() => {
+    const timeOutID = setTimeout(() => {
       if (changeSize) {
         setWidth(150);
       }
@@ -36,6 +36,10 @@ function Example({
         setPixelRatio(2);
       }
     }, 10);
+
+    return () => {
+      clearTimeout(timeOutID);
+    };
   }, [changePixelRatio, changeSize]);
 
   return (
