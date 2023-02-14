@@ -4,6 +4,7 @@
 
 import * as THREE from "three";
 
+import { crc32 } from "@foxglove/crc";
 import { toNanoSec } from "@foxglove/rostime";
 import { ModelPrimitive, SceneEntity } from "@foxglove/schemas";
 import { emptyPose } from "@foxglove/studio-base/util/Pose";
@@ -27,9 +28,26 @@ type RenderableModel = {
   model: THREE.Group;
   /** Reference to the original model before modification so it can be re-cloned if necessary. */
   cachedModel: LoadedModel;
+  /** Reference to the original message for checking whether this renderable can be reused */
+  primitive: ModelPrimitive;
 };
 
+function byteArraysEqual(a: Uint8Array, b: Uint8Array): boolean {
+  if (a.length !== b.length) {
+    return false;
+  }
+  for (let i = 0; i < a.length; i++) {
+    if (a[i] !== b[i]) {
+      return false;
+    }
+  }
+  return true;
+}
+
 export class RenderableModels extends RenderablePrimitive {
+  /** Renderables loaded from embedded data */
+  private renderablesByDataCrc = new Map<number, RenderableModel[]>();
+  /** Renderables loaded from URLs */
   private renderablesByUrl = new Map<string, RenderableModel[]>();
   private updateCount = 0;
 
@@ -45,6 +63,46 @@ export class RenderableModels extends RenderablePrimitive {
     });
   }
 
+  /**
+   * Reuse a renderable from `prevRenderables` if a matching one is found using `primitivesMatch()`, otherwise load a new one.
+   * @param getURL Called to retrieve the URL that should be used to load the primitive
+   * @param revokeURL Called with the URL returned by getURL after loading is complete
+   */
+  private async _createOrUpdateRenderable(
+    primitive: ModelPrimitive,
+    prevRenderables: RenderableModel[] | undefined,
+    primitivesMatch: (a: ModelPrimitive, b: ModelPrimitive) => boolean,
+    getURL: (_: ModelPrimitive) => string,
+    revokeURL: (_: string) => void,
+  ): Promise<RenderableModel | undefined> {
+    let renderable: RenderableModel | undefined;
+    if (prevRenderables) {
+      const idx = prevRenderables.findIndex((prev) => primitivesMatch(prev.primitive, primitive));
+      if (idx >= 0) {
+        renderable = prevRenderables.splice(idx, 1)[0]!;
+      }
+    }
+    if (renderable) {
+      this._updateModel(renderable, primitive);
+      return renderable;
+    }
+
+    const url = getURL(primitive);
+    try {
+      // Load the model if necessary
+      const cachedModel = await this._loadCachedModel(url, {
+        overrideMediaType: primitive.media_type.length > 0 ? primitive.media_type : undefined,
+      });
+      if (cachedModel) {
+        renderable = { model: cloneAndPrepareModel(cachedModel), cachedModel, primitive };
+        this._updateModel(renderable, primitive);
+      }
+    } finally {
+      revokeURL(url);
+    }
+    return renderable;
+  }
+
   private _updateModels(models: ModelPrimitive[]) {
     this.clear();
 
@@ -53,59 +111,76 @@ export class RenderableModels extends RenderablePrimitive {
     const prevRenderablesByUrl = this.renderablesByUrl;
     this.renderablesByUrl = new Map();
 
+    const prevRenderablesByDataCrc = this.renderablesByDataCrc;
+    this.renderablesByDataCrc = new Map();
+
     Promise.all(
       models.map(async (primitive) => {
-        let url = primitive.url;
-        let objectUrl: string | undefined;
-        if (url.length === 0) {
-          url = objectUrl = URL.createObjectURL(
-            new Blob([primitive.data], { type: primitive.media_type }),
-          );
-        }
-        let newRenderables = this.renderablesByUrl.get(url);
-        if (!newRenderables) {
-          newRenderables = [];
-          this.renderablesByUrl.set(url, newRenderables);
-        }
-        try {
-          let renderable = prevRenderablesByUrl.get(url)?.pop();
-          // Use an existing model that we previously loaded
-          if (renderable) {
-            this._updateModel(renderable, primitive);
-          } else {
-            // Load the model if necessary
-            const cachedModel = await this._loadCachedModel(url, {
-              overrideMediaType: primitive.media_type.length > 0 ? primitive.media_type : undefined,
-            });
-            if (cachedModel) {
-              renderable = { model: cloneAndPrepareModel(cachedModel), cachedModel };
-              this._updateModel(renderable, primitive);
-            }
+        let prevRenderables: RenderableModel[] | undefined;
+        let newRenderables: RenderableModel[] | undefined;
+        let renderable: RenderableModel | undefined;
+        if (primitive.url.length === 0) {
+          const dataCrc = crc32(primitive.data);
+          prevRenderables = prevRenderablesByDataCrc.get(dataCrc);
+          newRenderables = this.renderablesByDataCrc.get(dataCrc);
+          if (!newRenderables) {
+            newRenderables = [];
+            this.renderablesByDataCrc.set(dataCrc, newRenderables);
           }
 
-          if (originalUpdateCount !== this.updateCount) {
-            // another update has come in, bail before doing any mutations
-            return;
+          try {
+            renderable = await this._createOrUpdateRenderable(
+              primitive,
+              prevRenderables,
+              (model1, model2) =>
+                model1.media_type === model2.media_type &&
+                byteArraysEqual(model1.data, model2.data),
+              (model) => URL.createObjectURL(new Blob([model.data], { type: model.media_type })),
+              (url) => URL.revokeObjectURL(url),
+            );
+          } catch (err) {
+            this.renderer.settings.errors.add(
+              this.userData.settingsPath,
+              MODEL_FETCH_FAILED,
+              `Unhandled error loading model from ${primitive.data.byteLength}-byte data: ${err.message}`,
+            );
           }
-          if (renderable) {
-            newRenderables.push(renderable);
-            this.add(renderable.model);
+        } else {
+          prevRenderables = prevRenderablesByUrl.get(primitive.url);
+          newRenderables = this.renderablesByUrl.get(primitive.url);
+          if (!newRenderables) {
+            newRenderables = [];
+            this.renderablesByUrl.set(primitive.url, newRenderables);
+          }
 
-            // Render a new frame now that the model is loaded
-            this.renderer.queueAnimationFrame();
+          try {
+            renderable = await this._createOrUpdateRenderable(
+              primitive,
+              prevRenderables,
+              (model1, model2) =>
+                model1.url === model2.url && model1.media_type === model2.media_type,
+              (model) => model.url,
+              (_url) => {},
+            );
+          } catch (err) {
+            this.renderer.settings.errors.add(
+              this.userData.settingsPath,
+              MODEL_FETCH_FAILED,
+              `Unhandled error loading model from "${primitive.url}": ${err.message}`,
+            );
           }
-        } catch (err) {
-          this.renderer.settings.errors.add(
-            this.userData.settingsPath,
-            MODEL_FETCH_FAILED,
-            `Unhandled error loading model from ${
-              objectUrl != undefined ? `${primitive.data.byteLength}-byte data` : `"${url}"`
-            }: ${err.message}`,
-          );
-        } finally {
-          if (objectUrl != undefined) {
-            URL.revokeObjectURL(objectUrl);
-          }
+        }
+
+        if (originalUpdateCount !== this.updateCount) {
+          // another update has come in, bail before doing any mutations
+          return;
+        }
+        if (renderable) {
+          newRenderables.push(renderable);
+          this.add(renderable.model);
+
+          // Render a new frame now that the model is loaded
+          this.renderer.queueAnimationFrame();
         }
       }),
     )
@@ -122,6 +197,14 @@ export class RenderableModels extends RenderablePrimitive {
             this._disposeModel(renderable);
           }
         }
+        for (const renderables of prevRenderablesByDataCrc.values()) {
+          for (const renderable of renderables) {
+            renderable.model.removeFromParent();
+            this._disposeModel(renderable);
+          }
+        }
+
+        this.renderer.queueAnimationFrame();
       });
   }
 
@@ -132,6 +215,13 @@ export class RenderableModels extends RenderablePrimitive {
       }
     }
     this.renderablesByUrl.clear();
+
+    for (const renderables of this.renderablesByDataCrc.values()) {
+      for (const renderable of renderables) {
+        this._disposeModel(renderable);
+      }
+    }
+    this.renderablesByDataCrc.clear();
   }
 
   public override update(
@@ -182,9 +272,6 @@ export class RenderableModels extends RenderablePrimitive {
     return cachedModel;
   }
 
-  /**
-   * @returns true if model was successfully updated, false if it needs to be reloaded
-   */
   private _updateModel(renderable: RenderableModel, primitive: ModelPrimitive) {
     const overrideColor = this.userData.settings.color
       ? stringToRgba(tempRgba, this.userData.settings.color)
@@ -223,8 +310,6 @@ export class RenderableModels extends RenderablePrimitive {
       primitive.pose.orientation.z,
       primitive.pose.orientation.w,
     );
-
-    return true;
   }
 
   private _disposeModel(renderable: RenderableModel) {

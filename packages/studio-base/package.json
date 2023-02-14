@@ -33,6 +33,7 @@
     "@foxglove/avl": "1.0.0",
     "@foxglove/chartjs-plugin-zoom": "2.0.4",
     "@foxglove/comlink-transfer-handlers": "workspace:*",
+    "@foxglove/crc": "0.0.3",
     "@foxglove/den": "workspace:*",
     "@foxglove/electron-socket": "2.1.0",
     "@foxglove/hooks": "workspace:*",

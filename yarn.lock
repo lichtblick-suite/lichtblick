@@ -2239,7 +2239,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@foxglove/crc@npm:^0.0.3":
+"@foxglove/crc@npm:0.0.3, @foxglove/crc@npm:^0.0.3":
   version: 0.0.3
   resolution: "@foxglove/crc@npm:0.0.3"
   checksum: 2eee0e45780e3289c4a190fa909e5977643667e19a21b945a109977b89427b877d8e12ebf91821653d69bdb0390e58540e1c9bb906aefcc7dd818c64f131f071
@@ -2511,6 +2511,7 @@ __metadata:
     "@foxglove/avl": 1.0.0
     "@foxglove/chartjs-plugin-zoom": 2.0.4
     "@foxglove/comlink-transfer-handlers": "workspace:*"
+    "@foxglove/crc": 0.0.3
     "@foxglove/den": "workspace:*"
     "@foxglove/electron-socket": 2.1.0
     "@foxglove/hooks": "workspace:*"
