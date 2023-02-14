@@ -14,7 +14,7 @@ import {
   ListItemText,
   styled as muiStyled,
 } from "@mui/material";
-import { useState, useCallback, useMemo, useEffect, MouseEvent } from "react";
+import { useState, useCallback, useMemo, useEffect, MouseEvent, useRef } from "react";
 
 import { Time, isTimeInRangeInclusive } from "@foxglove/rostime";
 import Stack from "@foxglove/studio-base/components/Stack";
@@ -161,6 +161,7 @@ export default function PlaybackTimeDisplayMethod({
   onPause,
   isPlaying,
 }: PlaybackTimeDisplayMethodProps): JSX.Element {
+  const timeOutID = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
   const timeFormat = useAppTimeFormat();
   const timeRawString = useMemo(
     () => (currentTime ? formatTimeRaw(currentTime) : undefined),
@@ -222,6 +223,12 @@ export default function PlaybackTimeDisplayMethod({
       setIsEditing(false);
       setHasError(false);
     }
+
+    return () => {
+      if (timeOutID.current != undefined) {
+        clearTimeout(timeOutID.current);
+      }
+    };
   }, [hasError, inputText, isPlaying]);
 
   return (
@@ -260,7 +267,7 @@ export default function PlaybackTimeDisplayMethod({
             onBlur={(e) => {
               onSubmit(e);
               setIsEditing(false);
-              setTimeout(() => setHasError(false), 600);
+              timeOutID.current = setTimeout(() => setHasError(false), 600);
             }}
             onChange={(event) => setInputText(event.target.value)}
           />

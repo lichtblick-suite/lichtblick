@@ -12,7 +12,7 @@
 //   You may not use this file except in compliance with the License.
 
 import { Story } from "@storybook/react";
-import { useCallback, useRef } from "react";
+import { useCallback, useRef, useEffect } from "react";
 
 import PanelSetup, { Fixture, triggerWheel } from "@foxglove/studio-base/stories/PanelSetup";
 import { useReadySignal } from "@foxglove/studio-base/stories/ReadySignalContext";
@@ -196,12 +196,22 @@ export const EmptyTopic: Story = () => {
 };
 
 export const WithTooltip: Story = () => {
+  const timeOutID = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
   const readySignal = useReadySignal();
+
+  useEffect(() => {
+    return () => {
+      if (timeOutID.current != undefined) {
+        clearTimeout(timeOutID.current);
+      }
+    };
+  }, []);
+
   return (
     <div
       style={{ width: 300, height: 300 }}
       ref={() => {
-        setTimeout(() => {
+        timeOutID.current = setTimeout(() => {
           const [canvas] = document.getElementsByTagName("canvas");
           const x = 105;
           const y = 190;
