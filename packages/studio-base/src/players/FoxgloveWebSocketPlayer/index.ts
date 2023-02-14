@@ -246,7 +246,7 @@ export default class FoxgloveWebSocketPlayer implements Player {
       }
 
       if (event.capabilities.includes(ServerCapability.clientPublish)) {
-        this._playerCapabilities.push(PlayerCapabilities.advertise);
+        this._playerCapabilities = this._playerCapabilities.concat(PlayerCapabilities.advertise);
       }
       if (event.capabilities.includes(ServerCapability.services)) {
         this._serviceCallEncoding = event.supportedEncodings?.find((e) =>
@@ -255,7 +255,9 @@ export default class FoxgloveWebSocketPlayer implements Player {
 
         const problemId = "callService:unsupportedEncoding";
         if (this._serviceCallEncoding) {
-          this._playerCapabilities.push(PlayerCapabilities.callServices);
+          this._playerCapabilities = this._playerCapabilities.concat(
+            PlayerCapabilities.callServices,
+          );
           this._problems.removeProblem(problemId);
         } else {
           this._problems.addProblem(problemId, {
@@ -268,7 +270,7 @@ export default class FoxgloveWebSocketPlayer implements Player {
       }
 
       if (event.capabilities.includes(ServerCapability.parameters)) {
-        this._playerCapabilities.push(
+        this._playerCapabilities = this._playerCapabilities.concat(
           PlayerCapabilities.getParameters,
           PlayerCapabilities.setParameters,
         );
