@@ -55,7 +55,7 @@ function Wrapper(StoryFn: Story): JSX.Element {
   );
 }
 
-function Default(): JSX.Element {
+function Default() {
   return (
     <div
       style={{
@@ -108,14 +108,20 @@ function Default(): JSX.Element {
   );
 }
 
-export function Light(): JSX.Element {
+export const Light: Story = () => {
   return <Default />;
-}
+};
 Light.storyName = "Plot Legend (Light)";
+Light.play = async (ctx) => {
+  await ctx.parameters.storyReady;
+};
 Light.parameters = { useReadySignal: true, colorScheme: "light" };
 
-export function Dark(): JSX.Element {
+export const Dark: Story = () => {
   return <Default />;
-}
+};
 Dark.storyName = "Plot Legend (Dark)";
+Dark.play = async (ctx) => {
+  await ctx.parameters.storyReady;
+};
 Dark.parameters = { useReadySignal: true, colorScheme: "dark" };

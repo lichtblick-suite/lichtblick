@@ -63,7 +63,6 @@
   "resolutions": {
     "@types/node": "15.3.0",
     "react-dnd": "14.0.2",
-    "@storybook/react": "patch:@storybook/react@6.5.15#./patches/storybook-react.patch",
     "react-dom": "patch:react-dom@npm:17.0.2#./patches/react-dom.patch",
     "react-use": "patch:react-use@17.4.0#./patches/react-use.patch"
   },
@@ -79,9 +78,9 @@
     "@octokit/rest": "19.0.7",
     "@storybook/addon-actions": "6.5.16",
     "@storybook/addon-essentials": "6.5.16",
-    "@storybook/builder-webpack5": "6.5.15",
+    "@storybook/builder-webpack5": "6.5.16",
     "@storybook/manager-webpack5": "6.5.16",
-    "@storybook/react": "6.5.15",
+    "@storybook/react": "6.5.16",
     "@types/babel__core": "^7.20.0",
     "@types/babel__preset-env": "^7.9.2",
     "@types/case-sensitive-paths-webpack-plugin": "2.1.6",

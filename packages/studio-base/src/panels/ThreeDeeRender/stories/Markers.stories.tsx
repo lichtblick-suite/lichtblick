@@ -2,6 +2,7 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
+import { Story } from "@storybook/react";
 import { useEffect, useState } from "react";
 
 import { MessageEvent } from "@foxglove/studio";
@@ -551,16 +552,11 @@ export function Markers(): JSX.Element {
   );
 }
 
-EmptyLineStrip.parameters = {
-  colorScheme: "dark",
-  chromatic: { delay: 100 },
-  useReadySignal: true,
-};
 /**
  * Regression test: ability to reduce the number of points in a LineStrip marker to 0 after it is first rendered.
  * @see https://github.com/foxglove/studio/issues/3954
  */
-export function EmptyLineStrip(): JSX.Element {
+export const EmptyLineStrip: Story = () => {
   const readySignal = useReadySignal();
   const topics: Topic[] = [
     { name: "/tf", schemaName: "geometry_msgs/TransformStamped" },
@@ -680,4 +676,12 @@ export function EmptyLineStrip(): JSX.Element {
       />
     </PanelSetup>
   );
-}
+};
+EmptyLineStrip.play = async (ctx) => {
+  await ctx.parameters.storyReady;
+};
+EmptyLineStrip.parameters = {
+  colorScheme: "dark",
+  chromatic: { delay: 100 },
+  useReadySignal: true,
+};

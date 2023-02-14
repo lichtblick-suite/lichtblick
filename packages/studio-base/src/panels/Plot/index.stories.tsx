@@ -11,6 +11,7 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
+import { Story } from "@storybook/react";
 import { screen } from "@testing-library/dom";
 import userEvent from "@testing-library/user-event";
 import { shuffle } from "lodash";
@@ -373,18 +374,20 @@ export default {
   excludeStories: ["paths", "fixture"],
 };
 
-LineGraph.storyName = "line graph";
-export function LineGraph(): JSX.Element {
+export const LineGraph: Story = () => {
   const readySignal = useReadySignal({ count: 3 });
   const pauseFrame = useCallback(() => readySignal, [readySignal]);
   return <PlotWrapper pauseFrame={pauseFrame} config={exampleConfig} />;
-}
+};
+LineGraph.play = async (ctx) => {
+  await ctx.parameters.storyReady;
+};
+LineGraph.storyName = "line graph";
 LineGraph.parameters = {
   useReadySignal: true,
 };
 
-LineGraphWithXMinMax.storyName = "line graph with x min & max";
-export function LineGraphWithXMinMax(): JSX.Element {
+export const LineGraphWithXMinMax: Story = () => {
   const readySignal = useReadySignal({ count: 3 });
   const pauseFrame = useCallback(() => readySignal, [readySignal]);
   return (
@@ -393,13 +396,17 @@ export function LineGraphWithXMinMax(): JSX.Element {
       config={{ ...exampleConfig, minXValue: 1, maxXValue: 2 }}
     />
   );
-}
+};
+LineGraphWithXMinMax.play = async (ctx) => {
+  await ctx.parameters.storyReady;
+};
+LineGraphWithXMinMax.storyName = "line graph with x min & max";
 LineGraphWithXMinMax.parameters = {
   colorScheme: "light",
   useReadySignal: true,
 };
 
-export function LineGraphWithXRange(): JSX.Element {
+export const LineGraphWithXRange: Story = () => {
   const readySignal = useReadySignal({ count: 3 });
   const pauseFrame = useCallback(() => readySignal, [readySignal]);
   return (
@@ -409,25 +416,30 @@ export function LineGraphWithXRange(): JSX.Element {
       includeSettings
     />
   );
-}
+};
+LineGraphWithXRange.play = async (ctx) => {
+  await ctx.parameters.storyReady;
+};
 LineGraphWithXRange.parameters = {
   colorScheme: "light",
   useReadySignal: true,
 };
 LineGraphWithXRange.storyName = "line graph with x range";
 
-LineGraphWithNoTitle.storyName = "line graph with no title";
-export function LineGraphWithNoTitle(): JSX.Element {
+export const LineGraphWithNoTitle: Story = () => {
   const readySignal = useReadySignal({ count: 3 });
   const pauseFrame = useCallback(() => readySignal, [readySignal]);
   return <PlotWrapper pauseFrame={pauseFrame} config={{ ...exampleConfig, title: undefined }} />;
-}
+};
+LineGraphWithNoTitle.play = async (ctx) => {
+  await ctx.parameters.storyReady;
+};
+LineGraphWithNoTitle.storyName = "line graph with no title";
 LineGraphWithNoTitle.parameters = {
   useReadySignal: true,
 };
 
-LineGraphWithSettings.storyName = "line graph with settings";
-export function LineGraphWithSettings(): JSX.Element {
+export const LineGraphWithSettings: Story = () => {
   const readySignal = useReadySignal({ count: 3 });
   const pauseFrame = useCallback(() => readySignal, [readySignal]);
   return (
@@ -437,29 +449,31 @@ export function LineGraphWithSettings(): JSX.Element {
       includeSettings
     />
   );
-}
+};
 LineGraphWithSettings.parameters = {
   colorScheme: "light",
   useReadySignal: true,
 };
-LineGraphWithSettings.play = async () => {
+LineGraphWithSettings.storyName = "line graph with settings";
+LineGraphWithSettings.play = async (ctx) => {
   const user = userEvent.setup();
   const label = await screen.findByText("Y Axis");
   await user.click(label);
+  await ctx.parameters.storyReady;
 };
 
-LineGraphWithLegendsHidden.storyName = "line graph with legends hidden";
-export function LineGraphWithLegendsHidden(): JSX.Element {
+export const LineGraphWithLegendsHidden: Story = () => {
   const readySignal = useReadySignal({ count: 3 });
   const pauseFrame = useCallback(() => readySignal, [readySignal]);
   return <PlotWrapper pauseFrame={pauseFrame} config={{ ...exampleConfig, showLegend: false }} />;
-}
+};
+LineGraphWithLegendsHidden.play = async (ctx) => {
+  await ctx.parameters.storyReady;
+};
+LineGraphWithLegendsHidden.storyName = "line graph with legends hidden";
 LineGraphWithLegendsHidden.parameters = {
   useReadySignal: true,
 };
-
-InALineGraphWithMultiplePlotsXAxesAreSynced.storyName =
-  "in a line graph with multiple plots, x-axes are synced";
 
 const useStyles = makeStyles()(() => ({
   PanelSetup: {
@@ -470,7 +484,8 @@ const useStyles = makeStyles()(() => ({
     },
   },
 }));
-export function InALineGraphWithMultiplePlotsXAxesAreSynced(): JSX.Element {
+
+export const InALineGraphWithMultiplePlotsXAxesAreSynced: Story = () => {
   const readySignal = useReadySignal({ count: 6 });
   const pauseFrame = useCallback(() => readySignal, [readySignal]);
   const { classes } = useStyles();
@@ -503,13 +518,17 @@ export function InALineGraphWithMultiplePlotsXAxesAreSynced(): JSX.Element {
       />
     </PanelSetup>
   );
-}
+};
+InALineGraphWithMultiplePlotsXAxesAreSynced.storyName =
+  "in a line graph with multiple plots, x-axes are synced";
 InALineGraphWithMultiplePlotsXAxesAreSynced.parameters = {
   useReadySignal: true,
 };
+InALineGraphWithMultiplePlotsXAxesAreSynced.play = async (ctx) => {
+  await ctx.parameters.storyReady;
+};
 
-LineGraphAfterZoom.storyName = "line graph after zoom";
-export function LineGraphAfterZoom(): JSX.Element {
+export const LineGraphAfterZoom: Story = () => {
   const pauseState = useRef<"init" | "zoom" | "ready">("init");
   const readyState = useReadySignal();
 
@@ -543,14 +562,17 @@ export function LineGraphAfterZoom(): JSX.Element {
   }, [doZoom, readyState]);
 
   return <PlotWrapper pauseFrame={pauseFrame} config={exampleConfig} />;
-}
+};
+LineGraphAfterZoom.storyName = "line graph after zoom";
 LineGraphAfterZoom.parameters = {
   useReadySignal: true,
   colorScheme: "dark",
 };
+LineGraphAfterZoom.play = async (ctx) => {
+  await ctx.parameters.storyReady;
+};
 
-TimestampMethodHeaderStamp.storyName = "timestampMethod: headerStamp";
-export function TimestampMethodHeaderStamp(): JSX.Element {
+export const TimestampMethodHeaderStamp: Story = () => {
   const readySignal = useReadySignal({ count: 3 });
   const pauseFrame = useCallback(() => readySignal, [readySignal]);
 
@@ -570,13 +592,16 @@ export function TimestampMethodHeaderStamp(): JSX.Element {
       }}
     />
   );
-}
+};
+TimestampMethodHeaderStamp.storyName = "timestampMethod: headerStamp";
 TimestampMethodHeaderStamp.parameters = {
   useReadySignal: true,
 };
+TimestampMethodHeaderStamp.play = async (ctx) => {
+  await ctx.parameters.storyReady;
+};
 
-LongPath.storyName = "long path";
-export function LongPath(): JSX.Element {
+export const LongPath: Story = () => {
   const readySignal = useReadySignal({ count: 3 });
   const pauseFrame = useCallback(() => readySignal, [readySignal]);
 
@@ -596,13 +621,16 @@ export function LongPath(): JSX.Element {
       }}
     />
   );
-}
+};
+LongPath.storyName = "long path";
 LongPath.parameters = {
   useReadySignal: true,
 };
+LongPath.play = async (ctx) => {
+  await ctx.parameters.storyReady;
+};
 
-DisabledPath.storyName = "disabled path";
-export function DisabledPath(): JSX.Element {
+export const DisabledPath: Story = () => {
   const readySignal = useReadySignal({ count: 3 });
   const pauseFrame = useCallback(() => readySignal, [readySignal]);
 
@@ -626,13 +654,16 @@ export function DisabledPath(): JSX.Element {
       }}
     />
   );
-}
+};
+DisabledPath.storyName = "disabled path";
 DisabledPath.parameters = {
   useReadySignal: true,
 };
+DisabledPath.play = async (ctx) => {
+  await ctx.parameters.storyReady;
+};
 
-ReferenceLine.storyName = "reference line";
-export function ReferenceLine(): JSX.Element {
+export const ReferenceLine: Story = () => {
   const readySignal = useReadySignal({ count: 3 });
   const pauseFrame = useCallback(() => readySignal, [readySignal]);
 
@@ -652,13 +683,16 @@ export function ReferenceLine(): JSX.Element {
       }}
     />
   );
-}
+};
+ReferenceLine.storyName = "reference line";
 ReferenceLine.parameters = {
   useReadySignal: true,
 };
+ReferenceLine.play = async (ctx) => {
+  await ctx.parameters.storyReady;
+};
 
-WithMinAndMaxYValues.storyName = "with min and max Y values";
-export function WithMinAndMaxYValues(): JSX.Element {
+export const WithMinAndMaxYValues: Story = () => {
   const readySignal = useReadySignal({ count: 3 });
   const pauseFrame = useCallback(() => readySignal, [readySignal]);
 
@@ -680,19 +714,19 @@ export function WithMinAndMaxYValues(): JSX.Element {
       }}
     />
   );
-}
+};
 WithMinAndMaxYValues.parameters = {
   colorScheme: "light",
   useReadySignal: true,
 };
+WithMinAndMaxYValues.storyName = "with min and max Y values";
 WithMinAndMaxYValues.play = async () => {
   const user = userEvent.setup();
   const label = await screen.findByText("Y Axis");
   await user.click(label);
 };
 
-WithJustMinYValueLessThanMinimumValue.storyName = "with just min Y value less than minimum value";
-export function WithJustMinYValueLessThanMinimumValue(): JSX.Element {
+export const WithJustMinYValueLessThanMinimumValue: Story = () => {
   const readySignal = useReadySignal({ count: 3 });
   const pauseFrame = useCallback(() => readySignal, [readySignal]);
 
@@ -712,13 +746,16 @@ export function WithJustMinYValueLessThanMinimumValue(): JSX.Element {
       }}
     />
   );
-}
+};
+WithJustMinYValueLessThanMinimumValue.storyName = "with just min Y value less than minimum value";
 WithJustMinYValueLessThanMinimumValue.parameters = {
   useReadySignal: true,
 };
+WithJustMinYValueLessThanMinimumValue.play = async (ctx) => {
+  await ctx.parameters.storyReady;
+};
 
-WithJustMinYValueMoreThanMinimumValue.storyName = "with just min Y value more than minimum value";
-export function WithJustMinYValueMoreThanMinimumValue(): JSX.Element {
+export const WithJustMinYValueMoreThanMinimumValue: Story = () => {
   const readySignal = useReadySignal({ count: 3 });
   const pauseFrame = useCallback(() => readySignal, [readySignal]);
 
@@ -738,13 +775,16 @@ export function WithJustMinYValueMoreThanMinimumValue(): JSX.Element {
       }}
     />
   );
-}
+};
+WithJustMinYValueMoreThanMinimumValue.storyName = "with just min Y value more than minimum value";
 WithJustMinYValueMoreThanMinimumValue.parameters = {
   useReadySignal: true,
 };
+WithJustMinYValueMoreThanMinimumValue.play = async (ctx) => {
+  await ctx.parameters.storyReady;
+};
 
-WithJustMinYValueMoreThanMaximumValue.storyName = "with just min Y value more than maximum value";
-export function WithJustMinYValueMoreThanMaximumValue(): JSX.Element {
+export const WithJustMinYValueMoreThanMaximumValue: Story = () => {
   const readySignal = useReadySignal({ count: 3 });
   const pauseFrame = useCallback(() => readySignal, [readySignal]);
 
@@ -764,13 +804,16 @@ export function WithJustMinYValueMoreThanMaximumValue(): JSX.Element {
       }}
     />
   );
-}
+};
+WithJustMinYValueMoreThanMaximumValue.storyName = "with just min Y value more than maximum value";
 WithJustMinYValueMoreThanMaximumValue.parameters = {
   useReadySignal: true,
 };
+WithJustMinYValueMoreThanMaximumValue.play = async (ctx) => {
+  await ctx.parameters.storyReady;
+};
 
-WithJustMaxYValueLessThanMaximumValue.storyName = "with just max Y value less than maximum value";
-export function WithJustMaxYValueLessThanMaximumValue(): JSX.Element {
+export const WithJustMaxYValueLessThanMaximumValue: Story = () => {
   const readySignal = useReadySignal({ count: 3 });
   const pauseFrame = useCallback(() => readySignal, [readySignal]);
 
@@ -790,13 +833,16 @@ export function WithJustMaxYValueLessThanMaximumValue(): JSX.Element {
       }}
     />
   );
-}
+};
+WithJustMaxYValueLessThanMaximumValue.storyName = "with just max Y value less than maximum value";
 WithJustMaxYValueLessThanMaximumValue.parameters = {
   useReadySignal: true,
 };
+WithJustMaxYValueLessThanMaximumValue.play = async (ctx) => {
+  await ctx.parameters.storyReady;
+};
 
-WithJustMaxYValueMoreThanMaximumValue.storyName = "with just max Y value more than maximum value";
-export function WithJustMaxYValueMoreThanMaximumValue(): JSX.Element {
+export const WithJustMaxYValueMoreThanMaximumValue: Story = () => {
   const readySignal = useReadySignal({ count: 3 });
   const pauseFrame = useCallback(() => readySignal, [readySignal]);
 
@@ -816,13 +862,16 @@ export function WithJustMaxYValueMoreThanMaximumValue(): JSX.Element {
       }}
     />
   );
-}
+};
+WithJustMaxYValueMoreThanMaximumValue.storyName = "with just max Y value more than maximum value";
 WithJustMaxYValueMoreThanMaximumValue.parameters = {
   useReadySignal: true,
 };
+WithJustMaxYValueMoreThanMaximumValue.play = async (ctx) => {
+  await ctx.parameters.storyReady;
+};
 
-WithJustMaxYValueLessThanMinimumValue.storyName = "with just max Y value less than minimum value";
-export function WithJustMaxYValueLessThanMinimumValue(): JSX.Element {
+export const WithJustMaxYValueLessThanMinimumValue: Story = () => {
   const readySignal = useReadySignal({ count: 3 });
   const pauseFrame = useCallback(() => readySignal, [readySignal]);
 
@@ -842,14 +891,16 @@ export function WithJustMaxYValueLessThanMinimumValue(): JSX.Element {
       }}
     />
   );
-}
+};
+WithJustMaxYValueLessThanMinimumValue.storyName = "with just max Y value less than minimum value";
 WithJustMaxYValueLessThanMinimumValue.parameters = {
   useReadySignal: true,
 };
+WithJustMaxYValueLessThanMinimumValue.play = async (ctx) => {
+  await ctx.parameters.storyReady;
+};
 
-ScatterPlotPlusLineGraphPlusReferenceLine.storyName =
-  "scatter plot plus line graph plus reference line";
-export function ScatterPlotPlusLineGraphPlusReferenceLine(): JSX.Element {
+export const ScatterPlotPlusLineGraphPlusReferenceLine: Story = () => {
   const readySignal = useReadySignal({ count: 3 });
   const pauseFrame = useCallback(() => readySignal, [readySignal]);
 
@@ -874,13 +925,17 @@ export function ScatterPlotPlusLineGraphPlusReferenceLine(): JSX.Element {
       }}
     />
   );
-}
+};
+ScatterPlotPlusLineGraphPlusReferenceLine.storyName =
+  "scatter plot plus line graph plus reference line";
 ScatterPlotPlusLineGraphPlusReferenceLine.parameters = {
   useReadySignal: true,
 };
+ScatterPlotPlusLineGraphPlusReferenceLine.play = async (ctx) => {
+  await ctx.parameters.storyReady;
+};
 
-IndexBasedXAxisForArray.storyName = "index-based x-axis for array";
-export function IndexBasedXAxisForArray(): JSX.Element {
+export const IndexBasedXAxisForArray: Story = () => {
   const readySignal = useReadySignal({ count: 3 });
   const pauseFrame = useCallback(() => readySignal, [readySignal]);
 
@@ -901,13 +956,16 @@ export function IndexBasedXAxisForArray(): JSX.Element {
       }}
     />
   );
-}
+};
+IndexBasedXAxisForArray.storyName = "index-based x-axis for array";
 IndexBasedXAxisForArray.parameters = {
   useReadySignal: true,
 };
+IndexBasedXAxisForArray.play = async (ctx) => {
+  await ctx.parameters.storyReady;
+};
 
-CustomXAxisTopic.storyName = "custom x-axis topic";
-export function CustomXAxisTopic(): JSX.Element {
+export const CustomXAxisTopic: Story = () => {
   const readySignal = useReadySignal({ count: 3 });
   const pauseFrame = useCallback(() => readySignal, [readySignal]);
 
@@ -928,12 +986,16 @@ export function CustomXAxisTopic(): JSX.Element {
       }}
     />
   );
-}
+};
+CustomXAxisTopic.storyName = "custom x-axis topic";
 CustomXAxisTopic.parameters = {
   useReadySignal: true,
 };
+CustomXAxisTopic.play = async (ctx) => {
+  await ctx.parameters.storyReady;
+};
 
-export function CustomXAxisTopicWithXLimits(): JSX.Element {
+export const CustomXAxisTopicWithXLimits: Story = () => {
   const readySignal = useReadySignal({ count: 3 });
   const pauseFrame = useCallback(() => readySignal, [readySignal]);
 
@@ -956,15 +1018,17 @@ export function CustomXAxisTopicWithXLimits(): JSX.Element {
       }}
     />
   );
-}
+};
 CustomXAxisTopicWithXLimits.parameters = {
   colorScheme: "light",
   useReadySignal: true,
 };
 CustomXAxisTopicWithXLimits.storyName = "custom x-axis topic with x limits";
+CustomXAxisTopicWithXLimits.play = async (ctx) => {
+  await ctx.parameters.storyReady;
+};
 
-CurrentCustomXAxisTopic.storyName = "current custom x-axis topic";
-export function CurrentCustomXAxisTopic(): JSX.Element {
+export const CurrentCustomXAxisTopic: Story = () => {
   const readySignal = useReadySignal({ count: 3 });
   const pauseFrame = useCallback(() => readySignal, [readySignal]);
 
@@ -986,14 +1050,16 @@ export function CurrentCustomXAxisTopic(): JSX.Element {
       }}
     />
   );
-}
+};
+CurrentCustomXAxisTopic.storyName = "current custom x-axis topic";
 CurrentCustomXAxisTopic.parameters = {
   useReadySignal: true,
 };
+CurrentCustomXAxisTopic.play = async (ctx) => {
+  await ctx.parameters.storyReady;
+};
 
-CustomXAxisTopicWithMismatchedDataLengths.storyName =
-  "custom x-axis topic with mismatched data lengths";
-export function CustomXAxisTopicWithMismatchedDataLengths(): JSX.Element {
+export const CustomXAxisTopicWithMismatchedDataLengths: Story = () => {
   const readySignal = useReadySignal({ count: 3 });
   const pauseFrame = useCallback(() => readySignal, [readySignal]);
 
@@ -1025,13 +1091,17 @@ export function CustomXAxisTopicWithMismatchedDataLengths(): JSX.Element {
       }}
     />
   );
-}
+};
+CustomXAxisTopicWithMismatchedDataLengths.storyName =
+  "custom x-axis topic with mismatched data lengths";
 CustomXAxisTopicWithMismatchedDataLengths.parameters = {
   useReadySignal: true,
 };
+CustomXAxisTopicWithMismatchedDataLengths.play = async (ctx) => {
+  await ctx.parameters.storyReady;
+};
 
-SuperCloseValues.storyName = "super close values";
-export function SuperCloseValues(): JSX.Element {
+export const SuperCloseValues: Story = () => {
   const readySignal = useReadySignal({ count: 3 });
   const pauseFrame = useCallback(() => readySignal, [readySignal]);
 
@@ -1078,13 +1148,16 @@ export function SuperCloseValues(): JSX.Element {
       }}
     />
   );
-}
+};
+SuperCloseValues.storyName = "super close values";
 SuperCloseValues.parameters = {
   useReadySignal: true,
 };
+SuperCloseValues.play = async (ctx) => {
+  await ctx.parameters.storyReady;
+};
 
-TimeValues.storyName = "time values";
-export function TimeValues(): JSX.Element {
+export const TimeValues: Story = () => {
   const readySignal = useReadySignal({ count: 3 });
   const pauseFrame = useCallback(() => readySignal, [readySignal]);
 
@@ -1105,13 +1178,16 @@ export function TimeValues(): JSX.Element {
       }}
     />
   );
-}
+};
+TimeValues.storyName = "time values";
 TimeValues.parameters = {
   useReadySignal: true,
 };
+TimeValues.play = async (ctx) => {
+  await ctx.parameters.storyReady;
+};
 
-PreloadedDataInBinaryBlocks.storyName = "preloaded data in binary blocks";
-export function PreloadedDataInBinaryBlocks(): JSX.Element {
+export const PreloadedDataInBinaryBlocks: Story = () => {
   const readySignal = useReadySignal({ count: 3 });
   const pauseFrame = useCallback(() => readySignal, [readySignal]);
 
@@ -1128,13 +1204,16 @@ export function PreloadedDataInBinaryBlocks(): JSX.Element {
       }}
     />
   );
-}
+};
+PreloadedDataInBinaryBlocks.storyName = "preloaded data in binary blocks";
 PreloadedDataInBinaryBlocks.parameters = {
   useReadySignal: true,
 };
+PreloadedDataInBinaryBlocks.play = async (ctx) => {
+  await ctx.parameters.storyReady;
+};
 
-MixedStreamedAndPreloadedData.storyName = "mixed streamed and preloaded data";
-export function MixedStreamedAndPreloadedData(): JSX.Element {
+export const MixedStreamedAndPreloadedData: Story = () => {
   const readySignal = useReadySignal({ count: 3 });
   const pauseFrame = useCallback(() => readySignal, [readySignal]);
 
@@ -1155,13 +1234,16 @@ export function MixedStreamedAndPreloadedData(): JSX.Element {
       }}
     />
   );
-}
+};
+MixedStreamedAndPreloadedData.storyName = "mixed streamed and preloaded data";
 MixedStreamedAndPreloadedData.parameters = {
   useReadySignal: true,
 };
+MixedStreamedAndPreloadedData.play = async (ctx) => {
+  await ctx.parameters.storyReady;
+};
 
-PreloadedDataAndItsDerivative.storyName = "preloaded data and its derivative";
-export function PreloadedDataAndItsDerivative(): JSX.Element {
+export const PreloadedDataAndItsDerivative: Story = () => {
   const readySignal = useReadySignal({ count: 3 });
   const pauseFrame = useCallback(() => readySignal, [readySignal]);
 
@@ -1182,13 +1264,16 @@ export function PreloadedDataAndItsDerivative(): JSX.Element {
       }}
     />
   );
-}
+};
+PreloadedDataAndItsDerivative.storyName = "preloaded data and its derivative";
 PreloadedDataAndItsDerivative.parameters = {
   useReadySignal: true,
 };
+PreloadedDataAndItsDerivative.play = async (ctx) => {
+  await ctx.parameters.storyReady;
+};
 
-PreloadedDataAndItsNegative.storyName = "preloaded data and its negative";
-export function PreloadedDataAndItsNegative(): JSX.Element {
+export const PreloadedDataAndItsNegative: Story = () => {
   const readySignal = useReadySignal({ count: 3 });
   const pauseFrame = useCallback(() => readySignal, [readySignal]);
 
@@ -1209,13 +1294,16 @@ export function PreloadedDataAndItsNegative(): JSX.Element {
       }}
     />
   );
-}
+};
+PreloadedDataAndItsNegative.storyName = "preloaded data and its negative";
 PreloadedDataAndItsNegative.parameters = {
   useReadySignal: true,
 };
+PreloadedDataAndItsNegative.play = async (ctx) => {
+  await ctx.parameters.storyReady;
+};
 
-PreloadedDataAndItsAbsoluteValue.storyName = "preloaded data and its absolute value";
-export function PreloadedDataAndItsAbsoluteValue(): JSX.Element {
+export const PreloadedDataAndItsAbsoluteValue: Story = () => {
   const readySignal = useReadySignal({ count: 3 });
   const pauseFrame = useCallback(() => readySignal, [readySignal]);
 
@@ -1236,7 +1324,11 @@ export function PreloadedDataAndItsAbsoluteValue(): JSX.Element {
       }}
     />
   );
-}
+};
+PreloadedDataAndItsAbsoluteValue.storyName = "preloaded data and its absolute value";
 PreloadedDataAndItsAbsoluteValue.parameters = {
   useReadySignal: true,
+};
+PreloadedDataAndItsAbsoluteValue.play = async (ctx) => {
+  await ctx.parameters.storyReady;
 };

@@ -11,6 +11,7 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
+import { Story } from "@storybook/react";
 import { useCallback } from "react";
 import TestUtils from "react-dom/test-utils";
 
@@ -117,7 +118,7 @@ export default {
   },
 };
 
-export function ColorPalette(): JSX.Element {
+export const ColorPalette: Story = () => {
   return (
     <div style={{ width: "100%", padding: "1rem" }}>
       {expandedLineColors.map((color) => (
@@ -125,10 +126,9 @@ export function ColorPalette(): JSX.Element {
       ))}
     </div>
   );
-}
+};
 
-OnePath.parameters = { useReadySignal: true };
-export function OnePath(): JSX.Element {
+export const OnePath: Story = () => {
   const readySignal = useReadySignal({ count: 3 });
   const pauseFrame = useCallback(() => readySignal, [readySignal]);
   return (
@@ -141,10 +141,13 @@ export function OnePath(): JSX.Element {
       />
     </PanelSetup>
   );
-}
+};
+OnePath.play = async (ctx) => {
+  await ctx.parameters.storyReady;
+};
+OnePath.parameters = { useReadySignal: true };
 
-WithSettings.parameters = { useReadySignal: true };
-export function WithSettings(): JSX.Element {
+export const WithSettings: Story = () => {
   const readySignal = useReadySignal({ count: 3 });
   const pauseFrame = useCallback(() => readySignal, [readySignal]);
   return (
@@ -157,10 +160,13 @@ export function WithSettings(): JSX.Element {
       />
     </PanelSetup>
   );
-}
+};
+WithSettings.play = async (ctx) => {
+  await ctx.parameters.storyReady;
+};
+WithSettings.parameters = { useReadySignal: true };
 
-MultiplePaths.parameters = { useReadySignal: true };
-export function MultiplePaths(): JSX.Element {
+export const MultiplePaths: Story = () => {
   const readySignal = useReadySignal({ count: 3 });
   const pauseFrame = useCallback(() => readySignal, [readySignal]);
   return (
@@ -176,10 +182,13 @@ export function MultiplePaths(): JSX.Element {
       />
     </PanelSetup>
   );
-}
+};
+MultiplePaths.play = async (ctx) => {
+  await ctx.parameters.storyReady;
+};
+MultiplePaths.parameters = { useReadySignal: true };
 
-MultiplePathsWithHover.parameters = { useReadySignal: true };
-export function MultiplePathsWithHover(): JSX.Element {
+export const MultiplePathsWithHover: Story = () => {
   const readySignal = useReadySignal({ count: 3 });
   const pauseFrame = useCallback(() => readySignal, [readySignal]);
   return (
@@ -205,10 +214,13 @@ export function MultiplePathsWithHover(): JSX.Element {
       />
     </PanelSetup>
   );
-}
+};
+MultiplePathsWithHover.play = async (ctx) => {
+  await ctx.parameters.storyReady;
+};
+MultiplePathsWithHover.parameters = { useReadySignal: true };
 
-LongPath.parameters = { useReadySignal: true };
-export function LongPath(): JSX.Element {
+export const LongPath: Story = () => {
   const readySignal = useReadySignal({ count: 3 });
   const pauseFrame = useCallback(() => readySignal, [readySignal]);
   return (
@@ -221,10 +233,13 @@ export function LongPath(): JSX.Element {
       />
     </PanelSetup>
   );
-}
+};
+LongPath.play = async (ctx) => {
+  await ctx.parameters.storyReady;
+};
+LongPath.parameters = { useReadySignal: true };
 
-JsonPath.parameters = { useReadySignal: true };
-export function JsonPath(): JSX.Element {
+export const JsonPath: Story = () => {
   const readySignal = useReadySignal({ count: 3 });
   const pauseFrame = useCallback(() => readySignal, [readySignal]);
   return (
@@ -237,10 +252,13 @@ export function JsonPath(): JSX.Element {
       />
     </PanelSetup>
   );
-}
+};
+JsonPath.play = async (ctx) => {
+  await ctx.parameters.storyReady;
+};
+JsonPath.parameters = { useReadySignal: true };
 
-ColorClash.parameters = { useReadySignal: true };
-export function ColorClash(): JSX.Element {
+export const ColorClash: Story = () => {
   const readySignal = useReadySignal({ count: 3 });
   const pauseFrame = useCallback(() => readySignal, [readySignal]);
   return (
@@ -255,7 +273,11 @@ export function ColorClash(): JSX.Element {
       />
     </PanelSetup>
   );
-}
+};
+ColorClash.play = async (ctx) => {
+  await ctx.parameters.storyReady;
+};
+ColorClash.parameters = { useReadySignal: true };
 
 const messageCache: BlockCache = {
   blocks: [
@@ -305,8 +327,7 @@ const messageCache: BlockCache = {
   startTime: systemStateMessages[0]!.header.stamp,
 };
 
-Blocks.parameters = { useReadySignal: true };
-export function Blocks(): JSX.Element {
+export const Blocks: Story = () => {
   const readySignal = useReadySignal({ count: 3 });
   const pauseFrame = useCallback(() => readySignal, [readySignal]);
 
@@ -326,4 +347,8 @@ export function Blocks(): JSX.Element {
       />
     </PanelSetup>
   );
-}
+};
+Blocks.play = async (ctx) => {
+  await ctx.parameters.storyReady;
+};
+Blocks.parameters = { useReadySignal: true };
