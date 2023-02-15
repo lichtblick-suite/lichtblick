@@ -153,7 +153,7 @@ function RawMessages(props: Props) {
     [topicRosPath, topics],
   );
   const rootStructureItem: MessagePathStructureItem | undefined = useMemo(() => {
-    if (!topic || !topicRosPath) {
+    if (!topic || !topicRosPath || topic.schemaName == undefined) {
       return;
     }
     return traverseStructure(

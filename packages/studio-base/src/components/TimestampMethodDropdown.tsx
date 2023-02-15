@@ -19,6 +19,9 @@ import { RosDatatypes } from "@foxglove/studio-base/types/RosDatatypes";
 import { TimestampMethod } from "@foxglove/studio-base/util/time";
 
 function topicHasNoHeaderStamp(topic: Topic, datatypes: RosDatatypes): boolean {
+  if (topic.schemaName == undefined) {
+    return true;
+  }
   const structureTraversalResult = traverseStructure(
     messagePathStructures(datatypes)[topic.schemaName],
     [

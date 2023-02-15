@@ -79,14 +79,20 @@ function TopicRow({ topic }: { topic: Topic }): JSX.Element {
         />
       </td>
       <td>
-        {topic.schemaName}
-        <CopyButton
-          className={classes.copyIcon}
-          edge="end"
-          size="small"
-          iconSize="small"
-          getText={() => topic.schemaName}
-        />
+        {topic.schemaName == undefined ? (
+          "—"
+        ) : (
+          <>
+            {topic.schemaName}
+            <CopyButton
+              className={classes.copyIcon}
+              edge="end"
+              size="small"
+              iconSize="small"
+              getText={() => topic.schemaName ?? ""}
+            />
+          </>
+        )}
       </td>
       <td data-topic={topic.name} data-topic-stat="count">
         &mdash;
@@ -131,8 +137,8 @@ function SourceInfo(): JSX.Element {
       <table className={classes.table}>
         <thead>
           <tr>
-            <th>Topic Name</th>
-            <th>Datatype</th>
+            <th>Topic name</th>
+            <th>Schema name</th>
             <th>Message count</th>
             <th>Frequency</th>
           </tr>

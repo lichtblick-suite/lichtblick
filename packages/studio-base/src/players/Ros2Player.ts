@@ -2,7 +2,7 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { debounce, isEqual, sortBy } from "lodash";
+import { debounce, isEqual, sortBy, keyBy } from "lodash";
 import { v4 as uuidv4 } from "uuid";
 
 import { debouncePromise } from "@foxglove/den/async";
@@ -29,9 +29,9 @@ import {
   SubscribePayload,
   Topic,
   TopicStats,
+  TopicWithSchemaName,
 } from "@foxglove/studio-base/players/types";
 import rosDatatypesToMessageDefinition from "@foxglove/studio-base/util/rosDatatypesToMessageDefinition";
-import { getTopicsByTopicName } from "@foxglove/studio-base/util/selectors";
 
 const log = Logger.getLogger(__filename);
 const rosLog = Logger.getLogger("ROS2");
@@ -58,7 +58,7 @@ export default class Ros2Player implements Player {
   private _id: string = uuidv4(); // Unique ID for this player.
   private _listener?: (arg0: PlayerState) => Promise<void>; // Listener for _emitState().
   private _closed = false; // Whether the player has been completely closed using close().
-  private _providerTopics?: Topic[]; // Topics as advertised by peers
+  private _providerTopics?: TopicWithSchemaName[]; // Topics as advertised by peers
   private _providerTopicsStats = new Map<string, TopicStats>(); // topic names to topic statistics.
   private _providerDatatypes = new Map<string, RosMsgDefinition>(); // All known ROS 2 message definitions.
   private _publishedTopics = new Map<string, Set<string>>(); // A map of topic names to the set of publisher IDs publishing each topic.
@@ -193,7 +193,7 @@ export default class Ros2Player implements Player {
 
     try {
       // Convert the map of topics to publication endpoints to a list of topics
-      const topics: Topic[] = [];
+      const topics: TopicWithSchemaName[] = [];
       for (const [topic, endpoints] of rosNode.getPublishedTopics().entries()) {
         const dataTypes = new Set<string>();
         for (const endpoint of endpoints) {
@@ -214,7 +214,7 @@ export default class Ros2Player implements Player {
       }
 
       // Sort them for easy comparison
-      const sortedTopics: Topic[] = sortBy(topics, "name");
+      const sortedTopics: TopicWithSchemaName[] = sortBy(topics, "name");
 
       if (this._topicsChanged(sortedTopics)) {
         // Remove stats entries for removed topics
@@ -369,7 +369,7 @@ export default class Ros2Player implements Player {
     this._addInternalSubscriptions(subscriptions);
 
     // Filter down to topics we can actually subscribe to
-    const availableTopicsByTopicName = getTopicsByTopicName(this._providerTopics ?? []);
+    const availableTopicsByTopicName = keyBy(this._providerTopics ?? [], ({ name }) => name);
     const topicNames = subscriptions
       .map(({ topic }) => topic)
       .filter((topicName) => availableTopicsByTopicName[topicName]);
@@ -382,14 +382,14 @@ export default class Ros2Player implements Player {
       if (!availableTopic || this._rosNode.subscriptions.has(topicName)) {
         continue;
       }
-      const dataType = availableTopic.schemaName;
+      const schemaName = availableTopic.schemaName;
 
       // Find the first publisher for this topic to mimic its QoS history settings
       const rosEndpoint = publishedTopics.get(topicName)?.[0];
       if (!rosEndpoint) {
         this._problems.addProblem(`subscription:${topicName}`, {
           severity: "warn",
-          message: `No publisher for "${topicName}" ("${dataType}")`,
+          message: `No publisher for "${topicName}" ("${schemaName}")`,
           tip: `Publish "${topicName}"`,
         });
         continue;
@@ -400,12 +400,12 @@ export default class Ros2Player implements Player {
       // Try to retrieve the ROS message definition for this topic
       let msgDefinition: RosMsgDefinition[] | undefined;
       try {
-        msgDefinition = rosDatatypesToMessageDefinition(this._providerDatatypes, dataType);
+        msgDefinition = rosDatatypesToMessageDefinition(this._providerDatatypes, schemaName);
         this._problems.removeProblem(`msgdef:${topicName}`);
       } catch (error) {
         this._problems.addProblem(`msgdef:${topicName}`, {
           severity: "warn",
-          message: `Unknown message definition for "${topicName}" ("${dataType}")`,
+          message: `Unknown message definition for "${topicName}" ("${schemaName}")`,
           tip: `Only core ROS 2 data types are currently supported`,
         });
       }
@@ -430,7 +430,7 @@ export default class Ros2Player implements Player {
 
       const subscription = this._rosNode.subscribe({
         topic: topicName,
-        dataType,
+        dataType: schemaName,
         durability,
         history: rosEndpoint.history,
         reliability,
@@ -438,7 +438,7 @@ export default class Ros2Player implements Player {
       });
 
       subscription.on("message", (timestamp, message, data, _pub) => {
-        this._handleMessage(topicName, timestamp, message, dataType, data.byteLength, true);
+        this._handleMessage(topicName, timestamp, message, schemaName, data.byteLength, true);
         // Clear any existing subscription problems for this topic if we're receiving messages again.
         this._problems.removeProblem(`subscription:${topicName}`);
       });

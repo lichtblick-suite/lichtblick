@@ -59,7 +59,10 @@ const LogPanel = React.memo(({ config, saveConfig }: Props) => {
   );
 
   const availableTopics = useMemo(
-    () => topics.filter((topic) => SUPPORTED_DATATYPES.includes(topic.schemaName)),
+    () =>
+      topics.filter(
+        (topic) => topic.schemaName != undefined && SUPPORTED_DATATYPES.includes(topic.schemaName),
+      ),
     [topics],
   );
 

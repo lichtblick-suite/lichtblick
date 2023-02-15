@@ -59,7 +59,7 @@ export class McapStreamingIterableSource implements IIterableSource {
     const schemasById = new Map<number, McapTypes.TypedMcapRecords["Schema"]>();
     const channelInfoById = new Map<
       number,
-      { channel: McapTypes.Channel; parsedChannel: ParsedChannel; schemaName: string }
+      { channel: McapTypes.Channel; parsedChannel: ParsedChannel; schemaName: string | undefined }
     >();
 
     let startTime: Time | undefined;
@@ -97,13 +97,8 @@ export class McapStreamingIterableSource implements IIterableSource {
           if (channelIdsWithErrors.has(record.id)) {
             break;
           }
-          if (record.schemaId === 0) {
-            throw new Error(
-              `Channel ${record.id} has no schema; channels without schemas are not supported`,
-            );
-          }
           const schema = schemasById.get(record.schemaId);
-          if (!schema) {
+          if (record.schemaId !== 0 && !schema) {
             throw new Error(
               `Encountered channel with schema id ${record.schemaId} but no prior schema`,
             );
@@ -114,7 +109,7 @@ export class McapStreamingIterableSource implements IIterableSource {
             channelInfoById.set(record.id, {
               channel: record,
               parsedChannel,
-              schemaName: schema.name,
+              schemaName: schema?.name,
             });
             messagesByChannel.set(record.id, []);
           } catch (error) {
@@ -152,7 +147,7 @@ export class McapStreamingIterableSource implements IIterableSource {
             publishTime: fromNanoSec(record.publishTime),
             message: channelInfo.parsedChannel.deserializer(record.data),
             sizeInBytes: record.data.byteLength,
-            schemaName: channelInfo.schemaName,
+            schemaName: channelInfo.schemaName ?? "",
           });
           break;
         }

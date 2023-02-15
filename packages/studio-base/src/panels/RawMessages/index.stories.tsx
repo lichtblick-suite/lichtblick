@@ -54,6 +54,29 @@ storiesOf("panels/RawMessages", module)
       </PanelSetup>
     );
   })
+  .add("schemaless", () => {
+    return (
+      <PanelSetup
+        fixture={{
+          topics: [{ name: "foo", schemaName: undefined }],
+          datatypes: new Map(),
+          frame: {
+            ["foo"]: [
+              {
+                topic: "foo",
+                schemaName: "",
+                message: { bar: 1 },
+                receiveTime: { sec: 0, nsec: 0 },
+                sizeInBytes: 0,
+              },
+            ],
+          },
+        }}
+      >
+        <RawMessages overrideConfig={{ topicPath: "foo", ...noDiffConfig } as any} />
+      </PanelSetup>
+    );
+  })
   .add("collapsed", () => {
     return (
       <PanelSetup fixture={fixture}>

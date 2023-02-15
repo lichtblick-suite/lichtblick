@@ -204,8 +204,10 @@ export type Topic = {
   // a consistent representation for topics that people recognize though.
   name: string;
   // Name of the datatype (see `type PlayerStateActiveData` for details).
-  schemaName: string;
+  schemaName: string | undefined;
 };
+
+export type TopicWithSchemaName = Topic & { schemaName: string };
 
 export type TopicStats = {
   // The number of messages observed on the topic.

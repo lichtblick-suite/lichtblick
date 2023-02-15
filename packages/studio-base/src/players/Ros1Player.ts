@@ -2,7 +2,7 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { isEqual, sortBy } from "lodash";
+import { isEqual, sortBy, keyBy } from "lodash";
 import { v4 as uuidv4 } from "uuid";
 
 import { debouncePromise } from "@foxglove/den/async";
@@ -27,10 +27,10 @@ import {
   SubscribePayload,
   Topic,
   TopicStats,
+  TopicWithSchemaName,
 } from "@foxglove/studio-base/players/types";
 import { RosDatatypes } from "@foxglove/studio-base/types/RosDatatypes";
 import rosDatatypesToMessageDefinition from "@foxglove/studio-base/util/rosDatatypesToMessageDefinition";
-import { getTopicsByTopicName } from "@foxglove/studio-base/util/selectors";
 import { HttpServer } from "@foxglove/xmlrpc";
 
 const log = Logger.getLogger(__filename);
@@ -65,7 +65,7 @@ export default class Ros1Player implements Player {
   private _id: string = uuidv4(); // Unique ID for this player.
   private _listener?: (arg0: PlayerState) => Promise<void>; // Listener for _emitState().
   private _closed: boolean = false; // Whether the player has been completely closed using close().
-  private _providerTopics?: Topic[]; // Topics as advertised by rosmaster.
+  private _providerTopics?: TopicWithSchemaName[]; // Topics as advertised by rosmaster.
   private _providerTopicsStats = new Map<string, TopicStats>(); // topic names to topic statistics.
   private _providerDatatypes: RosDatatypes = new Map(); // All ROS message definitions received from subscriptions and set by publishers.
   private _publishedTopics = new Map<string, Set<string>>(); // A map of topic names to the set of publisher IDs publishing each topic.
@@ -213,7 +213,10 @@ export default class Ros1Player implements Player {
 
     try {
       const topicArrays = await rosNode.getPublishedTopics();
-      const topics: Topic[] = topicArrays.map(([name, schemaName]) => ({ name, schemaName }));
+      const topics: TopicWithSchemaName[] = topicArrays.map(([name, schemaName]) => ({
+        name,
+        schemaName,
+      }));
       // Sort them for easy comparison
       const sortedTopics = sortBy(topics, "name");
 
@@ -376,7 +379,7 @@ export default class Ros1Player implements Player {
     this._addInternalSubscriptions(subscriptions);
 
     // See what topics we actually can subscribe to.
-    const availableTopicsByTopicName = getTopicsByTopicName(this._providerTopics ?? []);
+    const availableTopicsByTopicName = keyBy(this._providerTopics ?? [], ({ name }) => name);
     const topicNames = subscriptions
       .map(({ topic }) => topic)
       .filter((topicName) => availableTopicsByTopicName[topicName]);

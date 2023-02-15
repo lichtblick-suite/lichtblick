@@ -20,8 +20,8 @@ const log = Logger.getLogger(__filename);
  */
 export type ParsedChannelAndEncodings = {
   messageEncoding: string;
-  schemaEncoding: string;
-  schema: Uint8Array;
+  schemaEncoding: string | undefined;
+  schema: Uint8Array | undefined;
   parsedChannel: ParsedChannel;
 };
 
@@ -94,7 +94,7 @@ export async function* streamMessages({
     {
       channel: McapTypes.TypedMcapRecords["Channel"];
       parsedChannel: ParsedChannel;
-      schemaName: string;
+      schemaName: string | undefined;
     }
   >();
 
@@ -111,13 +111,8 @@ export async function* streamMessages({
         if (channelInfoById.has(record.id)) {
           return;
         }
-        if (record.schemaId === 0) {
-          throw new Error(
-            `Channel ${record.id} (topic ${record.topic}) has no schema; channels without schemas are not supported`,
-          );
-        }
         const schema = schemasById.get(record.schemaId);
-        if (!schema) {
+        if (record.schemaId !== 0 && !schema) {
           throw new Error(
             `Missing schema info for schema id ${record.schemaId} (channel ${record.id}, topic ${record.topic})`,
           );
@@ -126,13 +121,13 @@ export async function* streamMessages({
         for (const info of parsedChannels) {
           if (
             info.messageEncoding === record.messageEncoding &&
-            info.schemaEncoding === schema.encoding &&
-            isEqual(info.schema, schema.data)
+            info.schemaEncoding === schema?.encoding &&
+            isEqual(info.schema, schema?.data)
           ) {
             channelInfoById.set(record.id, {
               channel: record,
               parsedChannel: info.parsedChannel,
-              schemaName: schema.name,
+              schemaName: schema?.name,
             });
             return;
           }
@@ -147,8 +142,8 @@ export async function* streamMessages({
 
         parsedChannels.push({
           messageEncoding: record.messageEncoding,
-          schemaEncoding: schema.encoding,
-          schema: schema.data,
+          schemaEncoding: schema?.encoding,
+          schema: schema?.data,
           parsedChannel,
         });
 
@@ -157,11 +152,15 @@ export async function* streamMessages({
         channelInfoById.set(record.id, {
           channel: record,
           parsedChannel,
-          schemaName: schema.name,
+          schemaName: schema?.name,
         });
 
         const err = new Error(
-          `No pre-initialized reader for ${record.topic} (message encoding ${record.messageEncoding}, schema encoding ${schema.encoding}, schema name ${schema.name})`,
+          `No pre-initialized reader for ${record.topic} (message encoding ${
+            record.messageEncoding
+          }, schema encoding ${schema?.encoding ?? "(none)"}, schema name ${
+            schema?.name ?? "(none)"
+          })`,
         );
         captureException(err);
         return;
@@ -179,7 +178,7 @@ export async function* streamMessages({
           receiveTime,
           message: info.parsedChannel.deserializer(record.data),
           sizeInBytes: record.data.byteLength,
-          schemaName: info.schemaName,
+          schemaName: info.schemaName ?? "",
         });
         return;
       }

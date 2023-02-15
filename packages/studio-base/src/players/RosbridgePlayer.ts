@@ -11,7 +11,7 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { isEqual, sortBy, transform } from "lodash";
+import { isEqual, sortBy, transform, keyBy } from "lodash";
 import { v4 as uuidv4 } from "uuid";
 
 import { debouncePromise } from "@foxglove/den/async";
@@ -36,10 +36,10 @@ import {
   PlayerPresence,
   PlayerMetricsCollectorInterface,
   TopicStats,
+  TopicWithSchemaName,
 } from "@foxglove/studio-base/players/types";
 import { RosDatatypes } from "@foxglove/studio-base/types/RosDatatypes";
 import { bagConnectionsToDatatypes } from "@foxglove/studio-base/util/bagConnectionsHelper";
-import { getTopicsByTopicName } from "@foxglove/studio-base/util/selectors";
 
 const log = Log.getLogger(__dirname);
 
@@ -89,7 +89,7 @@ export default class RosbridgePlayer implements Player {
   private _isRefreshing = false; // True if currently refreshing the node graph.
   private _listener?: (arg0: PlayerState) => Promise<void>; // Listener for _emitState().
   private _closed: boolean = false; // Whether the player has been completely closed using close().
-  private _providerTopics?: Topic[]; // Topics as published by the WebSocket.
+  private _providerTopics?: TopicWithSchemaName[]; // Topics as published by the WebSocket.
   private _providerTopicsStats = new Map<string, TopicStats>(); // topic names to topic statistics.
   private _providerDatatypes?: RosDatatypes; // Datatypes as published by the WebSocket.
   private _publishedTopics = new Map<string, Set<string>>(); // A map of topic names to the set of publisher IDs publishing each topic.
@@ -244,7 +244,7 @@ export default class RosbridgePlayer implements Player {
       this._problems.removeProblem("topicsAndRawTypesTimeout");
 
       const topicsMissingDatatypes: string[] = [];
-      const topics: Topic[] = [];
+      const topics: TopicWithSchemaName[] = [];
       const datatypeDescriptions = [];
       const messageReaders: Record<string, LazyMessageReader | ROS2MessageReader> = {};
 
@@ -443,7 +443,7 @@ export default class RosbridgePlayer implements Player {
     this._parsedTopics = new Set(subscriptions.map(({ topic }) => topic));
 
     // See what topics we actually can subscribe to.
-    const availableTopicsByTopicName = getTopicsByTopicName(this._providerTopics ?? []);
+    const availableTopicsByTopicName = keyBy(this._providerTopics ?? [], ({ name }) => name);
     const topicNames = subscriptions
       .map(({ topic }) => topic)
       .filter((topicName) => availableTopicsByTopicName[topicName]);

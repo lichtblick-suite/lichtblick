@@ -29,7 +29,7 @@ import {
   getTopicsByTopicName,
 } from "@foxglove/studio-base/util/selectors";
 
-import { MessagePathStructureItem, RosPath } from "./constants";
+import { MessagePathStructureItem, MessagePathStructureItemMessage, RosPath } from "./constants";
 import { filterMatches } from "./filterMatches";
 import { TypicalFilterNames } from "./isTypicalFilterName";
 import { messagePathStructures } from "./messagePathsForDatatype";
@@ -115,7 +115,9 @@ export function useCachedGetMessagePathDataItems(
       }
     }
     for (const { schemaName } of relevantTopics.values()) {
-      addRelevantDatatype(schemaName, []);
+      if (schemaName != undefined) {
+        addRelevantDatatype(schemaName, []);
+      }
     }
     return relevantDatatypes;
   }, [datatypes, relevantTopics]);
@@ -353,7 +355,11 @@ export function getMessagePathDataItems(
       );
     }
   }
-  const structure = structures[topic.schemaName];
+  const structure: MessagePathStructureItemMessage | undefined =
+    // If the topic has no schema, we can at least allow accessing the root message
+    topic.schemaName == undefined
+      ? { structureType: "message", datatype: "", nextByName: {} }
+      : structures[topic.schemaName];
   if (structure) {
     traverse(message.message, 0, quoteTopicNameIfNeeded(filledInPath.topicName), structure);
   }

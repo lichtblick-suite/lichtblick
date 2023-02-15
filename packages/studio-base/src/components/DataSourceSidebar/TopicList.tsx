@@ -147,11 +147,15 @@ function TopicListItem({
         primary={<HighlightChars str={topic.name} indices={positions} />}
         primaryTypographyProps={{ noWrap: true, title: topic.name }}
         secondary={
-          <HighlightChars
-            str={topic.schemaName}
-            indices={positions}
-            offset={topic.name.length + 1}
-          />
+          topic.schemaName == undefined ? (
+            "—"
+          ) : (
+            <HighlightChars
+              str={topic.schemaName}
+              indices={positions}
+              offset={topic.name.length + 1}
+            />
+          )
         }
         secondaryTypographyProps={{
           variant: "caption",

@@ -78,6 +78,7 @@ export function getMarkerOptions(
     if (
       cameraNamespace &&
       name.startsWith(cameraNamespace + "/") &&
+      schemaName != undefined &&
       imageMarkerDatatypes.includes(schemaName)
     ) {
       results.push(name);

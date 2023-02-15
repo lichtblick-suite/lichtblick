@@ -31,6 +31,7 @@ import {
   messagePathStructures,
   messagePathsForDatatype,
   validTerminatingStructureItem,
+  StructureTraversalResult,
 } from "./messagePathsForDatatype";
 import parseRosPath, { quoteFieldNameIfNeeded, quoteTopicNameIfNeeded } from "./parseRosPath";
 
@@ -58,6 +59,9 @@ function getFieldPaths(
 ): Map<string, RosMsgField> {
   const output = new Map<string, RosMsgField>();
   for (const topic of topics) {
+    if (topic.schemaName == undefined) {
+      continue;
+    }
     addFieldPathsForType(
       quoteTopicNameIfNeeded(topic.name),
       topic.schemaName,
@@ -272,9 +276,20 @@ export default React.memo<MessagePathInputBaseProps>(function MessagePathInput(
     [datatypes],
   );
 
-  const structureTraversalResult = useMemo(() => {
+  const structureTraversalResult = useMemo((): StructureTraversalResult | undefined => {
     if (!topic || !rosPath?.messagePath) {
       return undefined;
+    }
+    if (topic.schemaName == undefined) {
+      return {
+        valid: true,
+        msgPathPart: undefined,
+        structureItem: {
+          structureType: "message",
+          nextByName: {},
+          datatype: "",
+        },
+      };
     }
 
     return traverseStructure(
@@ -374,14 +389,17 @@ export default React.memo<MessagePathInputBaseProps>(function MessagePathInput(
           rosPath.messagePath[0]?.type === "filter" ? rosPath.messagePath[0].repr.length + 2 : 0;
 
         return {
-          autocompleteItems: messagePathsForDatatype(topic.schemaName, datatypes, {
-            validTypes,
-            noMultiSlices,
-            messagePath: rosPath.messagePath,
-          }).filter(
-            // .header.seq is pretty useless but shows up everryyywhere.
-            (msgPath) => msgPath !== "" && !msgPath.endsWith(".header.seq"),
-          ),
+          autocompleteItems:
+            topic.schemaName == undefined
+              ? []
+              : messagePathsForDatatype(topic.schemaName, datatypes, {
+                  validTypes,
+                  noMultiSlices,
+                  messagePath: rosPath.messagePath,
+                }).filter(
+                  // .header.seq is pretty useless but shows up everryyywhere.
+                  (msgPath) => msgPath !== "" && !msgPath.endsWith(".header.seq"),
+                ),
 
           autocompleteRange: {
             start: rosPath.topicNameRepr.length + initialFilterLength,
