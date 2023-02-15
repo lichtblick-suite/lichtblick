@@ -1,0 +1,91 @@
+{
+  "configById": {
+    "RawMessages!41teyny": {
+      "diffEnabled": false,
+      "diffMethod": "custom",
+      "diffTopicPath": "",
+      "showFullMessageForDiff": false,
+      "topicPath": "pointcloud_0"
+    },
+    "3D!2cny167": {
+      "cameraState": {
+        "perspective": true,
+        "distance": 42.66000692073286,
+        "phi": 51.275522132169115,
+        "thetaOffset": 41.991115960099805,
+        "targetOffset": [0, 0, 0],
+        "target": [0, 0, 0],
+        "targetOrientation": [0, 0, 0, 1],
+        "fovy": 45,
+        "near": 0.01,
+        "far": 5000
+      },
+      "scene": { "transforms": { "enablePreloading": true } },
+      "transforms": {},
+      "topics": {},
+      "layers": {
+        "b5ad4864-09db-4cfa-9096-2a1078fb6bdd": {
+          "visible": true,
+          "frameLocked": true,
+          "label": "Grid",
+          "instanceId": "b5ad4864-09db-4cfa-9096-2a1078fb6bdd",
+          "layerId": "foxglove.Grid",
+          "frameId": "base_link",
+          "size": 10,
+          "divisions": 10,
+          "lineWidth": 1,
+          "color": "#248eff",
+          "position": [5, 5, 0],
+          "rotation": [0, 0, 0],
+          "order": 1
+        },
+        "cbb67be5-74e9-4282-8ce9-40ab51885ed4": {
+          "visible": true,
+          "frameLocked": true,
+          "label": "Grid",
+          "instanceId": "cbb67be5-74e9-4282-8ce9-40ab51885ed4",
+          "layerId": "foxglove.Grid",
+          "frameId": "100hz",
+          "size": 5,
+          "divisions": 10,
+          "lineWidth": 1,
+          "color": "#248eff",
+          "position": [0, 2.5, 2.5],
+          "rotation": [0, 90, 0],
+          "order": 2
+        },
+        "499e0cc0-9ead-4834-b538-7bcf80829e4a": {
+          "visible": true,
+          "frameLocked": true,
+          "label": "Grid",
+          "instanceId": "499e0cc0-9ead-4834-b538-7bcf80829e4a",
+          "layerId": "foxglove.Grid",
+          "frameId": "150hz",
+          "size": 5,
+          "divisions": 10,
+          "lineWidth": 1,
+          "color": "#248eff",
+          "position": [0, 0, 0],
+          "rotation": [0, 0, 0],
+          "order": 3
+        }
+      },
+      "publish": {
+        "type": "point",
+        "poseTopic": "/move_base_simple/goal",
+        "pointTopic": "/clicked_point",
+        "poseEstimateTopic": "/initialpose",
+        "poseEstimateXDeviation": 0.5,
+        "poseEstimateYDeviation": 0.5,
+        "poseEstimateThetaDeviation": 0.26179939
+      },
+      "followTf": "base_link"
+    }
+  },
+  "globalVariables": {},
+  "userNodes": {},
+  "playbackConfig": {
+    "speed": 5
+  },
+  "layout": "3D!2cny167"
+}

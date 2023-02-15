@@ -5,6 +5,7 @@
     "@foxglove/studio-base": "workspace:*"
   },
   "devDependencies": {
+    "@foxglove/den": "workspace:*",
     "@foxglove/log": "workspace:*",
     "@foxglove/rostime": "1.1.2",
     "@foxglove/schemas": "0.7.3",

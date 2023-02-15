@@ -9,6 +9,7 @@ import Empty from "./layouts/Empty.json";
 import PointcloudMultipleThreeDee from "./layouts/PointcloudMultipleThreeDee.json";
 import PointcloudRawMessageAnd3d from "./layouts/PointcloudRawMessageAnd3d.json";
 import SinewaveSinglePlot from "./layouts/SinewaveSinglePlot.json";
+import TransformPreloading from "./layouts/TransformPreloading.json";
 
 // Make a new Layout with the provided panel state
 // The panel state is the .json file from an "export" on a layout
@@ -44,6 +45,7 @@ const layouts = [
     "Pointcloud - Multiple 3D",
     PointcloudMultipleThreeDee,
   ),
+  panelStateJsonToLayout("TransformPreloading", "Transform Preloading", TransformPreloading),
 ];
 
 const LAYOUTS = new Map<string, Layout>();

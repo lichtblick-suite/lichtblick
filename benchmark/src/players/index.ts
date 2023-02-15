@@ -6,3 +6,4 @@ export * from "./BenchmarkPlayer";
 export * from "./PointcloudPlayer";
 export * from "./SinewavePlayer";
 export * from "./TransformPlayer";
+export * from "./TransformPreloadingPlayer";
