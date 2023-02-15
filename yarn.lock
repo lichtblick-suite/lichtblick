@@ -2331,7 +2331,7 @@ __metadata:
     "@types/protobufjs": "workspace:*"
     "@types/zstd-codec": "workspace:*"
     flatbuffers: 23.1.21
-    flatbuffers_reflection: 0.0.2
+    flatbuffers_reflection: 0.0.3
     protobufjs: 7.2.0
     typescript: 4.9.4
     zstd-codec: "patch:zstd-codec@0.1.4#../../patches/zstd-codec.patch"
@@ -13390,10 +13390,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"flatbuffers_reflection@npm:0.0.2":
-  version: 0.0.2
-  resolution: "flatbuffers_reflection@npm:0.0.2"
-  checksum: 18639d041451887f757d8969b806f12c72fe1f1af7e264bc239c87f395ae9f9a8173f084baafbe162dc94298008f28c448704afb4525e837aeee9fccc2da1bac
+"flatbuffers_reflection@npm:0.0.3":
+  version: 0.0.3
+  resolution: "flatbuffers_reflection@npm:0.0.3"
+  checksum: bcef0af4ec41d6a21c9f6ae1df5be2e329c286d2ae566e09190ff585252b7ec6fbf79035c6ea255bc7c821851516b8bdcb5bf2f6c505e63a242e74c3fcd38cfe
   languageName: node
   linkType: hard
 
