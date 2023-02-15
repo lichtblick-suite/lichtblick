@@ -2,24 +2,32 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { Container, Typography, styled as muiStyled } from "@mui/material";
+import { Container, Typography } from "@mui/material";
 import { PropsWithChildren } from "react";
+import { makeStyles } from "tss-react/mui";
 
-import Stack from "@foxglove/studio-base/components/Stack";
+const useStyles = makeStyles()((theme) => ({
+  root: {
+    backgroundColor: theme.palette.background.default,
+    display: "flex",
+    flexDirection: "column",
+    flex: "auto",
+    alignItems: "center",
+    justifyContent: "center",
 
-const StyledStack = muiStyled(Stack)(({ theme }) => ({
-  backgroundColor: theme.palette.background.default,
-
-  code: {
-    color: theme.palette.primary.main,
-    background: "transparent",
-    padding: 0,
+    code: {
+      color: theme.palette.primary.main,
+      background: "transparent",
+      padding: 0,
+    },
   },
 }));
 
 export default function EmptyState({ children }: PropsWithChildren<unknown>): JSX.Element {
+  const { classes } = useStyles();
+
   return (
-    <StyledStack flex="auto" alignItems="center" justifyContent="center" fullWidth>
+    <div className={classes.root}>
       <Container maxWidth={false}>
         <Typography
           component="div"
@@ -31,6 +39,6 @@ export default function EmptyState({ children }: PropsWithChildren<unknown>): JS
           {children}
         </Typography>
       </Container>
-    </StyledStack>
+    </div>
   );
 }
