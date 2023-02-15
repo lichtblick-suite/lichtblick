@@ -345,17 +345,11 @@ function updateTexture(
       } else if (value >= 0 && value <= 100) {
         // Valid [0-100]
         const t = value / 100;
-        if (t === 1) {
-          rgba[offset + 0] = 0;
-          rgba[offset + 1] = 0;
-          rgba[offset + 2] = 0;
-          rgba[offset + 3] = 0;
-        } else {
-          rgba[offset + 0] = tempMinColor.r + (tempMaxColor.r - tempMinColor.r) * t;
-          rgba[offset + 1] = tempMinColor.g + (tempMaxColor.g - tempMinColor.g) * t;
-          rgba[offset + 2] = tempMinColor.b + (tempMaxColor.b - tempMinColor.b) * t;
-          rgba[offset + 3] = tempMinColor.a + (tempMaxColor.a - tempMinColor.a) * t;
-        }
+
+        rgba[offset + 0] = tempMinColor.r + (tempMaxColor.r - tempMinColor.r) * t;
+        rgba[offset + 1] = tempMinColor.g + (tempMaxColor.g - tempMinColor.g) * t;
+        rgba[offset + 2] = tempMinColor.b + (tempMaxColor.b - tempMinColor.b) * t;
+        rgba[offset + 3] = tempMinColor.a + (tempMaxColor.a - tempMinColor.a) * t;
       } else {
         // Invalid (< -1 or > 100)
         rgba[offset + 0] = tempInvalidColor.r;
