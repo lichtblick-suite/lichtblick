@@ -104,6 +104,7 @@ function Root(): JSX.Element {
           ) : (
             <a
               href="#"
+              target="_self"
               onClick={(event) => {
                 event.preventDefault();
                 setShouldLoadMoreInfo(true);

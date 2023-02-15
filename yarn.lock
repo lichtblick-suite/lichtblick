@@ -2267,6 +2267,12 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@foxglove/eslint-plugin-studio@workspace:*, @foxglove/eslint-plugin-studio@workspace:packages/eslint-plugin-studio":
+  version: 0.0.0-use.local
+  resolution: "@foxglove/eslint-plugin-studio@workspace:packages/eslint-plugin-studio"
+  languageName: unknown
+  linkType: soft
+
 "@foxglove/eslint-plugin@npm:0.21.0":
   version: 0.21.0
   resolution: "@foxglove/eslint-plugin@npm:0.21.0"
@@ -13563,6 +13569,7 @@ __metadata:
     "@babel/preset-env": 7.20.2
     "@babel/preset-typescript": 7.18.6
     "@foxglove/eslint-plugin": 0.21.0
+    "@foxglove/eslint-plugin-studio": "workspace:*"
     "@foxglove/tsconfig": 1.1.0
     "@octokit/rest": 19.0.7
     "@storybook/addon-actions": 6.5.16

@@ -83,7 +83,12 @@ export function LaunchingInDesktopScreen(): ReactElement {
           </Typography>
           <Typography align="center">
             Don’t have the app installed?&nbsp;
-            <Link color="primary" underline="hover" href="https://foxglove.dev/download">
+            <Link
+              color="primary"
+              underline="hover"
+              href="https://foxglove.dev/download"
+              target="_blank"
+            >
               Download Foxglove Studio
             </Link>
           </Typography>

@@ -14,6 +14,7 @@ ignorePatterns:
 plugins:
   - file-progress
   - tss-unused-classes
+  - "@foxglove/eslint-plugin-studio"
 
 extends:
   - plugin:@foxglove/base
@@ -25,6 +26,7 @@ settings:
 
 rules:
   "@foxglove/license-header": error
+  "@foxglove/studio/link-target": error
 
   tss-unused-classes/unused-classes: error
 

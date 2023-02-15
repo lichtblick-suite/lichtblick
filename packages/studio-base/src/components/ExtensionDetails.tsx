@@ -117,7 +117,13 @@ export function ExtensionDetails({ extension, onClose, installed }: Props): Reac
       <Stack gap={1} alignItems="flex-start">
         <Stack gap={0.5} paddingBottom={1}>
           <Stack direction="row" gap={1} alignItems="baseline">
-            <Link variant="body2" color="primary" href={extension.homepage} underline="hover">
+            <Link
+              variant="body2"
+              color="primary"
+              href={extension.homepage}
+              target="_blank"
+              underline="hover"
+            >
               {extension.id}
             </Link>
             <Typography

@@ -119,10 +119,11 @@ type DataSourceOptionProps = {
   icon: JSX.Element;
   onClick: () => void;
   href?: string;
+  target: "_blank";
 };
 
 function DataSourceOption(props: DataSourceOptionProps): JSX.Element {
-  const { icon, onClick, text, secondaryText, href } = props;
+  const { icon, onClick, text, secondaryText, href, target } = props;
   const { classes } = useStyles();
   const button = (
     <Button
@@ -146,7 +147,7 @@ function DataSourceOption(props: DataSourceOptionProps): JSX.Element {
   );
 
   return href ? (
-    <Link href={href} target="_blank" style={{ textDecoration: "none" }}>
+    <Link href={href} target={target} style={{ textDecoration: "none" }}>
       {button}
     </Link>
   ) : (
@@ -266,6 +267,7 @@ function SidebarItems(props: { onSelectView: (newValue: OpenDialogViews) => void
               </Button>
               <Button
                 href="https://foxglove.dev/tutorials"
+                target="_blank"
                 className={classes.button}
                 onClick={() => {
                   void analytics.logEvent(AppEvent.DIALOG_CLICK_CTA, {
@@ -481,6 +483,7 @@ export default function Start(props: IStartProps): JSX.Element {
                 icon={item.icon}
                 onClick={item.onClick}
                 href={item.href}
+                target="_blank"
               />
             ))}
           </Stack>
