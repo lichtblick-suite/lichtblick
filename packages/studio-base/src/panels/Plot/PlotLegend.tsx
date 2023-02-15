@@ -183,6 +183,10 @@ export function PlotLegend(props: Props): JSX.Element {
         [classes.rootLeft]: legendDisplay === "left",
         [classes.rootTop]: legendDisplay === "top",
       })}
+      style={{
+        maxHeight: legendDisplay === "top" ? "80%" : "none",
+        maxWidth: legendDisplay === "left" ? "80%" : "none",
+      }}
     >
       {showLegend && (
         <Stack

@@ -125,3 +125,17 @@ Dark.play = async (ctx) => {
   await ctx.parameters.storyReady;
 };
 Dark.parameters = { useReadySignal: true, colorScheme: "dark" };
+
+export function LimitWidth(): JSX.Element {
+  return (
+    <div
+      style={{
+        height: "100%",
+        width: "100%",
+      }}
+    >
+      <Plot overrideConfig={{ ...exampleConfig, legendDisplay: "left", sidebarDimension: 4096 }} />
+    </div>
+  );
+}
+LimitWidth.parameters = { useReadySignal: true, colorScheme: "light" };
