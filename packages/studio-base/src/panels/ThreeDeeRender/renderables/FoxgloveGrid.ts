@@ -14,9 +14,10 @@ import {
   baseColorModeSettingsNode,
   ColorModeSettings,
   getColorConverter,
-  autoSelectColorField,
   NEEDS_MIN_MAX,
   FS_SRGB_TO_LINEAR,
+  RGBA_PACKED_FIELDS,
+  hasSeparateRgbaFields,
 } from "./pointClouds/colors";
 import { FieldReader, getReader } from "./pointClouds/fieldReaders";
 import { BaseUserData, Renderable } from "../Renderable";
@@ -478,7 +479,8 @@ export class FoxgloveGrid extends SceneExtension<FoxgloveGridRenderable> {
         | Partial<LayerSettingsFoxgloveGrid>
         | undefined;
       const settings = { ...DEFAULT_SETTINGS, ...userSettings };
-      if (settings.colorField == undefined) {
+      // only want to autoselect if it's in flatcolor mode (without colorfield) and previously didn't have fields
+      if (settings.colorField == undefined && this.fieldsByTopic.get(topic) == undefined) {
         autoSelectColorField(settings, foxgloveGrid.fields, { supportsPackedRgbModes: false });
         // Update user settings with the newly selected color field
         this.renderer.updateConfig((draft) => {
@@ -899,3 +901,43 @@ const NumericTypeMinMaxValueMap: Record<NumericType, [number, number]> = {
   [NumericType.FLOAT32]: [0, 1.0],
   [NumericType.FLOAT64]: [0, 1.0],
 };
+
+function autoSelectColorField<Settings extends ColorModeSettings>(
+  output: Settings,
+  fields: PackedElementField[],
+  { supportsPackedRgbModes }: { supportsPackedRgbModes: boolean },
+): void {
+  // Prefer color fields first
+  if (supportsPackedRgbModes) {
+    for (const field of fields) {
+      const fieldNameLower = field.name.toLowerCase();
+      if (RGBA_PACKED_FIELDS.has(fieldNameLower)) {
+        output.colorField = field.name;
+        switch (fieldNameLower) {
+          case "rgb":
+            output.colorMode = "rgb";
+            break;
+          default:
+          case "rgba":
+            output.colorMode = "rgba";
+            break;
+        }
+        return;
+      }
+    }
+  }
+
+  if (hasSeparateRgbaFields(fields.map((f) => f.name))) {
+    output.colorMode = "rgba-fields";
+    return;
+  }
+
+  // Fall back to using the first field
+  if (fields.length > 0) {
+    const firstField = fields[0]!;
+    output.colorField = firstField.name;
+    output.colorMode = "colormap";
+    output.colorMap = "turbo";
+    return;
+  }
+}

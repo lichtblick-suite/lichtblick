@@ -4,7 +4,6 @@
 
 import * as THREE from "three";
 
-import { PackedElementField } from "@foxglove/schemas";
 import { SettingsTreeFields, SettingsTreeNode, Topic } from "@foxglove/studio";
 import { BaseSettings } from "@foxglove/studio-base/panels/ThreeDeeRender/settings";
 
@@ -180,41 +179,6 @@ function turboLinearCached(output: ColorRGBA, pct: number): void {
 export const RGBA_PACKED_FIELDS = new Set<string>(["rgb", "rgba"]);
 export const INTENSITY_FIELDS = new Set<string>(["intensity", "i"]);
 
-export function autoSelectColorField<Settings extends ColorModeSettings>(
-  output: Settings,
-  fields: PackedElementField[],
-  { supportsPackedRgbModes }: { supportsPackedRgbModes: boolean },
-): void {
-  // Prefer color fields first
-  if (supportsPackedRgbModes) {
-    for (const field of fields) {
-      const fieldNameLower = field.name.toLowerCase();
-      if (RGBA_PACKED_FIELDS.has(fieldNameLower)) {
-        output.colorField = field.name;
-        switch (fieldNameLower) {
-          case "rgb":
-            output.colorMode = "rgb";
-            break;
-          default:
-          case "rgba":
-            output.colorMode = "rgba";
-            break;
-        }
-        return;
-      }
-    }
-  }
-
-  // Fall back to using the first field
-  if (fields.length > 0) {
-    const firstField = fields[0]!;
-    output.colorField = firstField.name;
-    output.colorMode = "colormap";
-    output.colorMap = "turbo";
-    return;
-  }
-}
-
 function bestColorByField(
   fields: string[],
   { supportsPackedRgbModes }: { supportsPackedRgbModes: boolean },
@@ -234,7 +198,7 @@ function bestColorByField(
   return fields.find((field) => field === "x") || fields[0] ? fields[0]! : "";
 }
 
-function hasSeparateRgbaFields(fields: string[]) {
+export function hasSeparateRgbaFields(fields: string[]): boolean {
   let r = false;
   let g = false;
   let b = false;
