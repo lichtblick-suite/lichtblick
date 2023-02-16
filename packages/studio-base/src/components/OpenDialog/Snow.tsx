@@ -21,6 +21,7 @@ export default function Snow({ effect }: { effect: "snow" | "confetti" }): JSX.E
   const containerRef = useRef<HTMLDivElement>(ReactNull);
 
   useLayoutEffect(() => {
+    let requestID: ReturnType<typeof requestAnimationFrame>;
     const container = containerRef.current;
     if (!container) {
       return;
@@ -121,7 +122,7 @@ export default function Snow({ effect }: { effect: "snow" | "confetti" }): JSX.E
         return;
       }
 
-      requestAnimationFrame(animate);
+      requestID = requestAnimationFrame(animate);
       render();
     }
 
@@ -133,6 +134,7 @@ export default function Snow({ effect }: { effect: "snow" | "confetti" }): JSX.E
       material.dispose();
       renderer.dispose();
       container.removeChild(renderer.domElement);
+      cancelAnimationFrame(requestID);
     };
   }, [effect]);
 
