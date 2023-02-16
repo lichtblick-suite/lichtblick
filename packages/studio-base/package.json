@@ -183,7 +183,7 @@
     "style-loader": "3.3.1",
     "text-metrics": "3.0.0",
     "three": "patch:three@0.148.0#../../patches/three.patch",
-    "tinycolor2": "1.5.2",
+    "tinycolor2": "1.6.0",
     "ts-essentials": "9.3.0",
     "ts-key-enum": "2.0.12",
     "ts-loader": "9.4.2",

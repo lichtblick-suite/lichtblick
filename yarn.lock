@@ -2667,7 +2667,7 @@ __metadata:
     style-loader: 3.3.1
     text-metrics: 3.0.0
     three: "patch:three@0.148.0#../../patches/three.patch"
-    tinycolor2: 1.5.2
+    tinycolor2: 1.6.0
     ts-essentials: 9.3.0
     ts-key-enum: 2.0.12
     ts-loader: 9.4.2
@@ -11316,7 +11316,7 @@ __metadata:
     react-dom: 17.0.2
     react-refresh-typescript: 2.0.7
     react-use: 17.4.0
-    tinycolor2: 1.5.2
+    tinycolor2: 1.6.0
     tss-react: 4.5.2
     utif: 3.1.0
     webpack: 5.75.0
@@ -23766,10 +23766,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"tinycolor2@npm:1.5.2":
-  version: 1.5.2
-  resolution: "tinycolor2@npm:1.5.2"
-  checksum: 9df1ea9a986b03f1aebb1c1ac17fc561e358493f61b56d73ef2d7207fe7bd74eb71cf745b70487b2b5bb1ce33c9e8af7101088bb0b5fc532eaa1f9d1eda4ef31
+"tinycolor2@npm:1.6.0":
+  version: 1.6.0
+  resolution: "tinycolor2@npm:1.6.0"
+  checksum: 6df4d07fceeedc0a878d7bac47e2cd47c1ceeb1078340a9eb8a295bc0651e17c750f73d47b3028d829f30b85c15e0572c0fd4142083e4c21a30a597e47f47230
   languageName: node
   linkType: hard
 
