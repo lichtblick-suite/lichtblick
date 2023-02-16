@@ -11,8 +11,7 @@
   "transformIgnorePatterns": [],
   "globals": {
     "ReactNull": null,
-    "FOXGLOVE_STUDIO_VERSION": "TEST",
-    "FOXGLOVE_USER_AGENT": "TEST"
+    "FOXGLOVE_STUDIO_VERSION": "TEST"
   },
   "setupFiles": ["<rootDir>/src/test/setup.ts", "jest-canvas-mock", "fake-indexeddb/auto"],
   "setupFilesAfterEnv": ["<rootDir>/src/test/setupTestFramework.ts"],
