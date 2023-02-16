@@ -133,7 +133,6 @@ export type CustomWindowControlsProps = {
 
 type AppBarProps = CustomWindowControlsProps & {
   currentUser?: User;
-  disableSignin?: boolean;
   signIn?: CurrentUser["signIn"];
   leftInset?: number;
   onDoubleClick?: () => void;
@@ -143,7 +142,6 @@ type AppBarProps = CustomWindowControlsProps & {
 export function AppBar(props: AppBarProps): JSX.Element {
   const {
     currentUser,
-    disableSignin,
     signIn,
     leftInset,
     showCustomWindowControls = false,
@@ -160,7 +158,7 @@ export function AppBar(props: AppBarProps): JSX.Element {
   const currentUserType = useCurrentUserType();
   const analytics = useAnalytics();
 
-  const supportsAccountSettings = signIn != undefined && disableSignin !== true;
+  const supportsAccountSettings = signIn != undefined;
 
   const [helpAnchorEl, setHelpAnchorEl] = useState<undefined | HTMLElement>(undefined);
   const [userAnchorEl, setUserAnchorEl] = useState<undefined | HTMLElement>(undefined);

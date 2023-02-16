@@ -4,13 +4,7 @@
 
 import { useMemo, useState } from "react";
 
-import {
-  App,
-  IDataSourceFactory,
-  ConsoleApi,
-  AppSetting,
-  LaunchPreferenceValue,
-} from "@foxglove/studio-base";
+import { App, IDataSourceFactory, AppSetting, LaunchPreferenceValue } from "@foxglove/studio-base";
 
 import { McapLocalBenchmarkDataSourceFactory, SyntheticDataSourceFactory } from "./dataSources";
 import { LAYOUTS } from "./layouts";
@@ -47,19 +41,16 @@ export function Root(): JSX.Element {
 
   const layoutStorage = useMemo(() => new PredefinedLayoutStorage(LAYOUTS), []);
   const [extensionLoaders] = useState(() => []);
-  const consoleApi = useMemo(() => new ConsoleApi(process.env.FOXGLOVE_API_URL ?? ""), []);
 
   const url = new URL(window.location.href);
 
   return (
     <App
-      enableDialogAuth={true}
       enableLaunchPreferenceScreen={false}
       deepLinks={[url.href]}
       dataSources={dataSources}
       appConfiguration={appConfiguration}
       layoutStorage={layoutStorage}
-      consoleApi={consoleApi}
       extensionLoaders={extensionLoaders}
     />
   );

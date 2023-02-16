@@ -23,14 +23,12 @@ export type User = {
 
 export interface CurrentUser {
   currentUser: User | undefined;
-  signIn: () => void;
-  signOut: () => Promise<void>;
+  signIn?: () => void;
+  signOut?: () => Promise<void>;
 }
 
 const CurrentUserContext = createContext<CurrentUser>({
   currentUser: undefined,
-  signIn: () => {},
-  signOut: async () => {},
 });
 CurrentUserContext.displayName = "CurrentUserContext";
 
@@ -61,4 +59,5 @@ export function useCurrentUserType(): UserType {
   return "authenticated-free";
 }
 
+// ts-prune-ignore-next
 export default CurrentUserContext;

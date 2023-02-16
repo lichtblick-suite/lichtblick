@@ -7,8 +7,6 @@ import { useMemo, useEffect, useState, useCallback } from "react";
 import {
   App,
   AppSetting,
-  ConsoleApi,
-  FoxgloveDataPlatformDataSourceFactory,
   FoxgloveWebSocketDataSourceFactory,
   IAppConfiguration,
   IDataSourceFactory,
@@ -62,7 +60,6 @@ export default function Root({
     new IdbExtensionLoader("org"),
     new DesktopExtensionLoader(desktopBridge),
   ]);
-  const consoleApi = useMemo(() => new ConsoleApi(process.env.FOXGLOVE_API_URL ?? ""), []);
   const nativeAppMenu = useMemo(() => new NativeAppMenu(menuBridge), []);
   const nativeWindow = useMemo(() => new NativeWindow(desktopBridge), []);
 
@@ -76,14 +73,13 @@ export default function Root({
       new Ros2LocalBagDataSourceFactory(),
       new UlogLocalDataSourceFactory(),
       new VelodyneDataSourceFactory(),
-      new FoxgloveDataPlatformDataSourceFactory(consoleApi),
       new SampleNuscenesDataSourceFactory(),
       new McapLocalDataSourceFactory(),
       new RemoteDataSourceFactory(),
     ];
 
     return sources;
-  }, [consoleApi]);
+  }, []);
 
   // App url state in window.location will represent the user's current session state
   // better than the initial deep link so we prioritize the current window.location
@@ -124,11 +120,9 @@ export default function Root({
   return (
     <>
       <App
-        enableDialogAuth
         deepLinks={deepLinks}
         dataSources={dataSources}
         appConfiguration={appConfiguration}
-        consoleApi={consoleApi}
         layoutStorage={layoutStorage}
         extensionLoaders={extensionLoaders}
         nativeAppMenu={nativeAppMenu}

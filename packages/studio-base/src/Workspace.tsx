@@ -13,15 +13,7 @@
 import { Link, Typography } from "@mui/material";
 import { useSnackbar } from "notistack";
 import { extname } from "path";
-import {
-  useState,
-  useEffect,
-  useRef,
-  useCallback,
-  useMemo,
-  useLayoutEffect,
-  useContext,
-} from "react";
+import { useState, useEffect, useRef, useCallback, useMemo, useLayoutEffect } from "react";
 import { makeStyles } from "tss-react/mui";
 
 import Logger from "@foxglove/log";
@@ -55,7 +47,6 @@ import { SyncAdapters } from "@foxglove/studio-base/components/SyncAdapters";
 import VariablesSidebar from "@foxglove/studio-base/components/VariablesSidebar";
 import { useAnalytics } from "@foxglove/studio-base/context/AnalyticsContext";
 import { useAssets } from "@foxglove/studio-base/context/AssetsContext";
-import ConsoleApiContext from "@foxglove/studio-base/context/ConsoleApiContext";
 import {
   LayoutState,
   useCurrentLayoutSelector,
@@ -151,7 +142,6 @@ function ExtensionsSidebar() {
 
 type WorkspaceProps = CustomWindowControlsProps & {
   deepLinks?: string[];
-  disableSignin?: boolean;
   appBarLeftInset?: number;
   onAppBarDoubleClick?: () => void;
 };
@@ -186,9 +176,6 @@ export default function Workspace(props: WorkspaceProps): JSX.Element {
     return extensions;
   }, [availableSources]);
 
-  const supportsAccountSettings =
-    useContext(ConsoleApiContext) != undefined && props.disableSignin !== true;
-
   // We use playerId to detect when a player changes for RemountOnValueChange below
   // see comment below above the RemountOnValueChange component
   const playerId = useMessagePipeline(selectPlayerId);
@@ -196,6 +183,7 @@ export default function Workspace(props: WorkspaceProps): JSX.Element {
   const isPlayerPresent = playerPresence !== PlayerPresence.NOT_PRESENT;
 
   const { currentUser, signIn } = useCurrentUser();
+  const supportsAccountSettings = signIn != undefined;
 
   const { currentUserRequired } = useInitialDeepLinkState(props.deepLinks ?? DEFAULT_DEEPLINKS);
 
@@ -628,7 +616,6 @@ export default function Workspace(props: WorkspaceProps): JSX.Element {
         {enableNewTopNav && (
           <AppBar
             currentUser={currentUser}
-            disableSignin={props.disableSignin}
             signIn={signIn}
             leftInset={props.appBarLeftInset}
             onDoubleClick={props.onAppBarDoubleClick}

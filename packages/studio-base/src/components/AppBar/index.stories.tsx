@@ -6,8 +6,7 @@ import { Story } from "@storybook/react";
 
 import { AppBar } from "@foxglove/studio-base/components/AppBar";
 import MockMessagePipelineProvider from "@foxglove/studio-base/components/MessagePipeline/MockMessagePipelineProvider";
-import ConsoleApiContext from "@foxglove/studio-base/context/ConsoleApiContext";
-import ConsoleApi, { User } from "@foxglove/studio-base/services/ConsoleApi";
+import { User } from "@foxglove/studio-base/context/CurrentUserContext";
 
 export default {
   title: "components/AppBar",
@@ -18,20 +17,10 @@ export default {
   },
 };
 
-class FakeConsoleApi extends ConsoleApi {
-  public constructor() {
-    super("");
-  }
-}
-
-const fakeConsoleApi = new FakeConsoleApi();
-
 function Wrapper(StoryFn: Story): JSX.Element {
   return (
     <MockMessagePipelineProvider>
-      <ConsoleApiContext.Provider value={fakeConsoleApi}>
-        <StoryFn />
-      </ConsoleApiContext.Provider>
+      <StoryFn />
     </MockMessagePipelineProvider>
   );
 }
@@ -49,7 +38,7 @@ export function CustomWindowControlsDragRegion(): JSX.Element {
 }
 
 export function SignInDisabled(): JSX.Element {
-  return <AppBar disableSignin />;
+  return <AppBar />;
 }
 
 export function UserPresent(): JSX.Element {

@@ -8,7 +8,6 @@ import { fireEvent, screen } from "@testing-library/dom";
 import MultiProvider from "@foxglove/studio-base/components/MultiProvider";
 import Panel from "@foxglove/studio-base/components/Panel";
 import PanelToolbar from "@foxglove/studio-base/components/PanelToolbar";
-import ConsoleApiContext from "@foxglove/studio-base/context/ConsoleApiContext";
 import LayoutStorageContext from "@foxglove/studio-base/context/LayoutStorageContext";
 import PanelCatalogContext, {
   PanelCatalog,
@@ -76,7 +75,6 @@ export function Basic(): JSX.Element {
   const providers = [
     /* eslint-disable react/jsx-key */
     <PanelSetup>{undefined}</PanelSetup>,
-    <ConsoleApiContext.Provider value={{} as any} />,
     <EventsProvider />,
     <PanelCatalogContext.Provider value={new MockPanelCatalog()} />,
     <MockCurrentLayoutProvider initialState={{ layout: "Fake" }} />,

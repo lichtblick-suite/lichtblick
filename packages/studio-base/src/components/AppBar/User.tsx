@@ -62,7 +62,7 @@ export function UserMenu({
 
   const beginSignOut = useCallback(async () => {
     try {
-      await signOut();
+      await signOut?.();
     } catch (error) {
       log.error(error);
       enqueueSnackbar((error as Error).toString(), { variant: "error" });

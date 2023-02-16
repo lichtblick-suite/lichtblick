@@ -33,7 +33,7 @@ export default function AccountInfo(props: { currentUser?: User }): JSX.Element 
 
   const [{ loading }, beginSignOut] = useAsyncFn(async () => {
     try {
-      await signOut();
+      await signOut?.();
     } catch (error) {
       log.error(error);
       enqueueSnackbar((error as Error).toString(), { variant: "error" });

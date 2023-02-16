@@ -33,7 +33,7 @@ import {
   useMessagePipeline,
 } from "@foxglove/studio-base/components/MessagePipeline";
 import Stack from "@foxglove/studio-base/components/Stack";
-import { useConsoleApi } from "@foxglove/studio-base/context/ConsoleApiContext";
+import { useAppContext } from "@foxglove/studio-base/context/AppContext";
 import { EventsStore, useEvents } from "@foxglove/studio-base/context/EventsContext";
 import { useAppTimeFormat } from "@foxglove/studio-base/hooks";
 
@@ -86,7 +86,6 @@ export function CreateEventDialog(props: { deviceId: string; onClose: () => void
   const { deviceId, onClose } = props;
 
   const { classes } = useStyles();
-  const consoleApi = useConsoleApi();
 
   const refreshEvents = useEvents(selectRefreshEvents);
   const currentTime = useMessagePipeline(selectCurrentTime);
@@ -124,6 +123,7 @@ export function CreateEventDialog(props: { deviceId: string; onClose: () => void
   );
 
   const { formatTime } = useAppTimeFormat();
+  const { createEvent: appModuleCreateEvent } = useAppContext();
 
   const countedMetadata = countBy(event.metadataEntries, (kv) => kv.key);
   const duplicateKey = Object.entries(countedMetadata).find(
@@ -142,7 +142,8 @@ export function CreateEventDialog(props: { deviceId: string; onClose: () => void
     const keyedMetadata = Object.fromEntries(
       filteredMeta.map((entry) => [entry.key.trim(), entry.value.trim()]),
     );
-    await consoleApi.createEvent({
+
+    await appModuleCreateEvent?.({
       deviceId,
       timestamp: event.startTime.toISOString(),
       durationNanos: toNanoSec(
@@ -152,9 +153,10 @@ export function CreateEventDialog(props: { deviceId: string; onClose: () => void
       ).toString(),
       metadata: keyedMetadata,
     });
+
     onClose();
     refreshEvents();
-  }, [consoleApi, deviceId, event, onClose, refreshEvents]);
+  }, [appModuleCreateEvent, deviceId, event, onClose, refreshEvents]);
 
   const onMetaDataKeyDown = useCallback(
     (keyboardEvent: KeyboardEvent) => {
