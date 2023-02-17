@@ -108,6 +108,30 @@ describe("MessagePipelineProvider/useMessagePipeline", () => {
         setParameter: expect.any(Function),
         pauseFrame: expect.any(Function),
       },
+      {
+        playerState: {
+          activeData: undefined,
+          capabilities: [],
+          presence: PlayerPresence.NOT_PRESENT,
+          playerId: "",
+          progress: {},
+        },
+        subscriptions: [],
+        publishers: [],
+        messageEventsBySubscriberId: new Map(),
+        sortedTopics: [],
+        datatypes: new Map(),
+        setSubscriptions: expect.any(Function),
+        setPublishers: expect.any(Function),
+        publish: expect.any(Function),
+        callService: expect.any(Function),
+        startPlayback: undefined,
+        pausePlayback: undefined,
+        setPlaybackSpeed: undefined,
+        seekPlayback: undefined,
+        setParameter: expect.any(Function),
+        pauseFrame: expect.any(Function),
+      },
     ]);
   });
 

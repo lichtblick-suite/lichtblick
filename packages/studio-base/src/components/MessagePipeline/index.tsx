@@ -132,6 +132,13 @@ export function MessagePipelineProvider({
   const dispatch = store.getState().dispatch;
   useEffect(() => {
     if (!player) {
+      // When there is no player, set the player state to the default to go back to a state where we
+      // indicate the player is not present.
+      dispatch({
+        type: "update-player-state",
+        playerState: defaultPlayerState(),
+        renderDone: undefined,
+      });
       return;
     }
 

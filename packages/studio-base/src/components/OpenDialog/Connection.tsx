@@ -149,7 +149,8 @@ export default function Connection(props: ConnectionProps): JSX.Element {
       return;
     }
     selectSource(selectedSource.id, { type: "connection", params: fieldValues });
-  }, [selectedSource, fieldValues, selectSource]);
+    onCancel?.();
+  }, [onCancel, selectedSource, fieldValues, selectSource]);
 
   const disableOpen = selectedSource?.disabledReason != undefined || fieldErrors.size > 0;
 
