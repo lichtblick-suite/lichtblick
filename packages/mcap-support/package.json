@@ -21,22 +21,21 @@
     "prepack": "tsc -b"
   },
   "devDependencies": {
-    "@foxglove/schemas": "0.7.3",
-    "@mcap/core": "0.3.0",
     "@types/protobufjs": "workspace:*",
-    "@types/zstd-codec": "workspace:*",
     "typescript": "4.9.5"
   },
   "dependencies": {
     "@foxglove/rosmsg": "3.1.0",
     "@foxglove/rosmsg-serialization": "1.5.3",
     "@foxglove/rosmsg2-serialization": "1.1.1",
+    "@foxglove/schemas": "1.0.0",
     "@foxglove/wasm-bz2": "0.1.1",
     "@foxglove/wasm-lz4": "1.0.2",
+    "@foxglove/wasm-zstd": "1.0.1",
+    "@mcap/core": "1.1.0",
     "@protobufjs/base64": "1.1.2",
     "flatbuffers": "23.1.21",
     "flatbuffers_reflection": "0.0.3",
-    "protobufjs": "7.2.0",
-    "zstd-codec": "patch:zstd-codec@0.1.4#../../patches/zstd-codec.patch"
+    "protobufjs": "7.2.0"
   }
 }
