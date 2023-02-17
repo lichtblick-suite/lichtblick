@@ -270,16 +270,17 @@ function PanelExtensionAdapter(props: PanelExtensionAdapterProps): JSX.Element {
         if (!isMounted()) {
           return;
         }
-        // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-        if (position === "sibling") {
-          openSiblingPanel({
-            panelType: type,
-            updateIfExists,
-            siblingConfigCreator: (existingConfig) => getState(existingConfig) as PanelConfig,
-          });
-          return;
+        switch (position) {
+          case "sibling":
+            openSiblingPanel({
+              panelType: type,
+              updateIfExists,
+              siblingConfigCreator: (existingConfig) => getState(existingConfig) as PanelConfig,
+            });
+            return;
+          default:
+            assertNever(position, `Unsupported position for addPanel: ${position}`);
         }
-        assertNever(position, `Unsupported position for addPanel: ${position}`);
       },
     };
 

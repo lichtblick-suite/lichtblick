@@ -20,7 +20,18 @@ async function main(): Promise<void> {
       "packages/studio-base/tsconfig.json",
       "--error",
       "--ignore",
-      String.raw`used in module|^packages/(hooks|den|mcap|mcap-support)/|/studio-base/src/index\.ts|/studio-base/src/stories/|/studio-base/src/test/|/ThreeDeeRender/transforms/index\.ts|/nodeTransformerWorker/typescript/userUtils|\.stories\.ts|/\.storybook/|/storySupport/`,
+      [
+        String.raw`used in module`,
+        String.raw`^packages/(hooks|den|mcap|mcap-support)/`,
+        String.raw`/studio/src/index\.ts`,
+        String.raw`/studio-base/src/index\.ts`,
+        String.raw`/studio-base/src/stories/`,
+        String.raw`/studio-base/src/test/`,
+        String.raw`/ThreeDeeRender/transforms/index\.ts`,
+        String.raw`/nodeTransformerWorker/typescript/userUtils`,
+        String.raw`\.stories\.ts`,
+        String.raw`/\.storybook/|/storySupport/`,
+      ].join("|"),
 
       // --skip means don't consider exports used if they are only used in these files
       "--skip",

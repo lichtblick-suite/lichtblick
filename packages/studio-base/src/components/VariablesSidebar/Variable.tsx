@@ -22,6 +22,7 @@ import { pick } from "lodash";
 import { useMemo, useCallback, useState, useRef } from "react";
 import { makeStyles } from "tss-react/mui";
 
+import { VariableValue } from "@foxglove/studio";
 import CopyButton from "@foxglove/studio-base/components/CopyButton";
 import JsonInput from "@foxglove/studio-base/components/JsonInput";
 import Stack from "@foxglove/studio-base/components/Stack";
@@ -137,7 +138,7 @@ export default function Variable(props: {
 
   const onChangeValue = useCallback(
     (newVal: unknown) => {
-      setGlobalVariables({ [name]: newVal });
+      setGlobalVariables({ [name]: newVal as VariableValue });
       setCopied(false);
     },
     [name, setGlobalVariables],

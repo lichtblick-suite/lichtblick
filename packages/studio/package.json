@@ -6,6 +6,19 @@
     "type": "git",
     "url": "https://github.com/foxglove/studio/tree/main/packages/studio"
   },
-  "main": "",
-  "types": "index.d.ts"
+  "author": {
+    "name": "Foxglove Technologies",
+    "email": "support@foxglove.dev"
+  },
+  "homepage": "https://foxglove.dev/",
+  "main": "./src/index.ts",
+  "files": [
+    "src"
+  ],
+  "scripts": {
+    "prepack": "tsc -b tsconfig.json"
+  },
+  "devDependencies": {
+    "typescript": "4.9.5"
+  }
 }

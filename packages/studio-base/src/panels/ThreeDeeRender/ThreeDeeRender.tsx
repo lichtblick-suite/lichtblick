@@ -506,9 +506,9 @@ export function ThreeDeeRender({ context }: { context: PanelExtensionContext }):
       const id = selection?.renderable.idFromMessage();
       const customVariable = selection?.renderable.selectedIdVariable();
       if (customVariable) {
-        context.setVariable(customVariable, id ?? ReactNull);
+        context.setVariable(customVariable, id);
       }
-      context.setVariable(SELECTED_ID_VARIABLE, id ?? ReactNull);
+      context.setVariable(SELECTED_ID_VARIABLE, id);
     },
     [context],
   );

@@ -2585,6 +2585,8 @@ __metadata:
 "@foxglove/studio@workspace:*, @foxglove/studio@workspace:packages/studio":
   version: 0.0.0-use.local
   resolution: "@foxglove/studio@workspace:packages/studio"
+  dependencies:
+    typescript: 4.9.5
   languageName: unknown
   linkType: soft
 
