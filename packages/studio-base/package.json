@@ -132,7 +132,7 @@
     "hammerjs": "2.0.8",
     "idb": "7.1.1",
     "idb-keyval": "6.2.0",
-    "immer": "9.0.18",
+    "immer": "9.0.19",
     "intervals-fn": "3.0.3",
     "jest-diff": "29.4.2",
     "jszip": "3.10.1",
