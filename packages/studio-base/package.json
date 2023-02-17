@@ -108,7 +108,7 @@
     "amplitude-js": "8.21.4",
     "babel-jest": "29.4.2",
     "browserify-zlib": "0.2.0",
-    "chart.js": "4.2.0",
+    "chart.js": "4.2.1",
     "chartjs-plugin-annotation": "2.1.2",
     "chartjs-plugin-datalabels": "2.2.0",
     "chromatic": "6.15.0",
