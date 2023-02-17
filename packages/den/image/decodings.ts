@@ -11,6 +11,27 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
+function yuvToRGBA8(
+  y1: number,
+  u: number,
+  y2: number,
+  v: number,
+  c: number,
+  output: Uint8ClampedArray,
+): void {
+  // rgba
+  output[c] = y1 + 1.402 * v;
+  output[c + 1] = y1 - 0.34414 * u - 0.71414 * v;
+  output[c + 2] = y1 + 1.772 * u;
+  output[c + 3] = 255;
+
+  // rgba
+  output[c + 4] = y2 + 1.402 * v;
+  output[c + 5] = y2 - 0.34414 * u - 0.71414 * v;
+  output[c + 6] = y2 + 1.772 * u;
+  output[c + 7] = 255;
+}
+
 export function decodeYUV(
   yuv: Int8Array,
   width: number,
@@ -26,20 +47,31 @@ export function decodeYUV(
     const u = yuv[off]! - 128;
     const y1 = yuv[off + 1]!;
     const v = yuv[off + 2]! - 128;
-    const y2 = yuv[off + 3];
+    const y2 = yuv[off + 3]!;
+    yuvToRGBA8(y1, u, y2, v, c, output);
+    c += 8;
+    off += 4;
+  }
+}
 
-    // rgba
-    output[c] = y1 + 1.402 * v;
-    output[c + 1] = y1 - 0.34414 * u - 0.71414 * v;
-    output[c + 2] = y1 + 1.772 * u;
-    output[c + 3] = 255;
+// change name in the future do something more distinct
+export function decodeYUYV(
+  yuyv: Int8Array,
+  width: number,
+  height: number,
+  output: Uint8ClampedArray,
+): void {
+  let c = 0;
+  let off = 0;
 
-    // rgba
-    output[c + 4] = y2! + 1.402 * v;
-    output[c + 5] = y2! - 0.34414 * u - 0.71414 * v;
-    output[c + 6] = y2! + 1.772 * u;
-    output[c + 7] = 255;
-
+  // populate 2 pixels at a time
+  const max = height * width;
+  for (let r = 0; r <= max; r += 2) {
+    const y1 = yuyv[off]!;
+    const u = yuyv[off + 1]! - 128;
+    const y2 = yuyv[off + 2]!;
+    const v = yuyv[off + 3]! - 128;
+    yuvToRGBA8(y1, u, y2, v, c, output);
     c += 8;
     off += 4;
   }
