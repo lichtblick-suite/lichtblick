@@ -452,17 +452,17 @@ export class Renderer extends EventEmitter<RendererEvents> {
     this.addSchemaSubscriptions(FRAME_TRANSFORM_DATATYPES, {
       handler: this.handleFrameTransform,
       shouldSubscribe: () => true,
-      preload: config.scene.transforms?.enablePreloading ?? false,
+      preload: config.scene.transforms?.enablePreloading ?? true,
     });
     this.addSchemaSubscriptions(TF_DATATYPES, {
       handler: this.handleTFMessage,
       shouldSubscribe: () => true,
-      preload: config.scene.transforms?.enablePreloading ?? false,
+      preload: config.scene.transforms?.enablePreloading ?? true,
     });
     this.addSchemaSubscriptions(TRANSFORM_STAMPED_DATATYPES, {
       handler: this.handleTransformStamped,
       shouldSubscribe: () => true,
-      preload: config.scene.transforms?.enablePreloading ?? false,
+      preload: config.scene.transforms?.enablePreloading ?? true,
     });
 
     this.addSceneExtension(this.coreSettings);

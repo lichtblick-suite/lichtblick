@@ -176,7 +176,7 @@ export class FrameAxes extends SceneExtension<FrameAxisRenderable> {
           enablePreloading: {
             label: "Enable preloading",
             input: "boolean",
-            value: config.scene.transforms?.enablePreloading ?? false,
+            value: config.scene.transforms?.enablePreloading ?? true,
           },
         },
       },
