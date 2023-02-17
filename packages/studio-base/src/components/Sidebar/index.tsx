@@ -247,19 +247,21 @@ export default function Sidebar<K extends string>(props: SidebarProps<K>): JSX.E
           {bottomTabs}
           {enableMemoryUseIndicator && <MemoryUseIndicator />}
         </Tabs>
-        <HelpMenu
-          anchorEl={helpAnchorEl}
-          open={helpMenuOpen}
-          handleClose={handleHelpClose}
-          anchorOrigin={{
-            horizontal: "right",
-            vertical: "bottom",
-          }}
-          transformOrigin={{
-            vertical: "bottom",
-            horizontal: "left",
-          }}
-        />
+        {!enableNewTopNav && (
+          <HelpMenu
+            anchorEl={helpAnchorEl}
+            open={helpMenuOpen}
+            handleClose={handleHelpClose}
+            anchorOrigin={{
+              horizontal: "right",
+              vertical: "bottom",
+            }}
+            transformOrigin={{
+              vertical: "bottom",
+              horizontal: "left",
+            }}
+          />
+        )}
       </Stack>
       {
         // By always rendering the mosaic, even if we are only showing children, we can prevent the

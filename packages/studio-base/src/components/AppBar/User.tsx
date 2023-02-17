@@ -17,6 +17,7 @@ import { forwardRef, useCallback } from "react";
 import { makeStyles } from "tss-react/mui";
 
 import Logger from "@foxglove/log";
+import { APP_BAR_PRIMARY_COLOR } from "@foxglove/studio-base/components/AppBar/constants";
 import { useCurrentUser } from "@foxglove/studio-base/context/CurrentUserContext";
 import { useConfirm } from "@foxglove/studio-base/hooks/useConfirm";
 
@@ -25,9 +26,10 @@ const log = Logger.getLogger(__filename);
 const useStyles = makeStyles()((theme) => ({
   avatar: {
     color: theme.palette.common.white,
-    backgroundColor: "#9480ed",
-    height: theme.spacing(4),
-    width: theme.spacing(4),
+    backgroundColor: APP_BAR_PRIMARY_COLOR,
+    height: theme.spacing(3.25),
+    width: theme.spacing(3.25),
+    marginLeft: theme.spacing(0.5),
   },
   avatarButton: {
     padding: 0,

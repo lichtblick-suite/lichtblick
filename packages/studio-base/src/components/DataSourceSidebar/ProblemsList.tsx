@@ -2,8 +2,8 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import ErrorIcon from "@mui/icons-material/ErrorOutline";
-import InfoIcon from "@mui/icons-material/InfoOutlined";
+import ErrorOutlineOutlinedIcon from "@mui/icons-material/ErrorOutlineOutlined";
+import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 import WarningIcon from "@mui/icons-material/WarningAmber";
 import { List, ListItem, ListItemButton, ListItemText, Typography } from "@mui/material";
 import { useCallback, useState } from "react";
@@ -12,22 +12,33 @@ import NotificationModal from "@foxglove/studio-base/components/NotificationModa
 import Stack from "@foxglove/studio-base/components/Stack";
 import { PlayerProblem } from "@foxglove/studio-base/players/types";
 
-export function ProblemsList({ problems }: { problems: PlayerProblem[] }): JSX.Element {
-  const [problemModal, setProblemModal] = useState<JSX.Element | undefined>();
+export function ProblemsList({
+  problems,
+  setProblemModal,
+}: {
+  problems: PlayerProblem[];
+  setProblemModal?: (_: JSX.Element | undefined) => void;
+}): JSX.Element {
+  const [localProblemModal, setLocalProblemModal] = useState<JSX.Element | undefined>();
 
-  const showProblemModal = useCallback((problem: PlayerProblem) => {
-    setProblemModal(
-      <NotificationModal
-        notification={{
-          message: problem.message,
-          subText: problem.tip,
-          details: problem.error,
-          severity: problem.severity,
-        }}
-        onRequestClose={() => setProblemModal(undefined)}
-      />,
-    );
-  }, []);
+  const showProblemModal = useCallback(
+    (problem: PlayerProblem) => {
+      const modal = (
+        <NotificationModal
+          notification={{
+            message: problem.message,
+            subText: problem.tip,
+            details: problem.error,
+            severity: problem.severity,
+          }}
+          onRequestClose={() => (setProblemModal ?? setLocalProblemModal)(undefined)}
+        />
+      );
+
+      (setProblemModal ?? setLocalProblemModal)(modal);
+    },
+    [setProblemModal],
+  );
 
   if (problems.length === 0) {
     return (
@@ -41,22 +52,18 @@ export function ProblemsList({ problems }: { problems: PlayerProblem[] }): JSX.E
 
   return (
     <Stack fullHeight flex="auto" overflow="auto">
-      {problemModal}
+      {localProblemModal}
       <List dense disablePadding>
         {problems.map((problem, idx) => (
           <ListItem disablePadding key={`${idx}`}>
             <ListItemButton onClick={() => showProblemModal(problem)}>
-              <Stack direction="row" gap={1}>
-                {problem.severity === "warn" && <WarningIcon color="warning" />}
-                {problem.severity === "error" && <ErrorIcon color="error" />}
-                {problem.severity === "info" && <InfoIcon color="info" />}
-                <ListItemText
-                  primary={problem.message}
-                  primaryTypographyProps={{
-                    color:
-                      problem.severity === "warn" ? "warning.main" : `${problem.severity}.main`,
-                  }}
-                />
+              <Stack direction="row" gap={0.5} alignItems="center">
+                {problem.severity === "warn" && <WarningIcon fontSize="small" color="warning" />}
+                {problem.severity === "error" && (
+                  <ErrorOutlineOutlinedIcon fontSize="small" color="error" />
+                )}
+                {problem.severity === "info" && <InfoOutlinedIcon fontSize="small" color="info" />}
+                <ListItemText primary={problem.message} />
               </Stack>
             </ListItemButton>
           </ListItem>

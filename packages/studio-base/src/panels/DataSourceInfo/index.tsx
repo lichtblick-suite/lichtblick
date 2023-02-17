@@ -2,7 +2,7 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { Box, Divider } from "@mui/material";
+import { Divider } from "@mui/material";
 import { makeStyles } from "tss-react/mui";
 
 import CopyButton from "@foxglove/studio-base/components/CopyButton";
@@ -15,6 +15,7 @@ import {
 } from "@foxglove/studio-base/components/MessagePipeline";
 import Panel from "@foxglove/studio-base/components/Panel";
 import PanelToolbar from "@foxglove/studio-base/components/PanelToolbar";
+import Stack from "@foxglove/studio-base/components/Stack";
 import { Topic } from "@foxglove/studio-base/src/players/types";
 
 const useStyles = makeStyles<void, "copyIcon">()((theme, _params, classes) => ({
@@ -29,7 +30,6 @@ const useStyles = makeStyles<void, "copyIcon">()((theme, _params, classes) => ({
     borderCollapse: "collapse",
     display: "block",
     flex: 1,
-    overflowY: "auto",
 
     thead: {
       position: "sticky",
@@ -130,26 +130,28 @@ function SourceInfo(): JSX.Element {
     <>
       <PanelToolbar />
       <Divider />
-      <Box paddingTop={1}>
-        <DataSourceInfoView />
-      </Box>
-      <Divider />
-      <table className={classes.table}>
-        <thead>
-          <tr>
-            <th>Topic name</th>
-            <th>Schema name</th>
-            <th>Message count</th>
-            <th>Frequency</th>
-          </tr>
-        </thead>
-        <tbody>
-          {topics.map((topic) => (
-            <MemoTopicRow key={topic.name} topic={topic} />
-          ))}
-        </tbody>
-      </table>
-      <DirectTopicStatsUpdater interval={6} />
+      <Stack fullHeight overflowY="auto">
+        <Stack padding={1.5}>
+          <DataSourceInfoView />
+        </Stack>
+        <Divider />
+        <table className={classes.table}>
+          <thead>
+            <tr>
+              <th>Topic Name</th>
+              <th>Datatype</th>
+              <th>Message count</th>
+              <th>Frequency</th>
+            </tr>
+          </thead>
+          <tbody>
+            {topics.map((topic) => (
+              <MemoTopicRow key={topic.name} topic={topic} />
+            ))}
+          </tbody>
+        </table>
+        <DirectTopicStatsUpdater interval={6} />
+      </Stack>
     </>
   );
 }

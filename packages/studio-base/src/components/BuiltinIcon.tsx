@@ -9,11 +9,9 @@ type BuiltinIconProps = {
   name?: RegisteredIconNames;
 };
 
-function BuiltinIcon(props: BuiltinIconProps): JSX.Element {
+export function BuiltinIcon(props: BuiltinIconProps): JSX.Element {
   if (props.name == undefined) {
     return <></>;
   }
   return ICONS[props.name];
 }
-
-export { BuiltinIcon };

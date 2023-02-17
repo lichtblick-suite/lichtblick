@@ -71,7 +71,7 @@ const useStyles = makeStyles()((theme) => ({
     display: "block",
   },
   iconButton: {
-    padding: theme.spacing(0.75),
+    padding: theme.spacing(0.375),
   },
   checkbox: {
     "&.MuiCheckbox-root": {

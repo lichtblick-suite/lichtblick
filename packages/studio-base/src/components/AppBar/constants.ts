@@ -5,3 +5,4 @@
 export const APP_BAR_HEIGHT = 48;
 export const APP_BAR_BACKGROUND_COLOR = "#27272b";
 export const APP_BAR_FOREGROUND_COLOR = "#ffffff";
+export const APP_BAR_PRIMARY_COLOR = "#9480ed";

@@ -41,6 +41,7 @@ const NO_DATATYPES = new Map();
 function noop() {}
 
 type MockMessagePipelineProps = {
+  name?: string;
   presence?: PlayerPresence;
   topics?: Topic[];
   topicStats?: Map<string, TopicStats>;
@@ -98,6 +99,7 @@ function getPublicState(
 
   return {
     playerState: {
+      name: props.name,
       presence: props.presence ?? PlayerPresence.PRESENT,
       playerId: props.playerId ?? "1",
       progress: props.progress ?? {},

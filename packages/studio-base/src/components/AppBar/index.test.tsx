@@ -44,6 +44,7 @@ describe("<AppBar />", () => {
           onMaximizeWindow={mockMaximize}
           onUnmaximizeWindow={mockUnmaximize}
           onCloseWindow={mockClose}
+          onSelectDataSourceAction={() => {}}
         />
       </Wrapper>,
     );
@@ -66,6 +67,7 @@ describe("<AppBar />", () => {
           onUnmaximizeWindow={mockUnmaximize}
           onCloseWindow={mockClose}
           isMaximized
+          onSelectDataSourceAction={() => {}}
         />
       </Wrapper>,
     );
