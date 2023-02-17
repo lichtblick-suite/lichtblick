@@ -31,6 +31,12 @@ const markerObject = {
     y: 2,
     z: 4,
   },
+  orientation: {
+    x: 0,
+    y: 0,
+    z: Math.sin(Math.PI / 8),
+    w: Math.cos(Math.PI / 8),
+  },
   color: {
     r: 1,
     g: 0.1,
