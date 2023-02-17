@@ -45,6 +45,8 @@ import {
   Parameter,
 } from "@foxglove/ws-protocol";
 
+import { JsonMessageWriter } from "./JsonMessageWriter";
+import { MessageWriter } from "./MessageWriter";
 import WorkerSocketAdapter from "./WorkerSocketAdapter";
 
 const log = Log.getLogger(__dirname);
@@ -61,9 +63,6 @@ const SUPPORTED_PUBLICATION_ENCODINGS = ["json", ...ROS_ENCODINGS];
 const FALLBACK_PUBLICATION_ENCODING = "json";
 const SUPPORTED_SERVICE_ENCODINGS = ["json", ...ROS_ENCODINGS];
 
-interface MessageWriter {
-  writeMessage(message: unknown): Uint8Array;
-}
 type ResolvedChannel = { channel: Channel; parsedChannel: ParsedChannel };
 type Publication = ClientChannel & { messageWriter?: Ros1MessageWriter | Ros2MessageWriter };
 type ResolvedService = {
@@ -880,10 +879,4 @@ function dataTypeToFullName(dataType: string): string {
     return `${parts[0]}/msg/${parts[1]}`;
   }
   return dataType;
-}
-
-class JsonMessageWriter implements MessageWriter {
-  public writeMessage(message: unknown): Uint8Array {
-    return new Uint8Array(Buffer.from(JSON.stringify(message) ?? ""));
-  }
 }
