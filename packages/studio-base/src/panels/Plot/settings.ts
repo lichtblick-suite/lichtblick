@@ -29,16 +29,16 @@ const makeSeriesNode = memoizeWeak((path: PlotPath, index: number): SettingsTree
     label: plotPathDisplayName(path, index),
     visible: path.enabled,
     fields: {
-      label: {
-        input: "string",
-        label: "Label",
-        value: path.label,
-      },
       value: {
         label: "Message path",
         input: "messagepath",
         value: path.value,
         validTypes: plotableRosTypes,
+      },
+      label: {
+        input: "string",
+        label: "Label",
+        value: path.label,
       },
       color: {
         input: "rgb",
