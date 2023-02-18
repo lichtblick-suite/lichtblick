@@ -25,7 +25,6 @@ import {
   formatTime,
   getValidatedTimeAndMethodFromString,
 } from "@foxglove/studio-base/util/formatTime";
-import { fonts } from "@foxglove/studio-base/util/sharedStyleConstants";
 import { formatTimeRaw } from "@foxglove/studio-base/util/time";
 
 type PlaybackTimeDisplayMethodProps = {
@@ -61,7 +60,7 @@ const StyledTextField = muiStyled(TextField)<{ error?: boolean }>(({ error, them
     },
   },
   ".MuiInputBase-input": {
-    fontFeatureSettings: `${fonts.SANS_SERIF_FEATURE_SETTINGS}, 'zero' !important`,
+    fontFeatureSettings: `${theme.typography.fontFeatureSettings}, 'zero' !important`,
     minWidth: "20ch",
   },
   ".MuiIconButton-root": {

@@ -120,6 +120,7 @@ export default {
       delay: 100,
     },
     colorScheme: "dark",
+    disableI18n: true,
   },
 };
 

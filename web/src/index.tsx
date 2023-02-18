@@ -82,13 +82,14 @@ async function main() {
     return;
   }
 
-  const { installDevtoolsFormatters, overwriteFetch, waitForFonts } = await import(
+  const { installDevtoolsFormatters, overwriteFetch, waitForFonts, initI18n } = await import(
     "@foxglove/studio-base"
   );
   installDevtoolsFormatters();
   overwriteFetch();
   // consider moving waitForFonts into App to display an app loading screen
   await waitForFonts();
+  await initI18n();
 
   const { Root } = await import("./Root");
 

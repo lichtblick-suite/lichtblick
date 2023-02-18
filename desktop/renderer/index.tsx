@@ -17,6 +17,7 @@ import {
   installDevtoolsFormatters,
   overwriteFetch,
   waitForFonts,
+  initI18n,
 } from "@foxglove/studio-base";
 
 import Root from "./Root";
@@ -80,6 +81,7 @@ async function main() {
 
   // consider moving waitForFonts into App to display an app loading screen
   await waitForFonts();
+  await initI18n();
 
   const appConfiguration = await NativeStorageAppConfiguration.Initialize(
     (global as { storageBridge?: Storage }).storageBridge!,

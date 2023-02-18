@@ -44,9 +44,28 @@ export function Default(): JSX.Element {
   return <Wrapper />;
 }
 
+export function DefaultChinese(): JSX.Element {
+  return <Wrapper />;
+}
+DefaultChinese.parameters = { forceLanguage: "zh" };
+
 export function DefaultWithTimezone(): JSX.Element {
   return <Wrapper entries={[["timezone", "UTC"]]} />;
 }
+
+ChangingLanguage.parameters = { colorScheme: "light" };
+export function ChangingLanguage(): JSX.Element {
+  return <Wrapper />;
+}
+ChangingLanguage.play = async () => {
+  const user = userEvent.setup();
+  const input = await screen.findByText("English", { exact: false });
+  await user.click(input);
+
+  await userEvent.keyboard("中文");
+  const item = await screen.findByText("中文", { exact: false });
+  await user.click(item);
+};
 
 ChangingTimezone.parameters = { colorScheme: "light" };
 export function ChangingTimezone(): JSX.Element {

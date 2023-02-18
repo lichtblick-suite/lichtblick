@@ -97,6 +97,7 @@ export default {
       delay: 50,
     },
     colorScheme: "dark",
+    disableI18n: true,
   },
 };
 

@@ -21,9 +21,12 @@ import {
   ToggleButtonGroup,
   ToggleButton,
   ToggleButtonGroupProps,
+  SelectChangeEvent,
 } from "@mui/material";
+import { captureException } from "@sentry/core";
 import moment from "moment-timezone";
 import { MouseEvent, useCallback, useMemo } from "react";
+import { useTranslation } from "react-i18next";
 import { makeStyles } from "tss-react/mui";
 
 import { filterMap } from "@foxglove/den/collection";
@@ -34,6 +37,7 @@ import { SidebarContent } from "@foxglove/studio-base/components/SidebarContent"
 import Stack from "@foxglove/studio-base/components/Stack";
 import { useAppTimeFormat } from "@foxglove/studio-base/hooks";
 import { useAppConfigurationValue } from "@foxglove/studio-base/hooks/useAppConfigurationValue";
+import { Language } from "@foxglove/studio-base/i18n";
 import { LaunchPreferenceValue } from "@foxglove/studio-base/types/LaunchPreferenceValue";
 import { TimeDisplayMethod } from "@foxglove/studio-base/types/panels";
 import { formatTime } from "@foxglove/studio-base/util/formatTime";
@@ -41,6 +45,10 @@ import isDesktopApp from "@foxglove/studio-base/util/isDesktopApp";
 import { formatTimeRaw } from "@foxglove/studio-base/util/time";
 
 const MESSAGE_RATES = [1, 3, 5, 10, 15, 20, 30, 60];
+const LANGUAGE_OPTIONS: { key: Language; value: string }[] = [
+  { key: "en", value: "English" },
+  { key: "zh", value: "中文" },
+];
 
 const useStyles = makeStyles()((theme) => ({
   autocompleteInput: {
@@ -83,6 +91,7 @@ export function ColorSchemeSettings(): JSX.Element {
   const [colorScheme = "system", setColorScheme] = useAppConfigurationValue<string>(
     AppSetting.COLOR_SCHEME,
   );
+  const { t } = useTranslation("preferences");
 
   const handleChange = useCallback(
     (_event: MouseEvent<HTMLElement>, value?: string) => {
@@ -95,7 +104,7 @@ export function ColorSchemeSettings(): JSX.Element {
 
   return (
     <Stack>
-      <FormLabel>Color scheme:</FormLabel>
+      <FormLabel>{t("colorScheme")}:</FormLabel>
       <ToggleButtonGroup
         color="primary"
         size="small"
@@ -105,13 +114,13 @@ export function ColorSchemeSettings(): JSX.Element {
         onChange={handleChange}
       >
         <ToggleButton className={classes.toggleButton} value="dark">
-          <DarkModeIcon /> Dark
+          <DarkModeIcon /> {t("dark")}
         </ToggleButton>
         <ToggleButton className={classes.toggleButton} value="light">
-          <Brightness5Icon /> Light
+          <Brightness5Icon /> {t("light")}
         </ToggleButton>
         <ToggleButton className={classes.toggleButton} value="system">
-          <ComputerIcon /> Follow system
+          <ComputerIcon /> {t("followSystem")}
         </ToggleButton>
       </ToggleButtonGroup>
     </Stack>
@@ -123,6 +132,7 @@ export function TimezoneSettings(): React.ReactElement {
 
   const { classes } = useStyles();
 
+  const { t } = useTranslation("preferences");
   const [timezone, setTimezone] = useAppConfigurationValue<string>(AppSetting.TIMEZONE);
   const detectItem: Option = useMemo(
     () => ({
@@ -167,7 +177,7 @@ export function TimezoneSettings(): React.ReactElement {
   return (
     <FormControl fullWidth>
       <Typography color="text.secondary" marginBottom={0.5}>
-        Display timestamps in:
+        {t("displayTimestampsIn")}:
       </Typography>
       <Autocomplete
         options={[...fixedItems, ...timezoneItems]}
@@ -200,13 +210,15 @@ export function TimeFormat({
 }): React.ReactElement {
   const { timeFormat, setTimeFormat } = useAppTimeFormat();
 
+  const { t } = useTranslation("preferences");
+
   const [timezone] = useAppConfigurationValue<string>(AppSetting.TIMEZONE);
 
   const exampleTime = { sec: 946713600, nsec: 0 };
 
   return (
     <Stack>
-      <FormLabel>Timestamp format:</FormLabel>
+      <FormLabel>{t("timestampFormat")}:</FormLabel>
       <ToggleButtonGroup
         color="primary"
         size="small"
@@ -229,6 +241,7 @@ export function TimeFormat({
 
 export function LaunchDefault(): React.ReactElement {
   const { classes } = useStyles();
+  const { t } = useTranslation("preferences");
   const [preference, setPreference] = useAppConfigurationValue<string | undefined>(
     AppSetting.LAUNCH_PREFERENCE,
   );
@@ -245,7 +258,7 @@ export function LaunchDefault(): React.ReactElement {
 
   return (
     <Stack>
-      <FormLabel>Open links in:</FormLabel>
+      <FormLabel>{t("openLinksIn")}:</FormLabel>
       <ToggleButtonGroup
         color="primary"
         size="small"
@@ -255,13 +268,13 @@ export function LaunchDefault(): React.ReactElement {
         onChange={(_, value?: string) => value != undefined && void setPreference(value)}
       >
         <ToggleButton value={LaunchPreferenceValue.WEB} className={classes.toggleButton}>
-          <WebIcon /> Web app
+          <WebIcon /> {t("webApp")}
         </ToggleButton>
         <ToggleButton value={LaunchPreferenceValue.DESKTOP} className={classes.toggleButton}>
-          <ComputerIcon /> Desktop app
+          <ComputerIcon /> {t("desktopApp")}
         </ToggleButton>
         <ToggleButton value={LaunchPreferenceValue.ASK} className={classes.toggleButton}>
-          <QuestionAnswerOutlinedIcon /> Ask each time
+          <QuestionAnswerOutlinedIcon /> {t("askEachTime")}
         </ToggleButton>
       </ToggleButtonGroup>
     </Stack>
@@ -269,6 +282,7 @@ export function LaunchDefault(): React.ReactElement {
 }
 
 export function MessageFramerate(): React.ReactElement {
+  const { t } = useTranslation("preferences");
   const [messageRate, setMessageRate] = useAppConfigurationValue<number>(AppSetting.MESSAGE_RATE);
   const options = useMemo(
     () => MESSAGE_RATES.map((rate) => ({ key: rate, text: `${rate}`, data: rate })),
@@ -277,7 +291,7 @@ export function MessageFramerate(): React.ReactElement {
 
   return (
     <Stack>
-      <FormLabel>Message rate (Hz):</FormLabel>
+      <FormLabel>{t("messageRate")} (Hz):</FormLabel>
       <Select
         value={messageRate ?? 60}
         fullWidth
@@ -341,6 +355,46 @@ export function RosPackagePath(): React.ReactElement {
   );
 }
 
+export function LanguageSettings(): React.ReactElement {
+  const { t, i18n } = useTranslation("preferences");
+  const [selectedLanguage = "en", setSelectedLanguage] = useAppConfigurationValue<Language>(
+    AppSetting.LANGUAGE,
+  );
+  const onChangeLanguage = useCallback(
+    (event: SelectChangeEvent<Language>) => {
+      const lang = event.target.value as Language;
+      void setSelectedLanguage(lang);
+      i18n.changeLanguage(lang).catch((error) => {
+        console.error("Failed to switch languages", error);
+        captureException(error);
+      });
+    },
+    [i18n, setSelectedLanguage],
+  );
+  const options: { key: string; text: string; data: string }[] = useMemo(
+    () =>
+      LANGUAGE_OPTIONS.map((language) => ({
+        key: language.key,
+        text: `${language.value}`,
+        data: language.key,
+      })),
+    [],
+  );
+
+  return (
+    <Stack>
+      <FormLabel>{t("language")}:</FormLabel>
+      <Select<Language> value={selectedLanguage} fullWidth onChange={onChangeLanguage}>
+        {options.map((option) => (
+          <MenuItem key={option.key} value={option.key}>
+            {option.text}
+          </MenuItem>
+        ))}
+      </Select>
+    </Stack>
+  );
+}
+
 export default function Preferences(): React.ReactElement {
   const [crashReportingEnabled, setCrashReportingEnabled] = useAppConfigurationValue<boolean>(
     AppSetting.CRASH_REPORTING_ENABLED,
@@ -348,6 +402,7 @@ export default function Preferences(): React.ReactElement {
   const [telemetryEnabled, setTelemetryEnabled] = useAppConfigurationValue<boolean>(
     AppSetting.TELEMETRY_ENABLED,
   );
+  const { t } = useTranslation("preferences");
 
   // automatic updates are a desktop-only setting
   //
@@ -359,11 +414,11 @@ export default function Preferences(): React.ReactElement {
   const { classes } = useStyles();
 
   return (
-    <SidebarContent title="Preferences">
+    <SidebarContent title={t("preferences")}>
       <Stack gap={4}>
         <section>
           <Typography component="h2" variant="h5" gutterBottom color="primary">
-            General
+            {t("general")}
           </Typography>
           <Stack gap={2}>
             <div>
@@ -377,6 +432,9 @@ export default function Preferences(): React.ReactElement {
             </div>
             <div>
               <MessageFramerate />
+            </div>
+            <div>
+              <LanguageSettings />
             </div>
             {supportsAppUpdates && (
               <div>
@@ -393,7 +451,7 @@ export default function Preferences(): React.ReactElement {
 
         <section>
           <Typography component="h2" variant="h5" gutterBottom color="primary">
-            ROS
+            {t("ros")}
           </Typography>
           <Stack gap={1}>
             <div>
@@ -404,12 +462,10 @@ export default function Preferences(): React.ReactElement {
 
         <section>
           <Typography component="h2" variant="h5" gutterBottom color="primary">
-            Privacy
+            {t("privacy")}
           </Typography>
           <Stack gap={2}>
-            <Typography color="text.secondary">
-              Changes will take effect the next time Foxglove Studio is launched.
-            </Typography>
+            <Typography color="text.secondary">{t("privacyDescription")}</Typography>
             <FormControlLabel
               className={classes.formControlLabel}
               control={
@@ -419,7 +475,7 @@ export default function Preferences(): React.ReactElement {
                   onChange={(_event, checked) => void setTelemetryEnabled(checked)}
                 />
               }
-              label="Send anonymized usage data to help us improve Foxglove Studio"
+              label={t("sendAnonymizedUsageData")}
             />
             <FormControlLabel
               className={classes.formControlLabel}
@@ -430,19 +486,17 @@ export default function Preferences(): React.ReactElement {
                   onChange={(_event, checked) => void setCrashReportingEnabled(checked)}
                 />
               }
-              label="Send anonymized crash reports"
+              label={t("sendAnonymizedCrashReports")}
             />
           </Stack>
         </section>
 
         <section>
           <Typography component="h2" variant="h5" gutterBottom color="primary">
-            Experimental features
+            {t("experimentalFeatures")}
           </Typography>
           <Stack gap={1}>
-            <Typography color="text.secondary">
-              These features are unstable and not recommended for daily use.
-            </Typography>
+            <Typography color="text.secondary">{t("experimentalFeaturesDescription")}</Typography>
             <ExperimentalFeatureSettings />
           </Stack>
         </section>

@@ -24,6 +24,7 @@ import {
   useTheme,
 } from "@mui/material";
 import { MouseEvent, SyntheticEvent, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { makeStyles } from "tss-react/mui";
 
 import { AppSetting } from "@foxglove/studio-base/AppSetting";
@@ -35,6 +36,7 @@ import FoxgloveLogoText from "@foxglove/studio-base/components/FoxgloveLogoText"
 import {
   AutoUpdate,
   ColorSchemeSettings,
+  LanguageSettings,
   LaunchDefault,
   MessageFramerate,
   RosPackagePath,
@@ -186,6 +188,7 @@ export function PreferencesIconButton(props: IconButtonProps): JSX.Element {
 type TabOption = "general" | "privacy" | "extensions" | "experimental-features" | "about";
 
 export function PreferencesDialog(props: DialogProps & { activeTab?: TabOption }): JSX.Element {
+  const { t } = useTranslation("preferences");
   const { activeTab: _activeTab } = props;
   const [activeTab, setActiveTab] = useState<TabOption>(_activeTab ?? "general");
   const [crashReportingEnabled, setCrashReportingEnabled] = useAppConfigurationValue<boolean>(
@@ -225,7 +228,7 @@ export function PreferencesDialog(props: DialogProps & { activeTab?: TabOption }
         paddingY={2}
       >
         <Typography variant="h3" fontWeight={600}>
-          Preferences
+          {t("preferences")}
         </Typography>
         <IconButton edge="end" onClick={handleClose}>
           <CloseIcon />
@@ -238,15 +241,15 @@ export function PreferencesDialog(props: DialogProps & { activeTab?: TabOption }
           orientation={smUp ? "vertical" : "horizontal"}
           onChange={handleTabChange}
         >
-          <Tab className={classes.tab} label="General" value="general" />
-          <Tab className={classes.tab} label="Privacy" value="privacy" />
-          <Tab className={classes.tab} label="Extensions" value="extensions" />
+          <Tab className={classes.tab} label={t("general")} value="general" />
+          <Tab className={classes.tab} label={t("privacy")} value="privacy" />
+          <Tab className={classes.tab} label={t("extensions")} value="extensions" />
           <Tab
             className={classes.tab}
-            label="Experimental features"
+            label={t("experimentalFeatures")}
             value="experimental-features"
           />
-          <Tab className={classes.tab} label="About" value="about" />
+          <Tab className={classes.tab} label={t("about")} value="about" />
         </Tabs>
         <Stack direction="row" fullHeight overflowY="auto">
           <section
@@ -259,6 +262,7 @@ export function PreferencesDialog(props: DialogProps & { activeTab?: TabOption }
               <TimezoneSettings />
               <TimeFormat orientation={smUp ? "horizontal" : "vertical"} />
               <MessageFramerate />
+              <LanguageSettings />
               {supportsAppUpdates && <AutoUpdate />}
               {!isDesktopApp() && <LaunchDefault />}
               <RosPackagePath />
@@ -272,7 +276,7 @@ export function PreferencesDialog(props: DialogProps & { activeTab?: TabOption }
           >
             <Stack gap={2}>
               <Alert color="info" icon={<InfoOutlinedIcon />}>
-                Changes will take effect the next time Foxglove Studio is launched.
+                {t("privacyDescription")}
               </Alert>
               <Stack gap={0.5} paddingLeft={2}>
                 <FormControlLabel
@@ -284,7 +288,7 @@ export function PreferencesDialog(props: DialogProps & { activeTab?: TabOption }
                       onChange={(_event, checked) => void setTelemetryEnabled(checked)}
                     />
                   }
-                  label="Send anonymized usage data to help us improve Foxglove Studio"
+                  label={t("sendAnonymizedUsageData")}
                 />
                 <FormControlLabel
                   className={classes.formControlLabel}
@@ -295,7 +299,7 @@ export function PreferencesDialog(props: DialogProps & { activeTab?: TabOption }
                       onChange={(_event, checked) => void setCrashReportingEnabled(checked)}
                     />
                   }
-                  label="Send anonymized crash reports"
+                  label={t("sendAnonymizedCrashReports")}
                 />
               </Stack>
             </Stack>
@@ -318,7 +322,7 @@ export function PreferencesDialog(props: DialogProps & { activeTab?: TabOption }
           >
             <Stack gap={2}>
               <Alert color="warning" icon={<WarningAmberIcon />}>
-                These features are unstable and not recommended for daily use.
+                {t("experimentalFeaturesDescription")}
               </Alert>
               <Stack paddingLeft={2}>
                 <ExperimentalFeatureSettings />

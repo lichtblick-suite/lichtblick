@@ -14,6 +14,7 @@
 import { diff } from "jest-diff";
 import { isEqual } from "lodash";
 
+import { initI18n } from "@foxglove/studio-base/i18n";
 import {
   mockSendNotification,
   mockSetNotificationHandler,
@@ -37,6 +38,10 @@ const origError = console.error;
 const origWarn = console.warn;
 const consoleErrorMock = (console.error = jest.fn());
 const consoleWarnMock = (console.warn = jest.fn());
+
+beforeAll(async () => {
+  await initI18n();
+});
 
 beforeEach(() => {
   consoleErrorMock.mockClear();

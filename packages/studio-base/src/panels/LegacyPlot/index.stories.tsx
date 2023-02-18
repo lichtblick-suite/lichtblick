@@ -130,6 +130,7 @@ export default {
     chromatic: {
       delay: 100,
     },
+    disableI18n: true,
   },
 };
 

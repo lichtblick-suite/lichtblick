@@ -4,38 +4,50 @@
 
 import { ThemeOptions as MuiThemeOptions, TypographyStyle } from "@mui/material";
 
+import { Language } from "@foxglove/studio-base/i18n";
 import { fonts } from "@foxglove/studio-base/util/sharedStyleConstants";
 
-const baseFontStyles: TypographyStyle = {
-  fontFeatureSettings: fonts.SANS_SERIF_FEATURE_SETTINGS,
-};
+declare module "@mui/material/styles/createTypography" {
+  interface Typography {
+    fontFeatureSettings: string;
+  }
+  interface TypographyOptions {
+    fontFeatureSettings: string;
+  }
+}
 
-const muiTypography: MuiThemeOptions["typography"] = {
-  fontFamily: fonts.SANS_SERIF,
-  fontSize: 12,
-  body1: {
-    ...baseFontStyles,
-  },
-  body2: {
-    ...baseFontStyles,
-  },
-  button: {
-    ...baseFontStyles,
-    textTransform: "none",
-    fontWeight: 700,
-    letterSpacing: "-0.0125em",
-  },
-  overline: {
-    ...baseFontStyles,
-    letterSpacing: "0.05em",
-    lineHeight: "1.5",
-  },
-  h1: { ...baseFontStyles, fontSize: "2rem" },
-  h2: { ...baseFontStyles, fontSize: "1.8rem" },
-  h3: { ...baseFontStyles, fontSize: "1.6rem" },
-  h4: { ...baseFontStyles, fontSize: "1.2rem" },
-  h5: { ...baseFontStyles, fontSize: "1.1rem" },
-  h6: { ...baseFontStyles, fontSize: "1rem" },
-};
-
-export default muiTypography;
+export function muiTypography({ locale }: { locale: Language }): MuiThemeOptions["typography"] {
+  const fontFeatureSettings =
+    locale === "zh" ? fonts.SANS_SERIF_FEATURE_SETTINGS_ZH : fonts.SANS_SERIF_FEATURE_SETTINGS;
+  const baseFontStyles: TypographyStyle = {
+    fontFeatureSettings,
+  };
+  return {
+    fontFamily: fonts.SANS_SERIF,
+    fontSize: 12,
+    fontFeatureSettings,
+    body1: {
+      ...baseFontStyles,
+    },
+    body2: {
+      ...baseFontStyles,
+    },
+    button: {
+      ...baseFontStyles,
+      textTransform: "none",
+      fontWeight: 700,
+      letterSpacing: "-0.0125em",
+    },
+    overline: {
+      ...baseFontStyles,
+      letterSpacing: "0.05em",
+      lineHeight: "1.5",
+    },
+    h1: { ...baseFontStyles, fontSize: "2rem" },
+    h2: { ...baseFontStyles, fontSize: "1.8rem" },
+    h3: { ...baseFontStyles, fontSize: "1.6rem" },
+    h4: { ...baseFontStyles, fontSize: "1.2rem" },
+    h5: { ...baseFontStyles, fontSize: "1.1rem" },
+    h6: { ...baseFontStyles, fontSize: "1rem" },
+  };
+}

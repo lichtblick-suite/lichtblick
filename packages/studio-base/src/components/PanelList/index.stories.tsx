@@ -119,6 +119,7 @@ storiesOf("components/PanelList", module)
       delay: 100,
     },
     colorScheme: "dark",
+    disableI18n: true,
   })
   .addDecorator((childrenRenderFcn) => {
     return (

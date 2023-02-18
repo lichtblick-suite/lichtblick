@@ -3,6 +3,8 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 import { Story } from "@storybook/react";
+import { screen } from "@testing-library/dom";
+import userEvent from "@testing-library/user-event";
 import { range } from "lodash";
 
 import { ExtensionInfo, ExtensionLoader } from "@foxglove/studio-base";
@@ -77,23 +79,48 @@ export default {
 export function Default(): JSX.Element {
   return <PreferencesDialog open />;
 }
+export const DefaultChinese = (): JSX.Element => <Default />;
+DefaultChinese.parameters = { forceLanguage: "zh" };
+
+export function ChangingLanguage(): JSX.Element {
+  return <PreferencesDialog open />;
+}
+ChangingLanguage.play = async () => {
+  const user = userEvent.setup();
+  const input = await screen.findByText("English", { exact: false });
+  await user.click(input);
+
+  await userEvent.keyboard("中文");
+  const item = await screen.findByText("中文", { exact: false });
+  await user.click(item);
+};
 
 export function General(): JSX.Element {
   return <PreferencesDialog open activeTab="general" />;
 }
+export const GeneralChinese = (): JSX.Element => <General />;
+GeneralChinese.parameters = { forceLanguage: "zh" };
 
 export function Privacy(): JSX.Element {
   return <PreferencesDialog open activeTab="privacy" />;
 }
+export const PrivacyChinese = (): JSX.Element => <Privacy />;
+PrivacyChinese.parameters = { forceLanguage: "zh" };
 
 export function Extensions(): JSX.Element {
   return <PreferencesDialog open activeTab="extensions" />;
 }
+export const ExtensionsChinese = (): JSX.Element => <Extensions />;
+ExtensionsChinese.parameters = { forceLanguage: "zh" };
 
 export function Experimental(): JSX.Element {
   return <PreferencesDialog open activeTab="experimental-features" />;
 }
+export const ExperimentalChinese = (): JSX.Element => <Experimental />;
+ExperimentalChinese.parameters = { forceLanguage: "zh" };
 
 export function About(): JSX.Element {
   return <PreferencesDialog open activeTab="about" />;
 }
+export const AboutChinese = (): JSX.Element => <About />;
+AboutChinese.parameters = { forceLanguage: "zh" };
