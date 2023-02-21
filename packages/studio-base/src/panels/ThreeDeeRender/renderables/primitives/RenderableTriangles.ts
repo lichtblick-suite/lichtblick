@@ -242,7 +242,7 @@ function makeTriangleMesh(): TriangleMesh {
       metalness: 0,
       roughness: 1,
       flatShading: true,
-      side: THREE.TwoPassDoubleSide,
+      side: THREE.DoubleSide,
     }),
   );
 }

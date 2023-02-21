@@ -338,7 +338,7 @@ export class Renderer extends EventEmitter<RendererEvents> {
   public constructor(canvas: HTMLCanvasElement, config: RendererConfig) {
     super();
     // NOTE: Global side effect
-    THREE.Object3D.DefaultUp = new THREE.Vector3(0, 0, 1);
+    THREE.Object3D.DEFAULT_UP = new THREE.Vector3(0, 0, 1);
 
     this.canvas = canvas;
     this.config = config;

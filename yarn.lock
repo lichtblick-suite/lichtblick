@@ -2472,7 +2472,7 @@ __metadata:
     "@types/shallowequal": 1.1.1
     "@types/string-hash": 1.1.1
     "@types/text-metrics": "workspace:*"
-    "@types/three": ^0.148.1
+    "@types/three": ^0.149.0
     "@types/tinycolor2": 1.4.3
     "@types/url-search-params": 1.1.0
     "@types/uuid": 9.0.0
@@ -2557,7 +2557,7 @@ __metadata:
     string-replace-loader: 3.1.0
     style-loader: 3.3.1
     text-metrics: 3.0.0
-    three: "patch:three@0.148.0#../../patches/three.patch"
+    three: "patch:three@0.149.0#../../patches/three.patch"
     tinycolor2: 1.6.0
     ts-essentials: 9.3.0
     ts-key-enum: 2.0.12
@@ -6800,12 +6800,12 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@types/three@npm:^0.148.1":
-  version: 0.148.1
-  resolution: "@types/three@npm:0.148.1"
+"@types/three@npm:^0.149.0":
+  version: 0.149.0
+  resolution: "@types/three@npm:0.149.0"
   dependencies:
     "@types/webxr": "*"
-  checksum: 166eb03b80ece4d400641c17cc74a9ad28331dc1f255964dee3d9bead9a4d46e2c287beb1f65a44254b224163a8102f4fe1d50685c896c7fb84fd01c11c43e2d
+  checksum: 5def82bd5d4fb0eb6046e747eecced06d68fbf1747ab8f3e7657872e42e58ce7a92218d7c5e4ca26204257927638ad14da5d1cce7310aca15eb8a9bd484ea191
   languageName: node
   linkType: hard
 
@@ -23644,17 +23644,17 @@ __metadata:
   languageName: node
   linkType: hard
 
-"three@npm:0.148.0":
-  version: 0.148.0
-  resolution: "three@npm:0.148.0"
-  checksum: 3f6359585c006c6f78b2fc1adeb90559d9b7cd6daf5cf916e81494ff228f4a9beffe37136bd8d5b0afbf377ac070b70624245bec2e9ee557035e2c485ce05197
+"three@npm:0.149.0":
+  version: 0.149.0
+  resolution: "three@npm:0.149.0"
+  checksum: bb11e28054ce11ecfbe94150c2f253fe149cd7532b7b9253cf0806022d234ba3711944f42d65131d146193e7396b92c9965d88cd779b979f007795e13dfb44e9
   languageName: node
   linkType: hard
 
-"three@patch:three@0.148.0#../../patches/three.patch::locator=%40foxglove%2Fstudio-base%40workspace%3Apackages%2Fstudio-base":
-  version: 0.148.0
-  resolution: "three@patch:three@npm%3A0.148.0#../../patches/three.patch::version=0.148.0&hash=34f677&locator=%40foxglove%2Fstudio-base%40workspace%3Apackages%2Fstudio-base"
-  checksum: e28bed988c499e690a79f9a8245daa474390a2fc081ea0387f7059bfbdacb375c96b1e892ddfeb1832e4c73dc41771cb545e26176759696b29a75d3f60be08bf
+"three@patch:three@0.149.0#../../patches/three.patch::locator=%40foxglove%2Fstudio-base%40workspace%3Apackages%2Fstudio-base":
+  version: 0.149.0
+  resolution: "three@patch:three@npm%3A0.149.0#../../patches/three.patch::version=0.149.0&hash=752558&locator=%40foxglove%2Fstudio-base%40workspace%3Apackages%2Fstudio-base"
+  checksum: f8fb90a94def61dd5f7fc17a58ff133af92f43685761b9f40af8f524254e2475e59811fadcda0380436fba3889436fee8784ecda8a4ba687b6eb8f2b98c0683f
   languageName: node
   linkType: hard
 
