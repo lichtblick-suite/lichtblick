@@ -115,11 +115,10 @@ export class OccupancyGrids extends SceneExtension<OccupancyGridRenderable> {
       if (config.colorMode === "custom") {
         // prettier-ignore
         const customFields: SettingsTreeFields = {
-          minColor: { label: "Min Color", input: "rgba", value: config.minColor ?? DEFAULT_MIN_COLOR_STR },
-          maxColor: { label: "Max Color", input: "rgba", value: config.maxColor ?? DEFAULT_MAX_COLOR_STR },
-          unknownColor: { label: "Unknown Color", input: "rgba", value: config.unknownColor ?? DEFAULT_UNKNOWN_COLOR_STR },
-          invalidColor: { label: "Invalid Color", input: "rgba", value: config.invalidColor ?? DEFAULT_INVALID_COLOR_STR },
-          frameLocked: { label: "Frame Lock", input: "boolean", value: config.frameLocked ?? false },
+          minColor: { label: "Min color", input: "rgba", value: config.minColor ?? DEFAULT_MIN_COLOR_STR },
+          maxColor: { label: "Max color", input: "rgba", value: config.maxColor ?? DEFAULT_MAX_COLOR_STR },
+          unknownColor: { label: "Unknown color", input: "rgba", value: config.unknownColor ?? DEFAULT_UNKNOWN_COLOR_STR },
+          invalidColor: { label: "Invalid color", input: "rgba", value: config.invalidColor ?? DEFAULT_INVALID_COLOR_STR },
         };
         fields = {
           ...fields,
@@ -142,6 +141,12 @@ export class OccupancyGrids extends SceneExtension<OccupancyGridRenderable> {
           ...paletteFields,
         };
       }
+
+      fields.frameLocked = {
+        label: "Frame lock",
+        input: "boolean",
+        value: config.frameLocked ?? false,
+      };
 
       entries.push({
         path: ["topics", topic.name],
