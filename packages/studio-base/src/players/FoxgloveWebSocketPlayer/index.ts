@@ -72,6 +72,8 @@ type ResolvedService = {
 };
 
 export default class FoxgloveWebSocketPlayer implements Player {
+  private readonly _sourceId: string;
+
   private _url: string; // WebSocket URL.
   private _name: string;
   private _client?: FoxgloveClient; // The client when we're connected.
@@ -88,7 +90,7 @@ export default class FoxgloveWebSocketPlayer implements Player {
   private _receivedBytes: number = 0;
   private _metricsCollector: PlayerMetricsCollectorInterface;
   private _hasReceivedMessage = false;
-  private _presence: PlayerPresence = PlayerPresence.NOT_PRESENT;
+  private _presence: PlayerPresence = PlayerPresence.INITIALIZING;
   private _problems = new PlayerProblemManager();
   private _numTimeSeeks = 0;
   private _profile?: string;
@@ -110,8 +112,8 @@ export default class FoxgloveWebSocketPlayer implements Player {
   private _unsupportedChannelIds = new Set<ChannelId>();
   private _recentlyCanceledSubscriptions = new Set<SubscriptionId>();
   private _parameters = new Map<string, ParameterValue>();
-  private readonly _sourceId: string;
   private _getParameterInterval?: ReturnType<typeof setInterval>;
+  private _openTimeout?: ReturnType<typeof setInterval>;
   private _unresolvedPublications: AdvertiseOptions[] = [];
   private _publicationsByTopic = new Map<string, Publication>();
   private _serviceCallEncoding?: string;
@@ -132,7 +134,6 @@ export default class FoxgloveWebSocketPlayer implements Player {
     metricsCollector: PlayerMetricsCollectorInterface;
     sourceId: string;
   }) {
-    this._presence = PlayerPresence.INITIALIZING;
     this._metricsCollector = metricsCollector;
     this._url = url;
     this._name = url;
@@ -169,23 +170,9 @@ export default class FoxgloveWebSocketPlayer implements Player {
       this._services.clear();
       this._servicesByName.clear();
       this._serviceResponseCbs.clear();
+      this._parameters.clear();
       this._profile = undefined;
-    });
 
-    this._client.on("error", (err) => {
-      log.error(err);
-    });
-
-    this._client.on("close", (event) => {
-      log.info("Connection closed:", event);
-      this._presence = PlayerPresence.RECONNECTING;
-      this._startTime = undefined;
-      this._endTime = undefined;
-      this._clockTime = undefined;
-      this._serverPublishesTime = false;
-      this._serverCapabilities = [];
-      this._playerCapabilities = [];
-      this._supportedEncodings = undefined;
       this._datatypes = new Map();
 
       for (const topic of this._resolvedSubscriptionsByTopic.keys()) {
@@ -193,12 +180,29 @@ export default class FoxgloveWebSocketPlayer implements Player {
       }
       this._resolvedSubscriptionsById.clear();
       this._resolvedSubscriptionsByTopic.clear();
-      this._parameters.clear();
+    });
+
+    this._client.on("error", (err) => {
+      log.error(err);
+    });
+
+    // Note: We've observed closed being called not only when an already open connection is closed
+    // but also when a new connection fails to open
+    //
+    // Note: We explicitly avoid clearing state like start/end times, datatypes, etc to preserve
+    // this during a disconnect event. Any necessary state clearing is handled once a new connection
+    // is established
+    this._client.on("close", (event) => {
+      log.info("Connection closed:", event);
+      this._presence = PlayerPresence.RECONNECTING;
+
       if (this._getParameterInterval != undefined) {
         clearInterval(this._getParameterInterval);
+        this._getParameterInterval = undefined;
       }
+
       this._client?.close();
-      delete this._client;
+      this._client = undefined;
 
       this._problems.addProblem("ws:connection-failed", {
         severity: "error",
@@ -207,9 +211,7 @@ export default class FoxgloveWebSocketPlayer implements Player {
       });
 
       this._emitState();
-
-      // Try connecting again.
-      setTimeout(this._open, 3000);
+      this._openTimeout = setTimeout(this._open, 3000);
     });
 
     this._client.on("serverInfo", (event) => {
@@ -224,6 +226,12 @@ export default class FoxgloveWebSocketPlayer implements Player {
       this._serverPublishesTime = this._serverCapabilities.includes(ServerCapability.time);
       this._supportedEncodings = event.supportedEncodings;
       this._datatypes = new Map();
+
+      // If the server publishes the time we clear any existing clockTime we might have and let the
+      // server override
+      if (this._serverPublishesTime) {
+        this._clockTime = undefined;
+      }
 
       const maybeRosDistro = event.metadata?.["ROS_DISTRO"];
       if (maybeRosDistro) {
@@ -444,14 +452,14 @@ export default class FoxgloveWebSocketPlayer implements Player {
     });
 
     this._client.on("parameterValues", ({ parameters, id }) => {
-      const newParameters = parameters.filter((p) => !this._parameters.has(p.name));
+      const newParameters = parameters.filter((param) => !this._parameters.has(param.name));
 
       if (id === GET_ALL_PARAMS_REQUEST_ID) {
         // Reset params
-        this._parameters = new Map(parameters.map((p) => [p.name, p.value]));
+        this._parameters = new Map(parameters.map((param) => [param.name, param.value]));
       } else {
         // Update params
-        parameters.forEach((p) => this._parameters.set(p.name, p.value));
+        parameters.forEach((param) => this._parameters.set(param.name, param.value));
       }
 
       this._emitState();
@@ -584,8 +592,7 @@ export default class FoxgloveWebSocketPlayer implements Player {
       return Promise.resolve();
     }
 
-    const { _topics, _datatypes } = this;
-    if (!_topics) {
+    if (!this._topics) {
       return this._listener({
         name: this._name,
         presence: this._presence,
@@ -630,10 +637,10 @@ export default class FoxgloveWebSocketPlayer implements Player {
         isPlaying: true,
         speed: 1,
         lastSeekTime: this._numTimeSeeks,
-        topics: _topics,
+        topics: this._topics,
         // Always copy topic stats since message counts and timestamps are being updated
         topicStats: new Map(this._topicsStats),
-        datatypes: _datatypes,
+        datatypes: this._datatypes,
         parameters: new Map(this._parameters),
         services: new Map(this._services),
       },
@@ -647,11 +654,17 @@ export default class FoxgloveWebSocketPlayer implements Player {
 
   public close(): void {
     this._closed = true;
-    if (this._client) {
-      this._client.close();
-    }
+    this._client?.close();
     this._metricsCollector.close();
     this._hasReceivedMessage = false;
+    if (this._openTimeout != undefined) {
+      clearTimeout(this._openTimeout);
+      this._openTimeout = undefined;
+    }
+    if (this._getParameterInterval != undefined) {
+      clearInterval(this._getParameterInterval);
+      this._getParameterInterval = undefined;
+    }
   }
 
   public setSubscriptions(subscriptions: SubscribePayload[]): void {
@@ -802,8 +815,19 @@ export default class FoxgloveWebSocketPlayer implements Player {
 
   public setGlobalVariables(): void {}
 
+  // Return the current time
+  //
+  // For servers which publish a clock, we return that time. If the server disconnects we continue
+  // to return the last known time. For servers which do not publish a clock, we use wall time.
   private _getCurrentTime(): Time {
-    return this._serverPublishesTime ? this._clockTime ?? ZERO_TIME : fromMillis(Date.now());
+    // If the server does not publish the time, then we set the clock time to realtime as long as
+    // the server is connected. When the server is not connected, time stops.
+    if (!this._serverPublishesTime) {
+      this._clockTime =
+        this._presence === PlayerPresence.PRESENT ? fromMillis(Date.now()) : this._clockTime;
+    }
+
+    return this._clockTime ?? ZERO_TIME;
   }
 
   private _setupPublishers(): void {
