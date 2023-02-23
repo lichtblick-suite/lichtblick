@@ -117,12 +117,14 @@ export default class FoxgloveWebSocketPlayer implements Player {
   private _unresolvedPublications: AdvertiseOptions[] = [];
   private _publicationsByTopic = new Map<string, Publication>();
   private _serviceCallEncoding?: string;
-  private _services = new Map<string, Set<string>>();
   private _servicesByName = new Map<string, ResolvedService>();
   private _serviceResponseCbs = new Map<
     ServiceCallRequest["callId"],
     (response: ServiceCallResponse) => void
   >();
+  private _publishedTopics?: Map<string, Set<string>>;
+  private _subscribedTopics?: Map<string, Set<string>>;
+  private _advertisedServices?: Map<string, Set<string>>;
   private _nextServiceCallId = 0;
 
   public constructor({
@@ -167,11 +169,13 @@ export default class FoxgloveWebSocketPlayer implements Player {
       this._channelsById.clear();
       this._channelsByTopic.clear();
       this._setupPublishers();
-      this._services.clear();
       this._servicesByName.clear();
       this._serviceResponseCbs.clear();
       this._parameters.clear();
       this._profile = undefined;
+      this._publishedTopics = undefined;
+      this._subscribedTopics = undefined;
+      this._advertisedServices = undefined;
 
       this._datatypes = new Map();
 
@@ -290,6 +294,10 @@ export default class FoxgloveWebSocketPlayer implements Player {
         }, GET_ALL_PARAMS_PERIOD_MS);
 
         this._client?.getParameters([], GET_ALL_PARAMS_REQUEST_ID);
+      }
+
+      if (event.capabilities.includes(ServerCapability.connectionGraph)) {
+        this._client?.subscribeConnectionGraph();
       }
 
       this._emitState();
@@ -527,7 +535,6 @@ export default class FoxgloveWebSocketPlayer implements Player {
           requestMessageWriter,
         };
         this._servicesByName.set(service.name, resolvedService);
-        this._services.set(service.name, new Set([service.name]));
       }
       this._emitState();
     });
@@ -539,7 +546,6 @@ export default class FoxgloveWebSocketPlayer implements Player {
         );
         if (service) {
           this._servicesByName.delete(service.service.name);
-          this._services.delete(service.service.name);
         }
       }
     });
@@ -555,6 +561,35 @@ export default class FoxgloveWebSocketPlayer implements Player {
       }
       responseCallback(response);
       this._serviceResponseCbs.delete(response.callId);
+    });
+
+    this._client.on("connectionGraphUpdate", (event) => {
+      if (event.publishedTopics.length > 0 || event.removedTopics.length > 0) {
+        const newMap: Map<string, Set<string>> = new Map(this._publishedTopics ?? new Map());
+        for (const { name, publisherIds } of event.publishedTopics) {
+          newMap.set(name, new Set(publisherIds));
+        }
+        event.removedTopics.forEach((topic) => newMap.delete(topic));
+        this._publishedTopics = newMap;
+      }
+      if (event.subscribedTopics.length > 0 || event.removedTopics.length > 0) {
+        const newMap: Map<string, Set<string>> = new Map(this._subscribedTopics ?? new Map());
+        for (const { name, subscriberIds } of event.subscribedTopics) {
+          newMap.set(name, new Set(subscriberIds));
+        }
+        event.removedTopics.forEach((topic) => newMap.delete(topic));
+        this._subscribedTopics = newMap;
+      }
+      if (event.advertisedServices.length > 0 || event.removedServices.length > 0) {
+        const newMap: Map<string, Set<string>> = new Map(this._advertisedServices ?? new Map());
+        for (const { name, providerIds } of event.advertisedServices) {
+          newMap.set(name, new Set(providerIds));
+        }
+        event.removedServices.forEach((service) => newMap.delete(service));
+        this._advertisedServices = newMap;
+      }
+
+      this._emitState();
     });
   };
 
@@ -642,7 +677,9 @@ export default class FoxgloveWebSocketPlayer implements Player {
         topicStats: new Map(this._topicsStats),
         datatypes: this._datatypes,
         parameters: new Map(this._parameters),
-        services: new Map(this._services),
+        publishedTopics: this._publishedTopics,
+        subscribedTopics: this._subscribedTopics,
+        services: this._advertisedServices,
       },
     });
   });
