@@ -3,7 +3,7 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 import EventEmitter from "eventemitter3";
-import { isEqual, partition } from "lodash";
+import { partition } from "lodash";
 import { v4 as uuidv4 } from "uuid";
 
 import { MutexLocked } from "@foxglove/den/async";
@@ -31,6 +31,7 @@ import {
 
 import { NamespacedLayoutStorage } from "./NamespacedLayoutStorage";
 import WriteThroughLayoutCache from "./WriteThroughLayoutCache";
+import { isLayoutEqual } from "./compareLayouts";
 import computeLayoutSyncOperations, { SyncOperation } from "./computeLayoutSyncOperations";
 import { migratePanelsState } from "../migrateLayout";
 
@@ -290,7 +291,7 @@ export default class LayoutManager implements ILayoutManager {
     const newWorking =
       data == undefined
         ? localLayout.working
-        : isEqual(localLayout.baseline.data, data)
+        : isLayoutEqual(localLayout.baseline.data, data)
         ? undefined
         : { data, savedAt: now };
 

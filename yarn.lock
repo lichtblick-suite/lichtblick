@@ -2511,6 +2511,7 @@ __metadata:
     intervals-fn: 3.0.3
     jest-diff: 29.4.2
     jszip: 3.10.1
+    just-diff: 5.2.0
     leaflet: 1.9.3
     lodash: 4.17.21
     mathjs: 11.5.1
@@ -16820,6 +16821,13 @@ __metadata:
   version: 3.1.0
   resolution: "junk@npm:3.1.0"
   checksum: 6c4d68e8f8bc25b546baed802cd0e7be6a971e92f1e885c92cbfe98946d5690b961a32f8e7909e77765d3204c3e556d13c17f73e31697ffae1db07a58b9e68c0
+  languageName: node
+  linkType: hard
+
+"just-diff@npm:5.2.0":
+  version: 5.2.0
+  resolution: "just-diff@npm:5.2.0"
+  checksum: 5527fb6d28a446185250fba501ad857370c049bac7aa5a34c9ec82a45e1380af1a96137be7df2f87252d9f75ef67be41d4c0267d481ed0235b2ceb3ee1f5f75d
   languageName: node
   linkType: hard
 
