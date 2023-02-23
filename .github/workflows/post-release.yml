@@ -4,12 +4,6 @@ name: Post Release
 on:
   release:
     types: [released]
-  workflow_dispatch:
-    inputs:
-      target_commitish:
-        description: "Release branch"
-      tag_name:
-        description: "Tag name (with 'v' prefix)"
 
 jobs:
   bump:
@@ -20,10 +14,10 @@ jobs:
       contents: write
 
     steps:
-      - name: Checkout ${{ github.event.release.target_commitish || github.event.inputs.target_commitish }}
+      - name: Checkout release/${{ github.event.release.tag_name }}
         uses: actions/checkout@v3.3.0
         with:
-          ref: ${{ github.event.release.target_commitish || github.event.inputs.target_commitish }}
+          ref: release/${{ github.event.release.tag_name }}
           lfs: true
 
       - name: Configure git
@@ -34,7 +28,7 @@ jobs:
       - id: bump-version
         uses: foxglove/action-bump-version@v1
         with:
-          version: ${{ github.event.release.tag_name || github.event.inputs.tag_name }}-dev
+          version: ${{ github.event.release.tag_name }}-dev
           commit-message: Bump dev
           push: true
 
@@ -45,7 +39,7 @@ jobs:
           owner: foxglove
           repo: studio
           base: main
-          head: ${{ github.event.release.target_commitish || github.event.inputs.target_commitish }}
+          head: release/${{ github.event.release.tag_name }}
         env:
           GITHUB_TOKEN: ${{ secrets.FOXGLOVEBOT_GITHUB_TOKEN }}
 
@@ -54,10 +48,10 @@ jobs:
     runs-on: ubuntu-20.04
 
     steps:
-      - name: Checkout ${{ github.event.release.target_commitish || github.event.inputs.target_commitish }}
+      - name: Checkout release/${{ github.event.release.tag_name }}
         uses: actions/checkout@v3.3.0
         with:
-          ref: ${{ github.event.release.target_commitish || github.event.inputs.target_commitish }}
+          ref: release/${{ github.event.release.tag_name }}
           token: ${{ secrets.FOXGLOVEBOT_GITHUB_TOKEN }}
           lfs: true
 
