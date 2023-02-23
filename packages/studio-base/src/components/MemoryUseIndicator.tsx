@@ -5,14 +5,26 @@
 import { Tooltip, Typography } from "@mui/material";
 import { makeStyles } from "tss-react/mui";
 
-import { useMemoryInfo } from "@foxglove/studio-base/hooks";
+import { AppSetting } from "@foxglove/studio-base/AppSetting";
+import { useAppConfigurationValue, useMemoryInfo } from "@foxglove/studio-base/hooks";
 
 const useStyles = makeStyles()((theme) => ({
   root: {
-    width: "100%",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    flexDirection: "column",
     position: "relative",
-    textAlign: "left",
-    padding: theme.spacing(1),
+    width: 50,
+    flex: "1 0 50px",
+    fontSize: theme.typography.caption.fontSize,
+    overflow: "hidden",
+  },
+  label: {
+    fontWeight: "bold",
+  },
+  text: {
+    lineHeight: 1.1,
   },
 }));
 
@@ -22,7 +34,8 @@ function toMB(bytes: number): number {
 
 function MemoryUseIndicator(): JSX.Element {
   const memoryInfo = useMemoryInfo({ refreshIntervalMs: 5000 });
-  const { classes } = useStyles();
+  const { classes, cx } = useStyles();
+  const [enableNewTopNav = false] = useAppConfigurationValue<boolean>(AppSetting.ENABLE_NEW_TOPNAV);
 
   // If we can't load memory info (maybe not supported) then we don't show any indicator
   if (!memoryInfo) {
@@ -34,12 +47,17 @@ function MemoryUseIndicator(): JSX.Element {
   const limitMb = toMB(memoryInfo.jsHeapSizeLimit).toLocaleString();
 
   return (
-    <Tooltip title={`Used (MB): ${usedMb} / ${limitMb}`}>
+    <Tooltip
+      title={`Used (MB): ${usedMb} / ${limitMb}`}
+      placement={enableNewTopNav ? "bottom" : "right"}
+    >
       <div className={classes.root}>
-        <Typography variant="caption" style={{ fontWeight: "bold" }}>
-          mem
+        <Typography className={cx(classes.label, classes.text)} variant="caption">
+          MEM
         </Typography>
-        <Typography variant="caption">{usedPercent.toFixed(2)}%</Typography>
+        <Typography className={classes.text} variant="caption">
+          {usedPercent.toFixed(2)}%
+        </Typography>
       </div>
     </Tooltip>
   );

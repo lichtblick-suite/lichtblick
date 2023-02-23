@@ -10,13 +10,16 @@ import { AppBar as MuiAppBar, Button, IconButton, Toolbar, Typography } from "@m
 import { MouseEvent, useCallback, useState } from "react";
 import { makeStyles } from "tss-react/mui";
 
+import { AppSetting } from "@foxglove/studio-base/AppSetting";
 import { FoxgloveLogo } from "@foxglove/studio-base/components/FoxgloveLogo";
+import { MemoryUseIndicator } from "@foxglove/studio-base/components/MemoryUseIndicator";
 import { useAnalytics } from "@foxglove/studio-base/context/AnalyticsContext";
 import {
   CurrentUser,
   useCurrentUserType,
   User,
 } from "@foxglove/studio-base/context/CurrentUserContext";
+import { useAppConfigurationValue } from "@foxglove/studio-base/hooks";
 import useNativeAppMenuEvent from "@foxglove/studio-base/hooks/useNativeAppMenuEvent";
 import { AppEvent } from "@foxglove/studio-base/services/IAnalytics";
 
@@ -159,6 +162,9 @@ export function AppBar(props: AppBarProps): JSX.Element {
   const { classes, cx } = useStyles({ leftInset, debugDragRegion });
   const currentUserType = useCurrentUserType();
   const analytics = useAnalytics();
+  const [enableMemoryUseIndicator = false] = useAppConfigurationValue<boolean>(
+    AppSetting.ENABLE_MEMORY_USE_INDICATOR,
+  );
 
   const supportsAccountSettings = signIn != undefined;
 
@@ -233,6 +239,7 @@ export function AppBar(props: AppBarProps): JSX.Element {
 
           <div className={classes.end}>
             <div className={classes.endInner}>
+              {enableMemoryUseIndicator && <MemoryUseIndicator />}
               <HelpIconButton
                 color="inherit"
                 id="help-button"
