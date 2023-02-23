@@ -145,6 +145,10 @@ jobs:
           working-directory: ./
           run: yarn run test:integration
 
+      - name: test:web-integration
+        if: matrix.os == 'ubuntu-20.04'
+        run: yarn run test:web-integration
+
       - name: test:integration
         if: matrix.os != 'ubuntu-20.04'
         run: yarn run test:integration
