@@ -124,7 +124,6 @@ function TopicListItem({
         <Stack style={{ textAlign: "right" }}>
           <Typography
             variant="caption"
-            component="div"
             color="text.secondary"
             data-topic={topic.name}
             data-topic-stat="count"
@@ -133,7 +132,6 @@ function TopicListItem({
           </Typography>
           <Typography
             variant="caption"
-            component="div"
             color="text.secondary"
             data-topic={topic.name}
             data-topic-stat="frequency"

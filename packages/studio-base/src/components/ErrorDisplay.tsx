@@ -127,9 +127,7 @@ function ErrorDisplay(props: ErrorDisplayProps): JSX.Element {
           <Typography variant="h4" gutterBottom>
             {props.title ?? "The app encountered an unexpected error"}
           </Typography>
-          <Typography variant="body1" component="div">
-            {props.content}
-          </Typography>
+          <Typography variant="body1">{props.content}</Typography>
         </Stack>
         <Divider />
         <Typography variant="subtitle2" component="code" fontWeight="bold">

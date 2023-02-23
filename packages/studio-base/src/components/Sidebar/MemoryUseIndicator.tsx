@@ -36,12 +36,10 @@ function MemoryUseIndicator(): JSX.Element {
   return (
     <Tooltip title={`Used (MB): ${usedMb} / ${limitMb}`}>
       <div className={classes.root}>
-        <Typography component="div" variant="caption" style={{ fontWeight: "bold" }}>
+        <Typography variant="caption" style={{ fontWeight: "bold" }}>
           mem
         </Typography>
-        <Typography component="div" variant="caption">
-          {usedPercent.toFixed(2)}%
-        </Typography>
+        <Typography variant="caption">{usedPercent.toFixed(2)}%</Typography>
       </div>
     </Tooltip>
   );

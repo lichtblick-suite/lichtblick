@@ -109,8 +109,13 @@ const useStyles = makeStyles()((theme) => ({
   recentSourceSecondary: {
     color: "inherit",
   },
-  accountList: { padding: "0px" },
-  accountListItem: { margin: "0px 0px 5px 10px" },
+  featureList: {
+    paddingLeft: theme.spacing(1.5),
+
+    "li:not(:last-of-type)": {
+      marginBottom: theme.spacing(0.5),
+    },
+  },
 }));
 
 type DataSourceOptionProps = {
@@ -136,10 +141,10 @@ function DataSourceOption(props: DataSourceOptionProps): JSX.Element {
       onClick={onClick}
     >
       <Stack flex="auto" zeroMinWidth>
-        <Typography component="div" variant="subtitle1" color="text.primary">
+        <Typography variant="subtitle1" color="text.primary">
           {text}
         </Typography>
-        <Typography component="div" variant="body2" color="text.secondary" noWrap>
+        <Typography variant="body2" color="text.secondary" noWrap>
           {secondaryText}
         </Typography>
       </Stack>
@@ -294,15 +299,13 @@ function SidebarItems(props: { onSelectView: (newValue: OpenDialogViews) => void
             id: "collaborate",
             title: "Accelerate development with Foxglove Data Platform",
             text: (
-              <ul className={classes.accountList}>
-                <li className={classes.accountListItem}>
-                  Securely store petabytes of ROS or custom data
-                </li>
-                <li className={classes.accountListItem}>
+              <ul className={classes.featureList}>
+                <li>Securely store petabytes of ROS or custom data</li>
+                <li>
                   Use a convenient web interface to tag, search, and retrieve data at lightning
                   speed
                 </li>
-                <li className={classes.accountListItem}>
+                <li>
                   Share data files, visualization layouts, and custom extensions with teammates
                 </li>
               </ul>
@@ -381,9 +384,8 @@ function SidebarItems(props: { onSelectView: (newValue: OpenDialogViews) => void
     }
   }, [
     analytics,
-    classes.accountList,
-    classes.accountListItem,
     classes.button,
+    classes.featureList,
     currentUserType,
     freeUser,
     teamOrEnterpriseUser,

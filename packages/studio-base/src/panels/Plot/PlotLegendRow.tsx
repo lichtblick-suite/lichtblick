@@ -202,7 +202,6 @@ export function PlotLegendRow({
       {showPlotValuesInLegend && (
         <div className={classes.plotValue}>
           <Typography
-            component="div"
             variant="body2"
             align="right"
             color={hoverValue?.value != undefined ? "warning.main" : "text.secondary"}

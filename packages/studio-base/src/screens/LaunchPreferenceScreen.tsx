@@ -98,10 +98,10 @@ export function LaunchPreferenceScreen(): ReactElement {
                 onClick={action.onClick}
               >
                 <Stack flex="auto" zeroMinWidth>
-                  <Typography component="div" variant="subtitle1" color="text.primary">
+                  <Typography variant="subtitle1" color="text.primary">
                     {action.primary}
                   </Typography>
-                  <Typography component="div" variant="body2" color="text.secondary">
+                  <Typography variant="body2" color="text.secondary">
                     {action.secondary}
                   </Typography>
                 </Stack>

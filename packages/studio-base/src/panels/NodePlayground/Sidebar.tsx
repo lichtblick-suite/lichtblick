@@ -205,7 +205,7 @@ const Sidebar = ({
             collapse={() => updateExplorer(undefined)}
             title="Utilities"
             subheader={
-              <Typography variant="body2" color="text.secondary" component="div">
+              <Typography variant="body2" color="text.secondary">
                 You can import any of these modules into your script using the following syntax:{" "}
                 <pre>{`import { ... } from "./pointClouds.ts".`}</pre>
               </Typography>

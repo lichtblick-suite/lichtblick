@@ -221,7 +221,7 @@ export function AppBar(props: AppBarProps): JSX.Element {
               <FoxgloveLogo fontSize="inherit" color="inherit" />
             </IconButton>
             {currentUser != undefined && (
-              <Typography noWrap variant="h5" fontWeight={800} color="inherit" component="div">
+              <Typography noWrap variant="h5" fontWeight={800} color="inherit">
                 {currentUser.org.displayName}
               </Typography>
             )}

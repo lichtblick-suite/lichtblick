@@ -29,13 +29,7 @@ export default function EmptyState({ children }: PropsWithChildren<unknown>): JS
   return (
     <div className={classes.root}>
       <Container maxWidth={false}>
-        <Typography
-          component="div"
-          variant="body2"
-          color="text.secondary"
-          lineHeight={1.4}
-          align="center"
-        >
+        <Typography variant="body2" color="text.secondary" lineHeight={1.4} align="center">
           {children}
         </Typography>
       </Container>
