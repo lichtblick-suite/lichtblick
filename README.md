@@ -71,55 +71,7 @@ Foxglove Studio is primarily written in TypeScript – contributions are welcome
 
 Note: All contributors must agree to our [Contributor License Agreement](https://github.com/foxglove/cla).
 
-**Supported development environments:** Linux, Windows, macOS
-
-**Dependencies:**
-
-- [Node.js](https://nodejs.org/en/) v16.10+
-- [Git LFS](https://git-lfs.github.com/)
-- [Visual Studio Code](https://code.visualstudio.com/) – Recommended
-
-**Getting started:**
-
-1. Clone repo
-1. Run `corepack enable` and `yarn install`
-1. Launch the development environment:
-
-```sh
-# To launch the desktop app (run both scripts concurrently):
-$ yarn desktop:serve        # start webpack
-$ yarn desktop:start        # launch electron
-
-# To launch the browser app:
-$ yarn web:serve
-
-# To launch the browser app using a local instance of the backend server:
-$ yarn web:serve:local
-
-# To launch the storybook:
-$ yarn storybook
-
-# Advanced usage: running webpack and electron on different computers (or VMs) on the same network
-$ yarn desktop:serve --host 192.168.xxx.yyy         # the address where electron can reach the webpack dev server
-$ yarn dlx electron@13.0.0-beta.13 .webpack # launch the version of electron for the current computer's platform
-
-# To launch the desktop app using production API endpoints
-$ yarn desktop:serve --env FOXGLOVE_BACKEND=production
-$ yarn desktop:start
-
-# NOTE: yarn web:serve does not support connecting to the production endpoints
-```
-
-A [Dockerfile](/Dockerfile) to self-host the browser app is also available.
-
-**Other useful commands:**
-
-```sh
-$ yarn run          # list available commands
-$ yarn lint         # lint all files
-$ yarn test         # run all tests
-$ yarn test:watch   # run tests on changed files
-```
+See [CONTRIBUTING.md](CONTRIBUTING.md) for more details.
 
 ## Self-hosting
 
