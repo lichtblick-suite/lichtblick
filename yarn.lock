@@ -2240,7 +2240,7 @@ __metadata:
     "@types/protobufjs": "workspace:*"
     flatbuffers: 23.1.21
     flatbuffers_reflection: 0.0.3
-    protobufjs: 7.2.0
+    protobufjs: 7.2.2
     typescript: 4.9.5
   languageName: unknown
   linkType: soft
@@ -20381,9 +20381,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"protobufjs@npm:7.2.0":
-  version: 7.2.0
-  resolution: "protobufjs@npm:7.2.0"
+"protobufjs@npm:7.2.2":
+  version: 7.2.2
+  resolution: "protobufjs@npm:7.2.2"
   dependencies:
     "@protobufjs/aspromise": ^1.1.2
     "@protobufjs/base64": ^1.1.2
@@ -20397,7 +20397,7 @@ __metadata:
     "@protobufjs/utf8": ^1.1.0
     "@types/node": ">=13.7.0"
     long: ^5.0.0
-  checksum: 27d204d5765ad241c8141c47dbdf4e8a527a0bc916eade658b5cf561e33320fe928a0273cddd01c864fdc3822312cad5a536d56dd378697a06a0c24ae882cbb6
+  checksum: 86166e8f3e46789fa4d117ae72c17356db36bf87c0e0710d224be32e543b1c378a94e66dc2b1de5af45edfc25f56acfc7e688c50c956426a3ae97bc474f4445c
   languageName: node
   linkType: hard
 
