@@ -11,11 +11,12 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import ArrowLeftRightIcon from "@mdi/svg/svg/arrow-left-right.svg";
-import ArrowUpDownIcon from "@mdi/svg/svg/arrow-up-down.svg";
-import FitToPageIcon from "@mdi/svg/svg/fit-to-page-outline.svg";
-import ServiceIcon from "@mdi/svg/svg/rectangle-outline.svg";
-import TopicIcon from "@mdi/svg/svg/rhombus.svg";
+import {
+  ArrowBidirectionalUpDown16Regular,
+  PageFit16Regular,
+  RectangleLandscape16Regular,
+  Diamond32Filled,
+} from "@fluentui/react-icons";
 import { FormControlLabel, IconButton, Paper, Radio, RadioGroup } from "@mui/material";
 import Cytoscape from "cytoscape";
 import { useCallback, useMemo, useRef, useState } from "react";
@@ -381,10 +382,12 @@ function TopicGraph() {
         <Paper square={false} elevation={4} className={classes.pointerEventsAuto}>
           <Stack flex="0 0" className={cx(classes.stack, classes.pointerEventsAuto)}>
             <IconButton title="Zoom fit" onClick={onZoomFit} className={classes.icon}>
-              <FitToPageIcon />
+              <PageFit16Regular />
             </IconButton>
             <IconButton title="Orientation" onClick={toggleOrientation} className={classes.icon}>
-              {lrOrientation ? <ArrowLeftRightIcon /> : <ArrowUpDownIcon />}
+              <ArrowBidirectionalUpDown16Regular
+                style={{ transform: `rotate(${lrOrientation ? 90 : 0}deg)` }}
+              />
             </IconButton>
             <IconButton
               color={showServices ? "info" : "inherit"}
@@ -392,7 +395,7 @@ function TopicGraph() {
               title={showServices ? "Showing services" : "Hiding services"}
               onClick={toggleShowServices}
             >
-              <ServiceIcon />
+              <RectangleLandscape16Regular />
             </IconButton>
           </Stack>
         </Paper>
@@ -401,7 +404,7 @@ function TopicGraph() {
           checked={topicVisibility !== "none"}
           dataTest="set-topic-visibility"
           tooltip={topicVisibilityTooltip}
-          icon={<TopicIcon />}
+          icon={<Diamond32Filled />}
           selectedTab={selectedTab}
           onSelectTab={(newSelectedTab) => {
             setSelectedTab(newSelectedTab);

@@ -2433,7 +2433,6 @@ __metadata:
     "@foxglove/ws-protocol": 0.5.0
     "@foxglove/xmlrpc": 1.3.0
     "@mcap/core": 1.1.0
-    "@mdi/svg": 7.1.96
     "@mui/icons-material": 5.11.0
     "@mui/material": 5.11.9
     "@popperjs/core": 2.11.6
@@ -3103,13 +3102,6 @@ __metadata:
     heap-js: ^2.1.6
     tslib: ^2
   checksum: a43ba5bc1c7083b40bc84629eb6815675c04c9d92fd71f2dbe1eee8a0fe5863a4bd69ee4e5a34a9a8848a16b20eb0271c739bcb46fa49b063533a612360adc06
-  languageName: node
-  linkType: hard
-
-"@mdi/svg@npm:7.1.96":
-  version: 7.1.96
-  resolution: "@mdi/svg@npm:7.1.96"
-  checksum: afbb0947cbf342ffb08d9b0069095db5e4d9a5dab741457eac2a0a8433217834bb96589be26b8abbf4ac315473870e07a14b0b759b5148efeedad193067ab67c
   languageName: node
   linkType: hard
 

@@ -2,7 +2,7 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import FileDownloadIcon from "@mdi/svg/svg/file-download-outline.svg";
+import { ArrowDownload20Filled } from "@fluentui/react-icons";
 import CloseIcon from "@mui/icons-material/Close";
 import DeleteOutline from "@mui/icons-material/DeleteOutline";
 import {
@@ -110,7 +110,7 @@ export default function ShareJsonModal({
       <DialogActions>
         <Stack direction="row" gap={1}>
           <IconButton onClick={handleDownload} title="Download" aria-label="Download">
-            <FileDownloadIcon />
+            <ArrowDownload20Filled />
           </IconButton>
           <CopyButton color="default" getText={getText} />
           <HoverableIconButton

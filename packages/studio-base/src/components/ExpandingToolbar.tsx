@@ -2,7 +2,7 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import CloseFullscreenIcon from "@mui/icons-material/CloseFullscreen";
+import { ArrowMinimize24Filled } from "@fluentui/react-icons";
 import { Paper, IconButton, Tabs, Tab, styled as muiStyled } from "@mui/material";
 import { ReactElement, ReactNode } from "react";
 
@@ -130,7 +130,7 @@ export default function ExpandingToolbar<T extends string>({
             ))}
           </StyledTabs>
           <StyledIconButton onClick={() => onSelectTab(undefined)}>
-            <CloseFullscreenIcon fontSize="small" />
+            <ArrowMinimize24Filled />
           </StyledIconButton>
         </Stack>
       </Paper>

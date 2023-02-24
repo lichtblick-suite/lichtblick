@@ -11,7 +11,7 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import DatabaseIcon from "@mdi/svg/svg/database.svg";
+import { Database20Filled } from "@fluentui/react-icons";
 import { Box } from "@mui/material";
 import { storiesOf } from "@storybook/react";
 import { Mosaic, MosaicWindow } from "react-mosaic-component";
@@ -118,7 +118,7 @@ storiesOf("components/PanelToolbar", module)
   .add("one additional icon", () => {
     const additionalIcons = (
       <ToolbarIconButton title="database icon">
-        <DatabaseIcon />
+        <Database20Filled />
       </ToolbarIconButton>
     );
     return (
