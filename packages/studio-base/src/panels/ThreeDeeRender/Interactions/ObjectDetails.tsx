@@ -14,9 +14,7 @@
 import { first, omit } from "lodash";
 import Tree from "react-json-tree";
 
-import { AppSetting } from "@foxglove/studio-base/AppSetting";
 import Stack from "@foxglove/studio-base/components/Stack";
-import { useAppConfigurationValue } from "@foxglove/studio-base/hooks";
 import { RosValue } from "@foxglove/studio-base/players/types";
 import { getItemString } from "@foxglove/studio-base/util/getItemString";
 import { useJsonTreeTheme } from "@foxglove/studio-base/util/globalConstants";
@@ -26,6 +24,7 @@ import { InteractionData } from "./types";
 type Props = {
   readonly interactionData?: InteractionData;
   readonly selectedObject?: RosValue;
+  readonly timezone: string | undefined;
 };
 
 function maybePlainObject(rawVal: unknown) {
@@ -35,7 +34,7 @@ function maybePlainObject(rawVal: unknown) {
   return rawVal;
 }
 
-function ObjectDetails({ interactionData, selectedObject }: Props): JSX.Element {
+function ObjectDetails({ interactionData, selectedObject, timezone }: Props): JSX.Element {
   const jsonTreeTheme = useJsonTreeTheme();
   const topic = interactionData?.topic ?? "";
 
@@ -43,8 +42,6 @@ function ObjectDetails({ interactionData, selectedObject }: Props): JSX.Element 
   // We need a plain object to sort the keys and omit interaction data
   const plainObject = maybePlainObject(selectedObject);
   const originalObject = omit(plainObject as Record<string, unknown>, "interactionData");
-
-  const [timezone] = useAppConfigurationValue<string>(AppSetting.TIMEZONE);
 
   if (topic.length === 0) {
     // show the original object directly if there is no interaction data
