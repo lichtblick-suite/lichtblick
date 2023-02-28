@@ -9,7 +9,9 @@ import LeafletShadowIconUrl from "leaflet/dist/images/marker-shadow.png";
 import { StrictMode } from "react";
 import ReactDOM from "react-dom";
 
+import { useCrash } from "@foxglove/hooks";
 import { PanelExtensionContext } from "@foxglove/studio";
+import { CaptureErrorBoundary } from "@foxglove/studio-base/components/CaptureErrorBoundary";
 
 import MapPanel from "./MapPanel";
 
@@ -28,10 +30,15 @@ L.Marker.prototype.options.icon = L.icon({
   shadowSize: [41, 41],
 });
 
-export function initPanel(context: PanelExtensionContext): () => void {
+export function initPanel(
+  crash: ReturnType<typeof useCrash>,
+  context: PanelExtensionContext,
+): () => void {
   ReactDOM.render(
     <StrictMode>
-      <MapPanel context={context} />
+      <CaptureErrorBoundary onError={crash}>
+        <MapPanel context={context} />
+      </CaptureErrorBoundary>
     </StrictMode>,
     context.panelElement,
   );

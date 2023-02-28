@@ -7,3 +7,4 @@ export { default as useShallowMemo } from "./useShallowMemo";
 export { default as useVisibilityState } from "./useVisibilityState";
 export { default as useMustNotChange } from "./useMustNotChange";
 export { default as useValueChangedDebugLog } from "./useValueChangedDebugLog";
+export * from "./useCrash";
