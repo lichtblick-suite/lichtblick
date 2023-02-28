@@ -10,7 +10,7 @@
     "@actions/tool-cache": "2.0.1",
     "@foxglove/log": "workspace:*",
     "@foxglove/mcap-support": "workspace:*",
-    "@foxglove/rosbag": "0.2.3",
+    "@foxglove/rosbag": "0.3.0",
     "@foxglove/rostime": "1.1.2",
     "@mcap/core": "1.1.0",
     "@pmmmwh/react-refresh-webpack-plugin": "0.5.10",

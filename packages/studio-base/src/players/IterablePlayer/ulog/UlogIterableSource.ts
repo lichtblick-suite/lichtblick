@@ -88,9 +88,9 @@ export class UlogIterableSource implements IIterableSource {
         topics.push({ name, schemaName: msgDef.name });
         topicStats.set(name, { numMessages: count });
         messageDefinitionsByTopic[name] = msgDef.format;
-        const rosMsgDef = datatypes.get(msgDef.name);
-        if (rosMsgDef) {
-          parsedMessageDefinitionsByTopic[name] = [rosMsgDef];
+        const messageDefinition = datatypes.get(msgDef.name);
+        if (messageDefinition) {
+          parsedMessageDefinitionsByTopic[name] = [messageDefinition];
         }
       }
     }

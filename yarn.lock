@@ -2225,10 +2225,11 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@foxglove/mcap-support@workspace:packages/mcap-support"
   dependencies:
-    "@foxglove/rosmsg": 3.1.0
-    "@foxglove/rosmsg-serialization": 1.5.3
-    "@foxglove/rosmsg2-serialization": 1.1.1
-    "@foxglove/schemas": 1.0.0
+    "@foxglove/message-definition": 0.2.0
+    "@foxglove/rosmsg": 4.0.0
+    "@foxglove/rosmsg-serialization": 2.0.0
+    "@foxglove/rosmsg2-serialization": 2.0.0
+    "@foxglove/schemas": 1.1.0
     "@foxglove/wasm-bz2": 0.1.1
     "@foxglove/wasm-lz4": 1.0.2
     "@foxglove/wasm-zstd": 1.0.1
@@ -2242,6 +2243,13 @@ __metadata:
   languageName: unknown
   linkType: soft
 
+"@foxglove/message-definition@npm:0.2.0, @foxglove/message-definition@npm:^0.2.0":
+  version: 0.2.0
+  resolution: "@foxglove/message-definition@npm:0.2.0"
+  checksum: 8f972dd52cf2f44e8357c8f13ee2136b23548d49d9251fc47c68569a33effe5d082c0681e3b0761751dd27759ac778f1e45de9f52d5925298ccc80e607784159
+  languageName: node
+  linkType: hard
+
 "@foxglove/node-fetch@npm:3.1.0":
   version: 3.1.0
   resolution: "@foxglove/node-fetch@npm:3.1.0"
@@ -2252,65 +2260,67 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@foxglove/ros1@npm:1.6.0":
-  version: 1.6.0
-  resolution: "@foxglove/ros1@npm:1.6.0"
+"@foxglove/ros1@npm:2.0.0":
+  version: 2.0.0
+  resolution: "@foxglove/ros1@npm:2.0.0"
   dependencies:
-    "@foxglove/rosmsg": ^3.1.0
-    "@foxglove/rosmsg-serialization": ^1.5.2
+    "@foxglove/message-definition": ^0.2.0
+    "@foxglove/rosmsg": ^4.0.0
+    "@foxglove/rosmsg-serialization": ^2.0.0
     "@foxglove/xmlrpc": ^1.3.0
-    eventemitter3: ^4.0.7
+    eventemitter3: ^5.0.0
     ipaddr.js: ^2.0.1
   bin:
     roscore: dist/nodejs/roscore.js
-  checksum: c4a479c1a48778988fb5a153be871d45f14be144a207ded57a1ddf3f4fa56243debf65f0d65f72e1bbf10c3aeac9488e426a08c66071c318475591c8e4522800
+  checksum: 87ba6c9749888ba2445575ae54efc0f042c917b439a56e31d1743f3b7e9d151754c1575e06fefc7b8e5fda5bbff52585e23d80bf7336582030bbb0a5140d7d44
   languageName: node
   linkType: hard
 
-"@foxglove/ros2@npm:3.4.0":
-  version: 3.4.0
-  resolution: "@foxglove/ros2@npm:3.4.0"
+"@foxglove/ros2@npm:4.0.0":
+  version: 4.0.0
+  resolution: "@foxglove/ros2@npm:4.0.0"
   dependencies:
-    "@foxglove/rosmsg": ^3.1.0
-    "@foxglove/rosmsg2-serialization": ^1.0.7
+    "@foxglove/message-definition": ^0.2.0
+    "@foxglove/rosmsg": ^4.0.0
+    "@foxglove/rosmsg2-serialization": ^2.0.0
     "@foxglove/rtps": ^1.6.0
-    eventemitter3: ^4.0.7
-  checksum: 95d566796c0731ecba62f392e67f52b8001985612dd878f5c5e4a97e565a9140acbc4766f7c34374700617a8330e6407d1eae5a7bed2aaabab37d0c4b00f8673
+    eventemitter3: ^5.0.0
+  checksum: 5f0fe7def7c06b3e96b0a4eee2a0bcda79431a024fd0ef20852c92e884e7c0a9c09ea8b2caa69ec9024540c480ca16d234fc2ec1ec6158e9f47c23fc437d91d1
   languageName: node
   linkType: hard
 
-"@foxglove/rosbag2-web@npm:4.0.6":
-  version: 4.0.6
-  resolution: "@foxglove/rosbag2-web@npm:4.0.6"
+"@foxglove/rosbag2-web@npm:4.1.0":
+  version: 4.1.0
+  resolution: "@foxglove/rosbag2-web@npm:4.1.0"
   dependencies:
-    "@foxglove/rosbag2": ^4.3.3
+    "@foxglove/rosbag2": ^5.0.0
     "@foxglove/sql.js": ^0.0.4
-  checksum: da79306f1de0e835d4a83dde17eb0d370377317e488833e18b0f069eaeea9c9a4c1501a8ddeb388ee5045d11f94d78769d6f16ae82f09c1a521c732f35976b38
+  checksum: 3b1f4dcfbcb1c51aa1df8441c5b618a361286abf5d749c36bb386d1fee9cd927317a564950478c9905b06c73482039752600f04676330c7329e1f942bd2bde6c
   languageName: node
   linkType: hard
 
-"@foxglove/rosbag2@npm:^4.3.3":
-  version: 4.3.3
-  resolution: "@foxglove/rosbag2@npm:4.3.3"
+"@foxglove/rosbag2@npm:^5.0.0":
+  version: 5.0.0
+  resolution: "@foxglove/rosbag2@npm:5.0.0"
   dependencies:
-    "@foxglove/rosmsg-msgs-common": ^2.1.0
-    "@foxglove/rosmsg2-serialization": ^1.1.1
+    "@foxglove/rosmsg-msgs-common": ^3.0.0
+    "@foxglove/rosmsg2-serialization": ^2.0.0
     "@foxglove/rostime": ^1.1.2
-    "@foxglove/schemas": ^1.0.0
+    "@foxglove/schemas": ^1.1.0
     js-yaml: ^4.1.0
-  checksum: b9d6045afb91c54d58f9c39ec46d4e480b4fe84a60cc816c0988ffa1149a32344bcdfe3341afac16fa55da57cdbe7b9198df6c9497fbf6cf3ff46d5640029c04
+  checksum: 95d6aeb369591f36ab2dcead94db2f39cd1b21a43606d2315fbe55e53ccb6399da34cfe7ebcea5d2c845007ba5a8ad1d6735c5b0714fc18c0159c495d3ee37a8
   languageName: node
   linkType: hard
 
-"@foxglove/rosbag@npm:0.2.3":
-  version: 0.2.3
-  resolution: "@foxglove/rosbag@npm:0.2.3"
+"@foxglove/rosbag@npm:0.3.0":
+  version: 0.3.0
+  resolution: "@foxglove/rosbag@npm:0.3.0"
   dependencies:
-    "@foxglove/rosmsg": ^3.1.0
-    "@foxglove/rosmsg-serialization": ^1.5.2
+    "@foxglove/rosmsg": ^4.0.0
+    "@foxglove/rosmsg-serialization": ^2.0.0
     "@foxglove/rostime": ^1.1.2
     heap: ^0.2.7
-  checksum: 2952d0e0b38287b1c3b92b04db249e7ee52b37af8907b3686a70c42b6694b4dc145f3bb13c9a82bfc07566ba166d16a5eedc4d143f3d34858c6a5fc79d6b7867
+  checksum: 4471c3c61709ea59861b0cafdc93d89bbd34fb8dfd5d1c4424c88bb78f63782cf12f39e2fb1a391a74fe472ac139dfd6cda601b4a06e0882fae2db3041ed821d
   languageName: node
   linkType: hard
 
@@ -2329,41 +2339,45 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@foxglove/rosmsg-msgs-common@npm:2.1.0, @foxglove/rosmsg-msgs-common@npm:^2.0.0, @foxglove/rosmsg-msgs-common@npm:^2.1.0":
-  version: 2.1.0
-  resolution: "@foxglove/rosmsg-msgs-common@npm:2.1.0"
+"@foxglove/rosmsg-msgs-common@npm:3.0.0, @foxglove/rosmsg-msgs-common@npm:^3.0.0":
+  version: 3.0.0
+  resolution: "@foxglove/rosmsg-msgs-common@npm:3.0.0"
   dependencies:
-    "@foxglove/rosmsg": ^3.1.0
-  checksum: 1e6bcff0f21f431ab41dd703b7b4cbd76007fdea297c1c0d6b9cbddd9affe0f4991ea846be861c6863078555e8927bc64160db5a3a73f3d32d0f14c39e51a285
+    "@foxglove/message-definition": ^0.2.0
+    "@foxglove/rosmsg": ^4.0.0
+  checksum: 10fd24faa232c528f7b9e28acda82ebf49e092c263bd322edd1adf56601cdf1cf7512bcad3cdf1d0997605852c5e5dd2dfffe00107b8f8ae66f2d40d1b6e450e
   languageName: node
   linkType: hard
 
-"@foxglove/rosmsg-serialization@npm:1.5.3, @foxglove/rosmsg-serialization@npm:^1.5.2":
-  version: 1.5.3
-  resolution: "@foxglove/rosmsg-serialization@npm:1.5.3"
+"@foxglove/rosmsg-serialization@npm:2.0.0, @foxglove/rosmsg-serialization@npm:^2.0.0":
+  version: 2.0.0
+  resolution: "@foxglove/rosmsg-serialization@npm:2.0.0"
   dependencies:
-    "@foxglove/rosmsg": ^3.1.0
-  checksum: fdb665763b84f9af30d5161368aaf8ad662615cbb65ee648a7398c940f679baaeaca2eb569f573d2cedbdb171a0a1dabbdad14d0f2b70eff5c1afc337e58752b
+    "@foxglove/message-definition": ^0.2.0
+  checksum: 50924345dd088797262a79afa2f284ef5f622fb847a725e155eb14ec507f6187eb87327b0c2242afe9ab4debe2b668153895b44f89e5cb8944c21bcf0a8d1e91
   languageName: node
   linkType: hard
 
-"@foxglove/rosmsg2-serialization@npm:1.1.1, @foxglove/rosmsg2-serialization@npm:^1.0.7, @foxglove/rosmsg2-serialization@npm:^1.1.1":
-  version: 1.1.1
-  resolution: "@foxglove/rosmsg2-serialization@npm:1.1.1"
+"@foxglove/rosmsg2-serialization@npm:2.0.0, @foxglove/rosmsg2-serialization@npm:^2.0.0":
+  version: 2.0.0
+  resolution: "@foxglove/rosmsg2-serialization@npm:2.0.0"
   dependencies:
     "@foxglove/cdr": ^2.0.0
-    "@foxglove/rosmsg": ^3.1.0
+    "@foxglove/message-definition": ^0.2.0
     "@foxglove/rostime": ^1.1.2
-  checksum: 657ca1298a266002edfd19af5d198a8db78b11a71b6a9aa1ab034b7a0200cb6e12cdd6109a21509fa138090659f2e05c0ff1a4bc3d5d84ff85155313ce4da41f
+  checksum: 03ca52f31b32ba9af52fc543c33166c9b1926eb05cf5f0b8dc45b21040ff3653356fd6ae5a5db215295617cf1a1d30db5200089b8443844ab2bbdd69de54491d
   languageName: node
   linkType: hard
 
-"@foxglove/rosmsg@npm:3.1.0, @foxglove/rosmsg@npm:^3.1.0":
-  version: 3.1.0
-  resolution: "@foxglove/rosmsg@npm:3.1.0"
+"@foxglove/rosmsg@npm:4.0.0, @foxglove/rosmsg@npm:^4.0.0":
+  version: 4.0.0
+  resolution: "@foxglove/rosmsg@npm:4.0.0"
   dependencies:
+    "@foxglove/message-definition": ^0.2.0
     md5-typescript: ^1.0.5
-  checksum: 52b397fe778e690898e5e578536b38eed1b32f965d92c935f67c3ce6ef0592f72ba15db8a6d6bb1140fccd9ea3ef07b01a04c9b9f64ce43f4aec7ee51cf142d7
+  bin:
+    gendeps2: bin/gendeps2
+  checksum: d3a685cdadb03e0be0bd906b99cbea1b31fe6e2129c54d1f4229f5f4f4198bebae93961fc2f77ecc96a7fd0da7de432018fc4bcbaee6e36f24e062f7c5f33672
   languageName: node
   linkType: hard
 
@@ -2386,13 +2400,13 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@foxglove/schemas@npm:1.0.0, @foxglove/schemas@npm:^1.0.0":
-  version: 1.0.0
-  resolution: "@foxglove/schemas@npm:1.0.0"
+"@foxglove/schemas@npm:1.1.0, @foxglove/schemas@npm:^1.1.0":
+  version: 1.1.0
+  resolution: "@foxglove/schemas@npm:1.1.0"
   dependencies:
-    "@foxglove/rosmsg-msgs-common": ^2.0.0
-    tslib: ^2
-  checksum: c6fa851381441534ef465f247615c61a3963e80d02a94c7b07a49bb9468ab704c43e6fe7f07f83bacaf5bdc8bce8bf96b02fef5e62c9c427c5e10bd060c24fec
+    "@foxglove/rosmsg-msgs-common": ^3.0.0
+    tslib: ^2.5.0
+  checksum: 9757cac98e9606a4c13f37e3b05dd2384e7283b9b676781986710c1ead99777e54d79b4fb7c64c047db308d288ac2e47a69c488bd2e1e3a8a4adc88f9f1eddf9
   languageName: node
   linkType: hard
 
@@ -2420,18 +2434,19 @@ __metadata:
     "@foxglove/hooks": "workspace:*"
     "@foxglove/log": "workspace:*"
     "@foxglove/mcap-support": "workspace:*"
-    "@foxglove/ros1": 1.6.0
-    "@foxglove/ros2": 3.4.0
-    "@foxglove/rosbag": 0.2.3
-    "@foxglove/rosbag2-web": 4.0.6
+    "@foxglove/message-definition": 0.2.0
+    "@foxglove/ros1": 2.0.0
+    "@foxglove/ros2": 4.0.0
+    "@foxglove/rosbag": 0.3.0
+    "@foxglove/rosbag2-web": 4.1.0
     "@foxglove/roslibjs": 0.0.1
-    "@foxglove/rosmsg": 3.1.0
-    "@foxglove/rosmsg-msgs-common": 2.1.0
-    "@foxglove/rosmsg-serialization": 1.5.3
-    "@foxglove/rosmsg2-serialization": 1.1.1
+    "@foxglove/rosmsg": 4.0.0
+    "@foxglove/rosmsg-msgs-common": 3.0.0
+    "@foxglove/rosmsg-serialization": 2.0.0
+    "@foxglove/rosmsg2-serialization": 2.0.0
     "@foxglove/rostime": 1.1.2
     "@foxglove/rtps": 1.6.0
-    "@foxglove/schemas": 1.0.0
+    "@foxglove/schemas": 1.1.0
     "@foxglove/studio": "workspace:*"
     "@foxglove/three-text": 0.1.0
     "@foxglove/typescript-transformers": "workspace:*"
@@ -8870,7 +8885,7 @@ __metadata:
     "@foxglove/den": "workspace:*"
     "@foxglove/log": "workspace:*"
     "@foxglove/rostime": 1.1.2
-    "@foxglove/schemas": 1.0.0
+    "@foxglove/schemas": 1.1.0
     "@foxglove/studio": "workspace:*"
     "@foxglove/studio-base": "workspace:*"
     "@pmmmwh/react-refresh-webpack-plugin": 0.5.10
@@ -11209,7 +11224,7 @@ __metadata:
     "@foxglove/electron-socket": 2.1.0
     "@foxglove/log": "workspace:*"
     "@foxglove/mcap-support": "workspace:*"
-    "@foxglove/rosbag": 0.2.3
+    "@foxglove/rosbag": 0.3.0
     "@foxglove/rostime": 1.1.2
     "@foxglove/studio-base": "workspace:*"
     "@mcap/core": 1.1.0

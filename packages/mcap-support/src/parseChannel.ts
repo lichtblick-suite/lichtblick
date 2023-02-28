@@ -5,14 +5,15 @@
 import protobufjs from "protobufjs";
 import { FileDescriptorSet, IFileDescriptorSet } from "protobufjs/ext/descriptor";
 
-import { parse as parseMessageDefinition, RosMsgDefinition } from "@foxglove/rosmsg";
+import { MessageDefinition } from "@foxglove/message-definition";
+import { parse as parseMessageDefinition } from "@foxglove/rosmsg";
 import { MessageReader } from "@foxglove/rosmsg-serialization";
 import { MessageReader as ROS2MessageReader } from "@foxglove/rosmsg2-serialization";
 
 import { parseFlatbufferSchema } from "./parseFlatbufferSchema";
 import { parseJsonSchema } from "./parseJsonSchema";
 import { protobufDefinitionsToDatatypes, stripLeadingDot } from "./protobufDefinitionsToDatatypes";
-import { RosDatatypes } from "./types";
+import { MessageDefinitionMap } from "./types";
 
 type Channel = {
   messageEncoding: string;
@@ -21,14 +22,14 @@ type Channel = {
 
 export type ParsedChannel = {
   deserializer: (data: ArrayBufferView) => unknown;
-  datatypes: RosDatatypes;
+  datatypes: MessageDefinitionMap;
 };
 
 function parsedDefinitionsToDatatypes(
-  parsedDefinitions: RosMsgDefinition[],
+  parsedDefinitions: MessageDefinition[],
   rootName: string,
-): RosDatatypes {
-  const datatypes: RosDatatypes = new Map();
+): MessageDefinitionMap {
+  const datatypes: MessageDefinitionMap = new Map();
   parsedDefinitions.forEach(({ name, definitions }, index) => {
     if (index === 0) {
       datatypes.set(rootName, { name: rootName, definitions });
@@ -55,7 +56,7 @@ export function parseChannel(channel: Channel): ParsedChannel {
       );
     }
     const textDecoder = new TextDecoder();
-    let datatypes: RosDatatypes = new Map();
+    let datatypes: MessageDefinitionMap = new Map();
     let deserializer = (data: ArrayBufferView) => JSON.parse(textDecoder.decode(data));
     if (channel.schema != undefined) {
       const schema =
@@ -132,7 +133,7 @@ export function parseChannel(channel: Channel): ParsedChannel {
       );
     };
 
-    const datatypes: RosDatatypes = new Map();
+    const datatypes: MessageDefinitionMap = new Map();
     protobufDefinitionsToDatatypes(datatypes, type);
 
     if (!datatypes.has(channel.schema.name)) {

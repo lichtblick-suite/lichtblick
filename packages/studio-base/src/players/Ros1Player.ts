@@ -8,8 +8,8 @@ import { v4 as uuidv4 } from "uuid";
 import { debouncePromise } from "@foxglove/den/async";
 import { Sockets } from "@foxglove/electron-socket/renderer";
 import Logger from "@foxglove/log";
+import { MessageDefinition } from "@foxglove/message-definition";
 import { RosNode, TcpSocket } from "@foxglove/ros1";
-import { RosMsgDefinition } from "@foxglove/rosmsg";
 import { Time, fromMillis, isGreaterThan, toSec } from "@foxglove/rostime";
 import { ParameterValue } from "@foxglove/studio";
 import OsContextSingleton from "@foxglove/studio-base/OsContextSingleton";
@@ -515,7 +515,7 @@ export default class Ros1Player implements Player {
       const advertiseProblemId = `advertise:${topic}`;
 
       // Try to retrieve the ROS message definition for this topic
-      let msgdef: RosMsgDefinition[];
+      let msgdef: MessageDefinition[];
       try {
         const datatypes = options?.["datatypes"] as RosDatatypes | undefined;
         if (!datatypes || !(datatypes instanceof Map)) {
@@ -586,7 +586,7 @@ export default class Ros1Player implements Player {
 
   private _getRosDatatypes = (
     datatype: string,
-    messageDefinition: RosMsgDefinition[],
+    messageDefinition: MessageDefinition[],
   ): RosDatatypes => {
     const typesByName: RosDatatypes = new Map();
     for (const def of messageDefinition) {

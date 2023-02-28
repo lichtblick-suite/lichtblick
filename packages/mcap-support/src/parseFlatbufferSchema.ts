@@ -5,9 +5,9 @@
 import { ByteBuffer } from "flatbuffers";
 import { BaseType, Schema, SchemaT, FieldT, Parser, Table } from "flatbuffers_reflection";
 
-import { RosMsgField } from "@foxglove/rosmsg";
+import { MessageDefinitionField } from "@foxglove/message-definition";
 
-import { RosDatatypes } from "./types";
+import { MessageDefinitionMap } from "./types";
 
 function typeForSimpleField(type: BaseType): string {
   switch (type) {
@@ -55,8 +55,8 @@ function flatbufferString(unchecked: string | Uint8Array | null | undefined): st
   throw new Error(`Expected string, found ${typeof unchecked}`);
 }
 
-function typeForField(schema: SchemaT, field: FieldT): RosMsgField[] {
-  const fields: RosMsgField[] = [];
+function typeForField(schema: SchemaT, field: FieldT): MessageDefinitionField[] {
+  const fields: MessageDefinitionField[] = [];
   switch (field.type?.baseType) {
     case BaseType.UType:
     case BaseType.Bool:
@@ -156,10 +156,10 @@ export function parseFlatbufferSchema(
   schemaName: string,
   schemaArray: Uint8Array,
 ): {
-  datatypes: RosDatatypes;
+  datatypes: MessageDefinitionMap;
   deserializer: (buffer: ArrayBufferView) => unknown;
 } {
-  const datatypes: RosDatatypes = new Map();
+  const datatypes: MessageDefinitionMap = new Map();
   const schemaBuffer = new ByteBuffer(schemaArray);
   const rawSchema = Schema.getRootAsSchema(schemaBuffer);
   const schema = rawSchema.unpack();
@@ -170,7 +170,7 @@ export function parseFlatbufferSchema(
     if (object?.name === schemaName) {
       typeIndex = schemaIndex;
     }
-    let fields: RosMsgField[] = [];
+    let fields: MessageDefinitionField[] = [];
     if (object?.fields == undefined) {
       continue;
     }

@@ -11,15 +11,16 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { RosMsgDefinition } from "@foxglove/rosmsg";
+import { MessageDefinition } from "@foxglove/message-definition";
 import { RosDatatypes } from "@foxglove/studio-base/types/RosDatatypes";
 
-// For one datatype in the datatypes, find the RosMsgDefinition that we can use to either write or parse it.
-// `datatypes` should contain the root datatype and all complex sub-datatypes.
+// For one datatype in the datatypes, find the MessageDefinition that we can use
+// to either write or parse it. `datatypes` should contain the root datatype and
+// all complex sub-datatypes.
 export default function rosDatatypesToMessageDefinition(
   datatypes: RosDatatypes,
   rootDatatypeName: string,
-): RosMsgDefinition[] {
+): MessageDefinition[] {
   const result = [];
   const seenDatatypeNames = new Set([rootDatatypeName]);
   // It doesn't matter if we use a stack or queue here, but we use a stack.
@@ -37,7 +38,7 @@ export default function rosDatatypesToMessageDefinition(
       );
     }
     // The root datatype has no name field.
-    const msgDefinition: RosMsgDefinition =
+    const msgDefinition: MessageDefinition =
       currentDatatypeName === rootDatatypeName
         ? { definitions: currentDatatype.definitions }
         : { name: currentDatatypeName, definitions: currentDatatype.definitions };

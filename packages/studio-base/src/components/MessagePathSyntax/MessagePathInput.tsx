@@ -15,7 +15,7 @@ import { Stack } from "@mui/material";
 import { flatten, flatMap, partition } from "lodash";
 import { CSSProperties, useCallback, useMemo } from "react";
 
-import { RosMsgField } from "@foxglove/rosmsg";
+import { MessageDefinitionField } from "@foxglove/message-definition";
 import * as PanelAPI from "@foxglove/studio-base/PanelAPI";
 import Autocomplete, { IAutocomplete } from "@foxglove/studio-base/components/Autocomplete";
 import useGlobalVariables, {
@@ -56,8 +56,8 @@ import parseRosPath, { quoteFieldNameIfNeeded, quoteTopicNameIfNeeded } from "./
 function getFieldPaths(
   topics: readonly Topic[],
   datatypes: RosDatatypes,
-): Map<string, RosMsgField> {
-  const output = new Map<string, RosMsgField>();
+): Map<string, MessageDefinitionField> {
+  const output = new Map<string, MessageDefinitionField>();
   for (const topic of topics) {
     if (topic.schemaName == undefined) {
       continue;
@@ -78,7 +78,7 @@ function addFieldPathsForType(
   typeName: string,
   datatypes: RosDatatypes,
   seenTypes: string[],
-  output: Map<string, RosMsgField>,
+  output: Map<string, MessageDefinitionField>,
 ): void {
   const msgdef = datatypes.get(typeName);
   if (msgdef) {

@@ -1,14 +1,14 @@
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
-import { RosMsgDefinition } from "@foxglove/rosmsg";
+import { MessageDefinition } from "@foxglove/message-definition";
 import { ros1, ros2galactic } from "@foxglove/rosmsg-msgs-common";
 import { fromDate } from "@foxglove/rostime";
 import { Point, makeCovarianceArray } from "@foxglove/studio-base/util/geometry";
 
 import { Pose } from "./transforms/geometry";
 
-export const PublishRos1Datatypes = new Map<string, RosMsgDefinition>(
+export const PublishRos1Datatypes = new Map<string, MessageDefinition>(
   (
     [
       "geometry_msgs/Point",
@@ -23,7 +23,7 @@ export const PublishRos1Datatypes = new Map<string, RosMsgDefinition>(
   ).map((type) => [type, ros1[type]]),
 );
 
-export const PublishRos2Datatypes = new Map<string, RosMsgDefinition>(
+export const PublishRos2Datatypes = new Map<string, MessageDefinition>(
   (
     [
       "geometry_msgs/Point",

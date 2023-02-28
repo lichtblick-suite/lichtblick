@@ -8,8 +8,8 @@ import { v4 as uuidv4 } from "uuid";
 import { debouncePromise } from "@foxglove/den/async";
 import { Sockets } from "@foxglove/electron-socket/renderer";
 import Logger from "@foxglove/log";
+import { MessageDefinition } from "@foxglove/message-definition";
 import { RosNode } from "@foxglove/ros2";
-import { RosMsgDefinition } from "@foxglove/rosmsg";
 import { ros2galactic } from "@foxglove/rosmsg-msgs-common";
 import { Time, fromMillis, toSec, isGreaterThan } from "@foxglove/rostime";
 import { Durability, Reliability } from "@foxglove/rtps";
@@ -60,7 +60,7 @@ export default class Ros2Player implements Player {
   private _closed = false; // Whether the player has been completely closed using close().
   private _providerTopics?: TopicWithSchemaName[]; // Topics as advertised by peers
   private _providerTopicsStats = new Map<string, TopicStats>(); // topic names to topic statistics.
-  private _providerDatatypes = new Map<string, RosMsgDefinition>(); // All known ROS 2 message definitions.
+  private _providerDatatypes = new Map<string, MessageDefinition>(); // All known ROS 2 message definitions.
   private _publishedTopics = new Map<string, Set<string>>(); // A map of topic names to the set of publisher IDs publishing each topic.
   private _subscribedTopics = new Map<string, Set<string>>(); // A map of topic names to the set of subscriber IDs subscribed to each topic.
   // private _services = new Map<string, Set<string>>(); // A map of service names to service provider IDs that provide each service.
@@ -93,7 +93,7 @@ export default class Ros2Player implements Player {
   private _importRos2MsgDefs(): void {
     // Add common message definitions from ROS2 (rcl_interfaces, common_interfaces, etc)
     for (const dataType in ros2galactic) {
-      const msgDef = (ros2galactic as Record<string, RosMsgDefinition>)[dataType]!;
+      const msgDef = (ros2galactic as Record<string, MessageDefinition>)[dataType]!;
       this._providerDatatypes.set(dataType, msgDef);
       this._providerDatatypes.set(dataTypeToFullName(dataType), msgDef);
     }
@@ -104,7 +104,7 @@ export default class Ros2Player implements Player {
         schema,
         { rosVersion: 2 },
       );
-      const msgDef: RosMsgDefinition = { name: rosMsgInterfaceName, definitions: fields };
+      const msgDef: MessageDefinition = { name: rosMsgInterfaceName, definitions: fields };
       this._providerDatatypes.set(rosMsgInterfaceName, msgDef);
       this._providerDatatypes.set(rosFullInterfaceName, msgDef);
     }
@@ -398,7 +398,7 @@ export default class Ros2Player implements Player {
       }
 
       // Try to retrieve the ROS message definition for this topic
-      let msgDefinition: RosMsgDefinition[] | undefined;
+      let msgDefinition: MessageDefinition[] | undefined;
       try {
         msgDefinition = rosDatatypesToMessageDefinition(this._providerDatatypes, schemaName);
         this._problems.removeProblem(`msgdef:${topicName}`);

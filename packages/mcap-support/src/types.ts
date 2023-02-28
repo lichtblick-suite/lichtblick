@@ -2,7 +2,7 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { RosMsgDefinition } from "@foxglove/rosmsg";
+import { MessageDefinition } from "@foxglove/message-definition";
 
-/** RosDatatypes is a map of datatype name to the datatype definition */
-export type RosDatatypes = Map<string, RosMsgDefinition>;
+/** A map of schema name to the schema message definition */
+export type MessageDefinitionMap = Map<string, MessageDefinition>;

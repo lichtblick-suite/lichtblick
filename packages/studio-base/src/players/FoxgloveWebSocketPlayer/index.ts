@@ -9,7 +9,7 @@ import { v4 as uuidv4 } from "uuid";
 import { debouncePromise } from "@foxglove/den/async";
 import Log from "@foxglove/log";
 import { parseChannel, ParsedChannel } from "@foxglove/mcap-support";
-import { RosMsgDefinition } from "@foxglove/rosmsg";
+import { MessageDefinition } from "@foxglove/message-definition";
 import CommonRosTypes from "@foxglove/rosmsg-msgs-common";
 import { MessageWriter as Ros1MessageWriter } from "@foxglove/rosmsg-serialization";
 import { MessageWriter as Ros2MessageWriter } from "@foxglove/rosmsg2-serialization";
@@ -251,7 +251,7 @@ export default class FoxgloveWebSocketPlayer implements Player {
           : CommonRosTypes.ros2humble;
 
         for (const dataType in rosDataTypes) {
-          const msgDef = (rosDataTypes as Record<string, RosMsgDefinition>)[dataType]!;
+          const msgDef = (rosDataTypes as Record<string, MessageDefinition>)[dataType]!;
           this._datatypes.set(dataType, msgDef);
           this._datatypes.set(dataTypeToFullName(dataType), msgDef);
         }
@@ -898,7 +898,7 @@ export default class FoxgloveWebSocketPlayer implements Player {
       let messageWriter: Publication["messageWriter"] = undefined;
       if (ROS_ENCODINGS.includes(encoding)) {
         // Try to retrieve the ROS message definition for this topic
-        let msgdef: RosMsgDefinition[];
+        let msgdef: MessageDefinition[];
         try {
           const datatypes = options?.["datatypes"] as RosDatatypes | undefined;
           if (!datatypes || !(datatypes instanceof Map)) {

@@ -13,7 +13,7 @@
 
 import { DeepReadonly } from "ts-essentials";
 
-import { RosMsgDefinition } from "@foxglove/rosmsg";
+import { MessageDefinition } from "@foxglove/message-definition";
 import { Time } from "@foxglove/rostime";
 import type { MessageEvent, ParameterValue } from "@foxglove/studio";
 import { GlobalVariables } from "@foxglove/studio-base/hooks/useGlobalVariables";
@@ -28,7 +28,7 @@ export type MessageDefinitionsByTopic = {
   [topic: string]: string;
 };
 export type ParsedMessageDefinitionsByTopic = {
-  [topic: string]: RosMsgDefinition[];
+  [topic: string]: MessageDefinition[];
 };
 
 // A `Player` is a class that manages playback state. It manages subscriptions,

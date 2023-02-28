@@ -25,10 +25,11 @@
     "typescript": "4.9.5"
   },
   "dependencies": {
-    "@foxglove/rosmsg": "3.1.0",
-    "@foxglove/rosmsg-serialization": "1.5.3",
-    "@foxglove/rosmsg2-serialization": "1.1.1",
-    "@foxglove/schemas": "1.0.0",
+    "@foxglove/message-definition": "0.2.0",
+    "@foxglove/rosmsg": "4.0.0",
+    "@foxglove/rosmsg-serialization": "2.0.0",
+    "@foxglove/rosmsg2-serialization": "2.0.0",
+    "@foxglove/schemas": "1.1.0",
     "@foxglove/wasm-bz2": "0.1.1",
     "@foxglove/wasm-lz4": "1.0.2",
     "@foxglove/wasm-zstd": "1.0.1",

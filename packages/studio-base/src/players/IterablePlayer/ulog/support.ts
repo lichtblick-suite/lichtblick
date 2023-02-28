@@ -2,15 +2,15 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { RosMsgDefinition, RosMsgField } from "@foxglove/rosmsg";
-import { MessageDefinition, ULog, LogLevel } from "@foxglove/ulog";
+import { MessageDefinition, MessageDefinitionField } from "@foxglove/message-definition";
+import { MessageDefinition as ULogMessageDefinition, ULog, LogLevel } from "@foxglove/ulog";
 
 export function messageIdToTopic(msgId: number, ulog: ULog): string | undefined {
   return ulog.subscriptions.get(msgId)?.name;
 }
 
-export function messageDefinitionToRos(msgDef: MessageDefinition): RosMsgDefinition {
-  const definitions: RosMsgField[] = [];
+export function messageDefinitionToRos(msgDef: ULogMessageDefinition): MessageDefinition {
+  const definitions: MessageDefinitionField[] = [];
 
   for (const field of msgDef.fields) {
     const isString = field.type === "char";

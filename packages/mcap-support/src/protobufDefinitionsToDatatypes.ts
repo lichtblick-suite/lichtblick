@@ -3,9 +3,9 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 import protobufjs from "protobufjs";
 
-import { RosMsgField } from "@foxglove/rosmsg";
+import { MessageDefinitionField } from "@foxglove/message-definition";
 
-import { RosDatatypes } from "./types";
+import { MessageDefinitionMap } from "./types";
 
 function protobufScalarToRosPrimitive(type: string): string {
   switch (type) {
@@ -40,10 +40,10 @@ export function stripLeadingDot(typeName: string): string {
 }
 
 export function protobufDefinitionsToDatatypes(
-  datatypes: RosDatatypes,
+  datatypes: MessageDefinitionMap,
   type: protobufjs.Type,
 ): void {
-  const definitions: RosMsgField[] = [];
+  const definitions: MessageDefinitionField[] = [];
   // The empty list reference is added to the map so a `.has` lookup below can prevent infinite recursion on cyclical types
   datatypes.set(stripLeadingDot(type.fullName), { definitions });
   for (const field of type.fieldsArray) {

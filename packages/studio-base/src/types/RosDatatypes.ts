@@ -11,16 +11,16 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { RosMsgDefinition, RosMsgField } from "@foxglove/rosmsg";
+import { MessageDefinition, MessageDefinitionField } from "@foxglove/message-definition";
 
 /**
  * Extend the standard ROS message definition with an optional flag.
  */
-type OptionalRosMsgField = RosMsgField & { optional?: boolean };
+type OptionalMessageDefinitionField = MessageDefinitionField & { optional?: boolean };
 
-export type OptionalRosMsgDefinition = RosMsgDefinition & {
-  definitions: OptionalRosMsgField[];
+export type OptionalMessageDefinition = MessageDefinition & {
+  definitions: OptionalMessageDefinitionField[];
 };
 
 /** RosDatatypes is a map of datatype name to the datatype definition */
-export type RosDatatypes = Map<string, OptionalRosMsgDefinition>;
+export type RosDatatypes = Map<string, OptionalMessageDefinition>;

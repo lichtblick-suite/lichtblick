@@ -13,7 +13,7 @@
 
 import ts from "typescript/lib/typescript";
 
-import { RosMsgField } from "@foxglove/rosmsg";
+import { MessageDefinitionField } from "@foxglove/message-definition";
 import {
   noFuncError,
   nonFuncError,
@@ -300,7 +300,7 @@ export const constructDatatypes = (
     isComplex: boolean = false,
     typeMap: TypeMap = {},
     innerDepth: number = 1,
-  ): RosMsgField => {
+  ): MessageDefinitionField => {
     if (innerDepth > MAX_DEPTH) {
       throw new Error(`Max AST traversal depth exceeded.`);
     }
