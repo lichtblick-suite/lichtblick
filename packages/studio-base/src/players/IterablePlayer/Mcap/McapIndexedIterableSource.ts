@@ -49,6 +49,7 @@ export class McapIndexedIterableSource implements IIterableSource {
     const topicsByName = new Map<string, Topic>();
     const datatypes: RosDatatypes = new Map();
     const problems: PlayerProblem[] = [];
+    const publishersByTopic = new Map<string, Set<string>>();
 
     for (const channel of this.reader.channelsById.values()) {
       const schema = this.reader.schemasById.get(channel.schemaId);
@@ -83,6 +84,18 @@ export class McapIndexedIterableSource implements IIterableSource {
           topicStats.set(channel.topic, { numMessages: Number(numMessages) });
         }
       }
+
+      // Track the publisher for this topic. "callerid" is defined in the MCAP ROS 1 Well-known
+      // profile at <https://mcap.dev/specification/appendix.html>. We skip the profile check to
+      // allow non-ROS profiles to utilize this functionality as well
+      const publisherId = channel.metadata.get("callerid") ?? String(channel.id);
+      let publishers = publishersByTopic.get(channel.topic);
+      if (!publishers) {
+        publishers = new Set();
+        publishersByTopic.set(channel.topic, publishers);
+      }
+      publishers.add(publisherId);
+
       // Final datatypes is an unholy union of schemas across all channels
       for (const [name, datatype] of parsedChannel.datatypes) {
         datatypes.set(name, datatype);
@@ -99,7 +112,7 @@ export class McapIndexedIterableSource implements IIterableSource {
       datatypes,
       profile: this.reader.header.profile,
       problems,
-      publishersByTopic: new Map(),
+      publishersByTopic,
       topicStats,
     };
   }
