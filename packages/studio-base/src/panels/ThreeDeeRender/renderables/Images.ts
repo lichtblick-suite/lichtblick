@@ -24,7 +24,7 @@ import {
 import Logger from "@foxglove/log";
 import { toNanoSec } from "@foxglove/rostime";
 import { CameraCalibration, CompressedImage, RawImage } from "@foxglove/schemas";
-import { SettingsTreeAction, SettingsTreeFields } from "@foxglove/studio";
+import { SettingsTreeAction, SettingsTreeFields, Topic } from "@foxglove/studio";
 import type { RosValue } from "@foxglove/studio-base/players/types";
 
 import { cameraInfosEqual, normalizeCameraInfo, projectPixel } from "./projections";
@@ -65,6 +65,7 @@ export type LayerSettingsImage = BaseSettings & {
 
 const NO_CAMERA_INFO_ERR = "NoCameraInfo";
 const CREATE_BITMAP_ERR = "CreateBitmap";
+const CAMERA_MODEL = "CameraModel";
 
 const DEFAULT_IMAGE_WIDTH = 512;
 const DEFAULT_DISTANCE = 1;
@@ -130,9 +131,50 @@ export class Images extends SceneExtension<ImageRenderable> {
       handler: this.handleCameraInfo,
       shouldSubscribe: this.cameraInfoShouldSubscribe,
     });
+
+    this._updateTopicInfoIfNeeded();
+  }
+
+  private _lastTopics: readonly Topic[] | undefined = undefined;
+  /**
+   * Update cameraInfoToImageTopics based on the current config and list of available topics.
+   */
+  private _updateTopicInfoIfNeeded() {
+    if (this.renderer.topics === this._lastTopics) {
+      return;
+    }
+
+    this._lastTopics = this.renderer.topics;
+
+    this.cameraInfoTopics = new Set();
+    for (const topic of this.renderer.topics ?? []) {
+      if (
+        topicIsConvertibleToSchema(topic, CAMERA_INFO_DATATYPES) ||
+        topicIsConvertibleToSchema(topic, CAMERA_CALIBRATION_DATATYPES)
+      ) {
+        this.cameraInfoTopics.add(topic.name);
+      }
+
+      if (
+        !(
+          topicIsConvertibleToSchema(topic, ROS_IMAGE_DATATYPES) ||
+          topicIsConvertibleToSchema(topic, ROS_COMPRESSED_IMAGE_DATATYPES) ||
+          topicIsConvertibleToSchema(topic, RAW_IMAGE_DATATYPES) ||
+          topicIsConvertibleToSchema(topic, COMPRESSED_IMAGE_DATATYPES)
+        )
+      ) {
+        continue;
+      }
+      const imageTopic = topic.name;
+      const config = (this.renderer.config.topics[imageTopic] ?? {}) as Partial<LayerSettingsImage>;
+      if (typeof config.cameraInfoTopic === "string") {
+        this.cameraInfoToImageTopics.set(config.cameraInfoTopic, imageTopic);
+      }
+    }
   }
 
   public override settingsNodes(): SettingsTreeEntry[] {
+    this._updateTopicInfoIfNeeded();
     const configTopics = this.renderer.config.topics;
     const handler = this.handleSettingsAction;
     const entries: SettingsTreeEntry[] = [];
@@ -255,6 +297,7 @@ export class Images extends SceneExtension<ImageRenderable> {
   };
 
   private handleImage = (messageEvent: PartialMessageEvent<AnyImage>, image: AnyImage): void => {
+    this._updateTopicInfoIfNeeded();
     const imageTopic = messageEvent.topic;
     const receiveTime = toNanoSec(messageEvent.receiveTime);
     const frameId = "header" in image ? image.header.frame_id : image.frame_id;
@@ -331,11 +374,18 @@ export class Images extends SceneExtension<ImageRenderable> {
 
         const dataEqual = cameraInfosEqual(renderable.userData.cameraInfo, cameraInfo);
         if (!dataEqual) {
-          const cameraModel = new PinholeCameraModel(cameraInfo);
-          renderable.userData.cameraModel = cameraModel;
-          if (renderable.userData.image) {
-            const { image, settings } = renderable.userData;
-            this._updateImageRenderable(renderable, image, cameraModel, receiveTime, settings);
+          try {
+            const cameraModel = new PinholeCameraModel(cameraInfo);
+            renderable.userData.cameraModel = cameraModel;
+            if (renderable.userData.image) {
+              const { image, settings } = renderable.userData;
+              this._updateImageRenderable(renderable, image, cameraModel, receiveTime, settings);
+            }
+            this.renderer.settings.errors.removeFromTopic(imageTopic, CAMERA_MODEL);
+          } catch (errUnk) {
+            const err = errUnk as Error;
+            this.renderer.settings.errors.addToTopic(imageTopic, CAMERA_MODEL, err.message);
+            renderable.userData.cameraModel = undefined;
           }
         }
       }
