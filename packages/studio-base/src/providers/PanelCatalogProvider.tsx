@@ -13,7 +13,7 @@ import PanelCatalogContext, {
   PanelInfo,
 } from "@foxglove/studio-base/context/PanelCatalogContext";
 import { useAppConfigurationValue } from "@foxglove/studio-base/hooks/useAppConfigurationValue";
-import panels from "@foxglove/studio-base/panels";
+import * as panels from "@foxglove/studio-base/panels";
 import { SaveConfig } from "@foxglove/studio-base/types/panels";
 
 type PanelProps = {
@@ -27,6 +27,9 @@ export default function PanelCatalogProvider(
   const [showDebugPanels = false] = useAppConfigurationValue<boolean>(AppSetting.SHOW_DEBUG_PANELS);
   const [enableLegacyPlotPanel = false] = useAppConfigurationValue<boolean>(
     AppSetting.ENABLE_LEGACY_PLOT_PANEL,
+  );
+  const [enableUrdfViewerPanel = false] = useAppConfigurationValue<boolean>(
+    AppSetting.ENABLE_URDF_VIEWER,
   );
 
   const extensionPanels = useExtensionCatalog((state) => state.installedPanels);
@@ -58,17 +61,29 @@ export default function PanelCatalogProvider(
   }, [extensionPanels]);
 
   const allPanels = useMemo(() => {
-    return [...panels.builtin, ...panels.debug, ...panels.legacyPlot, ...wrappedExtensionPanels];
+    return [
+      ...panels.builtin,
+      ...panels.debug,
+      panels.legacyPlot,
+      panels.urdfViewer,
+      ...wrappedExtensionPanels,
+    ];
   }, [wrappedExtensionPanels]);
 
   const visiblePanels = useMemo(() => {
-    const legacyPlotPanels = enableLegacyPlotPanel ? panels.legacyPlot : [];
-
-    // debug panels are hidden by default, users can enable them within app settings
-    return showDebugPanels
-      ? [...panels.builtin, ...panels.debug, ...legacyPlotPanels, ...wrappedExtensionPanels]
-      : [...panels.builtin, ...legacyPlotPanels, ...wrappedExtensionPanels];
-  }, [enableLegacyPlotPanel, showDebugPanels, wrappedExtensionPanels]);
+    const panelList = [...panels.builtin];
+    if (showDebugPanels) {
+      panelList.push(...panels.debug);
+    }
+    if (enableLegacyPlotPanel) {
+      panelList.push(panels.legacyPlot);
+    }
+    if (enableUrdfViewerPanel) {
+      panelList.push(panels.urdfViewer);
+    }
+    panelList.push(...wrappedExtensionPanels);
+    return panelList;
+  }, [enableLegacyPlotPanel, enableUrdfViewerPanel, showDebugPanels, wrappedExtensionPanels]);
 
   const panelsByType = useMemo(() => {
     const byType = new Map<string, PanelInfo>();

@@ -26,7 +26,7 @@ import variableSliderThumbnail from "./VariableSlider/thumbnail.png";
 import diagnosticStatusThumbnail from "./diagnostics/thumbnails/diagnostic-status.png";
 import diagnosticSummaryThumbnail from "./diagnostics/thumbnails/diagnostic-summary.png";
 
-const builtin: PanelInfo[] = [
+export const builtin: PanelInfo[] = [
   {
     title: "3D",
     type: "3D",
@@ -139,13 +139,6 @@ const builtin: PanelInfo[] = [
     hasCustomToolbar: true,
   },
   {
-    title: "URDF Viewer",
-    type: "URDFViewer",
-    description: "Visualize Unified Robot Description Format files.",
-    thumbnail: URDFViewerThumbnail,
-    module: async () => await import("./URDFViewer"),
-  },
-  {
     title: "Topic Graph",
     type: "TopicGraph",
     description: "Display a graph of active nodes, topics, and services.",
@@ -183,7 +176,7 @@ const builtin: PanelInfo[] = [
   },
 ];
 
-const debug: PanelInfo[] = [
+export const debug: PanelInfo[] = [
   {
     title: "Studio - Playback Performance",
     type: "PlaybackPerformance",
@@ -192,12 +185,16 @@ const debug: PanelInfo[] = [
   },
 ];
 
-const legacyPlot: PanelInfo[] = [
-  {
-    title: "Legacy Plot",
-    type: "LegacyPlot",
-    module: async () => await import("./LegacyPlot"),
-  },
-];
+export const legacyPlot: PanelInfo = {
+  title: "Legacy Plot",
+  type: "LegacyPlot",
+  module: async () => await import("./LegacyPlot"),
+};
 
-export default { builtin, debug, legacyPlot };
+export const urdfViewer: PanelInfo = {
+  title: "URDF Viewer",
+  type: "URDFViewer",
+  description: "Visualize Unified Robot Description Format files.",
+  thumbnail: URDFViewerThumbnail,
+  module: async () => await import("./URDFViewer"),
+};
