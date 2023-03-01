@@ -87,7 +87,7 @@ export function DataSource({
   onSelectDataSourceAction: () => void;
 }): JSX.Element {
   const { classes, cx } = useStyles();
-  const playerName = useMessagePipeline(selectPlayerName) ?? "<unknown>";
+  const playerName = useMessagePipeline(selectPlayerName);
   const playerPresence = useMessagePipeline(selectPlayerPresence);
   const playerProblems = useMessagePipeline(selectPlayerProblems) ?? [];
 
@@ -95,6 +95,9 @@ export function DataSource({
   const initializing = playerPresence === PlayerPresence.INITIALIZING;
   const error = playerPresence === PlayerPresence.ERROR || playerProblems.length > 0;
   const loading = reconnecting || initializing;
+
+  const playerDisplayName =
+    initializing && playerName == undefined ? "Initializing..." : playerName;
 
   const [problemModal, setProblemModal] = useState<JSX.Element | undefined>(undefined);
 
@@ -148,7 +151,10 @@ export function DataSource({
           </div>
           <div className={classes.sourceInfo}>
             <Typography noWrap variant="inherit" component="span">
-              <TextMiddleTruncate className={classes.playerName} text={playerName} />
+              <TextMiddleTruncate
+                className={classes.playerName}
+                text={playerDisplayName ?? "<unknown>"}
+              />
             </Typography>
           </div>
           <ArrowDropDownIcon className={classes.arrow} />
