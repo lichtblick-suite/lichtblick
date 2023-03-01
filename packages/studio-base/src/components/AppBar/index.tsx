@@ -271,7 +271,7 @@ export function AppBar(props: AppBarProps): JSX.Element {
                     user: currentUserType,
                     cta: "help-menu",
                   });
-                  setPanelAnchorEl(event.currentTarget);
+                  setHelpAnchorEl(event.currentTarget);
                 }}
               />
               <PreferencesIconButton
