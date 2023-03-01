@@ -2133,7 +2133,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@foxglove/comlink-transfer-handlers@workspace:packages/comlink-transfer-handlers"
   dependencies:
-    comlink: 4.3.1
+    comlink: 4.4.1
     typescript: 4.9.5
   languageName: unknown
   linkType: soft
@@ -2510,7 +2510,7 @@ __metadata:
     chromatic: 6.15.0
     circular-dependency-plugin: 5.2.2
     clean-webpack-plugin: 4.0.0
-    comlink: 4.3.1
+    comlink: 4.4.1
     cross-env: 7.0.3
     crypto-browserify: 3.12.0
     css-loader: 6.7.3
@@ -10151,10 +10151,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"comlink@npm:4.3.1":
-  version: 4.3.1
-  resolution: "comlink@npm:4.3.1"
-  checksum: 557360a6558708c55aff74a25f834bfb9bfca8a42444682c4d5aead57681534a0206202be2a2760b4de124c3ba6d485b08978b6d5469cb3d26bf1438ee28a4f1
+"comlink@npm:4.4.1":
+  version: 4.4.1
+  resolution: "comlink@npm:4.4.1"
+  checksum: 16d58a8f590087fc45432e31d6c138308dfd4b75b89aec0b7f7bb97ad33d810381bd2b1e608a1fb2cf05979af9cbfcdcaf1715996d5fcf77aeb013b6da3260af
   languageName: node
   linkType: hard
 

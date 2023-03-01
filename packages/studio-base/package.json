@@ -114,7 +114,7 @@
     "chromatic": "6.15.0",
     "circular-dependency-plugin": "5.2.2",
     "clean-webpack-plugin": "4.0.0",
-    "comlink": "4.3.1",
+    "comlink": "4.4.1",
     "cross-env": "7.0.3",
     "crypto-browserify": "3.12.0",
     "css-loader": "6.7.3",
