@@ -967,6 +967,10 @@ export class IterablePlayer implements Player {
     try {
       while (this._isPlaying && !this._hasError && !this._nextState) {
         if (compare(this._currentTime, this._end) >= 0) {
+          // Playback has ended. Reset internal trackers for maintaining the playback speed.
+          this._lastTickMillis = undefined;
+          this._lastRangeMillis = undefined;
+          this._lastStamp = undefined;
           this._setState("idle");
           return;
         }
