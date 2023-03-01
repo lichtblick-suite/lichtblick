@@ -18,7 +18,7 @@ import { makeStyles } from "tss-react/mui";
 
 import Logger from "@foxglove/log";
 import { APP_BAR_PRIMARY_COLOR } from "@foxglove/studio-base/components/AppBar/constants";
-import { useCurrentUser } from "@foxglove/studio-base/context/CurrentUserContext";
+import { useCurrentUser, User } from "@foxglove/studio-base/context/CurrentUserContext";
 import { useConfirm } from "@foxglove/studio-base/hooks/useConfirm";
 
 const log = Logger.getLogger(__filename);
@@ -34,15 +34,31 @@ const useStyles = makeStyles()((theme) => ({
   avatarButton: {
     padding: 0,
   },
+  userIconImage: {
+    objectFit: "cover",
+    width: "100%",
+  },
 }));
 
-export const UserIconButton = forwardRef<HTMLButtonElement, IconButtonProps>((props, ref) => {
+type UserIconProps = IconButtonProps & {
+  currentUser?: User;
+};
+
+export const UserIconButton = forwardRef<HTMLButtonElement, UserIconProps>((props, ref) => {
   const { classes } = useStyles();
+  const { currentUser: me, ...otherProps } = props;
 
   return (
-    <IconButton {...props} ref={ref} className={classes.avatarButton}>
+    <IconButton {...otherProps} ref={ref} className={classes.avatarButton}>
       <Avatar className={classes.avatar} variant="rounded">
-        <PersonIcon />
+        {me?.avatarImageUrl != undefined && (
+          <img
+            src={me.avatarImageUrl}
+            referrerPolicy="same-origin"
+            className={classes.userIconImage}
+          />
+        )}
+        {me?.avatarImageUrl == undefined && <PersonIcon />}
       </Avatar>
     </IconButton>
   );

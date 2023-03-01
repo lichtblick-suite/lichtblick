@@ -6,6 +6,7 @@ import { createContext, useContext } from "react";
 
 export type User = {
   id: string;
+  avatarImageUrl?: string | null; // eslint-disable-line no-restricted-syntax
   email: string;
   orgId: string;
   orgDisplayName: string | null; // eslint-disable-line no-restricted-syntax
