@@ -9,9 +9,8 @@ import {
   MouseEvent,
   PropsWithChildren,
   useCallback,
-  useLayoutEffect,
+  useEffect,
   useMemo,
-  useRef,
   useState,
 } from "react";
 import { MosaicNode, MosaicWithoutDragDropContext } from "react-mosaic-component";
@@ -24,12 +23,16 @@ import ErrorBoundary from "@foxglove/studio-base/components/ErrorBoundary";
 import { MemoryUseIndicator } from "@foxglove/studio-base/components/MemoryUseIndicator";
 import Stack from "@foxglove/studio-base/components/Stack";
 import { useAppConfigurationValue } from "@foxglove/studio-base/hooks";
+import isDesktopApp from "@foxglove/studio-base/util/isDesktopApp";
 
+import { NewSidebar, NewSidebarItem } from "./NewSidebar";
 import { TabSpacer } from "./TabSpacer";
 
 function Noop(): ReactNull {
   return ReactNull;
 }
+
+type LayoutNode = "leftbar" | "children" | "rightbar";
 
 export type SidebarItem = {
   iconName: ComponentProps<typeof BuiltinIcon>["name"];
@@ -40,13 +43,14 @@ export type SidebarItem = {
 };
 
 const useStyles = makeStyles()((theme) => ({
-  nav: {
+  leftNav: {
     boxSizing: "content-box",
     borderRight: `1px solid ${theme.palette.divider}`,
     backgroundColor: theme.palette.background.paper,
   },
   tabs: {
     flexGrow: 1,
+
     ".MuiTabs-flexContainerVertical": {
       height: "100%",
     },
@@ -84,32 +88,79 @@ const useStyles = makeStyles()((theme) => ({
   },
 }));
 
-// Determine initial sidebar width, with a cap for larger
-// screens.
-function defaultInitialSidebarPercentage() {
-  const defaultFraction = 0.3;
-  const width = Math.min(384, defaultFraction * window.innerWidth);
-  return (100 * width) / window.innerWidth;
+/**
+ * Extract existing left split percentage from a layout node or return the default.
+ */
+function mosiacLeftSidebarSplitPercentage(node: MosaicNode<LayoutNode>): number | undefined {
+  if (typeof node !== "object") {
+    return undefined;
+  }
+  if (node.first === "leftbar") {
+    return node.splitPercentage;
+  } else {
+    return (
+      mosiacLeftSidebarSplitPercentage(node.first) ?? mosiacLeftSidebarSplitPercentage(node.second)
+    );
+  }
 }
 
-type SidebarProps<K> = PropsWithChildren<{
-  items: Map<K, SidebarItem>;
-  bottomItems: Map<K, SidebarItem>;
-  selectedKey: K | undefined;
-  onSelectKey: (key: K | undefined) => void;
+/**
+ * Extract existing right split percentage from a layout node or return the default.
+ */
+function mosiacRightSidebarSplitPercentage(node: MosaicNode<LayoutNode>): number | undefined {
+  if (typeof node !== "object") {
+    return undefined;
+  }
+  if (node.second === "rightbar") {
+    return node.splitPercentage;
+  } else {
+    return (
+      mosiacRightSidebarSplitPercentage(node.first) ??
+      mosiacRightSidebarSplitPercentage(node.second)
+    );
+  }
+}
+
+type SidebarProps<LeftKey, RightKey> = PropsWithChildren<{
+  items: Map<LeftKey, SidebarItem>;
+  bottomItems: Map<LeftKey, SidebarItem>;
+  selectedKey: LeftKey | undefined;
+  onSelectKey: (key: LeftKey | undefined) => void;
+
+  rightItems: Map<RightKey, NewSidebarItem>;
+  selectedRightKey: RightKey | undefined;
+  onSelectRightKey: (key: RightKey | undefined) => void;
 }>;
 
-export default function Sidebar<K extends string>(props: SidebarProps<K>): JSX.Element {
-  const { children, items, bottomItems, selectedKey, onSelectKey } = props;
+export default function Sidebars<LeftKey extends string, RightKey extends string>(
+  props: SidebarProps<LeftKey, RightKey>,
+): JSX.Element {
+  const {
+    children,
+    items,
+    bottomItems,
+    selectedKey,
+    onSelectKey,
+    rightItems,
+    selectedRightKey,
+    onSelectRightKey,
+  } = props;
+
   const [enableMemoryUseIndicator = false] = useAppConfigurationValue<boolean>(
     AppSetting.ENABLE_MEMORY_USE_INDICATOR,
   );
-  const [enableNewTopNav = false] = useAppConfigurationValue<boolean>(AppSetting.ENABLE_NEW_TOPNAV);
-  const [mosaicValue, setMosaicValue] = useState<MosaicNode<"sidebar" | "children">>("children");
-  const { classes } = useStyles();
-  const prevSelectedKey = useRef<string | undefined>(undefined);
+  // Since we can't toggle the title bar on an electron window, keep the setting at its initial
+  // value until the app is reloaded/relaunched.
+  const [currentEnableNewTopNav = false] = useAppConfigurationValue<boolean>(
+    AppSetting.ENABLE_NEW_TOPNAV,
+  );
+  const [initialEnableNewTopNav] = useState(currentEnableNewTopNav);
+  const enableNewTopNav = isDesktopApp() ? initialEnableNewTopNav : currentEnableNewTopNav;
 
-  const allItems = useMemo(() => {
+  const [mosaicValue, setMosaicValue] = useState<MosaicNode<LayoutNode>>("children");
+  const { classes } = useStyles();
+
+  const allLeftItems = useMemo(() => {
     return new Map([...items, ...bottomItems]);
   }, [bottomItems, items]);
 
@@ -124,38 +175,40 @@ export default function Sidebar<K extends string>(props: SidebarProps<K>): JSX.E
     setHelpAnchorEl(undefined);
   };
 
-  useLayoutEffect(() => {
-    const keyDoesNotExist = selectedKey != undefined && !allItems.has(selectedKey);
-    const keyChanged = prevSelectedKey.current !== selectedKey;
+  const leftSidebarOpen = selectedKey != undefined && allLeftItems.has(selectedKey);
+  const rightSidebarOpen = selectedRightKey != undefined && rightItems.has(selectedRightKey);
 
-    if (keyDoesNotExist) {
-      // if the selected key has been removed from allItems, hide the sidebar content
-      setMosaicValue("children");
-    } else if (keyChanged) {
-      if (selectedKey == undefined) {
-        // hide sidebar content when deselecting an item
-        setMosaicValue("children");
-      } else {
-        // show sidebar content when selecting an item
-        setMosaicValue((oldValue) => ({
+  useEffect(() => {
+    const width = Math.min(384, 0.3 * window.innerWidth);
+    const defaultLeftPercentage = (100 * width) / window.innerWidth;
+    const defaultRightPercentage = 80;
+    setMosaicValue((oldValue) => {
+      let node: MosaicNode<LayoutNode> = "children";
+      if (rightSidebarOpen) {
+        node = {
           direction: "row",
-          first: "sidebar",
-          second: "children",
-          splitPercentage:
-            // keep previous splitPercentage when changing from one tab to another
-            (typeof oldValue === "object" ? oldValue.splitPercentage : undefined) ??
-            defaultInitialSidebarPercentage(),
-        }));
+          first: node,
+          second: "rightbar",
+          splitPercentage: mosiacRightSidebarSplitPercentage(oldValue) ?? defaultRightPercentage,
+        };
       }
-    }
-    prevSelectedKey.current = selectedKey;
-  }, [allItems, selectedKey]);
+      if (leftSidebarOpen) {
+        node = {
+          direction: "row",
+          first: "leftbar",
+          second: node,
+          splitPercentage: mosiacLeftSidebarSplitPercentage(oldValue) ?? defaultLeftPercentage,
+        };
+      }
+      return node;
+    });
+  }, [leftSidebarOpen, rightSidebarOpen]);
 
-  const SelectedComponent =
-    (selectedKey != undefined && allItems.get(selectedKey)?.component) || Noop;
+  const SelectedLeftComponent =
+    (selectedKey != undefined && allLeftItems.get(selectedKey)?.component) || Noop;
 
   const onClickTabAction = useCallback(
-    (key: K) => {
+    (key: LeftKey) => {
       // toggle tab selected/unselected on click
       if (selectedKey === key) {
         onSelectKey(undefined);
@@ -221,7 +274,7 @@ export default function Sidebar<K extends string>(props: SidebarProps<K>): JSX.E
 
   return (
     <Stack direction="row" fullHeight overflow="hidden">
-      <Stack className={classes.nav} flexShrink={0} justifyContent="space-between">
+      <Stack className={classes.leftNav} flexShrink={0} justifyContent="space-between">
         <Tabs
           className={classes.tabs}
           orientation="vertical"
@@ -268,21 +321,36 @@ export default function Sidebar<K extends string>(props: SidebarProps<K>): JSX.E
         // children from having to re-mount each time the sidebar is opened/closed.
       }
       <div className={classes.mosaicWrapper}>
-        <MosaicWithoutDragDropContext<"sidebar" | "children">
+        <MosaicWithoutDragDropContext<LayoutNode>
           className=""
           value={mosaicValue}
           onChange={(value) => value != undefined && setMosaicValue(value)}
-          renderTile={(id) => (
-            <ErrorBoundary>
-              {id === "children" ? (
-                (children as JSX.Element)
-              ) : (
-                <Paper square elevation={0}>
-                  <SelectedComponent />
-                </Paper>
-              )}
-            </ErrorBoundary>
-          )}
+          renderTile={(id) => {
+            switch (id) {
+              case "children":
+                return <ErrorBoundary>{children as JSX.Element}</ErrorBoundary>;
+              case "leftbar":
+                return (
+                  <ErrorBoundary>
+                    <Paper square elevation={0}>
+                      <SelectedLeftComponent />
+                    </Paper>
+                  </ErrorBoundary>
+                );
+              case "rightbar":
+                return (
+                  <ErrorBoundary>
+                    <NewSidebar<RightKey>
+                      anchor="right"
+                      onClose={() => onSelectRightKey(undefined)}
+                      items={rightItems}
+                      activeTab={selectedRightKey}
+                      setActiveTab={onSelectRightKey}
+                    />
+                  </ErrorBoundary>
+                );
+            }
+          }}
           resize={{ minimumPaneSizePercentage: 10 }}
         />
       </div>

@@ -2,6 +2,7 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
+import { PanelRight24Filled, PanelRight24Regular } from "@fluentui/react-icons";
 import CheckBoxOutlineBlankIcon from "@mui/icons-material/CheckBoxOutlineBlank";
 import CloseIcon from "@mui/icons-material/Close";
 import FilterNoneIcon from "@mui/icons-material/FilterNone";
@@ -19,6 +20,7 @@ import {
   useCurrentUserType,
   User,
 } from "@foxglove/studio-base/context/CurrentUserContext";
+import { useWorkspace } from "@foxglove/studio-base/context/WorkspaceContext";
 import { useAppConfigurationValue } from "@foxglove/studio-base/hooks";
 import useNativeAppMenuEvent from "@foxglove/studio-base/hooks/useNativeAppMenuEvent";
 import { AppEvent } from "@foxglove/studio-base/services/IAnalytics";
@@ -106,10 +108,13 @@ const useStyles = makeStyles<{ leftInset?: number; debugDragRegion?: boolean }>(
           }).dark,
         },
       },
+      iconButton: {
+        padding: theme.spacing(0.375),
+      },
       endInner: {
         display: "flex",
         alignItems: "center",
-        gap: theme.spacing(0.5),
+        gap: theme.spacing(1),
         ...NOT_DRAGGABLE_STYLE, // make buttons clickable for desktop app
       },
       noDrag: {
@@ -167,6 +172,8 @@ export function AppBar(props: AppBarProps): JSX.Element {
   );
 
   const supportsAccountSettings = signIn != undefined;
+
+  const { rightSidebarOpen, setRightSidebarOpen } = useWorkspace();
 
   const [helpAnchorEl, setHelpAnchorEl] = useState<undefined | HTMLElement>(undefined);
   const [userAnchorEl, setUserAnchorEl] = useState<undefined | HTMLElement>(undefined);
@@ -240,7 +247,18 @@ export function AppBar(props: AppBarProps): JSX.Element {
           <div className={classes.end}>
             <div className={classes.endInner}>
               {enableMemoryUseIndicator && <MemoryUseIndicator />}
+              <IconButton
+                className={classes.iconButton}
+                color="inherit"
+                title={`${rightSidebarOpen ? "Hide" : "Show"} right sidebar`}
+                aria-label={`${rightSidebarOpen ? "Hide" : "Show"} right sidebar`}
+                size="large"
+                onClick={() => setRightSidebarOpen(!rightSidebarOpen)}
+              >
+                {rightSidebarOpen ? <PanelRight24Filled /> : <PanelRight24Regular />}
+              </IconButton>
               <HelpIconButton
+                className={classes.iconButton}
                 color="inherit"
                 id="help-button"
                 aria-label="Help menu button"
@@ -257,6 +275,7 @@ export function AppBar(props: AppBarProps): JSX.Element {
                 }}
               />
               <PreferencesIconButton
+                className={classes.iconButton}
                 color="inherit"
                 id="preferences-button"
                 aria-label="Preferences dialog button"
@@ -275,6 +294,7 @@ export function AppBar(props: AppBarProps): JSX.Element {
                 supportsAccountSettings &&
                 (currentUser ? (
                   <UserIconButton
+                    className={classes.iconButton}
                     aria-label="User profile menu button"
                     color="inherit"
                     id="user-profile-button"

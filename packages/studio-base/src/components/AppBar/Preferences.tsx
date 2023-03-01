@@ -72,9 +72,6 @@ const useStyles = makeStyles()((theme) => ({
   tabPanelActive: {
     display: "block",
   },
-  iconButton: {
-    padding: theme.spacing(0.375),
-  },
   checkbox: {
     "&.MuiCheckbox-root": {
       paddingTop: 0,
@@ -176,10 +173,8 @@ export const aboutItems: Map<
 ]);
 
 export function PreferencesIconButton(props: IconButtonProps): JSX.Element {
-  const { classes } = useStyles();
-
   return (
-    <IconButton {...props} className={classes.iconButton}>
+    <IconButton {...props}>
       <SettingsOutlinedIcon />
     </IconButton>
   );

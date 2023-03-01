@@ -8,11 +8,11 @@ import { HTML5Backend } from "react-dnd-html5-backend";
 
 import MockCurrentLayoutProvider from "@foxglove/studio-base/providers/CurrentLayoutProvider/MockCurrentLayoutProvider";
 
-import VariablesSidebar from ".";
+import VariablesList from ".";
 
 export default {
-  title: "components/VariablesSidebar",
-  component: VariablesSidebar,
+  title: "components/VariablesList",
+  component: VariablesList,
 };
 
 const initialState = {
@@ -25,7 +25,7 @@ export function Default(): JSX.Element {
   return (
     <DndProvider backend={HTML5Backend}>
       <MockCurrentLayoutProvider>
-        <VariablesSidebar />
+        <VariablesList />
       </MockCurrentLayoutProvider>
     </DndProvider>
   );
@@ -35,7 +35,7 @@ export function Interactive(): JSX.Element {
   return (
     <DndProvider backend={HTML5Backend}>
       <MockCurrentLayoutProvider>
-        <VariablesSidebar />
+        <VariablesList />
       </MockCurrentLayoutProvider>
     </DndProvider>
   );
@@ -68,7 +68,7 @@ export function WithVariablesLight(): JSX.Element {
   return (
     <DndProvider backend={HTML5Backend}>
       <MockCurrentLayoutProvider initialState={initialState}>
-        <VariablesSidebar />
+        <VariablesList />
       </MockCurrentLayoutProvider>
     </DndProvider>
   );
@@ -80,7 +80,7 @@ export function WithVariablesDark(): JSX.Element {
   return (
     <DndProvider backend={HTML5Backend}>
       <MockCurrentLayoutProvider initialState={initialState}>
-        <VariablesSidebar />
+        <VariablesList />
       </MockCurrentLayoutProvider>
     </DndProvider>
   );

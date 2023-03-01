@@ -9,11 +9,12 @@ import { HTML5Backend } from "react-dnd-html5-backend";
 import { AppSetting } from "@foxglove/studio-base/AppSetting";
 import { useAppConfigurationValue } from "@foxglove/studio-base/hooks";
 
-import Sidebar, { SidebarItem } from ".";
+import Sidebars, { SidebarItem } from ".";
+import { NewSidebarItem } from "./NewSidebar";
 
 export default {
   title: "components/Sidebar",
-  component: Sidebar,
+  component: Sidebars,
 };
 
 const A = () => <>A</>;
@@ -21,6 +22,8 @@ const B = () => <>B</>;
 const C = () => <>C</>;
 const D = () => <>D</>;
 const E = () => <>E</>;
+const X = () => <>X</>;
+const Y = () => <>Y</>;
 
 const ITEMS = new Map<string, SidebarItem>([
   ["a", { title: "A", component: A, iconName: "Add" }],
@@ -33,18 +36,28 @@ const BOTTOM_ITEMS = new Map<string, SidebarItem>([
   ["b", { title: "B", component: B, iconName: "ErrorBadge" }],
 ]);
 
+const RIGHT_ITEMS = new Map<string, NewSidebarItem>([
+  ["x", { title: "X", component: X }],
+  ["y", { title: "Y", component: Y }],
+]);
+
 function Story({
   clickKey,
   defaultSelectedKey,
+  defaultSelectedRightKey,
   enableAppBar,
   height = 300,
 }: {
   clickKey?: string;
   defaultSelectedKey?: string | undefined;
+  defaultSelectedRightKey?: string | undefined;
   enableAppBar?: boolean;
   height?: number;
 }) {
   const [selectedKey, setSelectedKey] = useState<string | undefined>(defaultSelectedKey);
+  const [selectedRightKey, setSelectedRightKey] = useState<string | undefined>(
+    defaultSelectedRightKey,
+  );
   const [_, setAppBarEnabled] = useAppConfigurationValue<boolean>(AppSetting.ENABLE_NEW_TOPNAV);
 
   useEffect(() => {
@@ -72,15 +85,18 @@ function Story({
 
   return (
     <DndProvider backend={HTML5Backend}>
-      <div style={{ width: 300, height }}>
-        <Sidebar
+      <div style={{ height }}>
+        <Sidebars
           items={ITEMS}
           bottomItems={BOTTOM_ITEMS}
+          rightItems={RIGHT_ITEMS}
           selectedKey={selectedKey}
           onSelectKey={setSelectedKey}
+          selectedRightKey={selectedRightKey}
+          onSelectRightKey={setSelectedRightKey}
         >
           Main content
-        </Sidebar>
+        </Sidebars>
       </div>
     </DndProvider>
   );
@@ -89,6 +105,12 @@ function Story({
 export const Unselected = (): JSX.Element => <Story />;
 export const ASelected = (): JSX.Element => <Story defaultSelectedKey="a" />;
 export const BSelected = (): JSX.Element => <Story defaultSelectedKey="b" />;
+
+export const RightX = (): JSX.Element => <Story defaultSelectedRightKey="x" />;
+export const RightY = (): JSX.Element => <Story defaultSelectedRightKey="y" />;
+export const LeftAndRight = (): JSX.Element => (
+  <Story defaultSelectedKey="b" defaultSelectedRightKey="y" />
+);
 
 export const ClickToSelect = (): JSX.Element => <Story clickKey="a" />;
 ClickToSelect.parameters = { colorScheme: "dark" };

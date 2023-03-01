@@ -4,8 +4,21 @@
 
 import { createContext, useContext } from "react";
 
-export const WorkspaceContext = createContext({
+type WorkspaceContextType = {
+  panelSettingsOpen: boolean;
+  openPanelSettings: () => void;
+  openHelp: () => void;
+  openAccountSettings: () => void;
+  openLayoutBrowser: () => void;
+  rightSidebarOpen: boolean;
+  // eslint-disable-next-line @foxglove/no-boolean-parameters
+  setRightSidebarOpen: (open: boolean) => void;
+};
+
+export const WorkspaceContext = createContext<WorkspaceContextType>({
   panelSettingsOpen: false,
+  rightSidebarOpen: false,
+
   openPanelSettings: (): void => {
     throw new Error("Must be in a WorkspaceContext.Provider to open panel settings");
   },
@@ -18,15 +31,12 @@ export const WorkspaceContext = createContext({
   openLayoutBrowser: (): void => {
     throw new Error("Must be in a WorkspaceContext.Provider to open layout browser");
   },
+  setRightSidebarOpen: (): void => {
+    throw new Error("Must be in a WorkspaceContext.Provider to open the right sidebar");
+  },
 });
 WorkspaceContext.displayName = "WorkspaceContext";
 
-export function useWorkspace(): {
-  panelSettingsOpen: boolean;
-  openPanelSettings: () => void;
-  openHelp: () => void;
-  openAccountSettings: () => void;
-  openLayoutBrowser: () => void;
-} {
+export function useWorkspace(): WorkspaceContextType {
   return useContext(WorkspaceContext);
 }

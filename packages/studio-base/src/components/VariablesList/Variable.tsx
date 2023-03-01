@@ -65,7 +65,7 @@ const useStyles = makeStyles<void, "copyButton">()((theme, _params, classes) => 
     },
   },
   edgeEnd: {
-    marginRight: theme.spacing(-1),
+    marginRight: theme.spacing(-1.625),
   },
   editorWrapper: {
     position: "relative",
@@ -79,6 +79,10 @@ const useStyles = makeStyles<void, "copyButton">()((theme, _params, classes) => 
       color: theme.palette.primary.main,
       transition: `background-color 300ms ease-in-out`,
     },
+  },
+  listItemText: {
+    marginTop: theme.spacing(0.125),
+    marginBottom: theme.spacing(0.125),
   },
 }));
 
@@ -208,6 +212,7 @@ export default function Variable(props: {
           onClick={() => setExpanded(!expanded)}
         >
           <ListItemText
+            className={classes.listItemText}
             primary={
               <Stack direction="row" alignItems="center" style={{ marginLeft: -12 }}>
                 <ArrowDropDownIcon

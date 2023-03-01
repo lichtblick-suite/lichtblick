@@ -2,12 +2,10 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import AddIcon from "@mui/icons-material/Add";
-import { Divider, IconButton } from "@mui/material";
+import { Button } from "@mui/material";
 import { union } from "lodash";
 import { useMemo, useRef, useState, ReactElement, useEffect } from "react";
 
-import { SidebarContent } from "@foxglove/studio-base/components/SidebarContent";
 import Stack from "@foxglove/studio-base/components/Stack";
 import { useAnalytics } from "@foxglove/studio-base/context/AnalyticsContext";
 import useGlobalVariables, {
@@ -19,7 +17,7 @@ import Variable from "./Variable";
 
 const ANIMATION_RESET_DELAY_MS = 1500;
 
-export default function VariablesSidebar(): ReactElement {
+export default function VariablesList(): ReactElement {
   const { globalVariables, setGlobalVariables } = useGlobalVariables();
   const globalVariableNames = useMemo(() => Object.keys(globalVariables), [globalVariables]);
 
@@ -56,35 +54,31 @@ export default function VariablesSidebar(): ReactElement {
   }, [globalVariables, skipAnimation]);
 
   return (
-    <SidebarContent
-      title="Variables"
-      disablePadding
-      trailingItems={[
-        <IconButton
+    <Stack flex="auto" fullWidth overflowX="auto">
+      {globalVariableNames.map((name, idx) => (
+        <Variable
+          key={name}
+          name={name}
+          selected={!skipAnimation.current && changedVariables.includes(name)}
+          index={idx}
+        />
+      ))}
+      <Stack direction="row" padding={1}>
+        <Button
+          color="inherit"
+          fullWidth
           data-testid="add-variable-button"
+          variant="contained"
           key="add-global-variable"
-          color="primary"
           disabled={globalVariables[""] != undefined}
           onClick={() => {
             setGlobalVariables({ "": '""' });
             void analytics.logEvent(AppEvent.VARIABLE_ADD);
           }}
         >
-          <AddIcon />
-        </IconButton>,
-      ]}
-    >
-      <Stack flex="auto">
-        <Divider />
-        {globalVariableNames.map((name, idx) => (
-          <Variable
-            key={name}
-            name={name}
-            selected={!skipAnimation.current && changedVariables.includes(name)}
-            index={idx}
-          />
-        ))}
+          Add variable
+        </Button>
       </Stack>
-    </SidebarContent>
+    </Stack>
   );
 }
