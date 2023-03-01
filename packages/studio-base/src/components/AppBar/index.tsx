@@ -7,14 +7,18 @@ import CheckBoxOutlineBlankIcon from "@mui/icons-material/CheckBoxOutlineBlank";
 import CloseIcon from "@mui/icons-material/Close";
 import FilterNoneIcon from "@mui/icons-material/FilterNone";
 import MinimizeIcon from "@mui/icons-material/Minimize";
-import { AppBar as MuiAppBar, Button, IconButton, Toolbar, Typography } from "@mui/material";
-import { MouseEvent, useCallback, useState } from "react";
+import { AppBar as MuiAppBar, Button, IconButton, Toolbar } from "@mui/material";
+import { useCallback, useState } from "react";
 import { makeStyles } from "tss-react/mui";
 
 import { AppSetting } from "@foxglove/studio-base/AppSetting";
 import { FoxgloveLogo } from "@foxglove/studio-base/components/FoxgloveLogo";
 import { MemoryUseIndicator } from "@foxglove/studio-base/components/MemoryUseIndicator";
 import { useAnalytics } from "@foxglove/studio-base/context/AnalyticsContext";
+import {
+  LayoutState,
+  useCurrentLayoutSelector,
+} from "@foxglove/studio-base/context/CurrentLayoutContext";
 import {
   CurrentUser,
   useCurrentUserType,
@@ -25,14 +29,15 @@ import { useAppConfigurationValue } from "@foxglove/studio-base/hooks";
 import useNativeAppMenuEvent from "@foxglove/studio-base/hooks/useNativeAppMenuEvent";
 import { AppEvent } from "@foxglove/studio-base/services/IAnalytics";
 
+import { AddPanelIconButton, AddPanelMenu } from "./AddPanel";
 import { DataSource } from "./DataSource";
 import { HelpIconButton, HelpMenu } from "./Help";
 import { PreferencesDialog, PreferencesIconButton } from "./Preferences";
 import { UserIconButton, UserMenu } from "./User";
 import {
-  APP_BAR_HEIGHT,
   APP_BAR_BACKGROUND_COLOR,
   APP_BAR_FOREGROUND_COLOR,
+  APP_BAR_HEIGHT,
   APP_BAR_PRIMARY_COLOR,
 } from "./constants";
 
@@ -76,7 +81,7 @@ const useStyles = makeStyles<{ leftInset?: number; debugDragRegion?: boolean }>(
         display: "flex",
         flex: 1,
         alignItems: "center",
-        gap: theme.spacing(0.5),
+        gap: theme.spacing(1),
 
         [theme.breakpoints.up("sm")]: {
           marginInlineStart: theme.spacing(-2),
@@ -99,6 +104,12 @@ const useStyles = makeStyles<{ leftInset?: number; debugDragRegion?: boolean }>(
           marginInlineEnd: theme.spacing(-2),
         },
       },
+      endInner: {
+        display: "flex",
+        alignItems: "center",
+        gap: theme.spacing(1),
+        ...NOT_DRAGGABLE_STYLE, // make buttons clickable for desktop app
+      },
       button: {
         backgroundColor: APP_BAR_PRIMARY_COLOR,
 
@@ -110,12 +121,6 @@ const useStyles = makeStyles<{ leftInset?: number; debugDragRegion?: boolean }>(
       },
       iconButton: {
         padding: theme.spacing(0.375),
-      },
-      endInner: {
-        display: "flex",
-        alignItems: "center",
-        gap: theme.spacing(1),
-        ...NOT_DRAGGABLE_STYLE, // make buttons clickable for desktop app
       },
       noDrag: {
         ...NOT_DRAGGABLE_STYLE, // make buttons clickable for desktop app
@@ -148,6 +153,8 @@ type AppBarProps = CustomWindowControlsProps & {
   onSelectDataSourceAction: () => void;
 };
 
+const selectedLayoutIdSelector = (state: LayoutState) => state.selectedLayout?.id;
+
 export function AppBar(props: AppBarProps): JSX.Element {
   const {
     currentUser,
@@ -171,37 +178,19 @@ export function AppBar(props: AppBarProps): JSX.Element {
     AppSetting.ENABLE_MEMORY_USE_INDICATOR,
   );
 
+  const selectedLayoutId = useCurrentLayoutSelector(selectedLayoutIdSelector);
   const supportsAccountSettings = signIn != undefined;
 
   const { rightSidebarOpen, setRightSidebarOpen } = useWorkspace();
 
   const [helpAnchorEl, setHelpAnchorEl] = useState<undefined | HTMLElement>(undefined);
   const [userAnchorEl, setUserAnchorEl] = useState<undefined | HTMLElement>(undefined);
+  const [panelAnchorEl, setPanelAnchorEl] = useState<undefined | HTMLElement>(undefined);
   const [prefsDialogOpen, setPrefsDialogOpen] = useState(false);
 
   const helpMenuOpen = Boolean(helpAnchorEl);
   const userMenuOpen = Boolean(userAnchorEl);
-
-  const handleHelpClick = (event: MouseEvent<HTMLElement>) => {
-    setHelpAnchorEl(event.currentTarget);
-  };
-  const handleHelpClose = () => {
-    setHelpAnchorEl(undefined);
-  };
-
-  const handleUserMenuClick = (event: MouseEvent<HTMLElement>) => {
-    setUserAnchorEl(event.currentTarget);
-  };
-  const handleUserClose = () => {
-    setUserAnchorEl(undefined);
-  };
-
-  const openPreferences = () => {
-    setPrefsDialogOpen(true);
-  };
-  const closePreferences = () => {
-    setPrefsDialogOpen(false);
-  };
+  const panelMenuOpen = Boolean(panelAnchorEl);
 
   const handleDoubleClick = useCallback(
     (event: React.MouseEvent) => {
@@ -233,10 +222,21 @@ export function AppBar(props: AppBarProps): JSX.Element {
             <IconButton className={cx(classes.logo, classes.noDrag)} size="large" color="inherit">
               <FoxgloveLogo fontSize="inherit" color="inherit" />
             </IconButton>
-            {currentUser != undefined && (
-              <Typography noWrap variant="h5" fontWeight={800} color="inherit">
-                {currentUser.org.displayName}
-              </Typography>
+            {selectedLayoutId != undefined && (
+              <AddPanelIconButton
+                className={classes.iconButton}
+                color="inherit"
+                id="add-panel-button"
+                title="Add panel"
+                aria-label="Add panel button"
+                aria-controls={panelMenuOpen ? "add-panel-menu" : undefined}
+                aria-haspopup="true"
+                aria-expanded={panelMenuOpen ? "true" : undefined}
+                size="large"
+                onClick={(event) => {
+                  setPanelAnchorEl(event.currentTarget);
+                }}
+              />
             )}
           </div>
 
@@ -271,7 +271,7 @@ export function AppBar(props: AppBarProps): JSX.Element {
                     user: currentUserType,
                     cta: "help-menu",
                   });
-                  handleHelpClick(event);
+                  setPanelAnchorEl(event.currentTarget);
                 }}
               />
               <PreferencesIconButton
@@ -287,7 +287,7 @@ export function AppBar(props: AppBarProps): JSX.Element {
                     user: currentUserType,
                     cta: "preferences-dialog",
                   });
-                  openPreferences();
+                  setPrefsDialogOpen(true);
                 }}
               />
               {!disableSignIn &&
@@ -301,7 +301,7 @@ export function AppBar(props: AppBarProps): JSX.Element {
                     aria-controls={userMenuOpen ? "user-profile-menu" : undefined}
                     aria-haspopup="true"
                     aria-expanded={userMenuOpen ? "true" : undefined}
-                    onClick={handleUserMenuClick}
+                    onClick={(event) => setPanelAnchorEl(event.currentTarget)}
                     size="small"
                     currentUser={currentUser}
                   />
@@ -335,24 +335,25 @@ export function AppBar(props: AppBarProps): JSX.Element {
           </div>
         </Toolbar>
       </MuiAppBar>
+      <AddPanelMenu
+        anchorEl={panelAnchorEl}
+        open={panelMenuOpen}
+        handleClose={() => setPanelAnchorEl(undefined)}
+      />
       <HelpMenu
         anchorEl={helpAnchorEl}
         open={helpMenuOpen}
-        handleClose={handleHelpClose}
-        anchorOrigin={{
-          horizontal: "right",
-          vertical: "bottom",
-        }}
-        transformOrigin={{
-          vertical: "top",
-          horizontal: "right",
-        }}
+        handleClose={() => setHelpAnchorEl(undefined)}
       />
-      <UserMenu anchorEl={userAnchorEl} open={userMenuOpen} handleClose={handleUserClose} />
+      <UserMenu
+        anchorEl={userAnchorEl}
+        open={userMenuOpen}
+        handleClose={() => setUserAnchorEl(undefined)}
+      />
       <PreferencesDialog
         id="preferences-dialog"
         open={prefsDialogOpen}
-        onClose={closePreferences}
+        onClose={() => setPrefsDialogOpen(false)}
       />
     </>
   );

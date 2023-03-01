@@ -526,13 +526,32 @@ export default function Workspace(props: WorkspaceProps): JSX.Element {
         "layouts",
         { iconName: "FiveTileGrid", title: "Layouts", component: ConnectedLayoutBrowser },
       ],
-      ["add-panel", { iconName: "RectangularClipping", title: "Add panel", component: AddPanel }],
-      [
-        "panel-settings",
-        { iconName: "PanelSettings", title: "Panel settings", component: PanelSettings },
-      ],
     ]);
 
+    if (!enableNewTopNav) {
+      topItems.set("add-panel", {
+        iconName: "RectangularClipping",
+        title: "Add panel",
+        component: AddPanel,
+      });
+    }
+    topItems.set("panel-settings", {
+      iconName: "PanelSettings",
+      title: "Panel settings",
+      component: PanelSettings,
+    });
+    topItems.set("variables", {
+      iconName: "Variable2",
+      title: "Variables",
+      component: VariablesList,
+    });
+    if (!enableNewTopNav) {
+      topItems.set("extensions", {
+        iconName: "AddIn",
+        title: "Extensions",
+        component: ExtensionsSidebar,
+      });
+    }
     if (enableStudioLogsSidebar) {
       topItems.set("studio-logs-settings", {
         iconName: "BacklogList",
@@ -544,18 +563,6 @@ export default function Workspace(props: WorkspaceProps): JSX.Element {
     const bottomItems = new Map<SidebarItemKey, SidebarItem>([]);
 
     if (!enableNewTopNav) {
-      topItems.set("extensions", {
-        iconName: "Variable2",
-        title: "Variables",
-        component: VariablesList,
-      });
-
-      topItems.set("variables", {
-        iconName: "AddIn",
-        title: "Extensions",
-        component: ExtensionsSidebar,
-      });
-
       if (supportsAccountSettings) {
         bottomItems.set("account", {
           iconName: currentUser != undefined ? "BlockheadFilled" : "Blockhead",

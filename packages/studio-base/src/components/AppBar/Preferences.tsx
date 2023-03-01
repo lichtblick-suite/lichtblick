@@ -2,9 +2,9 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
+import { Settings24Regular } from "@fluentui/react-icons";
 import CloseIcon from "@mui/icons-material/Close";
 import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
-import SettingsOutlinedIcon from "@mui/icons-material/SettingsOutlined";
 import WarningAmberIcon from "@mui/icons-material/WarningAmber";
 import {
   Alert,
@@ -175,7 +175,7 @@ export const aboutItems: Map<
 export function PreferencesIconButton(props: IconButtonProps): JSX.Element {
   return (
     <IconButton {...props}>
-      <SettingsOutlinedIcon />
+      <Settings24Regular />
     </IconButton>
   );
 }
