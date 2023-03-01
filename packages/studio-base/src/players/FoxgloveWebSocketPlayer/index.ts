@@ -94,6 +94,7 @@ export default class FoxgloveWebSocketPlayer implements Player {
   private _problems = new PlayerProblemManager();
   private _numTimeSeeks = 0;
   private _profile?: string;
+  private _urlState: PlayerState["urlState"];
 
   /** Earliest time seen */
   private _startTime?: Time;
@@ -141,6 +142,10 @@ export default class FoxgloveWebSocketPlayer implements Player {
     this._name = url;
     this._metricsCollector.playerConstructed();
     this._sourceId = sourceId;
+    this._urlState = {
+      sourceId: this._sourceId,
+      parameters: { url: this._url },
+    };
     this._open();
   }
 
@@ -637,6 +642,7 @@ export default class FoxgloveWebSocketPlayer implements Player {
         playerId: this._id,
         activeData: undefined,
         problems: this._problems.problems(),
+        urlState: this._urlState,
       });
     }
 
@@ -658,10 +664,7 @@ export default class FoxgloveWebSocketPlayer implements Player {
       profile: this._profile,
       playerId: this._id,
       problems: this._problems.problems(),
-      urlState: {
-        sourceId: this._sourceId,
-        parameters: { url: this._url },
-      },
+      urlState: this._urlState,
 
       activeData: {
         messages,
