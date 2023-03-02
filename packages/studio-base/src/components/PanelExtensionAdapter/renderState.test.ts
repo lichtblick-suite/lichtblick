@@ -34,6 +34,63 @@ describe("renderState", () => {
     });
   });
 
+  it("should provide stable time values", () => {
+    const buildRenderState = initRenderStateBuilder();
+    const initialState: Parameters<typeof buildRenderState>[0] = {
+      watchedFields: new Set(["currentTime", "endTime", "previewTime", "startTime"]),
+      appSettings: undefined,
+      currentFrame: [],
+      playerState: {
+        presence: PlayerPresence.PRESENT,
+        progress: {},
+        capabilities: [],
+        profile: "test",
+        playerId: "123",
+        activeData: {
+          datatypes: new Map(),
+          lastSeekTime: 1,
+          currentTime: { sec: 33, nsec: 1 },
+          endTime: { sec: 100, nsec: 1 },
+          startTime: { sec: 1, nsec: 1 },
+          isPlaying: true,
+          messages: [],
+          speed: 1,
+          topics: [],
+          topicStats: new Map(),
+          totalBytesReceived: 0,
+        },
+      },
+      colorScheme: undefined,
+      globalVariables: {},
+      hoverValue: {
+        value: 2.5,
+        componentId: "test",
+        type: "PLAYBACK_SECONDS",
+      },
+      sharedPanelState: {},
+      sortedTopics: [{ name: "test", schemaName: "schema" }],
+      subscriptions: [{ topic: "test", convertTo: "schema" }],
+    };
+    const firstRenderState = buildRenderState(initialState);
+    expect(firstRenderState).toEqual({
+      currentTime: { sec: 33, nsec: 1 },
+      endTime: { sec: 100, nsec: 1 },
+      previewTime: 3.500000001,
+      startTime: { sec: 1, nsec: 1 },
+    });
+
+    // need to change something to force a new, defined state
+    initialState.watchedFields = new Set(["currentTime", "endTime", "startTime", "topics"]);
+    const secondRenderState = buildRenderState(initialState);
+    expect(secondRenderState).toEqual({
+      currentTime: { sec: 33, nsec: 1 },
+      endTime: { sec: 100, nsec: 1 },
+      startTime: { sec: 1, nsec: 1 },
+      previewTime: 3.500000001,
+      topics: [{ datatype: "schema", name: "test", schemaName: "schema" }],
+    });
+  });
+
   it("should avoid conversion if the topic schema is already the desired convertTo schema", () => {
     const buildRenderState = initRenderStateBuilder();
     const state = buildRenderState({

@@ -329,44 +329,23 @@ function initRenderStateBuilder(): BuildRenderStateFn {
     }
 
     if (watchedFields.has("currentTime")) {
-      const currentTime = activeData?.currentTime;
-
-      if (currentTime != undefined && currentTime !== renderState.currentTime) {
+      if (renderState.currentTime !== activeData?.currentTime) {
+        renderState.currentTime = activeData?.currentTime;
         shouldRender = true;
-        renderState.currentTime = currentTime;
-      } else {
-        if (renderState.currentTime != undefined) {
-          shouldRender = true;
-        }
-        renderState.currentTime = undefined;
       }
     }
 
     if (watchedFields.has("startTime")) {
-      const startTime = activeData?.startTime;
-
-      if (startTime != undefined && startTime !== renderState.startTime) {
+      if (renderState.startTime !== activeData?.startTime) {
+        renderState.startTime = activeData?.startTime;
         shouldRender = true;
-        renderState.startTime = startTime;
-      } else {
-        if (renderState.startTime != undefined) {
-          shouldRender = true;
-        }
-        renderState.startTime = undefined;
       }
     }
 
     if (watchedFields.has("endTime")) {
-      const endTime = activeData?.endTime;
-
-      if (endTime != undefined && endTime !== renderState.endTime) {
+      if (renderState.endTime !== activeData?.endTime) {
+        renderState.endTime = activeData?.endTime;
         shouldRender = true;
-        renderState.endTime = endTime;
-      } else {
-        if (renderState.endTime != undefined) {
-          shouldRender = true;
-        }
-        renderState.endTime = undefined;
       }
     }
 
