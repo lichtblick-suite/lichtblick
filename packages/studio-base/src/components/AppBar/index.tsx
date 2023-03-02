@@ -301,7 +301,7 @@ export function AppBar(props: AppBarProps): JSX.Element {
                     aria-controls={userMenuOpen ? "user-profile-menu" : undefined}
                     aria-haspopup="true"
                     aria-expanded={userMenuOpen ? "true" : undefined}
-                    onClick={(event) => setPanelAnchorEl(event.currentTarget)}
+                    onClick={(event) => setUserAnchorEl(event.currentTarget)}
                     size="small"
                     currentUser={currentUser}
                   />
