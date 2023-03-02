@@ -569,4 +569,55 @@ describe("BufferedIterableSource", () => {
     // We should have called the messageIterator method only once
     expect(messageIteratorCount).toEqual(1);
   });
+
+  it("should exit producer when waiting for readhead to move past stamp", async () => {
+    const source = new TestSource();
+    const bufferedSource = new BufferedIterableSource(source, {
+      readAheadDuration: { sec: 1, nsec: 0 },
+    });
+
+    await bufferedSource.initialize();
+
+    const signal = waiter(1);
+
+    const debounceNotify = debounce(() => {
+      signal.notify();
+    }, 500);
+
+    let messageIteratorCount = 0;
+    source.messageIterator = async function* messageIterator(
+      args: MessageIteratorArgs,
+    ): AsyncIterableIterator<Readonly<IteratorResult>> {
+      expect(args).toEqual({
+        topics: ["a"],
+        start: { sec: 0, nsec: 0 },
+        end: { sec: 10, nsec: 0 },
+        consumptionType: "partial",
+      });
+      messageIteratorCount += 1;
+
+      for (let i = 0; i < 8; ++i) {
+        debounceNotify();
+        yield {
+          type: "stamp",
+          stamp: { sec: i, nsec: 0 },
+        };
+      }
+    };
+
+    const messageIterator = bufferedSource.messageIterator({
+      topics: ["a"],
+    });
+
+    // Reading the first message buffers some data
+    await messageIterator.next();
+
+    // Wait for the buffered iterable source to stop reading messages
+    await signal.wait();
+    expect(messageIteratorCount).toEqual(1);
+
+    // Exit the message iterator which will request a stop to the producer thread for the buffered source
+    await messageIterator.return?.();
+    expect(messageIteratorCount).toEqual(1);
+  });
 });

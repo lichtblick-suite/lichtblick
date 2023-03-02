@@ -116,7 +116,15 @@ class BufferedIterableSource implements IIterableSource {
 
         // When receiving a stamp result we enqueue the result into the cache and notify a reader.
         if (result.type === "stamp" && compare(result.stamp, readUntil) >= 0) {
+          // Continue to wait until our stamp time surpasses the readUntil and we know that
+          // we should read more data.
           while (compare(result.stamp, readUntil) >= 0) {
+            // The producer may have aborted while we are waiting for the read head to progress
+            // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+            if (this.aborted) {
+              return;
+            }
+
             // enqueue the stamp and wakeup the reader
             // but the reader might not be reading - cause it is not being read from
             this.cache.enqueue(result);
@@ -164,6 +172,7 @@ class BufferedIterableSource implements IIterableSource {
   }
 
   public async stopProducer(): Promise<void> {
+    log.debug("Stopping producer");
     this.aborted = true;
     this.writeSignal.notifyAll();
     await this.producer;

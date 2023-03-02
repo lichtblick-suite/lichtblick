@@ -345,17 +345,6 @@ export class IterablePlayer implements Player {
     this._nextState = newState;
     this._abort?.abort();
     this._abort = undefined;
-
-    // Support moving between idle (pause) and play and preserving the playback iterator
-    if (newState !== "idle" && newState !== "play" && this._playbackIterator) {
-      log.debug("Ending playback iterator because next state is not IDLE or PLAY");
-      const oldIterator = this._playbackIterator;
-      this._playbackIterator = undefined;
-      void oldIterator.return?.().catch((err) => {
-        log.error(err);
-      });
-    }
-
     void this._runState();
   }
 
@@ -376,6 +365,14 @@ export class IterablePlayer implements Player {
         this._nextState = undefined;
 
         log.debug(`Start state: ${state}`);
+
+        // If we are going into a state other than play or idle we throw away the playback iterator since
+        // we will need to make a new one.
+        if (state !== "idle" && state !== "play" && this._playbackIterator) {
+          log.debug("Ending playback iterator because next state is not IDLE or PLAY");
+          await this._playbackIterator.return?.();
+          this._playbackIterator = undefined;
+        }
 
         switch (state) {
           case "preinit":
@@ -531,11 +528,13 @@ export class IterablePlayer implements Player {
 
     const next = add(this._currentTime, { sec: 0, nsec: 1 });
 
+    log.debug("Ending previous iterator");
     await this._playbackIterator?.return?.();
 
     // set the playIterator to the seek time
-    log.debug("Initializing forward iterator from", next);
     await this._bufferedSource.stopProducer();
+
+    log.debug("Initializing forward iterator from", next);
     this._playbackIterator = this._bufferedSource.messageIterator({
       topics: Array.from(this._allTopics),
       start: next,
