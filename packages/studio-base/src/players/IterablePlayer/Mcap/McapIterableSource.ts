@@ -52,6 +52,11 @@ export class McapIterableSource implements IIterableSource {
 
     switch (source.type) {
       case "file": {
+        // Ensure the file is readable before proceeding (will throw in the event of a permission
+        // error). Workaround for the fact that `file.stream().getReader()` returns a generic
+        // "network error" in the event of a permission error.
+        await source.file.slice(0, 1).arrayBuffer();
+
         const readable = new FileReadable(source.file);
         const reader = await tryCreateIndexedReader(readable);
         if (reader) {
