@@ -380,3 +380,10 @@ DeleteLastLayout.parameters = {
   colorScheme: "dark",
 };
 DeleteLastLayout.play = async () => await deleteLayoutInteraction(0);
+
+export function SignInPrompt(_args: unknown): JSX.Element {
+  return <LayoutBrowser supportsSignIn />;
+}
+SignInPrompt.parameters = {
+  colorScheme: "light",
+};
