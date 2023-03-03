@@ -59,17 +59,12 @@ const useStyles = makeStyles()((theme) => ({
     gridArea: "sidebar",
     overflowY: "auto",
   },
-  tabs: {},
   tab: {
-    svg: {
-      fontSize: "inherit",
-    },
-    "> span, > .MuiSvgIcon-root": {
+    "> svg:not(.MuiSvgIcon-root)": {
       display: "flex",
+      flex: "none",
       color: theme.palette.primary.main,
       marginRight: theme.spacing(1.5),
-      height: theme.typography.pxToRem(21),
-      width: theme.typography.pxToRem(21),
     },
     [theme.breakpoints.up("md")]: {
       textAlign: "right",
@@ -174,10 +169,7 @@ export default function Connection(props: ConnectionProps): JSX.Element {
         </header>
         <div className={classes.sidebar}>
           <Tabs
-            classes={{
-              root: classes.tabs,
-              indicator: classes.indicator,
-            }}
+            classes={{ indicator: classes.indicator }}
             variant="scrollable"
             textColor="inherit"
             orientation={mdUp ? "vertical" : "horizontal"}

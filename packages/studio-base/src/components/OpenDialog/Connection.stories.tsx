@@ -35,6 +35,27 @@ const playerSelection: PlayerSelection = {
         return undefined;
       },
     },
+    {
+      id: "bar",
+      type: "connection",
+      displayName: "Another data source",
+      description: "Another description (with default icon)",
+
+      initialize: () => {
+        return undefined;
+      },
+    },
+    {
+      id: "bar",
+      type: "connection",
+      displayName: "Another data source",
+      description: "Another description (with default icon)",
+      iconName: "GenericScan",
+
+      initialize: () => {
+        return undefined;
+      },
+    },
   ],
 };
 

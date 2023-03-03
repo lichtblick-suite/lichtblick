@@ -14,7 +14,8 @@ import {
   Document24Regular,
   DocumentLink24Regular,
   Edit24Regular,
-  Flow20Regular,
+  Flow16Regular,
+  GridDots24Filled,
   Settings20Regular,
   SlideAdd24Regular,
   TextBulletListLtr24Regular,
@@ -22,7 +23,6 @@ import {
 
 import BlockheadFilledIcon from "@foxglove/studio-base/components/BlockheadFilledIcon";
 import BlockheadIcon from "@foxglove/studio-base/components/BlockheadIcon";
-import RosIcon from "@foxglove/studio-base/components/RosIcon";
 import { RegisteredIconNames } from "@foxglove/studio-base/types/Icons";
 
 import DatabaseSettings from "../assets/database-settings.svg";
@@ -46,14 +46,14 @@ const icons: {
   ErrorBadge: <DismissCircle24Regular />,
   FileASPX: <DocumentLink24Regular />,
   FiveTileGrid: <PanelLayout />,
-  Flow: <Flow20Regular />,
+  Flow: <Flow16Regular />,
   GenericScan: <BarcodeScanner24Regular />,
   OpenFile: <Document24Regular />,
   PanelSettings: <PanelSettings />,
   RectangularClipping: <SlideAdd24Regular />,
   Settings: <Settings20Regular />,
   Variable2: <BracesVariable24Regular />,
-  ROS: <RosIcon />,
+  ROS: <GridDots24Filled />,
 };
 
 export default icons;
