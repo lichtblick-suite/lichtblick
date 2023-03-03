@@ -87,6 +87,7 @@ const useStyles = makeStyles()((theme) => ({
 }));
 
 const webWorkerManager = new WebWorkerManager(() => {
+  // foxglove-depcheck-used: babel-plugin-transform-import-meta
   return new Worker(new URL("ImageCanvas.worker", import.meta.url));
 }, 1);
 

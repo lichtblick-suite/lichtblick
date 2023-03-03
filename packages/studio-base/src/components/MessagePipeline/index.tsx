@@ -75,7 +75,6 @@ type ProviderProps = {
 };
 
 const selectRenderDone = (state: MessagePipelineInternalState) => state.renderDone;
-const selectPublishers = (state: MessagePipelineInternalState) => state.public.publishers;
 const selectSubscriptions = (state: MessagePipelineInternalState) => state.public.subscriptions;
 
 export function MessagePipelineProvider({
@@ -89,9 +88,9 @@ export function MessagePipelineProvider({
   );
   useEffect(() => {
     store.getState().dispatch({ type: "set-player", player });
+    player?.setPublishers(store.getState().allPublishers);
   }, [player, store]);
 
-  const publishers = useStore(store, selectPublishers);
   const subscriptions = useStore(store, selectSubscriptions);
 
   // Debounce the subscription updates for players. This batches multiple subscribe calls
@@ -115,7 +114,6 @@ export function MessagePipelineProvider({
     () => debouncedPlayerSetSubscriptions(subscriptions),
     [debouncedPlayerSetSubscriptions, subscriptions],
   );
-  useEffect(() => player?.setPublishers(publishers), [player, publishers]);
 
   // Slow down the message pipeline framerate to the given FPS if it is set to less than 60
   const [messageRate] = useAppConfigurationValue<number>(AppSetting.MESSAGE_RATE);

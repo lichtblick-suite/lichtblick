@@ -93,7 +93,6 @@ describe("MessagePipelineProvider/useMessagePipeline", () => {
           progress: {},
         },
         subscriptions: [],
-        publishers: [],
         messageEventsBySubscriberId: new Map(),
         sortedTopics: [],
         datatypes: new Map(),
@@ -117,7 +116,6 @@ describe("MessagePipelineProvider/useMessagePipeline", () => {
           progress: {},
         },
         subscriptions: [],
-        publishers: [],
         messageEventsBySubscriberId: new Map(),
         sortedTopics: [],
         datatypes: new Map(),
@@ -484,30 +482,48 @@ describe("MessagePipelineProvider/useMessagePipeline", () => {
   it("sets publishers", async () => {
     const player = new FakePlayer();
     const { Hook, Wrapper } = makeTestHook({ player });
-    const { result } = renderHook(Hook, {
-      wrapper: Wrapper,
-    });
+    const { result } = renderHook(Hook, { wrapper: Wrapper });
 
     act(() =>
       result.current.setPublishers("test", [{ topic: "/studio/test", schemaName: "test" }]),
     );
-    expect(result.current.publishers).toEqual<typeof result.current.publishers>([
+    expect(player.publishers).toEqual<typeof player.publishers>([
       { topic: "/studio/test", schemaName: "test" },
     ]);
 
     act(() =>
       result.current.setPublishers("bar", [{ topic: "/studio/test2", schemaName: "test2" }]),
     );
-    expect(result.current.publishers).toEqual<typeof result.current.publishers>([
+    expect(player.publishers).toEqual<typeof player.publishers>([
       { topic: "/studio/test", schemaName: "test" },
       { topic: "/studio/test2", schemaName: "test2" },
     ]);
 
-    const lastPublishers = result.current.publishers;
+    const lastPublishers = player.publishers;
     // cause the player to emit a frame outside the render loop to trigger another render
     await doubleAct(async () => await player.emit());
     // make sure publishers are reference equal when they don't change
-    expect(result.current.publishers).toBe(lastPublishers);
+    expect(player.publishers).toBe(lastPublishers);
+  });
+
+  it("informs new player of existing prior advertisements", () => {
+    const player1 = new FakePlayer();
+    const { Hook, Wrapper, setPlayer } = makeTestHook({ player: player1 });
+    const { result, rerender } = renderHook(Hook, { wrapper: Wrapper });
+
+    act(() =>
+      result.current.setPublishers("test", [{ topic: "/studio/test", schemaName: "test" }]),
+    );
+    expect(player1.publishers).toEqual<typeof player1.publishers>([
+      { topic: "/studio/test", schemaName: "test" },
+    ]);
+
+    const player2 = new FakePlayer();
+    setPlayer(player2);
+    rerender();
+    expect(player2.publishers).toEqual<typeof player2.publishers>([
+      { topic: "/studio/test", schemaName: "test" },
+    ]);
   });
 
   it("renders with the same callback functions every time", async () => {

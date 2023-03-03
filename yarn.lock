@@ -2510,6 +2510,7 @@ __metadata:
     "@uiw/react-textarea-code-editor": 2.1.1
     amplitude-js: 8.21.4
     babel-jest: 29.4.3
+    babel-plugin-transform-import-meta: 2.2.0
     browserify-zlib: 0.2.0
     chart.js: 4.2.1
     chartjs-plugin-annotation: 2.1.2
@@ -2539,6 +2540,7 @@ __metadata:
     idb-keyval: 6.2.0
     immer: 9.0.19
     intervals-fn: 3.0.3
+    jest-canvas-mock: 2.4.0
     jest-diff: 29.4.2
     jszip: 3.10.1
     just-diff: 5.2.0
@@ -13566,7 +13568,6 @@ __metadata:
     eslint-plugin-react-hooks: 4.6.0
     eslint-plugin-tss-unused-classes: 0.0.4
     jest: 29.4.0
-    jest-canvas-mock: 2.4.0
     jest-environment-jsdom: 29.4.0
     license-checker: 25.0.1
     prettier: 2.8.3

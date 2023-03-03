@@ -19,7 +19,6 @@ export type MessagePipelineContext = {
   sortedTopics: Topic[];
   datatypes: RosDatatypes;
   subscriptions: SubscribePayload[];
-  publishers: AdvertiseOptions[];
   messageEventsBySubscriberId: Map<string, MessageEvent<unknown>[]>;
   setSubscriptions: (id: string, subscriptionsForId: SubscribePayload[]) => void;
   setPublishers: (id: string, publishersForId: AdvertiseOptions[]) => void;

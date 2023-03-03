@@ -126,7 +126,6 @@ function getPublicState(
             },
     },
     subscriptions: [],
-    publishers: [],
     sortedTopics:
       props.topics === prevState?.mockProps.topics
         ? prevState?.public.sortedTopics ?? []
@@ -244,6 +243,7 @@ export default function MockMessagePipelineProvider(
         player: undefined,
         dispatch,
         publishersById: {},
+        allPublishers: [],
         subscriptionsById: new Map(),
         subscriberIdsByTopic: new Map(),
         newTopicsBySubscriberId: new Map(),

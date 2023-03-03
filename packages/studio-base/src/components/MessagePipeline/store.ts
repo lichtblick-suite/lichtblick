@@ -43,6 +43,7 @@ export type MessagePipelineInternalState = {
 
   subscriptionsById: Map<string, SubscribePayload[]>;
   publishersById: { [key: string]: AdvertiseOptions[] };
+  allPublishers: AdvertiseOptions[];
   subscriberIdsByTopic: Map<string, string[]>;
   newTopicsBySubscriberId: Map<string, Set<string>>;
   lastMessageEventByTopic: Map<string, MessageEvent<unknown>>;
@@ -83,6 +84,7 @@ export function createMessagePipelineStore({
       set((state) => reducer(state, action));
     },
     publishersById: {},
+    allPublishers: [],
     subscriptionsById: new Map(),
     subscriberIdsByTopic: new Map(),
     newTopicsBySubscriberId: new Map(),
@@ -93,7 +95,6 @@ export function createMessagePipelineStore({
       playerState: defaultPlayerState(),
       messageEventsBySubscriberId: new Map(),
       subscriptions: [],
-      publishers: [],
       sortedTopics: [],
       datatypes: new Map(),
       setSubscriptions(id, payloads) {
@@ -101,6 +102,7 @@ export function createMessagePipelineStore({
       },
       setPublishers(id, payloads) {
         get().dispatch({ type: "set-publishers", id, payloads });
+        get().player?.setPublishers(get().allPublishers);
       },
       setParameter(key, value) {
         get().player?.setParameter(key, value);
@@ -323,7 +325,7 @@ export function reducer(
       return {
         ...prevState,
         publishersById: newPublishersById,
-        public: { ...prevState.public, publishers: flatten(Object.values(newPublishersById)) },
+        allPublishers: flatten(Object.values(newPublishersById)),
       };
     }
 

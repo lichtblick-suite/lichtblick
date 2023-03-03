@@ -579,6 +579,10 @@ export default class RosbridgePlayer implements Player {
   public publish({ topic, msg }: PublishPayload): void {
     const publisher = this._topicPublishers.get(topic);
     if (!publisher) {
+      if (this._advertisements.some((opts) => opts.topic === topic)) {
+        // Topic was advertised but the connection is not yet established
+        return;
+      }
       throw new Error(
         `Tried to publish on a topic that is not registered as a publisher: ${topic}`,
       );
