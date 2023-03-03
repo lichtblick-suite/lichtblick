@@ -246,7 +246,8 @@ function DraggablePanelItem({
       return (
         <Tooltip
           placement="right"
-          enterDelay={200}
+          enterDelay={500}
+          leaveDelay={0}
           TransitionComponent={Fade}
           title={
             <Stack paddingTop={0.25} style={{ width: 200 }}>

@@ -19,7 +19,8 @@ import { makeStyles } from "tss-react/mui";
 import Logger from "@foxglove/log";
 import { AppSetting } from "@foxglove/studio-base/AppSetting";
 import AccountSettings from "@foxglove/studio-base/components/AccountSettingsSidebar/AccountSettings";
-import { AppBar, CustomWindowControlsProps } from "@foxglove/studio-base/components/AppBar";
+import { AppBar } from "@foxglove/studio-base/components/AppBar";
+import { CustomWindowControlsProps } from "@foxglove/studio-base/components/AppBar/CustomWindowControls";
 import { DataSourceSidebar } from "@foxglove/studio-base/components/DataSourceSidebar";
 import { EventsList } from "@foxglove/studio-base/components/DataSourceSidebar/EventsList";
 import DocumentDropListener from "@foxglove/studio-base/components/DocumentDropListener";
@@ -522,13 +523,14 @@ export default function Workspace(props: WorkspaceProps): JSX.Element {
               : undefined,
         },
       ],
-      [
-        "layouts",
-        { iconName: "FiveTileGrid", title: "Layouts", component: ConnectedLayoutBrowser },
-      ],
     ]);
 
     if (!enableNewTopNav) {
+      topItems.set("layouts", {
+        iconName: "FiveTileGrid",
+        title: "Layouts",
+        component: ConnectedLayoutBrowser,
+      });
       topItems.set("add-panel", {
         iconName: "RectangularClipping",
         title: "Add panel",
@@ -540,12 +542,12 @@ export default function Workspace(props: WorkspaceProps): JSX.Element {
       title: "Panel settings",
       component: PanelSettings,
     });
-    topItems.set("variables", {
-      iconName: "Variable2",
-      title: "Variables",
-      component: VariablesList,
-    });
     if (!enableNewTopNav) {
+      topItems.set("variables", {
+        iconName: "Variable2",
+        title: "Variables",
+        component: VariablesList,
+      });
       topItems.set("extensions", {
         iconName: "AddIn",
         title: "Extensions",

@@ -12,7 +12,11 @@ import {
   FormGroup,
   FormControlLabel,
   CircularProgress,
-  useTheme,
+  List,
+  ListItem,
+  ListItemButton,
+  ListItemText,
+  Divider,
 } from "@mui/material";
 import { partition } from "lodash";
 import moment from "moment";
@@ -21,6 +25,7 @@ import path from "path";
 import { MouseEvent, useCallback, useContext, useEffect, useLayoutEffect, useMemo } from "react";
 import { useMountedState } from "react-use";
 import useAsyncFn from "react-use/lib/useAsyncFn";
+import { makeStyles } from "tss-react/mui";
 
 import Logger from "@foxglove/log";
 import { AppSetting } from "@foxglove/studio-base/AppSetting";
@@ -49,20 +54,42 @@ import showOpenFilePicker from "@foxglove/studio-base/util/showOpenFilePicker";
 
 import LayoutSection from "./LayoutSection";
 import { useLayoutBrowserReducer } from "./reducer";
-import { debugBorder } from "./styles";
 
 const log = Logger.getLogger(__filename);
 
 const selectedLayoutIdSelector = (state: LayoutState) => state.selectedLayout?.id;
 
+const useStyles = makeStyles()((theme) => ({
+  debugBanner: {
+    bottom: 0,
+    left: 0,
+    right: 0,
+    background: theme.palette.background.paper,
+    borderWidth: 4,
+    borderStyle: "solid",
+    borderImage: `repeating-linear-gradient(${[
+      "-45deg",
+      theme.palette.warning.main,
+      `${theme.palette.warning.main} 6px`,
+      "#121217 6px",
+      "#121217 12px",
+    ].join(",")}) 4`,
+  },
+  actionList: {
+    paddingTop: theme.spacing(1),
+  },
+}));
+
 export default function LayoutBrowser({
+  menuClose,
   currentDateForStorybook,
   supportsSignIn,
 }: React.PropsWithChildren<{
+  menuClose?: () => void;
   currentDateForStorybook?: Date;
   supportsSignIn?: boolean;
 }>): JSX.Element {
-  const theme = useTheme();
+  const { classes } = useStyles();
   const isMounted = useMountedState();
   const { enqueueSnackbar } = useSnackbar();
   const layoutManager = useLayoutManager();
@@ -243,6 +270,7 @@ export default function LayoutBrowser({
       } else {
         setSelectedLayoutId(item.id);
         dispatch({ type: "select-id", id: item.id });
+        menuClose?.();
       }
     },
     [
@@ -250,6 +278,7 @@ export default function LayoutBrowser({
       currentLayoutId,
       dispatch,
       layouts.value,
+      menuClose,
       promptForUnsavedChanges,
       setSelectedLayoutId,
     ],
@@ -505,10 +534,10 @@ export default function LayoutBrowser({
 
   const layoutDebug = useContext(LayoutStorageDebuggingContext);
 
+  const [enableNewTopNav = false] = useAppConfigurationValue<boolean>(AppSetting.ENABLE_NEW_TOPNAV);
   const [hideSignInPrompt = false, setHideSignInPrompt] = useAppConfigurationValue<boolean>(
     AppSetting.HIDE_SIGN_IN_PROMPT,
   );
-
   const showSignInPrompt =
     supportsSignIn === true && !layoutManager.supportsSharing && !hideSignInPrompt;
 
@@ -524,6 +553,7 @@ export default function LayoutBrowser({
     <SidebarContent
       title="Layouts"
       disablePadding
+      disableToolbar={enableNewTopNav}
       trailingItems={[
         (layouts.loading || state.busy || pendingMultiAction) && (
           <Stack key="loading" alignItems="center" justifyContent="center" padding={1}>
@@ -559,8 +589,30 @@ export default function LayoutBrowser({
       {promptModal}
       {confirmModal}
       {unsavedChangesPrompt}
-      <Stack fullHeight gap={2} style={{ pointerEvents: pendingMultiAction ? "none" : "auto" }}>
+      <Stack
+        fullHeight
+        gap={enableNewTopNav ? 1 : 2}
+        style={{ pointerEvents: pendingMultiAction ? "none" : "auto" }}
+      >
+        {enableNewTopNav && (
+          <>
+            <List className={classes.actionList} disablePadding>
+              <ListItem disablePadding>
+                <ListItemButton onClick={createNewLayout}>
+                  <ListItemText disableTypography>Create new layout</ListItemText>
+                </ListItemButton>
+              </ListItem>
+              <ListItem disablePadding>
+                <ListItemButton onClick={importLayout}>
+                  <ListItemText disableTypography>Import from file…</ListItemText>
+                </ListItemButton>
+              </ListItem>
+            </List>
+            <Divider variant="middle" />
+          </>
+        )}
         <LayoutSection
+          disablePadding={enableNewTopNav}
           title={layoutManager.supportsSharing ? "Personal" : undefined}
           emptyText="Add a new layout to get started with Foxglove Studio!"
           items={layouts.value?.personal}
@@ -579,6 +631,7 @@ export default function LayoutBrowser({
         />
         {layoutManager.supportsSharing && (
           <LayoutSection
+            disablePadding={enableNewTopNav}
             title="Organization"
             emptyText="Your organization doesn’t have any shared layouts yet. Share a layout to collaborate with others."
             items={layouts.value?.shared}
@@ -596,23 +649,14 @@ export default function LayoutBrowser({
             onMakePersonalCopy={onMakePersonalCopy}
           />
         )}
-        <Stack flexGrow={1} />
+        {!enableNewTopNav && <Stack flexGrow={1} />}
         {showSignInPrompt && <SignInPrompt onDismiss={() => void setHideSignInPrompt(true)} />}
         {layoutDebug && (
-          <Stack
-            gap={0.5}
-            padding={1}
-            position="sticky"
-            style={{
-              bottom: 0,
-              left: 0,
-              right: 0,
-              background: theme.palette.background.default,
-              ...debugBorder,
-            }}
-          >
-            <Stack direction="row" flex="auto" gap={1}>
+          <Stack gap={0.5} padding={1} position="sticky" className={classes.debugBanner}>
+            <Stack direction="row" flex="auto" gap={1} alignItems="center">
               <Button
+                size="small"
+                color="inherit"
                 onClick={async () => {
                   await layoutDebug.syncNow();
                   await reloadLayouts();
@@ -627,6 +671,8 @@ export default function LayoutBrowser({
                 <FormControlLabel
                   control={
                     <Switch
+                      size="small"
+                      color="warning"
                       checked={layoutManager.isOnline}
                       onChange={(_, checked) => {
                         layoutDebug.setOnline(checked);

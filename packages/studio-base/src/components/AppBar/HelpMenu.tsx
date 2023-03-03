@@ -2,20 +2,12 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { ChatHelp24Regular } from "@fluentui/react-icons";
-import CloudOutlinedIcon from "@mui/icons-material/CloudOutlined";
-import ForumOutlinedIcon from "@mui/icons-material/ForumOutlined";
-import VisibilityOutlinedIcon from "@mui/icons-material/VisibilityOutlined";
 import {
-  Divider,
-  ListItemText,
-  ListSubheader,
-  Menu,
-  MenuItem,
-  IconButton,
-  IconButtonProps,
-  MenuProps,
-} from "@mui/material";
+  ChatBubblesQuestion24Regular,
+  Cloud24Regular,
+  SlideLayout24Regular,
+} from "@fluentui/react-icons";
+import { Divider, ListItemText, ListSubheader, Menu, MenuItem, MenuProps } from "@mui/material";
 import { makeStyles } from "tss-react/mui";
 
 import { useAnalytics } from "@foxglove/studio-base/context/AnalyticsContext";
@@ -30,35 +22,35 @@ const useStyles = makeStyles()((theme) => ({
   paper: {
     width: 280,
   },
+  icon: {
+    color: theme.palette.primary.main,
+    flex: "none",
+  },
   menuItem: {
     gap: theme.spacing(1),
   },
   menuText: {
     whiteSpace: "normal",
+    flex: "0 1 auto",
   },
 }));
 
-export function HelpIconButton(props: IconButtonProps): JSX.Element {
-  return (
-    <IconButton {...props}>
-      <ChatHelp24Regular />
-    </IconButton>
-  );
-}
+type HelpMenuProps = {
+  anchorEl?: HTMLElement;
+  anchorOrigin?: MenuProps["anchorOrigin"];
+  handleClose: () => void;
+  open: boolean;
+  transformOrigin?: MenuProps["transformOrigin"];
+};
 
-export function HelpMenu(
-  props: {
-    handleClose: () => void;
-  } & MenuProps,
-): JSX.Element {
-  const { anchorEl, handleClose, open, ...menuProps } = props;
+export function HelpMenu(props: HelpMenuProps): JSX.Element {
+  const { anchorEl, anchorOrigin, handleClose, open, transformOrigin } = props;
   const { classes } = useStyles();
   const currentUserType = useCurrentUserType();
   const analytics = useAnalytics();
 
   return (
     <Menu
-      {...menuProps}
       classes={{ paper: classes.paper }}
       id="help-menu"
       anchorEl={anchorEl}
@@ -67,14 +59,8 @@ export function HelpMenu(
       MenuListProps={{
         "aria-labelledby": "help-button",
       }}
-      anchorOrigin={{
-        horizontal: "right",
-        vertical: "bottom",
-      }}
-      transformOrigin={{
-        vertical: "top",
-        horizontal: "right",
-      }}
+      anchorOrigin={anchorOrigin}
+      transformOrigin={transformOrigin}
     >
       <ListSubheader className={classes.subheader} tabIndex={-1}>
         Documentation
@@ -92,7 +78,7 @@ export function HelpMenu(
           handleClose();
         }}
       >
-        <VisibilityOutlinedIcon color="primary" />
+        <SlideLayout24Regular className={classes.icon} />
         <ListItemText
           primary="Studio"
           secondary="Open source robotics visualization and debugging."
@@ -112,7 +98,7 @@ export function HelpMenu(
           handleClose();
         }}
       >
-        <CloudOutlinedIcon color="primary" />
+        <Cloud24Regular className={classes.icon} />
         <ListItemText
           primary="Data Platform"
           secondary="Scalable data management platform"
@@ -136,7 +122,7 @@ export function HelpMenu(
           handleClose();
         }}
       >
-        <ForumOutlinedIcon color="primary" />
+        <ChatBubblesQuestion24Regular className={classes.icon} />
         <ListItemText
           primary="Join us on Slack"
           secondary="Give us feedback, ask questions, and collaborate with other users."

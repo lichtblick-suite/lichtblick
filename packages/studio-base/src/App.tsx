@@ -12,7 +12,7 @@ import { StudioLogsSettingsProvider } from "@foxglove/studio-base/providers/Stud
 import TimelineInteractionStateProvider from "@foxglove/studio-base/providers/TimelineInteractionStateProvider";
 
 import Workspace from "./Workspace";
-import { CustomWindowControlsProps } from "./components/AppBar";
+import { CustomWindowControlsProps } from "./components/AppBar/CustomWindowControls";
 import { ColorSchemeThemeProvider } from "./components/ColorSchemeThemeProvider";
 import CssBaseline from "./components/CssBaseline";
 import DocumentTitleAdapter from "./components/DocumentTitleAdapter";

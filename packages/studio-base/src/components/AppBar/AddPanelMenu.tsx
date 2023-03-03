@@ -2,34 +2,23 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { SlideAdd24Regular } from "@fluentui/react-icons";
-import { Menu, IconButton, IconButtonProps, MenuProps } from "@mui/material";
-import { forwardRef } from "react";
+import { Menu } from "@mui/material";
 
 import PanelList from "@foxglove/studio-base/components/PanelList";
 import useAddPanel from "@foxglove/studio-base/hooks/useAddPanel";
 
-export const AddPanelIconButton = forwardRef<HTMLButtonElement, IconButtonProps>((props, ref) => {
-  return (
-    <IconButton {...props} ref={ref} id="add-panel-button">
-      <SlideAdd24Regular />
-    </IconButton>
-  );
-});
+type AddPanelProps = {
+  anchorEl?: HTMLElement;
+  handleClose: () => void;
+  open: boolean;
+};
 
-AddPanelIconButton.displayName = "AddPanelIconButton";
-
-export function AddPanelMenu(
-  props: {
-    handleClose: () => void;
-  } & MenuProps,
-): JSX.Element {
-  const { anchorEl, handleClose, open, ...menuProps } = props;
+export function AddPanelMenu(props: AddPanelProps): JSX.Element {
+  const { anchorEl, handleClose, open } = props;
   const addPanel = useAddPanel();
 
   return (
     <Menu
-      {...menuProps}
       id="add-panel-menu"
       anchorEl={anchorEl}
       open={open}
@@ -50,7 +39,10 @@ export function AddPanelMenu(
       <PanelList
         // Close when a drag starts so the modal menu doesn't block the drop targets
         onDragStart={handleClose}
-        onPanelSelect={addPanel}
+        onPanelSelect={(selection) => {
+          addPanel(selection);
+          handleClose();
+        }}
       />
     </Menu>
   );

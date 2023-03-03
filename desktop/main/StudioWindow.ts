@@ -12,6 +12,8 @@ import {
   shell,
   MenuItem,
   systemPreferences,
+  nativeTheme,
+  TitleBarOverlayOptions,
 } from "electron";
 import path from "path";
 
@@ -99,6 +101,19 @@ const getTitleCase = (baseString: string): string =>
 
 type ClearableMenu = Menu & { clear: () => void };
 
+function getTitleBarOverlayOptions(): TitleBarOverlayOptions {
+  if (isWindows) {
+    return {
+      height: APP_BAR_HEIGHT,
+      color: nativeTheme.shouldUseDarkColors
+        ? APP_BAR_BACKGROUND_COLOR.dark
+        : APP_BAR_BACKGROUND_COLOR.light,
+      symbolColor: APP_BAR_FOREGROUND_COLOR,
+    };
+  }
+  return {};
+}
+
 function newStudioWindow(deepLinks: string[] = []): BrowserWindow {
   const { crashReportingEnabled, telemetryEnabled } = getTelemetrySettings();
   const enableNewTopNav = getAppSetting<boolean>(AppSetting.ENABLE_NEW_TOPNAV) ?? false;
@@ -119,13 +134,7 @@ function newStudioWindow(deepLinks: string[] = []): BrowserWindow {
     titleBarStyle: enableNewTopNav ? "hidden" : "default",
     trafficLightPosition:
       isMac && enableNewTopNav ? { x: macTrafficLightInset, y: macTrafficLightInset } : undefined,
-    titleBarOverlay: isWindows
-      ? {
-          height: APP_BAR_HEIGHT,
-          color: APP_BAR_BACKGROUND_COLOR,
-          symbolColor: APP_BAR_FOREGROUND_COLOR,
-        }
-      : undefined,
+    titleBarOverlay: getTitleBarOverlayOptions(),
     webPreferences: {
       contextIsolation: true,
       sandbox: false, // Allow preload script to access Node builtins
@@ -151,6 +160,9 @@ function newStudioWindow(deepLinks: string[] = []): BrowserWindow {
   }
 
   const browserWindow = new BrowserWindow(windowOptions);
+  nativeTheme.on("updated", () => {
+    browserWindow.setTitleBarOverlay(getTitleBarOverlayOptions());
+  });
 
   // Forward full screen events to the renderer
   browserWindow.addListener("enter-full-screen", () =>

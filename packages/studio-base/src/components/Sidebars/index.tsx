@@ -17,7 +17,7 @@ import { MosaicNode, MosaicWithoutDragDropContext } from "react-mosaic-component
 import { makeStyles } from "tss-react/mui";
 
 import { AppSetting } from "@foxglove/studio-base/AppSetting";
-import { HelpMenu } from "@foxglove/studio-base/components/AppBar/Help";
+import { HelpMenu } from "@foxglove/studio-base/components/AppBar/HelpMenu";
 import { BuiltinIcon } from "@foxglove/studio-base/components/BuiltinIcon";
 import ErrorBoundary from "@foxglove/studio-base/components/ErrorBoundary";
 import { MemoryUseIndicator } from "@foxglove/studio-base/components/MemoryUseIndicator";
