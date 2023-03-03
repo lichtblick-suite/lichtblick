@@ -311,7 +311,7 @@ describe("getStructureItemForPath", () => {
       },
       datatype: "",
     };
-    expect(getStructureItemForPath(structureItem, "0")).toEqual({
+    expect(getStructureItemForPath(structureItem, [0])).toEqual({
       structureType: "primitive",
       primitiveType: "uint32",
       datatype: "",
@@ -330,7 +330,7 @@ describe("getStructureItemForPath", () => {
       },
       datatype: "",
     };
-    expect(getStructureItemForPath(structureItem, "some_id")).toEqual({
+    expect(getStructureItemForPath(structureItem, ["some_id"])).toEqual({
       structureType: "primitive",
       primitiveType: "uint32",
       datatype: "",
@@ -353,7 +353,26 @@ describe("getStructureItemForPath", () => {
       },
       datatype: "",
     };
-    expect(getStructureItemForPath(structureItem, "0,some_id")).toEqual({
+    expect(getStructureItemForPath(structureItem, [0, "some_id"])).toEqual({
+      structureType: "primitive",
+      primitiveType: "uint32",
+      datatype: "",
+    });
+  });
+
+  it("returns a key named '0'", () => {
+    const structureItem: MessagePathStructureItem = {
+      structureType: "message",
+      nextByName: {
+        0: {
+          structureType: "primitive",
+          primitiveType: "uint32",
+          datatype: "",
+        },
+      },
+      datatype: "",
+    };
+    expect(getStructureItemForPath(structureItem, ["0"])).toEqual({
       structureType: "primitive",
       primitiveType: "uint32",
       datatype: "",

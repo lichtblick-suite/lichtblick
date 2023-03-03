@@ -11,8 +11,6 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import memoizeWeak from "memoize-weak";
-
 import { MessagePathStructureItem } from "@foxglove/studio-base/components/MessagePathSyntax/constants";
 import { isTypicalFilterName } from "@foxglove/studio-base/components/MessagePathSyntax/isTypicalFilterName";
 
@@ -127,41 +125,27 @@ export function getValueActionForValue(
 }
 
 // Given root structureItem (e.g. a message definition),
-// and a key path (comma-joined) to navigate down, return strutureItem for the field at that path
-// Using comma-joined path to allow memoization of this function
-export const getStructureItemForPath = memoizeWeak(
-  (
-    rootStructureItem: MessagePathStructureItem | undefined,
-    keyPathJoined: string,
-  ): MessagePathStructureItem | undefined => {
-    // split the path and parse into numbers and strings
-    const keyPath: (number | string)[] = [];
-    for (const part of keyPathJoined.split(",")) {
-      if (!isNaN(+part)) {
-        keyPath.push(+part);
-      } else {
-        keyPath.push(part);
-      }
+// and a key path to navigate down, return strutureItem for the field at that path
+export const getStructureItemForPath = (
+  rootStructureItem: MessagePathStructureItem | undefined,
+  keyPath: (number | string)[],
+): MessagePathStructureItem | undefined => {
+  let structureItem: MessagePathStructureItem | undefined = rootStructureItem;
+  // Walk down the keyPath, while updating `value` and `structureItem`
+  for (const pathItem of keyPath) {
+    if (structureItem == undefined) {
+      break;
+    } else if (structureItem.structureType === "message" && typeof pathItem === "string") {
+      structureItem = structureItem.nextByName[pathItem];
+    } else if (structureItem.structureType === "array" && typeof pathItem === "number") {
+      structureItem = structureItem.next;
+    } else if (structureItem.structureType === "primitive") {
+      // ROS has some primitives that contain nested data (time+duration). We currently don't
+      // support looking inside them.
+      return structureItem;
+    } else {
+      throw new Error(`Invalid structureType: ${structureItem.structureType} for value/pathItem.`);
     }
-    let structureItem: MessagePathStructureItem | undefined = rootStructureItem;
-    // Walk down the keyPath, while updating `value` and `structureItem`
-    for (const pathItem of keyPath) {
-      if (structureItem == undefined) {
-        break;
-      } else if (structureItem.structureType === "message" && typeof pathItem === "string") {
-        structureItem = structureItem.nextByName[pathItem];
-      } else if (structureItem.structureType === "array" && typeof pathItem === "number") {
-        structureItem = structureItem.next;
-      } else if (structureItem.structureType === "primitive") {
-        // ROS has some primitives that contain nested data (time+duration). We currently don't
-        // support looking inside them.
-        return structureItem;
-      } else {
-        throw new Error(
-          `Invalid structureType: ${structureItem.structureType} for value/pathItem.`,
-        );
-      }
-    }
-    return structureItem;
-  },
-);
+  }
+  return structureItem;
+};
