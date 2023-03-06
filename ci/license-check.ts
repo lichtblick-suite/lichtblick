@@ -23,6 +23,7 @@ const ALLOWED_LICENSES = [
   "WTFPL",
   "Unlicense",
   "OFL-1.1",
+  "BlueOak-1.0.0",
 ];
 
 const EXCLUDED_PACKAGES = ["gl-vec3@1.1.3"];
