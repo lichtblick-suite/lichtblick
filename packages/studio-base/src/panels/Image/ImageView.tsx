@@ -16,7 +16,6 @@ import produce from "immer";
 import { difference, keyBy, set, union } from "lodash";
 import { useEffect, useState, useMemo, useCallback, useRef } from "react";
 import ReactDOM from "react-dom";
-import { useUpdateEffect } from "react-use";
 import { DeepPartial } from "ts-essentials";
 import { makeStyles } from "tss-react/mui";
 
@@ -311,22 +310,11 @@ export function ImageView({ context }: Props): JSX.Element {
   const lastImageMessageRef = useRef(image);
 
   useEffect(() => {
-    if (image) {
-      lastImageMessageRef.current = image;
-    }
+    lastImageMessageRef.current = image;
   }, [image]);
 
-  // Keep the last image message, if it exists, to render on the ImageCanvas.
-  // Improve perf by hiding the ImageCanvas while seeking, instead of unmounting and remounting it.
-  const imageMessageToRender = image ?? lastImageMessageRef.current;
-
-  // Clear our cached last image when the camera topic changes since it came from the old topic.
-  useUpdateEffect(() => {
-    lastImageMessageRef.current = undefined;
-  }, [cameraTopic]);
-
   const doDownloadImage = useCallback(async () => {
-    if (!imageMessageToRender) {
+    if (!lastImageMessageRef.current) {
       return;
     }
 
@@ -335,8 +323,8 @@ export function ImageView({ context }: Props): JSX.Element {
       return;
     }
 
-    await downloadImage(imageMessageToRender, topic, config);
-  }, [imageTopics, cameraTopic, config, imageMessageToRender]);
+    await downloadImage(lastImageMessageRef.current, topic, config);
+  }, [imageTopics, cameraTopic, config]);
 
   const contextMenuItemsForClickPosition = useCallback<() => PanelContextMenuItem[]>(
     () => [
@@ -415,7 +403,7 @@ export function ImageView({ context }: Props): JSX.Element {
           {/* Always render the ImageCanvas because it's expensive to unmount and start up. */}
           <ImageCanvas
             topic={cameraTopicFullObject}
-            image={imageMessageToRender}
+            image={image}
             rawMarkerData={rawMarkerData}
             config={config}
             saveConfig={saveConfigWithMerging}
