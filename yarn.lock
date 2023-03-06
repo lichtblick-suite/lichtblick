@@ -11264,7 +11264,7 @@ __metadata:
     path-browserify: 1.0.1
     playwright: 1.30.0
     plist: 3.0.6
-    pngjs: 6.0.0
+    pngjs: 7.0.0
     quicklookjs: 0.0.3
     react: 17.0.2
     react-dom: 17.0.2
@@ -19928,10 +19928,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"pngjs@npm:6.0.0":
-  version: 6.0.0
-  resolution: "pngjs@npm:6.0.0"
-  checksum: ab6c285086060087097eab9fe6b5a528a24f9e79c03dea2b4fd6264ed4fdb5beff4a3257eeeaf2a9dc18249b539609c2a4e4013c567164a1f6b5ba2c974d5ecb
+"pngjs@npm:7.0.0":
+  version: 7.0.0
+  resolution: "pngjs@npm:7.0.0"
+  checksum: b19a018930d27de26229c1b3ff250b3a25d09caa22cbb0b0459987d91eb0a560a18ab5d67da45a38ed7514140f26d1db58de83c31159ec101f2bb270a3c707f1
   languageName: node
   linkType: hard
 
