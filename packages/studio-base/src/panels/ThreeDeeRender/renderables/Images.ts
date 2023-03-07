@@ -301,18 +301,8 @@ export class Images extends SceneExtension<ImageRenderable> {
     const imageTopic = messageEvent.topic;
     const receiveTime = toNanoSec(messageEvent.receiveTime);
     const frameId = "header" in image ? image.header.frame_id : image.frame_id;
-    const userSettings = this.renderer.config.topics[imageTopic] as
-      | Partial<LayerSettingsImage>
-      | undefined;
 
-    // Create an ImageRenderable for this topic if it doesn't already exist
-    const renderable = this._getImageRenderable(
-      imageTopic,
-      receiveTime,
-      image,
-      frameId,
-      userSettings,
-    );
+    const renderable = this._getImageRenderable(imageTopic, receiveTime, image, frameId);
 
     // Auto-select settings.cameraInfoTopic if it's not already set
     const settings = renderable.userData.settings;
@@ -323,7 +313,7 @@ export class Images extends SceneExtension<ImageRenderable> {
         this.cameraInfoToImageTopics.set(newCameraInfoTopic, imageTopic);
         // Update user settings with the newly selected CameraInfo topic
         this.renderer.updateConfig((draft) => {
-          const updatedUserSettings = { ...userSettings };
+          const updatedUserSettings = { ...settings };
           updatedUserSettings.cameraInfoTopic = newCameraInfoTopic;
           draft.topics[imageTopic] = updatedUserSettings;
         });
@@ -355,22 +345,12 @@ export class Images extends SceneExtension<ImageRenderable> {
     }
     const cameraInfo = normalizeCameraInfo(messageEvent.message);
     const frameId = cameraInfo.header.frame_id;
-    const userSettings = this.renderer.config.topics[cameraInfoTopic] as
-      | Partial<LayerSettingsImage>
-      | undefined;
-
     // Check if we have a mapping from this CameraInfo topic to an Image topic
     const imageTopics = this.cameraInfoToImageTopics.get(cameraInfoTopic);
     if (imageTopics && imageTopics.length > 0) {
       for (const imageTopic of imageTopics) {
         // Get the ImageRenderable for the image topic
-        const renderable = this._getImageRenderable(
-          imageTopic,
-          receiveTime,
-          undefined,
-          frameId,
-          userSettings,
-        );
+        const renderable = this._getImageRenderable(imageTopic, receiveTime, undefined, frameId);
 
         const dataEqual = cameraInfosEqual(renderable.userData.cameraInfo, cameraInfo);
         if (!dataEqual) {
@@ -501,17 +481,22 @@ export class Images extends SceneExtension<ImageRenderable> {
     tryCreateMesh(renderable, this.renderer);
   }
 
+  // Get or create an image renderable for the imageTopic
   private _getImageRenderable(
     imageTopic: string,
     receiveTime: bigint,
     image: AnyImage | undefined,
     frameId: string,
-    userSettings: Partial<LayerSettingsImage> | undefined,
   ): ImageRenderable {
     let renderable = this.renderables.get(imageTopic);
     if (renderable) {
       return renderable;
     }
+
+    // Lookup any existing settings for the image topic to save as user data with the renderable
+    const userSettings = this.renderer.config.topics[imageTopic] as
+      | Partial<LayerSettingsImage>
+      | undefined;
 
     renderable = new ImageRenderable(imageTopic, this.renderer, {
       receiveTime,
