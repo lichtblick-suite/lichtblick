@@ -7,7 +7,7 @@
   "devDependencies": {
     "@foxglove/log": "workspace:*",
     "@mui/icons-material": "5.11.0",
-    "@mui/material": "5.11.11",
+    "@mui/material": "5.11.12",
     "@pmmmwh/react-refresh-webpack-plugin": "0.5.10",
     "@sentry/browser": "7.30.0",
     "@sentry/tracing": "7.30.0",
