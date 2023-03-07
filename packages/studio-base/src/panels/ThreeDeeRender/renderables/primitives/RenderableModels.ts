@@ -289,6 +289,7 @@ export class RenderableModels extends RenderablePrimitive {
       }
       rgbToThreeColor(renderable.material.color, overrideColor);
       const transparent = overrideColor.a < 1;
+      renderable.material.opacity = overrideColor.a;
       renderable.material.transparent = transparent;
       renderable.material.depthWrite = !transparent;
       renderable.material.needsUpdate = true;
