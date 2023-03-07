@@ -318,6 +318,11 @@ export class PointCloudRenderable extends Renderable<PointCloudUserData> {
   }
 
   public startFrame(currentTime: bigint, renderFrameId: string, fixedFrameId: string): void {
+    // The PointCloud SceneExtension overrides startFrame which is responsible for setting the
+    // THREE.Object3D.visible flag on renderables so we set it here to synchronize the THREE
+    // visibility state with the settings state.
+    this.visible = this.userData.settings.visible;
+
     if (!this.userData.settings.visible) {
       this.renderer.settings.errors.clearPath(this.userData.settingsPath);
       this.pointsHistory.clearHistory();
