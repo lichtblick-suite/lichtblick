@@ -3,29 +3,22 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 import { action } from "@storybook/addon-actions";
-import { Story } from "@storybook/react";
-import { DndProvider } from "react-dnd";
-import { HTML5Backend } from "react-dnd-html5-backend";
 
 import { AppBar } from "@foxglove/studio-base/components/AppBar";
+import { StorybookDecorator } from "@foxglove/studio-base/components/AppBar/StorybookDecorator.stories";
 import MockMessagePipelineProvider from "@foxglove/studio-base/components/MessagePipeline/MockMessagePipelineProvider";
-import Panel from "@foxglove/studio-base/components/Panel";
 import Stack from "@foxglove/studio-base/components/Stack";
 import { User } from "@foxglove/studio-base/context/CurrentUserContext";
-import PanelCatalogContext, {
-  PanelCatalog,
-  PanelInfo,
-} from "@foxglove/studio-base/context/PanelCatalogContext";
 import { PlayerPresence } from "@foxglove/studio-base/players/types";
-import MockCurrentLayoutProvider from "@foxglove/studio-base/providers/CurrentLayoutProvider/MockCurrentLayoutProvider";
 
 export default {
   title: "components/AppBar",
   component: AppBar,
-  decorators: [Wrapper],
+  decorators: [StorybookDecorator],
   parameters: {
     colorScheme: "both-column",
   },
+  excludeStories: ["Wrapper"],
 };
 
 const actions = {
@@ -36,63 +29,6 @@ const actions = {
   onUnmaximizeWindow: action("onUnmaximizeWindow"),
   onCloseWindow: action("onCloseWindow"),
 };
-
-const SamplePanel1 = function () {
-  return <div></div>;
-};
-SamplePanel1.panelType = "sample";
-SamplePanel1.defaultConfig = {};
-
-const SamplePanel2 = function () {
-  return <div></div>;
-};
-SamplePanel2.panelType = "sample2";
-SamplePanel2.defaultConfig = {};
-
-const MockPanel1 = Panel(SamplePanel1);
-const MockPanel2 = Panel(SamplePanel2);
-
-const allPanels: PanelInfo[] = [
-  { title: "Regular Panel BBB", type: "Sample1", module: async () => ({ default: MockPanel1 }) },
-  { title: "Regular Panel AAA", type: "Sample2", module: async () => ({ default: MockPanel2 }) },
-
-  {
-    title: "Preconfigured Panel AAA",
-    type: "Sample1",
-    description: "Panel description",
-    module: async () => ({ default: MockPanel1 }),
-    config: { text: "def" },
-  },
-  {
-    title: "Preconfigured Panel BBB",
-    type: "Sample2",
-    module: async () => ({ default: MockPanel1 }),
-    config: { num: 456 },
-  },
-];
-
-class MockPanelCatalog implements PanelCatalog {
-  public getPanels(): readonly PanelInfo[] {
-    return allPanels;
-  }
-  public getPanelByType(type: string): PanelInfo | undefined {
-    return allPanels.find((panel) => !panel.config && panel.type === type);
-  }
-}
-
-function Wrapper(StoryFn: Story): JSX.Element {
-  return (
-    <DndProvider backend={HTML5Backend}>
-      <PanelCatalogContext.Provider value={new MockPanelCatalog()}>
-        <MockCurrentLayoutProvider>
-          <MockMessagePipelineProvider>
-            <StoryFn />
-          </MockMessagePipelineProvider>
-        </MockCurrentLayoutProvider>
-      </PanelCatalogContext.Provider>
-    </DndProvider>
-  );
-}
 
 export function Default(): JSX.Element {
   return (

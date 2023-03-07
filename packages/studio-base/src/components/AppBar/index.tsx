@@ -297,7 +297,7 @@ export function AppBar(props: AppBarProps): JSX.Element {
                 <QuestionCircle24Regular />
               </IconButton>
               <IconButton
-                className={cx(classes.iconButton, { "Mui-selected": userMenuOpen })}
+                className={classes.iconButton}
                 color="inherit"
                 id="preferences-button"
                 aria-label="Preferences dialog button"

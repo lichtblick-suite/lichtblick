@@ -7,7 +7,16 @@ import {
   Cloud24Regular,
   SlideLayout24Regular,
 } from "@fluentui/react-icons";
-import { Divider, ListItemText, ListSubheader, Menu, MenuItem, MenuProps } from "@mui/material";
+import {
+  Divider,
+  ListItemText,
+  ListSubheader,
+  Menu,
+  MenuItem,
+  PopoverOrigin,
+  PopoverPosition,
+  PopoverReference,
+} from "@mui/material";
 import { makeStyles } from "tss-react/mui";
 
 import { useAnalytics } from "@foxglove/studio-base/context/AnalyticsContext";
@@ -37,14 +46,26 @@ const useStyles = makeStyles()((theme) => ({
 
 type HelpMenuProps = {
   anchorEl?: HTMLElement;
-  anchorOrigin?: MenuProps["anchorOrigin"];
+  anchorOrigin?: PopoverOrigin;
+  anchorPosition?: PopoverPosition;
+  anchorReference?: PopoverReference;
+  disablePortal?: boolean;
   handleClose: () => void;
   open: boolean;
-  transformOrigin?: MenuProps["transformOrigin"];
+  transformOrigin?: PopoverOrigin;
 };
 
 export function HelpMenu(props: HelpMenuProps): JSX.Element {
-  const { anchorEl, anchorOrigin, handleClose, open, transformOrigin } = props;
+  const {
+    anchorEl,
+    anchorOrigin,
+    anchorPosition,
+    anchorReference,
+    disablePortal,
+    handleClose,
+    open,
+    transformOrigin,
+  } = props;
   const { classes } = useStyles();
   const currentUserType = useCurrentUserType();
   const analytics = useAnalytics();
@@ -54,13 +75,16 @@ export function HelpMenu(props: HelpMenuProps): JSX.Element {
       classes={{ paper: classes.paper }}
       id="help-menu"
       anchorEl={anchorEl}
+      anchorOrigin={anchorOrigin}
+      anchorReference={anchorReference}
+      anchorPosition={anchorPosition}
+      disablePortal={disablePortal}
       open={open}
       onClose={handleClose}
+      transformOrigin={transformOrigin}
       MenuListProps={{
         "aria-labelledby": "help-button",
       }}
-      anchorOrigin={anchorOrigin}
-      transformOrigin={transformOrigin}
     >
       <ListSubheader className={classes.subheader} tabIndex={-1}>
         Documentation

@@ -11,6 +11,8 @@ import {
   ListItemText,
   Menu,
   MenuItem,
+  PopoverPosition,
+  PopoverReference,
 } from "@mui/material";
 import { useSnackbar } from "notistack";
 import { forwardRef, useCallback } from "react";
@@ -70,11 +72,17 @@ UserIconButton.displayName = "UserIconButton";
 
 export function UserMenu({
   anchorEl,
+  anchorReference,
+  anchorPosition,
+  disablePortal,
   handleClose,
   open,
 }: {
   handleClose: () => void;
   anchorEl?: HTMLElement;
+  anchorReference?: PopoverReference;
+  anchorPosition?: PopoverPosition;
+  disablePortal?: boolean;
   open: boolean;
 }): JSX.Element {
   const { classes } = useStyles();
@@ -113,6 +121,9 @@ export function UserMenu({
     <>
       <Menu
         anchorEl={anchorEl}
+        anchorReference={anchorReference}
+        anchorPosition={anchorPosition}
+        disablePortal={disablePortal}
         id="account-menu"
         open={open}
         onClose={handleClose}
@@ -125,7 +136,7 @@ export function UserMenu({
         <MenuItem onClick={onSettingsClick}>
           <ListItemText>User settings</ListItemText>
         </MenuItem>
-        <Divider />
+        <Divider variant="middle" />
         <MenuItem onClick={onSignoutClick}>
           <ListItemText>Log out</ListItemText>
         </MenuItem>
