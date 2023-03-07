@@ -4,6 +4,7 @@
 
 import { keyframes } from "@emotion/react";
 import { simplify } from "intervals-fn";
+import { clamp } from "lodash";
 import { useMemo } from "react";
 import tinycolor from "tinycolor2";
 import { makeStyles } from "tss-react/mui";
@@ -56,11 +57,22 @@ export function ProgressPlot(props: ProgressProps): JSX.Element {
   const { availableRanges, loading } = props;
   const { classes } = useStyles();
 
-  const ranges = useMemo(() => {
+  const clampedRanges = useMemo(() => {
     if (!availableRanges) {
+      return undefined;
+    }
+
+    return availableRanges.map((range) => ({
+      start: clamp(range.start, 0, 1),
+      end: clamp(range.end, 0, 1),
+    }));
+  }, [availableRanges]);
+
+  const ranges = useMemo(() => {
+    if (!clampedRanges) {
       return <></>;
     }
-    const mergedRanges = simplify(availableRanges);
+    const mergedRanges = simplify(clampedRanges);
 
     return filterMap(mergedRanges, (range, idx) => {
       const width = range.end - range.start;
@@ -79,7 +91,7 @@ export function ProgressPlot(props: ProgressProps): JSX.Element {
         />
       );
     });
-  }, [availableRanges, classes.range]);
+  }, [clampedRanges, classes.range]);
 
   return (
     <Stack position="relative" fullHeight>

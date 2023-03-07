@@ -169,6 +169,7 @@ export const DownloadProgressByRanges: Story = () => {
   player.progress = {
     ...player.progress,
     fullyLoadedFractionRanges: [
+      { start: -2, end: 0.1 },
       { start: 0.23, end: 0.6 },
       { start: 0.7, end: 1 },
     ],

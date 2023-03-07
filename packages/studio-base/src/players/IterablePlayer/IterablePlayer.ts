@@ -252,10 +252,14 @@ export class IterablePlayer implements Player {
 
   public seekPlayback(time: Time): void {
     // Wait to perform seek until initialization is complete
-    if (this._state === "preinit" || this._state === "initialize" || !this._start || !this._end) {
+    if (this._state === "preinit" || this._state === "initialize") {
       log.debug(`Ignoring seek, state=${this._state}`);
       this._seekTarget = time;
       return;
+    }
+
+    if (!this._start || !this._end) {
+      throw new Error("invariant: initialized but no start/end set");
     }
 
     // Limit seek to within the valid range
@@ -439,6 +443,12 @@ export class IterablePlayer implements Player {
         datatypes,
         name,
       } = await this._bufferedSource.initialize();
+
+      // Prior to initialization, the seekTarget may have been set to an out-of-bounds value
+      // This brings the value in bounds
+      if (this._seekTarget) {
+        this._seekTarget = clampTime(this._seekTarget, start, end);
+      }
 
       this._profile = profile;
       this._start = start;
@@ -643,10 +653,16 @@ export class IterablePlayer implements Player {
   // Process a seek request. The seek is performed by requesting a getBackfillMessages from the source.
   // This provides the last message on all subscribed topics.
   private async _stateSeekBackfill() {
-    const targetTime = this._seekTarget;
-    if (!targetTime) {
+    if (!this._start || !this._end) {
+      throw new Error("invariant: stateSeekBackfill prior to initialization");
+    }
+
+    if (!this._seekTarget) {
       return;
     }
+
+    // Ensure the seek time is always within the data source bounds
+    const targetTime = clampTime(this._seekTarget, this._start, this._end);
 
     this._lastMessageEvent = undefined;
 
