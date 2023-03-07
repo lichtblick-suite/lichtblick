@@ -4,6 +4,7 @@
 
 import { alpha, Theme } from "@mui/material";
 import { CSSProperties } from "react";
+import tinycolor from "tinycolor2";
 
 type MuiLabComponents = {
   MuiFocusVisible?: {
@@ -515,10 +516,12 @@ export default function muiComponents(theme: Theme): Theme["components"] & MuiLa
       },
       styleOverrides: {
         arrow: {
-          color: theme.palette.grey[700],
+          color: tinycolor(theme.palette.grey[700]).setAlpha(0.86).toRgbString(),
+          backdropFilter: "blur(3px)",
         },
         tooltip: {
-          backgroundColor: theme.palette.grey[700],
+          backgroundColor: tinycolor(theme.palette.grey[700]).setAlpha(0.86).toRgbString(),
+          backdropFilter: "blur(3px)",
           fontWeight: "normal",
           fontSize: "0.75rem",
         },
