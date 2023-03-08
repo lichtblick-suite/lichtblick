@@ -12,8 +12,9 @@
 //   You may not use this file except in compliance with the License.
 
 import FullscreenExitIcon from "@mui/icons-material/FullscreenExit";
-import { styled as muiStyled, Typography } from "@mui/material";
+import { Typography } from "@mui/material";
 import { useContext, useMemo, CSSProperties } from "react";
+import { makeStyles } from "tss-react/mui";
 
 import PanelContext from "@foxglove/studio-base/components/PanelContext";
 import ToolbarIconButton from "@foxglove/studio-base/components/PanelToolbar/ToolbarIconButton";
@@ -28,27 +29,26 @@ type Props = {
   additionalIcons?: React.ReactNode;
   backgroundColor?: CSSProperties["backgroundColor"];
   children?: React.ReactNode;
+  className?: string;
   isUnknownPanel?: boolean;
 };
 
-const PanelToolbarRoot = muiStyled("div", {
-  shouldForwardProp: (prop) => prop !== "backgroundColor" && prop !== "enableDrag",
-})<{ backgroundColor?: CSSProperties["backgroundColor"]; enableDrag: boolean }>(
-  ({ theme, backgroundColor, enableDrag }) => ({
+const useStyles = makeStyles()((theme) => ({
+  root: {
     transition: "transform 80ms ease-in-out, opacity 80ms ease-in-out",
-    cursor: enableDrag ? "grab" : "auto",
+    cursor: "auto",
     flex: "0 0 auto",
     alignItems: "center",
     justifyContent: "flex-end",
     padding: theme.spacing(0.25, 0.75),
     display: "flex",
     minHeight: PANEL_TOOLBAR_MIN_HEIGHT,
-    backgroundColor: backgroundColor ?? theme.palette.background.paper,
+    backgroundColor: theme.palette.background.paper,
     width: "100%",
     left: 0,
     zIndex: theme.zIndex.appBar,
-  }),
-);
+  },
+}));
 
 // Panel toolbar should be added to any panel that's part of the
 // react-mosaic layout.  It adds a drag handle, remove/replace controls
@@ -57,8 +57,10 @@ export default React.memo<Props>(function PanelToolbar({
   additionalIcons,
   backgroundColor,
   children,
+  className,
   isUnknownPanel = false,
 }: Props) {
+  const { classes, cx } = useStyles();
   const {
     isFullscreen,
     exitFullscreen,
@@ -102,11 +104,11 @@ export default React.memo<Props>(function PanelToolbar({
 
   const title = customPanelTitle ?? panelContext?.title;
   return (
-    <PanelToolbarRoot
-      backgroundColor={backgroundColor}
+    <header
+      className={cx(classes.root, className)}
       data-testid="mosaic-drag-handle"
-      enableDrag={rootDragRef != undefined}
       ref={rootDragRef}
+      style={{ backgroundColor, cursor: rootDragRef != undefined ? "grab" : "auto" }}
     >
       {children ??
         (title && (
@@ -119,6 +121,6 @@ export default React.memo<Props>(function PanelToolbar({
         isUnknownPanel={!!isUnknownPanel}
         ref={controlsDragRef}
       />
-    </PanelToolbarRoot>
+    </header>
   );
 });

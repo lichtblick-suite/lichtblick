@@ -11,9 +11,9 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { styled as muiStyled } from "@mui/material";
 import { useCallback, useMemo, useState } from "react";
 import { MosaicNode } from "react-mosaic-component";
+import { makeStyles } from "tss-react/mui";
 
 import { EmptyPanelLayout } from "@foxglove/studio-base/components/EmptyPanelLayout";
 import Panel from "@foxglove/studio-base/components/Panel";
@@ -30,20 +30,23 @@ import { SaveConfig } from "@foxglove/studio-base/types/panels";
 import { TAB_PANEL_TYPE } from "@foxglove/studio-base/util/globalConstants";
 import { DEFAULT_TAB_PANEL_CONFIG, updateTabPanelLayout } from "@foxglove/studio-base/util/layout";
 
-const SPanelCover = muiStyled("div")`
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  z-index: 1;
-  background: ${({ theme }) => theme.palette.background.paper};
-  position: absolute;
-`;
+const useStyles = makeStyles()((theme) => ({
+  panelCover: {
+    top: "0",
+    left: "0",
+    width: "100%",
+    height: "100%",
+    zIndex: 1,
+    background: theme.palette.background.paper,
+    position: "absolute",
+  },
+}));
 
 type Props = { config: Config; saveConfig: SaveConfig<Config> };
 
 function Tab({ config, saveConfig }: Props) {
   const panelId = usePanelContext().id;
+  const { classes } = useStyles();
 
   const { tabs, activeTabIdx } = config;
   const activeTab = tabs[activeTabIdx];
@@ -126,7 +129,7 @@ function Tab({ config, saveConfig }: Props) {
         ) : (
           <EmptyPanelLayout tabId={panelId} />
         )}
-        {preventTabDrop && <SPanelCover />}
+        {preventTabDrop && <div className={classes.panelCover} />}
       </Stack>
     </Stack>
   );

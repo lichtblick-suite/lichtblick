@@ -12,11 +12,16 @@
 //   You may not use this file except in compliance with the License.
 
 import AddIcon from "@mui/icons-material/Add";
-import { IconButton, styled as muiStyled, useTheme } from "@mui/material";
+import { ButtonBase, useTheme } from "@mui/material";
 import { useEffect } from "react";
 import { useDrop } from "react-dnd";
+import { makeStyles } from "tss-react/mui";
 
-import PanelToolbar from "@foxglove/studio-base/components/PanelToolbar";
+import PanelToolbar, {
+  PANEL_TOOLBAR_MIN_HEIGHT,
+} from "@foxglove/studio-base/components/PanelToolbar";
+import ToolbarIconButton from "@foxglove/studio-base/components/PanelToolbar/ToolbarIconButton";
+import Stack from "@foxglove/studio-base/components/Stack";
 import { DraggableToolbarTab } from "@foxglove/studio-base/panels/Tab/DraggableToolbarTab";
 import {
   DraggingTabItem,
@@ -25,25 +30,17 @@ import {
 } from "@foxglove/studio-base/panels/Tab/TabDndContext";
 import { TabConfig } from "@foxglove/studio-base/types/layouts";
 
-const STabbedToolbar = muiStyled("div")(({ theme }) => ({
-  flex: "0 0",
-  display: "flex",
-  position: "relative",
-  flexDirection: "column",
-  borderBottom: `1px solid ${theme.palette.divider}`,
-  backgroundColor: theme.palette.background.default,
-  paddingLeft: theme.spacing(0.5),
-}));
-
-const STabs = muiStyled("div")({
-  flex: "auto",
-  display: "flex",
-  alignItems: "flex-end",
-});
-
-const StyledIconButton = muiStyled(IconButton)(({ theme }) => ({
-  padding: theme.spacing(0.25),
-  margin: theme.spacing(0, 0.5, -0.25),
+const useStyles = makeStyles()((theme) => ({
+  root: {
+    backgroundColor: theme.palette.background.default,
+  },
+  toolbar: {
+    padding: theme.spacing(0, 0.75, 0, 0.25),
+  },
+  button: {
+    flexGrow: 1,
+    height: PANEL_TOOLBAR_MIN_HEIGHT,
+  },
 }));
 
 type Props = {
@@ -56,6 +53,7 @@ type Props = {
 
 export function TabbedToolbar(props: Props): JSX.Element {
   const { panelId, actions, tabs, activeTabIdx, setDraggingTabState } = props;
+  const { classes } = useStyles();
   const theme = useTheme();
 
   const [{ isOver, item }, dropRef] = useDrop({
@@ -70,9 +68,25 @@ export function TabbedToolbar(props: Props): JSX.Element {
   }, [item, isOver, setDraggingTabState]);
 
   return (
-    <STabbedToolbar>
-      <PanelToolbar backgroundColor={theme.palette.background.default}>
-        <STabs role="tab" ref={dropRef} data-testid="toolbar-droppable">
+    <Stack className={classes.root} flex="0 0" position="relative">
+      <PanelToolbar
+        className={classes.toolbar}
+        backgroundColor={theme.palette.background.default}
+        additionalIcons={
+          <ToolbarIconButton data-testid="add-tab" title="Add tab" onClick={actions.addTab}>
+            <AddIcon fontSize="inherit" />
+          </ToolbarIconButton>
+        }
+      >
+        <Stack
+          direction="row"
+          flex="auto"
+          alignItems="center"
+          ref={dropRef}
+          data-testid="toolbar-droppable"
+          style={{ gap: 1 }}
+          overflow="hidden"
+        >
           {tabs.map((tab, i) => (
             <DraggableToolbarTab
               isActive={activeTabIdx === i}
@@ -84,16 +98,9 @@ export function TabbedToolbar(props: Props): JSX.Element {
               tabTitle={tab.title}
             />
           ))}
-          <StyledIconButton
-            size="small"
-            data-testid="add-tab"
-            title="Add tab"
-            onClick={actions.addTab}
-          >
-            <AddIcon fontSize="inherit" />
-          </StyledIconButton>
-        </STabs>
+          <ButtonBase className={classes.button} onDoubleClick={actions.addTab} />
+        </Stack>
       </PanelToolbar>
-    </STabbedToolbar>
+    </Stack>
   );
 }

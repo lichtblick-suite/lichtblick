@@ -12,9 +12,10 @@
 //   You may not use this file except in compliance with the License.
 
 import CloseIcon from "@mui/icons-material/Close";
-import { IconButton, InputBase, styled as muiStyled } from "@mui/material";
+import { IconButton, InputBase } from "@mui/material";
 import React, { Ref as ReactRef, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import textMetrics from "text-metrics";
+import { makeStyles } from "tss-react/mui";
 
 import { PANEL_TOOLBAR_MIN_HEIGHT } from "@foxglove/studio-base/components/PanelToolbar";
 import { TabActions } from "@foxglove/studio-base/panels/Tab/TabDndContext";
@@ -24,72 +25,66 @@ const MAX_TAB_WIDTH = 120;
 const MIN_ACTIVE_TAB_WIDTH = 40;
 const MIN_OTHER_TAB_WIDTH = 14;
 
-const Tab = muiStyled("div", {
-  shouldForwardProp: (prop) =>
-    prop !== "active" && prop !== "dragging" && prop !== "hidden" && prop !== "tabCount",
-})<{
-  active: boolean;
-  dragging: boolean;
-  hidden: boolean;
-  tabCount: number;
-  title: string;
-}>(({ active, dragging, hidden, tabCount, title, theme }) => ({
-  fontSize: theme.typography.overline.fontSize,
-  position: "relative",
-  borderTopLeftRadius: theme.shape.borderRadius,
-  borderTopRightRadius: theme.shape.borderRadius,
-  display: "flex",
-  alignItems: "center",
-  width: "100%",
-  height: PANEL_TOOLBAR_MIN_HEIGHT - 4,
-  padding: theme.spacing(0, 0.75),
-  userSelect: "none",
-  border: "1px solid transparent",
-  borderBottom: "none",
-  backgroundColor: "transparent",
-  maxWidth: MAX_TAB_WIDTH,
-  top: 5, // Shift the tab down so it's flush with the bottom of the PanelToolbar
-  marginTop: -4,
-  gap: theme.spacing(0.5),
+const useStyles = makeStyles<void, "active">()((theme, _params, classes) => ({
+  root: {
+    cursor: "pointer",
+    color: theme.palette.text.secondary,
+    fontSize: theme.typography.body2.fontSize,
+    fontWeight: theme.typography.body2.fontWeight,
+    position: "relative",
+    display: "flex",
+    alignItems: "center",
+    width: "100%",
+    height: PANEL_TOOLBAR_MIN_HEIGHT,
+    padding: theme.spacing(0, 1),
+    userSelect: "none",
+    backgroundColor: "transparent",
+    maxWidth: MAX_TAB_WIDTH,
+    gap: theme.spacing(0.5),
+    top: 1,
 
-  ...(active && {
-    minWidth: `calc(max(${MIN_ACTIVE_TAB_WIDTH}px,  min(${Math.ceil(
-      measureText(title) + 30,
-    )}px, ${MAX_TAB_WIDTH}px, 100% - ${MIN_OTHER_TAB_WIDTH * (tabCount - 1)}px)))`,
+    [`:not(.${classes.active}):hover`]: {
+      color: theme.palette.text.primary,
+    },
+  },
+  active: {
+    color: theme.palette.text.primary,
+    fontWeight: theme.typography.subtitle2.fontWeight,
     backgroundColor: theme.palette.background.paper,
-    borderColor: theme.palette.divider,
     userSelect: "all",
     zIndex: 1,
-  }),
-  ...(dragging && {
+    boxShadow: theme.shadows[2],
+  },
+  dragging: {
     backgroundColor: theme.palette.background.paper,
     borderColor: theme.palette.action.selected,
-  }),
-  ...(hidden && {
+  },
+  hidden: {
     visibility: "hidden",
-  }),
-}));
+  },
+  input: {
+    font: "inherit",
+    color: "inherit",
+  },
+  dropIndicator: {
+    position: "absolute",
+    top: 0,
+    bottom: 0,
+    width: 2,
+    height: "100%",
+    backgroundColor: theme.palette.primary.main,
+    opacity: 0.8,
+    borderRadius: theme.shape.borderRadius,
+    zIndex: 1,
+  },
+  iconButton: {
+    padding: theme.spacing(0.125),
+    color: theme.palette.text.secondary,
 
-const StyledIconButton = muiStyled(IconButton)(({ theme }) => ({
-  padding: theme.spacing(0.125),
-}));
-
-const DropIndicator = muiStyled("div", {
-  shouldForwardProp: (prop) => prop !== "direction",
-})<{
-  direction: "before" | "after";
-}>(({ theme, direction }) => ({
-  position: "absolute",
-  top: 0,
-  bottom: 0,
-  width: 2,
-  height: "100%",
-  backgroundColor: theme.palette.primary.main,
-  opacity: 0.8,
-  borderRadius: theme.shape.borderRadius,
-  zIndex: 1,
-  left: direction === "before" ? 0 : "auto",
-  right: direction === "before" ? "auto" : 0,
+    ":hover": {
+      color: theme.palette.text.primary,
+    },
+  },
 }));
 
 const fontFamily = fonts.SANS_SERIF;
@@ -128,7 +123,7 @@ export function ToolbarTab(props: Props): JSX.Element {
     highlight,
     hidden,
   } = props;
-
+  const { classes, cx } = useStyles();
   const inputRef = useRef<HTMLInputElement>(ReactNull);
   const [title, setTitle] = useState<string>(tabTitle);
   const [editingTitle, setEditingTitle] = useState<boolean>(false);
@@ -206,18 +201,36 @@ export function ToolbarTab(props: Props): JSX.Element {
   }, [tabTitle]);
 
   return (
-    <Tab
-      active={isActive}
-      dragging={isDragging}
+    <div
       hidden={hidden}
       onClick={onClickTab}
       ref={innerRef}
       title={tabTitle ? tabTitle : "Enter tab name"}
-      tabCount={tabCount}
       data-testid="toolbar-tab"
+      className={cx(classes.root, {
+        [classes.active]: isActive,
+        [classes.dragging]: isDragging,
+        [classes.hidden]: hidden,
+      })}
+      style={{
+        minWidth: isActive
+          ? `calc(max(${MIN_ACTIVE_TAB_WIDTH}px,  min(${Math.ceil(
+              measureText(tabTitle) + 30,
+            )}px, ${MAX_TAB_WIDTH}px, 100% - ${MIN_OTHER_TAB_WIDTH * (tabCount - 1)}px)))`
+          : undefined,
+      }}
     >
-      {highlight != undefined && <DropIndicator direction={highlight} />}
+      {highlight != undefined && (
+        <div
+          className={classes.dropIndicator}
+          style={{
+            left: highlight === "before" ? 0 : "auto",
+            right: highlight === "before" ? "auto" : 0,
+          }}
+        />
+      )}
       <InputBase
+        className={classes.input}
         readOnly={!editingTitle}
         placeholder="Enter tab name"
         value={title}
@@ -228,16 +241,17 @@ export function ToolbarTab(props: Props): JSX.Element {
         style={{ pointerEvents: editingTitle ? "all" : "none" }}
       />
       {isActive && (
-        <StyledIconButton
+        <IconButton
           edge="end"
           size="small"
           data-testid="tab-icon"
           title="Remove tab"
           onClick={removeTab}
+          className={classes.iconButton}
         >
           <CloseIcon fontSize="inherit" />
-        </StyledIconButton>
+        </IconButton>
       )}
-    </Tab>
+    </div>
   );
 }
