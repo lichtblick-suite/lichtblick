@@ -102,6 +102,7 @@ const useStyles = makeStyles<{ leftInset?: number; debugDragRegion?: boolean }>(
         justifySelf: "center",
         overflow: "hidden",
         maxWidth: "100%",
+        ...NOT_DRAGGABLE_STYLE, // make buttons clickable for desktop app
       },
       end: {
         gridArea: "end",
