@@ -8,11 +8,12 @@ import {
   Typography,
   Link,
   Button,
-  styled as muiStyled,
   ThemeProvider as MuiThemeProvider,
+  useTheme,
 } from "@mui/material";
-import { useState, useMemo, ReactElement } from "react";
+import { useState, useMemo, ReactElement, PropsWithChildren, CSSProperties } from "react";
 import { useTranslation } from "react-i18next";
+import { withStyles } from "tss-react/mui";
 
 import Stack from "@foxglove/studio-base/components/Stack";
 import { Language } from "@foxglove/studio-base/i18n";
@@ -20,33 +21,39 @@ import { createMuiTheme } from "@foxglove/studio-base/theme";
 
 const MINIMUM_CHROME_VERSION = 76;
 
-const Root = muiStyled("div", {
-  shouldForwardProp: (prop) => prop !== "isDismissable",
-})<{ isDismissable: boolean }>(({ isDismissable, theme }) => ({
-  display: "flex",
-  flexDirection: "column",
-  alignItems: "center",
-  justifyContent: "center",
-  width: "100%",
-  backgroundColor: theme.palette.primary.main,
-  color: theme.palette.primary.contrastText,
-  zIndex: 100,
+const BannerContainer = (props: PropsWithChildren<{ isDismissable: boolean }>) => {
+  const { isDismissable, children } = props;
 
-  ...(!isDismissable && {
-    position: "fixed",
-    top: 0,
-    left: 0,
+  const theme = useTheme();
+  const style: CSSProperties = {
+    display: "flex",
+    flexDirection: "column",
+    alignItems: "center",
+    justifyContent: "center",
+    width: "100%",
+    backgroundColor: theme.palette.primary.main,
+    color: theme.palette.primary.contrastText,
+    zIndex: 100,
+    ...(!isDismissable && {
+      position: "fixed",
+      top: 0,
+      left: 0,
+      right: 0,
+      bottom: 0,
+      height: "100vh",
+    }),
+  };
+
+  return <div style={style}>{children}</div>;
+};
+
+const DismissButton = withStyles(IconButton, (theme) => ({
+  root: {
+    position: "absolute",
+    margin: theme.spacing(1),
     right: 0,
-    bottom: 0,
-    height: "100vh",
-  }),
-}));
-
-const DismissButton = muiStyled(IconButton)(({ theme }) => ({
-  position: "absolute",
-  margin: theme.spacing(1),
-  right: 0,
-  top: 0,
+    top: 0,
+  },
 }));
 
 const VersionBanner = function ({
@@ -76,7 +83,7 @@ const VersionBanner = function ({
 
   return (
     <MuiThemeProvider theme={muiTheme}>
-      <Root isDismissable={isDismissable}>
+      <BannerContainer isDismissable={isDismissable}>
         <Stack padding={2} gap={1.5} alignItems="center">
           {isDismissable && (
             <DismissButton color="inherit" onClick={() => setShowBanner(false)}>
@@ -114,7 +121,7 @@ const VersionBanner = function ({
             {fixText}
           </Button>
         </Stack>
-      </Root>
+      </BannerContainer>
     </MuiThemeProvider>
   );
 };

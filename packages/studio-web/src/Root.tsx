@@ -14,36 +14,49 @@ import {
   UlogLocalDataSourceFactory,
   McapLocalDataSourceFactory,
   SampleNuscenesDataSourceFactory,
-  IAppConfiguration,
   IdbExtensionLoader,
   App,
+  AppSetting,
 } from "@foxglove/studio-base";
 
-import VelodyneUnavailableDataSourceFactory from "./dataSources/VelodyneUnavailableDataSourceFactory";
 import { IdbLayoutStorage } from "./services/IdbLayoutStorage";
+import LocalStorageAppConfiguration from "./services/LocalStorageAppConfiguration";
 
-export function Root({ appConfiguration }: { appConfiguration: IAppConfiguration }): JSX.Element {
+const isDevelopment = process.env.NODE_ENV === "development";
+
+export function Root(props: {
+  extraProviders: JSX.Element[] | undefined;
+  dataSources: IDataSourceFactory[] | undefined;
+}): JSX.Element {
+  const appConfiguration = useMemo(
+    () =>
+      new LocalStorageAppConfiguration({
+        defaults: {
+          [AppSetting.SHOW_DEBUG_PANELS]: isDevelopment,
+        },
+      }),
+    [],
+  );
   const layoutStorage = useMemo(() => new IdbLayoutStorage(), []);
   const [extensionLoaders] = useState(() => [
     new IdbExtensionLoader("org"),
     new IdbExtensionLoader("local"),
   ]);
 
-  const dataSources: IDataSourceFactory[] = useMemo(() => {
+  const dataSources = useMemo(() => {
     const sources = [
       new Ros1LocalBagDataSourceFactory(),
       new Ros2LocalBagDataSourceFactory(),
       new FoxgloveWebSocketDataSourceFactory(),
       new RosbridgeDataSourceFactory(),
       new UlogLocalDataSourceFactory(),
-      new VelodyneUnavailableDataSourceFactory(),
       new SampleNuscenesDataSourceFactory(),
       new McapLocalDataSourceFactory(),
       new RemoteDataSourceFactory(),
     ];
 
-    return sources;
-  }, []);
+    return props.dataSources ?? sources;
+  }, [props.dataSources]);
 
   return (
     <>
@@ -55,6 +68,7 @@ export function Root({ appConfiguration }: { appConfiguration: IAppConfiguration
         layoutStorage={layoutStorage}
         extensionLoaders={extensionLoaders}
         enableGlobalCss
+        extraProviders={props.extraProviders}
       />
     </>
   );

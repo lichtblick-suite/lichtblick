@@ -1,6 +1,6 @@
 {
   "extends": "@foxglove/tsconfig/base",
-  "include": ["*.ts"],
+  "include": ["**/*"],
   "compilerOptions": {
     "module": "commonjs",
     "noEmit": true,

@@ -2611,6 +2611,29 @@ __metadata:
   languageName: unknown
   linkType: soft
 
+"@foxglove/studio-web@workspace:*, @foxglove/studio-web@workspace:packages/studio-web":
+  version: 0.0.0-use.local
+  resolution: "@foxglove/studio-web@workspace:packages/studio-web"
+  dependencies:
+    "@foxglove/log": "workspace:*"
+    "@foxglove/studio-base": "workspace:*"
+    "@mui/icons-material": 5.11.0
+    "@mui/material": 5.11.12
+    "@pmmmwh/react-refresh-webpack-plugin": 0.5.10
+    "@types/copy-webpack-plugin": 10.1.0
+    clean-webpack-plugin: 4.0.0
+    copy-webpack-plugin: 11.0.0
+    html-webpack-plugin: 5.5.0
+    idb: 7.1.1
+    react: 17.0.2
+    react-dom: 17.0.2
+    react-i18next: 12.2.0
+    tss-react: 4.6.1
+    webpack: 5.75.0
+    webpack-dev-server: 4.11.1
+  languageName: unknown
+  linkType: soft
+
 "@foxglove/studio@workspace:*, @foxglove/studio@workspace:packages/studio":
   version: 0.0.0-use.local
   resolution: "@foxglove/studio@workspace:packages/studio"
@@ -25362,23 +25385,9 @@ __metadata:
   resolution: "web@workspace:web"
   dependencies:
     "@foxglove/log": "workspace:*"
-    "@foxglove/studio-base": "workspace:*"
-    "@mui/icons-material": 5.11.0
-    "@mui/material": 5.11.12
-    "@pmmmwh/react-refresh-webpack-plugin": 0.5.10
-    "@sentry/browser": 7.30.0
-    "@sentry/tracing": 7.30.0
-    "@sentry/webpack-plugin": 1.20.0
-    "@types/copy-webpack-plugin": 10.1.0
+    "@foxglove/studio-web": "workspace:*"
     "@types/serve-handler": ^6
-    clean-webpack-plugin: 4.0.0
-    copy-webpack-plugin: 11.0.0
-    html-webpack-plugin: 5.5.0
-    idb: 7.1.1
     playwright: 1.30.0
-    react: 17.0.2
-    react-dom: 17.0.2
-    react-i18next: 12.2.0
     serve-handler: 6.1.5
     webpack: 5.75.0
     webpack-dev-server: 4.11.1
