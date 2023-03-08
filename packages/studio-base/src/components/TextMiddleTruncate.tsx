@@ -54,11 +54,15 @@ export default function TextMiddleTruncate({
   style,
 }: Props): JSX.Element {
   const { classes, cx } = useStyles();
-  const startTextLen = Math.max(
+  let startTextLen = Math.max(
     0,
     text.length -
       (endTextLength == undefined || endTextLength === 0 ? DEFAULT_END_TEXT_LENGTH : endTextLength),
   );
+  // Don't split at or immediately after whitespace.
+  while (startTextLen < text.length && text.charAt(startTextLen).match(/\s/)) {
+    startTextLen += 2;
+  }
   const startText = text.substring(0, startTextLen);
   const endText = text.substring(startTextLen);
 

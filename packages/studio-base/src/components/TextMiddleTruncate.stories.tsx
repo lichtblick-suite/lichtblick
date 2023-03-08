@@ -55,6 +55,11 @@ export function Default(): JSX.Element {
         endTextLength={LONG_TOPIC_NAME.split("/").pop()!.length + 1}
         text={LONG_TOPIC_NAME}
       />
+
+      <div>Whitespace handling</div>
+      <div style={{ width: "12em" }}>
+        <TextMiddleTruncate text="Open a new connection..." endTextLength={18} />
+      </div>
     </div>
   );
 }
