@@ -1626,7 +1626,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@babel/runtime@npm:^7.0.0, @babel/runtime@npm:^7.1.2, @babel/runtime@npm:^7.12.5, @babel/runtime@npm:^7.17.8, @babel/runtime@npm:^7.18.3, @babel/runtime@npm:^7.18.6, @babel/runtime@npm:^7.19.4, @babel/runtime@npm:^7.20.13, @babel/runtime@npm:^7.20.6, @babel/runtime@npm:^7.21.0, @babel/runtime@npm:^7.5.0, @babel/runtime@npm:^7.5.5, @babel/runtime@npm:^7.7.2, @babel/runtime@npm:^7.7.6, @babel/runtime@npm:^7.8.4, @babel/runtime@npm:^7.8.7, @babel/runtime@npm:^7.9.2":
+"@babel/runtime@npm:^7.0.0, @babel/runtime@npm:^7.1.2, @babel/runtime@npm:^7.12.5, @babel/runtime@npm:^7.17.8, @babel/runtime@npm:^7.18.3, @babel/runtime@npm:^7.18.6, @babel/runtime@npm:^7.19.4, @babel/runtime@npm:^7.20.6, @babel/runtime@npm:^7.21.0, @babel/runtime@npm:^7.5.0, @babel/runtime@npm:^7.5.5, @babel/runtime@npm:^7.7.2, @babel/runtime@npm:^7.7.6, @babel/runtime@npm:^7.8.4, @babel/runtime@npm:^7.8.7, @babel/runtime@npm:^7.9.2":
   version: 7.21.0
   resolution: "@babel/runtime@npm:7.21.0"
   dependencies:
@@ -2546,7 +2546,7 @@ __metadata:
     just-diff: 5.2.0
     leaflet: 1.9.3
     lodash: 4.17.21
-    mathjs: 11.5.1
+    mathjs: 11.6.0
     memoize-weak: 1.0.2
     meshoptimizer: 0.18.1
     moment: 2.29.4
@@ -8925,7 +8925,7 @@ __metadata:
     "@types/react-dom": 17.0.18
     clean-webpack-plugin: 4.0.0
     html-webpack-plugin: 5.5.0
-    mathjs: 11.5.1
+    mathjs: 11.6.0
     react: 17.0.2
     react-dom: 17.0.2
     webpack: 5.75.0
@@ -17680,11 +17680,11 @@ __metadata:
   languageName: node
   linkType: hard
 
-"mathjs@npm:11.5.1":
-  version: 11.5.1
-  resolution: "mathjs@npm:11.5.1"
+"mathjs@npm:11.6.0":
+  version: 11.6.0
+  resolution: "mathjs@npm:11.6.0"
   dependencies:
-    "@babel/runtime": ^7.20.13
+    "@babel/runtime": ^7.21.0
     complex.js: ^2.1.1
     decimal.js: ^10.4.3
     escape-latex: ^1.2.0
@@ -17695,7 +17695,7 @@ __metadata:
     typed-function: ^4.1.0
   bin:
     mathjs: bin/cli.js
-  checksum: 91faa49abfb864f721c90720852830a213f2d459a9b5f3943e8d67b45d4d3c462d0d698c68d00323d3e812699c579516a221f9c1eb1313961c3e411211534b7c
+  checksum: d6f5acc876d31d387e3aa9c5831192c68ad52f848bbaed361a9021595e65caed87a94057b6c48649dd671e811d7b77ecda7e2a7f9aa50c2e18d295c415bfa613
   languageName: node
   linkType: hard
 
