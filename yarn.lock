@@ -2508,7 +2508,7 @@ __metadata:
     "@types/uuid": 9.0.1
     "@types/wicg-file-system-access": 2020.9.5
     "@uiw/react-textarea-code-editor": 2.1.1
-    amplitude-js: 8.21.4
+    amplitude-js: 8.21.6
     babel-jest: 29.5.0
     babel-plugin-transform-import-meta: 2.2.0
     browserify-zlib: 0.2.0
@@ -8037,9 +8037,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"amplitude-js@npm:8.21.4":
-  version: 8.21.4
-  resolution: "amplitude-js@npm:8.21.4"
+"amplitude-js@npm:8.21.6":
+  version: 8.21.6
+  resolution: "amplitude-js@npm:8.21.6"
   dependencies:
     "@amplitude/analytics-connector": ^1.4.6
     "@amplitude/ua-parser-js": 0.7.31
@@ -8047,7 +8047,7 @@ __metadata:
     "@babel/runtime": ^7.20.6
     blueimp-md5: ^2.19.0
     query-string: 8.0.3
-  checksum: f8e7030fd70bbcabfda4fd56ee7656444257bf7f053461117abbb7b36596b2f5545571090f2d2bc928137a615815d07fc8d8338703c5122636d9d501cea6494e
+  checksum: a5a9c7dcd01106c8a5414b9f6bc12ce812e7fc159aadfa270129aa9f5552374a57c6864c59705b0d662d921b70cf1a23437479c17ecf729840cccb2faa760703
   languageName: node
   linkType: hard
 
