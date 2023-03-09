@@ -159,6 +159,11 @@ export class CoordinateFrame {
     this._transforms.removeAfter(time);
   }
 
+  /** Removes a transform with a specific timestamp */
+  public removeTransformAt(time: Time): void {
+    this._transforms.remove(time);
+  }
+
   /**
    * Find the closest transform(s) in the transform history to the given time.
    * Note that if an exact match is found, both `outLower` and `outUpper` will

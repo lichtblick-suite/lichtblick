@@ -112,6 +112,7 @@ describe("ArrayMap", () => {
     expect(list.binarySearch(8)).toBe(~5);
     expect(list.binarySearch(9)).toBe(~5);
   });
+
   it("removes elements before key", () => {
     const list = new ArrayMap<number, string>();
     const data = [...Array(10).keys()];
@@ -128,5 +129,23 @@ describe("ArrayMap", () => {
     expect(list.binarySearch(7)).toBe(2);
     expect(list.binarySearch(8)).toBe(3);
     expect(list.binarySearch(9)).toBe(4);
+  });
+
+  it("removes specific elements", () => {
+    const list = new ArrayMap<number, string>();
+    const data = [...Array(10).keys()];
+    data.forEach((val) => list.set(val, String(val)));
+    list.remove(3);
+    expect(list.size).toBe(9);
+    expect(list.binarySearch(0)).toBe(0);
+    expect(list.binarySearch(1)).toBe(1);
+    expect(list.binarySearch(2)).toBe(2);
+    expect(list.binarySearch(3)).toBe(~3);
+    expect(list.binarySearch(4)).toBe(3);
+    expect(list.binarySearch(5)).toBe(4);
+    expect(list.binarySearch(6)).toBe(5);
+    expect(list.binarySearch(7)).toBe(6);
+    expect(list.binarySearch(8)).toBe(7);
+    expect(list.binarySearch(9)).toBe(8);
   });
 });

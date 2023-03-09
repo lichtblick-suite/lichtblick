@@ -53,6 +53,14 @@ export class ArrayMap<K, V> {
     return this._list.pop();
   }
 
+  /** Removes the element with the given key, if it exists */
+  public remove(key: K): void {
+    const index = this.binarySearch(key);
+    if (index >= 0) {
+      this._list.splice(index, 1);
+    }
+  }
+
   /** Removes all elements with keys greater than the given key. */
   public removeAfter(key: K): void {
     const index = this.binarySearch(key);

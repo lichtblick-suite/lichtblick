@@ -259,6 +259,13 @@ export class Urdfs extends SceneExtension<UrdfRenderable> {
 
   public override removeAllRenderables(): void {
     // Re-add coordinate frames and transforms since the scene has been cleared
+    this._refreshTransforms();
+  }
+
+  /**
+   * Re-add coordinate frames and transforms corresponding to existing custom URDFs
+   */
+  private _refreshTransforms() {
     for (const [instanceId, frames] of this.framesByInstanceId) {
       this._loadFrames(instanceId, frames);
     }
@@ -336,6 +343,19 @@ export class Urdfs extends SceneExtension<UrdfRenderable> {
           this.remove(renderable);
           this.renderables.delete(instanceId);
         }
+
+        // Remove transforms from the TF tree
+        const transforms = this.transformsByInstanceId.get(instanceId);
+        if (transforms) {
+          for (const { parent, child } of transforms) {
+            this.renderer.removeTransform(child, parent, 0n);
+          }
+        }
+        this.framesByInstanceId.delete(instanceId);
+        this.transformsByInstanceId.delete(instanceId);
+
+        // Re-add coordinate frames in case the deleted URDF shared frame names with other URDFs
+        this._refreshTransforms();
 
         // Update the settings tree
         this.updateSettingsTree();

@@ -62,6 +62,78 @@ export class TransformTree {
       : AddTransformResult.NOT_UPDATED;
   }
 
+  /**
+   * Removes transform data from a particular parent-child link at the given timestamp. Does nothing
+   * if the child does not exist or has a different parent.
+   */
+  public removeTransform(childFrameId: string, parentFrameId: string, stamp: bigint): void {
+    const child = this.frame(childFrameId);
+    if (!child) {
+      return;
+    }
+    if (child.parent()?.id !== parentFrameId) {
+      return;
+    }
+    child.removeTransformAt(stamp);
+    this._removeEmptyAncestors(child);
+  }
+
+  /**
+   * Walk up the tree starting from `candidate` and prune frames with no history entries and no
+   * children.
+   */
+  private _removeEmptyAncestors(candidate: CoordinateFrame): void {
+    if (candidate.transformsSize() > 0) {
+      // don't want to delete this frame, it is not empty
+      return;
+    }
+
+    // Build a list of children for each frame in the tree, used to check whether nodes are leaf
+    // nodes
+    const childrenByParentId = new Map<string, Set<string>>();
+    for (const frame of this._frames.values()) {
+      childrenByParentId.set(frame.id, new Set());
+    }
+    for (const frame of this._frames.values()) {
+      const parent = frame.parent();
+      if (parent === candidate) {
+        // can't delete this frame or its ancestors, it still has children
+        return;
+      }
+      if (parent == undefined) {
+        continue;
+      }
+      const children = childrenByParentId.get(parent.id);
+      if (!children) {
+        throw new Error("invariant: should have children array");
+      }
+      children.add(frame.id);
+    }
+
+    // Walk upwards, deleting nodes with no history entries and no children
+    for (
+      let current: typeof candidate | undefined = candidate;
+      current;
+      current = current.parent()
+    ) {
+      if (current.transformsSize() > 0) {
+        // don't want to delete this frame, it is not empty
+        return;
+      }
+      const children = childrenByParentId.get(current.id);
+      if (children && children.size > 0) {
+        // can't delete this frame or its ancestors, it still has children
+        return;
+      }
+      this._frames.delete(current.id);
+      childrenByParentId.delete(current.id);
+      const parentId = current.parent()?.id;
+      if (parentId) {
+        childrenByParentId.get(parentId)?.delete(current.id);
+      }
+    }
+  }
+
   public clear(): void {
     this._frames.clear();
   }

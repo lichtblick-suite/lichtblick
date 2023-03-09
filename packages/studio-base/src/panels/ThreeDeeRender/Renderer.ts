@@ -1003,6 +1003,12 @@ export class Renderer extends EventEmitter<RendererEvents> {
     }
   }
 
+  public removeTransform(childFrameId: string, parentFrameId: string, stamp: bigint): void {
+    this.transformTree.removeTransform(childFrameId, parentFrameId, stamp);
+    this.coordinateFrameList = this.transformTree.frameList();
+    this.emit("transformTreeUpdated", this);
+  }
+
   // Callback handlers
 
   public animationFrame = (): void => {
