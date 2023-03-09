@@ -3,7 +3,6 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 import { filterMap } from "@foxglove/den/collection";
-import Log from "@foxglove/log";
 import { compare, toSec } from "@foxglove/rostime";
 import {
   AppSettingValue,
@@ -20,8 +19,6 @@ import {
 } from "@foxglove/studio-base/hooks/useGlobalVariables";
 import { PlayerState, Topic as PlayerTopic } from "@foxglove/studio-base/players/types";
 import { HoverValue } from "@foxglove/studio-base/types/hoverValue";
-
-const log = Log.getLogger(__filename);
 
 const EmptyParameters = new Map<string, ParameterValue>();
 
@@ -41,12 +38,15 @@ type BuilderRenderStateInput = {
 
 type BuildRenderStateFn = (input: BuilderRenderStateInput) => Readonly<RenderState> | undefined;
 
-// Create a string lookup key using fromSchemaName and toSchemaName.
+// Branded string to ensure that users go through the `converterKey` function to compute a lookup key
+type ConverterKey = string & { __brand: "ConverterKey" };
+
+// Create a string lookup key from a message event
 //
-// The string key uses a newline delimeter to avoid producting the same key for from/to name values
-// that might concatenate to the same string. i.e. "fromName" "toName" and "fromNameto" "Name".
-function converterKey(fromSchemaName: string, toSchemaName: string): string {
-  return fromSchemaName + "\n" + toSchemaName;
+// The string key uses a newline delimeter to avoid producting the same key for topic/schema name
+// values that might concatenate to the same string. i.e. "topic" "schema" and "topics" "chema".
+function converterKey(topic: string, schema: string): ConverterKey {
+  return (topic + "\n" + schema) as ConverterKey;
 }
 
 /**
@@ -68,14 +68,19 @@ function initRenderStateBuilder(): BuildRenderStateFn {
   let prevMessageConverters: BuilderRenderStateInput["messageConverters"] | undefined;
   let prevSharedPanelState: BuilderRenderStateInput["sharedPanelState"];
 
-  // Topics which we are subscribed without a conversion, these are topics we want to receive the original message
-  const topicNoConversions: Set<string> = new Set();
+  // Topics which we are subscribed without a conversion, these are topics we want to receive the
+  // original message
+  const unconvertedSubscriptionTopics: Set<string> = new Set();
 
-  // Topic -> convertTo mapping. These are topics which we want to receive some converted data in the convertTo schema
-  const topicConversions: Map<string, string> = new Map();
-
-  // from + to -> converter mapping. Allows for quick lookup of a converter by its from and to schema names
-  const convertersByKey: Map<string, RegisterMessageConverterArgs<unknown>> = new Map();
+  // When a subscription with a convertTo exists, we lookup a converter which can produce the
+  // desired output message schema and store it in this map. The keys for the map are `topic + input
+  // schema`.
+  //
+  // This allows the runtime message event handler logic which builds currentFrame and allFrames to
+  // lookup whether the incoming message event has converters to run by looking up the topic +
+  // schema of the message event in this map.
+  const topicSchemaConverters: Map<ConverterKey, RegisterMessageConverterArgs<unknown>[]> =
+    new Map();
 
   const prevRenderState: RenderState = {};
 
@@ -94,42 +99,88 @@ function initRenderStateBuilder(): BuildRenderStateFn {
       watchedFields,
     } = input;
 
+    // Should render indicates whether any fields of render state are updated
+    let shouldRender = false;
+
+    // Hoisted active data to shorten some of the code below that repeatedly uses active data
+    const activeData = playerState?.activeData;
+
+    // The render state starts with the previous render state and changes are applied as detected
+    const renderState: RenderState = prevRenderState;
+
     // If the player has loaded all the blocks, the blocks reference won't change so our message
     // pipeline handler for allFrames won't create a new set of all frames for the newly
     // subscribed topic. To ensure a new set of allFrames with the newly subscribed topic is
     // created, we unset the blocks ref which will force re-creating allFrames.
     if (subscriptions !== prevSubscriptions) {
       prevBlocks = undefined;
+    }
+
+    // If topics, message converters, or subscriptions change, recalculate the
+    if (
+      prevSubscriptions !== subscriptions ||
+      prevSortedTopics !== sortedTopics ||
+      prevMessageConverters !== messageConverters
+    ) {
+      // reset which topics have subscriptions and which need converting
+      unconvertedSubscriptionTopics.clear();
+      topicSchemaConverters.clear();
 
       // Bin the subscriptions into two sets: those which want a conversion and those that do not.
       //
       // For the subscriptions that want a conversion, if the topic schemaName matches the requested
       // convertTo, then we don't need to do a conversion.
       for (const subscription of subscriptions) {
-        if (subscription.convertTo) {
-          const noConversion = sortedTopics.find(
-            (topic) =>
-              topic.name === subscription.topic && topic.schemaName === subscription.convertTo,
-          );
-          if (noConversion) {
-            topicNoConversions.add(noConversion.name);
-          } else {
-            topicConversions.set(subscription.topic, subscription.convertTo);
-          }
-        } else {
-          topicNoConversions.add(subscription.topic);
+        if (!subscription.convertTo) {
+          unconvertedSubscriptionTopics.add(subscription.topic);
+          continue;
+        }
+
+        // If the convertTo is the same as the original schema for the topic then we don't need to
+        // perform a conversion.
+        const noConversion = sortedTopics.find(
+          (topic) =>
+            topic.name === subscription.topic && topic.schemaName === subscription.convertTo,
+        );
+        if (noConversion) {
+          unconvertedSubscriptionTopics.add(noConversion.name);
+          continue;
+        }
+
+        // Since we don't have an existing topic with out destination schema we need to find
+        // a converter that will convert from the topic to the desired schema
+        const subscriberTopic = sortedTopics.find((topic) => topic.name === subscription.topic);
+        if (!subscriberTopic) {
+          continue;
+        }
+
+        const key = converterKey(subscription.topic, subscriberTopic.schemaName ?? "<no-schema>");
+        let existingConverters = topicSchemaConverters.get(key);
+
+        // We've already stored a converter for this topic to convertTo
+        const haveConverter = existingConverters?.find(
+          (conv) => conv.toSchemaName === subscription.convertTo,
+        );
+        if (haveConverter) {
+          continue;
+        }
+
+        // Find a converter that can go from the original topic schema to the target schema
+        // Note: We only support one converter per unique from/to pair so this _find_ only needs to
+        //       find one converter rather than multiple converters.
+        const converter = messageConverters?.find(
+          (conv) =>
+            conv.fromSchemaName === subscriberTopic.schemaName &&
+            conv.toSchemaName === subscription.convertTo,
+        );
+
+        if (converter) {
+          existingConverters ??= [];
+          existingConverters.push(converter);
+          topicSchemaConverters.set(key, existingConverters);
         }
       }
     }
-    prevSubscriptions = subscriptions;
-
-    // Should render indicates whether any fields of render state are updated
-    let shouldRender = false;
-
-    const activeData = playerState?.activeData;
-
-    // The render state starts with the previous render state and changes are applied as detected
-    const renderState: RenderState = prevRenderState;
 
     if (watchedFields.has("didSeek")) {
       const didSeek = prevSeekTime !== activeData?.lastSeekTime;
@@ -201,32 +252,6 @@ function initRenderStateBuilder(): BuildRenderStateFn {
       }
     }
 
-    // Update the mapping of converters.
-    // This needs to happen _after_ the above topics processing which re-runs if the message converters have changed,
-    // and _before_ currentFrame and _allFrames_ processing which use this cache.
-    //
-    // If setting `prevMessageConverters` runs before the above topics handling then topics won't
-    // run again if the message converters have changed.
-    //
-    // And if this runs after the currentFrame and allFrames handling then convertersByKey will be
-    // from the previous converters.
-    if (messageConverters !== prevMessageConverters) {
-      convertersByKey.clear();
-
-      if (messageConverters) {
-        for (const converter of messageConverters) {
-          const key = converterKey(converter.fromSchemaName, converter.toSchemaName);
-          if (convertersByKey.has(key)) {
-            log.error(
-              `A message converter from (${converter.fromSchemaName}) to (${converter.toSchemaName}) already exists.`,
-            );
-          }
-          convertersByKey.set(key, converter);
-        }
-      }
-    }
-    prevMessageConverters = messageConverters;
-
     if (watchedFields.has("currentFrame")) {
       // If there are new frames we render
       // If there are old frames we render (new frames either replace old or no new frames)
@@ -239,20 +264,17 @@ function initRenderStateBuilder(): BuildRenderStateFn {
           const postProcessedFrame: MessageEvent<unknown>[] = [];
 
           for (const messageEvent of currentFrame) {
-            if (topicNoConversions.has(messageEvent.topic)) {
+            if (unconvertedSubscriptionTopics.has(messageEvent.topic)) {
               postProcessedFrame.push(messageEvent);
             }
 
-            // When subscribing with a convertTo, we have a topic + destination schema
-            // to identify a potential converter to use we lookup a converter by the src schema + dest schema.
-            // The src schema comes from the message event and the destination schema from the subscription
-
-            // Lookup any subscriptions for this topic which want a conversion
-            const subConvertTo = topicConversions.get(messageEvent.topic);
-            if (subConvertTo) {
-              const convertKey = converterKey(messageEvent.schemaName, subConvertTo);
-              const converter = convertersByKey.get(convertKey);
-              if (converter) {
+            // Get the converters that need to be run for this message event
+            // See the comment for topicSchemaConverters on the use of the key
+            const converters = topicSchemaConverters.get(
+              converterKey(messageEvent.topic, messageEvent.schemaName),
+            );
+            if (converters) {
+              for (const converter of converters) {
                 const convertedMessage = converter.converter(messageEvent.message);
                 postProcessedFrame.push({
                   topic: messageEvent.topic,
@@ -300,16 +322,16 @@ function initRenderStateBuilder(): BuildRenderStateFn {
               // Message blocks may contain topics that we are not subscribed to so we need to filter those out.
               // We use the topicNoConversions and topicConversions to determine if we should include the message event
 
-              if (topicNoConversions.has(messageEvent.topic)) {
+              if (unconvertedSubscriptionTopics.has(messageEvent.topic)) {
                 frames.push(messageEvent);
               }
 
-              // Lookup any subscriptions for this topic which want a conversion
-              const subConvertTo = topicConversions.get(messageEvent.topic);
-              if (subConvertTo) {
-                const convertKey = converterKey(messageEvent.schemaName, subConvertTo);
-                const converter = convertersByKey.get(convertKey);
-                if (converter) {
+              // Get the converters available for this topic and schema
+              const converters = topicSchemaConverters.get(
+                converterKey(messageEvent.topic, messageEvent.schemaName),
+              );
+              if (converters) {
+                for (const converter of converters) {
                   const convertedMessage = converter.converter(messageEvent.message);
                   frames.push({
                     topic: messageEvent.topic,
@@ -379,6 +401,11 @@ function initRenderStateBuilder(): BuildRenderStateFn {
         renderState.appSettings = appSettings;
       }
     }
+
+    // Update the prev fields with the latest values at the end of all the watch steps
+    // Several of the watch steps depend on the comparison against prev and new values
+    prevSubscriptions = subscriptions;
+    prevMessageConverters = messageConverters;
 
     if (!shouldRender) {
       return undefined;

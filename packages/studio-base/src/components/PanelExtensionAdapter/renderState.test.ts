@@ -536,6 +536,163 @@ describe("renderState", () => {
       ],
     });
   });
+
+  // It is valid to register multiple converters all sharing the same _from_ schema and having
+  // different _to_ schemas.
+  it("should support multiple _from_ converters with different _to_", () => {
+    const buildRenderState = initRenderStateBuilder();
+    const state = buildRenderState({
+      watchedFields: new Set(["topics", "currentFrame", "allFrames"]),
+      playerState: {
+        presence: PlayerPresence.INITIALIZING,
+        capabilities: [],
+        profile: undefined,
+        playerId: "test",
+        progress: {
+          messageCache: {
+            startTime: { sec: 0, nsec: 0 },
+            blocks: [
+              {
+                sizeInBytes: 0,
+                messagesByTopic: {
+                  test: [
+                    {
+                      topic: "test",
+                      schemaName: "schema",
+                      receiveTime: { sec: 1, nsec: 0 },
+                      sizeInBytes: 1,
+                      message: { from: "allFrames" },
+                    },
+                  ],
+                },
+              },
+            ],
+          },
+        },
+      },
+      appSettings: undefined,
+      currentFrame: [
+        {
+          topic: "test",
+          schemaName: "schema",
+          receiveTime: { sec: 0, nsec: 0 },
+          sizeInBytes: 1,
+          message: { from: "currentFrame" },
+        },
+      ],
+      colorScheme: undefined,
+      globalVariables: {},
+      hoverValue: undefined,
+      sharedPanelState: {},
+      sortedTopics: [{ name: "test", schemaName: "schema" }],
+      subscriptions: [
+        { topic: "test" },
+        { topic: "test", convertTo: "otherSchema", preload: true },
+        { topic: "test", convertTo: "anotherSchema", preload: true },
+      ],
+      messageConverters: [
+        {
+          fromSchemaName: "schema",
+          toSchemaName: "otherSchema",
+          converter: () => {
+            return 1;
+          },
+        },
+        {
+          fromSchemaName: "schema",
+          toSchemaName: "anotherSchema",
+          converter: () => {
+            return 2;
+          },
+        },
+      ],
+    });
+
+    expect(state).toEqual({
+      topics: [
+        {
+          name: "test",
+          schemaName: "schema",
+          datatype: "schema",
+          convertibleTo: ["otherSchema", "anotherSchema"],
+        },
+      ],
+      currentFrame: [
+        {
+          topic: "test",
+          schemaName: "schema",
+          message: { from: "currentFrame" },
+          receiveTime: { sec: 0, nsec: 0 },
+          sizeInBytes: 1,
+        },
+        {
+          topic: "test",
+          schemaName: "otherSchema",
+          message: 1,
+          receiveTime: { sec: 0, nsec: 0 },
+          sizeInBytes: 1,
+          originalMessageEvent: {
+            topic: "test",
+            schemaName: "schema",
+            message: { from: "currentFrame" },
+            receiveTime: { sec: 0, nsec: 0 },
+            sizeInBytes: 1,
+          },
+        },
+        {
+          topic: "test",
+          schemaName: "anotherSchema",
+          message: 2,
+          receiveTime: { sec: 0, nsec: 0 },
+          sizeInBytes: 1,
+          originalMessageEvent: {
+            topic: "test",
+            schemaName: "schema",
+            message: { from: "currentFrame" },
+            receiveTime: { sec: 0, nsec: 0 },
+            sizeInBytes: 1,
+          },
+        },
+      ],
+      allFrames: [
+        {
+          message: { from: "allFrames" },
+          receiveTime: { nsec: 0, sec: 1 },
+          schemaName: "schema",
+          sizeInBytes: 1,
+          topic: "test",
+        },
+        {
+          message: 1,
+          originalMessageEvent: {
+            message: { from: "allFrames" },
+            receiveTime: { nsec: 0, sec: 1 },
+            schemaName: "schema",
+            sizeInBytes: 1,
+            topic: "test",
+          },
+          receiveTime: { nsec: 0, sec: 1 },
+          schemaName: "otherSchema",
+          sizeInBytes: 1,
+          topic: "test",
+        },
+        {
+          message: 2,
+          originalMessageEvent: {
+            message: { from: "allFrames" },
+            receiveTime: { nsec: 0, sec: 1 },
+            schemaName: "schema",
+            sizeInBytes: 1,
+            topic: "test",
+          },
+          receiveTime: { nsec: 0, sec: 1 },
+          schemaName: "anotherSchema",
+          sizeInBytes: 1,
+          topic: "test",
+        },
+      ],
+    });
+  });
 });
 
 describe("forEachSortedArrays", () => {
