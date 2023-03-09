@@ -4,6 +4,7 @@
 
 import { alpha } from "@mui/material";
 import { PropsWithChildren } from "react";
+import tinycolor from "tinycolor2";
 import { makeStyles } from "tss-react/mui";
 
 import "@foxglove/studio-base/styles/assets/inter.css";
@@ -161,10 +162,14 @@ const useStyles = makeStyles()(({ palette, typography }) => ({
         zIndex: 99,
 
         ".mosaic-split-line": {
-          boxShadow: `0 0 0 1px ${palette.grey.A100}`,
+          boxShadow: `0 0 0 1px ${palette.divider}`,
         },
         "&:hover .mosaic-split-line": {
-          boxShadow: `0 0 0 1px ${palette.grey.A100}`,
+          boxShadow: `0 0 0 1px ${
+            palette.mode === "dark"
+              ? tinycolor(palette.divider).lighten().toHexString()
+              : tinycolor(palette.divider).darken().toHexString()
+          }`,
         },
       },
       "&.borderless": {
