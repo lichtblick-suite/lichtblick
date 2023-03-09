@@ -155,7 +155,7 @@ export function UserMenu({
         </MenuItem>
         <Divider variant="middle" />
         <MenuItem onClick={onSignoutClick}>
-          <ListItemText>Log out</ListItemText>
+          <ListItemText>Sign out</ListItemText>
         </MenuItem>
       </Menu>
       {confirmModal}
