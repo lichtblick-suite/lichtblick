@@ -121,31 +121,39 @@ function mosiacRightSidebarSplitPercentage(node: MosaicNode<LayoutNode>): number
   }
 }
 
-type SidebarProps<LeftKey, RightKey> = PropsWithChildren<{
-  items: Map<LeftKey, SidebarItem>;
-  bottomItems: Map<LeftKey, SidebarItem>;
-  selectedKey: LeftKey | undefined;
-  onSelectKey: (key: LeftKey | undefined) => void;
+type SidebarProps<OldLeftKey, LeftKey, RightKey> = PropsWithChildren<{
+  items: Map<OldLeftKey, SidebarItem>;
+  bottomItems: Map<OldLeftKey, SidebarItem>;
+  selectedKey: OldLeftKey | undefined;
+  onSelectKey: (key: OldLeftKey | undefined) => void;
+
+  leftItems: Map<LeftKey, NewSidebarItem>;
+  selectedLeftKey: LeftKey | undefined;
+  onSelectLeftKey: (key: LeftKey | undefined) => void;
 
   rightItems: Map<RightKey, NewSidebarItem>;
   selectedRightKey: RightKey | undefined;
   onSelectRightKey: (key: RightKey | undefined) => void;
 }>;
 
-export default function Sidebars<LeftKey extends string, RightKey extends string>(
-  props: SidebarProps<LeftKey, RightKey>,
-): JSX.Element {
+export default function Sidebars<
+  OldLeftKey extends string,
+  LeftKey extends string,
+  RightKey extends string,
+>(props: SidebarProps<OldLeftKey, LeftKey, RightKey>): JSX.Element {
   const {
     children,
     items,
     bottomItems,
     selectedKey,
     onSelectKey,
+    leftItems,
+    selectedLeftKey,
+    onSelectLeftKey,
     rightItems,
     selectedRightKey,
     onSelectRightKey,
   } = props;
-
   const [enableMemoryUseIndicator = false] = useAppConfigurationValue<boolean>(
     AppSetting.ENABLE_MEMORY_USE_INDICATOR,
   );
@@ -160,7 +168,7 @@ export default function Sidebars<LeftKey extends string, RightKey extends string
   const [mosaicValue, setMosaicValue] = useState<MosaicNode<LayoutNode>>("children");
   const { classes } = useStyles();
 
-  const allLeftItems = useMemo(() => {
+  const allOldLeftItems = useMemo(() => {
     return new Map([...items, ...bottomItems]);
   }, [bottomItems, items]);
 
@@ -175,13 +183,20 @@ export default function Sidebars<LeftKey extends string, RightKey extends string
     setHelpAnchorEl(undefined);
   };
 
-  const leftSidebarOpen = selectedKey != undefined && allLeftItems.has(selectedKey);
-  const rightSidebarOpen = selectedRightKey != undefined && rightItems.has(selectedRightKey);
+  const oldLeftSidebarOpen = !enableNewTopNav
+    ? selectedKey != undefined && allOldLeftItems.has(selectedKey)
+    : false;
+  const leftSidebarOpen =
+    enableNewTopNav && selectedLeftKey != undefined && leftItems.has(selectedLeftKey);
+  const rightSidebarOpen =
+    enableNewTopNav && selectedRightKey != undefined && rightItems.has(selectedRightKey);
 
   useEffect(() => {
-    const width = Math.min(384, 0.3 * window.innerWidth);
-    const defaultLeftPercentage = (100 * width) / window.innerWidth;
-    const defaultRightPercentage = 80;
+    const leftTargetWidth = enableNewTopNav ? 280 : 384;
+    const rightTargetWidth = 320;
+    const defaultLeftPercentage = 100 * (leftTargetWidth / window.innerWidth);
+    const defaultRightPercentage = 100 * (1 - rightTargetWidth / window.innerWidth);
+
     setMosaicValue((oldValue) => {
       let node: MosaicNode<LayoutNode> = "children";
       if (rightSidebarOpen) {
@@ -192,7 +207,7 @@ export default function Sidebars<LeftKey extends string, RightKey extends string
           splitPercentage: mosiacRightSidebarSplitPercentage(oldValue) ?? defaultRightPercentage,
         };
       }
-      if (leftSidebarOpen) {
+      if (oldLeftSidebarOpen || leftSidebarOpen) {
         node = {
           direction: "row",
           first: "leftbar",
@@ -202,13 +217,13 @@ export default function Sidebars<LeftKey extends string, RightKey extends string
       }
       return node;
     });
-  }, [leftSidebarOpen, rightSidebarOpen]);
+  }, [enableNewTopNav, leftSidebarOpen, oldLeftSidebarOpen, rightSidebarOpen]);
 
   const SelectedLeftComponent =
-    (selectedKey != undefined && allLeftItems.get(selectedKey)?.component) || Noop;
+    (selectedKey != undefined && allOldLeftItems.get(selectedKey)?.component) || Noop;
 
   const onClickTabAction = useCallback(
-    (key: LeftKey) => {
+    (key: OldLeftKey) => {
       // toggle tab selected/unselected on click
       if (selectedKey === key) {
         onSelectKey(undefined);
@@ -274,18 +289,18 @@ export default function Sidebars<LeftKey extends string, RightKey extends string
 
   return (
     <Stack direction="row" fullHeight overflow="hidden">
-      <Stack className={classes.leftNav} flexShrink={0} justifyContent="space-between">
-        <Tabs
-          className={classes.tabs}
-          orientation="vertical"
-          variant="scrollable"
-          value={selectedKey ?? false}
-          scrollButtons={false}
-        >
-          {topTabs}
-          <TabSpacer />
-          {!enableNewTopNav && enableMemoryUseIndicator && <MemoryUseIndicator />}
-          {!enableNewTopNav && (
+      {!enableNewTopNav && (
+        <Stack className={classes.leftNav} flexShrink={0} justifyContent="space-between">
+          <Tabs
+            className={classes.tabs}
+            orientation="vertical"
+            variant="scrollable"
+            value={selectedKey ?? false}
+            scrollButtons={false}
+          >
+            {topTabs}
+            <TabSpacer />
+            {enableMemoryUseIndicator && <MemoryUseIndicator />}
             <Tab
               className={classes.tab}
               color="inherit"
@@ -297,10 +312,8 @@ export default function Sidebars<LeftKey extends string, RightKey extends string
               onClick={(event) => handleHelpClick(event)}
               icon={<HelpOutlineIcon color={helpMenuOpen ? "primary" : "inherit"} />}
             />
-          )}
-          {bottomTabs}
-        </Tabs>
-        {!enableNewTopNav && (
+            {bottomTabs}
+          </Tabs>
           <HelpMenu
             anchorEl={helpAnchorEl}
             open={helpMenuOpen}
@@ -314,8 +327,8 @@ export default function Sidebars<LeftKey extends string, RightKey extends string
               horizontal: "left",
             }}
           />
-        )}
-      </Stack>
+        </Stack>
+      )}
       {
         // By always rendering the mosaic, even if we are only showing children, we can prevent the
         // children from having to re-mount each time the sidebar is opened/closed.
@@ -332,9 +345,19 @@ export default function Sidebars<LeftKey extends string, RightKey extends string
               case "leftbar":
                 return (
                   <ErrorBoundary>
-                    <Paper square elevation={0}>
-                      <SelectedLeftComponent />
-                    </Paper>
+                    {enableNewTopNav ? (
+                      <NewSidebar<LeftKey>
+                        anchor="left"
+                        onClose={() => onSelectLeftKey(undefined)}
+                        items={leftItems}
+                        activeTab={selectedLeftKey}
+                        setActiveTab={onSelectLeftKey}
+                      />
+                    ) : (
+                      <Paper square elevation={0}>
+                        <SelectedLeftComponent />
+                      </Paper>
+                    )}
                   </ErrorBoundary>
                 );
               case "rightbar":

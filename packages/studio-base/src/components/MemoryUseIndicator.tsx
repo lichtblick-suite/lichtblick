@@ -48,6 +48,7 @@ function MemoryUseIndicator(): JSX.Element {
 
   return (
     <Tooltip
+      arrow={false}
       title={`Used (MB): ${usedMb} / ${limitMb}`}
       placement={enableNewTopNav ? "bottom" : "right"}
     >

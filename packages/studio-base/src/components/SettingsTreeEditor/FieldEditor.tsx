@@ -45,7 +45,7 @@ const useStyles = makeStyles<void, "error">()((theme, _params, classes) => {
     },
     fieldWrapper: {
       minWidth: theme.spacing(14),
-      marginRight: theme.spacing(1.25),
+      marginRight: theme.spacing(0.5),
       [`&.${classes.error}`]: {
         ".MuiInputBase-root": {
           outline: `1px ${theme.palette.error.main} solid`,

@@ -5,20 +5,18 @@
 import ClearIcon from "@mui/icons-material/Clear";
 import SearchIcon from "@mui/icons-material/Search";
 import {
-  AppBar,
-  Box,
   IconButton,
   List,
   ListItem,
   ListItemText,
   Skeleton,
-  styled as muiStyled,
   TextField,
   Typography,
   TypographyProps,
 } from "@mui/material";
 import { Fzf, FzfResultItem } from "fzf";
 import { useMemo, useState } from "react";
+import { makeStyles } from "tss-react/mui";
 
 import { DirectTopicStatsUpdater } from "@foxglove/studio-base/components/DirectTopicStatsUpdater";
 import {
@@ -68,46 +66,39 @@ const HighlightChars = ({
   return <>{nodes}</>;
 };
 
-const StyledAppBar = muiStyled(AppBar, { skipSx: true })(({ theme }) => ({
-  top: -1,
-  zIndex: theme.zIndex.appBar - 1,
-  borderBottom: `1px solid ${theme.palette.divider}`,
-  display: "flex",
-  flexDirection: "row",
-  padding: theme.spacing(1),
-  gap: theme.spacing(1),
-  alignItems: "center",
-}));
+const useStyles = makeStyles()((theme) => ({
+  appBar: {
+    top: 0,
+    zIndex: theme.zIndex.appBar,
+    padding: theme.spacing(0.5),
+    position: "sticky",
+    backgroundColor: theme.palette.background.paper,
+  },
+  listItem: {
+    paddingRight: theme.spacing(1),
 
-const StyledListItem = muiStyled(ListItem, { skipSx: true })(({ theme }) => ({
-  paddingRight: theme.spacing(1),
-
-  "&.MuiListItem-dense": {
-    ".MuiListItemText-root": {
-      marginTop: theme.spacing(0.5),
-      marginBottom: theme.spacing(0.5),
+    "&.MuiListItem-dense": {
+      ".MuiListItemText-root": {
+        marginTop: theme.spacing(0.5),
+        marginBottom: theme.spacing(0.5),
+      },
+    },
+    ".MuiListItemSecondaryAction-root": {
+      marginRight: theme.spacing(-1),
     },
   },
-  ".MuiListItemSecondaryAction-root": {
-    marginRight: theme.spacing(-1),
+  textField: {
+    ".MuiOutlinedInput-notchedOutline": {
+      border: "none",
+    },
   },
-  // "@media (pointer: fine)": {
-  //   ".MuiListItemSecondaryAction-root": {
-  //     visibility: "hidden",
-  //   },
-  //   "&:not(.loading):hover": {
-  //     // paddingRight: theme.spacing(6),
-
-  //     ".MuiListItemSecondaryAction-root": {
-  //       visibility: "visible",
-  //     },
-  //   },
-  // },
+  startAdornment: {
+    display: "flex",
+  },
 }));
 
 const selectPlayerPresence = ({ playerState }: MessagePipelineContext) => playerState.presence;
-
-const selectSortedTopics = (ctx: MessagePipelineContext) => ctx.sortedTopics;
+const selectSortedTopics = ({ sortedTopics }: MessagePipelineContext) => sortedTopics;
 
 function TopicListItem({
   topic,
@@ -116,8 +107,10 @@ function TopicListItem({
   topic: Topic;
   positions: Set<number>;
 }): JSX.Element {
+  const { classes } = useStyles();
   return (
-    <StyledListItem
+    <ListItem
+      className={classes.listItem}
       divider
       key={topic.name}
       secondaryAction={
@@ -163,13 +156,14 @@ function TopicListItem({
         }}
         style={{ marginRight: "48px" }}
       />
-    </StyledListItem>
+    </ListItem>
   );
 }
 
 const MemoTopicListItem = React.memo(TopicListItem);
 
 export function TopicList(): JSX.Element {
+  const { classes, cx } = useStyles();
   const [filterText, setFilterText] = useState<string>("");
 
   const playerPresence = useMessagePipeline(selectPlayerPresence);
@@ -187,6 +181,16 @@ export function TopicList(): JSX.Element {
     [filterText, topics],
   );
 
+  if (playerPresence === PlayerPresence.NOT_PRESENT) {
+    return (
+      <Stack flex="auto" fullHeight alignItems="center" gap={1} justifyContent="center">
+        <Typography align="center" variant="subtitle2" color="text.secondary">
+          No data source selected
+        </Typography>
+      </Stack>
+    );
+  }
+
   if (playerPresence === PlayerPresence.ERROR) {
     return (
       <Stack flex="auto" padding={2} fullHeight alignItems="center" justifyContent="center">
@@ -200,26 +204,27 @@ export function TopicList(): JSX.Element {
   if (playerPresence === PlayerPresence.INITIALIZING) {
     return (
       <>
-        <StyledAppBar position="sticky" color="inherit" elevation={0}>
+        <header className={classes.appBar}>
           <TextField
             disabled
-            variant="filled"
+            className={classes.textField}
             fullWidth
             placeholder="Waiting for data..."
             InputProps={{
+              size: "small",
               startAdornment: <SearchIcon fontSize="small" />,
             }}
           />
-        </StyledAppBar>
+        </header>
         <List key="loading" dense disablePadding>
           {[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15].map((i) => (
-            <StyledListItem className="loading" divider key={i}>
+            <ListItem className={cx(classes.listItem, "loading")} divider key={i}>
               <ListItemText
                 primary={<Skeleton animation={false} width="20%" />}
                 secondary={<Skeleton animation="wave" width="55%" />}
                 secondaryTypographyProps={{ variant: "caption" }}
               />
-            </StyledListItem>
+            </ListItem>
           ))}
         </List>
       </>
@@ -228,31 +233,36 @@ export function TopicList(): JSX.Element {
 
   return (
     <>
-      <StyledAppBar position="sticky" color="inherit" elevation={0}>
-        <Box flex="auto">
-          <TextField
-            disabled={playerPresence !== PlayerPresence.PRESENT}
-            onChange={(event) => setFilterText(event.target.value)}
-            value={filterText}
-            variant="filled"
-            fullWidth
-            placeholder="Filter by topic or datatype"
-            InputProps={{
-              startAdornment: <SearchIcon fontSize="small" />,
-              endAdornment: filterText && (
-                <IconButton
-                  size="small"
-                  title="Clear search"
-                  onClick={() => setFilterText("")}
-                  edge="end"
-                >
-                  <ClearIcon fontSize="small" />
-                </IconButton>
-              ),
-            }}
-          />
-        </Box>
-      </StyledAppBar>
+      <header className={classes.appBar}>
+        <TextField
+          id="topic-filter"
+          variant="filled"
+          disabled={playerPresence !== PlayerPresence.PRESENT}
+          onChange={(event) => setFilterText(event.target.value)}
+          value={filterText}
+          className={classes.textField}
+          fullWidth
+          placeholder="Filter by topic or datatype…"
+          InputProps={{
+            size: "small",
+            startAdornment: (
+              <label className={classes.startAdornment} htmlFor="topic-filter">
+                <SearchIcon fontSize="small" />
+              </label>
+            ),
+            endAdornment: filterText && (
+              <IconButton
+                size="small"
+                title="Clear search"
+                onClick={() => setFilterText("")}
+                edge="end"
+              >
+                <ClearIcon fontSize="small" />
+              </IconButton>
+            ),
+          }}
+        />
+      </header>
 
       {filteredTopics.length > 0 ? (
         <List key="topics" dense disablePadding>

@@ -7,14 +7,16 @@ import { SidebarContent } from "@foxglove/studio-base/components/SidebarContent"
 
 import { useStudioLogsSettingsTree } from "./useStudioLogsSettingsTree";
 
-function StudioLogsSettingsSidebar(): JSX.Element {
+export function StudioLogsSettings(): JSX.Element {
   const logSettings = useStudioLogsSettingsTree();
 
+  return <SettingsTreeEditor settings={logSettings} />;
+}
+
+export function StudioLogsSettingsSidebar(): JSX.Element {
   return (
     <SidebarContent overflow="auto" title="Studio Logs Settings" disablePadding>
-      <SettingsTreeEditor settings={logSettings} />
+      <StudioLogsSettings />
     </SidebarContent>
   );
 }
-
-export { StudioLogsSettingsSidebar };

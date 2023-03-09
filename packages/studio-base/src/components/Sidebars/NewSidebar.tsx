@@ -2,8 +2,7 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import ArrowLeftIcon from "@mui/icons-material/ArrowLeft";
-import ArrowRightIcon from "@mui/icons-material/ArrowRight";
+import CloseIcon from "@mui/icons-material/Close";
 import { Divider, IconButton, Tab, Tabs } from "@mui/material";
 import { makeStyles } from "tss-react/mui";
 
@@ -12,8 +11,13 @@ import Stack from "@foxglove/studio-base/components/Stack";
 const useStyles = makeStyles()((theme) => ({
   root: {
     boxSizing: "content-box",
-    borderLeft: `1px solid ${theme.palette.divider}`,
     backgroundColor: theme.palette.background.paper,
+  },
+  anchorRight: {
+    borderLeft: `1px solid ${theme.palette.divider}`,
+  },
+  anchorLeft: {
+    borderRight: `1px solid ${theme.palette.divider}`,
   },
   tabs: {
     minHeight: "auto",
@@ -38,11 +42,17 @@ const useStyles = makeStyles()((theme) => ({
     },
   },
   iconButton: {
-    fontSize: 20,
+    padding: theme.spacing(0.91125), // round out the overall height to 30px
+    color: theme.palette.text.secondary,
     borderRadius: 0,
+
+    ":hover": {
+      color: theme.palette.text.primary,
+    },
   },
   tabContent: {
     flex: "auto",
+    overflow: "auto",
   },
 }));
 
@@ -68,12 +78,19 @@ export function NewSidebar<K extends string>({
   activeTab: K | undefined;
   setActiveTab: (newValue: K) => void;
 }): JSX.Element {
-  const { classes } = useStyles();
+  const { classes, cx } = useStyles();
 
   const SelectedComponent = (activeTab != undefined && items.get(activeTab)?.component) || Noop;
 
   return (
-    <Stack className={classes.root} flexShrink={0}>
+    <Stack
+      className={cx(classes.root, {
+        [classes.anchorLeft]: anchor === "left",
+        [classes.anchorRight]: anchor === "right",
+      })}
+      flexShrink={0}
+      overflow="hidden"
+    >
       <Stack direction="row" justifyContent="space-between" alignItems="center">
         <Tabs
           className={classes.tabs}
@@ -86,16 +103,17 @@ export function NewSidebar<K extends string>({
           }}
         >
           {Array.from(items.entries(), ([key, item]) => (
-            <Tab key={key} label={item.title} value={key} />
+            <Tab key={key} label={item.title} value={key} data-testid={`${key}-${anchor}`} />
           ))}
         </Tabs>
 
-        <IconButton className={classes.iconButton} size="small" onClick={onClose}>
-          {anchor === "right" ? (
-            <ArrowRightIcon fontSize="inherit" />
-          ) : (
-            <ArrowLeftIcon fontSize="inherit" />
-          )}
+        <IconButton
+          className={classes.iconButton}
+          onClick={onClose}
+          size="small"
+          data-testid={`sidebar-close-${anchor}`}
+        >
+          <CloseIcon fontSize="inherit" />
         </IconButton>
       </Stack>
       <Divider />

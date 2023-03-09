@@ -115,6 +115,7 @@ export function DataSource({
     <>
       {problemModal}
       <Tooltip
+        arrow={false}
         disableHoverListener={initializing}
         disableFocusListener={initializing}
         classes={{ tooltip: classes.tooltip }}

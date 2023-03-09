@@ -60,7 +60,7 @@ export function Default(): JSX.Element {
       <UserMenu
         open
         anchorReference="anchorPosition"
-        anchorPosition={{ left: 0, top: 48 }}
+        anchorPosition={{ left: 0, top: 54 }}
         disablePortal
         handleClose={() => {
           // no-op

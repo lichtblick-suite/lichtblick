@@ -13,28 +13,43 @@ import {
   MenuItem,
   PopoverPosition,
   PopoverReference,
+  Tooltip,
 } from "@mui/material";
 import { useSnackbar } from "notistack";
 import { forwardRef, useCallback } from "react";
+import tinycolor from "tinycolor2";
 import { makeStyles } from "tss-react/mui";
 
 import Logger from "@foxglove/log";
-import { APP_BAR_PRIMARY_COLOR } from "@foxglove/studio-base/components/AppBar/constants";
+import {
+  APP_BAR_FOREGROUND_COLOR,
+  APP_BAR_PRIMARY_COLOR,
+} from "@foxglove/studio-base/components/AppBar/constants";
 import { useCurrentUser, User } from "@foxglove/studio-base/context/CurrentUserContext";
 import { useConfirm } from "@foxglove/studio-base/hooks/useConfirm";
 
 const log = Logger.getLogger(__filename);
 
 const useStyles = makeStyles()((theme) => ({
+  tooltip: {
+    marginTop: `${theme.spacing(0.5)} !important`,
+  },
   avatar: {
     color: theme.palette.common.white,
     backgroundColor: APP_BAR_PRIMARY_COLOR,
-    height: theme.spacing(3.25),
-    width: theme.spacing(3.25),
-    marginLeft: theme.spacing(0.5),
+    height: theme.spacing(3.5),
+    width: theme.spacing(3.5),
   },
-  avatarButton: {
-    padding: 0,
+  iconButton: {
+    padding: theme.spacing(1),
+    borderRadius: 0,
+
+    "&:hover": {
+      backgroundColor: tinycolor(APP_BAR_FOREGROUND_COLOR).setAlpha(0.08).toRgbString(),
+    },
+    "&.Mui-selected": {
+      backgroundColor: APP_BAR_PRIMARY_COLOR,
+    },
   },
   menuList: {
     minWidth: 200,
@@ -54,18 +69,20 @@ export const UserIconButton = forwardRef<HTMLButtonElement, UserIconProps>((prop
   const { currentUser: me, ...otherProps } = props;
 
   return (
-    <IconButton {...otherProps} ref={ref} className={classes.avatarButton}>
-      <Avatar className={classes.avatar} variant="rounded">
-        {me?.avatarImageUrl != undefined && (
-          <img
-            src={me.avatarImageUrl}
-            referrerPolicy="same-origin"
-            className={classes.userIconImage}
-          />
-        )}
-        {me?.avatarImageUrl == undefined && <PersonIcon />}
-      </Avatar>
-    </IconButton>
+    <Tooltip classes={{ tooltip: classes.tooltip }} title="My profile" arrow={false}>
+      <IconButton {...otherProps} ref={ref} className={classes.iconButton}>
+        <Avatar className={classes.avatar} variant="rounded">
+          {me?.avatarImageUrl != undefined && (
+            <img
+              src={me.avatarImageUrl}
+              referrerPolicy="same-origin"
+              className={classes.userIconImage}
+            />
+          )}
+          {me?.avatarImageUrl == undefined && <PersonIcon />}
+        </Avatar>
+      </IconButton>
+    </Tooltip>
   );
 });
 UserIconButton.displayName = "UserIconButton";

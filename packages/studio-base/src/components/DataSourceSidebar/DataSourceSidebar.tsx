@@ -32,6 +32,7 @@ import { TopicList } from "./TopicList";
 import { DataSourceInfoView } from "../DataSourceInfoView";
 
 type Props = {
+  disableToolbar?: boolean;
   onSelectDataSourceAction: () => void;
 };
 
@@ -79,7 +80,7 @@ const selectSelectedEventId = (store: EventsStore) => store.selectedEventId;
 type DataSourceSidebarTab = "topics" | "events" | "problems";
 
 export default function DataSourceSidebar(props: Props): JSX.Element {
-  const { onSelectDataSourceAction } = props;
+  const { disableToolbar = false, onSelectDataSourceAction } = props;
   const playerPresence = useMessagePipeline(selectPlayerPresence);
   const playerProblems = useMessagePipeline(selectPlayerProblems) ?? [];
   const { currentUser } = useCurrentUser();
@@ -110,9 +111,10 @@ export default function DataSourceSidebar(props: Props): JSX.Element {
 
   return (
     <SidebarContent
+      disablePadding
+      disableToolbar={disableToolbar}
       overflow="auto"
       title="Data source"
-      disablePadding
       trailingItems={[
         isLoading && (
           <Stack key="loading" alignItems="center" justifyContent="center" padding={1}>
@@ -130,33 +132,39 @@ export default function DataSourceSidebar(props: Props): JSX.Element {
       ].filter(Boolean)}
     >
       <Stack fullHeight>
-        <Stack paddingX={2} paddingBottom={2}>
-          <DataSourceInfoView />
-        </Stack>
+        {!disableToolbar && (
+          <Stack paddingX={2} paddingBottom={2}>
+            <DataSourceInfoView />
+          </Stack>
+        )}
         {playerPresence !== PlayerPresence.NOT_PRESENT && (
           <>
             <Stack flex={1}>
-              <StyledTabs
-                value={activeTab}
-                onChange={(_ev, newValue: DataSourceSidebarTab) => setActiveTab(newValue)}
-                textColor="inherit"
-              >
-                <StyledTab disableRipple label="Topics" value="topics" />
-                {showEventsTab && <StyledTab disableRipple label="Events" value="events" />}
-                <StyledTab
-                  disableRipple
-                  label={
-                    <Stack direction="row" alignItems="baseline" gap={1}>
-                      Problems
-                      {playerProblems.length > 0 && (
-                        <ProblemCount>{playerProblems.length}</ProblemCount>
-                      )}
-                    </Stack>
-                  }
-                  value="problems"
-                />
-              </StyledTabs>
-              <Divider />
+              {!disableToolbar && (
+                <>
+                  <StyledTabs
+                    value={activeTab}
+                    onChange={(_ev, newValue: DataSourceSidebarTab) => setActiveTab(newValue)}
+                    textColor="inherit"
+                  >
+                    <StyledTab disableRipple label="Topics" value="topics" />
+                    {showEventsTab && <StyledTab disableRipple label="Events" value="events" />}
+                    <StyledTab
+                      disableRipple
+                      label={
+                        <Stack direction="row" alignItems="baseline" gap={1}>
+                          Problems
+                          {playerProblems.length > 0 && (
+                            <ProblemCount>{playerProblems.length}</ProblemCount>
+                          )}
+                        </Stack>
+                      }
+                      value="problems"
+                    />
+                  </StyledTabs>
+                  <Divider />
+                </>
+              )}
               {activeTab === "topics" && (
                 <div className={classes.tabContent}>
                   <TopicList />

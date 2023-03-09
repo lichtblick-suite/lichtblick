@@ -10,7 +10,6 @@ import { AppSetting } from "@foxglove/studio-base/AppSetting";
 import { useAppConfigurationValue } from "@foxglove/studio-base/hooks";
 
 import Sidebars, { SidebarItem } from ".";
-import { NewSidebarItem } from "./NewSidebar";
 
 export default {
   title: "components/Sidebar",
@@ -22,8 +21,6 @@ const B = () => <>B</>;
 const C = () => <>C</>;
 const D = () => <>D</>;
 const E = () => <>E</>;
-const X = () => <>X</>;
-const Y = () => <>Y</>;
 
 const ITEMS = new Map<string, SidebarItem>([
   ["a", { title: "A", component: A, iconName: "Add" }],
@@ -36,28 +33,18 @@ const BOTTOM_ITEMS = new Map<string, SidebarItem>([
   ["b", { title: "B", component: B, iconName: "ErrorBadge" }],
 ]);
 
-const RIGHT_ITEMS = new Map<string, NewSidebarItem>([
-  ["x", { title: "X", component: X }],
-  ["y", { title: "Y", component: Y }],
-]);
-
 function Story({
   clickKey,
   defaultSelectedKey,
-  defaultSelectedRightKey,
   enableAppBar,
   height = 300,
 }: {
   clickKey?: string;
   defaultSelectedKey?: string | undefined;
-  defaultSelectedRightKey?: string | undefined;
   enableAppBar?: boolean;
   height?: number;
 }) {
   const [selectedKey, setSelectedKey] = useState<string | undefined>(defaultSelectedKey);
-  const [selectedRightKey, setSelectedRightKey] = useState<string | undefined>(
-    defaultSelectedRightKey,
-  );
   const [_, setAppBarEnabled] = useAppConfigurationValue<boolean>(AppSetting.ENABLE_NEW_TOPNAV);
 
   useEffect(() => {
@@ -89,11 +76,14 @@ function Story({
         <Sidebars
           items={ITEMS}
           bottomItems={BOTTOM_ITEMS}
-          rightItems={RIGHT_ITEMS}
+          rightItems={new Map()}
+          leftItems={new Map()}
           selectedKey={selectedKey}
           onSelectKey={setSelectedKey}
-          selectedRightKey={selectedRightKey}
-          onSelectRightKey={setSelectedRightKey}
+          selectedRightKey={undefined}
+          onSelectRightKey={() => {}}
+          selectedLeftKey={undefined}
+          onSelectLeftKey={() => {}}
         >
           Main content
         </Sidebars>
@@ -106,12 +96,6 @@ export const Unselected = (): JSX.Element => <Story />;
 export const ASelected = (): JSX.Element => <Story defaultSelectedKey="a" />;
 export const BSelected = (): JSX.Element => <Story defaultSelectedKey="b" />;
 
-export const RightX = (): JSX.Element => <Story defaultSelectedRightKey="x" />;
-export const RightY = (): JSX.Element => <Story defaultSelectedRightKey="y" />;
-export const LeftAndRight = (): JSX.Element => (
-  <Story defaultSelectedKey="b" defaultSelectedRightKey="y" />
-);
-
 export const ClickToSelect = (): JSX.Element => <Story clickKey="a" />;
 ClickToSelect.parameters = { colorScheme: "dark" };
 export const ClickToDeselect = (): JSX.Element => <Story defaultSelectedKey="a" clickKey="a" />;
@@ -120,5 +104,3 @@ ClickToDeselect.parameters = { colorScheme: "dark" };
 export const OverflowUnselected = (): JSX.Element => <Story height={200} />;
 export const OverflowCSelected = (): JSX.Element => <Story height={200} defaultSelectedKey="c" />;
 export const OverflowBSelected = (): JSX.Element => <Story height={200} defaultSelectedKey="b" />;
-
-export const WithAppBarEnabled = (): JSX.Element => <Story enableAppBar />;

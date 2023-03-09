@@ -44,6 +44,11 @@ const useStyles = makeStyles()(({ palette, typography }) => ({
       fontFamily: fonts.MONOSPACE,
       overflowWrap: "break-word",
     },
+    mark: {
+      color: palette.info.main,
+      fontWeight: 700,
+      backgroundColor: "transparent",
+    },
     div: {
       "::-webkit-scrollbar": {
         width: 4,

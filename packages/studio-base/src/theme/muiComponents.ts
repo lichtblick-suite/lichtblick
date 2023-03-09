@@ -2,7 +2,7 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { alpha, Theme } from "@mui/material";
+import { alpha, Fade, Theme } from "@mui/material";
 import { CSSProperties } from "react";
 import tinycolor from "tinycolor2";
 
@@ -382,6 +382,9 @@ export default function muiComponents(theme: Theme): Theme["components"] & MuiLa
       },
     },
     MuiMenu: {
+      defaultProps: {
+        TransitionComponent: Fade,
+      },
       styleOverrides: {
         paper: {
           borderRadius: theme.shape.borderRadius,
@@ -513,6 +516,7 @@ export default function muiComponents(theme: Theme): Theme["components"] & MuiLa
     MuiTooltip: {
       defaultProps: {
         arrow: true,
+        TransitionComponent: Fade,
       },
       styleOverrides: {
         arrow: {
@@ -523,7 +527,7 @@ export default function muiComponents(theme: Theme): Theme["components"] & MuiLa
           backgroundColor: tinycolor(theme.palette.grey[700]).setAlpha(0.86).toRgbString(),
           backdropFilter: "blur(3px)",
           fontWeight: "normal",
-          fontSize: "0.75rem",
+          fontSize: theme.typography.caption.fontSize,
         },
       },
     },

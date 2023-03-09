@@ -30,6 +30,7 @@ import {
   MosaicWithoutDragDropContext,
 } from "react-mosaic-component";
 
+import { AppSetting } from "@foxglove/studio-base/AppSetting";
 import { EmptyPanelLayout } from "@foxglove/studio-base/components/EmptyPanelLayout";
 import EmptyState from "@foxglove/studio-base/components/EmptyState";
 import {
@@ -43,16 +44,17 @@ import { useExtensionCatalog } from "@foxglove/studio-base/context/ExtensionCata
 import { useLayoutManager } from "@foxglove/studio-base/context/LayoutManagerContext";
 import { PanelComponent, usePanelCatalog } from "@foxglove/studio-base/context/PanelCatalogContext";
 import { useWorkspace } from "@foxglove/studio-base/context/WorkspaceContext";
+import { useAppConfigurationValue } from "@foxglove/studio-base/hooks/useAppConfigurationValue";
 import { defaultPlaybackConfig } from "@foxglove/studio-base/providers/CurrentLayoutProvider/reducers";
 import { MosaicDropResult, PanelConfig } from "@foxglove/studio-base/types/panels";
 import { getPanelIdForType, getPanelTypeFromId } from "@foxglove/studio-base/util/layout";
-
-import "react-mosaic-component/react-mosaic-component.css";
 
 import ErrorBoundary from "./ErrorBoundary";
 import { MosaicPathContext } from "./MosaicPathContext";
 import { PanelRemounter } from "./PanelRemounter";
 import { UnknownPanel } from "./UnknownPanel";
+
+import "react-mosaic-component/react-mosaic-component.css";
 
 type Props = {
   layout?: MosaicNode<string>;
@@ -221,6 +223,7 @@ export default function PanelLayout(): JSX.Element {
   const layoutLoading = useCurrentLayoutSelector(selectedLayoutLoadingSelector);
   const mosaicLayout = useCurrentLayoutSelector(selectedLayoutMosaicSelector);
   const registeredExtensions = useExtensionCatalog((state) => state.installedExtensions);
+  const [enableNewTopNav = false] = useAppConfigurationValue<boolean>(AppSetting.ENABLE_NEW_TOPNAV);
 
   const createNewLayout = async () => {
     const layoutData: Omit<LayoutData, "name" | "id"> = {
@@ -236,13 +239,18 @@ export default function PanelLayout(): JSX.Element {
       permission: "CREATOR_WRITE",
     });
     setSelectedLayoutId(layout.id);
-    openLayoutBrowser();
+
+    if (!enableNewTopNav) {
+      openLayoutBrowser();
+    }
   };
 
   const selectExistingLayout = async () => {
-    const layouts = await layoutManager.getLayouts();
-    if (layouts[0]) {
-      setSelectedLayoutId(layouts[0].id);
+    if (!enableNewTopNav) {
+      const layouts = await layoutManager.getLayouts();
+      if (layouts[0]) {
+        setSelectedLayoutId(layouts[0].id);
+      }
     }
     openLayoutBrowser();
   };

@@ -20,7 +20,7 @@ const useStyles = makeStyles()((theme) => ({
     flexShrink: 0,
     display: "flex",
     alignItems: "center",
-    padding: theme.spacing(2),
+    padding: theme.spacing(2, 2, 0, 2),
     gap: theme.spacing(0.5),
   },
 }));
@@ -59,7 +59,7 @@ export function SidebarContent({
           )}
         </div>
       )}
-      <Stack flex="auto" {...(!disablePadding && { paddingX: 2, paddingBottom: 2 })}>
+      <Stack flex="auto" {...(!disablePadding && { padding: 2 })}>
         {children}
       </Stack>
     </Stack>

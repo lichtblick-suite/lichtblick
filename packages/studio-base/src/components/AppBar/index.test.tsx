@@ -47,6 +47,10 @@ describe("<AppBar />", () => {
           onUnmaximizeWindow={mockUnmaximize}
           onCloseWindow={mockClose}
           onSelectDataSourceAction={() => {}}
+          prefsDialogOpen={false}
+          setPrefsDialogOpen={() => {}}
+          layoutMenuOpen={false}
+          setLayoutMenuOpen={() => {}}
         />
       </Wrapper>,
     );
@@ -70,6 +74,10 @@ describe("<AppBar />", () => {
           onCloseWindow={mockClose}
           isMaximized
           onSelectDataSourceAction={() => {}}
+          prefsDialogOpen={false}
+          setPrefsDialogOpen={() => {}}
+          layoutMenuOpen={false}
+          setLayoutMenuOpen={() => {}}
         />
       </Wrapper>,
     );
