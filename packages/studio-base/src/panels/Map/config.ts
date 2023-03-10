@@ -16,6 +16,7 @@ export type Config = {
   layer: string;
   topicColors: Record<string, string>;
   zoomLevel?: number;
+  maxNativeZoom?: number;
 };
 
 export function validateCustomUrl(url: string): Error | undefined {
@@ -110,6 +111,16 @@ export function buildSettingsTree(
       input: "string",
       value: config.customTileUrl,
       error,
+    };
+
+    generalSettings.maxNativeZoom = {
+      label: "Max tile level",
+      input: "select",
+      value: config.maxNativeZoom,
+      options: [18, 19, 20, 21, 22, 23, 24].map((num) => {
+        return { label: String(num), value: num };
+      }),
+      help: "Highest zoom supported by the custom map source. See https://leafletjs.com/examples/zoom-levels/ for more information.",
     };
   }
 

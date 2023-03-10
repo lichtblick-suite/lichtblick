@@ -104,6 +104,7 @@ function MapPanel(props: MapPanelProps): JSX.Element {
       layer: initialConfig.layer ?? "map",
       topicColors: initialConfig.topicColors ?? {},
       zoomLevel: initialConfig.zoomLevel,
+      maxNativeZoom: initialConfig.maxNativeZoom ?? 18,
     };
   });
 
@@ -259,6 +260,13 @@ function MapPanel(props: MapPanelProps): JSX.Element {
       });
     }
 
+    if (path[1] === "maxNativeZoom" && input === "select") {
+      setConfig((oldConfig) => {
+        const zoom = parseInt(String(value));
+        return { ...oldConfig, maxNativeZoom: isFinite(zoom) ? zoom : oldConfig.maxNativeZoom };
+      });
+    }
+
     if (path[1] === "followTopic" && input === "select") {
       setConfig((oldConfig) => {
         return { ...oldConfig, followTopic: String(value) };
@@ -293,6 +301,12 @@ function MapPanel(props: MapPanelProps): JSX.Element {
       customLayer.setUrl(config.customTileUrl);
     }
   }, [config.layer, config.customTileUrl, customLayer]);
+
+  useEffect(() => {
+    if (config.layer === "custom") {
+      customLayer.options.maxNativeZoom = config.maxNativeZoom;
+    }
+  }, [config.layer, config.maxNativeZoom, customLayer]);
 
   // Subscribe to eligible and enabled topics
   useEffect(() => {
