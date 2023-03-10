@@ -104,4 +104,22 @@ describe("parseChannel", () => {
     const obj = channel.deserializer(new Uint8Array([0, 1, 0, 0, 5, 0, 0, 0, 65, 66, 67, 68, 0]));
     expect(obj).toEqual({ data: "ABCD" });
   });
+
+  it("works with ros2idl", () => {
+    const channel = parseChannel({
+      messageEncoding: "cdr",
+      schema: {
+        name: "foo_msgs/Bar",
+        encoding: "ros2idl",
+        data: new TextEncoder().encode(`
+        module foo_msgs {
+          struct Bar {string data;};
+        };
+        `),
+      },
+    });
+
+    const obj = channel.deserializer(new Uint8Array([0, 1, 0, 0, 5, 0, 0, 0, 65, 66, 67, 68, 0]));
+    expect(obj).toEqual({ data: "ABCD" });
+  });
 });

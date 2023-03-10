@@ -2233,7 +2233,7 @@ __metadata:
   resolution: "@foxglove/mcap-support@workspace:packages/mcap-support"
   dependencies:
     "@foxglove/message-definition": 0.2.0
-    "@foxglove/rosmsg": 4.0.0
+    "@foxglove/rosmsg": 4.2.0
     "@foxglove/rosmsg-serialization": 2.0.0
     "@foxglove/rosmsg2-serialization": 2.0.0
     "@foxglove/schemas": 1.1.0
@@ -2376,7 +2376,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@foxglove/rosmsg@npm:4.0.0, @foxglove/rosmsg@npm:^4.0.0":
+"@foxglove/rosmsg@npm:4.0.0":
   version: 4.0.0
   resolution: "@foxglove/rosmsg@npm:4.0.0"
   dependencies:
@@ -2385,6 +2385,18 @@ __metadata:
   bin:
     gendeps2: bin/gendeps2
   checksum: d3a685cdadb03e0be0bd906b99cbea1b31fe6e2129c54d1f4229f5f4f4198bebae93961fc2f77ecc96a7fd0da7de432018fc4bcbaee6e36f24e062f7c5f33672
+  languageName: node
+  linkType: hard
+
+"@foxglove/rosmsg@npm:4.2.0, @foxglove/rosmsg@npm:^4.0.0":
+  version: 4.2.0
+  resolution: "@foxglove/rosmsg@npm:4.2.0"
+  dependencies:
+    "@foxglove/message-definition": ^0.2.0
+    md5-typescript: ^1.0.5
+  bin:
+    gendeps2: bin/gendeps2
+  checksum: 4d247a9157644702420dfc15aa29e9735f385dd5ab46c2ef88ca5a650e52658a57058f8d0532137adef5c62922496fca2769ee23555e17786f0366219476cd63
   languageName: node
   linkType: hard
 
