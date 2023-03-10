@@ -76,7 +76,7 @@ const emptyAction: ValueActionItem = {
 
 const MAX_ACTION_ITEMS = 4;
 
-export default function Value(props: ValueProps): JSX.Element {
+function Value(props: ValueProps): JSX.Element {
   const timeOutID = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
   const {
     arrLabel,
@@ -221,3 +221,7 @@ export default function Value(props: ValueProps): JSX.Element {
     </Stack>
   );
 }
+
+// In practice this seems to be an expensive component to render.
+// Memoization provides a very noticeable performance boost.
+export default React.memo(Value);
