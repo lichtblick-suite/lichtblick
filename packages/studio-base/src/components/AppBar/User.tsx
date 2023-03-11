@@ -14,6 +14,7 @@ import {
   PopoverPosition,
   PopoverReference,
   Tooltip,
+  Typography,
 } from "@mui/material";
 import { useSnackbar } from "notistack";
 import { forwardRef, useCallback } from "react";
@@ -69,7 +70,7 @@ export const UserIconButton = forwardRef<HTMLButtonElement, UserIconProps>((prop
   const { currentUser: me, ...otherProps } = props;
 
   return (
-    <Tooltip classes={{ tooltip: classes.tooltip }} title="My profile" arrow={false}>
+    <Tooltip classes={{ tooltip: classes.tooltip }} title={me?.email ?? "Profile"} arrow={false}>
       <IconButton {...otherProps} ref={ref} className={classes.iconButton}>
         <Avatar className={classes.avatar} variant="rounded">
           {me?.avatarImageUrl != undefined && (
@@ -150,12 +151,11 @@ export function UserMenu({
         <MenuItem onClick={onSettingsClick}>
           <ListItemText primary={currentUser.email} />
         </MenuItem>
-        <MenuItem onClick={onSettingsClick}>
-          <ListItemText>User settings</ListItemText>
-        </MenuItem>
         <Divider variant="middle" />
         <MenuItem onClick={onSignoutClick}>
-          <ListItemText>Sign out</ListItemText>
+          <ListItemText>
+            <Typography color="error">Sign out</Typography>
+          </ListItemText>
         </MenuItem>
       </Menu>
       {confirmModal}

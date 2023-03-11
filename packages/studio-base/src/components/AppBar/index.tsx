@@ -38,6 +38,7 @@ import {
 import { useWorkspace } from "@foxglove/studio-base/context/WorkspaceContext";
 import { useAppConfigurationValue } from "@foxglove/studio-base/hooks";
 import { AppEvent } from "@foxglove/studio-base/services/IAnalytics";
+import { fonts } from "@foxglove/studio-base/util/sharedStyleConstants";
 
 import { AddPanelMenu } from "./AddPanelMenu";
 import { DataSource } from "./DataSource";
@@ -125,6 +126,14 @@ const useStyles = makeStyles<{ leftInset?: number; debugDragRegion?: boolean }>(
             color: { main: APP_BAR_PRIMARY_COLOR },
           }).dark,
         },
+      },
+      keyEquivalent: {
+        fontFamily: fonts.MONOSPACE,
+        background: theme.palette.augmentColor({ color: { main: APP_BAR_FOREGROUND_COLOR } }).dark,
+        padding: theme.spacing(0, 0.5),
+        aspectRatio: 1,
+        borderRadius: theme.shape.borderRadius,
+        marginLeft: theme.spacing(1),
       },
     };
   },
@@ -220,8 +229,7 @@ export function AppBar(props: AppBarProps): JSX.Element {
                 ref={layoutButtonRef}
                 color="inherit"
                 id="layout-button"
-                title="Layout browser"
-                aria-label="Layout button"
+                title="Layouts"
                 aria-controls={layoutMenuOpen ? "layout-menu" : undefined}
                 aria-haspopup="true"
                 aria-expanded={layoutMenuOpen ? "true" : undefined}
@@ -259,14 +267,24 @@ export function AppBar(props: AppBarProps): JSX.Element {
               {enableMemoryUseIndicator && <MemoryUseIndicator />}
               <Stack direction="row" alignItems="center" paddingX={1.5}>
                 <AppBarIconButton
-                  title={`${leftSidebarOpen ? "Hide" : "Show"} left sidebar - Shortcut: [`}
+                  title={
+                    <>
+                      {leftSidebarOpen ? "Hide" : "Show"} left sidebar{" "}
+                      <kbd className={classes.keyEquivalent}>[</kbd>
+                    </>
+                  }
                   aria-label={`${leftSidebarOpen ? "Hide" : "Show"} left sidebar`}
                   onClick={() => setLeftSidebarOpen(!leftSidebarOpen)}
                 >
                   {leftSidebarOpen ? <PanelLeft24Filled /> : <PanelLeft24Regular />}
                 </AppBarIconButton>
                 <AppBarIconButton
-                  title={`${rightSidebarOpen ? "Hide" : "Show"} right sidebar - Shortcut: ]`}
+                  title={
+                    <>
+                      {rightSidebarOpen ? "Hide" : "Show"} right sidebar{" "}
+                      <kbd className={classes.keyEquivalent}>]</kbd>
+                    </>
+                  }
                   aria-label={`${rightSidebarOpen ? "Hide" : "Show"} right sidebar`}
                   onClick={() => setRightSidebarOpen(!rightSidebarOpen)}
                 >
@@ -276,8 +294,7 @@ export function AppBar(props: AppBarProps): JSX.Element {
               <AppBarIconButton
                 className={cx({ "Mui-selected": helpMenuOpen })}
                 id="help-button"
-                title="Help & Docs"
-                aria-label="Help menu button"
+                title="Help"
                 aria-controls={helpMenuOpen ? "help-menu" : undefined}
                 aria-haspopup="true"
                 aria-expanded={helpMenuOpen ? "true" : undefined}
@@ -293,8 +310,7 @@ export function AppBar(props: AppBarProps): JSX.Element {
               </AppBarIconButton>
               <AppBarIconButton
                 id="preferences-button"
-                title="Studio preferences"
-                aria-label="Preferences dialog button"
+                title="Preferences"
                 aria-controls={prefsDialogOpen ? "preferences-dialog" : undefined}
                 aria-haspopup="true"
                 aria-expanded={prefsDialogOpen ? "true" : undefined}

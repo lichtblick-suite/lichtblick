@@ -37,23 +37,27 @@ const useStyles = makeStyles()((theme) => ({
   },
 }));
 
-export const AppBarIconButton = forwardRef<HTMLButtonElement, IconButtonProps>((props, ref) => {
-  const { title, className, children, color = "inherit", ...rest } = props;
-  const { classes, cx } = useStyles();
+type AppBarIconButtonProps = Omit<IconButtonProps, "title"> & { title: React.ReactNode };
 
-  return (
-    <Tooltip
-      disableInteractive
-      classes={{ tooltip: classes.tooltip }}
-      title={title}
-      arrow={false}
-      enterDelay={200}
-    >
-      <IconButton color={color} ref={ref} className={cx(classes.iconButton, className)} {...rest}>
-        {children}
-      </IconButton>
-    </Tooltip>
-  );
-});
+export const AppBarIconButton = forwardRef<HTMLButtonElement, AppBarIconButtonProps>(
+  (props, ref) => {
+    const { title, className, children, color = "inherit", ...rest } = props;
+    const { classes, cx } = useStyles();
+
+    return (
+      <Tooltip
+        disableInteractive
+        classes={{ tooltip: classes.tooltip }}
+        title={title}
+        arrow={false}
+        enterDelay={200}
+      >
+        <IconButton color={color} ref={ref} className={cx(classes.iconButton, className)} {...rest}>
+          {children}
+        </IconButton>
+      </Tooltip>
+    );
+  },
+);
 
 AppBarIconButton.displayName = "AppBarIconButton";

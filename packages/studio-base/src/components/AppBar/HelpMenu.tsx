@@ -105,7 +105,7 @@ export function HelpMenu(props: HelpMenuProps): JSX.Element {
         <SlideLayout24Regular className={classes.icon} />
         <ListItemText
           primary="Studio"
-          secondary="Open source robotics visualization and debugging."
+          secondary="Open source robotics visualization and debugging"
           secondaryTypographyProps={{ className: classes.menuText }}
         />
       </MenuItem>
@@ -149,7 +149,7 @@ export function HelpMenu(props: HelpMenuProps): JSX.Element {
         <ChatBubblesQuestion24Regular className={classes.icon} />
         <ListItemText
           primary="Join us on Slack"
-          secondary="Give us feedback, ask questions, and collaborate with other users."
+          secondary="Give us feedback, ask questions, and collaborate with other users"
           secondaryTypographyProps={{ className: classes.menuText }}
         />
       </MenuItem>
