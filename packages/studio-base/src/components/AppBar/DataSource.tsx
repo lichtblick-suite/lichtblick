@@ -90,10 +90,11 @@ export function DataSource({
   const playerName = useMessagePipeline(selectPlayerName);
   const playerPresence = useMessagePipeline(selectPlayerPresence);
   const playerProblems = useMessagePipeline(selectPlayerProblems) ?? [];
-
   const reconnecting = playerPresence === PlayerPresence.RECONNECTING;
   const initializing = playerPresence === PlayerPresence.INITIALIZING;
-  const error = playerPresence === PlayerPresence.ERROR || playerProblems.length > 0;
+  const error =
+    playerPresence === PlayerPresence.ERROR ||
+    playerProblems.some((problem) => problem.severity === "error");
   const loading = reconnecting || initializing;
 
   const playerDisplayName =
