@@ -1,0 +1,10 @@
+{
+  "extends": "@foxglove/tsconfig/base",
+  "include": ["./**/*", "../common/*", "../../package.json"],
+  "compilerOptions": {
+    "rootDir": "../../",
+    "noEmit": true,
+    "lib": ["dom", "es2020"],
+    "useUnknownInCatchVariables": false
+  }
+}

@@ -54,6 +54,6 @@ export function setAppSetting(key: AppSetting, value: unknown): void {
 
   fs.writeFileSync(
     settingsPath,
-    JSON.stringify({ ...existingSettings, [key]: value }, undefined, 2),
+    JSON.stringify({ ...existingSettings, [key]: value }, undefined, 2) as string,
   );
 }

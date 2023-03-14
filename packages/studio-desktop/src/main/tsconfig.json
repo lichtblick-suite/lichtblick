@@ -1,0 +1,8 @@
+{
+  "extends": "@foxglove/tsconfig/base",
+  "include": ["./**/*", "../common/*", "../../package.json"],
+  "compilerOptions": {
+    "rootDir": "../../",
+    "noEmit": true
+  }
+}

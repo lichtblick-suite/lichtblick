@@ -35,14 +35,15 @@ const storageBridge = (global as unknown as { storageBridge?: Storage }).storage
 const menuBridge = (global as { menuBridge?: NativeMenuBridge }).menuBridge;
 const ctxbridge = (global as { ctxbridge?: OsContext }).ctxbridge;
 
-export default function Root({
-  appConfiguration,
-}: {
+export default function Root(props: {
   appConfiguration: IAppConfiguration;
+  extraProviders: JSX.Element[] | undefined;
+  dataSources: IDataSourceFactory[] | undefined;
 }): JSX.Element {
   if (!storageBridge) {
     throw new Error("storageBridge is missing");
   }
+  const { appConfiguration } = props;
 
   useEffect(() => {
     const handler = () => {
@@ -78,8 +79,8 @@ export default function Root({
       new RemoteDataSourceFactory(),
     ];
 
-    return sources;
-  }, []);
+    return props.dataSources ?? sources;
+  }, [props.dataSources]);
 
   // App url state in window.location will represent the user's current session state
   // better than the initial deep link so we prioritize the current window.location
@@ -136,6 +137,7 @@ export default function Root({
         onMaximizeWindow={onMaximizeWindow}
         onUnmaximizeWindow={onUnmaximizeWindow}
         onCloseWindow={onCloseWindow}
+        extraProviders={props.extraProviders}
       />
     </>
   );

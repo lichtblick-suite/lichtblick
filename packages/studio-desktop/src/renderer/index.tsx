@@ -5,8 +5,6 @@
 // Make Electron type definitions available globally, such as extensions to File and other built-ins
 /// <reference types="electron" />
 
-import * as Sentry from "@sentry/electron/renderer";
-import { BrowserTracing } from "@sentry/tracing";
 import { StrictMode, useEffect } from "react";
 import ReactDOM from "react-dom";
 
@@ -18,49 +16,14 @@ import {
   overwriteFetch,
   waitForFonts,
   initI18n,
+  IDataSourceFactory,
 } from "@foxglove/studio-base";
 
 import Root from "./Root";
 import NativeStorageAppConfiguration from "./services/NativeStorageAppConfiguration";
-import pkgInfo from "../../package.json";
 import { Storage } from "../common/types";
 
 const log = Logger.getLogger(__filename);
-
-log.debug("initializing renderer");
-
-// preload injects the crash reporting global based on app settings received from the main process
-const isCrashReportingEnabled =
-  (global as { allowCrashReporting?: boolean }).allowCrashReporting ?? false;
-
-if (isCrashReportingEnabled && typeof process.env.SENTRY_DSN === "string") {
-  log.info("initializing Sentry in renderer");
-  Sentry.init({
-    dsn: process.env.SENTRY_DSN,
-    autoSessionTracking: true,
-    release: `${process.env.SENTRY_PROJECT}@${pkgInfo.version}`,
-    // Remove the default breadbrumbs integration - it does not accurately track breadcrumbs and
-    // creates more noise than benefit.
-    integrations: (integrations) => {
-      return integrations
-        .filter((integration) => integration.name !== "Breadcrumbs")
-        .concat([
-          new BrowserTracing({
-            startTransactionOnLocationChange: false, // location changes as a result of non-navigation interactions such as seeking
-          }),
-        ]);
-    },
-    tracesSampleRate: 0.05,
-  });
-}
-
-installDevtoolsFormatters();
-overwriteFetch();
-
-const rootEl = document.getElementById("root");
-if (!rootEl) {
-  throw new Error("missing #root element");
-}
 
 const isDevelopment = process.env.NODE_ENV === "development";
 
@@ -73,7 +36,22 @@ function LogAfterRender(props: React.PropsWithChildren<unknown>): JSX.Element {
   return <>{props.children}</>;
 }
 
-async function main() {
+type MainParams = {
+  dataSources?: IDataSourceFactory[];
+  extraProviders?: JSX.Element[];
+};
+
+export async function main(params: MainParams = {}): Promise<void> {
+  log.debug("initializing renderer");
+
+  installDevtoolsFormatters();
+  overwriteFetch();
+
+  const rootEl = document.getElementById("root");
+  if (!rootEl) {
+    throw new Error("missing #root element");
+  }
+
   // Initialize the RPC channel for electron-socket. This method is called first
   // since the window.onmessage handler needs to be installed before
   // window.onload fires
@@ -95,11 +73,13 @@ async function main() {
   ReactDOM.render(
     <StrictMode>
       <LogAfterRender>
-        <Root appConfiguration={appConfiguration} />
+        <Root
+          appConfiguration={appConfiguration}
+          extraProviders={params.extraProviders}
+          dataSources={params.dataSources}
+        />
       </LogAfterRender>
     </StrictMode>,
     rootEl,
   );
 }
-
-void main();

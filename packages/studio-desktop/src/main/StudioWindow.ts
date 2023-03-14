@@ -30,8 +30,8 @@ import getDevModeIcon from "./getDevModeIcon";
 import { getAppSetting } from "./settings";
 import { simulateUserClick } from "./simulateUserClick";
 import { getTelemetrySettings } from "./telemetry";
-import pkgInfo from "../../package.json";
 import { encodeRendererArg } from "../common/rendererArgs";
+import { FOXGLOVE_PRODUCT_NAME, FOXGLOVE_PRODUCT_VERSION } from "../common/webpackDefines";
 
 declare const MAIN_WINDOW_WEBPACK_ENTRY: string;
 
@@ -129,7 +129,7 @@ function newStudioWindow(deepLinks: string[] = []): BrowserWindow {
     minWidth: 350,
     minHeight: 250,
     autoHideMenuBar: true,
-    title: pkgInfo.productName,
+    title: FOXGLOVE_PRODUCT_NAME,
     frame: enableNewTopNav && isLinux ? false : true,
     titleBarStyle: enableNewTopNav ? "hidden" : "default",
     trafficLightPosition:
@@ -397,9 +397,9 @@ function buildMenu(browserWindow: BrowserWindow): Menu {
   const showAboutDialog = () => {
     void dialog.showMessageBox(browserWindow, {
       type: "info",
-      title: `About ${pkgInfo.productName}`,
-      message: pkgInfo.productName,
-      detail: `Version: ${pkgInfo.version}`,
+      title: `About ${FOXGLOVE_PRODUCT_NAME}`,
+      message: FOXGLOVE_PRODUCT_NAME,
+      detail: `Version: ${FOXGLOVE_PRODUCT_VERSION}`,
     });
   };
 

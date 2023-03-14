@@ -6,11 +6,10 @@ import ReactRefreshPlugin from "@pmmmwh/react-refresh-webpack-plugin";
 import { CleanWebpackPlugin } from "clean-webpack-plugin";
 import HtmlWebpackPlugin from "html-webpack-plugin";
 import path from "path";
-import { Configuration, EnvironmentPlugin, WebpackPluginInstance } from "webpack";
+import { Configuration, WebpackPluginInstance } from "webpack";
 import type { Configuration as WebpackDevServerConfiguration } from "webpack-dev-server";
 
 import type { WebpackArgv } from "@foxglove/studio-base/WebpackArgv";
-import { buildEnvironmentDefaults } from "@foxglove/studio-base/environment";
 import { makeConfig } from "@foxglove/studio-base/webpack";
 
 interface WebpackConfiguration extends Configuration {
@@ -79,7 +78,6 @@ const mainConfig = (env: unknown, argv: WebpackArgv): Configuration => {
     plugins: [
       ...plugins,
       ...(appWebpackConfig.plugins ?? []),
-      new EnvironmentPlugin(buildEnvironmentDefaults(argv.env?.FOXGLOVE_BACKEND ?? argv.mode)),
       new HtmlWebpackPlugin({
         templateContent: `
   <!doctype html>

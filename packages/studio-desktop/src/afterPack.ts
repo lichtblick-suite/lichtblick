@@ -135,7 +135,7 @@ async function configureQuickLookExtension(context: AfterPackContext) {
   await fs.writeFile(appexInfoPlist, plist.build(newInfo));
   log.info("Updated appex Info.plist for Quick Look");
 
-  const webpackOutputDir = path.join("desktop", ".webpack", "quicklook");
+  const webpackOutputDir = path.join(context.packager.info.appDir, "quicklook");
   for (const file of await fs.readdir(webpackOutputDir, { withFileTypes: true })) {
     if (!file.isFile()) {
       throw new Error(`Expected only files in Quick Look webpack output, found: ${file.name}`);
@@ -168,7 +168,7 @@ async function configureQuickLookExtension(context: AfterPackContext) {
     "--options",
     "runtime", // notarization requires Hardened Runtime to be enabled
     "--entitlements",
-    path.join("node_modules", "quicklookjs", "dist", "PreviewExtension.entitlements"),
+    path.join(require.resolve("quicklookjs/index.d.ts"), "../dist/PreviewExtension.entitlements"),
     appexPath,
   ]);
   log.info("Re-sandboxed appex");

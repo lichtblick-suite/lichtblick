@@ -2,15 +2,14 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { captureException } from "@sentry/electron/main";
 import { dialog } from "electron";
 import { autoUpdater, UpdateInfo } from "electron-updater";
+import { EventEmitter } from "eventemitter3";
 
 import Logger from "@foxglove/log";
 import { AppSetting } from "@foxglove/studio-base/src/AppSetting";
 
 import { getAppSetting } from "./settings";
-import pkgInfo from "../../package.json";
 
 const log = Logger.getLogger(__filename);
 
@@ -29,7 +28,11 @@ function isNetworkError(err: unknown) {
   );
 }
 
-class StudioAppUpdater {
+type EventTypes = {
+  error: (err: Error) => void;
+};
+
+class StudioAppUpdater extends EventEmitter<EventTypes> {
   private started: boolean = false;
   // Seconds to wait after app startup to check and download updates.
   // This gives the user time to disable app updates for new installations
@@ -65,7 +68,7 @@ class StudioAppUpdater {
     };
     const onNotAvailable = (info: UpdateInfo) => {
       void dialog.showMessageBox({
-        message: `${pkgInfo.productName} is up to date (version ${info.version}).`,
+        message: `Foxglove Studio is up to date (version ${info.version}).`,
       });
     };
     const onError = (error: Error) => {
@@ -106,7 +109,7 @@ class StudioAppUpdater {
       if (isNetworkError(err)) {
         log.warn(`Network error checking for updates: ${err}`);
       } else {
-        captureException(err);
+        this.emit("error", err as Error);
       }
     } finally {
       setTimeout(() => {
