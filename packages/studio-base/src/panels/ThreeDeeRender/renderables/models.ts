@@ -39,7 +39,9 @@ export function replaceMaterials(model: LoadedModel, material: THREE.MeshStandar
       disposeStandardMaterial(meshChild.material);
     }
     meshChild.material = material;
-    meshChild.geometry.computeVertexNormals();
+    if (!meshChild.geometry.attributes.normal) {
+      meshChild.geometry.computeVertexNormals();
+    }
   });
 }
 
