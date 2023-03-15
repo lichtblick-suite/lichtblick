@@ -2,13 +2,11 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { info, warning } from "@actions/core";
+import { info, warning, error } from "@actions/core";
 import depcheck, { Detector } from "depcheck";
 import glob from "glob";
 import path from "path";
 import { promisify } from "util";
-
-import packageJson from "../package.json";
 
 /**
  * Detect comments of the form
@@ -53,7 +51,7 @@ function printAndAnalyzeResults(unused: depcheck.Results, packageName: string) {
   if (unused.devDependencies.length > 0) {
     hadError = true;
 
-    warning(`Unused devDependencies in ${packageName}:`);
+    error(`Unused devDependencies in ${packageName}:`);
     for (const dep of unused.devDependencies) {
       info(`- ${dep}`);
     }
@@ -62,7 +60,7 @@ function printAndAnalyzeResults(unused: depcheck.Results, packageName: string) {
 
   if (unused.dependencies.length > 0) {
     hadError = true;
-    warning(`Unused dependencies in ${packageName}:`);
+    error(`Unused dependencies in ${packageName}:`);
     for (const dep of unused.dependencies) {
       info(`- ${dep}`);
     }
@@ -75,7 +73,7 @@ function printAndAnalyzeResults(unused: depcheck.Results, packageName: string) {
 
   if (Object.keys(unused.missing).length > 0) {
     hadError = true;
-    warning(`Missing dependencies in ${packageName}:`);
+    error(`Missing dependencies in ${packageName}:`);
     for (const [dep, locations] of Object.entries(unused.missing)) {
       info(`- ${dep} (used in ${locations[0]!})`);
     }
@@ -84,18 +82,18 @@ function printAndAnalyzeResults(unused: depcheck.Results, packageName: string) {
 
   if (Object.keys(unused.invalidFiles).length > 0) {
     hadError = true;
-    warning(`Invalid files in ${packageName}:`);
-    for (const [filePath, error] of Object.entries(unused.invalidFiles)) {
-      info(`- ${filePath} (${error})`);
+    error(`Invalid files in ${packageName}:`);
+    for (const [filePath, err] of Object.entries(unused.invalidFiles)) {
+      info(`- ${filePath} (${err})`);
     }
     info("");
   }
 
   if (Object.keys(unused.invalidDirs).length > 0) {
     hadError = true;
-    warning(`Invalid directories in ${packageName}:`);
-    for (const [dirPath, error] of Object.entries(unused.invalidDirs)) {
-      info(`- ${dirPath} (${error})`);
+    error(`Invalid directories in ${packageName}:`);
+    for (const [dirPath, err] of Object.entries(unused.invalidDirs)) {
+      info(`- ${dirPath} (${err})`);
     }
     info("");
   }
@@ -108,38 +106,56 @@ function printAndAnalyzeResults(unused: depcheck.Results, packageName: string) {
   return !hadError;
 }
 
-async function getAllWorkspaces() {
+async function getAllWorkspacePackages(roots: string[]) {
   const results: { name: string; path: string }[] = [];
-  for (const pattern of packageJson.workspaces.packages) {
-    for (const workspaceRoot of await promisify(glob)(pattern)) {
-      try {
-        const workspacePath = path.join(path.dirname(__dirname), workspaceRoot);
-        // eslint-disable-next-line @typescript-eslint/no-var-requires
-        const workspacePackageJson = require(path.join(workspacePath, "package.json"));
-        const name = workspacePackageJson.name;
-        if (typeof name !== "string") {
-          warning(`No name in package.json at ${workspacePath}`);
-          continue;
-        }
-        if (name.startsWith("@types/")) {
-          info(`Skipping types package ${name}`);
-          continue;
-        }
-        results.push({ path: workspacePath, name });
-      } catch (err) {
-        // skip directories without package.json
+  const workspacePackages: string[] = [];
+  for (const workspaceRoot of roots) {
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    const workspaceInfo = require(path.resolve(process.cwd(), workspaceRoot, "package.json"));
+    const patterns: string[] = Array.isArray(workspaceInfo.workspaces)
+      ? workspaceInfo.workspaces
+      : Array.isArray(workspaceInfo.workspaces?.packages)
+      ? workspaceInfo.workspaces.packages
+      : [];
+    for (const pattern of patterns) {
+      for (const packagePath of await promisify(glob)(pattern)) {
+        workspacePackages.push(path.resolve(process.cwd(), workspaceRoot, packagePath));
       }
+    }
+  }
+  for (const packagePath of workspacePackages) {
+    try {
+      // eslint-disable-next-line @typescript-eslint/no-var-requires
+      const packageInfo = require(path.join(packagePath, "package.json"));
+      const name = packageInfo.name;
+      if (typeof name !== "string") {
+        warning(`No name in package.json at ${packagePath}`);
+        continue;
+      }
+      if (name.startsWith("@types/")) {
+        info(`Skipping types package ${name}`);
+        continue;
+      }
+      results.push({ path: packagePath, name });
+    } catch (err) {
+      // skip directories without package.json
     }
   }
   return results;
 }
 
 async function main() {
-  const workspaces = await getAllWorkspaces();
+  const roots = process.argv.slice(2);
+  if (roots.length === 0) {
+    error("Usage: lint-dependencies [workspace1] [workspace2] ...");
+    process.exit(1);
+  }
+  info(`Linting dependencies in workspaces: ${JSON.stringify(roots, undefined, 2)}`);
+  const packages = await getAllWorkspacePackages(roots);
   let hadError = false;
-  for (const workspace of workspaces) {
-    const results = await run(workspace.path);
-    if (!printAndAnalyzeResults(results, workspace.name)) {
+  for (const pkg of packages) {
+    const results = await run(pkg.path);
+    if (!printAndAnalyzeResults(results, pkg.name)) {
       hadError = true;
     }
   }
