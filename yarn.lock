@@ -2607,7 +2607,7 @@ __metadata:
     ts-essentials: 9.3.0
     ts-key-enum: 2.0.12
     ts-loader: 9.4.2
-    tss-react: 4.6.1
+    tss-react: 4.7.7
     ttypescript: 1.5.15
     typescript: 4.9.5
     typescript-transform-paths: 3.4.6
@@ -2667,7 +2667,7 @@ __metadata:
     react-refresh-typescript: 2.0.8
     react-use: 17.4.0
     tinycolor2: 1.6.0
-    tss-react: 4.6.1
+    tss-react: 4.7.7
     utif: 3.1.0
     webpack: 5.75.0
     webpack-dev-server: 4.11.1
@@ -2691,7 +2691,7 @@ __metadata:
     react: 17.0.2
     react-dom: 17.0.2
     react-i18next: 12.2.0
-    tss-react: 4.6.1
+    tss-react: 4.7.7
     webpack: 5.75.0
     webpack-dev-server: 4.11.1
   languageName: unknown
@@ -24099,9 +24099,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"tss-react@npm:4.6.1":
-  version: 4.6.1
-  resolution: "tss-react@npm:4.6.1"
+"tss-react@npm:4.7.7":
+  version: 4.7.7
+  resolution: "tss-react@npm:4.7.7"
   dependencies:
     "@emotion/cache": "*"
     "@emotion/serialize": "*"
@@ -24113,7 +24113,7 @@ __metadata:
   peerDependenciesMeta:
     "@emotion/server":
       optional: true
-  checksum: 93b7a7b6514ae86856eca2a7b8fde2878cdef01a5d0166998bb9ca9db94e60b1405cd5610ac9c7f4796af188ce7e9a8c7e39900f56d5ae2b4f518f7ede4d41ae
+  checksum: cbc16e809de8ccad9c55b0f73acf8d2c18f2aabd7c558453e427f668298cd1b4e85e0bdd5fb8ba29ddffa7666bd494cc40c1a7a4eaefe36805c8b966acc4e25b
   languageName: node
   linkType: hard
 
