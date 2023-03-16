@@ -118,7 +118,7 @@ class StudioAppUpdater extends EventEmitter<EventTypes> {
     }
   }
 
-  private static instance: StudioAppUpdater;
+  private static instance?: StudioAppUpdater;
   public static Instance(): StudioAppUpdater {
     return (StudioAppUpdater.instance ??= new StudioAppUpdater());
   }

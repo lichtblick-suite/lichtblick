@@ -278,10 +278,13 @@ export default class RosbridgePlayer implements Player {
         const parsedDefinition = parseMessageDefinition(messageDefinition, {
           ros2: this._rosVersion === 2,
         });
-        messageReaders[type] ??=
-          this._rosVersion !== 2
-            ? new LazyMessageReader(parsedDefinition)
-            : new ROS2MessageReader(parsedDefinition);
+        // https://github.com/typescript-eslint/typescript-eslint/issues/6632
+        if (!messageReaders[type]) {
+          messageReaders[type] =
+            this._rosVersion !== 2
+              ? new LazyMessageReader(parsedDefinition)
+              : new ROS2MessageReader(parsedDefinition);
+        }
       }
 
       // We call requestTopics on a timeout to check for new topics. If there are no changes to topics

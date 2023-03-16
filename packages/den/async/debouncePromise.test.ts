@@ -23,14 +23,14 @@ describe("debouncePromise", () => {
     const callsFinished = [signal(), signal(), signal(), signal()]; // indicate when the .currentPromise completes
 
     let numCallsStarted = 0;
-    const debouncedFn = debouncePromise(() => {
+    const debouncedFn = debouncePromise(async () => {
       callsStarted[numCallsStarted]?.resolve();
       const promise = callReturns[numCallsStarted];
       ++numCallsStarted;
       if (!promise) {
         throw new Error("no remaining promises");
       }
-      return promise;
+      return await promise;
     });
 
     let prevExpectedCallsStarted = 0;
@@ -95,9 +95,9 @@ describe("debouncePromise", () => {
 
     const sig = signal();
     let calls = 0;
-    const debouncedFn = debouncePromise(() => {
+    const debouncedFn = debouncePromise(async () => {
       ++calls;
-      return sig;
+      return await sig;
     });
 
     expect(calls).toBe(0);

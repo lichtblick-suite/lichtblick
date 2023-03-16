@@ -333,7 +333,10 @@ export default class UserNodePlayer implements Player {
           if (nodeRegistration.inputs.includes(message.topic)) {
             const outputMessage = await nodeRegistration.processMessage(message, globalVariables);
             if (outputMessage) {
-              messagesByTopic[outTopic] ??= [];
+              // https://github.com/typescript-eslint/typescript-eslint/issues/6632
+              if (!messagesByTopic[outTopic]) {
+                messagesByTopic[outTopic] = [];
+              }
               messagesByTopic[outTopic]?.push(outputMessage);
             }
           }

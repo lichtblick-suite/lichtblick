@@ -125,6 +125,7 @@ const upstreamSecond = {
 };
 
 const setListenerHelper = (player: UserNodePlayer, numPromises: number = 1) => {
+  // eslint-disable-next-line @typescript-eslint/promise-function-async
   const signals = [...new Array(numPromises)].map(() =>
     signal<{
       topicNames: string[];
