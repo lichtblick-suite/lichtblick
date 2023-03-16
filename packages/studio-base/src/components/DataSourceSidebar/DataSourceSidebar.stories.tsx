@@ -10,6 +10,7 @@ import { fromDate } from "@foxglove/rostime";
 import { AppSetting } from "@foxglove/studio-base/AppSetting";
 import MockMessagePipelineProvider from "@foxglove/studio-base/components/MessagePipeline/MockMessagePipelineProvider";
 import CurrentUserContext, { User } from "@foxglove/studio-base/context/CurrentUserContext";
+import { useEvents } from "@foxglove/studio-base/context/EventsContext";
 import { useAppConfigurationValue } from "@foxglove/studio-base/hooks";
 import { PlayerPresence, Topic } from "@foxglove/studio-base/players/types";
 import EventsProvider from "@foxglove/studio-base/providers/EventsProvider";
@@ -177,20 +178,22 @@ export const WithEvents = (): JSX.Element => {
     signOut: async () => undefined,
   };
 
+  const setEventsSupported = useEvents((store) => store.setEventsSupported);
+  useEffect(() => {
+    setEventsSupported(true);
+  }, [setEventsSupported]);
+
   return (
     <MockMessagePipelineProvider
       startTime={START_TIME}
       endTime={END_TIME}
       topics={TOPICS}
       presence={PlayerPresence.PRESENT}
-      urlState={{ sourceId: "foxglove-data-platform" }}
     >
       <CurrentUserContext.Provider value={userContextValue}>
-        <EventsProvider>
-          <Box height="100%" bgcolor="background.paper">
-            <DataSourceSidebar onSelectDataSourceAction={() => {}} />
-          </Box>
-        </EventsProvider>
+        <Box height="100%" bgcolor="background.paper">
+          <DataSourceSidebar onSelectDataSourceAction={() => {}} />
+        </Box>
       </CurrentUserContext.Provider>
     </MockMessagePipelineProvider>
   );

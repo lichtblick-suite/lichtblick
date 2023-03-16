@@ -81,9 +81,10 @@ type KeyValue = { key: string; value: string };
 
 const selectCurrentTime = (ctx: MessagePipelineContext) => ctx.playerState.activeData?.currentTime;
 const selectRefreshEvents = (store: EventsStore) => store.refreshEvents;
+const selectDeviceId = (store: EventsStore) => store.deviceId;
 
-export function CreateEventDialog(props: { deviceId: string; onClose: () => void }): JSX.Element {
-  const { deviceId, onClose } = props;
+export function CreateEventDialog(props: { onClose: () => void }): JSX.Element {
+  const { onClose } = props;
 
   const { classes } = useStyles();
 
@@ -131,8 +132,10 @@ export function CreateEventDialog(props: { deviceId: string; onClose: () => void
   );
   const canSubmit = event.startTime != undefined && event.duration != undefined && !duplicateKey;
 
+  const deviceId = useEvents(selectDeviceId);
+
   const [createdEvent, createEvent] = useAsyncFn(async () => {
-    if (event.startTime == undefined || event.duration == undefined) {
+    if (event.startTime == undefined || event.duration == undefined || deviceId == undefined) {
       return;
     }
 

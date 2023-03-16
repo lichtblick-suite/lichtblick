@@ -10,10 +10,12 @@ import MockMessagePipelineProvider from "@foxglove/studio-base/components/Messag
 import { useCurrentLayoutActions } from "@foxglove/studio-base/context/CurrentLayoutContext";
 import CurrentUserContext, { User } from "@foxglove/studio-base/context/CurrentUserContext";
 import PlayerSelectionContext, {
+  IDataSourceFactory,
   PlayerSelection,
 } from "@foxglove/studio-base/context/PlayerSelectionContext";
 import { useInitialDeepLinkState } from "@foxglove/studio-base/hooks/useInitialDeepLinkState";
 import { useSessionStorageValue } from "@foxglove/studio-base/hooks/useSessionStorageValue";
+import { Player } from "@foxglove/studio-base/players/types";
 import EventsProvider from "@foxglove/studio-base/providers/EventsProvider";
 import { LaunchPreferenceValue } from "@foxglove/studio-base/types/LaunchPreferenceValue";
 
@@ -115,15 +117,27 @@ describe("Initial deep link state", () => {
     expect(setSelectedLayoutId).toHaveBeenCalledWith("a288e116-d177-4b57-8f30-6ada61919638");
   });
 
-  it("waits for a current user to select a data platform source", () => {
+  it("waits for a current user to select a source with currentUserRequired=true", () => {
+    class FooFactory implements IDataSourceFactory {
+      public id = "foo-with-user";
+      public type = "connection" as const;
+      public displayName = "Foo";
+      public currentUserRequired = true;
+      public initialize(): Player | undefined {
+        throw new Error("not implemented");
+      }
+    }
     const { wrapper, setWrapperProps } = makeWrapper({
       currentUser: undefined,
-      playerSelection: emptyPlayerSelection,
+      playerSelection: {
+        ...emptyPlayerSelection,
+        availableSources: [new FooFactory()],
+      },
     });
     const { result, rerender } = renderHook(
       () =>
         useInitialDeepLinkState([
-          "https://studio.foxglove.dev/?ds=foxglove-data-platform&ds.deviceId=dev&layoutId=12345",
+          "https://studio.foxglove.dev/?ds=foo-with-user&ds.bar=baz&layoutId=12345",
         ]),
       { wrapper },
     );
@@ -155,8 +169,8 @@ describe("Initial deep link state", () => {
     });
     rerender();
 
-    expect(selectSource).toHaveBeenCalledWith("foxglove-data-platform", {
-      params: { deviceId: "dev" },
+    expect(selectSource).toHaveBeenCalledWith("foo-with-user", {
+      params: { bar: "baz" },
       type: "connection",
     });
 

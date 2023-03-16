@@ -73,9 +73,8 @@ const ProblemCount = muiStyled("div")(({ theme }) => ({
 
 const selectPlayerPresence = ({ playerState }: MessagePipelineContext) => playerState.presence;
 const selectPlayerProblems = ({ playerState }: MessagePipelineContext) => playerState.problems;
-const selectPlayerSourceId = ({ playerState }: MessagePipelineContext) =>
-  playerState.urlState?.sourceId;
 const selectSelectedEventId = (store: EventsStore) => store.selectedEventId;
+const selectEventsSupported = (store: EventsStore) => store.eventsSupported;
 
 type DataSourceSidebarTab = "topics" | "events" | "problems";
 
@@ -84,15 +83,14 @@ export default function DataSourceSidebar(props: Props): JSX.Element {
   const playerPresence = useMessagePipeline(selectPlayerPresence);
   const playerProblems = useMessagePipeline(selectPlayerProblems) ?? [];
   const { currentUser } = useCurrentUser();
-  const playerSourceId = useMessagePipeline(selectPlayerSourceId);
   const selectedEventId = useEvents(selectSelectedEventId);
   const [activeTab, setActiveTab] = useState<DataSourceSidebarTab>("topics");
   const { classes } = useStyles();
 
   const [enableNewTopNav = false] = useAppConfigurationValue<boolean>(AppSetting.ENABLE_NEW_TOPNAV);
 
-  const showEventsTab =
-    !enableNewTopNav && currentUser != undefined && playerSourceId === "foxglove-data-platform";
+  const eventsSupported = useEvents(selectEventsSupported);
+  const showEventsTab = !enableNewTopNav && currentUser != undefined && eventsSupported;
 
   const isLoading = useMemo(
     () =>

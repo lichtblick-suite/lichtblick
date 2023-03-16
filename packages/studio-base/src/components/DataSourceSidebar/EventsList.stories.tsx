@@ -2,7 +2,7 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { Story, StoryContext } from "@storybook/react";
+import { Story } from "@storybook/react";
 import { screen } from "@testing-library/dom";
 import userEvent from "@testing-library/user-event";
 import { useEffect } from "react";
@@ -14,14 +14,9 @@ import { makeMockEvents } from "@foxglove/studio-base/test/mocks/makeMockEvents"
 
 import { EventsList } from "./EventsList";
 
-function Wrapper(Child: Story, ctx: StoryContext): JSX.Element {
+function Wrapper(Child: Story): JSX.Element {
   return (
-    <MockMessagePipelineProvider
-      urlState={{
-        sourceId: "foxglove-data-platform",
-        parameters: { eventId: ctx.parameters.targetEventId },
-      }}
-    >
+    <MockMessagePipelineProvider>
       <EventsProvider>
         <Child />
       </EventsProvider>

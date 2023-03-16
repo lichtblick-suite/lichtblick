@@ -20,12 +20,17 @@ function createEventsStore() {
     events: { loading: false, value: NO_EVENTS },
     filter: "",
     selectedEventId: undefined,
+    eventsSupported: false,
+    deviceId: undefined,
 
     refreshEvents: () => set((old) => ({ eventFetchCount: old.eventFetchCount + 1 })),
     selectEvent: (id: undefined | string) => set({ selectedEventId: id }),
     setEvents: (events: AsyncState<TimelinePositionedEvent[]>) =>
       set({ events, selectedEventId: undefined }),
     setFilter: (filter: string) => set({ filter }),
+    // eslint-disable-next-line @foxglove/no-boolean-parameters
+    setEventsSupported: (eventsSupported: boolean) => set({ eventsSupported }),
+    setDeviceId: (deviceId: string | undefined) => set({ deviceId }),
   }));
 }
 

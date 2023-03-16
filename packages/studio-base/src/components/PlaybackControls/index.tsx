@@ -38,6 +38,7 @@ import {
 import PlaybackSpeedControls from "@foxglove/studio-base/components/PlaybackSpeedControls";
 import Stack from "@foxglove/studio-base/components/Stack";
 import { useCurrentUser } from "@foxglove/studio-base/context/CurrentUserContext";
+import { EventsStore, useEvents } from "@foxglove/studio-base/context/EventsContext";
 import { Player, PlayerPresence } from "@foxglove/studio-base/players/types";
 
 import PlaybackTimeDisplay from "./PlaybackTimeDisplay";
@@ -57,15 +58,8 @@ const useStyles = makeStyles()((theme) => ({
   },
 }));
 
-const selectDeviceId = (ctx: MessagePipelineContext) => {
-  if (ctx.playerState.urlState?.sourceId === "foxglove-data-platform") {
-    return ctx.playerState.urlState.parameters?.deviceId;
-  } else {
-    return undefined;
-  }
-};
-
 const selectPresence = (ctx: MessagePipelineContext) => ctx.playerState.presence;
+const selectEventsSupported = (store: EventsStore) => store.eventsSupported;
 
 export default function PlaybackControls(props: {
   play: NonNullable<Player["startPlayback"]>;
@@ -82,7 +76,7 @@ export default function PlaybackControls(props: {
   const [repeat, setRepeat] = useState(false);
   const [createEventDialogOpen, setCreateEventDialogOpen] = useState(false);
   const { currentUser } = useCurrentUser();
-  const deviceId = useMessagePipeline(selectDeviceId);
+  const eventsSupported = useEvents(selectEventsSupported);
 
   const toggleRepeat = useCallback(() => {
     setRepeat((old) => !old);
@@ -166,7 +160,7 @@ export default function PlaybackControls(props: {
         <Scrubber onSeek={seek} />
         <Stack direction="row" alignItems="center" flex={1} gap={1} overflowX="auto">
           <Stack direction="row" flex={1} gap={0.5}>
-            {currentUser && deviceId && (
+            {currentUser && eventsSupported && (
               <HoverableIconButton
                 size="small"
                 title="Create event"
@@ -215,8 +209,8 @@ export default function PlaybackControls(props: {
             <PlaybackSpeedControls />
           </Stack>
         </Stack>
-        {createEventDialogOpen && deviceId && (
-          <CreateEventDialog deviceId={deviceId} onClose={toggleCreateEventDialog} />
+        {createEventDialogOpen && eventsSupported && (
+          <CreateEventDialog onClose={toggleCreateEventDialog} />
         )}
       </div>
     </>

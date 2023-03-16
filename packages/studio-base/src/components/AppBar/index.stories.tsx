@@ -153,13 +153,6 @@ export function DataSources(): JSX.Element {
         style={{ display: "grid", gridTemplateColumns: "max-content auto", alignItems: "center" }}
       >
         <MockMessagePipelineProvider
-          name="roman-transbot (dev_W m1gvryKJmREqnVT)"
-          presence={PlayerPresence.PRESENT}
-          urlState={{ sourceId: "foxglove-data-platform" }}
-        >
-          <LabeledAppBar label="foxglove-data-platform" {...actions} />
-        </MockMessagePipelineProvider>
-        <MockMessagePipelineProvider
           name="Adapted from nuScenes dataset. Copyright © 2020 nuScenes. https://www.nuscenes.org/terms-of-use"
           presence={PlayerPresence.PRESENT}
           urlState={{ sourceId: "sample-nuscenes" }}
