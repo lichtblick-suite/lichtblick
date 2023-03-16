@@ -70,7 +70,7 @@
     "@actions/core": "1.10.0",
     "@actions/exec": "1.1.1",
     "@actions/tool-cache": "2.0.1",
-    "@babel/core": "7.20.12",
+    "@babel/core": "7.21.3",
     "@babel/preset-env": "7.20.2",
     "@babel/preset-typescript": "7.21.0",
     "@foxglove/eslint-plugin": "0.21.0",
