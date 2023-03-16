@@ -2636,7 +2636,7 @@ __metadata:
     use-immer: 0.8.1
     use-pan-and-zoom: 0.6.5
     uuid: 9.0.0
-    webpack: 5.75.0
+    webpack: 5.76.2
     xacro-parser: 0.3.9
     zustand: 4.3.6
   languageName: unknown
@@ -2688,7 +2688,7 @@ __metadata:
     tinycolor2: 1.6.0
     tss-react: 4.7.7
     utif: 3.1.0
-    webpack: 5.75.0
+    webpack: 5.76.2
     webpack-dev-server: 4.11.1
   languageName: unknown
   linkType: soft
@@ -2711,7 +2711,7 @@ __metadata:
     react-dom: 17.0.2
     react-i18next: 12.2.0
     tss-react: 4.7.7
-    webpack: 5.75.0
+    webpack: 5.76.2
     webpack-dev-server: 4.11.1
   languageName: unknown
   linkType: soft
@@ -8840,7 +8840,7 @@ __metadata:
     mathjs: 11.6.0
     react: 17.0.2
     react-dom: 17.0.2
-    webpack: 5.75.0
+    webpack: 5.76.2
     webpack-dev-server: 4.11.1
   languageName: unknown
   linkType: soft
@@ -11169,7 +11169,7 @@ __metadata:
     "@foxglove/studio-desktop": "workspace:*"
     electron: 22.1.0
     playwright: 1.30.0
-    webpack: 5.75.0
+    webpack: 5.76.2
   languageName: unknown
   linkType: soft
 
@@ -13473,7 +13473,7 @@ __metadata:
     tslib: 2.5.0
     typescript: 4.9.5
     typescript-plugin-css-modules: 4.1.1
-    webpack: 5.75.0
+    webpack: 5.76.2
     webpack-cli: 5.0.1
     webpack-dev-server: 4.11.1
     webpack-hot-middleware: 2.25.3
@@ -25183,7 +25183,7 @@ __metadata:
     "@types/serve-handler": ^6
     playwright: 1.30.0
     serve-handler: 6.1.5
-    webpack: 5.75.0
+    webpack: 5.76.2
     webpack-dev-server: 4.11.1
   languageName: unknown
   linkType: soft
@@ -25449,9 +25449,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"webpack@npm:5.75.0, webpack@npm:>=4.43.0 <6.0.0, webpack@npm:^5.1.0, webpack@npm:^5.9.0":
-  version: 5.75.0
-  resolution: "webpack@npm:5.75.0"
+"webpack@npm:5.76.2, webpack@npm:>=4.43.0 <6.0.0, webpack@npm:^5.1.0, webpack@npm:^5.9.0":
+  version: 5.76.2
+  resolution: "webpack@npm:5.76.2"
   dependencies:
     "@types/eslint-scope": ^3.7.3
     "@types/estree": ^0.0.51
@@ -25482,7 +25482,7 @@ __metadata:
       optional: true
   bin:
     webpack: bin/webpack.js
-  checksum: 2bcc5f3c195f375944e8af2f00bf2feea39cb9fda5f763b0d1b00077f1c51783db25c94d3fae96a07dead9fa085e6ae7474417e5ab31719c9776ea5969ceb83a
+  checksum: 86db98299a175c371031449c26077e87b33acd8f45de7f7945ed4b9b37c8ca11bc5169af9c44743efccd4d55e08042a3aa3a3bc42aff831309a0821ffbcd395e
   languageName: node
   linkType: hard
 
