@@ -33,7 +33,7 @@
     "@foxglove/wasm-bz2": "0.1.1",
     "@foxglove/wasm-lz4": "1.0.2",
     "@foxglove/wasm-zstd": "1.0.1",
-    "@mcap/core": "1.1.0",
+    "@mcap/core": "1.2.1",
     "@protobufjs/base64": "1.1.2",
     "flatbuffers": "23.1.21",
     "flatbuffers_reflection": "0.0.3",

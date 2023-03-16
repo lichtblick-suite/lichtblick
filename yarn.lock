@@ -2259,7 +2259,7 @@ __metadata:
     "@foxglove/wasm-bz2": 0.1.1
     "@foxglove/wasm-lz4": 1.0.2
     "@foxglove/wasm-zstd": 1.0.1
-    "@mcap/core": 1.1.0
+    "@mcap/core": 1.2.1
     "@protobufjs/base64": 1.1.2
     "@types/protobufjs": "workspace:*"
     flatbuffers: 23.1.21
@@ -2494,7 +2494,7 @@ __metadata:
     "@foxglove/wasm-lz4": 1.0.2
     "@foxglove/ws-protocol": 0.5.1
     "@foxglove/xmlrpc": 1.3.0
-    "@mcap/core": 1.1.0
+    "@mcap/core": 1.2.1
     "@mui/icons-material": 5.11.0
     "@mui/material": 5.11.12
     "@popperjs/core": 2.11.6
@@ -2654,7 +2654,7 @@ __metadata:
     "@foxglove/rosbag": 0.3.0
     "@foxglove/rostime": 1.1.2
     "@foxglove/studio-base": "workspace:*"
-    "@mcap/core": 1.1.0
+    "@mcap/core": 1.2.1
     "@pmmmwh/react-refresh-webpack-plugin": 0.5.10
     "@storybook/react": 6.5.15
     "@types/electron-devtools-installer": 2.2.2
@@ -3257,14 +3257,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@mcap/core@npm:1.1.0":
-  version: 1.1.0
-  resolution: "@mcap/core@npm:1.1.0"
+"@mcap/core@npm:1.2.1":
+  version: 1.2.1
+  resolution: "@mcap/core@npm:1.2.1"
   dependencies:
     "@foxglove/crc": ^0.0.3
-    heap-js: ^2.1.6
-    tslib: ^2
-  checksum: a43ba5bc1c7083b40bc84629eb6815675c04c9d92fd71f2dbe1eee8a0fe5863a4bd69ee4e5a34a9a8848a16b20eb0271c739bcb46fa49b063533a612360adc06
+    heap-js: ^2.2.0
+    tslib: ^2.5.0
+  checksum: 6af8a9aa026577f6d61bd1cf2bdaa205b216741de4d8cc02953c43585a20fbca2672efa0cd9eaa7eeceeaa6b40242ac05dc09c70dab66c878090baf751f69220
   languageName: node
   linkType: hard
 
@@ -14450,10 +14450,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"heap-js@npm:^2.1.6":
-  version: 2.1.6
-  resolution: "heap-js@npm:2.1.6"
-  checksum: cb712678bc441b5e9d5b825b1c8db170e1bc5757144ce10687d427ec53ac7ae0d8b9c9d4c18b7554949d7aad2ab8d6c71316355839bc1b7b498eaae088db5d94
+"heap-js@npm:^2.2.0":
+  version: 2.2.0
+  resolution: "heap-js@npm:2.2.0"
+  checksum: be89ec49ceac0c55a1cdbbe47b8fad76b43d98468b72e7fb3302f048a796ca8c8e683d59ffe564cc0b5ad31b68770a31bf2f315e3739bd7165ea34d7562a4b6b
   languageName: node
   linkType: hard
 
