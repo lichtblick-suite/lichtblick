@@ -18,10 +18,12 @@ import {
   RemoteDataSourceFactory,
   Ros1SocketDataSourceFactory,
   Ros2SocketDataSourceFactory,
+  Ros2UnavailableDataSourceFactory,
   SampleNuscenesDataSourceFactory,
   UlogLocalDataSourceFactory,
   VelodyneDataSourceFactory,
   OsContext,
+  AppConfigurationValue,
 } from "@foxglove/studio-base";
 
 import { DesktopExtensionLoader } from "./services/DesktopExtensionLoader";
@@ -45,14 +47,26 @@ export default function Root(props: {
   }
   const { appConfiguration } = props;
 
+  const [ros2NativeDsEnabled, setros2NativeDsEnabled] = useState<AppConfigurationValue>(
+    appConfiguration.get(AppSetting.ENABLE_ROS2_NATIVE_DATA_SOURCE),
+  );
+
   useEffect(() => {
     const handler = () => {
       void desktopBridge.updateNativeColorScheme();
     };
 
     appConfiguration.addChangeListener(AppSetting.COLOR_SCHEME, handler);
+    appConfiguration.addChangeListener(
+      AppSetting.ENABLE_ROS2_NATIVE_DATA_SOURCE,
+      setros2NativeDsEnabled,
+    );
     return () => {
       appConfiguration.removeChangeListener(AppSetting.COLOR_SCHEME, handler);
+      appConfiguration.removeChangeListener(
+        AppSetting.ENABLE_ROS2_NATIVE_DATA_SOURCE,
+        setros2NativeDsEnabled,
+      );
     };
   }, [appConfiguration]);
 
@@ -65,12 +79,17 @@ export default function Root(props: {
   const nativeWindow = useMemo(() => new NativeWindow(desktopBridge), []);
 
   const dataSources: IDataSourceFactory[] = useMemo(() => {
+    if (props.dataSources) {
+      return props.dataSources;
+    }
+
+    const ros2Enabled = (ros2NativeDsEnabled as boolean | undefined) ?? false;
     const sources = [
       new FoxgloveWebSocketDataSourceFactory(),
       new RosbridgeDataSourceFactory(),
       new Ros1SocketDataSourceFactory(),
+      ros2Enabled ? new Ros2SocketDataSourceFactory() : new Ros2UnavailableDataSourceFactory(),
       new Ros1LocalBagDataSourceFactory(),
-      new Ros2SocketDataSourceFactory(),
       new Ros2LocalBagDataSourceFactory(),
       new UlogLocalDataSourceFactory(),
       new VelodyneDataSourceFactory(),
@@ -79,8 +98,8 @@ export default function Root(props: {
       new RemoteDataSourceFactory(),
     ];
 
-    return props.dataSources ?? sources;
-  }, [props.dataSources]);
+    return sources;
+  }, [props.dataSources, ros2NativeDsEnabled]);
 
   // App url state in window.location will represent the user's current session state
   // better than the initial deep link so we prioritize the current window.location
