@@ -6,7 +6,6 @@ import { Divider } from "@mui/material";
 import { makeStyles } from "tss-react/mui";
 
 import CopyButton from "@foxglove/studio-base/components/CopyButton";
-import { DataSourceInfoView } from "@foxglove/studio-base/components/DataSourceInfoView";
 import { DirectTopicStatsUpdater } from "@foxglove/studio-base/components/DirectTopicStatsUpdater";
 import EmptyState from "@foxglove/studio-base/components/EmptyState";
 import {
@@ -35,6 +34,7 @@ const useStyles = makeStyles<void, "copyIcon">()((theme, _params, classes) => ({
       position: "sticky",
       textAlign: "left",
       top: 0,
+      zIndex: theme.zIndex.appBar - 1,
     },
 
     tr: {
@@ -131,10 +131,6 @@ function SourceInfo(): JSX.Element {
       <PanelToolbar />
       <Divider />
       <Stack fullHeight overflowY="auto">
-        <Stack padding={1.5}>
-          <DataSourceInfoView />
-        </Stack>
-        <Divider />
         <table className={classes.table}>
           <thead>
             <tr>
