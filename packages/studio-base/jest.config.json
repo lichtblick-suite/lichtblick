@@ -18,6 +18,7 @@
   "restoreMocks": true,
   "moduleNameMapper": {
     "\\.svg$": "<rootDir>/src/test/mocks/MockSvg.tsx",
+    "\\.css$": "<rootDir>/src/test/mocks/MockCss.ts",
     "react-monaco-editor": "<rootDir>/src/test/stubs/MonacoEditor.tsx",
     "\\.(glb|md|png)$": "<rootDir>/src/test/mocks/fileMock.ts",
     "@foxglove/studio-base/(.*)": "<rootDir>/src/$1"

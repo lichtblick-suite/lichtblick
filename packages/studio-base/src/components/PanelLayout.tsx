@@ -12,15 +12,7 @@
 //   You may not use this file except in compliance with the License.
 
 import { CircularProgress, Link, styled as muiStyled, Typography } from "@mui/material";
-import React, {
-  LazyExoticComponent,
-  PropsWithChildren,
-  Suspense,
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-} from "react";
+import React, { PropsWithChildren, Suspense, useCallback, useMemo } from "react";
 import { useDrop } from "react-dnd";
 import {
   MosaicDragType,
@@ -42,7 +34,7 @@ import {
 import { LayoutData } from "@foxglove/studio-base/context/CurrentLayoutContext/actions";
 import { useExtensionCatalog } from "@foxglove/studio-base/context/ExtensionCatalogContext";
 import { useLayoutManager } from "@foxglove/studio-base/context/LayoutManagerContext";
-import { PanelComponent, usePanelCatalog } from "@foxglove/studio-base/context/PanelCatalogContext";
+import { usePanelCatalog } from "@foxglove/studio-base/context/PanelCatalogContext";
 import { useWorkspace } from "@foxglove/studio-base/context/WorkspaceContext";
 import { useAppConfigurationValue } from "@foxglove/studio-base/hooks/useAppConfigurationValue";
 import { defaultPlaybackConfig } from "@foxglove/studio-base/providers/CurrentLayoutProvider/reducers";
@@ -119,14 +111,13 @@ export function UnconnectedPanelLayout(props: Props): React.ReactElement {
 
   const panelCatalog = usePanelCatalog();
 
-  const panelComponentCache = useRef(
-    new Map<string, LazyExoticComponent<PanelComponent> | (() => JSX.Element)>(),
+  const panelComponents = useMemo(
+    () =>
+      new Map(
+        panelCatalog.getPanels().map((panelInfo) => [panelInfo.type, React.lazy(panelInfo.module)]),
+      ),
+    [panelCatalog],
   );
-
-  // Clear panel cache when panel catalog changes.
-  useEffect(() => {
-    panelComponentCache.current.clear();
-  }, [panelCatalog]);
 
   const renderTile = useCallback(
     (id: string | Record<string, never> | undefined, path: MosaicPath) => {
@@ -136,19 +127,13 @@ export function UnconnectedPanelLayout(props: Props): React.ReactElement {
       }
       const type = getPanelTypeFromId(id);
 
-      let Panel = panelComponentCache.current.get(type);
-
-      // cache the lazy created panel component to avoid making the component again
-      if (!Panel) {
-        const panelInfo = panelCatalog.getPanelByType(type);
+      let panel: JSX.Element;
+      const PanelComponent = panelComponents.get(type);
+      if (PanelComponent) {
+        panel = <PanelComponent childId={id} tabId={tabId} />;
+      } else {
         // If we haven't found a panel of the given type, render the panel selector
-        Panel = panelInfo
-          ? React.lazy(panelInfo.module)
-          : () => <UnknownPanel overrideConfig={{ type, id }} />;
-
-        if (panelInfo) {
-          panelComponentCache.current.set(type, Panel);
-        }
+        panel = <UnknownPanel childId={id} tabId={tabId} overrideConfig={{ type, id }} />;
       }
 
       const mosaicWindow = (
@@ -168,7 +153,7 @@ export function UnconnectedPanelLayout(props: Props): React.ReactElement {
           >
             <MosaicPathContext.Provider value={path}>
               <PanelRemounter id={id} tabId={tabId}>
-                <Panel childId={id} tabId={tabId} />
+                {panel}
               </PanelRemounter>
             </MosaicPathContext.Provider>
           </Suspense>
@@ -179,7 +164,7 @@ export function UnconnectedPanelLayout(props: Props): React.ReactElement {
       }
       return mosaicWindow;
     },
-    [createTile, tabId, panelCatalog],
+    [panelComponents, createTile, tabId],
   );
 
   const bodyToRender = useMemo(
