@@ -2262,7 +2262,7 @@ __metadata:
     "@mcap/core": 1.2.1
     "@protobufjs/base64": 1.1.2
     "@types/protobufjs": "workspace:*"
-    flatbuffers: 23.1.21
+    flatbuffers: 23.3.3
     flatbuffers_reflection: 0.0.3
     protobufjs: 7.2.2
     typescript: 4.9.5
@@ -13217,10 +13217,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"flatbuffers@npm:23.1.21":
-  version: 23.1.21
-  resolution: "flatbuffers@npm:23.1.21"
-  checksum: 6e890adb8300e5352d579abf7c674eec7d838c27e82981c3d9cd5a4043ff83fc7097a88eae68729eb7cff6ded2b1a896ee2009632027d613040bef669290fbc6
+"flatbuffers@npm:23.3.3":
+  version: 23.3.3
+  resolution: "flatbuffers@npm:23.3.3"
+  checksum: 7d8352e233cc81942e36b2ccfd7f3baf5d9a5e9614ebd83e9f4bc4accaebd43cb824788bd76334f5a61a8c2a74ddfd8f87ca7ac01cc522ad2774ae66c276dff1
   languageName: node
   linkType: hard
 
