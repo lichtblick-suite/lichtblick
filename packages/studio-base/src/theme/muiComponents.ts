@@ -178,6 +178,11 @@ export default function muiComponents(theme: Theme): Theme["components"] & MuiLa
       defaultProps: {
         disableRipple: true,
       },
+      styleOverrides: {
+        root: {
+          ...iconHack,
+        },
+      },
     },
     MuiFormLabel: {
       styleOverrides: {

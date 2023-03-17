@@ -2,11 +2,8 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import CircleIcon from "@mui/icons-material/Circle";
-import CircleOutlinedIcon from "@mui/icons-material/CircleOutlined";
-import CircleTwoToneIcon from "@mui/icons-material/CircleTwoTone";
-import ErrorIcon from "@mui/icons-material/Error";
-import { IconButton, Tooltip, Typography } from "@mui/material";
+import { Square24Filled, Square24Regular, ErrorCircle16Filled } from "@fluentui/react-icons";
+import { Checkbox, Tooltip, Typography } from "@mui/material";
 import { ComponentProps, useMemo, useState } from "react";
 import { makeStyles } from "tss-react/mui";
 import { v4 as uuidv4 } from "uuid";
@@ -18,6 +15,7 @@ import { useHoverValue } from "@foxglove/studio-base/context/TimelineInteraction
 import { useWorkspace } from "@foxglove/studio-base/context/WorkspaceContext";
 import { plotPathDisplayName } from "@foxglove/studio-base/panels/Plot/types";
 import { getLineColor } from "@foxglove/studio-base/util/plotColors";
+import { fonts } from "@foxglove/studio-base/util/sharedStyleConstants";
 
 import { PlotPath } from "./internalTypes";
 
@@ -40,7 +38,7 @@ const useStyles = makeStyles<void, "plotName">()((theme, _params, classes) => ({
     display: "contents",
     cursor: "pointer",
 
-    "&:hover, &:focus-within": {
+    "&:hover": {
       "& > *:last-child": {
         opacity: 1,
       },
@@ -63,14 +61,17 @@ const useStyles = makeStyles<void, "plotName">()((theme, _params, classes) => ({
     display: "flex",
     alignItems: "center",
     position: "sticky",
-    padding: theme.spacing(0, 0.25),
     height: ROW_HEIGHT,
     left: 0,
   },
-  legendIconButton: {
-    padding: `${theme.spacing(0.75)} !important`,
-    marginLeft: theme.spacing(0.125),
-    fontSize: theme.typography.pxToRem(14),
+  checkbox: {
+    fontSize: "1em",
+    padding: theme.spacing(0.975),
+    borderRadius: 0,
+
+    "svg:not(.MuiSvgIcon-root)": {
+      fontSize: "1em",
+    },
   },
   disabledPathLabel: {
     opacity: 0.5,
@@ -79,14 +80,22 @@ const useStyles = makeStyles<void, "plotName">()((theme, _params, classes) => ({
     display: "flex",
     alignItems: "center",
     height: ROW_HEIGHT,
-    padding: theme.spacing(0, 1, 0, 0.25),
+    padding: theme.spacing(0, 1.5, 0, 0.5),
     gridColumn: "span 2",
+    fontFeatureSettings: `${fonts.SANS_SERIF_FEATURE_SETTINGS}, "zero"`,
+
+    ".MuiTypography-root": {
+      whiteSpace: "nowrap",
+    },
   },
   plotValue: {
     display: "flex",
     alignItems: "center",
     height: ROW_HEIGHT,
     padding: theme.spacing(0.25, 1, 0.25, 0.25),
+  },
+  errorIcon: {
+    color: theme.palette.error.main,
   },
 }));
 
@@ -119,8 +128,6 @@ export function PlotLegendRow({
     isTimestampScale: true,
   });
 
-  const [hover, setHover] = useState(false);
-
   const currentValue = useMemo(() => {
     if (!showPlotValuesInLegend) {
       return undefined;
@@ -149,14 +156,15 @@ export function PlotLegendRow({
       }}
     >
       <div className={classes.listIcon}>
-        <IconButton
-          className={classes.legendIconButton}
-          centerRipple={false}
+        <Checkbox
+          className={classes.checkbox}
+          checked={path.enabled}
           size="small"
           title="Toggle visibility"
-          onMouseEnter={() => setHover(true)}
-          onMouseLeave={() => setHover(false)}
-          onClick={(event) => {
+          style={{ color: getLineColor(path.color, index) }}
+          icon={<Square24Regular />}
+          checkedIcon={<Square24Filled />}
+          onChange={(event) => {
             event.stopPropagation();
 
             const newPaths = paths.slice();
@@ -167,25 +175,16 @@ export function PlotLegendRow({
             }
             savePaths(newPaths);
           }}
-          style={{ color: getLineColor(path.color, index) }}
-        >
-          {path.enabled ? (
-            <CircleIcon fontSize="inherit" />
-          ) : hover ? (
-            <CircleTwoToneIcon fontSize="inherit" />
-          ) : (
-            <CircleOutlinedIcon fontSize="inherit" />
-          )}
-        </IconButton>
+        />
       </div>
       <div
         className={classes.plotName}
         style={{ gridColumn: !showPlotValuesInLegend ? "span 2" : undefined }}
       >
         <Typography
-          noWrap={true}
+          noWrap={showPlotValuesInLegend}
           flex="auto"
-          variant="subtitle2"
+          variant="body2"
           className={cx({ [classes.disabledPathLabel]: !path.enabled })}
         >
           {plotPathDisplayName(path, index)}
@@ -195,7 +194,7 @@ export function PlotLegendRow({
             placement="top"
             title="Mismatch in the number of elements in x-axis and y-axis messages"
           >
-            <ErrorIcon fontSize="small" color="error" />
+            <ErrorCircle16Filled className={classes.errorIcon} />
           </Tooltip>
         )}
       </div>

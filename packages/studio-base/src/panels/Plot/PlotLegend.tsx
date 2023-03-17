@@ -2,8 +2,17 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
+import {
+  ChevronDown20Regular,
+  ChevronUp20Regular,
+  ChevronLeft20Regular,
+  ChevronRight20Regular,
+  TextBulletListLtr20Filled,
+  ArrowMinimize24Filled,
+} from "@fluentui/react-icons";
+import { IconButton } from "@mui/material";
 import { clamp } from "lodash";
-import { ComponentProps, useCallback, useRef } from "react";
+import { ComponentProps, useCallback, useMemo, useRef } from "react";
 import tinycolor from "tinycolor2";
 import { makeStyles } from "tss-react/mui";
 
@@ -31,23 +40,18 @@ type Props = {
   sidebarDimension: number;
 };
 
-type StyleProps = {
-  legendDisplay: Props["legendDisplay"];
-  sidebarDimension: Props["sidebarDimension"];
-};
-
-const useStyles = makeStyles<StyleProps, "container" | "toggleButton">()(
-  ({ palette, shape, spacing, typography }, _params, classes) => ({
+const useStyles = makeStyles<void, "container" | "toggleButton" | "toggleButtonFloating">()(
+  ({ palette, shadows, shape, spacing }, _params, classes) => ({
     root: {
       display: "flex",
       overflow: "hidden",
     },
     rootFloating: {
+      padding: spacing(0.75), // pad the container to prevent shadow from being clipped
       pointerEvents: "none",
-      gap: spacing(0.5),
-      borderRadius: shape.borderRadius,
+      gap: spacing(0.75),
       position: "absolute",
-      top: spacing(5.25),
+      top: spacing(4.5),
       left: spacing(4),
       zIndex: 1000,
       backgroundColor: "transparent",
@@ -57,47 +61,43 @@ const useStyles = makeStyles<StyleProps, "container" | "toggleButton">()(
 
       [`.${classes.container}`]: {
         pointerEvents: "auto",
+        borderRadius: shape.borderRadius,
         backgroundImage: `linear-gradient(${[
           "0deg",
           tinycolor(palette.background.default).setAlpha(0.2).toHex8String(),
           tinycolor(palette.background.default).setAlpha(0.2).toHex8String(),
         ].join(" ,")})`,
         backgroundColor: tinycolor(palette.background.paper).setAlpha(0.8).toHex8String(),
-      },
-
-      [`.${classes.toggleButton}`]: {
-        pointerEvents: "auto",
-        backgroundColor: tinycolor(palette.background.paper).setAlpha(0.8).toHex8String(),
-        backgroundImage: `linear-gradient(${[
-          "0deg",
-          tinycolor(palette.background.default).setAlpha(0.2).toHex8String(),
-          tinycolor(palette.background.default).setAlpha(0.2).toHex8String(),
-        ].join(" ,")})`,
-
-        "&:hover":
-          palette.mode === "dark"
-            ? {
-                backgroundImage: `linear-gradient(0deg, ${[
-                  tinycolor(palette.background.default).setAlpha(0.2).toHex8String(),
-                  tinycolor(palette.background.default).setAlpha(0.2).toHex8String(),
-                ].join(",")}),
-                linear-gradient(0deg, ${[palette.action.hover, palette.action.hover].join(",")})`,
-                backgroundColor: tinycolor(palette.background.paper).setAlpha(0.8).toHex8String(),
-              }
-            : {
-                backgroundColor: palette.background.paper,
-              },
+        backdropFilter: "blur(3px)",
+        maxWidth: `calc(100% - ${spacing(1)})`,
+        boxShadow: shadows[3],
       },
     },
     rootLeft: {
       alignItems: "flex-start",
 
       [`.${classes.toggleButton}`]: {
+        padding: spacing(0.25),
         height: "100%",
+        borderRadius: 0,
+        borderTop: "none",
+        borderBottom: "none",
+      },
+      [`.${classes.container}`]: {
+        overflow: "auto",
+        height: "100%",
+        alignContent: "flex-start",
       },
     },
     rootTop: {
       flexDirection: "column",
+
+      [`.${classes.toggleButton}`]: {
+        padding: spacing(0.25),
+        borderRadius: 0,
+        borderRight: "none",
+        borderLeft: "none",
+      },
     },
     container: {
       alignItems: "center",
@@ -114,9 +114,28 @@ const useStyles = makeStyles<StyleProps, "container" | "toggleButton">()(
       },
     },
     toggleButton: {
-      fontSize: typography.pxToRem(20),
-      padding: spacing(0.5),
-      border: "none",
+      fontSize: "1rem",
+      padding: spacing(0.75),
+
+      "svg:not(.MuiSvgIcon-root)": {
+        fontSize: "1em",
+      },
+    },
+    toggleButtonFloating: {
+      backdropFilter: "blur(3px)",
+      pointerEvents: "auto",
+      backgroundImage: `linear-gradient(${[
+        "0deg",
+        tinycolor(palette.background.default).setAlpha(0.2).toHex8String(),
+        tinycolor(palette.background.default).setAlpha(0.2).toHex8String(),
+      ].join(" ,")})`,
+      backgroundColor: tinycolor(palette.background.paper).setAlpha(0.8).toHex8String(),
+      boxShadow: shadows[3],
+
+      "&:hover": {
+        backgroundColor: palette.background.paper,
+        backgroundImage: `linear-gradient(0deg, ${palette.action.hover}, ${palette.action.hover})`,
+      },
     },
   }),
 );
@@ -134,9 +153,26 @@ export function PlotLegend(props: Props): JSX.Element {
     showPlotValuesInLegend,
     sidebarDimension,
   } = props;
-  const { classes, cx } = useStyles({ legendDisplay, sidebarDimension });
+  const { classes, cx } = useStyles();
 
   const dragStart = useRef({ x: 0, y: 0, sidebarDimension: 0 });
+
+  const toggleLegend = useCallback(
+    () => saveConfig({ showLegend: !showLegend }),
+    [showLegend, saveConfig],
+  );
+
+  const legendIcon = useMemo(() => {
+    if (legendDisplay !== "floating") {
+      const iconMap = showLegend
+        ? { left: ChevronLeft20Regular, top: ChevronUp20Regular }
+        : { left: ChevronRight20Regular, top: ChevronDown20Regular };
+      const ArrowIcon = iconMap[legendDisplay];
+
+      return <ArrowIcon />;
+    }
+    return showLegend ? <ArrowMinimize24Filled /> : <TextBulletListLtr20Filled />;
+  }, [showLegend, legendDisplay]);
 
   const handlePointerMove = useCallback(
     (event: React.PointerEvent) => {
@@ -188,12 +224,20 @@ export function PlotLegend(props: Props): JSX.Element {
         maxWidth: legendDisplay === "left" ? "80%" : "none",
       }}
     >
+      <IconButton
+        onClick={toggleLegend}
+        className={cx(classes.toggleButton, {
+          [classes.toggleButtonFloating]: legendDisplay === "floating",
+        })}
+      >
+        {legendIcon}
+      </IconButton>
       {showLegend && (
         <Stack
           flexGrow={1}
           gap={0.5}
           overflow="auto"
-          fullHeight={legendDisplay === "floating"}
+          fullHeight={legendDisplay !== "top"}
           style={{
             height: legendDisplay === "top" ? Math.round(sidebarDimension) : undefined,
             width: legendDisplay === "left" ? Math.round(sidebarDimension) : undefined,
@@ -202,7 +246,7 @@ export function PlotLegend(props: Props): JSX.Element {
           <Stack
             flex="auto"
             fullWidth
-            fullHeight={legendDisplay === "floating"}
+            fullHeight={legendDisplay !== "top"}
             overflow={legendDisplay === "floating" ? "auto" : undefined}
           >
             <div className={classes.container}>
