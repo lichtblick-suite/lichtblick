@@ -446,7 +446,7 @@ export default class FoxgloveWebSocketPlayer implements Player {
         this._parsedMessages.push({
           topic,
           receiveTime,
-          message: chanInfo.parsedChannel.deserializer(data),
+          message: chanInfo.parsedChannel.deserialize(data),
           sizeInBytes: data.byteLength,
           schemaName: chanInfo.channel.schemaName,
         });
@@ -863,7 +863,7 @@ export default class FoxgloveWebSocketPlayer implements Player {
     return await new Promise<Record<string, unknown>>((resolve, reject) => {
       this._serviceResponseCbs.set(serviceCallRequest.callId, (response: ServiceCallResponse) => {
         try {
-          const data = parsedResponse.deserializer(response.data);
+          const data = parsedResponse.deserialize(response.data);
           resolve(data as Record<string, unknown>);
         } catch (error) {
           reject(error);

@@ -19,9 +19,9 @@ describe("parseChannel", () => {
         ),
       },
     });
-    expect(channel.deserializer(new TextEncoder().encode(JSON.stringify({ value: "hi" })))).toEqual(
-      { value: "hi" },
-    );
+    expect(channel.deserialize(new TextEncoder().encode(JSON.stringify({ value: "hi" })))).toEqual({
+      value: "hi",
+    });
   });
 
   it("works with flatbuffer", () => {
@@ -30,7 +30,7 @@ describe("parseChannel", () => {
       messageEncoding: "flatbuffer",
       schema: { name: "reflection.Schema", encoding: "flatbuffer", data: reflectionSchema },
     });
-    const deserialized = channel.deserializer(reflectionSchema) as {
+    const deserialized = channel.deserialize(reflectionSchema) as {
       objects: Record<string, unknown>[];
     };
     expect(deserialized.objects.length).toEqual(10);
@@ -43,7 +43,7 @@ describe("parseChannel", () => {
       messageEncoding: "protobuf",
       schema: { name: "google.protobuf.FileDescriptorSet", encoding: "protobuf", data: fds },
     });
-    const deserialized = channel.deserializer(fds) as IFileDescriptorSet;
+    const deserialized = channel.deserialize(fds) as IFileDescriptorSet;
     expect(deserialized.file[0]!.name).toEqual("google_protobuf.proto");
   });
 
@@ -74,7 +74,7 @@ describe("parseChannel", () => {
         ),
       },
     });
-    expect(channel.deserializer(Buffer.from("0A0101", "hex"))).toEqual({ data: [1] });
+    expect(channel.deserialize(Buffer.from("0A0101", "hex"))).toEqual({ data: [1] });
   });
 
   it("works with ros1", () => {
@@ -87,7 +87,7 @@ describe("parseChannel", () => {
       },
     });
 
-    const obj = channel.deserializer(new Uint8Array([4, 0, 0, 0, 65, 66, 67, 68]));
+    const obj = channel.deserialize(new Uint8Array([4, 0, 0, 0, 65, 66, 67, 68]));
     expect(obj).toEqual({ data: "ABCD" });
   });
 
@@ -101,7 +101,7 @@ describe("parseChannel", () => {
       },
     });
 
-    const obj = channel.deserializer(new Uint8Array([0, 1, 0, 0, 5, 0, 0, 0, 65, 66, 67, 68, 0]));
+    const obj = channel.deserialize(new Uint8Array([0, 1, 0, 0, 5, 0, 0, 0, 65, 66, 67, 68, 0]));
     expect(obj).toEqual({ data: "ABCD" });
   });
 
@@ -119,7 +119,7 @@ describe("parseChannel", () => {
       },
     });
 
-    const obj = channel.deserializer(new Uint8Array([0, 1, 0, 0, 5, 0, 0, 0, 65, 66, 67, 68, 0]));
+    const obj = channel.deserialize(new Uint8Array([0, 1, 0, 0, 5, 0, 0, 0, 65, 66, 67, 68, 0]));
     expect(obj).toEqual({ data: "ABCD" });
   });
 });

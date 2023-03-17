@@ -145,7 +145,7 @@ export class McapStreamingIterableSource implements IIterableSource {
             topic: channelInfo.channel.topic,
             receiveTime,
             publishTime: fromNanoSec(record.publishTime),
-            message: channelInfo.parsedChannel.deserializer(record.data),
+            message: channelInfo.parsedChannel.deserialize(record.data),
             sizeInBytes: record.data.byteLength,
             schemaName: channelInfo.schemaName ?? "",
           });

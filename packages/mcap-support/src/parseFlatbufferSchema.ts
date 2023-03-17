@@ -157,7 +157,7 @@ export function parseFlatbufferSchema(
   schemaArray: Uint8Array,
 ): {
   datatypes: MessageDefinitionMap;
-  deserializer: (buffer: ArrayBufferView) => unknown;
+  deserialize: (buffer: ArrayBufferView) => unknown;
 } {
   const datatypes: MessageDefinitionMap = new Map();
   const schemaBuffer = new ByteBuffer(schemaArray);
@@ -187,7 +187,7 @@ export function parseFlatbufferSchema(
     }
   }
   const parser = new Parser(rawSchema);
-  const deserializer = (buffer: ArrayBufferView) => {
+  const deserialize = (buffer: ArrayBufferView) => {
     const byteBuffer = new ByteBuffer(
       new Uint8Array(buffer.buffer, buffer.byteOffset, buffer.byteLength),
     );
@@ -199,5 +199,5 @@ export function parseFlatbufferSchema(
     const obj = parser.toObject(table);
     return obj;
   };
-  return { datatypes, deserializer };
+  return { datatypes, deserialize };
 }

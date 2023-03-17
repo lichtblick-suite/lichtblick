@@ -21,7 +21,7 @@ type Channel = {
 };
 
 export type ParsedChannel = {
-  deserializer: (data: ArrayBufferView) => unknown;
+  deserialize: (data: ArrayBufferView) => unknown;
   datatypes: MessageDefinitionMap;
 };
 
@@ -57,7 +57,7 @@ export function parseChannel(channel: Channel): ParsedChannel {
     }
     const textDecoder = new TextDecoder();
     let datatypes: MessageDefinitionMap = new Map();
-    let deserializer = (data: ArrayBufferView) => JSON.parse(textDecoder.decode(data));
+    let deserialize = (data: ArrayBufferView) => JSON.parse(textDecoder.decode(data));
     if (channel.schema != undefined) {
       const schema =
         channel.schema.data.length > 0
@@ -72,11 +72,11 @@ export function parseChannel(channel: Channel): ParsedChannel {
           channel.schema.name,
         );
         datatypes = parsedDatatypes;
-        deserializer = (data) =>
+        deserialize = (data) =>
           postprocessValue(JSON.parse(textDecoder.decode(data)) as Record<string, unknown>);
       }
     }
-    return { deserializer, datatypes };
+    return { deserialize, datatypes };
   }
 
   if (channel.messageEncoding === "flatbuffer") {
@@ -126,7 +126,7 @@ export function parseChannel(channel: Channel): ParsedChannel {
     root.resolveAll();
     const type = root.lookupType(channel.schema.name);
 
-    const deserializer = (data: ArrayBufferView) => {
+    const deserialize = (data: ArrayBufferView) => {
       return type.toObject(
         type.decode(new Uint8Array(data.buffer, data.byteOffset, data.byteLength)),
         { defaults: true },
@@ -144,7 +144,7 @@ export function parseChannel(channel: Channel): ParsedChannel {
       );
     }
 
-    return { deserializer, datatypes };
+    return { deserialize, datatypes };
   }
 
   if (channel.messageEncoding === "ros1") {
@@ -162,7 +162,7 @@ export function parseChannel(channel: Channel): ParsedChannel {
     const reader = new MessageReader(parsedDefinitions);
     return {
       datatypes: parsedDefinitionsToDatatypes(parsedDefinitions, channel.schema.name),
-      deserializer: (data) => reader.readMessage(data),
+      deserialize: (data) => reader.readMessage(data),
     };
   }
 
@@ -186,7 +186,7 @@ export function parseChannel(channel: Channel): ParsedChannel {
     const reader = new ROS2MessageReader(parsedDefinitions);
     return {
       datatypes: parsedDefinitionsToDatatypes(parsedDefinitions, channel.schema.name),
-      deserializer: (data) => reader.readMessage(data),
+      deserialize: (data) => reader.readMessage(data),
     };
   }
 
