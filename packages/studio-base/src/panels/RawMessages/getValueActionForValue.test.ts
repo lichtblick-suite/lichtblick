@@ -75,6 +75,36 @@ describe("getValueActionForValue", () => {
     });
   });
 
+  it("does not crash with bigints nested inside arrays under isTypicalFilterName key (id)", () => {
+    const structureItem: MessagePathStructureItem = {
+      structureType: "array",
+      next: {
+        structureType: "message",
+        nextByName: {
+          some_id: {
+            structureType: "message",
+            datatype: "",
+            nextByName: {
+              x: {
+                structureType: "primitive",
+                primitiveType: "uint64",
+                datatype: "",
+              },
+            },
+          },
+        },
+        datatype: "",
+      },
+      datatype: "",
+    };
+    expect(
+      getValueActionForValue([{ some_id: { x: 18446744073709552000n } }], structureItem, [
+        0,
+        "some_id",
+      ]),
+    ).toEqual(undefined);
+  });
+
   it("returns paths with bigints inside object inside array", () => {
     const structureItem: MessagePathStructureItem = {
       structureType: "message",

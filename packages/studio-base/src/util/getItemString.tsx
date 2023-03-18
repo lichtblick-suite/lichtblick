@@ -5,11 +5,14 @@
 import { ReactNode } from "react";
 import tinycolor from "tinycolor2";
 
+import { filterMap } from "@foxglove/den/collection";
 import { isTypicalFilterName } from "@foxglove/studio-base/components/MessagePathSyntax/isTypicalFilterName";
 import { format, formatDuration } from "@foxglove/studio-base/util/formatTime";
 import { quatToEuler } from "@foxglove/studio-base/util/quatToEuler";
 
 const DURATION_20_YEARS_SEC = 20 * 365 * 24 * 60 * 60;
+
+const PRIMITIVE_TYPES = ["string", "number", "bigint", "boolean"];
 
 export function getItemString(
   _nodeType: string,
@@ -90,10 +93,16 @@ export function getItemString(
   }
 
   // Surface typically-used keys directly in the object summary so the user doesn't have to expand it.
-  const filterKeys = keys
-    .filter(isTypicalFilterName)
-    .map((key) => `${key}: ${(data as { [key: string]: unknown })[key]}`)
-    .join(", ");
+  const filterKeys = filterMap(keys, (key) => {
+    const value = (data as Record<string, unknown>)[key];
+    if (
+      isTypicalFilterName(key) &&
+      (value == undefined || PRIMITIVE_TYPES.includes(typeof value))
+    ) {
+      return `${key}: ${value}`;
+    }
+    return undefined;
+  }).join(", ");
   return (
     <span>
       {itemType} {filterKeys.length > 0 ? filterKeys : itemString}

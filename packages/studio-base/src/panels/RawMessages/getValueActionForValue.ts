@@ -86,9 +86,10 @@ export function getValueActionForValue(
       // back to `/topic.object[10]` if necessary.
       let typicalFilterName;
       if (structureItem.structureType === "message") {
-        typicalFilterName = Object.keys(structureItem.nextByName).find((key) =>
-          isTypicalFilterName(key),
-        );
+        typicalFilterName = Object.entries(structureItem.nextByName).find(
+          ([key, nextStructureItem]) =>
+            nextStructureItem.structureType === "primitive" && isTypicalFilterName(key),
+        )?.[0];
       }
       if (
         typeof value === "object" &&
