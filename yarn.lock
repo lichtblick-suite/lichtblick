@@ -2515,7 +2515,7 @@ __metadata:
     "@types/foxglove__roslibjs": "workspace:*"
     "@types/gl-matrix": 3.2.0
     "@types/hammerjs": 2.0.41
-    "@types/leaflet": 1.9.0
+    "@types/leaflet": 1.9.3
     "@types/memoize-weak": "workspace:*"
     "@types/moment-duration-format": 2.2.3
     "@types/nearley": 2.11.2
@@ -6436,12 +6436,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/leaflet@npm:1.9.0":
-  version: 1.9.0
-  resolution: "@types/leaflet@npm:1.9.0"
+"@types/leaflet@npm:1.9.3":
+  version: 1.9.3
+  resolution: "@types/leaflet@npm:1.9.3"
   dependencies:
     "@types/geojson": "*"
-  checksum: f3ee2e2fc8bd3480d77667471c8f774a3726ff7694a7d08d2423c05b40e28f00379c7d469b4cbd3b53a1bc96c75970c92f9da7908fc477cbac0eda2a9d17b6ad
+  checksum: d12042edc3a043d074b4fd3b4c4800f479dfb01db3980d8c1151edbc70b23ca9e84ab7da72ce0d1c36c040f89ba1421bd36d9d9796ec3704a0d3c942985a87ae
   languageName: node
   linkType: hard
 
