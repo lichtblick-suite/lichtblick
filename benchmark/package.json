@@ -8,7 +8,7 @@
     "@foxglove/den": "workspace:*",
     "@foxglove/log": "workspace:*",
     "@foxglove/rostime": "1.1.2",
-    "@foxglove/schemas": "1.1.0",
+    "@foxglove/schemas": "1.1.2",
     "@foxglove/studio": "workspace:*",
     "@pmmmwh/react-refresh-webpack-plugin": "0.5.10",
     "@types/react": "17.0.53",
