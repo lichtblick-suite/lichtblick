@@ -17,14 +17,14 @@ import RawMessages, { PREV_MSG_METHOD } from "@foxglove/studio-base/panels/RawMe
 import PanelSetup from "@foxglove/studio-base/stories/PanelSetup";
 
 import {
-  fixture,
-  enumFixture,
   enumAdvancedFixture,
-  withMissingData,
+  enumFixture,
+  fixture,
+  multipleMessagesFilter,
+  multipleNumberMessagesFixture,
   topicsToDiffFixture,
   topicsWithIdsToDiffFixture,
-  multipleNumberMessagesFixture,
-  multipleMessagesFilter,
+  withMissingData,
 } from "./fixture";
 
 const noDiffConfig = {

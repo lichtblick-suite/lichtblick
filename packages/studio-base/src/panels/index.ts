@@ -173,6 +173,7 @@ export const builtin: PanelInfo[] = [
     description: "Group related panels into tabs.",
     thumbnail: tabThumbnail,
     module: async () => await import("./Tab"),
+    hasCustomToolbar: true,
   },
 ];
 

@@ -6,6 +6,7 @@ import { Link, Typography } from "@mui/material";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useUnmount } from "react-use";
 
+import { SettingsTree } from "@foxglove/studio";
 import { AppSetting } from "@foxglove/studio-base/AppSetting";
 import { useConfigById } from "@foxglove/studio-base/PanelAPI";
 import { ActionMenu } from "@foxglove/studio-base/components/PanelSettings/ActionMenu";
@@ -38,6 +39,11 @@ const singlePanelIdSelector = (state: LayoutState) =>
     : undefined;
 
 const selectIncrementSequenceNumber = (store: PanelStateStore) => store.incrementSequenceNumber;
+
+const EMPTY_SETTINGS_TREE: SettingsTree = Object.freeze({
+  actionHandler: () => undefined,
+  nodes: {},
+});
 
 export default function PanelSettings({
   disableToolbar = false,
@@ -167,6 +173,8 @@ export default function PanelSettings({
 
   const isSettingsTree = settingsTree != undefined;
 
+  const showTitleField = panelInfo.hasCustomToolbar !== true;
+
   return (
     <SidebarContent
       disablePadding={enableNewTopNav || isSettingsTree}
@@ -189,8 +197,11 @@ export default function PanelSettings({
               <Typography variant="subtitle2">{`${panelInfo.title} panel`}</Typography>
             </Stack>
           )}
-          {settingsTree ? (
-            <SettingsTreeEditor key={selectedPanelId} settings={settingsTree} />
+          {settingsTree || showTitleField ? (
+            <SettingsTreeEditor
+              key={selectedPanelId}
+              settings={settingsTree ?? EMPTY_SETTINGS_TREE}
+            />
           ) : (
             <Stack
               flex="auto"

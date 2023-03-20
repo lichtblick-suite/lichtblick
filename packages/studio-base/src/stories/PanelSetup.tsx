@@ -19,7 +19,7 @@ import { HTML5Backend } from "react-dnd-html5-backend";
 import { Mosaic, MosaicNode, MosaicWindow } from "react-mosaic-component";
 
 import { useShallowMemo } from "@foxglove/hooks";
-import { MessageEvent } from "@foxglove/studio";
+import { MessageEvent, SettingsTree } from "@foxglove/studio";
 import MockMessagePipelineProvider from "@foxglove/studio-base/components/MessagePipeline/MockMessagePipelineProvider";
 import SettingsTreeEditor from "@foxglove/studio-base/components/SettingsTreeEditor";
 import AppConfigurationContext from "@foxglove/studio-base/context/AppConfigurationContext";
@@ -32,7 +32,6 @@ import {
 import { PanelsActions } from "@foxglove/studio-base/context/CurrentLayoutContext/actions";
 import PanelCatalogContext, {
   PanelCatalog,
-  PanelInfo,
 } from "@foxglove/studio-base/context/PanelCatalogContext";
 import { usePanelStateStore } from "@foxglove/studio-base/context/PanelStateContext";
 import {
@@ -40,13 +39,14 @@ import {
   useUserNodeState,
 } from "@foxglove/studio-base/context/UserNodeStateContext";
 import { GlobalVariables } from "@foxglove/studio-base/hooks/useGlobalVariables";
+import * as panels from "@foxglove/studio-base/panels";
 import { Diagnostic, UserNodeLog } from "@foxglove/studio-base/players/UserNodePlayer/types";
 import {
-  Topic,
+  AdvertiseOptions,
   PlayerStateActiveData,
   Progress,
   PublishPayload,
-  AdvertiseOptions,
+  Topic,
 } from "@foxglove/studio-base/players/types";
 import MockCurrentLayoutProvider from "@foxglove/studio-base/providers/CurrentLayoutProvider/MockCurrentLayoutProvider";
 import ExtensionCatalogProvider from "@foxglove/studio-base/providers/ExtensionCatalogProvider";
@@ -112,6 +112,21 @@ function setNativeValue(element: unknown, value: unknown) {
   }
 }
 
+export function makeMockPanelCatalog(): PanelCatalog {
+  const allPanels = [...panels.builtin, ...panels.debug, panels.legacyPlot, panels.urdfViewer];
+
+  const visiblePanels = [...panels.builtin];
+
+  return {
+    getPanels() {
+      return visiblePanels;
+    },
+    getPanelByType(type: string) {
+      return allPanels.find((panel) => panel.type === type);
+    },
+  };
+}
+
 export function triggerInputChange(
   node: HTMLInputElement | HTMLTextAreaElement,
   value: string = "",
@@ -153,15 +168,10 @@ export const MosaicWrapper = ({ children }: { children: React.ReactNode }): JSX.
   );
 };
 
-// empty catalog if one is not provided via props
-class MockPanelCatalog implements PanelCatalog {
-  public getPanels(): readonly PanelInfo[] {
-    return [];
-  }
-  public getPanelByType(_type: string): PanelInfo | undefined {
-    return undefined;
-  }
-}
+const EmptyTree: SettingsTree = {
+  actionHandler: () => undefined,
+  nodes: {},
+};
 
 function PanelWrapper({
   children,
@@ -170,18 +180,19 @@ function PanelWrapper({
   children?: ReactNode;
   includeSettings?: boolean;
 }): JSX.Element {
-  const settings = usePanelStateStore((store) => Object.values(store.settingsTrees)[0]);
+  const settings =
+    usePanelStateStore((store) => Object.values(store.settingsTrees)[0]) ?? EmptyTree;
 
   return (
     <>
-      {settings && includeSettings && <SettingsTreeEditor settings={settings} />}
+      {includeSettings && <SettingsTreeEditor settings={settings} />}
       {children}
     </>
   );
 }
 
 function UnconnectedPanelSetup(props: UnconnectedProps): JSX.Element | ReactNull {
-  const [mockPanelCatalog] = useState(() => props.panelCatalog ?? new MockPanelCatalog());
+  const [mockPanelCatalog] = useState(() => props.panelCatalog ?? makeMockPanelCatalog());
   const [mockAppConfiguration] = useState(() => ({
     get() {
       return undefined;

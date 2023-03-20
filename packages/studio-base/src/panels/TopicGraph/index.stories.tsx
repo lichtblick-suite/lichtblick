@@ -23,6 +23,17 @@ export const Empty = (): JSX.Element => {
   );
 };
 
+export const WithSettings = (): JSX.Element => {
+  return (
+    <PanelSetup includeSettings>
+      <TopicGraph />
+    </PanelSetup>
+  );
+};
+WithSettings.parameters = {
+  colorScheme: "light",
+};
+
 function TopicsStory({
   topicVisibility: initialTopicVisibility,
 }: {
