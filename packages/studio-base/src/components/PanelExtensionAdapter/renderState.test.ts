@@ -693,6 +693,87 @@ describe("renderState", () => {
       ],
     });
   });
+
+  it("should correctly avoid rendering when current frame stops changing", () => {
+    const buildRenderState = initRenderStateBuilder();
+
+    // The first render with a current frame produces a state with the current frame
+    {
+      const state = buildRenderState({
+        watchedFields: new Set(["currentFrame"]),
+        playerState: undefined,
+        appSettings: undefined,
+        currentFrame: [
+          {
+            topic: "test",
+            schemaName: "schema",
+            receiveTime: { sec: 0, nsec: 0 },
+            sizeInBytes: 0,
+            message: {},
+          },
+        ],
+        colorScheme: undefined,
+        globalVariables: {},
+        hoverValue: undefined,
+        sharedPanelState: {},
+        sortedTopics: [],
+        subscriptions: [{ topic: "test" }],
+        messageConverters: [],
+      });
+
+      expect(state).toEqual({
+        currentFrame: [
+          {
+            topic: "test",
+            schemaName: "schema",
+            message: {},
+            receiveTime: { sec: 0, nsec: 0 },
+            sizeInBytes: 0,
+          },
+        ],
+      });
+    }
+
+    // The next render has no current frame for our subscription so we get an undefined current frame
+    {
+      const state = buildRenderState({
+        watchedFields: new Set(["currentFrame"]),
+        playerState: undefined,
+        appSettings: undefined,
+        currentFrame: undefined,
+        colorScheme: undefined,
+        globalVariables: {},
+        hoverValue: undefined,
+        sharedPanelState: {},
+        sortedTopics: [],
+        subscriptions: [{ topic: "test" }],
+        messageConverters: [],
+      });
+
+      expect(state).toEqual({
+        currentFrame: undefined,
+      });
+    }
+
+    // Rendering again with no current frame should return no render state to indicate no render should happen
+    {
+      const state = buildRenderState({
+        watchedFields: new Set(["currentFrame"]),
+        playerState: undefined,
+        appSettings: undefined,
+        currentFrame: undefined,
+        colorScheme: undefined,
+        globalVariables: {},
+        hoverValue: undefined,
+        sharedPanelState: {},
+        sortedTopics: [],
+        subscriptions: [{ topic: "test" }],
+        messageConverters: [],
+      });
+
+      expect(state).toEqual(undefined);
+    }
+  });
 });
 
 describe("forEachSortedArrays", () => {

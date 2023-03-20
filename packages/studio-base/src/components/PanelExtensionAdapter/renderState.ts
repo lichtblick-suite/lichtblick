@@ -67,6 +67,7 @@ function initRenderStateBuilder(): BuildRenderStateFn {
   let prevSortedTopics: BuilderRenderStateInput["sortedTopics"] | undefined;
   let prevMessageConverters: BuilderRenderStateInput["messageConverters"] | undefined;
   let prevSharedPanelState: BuilderRenderStateInput["sharedPanelState"];
+  let prevCurrentFrame: RenderState["currentFrame"];
 
   // Topics which we are subscribed without a conversion, these are topics we want to receive the
   // original message
@@ -253,11 +254,8 @@ function initRenderStateBuilder(): BuildRenderStateFn {
     }
 
     if (watchedFields.has("currentFrame")) {
-      // If there are new frames we render
-      // If there are old frames we render (new frames either replace old or no new frames)
-      // Note: renderState.currentFrame.length !== currentFrame.length is wrong because it
-      // won't render when the number of messages is the same from old to new
-      if (renderState.currentFrame?.length !== 0 || currentFrame?.length !== 0) {
+      if (prevCurrentFrame !== currentFrame) {
+        prevCurrentFrame = currentFrame;
         shouldRender = true;
 
         if (currentFrame) {
