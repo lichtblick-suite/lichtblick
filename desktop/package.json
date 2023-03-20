@@ -4,7 +4,7 @@
   "devDependencies": {
     "@foxglove/log": "workspace:*",
     "@foxglove/studio-desktop": "workspace:*",
-    "electron": "22.1.0",
+    "electron": "23.1.4",
     "playwright": "1.30.0",
     "webpack": "5.76.2"
   }
