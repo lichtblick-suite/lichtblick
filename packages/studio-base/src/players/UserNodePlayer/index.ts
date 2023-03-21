@@ -11,7 +11,6 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { captureException } from "@sentry/core";
 import { isEqual, uniq } from "lodash";
 import memoizeWeak from "memoize-weak";
 import shallowequal from "shallowequal";
@@ -50,6 +49,7 @@ import {
   PlayerProblem,
   MessageBlock,
 } from "@foxglove/studio-base/players/types";
+import { reportError } from "@foxglove/studio-base/reportError";
 import { RosDatatypes } from "@foxglove/studio-base/types/RosDatatypes";
 import { UserNode, UserNodes } from "@foxglove/studio-base/types/panels";
 import Rpc from "@foxglove/studio-base/util/Rpc";
@@ -969,7 +969,7 @@ export default class UserNodePlayer implements Player {
       })
       .catch((err) => {
         log.error(err);
-        captureException(err);
+        reportError(err as Error);
       });
   }
 

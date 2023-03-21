@@ -16,10 +16,9 @@
 // etc). We should generally prevent users from making mistakes in the first place, but sometimes
 // its unavoidable to bail out with a generic error message (e.g. when dragging in a malformed
 // ROS bag).
-import { captureException } from "@sentry/core";
-import { SeverityLevel } from "@sentry/types";
 import { ReactNode } from "react";
 
+import { reportError } from "@foxglove/studio-base/reportError";
 import { AppError } from "@foxglove/studio-base/util/errors";
 import { inWebWorker } from "@foxglove/studio-base/util/workers";
 
@@ -90,10 +89,8 @@ export default function sendNotification(
 ): void {
   // We only want to send non-user errors and warnings to Sentry
   if (type === "app") {
-    const sentrySeverity: SeverityLevel | undefined =
-      severity === "error" ? "error" : severity === "warn" ? "warning" : undefined;
-    if (sentrySeverity != undefined) {
-      captureException(new AppError(details, message), { level: sentrySeverity });
+    if (severity === "warn" || severity === "error") {
+      reportError(new AppError(details, message));
     }
   }
 

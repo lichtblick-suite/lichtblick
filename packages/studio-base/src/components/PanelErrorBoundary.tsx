@@ -3,9 +3,9 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 import { Box, Button, Link, Stack } from "@mui/material";
-import { captureException } from "@sentry/core";
 import { Component, ErrorInfo, PropsWithChildren, ReactNode } from "react";
 
+import { reportError } from "@foxglove/studio-base/reportError";
 import { AppError } from "@foxglove/studio-base/util/errors";
 
 import ErrorDisplay from "./ErrorDisplay";
@@ -27,7 +27,7 @@ export default class PanelErrorBoundary extends Component<PropsWithChildren<Prop
   };
 
   public override componentDidCatch(error: Error, errorInfo: ErrorInfo): void {
-    captureException(new AppError(error, errorInfo));
+    reportError(new AppError(error, errorInfo));
     this.setState({ currentError: { error, errorInfo } });
   }
 

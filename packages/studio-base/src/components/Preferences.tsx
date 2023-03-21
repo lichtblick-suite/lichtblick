@@ -23,7 +23,6 @@ import {
   ToggleButtonGroupProps,
   SelectChangeEvent,
 } from "@mui/material";
-import { captureException } from "@sentry/core";
 import moment from "moment-timezone";
 import { MouseEvent, useCallback, useMemo } from "react";
 import { useTranslation } from "react-i18next";
@@ -38,6 +37,7 @@ import Stack from "@foxglove/studio-base/components/Stack";
 import { useAppTimeFormat } from "@foxglove/studio-base/hooks";
 import { useAppConfigurationValue } from "@foxglove/studio-base/hooks/useAppConfigurationValue";
 import { Language } from "@foxglove/studio-base/i18n";
+import { reportError } from "@foxglove/studio-base/reportError";
 import { LaunchPreferenceValue } from "@foxglove/studio-base/types/LaunchPreferenceValue";
 import { TimeDisplayMethod } from "@foxglove/studio-base/types/panels";
 import { formatTime } from "@foxglove/studio-base/util/formatTime";
@@ -366,7 +366,7 @@ export function LanguageSettings(): React.ReactElement {
       void setSelectedLanguage(lang);
       i18n.changeLanguage(lang).catch((error) => {
         console.error("Failed to switch languages", error);
-        captureException(error);
+        reportError(error as Error);
       });
     },
     [i18n, setSelectedLanguage],
