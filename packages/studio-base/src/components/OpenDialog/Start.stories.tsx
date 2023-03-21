@@ -93,7 +93,7 @@ const playerSelection: PlayerSelection = {
   ],
 };
 
-function CurrentUserWrapper(props: { children: ReactNode; user?: User }): JSX.Element {
+function CurrentUserWrapper(props: { children: ReactNode; user?: User | undefined }): JSX.Element {
   const value: CurrentUser = {
     currentUser: props.user,
     signIn: () => undefined,
@@ -121,6 +121,18 @@ export function UserNoAuth(): JSX.Element {
 }
 UserNoAuth.storyName = "User not authenticated";
 UserNoAuth.parameters = { colorScheme: "dark" };
+
+export function UserPrivate(): JSX.Element {
+  return (
+    <CurrentUserWrapper>
+      <PlayerSelectionContext.Provider value={playerSelection}>
+        <OpenDialog {...defaultProps} />
+      </PlayerSelectionContext.Provider>
+    </CurrentUserWrapper>
+  );
+}
+UserPrivate.storyName = "User not authenticated (private)";
+UserPrivate.parameters = { colorScheme: "dark" };
 
 export function UserAuthedFree(): JSX.Element {
   const freeUser = fakeUser("free");

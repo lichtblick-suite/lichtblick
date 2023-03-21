@@ -11,7 +11,10 @@ import FoxgloveLogoText from "@foxglove/studio-base/components/FoxgloveLogoText"
 import Stack from "@foxglove/studio-base/components/Stack";
 import TextMiddleTruncate from "@foxglove/studio-base/components/TextMiddleTruncate";
 import { useAnalytics } from "@foxglove/studio-base/context/AnalyticsContext";
-import { useCurrentUserType } from "@foxglove/studio-base/context/CurrentUserContext";
+import {
+  useCurrentUser,
+  useCurrentUserType,
+} from "@foxglove/studio-base/context/CurrentUserContext";
 import { usePlayerSelection } from "@foxglove/studio-base/context/PlayerSelectionContext";
 import { AppEvent } from "@foxglove/studio-base/services/IAnalytics";
 
@@ -169,6 +172,7 @@ type SidebarItem = {
 
 function SidebarItems(props: { onSelectView: (newValue: OpenDialogViews) => void }): JSX.Element {
   const { onSelectView } = props;
+  const { signIn } = useCurrentUser();
   const currentUserType = useCurrentUserType();
   const analytics = useAnalytics();
   const { classes } = useStyles();
@@ -310,11 +314,9 @@ function SidebarItems(props: { onSelectView: (newValue: OpenDialogViews) => void
                 </li>
               </ul>
             ),
-            actions: (
+            actions: signIn ? (
               <>
                 <Button
-                  href="https://console.foxglove.dev/signin"
-                  target="_blank"
                   className={classes.button}
                   variant="outlined"
                   onClick={() => {
@@ -322,24 +324,39 @@ function SidebarItems(props: { onSelectView: (newValue: OpenDialogViews) => void
                       user: currentUserType,
                       cta: "create-account",
                     });
+                    signIn();
                   }}
                 >
                   Create a free account
                 </Button>
                 <Button
-                  href="https://console.foxglove.dev/signin"
-                  target="_blank"
                   className={classes.button}
                   onClick={() => {
                     void analytics.logEvent(AppEvent.DIALOG_CLICK_CTA, {
                       user: currentUserType,
                       cta: "sign-in",
                     });
+                    signIn();
                   }}
                 >
                   Sign in
                 </Button>
               </>
+            ) : (
+              <Button
+                href="https://foxglove.dev/data-platform"
+                target="_blank"
+                className={classes.button}
+                variant="outlined"
+                onClick={() => {
+                  void analytics.logEvent(AppEvent.DIALOG_CLICK_CTA, {
+                    user: currentUserType,
+                    cta: "create-account",
+                  });
+                }}
+              >
+                Learn more
+              </Button>
             ),
           },
         ];
@@ -388,6 +405,7 @@ function SidebarItems(props: { onSelectView: (newValue: OpenDialogViews) => void
     classes.featureList,
     currentUserType,
     freeUser,
+    signIn,
     teamOrEnterpriseUser,
   ]);
 
