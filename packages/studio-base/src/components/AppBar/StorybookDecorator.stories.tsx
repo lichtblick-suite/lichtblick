@@ -13,6 +13,7 @@ import PanelCatalogContext, {
   PanelInfo,
 } from "@foxglove/studio-base/context/PanelCatalogContext";
 import MockCurrentLayoutProvider from "@foxglove/studio-base/providers/CurrentLayoutProvider/MockCurrentLayoutProvider";
+import WorkspaceContextProvider from "@foxglove/studio-base/providers/WorkspaceContextProvider";
 
 const SamplePanel1 = function () {
   return <div></div>;
@@ -64,13 +65,15 @@ export default {
 export function StorybookDecorator(StoryFn: Story): JSX.Element {
   return (
     <DndProvider backend={HTML5Backend}>
-      <PanelCatalogContext.Provider value={new MockPanelCatalog()}>
-        <MockCurrentLayoutProvider>
-          <MockMessagePipelineProvider>
-            <StoryFn />
-          </MockMessagePipelineProvider>
-        </MockCurrentLayoutProvider>
-      </PanelCatalogContext.Provider>
+      <WorkspaceContextProvider>
+        <PanelCatalogContext.Provider value={new MockPanelCatalog()}>
+          <MockCurrentLayoutProvider>
+            <MockMessagePipelineProvider>
+              <StoryFn />
+            </MockMessagePipelineProvider>
+          </MockCurrentLayoutProvider>
+        </PanelCatalogContext.Provider>
+      </WorkspaceContextProvider>
     </DndProvider>
   );
 }

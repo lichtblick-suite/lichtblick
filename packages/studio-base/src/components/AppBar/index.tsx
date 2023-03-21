@@ -35,7 +35,11 @@ import {
   useCurrentUserType,
   User,
 } from "@foxglove/studio-base/context/CurrentUserContext";
-import { useWorkspace } from "@foxglove/studio-base/context/WorkspaceContext";
+import {
+  useWorkspaceStore,
+  useWorkspaceActions,
+  WorkspaceContextStore,
+} from "@foxglove/studio-base/context/WorkspaceContext";
 import { useAppConfigurationValue } from "@foxglove/studio-base/hooks";
 import { AppEvent } from "@foxglove/studio-base/services/IAnalytics";
 import { fonts } from "@foxglove/studio-base/util/sharedStyleConstants";
@@ -150,12 +154,11 @@ type AppBarProps = CustomWindowControlsProps & {
   prefsDialogOpen: boolean;
   // eslint-disable-next-line @foxglove/no-boolean-parameters
   setPrefsDialogOpen: (open: boolean) => void;
-  layoutMenuOpen: boolean;
-  // eslint-disable-next-line @foxglove/no-boolean-parameters
-  setLayoutMenuOpen: (open: boolean) => void;
 };
 
 const selectedLayoutIdSelector = (state: LayoutState) => state.selectedLayout?.id;
+
+const selectWorkspace = (store: WorkspaceContextStore) => store;
 
 export function AppBar(props: AppBarProps): JSX.Element {
   const {
@@ -174,8 +177,6 @@ export function AppBar(props: AppBarProps): JSX.Element {
     debugDragRegion,
     prefsDialogOpen,
     setPrefsDialogOpen,
-    layoutMenuOpen,
-    setLayoutMenuOpen,
   } = props;
   const { classes, cx } = useStyles({ leftInset, debugDragRegion });
   const currentUserType = useCurrentUserType();
@@ -187,8 +188,8 @@ export function AppBar(props: AppBarProps): JSX.Element {
   const selectedLayoutId = useCurrentLayoutSelector(selectedLayoutIdSelector);
   const supportsAccountSettings = signIn != undefined;
 
-  const { leftSidebarOpen, setLeftSidebarOpen, rightSidebarOpen, setRightSidebarOpen } =
-    useWorkspace();
+  const { leftSidebarOpen, rightSidebarOpen, layoutMenuOpen } = useWorkspaceStore(selectWorkspace);
+  const { setLayoutMenuOpen, setRightSidebarOpen, setLeftSidebarOpen } = useWorkspaceActions();
 
   const [helpAnchorEl, setHelpAnchorEl] = useState<undefined | HTMLElement>(undefined);
   const [userAnchorEl, setUserAnchorEl] = useState<undefined | HTMLElement>(undefined);

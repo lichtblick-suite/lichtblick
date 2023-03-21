@@ -84,6 +84,10 @@ function Story({
           onSelectRightKey={() => {}}
           selectedLeftKey={undefined}
           onSelectLeftKey={() => {}}
+          leftSidebarSize={undefined}
+          rightSidebarSize={undefined}
+          setLeftSidebarSize={() => {}}
+          setRightSidebarSize={() => {}}
         >
           Main content
         </Sidebars>

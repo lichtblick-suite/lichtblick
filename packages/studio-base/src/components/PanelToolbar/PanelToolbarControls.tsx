@@ -29,7 +29,7 @@ import {
   usePanelStateStore,
 } from "@foxglove/studio-base/context/PanelStateContext";
 import { UserProfileStorageContext } from "@foxglove/studio-base/context/UserProfileStorageContext";
-import { useWorkspace } from "@foxglove/studio-base/context/WorkspaceContext";
+import { useWorkspaceActions } from "@foxglove/studio-base/context/WorkspaceContext";
 
 import { PanelActionsDropdown } from "./PanelActionsDropdown";
 
@@ -64,7 +64,7 @@ const PanelToolbarControlsComponent = forwardRef<HTMLDivElement, PanelToolbarCon
     const { id: panelId, type: panelType } = useContext(PanelContext) ?? {};
     const panelCatalog = useContext(PanelCatalogContext);
     const { setSelectedPanelIds } = useSelectedPanels();
-    const { openPanelSettings } = useWorkspace();
+    const { openPanelSettings } = useWorkspaceActions();
     const { classes } = useStyles();
 
     const hasSettingsSelector = useCallback(

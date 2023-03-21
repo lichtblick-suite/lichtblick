@@ -20,6 +20,7 @@ import MockPanelContextProvider from "@foxglove/studio-base/components/MockPanel
 import ToolbarIconButton from "@foxglove/studio-base/components/PanelToolbar/ToolbarIconButton";
 import MockCurrentLayoutProvider from "@foxglove/studio-base/providers/CurrentLayoutProvider/MockCurrentLayoutProvider";
 import { PanelStateContextProvider } from "@foxglove/studio-base/providers/PanelStateContextProvider";
+import WorkspaceContextProvider from "@foxglove/studio-base/providers/WorkspaceContextProvider";
 
 import PanelToolbar from "./index";
 
@@ -31,31 +32,35 @@ class MosaicWrapper extends React.Component<{
   public override render() {
     const { width } = this.props;
     return (
-      <Mosaic
-        onChange={() => undefined}
-        renderTile={(id, path) => (
-          <MosaicWindow
-            title="test"
-            path={path}
-            toolbarControls={<div />}
-            renderPreview={() => undefined as any}
-          >
-            <PanelStateContextProvider>
-              <Box
-                width="100%"
-                height="100%"
-                padding={3}
-                position="relative"
-                bgcolor="background.default"
-              >
-                <Box width={width}>{id === "Sibling" ? "Sibling Panel" : this.props.children}</Box>
-              </Box>
-            </PanelStateContextProvider>
-          </MosaicWindow>
-        )}
-        value={this.props.layout ?? "dummy"}
-        className="mosaic-foxglove-theme" // prevent the default mosaic theme from being applied
-      />
+      <WorkspaceContextProvider>
+        <Mosaic
+          onChange={() => undefined}
+          renderTile={(id, path) => (
+            <MosaicWindow
+              title="test"
+              path={path}
+              toolbarControls={<div />}
+              renderPreview={() => undefined as any}
+            >
+              <PanelStateContextProvider>
+                <Box
+                  width="100%"
+                  height="100%"
+                  padding={3}
+                  position="relative"
+                  bgcolor="background.default"
+                >
+                  <Box width={width}>
+                    {id === "Sibling" ? "Sibling Panel" : this.props.children}
+                  </Box>
+                </Box>
+              </PanelStateContextProvider>
+            </MosaicWindow>
+          )}
+          value={this.props.layout ?? "dummy"}
+          className="mosaic-foxglove-theme" // prevent the default mosaic theme from being applied
+        />
+      </WorkspaceContextProvider>
     );
   }
 }

@@ -35,7 +35,7 @@ import { LayoutData } from "@foxglove/studio-base/context/CurrentLayoutContext/a
 import { useExtensionCatalog } from "@foxglove/studio-base/context/ExtensionCatalogContext";
 import { useLayoutManager } from "@foxglove/studio-base/context/LayoutManagerContext";
 import { usePanelCatalog } from "@foxglove/studio-base/context/PanelCatalogContext";
-import { useWorkspace } from "@foxglove/studio-base/context/WorkspaceContext";
+import { useWorkspaceActions } from "@foxglove/studio-base/context/WorkspaceContext";
 import { useAppConfigurationValue } from "@foxglove/studio-base/hooks/useAppConfigurationValue";
 import { defaultPlaybackConfig } from "@foxglove/studio-base/providers/CurrentLayoutProvider/reducers";
 import { MosaicDropResult, PanelConfig } from "@foxglove/studio-base/types/panels";
@@ -202,7 +202,7 @@ const selectedLayoutMosaicSelector = (state: LayoutState) => state.selectedLayou
 
 export default function PanelLayout(): JSX.Element {
   const { changePanelLayout, setSelectedLayoutId } = useCurrentLayoutActions();
-  const { openLayoutBrowser } = useWorkspace();
+  const { openLayoutBrowser } = useWorkspaceActions();
   const layoutManager = useLayoutManager();
   const layoutExists = useCurrentLayoutSelector(selectedLayoutExistsSelector);
   const layoutLoading = useCurrentLayoutSelector(selectedLayoutLoadingSelector);

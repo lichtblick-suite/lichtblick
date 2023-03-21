@@ -18,25 +18,25 @@ import TabIcon from "@mui/icons-material/Tab";
 import { Button, styled as muiStyled, useTheme } from "@mui/material";
 import { last } from "lodash";
 import React, {
-  useState,
+  ComponentType,
+  CSSProperties,
+  MouseEventHandler,
+  Profiler,
   useCallback,
+  useContext,
+  useLayoutEffect,
   useMemo,
   useRef,
-  ComponentType,
-  Profiler,
-  MouseEventHandler,
-  useLayoutEffect,
-  CSSProperties,
-  useContext,
+  useState,
 } from "react";
 import {
-  MosaicContext,
-  MosaicWindowActions,
-  MosaicWindowContext,
   getNodeAtPath,
   getOtherBranch,
-  updateTree,
+  MosaicContext,
   MosaicNode,
+  MosaicWindowActions,
+  MosaicWindowContext,
+  updateTree,
 } from "react-mosaic-component";
 import { Transition } from "react-transition-group";
 import { useMountedState } from "react-use";
@@ -53,10 +53,13 @@ import {
   useSelectedPanels,
 } from "@foxglove/studio-base/context/CurrentLayoutContext";
 import { usePanelCatalog } from "@foxglove/studio-base/context/PanelCatalogContext";
-import { useWorkspace } from "@foxglove/studio-base/context/WorkspaceContext";
+import {
+  useWorkspaceStore,
+  WorkspaceStoreSelectors,
+} from "@foxglove/studio-base/context/WorkspaceContext";
 import usePanelDrag from "@foxglove/studio-base/hooks/usePanelDrag";
 import { TabPanelConfig } from "@foxglove/studio-base/types/layouts";
-import { PanelConfig, SaveConfig, OpenSiblingPanel } from "@foxglove/studio-base/types/panels";
+import { OpenSiblingPanel, PanelConfig, SaveConfig } from "@foxglove/studio-base/types/panels";
 import { TAB_PANEL_TYPE } from "@foxglove/studio-base/util/globalConstants";
 import {
   getPanelIdForType,
@@ -349,7 +352,7 @@ export default function Panel<
       [childId, mosaicActions, mosaicWindowActions, swapPanel, tabId],
     );
 
-    const { panelSettingsOpen } = useWorkspace();
+    const panelSettingsOpen = useWorkspaceStore(WorkspaceStoreSelectors.selectPanelSettingsOpen);
 
     const onPanelRootClick: MouseEventHandler<HTMLDivElement> = useCallback(
       (e) => {

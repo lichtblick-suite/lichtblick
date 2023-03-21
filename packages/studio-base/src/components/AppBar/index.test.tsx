@@ -12,6 +12,7 @@ import AppConfigurationContext from "@foxglove/studio-base/context/AppConfigurat
 import { UserNodeStateProvider } from "@foxglove/studio-base/context/UserNodeStateContext";
 import MockCurrentLayoutProvider from "@foxglove/studio-base/providers/CurrentLayoutProvider/MockCurrentLayoutProvider";
 import TimelineInteractionStateProvider from "@foxglove/studio-base/providers/TimelineInteractionStateProvider";
+import WorkspaceContextProvider from "@foxglove/studio-base/providers/WorkspaceContextProvider";
 import { makeMockAppConfiguration } from "@foxglove/studio-base/util/makeMockAppConfiguration";
 
 import { AppBar } from ".";
@@ -20,6 +21,7 @@ function Wrapper({ children }: React.PropsWithChildren<unknown>): JSX.Element {
   const appConfiguration = makeMockAppConfiguration();
   const providers = [
     /* eslint-disable react/jsx-key */
+    <WorkspaceContextProvider />,
     <AppConfigurationContext.Provider value={appConfiguration} />,
     <StudioToastProvider />,
     <TimelineInteractionStateProvider />,
@@ -49,8 +51,6 @@ describe("<AppBar />", () => {
           onSelectDataSourceAction={() => {}}
           prefsDialogOpen={false}
           setPrefsDialogOpen={() => {}}
-          layoutMenuOpen={false}
-          setLayoutMenuOpen={() => {}}
         />
       </Wrapper>,
     );
@@ -76,8 +76,6 @@ describe("<AppBar />", () => {
           onSelectDataSourceAction={() => {}}
           prefsDialogOpen={false}
           setPrefsDialogOpen={() => {}}
-          layoutMenuOpen={false}
-          setLayoutMenuOpen={() => {}}
         />
       </Wrapper>,
     );

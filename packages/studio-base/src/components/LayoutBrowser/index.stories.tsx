@@ -13,6 +13,7 @@ import { UserProfileStorageContext } from "@foxglove/studio-base/context/UserPro
 import CurrentLayoutProvider from "@foxglove/studio-base/providers/CurrentLayoutProvider";
 import { defaultPlaybackConfig } from "@foxglove/studio-base/providers/CurrentLayoutProvider/reducers";
 import LayoutManagerProvider from "@foxglove/studio-base/providers/LayoutManagerProvider";
+import WorkspaceContextProvider from "@foxglove/studio-base/providers/WorkspaceContextProvider";
 import { ISO8601Timestamp, Layout, LayoutID } from "@foxglove/studio-base/services/ILayoutStorage";
 import LayoutManager from "@foxglove/studio-base/services/LayoutManager/LayoutManager";
 import MockLayoutStorage from "@foxglove/studio-base/services/MockLayoutStorage";
@@ -379,7 +380,11 @@ DeleteLastLayout.parameters = {
 DeleteLastLayout.play = async () => await deleteLayoutInteraction(0);
 
 export function SignInPrompt(_args: unknown): JSX.Element {
-  return <LayoutBrowser supportsSignIn />;
+  return (
+    <WorkspaceContextProvider>
+      <LayoutBrowser supportsSignIn />
+    </WorkspaceContextProvider>
+  );
 }
 SignInPrompt.parameters = {
   colorScheme: "light",

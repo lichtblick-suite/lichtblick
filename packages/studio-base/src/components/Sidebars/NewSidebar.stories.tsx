@@ -72,6 +72,8 @@ function Story({
   const [selectedRightKey, setSelectedRightKey] = useState<RightKey | undefined>(defaultRightKey);
   const [selectedLeftKey, setSelectedLeftKey] = useState<LeftKey | undefined>(defaultLeftKey);
   const [_, setAppBarEnabled] = useAppConfigurationValue<boolean>(AppSetting.ENABLE_NEW_TOPNAV);
+  const [leftSidebarSize, setLeftSidebarSize] = useState<number | undefined>();
+  const [rightSidebarSize, setRightSidebarSize] = useState<number | undefined>();
 
   useEffect(() => {
     void setAppBarEnabled(true);
@@ -93,6 +95,10 @@ function Story({
           onSelectRightKey={setSelectedRightKey}
           selectedLeftKey={selectedLeftKey}
           onSelectLeftKey={setSelectedLeftKey}
+          leftSidebarSize={leftSidebarSize}
+          setLeftSidebarSize={setLeftSidebarSize}
+          rightSidebarSize={rightSidebarSize}
+          setRightSidebarSize={setRightSidebarSize}
         >
           {label ?? "Main content"}
         </Sidebars>

@@ -3,12 +3,12 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 import CloseIcon from "@mui/icons-material/Close";
-import { Link, IconButton, ButtonBase, Typography } from "@mui/material";
+import { ButtonBase, IconButton, Link, Typography } from "@mui/material";
 import { makeStyles } from "tss-react/mui";
 
 import { AppSetting } from "@foxglove/studio-base/AppSetting";
 import { useCurrentUser } from "@foxglove/studio-base/context/CurrentUserContext";
-import { useWorkspace } from "@foxglove/studio-base/context/WorkspaceContext";
+import { useWorkspaceActions } from "@foxglove/studio-base/context/WorkspaceContext";
 import { useAppConfigurationValue } from "@foxglove/studio-base/hooks";
 
 type SignInPromptProps = {
@@ -38,7 +38,7 @@ export default function SignInPrompt(props: SignInPromptProps): JSX.Element {
   const { onDismiss } = props;
   const { signIn } = useCurrentUser();
   const { classes } = useStyles();
-  const { openAccountSettings } = useWorkspace();
+  const { openAccountSettings } = useWorkspaceActions();
   const [topNavEnabled = false] = useAppConfigurationValue<boolean>(AppSetting.ENABLE_NEW_TOPNAV);
 
   const action = topNavEnabled ? signIn : openAccountSettings;

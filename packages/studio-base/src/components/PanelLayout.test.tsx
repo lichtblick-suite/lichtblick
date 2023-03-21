@@ -14,6 +14,7 @@ import PanelCatalogContext, {
 } from "@foxglove/studio-base/context/PanelCatalogContext";
 import MockCurrentLayoutProvider from "@foxglove/studio-base/providers/CurrentLayoutProvider/MockCurrentLayoutProvider";
 import { PanelStateContextProvider } from "@foxglove/studio-base/providers/PanelStateContextProvider";
+import WorkspaceContextProvider from "@foxglove/studio-base/providers/WorkspaceContextProvider";
 
 import { UnconnectedPanelLayout } from "./PanelLayout";
 
@@ -64,13 +65,15 @@ describe("UnconnectedPanelLayout", () => {
         wrapper: function Wrapper({ children }: React.PropsWithChildren<unknown>) {
           return (
             <DndProvider backend={HTML5Backend}>
-              <MockCurrentLayoutProvider>
-                <PanelStateContextProvider>
-                  <PanelCatalogContext.Provider value={panelCatalog}>
-                    {children}
-                  </PanelCatalogContext.Provider>
-                </PanelStateContextProvider>
-              </MockCurrentLayoutProvider>
+              <WorkspaceContextProvider>
+                <MockCurrentLayoutProvider>
+                  <PanelStateContextProvider>
+                    <PanelCatalogContext.Provider value={panelCatalog}>
+                      {children}
+                    </PanelCatalogContext.Provider>
+                  </PanelStateContextProvider>
+                </MockCurrentLayoutProvider>
+              </WorkspaceContextProvider>
             </DndProvider>
           );
         },

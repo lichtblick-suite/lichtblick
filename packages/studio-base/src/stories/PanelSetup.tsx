@@ -52,6 +52,7 @@ import MockCurrentLayoutProvider from "@foxglove/studio-base/providers/CurrentLa
 import ExtensionCatalogProvider from "@foxglove/studio-base/providers/ExtensionCatalogProvider";
 import { PanelStateContextProvider } from "@foxglove/studio-base/providers/PanelStateContextProvider";
 import TimelineInteractionStateProvider from "@foxglove/studio-base/providers/TimelineInteractionStateProvider";
+import WorkspaceContextProvider from "@foxglove/studio-base/providers/WorkspaceContextProvider";
 import ThemeProvider from "@foxglove/studio-base/theme/ThemeProvider";
 import { RosDatatypes } from "@foxglove/studio-base/types/RosDatatypes";
 import { SavedProps, UserNodes } from "@foxglove/studio-base/types/panels";
@@ -338,18 +339,20 @@ type Props = UnconnectedProps & {
 export default function PanelSetup(props: Props): JSX.Element {
   const theme = useTheme();
   return (
-    <UserNodeStateProvider>
-      <TimelineInteractionStateProvider>
-        <MockCurrentLayoutProvider onAction={props.onLayoutAction}>
-          <PanelStateContextProvider>
-            <ExtensionCatalogProvider loaders={[]}>
-              <ThemeProvider isDark={theme.palette.mode === "dark"}>
-                <UnconnectedPanelSetup {...props} />
-              </ThemeProvider>
-            </ExtensionCatalogProvider>
-          </PanelStateContextProvider>
-        </MockCurrentLayoutProvider>
-      </TimelineInteractionStateProvider>
-    </UserNodeStateProvider>
+    <WorkspaceContextProvider>
+      <UserNodeStateProvider>
+        <TimelineInteractionStateProvider>
+          <MockCurrentLayoutProvider onAction={props.onLayoutAction}>
+            <PanelStateContextProvider>
+              <ExtensionCatalogProvider loaders={[]}>
+                <ThemeProvider isDark={theme.palette.mode === "dark"}>
+                  <UnconnectedPanelSetup {...props} />
+                </ThemeProvider>
+              </ExtensionCatalogProvider>
+            </PanelStateContextProvider>
+          </MockCurrentLayoutProvider>
+        </TimelineInteractionStateProvider>
+      </UserNodeStateProvider>
+    </WorkspaceContextProvider>
   );
 }

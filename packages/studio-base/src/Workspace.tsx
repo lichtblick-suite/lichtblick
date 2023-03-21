@@ -13,7 +13,7 @@
 import { Link, Typography } from "@mui/material";
 import { useSnackbar } from "notistack";
 import { extname } from "path";
-import { useState, useEffect, useRef, useCallback, useMemo, useLayoutEffect } from "react";
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { makeStyles } from "tss-react/mui";
 
 import Logger from "@foxglove/log";
@@ -66,7 +66,14 @@ import {
   IDataSourceFactory,
   usePlayerSelection,
 } from "@foxglove/studio-base/context/PlayerSelectionContext";
-import { useWorkspace, WorkspaceContext } from "@foxglove/studio-base/context/WorkspaceContext";
+import {
+  LeftSidebarItemKey,
+  RightSidebarItemKey,
+  SidebarItemKey,
+  useWorkspaceActions,
+  useWorkspaceStore,
+  WorkspaceContextStore,
+} from "@foxglove/studio-base/context/WorkspaceContext";
 import { useAppConfigurationValue } from "@foxglove/studio-base/hooks";
 import useAddPanel from "@foxglove/studio-base/hooks/useAddPanel";
 import { useCalloutDismissalBlocker } from "@foxglove/studio-base/hooks/useCalloutDismissalBlocker";
@@ -76,6 +83,7 @@ import { useInitialDeepLinkState } from "@foxglove/studio-base/hooks/useInitialD
 import useNativeAppMenuEvent from "@foxglove/studio-base/hooks/useNativeAppMenuEvent";
 import { PlayerPresence } from "@foxglove/studio-base/players/types";
 import { PanelStateContextProvider } from "@foxglove/studio-base/providers/PanelStateContextProvider";
+import WorkspaceContextProvider from "@foxglove/studio-base/providers/WorkspaceContextProvider";
 import isDesktopApp from "@foxglove/studio-base/util/isDesktopApp";
 
 const log = Logger.getLogger(__filename);
@@ -92,21 +100,6 @@ const useStyles = makeStyles()({
     overflow: "hidden",
   },
 });
-
-type SidebarItemKey =
-  | "connection"
-  | "add-panel"
-  | "panel-settings"
-  | "variables"
-  | "extensions"
-  | "account"
-  | "layouts"
-  | "preferences"
-  | "help"
-  | "studio-logs-settings";
-
-type LeftSidebarItemKey = "topics" | "variables" | "studio-logs-settings";
-type RightSidebarItemKey = "panel-settings" | "events";
 
 const selectedLayoutIdSelector = (state: LayoutState) => state.selectedLayout?.id;
 
@@ -127,7 +120,7 @@ function keyboardEventHasModifier(event: KeyboardEvent) {
 
 function AddPanel() {
   const addPanel = useAddPanel();
-  const { openLayoutBrowser } = useWorkspace();
+  const { openLayoutBrowser } = useWorkspaceActions();
   const selectedLayoutId = useCurrentLayoutSelector(selectedLayoutIdSelector);
 
   return (
@@ -169,16 +162,40 @@ const selectSeek = (ctx: MessagePipelineContext) => ctx.seekPlayback;
 const selectPlayUntil = (ctx: MessagePipelineContext) => ctx.playUntil;
 const selectPlayerId = (ctx: MessagePipelineContext) => ctx.playerState.playerId;
 const selectEventsSupported = (store: EventsStore) => store.eventsSupported;
+const selectWorkspaceSidebarItem = (store: WorkspaceContextStore) => store.sidebarItem;
+const selectWorkspaceLeftSidebarItem = (store: WorkspaceContextStore) => store.leftSidebarItem;
+const selectWorkspaceLeftSidebarOpen = (store: WorkspaceContextStore) => store.leftSidebarOpen;
+const selectWorkspaceLeftSidebarSize = (store: WorkspaceContextStore) => store.leftSidebarSize;
+const selectWorkspaceRightSidebarItem = (store: WorkspaceContextStore) => store.rightSidebarItem;
+const selectWorkspaceRightSidebarOpen = (store: WorkspaceContextStore) => store.rightSidebarOpen;
+const selectWorkspaceRightSidebarSize = (store: WorkspaceContextStore) => store.rightSidebarSize;
 
-export default function Workspace(props: WorkspaceProps): JSX.Element {
+function WorkspaceContent(props: WorkspaceProps): JSX.Element {
   const { classes } = useStyles();
   const containerRef = useRef<HTMLDivElement>(ReactNull);
   const { availableSources, selectSource } = usePlayerSelection();
   const playerPresence = useMessagePipeline(selectPlayerPresence);
   const playerProblems = useMessagePipeline(selectPlayerProblems);
 
+  const sidebarItem = useWorkspaceStore(selectWorkspaceSidebarItem);
+  const leftSidebarItem = useWorkspaceStore(selectWorkspaceLeftSidebarItem);
+  const leftSidebarOpen = useWorkspaceStore(selectWorkspaceLeftSidebarOpen);
+  const leftSidebarSize = useWorkspaceStore(selectWorkspaceLeftSidebarSize);
+  const rightSidebarItem = useWorkspaceStore(selectWorkspaceRightSidebarItem);
+  const rightSidebarOpen = useWorkspaceStore(selectWorkspaceRightSidebarOpen);
+  const rightSidebarSize = useWorkspaceStore(selectWorkspaceRightSidebarSize);
+
+  const {
+    setLeftSidebarOpen,
+    setRightSidebarOpen,
+    selectLeftSidebarItem,
+    selectRightSidebarItem,
+    setLeftSidebarSize,
+    setRightSidebarSize,
+    selectSidebarItem,
+  } = useWorkspaceActions();
+
   const [prefsDialogOpen, setPrefsDialogOpen] = useState(false);
-  const [layoutMenuOpen, setLayoutMenuOpen] = useState(false);
 
   // file types we support for drag/drop
   const allowedDropExtensions = useMemo(() => {
@@ -225,26 +242,6 @@ export default function Workspace(props: WorkspaceProps): JSX.Element {
     { view: OpenDialogViews; activeDataSource?: IDataSourceFactory } | undefined
   >(isPlayerPresent || !showOpenDialogOnStartup || showSignInForm ? undefined : { view: "start" });
 
-  const [selectedSidebarItem, setSelectedSidebarItem] = useState<SidebarItemKey | undefined>(
-    "connection",
-  );
-
-  const [selectedLeftSidebarItem, setSelectedLeftSidebarItem] = useState<
-    LeftSidebarItemKey | undefined
-  >("topics");
-  const [selectedRightSidebarItem, setSelectedRightSidebarItem] = useState<
-    RightSidebarItemKey | undefined
-  >(undefined);
-
-  // When a player is present we hide the connection sidebar. To prevent hiding the connection sidebar
-  // when the user wants to select a new connection we track whether the sidebar item opened
-  const userSelectSidebarItem = useRef(false);
-
-  const selectSidebarItem = useCallback((item: SidebarItemKey | undefined) => {
-    userSelectSidebarItem.current = true;
-    setSelectedSidebarItem(item);
-  }, []);
-
   // When a player is activated, hide the open dialog.
   useLayoutEffect(() => {
     if (
@@ -267,43 +264,43 @@ export default function Workspace(props: WorkspaceProps): JSX.Element {
   useNativeAppMenuEvent(
     "open-layouts",
     useCallback(() => {
-      setSelectedSidebarItem("layouts");
-    }, []),
+      selectSidebarItem("layouts");
+    }, [selectSidebarItem]),
   );
 
   useNativeAppMenuEvent(
     "open-add-panel",
     useCallback(() => {
-      setSelectedSidebarItem("add-panel");
-    }, []),
+      selectSidebarItem("add-panel");
+    }, [selectSidebarItem]),
   );
 
   useNativeAppMenuEvent(
     "open-panel-settings",
     useCallback(() => {
-      setSelectedSidebarItem("panel-settings");
-    }, []),
+      selectSidebarItem("panel-settings");
+    }, [selectSidebarItem]),
   );
 
   useNativeAppMenuEvent(
     "open-variables",
     useCallback(() => {
-      setSelectedSidebarItem("variables");
-    }, []),
+      selectSidebarItem("variables");
+    }, [selectSidebarItem]),
   );
 
   useNativeAppMenuEvent(
     "open-extensions",
     useCallback(() => {
-      setSelectedSidebarItem("extensions");
-    }, []),
+      selectSidebarItem("extensions");
+    }, [selectSidebarItem]),
   );
 
   useNativeAppMenuEvent(
     "open-account",
     useCallback(() => {
-      setSelectedSidebarItem("account");
-    }, []),
+      selectSidebarItem("account");
+    }, [selectSidebarItem]),
   );
 
   useNativeAppMenuEvent(
@@ -312,9 +309,9 @@ export default function Workspace(props: WorkspaceProps): JSX.Element {
       if (enableNewTopNav) {
         setPrefsDialogOpen(true);
       } else {
-        setSelectedSidebarItem("preferences");
+        selectSidebarItem("preferences");
       }
-    }, [enableNewTopNav]),
+    }, [enableNewTopNav, selectSidebarItem]),
   );
 
   useNativeAppMenuEvent(
@@ -490,36 +487,6 @@ export default function Workspace(props: WorkspaceProps): JSX.Element {
     [openFiles, openHandle],
   );
 
-  const workspaceContextValue = useMemo(
-    () => ({
-      panelSettingsOpen:
-        selectedSidebarItem === "panel-settings" || selectedRightSidebarItem === "panel-settings",
-      openPanelSettings: () =>
-        enableNewTopNav
-          ? setSelectedRightSidebarItem("panel-settings")
-          : setSelectedSidebarItem("panel-settings"),
-      // ↓ ↓ ↓  just remove this one when deleting enableNewTopNav feature flag  ↓ ↓ ↓
-      openAccountSettings: () => supportsAccountSettings && setSelectedSidebarItem("account"),
-      openLayoutBrowser: () =>
-        enableNewTopNav ? setLayoutMenuOpen(true) : setSelectedSidebarItem("layouts"),
-      leftSidebarOpen: selectedLeftSidebarItem != undefined,
-      // eslint-disable-next-line @foxglove/no-boolean-parameters
-      setLeftSidebarOpen: (open: boolean) =>
-        setSelectedLeftSidebarItem(open ? "topics" : undefined),
-      rightSidebarOpen: selectedRightSidebarItem != undefined,
-      // eslint-disable-next-line @foxglove/no-boolean-parameters
-      setRightSidebarOpen: (open: boolean) =>
-        setSelectedRightSidebarItem(open ? "panel-settings" : undefined),
-    }),
-    [
-      selectedSidebarItem,
-      selectedLeftSidebarItem,
-      selectedRightSidebarItem,
-      enableNewTopNav,
-      supportsAccountSettings,
-    ],
-  );
-
   // Since the _component_ field of a sidebar item entry is a component and accepts no additional
   // props we need to wrap our DataSourceSidebar component to connect the open data source action to
   // open the data source dialog.
@@ -652,25 +619,19 @@ export default function Workspace(props: WorkspaceProps): JSX.Element {
   }, [PanelSettingsSidebar, showEventsTab]);
 
   const keyDownHandlers = useMemo(() => {
-    const { leftSidebarOpen, rightSidebarOpen, setLeftSidebarOpen, setRightSidebarOpen } =
-      workspaceContextValue;
     return {
       b: (ev: KeyboardEvent) => {
-        if (
-          !keyboardEventHasModifier(ev) ||
-          activeElementIsInput() ||
-          selectedSidebarItem == undefined
-        ) {
+        if (!keyboardEventHasModifier(ev) || activeElementIsInput() || sidebarItem == undefined) {
           return;
         }
 
         ev.preventDefault();
-        setSelectedSidebarItem(undefined);
+        selectSidebarItem(undefined);
       },
-      "[": () => setLeftSidebarOpen(!leftSidebarOpen),
-      "]": () => setRightSidebarOpen(!rightSidebarOpen),
+      "[": () => setLeftSidebarOpen((oldValue) => !oldValue),
+      "]": () => setRightSidebarOpen((oldValue) => !oldValue),
     };
-  }, [selectedSidebarItem, workspaceContextValue]);
+  }, [sidebarItem, setLeftSidebarOpen, setRightSidebarOpen, selectSidebarItem]);
 
   const play = useMessagePipeline(selectPlay);
   const playUntil = useMessagePipeline(selectPlayUntil);
@@ -687,7 +648,6 @@ export default function Workspace(props: WorkspaceProps): JSX.Element {
     <MultiProvider
       providers={[
         /* eslint-disable react/jsx-key */
-        <WorkspaceContext.Provider value={workspaceContextValue} />,
         <PanelStateContextProvider />,
         /* eslint-enable react/jsx-key */
       ]}
@@ -719,21 +679,23 @@ export default function Workspace(props: WorkspaceProps): JSX.Element {
             onSelectDataSourceAction={() => setShowOpenDialog({ view: "start" })}
             prefsDialogOpen={prefsDialogOpen}
             setPrefsDialogOpen={setPrefsDialogOpen}
-            layoutMenuOpen={layoutMenuOpen}
-            setLayoutMenuOpen={setLayoutMenuOpen}
           />
         )}
         <Sidebars
           items={sidebarItems}
           bottomItems={sidebarBottomItems}
-          selectedKey={selectedSidebarItem}
+          selectedKey={sidebarItem}
           onSelectKey={selectSidebarItem}
           leftItems={leftSidebarItems}
-          selectedLeftKey={selectedLeftSidebarItem}
-          onSelectLeftKey={setSelectedLeftSidebarItem}
+          selectedLeftKey={leftSidebarOpen ? leftSidebarItem : undefined}
+          onSelectLeftKey={selectLeftSidebarItem}
+          leftSidebarSize={leftSidebarSize}
+          setLeftSidebarSize={setLeftSidebarSize}
           rightItems={rightSidebarItems}
-          selectedRightKey={selectedRightSidebarItem}
-          onSelectRightKey={setSelectedRightSidebarItem}
+          selectedRightKey={rightSidebarOpen ? rightSidebarItem : undefined}
+          onSelectRightKey={selectRightSidebarItem}
+          rightSidebarSize={rightSidebarSize}
+          setRightSidebarSize={setRightSidebarSize}
         >
           {/* To ensure no stale player state remains, we unmount all panels when players change */}
           <RemountOnValueChange value={playerId}>
@@ -756,5 +718,13 @@ export default function Workspace(props: WorkspaceProps): JSX.Element {
         )}
       </div>
     </MultiProvider>
+  );
+}
+
+export default function Workspace(props: WorkspaceProps): JSX.Element {
+  return (
+    <WorkspaceContextProvider>
+      <WorkspaceContent {...props} />
+    </WorkspaceContextProvider>
   );
 }

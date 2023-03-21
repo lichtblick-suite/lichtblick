@@ -25,7 +25,7 @@ import {
   PanelStateStore,
   usePanelStateStore,
 } from "@foxglove/studio-base/context/PanelStateContext";
-import { useWorkspace } from "@foxglove/studio-base/context/WorkspaceContext";
+import { useWorkspaceActions } from "@foxglove/studio-base/context/WorkspaceContext";
 import { useAppConfigurationValue } from "@foxglove/studio-base/hooks";
 import { PanelConfig } from "@foxglove/studio-base/types/panels";
 import { TAB_PANEL_TYPE } from "@foxglove/studio-base/util/globalConstants";
@@ -70,7 +70,7 @@ export default function PanelSettings({
     }
   }, [selectAllPanels, selectedPanelIds, singlePanelId]);
 
-  const { openLayoutBrowser } = useWorkspace();
+  const { openLayoutBrowser } = useWorkspaceActions();
   const selectedPanelId = useMemo(
     () => (selectedPanelIds.length === 1 ? selectedPanelIds[0] : undefined),
     [selectedPanelIds],

@@ -2,7 +2,7 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { Square24Filled, Square24Regular, ErrorCircle16Filled } from "@fluentui/react-icons";
+import { ErrorCircle16Filled, Square24Filled, Square24Regular } from "@fluentui/react-icons";
 import { Checkbox, Tooltip, Typography } from "@mui/material";
 import { ComponentProps, useMemo, useState } from "react";
 import { makeStyles } from "tss-react/mui";
@@ -12,7 +12,7 @@ import { usePanelContext } from "@foxglove/studio-base/components/PanelContext";
 import TimeBasedChart from "@foxglove/studio-base/components/TimeBasedChart";
 import { useSelectedPanels } from "@foxglove/studio-base/context/CurrentLayoutContext";
 import { useHoverValue } from "@foxglove/studio-base/context/TimelineInteractionStateContext";
-import { useWorkspace } from "@foxglove/studio-base/context/WorkspaceContext";
+import { useWorkspaceActions } from "@foxglove/studio-base/context/WorkspaceContext";
 import { plotPathDisplayName } from "@foxglove/studio-base/panels/Plot/types";
 import { getLineColor } from "@foxglove/studio-base/util/plotColors";
 import { fonts } from "@foxglove/studio-base/util/sharedStyleConstants";
@@ -110,7 +110,7 @@ export function PlotLegendRow({
   savePaths,
   showPlotValuesInLegend,
 }: PlotLegendRowProps): JSX.Element {
-  const { openPanelSettings } = useWorkspace();
+  const { openPanelSettings } = useWorkspaceActions();
   const { id: panelId } = usePanelContext();
   const { setSelectedPanelIds } = useSelectedPanels();
   const { classes, cx } = useStyles();
