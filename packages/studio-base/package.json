@@ -136,7 +136,7 @@
     "jest-canvas-mock": "2.4.0",
     "jest-diff": "29.4.2",
     "jszip": "3.10.1",
-    "just-diff": "5.2.0",
+    "just-diff": "6.0.0",
     "leaflet": "1.9.3",
     "lodash": "4.17.21",
     "mathjs": "11.6.0",
