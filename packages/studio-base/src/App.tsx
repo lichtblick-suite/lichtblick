@@ -21,7 +21,6 @@ import MultiProvider from "./components/MultiProvider";
 import PlayerManager from "./components/PlayerManager";
 import SendNotificationToastAdapter from "./components/SendNotificationToastAdapter";
 import StudioToastProvider from "./components/StudioToastProvider";
-import AnalyticsProvider from "./context/AnalyticsProvider";
 import AppConfigurationContext, { IAppConfiguration } from "./context/AppConfigurationContext";
 import { AssetsProvider } from "./context/AssetsContext";
 import LayoutStorageContext from "./context/LayoutStorageContext";
@@ -87,7 +86,6 @@ export function App(props: AppProps): JSX.Element {
     <StudioToastProvider />,
     <LayoutStorageContext.Provider value={layoutStorage} />,
     <UserProfileLocalStorageProvider />,
-    <AnalyticsProvider amplitudeApiKey={process.env.AMPLITUDE_API_KEY} />,
     <LayoutManagerProvider />,
     <AssetsProvider loaders={assetLoaders} />,
     <TimelineInteractionStateProvider />,

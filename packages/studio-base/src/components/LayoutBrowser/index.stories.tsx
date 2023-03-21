@@ -7,7 +7,6 @@ import { fireEvent, screen } from "@testing-library/dom";
 import userEvent from "@testing-library/user-event";
 import { useMemo } from "react";
 
-import AnalyticsProvider from "@foxglove/studio-base/context/AnalyticsProvider";
 import { LayoutData } from "@foxglove/studio-base/context/CurrentLayoutContext/actions";
 import LayoutStorageContext from "@foxglove/studio-base/context/LayoutStorageContext";
 import { UserProfileStorageContext } from "@foxglove/studio-base/context/UserProfileStorageContext";
@@ -127,17 +126,15 @@ function WithSetup(Child: Story, ctx: StoryContext): JSX.Element {
   );
   return (
     <div style={{ display: "flex", height: "100%", width: 320 }}>
-      <AnalyticsProvider>
-        <UserProfileStorageContext.Provider value={userProfile}>
-          <LayoutStorageContext.Provider value={storage}>
-            <LayoutManagerProvider>
-              <CurrentLayoutProvider>
-                <Child />
-              </CurrentLayoutProvider>
-            </LayoutManagerProvider>
-          </LayoutStorageContext.Provider>
-        </UserProfileStorageContext.Provider>
-      </AnalyticsProvider>
+      <UserProfileStorageContext.Provider value={userProfile}>
+        <LayoutStorageContext.Provider value={storage}>
+          <LayoutManagerProvider>
+            <CurrentLayoutProvider>
+              <Child />
+            </CurrentLayoutProvider>
+          </LayoutManagerProvider>
+        </LayoutStorageContext.Provider>
+      </UserProfileStorageContext.Provider>
     </div>
   );
 }
