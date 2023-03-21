@@ -75,6 +75,7 @@ const useStyles = makeStyles<void, "container" | "toggleButton" | "toggleButtonF
     },
     rootLeft: {
       alignItems: "flex-start",
+      maxWidth: "80%",
 
       [`.${classes.toggleButton}`]: {
         padding: spacing(0.25),
@@ -91,6 +92,7 @@ const useStyles = makeStyles<void, "container" | "toggleButton" | "toggleButtonF
     },
     rootTop: {
       flexDirection: "column",
+      maxHeight: "80%",
 
       [`.${classes.toggleButton}`]: {
         padding: spacing(0.25),
@@ -163,15 +165,14 @@ export function PlotLegend(props: Props): JSX.Element {
   );
 
   const legendIcon = useMemo(() => {
-    if (legendDisplay !== "floating") {
-      const iconMap = showLegend
-        ? { left: ChevronLeft20Regular, top: ChevronUp20Regular }
-        : { left: ChevronRight20Regular, top: ChevronDown20Regular };
-      const ArrowIcon = iconMap[legendDisplay];
-
-      return <ArrowIcon />;
+    switch (legendDisplay) {
+      case "floating":
+        return showLegend ? <ArrowMinimize24Filled /> : <TextBulletListLtr20Filled />;
+      case "left":
+        return showLegend ? <ChevronLeft20Regular /> : <ChevronRight20Regular />;
+      case "top":
+        return showLegend ? <ChevronUp20Regular /> : <ChevronDown20Regular />;
     }
-    return showLegend ? <ArrowMinimize24Filled /> : <TextBulletListLtr20Filled />;
   }, [showLegend, legendDisplay]);
 
   const handlePointerMove = useCallback(
@@ -219,10 +220,6 @@ export function PlotLegend(props: Props): JSX.Element {
         [classes.rootLeft]: legendDisplay === "left",
         [classes.rootTop]: legendDisplay === "top",
       })}
-      style={{
-        maxHeight: legendDisplay === "top" ? "80%" : "none",
-        maxWidth: legendDisplay === "left" ? "80%" : "none",
-      }}
     >
       <IconButton
         onClick={toggleLegend}

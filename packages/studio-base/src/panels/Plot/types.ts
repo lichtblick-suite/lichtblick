@@ -40,7 +40,7 @@ export type PlotConfig = DeprecatedPlotConfig & {
   minYValue?: string | number;
   maxYValue?: string | number;
   showLegend: boolean;
-  legendDisplay: "floating" | "top" | "left";
+  legendDisplay: "floating" | "top" | "left" | "none";
   showPlotValuesInLegend: boolean;
   showXAxisLabels: boolean;
   showYAxisLabels: boolean;

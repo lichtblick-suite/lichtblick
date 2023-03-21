@@ -532,18 +532,20 @@ function Plot(props: Props) {
         fullWidth
         style={{ height: `calc(100% - ${PANEL_TOOLBAR_MIN_HEIGHT}px)` }}
       >
-        <PlotLegend
-          paths={yAxisPaths}
-          datasets={datasets}
-          currentTime={currentTimeSinceStart}
-          onClickPath={(index: number) => setFocusedPath(["paths", String(index)])}
-          saveConfig={saveConfig}
-          showLegend={showLegend}
-          pathsWithMismatchedDataLengths={pathsWithMismatchedDataLengths}
-          legendDisplay={legendDisplay}
-          showPlotValuesInLegend={showPlotValuesInLegend}
-          sidebarDimension={sidebarDimension}
-        />
+        {legendDisplay !== "none" && (
+          <PlotLegend
+            paths={yAxisPaths}
+            datasets={datasets}
+            currentTime={currentTimeSinceStart}
+            onClickPath={(index: number) => setFocusedPath(["paths", String(index)])}
+            saveConfig={saveConfig}
+            showLegend={showLegend}
+            pathsWithMismatchedDataLengths={pathsWithMismatchedDataLengths}
+            legendDisplay={legendDisplay}
+            showPlotValuesInLegend={showPlotValuesInLegend}
+            sidebarDimension={sidebarDimension}
+          />
+        )}
         <Stack flex="auto" alignItems="center" justifyContent="center" overflow="hidden">
           <PlotChart
             isSynced={xAxisVal === "timestamp" && isSynced}

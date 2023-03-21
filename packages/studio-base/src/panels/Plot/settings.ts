@@ -101,12 +101,12 @@ function buildSettingsTree(config: PlotConfig): SettingsTreeNodes {
         legendDisplay: {
           label: "Position",
           input: "select",
-          value: config.showLegend ? config.legendDisplay : "none",
+          value: config.legendDisplay,
           options: [
             { value: "floating", label: "Floating" },
             { value: "left", label: "Left" },
             { value: "top", label: "Top" },
-            { value: "none", label: "None" },
+            { value: "none", label: "Hidden" },
           ],
         },
         showPlotValuesInLegend: {
@@ -214,12 +214,8 @@ export function usePlotPanelSettings(
                 set(draft, path, value);
               }
             } else if (isEqual(path, ["legend", "legendDisplay"])) {
-              if (value === "none") {
-                draft.showLegend = false;
-              } else {
-                draft.legendDisplay = value;
-                draft.showLegend = true;
-              }
+              draft.legendDisplay = value;
+              draft.showLegend = true;
             } else if (isEqual(path, ["xAxis", "xAxisPath"])) {
               set(draft, ["xAxisPath", "value"], value);
             } else {
