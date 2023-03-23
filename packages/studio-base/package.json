@@ -46,7 +46,7 @@
     "@foxglove/roslibjs": "0.0.1",
     "@foxglove/rosmsg": "4.2.1",
     "@foxglove/rosmsg-msgs-common": "3.0.0",
-    "@foxglove/rosmsg-serialization": "2.0.0",
+    "@foxglove/rosmsg-serialization": "2.0.1",
     "@foxglove/rosmsg2-serialization": "2.0.0",
     "@foxglove/rostime": "1.1.2",
     "@foxglove/rtps": "1.6.0",
