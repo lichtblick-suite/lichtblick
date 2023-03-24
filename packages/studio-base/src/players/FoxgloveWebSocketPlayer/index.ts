@@ -43,6 +43,7 @@ import {
   ServiceCallRequest,
   ServiceCallResponse,
   Parameter,
+  StatusLevel,
 } from "@foxglove/ws-protocol";
 
 import { JsonMessageWriter } from "./JsonMessageWriter";
@@ -309,7 +310,14 @@ export default class FoxgloveWebSocketPlayer implements Player {
     });
 
     this._client.on("status", (event) => {
-      log.info("Status:", event);
+      const msg = `FoxgloveWebSocket: ${event.message}`;
+      if (event.level === StatusLevel.INFO) {
+        log.info(msg);
+      } else if (event.level === StatusLevel.WARNING) {
+        log.warn(msg);
+      } else {
+        log.error(msg);
+      }
     });
 
     this._client.on("advertise", (newChannels) => {
