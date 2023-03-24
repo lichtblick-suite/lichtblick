@@ -11,21 +11,17 @@ import ReactDOM from "react-dom";
 import { Sockets } from "@foxglove/electron-socket/renderer";
 import Logger from "@foxglove/log";
 import {
-  AppSetting,
   installDevtoolsFormatters,
   overwriteFetch,
   waitForFonts,
   initI18n,
   IDataSourceFactory,
+  IAppConfiguration,
 } from "@foxglove/studio-base";
 
 import Root from "./Root";
-import NativeStorageAppConfiguration from "./services/NativeStorageAppConfiguration";
-import { Storage } from "../common/types";
 
 const log = Logger.getLogger(__filename);
-
-const isDevelopment = process.env.NODE_ENV === "development";
 
 function LogAfterRender(props: React.PropsWithChildren<unknown>): JSX.Element {
   useEffect(() => {
@@ -39,9 +35,10 @@ function LogAfterRender(props: React.PropsWithChildren<unknown>): JSX.Element {
 type MainParams = {
   dataSources?: IDataSourceFactory[];
   extraProviders?: JSX.Element[];
+  appConfiguration: IAppConfiguration;
 };
 
-export async function main(params: MainParams = {}): Promise<void> {
+export async function main(params: MainParams): Promise<void> {
   log.debug("initializing renderer");
 
   installDevtoolsFormatters();
@@ -61,20 +58,11 @@ export async function main(params: MainParams = {}): Promise<void> {
   await waitForFonts();
   await initI18n();
 
-  const appConfiguration = await NativeStorageAppConfiguration.Initialize(
-    (global as { storageBridge?: Storage }).storageBridge!,
-    {
-      defaults: {
-        [AppSetting.SHOW_DEBUG_PANELS]: isDevelopment,
-      },
-    },
-  );
-
   ReactDOM.render(
     <StrictMode>
       <LogAfterRender>
         <Root
-          appConfiguration={appConfiguration}
+          appConfiguration={params.appConfiguration}
           extraProviders={params.extraProviders}
           dataSources={params.dataSources}
         />

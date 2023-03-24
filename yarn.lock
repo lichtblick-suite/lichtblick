@@ -2147,15 +2147,15 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@foxglove/electron-socket@npm:2.1.0":
-  version: 2.1.0
-  resolution: "@foxglove/electron-socket@npm:2.1.0"
+"@foxglove/electron-socket@npm:2.1.1":
+  version: 2.1.1
+  resolution: "@foxglove/electron-socket@npm:2.1.1"
   dependencies:
     dns-packet: ^5.2.4
     eventemitter3: ^4.0.7
   peerDependencies:
     electron: ">=12"
-  checksum: 71cfb3160127e4499df876234b7134fb4740e7bdf141f55e8398762c316a4a64bc520a7aa927699be1a4cf76548ce78028764f3f4a895e341f1c83d7e7a9d128
+  checksum: dc9d34999d12002de20f39b4d516016303edfd8ea9f825f93ac12824f6443680585fa52f95319b3f1c9116df678adc15a011f313ee94eb76a021fe44d37dab20
   languageName: node
   linkType: hard
 
@@ -2423,7 +2423,7 @@ __metadata:
     "@foxglove/comlink-transfer-handlers": "workspace:*"
     "@foxglove/crc": 0.0.3
     "@foxglove/den": "workspace:*"
-    "@foxglove/electron-socket": 2.1.0
+    "@foxglove/electron-socket": 2.1.1
     "@foxglove/hooks": "workspace:*"
     "@foxglove/log": "workspace:*"
     "@foxglove/mcap-support": "workspace:*"
@@ -2599,7 +2599,7 @@ __metadata:
   dependencies:
     "@actions/exec": 1.1.1
     "@actions/tool-cache": 2.0.1
-    "@foxglove/electron-socket": 2.1.0
+    "@foxglove/electron-socket": 2.1.1
     "@foxglove/log": "workspace:*"
     "@foxglove/mcap-support": "workspace:*"
     "@foxglove/rosbag": 0.3.0
@@ -11100,6 +11100,7 @@ __metadata:
   resolution: "desktop@workspace:desktop"
   dependencies:
     "@foxglove/log": "workspace:*"
+    "@foxglove/studio-base": "workspace:*"
     "@foxglove/studio-desktop": "workspace:*"
     electron: 23.1.4
     playwright: 1.30.0

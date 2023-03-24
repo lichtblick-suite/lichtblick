@@ -3,6 +3,7 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 import { NativeImage, nativeImage } from "electron";
+import path from "path";
 import tinycolor from "tinycolor2";
 
 const ROTATION_DEGREES = 270;
@@ -11,7 +12,14 @@ const ROTATION_DEGREES = 270;
 export default function getDevModeIcon(): NativeImage | undefined {
   try {
     // This can fail when opening the app from a packaged DMG.
-    const originalIcon = nativeImage.createFromPath("resources/icon/icon.png");
+    const originalIcon = nativeImage.createFromPath(
+      path.resolve(
+        __dirname,
+        "..",
+        require.resolve("@foxglove/studio-desktop/src/main"),
+        "../../../resources/icon/icon.png",
+      ),
+    );
 
     const buffer = originalIcon.toBitmap();
     for (let i = 0; i + 3 < buffer.length; i += 4) {

@@ -78,7 +78,11 @@ function useFeatures(): Feature[] {
     {
       key: AppSetting.ENABLE_ROS2_NATIVE_DATA_SOURCE,
       name: t("ros2NativeConnection"),
-      description: <>{t("ros2NativeConnectionDescription")}</>,
+      description: (
+        <>
+          {t("ros2NativeConnectionDescription")} {t("restartTheAppForChangesToTakeEffect")}
+        </>
+      ),
     },
   ];
 
