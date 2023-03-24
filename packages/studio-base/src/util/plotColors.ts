@@ -22,11 +22,10 @@ export const lineColors = [
   toolsColorScheme.blue.medium,
   toolsColorScheme.orange.medium,
   toolsColorScheme.yellow.medium,
-  toolsColorScheme.purple.dark,
-  toolsColorScheme.cyan.medium,
   toolsColorScheme.green.medium,
+  toolsColorScheme.cyan.medium,
+  toolsColorScheme.purple.medium,
   toolsColorScheme.paleGreen.medium,
-  "#DDDDDD",
 ];
 
 const colorExpansion = lineColors.map((color) => [

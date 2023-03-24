@@ -57,7 +57,7 @@ export const toolsColorScheme = {
   yellow: {
     dark: "#EDCC28",
     medium: "#f7df71",
-    light: "#f1e4a",
+    light: "#f1e4aa",
   },
 };
 

@@ -11,10 +11,12 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
+import { Square24Filled } from "@fluentui/react-icons";
 import { sortBy, take } from "lodash";
-import { PropsWithChildren, useMemo } from "react";
+import { Fragment, PropsWithChildren, useMemo } from "react";
 import { makeStyles } from "tss-react/mui";
 
+import Stack from "@foxglove/studio-base/components/Stack";
 import { fonts } from "@foxglove/studio-base/util/sharedStyleConstants";
 
 import { TimeBasedChartTooltipData } from "./index";
@@ -28,24 +30,46 @@ type Props = {
 
 const useStyles = makeStyles()((theme) => ({
   root: {
-    display: "flex",
-    flexDirection: "column",
     fontFamily: fonts.MONOSPACE,
     fontSize: theme.typography.caption.fontSize,
     lineHeight: theme.typography.caption.lineHeight,
     overflowWrap: "break-word",
   },
-  overflow: {
-    opacity: theme.palette.action.disabledOpacity,
-    fontStyle: "italic",
+  grid: {
+    columnGap: theme.spacing(0.5),
+    display: "grid",
+    gridTemplateColumns: "auto minmax(0px, max-content) minmax(auto, max-content)",
+    alignItems: "center",
+    fontFamily: fonts.MONOSPACE,
+    fontSize: theme.typography.caption.fontSize,
+    lineHeight: theme.typography.caption.lineHeight,
+    overflowWrap: "break-word",
+  },
+  icon: {
+    gridColumn: "1",
+    height: 12,
+    width: 12,
   },
   path: {
     opacity: 0.9,
     whiteSpace: "nowrap",
   },
+  value: {
+    fontWeight: 600,
+    paddingLeft: theme.spacing(2),
+  },
+  overflow: {
+    gridColumn: "2/4",
+    opacity: theme.palette.action.disabledOpacity,
+    fontStyle: "italic",
+
+    ":not(:last-child)": {
+      marginBottom: theme.spacing(0.5),
+    },
+  },
 }));
 
-function OverflowMessage() {
+function OverflowMessage(): JSX.Element {
   const { classes } = useStyles();
 
   return <div className={classes.overflow}>&lt;multiple values under cursor&gt;</div>;
@@ -55,7 +79,7 @@ export default function TimeBasedChartTooltipContent(
   props: PropsWithChildren<Props>,
 ): React.ReactElement {
   const { colorsByDatasetIndex, content, multiDataset } = props;
-  const { classes } = useStyles();
+  const { classes, cx } = useStyles();
 
   const itemsByPath = useMemo(() => {
     const out = new Map<string, TimeBasedChartTooltipData[]>();
@@ -83,7 +107,7 @@ export default function TimeBasedChartTooltipContent(
   // not include all datasets
   if (!multiDataset) {
     return (
-      <div className={classes.root} data-testid="TimeBasedChartTooltipContent">
+      <Stack className={classes.root} data-testid="TimeBasedChartTooltipContent">
         {take(content, 1).map((item, idx) => {
           const value =
             typeof item.value === "string"
@@ -99,7 +123,7 @@ export default function TimeBasedChartTooltipContent(
           );
         })}
         {content.length > 1 && <OverflowMessage />}
-      </div>
+      </Stack>
     );
   }
 
@@ -110,7 +134,7 @@ export default function TimeBasedChartTooltipContent(
   );
 
   return (
-    <div className={classes.root} data-testid="TimeBasedChartTooltipContent">
+    <div className={cx(classes.root, classes.grid)} data-testid="TimeBasedChartTooltipContent">
       {sortedItems.map(([path, items], idx) => {
         const firstItem = items[0];
         const color =
@@ -118,10 +142,9 @@ export default function TimeBasedChartTooltipContent(
             ? colorsByDatasetIndex?.[firstItem.datasetIndex]
             : "auto";
         return (
-          <div key={idx}>
-            <div className={classes.path} style={{ color: color ?? "auto" }}>
-              {path}
-            </div>
+          <Fragment key={idx}>
+            <Square24Filled className={classes.icon} primaryFill={color} />
+            <div className={classes.path}>{path}</div>
             {take(items, 1).map((item, itemIdx) => {
               const value =
                 typeof item.value === "string"
@@ -130,14 +153,14 @@ export default function TimeBasedChartTooltipContent(
                   ? item.value.toString()
                   : JSON.stringify(item.value);
               return (
-                <div key={itemIdx}>
+                <div className={classes.value} key={itemIdx}>
                   {value}
                   {item.constantName != undefined ? ` (${item.constantName})` : ""}
                 </div>
               );
             })}
             {itemsByPath.overflow.has(path) && <OverflowMessage />}
-          </div>
+          </Fragment>
         );
       })}
     </div>
