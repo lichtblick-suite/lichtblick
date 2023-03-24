@@ -20,11 +20,9 @@ export default {
   decorators: [
     (StoryFn: Story): JSX.Element => {
       return (
-        <div style={{ padding: 10, height: "300px" }}>
-          <StudioToastProvider>
-            <StoryFn />
-          </StudioToastProvider>
-        </div>
+        <StudioToastProvider>
+          <StoryFn />
+        </StudioToastProvider>
       );
     },
   ],
