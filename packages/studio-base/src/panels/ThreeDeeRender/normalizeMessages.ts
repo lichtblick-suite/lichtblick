@@ -3,7 +3,7 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 import type { Time } from "@foxglove/rostime";
-import { FrameTransform, NumericType } from "@foxglove/schemas";
+import { FrameTransform, FrameTransforms, NumericType } from "@foxglove/schemas";
 
 import type { PartialMessage } from "./SceneExtension";
 import {
@@ -186,6 +186,14 @@ export function normalizeFrameTransform(
       frameTransform?.translation ?? frameTransform?.transform?.translation,
     ),
     rotation: normalizeQuaternion(frameTransform?.rotation ?? frameTransform?.transform?.rotation),
+  };
+}
+
+export function normalizeFrameTransforms(
+  frameTransforms: PartialMessage<FrameTransforms> | undefined,
+): FrameTransforms {
+  return {
+    transforms: (frameTransforms?.transforms ?? []).map(normalizeFrameTransform),
   };
 }
 

@@ -11,7 +11,7 @@ import { v4 as uuidv4 } from "uuid";
 
 import Logger from "@foxglove/log";
 import { toNanoSec } from "@foxglove/rostime";
-import type { FrameTransform, SceneUpdate } from "@foxglove/schemas";
+import type { FrameTransform, FrameTransforms, SceneUpdate } from "@foxglove/schemas";
 import {
   MessageEvent,
   ParameterValue,
@@ -38,10 +38,11 @@ import { SettingsManager, SettingsTreeEntry } from "./SettingsManager";
 import { SharedGeometry } from "./SharedGeometry";
 import { CameraState } from "./camera";
 import { DARK_OUTLINE, LIGHT_OUTLINE, stringToRgb } from "./color";
-import { FRAME_TRANSFORM_DATATYPES } from "./foxglove";
+import { FRAME_TRANSFORMS_DATATYPES, FRAME_TRANSFORM_DATATYPES } from "./foxglove";
 import { DetailLevel, msaaSamples } from "./lod";
 import {
   normalizeFrameTransform,
+  normalizeFrameTransforms,
   normalizeTFMessage,
   normalizeTransformStamped,
 } from "./normalizeMessages";
@@ -451,6 +452,11 @@ export class Renderer extends EventEmitter<RendererEvents> {
     // Internal handlers for TF messages to update the transform tree
     this.addSchemaSubscriptions(FRAME_TRANSFORM_DATATYPES, {
       handler: this.handleFrameTransform,
+      shouldSubscribe: () => true,
+      preload: config.scene.transforms?.enablePreloading ?? true,
+    });
+    this.addSchemaSubscriptions(FRAME_TRANSFORMS_DATATYPES, {
+      handler: this.handleFrameTransforms,
       shouldSubscribe: () => true,
       preload: config.scene.transforms?.enablePreloading ?? true,
     });
@@ -1154,9 +1160,19 @@ export class Renderer extends EventEmitter<RendererEvents> {
   };
 
   private handleFrameTransform = ({ message }: MessageEvent<DeepPartial<FrameTransform>>): void => {
-    // foxglove.FrameTransform - Ingest the list of transforms into our TF tree
+    // foxglove.FrameTransform - Ingest this single transform into our TF tree
     const transform = normalizeFrameTransform(message);
     this.addFrameTransform(transform);
+  };
+
+  private handleFrameTransforms = ({
+    message,
+  }: MessageEvent<DeepPartial<FrameTransforms>>): void => {
+    // foxglove.FrameTransforms - Ingest the list of transforms into our TF tree
+    const frameTransforms = normalizeFrameTransforms(message);
+    for (const transform of frameTransforms.transforms) {
+      this.addFrameTransform(transform);
+    }
   };
 
   private handleTFMessage = ({ message }: MessageEvent<DeepPartial<TFMessage>>): void => {

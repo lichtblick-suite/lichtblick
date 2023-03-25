@@ -5,6 +5,9 @@
 export const FRAME_TRANSFORM_DATATYPES = new Set<string>();
 addFoxgloveSchema(FRAME_TRANSFORM_DATATYPES, "foxglove.FrameTransform");
 
+export const FRAME_TRANSFORMS_DATATYPES = new Set<string>();
+addFoxgloveSchema(FRAME_TRANSFORMS_DATATYPES, "foxglove.FrameTransforms");
+
 export const POINTCLOUD_DATATYPES = new Set<string>();
 addFoxgloveSchema(POINTCLOUD_DATATYPES, "foxglove.PointCloud");
 
