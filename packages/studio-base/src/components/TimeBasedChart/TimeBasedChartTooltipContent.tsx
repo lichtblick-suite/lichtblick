@@ -14,6 +14,7 @@
 import { Square24Filled } from "@fluentui/react-icons";
 import { sortBy, take } from "lodash";
 import { Fragment, PropsWithChildren, useMemo } from "react";
+import { DeepReadonly } from "ts-essentials";
 import { makeStyles } from "tss-react/mui";
 
 import Stack from "@foxglove/studio-base/components/Stack";
@@ -21,12 +22,13 @@ import { fonts } from "@foxglove/studio-base/util/sharedStyleConstants";
 
 import { TimeBasedChartTooltipData } from "./index";
 
-type Props = {
+type Props = DeepReadonly<{
   colorsByDatasetIndex?: Record<string, undefined | string>;
   content: TimeBasedChartTooltipData[];
+  labelsByDatasetIndex?: Record<string, undefined | string>;
   // Flag indicating the containing chart has multiple datasets
   multiDataset: boolean;
-};
+}>;
 
 const useStyles = makeStyles()((theme) => ({
   root: {
@@ -78,7 +80,7 @@ function OverflowMessage(): JSX.Element {
 export default function TimeBasedChartTooltipContent(
   props: PropsWithChildren<Props>,
 ): React.ReactElement {
-  const { colorsByDatasetIndex, content, multiDataset } = props;
+  const { colorsByDatasetIndex, content, labelsByDatasetIndex, multiDataset } = props;
   const { classes, cx } = useStyles();
 
   const itemsByPath = useMemo(() => {
@@ -141,10 +143,14 @@ export default function TimeBasedChartTooltipContent(
           firstItem?.datasetIndex != undefined
             ? colorsByDatasetIndex?.[firstItem.datasetIndex]
             : "auto";
+        const label =
+          firstItem?.datasetIndex != undefined
+            ? labelsByDatasetIndex?.[firstItem.datasetIndex]
+            : undefined;
         return (
           <Fragment key={idx}>
             <Square24Filled className={classes.icon} primaryFill={color} />
-            <div className={classes.path}>{path}</div>
+            <div className={classes.path}>{label ?? path}</div>
             {take(items, 1).map((item, itemIdx) => {
               const value =
                 typeof item.value === "string"

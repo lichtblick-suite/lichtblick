@@ -119,8 +119,8 @@ export function PlotLegendRow({
     if (!showPlotValuesInLegend) {
       return [];
     }
-    return datasets.find((set) => set.label === path.value)?.data ?? [];
-  }, [datasets, path.value, showPlotValuesInLegend]);
+    return datasets[index]?.data ?? [];
+  }, [datasets, index, showPlotValuesInLegend]);
 
   const [hoverComponentId] = useState<string>(() => uuidv4());
   const hoverValue = useHoverValue({

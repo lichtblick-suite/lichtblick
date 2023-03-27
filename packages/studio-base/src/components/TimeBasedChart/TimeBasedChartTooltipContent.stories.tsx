@@ -120,22 +120,33 @@ export const MultipleItemsSingleDatasetLight = Object.assign(
 );
 
 export function MultipleItemsMultipleDataset(): JSX.Element {
-  const data: TimeBasedChartTooltipData = {
-    datasetIndex: 0,
-    x: 0,
-    y: 0,
-    path: "/some/topic.path",
-    value: 3,
-    constantName: "ACTIVE",
-  };
+  const data: TimeBasedChartTooltipData[] = [
+    {
+      datasetIndex: 0,
+      x: 0,
+      y: 0,
+      path: "/some/topic.path",
+      value: 3,
+      constantName: "ACTIVE",
+    },
+    {
+      datasetIndex: 1,
+      x: 0,
+      y: 0,
+      path: "/other/topic.path",
+      value: 4,
+      constantName: "ACTIVE",
+    },
+  ];
   return (
     <Tooltip
       open
       title={
         <TimeBasedChartTooltipContent
           multiDataset={true}
-          content={[data, data]}
-          colorsByDatasetIndex={{ "0": "chartreuse" }}
+          content={data}
+          colorsByDatasetIndex={{ "0": "chartreuse", "1": "yellow" }}
+          labelsByDatasetIndex={{ "1": "-*- Custom Label -*-" }}
         />
       }
       placement="top"

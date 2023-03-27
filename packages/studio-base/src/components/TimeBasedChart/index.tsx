@@ -11,17 +11,17 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { Tooltip, Button, useTheme, Fade } from "@mui/material";
+import { Button, Fade, Tooltip, useTheme } from "@mui/material";
 import { ChartOptions, ScaleOptions } from "chart.js";
 import { AnnotationOptions } from "chartjs-plugin-annotation";
 import React, {
-  useEffect,
-  useCallback,
-  useState,
-  useRef,
   ComponentProps,
-  useMemo,
   MouseEvent,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
 } from "react";
 import { useMountedState, useThrottle } from "react-use";
 import { makeStyles } from "tss-react/mui";
@@ -39,15 +39,15 @@ import Stack from "@foxglove/studio-base/components/Stack";
 import {
   TimelineInteractionStateStore,
   useClearHoverValue,
-  useTimelineInteractionState,
   useSetHoverValue,
+  useTimelineInteractionState,
 } from "@foxglove/studio-base/context/TimelineInteractionStateContext";
 import { fonts } from "@foxglove/studio-base/util/sharedStyleConstants";
 
 import HoverBar from "./HoverBar";
 import TimeBasedChartTooltipContent from "./TimeBasedChartTooltipContent";
 import { VerticalBarWrapper } from "./VerticalBarWrapper";
-import { downsampleTimeseries, downsampleScatter } from "./downsample";
+import { downsampleScatter, downsampleTimeseries } from "./downsample";
 
 const log = Logger.getLogger(__filename);
 
@@ -755,6 +755,10 @@ export default function TimeBasedChart(props: Props): JSX.Element {
     );
   }, [data.datasets]);
 
+  const labelsByDatasetIndex = useMemo(() => {
+    return Object.fromEntries(data.datasets.map((dataset, index) => [index, dataset.label]));
+  }, [data.datasets]);
+
   const datasetsLength = datasets.length;
   const tooltipContent = useMemo(() => {
     return activeTooltip ? (
@@ -762,9 +766,10 @@ export default function TimeBasedChart(props: Props): JSX.Element {
         content={activeTooltip.data}
         multiDataset={datasetsLength > 1}
         colorsByDatasetIndex={colorsByDatasetIndex}
+        labelsByDatasetIndex={labelsByDatasetIndex}
       />
     ) : undefined;
-  }, [activeTooltip, colorsByDatasetIndex, datasetsLength]);
+  }, [activeTooltip, colorsByDatasetIndex, datasetsLength, labelsByDatasetIndex]);
 
   // reset is shown if we have sync lock and there has been user interaction, or if we don't
   // have sync lock and the user has manually interacted with the plot

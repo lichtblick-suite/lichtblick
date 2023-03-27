@@ -2,10 +2,8 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { v4 as uuidv4 } from "uuid";
-
 import { filterMap } from "@foxglove/den/collection";
-import { isTime, Time, toSec, subtract } from "@foxglove/rostime";
+import { isTime, subtract, Time, toSec } from "@foxglove/rostime";
 import { format } from "@foxglove/studio-base/util/formatTime";
 import { darkColor, getLineColor, lightColor } from "@foxglove/studio-base/util/plotColors";
 import { formatTimeRaw, TimestampMethod } from "@foxglove/studio-base/util/time";
@@ -14,13 +12,13 @@ import { PlotXAxisVal } from "./index";
 import {
   BasePlotPath,
   DataSet,
+  Datum,
   isReferenceLinePlotPathType,
   PlotDataByPath,
   PlotDataItem,
   PlotPath,
-  Datum,
 } from "./internalTypes";
-import { derivative, applyToDatum, mathFunctions, MathFunction } from "./transformPlotRange";
+import { applyToDatum, derivative, MathFunction, mathFunctions } from "./transformPlotRange";
 
 const isCustomScale = (xAxisVal: PlotXAxisVal): boolean =>
   xAxisVal === "custom" || xAxisVal === "currentCustom";
@@ -218,7 +216,7 @@ function getDatasetsFromMessagePlotPath({
   const borderColor = getLineColor(path.color, index);
   const dataset: DataSet = {
     borderColor,
-    label: path.value ? path.value : uuidv4(),
+    label: path.label != undefined && path.label !== "" ? path.label : path.value,
     showLine,
     fill: false,
     borderWidth: 1,
