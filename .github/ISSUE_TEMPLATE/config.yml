@@ -1,0 +1,14 @@
+blank_issues_enabled: false
+contact_links:
+  - name: "🙋‍♀️ Question"
+    url: https://github.com/orgs/foxglove/discussions/new/choose
+    about: Search discussions or ask our community for help
+  - name: "🚀 Feature request"
+    url: https://github.com/orgs/foxglove/discussions/new/choose
+    about: Search existing feature requests or share a new idea
+  - name: "📚 Stack Exchange"
+    url: https://robotics.stackexchange.com/questions/ask
+    about: Get help from the robotics community
+  - name: "💬 Live chat"
+    url: https://foxglove.dev/slack
+    about: Join the discussion in our Slack community
