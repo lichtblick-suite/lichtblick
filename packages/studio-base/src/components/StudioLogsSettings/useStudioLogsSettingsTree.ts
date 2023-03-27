@@ -59,6 +59,9 @@ function useStudioLogsSettingsTree(): SettingsTree {
 
       const parts = channelName.split("/");
 
+      // Studio code may live in a `studio` workspace, and we'll still want the tree to work the same
+      const studioSpacePrefix = /^(studio\/)/.test(channelName) ? `${parts.shift()}/` : "";
+
       const [type, pkgName, srcPath, component, ...rest] = parts;
 
       // misc entry
@@ -102,7 +105,7 @@ function useStudioLogsSettingsTree(): SettingsTree {
 
       itemDetailByPath.set(pkgName, {
         type: "prefix",
-        fullPath: `packages/${pkgName}`,
+        fullPath: `${studioSpacePrefix}packages/${pkgName}`,
       });
 
       const componentNode = (pkgNode.children![component] ??= {
@@ -119,14 +122,14 @@ function useStudioLogsSettingsTree(): SettingsTree {
       if (extname(component)) {
         itemDetailByPath.set(`${pkgName}/${component}`, {
           type: "channel",
-          fullPath: `packages/${pkgName}/src/${component}`,
+          fullPath: `${studioSpacePrefix}packages/${pkgName}/src/${component}`,
         });
         continue;
       }
 
       itemDetailByPath.set(`${pkgName}/${component}`, {
         type: "prefix",
-        fullPath: `packages/${pkgName}/src/${component}`,
+        fullPath: `${studioSpacePrefix}packages/${pkgName}/src/${component}`,
       });
 
       // If there are items under the component, add a children entry and add them to the children entry
@@ -142,7 +145,7 @@ function useStudioLogsSettingsTree(): SettingsTree {
 
         itemDetailByPath.set(`${pkgName}/${component}/${leafId}`, {
           type: "channel",
-          fullPath: `packages/${pkgName}/src/${component}/${leafId}`,
+          fullPath: `${studioSpacePrefix}packages/${pkgName}/src/${component}/${leafId}`,
         });
       }
     }
