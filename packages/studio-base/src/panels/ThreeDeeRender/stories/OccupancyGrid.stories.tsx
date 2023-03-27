@@ -2,6 +2,9 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
+import { screen } from "@testing-library/dom";
+import userEvent from "@testing-library/user-event";
+
 import { MessageEvent } from "@foxglove/studio";
 import { LayerSettingsOccupancyGrid } from "@foxglove/studio-base/panels/ThreeDeeRender/renderables/OccupancyGrids";
 import { Topic } from "@foxglove/studio-base/players/types";
@@ -29,7 +32,7 @@ function makeGridData({ width, height }: { width: number; height: number }) {
   return grid;
 }
 
-export function Occupancy_Grid_Costmap(): JSX.Element {
+function BaseStory({ includeSettings = false }: { includeSettings?: boolean }): JSX.Element {
   const topics: Topic[] = [
     { name: "/grid", schemaName: "nav_msgs/OccupancyGrid" },
     { name: "/tf", schemaName: "geometry_msgs/TransformStamped" },
@@ -116,7 +119,7 @@ export function Occupancy_Grid_Costmap(): JSX.Element {
   });
 
   return (
-    <PanelSetup fixture={fixture}>
+    <PanelSetup fixture={fixture} includeSettings={includeSettings}>
       <ThreeDeeRender
         overrideConfig={{
           followTf: "base_link",
@@ -127,7 +130,6 @@ export function Occupancy_Grid_Costmap(): JSX.Element {
             } as LayerSettingsOccupancyGrid,
             "/custom": {
               visible: true,
-              colorMode: "custom",
             } as LayerSettingsOccupancyGrid,
           },
           layers: {
@@ -150,3 +152,16 @@ export function Occupancy_Grid_Costmap(): JSX.Element {
     </PanelSetup>
   );
 }
+
+export function Occupancy_Grid_Costmap(): JSX.Element {
+  return <BaseStory />;
+}
+
+export function Occupancy_Grid_Costmap_With_Settings(): JSX.Element {
+  return <BaseStory includeSettings />;
+}
+Occupancy_Grid_Costmap_With_Settings.play = async () => {
+  const user = userEvent.setup();
+  const label = await screen.findByText("/custom");
+  await user.click(label);
+};

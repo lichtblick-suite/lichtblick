@@ -96,13 +96,14 @@ export class OccupancyGrids extends SceneExtension<OccupancyGridRenderable> {
       if (!topicIsConvertibleToSchema(topic, OCCUPANCY_GRID_DATATYPES)) {
         continue;
       }
-      const config = (configTopics[topic.name] ?? {}) as Partial<LayerSettingsOccupancyGrid>;
+
+      const configWithDefaults = { ...DEFAULT_SETTINGS, ...configTopics[topic.name] };
 
       let fields: SettingsTreeFields = {
         colorMode: {
           label: "Color mode",
           input: "select",
-          value: config.colorMode ?? "custom",
+          value: configWithDefaults.colorMode,
           options: [
             { label: "Custom", value: "custom" },
             { label: "Map", value: "map" },
@@ -112,13 +113,13 @@ export class OccupancyGrids extends SceneExtension<OccupancyGridRenderable> {
         },
       };
 
-      if (config.colorMode === "custom") {
+      if (configWithDefaults.colorMode === "custom") {
         // prettier-ignore
         const customFields: SettingsTreeFields = {
-          minColor: { label: "Min color", input: "rgba", value: config.minColor ?? DEFAULT_MIN_COLOR_STR },
-          maxColor: { label: "Max color", input: "rgba", value: config.maxColor ?? DEFAULT_MAX_COLOR_STR },
-          unknownColor: { label: "Unknown color", input: "rgba", value: config.unknownColor ?? DEFAULT_UNKNOWN_COLOR_STR },
-          invalidColor: { label: "Invalid color", input: "rgba", value: config.invalidColor ?? DEFAULT_INVALID_COLOR_STR },
+          minColor: { label: "Min color", input: "rgba", value: configWithDefaults.minColor },
+          maxColor: { label: "Max color", input: "rgba", value: configWithDefaults.maxColor },
+          unknownColor: { label: "Unknown color", input: "rgba", value: configWithDefaults.unknownColor },
+          invalidColor: { label: "Invalid color", input: "rgba", value: configWithDefaults.invalidColor }
         };
         fields = {
           ...fields,
@@ -129,7 +130,7 @@ export class OccupancyGrids extends SceneExtension<OccupancyGridRenderable> {
           alpha: {
             label: "Alpha",
             input: "number",
-            value: config.alpha ?? DEFAULT_ALPHA,
+            value: configWithDefaults.alpha,
             min: 0.0,
             max: 1.0,
             step: 0.1,
@@ -145,7 +146,7 @@ export class OccupancyGrids extends SceneExtension<OccupancyGridRenderable> {
       fields.frameLocked = {
         label: "Frame lock",
         input: "boolean",
-        value: config.frameLocked ?? false,
+        value: configWithDefaults.frameLocked,
       };
 
       entries.push({
@@ -154,7 +155,7 @@ export class OccupancyGrids extends SceneExtension<OccupancyGridRenderable> {
           label: topic.name,
           icon: "Cells",
           fields,
-          visible: config.visible ?? DEFAULT_SETTINGS.visible,
+          visible: configWithDefaults.visible,
           order: topic.name.toLocaleLowerCase(),
           handler,
         },
