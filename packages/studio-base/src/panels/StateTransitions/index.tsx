@@ -11,20 +11,19 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import AddIcon from "@mui/icons-material/Add";
-import ClearIcon from "@mui/icons-material/Clear";
-import { alpha, Button, IconButton } from "@mui/material";
+import { Edit16Filled } from "@fluentui/react-icons";
+import { Button, Typography } from "@mui/material";
 import { ChartOptions, ScaleOptions } from "chart.js";
 import { uniq } from "lodash";
-import { useCallback, useMemo, useRef } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { useResizeDetector } from "react-resize-detector";
+import tinycolor from "tinycolor2";
 import { makeStyles } from "tss-react/mui";
 
 import { useShallowMemo } from "@foxglove/hooks";
 import { add as addTimes, fromSec, subtract as subtractTimes, toSec } from "@foxglove/rostime";
 import * as PanelAPI from "@foxglove/studio-base/PanelAPI";
 import { useBlocksByTopic } from "@foxglove/studio-base/PanelAPI";
-import MessagePathInput from "@foxglove/studio-base/components/MessagePathSyntax/MessagePathInput";
 import { getTopicsFromPaths } from "@foxglove/studio-base/components/MessagePathSyntax/parseRosPath";
 import { useDecodeMessagePathsForMessagesByTopic } from "@foxglove/studio-base/components/MessagePathSyntax/useCachedGetMessagePathDataItems";
 import useMessagesByPath from "@foxglove/studio-base/components/MessagePathSyntax/useMessagesByPath";
@@ -34,25 +33,24 @@ import {
   useMessagePipelineGetter,
 } from "@foxglove/studio-base/components/MessagePipeline";
 import Panel from "@foxglove/studio-base/components/Panel";
-import PanelToolbar, {
-  PANEL_TOOLBAR_MIN_HEIGHT,
-} from "@foxglove/studio-base/components/PanelToolbar";
+import { usePanelContext } from "@foxglove/studio-base/components/PanelContext";
+import PanelToolbar from "@foxglove/studio-base/components/PanelToolbar";
 import Stack from "@foxglove/studio-base/components/Stack";
 import TimeBasedChart, {
   TimeBasedChartTooltipData,
 } from "@foxglove/studio-base/components/TimeBasedChart";
-import TimestampMethodDropdown from "@foxglove/studio-base/components/TimestampMethodDropdown";
-import { usePanelMousePresence } from "@foxglove/studio-base/hooks/usePanelMousePresence";
+import { useSelectedPanels } from "@foxglove/studio-base/context/CurrentLayoutContext";
+import { useWorkspaceActions } from "@foxglove/studio-base/context/WorkspaceContext";
 import {
   ChartData,
   OnClickArg as OnChartClickArgs,
 } from "@foxglove/studio-base/src/components/Chart";
 import { OpenSiblingPanel, PanelConfig, SaveConfig } from "@foxglove/studio-base/types/panels";
 import { fonts } from "@foxglove/studio-base/util/sharedStyleConstants";
-import { TimestampMethod } from "@foxglove/studio-base/util/time";
 
 import messagesToDatasets from "./messagesToDatasets";
 import { useStateTransitionsPanelSettings } from "./settings";
+import { stateTransitionPathDisplayName } from "./shared";
 import { StateTransitionConfig } from "./types";
 
 export const transitionableRosTypes = [
@@ -73,45 +71,46 @@ const fontFamily = fonts.MONOSPACE;
 const fontSize = 10;
 const fontWeight = "bold";
 
-const useStyles = makeStyles()((theme) => ({
-  addButton: {
-    position: "absolute",
-    top: `calc(${PANEL_TOOLBAR_MIN_HEIGHT}px + ${theme.spacing(1)})`,
-    right: theme.spacing(0.5),
-    zIndex: 1,
-  },
-  clearButton: {
-    "&.MuiIconButton-root": {
-      padding: theme.spacing(0.125),
-    },
-  },
-  visibilityHidden: {
-    visibility: "hidden",
-  },
+const useStyles = makeStyles<void, "button">()((theme) => ({
   chartWrapper: {
     position: "relative",
     marginTop: theme.spacing(0.5),
   },
+  chartOverlay: {
+    top: 0,
+    left: 0,
+    right: 0,
+    pointerEvents: "none",
+  },
   row: {
-    display: "grid",
-    position: "absolute",
-    alignItems: "center",
-    gridTemplateColumns: "auto minmax(min-content, 1fr) auto",
-    gap: theme.spacing(0.25),
-    paddingLeft: theme.spacing(0.25),
-    left: theme.spacing(0.5),
-    borderRadius: theme.shape.borderRadius,
+    paddingInline: theme.spacing(0.5),
+    pointerEvents: "none",
+  },
+  button: {
+    minWidth: "auto",
+    textAlign: "left",
+    pointerEvents: "auto",
+    fontWeight: "normal",
+    padding: theme.spacing(0, 1),
+    maxWidth: "100%",
 
-    ".MuiIconButton-root": {
-      visibility: "hidden",
-    },
-    "&:hover, &:focus-within": {
-      backgroundColor: alpha(theme.palette.background.paper, 0.67),
+    "&:hover": {
+      backgroundColor: tinycolor(theme.palette.background.paper).setAlpha(0.67).toString(),
       backgroundImage: `linear-gradient(to right, ${theme.palette.action.focus}, ${theme.palette.action.focus})`,
+    },
+    ".MuiButton-endIcon": {
+      opacity: 0.8,
+      fontSize: 14,
+      marginLeft: theme.spacing(0.5),
 
-      ".MuiIconButton-root": {
-        visibility: "visible",
+      svg: {
+        fontSize: "1em",
+        height: "1em",
+        width: "1em",
       },
+    },
+    ":not(:hover) .MuiButton-endIcon": {
+      display: "none",
     },
   },
 }));
@@ -177,34 +176,15 @@ type Props = {
 const StateTransitions = React.memo(function StateTransitions(props: Props) {
   const { config, saveConfig } = props;
   const { paths } = config;
-  const { classes, cx } = useStyles();
-
-  const onInputChange = (value: string, index?: number) => {
-    if (index == undefined) {
-      throw new Error("index not set");
-    }
-    const newPaths = config.paths.slice();
-    const newPath = newPaths[index];
-    if (newPath) {
-      newPaths[index] = { ...newPath, value: value.trim() };
-    }
-    saveConfig({ paths: newPaths });
-  };
-
-  const onInputTimestampMethodChange = (value: TimestampMethod, index: number | undefined) => {
-    if (index == undefined) {
-      throw new Error("index not set");
-    }
-    const newPaths = config.paths.slice();
-    const newPath = newPaths[index];
-    if (newPath) {
-      newPaths[index] = { ...newPath, timestampMethod: value };
-    }
-    saveConfig({ paths: newPaths });
-  };
+  const { classes } = useStyles();
 
   const pathStrings = useMemo(() => paths.map(({ value }) => value), [paths]);
   const subscribeTopics = useMemo(() => getTopicsFromPaths(pathStrings), [pathStrings]);
+
+  const { openPanelSettings } = useWorkspaceActions();
+  const { id: panelId } = usePanelContext();
+  const { setSelectedPanelIds } = useSelectedPanels();
+  const [focusedPath, setFocusedPath] = useState<undefined | string[]>(undefined);
 
   const { startTime } = PanelAPI.useDataSourceInfo();
   const currentTime = useMessagePipeline(selectCurrentTime);
@@ -223,7 +203,7 @@ const StateTransitions = React.memo(function StateTransitions(props: Props) {
   );
 
   const { height, heightPerTopic } = useMemo(() => {
-    const onlyTopicsHeight = paths.length * 55;
+    const onlyTopicsHeight = paths.length * 64;
     const xAxisHeight = 30;
     return {
       height: Math.max(80, onlyTopicsHeight + xAxisHeight),
@@ -301,6 +281,9 @@ const StateTransitions = React.memo(function StateTransitions(props: Props) {
         // Hide all y-axis ticks since each bar on the y-axis is just a separate path.
         display: false,
       },
+      grid: {
+        display: false,
+      },
       type: "linear",
       min: minY,
       max: -3,
@@ -310,6 +293,9 @@ const StateTransitions = React.memo(function StateTransitions(props: Props) {
   const xScale = useMemo<ScaleOptions<"linear">>(() => {
     return {
       type: "linear",
+      border: {
+        display: false,
+      },
     };
   }, []);
 
@@ -339,10 +325,8 @@ const StateTransitions = React.memo(function StateTransitions(props: Props) {
   );
 
   const data: ChartData = useShallowMemo({ datasets });
-  const rootRef = useRef<HTMLDivElement>(ReactNull);
-  const mousePresent = usePanelMousePresence(rootRef);
 
-  useStateTransitionsPanelSettings(config, saveConfig);
+  useStateTransitionsPanelSettings(config, saveConfig, focusedPath);
 
   const pointToDatumTooltipMap = useMemo(() => {
     const lookup = new Map<string, TimeBasedChartTooltipData>();
@@ -353,26 +337,8 @@ const StateTransitions = React.memo(function StateTransitions(props: Props) {
   }, [tooltips]);
 
   return (
-    <Stack ref={rootRef} flexGrow={1} overflow="hidden" style={{ zIndex: 0 }}>
+    <Stack flexGrow={1} overflow="hidden" style={{ zIndex: 0 }}>
       <PanelToolbar />
-      <div
-        className={cx(classes.addButton, {
-          [classes.visibilityHidden]: !mousePresent,
-        })}
-      >
-        <Button
-          size="small"
-          variant="contained"
-          color="inherit"
-          startIcon={<AddIcon />}
-          disableRipple
-          onClick={() =>
-            saveConfig({ paths: [...config.paths, { value: "", timestampMethod: "receiveTime" }] })
-          }
-        >
-          Add topic
-        </Button>
-      </div>
       <Stack fullWidth flex="auto" overflowX="hidden" overflowY="auto">
         <div className={classes.chartWrapper} style={{ height }} ref={sizeRef}>
           <TimeBasedChart
@@ -392,43 +358,37 @@ const StateTransitions = React.memo(function StateTransitions(props: Props) {
             currentTime={currentTimeSinceStart}
           />
 
-          {paths.map(({ value: path, timestampMethod }, index) => (
-            <div className={classes.row} key={index} style={{ top: index * heightPerTopic }}>
-              <IconButton
-                size="small"
-                className={classes.clearButton}
-                onClick={() => {
-                  const newPaths = config.paths.slice();
-                  newPaths.splice(index, 1);
-                  saveConfig({ paths: newPaths });
-                }}
-              >
-                <ClearIcon fontSize="inherit" />
-              </IconButton>
-              <MessagePathInput
-                path={path}
-                onChange={onInputChange}
-                index={index}
-                autoSize
-                validTypes={transitionableRosTypes}
-                noMultiSlices
-              />
-              <TimestampMethodDropdown
-                path={path}
-                index={index}
-                iconButtonProps={{ disabled: path !== "" }}
-                timestampMethod={timestampMethod}
-                onTimestampMethodChange={onInputTimestampMethodChange}
-              />
-            </div>
-          ))}
+          <Stack className={classes.chartOverlay} position="absolute" paddingTop={0.5}>
+            {paths.map((path, index) => (
+              <div className={classes.row} key={index} style={{ height: heightPerTopic }}>
+                <Button
+                  size="small"
+                  color="inherit"
+                  className={classes.button}
+                  endIcon={<Edit16Filled />}
+                  onClick={() => {
+                    setSelectedPanelIds([panelId]);
+                    openPanelSettings();
+                    setFocusedPath(["paths", String(index)]);
+                  }}
+                >
+                  <Typography variant="inherit" noWrap>
+                    {stateTransitionPathDisplayName(path, index)}
+                  </Typography>
+                </Button>
+              </div>
+            ))}
+          </Stack>
         </div>
       </Stack>
     </Stack>
   );
 });
 
-const defaultConfig: StateTransitionConfig = { paths: [], isSynced: true };
+const defaultConfig: StateTransitionConfig = {
+  paths: [{ value: "", timestampMethod: "receiveTime" }],
+  isSynced: true,
+};
 export default Panel(
   Object.assign(StateTransitions, {
     panelType: "StateTransitions",
