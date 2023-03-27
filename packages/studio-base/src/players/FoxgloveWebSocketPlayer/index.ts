@@ -826,7 +826,13 @@ export default class FoxgloveWebSocketPlayer implements Player {
     }
 
     if (clientChannel.encoding === "json") {
-      const message = Buffer.from(JSON.stringify(msg) ?? "");
+      // Ensure that typed arrays are encoded as arrays and not objects.
+      const replacer = (_key: string, value: unknown) => {
+        return ArrayBuffer.isView(value)
+          ? Array.from(value as unknown as ArrayLike<unknown>)
+          : value;
+      };
+      const message = Buffer.from(JSON.stringify(msg, replacer) ?? "");
       this._client.sendMessage(clientChannel.id, message);
     } else if (
       ROS_ENCODINGS.includes(clientChannel.encoding) &&
