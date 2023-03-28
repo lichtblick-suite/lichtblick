@@ -38,9 +38,6 @@ function makeGeoJsonMessage(center: { lat: number; lon: number }) {
     features: [
       {
         type: "Feature",
-        properties: {
-          name: "Named Line",
-        },
         geometry: {
           type: "LineString",
           coordinates: [
