@@ -52,10 +52,6 @@ enum AppEvent {
 
   // Experimental features
   EXPERIMENTAL_FEATURE_TOGGLE = "Studio: Experimental Feature Toggled",
-
-  // URDF functionality
-  URDF_LOAD_LOCAL_FILE = "Studio: Local URDF File Loaded",
-  URDF_LOAD_PARAM = "Studio: URDF Loaded from robot_description Paramter",
 }
 
 interface IAnalytics {

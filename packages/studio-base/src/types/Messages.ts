@@ -342,11 +342,3 @@ export type CameraInfo = Readonly<{
   P: FloatArray;
   R: FloatArray;
 }>;
-
-export type JointState = Readonly<{
-  header: Header;
-  name: string[];
-  position: FloatArray;
-  velocity: FloatArray;
-  effort: FloatArray;
-}>;

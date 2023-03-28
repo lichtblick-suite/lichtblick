@@ -56,11 +56,6 @@ function useFeatures(): Feature[] {
       description: <>{t("legacyPlotPanelDescription")}</>,
     },
     {
-      key: AppSetting.ENABLE_URDF_VIEWER,
-      name: t("urdfPanel"),
-      description: <>{t("urdfPanelDescription")}</>,
-    },
-    {
       key: AppSetting.ENABLE_MEMORY_USE_INDICATOR,
       name: t("memoryUseIndicator"),
       description: <>{t("memoryUseIndicatorDescription")}</>,

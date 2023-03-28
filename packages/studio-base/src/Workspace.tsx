@@ -52,8 +52,6 @@ import {
 } from "@foxglove/studio-base/components/StudioLogsSettings";
 import { SyncAdapters } from "@foxglove/studio-base/components/SyncAdapters";
 import VariablesList from "@foxglove/studio-base/components/VariablesList";
-import { useAnalytics } from "@foxglove/studio-base/context/AnalyticsContext";
-import { useAssets } from "@foxglove/studio-base/context/AssetsContext";
 import {
   LayoutState,
   useCurrentLayoutSelector,
@@ -199,7 +197,7 @@ function WorkspaceContent(props: WorkspaceProps): JSX.Element {
 
   // file types we support for drag/drop
   const allowedDropExtensions = useMemo(() => {
-    const extensions = [".foxe", ".urdf", ".xacro"];
+    const extensions = [".foxe"];
     for (const source of availableSources) {
       if (source.type === "file" && source.supportedFileTypes) {
         extensions.push(...source.supportedFileTypes);
@@ -361,9 +359,6 @@ function WorkspaceContent(props: WorkspaceProps): JSX.Element {
 
   const { enqueueSnackbar } = useSnackbar();
 
-  const { loadFromFile } = useAssets();
-  const analytics = useAnalytics();
-
   const installExtension = useExtensionCatalog((state) => state.installExtension);
 
   const openHandle = useCallback(
@@ -372,8 +367,6 @@ function WorkspaceContent(props: WorkspaceProps): JSX.Element {
     ) => {
       log.debug("open handle", handle);
       const file = await handle.getFile();
-      // electron extends File with a `path` field which is not available in browsers
-      const basePath = (file as { path?: string }).path ?? "";
 
       if (file.name.endsWith(".foxe")) {
         // Extension installation
@@ -388,15 +381,6 @@ function WorkspaceContent(props: WorkspaceProps): JSX.Element {
             variant: "error",
           });
         }
-      } else {
-        try {
-          if (await loadFromFile(file, { basePath, analytics, source: "local_file" })) {
-            return;
-          }
-        } catch (err) {
-          log.error(err);
-          enqueueSnackbar(`Failed to load ${file.name}: ${err.message}`, { variant: "error" });
-        }
       }
 
       // Look for a source that supports the file extensions
@@ -408,7 +392,7 @@ function WorkspaceContent(props: WorkspaceProps): JSX.Element {
         selectSource(matchedSource.id, { type: "file", handle });
       }
     },
-    [analytics, availableSources, enqueueSnackbar, installExtension, loadFromFile, selectSource],
+    [availableSources, enqueueSnackbar, installExtension, selectSource],
   );
 
   const openFiles = useCallback(
@@ -417,9 +401,6 @@ function WorkspaceContent(props: WorkspaceProps): JSX.Element {
       log.debug("open files", files);
 
       for (const file of files) {
-        // electron extends File with a `path` field which is not available in browsers
-        const basePath = (file as { path?: string }).path ?? "";
-
         if (file.name.endsWith(".foxe")) {
           // Extension installation
           try {
@@ -432,15 +413,6 @@ function WorkspaceContent(props: WorkspaceProps): JSX.Element {
             enqueueSnackbar(`Failed to install extension ${file.name}: ${err.message}`, {
               variant: "error",
             });
-          }
-        } else {
-          try {
-            if (!(await loadFromFile(file, { basePath, analytics, source: "local_file" }))) {
-              otherFiles.push(file);
-            }
-          } catch (err) {
-            log.error(err);
-            enqueueSnackbar(`Failed to load ${file.name}: ${err.message}`, { variant: "error" });
           }
         }
       }
@@ -461,7 +433,7 @@ function WorkspaceContent(props: WorkspaceProps): JSX.Element {
         }
       }
     },
-    [analytics, availableSources, enqueueSnackbar, installExtension, loadFromFile, selectSource],
+    [availableSources, enqueueSnackbar, installExtension, selectSource],
   );
 
   // files the main thread told us to open

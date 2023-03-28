@@ -114,7 +114,7 @@ function setNativeValue(element: unknown, value: unknown) {
 }
 
 export function makeMockPanelCatalog(): PanelCatalog {
-  const allPanels = [...panels.builtin, ...panels.debug, panels.legacyPlot, panels.urdfViewer];
+  const allPanels = [...panels.builtin, ...panels.debug, panels.legacyPlot];
 
   const visiblePanels = [...panels.builtin];
 

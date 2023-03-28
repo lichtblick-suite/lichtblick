@@ -28,9 +28,6 @@ export default function PanelCatalogProvider(
   const [enableLegacyPlotPanel = false] = useAppConfigurationValue<boolean>(
     AppSetting.ENABLE_LEGACY_PLOT_PANEL,
   );
-  const [enableUrdfViewerPanel = false] = useAppConfigurationValue<boolean>(
-    AppSetting.ENABLE_URDF_VIEWER,
-  );
 
   const extensionPanels = useExtensionCatalog((state) => state.installedPanels);
 
@@ -61,13 +58,7 @@ export default function PanelCatalogProvider(
   }, [extensionPanels]);
 
   const allPanels = useMemo(() => {
-    return [
-      ...panels.builtin,
-      ...panels.debug,
-      panels.legacyPlot,
-      panels.urdfViewer,
-      ...wrappedExtensionPanels,
-    ];
+    return [...panels.builtin, ...panels.debug, panels.legacyPlot, ...wrappedExtensionPanels];
   }, [wrappedExtensionPanels]);
 
   const visiblePanels = useMemo(() => {
@@ -78,12 +69,9 @@ export default function PanelCatalogProvider(
     if (enableLegacyPlotPanel) {
       panelList.push(panels.legacyPlot);
     }
-    if (enableUrdfViewerPanel) {
-      panelList.push(panels.urdfViewer);
-    }
     panelList.push(...wrappedExtensionPanels);
     return panelList;
-  }, [enableLegacyPlotPanel, enableUrdfViewerPanel, showDebugPanels, wrappedExtensionPanels]);
+  }, [enableLegacyPlotPanel, showDebugPanels, wrappedExtensionPanels]);
 
   const panelsByType = useMemo(() => {
     const byType = new Map<string, PanelInfo>();

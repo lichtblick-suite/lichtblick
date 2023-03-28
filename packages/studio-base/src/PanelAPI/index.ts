@@ -22,6 +22,4 @@ export { useMessageReducer } from "./useMessageReducer";
 export { useMessagesByTopic } from "./useMessagesByTopic";
 export { useBlocksByTopic } from "./useBlocksByTopic";
 
-export { default as useParameter } from "./useParameter";
-
 export { default as useConfigById } from "./useConfigById";

@@ -2,7 +2,7 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { useState, Suspense, Fragment, useEffect } from "react";
+import { Suspense, Fragment, useEffect } from "react";
 import { DndProvider } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
 
@@ -22,7 +22,6 @@ import PlayerManager from "./components/PlayerManager";
 import SendNotificationToastAdapter from "./components/SendNotificationToastAdapter";
 import StudioToastProvider from "./components/StudioToastProvider";
 import AppConfigurationContext, { IAppConfiguration } from "./context/AppConfigurationContext";
-import { AssetsProvider } from "./context/AssetsContext";
 import LayoutStorageContext from "./context/LayoutStorageContext";
 import NativeAppMenuContext, { INativeAppMenu } from "./context/NativeAppMenuContext";
 import NativeWindowContext, { INativeWindow } from "./context/NativeWindowContext";
@@ -37,7 +36,6 @@ import UserProfileLocalStorageProvider from "./providers/UserProfileLocalStorage
 import { LaunchPreference } from "./screens/LaunchPreference";
 import { ExtensionLoader } from "./services/ExtensionLoader";
 import { ILayoutStorage } from "./services/ILayoutStorage";
-import URDFAssetLoader from "./services/URDFAssetLoader";
 
 type AppProps = CustomWindowControlsProps & {
   deepLinks: string[];
@@ -65,8 +63,6 @@ function contextMenuHandler(event: MouseEvent) {
 }
 
 export function App(props: AppProps): JSX.Element {
-  const [assetLoaders] = useState(() => [new URDFAssetLoader()]);
-
   const {
     appConfiguration,
     dataSources,
@@ -87,7 +83,6 @@ export function App(props: AppProps): JSX.Element {
     <LayoutStorageContext.Provider value={layoutStorage} />,
     <UserProfileLocalStorageProvider />,
     <LayoutManagerProvider />,
-    <AssetsProvider loaders={assetLoaders} />,
     <TimelineInteractionStateProvider />,
     <UserNodeStateProvider />,
     <CurrentLayoutProvider />,

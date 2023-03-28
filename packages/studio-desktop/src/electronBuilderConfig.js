@@ -51,16 +51,6 @@ function makeElectronBuilderConfig(params) {
           name: "Foxglove Studio Extension",
           mimeType: "application/zip",
         },
-        {
-          ext: "urdf",
-          name: "Unified Robot Description Format File",
-          mimeType: "text/xml",
-        },
-        {
-          ext: "xacro",
-          name: "Xacro File",
-          mimeType: "text/xml",
-        },
       ],
     },
     win: {
@@ -87,16 +77,6 @@ function makeElectronBuilderConfig(params) {
           name: "Foxglove Studio Extension",
           mimeType: "application/zip",
         },
-        {
-          ext: "urdf",
-          name: "Unified Robot Description Format File",
-          icon: path.join(__dirname, "../resources/icon/URDFIcon.ico"),
-        },
-        {
-          ext: "xacro",
-          name: "Xacro File",
-          icon: path.join(__dirname, "../resources/icon/XacroIcon.ico"),
-        },
       ],
     },
     mac: {
@@ -121,8 +101,6 @@ function makeElectronBuilderConfig(params) {
         { from: path.join(__dirname, "../resources/icon/BagIcon.png"), to: "BagIcon.png" },
         { from: path.join(__dirname, "../resources/icon/McapIcon.png"), to: "McapIcon.png" },
         { from: path.join(__dirname, "../resources/icon/FoxeIcon.png"), to: "FoxeIcon.png" },
-        { from: path.join(__dirname, "../resources/icon/URDFIcon.png"), to: "URDFIcon.png" },
-        { from: path.join(__dirname, "../resources/icon/XacroIcon.png"), to: "XacroIcon.png" },
       ],
       extendInfo: {
         CFBundleDocumentTypes: [
@@ -152,24 +130,6 @@ function makeElectronBuilderConfig(params) {
             LSHandlerRank: "Owner",
             CFBundleTypeIconSystemGenerated: 1,
             LSItemContentTypes: ["dev.foxglove.extension"],
-          },
-          {
-            CFBundleTypeExtensions: ["urdf"],
-            CFBundleTypeIconFile: "URDFIcon",
-            CFBundleTypeName: "Unified Robot Description Format File",
-            CFBundleTypeRole: "Viewer",
-            LSHandlerRank: "Default",
-            CFBundleTypeIconSystemGenerated: 1,
-            LSItemContentTypes: ["org.ros.urdf"],
-          },
-          {
-            CFBundleTypeExtensions: ["xacro"],
-            CFBundleTypeIconFile: "XacroIcon",
-            CFBundleTypeName: "Xacro File",
-            CFBundleTypeRole: "Viewer",
-            LSHandlerRank: "Default",
-            CFBundleTypeIconSystemGenerated: 1,
-            LSItemContentTypes: ["org.ros.xacro"],
           },
         ],
         CFBundleURLTypes: [
@@ -204,22 +164,6 @@ function makeElectronBuilderConfig(params) {
             UTTypeIdentifier: "org.ros.bag",
             UTTypeTagSpecification: { "public.filename-extension": "bag" },
             UTTypeReferenceURL: "http://wiki.ros.org/Bags",
-          },
-          {
-            UTTypeConformsTo: ["public.xml"],
-            UTTypeDescription: "Unified Robot Description Format File",
-            UTTypeIcons: { UTTypeIconText: "urdf" },
-            UTTypeIdentifier: "org.ros.urdf",
-            UTTypeTagSpecification: { "public.filename-extension": "urdf" },
-            UTTypeReferenceURL: "http://wiki.ros.org/urdf",
-          },
-          {
-            UTTypeConformsTo: ["public.xml"],
-            UTTypeDescription: "Xacro File",
-            UTTypeIcons: { UTTypeIconText: "xacro" },
-            UTTypeIdentifier: "org.ros.xacro",
-            UTTypeTagSpecification: { "public.filename-extension": "xacro" },
-            UTTypeReferenceURL: "https://github.com/ros/xacro/wiki",
           },
         ],
       },

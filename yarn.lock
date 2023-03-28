@@ -2581,14 +2581,12 @@ __metadata:
     ttypescript: 1.5.15
     typescript: 4.9.5
     typescript-transform-paths: 3.4.6
-    urdf-loader: 0.10.4
     url-search-params: 1.1.0
     use-debounce: 9.0.3
     use-immer: 0.8.1
     use-pan-and-zoom: 0.6.5
     uuid: 9.0.0
     webpack: 5.76.2
-    xacro-parser: 0.3.9
     zustand: 4.3.6
   languageName: unknown
   linkType: soft
@@ -24497,15 +24495,6 @@ __metadata:
   bin:
     browserslist-lint: cli.js
   checksum: 12db73b4f63029ac407b153732e7cd69a1ea8206c9100b482b7d12859cd3cd0bc59c602d7ae31e652706189f1acb90d42c53ab24a5ba563ed13aebdddc5561a0
-  languageName: node
-  linkType: hard
-
-"urdf-loader@npm:0.10.4":
-  version: 0.10.4
-  resolution: "urdf-loader@npm:0.10.4"
-  peerDependencies:
-    three: ">=0.105.0"
-  checksum: 87dacb31d7aa1e1a641a5ca2c9aa77f557406a885bb16c4d827a4e3f1f1a29047a3e69ff9d2777bce9848bd1f0034727e9b992ebebc4cc44857f8be105380e88
   languageName: node
   linkType: hard
 
