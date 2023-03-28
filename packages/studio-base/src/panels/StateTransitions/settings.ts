@@ -3,7 +3,7 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 import produce from "immer";
-import { isEqual } from "lodash";
+import { isEqual, set } from "lodash";
 import memoizeWeak from "memoize-weak";
 import { useCallback, useEffect } from "react";
 
@@ -100,6 +100,12 @@ export function useStateTransitionsPanelSettings(
         const { input, path, value } = action.payload;
         if (input === "boolean" && isEqual(path, ["general", "isSynced"])) {
           saveConfig({ isSynced: value });
+        } else {
+          saveConfig(
+            produce((draft) => {
+              set(draft, path, value);
+            }),
+          );
         }
       }
 
