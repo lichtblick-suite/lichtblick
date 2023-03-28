@@ -21,7 +21,7 @@ import { makeStyles } from "tss-react/mui";
 import { useDebouncedCallback } from "use-debounce";
 
 import Logger from "@foxglove/log";
-import { Time, compare, isGreaterThan, isLessThan, toNanoSec } from "@foxglove/rostime";
+import { Time, toNanoSec } from "@foxglove/rostime";
 import {
   LayoutActions,
   MessageEvent,
@@ -442,7 +442,9 @@ export function ThreeDeeRender({ context }: { context: PanelExtensionContext }):
   const [topics, setTopics] = useState<ReadonlyArray<Topic> | undefined>();
   const [parameters, setParameters] = useState<ReadonlyMap<string, ParameterValue> | undefined>();
   const [variables, setVariables] = useState<ReadonlyMap<string, VariableValue> | undefined>();
-  const [messages, setMessages] = useState<ReadonlyArray<MessageEvent<unknown>> | undefined>();
+  const [currentFrameMessages, setCurrentFrameMessages] = useState<
+    ReadonlyArray<MessageEvent<unknown>> | undefined
+  >();
   const [currentTime, setCurrentTime] = useState<Time | undefined>();
   const [didSeek, setDidSeek] = useState<boolean>(false);
   const [sharedPanelState, setSharedPanelState] = useState<undefined | Shared3DPanelState>();
@@ -622,7 +624,7 @@ export function ThreeDeeRender({ context }: { context: PanelExtensionContext }):
 
         // currentFrame has messages on subscribed topics since the last render call
         deepParseMessageEvents(renderState.currentFrame);
-        setMessages(renderState.currentFrame);
+        setCurrentFrameMessages(renderState.currentFrame);
 
         // allFrames has messages on preloaded topics across all frames (as they are loaded)
         deepParseMessageEvents(renderState.allFrames);
@@ -711,22 +713,20 @@ export function ThreeDeeRender({ context }: { context: PanelExtensionContext }):
     }
   }, [variables, renderer]);
 
-  // Keep the renderer currentTime up to date
+  // Keep the renderer currentTime up to date and handle seeking
   useEffect(() => {
-    if (renderer && currentTime != undefined) {
-      renderer.currentTime = toNanoSec(currentTime);
-      renderRef.current.needsRender = true;
+    const newTimeNs = currentTime ? toNanoSec(currentTime) : undefined;
+    if (!renderer || newTimeNs == undefined || newTimeNs === renderer.currentTime) {
+      return;
     }
-  }, [currentTime, renderer]);
+    const oldTimeNs = renderer.currentTime;
 
-  // Flush the renderer's state when the seek count changes
-  useEffect(() => {
-    if (renderer && didSeek) {
-      // want to clear after the current time only if preloading is not active or if the seek time is after the previous time
-      renderer.clear();
+    renderer.setCurrentTime(newTimeNs);
+    if (didSeek) {
+      renderer.handleSeek(oldTimeNs);
       setDidSeek(false);
     }
-  }, [renderer, didSeek]);
+  }, [currentTime, renderer, didSeek]);
 
   // Keep the renderer colorScheme and backgroundColor up to date
   useEffect(() => {
@@ -736,105 +736,31 @@ export function ThreeDeeRender({ context }: { context: PanelExtensionContext }):
     }
   }, [backgroundColor, colorScheme, renderer]);
 
-  const allFramesCursorRef = useRef<{
-    // index represents where the last read message is in allFrames
-    index: number;
-    cursorTimeReached?: Time;
-  }>({
-    index: -1,
-    cursorTimeReached: undefined,
-  });
   // Handle preloaded messages and render a frame if new messages are available
   // Should be called before `messages` is handled
   useEffect(() => {
     // we want didseek to be handled by the renderer first so that transforms aren't cleared after the cursor has been brought up
-
     if (!renderer || !currentTime) {
       return;
     }
-
-    const allFramesCursor = allFramesCursorRef.current;
-    // index always indicates last read-in message
-    let cursor = allFramesCursor.index;
-    let cursorTimeReached = allFramesCursor.cursorTimeReached;
-
-    if (!allFrames || allFrames.length === 0) {
-      // when tf preloading is disabled
-      if (cursor > -1) {
-        allFramesCursorRef.current = { index: -1, cursorTimeReached: undefined };
-      }
-      return;
-    }
-
-    // if a seek occurred and the new time is before the current cursor time, reset the cursor for this read
-    if (didSeek) {
-      if (cursorTimeReached && isGreaterThan(cursorTimeReached, currentTime)) {
-        cursorTimeReached = undefined;
-        cursor = -1;
-      }
-    }
-
-    /**
-     * Assumptions about allFrames needed by allFramesCursor:
-     *  - always sorted by receiveTime
-     *  - preloaded topics/schemas are only ever all removed or all added at once, otherwise it is not stable and would need to be reset
-     *  - allFrame chunks are only ever loaded from beginning to end and does not have any eviction
-     */
-
-    // cursor should never be over allFramesLength, if it some how is, it means the cursor was at the end of `allFrames` prior to eviction and eviction shortened allframes
-    // in this case we should set the cursor to the end of allFrames
-    cursor = Math.min(cursor, allFrames.length - 1);
-    let message;
-
-    let hasAddedMessageEvents = false;
-    // load preloaded messages up to current time
-    while (cursor < allFrames.length - 1) {
-      cursor++;
-      message = allFrames[cursor]!;
-      // read messages until we reach the current time
-      if (isLessThan(currentTime, message.receiveTime)) {
-        cursorTimeReached = currentTime;
-        // reset cursor to last read message index
-        cursor--;
-        break;
-      }
-      if (!hasAddedMessageEvents) {
-        hasAddedMessageEvents = true;
-        // transform tree specific optimization - adding to tree before it's highest cache time is expensive
-        // so we clear it to avoid adding to the tree before the highest cache time
-        renderer.transformTree.clearAfter(toNanoSec(message.receiveTime));
-      }
-
-      renderer.addMessageEvent(message);
-      if (cursor === allFrames.length - 1) {
-        cursorTimeReached = message.receiveTime;
-      }
-    }
-
-    // want to avoid setting anything if nothing has changed
-    if (!hasAddedMessageEvents) {
-      return;
-    }
-
-    allFramesCursorRef.current = { index: cursor, cursorTimeReached };
-    // want to re-render if frames were read and if the current time has been reached to avoid showing intermediate state
-    if (cursorTimeReached && compare(cursorTimeReached, currentTime) === 0) {
+    const newMessagesHandled = renderer.handleAllFramesMessages(allFrames);
+    if (newMessagesHandled) {
       renderRef.current.needsRender = true;
     }
-  }, [renderer, currentTime, allFrames, didSeek]);
+  }, [renderer, currentTime, allFrames]);
 
   // Handle messages and render a frame if new messages are available
   useEffect(() => {
-    if (!renderer || !messages) {
+    if (!renderer || !currentFrameMessages) {
       return;
     }
 
-    for (const message of messages) {
+    for (const message of currentFrameMessages) {
       renderer.addMessageEvent(message);
     }
 
     renderRef.current.needsRender = true;
-  }, [messages, renderer]);
+  }, [currentFrameMessages, renderer]);
 
   // Update the renderer when the camera moves
   useEffect(() => {
