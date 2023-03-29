@@ -157,12 +157,6 @@ export default function PanelSettings({
     );
   }
 
-  if (!panelInfo) {
-    throw new Error(
-      `Attempt to render settings but no panel component could be found for panel id ${selectedPanelId}`,
-    );
-  }
-
   if (!config) {
     return (
       <SidebarContent disableToolbar={disableToolbar} title="Panel settings">
@@ -173,13 +167,14 @@ export default function PanelSettings({
 
   const isSettingsTree = settingsTree != undefined;
 
-  const showTitleField = panelInfo.hasCustomToolbar !== true;
+  const showTitleField = panelInfo != undefined && panelInfo.hasCustomToolbar !== true;
+  const title = panelInfo?.title ?? "Unknown";
 
   return (
     <SidebarContent
       disablePadding={enableNewTopNav || isSettingsTree}
       disableToolbar={disableToolbar}
-      title={`${panelInfo.title} panel settings`}
+      title={`${title} panel settings`}
       trailingItems={[
         <ActionMenu
           key={1}
@@ -194,7 +189,7 @@ export default function PanelSettings({
         <Stack flex="auto">
           {settingsTree && enableNewTopNav && (
             <Stack padding={0.75}>
-              <Typography variant="subtitle2">{`${panelInfo.title} panel`}</Typography>
+              <Typography variant="subtitle2">{`${title} panel`}</Typography>
             </Stack>
           )}
           {settingsTree || showTitleField ? (
@@ -210,7 +205,9 @@ export default function PanelSettings({
               paddingX={enableNewTopNav ? 1 : 0}
             >
               <Typography variant="body2" color="text.secondary" align="center">
-                {`The ${panelInfo.title} panel does not have any settings`}
+                {`${
+                  panelInfo ? `The ${panelInfo.title}` : "This"
+                } panel does not have any settings`}
               </Typography>
             </Stack>
           )}
