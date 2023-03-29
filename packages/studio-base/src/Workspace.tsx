@@ -571,24 +571,24 @@ function WorkspaceContent(props: WorkspaceProps): JSX.Element {
 
   const leftSidebarItems = useMemo(() => {
     const items = new Map<LeftSidebarItemKey, NewSidebarItem>([
+      ["panel-settings", { title: "Panel", component: PanelSettingsSidebar }],
       ["topics", { title: "Topics", component: TopicList }],
+    ]);
+    return items;
+  }, [PanelSettingsSidebar]);
+
+  const rightSidebarItems = useMemo(() => {
+    const items = new Map<RightSidebarItemKey, NewSidebarItem>([
       ["variables", { title: "Variables", component: VariablesList }],
     ]);
     if (enableStudioLogsSidebar) {
       items.set("studio-logs-settings", { title: "Studio Logs", component: StudioLogsSettings });
     }
-    return items;
-  }, [enableStudioLogsSidebar]);
-
-  const rightSidebarItems = useMemo(() => {
-    const items = new Map<RightSidebarItemKey, NewSidebarItem>([
-      ["panel-settings", { title: "Panel settings", component: PanelSettingsSidebar }],
-    ]);
     if (showEventsTab) {
       items.set("events", { title: "Events", component: EventsList });
     }
     return items;
-  }, [PanelSettingsSidebar, showEventsTab]);
+  }, [enableStudioLogsSidebar, showEventsTab]);
 
   const keyDownHandlers = useMemo(() => {
     return {

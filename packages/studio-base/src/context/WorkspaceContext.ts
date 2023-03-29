@@ -24,8 +24,11 @@ export type SidebarItemKey =
   | "studio-logs-settings"
   | "variables";
 
-export type LeftSidebarItemKey = "topics" | "variables" | "studio-logs-settings";
-export type RightSidebarItemKey = "panel-settings" | "events";
+const LeftSidebarItemKeys = ["panel-settings", "topics"] as const;
+export type LeftSidebarItemKey = (typeof LeftSidebarItemKeys)[number];
+
+const RightSidebarItemKeys = ["events", "variables", "studio-logs-settings"] as const;
+export type RightSidebarItemKey = (typeof RightSidebarItemKeys)[number];
 
 export type WorkspaceContextStore = DeepReadonly<{
   layoutMenuOpen: boolean;
@@ -46,7 +49,7 @@ WorkspaceContext.displayName = "WorkspaceContext";
 
 export const WorkspaceStoreSelectors = {
   selectPanelSettingsOpen: (store: WorkspaceContextStore): boolean =>
-    store.sidebarItem === "panel-settings" || store.rightSidebarItem === "panel-settings",
+    store.sidebarItem === "panel-settings" || store.leftSidebarItem === "panel-settings",
 };
 
 /**
@@ -101,7 +104,7 @@ export function useWorkspaceActions(): WorkspaceActions {
     return {
       openPanelSettings: () =>
         enableNewTopNav
-          ? set({ rightSidebarItem: "panel-settings", rightSidebarOpen: true })
+          ? set({ leftSidebarItem: "panel-settings", leftSidebarOpen: true })
           : set({ sidebarItem: "panel-settings" }),
 
       openAccountSettings: () => supportsAccountSettings && set({ sidebarItem: "account" }),
@@ -137,9 +140,10 @@ export function useWorkspaceActions(): WorkspaceActions {
         set((oldValue) => {
           const leftSidebarOpen = setterValue(setter, oldValue.leftSidebarOpen);
           if (leftSidebarOpen) {
+            const oldItem = LeftSidebarItemKeys.find((item) => item === oldValue.leftSidebarItem);
             return {
               leftSidebarOpen,
-              leftSidebarItem: oldValue.leftSidebarItem ?? "topics",
+              leftSidebarItem: oldItem ?? "panel-settings",
             };
           } else {
             return { leftSidebarOpen: false };
@@ -152,10 +156,11 @@ export function useWorkspaceActions(): WorkspaceActions {
       setRightSidebarOpen: (setter: SetStateAction<boolean>) => {
         set((oldValue) => {
           const rightSidebarOpen = setterValue(setter, oldValue.rightSidebarOpen);
+          const oldItem = RightSidebarItemKeys.find((item) => item === oldValue.rightSidebarItem);
           if (rightSidebarOpen) {
             return {
               rightSidebarOpen,
-              rightSidebarItem: oldValue.rightSidebarItem ?? "panel-settings",
+              rightSidebarItem: oldItem ?? "variables",
             };
           } else {
             return { rightSidebarOpen: false };
