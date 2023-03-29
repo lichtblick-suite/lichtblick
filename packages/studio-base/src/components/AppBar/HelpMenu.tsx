@@ -86,9 +86,7 @@ export function HelpMenu(props: HelpMenuProps): JSX.Element {
         "aria-labelledby": "help-button",
       }}
     >
-      <ListSubheader className={classes.subheader} tabIndex={-1}>
-        Documentation
-      </ListSubheader>
+      <ListSubheader className={classes.subheader}>Documentation</ListSubheader>
       <MenuItem
         href="https://foxglove.dev/docs/studio"
         className={classes.menuItem}
@@ -130,9 +128,7 @@ export function HelpMenu(props: HelpMenuProps): JSX.Element {
         />
       </MenuItem>
       <Divider />
-      <ListSubheader className={classes.subheader} tabIndex={-1}>
-        Community
-      </ListSubheader>
+      <ListSubheader className={classes.subheader}>Community</ListSubheader>
       <MenuItem
         href="https://foxglove.dev/slack"
         className={classes.menuItem}
