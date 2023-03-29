@@ -63,13 +63,12 @@ const useStyles = makeStyles<void, "error">()((theme, _params, classes) => {
       textAlign: "end",
     },
     pseudoInputWrapper: {
-      padding: theme.spacing(0.75, 1),
       borderRadius: theme.shape.borderRadius,
       fontSize: "0.75em",
       backgroundColor: inputBackgroundColor,
 
       input: {
-        height: "1.4375em",
+        height: "1.77em",
       },
       "&:hover": {
         backgroundColor: prefersDarkMode ? "rgba(255, 255, 255, 0.13)" : "rgba(0, 0, 0, 0.09)",

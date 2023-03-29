@@ -12,6 +12,7 @@
 //   You may not use this file except in compliance with the License.
 
 import { storiesOf } from "@storybook/react";
+import { range } from "lodash";
 import { Component } from "react";
 import TestUtils from "react-dom/test-utils";
 
@@ -155,7 +156,7 @@ storiesOf("components/Autocomplete", module)
           getItemText={({ value }: any) => `item: ${value.toUpperCase()}`}
           selectedItem={{ value: "two" }}
           onSelect={() => {}}
-          clearOnFocus
+          selectOnFocus
         />
       </div>
     );
@@ -173,18 +174,6 @@ storiesOf("components/Autocomplete", module)
       </div>
     );
   })
-  .add("at the right edge of the screen", () => {
-    class Example extends Component {
-      public override render() {
-        return (
-          <div style={{ position: "absolute", right: 0, padding: 20 }} ref={focusInput}>
-            <Autocomplete items={["loooooooooooooong item"]} value="looo" onSelect={() => {}} />
-          </div>
-        );
-      }
-    }
-    return <Example />;
-  })
   .add("with a long truncated path (and autoSize)", () => {
     class Example extends Component {
       public override render() {
@@ -196,6 +185,19 @@ storiesOf("components/Autocomplete", module)
               onSelect={() => {}}
               autoSize
             />
+          </div>
+        );
+      }
+    }
+    return <Example />;
+  })
+  .add("many items", () => {
+    const items = range(1, 1000).map((i) => `item_${i}`);
+    class Example extends Component {
+      public override render() {
+        return (
+          <div style={{ maxWidth: 200 }} ref={focusInput}>
+            <Autocomplete items={items} onSelect={() => {}} autoSize />
           </div>
         );
       }

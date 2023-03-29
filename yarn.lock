@@ -2473,7 +2473,6 @@ __metadata:
     "@types/nearley": 2.11.2
     "@types/prettier": 2.7.2
     "@types/react": 17.0.53
-    "@types/react-autocomplete": 1.8.6
     "@types/react-dom": 17.0.18
     "@types/react-hover-observer": "workspace:*"
     "@types/react-table": 7.7.14
@@ -2543,7 +2542,6 @@ __metadata:
     path-browserify: 1.0.1
     prettier: 2.8.3
     react: 17.0.2
-    react-autocomplete: "https://github.com/foxglove/react-autocomplete/raw/9717d597d7c78c316fb7ad3c2c57060c243530c2/react-autocomplete-9.9.9.tgz"
     react-colorful: 5.6.1
     react-dnd: 14.0.2
     react-dnd-html5-backend: 14.0.2
@@ -6566,15 +6564,6 @@ __metadata:
   version: 1.2.4
   resolution: "@types/range-parser@npm:1.2.4"
   checksum: b7c0dfd5080a989d6c8bb0b6750fc0933d9acabeb476da6fe71d8bdf1ab65e37c136169d84148034802f48378ab94e3c37bb4ef7656b2bec2cb9c0f8d4146a95
-  languageName: node
-  linkType: hard
-
-"@types/react-autocomplete@npm:1.8.6":
-  version: 1.8.6
-  resolution: "@types/react-autocomplete@npm:1.8.6"
-  dependencies:
-    "@types/react": "*"
-  checksum: 8ffce3570f8d3387bc47f12b6032b1d86c1b93abf7fa3585ce2e293052b76d8eacb19287d1b5b810e7bb0c56ea22433b9b11e301aaf3703bc9fd46980e723aa7
   languageName: node
   linkType: hard
 
@@ -11361,13 +11350,6 @@ __metadata:
     "@babel/runtime": ^7.8.7
     csstype: ^3.0.2
   checksum: 863ba9e086f7093df3376b43e74ce4422571d404fc9828bf2c56140963d5edf0e56160f9b2f3bb61b282c07f8fc8134f023c98fd684bddcb12daf7b0f14d951c
-  languageName: node
-  linkType: hard
-
-"dom-scroll-into-view@npm:1.0.1":
-  version: 1.0.1
-  resolution: "dom-scroll-into-view@npm:1.0.1"
-  checksum: b2bb6646e7ca409dbeee283d10a698eea264fbb60214aba8293e92076fd0bc2c1c95ca37f004e6958ccd582aaad948809233d1ef86c06a6aadc123b1d619ce5d
   languageName: node
   linkType: hard
 
@@ -20068,7 +20050,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"prop-types@npm:^15.0.0, prop-types@npm:^15.5.10, prop-types@npm:^15.6.0, prop-types@npm:^15.6.2, prop-types@npm:^15.7.2, prop-types@npm:^15.8.1":
+"prop-types@npm:^15.0.0, prop-types@npm:^15.6.0, prop-types@npm:^15.6.2, prop-types@npm:^15.7.2, prop-types@npm:^15.8.1":
   version: 15.8.1
   resolution: "prop-types@npm:15.8.1"
   dependencies:
@@ -20364,19 +20346,6 @@ __metadata:
   peerDependencies:
     webpack: ^4.0.0 || ^5.0.0
   checksum: 51cc1b0d0e8c37c4336b5318f3b2c9c51d6998ad6f56ea09612afcfefc9c1f596341309e934a744ae907177f28efc9f1654eacd62151e82853fcc6d37450e795
-  languageName: node
-  linkType: hard
-
-"react-autocomplete@https://github.com/foxglove/react-autocomplete/raw/9717d597d7c78c316fb7ad3c2c57060c243530c2/react-autocomplete-9.9.9.tgz":
-  version: 9.9.9
-  resolution: "react-autocomplete@https://github.com/foxglove/react-autocomplete/raw/9717d597d7c78c316fb7ad3c2c57060c243530c2/react-autocomplete-9.9.9.tgz"
-  dependencies:
-    dom-scroll-into-view: 1.0.1
-    prop-types: ^15.5.10
-  peerDependencies:
-    react: ^0.14.7 || ^15.0.0-0 || ^16.0.0-0
-    react-dom: ^0.14.7 || ^15.0.0-0 || ^16.0.0-0
-  checksum: ae129549f7e2d2acf206071a6cedd007f77519d44af7ba327cea85bd8d6f087c139d29a11474d86b207d1a1b0ea99dd4fb775dcc9d76ef50f340d763fdcb0a40
   languageName: node
   linkType: hard
 

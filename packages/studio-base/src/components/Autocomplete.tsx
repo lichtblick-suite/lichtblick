@@ -11,134 +11,52 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { alpha, Paper, useTheme, Modal } from "@mui/material";
+import ClearIcon from "@mui/icons-material/Clear";
+import {
+  alpha,
+  Autocomplete as MuiAutocomplete,
+  MenuItem,
+  TextField,
+  useTheme,
+} from "@mui/material";
 import { Fzf, FzfResultItem } from "fzf";
-import { maxBy } from "lodash";
-import React, {
+import * as React from "react";
+import {
   CSSProperties,
+  SyntheticEvent,
+  useCallback,
+  useImperativeHandle,
+  useMemo,
   useRef,
   useState,
-  useCallback,
-  useMemo,
-  useImperativeHandle,
 } from "react";
-import ReactAutocomplete from "react-autocomplete";
-import textMetrics from "text-metrics";
 import { makeStyles } from "tss-react/mui";
 
-import { fonts } from "@foxglove/studio-base/util/sharedStyleConstants";
+import { ReactWindowListboxAdapter } from "@foxglove/studio-base/components/ReactWindowListboxAdapter";
 
-// react-autocomplete tries to auto-scroll as soon as the menu is rendered, which is not compatible
-// with mui's Modal because the Modal takes a couple of react render cycles before elements are
-// actually mounted.
-Object.assign(ReactAutocomplete.prototype, { maybeScrollItemIntoView: () => {} });
+const MAX_FZF_MATCHES = 200;
 
-const fontFamily = fonts.SANS_SERIF;
-const fontSize = "12px";
-let textMeasure: undefined | textMetrics.TextMeasure;
-function measureText(text: string): number {
-  if (textMeasure == undefined) {
-    textMeasure = textMetrics.init({ fontFamily, fontSize });
-  }
-  return textMeasure.width(text) + 3;
-}
-
-const ROW_HEIGHT = 24;
-const MAX_ITEMS = 200;
-
-const useStyles = makeStyles()((theme) => ({
-  root: {
-    borderTopLeftRadius: 0,
-    position: "fixed",
-    overflow: "auto",
-    zIndex: 1,
-    marginLeft: -6,
-  },
-  input: {
-    background: "transparent !important",
-    borderRadius: 0,
-    border: "none",
-    color: theme.palette.text.primary,
-    flexGrow: 1,
-    fontSize: "1rem",
-    margin: 0,
-    padding: 0,
-    textAlign: "left",
-    fontFamily: fonts.SANS_SERIF,
-
-    "&.disabled, &[disabled]": {
-      color: theme.palette.text.disabled,
-    },
-    "&:focus": {
-      outline: "none",
-    },
-    "&::placeholder": {
-      color: theme.palette.text.secondary,
-    },
-  },
-  inputError: {
-    color: `${theme.palette.error.main} !important`,
-  },
-  inputPlaceholder: {
-    color: theme.palette.text.secondary,
-  },
-  item: {
-    padding: 6,
-    cursor: "pointer",
-    minHeight: ROW_HEIGHT,
-    lineHeight: `${ROW_HEIGHT - 10}px`,
-    overflowWrap: "break-word",
-    color: theme.palette.text.primary,
-    whiteSpace: "pre",
-  },
-  itemSelected: {
-    backgroundColor: alpha(
-      theme.palette.primary.main,
-      theme.palette.action.selectedOpacity + theme.palette.action.hoverOpacity,
-    ),
-  },
-  itemHighlighted: {
-    backgroundColor: theme.palette.action.hover,
-  },
-}));
-
-// <Autocomplete> is a Studio-specific autocomplete with support for things like multiple
-// autocompletes that seamlessly transition into each other, e.g. when building more complex
-// strings like in the Plot panel.
-//
-// The multiple autocompletes doesn't work super well with react-autocomplete, so we have to
-// reimplement some of its behaviour to make things work properly, such as the `ignoreBlur`
-// stuff. Mostly, though, we can lean on react-autocomplete to do the heavy lifting.
-//
-// For future reference, the reason `<ReactAutocomplete>` (and we) has to do `ignoreBlur`, is that
-// when you select an item from the autocomplete menu by clicking, it first triggers a `blur` event
-// on the `<input>`, before triggering a `click` event. If we wouldn't ignore that `blur` event,
-// we'd hide the menu before the `click` event even has a chance of getting fired. So the `blur`
-// event has to be ignored, and the subsequent `focus` event also has to be ignored since it's kind
-// of a "false" focus event. (In our case we just don't bother with ignoring the `focus` event since
-// it doesn't cause any problems.)
-type AutocompleteProps<T = unknown> = {
-  items: readonly T[];
-  getItemValue?: (arg0: T) => string;
-  getItemText?: (arg0: T) => string;
-  filterText?: string;
-  value?: string;
-  selectedItem?: T;
-  onChange?: (event: React.SyntheticEvent<HTMLInputElement>, text: string) => void;
-  onSelect: (text: string, item: T, autocomplete: IAutocomplete) => void;
-  onBlur?: () => void;
-  hasError?: boolean;
-  autocompleteKey?: string;
-  placeholder?: string;
+type AutocompleteProps<T> = {
   autoSize?: boolean;
-  sortWhenFiltering?: boolean;
-  clearOnFocus?: boolean; // only for uncontrolled use (when onChange is not set)
-  minWidth?: number;
-  menuStyle?: CSSProperties;
-  inputStyle?: CSSProperties;
-  disabled?: boolean;
   disableAutoSelect?: boolean;
+  disabled?: boolean;
+  filterText?: string;
+  getItemText?: (item: T) => string;
+  getItemValue?: (item: T) => string;
+  hasError?: boolean;
+  inputStyle?: CSSProperties;
+  items: readonly T[];
+  menuStyle?: CSSProperties;
+  minWidth?: number;
+  onBlur?: () => void;
+  onChange?: (event: React.SyntheticEvent<Element>, text: string) => void;
+  onSelect: (value: string | T, autocomplete: IAutocomplete) => void;
+  placeholder?: string;
   readOnly?: boolean;
+  selectedItem?: T;
+  selectOnFocus?: boolean;
+  sortWhenFiltering?: boolean;
+  value?: string;
 };
 
 export interface IAutocomplete {
@@ -146,6 +64,48 @@ export interface IAutocomplete {
   focus(): void;
   blur(): void;
 }
+
+const useStyles = makeStyles()((theme) => {
+  const prefersDarkMode = theme.palette.mode === "dark";
+  const inputBackgroundColor = prefersDarkMode
+    ? "rgba(255, 255, 255, 0.09)"
+    : "rgba(0, 0, 0, 0.06)";
+
+  return {
+    root: {
+      ".MuiInputBase-root.MuiInputBase-sizeSmall": {
+        backgroundColor: "transparent",
+        paddingInline: 0,
+        "&:focus-within": {
+          backgroundColor: inputBackgroundColor,
+        },
+      },
+    },
+    inputError: {
+      input: {
+        color: theme.palette.error.main,
+      },
+    },
+    item: {
+      padding: 6,
+      cursor: "pointer",
+      minHeight: "100%",
+      lineHeight: "calc(100% - 10px)",
+      overflowWrap: "break-word",
+      color: theme.palette.text.primary,
+      whiteSpace: "pre",
+    },
+    itemSelected: {
+      backgroundColor: alpha(
+        theme.palette.primary.main,
+        theme.palette.action.selectedOpacity + theme.palette.action.hoverOpacity,
+      ),
+    },
+    itemHighlighted: {
+      backgroundColor: theme.palette.action.hover,
+    },
+  };
+});
 
 function defaultGetText(name: string): (item: unknown) => string {
   return function (item: unknown) {
@@ -186,28 +146,31 @@ const HighlightChars = (props: { str: string; indices: Set<number> }) => {
         </b>
       );
     } else {
-      return char;
+      return (
+        <span key={i} style={{ whiteSpace: "pre" }}>
+          {char}
+        </span>
+      );
     }
   });
 
   return <>{nodes}</>;
 };
 
+/**
+ * <Autocomplete> is a Studio-specific wrapper of MUI autocomplete with support
+ * for things like multiple autocompletes that seamlessly transition into each
+ * other, e.g. when building more complex strings like in the Plot panel.
+ */
 export default React.forwardRef(function Autocomplete<T = unknown>(
   props: AutocompleteProps<T>,
   ref: React.ForwardedRef<IAutocomplete>,
 ): JSX.Element {
-  // References
-  const autocomplete = useRef<ReactAutocomplete>(ReactNull);
-  const ignoreBlur = useRef<boolean>(false);
+  const inputRef = useRef<HTMLInputElement>(ReactNull);
 
-  // Context
   const { classes, cx } = useStyles();
 
-  // State
-  const [showAllItems, setShowAllItems] = useState<boolean>(false);
   const [stateValue, setValue] = useState<string | undefined>(undefined);
-  const [focused, setFocused] = useState<boolean>(false);
 
   const getItemText = useMemo(
     () => props.getItemText ?? defaultGetText("getItemText"),
@@ -221,25 +184,19 @@ export default React.forwardRef(function Autocomplete<T = unknown>(
 
   // Props
   const {
-    autocompleteKey,
-    autoSize = false,
-    items,
-    placeholder,
     selectedItem,
     // eslint-disable-next-line @typescript-eslint/strict-boolean-expressions
     value = stateValue ?? (selectedItem ? getItemText(selectedItem) : undefined),
+    disabled,
     filterText = value ?? "",
-    sortWhenFiltering = true,
-    clearOnFocus = false,
-    minWidth = 100,
-    menuStyle = {},
-    inputStyle = {},
+    items,
+    onBlur: onBlurCallback,
     onChange: onChangeCallback,
     onSelect: onSelectCallback,
-    onBlur: onBlurCallback,
-    disabled,
-    disableAutoSelect,
+    placeholder,
     readOnly,
+    selectOnFocus,
+    sortWhenFiltering = true,
   }: AutocompleteProps<T> = props;
 
   const fzfUnfiltered = useMemo(() => {
@@ -251,7 +208,7 @@ export default React.forwardRef(function Autocomplete<T = unknown>(
     return new Fzf(items, {
       fuzzy: "v2",
       sort: sortWhenFiltering,
-      limit: MAX_ITEMS,
+      limit: MAX_FZF_MATCHES,
       selector: getItemText,
     });
   }, [getItemText, items, sortWhenFiltering]);
@@ -262,37 +219,19 @@ export default React.forwardRef(function Autocomplete<T = unknown>(
 
   const hasError = Boolean(props.hasError ?? (autocompleteItems.length === 0 && value?.length));
 
-  const open = focused && autocompleteItems.length > 0;
-  if (!open) {
-    ignoreBlur.current = false;
-  }
-
   const selectedItemValue = selectedItem != undefined ? getItemValue(selectedItem) : undefined;
   const setSelectionRange = useCallback((selectionStart: number, selectionEnd: number): void => {
-    if (autocomplete.current?.refs.input) {
-      (autocomplete.current.refs.input as HTMLInputElement).setSelectionRange(
-        selectionStart,
-        selectionEnd,
-      );
-    }
-    setFocused(true);
+    inputRef.current?.focus();
+    inputRef.current?.setSelectionRange(selectionStart, selectionEnd);
   }, []);
 
-  const focus = useCallback((): void => {
-    if (autocomplete.current?.refs.input) {
-      (autocomplete.current.refs.input as HTMLInputElement).focus();
-    }
+  const focus = useCallback(() => {
+    inputRef.current?.focus();
   }, []);
 
-  const blur = useCallback((): void => {
-    if (autocomplete.current?.refs.input) {
-      (autocomplete.current.refs.input as HTMLInputElement).blur();
-    }
-    ignoreBlur.current = false;
-    setFocused(false);
-    if (onBlurCallback) {
-      onBlurCallback();
-    }
+  const blur = useCallback(() => {
+    inputRef.current?.blur();
+    onBlurCallback?.();
   }, [onBlurCallback]);
 
   // Give callers an opportunity to control autocomplete
@@ -303,235 +242,95 @@ export default React.forwardRef(function Autocomplete<T = unknown>(
   ]);
 
   const onChange = useCallback(
-    (event: React.SyntheticEvent<HTMLInputElement>): void => {
+    (_event: ReactNull | React.SyntheticEvent<Element>, newValue: string): void => {
       if (onChangeCallback) {
-        onChangeCallback(event, (event.target as HTMLInputElement).value);
+        if (_event) {
+          onChangeCallback(_event, newValue);
+        }
       } else {
-        setValue((event.target as HTMLInputElement).value);
+        setValue(newValue);
       }
     },
     [onChangeCallback],
   );
 
-  // Make sure the input field gets focused again after selecting, in case we're doing multiple
-  // autocompletes. We pass an instance of an `IAutocomplete` to `onSelect` in case
-  // the user of this component wants to call `blur()`.
+  // To allow multiple completions in sequence, it's up to the parent component
+  // to manually blur the input to finish a completion.
   const onSelect = useCallback(
-    (textValue: string, { item }: FzfResultItem<T>): void => {
-      if (autocomplete.current?.refs.input) {
-        (autocomplete.current.refs.input as HTMLInputElement).focus();
-        setFocused(true);
+    (
+      _event: SyntheticEvent<Element>,
+      selectedValue: ReactNull | string | FzfResultItem<T>,
+    ): void => {
+      if (selectedValue != undefined && typeof selectedValue !== "string") {
         setValue(undefined);
-        onSelectCallback(textValue, item, { setSelectionRange, focus, blur });
+        onSelectCallback(selectedValue.item, { setSelectionRange, focus, blur });
       }
     },
     [onSelectCallback, blur, focus, setSelectionRange],
   );
 
-  const onFocus = useCallback((): void => {
-    if (
-      autocomplete.current?.refs.input &&
-      document.activeElement === autocomplete.current.refs.input
-    ) {
-      setFocused(true);
-      if (clearOnFocus) {
-        setValue("");
-      }
-    }
-  }, [clearOnFocus]);
-
-  const onBlur = useCallback((): void => {
-    if (ignoreBlur.current) {
-      return;
-    }
-    if (
-      autocomplete.current?.refs.input &&
-      document.activeElement === autocomplete.current.refs.input
-    ) {
-      // Bail if we actually still are focused.
-      return;
-    }
-    setFocused(false);
-    setValue(undefined);
-    if (onBlurCallback) {
-      onBlurCallback();
-    }
-  }, [onBlurCallback, ignoreBlur]);
-
-  // Wait for a mouseup event, and check in the mouseup event if anything was actually selected, or
-  // if it just was a click without a drag. In the latter case, select everything. This is very
-  // similar to how, say, the browser bar in Chrome behaves.
-  const onMouseDown = useCallback(
-    (_event: React.MouseEvent<HTMLInputElement>): void => {
-      if (disableAutoSelect ?? false) {
-        return;
-      }
-      if (focused) {
-        return;
-      }
-      const onMouseUp = (e: MouseEvent) => {
-        document.removeEventListener("mouseup", onMouseUp, true);
-
-        if (
-          autocomplete.current?.refs.input && // Make sure that the element is actually still focused.
-          document.activeElement === autocomplete.current.refs.input
-        ) {
-          if (
-            (autocomplete.current.refs.input as HTMLInputElement).selectionStart ===
-            (autocomplete.current.refs.input as HTMLInputElement).selectionEnd
-          ) {
-            (autocomplete.current.refs.input as HTMLInputElement).select();
-            e.stopPropagation();
-            e.preventDefault();
-          }
-          // Also set `state.focused` for good measure, since we know here that we're focused.
-          setFocused(true);
-        }
-      };
-      document.addEventListener("mouseup", onMouseUp, true);
-    },
-    [disableAutoSelect, focused],
-  );
-
-  // When scrolling down by even a little bit, just show all items. In most cases people won't
-  // do this and instead will type more text to narrow down their autocomplete.
-  const onScroll = useCallback((event: React.MouseEvent<HTMLDivElement>): void => {
-    if (event.currentTarget.scrollTop > 0) {
-      // Never set `showAllItems` to false here, as `<ReactAutocomplete>` may have a reference to
-      // the highlighted element. We only set it back to false in `componentDidUpdate`.
-      setShowAllItems(true);
-    }
-  }, []);
-
-  const onKeyDown = useCallback(
-    (event: React.KeyboardEvent<HTMLInputElement>): void => {
-      if (event.key === "Escape" || (event.key === "Enter" && items.length === 0)) {
-        blur();
-      }
-    },
-    [blur, items],
-  );
+  // Don't filter out options here because we assume that the parent
+  // component has already filtered them. This allows completing fragments.
+  const filterOptions = useCallback((options: FzfResultItem<T>[]) => options, []);
 
   return (
-    <ReactAutocomplete
-      open={open}
-      items={autocompleteItems}
-      getItemValue={(item: FzfResultItem<T>) => getItemValue(item.item)}
-      renderItem={(item: FzfResultItem<T>, isHighlighted) => {
+    <MuiAutocomplete
+      className={classes.root}
+      clearIcon={<ClearIcon fontSize="small" />}
+      componentsProps={{
+        clearIndicator: { size: "small" },
+        paper: { elevation: 8 },
+      }}
+      disableCloseOnSelect
+      disabled={disabled}
+      freeSolo
+      fullWidth
+      getOptionLabel={(item: string | FzfResultItem<T>) => {
+        if (typeof item === "string") {
+          return item;
+        }
+        return getItemValue(item.item);
+      }}
+      filterOptions={filterOptions}
+      ListboxComponent={ReactWindowListboxAdapter}
+      onChange={onSelect}
+      onInputChange={onChange}
+      openOnFocus
+      options={autocompleteItems}
+      readOnly={readOnly}
+      renderInput={(params) => (
+        <TextField
+          {...params}
+          variant="filled"
+          inputRef={inputRef}
+          placeholder={placeholder}
+          className={cx({ [classes.inputError]: hasError })}
+          size="small"
+        />
+      )}
+      renderOption={(optProps, item: FzfResultItem<T>, { selected }) => {
         const itemValue = getItemValue(item.item);
         return (
-          <div
+          <MenuItem
+            dense
+            {...optProps}
             key={itemValue}
-            data-highlighted={isHighlighted}
+            component="span"
+            data-highlighted={selected}
             data-test-auto-item
             className={cx(classes.item, {
-              [classes.itemHighlighted]: isHighlighted,
+              [classes.itemHighlighted]: selected,
               [classes.itemSelected]:
                 selectedItemValue != undefined && itemValue === selectedItemValue,
             })}
           >
             <HighlightChars str={getItemText(item.item)} indices={item.positions} />
-          </div>
+          </MenuItem>
         );
       }}
-      onChange={onChange}
-      onSelect={onSelect}
-      value={value ?? ""}
-      inputProps={{
-        className: cx(classes.input, {
-          [classes.inputError]: hasError,
-          [classes.inputPlaceholder]: value == undefined || value.length === 0,
-        }),
-        autoCorrect: "off",
-        autoCapitalize: "off",
-        disabled,
-        readOnly,
-        spellCheck: "false",
-        placeholder,
-        style: {
-          ...inputStyle,
-          fontFamily,
-          fontSize,
-          paddingLeft: 4,
-          pointerEvents: readOnly === true ? "none" : "auto",
-          width: autoSize
-            ? Math.max(
-                measureText(value != undefined && value.length > 0 ? value : placeholder ?? ""),
-                minWidth,
-              )
-            : "100%",
-        },
-        onFocus,
-        onBlur,
-        onMouseDown,
-        onKeyDown,
-      }}
-      renderMenu={(menuItems, _val, style) => {
-        // Hacky virtualization. Either don't show all menuItems (typical when the user is still
-        // typing in the autcomplete), or do show them all (once the user scrolls). Not the most
-        // sophisticated, but good enough!
-        const maxNumberOfItems = Math.ceil(window.innerHeight / ROW_HEIGHT + 10);
-        const menuItemsToShow =
-          showAllItems || menuItems.length <= maxNumberOfItems * 2
-            ? menuItems
-            : menuItems.slice(0, maxNumberOfItems).concat(menuItems.slice(-maxNumberOfItems));
-
-        // The longest string might not be the widest (e.g. "|||" vs "www"), but this is
-        // quite a bit faster, so we throw in a nice padding and call it good enough! :-)
-        const longestItem = maxBy(autocompleteItems, (item) => getItemText(item.item).length);
-        const width =
-          50 + (longestItem != undefined ? measureText(getItemText(longestItem.item)) : 0);
-        const maxHeight = `calc(100vh - 10px - ${style.top}px)`;
-
-        return (
-          <Paper
-            elevation={6}
-            className={classes.root}
-            key={
-              autocompleteKey
-              /* So we scroll to the top when selecting */
-            }
-            style={
-              // If the autocomplete would fall off the screen, pin it to the right.
-              (style.left as number) + width <= window.innerWidth
-                ? { ...menuStyle, ...style, width, maxWidth: "100%", maxHeight }
-                : {
-                    ...menuStyle,
-                    ...style,
-                    width,
-                    maxWidth: "100%",
-                    maxHeight,
-                    left: "auto",
-                    right: 0,
-                  }
-            }
-            onScroll={onScroll}
-          >
-            {/* Have to wrap onMouseEnter and onMouseLeave in a separate <div>, as react-autocomplete
-             * would override them on the root <div>. */}
-            <div
-              onMouseEnter={() => (ignoreBlur.current = true)}
-              onMouseLeave={() => (ignoreBlur.current = false)}
-            >
-              {menuItemsToShow}
-            </div>
-          </Paper>
-        );
-      }}
-      // @ts-expect-error renderMenuWrapper added in the fork but we don't have typings for it
-      renderMenuWrapper={(menu) => (
-        <Modal disableAutoFocus open={open} hideBackdrop>
-          {menu}
-        </Modal>
-      )}
-      ref={autocomplete}
-      wrapperStyle={{
-        display: "flex",
-        flex: "1 1 auto",
-        alignItems: "center",
-        overflow: "hidden",
-        height: "100%",
-      }}
+      selectOnFocus={selectOnFocus}
+      size="small"
+      value={value ?? ReactNull}
     />
   );
 }) as <T>(props: AutocompleteProps<T> & React.RefAttributes<IAutocomplete>) => JSX.Element; // https://stackoverflow.com/a/58473012/23649
