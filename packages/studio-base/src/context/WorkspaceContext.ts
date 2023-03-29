@@ -36,6 +36,7 @@ export type WorkspaceContextStore = DeepReadonly<{
   rightSidebarOpen: boolean;
   leftSidebarItem: undefined | LeftSidebarItemKey;
   leftSidebarSize: undefined | number;
+  prefsDialogOpen: boolean;
   rightSidebarItem: undefined | RightSidebarItemKey;
   rightSidebarSize: undefined | number;
   sidebarItem: undefined | SidebarItemKey;
@@ -73,6 +74,7 @@ export type WorkspaceActions = {
   setLayoutMenuOpen: Dispatch<SetStateAction<boolean>>;
   setLeftSidebarOpen: Dispatch<SetStateAction<boolean>>;
   setLeftSidebarSize: (size: undefined | number) => void;
+  setPrefsDialogOpen: Dispatch<SetStateAction<boolean>>;
   setRightSidebarOpen: Dispatch<SetStateAction<boolean>>;
   setRightSidebarSize: (size: undefined | number) => void;
 };
@@ -119,8 +121,13 @@ export function useWorkspaceActions(): WorkspaceActions {
         });
       },
 
-      selectSidebarItem: (selectedSidebarItem: undefined | SidebarItemKey) =>
-        set({ sidebarItem: selectedSidebarItem }),
+      selectSidebarItem: (selectedSidebarItem: undefined | SidebarItemKey) => {
+        if (selectedSidebarItem === "preferences") {
+          set({ prefsDialogOpen: true });
+        } else {
+          set({ sidebarItem: selectedSidebarItem });
+        }
+      },
 
       selectLeftSidebarItem: (selectedLeftSidebarItem: undefined | LeftSidebarItemKey) => {
         set({
@@ -152,6 +159,13 @@ export function useWorkspaceActions(): WorkspaceActions {
       },
 
       setLeftSidebarSize: (leftSidebarSize: undefined | number) => set({ leftSidebarSize }),
+
+      setPrefsDialogOpen: (setter: SetStateAction<boolean>) => {
+        set((oldValue) => {
+          const prefsDialogOpen = setterValue(setter, oldValue.prefsDialogOpen);
+          return { prefsDialogOpen };
+        });
+      },
 
       setRightSidebarOpen: (setter: SetStateAction<boolean>) => {
         set((oldValue) => {

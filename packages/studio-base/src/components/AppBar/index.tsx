@@ -15,6 +15,7 @@ import {
 import { AppBar as MuiAppBar, Button, IconButton } from "@mui/material";
 import { useCallback, useRef, useState } from "react";
 import { makeStyles } from "tss-react/mui";
+import { shallow } from "zustand/shallow";
 
 import { AppSetting } from "@foxglove/studio-base/AppSetting";
 import { AppBarIconButton } from "@foxglove/studio-base/components/AppBar/AppBarIconButton";
@@ -36,8 +37,8 @@ import {
   User,
 } from "@foxglove/studio-base/context/CurrentUserContext";
 import {
-  useWorkspaceStore,
   useWorkspaceActions,
+  useWorkspaceStore,
   WorkspaceContextStore,
 } from "@foxglove/studio-base/context/WorkspaceContext";
 import { useAppConfigurationValue } from "@foxglove/studio-base/hooks";
@@ -48,7 +49,6 @@ import { AddPanelMenu } from "./AddPanelMenu";
 import { DataSource } from "./DataSource";
 import { HelpMenu } from "./HelpMenu";
 import { LayoutMenu } from "./LayoutMenu";
-import { PreferencesDialog } from "./Preferences";
 import { UserIconButton, UserMenu } from "./User";
 import {
   APP_BAR_BACKGROUND_COLOR,
@@ -151,9 +151,6 @@ type AppBarProps = CustomWindowControlsProps & {
   debugDragRegion?: boolean;
   disableSignIn?: boolean;
   onSelectDataSourceAction: () => void;
-  prefsDialogOpen: boolean;
-  // eslint-disable-next-line @foxglove/no-boolean-parameters
-  setPrefsDialogOpen: (open: boolean) => void;
 };
 
 const selectedLayoutIdSelector = (state: LayoutState) => state.selectedLayout?.id;
@@ -163,20 +160,18 @@ const selectWorkspace = (store: WorkspaceContextStore) => store;
 export function AppBar(props: AppBarProps): JSX.Element {
   const {
     currentUser,
-    disableSignIn = false,
-    signIn,
-    leftInset,
-    showCustomWindowControls = false,
-    onDoubleClick,
-    isMaximized,
-    onMinimizeWindow,
-    onMaximizeWindow,
-    onUnmaximizeWindow,
-    onCloseWindow,
-    onSelectDataSourceAction,
     debugDragRegion,
-    prefsDialogOpen,
-    setPrefsDialogOpen,
+    disableSignIn = false,
+    isMaximized,
+    leftInset,
+    onCloseWindow,
+    onDoubleClick,
+    onMaximizeWindow,
+    onMinimizeWindow,
+    onSelectDataSourceAction,
+    onUnmaximizeWindow,
+    showCustomWindowControls = false,
+    signIn,
   } = props;
   const { classes, cx } = useStyles({ leftInset, debugDragRegion });
   const currentUserType = useCurrentUserType();
@@ -188,8 +183,12 @@ export function AppBar(props: AppBarProps): JSX.Element {
   const selectedLayoutId = useCurrentLayoutSelector(selectedLayoutIdSelector);
   const supportsAccountSettings = signIn != undefined;
 
-  const { leftSidebarOpen, rightSidebarOpen, layoutMenuOpen } = useWorkspaceStore(selectWorkspace);
-  const { setLayoutMenuOpen, setRightSidebarOpen, setLeftSidebarOpen } = useWorkspaceActions();
+  const { leftSidebarOpen, rightSidebarOpen, layoutMenuOpen, prefsDialogOpen } = useWorkspaceStore(
+    selectWorkspace,
+    shallow,
+  );
+  const { setLayoutMenuOpen, setRightSidebarOpen, setLeftSidebarOpen, setPrefsDialogOpen } =
+    useWorkspaceActions();
 
   const [helpAnchorEl, setHelpAnchorEl] = useState<undefined | HTMLElement>(undefined);
   const [userAnchorEl, setUserAnchorEl] = useState<undefined | HTMLElement>(undefined);
@@ -391,11 +390,6 @@ export function AppBar(props: AppBarProps): JSX.Element {
         anchorEl={userAnchorEl}
         open={userMenuOpen}
         handleClose={() => setUserAnchorEl(undefined)}
-      />
-      <PreferencesDialog
-        id="preferences-dialog"
-        open={prefsDialogOpen}
-        onClose={() => setPrefsDialogOpen(false)}
       />
     </>
   );

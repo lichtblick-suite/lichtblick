@@ -16,12 +16,12 @@ import {
   FormLabel,
   MenuItem,
   Select,
-  TextField,
-  Typography,
-  ToggleButtonGroup,
-  ToggleButton,
-  ToggleButtonGroupProps,
   SelectChangeEvent,
+  TextField,
+  ToggleButton,
+  ToggleButtonGroup,
+  ToggleButtonGroupProps,
+  Typography,
 } from "@mui/material";
 import moment from "moment-timezone";
 import { MouseEvent, useCallback, useMemo } from "react";
@@ -31,8 +31,6 @@ import { makeStyles } from "tss-react/mui";
 import { filterMap } from "@foxglove/den/collection";
 import { AppSetting } from "@foxglove/studio-base/AppSetting";
 import OsContextSingleton from "@foxglove/studio-base/OsContextSingleton";
-import { ExperimentalFeatureSettings } from "@foxglove/studio-base/components/ExperimentalFeatureSettings";
-import { SidebarContent } from "@foxglove/studio-base/components/SidebarContent";
 import Stack from "@foxglove/studio-base/components/Stack";
 import { useAppTimeFormat } from "@foxglove/studio-base/hooks";
 import { useAppConfigurationValue } from "@foxglove/studio-base/hooks/useAppConfigurationValue";
@@ -41,7 +39,6 @@ import { reportError } from "@foxglove/studio-base/reportError";
 import { LaunchPreferenceValue } from "@foxglove/studio-base/types/LaunchPreferenceValue";
 import { TimeDisplayMethod } from "@foxglove/studio-base/types/panels";
 import { formatTime } from "@foxglove/studio-base/util/formatTime";
-import isDesktopApp from "@foxglove/studio-base/util/isDesktopApp";
 import { formatTimeRaw } from "@foxglove/studio-base/util/time";
 
 const MESSAGE_RATES = [1, 3, 5, 10, 15, 20, 30, 60];
@@ -392,115 +389,5 @@ export function LanguageSettings(): React.ReactElement {
         ))}
       </Select>
     </Stack>
-  );
-}
-
-export default function Preferences(): React.ReactElement {
-  const [crashReportingEnabled, setCrashReportingEnabled] = useAppConfigurationValue<boolean>(
-    AppSetting.CRASH_REPORTING_ENABLED,
-  );
-  const [telemetryEnabled, setTelemetryEnabled] = useAppConfigurationValue<boolean>(
-    AppSetting.TELEMETRY_ENABLED,
-  );
-  const { t } = useTranslation("preferences");
-
-  // automatic updates are a desktop-only setting
-  //
-  // electron-updater does not provide a way to detect if we are on a supported update platform
-  // so we hard-code linux as an _unsupported_ auto-update platform since we cannot auto-update
-  // with our .deb package install method on linux.
-  const supportsAppUpdates = isDesktopApp() && OsContextSingleton?.platform !== "linux";
-
-  const { classes } = useStyles();
-
-  return (
-    <SidebarContent title={t("preferences")}>
-      <Stack gap={4}>
-        <section>
-          <Typography component="h2" variant="h5" gutterBottom color="primary">
-            {t("general")}
-          </Typography>
-          <Stack gap={2}>
-            <div>
-              <ColorSchemeSettings />
-            </div>
-            <div>
-              <TimezoneSettings />
-            </div>
-            <div>
-              <TimeFormat />
-            </div>
-            <div>
-              <MessageFramerate />
-            </div>
-            <div>
-              <LanguageSettings />
-            </div>
-            {supportsAppUpdates && (
-              <div>
-                <AutoUpdate />
-              </div>
-            )}
-            {!isDesktopApp() && (
-              <div>
-                <LaunchDefault />
-              </div>
-            )}
-          </Stack>
-        </section>
-
-        <section>
-          <Typography component="h2" variant="h5" gutterBottom color="primary">
-            {t("ros")}
-          </Typography>
-          <Stack gap={1}>
-            <div>
-              <RosPackagePath />
-            </div>
-          </Stack>
-        </section>
-
-        <section>
-          <Typography component="h2" variant="h5" gutterBottom color="primary">
-            {t("privacy")}
-          </Typography>
-          <Stack gap={2}>
-            <Typography color="text.secondary">{t("privacyDescription")}</Typography>
-            <FormControlLabel
-              className={classes.formControlLabel}
-              control={
-                <Checkbox
-                  className={classes.checkbox}
-                  checked={telemetryEnabled ?? true}
-                  onChange={(_event, checked) => void setTelemetryEnabled(checked)}
-                />
-              }
-              label={t("sendAnonymizedUsageData")}
-            />
-            <FormControlLabel
-              className={classes.formControlLabel}
-              control={
-                <Checkbox
-                  className={classes.checkbox}
-                  checked={crashReportingEnabled ?? true}
-                  onChange={(_event, checked) => void setCrashReportingEnabled(checked)}
-                />
-              }
-              label={t("sendAnonymizedCrashReports")}
-            />
-          </Stack>
-        </section>
-
-        <section>
-          <Typography component="h2" variant="h5" gutterBottom color="primary">
-            {t("experimentalFeatures")}
-          </Typography>
-          <Stack gap={1}>
-            <Typography color="text.secondary">{t("experimentalFeaturesDescription")}</Typography>
-            <ExperimentalFeatureSettings />
-          </Stack>
-        </section>
-      </Stack>
-    </SidebarContent>
   );
 }

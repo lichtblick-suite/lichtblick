@@ -22,6 +22,7 @@ function createWorkspaceContextStore(
           leftSidebarItem: "panel-settings",
           leftSidebarOpen: true,
           leftSidebarSize: undefined,
+          prefsDialogOpen: false,
           rightSidebarItem: undefined,
           rightSidebarOpen: false,
           rightSidebarSize: undefined,

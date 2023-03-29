@@ -8,11 +8,12 @@ import userEvent from "@testing-library/user-event";
 import { range } from "lodash";
 
 import { ExtensionInfo, ExtensionLoader } from "@foxglove/studio-base";
-import { PreferencesDialog } from "@foxglove/studio-base/components/AppBar/Preferences";
 import ExtensionMarketplaceContext, {
   ExtensionMarketplace,
 } from "@foxglove/studio-base/context/ExtensionMarketplaceContext";
 import ExtensionCatalogProvider from "@foxglove/studio-base/providers/ExtensionCatalogProvider";
+
+import { PreferencesDialog } from "./PreferencesDialog";
 
 const installedExtensions: ExtensionInfo[] = range(1, 10).map((index) => ({
   id: "publisher.storyextension",

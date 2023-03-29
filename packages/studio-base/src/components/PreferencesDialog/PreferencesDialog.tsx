@@ -31,6 +31,10 @@ import CopyButton from "@foxglove/studio-base/components/CopyButton";
 import { ExperimentalFeatureSettings } from "@foxglove/studio-base/components/ExperimentalFeatureSettings";
 import ExtensionsSettings from "@foxglove/studio-base/components/ExtensionsSettings";
 import FoxgloveLogoText from "@foxglove/studio-base/components/FoxgloveLogoText";
+import Stack from "@foxglove/studio-base/components/Stack";
+import { useAppConfigurationValue } from "@foxglove/studio-base/hooks";
+import isDesktopApp from "@foxglove/studio-base/util/isDesktopApp";
+
 import {
   AutoUpdate,
   ColorSchemeSettings,
@@ -40,10 +44,7 @@ import {
   RosPackagePath,
   TimeFormat,
   TimezoneSettings,
-} from "@foxglove/studio-base/components/Preferences";
-import Stack from "@foxglove/studio-base/components/Stack";
-import { useAppConfigurationValue } from "@foxglove/studio-base/hooks";
-import isDesktopApp from "@foxglove/studio-base/util/isDesktopApp";
+} from "./settings";
 
 const useStyles = makeStyles()((theme) => ({
   layoutGrid: {

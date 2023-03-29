@@ -39,7 +39,6 @@ import PanelLayout from "@foxglove/studio-base/components/PanelLayout";
 import PanelList from "@foxglove/studio-base/components/PanelList";
 import PanelSettings from "@foxglove/studio-base/components/PanelSettings";
 import PlaybackControls from "@foxglove/studio-base/components/PlaybackControls";
-import Preferences from "@foxglove/studio-base/components/Preferences";
 import RemountOnValueChange from "@foxglove/studio-base/components/RemountOnValueChange";
 import { SidebarContent } from "@foxglove/studio-base/components/SidebarContent";
 import Sidebars, { SidebarItem } from "@foxglove/studio-base/components/Sidebars";
@@ -52,6 +51,7 @@ import {
 } from "@foxglove/studio-base/components/StudioLogsSettings";
 import { SyncAdapters } from "@foxglove/studio-base/components/SyncAdapters";
 import VariablesList from "@foxglove/studio-base/components/VariablesList";
+import { WorkspaceDialogs } from "@foxglove/studio-base/components/WorkspaceDialogs";
 import {
   LayoutState,
   useCurrentLayoutSelector,
@@ -189,11 +189,10 @@ function WorkspaceContent(props: WorkspaceProps): JSX.Element {
     selectLeftSidebarItem,
     selectRightSidebarItem,
     setLeftSidebarSize,
+    setPrefsDialogOpen,
     setRightSidebarSize,
     selectSidebarItem,
   } = useWorkspaceActions();
-
-  const [prefsDialogOpen, setPrefsDialogOpen] = useState(false);
 
   // file types we support for drag/drop
   const allowedDropExtensions = useMemo(() => {
@@ -304,12 +303,8 @@ function WorkspaceContent(props: WorkspaceProps): JSX.Element {
   useNativeAppMenuEvent(
     "open-preferences",
     useCallback(() => {
-      if (enableNewTopNav) {
-        setPrefsDialogOpen(true);
-      } else {
-        selectSidebarItem("preferences");
-      }
-    }, [enableNewTopNav, selectSidebarItem]),
+      setPrefsDialogOpen(true);
+    }, [setPrefsDialogOpen]),
   );
 
   useNativeAppMenuEvent(
@@ -551,7 +546,6 @@ function WorkspaceContent(props: WorkspaceProps): JSX.Element {
       bottomItems.set("preferences", {
         iconName: "Settings",
         title: "Preferences",
-        component: Preferences,
       });
     }
 
@@ -649,8 +643,6 @@ function WorkspaceContent(props: WorkspaceProps): JSX.Element {
             onUnmaximizeWindow={props.onUnmaximizeWindow}
             onCloseWindow={props.onCloseWindow}
             onSelectDataSourceAction={() => setShowOpenDialog({ view: "start" })}
-            prefsDialogOpen={prefsDialogOpen}
-            setPrefsDialogOpen={setPrefsDialogOpen}
           />
         )}
         <Sidebars
@@ -689,6 +681,7 @@ function WorkspaceContent(props: WorkspaceProps): JSX.Element {
           </div>
         )}
       </div>
+      <WorkspaceDialogs />
     </MultiProvider>
   );
 }
