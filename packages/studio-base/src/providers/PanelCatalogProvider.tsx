@@ -28,6 +28,9 @@ export default function PanelCatalogProvider(
   const [enableLegacyPlotPanel = false] = useAppConfigurationValue<boolean>(
     AppSetting.ENABLE_LEGACY_PLOT_PANEL,
   );
+  const [enableNewImagePanel = false] = useAppConfigurationValue<boolean>(
+    AppSetting.ENABLE_NEW_IMAGE_PANEL,
+  );
 
   const extensionPanels = useExtensionCatalog((state) => state.installedPanels);
 
@@ -58,7 +61,13 @@ export default function PanelCatalogProvider(
   }, [extensionPanels]);
 
   const allPanels = useMemo(() => {
-    return [...panels.builtin, ...panels.debug, panels.legacyPlot, ...wrappedExtensionPanels];
+    return [
+      ...panels.builtin,
+      ...panels.debug,
+      panels.legacyPlot,
+      panels.newImage,
+      ...wrappedExtensionPanels,
+    ];
   }, [wrappedExtensionPanels]);
 
   const visiblePanels = useMemo(() => {
@@ -69,9 +78,12 @@ export default function PanelCatalogProvider(
     if (enableLegacyPlotPanel) {
       panelList.push(panels.legacyPlot);
     }
+    if (enableNewImagePanel) {
+      panelList.push(panels.newImage);
+    }
     panelList.push(...wrappedExtensionPanels);
     return panelList;
-  }, [enableLegacyPlotPanel, showDebugPanels, wrappedExtensionPanels]);
+  }, [enableLegacyPlotPanel, enableNewImagePanel, showDebugPanels, wrappedExtensionPanels]);
 
   const panelsByType = useMemo(() => {
     const byType = new Map<string, PanelInfo>();

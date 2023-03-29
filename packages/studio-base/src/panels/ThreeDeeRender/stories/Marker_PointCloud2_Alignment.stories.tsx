@@ -8,12 +8,12 @@ import PanelSetup from "@foxglove/studio-base/stories/PanelSetup";
 
 import { makeColor, QUAT_IDENTITY, rad2deg, packRvizRgba, VEC3_ZERO } from "./common";
 import useDelayedFixture from "./useDelayedFixture";
-import ThreeDeeRender from "../index";
+import { ThreeDeePanel } from "../index";
 import { Marker, MarkerType, PointCloud2, TransformStamped } from "../ros";
 
 export default {
   title: "panels/ThreeDeeRender",
-  component: ThreeDeeRender,
+  component: ThreeDeePanel,
 };
 
 Marker_PointCloud2_Alignment.parameters = { colorScheme: "dark" };
@@ -144,9 +144,9 @@ export function Marker_PointCloud2_Alignment(): JSX.Element {
 
   return (
     <PanelSetup fixture={fixture}>
-      <ThreeDeeRender
+      <ThreeDeePanel
         overrideConfig={{
-          ...ThreeDeeRender.defaultConfig,
+          ...ThreeDeePanel.defaultConfig,
           topics: {
             "/markers": { visible: true },
             "/pointcloud": {

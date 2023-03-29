@@ -9,12 +9,12 @@ import PanelSetup from "@foxglove/studio-base/stories/PanelSetup";
 
 import { makeFail, makePass, QUAT_IDENTITY, rad2deg, TEST_COLORS, VEC3_ZERO } from "./common";
 import useDelayedFixture from "./useDelayedFixture";
-import ThreeDeeRender from "../index";
+import { ThreeDeePanel } from "../index";
 import { TransformStamped } from "../ros";
 
 export default {
   title: "panels/ThreeDeeRender",
-  component: ThreeDeeRender,
+  component: ThreeDeePanel,
 };
 
 MarkerLifetimes.parameters = { colorScheme: "dark" };
@@ -156,9 +156,9 @@ export function MarkerLifetimes(): JSX.Element {
 
   return (
     <PanelSetup fixture={fixture}>
-      <ThreeDeeRender
+      <ThreeDeePanel
         overrideConfig={{
-          ...ThreeDeeRender.defaultConfig,
+          ...ThreeDeePanel.defaultConfig,
           followTf: "base_link",
           cameraState: {
             distance: 3,

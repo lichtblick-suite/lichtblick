@@ -9,14 +9,14 @@ import PanelSetup from "@foxglove/studio-base/stories/PanelSetup";
 
 import { makePass, QUAT_IDENTITY, rad2deg, TEST_COLORS } from "./common";
 import useDelayedFixture from "./useDelayedFixture";
-import ThreeDeeRender from "../index";
+import { ThreeDeePanel } from "../index";
 import { TransformStamped } from "../ros";
 
 const VEC3_ZERO = { x: 0, y: 0, z: 0 };
 
 export default {
   title: "panels/ThreeDeeRender",
-  component: ThreeDeeRender,
+  component: ThreeDeePanel,
 };
 
 TransformInterpolation.parameters = { colorScheme: "dark" };
@@ -88,7 +88,7 @@ export function TransformInterpolation(): JSX.Element {
 
   return (
     <PanelSetup fixture={fixture}>
-      <ThreeDeeRender
+      <ThreeDeePanel
         overrideConfig={{
           followTf: "base_link",
           layers: {
@@ -189,7 +189,7 @@ export function TransformOffsets(): JSX.Element {
 
   return (
     <PanelSetup fixture={fixture}>
-      <ThreeDeeRender
+      <ThreeDeePanel
         overrideConfig={{
           followTf: "b",
           layers: {

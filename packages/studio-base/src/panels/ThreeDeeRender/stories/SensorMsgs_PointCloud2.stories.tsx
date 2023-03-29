@@ -10,12 +10,12 @@ import PanelSetup from "@foxglove/studio-base/stories/PanelSetup";
 
 import { packRvizRgba, QUAT_IDENTITY, rad2deg } from "./common";
 import useDelayedFixture from "./useDelayedFixture";
-import ThreeDeeRender from "../index";
+import { ThreeDeePanel } from "../index";
 import { PointCloud2, TransformStamped } from "../ros";
 
 export default {
   title: "panels/ThreeDeeRender",
-  component: ThreeDeeRender,
+  component: ThreeDeePanel,
 };
 
 export const SensorMsgs_PointCloud2_RGBA = (): JSX.Element => (
@@ -125,7 +125,7 @@ function SensorMsgs_PointCloud2({ rgbaFieldName }: { rgbaFieldName: string }): J
 
   return (
     <PanelSetup fixture={fixture}>
-      <ThreeDeeRender
+      <ThreeDeePanel
         overrideConfig={{
           followTf: "base_link",
           topics: {
@@ -301,7 +301,7 @@ export function SensorMsgs_PointCloud2_Intensity(): JSX.Element {
 
   return (
     <PanelSetup fixture={fixture}>
-      <ThreeDeeRender
+      <ThreeDeePanel
         overrideConfig={{
           followTf: "base_link",
           topics: {
@@ -387,7 +387,7 @@ export function SensorMsgs_PointCloud2_TwoDimensions(): JSX.Element {
 
   return (
     <PanelSetup fixture={fixture}>
-      <ThreeDeeRender
+      <ThreeDeePanel
         overrideConfig={{
           followTf: "sensor",
           layers: {

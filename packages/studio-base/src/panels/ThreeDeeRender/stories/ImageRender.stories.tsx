@@ -13,12 +13,12 @@ import PanelSetup, { Fixture } from "@foxglove/studio-base/stories/PanelSetup";
 
 import { PNG_TEST_IMAGE, rad2deg, SENSOR_FRAME_ID } from "./common";
 import { useFixtureQueue } from "./useFixtureQueue";
-import ThreeDeeRender from "../index";
+import { ThreeDeePanel } from "../index";
 import { CameraInfo, CompressedImage as RosCompressedImage, Image } from "../ros";
 
 export default {
   title: "panels/ThreeDeeRender/Images",
-  component: ThreeDeeRender,
+  component: ThreeDeePanel,
 };
 
 export const ImageRender: Story = () => {
@@ -131,9 +131,9 @@ export const ImageRender: Story = () => {
 
   return (
     <PanelSetup fixture={fixture}>
-      <ThreeDeeRender
+      <ThreeDeePanel
         overrideConfig={{
-          ...ThreeDeeRender.defaultConfig,
+          ...ThreeDeePanel.defaultConfig,
           followTf: SENSOR_FRAME_ID,
           scene: {
             labelScaleFactor: 0,
@@ -291,9 +291,9 @@ export const FoxgloveImage: Story = () => {
 
   return (
     <PanelSetup fixture={fixture}>
-      <ThreeDeeRender
+      <ThreeDeePanel
         overrideConfig={{
-          ...ThreeDeeRender.defaultConfig,
+          ...ThreeDeePanel.defaultConfig,
           followTf: SENSOR_FRAME_ID,
           scene: {
             labelScaleFactor: 0,
@@ -413,9 +413,9 @@ export const ImageThenInfo: Story = () => {
 
   return (
     <PanelSetup fixture={activeFixture} pauseFrame={pauseFrame}>
-      <ThreeDeeRender
+      <ThreeDeePanel
         overrideConfig={{
-          ...ThreeDeeRender.defaultConfig,
+          ...ThreeDeePanel.defaultConfig,
           followTf: SENSOR_FRAME_ID,
           scene: {
             labelScaleFactor: 0,
@@ -524,9 +524,9 @@ export const InfoThenImage: Story = () => {
 
   return (
     <PanelSetup fixture={activeFixture} pauseFrame={pauseFrame}>
-      <ThreeDeeRender
+      <ThreeDeePanel
         overrideConfig={{
-          ...ThreeDeeRender.defaultConfig,
+          ...ThreeDeePanel.defaultConfig,
           followTf: SENSOR_FRAME_ID,
           scene: {
             labelScaleFactor: 0,

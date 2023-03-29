@@ -11,11 +11,11 @@ import PanelSetup from "@foxglove/studio-base/stories/PanelSetup";
 
 import { QUAT_IDENTITY, rad2deg } from "./common";
 import useDelayedFixture from "./useDelayedFixture";
-import ThreeDeeRender from "../index";
+import { ThreeDeePanel } from "../index";
 
 export default {
   title: "panels/ThreeDeeRender",
-  component: ThreeDeeRender,
+  component: ThreeDeePanel,
 };
 
 type Vec4 = [number, number, number, number];
@@ -123,7 +123,7 @@ export function Foxglove_PoseInFrame(): JSX.Element {
 
   return (
     <PanelSetup fixture={fixture}>
-      <ThreeDeeRender
+      <ThreeDeePanel
         overrideConfig={{
           followTf: "base_link",
           topics: {

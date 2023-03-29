@@ -65,6 +65,7 @@ import {
 import { DEFAULT_PUBLISH_SETTINGS } from "./renderables/CoreSettings";
 import type { LayerSettingsTransform } from "./renderables/FrameAxes";
 import { PublishClickEvent, PublishClickType } from "./renderables/PublishClickTool";
+import { InterfaceMode } from "./types";
 
 const log = Logger.getLogger(__filename);
 
@@ -116,6 +117,7 @@ const useStyles = makeStyles()((theme) => ({
  * Provides DOM overlay elements on top of the 3D scene (e.g. stats, debug GUI).
  */
 function RendererOverlay(props: {
+  interfaceMode: InterfaceMode;
   canvas: HTMLCanvasElement | ReactNull;
   addPanel: LayoutActions["addPanel"];
   enableStats: boolean;
@@ -141,9 +143,6 @@ function RendererOverlay(props: {
   );
   const [interactionsTabType, setInteractionsTabType] = useState<TabType | undefined>(undefined);
   const renderer = useRenderer();
-
-  // Publish control is only available if the canPublish prop is true and we have a fixed frame in the renderer
-  const showPublishControl: boolean = props.canPublish && renderer?.fixedFrameId != undefined;
 
   // Toggle object selection mode on/off in the renderer
   useEffect(() => {
@@ -234,6 +233,76 @@ function RendererOverlay(props: {
 
   const theme = useTheme();
 
+  // Publish control is only available if the canPublish prop is true and we have a fixed frame in the renderer
+  const showPublishControl =
+    props.interfaceMode === "3d" && props.canPublish && renderer?.fixedFrameId != undefined;
+  const publishControls = showPublishControl && (
+    <>
+      <IconButton
+        {...longPressPublishEvent}
+        color={props.publishActive ? "info" : "inherit"}
+        title={props.publishActive ? "Click to cancel" : "Click to publish"}
+        ref={publickClickButtonRef}
+        onClick={props.onClickPublish}
+        data-testid="publish-button"
+        style={{ fontSize: "1rem", pointerEvents: "auto" }}
+      >
+        {selectedPublishClickIcon}
+        <div
+          style={{
+            borderBottom: "6px solid currentColor",
+            borderRight: "6px solid transparent",
+            bottom: 0,
+            left: 0,
+            height: 0,
+            width: 0,
+            margin: theme.spacing(0.25),
+            position: "absolute",
+          }}
+        />
+      </IconButton>
+      <Menu
+        id="publish-menu"
+        anchorEl={publickClickButtonRef.current}
+        anchorOrigin={{ vertical: "top", horizontal: "left" }}
+        transformOrigin={{ vertical: "top", horizontal: "right" }}
+        open={publishMenuExpanded}
+        onClose={() => setPublishMenuExpanded(false)}
+      >
+        <MenuItem
+          selected={props.publishClickType === "pose_estimate"}
+          onClick={() => {
+            props.onChangePublishClickType("pose_estimate");
+            setPublishMenuExpanded(false);
+          }}
+        >
+          <ListItemIcon>{PublishClickIcons.pose_estimate}</ListItemIcon>
+          <ListItemText>Publish pose estimate</ListItemText>
+        </MenuItem>
+        <MenuItem
+          selected={props.publishClickType === "pose"}
+          onClick={() => {
+            props.onChangePublishClickType("pose");
+            setPublishMenuExpanded(false);
+          }}
+        >
+          <ListItemIcon>{PublishClickIcons.pose}</ListItemIcon>
+          <ListItemText>Publish pose</ListItemText>
+        </MenuItem>
+        <MenuItem
+          selected={props.publishClickType === "point"}
+          onClick={() => {
+            props.onChangePublishClickType("point");
+            setPublishMenuExpanded(false);
+          }}
+        >
+          <ListItemIcon>{PublishClickIcons.point}</ListItemIcon>
+          <ListItemText>Publish point</ListItemText>
+        </MenuItem>
+      </Menu>
+    </>
+  );
+
   return (
     <React.Fragment>
       <div
@@ -255,92 +324,29 @@ function RendererOverlay(props: {
           setInteractionsTabType={setInteractionsTabType}
           timezone={props.timezone}
         />
-        <Paper square={false} elevation={4} style={{ display: "flex", flexDirection: "column" }}>
-          <IconButton
-            className={classes.iconButton}
-            color={props.perspective ? "info" : "inherit"}
-            title={props.perspective ? "Switch to 2D camera" : "Switch to 3D camera"}
-            onClick={props.onTogglePerspective}
-          >
-            <span className={classes.threeDeeButton}>3D</span>
-          </IconButton>
-          <IconButton
-            data-testid="measure-button"
-            className={classes.iconButton}
-            color={props.measureActive ? "info" : "inherit"}
-            title={props.measureActive ? "Cancel measuring" : "Measure distance"}
-            onClick={props.onClickMeasure}
-          >
-            <Ruler24Filled className={classes.rulerIcon} />
-          </IconButton>
+        {props.interfaceMode === "3d" && (
+          <Paper square={false} elevation={4} style={{ display: "flex", flexDirection: "column" }}>
+            <IconButton
+              className={classes.iconButton}
+              color={props.perspective ? "info" : "inherit"}
+              title={props.perspective ? "Switch to 2D camera" : "Switch to 3D camera"}
+              onClick={props.onTogglePerspective}
+            >
+              <span className={classes.threeDeeButton}>3D</span>
+            </IconButton>
+            <IconButton
+              data-testid="measure-button"
+              className={classes.iconButton}
+              color={props.measureActive ? "info" : "inherit"}
+              title={props.measureActive ? "Cancel measuring" : "Measure distance"}
+              onClick={props.onClickMeasure}
+            >
+              <Ruler24Filled className={classes.rulerIcon} />
+            </IconButton>
 
-          {showPublishControl && (
-            <>
-              <IconButton
-                {...longPressPublishEvent}
-                color={props.publishActive ? "info" : "inherit"}
-                title={props.publishActive ? "Click to cancel" : "Click to publish"}
-                ref={publickClickButtonRef}
-                onClick={props.onClickPublish}
-                data-testid="publish-button"
-                style={{ fontSize: "1rem", pointerEvents: "auto" }}
-              >
-                {selectedPublishClickIcon}
-                <div
-                  style={{
-                    borderBottom: "6px solid currentColor",
-                    borderRight: "6px solid transparent",
-                    bottom: 0,
-                    left: 0,
-                    height: 0,
-                    width: 0,
-                    margin: theme.spacing(0.25),
-                    position: "absolute",
-                  }}
-                />
-              </IconButton>
-              <Menu
-                id="publish-menu"
-                anchorEl={publickClickButtonRef.current}
-                anchorOrigin={{ vertical: "top", horizontal: "left" }}
-                transformOrigin={{ vertical: "top", horizontal: "right" }}
-                open={publishMenuExpanded}
-                onClose={() => setPublishMenuExpanded(false)}
-              >
-                <MenuItem
-                  selected={props.publishClickType === "pose_estimate"}
-                  onClick={() => {
-                    props.onChangePublishClickType("pose_estimate");
-                    setPublishMenuExpanded(false);
-                  }}
-                >
-                  <ListItemIcon>{PublishClickIcons.pose_estimate}</ListItemIcon>
-                  <ListItemText>Publish pose estimate</ListItemText>
-                </MenuItem>
-                <MenuItem
-                  selected={props.publishClickType === "pose"}
-                  onClick={() => {
-                    props.onChangePublishClickType("pose");
-                    setPublishMenuExpanded(false);
-                  }}
-                >
-                  <ListItemIcon>{PublishClickIcons.pose}</ListItemIcon>
-                  <ListItemText>Publish pose</ListItemText>
-                </MenuItem>
-                <MenuItem
-                  selected={props.publishClickType === "point"}
-                  onClick={() => {
-                    props.onChangePublishClickType("point");
-                    setPublishMenuExpanded(false);
-                  }}
-                >
-                  <ListItemIcon>{PublishClickIcons.point}</ListItemIcon>
-                  <ListItemText>Publish point</ListItemText>
-                </MenuItem>
-              </Menu>
-            </>
-          )}
-        </Paper>
+            {publishControls}
+          </Paper>
+        )}
       </div>
       {clickedObjects.length > 1 && !selectedObject && (
         <InteractionContextMenu
@@ -390,7 +396,11 @@ function useRendererProperty<K extends keyof Renderer>(
 /**
  * A panel that renders a 3D scene. This is a thin wrapper around a `Renderer` instance.
  */
-export function ThreeDeeRender({ context }: { context: PanelExtensionContext }): JSX.Element {
+export function ThreeDeeRender(props: {
+  context: PanelExtensionContext;
+  interfaceMode: InterfaceMode;
+}): JSX.Element {
+  const { context, interfaceMode } = props;
   const { initialState, saveState } = context;
 
   // Load and save the persisted panel configuration
@@ -428,14 +438,14 @@ export function ThreeDeeRender({ context }: { context: PanelExtensionContext }):
   const [renderer, setRenderer] = useState<Renderer | undefined>(undefined);
   const rendererRef = useRef<Renderer | undefined>(undefined);
   useEffect(() => {
-    const newRenderer = canvas ? new Renderer(canvas, configRef.current) : undefined;
+    const newRenderer = canvas ? new Renderer(canvas, configRef.current, interfaceMode) : undefined;
     setRenderer(newRenderer);
     rendererRef.current = newRenderer;
     return () => {
       rendererRef.current?.dispose();
       rendererRef.current = undefined;
     };
-  }, [canvas, configRef, config.scene.transforms?.enablePreloading]);
+  }, [canvas, configRef, config.scene.transforms?.enablePreloading, interfaceMode]);
 
   const [colorScheme, setColorScheme] = useState<"dark" | "light" | undefined>();
   const [timezone, setTimezone] = useState<string | undefined>();
@@ -985,6 +995,7 @@ export function ThreeDeeRender({ context }: { context: PanelExtensionContext }):
         />
         <RendererContext.Provider value={renderer}>
           <RendererOverlay
+            interfaceMode={interfaceMode}
             canvas={canvas}
             addPanel={addPanel}
             enableStats={config.scene.enableStats ?? false}

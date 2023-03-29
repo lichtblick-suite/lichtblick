@@ -14,12 +14,12 @@ import {
   SENSOR_FRAME_ID,
 } from "./common";
 import useDelayedFixture from "./useDelayedFixture";
-import ThreeDeeRender from "../index";
+import { ThreeDeePanel } from "../index";
 import { PoseStamped, PoseWithCovarianceStamped, TransformStamped } from "../ros";
 
 export default {
   title: "panels/ThreeDeeRender",
-  component: ThreeDeeRender,
+  component: ThreeDeePanel,
 };
 
 PoseMarkers.parameters = { colorScheme: "dark" };
@@ -167,9 +167,9 @@ export function PoseMarkers(): JSX.Element {
 
   return (
     <PanelSetup fixture={fixture}>
-      <ThreeDeeRender
+      <ThreeDeePanel
         overrideConfig={{
-          ...ThreeDeeRender.defaultConfig,
+          ...ThreeDeePanel.defaultConfig,
           followTf: "base_link",
           cameraState: {
             distance: 4,

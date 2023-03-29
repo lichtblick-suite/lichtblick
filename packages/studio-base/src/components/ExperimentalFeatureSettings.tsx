@@ -79,6 +79,11 @@ function useFeatures(): Feature[] {
         </>
       ),
     },
+    {
+      key: AppSetting.ENABLE_NEW_IMAGE_PANEL,
+      name: t("newImagePanel"),
+      description: <>{t("newImagePanelDescription")}</>,
+    },
   ];
 
   if (process.env.NODE_ENV === "development") {

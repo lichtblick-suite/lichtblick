@@ -11,12 +11,12 @@ import PanelSetup from "@foxglove/studio-base/stories/PanelSetup";
 
 import { QUAT_IDENTITY, rad2deg } from "./common";
 import useDelayedFixture from "./useDelayedFixture";
-import ThreeDeeRender from "../index";
+import { ThreeDeePanel } from "../index";
 import { LaserScan, PointCloud2, TransformStamped } from "../ros";
 
 export default {
   title: "panels/ThreeDeeRender/LaserScan",
-  component: ThreeDeeRender,
+  component: ThreeDeePanel,
   parameters: { colorScheme: "dark" },
 };
 
@@ -121,7 +121,7 @@ function SensorMsgs_LaserScan({
 
   return (
     <PanelSetup fixture={fixture}>
-      <ThreeDeeRender
+      <ThreeDeePanel
         overrideConfig={{
           followTf: "base_link",
           scene: { enableStats: false },
@@ -315,7 +315,7 @@ export function ComparisonWithPointCloudColors(): JSX.Element {
 
   return (
     <PanelSetup fixture={fixture}>
-      <ThreeDeeRender
+      <ThreeDeePanel
         overrideConfig={{
           followTf: "base_link",
           scene: { enableStats: false },

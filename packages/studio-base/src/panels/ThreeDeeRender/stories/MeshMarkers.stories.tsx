@@ -9,12 +9,12 @@ import PanelSetup from "@foxglove/studio-base/stories/PanelSetup";
 import { makeColor, OBJ_CUBE_MESH_RESOURCE, STL_CUBE_MESH_RESOURCE } from "./common";
 import useDelayedFixture from "./useDelayedFixture";
 import { DEFAULT_CAMERA_STATE } from "../camera";
-import ThreeDeeRender from "../index";
+import { ThreeDeePanel } from "../index";
 import { Marker } from "../ros";
 
 export default {
   title: "panels/ThreeDeeRender",
-  component: ThreeDeeRender,
+  component: ThreeDeePanel,
 };
 
 MeshMarkers.parameters = { colorScheme: "dark" };
@@ -96,7 +96,7 @@ export function MeshMarkers(): JSX.Element {
 
   return (
     <PanelSetup fixture={fixture}>
-      <ThreeDeeRender
+      <ThreeDeePanel
         overrideConfig={{
           layers: {
             grid: { layerId: "foxglove.Grid" },

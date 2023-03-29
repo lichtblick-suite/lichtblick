@@ -14,12 +14,12 @@ import {
   SENSOR_FRAME_ID,
 } from "./common";
 import useDelayedFixture from "./useDelayedFixture";
-import ThreeDeeRender from "../index";
+import { ThreeDeePanel } from "../index";
 import { CameraInfo, TransformStamped } from "../ros";
 
 export default {
   title: "panels/ThreeDeeRender",
-  component: ThreeDeeRender,
+  component: ThreeDeePanel,
 };
 
 CameraInfoRender.parameters = { colorScheme: "dark" };
@@ -133,9 +133,9 @@ export function CameraInfoRender(): JSX.Element {
 
   return (
     <PanelSetup fixture={fixture}>
-      <ThreeDeeRender
+      <ThreeDeePanel
         overrideConfig={{
-          ...ThreeDeeRender.defaultConfig,
+          ...ThreeDeePanel.defaultConfig,
           followTf: SENSOR_FRAME_ID,
           scene: {
             labelScaleFactor: 0.1,

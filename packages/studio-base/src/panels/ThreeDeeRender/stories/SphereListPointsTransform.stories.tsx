@@ -11,12 +11,12 @@ import { SphereListMarker } from "@foxglove/studio-base/types/Messages";
 
 import { makeColor, rad2deg } from "./common";
 import useDelayedFixture from "./useDelayedFixture";
-import ThreeDeeRender from "../index";
+import { ThreeDeePanel } from "../index";
 import { TransformStamped } from "../ros";
 
 export default {
   title: "panels/ThreeDeeRender",
-  component: ThreeDeeRender,
+  component: ThreeDeePanel,
 };
 
 SphereListPointsTransform.parameters = { colorScheme: "dark" };
@@ -113,7 +113,7 @@ export function SphereListPointsTransform(): JSX.Element {
 
   return (
     <PanelSetup fixture={fixture}>
-      <ThreeDeeRender
+      <ThreeDeePanel
         overrideConfig={{
           followTf: "camera_link",
           layers: {

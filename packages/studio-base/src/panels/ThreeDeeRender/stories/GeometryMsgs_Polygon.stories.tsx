@@ -8,12 +8,12 @@ import PanelSetup from "@foxglove/studio-base/stories/PanelSetup";
 
 import { QUAT_IDENTITY, rad2deg } from "./common";
 import useDelayedFixture from "./useDelayedFixture";
-import ThreeDeeRender from "../index";
+import { ThreeDeePanel } from "../index";
 import { PolygonStamped, TransformStamped } from "../ros";
 
 export default {
   title: "panels/ThreeDeeRender",
-  component: ThreeDeeRender,
+  component: ThreeDeePanel,
 };
 
 GeometryMsgs_Polygon.parameters = { colorScheme: "dark" };
@@ -82,9 +82,9 @@ export function GeometryMsgs_Polygon(): JSX.Element {
 
   return (
     <PanelSetup fixture={fixture}>
-      <ThreeDeeRender
+      <ThreeDeePanel
         overrideConfig={{
-          ...ThreeDeeRender.defaultConfig,
+          ...ThreeDeePanel.defaultConfig,
           followTf: "base_link",
           cameraState: {
             distance: 8.25,

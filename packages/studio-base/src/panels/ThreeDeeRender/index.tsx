@@ -13,12 +13,17 @@ import { PanelExtensionAdapter } from "@foxglove/studio-base/components/PanelExt
 import { SaveConfig } from "@foxglove/studio-base/types/panels";
 
 import { ThreeDeeRender } from "./ThreeDeeRender";
+import { InterfaceMode } from "./types";
 
-function initPanel(crash: ReturnType<typeof useCrash>, context: PanelExtensionContext) {
+function initPanel(
+  crash: ReturnType<typeof useCrash>,
+  interfaceMode: InterfaceMode,
+  context: PanelExtensionContext,
+) {
   ReactDOM.render(
     <StrictMode>
       <CaptureErrorBoundary onError={crash}>
-        <ThreeDeeRender context={context} />
+        <ThreeDeeRender context={context} interfaceMode={interfaceMode} />
       </CaptureErrorBoundary>
     </StrictMode>,
     context.panelElement,
@@ -33,9 +38,12 @@ type Props = {
   saveConfig: SaveConfig<unknown>;
 };
 
-function ThreeDeeRenderAdapter(props: Props) {
+function ThreeDeeRenderAdapter(interfaceMode: InterfaceMode, props: Props) {
   const crash = useCrash();
-  const boundInitPanel = useMemo(() => initPanel.bind(undefined, crash), [crash]);
+  const boundInitPanel = useMemo(
+    () => initPanel.bind(undefined, crash, interfaceMode),
+    [crash, interfaceMode],
+  );
 
   return (
     <PanelExtensionAdapter
@@ -46,7 +54,16 @@ function ThreeDeeRenderAdapter(props: Props) {
   );
 }
 
-ThreeDeeRenderAdapter.panelType = "3D";
-ThreeDeeRenderAdapter.defaultConfig = {};
+export const ThreeDeePanel = Panel(
+  Object.assign(ThreeDeeRenderAdapter.bind(undefined, "3d"), {
+    panelType: "3D",
+    defaultConfig: {},
+  }),
+);
 
-export default Panel(ThreeDeeRenderAdapter);
+export const ImagePanel = Panel(
+  Object.assign(ThreeDeeRenderAdapter.bind(undefined, "image"), {
+    panelType: "Image",
+    defaultConfig: {},
+  }),
+);

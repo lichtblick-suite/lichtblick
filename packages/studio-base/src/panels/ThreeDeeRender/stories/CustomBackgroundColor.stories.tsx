@@ -5,11 +5,11 @@
 import PanelSetup from "@foxglove/studio-base/stories/PanelSetup";
 
 import useDelayedFixture from "./useDelayedFixture";
-import ThreeDeeRender from "../index";
+import { ThreeDeePanel } from "../index";
 
 export default {
   title: "panels/ThreeDeeRender",
-  component: ThreeDeeRender,
+  component: ThreeDeePanel,
 };
 
 export function CustomBackgroundColor(): JSX.Element {
@@ -24,9 +24,9 @@ export function CustomBackgroundColor(): JSX.Element {
 
   return (
     <PanelSetup fixture={fixture}>
-      <ThreeDeeRender
+      <ThreeDeePanel
         overrideConfig={{
-          ...ThreeDeeRender.defaultConfig,
+          ...ThreeDeePanel.defaultConfig,
           scene: { backgroundColor: "#2d7566" },
         }}
       />

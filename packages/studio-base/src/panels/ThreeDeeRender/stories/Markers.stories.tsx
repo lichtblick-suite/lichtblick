@@ -12,12 +12,12 @@ import { useReadySignal } from "@foxglove/studio-base/stories/ReadySignalContext
 
 import { makeColor, QUAT_IDENTITY, rad2deg, SENSOR_FRAME_ID } from "./common";
 import useDelayedFixture from "./useDelayedFixture";
-import ThreeDeeRender from "../index";
+import { ThreeDeePanel } from "../index";
 import { ColorRGBA, Marker, TransformStamped } from "../ros";
 
 export default {
   title: "panels/ThreeDeeRender",
-  component: ThreeDeeRender,
+  component: ThreeDeePanel,
 };
 
 Markers.parameters = { colorScheme: "dark", chromatic: { delay: 100 } };
@@ -524,9 +524,9 @@ export function Markers(): JSX.Element {
 
   return (
     <PanelSetup fixture={fixture}>
-      <ThreeDeeRender
+      <ThreeDeePanel
         overrideConfig={{
-          ...ThreeDeeRender.defaultConfig,
+          ...ThreeDeePanel.defaultConfig,
           followTf: "base_link",
           layers: {
             grid: { layerId: "foxglove.Grid" },
@@ -657,9 +657,9 @@ export const EmptyLineStrip: Story = () => {
 
   return (
     <PanelSetup fixture={fixture}>
-      <ThreeDeeRender
+      <ThreeDeePanel
         overrideConfig={{
-          ...ThreeDeeRender.defaultConfig,
+          ...ThreeDeePanel.defaultConfig,
           followTf: "base_link",
           layers: {
             grid: { layerId: "foxglove.Grid" },

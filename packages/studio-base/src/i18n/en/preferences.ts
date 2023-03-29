@@ -40,4 +40,6 @@ export default {
   ros2NativeConnectionDescription: "Enable the deprecated ROS 2 native connector.",
   layoutDebugging: "Layout debugging",
   layoutDebuggingDescription: "Show extra controls for developing and debugging layout storage.",
+  newImagePanel: "New Image panel",
+  newImagePanelDescription: "Enable the experimental Image panel.",
 };

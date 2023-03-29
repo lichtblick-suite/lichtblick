@@ -15,11 +15,11 @@ import { Topic } from "@foxglove/studio-base/players/types";
 import PanelSetup from "@foxglove/studio-base/stories/PanelSetup";
 
 import { makeColor, QUAT_IDENTITY, rad2deg } from "./common";
-import ThreeDeeRender from "../index";
+import { ThreeDeePanel } from "../index";
 
 export default {
   title: "panels/ThreeDeeRender/SceneEntities",
-  component: ThreeDeeRender,
+  component: ThreeDeePanel,
 };
 
 const icospherePointsAndIndices = {
@@ -385,9 +385,9 @@ export function BasicEntities(): JSX.Element {
 
   return (
     <PanelSetup fixture={fixture}>
-      <ThreeDeeRender
+      <ThreeDeePanel
         overrideConfig={{
-          ...ThreeDeeRender.defaultConfig,
+          ...ThreeDeePanel.defaultConfig,
           followTf: "root",
           layers: {
             grid: { layerId: "foxglove.Grid" },

@@ -9,12 +9,12 @@ import delay from "@foxglove/studio-base/util/delay";
 
 import { QUAT_IDENTITY, rad2deg } from "./common";
 import useDelayedFixture from "./useDelayedFixture";
-import ThreeDeeRender from "../index";
+import { ThreeDeePanel } from "../index";
 import { TransformStamped } from "../ros";
 
 export default {
   title: "panels/ThreeDeeRender",
-  component: ThreeDeeRender,
+  component: ThreeDeePanel,
 };
 
 MeasurementTool.parameters = { colorScheme: "dark", chromatic: { delay: 200 } };
@@ -62,9 +62,9 @@ export function MeasurementTool(): JSX.Element {
   });
   return (
     <PanelSetup fixture={fixture}>
-      <ThreeDeeRender
+      <ThreeDeePanel
         overrideConfig={{
-          ...ThreeDeeRender.defaultConfig,
+          ...ThreeDeePanel.defaultConfig,
           followTf: "base_link",
           layers: {
             grid: { layerId: "foxglove.Grid" },

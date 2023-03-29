@@ -31,7 +31,7 @@ export const builtin: PanelInfo[] = [
     type: "3D",
     description: "Display markers, camera images, meshes, URDFs, and more in a 3D scene.",
     thumbnail: threeDeeRenderThumbnail,
-    module: async () => await import("./ThreeDeeRender"),
+    module: async () => ({ default: (await import("./ThreeDeeRender")).ThreeDeePanel }),
     settingsOnboardingTooltip: "Open settings to configure topics and layers.",
   },
   {
@@ -189,4 +189,10 @@ export const legacyPlot: PanelInfo = {
   title: "Legacy Plot",
   type: "LegacyPlot",
   module: async () => await import("./LegacyPlot"),
+};
+
+export const newImage: PanelInfo = {
+  title: "3D Image",
+  type: "Image",
+  module: async () => ({ default: (await import("./ThreeDeeRender")).ImagePanel }),
 };

@@ -10,11 +10,11 @@ import PanelSetup from "@foxglove/studio-base/stories/PanelSetup";
 
 import { makePass, QUAT_IDENTITY, rad2deg, TEST_COLORS } from "./common";
 import useDelayedFixture from "./useDelayedFixture";
-import ThreeDeeRender from "../index";
+import { ThreeDeePanel } from "../index";
 
 export default {
   title: "panels/ThreeDeeRender",
-  component: ThreeDeeRender,
+  component: ThreeDeePanel,
 };
 
 FoxgloveFrameTransforms.parameters = { colorScheme: "dark" };
@@ -91,7 +91,7 @@ export function FoxgloveFrameTransforms(): JSX.Element {
 
   return (
     <PanelSetup fixture={fixture}>
-      <ThreeDeeRender
+      <ThreeDeePanel
         overrideConfig={{
           followTf: "sensor_1",
           layers: {

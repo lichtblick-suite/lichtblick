@@ -10,12 +10,12 @@ import PanelSetup from "@foxglove/studio-base/stories/PanelSetup";
 
 import { QUAT_IDENTITY, rad2deg } from "./common";
 import useDelayedFixture from "./useDelayedFixture";
-import ThreeDeeRender from "../index";
+import { ThreeDeePanel } from "../index";
 import { NavPath, TransformStamped } from "../ros";
 
 export default {
   title: "panels/ThreeDeeRender",
-  component: ThreeDeeRender,
+  component: ThreeDeePanel,
 };
 
 NavMsgs_Path.parameters = { colorScheme: "dark" };
@@ -122,7 +122,7 @@ export function NavMsgs_Path(): JSX.Element {
 
   return (
     <PanelSetup fixture={fixture}>
-      <ThreeDeeRender
+      <ThreeDeePanel
         overrideConfig={{
           followTf: "base_link",
           layers: {

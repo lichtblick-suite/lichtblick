@@ -15,12 +15,12 @@ import {
   SENSOR_FRAME_ID,
 } from "./common";
 import useDelayedFixture from "./useDelayedFixture";
-import ThreeDeeRender from "../index";
+import { ThreeDeePanel } from "../index";
 import { Marker, TransformStamped } from "../ros";
 
 export default {
   title: "panels/ThreeDeeRender",
-  component: ThreeDeeRender,
+  component: ThreeDeePanel,
 };
 
 AutoSelectFrame.parameters = { colorScheme: "dark" };
@@ -95,9 +95,9 @@ export function AutoSelectFrame(): JSX.Element {
 
   return (
     <PanelSetup fixture={fixture}>
-      <ThreeDeeRender
+      <ThreeDeePanel
         overrideConfig={{
-          ...ThreeDeeRender.defaultConfig,
+          ...ThreeDeePanel.defaultConfig,
           followTf: undefined,
           cameraState: {
             distance: 4,

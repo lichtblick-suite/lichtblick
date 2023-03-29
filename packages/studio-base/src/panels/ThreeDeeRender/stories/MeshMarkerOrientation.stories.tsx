@@ -14,12 +14,12 @@ import {
 } from "./common";
 import useDelayedFixture from "./useDelayedFixture";
 import { DEFAULT_CAMERA_STATE } from "../camera";
-import ThreeDeeRender from "../index";
+import { ThreeDeePanel } from "../index";
 import { Marker } from "../ros";
 
 export default {
   title: "panels/ThreeDeeRender",
-  component: ThreeDeeRender,
+  component: ThreeDeePanel,
 };
 
 MeshMarkerOrientation.parameters = { colorScheme: "dark" };
@@ -177,7 +177,7 @@ export function MeshMarkerOrientation(): JSX.Element {
 
   return (
     <PanelSetup fixture={fixture}>
-      <ThreeDeeRender
+      <ThreeDeePanel
         overrideConfig={{
           layers: {
             grid: { layerId: "foxglove.Grid" },

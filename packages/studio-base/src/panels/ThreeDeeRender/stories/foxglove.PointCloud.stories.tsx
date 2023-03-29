@@ -11,12 +11,12 @@ import PanelSetup from "@foxglove/studio-base/stories/PanelSetup";
 
 import { QUAT_IDENTITY, rad2deg, VEC3_ZERO } from "./common";
 import useDelayedFixture from "./useDelayedFixture";
-import ThreeDeeRender from "../index";
+import { ThreeDeePanel } from "../index";
 import { TransformStamped } from "../ros";
 
 export default {
   title: "panels/ThreeDeeRender",
-  component: ThreeDeeRender,
+  component: ThreeDeePanel,
   parameters: {
     colorScheme: "dark",
   },
@@ -150,7 +150,7 @@ function Foxglove_PointCloud({
 
   return (
     <PanelSetup fixture={fixture}>
-      <ThreeDeeRender
+      <ThreeDeePanel
         overrideConfig={{
           followTf: "base_link",
           topics: {
@@ -333,7 +333,7 @@ function Foxglove_PointCloud_Intensity_Base({
 
   return (
     <PanelSetup fixture={fixture}>
-      <ThreeDeeRender
+      <ThreeDeePanel
         overrideConfig={{
           followTf: "base_link",
           topics: {
@@ -427,7 +427,7 @@ export function Foxglove_PointCloud_TwoDimensions(): JSX.Element {
 
   return (
     <PanelSetup fixture={fixture}>
-      <ThreeDeeRender
+      <ThreeDeePanel
         overrideConfig={{
           followTf: "sensor",
           layers: {

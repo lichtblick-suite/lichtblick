@@ -8,7 +8,7 @@ import PanelSetup from "@foxglove/studio-base/stories/PanelSetup";
 
 import { makeColor, STL_CUBE_MESH_RESOURCE } from "./common";
 import useDelayedFixture from "./useDelayedFixture";
-import ThreeDeeRender from "../index";
+import { ThreeDeePanel } from "../index";
 
 const RED = makeColorAttribute("#f44336");
 const GREEN = makeColorAttribute("#4caf50");
@@ -97,7 +97,7 @@ const URDF2 = `<?xml version="1.0"?>
 
 export default {
   title: "panels/ThreeDeeRender",
-  component: ThreeDeeRender,
+  component: ThreeDeePanel,
 };
 
 Urdfs.parameters = { colorScheme: "dark" };
@@ -126,7 +126,7 @@ export function Urdfs(): JSX.Element {
 
   return (
     <PanelSetup fixture={fixture}>
-      <ThreeDeeRender
+      <ThreeDeePanel
         overrideConfig={{
           scene: {
             transforms: {

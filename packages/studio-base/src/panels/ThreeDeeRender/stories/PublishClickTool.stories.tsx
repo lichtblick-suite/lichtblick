@@ -11,13 +11,13 @@ import delay from "@foxglove/studio-base/util/delay";
 
 import { QUAT_IDENTITY, rad2deg } from "./common";
 import useDelayedFixture from "./useDelayedFixture";
-import ThreeDeeRender from "../index";
+import { ThreeDeePanel } from "../index";
 import { PublishClickType } from "../renderables/PublishClickTool";
 import { TransformStamped } from "../ros";
 
 export default {
   title: "panels/ThreeDeeRender/PublishClickTool",
-  component: ThreeDeeRender,
+  component: ThreeDeePanel,
 };
 
 export const Point = Object.assign(PublishClickToolTemplate.bind({}), {
@@ -141,9 +141,9 @@ function PublishClickToolTemplate({ type }: { type: PublishClickType }): JSX.Ele
 
   return (
     <PanelSetup fixture={fixture}>
-      <ThreeDeeRender
+      <ThreeDeePanel
         overrideConfig={{
-          ...ThreeDeeRender.defaultConfig,
+          ...ThreeDeePanel.defaultConfig,
           followTf: "base_link",
           layers: {
             grid: { layerId: "foxglove.Grid" },

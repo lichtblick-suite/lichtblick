@@ -8,11 +8,11 @@ import { VelodyneScan } from "@foxglove/studio-base/types/Messages";
 
 import { rad2deg } from "./common";
 import useDelayedFixture from "./useDelayedFixture";
-import ThreeDeeRender from "../index";
+import { ThreeDeePanel } from "../index";
 
 export default {
   title: "panels/ThreeDeeRender",
-  component: ThreeDeeRender,
+  component: ThreeDeePanel,
   parameters: { colorScheme: "light" },
 };
 
@@ -1313,7 +1313,7 @@ export function VelodyneScan_Intensity(): JSX.Element {
 
   return (
     <PanelSetup fixture={fixture}>
-      <ThreeDeeRender
+      <ThreeDeePanel
         overrideConfig={{
           followTf: velodyneScan.header.frame_id,
           topics: {

@@ -76,6 +76,7 @@ import {
 } from "./ros";
 import { BaseSettings, CustomLayerSettings, SelectEntry } from "./settings";
 import { AddTransformResult, makePose, Pose, Transform, TransformTree } from "./transforms";
+import { InterfaceMode } from "./types";
 
 const log = Logger.getLogger(__filename);
 
@@ -265,6 +266,7 @@ class InstancedLineMaterial extends THREE.LineBasicMaterial {
  * `WebGLRenderingContext`, and `SettingsTree`.
  */
 export class Renderer extends EventEmitter<RendererEvents> {
+  public readonly interfaceMode: InterfaceMode;
   private canvas: HTMLCanvasElement;
   public readonly gl: THREE.WebGLRenderer;
   public maxLod = DetailLevel.High;
@@ -336,11 +338,16 @@ export class Renderer extends EventEmitter<RendererEvents> {
   private _cameraSyncError: undefined | string;
   private _devicePixelRatioMediaQuery?: MediaQueryList;
 
-  public constructor(canvas: HTMLCanvasElement, config: RendererConfig) {
+  public constructor(
+    canvas: HTMLCanvasElement,
+    config: RendererConfig,
+    interfaceMode: InterfaceMode,
+  ) {
     super();
     // NOTE: Global side effect
     THREE.Object3D.DEFAULT_UP = new THREE.Vector3(0, 0, 1);
 
+    this.interfaceMode = interfaceMode;
     this.canvas = canvas;
     this.config = config;
 

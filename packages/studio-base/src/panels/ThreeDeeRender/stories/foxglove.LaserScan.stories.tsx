@@ -14,11 +14,11 @@ import { emptyPose } from "@foxglove/studio-base/util/Pose";
 
 import { QUAT_IDENTITY, rad2deg } from "./common";
 import useDelayedFixture from "./useDelayedFixture";
-import ThreeDeeRender from "../index";
+import { ThreeDeePanel } from "../index";
 
 export default {
   title: "panels/ThreeDeeRender/foxglove.LaserScan",
-  component: ThreeDeeRender,
+  component: ThreeDeePanel,
   parameters: { colorScheme: "dark" },
 };
 
@@ -120,7 +120,7 @@ function Foxglove_LaserScan({
 
   return (
     <PanelSetup fixture={fixture}>
-      <ThreeDeeRender
+      <ThreeDeePanel
         overrideConfig={{
           followTf: "base_link",
           scene: { enableStats: false },
@@ -307,7 +307,7 @@ export function ComparisonWithPointCloudColors(): JSX.Element {
 
   return (
     <PanelSetup fixture={fixture}>
-      <ThreeDeeRender
+      <ThreeDeePanel
         overrideConfig={{
           followTf: "base_link",
           scene: { enableStats: false },
