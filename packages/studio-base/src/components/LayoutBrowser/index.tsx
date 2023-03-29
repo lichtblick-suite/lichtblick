@@ -102,6 +102,7 @@ export default function LayoutBrowser({
   const { setSelectedLayoutId } = useCurrentLayoutActions();
 
   const [state, dispatch] = useLayoutBrowserReducer({
+    lastSelectedId: currentLayoutId,
     busy: layoutManager.isBusy,
     error: layoutManager.error,
     online: layoutManager.isOnline,

@@ -84,11 +84,10 @@ function reducer(draft: State, action: Action) {
 }
 
 export function useLayoutBrowserReducer(
-  props: Pick<State, "busy" | "error" | "online">,
+  props: Pick<State, "busy" | "error" | "online" | "lastSelectedId">,
 ): [State, Dispatch<Action>] {
   return useImmerReducer(reducer, {
     ...props,
-    lastSelectedId: undefined,
     selectedIds: [],
     multiAction: undefined,
   });
