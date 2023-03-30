@@ -52,7 +52,7 @@ export default function AccountInfo(props: { currentUser?: User }): JSX.Element 
   }, [beginSignOut, confirm]);
 
   const onSettingsClick = useCallback(() => {
-    window.open(process.env.FOXGLOVE_ACCOUNT_DASHBOARD_URL, "_blank");
+    window.open(process.env.FOXGLOVE_ACCOUNT_PROFILE_URL, "_blank");
   }, []);
 
   if (!props.currentUser) {

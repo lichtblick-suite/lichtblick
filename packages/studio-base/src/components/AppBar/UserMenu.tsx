@@ -92,15 +92,15 @@ export function UserMenu({
   );
 
   const onProfileClick = useCallback(() => {
-    void analytics.logEvent(AppEvent.DIALOG_CLICK_CTA, {
+    void analytics.logEvent(AppEvent.APP_BAR_CLICK_CTA, {
       user: currentUserType,
       cta: "profile",
     });
-    window.open(process.env.FOXGLOVE_ACCOUNT_DASHBOARD_URL, "_blank");
+    window.open(process.env.FOXGLOVE_ACCOUNT_PROFILE_URL, "_blank");
   }, [analytics, currentUserType]);
 
   const onDocsClick = useCallback(() => {
-    void analytics.logEvent(AppEvent.DIALOG_CLICK_CTA, {
+    void analytics.logEvent(AppEvent.APP_BAR_CLICK_CTA, {
       user: currentUserType,
       cta: "docs",
     });
