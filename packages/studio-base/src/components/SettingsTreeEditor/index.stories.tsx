@@ -4,6 +4,7 @@
 
 import { Box } from "@mui/material";
 import { fireEvent } from "@testing-library/dom";
+import userEvent from "@testing-library/user-event";
 import produce from "immer";
 import { last } from "lodash";
 import { useCallback, useMemo, useState, useEffect } from "react";
@@ -146,6 +147,94 @@ For ROS users, we also support package:// URLs
     },
   },
   empty: undefined,
+};
+
+const SelectValidWithUndefinedSettings: SettingsTreeNodes = {
+  general: {
+    fields: {
+      validSelectWithUndefined: {
+        label: "Valid Select w/ Undefined",
+        value: undefined,
+        input: "select",
+        options: [
+          { label: "Undefined", value: undefined },
+          { label: "Nothing", value: "" },
+          { label: "Something", value: "something" },
+        ],
+      },
+    },
+  },
+};
+const SelectValidWithEmptyStringSettings: SettingsTreeNodes = {
+  general: {
+    fields: {
+      validSelectWithEmptyString: {
+        label: 'Valid Select w/ ""',
+        value: "",
+        input: "select",
+        options: [
+          { label: "Undefined", value: undefined },
+          { label: "Nothing", value: "" },
+          { label: "Something", value: "something" },
+        ],
+      },
+    },
+  },
+};
+const SelectInvalidWithUndefinedSettings: SettingsTreeNodes = {
+  general: {
+    fields: {
+      invalidSelectWithUndefined: {
+        label: "Invalid Select w/ Undefined",
+        value: "foobar",
+        input: "select",
+        options: [
+          { label: "Undefined", value: undefined },
+          { label: "Nothing", value: "" },
+          { label: "Something", value: "something" },
+        ],
+      },
+    },
+  },
+};
+const SelectInvalidWithoutUndefinedSettings: SettingsTreeNodes = {
+  general: {
+    fields: {
+      invalidSelectWithoutUndefined: {
+        label: "Invalid Select w/o Undefined",
+        value: "foobar",
+        input: "select",
+        options: [
+          { label: "Nothing", value: "" },
+          { label: "Something", value: "something" },
+        ],
+      },
+    },
+  },
+};
+const SelectEmptySettings: SettingsTreeNodes = {
+  general: {
+    fields: {
+      emptySelect: {
+        label: "Empty Select",
+        value: undefined,
+        input: "select",
+        options: [],
+      },
+    },
+  },
+};
+const SelectEmptyInvalidSettings: SettingsTreeNodes = {
+  general: {
+    fields: {
+      invalidEmptySelect: {
+        label: "Invalid Empty Select",
+        value: "foobar",
+        input: "select",
+        options: [],
+      },
+    },
+  },
 };
 
 const DisabledSettings: SettingsTreeNodes = {
@@ -731,7 +820,7 @@ function Wrapper({ nodes }: { nodes: SettingsTreeNodes }): JSX.Element {
           const nodeCount = Object.keys(dynamicNodes).length;
           setDynamicNodes((oldNodes) => ({
             ...oldNodes,
-            [`background{nodeCount + 1}`]: makeBackgroundNode(nodeCount + 1),
+            [`background${nodeCount + 1}`]: makeBackgroundNode(nodeCount + 1),
           }));
         }
         if (action.payload.id === "remove-grid" || action.payload.id === "remove-background") {
@@ -919,3 +1008,38 @@ export function Vec3(): JSX.Element {
 
   return <Wrapper nodes={settings} />;
 }
+
+async function clickSelect() {
+  const user = userEvent.setup();
+  await user.click(document.querySelector(".MuiSelect-select")!);
+}
+
+export function SelectInvalidWithUndefined(): JSX.Element {
+  return <Wrapper nodes={SelectInvalidWithUndefinedSettings} />;
+}
+SelectInvalidWithUndefined.play = clickSelect;
+
+export function SelectInvalidWithoutUndefined(): JSX.Element {
+  return <Wrapper nodes={SelectInvalidWithoutUndefinedSettings} />;
+}
+SelectInvalidWithoutUndefined.play = clickSelect;
+
+export function SelectValidWithUndefined(): JSX.Element {
+  return <Wrapper nodes={SelectValidWithUndefinedSettings} />;
+}
+SelectValidWithUndefined.play = clickSelect;
+
+export function SelectValidWithEmptyString(): JSX.Element {
+  return <Wrapper nodes={SelectValidWithEmptyStringSettings} />;
+}
+SelectValidWithEmptyString.play = clickSelect;
+
+export function SelectEmpty(): JSX.Element {
+  return <Wrapper nodes={SelectEmptySettings} />;
+}
+SelectEmpty.play = clickSelect;
+
+export function SelectEmptyInvalid(): JSX.Element {
+  return <Wrapper nodes={SelectEmptyInvalidSettings} />;
+}
+SelectEmptyInvalid.play = clickSelect;

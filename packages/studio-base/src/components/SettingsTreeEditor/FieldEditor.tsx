@@ -26,8 +26,10 @@ import Stack from "@foxglove/studio-base/components/Stack";
 
 import { ColorPickerInput, ColorGradientInput, NumberInput, Vec3Input, Vec2Input } from "./inputs";
 
-// Used to both undefined and empty string in select inputs.
+/** Used to allow both undefined and empty string in select inputs. */
 const UNDEFINED_SENTINEL_VALUE = uuid();
+/** Used to avoid MUI errors when an invalid option is selected */
+const INVALID_SENTINEL_VALUE = uuid();
 
 const useStyles = makeStyles<void, "error">()((theme, _params, classes) => {
   const prefersDarkMode = theme.palette.mode === "dark";
@@ -46,11 +48,9 @@ const useStyles = makeStyles<void, "error">()((theme, _params, classes) => {
     fieldWrapper: {
       minWidth: theme.spacing(14),
       marginRight: theme.spacing(0.5),
-      [`&.${classes.error}`]: {
-        ".MuiInputBase-root": {
-          outline: `1px ${theme.palette.error.main} solid`,
-          outlineOffset: -1,
-        },
+      [`&.${classes.error} .MuiInputBase-root, .MuiInputBase-root.${classes.error}`]: {
+        outline: `1px ${theme.palette.error.main} solid`,
+        outlineOffset: -1,
       },
     },
     multiLabelWrapper: {
@@ -121,7 +121,7 @@ function FieldInput({
   field: DeepReadonly<SettingsTreeField>;
   path: readonly string[];
 }): JSX.Element {
-  const { classes } = useStyles();
+  const { classes, cx } = useStyles();
 
   switch (field.input) {
     case "autocomplete":
@@ -297,23 +297,42 @@ function FieldInput({
           />
         </Stack>
       );
-    case "select":
+    case "select": {
+      const selectedOptionIndex = // use findIndex instead of find to avoid confusing TypeScript with union of arrays
+        field.options.findIndex((option) => option.value === field.value);
+      const selectedOption = field.options[selectedOptionIndex];
+
+      const isEmpty = field.options.length === 0;
+      let selectValue = field.value;
+      if (!selectedOption) {
+        selectValue = INVALID_SENTINEL_VALUE;
+      } else if (selectValue == undefined) {
+        // We can't pass value={undefined} or we get a React error "A component is changing an
+        // uncontrolled input to be controlled" when changing the value to be non-undefined.
+        selectValue = UNDEFINED_SENTINEL_VALUE;
+      }
+
+      const hasError = !selectedOption && (!isEmpty || field.value != undefined);
       return (
         <Select
+          className={cx({ [classes.error]: hasError })}
           size="small"
           displayEmpty
           fullWidth
           disabled={field.disabled}
           readOnly={field.readonly}
           variant="filled"
-          value={field.value ?? UNDEFINED_SENTINEL_VALUE}
-          renderValue={(value) => {
+          value={selectValue}
+          renderValue={(_value) => {
+            // Use field.value rather than the passed-in value so we can render the value even when
+            // it was not present in the list of options.
+            const value = field.value;
             for (const option of field.options) {
               if (option.value === value) {
                 return option.label.trim();
               }
             }
-            return undefined;
+            return value;
           }}
           onChange={(event) =>
             actionHandler({
@@ -335,8 +354,13 @@ function FieldInput({
               {label}
             </MenuItem>
           ))}
+          {isEmpty && <MenuItem disabled>No options</MenuItem>}
+          {!selectedOption && (
+            <MenuItem style={{ display: "none" }} value={INVALID_SENTINEL_VALUE} />
+          )}
         </Select>
       );
+    }
     case "gradient":
       return (
         <ColorGradientInput
