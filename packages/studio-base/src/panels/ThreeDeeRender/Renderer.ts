@@ -309,7 +309,7 @@ export class Renderer extends EventEmitter<RendererEvents> {
   private controls: OrbitControls;
   public followMode: FollowMode;
   // The pose of the render frame in the fixed frame when following was disabled
-  private unfollowPoseSnapshot: Pose | undefined;
+  public unfollowPoseSnapshot: Pose | undefined;
 
   // Are we connected to a ROS data source? Normalize coordinate frames if so by
   // stripping any leading "/" prefix. See `normalizeFrameId()` for details.
@@ -1475,6 +1475,9 @@ export class Renderer extends EventEmitter<RendererEvents> {
       } else {
         log.debug(`Changing fixed frame from "${this.fixedFrameId}" to "${fixedFrameId}"`);
       }
+      // Set the unfollowPoseSnapshot to undefined because there is a new fixed frame for the snapshot
+      // This keeps the camera settings offsets based off of the display frame rather than old fixed frame.
+      this.unfollowPoseSnapshot = undefined;
       this.fixedFrameId = fixedFrameId;
     }
 

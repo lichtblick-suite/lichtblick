@@ -68,10 +68,10 @@ const defaultRendererConfig: RendererConfig = {
   publish: DEFAULT_PUBLISH_SETTINGS,
 };
 
-const tf = {
+const makeTf = () => ({
   translation: { x: 0, y: 0, z: 0 },
   rotation: { x: 0, y: 0, z: 0, w: 1 },
-};
+});
 
 function createTFMessageEvent(
   parentId: string,
@@ -86,7 +86,7 @@ function createTFMessageEvent(
       frame_id: parentId,
     },
     child_frame_id: childId,
-    transform: tf,
+    transform: makeTf(),
   }));
   return {
     topic,
@@ -114,6 +114,39 @@ describe("Renderer", () => {
 
   it("constructs a renderer without error", () => {
     expect(() => new Renderer(canvas, defaultRendererConfig, "3d")).not.toThrow();
+  });
+  it("fixed follow mode: ensures that the unfollowPoseSnapshot updates when there is a new fixedFrame", () => {
+    const renderer = new Renderer(
+      canvas,
+      {
+        ...defaultRendererConfig,
+        followMode: "follow-none",
+        followTf: "display",
+        scene: { transforms: { enablePreloading: false } },
+      },
+      "3d",
+    );
+    renderer.setCurrentTime(1n);
+
+    const tfWithDisplayParent = createTFMessageEvent("display", "childOfDisplay", 1n, [1n]);
+    renderer.addMessageEvent(tfWithDisplayParent);
+    renderer.animationFrame();
+
+    // record to make sure it changes when there's a new fixed frame
+    const tfWithDisplayChild = createTFMessageEvent("parentOfDisplay", "display", 1n, [1n]);
+    tfWithDisplayChild.message.transforms[0]!.transform.translation.x = 1;
+    renderer.addMessageEvent(tfWithDisplayChild);
+    renderer.animationFrame();
+    expect(renderer.fixedFrameId).toEqual("parentOfDisplay");
+    expect(renderer.unfollowPoseSnapshot?.position).toEqual({ x: 1, y: 0, z: 0 });
+
+    const tfWithFinalRoot = createTFMessageEvent("root", "parentOfDisplay", 1n, [1n]);
+    tfWithFinalRoot.message.transforms[0]!.transform.translation.y = 1;
+    renderer.addMessageEvent(tfWithFinalRoot);
+    renderer.animationFrame();
+    expect(renderer.fixedFrameId).toEqual("root");
+    // combines the two translations
+    expect(renderer.unfollowPoseSnapshot?.position).toEqual({ x: 1, y: 1, z: 0 });
   });
   it("tfPreloading off:  when seeking to before currentTime, clears transform tree", () => {
     // This test is meant accurately represent the flow of seek through the react component
