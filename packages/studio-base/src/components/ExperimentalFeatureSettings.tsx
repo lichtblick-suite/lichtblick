@@ -71,6 +71,14 @@ function useFeatures(): Feature[] {
       ),
     },
     {
+      key: AppSetting.ENABLE_NEW_IMAGE_PANEL,
+      name: t("newImagePanel"),
+      description: <>{t("newImagePanelDescription")}</>,
+    },
+  ];
+
+  if (isDesktopApp()) {
+    features.push({
       key: AppSetting.ENABLE_ROS2_NATIVE_DATA_SOURCE,
       name: t("ros2NativeConnection"),
       description: (
@@ -78,13 +86,8 @@ function useFeatures(): Feature[] {
           {t("ros2NativeConnectionDescription")} {t("restartTheAppForChangesToTakeEffect")}
         </>
       ),
-    },
-    {
-      key: AppSetting.ENABLE_NEW_IMAGE_PANEL,
-      name: t("newImagePanel"),
-      description: <>{t("newImagePanelDescription")}</>,
-    },
-  ];
+    });
+  }
 
   if (process.env.NODE_ENV === "development") {
     features.push({
