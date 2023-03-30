@@ -7,6 +7,7 @@ import { DeepReadonly } from "ts-essentials";
 import { StoreApi, useStore } from "zustand";
 
 import { AppSetting } from "@foxglove/studio-base/AppSetting";
+import { PreferencesDialogTab } from "@foxglove/studio-base/components/PreferencesDialog/PreferencesDialog";
 import { useCurrentUser } from "@foxglove/studio-base/context/CurrentUserContext";
 import { useAppConfigurationValue } from "@foxglove/studio-base/hooks";
 import useGuaranteedContext from "@foxglove/studio-base/hooks/useGuaranteedContext";
@@ -36,9 +37,12 @@ export type WorkspaceContextStore = DeepReadonly<{
   rightSidebarOpen: boolean;
   leftSidebarItem: undefined | LeftSidebarItemKey;
   leftSidebarSize: undefined | number;
-  prefsDialogOpen: boolean;
   rightSidebarItem: undefined | RightSidebarItemKey;
   rightSidebarSize: undefined | number;
+  prefsDialogState: {
+    initialTab: undefined | PreferencesDialogTab;
+    open: boolean;
+  };
   sidebarItem: undefined | SidebarItemKey;
 }>;
 
@@ -65,16 +69,19 @@ export function useWorkspaceStore<T>(
 }
 
 export type WorkspaceActions = {
-  openPanelSettings: () => void;
   openAccountSettings: () => void;
+  openPanelSettings: () => void;
   openLayoutBrowser: () => void;
+  prefsDialogActions: {
+    close: () => void;
+    open: (initialTab?: PreferencesDialogTab) => void;
+  };
   selectSidebarItem: (selectedSidebarItem: undefined | SidebarItemKey) => void;
   selectLeftSidebarItem: (item: undefined | LeftSidebarItemKey) => void;
   selectRightSidebarItem: (item: undefined | RightSidebarItemKey) => void;
   setLayoutMenuOpen: Dispatch<SetStateAction<boolean>>;
   setLeftSidebarOpen: Dispatch<SetStateAction<boolean>>;
   setLeftSidebarSize: (size: undefined | number) => void;
-  setPrefsDialogOpen: Dispatch<SetStateAction<boolean>>;
   setRightSidebarOpen: Dispatch<SetStateAction<boolean>>;
   setRightSidebarSize: (size: undefined | number) => void;
 };
@@ -104,15 +111,22 @@ export function useWorkspaceActions(): WorkspaceActions {
 
   return useMemo(() => {
     return {
+      openAccountSettings: () => supportsAccountSettings && set({ sidebarItem: "account" }),
+
       openPanelSettings: () =>
         enableNewTopNav
           ? set({ leftSidebarItem: "panel-settings", leftSidebarOpen: true })
           : set({ sidebarItem: "panel-settings" }),
 
-      openAccountSettings: () => supportsAccountSettings && set({ sidebarItem: "account" }),
-
       openLayoutBrowser: () =>
         enableNewTopNav ? set({ layoutMenuOpen: true }) : set({ sidebarItem: "layouts" }),
+
+      prefsDialogActions: {
+        close: () => set({ prefsDialogState: { open: false, initialTab: undefined } }),
+        open: (initialTab?: PreferencesDialogTab) => {
+          set({ prefsDialogState: { open: true, initialTab } });
+        },
+      },
 
       setLayoutMenuOpen: (setter: SetStateAction<boolean>) => {
         set((oldValue) => {
@@ -123,7 +137,7 @@ export function useWorkspaceActions(): WorkspaceActions {
 
       selectSidebarItem: (selectedSidebarItem: undefined | SidebarItemKey) => {
         if (selectedSidebarItem === "preferences") {
-          set({ prefsDialogOpen: true });
+          set({ prefsDialogState: { open: true, initialTab: undefined } });
         } else {
           set({ sidebarItem: selectedSidebarItem });
         }
@@ -159,13 +173,6 @@ export function useWorkspaceActions(): WorkspaceActions {
       },
 
       setLeftSidebarSize: (leftSidebarSize: undefined | number) => set({ leftSidebarSize }),
-
-      setPrefsDialogOpen: (setter: SetStateAction<boolean>) => {
-        set((oldValue) => {
-          const prefsDialogOpen = setterValue(setter, oldValue.prefsDialogOpen);
-          return { prefsDialogOpen };
-        });
-      },
 
       setRightSidebarOpen: (setter: SetStateAction<boolean>) => {
         set((oldValue) => {

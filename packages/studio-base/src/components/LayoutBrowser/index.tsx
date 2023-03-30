@@ -40,6 +40,7 @@ import {
   useCurrentLayoutSelector,
 } from "@foxglove/studio-base/context/CurrentLayoutContext";
 import { LayoutData } from "@foxglove/studio-base/context/CurrentLayoutContext/actions";
+import { useCurrentUser } from "@foxglove/studio-base/context/CurrentUserContext";
 import { useLayoutManager } from "@foxglove/studio-base/context/LayoutManagerContext";
 import LayoutStorageDebuggingContext from "@foxglove/studio-base/context/LayoutStorageDebuggingContext";
 import { useAppConfigurationValue } from "@foxglove/studio-base/hooks/useAppConfigurationValue";
@@ -83,13 +84,12 @@ const useStyles = makeStyles()((theme) => ({
 export default function LayoutBrowser({
   menuClose,
   currentDateForStorybook,
-  supportsSignIn,
 }: React.PropsWithChildren<{
   menuClose?: () => void;
   currentDateForStorybook?: Date;
-  supportsSignIn?: boolean;
 }>): JSX.Element {
   const { classes } = useStyles();
+  const { signIn } = useCurrentUser();
   const isMounted = useMountedState();
   const { enqueueSnackbar } = useSnackbar();
   const layoutManager = useLayoutManager();
@@ -540,7 +540,7 @@ export default function LayoutBrowser({
     AppSetting.HIDE_SIGN_IN_PROMPT,
   );
   const showSignInPrompt =
-    supportsSignIn === true && !layoutManager.supportsSharing && !hideSignInPrompt;
+    signIn != undefined && !layoutManager.supportsSharing && !hideSignInPrompt;
 
   const pendingMultiAction = state.multiAction?.ids != undefined;
 

@@ -184,12 +184,12 @@ function WorkspaceContent(props: WorkspaceProps): JSX.Element {
   const rightSidebarSize = useWorkspaceStore(selectWorkspaceRightSidebarSize);
 
   const {
+    prefsDialogActions,
     setLeftSidebarOpen,
     setRightSidebarOpen,
     selectLeftSidebarItem,
     selectRightSidebarItem,
     setLeftSidebarSize,
-    setPrefsDialogOpen,
     setRightSidebarSize,
     selectSidebarItem,
   } = useWorkspaceActions();
@@ -303,8 +303,8 @@ function WorkspaceContent(props: WorkspaceProps): JSX.Element {
   useNativeAppMenuEvent(
     "open-preferences",
     useCallback(() => {
-      setPrefsDialogOpen(true);
-    }, [setPrefsDialogOpen]),
+      prefsDialogActions.open();
+    }, [prefsDialogActions]),
   );
 
   useNativeAppMenuEvent(
@@ -474,11 +474,6 @@ function WorkspaceContent(props: WorkspaceProps): JSX.Element {
     };
   }, []);
 
-  const ConnectedLayoutBrowser = useCallback(
-    () => <LayoutBrowser supportsSignIn={supportsAccountSettings} />,
-    [supportsAccountSettings],
-  );
-
   const [sidebarItems, sidebarBottomItems] = useMemo(() => {
     const topItems = new Map<SidebarItemKey, SidebarItem>([
       [
@@ -499,7 +494,7 @@ function WorkspaceContent(props: WorkspaceProps): JSX.Element {
       topItems.set("layouts", {
         iconName: "FiveTileGrid",
         title: "Layouts",
-        component: ConnectedLayoutBrowser,
+        component: LayoutBrowser,
       });
       topItems.set("add-panel", {
         iconName: "RectangularClipping",
@@ -553,7 +548,6 @@ function WorkspaceContent(props: WorkspaceProps): JSX.Element {
   }, [
     DataSourceSidebarItem,
     playerProblems,
-    ConnectedLayoutBrowser,
     enableStudioLogsSidebar,
     enableNewTopNav,
     supportsAccountSettings,
@@ -632,8 +626,6 @@ function WorkspaceContent(props: WorkspaceProps): JSX.Element {
       <div className={classes.container} ref={containerRef} tabIndex={0}>
         {enableNewTopNav && (
           <AppBar
-            currentUser={currentUser}
-            signIn={signIn}
             leftInset={props.appBarLeftInset}
             onDoubleClick={props.onAppBarDoubleClick}
             showCustomWindowControls={props.showCustomWindowControls}

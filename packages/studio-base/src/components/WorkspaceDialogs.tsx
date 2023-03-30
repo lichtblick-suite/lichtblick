@@ -9,20 +9,25 @@ import {
   WorkspaceContextStore,
 } from "@foxglove/studio-base/context/WorkspaceContext";
 
-const selectWorkspacePrefsDialogOpen = (store: WorkspaceContextStore) => store.prefsDialogOpen;
+const selectWorkspacePrefsDialogOpen = (store: WorkspaceContextStore) =>
+  store.prefsDialogState.open;
 
 /**
  * Encapsulates dialogs shown and controlled at workspace level.
  */
 export function WorkspaceDialogs(): JSX.Element {
   const prefsDialogOpen = useWorkspaceStore(selectWorkspacePrefsDialogOpen);
-  const { setPrefsDialogOpen } = useWorkspaceActions();
+  const { prefsDialogActions } = useWorkspaceActions();
 
   return (
-    <PreferencesDialog
-      id="preferences-dialog"
-      open={prefsDialogOpen}
-      onClose={() => setPrefsDialogOpen(false)}
-    />
+    <>
+      {prefsDialogOpen && (
+        <PreferencesDialog
+          id="preferences-dialog"
+          open
+          onClose={() => prefsDialogActions.close()}
+        />
+      )}
+    </>
   );
 }

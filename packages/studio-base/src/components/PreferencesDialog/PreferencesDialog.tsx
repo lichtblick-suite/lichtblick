@@ -32,6 +32,10 @@ import { ExperimentalFeatureSettings } from "@foxglove/studio-base/components/Ex
 import ExtensionsSettings from "@foxglove/studio-base/components/ExtensionsSettings";
 import FoxgloveLogoText from "@foxglove/studio-base/components/FoxgloveLogoText";
 import Stack from "@foxglove/studio-base/components/Stack";
+import {
+  useWorkspaceStore,
+  WorkspaceContextStore,
+} from "@foxglove/studio-base/context/WorkspaceContext";
 import { useAppConfigurationValue } from "@foxglove/studio-base/hooks";
 import isDesktopApp from "@foxglove/studio-base/util/isDesktopApp";
 
@@ -171,12 +175,25 @@ export const aboutItems: Map<
   ],
 ]);
 
-type TabOption = "general" | "privacy" | "extensions" | "experimental-features" | "about";
+export type PreferencesDialogTab =
+  | "general"
+  | "privacy"
+  | "extensions"
+  | "experimental-features"
+  | "about";
 
-export function PreferencesDialog(props: DialogProps & { activeTab?: TabOption }): JSX.Element {
+const selectWorkspaceInitialActiveTab = (store: WorkspaceContextStore) =>
+  store.prefsDialogState.initialTab;
+
+export function PreferencesDialog(
+  props: DialogProps & { activeTab?: PreferencesDialogTab },
+): JSX.Element {
   const { t } = useTranslation("preferences");
   const { activeTab: _activeTab } = props;
-  const [activeTab, setActiveTab] = useState<TabOption>(_activeTab ?? "general");
+  const initialActiveTab = useWorkspaceStore(selectWorkspaceInitialActiveTab);
+  const [activeTab, setActiveTab] = useState<PreferencesDialogTab>(
+    _activeTab ?? initialActiveTab ?? "general",
+  );
   const [crashReportingEnabled, setCrashReportingEnabled] = useAppConfigurationValue<boolean>(
     AppSetting.CRASH_REPORTING_ENABLED,
   );
@@ -194,7 +211,7 @@ export function PreferencesDialog(props: DialogProps & { activeTab?: TabOption }
   // with our .deb package install method on linux.
   const supportsAppUpdates = isDesktopApp() && OsContextSingleton?.platform !== "linux";
 
-  const handleTabChange = (_event: SyntheticEvent, newValue: TabOption) => {
+  const handleTabChange = (_event: SyntheticEvent, newValue: PreferencesDialogTab) => {
     setActiveTab(newValue);
   };
 

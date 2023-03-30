@@ -12,6 +12,7 @@ import ExtensionMarketplaceContext, {
   ExtensionMarketplace,
 } from "@foxglove/studio-base/context/ExtensionMarketplaceContext";
 import ExtensionCatalogProvider from "@foxglove/studio-base/providers/ExtensionCatalogProvider";
+import WorkspaceContextProvider from "@foxglove/studio-base/providers/WorkspaceContextProvider";
 
 import { PreferencesDialog } from "./PreferencesDialog";
 
@@ -62,11 +63,13 @@ Mock markdown rendering for URL [${url}](${url}).`,
 
 function Wrapper(StoryComponent: Story): JSX.Element {
   return (
-    <ExtensionCatalogProvider loaders={[MockExtensionLoader]}>
-      <ExtensionMarketplaceContext.Provider value={MockExtensionMarketplace}>
-        <StoryComponent />
-      </ExtensionMarketplaceContext.Provider>
-    </ExtensionCatalogProvider>
+    <WorkspaceContextProvider>
+      <ExtensionCatalogProvider loaders={[MockExtensionLoader]}>
+        <ExtensionMarketplaceContext.Provider value={MockExtensionMarketplace}>
+          <StoryComponent />
+        </ExtensionMarketplaceContext.Provider>
+      </ExtensionCatalogProvider>
+    </WorkspaceContextProvider>
   );
 }
 

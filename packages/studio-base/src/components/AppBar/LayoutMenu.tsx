@@ -9,12 +9,11 @@ import LayoutBrowser from "@foxglove/studio-base/components/LayoutBrowser";
 type LayoutMenuProps = {
   anchorEl?: HTMLElement;
   handleClose: () => void;
-  supportsSignIn?: boolean;
   open: boolean;
 };
 
 export function LayoutMenu(props: LayoutMenuProps): JSX.Element {
-  const { anchorEl, handleClose, open, supportsSignIn } = props;
+  const { anchorEl, handleClose, open } = props;
   return (
     <Menu
       id="layout-menu"
@@ -34,7 +33,7 @@ export function LayoutMenu(props: LayoutMenuProps): JSX.Element {
         horizontal: "left",
       }}
     >
-      <LayoutBrowser menuClose={handleClose} supportsSignIn={supportsSignIn} />
+      <LayoutBrowser menuClose={handleClose} />
     </Menu>
   );
 }

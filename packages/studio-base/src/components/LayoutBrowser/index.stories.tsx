@@ -8,6 +8,7 @@ import userEvent from "@testing-library/user-event";
 import { useMemo } from "react";
 
 import { LayoutData } from "@foxglove/studio-base/context/CurrentLayoutContext/actions";
+import CurrentUserContext from "@foxglove/studio-base/context/CurrentUserContext";
 import LayoutStorageContext from "@foxglove/studio-base/context/LayoutStorageContext";
 import { UserProfileStorageContext } from "@foxglove/studio-base/context/UserProfileStorageContext";
 import CurrentLayoutProvider from "@foxglove/studio-base/providers/CurrentLayoutProvider";
@@ -381,9 +382,17 @@ DeleteLastLayout.play = async () => await deleteLayoutInteraction(0);
 
 export function SignInPrompt(_args: unknown): JSX.Element {
   return (
-    <WorkspaceContextProvider>
-      <LayoutBrowser supportsSignIn />
-    </WorkspaceContextProvider>
+    <CurrentUserContext.Provider
+      value={{
+        currentUser: undefined,
+        signIn: () => undefined,
+        signOut: async () => undefined,
+      }}
+    >
+      <WorkspaceContextProvider>
+        <LayoutBrowser />
+      </WorkspaceContextProvider>
+    </CurrentUserContext.Provider>
   );
 }
 SignInPrompt.parameters = {
