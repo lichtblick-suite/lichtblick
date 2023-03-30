@@ -2165,13 +2165,13 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@foxglove/eslint-plugin@npm:0.21.0":
-  version: 0.21.0
-  resolution: "@foxglove/eslint-plugin@npm:0.21.0"
+"@foxglove/eslint-plugin@npm:0.21.2":
+  version: 0.21.2
+  resolution: "@foxglove/eslint-plugin@npm:0.21.2"
   dependencies:
     "@typescript-eslint/utils": ^5
     tsutils: ^3
-    typescript: ^4
+    typescript: ^4 || ^5
   peerDependencies:
     eslint: ^7 || ^8
     eslint-config-prettier: ^8
@@ -2180,7 +2180,7 @@ __metadata:
     eslint-plugin-import: ^2
     eslint-plugin-prettier: ^3 || ^4
     prettier: ^2
-  checksum: 27bb615e278d77046c890d38744e3e528d41f228fec5309e92e0cfcb4fb58991145b00a23033d928aa2ddd3acae978b790bba3f4fefe0c4b76b533022ce8b0f2
+  checksum: 28fc1baf7809352ef60abad36e57c69a899b9ea7dd230f9a4228bb55db8e30d18fe93bbacc24b126c7c7737d4a940a36d393cd65c530d7873f1b515294c7b450
   languageName: node
   linkType: hard
 
@@ -12603,7 +12603,7 @@ __metadata:
     "@babel/core": 7.21.3
     "@babel/preset-env": 7.20.2
     "@babel/preset-typescript": 7.21.0
-    "@foxglove/eslint-plugin": 0.21.0
+    "@foxglove/eslint-plugin": 0.21.2
     "@foxglove/eslint-plugin-studio": "workspace:*"
     "@foxglove/tsconfig": 1.1.0
     "@octokit/rest": 19.0.7
@@ -23340,7 +23340,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"typescript@npm:4.9.5, typescript@npm:^4":
+"typescript@npm:4.9.5":
   version: 4.9.5
   resolution: "typescript@npm:4.9.5"
   bin:
@@ -23350,13 +23350,33 @@ __metadata:
   languageName: node
   linkType: hard
 
-"typescript@patch:typescript@4.9.5#~builtin<compat/typescript>, typescript@patch:typescript@^4#~builtin<compat/typescript>":
+"typescript@npm:^4 || ^5":
+  version: 5.0.2
+  resolution: "typescript@npm:5.0.2"
+  bin:
+    tsc: bin/tsc
+    tsserver: bin/tsserver
+  checksum: bef1dcd166acfc6934b2ec4d72f93edb8961a5fab36b8dd2aaf6f4f4cd5c0210f2e0850aef4724f3b4913d5aef203a94a28ded731b370880c8bcff7e4ff91fc1
+  languageName: node
+  linkType: hard
+
+"typescript@patch:typescript@4.9.5#~builtin<compat/typescript>":
   version: 4.9.5
   resolution: "typescript@patch:typescript@npm%3A4.9.5#~builtin<compat/typescript>::version=4.9.5&hash=ad5954"
   bin:
     tsc: bin/tsc
     tsserver: bin/tsserver
   checksum: 8f6260acc86b56bfdda6004bc53f32ea548f543e8baef7071c8e34d29d292f3e375c8416556c8de10b24deef6933cd1c16a8233dc84a3dd43a13a13265d0faab
+  languageName: node
+  linkType: hard
+
+"typescript@patch:typescript@^4 || ^5#~builtin<compat/typescript>":
+  version: 5.0.2
+  resolution: "typescript@patch:typescript@npm%3A5.0.2#~builtin<compat/typescript>::version=5.0.2&hash=ad5954"
+  bin:
+    tsc: bin/tsc
+    tsserver: bin/tsserver
+  checksum: bdbf3d0aac0d6cf010fbe0536753dc19f278eb4aba88140dcd25487dfe1c56ca8b33abc0dcd42078790a939b08ebc4046f3e9bb961d77d3d2c3cfa9829da4d53
   languageName: node
   linkType: hard
 

@@ -73,7 +73,7 @@
     "@babel/core": "7.21.3",
     "@babel/preset-env": "7.20.2",
     "@babel/preset-typescript": "7.21.0",
-    "@foxglove/eslint-plugin": "0.21.0",
+    "@foxglove/eslint-plugin": "0.21.2",
     "@foxglove/eslint-plugin-studio": "workspace:*",
     "@foxglove/tsconfig": "1.1.0",
     "@octokit/rest": "19.0.7",

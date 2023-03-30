@@ -67,14 +67,6 @@ rules:
   no-restricted-imports:
     - error
     - paths:
-        - name: "@mui/material"
-          importNames: [styled]
-          message: "@mui/styled has performance implications. Use tss-react/mui instead."
-        - name: "@mui/material/styles/styled"
-          message: "@mui/styled has performance implications. Use tss-react/mui instead."
-        - name: "@emotion/styled"
-          message: "@emotion/styled has performance implications. Use tss-react/mui instead."
-
         - name: "lodash"
           importNames: [get]
           message: "Use optional chaining instead of lodash.get."
@@ -148,7 +140,7 @@ overrides:
       - "**/*.stories.tsx"
 
   - rules:
-      no-restricted-imports: off
+      "@foxglove/no-restricted-imports": off
     files:
       # Ignore existing implementations of @mui/styled
       - "packages/studio-base/src/components/DataSourceSidebar/DataSourceSidebar.tsx"
