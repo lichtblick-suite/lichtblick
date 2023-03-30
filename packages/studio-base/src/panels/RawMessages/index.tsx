@@ -341,7 +341,10 @@ function RawMessages(props: Props) {
               keyPath.slice(0, -1).reverse(),
             );
             if (childStructureItem) {
-              const field = keyPath[0];
+              // if it's an array index (typeof number) then we want the nearest named array which will be typeof string
+
+              const keyPathIndex = keyPath.findIndex((key) => typeof key === "string");
+              const field = keyPath[keyPathIndex];
               if (typeof field === "string") {
                 const enumMapping = enumValuesByDatatypeAndField(datatypes);
                 const datatype = childStructureItem.datatype;
