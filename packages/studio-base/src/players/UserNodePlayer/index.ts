@@ -21,7 +21,6 @@ import Log from "@foxglove/log";
 import { Time, compare } from "@foxglove/rostime";
 import { ParameterValue } from "@foxglove/studio";
 import { GlobalVariables } from "@foxglove/studio-base/hooks/useGlobalVariables";
-import getPrettifiedCode from "@foxglove/studio-base/panels/NodePlayground/getPrettifiedCode";
 import { MemoizedLibGenerator } from "@foxglove/studio-base/players/UserNodePlayer/MemoizedLibGenerator";
 import { generateTypesLib } from "@foxglove/studio-base/players/UserNodePlayer/nodeTransformerWorker/generateTypesLib";
 import { TransformArgs } from "@foxglove/studio-base/players/UserNodePlayer/nodeTransformerWorker/types";
@@ -184,7 +183,12 @@ export default class UserNodePlayer implements Player {
         datatypes: new Map([...basicDatatypes, ...args.datatypes]),
       });
 
-      return await getPrettifiedCode(lib);
+      // Do not prettify the types library as it can cause severe performance
+      // degradations. This is OK because the generated types library is
+      // read-only and should be rarely read by a human. Further, the
+      // not-prettified code is not that bad either. It just lacks the
+      // appropriate indentations.
+      return lib;
     });
 
     this._rosLibGenerator = new MemoizedLibGenerator(async (args) => {
