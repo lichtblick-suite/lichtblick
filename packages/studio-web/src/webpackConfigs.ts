@@ -24,6 +24,8 @@ export type ConfigParams = {
   outputPath: string;
   /** Source map (`devtool`) setting to use for production builds */
   prodSourceMap: string | false;
+  /** Set the app version information */
+  version?: string;
 };
 
 export const devServerConfig = (params: ConfigParams): WebpackConfiguration => ({
@@ -66,7 +68,10 @@ export const mainConfig =
       plugins.push(new ReactRefreshPlugin());
     }
 
-    const appWebpackConfig = makeConfig(env, argv, { allowUnusedVariables });
+    const appWebpackConfig = makeConfig(env, argv, {
+      allowUnusedVariables,
+      version: params.version,
+    });
 
     const config: Configuration = {
       name: "main",
