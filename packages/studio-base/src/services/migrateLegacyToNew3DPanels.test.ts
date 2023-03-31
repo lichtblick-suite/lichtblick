@@ -56,6 +56,7 @@ describe("migrateLegacyToNew3DPanels", () => {
             },
             "followMode": "follow-none",
             "followTf": undefined,
+            "imageMode": {},
             "layers": {},
             "publish": {
               "pointTopic": "/clicked_point",
@@ -125,6 +126,7 @@ describe("migrateLegacyToNew3DPanels", () => {
             },
             "followMode": "follow-none",
             "followTf": undefined,
+            "imageMode": {},
             "layers": {},
             "publish": {
               "pointTopic": "/clicked_point",
@@ -230,6 +232,7 @@ describe("migrateLegacyToNew3DPanels", () => {
             },
             "followMode": "follow-none",
             "followTf": undefined,
+            "imageMode": {},
             "layers": {},
             "publish": {
               "pointTopic": "/clicked_point",

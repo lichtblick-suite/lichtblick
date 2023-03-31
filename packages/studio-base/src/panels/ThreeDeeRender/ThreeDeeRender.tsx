@@ -12,6 +12,7 @@ import {
   Paper,
   useTheme,
 } from "@mui/material";
+import { Immutable } from "immer";
 import { cloneDeep, isEqual, merge } from "lodash";
 import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import ReactDOM from "react-dom";
@@ -47,6 +48,8 @@ import type { PickedRenderable } from "./Picker";
 import { Renderable, SELECTED_ID_VARIABLE } from "./Renderable";
 import {
   FollowMode,
+  ImageModeConfig,
+  LegacyImageConfig,
   Renderer,
   RendererConfig,
   RendererEvents,
@@ -62,9 +65,9 @@ import {
   PublishRos1Datatypes,
   PublishRos2Datatypes,
 } from "./publish";
-import { DEFAULT_PUBLISH_SETTINGS } from "./renderables/CoreSettings";
 import type { LayerSettingsTransform } from "./renderables/FrameAxes";
 import { PublishClickEvent, PublishClickType } from "./renderables/PublishClickTool";
+import { DEFAULT_PUBLISH_SETTINGS } from "./renderables/PublishSettings";
 import { InterfaceMode } from "./types";
 
 const log = Logger.getLogger(__filename);
@@ -404,7 +407,7 @@ export function ThreeDeeRender(props: {
   const { initialState, saveState } = context;
 
   // Load and save the persisted panel configuration
-  const [config, setConfig] = useState<RendererConfig>(() => {
+  const [config, setConfig] = useState<Immutable<RendererConfig>>(() => {
     const partialConfig = initialState as DeepPartial<RendererConfig> | undefined;
 
     // Initialize the camera from default settings overlaid with persisted settings
@@ -419,6 +422,13 @@ export function ThreeDeeRender(props: {
       Partial<LayerSettingsTransform>
     >;
 
+    // Merge in config from the legacy Image panel
+    const legacyImageConfig = partialConfig as DeepPartial<LegacyImageConfig> | undefined;
+    const imageMode: ImageModeConfig = {
+      imageTopic: legacyImageConfig?.cameraTopic,
+      ...partialConfig?.imageMode,
+    };
+
     return {
       cameraState,
       followMode: partialConfig?.followMode ?? "follow-pose",
@@ -428,6 +438,7 @@ export function ThreeDeeRender(props: {
       topics: partialConfig?.topics ?? {},
       layers: partialConfig?.layers ?? {},
       publish,
+      imageMode,
     };
   });
   const configRef = useLatest(config);
@@ -590,7 +601,7 @@ export function ThreeDeeRender(props: {
 
   // Save panel settings whenever they change
   const throttledSave = useDebouncedCallback(
-    (newConfig: RendererConfig) => saveState(newConfig),
+    (newConfig: Immutable<RendererConfig>) => saveState(newConfig),
     1000,
     { leading: false, trailing: true, maxWait: 1000 },
   );
@@ -959,7 +970,7 @@ export function ThreeDeeRender(props: {
       action: "update",
       payload: {
         input: "boolean",
-        path: ["scene", "cameraState", "perspective"],
+        path: ["cameraState", "perspective"],
         value: !currentState,
       },
     });

@@ -20,7 +20,6 @@ export type Config = DefaultConfig & {
   mode?: ZoomMode;
   pan?: { x: number; y: number };
   rotation?: number;
-  saveStoryConfig?: () => void;
   smooth?: boolean;
   transformMarkers: boolean;
   zoom?: number;

@@ -192,7 +192,7 @@ export const legacyPlot: PanelInfo = {
 };
 
 export const newImage: PanelInfo = {
-  title: "3D Image",
+  title: "🚧 Image",
   type: "Image",
   module: async () => ({ default: (await import("./ThreeDeeRender")).ImagePanel }),
 };

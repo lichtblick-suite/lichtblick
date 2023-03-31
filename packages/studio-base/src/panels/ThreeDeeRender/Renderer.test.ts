@@ -7,7 +7,7 @@ import { fromNanoSec } from "@foxglove/rostime";
 import { MessageEvent } from "@foxglove/studio";
 import { Renderer, RendererConfig } from "@foxglove/studio-base/panels/ThreeDeeRender/Renderer";
 import { DEFAULT_CAMERA_STATE } from "@foxglove/studio-base/panels/ThreeDeeRender/camera";
-import { DEFAULT_PUBLISH_SETTINGS } from "@foxglove/studio-base/panels/ThreeDeeRender/renderables/CoreSettings";
+import { DEFAULT_PUBLISH_SETTINGS } from "@foxglove/studio-base/panels/ThreeDeeRender/renderables/PublishSettings";
 import { TFMessage } from "@foxglove/studio-base/panels/ThreeDeeRender/ros";
 
 // Jest doesn't support ES module imports fully yet, so we need to mock the wasm file
@@ -66,6 +66,7 @@ const defaultRendererConfig: RendererConfig = {
   topics: {},
   layers: {},
   publish: DEFAULT_PUBLISH_SETTINGS,
+  imageMode: {},
 };
 
 const makeTf = () => ({

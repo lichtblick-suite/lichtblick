@@ -13,13 +13,7 @@ import type { RosValue } from "@foxglove/studio-base/players/types";
 import { Label } from "@foxglove/three-text";
 
 import { Axis, AXIS_LENGTH } from "./Axis";
-import {
-  DEFAULT_AXIS_SCALE,
-  DEFAULT_LABEL_SCALE_FACTOR,
-  DEFAULT_LINE_COLOR_STR,
-  DEFAULT_LINE_WIDTH_PX,
-  DEFAULT_TF_LABEL_SIZE,
-} from "./CoreSettings";
+import { DEFAULT_LABEL_SCALE_FACTOR } from "./SceneSettings";
 import { makeLinePickingMaterial } from "./markers/materials";
 import { BaseUserData, Renderable } from "../Renderable";
 import { Renderer, RendererConfig } from "../Renderer";
@@ -38,6 +32,11 @@ const PICKING_LINE_SIZE = 6;
 const PI_2 = Math.PI / 2;
 
 const DEFAULT_EDITABLE = false;
+
+const DEFAULT_AXIS_SCALE = 1;
+const DEFAULT_LINE_WIDTH_PX = 2;
+const DEFAULT_LINE_COLOR_STR = "#ffff00";
+const DEFAULT_TF_LABEL_SIZE = 0.2;
 
 const DEFAULT_SETTINGS: LayerSettingsTransform = {
   visible: true,
