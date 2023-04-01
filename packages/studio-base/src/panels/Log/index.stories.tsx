@@ -186,7 +186,7 @@ export const TopicToRender = (): JSX.Element => {
         );
         setTimeout(() => {
           TestUtils.Simulate.click(document.querySelectorAll("[data-testid=topic-set]")[0]!);
-        });
+        }, 0);
       }}
     >
       <Log overrideConfig={{ searchTerms: [], minLogLevel: 1, topicToRender: "/foo/rosout" }} />

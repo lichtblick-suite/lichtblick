@@ -91,6 +91,11 @@ rules:
         `// eslint-disable-next-line no-restricted-syntax`. For rationale, see:
         https://github.com/sindresorhus/meta/discussions/7"
 
+    - selector: "CallExpression[callee.name='setTimeout'][arguments.length<2]"
+      message: "`setTimeout()` must be invoked with at least two arguments."
+    - selector: "CallExpression[callee.name='setInterval'][arguments.length<2]"
+      message: "`setInterval()` must be invoked with at least two arguments."
+
   jest/expect-expect:
     [error, { assertFunctionNames: [expect*, sendNotification.expectCalledDuringTest] }]
 

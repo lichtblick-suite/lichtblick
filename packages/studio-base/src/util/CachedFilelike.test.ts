@@ -35,7 +35,7 @@ class InMemoryFileReader implements FileReader {
     return {
       on: (type: "data" | "error", callback: ((_: Uint8Array) => void) & ((_: Error) => void)) => {
         if (type === "data") {
-          setTimeout(() => callback(this._buffer.slice(offset, offset + length)));
+          setTimeout(() => callback(this._buffer.slice(offset, offset + length)), 0);
         }
       },
       destroy() {

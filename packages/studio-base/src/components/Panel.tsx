@@ -522,7 +522,7 @@ export default function Panel<
       const overlay = quickActionsOverlayRef.current;
       if (overlay) {
         overlay.style.opacity = "0";
-        setTimeout(() => (overlay.style.opacity = "1"));
+        setTimeout(() => (overlay.style.opacity = "1"), 0);
       }
     }, []);
     const dragSpec = { tabId, panelId: childId, onDragStart };
