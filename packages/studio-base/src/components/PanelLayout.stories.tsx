@@ -155,6 +155,23 @@ RemoveUnknownPanel.play = async () => {
   (await screen.findAllByTestId("panel-menu-remove")).forEach((button) => fireEvent.click(button));
 };
 
+export const EmptyLayout = (): JSX.Element => {
+  return (
+    <PanelSetup fixture={{ layout: undefined }}>
+      <PanelLayout />
+    </PanelSetup>
+  );
+};
+
+export const EmptyLayoutChinese = (): JSX.Element => {
+  return (
+    <PanelSetup fixture={{ layout: undefined }}>
+      <PanelLayout />
+    </PanelSetup>
+  );
+};
+EmptyLayoutChinese.parameters = { forceLanguage: "zh" };
+
 export const PanelLoading = (): JSX.Element => {
   return (
     <DndProvider backend={HTML5Backend}>

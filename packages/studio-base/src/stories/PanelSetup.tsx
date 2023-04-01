@@ -12,10 +12,12 @@
 //   You may not use this file except in compliance with the License.
 
 import { useTheme } from "@mui/material";
+import { TFunction } from "i18next";
 import { flatten } from "lodash";
-import { ComponentProps, ReactNode, useLayoutEffect, useRef, useState } from "react";
+import { ComponentProps, ReactNode, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { DndProvider } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
+import { useTranslation } from "react-i18next";
 import { Mosaic, MosaicNode, MosaicWindow } from "react-mosaic-component";
 
 import { useShallowMemo } from "@foxglove/hooks";
@@ -113,10 +115,10 @@ function setNativeValue(element: unknown, value: unknown) {
   }
 }
 
-export function makeMockPanelCatalog(): PanelCatalog {
-  const allPanels = [...panels.builtin, ...panels.debug, panels.legacyPlot];
+export function makeMockPanelCatalog(t: TFunction<"panels">): PanelCatalog {
+  const allPanels = [...panels.getBuiltin(t), ...panels.getDebug(t), panels.getLegacyPlot(t)];
 
-  const visiblePanels = [...panels.builtin];
+  const visiblePanels = [...panels.getBuiltin(t)];
 
   return {
     getPanels() {
@@ -193,7 +195,11 @@ function PanelWrapper({
 }
 
 function UnconnectedPanelSetup(props: UnconnectedProps): JSX.Element | ReactNull {
-  const [mockPanelCatalog] = useState(() => props.panelCatalog ?? makeMockPanelCatalog());
+  const { t } = useTranslation("panels");
+  const mockPanelCatalog = useMemo(
+    () => props.panelCatalog ?? makeMockPanelCatalog(t),
+    [props.panelCatalog, t],
+  );
   const [mockAppConfiguration] = useState(() => ({
     get() {
       return undefined;

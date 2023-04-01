@@ -3,6 +3,7 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 // Generic global translation
-export default {
+export const general = {
   foxglove: "Foxglove",
+  learnMore: "Learn more",
 };

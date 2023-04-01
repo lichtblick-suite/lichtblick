@@ -14,6 +14,7 @@ import { Link, Typography } from "@mui/material";
 import { useSnackbar } from "notistack";
 import { extname } from "path";
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
+import { useTranslation, Trans } from "react-i18next";
 import { makeStyles } from "tss-react/mui";
 
 import Logger from "@foxglove/log";
@@ -120,12 +121,19 @@ function AddPanel() {
   const addPanel = useAddPanel();
   const { openLayoutBrowser } = useWorkspaceActions();
   const selectedLayoutId = useCurrentLayoutSelector(selectedLayoutIdSelector);
+  const { t } = useTranslation("addPanel");
 
   return (
-    <SidebarContent disablePadding={selectedLayoutId != undefined} title="Add panel">
+    <SidebarContent disablePadding={selectedLayoutId != undefined} title={t("addPanel")}>
       {selectedLayoutId == undefined ? (
         <Typography color="text.secondary">
-          <Link onClick={openLayoutBrowser}>Select a layout</Link> to get started!
+          <Trans
+            t={t}
+            i18nKey="noLayoutSelected"
+            components={{
+              selectLayoutLink: <Link onClick={openLayoutBrowser} />,
+            }}
+          />
         </Typography>
       ) : (
         <PanelList onPanelSelect={addPanel} />

@@ -34,6 +34,7 @@ import fuzzySort from "fuzzysort";
 import { countBy, isEmpty } from "lodash";
 import { forwardRef, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useDrag } from "react-dnd";
+import { useTranslation } from "react-i18next";
 import { MosaicDragType, MosaicPath } from "react-mosaic-component";
 import { makeStyles } from "tss-react/mui";
 
@@ -330,6 +331,7 @@ const PanelList = forwardRef<HTMLDivElement, Props>((props: Props, ref) => {
   const [searchQuery, setSearchQuery] = useState("");
   const [highlightedPanelIdx, setHighlightedPanelIdx] = useState<number | undefined>();
   const { classes, cx } = useStyles();
+  const { t } = useTranslation("addPanel");
 
   const { dropPanel } = useCurrentLayoutActions();
   const mosaicId = usePanelMosaicId();
@@ -509,7 +511,7 @@ const PanelList = forwardRef<HTMLDivElement, Props>((props: Props, ref) => {
       >
         <TextField
           fullWidth
-          placeholder="Search panels"
+          placeholder={t("searchPanels")}
           value={searchQuery}
           onChange={handleSearchChange}
           onKeyDown={onKeyDown}
@@ -537,7 +539,7 @@ const PanelList = forwardRef<HTMLDivElement, Props>((props: Props, ref) => {
       {noResults && (
         <Stack alignItems="center" justifyContent="center" paddingX={1} paddingY={2}>
           <Typography variant="body2" color="text.secondary">
-            No panels match search criteria.
+            {t("noPanelsMatchSearchCriteria")}
           </Typography>
         </Stack>
       )}

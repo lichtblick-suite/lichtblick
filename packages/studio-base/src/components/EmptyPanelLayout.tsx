@@ -14,6 +14,7 @@
 import { Link, Typography, styled as muiStyled } from "@mui/material";
 import { useCallback } from "react";
 import { useDrop } from "react-dnd";
+import { useTranslation } from "react-i18next";
 import { MosaicDragType } from "react-mosaic-component";
 
 import PanelList, { PanelSelection } from "@foxglove/studio-base/components/PanelList";
@@ -59,6 +60,7 @@ const DropTarget = muiStyled("div", {
 
 export const EmptyPanelLayout = ({ tabId }: Props): JSX.Element => {
   const { addPanel } = useCurrentLayoutActions();
+  const { t } = useTranslation("addPanel");
 
   const [{ isOver }, drop] = useDrop<unknown, MosaicDropResult, { isOver: boolean }>({
     accept: MosaicDragType.WINDOW,
@@ -83,9 +85,9 @@ export const EmptyPanelLayout = ({ tabId }: Props): JSX.Element => {
       <Root>
         <Stack paddingBottom={2}>
           <Typography variant="body2" paddingX={2} paddingTop={2}>
-            Select a panel below to add it to your layout.{" "}
+            {t("selectPanelToAddToLayout")}{" "}
             <Link color="primary" target="_blank" href="https://foxglove.dev/docs/studio/layouts">
-              Learn more
+              {t("learnMore", { ns: "general" })}
             </Link>
           </Typography>
           <PanelList mode="grid" onPanelSelect={onPanelSelect} />

@@ -27,6 +27,7 @@ async function main(): Promise<void> {
         String.raw`/studio-base/src/index\.ts`,
         String.raw`/studio-base/src/stories/`,
         String.raw`/studio-base/src/test/`,
+        String.raw`/studio-base/src/i18n/`, // Doesn't work due to use of `export *` & `import *`
         String.raw`/ThreeDeeRender/transforms/index\.ts`,
         String.raw`/nodeTransformerWorker/typescript/userUtils`,
         String.raw`\.stories\.ts`,
