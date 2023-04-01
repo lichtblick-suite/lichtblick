@@ -105,7 +105,7 @@
     "babel-plugin-transform-import-meta": "2.2.0",
     "browserify-zlib": "0.2.0",
     "chart.js": "4.2.1",
-    "chartjs-plugin-annotation": "2.1.2",
+    "chartjs-plugin-annotation": "2.2.1",
     "chartjs-plugin-datalabels": "2.2.0",
     "chromatic": "6.17.1",
     "circular-dependency-plugin": "5.2.2",

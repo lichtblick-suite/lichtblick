@@ -2494,7 +2494,7 @@ __metadata:
     babel-plugin-transform-import-meta: 2.2.0
     browserify-zlib: 0.2.0
     chart.js: 4.2.1
-    chartjs-plugin-annotation: 2.1.2
+    chartjs-plugin-annotation: 2.2.1
     chartjs-plugin-datalabels: 2.2.0
     chromatic: 6.17.1
     circular-dependency-plugin: 5.2.2
@@ -8879,12 +8879,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"chartjs-plugin-annotation@npm:2.1.2":
-  version: 2.1.2
-  resolution: "chartjs-plugin-annotation@npm:2.1.2"
+"chartjs-plugin-annotation@npm:2.2.1":
+  version: 2.2.1
+  resolution: "chartjs-plugin-annotation@npm:2.2.1"
   peerDependencies:
     chart.js: ">=3.7.0"
-  checksum: 821cfae3d2e7f7c70e8d42ba6fa22f0b40afa9d0cc52938afc9ddc547fe97c7fa3a0b849026bdc9afba823736b21733cdb2c911f0500008f2deb8f83743bf672
+  checksum: 443582b13779105c8f147638253e56e30d72c4cf28abab2da30a9f2637ccb068f5fade81ec6a9d78c03d10722107057ab9cc93042bb3951da63bc3edf79322a3
   languageName: node
   linkType: hard
 
