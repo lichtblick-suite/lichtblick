@@ -28,14 +28,14 @@ function StudioLogsSettingsProvider(props: PropsWithChildren<unknown>): JSX.Elem
   // Setup an interval to check for changes to the total number of logging channels
   //
   // When the total number of channels changes we re-initialize the settings store so we display any
-  // newly added log chnanels.
+  // newly added log channels.
   useEffect(() => {
     const storeChannelsCount = studioLogsSettingsStore.getState().channels.length;
     const intervalHandle = setInterval(() => {
       if (storeChannelsCount !== Log.channels().length) {
         setStudioLogsSettingsStore(createStudioLogsSettingsStore(savedStateRef.current));
       }
-    });
+    }, 1000);
 
     return () => clearInterval(intervalHandle);
   }, [studioLogsSettingsStore, studioLogsSettingsSavedState]);
