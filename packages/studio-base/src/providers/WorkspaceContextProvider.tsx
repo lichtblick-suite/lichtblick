@@ -18,7 +18,6 @@ function createWorkspaceContextStore(
     persist(
       () => {
         const store: WorkspaceContextStore = {
-          layoutMenuOpen: false,
           leftSidebarItem: "panel-settings",
           leftSidebarOpen: true,
           leftSidebarSize: undefined,
@@ -37,8 +36,7 @@ function createWorkspaceContextStore(
       {
         name: "fox.workspace",
         partialize: (value) => {
-          const { layoutMenuOpen: _, ...rest } = value;
-          return rest;
+          return value;
         },
       },
     ),
