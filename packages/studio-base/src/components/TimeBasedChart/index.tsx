@@ -14,6 +14,7 @@
 import { Button, Fade, Tooltip, useTheme } from "@mui/material";
 import { ChartOptions, ScaleOptions } from "chart.js";
 import { AnnotationOptions } from "chartjs-plugin-annotation";
+import { isEqual } from "lodash";
 import React, {
   ComponentProps,
   MouseEvent,
@@ -672,6 +673,19 @@ export default function TimeBasedChart(props: Props): JSX.Element {
   const onScalesUpdate = useCallback(
     (scales: RpcScales, { userInteraction }: { userInteraction: boolean }) => {
       if (!isMounted()) {
+        return;
+      }
+
+      // If this is an update from the chart adjusting its own bounds and not a
+      // user interaction and the X scale is defined but hasn't changed we can
+      // skip updating global bounds and downsampling. This avoids a feedback
+      // loop on boundary conditions when the chart is adjusting its own Y axis
+      // to fit the dataset.
+      if (
+        scales.x != undefined &&
+        isEqual(scales.x, currentScalesRef.current?.x) &&
+        !userInteraction
+      ) {
         return;
       }
 
