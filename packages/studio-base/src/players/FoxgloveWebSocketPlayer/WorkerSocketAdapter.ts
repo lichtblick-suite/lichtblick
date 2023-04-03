@@ -8,6 +8,7 @@ import { FromWorkerMessage, ToWorkerMessage } from "./worker";
 
 export default class WorkerSocketAdapter implements IWebSocket {
   private worker: Worker;
+  private connectionClosed: boolean = false;
   public binaryType: string = "";
   public protocol: string = "";
   public onerror: ((event: unknown) => void) | undefined = undefined;
@@ -35,6 +36,10 @@ export default class WorkerSocketAdapter implements IWebSocket {
           }
           break;
         case "close":
+          // websocket connection got closed, we can terminate the worker
+          this.connectionClosed = true;
+          this.worker.terminate();
+
           if (this.onclose) {
             this.onclose(event.data);
           }
@@ -54,11 +59,12 @@ export default class WorkerSocketAdapter implements IWebSocket {
   }
 
   public close(): void {
-    this.sendToWorker({
-      type: "close",
-      data: undefined,
-    });
-    this.worker.terminate();
+    if (!this.connectionClosed) {
+      this.sendToWorker({
+        type: "close",
+        data: undefined,
+      });
+    }
   }
 
   public send(data: string | ArrayBuffer | ArrayBufferView): void {
@@ -66,6 +72,9 @@ export default class WorkerSocketAdapter implements IWebSocket {
   }
 
   private sendToWorker(msg: ToWorkerMessage): void {
+    if (this.connectionClosed) {
+      throw Error("Can't send message over closed websocket connection");
+    }
     this.worker.postMessage(msg);
   }
 }
