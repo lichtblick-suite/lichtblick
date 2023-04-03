@@ -398,6 +398,8 @@ export default class UserNodePlayer implements Player {
     nodeId: string,
     userNode: UserNode,
     state: ProtectedState,
+    rosLib: string,
+    typesLib: string,
   ): Promise<NodeRegistration> {
     for (const cacheEntry of state.nodeRegistrationCache) {
       if (nodeId === cacheEntry.nodeId && isEqual(userNode, cacheEntry.userNode)) {
@@ -409,8 +411,6 @@ export default class UserNodePlayer implements Player {
     const { topics = [], datatypes = new Map() } = state.lastPlayerStateActiveData ?? {};
     const nodeDatatypes: RosDatatypes = new Map([...basicDatatypes, ...datatypes]);
 
-    const rosLib = await this._getRosLib(state);
-    const typesLib = await this._getTypesLib(state);
     const { name, sourceCode } = userNode;
     const transformMessage: TransformArgs = {
       name,
@@ -663,9 +663,13 @@ export default class UserNodePlayer implements Player {
       nodeRegistration.terminate();
     }
 
+    const rosLib = await this._getRosLib(state);
+    const typesLib = await this._getTypesLib(state);
+
     const allNodeRegistrations = await Promise.all(
       Object.entries(state.userNodes).map(
-        async ([nodeId, userNode]) => await this._createNodeRegistration(nodeId, userNode, state),
+        async ([nodeId, userNode]) =>
+          await this._createNodeRegistration(nodeId, userNode, state, rosLib, typesLib),
       ),
     );
 
