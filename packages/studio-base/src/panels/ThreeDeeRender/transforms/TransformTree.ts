@@ -2,7 +2,7 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { CoordinateFrame, MAX_DURATION } from "./CoordinateFrame";
+import { CoordinateFrame, MAX_DURATION, FallbackFrameId, AnyFrameId } from "./CoordinateFrame";
 import { Transform } from "./Transform";
 import { Pose } from "./geometry";
 import { Duration, Time } from "./time";
@@ -23,6 +23,7 @@ export class TransformTree {
   private _frames = new Map<string, CoordinateFrame>();
   private _maxStorageTime: Duration;
   private _maxCapacityPerFrame: number;
+  public defaultRootFrame: CoordinateFrame<FallbackFrameId>;
 
   public constructor(
     maxStorageTime = MAX_DURATION,
@@ -30,6 +31,13 @@ export class TransformTree {
   ) {
     this._maxStorageTime = maxStorageTime;
     this._maxCapacityPerFrame = maxCapacityPerFrame;
+    this.defaultRootFrame = new CoordinateFrame(
+      CoordinateFrame.FALLBACK_FRAME_ID,
+      undefined,
+      this._maxStorageTime,
+      this._maxCapacityPerFrame,
+    );
+    this.defaultRootFrame.addTransform(0n, Transform.Identity());
   }
 
   public addTransform(
@@ -144,12 +152,18 @@ export class TransformTree {
     }
   }
 
-  public hasFrame(id: string): boolean {
+  public hasFrame(id: AnyFrameId): boolean {
+    if (id === CoordinateFrame.FALLBACK_FRAME_ID) {
+      return true;
+    }
     return this._frames.has(id);
   }
 
-  public frame(id: string): CoordinateFrame | undefined {
-    return this._frames.get(id);
+  public frame<ID extends AnyFrameId>(id: ID): CoordinateFrame<ID> | undefined {
+    if (id === CoordinateFrame.FALLBACK_FRAME_ID) {
+      return this.defaultRootFrame as CoordinateFrame<ID>;
+    }
+    return this._frames.get(id) as CoordinateFrame<ID>;
   }
 
   public getOrCreateFrame(id: string): CoordinateFrame {
@@ -168,9 +182,9 @@ export class TransformTree {
   public apply(
     output: Pose,
     input: Readonly<Pose>,
-    frameId: string,
-    rootFrameId: string | undefined,
-    srcFrameId: string,
+    frameId: AnyFrameId,
+    rootFrameId: AnyFrameId | undefined,
+    srcFrameId: AnyFrameId,
     dstTime: Time,
     srcTime: Time,
     maxDelta?: Duration,

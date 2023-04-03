@@ -28,6 +28,12 @@ const tempTransform = Transform.Identity();
 const tempMatrix = mat4Identity();
 const temp2Matrix = mat4Identity();
 
+const FALLBACK_FRAME_ID = Symbol("FALLBACK_FRAME_ID");
+export type FallbackFrameId = typeof FALLBACK_FRAME_ID;
+
+export type UserFrameId = string;
+export type AnyFrameId = UserFrameId | FallbackFrameId;
+
 /**
  * CoordinateFrame is a named 3D coordinate frame with an optional parent frame
  * and a history of transforms from this frame to its parent. The parent/child
@@ -35,8 +41,10 @@ const temp2Matrix = mat4Identity();
  * coordinate frame to another while interpolating over time.
  */
 // ts-prune-ignore-next
-export class CoordinateFrame {
-  public readonly id: string;
+export class CoordinateFrame<ID extends AnyFrameId = UserFrameId> {
+  public static readonly FALLBACK_FRAME_ID: FallbackFrameId = FALLBACK_FRAME_ID;
+
+  public readonly id: ID;
   public maxStorageTime: Duration;
   public maxCapacity: number;
   // The percentage of maxCapacity that can be exceeded before overfilled frames in history are cleared
@@ -45,25 +53,35 @@ export class CoordinateFrame {
   public offsetPosition: vec3 | undefined;
   public offsetEulerDegrees: vec3 | undefined;
 
-  private _parent?: CoordinateFrame;
+  private _parent?: CoordinateFrame<UserFrameId>;
   private _transforms: ArrayMap<Time, Transform>;
 
   public constructor(
-    id: string,
-    parent: CoordinateFrame | undefined,
+    id: ID,
+    parent: CoordinateFrame<UserFrameId> | undefined, // fallback frame not allowed as parent
     maxStorageTime: Duration,
     maxCapacity: number,
     capacityOverfillPercentage = 0.1,
   ) {
+    if (parent) {
+      this._parent = parent;
+    }
     this.id = id;
     this.maxStorageTime = maxStorageTime;
     this.maxCapacity = maxCapacity;
     this.capacityOverfillPercentage = capacityOverfillPercentage;
-    this._parent = parent;
     this._transforms = new ArrayMap<Time, Transform>();
   }
 
-  public parent(): CoordinateFrame | undefined {
+  public static assertUserFrame(
+    frame: CoordinateFrame<AnyFrameId>,
+  ): asserts frame is CoordinateFrame<UserFrameId> {
+    if (frame.id === FALLBACK_FRAME_ID) {
+      throw new Error("Expected user frame");
+    }
+  }
+
+  public parent(): CoordinateFrame<UserFrameId> | undefined {
     return this._parent;
   }
 
@@ -71,13 +89,17 @@ export class CoordinateFrame {
    * Returns the top-most frame by walking up each parent frame. If the current
    * frame does not have a parent, the current frame is returned.
    */
-  public root(): CoordinateFrame {
+  public root(): CoordinateFrame<ID> {
+    if (this.id === FALLBACK_FRAME_ID) {
+      return this;
+    }
+    CoordinateFrame.assertUserFrame(this);
     // eslint-disable-next-line @typescript-eslint/no-this-alias
-    let root: CoordinateFrame = this;
+    let root: CoordinateFrame<UserFrameId> = this;
     while (root._parent) {
       root = root._parent;
     }
-    return root;
+    return root as CoordinateFrame<ID>;
   }
 
   /**
@@ -98,7 +120,7 @@ export class CoordinateFrame {
    * Set the parent frame for this frame. If the parent frame is already set to
    * a different frame, the transform history is cleared.
    */
-  public setParent(parent: CoordinateFrame): void {
+  public setParent(parent: CoordinateFrame<UserFrameId>): void {
     if (this._parent && this._parent !== parent) {
       this._transforms.clear();
     }
@@ -111,8 +133,8 @@ export class CoordinateFrame {
    * @param id Frame ID to search for
    * @returns The ancestor frame, or undefined if not found
    */
-  public findAncestor(id: string): CoordinateFrame | undefined {
-    let ancestor: CoordinateFrame | undefined = this._parent;
+  public findAncestor(id: string): CoordinateFrame<UserFrameId> | undefined {
+    let ancestor = this._parent;
     while (ancestor) {
       if (ancestor.id === id) {
         return ancestor;
@@ -267,11 +289,18 @@ export class CoordinateFrame {
   public applyLocal(
     out: Pose,
     input: Readonly<Pose>,
-    srcFrame: CoordinateFrame,
+    srcFrame: CoordinateFrame<AnyFrameId>,
     time: Time,
     maxDelta: Duration = MAX_DURATION,
   ): Pose | undefined {
     // perf-sensitive: function params instead of options object to avoid allocations
+    if (this.id === FALLBACK_FRAME_ID || srcFrame.id === FALLBACK_FRAME_ID) {
+      // Fallback frame will be used as both src and input frame because it is both the render and root/fixed frame
+      // This will result in no transformation being done to the input pose.
+      return out;
+    }
+    CoordinateFrame.assertUserFrame(this);
+    CoordinateFrame.assertUserFrame(srcFrame);
     if (srcFrame === this) {
       // Identity transform
       copyPose(out, input);
@@ -287,9 +316,8 @@ export class CoordinateFrame {
         ? out
         : undefined;
     }
-
     // Check if the two frames share a common ancestor
-    let curSrcFrame: CoordinateFrame | undefined = srcFrame;
+    let curSrcFrame: CoordinateFrame<UserFrameId> | undefined = srcFrame;
     while (curSrcFrame) {
       const commonAncestor = this.findAncestor(curSrcFrame.id);
       if (commonAncestor) {
@@ -330,8 +358,8 @@ export class CoordinateFrame {
   public apply(
     out: Pose,
     input: Readonly<Pose>,
-    rootFrame: CoordinateFrame,
-    srcFrame: CoordinateFrame,
+    rootFrame: CoordinateFrame<AnyFrameId>,
+    srcFrame: CoordinateFrame<AnyFrameId>,
     dstTime: Time,
     srcTime: Time,
     maxDelta: Duration = MAX_DURATION,
@@ -456,7 +484,9 @@ export class CoordinateFrame {
       mat4.multiply(out, tempTransform.matrix(), out);
 
       if (curFrame._parent == undefined) {
-        throw new Error(`Frame "${parentFrame.id}" is not a parent of "${childFrame.id}"`);
+        throw new Error(
+          `Frame "${parentFrame.displayName()}" is not a parent of "${childFrame.displayName()}"`,
+        );
       }
       curFrame = curFrame._parent;
     }
@@ -506,7 +536,10 @@ export class CoordinateFrame {
    * Returns a display-friendly rendition of `frameId`, quoting the id if it is
    * an empty string or starts or ends with whitespace.
    */
-  public static DisplayName(frameId: string): string {
+  public static DisplayName(frameId: AnyFrameId): string {
+    if (frameId === FALLBACK_FRAME_ID) {
+      return "(none)";
+    }
     return frameId === "" || frameId.startsWith(" ") || frameId.endsWith(" ")
       ? `"${frameId}"`
       : frameId;

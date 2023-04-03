@@ -13,6 +13,7 @@ import { BaseUserData, Renderable } from "./Renderable";
 import type { Renderer } from "./Renderer";
 import type { SettingsTreeEntry } from "./SettingsManager";
 import { missingTransformMessage, MISSING_TRANSFORM } from "./renderables/transforms";
+import { AnyFrameId } from "./transforms";
 import { updatePose } from "./updatePose";
 
 export type PartialMessage<T> = DeepPartial<T>;
@@ -158,7 +159,11 @@ export class SceneExtension<
    *   does not move relative to any parent frame. The fixed frame is the root frame of the render
    *   frame.
    */
-  public startFrame(currentTime: bigint, renderFrameId: string, fixedFrameId: string): void {
+  public startFrame(
+    currentTime: bigint,
+    renderFrameId: AnyFrameId,
+    fixedFrameId: AnyFrameId,
+  ): void {
     for (const renderable of this.renderables.values()) {
       const path = renderable.userData.settingsPath;
 
