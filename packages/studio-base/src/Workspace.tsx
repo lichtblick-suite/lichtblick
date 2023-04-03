@@ -417,6 +417,8 @@ function WorkspaceContent(props: WorkspaceProps): JSX.Element {
               variant: "error",
             });
           }
+        } else {
+          otherFiles.push(file);
         }
       }
 
