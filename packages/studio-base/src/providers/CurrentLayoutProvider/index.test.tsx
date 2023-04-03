@@ -141,7 +141,14 @@ describe("CurrentLayoutProvider", () => {
     expect(all.map((item) => (item instanceof Error ? undefined : item.layoutState))).toEqual([
       { selectedLayout: undefined },
       { selectedLayout: { loading: true, id: "example", data: undefined } },
-      { selectedLayout: { loading: false, id: "example", data: expectedState } },
+      {
+        selectedLayout: {
+          loading: false,
+          id: "example",
+          data: expectedState,
+          name: "Example layout",
+        },
+      },
     ]);
     (console.warn as jest.Mock).mockClear();
   });
@@ -187,9 +194,23 @@ describe("CurrentLayoutProvider", () => {
     expect(all.map((item) => (item instanceof Error ? undefined : item.layoutState))).toEqual([
       { selectedLayout: undefined },
       { selectedLayout: { loading: true, id: "example", data: undefined } },
-      { selectedLayout: { loading: false, id: "example", data: TEST_LAYOUT } },
+      {
+        selectedLayout: {
+          loading: false,
+          id: "example",
+          data: TEST_LAYOUT,
+          name: "Example layout",
+        },
+      },
       { selectedLayout: { loading: true, id: "example2", data: undefined } },
-      { selectedLayout: { loading: false, id: "example2", data: newLayout } },
+      {
+        selectedLayout: {
+          loading: false,
+          id: "example2",
+          data: newLayout,
+          name: "Example layout 2",
+        },
+      },
     ]);
     (console.warn as jest.Mock).mockClear();
   });
@@ -228,13 +249,13 @@ describe("CurrentLayoutProvider", () => {
     };
 
     expect(mockLayoutManager.updateLayout.mock.calls).toEqual([
-      [{ id: "example", data: newState }],
+      [{ id: "example", data: newState, name: "Test layout" }],
     ]);
     expect(all.map((item) => (item instanceof Error ? undefined : item.layoutState))).toEqual([
       { selectedLayout: undefined },
       { selectedLayout: { loading: true, id: "example", data: undefined } },
-      { selectedLayout: { loading: false, id: "example", data: TEST_LAYOUT } },
-      { selectedLayout: { loading: false, id: "example", data: newState } },
+      { selectedLayout: { loading: false, id: "example", data: TEST_LAYOUT, name: "Test layout" } },
+      { selectedLayout: { loading: false, id: "example", data: newState, name: "Test layout" } },
     ]);
     (console.warn as jest.Mock).mockClear();
   });
