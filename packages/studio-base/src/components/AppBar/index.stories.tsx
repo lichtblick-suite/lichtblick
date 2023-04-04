@@ -30,8 +30,6 @@ const actions = {
   onCloseWindow: action("onCloseWindow"),
   prefsDialogOpen: false,
   setPrefsDialogOpen: action("setPrefsDialogOpen"),
-  layoutMenuOpen: false,
-  setLayoutMenuOpen: action("setLayoutMenuOpen"),
 };
 
 export function Default(): JSX.Element {

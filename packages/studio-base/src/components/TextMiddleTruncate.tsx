@@ -18,7 +18,6 @@ const DEFAULT_END_TEXT_LENGTH = 16;
 
 const useStyles = makeStyles()(() => ({
   root: {
-    alignSelf: "start",
     display: "flex",
     justifyContent: "flex-start",
     overflow: "hidden",
