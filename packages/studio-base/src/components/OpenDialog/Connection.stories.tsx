@@ -69,6 +69,11 @@ export const Light = (): JSX.Element => (
 Light.storyName = "Default (light)";
 Light.parameters = { colorScheme: "light" };
 
+export const LightChinese = Object.assign(Light.bind(undefined), {
+  storyName: "Default Chinese",
+  parameters: { forceLanguage: "zh" },
+});
+
 export const Dark = (): JSX.Element => (
   <PlayerSelectionContext.Provider value={playerSelection}>
     <OpenDialog {...defaultProps} />

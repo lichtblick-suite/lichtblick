@@ -2,6 +2,7 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
+import { t } from "i18next";
 import { set } from "lodash";
 
 import { SettingsTreeAction } from "@foxglove/studio";
@@ -33,22 +34,22 @@ export class SceneSettings extends SceneExtension {
       {
         path: ["scene"],
         node: {
-          label: "Scene",
-          actions: [{ type: "action", id: "reset-scene", label: "Reset" }],
+          label: t("threeDee:scene"),
+          actions: [{ type: "action", id: "reset-scene", label: t("threeDee:reset") }],
           fields: {
             enableStats: {
-              label: "Render stats",
+              label: t("threeDee:renderStats"),
               input: "boolean",
               value: config.scene.enableStats,
             },
             backgroundColor: {
-              label: "Background",
+              label: t("threeDee:background"),
               input: "rgb",
               value: config.scene.backgroundColor,
             },
             labelScaleFactor: {
-              label: "Label scale",
-              help: "Scale factor to apply to all labels",
+              label: t("threeDee:labelScale"),
+              help: t("threeDee:labelScaleHelp"),
               input: "number",
               min: 0,
               step: 0.1,
@@ -57,29 +58,29 @@ export class SceneSettings extends SceneExtension {
               placeholder: String(DEFAULT_LABEL_SCALE_FACTOR),
             },
             ignoreColladaUpAxis: {
-              label: "Ignore COLLADA <up_axis>",
-              help: "Match the behavior of rviz by ignoring the <up_axis> tag in COLLADA files",
+              label: t("threeDee:ignoreColladaUpAxis"),
+              help: t("threeDee:ignoreColladaUpAxisHelp"),
               input: "boolean",
               value: config.scene.ignoreColladaUpAxis,
               error:
                 (config.scene.ignoreColladaUpAxis ?? false) !==
                 this.renderer.modelCache.options.ignoreColladaUpAxis
-                  ? "This setting requires a restart to take effect"
+                  ? t("threeDee:takeEffectAfterReboot")
                   : undefined,
             },
             meshUpAxis: {
-              label: "Mesh up axis",
-              help: "The direction to use as “up” when loading meshes without orientation info (STL and OBJ)",
+              label: t("threeDee:meshUpAxis"),
+              help: t("threeDee:meshUpAxisHelp"),
               input: "select",
               value: config.scene.meshUpAxis ?? DEFAULT_MESH_UP_AXIS,
               options: [
-                { label: "Y-up", value: "y_up" },
-                { label: "Z-up", value: "z_up" },
+                { label: t("threeDee:YUp"), value: "y_up" },
+                { label: t("threeDee:ZUp"), value: "z_up" },
               ],
               error:
                 (config.scene.meshUpAxis ?? DEFAULT_MESH_UP_AXIS) !==
                 this.renderer.modelCache.options.meshUpAxis
-                  ? "This setting requires a restart to take effect"
+                  ? t("threeDee:takeEffectAfterReboot")
                   : undefined,
             },
           },

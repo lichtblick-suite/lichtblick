@@ -2,10 +2,12 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
+import { TFunction } from "i18next";
 import produce from "immer";
 import { isEqual, isNumber, set } from "lodash";
 import memoizeWeak from "memoize-weak";
 import { useCallback, useEffect } from "react";
+import { useTranslation } from "react-i18next";
 
 import { SettingsTreeAction, SettingsTreeNode, SettingsTreeNodes } from "@foxglove/studio";
 import { PlotPath } from "@foxglove/studio-base/panels/Plot/internalTypes";
@@ -15,124 +17,128 @@ import { lineColors } from "@foxglove/studio-base/util/plotColors";
 
 import { plotableRosTypes, PlotConfig, plotPathDisplayName } from "./types";
 
-const makeSeriesNode = memoizeWeak((path: PlotPath, index: number): SettingsTreeNode => {
-  return {
-    actions: [
-      {
-        type: "action",
-        id: "delete-series",
-        label: "Delete series",
-        display: "inline",
-        icon: "Clear",
+const makeSeriesNode = memoizeWeak(
+  (path: PlotPath, index: number, t: TFunction<"plot">): SettingsTreeNode => {
+    return {
+      actions: [
+        {
+          type: "action",
+          id: "delete-series",
+          label: t("deleteSeries"),
+          display: "inline",
+          icon: "Clear",
+        },
+      ],
+      label: plotPathDisplayName(path, index),
+      visible: path.enabled,
+      fields: {
+        value: {
+          label: t("messagePath"),
+          input: "messagepath",
+          value: path.value,
+          validTypes: plotableRosTypes,
+        },
+        label: {
+          input: "string",
+          label: t("label"),
+          value: path.label,
+        },
+        color: {
+          input: "rgb",
+          label: t("color"),
+          value: path.color ?? lineColors[index % lineColors.length],
+        },
+        timestampMethod: {
+          input: "select",
+          label: t("timestamp"),
+          value: path.timestampMethod,
+          options: [
+            { label: t("receiveTime"), value: "receiveTime" },
+            { label: t("headerStamp"), value: "headerStamp" },
+          ],
+        },
       },
-    ],
-    label: plotPathDisplayName(path, index),
-    visible: path.enabled,
-    fields: {
-      value: {
-        label: "Message path",
-        input: "messagepath",
-        value: path.value,
-        validTypes: plotableRosTypes,
-      },
-      label: {
-        input: "string",
-        label: "Label",
-        value: path.label,
-      },
-      color: {
-        input: "rgb",
-        label: "Color",
-        value: path.color ?? lineColors[index % lineColors.length],
-      },
-      timestampMethod: {
-        input: "select",
-        label: "Timestamp",
-        value: path.timestampMethod,
-        options: [
-          { label: "Receive Time", value: "receiveTime" },
-          { label: "Header Stamp", value: "headerStamp" },
-        ],
-      },
-    },
-  };
-});
+    };
+  },
+);
 
-const makeRootSeriesNode = memoizeWeak((paths: PlotPath[]): SettingsTreeNode => {
-  const children = Object.fromEntries(
-    paths.map((path, index) => [`${index}`, makeSeriesNode(path, index)]),
-  );
-  return {
-    label: "Series",
-    children,
-    actions: [
-      {
-        type: "action",
-        id: "add-series",
-        label: "Add series",
-        display: "inline",
-        icon: "Addchart",
-      },
-    ],
-  };
-});
+const makeRootSeriesNode = memoizeWeak(
+  (paths: PlotPath[], t: TFunction<"plot">): SettingsTreeNode => {
+    const children = Object.fromEntries(
+      paths.map((path, index) => [`${index}`, makeSeriesNode(path, index, t)]),
+    );
+    return {
+      label: t("series"),
+      children,
+      actions: [
+        {
+          type: "action",
+          id: "add-series",
+          label: t("addSeries"),
+          display: "inline",
+          icon: "Addchart",
+        },
+      ],
+    };
+  },
+);
 
-function buildSettingsTree(config: PlotConfig): SettingsTreeNodes {
+function buildSettingsTree(config: PlotConfig, t: TFunction<"plot">): SettingsTreeNodes {
   const maxYError =
     isNumber(config.minYValue) && isNumber(config.maxYValue) && config.minYValue >= config.maxYValue
-      ? "Y max must be greater than Y min."
+      ? t("maxYError")
       : undefined;
 
   const maxXError =
     isNumber(config.minXValue) && isNumber(config.maxXValue) && config.minXValue >= config.maxXValue
-      ? "X max must be greater than X min."
+      ? t("maxXError")
       : undefined;
 
   return {
     general: {
-      label: "General",
+      label: t("general"),
       fields: {
-        isSynced: { label: "Sync with other plots", input: "boolean", value: config.isSynced },
+        isSynced: { label: t("syncWithOtherPlots"), input: "boolean", value: config.isSynced },
       },
     },
     legend: {
-      label: "Legend",
+      label: t("legend"),
       fields: {
         legendDisplay: {
-          label: "Position",
+          label: t("position"),
           input: "select",
           value: config.legendDisplay,
           options: [
-            { value: "floating", label: "Floating" },
-            { value: "left", label: "Left" },
-            { value: "top", label: "Top" },
-            { value: "none", label: "Hidden" },
+            { value: "floating", label: t("floating") },
+            { value: "left", label: t("left") },
+            { value: "top", label: t("top") },
+            { value: "none", label: t("hidden") },
           ],
         },
         showPlotValuesInLegend: {
-          label: "Show values",
+          label: t("showValues"),
           input: "boolean",
           value: config.showPlotValuesInLegend,
         },
       },
     },
     yAxis: {
-      label: "Y Axis",
+      label: t("yAxis"),
       defaultExpansionState: "collapsed",
       fields: {
         showYAxisLabels: {
-          label: "Show labels",
+          label: t("showLabels"),
           input: "boolean",
           value: config.showYAxisLabels,
         },
         minYValue: {
-          label: "Min",
+          label: t("min"),
           input: "number",
           value: config.minYValue != undefined ? Number(config.minYValue) : undefined,
           placeholder: "auto",
         },
         maxYValue: {
-          label: "Max",
+          label: t("max"),
           input: "number",
           error: maxYError,
           value: config.maxYValue != undefined ? Number(config.maxYValue) : undefined,
@@ -141,56 +147,56 @@ function buildSettingsTree(config: PlotConfig): SettingsTreeNodes {
       },
     },
     xAxis: {
-      label: "X Axis",
+      label: t("xAxis"),
       defaultExpansionState: "collapsed",
       fields: {
         xAxisVal: {
-          label: "Value",
+          label: t("value"),
           input: "select",
           value: config.xAxisVal,
           options: [
-            { label: "Timestamp", value: "timestamp" },
-            { label: "Index", value: "index" },
-            { label: "Path (current)", value: "currentCustom" },
-            { label: "Path (accumulated)", value: "custom" },
+            { label: t("timestamp"), value: "timestamp" },
+            { label: t("index"), value: "index" },
+            { label: t("currentPath"), value: "currentCustom" },
+            { label: t("accumulatedPath"), value: "custom" },
           ],
         },
         xAxisPath:
           config.xAxisVal === "currentCustom" || config.xAxisVal === "custom"
             ? {
-                label: "Message path",
+                label: t("messagePath"),
                 input: "messagepath",
                 value: config.xAxisPath?.value ?? "",
                 validTypes: plotableRosTypes,
               }
             : undefined,
         showXAxisLabels: {
-          label: "Show labels",
+          label: t("showLabels"),
           input: "boolean",
           value: config.showXAxisLabels,
         },
         minXValue: {
-          label: "Min",
+          label: t("min"),
           input: "number",
           value: config.minXValue != undefined ? Number(config.minXValue) : undefined,
           placeholder: "auto",
         },
         maxXValue: {
-          label: "Max",
+          label: t("max"),
           input: "number",
           error: maxXError,
           value: config.maxXValue != undefined ? Number(config.maxXValue) : undefined,
           placeholder: "auto",
         },
         followingViewWidth: {
-          label: "Range (seconds)",
+          label: t("secondsRange"),
           input: "number",
           placeholder: "auto",
           value: config.followingViewWidth,
         },
       },
     },
-    paths: makeRootSeriesNode(config.paths),
+    paths: makeRootSeriesNode(config.paths, t),
   };
 }
 
@@ -200,6 +206,7 @@ export function usePlotPanelSettings(
   focusedPath?: readonly string[],
 ): void {
   const updatePanelSettingsTree = usePanelSettingsTreeUpdate();
+  const { t } = useTranslation("plot");
 
   const actionHandler = useCallback(
     (action: SettingsTreeAction) => {
@@ -259,7 +266,7 @@ export function usePlotPanelSettings(
     updatePanelSettingsTree({
       actionHandler,
       focusedPath,
-      nodes: buildSettingsTree(config),
+      nodes: buildSettingsTree(config, t),
     });
-  }, [actionHandler, config, focusedPath, updatePanelSettingsTree]);
+  }, [actionHandler, config, focusedPath, updatePanelSettingsTree, t]);
 }

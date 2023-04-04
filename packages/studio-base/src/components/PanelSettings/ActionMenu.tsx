@@ -4,6 +4,7 @@
 
 import MoreVertIcon from "@mui/icons-material/MoreVert";
 import { IconButton, Menu, MenuItem } from "@mui/material";
+import { useTranslation } from "react-i18next";
 
 export function ActionMenu({
   allowShare,
@@ -15,6 +16,7 @@ export function ActionMenu({
   onShare: () => void;
 }): JSX.Element {
   const [anchorEl, setAnchorEl] = React.useState<undefined | HTMLElement>();
+  const { t } = useTranslation("panelSettings");
   const open = Boolean(anchorEl);
   const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
     setAnchorEl(event.currentTarget);
@@ -50,7 +52,7 @@ export function ActionMenu({
             handleClose();
           }}
         >
-          Import/export settings...
+          {t("importOrExportSettingsWithEllipsis")}
         </MenuItem>
         <MenuItem
           onClick={() => {
@@ -58,7 +60,7 @@ export function ActionMenu({
             handleClose();
           }}
         >
-          Reset to defaults
+          {t("resetToDefaults")}
         </MenuItem>
       </Menu>
     </div>

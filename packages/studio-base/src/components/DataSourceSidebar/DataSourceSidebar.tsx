@@ -12,6 +12,7 @@ import {
   CircularProgress,
 } from "@mui/material";
 import { useState, useEffect, useMemo } from "react";
+import { useTranslation } from "react-i18next";
 import { makeStyles } from "tss-react/mui";
 
 import { AppSetting } from "@foxglove/studio-base/AppSetting";
@@ -86,6 +87,7 @@ export default function DataSourceSidebar(props: Props): JSX.Element {
   const selectedEventId = useEvents(selectSelectedEventId);
   const [activeTab, setActiveTab] = useState<DataSourceSidebarTab>("topics");
   const { classes } = useStyles();
+  const { t } = useTranslation("dataSourceInfo");
 
   const [enableNewTopNav = false] = useAppConfigurationValue<boolean>(AppSetting.ENABLE_NEW_TOPNAV);
 
@@ -112,7 +114,7 @@ export default function DataSourceSidebar(props: Props): JSX.Element {
       disablePadding
       disableToolbar={disableToolbar}
       overflow="auto"
-      title="Data source"
+      title={t("dataSource")}
       trailingItems={[
         isLoading && (
           <Stack key="loading" alignItems="center" justifyContent="center" padding={1}>

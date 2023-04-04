@@ -35,6 +35,9 @@ const actions = {
 export function Default(): JSX.Element {
   return <AppBar {...actions} />;
 }
+export const DefaultChinese = Object.assign(Default.bind(undefined), {
+  parameters: { forceLanguage: "zh" },
+});
 
 export function CustomWindowControls(): JSX.Element {
   return <AppBar showCustomWindowControls {...actions} />;
@@ -114,6 +117,9 @@ export function SignInStates(): JSX.Element {
     </div>
   );
 }
+export const SignInStatesChinese = Object.assign(SignInStates.bind(undefined), {
+  parameters: { forceLanguage: "zh" },
+});
 
 export function PlayerStates(): JSX.Element {
   return (
@@ -170,6 +176,9 @@ export function PlayerStates(): JSX.Element {
   );
 }
 PlayerStates.parameters = { colorScheme: "light" };
+export const PlayerStatesChinese = Object.assign(PlayerStates.bind(undefined), {
+  parameters: { olorScheme: "light", forceLanguage: "zh" },
+});
 
 export function DataSources(): JSX.Element {
   return (
@@ -232,3 +241,6 @@ export function DataSources(): JSX.Element {
   );
 }
 DataSources.parameters = { colorScheme: "light" };
+export const DataSourcesChinese = Object.assign(DataSources.bind(undefined), {
+  parameters: { colorScheme: "light", forceLanguage: "zh" },
+});

@@ -4,8 +4,6 @@
 
 import { TypeOptions } from "i18next";
 
-// Generic global translation
-export const general: TypeOptions["resources"]["general"] = {
-  foxglove: "Foxglove",
-  learnMore: "了解更多",
+export const appBar: TypeOptions["resources"]["appBar"] = {
+  openDataSource: "打开数据源……",
 };

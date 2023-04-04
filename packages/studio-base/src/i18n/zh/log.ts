@@ -4,8 +4,7 @@
 
 import { TypeOptions } from "i18next";
 
-// Generic global translation
-export const general: TypeOptions["resources"]["general"] = {
-  foxglove: "Foxglove",
-  learnMore: "了解更多",
+export const log: TypeOptions["resources"]["log"] = {
+  topicError: "话题 {{topic}} 不可用",
+  topic: "话题",
 };

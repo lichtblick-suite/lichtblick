@@ -21,26 +21,14 @@ storiesOf("components/ShareJsonModal", module)
   .add(
     "standard",
     () => (
-      <ShareJsonModal
-        title="Foo"
-        onRequestClose={() => {}}
-        initialValue=""
-        onChange={() => {}}
-        noun="layout"
-      />
+      <ShareJsonModal title="Foo" onRequestClose={() => {}} initialValue="" onChange={() => {}} />
     ),
     { colorScheme: "dark" },
   )
   .add(
     "standard light",
     () => (
-      <ShareJsonModal
-        title="Foo"
-        onRequestClose={() => {}}
-        initialValue=""
-        onChange={() => {}}
-        noun="layout"
-      />
+      <ShareJsonModal title="Foo" onRequestClose={() => {}} initialValue="" onChange={() => {}} />
     ),
     { colorScheme: "light" },
   )
@@ -52,7 +40,6 @@ storiesOf("components/ShareJsonModal", module)
         onRequestClose={() => {}}
         initialValue={{ foo: "bar", baz: "qux" }}
         onChange={() => {}}
-        noun="layout"
       />
     ),
     { colorScheme: "dark" },
@@ -74,7 +61,6 @@ storiesOf("components/ShareJsonModal", module)
             onRequestClose={() => {}}
             initialValue=""
             onChange={() => {}}
-            noun="layout"
           />
         </div>
       );

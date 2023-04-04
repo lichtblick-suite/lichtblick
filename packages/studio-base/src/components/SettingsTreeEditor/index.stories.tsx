@@ -884,6 +884,11 @@ Basics.play = () => {
     .forEach((node) => fireEvent.click(node));
 };
 
+export const BasicsChinese = Object.assign(Basics.bind(undefined), {
+  play: Basics.play,
+  parameters: { forceLanguage: "zh" },
+});
+
 export function DisabledFields(): JSX.Element {
   return <Wrapper nodes={DisabledSettings} />;
 }

@@ -27,5 +27,8 @@ export async function initI18n(): Promise<void> {
       },
       fallbackLng: "en",
       defaultNS,
+      interpolation: {
+        escapeValue: false, // not needed for react as it escapes by default
+      },
     });
 }

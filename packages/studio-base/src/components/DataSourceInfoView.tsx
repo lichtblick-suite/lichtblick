@@ -4,6 +4,7 @@
 
 import { Skeleton, Typography } from "@mui/material";
 import { MutableRefObject, useEffect, useRef } from "react";
+import { useTranslation } from "react-i18next";
 import { makeStyles } from "tss-react/mui";
 
 import { Time } from "@foxglove/rostime";
@@ -48,6 +49,7 @@ function DataSourceInfoContent(props: {
 }): JSX.Element {
   const { durationRef, endTimeRef, playerName, playerPresence, playerSourceId, startTime } = props;
   const { classes } = useStyles();
+  const { t } = useTranslation("dataSourceInfo");
 
   const isLiveConnection =
     playerSourceId != undefined
@@ -58,14 +60,14 @@ function DataSourceInfoContent(props: {
     <Stack gap={1.5}>
       <Stack>
         <Typography className={classes.overline} display="block" variant="overline">
-          Current source
+          {t("currentSource")}
         </Typography>
         {playerPresence === PlayerPresence.INITIALIZING ? (
           <Typography variant="inherit">
             <Skeleton animation="wave" width="40%" />
           </Typography>
         ) : playerPresence === PlayerPresence.RECONNECTING ? (
-          <Typography variant="inherit">Waiting for connection…</Typography>
+          <Typography variant="inherit">{t("waitingForConnection")}</Typography>
         ) : playerName ? (
           <Typography variant="inherit" component="span">
             <MultilineMiddleTruncate text={playerName} />
@@ -79,7 +81,7 @@ function DataSourceInfoContent(props: {
 
       <Stack>
         <Typography className={classes.overline} variant="overline">
-          Start time
+          {t("startTime")}
         </Typography>
         {playerPresence === PlayerPresence.INITIALIZING ? (
           <Skeleton animation="wave" width="50%" />
@@ -95,7 +97,7 @@ function DataSourceInfoContent(props: {
       {!isLiveConnection && (
         <Stack>
           <Typography className={classes.overline} variant="overline">
-            End time
+            {t("endTime")}
           </Typography>
           {playerPresence === PlayerPresence.INITIALIZING ? (
             <Skeleton animation="wave" width="50%" />
@@ -109,7 +111,7 @@ function DataSourceInfoContent(props: {
 
       <Stack>
         <Typography className={classes.overline} variant="overline">
-          Duration
+          {t("duration")}
         </Typography>
         {playerPresence === PlayerPresence.INITIALIZING ? (
           <Skeleton animation="wave" width={100} />

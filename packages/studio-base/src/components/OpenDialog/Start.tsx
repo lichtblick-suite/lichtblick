@@ -4,6 +4,7 @@
 
 import { Button, Link, List, ListItem, ListItemButton, SvgIcon, Typography } from "@mui/material";
 import { ReactNode, useMemo } from "react";
+import { useTranslation } from "react-i18next";
 import tinycolor from "tinycolor2";
 import { makeStyles } from "tss-react/mui";
 
@@ -176,12 +177,13 @@ function SidebarItems(props: { onSelectView: (newValue: OpenDialogViews) => void
   const currentUserType = useCurrentUserType();
   const analytics = useAnalytics();
   const { classes } = useStyles();
+  const { t } = useTranslation("openDialog");
 
   const { freeUser, teamOrEnterpriseUser } = useMemo(() => {
     const demoItem = {
       id: "new",
-      title: "New to Foxglove Studio?",
-      text: "Start by exploring a sample dataset or checking out our documentation.",
+      title: t("newToFoxgloveStudio"),
+      text: t("newToFoxgloveStudioDescription"),
       actions: (
         <>
           <Button
@@ -196,7 +198,7 @@ function SidebarItems(props: { onSelectView: (newValue: OpenDialogViews) => void
             className={classes.button}
             variant="outlined"
           >
-            Explore sample data
+            {t("exploreSampleData")}
           </Button>
           <Button
             href="https://foxglove.dev/docs/studio/connection/data-sources"
@@ -209,7 +211,7 @@ function SidebarItems(props: { onSelectView: (newValue: OpenDialogViews) => void
               });
             }}
           >
-            View our docs
+            {t("viewOurDocs")}
           </Button>
         </>
       ),
@@ -220,8 +222,8 @@ function SidebarItems(props: { onSelectView: (newValue: OpenDialogViews) => void
         demoItem,
         {
           id: "join-community",
-          title: "Join our community",
-          text: "Join us on Slack or GitHub to get help, make feature requests, and report bugs.",
+          title: t("joinOurCommunity"),
+          text: t("joinOurCommunityDescription"),
           actions: (
             <>
               <Button
@@ -236,7 +238,7 @@ function SidebarItems(props: { onSelectView: (newValue: OpenDialogViews) => void
                   });
                 }}
               >
-                Join our Slack
+                {t("joinOurSlack")}
               </Button>
               <Button
                 href="https://github.com/foxglove/studio/issues/new/choose"
@@ -249,15 +251,15 @@ function SidebarItems(props: { onSelectView: (newValue: OpenDialogViews) => void
                   });
                 }}
               >
-                Open a GitHub issue
+                {t("openAGitHubIssue")}
               </Button>
             </>
           ),
         },
         {
           id: "need-help",
-          title: "Need help?",
-          text: "View our documentation, or check out the tutorials on the Foxglove blog.",
+          title: t("needHelp"),
+          text: t("needHelpDescription"),
           actions: (
             <>
               <Button
@@ -272,7 +274,7 @@ function SidebarItems(props: { onSelectView: (newValue: OpenDialogViews) => void
                   });
                 }}
               >
-                View our docs
+                {t("viewOurDocs")}
               </Button>
               <Button
                 href="https://foxglove.dev/tutorials"
@@ -285,14 +287,14 @@ function SidebarItems(props: { onSelectView: (newValue: OpenDialogViews) => void
                   });
                 }}
               >
-                See tutorials
+                {t("seeTutorials")}
               </Button>
             </>
           ),
         },
       ],
     };
-  }, [analytics, classes.button, currentUserType, onSelectView]);
+  }, [analytics, classes.button, currentUserType, onSelectView, t]);
 
   const sidebarItems: SidebarItem[] = useMemo(() => {
     switch (currentUserType) {
@@ -301,17 +303,12 @@ function SidebarItems(props: { onSelectView: (newValue: OpenDialogViews) => void
           ...freeUser,
           {
             id: "collaborate",
-            title: "Accelerate development with Foxglove Data Platform",
+            title: t("collaborateTitle"),
             text: (
               <ul className={classes.featureList}>
-                <li>Securely store petabytes of ROS or custom data</li>
-                <li>
-                  Use a convenient web interface to tag, search, and retrieve data at lightning
-                  speed
-                </li>
-                <li>
-                  Share data files, visualization layouts, and custom extensions with teammates
-                </li>
+                <li>{t("secureStorageOfData")}</li>
+                <li>{t("convenientWebInterface")}</li>
+                <li>{t("canBeShared")}</li>
               </ul>
             ),
             actions: signIn ? (
@@ -327,7 +324,7 @@ function SidebarItems(props: { onSelectView: (newValue: OpenDialogViews) => void
                     signIn();
                   }}
                 >
-                  Create a free account
+                  {t("createAFreeAccount")}
                 </Button>
                 <Button
                   className={classes.button}
@@ -339,7 +336,7 @@ function SidebarItems(props: { onSelectView: (newValue: OpenDialogViews) => void
                     signIn();
                   }}
                 >
-                  Sign in
+                  {t("signIn")}
                 </Button>
               </>
             ) : (
@@ -355,7 +352,7 @@ function SidebarItems(props: { onSelectView: (newValue: OpenDialogViews) => void
                   });
                 }}
               >
-                Learn more
+                {t("learnMore")}
               </Button>
             ),
           },
@@ -364,8 +361,8 @@ function SidebarItems(props: { onSelectView: (newValue: OpenDialogViews) => void
         return [
           {
             id: "start-collaborating",
-            title: "Start collaborating with your Foxglove organization",
-            text: "Make the most of your Foxglove account – whether you want to dive deep on your data or share tools with your teammates.",
+            title: t("startCollaborating"),
+            text: t("startCollaboratingDescription"),
             actions: (
               <>
                 <Button
@@ -380,14 +377,14 @@ function SidebarItems(props: { onSelectView: (newValue: OpenDialogViews) => void
                     });
                   }}
                 >
-                  Upload to Data Platform
+                  {t("uploadToDataPlatform")}
                 </Button>
                 <Button
                   href="https://foxglove.dev/docs/studio/layouts#team-layouts"
                   target="_blank"
                   className={classes.button}
                 >
-                  Share layouts
+                  {t("shareLayouts")}
                 </Button>
               </>
             ),
@@ -407,6 +404,7 @@ function SidebarItems(props: { onSelectView: (newValue: OpenDialogViews) => void
     freeUser,
     signIn,
     teamOrEnterpriseUser,
+    t,
   ]);
 
   return (
@@ -435,13 +433,14 @@ export default function Start(props: IStartProps): JSX.Element {
   const { recentSources, selectRecent } = usePlayerSelection();
   const { classes } = useStyles();
   const analytics = useAnalytics();
+  const { t } = useTranslation("openDialog");
 
   const startItems = useMemo(() => {
     return [
       {
         key: "open-local-file",
-        text: "Open local file",
-        secondaryText: "Visualize data directly from your local filesystem.",
+        text: t("openLocalFile"),
+        secondaryText: t("openLocalFileDescription"),
         icon: (
           <SvgIcon fontSize="large" color="primary" viewBox="0 0 2048 2048">
             <path d="M1955 1533l-163-162v677h-128v-677l-163 162-90-90 317-317 317 317-90 90zM256 1920h1280v128H128V0h1115l549 549v475h-128V640h-512V128H256v1792zM1280 512h293l-293-293v293z" />
@@ -454,8 +453,8 @@ export default function Start(props: IStartProps): JSX.Element {
       },
       {
         key: "open-url",
-        text: "Upload and share data",
-        secondaryText: "Use Foxglove Data Platform to share data with your team.",
+        text: t("openUrl"),
+        secondaryText: t("openUrlDescription"),
         icon: (
           <SvgIcon fontSize="large" color="primary" viewBox="0 0 2048 2048">
             <path d="M256 1920h512v128H128V0h1115l549 549v91h-640V128H256v1792zM1280 512h293l-293-293v293zm128 256q133 0 249 50t204 137 137 203 50 250q0 133-50 249t-137 204-203 137-250 50q-133 0-249-50t-204-137-137-203-50-250q0-133 50-249t137-204 203-137 250-50zm0 1152q21 0 37-14t28-38 21-53 15-57 9-53 6-41h-230q2 14 5 39t10 53 16 58 21 52 27 39 35 15zm126-384q1-32 1-64t1-64q0-63-3-128h-250q-3 65-3 128 0 64 3 128h251zm-638-128q0 32 4 64t12 64h243q-3-64-3-128 0-63 3-128H912q-8 32-12 64t-4 64zm512-512q-19 0-34 15t-27 39-21 53-15 57-10 53-6 39h225q-2-13-6-37t-11-53-16-58-20-54-27-39-32-15zm253 384q3 65 3 128v64q0 32-2 64h242q8-32 12-64t4-64q0-32-4-64t-12-64h-243zm190-128q-43-75-108-131t-145-88q21 52 32 107t19 112h202zm-637-218q-78 32-142 88t-107 130h200q13-111 49-218zm-249 730q42 73 106 129t142 88q-21-51-31-106t-17-111H965zm642 215q77-32 139-87t105-128h-198q-5 51-15 109t-31 106z" />
@@ -469,8 +468,8 @@ export default function Start(props: IStartProps): JSX.Element {
       },
       {
         key: "open-connection",
-        text: "Open connection",
-        secondaryText: "Connect to a live robot or server.",
+        text: t("openConnection"),
+        secondaryText: t("openConnectionDescription"),
         icon: (
           <SvgIcon fontSize="large" color="primary" viewBox="0 0 2048 2048">
             <path d="M1408 256h640v640h-640V640h-120l-449 896H640v256H0v-640h640v256h120l449-896h199V256zM512 1664v-384H128v384h384zm1408-896V384h-384v384h384z" />
@@ -482,7 +481,7 @@ export default function Start(props: IStartProps): JSX.Element {
         },
       },
     ];
-  }, [analytics, onSelectView]);
+  }, [analytics, onSelectView, t]);
 
   return (
     <Stack className={classes.grid}>
@@ -493,7 +492,7 @@ export default function Start(props: IStartProps): JSX.Element {
         <Stack gap={4}>
           <Stack gap={1}>
             <Typography variant="h5" gutterBottom>
-              Open data source
+              {t("openDataSource")}
             </Typography>
             {startItems.map((item) => (
               <DataSourceOption
@@ -510,7 +509,7 @@ export default function Start(props: IStartProps): JSX.Element {
           {recentSources.length > 0 && (
             <Stack gap={1}>
               <Typography variant="h5" gutterBottom>
-                Recent data sources
+                {t("recentDataSources")}
               </Typography>
               <List disablePadding>
                 {recentSources.slice(0, 5).map((recent) => (

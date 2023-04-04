@@ -2,7 +2,9 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-export const preferences = {
+import { TypeOptions } from "i18next";
+
+export const preferences: TypeOptions["resources"]["preferences"] = {
   preferences: "偏好",
   colorScheme: "配色方案",
   dark: "暗色",
@@ -35,4 +37,11 @@ export const preferences = {
   restartTheAppForChangesToTakeEffect: " 重新启动应用程序以使更改生效。",
   layoutDebugging: "布局调试",
   layoutDebuggingDescription: "显示用于开发和调试布局存储的额外控件。",
+  extensions: "扩展",
+  about: "关于",
+  noExperimentalFeatures: "目前没有实验性的功能。",
+  ros2NativeConnection: "ROS 2 的本地连接",
+  ros2NativeConnectionDescription: "启用已废弃的 ROS 2 本地连接器",
+  newImagePanel: "新图像面板",
+  newImagePanelDescription: "启用实验性图像面板。",
 };

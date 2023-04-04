@@ -2,6 +2,7 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
+import { t } from "i18next";
 import { maxBy } from "lodash";
 
 import Logger from "@foxglove/log";
@@ -72,7 +73,7 @@ export class Grids extends SceneExtension<GridRenderable> {
 
     renderer.addCustomLayerAction({
       layerId: LAYER_ID,
-      label: "Add Grid",
+      label: t("threeDee:addGrid"),
       icon: "Grid",
       handler: this.handleAddGrid,
     });
@@ -112,23 +113,23 @@ export class Grids extends SceneExtension<GridRenderable> {
 
       // prettier-ignore
       const fields: SettingsTreeFields = {
-        frameId: { label: "Frame", input: "select", options: frameIdOptions, value: config.frameId }, // options is extended in `settings.ts:buildTopicNode()`
-        size: { label: "Size", input: "number", min: 0, step: 0.5, precision: PRECISION_DISTANCE, value: config.size, placeholder: String(DEFAULT_SIZE) },
-        divisions: { label: "Divisions", input: "number", min: 1, max: MAX_DIVISIONS, step: 1, precision: 0, value: config.divisions, placeholder: String(DEFAULT_DIVISIONS) },
-        lineWidth: { label: "Line Width", input: "number", min: 0, step: 0.5, precision: 1, value: config.lineWidth, placeholder: String(DEFAULT_LINE_WIDTH) },
-        color: { label: "Color", input: "rgba", value: config.color ?? DEFAULT_COLOR },
-        position: { label: "Position", input: "vec3", labels: ["X", "Y", "Z"], precision: PRECISION_DISTANCE, value: config.position ?? [0, 0, 0] },
-        rotation: { label: "Rotation", input: "vec3", labels: ["R", "P", "Y"], precision: PRECISION_DEGREES, value: config.rotation ?? [0, 0, 0] },
+        frameId: { label: t("threeDee:frame"), input: "select", options: frameIdOptions, value: config.frameId }, // options is extended in `settings.ts:buildTopicNode()`
+        size: { label: t("threeDee:size"), input: "number", min: 0, step: 0.5, precision: PRECISION_DISTANCE, value: config.size, placeholder: String(DEFAULT_SIZE) },
+        divisions: { label: t("threeDee:divisions"), input: "number", min: 1, max: MAX_DIVISIONS, step: 1, precision: 0, value: config.divisions, placeholder: String(DEFAULT_DIVISIONS) },
+        lineWidth: { label: t("threeDee:lineWidth"), input: "number", min: 0, step: 0.5, precision: 1, value: config.lineWidth, placeholder: String(DEFAULT_LINE_WIDTH) },
+        color: { label: t("threeDee:color"), input: "rgba", value: config.color ?? DEFAULT_COLOR },
+        position: { label: t("threeDee:position"), input: "vec3", labels: ["X", "Y", "Z"], precision: PRECISION_DISTANCE, value: config.position ?? [0, 0, 0] },
+        rotation: { label: t("threeDee:rotation"), input: "vec3", labels: ["R", "P", "Y"], precision: PRECISION_DEGREES, value: config.rotation ?? [0, 0, 0] },
       };
 
       entries.push({
         path: ["layers", instanceId],
         node: {
-          label: config.label ?? "Grid",
+          label: config.label ?? t("threeDee:grid"),
           icon: "Grid",
           fields,
           visible: config.visible ?? DEFAULT_SETTINGS.visible,
-          actions: [{ type: "action", id: "delete", label: "Delete" }],
+          actions: [{ type: "action", id: "delete", label: t("threeDee:delete") }],
           order: layerConfig.order,
           handler,
         },

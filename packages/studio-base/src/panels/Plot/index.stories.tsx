@@ -457,10 +457,18 @@ LineGraphWithSettings.parameters = {
 LineGraphWithSettings.storyName = "line graph with settings";
 LineGraphWithSettings.play = async (ctx) => {
   const user = userEvent.setup();
-  const label = await screen.findByText("Y Axis");
+  const label = await screen.findByTestId("settings__nodeHeaderToggle__yAxis");
   await user.click(label);
   await ctx.parameters.storyReady;
 };
+
+export const LineGraphWithSettingsChinese = Object.assign(LineGraphWithSettings.bind(undefined), {
+  play: LineGraphWithSettings.play,
+  parameters: {
+    ...LineGraphWithSettings.parameters,
+    forceLanguage: "zh",
+  },
+});
 
 export const LineGraphWithLegendsHidden: Story = () => {
   const readySignal = useReadySignal({ count: 3 });

@@ -5,6 +5,7 @@
 import { ErrorCircle20Filled, Open16Filled } from "@fluentui/react-icons";
 import { ButtonBase, CircularProgress, IconButton, Tooltip } from "@mui/material";
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import tc from "tinycolor2";
 import { makeStyles } from "tss-react/mui";
 
@@ -99,6 +100,7 @@ export function DataSource({
 }: {
   onSelectDataSourceAction: () => void;
 }): JSX.Element {
+  const { t } = useTranslation("appBar");
   const { classes, cx } = useStyles();
 
   const playerName = useMessagePipeline(selectPlayerName);
@@ -120,7 +122,7 @@ export function DataSource({
   if (playerPresence === PlayerPresence.NOT_PRESENT) {
     return (
       <ButtonBase className={classes.button} color="inherit" onClick={onSelectDataSourceAction}>
-        Open data source…
+        {t("openDataSource")}
       </ButtonBase>
     );
   }

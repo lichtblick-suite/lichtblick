@@ -1,0 +1,36 @@
+// This Source Code Form is subject to the terms of the Mozilla Public
+// License, v2.0. If a copy of the MPL was not distributed with this
+// file, You can obtain one at http://mozilla.org/MPL/2.0/
+
+export const plot = {
+  deleteSeries: "Delete series",
+  messagePath: "Message path",
+  label: "Label",
+  color: "Color",
+  timestamp: "Timestamp",
+  receiveTime: "Receive Time",
+  headerStamp: "Header Stamp",
+  series: "Series",
+  addSeries: "Add series",
+  maxYError: "Y max must be greater than Y min.",
+  maxXError: "X max must be greater than X min.",
+  general: "General",
+  syncWithOtherPlots: "Sync with other plots",
+  legend: "Legend",
+  position: "Position",
+  floating: "Floating",
+  left: "Left",
+  top: "Top",
+  hidden: "Hidden",
+  showValues: "Show values",
+  yAxis: "Y Axis",
+  showLabels: "Show labels",
+  min: "Min",
+  max: "Max",
+  xAxis: "X Axis",
+  value: "Value",
+  index: "Index",
+  currentPath: "Path (current)",
+  accumulatedPath: "Path (accumulated)",
+  secondsRange: "Range (seconds)",
+};

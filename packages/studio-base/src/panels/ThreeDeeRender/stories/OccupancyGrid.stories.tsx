@@ -165,3 +165,8 @@ Occupancy_Grid_Costmap_With_Settings.play = async () => {
   const label = await screen.findByText("/custom");
   await user.click(label);
 };
+
+export const OccupancyGridCostmapWithSettingsChinese = Object.assign(
+  Occupancy_Grid_Costmap_With_Settings.bind(undefined),
+  { play: Occupancy_Grid_Costmap_With_Settings.play, parameters: { forceLanguage: "zh" } },
+);

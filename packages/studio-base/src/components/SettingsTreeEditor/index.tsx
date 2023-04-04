@@ -7,6 +7,7 @@ import SearchIcon from "@mui/icons-material/Search";
 import { IconButton, TextField } from "@mui/material";
 import memoizeWeak from "memoize-weak";
 import { useCallback, useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { DeepReadonly } from "ts-essentials";
 import { makeStyles } from "tss-react/mui";
 
@@ -55,6 +56,7 @@ export default function SettingsTreeEditor({
   const { classes } = useStyles();
   const { actionHandler, focusedPath } = settings;
   const [filterText, setFilterText] = useState<string>("");
+  const { t } = useTranslation("settingsEditor");
 
   const filteredNodes = useMemo(() => {
     if (filterText.length > 0) {
@@ -91,11 +93,11 @@ export default function SettingsTreeEditor({
   const panelTitleField = useMemo<SettingsTreeField>(
     () => ({
       input: "string",
-      label: "Title",
+      label: t("title"),
       placeholder: defaultPanelTitle ?? panelInfo?.title,
       value: customPanelTitle,
     }),
-    [customPanelTitle, defaultPanelTitle, panelInfo?.title],
+    [customPanelTitle, defaultPanelTitle, panelInfo?.title, t],
   );
   const handleTitleChange = useCallback(
     (action: SettingsTreeAction) => {
@@ -120,7 +122,7 @@ export default function SettingsTreeEditor({
             value={filterText}
             className={classes.textField}
             fullWidth
-            placeholder="Seach panel settings…"
+            placeholder={t("searchPanelSettings")}
             InputProps={{
               size: "small",
               startAdornment: (
@@ -131,7 +133,7 @@ export default function SettingsTreeEditor({
               endAdornment: filterText && (
                 <IconButton
                   size="small"
-                  title="Clear search"
+                  title={t("clearSearch")}
                   onClick={() => setFilterText("")}
                   edge="end"
                 >

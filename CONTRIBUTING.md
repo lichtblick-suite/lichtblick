@@ -106,7 +106,7 @@ function MyComponent() {
 
 ```ts
 // i18n/en/myComponent.ts
-export default {
+export const myComponent = {
   hello: "Hello!",
 };
 ```
@@ -128,37 +128,23 @@ function MyComponent(props: Props): JSX.Element {
 ```
 
 ```ts
-// i18n/index.ts
-export const translations = {
-  en: {
-    ...,
-    myComponent: enMyComponent,
-  },
-  zh: {
-    ...,
-    myComponent: zhMyComponent,
-  },
-};
-```
-
-```ts
 // i18n/en/myComponent.ts
-export default {
+export const myComponent = {
   hello: "Hello!",
 };
 
 // i18n/en/index.ts
-export { default as enMyComponent } from "./myComponent";
+export * from "./myComponent";
 ```
 
 ```ts
 // i18n/zh/myComponent.ts
-export default {
+export const myComponent: TypeOptions["resources"]["myComponent"] = {
   hello: "你好！",
 };
 
 // i18n/zh/index.ts
-export { default as zhMyComponent } from "./myComponent";
+export * from "./myComponent";
 ```
 
 Result:

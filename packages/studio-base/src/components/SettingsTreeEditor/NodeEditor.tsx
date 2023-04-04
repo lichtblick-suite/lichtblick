@@ -16,9 +16,11 @@ import {
   Typography,
   useTheme,
 } from "@mui/material";
+import { TFunction } from "i18next";
 import { isEqual, partition } from "lodash";
 import memoizeWeak from "memoize-weak";
 import { ChangeEvent, useCallback, useEffect, useMemo, useRef } from "react";
+import { useTranslation } from "react-i18next";
 import tinycolor from "tinycolor2";
 import { DeepReadonly } from "ts-essentials";
 import { keyframes } from "tss-react";
@@ -62,7 +64,8 @@ const useStyles = makeStyles()((theme) => ({
     },
   },
   focusedNode: {
-    animation: `${keyframes`
+    animation: `
+      ${keyframes`
       from {
         background-color: ${tinycolor(theme.palette.primary.main).setAlpha(0.3).toRgbString()};
       }
@@ -163,10 +166,13 @@ function ExpansionArrow({ expanded }: { expanded: boolean }): JSX.Element {
 const makeStablePath = memoizeWeak((path: readonly string[], key: string) => [...path, key]);
 
 type SelectVisibilityFilterValue = "all" | "visible" | "invisible";
-const SelectVisibilityFilterOptions: { label: string; value: SelectVisibilityFilterValue }[] = [
-  { label: "List all", value: "all" },
-  { label: "List visible", value: "visible" },
-  { label: "List invisible", value: "invisible" },
+const SelectVisibilityFilterOptions: (t: TFunction<"settingsEditor">) => {
+  label: string;
+  value: SelectVisibilityFilterValue;
+}[] = (t) => [
+  { label: t("listAll"), value: "all" },
+  { label: t("listVisible"), value: "visible" },
+  { label: t("listInvisible"), value: "invisible" },
 ];
 function showVisibleFilter(child: DeepReadonly<SettingsTreeNode>): boolean {
   // want to show children with undefined visibility
@@ -176,12 +182,13 @@ function showInvisibleFilter(child: DeepReadonly<SettingsTreeNode>): boolean {
   // want to show children with undefined visibility
   return child.visible !== true;
 }
-const SelectVisibilityFilterField = {
-  input: "select",
-  label: "Filter list",
-  help: "Filter list by visibility",
-  options: SelectVisibilityFilterOptions,
-} as const;
+const getSelectVisibilityFilterField = (t: TFunction<"settingsEditor">) =>
+  ({
+    input: "select",
+    label: t("filterList"),
+    help: t("filterListHelp"),
+    options: SelectVisibilityFilterOptions(t),
+  } as const);
 
 type State = {
   editing: boolean;
@@ -198,7 +205,7 @@ function NodeEditorComponent(props: NodeEditorProps): JSX.Element {
     open: defaultOpen,
     visibilityFilter: "all",
   });
-
+  const { t } = useTranslation("settingsEditor");
   const { classes, cx } = useStyles();
 
   const theme = useTheme();
@@ -345,6 +352,7 @@ function NodeEditorComponent(props: NodeEditorProps): JSX.Element {
             marginLeft: theme.spacing(0.75 + 2 * indent),
           }}
           onClick={toggleOpen}
+          data-testid={`settings__nodeHeaderToggle__${props.path.join("-")}`}
         >
           {hasProperties && <ExpansionArrow expanded={state.open} />}
           {IconComponent && (
@@ -392,7 +400,7 @@ function NodeEditorComponent(props: NodeEditorProps): JSX.Element {
               fontWeight={indent < 2 ? 600 : 400}
               color={visible ? "text.primary" : "text.disabled"}
             >
-              <HighlightedText text={settings.label ?? "General"} highlight={filter} />
+              <HighlightedText text={settings.label ?? t("general")} highlight={filter} />
             </Typography>
           )}
         </div>
@@ -478,7 +486,7 @@ function NodeEditorComponent(props: NodeEditorProps): JSX.Element {
       {state.open && selectVisibilityFilterEnabled && hasChildren && (
         <FieldEditor
           key="visibilityFilter"
-          field={{ ...SelectVisibilityFilterField, value: state.visibilityFilter }}
+          field={{ ...getSelectVisibilityFilterField(t), value: state.visibilityFilter }}
           path={makeStablePath(props.path, "visibilityFilter")}
           actionHandler={selectVisibilityFilter}
         />
