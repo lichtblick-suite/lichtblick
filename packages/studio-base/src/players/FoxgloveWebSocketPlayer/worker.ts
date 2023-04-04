@@ -23,29 +23,39 @@ self.onmessage = (event: MessageEvent<ToWorkerMessage>) => {
   const { type, data } = event.data;
   switch (type) {
     case "open":
-      ws = new WebSocket(data.wsUrl, data.protocols);
-      ws.binaryType = "arraybuffer";
-      ws.onerror = (wsEvent) => {
+      try {
+        ws = new WebSocket(data.wsUrl, data.protocols);
+        ws.binaryType = "arraybuffer";
+        ws.onerror = (wsEvent) => {
+          send({
+            type: "error",
+            error: (wsEvent as unknown as { error: Error }).error,
+          });
+        };
+        ws.onopen = (_event) => {
+          send({
+            type: "open",
+            protocol: ws!.protocol,
+          });
+        };
+        ws.onclose = (wsEvent) => {
+          send({ type: "close", data: JSON.parse(JSON.stringify(wsEvent) ?? "{}") });
+        };
+        ws.onmessage = (wsEvent: MessageEvent<unknown>) => {
+          send({
+            type: "message",
+            data: wsEvent.data,
+          });
+        };
+      } catch (err) {
+        // try-catch is needed to catch `Mixed Content` errors in Chrome, where the client
+        // attempts to load `ws://` from `https://`. (Safari would catch these in `ws.onerror`
+        // but with `undefined` as an error.)
         send({
           type: "error",
-          error: (wsEvent as unknown as { error: Error }).error,
+          error: err ?? { message: "Insecure WebSocket connection" },
         });
-      };
-      ws.onopen = (_event) => {
-        send({
-          type: "open",
-          protocol: ws!.protocol,
-        });
-      };
-      ws.onclose = (wsEvent) => {
-        send({ type: "close", data: JSON.parse(JSON.stringify(wsEvent) ?? "{}") });
-      };
-      ws.onmessage = (wsEvent: MessageEvent<unknown>) => {
-        send({
-          type: "message",
-          data: wsEvent.data,
-        });
-      };
+      }
       break;
     case "close":
       ws?.close();

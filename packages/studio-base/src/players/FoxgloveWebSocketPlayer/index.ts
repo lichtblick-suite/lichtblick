@@ -206,6 +206,18 @@ export default class FoxgloveWebSocketPlayer implements Player {
 
     this._client.on("error", (err) => {
       log.error(err);
+
+      if (
+        (err as unknown as undefined | { message?: string })?.message != undefined &&
+        err.message.includes("insecure WebSocket connection")
+      ) {
+        this._problems.addProblem("ws:connection-failed", {
+          severity: "error",
+          message: "Insecure WebSocket connection",
+          tip: `Check that the WebSocket server at ${this._url} is reachable and supports protocol version ${FoxgloveClient.SUPPORTED_SUBPROTOCOL}.`,
+        });
+        this._emitState();
+      }
     });
 
     // Note: We've observed closed being called not only when an already open connection is closed
