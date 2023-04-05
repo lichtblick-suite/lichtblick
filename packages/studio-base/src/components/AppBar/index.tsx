@@ -3,7 +3,7 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 import {
-  AddCircle24Regular,
+  SlideAdd24Regular,
   PanelLeft24Filled,
   PanelLeft24Regular,
   PanelRight24Filled,
@@ -259,7 +259,7 @@ export function AppBar(props: AppBarProps): JSX.Element {
                   setPanelAnchorEl(event.currentTarget);
                 }}
               >
-                <AddCircle24Regular />
+                <SlideAdd24Regular />
               </AppBarIconButton>
             </div>
           </div>
