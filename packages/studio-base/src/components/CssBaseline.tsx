@@ -51,8 +51,8 @@ const useStyles = makeStyles()(({ palette, typography }) => ({
     },
     div: {
       "::-webkit-scrollbar": {
-        width: 4,
-        height: 4,
+        width: 6,
+        height: 0,
       },
       "::-webkit-scrollbar-corner": {
         background: "transparent",
@@ -62,7 +62,7 @@ const useStyles = makeStyles()(({ palette, typography }) => ({
       },
       "::-webkit-scrollbar-thumb": {
         background: palette.action.focus,
-        borderRadius: 2,
+        borderRadius: 0,
       },
     },
     "p:not([class^='Mui')": {
