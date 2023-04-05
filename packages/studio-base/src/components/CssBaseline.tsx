@@ -52,7 +52,7 @@ const useStyles = makeStyles()(({ palette, typography }) => ({
     div: {
       "::-webkit-scrollbar": {
         width: 6,
-        height: 0,
+        height: 6,
       },
       "::-webkit-scrollbar-corner": {
         background: "transparent",
