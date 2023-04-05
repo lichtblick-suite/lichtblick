@@ -52,8 +52,12 @@ export const WorkspaceContext = createContext<undefined | StoreApi<WorkspaceCont
 WorkspaceContext.displayName = "WorkspaceContext";
 
 export const WorkspaceStoreSelectors = {
-  selectPanelSettingsOpen: (store: WorkspaceContextStore): boolean =>
-    store.sidebarItem === "panel-settings" || store.leftSidebarItem === "panel-settings",
+  selectPanelSettingsOpen: (store: WorkspaceContextStore): boolean => {
+    return (
+      store.sidebarItem === "panel-settings" ||
+      (store.leftSidebarOpen && store.leftSidebarItem === "panel-settings")
+    );
+  },
 };
 
 /**
