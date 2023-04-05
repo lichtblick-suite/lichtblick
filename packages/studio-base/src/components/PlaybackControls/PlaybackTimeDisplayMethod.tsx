@@ -69,9 +69,15 @@ const StyledTextField = muiStyled(TextField)<{ error?: boolean }>(({ error, them
     borderLeft: `1px solid ${theme.palette.background.paper}`,
     visibility: "hidden",
     marginRight: theme.spacing(-1),
+
+    ...(error === true && {
+      color: theme.palette.error.main,
+      borderLeftColor: theme.palette.error.main,
+    }),
   },
   ...(error === true && {
     outline: `1px solid ${theme.palette.error.main}`,
+    outlineOffset: -1,
   }),
 }));
 

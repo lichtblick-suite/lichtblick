@@ -40,6 +40,7 @@ const selectPlayerSourceId = ({ playerState }: MessagePipelineContext) =>
   playerState.urlState?.sourceId;
 
 function DataSourceInfoContent(props: {
+  disableSource?: boolean;
   durationRef: MutableRefObject<ReactNull | HTMLDivElement>;
   endTimeRef: MutableRefObject<ReactNull | HTMLDivElement>;
   playerName?: string;
@@ -47,7 +48,15 @@ function DataSourceInfoContent(props: {
   playerSourceId?: string;
   startTime?: Time;
 }): JSX.Element {
-  const { durationRef, endTimeRef, playerName, playerPresence, playerSourceId, startTime } = props;
+  const {
+    disableSource = false,
+    durationRef,
+    endTimeRef,
+    playerName,
+    playerPresence,
+    playerSourceId,
+    startTime,
+  } = props;
   const { classes } = useStyles();
   const { t } = useTranslation("dataSourceInfo");
 
@@ -58,26 +67,28 @@ function DataSourceInfoContent(props: {
 
   return (
     <Stack gap={1.5}>
-      <Stack>
-        <Typography className={classes.overline} display="block" variant="overline">
-          {t("currentSource")}
-        </Typography>
-        {playerPresence === PlayerPresence.INITIALIZING ? (
-          <Typography variant="inherit">
-            <Skeleton animation="wave" width="40%" />
+      {!disableSource && (
+        <Stack>
+          <Typography className={classes.overline} display="block" variant="overline">
+            {t("currentSource")}
           </Typography>
-        ) : playerPresence === PlayerPresence.RECONNECTING ? (
-          <Typography variant="inherit">{t("waitingForConnection")}</Typography>
-        ) : playerName ? (
-          <Typography variant="inherit" component="span">
-            <MultilineMiddleTruncate text={playerName} />
-          </Typography>
-        ) : (
-          <Typography className={classes.numericValue} variant="inherit">
-            &mdash;
-          </Typography>
-        )}
-      </Stack>
+          {playerPresence === PlayerPresence.INITIALIZING ? (
+            <Typography variant="inherit">
+              <Skeleton animation="wave" width="40%" />
+            </Typography>
+          ) : playerPresence === PlayerPresence.RECONNECTING ? (
+            <Typography variant="inherit">{t("waitingForConnection")}</Typography>
+          ) : playerName ? (
+            <Typography variant="inherit" component="span">
+              <MultilineMiddleTruncate text={playerName} />
+            </Typography>
+          ) : (
+            <Typography className={classes.numericValue} variant="inherit">
+              &mdash;
+            </Typography>
+          )}
+        </Stack>
+      )}
 
       <Stack>
         <Typography className={classes.overline} variant="overline">
@@ -129,7 +140,7 @@ const MemoDataSourceInfoContent = React.memo(DataSourceInfoContent);
 
 const EmDash = "\u2014";
 
-export function DataSourceInfoView(): JSX.Element {
+export function DataSourceInfoView({ disableSource }: { disableSource?: boolean }): JSX.Element {
   const startTime = useMessagePipeline(selectStartTime);
   const endTime = useMessagePipeline(selectEndTime);
   const playerName = useMessagePipeline(selectPlayerName);
@@ -164,6 +175,7 @@ export function DataSourceInfoView(): JSX.Element {
 
   return (
     <MemoDataSourceInfoContent
+      disableSource={disableSource}
       durationRef={durationRef}
       endTimeRef={endTimeRef}
       playerName={playerName}

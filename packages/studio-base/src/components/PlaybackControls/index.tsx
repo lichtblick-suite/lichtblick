@@ -20,12 +20,16 @@ import {
   Next20Regular,
   Previous20Filled,
   Previous20Regular,
+  Info24Regular,
 } from "@fluentui/react-icons";
+import { Tooltip } from "@mui/material";
 import { useCallback, useMemo, useState } from "react";
 import { makeStyles } from "tss-react/mui";
 
 import { compare, Time } from "@foxglove/rostime";
+import { AppSetting } from "@foxglove/studio-base/AppSetting";
 import { CreateEventDialog } from "@foxglove/studio-base/components/CreateEventDialog";
+import { DataSourceInfoView } from "@foxglove/studio-base/components/DataSourceInfoView";
 import EventIcon from "@foxglove/studio-base/components/EventIcon";
 import EventOutlinedIcon from "@foxglove/studio-base/components/EventOutlinedIcon";
 import HoverableIconButton from "@foxglove/studio-base/components/HoverableIconButton";
@@ -39,6 +43,7 @@ import PlaybackSpeedControls from "@foxglove/studio-base/components/PlaybackSpee
 import Stack from "@foxglove/studio-base/components/Stack";
 import { useCurrentUser } from "@foxglove/studio-base/context/CurrentUserContext";
 import { EventsStore, useEvents } from "@foxglove/studio-base/context/EventsContext";
+import { useAppConfigurationValue } from "@foxglove/studio-base/hooks";
 import { Player, PlayerPresence } from "@foxglove/studio-base/players/types";
 
 import PlaybackTimeDisplay from "./PlaybackTimeDisplay";
@@ -56,6 +61,11 @@ const useStyles = makeStyles()((theme) => ({
     borderTop: `1px solid ${theme.palette.divider}`,
     zIndex: 100000,
   },
+  popper: {
+    "&[data-popper-placement*=top] .MuiTooltip-tooltip": {
+      margin: theme.spacing(0.5, 0.5, 0.75),
+    },
+  },
 }));
 
 const selectPresence = (ctx: MessagePipelineContext) => ctx.playerState.presence;
@@ -71,6 +81,7 @@ export default function PlaybackControls(props: {
 }): JSX.Element {
   const { play, pause, seek, isPlaying, getTimeInfo, playUntil } = props;
   const presence = useMessagePipeline(selectPresence);
+  const [enableNewTopNav = false] = useAppConfigurationValue<boolean>(AppSetting.ENABLE_NEW_TOPNAV);
 
   const { classes } = useStyles();
   const [repeat, setRepeat] = useState(false);
@@ -168,6 +179,23 @@ export default function PlaybackControls(props: {
                 activeIcon={<EventIcon />}
                 onClick={toggleCreateEventDialog}
               />
+            )}
+            {enableNewTopNav && (
+              <Tooltip
+                classes={{ popper: classes.popper }}
+                title={
+                  <Stack paddingY={0.75}>
+                    <DataSourceInfoView disableSource />
+                  </Stack>
+                }
+              >
+                <HoverableIconButton
+                  disabled={presence !== PlayerPresence.PRESENT}
+                  size="small"
+                  icon={<Info24Regular />}
+                  activeColor="info"
+                />
+              </Tooltip>
             )}
             <PlaybackTimeDisplay onSeek={seek} onPause={pause} />
           </Stack>
