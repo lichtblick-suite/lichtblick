@@ -6,7 +6,7 @@
     "@foxglove/studio-base": "workspace:*",
     "@foxglove/studio-desktop": "workspace:*",
     "electron": "23.1.4",
-    "playwright": "1.30.0",
+    "playwright": "1.32.2",
     "webpack": "5.76.2"
   }
 }
