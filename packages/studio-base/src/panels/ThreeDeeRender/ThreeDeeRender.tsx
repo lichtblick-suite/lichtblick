@@ -737,7 +737,16 @@ export function ThreeDeeRender(props: {
   // Keep the renderer currentTime up to date and handle seeking
   useEffect(() => {
     const newTimeNs = currentTime ? toNanoSec(currentTime) : undefined;
-    if (!renderer || newTimeNs == undefined || newTimeNs === renderer.currentTime) {
+
+    /*
+     * NOTE AROUND SEEK HANDLING
+     * Seeking MUST be handled even if there is no change in current time.  When there is a subscription
+     * change while paused, the player goes into `seek-backfill` which sets didSeek to true.
+     *
+     * We cannot early return here when there is no change in current time due to that, otherwise it would
+     * handle seek next time the current time changes and clear the backfilled messages and transforms.
+     */
+    if (!renderer || newTimeNs == undefined) {
       return;
     }
     const oldTimeNs = renderer.currentTime;
