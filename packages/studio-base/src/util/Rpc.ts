@@ -15,7 +15,7 @@
 // instances of web-workers and shared-workers respectively, as well as avaiable on
 // 'global' within them.
 export interface Channel {
-  postMessage(data: unknown, transfer?: (Transferable | OffscreenCanvas)[]): void;
+  postMessage(data: unknown, transfer?: Transferable[]): void;
   onmessage?: ((ev: MessageEvent) => unknown) | null; // eslint-disable-line no-restricted-syntax
   terminate: () => void;
 }
@@ -154,7 +154,7 @@ export default class Rpc {
   public async send<TResult, TData = unknown>(
     topic: string,
     data?: TData,
-    transfer?: (Transferable | OffscreenCanvas)[],
+    transfer?: Transferable[],
   ): Promise<TResult> {
     const id = this._messageId++;
     const message = { topic, id, data };

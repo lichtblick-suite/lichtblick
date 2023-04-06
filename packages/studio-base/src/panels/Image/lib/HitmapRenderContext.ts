@@ -16,10 +16,7 @@ export class HitmapRenderContext {
     private readonly _ctx: CanvasRenderingContext2D | OffscreenCanvasRenderingContext2D,
     private readonly _hitmapCanvas: HTMLCanvasElement | OffscreenCanvas | undefined,
   ) {
-    this._hctx = (this._hitmapCanvas?.getContext("2d") ?? undefined) as
-      | CanvasRenderingContext2D
-      | OffscreenCanvasRenderingContext2D
-      | undefined;
+    this._hctx = this._hitmapCanvas?.getContext("2d") ?? undefined;
     if (this._hctx) {
       this._hctx.imageSmoothingEnabled = false;
       this._hctx.clearRect(0, 0, this._ctx.canvas.width, this._ctx.canvas.height);

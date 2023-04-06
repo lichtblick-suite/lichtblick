@@ -88,7 +88,7 @@ function rpcMouseEvent(event: React.MouseEvent<HTMLElement>) {
 type RpcSend = <T>(
   topic: string,
   payload?: Record<string, unknown>,
-  transferables?: (Transferable | OffscreenCanvas)[],
+  transferables?: Transferable[],
 ) => Promise<T>;
 
 // Chart component renders data using workers with chartjs offscreen canvas
@@ -137,7 +137,7 @@ function Chart(props: Props): JSX.Element {
     const sendWrapper = async <T,>(
       topic: string,
       payload?: Record<string, unknown>,
-      transferables?: (Transferable | OffscreenCanvas)[],
+      transferables?: Transferable[],
     ) => {
       return await rpc.send<T>(topic, { id, ...payload }, transferables);
     };

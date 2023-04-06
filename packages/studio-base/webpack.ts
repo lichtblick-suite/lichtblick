@@ -181,7 +181,7 @@ export function makeConfig(
           options: {
             multiple: [
               {
-                search: "etwModule = require(etwModulePath);",
+                search: /etwModule\s*=\s*require\(etwModulePath\);/,
                 replace:
                   "throw new Error('[Foxglove] This module is not supported in the browser.');",
               },
@@ -199,6 +199,10 @@ export function makeConfig(
                 search: `return{module:require(n),modulePath:n,error:void 0}`,
                 replace:
                   "throw new Error('[Foxglove] This module is not supported in the browser.');",
+              },
+              {
+                search: `return { module:   require(modulePath), modulePath, error: void 0 };`,
+                replace: `throw new Error('[Foxglove] This module is not supported in the browser.');`,
               },
               {
                 search: `getModuleResolver=function(e){let t;try{t=require(e)}`,

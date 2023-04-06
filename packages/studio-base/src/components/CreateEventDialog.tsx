@@ -252,7 +252,7 @@ export function CreateEventDialog(props: { onClose: () => void }): JSX.Element {
         <FormLabel>Metadata</FormLabel>
         <div className={classes.grid}>
           {event.metadataEntries.map(({ key, value }, index) => {
-            const hasDuplicate = ((key.length > 0 && countedMetadata[key]) ?? 0) > 1;
+            const hasDuplicate = ((key.length > 0 ? countedMetadata[key] : undefined) ?? 0) > 1;
             return (
               <div className={classes.row} key={index}>
                 <TextField
