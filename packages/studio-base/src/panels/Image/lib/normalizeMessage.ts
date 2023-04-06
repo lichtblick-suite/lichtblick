@@ -22,7 +22,7 @@ export const NORMALIZABLE_IMAGE_DATATYPES = [
   "foxglove_msgs/msg/RawImage",
   "foxglove_msgs/CompressedImage",
   "foxglove_msgs/msg/CompressedImage",
-];
+] as const;
 
 /**
  * Convert a message based on datatype to a NormalizedImageMessage
@@ -32,7 +32,8 @@ export function normalizeImageMessage(
   message: unknown,
   datatype: string,
 ): NormalizedImageMessage | undefined {
-  switch (datatype) {
+  // Cast to the union of all supported datatypes to ensure we handle all cases
+  switch (datatype as (typeof NORMALIZABLE_IMAGE_DATATYPES)[number]) {
     case "foxglove_msgs/RawImage":
     case "foxglove_msgs/msg/RawImage":
     case "foxglove.RawImage": {

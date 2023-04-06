@@ -33,8 +33,10 @@ import { fonts } from "@foxglove/studio-base/util/sharedStyleConstants";
 import { formatTimeRaw } from "@foxglove/studio-base/util/time";
 
 import { ImageCanvas, ImageEmptyState, Toolbar } from "./components";
-import { ANNOTATION_DATATYPES, useImagePanelMessages } from "./hooks";
+import { useImagePanelMessages } from "./hooks";
+import { CALIBRATION_DATATYPES } from "./hooks/normalizeCameraInfo";
 import { downloadImage } from "./lib/downloadImage";
+import { ANNOTATION_DATATYPES } from "./lib/normalizeAnnotations";
 import { NORMALIZABLE_IMAGE_DATATYPES } from "./lib/normalizeMessage";
 import { getRelatedMarkerTopics, getMarkerOptions, getCameraInfoTopic } from "./lib/util";
 import { buildSettingsTree } from "./settings";
@@ -46,6 +48,7 @@ type Props = {
 
 const SUPPORTED_IMAGE_SCHEMAS = new Set(NORMALIZABLE_IMAGE_DATATYPES);
 const SUPPORTED_ANNOTATION_SCHEMAS = new Set(ANNOTATION_DATATYPES);
+const SUPPORTED_CALIBRATION_SCHEMAS = new Set(CALIBRATION_DATATYPES);
 
 function topicIsConvertibleToSchema(topic: Topic, supportedSchemaNames: Set<string>): boolean {
   return (
@@ -146,12 +149,12 @@ export function ImageView({ context }: Props): JSX.Element {
     }
     if (
       cameraInfoTopicFullObject &&
-      topicIsConvertibleToSchema(cameraInfoTopicFullObject, SUPPORTED_IMAGE_SCHEMAS)
+      topicIsConvertibleToSchema(cameraInfoTopicFullObject, SUPPORTED_CALIBRATION_SCHEMAS)
     ) {
       subs.push({
         topic: cameraInfoTopicFullObject.name,
         preload: false,
-        convertTo: pickConvertToSchema(cameraInfoTopicFullObject, SUPPORTED_IMAGE_SCHEMAS),
+        convertTo: pickConvertToSchema(cameraInfoTopicFullObject, SUPPORTED_CALIBRATION_SCHEMAS),
       });
     }
     for (const topic of enabledMarkerTopicsFullObjects) {

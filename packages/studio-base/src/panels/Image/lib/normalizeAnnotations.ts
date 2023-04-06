@@ -14,6 +14,28 @@ import { mightActuallyBePartial } from "@foxglove/studio-base/util/mightActually
 
 import type { Annotation, PointsAnnotation } from "../types";
 
+// Supported annotation schema names
+export const ANNOTATION_DATATYPES = [
+  // Single marker
+  "visualization_msgs/ImageMarker",
+  "visualization_msgs/msg/ImageMarker",
+  "ros.visualization_msgs.ImageMarker",
+  // Marker arrays
+  "foxglove_msgs/ImageMarkerArray",
+  "foxglove_msgs/msg/ImageMarkerArray",
+  "studio_msgs/ImageMarkerArray",
+  "studio_msgs/msg/ImageMarkerArray",
+  "visualization_msgs/ImageMarkerArray",
+  "visualization_msgs/msg/ImageMarkerArray",
+  "ros.visualization_msgs.ImageMarkerArray",
+  // backwards compat with webviz
+  "webviz_msgs/ImageMarkerArray",
+  // foxglove
+  "foxglove_msgs/ImageAnnotations",
+  "foxglove_msgs/msg/ImageAnnotations",
+  "foxglove.ImageAnnotations",
+] as const;
+
 function foxglovePointTypeToStyle(
   type: PointsAnnotationType,
 ): PointsAnnotation["style"] | undefined {
@@ -169,7 +191,8 @@ function normalizeAnnotations(
   // The panel may send the annotations to a web worker, for this we need
   const message = toPOD(maybeLazyMessage);
 
-  switch (datatype) {
+  // Cast to the union of all supported datatypes to ensure we handle all cases
+  switch (datatype as (typeof ANNOTATION_DATATYPES)[number]) {
     // single marker
     case "visualization_msgs/ImageMarker":
     case "visualization_msgs/msg/ImageMarker":

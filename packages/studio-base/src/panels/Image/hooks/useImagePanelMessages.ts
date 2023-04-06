@@ -57,27 +57,6 @@ export type SynchronizationItem = {
   annotationsByTopic: Map<string, Annotation[]>;
 };
 
-export const ANNOTATION_DATATYPES = [
-  // Single marker
-  "visualization_msgs/ImageMarker",
-  "visualization_msgs/msg/ImageMarker",
-  "ros.visualization_msgs.ImageMarker",
-  // Marker arrays
-  "foxglove_msgs/ImageMarkerArray",
-  "foxglove_msgs/msg/ImageMarkerArray",
-  "studio_msgs/ImageMarkerArray",
-  "studio_msgs/msg/ImageMarkerArray",
-  "visualization_msgs/ImageMarkerArray",
-  "visualization_msgs/msg/ImageMarkerArray",
-  "ros.visualization_msgs.ImageMarkerArray",
-  // backwards compat with webviz
-  "webviz_msgs/ImageMarkerArray",
-  // foxglove
-  "foxglove_msgs/ImageAnnotations",
-  "foxglove_msgs/msg/ImageAnnotations",
-  "foxglove.ImageAnnotations",
-] as const;
-
 function addMessages(
   state: ImagePanelState,
   messageEvents: readonly MessageEvent<unknown>[],
