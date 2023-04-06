@@ -57,10 +57,12 @@ export class RenderableMarker extends Renderable<MarkerUserData> {
   }
 
   public override selectedIdVariable(): string | undefined {
-    const settings = this.renderer.config.topics[this.userData.topic] as
-      | LayerSettingsMarker
-      | undefined;
+    const settings = this.getSettings();
     return settings?.selectedIdVariable;
+  }
+
+  public getSettings(): LayerSettingsMarker | undefined {
+    return this.renderer.config.topics[this.userData.topic] as LayerSettingsMarker | undefined;
   }
 
   public override details(): Record<string, RosValue> {

@@ -7,7 +7,6 @@ import * as THREE from "three";
 import { toNanoSec } from "@foxglove/rostime";
 import { Point3, SceneEntity, TriangleListPrimitive } from "@foxglove/schemas";
 import { DynamicBufferGeometry } from "@foxglove/studio-base/panels/ThreeDeeRender/DynamicBufferGeometry";
-import { emptyPose } from "@foxglove/studio-base/util/Pose";
 
 import { RenderablePrimitive } from "./RenderablePrimitive";
 import type { Renderer } from "../../Renderer";
@@ -25,15 +24,7 @@ type TriangleMesh = THREE.Mesh<DynamicBufferGeometry, THREE.MeshStandardMaterial
 export class RenderableTriangles extends RenderablePrimitive {
   private _triangleMeshes: TriangleMesh[] = [];
   public constructor(renderer: Renderer) {
-    super("", renderer, {
-      receiveTime: -1n,
-      messageTime: -1n,
-      frameId: "",
-      pose: emptyPose(),
-      settings: { visible: true, color: undefined, selectedIdVariable: undefined },
-      settingsPath: [],
-      entity: undefined,
-    });
+    super("", renderer);
   }
 
   private _ensureCapacity(triCount: number) {

@@ -12,7 +12,7 @@ import { Marker } from "../../ros";
 
 export class RenderableCube extends RenderableMarker {
   private mesh: THREE.Mesh<THREE.BoxGeometry, THREE.MeshStandardMaterial>;
-  private outline: THREE.LineSegments | undefined;
+  private outline: THREE.LineSegments;
 
   public constructor(
     topic: string,
@@ -58,6 +58,8 @@ export class RenderableCube extends RenderableMarker {
       this.mesh.material.depthWrite = !transparent;
       this.mesh.material.needsUpdate = true;
     }
+
+    this.outline.visible = this.getSettings()?.showOutlines ?? true;
 
     rgbToThreeColor(this.mesh.material.color, marker.color);
     this.mesh.material.opacity = marker.color.a;

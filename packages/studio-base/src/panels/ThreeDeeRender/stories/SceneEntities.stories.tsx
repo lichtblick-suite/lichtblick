@@ -325,10 +325,12 @@ export function BasicEntities(): JSX.Element {
     { name: "transforms", schemaName: "foxglove.FrameTransform" },
     { name: "scene1", schemaName: "foxglove.SceneUpdate" },
     { name: "scene2", schemaName: "foxglove.SceneUpdate" },
+    { name: "scene3", schemaName: "foxglove.SceneUpdate" },
   ];
 
   const scene1 = makeStoryScene({ topic: "scene1", frameId: "frame1" });
   const scene2 = makeStoryScene({ topic: "scene2", frameId: "frame2" });
+  const scene3 = makeStoryScene({ topic: "scene3", frameId: "frame3" });
 
   const tf1: MessageEvent<FrameTransform> = {
     topic: "transforms",
@@ -350,7 +352,7 @@ export function BasicEntities(): JSX.Element {
       timestamp: { sec: 0, nsec: 0 },
       parent_frame_id: "root",
       child_frame_id: "frame1",
-      translation: { x: -4, y: -4, z: 0 },
+      translation: { x: -5, y: -4, z: 0 },
       rotation: QUAT_IDENTITY,
     },
     schemaName: "foxglove.FrameTransform",
@@ -360,10 +362,23 @@ export function BasicEntities(): JSX.Element {
     topic: "transforms",
     receiveTime: { sec: 10, nsec: 0 },
     message: {
-      timestamp: { sec: 0, nsec: 0 },
+      timestamp: { sec: -1, nsec: 0 },
       parent_frame_id: "root",
       child_frame_id: "frame2",
-      translation: { x: 0, y: -4, z: 0 },
+      translation: { x: -1, y: -4, z: 0 },
+      rotation: QUAT_IDENTITY,
+    },
+    schemaName: "foxglove.FrameTransform",
+    sizeInBytes: 0,
+  };
+  const tf4: MessageEvent<FrameTransform> = {
+    topic: "transforms",
+    receiveTime: { sec: 10, nsec: 0 },
+    message: {
+      timestamp: { sec: -1, nsec: 0 },
+      parent_frame_id: "root",
+      child_frame_id: "frame3",
+      translation: { x: 3, y: -4, z: 0 },
       rotation: QUAT_IDENTITY,
     },
     schemaName: "foxglove.FrameTransform",
@@ -373,9 +388,10 @@ export function BasicEntities(): JSX.Element {
   const fixture = {
     topics,
     frame: {
-      transforms: [tf1, tf2, tf3],
+      transforms: [tf1, tf2, tf3, tf4],
       scene1: [scene1],
       scene2: [scene2],
+      scene3: [scene3],
     },
     capabilities: [],
     activeData: {
@@ -393,7 +409,7 @@ export function BasicEntities(): JSX.Element {
             grid: { layerId: "foxglove.Grid" },
           },
           cameraState: {
-            distance: 12,
+            distance: 14,
             perspective: true,
             phi: 40,
             targetOffset: [0, 0, 0],
@@ -407,6 +423,7 @@ export function BasicEntities(): JSX.Element {
           topics: {
             scene1: { visible: true },
             scene2: { visible: true, color: "#6324c7ff" },
+            scene3: { visible: true, showOutlines: false },
           },
         }}
       />

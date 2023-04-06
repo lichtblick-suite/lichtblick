@@ -11,7 +11,6 @@ import { LineSegmentsGeometry } from "three/examples/jsm/lines/LineSegmentsGeome
 import { toNanoSec } from "@foxglove/rostime";
 import { LinePrimitive, LineType, SceneEntity } from "@foxglove/schemas";
 import { LineMaterial } from "@foxglove/studio-base/panels/ThreeDeeRender/LineMaterial";
-import { emptyPose } from "@foxglove/studio-base/util/Pose";
 
 import { RenderablePrimitive } from "./RenderablePrimitive";
 import type { Renderer } from "../../Renderer";
@@ -23,15 +22,7 @@ const tempRgba = makeRgba();
 export class RenderableLines extends RenderablePrimitive {
   private _lines: LineSegments2[] = [];
   public constructor(renderer: Renderer) {
-    super("", renderer, {
-      receiveTime: -1n,
-      messageTime: -1n,
-      frameId: "",
-      pose: emptyPose(),
-      settings: { visible: true, color: undefined, selectedIdVariable: undefined },
-      settingsPath: [],
-      entity: undefined,
-    });
+    super("", renderer);
   }
 
   private _updateLines(lines: LinePrimitive[]) {

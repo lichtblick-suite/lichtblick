@@ -28,12 +28,14 @@ import { makePose } from "../transforms";
 
 export type LayerSettingsMarker = BaseSettings & {
   color: string | undefined;
+  showOutlines: boolean | undefined;
   selectedIdVariable: string | undefined;
   namespaces: Record<string, LayerSettingsMarkerNamespace>;
 };
 
 const DEFAULT_SETTINGS: LayerSettingsMarker = {
   visible: false,
+  showOutlines: true,
   color: undefined,
   selectedIdVariable: undefined,
   namespaces: {},
@@ -67,6 +69,7 @@ export class Markers extends SceneExtension<TopicMarkers> {
         order: topic.name.toLocaleLowerCase(),
         fields: {
           color: { label: "Color", input: "rgba", value: config.color },
+          showOutlines: { label: "Show outline", input: "boolean", value: config.showOutlines },
           selectedIdVariable: {
             label: "Selection Variable",
             input: "string",

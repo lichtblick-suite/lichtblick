@@ -6,7 +6,6 @@ import * as THREE from "three";
 
 import { toNanoSec } from "@foxglove/rostime";
 import { ArrowPrimitive, SceneEntity } from "@foxglove/schemas";
-import { emptyPose } from "@foxglove/studio-base/util/Pose";
 
 import { RenderablePrimitive } from "./RenderablePrimitive";
 import type { Renderer } from "../../Renderer";
@@ -54,15 +53,7 @@ export class RenderableArrows extends RenderablePrimitive {
   private headOutline: THREE.LineSegments;
 
   public constructor(renderer: Renderer) {
-    super("", renderer, {
-      receiveTime: -1n,
-      messageTime: -1n,
-      frameId: "",
-      pose: emptyPose(),
-      settings: { visible: true, color: undefined, selectedIdVariable: undefined },
-      settingsPath: [],
-      entity: undefined,
-    });
+    super("", renderer, undefined);
 
     this.maxInstances = 16;
     this.instanceOpacity = new THREE.InstancedBufferAttribute(
@@ -261,6 +252,9 @@ export class RenderableArrows extends RenderablePrimitive {
       const lifetimeNs = toNanoSec(entity.lifetime);
       this.userData.expiresAt = lifetimeNs === 0n ? undefined : receiveTime + lifetimeNs;
       this._updateMesh(entity.arrows);
+
+      this.headOutline.visible = settings.showOutlines ?? true;
+      this.shaftOutline.visible = settings.showOutlines ?? true;
     }
   }
 

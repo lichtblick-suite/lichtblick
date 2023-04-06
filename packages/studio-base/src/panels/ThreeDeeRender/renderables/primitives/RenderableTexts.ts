@@ -4,7 +4,6 @@
 
 import { toNanoSec } from "@foxglove/rostime";
 import { SceneEntity, TextPrimitive } from "@foxglove/schemas";
-import { emptyPose } from "@foxglove/studio-base/util/Pose";
 import { Label, LabelPool } from "@foxglove/three-text";
 
 import { RenderablePrimitive } from "./RenderablePrimitive";
@@ -19,15 +18,7 @@ export class RenderableTexts extends RenderablePrimitive {
   private labels: Label[] = [];
 
   public constructor(renderer: Renderer) {
-    super("", renderer, {
-      receiveTime: -1n,
-      messageTime: -1n,
-      frameId: "",
-      pose: emptyPose(),
-      settings: { visible: true, color: undefined, selectedIdVariable: undefined },
-      settingsPath: [],
-      entity: undefined,
-    });
+    super("", renderer);
 
     this.labelPool = renderer.labelPool;
   }

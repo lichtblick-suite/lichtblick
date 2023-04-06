@@ -6,7 +6,6 @@ import * as THREE from "three";
 
 import { toNanoSec } from "@foxglove/rostime";
 import { CylinderPrimitive, SceneEntity } from "@foxglove/schemas";
-import { emptyPose } from "@foxglove/studio-base/util/Pose";
 
 import { RenderablePrimitive } from "./RenderablePrimitive";
 import type { Renderer } from "../../Renderer";
@@ -48,15 +47,7 @@ export class RenderableCylinders extends RenderablePrimitive {
   private outline: THREE.LineSegments;
 
   public constructor(renderer: Renderer) {
-    super("", renderer, {
-      receiveTime: -1n,
-      messageTime: -1n,
-      frameId: "",
-      pose: emptyPose(),
-      settings: { visible: true, color: undefined, selectedIdVariable: undefined },
-      settingsPath: [],
-      entity: undefined,
-    });
+    super("", renderer);
 
     this.geometry = renderer.sharedGeometry
       .getGeometry(`${this.constructor.name}-cylinder`, createGeometry)
@@ -222,6 +213,7 @@ export class RenderableCylinders extends RenderablePrimitive {
       const lifetimeNs = toNanoSec(entity.lifetime);
       this.userData.expiresAt = lifetimeNs === 0n ? undefined : receiveTime + lifetimeNs;
       this._updateMesh(entity.cylinders);
+      this.outline.visible = settings.showOutlines ?? true;
     }
   }
 

@@ -40,11 +40,13 @@ import { topicIsConvertibleToSchema } from "../topicIsConvertibleToSchema";
 import { makePose } from "../transforms";
 
 export type LayerSettingsEntity = BaseSettings & {
+  showOutlines: boolean | undefined;
   color: string | undefined;
   selectedIdVariable: string | undefined;
 };
 
-const DEFAULT_SETTINGS: LayerSettingsEntity = {
+const SCENE_ENTITIES_DEFAULT_SETTINGS: LayerSettingsEntity = {
+  showOutlines: true,
   visible: false,
   color: undefined,
   selectedIdVariable: undefined,
@@ -74,6 +76,11 @@ export class FoxgloveSceneEntities extends SceneExtension<TopicEntities> {
         order: topic.name.toLocaleLowerCase(),
         fields: {
           color: { label: "Color", input: "rgba", value: config.color },
+          showOutlines: {
+            label: "Show outlines",
+            input: "boolean",
+            value: config.showOutlines ?? SCENE_ENTITIES_DEFAULT_SETTINGS.showOutlines,
+          },
           selectedIdVariable: {
             label: "Selection Variable",
             input: "string",
@@ -82,7 +89,7 @@ export class FoxgloveSceneEntities extends SceneExtension<TopicEntities> {
             placeholder: SELECTED_ID_VARIABLE,
           },
         },
-        visible: config.visible ?? DEFAULT_SETTINGS.visible,
+        visible: config.visible ?? SCENE_ENTITIES_DEFAULT_SETTINGS.visible,
         handler: this.handleSettingsAction,
       };
 
@@ -127,7 +134,7 @@ export class FoxgloveSceneEntities extends SceneExtension<TopicEntities> {
       const settings = this.renderer.config.topics[topicName] as
         | Partial<LayerSettingsEntity>
         | undefined;
-      renderable.userData.settings = { ...DEFAULT_SETTINGS, ...settings };
+      renderable.userData.settings = { ...SCENE_ENTITIES_DEFAULT_SETTINGS, ...settings };
       renderable.updateSettings();
     }
   };
@@ -168,7 +175,7 @@ export class FoxgloveSceneEntities extends SceneExtension<TopicEntities> {
         pose: makePose(),
         settingsPath: ["topics", topic],
         topic,
-        settings: { ...DEFAULT_SETTINGS, ...userSettings },
+        settings: { ...SCENE_ENTITIES_DEFAULT_SETTINGS, ...userSettings },
       });
       this.renderables.set(topic, topicEntities);
       this.add(topicEntities);

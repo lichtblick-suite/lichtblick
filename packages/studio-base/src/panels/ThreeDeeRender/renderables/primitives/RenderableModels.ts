@@ -7,10 +7,9 @@ import * as THREE from "three";
 import { crc32 } from "@foxglove/crc";
 import { toNanoSec } from "@foxglove/rostime";
 import { ModelPrimitive, SceneEntity } from "@foxglove/schemas";
-import { emptyPose } from "@foxglove/studio-base/util/Pose";
 
 import { RenderablePrimitive } from "./RenderablePrimitive";
-import { LoadedModel } from "../../ModelCache";
+import { EDGE_LINE_SEGMENTS_NAME, LoadedModel } from "../../ModelCache";
 import type { Renderer } from "../../Renderer";
 import { makeRgba, rgbToThreeColor, stringToRgba } from "../../color";
 import { disposeMeshesRecursive } from "../../dispose";
@@ -52,15 +51,7 @@ export class RenderableModels extends RenderablePrimitive {
   private updateCount = 0;
 
   public constructor(renderer: Renderer) {
-    super("", renderer, {
-      receiveTime: -1n,
-      messageTime: -1n,
-      frameId: "",
-      pose: emptyPose(),
-      settings: { visible: true, color: undefined, selectedIdVariable: undefined },
-      settingsPath: [],
-      entity: undefined,
-    });
+    super("", renderer);
   }
 
   /**
@@ -203,7 +194,7 @@ export class RenderableModels extends RenderablePrimitive {
             this._disposeModel(renderable);
           }
         }
-
+        this.updateOutlineVisibility();
         this.renderer.queueAnimationFrame();
       });
   }
@@ -240,6 +231,20 @@ export class RenderableModels extends RenderablePrimitive {
 
   public updateSettings(settings: LayerSettingsEntity): void {
     this.update(this.userData.topic, this.userData.entity, settings, this.userData.receiveTime);
+  }
+
+  private updateOutlineVisibility(): void {
+    const showOutlines = this.getSettings()?.showOutlines ?? true;
+    this.traverse((lineSegments) => {
+      // Want to avoid picking up the LineSegments from the model itself
+      // only update line segments that we've added with the special name
+      if (
+        lineSegments instanceof THREE.LineSegments &&
+        lineSegments.name === EDGE_LINE_SEGMENTS_NAME
+      ) {
+        lineSegments.visible = showOutlines;
+      }
+    });
   }
 
   private async _loadCachedModel(

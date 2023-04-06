@@ -4,6 +4,8 @@
 
 import * as THREE from "three";
 
+import { EDGE_LINE_SEGMENTS_NAME } from "@foxglove/studio-base/panels/ThreeDeeRender/ModelCache";
+
 import { RenderableMarker } from "./RenderableMarker";
 import { makeStandardMaterial } from "./materials";
 import type { Renderer } from "../../Renderer";
@@ -87,6 +89,7 @@ export class RenderableMeshResource extends RenderableMarker {
           }
           this.mesh = mesh;
           this.add(mesh);
+          this.updateOutlineVisibility();
 
           // Remove any mesh fetch error message since loading was successful
           this.renderer.settings.errors.remove(this.userData.settingsPath, MESH_FETCH_FAILED);
@@ -101,8 +104,23 @@ export class RenderableMeshResource extends RenderableMarker {
           );
         });
     }
+    this.updateOutlineVisibility();
 
     this.scale.set(marker.scale.x, marker.scale.y, marker.scale.z);
+  }
+
+  private updateOutlineVisibility(): void {
+    const showOutlines = this.getSettings()?.showOutlines ?? true;
+    this.traverse((lineSegments) => {
+      // Want to avoid picking up the LineSegments from the model itself
+      // only update line segments that we've added with the special name
+      if (
+        lineSegments instanceof THREE.LineSegments &&
+        lineSegments.name === EDGE_LINE_SEGMENTS_NAME
+      ) {
+        lineSegments.visible = showOutlines;
+      }
+    });
   }
 
   private async _loadModel(

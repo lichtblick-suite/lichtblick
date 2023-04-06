@@ -20,8 +20,7 @@ export default {
   component: ThreeDeePanel,
 };
 
-Markers.parameters = { colorScheme: "dark", chromatic: { delay: 100 } };
-export function Markers(): JSX.Element {
+function AllMarkers(props: { showOutlines: boolean }): JSX.Element {
   const topics: Topic[] = [
     { name: "/tf", schemaName: "geometry_msgs/TransformStamped" },
     { name: "/markers", schemaName: "visualization_msgs/Marker" },
@@ -544,13 +543,23 @@ export function Markers(): JSX.Element {
             targetOrientation: [0, 0, 0, 1],
           },
           topics: {
-            "/markers": { visible: true },
+            "/markers": { visible: true, showOutlines: props.showOutlines },
           },
         }}
       />
     </PanelSetup>
   );
 }
+
+export function Markers(): JSX.Element {
+  return <AllMarkers showOutlines={true} />;
+}
+Markers.parameters = { colorScheme: "dark", chromatic: { delay: 100 } };
+
+export function MarkersNoOutlines(): JSX.Element {
+  return <AllMarkers showOutlines={false} />;
+}
+MarkersNoOutlines.parameters = { colorScheme: "dark", chromatic: { delay: 100 } };
 
 /**
  * Regression test: ability to reduce the number of points in a LineStrip marker to 0 after it is first rendered.

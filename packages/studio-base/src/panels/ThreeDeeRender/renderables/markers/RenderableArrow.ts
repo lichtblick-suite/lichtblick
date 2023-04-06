@@ -29,8 +29,8 @@ const tempDirection = new THREE.Vector3();
 export class RenderableArrow extends RenderableMarker {
   public shaftMesh: THREE.Mesh<THREE.CylinderGeometry, THREE.MeshStandardMaterial>;
   public headMesh: THREE.Mesh<THREE.ConeGeometry, THREE.MeshStandardMaterial>;
-  private shaftOutline: THREE.LineSegments | undefined;
-  private headOutline: THREE.LineSegments | undefined;
+  private shaftOutline: THREE.LineSegments;
+  private headOutline: THREE.LineSegments;
 
   public constructor(
     topic: string,
@@ -105,6 +105,11 @@ export class RenderableArrow extends RenderableMarker {
     this.shaftMesh.material.opacity = marker.color.a;
     this.headMesh.material.color.set(this.shaftMesh.material.color);
     this.headMesh.material.opacity = marker.color.a;
+
+    const settings = this.getSettings();
+
+    this.shaftOutline.visible = settings?.showOutlines ?? true;
+    this.headOutline.visible = settings?.showOutlines ?? true;
 
     // Adapted from <https://github.com/ros-visualization/rviz/blob/noetic-devel/src/rviz/default_plugin/markers/arrow_marker.cpp
     if (marker.points.length === 2) {

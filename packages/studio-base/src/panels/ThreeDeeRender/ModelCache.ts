@@ -274,6 +274,7 @@ export class ModelCache {
   }
 }
 
+export const EDGE_LINE_SEGMENTS_NAME = "edges";
 function addEdges(model: LoadedModel, edgeMaterial: THREE.Material): LoadedModel {
   const edgesToAdd: [edges: THREE.LineSegments, parent: THREE.Object3D][] = [];
 
@@ -289,6 +290,7 @@ function addEdges(model: LoadedModel, edgeMaterial: THREE.Material): LoadedModel
     // Draw edges for all meshes
     const edgesGeometry = new THREE.EdgesGeometry(child.geometry, 40);
     const line = new THREE.LineSegments(edgesGeometry, edgeMaterial);
+    line.name = EDGE_LINE_SEGMENTS_NAME;
     edgesToAdd.push([line, child]);
   });
 
