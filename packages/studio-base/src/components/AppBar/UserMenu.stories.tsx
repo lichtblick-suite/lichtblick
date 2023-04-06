@@ -50,7 +50,7 @@ function SignInStates(): JSX.Element {
       <div style={{ width: 224, paddingLeft: 16 }}>sign in undefined</div>
       <div style={{ width: 224, paddingLeft: 16 }}>no user present</div>
       <div style={{ width: 240, paddingLeft: 16 }}>user present</div>
-      <MenuStory top={44} left={0} />
+      <MenuStory top={44} left={16} />
       <CurrentUserContext.Provider
         value={{
           currentUser: undefined,
