@@ -1,7 +1,7 @@
 {
   "name": "@foxglove/studio-base",
-  "version": "1.48.0-dev",
   "description": "Core components of Foxglove Studio",
+  "private": true,
   "license": "MPL-2.0",
   "repository": {
     "type": "git",
@@ -12,18 +12,7 @@
     "email": "support@foxglove.dev"
   },
   "homepage": "https://foxglove.dev/",
-  "browser": "assets/index.js",
   "main": "src/index",
-  "files": [
-    "assets",
-    "src/**/*.js",
-    "src/**/*.d.ts"
-  ],
-  "scripts": {
-    "prepack": "yarn build:webpack && yarn build:tsc",
-    "build:tsc": "ttsc --module es2020 --project tsconfig.json",
-    "build:webpack": "cross-env TS_NODE_PROJECT=\"tsconfig.cli.json\" webpack --mode production --progress"
-  },
   "devDependencies": {
     "@emotion/cache": "11.10.5",
     "@emotion/react": "11.10.6",
@@ -109,9 +98,7 @@
     "chartjs-plugin-datalabels": "2.2.0",
     "chromatic": "6.17.1",
     "circular-dependency-plugin": "5.2.2",
-    "clean-webpack-plugin": "4.0.0",
     "comlink": "4.4.1",
-    "cross-env": "7.0.3",
     "crypto-browserify": "3.12.0",
     "css-loader": "6.7.3",
     "cytoscape": "3.23.0",
@@ -187,9 +174,7 @@
     "ts-key-enum": "2.0.12",
     "ts-loader": "9.4.2",
     "tss-react": "4.8.2",
-    "ttypescript": "1.5.15",
     "typescript": "4.9.5",
-    "typescript-transform-paths": "3.4.6",
     "url-search-params": "1.1.0",
     "use-debounce": "9.0.3",
     "use-immer": "0.8.1",

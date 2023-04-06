@@ -36,8 +36,6 @@ jobs:
             command: yarn run benchmark:build:prod
           - name: test
             command: yarn run test --maxWorkers=100%
-          - name: pack studio-base
-            command: yarn workspace @foxglove/studio-base pack
         include:
           - os: windows-2019
             config:

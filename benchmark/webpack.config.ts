@@ -54,7 +54,10 @@ const mainConfig = (env: unknown, argv: WebpackArgv): Configuration => {
     plugins.push(new ReactRefreshPlugin());
   }
 
-  const appWebpackConfig = makeConfig(env, argv, { allowUnusedVariables });
+  const appWebpackConfig = makeConfig(env, argv, {
+    allowUnusedVariables,
+    version: "0.0.0-benchmark",
+  });
 
   const config: Configuration = {
     name: "main",

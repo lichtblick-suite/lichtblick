@@ -25,7 +25,7 @@ export type ConfigParams = {
   /** Source map (`devtool`) setting to use for production builds */
   prodSourceMap: string | false;
   /** Set the app version information */
-  version?: string;
+  version: string;
 };
 
 export const devServerConfig = (params: ConfigParams): WebpackConfiguration => ({

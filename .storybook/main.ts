@@ -23,7 +23,7 @@ module.exports = {
     const studioWebpackConfig = makeConfig(
       undefined,
       { mode: config.mode },
-      { allowUnusedVariables: true },
+      { allowUnusedVariables: true, version: "0.0.0-storybook" },
     );
 
     return {

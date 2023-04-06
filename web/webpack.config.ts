@@ -6,11 +6,14 @@ import path from "path";
 
 import { ConfigParams, devServerConfig, mainConfig } from "@foxglove/studio-web/src/webpackConfigs";
 
+import packageJson from "../package.json";
+
 const params: ConfigParams = {
   outputPath: path.resolve(__dirname, ".webpack"),
   contextPath: path.resolve(__dirname, "src"),
   entrypoint: "./entrypoint.tsx",
   prodSourceMap: "source-map",
+  version: packageJson.version,
 };
 
 // foxglove-depcheck-used: webpack-dev-server

@@ -66,10 +66,6 @@ jobs:
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_PUBLISH_TOKEN }}
 
-      - run: npm publish ./packages/studio-base
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_PUBLISH_TOKEN }}
-
   docker:
     name: Publish to GHCR
     runs-on: ubuntu-20.04

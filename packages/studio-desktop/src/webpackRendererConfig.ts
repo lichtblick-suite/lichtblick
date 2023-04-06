@@ -27,7 +27,10 @@ export const webpackRendererConfig =
       plugins.push(new ReactRefreshPlugin());
     }
 
-    const appWebpackConfig = makeConfig(env, argv, { allowUnusedVariables });
+    const appWebpackConfig = makeConfig(env, argv, {
+      allowUnusedVariables,
+      version: params.packageJson.version,
+    });
 
     const config: Configuration = {
       ...appWebpackConfig,
