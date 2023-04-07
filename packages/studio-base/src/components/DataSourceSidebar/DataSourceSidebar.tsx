@@ -110,12 +110,6 @@ export default function DataSourceSidebar(props: Props): JSX.Element {
     }
   }, [playerPresence, showEventsTab, selectedEventId]);
 
-  const [hasDismissedWssErrorModal, setHasDismissedWssErrorModal] = useState(false);
-  const hasWssConnectionProblem = playerProblems.find(
-    (problem) =>
-      problem.severity === "error" && problem.message === "Insecure WebSocket connection",
-  );
-
   return (
     <SidebarContent
       disablePadding
@@ -191,9 +185,7 @@ export default function DataSourceSidebar(props: Props): JSX.Element {
           </>
         )}
       </Stack>
-      {hasWssConnectionProblem && !hasDismissedWssErrorModal && (
-        <WssErrorModal onClose={() => setHasDismissedWssErrorModal(true)} />
-      )}
+      <WssErrorModal playerProblems={playerProblems} />
     </SidebarContent>
   );
 }

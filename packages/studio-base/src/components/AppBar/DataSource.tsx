@@ -20,6 +20,7 @@ import {
 } from "@foxglove/studio-base/components/MessagePipeline";
 import Stack from "@foxglove/studio-base/components/Stack";
 import TextMiddleTruncate from "@foxglove/studio-base/components/TextMiddleTruncate";
+import WssErrorModal from "@foxglove/studio-base/components/WssErrorModal";
 import { PlayerPresence } from "@foxglove/studio-base/players/types";
 
 const LEFT_ICON_SIZE = 19;
@@ -130,6 +131,7 @@ export function DataSource({
   return (
     <>
       {problemModal}
+      <WssErrorModal playerProblems={playerProblems} />
       <Stack direction="row" alignItems="center">
         <ButtonBase className={classes.button} onClick={onSelectDataSourceAction}>
           <div className={cx(classes.adornment, { [classes.adornmentError]: error })}>

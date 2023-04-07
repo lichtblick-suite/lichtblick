@@ -13,5 +13,9 @@ export default {
 };
 
 export function Default(): JSX.Element {
-  return <WssErrorModal />;
+  return (
+    <WssErrorModal
+      playerProblems={[{ severity: "error", message: "Insecure WebSocket connection" }]}
+    />
+  );
 }

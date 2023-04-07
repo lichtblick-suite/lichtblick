@@ -7,6 +7,8 @@ import { Dialog, IconButton, Stack, Typography } from "@mui/material";
 import { useState } from "react";
 import { makeStyles } from "tss-react/mui";
 
+import { PlayerProblem } from "@foxglove/studio-base/players/types";
+
 import WssErrorModalScreenshot from "./WssErrorModal.png";
 
 const useStyles = makeStyles()({
@@ -15,16 +17,26 @@ const useStyles = makeStyles()({
   },
 });
 
-export default function WssErrorModal(props: { onClose?: () => void }): JSX.Element {
-  const [open, setOpen] = useState(true);
-  const { onClose } = props;
-
+export default function WssErrorModal(props: { playerProblems?: PlayerProblem[] }): JSX.Element {
+  const { playerProblems } = props;
   const { classes } = useStyles();
+
+  const [open, setOpen] = useState(true);
+  const [hasDismissedWssErrorModal, setHasDismissedWssErrorModal] = useState(false);
 
   const handleClose = () => {
     setOpen(false);
-    onClose?.();
+    setHasDismissedWssErrorModal(true);
   };
+
+  const hasWssConnectionProblem = playerProblems?.find(
+    (problem) =>
+      problem.severity === "error" && problem.message === "Insecure WebSocket connection",
+  );
+
+  if (hasDismissedWssErrorModal || !hasWssConnectionProblem) {
+    return <></>;
+  }
 
   return (
     <Dialog open={open} onClose={handleClose}>
