@@ -37,6 +37,6 @@
     "@protobufjs/base64": "1.1.2",
     "flatbuffers": "23.3.3",
     "flatbuffers_reflection": "0.0.3",
-    "protobufjs": "7.2.2"
+    "protobufjs": "patch:protobufjs@7.2.3#../../patches/protobufjs.patch"
   }
 }

@@ -1,0 +1,150 @@
+diff --git a/src/converter.js b/src/converter.js
+index c9e68b5bee3ce7dd9a8190cd9c53d4d234d3eba0..14765609553fcd404b79ddd84b8d4a85ad2325db 100644
+--- a/src/converter.js
++++ b/src/converter.js
+@@ -67,14 +67,7 @@ function genValuePartial_fromObject(gen, field, fieldIndex, prop) {
+             case "sint64":
+             case "fixed64":
+             case "sfixed64": gen
+-                ("if(util.Long)")
+-                    ("(m%s=util.Long.fromValue(d%s)).unsigned=%j", prop, prop, isUnsigned)
+-                ("else if(typeof d%s===\"string\")", prop)
+-                    ("m%s=parseInt(d%s,10)", prop, prop)
+-                ("else if(typeof d%s===\"number\")", prop)
+-                    ("m%s=d%s", prop, prop)
+-                ("else if(typeof d%s===\"object\")", prop)
+-                    ("m%s=new util.LongBits(d%s.low>>>0,d%s.high>>>0).toNumber(%s)", prop, prop, prop, isUnsigned ? "true" : "");
++                ("(m%s=d%s)", prop, prop)
+                 break;
+             case "bytes": gen
+                 ("if(typeof d%s===\"string\")", prop)
+@@ -181,11 +174,7 @@ function genValuePartial_toObject(gen, field, fieldIndex, prop) {
+             case "sint64":
+             case "fixed64":
+             case "sfixed64": gen
+-            ("if(typeof m%s===\"number\")", prop)
+-                ("d%s=o.longs===String?String(m%s):m%s", prop, prop, prop)
+-            ("else") // Long-like
+-                ("d%s=o.longs===String?util.Long.prototype.toString.call(m%s):o.longs===Number?new util.LongBits(m%s.low>>>0,m%s.high>>>0).toNumber(%s):m%s", prop, prop, prop, prop, isUnsigned ? "true": "", prop);
+-                break;
++            ("d%s=m%s", prop, prop);
+             case "bytes": gen
+             ("d%s=o.bytes===String?util.base64.encode(m%s,0,m%s.length):o.bytes===Array?Array.prototype.slice.call(m%s):m%s", prop, prop, prop, prop, prop);
+                 break;
+@@ -247,11 +236,7 @@ converter.toObject = function toObject(mtype) {
+             if (field.resolvedType instanceof Enum) gen
+         ("d%s=o.enums===String?%j:%j", prop, field.resolvedType.valuesById[field.typeDefault], field.typeDefault);
+             else if (field.long) gen
+-        ("if(util.Long){")
+-            ("var n=new util.Long(%i,%i,%j)", field.typeDefault.low, field.typeDefault.high, field.typeDefault.unsigned)
+-            ("d%s=o.longs===String?n.toString():o.longs===Number?n.toNumber():n", prop)
+-        ("}else")
+-            ("d%s=o.longs===String?%j:%i", prop, field.typeDefault.toString(), field.typeDefault.toNumber());
++        ("d%s=%sn", prop, field.typeDefault);
+             else if (field.bytes) {
+                 var arrayDefault = "[" + Array.prototype.slice.call(field.typeDefault).join(",") + "]";
+                 gen
+diff --git a/src/decoder.js b/src/decoder.js
+index f55451f258d24bb5bffc5670c6bb13b8f5002c5a..3e78ee8329526ca469e0f36a47268b1638793d8e 100644
+--- a/src/decoder.js
++++ b/src/decoder.js
+@@ -72,7 +72,7 @@ function decoder(mtype) {
+                 ("}");
+ 
+             if (types.long[field.keyType] !== undefined) gen
+-                ("%s[typeof k===\"object\"?util.longToHash(k):k]=value", ref);
++                ("%s[k]=value", ref);
+             else gen
+                 ("%s[k]=value", ref);
+ 
+diff --git a/src/field.js b/src/field.js
+index e0feb8b4346a07970a0493dd724c0d4ea22c5c9c..e25512009eeadb6136c24a64e8bdb77ecd8212e5 100644
+--- a/src/field.js
++++ b/src/field.js
+@@ -157,7 +157,7 @@ function Field(name, id, type, rule, extend, options, comment) {
+      * Whether this field's value should be treated as a long.
+      * @type {boolean}
+      */
+-    this.long = util.Long ? types.long[type] !== undefined : /* istanbul ignore next */ false;
++    this.long = types.long[type] !== undefined;
+ 
+     /**
+      * Whether this field's value is a buffer.
+@@ -292,11 +292,7 @@ Field.prototype.resolve = function resolve() {
+ 
+     // convert to internal data type if necesssary
+     if (this.long) {
+-        this.typeDefault = util.Long.fromNumber(this.typeDefault, this.type.charAt(0) === "u");
+-
+-        /* istanbul ignore else */
+-        if (Object.freeze)
+-            Object.freeze(this.typeDefault); // long instances are meant to be immutable anyway (i.e. use small int cache that even requires it)
++        // nothing to do
+ 
+     } else if (this.bytes && typeof this.typeDefault === "string") {
+         var buf;
+diff --git a/src/reader.js b/src/reader.js
+index 1b6ae13f8805b616637dc81a96331a4646a64809..2b0a00fe2a22ea50dfb5bc7cbeab6c47734d9e78 100644
+--- a/src/reader.js
++++ b/src/reader.js
+@@ -384,7 +384,7 @@ Reader._configure = function(BufferReader_) {
+     Reader.create = create();
+     BufferReader._configure();
+ 
+-    var fn = util.Long ? "toLong" : /* istanbul ignore next */ "toNumber";
++    var fn = "toBigInt";
+     util.merge(Reader.prototype, {
+ 
+         int64: function read_int64() {
+diff --git a/src/types.js b/src/types.js
+index 5fda19a69a4f226ed0f4e4504ca0106fe0754a3d..19ba4eb101a4f35dd09183882daab14449033047 100644
+--- a/src/types.js
++++ b/src/types.js
+@@ -100,11 +100,11 @@ types.defaults = bake([
+     /* sint32   */ 0,
+     /* fixed32  */ 0,
+     /* sfixed32 */ 0,
+-    /* int64    */ 0,
+-    /* uint64   */ 0,
+-    /* sint64   */ 0,
+-    /* fixed64  */ 0,
+-    /* sfixed64 */ 0,
++    /* int64    */ 0n,
++    /* uint64   */ 0n,
++    /* sint64   */ 0n,
++    /* fixed64  */ 0n,
++    /* sfixed64 */ 0n,
+     /* bool     */ false,
+     /* string   */ "",
+     /* bytes    */ util.emptyArray,
+@@ -122,9 +122,9 @@ types.defaults = bake([
+  * @property {number} sfixed64=1 Fixed64 wire type
+  */
+ types.long = bake([
+-    /* int64    */ 0,
+-    /* uint64   */ 0,
+-    /* sint64   */ 0,
++    /* int64    */ 1,
++    /* uint64   */ 1,
++    /* sint64   */ 1,
+     /* fixed64  */ 1,
+     /* sfixed64 */ 1
+ ], 7);
+diff --git a/src/util/longbits.js b/src/util/longbits.js
+index 11bfb1c002e29d1e91c19ac5a3696d89fbaf419c..fd519d84abcdf92e290bb8d5b23846357940123d 100644
+--- a/src/util/longbits.js
++++ b/src/util/longbits.js
+@@ -106,6 +106,13 @@ LongBits.prototype.toNumber = function toNumber(unsigned) {
+     return this.lo + this.hi * 4294967296;
+ };
+ 
++const view = new DataView(new ArrayBuffer(8));
++LongBits.prototype.toBigInt = function toBigInt(unsigned) {
++    view.setUint32(0, this.lo, true);
++    view.setUint32(4, this.hi, true);
++    return unsigned ? view.getBigUint64(0, true) : view.getBigInt64(0, true);
++};
++
+ /**
+  * Converts this long bits to a long.
+  * @param {boolean} [unsigned=false] Whether unsigned or not

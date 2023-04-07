@@ -2231,7 +2231,7 @@ __metadata:
     "@types/protobufjs": "workspace:*"
     flatbuffers: 23.3.3
     flatbuffers_reflection: 0.0.3
-    protobufjs: 7.2.2
+    protobufjs: "patch:protobufjs@7.2.3#../../patches/protobufjs.patch"
     typescript: 5.0.3
   languageName: unknown
   linkType: soft
@@ -19279,9 +19279,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"protobufjs@npm:7.2.2":
-  version: 7.2.2
-  resolution: "protobufjs@npm:7.2.2"
+"protobufjs@npm:7.2.3":
+  version: 7.2.3
+  resolution: "protobufjs@npm:7.2.3"
   dependencies:
     "@protobufjs/aspromise": ^1.1.2
     "@protobufjs/base64": ^1.1.2
@@ -19295,7 +19295,27 @@ __metadata:
     "@protobufjs/utf8": ^1.1.0
     "@types/node": ">=13.7.0"
     long: ^5.0.0
-  checksum: 86166e8f3e46789fa4d117ae72c17356db36bf87c0e0710d224be32e543b1c378a94e66dc2b1de5af45edfc25f56acfc7e688c50c956426a3ae97bc474f4445c
+  checksum: 9afa6de5fced0139a5180c063718508fac3ea734a9f1aceb99712367b15473a83327f91193f16b63540f9112b09a40912f5f0441a9b0d3f3c6a1c7f707d78249
+  languageName: node
+  linkType: hard
+
+"protobufjs@patch:protobufjs@7.2.3#../../patches/protobufjs.patch::locator=%40foxglove%2Fmcap-support%40workspace%3Apackages%2Fmcap-support":
+  version: 7.2.3
+  resolution: "protobufjs@patch:protobufjs@npm%3A7.2.3#../../patches/protobufjs.patch::version=7.2.3&hash=b342bd&locator=%40foxglove%2Fmcap-support%40workspace%3Apackages%2Fmcap-support"
+  dependencies:
+    "@protobufjs/aspromise": ^1.1.2
+    "@protobufjs/base64": ^1.1.2
+    "@protobufjs/codegen": ^2.0.4
+    "@protobufjs/eventemitter": ^1.1.0
+    "@protobufjs/fetch": ^1.1.0
+    "@protobufjs/float": ^1.0.2
+    "@protobufjs/inquire": ^1.1.0
+    "@protobufjs/path": ^1.1.2
+    "@protobufjs/pool": ^1.1.0
+    "@protobufjs/utf8": ^1.1.0
+    "@types/node": ">=13.7.0"
+    long: ^5.0.0
+  checksum: 30f1cd2382edf301c0c5b05420fa0c7c5806dfc4ca336742d5638d6afcf89ec7ba2e0ededdb20ae5c8ca2810f7ba612dfa3866cf79c8038015b6b8f3366e23ea
   languageName: node
   linkType: hard
 
