@@ -98,6 +98,7 @@ export function pointSettingsNode(
       placeholder: "2",
       precision: 2,
       value: pointSize,
+      min: 0,
     },
     pointShape: {
       label: "Point shape",
