@@ -254,12 +254,12 @@ export class Images extends SceneExtension<ImageRenderable> {
         return;
       }
 
-      const { image, cameraModel, receiveTime } = renderable.userData;
-      if (!image || !cameraModel) {
+      const { image, cameraInfo, receiveTime } = renderable.userData;
+      if (!image || !cameraInfo) {
         return;
       }
 
-      this._updateImageRenderable(renderable, image, cameraModel, receiveTime, settings);
+      this._updateImageRenderable(renderable, image, cameraInfo, receiveTime, settings);
       return;
     }
 
@@ -298,9 +298,8 @@ export class Images extends SceneExtension<ImageRenderable> {
       return;
     }
 
-    const cameraModel = this._recomputeCameraModel(newRenderable, cameraInfo);
-    if (image && cameraModel) {
-      this._updateImageRenderable(newRenderable, image, cameraModel, receiveTime, settings);
+    if (image) {
+      this._updateImageRenderable(newRenderable, image, cameraInfo, receiveTime, settings);
     }
   };
 
@@ -398,10 +397,7 @@ export class Images extends SceneExtension<ImageRenderable> {
       return;
     }
 
-    const cameraModel = this._recomputeCameraModel(renderable, cameraInfo);
-    if (cameraModel) {
-      this._updateImageRenderable(renderable, image, cameraModel, receiveTime, settings);
-    }
+    this._updateImageRenderable(renderable, image, cameraInfo, receiveTime, settings);
   };
 
   private handleCameraInfo = (
@@ -436,18 +432,15 @@ export class Images extends SceneExtension<ImageRenderable> {
         continue;
       }
 
-      const cameraModel = this._recomputeCameraModel(renderable, cameraInfo);
-      if (cameraModel) {
-        this._updateImageRenderable(renderable, image, cameraModel, receiveTime, settings);
-      }
+      this._updateImageRenderable(renderable, image, cameraInfo, receiveTime, settings);
     }
   };
 
   /**
-   * Recompute a new camera model if the newCameraInfo differs from the current renderable info
+   * Recompute a new camera model if the newCameraInfo differs from the current renderable info. If
+   * the info is unchanged then the existing camera model is returned.
    *
-   * Return a new camera model if the info differs, return undefined if the info is unchanged or
-   * if a camera model could not be created.
+   * If a camera model could not be created this returns undefined.
    *
    * This function will set a topic error on the image topic if the camera model creation fails.
    */
@@ -455,10 +448,10 @@ export class Images extends SceneExtension<ImageRenderable> {
     renderable: ImageRenderable,
     newCameraInfo: CameraInfo,
   ): PinholeCameraModel | undefined {
-    // If the camera info has not changed, we don't need to make a new model
+    // If the camera info has not changed, we don't need to make a new model and can return the existing one
     const dataEqual = cameraInfosEqual(renderable.userData.cameraInfo, newCameraInfo);
     if (dataEqual && renderable.userData.cameraModel != undefined) {
-      return;
+      return renderable.userData.cameraModel;
     }
 
     const imageTopic = renderable.userData.topic;
@@ -480,6 +473,7 @@ export class Images extends SceneExtension<ImageRenderable> {
     }
 
     // Save the latest camera info if we were able to make a model
+    // This is used to avoid recomputing the model if the camera info hasn't changed (above)
     renderable.userData.cameraInfo = newCameraInfo;
 
     return renderable.userData.cameraModel;
@@ -488,7 +482,7 @@ export class Images extends SceneExtension<ImageRenderable> {
   private _updateImageRenderable(
     renderable: ImageRenderable,
     image: AnyImage,
-    cameraModel: PinholeCameraModel,
+    cameraInfo: CameraInfo,
     receiveTime: bigint,
     settings: Partial<LayerSettingsImage> | undefined,
   ): void {
@@ -502,7 +496,15 @@ export class Images extends SceneExtension<ImageRenderable> {
     const topic = renderable.userData.topic;
 
     renderable.userData.image = image;
-    renderable.userData.cameraModel = cameraModel;
+    const cameraModel = (renderable.userData.cameraModel = this._recomputeCameraModel(
+      renderable,
+      cameraInfo,
+    ));
+
+    // We need a valid camera model to render the image
+    if (!cameraModel) {
+      return;
+    }
 
     // If there is camera info, the frameId comes from the camera info since the user may have
     // selected camera info with a different frame than our image frame.
