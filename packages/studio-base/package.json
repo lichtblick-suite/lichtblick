@@ -96,7 +96,7 @@
     "chart.js": "4.2.1",
     "chartjs-plugin-annotation": "2.2.1",
     "chartjs-plugin-datalabels": "2.2.0",
-    "chromatic": "6.17.1",
+    "chromatic": "6.17.3",
     "circular-dependency-plugin": "5.2.2",
     "comlink": "4.4.1",
     "crypto-browserify": "3.12.0",

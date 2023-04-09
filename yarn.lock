@@ -2493,7 +2493,7 @@ __metadata:
     chart.js: 4.2.1
     chartjs-plugin-annotation: 2.2.1
     chartjs-plugin-datalabels: 2.2.0
-    chromatic: 6.17.1
+    chromatic: 6.17.3
     circular-dependency-plugin: 5.2.2
     comlink: 4.4.1
     crypto-browserify: 3.12.0
@@ -8934,9 +8934,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"chromatic@npm:6.17.1":
-  version: 6.17.1
-  resolution: "chromatic@npm:6.17.1"
+"chromatic@npm:6.17.3":
+  version: 6.17.3
+  resolution: "chromatic@npm:6.17.3"
   dependencies:
     "@discoveryjs/json-ext": ^0.5.7
     "@types/webpack-env": ^1.17.0
@@ -8945,7 +8945,7 @@ __metadata:
     chroma: bin/main.cjs
     chromatic: bin/main.cjs
     chromatic-cli: bin/main.cjs
-  checksum: cac153f5e3ddc5faccffbabb1407271dcc8e63fc44bdf59fbe7acb00dbd779af82af7d37bff23091023bc9825ff5ceada51c18880fa5549e7262566b9fd9c296
+  checksum: 4ac84633a15993302c1d82a49d76adb7622f79c76ed2282960816a99f82263c115ffb4a7c86d61047f07b5d4d252515a3433481732b0e87af4be6c33e29f381f
   languageName: node
   linkType: hard
 
