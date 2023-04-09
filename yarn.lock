@@ -2510,7 +2510,7 @@ __metadata:
     fzf: 0.5.1
     gl-matrix: 3.4.3
     hammerjs: 2.0.8
-    i18next: 22.4.13
+    i18next: 22.4.14
     i18next-browser-languagedetector: 7.0.1
     idb: 7.1.1
     idb-keyval: 6.2.0
@@ -13917,12 +13917,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"i18next@npm:22.4.13":
-  version: 22.4.13
-  resolution: "i18next@npm:22.4.13"
+"i18next@npm:22.4.14":
+  version: 22.4.14
+  resolution: "i18next@npm:22.4.14"
   dependencies:
     "@babel/runtime": ^7.20.6
-  checksum: a40ca4ce749854a806a01e3e60ee492f2911b1f7acb6ed338bb023211259ef8c39e914734d10197d3279941459767897ceb1989c8e24cd73730fdf211e079037
+  checksum: 963b70c7e1fee9666ef4d9ea87a63d0c9483007e2a0ea9520356e43a2cd550f3eb1cab24c57a102f3e84fd737fdff41bafc953dafc3bd6589dc9ea52ddb49905
   languageName: node
   linkType: hard
 
