@@ -5,8 +5,7 @@
 import { downloadFiles } from "@foxglove/studio-base/util/download";
 import { formatTimeRaw } from "@foxglove/studio-base/util/time";
 
-import { DataSet, Datum } from "./internalTypes";
-import { PlotXAxisVal } from "./types";
+import { DataSet, Datum, PlotXAxisVal } from "./internalTypes";
 
 function getCSVRow(label: string | undefined, data: Datum) {
   const { x, value, receiveTime, headerStamp } = data;

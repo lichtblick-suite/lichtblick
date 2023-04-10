@@ -6,7 +6,7 @@ import * as THREE from "three";
 
 import { RenderableMarker } from "./RenderableMarker";
 import { makeStandardMaterial } from "./materials";
-import type { Renderer } from "../../Renderer";
+import type { IRenderer } from "../../IRenderer";
 import { rgbToThreeColor } from "../../color";
 import { Marker } from "../../ros";
 
@@ -18,7 +18,7 @@ export class RenderableCube extends RenderableMarker {
     topic: string,
     marker: Marker,
     receiveTime: bigint | undefined,
-    renderer: Renderer,
+    renderer: IRenderer,
   ) {
     super(topic, marker, receiveTime, renderer);
 

@@ -27,8 +27,8 @@ import type { RosObject, RosValue } from "@foxglove/studio-base/players/types";
 
 import { colorHasTransparency, getColorConverter } from "./pointClouds/colors";
 import { FieldReader, getReader, isSupportedField } from "./pointClouds/fieldReaders";
+import type { IRenderer } from "../IRenderer";
 import { BaseUserData, Renderable } from "../Renderable";
-import { Renderer } from "../Renderer";
 import { PartialMessage, PartialMessageEvent, SceneExtension } from "../SceneExtension";
 import { SettingsTreeEntry, SettingsTreeNodeWithActionHandler } from "../SettingsManager";
 import { POINTCLOUD_DATATYPES as FOXGLOVE_POINTCLOUD_DATATYPES } from "../foxglove";
@@ -103,7 +103,7 @@ export class PointCloudRenderable extends Renderable<PointCloudUserData> {
   private pointsHistory: RenderObjectHistory<PointCloudRenderable>;
   private stixelsHistory: RenderObjectHistory<PointCloudRenderable>;
 
-  public constructor(topic: string, renderer: Renderer, userData: PointCloudUserData) {
+  public constructor(topic: string, renderer: IRenderer, userData: PointCloudUserData) {
     super(topic, renderer, userData);
 
     const isDecay = userData.settings.decayTime > 0;
@@ -650,7 +650,7 @@ export class PointCloudRenderable extends Renderable<PointCloudUserData> {
 export class PointClouds extends SceneExtension<PointCloudRenderable> {
   private fieldsByTopic = new Map<string, string[]>();
 
-  public constructor(renderer: Renderer) {
+  public constructor(renderer: IRenderer) {
     super("foxglove.PointClouds", renderer);
 
     renderer.addSchemaSubscriptions(ROS_POINTCLOUD_DATATYPES, this.handleRosPointCloud);

@@ -22,8 +22,8 @@ import { SettingsTreeAction } from "@foxglove/studio";
 
 import { TopicEntities } from "./TopicEntities";
 import { PrimitivePool } from "./primitives/PrimitivePool";
+import type { IRenderer } from "../IRenderer";
 import { SELECTED_ID_VARIABLE } from "../Renderable";
-import { Renderer } from "../Renderer";
 import { PartialMessage, PartialMessageEvent, SceneExtension } from "../SceneExtension";
 import { SettingsTreeEntry, SettingsTreeNodeWithActionHandler } from "../SettingsManager";
 import { SCENE_UPDATE_DATATYPES } from "../foxglove";
@@ -35,15 +35,9 @@ import {
   normalizeVector3,
   normalizeByteArray,
 } from "../normalizeMessages";
-import { BaseSettings } from "../settings";
+import { LayerSettingsEntity } from "../settings";
 import { topicIsConvertibleToSchema } from "../topicIsConvertibleToSchema";
 import { makePose } from "../transforms";
-
-export type LayerSettingsEntity = BaseSettings & {
-  showOutlines: boolean | undefined;
-  color: string | undefined;
-  selectedIdVariable: string | undefined;
-};
 
 const SCENE_ENTITIES_DEFAULT_SETTINGS: LayerSettingsEntity = {
   showOutlines: true,
@@ -55,7 +49,7 @@ const SCENE_ENTITIES_DEFAULT_SETTINGS: LayerSettingsEntity = {
 export class FoxgloveSceneEntities extends SceneExtension<TopicEntities> {
   private primitivePool = new PrimitivePool(this.renderer);
 
-  public constructor(renderer: Renderer) {
+  public constructor(renderer: IRenderer) {
     super("foxglove.SceneEntities", renderer);
 
     renderer.addSchemaSubscriptions(SCENE_UPDATE_DATATYPES, this.handleSceneUpdate);

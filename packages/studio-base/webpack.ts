@@ -2,7 +2,6 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import CircularDependencyPlugin from "circular-dependency-plugin";
 import { ESBuildMinifyPlugin } from "esbuild-loader";
 import ForkTsCheckerWebpackPlugin from "fork-ts-checker-webpack-plugin";
 import monacoPkg from "monaco-editor/package.json";
@@ -10,7 +9,7 @@ import MonacoWebpackPlugin from "monaco-editor-webpack-plugin";
 import path from "path";
 import ReactRefreshTypescript from "react-refresh-typescript";
 import ts from "typescript";
-import webpack, { Configuration, WebpackPluginInstance } from "webpack";
+import webpack, { Configuration } from "webpack";
 
 import { createTssReactNameTransformer } from "@foxglove/typescript-transformers";
 
@@ -225,10 +224,6 @@ export function makeConfig(
       ],
     },
     plugins: [
-      new CircularDependencyPlugin({
-        exclude: /node_modules/,
-        failOnError: true,
-      }) as WebpackPluginInstance,
       new webpack.ProvidePlugin({
         // since we avoid "import React from 'react'" we shim here when used globally
         React: "react",

@@ -4,7 +4,7 @@
 
 import { Link } from "@mui/material";
 
-import { IDataSourceFactory } from "@foxglove/studio-base";
+import { IDataSourceFactory } from "@foxglove/studio-base/context/PlayerSelectionContext";
 
 export default class Ros2UnavailableDataSourceFactory implements IDataSourceFactory {
   public id = "ros2-socket";

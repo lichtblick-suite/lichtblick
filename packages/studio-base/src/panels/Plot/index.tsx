@@ -66,7 +66,7 @@ import { usePlotPanelSettings } from "./settings";
 import { PlotConfig } from "./types";
 
 export { plotableRosTypes } from "./types";
-export type { PlotConfig, PlotXAxisVal } from "./types";
+export type { PlotConfig } from "./types";
 
 const defaultSidebarDimension = 240;
 

@@ -5,10 +5,12 @@
 
 import { fromNanoSec } from "@foxglove/rostime";
 import { MessageEvent } from "@foxglove/studio";
-import { Renderer, RendererConfig } from "@foxglove/studio-base/panels/ThreeDeeRender/Renderer";
+import { Renderer } from "@foxglove/studio-base/panels/ThreeDeeRender/Renderer";
 import { DEFAULT_CAMERA_STATE } from "@foxglove/studio-base/panels/ThreeDeeRender/camera";
 import { DEFAULT_PUBLISH_SETTINGS } from "@foxglove/studio-base/panels/ThreeDeeRender/renderables/PublishSettings";
 import { TFMessage } from "@foxglove/studio-base/panels/ThreeDeeRender/ros";
+
+import { RendererConfig } from "./IRenderer";
 
 // Jest doesn't support ES module imports fully yet, so we need to mock the wasm file
 jest.mock("three/examples/jsm/libs/draco/draco_decoder.wasm", () => "");

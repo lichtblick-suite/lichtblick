@@ -7,15 +7,15 @@ import { set } from "lodash";
 
 import { SettingsTreeAction } from "@foxglove/studio";
 
+import type { IRenderer } from "../IRenderer";
 import { DEFAULT_MESH_UP_AXIS } from "../ModelCache";
-import { Renderer } from "../Renderer";
 import { SceneExtension } from "../SceneExtension";
 import { SettingsTreeEntry } from "../SettingsManager";
 
 export const DEFAULT_LABEL_SCALE_FACTOR = 1;
 
 export class SceneSettings extends SceneExtension {
-  public constructor(renderer: Renderer) {
+  public constructor(renderer: IRenderer) {
     super("foxglove.SceneSettings", renderer);
 
     renderer.labelPool.scaleFactor =

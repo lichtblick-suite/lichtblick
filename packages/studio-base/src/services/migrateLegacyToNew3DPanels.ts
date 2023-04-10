@@ -7,7 +7,7 @@ import { MosaicNode } from "react-mosaic-component";
 
 import { filterMap } from "@foxglove/den/collection";
 import { LayoutData } from "@foxglove/studio-base/context/CurrentLayoutContext/actions";
-import type { RendererConfig } from "@foxglove/studio-base/panels/ThreeDeeRender/Renderer";
+import type { RendererConfig } from "@foxglove/studio-base/panels/ThreeDeeRender/IRenderer";
 import { DEFAULT_CAMERA_STATE } from "@foxglove/studio-base/panels/ThreeDeeRender/camera";
 import {
   getAllPanelIds,

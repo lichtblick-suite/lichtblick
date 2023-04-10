@@ -7,11 +7,11 @@ import * as THREE from "three";
 import { toNanoSec } from "@foxglove/rostime";
 import { RosValue } from "@foxglove/studio-base/players/types";
 
+import type { IRenderer } from "../../IRenderer";
 import { BaseUserData, Renderable } from "../../Renderable";
-import type { Renderer } from "../../Renderer";
 import { makeRgba, rgbToThreeColor, stringToRgba } from "../../color";
 import { Marker } from "../../ros";
-import { LayerSettingsMarker } from "../Markers";
+import type { LayerSettingsMarker } from "../TopicMarkers";
 
 const tempColor = new THREE.Color();
 const tempColor2 = new THREE.Color();
@@ -33,7 +33,7 @@ export class RenderableMarker extends Renderable<MarkerUserData> {
     topic: string,
     marker: Marker,
     receiveTime: bigint | undefined,
-    renderer: Renderer,
+    renderer: IRenderer,
   ) {
     const name = getMarkerId(topic, marker.ns, marker.id);
     const hasLifetime = marker.lifetime.sec !== 0 || marker.lifetime.nsec !== 0;

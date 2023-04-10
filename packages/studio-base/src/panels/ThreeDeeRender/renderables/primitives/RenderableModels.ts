@@ -9,11 +9,11 @@ import { toNanoSec } from "@foxglove/rostime";
 import { ModelPrimitive, SceneEntity } from "@foxglove/schemas";
 
 import { RenderablePrimitive } from "./RenderablePrimitive";
+import type { IRenderer } from "../../IRenderer";
 import { EDGE_LINE_SEGMENTS_NAME, LoadedModel } from "../../ModelCache";
-import type { Renderer } from "../../Renderer";
 import { makeRgba, rgbToThreeColor, stringToRgba } from "../../color";
 import { disposeMeshesRecursive } from "../../dispose";
-import { LayerSettingsEntity } from "../SceneEntities";
+import { LayerSettingsEntity } from "../../settings";
 import { removeLights, replaceMaterials } from "../models";
 
 const tempRgba = makeRgba();
@@ -50,7 +50,7 @@ export class RenderableModels extends RenderablePrimitive {
   private renderablesByUrl = new Map<string, RenderableModel[]>();
   private updateCount = 0;
 
-  public constructor(renderer: Renderer) {
+  public constructor(renderer: IRenderer) {
     super("", renderer);
   }
 

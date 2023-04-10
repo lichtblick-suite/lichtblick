@@ -7,7 +7,7 @@ import * as THREE from "three";
 import { RenderableMarker } from "./RenderableMarker";
 import { markerHasTransparency, makePointsMaterial } from "./materials";
 import { DynamicBufferGeometry } from "../../DynamicBufferGeometry";
-import type { Renderer } from "../../Renderer";
+import type { IRenderer } from "../../IRenderer";
 import { Marker } from "../../ros";
 
 export class RenderablePoints extends RenderableMarker {
@@ -18,7 +18,7 @@ export class RenderablePoints extends RenderableMarker {
     topic: string,
     marker: Marker,
     receiveTime: bigint | undefined,
-    renderer: Renderer,
+    renderer: IRenderer,
   ) {
     super(topic, marker, receiveTime, renderer);
 

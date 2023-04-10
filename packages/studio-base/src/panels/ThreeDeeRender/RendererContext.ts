@@ -5,16 +5,16 @@
 import EventEmitter from "eventemitter3";
 import { createContext, useContext, useEffect } from "react";
 
-import { Renderer, RendererEvents } from "./Renderer";
+import type { IRenderer, RendererEvents } from "./IRenderer";
 
-export const RendererContext = createContext<Renderer | undefined>(undefined);
+export const RendererContext = createContext<IRenderer | undefined>(undefined);
 
 /**
  * React hook to retrieve the Renderer instance registered with the
  * RendererContext. This will always return undefined from the ThreeDeeRender()
  * component since the context exists below ThreeDeeRender().
  */
-export function useRenderer(): Renderer | undefined {
+export function useRenderer(): IRenderer | undefined {
   const renderer = useContext(RendererContext);
   return renderer ?? undefined;
 }
@@ -33,7 +33,7 @@ export function useRendererEvent<K extends keyof RendererEvents>(
   listener: (
     ...args: EventEmitter.ArgumentMap<RendererEvents>[Extract<K, keyof RendererEvents>]
   ) => void,
-  rendererInstance?: Renderer | ReactNull,
+  rendererInstance?: IRenderer | ReactNull,
 ): void {
   const usedRenderer = useRenderer();
   const renderer = rendererInstance ?? usedRenderer;

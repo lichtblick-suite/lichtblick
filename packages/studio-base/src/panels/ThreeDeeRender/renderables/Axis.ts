@@ -4,7 +4,7 @@
 
 import * as THREE from "three";
 
-import { Renderer } from "../Renderer";
+import type { IRenderer } from "../IRenderer";
 import { arrowHeadSubdivisions, arrowShaftSubdivisions, DetailLevel } from "../lod";
 import { ColorRGBA } from "../ros";
 
@@ -27,11 +27,11 @@ const tempMat4 = new THREE.Matrix4();
 const tempVec = new THREE.Vector3();
 
 export class Axis extends THREE.Object3D {
-  private readonly renderer: Renderer;
+  private readonly renderer: IRenderer;
   private shaftMesh: THREE.InstancedMesh<THREE.BufferGeometry, THREE.MeshStandardMaterial>;
   private headMesh: THREE.InstancedMesh<THREE.BufferGeometry, THREE.MeshStandardMaterial>;
 
-  public constructor(name: string, renderer: Renderer) {
+  public constructor(name: string, renderer: IRenderer) {
     super();
     this.name = name;
     this.renderer = renderer;

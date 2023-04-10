@@ -13,8 +13,8 @@ import {
   makeLinePickingMaterial,
   markerHasTransparency,
 } from "./materials";
+import type { IRenderer } from "../../IRenderer";
 import { LineMaterial } from "../../LineMaterial";
-import type { Renderer } from "../../Renderer";
 import { Marker } from "../../ros";
 
 export class RenderableLineList extends RenderableMarker {
@@ -26,7 +26,7 @@ export class RenderableLineList extends RenderableMarker {
     topic: string,
     marker: Marker,
     receiveTime: bigint | undefined,
-    renderer: Renderer,
+    renderer: IRenderer,
     options: { worldUnits?: boolean } = {},
   ) {
     super(topic, marker, receiveTime, renderer);

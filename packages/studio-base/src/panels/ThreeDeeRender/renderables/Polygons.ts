@@ -7,8 +7,8 @@ import { SettingsTreeAction, SettingsTreeFields } from "@foxglove/studio";
 import type { RosValue } from "@foxglove/studio-base/players/types";
 
 import { RenderableLineStrip } from "./markers/RenderableLineStrip";
+import type { IRenderer } from "../IRenderer";
 import { BaseUserData, Renderable } from "../Renderable";
-import { Renderer } from "../Renderer";
 import { PartialMessage, PartialMessageEvent, SceneExtension } from "../SceneExtension";
 import { SettingsTreeEntry } from "../SettingsManager";
 import { makeRgba, rgbaToCssString, stringToRgba } from "../color";
@@ -61,7 +61,7 @@ export class PolygonRenderable extends Renderable<PolygonUserData> {
 }
 
 export class Polygons extends SceneExtension<PolygonRenderable> {
-  public constructor(renderer: Renderer) {
+  public constructor(renderer: IRenderer) {
     super("foxglove.Polygons", renderer);
 
     renderer.addSchemaSubscriptions(POLYGON_STAMPED_DATATYPES, this.handlePolygon);

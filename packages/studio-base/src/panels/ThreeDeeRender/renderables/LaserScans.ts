@@ -19,8 +19,8 @@ import { emptyPose } from "@foxglove/studio-base/util/Pose";
 
 import { colorHasTransparency, getColorConverter } from "./pointClouds/colors";
 import { DynamicBufferGeometry } from "../DynamicBufferGeometry";
+import { IRenderer } from "../IRenderer";
 import { BaseUserData, Renderable } from "../Renderable";
-import { Renderer } from "../Renderer";
 import { PartialMessage, PartialMessageEvent, SceneExtension } from "../SceneExtension";
 import { SettingsTreeEntry, SettingsTreeNodeWithActionHandler } from "../SettingsManager";
 import { LASERSCAN_DATATYPES as FOXGLOVE_LASERSCAN_DATATYPES } from "../foxglove";
@@ -80,7 +80,7 @@ class LaserScanRenderable extends Renderable<LaserScanUserData> {
   public override pickableInstances = true;
   private pointsHistory: RenderObjectHistory<LaserScanRenderable>;
 
-  public constructor(topic: string, renderer: Renderer, userData: LaserScanUserData) {
+  public constructor(topic: string, renderer: IRenderer, userData: LaserScanUserData) {
     super(topic, renderer, userData);
 
     const isDecay = userData.settings.decayTime > 0;
@@ -280,7 +280,7 @@ class LaserScanRenderable extends Renderable<LaserScanUserData> {
 }
 
 export class LaserScans extends SceneExtension<LaserScanRenderable> {
-  public constructor(renderer: Renderer) {
+  public constructor(renderer: IRenderer) {
     super("foxglove.LaserScans", renderer);
 
     renderer.addSchemaSubscriptions(ROS_LASERSCAN_DATATYPES, this.handleLaserScan);
@@ -589,7 +589,7 @@ class LaserScanInstancePickingMaterial extends THREE.RawShaderMaterial {
 }
 
 function invalidLaserScanError(
-  renderer: Renderer,
+  renderer: IRenderer,
   renderable: LaserScanRenderable,
   message: string,
 ): void {

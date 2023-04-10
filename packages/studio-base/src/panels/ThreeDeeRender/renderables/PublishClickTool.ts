@@ -6,8 +6,8 @@ import * as THREE from "three";
 
 import { RenderableArrow } from "./markers/RenderableArrow";
 import { RenderableSphere } from "./markers/RenderableSphere";
+import type { IRenderer } from "../IRenderer";
 import { Renderable, BaseUserData } from "../Renderable";
-import { Renderer } from "../Renderer";
 import { SceneExtension } from "../SceneExtension";
 import { Marker, MarkerAction, MarkerType, TIME_ZERO } from "../ros";
 import { makePose, Point, Pose } from "../transforms/geometry";
@@ -75,7 +75,7 @@ export class PublishClickTool extends SceneExtension<Renderable<BaseUserData>, P
   private point1?: THREE.Vector3;
   private point2?: THREE.Vector3;
 
-  public constructor(renderer: Renderer) {
+  public constructor(renderer: IRenderer) {
     super("foxglove.PublishClickTool", renderer);
 
     this.sphere = new RenderableSphere("", makeSphereMarker(), undefined, this.renderer);

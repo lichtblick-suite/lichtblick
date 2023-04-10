@@ -8,9 +8,9 @@ import { DeepPartial } from "ts-essentials";
 
 import { MessageEvent, SettingsTreeAction } from "@foxglove/studio";
 
+import type { IRenderer } from "./IRenderer";
 import { Path } from "./LayerErrors";
 import { BaseUserData, Renderable } from "./Renderable";
-import type { Renderer } from "./Renderer";
 import type { SettingsTreeEntry } from "./SettingsManager";
 import { missingTransformMessage, MISSING_TRANSFORM } from "./renderables/transforms";
 import { AnyFrameId } from "./transforms";
@@ -46,7 +46,7 @@ export class SceneExtension<
   /** A unique identifier for this SceneExtension, such as `foxglove.Markers`. */
   public readonly extensionId: string;
   /** A reference to the parent `Renderer` instance. */
-  protected readonly renderer: Renderer;
+  protected readonly renderer: IRenderer;
   /**
    * A map of string identifiers to Renderable instances. SceneExtensions are free to use any IDs
    * they choose, although topic names are a common choice for extensions display up to one
@@ -58,7 +58,7 @@ export class SceneExtension<
    * @param extensionId A unique identifier for this SceneExtension, such as `foxglove.Markers`.
    * @param renderer A reference to the parent `Renderer` instance.
    */
-  public constructor(extensionId: string, renderer: Renderer) {
+  public constructor(extensionId: string, renderer: IRenderer) {
     super();
     this.extensionId = this.name = extensionId;
     this.renderer = renderer;

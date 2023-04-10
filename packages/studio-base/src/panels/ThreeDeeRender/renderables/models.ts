@@ -4,8 +4,12 @@
 
 import * as THREE from "three";
 
-import { GltfMesh } from "./markers/RenderableMeshResource";
 import { LoadedModel } from "../ModelCache";
+
+export type GltfMesh = THREE.Mesh<
+  THREE.BufferGeometry,
+  THREE.MeshStandardMaterial | THREE.MeshStandardMaterial[]
+>;
 
 export function removeLights(model: LoadedModel): void {
   // Remove lights from the model

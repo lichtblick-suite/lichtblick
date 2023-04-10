@@ -6,7 +6,7 @@ import { t } from "i18next";
 
 import { SettingsTreeAction } from "@foxglove/studio";
 
-import { FollowMode, Renderer } from "../Renderer";
+import type { FollowMode, IRenderer } from "../IRenderer";
 import { SceneExtension } from "../SceneExtension";
 import { SettingsTreeEntry } from "../SettingsManager";
 import { DEFAULT_CAMERA_STATE } from "../camera";
@@ -16,7 +16,7 @@ import { CoordinateFrame } from "../transforms";
 const FOLLOW_TF_PATH = ["general", "followTf"];
 
 export class FrameSettings extends SceneExtension {
-  public constructor(renderer: Renderer) {
+  public constructor(renderer: IRenderer) {
     super("foxglove.FrameSettings", renderer);
 
     renderer.on("transformTreeUpdated", this.handleTransformTreeUpdated);

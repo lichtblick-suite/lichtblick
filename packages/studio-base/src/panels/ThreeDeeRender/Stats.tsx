@@ -4,7 +4,7 @@
 
 import { useEffect, useState } from "react";
 
-import { Renderer } from "./Renderer";
+import type { IRenderer } from "./IRenderer";
 import { useRendererEvent } from "./RendererContext";
 
 let stats: THREEStats | undefined;
@@ -17,7 +17,7 @@ let maxTriangles = 0;
 let maxTextures = 0;
 let maxGeometries = 0;
 
-function update(renderer: Renderer) {
+function update(renderer: IRenderer) {
   maxDrawCalls = Math.max(maxDrawCalls, renderer.gl.info.render.calls);
   maxTriangles = Math.max(maxTriangles, renderer.gl.info.render.triangles);
   maxTextures = Math.max(maxTextures, renderer.gl.info.memory.textures);

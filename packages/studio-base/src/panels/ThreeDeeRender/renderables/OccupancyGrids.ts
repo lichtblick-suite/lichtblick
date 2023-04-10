@@ -8,8 +8,8 @@ import { toNanoSec } from "@foxglove/rostime";
 import { SettingsTreeAction, SettingsTreeFields } from "@foxglove/studio";
 import type { RosValue } from "@foxglove/studio-base/players/types";
 
+import type { IRenderer } from "../IRenderer";
 import { BaseUserData, Renderable } from "../Renderable";
-import { Renderer } from "../Renderer";
 import { PartialMessage, PartialMessageEvent, SceneExtension } from "../SceneExtension";
 import { SettingsTreeEntry } from "../SettingsManager";
 import { rgbaToCssString, SRGBToLinear, stringToRgba } from "../color";
@@ -82,7 +82,7 @@ export class OccupancyGridRenderable extends Renderable<OccupancyGridUserData> {
 }
 
 export class OccupancyGrids extends SceneExtension<OccupancyGridRenderable> {
-  public constructor(renderer: Renderer) {
+  public constructor(renderer: IRenderer) {
     super("foxglove.OccupancyGrids", renderer);
 
     renderer.addSchemaSubscriptions(OCCUPANCY_GRID_DATATYPES, this.handleOccupancyGrid);
@@ -288,7 +288,7 @@ function createGeometry(): THREE.PlaneGeometry {
   return geometry;
 }
 function invalidOccupancyGridError(
-  renderer: Renderer,
+  renderer: IRenderer,
   renderable: OccupancyGridRenderable,
   message: string,
 ): void {

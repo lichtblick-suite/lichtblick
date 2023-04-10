@@ -5,7 +5,7 @@
 import { GUI } from "dat.gui";
 import { useEffect, useState } from "react";
 
-import { Renderer } from "./Renderer";
+import type { IRenderer } from "./IRenderer";
 import { useRenderer } from "./RendererContext";
 
 export function DebugGui(): JSX.Element {
@@ -24,7 +24,7 @@ export function DebugGui(): JSX.Element {
   return <div ref={setDiv} />;
 }
 
-function createDebugGui(renderer: Renderer, div: HTMLDivElement): GUI {
+function createDebugGui(renderer: IRenderer, div: HTMLDivElement): GUI {
   const gui = new GUI({ autoPlace: false, width: 300 });
   div.appendChild(gui.domElement);
 

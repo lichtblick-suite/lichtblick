@@ -28,6 +28,13 @@ export type PlotPath = BasePlotPath & {
   timestampMethod: TimestampMethod;
 };
 
+// X-axis values:
+export type PlotXAxisVal =
+  | "timestamp" // Message playback time. Preloaded.
+  | "index" // Message-path value index. One "current" message at playback time.
+  | "custom" // Message path data. Preloaded.
+  | "currentCustom"; // Message path data. One "current" message at playback time.
+
 export type Datum = {
   x: number;
   y: number;

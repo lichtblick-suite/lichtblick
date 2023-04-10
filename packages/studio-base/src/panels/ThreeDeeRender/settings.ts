@@ -20,6 +20,12 @@ export type BaseSettings = {
   frameLocked?: boolean;
 };
 
+export type LayerSettingsEntity = BaseSettings & {
+  showOutlines: boolean | undefined;
+  color: string | undefined;
+  selectedIdVariable: string | undefined;
+};
+
 /**
  * Settings for a "Custom Layer", a user-added collection of one or more renderables such as a Grid.
  */

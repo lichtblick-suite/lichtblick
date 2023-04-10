@@ -4,14 +4,14 @@
 
 import * as THREE from "three";
 
-import { Renderer } from "./Renderer";
+import type { IRenderer } from "./IRenderer";
 
 type vec4 = [number, number, number, number];
 
 export class ScreenOverlay extends THREE.Object3D {
   private material: THREE.ShaderMaterial;
 
-  public constructor(renderer: Renderer) {
+  public constructor(renderer: IRenderer) {
     super();
 
     this.material = new THREE.ShaderMaterial({

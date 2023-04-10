@@ -20,8 +20,8 @@ import {
   hasSeparateRgbaFields,
 } from "./pointClouds/colors";
 import { FieldReader, getReader } from "./pointClouds/fieldReaders";
+import type { IRenderer } from "../IRenderer";
 import { BaseUserData, Renderable } from "../Renderable";
-import { Renderer } from "../Renderer";
 import { PartialMessage, PartialMessageEvent, SceneExtension } from "../SceneExtension";
 import { SettingsTreeEntry, SettingsTreeNodeWithActionHandler } from "../SettingsManager";
 import { rgbaToCssString, rgbaToLinear, stringToRgba } from "../color";
@@ -387,7 +387,7 @@ export class FoxgloveGridRenderable extends Renderable<FoxgloveGridUserData> {
 export class FoxgloveGrid extends SceneExtension<FoxgloveGridRenderable> {
   private fieldsByTopic = new Map<string, string[]>();
 
-  public constructor(renderer: Renderer) {
+  public constructor(renderer: IRenderer) {
     super("foxglove.Grid", renderer);
 
     renderer.addSchemaSubscriptions(GRID_DATATYPES, this.handleFoxgloveGrid);
@@ -621,7 +621,7 @@ function createGridGeometry(): THREE.PlaneGeometry {
   return geometry;
 }
 
-function invalidFoxgloveGridError(renderer: Renderer, topic: string, message: string): void {
+function invalidFoxgloveGridError(renderer: IRenderer, topic: string, message: string): void {
   renderer.settings.errors.addToTopic(topic, INVALID_FOXGLOVE_GRID, message);
 }
 

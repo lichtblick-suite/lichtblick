@@ -6,7 +6,7 @@ import * as THREE from "three";
 
 import type { RosValue } from "@foxglove/studio-base/players/types";
 
-import type { Renderer } from "./Renderer";
+import type { IRenderer } from "./IRenderer";
 import type { BaseSettings } from "./settings";
 import type { Pose } from "./transforms";
 
@@ -45,11 +45,11 @@ export class Renderable<TUserData extends BaseUserData = BaseUserData> extends T
    */
   public readonly pickableInstances: boolean = false;
   /** A reference to the parent `Renderer` that owns the scene graph containing this object */
-  protected readonly renderer: Renderer;
+  protected readonly renderer: IRenderer;
   /** Additional data associated with this entity */
   public override userData: TUserData;
 
-  public constructor(name: string, renderer: Renderer, userData: TUserData) {
+  public constructor(name: string, renderer: IRenderer, userData: TUserData) {
     super();
     this.name = name;
     this.renderer = renderer;

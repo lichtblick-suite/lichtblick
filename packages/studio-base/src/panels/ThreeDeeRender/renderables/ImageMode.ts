@@ -7,7 +7,7 @@ import { set } from "lodash";
 import { filterMap } from "@foxglove/den/collection";
 import { SettingsTreeAction } from "@foxglove/studio";
 
-import { Renderer } from "../Renderer";
+import type { IRenderer } from "../IRenderer";
 import { SceneExtension } from "../SceneExtension";
 import { SettingsTreeEntry } from "../SettingsManager";
 import {
@@ -29,7 +29,7 @@ const IMAGE_TOPIC_UNAVAILABLE = "IMAGE_TOPIC_UNAVAILABLE";
 const CALIBRATION_TOPIC_UNAVAILABLE = "CALIBRATION_TOPIC_UNAVAILABLE";
 
 export class ImageMode extends SceneExtension {
-  public constructor(renderer: Renderer) {
+  public constructor(renderer: IRenderer) {
     super("foxglove.ImageMode", renderer);
 
     renderer.settings.errors.on("update", this.handleErrorChange);

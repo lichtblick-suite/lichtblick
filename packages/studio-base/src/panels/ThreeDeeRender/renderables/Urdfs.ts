@@ -19,8 +19,8 @@ import { RenderableCylinder } from "./markers/RenderableCylinder";
 import { RenderableMeshResource } from "./markers/RenderableMeshResource";
 import { RenderableSphere } from "./markers/RenderableSphere";
 import { missingTransformMessage, MISSING_TRANSFORM } from "./transforms";
+import type { IRenderer } from "../IRenderer";
 import { BaseUserData, Renderable } from "../Renderable";
-import { Renderer } from "../Renderer";
 import { PartialMessageEvent, SceneExtension } from "../SceneExtension";
 import { SettingsTreeEntry } from "../SettingsManager";
 import {
@@ -151,7 +151,7 @@ export class Urdfs extends SceneExtension<UrdfRenderable> {
   private transformsByInstanceId = new Map<string, TransformData[]>();
   private jointStates = new Map<string, JointPosition>();
 
-  public constructor(renderer: Renderer) {
+  public constructor(renderer: IRenderer) {
     super("foxglove.Urdfs", renderer);
 
     renderer.addTopicSubscription(TOPIC_NAME, this.handleRobotDescription);
@@ -698,7 +698,7 @@ function createRenderable(
   robot: UrdfRobot,
   id: number,
   frameId: string,
-  renderer: Renderer,
+  renderer: IRenderer,
   baseUrl: string | undefined,
 ): Renderable {
   const name = `${frameId}-${id}-${visual.geometry.geometryType}`;

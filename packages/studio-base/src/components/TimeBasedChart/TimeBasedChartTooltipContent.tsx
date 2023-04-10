@@ -20,7 +20,14 @@ import { makeStyles } from "tss-react/mui";
 import Stack from "@foxglove/studio-base/components/Stack";
 import { fonts } from "@foxglove/studio-base/util/sharedStyleConstants";
 
-import { TimeBasedChartTooltipData } from "./index";
+export type TimeBasedChartTooltipData = {
+  datasetIndex?: number;
+  x: number | bigint;
+  y: number | bigint;
+  path: string;
+  value: number | bigint | boolean | string;
+  constantName?: string;
+};
 
 type Props = DeepReadonly<{
   colorsByDatasetIndex?: Record<string, undefined | string>;

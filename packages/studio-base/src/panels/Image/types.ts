@@ -2,8 +2,10 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
+import type { AVLTree } from "@foxglove/avl";
 import type { PinholeCameraModel } from "@foxglove/den/image";
-import type { Time } from "@foxglove/studio";
+import type { Time } from "@foxglove/rostime";
+import type { RenderState } from "@foxglove/studio";
 import type { CameraInfo, Color, ImageMarker, Point2D } from "@foxglove/studio-base/types/Messages";
 
 export type DefaultConfig = {
@@ -24,6 +26,31 @@ export type Config = DefaultConfig & {
   transformMarkers: boolean;
   zoom?: number;
   zoomPercentage?: number;
+};
+
+export type UseImagePanelMessagesParams = {
+  imageTopic: string;
+  cameraInfoTopic: string | undefined;
+  annotationTopics: string[];
+  synchronize: boolean;
+};
+
+export type SynchronizationItem = {
+  image?: NormalizedImageMessage;
+  annotationsByTopic: Map<string, Annotation[]>;
+};
+
+export type ImagePanelState = UseImagePanelMessagesParams & {
+  image?: NormalizedImageMessage;
+  cameraInfo?: CameraInfo;
+  annotationsByTopic: ReadonlyMap<string, Annotation[]>;
+  tree: AVLTree<Time, SynchronizationItem>;
+
+  actions: {
+    setCurrentFrame(currentFrame: NonNullable<RenderState["currentFrame"]>): void;
+    clear(): void;
+    setParams(newParams: UseImagePanelMessagesParams): void;
+  };
 };
 
 export type PanZoom = { x: number; y: number; scale: number };

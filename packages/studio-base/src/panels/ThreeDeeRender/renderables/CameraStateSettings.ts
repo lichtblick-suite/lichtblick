@@ -7,14 +7,14 @@ import { cloneDeep, set } from "lodash";
 
 import { SettingsTreeAction } from "@foxglove/studio";
 
-import { Renderer } from "../Renderer";
+import type { IRenderer } from "../IRenderer";
 import { SceneExtension } from "../SceneExtension";
 import { SettingsTreeEntry } from "../SettingsManager";
 import { DEFAULT_CAMERA_STATE } from "../camera";
 import { PRECISION_DEGREES, PRECISION_DISTANCE } from "../settings";
 
 export class CameraStateSettings extends SceneExtension {
-  public constructor(renderer: Renderer) {
+  public constructor(renderer: IRenderer) {
     super("foxglove.CameraStateSettings", renderer);
 
     renderer.on("cameraMove", this.handleCameraMove);

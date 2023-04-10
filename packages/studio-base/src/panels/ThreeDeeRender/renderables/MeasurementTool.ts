@@ -5,8 +5,8 @@ import * as THREE from "three";
 
 import { Label } from "@foxglove/three-text";
 
+import type { IRenderer } from "../IRenderer";
 import { Renderable, BaseUserData } from "../Renderable";
-import { Renderer } from "../Renderer";
 import { SceneExtension } from "../SceneExtension";
 
 type MeasurementState = "idle" | "place-first-point" | "place-second-point";
@@ -98,7 +98,7 @@ export class MeasurementTool extends SceneExtension<Renderable<BaseUserData>, Me
 
   public state: MeasurementState = "idle";
 
-  public constructor(renderer: Renderer) {
+  public constructor(renderer: IRenderer) {
     super("foxglove.MeasurementTool", renderer);
 
     this.line.userData.picking = false;

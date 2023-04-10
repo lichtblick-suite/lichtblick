@@ -46,20 +46,15 @@ import {
 import { fonts } from "@foxglove/studio-base/util/sharedStyleConstants";
 
 import HoverBar from "./HoverBar";
-import TimeBasedChartTooltipContent from "./TimeBasedChartTooltipContent";
+import TimeBasedChartTooltipContent, {
+  TimeBasedChartTooltipData,
+} from "./TimeBasedChartTooltipContent";
 import { VerticalBarWrapper } from "./VerticalBarWrapper";
 import { downsampleScatter, downsampleTimeseries } from "./downsample";
 
-const log = Logger.getLogger(__filename);
+export type { TimeBasedChartTooltipData };
 
-export type TimeBasedChartTooltipData = {
-  datasetIndex?: number;
-  x: number | bigint;
-  y: number | bigint;
-  path: string;
-  value: number | bigint | boolean | string;
-  constantName?: string;
-};
+const log = Logger.getLogger(__filename);
 
 const useStyles = makeStyles()((theme) => ({
   root: {

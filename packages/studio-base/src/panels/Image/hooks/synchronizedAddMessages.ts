@@ -7,10 +7,9 @@ import { Time, isLessThan, toNanoSec, fromNanoSec } from "@foxglove/rostime";
 import { MessageEvent } from "@foxglove/studio";
 
 import { normalizeCameraInfo } from "./normalizeCameraInfo";
-import { ImagePanelState, SynchronizationItem } from "./useImagePanelMessages";
 import { normalizeAnnotations } from "../lib/normalizeAnnotations";
 import { normalizeImageMessage } from "../lib/normalizeMessage";
-import { Annotation } from "../types";
+import type { Annotation, ImagePanelState, SynchronizationItem } from "../types";
 
 export function synchronizedAddMessages(
   state: Pick<ImagePanelState, "imageTopic" | "cameraInfoTopic" | "annotationTopics" | "tree">,

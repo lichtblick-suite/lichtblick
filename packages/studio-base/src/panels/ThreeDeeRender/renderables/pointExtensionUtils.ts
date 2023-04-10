@@ -7,8 +7,8 @@ import * as THREE from "three";
 import { PackedElementField, PointCloud } from "@foxglove/schemas";
 import { SettingsTreeNode, Topic } from "@foxglove/studio";
 import { DynamicBufferGeometry } from "@foxglove/studio-base/panels/ThreeDeeRender/DynamicBufferGeometry";
+import { IRenderer } from "@foxglove/studio-base/panels/ThreeDeeRender/IRenderer";
 import { BaseUserData, Renderable } from "@foxglove/studio-base/panels/ThreeDeeRender/Renderable";
-import { Renderer } from "@foxglove/studio-base/panels/ThreeDeeRender/Renderer";
 import { rgbaToCssString } from "@foxglove/studio-base/panels/ThreeDeeRender/color";
 import { isSupportedField } from "@foxglove/studio-base/panels/ThreeDeeRender/renderables/pointClouds/fieldReaders";
 import {
@@ -360,7 +360,7 @@ type HistoryEntry = { receiveTime: bigint; messageTime: bigint; object3d: ThreeO
 export class RenderObjectHistory<ParentRenderable extends Renderable<RenderObjectHistoryUserData>> {
   public history: HistoryEntry[];
   private renderable: ParentRenderable;
-  private renderer: Renderer;
+  private renderer: IRenderer;
 
   public constructor({
     initial,
@@ -368,7 +368,7 @@ export class RenderObjectHistory<ParentRenderable extends Renderable<RenderObjec
     parentRenderable,
   }: {
     initial: HistoryEntry;
-    renderer: Renderer;
+    renderer: IRenderer;
     parentRenderable: ParentRenderable;
   }) {
     this.history = [initial];

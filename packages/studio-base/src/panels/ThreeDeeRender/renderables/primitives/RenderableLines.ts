@@ -13,15 +13,15 @@ import { LinePrimitive, LineType, SceneEntity } from "@foxglove/schemas";
 import { LineMaterial } from "@foxglove/studio-base/panels/ThreeDeeRender/LineMaterial";
 
 import { RenderablePrimitive } from "./RenderablePrimitive";
-import type { Renderer } from "../../Renderer";
+import type { IRenderer } from "../../IRenderer";
 import { makeRgba, rgbToThreeColor, SRGBToLinear, stringToRgba } from "../../color";
-import { LayerSettingsEntity } from "../SceneEntities";
+import { LayerSettingsEntity } from "../../settings";
 
 const tempRgba = makeRgba();
 
 export class RenderableLines extends RenderablePrimitive {
   private _lines: LineSegments2[] = [];
-  public constructor(renderer: Renderer) {
+  public constructor(renderer: IRenderer) {
     super("", renderer);
   }
 

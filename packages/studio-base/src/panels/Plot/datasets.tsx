@@ -8,7 +8,6 @@ import { format } from "@foxglove/studio-base/util/formatTime";
 import { darkColor, getLineColor, lightColor } from "@foxglove/studio-base/util/plotColors";
 import { formatTimeRaw, TimestampMethod } from "@foxglove/studio-base/util/time";
 
-import { PlotXAxisVal } from "./index";
 import {
   BasePlotPath,
   DataSet,
@@ -17,6 +16,7 @@ import {
   PlotDataByPath,
   PlotDataItem,
   PlotPath,
+  PlotXAxisVal,
 } from "./internalTypes";
 import { applyToDatum, derivative, MathFunction, mathFunctions } from "./transformPlotRange";
 

@@ -8,5 +8,9 @@ rules:
   prettier/prettier: error
   # Common sense should prevent triggering this in development
   import/no-self-import: error
-  # https://github.com/benmosher/eslint-plugin-import/issues/242#issuecomment-230118951
+  # https://github.com/import-js/eslint-plugin-import/issues/242#issuecomment-230118951
   import/no-duplicates: error
+  # https://github.com/import-js/eslint-plugin-import/blob/main/docs/rules/no-cycle.md
+  import/no-cycle:
+    - error
+    - ignoreExternal: true

@@ -9,8 +9,8 @@ import Logger from "@foxglove/log";
 import { SettingsTreeAction, SettingsTreeFields } from "@foxglove/studio";
 
 import { RenderableLineList } from "./markers/RenderableLineList";
+import type { IRenderer } from "../IRenderer";
 import { BaseUserData, Renderable } from "../Renderable";
-import { Renderer } from "../Renderer";
 import { SceneExtension } from "../SceneExtension";
 import { SettingsTreeEntry } from "../SettingsManager";
 import { stringToRgba } from "../color";
@@ -68,7 +68,7 @@ export class GridRenderable extends Renderable<GridUserData> {
 }
 
 export class Grids extends SceneExtension<GridRenderable> {
-  public constructor(renderer: Renderer) {
+  public constructor(renderer: IRenderer) {
     super("foxglove.Grids", renderer);
 
     renderer.addCustomLayerAction({

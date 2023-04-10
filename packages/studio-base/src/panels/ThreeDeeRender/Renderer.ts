@@ -28,9 +28,18 @@ import { light, dark } from "@foxglove/studio-base/theme/palette";
 import { fonts } from "@foxglove/studio-base/util/sharedStyleConstants";
 import { LabelMaterial, LabelPool } from "@foxglove/three-text";
 
+import {
+  FollowMode,
+  IRenderer,
+  InstancedLineMaterial,
+  MessageHandler,
+  RendererConfig,
+  RendererEvents,
+  RendererSubscription,
+} from "./IRenderer";
 import { Input } from "./Input";
 import { LineMaterial } from "./LineMaterial";
-import { ModelCache, MeshUpAxis, DEFAULT_MESH_UP_AXIS } from "./ModelCache";
+import { ModelCache, DEFAULT_MESH_UP_AXIS } from "./ModelCache";
 import { PickedRenderable, Picker } from "./Picker";
 import type { Renderable } from "./Renderable";
 import { SceneExtension } from "./SceneExtension";
@@ -49,7 +58,7 @@ import {
 } from "./normalizeMessages";
 import { CameraStateSettings } from "./renderables/CameraStateSettings";
 import { Cameras } from "./renderables/Cameras";
-import { FrameAxes, LayerSettingsTransform } from "./renderables/FrameAxes";
+import { FrameAxes } from "./renderables/FrameAxes";
 import { FrameSettings } from "./renderables/FrameSettings";
 import { Grids } from "./renderables/Grids";
 import { ImageMode } from "./renderables/ImageMode";
@@ -62,7 +71,7 @@ import { PointClouds } from "./renderables/PointClouds";
 import { Polygons } from "./renderables/Polygons";
 import { PoseArrays } from "./renderables/PoseArrays";
 import { Poses } from "./renderables/Poses";
-import { PublishClickTool, PublishClickType } from "./renderables/PublishClickTool";
+import { PublishClickTool } from "./renderables/PublishClickTool";
 import { PublishSettings } from "./renderables/PublishSettings";
 import { FoxgloveSceneEntities } from "./renderables/SceneEntities";
 import { SceneSettings } from "./renderables/SceneSettings";
@@ -79,7 +88,7 @@ import {
   TRANSFORM_STAMPED_DATATYPES,
   Vector3,
 } from "./ros";
-import { BaseSettings, CustomLayerSettings, SelectEntry } from "./settings";
+import { SelectEntry } from "./settings";
 import {
   AddTransformResult,
   CoordinateFrame,
@@ -91,33 +100,6 @@ import {
 import { InterfaceMode } from "./types";
 
 const log = Logger.getLogger(__filename);
-
-export type RendererEvents = {
-  startFrame: (currentTime: bigint, renderer: Renderer) => void;
-  endFrame: (currentTime: bigint, renderer: Renderer) => void;
-  cameraMove: (renderer: Renderer) => void;
-  renderablesClicked: (
-    selections: PickedRenderable[],
-    cursorCoords: { x: number; y: number },
-    renderer: Renderer,
-  ) => void;
-  selectedRenderable: (selection: PickedRenderable | undefined, renderer: Renderer) => void;
-  parametersChange: (
-    parameters: ReadonlyMap<string, ParameterValue> | undefined,
-    renderer: Renderer,
-  ) => void;
-  variablesChange: (
-    variables: ReadonlyMap<string, VariableValue> | undefined,
-    renderer: Renderer,
-  ) => void;
-  transformTreeUpdated: (renderer: Renderer) => void;
-  settingsTreeChange: (renderer: Renderer) => void;
-  configChange: (renderer: Renderer) => void;
-  schemaHandlersChanged: (renderer: Renderer) => void;
-  topicHandlersChanged: (renderer: Renderer) => void;
-};
-
-export type FollowMode = "follow-pose" | "follow-position" | "follow-none";
 
 /** Legacy Image panel settings that occur at the root level */
 export type LegacyImageConfig = {
@@ -143,89 +125,6 @@ export type ImageModeConfig = {
   imageTopic?: string;
   /** Topic containing CameraCalibration or CameraInfo */
   calibrationTopic?: string;
-};
-
-export type RendererConfig = {
-  /** Camera settings for the currently rendering scene */
-  cameraState: CameraState;
-  /** Coordinate frameId of the rendering frame */
-  followTf: string | undefined;
-  /** Camera follow mode */
-  followMode: FollowMode;
-  scene: {
-    /** Show rendering metrics in a DOM overlay */
-    enableStats?: boolean;
-    /** Background color override for the scene, sent to `glClearColor()` */
-    backgroundColor?: string;
-    /* Scale factor to apply to all labels */
-    labelScaleFactor?: number;
-    /** Ignore the <up_axis> tag in COLLADA files (matching rviz behavior) */
-    ignoreColladaUpAxis?: boolean;
-    meshUpAxis?: MeshUpAxis;
-    transforms?: {
-      /** Toggles translation and rotation offset controls for frames */
-      editable?: boolean;
-      /** Toggles visibility of frame axis labels */
-      showLabel?: boolean;
-      /** Size of frame axis labels */
-      labelSize?: number;
-      /** Size of coordinate frame axes */
-      axisScale?: number;
-      /** Width of the connecting line between child and parent frames */
-      lineWidth?: number;
-      /** Color of the connecting line between child and parent frames */
-      lineColor?: string;
-      /** Enable transform preloading */
-      enablePreloading?: boolean;
-    };
-    /** Sync camera with other 3d panels */
-    syncCamera?: boolean;
-    /** Toggles visibility of all topics */
-    topicsVisible?: boolean;
-  };
-  publish: {
-    /** The type of message to publish when clicking in the scene */
-    type: PublishClickType;
-    /** The topic on which to publish poses */
-    poseTopic: string;
-    /** The topic on which to publish points */
-    pointTopic: string;
-    /** The topic on which to publish pose estimates */
-    poseEstimateTopic: string;
-    /** The X standard deviation to publish with poses */
-    poseEstimateXDeviation: number;
-    /** The Y standard deviation to publish with poses */
-    poseEstimateYDeviation: number;
-    /** The theta standard deviation to publish with poses */
-    poseEstimateThetaDeviation: number;
-  };
-  /** frameId -> settings */
-  transforms: Record<string, Partial<LayerSettingsTransform> | undefined>;
-  /** topicName -> settings */
-  topics: Record<string, Partial<BaseSettings> | undefined>;
-  /** instanceId -> settings */
-  layers: Record<string, Partial<CustomLayerSettings> | undefined>;
-
-  /** Settings pertaining to Image mode */
-  imageMode: ImageModeConfig;
-};
-
-/** Callback for handling a message received on a topic */
-export type MessageHandler<T = unknown> = (messageEvent: MessageEvent<T>) => void;
-
-export type RendererSubscription<T = unknown> = {
-  /** Preload the full history of topic messages as a best effort */
-  preload?: boolean;
-  /**
-   * By default, topic subscriptions are only created when the topic visibility
-   * has been toggled on by the user in the settings sidebar. Override this
-   * behavior with a custom shouldSubscribe callback. This callback will be
-   * called whenever the list of available topics changes or when any 3D panel
-   * settings are changed.
-   */
-  shouldSubscribe?: (topic: string) => boolean;
-  /** Callback that will be fired for each matching incoming message */
-  handler: MessageHandler<T>;
 };
 
 /** Menu item entry and callback for the "Custom Layers" menu */
@@ -294,19 +193,11 @@ Object.defineProperty(LabelMaterial.prototype, "fragmentShaderKey", {
   configurable: true,
 });
 
-class InstancedLineMaterial extends THREE.LineBasicMaterial {
-  public constructor(...args: ConstructorParameters<typeof THREE.LineBasicMaterial>) {
-    super(...args);
-    this.defines ??= {};
-    this.defines.USE_INSTANCING = true;
-  }
-}
-
 /**
  * An extensible 3D renderer attached to a `HTMLCanvasElement`,
  * `WebGLRenderingContext`, and `SettingsTree`.
  */
-export class Renderer extends EventEmitter<RendererEvents> {
+export class Renderer extends EventEmitter<RendererEvents> implements IRenderer {
   public readonly interfaceMode: InterfaceMode;
   private canvas: HTMLCanvasElement;
   public readonly gl: THREE.WebGLRenderer;

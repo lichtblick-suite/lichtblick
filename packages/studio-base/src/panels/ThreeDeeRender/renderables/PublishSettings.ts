@@ -7,7 +7,7 @@ import { round, set } from "lodash";
 import { SettingsTreeAction } from "@foxglove/studio";
 
 import { PublishClickType } from "./PublishClickTool";
-import { Renderer, RendererConfig } from "../Renderer";
+import type { IRenderer, RendererConfig } from "../IRenderer";
 import { SceneExtension } from "../SceneExtension";
 import { SettingsTreeEntry } from "../SettingsManager";
 
@@ -22,7 +22,7 @@ export const DEFAULT_PUBLISH_SETTINGS: RendererConfig["publish"] = {
 };
 
 export class PublishSettings extends SceneExtension {
-  public constructor(renderer: Renderer) {
+  public constructor(renderer: IRenderer) {
     super("foxglove.PublishSettings", renderer);
 
     renderer.publishClickTool.addEventListener(

@@ -25,8 +25,7 @@ import TimeBasedChart, {
 } from "@foxglove/studio-base/components/TimeBasedChart";
 import { getLineColor } from "@foxglove/studio-base/util/plotColors";
 
-import { PlotXAxisVal } from "./index";
-import { PlotPath, isReferenceLinePlotPathType } from "./internalTypes";
+import { PlotPath, isReferenceLinePlotPathType, PlotXAxisVal } from "./internalTypes";
 
 // A "reference line" plot path is a numeric value. It creates a horizontal line on the plot at the specified value.
 function getAnnotationFromReferenceLine(path: PlotPath, index: number): AnnotationOptions {
