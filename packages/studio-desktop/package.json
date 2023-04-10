@@ -9,7 +9,7 @@
     "@foxglove/electron-socket": "2.1.1",
     "@foxglove/log": "workspace:*",
     "@foxglove/mcap-support": "workspace:*",
-    "@foxglove/rosbag": "0.3.0",
+    "@foxglove/rosbag": "0.4.0",
     "@foxglove/rostime": "1.1.2",
     "@foxglove/studio-base": "workspace:*",
     "@mcap/core": "1.2.1",
