@@ -13,7 +13,7 @@ export const output = "/studio_script/my_gps";
 // Our node will output a LocationFix message
 type LocationFix = Message<"foxglove.LocationFix">;
 
-export default function node(event: Input<"/input/topic">): LocationFix {
+export default function script(event: Input<"/input/topic">): LocationFix {
   return {
     latitude: 51.477928,
     longitude: -0.001545,

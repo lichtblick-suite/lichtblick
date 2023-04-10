@@ -15,7 +15,7 @@ export const output = "/studio_script/output_topic";
 // Make an InputEvent type alias. Since our node will get a message from either input topic, we need to enumerate the topics.
 type InputEvent = Input<"/input/topic"> | Input<"/input/another">;
 
-export default function node(event: InputEvent, globalVars: GlobalVariables): Output {
+export default function script(event: InputEvent, globalVars: GlobalVariables): Output {
   // Remember that your node will get messages on each topic, so you
   // need to check each event's topic to know which fields are available on the message.
   switch (event.topic) {
