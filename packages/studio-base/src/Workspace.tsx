@@ -75,7 +75,6 @@ import {
 } from "@foxglove/studio-base/context/WorkspaceContext";
 import { useAppConfigurationValue } from "@foxglove/studio-base/hooks";
 import useAddPanel from "@foxglove/studio-base/hooks/useAddPanel";
-import { useCalloutDismissalBlocker } from "@foxglove/studio-base/hooks/useCalloutDismissalBlocker";
 import { useDefaultWebLaunchPreference } from "@foxglove/studio-base/hooks/useDefaultWebLaunchPreference";
 import useElectronFilesToOpen from "@foxglove/studio-base/hooks/useElectronFilesToOpen";
 import { useInitialDeepLinkState } from "@foxglove/studio-base/hooks/useInitialDeepLinkState";
@@ -263,8 +262,6 @@ function WorkspaceContent(props: WorkspaceProps): JSX.Element {
       containerRef.current.focus();
     }
   }, []);
-
-  useCalloutDismissalBlocker();
 
   useNativeAppMenuEvent(
     "open-layouts",
