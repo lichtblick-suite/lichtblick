@@ -2583,7 +2583,7 @@ __metadata:
     just-diff: 6.0.2
     leaflet: 1.9.3
     lodash: 4.17.21
-    mathjs: 11.6.0
+    mathjs: 11.8.0
     memoize-weak: 1.0.2
     meshoptimizer: 0.18.1
     moment: 2.29.4
@@ -8111,7 +8111,7 @@ __metadata:
     "@types/react-dom": 17.0.18
     clean-webpack-plugin: 4.0.0
     html-webpack-plugin: 5.5.0
-    mathjs: 11.6.0
+    mathjs: 11.8.0
     react: 17.0.2
     react-dom: 17.0.2
     webpack: 5.76.2
@@ -16653,9 +16653,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"mathjs@npm:11.6.0":
-  version: 11.6.0
-  resolution: "mathjs@npm:11.6.0"
+"mathjs@npm:11.8.0":
+  version: 11.8.0
+  resolution: "mathjs@npm:11.8.0"
   dependencies:
     "@babel/runtime": ^7.21.0
     complex.js: ^2.1.1
@@ -16668,7 +16668,7 @@ __metadata:
     typed-function: ^4.1.0
   bin:
     mathjs: bin/cli.js
-  checksum: d6f5acc876d31d387e3aa9c5831192c68ad52f848bbaed361a9021595e65caed87a94057b6c48649dd671e811d7b77ecda7e2a7f9aa50c2e18d295c415bfa613
+  checksum: 09716946b03b57c1f05db4f719bd479349154d51e94a8781ab356bde8517771bb35e7ebcc91732c7ca33782b824422ee23e4cae8af14fda69ef4adc5f46a26ec
   languageName: node
   linkType: hard
 
