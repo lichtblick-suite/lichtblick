@@ -7,6 +7,7 @@ import { Immutable } from "immer";
 import * as THREE from "three";
 
 import { MessageEvent, ParameterValue, SettingsIcon, Topic, VariableValue } from "@foxglove/studio";
+import { CameraStateSettings } from "@foxglove/studio-base/panels/ThreeDeeRender/renderables/CameraStateSettings";
 import { LabelPool } from "@foxglove/three-text";
 
 import { Input } from "./Input";
@@ -23,7 +24,7 @@ import { PublishClickTool, PublishClickType } from "./renderables/PublishClickTo
 import { MarkerPool } from "./renderables/markers/MarkerPool";
 import { Quaternion, Vector3 } from "./ros";
 import { BaseSettings, CustomLayerSettings, SelectEntry } from "./settings";
-import { Pose, TransformTree } from "./transforms";
+import { TransformTree } from "./transforms";
 import { InterfaceMode } from "./types";
 
 export type RendererEvents = {
@@ -180,9 +181,8 @@ export interface IRenderer extends EventEmitter<RendererEvents> {
   measurementTool: MeasurementTool;
   publishClickTool: PublishClickTool;
 
-  followMode: FollowMode;
-  // The pose of the render frame in the fixed frame when following was disabled
-  unfollowPoseSnapshot: Pose | undefined;
+  /** only public for testing - prefer to use `getCameraState` instead */
+  cameraStateSettings: CameraStateSettings;
 
   // Are we connected to a ROS data source? Normalize coordinate frames if so by
   // stripping any leading "/" prefix. See `normalizeFrameId()` for details.
@@ -307,7 +307,4 @@ export interface IRenderer extends EventEmitter<RendererEvents> {
   // Callback handlers
   animationFrame: () => void;
   queueAnimationFrame: () => void;
-
-  // This should not be called on initialization only on settings changes
-  updateFollowMode(newFollowMode: FollowMode): void;
 }
