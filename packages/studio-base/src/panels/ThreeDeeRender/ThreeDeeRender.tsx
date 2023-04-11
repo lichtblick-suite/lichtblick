@@ -42,7 +42,6 @@ import PublishPoseEstimateIcon from "@foxglove/studio-base/components/PublishPos
 import ThemeProvider from "@foxglove/studio-base/theme/ThemeProvider";
 import { fonts } from "@foxglove/studio-base/util/sharedStyleConstants";
 
-import { DebugGui } from "./DebugGui";
 import type {
   RendererConfig,
   RendererSubscription,
@@ -76,8 +75,6 @@ type Shared3DPanelState = {
   followMode: FollowMode;
   followTf: undefined | string;
 };
-
-const SHOW_DEBUG: true | false = false;
 
 const PANEL_STYLE: React.CSSProperties = {
   width: "100%",
@@ -163,12 +160,6 @@ function RendererOverlay(props: {
   const stats = props.enableStats ? (
     <div id="stats" style={{ position: "absolute", top: "10px", left: "10px" }}>
       <Stats />
-    </div>
-  ) : undefined;
-
-  const debug = SHOW_DEBUG ? (
-    <div id="debug" style={{ position: "absolute", top: "70px", left: "10px" }}>
-      <DebugGui />
     </div>
   ) : undefined;
 
@@ -368,7 +359,6 @@ function RendererOverlay(props: {
         />
       )}
       {stats}
-      {debug}
     </React.Fragment>
   );
 }

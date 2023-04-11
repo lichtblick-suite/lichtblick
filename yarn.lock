@@ -2524,7 +2524,6 @@ __metadata:
     "@testing-library/user-event": 14.4.3
     "@types/base16": ^1.0.2
     "@types/cytoscape": ^3.19.9
-    "@types/dat.gui": ^0.7.7
     "@types/foxglove__roslibjs": "workspace:*"
     "@types/gl-matrix": 3.2.0
     "@types/hammerjs": 2.0.41
@@ -2563,7 +2562,6 @@ __metadata:
     css-loader: 6.7.3
     cytoscape: 3.23.0
     cytoscape-dagre: 2.5.0
-    dat.gui: 0.7.9
     esbuild-loader: 2.21.0
     eventemitter3: 5.0.0
     fake-indexeddb: 4.0.1
@@ -5456,13 +5454,6 @@ __metadata:
   version: 3.19.9
   resolution: "@types/cytoscape@npm:3.19.9"
   checksum: 773e7c73198a0dc9fe8fe708aca47af5e1fc47ba6e3138e37e3de23cd336441dd79d2a0215473c755a6bdd9842e3ed83e2e6d51abd128a34a5680fc10b3402b5
-  languageName: node
-  linkType: hard
-
-"@types/dat.gui@npm:^0.7.7":
-  version: 0.7.7
-  resolution: "@types/dat.gui@npm:0.7.7"
-  checksum: 0a20c10013c5d8595593b9d258f48c070a09601382e9cb0a4d03b98821a8373430747b31935f73434bf0c59122c43276c6763ca1e493eaeb05a9d74bf37a7b81
   languageName: node
   linkType: hard
 
@@ -10083,13 +10074,6 @@ __metadata:
     graphlib: ^2.1.8
     lodash: ^4.17.15
   checksum: b9fabd425466d7b662381c2e457b1adda996bc4169aa60121d4de50250d83a6bb4b77d559e2f887c9c564caea781c2a377fd4de2a76c15f8f04ec3d086ca95f9
-  languageName: node
-  linkType: hard
-
-"dat.gui@npm:0.7.9":
-  version: 0.7.9
-  resolution: "dat.gui@npm:0.7.9"
-  checksum: b5b70160657224eacdb8e0a8d76376e6e59adcc654db577531c7bebce854c4f774d1511df6f064e8246a88cf9a3abe489e4d647cf9e53d26a26141a1b5d31e68
   languageName: node
   linkType: hard
 
