@@ -158,8 +158,9 @@ export default function PlaybackControls(props: {
   );
 
   const toggleCreateEventDialog = useCallback(() => {
+    pause();
     setCreateEventDialogOpen((open) => !open);
-  }, []);
+  }, [pause]);
 
   const disableControls = presence === PlayerPresence.ERROR;
 
