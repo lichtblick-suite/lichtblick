@@ -2580,7 +2580,7 @@ __metadata:
     jest-canvas-mock: 2.4.0
     jest-diff: 29.4.2
     jszip: 3.10.1
-    just-diff: 6.0.0
+    just-diff: 6.0.2
     leaflet: 1.9.3
     lodash: 4.17.21
     mathjs: 11.6.0
@@ -15880,10 +15880,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"just-diff@npm:6.0.0":
-  version: 6.0.0
-  resolution: "just-diff@npm:6.0.0"
-  checksum: 966f2b774ac24481d56d62e5020cc31fa943bbc24633beede20f953ace58e985a9752ef8beaa7fe3e990fd93114fdf555023b7d6e80c69f19b69753f97644a10
+"just-diff@npm:6.0.2":
+  version: 6.0.2
+  resolution: "just-diff@npm:6.0.2"
+  checksum: 1a0c7524f640cb88ab013862733e710f840927834208fd3b85cbc5da2ced97acc75e7dcfe493268ac6a6514c51dd8624d2fd9d057050efba3c02b81a6dcb7ff9
   languageName: node
   linkType: hard
 
