@@ -3,7 +3,7 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 import ReactRefreshPlugin from "@pmmmwh/react-refresh-webpack-plugin";
-import { ESBuildMinifyPlugin } from "esbuild-loader";
+import { EsbuildPlugin } from "esbuild-loader";
 import ForkTsCheckerWebpackPlugin from "fork-ts-checker-webpack-plugin";
 import HtmlWebpackPlugin from "html-webpack-plugin";
 import path from "path";
@@ -66,7 +66,7 @@ export const webpackQuicklookConfig =
       optimization: {
         removeAvailableModules: true,
         minimizer: [
-          new ESBuildMinifyPlugin({
+          new EsbuildPlugin({
             target: "es2020",
             minify: true,
           }),

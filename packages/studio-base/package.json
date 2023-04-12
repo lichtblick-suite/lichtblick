@@ -100,7 +100,7 @@
     "css-loader": "6.7.3",
     "cytoscape": "3.23.0",
     "cytoscape-dagre": "2.5.0",
-    "esbuild-loader": "2.21.0",
+    "esbuild-loader": "3.0.1",
     "eventemitter3": "5.0.0",
     "fake-indexeddb": "4.0.1",
     "fetch-mock": "9.11.0",
