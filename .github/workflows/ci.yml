@@ -45,7 +45,7 @@ jobs:
     name: ${{ matrix.config.name }} (${{ matrix.os }})
 
     steps:
-      - uses: actions/checkout@v3.5.0
+      - uses: actions/checkout@v3.5.1
         with:
           lfs: true
 
@@ -72,7 +72,7 @@ jobs:
     runs-on: ubuntu-20.04
 
     steps:
-      - uses: actions/checkout@v3.5.0
+      - uses: actions/checkout@v3.5.1
         with:
           fetch-depth: 0 # Required for Chromatic
           lfs: true
@@ -116,7 +116,7 @@ jobs:
     name: integration (${{ matrix.os }})
 
     steps:
-      - uses: actions/checkout@v3.5.0
+      - uses: actions/checkout@v3.5.1
         with:
           lfs: true
 

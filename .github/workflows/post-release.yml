@@ -15,7 +15,7 @@ jobs:
 
     steps:
       - name: Checkout release/${{ github.event.release.tag_name }}
-        uses: actions/checkout@v3.5.0
+        uses: actions/checkout@v3.5.1
         with:
           ref: release/${{ github.event.release.tag_name }}
           lfs: true
@@ -49,7 +49,7 @@ jobs:
 
     steps:
       - name: Checkout ${{ github.event.release.tag_name || github.event.inputs.tag_name }}
-        uses: actions/checkout@v3.5.0
+        uses: actions/checkout@v3.5.1
         with:
           ref: ${{ github.event.release.tag_name || github.event.inputs.tag_name }}
           lfs: true
@@ -76,7 +76,7 @@ jobs:
 
     steps:
       - name: Checkout ${{ github.event.release.tag_name || github.event.inputs.tag_name }}
-        uses: actions/checkout@v3.5.0
+        uses: actions/checkout@v3.5.1
         with:
           ref: ${{ github.event.release.tag_name || github.event.inputs.tag_name }}
           lfs: true
