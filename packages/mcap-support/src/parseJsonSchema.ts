@@ -8,6 +8,9 @@ import { MessageDefinitionField } from "@foxglove/message-definition";
 
 import { MessageDefinitionMap } from "./types";
 
+/**
+ * Parse a JSON Schema and produce datatypes and a deserializer function.
+ */
 export function parseJsonSchema(
   rootJsonSchema: Record<string, unknown>,
   rootTypeName: string,

@@ -150,8 +150,12 @@ function typeForField(schema: SchemaT, field: FieldT): MessageDefinitionField[] 
   return fields;
 }
 
-// Note: Currently this does not support "lazy" message reading in the style of the ros1 message
-// reader, and so will relatively inefficiently deserialize the entire flatbuffer message.
+/**
+ * Parse a flatbuffer binary schema and produce datatypes and a deserializer function.
+ *
+ * Note: Currently this does not support "lazy" message reading in the style of the ros1 message
+ * reader, and so will relatively inefficiently deserialize the entire flatbuffer message.
+ */
 export function parseFlatbufferSchema(
   schemaName: string,
   schemaArray: Uint8Array,

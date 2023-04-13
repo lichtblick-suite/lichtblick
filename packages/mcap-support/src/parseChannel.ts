@@ -2,9 +2,6 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import protobufjs from "protobufjs";
-import { FileDescriptorSet, IFileDescriptorSet } from "protobufjs/ext/descriptor";
-
 import { MessageDefinition } from "@foxglove/message-definition";
 import { parse as parseMessageDefinition, parseRos2idl } from "@foxglove/rosmsg";
 import { MessageReader } from "@foxglove/rosmsg-serialization";
@@ -12,7 +9,7 @@ import { MessageReader as ROS2MessageReader } from "@foxglove/rosmsg2-serializat
 
 import { parseFlatbufferSchema } from "./parseFlatbufferSchema";
 import { parseJsonSchema } from "./parseJsonSchema";
-import { protobufDefinitionsToDatatypes, stripLeadingDot } from "./protobufDefinitionsToDatatypes";
+import { parseProtobufSchema } from "./parseProtobufSchema";
 import { MessageDefinitionMap } from "./types";
 
 type Channel = {
@@ -102,49 +99,7 @@ export function parseChannel(channel: Channel): ParsedChannel {
         } is not supported (expected protobuf)`,
       );
     }
-    const descriptorSet = FileDescriptorSet.decode(channel.schema.data);
-
-    // Modify the definition of google.protobuf.Timestamp so it gets parsed as {sec, nsec},
-    // compatible with the rest of Studio.
-    for (const file of (descriptorSet as unknown as IFileDescriptorSet).file) {
-      if (file.package === "google.protobuf") {
-        for (const message of file.messageType ?? []) {
-          if (message.name === "Timestamp" || message.name === "Duration") {
-            for (const field of message.field ?? []) {
-              if (field.name === "seconds") {
-                field.name = "sec";
-              } else if (field.name === "nanos") {
-                field.name = "nsec";
-              }
-            }
-          }
-        }
-      }
-    }
-
-    const root = protobufjs.Root.fromDescriptor(descriptorSet);
-    root.resolveAll();
-    const type = root.lookupType(channel.schema.name);
-
-    const deserialize = (data: ArrayBufferView) => {
-      return type.toObject(
-        type.decode(new Uint8Array(data.buffer, data.byteOffset, data.byteLength)),
-        { defaults: true },
-      );
-    };
-
-    const datatypes: MessageDefinitionMap = new Map();
-    protobufDefinitionsToDatatypes(datatypes, type);
-
-    if (!datatypes.has(channel.schema.name)) {
-      throw new Error(
-        `Protobuf schema does not contain an entry for '${
-          channel.schema.name
-        }'. The schema name should be fully-qualified, e.g. '${stripLeadingDot(type.fullName)}'.`,
-      );
-    }
-
-    return { deserialize, datatypes };
+    return parseProtobufSchema(channel.schema.name, channel.schema.data);
   }
 
   if (channel.messageEncoding === "ros1") {
