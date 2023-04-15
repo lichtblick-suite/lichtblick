@@ -136,7 +136,7 @@ export function makeConfig(
         { test: /\.(md|template)$/, type: "asset/source" },
         {
           test: /\.svg$/,
-          loader: "react-svg-loader", // foxglove-depcheck-used: react-svg-loader
+          loader: "@svgr/webpack", // foxglove-depcheck-used: @svgr/webpack
           options: {
             svgo: {
               plugins: [{ removeViewBox: false }, { removeDimensions: false }],
