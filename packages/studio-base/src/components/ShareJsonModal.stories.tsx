@@ -11,59 +11,56 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { storiesOf } from "@storybook/react";
+import { StoryFn } from "@storybook/react";
 import { useEffect } from "react";
 import TestUtils from "react-dom/test-utils";
 
 import ShareJsonModal from "@foxglove/studio-base/components/ShareJsonModal";
 
-storiesOf("components/ShareJsonModal", module)
-  .add(
-    "standard",
-    () => (
+export default {
+  title: "components/ShareJsonModal",
+};
+
+export const Standard: StoryFn = () => (
+  <ShareJsonModal title="Foo" onRequestClose={() => {}} initialValue="" onChange={() => {}} />
+);
+
+Standard.storyName = "standard";
+Standard.parameters = { colorScheme: "dark" };
+
+export const StandardLight: StoryFn = () => (
+  <ShareJsonModal title="Foo" onRequestClose={() => {}} initialValue="" onChange={() => {}} />
+);
+
+StandardLight.storyName = "standard light";
+StandardLight.parameters = { colorScheme: "light" };
+
+export const Json: StoryFn = () => (
+  <ShareJsonModal
+    title="Foo"
+    onRequestClose={() => {}}
+    initialValue={{ foo: "bar", baz: "qux" }}
+    onChange={() => {}}
+  />
+);
+
+Json.storyName = "JSON";
+Json.parameters = { colorScheme: "dark" };
+
+export const SubmittingInvalidLayout: StoryFn = () => {
+  useEffect(() => {
+    setTimeout(() => {
+      const textarea = document.querySelector("textarea")!;
+      textarea.value = "{";
+      TestUtils.Simulate.change(textarea);
+    }, 10);
+  }, []);
+  return (
+    <div data-modalcontainer="true">
       <ShareJsonModal title="Foo" onRequestClose={() => {}} initialValue="" onChange={() => {}} />
-    ),
-    { colorScheme: "dark" },
-  )
-  .add(
-    "standard light",
-    () => (
-      <ShareJsonModal title="Foo" onRequestClose={() => {}} initialValue="" onChange={() => {}} />
-    ),
-    { colorScheme: "light" },
-  )
-  .add(
-    "JSON",
-    () => (
-      <ShareJsonModal
-        title="Foo"
-        onRequestClose={() => {}}
-        initialValue={{ foo: "bar", baz: "qux" }}
-        onChange={() => {}}
-      />
-    ),
-    { colorScheme: "dark" },
-  )
-  .add(
-    "submitting invalid layout",
-    () => {
-      useEffect(() => {
-        setTimeout(() => {
-          const textarea = document.querySelector("textarea")!;
-          textarea.value = "{";
-          TestUtils.Simulate.change(textarea);
-        }, 10);
-      }, []);
-      return (
-        <div data-modalcontainer="true">
-          <ShareJsonModal
-            title="Foo"
-            onRequestClose={() => {}}
-            initialValue=""
-            onChange={() => {}}
-          />
-        </div>
-      );
-    },
-    { colorScheme: "dark" },
+    </div>
   );
+};
+
+SubmittingInvalidLayout.storyName = "submitting invalid layout";
+SubmittingInvalidLayout.parameters = { colorScheme: "dark" };

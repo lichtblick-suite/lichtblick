@@ -115,10 +115,8 @@ export const Default: Story = () => (
   </PanelSetup>
 );
 
-Default.story = {
-  name: "default",
-  parameters: { colorScheme: "both-row" },
-};
+Default.storyName = "default";
+Default.parameters = { colorScheme: "both-row" };
 
 export const ShowingPanelList: Story = () => (
   <PanelSetup fixture={fixture} panelCatalog={new MockPanelCatalog()}>
@@ -126,9 +124,7 @@ export const ShowingPanelList: Story = () => (
   </PanelSetup>
 );
 
-ShowingPanelList.story = {
-  name: "showing panel list",
-};
+ShowingPanelList.storyName = "showing panel list";
 
 export const ShowingPanelListLight: Story = () => (
   <PanelSetup fixture={fixture} panelCatalog={new MockPanelCatalog()}>
@@ -136,10 +132,8 @@ export const ShowingPanelListLight: Story = () => (
   </PanelSetup>
 );
 
-ShowingPanelListLight.story = {
-  name: "showing panel list light",
-  parameters: { colorScheme: "light" },
-};
+ShowingPanelListLight.storyName = "showing panel list light";
+ShowingPanelListLight.parameters = { colorScheme: "light" };
 
 export const PickingAPanelFromThePanelListCreatesANewTabIfThereAreNone: Story = () => {
   return (
@@ -168,9 +162,8 @@ export const PickingAPanelFromThePanelListCreatesANewTabIfThereAreNone: Story = 
   );
 };
 
-PickingAPanelFromThePanelListCreatesANewTabIfThereAreNone.story = {
-  name: "picking a panel from the panel list creates a new tab if there are none",
-};
+PickingAPanelFromThePanelListCreatesANewTabIfThereAreNone.storyName =
+  "picking a panel from the panel list creates a new tab if there are none";
 
 export const PickingAPanelFromThePanelListUpdatesTheTabsLayout: Story = () => {
   return (
@@ -199,9 +192,8 @@ export const PickingAPanelFromThePanelListUpdatesTheTabsLayout: Story = () => {
   );
 };
 
-PickingAPanelFromThePanelListUpdatesTheTabsLayout.story = {
-  name: "picking a panel from the panel list updates the tab's layout",
-};
+PickingAPanelFromThePanelListUpdatesTheTabsLayout.storyName =
+  "picking a panel from the panel list updates the tab's layout";
 
 export const DraggingAPanelFromThePanelListUpdatesTheTabsLayout: Story = () => {
   return (
@@ -233,9 +225,8 @@ export const DraggingAPanelFromThePanelListUpdatesTheTabsLayout: Story = () => {
   );
 };
 
-DraggingAPanelFromThePanelListUpdatesTheTabsLayout.story = {
-  name: "dragging a panel from the panel list updates the tab's layout",
-};
+DraggingAPanelFromThePanelListUpdatesTheTabsLayout.storyName =
+  "dragging a panel from the panel list updates the tab's layout";
 
 export const DraggingAPanelFromThePanelListCreatesANewTabIfThereAreNone: Story = () => {
   return (
@@ -267,9 +258,8 @@ export const DraggingAPanelFromThePanelListCreatesANewTabIfThereAreNone: Story =
   );
 };
 
-DraggingAPanelFromThePanelListCreatesANewTabIfThereAreNone.story = {
-  name: "dragging a panel from the panel list creates a new tab if there are none",
-};
+DraggingAPanelFromThePanelListCreatesANewTabIfThereAreNone.storyName =
+  "dragging a panel from the panel list creates a new tab if there are none";
 
 export const WithChosenActiveTab: Story = () => (
   <PanelSetup panelCatalog={new MockPanelCatalog()} fixture={fixture}>
@@ -309,10 +299,8 @@ export const WithChosenActiveTab: Story = () => (
   </PanelSetup>
 );
 
-WithChosenActiveTab.story = {
-  name: "with chosen active tab",
-  parameters: { colorScheme: "both-row" },
-};
+WithChosenActiveTab.storyName = "with chosen active tab";
+WithChosenActiveTab.parameters = { colorScheme: "both-row" };
 
 export const AddTab: Story = () => {
   return (
@@ -339,9 +327,7 @@ export const AddTab: Story = () => {
   );
 };
 
-AddTab.story = {
-  name: "add tab",
-};
+AddTab.storyName = "add tab";
 
 export const RemoveTab: Story = () => {
   return (
@@ -368,9 +354,7 @@ export const RemoveTab: Story = () => {
   );
 };
 
-RemoveTab.story = {
-  name: "remove tab",
-};
+RemoveTab.storyName = "remove tab";
 
 export const ReorderTabsWithinTabPanelByDroppingOnTab: Story = () => {
   return (
@@ -399,9 +383,8 @@ export const ReorderTabsWithinTabPanelByDroppingOnTab: Story = () => {
   );
 };
 
-ReorderTabsWithinTabPanelByDroppingOnTab.story = {
-  name: "reorder tabs within Tab panel by dropping on tab",
-};
+ReorderTabsWithinTabPanelByDroppingOnTab.storyName =
+  "reorder tabs within Tab panel by dropping on tab";
 
 export const MoveTabToDifferentTabPanel: Story = () => {
   return (
@@ -436,9 +419,7 @@ export const MoveTabToDifferentTabPanel: Story = () => {
   );
 };
 
-MoveTabToDifferentTabPanel.story = {
-  name: "move tab to different Tab panel",
-};
+MoveTabToDifferentTabPanel.storyName = "move tab to different Tab panel";
 
 export const PreventDraggingSelectedParentTabIntoChildTabPanel: Story = () => {
   return (
@@ -474,9 +455,8 @@ export const PreventDraggingSelectedParentTabIntoChildTabPanel: Story = () => {
   );
 };
 
-PreventDraggingSelectedParentTabIntoChildTabPanel.story = {
-  name: "prevent dragging selected parent tab into child tab panel",
-};
+PreventDraggingSelectedParentTabIntoChildTabPanel.storyName =
+  "prevent dragging selected parent tab into child tab panel";
 
 export const DraggingAndDroppingANestedTabPanelDoesNotRemoveAnyTabs: Story = () => {
   return (
@@ -507,9 +487,8 @@ export const DraggingAndDroppingANestedTabPanelDoesNotRemoveAnyTabs: Story = () 
   );
 };
 
-DraggingAndDroppingANestedTabPanelDoesNotRemoveAnyTabs.story = {
-  name: "dragging and dropping a nested tab panel does not remove any tabs",
-};
+DraggingAndDroppingANestedTabPanelDoesNotRemoveAnyTabs.storyName =
+  "dragging and dropping a nested tab panel does not remove any tabs";
 
 export const SupportsDraggingBetweenTabsAnywhereInTheLayout: Story = () => {
   return (
@@ -536,6 +515,5 @@ export const SupportsDraggingBetweenTabsAnywhereInTheLayout: Story = () => {
   );
 };
 
-SupportsDraggingBetweenTabsAnywhereInTheLayout.story = {
-  name: "supports dragging between tabs anywhere in the layout",
-};
+SupportsDraggingBetweenTabsAnywhereInTheLayout.storyName =
+  "supports dragging between tabs anywhere in the layout";

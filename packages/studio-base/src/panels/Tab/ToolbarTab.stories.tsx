@@ -11,7 +11,7 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { storiesOf } from "@storybook/react";
+import { StoryFn } from "@storybook/react";
 import { noop } from "lodash";
 import React, { ReactNode } from "react";
 
@@ -46,46 +46,69 @@ const Container = React.forwardRef<HTMLDivElement, { children?: ReactNode }>(fun
   );
 });
 
-storiesOf("panels/Tab/ToolbarTab", module)
-  .add("default", () => (
-    <Container>
-      <ToolbarTab {...baseProps} />
-    </Container>
-  ))
-  .add("active with close icon", () => (
-    <Container>
-      <ToolbarTab {...{ ...baseProps, isActive: true, tabCount: 3 }} />
-    </Container>
-  ))
-  .add("active without close icon", () => (
-    <Container>
-      <ToolbarTab {...{ ...baseProps, isActive: true, tabCount: 1 }} />
-    </Container>
-  ))
-  .add("hidden", () => (
-    <Container>
-      <ToolbarTab {...{ ...baseProps, hidden: true }} />
-    </Container>
-  ))
-  .add("highlight", () => (
-    <Container>
-      <ToolbarTab {...{ ...baseProps, highlight: "before" }} />
-    </Container>
-  ))
-  .add("dragging", () => (
-    <Container>
-      <ToolbarTab {...{ ...baseProps, isDragging: true }} />
-    </Container>
-  ))
-  .add("editing", () => (
-    <Container
-      ref={async (el) => {
-        await tick();
-        if (el) {
-          el.querySelectorAll("input")[0]?.click();
-        }
-      }}
-    >
-      <ToolbarTab {...{ ...baseProps, isActive: true }} />
-    </Container>
-  ));
+export default {
+  title: "panels/Tab/ToolbarTab",
+};
+
+export const Default: StoryFn = () => (
+  <Container>
+    <ToolbarTab {...baseProps} />
+  </Container>
+);
+
+Default.storyName = "default";
+
+export const ActiveWithCloseIcon: StoryFn = () => (
+  <Container>
+    <ToolbarTab {...{ ...baseProps, isActive: true, tabCount: 3 }} />
+  </Container>
+);
+
+ActiveWithCloseIcon.storyName = "active with close icon";
+
+export const ActiveWithoutCloseIcon: StoryFn = () => (
+  <Container>
+    <ToolbarTab {...{ ...baseProps, isActive: true, tabCount: 1 }} />
+  </Container>
+);
+
+ActiveWithoutCloseIcon.storyName = "active without close icon";
+
+export const Hidden: StoryFn = () => (
+  <Container>
+    <ToolbarTab {...{ ...baseProps, hidden: true }} />
+  </Container>
+);
+
+Hidden.storyName = "hidden";
+
+export const Highlight: StoryFn = () => (
+  <Container>
+    <ToolbarTab {...{ ...baseProps, highlight: "before" }} />
+  </Container>
+);
+
+Highlight.storyName = "highlight";
+
+export const Dragging: StoryFn = () => (
+  <Container>
+    <ToolbarTab {...{ ...baseProps, isDragging: true }} />
+  </Container>
+);
+
+Dragging.storyName = "dragging";
+
+export const Editing: StoryFn = () => (
+  <Container
+    ref={async (el) => {
+      await tick();
+      if (el) {
+        el.querySelectorAll("input")[0]?.click();
+      }
+    }}
+  >
+    <ToolbarTab {...{ ...baseProps, isActive: true }} />
+  </Container>
+);
+
+Editing.storyName = "editing";
