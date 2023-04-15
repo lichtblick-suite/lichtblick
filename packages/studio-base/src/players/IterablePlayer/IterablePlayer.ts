@@ -666,13 +666,15 @@ export class IterablePlayer implements Player {
 
     this._lastMessageEvent = undefined;
 
-    // If the backfill does not complete within 100 milliseconds, we emit a seek event with no messages.
-    // This provides feedback to the user that we've acknowledged their seek request but haven't loaded the data.
+    // If the backfill does not complete within 100 milliseconds, we emit with no messages to
+    // indicate buffering. This provides feedback to the user that we've acknowledged their seek
+    // request but haven't loaded the data.
+    //
+    // Note: we explicitly avoid setting _lastSeekEmitTime so panels do not reset visualizations
     const seekAckTimeout = setTimeout(() => {
       this._presence = PlayerPresence.BUFFERING;
       this._messages = [];
       this._currentTime = targetTime;
-      this._lastSeekEmitTime = Date.now();
       this._queueEmitState();
     }, 100);
 
