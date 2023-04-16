@@ -50,7 +50,7 @@ const parseRosPath = memoize((path: string): RosPath | undefined => {
 });
 export default parseRosPath;
 
-export function getTopicsFromPaths(paths: string[]): string[] {
+export function getTopicsFromPaths(paths: readonly string[]): string[] {
   return uniq(
     filterMap(paths, (path) => {
       const rosPath = parseRosPath(path);

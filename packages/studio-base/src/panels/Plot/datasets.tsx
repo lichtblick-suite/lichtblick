@@ -2,6 +2,8 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
+import { Immutable } from "immer";
+
 import { filterMap } from "@foxglove/den/collection";
 import { isTime, subtract, Time, toSec } from "@foxglove/rostime";
 import { format } from "@foxglove/studio-base/util/formatTime";
@@ -27,8 +29,8 @@ function getXForPoint(
   xAxisVal: PlotXAxisVal,
   timestamp: number,
   innerIdx: number,
-  xAxisRanges: readonly (readonly PlotDataItem[])[] | undefined,
-  xItem: PlotDataItem | undefined,
+  xAxisRanges: Immutable<PlotDataItem[][]> | undefined,
+  xItem: undefined | Immutable<PlotDataItem>,
   xAxisPath: BasePlotPath | undefined,
 ): number | bigint {
   if (isCustomScale(xAxisVal) && xAxisPath) {
@@ -47,13 +49,13 @@ function getXForPoint(
 }
 
 function getDatumsForMessagePathItem(
-  yItem: PlotDataItem,
-  xItem: PlotDataItem | undefined,
+  yItem: Immutable<PlotDataItem>,
+  xItem: undefined | Immutable<PlotDataItem>,
   startTime: Time,
   timestampMethod: TimestampMethod,
   xAxisVal: PlotXAxisVal,
   xAxisPath?: BasePlotPath,
-  xAxisRanges?: readonly (readonly PlotDataItem[])[],
+  xAxisRanges?: Immutable<PlotDataItem[][]>,
 ): { data: Datum[]; hasMismatchedData: boolean } {
   const timestamp = timestampMethod === "headerStamp" ? yItem.headerStamp : yItem.receiveTime;
   if (!timestamp) {
@@ -116,11 +118,11 @@ function getDatasetsFromMessagePlotPath({
   invertedTheme = false,
 }: {
   path: PlotPath;
-  yAxisRanges: readonly (readonly PlotDataItem[])[];
+  yAxisRanges: Immutable<PlotDataItem[][]>;
   index: number;
   startTime: Time;
   xAxisVal: PlotXAxisVal;
-  xAxisRanges: readonly (readonly PlotDataItem[])[] | undefined;
+  xAxisRanges: Immutable<PlotDataItem[][]> | undefined;
   xAxisPath?: BasePlotPath;
   invertedTheme?: boolean;
 }): {
@@ -147,10 +149,10 @@ function getDatasetsFromMessagePlotPath({
   }
 
   for (const [rangeIdx, range] of yAxisRanges.entries()) {
-    const xRange: readonly PlotDataItem[] | undefined = xAxisRanges?.[rangeIdx];
+    const xRange = xAxisRanges?.[rangeIdx];
     let rangeData: Datum[] = [];
     for (const [outerIdx, item] of range.entries()) {
-      const xItem: PlotDataItem | undefined = xRange?.[outerIdx];
+      const xItem = xRange?.[outerIdx];
       const { data: datums, hasMismatchedData: itemHasMistmatchedData } =
         getDatumsForMessagePathItem(
           item,
@@ -234,7 +236,7 @@ function getDatasetsFromMessagePlotPath({
 
 type Args = {
   paths: PlotPath[];
-  itemsByPath: PlotDataByPath;
+  itemsByPath: Immutable<PlotDataByPath>;
   startTime: Time;
   xAxisVal: PlotXAxisVal;
   xAxisPath?: BasePlotPath;

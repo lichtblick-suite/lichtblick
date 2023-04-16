@@ -53,9 +53,7 @@ export type PlotDataItem = {
   headerStamp?: Time;
 };
 
-export type PlotDataByPath = {
-  [path: string]: PlotDataItem[][];
-};
+export type PlotDataByPath = Record<string, PlotDataItem[][]>;
 
 // A "reference line" plot path is a numeric value. It creates a horizontal line on the plot at the specified value.
 export function isReferenceLinePlotPathType(path: BasePlotPath): boolean {

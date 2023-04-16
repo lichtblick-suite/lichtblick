@@ -45,11 +45,11 @@ export type MessagePathDataItem = {
 // and message to an array of `MessagePathDataItem` objects. The array+objects will be the same by
 // reference, as long as topics/datatypes/global variables haven't changed in the meantime.
 export function useCachedGetMessagePathDataItems(
-  paths: string[],
+  paths: readonly string[],
 ): (path: string, message: MessageEvent<unknown>) => MessagePathDataItem[] | undefined {
   const { topics: providerTopics, datatypes } = PanelAPI.useDataSourceInfo();
   const { globalVariables } = useGlobalVariables();
-  const memoizedPaths: string[] = useShallowMemo<string[]>(paths);
+  const memoizedPaths = useShallowMemo(paths);
 
   // We first fill in global variables in the paths, so we can later see which paths have really
   // changed when the global variables have changed.
@@ -376,11 +376,11 @@ export type MessageDataItemsByPath = {
 };
 
 export function useDecodeMessagePathsForMessagesByTopic(
-  paths: string[],
+  paths: readonly string[],
 ): (messagesByTopic: {
   [topicName: string]: readonly MessageEvent<unknown>[];
 }) => MessageDataItemsByPath {
-  const memoizedPaths = useShallowMemo<string[]>(paths);
+  const memoizedPaths = useShallowMemo(paths);
   const cachedGetMessagePathDataItems = useCachedGetMessagePathDataItems(memoizedPaths);
   // Note: Let callers define their own memoization scheme for messagesByTopic. For regular playback
   // useMemo might be appropriate, but weakMemo will likely better for blocks.
