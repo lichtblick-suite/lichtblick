@@ -347,7 +347,7 @@ export class FoxgloveGridRenderable extends Renderable<FoxgloveGridUserData> {
             }
           }
         }
-      } else {
+      } else if (settings.colorMode === "flat") {
         // flat
         const colorConverter = getColorConverter(
           settings as typeof settings & { colorMode: typeof settings.colorMode },
