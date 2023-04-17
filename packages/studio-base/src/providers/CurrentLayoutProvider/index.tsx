@@ -198,7 +198,7 @@ export default function CurrentLayoutProvider({
             if (isMounted()) {
               enqueueSnackbar(`Your changes could not be saved. ${error.toString()}`, {
                 variant: "error",
-                id: "CurrentLayoutProvider.throttledSave",
+                key: "CurrentLayoutProvider.throttledSave",
               });
             }
           });

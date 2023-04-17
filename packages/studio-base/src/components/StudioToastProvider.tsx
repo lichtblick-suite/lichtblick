@@ -9,95 +9,122 @@ import {
   Info20Regular,
   Warning20Regular,
 } from "@fluentui/react-icons";
-import { Grow, IconButton, useTheme } from "@mui/material";
-import { SnackbarProvider, SnackbarKey, useSnackbar } from "notistack";
-import { PropsWithChildren } from "react";
+import { Grow, IconButton } from "@mui/material";
+import {
+  SnackbarProvider,
+  SnackbarKey,
+  useSnackbar,
+  MaterialDesignContent,
+  CustomContentProps,
+} from "notistack";
+import { PropsWithChildren, forwardRef } from "react";
 import { makeStyles } from "tss-react/mui";
 
 import { APP_BAR_HEIGHT } from "@foxglove/studio-base/components/AppBar/constants";
 
 const anchorWithOffset = (origin: "top" | "bottom") => ({
-  "&.SnackbarContainer-root": {
+  "&.notistack-SnackbarContainer": {
     top: origin === "top" ? APP_BAR_HEIGHT : undefined,
   },
 });
 
-const useStyles = makeStyles()((theme) => ({
-  /* eslint-disable tss-unused-classes/unused-classes */
-  root: {
-    "&.SnackbarContainer-root": {
-      maxHeight: `calc(100% - ${APP_BAR_HEIGHT}px)`,
-    },
-    ".SnackbarContent-root": {
-      padding: theme.spacing(0.5, 1.5, 0.5, 1),
+const useStyles = makeStyles<void, "icon" | "dismissButton">()((theme, _params, classes) => ({
+  icon: {},
+  dismissButton: {
+    color: theme.palette.common.white,
 
-      ".MuiIconButton-root svg": {
-        height: "1em",
-        width: "1em",
-        fontSize: "1rem",
-      },
+    "svg:not(.MuiSvgIcon-root)": {
+      fontSize: 16,
     },
-    ".SnackbarItem-message": {
+  },
+  root: {
+    "#notistack-snackbar": {
       padding: 0,
-      gap: theme.spacing(1),
+      gap: theme.spacing(0.75),
+    },
+    "&.notistack-MuiContent": {
+      padding: theme.spacing(0.5, 1.5, 0.5, 1),
+      fontSize: theme.typography.body2.fontSize,
+    },
+    "&.notistack-MuiContent-default": {
+      backgroundColor: theme.palette.background.paper,
+      color: theme.palette.text.primary,
+
+      [`.${classes.icon}`]: { color: theme.palette.primary.main },
+      [`.${classes.dismissButton}`]: { color: theme.palette.text.primary },
+    },
+    "&.notistack-MuiContent-success": {
+      backgroundColor: theme.palette.success.main,
+    },
+    "&.notistack-MuiContent-error": {
+      backgroundColor: theme.palette.error.main,
+    },
+    "&.notistack-MuiContent-info": {
+      backgroundColor: theme.palette.info.main,
+    },
+    "&.notistack-MuiContent-warning": {
+      backgroundColor: theme.palette.warning.main,
     },
   },
-  container: {
-    zIndex: theme.zIndex.tooltip,
-  },
+}));
+
+const useContainerStyles = makeStyles()({
+  /* eslint-disable tss-unused-classes/unused-classes */
+  containerAnchorOriginBottomCenter: anchorWithOffset("bottom"),
+  containerAnchorOriginBottomRight: anchorWithOffset("bottom"),
+  containerAnchorOriginBottomLeft: anchorWithOffset("bottom"),
   containerAnchorOriginTopCenter: anchorWithOffset("top"),
   containerAnchorOriginTopRight: anchorWithOffset("top"),
   containerAnchorOriginTopLeft: anchorWithOffset("top"),
-  variantDefault: {
-    "&.SnackbarContent-root": {
-      backgroundColor: theme.palette.background.paper,
-      color: theme.palette.text.primary,
-    },
-  },
-  variantSuccess: {
-    "&.SnackbarContent-root": { backgroundColor: theme.palette.success.main },
-  },
-  variantError: {
-    "&.SnackbarContent-root": { backgroundColor: theme.palette.error.main },
-  },
-  variantInfo: {
-    "&.SnackbarContent-root": { backgroundColor: theme.palette.info.main },
-  },
-  variantWarning: {
-    "&.SnackbarContent-root": { backgroundColor: theme.palette.warning.main },
-  },
   /* eslint-enable tss-unused-classes/unused-classes */
-}));
+});
 
 const CloseSnackbarAction = ({ id }: { id: SnackbarKey }) => {
   const { closeSnackbar } = useSnackbar();
+  const { classes } = useStyles();
   return (
-    <IconButton size="small" color="inherit" onClick={() => closeSnackbar(id)}>
+    <IconButton size="small" className={classes.dismissButton} onClick={() => closeSnackbar(id)}>
       <Dismiss16Filled />
     </IconButton>
   );
 };
 
-export default function StudioToastProvider(props: PropsWithChildren<unknown>): JSX.Element {
+const Snackbar = forwardRef<HTMLDivElement, CustomContentProps>((props, ref) => {
   const { classes } = useStyles();
-  const theme = useTheme();
+  return <MaterialDesignContent ref={ref} {...props} className={classes.root} />;
+});
+Snackbar.displayName = "Snackbar";
+
+export default function StudioToastProvider({ children }: PropsWithChildren<unknown>): JSX.Element {
+  const { classes: containerClasses } = useContainerStyles();
+  const { classes } = useStyles();
   return (
     <SnackbarProvider
+      Components={{
+        default: Snackbar,
+        error: Snackbar,
+        success: Snackbar,
+        warning: Snackbar,
+        info: Snackbar,
+      }}
       action={(id) => <CloseSnackbarAction id={id} />}
       iconVariant={{
-        default: <Info20Regular primaryFill={theme.palette.primary.main} />,
-        info: <Info20Regular />,
-        error: <DismissCircle20Regular />,
-        warning: <Warning20Regular />,
-        success: <CheckmarkCircle20Regular />,
+        default: <Info20Regular className={classes.icon} />,
+        info: <Info20Regular className={classes.icon} />,
+        error: <DismissCircle20Regular className={classes.icon} />,
+        warning: <Warning20Regular className={classes.icon} />,
+        success: <CheckmarkCircle20Regular className={classes.icon} />,
       }}
-      anchorOrigin={{ vertical: "top", horizontal: "center" }}
+      anchorOrigin={{
+        vertical: "top",
+        horizontal: "center",
+      }}
       maxSnack={5}
       preventDuplicate
       TransitionComponent={Grow}
-      classes={classes}
+      classes={containerClasses}
     >
-      {props.children}
+      {children}
     </SnackbarProvider>
   );
 }
