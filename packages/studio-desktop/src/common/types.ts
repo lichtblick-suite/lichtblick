@@ -7,7 +7,7 @@ export type ForwardedMenuEvent =
   | "open-file"
   | "open-remote-file"
   | "open-sample-data"
-  | "open-preferences"
+  | "open-app-settings"
   | "open-layouts"
   | "open-add-panel"
   | "open-panel-settings"

@@ -306,7 +306,7 @@ function WorkspaceContent(props: WorkspaceProps): JSX.Element {
   );
 
   useNativeAppMenuEvent(
-    "open-preferences",
+    "open-app-settings",
     useCallback(() => {
       prefsDialogActions.open();
     }, [prefsDialogActions]),
@@ -545,9 +545,9 @@ function WorkspaceContent(props: WorkspaceProps): JSX.Element {
         });
       }
 
-      bottomItems.set("preferences", {
+      bottomItems.set("app-settings", {
         iconName: "Settings",
-        title: "Preferences",
+        title: "Settings",
       });
     }
 

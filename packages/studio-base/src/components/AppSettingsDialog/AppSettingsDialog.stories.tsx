@@ -14,7 +14,7 @@ import ExtensionMarketplaceContext, {
 import ExtensionCatalogProvider from "@foxglove/studio-base/providers/ExtensionCatalogProvider";
 import WorkspaceContextProvider from "@foxglove/studio-base/providers/WorkspaceContextProvider";
 
-import { PreferencesDialog } from "./PreferencesDialog";
+import { AppSettingsDialog } from "./AppSettingsDialog";
 
 const installedExtensions: ExtensionInfo[] = range(1, 10).map((index) => ({
   id: "publisher.storyextension",
@@ -74,20 +74,20 @@ function Wrapper(StoryComponent: Story): JSX.Element {
 }
 
 export default {
-  title: "components/PreferencesDialog",
-  component: PreferencesDialog,
+  title: "components/AppSettingsDialog",
+  component: AppSettingsDialog,
   parameters: { colorScheme: "light" },
   decorators: [Wrapper],
 };
 
 export function Default(): JSX.Element {
-  return <PreferencesDialog open />;
+  return <AppSettingsDialog open />;
 }
 export const DefaultChinese = (): JSX.Element => <Default />;
 DefaultChinese.parameters = { forceLanguage: "zh" };
 
 export function ChangingLanguage(): JSX.Element {
-  return <PreferencesDialog open />;
+  return <AppSettingsDialog open />;
 }
 ChangingLanguage.play = async () => {
   const user = userEvent.setup();
@@ -100,31 +100,31 @@ ChangingLanguage.play = async () => {
 };
 
 export function General(): JSX.Element {
-  return <PreferencesDialog open activeTab="general" />;
+  return <AppSettingsDialog open activeTab="general" />;
 }
 export const GeneralChinese = (): JSX.Element => <General />;
 GeneralChinese.parameters = { forceLanguage: "zh" };
 
 export function Privacy(): JSX.Element {
-  return <PreferencesDialog open activeTab="privacy" />;
+  return <AppSettingsDialog open activeTab="privacy" />;
 }
 export const PrivacyChinese = (): JSX.Element => <Privacy />;
 PrivacyChinese.parameters = { forceLanguage: "zh" };
 
 export function Extensions(): JSX.Element {
-  return <PreferencesDialog open activeTab="extensions" />;
+  return <AppSettingsDialog open activeTab="extensions" />;
 }
 export const ExtensionsChinese = (): JSX.Element => <Extensions />;
 ExtensionsChinese.parameters = { forceLanguage: "zh" };
 
 export function Experimental(): JSX.Element {
-  return <PreferencesDialog open activeTab="experimental-features" />;
+  return <AppSettingsDialog open activeTab="experimental-features" />;
 }
 export const ExperimentalChinese = (): JSX.Element => <Experimental />;
 ExperimentalChinese.parameters = { forceLanguage: "zh" };
 
 export function About(): JSX.Element {
-  return <PreferencesDialog open activeTab="about" />;
+  return <AppSettingsDialog open activeTab="about" />;
 }
 export const AboutChinese = (): JSX.Element => <About />;
 AboutChinese.parameters = { forceLanguage: "zh" };

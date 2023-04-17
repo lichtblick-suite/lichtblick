@@ -262,9 +262,9 @@ function buildMenu(browserWindow: BrowserWindow): Menu {
         { type: "separator" },
 
         {
-          label: "Preferences…",
+          label: "Settings…",
           accelerator: "CommandOrControl+,",
-          click: () => browserWindow.webContents.send("open-preferences"),
+          click: () => browserWindow.webContents.send("open-app-settings"),
         },
         { role: "services" },
         { type: "separator" },
@@ -295,9 +295,9 @@ function buildMenu(browserWindow: BrowserWindow): Menu {
         : [
             { type: "separator" } as const,
             {
-              label: "Preferences…",
+              label: "Settings…",
               accelerator: "CommandOrControl+,",
-              click: () => browserWindow.webContents.send("open-preferences"),
+              click: () => browserWindow.webContents.send("open-app-settings"),
             } as const,
           ]),
       { type: "separator" },
@@ -627,9 +627,9 @@ class StudioWindow {
 
       fileMenu.submenu?.append(
         new MenuItem({
-          label: "Preferences…",
+          label: "Settings…",
           accelerator: "CommandOrControl+,",
-          click: () => browserWindow.webContents.send("open-preferences"),
+          click: () => browserWindow.webContents.send("open-app-settings"),
         }),
       );
     }

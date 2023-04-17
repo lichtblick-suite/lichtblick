@@ -175,7 +175,7 @@ export const aboutItems: Map<
   ],
 ]);
 
-export type PreferencesDialogTab =
+export type AppSettingsTab =
   | "general"
   | "privacy"
   | "extensions"
@@ -185,13 +185,13 @@ export type PreferencesDialogTab =
 const selectWorkspaceInitialActiveTab = (store: WorkspaceContextStore) =>
   store.prefsDialogState.initialTab;
 
-export function PreferencesDialog(
-  props: DialogProps & { activeTab?: PreferencesDialogTab },
+export function AppSettingsDialog(
+  props: DialogProps & { activeTab?: AppSettingsTab },
 ): JSX.Element {
-  const { t } = useTranslation("preferences");
+  const { t } = useTranslation("appSettings");
   const { activeTab: _activeTab } = props;
   const initialActiveTab = useWorkspaceStore(selectWorkspaceInitialActiveTab);
-  const [activeTab, setActiveTab] = useState<PreferencesDialogTab>(
+  const [activeTab, setActiveTab] = useState<AppSettingsTab>(
     _activeTab ?? initialActiveTab ?? "general",
   );
   const [crashReportingEnabled, setCrashReportingEnabled] = useAppConfigurationValue<boolean>(
@@ -211,7 +211,7 @@ export function PreferencesDialog(
   // with our .deb package install method on linux.
   const supportsAppUpdates = isDesktopApp() && OsContextSingleton?.platform !== "linux";
 
-  const handleTabChange = (_event: SyntheticEvent, newValue: PreferencesDialogTab) => {
+  const handleTabChange = (_event: SyntheticEvent, newValue: AppSettingsTab) => {
     setActiveTab(newValue);
   };
 
@@ -231,7 +231,7 @@ export function PreferencesDialog(
         paddingY={2}
       >
         <Typography variant="h3" fontWeight={600}>
-          {t("preferences")}
+          {t("settings")}
         </Typography>
         <IconButton edge="end" onClick={handleClose}>
           <CloseIcon />

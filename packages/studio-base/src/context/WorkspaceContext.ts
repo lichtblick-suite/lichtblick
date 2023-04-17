@@ -7,7 +7,7 @@ import { DeepReadonly } from "ts-essentials";
 import { StoreApi, useStore } from "zustand";
 
 import { AppSetting } from "@foxglove/studio-base/AppSetting";
-import { PreferencesDialogTab } from "@foxglove/studio-base/components/PreferencesDialog/PreferencesDialog";
+import { AppSettingsTab } from "@foxglove/studio-base/components/AppSettingsDialog/AppSettingsDialog";
 import { useCurrentUser } from "@foxglove/studio-base/context/CurrentUserContext";
 import { useAppConfigurationValue } from "@foxglove/studio-base/hooks";
 import useGuaranteedContext from "@foxglove/studio-base/hooks/useGuaranteedContext";
@@ -21,7 +21,7 @@ export type SidebarItemKey =
   | "help"
   | "layouts"
   | "panel-settings"
-  | "preferences"
+  | "app-settings"
   | "studio-logs-settings"
   | "variables";
 
@@ -39,7 +39,7 @@ export type WorkspaceContextStore = DeepReadonly<{
   rightSidebarItem: undefined | RightSidebarItemKey;
   rightSidebarSize: undefined | number;
   prefsDialogState: {
-    initialTab: undefined | PreferencesDialogTab;
+    initialTab: undefined | AppSettingsTab;
     open: boolean;
   };
   sidebarItem: undefined | SidebarItemKey;
@@ -77,7 +77,7 @@ export type WorkspaceActions = {
   openLayoutBrowser: () => void;
   prefsDialogActions: {
     close: () => void;
-    open: (initialTab?: PreferencesDialogTab) => void;
+    open: (initialTab?: AppSettingsTab) => void;
   };
   selectSidebarItem: (selectedSidebarItem: undefined | SidebarItemKey) => void;
   selectLeftSidebarItem: (item: undefined | LeftSidebarItemKey) => void;
@@ -124,13 +124,13 @@ export function useWorkspaceActions(): WorkspaceActions {
 
       prefsDialogActions: {
         close: () => set({ prefsDialogState: { open: false, initialTab: undefined } }),
-        open: (initialTab?: PreferencesDialogTab) => {
+        open: (initialTab?: AppSettingsTab) => {
           set({ prefsDialogState: { open: true, initialTab } });
         },
       },
 
       selectSidebarItem: (selectedSidebarItem: undefined | SidebarItemKey) => {
-        if (selectedSidebarItem === "preferences") {
+        if (selectedSidebarItem === "app-settings") {
           set({ prefsDialogState: { open: true, initialTab: undefined } });
         } else {
           set({ sidebarItem: selectedSidebarItem });

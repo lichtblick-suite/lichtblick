@@ -42,7 +42,7 @@ type Feature = {
 };
 
 function useFeatures(): Feature[] {
-  const { t } = useTranslation("preferences");
+  const { t } = useTranslation("appSettings");
 
   const features: Feature[] = [
     {
@@ -136,7 +136,7 @@ function ExperimentalFeatureItem(props: { feature: Feature }) {
 
 export const ExperimentalFeatureSettings = (): React.ReactElement => {
   const features = useFeatures();
-  const { t } = useTranslation("preferences");
+  const { t } = useTranslation("appSettings");
   return (
     <Stack gap={2}>
       {features.length === 0 && (

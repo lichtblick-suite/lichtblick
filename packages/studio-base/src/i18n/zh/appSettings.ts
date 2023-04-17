@@ -4,8 +4,8 @@
 
 import { TypeOptions } from "i18next";
 
-export const preferences: TypeOptions["resources"]["preferences"] = {
-  preferences: "偏好",
+export const appSettings: TypeOptions["resources"]["appSettings"] = {
+  settings: "设置",
   colorScheme: "配色方案",
   dark: "暗色",
   light: "亮色",

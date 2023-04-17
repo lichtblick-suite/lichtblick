@@ -88,7 +88,7 @@ export function ColorSchemeSettings(): JSX.Element {
   const [colorScheme = "system", setColorScheme] = useAppConfigurationValue<string>(
     AppSetting.COLOR_SCHEME,
   );
-  const { t } = useTranslation("preferences");
+  const { t } = useTranslation("appSettings");
 
   const handleChange = useCallback(
     (_event: MouseEvent<HTMLElement>, value?: string) => {
@@ -129,7 +129,7 @@ export function TimezoneSettings(): React.ReactElement {
 
   const { classes } = useStyles();
 
-  const { t } = useTranslation("preferences");
+  const { t } = useTranslation("appSettings");
   const [timezone, setTimezone] = useAppConfigurationValue<string>(AppSetting.TIMEZONE);
   const detectItem: Option = useMemo(
     () => ({
@@ -207,7 +207,7 @@ export function TimeFormat({
 }): React.ReactElement {
   const { timeFormat, setTimeFormat } = useAppTimeFormat();
 
-  const { t } = useTranslation("preferences");
+  const { t } = useTranslation("appSettings");
 
   const [timezone] = useAppConfigurationValue<string>(AppSetting.TIMEZONE);
 
@@ -238,7 +238,7 @@ export function TimeFormat({
 
 export function LaunchDefault(): React.ReactElement {
   const { classes } = useStyles();
-  const { t } = useTranslation("preferences");
+  const { t } = useTranslation("appSettings");
   const [preference, setPreference] = useAppConfigurationValue<string | undefined>(
     AppSetting.LAUNCH_PREFERENCE,
   );
@@ -279,7 +279,7 @@ export function LaunchDefault(): React.ReactElement {
 }
 
 export function MessageFramerate(): React.ReactElement {
-  const { t } = useTranslation("preferences");
+  const { t } = useTranslation("appSettings");
   const [messageRate, setMessageRate] = useAppConfigurationValue<number>(AppSetting.MESSAGE_RATE);
   const options = useMemo(
     () => MESSAGE_RATES.map((rate) => ({ key: rate, text: `${rate}`, data: rate })),
@@ -353,7 +353,7 @@ export function RosPackagePath(): React.ReactElement {
 }
 
 export function LanguageSettings(): React.ReactElement {
-  const { t, i18n } = useTranslation("preferences");
+  const { t, i18n } = useTranslation("appSettings");
   const [selectedLanguage = "en", setSelectedLanguage] = useAppConfigurationValue<Language>(
     AppSetting.LANGUAGE,
   );

@@ -8,7 +8,7 @@ import { useCallback } from "react";
 import { makeStyles } from "tss-react/mui";
 
 import Logger from "@foxglove/log";
-import { PreferencesDialogTab } from "@foxglove/studio-base/components/PreferencesDialog/PreferencesDialog";
+import { AppSettingsTab } from "@foxglove/studio-base/components/AppSettingsDialog/AppSettingsDialog";
 import { useAnalytics } from "@foxglove/studio-base/context/AnalyticsContext";
 import {
   useCurrentUser,
@@ -80,11 +80,11 @@ export function UserMenu({
     signIn?.();
   }, [analytics, currentUserType, signIn]);
 
-  const onPreferencesClick = useCallback(
-    (tab?: PreferencesDialogTab) => {
+  const onSettingsClick = useCallback(
+    (tab?: AppSettingsTab) => {
       void analytics.logEvent(AppEvent.APP_BAR_CLICK_CTA, {
         user: currentUserType,
-        cta: "preferences-dialog",
+        cta: "app-settings-dialog",
       });
       prefsDialogActions.open(tab);
     },
@@ -129,8 +129,8 @@ export function UserMenu({
         MenuListProps={{ className: classes.menuList, dense: true }}
       >
         {currentUser && <MenuItem disabled>{currentUser.email}</MenuItem>}
-        <MenuItem onClick={() => onPreferencesClick()}>Settings</MenuItem>
-        <MenuItem onClick={() => onPreferencesClick("extensions")}>Extensions</MenuItem>
+        <MenuItem onClick={() => onSettingsClick()}>Settings</MenuItem>
+        <MenuItem onClick={() => onSettingsClick("extensions")}>Extensions</MenuItem>
         {currentUser && <MenuItem onClick={onProfileClick}>User profile</MenuItem>}
         <Divider variant="middle" />
         <MenuItem onClick={onDocsClick}>Documentation</MenuItem>

@@ -2,7 +2,7 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { PreferencesDialog } from "@foxglove/studio-base/components/PreferencesDialog";
+import { AppSettingsDialog } from "@foxglove/studio-base/components/AppSettingsDialog";
 import {
   useWorkspaceActions,
   useWorkspaceStore,
@@ -22,8 +22,8 @@ export function WorkspaceDialogs(): JSX.Element {
   return (
     <>
       {prefsDialogOpen && (
-        <PreferencesDialog
-          id="preferences-dialog"
+        <AppSettingsDialog
+          id="app-settings-dialog"
           open
           onClose={() => prefsDialogActions.close()}
         />
