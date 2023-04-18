@@ -2309,7 +2309,7 @@ __metadata:
     "@protobufjs/base64": 1.1.2
     "@types/protobufjs": "workspace:*"
     flatbuffers: 23.3.3
-    flatbuffers_reflection: 0.0.3
+    flatbuffers_reflection: 0.0.4
     protobufjs: "patch:protobufjs@7.2.3#../../patches/protobufjs.patch"
     typescript: 5.0.3
   languageName: unknown
@@ -12483,10 +12483,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"flatbuffers_reflection@npm:0.0.3":
-  version: 0.0.3
-  resolution: "flatbuffers_reflection@npm:0.0.3"
-  checksum: bcef0af4ec41d6a21c9f6ae1df5be2e329c286d2ae566e09190ff585252b7ec6fbf79035c6ea255bc7c821851516b8bdcb5bf2f6c505e63a242e74c3fcd38cfe
+"flatbuffers_reflection@npm:0.0.4":
+  version: 0.0.4
+  resolution: "flatbuffers_reflection@npm:0.0.4"
+  checksum: 88353e0bcee4ff781083a681d533a84f95533a4b57aba42b03beb788be2592d21b40fa996e641eadd4f312a7fca7eb7da4a298e0443cc3ae1fcb8dcd630a5cf9
   languageName: node
   linkType: hard
 
