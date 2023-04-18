@@ -7,7 +7,7 @@ import { Immutable } from "immer";
 import * as THREE from "three";
 
 import { MessageEvent, ParameterValue, SettingsIcon, Topic, VariableValue } from "@foxglove/studio";
-import { CameraStateSettings } from "@foxglove/studio-base/panels/ThreeDeeRender/renderables/CameraStateSettings";
+import { ICameraHandler } from "@foxglove/studio-base/panels/ThreeDeeRender/renderables/ICameraHandler";
 import { LabelPool } from "@foxglove/three-text";
 
 import { Input } from "./Input";
@@ -182,7 +182,7 @@ export interface IRenderer extends EventEmitter<RendererEvents> {
   publishClickTool: PublishClickTool;
 
   /** only public for testing - prefer to use `getCameraState` instead */
-  cameraStateSettings: CameraStateSettings;
+  cameraHandler: ICameraHandler;
 
   // Are we connected to a ROS data source? Normalize coordinate frames if so by
   // stripping any leading "/" prefix. See `normalizeFrameId()` for details.
@@ -276,7 +276,7 @@ export interface IRenderer extends EventEmitter<RendererEvents> {
 
   setCameraState(cameraState: CameraState): void;
 
-  getCameraState(): CameraState;
+  getCameraState(): CameraState | undefined;
 
   setSelectedRenderable(selection: PickedRenderable | undefined): void;
 

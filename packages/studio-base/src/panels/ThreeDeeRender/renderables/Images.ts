@@ -25,6 +25,7 @@ import Logger from "@foxglove/log";
 import { toNanoSec } from "@foxglove/rostime";
 import { CameraCalibration, CompressedImage, RawImage } from "@foxglove/schemas";
 import { SettingsTreeAction, SettingsTreeFields, Topic } from "@foxglove/studio";
+import { AnyImage } from "@foxglove/studio-base/panels/ThreeDeeRender/renderables/ImageTypes";
 import type { RosValue } from "@foxglove/studio-base/players/types";
 
 import { cameraInfosEqual, normalizeCameraInfo, projectPixel } from "./projections";
@@ -53,8 +54,6 @@ import { makePose } from "../transforms";
 
 const log = Logger.getLogger(__filename);
 void log;
-
-type AnyImage = RosImage | RosCompressedImage | RawImage | CompressedImage;
 
 export type LayerSettingsImage = BaseSettings & {
   cameraInfoTopic: string | undefined;

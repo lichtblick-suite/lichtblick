@@ -7,6 +7,7 @@ import { fromNanoSec } from "@foxglove/rostime";
 import { MessageEvent } from "@foxglove/studio";
 import { Renderer } from "@foxglove/studio-base/panels/ThreeDeeRender/Renderer";
 import { DEFAULT_CAMERA_STATE } from "@foxglove/studio-base/panels/ThreeDeeRender/camera";
+import { CameraStateSettings } from "@foxglove/studio-base/panels/ThreeDeeRender/renderables/CameraStateSettings";
 import { DEFAULT_PUBLISH_SETTINGS } from "@foxglove/studio-base/panels/ThreeDeeRender/renderables/PublishSettings";
 import { TFMessage } from "@foxglove/studio-base/panels/ThreeDeeRender/ros";
 
@@ -129,6 +130,9 @@ describe("3D Renderer", () => {
       },
       "3d",
     );
+    const cameraState = renderer.sceneExtensions.get(
+      "foxglove.CameraStateSettings",
+    ) as CameraStateSettings;
 
     renderer.setCurrentTime(1n);
 
@@ -141,7 +145,7 @@ describe("3D Renderer", () => {
     tfWithDisplayChild.message.transforms[0]!.transform.translation.x = 1;
     renderer.addMessageEvent(tfWithDisplayChild);
     renderer.animationFrame();
-    expect(renderer.cameraStateSettings.unfollowPoseSnapshot).toBeUndefined();
+    expect(cameraState.unfollowPoseSnapshot).toBeUndefined();
   });
   it("records pose snapshot after changing from follow-pose mode to follow-none", () => {
     const config = {
@@ -151,6 +155,9 @@ describe("3D Renderer", () => {
       scene: { transforms: { enablePreloading: false } },
     };
     const renderer = new Renderer(canvas, config, "3d");
+    const cameraState = renderer.sceneExtensions.get(
+      "foxglove.CameraStateSettings",
+    ) as CameraStateSettings;
 
     renderer.setCurrentTime(1n);
 
@@ -163,11 +170,11 @@ describe("3D Renderer", () => {
     tfWithDisplayChild.message.transforms[0]!.transform.translation.x = 1;
     renderer.addMessageEvent(tfWithDisplayChild);
     renderer.animationFrame();
-    expect(renderer.cameraStateSettings.unfollowPoseSnapshot).toBeUndefined();
+    expect(cameraState.unfollowPoseSnapshot).toBeUndefined();
     renderer.config = { ...config, followMode: "follow-none" };
     renderer.animationFrame();
     // parent is the camera group that holds the pose from the snapshot
-    expect(renderer.cameraStateSettings.unfollowPoseSnapshot?.position).toEqual({
+    expect(cameraState.unfollowPoseSnapshot?.position).toEqual({
       x: 1,
       y: 0,
       z: 0,
@@ -181,6 +188,9 @@ describe("3D Renderer", () => {
       scene: { transforms: { enablePreloading: false } },
     };
     const renderer = new Renderer(canvas, config, "3d");
+    const cameraState = renderer.sceneExtensions.get(
+      "foxglove.CameraStateSettings",
+    ) as CameraStateSettings;
 
     renderer.setCurrentTime(1n);
 
@@ -193,14 +203,14 @@ describe("3D Renderer", () => {
     tfWithDisplayChild.message.transforms[0]!.transform.translation.x = 1;
     renderer.addMessageEvent(tfWithDisplayChild);
     renderer.animationFrame();
-    expect(renderer.cameraStateSettings.unfollowPoseSnapshot?.position).toEqual({
+    expect(cameraState.unfollowPoseSnapshot?.position).toEqual({
       x: 1,
       y: 0,
       z: 0,
     });
     renderer.config = { ...config, followMode: "follow-pose" };
     renderer.animationFrame();
-    expect(renderer.cameraStateSettings.unfollowPoseSnapshot).toBeUndefined();
+    expect(cameraState.unfollowPoseSnapshot).toBeUndefined();
   });
   it("keeps same unfollowPoseSnapshot when switching from follow-none to follow-position", () => {
     const config = {
@@ -210,6 +220,9 @@ describe("3D Renderer", () => {
       scene: { transforms: { enablePreloading: false } },
     };
     const renderer = new Renderer(canvas, config, "3d");
+    const cameraState = renderer.sceneExtensions.get(
+      "foxglove.CameraStateSettings",
+    ) as CameraStateSettings;
 
     renderer.setCurrentTime(1n);
 
@@ -222,14 +235,14 @@ describe("3D Renderer", () => {
     tfWithDisplayChild.message.transforms[0]!.transform.translation.x = 1;
     renderer.addMessageEvent(tfWithDisplayChild);
     renderer.animationFrame();
-    expect(renderer.cameraStateSettings.unfollowPoseSnapshot?.position).toEqual({
+    expect(cameraState.unfollowPoseSnapshot?.position).toEqual({
       x: 1,
       y: 0,
       z: 0,
     });
     renderer.config = { ...config, followMode: "follow-position" };
     renderer.animationFrame();
-    expect(renderer.cameraStateSettings.unfollowPoseSnapshot?.position).toEqual({
+    expect(cameraState.unfollowPoseSnapshot?.position).toEqual({
       x: 1,
       y: 0,
       z: 0,
@@ -246,6 +259,9 @@ describe("3D Renderer", () => {
       },
       "3d",
     );
+    const cameraState = renderer.sceneExtensions.get(
+      "foxglove.CameraStateSettings",
+    ) as CameraStateSettings;
 
     renderer.setCurrentTime(1n);
 
@@ -259,7 +275,7 @@ describe("3D Renderer", () => {
     renderer.addMessageEvent(tfWithDisplayChild);
     renderer.animationFrame();
     expect(renderer.fixedFrameId).toEqual("parentOfDisplay");
-    expect(renderer.cameraStateSettings.unfollowPoseSnapshot?.position).toEqual({
+    expect(cameraState.unfollowPoseSnapshot?.position).toEqual({
       x: 1,
       y: 0,
       z: 0,
@@ -271,7 +287,7 @@ describe("3D Renderer", () => {
     renderer.animationFrame();
     expect(renderer.fixedFrameId).toEqual("root");
     // combines the two translations
-    expect(renderer.cameraStateSettings.unfollowPoseSnapshot?.position).toEqual({
+    expect(cameraState.unfollowPoseSnapshot?.position).toEqual({
       x: 1,
       y: 1,
       z: 0,

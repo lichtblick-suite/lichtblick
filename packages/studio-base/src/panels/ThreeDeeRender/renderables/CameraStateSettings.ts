@@ -8,6 +8,7 @@ import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
 
 import { SettingsTreeAction } from "@foxglove/studio";
+import { ICameraHandler } from "@foxglove/studio-base/panels/ThreeDeeRender/renderables/ICameraHandler";
 import {
   AnyFrameId,
   CoordinateFrame,
@@ -34,7 +35,7 @@ const tempVec3 = new THREE.Vector3();
 const tempSpherical = new THREE.Spherical();
 const tempEuler = new THREE.Euler();
 const FOLLOW_TF_PATH = ["general", "followTf"];
-export class CameraStateSettings extends SceneExtension {
+export class CameraStateSettings extends SceneExtension implements ICameraHandler {
   // The frameId's of the fixed and render frames used to create the current unfollowPoseSnapshot
   private unfollowSnapshotFrameIds:
     | {
@@ -59,7 +60,7 @@ export class CameraStateSettings extends SceneExtension {
   private orthographicCamera: THREE.OrthographicCamera;
   private aspect: number;
 
-  public constructor(renderer: IRenderer, canvas: HTMLCanvasElement, renderSize: THREE.Vector2) {
+  public constructor(renderer: IRenderer, canvas: HTMLCanvasElement, aspect: number) {
     super("foxglove.CameraStateSettings", renderer);
 
     // for Frame settings, we need to listen to the transform tree to update settings when new possible display frames are present
@@ -94,7 +95,7 @@ export class CameraStateSettings extends SceneExtension {
 
     // Make the canvas able to receive keyboard events and setup WASD controls
     canvas.tabIndex = 1000;
-    this.aspect = renderSize.width / renderSize.height;
+    this.aspect = aspect;
     this.controls.keys = { LEFT: "KeyA", RIGHT: "KeyD", UP: "KeyW", BOTTOM: "KeyS" };
     this.controls.listenToKeyEvents(canvas);
   }
@@ -430,8 +431,8 @@ export class CameraStateSettings extends SceneExtension {
       : this.orthographicCamera;
   }
 
-  public handleResize(renderSize: THREE.Vector2): void {
-    this.aspect = renderSize.width / renderSize.height;
+  public handleResize(width: number, height: number): void {
+    this.aspect = width / height;
     this.setCameraState(this.renderer.config.cameraState);
   }
 

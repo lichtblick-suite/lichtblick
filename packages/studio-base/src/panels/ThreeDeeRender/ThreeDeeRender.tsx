@@ -486,6 +486,9 @@ export function ThreeDeeRender(props: {
     const listener = () => {
       if (renderer) {
         const newCameraState = renderer.getCameraState();
+        if (!newCameraState) {
+          return;
+        }
         // This needs to be before `setConfig` otherwise flickering will occur during
         // non-follow mode playback
         renderer.setCameraState(newCameraState);
@@ -969,7 +972,7 @@ export function ThreeDeeRender(props: {
   }, [publishActive, renderer]);
 
   const onTogglePerspective = useCallback(() => {
-    const currentState = renderer?.getCameraState().perspective ?? false;
+    const currentState = renderer?.getCameraState()?.perspective ?? false;
     actionHandler({
       action: "update",
       payload: {
