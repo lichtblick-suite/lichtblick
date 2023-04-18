@@ -3,14 +3,21 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 import { PaletteOptions } from "@mui/material/styles";
+import { CSSProperties } from "react";
 
-type CustomPaletteOptions = {
-  name: string;
-};
+declare module "@mui/material/styles" {
+  interface PaletteOptions {
+    name: string;
+  }
+  interface TypeBackground {
+    menu: CSSProperties["color"];
+  }
+}
 
-export const dark: PaletteOptions & CustomPaletteOptions = {
+export const dark: PaletteOptions = {
   name: "dark",
   mode: "dark",
+  tonalOffset: 0.15,
   primary: { main: "#9480ed" },
   secondary: { main: "#b1b1b1" },
   error: { main: "#f54966" },
@@ -21,32 +28,34 @@ export const dark: PaletteOptions & CustomPaletteOptions = {
     primary: "#e1e1e4",
     secondary: "#a7a6af",
   },
-  divider: "#585858",
+  divider: "#585861",
   background: {
-    default: "#121217",
+    default: "#15151a",
     paper: "#27272b",
+    menu: "#35363A",
   },
   grey: {
-    50: "#121212",
-    100: "#1E1E1E",
-    200: "#222222",
-    300: "#272727",
-    400: "#2C2C2C",
-    500: "#2E2E2E",
-    600: "#333333",
-    700: "#353535",
-    800: "#383838",
-    900: "#454545",
-    A100: "#303030",
-    A200: "#616161",
-    A400: "#aaaaaa",
-    A700: "#d5d5d5",
+    50: "#121217",
+    100: "#16161b",
+    200: "#212127",
+    300: "#27272b",
+    400: "#2d2d33",
+    500: "#2f2f35",
+    600: "#33333a",
+    700: "#35353d",
+    800: "#3b3b44",
+    900: "#45474d",
+    A100: "#313138",
+    A200: "#60636c",
+    A400: "#aeb0b7",
+    A700: "#d2d5df",
   },
 };
 
-export const light: PaletteOptions & CustomPaletteOptions = {
+export const light: PaletteOptions = {
   name: "light",
   mode: "light",
+  tonalOffset: 0.22,
   primary: { main: "#6f3be8" },
   secondary: { main: "#808080" },
   error: { main: "#db3553" },
@@ -56,6 +65,7 @@ export const light: PaletteOptions & CustomPaletteOptions = {
   background: {
     default: "#f4f4f5",
     paper: "#ffffff",
+    menu: "#ffffff",
   },
   text: {
     primary: "#393939",
