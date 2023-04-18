@@ -10,7 +10,7 @@ import { MessageEvent } from "@foxglove/studio-base/players/types";
 
 import { FileReadable } from "./FileReadable";
 import { McapIndexedIterableSource } from "./McapIndexedIterableSource";
-import { McapStreamingIterableSource } from "./McapStreamingIterableSource";
+import { McapUnindexedIterableSource } from "./McapUnindexedIterableSource";
 import { RemoteFileReadable } from "./RemoteFileReadable";
 import {
   IIterableSource,
@@ -62,7 +62,7 @@ export class McapIterableSource implements IIterableSource {
         if (reader) {
           this._sourceImpl = new McapIndexedIterableSource(reader);
         } else {
-          this._sourceImpl = new McapStreamingIterableSource({
+          this._sourceImpl = new McapUnindexedIterableSource({
             size: source.file.size,
             stream: source.file.stream(),
           });
@@ -85,7 +85,7 @@ export class McapIterableSource implements IIterableSource {
             throw new Error(`Remote file is missing Content-Length header. <${source.url}>`);
           }
 
-          this._sourceImpl = new McapStreamingIterableSource({
+          this._sourceImpl = new McapUnindexedIterableSource({
             size: parseInt(size),
             stream: response.body,
           });

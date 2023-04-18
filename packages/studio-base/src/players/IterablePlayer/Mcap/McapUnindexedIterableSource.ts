@@ -32,7 +32,8 @@ const DURATION_YEAR_SEC = 365 * 24 * 60 * 60;
 
 type Options = { size: number; stream: ReadableStream<Uint8Array> };
 
-export class McapStreamingIterableSource implements IIterableSource {
+/** Only efficient for small files */
+export class McapUnindexedIterableSource implements IIterableSource {
   private options: Options;
   private msgEventsByChannel?: Map<number, MessageEvent<unknown>[]>;
   private start?: Time;
@@ -242,6 +243,7 @@ export class McapStreamingIterableSource implements IIterableSource {
     }
 
     const topicsSet = new Set(topics);
+    const resultMessages = [];
 
     for (const [channelId, msgEvents] of this.msgEventsByChannel) {
       for (const msgEvent of msgEvents) {
@@ -249,14 +251,19 @@ export class McapStreamingIterableSource implements IIterableSource {
           isTimeInRangeInclusive(msgEvent.receiveTime, start, end) &&
           topicsSet.has(msgEvent.topic)
         ) {
-          yield {
-            type: "message-event",
+          resultMessages.push({
+            type: "message-event" as const,
             connectionId: channelId,
             msgEvent,
-          };
+          });
         }
       }
     }
+
+    // Messages need to be yielded in receiveTime order
+    resultMessages.sort((a, b) => compare(a.msgEvent.receiveTime, b.msgEvent.receiveTime));
+
+    yield* resultMessages;
   }
 
   public async getBackfillMessages(
