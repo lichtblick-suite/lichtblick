@@ -194,7 +194,6 @@ export default function PlaybackControls(props: {
                   disabled={presence !== PlayerPresence.PRESENT}
                   size="small"
                   icon={<Info24Regular />}
-                  activeColor="info"
                 />
               </Tooltip>
             )}
