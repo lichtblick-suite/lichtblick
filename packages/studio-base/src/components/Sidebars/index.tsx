@@ -27,6 +27,7 @@ import isDesktopApp from "@foxglove/studio-base/util/isDesktopApp";
 
 import { NewSidebar, NewSidebarItem } from "./NewSidebar";
 import { TabSpacer } from "./TabSpacer";
+import "react-mosaic-component/react-mosaic-component.css";
 
 function Noop(): ReactNull {
   return ReactNull;

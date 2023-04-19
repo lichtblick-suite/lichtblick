@@ -12,8 +12,7 @@
 //   You may not use this file except in compliance with the License.
 
 import { Story } from "@storybook/react";
-import { screen } from "@testing-library/dom";
-import userEvent from "@testing-library/user-event";
+import { screen, userEvent } from "@storybook/testing-library";
 import { shuffle } from "lodash";
 import { useCallback, useRef } from "react";
 import { makeStyles } from "tss-react/mui";
@@ -456,9 +455,8 @@ LineGraphWithSettings.parameters = {
 };
 LineGraphWithSettings.storyName = "line graph with settings";
 LineGraphWithSettings.play = async (ctx) => {
-  const user = userEvent.setup();
   const label = await screen.findByTestId("settings__nodeHeaderToggle__yAxis");
-  await user.click(label);
+  userEvent.click(label);
   await ctx.parameters.storyReady;
 };
 
@@ -729,9 +727,8 @@ WithMinAndMaxYValues.parameters = {
 };
 WithMinAndMaxYValues.storyName = "with min and max Y values";
 WithMinAndMaxYValues.play = async () => {
-  const user = userEvent.setup();
   const label = await screen.findByText("Y Axis");
-  await user.click(label);
+  userEvent.click(label);
 };
 
 export const WithJustMinYValueLessThanMinimumValue: Story = () => {

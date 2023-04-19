@@ -3,8 +3,7 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 import { Box } from "@mui/material";
-import { fireEvent } from "@testing-library/dom";
-import userEvent from "@testing-library/user-event";
+import { fireEvent, userEvent } from "@storybook/testing-library";
 import produce from "immer";
 import { last } from "lodash";
 import { useCallback, useMemo, useState, useEffect } from "react";
@@ -1015,8 +1014,7 @@ export function Vec3(): JSX.Element {
 }
 
 async function clickSelect() {
-  const user = userEvent.setup();
-  await user.click(document.querySelector(".MuiSelect-select")!);
+  userEvent.click(document.querySelector(".MuiSelect-select")!);
 }
 
 export function SelectInvalidWithUndefined(): JSX.Element {

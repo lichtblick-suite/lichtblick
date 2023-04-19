@@ -12,7 +12,7 @@
 //   You may not use this file except in compliance with the License.
 
 import { Story } from "@storybook/react";
-import { fireEvent, screen } from "@testing-library/dom";
+import { fireEvent, screen } from "@storybook/testing-library";
 import { DndProvider } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
 

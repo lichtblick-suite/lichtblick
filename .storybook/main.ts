@@ -1,19 +1,39 @@
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
+
+/* eslint-disable filenames/match-exported */
+
+import { StorybookConfig } from "@storybook/react-webpack5";
+import fs from "fs";
 import path from "path";
 import { Configuration } from "webpack";
 
 import { makeConfig } from "@foxglove/studio-base/webpack";
 
-module.exports = {
-  stories: ["../**/*.stories.@(ts|tsx)"],
+const STORY_SUFFIX = /\.stories\.tsx?$/;
+/** Workaround for https://github.com/storybookjs/storybook/issues/19446 */
+function* findStories(dir: string): Iterable<string> {
+  for (const child of fs.readdirSync(dir, { withFileTypes: true })) {
+    const childPath = path.join(dir, child.name);
+    if (child.isDirectory()) {
+      if (child.name === "node_modules" || child.name === ".git") {
+        continue;
+      }
+      yield* findStories(childPath);
+    } else if (STORY_SUFFIX.test(child.name)) {
+      yield childPath;
+    }
+  }
+}
+
+const storybookConfig: StorybookConfig = {
+  stories: [...findStories(path.join(__dirname, ".."))],
   addons: ["@storybook/addon-essentials", "@storybook/addon-actions"],
-
-  core: {
-    builder: "webpack5",
+  framework: {
+    name: "@storybook/react-webpack5",
+    options: {},
   },
-
   // Carefully merge our main webpack config with the Storybook default config.
   // For the most part, our webpack config has already been designed to handle
   // all the imports and edge cases we need to support. However, at least some of
@@ -25,7 +45,6 @@ module.exports = {
       { mode: config.mode },
       { allowUnusedVariables: true, version: "0.0.0-storybook" },
     );
-
     return {
       ...config,
       // context is required for ForkTsCheckerWebpackPlugin to find .storybook/tsconfig.json
@@ -34,6 +53,7 @@ module.exports = {
         ...config.optimization,
         minimize: false, // disabling minification improves build performance
       },
+
       resolve: {
         ...studioWebpackConfig.resolve,
         alias: {
@@ -48,3 +68,5 @@ module.exports = {
     };
   },
 };
+
+module.exports = storybookConfig;

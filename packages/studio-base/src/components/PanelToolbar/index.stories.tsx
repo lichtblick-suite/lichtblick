@@ -24,6 +24,8 @@ import WorkspaceContextProvider from "@foxglove/studio-base/providers/WorkspaceC
 
 import PanelToolbar from "./index";
 
+import "react-mosaic-component/react-mosaic-component.css";
+
 class MosaicWrapper extends React.Component<{
   layout?: any;
   children: React.ReactNode;

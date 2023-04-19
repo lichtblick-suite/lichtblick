@@ -12,7 +12,7 @@
 //   You may not use this file except in compliance with the License.
 
 import { Story } from "@storybook/react";
-import { fireEvent } from "@testing-library/dom";
+import { fireEvent } from "@storybook/testing-library";
 
 import Panel from "@foxglove/studio-base/components/Panel";
 import PanelLayout from "@foxglove/studio-base/components/PanelLayout";

@@ -12,8 +12,7 @@
 //   You may not use this file except in compliance with the License.
 
 import { Stack } from "@mui/material";
-import { screen, waitFor } from "@testing-library/dom";
-import userEvent from "@testing-library/user-event";
+import { screen, waitFor, userEvent } from "@storybook/testing-library";
 
 import { Topic } from "@foxglove/studio-base/players/types";
 import PanelSetup, { Fixture } from "@foxglove/studio-base/stories/PanelSetup";
@@ -94,14 +93,13 @@ export default {
 
 function makePathAndSelectionAction(path: undefined | string, item: number) {
   return async () => {
-    const user = userEvent.setup();
     if (path != undefined) {
       const input = await screen.findByPlaceholderText("/some/topic.msgs[0].field");
-      await user.click(input);
-      await user.keyboard(path);
+      userEvent.click(input);
+      userEvent.keyboard(path);
     }
     const options = await waitFor(() => document.querySelectorAll("[data-test-auto-item]"));
-    await user.click(options[item]!);
+    userEvent.click(options[item]!);
   };
 }
 

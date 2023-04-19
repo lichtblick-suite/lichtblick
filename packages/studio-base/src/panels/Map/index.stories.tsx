@@ -3,7 +3,7 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 import { Story, StoryContext } from "@storybook/react";
-import userEvent from "@testing-library/user-event";
+import { userEvent } from "@storybook/testing-library";
 import { cloneDeep, tap } from "lodash";
 import { useState } from "react";
 import { useTimeoutFn } from "react-use";
@@ -446,9 +446,8 @@ GeoJSON.parameters = {
   colorScheme: "light",
 };
 GeoJSON.play = async () => {
-  const user = userEvent.setup();
   const followSelect = document.querySelectorAll("div[role=button][aria-haspopup=listbox]")[1];
   if (followSelect) {
-    await user.click(followSelect);
+    userEvent.click(followSelect);
   }
 };

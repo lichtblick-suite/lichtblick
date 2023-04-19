@@ -2,8 +2,7 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { screen } from "@testing-library/dom";
-import userEvent from "@testing-library/user-event";
+import { screen, userEvent } from "@storybook/testing-library";
 import { PropsWithChildren, useEffect, useState } from "react";
 import { DndProvider } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
@@ -118,10 +117,8 @@ export const LeftClicked = (): JSX.Element => <Story defaultLeftKey="a" />;
 LeftClicked.storyName = "Left (tab click interaction)";
 LeftClicked.parameters = { colorScheme: "dark" };
 LeftClicked.play = async () => {
-  const user = userEvent.setup();
-
   const leftTab = await screen.findByTestId("b-left");
-  await user.click(leftTab);
+  userEvent.click(leftTab);
 };
 export const LeftClosed = (): JSX.Element => (
   <Story defaultLeftKey="b" defaultRightKey="y" label="Left sidebar should be closed" />
@@ -129,10 +126,8 @@ export const LeftClosed = (): JSX.Element => (
 LeftClosed.storyName = "Left (closed by interaction)";
 LeftClosed.parameters = { colorScheme: "dark" };
 LeftClosed.play = async () => {
-  const user = userEvent.setup();
-
   const leftClose = await screen.findByTestId("sidebar-close-left");
-  await user.click(leftClose);
+  userEvent.click(leftClose);
 };
 
 // Right
@@ -146,10 +141,8 @@ export const RightClicked = (): JSX.Element => <Story defaultRightKey="x" />;
 RightClicked.storyName = "Right (tab click interaction)";
 RightClicked.parameters = { colorScheme: "dark" };
 RightClicked.play = async () => {
-  const user = userEvent.setup();
-
   const rightTab = await screen.findByTestId("y-right");
-  await user.click(rightTab);
+  userEvent.click(rightTab);
 };
 export const RightClosed = (): JSX.Element => (
   <Story defaultLeftKey="b" defaultRightKey="y" label="Right sidebar should be closed" />
@@ -157,10 +150,8 @@ export const RightClosed = (): JSX.Element => (
 RightClosed.storyName = "Right (closed by interaction)";
 RightClosed.parameters = { colorScheme: "dark" };
 RightClosed.play = async () => {
-  const user = userEvent.setup();
-
   const rightClose = await screen.findByTestId("sidebar-close-right");
-  await user.click(rightClose);
+  userEvent.click(rightClose);
 };
 
 // Both
@@ -172,11 +163,9 @@ export const BothClicked = (): JSX.Element => <Story defaultLeftKey="a" defaultR
 BothClicked.storyName = "Both (tab click interaction)";
 BothClicked.parameters = { colorScheme: "dark" };
 BothClicked.play = async () => {
-  const user = userEvent.setup();
-
   const leftTab = await screen.findByTestId("b-left");
-  await user.click(leftTab);
+  userEvent.click(leftTab);
 
   const rightTab = await screen.findByTestId("y-right");
-  await user.click(rightTab);
+  userEvent.click(rightTab);
 };

@@ -2,6 +2,7 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
+import { GlobalStyles } from "@mui/material";
 import { Story, StoryContext } from "@storybook/react";
 import { useMemo, useRef, useEffect } from "react";
 import { useTranslation } from "react-i18next";
@@ -92,6 +93,22 @@ function StudioContextProviders({
         width: "100%",
       }}
     >
+      <GlobalStyles
+        styles={{
+          /* Help stories that don't have an intrinsic height to display correctly and consistently */
+          "#storybook-root": {
+            height: "100%",
+            width: "100%",
+            display: "flex",
+            flexDirection: "column",
+            position: "relative",
+            flex: "1 1 100%",
+            outline: "none",
+            overflow: "hidden",
+            zIndex: "0",
+          },
+        }}
+      />
       {
         // We need to render exactly 1 copy of GlobalCss, so the body background and font color may
         // not match the theme when rendering both color schemes in one story. If this is a problem
@@ -149,7 +166,7 @@ function StudioContextProviders({
 }
 
 function WithContextProviders(Child: Story, ctx: StoryContext): JSX.Element {
-  if ((ctx.parameters.fileName as string).startsWith("../packages/studio-base/")) {
+  if ((ctx.parameters.fileName as string).includes("/packages/studio-base/")) {
     return (
       <StudioContextProviders ctx={ctx}>
         <Child />

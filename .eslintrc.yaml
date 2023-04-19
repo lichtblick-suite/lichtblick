@@ -20,6 +20,7 @@ extends:
   - plugin:@foxglove/base
   - plugin:@foxglove/react
   - plugin:@foxglove/jest
+  - plugin:storybook/recommended
 
 settings:
   import/internal-regex: "^@foxglove"

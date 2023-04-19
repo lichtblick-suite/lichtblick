@@ -3,8 +3,7 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 import { Story } from "@storybook/react";
-import { screen } from "@testing-library/dom";
-import userEvent from "@testing-library/user-event";
+import { screen, userEvent } from "@storybook/testing-library";
 import { useEffect } from "react";
 
 import MockMessagePipelineProvider from "@foxglove/studio-base/components/MessagePipeline/MockMessagePipelineProvider";
@@ -52,9 +51,8 @@ export function Selected(): JSX.Element {
   return <EventsList />;
 }
 Selected.play = async () => {
-  const user = userEvent.setup();
   const events = await screen.findAllByTestId("sidebar-event");
-  await user.click(events[1]!);
+  userEvent.click(events[1]!);
 };
 Selected.parameters = {
   colorScheme: "light",

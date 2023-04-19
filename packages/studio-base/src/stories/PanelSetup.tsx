@@ -59,6 +59,8 @@ import ThemeProvider from "@foxglove/studio-base/theme/ThemeProvider";
 import { RosDatatypes } from "@foxglove/studio-base/types/RosDatatypes";
 import { SavedProps, UserNodes } from "@foxglove/studio-base/types/panels";
 
+import "react-mosaic-component/react-mosaic-component.css";
+
 function noop() {}
 
 type Frame = {

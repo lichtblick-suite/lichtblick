@@ -2,8 +2,7 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { screen } from "@testing-library/dom";
-import userEvent from "@testing-library/user-event";
+import { screen, userEvent } from "@storybook/testing-library";
 import { useState } from "react";
 
 import { ColorPickerControl } from "./ColorPickerControl";
@@ -31,10 +30,9 @@ export function TextEntry(): JSX.Element {
   return <ColorPickerControl alphaType="none" value={color} onChange={setColor} />;
 }
 TextEntry.play = async () => {
-  const user = userEvent.setup();
   const inputs = await screen.findAllByPlaceholderText("RRGGBB");
   for (const input of inputs) {
-    await user.click(input);
-    await user.type(input, "aabbcc");
+    userEvent.click(input);
+    userEvent.type(input, "aabbcc");
   }
 };

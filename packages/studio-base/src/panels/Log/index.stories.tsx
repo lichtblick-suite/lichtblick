@@ -11,8 +11,7 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { screen } from "@testing-library/dom";
-import userEvent from "@testing-library/user-event";
+import { screen, userEvent } from "@storybook/testing-library";
 import { range } from "lodash";
 import TestUtils from "react-dom/test-utils";
 
@@ -241,9 +240,8 @@ export const AutoCompleteItems = (): JSX.Element => {
   );
 };
 AutoCompleteItems.play = async () => {
-  const user = userEvent.setup();
   const input = (await screen.findAllByPlaceholderText("Search filter"))[0]!;
-  await user.click(input);
+  userEvent.click(input);
 };
 
 export const FoxgloveLog = (): JSX.Element => {

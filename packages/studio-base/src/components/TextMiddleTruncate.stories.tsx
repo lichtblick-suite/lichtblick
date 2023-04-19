@@ -11,7 +11,7 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { fireEvent, screen } from "@testing-library/dom";
+import { fireEvent, screen } from "@storybook/testing-library";
 
 import TextMiddleTruncate from "./TextMiddleTruncate";
 

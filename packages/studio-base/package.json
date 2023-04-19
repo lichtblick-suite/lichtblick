@@ -54,13 +54,12 @@
     "@mui/material": "5.12.0",
     "@popperjs/core": "2.11.6",
     "@protobufjs/base64": "1.1.2",
-    "@storybook/addon-actions": "6.5.16",
-    "@storybook/react": "6.5.16",
+    "@storybook/addon-actions": "7.0.4",
+    "@storybook/react": "7.0.4",
+    "@storybook/testing-library": "0.1.0",
     "@svgr/webpack": "7.0.0",
-    "@testing-library/dom": "9.2.0",
     "@testing-library/react": "12.1.2",
     "@testing-library/react-hooks": "8.0.1",
-    "@testing-library/user-event": "14.4.3",
     "@types/base16": "^1.0.2",
     "@types/cytoscape": "^3.19.9",
     "@types/foxglove__roslibjs": "workspace:*",
@@ -176,7 +175,7 @@
     "use-immer": "0.8.1",
     "use-pan-and-zoom": "0.6.5",
     "uuid": "9.0.0",
-    "webpack": "5.76.2",
+    "webpack": "5.79.0",
     "zustand": "4.3.7"
   }
 }

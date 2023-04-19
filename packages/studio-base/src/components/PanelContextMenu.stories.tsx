@@ -3,7 +3,7 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 import { Story } from "@storybook/react";
-import { fireEvent } from "@testing-library/dom";
+import { fireEvent } from "@storybook/testing-library";
 import { v4 as uuid } from "uuid";
 
 import Panel from "@foxglove/studio-base/components/Panel";

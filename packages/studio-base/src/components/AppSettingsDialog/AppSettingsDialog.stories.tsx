@@ -3,8 +3,7 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 import { Story } from "@storybook/react";
-import { screen } from "@testing-library/dom";
-import userEvent from "@testing-library/user-event";
+import { screen, userEvent } from "@storybook/testing-library";
 import { range } from "lodash";
 
 import { ExtensionInfo, ExtensionLoader } from "@foxglove/studio-base";
@@ -90,13 +89,12 @@ export function ChangingLanguage(): JSX.Element {
   return <AppSettingsDialog open />;
 }
 ChangingLanguage.play = async () => {
-  const user = userEvent.setup();
   const input = await screen.findByText("English", { exact: false });
-  await user.click(input);
+  userEvent.click(input);
 
-  await userEvent.keyboard("中文");
+  userEvent.keyboard("中文");
   const item = await screen.findByText("中文", { exact: false });
-  await user.click(item);
+  userEvent.click(item);
 };
 
 export function General(): JSX.Element {

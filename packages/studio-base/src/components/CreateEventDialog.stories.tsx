@@ -3,8 +3,7 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 import { Story } from "@storybook/react";
-import { screen } from "@testing-library/dom";
-import userEvent from "@testing-library/user-event";
+import { screen, userEvent } from "@storybook/testing-library";
 
 import MockMessagePipelineProvider from "@foxglove/studio-base/components/MessagePipeline/MockMessagePipelineProvider";
 import EventsProvider from "@foxglove/studio-base/providers/EventsProvider";
@@ -39,26 +38,24 @@ export const Normal: Story = () => {
 };
 
 Normal.play = async () => {
-  const user = userEvent.setup();
-
   const firstKey = await screen.findByPlaceholderText("Key (string)");
-  await user.click(firstKey);
-  await user.keyboard("1");
+  userEvent.click(firstKey);
+  userEvent.keyboard("1");
 
   const firstValue = await screen.findByPlaceholderText("Value (string)");
-  await user.click(firstValue);
-  await user.keyboard("2");
+  userEvent.click(firstValue);
+  userEvent.keyboard("2");
 
   const firstPlus = await screen.findByTestId("add");
-  await user.click(firstPlus);
+  userEvent.click(firstPlus);
 
   const secondKey = await screen.findAllByPlaceholderText("Key (string)");
-  await user.click(secondKey[1]!);
-  await user.keyboard("3");
+  userEvent.click(secondKey[1]!);
+  userEvent.keyboard("3");
 
   const secondValue = await screen.findAllByPlaceholderText("Value (string)");
-  await user.click(secondValue[1]!);
-  await user.keyboard("4");
+  userEvent.click(secondValue[1]!);
+  userEvent.keyboard("4");
 };
 
 export const WithDuplicates: Story = () => {
@@ -66,24 +63,22 @@ export const WithDuplicates: Story = () => {
 };
 
 WithDuplicates.play = async () => {
-  const user = userEvent.setup();
-
   const firstKey = await screen.findByPlaceholderText("Key (string)");
-  await user.click(firstKey);
-  await user.keyboard("1");
+  userEvent.click(firstKey);
+  userEvent.keyboard("1");
 
   const firstValue = await screen.findByPlaceholderText("Value (string)");
-  await user.click(firstValue);
-  await user.keyboard("2");
+  userEvent.click(firstValue);
+  userEvent.keyboard("2");
 
   const firstPlus = await screen.findByTestId("add");
-  await user.click(firstPlus);
+  userEvent.click(firstPlus);
 
   const secondKey = await screen.findAllByPlaceholderText("Key (string)");
-  await user.click(secondKey[1]!);
-  await user.keyboard("1");
+  userEvent.click(secondKey[1]!);
+  userEvent.keyboard("1");
 
   const secondValue = await screen.findAllByPlaceholderText("Value (string)");
-  await user.click(secondValue[1]!);
-  await user.keyboard("2");
+  userEvent.click(secondValue[1]!);
+  userEvent.keyboard("2");
 };

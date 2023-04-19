@@ -2,7 +2,7 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { screen } from "@testing-library/react";
+import { screen } from "@storybook/testing-library";
 
 import { MessageEvent } from "@foxglove/studio";
 import { PlayerCapabilities, Topic } from "@foxglove/studio-base/players/types";
