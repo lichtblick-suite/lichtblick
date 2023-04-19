@@ -9038,6 +9038,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"chart.js@patch:chart.js@npm%3A4.2.1#./patches/chart.js-npm-4.2.1-97512b9a29.patch::locator=foxglove-studio%40workspace%3A.":
+  version: 4.2.1
+  resolution: "chart.js@patch:chart.js@npm%3A4.2.1#./patches/chart.js-npm-4.2.1-97512b9a29.patch::version=4.2.1&hash=319ec7&locator=foxglove-studio%40workspace%3A."
+  dependencies:
+    "@kurkle/color": ^0.3.0
+  checksum: 55581fbde48e77269bac8569dd0ef34a297e1559cb35c574e6e1408be29755a89650025c8af96acd2b1a6ca2146964fe24ef66b66cb533300401f6caa07f6f3a
+  languageName: node
+  linkType: hard
+
 "chartjs-plugin-annotation@npm:2.2.1":
   version: 2.2.1
   resolution: "chartjs-plugin-annotation@npm:2.2.1"

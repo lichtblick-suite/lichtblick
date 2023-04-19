@@ -1,0 +1,14 @@
+diff --git a/dist/chunks/helpers.segment.js b/dist/chunks/helpers.segment.js
+index 0ed995200101efa12327093707f1b53b7562ce33..f740cd2f856d48bff375f9f77ddc3677ea0db14b 100644
+--- a/dist/chunks/helpers.segment.js
++++ b/dist/chunks/helpers.segment.js
+@@ -877,7 +877,8 @@ const formatters = {
+             delta = calculateDelta(tickValue, ticks);
+         }
+         const logDelta = log10(Math.abs(delta));
+-        const numDecimal = Math.max(Math.min(-1 * Math.floor(logDelta), 20), 0);
++        // https://github.com/chartjs/Chart.js/pull/11238
++        const numDecimal = isNaN(logDelta) ? 1 : Math.max(Math.min(-1 * Math.floor(logDelta), 20), 0);
+         const options = {
+             notation,
+             minimumFractionDigits: numDecimal,
