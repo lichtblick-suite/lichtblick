@@ -40,6 +40,7 @@ function generateAnnotations(stamp: Time): ImageAnnotations {
       },
     ],
     points: [],
+    texts: [],
   };
 }
 

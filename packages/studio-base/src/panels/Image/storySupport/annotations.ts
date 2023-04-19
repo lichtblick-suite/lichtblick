@@ -4,7 +4,7 @@
 
 import { range } from "lodash";
 
-import { ImageAnnotations } from "@foxglove/schemas";
+import { ImageAnnotations, TextAnnotation } from "@foxglove/schemas";
 import { normalizeAnnotations } from "@foxglove/studio-base/panels/Image/lib/normalizeAnnotations";
 import { ImageMarker, ImageMarkerType } from "@foxglove/studio-base/types/Messages";
 
@@ -198,6 +198,16 @@ const outlineColors = [
   { r: 1, g: 0, b: 1, a: 1 },
 ];
 export const foxgloveAnnotations: ImageAnnotations = {
+  texts: [
+    {
+      timestamp: { sec: 0, nsec: 0 },
+      position: { x: 30, y: 30 },
+      text: "This is a test {x:30,y:30}",
+      font_size: 20,
+      text_color: { r: 1, g: 0, b: 0, a: 1 },
+      background_color: { r: 0.2, g: 0, b: 1, a: 0.5 },
+    },
+  ] as TextAnnotation[],
   circles: [],
   points: [
     {
