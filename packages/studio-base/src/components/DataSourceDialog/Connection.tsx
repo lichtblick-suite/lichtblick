@@ -9,21 +9,16 @@ import { makeStyles } from "tss-react/mui";
 import { BuiltinIcon } from "@foxglove/studio-base/components/BuiltinIcon";
 import Stack from "@foxglove/studio-base/components/Stack";
 import { useAnalytics } from "@foxglove/studio-base/context/AnalyticsContext";
+import { usePlayerSelection } from "@foxglove/studio-base/context/PlayerSelectionContext";
 import {
-  IDataSourceFactory,
-  usePlayerSelection,
-} from "@foxglove/studio-base/context/PlayerSelectionContext";
+  WorkspaceContextStore,
+  useWorkspaceActions,
+  useWorkspaceStore,
+} from "@foxglove/studio-base/context/WorkspaceContext";
 import { AppEvent } from "@foxglove/studio-base/services/IAnalytics";
 
 import { FormField } from "./FormField";
 import View from "./View";
-
-type ConnectionProps = {
-  onBack?: () => void;
-  onCancel?: () => void;
-  availableSources: IDataSourceFactory[];
-  activeSource?: IDataSourceFactory;
-};
 
 const useStyles = makeStyles()((theme) => ({
   grid: {
@@ -86,25 +81,35 @@ const useStyles = makeStyles()((theme) => ({
   },
 }));
 
-export default function Connection(props: ConnectionProps): JSX.Element {
-  const { availableSources, activeSource, onCancel, onBack } = props;
-  const { classes } = useStyles();
+const selectDataSourceDialog = (store: WorkspaceContextStore) => store.dataSourceDialog;
 
+export default function Connection(): JSX.Element {
+  const { classes } = useStyles();
   const theme = useTheme();
   const mdUp = useMediaQuery(theme.breakpoints.up("md"));
 
-  const { selectSource } = usePlayerSelection();
+  const { activeDataSource } = useWorkspaceStore(selectDataSourceDialog);
+  const { dataSourceDialogActions } = useWorkspaceActions();
+
+  const { availableSources, selectSource } = usePlayerSelection();
   const analytics = useAnalytics();
+
+  // connectionSources is the list of availableSources supporting "connections"
+  const connectionSources = useMemo(() => {
+    return availableSources.filter((source) => {
+      return source.type === "connection" && source.hidden !== true;
+    });
+  }, [availableSources]);
 
   // List enabled sources before disabled sources so the default selected item is an available source
   const enabledSourcesFirst = useMemo(() => {
-    const enabledSources = availableSources.filter((source) => source.disabledReason == undefined);
-    const disabledSources = availableSources.filter((source) => source.disabledReason);
+    const enabledSources = connectionSources.filter((source) => source.disabledReason == undefined);
+    const disabledSources = connectionSources.filter((source) => source.disabledReason);
     return [...enabledSources, ...disabledSources];
-  }, [availableSources]);
+  }, [connectionSources]);
 
   const [selectedConnectionIdx, setSelectedConnectionIdx] = useState<number>(() => {
-    const foundIdx = availableSources.findIndex((source) => source === activeSource);
+    const foundIdx = connectionSources.findIndex((source) => source === activeDataSource);
     const selectedIdx = foundIdx < 0 ? 0 : foundIdx;
     void analytics.logEvent(AppEvent.DIALOG_SELECT_VIEW, {
       type: "live",
@@ -122,11 +127,11 @@ export default function Connection(props: ConnectionProps): JSX.Element {
   const [fieldValues, setFieldValues] = useState<Record<string, string | undefined>>({});
 
   useLayoutEffect(() => {
-    const connectionIdx = availableSources.findIndex((source) => source === activeSource);
+    const connectionIdx = connectionSources.findIndex((source) => source === activeDataSource);
     if (connectionIdx >= 0) {
       setSelectedConnectionIdx(connectionIdx);
     }
-  }, [activeSource, availableSources]);
+  }, [activeDataSource, connectionSources]);
 
   // clear field values when the user changes the source tab
   useLayoutEffect(() => {
@@ -144,8 +149,16 @@ export default function Connection(props: ConnectionProps): JSX.Element {
       return;
     }
     selectSource(selectedSource.id, { type: "connection", params: fieldValues });
-    onCancel?.();
-  }, [onCancel, selectedSource, fieldValues, selectSource]);
+    void analytics.logEvent(AppEvent.DIALOG_CLOSE, { activeDataSource });
+    dataSourceDialogActions.close();
+  }, [
+    selectedSource,
+    selectSource,
+    fieldValues,
+    analytics,
+    activeDataSource,
+    dataSourceDialogActions,
+  ]);
 
   const disableOpen = selectedSource?.disabledReason != undefined || fieldErrors.size > 0;
 
@@ -160,7 +173,7 @@ export default function Connection(props: ConnectionProps): JSX.Element {
   );
 
   return (
-    <View onBack={onBack} onCancel={onCancel} onOpen={disableOpen ? undefined : onOpen}>
+    <View onOpen={disableOpen ? undefined : onOpen}>
       <Stack className={classes.grid}>
         <header className={classes.header}>
           <Typography variant="h3" fontWeight={600} gutterBottom>

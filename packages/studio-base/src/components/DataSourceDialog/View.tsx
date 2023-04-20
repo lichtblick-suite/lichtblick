@@ -8,10 +8,9 @@ import { PropsWithChildren } from "react";
 import { makeStyles } from "tss-react/mui";
 
 import Stack from "@foxglove/studio-base/components/Stack";
+import { useWorkspaceActions } from "@foxglove/studio-base/context/WorkspaceContext";
 
 type ViewProps = {
-  onBack?: () => void;
-  onCancel?: () => void;
   onOpen?: () => void;
 };
 
@@ -28,8 +27,9 @@ const useStyles = makeStyles()((theme) => ({
 }));
 
 export default function View(props: PropsWithChildren<ViewProps>): JSX.Element {
-  const { onCancel, onOpen, onBack } = props;
+  const { onOpen } = props;
   const { classes } = useStyles();
+  const { dataSourceDialogActions } = useWorkspaceActions();
 
   return (
     <>
@@ -42,12 +42,21 @@ export default function View(props: PropsWithChildren<ViewProps>): JSX.Element {
         paddingBottom={4}
         paddingTop={2}
       >
-        <Button startIcon={<ChevronLeftIcon fontSize="large" />} onClick={onBack} size="large">
+        <Button
+          startIcon={<ChevronLeftIcon fontSize="large" />}
+          onClick={() => dataSourceDialogActions.open("start")}
+          size="large"
+        >
           Back
         </Button>
 
         <Stack direction="row" gap={2}>
-          <Button size="large" color="inherit" variant="outlined" onClick={onCancel}>
+          <Button
+            size="large"
+            color="inherit"
+            variant="outlined"
+            onClick={() => dataSourceDialogActions.close()}
+          >
             Cancel
           </Button>
           <Button size="large" variant="contained" onClick={onOpen} disabled={onOpen == undefined}>

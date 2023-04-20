@@ -6,8 +6,10 @@ import { createContext, Dispatch, SetStateAction, useMemo, useState } from "reac
 import { DeepReadonly } from "ts-essentials";
 import { StoreApi, useStore } from "zustand";
 
+import { IDataSourceFactory } from "@foxglove/studio-base";
 import { AppSetting } from "@foxglove/studio-base/AppSetting";
 import { AppSettingsTab } from "@foxglove/studio-base/components/AppSettingsDialog/AppSettingsDialog";
+import { DataSourceDialogItem } from "@foxglove/studio-base/components/DataSourceDialog";
 import { useCurrentUser } from "@foxglove/studio-base/context/CurrentUserContext";
 import { useAppConfigurationValue } from "@foxglove/studio-base/hooks";
 import useGuaranteedContext from "@foxglove/studio-base/hooks/useGuaranteedContext";
@@ -32,6 +34,11 @@ const RightSidebarItemKeys = ["events", "variables", "studio-logs-settings"] as 
 export type RightSidebarItemKey = (typeof RightSidebarItemKeys)[number];
 
 export type WorkspaceContextStore = DeepReadonly<{
+  dataSourceDialog: {
+    activeDataSource: undefined | IDataSourceFactory;
+    item: undefined | DataSourceDialogItem;
+    open: boolean;
+  };
   leftSidebarOpen: boolean;
   rightSidebarOpen: boolean;
   leftSidebarItem: undefined | LeftSidebarItemKey;
@@ -72,6 +79,10 @@ export function useWorkspaceStore<T>(
 }
 
 export type WorkspaceActions = {
+  dataSourceDialogActions: {
+    close: () => void;
+    open: (item: DataSourceDialogItem, dataSource?: IDataSourceFactory) => void;
+  };
   openAccountSettings: () => void;
   openPanelSettings: () => void;
   openLayoutBrowser: () => void;
@@ -113,6 +124,25 @@ export function useWorkspaceActions(): WorkspaceActions {
 
   return useMemo(() => {
     return {
+      dataSourceDialogActions: {
+        close: () => {
+          set({ dataSourceDialog: { activeDataSource: undefined, item: undefined, open: false } });
+        },
+
+        open: (
+          selectedDataSourceDialogItem: DataSourceDialogItem,
+          dataSource?: IDataSourceFactory,
+        ) => {
+          set({
+            dataSourceDialog: {
+              activeDataSource: dataSource,
+              item: selectedDataSourceDialogItem,
+              open: true,
+            },
+          });
+        },
+      },
+
       openAccountSettings: () => supportsAccountSettings && set({ sidebarItem: "account" }),
 
       openPanelSettings: () =>

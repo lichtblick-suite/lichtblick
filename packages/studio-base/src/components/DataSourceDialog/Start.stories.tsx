@@ -2,7 +2,7 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { StoryObj } from "@storybook/react";
+import { StoryFn, StoryObj } from "@storybook/react";
 import { ReactNode } from "react";
 
 import CurrentUserContext, {
@@ -12,13 +12,31 @@ import CurrentUserContext, {
 import PlayerSelectionContext, {
   PlayerSelection,
 } from "@foxglove/studio-base/context/PlayerSelectionContext";
+import WorkspaceContextProvider from "@foxglove/studio-base/providers/WorkspaceContextProvider";
 
-import OpenDialog, { OpenDialogProps } from "./OpenDialog";
+import { DataSourceDialog } from "./DataSourceDialog";
+
+const Wrapper = (Story: StoryFn): JSX.Element => {
+  return (
+    <WorkspaceContextProvider
+      initialState={{
+        dataSourceDialog: {
+          activeDataSource: undefined,
+          item: "start",
+          open: true,
+        },
+      }}
+    >
+      <Story />
+    </WorkspaceContextProvider>
+  );
+};
 
 export default {
-  title: "components/OpenDialog/Start",
-  component: OpenDialog,
+  title: "components/DataSourceDialog/Start",
+  component: DataSourceDialog,
   parameters: { colorScheme: "dark" },
+  decorators: [Wrapper],
 };
 
 function fakeUser(type: "free" | "paid" | "enterprise"): User {
@@ -104,28 +122,28 @@ function CurrentUserWrapper(props: { children: ReactNode; user?: User | undefine
   return <CurrentUserContext.Provider value={value}>{props.children}</CurrentUserContext.Provider>;
 }
 
-const defaultProps: OpenDialogProps = { backdropAnimation: false };
+const Default = (): JSX.Element => <DataSourceDialog backdropAnimation={false} />;
 
 export const DefaultLight: StoryObj = {
-  render: () => <OpenDialog {...defaultProps} />,
+  render: Default,
   name: "Default (light)",
   parameters: { colorScheme: "light" },
 };
 
 export const DefaultDark: StoryObj = {
-  render: () => <OpenDialog {...defaultProps} />,
+  render: Default,
   name: "Default (dark)",
+  parameters: { colorScheme: "dark" },
 };
 
 export const UserNoAuth: StoryObj = {
-  render: function Story() {
+  render: () => {
     return (
       <PlayerSelectionContext.Provider value={playerSelection}>
-        <OpenDialog {...defaultProps} />
+        <DataSourceDialog backdropAnimation={false} />
       </PlayerSelectionContext.Provider>
     );
   },
-
   name: "User not authenticated",
 };
 
@@ -136,16 +154,15 @@ export const UserNoAuthChinese: StoryObj = {
 };
 
 export const UserPrivate: StoryObj = {
-  render: function Story() {
+  render: () => {
     return (
       <CurrentUserWrapper>
         <PlayerSelectionContext.Provider value={playerSelection}>
-          <OpenDialog {...defaultProps} />
+          <DataSourceDialog backdropAnimation={false} />
         </PlayerSelectionContext.Provider>
       </CurrentUserWrapper>
     );
   },
-
   name: "User not authenticated (private)",
 };
 
@@ -156,18 +173,17 @@ export const UserPrivateChinese: StoryObj = {
 };
 
 export const UserAuthedFree: StoryObj = {
-  render: function Story() {
+  render: () => {
     const freeUser = fakeUser("free");
 
     return (
       <CurrentUserWrapper user={freeUser}>
         <PlayerSelectionContext.Provider value={playerSelection}>
-          <OpenDialog {...defaultProps} />
+          <DataSourceDialog backdropAnimation={false} />
         </PlayerSelectionContext.Provider>
       </CurrentUserWrapper>
     );
   },
-
   name: "User Authenticated with Free Account",
 };
 
@@ -178,18 +194,17 @@ export const UserAuthedFreeChinese: StoryObj = {
 };
 
 export const UserAuthedPaid: StoryObj = {
-  render: function Story() {
+  render: () => {
     const freeUser = fakeUser("paid");
 
     return (
       <CurrentUserWrapper user={freeUser}>
         <PlayerSelectionContext.Provider value={playerSelection}>
-          <OpenDialog {...defaultProps} />
+          <DataSourceDialog backdropAnimation={false} />
         </PlayerSelectionContext.Provider>
       </CurrentUserWrapper>
     );
   },
-
   name: "User Authenticated with Paid Account",
 };
 

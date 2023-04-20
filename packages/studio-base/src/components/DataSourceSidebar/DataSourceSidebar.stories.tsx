@@ -14,14 +14,17 @@ import { useEvents } from "@foxglove/studio-base/context/EventsContext";
 import { useAppConfigurationValue } from "@foxglove/studio-base/hooks";
 import { PlayerPresence, Topic } from "@foxglove/studio-base/players/types";
 import EventsProvider from "@foxglove/studio-base/providers/EventsProvider";
+import WorkspaceContextProvider from "@foxglove/studio-base/providers/WorkspaceContextProvider";
 
 import DataSourceSidebar from "./DataSourceSidebar";
 
-function Wrapper(Wrapped: StoryFn): JSX.Element {
+function Wrapper(Story: StoryFn): JSX.Element {
   return (
-    <EventsProvider>
-      <Wrapped />
-    </EventsProvider>
+    <WorkspaceContextProvider>
+      <EventsProvider>
+        <Story />
+      </EventsProvider>
+    </WorkspaceContextProvider>
   );
 }
 
@@ -93,13 +96,12 @@ export const PlayerNotPresent: StoryObj = {
     return (
       <MockMessagePipelineProvider noActiveData presence={PlayerPresence.NOT_PRESENT}>
         <Box height="100%" bgcolor="background.paper">
-          <DataSourceSidebar onSelectDataSourceAction={() => {}} />
+          <DataSourceSidebar />
         </Box>
       </MockMessagePipelineProvider>
     );
   },
 };
-
 export const PlayerNotPresentChinese: StoryObj = {
   ...PlayerNotPresent,
   parameters: { forceLanguage: "zh" },
@@ -114,13 +116,12 @@ export const PlayerIntializing: StoryObj = {
         presence={PlayerPresence.INITIALIZING}
       >
         <Box height="100%" bgcolor="background.paper">
-          <DataSourceSidebar onSelectDataSourceAction={() => {}} />
+          <DataSourceSidebar />
         </Box>
       </MockMessagePipelineProvider>
     );
   },
 };
-
 export const PlayerIntializingChinese: StoryObj = {
   ...PlayerIntializing,
   parameters: { forceLanguage: "zh" },
@@ -144,13 +145,12 @@ export const PlayerReconnecting: StoryObj = {
         ]}
       >
         <Box height="100%" bgcolor="background.paper">
-          <DataSourceSidebar onSelectDataSourceAction={() => {}} />
+          <DataSourceSidebar />
         </Box>
       </MockMessagePipelineProvider>
     );
   },
 };
-
 export const PlayerReconnectingChinese: StoryObj = {
   ...PlayerReconnecting,
   parameters: { forceLanguage: "zh" },
@@ -166,7 +166,7 @@ export const PlayerPresent: StoryObj = {
         presence={PlayerPresence.PRESENT}
       >
         <Box height="100%" bgcolor="background.paper">
-          <DataSourceSidebar onSelectDataSourceAction={() => {}} />
+          <DataSourceSidebar />
         </Box>
       </MockMessagePipelineProvider>
     );
@@ -194,13 +194,12 @@ export const PlayerPresentWithCustomTimezone: StoryObj = {
         presence={PlayerPresence.PRESENT}
       >
         <Box height="100%" bgcolor="background.paper">
-          <DataSourceSidebar onSelectDataSourceAction={() => {}} />
+          <DataSourceSidebar />
         </Box>
       </MockMessagePipelineProvider>
     );
   },
 };
-
 export const PlayerPresentWithCustomTimezoneChinese: StoryObj = {
   ...PlayerPresentWithCustomTimezone,
   parameters: { forceLanguage: "zh" },
@@ -228,14 +227,13 @@ export const WithEvents: StoryObj = {
       >
         <CurrentUserContext.Provider value={userContextValue}>
           <Box height="100%" bgcolor="background.paper">
-            <DataSourceSidebar onSelectDataSourceAction={() => {}} />
+            <DataSourceSidebar />
           </Box>
         </CurrentUserContext.Provider>
       </MockMessagePipelineProvider>
     );
   },
 };
-
 export const WithEventsChinese: StoryObj = { ...WithEvents, parameters: { forceLanguage: "zh" } };
 
 export const PlayerWithError: StoryObj = {
@@ -272,13 +270,12 @@ export const PlayerWithError: StoryObj = {
         ]}
       >
         <Box height="100%" bgcolor="background.paper">
-          <DataSourceSidebar onSelectDataSourceAction={() => {}} />
+          <DataSourceSidebar />
         </Box>
       </MockMessagePipelineProvider>
     );
   },
 };
-
 export const PlayerWithErrorChinese: StoryObj = {
   ...PlayerWithError,
   parameters: { forceLanguage: "zh" },

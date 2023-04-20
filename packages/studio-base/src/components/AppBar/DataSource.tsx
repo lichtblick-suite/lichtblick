@@ -21,6 +21,7 @@ import {
 import Stack from "@foxglove/studio-base/components/Stack";
 import TextMiddleTruncate from "@foxglove/studio-base/components/TextMiddleTruncate";
 import WssErrorModal from "@foxglove/studio-base/components/WssErrorModal";
+import { useWorkspaceActions } from "@foxglove/studio-base/context/WorkspaceContext";
 import { PlayerPresence } from "@foxglove/studio-base/players/types";
 
 const LEFT_ICON_SIZE = 19;
@@ -96,17 +97,14 @@ const selectPlayerName = ({ playerState }: MessagePipelineContext) => playerStat
 const selectPlayerPresence = ({ playerState }: MessagePipelineContext) => playerState.presence;
 const selectPlayerProblems = ({ playerState }: MessagePipelineContext) => playerState.problems;
 
-export function DataSource({
-  onSelectDataSourceAction,
-}: {
-  onSelectDataSourceAction: () => void;
-}): JSX.Element {
+export function DataSource(): JSX.Element {
   const { t } = useTranslation("appBar");
   const { classes, cx } = useStyles();
 
   const playerName = useMessagePipeline(selectPlayerName);
   const playerPresence = useMessagePipeline(selectPlayerPresence);
   const playerProblems = useMessagePipeline(selectPlayerProblems) ?? [];
+  const { dataSourceDialogActions } = useWorkspaceActions();
 
   const reconnecting = playerPresence === PlayerPresence.RECONNECTING;
   const initializing = playerPresence === PlayerPresence.INITIALIZING;
@@ -120,9 +118,11 @@ export function DataSource({
 
   const [problemModal, setProblemModal] = useState<JSX.Element | undefined>(undefined);
 
+  const openDataSourceDialog = () => dataSourceDialogActions.open("start");
+
   if (playerPresence === PlayerPresence.NOT_PRESENT) {
     return (
-      <ButtonBase className={classes.button} color="inherit" onClick={onSelectDataSourceAction}>
+      <ButtonBase className={classes.button} color="inherit" onClick={openDataSourceDialog}>
         {t("openDataSource")}
       </ButtonBase>
     );
@@ -133,7 +133,7 @@ export function DataSource({
       {problemModal}
       <WssErrorModal playerProblems={playerProblems} />
       <Stack direction="row" alignItems="center">
-        <ButtonBase className={classes.button} onClick={onSelectDataSourceAction}>
+        <ButtonBase className={classes.button} onClick={openDataSourceDialog}>
           <div className={cx(classes.adornment, { [classes.adornmentError]: error })}>
             {loading && (
               <CircularProgress

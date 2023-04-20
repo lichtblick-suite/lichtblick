@@ -26,6 +26,7 @@ import Stack from "@foxglove/studio-base/components/Stack";
 import WssErrorModal from "@foxglove/studio-base/components/WssErrorModal";
 import { useCurrentUser } from "@foxglove/studio-base/context/CurrentUserContext";
 import { EventsStore, useEvents } from "@foxglove/studio-base/context/EventsContext";
+import { useWorkspaceActions } from "@foxglove/studio-base/context/WorkspaceContext";
 import { useAppConfigurationValue } from "@foxglove/studio-base/hooks/useAppConfigurationValue";
 import { PlayerPresence } from "@foxglove/studio-base/players/types";
 
@@ -35,7 +36,6 @@ import { DataSourceInfoView } from "../DataSourceInfoView";
 
 type Props = {
   disableToolbar?: boolean;
-  onSelectDataSourceAction: () => void;
 };
 
 const useStyles = makeStyles()({
@@ -81,7 +81,7 @@ const selectEventsSupported = (store: EventsStore) => store.eventsSupported;
 type DataSourceSidebarTab = "topics" | "events" | "problems";
 
 export default function DataSourceSidebar(props: Props): JSX.Element {
-  const { disableToolbar = false, onSelectDataSourceAction } = props;
+  const { disableToolbar = false } = props;
   const playerPresence = useMessagePipeline(selectPlayerPresence);
   const playerProblems = useMessagePipeline(selectPlayerProblems) ?? [];
   const { currentUser } = useCurrentUser();
@@ -89,6 +89,7 @@ export default function DataSourceSidebar(props: Props): JSX.Element {
   const [activeTab, setActiveTab] = useState<DataSourceSidebarTab>("topics");
   const { classes } = useStyles();
   const { t } = useTranslation("dataSourceInfo");
+  const { dataSourceDialogActions } = useWorkspaceActions();
 
   const [enableNewTopNav = false] = useAppConfigurationValue<boolean>(AppSetting.ENABLE_NEW_TOPNAV);
 
@@ -126,7 +127,7 @@ export default function DataSourceSidebar(props: Props): JSX.Element {
           key="add-connection"
           color="primary"
           title="New connection"
-          onClick={onSelectDataSourceAction}
+          onClick={() => dataSourceDialogActions.open("start")}
         >
           <AddIcon />
         </IconButton>,

@@ -180,7 +180,6 @@ type AppBarProps = CustomWindowControlsProps & {
   onDoubleClick?: () => void;
   debugDragRegion?: boolean;
   disableSignIn?: boolean;
-  onSelectDataSourceAction: () => void;
 };
 
 const selectCurrentLayoutId = ({ selectedLayout }: LayoutState) => selectedLayout?.id;
@@ -196,7 +195,6 @@ export function AppBar(props: AppBarProps): JSX.Element {
     onDoubleClick,
     onMaximizeWindow,
     onMinimizeWindow,
-    onSelectDataSourceAction,
     onUnmaximizeWindow,
     showCustomWindowControls = false,
   } = props;
@@ -265,7 +263,7 @@ export function AppBar(props: AppBarProps): JSX.Element {
           </div>
 
           <div className={classes.middle}>
-            <DataSource onSelectDataSourceAction={onSelectDataSourceAction} />
+            <DataSource />
           </div>
 
           <div className={classes.end}>
