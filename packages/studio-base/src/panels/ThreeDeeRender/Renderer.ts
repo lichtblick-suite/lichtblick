@@ -367,7 +367,7 @@ export class Renderer extends EventEmitter<RendererEvents> implements IRenderer 
 
     this.addSceneExtension(new SceneSettings(this));
     this.addSceneExtension(new Cameras(this));
-    this.addSceneExtension(new FrameAxes(this));
+    this.addSceneExtension(new FrameAxes(this, { visible: interfaceMode === "3d" }));
     this.addSceneExtension(new Grids(this));
     this.addSceneExtension(new Images(this));
     this.addSceneExtension(new Markers(this));
